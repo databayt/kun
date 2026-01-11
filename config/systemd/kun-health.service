@@ -1,0 +1,12 @@
+[Unit]
+Description=Kun Health Check Service
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/scripts/health-check.sh
+StandardOutput=append:/var/log/kun/health.log
+StandardError=append:/var/log/kun/health.log
+
+[Install]
+WantedBy=multi-user.target

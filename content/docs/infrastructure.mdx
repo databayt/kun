@@ -1,0 +1,179 @@
+---
+title: Infrastructure
+description: Technical reference guide for Kun remote infrastructure
+---
+
+# Infrastructure Guide
+
+This technical reference covers the infrastructure components required for each phase of Kun.
+
+## Hardware Requirements
+
+### Phase 1: Individual
+
+| Component | Minimum | Recommended |
+|-----------|---------|-------------|
+| CPU | 2 cores | 4+ cores |
+| RAM | 4 GB | 8+ GB |
+| Storage | 20 GB SSD | 100+ GB SSD |
+| Network | 10 Mbps | 100+ Mbps |
+
+### Phase 2: Team Server
+
+| Component | Minimum | Recommended |
+|-----------|---------|-------------|
+| CPU | 8 cores | 16+ cores |
+| RAM | 32 GB | 64+ GB |
+| Storage | 500 GB NVMe | 1+ TB NVMe |
+| Network | 100 Mbps | 1 Gbps |
+
+### Phase 3: Commercial
+
+| Component | Minimum | Recommended |
+|-----------|---------|-------------|
+| CPU | 32 cores | 64+ cores |
+| RAM | 128 GB | 256+ GB |
+| Storage | 2 TB NVMe | 4+ TB NVMe RAID |
+| Network | 1 Gbps | 10 Gbps |
+
+## Software Stack
+
+### Operating System
+
+```bash
+# Ubuntu 22.04 LTS or 24.04 LTS
+cat /etc/os-release
+```
+
+### Core Components
+
+| Component | Version | Purpose |
+|-----------|---------|---------|
+| Tailscale | Latest | VPN + SSH |
+| tmux | 3.x | Session persistence |
+| Node.js | 20.x LTS | Claude Code runtime |
+| pnpm | 8.x | Package manager |
+
+## Network Architecture
+
+### Tailscale Setup
+
+```bash
+# Install Tailscale
+curl -fsSL https://tailscale.com/install.sh | sh
+
+# Enable with SSH
+sudo tailscale up --ssh
+
+# Check status
+tailscale status
+```
+
+### Firewall Configuration
+
+```bash
+# Tailscale handles most networking, but for local services:
+sudo ufw allow from 100.64.0.0/10  # Tailscale CGNAT range
+```
+
+## Directory Layout
+
+<DirectoryStructure />
+
+### Phase 2 Directory Structure
+
+```
+/
+├── etc/claude-code/
+│   ├── env.sh              # Shared environment variables
+│   └── CLAUDE.md           # Team context file
+├── opt/databayt/codebase/  # Pattern library (git clone)
+└── home/
+    ├── dev1/
+    │   └── .tmux.conf
+    ├── dev2/
+    │   └── .tmux.conf
+    └── ...
+```
+
+## Monitoring
+
+### Netdata Installation
+
+```bash
+# Install Netdata
+bash <(curl -Ss https://my-netdata.io/kickstart.sh)
+
+# Access dashboard
+# http://localhost:19999
+```
+
+### Health Checks
+
+```bash
+# System health check script
+#!/bin/bash
+echo "=== Tailscale Status ==="
+tailscale status
+
+echo "=== tmux Sessions ==="
+tmux list-sessions
+
+echo "=== System Resources ==="
+free -h
+df -h /
+
+echo "=== Active Users ==="
+who
+```
+
+## Backup Strategy
+
+### What to Backup
+
+| Priority | Item | Frequency |
+|----------|------|-----------|
+| Critical | `/etc/claude-code/` | Daily |
+| Critical | User home directories | Daily |
+| Important | tmux resurrect files | Daily |
+| Optional | Logs | Weekly |
+
+### Backup Script
+
+```bash
+#!/bin/bash
+BACKUP_DIR="/backup/$(date +%Y%m%d)"
+mkdir -p $BACKUP_DIR
+
+# Backup config
+tar -czf $BACKUP_DIR/claude-config.tar.gz /etc/claude-code/
+
+# Backup user homes
+tar -czf $BACKUP_DIR/homes.tar.gz /home/
+
+# Sync to remote (optional)
+# rsync -avz $BACKUP_DIR remote:/backups/
+```
+
+## Security Hardening
+
+### SSH Configuration
+
+```bash
+# /etc/ssh/sshd_config additions
+PermitRootLogin no
+PasswordAuthentication no  # Use Tailscale SSH instead
+AllowTcpForwarding no
+X11Forwarding no
+```
+
+### Audit Logging
+
+```bash
+# Enable auditd
+sudo apt install auditd
+sudo systemctl enable auditd
+
+# Monitor sensitive files
+sudo auditctl -w /etc/claude-code/ -p wa -k claude-config
+```

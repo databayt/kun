@@ -1,0 +1,117 @@
+---
+title: PRD
+description: Product Requirements Document for Kun
+---
+
+# Product Requirements Document
+
+## Overview
+
+This document outlines the functional and non-functional requirements for Kun, the Remote AI Development Infrastructure.
+
+## Functional Requirements
+
+### FR-1: Remote Access
+
+| ID | Requirement | Priority |
+|----|-------------|----------|
+| FR-1.1 | System SHALL provide VPN-based remote access | P0 |
+| FR-1.2 | System SHALL support SSH over Tailscale | P0 |
+| FR-1.3 | System SHALL allow mobile device connectivity | P0 |
+| FR-1.4 | System SHALL maintain persistent sessions | P0 |
+
+### FR-2: Session Management
+
+| ID | Requirement | Priority |
+|----|-------------|----------|
+| FR-2.1 | System SHALL provide tmux-based sessions | P0 |
+| FR-2.2 | Sessions SHALL survive network disconnects | P0 |
+| FR-2.3 | Sessions SHALL persist across reboots | P1 |
+| FR-2.4 | System SHALL support multiple named sessions | P1 |
+
+### FR-3: AI Integration
+
+| ID | Requirement | Priority |
+|----|-------------|----------|
+| FR-3.1 | System SHALL provide Claude Code CLI | P0 |
+| FR-3.2 | AI SHALL have access to pattern library | P0 |
+| FR-3.3 | AI SHALL follow CLAUDE.md constraints | P0 |
+| FR-3.4 | System SHALL support API key management | P0 |
+
+### FR-4: Multi-User (Phase 2)
+
+| ID | Requirement | Priority |
+|----|-------------|----------|
+| FR-4.1 | System SHALL support 10+ concurrent users | P1 |
+| FR-4.2 | Users SHALL have isolated home directories | P1 |
+| FR-4.3 | System SHALL enforce per-user access controls | P1 |
+| FR-4.4 | Configuration SHALL be shared across users | P1 |
+
+### FR-5: Commercial (Phase 3)
+
+| ID | Requirement | Priority |
+|----|-------------|----------|
+| FR-5.1 | System SHALL provide Docker isolation | P2 |
+| FR-5.2 | System SHALL meter resource usage | P2 |
+| FR-5.3 | System SHALL integrate billing (Stripe) | P2 |
+| FR-5.4 | System SHALL support pattern marketplace | P2 |
+
+## Non-Functional Requirements
+
+### NFR-1: Performance
+
+| ID | Requirement | Target |
+|----|-------------|--------|
+| NFR-1.1 | SSH connection latency | < 200ms |
+| NFR-1.2 | Session resume time | < 2s |
+| NFR-1.3 | Claude response time | < 5s |
+
+### NFR-2: Reliability
+
+| ID | Requirement | Target |
+|----|-------------|--------|
+| NFR-2.1 | System uptime | 99.9% |
+| NFR-2.2 | Session persistence | 7+ days |
+| NFR-2.3 | Data durability | No data loss |
+
+### NFR-3: Security
+
+| ID | Requirement | Target |
+|----|-------------|--------|
+| NFR-3.1 | Zero-trust network | Tailscale VPN |
+| NFR-3.2 | Certificate-based auth | Tailscale SSH |
+| NFR-3.3 | Encrypted secrets | 1Password/Vault |
+| NFR-3.4 | Audit logging | All access logged |
+
+### NFR-4: Scalability
+
+| ID | Requirement | Target |
+|----|-------------|--------|
+| NFR-4.1 | Phase 1 users | 1-3 |
+| NFR-4.2 | Phase 2 users | 10+ |
+| NFR-4.3 | Phase 3 users | 50+ |
+
+## Acceptance Criteria
+
+### Phase 1 Acceptance
+
+- [ ] Developer can SSH to server from laptop
+- [ ] Developer can SSH to server from phone (Termius)
+- [ ] tmux sessions persist across disconnects
+- [ ] Claude Code works in terminal
+- [ ] Pattern library is accessible
+
+### Phase 2 Acceptance
+
+- [ ] 10 developers can connect simultaneously
+- [ ] Each developer has isolated home directory
+- [ ] Shared CLAUDE.md is readable by all
+- [ ] ACLs restrict access appropriately
+- [ ] Netdata monitoring is accessible
+
+### Phase 3 Acceptance
+
+- [ ] Docker containers isolate users
+- [ ] Usage is metered accurately
+- [ ] Billing integration works
+- [ ] Patterns can be published/purchased

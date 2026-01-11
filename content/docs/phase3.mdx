@@ -1,0 +1,295 @@
+---
+title: "Phase 3: Commercial"
+description: Commercial platform with Docker isolation and billing
+---
+
+# Phase 3: Commercial Platform
+
+This guide covers transforming Kun into a commercial platform with user isolation, usage metering, and billing integration.
+
+<Phase3Flow />
+
+## Prerequisites
+
+- Completed Phase 2 setup
+- Docker and Docker Compose installed
+- Stripe account for billing
+- Domain name for the platform
+
+## Architecture Overview
+
+<KunStackedBlocks />
+
+## Step 1: Docker Setup
+
+Install Docker and Docker Compose:
+
+```bash
+# Install Docker
+curl -fsSL https://get.docker.com | sh
+
+# Add admin to docker group
+sudo usermod -aG docker $USER
+
+# Install Docker Compose
+sudo apt install docker-compose-plugin -y
+```
+
+## Step 2: Container Template
+
+Create a Dockerfile for user containers:
+
+```dockerfile
+# docker/Dockerfile
+FROM ubuntu:22.04
+
+# Install base packages
+RUN apt-get update && apt-get install -y \
+    curl \
+    git \
+    tmux \
+    sudo \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Node.js
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs
+
+# Install Claude Code
+RUN npm install -g @anthropic-ai/claude-code
+
+# Create non-root user
+ARG USER_ID=1000
+ARG USER_NAME=developer
+RUN useradd -m -u ${USER_ID} -s /bin/bash ${USER_NAME}
+
+# Copy configuration
+COPY --chown=${USER_NAME}:${USER_NAME} config/. /home/${USER_NAME}/
+
+USER ${USER_NAME}
+WORKDIR /home/${USER_NAME}
+
+CMD ["tmux", "new-session", "-A", "-s", "main"]
+```
+
+## Step 3: Docker Compose for Users
+
+```yaml
+# docker/docker-compose.yml
+version: '3.8'
+
+services:
+  user-template:
+    build:
+      context: .
+      args:
+        USER_ID: ${USER_ID:-1000}
+        USER_NAME: ${USER_NAME:-developer}
+    image: kun-user:latest
+    volumes:
+      - ${USER_HOME}:/home/developer/workspace
+      - /etc/claude-code:/etc/claude-code:ro
+      - /opt/databayt/codebase:/opt/databayt/codebase:ro
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+    networks:
+      - kun-network
+
+networks:
+  kun-network:
+    driver: bridge
+```
+
+## Step 4: User Provisioning Script
+
+```bash
+#!/bin/bash
+# scripts/provision-user.sh
+
+USER_EMAIL=$1
+USER_ID=$2
+
+# Create user directory
+USER_HOME="/data/users/${USER_EMAIL}"
+mkdir -p ${USER_HOME}
+
+# Generate unique container name
+CONTAINER_NAME="kun-${USER_ID}"
+
+# Create docker-compose override
+cat > ${USER_HOME}/docker-compose.override.yml << EOF
+services:
+  ${CONTAINER_NAME}:
+    extends:
+      file: /opt/kun/docker/docker-compose.yml
+      service: user-template
+    container_name: ${CONTAINER_NAME}
+    environment:
+      - USER_ID=${USER_ID}
+      - USER_EMAIL=${USER_EMAIL}
+    volumes:
+      - ${USER_HOME}:/home/developer/workspace
+EOF
+
+# Start container
+docker-compose -f /opt/kun/docker/docker-compose.yml \
+  -f ${USER_HOME}/docker-compose.override.yml \
+  up -d ${CONTAINER_NAME}
+
+echo "Container ${CONTAINER_NAME} provisioned for ${USER_EMAIL}"
+```
+
+## Step 5: Usage Metering
+
+Create a metering service:
+
+```bash
+#!/bin/bash
+# scripts/meter-usage.sh
+
+OUTPUT_FILE="/var/log/kun/usage-$(date +%Y%m%d).json"
+
+for container in $(docker ps --filter "name=kun-" --format "{{.Names}}"); do
+  STATS=$(docker stats --no-stream --format "json" $container)
+  USER=$(docker inspect --format '{{.Config.Env}}' $container | grep -oP 'USER_EMAIL=\K[^"]+')
+
+  echo "{\"timestamp\":\"$(date -Iseconds)\",\"container\":\"$container\",\"user\":\"$USER\",\"stats\":$STATS}" >> $OUTPUT_FILE
+done
+```
+
+Schedule with cron:
+
+```bash
+# Every 5 minutes
+*/5 * * * * /opt/kun/scripts/meter-usage.sh
+```
+
+## Step 6: Stripe Integration
+
+Create a basic billing service:
+
+```typescript
+// src/billing/stripe.ts
+import Stripe from 'stripe';
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+
+export async function createSubscription(
+  email: string,
+  priceId: string
+) {
+  // Create or get customer
+  const customers = await stripe.customers.list({ email });
+  let customer = customers.data[0];
+
+  if (!customer) {
+    customer = await stripe.customers.create({ email });
+  }
+
+  // Create subscription
+  const subscription = await stripe.subscriptions.create({
+    customer: customer.id,
+    items: [{ price: priceId }],
+    payment_behavior: 'default_incomplete',
+    expand: ['latest_invoice.payment_intent'],
+  });
+
+  return subscription;
+}
+
+export async function recordUsage(
+  subscriptionId: string,
+  quantity: number
+) {
+  const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+  const usageItem = subscription.items.data[0];
+
+  await stripe.subscriptionItems.createUsageRecord(
+    usageItem.id,
+    {
+      quantity,
+      timestamp: Math.floor(Date.now() / 1000),
+      action: 'increment',
+    }
+  );
+}
+```
+
+## Step 7: Pattern Marketplace (Future)
+
+Structure for pattern marketplace:
+
+```
+/opt/kun/marketplace/
+├── patterns/
+│   ├── official/           # Databayt patterns
+│   └── community/          # User-submitted patterns
+├── api/
+│   ├── list.ts            # Browse patterns
+│   ├── purchase.ts        # Buy pattern
+│   └── publish.ts         # Submit pattern
+└── payments/
+    └── revenue-share.ts   # Split with creators
+```
+
+## Verification Checklist
+
+- [ ] Docker installed and configured
+- [ ] User container template working
+- [ ] Provisioning script tested
+- [ ] Usage metering collecting data
+- [ ] Stripe integration tested
+- [ ] Resource limits enforced
+
+## Security Considerations
+
+1. **Container isolation**: Each user in separate container
+2. **Resource limits**: CPU and memory caps per container
+3. **Network isolation**: Containers can't communicate directly
+4. **API key management**: Keys injected at runtime, not baked in
+5. **Audit logging**: All container actions logged
+
+## Pricing Model Example
+
+| Tier | Price | Includes |
+|------|-------|----------|
+| Trial | Free | 7 days, 2 CPU, 4GB RAM |
+| Basic | $29/mo | 2 CPU, 8GB RAM, 100GB |
+| Pro | $99/mo | 4 CPU, 16GB RAM, 500GB |
+| Enterprise | Custom | Dedicated resources |
+
+## Off-Grid Option (Solar + Starlink)
+
+For truly remote deployment:
+
+```
+Solar Array (10kW)
+       │
+       ▼
+  Battery Bank (30kWh)
+       │
+       ▼
+  Inverter + UPS
+       │
+       ▼
+  Kun Server + Starlink
+```
+
+Requirements:
+- 10kW solar array
+- 30kWh battery storage
+- Starlink Business tier
+- Environmental enclosure
+
+## Next Steps
+
+With Phase 3 complete:
+- Market the platform
+- Build pattern marketplace
+- Expand to multiple regions
+- Consider enterprise features

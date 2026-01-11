@@ -1,0 +1,190 @@
+---
+title: "Phase 1: Individual"
+description: Personal remote AI development setup guide
+---
+
+# Phase 1: Individual Setup
+
+This guide walks you through setting up Kun for personal use - access Claude Code from anywhere with persistent sessions.
+
+<Phase1SetupFlow />
+
+## Prerequisites
+
+- Ubuntu 22.04/24.04 LTS server or desktop
+- Stable internet connection
+- Mobile device with Termius app
+
+## Step 1: Install Tailscale
+
+Tailscale creates a secure, zero-config VPN network.
+
+```bash
+# Install Tailscale
+curl -fsSL https://tailscale.com/install.sh | sh
+
+# Start Tailscale with SSH
+sudo tailscale up --ssh
+
+# Verify connection
+tailscale status
+```
+
+Note your Tailscale IP (e.g., `100.64.x.x`) - you'll use this to connect.
+
+## Step 2: Configure tmux
+
+tmux provides persistent sessions that survive disconnects.
+
+```bash
+# Install tmux
+sudo apt install tmux -y
+
+# Create configuration
+cat > ~/.tmux.conf << 'EOF'
+# Set prefix to Ctrl+a (easier on mobile)
+set -g prefix C-a
+unbind C-b
+bind C-a send-prefix
+
+# Enable mouse support
+set -g mouse on
+
+# Increase history
+set -g history-limit 50000
+
+# Start windows at 1
+set -g base-index 1
+setw -g pane-base-index 1
+
+# Status bar
+set -g status-right '%H:%M %d-%b'
+EOF
+```
+
+## Step 3: Create Persistent Session
+
+```bash
+# Create a new session
+tmux new-session -d -s claude -n main
+
+# Attach to verify
+tmux attach -t claude
+
+# Detach: Press Ctrl+a, then d
+```
+
+## Step 4: Install Claude Code
+
+```bash
+# Install Node.js 20.x
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install nodejs -y
+
+# Install Claude Code
+npm install -g @anthropic-ai/claude-code
+
+# Verify installation
+claude --version
+```
+
+## Step 5: Configure API Key
+
+```bash
+# Store API key securely
+export ANTHROPIC_API_KEY="your-key-here"
+
+# Add to bashrc for persistence
+echo 'export ANTHROPIC_API_KEY="your-key-here"' >> ~/.bashrc
+```
+
+## Step 6: Mobile Setup (Termius)
+
+1. Download Termius from App Store / Play Store
+2. Create new SSH connection:
+   - Host: Your Tailscale IP
+   - Port: 22
+   - Username: Your Linux username
+3. Connect and attach to tmux:
+
+```bash
+tmux attach -t claude
+```
+
+## Step 7: Systemd Auto-Start
+
+Create a service to start tmux on boot:
+
+```bash
+# Create systemd user directory
+mkdir -p ~/.config/systemd/user/
+
+# Create service file
+cat > ~/.config/systemd/user/claude-tmux.service << 'EOF'
+[Unit]
+Description=Claude Code tmux Session
+After=network.target
+
+[Service]
+Type=forking
+ExecStart=/usr/bin/tmux new-session -d -s claude
+ExecStop=/usr/bin/tmux kill-session -t claude
+Restart=on-failure
+
+[Install]
+WantedBy=default.target
+EOF
+
+# Enable service
+systemctl --user enable claude-tmux.service
+systemctl --user start claude-tmux.service
+
+# Enable lingering for user services
+sudo loginctl enable-linger $USER
+```
+
+## Verification Checklist
+
+- [ ] Tailscale connected: `tailscale status`
+- [ ] tmux session running: `tmux list-sessions`
+- [ ] Claude Code installed: `claude --version`
+- [ ] Mobile SSH works: Connect from Termius
+- [ ] Session survives disconnect: Detach and reattach
+
+## Troubleshooting
+
+### Tailscale not connecting
+
+```bash
+# Check Tailscale service
+sudo systemctl status tailscaled
+
+# Restart if needed
+sudo systemctl restart tailscaled
+```
+
+### tmux session lost
+
+```bash
+# List all sessions
+tmux list-sessions
+
+# If empty, create new session
+tmux new-session -d -s claude
+
+# Check systemd service
+systemctl --user status claude-tmux.service
+```
+
+### Mobile keyboard issues
+
+- In Termius, enable "Send ctrl as ctrl" in settings
+- Use `Ctrl+a` for tmux prefix (easier than `Ctrl+b` on mobile)
+- Consider tmux mouse mode for touch scrolling
+
+## Next Steps
+
+Once Phase 1 is stable:
+- Add pattern library access
+- Configure CLAUDE.md for your projects
+- Consider upgrading to Phase 2 for team access

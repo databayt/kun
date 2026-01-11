@@ -1,0 +1,78 @@
+---
+title: Introduction
+description: Remote AI Development Infrastructure - كن (Be!)
+---
+
+# Kun (كن)
+
+**Remote AI Development Infrastructure**
+
+> "كن" (Kun) - "Be!" - The divine command of creation from the Quran.
+> This infrastructure embodies the architecture-first paradigm where AI generates code within intentional constraints.
+
+## Executive Summary
+
+**Kun** (كن - Arabic for "Be!") is a remote AI development infrastructure that enables distributed teams to access Claude Code from anywhere while maintaining architectural consistency through shared patterns, centralized configuration, and intentional constraints.
+
+The name reflects the Quranic command of creation - the word by which God creates. Similarly, this infrastructure embodies the architecture-first paradigm where humans design systems and AI generates code within those intentional boundaries.
+
+## Problem Statement
+
+### Current Challenges
+
+| Problem | Impact | Severity |
+|---------|--------|----------|
+| **Fragmented Environments** | "Works on my machine" syndrome | Critical |
+| **AI Context Loss** | Each Claude session starts fresh, losing team patterns | High |
+| **Mobile Inaccessibility** | Cannot develop or review from phones | Medium |
+| **Pattern Inconsistency** | AI generates different code styles per developer | High |
+| **No Scalability Path** | Team tool cannot become commercial platform | Medium |
+
+## Vision Statement
+
+> Build a centralized development environment where AI works within intentional architectural constraints, enabling any team member to create production-quality software from any device.
+
+## Three Phases
+
+<Structure />
+
+## Quick Start (Phase 1)
+
+```bash
+# Install Tailscale
+curl -fsSL https://tailscale.com/install.sh | sh
+
+# Enable SSH
+sudo tailscale up --ssh
+
+# Start tmux session
+tmux new-session -d -s claude -n claude
+
+# Connect from mobile with Termius using your Tailscale IP
+```
+
+## Target Users
+
+### Phase 1: Individual Developer
+- Wants persistent Claude Code sessions
+- Needs mobile access for on-the-go development
+- Values pattern consistency
+
+### Phase 2: Team (10+ Developers)
+- 10+ developers across locations
+- Using shared patterns from databayt/codebase
+- Need consistent AI context across team
+
+### Phase 3: External Clients
+- Renting compute + patterns
+- Want pre-configured AI development stack
+- Pay per usage
+
+## Philosophy
+
+> "The future of software is not just written. It's designed." - Craig Adam
+
+Kun represents the shift from "vibe coding" to intentional architecture:
+- **Speed without chaos**: AI generates fast, but within constraints
+- **Patterns as training data**: Every good function teaches the next generation
+- **Direction over velocity**: Move fast, but with a map

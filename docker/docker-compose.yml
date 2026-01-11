@@ -1,0 +1,115 @@
+# ╔═══════════════════════════════════════════════════════════════╗
+# ║   Kun Docker Compose                                          ║
+# ║   Phase 3: Multi-User Container Orchestration                 ║
+# ╚═══════════════════════════════════════════════════════════════╝
+
+version: '3.8'
+
+services:
+  # ============================================================
+  # User Container Template
+  # Deploy multiple instances with different user configs
+  # ============================================================
+  kun-user:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: kun-dev:latest
+    container_name: kun-user-${USER_ID:-default}
+    hostname: kun-${USER_ID:-default}
+
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+
+    # Environment
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
+      - SSH_PUBLIC_KEY=${SSH_PUBLIC_KEY:-}
+      - USER_ID=${USER_ID:-default}
+
+    # Volumes
+    volumes:
+      # User home directory (persistent)
+      - kun-user-${USER_ID:-default}-home:/home/developer
+
+      # Pattern library (read-only)
+      - ../:/opt/databayt/codebase:ro
+
+      # Shared configuration
+      - ../config/claude/CLAUDE.md:/etc/claude-code/CLAUDE.md:ro
+
+    # Networking
+    networks:
+      - kun-internal
+    ports:
+      - "${SSH_PORT:-2222}:22"
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "pgrep", "-x", "sshd"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+    # Restart policy
+    restart: unless-stopped
+
+  # ============================================================
+  # Metrics Collector (Phase 3 - Usage Billing)
+  # ============================================================
+  metrics:
+    image: prom/prometheus:latest
+    container_name: kun-metrics
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    networks:
+      - kun-internal
+    ports:
+      - "9090:9090"
+    profiles:
+      - monitoring
+
+  # ============================================================
+  # Usage Database
+  # ============================================================
+  postgres:
+    image: postgres:15-alpine
+    container_name: kun-db
+    environment:
+      - POSTGRES_USER=kun
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-kunpassword}
+      - POSTGRES_DB=kun_usage
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - kun-internal
+    profiles:
+      - billing
+
+# ============================================================
+# Networks
+# ============================================================
+networks:
+  kun-internal:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+
+# ============================================================
+# Volumes
+# ============================================================
+volumes:
+  kun-user-default-home:
+  prometheus-data:
+  postgres-data:

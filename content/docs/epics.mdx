@@ -1,0 +1,133 @@
+---
+title: Epics
+description: User stories organized by epic for Kun implementation
+---
+
+# Epics & User Stories
+
+## Overview
+
+This document contains 50 user stories across 12 epics, covering all three phases of Kun implementation.
+
+## Phase 1: Individual Setup
+
+### Epic 1: Network Foundation
+
+| ID | Story | Priority |
+|----|-------|----------|
+| P1-1 | As a developer, I want to install Tailscale so I can access my server remotely | P0 |
+| P1-2 | As a developer, I want to enable Tailscale SSH so I don't need to manage SSH keys | P0 |
+| P1-3 | As a developer, I want my server to auto-start Tailscale on boot | P1 |
+| P1-4 | As a developer, I want to verify connectivity from my laptop | P0 |
+
+### Epic 2: Session Management
+
+| ID | Story | Priority |
+|----|-------|----------|
+| P1-5 | As a developer, I want to create persistent tmux sessions | P0 |
+| P1-6 | As a developer, I want sessions to survive network disconnects | P0 |
+| P1-7 | As a developer, I want sessions to auto-start on boot | P1 |
+| P1-8 | As a developer, I want named windows for different projects | P1 |
+
+### Epic 3: Mobile Access
+
+| ID | Story | Priority |
+|----|-------|----------|
+| P1-9 | As a developer, I want to configure Termius for mobile SSH | P0 |
+| P1-10 | As a developer, I want to attach to tmux from my phone | P0 |
+| P1-11 | As a developer, I want touch-friendly keyboard shortcuts | P1 |
+| P1-12 | As a developer, I want to resume work during commute | P1 |
+
+### Epic 4: AI Integration
+
+| ID | Story | Priority |
+|----|-------|----------|
+| P1-13 | As a developer, I want to install Claude Code CLI | P0 |
+| P1-14 | As a developer, I want my API key securely stored | P0 |
+| P1-15 | As a developer, I want access to pattern library | P0 |
+| P1-16 | As a developer, I want CLAUDE.md context loaded | P0 |
+
+## Phase 2: Team Server
+
+### Epic 5: Multi-User Accounts
+
+| ID | Story | Priority |
+|----|-------|----------|
+| P2-1 | As an admin, I want to create user accounts for developers | P0 |
+| P2-2 | As an admin, I want each user to have a home directory | P0 |
+| P2-3 | As an admin, I want to manage user groups | P1 |
+| P2-4 | As a developer, I want my own tmux sessions | P0 |
+
+### Epic 6: Access Control
+
+| ID | Story | Priority |
+|----|-------|----------|
+| P2-5 | As an admin, I want to configure Tailscale ACLs | P0 |
+| P2-6 | As an admin, I want to restrict access by user group | P0 |
+| P2-7 | As an admin, I want to audit access logs | P1 |
+| P2-8 | As an admin, I want to revoke access immediately | P0 |
+
+### Epic 7: Configuration Management
+
+| ID | Story | Priority |
+|----|-------|----------|
+| P2-9 | As an admin, I want centralized CLAUDE.md | P0 |
+| P2-10 | As an admin, I want shared environment variables | P0 |
+| P2-11 | As an admin, I want pattern library on shared path | P0 |
+| P2-12 | As a developer, I want configuration auto-loaded | P0 |
+
+### Epic 8: Monitoring
+
+| ID | Story | Priority |
+|----|-------|----------|
+| P2-13 | As an admin, I want to install Netdata | P1 |
+| P2-14 | As an admin, I want to monitor system resources | P1 |
+| P2-15 | As an admin, I want to see active sessions | P1 |
+| P2-16 | As an admin, I want alerts for issues | P2 |
+
+## Phase 3: Commercial Platform
+
+### Epic 9: Container Isolation
+
+| ID | Story | Priority |
+|----|-------|----------|
+| P3-1 | As an admin, I want Docker-based user isolation | P0 |
+| P3-2 | As a customer, I want my own container | P0 |
+| P3-3 | As an admin, I want resource limits per container | P0 |
+| P3-4 | As a customer, I want my data isolated | P0 |
+
+### Epic 10: Usage Metering
+
+| ID | Story | Priority |
+|----|-------|----------|
+| P3-5 | As an admin, I want to track CPU usage | P0 |
+| P3-6 | As an admin, I want to track memory usage | P0 |
+| P3-7 | As an admin, I want to track session time | P0 |
+| P3-8 | As a customer, I want to see my usage | P1 |
+
+### Epic 11: Billing Integration
+
+| ID | Story | Priority |
+|----|-------|----------|
+| P3-9 | As an admin, I want Stripe integration | P0 |
+| P3-10 | As a customer, I want to subscribe to a plan | P0 |
+| P3-11 | As a customer, I want usage-based billing | P1 |
+| P3-12 | As a customer, I want invoices | P1 |
+
+### Epic 12: Pattern Marketplace
+
+| ID | Story | Priority |
+|----|-------|----------|
+| P3-13 | As a developer, I want to publish patterns | P2 |
+| P3-14 | As a customer, I want to browse patterns | P2 |
+| P3-15 | As a customer, I want to purchase patterns | P2 |
+| P3-16 | As a developer, I want revenue from my patterns | P2 |
+
+## Story Point Summary
+
+| Phase | Stories | P0 | P1 | P2 |
+|-------|---------|----|----|----|
+| Phase 1 | 16 | 10 | 6 | 0 |
+| Phase 2 | 16 | 11 | 4 | 1 |
+| Phase 3 | 16 | 8 | 4 | 4 |
+| **Total** | **48** | **29** | **14** | **5** |

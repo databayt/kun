@@ -1,0 +1,226 @@
+---
+title: "Phase 2: Team"
+description: Multi-user team server setup for 10+ developers
+---
+
+# Phase 2: Team Server
+
+This guide covers setting up Kun for a team of 10+ developers with shared configuration, access controls, and monitoring.
+
+<Phase2Flow />
+
+## Prerequisites
+
+- Completed Phase 1 setup
+- Dedicated server (see [Infrastructure](/docs/infrastructure) for specs)
+- Tailscale Teams or Enterprise account
+
+## Step 1: Create User Accounts
+
+```bash
+# Create developer group
+sudo groupadd developers
+
+# Create user with home directory
+sudo useradd -m -s /bin/bash -G developers dev1
+sudo useradd -m -s /bin/bash -G developers dev2
+# ... repeat for each developer
+
+# Set temporary passwords
+sudo passwd dev1
+```
+
+## Step 2: Configure Tailscale ACLs
+
+In your Tailscale admin console, configure access controls:
+
+```json
+{
+  "groups": {
+    "group:developers": ["user1@example.com", "user2@example.com"],
+    "group:admins": ["admin@example.com"]
+  },
+  "acls": [
+    {
+      "action": "accept",
+      "src": ["group:developers"],
+      "dst": ["tag:kun-server:22"]
+    },
+    {
+      "action": "accept",
+      "src": ["group:admins"],
+      "dst": ["*:*"]
+    }
+  ],
+  "tagOwners": {
+    "tag:kun-server": ["group:admins"]
+  }
+}
+```
+
+## Step 3: Centralized Configuration
+
+Create shared configuration directory:
+
+```bash
+# Create config directory
+sudo mkdir -p /etc/claude-code
+
+# Create shared environment
+sudo cat > /etc/claude-code/env.sh << 'EOF'
+export CLAUDE_CODE_CONFIG="/etc/claude-code"
+export PATTERN_LIBRARY="/opt/databayt/codebase"
+EOF
+
+# Create team CLAUDE.md
+sudo cat > /etc/claude-code/CLAUDE.md << 'EOF'
+# Team Claude Code Configuration
+
+## Pattern Library
+Reference patterns from /opt/databayt/codebase/
+
+## Code Standards
+- Use pnpm as package manager
+- Follow TypeScript strict mode
+- Use Tailwind CSS 4 with semantic tokens
+
+## Architecture
+- Mirror pattern: URL routes = directory structure
+- Server actions for mutations
+- Zod for validation
+EOF
+
+# Set permissions
+sudo chmod 755 /etc/claude-code
+sudo chmod 644 /etc/claude-code/*
+```
+
+## Step 4: Clone Pattern Library
+
+```bash
+# Clone pattern library
+sudo mkdir -p /opt/databayt
+sudo git clone https://github.com/databayt/codebase.git /opt/databayt/codebase
+
+# Set permissions for developers
+sudo chown -R root:developers /opt/databayt
+sudo chmod -R 755 /opt/databayt
+```
+
+## Step 5: User Bashrc Setup
+
+Create a template bashrc for developers:
+
+```bash
+# Create skel additions
+sudo cat >> /etc/skel/.bashrc << 'EOF'
+
+# Kun configuration
+source /etc/claude-code/env.sh
+
+# Helpful aliases
+alias claude-attach='tmux attach -t claude || tmux new-session -s claude'
+alias patterns='cd /opt/databayt/codebase'
+EOF
+```
+
+## Step 6: Systemd Services
+
+Create a systemd service for each user's tmux session:
+
+```bash
+# Create service template
+sudo cat > /etc/systemd/system/claude-tmux@.service << 'EOF'
+[Unit]
+Description=Claude Code tmux Session for %i
+After=network.target
+
+[Service]
+Type=forking
+User=%i
+ExecStart=/usr/bin/tmux new-session -d -s claude
+ExecStop=/usr/bin/tmux kill-session -t claude
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Enable for each user
+sudo systemctl enable claude-tmux@dev1.service
+sudo systemctl enable claude-tmux@dev2.service
+# ... repeat for each developer
+
+# Start services
+sudo systemctl daemon-reload
+sudo systemctl start claude-tmux@dev1.service
+```
+
+## Step 7: Install Monitoring
+
+```bash
+# Install Netdata
+bash <(curl -Ss https://my-netdata.io/kickstart.sh)
+
+# Configure authentication (optional)
+# Edit /etc/netdata/netdata.conf
+
+# Access at http://your-tailscale-ip:19999
+```
+
+## Step 8: Health Check Script
+
+```bash
+# Create health check script
+sudo cat > /usr/local/bin/kun-health << 'EOF'
+#!/bin/bash
+echo "=== Kun Server Health Check ==="
+echo
+
+echo "## Tailscale Status"
+tailscale status
+echo
+
+echo "## Active tmux Sessions"
+for user in $(members developers 2>/dev/null || getent group developers | cut -d: -f4 | tr ',' '\n'); do
+  echo "User: $user"
+  sudo -u $user tmux list-sessions 2>/dev/null || echo "  No sessions"
+done
+echo
+
+echo "## System Resources"
+echo "CPU: $(grep -c processor /proc/cpuinfo) cores"
+echo "Memory: $(free -h | awk '/^Mem:/ {print $3 "/" $2}')"
+echo "Disk: $(df -h / | awk 'NR==2 {print $3 "/" $2}')"
+echo
+
+echo "## Network"
+echo "Connections: $(ss -tuln | grep -c LISTEN) listening"
+EOF
+
+sudo chmod +x /usr/local/bin/kun-health
+```
+
+## Verification Checklist
+
+- [ ] All user accounts created
+- [ ] Tailscale ACLs configured
+- [ ] /etc/claude-code accessible to all developers
+- [ ] Pattern library cloned
+- [ ] tmux services running for each user
+- [ ] Netdata dashboard accessible
+- [ ] Health check script working
+
+## Security Best Practices
+
+1. **Regular key rotation**: Update Tailscale auth keys quarterly
+2. **Audit logs**: Review `/var/log/auth.log` regularly
+3. **Access reviews**: Verify ACLs match current team
+4. **Backup secrets**: Store API keys in 1Password/Vault
+
+## Next Steps
+
+With Phase 2 complete:
+- Document team conventions in CLAUDE.md
+- Set up automated backups
+- Consider Phase 3 for external access

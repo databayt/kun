@@ -1,0 +1,93 @@
+{
+  "// Kun Tailscale ACL Configuration": "Copy this to https://login.tailscale.com/admin/acls",
+
+  "groups": {
+    "group:admins": [
+      "admin@databayt.org"
+    ],
+    "group:developers": [
+      "dev1@databayt.com",
+      "dev2@databayt.com",
+      "dev3@databayt.com",
+      "dev4@databayt.com",
+      "dev5@databayt.com",
+      "dev6@databayt.com",
+      "dev7@databayt.com",
+      "dev8@databayt.com",
+      "dev9@databayt.com",
+      "dev10@databayt.com"
+    ],
+    "group:external": []
+  },
+
+  "tagOwners": {
+    "tag:kun-server": ["group:admins"],
+    "tag:kun-dev": ["group:admins"]
+  },
+
+  "acls": [
+    {
+      "// comment": "Admins have full access to everything",
+      "action": "accept",
+      "src": ["group:admins"],
+      "dst": ["*:*"]
+    },
+    {
+      "// comment": "Developers can SSH to kun-server",
+      "action": "accept",
+      "src": ["group:developers"],
+      "dst": ["tag:kun-server:22"]
+    },
+    {
+      "// comment": "Developers can access Netdata monitoring",
+      "action": "accept",
+      "src": ["group:developers"],
+      "dst": ["tag:kun-server:19999"]
+    },
+    {
+      "// comment": "External users can only SSH to their container",
+      "action": "accept",
+      "src": ["group:external"],
+      "dst": ["tag:kun-server:22"]
+    }
+  ],
+
+  "ssh": [
+    {
+      "// comment": "Admins can SSH as any user",
+      "action": "accept",
+      "src": ["group:admins"],
+      "dst": ["tag:kun-server"],
+      "users": ["root", "autogroup:nonroot"]
+    },
+    {
+      "// comment": "Developers can SSH as their own user (no root)",
+      "action": "accept",
+      "src": ["group:developers"],
+      "dst": ["tag:kun-server"],
+      "users": ["autogroup:nonroot"]
+    },
+    {
+      "// comment": "External users SSH to isolated accounts only",
+      "action": "accept",
+      "src": ["group:external"],
+      "dst": ["tag:kun-server"],
+      "users": ["autogroup:nonroot"]
+    }
+  ],
+
+  "nodeAttrs": [
+    {
+      "target": ["tag:kun-server"],
+      "attr": ["funnel"]
+    }
+  ],
+
+  "// Instructions": [
+    "1. Go to https://login.tailscale.com/admin/acls",
+    "2. Replace the default ACL with this configuration",
+    "3. Update email addresses in groups to match your team",
+    "4. Apply the tag 'kun-server' to your server in the Machines tab",
+    "5. Test access from different accounts"
+  ]
+}

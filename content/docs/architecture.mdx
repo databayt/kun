@@ -1,0 +1,116 @@
+---
+title: Architecture
+description: System design, topology, and security architecture for Kun
+---
+
+# Architecture
+
+## System Design
+
+Kun follows a centralized architecture where all developers connect to a shared infrastructure, ensuring consistent AI context and pattern compliance.
+
+<KunEndToEndFlow />
+
+## Network Topology
+
+### Phase 1: Individual Setup
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Developer's Devices                       │
+│                                                              │
+│   ┌─────────┐    ┌─────────┐    ┌─────────┐                │
+│   │ Laptop  │    │ Phone   │    │ Tablet  │                │
+│   └────┬────┘    └────┬────┘    └────┬────┘                │
+│        │              │              │                       │
+│        └──────────────┼──────────────┘                       │
+│                       │                                       │
+│                       ▼                                       │
+│              ┌───────────────┐                               │
+│              │   Tailscale   │  ← WireGuard-based VPN       │
+│              │    Network    │                               │
+│              └───────┬───────┘                               │
+│                      │                                       │
+│                      ▼                                       │
+│              ┌───────────────┐                               │
+│              │  Home Server  │                               │
+│              │  ├── tmux     │  ← Persistent sessions       │
+│              │  └── Claude   │  ← AI development            │
+│              └───────────────┘                               │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Phase 2: Team Server
+
+<Phase2Flow />
+
+## Security Model
+
+### Defense in Depth
+
+| Layer | Technology | Purpose |
+|-------|------------|---------|
+| **Network** | Tailscale VPN | Zero-trust network access |
+| **Auth** | Tailscale SSH | Certificate-based authentication |
+| **Access** | ACLs | Role-based access control |
+| **Secrets** | 1Password/Vault | Centralized secret management |
+| **Audit** | Systemd journal | Activity logging |
+
+### Access Control
+
+```json
+{
+  "acls": [
+    {
+      "action": "accept",
+      "src": ["group:developers"],
+      "dst": ["tag:dev-server:22"]
+    },
+    {
+      "action": "accept",
+      "src": ["group:admins"],
+      "dst": ["*:*"]
+    }
+  ]
+}
+```
+
+## Directory Structure
+
+<DirectoryStructure />
+
+## Technology Stack
+
+| Component | Technology |
+|-----------|------------|
+| OS | Ubuntu 22.04/24.04 LTS |
+| VPN | Tailscale |
+| Sessions | tmux |
+| AI | Claude Code CLI |
+| Runtime | Node.js 20.x |
+| Package Manager | pnpm |
+| Secrets | 1Password CLI / Vault |
+| Monitoring | Netdata |
+
+## Architecture Principles
+
+### 1. Mirror-Pattern
+Every URL route maps 1:1 to directory structure.
+
+### 2. Architecture-First
+Design systems, not just features. AI generates code within intentional constraints.
+
+### 3. Guardrails
+CLAUDE.md files and patterns are training data for AI collaborators.
+
+### 4. Human Review Layer
+Humans own architectural tradeoffs; AI handles implementation velocity.
+
+## Integration with Pattern Library
+
+From `databayt/codebase`:
+- 54 UI components
+- 62 Atom components
+- 31 Templates
+- 11 Claude agents
+- 4 Claude commands

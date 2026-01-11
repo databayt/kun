@@ -1,0 +1,29 @@
+[Unit]
+Description=Claude Code tmux session
+Documentation=https://github.com/databayt/kun
+After=network.target tailscaled.service
+
+[Service]
+Type=forking
+User=developer
+Group=developers
+Environment="HOME=/home/developer"
+WorkingDirectory=/home/developer
+
+# Create the tmux session
+ExecStart=/usr/bin/tmux new-session -d -s claude-main -n claude
+ExecStartPost=/usr/bin/tmux new-window -t claude-main -n server
+
+# Stop the session
+ExecStop=/usr/bin/tmux kill-session -t claude-main
+
+# Restart configuration
+Restart=on-failure
+RestartSec=10
+
+# Timeout settings
+TimeoutStartSec=30
+TimeoutStopSec=10
+
+[Install]
+WantedBy=multi-user.target

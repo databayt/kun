@@ -1,0 +1,13 @@
+{
+  "title": "Documentation",
+  "pages": [
+    "index",
+    "architecture",
+    "prd",
+    "epics",
+    "infrastructure",
+    "phase1",
+    "phase2",
+    "phase3"
+  ]
+}
