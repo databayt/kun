@@ -1,0 +1,263 @@
+/* Container Styles - Optimized & Responsive */
+
+@layer components {
+  /* CSS Custom Properties for consistent spacing */
+  :root {
+    --container-padding-xs: 0.625rem;  /* 10px - mobile */
+    --container-padding-sm: 1rem;      /* 16px - sm 640px */
+    --container-padding-md: 1.25rem;   /* 20px - md 768px */
+    --container-padding-lg: 1.5rem;    /* 24px - lg 1024px */
+    --container-padding-xl: 1.5rem;    /* 24px - xl 1280px */
+    --container-padding-2xl: 2rem;     /* 32px */
+
+    --container-max-sm: 640px;
+    --container-max-md: 768px;
+    --container-max-lg: 1024px;
+    --container-max-xl: 1280px;
+    --container-max-2xl: 1536px;
+  }
+
+  /* Main layout container - optimized with CSS variables */
+  .layout-container {
+    @apply w-full;
+    padding-inline: var(--container-padding-xs);
+  }
+
+  @media (min-width: 640px) {
+    .layout-container {
+      padding-inline: var(--container-padding-sm);
+    }
+  }
+
+  @media (min-width: 768px) {
+    .layout-container {
+      padding-inline: var(--container-padding-md);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .layout-container {
+      padding-inline: var(--container-padding-lg);
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .layout-container {
+      padding-inline: var(--container-padding-xl);
+    }
+  }
+
+  /* Standard containers with different max-widths */
+  .container {
+    @apply w-full mx-auto px-4 sm:px-6 lg:px-8;
+    max-width: var(--container-max-xl);
+  }
+
+  .container-sm {
+    @apply w-full mx-auto px-4 sm:px-6;
+    max-width: var(--container-max-sm);
+  }
+
+  .container-md {
+    @apply w-full mx-auto px-4 sm:px-6 lg:px-8;
+    max-width: var(--container-max-md);
+  }
+
+  .container-lg {
+    @apply w-full mx-auto px-4 sm:px-6 lg:px-8;
+    max-width: var(--container-max-lg);
+  }
+
+  .container-xl {
+    @apply w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-10;
+    max-width: var(--container-max-xl);
+  }
+
+  .container-2xl {
+    @apply w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-12;
+    max-width: var(--container-max-2xl);
+  }
+
+  /* Full width container without max-width constraint */
+  .container-fluid {
+    @apply w-full px-4 sm:px-6 lg:px-8;
+  }
+
+  /* shadcn/ui blocks pattern container-wrapper */
+  .container-wrapper {
+    @apply mx-auto w-full;
+    padding-inline: var(--container-padding-xs);
+  }
+
+  /* Remove padding when nested inside layout-container to avoid double padding */
+  .layout-container .container-wrapper {
+    padding-inline: 0;
+  }
+
+  @media (min-width: 640px) {
+    .container-wrapper {
+      padding-inline: var(--container-padding-sm);
+    }
+  }
+
+  @media (min-width: 768px) {
+    .container-wrapper {
+      padding-inline: var(--container-padding-md);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .container-wrapper {
+      padding-inline: var(--container-padding-lg);
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .container-wrapper {
+      padding-inline: var(--container-padding-xl);
+    }
+  }
+
+  /* Section soft spacing for blocks */
+  .section-soft {
+    @apply py-8 sm:py-12 lg:py-16;
+  }
+
+  /* Border grid pattern */
+  .border-grid {
+    @apply border-b border-border;
+  }
+
+  /* Section container with vertical spacing */
+  .container-section {
+    @apply container py-12 sm:py-16 lg:py-20;
+  }
+
+  /* Prose/content.tsx container for readable text */
+  .container-prose {
+    @apply w-full mx-auto px-4 sm:px-6 lg:px-8;
+    max-width: 65ch; /* Optimal reading width */
+  }
+
+  /* Responsive padding utilities - simplified */
+  .px-responsive {
+    padding-inline: var(--container-padding-xs);
+  }
+
+  .py-responsive {
+    @apply py-6 sm:py-8 md:py-10 lg:py-12;
+  }
+
+  @media (min-width: 640px) {
+    .px-responsive { padding-inline: var(--container-padding-sm); }
+  }
+
+  @media (min-width: 768px) {
+    .px-responsive { padding-inline: var(--container-padding-md); }
+  }
+
+  @media (min-width: 1024px) {
+    .px-responsive { padding-inline: var(--container-padding-lg); }
+  }
+
+  @media (min-width: 1280px) {
+    .px-responsive { padding-inline: var(--container-padding-xl); }
+  }
+
+  /* Margin utilities - simplified */
+  .mt-responsive {
+    @apply mt-8 sm:mt-12 lg:mt-16;
+  }
+
+  .mb-responsive {
+    @apply mb-8 sm:mb-12 lg:mb-16;
+  }
+
+  .my-responsive {
+    @apply my-8 sm:my-12 lg:my-16;
+  }
+
+  /* Full bleed utilities - optimized for RTL */
+  .full-bleed {
+    width: 100vw;
+    position: relative;
+    margin-inline: calc(50% - 50vw);
+  }
+
+  /* RTL-specific overrides using logical properties */
+  [dir="rtl"] {
+    --container-padding-start: var(--container-padding-xs);
+    --container-padding-end: var(--container-padding-xs);
+  }
+
+  /* Logical property utilities for better RTL support */
+  .ps-responsive {
+    padding-inline-start: var(--container-padding-xs);
+  }
+
+  .pe-responsive {
+    padding-inline-end: var(--container-padding-xs);
+  }
+
+  .ms-responsive {
+    margin-inline-start: 2rem;
+  }
+
+  .me-responsive {
+    margin-inline-end: 2rem;
+  }
+
+  @media (min-width: 640px) {
+    .ps-responsive { padding-inline-start: var(--container-padding-sm); }
+    .pe-responsive { padding-inline-end: var(--container-padding-sm); }
+    .ms-responsive { margin-inline-start: 3rem; }
+    .me-responsive { margin-inline-end: 3rem; }
+  }
+
+  @media (min-width: 768px) {
+    .ps-responsive { padding-inline-start: var(--container-padding-md); }
+    .pe-responsive { padding-inline-end: var(--container-padding-md); }
+    .ms-responsive { margin-inline-start: 4rem; }
+    .me-responsive { margin-inline-end: 4rem; }
+  }
+
+  @media (min-width: 1024px) {
+    .ps-responsive { padding-inline-start: var(--container-padding-lg); }
+    .pe-responsive { padding-inline-end: var(--container-padding-lg); }
+  }
+
+  /* Grid container utilities */
+  .container-grid {
+    @apply container;
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  .container-grid-sm {
+    @apply container;
+    display: grid;
+    gap: 1rem;
+  }
+
+  .container-grid-lg {
+    @apply container;
+    display: grid;
+    gap: 2rem;
+  }
+
+  /* Flex container utilities */
+  .container-flex {
+    @apply container flex;
+    gap: 1rem;
+  }
+
+  .container-flex-center {
+    @apply container flex items-center justify-center;
+    gap: 1rem;
+  }
+
+  .container-flex-between {
+    @apply container flex items-center justify-between;
+    gap: 1rem;
+  }
+}

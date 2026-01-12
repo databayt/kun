@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "../styles/container.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -49,14 +50,6 @@
 }
 
 :root {
-  /* Container padding - responsive */
-  --container-padding-xs: 0.625rem;  /* 10px - mobile */
-  --container-padding-sm: 1rem;      /* 16px - sm 640px */
-  --container-padding-md: 1.25rem;   /* 20px - md 768px */
-  --container-padding-lg: 1.5rem;    /* 24px - lg 1024px */
-  --container-padding-xl: 1.5rem;    /* 24px - xl 1280px */
-  --container-padding-2xl: 2rem;     /* 32px */
-
   --radius: 0.65rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -310,76 +303,5 @@
 
   &::-webkit-scrollbar {
     display: none;
-  }
-}
-
-@layer components {
-  /* Container wrapper - shadcn/ui blocks pattern */
-  .container-wrapper {
-    @apply mx-auto w-full max-w-screen-2xl;
-    padding-inline: var(--container-padding-xs);
-  }
-
-  @media (min-width: 640px) {
-    .container-wrapper {
-      padding-inline: var(--container-padding-sm);
-    }
-  }
-
-  @media (min-width: 768px) {
-    .container-wrapper {
-      padding-inline: var(--container-padding-md);
-    }
-  }
-
-  @media (min-width: 1024px) {
-    .container-wrapper {
-      padding-inline: var(--container-padding-lg);
-    }
-  }
-
-  @media (min-width: 1280px) {
-    .container-wrapper {
-      padding-inline: var(--container-padding-xl);
-    }
-  }
-
-  /* Responsive padding utilities */
-  .px-responsive {
-    padding-inline: var(--container-padding-xs);
-  }
-
-  @media (min-width: 640px) {
-    .px-responsive { padding-inline: var(--container-padding-sm); }
-  }
-
-  @media (min-width: 768px) {
-    .px-responsive { padding-inline: var(--container-padding-md); }
-  }
-
-  @media (min-width: 1024px) {
-    .px-responsive { padding-inline: var(--container-padding-lg); }
-  }
-
-  @media (min-width: 1280px) {
-    .px-responsive { padding-inline: var(--container-padding-xl); }
-  }
-
-  /* Vertical responsive padding */
-  .py-responsive {
-    @apply py-6 sm:py-8 md:py-10 lg:py-12;
-  }
-
-  /* Responsive margin utilities */
-  .mt-responsive {
-    @apply mt-8 sm:mt-12 lg:mt-16;
-  }
-
-  .mb-responsive {
-    @apply mb-8 sm:mb-12 lg:mb-16;
-  }
-
-  .my-responsive {
-    @apply my-8 sm:my-12 lg:my-16;
   }
 }

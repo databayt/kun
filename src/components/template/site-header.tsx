@@ -12,7 +12,7 @@ interface SiteHeaderProps {
 export function SiteHeader({ lang }: SiteHeaderProps) {
   return (
     <header className="bg-background sticky top-0 z-50 w-full">
-      <div className="container-wrapper px-3 lg:px-0">
+      <div className="container-wrapper">
         <div className="flex h-(--header-height) items-center **:data-[slot=separator]:!h-4">
           <Link href={`/${lang}`} className="flex items-center gap-1.5 me-6">
             <span className="font-bold">Kun</span>
