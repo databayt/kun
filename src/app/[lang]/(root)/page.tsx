@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { RoadmapCards } from "@/components/home/roadmap-cards"
 import { StageBanner } from "@/components/home/stage-banner"
 import { QuickLinks } from "@/components/home/quick-links"
+import { StackCards } from "@/components/home/stack-cards"
 
 export default async function HomePage({
   params,
@@ -40,6 +41,9 @@ export default async function HomePage({
           </Button>
         </div>
       </section>
+
+      {/* Stack Cards */}
+      <StackCards />
 
       {/* Stage Banner - Current Focus */}
       <StageBanner
