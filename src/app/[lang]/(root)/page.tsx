@@ -20,12 +20,7 @@ export default async function HomePage({
           {lang === "ar" ? "كن" : "Kun"}
         </h1>
         <p className="text-center text-xl font-medium text-primary">
-          {lang === "ar" ? "آلة الكود" : "The Code Machine"}
-        </p>
-        <p className="max-w-[42rem] text-center leading-normal text-muted-foreground sm:text-xl sm:leading-8">
-          {lang === "ar"
-            ? "برمجة بالاستلهام على نطاق واسع. إعداد مرة واحدة، برمجة من أي مكان."
-            : "Vibe coding at scale. Configure once, code everywhere."}
+          {lang === "ar" ? "آلة كود الأنماط المحددة" : "Specific pattern code machine"}
         </p>
         <div className="flex gap-4">
           <Button asChild size="lg">
