@@ -1,0 +1,131 @@
+---
+title: Projects
+description: Browse and clone open projects from the databayt organization
+---
+
+# Open Projects
+
+All projects in the [databayt](https://github.com/databayt) organization are available for team development.
+
+## Active Projects
+
+| Project | Description | Stack | Status |
+|---------|-------------|-------|--------|
+| **kun** | Code machine infrastructure & docs | Next.js, MDX | Active |
+| **codebase** | Component patterns library | React, TypeScript | Active |
+| **mkan** | Main application | Next.js, Prisma | Active |
+
+## Getting Started
+
+### 1. Clone a Project
+
+```bash
+# Using HTTPS
+git clone https://github.com/databayt/PROJECT_NAME.git
+
+# Using SSH (recommended)
+git clone git@github.com:databayt/PROJECT_NAME.git
+
+# Using GitHub CLI
+gh repo clone databayt/PROJECT_NAME
+```
+
+### 2. Install Dependencies
+
+All projects use pnpm:
+
+```bash
+cd PROJECT_NAME
+pnpm install
+```
+
+### 3. Setup Environment
+
+Copy the example environment file and fill in your secrets:
+
+```bash
+cp .env.example .env.local
+# Edit .env.local with your values
+```
+
+### 4. Run Development Server
+
+```bash
+pnpm dev
+```
+
+## Project Structure
+
+Each project follows a similar structure:
+
+```
+project/
+├── src/
+│   ├── app/          # Next.js App Router
+│   ├── components/   # React components
+│   ├── lib/          # Utilities
+│   └── styles/       # CSS/Tailwind
+├── prisma/           # Database schema (if applicable)
+├── public/           # Static assets
+├── .env.example      # Environment template
+└── package.json
+```
+
+## Browsing All Repositories
+
+View all available repositories:
+
+```bash
+# List all repos in databayt org
+gh repo list databayt
+
+# Search for specific repos
+gh repo list databayt --topic next-js
+```
+
+Or visit: [github.com/databayt](https://github.com/databayt)
+
+## Contributing
+
+### Branch Strategy
+
+```bash
+# Create feature branch
+git checkout -b feature/your-feature
+
+# Make changes and commit
+git add .
+git commit -m "feat: your feature description"
+
+# Push and create PR
+git push -u origin feature/your-feature
+gh pr create
+```
+
+### Commit Convention
+
+Use conventional commits:
+
+- `feat:` New feature
+- `fix:` Bug fix
+- `docs:` Documentation
+- `refactor:` Code refactoring
+- `test:` Tests
+- `chore:` Maintenance
+
+## Project-Specific Documentation
+
+Each project has its own README with:
+
+- Setup instructions
+- Architecture overview
+- API documentation
+- Development guidelines
+
+Check the project's `README.md` and `/docs` folder for details.
+
+## Need Help?
+
+- Open an issue in the relevant repository
+- Ask in team Slack/Discord
+- Check the [full documentation](/docs)

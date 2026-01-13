@@ -7,6 +7,8 @@
     "epics",
     "infrastructure",
     "phase1",
+    "secrets",
+    "projects",
     "phase2",
     "phase3"
   ]
