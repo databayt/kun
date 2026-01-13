@@ -17,7 +17,7 @@ export default async function HomePage({
       {/* Hero Section */}
       <section className="flex flex-col items-center justify-center gap-6 py-20 md:py-28">
         <h1 className="text-center text-6xl font-bold tracking-tight sm:text-7xl md:text-8xl lg:text-9xl">
-          {lang === "ar" ? "كن" : "Kun"}
+          كن
         </h1>
         <p className="text-center text-xl font-medium text-primary">
           {lang === "ar" ? "آلة كود الأنماط المحددة" : "Specific pattern code machine"}
