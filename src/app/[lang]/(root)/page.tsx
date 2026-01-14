@@ -21,12 +21,12 @@ export default async function HomePage({
           كن
         </h1>
         <p className="text-center text-xl font-medium text-primary">
-          {lang === "ar" ? "آلة كود الأنماط المحددة" : "Specific pattern code machine"}
+          {lang === "ar" ? "آلة الكود" : "Code machine"}
         </p>
         <div className="flex gap-4">
           <Button asChild size="lg">
             <Link href={`/${lang}/docs/phase1`}>
-              {lang === "ar" ? "البدء السريع" : "Quick Start"}{" "}
+              {lang === "ar" ? "ابدأ الآن" : "Get Started"}{" "}
               <ArrowRight className="ms-2 h-4 w-4 rtl:rotate-180" />
             </Link>
           </Button>

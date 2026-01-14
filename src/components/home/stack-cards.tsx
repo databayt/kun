@@ -9,12 +9,12 @@ import {
   TailwindCSS,
   ShadcnUI,
   PrismaIcon,
-  Vercel,
+  Triangle,
   Claude,
   ZodIcon,
   Figma,
-  NodeJS,
   PlanetScale,
+  Authentication,
 } from "@/components/icons"
 
 interface StackItem {
@@ -72,7 +72,7 @@ const stackItems: StackItem[] = [
     id: "vercel",
     title: "Vercel",
     description: "Frontend cloud platform",
-    icon: <Vercel className="h-8 w-8" />,
+    icon: <Triangle className="h-8 w-8" />,
     href: "https://vercel.com",
   },
   {
@@ -97,11 +97,11 @@ const stackItems: StackItem[] = [
     href: "https://planetscale.com",
   },
   {
-    id: "nodejs",
-    title: "Node.js",
-    description: "JavaScript runtime",
-    icon: <NodeJS className="h-8 w-8" />,
-    href: "https://nodejs.org",
+    id: "authjs",
+    title: "Auth.js",
+    description: "Authentication library",
+    icon: <Authentication className="h-8 w-8" />,
+    href: "https://authjs.dev",
   },
   {
     id: "figma",
