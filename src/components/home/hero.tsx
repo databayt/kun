@@ -29,9 +29,6 @@ export function Hero({ lang }: HeroProps) {
         text={lang === "ar" ? "البنية التحتية للتطوير بالذكاء الاصطناعي" : "Remote AI Development Infrastructure"}
         href={`/${lang}/docs/phase1`}
       />
-      <h1 className="text-center text-6xl font-bold tracking-tight sm:text-7xl md:text-8xl lg:text-9xl">
-        كن
-      </h1>
       <PageHeaderHeading className="max-w-4xl">
         {lang === "ar" ? titleAr : title}
       </PageHeaderHeading>
