@@ -1,21 +1,24 @@
 "use client"
 
-import Link from "next/link"
 import { ReactNode } from "react"
 import {
   NextJS,
   ReactIcon,
   TypeScript,
+  NodeJS,
   TailwindCSS,
   ShadcnUI,
+  PlanetScale,
   PrismaIcon,
   Triangle,
-  Claude,
   ZodIcon,
-  Figma,
-  PlanetScale,
+  ReactHookForm,
   Authentication,
-} from "@/components/icons"
+  Claude,
+  PythonIcon,
+  RustIcon,
+  Figma,
+} from "@/components/atom/icons"
 
 interface StackItem {
   id: string
@@ -48,6 +51,13 @@ const stackItems: StackItem[] = [
     href: "https://typescriptlang.org",
   },
   {
+    id: "nodejs",
+    title: "Node.js",
+    description: "JavaScript runtime",
+    icon: <NodeJS className="h-8 w-8" />,
+    href: "https://nodejs.org",
+  },
+  {
     id: "tailwind",
     title: "Tailwind CSS",
     description: "Utility-first CSS framework",
@@ -60,6 +70,13 @@ const stackItems: StackItem[] = [
     description: "Accessible React components",
     icon: <ShadcnUI className="h-8 w-8" />,
     href: "https://ui.shadcn.com",
+  },
+  {
+    id: "planetscale",
+    title: "PlanetScale",
+    description: "Serverless MySQL platform",
+    icon: <PlanetScale className="h-8 w-8" />,
+    href: "https://planetscale.com",
   },
   {
     id: "prisma",
@@ -76,13 +93,6 @@ const stackItems: StackItem[] = [
     href: "https://vercel.com",
   },
   {
-    id: "claude",
-    title: "Claude",
-    description: "AI-assisted development",
-    icon: <Claude className="h-8 w-8" />,
-    href: "https://claude.ai",
-  },
-  {
     id: "zod",
     title: "Zod",
     description: "TypeScript-first validation",
@@ -90,11 +100,11 @@ const stackItems: StackItem[] = [
     href: "https://zod.dev",
   },
   {
-    id: "planetscale",
-    title: "PlanetScale",
-    description: "Serverless MySQL platform",
-    icon: <PlanetScale className="h-8 w-8" />,
-    href: "https://planetscale.com",
+    id: "reacthookform",
+    title: "React Hook Form",
+    description: "Performant form validation",
+    icon: <ReactHookForm className="h-8 w-8" />,
+    href: "https://react-hook-form.com",
   },
   {
     id: "authjs",
@@ -102,6 +112,27 @@ const stackItems: StackItem[] = [
     description: "Authentication library",
     icon: <Authentication className="h-8 w-8" />,
     href: "https://authjs.dev",
+  },
+  {
+    id: "claude",
+    title: "Claude",
+    description: "AI-assisted development",
+    icon: <Claude className="h-8 w-8" />,
+    href: "https://claude.ai",
+  },
+  {
+    id: "python",
+    title: "Python",
+    description: "General-purpose programming",
+    icon: <PythonIcon className="h-8 w-8" />,
+    href: "https://python.org",
+  },
+  {
+    id: "rust",
+    title: "Rust",
+    description: "Systems programming language",
+    icon: <RustIcon className="h-8 w-8" />,
+    href: "https://rust-lang.org",
   },
   {
     id: "figma",
