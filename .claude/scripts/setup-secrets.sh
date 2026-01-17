@@ -65,25 +65,34 @@ cat > "$ENV_FILE" << 'HEADER'
 
 HEADER
 
-# Parse required secrets
-echo "# Required" >> "$ENV_FILE"
+# Parse all sections from the gist
 echo "$SECRETS" | python3 -c "
 import sys, json
 data = json.load(sys.stdin)
-for key, value in data.get('required', {}).items():
-    if value and not value.startswith('ghp_xxx') and not value.startswith('neon_api_xxx'):
-        print(f'{key}={value}')
-" >> "$ENV_FILE"
 
-# Parse optional secrets (only non-empty)
-echo "" >> "$ENV_FILE"
-echo "# Optional" >> "$ENV_FILE"
-echo "$SECRETS" | python3 -c "
-import sys, json
-data = json.load(sys.stdin)
-for key, value in data.get('optional', {}).items():
-    if value:
-        print(f'{key}={value}')
+# Section order for .env file
+sections = [
+    ('required', 'Required'),
+    ('databases', 'Databases'),
+    ('ai', 'AI'),
+    ('auth', 'Auth'),
+    ('services', 'Services'),
+    ('cloudinary', 'Cloudinary'),
+    ('imagekit', 'ImageKit'),
+    ('telegram', 'Telegram'),
+    ('optional', 'Optional')
+]
+
+for section_key, section_name in sections:
+    section = data.get(section_key, {})
+    if section:
+        has_values = any(v and not str(v).startswith('ghp_xxx') and not str(v).startswith('neon_api_xxx') and 'GET_FROM' not in str(v) for v in section.values())
+        if has_values:
+            print(f'# {section_name}')
+            for key, value in section.items():
+                if value and not str(value).startswith('ghp_xxx') and not str(value).startswith('neon_api_xxx') and 'GET_FROM' not in str(value):
+                    print(f'{key}={value}')
+            print()
 " >> "$ENV_FILE"
 
 # Set permissions

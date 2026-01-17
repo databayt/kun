@@ -224,13 +224,49 @@ See full keyword list (90+) in `~/.claude/CLAUDE.md`.
 Secrets are stored in a private GitHub gist and auto-loaded via scripts.
 
 ### What's Included
+
+**Required**
 - `GITHUB_PERSONAL_ACCESS_TOKEN` - GitHub API access
-- `NEON_API_KEY` - Neon database MCP
-- `DATABASE_URL` - PostgreSQL connection
+
+**Per-Project Databases**
+- `DATABASE_URL_CODEBASE` - Codebase project DB
+- `DATABASE_URL_HOGWARTS` - Hogwarts (education SaaS) DB
+- `DATABASE_URL_MKAN` - Mkan (rental marketplace) DB
+- `DATABASE_URL_SOUQ` - Souq (e-commerce) DB (when created)
+- `DATABASE_URL_SHIFA` - Shifa (healthcare) DB (when created)
+
+**AI Keys**
 - `ANTHROPIC_API_KEY` - Claude API
 - `GROQ_API_KEY` - Groq API
+
+**Auth**
 - OAuth credentials (Google, Facebook)
-- Service keys (Stripe, Resend, Cloudinary, ImageKit)
+- `AUTH_SECRET` - NextAuth secret
+
+**Services**
+- Stripe, Resend, Cloudinary, ImageKit, Telegram
+
+### Per-Project Database Usage
+
+When working on a specific project, copy the appropriate DATABASE_URL to your project's `.env`:
+
+```bash
+# Working on hogwarts?
+DATABASE_URL=$DATABASE_URL_HOGWARTS
+
+# Working on mkan?
+DATABASE_URL=$DATABASE_URL_MKAN
+
+# Working on codebase?
+DATABASE_URL=$DATABASE_URL_CODEBASE
+```
+
+Or use an alias in your shell profile:
+```bash
+alias use-hogwarts='export DATABASE_URL=$DATABASE_URL_HOGWARTS'
+alias use-mkan='export DATABASE_URL=$DATABASE_URL_MKAN'
+alias use-codebase='export DATABASE_URL=$DATABASE_URL_CODEBASE'
+```
 
 ### Update Secrets
 
@@ -244,7 +280,7 @@ Secrets are stored in a private GitHub gist and auto-loaded via scripts.
 Create/edit `~/.claude/.env` directly:
 ```bash
 GITHUB_PERSONAL_ACCESS_TOKEN=ghp_xxx
-NEON_API_KEY=neon_xxx
+DATABASE_URL_HOGWARTS=postgresql://...
 # ... other variables
 ```
 
