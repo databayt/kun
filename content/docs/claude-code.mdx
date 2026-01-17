@@ -1,0 +1,479 @@
+---
+title: "Claude Code"
+description: "Team setup guide for Claude Code configuration"
+---
+
+Complete setup guide for the databayt team Claude Code configuration.
+
+## One-Liner Setup
+
+### macOS / Linux
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/databayt/codebase/main/.claude/scripts/install.sh | bash && ~/.claude/scripts/setup-secrets.sh 68453b25fa9d28c94426c55c179b3838
+```
+
+### Windows (PowerShell)
+
+```powershell
+irm https://raw.githubusercontent.com/databayt/codebase/main/.claude/scripts/install.ps1 | iex; & "$env:USERPROFILE\.claude\scripts\setup-secrets.ps1" -GistId 68453b25fa9d28c94426c55c179b3838
+```
+
+This installs Claude Code CLI, downloads team configuration, and sets up secrets automatically.
+
+---
+
+## What Gets Installed
+
+| Component | Count | Description |
+|-----------|-------|-------------|
+| **Agents** | 29 | Architecture, React, Prisma, product repos (hogwarts, souq, mkan, shifa), etc. |
+| **Commands** | 17 | `/repos`, `/atom`, `/template`, `/block`, `/build`, `/deploy`, etc. |
+| **Memory** | 5 | atoms, templates, blocks, reports, repositories |
+| **MCP Servers** | 28 | GitHub, Neon, shadcn, browser, Vercel, Stripe, etc. |
+| **Scripts** | 6 | install, sync, setup-secrets, sync-repos (macOS + Windows) |
+
+---
+
+## Step-by-Step Installation
+
+### Step 1: Install Claude Code CLI
+
+**macOS / Linux**
+```bash
+curl -fsSL https://claude.ai/install.sh | sh
+```
+
+**Windows (PowerShell)**
+```powershell
+irm https://claude.ai/install.ps1 | iex
+```
+
+**Verify**
+```bash
+claude --version
+```
+
+### Step 2: Download Team Config
+
+**macOS / Linux**
+```bash
+curl -fsSL https://raw.githubusercontent.com/databayt/codebase/main/.claude/scripts/install.sh | bash
+```
+
+**Windows**
+```powershell
+irm https://raw.githubusercontent.com/databayt/codebase/main/.claude/scripts/install.ps1 | iex
+```
+
+### Step 3: Setup Secrets
+
+**macOS / Linux**
+```bash
+~/.claude/scripts/setup-secrets.sh 68453b25fa9d28c94426c55c179b3838
+```
+
+**Windows**
+```powershell
+& "$env:USERPROFILE\.claude\scripts\setup-secrets.ps1" -GistId 68453b25fa9d28c94426c55c179b3838
+```
+
+### Step 4: Restart Terminal & Run
+
+```bash
+claude
+# or with alias
+c
+```
+
+---
+
+## Directory Structure
+
+```
+~/.claude/                      # Windows: %USERPROFILE%\.claude\
+├── CLAUDE.md                   # Global instructions (468 lines, 90+ keywords)
+├── CLAUDE.local.md             # Your personal overrides (not synced)
+├── settings.json               # Environment & hooks (macOS/Linux)
+├── settings-windows.json       # Windows-specific hooks
+├── mcp.json                    # 28 MCP server configurations
+├── .env                        # Secrets (auto-generated, DO NOT COMMIT)
+├── agents/                     # 29 custom agents
+│   ├── architecture.md
+│   ├── hogwarts.md             # Education SaaS patterns
+│   ├── souq.md                 # E-commerce patterns
+│   ├── mkan.md                 # Rental/booking patterns
+│   ├── shifa.md                # Healthcare patterns
+│   ├── react.md
+│   ├── prisma.md
+│   └── ...
+├── commands/                   # 17 slash commands
+│   ├── repos.md                # Repository explorer
+│   ├── atom.md
+│   ├── template.md
+│   ├── block.md
+│   └── ...
+├── memory/                     # Persistent memory files
+│   ├── atom.json
+│   ├── template.json
+│   ├── block.json
+│   ├── report.json
+│   └── repositories.json       # All org repos with monitoring
+└── scripts/
+    ├── install.sh              # macOS/Linux installer
+    ├── install.ps1             # Windows installer
+    ├── sync.sh                 # macOS/Linux config sync
+    ├── sync.ps1                # Windows config sync
+    ├── setup-secrets.sh        # macOS/Linux secrets setup
+    ├── setup-secrets.ps1       # Windows secrets setup
+    ├── sync-repos.sh           # Sync all org repos locally
+    └── sync-repos.ps1          # Windows repo sync
+```
+
+---
+
+## Shell Configuration
+
+### macOS / Linux
+
+Add to `~/.zshrc` or `~/.bashrc`:
+```bash
+export PATH="$HOME/.local/bin:$HOME/.claude/bin:$PATH"
+alias c='claude --dangerously-skip-permissions'
+
+# Auto-load secrets
+[ -f "$HOME/.claude/.env" ] && export $(grep -v "^#" "$HOME/.claude/.env" | xargs)
+```
+
+Reload: `source ~/.zshrc`
+
+### Windows (PowerShell Profile)
+
+Add to `$PROFILE`:
+```powershell
+# Claude Code alias
+Set-Alias -Name c -Value claude
+
+# Quick start with permissions
+function cc { claude --dangerously-skip-permissions $args }
+
+# Auto-load secrets
+if (Test-Path "$env:USERPROFILE\.claude\.env") {
+    Get-Content "$env:USERPROFILE\.claude\.env" | ForEach-Object {
+        if ($_ -and -not $_.StartsWith("#")) {
+            $parts = $_ -split "=", 2
+            if ($parts.Length -eq 2) {
+                [Environment]::SetEnvironmentVariable($parts[0], $parts[1], "Process")
+            }
+        }
+    }
+}
+```
+
+Reload: `. $PROFILE`
+
+---
+
+## Quick Keywords
+
+After setup, just say these words to trigger actions:
+
+### Workflow
+| Keyword | Action |
+|---------|--------|
+| `dev` | Kill port 3000 → Start server → Open browser |
+| `build` | Run build with error scanning |
+| `push` | Full git commit + push |
+| `quick` | Fast commit (skip build) |
+| `deploy` | Deploy to Vercel staging |
+| `ship` | Deploy to production |
+
+### Creation
+| Keyword | Action |
+|---------|--------|
+| `atom` | Create atom (2+ primitives) |
+| `template` | Create template (full-page layout) |
+| `block` | Create block (UI + logic) |
+| `component` | Create React component |
+| `page` | Create Next.js page |
+
+### Repository References
+| Keyword | Action |
+|---------|--------|
+| `like hogwarts` | Reference education SaaS patterns |
+| `like souq` | Reference e-commerce patterns |
+| `like mkan` | Reference rental/booking patterns |
+| `like shifa` | Reference healthcare patterns |
+| `from codebase` | Clone pattern from codebase |
+| `/repos` | Explore all org repositories |
+
+### Quality
+| Keyword | Action |
+|---------|--------|
+| `test` | Generate tests (Vitest) |
+| `security` | Security audit (OWASP) |
+| `performance` | Core Web Vitals check |
+| `review` | Code review |
+
+See full keyword list (90+) in `~/.claude/CLAUDE.md`.
+
+---
+
+## Secrets Management
+
+Secrets are stored in a private GitHub gist and auto-loaded via scripts.
+
+### What's Included
+- `GITHUB_PERSONAL_ACCESS_TOKEN` - GitHub API access
+- `NEON_API_KEY` - Neon database MCP
+- `DATABASE_URL` - PostgreSQL connection
+- `ANTHROPIC_API_KEY` - Claude API
+- `GROQ_API_KEY` - Groq API
+- OAuth credentials (Google, Facebook)
+- Service keys (Stripe, Resend, Cloudinary, ImageKit)
+
+### Update Secrets
+
+1. Go to: https://gist.github.com/abdout/68453b25fa9d28c94426c55c179b3838
+2. Click **Edit**
+3. Update values
+4. Team members run setup-secrets again to get updates
+
+### Manual Override
+
+Create/edit `~/.claude/.env` directly:
+```bash
+GITHUB_PERSONAL_ACCESS_TOKEN=ghp_xxx
+NEON_API_KEY=neon_xxx
+# ... other variables
+```
+
+---
+
+## Repository Sync
+
+Sync all organization repositories locally for deep reference:
+
+**macOS / Linux**
+```bash
+# Sync all repos
+~/.claude/scripts/sync-repos.sh
+
+# Check status
+~/.claude/scripts/sync-repos.sh status
+
+# Watch upstream dependencies
+~/.claude/scripts/sync-repos.sh watch
+
+# Sync specific repo
+~/.claude/scripts/sync-repos.sh hogwarts
+```
+
+**Windows**
+```powershell
+& "$env:USERPROFILE\.claude\scripts\sync-repos.ps1"
+& "$env:USERPROFILE\.claude\scripts\sync-repos.ps1" -RepoName status
+```
+
+### Monitored Repositories
+
+**Core Libraries** (Priority 1):
+- `codebase` - Patterns, agents, templates, blocks
+- `shadcn` - UI component library (shadcn/ui fork)
+- `radix` - Radix primitives
+- `kun` - Code Machine config
+
+**Product Repositories** (Priority 2):
+- `hogwarts` - Education SaaS (multi-tenant, LMS, billing)
+- `souq` - E-commerce (multi-vendor, cart)
+- `mkan` - Rental marketplace (booking, listings)
+- `shifa` - Medical platform (appointments, patients)
+
+**Specialized** (Priority 3):
+- `swift-app` - iOS mobile
+- `distributed-computer` - Rust infrastructure
+- `marketing` - Landing pages
+
+---
+
+## Configuration Sync
+
+To get latest team configuration updates:
+
+**macOS / Linux**
+```bash
+~/.claude/scripts/sync.sh
+```
+
+**Windows**
+```powershell
+& "$env:USERPROFILE\.claude\scripts\sync.ps1"
+```
+
+This updates:
+- CLAUDE.md (keywords, patterns)
+- Agents (29 files)
+- Commands (17 files)
+- Memory files
+- Scripts
+
+Your `CLAUDE.local.md` is preserved.
+
+---
+
+## MCP Servers
+
+28 MCP servers are pre-configured:
+
+| MCP | Purpose | Trigger |
+|-----|---------|---------|
+| `github` | Git operations | push, pr, issue |
+| `neon` | Database | prisma, migration |
+| `shadcn` | UI components | ui, component |
+| `browser` | Playwright | test, e2e |
+| `vercel` | Deployments | deploy, ship |
+| `stripe` | Payments | payment, billing |
+| `posthog` | Analytics | analytics |
+| `sentry` | Errors | error, debug |
+| `airtable` | Data | airtable |
+| `notion` | Docs | notion |
+
+See full list in `~/.claude/mcp.json`.
+
+---
+
+## Product Agent Reference
+
+Each product repo has a dedicated agent with patterns:
+
+### hogwarts (Education SaaS)
+```
+"auth like hogwarts"      # Multi-tenant auth
+"billing like hogwarts"   # Stripe subscription
+"lms like hogwarts"       # Course management
+```
+
+**Patterns**: Multi-tenant architecture, subdomain routing, role-based access, Stripe billing
+
+### souq (E-commerce)
+```
+"cart from souq"          # Shopping cart
+"vendor like souq"        # Vendor dashboard
+"catalog like souq"       # Product catalog
+```
+
+**Patterns**: Redux cart, multi-vendor, product variants, order management
+
+### mkan (Rental Marketplace)
+```
+"booking like mkan"       # Booking system
+"listings like mkan"      # Property listings
+"calendar like mkan"      # Availability calendar
+```
+
+**Patterns**: Property listings, date range booking, availability management, search filters
+
+### shifa (Healthcare)
+```
+"appointments like shifa" # Appointment scheduling
+"patient like shifa"      # Patient records
+"schedule like shifa"     # Doctor scheduling
+```
+
+**Patterns**: Appointment system, patient records, doctor schedules, prescription management
+
+---
+
+## Local Customizations
+
+Create `~/.claude/CLAUDE.local.md` for personal overrides:
+
+```markdown
+# My Local Settings
+
+## Additional Preferences
+- My preferred editor: VSCode
+- Custom project paths: /path/to/my/projects
+
+## Personal Keywords
+| Keyword | Action |
+|---------|--------|
+| `myproject` | cd to my main project |
+```
+
+This file is never overwritten by sync.
+
+---
+
+## Troubleshooting
+
+### Windows: "claude not found"
+```powershell
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+```
+
+### macOS: Permission denied
+```bash
+chmod +x ~/.claude/scripts/*.sh
+```
+
+### MCP servers not loading
+1. Check `~/.claude/mcp.json` exists
+2. Verify environment variables are set
+3. Restart Claude
+
+### Secrets not loading
+```bash
+# Check .env file
+cat ~/.claude/.env
+
+# Manually source
+source ~/.zshrc
+```
+
+---
+
+## Config Sources
+
+Configuration is available from two repositories:
+
+**Primary (codebase)**
+```
+https://github.com/databayt/codebase/tree/main/.claude
+```
+
+**Alternative (kun)**
+```
+https://github.com/databayt/kun/tree/main/.claude
+```
+
+Both contain identical configuration.
+
+---
+
+## Permission Flags
+
+| Flag | Purpose |
+|------|---------|
+| `--dangerously-skip-permissions` | Skip all prompts |
+| `--allowedTools "Bash,Read,Write"` | Whitelist tools |
+| `-p "prompt"` | Direct prompt mode |
+| `-r` | Resume last session |
+
+---
+
+## Usage Examples
+
+```bash
+# Start session
+c
+
+# Direct prompt
+c "fix the login bug"
+
+# Resume last session
+c -r
+
+# With specific tools allowed
+claude --allowedTools "Read,Grep,Glob" "find all TODO comments"
+```
