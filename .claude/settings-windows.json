@@ -1,0 +1,33 @@
+{
+  "env": {
+    "CODEBASE_PATH": "%USERPROFILE%\\codebase",
+    "CODEBASE_REPO": "databayt/codebase",
+    "CODEBASE_OWNER": "databayt",
+    "CODEBASE_NAME": "codebase",
+    "DEV_PORT": "3000"
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash(pnpm dev)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "for /f \"tokens=5\" %a in ('netstat -aon ^| findstr :3000') do taskkill /PID %a /F 2>nul"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash(pnpm dev)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "timeout /t 2 >nul && start chrome http://localhost:3000"
+          }
+        ]
+      }
+    ]
+  }
+}

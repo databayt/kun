@@ -1,0 +1,242 @@
+{
+  "$schema": "repository-registry-schema",
+  "description": "Track all databayt organization repositories for deep reference",
+  "lastUpdated": "2026-01-17T00:00:00Z",
+  "organization": {
+    "name": "databayt",
+    "url": "https://github.com/databayt",
+    "description": "Code Machine - AI-powered development ecosystem"
+  },
+  "repositories": {
+    "core": [
+      {
+        "id": "codebase",
+        "name": "Codebase",
+        "url": "https://github.com/databayt/codebase",
+        "local": "/Users/abdout/codebase",
+        "description": "Component library and patterns source of truth",
+        "stack": ["Next.js 16", "React 19", "TypeScript 5", "Tailwind CSS 4", "Prisma 6"],
+        "purpose": ["patterns", "agents", "templates", "blocks", "registry"],
+        "agent": null,
+        "priority": 1,
+        "status": "active",
+        "lastSync": null,
+        "watchPaths": ["src/components/", "src/registry/", ".claude/"]
+      },
+      {
+        "id": "shadcn",
+        "name": "shadcn/ui Fork",
+        "url": "https://github.com/databayt/shadcn",
+        "upstream": "https://github.com/shadcn-ui/ui",
+        "local": "/Users/abdout/oss/shadcn",
+        "description": "Fork of shadcn/ui with customizations",
+        "stack": ["React", "Radix UI", "Tailwind CSS"],
+        "purpose": ["ui-components", "registry-system"],
+        "agent": "shadcn",
+        "priority": 1,
+        "status": "active",
+        "lastSync": null,
+        "watchPaths": ["apps/www/registry/", "packages/"]
+      },
+      {
+        "id": "radix",
+        "name": "Radix UI Fork",
+        "url": "https://github.com/databayt/radix",
+        "upstream": "https://github.com/radix-ui/primitives",
+        "local": "/Users/abdout/oss/radix",
+        "description": "Fork of Radix UI primitives",
+        "stack": ["React", "TypeScript"],
+        "purpose": ["ui-primitives", "accessibility"],
+        "agent": null,
+        "priority": 1,
+        "status": "active",
+        "lastSync": null,
+        "watchPaths": ["packages/react/"]
+      },
+      {
+        "id": "kun",
+        "name": "Code Machine",
+        "url": "https://github.com/databayt/kun",
+        "local": "/Users/abdout/kun",
+        "description": "Claude Code team configuration and documentation hub",
+        "stack": ["Next.js 16", "Fumadocs", "TypeScript"],
+        "purpose": ["claude-code-config", "documentation", "team-distribution"],
+        "agent": null,
+        "priority": 1,
+        "status": "active",
+        "lastSync": null,
+        "watchPaths": [".claude/", "content/docs/"]
+      }
+    ],
+    "products": [
+      {
+        "id": "hogwarts",
+        "name": "Hogwarts",
+        "url": "https://github.com/databayt/hogwarts",
+        "local": "/Users/abdout/oss/hogwarts",
+        "description": "Education SaaS platform - multi-tenant, LMS, billing",
+        "stack": ["Next.js", "Prisma", "NextAuth", "Stripe"],
+        "purpose": ["multi-tenant", "lms", "sis", "billing", "sms"],
+        "patterns": ["multi-tenant-architecture", "role-based-access", "stripe-billing", "subdomain-routing"],
+        "agent": "hogwarts",
+        "priority": 2,
+        "status": "active",
+        "lastSync": null,
+        "watchPaths": ["src/components/platform/", "prisma/", "src/auth.ts"]
+      },
+      {
+        "id": "souq",
+        "name": "Souq",
+        "url": "https://github.com/databayt/souq",
+        "local": "/Users/abdout/oss/souq",
+        "description": "E-commerce marketplace - multi-vendor",
+        "stack": ["Next.js", "Redux Toolkit", "Tailwind CSS"],
+        "purpose": ["e-commerce", "multi-vendor", "cart", "checkout"],
+        "patterns": ["redux-cart", "vendor-dashboard", "product-catalog", "order-management"],
+        "agent": "souq",
+        "priority": 2,
+        "status": "active",
+        "lastSync": null,
+        "watchPaths": ["src/store/", "src/app/vendor/", "prisma/models/"]
+      },
+      {
+        "id": "mkan",
+        "name": "Mkan",
+        "url": "https://github.com/databayt/mkan",
+        "local": "/Users/abdout/oss/mkan",
+        "description": "Rental marketplace - Airbnb-style",
+        "stack": ["Next.js", "Prisma", "NextAuth", "Docker"],
+        "purpose": ["rentals", "booking", "listings", "search"],
+        "patterns": ["property-listings", "booking-system", "availability-calendar", "search-filters"],
+        "agent": "mkan",
+        "priority": 2,
+        "status": "active",
+        "lastSync": null,
+        "watchPaths": ["src/components/search/", "src/lib/booking.ts", "prisma/models/"]
+      },
+      {
+        "id": "shifa",
+        "name": "Shifa",
+        "url": "https://github.com/databayt/shifa",
+        "local": "/Users/abdout/oss/shifa",
+        "description": "Medical/healthcare platform",
+        "stack": ["Next.js", "Prisma", "TypeScript"],
+        "purpose": ["healthcare", "appointments", "patients", "prescriptions"],
+        "patterns": ["appointment-scheduling", "patient-records", "doctor-schedule", "prescription-system"],
+        "agent": "shifa",
+        "priority": 2,
+        "status": "active",
+        "lastSync": null,
+        "watchPaths": ["src/app/clinic/", "src/lib/appointments.ts", "prisma/models/"]
+      }
+    ],
+    "specialized": [
+      {
+        "id": "swift-app",
+        "name": "Swift App",
+        "url": "https://github.com/databayt/swift-app",
+        "local": "/Users/abdout/oss/swift-app",
+        "description": "iOS application (Hogwarts mobile)",
+        "stack": ["Swift 5.9+", "SwiftUI", "iOS 17+"],
+        "purpose": ["ios", "mobile", "swiftui"],
+        "patterns": ["mvvm", "clean-architecture", "offline-sync", "bilingual"],
+        "agent": null,
+        "priority": 3,
+        "status": "active",
+        "lastSync": null,
+        "watchPaths": ["Sources/"]
+      },
+      {
+        "id": "distributed-computer",
+        "name": "Distributed Computer",
+        "url": "https://github.com/databayt/distributed-computer",
+        "local": "/Users/abdout/oss/distributed-computer",
+        "description": "Rust infrastructure for fair compensation",
+        "stack": ["Rust", "libp2p", "DHT"],
+        "purpose": ["p2p", "token", "infrastructure"],
+        "patterns": ["rust-crate-organization", "p2p-networking", "token-economics"],
+        "agent": null,
+        "priority": 3,
+        "status": "active",
+        "lastSync": null,
+        "watchPaths": ["crates/"]
+      },
+      {
+        "id": "marketing",
+        "name": "Marketing",
+        "url": "https://github.com/databayt/marketing",
+        "local": "/Users/abdout/oss/marketing",
+        "description": "Marketing website",
+        "stack": ["Next.js", "TypeScript", "Tailwind CSS"],
+        "purpose": ["landing-pages", "marketing", "seo"],
+        "patterns": ["landing-page-sections", "i18n", "seo-optimization"],
+        "agent": null,
+        "priority": 3,
+        "status": "active",
+        "lastSync": null,
+        "watchPaths": ["src/components/", "src/app/"]
+      }
+    ]
+  },
+  "keywords": {
+    "from codebase": {"repo": "codebase", "action": "clone-pattern"},
+    "from shadcn": {"repo": "shadcn", "action": "use-component"},
+    "from radix": {"repo": "radix", "action": "use-primitive"},
+    "like hogwarts": {"repo": "hogwarts", "action": "reference-patterns"},
+    "like souq": {"repo": "souq", "action": "reference-patterns"},
+    "like mkan": {"repo": "mkan", "action": "reference-patterns"},
+    "like shifa": {"repo": "shifa", "action": "reference-patterns"},
+    "repositories": {"action": "show-documentation"}
+  },
+  "monitoring": {
+    "enabled": true,
+    "checkInterval": "daily",
+    "notifyOn": ["new-release", "breaking-change", "security-update"],
+    "autoSync": {
+      "enabled": false,
+      "branches": ["main"],
+      "requireApproval": true
+    },
+    "watchList": [
+      {
+        "repo": "shadcn-ui/ui",
+        "reason": "upstream-dependency",
+        "checkFor": ["registry-updates", "new-components", "breaking-changes"]
+      },
+      {
+        "repo": "radix-ui/primitives",
+        "reason": "upstream-dependency",
+        "checkFor": ["new-releases", "accessibility-fixes"]
+      },
+      {
+        "repo": "vercel/next.js",
+        "reason": "framework",
+        "checkFor": ["major-releases", "deprecations"]
+      },
+      {
+        "repo": "prisma/prisma",
+        "reason": "orm",
+        "checkFor": ["new-releases", "migration-changes"]
+      }
+    ]
+  },
+  "sync": {
+    "lastFullSync": null,
+    "syncScript": "~/.claude/scripts/sync-repos.sh",
+    "repos": {
+      "codebase": {"synced": false, "hash": null},
+      "shadcn": {"synced": false, "hash": null},
+      "radix": {"synced": false, "hash": null},
+      "hogwarts": {"synced": false, "hash": null},
+      "souq": {"synced": false, "hash": null},
+      "mkan": {"synced": false, "hash": null},
+      "shifa": {"synced": false, "hash": null}
+    }
+  },
+  "preferences": {
+    "defaultBranch": "main",
+    "preferLocal": true,
+    "fallbackToGitHub": true,
+    "cachePatterns": true
+  }
+}

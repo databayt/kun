@@ -1,0 +1,180 @@
+{
+  "registries": {
+    "@billingsdk": "https://billingsdk.com/r/{name}.json",
+    "@eldoraui": "https://eldoraui.site/r/{name}.json"
+  },
+  "mcpServers": {
+    "shadcn": {
+      "command": "npx",
+      "args": ["shadcn@latest", "mcp"],
+      "description": "shadcn/ui component registry - browse, search, install components"
+    },
+    "a11y": {
+      "command": "npx",
+      "args": ["-y", "a11y-mcp"],
+      "description": "Accessibility audits with axe-core for WCAG 2.1 AA compliance"
+    },
+    "storybook": {
+      "command": "npx",
+      "args": ["-y", "storybook-mcp"],
+      "env": {
+        "STORYBOOK_URL": "http://localhost:6006/index.json"
+      },
+      "description": "Component documentation and visual testing"
+    },
+    "design-system-analyzer": {
+      "command": "npx",
+      "args": ["-y", "@yajihum/design-system-mcp"],
+      "description": "Analyze React components and design tokens"
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@github/github-mcp-server"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+      },
+      "description": "GitHub repositories, issues, PRs, and Projects"
+    },
+    "browser": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest", "--headless", "--user-data-dir", "/Users/abdout/.playwright-profile"],
+      "description": "Silent headless browser with persistent sessions"
+    },
+    "browser-headed": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest", "--user-data-dir", "/Users/abdout/.playwright-profile"],
+      "description": "Visible browser for login/trust setup"
+    },
+    "browser-extension": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest", "--extension"],
+      "description": "Connect to existing Chrome tabs (2FA sites)"
+    },
+    "ref": {
+      "command": "npx",
+      "args": ["-y", "ref-tools-mcp@latest"],
+      "env": {
+        "REF_API_KEY": "${REF_API_KEY}"
+      },
+      "description": "Search documentation, curated technical docs"
+    },
+    "vercel": {
+      "type": "http",
+      "url": "https://mcp.vercel.com/",
+      "description": "Deployments, logs, performance monitoring"
+    },
+    "sentry": {
+      "type": "http",
+      "url": "https://mcp.sentry.dev/mcp",
+      "description": "Error monitoring, debug production issues"
+    },
+    "linear": {
+      "type": "sse",
+      "url": "https://mcp.linear.app/sse",
+      "description": "Issue tracking and project management"
+    },
+    "stripe": {
+      "type": "http",
+      "url": "https://mcp.stripe.com",
+      "description": "Payment processing, subscriptions"
+    },
+    "figma": {
+      "type": "http",
+      "url": "http://127.0.0.1:3845/mcp",
+      "description": "Access designs, export assets"
+    },
+    "postgres": {
+      "command": "npx",
+      "args": ["-y", "@bytebase/dbhub"],
+      "env": {
+        "DATABASE_URL": "${DATABASE_URL}"
+      },
+      "description": "Database queries and management"
+    },
+    "neon": {
+      "command": "npx",
+      "args": ["-y", "@neondatabase/mcp-server-neon"],
+      "env": {
+        "NEON_API_KEY": "${NEON_API_KEY}"
+      },
+      "description": "Neon PostgreSQL - branching, migrations, queries"
+    },
+    "posthog": {
+      "type": "http",
+      "url": "https://mcp.posthog.com",
+      "env": {
+        "POSTHOG_API_KEY": "${POSTHOG_API_KEY}",
+        "POSTHOG_PROJECT_ID": "${POSTHOG_PROJECT_ID}"
+      },
+      "description": "Product analytics, feature flags"
+    },
+    "notion": {
+      "type": "http",
+      "url": "https://mcp.notion.so",
+      "env": {
+        "NOTION_API_KEY": "${NOTION_API_KEY}"
+      },
+      "description": "Documentation sync, knowledge base"
+    },
+    "slack": {
+      "type": "http",
+      "url": "https://mcp.slack.com",
+      "env": {
+        "SLACK_BOT_TOKEN": "${SLACK_BOT_TOKEN}",
+        "SLACK_WORKSPACE_ID": "${SLACK_WORKSPACE_ID}"
+      },
+      "description": "Team notifications, collaboration"
+    },
+    "memory-bank": {
+      "command": "npx",
+      "args": ["-y", "@memory-bank/mcp-server@latest"],
+      "description": "Persistent context across sessions"
+    },
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"],
+      "description": "Up-to-date documentation for libraries"
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "description": "Dynamic problem-solving through thought sequences"
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/Users/abdout"],
+      "description": "Direct file system access"
+    },
+    "git": {
+      "command": "npx",
+      "args": ["-y", "mcp-server-git"],
+      "description": "Local git operations"
+    },
+    "airtable": {
+      "command": "npx",
+      "args": ["-y", "@airtable/mcp-server"],
+      "env": {
+        "AIRTABLE_API_KEY": "${AIRTABLE_API_KEY}"
+      },
+      "description": "Airtable data management"
+    },
+    "algolia": {
+      "command": "/Users/abdout/.claude/bin/algolia-mcp",
+      "env": {
+        "ALGOLIA_APP_ID": "${ALGOLIA_APP_ID}",
+        "ALGOLIA_API_KEY": "${ALGOLIA_API_KEY}",
+        "ALGOLIA_INDEX_NAME": "${ALGOLIA_INDEX_NAME}",
+        "ALGOLIA_WRITE_API_KEY": "${ALGOLIA_WRITE_API_KEY}"
+      },
+      "description": "Algolia search - indexing, querying"
+    },
+    "gcloud": {
+      "command": "/Users/abdout/.claude/bin/gcloud-mcp.sh",
+      "description": "Google Cloud CLI - OAuth, projects, auth"
+    },
+    "keychain": {
+      "command": "/Users/abdout/.claude/bin/keychain-mcp.sh",
+      "description": "macOS Keychain - stored credentials"
+    }
+  }
+}

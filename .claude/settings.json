@@ -1,0 +1,55 @@
+{
+  "env": {
+    "CODEBASE_PATH": "/Users/abdout/codebase",
+    "CODEBASE_REPO": "databayt/codebase",
+    "CODEBASE_OWNER": "databayt",
+    "CODEBASE_NAME": "codebase",
+    "DEV_PORT": "3000",
+    "OSS_PATH": "/Users/abdout/oss",
+    "GITHUB_USER": "abdout"
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash(pnpm dev)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "lsof -ti:3000 | xargs kill -9 2>/dev/null; exit 0"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash(pnpm dev)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sleep 2 && open -a 'Google Chrome' http://localhost:3000 &"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [[ \"$FILE_PATH\" =~ \\.(ts|tsx|js|jsx|json|css|md)$ ]]; then npx prettier --write \"$FILE_PATH\" 2>/dev/null; fi; exit 0"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"[$(date '+%Y-%m-%d %H:%M:%S')] Session ended\" >> ~/.claude/session-log.txt"
+          }
+        ]
+      }
+    ]
+  }
+}
