@@ -10,13 +10,13 @@ Complete setup guide for the databayt team Claude Code configuration.
 ### macOS / Linux
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/databayt/codebase/main/.claude/scripts/install.sh | bash && ~/.claude/scripts/setup-secrets.sh 68453b25fa9d28c94426c55c179b3838
+curl -fsSL https://raw.githubusercontent.com/databayt/codebase/main/.claude/scripts/install.sh | bash && ~/.claude/scripts/secrets.sh 68453b25fa9d28c94426c55c179b3838
 ```
 
 ### Windows (PowerShell)
 
 ```powershell
-irm https://raw.githubusercontent.com/databayt/codebase/main/.claude/scripts/install.ps1 | iex; & "$env:USERPROFILE\.claude\scripts\setup-secrets.ps1" -GistId 68453b25fa9d28c94426c55c179b3838
+irm https://raw.githubusercontent.com/databayt/codebase/main/.claude/scripts/install.ps1 | iex; & "$env:USERPROFILE\.claude\scripts\secrets.ps1" -GistId 68453b25fa9d28c94426c55c179b3838
 ```
 
 This installs Claude Code CLI, downloads team configuration, and sets up secrets automatically.
@@ -70,12 +70,12 @@ irm https://raw.githubusercontent.com/databayt/codebase/main/.claude/scripts/ins
 
 **macOS / Linux**
 ```bash
-~/.claude/scripts/setup-secrets.sh 68453b25fa9d28c94426c55c179b3838
+~/.claude/scripts/secrets.sh 68453b25fa9d28c94426c55c179b3838
 ```
 
 **Windows**
 ```powershell
-& "$env:USERPROFILE\.claude\scripts\setup-secrets.ps1" -GistId 68453b25fa9d28c94426c55c179b3838
+& "$env:USERPROFILE\.claude\scripts\secrets.ps1" -GistId 68453b25fa9d28c94426c55c179b3838
 ```
 
 ### Step 4: Restart Terminal & Run
@@ -124,8 +124,8 @@ c
     ├── install.ps1             # Windows installer
     ├── sync.sh                 # macOS/Linux config sync
     ├── sync.ps1                # Windows config sync
-    ├── setup-secrets.sh        # macOS/Linux secrets setup
-    ├── setup-secrets.ps1       # Windows secrets setup
+    ├── secrets.sh        # macOS/Linux secrets setup
+    ├── secrets.ps1       # Windows secrets setup
     ├── sync-repos.sh           # Sync all org repos locally
     └── sync-repos.ps1          # Windows repo sync
 ```

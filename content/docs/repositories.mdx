@@ -1,0 +1,205 @@
+---
+title: "Organization Repos"
+description: "Reference guide for databayt repositories"
+---
+
+Complete reference of all repositories in the databayt GitHub organization.
+
+## Core Libraries
+
+### codebase
+
+Component library and patterns - the source of truth.
+
+- **URL**: [github.com/databayt/codebase](https://github.com/databayt/codebase)
+- **Stack**: Next.js 16, React 19, TypeScript, Tailwind CSS 4, Prisma 6
+- **Use For**: Patterns, agents, templates, blocks, registry
+
+```bash
+# Clone
+git clone https://github.com/databayt/codebase.git
+
+# Reference pattern
+# Say: "table from codebase" or "auth from codebase"
+```
+
+### shadcn
+
+Fork of shadcn/ui with customizations.
+
+- **URL**: [github.com/databayt/shadcn](https://github.com/databayt/shadcn)
+- **Upstream**: [github.com/shadcn-ui/ui](https://github.com/shadcn-ui/ui)
+- **Use For**: UI components, registry system
+
+```bash
+# Reference component
+# Say: "button from shadcn" or "card from shadcn"
+```
+
+### radix
+
+Fork of Radix UI primitives.
+
+- **URL**: [github.com/databayt/radix](https://github.com/databayt/radix)
+- **Upstream**: [github.com/radix-ui/primitives](https://github.com/radix-ui/primitives)
+- **Use For**: Low-level accessible UI primitives
+
+```bash
+# Reference primitive
+# Say: "dialog from radix" or "popover from radix"
+```
+
+### kun
+
+Code Machine configuration and documentation (this repo).
+
+- **URL**: [github.com/databayt/kun](https://github.com/databayt/kun)
+- **Use For**: Claude Code team config, infrastructure docs
+
+---
+
+## Product Repositories
+
+### hogwarts
+
+Education SaaS platform.
+
+- **URL**: [github.com/databayt/hogwarts](https://github.com/databayt/hogwarts)
+- **Stack**: Next.js, Prisma, NextAuth, Stripe
+- **Features**: Multi-tenant, LMS, SIS, billing, SMS
+
+```bash
+# Reference pattern
+# Say: "auth like hogwarts" or "billing like hogwarts"
+```
+
+**Good for reference**:
+- Multi-tenant architecture
+- School management (LMS, SIS)
+- Stripe billing integration
+- Role-based access control
+
+### souq
+
+E-commerce marketplace platform.
+
+- **URL**: [github.com/databayt/souq](https://github.com/databayt/souq)
+- **Stack**: Next.js, Redux Toolkit, Tailwind CSS
+- **Features**: Multi-vendor, product catalog, cart
+
+```bash
+# Reference pattern
+# Say: "cart from souq" or "vendor dashboard like souq"
+```
+
+**Good for reference**:
+- Multi-vendor architecture
+- Product catalog
+- Shopping cart
+- Vendor dashboards
+
+### mkan
+
+Rental marketplace (Airbnb-style).
+
+- **URL**: [github.com/databayt/mkan](https://github.com/databayt/mkan)
+- **Stack**: Next.js, Prisma, NextAuth, Docker
+- **Features**: Property listings, booking, virtual tours
+
+```bash
+# Reference pattern
+# Say: "booking like mkan" or "listings like mkan"
+```
+
+**Good for reference**:
+- Property listings
+- Booking system
+- Search and filters
+- User reviews
+
+### shifa
+
+Medical/healthcare platform.
+
+- **URL**: [github.com/databayt/shifa](https://github.com/databayt/shifa)
+- **Stack**: Next.js, Prisma, TypeScript
+- **Features**: Appointments, patient records, notifications
+
+```bash
+# Reference pattern
+# Say: "appointments like shifa" or "patient flow like shifa"
+```
+
+**Good for reference**:
+- Appointment scheduling
+- Patient management
+- Healthcare workflows
+- Notification system
+
+---
+
+## Mobile & Infrastructure
+
+### swift-app
+
+iOS application for Hogwarts.
+
+- **URL**: [github.com/databayt/swift-app](https://github.com/databayt/swift-app)
+- **Stack**: Swift 5.9+, SwiftUI, iOS 17+
+- **Architecture**: MVVM, Clean Architecture, atomic design
+
+**Good for reference**:
+- SwiftUI patterns
+- Offline-first sync
+- Bilingual (Arabic/English)
+
+### distributed-computer
+
+Rust infrastructure for fair compensation.
+
+- **URL**: [github.com/databayt/distributed-computer](https://github.com/databayt/distributed-computer)
+- **Stack**: Rust, libp2p, DHT
+- **Features**: P2P networking, token distribution (HWC)
+
+**Good for reference**:
+- Rust crate organization
+- P2P networking
+- Token economics
+
+### marketing
+
+Marketing website.
+
+- **URL**: [github.com/databayt/marketing](https://github.com/databayt/marketing)
+- **Stack**: Next.js, TypeScript, Tailwind CSS
+- **Features**: Landing pages, i18n
+
+**Good for reference**:
+- Landing page patterns
+- Marketing components
+- SEO optimization
+
+---
+
+## Quick Reference
+
+| Say | Action |
+|-----|--------|
+| `from codebase` | Clone pattern from codebase |
+| `from shadcn` | Use shadcn/ui component |
+| `from radix` | Use Radix primitive |
+| `like hogwarts` | Reference hogwarts patterns |
+| `like souq` | Reference souq patterns |
+| `like mkan` | Reference mkan patterns |
+| `like shifa` | Reference shifa patterns |
+
+---
+
+## Priority Order
+
+When building features, check repos in this order:
+
+1. **codebase** - Always check first for existing patterns
+2. **shadcn** - For UI components
+3. **radix** - For primitives
+4. **Product repos** - For domain-specific patterns
