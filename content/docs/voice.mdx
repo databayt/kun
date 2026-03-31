@@ -1,0 +1,86 @@
+---
+title: Voice
+description: Speak commands instead of typing them
+---
+
+# Voice
+
+Voice input across all Anthropic surfaces — Claude Desktop, iOS, and system-level dictation. Say what you want, Claude does it.
+
+## Voice Modes
+
+| Mode | Platform | Best For |
+|------|----------|----------|
+| **Claude Desktop Voice** | macOS/Windows Desktop App | Planning, brainstorming, quick decisions |
+| **Claude iOS Voice** | iPhone app | On-the-go decisions, mobile review |
+| **System Dictation** | macOS/Windows built-in | Typing into terminal or any field |
+
+## Team Voice Setup
+
+| Person | Tool | Cost |
+|--------|------|------|
+| **Abdout** | macOS Dictation or Wispr Flow | Free or $10/mo |
+| **Ali** | Windows Voice Typing (Win+H) | Free |
+| **Samia** | Claude Desktop voice mode + Win Voice Typing | Free |
+| **Sedon** | Windows Voice Typing (Win+H) | Free |
+
+## Use Cases
+
+### Quick Decisions
+
+```
+Voice: "Yes, ship the admission module"
+Voice: "No, hold off on the pricing change until Ali reviews"
+Voice: "Approve the $50 Vercel upgrade"
+```
+
+### Brain Dumps
+
+```
+Voice: "I'm thinking about the notification system for hogwarts.
+        We need email, SMS, and in-app. Start with in-app because
+        it doesn't need external services. Use the pattern from
+        souq if they have notifications..."
+→ Claude transcribes, structures into a plan, creates issues
+```
+
+### Review Dispatches
+
+```
+Voice: "Read me the latest captain dispatch"
+→ dispatch.sh read captain → speaks the content
+```
+
+### Create Issues by Voice
+
+```
+Voice: "Create an issue for hogwarts about the admission page being slow"
+→ gh issue create --repo databayt/hogwarts --title "Admission page performance"
+```
+
+## Voice → Cowork → Code Flow
+
+```
+1. Voice (iPhone): "Plan the notification system"
+2. Cowork (Desktop): Structures plan, creates issues
+3. Code (Terminal): Picks up issues, builds the feature
+```
+
+## Accessibility
+
+Voice is critical for Samia's workflow:
+- Claude Desktop voice mode for content creation
+- VoiceOver on iPhone 13 for mobile testing
+- Windows Voice Typing for dictation into any field
+
+## System-Level Dictation
+
+### macOS
+
+Press `Fn Fn` (double-tap Function key) to activate dictation in any text field, including the terminal.
+
+### Windows
+
+Press `Win+H` to activate Voice Typing in any text field.
+
+Both work directly in Claude Code's terminal input.

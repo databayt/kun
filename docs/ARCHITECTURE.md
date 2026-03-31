@@ -1,635 +1,431 @@
-# Architecture Document: Kun (كن)
-## Remote AI Development Infrastructure
+# Architecture: Kun (كن)
 
-> **BMAD Phase**: Solutioning
-> **Version**: 1.0
-> **Date**: 2026-01-10
-> **Status**: Approved
+> **Version**: 3.0
+> **Date**: 2026-03-30
 
 ---
 
 ## 1. Architecture Overview
 
-### 1.1 High-Level System Diagram
-
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                           KUN ARCHITECTURE                               │
-├─────────────────────────────────────────────────────────────────────────┤
-│                                                                          │
-│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐                 │
-│  │   Clients   │    │   Network   │    │   Server    │                 │
-│  ├─────────────┤    ├─────────────┤    ├─────────────┤                 │
-│  │ Termius     │───▶│ Tailscale   │───▶│ Ubuntu LTS  │                 │
-│  │ (iOS/Android)    │ VPN Mesh    │    │ 22.04/24.04 │                 │
-│  ├─────────────┤    │             │    ├─────────────┤                 │
-│  │ SSH Client  │───▶│ WireGuard   │───▶│ tmux Server │                 │
-│  │ (Laptop)    │    │ Protocol    │    │             │                 │
-│  ├─────────────┤    └─────────────┘    ├─────────────┤                 │
-│  │ VSCode SSH  │                       │ Claude Code │                 │
-│  │ Remote      │                       │ CLI         │                 │
-│  └─────────────┘                       └─────────────┘                 │
-│                                               │                          │
-│                                               ▼                          │
-│                        ┌─────────────────────────────────────┐          │
-│                        │           Shared Resources           │          │
-│                        ├─────────────────────────────────────┤          │
-│                        │ ┌───────────┐   ┌───────────────┐  │          │
-│                        │ │ CLAUDE.md │   │ databayt/     │  │          │
-│                        │ │ (Global)  │   │ codebase      │  │          │
-│                        │ └───────────┘   └───────────────┘  │          │
-│                        │ ┌───────────┐   ┌───────────────┐  │          │
-│                        │ │ Secrets   │   │ .claude/      │  │          │
-│                        │ │ (Vault)   │   │ agents        │  │          │
-│                        │ └───────────┘   └───────────────┘  │          │
-│                        └─────────────────────────────────────┘          │
-│                                                                          │
-└─────────────────────────────────────────────────────────────────────────┘
-```
-
-### 1.2 Component Summary
-
-| Component | Technology | Purpose |
-|-----------|------------|---------|
-| VPN | Tailscale | Secure mesh network |
-| Server | Ubuntu LTS | Host environment |
-| Sessions | tmux | Persistent terminals |
-| AI | Claude Code CLI | AI-assisted development |
-| Secrets | 1Password/Vault | Centralized credentials |
-| Patterns | databayt/codebase | Shared component library |
-| Monitoring | Netdata | Real-time metrics |
-
----
-
-## 2. Infrastructure Topology
-
-### 2.1 Phase 1: Individual Setup
+Kun is a **configuration engine** — not a server, not a platform. It sits as the configuration layer on top of Anthropic's product suite, transforming general-purpose AI into Databayt's operating system.
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                     INDIVIDUAL DEVELOPER                         │
+│                   DATABAYT ENGINE ARCHITECTURE                    │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                  │
-│  User Device                       Linux Desktop                 │
-│  ──────────                        ─────────────                 │
-│  ┌──────────┐                      ┌──────────────────────────┐ │
-│  │ Phone    │                      │ Ubuntu 22.04/24.04       │ │
-│  │ (Termius)│───┐                  │                          │ │
-│  └──────────┘   │                  │  ┌─────────────────────┐ │ │
-│                 │   Tailscale      │  │ tmux session        │ │ │
-│  ┌──────────┐   │   VPN Mesh       │  │ ├── window: claude  │ │ │
-│  │ Laptop   │───┼─────────────────▶│  │ │   └── Claude Code │ │ │
-│  │ (SSH)    │   │                  │  │ └── window: server  │ │ │
-│  └──────────┘   │                  │  └─────────────────────┘ │ │
-│                 │                  │                          │ │
-│  ┌──────────┐   │                  │  Shared Resources:       │ │
-│  │ Tablet   │───┘                  │  ├── ~/.claude/CLAUDE.md │ │
-│  │ (VSCode) │                      │  ├── ~/repos/codebase    │ │
-│  └──────────┘                      │  └── ~/.ssh/             │ │
-│                                    └──────────────────────────┘ │
+│  Layer 5: Company Operations                                    │
+│  ┌────────────────────────────────────────────────────────────┐ │
+│  │ Cowork │ Claude Apps │ Team Follow-up │ Revenue Tracking   │ │
+│  └────────────────────────────────────────────────────────────┘ │
+│                                                                  │
+│  Layer 4: Coordination & Automation                             │
+│  ┌────────────────────────────────────────────────────────────┐ │
+│  │ Agent Teams │ Scheduled Tasks │ CI/CD │ Repo Sync          │ │
+│  └────────────────────────────────────────────────────────────┘ │
+│                                                                  │
+│  Layer 3: KUN CONFIGURATION ENGINE (core value)                 │
+│  ┌────────────────────────────────────────────────────────────┐ │
+│  │ CLAUDE.md   │ 28 Agents  │ 17 Skills  │ 18 MCP Servers   │ │
+│  │ 8 Rules     │ 5 Hooks    │ 6 Memory   │ 100+ Keywords    │ │
+│  └────────────────────────────────────────────────────────────┘ │
+│                                                                  │
+│  Layer 2: Developer Surfaces (Anthropic-provided)               │
+│  ┌────────────────────────────────────────────────────────────┐ │
+│  │ CLI │ VS Code │ JetBrains │ Desktop │ Web │ iOS           │ │
+│  └────────────────────────────────────────────────────────────┘ │
+│                                                                  │
+│  Layer 1: Foundation (Anthropic-provided)                       │
+│  ┌────────────────────────────────────────────────────────────┐ │
+│  │ Opus 4.6 │ Sonnet 4.6 │ Haiku 4.5 │ 1M Context │ API    │ │
+│  └────────────────────────────────────────────────────────────┘ │
 │                                                                  │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### 2.2 Phase 2: Team Server
+---
 
-```
-┌──────────────────────────────────────────────────────────────────┐
-│                        CENTRAL SERVER                             │
-├──────────────────────────────────────────────────────────────────┤
-│                                                                   │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐              │
-│  │ Tailscale   │  │ SSH Server  │  │ Netdata     │              │
-│  │ (tailscaled)│  │ (openssh)   │  │ (Monitor)   │              │
-│  └─────────────┘  └─────────────┘  └─────────────┘              │
-│         │                │                │                      │
-│         ▼                ▼                ▼                      │
-│  ┌──────────────────────────────────────────────────┐           │
-│  │              systemd Services                     │           │
-│  ├──────────────────────────────────────────────────┤           │
-│  │ claude-tmux.service  - Persistent sessions       │           │
-│  │ tailscaled.service   - VPN connectivity          │           │
-│  │ netdata.service      - Monitoring                │           │
-│  └──────────────────────────────────────────────────┘           │
-│                                                                   │
-│  ┌──────────────────────────────────────────────────┐           │
-│  │              User Accounts                        │           │
-│  ├──────────────────────────────────────────────────┤           │
-│  │ /home/dev1/    - Developer 1 home                │           │
-│  │ /home/dev2/    - Developer 2 home                │           │
-│  │ /home/dev3/    - Developer 3 home                │           │
-│  │ ...            - (10+ developers)                │           │
-│  └──────────────────────────────────────────────────┘           │
-│                                                                   │
-│  ┌──────────────────────────────────────────────────┐           │
-│  │              Shared Configuration                 │           │
-│  ├──────────────────────────────────────────────────┤           │
-│  │ /etc/claude-code/env.sh     - Team secrets       │           │
-│  │ /etc/claude-code/CLAUDE.md  - Global context     │           │
-│  │ /opt/databayt/codebase      - Pattern library    │           │
-│  └──────────────────────────────────────────────────┘           │
-│                                                                   │
-└──────────────────────────────────────────────────────────────────┘
-         │
-         │ Tailscale ACLs
-         ▼
-┌────────────────────────────────────────────────────────────────┐
-│                      TEAM ACCESS                                │
-├────────────────────────────────────────────────────────────────┤
-│  group:admins     ──▶ Full access (root, all ports)           │
-│  group:developers ──▶ SSH access (port 22, own user)           │
-└────────────────────────────────────────────────────────────────┘
-```
+## 2. Layer 1: Foundation (Anthropic-Provided)
 
-### 2.3 Phase 3: Commercial Platform
+The models and API that power everything. Kun selects optimally within this layer.
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                      COMMERCIAL PLATFORM                             │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                      │
-│  ┌───────────────────────────────────────────────────────────┐      │
-│  │                    API Gateway                             │      │
-│  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐        │      │
-│  │  │ Auth        │  │ Rate Limit  │  │ Usage Meter │        │      │
-│  │  │ (JWT/OAuth) │  │ (per-tier)  │  │ (Stripe)    │        │      │
-│  │  └─────────────┘  └─────────────┘  └─────────────┘        │      │
-│  └───────────────────────────────────────────────────────────┘      │
-│                              │                                       │
-│                              ▼                                       │
-│  ┌───────────────────────────────────────────────────────────┐      │
-│  │                 Container Orchestration                    │      │
-│  │  ┌──────────────────────────────────────────────────┐     │      │
-│  │  │              Docker / Kubernetes                  │     │      │
-│  │  ├──────────────────────────────────────────────────┤     │      │
-│  │  │  Pod: user-001   Pod: user-002   Pod: user-003   │     │      │
-│  │  │  ├── claude      ├── claude      ├── claude      │     │      │
-│  │  │  ├── tmux        ├── tmux        ├── tmux        │     │      │
-│  │  │  └── patterns    └── patterns    └── patterns    │     │      │
-│  │  └──────────────────────────────────────────────────┘     │      │
-│  └───────────────────────────────────────────────────────────┘      │
-│                                                                      │
-│  ┌───────────────────────────────────────────────────────────┐      │
-│  │                   Pattern Library                          │      │
-│  │  ┌─────────────────────────────────────────────────────┐  │      │
-│  │  │ databayt/codebase - 54 UI + 62 Atoms + 31 Templates │  │      │
-│  │  │ databayt/patterns - Enterprise patterns             │  │      │
-│  │  │ community/patterns - Community contributed          │  │      │
-│  │  └─────────────────────────────────────────────────────┘  │      │
-│  └───────────────────────────────────────────────────────────┘      │
-│                                                                      │
-└─────────────────────────────────────────────────────────────────────┘
-```
+### Model Selection Strategy
+
+| Model | Use Case | Kun Usage |
+|-------|----------|-----------|
+| **Opus 4.6** | Architecture, complex features, code review | Default for all agents and skills |
+| **Sonnet 4.6** | Fast iteration, routine changes | Quick fixes, exploration |
+| **Haiku 4.5** | Search, lookups, simple queries | Explore subagent type |
+
+### Cost Context
+
+Databayt runs on a single Max 20x plan ($200/month). Model selection matters for staying within usage limits.
+
+| Technique | Savings | Application |
+|-----------|---------|-------------|
+| Prompt Caching | 90% | CLAUDE.md cached across sessions |
+| Batch API | 50% | CI/CD review pipelines (Phase 2) |
+| Haiku for exploration | 80% vs Opus | Search, lookups |
 
 ---
 
-## 3. Security Architecture
+## 3. Layer 2: Developer Surfaces
 
-### 3.1 Security Layers
+Every surface Anthropic provides. Kun's configuration loads automatically regardless of which surface each team member uses.
+
+### Team Device Matrix
+
+| Member | Primary Surface | Secondary | OS |
+|--------|----------------|-----------|-----|
+| Osman Abdout | CLI (MacBook M4) | iOS (iPhone 16e) | macOS |
+| Ali Aseel | Desktop App (Windows) | Web (claude.ai/code) | Windows |
+| Samia Hamd | Desktop App (Windows) | iOS (iPhone 13 Mini) | Windows |
+| Osman Sedon | Desktop App (Windows) | Web (claude.ai/code) | Windows |
+
+### Surface Capabilities
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                       SECURITY LAYERS                            │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  Layer 4: Session Isolation (Phase 3)                           │
-│  ┌──────────────────────────────────────────────────────────┐   │
-│  │ Docker containers per user                                │   │
-│  │ Resource limits (CPU, memory)                             │   │
-│  │ Isolated filesystems                                      │   │
-│  │ Network namespaces                                        │   │
-│  └──────────────────────────────────────────────────────────┘   │
-│                              ▲                                   │
-│  Layer 3: Secrets Management                                    │
-│  ┌──────────────────────────────────────────────────────────┐   │
-│  │ 1Password CLI or HashiCorp Vault                          │   │
-│  │ Environment variables via /etc/claude-code/env.sh         │   │
-│  │ No secrets in git repositories                            │   │
-│  │ API keys scoped per project                               │   │
-│  └──────────────────────────────────────────────────────────┘   │
-│                              ▲                                   │
-│  Layer 2: System Security                                       │
-│  ┌──────────────────────────────────────────────────────────┐   │
-│  │ SSH key authentication only (password disabled)           │   │
-│  │ Non-root user for development                             │   │
-│  │ UFW firewall (allow only Tailscale)                       │   │
-│  │ Fail2ban for SSH protection                               │   │
-│  └──────────────────────────────────────────────────────────┘   │
-│                              ▲                                   │
-│  Layer 1: Network Security                                      │
-│  ┌──────────────────────────────────────────────────────────┐   │
-│  │ Tailscale VPN (WireGuard-based) - No exposed ports        │   │
-│  │ Tailscale SSH - Certificate-based authentication          │   │
-│  │ ACL-based access control per user group                   │   │
-│  └──────────────────────────────────────────────────────────┘   │
-│                                                                  │
-└─────────────────────────────────────────────────────────────────┘
+┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐
+│ Terminal  │  │ Desktop  │  │ Web      │  │ iOS      │
+│ CLI      │  │ App      │  │claude.ai │  │ App      │
+│          │  │          │  │ /code    │  │          │
+│ Power    │  │ Visual   │  │ Zero     │  │ On-the-  │
+│ users    │  │ diffs    │  │ setup    │  │ go       │
+└──────────┘  └──────────┘  └──────────┘  └──────────┘
+      │             │             │             │
+      └─────────────┴──────┬──────┴─────────────┘
+                           │
+                           ▼
+             ┌──────────────────────────┐
+             │  KUN CONFIGURATION       │
+             │  (loaded automatically)  │
+             │  ~/.claude/settings.json │
+             │  ~/.claude/CLAUDE.md     │
+             │  ~/.claude/agents/       │
+             │  ~/.claude/mcp.json      │
+             └──────────────────────────┘
 ```
 
-### 3.2 Access Control Matrix
+### Cross-Device Handoff
 
-| Role | Tailscale Access | SSH Users | tmux Sessions | Secrets |
-|------|------------------|-----------|---------------|---------|
-| Admin | All ports | root, developer | All | Full |
-| Developer | Port 22 | own-user | Own + shared | Project-scoped |
-| External | Port 22 | isolated-user | Own only | Read-only patterns |
-
-### 3.3 Tailscale ACL Configuration
-
-```json
-{
-  "groups": {
-    "group:admins": ["admin@databayt.org"],
-    "group:developers": [
-      "dev1@databayt.com",
-      "dev2@databayt.com",
-      "dev3@databayt.com"
-    ]
-  },
-  "tagOwners": {
-    "tag:kun-server": ["group:admins"]
-  },
-  "acls": [
-    {
-      "action": "accept",
-      "src": ["group:admins"],
-      "dst": ["*:*"]
-    },
-    {
-      "action": "accept",
-      "src": ["group:developers"],
-      "dst": ["tag:kun-server:22"]
-    }
-  ],
-  "ssh": [
-    {
-      "action": "accept",
-      "src": ["group:admins"],
-      "dst": ["tag:kun-server"],
-      "users": ["root", "autogroup:nonroot"]
-    },
-    {
-      "action": "accept",
-      "src": ["group:developers"],
-      "dst": ["tag:kun-server"],
-      "users": ["autogroup:nonroot"]
-    }
-  ]
-}
-```
+| Feature | Description | Status |
+|---------|-------------|--------|
+| **Remote Control** | Continue session from another device | GA |
+| **Dispatch** | Send task from phone, opens Desktop session | GA |
+| **/teleport** | Pull web/iOS session into terminal | GA |
+| **/desktop** | Hand off terminal to Desktop for visual review | GA |
+| **Agent Teams** | Lead + teammate parallel coordination | Experimental |
 
 ---
 
-## 4. Data Architecture
+## 4. Layer 3: Kun Configuration Engine (Core)
 
-### 4.1 Directory Structure
+This is Kun's actual value — the configuration that transforms general-purpose Claude into Databayt's engine.
 
-```
-/
-├── etc/
-│   └── claude-code/
-│       ├── env.sh              # Shared environment variables
-│       ├── CLAUDE.md           # Global Claude context
-│       └── settings.json       # Team settings
-│
-├── opt/
-│   └── databayt/
-│       └── codebase/           # Pattern library (read-only)
-│           ├── src/
-│           │   ├── components/
-│           │   │   ├── ui/     # 54 shadcn/ui primitives
-│           │   │   ├── atom/   # 62 atomic components
-│           │   │   └── template/ # Full-page layouts
-│           │   └── registry/
-│           └── .claude/
-│               ├── agents/     # 11 specialized agents
-│               └── commands/   # Custom slash commands
-│
-├── home/
-│   ├── dev1/
-│   │   ├── .claude/            # User-specific Claude config
-│   │   ├── .tmux.conf          # User tmux config
-│   │   └── projects/           # User's project directories
-│   ├── dev2/
-│   └── ...
-│
-└── var/
-    └── log/
-        └── kun/                # Kun-specific logs
-            ├── sessions.log
-            └── health.log
-```
-
-### 4.2 Configuration Hierarchy
+### 4.1 CLAUDE.md Hierarchy
 
 ```
 Priority (High → Low):
 ┌─────────────────────────────────────────────────────────────────┐
-│ 1. Project-level: ~/projects/myapp/CLAUDE.md                   │
-│    └── Specific instructions for this project                  │
+│ 1. Project-level: ~/project/CLAUDE.md                          │
+│    └── Project-specific context (e.g., Hogwarts school modules)│
 ├─────────────────────────────────────────────────────────────────┤
-│ 2. User-level: ~/.claude/CLAUDE.md                             │
-│    └── Personal preferences and patterns                       │
+│ 2. Repo-level: ~/project/.claude/CLAUDE.md                     │
+│    └── Keywords, workflows, agent references, MCP triggers     │
 ├─────────────────────────────────────────────────────────────────┤
-│ 3. Team-level: /etc/claude-code/CLAUDE.md                      │
-│    └── Shared team conventions                                 │
+│ 3. User-level: ~/.claude/CLAUDE.md                             │
+│    └── Stack preferences, mode, component hierarchy            │
 ├─────────────────────────────────────────────────────────────────┤
-│ 4. Pattern library: /opt/databayt/codebase/CLAUDE.md           │
-│    └── Core architectural patterns                             │
+│ 4. Pattern library: /Users/abdout/codebase/CLAUDE.md           │
+│    └── Core architectural patterns and conventions             │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
----
+### 4.2 Agent Fleet
 
-## 5. Technology Stack
-
-### 5.1 Core Stack
-
-| Layer | Technology | Version | Purpose |
-|-------|------------|---------|---------|
-| OS | Ubuntu LTS | 22.04/24.04 | Host environment |
-| Runtime | Node.js | 20.x LTS | Claude Code |
-| Package Manager | pnpm | Latest | Package management |
-| VPN | Tailscale | Latest | Secure networking |
-| Terminal | tmux | 3.x | Session persistence |
-| AI | Claude Code | Latest | AI development |
-
-### 5.2 Monitoring Stack
-
-| Tool | Purpose |
-|------|---------|
-| Netdata | Real-time metrics |
-| journalctl | System logs |
-| Custom scripts | Health checks |
-| Slack webhooks | Alerting |
-
-### 5.3 Phase 3 Stack
-
-| Technology | Purpose |
-|------------|---------|
-| Docker | Container isolation |
-| Kubernetes (optional) | Orchestration |
-| Stripe | Usage billing |
-| PostgreSQL | Usage database |
-| Redis | Session cache |
-
----
-
-## 6. Scalability Architecture
-
-### 6.1 Vertical Scaling (Phase 1-2)
-
-| Stage | RAM | Cores | Concurrent Users |
-|-------|-----|-------|------------------|
-| Start | 16GB | 8 | 3-5 |
-| Growth | 32GB | 16 | 8-12 |
-| Enterprise | 64GB | 32 | 15-20 |
-
-### 6.2 Horizontal Scaling (Phase 3)
+28 specialized agents organized in 6 chains:
 
 ```
-                    ┌─────────────────────┐
-                    │   Load Balancer     │
-                    │   (Tailscale Exit)  │
-                    └─────────┬───────────┘
-                              │
-         ┌────────────────────┼────────────────────┐
-         │                    │                    │
-         ▼                    ▼                    ▼
-    ┌─────────┐         ┌─────────┐         ┌─────────┐
-    │ Node 1  │         │ Node 2  │         │ Node N  │
-    │ (Solar) │         │ (Grid)  │         │ (Cloud) │
-    │ 16 users│         │ 16 users│         │ 16 users│
-    └─────────┘         └─────────┘         └─────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                        AGENT FLEET                               │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  Stack Chain (7)           Design Chain (4)                     │
+│  ├── nextjs                ├── orchestration (master)           │
+│  ├── react                 ├── architecture                     │
+│  ├── typescript            ├── pattern                          │
+│  ├── tailwind              └── structure                        │
+│  ├── prisma                                                     │
+│  ├── shadcn                UI Chain (4)                         │
+│  └── authjs                ├── shadcn                           │
+│                            ├── atom                             │
+│  DevOps Chain (3)          ├── template                         │
+│  ├── build                 └── block                            │
+│  ├── deploy                                                     │
+│  └── test                  VCS Chain (2)                        │
+│                            ├── git                              │
+│  Specialized (8)           └── github                           │
+│  ├── middleware                                                  │
+│  ├── internationalization  Reference Chain (5)                  │
+│  ├── semantic              ├── hogwarts (education SaaS)        │
+│  ├── sse                   ├── souq (e-commerce)                │
+│  ├── optimize              ├── mkan (rentals)                   │
+│  ├── performance           ├── shifa (medical)                  │
+│  └── comment               └── icon                             │
+│                                                                  │
+│  Orchestration Agent = Master Coordinator                       │
+│  Routes tasks → Appropriate chain → Databayt products           │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-### 6.3 Resource Limits per User (Phase 3)
+### 4.3 Skill Library
 
-```yaml
-resources:
-  limits:
-    cpu: "2"
-    memory: "4Gi"
-  requests:
-    cpu: "0.5"
-    memory: "1Gi"
-```
+17 skills triggered by keywords or slash commands:
 
----
+| Category | Skills | Trigger Keywords |
+|----------|--------|-----------------|
+| **Workflow** | /dev, /build, /quick, /deploy | dev, build, push, ship |
+| **Creation** | /atom, /template, /block, /saas | atom, template, block, saas |
+| **Quality** | /test, /security, /performance, /fix | test, security, performance, fix |
+| **Documentation** | /docs, /codebase, /repos | docs, codebase, repos |
+| **Utilities** | /screenshot, /motion | screenshot, motion |
 
-## 7. Resilience Architecture
+### 4.4 MCP Ecosystem
 
-### 7.1 Failure Modes and Recovery
-
-| Failure | Impact | Detection | Recovery |
-|---------|--------|-----------|----------|
-| tmux crash | Session lost | Health check | Auto-restart via systemd |
-| Tailscale disconnect | No access | Health check | Auto-reconnect |
-| Power loss | All sessions lost | UPS monitor | Auto-start on boot |
-| Disk full | Cannot write | Netdata alert | Cleanup + notification |
-| Claude API down | No AI | API monitoring | Graceful degradation |
-
-### 7.2 Backup Strategy
+18 MCP servers providing external tool integration:
 
 ```
-Daily Backups:
-├── /home/*/projects/    → Incremental backup
-├── /etc/claude-code/    → Full backup
-└── /opt/databayt/       → Git pull (source of truth on GitHub)
-
-Retention:
-├── Daily:   7 days
-├── Weekly:  4 weeks
-└── Monthly: 12 months
+┌─────────────────────────────────────────────────────────────────┐
+│                       MCP ECOSYSTEM                              │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  UI & Design              DevOps & Infra                        │
+│  ├── shadcn (components)  ├── vercel (deploy)                   │
+│  ├── figma (design)       ├── github (repos, PRs)               │
+│  ├── tailwind (CSS)       ├── sentry (errors)                   │
+│  ├── a11y (accessibility) └── gcloud (cloud)                    │
+│  └── storybook (docs)                                           │
+│                            Data & Auth                           │
+│  Testing                   ├── neon (Postgres)                  │
+│  ├── browser (headless)    ├── postgres (queries)               │
+│  └── browser-headed        ├── stripe (payments)                │
+│      (visual testing)      └── keychain (credentials)           │
+│                                                                  │
+│  Knowledge                 Project Management                   │
+│  ├── ref (tech docs)       └── linear (issues)                  │
+│  └── context7 (latest)                                          │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-### 7.3 Health Check Script
+### 4.5 Rules, Hooks, Memory
 
-```bash
-#!/bin/bash
-# /opt/scripts/health-check.sh
+**8 Rules** — Path-scoped, auto-activate on file patterns:
 
-WEBHOOK_URL="https://hooks.slack.com/services/..."
+| Rule | Activates On | Enforces |
+|------|-------------|----------|
+| auth | `**/auth/**`, `**/middleware.*` | NextAuth v5, session scoping |
+| i18n | `**/*-ar.json`, `**/dictionaries/**` | Arabic RTL, on-demand translation |
+| prisma | `**/*.prisma` | schoolId inclusion, $extends |
+| tailwind | `**/*.css`, `**/styles/**` | CSS-first v4, OKLCH, RTL logical |
+| testing | `**/tests/**`, `**/*.spec.*` | Playwright/Vitest conventions |
+| deployment | `**/vercel.json` | pnpm, tsc before builds |
+| multi-repo | (global) | Codebase paths, fork workflows |
+| org-refs | (global) | Repo priority: codebase → shadcn → radix |
 
-check_service() {
-    if ! systemctl is-active --quiet $1; then
-        curl -X POST -H 'Content-type: application/json' \
-          --data "{\"text\":\"[KUN] Service $1 is down\"}" \
-          $WEBHOOK_URL
-        return 1
-    fi
-    return 0
-}
+**5 Hooks** — Guaranteed execution at lifecycle events:
 
-check_disk() {
-    usage=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
-    if [ $usage -gt 90 ]; then
-        curl -X POST -H 'Content-type: application/json' \
-          --data "{\"text\":\"[KUN] Disk usage at $usage%\"}" \
-          $WEBHOOK_URL
-    fi
-}
+| Hook | Event | Action |
+|------|-------|--------|
+| SessionStart | Session begins | Print model info + timestamp |
+| PreToolUse | Before `pnpm dev` | Kill port 3000 |
+| PostToolUse | After `pnpm dev` | Open Chrome |
+| PostToolUse | After Write/Edit | Auto-run Prettier |
+| Stop | Agent finishes | Log session end |
 
-check_service tailscaled
-check_service ssh
-check_disk
-```
+**6 Memory Files** — Cross-session learning:
+
+| Memory | Contents |
+|--------|----------|
+| preferences.json | Port 3000, single .env, pnpm-only |
+| repositories.json | 14 databayt repos with paths, stacks |
+| atom.json | 59 atoms across 6 categories |
+| template.json | 31 templates across 5 categories |
+| block.json | 4 blocks (DataTable, Auth, Invoice, Report) |
+| report.json | T&C electrical report templates |
 
 ---
 
-## 8. Integration Points
+## 5. Layer 4: Coordination & Automation
 
-### 8.1 External Integrations
+### 5.1 Repository Architecture
 
-| System | Integration Type | Purpose |
-|--------|------------------|---------|
-| GitHub | SSH + API | Repository access |
-| Vercel | CLI | Preview deployments |
-| Anthropic | API | Claude Code |
-| Stripe | API | Usage billing (Phase 3) |
-| Slack | Webhooks | Notifications |
-
-### 8.2 Pattern Library Integration
+Kun coordinates 14 repositories under github.com/databayt:
 
 ```
-Claude Code Session
-        │
-        ▼
-┌───────────────────────────────────────────────────────────────┐
-│                      CLAUDE.md Context                         │
-├───────────────────────────────────────────────────────────────┤
-│ Reference: /opt/databayt/codebase/                            │
-│ ├── src/components/ui/       → 54 primitives                  │
-│ ├── src/components/atom/     → 62 atoms                       │
-│ ├── src/registry/            → 31 templates                   │
-│ ├── .claude/agents/          → 11 specialized agents          │
-│ └── .claude/commands/        → Custom slash commands          │
-│                                                                │
-│ When implementing:                                             │
-│ 1. Check codebase for existing patterns                       │
-│ 2. Follow mirror-pattern architecture                         │
-│ 3. Use standard file naming conventions                       │
-│ 4. Reference appropriate agent for domain                     │
-└───────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                   DATABAYT REPOSITORY MAP                         │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  Revenue Products                                               │
+│  ├── hogwarts (FLAGSHIP — ed.databayt.org)                     │
+│  │   └── Multi-tenant SaaS, education, daily active             │
+│  ├── mkan (rental marketplace — mkan.vercel.app)               │
+│  │   └── Airbnb-inspired, Phase 1 done                         │
+│  ├── souq (e-commerce — souq-smoky.vercel.app)                 │
+│  │   └── Multi-vendor, MVP, paused                              │
+│  └── shifa (medical — shifa-lovat.vercel.app)                  │
+│      └── Early stage, paused                                    │
+│                                                                  │
+│  Infrastructure                                                  │
+│  ├── codebase (pattern library — base-coral.vercel.app)        │
+│  │   └── 54 ui + 62 atoms + 31 templates                       │
+│  ├── kun (THIS — configuration engine)                          │
+│  ├── shadcn (shadcn/ui fork)                                   │
+│  ├── radix (Radix UI primitives fork)                          │
+│  ├── swift-app (iOS companion for Hogwarts)                    │
+│  ├── marketing (landing pages)                                  │
+│  ├── spma (project management, early)                          │
+│  ├── apple (design R&D)                                        │
+│  ├── distributed-computer (Rust/blockchain R&D)                │
+│  └── .github (org profile)                                     │
+│                                                                  │
+│  Shared DNA: Next.js 16 + TypeScript 5 + Prisma 6 +           │
+│  shadcn/ui + Arabic RTL + Atomic component hierarchy           │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
----
+### 5.2 Agent Teams (Experimental)
 
-## 9. Deployment Architecture
-
-### 9.1 Phase 1 Deployment (Manual)
-
-```bash
-# 1. System setup
-sudo apt update && sudo apt upgrade -y
-sudo apt install -y git curl wget tmux htop build-essential openssh-server
-
-# 2. Node.js + Claude Code
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-sudo apt install -y nodejs
-npm install -g pnpm @anthropic-ai/claude-code
-
-# 3. Tailscale
-curl -fsSL https://tailscale.com/install.sh | sh
-sudo tailscale up --ssh
-
-# 4. tmux configuration
-cat > ~/.tmux.conf << 'EOF'
-set -g mouse on
-set -g history-limit 50000
-EOF
+```
+┌──────────────┐
+│  LEAD AGENT  │
+│ (Orchestrate)│
+└──────┬───────┘
+       │
+  ┌────┼────┐
+  ▼    ▼    ▼
+┌────┐┌────┐┌────┐
+│ A  ││ B  ││ C  │   Each agent: isolated git worktree
+│feat││test││docs│   No merge conflicts
+└────┘└────┘└────┘   Consolidated into single PR
 ```
 
-### 9.2 Phase 2 Deployment (Automated)
+### 5.3 Scheduled Tasks
 
-```bash
-# Ansible playbook structure
-kun-deployment/
-├── inventory/
-│   └── hosts.yml
-├── playbooks/
-│   ├── setup-server.yml
-│   ├── setup-users.yml
-│   ├── setup-monitoring.yml
-│   └── deploy-patterns.yml
-└── roles/
-    ├── common/
-    ├── tailscale/
-    ├── claude-code/
-    └── monitoring/
+| Type | Runs On | Use Case |
+|------|---------|----------|
+| **Cloud** | Anthropic infrastructure | Daily health checks, dependency updates |
+| **Desktop** | Local machine (app open) | Recurring builds, test runs |
+| **In-session** | Active session (/loop) | Poll deploy status, watch CI |
+
+### 5.4 CI/CD Integration (Phase 2)
+
 ```
-
-### 9.3 Phase 3 Deployment (Container)
-
-```dockerfile
-# Dockerfile
-FROM ubuntu:22.04
-
-RUN apt-get update && apt-get install -y \
-    nodejs npm git tmux curl \
-    && npm install -g @anthropic-ai/claude-code pnpm
-
-RUN useradd -m developer
-USER developer
-WORKDIR /home/developer
-
-# Copy pattern library (read-only)
-COPY --chown=developer:developer codebase /opt/databayt/codebase
-
-CMD ["tmux", "new-session", "-s", "main"]
+Pull Request ──▶ GitHub Actions ──▶ Agent SDK Review
+                                       ├── Code quality
+                                       ├── Security scan
+                                       ├── Pattern compliance
+                                       └── Auto-fix + commit
 ```
 
 ---
 
-## 10. Decision Records
+## 6. Layer 5: Company Operations
 
-### ADR-001: Tailscale over Traditional VPN
+### 6.1 Team Workflows
 
-**Status**: Accepted
+| Team Member | Primary Workflow | Tools |
+|-------------|-----------------|-------|
+| **Osman Abdout** | Engineering: code → build → deploy | CLI, all MCPs |
+| **Ali Aseel** | Business: outreach, contracts, client relations | Cowork, Claude Desktop |
+| **Samia Hamd** | Content: docs, Arabic copy, research, voiceover | Cowork, Claude Desktop |
+| **Osman Sedon** | Engineering support (part-time) | Claude Desktop |
+| **Kun** | Coordination: follow-up, R&D, optimization | All layers |
 
-**Context**: Need secure remote access without complex router configuration.
+### 6.2 Business Operations via Cowork
 
-**Decision**: Use Tailscale instead of OpenVPN or WireGuard directly.
+| Function | How |
+|----------|-----|
+| Project management | Cowork + Linear MCP |
+| Documentation | Artifacts + /docs skill |
+| Client communication | Cowork + email drafting |
+| Financial tracking | Stripe MCP + Cowork |
+| Content creation | Cowork (Arabic/English) |
+| Research | Web search + synthesis |
 
-**Rationale**:
-- Zero-config VPN
-- Built-in SSH (no key management)
-- Works across NAT without port forwarding
-- Free tier sufficient for initial team
+### 6.3 Accessibility
 
-### ADR-002: tmux over Screen
-
-**Status**: Accepted
-
-**Context**: Need persistent terminal sessions.
-
-**Decision**: Use tmux over GNU Screen.
-
-**Rationale**:
-- Better mobile scrolling with mouse support
-- More active development
-- Better window/pane management
-- Industry standard
-
-### ADR-003: Docker for Isolation (Phase 3)
-
-**Status**: Proposed
-
-**Context**: Need to isolate external users.
-
-**Decision**: Use Docker containers per user.
-
-**Rationale**:
-- Strong isolation without VM overhead
-- Resource limits
-- Easy cleanup
-- Path to Kubernetes if needed
+Samia Hamd uses a screen reader. All products and workflows must be accessible:
+- VoiceOver compatibility on iOS/macOS
+- NVDA/JAWS on Windows
+- a11y MCP for automated accessibility audits
+- Semantic HTML enforced by semantic agent
 
 ---
 
-## 11. References
+## 7. Security Architecture
 
-- [Tailscale Documentation](https://tailscale.com/kb/)
-- [tmux Manual](https://man7.org/linux/man-pages/man1/tmux.1.html)
-- [Claude Code Documentation](https://claude.ai/code)
-- [databayt/codebase](https://github.com/databayt/codebase)
+### Anthropic-Native Security
+
+| Layer | Mechanism |
+|-------|-----------|
+| **Data** | SOC 2 Type II, no training on customer data |
+| **Network** | Encrypted in transit (TLS 1.3) |
+| **Compliance** | GDPR compliant |
+
+### Kun-Level Security
+
+| Mechanism | Implementation |
+|-----------|---------------|
+| **Deny rules** | rm -rf, prisma reset, DROP TABLE, TRUNCATE blocked |
+| **Hook guards** | PreToolUse hooks validate before execution |
+| **Secrets** | macOS Keychain MCP, never in git |
+| **Permissions** | 38 explicit allow rules, everything else prompts |
+| **/security skill** | OWASP Top 10 audit on demand |
+
+---
+
+## 8. Decision Records
+
+### ADR-001: Anthropic-Native over Custom Infrastructure
+
+**Decision**: Build Kun as a configuration engine on native Anthropic products. Self-hosting is an optional appendix.
+
+**Rationale**: Anthropic invests billions in their products. Our configuration on top is the value-add, not parallel infrastructure.
+
+### ADR-002: Configuration-as-Code
+
+**Decision**: All configuration lives in git-trackable files (CLAUDE.md, settings.json, agents/, skills/, rules/, mcp.json).
+
+**Rationale**: Git provides versioning, diffing, branching, and PR review. Same workflow as code.
+
+### ADR-003: Opus 4.6 as Default Model
+
+**Decision**: Default to Opus 4.6 for all agents and primary work. Haiku 4.5 for exploration subagents only.
+
+**Rationale**: Architecture-first approach values output quality over cost. Max plan ($200/mo) makes this cost-effective.
+
+### ADR-004: Hogwarts-First Product Strategy
+
+**Decision**: Concentrate all engineering effort on Hogwarts until the King Fahad Schools pilot is delivering revenue.
+
+**Rationale**: With $500 remaining capital and a $1K/month target, revenue from the flagship product is existential. Mkan, Souq, and Shifa can wait.
+
+### ADR-005: Databayt Shared Component Library
+
+**Decision**: All products inherit from databayt/codebase. No product builds UI primitives from scratch.
+
+**Rationale**: With a team of 4 (2 full-time engineers), code reuse is survival. Every atom built once serves all products.
+
+---
+
+## 9. References
+
+- [PROJECT-BRIEF.md](./PROJECT-BRIEF.md) — Company, team, financial targets
+- [CONFIGURATION.md](./CONFIGURATION.md) — Detailed engine blueprint
+- [PRODUCTS.md](./PRODUCTS.md) — Anthropic product catalog
+- [SELF-HOSTING.md](./SELF-HOSTING.md) — Optional infrastructure appendix
+- [Repository details](./repositories/) — Individual repo documentation

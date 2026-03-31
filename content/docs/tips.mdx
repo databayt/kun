@@ -1,0 +1,116 @@
+---
+title: Tips
+description: Master-level techniques and advanced workflows
+---
+
+# Tips
+
+Advanced techniques for getting the most out of Claude Code and the Kun engine.
+
+## Keywords Are Everything
+
+One word triggers an entire workflow. Master the keywords and you 10x your speed:
+
+| Instead of... | Say... | What Happens |
+|--------------|--------|-------------|
+| "Start the development server" | `dev` | Kill port 3000 → pnpm dev → Chrome opens |
+| "Commit and push to remote" | `push` | Lint → fix → git add → commit → push |
+| "Deploy to production" | `ship` | Build → verify → Vercel deploy → report URL |
+| "Create a data table component" | `table users` | Block agent → DataTable → Prisma schema |
+| "Set up authentication" | `auth` | AuthJS agent → NextAuth setup |
+
+## Compound Keywords
+
+Chain keywords for complex operations:
+
+```
+"saas billing"     → Schema + Actions + UI + Stripe integration
+"test login"       → Vitest + Playwright tests for auth flow
+"handover auth"    → 5-pass QA on auth block
+"motion hero"      → Framer Motion animations on hero section
+```
+
+## Reference Other Projects
+
+```
+"auth like hogwarts"      → Copy hogwarts multi-tenant auth pattern
+"cart from souq"          → Clone souq's cart implementation
+"booking like mkan"       → Reference mkan's booking system
+"table from codebase"     → Get DataTable from pattern library
+```
+
+## Visual Debugging
+
+Use the `see` keyword for visual inspection:
+
+```
+see                       → Screenshot localhost:3000
+see /en/dashboard         → Screenshot specific page
+see headed                → Open visible browser window
+debug /en/settings        → Screenshot + console errors + network
+check /en/dashboard       → Responsive QA at 3 breakpoints + RTL
+```
+
+## Performance Keywords
+
+```
+parallelize               → Convert sequential fetches to Promise.all
+waterfall                 → Find and fix request waterfalls
+bundle                    → Analyze bundle size, suggest splits
+lazy                      → Add dynamic imports for heavy components
+suspense                  → Add Suspense boundaries
+```
+
+## Autopilot Mode
+
+Run with `--dangerously-skip-permissions` for uninterrupted 100-turn cycles:
+
+```bash
+alias c='claude --dangerously-skip-permissions'
+c "build the complete settings page with profile, notifications, and billing tabs"
+```
+
+Claude will:
+1. Plan the approach
+2. Create components
+3. Connect data layer
+4. Add i18n keys
+5. Test at 3 breakpoints
+6. Fix issues automatically
+
+## Remote Control
+
+Start on Mac, continue from iPhone:
+
+```
+MacBook: Start feature work → gets complex → need to leave
+iPhone:  Open Claude iOS → Remote Control → monitor progress
+iPhone:  dispatch.sh inbox "Ship it when done"
+MacBook: Captain reads inbox → finishes and deploys
+```
+
+## Agent Teams (Experimental)
+
+Parallelize feature development:
+
+```
+"Build settings: profile tab, notifications tab, billing tab"
+→ Lead Agent dispatches:
+  ├── Agent A (worktree) → Profile form
+  ├── Agent B (worktree) → Notifications
+  └── Agent C (worktree) → Billing + Stripe
+→ Lead merges → single PR
+```
+
+## Shell Aliases
+
+```bash
+# Quick start
+alias c='claude --dangerously-skip-permissions'
+
+# Resume last session
+alias cr='claude -r'
+
+# Direct prompt
+alias cq='claude -p'
+```

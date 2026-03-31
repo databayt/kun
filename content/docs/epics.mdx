@@ -1,133 +1,150 @@
 ---
 title: Epics
-description: User stories organized by epic for Kun implementation
+description: 57 stories across 12 epics with sprint plan for April-June 2026
 ---
 
-# Epics & User Stories
+# Epics & Stories
+
+57 stories across 12 epics, organized by phase. Sprints run April-June 2026.
 
 ## Overview
 
-This document contains 50 user stories across 12 epics, covering all three phases of Kun implementation.
+| Epic | Phase | Stories | Status |
+|------|-------|---------|--------|
+| E1: CLAUDE.md Configuration | 1 | 5 | Done |
+| E2: Agent Fleet | 1 | 6 | Done |
+| E3: Skill Library | 1 | 5 | Done |
+| E4: MCP Ecosystem | 1 | 5 | Done |
+| E5: Hook Automation | 1 | 4 | Done |
+| E6: Rules & Memory | 1 | 4 | Done |
+| E7: Team Configuration | 2 | 5 | Planned |
+| E8: Hogwarts Pilot | 2 | 5 | **In Progress** |
+| E9: Agent Teams & CI/CD | 2 | 4 | Planned |
+| E10: Revenue & Operations | 2 | 5 | Planned |
+| E11: Agent SDK Platform | 3 | 4 | Future |
+| E12: Enterprise & Optimization | 3 | 3 | Future |
 
-## Phase 1: Individual Setup
+## Phase 1: Developer Engine (Done)
 
-### Epic 1: Network Foundation
+### E1: CLAUDE.md Configuration
 
-| ID | Story | Priority |
-|----|-------|----------|
-| P1-1 | As a developer, I want to install Tailscale so I can access my server remotely | P0 |
-| P1-2 | As a developer, I want to enable Tailscale SSH so I don't need to manage SSH keys | P0 |
-| P1-3 | As a developer, I want my server to auto-start Tailscale on boot | P1 |
-| P1-4 | As a developer, I want to verify connectivity from my laptop | P0 |
+- [x] User-level CLAUDE.md (stack, mode, preferences)
+- [x] Project-level CLAUDE.md (context, architecture)
+- [x] Repo-level CLAUDE.md (100+ keywords, workflows)
+- [x] Keyword system (dev, build, deploy, saas, test...)
+- [x] Configuration hierarchy validation
 
-### Epic 2: Session Management
+### E2: Agent Fleet
 
-| ID | Story | Priority |
-|----|-------|----------|
-| P1-5 | As a developer, I want to create persistent tmux sessions | P0 |
-| P1-6 | As a developer, I want sessions to survive network disconnects | P0 |
-| P1-7 | As a developer, I want sessions to auto-start on boot | P1 |
-| P1-8 | As a developer, I want named windows for different projects | P1 |
+- [x] Stack chain (7): nextjs, react, typescript, tailwind, prisma, shadcn, authjs
+- [x] Design chain (4): orchestration, architecture, pattern, structure
+- [x] UI chain (4): shadcn, atom, template, block
+- [x] DevOps chain (3): build, deploy, test
+- [x] VCS chain (2): git, github
+- [x] Specialized (8): middleware, i18n, semantic, sse, optimize, performance, comment, icon
 
-### Epic 3: Mobile Access
+### E3: Skill Library
 
-| ID | Story | Priority |
-|----|-------|----------|
-| P1-9 | As a developer, I want to configure Termius for mobile SSH | P0 |
-| P1-10 | As a developer, I want to attach to tmux from my phone | P0 |
-| P1-11 | As a developer, I want touch-friendly keyboard shortcuts | P1 |
-| P1-12 | As a developer, I want to resume work during commute | P1 |
+- [x] Workflow: /dev, /build, /quick, /deploy
+- [x] Creation: /atom, /template, /block, /saas
+- [x] Quality: /test, /security, /performance, /fix
+- [x] Documentation: /docs, /codebase, /repos
+- [x] QA: /handover (5-pass across 2 environments)
 
-### Epic 4: AI Integration
+### E4: MCP Ecosystem
 
-| ID | Story | Priority |
-|----|-------|----------|
-| P1-13 | As a developer, I want to install Claude Code CLI | P0 |
-| P1-14 | As a developer, I want my API key securely stored | P0 |
-| P1-15 | As a developer, I want access to pattern library | P0 |
-| P1-16 | As a developer, I want CLAUDE.md context loaded | P0 |
+- [x] UI & Design: shadcn, figma, tailwind, a11y, storybook
+- [x] Testing: browser (headless), browser-headed
+- [x] DevOps: github, vercel, sentry, gcloud
+- [x] Data: neon, postgres, stripe, keychain
+- [x] Knowledge: ref, context7, linear
 
-## Phase 2: Team Server
+### E5: Hook Automation
 
-### Epic 5: Multi-User Accounts
+- [x] Auto-format (Prettier on Write/Edit)
+- [x] Port management (kill 3000 before dev)
+- [x] Browser launch (Chrome after dev)
+- [x] Session logging (timestamps)
 
-| ID | Story | Priority |
-|----|-------|----------|
-| P2-1 | As an admin, I want to create user accounts for developers | P0 |
-| P2-2 | As an admin, I want each user to have a home directory | P0 |
-| P2-3 | As an admin, I want to manage user groups | P1 |
-| P2-4 | As a developer, I want my own tmux sessions | P0 |
+### E6: Rules & Memory
 
-### Epic 6: Access Control
+- [x] 8 path-scoped rules (auth, i18n, prisma, tailwind, testing, deployment, multi-repo, org-refs)
+- [x] Preference memory (port, env, pnpm)
+- [x] Component memory (59 atoms, 31 templates, 4 blocks)
+- [x] Repository memory (14 repos)
 
-| ID | Story | Priority |
-|----|-------|----------|
-| P2-5 | As an admin, I want to configure Tailscale ACLs | P0 |
-| P2-6 | As an admin, I want to restrict access by user group | P0 |
-| P2-7 | As an admin, I want to audit access logs | P1 |
-| P2-8 | As an admin, I want to revoke access immediately | P0 |
+## Phase 2: Team Engine (Current)
 
-### Epic 7: Configuration Management
+### E7: Team Configuration
 
-| ID | Story | Priority |
-|----|-------|----------|
-| P2-9 | As an admin, I want centralized CLAUDE.md | P0 |
-| P2-10 | As an admin, I want shared environment variables | P0 |
-| P2-11 | As an admin, I want pattern library on shared path | P0 |
-| P2-12 | As a developer, I want configuration auto-loaded | P0 |
+| Story | Owner | Priority |
+|-------|-------|----------|
+| Shared settings.json via git | Osman A. | P0 |
+| Role-based installer (engineer/business/content) | Osman A. | P0 |
+| Windows setup guide + PowerShell installer | Sedon | P1 |
+| Onboarding documentation for all roles | Samia | P1 |
+| Local override support (.local.json) | Osman A. | P0 |
 
-### Epic 8: Monitoring
+### E8: Hogwarts Pilot (King Fahad Schools)
 
-| ID | Story | Priority |
-|----|-------|----------|
-| P2-13 | As an admin, I want to install Netdata | P1 |
-| P2-14 | As an admin, I want to monitor system resources | P1 |
-| P2-15 | As an admin, I want to see active sessions | P1 |
-| P2-16 | As an admin, I want alerts for issues | P2 |
+| Story | Owner | Priority |
+|-------|-------|----------|
+| Admission block — 5-pass QA clean | Osman A. | P0 |
+| Notification system — SMS + in-app for parents | Osman A. | P0 |
+| Messaging — school-parent communication | Osman A. | P1 |
+| Arabic content + user guide | Samia | P0 |
+| Client onboarding plan + training materials | Ali | P0 |
 
-## Phase 3: Commercial Platform
+### E9: Agent Teams & CI/CD
 
-### Epic 9: Container Isolation
+| Story | Owner | Priority |
+|-------|-------|----------|
+| Agent Teams parallel feature build | Osman A. | P0 |
+| GitHub Actions PR review (Agent SDK) | Osman A. | P0 |
+| Scheduled cloud tasks (health, deps) | Osman A. | P1 |
+| Pattern compliance CI check | Osman A. | P1 |
 
-| ID | Story | Priority |
-|----|-------|----------|
-| P3-1 | As an admin, I want Docker-based user isolation | P0 |
-| P3-2 | As a customer, I want my own container | P0 |
-| P3-3 | As an admin, I want resource limits per container | P0 |
-| P3-4 | As a customer, I want my data isolated | P0 |
+### E10: Revenue & Operations
 
-### Epic 10: Usage Metering
+| Story | Owner | Priority |
+|-------|-------|----------|
+| Stripe billing integration for Hogwarts | Osman A. | P0 |
+| Client outreach templates (Arabic) | Ali | P0 |
+| Financial tracking dashboard (Cowork + Stripe MCP) | Ali | P1 |
+| Arabic marketing content for ed.databayt.org | Samia | P1 |
+| Competitive analysis: school platforms in Sudan | Samia | P2 |
 
-| ID | Story | Priority |
-|----|-------|----------|
-| P3-5 | As an admin, I want to track CPU usage | P0 |
-| P3-6 | As an admin, I want to track memory usage | P0 |
-| P3-7 | As an admin, I want to track session time | P0 |
-| P3-8 | As a customer, I want to see my usage | P1 |
+## Phase 3: Company Engine (Future)
 
-### Epic 11: Billing Integration
+### E11: Agent SDK Platform
 
-| ID | Story | Priority |
-|----|-------|----------|
-| P3-9 | As an admin, I want Stripe integration | P0 |
-| P3-10 | As a customer, I want to subscribe to a plan | P0 |
-| P3-11 | As a customer, I want usage-based billing | P1 |
-| P3-12 | As a customer, I want invoices | P1 |
+- [ ] CI/CD review agent (auto-review every PR)
+- [ ] Deploy verification agent (post-deploy health)
+- [ ] School onboarding agent (automated tenant setup)
+- [ ] Client report agent (weekly status generation)
 
-### Epic 12: Pattern Marketplace
+### E12: Enterprise & Optimization
 
-| ID | Story | Priority |
-|----|-------|----------|
-| P3-13 | As a developer, I want to publish patterns | P2 |
-| P3-14 | As a customer, I want to browse patterns | P2 |
-| P3-15 | As a customer, I want to purchase patterns | P2 |
-| P3-16 | As a developer, I want revenue from my patterns | P2 |
+- [ ] SSO/SCIM + audit logging
+- [ ] Prompt caching + batch API (95% cost savings)
+- [ ] Pattern distribution packaging
 
-## Story Point Summary
+## Sprint Plan (April-June 2026)
 
-| Phase | Stories | P0 | P1 | P2 |
-|-------|---------|----|----|----|
-| Phase 1 | 16 | 10 | 6 | 0 |
-| Phase 2 | 16 | 11 | 4 | 1 |
-| Phase 3 | 16 | 8 | 4 | 4 |
-| **Total** | **48** | **29** | **14** | **5** |
+| Sprint | Dates | Focus | Key Deliverables |
+|--------|-------|-------|-----------------|
+| **S1** | Apr 1-14 | Foundation | Installer scripts, role configs, fumadocs site |
+| **S2** | Apr 15-28 | Hogwarts QA | Admission 5-pass, notification system |
+| **S3** | May 1-14 | Team + Revenue | Cowork onboarding (Ali, Samia), Stripe billing |
+| **S4** | May 15-28 | Automation | Agent Teams, CI/CD, scheduled tasks |
+| **S5** | Jun 1-14 | Pilot Launch | King Fahad Schools go-live, monitoring |
+
+### Sprint 1 Detail (Current)
+
+| Task | Owner | Status |
+|------|-------|--------|
+| Refactor docs to Databayt context | Osman A. | Done |
+| Update fumadocs MDX site | Osman A. | In Progress |
+| Create role-based installer | Osman A. | Planned |
+| Update repositories.json (11 → 14 repos) | Osman A. | Planned |
+| Windows PowerShell installer | Sedon | Planned |

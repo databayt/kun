@@ -1,0 +1,74 @@
+---
+title: Connectors
+description: GitHub, Figma, Slack, Linear and service integrations
+---
+
+# Connectors
+
+Service integrations that connect Kun to external platforms. Each connector is backed by an MCP server and triggered by keywords.
+
+## Configured Services
+
+| Service | Account | MCP Server | Trigger |
+|---------|---------|-----------|---------|
+| **GitHub** | abdout (databayt org) | github | `push`, `pr`, `issue` |
+| **Figma** | databayt designs | figma | `figma`, design URLs |
+| **Vercel** | osman-abdouts-projects | vercel | `deploy`, `ship` |
+| **Neon** | databayt databases | neon | `prisma`, `migration` |
+| **Stripe** | databayt payments | stripe | `payment`, `billing` |
+| **Sentry** | databayt monitoring | sentry | `error`, `debug` |
+| **Linear** | databayt workspace | linear | `linear`, `task` |
+| **PostHog** | databayt analytics | posthog | `analytics` |
+
+## Planned Connectors
+
+| Service | Account | Status |
+|---------|---------|--------|
+| **Slack** | hogwarts workspace | MCP configured |
+| **Notion** | databayt workspace | Needs API key |
+| **Discord** | databayt server | Planned |
+
+## GitHub Integration
+
+The deepest integration. Used for:
+
+- **Code**: Push, pull, branch management
+- **Issues**: 22 labels (priority/type/scope/assign), 3 milestones
+- **PRs**: Create, review, merge
+- **Actions**: CI/CD pipeline triggers
+
+### Labels
+
+| Category | Labels |
+|----------|--------|
+| Priority | P0-critical, P1-high, P2-medium, P3-low |
+| Type | agent, skill, mcp, hook, rule, memory, docs, infra |
+| Scope | captain, business, product, tech, specialist, cross-repo |
+| Assign | abdout, ali, samia, sedon, captain |
+
+## Figma Integration
+
+Design-to-code workflow:
+
+```
+"figma https://figma.com/design/abc/..."
+  → Figma MCP: get_design_context
+  → Map to existing shadcn/ui + atoms
+  → Generate components with Tailwind (RTL-aware)
+```
+
+## Vercel Integration
+
+Deployment automation:
+
+```
+"deploy" → build verification → Vercel MCP → poll status → report URL
+"ship" → production deployment with retry (max 5)
+```
+
+## Authentication
+
+Most connectors authenticate via:
+- **Environment variables** in `~/.claude/.env`
+- **macOS Keychain** via the keychain MCP
+- **OAuth** for remote MCP servers (Stripe, Linear, Sentry)

@@ -1,0 +1,132 @@
+---
+title: Team
+description: 4 roles with tailored MCP configs and agent indexes
+---
+
+# Team
+
+4 humans with tailored tools. Each role gets a specific MCP config, skill set, and agent index — so everyone has exactly the tools they need, nothing more.
+
+## Team Members
+
+### Abdout — Founder and Tech Lead
+
+| | |
+|---|---|
+| **Equipment** | MacBook Pro M4, iPhone 16e |
+| **Access** | CLI, Desktop, iOS, claude.ai/code, WebStorm |
+| **Role** | engineer |
+| **Strengths** | Architecture, full-stack, system design |
+| **Focus** | Kun engine + cross-repo architecture |
+| **MCP** | All 18 servers (mcp.json) |
+| **Skills** | All 25 |
+
+### Ali — Business
+
+| | |
+|---|---|
+| **Equipment** | HP Windows, Android |
+| **Access** | Desktop App, claude.ai/code, Cowork |
+| **Role** | business |
+| **Strengths** | CS+Business degrees, market research, client outreach |
+| **Focus** | Revenue, proposals, client relationships |
+| **MCP** | 8 servers (mcp-business.json) |
+| **Skills** | Core + proposal, pricing, weekly |
+
+### Samia — Creative and Content
+
+| | |
+|---|---|
+| **Equipment** | Dell Windows, iPhone 13 |
+| **Access** | Desktop App, iOS, Cowork, voice mode |
+| **Role** | content |
+| **Strengths** | Writing, translation AR/EN, voiceover, vision/strategy |
+| **Focus** | Content, translation, UX writing, brand voice |
+| **MCP** | 8 servers (mcp-content.json) |
+| **Skills** | Core + translate, content-calendar |
+
+### Sedon — Facilitator and Ops
+
+| | |
+|---|---|
+| **Equipment** | HP Windows, Android |
+| **Access** | Desktop App, claude.ai/code |
+| **Role** | ops |
+| **Strengths** | Mechanical engineering, social skills, Saudi market gateway |
+| **Focus** | Saudi ops, payments, server hosting, customer facilitation |
+| **MCP** | 9 servers (mcp-ops.json) |
+| **Skills** | Core + monitor, costs, incident |
+| **Special** | Saudi physical address, bank account, home server, payment processing |
+
+## Role-Specific MCP Configs
+
+| Role | Config File | Servers |
+|------|------------|---------|
+| **engineer** | mcp.json | github, vercel, neon, stripe, sentry, figma, shadcn, browser, + 10 more |
+| **business** | mcp-business.json | github, slack, linear, stripe, notion, browser, context7, memory-bank |
+| **content** | mcp-content.json | github, slack, notion, browser, figma, context7, memory-bank, ref |
+| **ops** | mcp-ops.json | github, slack, vercel, sentry, neon, stripe, browser, posthog, memory-bank |
+
+## Installation by Role
+
+```bash
+# Engineer (Abdout) — macOS
+cd ~/kun && bash .claude/scripts/install.sh
+
+# Business (Ali) — Windows
+cd ~/kun; .\.claude\scripts\install.ps1 -Role business
+
+# Content (Samia) — Windows
+cd ~/kun; .\.claude\scripts\install.ps1 -Role content
+
+# Ops (Sedon) — Windows
+cd ~/kun; .\.claude\scripts\install.ps1 -Role ops
+```
+
+## Daily Workflows
+
+### Abdout (Engineering)
+
+```
+> "dev"                    # Start dev server
+> [build features]         # Full 40-agent fleet
+> "build"                  # Validate
+> "push"                   # Commit + push
+> "deploy"                 # Ship to Vercel
+```
+
+### Ali (Business)
+
+```
+Cowork:
+> "Draft proposal for King Fahad Schools"
+> "Research competitor platforms in Sudan"
+> "Monthly revenue report"
+```
+
+### Samia (Content)
+
+```
+Cowork:
+> "Translate UI strings to Arabic"
+> "Write admission module documentation"
+> "Plan this week's content calendar"
+```
+
+### Sedon (Ops)
+
+```
+> "/monitor"               # Check all deployments
+> "/costs"                 # API spend breakdown
+> [assigned tasks]         # Bug fixes, Saudi ops
+> "push"                   # Commit + push
+```
+
+## Voice Tools
+
+| Person | Tool | Platform |
+|--------|------|----------|
+| Abdout | macOS Dictation | Built-in (Fn Fn) |
+| Ali | Windows Voice Typing | Built-in (Win+H) |
+| Samia | Claude voice mode + Windows Voice Typing | Desktop App + built-in |
+| Sedon | Windows Voice Typing | Built-in (Win+H) |

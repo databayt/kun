@@ -1,0 +1,57 @@
+{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@github/github-mcp-server"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+      },
+      "description": "GitHub repositories for content PRs and documentation"
+    },
+    "slack": {
+      "type": "http",
+      "url": "https://mcp.slack.com",
+      "env": {
+        "SLACK_BOT_TOKEN": "${SLACK_BOT_TOKEN}",
+        "SLACK_WORKSPACE_ID": "${SLACK_WORKSPACE_ID}"
+      },
+      "description": "Team notifications, content review"
+    },
+    "notion": {
+      "type": "http",
+      "url": "https://mcp.notion.so",
+      "env": {
+        "NOTION_API_KEY": "${NOTION_API_KEY}"
+      },
+      "description": "Content management, editorial calendar, knowledge base"
+    },
+    "browser": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest", "--headless"],
+      "description": "Headless browser for research and reference screenshots"
+    },
+    "figma": {
+      "type": "http",
+      "url": "http://127.0.0.1:3845/mcp",
+      "description": "Design review, UX writing context, asset export"
+    },
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"],
+      "description": "Up-to-date documentation for libraries"
+    },
+    "memory-bank": {
+      "command": "npx",
+      "args": ["-y", "@memory-bank/mcp-server@latest"],
+      "description": "Persistent context across sessions"
+    },
+    "ref": {
+      "command": "npx",
+      "args": ["-y", "ref-tools-mcp@latest"],
+      "env": {
+        "REF_API_KEY": "${REF_API_KEY}"
+      },
+      "description": "Search curated technical documentation"
+    }
+  }
+}

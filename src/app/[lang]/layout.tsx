@@ -1,15 +1,7 @@
-import type { Metadata } from "next"
 import { ThemeProvider } from "next-themes"
-import { GeistSans } from "geist/font/sans"
-import { GeistMono } from "geist/font/mono"
-
-export const metadata: Metadata = {
-  title: {
-    default: "Kun - Remote AI Development Infrastructure",
-    template: "%s | Kun"
-  },
-  description: "Remote AI Development Infrastructure - كن (Be!)",
-}
+import { fontSans, fontRubik, fontVariables } from "@/components/atom/fonts"
+import { type Locale, localeConfig } from "@/components/local/config"
+import { cn } from "@/lib/utils"
 
 export default async function LangLayout({
   children,
@@ -18,19 +10,22 @@ export default async function LangLayout({
   children: React.ReactNode
   params: Promise<{ lang: string }>
 }) {
-  const { lang } = await params
-  const dir = lang === "ar" ? "rtl" : "ltr"
+  const { lang } = await params as { lang: Locale }
+  const config = localeConfig[lang] || localeConfig['en']
+  const fontClass = lang === 'ar' ? fontRubik.className : fontSans.className
 
   return (
-    <html lang={lang} dir={dir} suppressHydrationWarning>
-      <body className={`${GeistSans.variable} ${GeistMono.variable} font-sans antialiased`}>
+    <html lang={lang} dir={config.dir} suppressHydrationWarning>
+      <body className={cn(fontClass, fontVariables, "group/body overscroll-none antialiased [--footer-height:calc(var(--spacing)*14)] [--header-height:calc(var(--spacing)*14)]")}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <div className="layout-container">
+            {children}
+          </div>
         </ThemeProvider>
       </body>
     </html>
@@ -38,5 +33,5 @@ export default async function LangLayout({
 }
 
 export function generateStaticParams() {
-  return [{ lang: "en" }, { lang: "ar" }]
+  return Object.keys(localeConfig).map((lang) => ({ lang }))
 }

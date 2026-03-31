@@ -1,353 +1,231 @@
-# Product Requirements Document: Kun (كن)
-## Remote AI Development Infrastructure
+# Product Requirements: Kun (كن)
 
-> **BMAD Phase**: Planning
-> **Version**: 1.0
-> **Date**: 2026-01-10
-> **Status**: Approved
+> **Version**: 3.0
+> **Date**: 2026-03-30
 
 ---
 
 ## 1. Overview
 
-### 1.1 Purpose
+### Purpose
 
-This PRD defines the functional and non-functional requirements for Kun (كن), a remote AI development infrastructure enabling distributed teams to access Claude Code from anywhere with shared patterns and centralized configuration.
+Define the requirements for the Kun engine — the configuration layer that transforms Anthropic's product suite into Databayt's operating system, serving 4 team members across 14 repositories with a $1K/month sustainability target.
 
-### 1.2 Scope
+### Scope
 
-| Phase | Scope | Target Users |
-|-------|-------|--------------|
-| Phase 1 | Individual developer setup | Solo developers |
-| Phase 2 | Team server with shared resources | 10+ developers |
-| Phase 3 | Commercial platform with isolation | External clients |
+| Phase | Scope | Users | Status |
+|-------|-------|-------|--------|
+| Phase 1: Developer Engine | Individual developer configuration | Osman Abdout (primary) | Done |
+| Phase 2: Team Engine | Shared config + coordination for 4 members | Full Databayt team | Next |
+| Phase 3: Company Engine | Full operations + custom automation | Team + CI/CD + clients | Future |
 
----
+### Constraints
 
-## 2. Functional Requirements
-
-### 2.1 Phase 1: Individual Setup
-
-#### FR-1.1: Server Preparation
-
-| ID | Requirement | Priority | Acceptance Criteria |
-|----|-------------|----------|---------------------|
-| FR-1.1.1 | Install Ubuntu LTS | P0 | Ubuntu 22.04 or 24.04 running |
-| FR-1.1.2 | Install Node.js 20.x | P0 | `node --version` returns 20.x |
-| FR-1.1.3 | Install pnpm | P0 | `pnpm --version` works |
-| FR-1.1.4 | Install Claude Code | P0 | `claude --version` works |
-| FR-1.1.5 | Enable SSH | P0 | SSH service active and enabled |
-| FR-1.1.6 | Install tmux | P0 | `tmux -V` returns version |
-
-#### FR-1.2: Tailscale VPN
-
-| ID | Requirement | Priority | Acceptance Criteria |
-|----|-------------|----------|---------------------|
-| FR-1.2.1 | Install Tailscale | P0 | `tailscale --version` works |
-| FR-1.2.2 | Authenticate to network | P0 | Device appears in Tailscale admin |
-| FR-1.2.3 | Enable Tailscale SSH | P0 | `tailscale up --ssh` successful |
-| FR-1.2.4 | Document Tailscale IP | P0 | IP recorded and accessible |
-
-#### FR-1.3: tmux Configuration
-
-| ID | Requirement | Priority | Acceptance Criteria |
-|----|-------------|----------|---------------------|
-| FR-1.3.1 | Enable mouse support | P0 | Scrolling works in tmux |
-| FR-1.3.2 | Increase history limit | P1 | 50000 lines of scrollback |
-| FR-1.3.3 | Create named session | P0 | `tmux attach -t claude` works |
-| FR-1.3.4 | Configure status bar | P2 | Session name and time visible |
-
-#### FR-1.4: Mobile Access
-
-| ID | Requirement | Priority | Acceptance Criteria |
-|----|-------------|----------|---------------------|
-| FR-1.4.1 | Termius connectivity | P0 | SSH from Termius succeeds |
-| FR-1.4.2 | tmux attachment | P0 | Can attach to session from phone |
-| FR-1.4.3 | Mouse scrolling | P0 | Can scroll terminal on phone |
-| FR-1.4.4 | Keyboard input | P0 | Can type commands on phone |
-
-#### FR-1.5: Pattern Library
-
-| ID | Requirement | Priority | Acceptance Criteria |
-|----|-------------|----------|---------------------|
-| FR-1.5.1 | Clone databayt/codebase | P1 | Repository cloned to ~/repos |
-| FR-1.5.2 | Link custom commands | P2 | /spec, /plan, /ship available |
-| FR-1.5.3 | Symlink agents | P2 | Agents accessible to Claude |
+| Constraint | Value |
+|-----------|-------|
+| Team size | 4 (2 engineers, 1 business, 1 content/research) |
+| Budget | $200/month Claude Code Max |
+| Capital | $500 remaining |
+| Revenue target | $1K/month |
+| Primary product | Hogwarts (education SaaS) |
 
 ---
 
-### 2.2 Phase 2: Team Server
+## 2. Phase 1: Developer Engine (Done)
 
-#### FR-2.1: User Management
+### FR-1.1: CLAUDE.md Configuration
 
-| ID | Requirement | Priority | Acceptance Criteria |
-|----|-------------|----------|---------------------|
-| FR-2.1.1 | Create developers group | P0 | Group exists with correct GID |
-| FR-2.1.2 | Create user accounts | P0 | 10+ users with home directories |
-| FR-2.1.3 | Configure permissions | P0 | Shared dirs 755, private dirs 700 |
-| FR-2.1.4 | Shell defaults | P1 | bash with proper .bashrc |
+| ID | Requirement | Priority | Status |
+|----|-------------|----------|--------|
+| FR-1.1.1 | User-level CLAUDE.md defines stack, mode, preferences | P0 | Done |
+| FR-1.1.2 | Project-level CLAUDE.md provides project context | P0 | Done |
+| FR-1.1.3 | Repo-level CLAUDE.md maps keywords to workflows | P0 | Done |
+| FR-1.1.4 | Project > Repo > User priority respected | P0 | Done |
+| FR-1.1.5 | 100+ keyword mappings | P1 | Done |
 
-#### FR-2.2: Tailscale ACLs
+### FR-1.2: Agent Fleet
 
-| ID | Requirement | Priority | Acceptance Criteria |
-|----|-------------|----------|---------------------|
-| FR-2.2.1 | Define admin group | P0 | Admins have full access |
-| FR-2.2.2 | Define developer group | P0 | Developers have SSH only |
-| FR-2.2.3 | Apply server tag | P0 | Server tagged as kun-server |
-| FR-2.2.4 | Configure SSH rules | P0 | SSH limited to own user |
+| ID | Requirement | Priority | Status |
+|----|-------------|----------|--------|
+| FR-1.2.1 | Stack chain: nextjs, react, typescript, tailwind, prisma, shadcn, authjs | P0 | Done |
+| FR-1.2.2 | Design chain: orchestration, architecture, pattern, structure | P0 | Done |
+| FR-1.2.3 | UI chain: shadcn, atom, template, block | P0 | Done |
+| FR-1.2.4 | DevOps chain: build, deploy, test | P0 | Done |
+| FR-1.2.5 | VCS chain: git, github | P0 | Done |
+| FR-1.2.6 | Specialized: middleware, i18n, semantic, sse, optimize, performance, comment | P1 | Done |
+| FR-1.2.7 | Reference chain: hogwarts, souq, mkan, shifa | P1 | Done |
+| FR-1.2.8 | Orchestration master routes tasks | P0 | Done |
 
-#### FR-2.3: Secrets Management
+### FR-1.3: Skill Library
 
-| ID | Requirement | Priority | Acceptance Criteria |
-|----|-------------|----------|---------------------|
-| FR-2.3.1 | Create /etc/claude-code | P0 | Directory exists with 755 |
-| FR-2.3.2 | Create env.sh | P0 | Environment file sourced |
-| FR-2.3.3 | Store API keys | P0 | ANTHROPIC_API_KEY available |
-| FR-2.3.4 | Store GitHub token | P1 | GITHUB_TOKEN available |
-| FR-2.3.5 | 1Password/Vault setup | P2 | Secrets rotatable without user changes |
+| ID | Requirement | Priority | Status |
+|----|-------------|----------|--------|
+| FR-1.3.1 | Workflow: /dev, /build, /quick, /deploy | P0 | Done |
+| FR-1.3.2 | Creation: /atom, /template, /block, /saas | P0 | Done |
+| FR-1.3.3 | Quality: /test, /security, /performance, /fix | P0 | Done |
+| FR-1.3.4 | Documentation: /docs, /codebase, /repos | P1 | Done |
+| FR-1.3.5 | QA: /handover runs 5-pass QA | P0 | Done |
 
-#### FR-2.4: Shared Configuration
+### FR-1.4: MCP, Hooks, Rules, Memory
 
-| ID | Requirement | Priority | Acceptance Criteria |
-|----|-------------|----------|---------------------|
-| FR-2.4.1 | Global CLAUDE.md | P0 | /etc/claude-code/CLAUDE.md exists |
-| FR-2.4.2 | Shared agents | P1 | Agents in shared location |
-| FR-2.4.3 | Shared commands | P1 | Commands in shared location |
-| FR-2.4.4 | Pattern library | P0 | /opt/databayt/codebase accessible |
-
-#### FR-2.5: Systemd Services
-
-| ID | Requirement | Priority | Acceptance Criteria |
-|----|-------------|----------|---------------------|
-| FR-2.5.1 | Create claude-tmux.service | P1 | Service file created |
-| FR-2.5.2 | Enable auto-start | P1 | Starts on boot |
-| FR-2.5.3 | Configure restart | P1 | Restarts on failure |
-| FR-2.5.4 | Log to journald | P2 | Logs viewable via journalctl |
-
-#### FR-2.6: Monitoring
-
-| ID | Requirement | Priority | Acceptance Criteria |
-|----|-------------|----------|---------------------|
-| FR-2.6.1 | Install Netdata | P1 | Dashboard at port 19999 |
-| FR-2.6.2 | Configure metrics | P1 | CPU, memory, disk visible |
-| FR-2.6.3 | Health check script | P1 | Script runs every 5 minutes |
-| FR-2.6.4 | Slack alerting | P2 | Alerts sent on service failure |
+| ID | Requirement | Priority | Status |
+|----|-------------|----------|--------|
+| FR-1.4.1 | 18 MCP servers (UI, DevOps, Data, Testing, Knowledge, PM) | P0 | Done |
+| FR-1.4.2 | 5 hooks (format, port, browser, session) | P0 | Done |
+| FR-1.4.3 | 8 path-scoped rules (auth, i18n, prisma, tailwind, testing, deploy, multi-repo, org-refs) | P0 | Done |
+| FR-1.4.4 | 6 memory files (preferences, repos, atoms, templates, blocks, reports) | P1 | Done |
+| FR-1.4.5 | 38 allow rules, 4 deny rules in settings | P0 | Done |
 
 ---
 
-### 2.3 Phase 3: Commercial Platform
+## 3. Phase 2: Team Engine (Next)
 
-#### FR-3.1: Container Isolation
+Grounded in Databayt's actual team: 4 members, 3 on Windows, 1 on macOS.
 
-| ID | Requirement | Priority | Acceptance Criteria |
-|----|-------------|----------|---------------------|
-| FR-3.1.1 | Create Dockerfile | P0 | Container builds successfully |
-| FR-3.1.2 | Install Claude Code in container | P0 | Claude works in container |
-| FR-3.1.3 | Network isolation | P0 | Containers cannot see each other |
-| FR-3.1.4 | Resource limits | P0 | CPU and memory limits enforced |
-| FR-3.1.5 | Persistent volumes | P0 | User data survives restart |
-
-#### FR-3.2: Usage Metering
+### FR-2.1: Team Onboarding
 
 | ID | Requirement | Priority | Acceptance Criteria |
 |----|-------------|----------|---------------------|
-| FR-3.2.1 | Track compute time | P0 | Container uptime recorded |
-| FR-3.2.2 | Track Claude tokens | P0 | API calls metered |
-| FR-3.2.3 | Track storage | P1 | Disk usage recorded |
-| FR-3.2.4 | Export to database | P0 | Metrics in PostgreSQL |
-| FR-3.2.5 | Usage API | P1 | /api/usage endpoint |
+| FR-2.1.1 | Cross-platform installer | P0 | install.sh (macOS) + install.ps1 (Windows) work for all 4 members |
+| FR-2.1.2 | Shared settings.json | P0 | `.claude/settings.json` in git, team-wide allow/deny rules |
+| FR-2.1.3 | Local overrides | P0 | `.claude/settings.local.json` for personal preferences |
+| FR-2.1.4 | Accessibility setup | P0 | Screen reader compatibility verified for Samia |
+| FR-2.1.5 | Onboarding docs | P1 | Each member productive within 30 minutes |
 
-#### FR-3.3: Billing Integration
-
-| ID | Requirement | Priority | Acceptance Criteria |
-|----|-------------|----------|---------------------|
-| FR-3.3.1 | Stripe integration | P0 | Stripe SDK configured |
-| FR-3.3.2 | Usage-based products | P0 | Products in Stripe dashboard |
-| FR-3.3.3 | Meter readings | P0 | Usage sent to Stripe |
-| FR-3.3.4 | Invoice generation | P0 | Invoices auto-generated |
-| FR-3.3.5 | Payment webhooks | P1 | Failed payments handled |
-
-#### FR-3.4: API Gateway
+### FR-2.2: Role-Based Configuration
 
 | ID | Requirement | Priority | Acceptance Criteria |
 |----|-------------|----------|---------------------|
-| FR-3.4.1 | JWT authentication | P0 | Tokens validated |
-| FR-3.4.2 | Rate limiting | P0 | Limits per tier |
-| FR-3.4.3 | Session endpoints | P0 | CRUD for sessions |
-| FR-3.4.4 | Usage endpoints | P1 | GET usage stats |
-| FR-3.4.5 | API documentation | P2 | OpenAPI spec |
+| FR-2.2.1 | Engineer config (Osman A. + Sedon) | P0 | Full agent fleet, all MCPs, CLI access |
+| FR-2.2.2 | Business config (Ali) | P0 | Cowork, Claude Desktop, Stripe MCP, client templates |
+| FR-2.2.3 | Content config (Samia) | P0 | Cowork, web search, i18n tools, accessible UI |
+| FR-2.2.4 | Cost tracking per member | P1 | Know who uses how much of the $200/month budget |
 
-#### FR-3.5: Pattern Marketplace
-
-| ID | Requirement | Priority | Acceptance Criteria |
-|----|-------------|----------|---------------------|
-| FR-3.5.1 | Browse patterns | P1 | List available patterns |
-| FR-3.5.2 | Install patterns | P1 | Add to user container |
-| FR-3.5.3 | Version management | P2 | Lock to specific version |
-| FR-3.5.4 | Rating system | P3 | Users can rate patterns |
-
-#### FR-3.6: Off-Grid Setup
+### FR-2.3: Hogwarts Pilot Support
 
 | ID | Requirement | Priority | Acceptance Criteria |
 |----|-------------|----------|---------------------|
-| FR-3.6.1 | Solar installation | P2 | 800W panels installed |
-| FR-3.6.2 | Battery bank | P2 | 5kWh LiFePO4 operational |
-| FR-3.6.3 | Starlink setup | P2 | Internet via satellite |
-| FR-3.6.4 | 48-hour autonomy | P2 | Runs 2 days without sun |
+| FR-2.3.1 | Admission block QA | P0 | /handover admission passes all 5 QA checks |
+| FR-2.3.2 | Notification system | P0 | Twilio + in-app notifications working |
+| FR-2.3.3 | Messaging system | P0 | School-to-parent messaging functional |
+| FR-2.3.4 | Deployment pipeline | P0 | ed.databayt.org deploys reliably |
+| FR-2.3.5 | Client training materials | P1 | Arabic documentation for King Fahad Schools staff |
+
+### FR-2.4: Agent Teams
+
+| ID | Requirement | Priority | Acceptance Criteria |
+|----|-------------|----------|---------------------|
+| FR-2.4.1 | Lead agent coordination | P0 | Lead assigns subtasks to teammates |
+| FR-2.4.2 | Parallel execution | P0 | 3+ agents work simultaneously |
+| FR-2.4.3 | Git worktree isolation | P0 | Each agent in isolated branch |
+| FR-2.4.4 | Consolidated output | P0 | Work merges into single PR |
+
+### FR-2.5: CI/CD Integration
+
+| ID | Requirement | Priority | Acceptance Criteria |
+|----|-------------|----------|---------------------|
+| FR-2.5.1 | GitHub Actions review | P0 | Every PR auto-reviewed by Claude |
+| FR-2.5.2 | Pattern compliance | P0 | CI verifies code follows CLAUDE.md |
+| FR-2.5.3 | Scheduled cloud tasks | P1 | Daily health check, weekly dependency audit |
+| FR-2.5.4 | Auto-fix pipeline | P1 | Trivial lint/type errors auto-fixed |
 
 ---
 
-## 3. Non-Functional Requirements
+## 4. Phase 3: Company Engine (Future)
 
-### 3.1 Performance
+### FR-3.1: Agent SDK Pipelines
 
-| ID | Requirement | Target |
-|----|-------------|--------|
-| NFR-P1 | SSH connection latency | < 100ms within Tailscale |
-| NFR-P2 | tmux keystroke latency | < 50ms |
-| NFR-P3 | Claude Code startup | < 5 seconds |
-| NFR-P4 | Session attach time | < 2 seconds |
+| ID | Requirement | Priority |
+|----|-------------|----------|
+| FR-3.1.1 | CI/CD review agent in GitHub Actions | P0 |
+| FR-3.1.2 | Deploy verification agent | P0 |
+| FR-3.1.3 | Client onboarding agent | P1 |
+| FR-3.1.4 | Structured output (validated JSON) | P1 |
 
-### 3.2 Availability
+### FR-3.2: Cost Optimization
 
-| ID | Requirement | Target |
-|----|-------------|--------|
-| NFR-A1 | Server uptime | 99.9% (8.76 hours/year downtime) |
-| NFR-A2 | Session persistence | 7+ days without restart |
-| NFR-A3 | Service recovery | < 5 minutes after failure |
-| NFR-A4 | Data durability | < 1 hour data loss on failure |
+| ID | Requirement | Priority |
+|----|-------------|----------|
+| FR-3.2.1 | Prompt caching (90% savings) | P0 |
+| FR-3.2.2 | Batch API for CI/CD (50% savings) | P0 |
+| FR-3.2.3 | Model routing (Haiku for exploration) | P1 |
+| FR-3.2.4 | Usage monitoring dashboard | P1 |
 
-### 3.3 Scalability
+### FR-3.3: Pattern Distribution
 
-| ID | Requirement | Target |
-|----|-------------|--------|
-| NFR-S1 | Phase 1 users | 1-3 concurrent |
-| NFR-S2 | Phase 2 users | 10-15 concurrent |
-| NFR-S3 | Phase 3 users | 50+ concurrent (with scaling) |
-| NFR-S4 | Pattern library size | 1000+ patterns |
-
-### 3.4 Security
-
-| ID | Requirement | Target |
-|----|-------------|--------|
-| NFR-SE1 | Authentication | SSH keys + Tailscale certificates |
-| NFR-SE2 | Encryption in transit | WireGuard (Tailscale) |
-| NFR-SE3 | Secrets storage | Encrypted at rest |
-| NFR-SE4 | Access logging | All SSH sessions logged |
-| NFR-SE5 | Session isolation | No cross-user access (Phase 3) |
-
-### 3.5 Usability
-
-| ID | Requirement | Target |
-|----|-------------|--------|
-| NFR-U1 | Mobile UX | Full functionality on Termius |
-| NFR-U2 | Setup time | < 2 hours for Phase 1 |
-| NFR-U3 | Onboarding | < 30 minutes for new team member |
-| NFR-U4 | Documentation | Complete runbook available |
-
-### 3.6 Maintainability
-
-| ID | Requirement | Target |
-|----|-------------|--------|
-| NFR-M1 | Update process | < 30 minutes downtime |
-| NFR-M2 | Log retention | 30 days |
-| NFR-M3 | Backup frequency | Daily |
-| NFR-M4 | Config as code | All configs in git |
+| ID | Requirement | Priority |
+|----|-------------|----------|
+| FR-3.3.1 | Kun config packaged for distribution | P1 |
+| FR-3.3.2 | One-command install for external teams | P1 |
+| FR-3.3.3 | Pattern marketplace | P2 |
 
 ---
 
-## 4. Constraints
+## 5. Non-Functional Requirements
 
-### 4.1 Technical Constraints
+### Performance
 
-| Constraint | Description | Impact |
-|------------|-------------|--------|
-| OS | Ubuntu 22.04/24.04 LTS only | systemd required for services |
-| Node.js | Version 20.x LTS | Claude Code dependency |
-| Tailscale | Teams tier for 10+ users | $6/user/month cost |
-| Storage | SSD required | HDD too slow for development |
-| RAM | Minimum 16GB | For comfortable multi-user |
+| ID | Requirement | Target |
+|----|-------------|--------|
+| NFR-P1 | Keyword → workflow start | < 3 seconds |
+| NFR-P2 | MCP tool response | < 5 seconds |
+| NFR-P3 | Autopilot cycle length | 100 turns |
 
-### 4.2 Business Constraints
+### Usability
 
-| Constraint | Description |
-|------------|-------------|
-| Budget | Tailscale Teams tier ~$60/month for 10 users |
-| Team Size | 10+ developers initially |
-| Timeline | Phase 1 in 1 week, Phase 2 in 3 weeks |
+| ID | Requirement | Target |
+|----|-------------|--------|
+| NFR-U1 | Developer onboarding | < 30 minutes |
+| NFR-U2 | Non-dev onboarding | < 1 hour |
+| NFR-U3 | Screen reader compatibility | WCAG 2.1 AA |
+| NFR-U4 | Same config on CLI, Desktop, Web, iOS | 100% |
 
-### 4.3 Regulatory Constraints
+### Security
 
-| Constraint | Description |
-|------------|-------------|
-| Data Residency | Server location determines data residency |
-| API Terms | Anthropic ToS for Claude API usage |
-| Billing | Stripe compliance for Phase 3 |
+| ID | Requirement | Target |
+|----|-------------|--------|
+| NFR-SE1 | Destructive commands blocked | rm -rf, DROP TABLE |
+| NFR-SE2 | Secrets never in git | Keychain or Vault |
+| NFR-SE3 | Explicit allow-list permissions | Prompt for unknown |
 
----
+### Cost
 
-## 5. Dependencies
-
-### 5.1 External Services
-
-| Service | Type | Criticality | Fallback |
-|---------|------|-------------|----------|
-| Tailscale | SaaS | Critical | Port forwarding + SSH |
-| Anthropic API | SaaS | Critical | No fallback |
-| GitHub | SaaS | High | Local git server |
-| 1Password/Vault | SaaS/Self-hosted | Medium | Environment files |
-| Stripe | SaaS | Medium (Phase 3) | Manual invoicing |
-
-### 5.2 Pattern Library
-
-| Component | Path | Count |
-|-----------|------|-------|
-| UI Components | codebase/src/components/ui/ | 54 |
-| Atoms | codebase/src/components/atom/ | 62 |
-| Templates | codebase/src/registry/ | 31 |
-| Claude Agents | codebase/.claude/agents/ | 11 |
-| Claude Commands | codebase/.claude/commands/ | 4 |
-
-### 5.3 Hardware (Phase 3 Off-Grid)
-
-| Component | Specification | Cost Estimate |
-|-----------|---------------|---------------|
-| Solar Panels | 4x 200W monocrystalline | $400 |
-| Battery Bank | 5kWh LiFePO4 | $2000 |
-| Charge Controller | 60A MPPT | $300 |
-| Inverter | 2000W pure sine wave | $400 |
-| Starlink Mini | Monthly subscription | $120/month |
+| ID | Requirement | Target |
+|----|-------------|--------|
+| NFR-C1 | Claude Code plan | $200/month (Max 20x) |
+| NFR-C2 | Total monthly expenses | < $400 (Claude + services) |
+| NFR-C3 | Revenue from products | $1,000/month by June 2026 |
 
 ---
 
 ## 6. Acceptance Criteria Summary
 
-### 6.1 Phase 1 Complete When
+### Phase 1 Complete When (Done)
 
-- [ ] SSH via Tailscale works from laptop
-- [ ] SSH via Termius works from phone
-- [ ] tmux session persists across disconnects
-- [ ] Claude Code responds to prompts
-- [ ] Mouse scrolling works on mobile
-- [ ] Pattern library accessible
+- [x] CLAUDE.md hierarchy configured (user + project + repo)
+- [x] 28 agents operational across 6 chains
+- [x] 17 skills triggerable via keywords
+- [x] 18 MCP servers connected
+- [x] 5 hooks automating formatting, port, sessions
+- [x] 8 rules auto-activating on file patterns
+- [x] 6 memory files persisting cross-session
+- [x] Works on CLI, Desktop, Web, and iOS
 
-### 6.2 Phase 2 Complete When
+### Phase 2 Complete When
 
-- [ ] 10+ user accounts created
-- [ ] All users can SSH via Tailscale
-- [ ] Shared CLAUDE.md applied to all sessions
-- [ ] Secrets accessible without per-user config
-- [ ] Netdata dashboard accessible
-- [ ] Health checks running and alerting
+- [ ] All 4 team members onboarded and productive
+- [ ] Hogwarts admission block passes /handover QA
+- [ ] King Fahad Schools pilot deployed and operational
+- [ ] Agent Teams running parallel features
+- [ ] CI/CD reviewing every PR automatically
+- [ ] Team generating $1K/month revenue
 
-### 6.3 Phase 3 Complete When
+### Phase 3 Complete When
 
-- [ ] Docker containers isolate users
-- [ ] Usage metering records all activity
-- [ ] Stripe charges based on usage
-- [ ] API gateway authenticates requests
-- [ ] 10+ external users active
-- [ ] (Optional) Solar setup operational
+- [ ] Agent SDK agents in production CI/CD
+- [ ] 95% cost reduction via caching + batch
+- [ ] Pattern distribution installable in one command
+- [ ] Multiple paying Hogwarts customers
 
 ---
 
@@ -355,18 +233,11 @@ This PRD defines the functional and non-functional requirements for Kun (كن), 
 
 | Term | Definition |
 |------|------------|
-| **Kun (كن)** | Arabic for "Be!" - the divine command of creation |
-| **Tailscale** | Zero-config VPN based on WireGuard |
-| **tmux** | Terminal multiplexer for persistent sessions |
-| **Termius** | SSH client for iOS and Android |
-| **Claude Code** | Anthropic's AI-powered CLI development tool |
-| **Pattern Library** | databayt/codebase repository with reusable components |
-| **BMAD** | Breakthrough Method for Agile AI-Driven Development |
-
----
-
-## 8. Revision History
-
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 1.0 | 2026-01-10 | Claude Code | Initial PRD |
+| **Kun (كن)** | Arabic for "Be!" — Databayt's configuration engine |
+| **Databayt** | The company (databayt.org, github.com/databayt) |
+| **Hogwarts** | Flagship education SaaS product |
+| **CLAUDE.md** | Markdown context file loaded at session start |
+| **Agent** | Specialized AI with domain expertise |
+| **Skill** | Organized instruction folder triggered by slash command |
+| **MCP** | Model Context Protocol — standard for AI tool integration |
+| **Cowork** | Claude Desktop's agentic mode for knowledge work |

@@ -1,0 +1,92 @@
+# Self-Hosting (Optional)
+
+> **Status**: Optional appendix. Anthropic-native products handle 90%+ of use cases.
+> **When relevant**: Air-gapped environments, data residency, or dedicated server preference.
+
+---
+
+## When You Need This vs. When You Don't
+
+| Scenario | Self-Host? | Anthropic Alternative |
+|----------|-----------|----------------------|
+| No internet | Yes | - |
+| Data residency compliance | Maybe | Enterprise plan (regional) |
+| Mobile access | No | iOS app, claude.ai/code |
+| Persistent sessions | No | Desktop app, cloud tasks |
+| Cross-device | No | Remote Control, Dispatch |
+| Team isolation | No | Team/Enterprise RBAC |
+
+**Databayt's position**: We use Anthropic-native products. This appendix exists for future scenarios or external teams with different constraints.
+
+---
+
+## 1. Tailscale VPN
+
+Secure mesh VPN for remote access without port forwarding.
+
+```bash
+curl -fsSL https://tailscale.com/install.sh | sh
+sudo tailscale up --ssh
+```
+
+### ACL Summary
+
+| Role | Access |
+|------|--------|
+| Admin | All ports, root + non-root SSH |
+| Developer | Port 22, non-root SSH |
+
+---
+
+## 2. tmux Sessions
+
+Persistent terminal sessions that survive disconnects.
+
+```bash
+# Create session
+tmux new-session -d -s claude -n claude
+tmux send-keys -t claude:claude 'claude' Enter
+
+# Attach from any device
+ssh [tailscale-ip]
+tmux attach -t claude
+```
+
+---
+
+## 3. Server Setup (Ubuntu 22.04+)
+
+```bash
+sudo apt update && sudo apt install -y git curl tmux build-essential openssh-server
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs
+npm install -g pnpm @anthropic-ai/claude-code
+```
+
+---
+
+## 4. Docker Isolation (Multi-Tenant)
+
+For hosting external users with resource limits.
+
+```dockerfile
+FROM ubuntu:22.04
+RUN apt-get update && apt-get install -y nodejs npm git tmux curl \
+    && npm install -g @anthropic-ai/claude-code pnpm
+RUN useradd -m developer
+USER developer
+CMD ["tmux", "new-session", "-s", "main"]
+```
+
+---
+
+## 5. Migration to Anthropic-Native
+
+| Self-Hosted | Replace With |
+|------------|-------------|
+| Tailscale SSH | claude.ai/code or iOS app |
+| tmux sessions | Desktop app |
+| Termius mobile | Claude Code iOS |
+| systemd services | Scheduled Cloud Tasks |
+| Netdata monitoring | Sentry MCP + Slack |
+| Docker isolation | Team/Enterprise RBAC |

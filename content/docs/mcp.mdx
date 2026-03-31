@@ -1,0 +1,96 @@
+---
+title: MCP
+description: 18 MCP servers connecting Claude Code to external services
+---
+
+# MCP Servers
+
+18 Model Context Protocol servers that connect Claude Code to external services — from design tools to databases to deployment platforms.
+
+## UI and Design (5)
+
+| Server | Purpose | Trigger |
+|--------|---------|---------|
+| **shadcn** | Component registry, install components | `ui`, `component`, `atom` |
+| **figma** | Design file access (127.0.0.1:3845) | `figma`, design URLs |
+| **tailwind** | CSS utilities, documentation | `tailwind`, `css` |
+| **a11y** | Accessibility audits (WCAG 2.1 AA) | `accessibility`, `a11y` |
+| **storybook** | Visual testing | `storybook` |
+
+## Testing (2)
+
+| Server | Purpose | Trigger |
+|--------|---------|---------|
+| **browser** | Headless Chromium (1920x1080) | `test`, `e2e`, `see` |
+| **browser-headed** | Visible Chromium for auth flows | `see headed` |
+
+## DevOps and Infra (4)
+
+| Server | Purpose | Trigger |
+|--------|---------|---------|
+| **github** | Repos, issues, PRs, Actions | `push`, `pr`, `issue` |
+| **vercel** | Deployments, logs | `deploy`, `ship` |
+| **sentry** | Error monitoring | `error`, `debug` |
+| **gcloud** | Google Cloud CLI | `gcloud` |
+
+## Data and Auth (4)
+
+| Server | Purpose | Trigger |
+|--------|---------|---------|
+| **neon** | Neon PostgreSQL branching | `prisma`, `migration`, `db` |
+| **postgres** | Database queries (dbhub) | `sql`, `query` |
+| **stripe** | Payments, subscriptions | `payment`, `billing` |
+| **keychain** | macOS Keychain credentials | `credentials` |
+
+## Knowledge and PM (3)
+
+| Server | Purpose | Trigger |
+|--------|---------|---------|
+| **ref** | Technical documentation | `docs`, `lookup` |
+| **context7** | Up-to-date library docs | `latest docs` |
+| **linear** | Issue tracking | `linear`, `task` |
+
+## Role-Specific Configs
+
+Not every team member needs all 18 servers. Each role gets a tailored MCP config:
+
+| Role | Config File | Server Count |
+|------|------------|--------------|
+| **engineer** | mcp.json | All 18 |
+| **business** | mcp-business.json | 8 (github, slack, linear, stripe, notion, browser, context7, memory-bank) |
+| **content** | mcp-content.json | 8 (github, slack, notion, browser, figma, context7, memory-bank, ref) |
+| **ops** | mcp-ops.json | 9 (github, slack, vercel, sentry, neon, stripe, browser, posthog, memory-bank) |
+
+## Configuration
+
+MCP servers are configured in `~/.claude/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": ""
+      }
+    }
+  }
+}
+```
+
+## Installation
+
+```bash
+# Engineer (all 18 servers)
+cd ~/kun && bash .claude/scripts/install.sh
+
+# Business role (8 servers)
+cd ~/kun && bash .claude/scripts/install.sh business
+
+# Content role (8 servers)
+cd ~/kun && bash .claude/scripts/install.sh content
+
+# Ops role (9 servers)
+cd ~/kun && bash .claude/scripts/install.sh ops
+```

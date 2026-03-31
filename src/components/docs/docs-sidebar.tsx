@@ -14,16 +14,22 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 
-// Configuration for kun docs navigation
+// Configuration for kun docs navigation — must match content/docs/meta.json
 const DOCS_LINKS = [
   { key: "introduction", href: "/docs", fallback: "Introduction" },
+  { key: "keywords", href: "/docs/keywords", fallback: "The Standard Book of Spells" },
+  { key: "products", href: "/docs/products", fallback: "Products" },
   { key: "architecture", href: "/docs/architecture", fallback: "Architecture" },
+  { key: "configuration", href: "/docs/configuration", fallback: "Configuration" },
+  { key: "workflows", href: "/docs/workflows", fallback: "Workflows" },
   { key: "prd", href: "/docs/prd", fallback: "PRD" },
   { key: "epics", href: "/docs/epics", fallback: "Epics" },
-  { key: "infrastructure", href: "/docs/infrastructure", fallback: "Infrastructure" },
-  { key: "phase1", href: "/docs/phase1", fallback: "Phase 1: Individual" },
-  { key: "phase2", href: "/docs/phase2", fallback: "Phase 2: Team" },
-  { key: "phase3", href: "/docs/phase3", fallback: "Phase 3: Commercial" },
+  { key: "claude-code", href: "/docs/claude-code", fallback: "Claude Code" },
+  { key: "secrets", href: "/docs/secrets", fallback: "Secrets" },
+  { key: "stack", href: "/docs/stack", fallback: "Stack" },
+  { key: "repositories", href: "/docs/repositories", fallback: "Repositories" },
+  { key: "projects", href: "/docs/projects", fallback: "Projects" },
+  { key: "self-hosting", href: "/docs/self-hosting", fallback: "Self-Hosting" },
 ] as const
 
 export function DocsSidebar({

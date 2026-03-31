@@ -1,0 +1,153 @@
+---
+title: Issue
+description: GitHub issue creation — from CLI, Slack, or Cowork with auto-labeling and Slack notifications
+---
+
+# Issue
+
+Create GitHub issues across all databayt repos. Issues can originate from Claude Code, Slack messages, or Cowork sessions.
+
+## Usage
+
+```bash
+# From Claude Code
+/issue "Login crashes on Safari mobile" --repo hogwarts
+
+# From keyword
+issue "Add dark mode to dashboard"
+
+# From Slack context
+issue from slack #dev
+```
+
+## Repo Mapping
+
+| Repo | Scope |
+|------|-------|
+| `databayt/kun` | Engine: agents, skills, MCP, hooks, rules, memory |
+| `databayt/hogwarts` | Education: features, bugs, LMS, SIS, billing |
+| `databayt/souq` | E-commerce: vendors, cart, checkout |
+| `databayt/mkan` | Rentals: listings, booking, search |
+| `databayt/shifa` | Medical: appointments, patient records |
+| `databayt/codebase` | Shared: patterns, components, templates |
+| `databayt/shadcn` | UI: component library |
+| `databayt/swift-app` | Mobile: iOS app |
+| `databayt/marketing` | Marketing: landing pages |
+
+Kun auto-detects the repo from context. If ambiguous, it asks.
+
+## Labels
+
+### Priority
+
+| Label | When |
+|-------|------|
+| `P0-critical` | Production down, data loss, security |
+| `P1-high` | Blocks current sprint, customer-facing bug |
+| `P2-medium` | Important but not blocking |
+| `P3-low` | Nice to have, cleanup |
+
+### Type
+
+| Label | When |
+|-------|------|
+| `bug` | Something is broken |
+| `enhancement` | Improve existing feature |
+| `type:agent` | Agent configuration |
+| `type:skill` | Skill/command |
+| `type:mcp` | MCP server integration |
+| `type:hook` | Hook configuration |
+| `type:rule` | Rule file |
+| `type:memory` | Memory system |
+| `type:docs` | Documentation |
+| `type:infra` | Infrastructure, CI/CD |
+
+### Scope
+
+`scope:captain`, `scope:business`, `scope:product`, `scope:tech`, `scope:specialist`, `scope:cross-repo`
+
+### Assignment
+
+`assign:abdout`, `assign:ali`, `assign:samia`, `assign:sedon`, `assign:captain`
+
+## Issue Body Template
+
+Every issue follows this structure:
+
+```markdown
+## Context
+Why this matters — user impact, business context, or technical debt.
+
+## Action
+- [ ] Step 1
+- [ ] Step 2
+- [ ] Step 3
+
+## Verification
+How to confirm it's done — test commands, URLs to check, expected behavior.
+```
+
+## Slack Integration
+
+### Issue → Slack
+
+When an issue is created, kun posts to `#dev`:
+
+```
+New issue: databayt/hogwarts#15 — Login crashes on Safari mobile
+Priority: P1-high | Assigned: abdout
+```
+
+### Slack → Issue
+
+Team members describe problems in Slack. Kun creates issues from those messages:
+
+```
+Ali in #dev: "The admission form loses data when you switch tabs"
+       ↓
+kun creates: databayt/hogwarts#16
+  Title: "Admission form loses data on tab switch"
+  Body: "Reported by Ali in #dev. The admission form..."
+       ↓
+kun replies in #dev: "Created databayt/hogwarts#16 — assigned to abdout"
+```
+
+### Channel → Repo Default
+
+| Channel | Default Repo |
+|---------|-------------|
+| `#hogwarts` | `databayt/hogwarts` |
+| `#dev` | Current working repo |
+| `#ops` | `databayt/kun` |
+
+## From Cowork
+
+Issues created during Cowork planning sessions follow the same format:
+
+```
+[Cowork session]
+"Plan the notification system for hogwarts"
+→ Creates: #10 Add notification preferences
+→ Creates: #11 Build notification delivery service  
+→ Creates: #12 Add push notification support
+→ Posts all three to #hogwarts
+```
+
+## Examples
+
+```bash
+# Bug report
+/issue "Admission form validation broken on mobile" --repo hogwarts
+
+# Feature request
+/issue "Add Arabic translation for settings page" --repo hogwarts
+
+# From Slack
+/issue from slack #dev
+
+# Cross-repo
+/issue "Update shadcn Button to support RTL icon flip" --repo shadcn
+
+# Batch from planning
+/issue batch "hogwarts notifications" --issues 3
+```

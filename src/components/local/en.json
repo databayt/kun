@@ -1,0 +1,85 @@
+{
+  "homepage": {
+    "heading": "The Engine of Incantations",
+    "description": "Magic begins with a word. Not a paragraph. Not a committee. A single, well-chosen word spoken with intent — no wand-waving required."
+  },
+  "announcement": {
+    "text": "In-house engine for Anthropic products"
+  },
+  "actions": {
+    "getStarted": "Get Started",
+    "configuration": "Configuration"
+  },
+  "stages": {
+    "phase": "Phase",
+    "currentFocus": "Current Focus",
+    "sprintPlan": "Sprint Plan"
+  },
+  "phases": {
+    "heading": "Three Phases",
+    "description": "From developer engine to company engine",
+    "done": "Done",
+    "current": "Current",
+    "future": "Future",
+    "phase1": {
+      "title": "Developer Engine",
+      "description": "Full agent fleet, skills, MCP servers, hooks, rules, memory",
+      "features": [
+        "28 agents across 6 chains",
+        "17 skills with keyword triggers",
+        "18 MCP servers",
+        "100+ keyword mappings"
+      ]
+    },
+    "phase2": {
+      "title": "Team Engine",
+      "description": "Team onboarding, Hogwarts pilot, Agent Teams, revenue",
+      "features": [
+        "Role-based installer",
+        "Hogwarts pilot (King Fahad Schools)",
+        "Agent Teams (parallel work)",
+        "Cowork for business & content"
+      ]
+    },
+    "phase3": {
+      "title": "Company Engine",
+      "description": "Agent SDK pipelines, cost optimization, multi-customer scaling",
+      "features": [
+        "Agent SDK custom pipelines",
+        "Enterprise SSO/SCIM",
+        "95% API cost savings",
+        "Pattern distribution"
+      ]
+    }
+  },
+  "quickLinks": {
+    "heading": "Quick Links",
+    "description": "Everything you need to get started",
+    "learnMore": "Learn more",
+    "configuration": {
+      "title": "Configuration",
+      "description": "Agents, skills, MCP servers, hooks, rules, and memory"
+    },
+    "secrets": {
+      "title": "Secrets",
+      "description": "Access API keys, tokens, and environment variables"
+    },
+    "projects": {
+      "title": "Projects",
+      "description": "Browse and clone open projects from databayt"
+    },
+    "docs": {
+      "title": "Full Documentation",
+      "description": "Complete guides for all phases and features"
+    }
+  },
+  "stageBanner": {
+    "title": "Team Engine",
+    "description": "Team onboarding, Hogwarts pilot for King Fahad Schools, Agent Teams, and revenue workflows.",
+    "links": {
+      "configuration": "Configuration",
+      "secrets": "Secrets",
+      "projects": "Projects"
+    }
+  }
+}

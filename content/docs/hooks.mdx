@@ -1,0 +1,83 @@
+---
+title: Hooks
+description: Lifecycle automations that trigger on events
+---
+
+# Hooks
+
+5 hooks that automate repetitive actions across the development lifecycle. They fire on specific events — before a tool runs, after a file changes, when a session ends.
+
+## Active Hooks
+
+| Hook | Event | Action |
+|------|-------|--------|
+| **Port Guard** | Before `pnpm dev` | Kill anything on port 3000 |
+| **Browser Open** | After `pnpm dev` | Open Chrome to localhost:3000 |
+| **Auto-Format** | After Write/Edit | Run Prettier on changed files |
+| **Session Log** | Agent finishes | Log timestamp to session log |
+| **Notification** | Agent needs attention | macOS notification via osascript |
+
+## How Hooks Work
+
+Hooks are shell commands configured in `~/.claude/settings.json` under the `hooks` key:
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash(pnpm dev)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "lsof -ti:3000 | xargs kill -9 2>/dev/null; exit 0"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx prettier --write \"$FILE_PATH\" 2>/dev/null; exit 0"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+## Hook Events
+
+| Event | When It Fires | Common Use |
+|-------|--------------|------------|
+| **PreToolUse** | Before a tool executes | Port cleanup, validation |
+| **PostToolUse** | After a tool completes | Formatting, browser open |
+| **Stop** | When agent finishes | Logging, cleanup |
+| **Notification** | Agent pauses for input | Desktop alerts |
+
+## Matcher Patterns
+
+- `Bash(pnpm dev)` — matches specific bash commands
+- `Write|Edit` — matches multiple tools with pipe
+- `*` — matches everything
+
+## Role Availability
+
+| Role | Hooks |
+|------|-------|
+| **engineer** | All 5 |
+| **business** | Prettier only |
+| **content** | Prettier only |
+| **ops** | All 5 |
+
+## Adding Custom Hooks
+
+Edit `~/.claude/settings.json` to add new hooks. Each hook needs:
+
+1. **Event** — when to fire (PreToolUse, PostToolUse, Stop, Notification)
+2. **Matcher** — which tool/command to match
+3. **Command** — shell command to execute

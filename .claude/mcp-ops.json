@@ -1,0 +1,63 @@
+{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@github/github-mcp-server"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+      },
+      "description": "GitHub repositories, CI/CD workflows, deployment status"
+    },
+    "slack": {
+      "type": "http",
+      "url": "https://mcp.slack.com",
+      "env": {
+        "SLACK_BOT_TOKEN": "${SLACK_BOT_TOKEN}",
+        "SLACK_WORKSPACE_ID": "${SLACK_WORKSPACE_ID}"
+      },
+      "description": "Team notifications, incident alerts"
+    },
+    "vercel": {
+      "type": "http",
+      "url": "https://mcp.vercel.com/",
+      "description": "Deployments, logs, performance monitoring"
+    },
+    "sentry": {
+      "type": "http",
+      "url": "https://mcp.sentry.dev/mcp",
+      "description": "Error monitoring, production debugging"
+    },
+    "neon": {
+      "command": "npx",
+      "args": ["-y", "@neondatabase/mcp-server-neon"],
+      "env": {
+        "NEON_API_KEY": "${NEON_API_KEY}"
+      },
+      "description": "Neon PostgreSQL - database health, branching"
+    },
+    "stripe": {
+      "type": "http",
+      "url": "https://mcp.stripe.com",
+      "description": "Payment processing, fee tracking"
+    },
+    "browser": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest", "--headless"],
+      "description": "Headless browser for uptime checks and site verification"
+    },
+    "posthog": {
+      "type": "http",
+      "url": "https://mcp.posthog.com",
+      "env": {
+        "POSTHOG_API_KEY": "${POSTHOG_API_KEY}",
+        "POSTHOG_PROJECT_ID": "${POSTHOG_PROJECT_ID}"
+      },
+      "description": "Product analytics, usage patterns"
+    },
+    "memory-bank": {
+      "command": "npx",
+      "args": ["-y", "@memory-bank/mcp-server@latest"],
+      "description": "Persistent context across sessions"
+    }
+  }
+}

@@ -26,7 +26,7 @@ export function PageHeader({
   ...props
 }: PageHeaderProps) {
   return (
-    <section className={cn(className)} {...props}>
+    <section className={cn("border-grid border-b-[0.5px]", className)} {...props}>
       <div className="flex flex-col items-start gap-1 py-8 md:py-10 lg:py-12">
         {announcement && (
           <div className={cn(announcementClassName)}>
@@ -36,6 +36,7 @@ export function PageHeader({
         {heading && (
           <h2
             className={cn(
+              "text-primary leading-tighter max-w-2xl text-4xl font-semibold tracking-tight text-balance lg:leading-[1.1] lg:font-semibold xl:text-5xl xl:tracking-tight",
               headingClassName
             )}
           >
@@ -55,7 +56,7 @@ export function PageHeader({
         {actions && (
           <div
             className={cn(
-              "flex w-full items-center justify-start gap-4 pt-2",
+              "flex w-full items-center justify-start gap-2 pt-2",
               actionsClassName
             )}
           >

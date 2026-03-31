@@ -35,21 +35,6 @@
       },
       "description": "GitHub repositories, issues, PRs, and Projects"
     },
-    "browser": {
-      "command": "npx",
-      "args": ["-y", "@playwright/mcp@latest", "--headless", "--user-data-dir", "/Users/abdout/.playwright-profile"],
-      "description": "Silent headless browser with persistent sessions"
-    },
-    "browser-headed": {
-      "command": "npx",
-      "args": ["-y", "@playwright/mcp@latest", "--user-data-dir", "/Users/abdout/.playwright-profile"],
-      "description": "Visible browser for login/trust setup"
-    },
-    "browser-extension": {
-      "command": "npx",
-      "args": ["-y", "@playwright/mcp@latest", "--extension"],
-      "description": "Connect to existing Chrome tabs (2FA sites)"
-    },
     "ref": {
       "command": "npx",
       "args": ["-y", "ref-tools-mcp@latest"],

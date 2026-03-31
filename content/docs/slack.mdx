@@ -1,0 +1,235 @@
+---
+title: Slack
+description: Team communication setup — workspace, channels, MCP integration
+---
+
+# Slack
+
+Team communication hub for Databayt. Connected to Claude Code via MCP for notifications, dispatch, and collaboration.
+
+## Workspace
+
+| Property | Value |
+|----------|-------|
+| Workspace | `hogwarts-wve9301` |
+| Invite Link | [Join Slack](https://join.slack.com/t/hogwarts-wve9301/shared_invite/zt-3tzetcgoi-Py59bwMs68bgw4fxxg3imQ) |
+| Team | Abdout, Ali, Samia, Sedon |
+
+Share the invite link with team members to join.
+
+## Channels
+
+Recommended channel structure:
+
+| Channel | Purpose |
+|---------|---------|
+| `#general` | Team-wide announcements |
+| `#dev` | Development discussion, PR notifications |
+| `#ops` | Deployments, incidents, monitoring |
+| `#hogwarts` | Hogwarts product-specific |
+| `#dispatch` | Captain dispatches, weekly reviews |
+| `#alerts` | Automated alerts (deploys, errors, costs) |
+
+## MCP Integration
+
+Slack MCP is configured in `.claude/mcp.json`:
+
+```json
+"slack": {
+  "type": "http",
+  "url": "https://mcp.slack.com",
+  "env": {
+    "SLACK_BOT_TOKEN": "${SLACK_BOT_TOKEN}",
+    "SLACK_WORKSPACE_ID": "${SLACK_WORKSPACE_ID}"
+  }
+}
+```
+
+### Setup Steps
+
+#### 1. Create Slack App
+
+1. Go to [api.slack.com/apps](https://api.slack.com/apps)
+2. Click **Create New App** > **From scratch**
+3. Name: `Kun Bot` (or `Databayt Bot`)
+4. Workspace: `hogwarts-wve9301`
+
+#### 2. Configure Bot Scopes
+
+Under **OAuth & Permissions** > **Bot Token Scopes**, add:
+
+| Scope | Purpose |
+|-------|---------|
+| `channels:history` | Read channel messages |
+| `channels:read` | List channels |
+| `chat:write` | Send messages |
+| `groups:history` | Read private channel messages |
+| `groups:read` | List private channels |
+| `im:history` | Read DMs |
+| `im:read` | List DMs |
+| `im:write` | Send DMs |
+| `users:read` | List workspace members |
+| `reactions:read` | Read reactions |
+| `reactions:write` | Add reactions |
+| `files:read` | Access shared files |
+
+#### 3. Install App to Workspace
+
+1. Under **Install App**, click **Install to Workspace**
+2. Authorize the requested permissions
+3. Copy the **Bot User OAuth Token** (starts with `xoxb-`)
+
+#### 4. Get Workspace ID
+
+Find your Workspace ID:
+
+```bash
+# Option 1: From Slack URL
+# Open Slack in browser, workspace ID is in the URL:
+# https://app.slack.com/client/T_WORKSPACE_ID/...
+
+# Option 2: From Slack API
+curl -s -H "Authorization: Bearer xoxb-YOUR-TOKEN" \
+  https://slack.com/api/auth.test | jq '.team_id'
+```
+
+#### 5. Set Environment Variables
+
+Add to your `.env` file:
+
+```bash
+SLACK_BOT_TOKEN=xoxb-your-bot-token
+SLACK_WORKSPACE_ID=T_your_workspace_id
+```
+
+Or export in shell:
+
+```bash
+export SLACK_BOT_TOKEN="xoxb-your-bot-token"
+export SLACK_WORKSPACE_ID="T_your_workspace_id"
+```
+
+#### 6. Store in Keychain (Recommended)
+
+```bash
+# Store securely in macOS Keychain
+security add-generic-password -a "slack" -s "SLACK_BOT_TOKEN" -w "xoxb-your-token" -U
+security add-generic-password -a "slack" -s "SLACK_WORKSPACE_ID" -w "T_your_id" -U
+```
+
+#### 7. Verify Connection
+
+After setting credentials, restart Claude Code and test:
+
+```bash
+# Say "slack" to trigger the MCP
+# Or use directly:
+claude "list slack channels"
+```
+
+## Usage in Claude Code
+
+Once connected, the `slack` keyword triggers the MCP:
+
+| You Say | Action |
+|---------|--------|
+| `slack` | Connect to Slack MCP |
+| `notify #dev "deployed v2"` | Post to #dev channel |
+| `slack channels` | List all channels |
+| `dispatch slack` | Send captain dispatch to #dispatch |
+
+### From Agents
+
+Agents like `captain`, `ops`, and `support` can use Slack for:
+
+- **Captain**: Weekly dispatches to #dispatch
+- **Ops**: Deploy notifications to #ops, incident alerts to #alerts
+- **Support**: Customer issue updates to #hogwarts
+- **Growth**: Content announcements to #general
+
+### Dispatch Integration
+
+The dispatch system can route messages through Slack:
+
+```bash
+# Captain dispatch goes to both Apple Notes and Slack
+dispatch slack "Weekly: revenue at $X, 3 PRs merged, hogwarts demo Thursday"
+```
+
+## Cowork Bridge
+
+Slack complements the Cowork / Claude Code bridge:
+
+| Channel | Cowork | Claude Code |
+|---------|--------|-------------|
+| `#dispatch` | Receives strategic updates | Sends build/deploy updates |
+| `#dev` | Reviews PR discussions | Posts PR links, build status |
+| `#alerts` | Monitors for issues | Sends automated alerts |
+
+Non-technical team members (Samia, Sedon) use Slack directly instead of Claude Code.
+
+## GitHub Integration
+
+Kun bridges Slack and GitHub — team members describe issues in Slack, kun creates them in GitHub and posts the link back.
+
+### Workflow
+
+```
+Team member in Slack → describes bug/feature
+       ↓
+Claude Code reads Slack (Slack MCP)
+       ↓
+Creates GitHub issue (GitHub MCP)
+       ↓
+Posts issue link back to Slack
+```
+
+### Usage
+
+| You Say | Action |
+|---------|--------|
+| `issue from slack` | Read recent Slack messages, create GitHub issues |
+| `issue "title" --repo hogwarts` | Create issue directly, post link to #dev |
+| `slack issues` | List open issues from Slack-reported bugs |
+
+### Example
+
+In `#dev`, Ali posts: *"Login page crashes on Safari mobile when switching to Arabic"*
+
+```bash
+# Claude Code creates the issue
+gh issue create --repo databayt/hogwarts \
+  --title "Login crashes on Safari mobile (Arabic/RTL)" \
+  --body "Reported by Ali in #dev. Login page crashes on Safari mobile when switching to Arabic."
+
+# Posts back to #dev
+"Created databayt/hogwarts#15 — assigned to abdout"
+```
+
+### Channel → Repo Mapping
+
+| Channel | Default Repo |
+|---------|-------------|
+| `#hogwarts` | `databayt/hogwarts` |
+| `#dev` | Current working repo |
+| `#ops` | `databayt/kun` |
+| `#alerts` | Repo from error context |
+
+### Two-Way Sync
+
+GitHub activity flows back to Slack:
+
+| GitHub Event | Slack Channel | Message |
+|-------------|---------------|---------|
+| Issue created | `#dev` | "New issue: #15 Login crashes on Safari" |
+| PR merged | `#dev` | "Merged: #42 Fix RTL login crash" |
+| Deploy succeeded | `#ops` | "Deployed hogwarts v1.2.3 to production" |
+| Deploy failed | `#alerts` | "Deploy failed: hogwarts — build error" |
+
+## Security Notes
+
+- Bot tokens start with `xoxb-` — never commit to git
+- Store in macOS Keychain or `.env` (gitignored)
+- Rotate tokens if compromised at [api.slack.com/apps](https://api.slack.com/apps)
+- Limit bot scopes to what's actually needed
+- The bot can only access channels it's been invited to

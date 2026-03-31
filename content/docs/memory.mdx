@@ -1,0 +1,91 @@
+---
+title: Memory
+description: Persistent files that carry context across sessions
+---
+
+# Memory
+
+6 memory files that persist across conversations. They store component registries, team profiles, and project state — so Claude never forgets what was built, who's on the team, or what patterns exist.
+
+## Memory Files
+
+| File | Contents |
+|------|----------|
+| **preferences.json** | Port 3000, single .env, pnpm-only |
+| **repositories.json** | 14 databayt repos with paths + stacks |
+| **atom.json** | 59 atoms across 6 categories |
+| **template.json** | 31 templates across 5 categories |
+| **block.json** | 4 blocks (DataTable, Auth, Invoice, Report) |
+| **report.json** | T&C electrical report templates |
+
+## Project-Level Memory
+
+Stored at `~/.claude/projects/[project]/memory/`:
+
+| File | Contents |
+|------|----------|
+| Company profile | Databayt team, financials, products |
+| Active projects | Hogwarts pilot status, Ahmed Baha |
+| User preferences | Feedback, corrections, working style |
+| Team profiles | 4 members with equipment, access, strengths |
+
+## How Memory Works
+
+Memory files are JSON or markdown files in `~/.claude/memory/`. Claude reads them at the start of each conversation and updates them when new information is learned.
+
+### Auto-Memory
+
+Claude automatically saves memories when it learns:
+- **User info** — role, preferences, expertise level
+- **Feedback** — corrections, confirmations, working style
+- **Project state** — active work, decisions, deadlines
+- **References** — where to find things in external systems
+
+### Memory Index
+
+`MEMORY.md` is the index file — always loaded into context. Each entry is one line pointing to a memory file:
+
+```markdown
+# Memory Index
+
+- [Company Profile](company_databayt.md) — Team of 4, $1K target
+- [User Profile](user_osman.md) — Founder, MacBook M4
+- [Team Profiles](team_profiles.md) — All 4 members
+```
+
+## Component Registry
+
+The atom, template, and block memory files serve as a registry of all components built across projects:
+
+```json
+{
+  "atoms": [
+    {
+      "name": "tabs",
+      "primitives": ["Tabs", "TabsList", "TabsTrigger", "TabsContent"],
+      "path": "src/components/atom/tabs.tsx"
+    }
+  ]
+}
+```
+
+When you say `atom tabs`, Claude checks the registry first before creating something new.
+
+## Team Memory
+
+`team.json` stores profiles of all 4 team members:
+
+```json
+{
+  "team": [
+    {
+      "name": "Abdout",
+      "role": "founder-tech-lead",
+      "equipment": { "laptop": "MacBook Pro M4", "phone": "iPhone 16e" },
+      "strengths": ["architecture", "full-stack", "infrastructure"]
+    }
+  ]
+}
+```
+
+This allows agents to tailor their output to each team member's capabilities and tools.

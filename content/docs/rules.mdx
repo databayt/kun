@@ -1,0 +1,95 @@
+---
+title: Rules
+description: Path-scoped rules that activate on file touch
+---
+
+# Rules
+
+8 rules that auto-activate when you touch specific file patterns. Each rule injects domain knowledge and constraints for its area — authentication, i18n, database, styling, testing, deployment.
+
+## Active Rules
+
+| Rule | Activates On | Enforces |
+|------|-------------|----------|
+| **auth** | `**/auth/**`, `**/middleware.*` | NextAuth v5, session scoping, role-based access |
+| **i18n** | `**/*-ar.json`, `**/dictionaries/**` | Single-language storage, RTL, Arabic-first |
+| **prisma** | `**/*.prisma` | schoolId inclusion, `$extends`, multi-tenant |
+| **tailwind** | `**/*.css`, `**/styles/**` | CSS-first v4, OKLCH colors, RTL logical properties |
+| **testing** | `**/tests/**`, `**/*.spec.*` | Playwright/Vitest conventions |
+| **deployment** | `**/vercel.json` | pnpm, tsc before builds |
+| **multi-repo** | (global) | Codebase paths, fork workflows |
+| **org-refs** | (global) | Repository priority lookup order |
+
+## How Rules Work
+
+Rules are markdown files in `~/.claude/rules/` with glob-pattern activation:
+
+```markdown
+# Auth Rule
+
+When editing auth files, enforce:
+- NextAuth v5 patterns
+- Session scoping by schoolId
+- Role-based access control
+...
+```
+
+When you open or edit a file matching the glob pattern, the rule's instructions are injected into Claude's context automatically.
+
+## Rule Examples
+
+### Auth Rule
+
+Activates on `**/auth/**` and `**/middleware.*`:
+
+- Use NextAuth v5 (`next-auth@5`)
+- Session includes `schoolId` for multi-tenant isolation
+- Role hierarchy: superadmin, admin, teacher, student, parent
+- Middleware checks both authentication and authorization
+
+### i18n Rule
+
+Activates on `**/*-ar.json` and `**/dictionaries/**`:
+
+- Arabic is the default language (RTL)
+- One language per dictionary file
+- Use `dir="rtl"` on Arabic layouts
+- Logical CSS properties (`margin-inline-start` not `margin-left`)
+
+### Prisma Rule
+
+Activates on `**/*.prisma`:
+
+- Every query must include `schoolId` where clause
+- Use `$extends` for middleware
+- Multi-tenant isolation at the query level
+- Never use `findMany` without a school filter
+
+### Tailwind Rule
+
+Activates on `**/*.css` and `**/styles/**`:
+
+- Tailwind CSS v4 (CSS-first, no tailwind.config.js)
+- OKLCH color space for tokens
+- RTL-aware: use logical properties (`ps-4` not `pl-4`)
+- Responsive: mobile-first breakpoints
+
+## Global Rules
+
+Two rules activate on every file regardless of pattern:
+
+- **multi-repo** — Knows about `CODEBASE_PATH`, `OSS_PATH`, fork workflows
+- **org-refs** — Priority lookup: codebase, shadcn, radix, then product repos
+
+## Adding Custom Rules
+
+Create a markdown file in `~/.claude/rules/` with clear constraints:
+
+```markdown
+# My Custom Rule
+
+When editing files matching this pattern, enforce:
+1. Specific pattern or convention
+2. Required imports or structure
+3. Forbidden anti-patterns
+```

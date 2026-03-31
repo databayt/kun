@@ -1,0 +1,97 @@
+---
+title: Commands
+description: Slash commands for rapid workflows
+---
+
+# Commands
+
+Type `/command` in Claude Code to trigger a complete workflow. Commands are markdown templates in `~/.claude/commands/` that expand into full prompts with agent routing and MCP integration.
+
+## Core Commands
+
+| Command | Purpose |
+|---------|---------|
+| `/dev` | Start dev server (kill port, pnpm dev, open Chrome) |
+| `/build` | Smart build with error scanning and auto-fix |
+| `/push` | Full commit + push workflow |
+| `/quick` | Fast commit (skip build validation) |
+| `/deploy` | Deploy to Vercel staging/production |
+
+## Creation Commands
+
+| Command | Purpose |
+|---------|---------|
+| `/atom [name]` | Create atom component (2+ primitives) |
+| `/template [name]` | Create full-page layout template |
+| `/block [source]` | Add block with business logic |
+| `/saas [feature]` | Generate complete SaaS feature |
+| `/clone [source]` | Clone pattern from codebase or GitHub |
+
+## Quality Commands
+
+| Command | Purpose |
+|---------|---------|
+| `/test [file]` | Generate tests (Vitest + Playwright) |
+| `/review` | Code review |
+| `/security` | OWASP Top 10 security audit |
+| `/performance` | Core Web Vitals performance audit |
+| `/handover [block]` | 5-pass production QA |
+
+## Business Commands
+
+| Command | Purpose | Role |
+|---------|---------|------|
+| `/proposal [client]` | Generate client proposal | business |
+| `/pricing [product]` | Calculate pricing tiers | business |
+| `/weekly [mode]` | Captain weekly review (plan/check/review) | all |
+
+## Content Commands
+
+| Command | Purpose | Role |
+|---------|---------|------|
+| `/translate [file]` | AR/EN translation workflow | content |
+| `/content-calendar` | Plan weekly content schedule | content |
+| `/docs` | Generate MDX documentation | all |
+
+## Ops Commands
+
+| Command | Purpose | Role |
+|---------|---------|------|
+| `/monitor` | Check deployments + costs + uptime | ops |
+| `/costs` | API spend breakdown | ops |
+| `/incident [severity]` | Incident response (P0/P1/P2) | ops |
+
+## Communication Commands
+
+| Command | Purpose |
+|---------|---------|
+| `/dispatch [channel] [message]` | Send via Apple Notes Dispatch |
+| `/issue [repo] [title]` | Create GitHub issue with labels |
+| `/credentials [action]` | Manage Keychain API keys |
+
+## Utility Commands
+
+| Command | Purpose |
+|---------|---------|
+| `/codebase search` | Search pattern library |
+| `/repos` | Explore databayt repositories |
+| `/screenshot` | View recent screenshot |
+| `/motion` | Add Framer Motion animations |
+
+## Creating Custom Commands
+
+Commands are markdown files with a simple structure:
+
+```markdown
+Description of what the command does.
+
+Arguments: $ARGUMENTS
+
+## Steps
+
+1. First step
+2. Second step
+3. Third step
+```
+
+Place in `~/.claude/commands/` and they become available as `/command-name`.

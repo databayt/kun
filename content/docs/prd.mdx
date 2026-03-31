@@ -1,117 +1,154 @@
 ---
 title: PRD
-description: Product Requirements Document for Kun
+description: Configuration requirements by phase for the Kun engine
 ---
 
-# Product Requirements Document
+# Product Requirements
 
-## Overview
+Requirements for Kun — the configuration engine running Databayt's operations across a 4-person team, 14 repositories, and 5 products.
 
-This document outlines the functional and non-functional requirements for Kun, the Remote AI Development Infrastructure.
+## Constraints
 
-## Functional Requirements
+| Constraint | Value |
+|-----------|-------|
+| Team size | 4 (2 engineers, 1 business, 1 content) |
+| Budget | $1,000/month target ($200 Claude + $200 services + $600 team) |
+| Current subscription | Max 20x ($200/month) — Osman Abdout |
+| Revenue pipeline | King Fahad Schools pilot (Hogwarts) |
+| License | SSPL (open source, commercial use requires license) |
+| Accessibility | P0 — Samia uses screen reader + VoiceOver |
 
-### FR-1: Remote Access
+## Phase 1: Developer Engine (Done)
 
-| ID | Requirement | Priority |
-|----|-------------|----------|
-| FR-1.1 | System SHALL provide VPN-based remote access | P0 |
-| FR-1.2 | System SHALL support SSH over Tailscale | P0 |
-| FR-1.3 | System SHALL allow mobile device connectivity | P0 |
-| FR-1.4 | System SHALL maintain persistent sessions | P0 |
+### CLAUDE.md Configuration
 
-### FR-2: Session Management
+| Requirement | Priority | Status |
+|-------------|----------|--------|
+| User-level CLAUDE.md with stack preferences | P0 | Done |
+| Project-level CLAUDE.md with context | P0 | Done |
+| Repo-level CLAUDE.md with 100+ keywords | P0 | Done |
+| Configuration hierarchy respected | P0 | Done |
 
-| ID | Requirement | Priority |
-|----|-------------|----------|
-| FR-2.1 | System SHALL provide tmux-based sessions | P0 |
-| FR-2.2 | Sessions SHALL survive network disconnects | P0 |
-| FR-2.3 | Sessions SHALL persist across reboots | P1 |
-| FR-2.4 | System SHALL support multiple named sessions | P1 |
+### Agent Fleet
 
-### FR-3: AI Integration
+| Requirement | Priority | Status |
+|-------------|----------|--------|
+| Stack chain (7): nextjs, react, typescript, tailwind, prisma, shadcn, authjs | P0 | Done |
+| Design chain (4): orchestration, architecture, pattern, structure | P0 | Done |
+| UI chain (4): shadcn, atom, template, block | P0 | Done |
+| DevOps chain (3): build, deploy, test | P0 | Done |
+| VCS chain (2): git, github | P0 | Done |
+| Specialized (8): middleware, i18n, semantic, sse, optimize, performance, comment, icon | P1 | Done |
+| Reference chain (4): hogwarts, souq, mkan, shifa product agents | P1 | Done |
+| Handoff protocol between agents | P0 | Done |
 
-| ID | Requirement | Priority |
-|----|-------------|----------|
-| FR-3.1 | System SHALL provide Claude Code CLI | P0 |
-| FR-3.2 | AI SHALL have access to pattern library | P0 |
-| FR-3.3 | AI SHALL follow CLAUDE.md constraints | P0 |
-| FR-3.4 | System SHALL support API key management | P0 |
+### Skills, MCP, Hooks, Rules, Memory
 
-### FR-4: Multi-User (Phase 2)
+| Requirement | Priority | Status |
+|-------------|----------|--------|
+| 17 skills with keyword triggers | P0 | Done |
+| 18 MCP servers connected | P0 | Done |
+| 5 hooks (format, port, session) | P0 | Done |
+| 8 path-scoped rules | P0 | Done |
+| 6 memory files persisting cross-session | P1 | Done |
+| 38 allow + 4 deny permission rules | P0 | Done |
 
-| ID | Requirement | Priority |
-|----|-------------|----------|
-| FR-4.1 | System SHALL support 10+ concurrent users | P1 |
-| FR-4.2 | Users SHALL have isolated home directories | P1 |
-| FR-4.3 | System SHALL enforce per-user access controls | P1 |
-| FR-4.4 | Configuration SHALL be shared across users | P1 |
+## Phase 2: Team Engine (Current)
 
-### FR-5: Commercial (Phase 3)
+### Team Configuration
 
-| ID | Requirement | Priority |
-|----|-------------|----------|
-| FR-5.1 | System SHALL provide Docker isolation | P2 |
-| FR-5.2 | System SHALL meter resource usage | P2 |
-| FR-5.3 | System SHALL integrate billing (Stripe) | P2 |
-| FR-5.4 | System SHALL support pattern marketplace | P2 |
+| Requirement | Priority |
+|-------------|----------|
+| Shared settings.json via git | P0 |
+| Local override support (.local.json) | P0 |
+| One-command installer (< 30 min setup) | P0 |
+| Role-based configs (engineer, business, content) | P0 |
+| Accessibility: screen reader compatible outputs | P0 |
+
+### Hogwarts Pilot (King Fahad Schools)
+
+| Requirement | Priority |
+|-------------|----------|
+| Admission block — 5-pass QA clean | P0 |
+| Notification system — SMS + in-app | P0 |
+| Messaging — school-parent communication | P1 |
+| Arabic RTL — complete, no LTR remnants | P0 |
+| Demo environment — demo.databayt.org stable | P0 |
+
+### Agent Teams (Experimental)
+
+| Requirement | Priority |
+|-------------|----------|
+| Lead agent coordination | P0 |
+| Parallel agent execution (3+) | P0 |
+| Git worktree isolation | P0 |
+| Consolidated PR output | P0 |
+
+### CI/CD & Automation
+
+| Requirement | Priority |
+|-------------|----------|
+| GitHub Actions code review via Agent SDK | P0 |
+| Pattern compliance check in CI | P0 |
+| Scheduled cloud tasks (health, deps, sync) | P1 |
+| Auto-fix pipeline for trivial issues | P1 |
+
+### Business Operations
+
+| Requirement | Priority |
+|-------------|----------|
+| Cowork for Ali (client outreach, proposals) | P1 |
+| Cowork for Samia (Arabic content, docs, research) | P1 |
+| Stripe MCP for financial tracking | P1 |
+| Claude Apps (Slack, Figma) | P2 |
+
+## Phase 3: Company Engine (Future)
+
+### Agent SDK Platform
+
+| Requirement | Priority |
+|-------------|----------|
+| CI/CD review agent in GitHub Actions | P0 |
+| Deploy verification agent | P0 |
+| School onboarding automation agent | P1 |
+| Client report generation agent | P1 |
+
+### Enterprise & Optimization
+
+| Requirement | Priority |
+|-------------|----------|
+| SSO (SAML/OIDC) + SCIM | P0 |
+| Audit logging | P0 |
+| Prompt caching (90% savings) | P0 |
+| Batch API for CI/CD (50% savings) | P0 |
+| Pattern distribution packaging | P1 |
 
 ## Non-Functional Requirements
 
-### NFR-1: Performance
-
-| ID | Requirement | Target |
-|----|-------------|--------|
-| NFR-1.1 | SSH connection latency | < 200ms |
-| NFR-1.2 | Session resume time | < 2s |
-| NFR-1.3 | Claude response time | < 5s |
-
-### NFR-2: Reliability
-
-| ID | Requirement | Target |
-|----|-------------|--------|
-| NFR-2.1 | System uptime | 99.9% |
-| NFR-2.2 | Session persistence | 7+ days |
-| NFR-2.3 | Data durability | No data loss |
-
-### NFR-3: Security
-
-| ID | Requirement | Target |
-|----|-------------|--------|
-| NFR-3.1 | Zero-trust network | Tailscale VPN |
-| NFR-3.2 | Certificate-based auth | Tailscale SSH |
-| NFR-3.3 | Encrypted secrets | 1Password/Vault |
-| NFR-3.4 | Audit logging | All access logged |
-
-### NFR-4: Scalability
-
-| ID | Requirement | Target |
-|----|-------------|--------|
-| NFR-4.1 | Phase 1 users | 1-3 |
-| NFR-4.2 | Phase 2 users | 10+ |
-| NFR-4.3 | Phase 3 users | 50+ |
+| Category | Requirement | Target |
+|----------|-------------|--------|
+| Performance | Claude Code startup | < 5 seconds |
+| Performance | Keyword → workflow start | < 3 seconds |
+| Performance | Autopilot cycle | 100 turns |
+| Reliability | Configuration load | 100% success |
+| Reliability | Hook execution | Guaranteed |
+| Usability | Engineer onboarding | < 30 minutes |
+| Usability | Non-dev onboarding (Ali, Samia) | < 1 hour |
+| Accessibility | Screen reader navigation | Full support |
+| Accessibility | VoiceOver mobile testing | Samia workflow |
+| Quality | Pattern compliance | 90%+ |
+| Security | Destructive commands | Always blocked |
+| Security | Secrets | Never in git |
+| Cost | Total monthly | < $1,000 |
+| Cost | API reduction (Phase 3) | 95% via caching + batch |
 
 ## Acceptance Criteria
 
-### Phase 1 Acceptance
+### Phase 2 Complete When:
 
-- [ ] Developer can SSH to server from laptop
-- [ ] Developer can SSH to server from phone (Termius)
-- [ ] tmux sessions persist across disconnects
-- [ ] Claude Code works in terminal
-- [ ] Pattern library is accessible
-
-### Phase 2 Acceptance
-
-- [ ] 10 developers can connect simultaneously
-- [ ] Each developer has isolated home directory
-- [ ] Shared CLAUDE.md is readable by all
-- [ ] ACLs restrict access appropriately
-- [ ] Netdata monitoring is accessible
-
-### Phase 3 Acceptance
-
-- [ ] Docker containers isolate users
-- [ ] Usage is metered accurately
-- [ ] Billing integration works
-- [ ] Patterns can be published/purchased
+1. Any team member can set up Kun in < 30 minutes
+2. Hogwarts admission block passes 5-pass QA on both environments
+3. Ali can use Cowork for client communication independently
+4. Samia can use Cowork with screen reader for content creation
+5. Agent Teams can parallelize a 3-tab feature build
+6. Scheduled tasks run daily health checks on ed.databayt.org

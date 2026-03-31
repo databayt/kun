@@ -1,39 +1,18 @@
-import { RoadmapCards } from "@/components/home/roadmap-cards"
-import { StageBanner } from "@/components/home/stage-banner"
-import { QuickLinks } from "@/components/home/quick-links"
-import { StackCards } from "@/components/home/stack-cards"
-import { Hero } from "@/components/home/hero"
+import HomeContent from "@/components/root/home/content";
+import { getDictionary } from "@/components/local/dictionaries";
+import { type Locale } from "@/components/local/config";
 
-export default async function HomePage({
-  params,
-}: {
-  params: Promise<{ lang: string }>
-}) {
-  const { lang } = await params
+export const metadata = {
+  title: "Home",
+}
 
-  return (
-    <div className="container-wrapper px-responsive">
-      {/* Hero Section */}
-      <Hero lang={lang} />
+interface HomePageProps {
+  params: Promise<{ lang: Locale }>;
+}
 
-      {/* Stack Cards */}
-      <StackCards />
+export default async function HomePage({ params }: HomePageProps) {
+  const { lang } = await params;
+  const dictionary = await getDictionary(lang);
 
-      {/* Stage Banner - Current Focus */}
-      <StageBanner
-        lang={lang}
-        stage={1}
-        title="Team Configuration"
-        titleAr="تكوين الفريق"
-        description="Configure your machine with cloud configs, secrets, and access to open projects."
-        descriptionAr="قم بإعداد جهازك مع الإعدادات السحابية والأسرار والوصول إلى المشاريع المفتوحة."
-      />
-
-      {/* Roadmap Section */}
-      <RoadmapCards lang={lang} currentStage={1} />
-
-      {/* Quick Links */}
-      <QuickLinks lang={lang} />
-    </div>
-  )
+  return <HomeContent dictionary={dictionary} params={{ lang }} />;
 }

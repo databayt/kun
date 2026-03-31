@@ -1,0 +1,70 @@
+---
+title: Apps
+description: Claude in Slack, Figma, and Asana
+---
+
+# Claude Apps
+
+Anthropic's native integrations that bring Claude directly into the tools your team already uses.
+
+## Available Apps
+
+| App | Platform | Databayt Usage |
+|-----|----------|----------------|
+| **Claude for Slack** | Slack workspace | Team Q&A, code review requests, incident alerts |
+| **Claude for Figma** | Figma plugin | Design-to-code, component suggestions |
+| **Claude for Asana** | Asana workspace | Task management (not currently used) |
+
+## Claude for Slack
+
+Bring Claude into team conversations:
+
+- **@claude** in any channel for instant answers
+- Code review requests from non-technical team members
+- Automated alerts from monitoring
+- Customer support escalation routing
+
+### Setup
+
+1. Install from Slack App Directory
+2. Add to hogwarts workspace
+3. Configure channels for alerts
+
+## Claude for Figma
+
+Design-to-code bridge:
+
+- Select a Figma frame → Claude generates matching React + Tailwind code
+- Checks existing shadcn/ui and atom components first
+- Outputs RTL-aware responsive code
+- Integrates with the `mirror` keyword for design matching
+
+### Workflow
+
+```
+Designer: Creates frame in Figma
+Developer: "mirror figma.com/design/abc... /dashboard"
+  → Figma MCP: get_design_context + screenshot
+  → See: screenshot current implementation
+  → Compare: pixel-level differences
+  → Fix: edit components to match
+```
+
+## Claude Desktop App
+
+Not technically an "app" integration, but the primary interface for non-technical team:
+
+| Feature | Who Uses It |
+|---------|-------------|
+| **Chat** | Everyone — general queries |
+| **Cowork** | Ali (business), Samia (content) |
+| **Voice** | Samia (accessibility), anyone on mobile |
+| **Code tab** | Abdout — visual diff review |
+
+## Future Apps
+
+| App | Timeline | Use Case |
+|-----|----------|----------|
+| **Discord bot** | Phase 2 | Open-source community support |
+| **GitHub App** | Phase 2 | Automated PR review via Agent SDK |
+| **WhatsApp** | Phase 3 | Customer communication (via Sedon) |

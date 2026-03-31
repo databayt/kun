@@ -1,0 +1,135 @@
+---
+title: Anthropic Products
+description: Complete product catalog mapped to Databayt's team and operations
+---
+
+# Anthropic Product Catalog
+
+Every Anthropic product mapped to its role in Databayt's operations — who uses what and why.
+
+## Claude Code
+
+The primary development interface. Kun's configuration loads automatically on all surfaces.
+
+### Surfaces by Team Member
+
+| Surface | User | Device |
+|---------|------|--------|
+| **Terminal CLI** | Osman Abdout | MacBook M4 |
+| **Desktop App** | All team members | Mac/Windows |
+| **claude.ai/code** | Ali, Samia, Sedon | Windows (browser) |
+| **iOS App** | Osman A., Samia | iPhone 16e, iPhone 13 Mini |
+| **VS Code Extension** | Optional | Any |
+
+### Key Capabilities Kun Uses
+
+| Feature | Kun Usage |
+|---------|-----------|
+| **Hooks** (21 lifecycle events) | Auto-format, port management, session logging |
+| **Skills** | 17 skills for common workflows |
+| **Subagents** | 28 specialized agents |
+| **MCP** (3,000+ integrations) | 18 servers configured |
+| **Agent Teams** (Experimental) | Parallel feature development |
+| **Git Worktrees** | Isolated branches per agent |
+| **Remote Control / Dispatch** | Cross-device handoff |
+| **Scheduled Tasks** | Cloud, Desktop, or /loop |
+
+## Claude Desktop App
+
+Standalone macOS/Windows application.
+
+| Feature | Databayt Usage |
+|---------|----------------|
+| **Chat** | General queries, planning |
+| **Cowork mode** | Ali (business), Samia (content) |
+| **Code tab** | Visual diff review |
+| **Multiple sessions** | Parallel workstreams |
+| **Scheduled tasks** | Daily builds |
+| **Voice mode** | Accessibility for Samia |
+
+### Cowork Use Cases (Research Preview)
+
+| Team Member | Use Cases |
+|-------------|-----------|
+| **Ali Aseel** | Client outreach, proposals, market research, financial analysis |
+| **Samia Hamd** | Arabic content, documentation, research, UX writing |
+| **Osman Abdout** | Project planning, architecture documents, specifications |
+
+## Agent SDK
+
+Build production AI agents. Python and TypeScript.
+
+### Databayt Roadmap
+
+| Agent | Purpose | Phase |
+|-------|---------|-------|
+| PR Review | Auto-review every pull request | 2 |
+| Deploy Verify | Post-deploy health check | 2 |
+| School Onboarding | Automated tenant setup | 3 |
+| Report Generator | Client reports | 3 |
+
+## Models
+
+| Model | Use Case | Cost (API) |
+|-------|----------|------------|
+| **Opus 4.6** | Architecture, complex features, review | $5 / $25 per MTok |
+| **Sonnet 4.6** | Fast iteration, routine changes | $3 / $15 per MTok |
+| **Haiku 4.5** | Search, lookups, exploration | $1 / $5 per MTok |
+
+Kun defaults to **Opus 4.6** for all agents. Haiku for explore subagents only.
+
+## Databayt's Current Plan
+
+| Item | Plan | Cost | User |
+|------|------|------|------|
+| **Primary** | Max 20x | $200/month | Osman Abdout |
+| **Shared access** | (same account) | Included | Desktop/Web for team |
+
+### Growth Path
+
+| Stage | Plan | Monthly Cost | When |
+|-------|------|-------------|------|
+| **Now** | Max 20x (1 seat) | $200 | Current |
+| **Team grows** | + Pro seats ($20/each) | $260 | When Ali/Samia need own accounts |
+| **Revenue stable** | Team Premium (4 seats) | $500 | When $1K/month achieved |
+| **Scale** | Enterprise | Custom | Multiple products, clients |
+
+### Cost Optimization
+
+| Technique | Savings | When |
+|-----------|---------|------|
+| Prompt Caching | 90% | Repeated CLAUDE.md context |
+| Batch API | 50% | Async CI/CD reviews |
+| Caching + Batch | 95% | High-volume operations |
+| Haiku for exploration | 80% vs Opus | Search, lookups |
+
+## All Plans Reference
+
+| Plan | Price | Code | Cowork | Models |
+|------|-------|------|--------|--------|
+| **Free** | $0 | Limited | - | Sonnet |
+| **Pro** | $20/mo | Yes | - | All |
+| **Max 5x** | $100/mo | Yes | Yes | All |
+| **Max 20x** | $200/mo | Yes | Yes | All + priority Opus |
+| **Team Premium** | $125/seat/mo | Yes | - | All |
+| **Enterprise** | Custom | Yes | Yes | SSO/SCIM/Audit |
+
+## Feature Availability
+
+| Feature | Pro | Max | Team Premium | Enterprise |
+|---------|-----|-----|-------------|------------|
+| Claude Code | Yes | Yes | Yes | Yes |
+| Cowork | - | Yes | - | Yes |
+| Agent Teams | Yes | Yes | Yes | Yes |
+| Scheduled Cloud Tasks | Yes | Yes | Yes | Yes |
+| SSO/SCIM | - | - | - | Yes |
+| 1M Context | Beta | Yes | Yes | Yes |
+
+## References
+
+- [Claude Code Docs](https://docs.anthropic.com/en/docs/claude-code/overview)
+- [Models](https://docs.anthropic.com/en/docs/about-claude/models)
+- [Agent SDK](https://docs.anthropic.com/en/docs/agent-sdk/overview)
+- [Pricing](https://claude.ai/pricing)
+- [Cowork](https://support.anthropic.com/en/articles/13345190-get-started-with-cowork)
+- [MCP Protocol](https://modelcontextprotocol.io)

@@ -1,17 +1,14 @@
-# Kun (كن) - Project Context
+# Kun (كن) — The Kun Engine
 
-> "كن" (Kun) - "Be!" - The divine command of creation from the Quran.
-> This infrastructure embodies the architecture-first paradigm where AI generates code within intentional constraints.
+> The configuration engine that transforms Anthropic's product suite into a unified software company operating system.
 
 ---
 
 ## Project Overview
 
-**Kun** is a Remote AI Development Infrastructure enabling:
-- Team members to access Claude Code from anywhere (laptop, phone)
-- Centralized configuration and secrets management
-- Shared patterns from databayt/codebase
-- Future: Usage-based rental model for external developers
+**Kun** is the optimal configuration layer — agents, skills, hooks, MCP servers, rules, and memory — that makes Claude Code, Claude Desktop, Cowork, and the Agent SDK work together as a single engine running both technical and business sides of a software company.
+
+**Core insight**: Don't build what Anthropic ships. Configure it.
 
 ---
 
@@ -19,67 +16,83 @@
 
 | Document | Purpose |
 |----------|---------|
-| `docs/PROJECT-BRIEF.md` | Vision, goals, target users |
-| `docs/ARCHITECTURE.md` | System design, topology, security |
-| `docs/PRD.md` | Functional & non-functional requirements |
-| `docs/EPICS.md` | 50 stories across 12 epics |
-| `REMOTE-INFRASTRUCTURE.md` | Technical reference guide |
+| `docs/PROJECT-BRIEF.md` | Vision, goals, Anthropic product mapping |
+| `docs/ARCHITECTURE.md` | 5-layer engine architecture |
+| `docs/PRD.md` | Configuration requirements by phase |
+| `docs/EPICS.md` | 53 stories across 12 epics |
+| `docs/PRODUCTS.md` | Anthropic product catalog + pricing |
+| `docs/CONFIGURATION.md` | Full engine blueprint (settings, agents, skills, MCP, hooks, rules, memory) |
+| `docs/WORKFLOWS.md` | Technical + business operations playbook |
+| `docs/SELF-HOSTING.md` | Optional: Tailscale/tmux/Docker for air-gapped setups |
 
 ---
 
 ## Three Phases
 
-### Phase 1: Individual Setup
-- Tailscale VPN + Tailscale SSH
-- tmux for persistent sessions
-- Termius for mobile access
-- Claude Code CLI
+### Phase 1: Developer Engine (Done)
+- CLAUDE.md hierarchy (user → project → repo)
+- 28 agents across 6 chains
+- 17 skills with keyword triggers
+- 18 MCP servers
+- 5 hooks (format, port, session)
+- 8 path-scoped rules
+- 6 memory files
+- 100+ keyword mappings
 
-### Phase 2: Team Server (10+ Developers)
-- Multi-user accounts
-- Tailscale ACLs
-- Centralized secrets (/etc/claude-code/)
-- Shared CLAUDE.md and patterns
-- Systemd services
-- Netdata monitoring
+### Phase 2: Team Engine (Next)
+- Shared settings via git
+- Agent Teams (parallel work, worktree isolation)
+- CI/CD with Agent SDK (auto PR review)
+- Scheduled cloud tasks
+- Cowork for non-technical staff
 
-### Phase 3: Commercial Platform
-- Docker container isolation
-- Usage metering
-- Stripe billing
-- Pattern marketplace
-- (Optional) Solar + Starlink off-grid
-
----
-
-## Technology Stack
-
-| Component | Technology |
-|-----------|------------|
-| OS | Ubuntu 22.04/24.04 LTS |
-| VPN | Tailscale |
-| Sessions | tmux |
-| AI | Claude Code CLI |
-| Runtime | Node.js 20.x |
-| Package Manager | pnpm |
-| Secrets | 1Password CLI / Vault |
-| Monitoring | Netdata |
+### Phase 3: Company Engine (Future)
+- Agent SDK custom pipelines
+- Enterprise SSO/SCIM/audit
+- API cost optimization (95% via caching + batch)
+- Pattern distribution + marketplace
 
 ---
 
-## Pattern Library Reference
+## Anthropic Products Used
 
-When implementing features, reference patterns from:
+| Product | Role in Kun |
+|---------|-------------|
+| **Claude Code** (CLI, Desktop, Web, iOS) | Primary development interface |
+| **Cowork** | Business operations for non-devs |
+| **Claude Apps** | Slack, Figma, Asana integrations |
+| **Agent SDK** | Custom CI/CD and automation agents |
+| **API** | Programmatic access with cost optimization |
+| **Enterprise** | SSO, SCIM, audit logging |
+
+---
+
+## Configuration Engine (The Core Value)
+
+| Component | Count | Details |
+|-----------|-------|---------|
+| Agents | 28 | Stack, Design, UI, DevOps, VCS, Specialized chains |
+| Skills | 17 | /dev, /build, /deploy, /atom, /test, /security, etc. |
+| MCP Servers | 18 | shadcn, github, vercel, neon, stripe, figma, etc. |
+| Rules | 8 | Auth, i18n, prisma, tailwind, testing, deployment |
+| Hooks | 5 | Auto-format, port management, session logging |
+| Memory | 6 | Preferences, repos, atoms, templates, blocks, reports |
+| Keywords | 100+ | One word → complete workflow |
+
+---
+
+## Pattern Library
+
+Reference patterns from `/Users/abdout/codebase/`:
 
 ```
-/Users/abdout/codebase/
 ├── src/components/
 │   ├── ui/           # 54 shadcn/ui primitives
 │   ├── atom/         # 62 atomic components
 │   └── template/     # Full-page layouts
 ├── src/registry/     # 31 templates
 └── .claude/
-    ├── agents/       # 11 specialized agents
+    ├── agents/       # Specialized agents
     └── commands/     # Custom slash commands
 ```
 
@@ -87,62 +100,11 @@ When implementing features, reference patterns from:
 
 ## Architecture Principles
 
-### 1. Mirror-Pattern
-Every URL route maps 1:1 to directory structure.
-
-### 2. Architecture-First
-Design systems, not just features. AI generates code within intentional constraints.
-
-### 3. Guardrails
-CLAUDE.md files and patterns are training data for AI collaborators.
-
-### 4. Human Review Layer
-Humans own architectural tradeoffs; AI handles implementation velocity.
-
----
-
-## Key Commands
-
-```bash
-# Phase 1 Quick Start
-curl -fsSL https://tailscale.com/install.sh | sh
-sudo tailscale up --ssh
-tmux new-session -d -s claude -n claude
-
-# Attach from mobile
-ssh [tailscale-ip]
-tmux attach -t claude
-
-# Check status
-tailscale status
-tmux list-sessions
-systemctl status claude-tmux
-```
-
----
-
-## Directory Structure (Phase 2)
-
-```
-/
-├── etc/claude-code/
-│   ├── env.sh              # Shared environment
-│   └── CLAUDE.md           # Team context
-├── opt/databayt/codebase/  # Pattern library
-└── home/
-    ├── dev1/
-    ├── dev2/
-    └── ...
-```
-
----
-
-## Security
-
-- **Network**: Tailscale VPN (WireGuard-based)
-- **Auth**: Tailscale SSH (certificate-based)
-- **Access**: ACL-based per user group
-- **Secrets**: Never in git, managed via Vault/1Password
+1. **Configuration over infrastructure** — Don't build what Anthropic ships
+2. **Architecture-first** — Humans design systems, AI generates within constraints
+3. **Guardrails as training data** — CLAUDE.md, agents, rules shape AI output
+4. **Full spectrum** — Technical AND business operations
+5. **Anthropic-native** — Use products as designed, don't wrap or abstract
 
 ---
 
@@ -150,39 +112,28 @@ systemctl status claude-tmux
 
 1. Check `docs/EPICS.md` for current stories
 2. Reference `docs/ARCHITECTURE.md` for design decisions
-3. Follow patterns from `/Users/abdout/codebase/`
-4. Use conventional commits
-5. PR workflow - no direct commits to main
-
----
-
-## Agents
-
-For specialized work, reference agents from codebase:
-
-| Domain | Agent Path |
-|--------|------------|
-| Architecture | `codebase/.claude/agents/architect.md` |
-| Next.js | `codebase/.claude/agents/nextjs.md` |
-| TypeScript | `codebase/.claude/agents/typescript.md` |
-| Testing | `codebase/.claude/agents/test.md` |
+3. Reference `docs/CONFIGURATION.md` for engine blueprint
+4. Follow patterns from `/Users/abdout/codebase/`
+5. Use conventional commits
+6. PR workflow — no direct commits to main
 
 ---
 
 ## Quick Links
 
-- [BMAD Method](https://github.com/bmad-code-org/BMAD-METHOD)
-- [Tailscale Docs](https://tailscale.com/kb/)
-- [tmux Cheatsheet](https://tmuxcheatsheet.com/)
-- [Claude Code](https://claude.ai/code)
+- [Claude Code Docs](https://docs.anthropic.com/en/docs/claude-code/overview)
+- [Agent SDK Docs](https://docs.anthropic.com/en/docs/agent-sdk/overview)
+- [MCP Protocol](https://modelcontextprotocol.io)
+- [Claude Pricing](https://claude.ai/pricing)
+- [databayt/codebase](https://github.com/databayt/codebase)
 
 ---
 
 ## Philosophy
 
-> "The future of software is not just written. It's designed." - Craig Adam
+> "The future of software is not just written. It's designed." — Craig Adam
 
-Kun represents the shift from "vibe coding" to intentional architecture:
-- **Speed without chaos**: AI generates fast, but within constraints
-- **Patterns as training data**: Every good function teaches the next generation
-- **Direction over velocity**: Move fast, but with a map
+Kun is the shift from "vibe coding" to intentional architecture:
+- **Configuration is the product** — The agents, skills, rules ARE the engine
+- **Patterns as training data** — Every good component teaches the next generation
+- **Anthropic is the platform** — They build the products, we configure the intent

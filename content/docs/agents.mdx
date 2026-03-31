@@ -1,0 +1,155 @@
+---
+title: Agents
+description: 40 agents across 4 tiers — from captain to specialists
+---
+
+# Agents
+
+40 specialized agents organized in a 4-tier hierarchy. The top 9 leadership agents manage business, product, and technical strategy. The bottom 31 specialist agents handle execution across stack, design, UI, DevOps, VCS, and domain expertise.
+
+## Hierarchy
+
+```
+captain (Tier 0 — company brain)
+├── Business (Tier 1): revenue, growth, support
+├── Product (Tier 2): product, analyst
+└── Tech Leadership (Tier 3): tech-lead, ops, guardian
+        └── orchestration → 31 specialist agents
+```
+
+## Tier 0 — Captain
+
+| Agent | Scope |
+|-------|-------|
+| **captain** | CEO brain — weekly allocation, revenue strategy, team coordination across 5 products and 4 humans. Never writes code. Always delegates. |
+
+## Tier 1 — Business (3)
+
+| Agent | Scope | Primary Human |
+|-------|-------|---------------|
+| **revenue** | Pricing strategy, proposals, contracts, MRR tracking, Saudi payment setup | Ali, Sedon |
+| **growth** | Content strategy, SEO, social media, developer relations, Arabic-first content | Samia, Ali |
+| **support** | Customer onboarding, issue triage, knowledge base, SLA tracking | Sedon, Ali |
+
+## Tier 2 — Product (2)
+
+| Agent | Scope | Primary Human |
+|-------|-------|---------------|
+| **product** | Roadmap across 5 products, user stories, ICE scoring, release planning | All |
+| **analyst** | Market intelligence per vertical, competitor analysis, usage analytics | Ali, Samia |
+
+## Tier 3 — Tech Leadership (3)
+
+| Agent | Scope | Primary Human |
+|-------|-------|---------------|
+| **tech-lead** | Architecture across 14 repos, shared patterns, breaking changes, tech debt | Abdout |
+| **ops** | CI/CD, deployment health, API spend tracking, cost optimization, uptime | Sedon, Abdout |
+| **guardian** | OWASP Top 10, performance budgets, SSPL compliance, medical data privacy | Abdout |
+
+## Specialist Agents (31 agents, 7 chains)
+
+### Stack Chain (7)
+
+| Agent | Domain |
+|-------|--------|
+| nextjs | App Router, Server Components, Server Actions |
+| react | Hooks, concurrent features, performance |
+| typescript | Strict mode, generics, advanced types |
+| tailwind | Semantic tokens, responsive, RTL/LTR |
+| prisma | PostgreSQL, migrations, query optimization |
+| shadcn | Radix primitives, registry, MCP |
+| authjs | JWT, OAuth, sessions |
+
+### Design Chain (4)
+
+| Agent | Domain |
+|-------|--------|
+| orchestration | Master coordinator, multi-agent workflows |
+| architecture | Mirror pattern, multi-tenant (Hogwarts) |
+| pattern | Code conventions, anti-patterns |
+| structure | File organization, naming |
+
+### UI Chain (4)
+
+| Agent | Domain |
+|-------|--------|
+| shadcn | Radix primitives, registry |
+| atom | Compose 2+ shadcn/ui primitives |
+| template | Full-page layouts |
+| block | UI + business logic (DataTable, auth, payments) |
+
+### DevOps Chain (3)
+
+| Agent | Domain |
+|-------|--------|
+| build | TypeScript validation, Turbopack |
+| deploy | Vercel, staging/production |
+| test | Vitest, Playwright, TDD |
+
+### VCS Chain (2)
+
+| Agent | Domain |
+|-------|--------|
+| git | Branching, commits, conventional format |
+| github | PRs, issues, Actions, code review |
+
+### Specialized (8)
+
+| Agent | Domain |
+|-------|--------|
+| middleware | Auth, i18n, subdomain routing |
+| internationalization | Arabic/English, RTL/LTR, dictionaries |
+| semantic | HTML, color tokens, accessibility |
+| sse | Server-side exception diagnosis |
+| optimize | Feature optimization, automation |
+| performance | Core Web Vitals, profiling |
+| comment | Code comments |
+| icon | SVG icon management |
+
+### Reference Chain (4)
+
+| Agent | Product |
+|-------|---------|
+| hogwarts | Education SaaS patterns |
+| souq | E-commerce patterns |
+| mkan | Rental marketplace patterns |
+| shifa | Medical platform patterns |
+
+## How Agents Work
+
+Agents are markdown files in `~/.claude/agents/` with YAML frontmatter:
+
+```markdown
+---
+name: agent-name
+description: What this agent does
+model: opus
+---
+
+# Agent Name
+
+Instructions, context, and domain knowledge...
+```
+
+When invoked (via the Agent tool or keyword trigger), Claude loads the agent's instructions and delegates accordingly.
+
+## Inter-Agent Routing
+
+```
+"saas billing"
+  → orchestration agent
+  → prisma (schema) + block (UI) + stripe MCP
+  → Complete billing feature
+
+"ship hogwarts admission"
+  → captain
+  → product (stories) → tech-lead (architecture)
+  → orchestration → specialists
+```
+
+## Installation
+
+```bash
+# All 40 agents installed to ~/.claude/agents/
+cd ~/kun && bash .claude/scripts/install.sh
+```

@@ -1,0 +1,54 @@
+{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@github/github-mcp-server"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+      },
+      "description": "GitHub repositories, issues, PRs, and Projects"
+    },
+    "slack": {
+      "type": "http",
+      "url": "https://mcp.slack.com",
+      "env": {
+        "SLACK_BOT_TOKEN": "${SLACK_BOT_TOKEN}",
+        "SLACK_WORKSPACE_ID": "${SLACK_WORKSPACE_ID}"
+      },
+      "description": "Team notifications, collaboration"
+    },
+    "linear": {
+      "type": "sse",
+      "url": "https://mcp.linear.app/sse",
+      "description": "Issue tracking and project management"
+    },
+    "stripe": {
+      "type": "http",
+      "url": "https://mcp.stripe.com",
+      "description": "Payment processing, subscriptions, revenue tracking"
+    },
+    "notion": {
+      "type": "http",
+      "url": "https://mcp.notion.so",
+      "env": {
+        "NOTION_API_KEY": "${NOTION_API_KEY}"
+      },
+      "description": "Documentation sync, proposals, knowledge base"
+    },
+    "browser": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest", "--headless"],
+      "description": "Headless browser for market research and competitor analysis"
+    },
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"],
+      "description": "Up-to-date documentation for libraries"
+    },
+    "memory-bank": {
+      "command": "npx",
+      "args": ["-y", "@memory-bank/mcp-server@latest"],
+      "description": "Persistent context across sessions"
+    }
+  }
+}

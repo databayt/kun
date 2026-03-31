@@ -1,0 +1,92 @@
+---
+title: Dispatch
+description: Apple Notes async communication — 3 channels for team coordination
+---
+
+# Dispatch
+
+Async communication via Apple Notes. Three notes in a Dispatch folder, synced via iCloud to all Apple devices. Captain writes updates, Cowork bridges think/do, Abdout leaves instructions.
+
+## Three Channels
+
+| Note | Direction | Purpose |
+|------|-----------|---------|
+| **Dispatch/Captain** | Captain → Abdout | Updates, decisions, weekly summaries |
+| **Dispatch/Cowork** | Cowork ↔ Code | Bridge between thinking and doing |
+| **Dispatch/Inbox** | Abdout → Captain | Instructions, approvals, priorities |
+
+## Usage
+
+### Write
+
+```bash
+dispatch.sh captain "Weekly review complete. Revenue: $0. Hogwarts pilot on track."
+dispatch.sh captain "Need approval: add Pro seat for Ali" decision
+dispatch.sh cowork "Architecture planned. Issues created: #10, #11, #12"
+```
+
+### Read
+
+```bash
+dispatch.sh read inbox     # Check Abdout's instructions
+dispatch.sh read cowork    # Check Cowork handoffs
+dispatch.sh read captain   # Review own dispatch log
+```
+
+### Priority Levels
+
+| Level | Prefix | When |
+|-------|--------|------|
+| `fyi` | Blue | Informational, no action needed |
+| `normal` | Clipboard | Standard update |
+| `decision` | Yellow | Needs Abdout's approval |
+| `urgent` | Red | Immediate attention required |
+
+## Session Start Protocol
+
+Every Claude Code session begins with:
+
+1. `dispatch.sh read inbox` — check what Abdout wrote
+2. `dispatch.sh read cowork` — check for Cowork handoffs
+3. `gh issue list --repo databayt/kun --state open` — check work queue
+4. Proceed with highest priority
+
+## How It Works
+
+The dispatch system uses AppleScript to read/write Apple Notes:
+
+```bash
+# Write: appends timestamped entry to note
+osascript -e 'tell application "Notes"
+  tell folder "Dispatch"
+    set theNote to note "Captain"
+    set body of theNote to body & "<hr><p>message</p>"
+  end tell
+end tell'
+
+# Read: returns plain text of note
+osascript -e 'tell application "Notes"
+  tell folder "Dispatch"
+    return plaintext of note "Inbox"
+  end tell
+end tell'
+```
+
+## iCloud Sync
+
+Notes sync via iCloud to:
+- MacBook Pro M4 (primary)
+- iPhone 16e (mobile review)
+
+Abdout can read dispatches from anywhere and leave instructions in the Inbox from his phone.
+
+## Integration with GitHub Issues
+
+Dispatch handles async communication. GitHub Issues handles structured work:
+
+```
+Dispatch: "Admission feature needed for pilot. See issues."
+GitHub:   databayt/hogwarts#10 — Implement admission form
+          databayt/hogwarts#11 — Admission notification emails
+          databayt/hogwarts#12 — Admission admin dashboard
+```

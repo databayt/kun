@@ -4,13 +4,60 @@
 
 ## Quick Stats
 
-- **Total Agents**: 27
+- **Total Agents**: 40 (9 leadership + 31 specialists)
 - **Model**: opus (all agents)
 - **Stack**: Next.js 16 + React 19 + Prisma 6 + TypeScript 5
 
 ---
 
-## Agent Categories
+## Company Hierarchy
+
+```
+                         captain (CEO brain)
+                        /       |        \
+                   revenue   growth    support        (Business)
+                      \       /
+                   product  analyst                   (Product)
+                      |
+                tech-lead — ops — guardian             (Tech Leadership)
+                      |
+                 orchestration                        (Coordination)
+                      |
+                 31 specialists                       (Execution)
+```
+
+### Tier 0 — Captain (1)
+
+| Agent | Purpose | Scope |
+|-------|---------|-------|
+| **captain** | CEO brain — weekly allocation, revenue strategy | All 5 products, all 4 humans |
+
+### Tier 1 — Business (3)
+
+| Agent | Purpose | Primary Human |
+|-------|---------|---------------|
+| **revenue** | Pricing, proposals, contracts, cost analysis | Ali + Sedon |
+| **growth** | Content, SEO, social, developer relations | Samia + Ali |
+| **support** | Onboarding, issue triage, knowledge base | Sedon + Ali |
+
+### Tier 2 — Product (2)
+
+| Agent | Purpose | Primary Human |
+|-------|---------|---------------|
+| **product** | Roadmap across all 5 products, stories, prioritization | All team |
+| **analyst** | Market intelligence, competitors, analytics | Ali + Samia |
+
+### Tier 3 — Tech Leadership (3)
+
+| Agent | Purpose | Primary Human |
+|-------|---------|---------------|
+| **tech-lead** | Architecture across 14 repos, shared patterns | Abdout |
+| **ops** | CI/CD, costs, monitoring, infrastructure | Sedon + Abdout |
+| **guardian** | Security, performance budgets, compliance | Abdout |
+
+---
+
+## Specialist Categories
 
 ### Stack (7)
 
@@ -94,22 +141,38 @@ Handing off to `react` agent:
 ## Inter-Agent Relationships
 
 ```
-orchestration (master coordinator)
+captain (company brain)
     │
-    ├── Design Chain
-    │   └── architecture → pattern → structure
+    ├── Business Layer
+    │   ├── revenue (deals, pricing, Ali + Sedon)
+    │   ├── growth (content, SEO, Samia + Ali)
+    │   └── support (customers, onboarding, Sedon + Ali)
     │
-    ├── Stack Chain
-    │   └── nextjs → react → typescript
+    ├── Product Layer
+    │   ├── product (roadmap, stories, all team)
+    │   └── analyst (market intel, Ali + Samia)
     │
-    ├── UI Chain
-    │   └── shadcn → atom → template → block
-    │
-    ├── DevOps Chain
-    │   └── build → deploy
-    │
-    └── Standalone
-        └── test, git → github
+    └── Tech Leadership
+        ├── tech-lead (cross-repo architecture, Abdout)
+        ├── ops (delivery, costs, Sedon + Abdout)
+        └── guardian (security, quality, Abdout)
+            │
+            └── orchestration (task coordinator)
+                │
+                ├── Design Chain
+                │   └── architecture → pattern → structure
+                │
+                ├── Stack Chain
+                │   └── nextjs → react → typescript
+                │
+                ├── UI Chain
+                │   └── shadcn → atom → template → block
+                │
+                ├── DevOps Chain
+                │   └── build → deploy
+                │
+                └── Standalone
+                    └── test, git → github
 
 Cross-references:
   tailwind ↔ semantic ↔ shadcn
@@ -119,6 +182,10 @@ Cross-references:
   authjs → middleware (auth flow)
   optimize → architecture + prisma (feature analysis)
   performance → nextjs + react + prisma + build (runtime optimization)
+  revenue ↔ analyst ↔ product (pricing feedback loop)
+  growth ↔ product (content aligned with releases)
+  support → tech-lead (bug escalation)
+  ops → guardian (security review of infra)
 ```
 
 ---

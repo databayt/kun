@@ -1,261 +1,354 @@
 # Project Brief: Kun (كن)
-## Remote AI Development Infrastructure
 
-> **BMAD Phase**: Analysis (Brainstorming Output)
-> **Version**: 1.0
-> **Date**: 2026-01-10
-> **Status**: Approved
+> **Version**: 3.0
+> **Date**: 2026-03-30
+> **Status**: Active
 
 ---
 
-## 1. Executive Summary
+## 1. What is Kun
 
-**Kun** (كن - Arabic for "Be!") is a remote AI development infrastructure that enables distributed teams to access Claude Code from anywhere while maintaining architectural consistency through shared patterns, centralized configuration, and intentional constraints.
+Kun (كن — Arabic for "Be!") is **the optimal configuration** — agents, skills, hooks, MCP servers, rules, and memory — that makes Claude Code, Claude Desktop, Cowork, and the Agent SDK work together as a single engine running both the technical and business sides of **Databayt**.
 
-The name reflects the Quranic command of creation - the word by which God creates. Similarly, this infrastructure embodies the architecture-first paradigm where humans design systems and AI generates code within those intentional boundaries.
+Kun is not a server. Not a platform. It is the brain that coordinates 14 repositories, 4 team members, and every tool in the stack — from git commit to Stripe checkout to team standup.
 
----
-
-## 2. Problem Statement
-
-### Current Challenges
-
-| Problem | Impact | Severity |
-|---------|--------|----------|
-| **Fragmented Environments** | "Works on my machine" syndrome | Critical |
-| **AI Context Loss** | Each Claude session starts fresh, losing team patterns | High |
-| **Mobile Inaccessibility** | Cannot develop or review from phones | Medium |
-| **Pattern Inconsistency** | AI generates different code styles per developer | High |
-| **No Scalability Path** | Team tool cannot become commercial platform | Medium |
-
-### Root Cause Analysis
-
-```
-Developer A ──> Local Claude ──> Pattern X
-Developer B ──> Local Claude ──> Pattern Y
-Developer C ──> Local Claude ──> Pattern Z
-                    │
-                    ▼
-            Inconsistent Codebase
-            Tech Debt Accumulation
-            AI "Vibe Coding" Without Constraints
-```
+**One word, and it happens.**
 
 ---
 
-## 3. Vision and Goals
+## 2. The Company
 
-### Vision Statement
+### Databayt (داتابايت)
 
-> Build a centralized development environment where AI works within intentional architectural constraints, enabling any team member to create production-quality software from any device.
+- **Website**: [databayt.org](https://databayt.org)
+- **GitHub**: [github.com/databayt](https://github.com/databayt)
+- **License**: SSPL (open source, commercial use requires license)
+- **Philosophy**: Open source, shared economy, state-of-the-art stack
+- **Design inspiration**: Apple, Tesla, Airbnb, Uber
 
-### Primary Goals
+Databayt builds products that automate real-world operations — schools, rentals, commerce, healthcare — using a shared component library (codebase) and a unified configuration engine (kun). Every product shares the same DNA: Next.js, TypeScript, Prisma, shadcn/ui, Arabic-first RTL, atomic component hierarchy.
 
-| Goal | Description | Success Metric |
-|------|-------------|----------------|
-| **Unified Environment** | Single server, shared context | All team members on same patterns |
-| **Mobile-First AI** | Claude Code from any device | Working tmux on Termius |
-| **Architecture-First** | AI within intentional constraints | 90%+ pattern compliance |
-| **Scalable Platform** | Team to commercial path | Docker isolation, usage billing |
+### What We Believe
 
-### Secondary Goals
-
-- Off-grid capability (solar + Starlink)
-- Pattern library ecosystem via databayt repositories
-- Usage-based billing for external developers
-
----
-
-## 4. Target Users
-
-### Phase 1: Individual Developer
-
-**Persona**: Solo Developer
-- Wants persistent Claude Code sessions
-- Needs mobile access for on-the-go development
-- Values pattern consistency
-
-**Use Case**: Start a feature on laptop, continue from phone during commute, complete on tablet at home.
-
-### Phase 2: Team (10+ Developers)
-
-**Persona**: Databayt Development Team
-- 10+ developers across locations
-- Using shared patterns from databayt/codebase
-- Need consistent AI context across team
-
-**Use Case**: All team members connect to same server, same patterns, same CLAUDE.md context. AI generates consistent code regardless of who prompts.
-
-### Phase 3: External Clients
-
-**Persona**: Startup Developer / Agency
-- Renting compute + patterns
-- Want pre-configured AI development stack
-- Pay per usage
-
-**Use Case**: Startup connects to Kun, gets access to databayt patterns, builds MVP in days instead of weeks.
+- **Configuration over infrastructure** — Don't build what Anthropic ships. Configure it.
+- **Architecture over vibe coding** — Humans design systems, AI generates within constraints.
+- **Patterns as training data** — Every good component teaches the next generation.
+- **Full spectrum** — AI assists the entire company, not just developers.
+- **Open source, shared economy** — Build in the open, sustain through value.
 
 ---
 
-## 5. Success Metrics
+## 3. The Team
 
-### Phase 1 Metrics (Individual)
+| # | Name | Role | Background | Devices | Email |
+|---|------|------|-----------|---------|-------|
+| 1 | **Osman Abdout** | Founder, Lead Engineer | Electrical engineer (10+ years), software engineer (4 years) | MacBook M4, iPhone 16e | abdout@databayt.org |
+| 2 | **Ali Aseel** | Business & Operations | Computer Science + MBA (India), 2 years business experience | Windows laptop, Android | ali@databayt.org |
+| 3 | **Samia Hamd** | Content, Research & Voice | Languages specialist, advanced Arabic/English, writer, voiceover artist, researcher. Blind — uses screen reader. | Dell Windows laptop, iPhone 13 Mini | samia@databayt.org |
+| 4 | **Osman Sedon** | Engineering (Part-time) | Mechanical engineer (2 years), limited availability | HP Windows, Android | sedon@databayt.org |
 
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| Session Persistence | 99.9% uptime | Sessions survive 7+ days |
-| Mobile Latency | < 200ms | Response time on Termius |
-| Setup Time | < 2 hours | From zero to working mobile access |
+### Device Matrix
 
-### Phase 2 Metrics (Team)
-
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| Team Adoption | 100% | All developers using remote sessions daily |
-| Pattern Compliance | 90%+ | Code follows databayt/codebase patterns |
-| Context Sharing | 100% | All members see same CLAUDE.md |
-
-### Phase 3 Metrics (Commercial)
-
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| External Users | 10+ | Paying customers in first quarter |
-| Revenue | $1000+/month | From usage billing |
-| Build Speed | 3x faster | Compared to no patterns |
+| Member | OS | Mobile | Claude Code Access |
+|--------|-----|--------|-------------------|
+| Osman Abdout | macOS | iOS | CLI + Desktop + iOS |
+| Ali Aseel | Windows | Android | Desktop + Web |
+| Samia Hamd | Windows | iOS | Desktop + Web + iOS |
+| Osman Sedon | Windows | Android | Desktop + Web |
 
 ---
 
-## 6. Scope
+## 4. The Driver: Sustain $1,000/month
 
-### In Scope
+### Financial Target
 
-**Phase 1**:
-- Tailscale VPN setup
-- tmux persistent sessions
-- Termius mobile configuration
-- Claude Code installation
-- Pattern library integration (databayt/codebase)
+The immediate priority is **sustainability** — covering operating costs and paying the team.
 
-**Phase 2**:
-- Multi-user accounts
-- Tailscale ACLs
-- Centralized secrets management
-- Shared CLAUDE.md configuration
-- Systemd auto-start services
-- Netdata monitoring
+| Expense | Monthly Cost |
+|---------|-------------|
+| Claude Code (Max plan) | $200 |
+| Services (Neon, Vercel, AWS, Namecheap) | ~$200 |
+| Team salary (3 members x $200) | $600 |
+| **Total monthly target** | **$1,000** |
 
-**Phase 3**:
-- Docker-based user isolation
-- Usage metering
-- Stripe billing integration
-- Pattern marketplace
-- Off-grid solar + Starlink
+### Current Budget
 
-### Out of Scope
+- **Remaining capital**: $500 (until end of running year)
+- **Revenue pipeline**: Ahmed Baha / King Fahad Schools (Sudan) — pilot phase for Hogwarts (admission, notifications, messaging), potential full SaaS contract
 
-- Custom IDE development
-- Cloud provider migration
-- Native mobile apps
-- Real-time collaboration (VS Code Live Share style)
+### Revenue Strategy (Next 3 Months)
+
+| Priority | Source | Product | Target |
+|----------|--------|---------|--------|
+| 1 | **King Fahad Schools pilot** | Hogwarts (admission + notifications) | First paying customer |
+| 2 | **Additional school onboarding** | Hogwarts SaaS | Recurring revenue |
+| 3 | **Freelance/contracts** | Upwork + Discord | Bridge income |
+| 4 | **Mkan early access** | Rental marketplace | Secondary product |
 
 ---
 
-## 7. Constraints and Dependencies
+## 5. The Products
 
-### Technical Constraints
+### Tier 1: Revenue Products
 
-| Constraint | Impact |
-|------------|--------|
-| Ubuntu 22.04/24.04 LTS | systemd required |
-| Node.js 20.x LTS | Claude Code requirement |
-| Tailscale Teams tier | 10+ developers exceed free tier |
-| Anthropic API | Claude Code dependency |
+#### Hogwarts — Educational Automation (FLAGSHIP)
 
-### External Dependencies
+- **URL**: [ed.databayt.org](https://ed.databayt.org)
+- **Repo**: [databayt/hogwarts](https://github.com/databayt/hogwarts) — 1.7 GB, most active
+- **Status**: Active development (multiple commits/day)
+- **Stack**: Next.js 16, React 19, Prisma 6, NextAuth 5, Stripe 20, Sentry, Socket.io, i18next
+- **Features**: Multi-tenant SaaS, admission, LMS, SIS, finance, library, exams, timetable, SMS/notifications
+- **Revenue model**: SaaS subscriptions, per-school pricing
+- **Next milestone**: King Fahad Schools pilot (admission + notifications + messaging)
+- **Details**: [repositories/hogwarts.md](./repositories/hogwarts.md)
 
-| Dependency | Risk Level | Mitigation |
-|------------|------------|------------|
-| Tailscale SaaS | Medium | Backup SSH with port forwarding |
-| Anthropic API | Medium | Version pin, monitor changelog |
-| GitHub | Low | Mirror repos locally |
-| 1Password/Vault | Low | Export secrets as backup |
+#### Mkan — Rental Marketplace
 
-### Pattern Library Dependencies
+- **URL**: [mkan.vercel.app](https://mkan.vercel.app)
+- **Repo**: [databayt/mkan](https://github.com/databayt/mkan)
+- **Status**: Phase 1 complete, production readiness
+- **Stack**: Next.js 16, React 19, Prisma 6, NextAuth 5, Mapbox, Sentry
+- **Features**: Property listings, search, booking, host dashboard, Airbnb-inspired design
+- **Revenue model**: Transaction fees, premium listings
+- **Details**: [repositories/mkan.md](./repositories/mkan.md)
 
-From `/Users/abdout/codebase`:
-- 54 UI components
-- 62 Atom components
-- 31 Templates
-- 11 Claude agents
-- 4 Claude commands
+### Tier 2: Supporting Products
 
----
+#### Souq — Multi-Vendor E-Commerce
 
-## 8. Risks and Mitigations
+- **URL**: [souq-smoky.vercel.app](https://souq-smoky.vercel.app)
+- **Repo**: [databayt/souq](https://github.com/databayt/souq)
+- **Status**: MVP, low activity
+- **Features**: Multi-vendor, customer storefront, vendor dashboards, admin panel
+- **Details**: [repositories/souq.md](./repositories/souq.md)
 
-| Risk | Impact | Probability | Mitigation |
-|------|--------|-------------|------------|
-| Tailscale outage | High | Low | Backup SSH with port forwarding |
-| Claude API changes | Medium | Medium | Version pin, monitor changelog |
-| Session data loss | High | Low | Regular backups, UPS |
-| Security breach | High | Low | Strict ACLs, audit logs |
-| Billing disputes | Medium | Medium | Detailed usage logs |
-| Solar insufficient | Medium | Medium | Oversized battery, grid backup |
+#### Shifa — Medical Platform
 
----
+- **URL**: [shifa-lovat.vercel.app](https://shifa-lovat.vercel.app)
+- **Repo**: [databayt/shifa](https://github.com/databayt/shifa)
+- **Status**: Early stage, paused
+- **Features**: Patient records, appointments, medical workflows
+- **Details**: [repositories/shifa.md](./repositories/shifa.md)
 
-## 9. Philosophical Foundation
+### Tier 3: Infrastructure
 
-### Architecture-First AI Development
-
-> "The future of software is not just written. It's designed." - Craig Adam
-
-**Core Principles**:
-
-1. **Systems Over Snippets**: Kun is an environment that defines how AI-generated code integrates into architecture.
-
-2. **Guardrails, Not Just Features**: CLAUDE.md files and shared configs are training data for AI collaborators.
-
-3. **Curated Examples**: databayt/codebase is the pattern library that AI learns from.
-
-4. **Human Review Layer**: Architecture ensures humans own tradeoffs while AI handles implementation velocity.
-
-### The New Paradigm
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│           The Architecture-First Model (Intentional)        │
-│                                                              │
-│                  ┌────────────────────┐                     │
-│                  │   KUN SERVER       │                     │
-│                  │  ├── CLAUDE.md     │  ← Shared context   │
-│                  │  ├── Patterns      │  ← Guardrails       │
-│                  │  └── Codebase ref  │  ← Training data    │
-│                  └─────────┬──────────┘                     │
-│                            │                                 │
-│        ┌───────────────────┼───────────────────┐            │
-│        ▼                   ▼                   ▼            │
-│     Dev A               Dev B               Dev C           │
-│   (Same context)    (Same patterns)    (Same guardrails)   │
-│                                                              │
-│   Result: Coherent, scalable, maintainable code             │
-└─────────────────────────────────────────────────────────────┘
-```
+| Repo | Purpose | Details |
+|------|---------|---------|
+| **[codebase](./repositories/codebase.md)** | Pattern library — atoms, templates, blocks | Accelerates all product development |
+| **[kun](./repositories/kun.md)** | Configuration engine — this project | Coordinates everything |
+| **[shadcn](./repositories/shadcn.md)** | UI component library (shadcn/ui fork) | Shared UI primitives |
+| **[radix](./repositories/radix.md)** | Radix UI primitives fork | Foundation for shadcn |
+| **[swift-app](./repositories/swift-app.md)** | iOS companion for Hogwarts | Native Swift/SwiftUI |
+| **[marketing](./repositories/marketing.md)** | Landing pages for all products | Company website |
+| **[spma](./repositories/spma.md)** | Project management tool | Internal use |
+| **[apple](./repositories/apple.md)** | Apple design experiments | R&D |
+| **[distributed-computer](./repositories/distributed-computer.md)** | Rust infrastructure, Hogwarts Coin | Future/R&D |
 
 ---
 
-## 10. Approval
+## 6. The Stack
 
-| Role | Name | Date | Signature |
-|------|------|------|-----------|
-| Project Sponsor | Abdout | 2026-01-10 | ✓ |
-| Technical Lead | Claude Code | 2026-01-10 | ✓ |
+### Core
+
+| Layer | Technology | Purpose |
+|-------|-----------|---------|
+| Framework | Next.js 16, React 19 | Full-stack web |
+| Language | TypeScript 5 (strict) | Type safety |
+| Database | Prisma 6 + Neon (PostgreSQL) | ORM + serverless DB |
+| Auth | NextAuth v5 (Auth.js) | Authentication |
+| Styling | Tailwind CSS 4 + shadcn/ui | Design system |
+| Payments | Stripe | Billing + subscriptions |
+| Mobile | Swift/SwiftUI (iOS), Kotlin (Android planned) | Native apps |
+
+### Services
+
+| Service | Purpose | Cost |
+|---------|---------|------|
+| Vercel | Hosting + deployment | Free tier + pro |
+| Neon | PostgreSQL databases | Free tier + scaling |
+| GitHub | Code + CI/CD | Free (org) |
+| Namecheap | Domains | Annual |
+| AWS (S3/CloudFront) | File storage + CDN | Pay-as-you-go |
+| Figma | Design | Free tier |
+| Sentry | Error monitoring | Free tier |
+| Upstash | Redis + rate limiting | Free tier |
+
+### AI Engine
+
+| Product | Role | Cost |
+|---------|------|------|
+| Claude Code (Max) | Primary development interface | $200/month |
+| Claude Desktop | Team access (Windows/Mac) | Included |
+| Claude iOS | Mobile access | Included |
+| Cowork | Business operations | Included |
+| Agent SDK | CI/CD automation (Phase 2) | API pricing |
+
+### Component Hierarchy
+
+| Level | Name | Description |
+|-------|------|-------------|
+| 1 | `ui` | Radix primitives (shadcn/ui) |
+| 2 | `atom` | 2+ primitives composed |
+| 3 | `template` | Full-page layouts |
+| 4 | `block` | UI + business logic |
+| 5 | `micro` | Mini micro-services |
 
 ---
 
-## 11. References
+## 7. Kun's Role
 
-- [BMAD Method](https://github.com/bmad-code-org/BMAD-METHOD)
-- [Architecture is Back (Craig Adam)](https://medium.com/@craig_32726/agile-is-out-architecture-is-back-7586910ab810)
-- [Claude Code from iPhone (Pete Sena)](https://petesena.medium.com/how-to-run-claude-code-from-your-iphone-using-tailscale-termius-and-tmux-2e16d0e5f68b)
-- [Tailscale SSH Documentation](https://tailscale.com/kb/1193/tailscale-ssh)
+Kun is the operating system of Databayt. It doesn't write code — it **coordinates** how code gets written, reviewed, tested, deployed, and maintained across all 14 repositories.
+
+### What Kun Controls
+
+| Domain | How |
+|--------|-----|
+| **Development** | 28 agents, 17 skills, 100+ keywords |
+| **Code quality** | Rules, hooks, automated review |
+| **Deployment** | Vercel MCP, deploy skills |
+| **Database** | Neon MCP, Prisma agents |
+| **Design** | Figma MCP, component mapping |
+| **Testing** | Browser MCP, Playwright, Vitest |
+| **Team coordination** | Agent teams, shared settings |
+| **Business ops** | Cowork, scheduled tasks |
+| **Memory** | Cross-session learning, pattern library |
+| **Cost management** | Model selection, caching strategy |
+
+### How Kun Operates
+
+Kun acts with **moderate autonomy for the good of the company**. It has its own judgment — it researches, plans, follows up, and self-improves. It manages:
+
+- Repository health and synchronization
+- Team productivity and follow-up
+- Subscription and service management
+- R&D — reading, web research, continuous learning
+- Path optimization across all company operations
+
+### Configuration Engine (The Core)
+
+| Component | Count | Purpose |
+|-----------|-------|---------|
+| Agents | 28 | Specialized expertise across 6 chains |
+| Skills | 17 | Keyword-triggered workflows |
+| MCP Servers | 18 | External tool integrations |
+| Rules | 8 | Path-scoped guardrails |
+| Hooks | 5 | Auto-format, port management, session logging |
+| Memory | 6 | Cross-session learning |
+| Keywords | 100+ | One word → complete workflow |
+
+---
+
+## 8. Three-Month Plan (April — June 2026)
+
+### Month 1: Ship Hogwarts Pilot
+
+| Week | Focus | Owner |
+|------|-------|-------|
+| 1 | Polish admission block, notification system | Osman A. + Kun |
+| 2 | Messaging system, pilot deployment | Osman A. + Kun |
+| 3 | King Fahad Schools onboarding + training | Ali (business) + Samia (docs/training) |
+| 4 | Pilot feedback, iteration, billing setup | Full team |
+
+### Month 2: Stabilize + Second Customer
+
+| Week | Focus | Owner |
+|------|-------|-------|
+| 1-2 | Bug fixes from pilot, feature requests | Osman A. + Kun |
+| 3 | Outreach for second school | Ali |
+| 4 | Codebase improvements, pattern extraction | Osman A. + Kun |
+
+### Month 3: Scale + Diversify
+
+| Week | Focus | Owner |
+|------|-------|-------|
+| 1-2 | Mkan soft launch, marketing site | Full team |
+| 3 | Upwork/freelance pipeline | Ali + Osman A. |
+| 4 | Revenue review, Q3 planning | Full team |
+
+### Team Assignments by Strength
+
+| Member | Primary Role | Deliverables |
+|--------|-------------|-------------|
+| **Osman Abdout** | Engineering lead | Code, architecture, deployment |
+| **Ali Aseel** | Business development | Client relations, contracts, outreach |
+| **Samia Hamd** | Content + Research | Documentation, Arabic content, voiceover, UX writing, research |
+| **Osman Sedon** | Engineering support | Specific technical tasks as available |
+| **Kun** | Operations engine | Coordination, R&D, follow-up, optimization |
+
+---
+
+## 9. Services & Credentials
+
+Kun maintains awareness of all service accounts and credentials for operational continuity.
+
+| Service | Purpose | Account |
+|---------|---------|---------|
+| GitHub | Code hosting | github.com/databayt |
+| Vercel | Deployment | vercel.com (databayt) |
+| Neon | Databases | neon.tech |
+| Namecheap | Domains | databayt.org + subdomains |
+| Figma | Design | figma.com |
+| Stripe | Payments | stripe.com |
+| AWS | S3/CloudFront | aws.amazon.com |
+| Sentry | Error monitoring | sentry.io |
+| Upstash | Redis | upstash.com |
+
+Email accounts: abdout@databayt.org, ali@databayt.org, samia@databayt.org, sedon@databayt.org
+
+---
+
+## 10. Repository Map
+
+14 repositories under [github.com/databayt](https://github.com/databayt):
+
+| Repo | Type | Status | Last Active | Detail |
+|------|------|--------|-------------|--------|
+| [hogwarts](./repositories/hogwarts.md) | Product | Active (daily) | 2026-03-30 | Flagship SaaS — education |
+| [mkan](./repositories/mkan.md) | Product | Phase 1 done | 2026-02-06 | Rental marketplace |
+| [souq](./repositories/souq.md) | Product | MVP | 2025-12-21 | E-commerce |
+| [shifa](./repositories/shifa.md) | Product | Paused | 2025-12-28 | Medical |
+| [codebase](./repositories/codebase.md) | Library | Active | 2026-01-31 | Pattern library |
+| [kun](./repositories/kun.md) | Engine | Active | 2026-03-30 | This project |
+| [shadcn](./repositories/shadcn.md) | Library | Fork sync | 2025-12-01 | UI components |
+| [radix](./repositories/radix.md) | Library | Fork sync | 2025-12-07 | UI primitives |
+| [swift-app](./repositories/swift-app.md) | Mobile | Phase 2 | 2026-02-10 | iOS app |
+| [marketing](./repositories/marketing.md) | Website | Active | 2026-01-29 | Landing pages |
+| [spma](./repositories/spma.md) | Internal | Early | 2026-02-23 | Project management |
+| [apple](./repositories/apple.md) | R&D | Experiment | 2026-02-06 | Design lab |
+| [distributed-computer](./repositories/distributed-computer.md) | R&D | Concept | 2025-12-17 | Rust/blockchain |
+| [.github](./repositories/dotgithub.md) | Config | Static | 2025-08-09 | Org profile |
+
+---
+
+## 11. The Name
+
+كن (Kun) — "Be!" — the divine command of creation from the Quran. One word, and reality manifests.
+
+With Kun configured:
+- "dev" → server running, browser open
+- "deploy" → production deployment with verification
+- "saas billing" → schema + API + UI + Stripe integration
+- "handover" → 5-pass QA across environments
+
+> "The future of software is not just written. It's designed." — Craig Adam
+
+---
+
+## 12. References
+
+### Company
+- [databayt.org](https://databayt.org)
+- [github.com/databayt](https://github.com/databayt)
+
+### Anthropic
+- [Claude Code Docs](https://docs.anthropic.com/en/docs/claude-code/overview)
+- [Agent SDK](https://docs.anthropic.com/en/docs/agent-sdk/overview)
+- [MCP Protocol](https://modelcontextprotocol.io)
+- [Claude Pricing](https://claude.ai/pricing)
+
+### Kun Documentation
+- [ARCHITECTURE.md](./ARCHITECTURE.md) — System design
+- [CONFIGURATION.md](./CONFIGURATION.md) — Engine blueprint
+- [PRODUCTS.md](./PRODUCTS.md) — Anthropic product catalog
+- [WORKFLOWS.md](./WORKFLOWS.md) — Operations playbook
+- [EPICS.md](./EPICS.md) — Development stories
