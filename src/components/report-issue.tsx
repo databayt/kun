@@ -2,6 +2,9 @@
 
 import { useState } from "react"
 import { usePathname } from "next/navigation"
+
+import { reportIssue } from "@/actions/report-issue"
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -9,14 +12,36 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { reportIssue } from "@/actions/report-issue"
+
+const translations = {
+  en: {
+    link: "Report an issue",
+    title: "Report an issue",
+    placeholder: "Describe the issue...",
+    submit: "Submit",
+    submitting: "Submitting...",
+    success: "Submitted. Thank you!",
+    error: "Something went wrong. Try again.",
+  },
+  ar: {
+    link: "الإبلاغ عن مشكلة",
+    title: "الإبلاغ عن مشكلة",
+    placeholder: "صف المشكلة...",
+    submit: "إرسال",
+    submitting: "جاري الإرسال...",
+    success: "تم الإرسال. شكراً لك!",
+    error: "حدث خطأ. حاول مرة أخرى.",
+  },
+} as const
 
 export function ReportIssue() {
   const [open, setOpen] = useState(false)
   const [description, setDescription] = useState("")
-  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle")
+  const [status, setStatus] = useState<
+    "idle" | "loading" | "success" | "error"
+  >("idle")
   const pathname = usePathname()
+  const t = translations[pathname?.startsWith("/ar") ? "ar" : "en"]
 
   async function handleSubmit() {
     if (!description.trim()) return
@@ -35,30 +60,39 @@ export function ReportIssue() {
   }
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setStatus("idle") }}>
+    <Dialog
+      open={open}
+      onOpenChange={(v) => {
+        setOpen(v)
+        if (!v) setStatus("idle")
+      }}
+    >
       <DialogTrigger asChild>
-        <button className="font-medium underline underline-offset-4 cursor-pointer">
-          Report an issue
+        <button className="cursor-pointer font-medium underline underline-offset-4">
+          {t.link}
         </button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Report an issue</DialogTitle>
+          <DialogTitle>{t.title}</DialogTitle>
         </DialogHeader>
         <textarea
-          className="border-input bg-transparent placeholder:text-muted-foreground focus-visible:ring-ring min-h-[120px] w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-1 focus-visible:outline-none"
-          placeholder="Describe the issue..."
+          className="border-input placeholder:text-muted-foreground focus-visible:ring-ring min-h-[120px] w-full rounded-md border bg-transparent px-3 py-2 text-sm focus-visible:ring-1 focus-visible:outline-none"
+          placeholder={t.placeholder}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
         {status === "error" && (
-          <p className="text-destructive text-sm">Something went wrong. Try again.</p>
+          <p className="text-destructive text-sm">{t.error}</p>
         )}
         {status === "success" ? (
-          <p className="text-sm text-green-600">Submitted. Thank you!</p>
+          <p className="text-sm text-green-600">{t.success}</p>
         ) : (
-          <Button onClick={handleSubmit} disabled={!description.trim() || status === "loading"}>
-            {status === "loading" ? "Submitting..." : "Submit"}
+          <Button
+            onClick={handleSubmit}
+            disabled={!description.trim() || status === "loading"}
+          >
+            {status === "loading" ? t.submitting : t.submit}
           </Button>
         )}
       </DialogContent>
