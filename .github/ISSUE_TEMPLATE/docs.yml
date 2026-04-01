@@ -1,0 +1,43 @@
+name: Documentation
+description: Report an issue or suggest an improvement to the documentation
+labels: ["documentation"]
+body:
+  - type: input
+    id: page-url
+    attributes:
+      label: Page URL
+      description: Which documentation page has the issue?
+      placeholder: /docs/agents
+    validations:
+      required: true
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: Issue type
+      options:
+        - Incorrect information
+        - Missing information
+        - Typo or grammar
+        - Broken link
+        - Unclear explanation
+        - Code example doesn't work
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What's wrong or could be improved?
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested fix
+      description: If you know what the correction should be
+    validations:
+      required: false
