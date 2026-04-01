@@ -16,7 +16,7 @@ export default async function RootLayout({
     <>
       <SiteHeader lang={lang} />
       <main className="flex-1">{children}</main>
-      <div className="py-4 text-center text-sm text-muted-foreground">
+      <div className="pt-8 pb-4 text-start text-sm text-muted-foreground">
         <ReportIssue />
       </div>
       <SiteFooter />
