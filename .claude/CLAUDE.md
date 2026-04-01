@@ -151,15 +151,12 @@ Say any of these words to trigger the corresponding tools:
 | `cycle` | Full development cycle |
 | `loop` | Continuous iteration |
 
-### Report (T&C Electrical)
+### Report (Issue Auto-Fix)
 | Keyword | Action |
 |---------|--------|
-| `report` | Generate T&C report |
-| `relay` | Protection relay report |
-| `transformer` | Transformer report |
-| `switchgear` | Switchgear report |
-| `cable` | Cable testing report |
-| `grounding` | Grounding report |
+| `report` | Auto-fix user-reported issues — read, verify, fix, close |
+| `report hogwarts` | Process only hogwarts report issues |
+| `report kun` | Process only kun report issues |
 
 ---
 
