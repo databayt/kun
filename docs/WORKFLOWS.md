@@ -113,7 +113,7 @@ Loop: Fix → re-test until clean
 ### 3.1 Admission Block Development
 
 ```
-Developer (Osman):
+Developer (Abdout):
   > "handover admission"
   1. Navigate admission pages (forms, tables, detail views)
   2. Test enrollment workflow end-to-end
@@ -127,18 +127,15 @@ Developer (Osman):
 ### 3.2 King Fahad Schools Onboarding
 
 ```
-Business (Ali):
-  > Cowork: "Create onboarding plan for King Fahad Schools"
-  1. Generate school tenant configuration checklist
-  2. Draft welcome email (Arabic)
-  3. Create admin account setup guide
-  4. List training session agenda
+QA + Sales (Ali):
+  > Test admission flow end-to-end, report issues on GitHub
+  > Prepare pitch materials for Ahmed Baha
+  > Continue outreach: other schools, sponsors, investors, contributors
 
-Content (Samia):
-  > Cowork: "Write Arabic user guide for school admission system"
-  1. Generate step-by-step walkthrough
-  2. Include screenshots
-  3. Record voiceover for video guide
+R&D (Samia):
+  > Research sharing economy pitch framing
+  > Study how open-source school solutions position themselves
+  > Arabic content for pitch and documentation
 ```
 
 ### 3.3 Pilot Monitoring
@@ -154,53 +151,51 @@ Kun (Scheduled):
 
 ## 4. Team Workflows
 
-### 4.1 Osman Abdout (Engineering)
+### 4.1 Abdout — Builder
 
 ```
 Daily:
-  $ claude                        # Open CLI on MacBook
-  > "dev"                         # Start Hogwarts dev server
+  > "dev"                         # Start dev server
   > [feature development]         # Build with full agent fleet
   > "build"                       # Validate
   > "push"                        # Commit + push
   > "deploy"                      # Ship to Vercel
-
-  iPhone: Remote Control to monitor long builds
 ```
 
-### 4.2 Ali Aseel (Business)
+### 4.2 Ali — QA Engineer + Sales
 
 ```
 Daily:
-  Claude Desktop (Windows):
-  > Cowork: "Summarize this week's Hogwarts progress for client update"
-  > Cowork: "Draft proposal for [school name]"
-  > Cowork: "Research competitor school platforms in Sudan"
+  QA:
+  > Test features from URL checklists on GitHub Issues
+  > Report bugs as comments (not WhatsApp)
+  > Re-verify fixes, check off boxes
 
-  Android: Claude web for quick checks
+  Sales (sales@databayt.org):
+  > Outreach: schools, sponsors, investors, early adopters, contributors
+  > Draft proposals, follow up leads
+  > Networking for all kinds of support
 ```
 
-### 4.3 Samia Hamd (Content & Research)
+### 4.3 Samia — R&D
 
 ```
 Daily:
-  Claude Desktop (Windows, screen reader):
-  > Cowork: "Translate these UI strings to Arabic"
-  > Cowork: "Research best practices for school notification systems"
-  > Cowork: "Write help documentation for the admission module"
-  > Cowork: "Review this page for accessibility issues"
-
-  iPhone 13 Mini: VoiceOver for mobile testing
+  Cowork:
+  > Research Claude/Anthropic products — learn the platform deeply
+  > Study sharing economy models — how to distribute revenue fairly
+  > Investigate startup patterns — sustainability, community, open source
+  > Take care of Kun — understand agents, skills, configuration
+  > Content: translation, documentation when needed
 ```
 
-### 4.4 Osman Sedon (Engineering, Part-Time)
+### 4.4 Sedon — Executor
 
 ```
-As available:
-  Claude Desktop (Windows):
-  > "fix"                         # Auto-fix lint/type errors
-  > [assigned task]               # Specific feature or bug fix
-  > "push"                        # Commit + push
+As available (needs clear task maps):
+  > [assigned task]               # Specific, well-defined task with clear steps
+  > Saudi operations              # Bank account, physical presence, payments
+  > Batch weekly                  # Give him the week's map on Monday
 ```
 
 ---
@@ -210,11 +205,11 @@ As available:
 ### 5.1 Start on Desktop, Continue on Phone
 
 ```
-MacBook (CLI):
+Desktop (CLI):
   > "Start building the notification system"
   > [work in progress]
 
-iPhone (Remote Control):
+Phone (Remote Control):
   > Monitor session progress
   > Dispatch: "deploy to preview"
 ```
@@ -279,47 +274,46 @@ Kun monitors all 14 repos:
 
 ## 7. Business Workflows
 
-### 7.1 Client Communication
+### 7.1 Outreach & Pitch
 
 ```
-Cowork (Ali):
-  > "Draft project update for Ahmed Baha"
-  1. GitHub MCP: Fetch merged PRs this week
-  2. Summarize features + fixes
-  3. Draft Arabic email
-  4. Output as artifact
+Ali (sales@databayt.org):
+  > Pitch: open source, sharing economy, community contribution
+  > Targets: schools, sponsors, investors, early adopters, contributors
+  > Materials: pitch deck, demo URL, partnership proposal
+  > Follow-up: track leads, schedule calls
 ```
 
 ### 7.2 Financial Tracking
 
 ```
 Cowork + Stripe MCP:
-  > "Monthly revenue and expense report"
-  1. Stripe: Fetch subscriptions + transactions
-  2. Calculate: Revenue vs. $1K target
-  3. List expenses: Claude ($200) + services
-  4. Burn rate and runway
+  > "Monthly burn and runway report"
+  1. Track expenses: Claude ($200) + services (~$300)
+  2. Current burn: ~$500/month
+  3. Runway: $5K / $500 = 10 months
+  4. Revenue: track when it starts coming in
 ```
 
-### 7.3 Content Creation
+### 7.3 Sharing Economy Research
 
 ```
 Cowork (Samia):
-  > "Write Arabic blog post about school automation benefits"
-  1. Research: Best practices, competitor analysis
-  2. Draft: Arabic content with English summary
-  3. SEO: Keywords, meta descriptions
-  4. Output: MDX file for marketing site
+  > Study sharing economy models — how open-source companies sustain
+  > Investigate revenue distribution — fair economics for contributors
+  > Research startup patterns — community-driven growth
+  > Read books on sharing economy and startups
+  > Design databayt's revenue model
 ```
 
-### 7.4 Competitive Research
+### 7.4 Market Research
 
 ```
 Cowork (Samia or Ali):
-  > "Analyze school management platforms available in Sudan"
-  1. Web search: Products, pricing, features
+  > "Analyze school management landscape in Sudan/MENA"
+  1. Web search: Products, pricing, features, gaps
   2. Compare: Feature matrix vs. Hogwarts
-  3. Identify: Our differentiators
+  3. Identify: Open-source differentiator + sharing economy angle
   4. Output: Report for team review
 ```
 
@@ -329,17 +323,19 @@ Cowork (Samia or Ali):
 
 | I Want To... | Say... | Who |
 |-------------|--------|-----|
-| Start dev server | "dev" | Osman A. / Sedon |
-| Build project | "build" | Osman A. / Sedon |
-| Push code | "push" / "quick" | Osman A. / Sedon |
-| Deploy | "deploy" / "ship" | Osman A. |
-| Create component | "atom/template/block [name]" | Osman A. |
-| Generate feature | "saas [feature]" | Osman A. |
-| Run tests | "test [target]" | Osman A. / Sedon |
-| QA handover | "handover [block]" | Osman A. |
-| Fix errors | "fix" | Anyone |
-| Generate docs | "docs" | Samia / Osman A. |
-| Client update | Cowork | Ali |
-| Arabic content | Cowork | Samia |
-| Revenue report | Cowork + Stripe MCP | Ali / Kun |
-| Research | Cowork + web search | Samia |
+| Start dev server | "dev" | Abdout |
+| Build project | "build" | Abdout |
+| Push code | "push" / "quick" | Abdout |
+| Deploy | "deploy" / "ship" | Abdout |
+| Create component | "atom/template/block [name]" | Abdout |
+| Generate feature | "saas [feature]" | Abdout |
+| Run tests | "test [target]" | Abdout |
+| QA testing | GitHub Issue checklists | Ali |
+| Report bugs | Comment on GitHub Issue | Ali |
+| Fix errors | "fix" | Abdout |
+| Client outreach | sales@databayt.org | Ali |
+| Sponsor/investor search | Outreach | Ali |
+| Sharing economy research | Cowork | Samia |
+| Claude/Anthropic R&D | Cowork | Samia |
+| Kun care/config | Cowork | Samia |
+| Saudi operations | Clear task map | Sedon |

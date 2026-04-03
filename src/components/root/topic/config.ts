@@ -710,10 +710,10 @@ export const topicDetails: Record<string, TopicDetail> = {
       "Script configures settings.json with role-appropriate MCPs",
     ],
     usage: [
-      "Abdout — Founder & Architect: MacBook M4, Claude Max, 40 agents, 18 MCPs, all keywords",
-      "Ali — Developer & QA: HP Windows, Claude Code, QA on hogwarts, bug reports on GitHub Issues",
-      "Samia — Creative & Content: Dell Windows, translation AR/EN, voiceover, vision/strategy",
-      "Sedon — Facilitator & Ops: HP Windows, Saudi gateway, part-time, batch weekly tasks",
+      "Abdout — Builder: full agent fleet, all MCPs, all keywords",
+      "Ali — QA Engineer + Sales: testing, issue reports, outreach (sales@databayt.org)",
+      "Samia — R&D & Kun Caretaker: Claude/Anthropic research, sharing economy, Kun care",
+      "Sedon — Executor: clear task maps, Saudi operations, batch weekly",
     ],
     configPaths: [
       ".claude/setup/team-setup.sh",

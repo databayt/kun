@@ -1,79 +1,68 @@
 # Cowork ↔ Claude Code Bridge
 
-Cowork and Claude Code are two modes of the same brain. They share everything in `~/.claude/` — agents, memory, settings, rules. The difference is posture:
+Cowork and Claude Code are separate sessions sharing the same `~/.claude/` directory. They do NOT share conversation history. The bridge is a file + GitHub Issues.
 
-- **Cowork** = Think. Plan. Research. Write. Decide.
-- **Claude Code** = Do. Build. Deploy. Fix. Ship.
+## How It Actually Works
 
-## Shared State
+| What | Cowork Can Do | Code Can Do |
+|------|--------------|-------------|
+| Read `~/.claude/bridge.md` | Yes (filesystem MCP) | Yes (Read tool) |
+| Write `~/.claude/bridge.md` | Yes (filesystem MCP) | Yes (Write tool) |
+| Read `~/.claude/memory/` | Yes (filesystem MCP) | Yes (auto-loaded) |
+| GitHub issues | Yes (github MCP) | Yes (gh CLI + github MCP) |
+| Apple Notes (dispatch.sh) | No (needs bash) | Yes (osascript) |
+| Run bash commands | No | Yes |
+| Use hooks | No | Yes |
+| Use skills (/commands) | No | Yes |
 
-Both modes read and write to:
+## The Bridge File
 
-| Resource | Path | Purpose |
-|----------|------|---------|
-| Agents | `~/.claude/agents/*.md` | Same 40 agents available in both modes |
-| Memory | `~/.claude/memory/*.json` | Persistent state (team, repos, patterns) |
-| Dispatch/Cowork | Notes → Dispatch → Cowork | Handoff note between modes |
-| GitHub Issues | databayt/*/issues | Work items created in either mode |
+`~/.claude/bridge.md` is the handoff point. Both modes read and write it directly.
 
-## Handoff: Cowork → Code
+### Cowork → Code handoff
 
-When work starts in Cowork (planning, strategy, research):
+1. Cowork plans, researches, decides
+2. Cowork writes results to `~/.claude/bridge.md` via filesystem MCP
+3. Cowork creates GitHub issues for actionable work
+4. Code reads bridge.md at session start → sees plan → executes
 
-1. Cowork produces a **deliverable**: plan, architecture, stories, research brief
-2. Cowork writes it to Dispatch/Cowork note: `dispatch.sh cowork "Plan complete: [summary]. Issues created: #X, #Y, #Z"`
-3. Cowork creates GitHub issues for each actionable item
-4. Claude Code reads Cowork note at session start
-5. Claude Code picks up the issues and executes
+### Code → Cowork handoff
 
-Example flow:
-```
-[Cowork session]
-Abdout: "Plan the hogwarts notification system"
-→ Research patterns, design architecture, write stories
-→ Create issues: databayt/hogwarts#10, #11, #12
-→ dispatch.sh cowork "Notification system planned. 3 issues created. Start with #10."
-
-[Claude Code session]  
-Captain: reads Cowork note → sees plan → starts executing #10
-```
-
-## Handoff: Code → Cowork
-
-When Code finishes work that needs strategic review:
-
-1. Code writes to Dispatch/Cowork: `dispatch.sh cowork "Built X. Needs review: [what to look at]"`
-2. Code creates a GitHub issue if follow-up work is needed
-3. Cowork picks up in the next Desktop session
+1. Code builds, deploys, fixes
+2. Code writes results to `~/.claude/bridge.md`
+3. Code creates GitHub issues for follow-up
+4. Cowork reads bridge.md at session start → sees results → plans next
 
 ## Session Start Protocol
 
-Every Claude Code session:
-1. Read inbox: `dispatch.sh read inbox` — check for Abdout's instructions
-2. Read cowork: `dispatch.sh read cowork` — check for Cowork handoffs
-3. Check GitHub: `gh issue list --repo databayt/kun --assignee abdout --state open`
-4. Proceed with highest priority work
+### Claude Code session
+1. Read `~/.claude/bridge.md` — check for Cowork handoffs
+2. `dispatch.sh read inbox` — check Abdout's Apple Notes instructions
+3. `gh issue list --repo databayt/kun --state open` — check work queue
+4. Proceed with highest priority
 
-Every Cowork session:
-1. Check Dispatch/Cowork note for Code's output
-2. Review GitHub issues for completed/blocked items
-3. Plan next moves
+### Cowork session
+1. Read `~/.claude/bridge.md` via filesystem MCP — check for Code results
+2. Check GitHub issues for completed/blocked items
+3. Plan next moves, update bridge.md with plan
 
-## Voice Mode Integration
+## What's NOT Shared
 
-Abdout can use voice in Claude Desktop for:
-- Quick decisions: "Yes, ship it" / "No, hold off"
-- Brain dumps: Speak a plan, Claude transcribes and structures it
-- Review dispatches: "Read me the latest captain dispatch"
-- Create issues by voice: "Create an issue for hogwarts about the admission page being slow"
+- Conversation history (each session is independent)
+- Active context (tools loaded, files read)
+- Hooks and settings.json automation
+- Slash commands (/dev, /build, etc.)
 
-Voice → Cowork → structured plan → issues → Code executes.
+## Desktop MCP Config
 
-## The Key Insight
+Cowork has tool access via `~/Library/Application Support/Claude/claude_desktop_config.json`:
+- **filesystem** — reads/writes ~/.claude/, ~/kun, ~/codebase
+- **github** — repos, issues, PRs in databayt org
 
-Cowork doesn't need to know how to code.
-Claude Code doesn't need to strategize.
-They share a brain through files, notes, and issues.
+## Apple Notes (Code-Only)
 
-Abdout switches between them like switching between thinking and doing.
-Both are the same Captain — one thinks, one acts.
+dispatch.sh requires bash/osascript — only works from Claude Code:
+- `dispatch.sh captain "update"` — write to Notes for Abdout's iPhone
+- `dispatch.sh read inbox` — read Abdout's instructions
+
+Cowork cannot use dispatch.sh. If Cowork needs to reach Abdout asynchronously, write to bridge.md or create a GitHub issue.

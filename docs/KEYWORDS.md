@@ -506,7 +506,7 @@ Generates tests — Vitest for units, Playwright for journeys. Your Protego agai
 > **The Order:**
 > **Familiar:** `test` | **Backup:** `react`, `nextjs`, `build` | **Portal:** Browser MCP | **Skill:** `/test` | **Ward:** `testing`
 >
-> Vitest for unit/component tests. Playwright for E2E across chromium/firefox/webkit/mobile. Target: 95%+ coverage. Test accounts use password `1234`.
+> Vitest for unit/component tests. Playwright for E2E across chromium/firefox/webkit/mobile. Target: 95%+ coverage. Test accounts use configured credentials.
 
 ### `e2e`
 

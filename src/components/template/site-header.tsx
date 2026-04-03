@@ -3,6 +3,7 @@ import Link from "next/link"
 import { ModeSwitcher } from "./mode-switcher"
 import { LangSwitcher } from "./lang-switcher"
 import { GitHubLink } from "./github-link"
+import { UserButton } from "./user-button"
 import { Separator } from "@/components/ui/separator"
 
 interface SiteHeaderProps {
@@ -24,12 +25,31 @@ export function SiteHeader({ lang }: SiteHeaderProps) {
             >
               Docs
             </Link>
+            <Link
+              href={`/${lang}/incantations`}
+              className="transition-colors hover:text-foreground/80 text-foreground/60"
+            >
+              Incantations
+            </Link>
+            <Link
+              href={`/${lang}/team`}
+              className="transition-colors hover:text-foreground/80 text-foreground/60"
+            >
+              Team
+            </Link>
+            <Link
+              href={`/${lang}/context`}
+              className="transition-colors hover:text-foreground/80 text-foreground/60"
+            >
+              Context
+            </Link>
           </nav>
           <div className="ms-auto flex items-center gap-2">
             <GitHubLink />
             <Separator orientation="vertical" />
             <LangSwitcher />
             <ModeSwitcher />
+            <UserButton />
           </div>
         </div>
       </div>

@@ -77,6 +77,17 @@ Execute the full deployment loop:
 - **Env var missing**: Check Vercel environment variables
 - **Prisma errors**: Ensure prisma generate runs in build
 
+### Pipeline Integration (when used from `/feature` or `/ship`):
+If a feature issue number is in context:
+1. Include `Closes #<issue-number>` in the commit message
+2. After successful deployment, comment on the issue:
+   ```bash
+   gh issue comment <number> --repo <repo> --body "Deployed to production.
+   **URL**: <deployment-url>
+   **Aliases**: <production domains>
+   **Status**: Ready"
+   ```
+
 ### Success Criteria:
 - Deployment status: Ready
 - All aliases assigned

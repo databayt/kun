@@ -4,77 +4,29 @@
   "company": {
     "name": "Databayt",
     "license": "SSPL",
-    "revenueTarget": "$1,000/month",
-    "repos": 14,
     "products": ["hogwarts", "souq", "mkan", "shifa", "swift-app"],
     "stack": "Next.js 16, React 19, Prisma 6, TypeScript 5, Tailwind CSS 4, shadcn/ui"
   },
   "team": [
     {
       "name": "Abdout",
-      "fullName": "Osman Abdout",
       "role": "founder-tech-lead",
-      "installRole": "engineer",
-      "equipment": {
-        "laptop": "MacBook Pro M4",
-        "phone": "iPhone 16e"
-      },
-      "access": ["CLI", "Desktop App", "iOS App", "claude.ai/code", "WebStorm", "VS Code"],
-      "strengths": ["architecture", "full-stack engineering", "infrastructure", "system design"],
-      "focus": "Kun engine, cross-repo architecture, technical decisions",
-      "voiceTool": "Wispr Flow ($10/mo) or macOS Dictation (free)",
-      "subscription": "Claude Max 20x ($200/month)"
+      "installRole": "engineer"
     },
     {
       "name": "Ali",
-      "fullName": "Ali Aseel",
       "role": "business",
-      "installRole": "business",
-      "equipment": {
-        "laptop": "HP Windows",
-        "phone": "Android"
-      },
-      "access": ["Desktop App", "claude.ai/code", "Cowork", "VS Code"],
-      "strengths": ["CS+Business degree (BS+MS)", "market research", "client outreach", "tech-savvy community"],
-      "focus": "Revenue, proposals, client relationships, market intelligence",
-      "voiceTool": "Windows Voice Typing (Win+H, free)",
-      "commitment": "Long-term, fully committed to databayt vision"
+      "installRole": "business"
     },
     {
       "name": "Samia",
-      "fullName": "Samia Hamd",
       "role": "creative-content",
-      "installRole": "content",
-      "equipment": {
-        "laptop": "Dell Windows",
-        "phone": "iPhone 13"
-      },
-      "access": ["Desktop App", "iOS App", "claude.ai/code", "Cowork", "voice mode"],
-      "strengths": ["writing", "translation AR/EN", "voiceover", "vision/strategy brainstorming", "research"],
-      "focus": "Content creation, translation, UX writing, brand voice, documentation",
-      "voiceTool": "Claude Desktop voice mode + Windows Voice Typing (free)",
-      "note": "Core vision contributor — most strategic ideas brainstormed with her"
+      "installRole": "content"
     },
     {
       "name": "Sedon",
-      "fullName": "Sedon",
       "role": "facilitator-ops",
-      "installRole": "ops",
-      "equipment": {
-        "laptop": "HP Windows",
-        "phone": "Android"
-      },
-      "access": ["Desktop App", "claude.ai/code", "VS Code"],
-      "strengths": ["mechanical engineering", "social skills", "trusted", "Saudi market gateway"],
-      "focus": "Saudi operations, payment gateway, server supervision, customer facilitation",
-      "voiceTool": "Windows Voice Typing (Win+H, free)",
-      "commitment": "Part-time but willing, least available",
-      "special": {
-        "saudiAddress": "Physical address in Saudi Arabia available for company use",
-        "bankAccount": "Will create Saudi bank account for databayt",
-        "paymentGateway": "Gateway for subscriptions and all payments",
-        "homeServer": "Server hosting at his home for self-hosted services"
-      }
+      "installRole": "ops"
     }
   ]
 }

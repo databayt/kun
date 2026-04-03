@@ -40,50 +40,61 @@ Databayt builds products that automate real-world operations — schools, rental
 
 ## 3. The Team
 
-| # | Name | Role | Background | Devices | Email |
-|---|------|------|-----------|---------|-------|
-| 1 | **Osman Abdout** | Founder, Lead Engineer | Electrical engineer (10+ years), software engineer (4 years) | MacBook M4, iPhone 16e | abdout@databayt.org |
-| 2 | **Ali Aseel** | Business & Operations | Computer Science + MBA (India), 2 years business experience | Windows laptop, Android | ali@databayt.org |
-| 3 | **Samia Hamd** | Content, Research & Voice | Languages specialist, advanced Arabic/English, writer, voiceover artist, researcher. Blind — uses screen reader. | Dell Windows laptop, iPhone 13 Mini | samia@databayt.org |
-| 4 | **Osman Sedon** | Engineering (Part-time) | Mechanical engineer (2 years), limited availability | HP Windows, Android | sedon@databayt.org |
-
-### Device Matrix
-
-| Member | OS | Mobile | Claude Code Access |
-|--------|-----|--------|-------------------|
-| Osman Abdout | macOS | iOS | CLI + Desktop + iOS |
-| Ali Aseel | Windows | Android | Desktop + Web |
-| Samia Hamd | Windows | iOS | Desktop + Web + iOS |
-| Osman Sedon | Windows | Android | Desktop + Web |
+| # | Name | Role |
+|---|------|------|
+| 1 | **Abdout** | Builder — engineering everything |
+| 2 | **Ali** | QA Engineer + Sales — issue reporting, sales@databayt.org, outreach for schools/sponsors/investors/early adopters/contributors |
+| 3 | **Samia** | R&D — Claude/Anthropic products, sharing economy research, revenue distribution, Kun caretaker |
+| 4 | **Sedon** | Executor — clear task maps, reliable delivery, Saudi operations |
 
 ---
 
-## 4. The Driver: Sustain $1,000/month
+## 4. The Driver: Establish Real-World Solutions
 
-### Financial Target
+### Financial Reality
 
-The immediate priority is **sustainability** — covering operating costs and paying the team.
+We are starting the company. Not in survival mode — in building mode.
 
 | Expense | Monthly Cost |
 |---------|-------------|
 | Claude Code (Max plan) | $200 |
-| Services (Neon, Vercel, AWS, Namecheap) | ~$200 |
-| Team salary (3 members x $200) | $600 |
-| **Total monthly target** | **$1,000** |
+| Services (Neon, Vercel, AWS, Namecheap) | ~$300 |
+| Team salary | $0 (equity/sweat phase) |
+| **Total monthly burn** | **~$500** |
 
 ### Current Budget
 
-- **Remaining capital**: $500 (until end of running year)
-- **Revenue pipeline**: Ahmed Baha / King Fahad Schools (Sudan) — pilot phase for Hogwarts (admission, notifications, messaging), potential full SaaS contract
+- **Remaining capital**: $5,000 (~10 months runway at $500/month)
+- **Revenue pipeline**: Ahmed Baha / King Fahad Schools (Sudan) — interested client, meeting April 4, 2026
+- **Outreach**: Ali actively looking for schools, sponsors, investors, early adopters, leads, clients, contributors
 
-### Revenue Strategy (Next 3 Months)
+### Strategy: Open Source, Sharing Economy
 
-| Priority | Source | Product | Target |
-|----------|--------|---------|--------|
-| 1 | **King Fahad Schools pilot** | Hogwarts (admission + notifications) | First paying customer |
-| 2 | **Additional school onboarding** | Hogwarts SaaS | Recurring revenue |
-| 3 | **Freelance/contracts** | Upwork + Discord | Bridge income |
-| 4 | **Mkan early access** | Rental marketplace | Secondary product |
+We don't care about starting slow. We care about:
+1. **Establishing real-world solutions** that actually work for schools
+2. **Building community** — pushing contributors to participate
+3. **Sharing economy model** — transparent, fair revenue distribution
+4. **Market leadership** — targeting lead school solutions in Sudan and MENA
+
+The pitch is the same for everyone — Ahmed Baha, future schools, sponsors, investors: we are open source and we are sharing economy.
+
+### Pilot: King Fahad Schools
+
+Ahmed Baha is an interested client. The pitch is partnership, not sales:
+1. **Admission flow** — end-to-end online application (wizard, admin review, status tracking, notifications)
+2. **Seeded school data** — announcements, events, and content so the system feels real
+
+### Growth Strategy
+
+| Channel | Owner | What |
+|---------|-------|------|
+| **Schools (clients)** | Ali | Direct outreach, sales@databayt.org |
+| **Sponsors** | Ali | Organizations supporting education tech |
+| **Investors** | Ali | Seed/angel, aligned with sharing economy |
+| **Early adopters** | Ali | Schools willing to pilot |
+| **Contributors** | Ali + Community | Open source developers |
+| **Revenue model** | Samia | Researching sharing economy, fair distribution |
+| **Product R&D** | Samia | Claude/Anthropic products, Kun engine |
 
 ---
 
@@ -240,40 +251,40 @@ Kun acts with **moderate autonomy for the good of the company**. It has its own 
 
 ## 8. Three-Month Plan (April — June 2026)
 
-### Month 1: Ship Hogwarts Pilot
+### Month 1: Hogwarts Pilot + Foundation
 
 | Week | Focus | Owner |
 |------|-------|-------|
-| 1 | Polish admission block, notification system | Osman A. + Kun |
-| 2 | Messaging system, pilot deployment | Osman A. + Kun |
-| 3 | King Fahad Schools onboarding + training | Ali (business) + Samia (docs/training) |
-| 4 | Pilot feedback, iteration, billing setup | Full team |
+| 1 (Apr 1-4) | QA fixes, seed school content, **Ahmed meeting Fri Apr 4** | Abdout + Ali |
+| 2 (Apr 7-11) | Iterate on Ahmed's feedback, continue outreach | Abdout + Ali |
+| 3 (Apr 14-18) | Pilot live usage, community groundwork | Full team |
+| 4 (Apr 21-25) | Solidify product, expand outreach | Full team |
 
-### Month 2: Stabilize + Second Customer
-
-| Week | Focus | Owner |
-|------|-------|-------|
-| 1-2 | Bug fixes from pilot, feature requests | Osman A. + Kun |
-| 3 | Outreach for second school | Ali |
-| 4 | Codebase improvements, pattern extraction | Osman A. + Kun |
-
-### Month 3: Scale + Diversify
+### Month 2: Establish + Grow
 
 | Week | Focus | Owner |
 |------|-------|-------|
-| 1-2 | Mkan soft launch, marketing site | Full team |
-| 3 | Upwork/freelance pipeline | Ali + Osman A. |
-| 4 | Revenue review, Q3 planning | Full team |
+| 1-2 | Product quality, feature requests from pilot | Abdout + Kun |
+| 3 | Outreach: more schools, sponsors, contributors | Ali |
+| 4 | Sharing economy model design, Kun improvements | Samia + Abdout |
+
+### Month 3: Market Presence
+
+| Week | Focus | Owner |
+|------|-------|-------|
+| 1-2 | Community building, contributor onboarding | Full team |
+| 3 | Marketing, case study from pilot | Ali + Samia |
+| 4 | Q3 planning, revenue model finalization | Full team |
 
 ### Team Assignments by Strength
 
-| Member | Primary Role | Deliverables |
-|--------|-------------|-------------|
-| **Osman Abdout** | Engineering lead | Code, architecture, deployment |
-| **Ali Aseel** | Business development | Client relations, contracts, outreach |
-| **Samia Hamd** | Content + Research | Documentation, Arabic content, voiceover, UX writing, research |
-| **Osman Sedon** | Engineering support | Specific technical tasks as available |
-| **Kun** | Operations engine | Coordination, R&D, follow-up, optimization |
+| Member | Role | Deliverables |
+|--------|------|-------------|
+| **Abdout** | Builder | Code, architecture, deployment |
+| **Ali** | QA + Sales | Issue reporting, sales@databayt.org, outreach for all support types |
+| **Samia** | R&D | Claude/Anthropic research, sharing economy models, revenue distribution |
+| **Sedon** | Executor | Clear task maps, Saudi operations, bank/payments |
+| **Kun** | Engine | Coordination, follow-up, optimization (Samia taking over care) |
 
 ---
 
@@ -293,7 +304,7 @@ Kun maintains awareness of all service accounts and credentials for operational 
 | Sentry | Error monitoring | sentry.io |
 | Upstash | Redis | upstash.com |
 
-Email accounts: abdout@databayt.org, ali@databayt.org, samia@databayt.org, sedon@databayt.org
+Email accounts: [team]@databayt.org
 
 ---
 

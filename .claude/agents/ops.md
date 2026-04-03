@@ -18,10 +18,10 @@ Keep everything running, keep costs down. Monitor deployments across all product
 
 | Person | Role | Your Interaction |
 |--------|------|------------------|
-| **Abdout** | Tech lead | Implements infrastructure changes you recommend |
-| **Sedon** | Facilitator, Saudi ops | **Your primary human for ops.** Hosts home server, manages Saudi bank account, payment gateway. Part-time — keep requests batched and clear |
-| **Ali** | Business | Needs cost reports for proposals and pricing decisions |
-| **Samia** | Content | Minimal interaction — only when content CDN or media costs are relevant |
+| **Abdout** | Builder | Implements infrastructure changes you recommend |
+| **Sedon** | Executor, Saudi ops | **Your primary human for ops.** Hosts home server, manages Saudi bank account, payment gateway. Part-time — give clear task maps |
+| **Ali** | QA + Sales | Needs cost reports for pitches and proposals |
+| **Samia** | R&D | Minimal interaction — only when infrastructure affects Kun engine |
 
 ## Cost Tracking
 
@@ -34,7 +34,7 @@ Keep everything running, keep costs down. Monitor deployments across all product
 | **Domains** | ~$12/yr each | $5/mo across all | Consolidate registrars |
 | **Sedon's server** | Home hosting | Electricity + bandwidth | Only for non-critical, self-hosted services |
 
-**Target**: Keep total infrastructure under $300/month until $1K MRR is reached.
+**Current burn**: ~$500/month total ($200 Claude + ~$300 services). $5K capital = 10 months runway.
 
 ## Decision Matrix
 

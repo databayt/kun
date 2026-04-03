@@ -1,13 +1,229 @@
 ---
 title: Issue
-description: GitHub issue creation — from CLI, Slack, or Cowork with auto-labeling and Slack notifications
+description: Issue pipeline — from user report to auto-fix, including Report an Issue dialog, report agent, and scheduled automation
 ---
 
 # Issue
 
-Create GitHub issues across all databayt repos. Issues can originate from Claude Code, Slack messages, or Cowork sessions.
+The issue pipeline connects user-reported bugs to automated fixes. Users click "Report an Issue" in the UI, a GitHub issue is created, and the report agent processes it.
 
-## Usage
+## Report an Issue (User-Facing)
+
+Every hogwarts page has a "Report an Issue" link or icon. When clicked, a dialog opens with a textarea. On submit, a GitHub issue is created in `databayt/hogwarts` with the `report` label.
+
+### Where It Appears
+
+| Location | Variant | How |
+|----------|---------|-----|
+| SaaS marketing footer | `text` | Inline link next to "built by Databayt... GitHub" |
+| Application form wizard | `icon` | Bug icon in FormFooter next to Logo, Help, Save |
+| School marketing pages | `text` | Bottom of page |
+| School dashboard | `text` | Bottom of page |
+| SaaS dashboard | `text` | Bottom of page |
+| Auth pages | `text` | Absolute bottom-left |
+| Onboarding | `text` | Bottom of page |
+| Exam wizard | `text` | Absolute bottom-left |
+
+### Component
+
+```
+src/components/report-issue.tsx
+```
+
+Two variants:
+- **`text`** (default) — underlined "Report an issue" link that opens the dialog
+- **`icon`** — Bug icon (`lucide-react`) that opens the same dialog
+
+The dialog contains only a textarea and submit button. Bilingual via `useDictionary()`.
+
+### Server Action
+
+```
+src/lib/actions/report-issue.ts
+```
+
+On submit:
+1. Reads `GITHUB_PERSONAL_ACCESS_TOKEN` from env
+2. Reads auth session via `auth()` (for reporter identification)
+3. Creates GitHub issue with `report` label
+4. Posts acknowledgment comment: "Received. This report is queued for automated review and fix."
+
+### Issue Body Format
+
+```markdown
+<user's description>
+
+---
+
+**Page**: https://kingfahad.databayt.org/en/admissions
+**Time**: 2026-04-02T08:42:26Z
+```
+
+Title is truncated to 80 characters from the description.
+
+### i18n
+
+Translation keys in `en.json` / `ar.json` under `reportIssue`:
+
+| Key | English | Arabic |
+|-----|---------|--------|
+| `link` | Report an issue | الإبلاغ عن مشكلة |
+| `title` | Report an issue | الإبلاغ عن مشكلة |
+| `placeholder` | Describe the issue... | ...صف المشكلة |
+| `submit` | Submit | إرسال |
+| `submitting` | Submitting... | ...جاري الإرسال |
+| `success` | Submitted. Thank you! | !تم الإرسال. شكراً لك |
+| `error` | Something went wrong. Try again. | .حدث خطأ. حاول مرة أخرى |
+
+## Report Agent (Auto-Fix)
+
+The report agent processes open `report`-labeled issues. Triggered manually by typing `report` in Claude Code, or by the session-start hook.
+
+### Trigger
+
+```bash
+# Manual
+report
+report hogwarts
+
+# Session-start hook (automatic)
+# Checks hogwarts + kun for open report issues on every session start
+```
+
+### Pipeline
+
+```
+READ → LOCATE → CONTEXT → VALIDATE → FIX → BUILD → PUSH → CLOSE
+```
+
+| Step | What It Does |
+|------|-------------|
+| **READ** | `gh issue view` — extract description, page URL, time |
+| **LOCATE** | Map URL to route directory (`src/app/`) and component directory (`src/components/`) |
+| **CONTEXT** | Read `CLAUDE.md`, `README.md`, `ISSUE.md` in the component directory |
+| **VALIDATE** | Is it a real bug? Does it align with plans? Will the fix improve things? |
+| **FIX** | Edit minimum code needed, follow documented patterns |
+| **BUILD** | `pnpm build` — verify no regressions |
+| **PUSH** | `fix:` commit with `Closes #N`, push to main |
+| **CLOSE** | `gh issue close` with structured comment (root cause, fix, files, verification) |
+
+### Validation Gate
+
+Before writing any code, the agent answers three questions:
+
+1. **Is it a real bug?** — Can it reproduce from description + URL? If not → `cannot-reproduce` label
+2. **Is it aligned?** — Does it contradict `ISSUE.md` planned work? If feature request → `needs-human` label
+3. **Is the fix safe?** — Could it break shared code? When in doubt → `needs-human` label
+
+### Escalation
+
+| Situation | Action |
+|-----------|--------|
+| Build error after fix | Hand off to `build` agent |
+| Server-side exception | Hand off to `sse` agent |
+| Performance issue | Hand off to `performance` agent |
+| Security concern | Hand off to `guardian` agent |
+| Needs architecture change | Comment + `needs-human` label |
+| Cannot reproduce | Comment + `cannot-reproduce` label |
+
+### Agent Definition
+
+```
+.claude/agents/report.md
+```
+
+### Close Comment Format
+
+```markdown
+Fixed in abc1234.
+
+**What was wrong**: <root cause>
+**What was fixed**: <change summary>
+**Files changed**: <list>
+**Verified**: build passes, auto-deploying to production
+```
+
+## Scheduled Trigger (Paused)
+
+A remote trigger exists that runs the report agent every 2 hours in Anthropic's cloud. Currently **paused** — using manual `report` keyword until the feature stabilizes.
+
+| Field | Value |
+|-------|-------|
+| **Name** | Report Auto-Fix (Every 2h) |
+| **ID** | `trig_01MFLRtUTfMMNTDGBBGQtZLq` |
+| **Schedule** | `0 */2 * * *` (every 2 hours) |
+| **Status** | Disabled |
+| **Repo** | `databayt/hogwarts` |
+| **Model** | claude-sonnet-4-6 |
+| **Manage** | https://claude.ai/code/scheduled |
+
+To re-enable when ready:
+```bash
+# In Claude Code
+schedule update trig_01MFLRtUTfMMNTDGBBGQtZLq --enabled true
+```
+
+## Session-Start Hook
+
+Every time Claude Code opens, the session-start hook checks for open report issues:
+
+```bash
+# In ~/.claude/settings.json (SessionStart hook)
+gh issue list --label report --state open --repo databayt/hogwarts
+gh issue list --label report --state open --repo databayt/kun
+```
+
+If found, the agent processes them immediately per the rule in `session-start.md`.
+
+## Full Pipeline Flow
+
+```
+User clicks "Report an issue"
+    ↓
+Dialog opens → user types description → Submit
+    ↓
+Server action creates GitHub issue (label: report)
+    ↓
+Acknowledgment comment posted: "Received. Queued for review."
+    ↓
+Next Claude Code session → hook detects → agent processes
+    OR
+User types "report" → agent processes manually
+    OR
+Scheduled trigger (when enabled) → agent processes every 2h
+    ↓
+Agent: READ → LOCATE → CONTEXT → VALIDATE → FIX → BUILD → PUSH
+    ↓
+Issue closed with structured comment
+    ↓
+Vercel auto-deploys fix to production
+```
+
+## Files
+
+### Hogwarts
+
+| File | Role |
+|------|------|
+| `src/components/report-issue.tsx` | UI component (text + icon variants) |
+| `src/lib/actions/report-issue.ts` | Server action (GitHub API + auth + ack comment) |
+| `src/components/form/footer.tsx` | FormFooter with `showReport` prop |
+| `src/components/internationalization/en.json` | English translations |
+| `src/components/internationalization/ar.json` | Arabic translations |
+
+### Kun (Engine)
+
+| File | Role |
+|------|------|
+| `.claude/agents/report.md` | Report agent definition (12-step pipeline) |
+| `.claude/rules/session-start.md` | Auto-process rule |
+| `content/docs/issue.mdx` | This documentation |
+
+## Issue Creation (CLI)
+
+Issues can also be created from Claude Code or Slack, not just the dialog.
+
+### Usage
 
 ```bash
 # From Claude Code
@@ -15,12 +231,9 @@ Create GitHub issues across all databayt repos. Issues can originate from Claude
 
 # From keyword
 issue "Add dark mode to dashboard"
-
-# From Slack context
-issue from slack #dev
 ```
 
-## Repo Mapping
+### Repo Mapping
 
 | Repo | Scope |
 |------|-------|
@@ -34,11 +247,9 @@ issue from slack #dev
 | `databayt/swift-app` | Mobile: iOS app |
 | `databayt/marketing` | Marketing: landing pages |
 
-Kun auto-detects the repo from context. If ambiguous, it asks.
+### Labels
 
-## Labels
-
-### Priority
+#### Priority
 
 | Label | When |
 |-------|------|
@@ -47,32 +258,17 @@ Kun auto-detects the repo from context. If ambiguous, it asks.
 | `P2-medium` | Important but not blocking |
 | `P3-low` | Nice to have, cleanup |
 
-### Type
+#### Type
 
 | Label | When |
 |-------|------|
+| `report` | User-reported via dialog — auto-processed by report agent |
 | `bug` | Something is broken |
 | `enhancement` | Improve existing feature |
-| `type:agent` | Agent configuration |
-| `type:skill` | Skill/command |
-| `type:mcp` | MCP server integration |
-| `type:hook` | Hook configuration |
-| `type:rule` | Rule file |
-| `type:memory` | Memory system |
-| `type:docs` | Documentation |
-| `type:infra` | Infrastructure, CI/CD |
+| `needs-human` | Agent can't fix, needs human judgment |
+| `cannot-reproduce` | Agent couldn't reproduce the reported issue |
 
-### Scope
-
-`scope:captain`, `scope:business`, `scope:product`, `scope:tech`, `scope:specialist`, `scope:cross-repo`
-
-### Assignment
-
-`assign:abdout`, `assign:ali`, `assign:samia`, `assign:sedon`, `assign:captain`
-
-## Issue Body Template
-
-Every issue follows this structure:
+### Issue Body Template (CLI)
 
 ```markdown
 ## Context
@@ -85,69 +281,4 @@ Why this matters — user impact, business context, or technical debt.
 
 ## Verification
 How to confirm it's done — test commands, URLs to check, expected behavior.
-```
-
-## Slack Integration
-
-### Issue → Slack
-
-When an issue is created, kun posts to `#dev`:
-
-```
-New issue: databayt/hogwarts#15 — Login crashes on Safari mobile
-Priority: P1-high | Assigned: abdout
-```
-
-### Slack → Issue
-
-Team members describe problems in Slack. Kun creates issues from those messages:
-
-```
-Ali in #dev: "The admission form loses data when you switch tabs"
-       ↓
-kun creates: databayt/hogwarts#16
-  Title: "Admission form loses data on tab switch"
-  Body: "Reported by Ali in #dev. The admission form..."
-       ↓
-kun replies in #dev: "Created databayt/hogwarts#16 — assigned to abdout"
-```
-
-### Channel → Repo Default
-
-| Channel | Default Repo |
-|---------|-------------|
-| `#hogwarts` | `databayt/hogwarts` |
-| `#dev` | Current working repo |
-| `#ops` | `databayt/kun` |
-
-## From Cowork
-
-Issues created during Cowork planning sessions follow the same format:
-
-```
-[Cowork session]
-"Plan the notification system for hogwarts"
-→ Creates: #10 Add notification preferences
-→ Creates: #11 Build notification delivery service  
-→ Creates: #12 Add push notification support
-→ Posts all three to #hogwarts
-```
-
-## Examples
-
-```bash
-# Bug report
-/issue "Admission form validation broken on mobile" --repo hogwarts
-
-# Feature request
-/issue "Add Arabic translation for settings page" --repo hogwarts
-
-# From Slack
-/issue from slack #dev
-
-# Cross-repo
-/issue "Update shadcn Button to support RTL icon flip" --repo shadcn
-
-# Batch from planning
-/issue batch "hogwarts notifications" --issues 3
 ```

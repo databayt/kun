@@ -2,7 +2,7 @@
 
 ## Preferences
 
-- **Model**: Opus 4.5 (default)
+- **Model**: Opus 4.6 (default)
 - **Package Manager**: pnpm
 - **Stack**: Next.js 16, React 19, Prisma 6, TypeScript 5, Tailwind CSS 4, shadcn/ui
 - **Languages**: Arabic (RTL default), English (LTR)
@@ -10,153 +10,70 @@
 
 ---
 
-## Quick Keywords
+## Keywords
 
-Say any of these words to trigger the corresponding tools:
+One word triggers a complete workflow. Keywords are organized by power level.
 
-### Workflow
-| Keyword | Action |
-|---------|--------|
-| `dev` | Start dev server, kill port 3000, open Chrome |
-| `build` | Run pnpm build with error scanning |
-| `push` | Full git add, commit, push workflow |
-| `quick` | Fast commit (skip build validation) |
-| `ship` | Deploy to Vercel production |
-| `deploy` | Deploy to staging/preview |
-| `validate` | Run all quality checks |
+### Tier 1 — Pipeline (idea to production)
 
-### Creation
-| Keyword | Action |
-|---------|--------|
-| `component` | Create React component |
-| `page` | Create Next.js page |
-| `api` | Create Server Action |
-| `atom` | Create atom (2+ primitives) |
-| `template` | Create template (full-page layout) |
-| `block` | Create block (UI + logic) |
-| `feature` | Plan and create full feature |
-| `migration` | Create Prisma migration |
+The feature pipeline. Each keyword is a standalone stage. `feature` chains them all.
 
-### Framework
-| Keyword | Action |
-|---------|--------|
-| `nextjs` | Apply Next.js 16 patterns |
-| `react` | Apply React 19 patterns |
-| `typescript` | TypeScript strict mode |
-| `prisma` | Database operations |
-| `tailwind` | Styling with Tailwind v4 |
-| `shadcn` | shadcn/ui components |
+```
+feature billing hogwarts
+    ↓
+IDEA → SPEC → [approve] → SCHEMA → CODE → WIRE → CHECK → SHIP → WATCH
+```
 
-### UI Patterns
-| Keyword | Action |
-|---------|--------|
-| `table` | DataTable with sorting, filtering |
-| `header` | Page header with navigation |
-| `menu` | Navigation menu/sidebar |
-| `form` | Form with validation |
-| `modal` | Dialog/modal component |
-| `card` | Card variations |
-| `sidebar` | Sidebar navigation |
-| `footer` | Footer component |
-| `hero` | Hero section |
-| `navbar` | Top navigation bar |
+| Keyword | Stage | What It Does | Exit Gate |
+|---------|-------|-------------|-----------|
+| `feature` | All | Chains all stages — idea to production | Feature live, issue closed |
+| `idea` | Capture | Create structured GitHub issue with acceptance criteria | Issue exists |
+| `spec` | Specify | Data model sketch + file plan + human approval | Spec on issue, approved |
+| `schema` | Data | Prisma model + migration + Zod validation | Migration applied, types compile |
+| `code` | Logic | Server actions with auth + validation + tenant isolation | `tsc --noEmit` passes |
+| `wire` | UI | Pages + forms + tables + i18n wired to actions | `pnpm build` passes |
+| `check` | Quality | Type-check + build + visual verification | All gates green |
+| `ship` | Deploy | Commit + push + Vercel deploy + verify | Deployment Ready |
+| `watch` | Monitor | Post-deploy health check + production screenshot | No errors, issue closed |
 
-### Features
-| Keyword | Action |
-|---------|--------|
-| `auth` | Authentication flow |
-| `saas` | SaaS feature (schema + API + UI + billing) |
-| `dashboard` | Dashboard layout |
-| `landing` | Landing page |
-| `checkout` | Payment checkout |
-| `settings` | Settings page |
-| `profile` | User profile |
-| `admin` | Admin panel |
-| `onboarding` | User onboarding flow |
+**Usage**: `/feature billing hogwarts` or enter at any stage: `/schema billing`, `/wire #42`, `/check`
 
-### Animation
-| Keyword | Action |
-|---------|--------|
-| `motion` | Framer Motion animations |
-| `animation` | CSS/Framer animations |
-| `transition` | Page transitions |
-| `gesture` | Touch/drag interactions |
-| `scroll` | Scroll-triggered animations |
+**Product scope**: Append product name to activate domain context — `hogwarts`, `souq`, `mkan`, `shifa`
 
-### Quality
-| Keyword | Action |
-|---------|--------|
-| `test` | Generate tests (Vitest) |
-| `e2e` | E2E tests (Playwright) |
-| `coverage` | Test coverage report |
-| `review` | Code review |
-| `security` | Security audit (OWASP) |
-| `audit` | Full quality audit |
-| `accessibility` | a11y audit (WCAG) |
-| `optimize` | Performance optimization |
-| `performance` | Core Web Vitals check |
+### Tier 2 — Standalone Tools
 
-### Build
-| Keyword | Action |
-|---------|--------|
-| `fix` | Auto-fix lint/type errors |
-| `error` | Scan and fix errors |
-| `scan` | Scan codebase for issues |
-| `lint` | Run ESLint |
-| `format` | Run Prettier |
-| `type-check` | TypeScript strict check |
+Powerful workflows that run independently of the pipeline.
 
-### Documentation
-| Keyword | Action |
-|---------|--------|
-| `docs` | Generate MDX documentation |
-| `readme` | Create/update README |
-| `api-docs` | API documentation |
-| `storybook` | Component stories |
-| `changelog` | Update changelog |
+| Keyword | What It Does |
+|---------|-------------|
+| `dev` | Kill port 3000, start dev server, open Chrome |
+| `build` | TypeScript check + production build with auto-fix loop |
+| `deploy` | Vercel deployment with error detection and retry |
+| `report` | Auto-fix user-reported GitHub issues — read, verify, fix, close |
+| `atom` | Create atom component (2+ shadcn/ui primitives) |
+| `block` | Create block (UI + business logic) |
+| `template` | Create full-page layout template |
+| `test` | Generate and run tests (Vitest, Playwright) |
+| `clone` | Clone patterns from codebase, shadcn, or GitHub |
+| `incident` | Production incident response workflow |
+| `monitor` | Cross-product deployment and health check |
+| `translate` | Arabic/English translation workflow |
 
-### Clone/Copy
-| Keyword | Action |
-|---------|--------|
-| `clone` | Clone from codebase/github |
-| `copy` | Copy component |
-| `fork` | Create variant |
-| `extend` | Inherit and modify |
-| `sync` | Sync with upstream |
-| `upstream` | Pull from upstream |
+### Tier 3 — Vocabulary
 
-### External Services
-| Keyword | MCPs Triggered |
-|---------|----------------|
-| `github` | github MCP |
-| `figma` | figma MCP |
-| `linear` | linear MCP |
-| `slack` | slack MCP |
-| `notion` | notion MCP |
-| `sentry` | sentry MCP |
-| `stripe` | stripe MCP |
-| `vercel` | vercel MCP |
-| `analytics` | posthog MCP |
-| `neon` | neon MCP |
+Claude understands these keywords and activates the right agents and MCPs. No dedicated command needed.
 
-### Planning (BMAD)
-| Keyword | Action |
-|---------|--------|
-| `bmad` | Show BMAD menu |
-| `flow` | Quick flow (5 min) |
-| `plan` | Start planning phase |
-| `architect` | Architecture design |
-| `implement` | Execute implementation |
-| `story` | User story workflow |
-| `cycle` | Full development cycle |
-| `loop` | Continuous iteration |
-
-### Report (Issue Auto-Fix)
-| Keyword | Action |
-|---------|--------|
-| `report` | Auto-fix user-reported issues — read, verify, fix, close |
-| `report hogwarts` | Process only hogwarts report issues |
-| `report kun` | Process only kun report issues |
+**Frameworks**: `nextjs`, `react`, `typescript`, `prisma`, `tailwind`, `shadcn`, `authjs`
+**UI patterns**: `table`, `form`, `modal`, `card`, `sidebar`, `header`, `footer`, `hero`, `navbar`, `menu`
+**Features**: `auth`, `dashboard`, `landing`, `checkout`, `settings`, `profile`, `admin`, `onboarding`
+**Animation**: `motion`, `animation`, `transition`, `gesture`, `scroll`
+**Quality**: `security`, `performance`, `accessibility`, `review`, `audit`, `coverage`, `e2e`
+**Build**: `fix`, `error`, `lint`, `format`, `type-check`
+**React perf**: `parallelize`, `waterfall`, `bundle`, `lazy`, `suspense`, `memo`, `streaming`, `barrel`, `dedup`
+**Docs**: `docs`, `readme`, `api-docs`, `storybook`, `changelog`
+**Services**: `github`, `figma`, `linear`, `slack`, `stripe`, `vercel`, `sentry`, `neon`, `analytics`
+**Cross-repo**: `from codebase`, `from shadcn`, `like hogwarts`, `like souq`, `like mkan`, `like shifa`
+**Operations**: `report`, `costs`, `pricing`, `weekly`, `dispatch`, `monitor`, `incident`, `credentials`
 
 ---
 
@@ -174,27 +91,16 @@ Say any of these words to trigger the corresponding tools:
 
 ---
 
-## BMAD Method
+## Planning
 
-Installed globally at `~/.claude/bmad/`
+For feature development, use the pipeline: `/feature <name> [product]`
 
-### Commands
-| Command | Purpose |
-|---------|---------|
-| `*menu` | Show all BMAD options |
-| `*workflow-init` | Analyze project, recommend track |
-| `*bmad-quick-flow` | Rapid development (~5 min) |
-| `*2-plan-workflows` | Planning phase |
-| `*3-solutioning` | Architecture design |
-| `*4-implementation` | Execute plan |
-| `*document-project` | Generate documentation |
+The pipeline replaces BMAD for day-to-day work:
+- Bug fixes → `/report`
+- New features → `/feature <name>`
+- Components → `/atom`, `/block`, `/template`
 
-### Tracks
-| Track | Time | Use For |
-|-------|------|---------|
-| Quick Flow | ~5 min | Bug fixes, small features |
-| BMad Method | ~15 min | Products, platforms |
-| Enterprise | ~30 min | Compliance systems |
+BMAD is still available at `~/.claude/bmad/` for enterprise-scale planning.
 
 ---
 
@@ -246,69 +152,68 @@ When implementing, check codebase first:
 
 ## Slash Commands
 
-### Core
+### Pipeline (idea → production)
+| Command | Purpose |
+|---------|---------|
+| `/feature <name> [product]` | Full pipeline — idea to production |
+| `/idea <name>` | Capture feature as GitHub issue |
+| `/spec #N` | Generate technical spec from issue |
+| `/schema #N` | Create Prisma model + migration + Zod |
+| `/code #N` | Create server actions + auth + validation |
+| `/wire #N` | Create pages + forms + tables + i18n |
+| `/check` | Quality gate — type-check + build + visual |
+| `/ship` | Commit + deploy to Vercel production |
+| `/watch` | Post-deploy health check |
+
+### Standalone Tools
 | Command | Purpose |
 |---------|---------|
 | `/dev` | Start dev server |
-| `/build` | Smart build |
-| `/push` | Full commit + push |
-| `/quick` | Fast commit |
+| `/build` | Smart build with auto-fix |
 | `/deploy` | Deploy to Vercel |
-
-### Creation
-| Command | Purpose |
-|---------|---------|
-| `/atom <name>` | Create atom |
-| `/template <name>` | Create template |
-| `/block <source>` | Add block |
-| `/saas <feature>` | Generate SaaS feature |
-| `/clone <source>` | Clone from source |
-
-### Quality
-| Command | Purpose |
-|---------|---------|
-| `/test <file>` | Generate tests |
-| `/review` | Code review |
-| `/security` | Security audit |
-| `/performance` | Performance audit |
-| `/docs` | Generate docs |
+| `/report` | Auto-fix user-reported issues |
+| `/atom <name>` | Create atom component |
+| `/block <source>` | Create block (UI + logic) |
+| `/template <name>` | Create full-page layout |
+| `/test <file>` | Generate and run tests |
+| `/clone <source>` | Clone from codebase/GitHub |
 
 ### Utilities
 | Command | Purpose |
 |---------|---------|
-| `/codebase search` | Search codebase |
+| `/codebase` | Search reference codebase |
 | `/screenshot` | View recent screenshot |
-| `/nextjs` | Apply Next.js patterns |
-| `/motion` | Add animations |
+| `/monitor` | Cross-product health check |
+| `/incident` | Production incident response |
+| `/translate` | Arabic/English translation |
+| `/docs` | Generate documentation |
+| `/security` | Security audit |
+| `/performance` | Performance audit |
 
 ---
 
 ## Behavior
 
 When you see a keyword:
-1. Reference the mapped agent(s)
-2. Use relevant MCP tools
-3. Apply quality checks automatically
-4. Suggest relevant commands
+1. **Pipeline keywords** → execute the corresponding pipeline stage command
+2. **Tool keywords** → execute the standalone tool command
+3. **Vocabulary keywords** → activate the right agent(s) and MCP tools
 
 ### Examples
 
-| You Say | Tools Activated |
-|---------|-----------------|
-| "dev" | Kill port 3000 → pnpm dev → Open Chrome |
-| "push" | git add → commit → push → github MCP |
-| "table users" | block agent → DataTable → prisma |
-| "auth" | authjs agent → NextAuth setup |
-| "saas billing" | orchestrate → stripe MCP → schema + UI |
-| "motion hero" | framer-motion → page transitions |
-| "test login" | test agent → Vitest + Playwright |
-| "bmad" | Show BMAD menu → workflow selection |
-| "clone vercel/ai" | github MCP → clone → adapt |
-| "parallelize" | Convert sequential → Promise.all |
-| "waterfall" | Detect and fix request waterfalls |
-| "bundle" | Analyze and optimize bundle size |
-| "lazy" | Add lazy loading with dynamic imports |
-| "suspense" | Add Suspense boundaries |
+| You Say | What Happens |
+|---------|-------------|
+| `feature billing hogwarts` | Full pipeline: idea → spec → schema → code → wire → check → ship → watch |
+| `spec #42` | Generate technical spec for issue #42 |
+| `schema` | Create Prisma model + migration from latest spec |
+| `wire billing` | Create pages + forms + tables for billing feature |
+| `check` | Type-check + build + visual verification |
+| `ship` | Commit + deploy to Vercel + verify |
+| `dev` | Kill port 3000 → pnpm dev → Open Chrome |
+| `report hogwarts` | Auto-fix open report issues in hogwarts |
+| `table users` | block agent → DataTable → prisma |
+| `auth like hogwarts` | Reference hogwarts auth patterns |
+| `clone vercel/ai` | Clone and adapt from GitHub |
 
 ---
 

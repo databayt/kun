@@ -9,54 +9,17 @@ description: 4 roles with tailored MCP configs and agent indexes
 
 ## Team Members
 
-### Abdout — Founder and Tech Lead
+### Abdout — Builder
+Engineering everything. Architecture, full-stack, deployment.
 
-| | |
-|---|---|
-| **Equipment** | MacBook Pro M4, iPhone 16e |
-| **Access** | CLI, Desktop, iOS, claude.ai/code, WebStorm |
-| **Role** | engineer |
-| **Strengths** | Architecture, full-stack, system design |
-| **Focus** | Kun engine + cross-repo architecture |
-| **MCP** | All 18 servers (mcp.json) |
-| **Skills** | All 25 |
+### Ali — QA Engineer + Sales
+Tests features (reports issues on GitHub), manages sales@databayt.org. Outreach for schools, sponsors, investors, early adopters, leads, clients, contributors.
 
-### Ali — Business
+### Samia — R&D & Kun Caretaker
+Research on Claude/Anthropic products, sharing economy models, revenue distribution. Taking care of Kun engine. Core vision contributor.
 
-| | |
-|---|---|
-| **Equipment** | HP Windows, Android |
-| **Access** | Desktop App, claude.ai/code, Cowork |
-| **Role** | business |
-| **Strengths** | CS+Business degrees, market research, client outreach |
-| **Focus** | Revenue, proposals, client relationships |
-| **MCP** | 8 servers (mcp-business.json) |
-| **Skills** | Core + proposal, pricing, weekly |
-
-### Samia — Creative and Content
-
-| | |
-|---|---|
-| **Equipment** | Dell Windows, iPhone 13 |
-| **Access** | Desktop App, iOS, Cowork, voice mode |
-| **Role** | content |
-| **Strengths** | Writing, translation AR/EN, voiceover, vision/strategy |
-| **Focus** | Content, translation, UX writing, brand voice |
-| **MCP** | 8 servers (mcp-content.json) |
-| **Skills** | Core + translate, content-calendar |
-
-### Sedon — Facilitator and Ops
-
-| | |
-|---|---|
-| **Equipment** | HP Windows, Android |
-| **Access** | Desktop App, claude.ai/code |
-| **Role** | ops |
-| **Strengths** | Mechanical engineering, social skills, Saudi market gateway |
-| **Focus** | Saudi ops, payments, server hosting, customer facilitation |
-| **MCP** | 9 servers (mcp-ops.json) |
-| **Skills** | Core + monitor, costs, incident |
-| **Special** | Saudi physical address, bank account, home server, payment processing |
+### Sedon — Executor
+Clear task maps, reliable delivery. Saudi operations: bank account, physical presence, payments.
 
 ## Role-Specific MCP Configs
 
@@ -67,66 +30,100 @@ description: 4 roles with tailored MCP configs and agent indexes
 | **content** | mcp-content.json | github, slack, notion, browser, figma, context7, memory-bank, ref |
 | **ops** | mcp-ops.json | github, slack, vercel, sentry, neon, stripe, browser, posthog, memory-bank |
 
-## Installation by Role
+## Setup
+
+One command per role — installs or updates config + runs health check:
 
 ```bash
-# Engineer (Abdout) — macOS
-cd ~/kun && bash .claude/scripts/install.sh
+# macOS/Linux
+cd ~/kun && bash .claude/scripts/setup.sh engineer
+cd ~/kun && bash .claude/scripts/setup.sh business
+cd ~/kun && bash .claude/scripts/setup.sh content
+cd ~/kun && bash .claude/scripts/setup.sh ops
 
-# Business (Ali) — Windows
-cd ~/kun; .\.claude\scripts\install.ps1 -Role business
-
-# Content (Samia) — Windows
-cd ~/kun; .\.claude\scripts\install.ps1 -Role content
-
-# Ops (Sedon) — Windows
-cd ~/kun; .\.claude\scripts\install.ps1 -Role ops
+# Windows (PowerShell)
+cd ~/kun; .\.claude\scripts\setup.ps1 -Role engineer
+cd ~/kun; .\.claude\scripts\setup.ps1 -Role business
+cd ~/kun; .\.claude\scripts\setup.ps1 -Role content
+cd ~/kun; .\.claude\scripts\setup.ps1 -Role ops
 ```
+
+Re-run anytime to update config after pulling latest from git.
+
+### What gets installed
+
+| Layer | Common (all roles) | Scoped (per role) |
+|-------|-------------------|-------------------|
+| **CLAUDE.md** | Shared instructions | — |
+| **Agents** | All 45 agent definitions | Role-specific index |
+| **Commands** | docs, repos, screenshot, codebase | Role-specific skills |
+| **Rules** | All rules | — |
+| **Memory** | Team, company data | — |
+| **Settings** | — | Hooks (engineer) or minimal |
+| **MCP** | — | Role-specific server set |
 
 ## Daily Workflows
 
-### Abdout (Engineering)
+### Abdout — Builder
 
 ```
 > "dev"                    # Start dev server
-> [build features]         # Full 40-agent fleet
+> [build features]         # Full agent fleet
 > "build"                  # Validate
 > "push"                   # Commit + push
 > "deploy"                 # Ship to Vercel
 ```
 
-### Ali (Business)
+### Ali — QA + Sales
+
+```
+QA:
+> Test features from URL checklists on GitHub Issues
+> Report bugs as comments (not WhatsApp)
+> Re-verify fixes, check off boxes
+
+Sales (sales@databayt.org):
+> Outreach: schools, sponsors, investors, early adopters, contributors
+> Draft proposals, follow up leads
+```
+
+### Samia — R&D
 
 ```
 Cowork:
-> "Draft proposal for King Fahad Schools"
-> "Research competitor platforms in Sudan"
-> "Monthly revenue report"
+> Research Claude/Anthropic products
+> Study sharing economy models
+> Investigate revenue distribution
+> Take care of Kun engine
 ```
 
-### Samia (Content)
+### Sedon — Executor
 
 ```
-Cowork:
-> "Translate UI strings to Arabic"
-> "Write admission module documentation"
-> "Plan this week's content calendar"
+> [clear task map]         # Well-defined tasks with steps
+> Saudi operations         # Bank, payments, physical presence
+> Batch weekly             # Monday map, Friday delivery
 ```
 
-### Sedon (Ops)
+## Config Health Monitoring
 
+Each team member's config is verified continuously. Results report to a shared GitHub issue.
+
+```bash
+# Check local health
+bash ~/.claude/scripts/health.sh
+
+# Check + report to GitHub
+bash ~/.claude/scripts/health.sh --report
+
+# Windows
+.\.claude\scripts\health.ps1
+.\.claude\scripts\health.ps1 -Report
 ```
-> "/monitor"               # Check all deployments
-> "/costs"                 # API spend breakdown
-> [assigned tasks]         # Bug fixes, Saudi ops
-> "push"                   # Commit + push
-```
 
-## Voice Tools
+Or use the `/health` command inside Claude Code:
+- `/health` — local check + team dashboard from GitHub
+- `/health report` — post local health to GitHub
+- `/health all` — show all team members' latest status
 
-| Person | Tool | Platform |
-|--------|------|----------|
-| Abdout | macOS Dictation | Built-in (Fn Fn) |
-| Ali | Windows Voice Typing | Built-in (Win+H) |
-| Samia | Claude voice mode + Windows Voice Typing | Desktop App + built-in |
-| Sedon | Windows Voice Typing | Built-in (Win+H) |
+Checks: core files exist, JSON valid, MCP count matches role, commands match scope, permissions correct, CLI installed, config staleness.

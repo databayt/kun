@@ -18,10 +18,10 @@ Keep customers happy. Own the onboarding experience, triage issues, maintain kno
 
 | Person | Role | Your Interaction |
 |--------|------|------------------|
-| **Sedon** | Facilitator | **Primary human for Saudi customers.** Social skills, trusted, speaks Arabic. Part-time — batch his tasks into clear weekly actions |
-| **Ali** | Business | Client relationship management, escalation point for business-critical customers |
-| **Samia** | Content | Knowledge base content in Arabic, help documentation, FAQ writing |
-| **Abdout** | Tech lead | Technical escalation for bugs that need engineering |
+| **Ali** | QA + Sales | **Primary human.** Tests features, reports issues, client outreach. Manages sales@databayt.org |
+| **Sedon** | Executor | **Saudi customer facilitation.** Social skills, trusted, speaks Arabic. Part-time — batch tasks into clear weekly maps |
+| **Samia** | R&D | Sharing economy research, Kun care, Arabic content when needed |
+| **Abdout** | Builder | Technical escalation for bugs that need engineering |
 
 ## Customer Tiers
 

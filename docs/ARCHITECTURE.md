@@ -73,14 +73,14 @@ Databayt runs on a single Max 20x plan ($200/month). Model selection matters for
 
 Every surface Anthropic provides. Kun's configuration loads automatically regardless of which surface each team member uses.
 
-### Team Device Matrix
+### Team Roles
 
-| Member | Primary Surface | Secondary | OS |
-|--------|----------------|-----------|-----|
-| Osman Abdout | CLI (MacBook M4) | iOS (iPhone 16e) | macOS |
-| Ali Aseel | Desktop App (Windows) | Web (claude.ai/code) | Windows |
-| Samia Hamd | Desktop App (Windows) | iOS (iPhone 13 Mini) | Windows |
-| Osman Sedon | Desktop App (Windows) | Web (claude.ai/code) | Windows |
+| Member | Role |
+|--------|------|
+| Abdout | Builder |
+| Ali | QA Engineer + Sales |
+| Samia | R&D & Kun Caretaker |
+| Sedon | Executor |
 
 ### Surface Capabilities
 
@@ -337,13 +337,13 @@ Pull Request ──▶ GitHub Actions ──▶ Agent SDK Review
 
 ### 6.1 Team Workflows
 
-| Team Member | Primary Workflow | Tools |
-|-------------|-----------------|-------|
-| **Osman Abdout** | Engineering: code → build → deploy | CLI, all MCPs |
-| **Ali Aseel** | Business: outreach, contracts, client relations | Cowork, Claude Desktop |
-| **Samia Hamd** | Content: docs, Arabic copy, research, voiceover | Cowork, Claude Desktop |
-| **Osman Sedon** | Engineering support (part-time) | Claude Desktop |
-| **Kun** | Coordination: follow-up, R&D, optimization | All layers |
+| Member | Role | Primary Workflow |
+|--------|------|-----------------|
+| **Abdout** | Builder | code → build → deploy |
+| **Ali** | QA + Sales | testing, issue reports, outreach (sales@databayt.org) |
+| **Samia** | R&D | Claude/Anthropic research, sharing economy, Kun care |
+| **Sedon** | Executor | clear task maps, Saudi operations |
+| **Kun** | Engine | coordination, follow-up, optimization |
 
 ### 6.2 Business Operations via Cowork
 
@@ -358,7 +358,7 @@ Pull Request ──▶ GitHub Actions ──▶ Agent SDK Review
 
 ### 6.3 Accessibility
 
-Samia Hamd uses a screen reader. All products and workflows must be accessible:
+All products and workflows must be accessible:
 - VoiceOver compatibility on iOS/macOS
 - NVDA/JAWS on Windows
 - a11y MCP for automated accessibility audits
@@ -412,7 +412,7 @@ Samia Hamd uses a screen reader. All products and workflows must be accessible:
 
 **Decision**: Concentrate all engineering effort on Hogwarts until the King Fahad Schools pilot is delivering revenue.
 
-**Rationale**: With $500 remaining capital and a $1K/month target, revenue from the flagship product is existential. Mkan, Souq, and Shifa can wait.
+**Rationale**: Hogwarts is the most mature product. $5K capital with $500/month burn gives 10 months runway. Not rushing — building for long-term market leadership in Sudan/MENA education. Mkan, Souq, and Shifa can wait.
 
 ### ADR-005: Databayt Shared Component Library
 

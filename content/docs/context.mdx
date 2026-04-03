@@ -1,0 +1,166 @@
+---
+title: Context
+description: Cloud tag control room — sprint-aware, contributor-aware keyword dispatch for all 4 team members
+---
+
+# Context
+
+Cloud tag UI where any team member clicks a keyword and dispatches a workflow. The cloud adapts to who's viewing and what stories are active — keywords grow or shrink based on relevance.
+
+**Route:** `/[lang]/context` (en + ar)
+
+## How It Works
+
+```
+Team member visits /context
+  → Clicks their initial (A, ع, S, س) — cloud re-weights for their role
+  → Sees active stories as chips (Homepage, Admission #115, ...)
+  → Clicks a story — its keywords grow in the cloud
+  → Clicks a keyword (e.g. "report")
+  → Modal: confirm repo + story context
+  → Submit
+  → Server action creates GitHub Issue:
+      repo: databayt/hogwarts
+      title: "dispatch: report admission"
+      label: dispatch
+  → Claude Code picks it up → executes → closes issue
+```
+
+## Cloud Tag
+
+Keywords render as a tag cloud with varying text sizes and weights. Each keyword gets a computed weight (1–5) based on:
+
+- **Story boost** (+2): keyword is in the selected story's `keywords[]`
+- **Contributor boost** (+1): keyword matches the viewer's role
+- **Active boost** (+1): keyword is in any active story (not just selected)
+- **Base** (2): all keywords start here
+
+```
+weight 5 → text-2xl font-bold       (hot — active story + your role)
+weight 4 → text-xl font-semibold
+weight 3 → text-base font-medium    (available, not highlighted)
+weight 2 → text-sm font-normal
+weight 1 → text-xs font-light       (cold — irrelevant to current work)
+```
+
+The cloud breathes — it looks different for Abdout (engineering keywords prominent) vs Ali (QA/review keywords prominent) vs the same person switching between stories.
+
+## Contributors
+
+4 team members, each with a role that boosts their keywords:
+
+| Initial | Name | Role | Boosted Keywords |
+|---------|------|------|-----------------|
+| A / ع | Abdout | Engineer | feature, spec, schema, code, wire, deploy, build, fix, performance |
+| A / ع | Ali | QA | report, check, review, test, deploy, monitor, handover, security |
+| S / س | Samia | Research | translate, docs, clone, review, constitution |
+| S / س | Sedon | Ops | monitor, deploy, incident |
+
+## Stories (Kanban Board)
+
+No fixed-date sprints. Stories are a kanban board — they end when they end, next follows.
+
+```typescript
+interface Story {
+  id: string            // "homepage", "admission"
+  name: string
+  nameAr: string
+  repo: string          // "hogwarts" | "kun" | ...
+  issue?: number        // GitHub issue number
+  keywords: string[]    // relevant keywords
+  status: "active" | "next" | "done"
+}
+```
+
+Update `src/components/root/context/config.ts` → `board.stories` as work progresses. The captain agent or Abdout moves stories between statuses.
+
+## Keyword Groups
+
+34 keywords in 4 groups (all rendered as one cloud, groups determine ordering):
+
+| Group | Keywords |
+|-------|----------|
+| **Pipeline** | feature, idea, spec, schema, ready, code, wire, check, ship, watch |
+| **Tools** | dev, build, deploy, report, test, clone, monitor, atom, block, template, translate, incident |
+| **Quality** | security, performance, fix, review, analyze, constitution |
+| **Services** | github, vercel, neon, stripe, figma, sentry |
+
+### New Keywords (absorbed from BMAD/Spec Kit)
+
+| Keyword | Source | What It Does |
+|---------|--------|-------------|
+| `ready` | BMAD readiness gate | Pre-code check — validates spec, schema, dependencies before coding starts |
+| `analyze` | Spec Kit cross-artifact | Consistency check — spec vs schema vs code vs tests, reports drift |
+| `constitution` | Spec Kit governance | Read/update project constitution (CLAUDE.md governance principles) |
+
+Pipeline is now: `idea → spec → schema → ready → code → wire → check → ship → watch`
+
+## Dispatch Mechanism
+
+Clicking a keyword calls the `dispatch` server action — creates a GitHub Issue with `dispatch` label. Claude Code picks it up via remote trigger or scheduled check.
+
+### Environment
+
+Requires `GITHUB_PERSONAL_ACCESS_TOKEN` in `.env` with repo scope.
+
+## Components
+
+```
+src/components/root/context/
+  config.ts            — Board, stories, contributors, keyword groups, weight computation
+  content.tsx          — Main layout (contributors, stories, cloud, modal)
+  cloud-tag.tsx        — Weighted tag cloud rendering
+  contributor-bar.tsx  — Clickable contributor initials
+  story-bar.tsx        — Story chips with status
+  dispatch-modal.tsx   — Run confirmation dialog
+  status-bar.tsx       — Live repo status strip
+
+src/actions/
+  dispatch.ts          — Server action: create GitHub issue
+  status.ts            — Server action: fetch repo status
+
+src/app/[lang]/(root)/context/
+  page.tsx             — Page wrapper
+```
+
+## UI Layout
+
+```
++-----------------------------------------------+
+| context                                        |
++-----------------------------------------------+
+| [A] [ع] [S] [س]                              |  ← contributor initials
++-----------------------------------------------+
+| Homepage · Admission #115 · Announcement ·    |  ← story chips
+| Event · Notification · Messaging              |
++-----------------------------------------------+
+| 5 open · 2 dispatched · push 10m ago          |  ← status bar
++-----------------------------------------------+
+|                                                |
+|        feature  idea  spec                     |
+|    schema  ready    code     wire              |
+|       check    ship  watch                     |
+|                                                |
+|     dev  build   deploy  report                |
+|   test  clone  monitor  atom                   |
+|    block  template  translate                  |
+|                                                |
+|     security  performance                      |
+|       fix    review  analyze                   |
+|             constitution                       |
+|                                                |
+|   github vercel neon stripe figma sentry       |
+|                                                |
++-----------------------------------------------+
+```
+
+## Mobile
+
+Touch targets are 44px minimum. Cloud wraps naturally with `flex-wrap`. Modal is `sm:max-w-md`. Arabic RTL supported.
+
+## Future
+
+- **Activity feed** — recent dispatch results below the cloud
+- **Auto-board** — captain agent updates stories as issues close
+- **Notifications** — toast when dispatch completes
+- **Velocity** — story completion rate visible on the board

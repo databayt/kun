@@ -9,13 +9,13 @@
 
 ### Purpose
 
-Define the requirements for the Kun engine — the configuration layer that transforms Anthropic's product suite into Databayt's operating system, serving 4 team members across 14 repositories with a $1K/month sustainability target.
+Define the requirements for the Kun engine — the configuration layer that transforms Anthropic's product suite into Databayt's operating system, serving 4 team members across 14 repositories. Open source, sharing economy model.
 
 ### Scope
 
 | Phase | Scope | Users | Status |
 |-------|-------|-------|--------|
-| Phase 1: Developer Engine | Individual developer configuration | Osman Abdout (primary) | Done |
+| Phase 1: Developer Engine | Individual developer configuration | Tech lead (primary) | Done |
 | Phase 2: Team Engine | Shared config + coordination for 4 members | Full Databayt team | Next |
 | Phase 3: Company Engine | Full operations + custom automation | Team + CI/CD + clients | Future |
 
@@ -23,11 +23,12 @@ Define the requirements for the Kun engine — the configuration layer that tran
 
 | Constraint | Value |
 |-----------|-------|
-| Team size | 4 (2 engineers, 1 business, 1 content/research) |
-| Budget | $200/month Claude Code Max |
-| Capital | $500 remaining |
-| Revenue target | $1K/month |
+| Team size | 4 (1 builder, 1 QA+sales, 1 R&D, 1 executor) |
+| Budget | $200/month Claude Code Max + ~$300 services |
+| Capital | $5,000 remaining (~10 months runway) |
+| Monthly burn | ~$500 |
 | Primary product | Hogwarts (education SaaS) |
+| Model | Open source, sharing economy |
 
 ---
 
@@ -96,9 +97,9 @@ Grounded in Databayt's actual team: 4 members, 3 on Windows, 1 on macOS.
 
 | ID | Requirement | Priority | Acceptance Criteria |
 |----|-------------|----------|---------------------|
-| FR-2.2.1 | Engineer config (Osman A. + Sedon) | P0 | Full agent fleet, all MCPs, CLI access |
-| FR-2.2.2 | Business config (Ali) | P0 | Cowork, Claude Desktop, Stripe MCP, client templates |
-| FR-2.2.3 | Content config (Samia) | P0 | Cowork, web search, i18n tools, accessible UI |
+| FR-2.2.1 | Engineer config | P0 | Full agent fleet, all MCPs, CLI access |
+| FR-2.2.2 | Business config | P0 | Cowork, Claude Desktop, Stripe MCP, client templates |
+| FR-2.2.3 | Content config | P0 | Cowork, web search, i18n tools, accessible UI |
 | FR-2.2.4 | Cost tracking per member | P1 | Know who uses how much of the $200/month budget |
 
 ### FR-2.3: Hogwarts Pilot Support
@@ -194,7 +195,7 @@ Grounded in Databayt's actual team: 4 members, 3 on Windows, 1 on macOS.
 |----|-------------|--------|
 | NFR-C1 | Claude Code plan | $200/month (Max 20x) |
 | NFR-C2 | Total monthly expenses | < $400 (Claude + services) |
-| NFR-C3 | Revenue from products | $1,000/month by June 2026 |
+| NFR-C3 | Revenue from products | Sustainable (building for long-term, not rushing) |
 
 ---
 
@@ -218,7 +219,7 @@ Grounded in Databayt's actual team: 4 members, 3 on Windows, 1 on macOS.
 - [ ] King Fahad Schools pilot deployed and operational
 - [ ] Agent Teams running parallel features
 - [ ] CI/CD reviewing every PR automatically
-- [ ] Team generating $1K/month revenue
+- [ ] Sustainable revenue model established (sharing economy)
 
 ### Phase 3 Complete When
 

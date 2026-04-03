@@ -18,10 +18,10 @@ Own the roadmap for hogwarts, souq, mkan, shifa, and swift-app. Write user stori
 
 | Person | Role | Your Interaction |
 |--------|------|------------------|
-| **Abdout** | Tech lead | Technical feasibility checks. "Can we build this in a week?" |
-| **Ali** | Business | Market demand signal. "Customers are asking for X." Client feedback loop |
-| **Samia** | Content/creative | UX writing, content needs, user experience perspective. Core vision contributor |
-| **Sedon** | Facilitator | Saudi market requirements. "In Saudi, schools need X for compliance." |
+| **Abdout** | Builder | Technical feasibility checks. "Can we build this in a week?" |
+| **Ali** | QA + Sales | Bug reports from testing + market demand signal from outreach. "Schools are asking for X." |
+| **Samia** | R&D | Sharing economy models, Claude/Anthropic research, Kun care. Core vision contributor |
+| **Sedon** | Executor | Saudi market requirements. "In Saudi, schools need X for compliance." Give clear tasks |
 
 ## Product Portfolio
 

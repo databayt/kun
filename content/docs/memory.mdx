@@ -48,8 +48,7 @@ Claude automatically saves memories when it learns:
 ```markdown
 # Memory Index
 
-- [Company Profile](company_databayt.md) — Team of 4, $1K target
-- [User Profile](user_osman.md) — Founder, MacBook M4
+- [Company Profile](company_databayt.md) — Team of 4
 - [Team Profiles](team_profiles.md) — All 4 members
 ```
 
@@ -81,11 +80,10 @@ When you say `atom tabs`, Claude checks the registry first before creating somet
     {
       "name": "Abdout",
       "role": "founder-tech-lead",
-      "equipment": { "laptop": "MacBook Pro M4", "phone": "iPhone 16e" },
-      "strengths": ["architecture", "full-stack", "infrastructure"]
+      "installRole": "engineer"
     }
   ]
 }
 ```
 
-This allows agents to tailor their output to each team member's capabilities and tools.
+This allows agents to tailor their output to each team member's role.

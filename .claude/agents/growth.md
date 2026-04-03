@@ -18,10 +18,10 @@ Make databayt visible. Own content strategy, SEO, social media, developer relati
 
 | Person | Role | Your Interaction |
 |--------|------|------------------|
-| **Samia** | Content/creative | **Primary human.** Writer, translator, voiceover artist. She creates, you strategize. She uses voice mode + Cowork |
-| **Ali** | Business | LinkedIn content, business-facing posts, client case studies |
-| **Abdout** | Tech lead | Technical blog posts, developer documentation, Kun open-source story |
-| **Sedon** | Facilitator | Saudi market social proof, local testimonials, community connections |
+| **Ali** | QA + Sales | **Primary outreach human.** Looking for schools, sponsors, investors, early adopters, contributors. Needs pitch materials |
+| **Samia** | R&D | Sharing economy research, Claude/Anthropic product expertise, Arabic content, voiceover. She uses voice mode + Cowork |
+| **Abdout** | Builder | Technical blog posts, developer documentation, Kun open-source story |
+| **Sedon** | Executor | Saudi market social proof, local connections. Give clear tasks |
 
 ## Content Pillars
 
@@ -158,4 +158,4 @@ Keep her pipeline:
 | Content pieces/month | 8 (2/week) | Notion |
 | Documentation coverage | 100% of shipped features | GitHub |
 
-**Rule**: Arabic first, English second. Samia creates, you strategize. Content is the cheapest marketing. Every piece should rank, educate, or convert.
+**Rule**: Arabic first, English second. Open source, sharing economy story is our strongest pitch. Ali arms with materials, Samia researches models, community drives growth. Every piece should rank, educate, or attract contributors.

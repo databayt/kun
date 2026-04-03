@@ -28,14 +28,14 @@ Layer 1: Foundation (Anthropic-provided)
   Opus 4.6 | Sonnet 4.6 | Haiku 4.5 | 1M Context | API
 ```
 
-## Team Device Matrix
+## Team Roles
 
-| Member | Primary | Mobile | Role |
-|--------|---------|--------|------|
-| **Osman Abdout** | MacBook M4 (CLI) | iPhone 16e | Engineering lead |
-| **Ali Aseel** | Windows (Desktop/Web) | Android | Business & operations |
-| **Samia Hamd** | Dell Windows (Desktop, screen reader) | iPhone 13 Mini (VoiceOver) | Content & research |
-| **Osman Sedon** | HP Windows (Desktop/Web) | Android | Engineering (part-time) |
+| Member | Role |
+|--------|------|
+| **Abdout** | Builder |
+| **Ali** | QA Engineer + Sales |
+| **Samia** | R&D & Kun Caretaker |
+| **Sedon** | Executor |
 
 ## Layer 3: The Engine (Kun's Core)
 
@@ -140,12 +140,12 @@ Shared state: `~/.claude/` (agents, memory, settings, rules). Same brain, two mo
 
 ### Team Workflows
 
-| Member | Surface | Primary Workflows |
-|--------|---------|-------------------|
-| **Osman A.** | CLI (MacBook) | dev → build → push → deploy |
-| **Ali** | Cowork (Windows) | Client outreach, proposals, financial tracking |
-| **Samia** | Cowork (Windows, screen reader) | Arabic content, documentation, research |
-| **Sedon** | Desktop/Web (Windows) | Assigned tasks, fix → push |
+| Member | Role | Primary Workflows |
+|--------|------|-------------------|
+| **Abdout** | Builder | dev → build → push → deploy |
+| **Ali** | QA + Sales | Testing, issue reports, outreach (sales@databayt.org) |
+| **Samia** | R&D | Claude/Anthropic research, sharing economy, Kun care |
+| **Sedon** | Executor | Clear task maps, Saudi operations |
 
 ### Hogwarts Pilot (King Fahad Schools)
 
@@ -188,7 +188,7 @@ databayt/ (14 repos)
 | Kun config | 4 deny rules (rm -rf, DROP TABLE, etc.), 38 explicit allow rules |
 | Hooks | PreToolUse guards validate before execution |
 | Secrets | macOS Keychain MCP, never in git |
-| Accessibility | Screen reader compatibility, VoiceOver testing (Samia) |
+| Accessibility | Screen reader compatibility, VoiceOver testing |
 
 ## Architecture Decision Records
 
@@ -205,7 +205,7 @@ databayt/ (14 repos)
 ### ADR-003: Single Subscription Model
 
 **Decision**: One Max 20x ($200/month) shared via Desktop/Web.
-**Rationale**: Fits $1K/month budget. Add Pro seats ($20) when revenue grows.
+**Rationale**: $500/month burn with $5K capital = 10 months runway. Add Pro seats ($20) when revenue grows.
 
 ### ADR-004: Hogwarts-First Development
 

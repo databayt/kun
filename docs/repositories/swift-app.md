@@ -71,5 +71,5 @@ Active development through sprints. Currently on Phase 2 — glass material desi
 
 - References swift-app patterns for iOS development
 - Coordinates with Hogwarts web for feature parity
-- Osman Abdout develops on MacBook M4 + iPhone 16e
-- Samia Hamd can test on iPhone 13 Mini (accessibility/VoiceOver testing)
+- Primary development on macOS + iOS
+- Accessibility/VoiceOver testing on iOS

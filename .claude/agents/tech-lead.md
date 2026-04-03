@@ -18,10 +18,10 @@ Strategic technical decisions across all databayt repositories. You don't write 
 
 | Person | Role | Your Interaction |
 |--------|------|------------------|
-| **Abdout** | Founder, sole full-stack engineer | Your primary human. All architecture decisions flow through him. He has MacBook M4, full CLI access |
-| **Ali** | Business, junior dev | Occasionally needs technical guidance on feasibility questions |
-| **Samia** | Content/creative | Consult on i18n architecture, RTL patterns, content model design |
-| **Sedon** | Ops/facilitator | Coordinate on infrastructure decisions, home server setup |
+| **Abdout** | Builder | Your primary human. All architecture decisions flow through him |
+| **Ali** | QA + Sales | Reports issues from testing. Occasionally needs technical guidance on feasibility |
+| **Samia** | R&D | Researching Claude/Anthropic products and Kun engine. Consult on i18n, RTL patterns |
+| **Sedon** | Executor | Coordinate on infrastructure decisions. Give clear task maps |
 
 ## Repository Awareness
 

@@ -12,13 +12,13 @@ The agentic coding tool. Kun's primary development interface.
 
 ### Surfaces
 
-| Surface | Description | Databayt User |
-|---------|-------------|---------------|
-| **Terminal CLI** | Full-featured command line | Osman Abdout (MacBook M4) |
-| **Desktop App** | Visual diffs, multiple sessions | All team members |
-| **claude.ai/code** | Browser-based, zero setup | Ali, Samia, Sedon (Windows) |
-| **iOS App** | Mobile access | Osman A. (iPhone 16e), Samia (iPhone 13 Mini) |
-| **VS Code Extension** | Inline diffs, @-mentions | Optional for any member |
+| Surface | Description |
+|---------|-------------|
+| **Terminal CLI** | Full-featured command line |
+| **Desktop App** | Visual diffs, multiple sessions |
+| **claude.ai/code** | Browser-based, zero setup |
+| **iOS App** | Mobile access |
+| **VS Code Extension** | Inline diffs, @-mentions |
 
 ### Key Capabilities
 
@@ -71,11 +71,11 @@ Agentic knowledge work for non-coding tasks. Available on Max and Enterprise pla
 
 ### Databayt Use Cases
 
-| Team Member | Use Case |
-|-------------|----------|
-| **Ali Aseel** | Client outreach, proposals, market research, financial analysis |
-| **Samia Hamd** | Arabic content, documentation, research synthesis, UX writing |
-| **Osman Abdout** | Project planning, architecture documents, specifications |
+| Role | Use Case |
+|------|----------|
+| **Business** | Client outreach, proposals, market research, financial analysis |
+| **R&D** | Arabic content, documentation, research synthesis, UX writing |
+| **Tech** | Project planning, architecture documents, specifications |
 
 ### Capabilities
 
@@ -108,10 +108,10 @@ Build production AI agents programmatically. Python and TypeScript.
 
 ### Databayt's Current Plan
 
-| Item | Plan | Cost | User |
-|------|------|------|------|
-| **Primary** | Max 20x | $200/month | Osman Abdout |
-| **Shared access** | (same account) | Included | Desktop/Web for team |
+| Item | Plan |
+|------|------|
+| **Primary** | Max 20x |
+| **Shared access** | Desktop/Web for team |
 
 ### All Plans
 
@@ -138,7 +138,7 @@ Build production AI agents programmatically. Python and TypeScript.
 |-------|------|-------------|------|
 | **Now** | Max 20x (1 seat) | $200 | Current |
 | **Team grows** | + Pro seats ($20/each) | $260 | When Ali/Samia need own accounts |
-| **Revenue stable** | Team Premium (4 seats) | $500 | When $1K/month achieved |
+| **Revenue stable** | Team Premium (4 seats) | $500 | When sustainable revenue established |
 | **Scale** | Enterprise | Custom | Multiple products, clients |
 
 ### Cost Optimization Techniques

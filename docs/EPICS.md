@@ -191,20 +191,20 @@
 **Goal**: Get all 4 Databayt team members productive with Kun.
 
 #### Story 7.1: Cross-Platform Installer
-- [ ] install.sh (macOS for Osman A.) + install.ps1 (Windows for Ali, Samia, Sedon)
+- [ ] install.sh (macOS for Abdout) + install.ps1 (Windows for Ali, Samia, Sedon)
 - [ ] Sets up agents, skills, rules, settings, MCP
-**Points**: 3 | **Priority**: P0 | **Owner**: Osman A. + Kun
+**Points**: 3 | **Priority**: P0 | **Owner**: Abdout + Kun
 
 #### Story 7.2: Shared Settings via Git
 - [ ] `.claude/settings.json` committed to each product repo
 - [ ] `.claude/settings.local.json` for personal overrides (.gitignore)
-**Points**: 2 | **Priority**: P0 | **Owner**: Osman A.
+**Points**: 2 | **Priority**: P0 | **Owner**: Abdout
 
 #### Story 7.3: Accessibility Setup for Samia
 - [ ] Screen reader compatibility verified (VoiceOver, NVDA)
 - [ ] Cowork workflows tested with assistive technology
 - [ ] Keyboard-only navigation confirmed
-**Points**: 2 | **Priority**: P0 | **Owner**: Osman A. + Samia
+**Points**: 2 | **Priority**: P0 | **Owner**: Abdout + Samia
 
 #### Story 7.4: Role-Based Configurations
 - [ ] Engineer config: full agents, MCPs, CLI
@@ -227,25 +227,25 @@
 - [ ] /handover admission passes all 5 QA checks
 - [ ] Controlled selects, enum labels, i18n complete
 - [ ] Application forms, enrollment workflow stable
-**Points**: 5 | **Priority**: P0 | **Owner**: Osman A. + Kun
+**Points**: 5 | **Priority**: P0 | **Owner**: Abdout + Kun
 
 #### Story 8.2: Notification System
 - [ ] Twilio SMS integration working
 - [ ] In-app notifications functional
 - [ ] Push notifications (web + mobile)
-**Points**: 3 | **Priority**: P0 | **Owner**: Osman A.
+**Points**: 3 | **Priority**: P0 | **Owner**: Abdout
 
 #### Story 8.3: Messaging System
 - [ ] School-to-parent messaging
 - [ ] Socket.io real-time delivery
 - [ ] Message history and search
-**Points**: 3 | **Priority**: P0 | **Owner**: Osman A.
+**Points**: 3 | **Priority**: P0 | **Owner**: Abdout
 
 #### Story 8.4: Pilot Deployment
 - [ ] ed.databayt.org stable and monitored
 - [ ] King Fahad Schools tenant created and configured
 - [ ] Sentry error monitoring active
-**Points**: 2 | **Priority**: P0 | **Owner**: Osman A. + Kun
+**Points**: 2 | **Priority**: P0 | **Owner**: Abdout + Kun
 
 #### Story 8.5: Client Training
 - [ ] Arabic user guide for school staff
@@ -288,13 +288,13 @@
 
 ### Epic 10: Revenue & Operations
 
-**Goal**: Build the business workflows to reach $1K/month.
+**Goal**: Build the business workflows for sustainable revenue (open source, sharing economy).
 
 #### Story 10.1: Stripe Billing Setup
 - [ ] Hogwarts SaaS subscription tiers configured
 - [ ] Payment collection working for pilot customer
 - [ ] Invoice generation
-**Points**: 3 | **Priority**: P0 | **Owner**: Osman A. + Kun
+**Points**: 3 | **Priority**: P0 | **Owner**: Abdout + Kun
 
 #### Story 10.2: Client Outreach Templates
 - [ ] School outreach email templates (Arabic + English)
@@ -385,7 +385,7 @@
 
 ### Sprint 1 (April 1-14): Hogwarts Pilot Delivery
 - Story 8.1 (admission polish) + 8.2 (notifications) + 8.3 (messaging)
-- Owner: Osman A. + Kun
+- Owner: Abdout + Kun
 - Goal: Core features ready for pilot
 
 ### Sprint 2 (April 15-30): Team Onboarding + Pilot Deploy
@@ -395,7 +395,7 @@
 
 ### Sprint 3 (May 1-14): Revenue + Quality
 - Story 10.1 (billing) + 10.2 (outreach) + 9.3 (CI/CD review)
-- Owner: Osman A. (billing), Ali (outreach), Kun (CI/CD)
+- Owner: Abdout (billing), Ali (outreach), Kun (CI/CD)
 - Goal: First invoice sent, automated PR review
 
 ### Sprint 4 (May 15-31): Stabilize + Expand
@@ -405,4 +405,4 @@
 
 ### Sprint 5 (June): Scale
 - Story 9.1 (agent teams) + 9.2 (worktree) + remaining Phase 2
-- Goal: Full Phase 2 complete, $1K/month target met
+- Goal: Full Phase 2 complete, sustainable revenue model established

@@ -10,7 +10,7 @@ Steps:
    - Stripe: Calculate transaction fees from recent volume (stripe MCP)
    - Domains: Estimate from known registrations
 2. Calculate total monthly spend
-3. Compare against budget ($300/mo target before $1K MRR)
+3. Compare against budget (~$500/mo burn, $5K capital = 10 months runway)
 4. Identify optimization opportunities:
    - Can any Vercel project stay on free tier?
    - Are there stale Neon branches to delete?

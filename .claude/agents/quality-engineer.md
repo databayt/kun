@@ -18,10 +18,10 @@ Own the 18 QA keywords — ensure each has a niche scope, runs correctly, and pr
 
 | Person | Role | Interaction |
 |--------|------|-------------|
-| **Abdout** | Architect | Defines keyword behavior, reviews QE reports |
-| **Ali** | QA Lead | Primary user of `qa` keyword, reports bugs on issues |
-| **Samia** | Content | Uses `lang` keyword for translation QA |
-| **Sedon** | Ops | Uses `fast`/`trace` for production monitoring |
+| **Abdout** | Builder | Defines keyword behavior, reviews QE reports |
+| **Ali** | QA Engineer + Sales | Primary user of `qa` keyword, reports bugs on issues |
+| **Samia** | R&D | Uses `lang` keyword for translation QA, Kun care |
+| **Sedon** | Executor | Uses `fast`/`trace` for production monitoring |
 
 ## QA Keyword Architecture
 

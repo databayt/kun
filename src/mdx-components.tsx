@@ -19,6 +19,7 @@ import { FlowChart, Phase1Flow, Phase2Flow, Phase3Flow, KunEndToEndFlow } from "
 import { BuildingBlocks, KunBuildingBlocks, BlockDiagram } from "@/components/docs/arrangements/block-diagram"
 import { StackedBlocks, KunStackedBlocks } from "@/components/docs/arrangements/stacked-blocks"
 import { StepperFlow, Phase1SetupFlow, Phase2SetupFlow } from "@/components/docs/arrangements/stepper-flow"
+import { Spellbook, SpellSchool, SpellbookLegend, SpellWorkflows, SpellMastery, SpellStats } from "@/components/docs/spellbook"
 
 // This file is required to use MDX in `app` directory.
 
@@ -303,6 +304,12 @@ const mdxComponents = {
     StepperFlow,
     Phase1SetupFlow,
     Phase2SetupFlow,
+    Spellbook,
+    SpellSchool,
+    SpellbookLegend,
+    SpellWorkflows,
+    SpellMastery,
+    SpellStats,
 }
 
 export function useMDXComponents(components: Record<string, React.ComponentType<unknown>>): Record<string, React.ComponentType<unknown>> {
