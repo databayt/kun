@@ -1,9 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Bug, CircleHelp, X } from "lucide-react"
 
 import { reportIssue } from "@/actions/report-issue"
 import { Button } from "@/components/ui/button"
@@ -13,12 +11,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
 
 const translations = {
   en: {
@@ -29,8 +21,6 @@ const translations = {
     submitting: "Submitting...",
     success: "Submitted. Thank you!",
     error: "Something went wrong. Try again.",
-    help: "Help",
-    close: "Close",
   },
   ar: {
     report: "الإبلاغ عن مشكلة",
@@ -40,14 +30,11 @@ const translations = {
     submitting: "جاري الإرسال...",
     success: "تم الإرسال. شكراً لك!",
     error: "حدث خطأ. حاول مرة أخرى.",
-    help: "مساعدة",
-    close: "إغلاق",
   },
 } as const
 
 export function ReportIssue() {
   const [open, setOpen] = useState(false)
-  const [dismissed, setDismissed] = useState(false)
   const [description, setDescription] = useState("")
   const [status, setStatus] = useState<
     "idle" | "loading" | "success" | "error"
@@ -71,62 +58,14 @@ export function ReportIssue() {
     }
   }
 
-  if (dismissed) return null
-
   return (
-    <TooltipProvider delayDuration={300}>
-      <div className="flex items-center gap-3">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button
-              onClick={() => setOpen(true)}
-              className="text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
-            >
-              <Bug className="h-4 w-4" />
-            </button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>{t.report}</p>
-          </TooltipContent>
-        </Tooltip>
-
-        <Link
-          href="https://databayt.org"
-          target="_blank"
-          className="text-muted-foreground hover:text-foreground text-xs font-semibold transition-colors"
-        >
-          d
-        </Link>
-
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Link
-              href="https://github.com/databayt/kun/issues"
-              target="_blank"
-              className="text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <CircleHelp className="h-4 w-4" />
-            </Link>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>{t.help}</p>
-          </TooltipContent>
-        </Tooltip>
-
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button
-              onClick={() => setDismissed(true)}
-              className="text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>{t.close}</p>
-          </TooltipContent>
-        </Tooltip>
-      </div>
+    <>
+      <button
+        onClick={() => setOpen(true)}
+        className="inline font-medium underline underline-offset-4 cursor-pointer"
+      >
+        {t.report}
+      </button>
 
       <Dialog
         open={open}
@@ -160,6 +99,6 @@ export function ReportIssue() {
           )}
         </DialogContent>
       </Dialog>
-    </TooltipProvider>
+    </>
   )
 }

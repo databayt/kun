@@ -1,3 +1,5 @@
+import { ReportIssue } from "@/components/report-issue"
+
 export function SiteFooter() {
   return (
     <footer className="border-grid border-t py-6 md:py-0 md:mt-4">
@@ -22,7 +24,8 @@ export function SiteFooter() {
             >
               GitHub
             </a>
-            .
+            .{" "}
+            <ReportIssue />
           </div>
         </div>
       </div>

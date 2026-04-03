@@ -1,6 +1,5 @@
 import { SiteHeader } from "@/components/template/site-header"
 import { SiteFooter } from "@/components/template/site-footer"
-import { ReportIssue } from "@/components/report-issue"
 import { type Locale } from "@/components/local/config"
 
 export default async function RootLayout({
@@ -16,9 +15,6 @@ export default async function RootLayout({
     <>
       <SiteHeader lang={lang} />
       <main className="flex-1">{children}</main>
-      <div className="pt-8 pb-4 text-start text-sm text-muted-foreground">
-        <ReportIssue />
-      </div>
       <SiteFooter />
     </>
   )
