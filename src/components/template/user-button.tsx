@@ -8,6 +8,7 @@ import {
   DialogContent,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
 
 export function UserButton() {
   const { data: session, status } = useSession()
@@ -60,17 +61,18 @@ export function UserButton() {
         </DialogTrigger>
         <DialogContent className="max-w-xs p-6 gap-0 [&>button]:hidden">
           <p className="text-sm text-foreground">
-            {isAr ? session.user.name : session.user.name}
+            {session.user.name}
           </p>
           <p className="text-xs text-muted-foreground/50">
             {session.user.email}
           </p>
-          <button
+          <Button
+            variant="outline"
             onClick={() => signOut({ callbackUrl: `/${lang}` })}
-            className="mt-6 cursor-pointer text-sm font-mono text-muted-foreground/50 transition-colors hover:text-foreground text-start"
+            className="mt-6 w-full"
           >
             {isAr ? "خروج" : "sign out"}
-          </button>
+          </Button>
         </DialogContent>
       </Dialog>
     )
@@ -109,15 +111,15 @@ export function UserButton() {
 
           {error && <p className="text-xs text-red-500">{error}</p>}
 
-          <button
+          <Button
             type="submit"
             disabled={loading}
-            className="cursor-pointer text-sm font-mono text-muted-foreground/50 transition-colors hover:text-foreground disabled:text-muted-foreground/20"
+            className="w-full"
           >
             {loading
               ? isAr ? "جاري..." : "signing in..."
               : isAr ? "دخول" : "sign in"}
-          </button>
+          </Button>
         </form>
       </DialogContent>
     </Dialog>
