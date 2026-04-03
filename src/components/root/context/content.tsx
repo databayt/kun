@@ -55,12 +55,20 @@ export default function ContextContent({ lang }: ContextContentProps) {
     window.location.reload()
   }
 
-  if (authStatus === "loading") return null
+  // Loading or not authenticated — skeleton cloud
+  if (authStatus === "loading") {
+    return (
+      <div className="container-wrapper h-[calc(100vh-var(--header-height)-var(--footer-height))]">
+        <div className="mx-auto max-w-xl flex h-full flex-col items-center justify-center px-6">
+          <CloudTag selectedStory={null} contributor={null} skeleton />
+        </div>
+      </div>
+    )
+  }
 
-  // Not authenticated — skeleton cloud + login dialog
   if (!contributor) {
     return (
-      <div className="container-wrapper h-[calc(100vh-var(--header-height))]">
+      <div className="container-wrapper h-[calc(100vh-var(--header-height)-var(--footer-height))]">
         <div className="mx-auto max-w-xl flex h-full flex-col items-center justify-center px-6">
           <CloudTag
             selectedStory={null}
@@ -117,7 +125,7 @@ export default function ContextContent({ lang }: ContextContentProps) {
   }
 
   return (
-    <div className="container-wrapper h-[calc(100vh-var(--header-height))]">
+    <div className="container-wrapper h-[calc(100vh-var(--header-height)-var(--footer-height))]">
       <div className="mx-auto max-w-xl flex h-full flex-col items-center justify-center px-6">
         <CloudTag
           selectedStory={null}

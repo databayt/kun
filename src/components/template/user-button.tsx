@@ -3,12 +3,13 @@
 import { useState } from "react"
 import { useSession, signIn, signOut } from "next-auth/react"
 import { usePathname } from "next/navigation"
+import { LogIn } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
 
 export function UserButton() {
   const { data: session, status } = useSession()
@@ -45,27 +46,20 @@ export function UserButton() {
     window.location.reload()
   }
 
-  // Signed in — show initial, click to sign out
+  // Signed in
   if (session?.user) {
     const initial = session.user.name?.[0] || "?"
 
     return (
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <button
-            title={session.user.name || ""}
-            className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full bg-foreground text-xs font-mono text-background transition-opacity hover:opacity-80"
-          >
-            {initial}
-          </button>
+          <Button variant="ghost" size="icon" className="size-8" title={session.user.name || ""}>
+            <span className="text-xs font-mono">{initial}</span>
+          </Button>
         </DialogTrigger>
         <DialogContent className="max-w-xs p-6 gap-0 [&>button]:hidden">
-          <p className="text-sm text-foreground">
-            {session.user.name}
-          </p>
-          <p className="text-xs text-muted-foreground/50">
-            {session.user.email}
-          </p>
+          <p className="text-sm text-foreground">{session.user.name}</p>
+          <p className="text-xs text-muted-foreground/50">{session.user.email}</p>
           <Button
             variant="outline"
             onClick={() => signOut({ callbackUrl: `/${lang}` })}
@@ -78,17 +72,17 @@ export function UserButton() {
     )
   }
 
-  // Not signed in — show ?, click to open login dialog
+  // Not signed in
   return (
     <Dialog open={open} onOpenChange={(v) => { setOpen(v); setError(""); }}>
       <DialogTrigger asChild>
-        <button className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full text-xs font-mono text-muted-foreground/40 transition-colors hover:text-foreground">
-          ?
-        </button>
+        <Button variant="ghost" size="icon" className="size-8" title="Sign in">
+          <LogIn className="size-4.5" />
+        </Button>
       </DialogTrigger>
       <DialogContent className="max-w-xs p-6 gap-0 [&>button]:hidden">
         <p className="text-sm text-muted-foreground/50">
-          {isAr ? "سياق" : "context"}
+          {isAr ? "تسجيل الدخول" : "sign in"}
         </p>
 
         <form onSubmit={handleLogin} className="mt-6 space-y-4">
@@ -111,11 +105,7 @@ export function UserButton() {
 
           {error && <p className="text-xs text-red-500">{error}</p>}
 
-          <Button
-            type="submit"
-            disabled={loading}
-            className="w-full"
-          >
+          <Button type="submit" disabled={loading} className="w-full">
             {loading
               ? isAr ? "جاري..." : "signing in..."
               : isAr ? "دخول" : "sign in"}
