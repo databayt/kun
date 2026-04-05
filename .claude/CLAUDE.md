@@ -58,6 +58,10 @@ Powerful workflows that run independently of the pipeline.
 | `incident` | Production incident response workflow |
 | `monitor` | Cross-product deployment and health check |
 | `translate` | Arabic/English translation workflow |
+| `package` | Cross-repo dependency audit, upgrades, version alignment |
+| `learn` | Org intelligence — extract patterns, conventions, team dynamics |
+| `analyze` | Repo config generator — analyze patterns, generate config PR |
+| `profile` | Selective config loading — core, developer, security, per-person |
 
 ### Tier 3 — Vocabulary
 
@@ -68,12 +72,13 @@ Claude understands these keywords and activates the right agents and MCPs. No de
 **Features**: `auth`, `dashboard`, `landing`, `checkout`, `settings`, `profile`, `admin`, `onboarding`
 **Animation**: `motion`, `animation`, `transition`, `gesture`, `scroll`
 **Quality**: `security`, `performance`, `accessibility`, `review`, `audit`, `coverage`, `e2e`
-**Build**: `fix`, `error`, `lint`, `format`, `type-check`
+**Build**: `fix`, `error`, `lint`, `format`, `type-check`, `package`, `deps`, `outdated`
 **React perf**: `parallelize`, `waterfall`, `bundle`, `lazy`, `suspense`, `memo`, `streaming`, `barrel`, `dedup`
 **Docs**: `docs`, `readme`, `api-docs`, `storybook`, `changelog`
 **Services**: `github`, `figma`, `linear`, `slack`, `stripe`, `vercel`, `sentry`, `neon`, `analytics`
 **Cross-repo**: `from codebase`, `from shadcn`, `like hogwarts`, `like souq`, `like mkan`, `like shifa`
 **Operations**: `report`, `costs`, `pricing`, `weekly`, `dispatch`, `monitor`, `incident`, `credentials`
+**Intelligence**: `learn`, `analyze`, `profile`, `conventions`, `health`, `patterns`, `drift`
 
 ---
 
@@ -178,6 +183,13 @@ When implementing, check codebase first:
 | `/test <file>` | Generate and run tests |
 | `/clone <source>` | Clone from codebase/GitHub |
 
+### Intelligence
+| Command | Purpose |
+|---------|---------|
+| `/learn` | Org intelligence — full org, single repo, team, conventions, health |
+| `/analyze <repo>` | Generate `.claude/` config PR from repo patterns |
+| `/profile [name]` | Show/switch/create configuration profiles |
+
 ### Utilities
 | Command | Purpose |
 |---------|---------|
@@ -186,6 +198,7 @@ When implementing, check codebase first:
 | `/monitor` | Cross-product health check |
 | `/incident` | Production incident response |
 | `/translate` | Arabic/English translation |
+| `/package` | Dependency audit and upgrades |
 | `/docs` | Generate documentation |
 | `/security` | Security audit |
 | `/performance` | Performance audit |
@@ -214,6 +227,14 @@ When you see a keyword:
 | `table users` | block agent → DataTable → prisma |
 | `auth like hogwarts` | Reference hogwarts auth patterns |
 | `clone vercel/ai` | Clone and adapt from GitHub |
+| `learn` | Full org intelligence scan — all repos, team, conventions |
+| `learn hogwarts` | Deep dive into hogwarts patterns and conventions |
+| `learn team` | Who works on what, when, expertise areas |
+| `learn health` | Velocity metrics, fix:feature ratio, trends |
+| `analyze hogwarts` | Generate `.claude/` config PR from hogwarts patterns |
+| `analyze . --dry-run` | Preview config generation without PR |
+| `profile ali` | Switch to Ali's QA + Sales profile |
+| `profile show core` | Show what's in the core profile |
 
 ---
 

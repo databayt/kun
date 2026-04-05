@@ -4,7 +4,7 @@
 
 ## Quick Stats
 
-- **Total Agents**: 40 (9 leadership + 31 specialists)
+- **Total Agents**: 43 (9 leadership + 34 specialists)
 - **Model**: opus (all agents)
 - **Stack**: Next.js 16 + React 19 + Prisma 6 + TypeScript 5
 
@@ -22,8 +22,10 @@
                 tech-lead — ops — guardian             (Tech Leadership)
                       |
                  orchestration                        (Coordination)
+                    /    \
+              learn → analyze                         (Learning)
                       |
-                 31 specialists                       (Execution)
+                 33 specialists                       (Execution)
 ```
 
 ### Tier 0 — Captain (1)
@@ -89,13 +91,14 @@
 | **template** | Page layouts (hero, sidebar, auth) | block |
 | **block** | Functional UI (DataTable, Forms, Wizards) | - |
 
-### DevOps (3)
+### DevOps (4)
 
 | Agent | Purpose | Handoff |
 |-------|---------|---------|
 | **build** | Turbopack, TypeScript validation, bundles | deploy |
 | **deploy** | Vercel, monitoring, rollback, staging | - |
 | **test** | Vitest, Playwright, 95% coverage target | - |
+| **package** | Cross-repo dependency audit, upgrades, alignment | tech-lead, build |
 
 ### VCS (2)
 
@@ -115,6 +118,13 @@
 | **optimize** | Feature automation, integration, time savings | architecture, prisma |
 | **performance** | Core Web Vitals, profiling, runtime optimization | nextjs, react, prisma, build, tailwind |
 | **comment** | Code comments, WHY over WHAT, Clean Code | pattern, typescript |
+
+### Learning (2)
+
+| Agent | Purpose | Handoff |
+|-------|---------|---------|
+| **learn** | Org intelligence — extract patterns, conventions, team dynamics from git history | captain, tech-lead, analyze |
+| **analyze** | Repo config generator — analyze patterns, generate CLAUDE.md + agents + rules as PR | learn, tech-lead, github |
 
 ---
 
@@ -169,7 +179,10 @@ captain (company brain)
                 │   └── shadcn → atom → template → block
                 │
                 ├── DevOps Chain
-                │   └── build → deploy
+                │   └── build → deploy, package → tech-lead
+                │
+                ├── Learning Chain
+                │   └── learn → analyze → github (PR)
                 │
                 └── Standalone
                     └── test, git → github
@@ -186,6 +199,9 @@ Cross-references:
   growth ↔ product (content aligned with releases)
   support → tech-lead (bug escalation)
   ops → guardian (security review of infra)
+  learn → analyze (intelligence feeds config generation)
+  learn → captain (org insights inform strategy)
+  analyze → github (config PRs follow workflow cycle)
 ```
 
 ---
@@ -194,15 +210,17 @@ Cross-references:
 
 Keep agents updated with latest stable versions:
 
-| Technology | Current | Check Command |
-|------------|---------|---------------|
-| Next.js | 16.0.7 | `npm view next version` |
-| React | 19.2.0 | `npm view react version` |
-| TypeScript | 5.8.x | `npm view typescript version` |
-| Tailwind | 4.1.x | `npm view tailwindcss version` |
-| Prisma | 6.16.2 | `npm view prisma version` |
-| Zod | 3.25.x | `npm view zod version` |
-| NextAuth | 5.x | `npm view next-auth version` |
+| Technology | Latest | Check Command |
+|------------|--------|---------------|
+| Next.js | 16.2.2 | `npm view next version` |
+| React | 19.2.4 | `npm view react version` |
+| TypeScript | 6.0.2 | `npm view typescript version` |
+| Tailwind | 4.2.2 | `npm view tailwindcss version` |
+| Prisma | 7.6.0 | `npm view prisma version` |
+| Zod | 4.3.6 | `npm view zod version` |
+| NextAuth | 5.0.0-beta.30 | `npm view next-auth@beta version` |
+| Vercel AI SDK | 6.0.145 | `npm view ai version` |
+| lucide-react | 1.7.0 | `npm view lucide-react version` |
 
 ---
 
@@ -270,6 +288,9 @@ Use the build agent to fix TypeScript errors.
 | Feature optimization | optimize |
 | Runtime performance | performance |
 | Code comments | comment |
+| Dependency management | package |
+| Org intelligence | learn |
+| Repo config generation | analyze |
 
 ---
 
