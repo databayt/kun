@@ -29,8 +29,8 @@
       "@/content/*": [
         "./content/*"
       ],
-      "@/.source": [
-        "./.source"
+      "@/.source/*": [
+        "./.source/*"
       ]
     }
   },

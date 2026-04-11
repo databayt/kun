@@ -189,17 +189,29 @@ pnpm build
 
 If build fails, fix the build error. If the fix breaks other things, revert and comment on the issue.
 
-### 10. PUSH — Deploy
+### 10. PUSH — Branch + PR
+
+Create a branch, commit, and open a PR. For single-file i18n fixes, auto-merge.
 
 ```bash
+git checkout -b fix/report-<issue-number>
 git add <changed-files>
 git commit -m "fix: <description from issue title>
 
 Closes #<issue-number>
 
 Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
-git push origin main
+git push -u origin fix/report-<issue-number>
+gh pr create --title "fix: <description>" --body "Closes #<issue-number>" --label report
 ```
+
+**Auto-merge criteria** (all must be true):
+- Single file changed (e.g., dictionary/translation fix)
+- No business logic touched
+- Build passes
+
+If auto-merge: `gh pr merge <number> --squash --delete-branch`
+If multi-file or logic change: leave PR open, add comment with fix summary.
 
 ### 11. VERIFY — Post-deploy check
 

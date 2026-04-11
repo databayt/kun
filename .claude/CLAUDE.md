@@ -57,23 +57,47 @@ Powerful workflows that run independently of the pipeline.
 | `clone` | Clone patterns from codebase, shadcn, or GitHub |
 | `incident` | Production incident response workflow |
 | `monitor` | Cross-product deployment and health check |
-| `translate` | Arabic/English translation workflow |
+| `translate` | Full-coverage translation sweep (all routes or specific block) |
+| `skeleton` | Full-coverage loading state sweep (all routes or specific block) |
+| `structure` | Full-coverage file convention sweep (all routes or specific block) |
+| `guard` | Full-coverage security sweep (all routes or specific block) |
+| `coverage` | Coverage report — what's checked, what's not |
 | `package` | Cross-repo dependency audit, upgrades, version alignment |
 | `learn` | Org intelligence — extract patterns, conventions, team dynamics |
 | `analyze` | Repo config generator — analyze patterns, generate config PR |
 | `profile` | Selective config loading — core, developer, security, per-person |
 
+### Tier 2b — Coverage Sweeps
+
+Full-coverage sweeps with persistent ledger tracking. Say the keyword alone for full app, or with a block name for scoped sweep. All support `--status` for coverage report.
+
+| Keyword | What It Does | Mode |
+|---------|-------------|------|
+| `nextjs` | Next.js 16 App Router best practices | fix |
+| `react` | React 19 patterns — waterfalls, barrel imports, setState | fix |
+| `typescript` | Strict mode — no any, no ts-ignore, proper types | fix |
+| `tailwind` | Semantic tokens, logical properties for RTL | fix |
+| `shadcn` | Use ui/ primitives — no raw HTML elements | fix |
+| `prisma` | Query best practices — select, tenant scope, N+1 | report |
+| `authjs` | Auth.js v5 patterns — auth(), sessions, roles | report |
+| `accessibility` | A11y — semantic HTML, keyboard, ARIA, alt text | fix |
+| `barrel` | No barrel imports — direct imports only | fix |
+| `waterfall` | No sequential fetching — Promise.all() | fix |
+
+**Every sweep keyword supports:** `keyword` (full app), `keyword blockname` (scoped), `keyword --status` (report only)
+
+**Infrastructure:** Keywords registry at `.claude/coverage/keywords.json`, sweep protocol at `.claude/coverage/sweep-protocol.md`, per-product ledger at `<product>/.claude/coverage/ledger.json`
+
 ### Tier 3 — Vocabulary
 
 Claude understands these keywords and activates the right agents and MCPs. No dedicated command needed.
 
-**Frameworks**: `nextjs`, `react`, `typescript`, `prisma`, `tailwind`, `shadcn`, `authjs`
 **UI patterns**: `table`, `form`, `modal`, `card`, `sidebar`, `header`, `footer`, `hero`, `navbar`, `menu`
 **Features**: `auth`, `dashboard`, `landing`, `checkout`, `settings`, `profile`, `admin`, `onboarding`
 **Animation**: `motion`, `animation`, `transition`, `gesture`, `scroll`
-**Quality**: `security`, `performance`, `accessibility`, `review`, `audit`, `coverage`, `e2e`
-**Build**: `fix`, `error`, `lint`, `format`, `type-check`, `package`, `deps`, `outdated`
-**React perf**: `parallelize`, `waterfall`, `bundle`, `lazy`, `suspense`, `memo`, `streaming`, `barrel`, `dedup`
+**Quality**: `security`, `performance`, `review`, `audit`, `e2e`
+**Build**: `fix`, `error`, `lint`, `format`, `type-check`, `deps`, `outdated`
+**React perf**: `parallelize`, `bundle`, `lazy`, `suspense`, `memo`, `streaming`, `dedup`
 **Docs**: `docs`, `readme`, `api-docs`, `storybook`, `changelog`
 **Services**: `github`, `figma`, `linear`, `slack`, `stripe`, `vercel`, `sentry`, `neon`, `analytics`
 **Cross-repo**: `from codebase`, `from shadcn`, `like hogwarts`, `like souq`, `like mkan`, `like shifa`
@@ -190,6 +214,32 @@ When implementing, check codebase first:
 | `/analyze <repo>` | Generate `.claude/` config PR from repo patterns |
 | `/profile [name]` | Show/switch/create configuration profiles |
 
+### Coverage Sweeps (all support `[block]` scoping)
+| Command | Purpose |
+|---------|---------|
+| `/translate [block]` | Find and fix hardcoded strings |
+| `/nextjs [block]` | Enforce Next.js 16 App Router patterns |
+| `/react [block]` | Fix waterfalls, barrel imports, setState |
+| `/typescript [block]` | Remove `any`, fix types |
+| `/tailwind [block]` | Semantic tokens, logical properties for RTL |
+| `/shadcn [block]` | Replace raw HTML with ui/ primitives |
+| `/prisma [block]` | Audit queries — select, tenant, N+1 |
+| `/authjs [block]` | Audit auth — auth(), sessions, roles |
+| `/skeleton [block]` | Check/create loading.tsx |
+| `/structure [block]` | Verify mirror pattern conventions |
+| `/guard [block]` | Verify auth + validation + tenant |
+| `/waterfall [block]` | Parallelize sequential fetching |
+| `/barrel [block]` | Replace barrel imports |
+| `/accessibility [block]` | Fix a11y — keyboard, ARIA, alt text |
+| `/coverage [product] [keyword]` | Coverage report |
+
+### Patterns
+| Command | Purpose |
+|---------|---------|
+| `/pattern` | List all canonical patterns with status |
+| `/pattern <keyword>` | Show pattern card (form, table, modal, auth, etc.) |
+| `/clone pattern:<keyword>` | Clone canonical pattern to current repo |
+
 ### Utilities
 | Command | Purpose |
 |---------|---------|
@@ -197,7 +247,6 @@ When implementing, check codebase first:
 | `/screenshot` | View recent screenshot |
 | `/monitor` | Cross-product health check |
 | `/incident` | Production incident response |
-| `/translate` | Arabic/English translation |
 | `/package` | Dependency audit and upgrades |
 | `/docs` | Generate documentation |
 | `/security` | Security audit |
@@ -210,7 +259,8 @@ When implementing, check codebase first:
 When you see a keyword:
 1. **Pipeline keywords** → execute the corresponding pipeline stage command
 2. **Tool keywords** → execute the standalone tool command
-3. **Vocabulary keywords** → activate the right agent(s) and MCP tools
+3. **Sweep keywords** → run full-coverage sweep with ledger tracking (all routes or scoped to block)
+4. **Vocabulary keywords** → activate the right agent(s) and MCP tools
 
 ### Examples
 
@@ -235,6 +285,25 @@ When you see a keyword:
 | `analyze . --dry-run` | Preview config generation without PR |
 | `profile ali` | Switch to Ali's QA + Sales profile |
 | `profile show core` | Show what's in the core profile |
+| `translation` | Sweep ALL routes for hardcoded strings, fix them |
+| `translation admission` | Sweep admission block only |
+| `nextjs` | Enforce Next.js 16 best practices across all routes |
+| `nextjs finance` | Enforce Next.js patterns in finance block only |
+| `react` | Fix waterfalls, barrel imports, setState across all components |
+| `react admission` | Fix React anti-patterns in admission block |
+| `typescript` | Remove `any`, `ts-ignore`, fix types across all files |
+| `tailwind` | Semantic tokens, logical properties for RTL across all components |
+| `shadcn` | Replace raw HTML with shadcn/ui primitives |
+| `prisma` | Audit all queries for select, tenant scope, N+1 |
+| `skeleton` | Check/create loading.tsx for every page |
+| `structure` | Verify mirror pattern conventions |
+| `guard` | Verify auth + validation + tenant isolation |
+| `waterfall` | Find and parallelize sequential data fetching |
+| `barrel` | Replace barrel imports with direct imports |
+| `accessibility` | Fix clickable divs, missing alt, ARIA |
+| `authjs` | Audit auth patterns — auth(), sessions, roles |
+| `coverage hogwarts` | Show coverage status for all keywords |
+| `coverage hogwarts react` | Detailed per-module React breakdown |
 
 ---
 

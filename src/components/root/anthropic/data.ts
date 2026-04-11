@@ -1,20 +1,61 @@
 export type AssetCategory =
-  | "brand"
   | "illustrations"
   | "engineering"
+  | "research"
+  | "values"
+  | "ui-icons"
+  | "maps"
+  | "brand"
   | "partners"
   | "benchmarks"
-  | "research"
   | "social"
-  | "maps"
   | "events"
   | "animations"
   | "fonts"
   | "documents"
-  | "values"
   | "team"
-  | "mars"
-  | "ui-icons";
+  | "mars";
+
+// Display order for categories
+export const CATEGORY_ORDER: AssetCategory[] = [
+  "illustrations",
+  "engineering",
+  "research",
+  "values",
+  "ui-icons",
+  "maps",
+  "brand",
+  "partners",
+  "benchmarks",
+  "social",
+  "events",
+  "animations",
+  "team",
+  "fonts",
+  "documents",
+  "mars",
+];
+
+// Category → background color mapping (inspired by Anthropic's section theming)
+export const CATEGORY_COLORS: Record<AssetCategory, string> = {
+  illustrations: "cycle",    // Uses last 15 colors from palette, cycling per asset
+  engineering: "#141413",    // Slate Dark — dark terminal/code feel
+  research: "#cbcadb",       // Heather — soft lavender for academic tone
+  values: "#e3dacc",         // Oat — warm earthy for company culture
+  "ui-icons": "#faf9f5",    // Ivory Light — clean, minimal for UI elements
+  maps: "#bcd1ca",           // Cactus — geographic/nature teal
+  brand: "#d97757",          // Clay — core brand orange
+  partners: "#f5f4ed",       // Slate 100 — neutral canvas for logos
+  benchmarks: "#e8e6dc",     // Slate 200 — data-table warmth
+  social: "#ebcece",         // Coral — social/sharing pink warmth
+  events: "#d97757",         // Clay — energetic event orange
+  animations: "#141413",     // Slate Dark — dark canvas for motion
+  team: "#e3dacc",           // Oat — warm people-photos backdrop
+  fonts: "#f0eee6",          // Ivory Medium
+  documents: "#e8e6dc",      // Slate 200
+  mars: "#d97757",           // Clay — Mars red-orange
+};
+
 
 // S3 bucket: hogwarts-databayt | CloudFront: d1dlwtcfl0db67.cloudfront.net
 export const CDN_BASE = "https://d1dlwtcfl0db67.cloudfront.net";
@@ -61,22 +102,22 @@ function a(
 export const LAST_CRAWLED = "2026-04-03";
 
 export const CATEGORY_LABELS: Record<AssetCategory, string> = {
-  brand: "Brand & Logos",
   illustrations: "Illustrations",
   engineering: "Engineering Blog",
+  research: "Research",
+  values: "Company Values",
+  "ui-icons": "UI Icons",
+  maps: "Maps",
+  brand: "Brand & Logos",
   partners: "Partner Logos",
   benchmarks: "Benchmarks",
-  research: "Research",
   social: "Social Cards",
-  maps: "Maps",
   events: "Events",
   animations: "Animations",
+  team: "Team",
   fonts: "Fonts",
   documents: "Documents",
-  values: "Company Values",
-  team: "Team",
   mars: "Claude on Mars",
-  "ui-icons": "UI Icons",
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -296,13 +337,81 @@ export const URL_INDEX = {
   external: ["https://claude.ai", "https://platform.claude.com", "https://docs.claude.com", "https://status.claude.com"],
 } as const;
 
-// Brand colors (official)
-export const BRAND_COLORS = {
-  dark: "#141413",
-  light: "#faf9f5",
-  midGray: "#b0aea5",
-  lightGray: "#e8e6dc",
-  orange: "#d97757",
-  blue: "#6a9bcc",
-  green: "#788c5d",
-} as const;
+// ═══════════════════════════════════════════════════════════════════════════
+// Anthropic Color System — extracted from anthropic.com CSS + design tokens
+// All values include OKLCH conversion for modern color workflows
+// ═══════════════════════════════════════════════════════════════════════════
+
+export interface ColorToken {
+  name: string;
+  hex: string;
+  oklch: string;
+  role: "background" | "text" | "accent" | "surface" | "border" | "model" | "interactive";
+  group: "core" | "slate" | "accents" | "models" | "ui" | "tags";
+}
+
+export const COLORS: ColorToken[] = [
+  // ── Core Brand ────────────────────────────────────────────────────────
+  { name: "Dark", hex: "#0f0f0e", oklch: "oklch(0.13 0.004 95)", role: "text", group: "core" },
+  { name: "Slate Dark", hex: "#141413", oklch: "oklch(0.15 0.005 95)", role: "text", group: "core" },
+  { name: "Clay", hex: "#d97757", oklch: "oklch(0.65 0.14 45)", role: "accent", group: "core" },
+  { name: "Ivory Light", hex: "#faf9f5", oklch: "oklch(0.98 0.008 95)", role: "background", group: "core" },
+  { name: "White", hex: "#ffffff", oklch: "oklch(1.0 0 0)", role: "surface", group: "core" },
+
+  // ── Slate Scale ───────────────────────────────────────────────────────
+  { name: "Slate 900", hex: "#1a1918", oklch: "oklch(0.17 0.004 80)", role: "text", group: "slate" },
+  { name: "Slate 850", hex: "#1f1e1d", oklch: "oklch(0.19 0.004 80)", role: "text", group: "slate" },
+  { name: "Slate 800", hex: "#262624", oklch: "oklch(0.22 0.005 90)", role: "text", group: "slate" },
+  { name: "Slate 750", hex: "#30302e", oklch: "oklch(0.27 0.005 90)", role: "text", group: "slate" },
+  { name: "Slate 700", hex: "#3d3d3a", oklch: "oklch(0.33 0.006 95)", role: "text", group: "slate" },
+  { name: "Slate 650", hex: "#4d4c48", oklch: "oklch(0.39 0.007 95)", role: "text", group: "slate" },
+  { name: "Slate 600", hex: "#5e5d59", oklch: "oklch(0.46 0.008 95)", role: "border", group: "slate" },
+  { name: "Slate 550", hex: "#73726c", oklch: "oklch(0.53 0.010 95)", role: "border", group: "slate" },
+  { name: "Slate 500", hex: "#87867f", oklch: "oklch(0.61 0.012 95)", role: "border", group: "slate" },
+  { name: "Slate 450", hex: "#9c9a92", oklch: "oklch(0.68 0.012 95)", role: "border", group: "slate" },
+  { name: "Slate 400", hex: "#b0aea5", oklch: "oklch(0.75 0.012 95)", role: "border", group: "slate" },
+  { name: "Slate 350", hex: "#c2c0b6", oklch: "oklch(0.80 0.012 95)", role: "border", group: "slate" },
+  { name: "Slate 300", hex: "#d1cfc5", oklch: "oklch(0.85 0.012 95)", role: "border", group: "slate" },
+  { name: "Slate 250", hex: "#dedcd1", oklch: "oklch(0.89 0.013 92)", role: "surface", group: "slate" },
+  { name: "Slate 200", hex: "#e8e6dc", oklch: "oklch(0.92 0.013 95)", role: "surface", group: "slate" },
+  { name: "Slate 150", hex: "#f0eee6", oklch: "oklch(0.95 0.012 95)", role: "surface", group: "slate" },
+  { name: "Slate 100", hex: "#f5f4ed", oklch: "oklch(0.97 0.010 95)", role: "surface", group: "slate" },
+  { name: "Slate 050", hex: "#faf9f5", oklch: "oklch(0.98 0.008 95)", role: "background", group: "slate" },
+
+  // ── Accents ───────────────────────────────────────────────────────────
+  { name: "Oat", hex: "#e3dacc", oklch: "oklch(0.89 0.018 80)", role: "surface", group: "accents" },
+  { name: "Coral", hex: "#ebcece", oklch: "oklch(0.87 0.04 15)", role: "surface", group: "accents" },
+  { name: "Cactus", hex: "#bcd1ca", oklch: "oklch(0.84 0.03 175)", role: "surface", group: "accents" },
+  { name: "Heather", hex: "#cbcadb", oklch: "oklch(0.84 0.03 280)", role: "surface", group: "accents" },
+  { name: "Olive", hex: "#788c5d", oklch: "oklch(0.60 0.08 130)", role: "accent", group: "accents" },
+  { name: "Sky", hex: "#6a9bcc", oklch: "oklch(0.66 0.09 240)", role: "accent", group: "accents" },
+  { name: "Fig", hex: "#c46686", oklch: "oklch(0.58 0.12 355)", role: "accent", group: "accents" },
+
+  // ── Models ────────────────────────────────────────────────────────────
+  { name: "Opus", hex: "#d97757", oklch: "oklch(0.65 0.14 45)", role: "model", group: "models" },
+  { name: "Sonnet", hex: "#6a9bcc", oklch: "oklch(0.66 0.09 240)", role: "model", group: "models" },
+  { name: "Haiku", hex: "#788c5d", oklch: "oklch(0.60 0.08 130)", role: "model", group: "models" },
+
+  // ── UI & Functional ───────────────────────────────────────────────────
+  { name: "Focus", hex: "#2c84db", oklch: "oklch(0.60 0.15 250)", role: "interactive", group: "ui" },
+  { name: "Error", hex: "#bf4d43", oklch: "oklch(0.52 0.14 25)", role: "interactive", group: "ui" },
+  { name: "Success", hex: "#10b981", oklch: "oklch(0.70 0.15 165)", role: "interactive", group: "ui" },
+
+  // ── Research Tags ─────────────────────────────────────────────────────
+  { name: "Tag Tan", hex: "#d4cab9", oklch: "oklch(0.83 0.02 75)", role: "surface", group: "tags" },
+  { name: "Tag Coral", hex: "#ea9085", oklch: "oklch(0.72 0.10 25)", role: "surface", group: "tags" },
+  { name: "Tag Periwinkle", hex: "#b0bdf6", oklch: "oklch(0.79 0.10 265)", role: "surface", group: "tags" },
+];
+
+export const COLOR_GROUPS: Record<string, string> = {
+  core: "Core Brand",
+  slate: "Slate Scale",
+  accents: "Accents",
+  models: "Model Colors",
+  ui: "Functional",
+  tags: "Research Tags",
+};
+
+// Last 15 colors from the palette — used to cycle illustration backgrounds
+export const ILLUSTRATION_COLORS = COLORS.slice(-15).map((c) => c.hex);
+

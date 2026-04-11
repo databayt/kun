@@ -1,0 +1,338 @@
+{
+  "$schema": "coverage-keywords-v1",
+  "description": "What each sweepable keyword checks and how. Used by keyword commands to run systematic coverage sweeps. Reference: .claude/coverage/sweep-protocol.md for the universal protocol.",
+  "keywords": {
+
+    "translation": {
+      "method": "code",
+      "mode": "fix",
+      "description": "Every user-facing string uses dictionary keys, not hardcoded English",
+      "patterns": [
+        "<FormLabel>[A-Za-z][^{<]+</FormLabel>",
+        "toast\\.(success|error|warning|info)\\([\"'][A-Za-z]",
+        "<Button[^>]*>[A-Za-z][^{<]+</Button>",
+        "placeholder=[\"'][A-Z][^\"'{]+[\"']",
+        "error:\\s*[\"'][A-Z]",
+        "label:\\s*[\"'][A-Z]",
+        "\\.(min|max|email|url|regex|refine)\\([^)]*[\"'][A-Z]",
+        "(title|name|description|label|body)(Ar|En|Arabic|English)\\b"
+      ],
+      "skipPaths": ["dictionaries/", "__tests__/", ".test.", ".spec.", "node_modules/"],
+      "agent": "internationalization",
+      "fixAction": "Replace hardcoded string with dictionary key (d?.section.key), add key to en.json and ar.json",
+      "fixReference": ".claude/rules/translation.md",
+      "helpers": [
+        "ValidationHelper from @/components/internationalization/helpers",
+        "ToastHelper from @/components/internationalization/helpers",
+        "ErrorHelper from @/components/internationalization/helpers"
+      ]
+    },
+
+    "skeleton": {
+      "method": "code",
+      "mode": "fix",
+      "description": "Every page directory has a loading.tsx with Skeleton components",
+      "checkType": "sibling_file",
+      "requiredSiblings": ["loading.tsx"],
+      "skipPaths": ["(auth)/", "node_modules/"],
+      "fixAction": "Create loading.tsx with Skeleton components matching the page layout"
+    },
+
+    "structure": {
+      "method": "code",
+      "mode": "report",
+      "description": "Every module follows mirror pattern file conventions",
+      "checkType": "file_convention",
+      "expectedFiles": {
+        "page": ["page.tsx"],
+        "component": ["content.tsx"],
+        "data": ["actions.ts", "validation.ts"],
+        "optional": ["form.tsx", "columns.tsx", "table.tsx", "queries.ts", "authorization.ts"]
+      },
+      "agent": "structure"
+    },
+
+    "guard": {
+      "method": "code",
+      "mode": "report",
+      "description": "Every route has auth checks, Zod validation, and tenant isolation",
+      "patterns": [
+        "auth\\(\\)",
+        "safeParse|safeParseAsync",
+        "getTenantContext|schoolId",
+        "redirect\\(\"/login\"\\)|redirect\\(\"/unauthorized\"\\)"
+      ],
+      "checkLocations": {
+        "layout": "auth() call with redirect",
+        "actions": "Zod validation + getTenantContext",
+        "page": "session check or protected by layout"
+      },
+      "agent": "guardian"
+    },
+
+    "rtl": {
+      "method": "browser",
+      "mode": "report",
+      "description": "Every page renders correctly in RTL (Arabic) mode",
+      "browserSteps": [
+        "Navigate to /ar/ version of the page",
+        "Screenshot and check: direction, alignment, mirroring",
+        "Check for LTR remnants (wrong margins, wrong text-align)",
+        "Valid LTR exceptions: phone inputs, email inputs, URLs, code blocks"
+      ],
+      "agent": "internationalization"
+    },
+
+    "pattern": {
+      "method": "code",
+      "mode": "report",
+      "description": "Every page/action/form follows standardized conventions",
+      "conventions": {
+        "page.tsx": "async server component, imports content from components/",
+        "actions.ts": "use server, auth + tenant + validate + execute + revalidate",
+        "layout.tsx": "auth guard, metadata, shared UI",
+        "content.tsx": "server component, fetches data, renders UI",
+        "form.tsx": "client component, controlled inputs, Zod validation",
+        "columns.tsx": "client component with useMemo for column definitions"
+      },
+      "agent": "pattern"
+    },
+
+    "nextjs": {
+      "method": "code",
+      "mode": "fix",
+      "description": "Every file follows Next.js 16 App Router best practices",
+      "antiPatterns": [
+        { "pattern": "from [\"']next/router[\"']", "fix": "Use next/navigation instead", "severity": "critical" },
+        { "pattern": "getServerSideProps|getStaticProps|getInitialProps", "fix": "Use server components or route handlers", "severity": "critical" },
+        { "pattern": "<img\\s", "fix": "Use next/image for optimization", "severity": "high" },
+        { "pattern": "<a\\s+href=[\"']/", "fix": "Use next/link for internal navigation", "severity": "high" },
+        { "pattern": "useRouter\\(\\)(?!.*from [\"']next/navigation)", "fix": "Import from next/navigation not next/router", "severity": "critical" },
+        { "pattern": "getSession\\(\\)", "fix": "Use auth() from next-auth in server components", "severity": "high" },
+        { "pattern": "useEffect\\([^)]*fetch\\(", "fix": "Move data fetching to server component", "severity": "high" },
+        { "pattern": "export default function.*\\{[\\s]*const.*=.*await", "fix": "Ensure page component is async", "severity": "medium" }
+      ],
+      "bestPractices": [
+        "Server Components by default — no 'use client' unless needed for hooks/events",
+        "Async params: const { lang } = await props.params",
+        "Streaming with Suspense for slow data",
+        "Route groups (parentheses) for layout organization",
+        "loading.tsx and error.tsx for each route segment",
+        "Metadata export in layouts and pages",
+        "Server Actions with 'use server' for mutations"
+      ],
+      "agent": "nextjs",
+      "skipPaths": ["node_modules/", ".next/", "__tests__/"]
+    },
+
+    "react": {
+      "method": "code",
+      "mode": "fix",
+      "description": "Every component follows React 19 best practices",
+      "antiPatterns": [
+        { "pattern": "await\\s+\\w+\\([^)]*\\);\\s*\\n\\s*(?:const|let).*=\\s*await", "fix": "Parallelize with Promise.all()", "severity": "critical" },
+        { "pattern": "import\\s+\\{[^}]+\\}\\s+from\\s+[\"']@/components/icons[\"']", "fix": "Direct import from lucide-react", "severity": "high" },
+        { "pattern": "import\\s+\\{[^}]+\\}\\s+from\\s+[\"']\\./index[\"']", "fix": "Import directly from specific module", "severity": "high" },
+        { "pattern": "set\\w+\\(\\[\\.\\.\\.", "fix": "Use functional setState: setX(prev => [...])", "severity": "medium" },
+        { "pattern": "useState\\([^()]+\\(\\)", "fix": "Lazy init: useState(() => expensive())", "severity": "medium" },
+        { "pattern": "useEffect\\(\\(\\)\\s*=>\\s*\\{[^}]*set\\w+\\(", "fix": "Derive state during render, not in useEffect", "severity": "medium" },
+        { "pattern": "<\\w+Component\\s+data=\\{\\w+\\}", "fix": "Pass only needed fields, not entire objects (RSC serialization)", "severity": "medium" }
+      ],
+      "bestPractices": [
+        "Server Components by default",
+        "Parallel data fetching with Promise.all()",
+        "No barrel imports — direct imports from specific modules",
+        "Functional setState for state updates",
+        "Lazy state initialization for expensive computations",
+        "Minimal RSC serialization — pass only needed props",
+        "React.cache() for deduplication"
+      ],
+      "agent": "react",
+      "skipPaths": ["node_modules/", ".next/", "__tests__/"]
+    },
+
+    "typescript": {
+      "method": "code",
+      "mode": "fix",
+      "description": "Every file follows TypeScript 5 strict mode best practices",
+      "antiPatterns": [
+        { "pattern": ":\\s*any\\b", "fix": "Replace with proper type or unknown", "severity": "critical" },
+        { "pattern": "as\\s+any\\b", "fix": "Use type guard or proper assertion", "severity": "critical" },
+        { "pattern": "@ts-ignore", "fix": "Fix the type error or use @ts-expect-error with explanation", "severity": "high" },
+        { "pattern": "@ts-expect-error(?!\\s+--)", "fix": "Add explanation comment after @ts-expect-error", "severity": "medium" },
+        { "pattern": "\\!\\.", "fix": "Use optional chaining (?.) or proper null check", "severity": "medium" },
+        { "pattern": "\\!;", "fix": "Avoid non-null assertion, add proper type narrowing", "severity": "medium" },
+        { "pattern": "Object\\b(?!\\.(keys|values|entries|assign|freeze))", "fix": "Use Record<string, T> or specific interface", "severity": "medium" },
+        { "pattern": "Function\\b", "fix": "Use specific function type: () => void", "severity": "medium" }
+      ],
+      "bestPractices": [
+        "Strict mode always — no any, no ts-ignore",
+        "Discriminated unions over type assertions",
+        "Proper generic constraints",
+        "Return types on exported functions",
+        "Const assertions for literal types",
+        "Satisfies operator over as assertion"
+      ],
+      "agent": "typescript",
+      "skipPaths": ["node_modules/", ".next/", "*.js", "*.mjs"]
+    },
+
+    "tailwind": {
+      "method": "code",
+      "mode": "fix",
+      "description": "Every component uses Tailwind CSS 4 correctly with semantic tokens",
+      "antiPatterns": [
+        { "pattern": "style=\\{\\{[^}]*color:", "fix": "Use Tailwind class instead of inline color", "severity": "high" },
+        { "pattern": "style=\\{\\{[^}]*margin:|padding:|width:|height:", "fix": "Use Tailwind spacing classes", "severity": "high" },
+        { "pattern": "#[0-9a-fA-F]{3,8}", "fix": "Use semantic color token (bg-primary, text-muted-foreground)", "severity": "high" },
+        { "pattern": "rgb\\(|rgba\\(|hsl\\(", "fix": "Use Tailwind color classes with semantic tokens", "severity": "high" },
+        { "pattern": "className=.*ml-.*className=.*mr-", "fix": "Use logical properties (ms-, me-) for RTL support", "severity": "medium" },
+        { "pattern": "text-left|text-right", "fix": "Use text-start/text-end for RTL support", "severity": "medium" },
+        { "pattern": "pl-|pr-|left-|right-", "fix": "Use logical properties (ps-, pe-, start-, end-) for RTL", "severity": "medium" }
+      ],
+      "bestPractices": [
+        "Semantic tokens (bg-primary, text-foreground) over raw colors",
+        "Logical properties (ms-, me-, ps-, pe-) for RTL/LTR",
+        "Responsive design: sm:, md:, lg: breakpoints",
+        "No inline styles when Tailwind class exists",
+        "Dark mode via CSS variables, not dark: prefix overuse",
+        "text-start/text-end instead of text-left/text-right"
+      ],
+      "agent": "tailwind",
+      "skipPaths": ["node_modules/", ".next/", "*.css"]
+    },
+
+    "shadcn": {
+      "method": "code",
+      "mode": "fix",
+      "description": "Every component uses shadcn/ui primitives instead of raw HTML",
+      "antiPatterns": [
+        { "pattern": "<button\\s(?!.*variant)", "fix": "Use <Button> from @/components/ui/button", "severity": "high" },
+        { "pattern": "<input\\s(?!.*type=[\"']hidden)", "fix": "Use <Input> from @/components/ui/input", "severity": "high" },
+        { "pattern": "<select\\s", "fix": "Use <Select> from @/components/ui/select", "severity": "high" },
+        { "pattern": "<textarea\\s", "fix": "Use <Textarea> from @/components/ui/textarea", "severity": "high" },
+        { "pattern": "<table\\s", "fix": "Use <Table> from @/components/ui/table", "severity": "medium" },
+        { "pattern": "<dialog\\s", "fix": "Use <Dialog> from @/components/ui/dialog", "severity": "medium" },
+        { "pattern": "<label\\s(?!.*htmlFor)", "fix": "Use <Label> from @/components/ui/label", "severity": "medium" }
+      ],
+      "bestPractices": [
+        "Use @/components/ui/ primitives for all standard HTML elements",
+        "Compose into atoms when 2+ primitives combine",
+        "Use proper variants (default, destructive, outline, secondary, ghost, link)",
+        "No custom modals — use Dialog",
+        "No custom dropdowns — use DropdownMenu",
+        "No custom tooltips — use Tooltip",
+        "No custom tabs — use Tabs"
+      ],
+      "agent": "shadcn",
+      "skipPaths": ["node_modules/", ".next/", "components/ui/"]
+    },
+
+    "prisma": {
+      "method": "code",
+      "mode": "report",
+      "description": "Every database query follows Prisma 6 best practices",
+      "antiPatterns": [
+        { "pattern": "findMany\\(\\)(?!.*select|.*include)", "fix": "Always use select or include to limit fields", "severity": "high" },
+        { "pattern": "findMany\\(\\{[^}]*\\}\\)(?!.*where)", "fix": "Add where clause, especially tenant scope (schoolId)", "severity": "critical" },
+        { "pattern": "\\.create\\((?!.*data:.*schoolId)", "fix": "Include schoolId in every create for tenant isolation", "severity": "critical" },
+        { "pattern": "for.*await.*prisma\\.", "fix": "Batch with createMany/updateMany or transaction", "severity": "high" },
+        { "pattern": "prisma\\.\\$queryRaw", "fix": "Prefer Prisma client API over raw queries", "severity": "medium" },
+        { "pattern": "\\.findFirst\\((?!.*where)", "fix": "Add where clause to findFirst", "severity": "high" }
+      ],
+      "bestPractices": [
+        "Always select/include — never fetch full records",
+        "Tenant scope (schoolId) in every query",
+        "Transactions for multi-step mutations",
+        "Batch operations over loops (createMany, updateMany)",
+        "Proper error handling with PrismaClientKnownRequestError",
+        "React.cache() for deduplication in server components"
+      ],
+      "agent": "prisma",
+      "skipPaths": ["node_modules/", ".next/", "prisma/"]
+    },
+
+    "authjs": {
+      "method": "code",
+      "mode": "report",
+      "description": "Every auth touchpoint follows Auth.js v5 best practices",
+      "antiPatterns": [
+        { "pattern": "getSession\\(\\)(?!.*from.*next-auth)", "fix": "Use auth() from @/auth in server components", "severity": "critical" },
+        { "pattern": "useSession\\(\\)(?!.*from.*next-auth/react)", "fix": "Prefer server-side auth() over client useSession", "severity": "high" },
+        { "pattern": "session\\.user\\.(id|email|role)(?!.*&&)", "fix": "Add null check before accessing session properties", "severity": "medium" },
+        { "pattern": "jwt.*secret.*=", "fix": "Use AUTH_SECRET env var, not hardcoded secrets", "severity": "critical" },
+        { "pattern": "credentials.*password(?!.*hash)", "fix": "Always hash passwords, never store plain text", "severity": "critical" }
+      ],
+      "bestPractices": [
+        "auth() in server components and server actions",
+        "Middleware for route protection (proxy.ts)",
+        "Role-based access in layouts, not pages",
+        "Session via JWT, extended with user role/schoolId",
+        "AUTH_SECRET from env, never hardcoded",
+        "Proper callback chain: jwt → session → authorized"
+      ],
+      "agent": "authjs",
+      "skipPaths": ["node_modules/", ".next/"]
+    },
+
+    "accessibility": {
+      "method": "code",
+      "mode": "report",
+      "description": "Every component follows accessibility best practices",
+      "antiPatterns": [
+        { "pattern": "<div\\s+onClick", "fix": "Use <button> or role='button' with keyboard handler", "severity": "critical" },
+        { "pattern": "<img(?!.*alt=)", "fix": "Add alt attribute to every image", "severity": "critical" },
+        { "pattern": "tabIndex=[\"']-1[\"'](?!.*aria-)", "fix": "Negative tabIndex needs aria attributes for context", "severity": "medium" },
+        { "pattern": "<svg(?!.*aria-|.*role=)", "fix": "Add aria-label or role='img' to SVGs", "severity": "medium" },
+        { "pattern": "className=.*text-xs(?!.*sr-only)", "fix": "Ensure small text meets 4.5:1 contrast ratio", "severity": "medium" },
+        { "pattern": "<form(?!.*onSubmit|.*action=)", "fix": "Forms need submit handler or server action", "severity": "medium" }
+      ],
+      "bestPractices": [
+        "Semantic HTML: proper heading levels (h1-h6 in order)",
+        "Interactive elements are keyboard accessible",
+        "Images have meaningful alt text",
+        "Forms have associated labels",
+        "Focus management for modals and drawers",
+        "ARIA roles only when semantic HTML insufficient"
+      ],
+      "skipPaths": ["node_modules/", ".next/", "__tests__/"]
+    },
+
+    "barrel": {
+      "method": "code",
+      "mode": "fix",
+      "description": "No barrel file imports — direct imports from specific modules",
+      "antiPatterns": [
+        { "pattern": "from [\"']@/components/icons[\"']", "fix": "Import directly: from 'lucide-react'", "severity": "high" },
+        { "pattern": "from [\"']\\./index[\"']", "fix": "Import from specific file, not index", "severity": "high" },
+        { "pattern": "from [\"']\\.\\./index[\"']", "fix": "Import from specific file, not parent index", "severity": "high" },
+        { "pattern": "export \\* from", "fix": "Export specific items, not barrel re-exports", "severity": "medium" }
+      ],
+      "bestPractices": [
+        "Direct imports from specific modules (200-800ms savings per barrel)",
+        "No index.ts re-export files",
+        "Import { X } from 'lucide-react' not from icons barrel",
+        "Import from '@/components/ui/button' not '@/components/ui'"
+      ],
+      "skipPaths": ["node_modules/", ".next/"]
+    },
+
+    "waterfall": {
+      "method": "code",
+      "mode": "fix",
+      "description": "No sequential data fetching — parallel with Promise.all",
+      "antiPatterns": [
+        { "pattern": "const \\w+ = await \\w+\\([^)]*\\);\\s*\\n\\s*const \\w+ = await", "fix": "Use Promise.all([a(), b()]) for independent fetches", "severity": "critical" },
+        { "pattern": "for\\s*\\(.*\\)\\s*\\{[^}]*await", "fix": "Use Promise.all with map instead of sequential loop", "severity": "critical" },
+        { "pattern": "forEach\\(async", "fix": "Use Promise.all with map for parallel async operations", "severity": "high" }
+      ],
+      "bestPractices": [
+        "Promise.all() for independent fetches (2-10x improvement)",
+        "Promise.all with map instead of for-await loops",
+        "Suspense boundaries for parallel streaming",
+        "React.cache() for deduplication across components"
+      ],
+      "skipPaths": ["node_modules/", ".next/", "__tests__/"]
+    }
+  }
+}

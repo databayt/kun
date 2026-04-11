@@ -12,10 +12,30 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 
+const categories = {
+  en: [
+    { value: "visual", label: "Visual / Layout" },
+    { value: "broken", label: "Broken / Not Working" },
+    { value: "data", label: "Wrong Data" },
+    { value: "slow", label: "Slow / Performance" },
+    { value: "confusing", label: "Confusing / UX" },
+    { value: "other", label: "Other" },
+  ],
+  ar: [
+    { value: "visual", label: "مظهر / تخطيط" },
+    { value: "broken", label: "معطل / لا يعمل" },
+    { value: "data", label: "بيانات خاطئة" },
+    { value: "slow", label: "بطيء / أداء" },
+    { value: "confusing", label: "مربك / تجربة المستخدم" },
+    { value: "other", label: "أخرى" },
+  ],
+} as const
+
 const translations = {
   en: {
     report: "Report an issue",
     title: "Report an issue",
+    category: "Category",
     placeholder: "Describe the issue...",
     submit: "Submit",
     submitting: "Submitting...",
@@ -25,6 +45,7 @@ const translations = {
   ar: {
     report: "الإبلاغ عن مشكلة",
     title: "الإبلاغ عن مشكلة",
+    category: "التصنيف",
     placeholder: "صف المشكلة...",
     submit: "إرسال",
     submitting: "جاري الإرسال...",
@@ -36,19 +57,30 @@ const translations = {
 export function ReportIssue() {
   const [open, setOpen] = useState(false)
   const [description, setDescription] = useState("")
+  const [category, setCategory] = useState("")
   const [status, setStatus] = useState<
     "idle" | "loading" | "success" | "error"
   >("idle")
   const pathname = usePathname()
-  const t = translations[pathname?.startsWith("/ar") ? "ar" : "en"]
+  const lang = pathname?.startsWith("/ar") ? "ar" : "en"
+  const t = translations[lang]
+  const cats = categories[lang]
 
   async function handleSubmit() {
     if (!description.trim()) return
     setStatus("loading")
     try {
-      await reportIssue({ description, pageUrl: window.location.href })
+      await reportIssue({
+        description,
+        pageUrl: window.location.href,
+        category: category || undefined,
+        viewport: `${window.innerWidth}x${window.innerHeight}`,
+        direction: document.documentElement.dir || (lang === "ar" ? "rtl" : "ltr"),
+        browser: navigator.userAgent,
+      })
       setStatus("success")
       setDescription("")
+      setCategory("")
       setTimeout(() => {
         setOpen(false)
         setStatus("idle")
@@ -78,6 +110,18 @@ export function ReportIssue() {
           <DialogHeader>
             <DialogTitle>{t.title}</DialogTitle>
           </DialogHeader>
+          <select
+            className="border-input text-foreground bg-transparent w-full rounded-md border px-3 py-2 text-sm"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+          >
+            <option value="">{t.category}</option>
+            {cats.map((c) => (
+              <option key={c.value} value={c.value}>
+                {c.label}
+              </option>
+            ))}
+          </select>
           <textarea
             className="border-input placeholder:text-muted-foreground focus-visible:ring-ring min-h-[120px] w-full rounded-md border bg-transparent px-3 py-2 text-sm focus-visible:ring-1 focus-visible:outline-none"
             placeholder={t.placeholder}

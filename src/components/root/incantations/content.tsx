@@ -1,8 +1,14 @@
 "use client"
 
-import { useEffect, useId, useRef, useState } from "react"
-import { AnimatePresence, motion } from "framer-motion"
+import { useState } from "react"
 import { cn } from "@/lib/utils"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog"
 import {
   schools,
   workflows,
@@ -43,354 +49,178 @@ function OrderBadge({ type, name }: OrderItem) {
   )
 }
 
-// ─── Close Icon ─────────────────────────────────────────────────────────────────
+// ─── Spell Dialog Content ───────────────────────────────────────────────────────
 
-function CloseIcon() {
+function SpellContent({ spell, schoolName }: { spell: Spell; schoolName: string }) {
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="size-4"
-    >
-      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-      <path d="M18 6l-12 12" />
-      <path d="M6 6l12 12" />
-    </svg>
+    <>
+      <DialogHeader>
+        <DialogTitle>
+          <code className="text-xl font-bold">{spell.name}</code>
+        </DialogTitle>
+        <DialogDescription>{spell.effect}</DialogDescription>
+        <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+          {schoolName}
+        </p>
+      </DialogHeader>
+
+      <div className="space-y-5 pt-4">
+        <div>
+          <div className="mb-2 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+            What activates
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {spell.order.map((o, i) => (
+              <OrderBadge key={`${o.type}-${o.name}-${i}`} {...o} />
+            ))}
+          </div>
+        </div>
+
+        {spell.steps.length > 0 && (
+          <div>
+            <div className="mb-2 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+              Execution
+            </div>
+            <ol className="space-y-2">
+              {spell.steps.map((step, i) => (
+                <li key={i} className="flex gap-3 text-[13px]">
+                  <span className="mt-px flex size-5 shrink-0 items-center justify-center rounded-full border bg-muted font-mono text-[10px] text-muted-foreground">
+                    {i + 1}
+                  </span>
+                  <span>{step}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
+
+        {spell.connects.length > 0 && (
+          <div>
+            <div className="mb-1.5 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+              Connects to
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {spell.connects.map((c) => (
+                <code
+                  key={c}
+                  className="rounded bg-muted px-2 py-0.5 text-[11px]"
+                >
+                  {c}
+                </code>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {spell.depends.length > 0 && (
+          <div>
+            <div className="mb-1.5 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+              Depends on
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {spell.depends.map((d) => (
+                <code
+                  key={d}
+                  className="rounded border border-dashed px-2 py-0.5 text-[11px]"
+                >
+                  {d}
+                </code>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </>
   )
 }
 
-// ─── Hook ───────────────────────────────────────────────────────────────────────
+// ─── Workflow Dialog Content ────────────────────────────────────────────────────
 
-function useOutsideClick(
-  ref: React.RefObject<HTMLDivElement | null>,
-  callback: () => void
-) {
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (ref.current && !ref.current.contains(event.target as Node)) {
-        callback()
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [ref, callback])
-}
+function WorkflowContent({ workflow }: { workflow: Workflow }) {
+  return (
+    <>
+      <DialogHeader>
+        <DialogTitle>{workflow.name}</DialogTitle>
+        <DialogDescription>{workflow.description}</DialogDescription>
+        <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+          Workflow — {workflow.steps.length} steps
+        </p>
+      </DialogHeader>
 
-// ─── Tag colors by school ───────────────────────────────────────────────────────
-
-const schoolColors: Record<string, string> = {
-  pipeline: "bg-foreground text-background hover:bg-foreground/80",
-  "charm-work": "bg-muted hover:bg-muted/70 border border-border",
-  transfiguration: "bg-muted hover:bg-muted/70 border border-border",
-  "ancient-runes": "bg-muted hover:bg-muted/70 border border-border",
-  conjuration: "bg-muted hover:bg-muted/70 border border-border",
-  "dark-arts": "bg-muted hover:bg-muted/70 border border-border",
-  animation: "bg-muted hover:bg-muted/70 border border-border",
-  defense: "bg-muted hover:bg-muted/70 border border-border",
-  reparo: "bg-muted hover:bg-muted/70 border border-border",
-  quill: "bg-muted hover:bg-muted/70 border border-border",
-  geminio: "bg-muted hover:bg-muted/70 border border-border",
-  summoning: "bg-muted hover:bg-muted/70 border border-border",
-  divination: "bg-muted hover:bg-muted/70 border border-border",
-  "performance-magic": "bg-muted hover:bg-muted/70 border border-border",
-  portkeys: "bg-muted hover:bg-muted/70 border border-border",
-  unforgivable: "bg-destructive/10 text-destructive hover:bg-destructive/20 border border-destructive/20",
+      <div className="space-y-0 pt-4">
+        {workflow.steps.map((step, i) => (
+          <div key={step.keyword} className="flex items-center gap-3">
+            <div className="flex flex-col items-center">
+              <div className="flex size-9 items-center justify-center rounded-full border bg-muted">
+                <code className="text-[10px] font-bold">
+                  {step.keyword.slice(0, 4)}
+                </code>
+              </div>
+              {i < workflow.steps.length - 1 && (
+                <div className="h-6 w-px bg-border" />
+              )}
+            </div>
+            <div className="-mt-1">
+              <code className="text-sm font-bold">{step.keyword}</code>
+              <p className="text-[12px] text-muted-foreground">
+                {step.action}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </>
+  )
 }
 
 // ─── Main Component ─────────────────────────────────────────────────────────────
 
 export default function IncantationsContent() {
   const [active, setActive] = useState<ActiveItem | null>(null)
-  const id = useId()
-  const ref = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") setActive(null)
-    }
-    if (active) {
-      document.body.style.overflow = "hidden"
-    } else {
-      document.body.style.overflow = "auto"
-    }
-    window.addEventListener("keydown", onKeyDown)
-    return () => window.removeEventListener("keydown", onKeyDown)
-  }, [active])
-
-  useOutsideClick(ref, () => setActive(null))
-
-  // Flatten all spells with their school info
-  const allSpells = schools.flatMap((school) =>
-    school.spells.map((spell) => ({ spell, schoolId: school.id, schoolName: school.name }))
-  )
 
   return (
     <>
-      {/* ── Backdrop ── */}
-      <AnimatePresence>
-        {active && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-10 h-full w-full bg-black/50"
-          />
-        )}
-      </AnimatePresence>
+      <Dialog open={!!active} onOpenChange={(open) => !open && setActive(null)}>
+        <DialogContent className="max-h-[85vh] max-w-[520px] overflow-y-auto">
+          {active?.type === "spell" && (
+            <SpellContent spell={active.spell} schoolName={active.schoolName} />
+          )}
+          {active?.type === "workflow" && (
+            <WorkflowContent workflow={active.workflow} />
+          )}
+        </DialogContent>
+      </Dialog>
 
-      {/* ── Expanded Dialog ── */}
-      <AnimatePresence>
-        {active && (
-          <div className="fixed inset-0 z-[100] grid place-items-center">
-            <motion.button
-              key={`close-${id}`}
-              layout
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0, transition: { duration: 0.05 } }}
-              className="absolute top-4 right-4 flex items-center justify-center rounded-full bg-background p-1.5 lg:hidden"
-              onClick={() => setActive(null)}
-            >
-              <CloseIcon />
-            </motion.button>
+      <div className="px-responsive py-6 lg:px-0">
+        <h1 className="text-3xl font-semibold tracking-tight">Incantations</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          One word triggers a complete workflow.
+        </p>
 
-            {active.type === "spell" ? (
-              <motion.div
-                layoutId={`card-${active.spell.name}-${id}`}
-                ref={ref}
-                className="mx-4 flex h-fit max-h-[85%] w-full max-w-[520px] flex-col overflow-y-auto rounded-lg border bg-background md:mx-0"
-              >
-                {/* Header */}
-                <div className="border-b p-6">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <motion.code
-                        layoutId={`name-${active.spell.name}-${id}`}
-                        className="text-xl font-bold"
-                      >
-                        {active.spell.name}
-                      </motion.code>
-                      <motion.p
-                        layoutId={`effect-${active.spell.name}-${id}`}
-                        className="mt-1 text-sm text-muted-foreground"
-                      >
-                        {active.spell.effect}
-                      </motion.p>
-                    </div>
-                    <button
-                      onClick={() => setActive(null)}
-                      className="hidden rounded-full p-1.5 hover:bg-muted lg:flex"
-                    >
-                      <CloseIcon />
-                    </button>
-                  </div>
-                  <p className="mt-2 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-                    {active.schoolName}
-                  </p>
-                </div>
-
-                {/* Order */}
-                <motion.div
-                  layout
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="space-y-5 p-6"
-                >
-                  <div>
-                    <div className="mb-2 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-                      What activates
-                    </div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {active.spell.order.map((o, i) => (
-                        <OrderBadge key={`${o.type}-${o.name}-${i}`} {...o} />
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Steps */}
-                  {active.spell.steps.length > 0 && (
-                    <div>
-                      <div className="mb-2 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-                        Execution
-                      </div>
-                      <ol className="space-y-2">
-                        {active.spell.steps.map((step, i) => (
-                          <li key={i} className="flex gap-3 text-[13px]">
-                            <span className="mt-px flex size-5 shrink-0 items-center justify-center rounded-full border bg-muted font-mono text-[10px] text-muted-foreground">
-                              {i + 1}
-                            </span>
-                            <span>{step}</span>
-                          </li>
-                        ))}
-                      </ol>
-                    </div>
-                  )}
-
-                  {/* Connects */}
-                  {active.spell.connects.length > 0 && (
-                    <div>
-                      <div className="mb-1.5 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-                        Connects to
-                      </div>
-                      <div className="flex flex-wrap gap-1.5">
-                        {active.spell.connects.map((c) => (
-                          <code
-                            key={c}
-                            className="rounded bg-muted px-2 py-0.5 text-[11px]"
-                          >
-                            {c}
-                          </code>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Depends */}
-                  {active.spell.depends.length > 0 && (
-                    <div>
-                      <div className="mb-1.5 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-                        Depends on
-                      </div>
-                      <div className="flex flex-wrap gap-1.5">
-                        {active.spell.depends.map((d) => (
-                          <code
-                            key={d}
-                            className="rounded border border-dashed px-2 py-0.5 text-[11px]"
-                          >
-                            {d}
-                          </code>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </motion.div>
-              </motion.div>
-            ) : (
-              <motion.div
-                layoutId={`workflow-${active.workflow.id}-${id}`}
-                ref={ref}
-                className="mx-4 flex h-fit max-h-[85%] w-full max-w-[520px] flex-col overflow-y-auto rounded-lg border bg-background md:mx-0"
-              >
-                {/* Header */}
-                <div className="border-b p-6">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <motion.div
-                        layoutId={`wf-name-${active.workflow.id}-${id}`}
-                        className="text-lg font-semibold"
-                      >
-                        {active.workflow.name}
-                      </motion.div>
-                      <motion.p
-                        layoutId={`wf-desc-${active.workflow.id}-${id}`}
-                        className="mt-1 text-sm text-muted-foreground"
-                      >
-                        {active.workflow.description}
-                      </motion.p>
-                    </div>
-                    <button
-                      onClick={() => setActive(null)}
-                      className="hidden rounded-full p-1.5 hover:bg-muted lg:flex"
-                    >
-                      <CloseIcon />
-                    </button>
-                  </div>
-                  <p className="mt-2 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-                    Workflow — {active.workflow.steps.length} steps
-                  </p>
-                </div>
-
-                {/* Steps */}
-                <motion.div
-                  layout
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="p-6"
-                >
-                  <div className="space-y-0">
-                    {active.workflow.steps.map((step, i) => (
-                      <div key={step.keyword} className="flex items-center gap-3">
-                        <div className="flex flex-col items-center">
-                          <div className="flex size-9 items-center justify-center rounded-full border bg-muted">
-                            <code className="text-[10px] font-bold">
-                              {step.keyword.slice(0, 4)}
-                            </code>
-                          </div>
-                          {i < active.workflow.steps.length - 1 && (
-                            <div className="h-6 w-px bg-border" />
-                          )}
-                        </div>
-                        <div className="-mt-1">
-                          <code className="text-sm font-bold">{step.keyword}</code>
-                          <p className="text-[12px] text-muted-foreground">
-                            {step.action}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </motion.div>
-              </motion.div>
-            )}
+        {/* Workflows */}
+        <div className="mt-8 mb-8">
+          <div className="mb-3 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+            Workflows
           </div>
-        )}
-      </AnimatePresence>
-
-      {/* ── Page ── */}
-      <div className="flex h-[calc(100vh-var(--header-height))] flex-col">
-        {/* Header area */}
-        <div className="border-b px-responsive py-6 lg:px-0">
-          <h1 className="text-3xl font-semibold tracking-tight">Incantations</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            One word triggers a complete workflow. Click any to see what happens inside.
-          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4">
+            {workflows.map((wf) => (
+              <button
+                key={wf.id}
+                onClick={() => setActive({ type: "workflow", workflow: wf })}
+                className="w-fit cursor-pointer text-start"
+              >
+                <div className="text-sm text-blue-500 hover:underline">{wf.name}</div>
+                <div className="text-xs text-muted-foreground">{wf.steps.map((s) => s.keyword).join(", ")}</div>
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* Cloud tag area */}
-        <div className="flex-1 overflow-y-auto px-responsive py-6 lg:px-0">
-          {/* Workflows */}
-          <div className="mb-6">
-            <div className="mb-3 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-              Workflows
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {workflows.map((wf) => (
-                <motion.button
-                  layoutId={`workflow-${wf.id}-${id}`}
-                  key={wf.id}
-                  onClick={() => setActive({ type: "workflow", workflow: wf })}
-                  className="cursor-pointer rounded-lg border bg-muted/50 px-3 py-2 text-start transition-colors hover:bg-muted"
-                >
-                  <motion.div
-                    layoutId={`wf-name-${wf.id}-${id}`}
-                    className="text-xs font-semibold"
-                  >
-                    {wf.name}
-                  </motion.div>
-                  <motion.p
-                    layoutId={`wf-desc-${wf.id}-${id}`}
-                    className="text-[10px] text-muted-foreground"
-                  >
-                    {wf.description}
-                  </motion.p>
-                </motion.button>
-              ))}
-            </div>
-          </div>
-
-          {/* Keywords by school */}
+        {/* Keywords index — two columns */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
           {schools.map((school) => (
-            <div key={school.id} className="mb-5">
-              <div className="mb-2 flex items-baseline gap-2">
+            <div key={school.id}>
+              <div className="mb-1.5 flex items-baseline gap-2">
                 <span className="font-mono text-[10px] text-muted-foreground">
                   {school.number}.
                 </span>
@@ -398,10 +228,9 @@ export default function IncantationsContent() {
                   {school.name}
                 </span>
               </div>
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-col gap-0.5">
                 {school.spells.map((spell) => (
-                  <motion.button
-                    layoutId={`card-${spell.name}-${id}`}
+                  <button
                     key={spell.name}
                     onClick={() =>
                       setActive({
@@ -410,24 +239,15 @@ export default function IncantationsContent() {
                         schoolName: school.name,
                       })
                     }
-                    className={cn(
-                      "cursor-pointer rounded-full px-3 py-1 transition-all",
-                      schoolColors[school.id] || "bg-muted hover:bg-muted/70 border border-border"
-                    )}
+                    className="w-fit cursor-pointer text-start text-sm"
                   >
-                    <motion.code
-                      layoutId={`name-${spell.name}-${id}`}
-                      className="text-xs font-bold"
-                    >
-                      {spell.name}
-                    </motion.code>
-                    <motion.p
-                      layoutId={`effect-${spell.name}-${id}`}
-                      className="sr-only"
-                    >
-                      {spell.effect}
-                    </motion.p>
-                  </motion.button>
+                    <code className="text-sm text-blue-500 hover:underline">{spell.name}</code>
+                    <span className="text-muted-foreground">
+                      {spell.connects.length > 0
+                        ? ` — ${spell.connects.join(", ")}`
+                        : ` — ${spell.effect}`}
+                    </span>
+                  </button>
                 ))}
               </div>
             </div>

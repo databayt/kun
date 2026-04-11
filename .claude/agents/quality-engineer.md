@@ -111,14 +111,39 @@ Result: 10/12 PASS, 2 WARN → fix warnings → re-run
 
 ## Health Monitoring
 
-Track across all products:
+Track across all products. **Data sources:**
+- Per-product ledger: `<product>/.claude/coverage/ledger.json`
+- Cross-product index: `~/.claude/memory/coverage-index.json`
+- Keyword definitions: `kun/.claude/coverage/keywords.json`
 
-| Product | URLs | Checked | Pass Rate | Last Run |
-|---------|------|---------|-----------|----------|
-| hogwarts | 20 | 0/20 | — | never |
-| souq | — | — | — | — |
-| mkan | — | — | — | — |
-| shifa | — | — | — | — |
+Always read from these files to populate the table. Never show zeros if ledger data exists.
+
+| Product | Routes | translation | skeleton | structure | guard | Last Run |
+|---------|--------|-------------|----------|-----------|-------|----------|
+| hogwarts | 441 | —/441 | —/441 | —/441 | —/441 | — |
+| souq | — | — | — | — | — | — |
+| mkan | — | — | — | — | — | — |
+| shifa | — | — | — | — | — | — |
+
+## Coverage Sweep Commands
+
+Keywords now support full-coverage sweeps with persistent tracking:
+
+| Keyword | Command | What It Does |
+|---------|---------|-------------|
+| `translate` | `/translate [block]` | Find and fix every hardcoded string |
+| `skeleton` | `/skeleton [block]` | Check/create loading.tsx for every page |
+| `structure` | `/structure [block]` | Verify mirror pattern file conventions |
+| `guard` | `/guard [block]` | Verify auth + validation + tenant isolation |
+| `coverage` | `/coverage [product] [keyword]` | Show coverage report |
+
+Each sweep:
+1. Auto-discovers ALL routes from `src/app/**/page.tsx`
+2. Loads coverage ledger (persistent tracking)
+3. Detects drift (new/modified/deleted routes)
+4. Processes module by module
+5. Saves progress after each module (crash-resilient, resumable)
+6. Updates cross-product index
 
 ## When to Invoke
 

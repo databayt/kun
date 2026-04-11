@@ -1,0 +1,477 @@
+{
+  "version": "1.0.0",
+  "description": "Cross-repo pattern registry — maps keywords to canonical implementations across all databayt repositories",
+  "keywords": {
+    "form": {
+      "canonical": "hogwarts",
+      "canonicalPath": "src/components/form/",
+      "maturity": "production",
+      "fileCount": 22,
+      "description": "Central form system with 14 field atoms, wizard factory, bridges, analytics, and server action helpers",
+      "dependencies": ["react-hook-form", "zod", "@hookform/resolvers"],
+      "cloneCommand": "/clone pattern:form",
+      "card": ".claude/patterns/cards/form.md",
+      "implementations": {
+        "hogwarts": {
+          "path": "src/components/form/",
+          "pattern": "central-block",
+          "subPatterns": ["triplet", "wizard", "application"],
+          "fileCount": 22,
+          "maturity": "production",
+          "notes": "14 field atoms, createWizardProvider factory, useActionStateBridge for React 19, multi-step provider, bridges"
+        },
+        "codebase": {
+          "path": "src/components/ui/form.tsx",
+          "pattern": "primitive-only",
+          "fileCount": 1,
+          "maturity": "partial",
+          "notes": "Only the shadcn form primitive — no field atoms, no wizard, no actions"
+        },
+        "mkan": {
+          "path": "per-feature",
+          "pattern": "triple-file",
+          "fileCount": 28,
+          "maturity": "development",
+          "notes": "Per-step form.tsx + use-{step}.tsx + validation.ts — no central system"
+        },
+        "shifa": {
+          "path": "per-feature",
+          "pattern": "inline-useForm",
+          "fileCount": 24,
+          "maturity": "development",
+          "notes": "Inline useForm + zodResolver — no central system"
+        },
+        "souq": {
+          "path": "n/a",
+          "pattern": "plain-react-state",
+          "fileCount": 0,
+          "maturity": "none",
+          "notes": "JavaScript, no react-hook-form, no Zod forms"
+        }
+      }
+    },
+    "table": {
+      "canonical": "hogwarts",
+      "canonicalPath": "src/components/table/",
+      "maturity": "production",
+      "fileCount": 41,
+      "description": "DataTable with 14 sub-components, URL-synced state via nuqs, Prisma filter integration, action bar, skeleton",
+      "dependencies": ["@tanstack/react-table", "nuqs"],
+      "cloneCommand": "/clone pattern:table",
+      "card": ".claude/patterns/cards/table.md",
+      "implementations": {
+        "hogwarts": {
+          "path": "src/components/table/",
+          "pattern": "full-block",
+          "fileCount": 41,
+          "maturity": "production",
+          "notes": "DataTable + 14 sub-components, useDataTable hook, URL-synced via nuqs, Prisma integration, used by 30+ modules"
+        },
+        "codebase": {
+          "path": "src/components/table/ + src/components/tablecn/",
+          "pattern": "dual-system",
+          "fileCount": 129,
+          "maturity": "partial",
+          "notes": "Two parallel systems — table/ (62 files) and tablecn/ (67 files). tablecn adds DataGrid. Needs consolidation"
+        },
+        "shifa": {
+          "path": "src/components/table/ + src/components/template/table/",
+          "pattern": "basic",
+          "fileCount": 8,
+          "maturity": "development",
+          "notes": "Basic DataTable + advanced DataTable with faceted filters — two separate implementations"
+        },
+        "mkan": {
+          "path": "src/components/ui/table.tsx",
+          "pattern": "primitive-only",
+          "fileCount": 1,
+          "maturity": "none",
+          "notes": "Only the shadcn table primitive — no DataTable"
+        },
+        "souq": {
+          "path": "n/a",
+          "pattern": "none",
+          "fileCount": 0,
+          "maturity": "none",
+          "notes": "No table system"
+        }
+      }
+    },
+    "modal": {
+      "canonical": "hogwarts",
+      "canonicalPath": "src/components/atom/modal/",
+      "maturity": "production",
+      "fileCount": 13,
+      "description": "Complete modal system with CRUD integration, route modals, carousel, multi-step, and form layout",
+      "dependencies": ["@radix-ui/react-dialog"],
+      "cloneCommand": "/clone pattern:modal",
+      "card": ".claude/patterns/cards/modal.md",
+      "implementations": {
+        "hogwarts": {
+          "path": "src/components/atom/modal/",
+          "pattern": "full-system",
+          "fileCount": 13,
+          "maturity": "production",
+          "notes": "Superset: context, modal, crud-modal, crud-form, route-modal, modal-footer, modal-form-layout, carousel, indicator, step, types, ui, use-crud-modal"
+        },
+        "codebase": {
+          "path": "src/components/atom/modal/",
+          "pattern": "core-subset",
+          "fileCount": 8,
+          "maturity": "partial",
+          "notes": "Core modal system — missing crud-modal, crud-form, route-modal, modal-footer, modal-form-layout"
+        },
+        "mkan": {
+          "path": "src/components/atom/modal/",
+          "pattern": "core-subset",
+          "fileCount": 9,
+          "maturity": "development",
+          "notes": "Same core as codebase, type.ts (not types.ts), has provider.tsx (redundant with context.tsx), openModal has data param"
+        },
+        "shifa": {
+          "path": "src/components/atom/modal/",
+          "pattern": "minimal-subset",
+          "fileCount": 7,
+          "maturity": "development",
+          "notes": "Smallest subset — type.ts naming, missing crud extensions"
+        },
+        "souq": {
+          "path": "n/a",
+          "pattern": "none",
+          "fileCount": 0,
+          "maturity": "none",
+          "notes": "No modal system"
+        }
+      }
+    },
+    "auth": {
+      "canonical": "hogwarts",
+      "canonicalPath": "src/components/auth/",
+      "maturity": "production",
+      "fileCount": 33,
+      "description": "Complete auth system with login, join, reset, password, verification, 2FA, OAuth, role-gate, user-button",
+      "dependencies": ["next-auth", "@auth/prisma-adapter", "bcryptjs"],
+      "cloneCommand": "/clone pattern:auth",
+      "card": ".claude/patterns/cards/auth.md",
+      "implementations": {
+        "hogwarts": {
+          "path": "src/components/auth/",
+          "pattern": "full-system",
+          "fileCount": 33,
+          "maturity": "production",
+          "notes": "Complete: login, join, reset, password, verification, 2FA, OAuth, role-gate, user-button, tenant-login, admin-auth-guard, tests"
+        },
+        "codebase": {
+          "path": "src/components/auth/",
+          "pattern": "full-system",
+          "fileCount": 30,
+          "maturity": "production",
+          "notes": "Near-complete: login, join, reset, password, verification, OAuth — missing tenant extensions"
+        },
+        "mkan": {
+          "path": "src/components/auth/",
+          "pattern": "standard",
+          "fileCount": 25,
+          "maturity": "development",
+          "notes": "Standard flows: login, join, reset, password, verification, setting — no 2FA, no tenant"
+        },
+        "shifa": {
+          "path": "src/components/auth/",
+          "pattern": "standard",
+          "fileCount": 23,
+          "maturity": "development",
+          "notes": "Nearly identical to mkan — same file tree, simpler validation (min 6 password)"
+        },
+        "souq": {
+          "path": "n/a",
+          "pattern": "clerk",
+          "fileCount": 0,
+          "maturity": "production",
+          "notes": "Uses Clerk — completely different auth system, not compatible with NextAuth pattern"
+        }
+      }
+    },
+    "validation": {
+      "canonical": "hogwarts",
+      "canonicalPath": "per-feature validation.ts",
+      "maturity": "production",
+      "fileCount": 30,
+      "description": "Zod schema factories with i18n ValidationHelper for type-safe, translated error messages",
+      "dependencies": ["zod"],
+      "cloneCommand": "/clone pattern:validation",
+      "card": ".claude/patterns/cards/validation.md",
+      "implementations": {
+        "hogwarts": {
+          "path": "per-feature validation.ts",
+          "pattern": "schema-factory",
+          "fileCount": 30,
+          "maturity": "production",
+          "notes": "Schema factory functions accepting ValidationHelper for i18n error messages, dedicated validation.ts per feature"
+        },
+        "codebase": {
+          "path": "src/lib/validations/",
+          "pattern": "centralized",
+          "fileCount": 2,
+          "maturity": "partial",
+          "notes": "Only log.ts and og.ts validation schemas"
+        },
+        "mkan": {
+          "path": "mixed locations",
+          "pattern": "scattered",
+          "fileCount": 12,
+          "maturity": "development",
+          "notes": "Some co-located with components, some in lib/schemas/, some inline in actions"
+        },
+        "shifa": {
+          "path": "mixed locations",
+          "pattern": "scattered",
+          "fileCount": 5,
+          "maturity": "development",
+          "notes": "lib/validation.ts (centralized) + per-component validation.ts"
+        },
+        "souq": {
+          "path": "lib/validations/",
+          "pattern": "centralized",
+          "fileCount": 5,
+          "maturity": "development",
+          "notes": "Zod v4 (not v3) — cart, order, product, review, stripe schemas"
+        }
+      }
+    },
+    "action": {
+      "canonical": "hogwarts",
+      "canonicalPath": "src/components/form/actions.ts",
+      "maturity": "production",
+      "fileCount": 1,
+      "description": "Server action factory with auth, tenant isolation, Zod validation, and ActionResponse<T> return type",
+      "dependencies": ["zod", "next/cache"],
+      "cloneCommand": "/clone pattern:action",
+      "card": ".claude/patterns/cards/action.md",
+      "implementations": {
+        "hogwarts": {
+          "path": "src/components/form/actions.ts + per-feature actions.ts",
+          "pattern": "factory",
+          "fileCount": 35,
+          "maturity": "production",
+          "notes": "createFormAction, createGenericAction, updateGenericAction, deleteGenericAction — auth + tenant + Zod + ActionResponse<T>"
+        },
+        "codebase": {
+          "path": "per-block actions.ts",
+          "pattern": "per-block",
+          "fileCount": 5,
+          "maturity": "partial",
+          "notes": "Actions exist in blocks (invoice, report) but no factory pattern"
+        },
+        "mkan": {
+          "path": "src/lib/actions/ + per-component action.ts",
+          "pattern": "mixed",
+          "fileCount": 19,
+          "maturity": "development",
+          "notes": "Centralized lib/actions/ + co-located action.ts — no factory, no ActionResponse type"
+        },
+        "shifa": {
+          "path": "src/lib/actions/ + per-component action.ts",
+          "pattern": "mixed",
+          "fileCount": 14,
+          "maturity": "development",
+          "notes": "Same mixed pattern as mkan — centralized + co-located"
+        },
+        "souq": {
+          "path": "app/api/",
+          "pattern": "rest-api",
+          "fileCount": 15,
+          "maturity": "production",
+          "notes": "REST API routes — no server actions at all"
+        }
+      }
+    },
+    "columns": {
+      "canonical": "hogwarts",
+      "canonicalPath": "per-feature columns.tsx",
+      "maturity": "production",
+      "fileCount": 20,
+      "description": "Column definitions with getColumns(fd, rp) accepting dictionary for i18n labels, ActionMenu for row actions",
+      "dependencies": ["@tanstack/react-table"],
+      "cloneCommand": "/clone pattern:columns",
+      "card": ".claude/patterns/cards/columns.md",
+      "implementations": {
+        "hogwarts": {
+          "path": "per-feature columns.tsx",
+          "pattern": "factory-function",
+          "fileCount": 20,
+          "maturity": "production",
+          "notes": "getXxxColumns(fd, rp) returning ColumnDef<T>[], dictionary-driven labels, ActionMenu, DataTableColumnHeader"
+        },
+        "shifa": {
+          "path": "src/components/table/columns.tsx",
+          "pattern": "single-file",
+          "fileCount": 2,
+          "maturity": "development",
+          "notes": "Basic appointment columns — no factory pattern, no i18n"
+        },
+        "codebase": {
+          "path": "src/components/table/_components/",
+          "pattern": "example",
+          "fileCount": 2,
+          "maturity": "partial",
+          "notes": "Task columns as example — not generalized"
+        },
+        "mkan": {
+          "path": "n/a",
+          "pattern": "none",
+          "fileCount": 0,
+          "maturity": "none",
+          "notes": "No column definitions — no DataTable"
+        },
+        "souq": {
+          "path": "n/a",
+          "pattern": "none",
+          "fileCount": 0,
+          "maturity": "none",
+          "notes": "No column definitions"
+        }
+      }
+    },
+    "wizard": {
+      "canonical": "hogwarts",
+      "canonicalPath": "src/components/form/wizard/",
+      "maturity": "production",
+      "fileCount": 6,
+      "description": "URL-routed multi-step wizard with createWizardProvider factory, progress tracking, and step validation",
+      "dependencies": ["react-hook-form", "zod", "nuqs"],
+      "cloneCommand": "/clone pattern:wizard",
+      "card": ".claude/patterns/cards/wizard.md",
+      "implementations": {
+        "hogwarts": {
+          "path": "src/components/form/wizard/",
+          "pattern": "factory",
+          "fileCount": 6,
+          "maturity": "production",
+          "notes": "createWizardProvider factory, WizardLayout, WizardStep, WizardTabs, URL-routed, used for students (10 steps), teachers (9 steps), events, announcements"
+        },
+        "mkan": {
+          "path": "src/components/host/",
+          "pattern": "manual",
+          "fileCount": 24,
+          "maturity": "development",
+          "notes": "Manual multi-step for listing creation — 8 steps, each with form.tsx + use-{step}.tsx + validation.ts. Not using wizard factory"
+        },
+        "shifa": {
+          "path": "src/components/paediatric/",
+          "pattern": "manual",
+          "fileCount": 12,
+          "maturity": "development",
+          "notes": "Manual multi-step for fellowship application — similar per-step pattern without factory"
+        },
+        "codebase": {
+          "path": "n/a",
+          "pattern": "none",
+          "fileCount": 0,
+          "maturity": "none",
+          "notes": "No wizard system — will be added as part of form block extraction"
+        },
+        "souq": {
+          "path": "n/a",
+          "pattern": "none",
+          "fileCount": 0,
+          "maturity": "none",
+          "notes": "No wizard system"
+        }
+      }
+    },
+    "sidebar": {
+      "canonical": "hogwarts",
+      "canonicalPath": "src/components/template/platform-sidebar/",
+      "maturity": "production",
+      "fileCount": 3,
+      "description": "Collapsible sidebar with config-driven navigation, icons, and role-based visibility",
+      "dependencies": ["@radix-ui/react-collapsible"],
+      "cloneCommand": "/clone pattern:sidebar",
+      "card": ".claude/patterns/cards/sidebar.md",
+      "implementations": {
+        "hogwarts": {
+          "path": "src/components/template/platform-sidebar/",
+          "pattern": "config-driven",
+          "fileCount": 3,
+          "maturity": "production",
+          "notes": "config.ts + content.tsx + icons.tsx — role-based nav, collapsible, multi-tenant aware"
+        },
+        "codebase": {
+          "path": "src/components/template/sidebar-01/ through sidebar-16/",
+          "pattern": "catalog",
+          "fileCount": 16,
+          "maturity": "production",
+          "notes": "16 sidebar variants in registry catalog — pick and customize"
+        },
+        "mkan": {
+          "path": "src/components/atom/sidebar/ + src/components/row/organisms/",
+          "pattern": "mixed",
+          "fileCount": 4,
+          "maturity": "development",
+          "notes": "Custom sidebar atom + legacy row/ sidebar"
+        },
+        "shifa": {
+          "path": "src/components/template/sidebar/",
+          "pattern": "basic",
+          "fileCount": 2,
+          "maturity": "development",
+          "notes": "Basic sidebar template"
+        },
+        "souq": {
+          "path": "components/admin/AdminSidebar.jsx",
+          "pattern": "single-file",
+          "fileCount": 1,
+          "maturity": "development",
+          "notes": "Single admin sidebar component — JavaScript"
+        }
+      }
+    },
+    "header": {
+      "canonical": "codebase",
+      "canonicalPath": "src/components/template/header-01/",
+      "maturity": "production",
+      "fileCount": 10,
+      "description": "Responsive header with command menu, language switcher, mode switcher, mobile nav, and main nav",
+      "dependencies": ["cmdk", "next-themes"],
+      "cloneCommand": "/clone pattern:header",
+      "card": ".claude/patterns/cards/header.md",
+      "implementations": {
+        "codebase": {
+          "path": "src/components/template/header-01/",
+          "pattern": "composable",
+          "fileCount": 10,
+          "maturity": "production",
+          "notes": "Most composable: command-menu, lang-switcher, mode-switcher, mobile-nav, main-nav — all separate files"
+        },
+        "hogwarts": {
+          "path": "src/components/template/platform-header/ + marketing-header/ + saas-header/ + notion-header/",
+          "pattern": "domain-prefixed",
+          "fileCount": 12,
+          "maturity": "production",
+          "notes": "4 header variants for different contexts — each is a customized instance"
+        },
+        "mkan": {
+          "path": "src/components/template/header-airbnb/",
+          "pattern": "domain-specific",
+          "fileCount": 3,
+          "maturity": "development",
+          "notes": "Airbnb-style header with search integration"
+        },
+        "shifa": {
+          "path": "src/components/template/header/",
+          "pattern": "multi-variant",
+          "fileCount": 6,
+          "maturity": "development",
+          "notes": "3 header variants: default, shadcn, taxonomy"
+        },
+        "souq": {
+          "path": "components/Navbar.jsx",
+          "pattern": "single-file",
+          "fileCount": 1,
+          "maturity": "development",
+          "notes": "Single navbar component — JavaScript"
+        }
+      }
+    }
+  }
+}
