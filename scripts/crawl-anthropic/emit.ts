@@ -3,7 +3,12 @@ import { DATA_TS_PATH } from "./config.js";
 import type { NewAssetRow } from "./types.js";
 
 function escape(s: string): string {
-  return s.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  return s
+    .replace(/\\/g, "\\\\")
+    .replace(/"/g, '\\"')
+    .replace(/[\r\n\t]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function shortName(slug: string): string {
@@ -41,7 +46,7 @@ export async function appendRowsAndBumpDate(rows: NewAssetRow[], today: string):
   }
 
   const insertion = blocks.join("\n");
-  let updated = txt.replace(closeRe, `${insertion}\n];\n\n// Computed stats`);
+  let updated = txt.replace(closeRe, () => `${insertion}\n];\n\n// Computed stats`);
 
   updated = updated.replace(
     /export const LAST_CRAWLED = "[^"]+";/,
