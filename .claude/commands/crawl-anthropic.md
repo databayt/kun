@@ -31,7 +31,7 @@ Marketing pages with Lottie/dynamic content (`/pricing`, `/claude/*`, `/product/
 
 Script reads `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` (or `AWS_PROFILE`) from env. Without credentials, the script downloads + categorizes locally but skips upload. Run again with `--upload-only` once creds are configured.
 
-## Custom CNAME (`cdn.databayt.org`)
+## Custom CNAME (`assets.databayt.org`)
 
 The CDN is currently exposed at `d1dlwtcfl0db67.cloudfront.net`. To add a friendly alias:
 

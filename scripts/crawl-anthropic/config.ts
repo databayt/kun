@@ -1,7 +1,7 @@
 export const BUCKET = "hogwarts-databayt";
 export const REGION = "us-east-1";
 export const DISTRIBUTION_DOMAIN = "d1dlwtcfl0db67.cloudfront.net";
-export const CNAME_DOMAIN = "cdn.databayt.org";
+export const CNAME_DOMAIN = "assets.databayt.org";
 export const CDN_BASE = `https://${DISTRIBUTION_DOMAIN}`;
 
 export const USER_AGENT =
