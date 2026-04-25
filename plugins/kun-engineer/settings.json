@@ -1,0 +1,6 @@
+{
+  "_comment": "Engineer profile — opens up all skills. Default for Abdout.",
+  "permissions": {
+    "allow": ["Skill"]
+  }
+}

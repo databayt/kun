@@ -1,0 +1,13 @@
+{
+  "name": "kun-core",
+  "description": "Kun engine core — 30 specialist agents, 14 sweep skills, 12 path-scoped rules, 3 critical hooks, 13 memory files. The technical foundation every databayt repo needs.",
+  "version": "4.0.0",
+  "author": {
+    "name": "databayt",
+    "url": "https://github.com/databayt"
+  },
+  "homepage": "https://kun.databayt.org",
+  "repository": "https://github.com/databayt/kun",
+  "license": "SSPL-1.0",
+  "keywords": ["claude-code", "agents", "skills", "next.js", "react", "prisma", "tailwind", "ui-development"]
+}

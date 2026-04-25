@@ -1,0 +1,70 @@
+{
+  "$schema": "https://kun.databayt.org/schemas/preferences.v1.json",
+  "version": "1.0",
+  "lastUpdated": "2026-04-25",
+  "stack": {
+    "framework": "Next.js 16",
+    "react": "19",
+    "language": "TypeScript 5",
+    "styling": "Tailwind CSS 4",
+    "components": "shadcn/ui",
+    "orm": "Prisma 6",
+    "database": "PostgreSQL (Neon)",
+    "auth": "Auth.js v5",
+    "test": "Vitest 2 + Playwright"
+  },
+  "runtime": {
+    "packageManager": "pnpm",
+    "port": 3000,
+    "envFile": ".env",
+    "envForbidden": [".env.local", ".env.development", ".env.production", ".env.test"],
+    "nodeMin": "20.x"
+  },
+  "languages": {
+    "default": "ar",
+    "supported": ["ar", "en"],
+    "rtlDefault": true,
+    "rtlOnArabic": true
+  },
+  "model": {
+    "default": "claude-opus-4-7",
+    "research": "claude-haiku-4-5",
+    "specialist": "claude-sonnet-4-6",
+    "captain": "claude-opus-4-7",
+    "fastMode": false
+  },
+  "mode": {
+    "autopilot": true,
+    "turnLimit": 100,
+    "permissionMode": "default"
+  },
+  "components": {
+    "hierarchy": ["ui", "atom", "template", "block", "micro"],
+    "uiSource": "databayt/shadcn",
+    "primitiveSource": "databayt/radix",
+    "patternSource": "/Users/abdout/codebase"
+  },
+  "git": {
+    "branchPrefix": {
+      "feature": "feat/",
+      "bugfix": "fix/",
+      "chore": "chore/",
+      "docs": "docs/",
+      "refactor": "refactor/"
+    },
+    "commitConvention": "conventional",
+    "mergeStrategy": "squash",
+    "deleteBranchAfterMerge": true,
+    "neverForcePushMain": true
+  },
+  "deploy": {
+    "primary": "Vercel",
+    "alternativeFor": "self-hosting via Tailscale/tmux/Docker (optional)"
+  },
+  "humans": {
+    "abdout": { "role": "founder", "hardware": "MacBook M4", "primary": ["engineering", "config"] },
+    "ali":    { "role": "qa-sales", "hardware": "Windows + Android", "primary": ["qa", "outreach"] },
+    "samia":  { "role": "rd", "hardware": "Dell Windows + iPhone 13 Mini", "primary": ["research", "kun-care"], "accessibility": "blind / screen-reader" },
+    "sedon":  { "role": "executor", "hardware": "HP Windows + Android", "primary": ["saudi-ops"] }
+  }
+}

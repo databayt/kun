@@ -1,0 +1,40 @@
+{
+  "$schema": "https://kun.databayt.org/schemas/captain-state.v1.json",
+  "version": "1.0",
+  "lastUpdated": "2026-04-25",
+  "sprint": {
+    "current": "S1",
+    "window": "2026-04-26 → 2026-05-09",
+    "focus": "Foundation Repair (E13, E14, E15)",
+    "epicsActive": ["E13", "E14", "E15"]
+  },
+  "runway": {
+    "weeks": null,
+    "monthlyBurn": 500,
+    "capital": 5000,
+    "mrr": 0,
+    "lastUpdated": null,
+    "_note": "Populated by scripts/runway.sh — see Story 16.3"
+  },
+  "pilot": {
+    "name": "King Fahad Schools",
+    "stage": "meeting",
+    "owner": "ahmed-baha",
+    "primaryHuman": "abdout",
+    "lastMeeting": "2026-04-04",
+    "nextAction": null,
+    "_note": "Updated by support agent — see Story 18.1"
+  },
+  "blockers": [],
+  "decisionsPending": [],
+  "lastWeeklyReview": null,
+  "lastWeeklyReviewBy": null,
+  "openCriticalIssues": {
+    "hogwarts": {
+      "tracker": "databayt/hogwarts#115",
+      "title": "Admission QA — King Fahad pilot",
+      "completionPercent": null
+    }
+  },
+  "alerts": []
+}

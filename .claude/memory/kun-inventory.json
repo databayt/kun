@@ -1,0 +1,22 @@
+{
+  "generated_at": "2026-04-25 19:03:52 UTC",
+  "counts": {
+    "agents": 49,
+    "commands": 59,
+    "skills": 64,
+    "rules": 12,
+    "memory_json": 14,
+    "memory_md": 2,
+    "auto_memory": 22,
+    "patterns": 10,
+    "mcp_servers": 25,
+    "mcp_variants": 3,
+    "hooks": 13,
+    "allow_rules": 49,
+    "deny_rules": 10
+  },
+  "phantom": {
+    "rules": [],
+    "memory": []
+  }
+}

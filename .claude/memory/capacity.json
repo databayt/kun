@@ -1,0 +1,66 @@
+{
+  "$schema": "https://kun.databayt.org/schemas/capacity.v1.json",
+  "version": "1.0",
+  "lastUpdated": "2026-04-25",
+  "humans": [
+    {
+      "id": "abdout",
+      "name": "Osman Abdout",
+      "role": "founder",
+      "email": "abdout@databayt.org",
+      "timezone": "Asia/Riyadh",
+      "hardware": ["MacBook M4", "iPhone 16e"],
+      "accessibility": null,
+      "currentFocus": "Hogwarts admission — kun config",
+      "hoursPerWeekDeclared": 40,
+      "hoursPerWeekActual": null,
+      "blockers": [],
+      "preferredChannel": "claude-code",
+      "active": true
+    },
+    {
+      "id": "ali",
+      "name": "Ali Aseel",
+      "role": "qa-sales",
+      "email": "ali@databayt.org",
+      "alias": "sales@databayt.org",
+      "timezone": "Asia/Riyadh",
+      "hardware": ["Windows", "Android"],
+      "accessibility": "blind / screen-reader user",
+      "currentFocus": "Issue databayt/hogwarts#115 admission QA",
+      "hoursPerWeekDeclared": null,
+      "blockers": [],
+      "preferredChannel": "github-issues + slack",
+      "active": true
+    },
+    {
+      "id": "samia",
+      "name": "Samia Hamd",
+      "role": "rd",
+      "email": "samia@databayt.org",
+      "timezone": "Asia/Riyadh",
+      "hardware": ["Dell Windows", "iPhone 13 Mini"],
+      "accessibility": "blind / screen-reader user",
+      "currentFocus": "Sharing economy research, kun caretaker",
+      "hoursPerWeekDeclared": null,
+      "blockers": [],
+      "preferredChannel": "cowork",
+      "active": true
+    },
+    {
+      "id": "sedon",
+      "name": "Osman Sedon",
+      "role": "executor",
+      "email": "sedon@databayt.org",
+      "timezone": "Asia/Riyadh",
+      "hardware": ["HP Windows", "Android"],
+      "accessibility": null,
+      "currentFocus": "Saudi bank account, payment gateway, home server",
+      "hoursPerWeekDeclared": "part-time",
+      "blockers": [],
+      "preferredChannel": "github-issues + apple-notes",
+      "active": true
+    }
+  ],
+  "_note": "Updated weekly by /standup (Story 26.2) and on capacity change."
+}

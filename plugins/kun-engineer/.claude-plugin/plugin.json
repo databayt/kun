@@ -1,0 +1,9 @@
+{
+  "name": "kun-engineer",
+  "description": "Role profile: full engineering surface — all kun-core specialist agents and skills. For builders shipping product code.",
+  "version": "4.0.0",
+  "author": { "name": "databayt", "url": "https://github.com/databayt" },
+  "homepage": "https://kun.databayt.org/team#engineer",
+  "repository": "https://github.com/databayt/kun",
+  "license": "SSPL-1.0"
+}

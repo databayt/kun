@@ -1,0 +1,190 @@
+#!/usr/bin/env bash
+# generate-agents-md.sh — Generate per-repo AGENTS.md from a template.
+# Story 27.2 in docs/EPICS-V4.md.
+#
+# Reads .claude/memory/repositories.json to know which repos and their stack.
+# Writes a draft AGENTS.md per repo to /Users/abdout/<repo>/AGENTS.md.draft
+# (NOT to the repo's main branch — opens a draft for human review).
+#
+# Usage:
+#   bash scripts/generate-agents-md.sh                  # all live repos
+#   bash scripts/generate-agents-md.sh hogwarts mkan    # named only
+#   bash scripts/generate-agents-md.sh --commit         # also commit + open PR
+
+set -uo pipefail
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+REGISTRY="${REPO_ROOT}/.claude/memory/repositories.json"
+
+[ -f "$REGISTRY" ] || { echo "fatal: $REGISTRY not found" >&2; exit 1; }
+command -v jq >/dev/null 2>&1 || { echo "fatal: jq required" >&2; exit 1; }
+
+commit_mode=0
+filter=""
+for arg in "$@"; do
+  case "$arg" in
+    --commit) commit_mode=1 ;;
+    --help|-h) sed -n '2,12p' "$0"; exit 0 ;;
+    *) filter="$filter $arg" ;;
+  esac
+done
+
+# Pick repos to process
+if [ -z "$filter" ]; then
+  repos=$(jq -r '.repositories | to_entries[] | .value[] | select(.tier <= 3 and .status != "archived") | .id' "$REGISTRY")
+else
+  repos=$filter
+fi
+
+generate_one() {
+  local id="$1"
+  local entry
+  entry=$(jq -r --arg id "$id" '.repositories | to_entries[] | .value[] | select(.id == $id)' "$REGISTRY")
+  if [ -z "$entry" ] || [ "$entry" = "null" ]; then
+    echo "skip: $id not in registry"
+    return
+  fi
+
+  local local_path
+  local_path=$(echo "$entry" | jq -r '.local // empty')
+
+  if [ -z "$local_path" ] || [ ! -d "$local_path" ]; then
+    echo "skip: $id has no local checkout (would target $local_path)"
+    return
+  fi
+
+  local name purpose stack agent primary_human deploy_url tier
+  name=$(echo "$entry" | jq -r '.name')
+  purpose=$(echo "$entry" | jq -r '.description')
+  stack=$(echo "$entry" | jq -r '.stack | join(", ")')
+  agent=$(echo "$entry" | jq -r '.agent // "—"')
+  primary_human=$(echo "$entry" | jq -r '.primaryHuman // "—"')
+  deploy_url=$(echo "$entry" | jq -r '.deployUrl // "—"')
+  tier=$(echo "$entry" | jq -r '.tier')
+
+  local out="${local_path}/AGENTS.md.draft"
+
+  cat > "$out" <<EOF
+# ${name} Development Guide
+
+> Audience: AI coding agents (Claude Code, Cursor, Windsurf) and humans.
+> Format: [Vercel's \`next.js/AGENTS.md\`](https://github.com/vercel/next.js/blob/canary/AGENTS.md) adapted for databayt conventions.
+> Companion: \`CLAUDE.md\` (this file is imported via \`@AGENTS.md\` directive).
+
+---
+
+## Project
+
+| | |
+|---|---|
+| **Repo** | databayt/${id} |
+| **Tier** | ${tier} |
+| **Purpose** | ${purpose} |
+| **Stack** | ${stack} |
+| **Owner agent** | ${agent} |
+| **Primary human** | ${primary_human} |
+| **Production URL** | ${deploy_url} |
+
+This repo follows kun engine v4 conventions. See [databayt/kun](https://github.com/databayt/kun) for the engine source.
+
+---
+
+## Build commands
+
+\`\`\`bash
+pnpm install --frozen-lockfile
+pnpm dev                            # :3000
+pnpm build
+pnpm typecheck
+pnpm lint
+pnpm test
+\`\`\`
+
+(Adjust if this repo uses a different package manager — check \`package.json\` engines field.)
+
+---
+
+## Conventions (inherited from kun)
+
+- **Auth**: Auth.js v5 — see \`.claude/rules/auth.md\` (kun)
+- **Tenant scoping**: every Prisma query has \`schoolId\` — see \`.claude/rules/prisma.md\`
+- **i18n**: Arabic-first, RTL default, logical properties only — see \`.claude/rules/i18n.md\`
+- **Tailwind**: semantic tokens, no raw hex — see \`.claude/rules/tailwind.md\`
+- **Testing**: 95% coverage on tenant-owned code — see \`.claude/rules/testing.md\`
+- **Deployment**: Vercel-first — see \`.claude/rules/deployment.md\`
+
+---
+
+## Specialized skills
+
+Use kun skills for heavy workflows:
+
+- \`/feature\` — full pipeline (idea → spec → schema → code → wire → check → ship → watch)
+- \`/report\` — auto-fix user-reported bugs (when GitHub issue labeled \`report\`)
+- 14 sweep skills (\`/nextjs\`, \`/react\`, \`/typescript\`, \`/tailwind\`, \`/shadcn\`, \`/prisma\`, etc.)
+
+Install skills via:
+\`\`\`bash
+claude --plugin-dir /path/to/kun/plugins/kun-core
+\`\`\`
+
+---
+
+## Anti-patterns
+
+See \`.claude/rules/\` in this repo (or in kun if local rules are not yet ported). Highlights:
+
+- ❌ Skip auth check in server actions
+- ❌ Query without \`schoolId\` on tenant-owned tables
+- ❌ Hardcode user-facing strings (use dictionary keys)
+- ❌ Physical CSS properties (\`ml-\`, \`mr-\`) — use logical (\`ms-\`, \`me-\`)
+- ❌ Bare \`findMany()\` without \`select\` clause
+- ❌ \`--no-verify\` git operations
+
+---
+
+## Reference
+
+- Engine source: [databayt/kun](https://github.com/databayt/kun)
+- Engine docs: https://kun.databayt.org
+- Captain decision matrix: \`.claude/captain/decision-matrix.yaml\` (in kun)
+- Cost routing: \`.claude/cost/routing.yaml\` (in kun)
+
+---
+
+_Generated by \`bash scripts/generate-agents-md.sh ${id}\` from databayt/kun. Edit this file directly — it does not regenerate automatically. Last regenerated: $(date -u +%Y-%m-%d)._
+EOF
+
+  echo "wrote: $out"
+
+  if [ "$commit_mode" -eq 1 ]; then
+    open_pr_for "$local_path"
+  fi
+}
+
+open_pr_for() {
+  local local_path="$1"
+  local branch
+  branch="claude/agents-md-$(date +%Y-%m-%d)"
+  local msg
+  msg=$'docs: add AGENTS.md (Vercel-style)\n\nGenerated from databayt/kun via generate-agents-md.sh per Story 27.2.\nImports kun engine conventions; adapt locally as needed.\n\nCo-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>'
+  (
+    cd "$local_path" || exit 1
+    git checkout -b "$branch" 2>/dev/null || git checkout "$branch"
+    mv AGENTS.md.draft AGENTS.md
+    git add AGENTS.md
+    git commit -m "$msg"
+    git push -u origin "$branch"
+    gh pr create --title "docs: add AGENTS.md" \
+      --body "Closes — see [databayt/kun #agents-md adoption](https://github.com/databayt/kun/blob/main/docs/EPICS-V4.md#story-27-2)" 2>&1 | tail -3
+  )
+}
+
+for r in $repos; do
+  generate_one "$r"
+done
+
+echo
+echo "Done. Drafts written to <repo>/AGENTS.md.draft."
+[ "$commit_mode" -eq 0 ] && echo "Re-run with --commit to push + open PRs."
+exit 0

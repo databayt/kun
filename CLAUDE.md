@@ -1,6 +1,10 @@
+@AGENTS.md
+
 # Kun (كن) — The Kun Engine
 
 > The configuration engine that transforms Anthropic's product suite into a unified software company operating system.
+
+> **Note**: This file imports `AGENTS.md` (Vercel-style canonical agent guide) at the top. Build/test/PR conventions live there. Below: kun-specific mission, philosophy, and the three-phase plan.
 
 ---
 

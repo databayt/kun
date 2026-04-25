@@ -1,0 +1,13 @@
+{
+  "name": "kun-captain",
+  "description": "CEO-brain captain + 9-agent leadership tier (revenue, growth, support, product, analyst, tech-lead, ops, guardian) + 7 captain skills (weekly, dispatch, monitor, costs, health, incident, captain). Org orchestration over a databayt-shaped team.",
+  "version": "4.0.0",
+  "author": {
+    "name": "databayt",
+    "url": "https://github.com/databayt"
+  },
+  "homepage": "https://kun.databayt.org/captain",
+  "repository": "https://github.com/databayt/kun",
+  "license": "SSPL-1.0",
+  "keywords": ["claude-code", "ceo-brain", "captain", "agile", "agent-team", "leadership"]
+}

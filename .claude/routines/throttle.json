@@ -1,0 +1,14 @@
+{
+  "last_updated": "2026-04-25T18:59:33Z",
+  "active": false,
+  "reason": "",
+  "inputs": {
+    "projected_monthly_usd": 0,
+    "weeks_remaining": 43
+  },
+  "actions": {
+    "skip_prompt_logging": false,
+    "pilot_health_cadence": "hourly",
+    "captain_model_downshift": false
+  }
+}

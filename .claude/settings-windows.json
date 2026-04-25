@@ -4,9 +4,69 @@
     "CODEBASE_REPO": "databayt/codebase",
     "CODEBASE_OWNER": "databayt",
     "CODEBASE_NAME": "codebase",
-    "DEV_PORT": "3000"
+    "DEV_PORT": "3000",
+    "OSS_PATH": "%USERPROFILE%\\oss",
+    "GITHUB_USER": "abdout",
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
+  "permissions": {
+    "allow": [
+      "Read",
+      "Glob",
+      "Grep",
+      "Edit",
+      "Write",
+      "WebFetch",
+      "WebSearch",
+
+      "Bash(pnpm:*)",
+      "Bash(npm run:*)",
+      "Bash(npm test:*)",
+      "Bash(npm install)",
+      "Bash(npx:*)",
+
+      "Bash(git status)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git pull:*)",
+      "Bash(git checkout:*)",
+      "Bash(git branch:*)",
+      "Bash(git fetch:*)",
+      "Bash(git remote:*)",
+
+      "Bash(gh issue:*)",
+      "Bash(gh pr:*)",
+      "Bash(gh repo:*)",
+      "Bash(gh api:*)",
+      "Bash(gh run:*)",
+      "Bash(gh workflow:*)"
+    ],
+    "deny": [
+      "Bash(rm -rf /*)",
+      "Bash(curl * | sh)",
+      "Bash(curl * | bash)",
+      "Bash(sudo *)",
+      "Bash(git push --force *main*)",
+      "Bash(git push -f *main*)",
+      "Bash(git reset --hard origin/main)"
+    ]
   },
   "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"%CLAUDE_PROJECT_DIR%\\scripts\\session-start.ps1\" 2>nul",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
       {
         "matcher": "Bash(pnpm dev)",
@@ -25,6 +85,37 @@
           {
             "type": "command",
             "command": "timeout /t 2 >nul && start chrome http://localhost:3000"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -Command \"if ('%FILE_PATH%' -match '\\.(ts|tsx|js|jsx|json|css|md)$') { npx prettier --write '%FILE_PATH%' 2>$null }\" 2>nul"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -Command \"Add-Content -Path $env:USERPROFILE\\.claude\\session-log.txt -Value \\\"[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')] Session ended\\\"\""
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -Command \"if (Get-Module -ListAvailable -Name BurntToast) { New-BurntToastNotification -Text 'Captain', 'Claude Code needs attention' } else { Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.MessageBox]::Show('Claude Code needs attention', 'Captain', 0, 64) | Out-Null }\" 2>nul"
           }
         ]
       }

@@ -1,0 +1,183 @@
+{
+  "$schema": "https://kun.databayt.org/schemas/routines.v1.json",
+  "version": "1.0",
+  "lastUpdated": "2026-04-25",
+  "description": "Anthropic Routines (cloud-managed scheduled agents) registered for kun. Source of truth for what runs autonomously when Abdout's MacBook is closed.",
+  "betaHeader": "experimental-cc-routine-2026-04-01",
+  "_setupCommand": "bash scripts/setup-routines.sh",
+  "_consoleUrl": "https://claude.ai/code/routines",
+  "routines": [
+    {
+      "id": "daily-org-pulse",
+      "story": "17.2",
+      "name": "Daily Org Pulse",
+      "promptFile": ".claude/routines/daily-org-pulse.md",
+      "schedule": {
+        "type": "cron",
+        "cadence": "daily",
+        "at": "07:00",
+        "timezone": "Asia/Riyadh"
+      },
+      "repos": ["databayt/kun"],
+      "branchPushAllowed": false,
+      "connectors": ["github", "slack"],
+      "model": "claude-sonnet-4-6",
+      "estimatedDailyCost": 0.05,
+      "status": "design"
+    },
+    {
+      "id": "weekly-captain-cycle",
+      "story": "17.3",
+      "name": "Weekly Captain Cycle",
+      "promptFile": ".claude/routines/weekly-captain-cycle.md",
+      "schedule": {
+        "type": "cron",
+        "cadence": "weekly",
+        "dayOfWeek": "Monday",
+        "at": "08:00",
+        "timezone": "Asia/Riyadh"
+      },
+      "repos": ["databayt/kun"],
+      "branchPushAllowed": true,
+      "branchPattern": "claude/captain-weekly-*",
+      "connectors": ["github", "slack", "stripe"],
+      "model": "claude-opus-4-7",
+      "estimatedWeeklyCost": 0.50,
+      "status": "design"
+    },
+    {
+      "id": "fork-sync-watchdog",
+      "story": "17.4",
+      "name": "Fork Sync Watchdog",
+      "promptFile": ".claude/routines/fork-sync-watchdog.md",
+      "schedule": {
+        "type": "cron",
+        "cadence": "weekly",
+        "dayOfWeek": "Sunday",
+        "at": "22:00",
+        "timezone": "Asia/Riyadh"
+      },
+      "repos": ["databayt/shadcn", "databayt/radix"],
+      "branchPushAllowed": true,
+      "branchPattern": "claude/sync-upstream-*",
+      "connectors": ["github"],
+      "model": "claude-haiku-4-5",
+      "estimatedWeeklyCost": 0.10,
+      "status": "design"
+    },
+    {
+      "id": "pilot-health",
+      "story": "17.5",
+      "name": "Hogwarts Pilot Health",
+      "promptFile": ".claude/routines/pilot-health.md",
+      "schedule": {
+        "type": "cron",
+        "cadence": "hourly",
+        "timezone": "Asia/Riyadh"
+      },
+      "additionalTrigger": {
+        "type": "github",
+        "event": "pull_request.opened",
+        "repos": ["databayt/hogwarts"]
+      },
+      "repos": ["databayt/hogwarts"],
+      "branchPushAllowed": false,
+      "connectors": ["github", "browser"],
+      "model": "claude-sonnet-4-6",
+      "estimatedDailyCost": 0.30,
+      "status": "design",
+      "_note": "Hourly is aggressive — captain throttles to every 4h if monthly forecast > $180 (E28.5)"
+    },
+    {
+      "id": "stripe-nightly",
+      "story": "18.3",
+      "name": "Stripe Revenue Sync",
+      "promptFile": ".claude/routines/stripe-nightly.md",
+      "schedule": {
+        "type": "cron",
+        "cadence": "daily",
+        "at": "23:30",
+        "timezone": "Asia/Riyadh"
+      },
+      "repos": ["databayt/kun"],
+      "branchPushAllowed": true,
+      "branchPattern": "claude/revenue-sync-*",
+      "connectors": ["stripe", "github"],
+      "model": "claude-haiku-4-5",
+      "estimatedDailyCost": 0.02,
+      "status": "design"
+    },
+    {
+      "id": "report-auto-fix",
+      "story": "23.3",
+      "name": "Auto-Fix Report Issues",
+      "promptFile": ".claude/routines/report-auto-fix.md",
+      "schedule": null,
+      "additionalTrigger": {
+        "type": "github",
+        "event": "issues.labeled",
+        "labels": ["report"],
+        "repos": [
+          "databayt/hogwarts",
+          "databayt/kun",
+          "databayt/souq",
+          "databayt/mkan",
+          "databayt/shifa",
+          "databayt/marketing"
+        ]
+      },
+      "repos": ["databayt/hogwarts", "databayt/kun", "databayt/souq", "databayt/mkan", "databayt/shifa", "databayt/marketing"],
+      "branchPushAllowed": true,
+      "branchPattern": "claude/report-fix-*",
+      "connectors": ["github", "vercel"],
+      "model": "claude-sonnet-4-6",
+      "estimatedPerInvocationCost": 0.40,
+      "status": "design",
+      "replaces": "trig_01MFLRtUTfMMNTDGBBGQtZLq"
+    },
+    {
+      "id": "cost-watcher",
+      "story": "23.4",
+      "name": "Anthropic Cost Watcher",
+      "promptFile": ".claude/routines/cost-watcher.md",
+      "schedule": {
+        "type": "cron",
+        "cadence": "daily",
+        "at": "23:00",
+        "timezone": "Asia/Riyadh"
+      },
+      "repos": ["databayt/kun"],
+      "branchPushAllowed": true,
+      "branchPattern": "claude/cost-update-*",
+      "connectors": ["github"],
+      "model": "claude-haiku-4-5",
+      "estimatedDailyCost": 0.02,
+      "useBatchApi": true,
+      "status": "design"
+    },
+    {
+      "id": "agents-md-sync",
+      "story": "27.4",
+      "name": "AGENTS.md ↔ CLAUDE.md Drift Watchdog",
+      "promptFile": ".claude/routines/agents-md-sync.md",
+      "schedule": {
+        "type": "cron",
+        "cadence": "weekly",
+        "dayOfWeek": "Saturday",
+        "at": "21:00",
+        "timezone": "Asia/Riyadh"
+      },
+      "repos": ["databayt/kun", "databayt/hogwarts", "databayt/mkan", "databayt/souq", "databayt/shifa", "databayt/marketing", "databayt/swift-app"],
+      "branchPushAllowed": false,
+      "connectors": ["github"],
+      "model": "claude-haiku-4-5",
+      "estimatedWeeklyCost": 0.05,
+      "useBatchApi": true,
+      "status": "design"
+    }
+  ],
+  "totals": {
+    "estimatedMonthlyCost": 25.70,
+    "_note": "Stays inside $200/mo Anthropic Max envelope. Captain auto-throttles via E28.5 if forecast exceeds $180/mo. useBatchApi:true on non-interactive routines saves another ~50% on those entries."
+  }
+}

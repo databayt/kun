@@ -1,0 +1,32 @@
+{
+  "$schema": "https://kun.databayt.org/schemas/template.v1.json",
+  "version": "1.0",
+  "lastUpdated": "2026-04-25",
+  "source": "/Users/abdout/codebase/src/registry",
+  "definition": "A template is a full-page or major-section layout composing atoms + ui primitives.",
+  "agent": ".claude/agents/template.md",
+  "skill": "/template",
+  "templates": [
+    { "name": "auth-login", "category": "auth", "purpose": "Login page with form + branding" },
+    { "name": "auth-register", "category": "auth", "purpose": "Registration with validation" },
+    { "name": "auth-forgot-password", "category": "auth" },
+    { "name": "auth-reset-password", "category": "auth" },
+    { "name": "dashboard-shell", "category": "dashboard", "purpose": "Sidebar + topbar + content slot" },
+    { "name": "dashboard-overview", "category": "dashboard", "purpose": "Stats grid + recent activity" },
+    { "name": "settings-tabs", "category": "settings" },
+    { "name": "profile-edit", "category": "settings" },
+    { "name": "data-table-page", "category": "table", "purpose": "List page — toolbar + table + pagination" },
+    { "name": "detail-page", "category": "detail", "purpose": "Item detail with tabs + actions" },
+    { "name": "form-wizard", "category": "form", "purpose": "Multi-step form with progress" },
+    { "name": "marketing-hero", "category": "marketing" },
+    { "name": "marketing-features", "category": "marketing" },
+    { "name": "marketing-pricing", "category": "marketing" },
+    { "name": "marketing-cta", "category": "marketing" },
+    { "name": "marketing-footer", "category": "marketing" },
+    { "name": "checkout-flow", "category": "commerce" },
+    { "name": "search-results", "category": "search" },
+    { "name": "empty-search", "category": "search" }
+  ],
+  "_note": "Partial seed — full registry has 31 templates. Run `bash scripts/sync-templates.sh` to refresh from /Users/abdout/codebase/src/registry/.",
+  "_followUp": "Story E14.5 — populate the remaining 12 templates from the registry."
+}

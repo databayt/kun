@@ -1,0 +1,33 @@
+{
+  "$schema": "https://kun.databayt.org/schemas/atom.v1.json",
+  "version": "1.0",
+  "lastUpdated": "2026-04-25",
+  "source": "/Users/abdout/codebase/src/components/atom",
+  "definition": "An atom composes 2+ shadcn/ui primitives into a reusable pattern.",
+  "agent": ".claude/agents/atom.md",
+  "skill": "/atom",
+  "atoms": [
+    { "name": "input-field", "primitives": ["Label", "Input", "FormMessage"], "category": "form", "purpose": "Standard labeled input with validation message" },
+    { "name": "select-field", "primitives": ["Label", "Select", "FormMessage"], "category": "form", "purpose": "Standard labeled select" },
+    { "name": "textarea-field", "primitives": ["Label", "Textarea", "FormMessage"], "category": "form", "purpose": "Standard labeled textarea" },
+    { "name": "checkbox-field", "primitives": ["Label", "Checkbox", "FormMessage"], "category": "form" },
+    { "name": "switch-field", "primitives": ["Label", "Switch", "FormMessage"], "category": "form" },
+    { "name": "radio-group-field", "primitives": ["Label", "RadioGroup", "FormMessage"], "category": "form" },
+    { "name": "date-field", "primitives": ["Label", "Calendar", "Popover", "FormMessage"], "category": "form" },
+    { "name": "file-field", "primitives": ["Label", "Input", "FormMessage"], "category": "form" },
+    { "name": "search-input", "primitives": ["Input", "Icon"], "category": "form" },
+    { "name": "user-card", "primitives": ["Avatar", "Card", "Button"], "category": "display" },
+    { "name": "stat-card", "primitives": ["Card", "Icon", "Badge"], "category": "display" },
+    { "name": "empty-state", "primitives": ["Icon", "Heading", "Button"], "category": "display" },
+    { "name": "loading-state", "primitives": ["Skeleton", "Card"], "category": "feedback" },
+    { "name": "error-state", "primitives": ["Alert", "Button"], "category": "feedback" },
+    { "name": "confirm-dialog", "primitives": ["AlertDialog", "Button"], "category": "modal" },
+    { "name": "destructive-confirm", "primitives": ["AlertDialog", "Button", "Input"], "category": "modal" },
+    { "name": "data-table-toolbar", "primitives": ["Input", "Select", "Button", "DropdownMenu"], "category": "table" },
+    { "name": "pagination-bar", "primitives": ["Button", "Select"], "category": "table" },
+    { "name": "language-switcher", "primitives": ["Select", "Button"], "category": "navigation" },
+    { "name": "theme-toggle", "primitives": ["DropdownMenu", "Button"], "category": "navigation" }
+  ],
+  "_note": "Partial seed — full registry has 62 atoms. Run `bash scripts/sync-atoms.sh` to refresh from /Users/abdout/codebase/__registry__/atom/.",
+  "_followUp": "Story E14.5 — populate the remaining 42 atoms from the registry."
+}

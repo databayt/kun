@@ -1,0 +1,29 @@
+{
+  "_comment": "Ops profile — deployment + incident + monitoring. For Sedon (Saudi ops).",
+  "permissions": {
+    "allow": [
+      "Skill(monitor *)",
+      "Skill(costs *)",
+      "Skill(incident *)",
+      "Skill(deploy *)",
+      "Skill(watch *)",
+      "Skill(health *)",
+      "Skill(coverage *)",
+      "Skill(report *)",
+      "Skill(captain *)",
+      "Skill(weekly *)",
+      "Skill(dispatch *)",
+      "Skill(standup *)",
+      "Skill(repos *)",
+      "Skill(codebase *)",
+      "Skill(credentials *)",
+      "Skill(package *)",
+      "Skill(docs *)"
+    ],
+    "deny": [
+      "Skill(schema *)",
+      "Skill(code *)",
+      "Skill(wire *)"
+    ]
+  }
+}

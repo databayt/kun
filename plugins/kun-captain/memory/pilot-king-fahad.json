@@ -1,0 +1,84 @@
+{
+  "$schema": "https://kun.databayt.org/schemas/pilot.v1.json",
+  "version": "1.0",
+  "lastUpdated": "2026-04-25",
+  "pilot": {
+    "id": "king-fahad",
+    "name": "King Fahad Schools",
+    "country": "Sudan",
+    "primaryContact": {
+      "name": "Ahmed Baha",
+      "role": "decision-maker"
+    },
+    "tenantSubdomain": "kingfahad.databayt.org",
+    "creds": {
+      "admin": "admin@kingfahad.edu",
+      "applicant": "applicant@kingfahad.edu",
+      "_note": "Test passwords stored in Keychain — see /credentials skill"
+    }
+  },
+  "currentStage": "meeting",
+  "stages": [
+    {
+      "id": "interest",
+      "label": "Interest expressed",
+      "entryCriteria": "Initial contact confirmed",
+      "exitCriteria": "Discovery call scheduled",
+      "completedAt": null
+    },
+    {
+      "id": "meeting",
+      "label": "Discovery / pitch meeting held",
+      "entryCriteria": "Meeting on calendar",
+      "exitCriteria": "Decision on next step (proposal vs decline)",
+      "completedAt": "2026-04-04",
+      "_note": "Outcome of 2026-04-04 meeting not yet ingested into memory — captain to follow up via /weekly"
+    },
+    {
+      "id": "proposal",
+      "label": "Written proposal sent",
+      "entryCriteria": "Pricing approved by captain + revenue agent",
+      "exitCriteria": "Counter-signed or written decision",
+      "completedAt": null
+    },
+    {
+      "id": "contract",
+      "label": "Contract signed",
+      "entryCriteria": "Both parties signed",
+      "exitCriteria": "First payment received",
+      "completedAt": null
+    },
+    {
+      "id": "onboarding",
+      "label": "Tenant provisioned",
+      "entryCriteria": "Tenant subdomain live",
+      "exitCriteria": "First admission submitted via production",
+      "completedAt": null
+    },
+    {
+      "id": "live",
+      "label": "Operational pilot",
+      "entryCriteria": "Daily active usage",
+      "exitCriteria": "30 days continuous usage with <2 P0 incidents",
+      "completedAt": null
+    },
+    {
+      "id": "renewal",
+      "label": "Pilot → paying customer",
+      "entryCriteria": "30-day mark passed",
+      "exitCriteria": "Renewal signed OR pilot ended",
+      "completedAt": null
+    }
+  ],
+  "blockers": [
+    {
+      "id": "qa-115",
+      "title": "Admission QA — 5 interactive items pending",
+      "tracker": "databayt/hogwarts#115",
+      "owner": "ali",
+      "severity": "high"
+    }
+  ],
+  "decisions": [],
+  "_followUp": "Stage transitions written by support agent or /dispatch with --pilot king-fahad."
+}

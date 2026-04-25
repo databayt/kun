@@ -1,0 +1,40 @@
+{
+  "$schema": "https://kun.databayt.org/schemas/block.v1.json",
+  "version": "1.0",
+  "lastUpdated": "2026-04-25",
+  "source": "/Users/abdout/codebase/src/components/block",
+  "definition": "A block is a UI component with integrated business logic — server actions, validation, tenant scoping. Beyond shadcn/ui blocks.",
+  "agent": ".claude/agents/block.md",
+  "skill": "/block",
+  "blocks": [
+    {
+      "name": "data-table",
+      "purpose": "Generic data table with sorting/filtering/pagination/selection, nuqs URL state, Prisma filters",
+      "consumers": ["hogwarts", "souq", "mkan", "shifa"],
+      "files": 41,
+      "subComponents": 14,
+      "patternCard": ".claude/patterns/cards/table.md"
+    },
+    {
+      "name": "auth-flow",
+      "purpose": "Login + register + forgot-password + reset + verify, tenant-aware",
+      "consumers": ["hogwarts", "marketing"],
+      "patternCard": ".claude/patterns/cards/auth.md"
+    },
+    {
+      "name": "billing-portal",
+      "purpose": "Stripe customer portal integration — invoice list, payment methods, plan switch",
+      "consumers": ["hogwarts"],
+      "depends": ["stripe MCP"]
+    },
+    {
+      "name": "admission-flow",
+      "purpose": "Multi-step student admission with file upload, OTP, status chain (King Fahad pilot block)",
+      "consumers": ["hogwarts"],
+      "patternCard": ".claude/patterns/cards/wizard.md",
+      "issue": "databayt/hogwarts#115"
+    }
+  ],
+  "_note": "4 production blocks. Adding a 5th requires captain approval (high reuse threshold).",
+  "_followUp": "When admission ships to King Fahad, promote learnings into a `pilot-onboarding` block for repeated school onboarding."
+}
