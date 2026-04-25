@@ -76,12 +76,15 @@ If any leg fails, captain logs the failure to `~/.claude/memory/dispatch-failure
 
 ## Implementation
 
-Underlying script: `~/.claude/scripts/dispatch.sh` (existing) — extended for `--priority`/`--deadline`/`--channel` args by Story 19.4.
+Underlying script: `scripts/dispatch.sh` in the kun repo (Story 19.4 ships this). Mac: writes to Apple Notes via osascript. Windows: falls back to `gh issue create --label captain`.
 
 ```bash
-~/.claude/scripts/dispatch.sh write captain "msg" [priority] [deadline]
-~/.claude/scripts/dispatch.sh read inbox [n]
+bash scripts/dispatch.sh write captain "msg" [fyi|normal|decision|urgent] [24h|48h|72h]
+bash scripts/dispatch.sh read inbox [n]
+bash scripts/dispatch.sh log [n]                # show recent dispatch-log entries
 ```
+
+Idempotent: re-running `write` with the same channel + body within 24h dedupes (prevents notification spam).
 
 The script:
 - Validates priority + channel + deadline args
