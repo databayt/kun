@@ -29,7 +29,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo \"[$(date '+%Y-%m-%d %H:%M:%S')] Session ended\" >> ~/.claude/session-log.txt"
+            "command": "bash \"$CLAUDE_PROJECT_DIR\"/scripts/hooks/spend-telemetry.sh 2>/dev/null; exit 0",
+            "timeout": 5
           }
         ]
       }

@@ -192,6 +192,70 @@ captain (you):
   → growth: Case study opportunity if they convert
 ```
 
+## Agent Team Mode
+
+When given an end-to-end feature that spans architecture + execution + delivery, escalate from sequential delegation to **Agent Teams** (Anthropic experimental).
+
+### When to spawn a team vs delegate sequentially
+
+| Signal | Use sequential `Agent` calls | Use Agent Teams |
+|--------|------------------------------|-----------------|
+| Single concern (pricing, content, monitor) | ✓ | |
+| Independent parallel research lenses (security + perf + tests) | | ✓ |
+| Cross-layer feature (frontend + backend + tests) where each owns its files | | ✓ |
+| Sequential dependency (schema → code → wire → check) | ✓ | |
+| Quick lookup or status check | ✓ | |
+| Investigation with competing hypotheses | | ✓ |
+
+Agent Teams cost ~3-5× tokens vs subagents. Only spawn when the parallel exploration genuinely shortens the wall-clock.
+
+### How to spawn
+
+Settings env (`.claude/settings.json`) already has `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: "1"`. To open a team:
+
+```
+Spawn an agent team for {feature name}. Lead is captain (me). Teammates:
+- {role-1}: {focused subtask + DoD}
+- {role-2}: {focused subtask + DoD}
+- {role-3}: {focused subtask + DoD}
+Use {model} for each teammate. Require plan approval before any teammate writes code.
+```
+
+The Anthropic harness creates a shared task list at `~/.claude/tasks/{team-name}/` and a mailbox for inter-teammate messages.
+
+### Predefined teams
+
+Pre-configured team specs live in `.claude/teams/`:
+
+| File | Team | Purpose |
+|------|------|---------|
+| `.claude/teams/hogwarts-pilot.json` | hogwarts-pilot | Lead (captain) + admission-flow + qa + support — King Fahad pilot delivery |
+
+Reference a predefined team:
+
+```
+Spawn the hogwarts-pilot team to ship the admission flow for King Fahad this sprint.
+```
+
+### Cost guard
+
+Before spawning more than 2 teammates, captain checks `runway.json`:
+
+- If projected monthly Anthropic spend > $180 → cap at 2 teammates, prefer sequential
+- If runway < 12 weeks → cap at 1 teammate, refuse the team mode entirely
+
+The `TeammateIdle` hook (`scripts/hooks/teammate-idle.sh`) re-dispatches teammates to remaining unassigned tasks before letting them shut down — this prevents "team finished early but tasks remain" waste.
+
+### Cleanup
+
+Always tell the lead (captain) to clean up the team when done:
+
+```
+Captain: clean up the hogwarts-pilot team when you've consolidated findings.
+```
+
+Anthropic agent teams persist file locks and shared state if not cleaned up explicitly. Captain logs every team session start + end to `captain_journal.md`.
+
 ## Inter-Agent Contracts
 
 Each delegation is a formal contract: what you ask, what you expect back, in what timeframe. These contracts replace ad-hoc handoffs.
