@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Add assets.databayt.org as a CNAME alias to the existing CloudFront distribution.
+# Add cdn.databayt.org as a CNAME alias to the existing CloudFront distribution.
 # This is purely additive — d1dlwtcfl0db67.cloudfront.net keeps working unchanged,
 # so any code in hogwarts (or anywhere) that hardcodes the old URL is unaffected.
 #
@@ -9,7 +9,7 @@ set -euo pipefail
 # Without AWS CLI, do steps 1-3 manually in the AWS console.
 
 DISTRIBUTION_ID="${DISTRIBUTION_ID:-}"      # e.g. EXXXXXXXXXXX (find in CloudFront console)
-DOMAIN="${DOMAIN:-assets.databayt.org}"
+DOMAIN="${DOMAIN:-cdn.databayt.org}"
 HOSTED_ZONE_ID="${HOSTED_ZONE_ID:-}"        # Route 53 hosted zone for databayt.org
 CERT_ARN="${CERT_ARN:-}"                    # ACM cert ARN in us-east-1, set after step 2
 
@@ -18,28 +18,28 @@ if ! command -v aws >/dev/null 2>&1; then
 AWS CLI not installed. Do these 4 steps manually in the AWS console:
 
   1. Route 53 (or your DNS provider): add a CNAME record
-        Name:  assets.databayt.org
+        Name:  cdn.databayt.org
         Type:  CNAME
         Value: d1dlwtcfl0db67.cloudfront.net
         TTL:   300
 
   2. ACM (region MUST be us-east-1, required for CloudFront):
-        Request a public certificate for: assets.databayt.org
+        Request a public certificate for: cdn.databayt.org
         Validation: DNS (auto-validates if you use Route 53)
         Wait until status = "Issued"
 
   3. CloudFront → distribution d1dlwtcfl0db67 → Settings → Edit:
-        - Alternate domain names (CNAMEs): add assets.databayt.org
+        - Alternate domain names (CNAMEs): add cdn.databayt.org
         - Custom SSL certificate: select the ACM cert from step 2
         Save and wait for "Deployed" (~5–10 min)
 
   4. Verify:
-        curl -sI https://assets.databayt.org/anthropic/brand/claude-wordmark.svg
+        curl -sI https://cdn.databayt.org/anthropic/brand/claude-wordmark.svg
      Should return 200 OK with the same ETag as:
         curl -sI https://d1dlwtcfl0db67.cloudfront.net/anthropic/brand/claude-wordmark.svg
 
 After verify passes, change CDN_BASE in src/components/root/anthropic/data.ts to:
-        export const CDN_BASE = "https://assets.databayt.org";
+        export const CDN_BASE = "https://cdn.databayt.org";
 
 That single edit rewrites all 169+ asset URLs to the new friendly host.
 Hogwarts references stay valid — adding a CNAME is purely additive.
