@@ -15,9 +15,9 @@
     "setup:phase3": "bash scripts/phase3/setup.sh",
     "health": "bash scripts/monitoring/health-check.sh",
     "status": "bash scripts/status.sh",
-    "crawl:anthropic": "tsx scripts/crawl-anthropic/index.ts",
-    "crawl:anthropic:dry": "tsx scripts/crawl-anthropic/index.ts --dry-run",
-    "crawl:anthropic:upload-only": "tsx scripts/crawl-anthropic/index.ts --upload-only"
+    "crawl:anthropic": "tsx --env-file=.env scripts/crawl-anthropic/index.ts",
+    "crawl:anthropic:dry": "tsx --env-file=.env scripts/crawl-anthropic/index.ts --dry-run",
+    "crawl:anthropic:upload-only": "tsx --env-file=.env scripts/crawl-anthropic/index.ts --upload-only"
   },
   "dependencies": {
     "@auth/core": "^0.34.3",
