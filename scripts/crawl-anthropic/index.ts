@@ -21,7 +21,7 @@ import { categorize } from "./categorize.js";
 import { deriveSlug, ensureUnique } from "./slugify.js";
 import { loadSeenSourceUrls, loadExistingKeys } from "./diff.js";
 import { appendRowsAndBumpDate } from "./emit.js";
-import type { Manifest, NewAssetRow, RunReport, AssetCandidate, PageSource } from "./types.js";
+import type { Manifest, NewAssetRow, RunReport, AssetCandidate, PageSource, AssetCategory } from "./types.js";
 
 const argv = new Set(process.argv.slice(2));
 const DRY_RUN = argv.has("--dry-run");
@@ -50,13 +50,43 @@ function sourceTag(pageUrl: string): string {
   } catch { return pageUrl; }
 }
 
+function titleFromUrl(sourceUrl: string): string | null {
+  try {
+    const u = new URL(sourceUrl);
+    const filename = u.pathname.split("/").pop() ?? "";
+    const stem = filename
+      .replace(/\.[^.]+$/, "")
+      .replace(/-p-\d+$/i, "");
+    // Strip 24-char Webflow asset id prefix and 40-char Sanity hash prefix.
+    const cleaned = stem
+      .replace(/^[a-f0-9]{24}_/i, "")
+      .replace(/^[a-f0-9]{40}-/i, "")
+      .replace(/-\d{2,4}x\d{2,4}$/i, "");
+    if (cleaned.length < 2) return null;
+    return cleaned
+      .split(/[-_]+/)
+      .filter(Boolean)
+      .map((w) => (w.length > 0 ? w[0]!.toUpperCase() + w.slice(1) : w))
+      .join(" ");
+  } catch {
+    return null;
+  }
+}
+
 function describe(candidate: AssetCandidate, format: string): { name: string; description: string } {
   const alt = candidate.alt?.trim();
-  const name = alt && alt.length > 1 ? alt : "Asset";
-  const description = alt
-    ? `${alt} (${format.toUpperCase()})`
-    : `Asset from ${sourceTag(candidate.pageUrl)}`;
-  return { name, description };
+  if (alt && alt.length > 1) {
+    return { name: alt, description: `${alt} (${format.toUpperCase()})` };
+  }
+  const titled = titleFromUrl(candidate.sourceUrl);
+  const where = sourceTag(candidate.pageUrl);
+  if (titled) {
+    return {
+      name: titled,
+      description: `${titled} from ${where} (${format.toUpperCase()})`,
+    };
+  }
+  return { name: "Asset", description: `Asset from ${where}` };
 }
 
 async function expandFollowedPages(src: PageSource): Promise<PageSource[]> {
@@ -154,22 +184,41 @@ async function main(): Promise<void> {
     }
     report.assetsDownloaded++;
 
-    if (existingManifest && existingManifest.sha256 === blob.sha256) {
-      return;
+    // If S3 already has these exact bytes under a known key, reuse it. Don't
+    // re-upload — but DO emit a row so data.ts gets the catalog entry. This is
+    // how we backfill the historical orphan gap (manifest grew, data.ts didn't).
+    const skipUpload = !!(existingManifest && existingManifest.sha256 === blob.sha256);
+
+    let key: string;
+    let category: AssetCategory;
+    let needsReview = false;
+    if (skipUpload) {
+      key = existingManifest!.key;
+      category = (key.split("/")[1] ?? "illustrations") as AssetCategory;
+      usedKeys.add(key);
+    } else {
+      const cat = categorize(cand, blob);
+      category = cat.category;
+      needsReview = cat.needsReview;
+      const baseSlug = deriveSlug({
+        alt: cand.alt,
+        caption: cand.caption,
+        pageUrl: cand.pageUrl,
+        sourceUrl: cand.sourceUrl,
+        sha256: blob.sha256,
+        category,
+      });
+      const slug = ensureUnique(baseSlug, category, usedKeys, blob.sha256);
+      key = `anthropic/${category}/${slug}.${blob.format}`;
     }
 
-    const { category, needsReview } = categorize(cand, blob);
-    const baseSlug = deriveSlug({
-      alt: cand.alt,
-      caption: cand.caption,
-      pageUrl: cand.pageUrl,
-      sourceUrl: cand.sourceUrl,
-      sha256: blob.sha256,
-      category,
-    });
-    const slug = ensureUnique(baseSlug, category, usedKeys, blob.sha256);
-    const key = `anthropic/${category}/${slug}.${blob.format}`;
-    const { name, description } = describe(cand, blob.format);
+    // When backfilling, the existing key's extension wins — that's what's
+    // actually on S3 — even if the bytes are now served as a different format.
+    const rowFormat = skipUpload
+      ? ((key.split(".").pop() as typeof blob.format) ?? blob.format)
+      : blob.format;
+
+    const { name, description } = describe(cand, rowFormat);
 
     const row: NewAssetRow = {
       key,
@@ -177,14 +226,14 @@ async function main(): Promise<void> {
       name,
       description,
       category,
-      format: blob.format,
+      format: rowFormat,
       source: sourceTag(cand.pageUrl),
       width: blob.width,
       height: blob.height,
     };
 
-    let uploadOk = false;
-    if (!DRY_RUN && credsAvailable) {
+    let uploadOk = skipUpload;
+    if (!skipUpload && !DRY_RUN && credsAvailable) {
       try {
         const result = await uploadLimit(() => uploadAsset(key, blob, cand.sourceUrl));
         if (result.uploaded) report.assetsUploaded++;

@@ -82,13 +82,50 @@ async function dimensionsFromBuffer(buf: Buffer, format: AssetFormat): Promise<{
   return {};
 }
 
+// Sniff the real format from magic bytes. Servers sometimes do server-side
+// conversion (e.g. Sanity returns WebP when given a PNG URL with `?fm=webp`).
+// Trust the bytes, not the extension.
+function sniffFormat(buf: Buffer): AssetFormat | null {
+  if (buf.length < 12) return null;
+  const h = buf;
+  if (h[0] === 0x89 && h[1] === 0x50 && h[2] === 0x4e && h[3] === 0x47) return "png";
+  if (h[0] === 0xff && h[1] === 0xd8) return "jpg";
+  if (h[0] === 0x52 && h[1] === 0x49 && h[2] === 0x46 && h[3] === 0x46 &&
+      h[8] === 0x57 && h[9] === 0x45 && h[10] === 0x42 && h[11] === 0x50) return "webp";
+  if (h[0] === 0x47 && h[1] === 0x49 && h[2] === 0x46) return "gif";
+  if (h[0] === 0x25 && h[1] === 0x50 && h[2] === 0x44 && h[3] === 0x46) return "pdf";
+  if (h[0] === 0x00 && h[1] === 0x00 && h[2] === 0x01 && h[3] === 0x00) return "ico";
+  if (h[0] === 0x77 && h[1] === 0x4f && h[2] === 0x46 && h[3] === 0x32) return "woff2";
+  if (h[0] === 0x00 && h[1] === 0x01 && h[2] === 0x00 && h[3] === 0x00) return "ttf";
+  if (h[0] === 0x4f && h[1] === 0x54 && h[2] === 0x54 && h[3] === 0x4f) return "ttf";
+  if (h[4] === 0x66 && h[5] === 0x74 && h[6] === 0x79 && h[7] === 0x70) return "mp4";
+  if (h[0] === 0x1a && h[1] === 0x45 && h[2] === 0xdf && h[3] === 0xa3) return "webm";
+  if (h[0] === 0x52 && h[1] === 0x49 && h[2] === 0x46 && h[3] === 0x46 &&
+      h[8] === 0x57 && h[9] === 0x41 && h[10] === 0x56 && h[11] === 0x45) return "wav";
+  const head = buf.slice(0, 512).toString("utf-8").trim().toLowerCase();
+  if (head.startsWith("<?xml") || head.startsWith("<svg")) return "svg";
+  if (head.startsWith("{") || head.startsWith("[")) return "json";
+  return null;
+}
+
 export async function downloadAsset(sourceUrl: string): Promise<BlobMeta | null> {
   const fetched = await fetchBytes(sourceUrl);
   if (!fetched) return null;
   const { buf, contentType } = fetched;
   if (buf.length === 0) return null;
 
-  const format = detectFormat(sourceUrl, contentType);
+  // Reject HTML 404 splashes outright (e.g. Mintlify serves /favicon.ico as a 200 OK splash).
+  const ctLower = contentType.toLowerCase();
+  if (ctLower.includes("text/html") || ctLower.includes("application/xhtml")) {
+    console.warn(`[download] ${sourceUrl} returned ${contentType} — HTML splash rejected`);
+    return null;
+  }
+
+  // Sniff actual format from bytes — handles server-side conversions like
+  // Sanity's `?fm=webp` query that converts PNG to WebP at delivery time.
+  const sniffed = sniffFormat(buf);
+  const fromUrl = detectFormat(sourceUrl, contentType);
+  const format = sniffed ?? fromUrl;
   if (!format) {
     console.warn(`[download] no format detected for ${sourceUrl} (ct=${contentType})`);
     return null;
@@ -101,7 +138,15 @@ export async function downloadAsset(sourceUrl: string): Promise<BlobMeta | null>
   const stagingPath = join(STAGING_DIR, `${sha256}.${format}`);
   await writeFile(stagingPath, buf);
 
-  const ct = contentType || mime.lookup(format) || "application/octet-stream";
+  // Trust the format-derived MIME over the server header; CDNs sometimes mislabel.
+  const formatMime: Record<string, string> = {
+    svg: "image/svg+xml", png: "image/png", jpg: "image/jpeg", webp: "image/webp",
+    gif: "image/gif", ico: "image/x-icon",
+    json: "application/json", pdf: "application/pdf",
+    woff2: "font/woff2", ttf: "font/ttf",
+    mp4: "video/mp4", webm: "video/webm", wav: "audio/wav",
+  };
+  const ct = formatMime[format] || mime.lookup(format) || contentType || "application/octet-stream";
 
   return {
     sha256,

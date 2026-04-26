@@ -135,13 +135,24 @@ export async function fetchDynamic(url: string): Promise<{ html: string; network
     });
 
     try {
-      await page.goto(url, { waitUntil: "domcontentloaded", timeout: 45000 });
-      await page.waitForLoadState("load", { timeout: 15000 }).catch(() => {});
-      await page.waitForTimeout(2000);
-      const html = await page.content();
-      return { html, networkAssets: Array.from(networkAssets) };
-    } catch (err) {
-      console.error(`[playwright] ${url} failed:`, (err as Error).message);
+      let lastErr: Error | null = null;
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          await page.goto(url, { waitUntil: "domcontentloaded", timeout: 90000 });
+          await page.waitForLoadState("load", { timeout: 30000 }).catch(() => {});
+          await page.waitForLoadState("networkidle", { timeout: 15000 }).catch(() => {});
+          await page.waitForTimeout(2500);
+          const html = await page.content();
+          return { html, networkAssets: Array.from(networkAssets) };
+        } catch (err) {
+          lastErr = err as Error;
+          if (attempt === 0) {
+            console.warn(`[playwright retry] ${url}: ${(err as Error).message.slice(0, 120)}`);
+            await new Promise((r) => setTimeout(r, 2000));
+          }
+        }
+      }
+      console.error(`[playwright] ${url} failed:`, lastErr?.message);
       return null;
     } finally {
       await ctx.close();
