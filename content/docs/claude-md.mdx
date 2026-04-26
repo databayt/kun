@@ -1,61 +1,54 @@
 ---
 title: CLAUDE.md
-description: Project instructions that shape every response — the 3-layer hierarchy
+description: Project instructions that shape every response — the three-layer hierarchy
 ---
 
 # CLAUDE.md
 
-The most powerful configuration primitive in Claude Code. A markdown file that shapes every response, every agent, every workflow. Kun uses a 3-layer hierarchy that cascades from global preferences down to repo-specific operations.
+The most powerful configuration primitive in Claude Code. A markdown file that shapes every response, every agent, every workflow. Kun uses a three-layer hierarchy that cascades from global preferences down to repo-specific operations.
 
-## 3-Layer Hierarchy
+## Three-Layer Hierarchy
 
 ```
-Priority (High → Low):
-1. Project-level  ~/project/CLAUDE.md         — Project context
-2. Repo-level     ~/project/.claude/CLAUDE.md  — Keywords, workflows
-3. User-level     ~/.claude/CLAUDE.md          — Stack, preferences
-4. Pattern library /Users/abdout/codebase/     — Core patterns
+Priority (high → low):
+1. Project-level    <project>/CLAUDE.md         — Project context
+2. Repo-level       <project>/.claude/CLAUDE.md — Keywords, workflows
+3. User-level       ~/.claude/CLAUDE.md         — Stack, preferences
+4. Pattern library  codebase repo               — Core patterns
 ```
 
-Higher layers override lower ones. This means project-specific context always wins over global defaults.
+Higher layers override lower ones — project-specific context wins over global defaults.
 
-## Layer 1: User-Level (`~/.claude/CLAUDE.md`)
+## Layer 1: User-level (`~/.claude/CLAUDE.md`)
 
-Global preferences that apply to every project and every conversation.
+Global preferences that apply to every project and conversation.
 
 | Setting | Value |
 |---------|-------|
-| Model | Opus 4.6 |
+| Model | `claude-opus-4-7` |
 | Package manager | pnpm |
 | Stack | Next.js 16, React 19, Prisma 6, TypeScript 5, Tailwind CSS 4, shadcn/ui |
 | Languages | Arabic (RTL default), English (LTR) |
-| Mode | Full Autopilot (100-turn cycles) |
 | Port | Always 3000 |
-| Environment | Single .env only |
+| Environment | Single `.env` only |
 | Component hierarchy | ui, atom, template, block, micro |
 
-## Layer 2: Project-Level (`CLAUDE.md`)
+## Layer 2: Project-level (`CLAUDE.md`)
 
-Project-specific context per product:
+Project-specific context: domain model, multi-tenancy approach, license, key constraints.
 
-| Product | Context |
-|---------|---------|
-| **Hogwarts** | Multi-tenant education SaaS, school modules, SSPL license |
-| **Mkan** | Rental marketplace, Airbnb-inspired, booking flow |
-| **Kun** | Configuration engine, documentation site, 3-phase roadmap |
+## Layer 3: Repo-level (`.claude/CLAUDE.md`)
 
-## Layer 3: Repo-Level (`.claude/CLAUDE.md`)
-
-Operational configuration: 100+ keyword-to-action mappings, MCP trigger table, slash command reference, organization repository references, React best practices from Vercel.
+Operational configuration: keyword-to-action mappings, MCP trigger table, slash command reference, organization repo references, framework best practices.
 
 ### What It Contains
 
-- **Keyword mappings** — Say `dev` to start server, `push` to commit, `deploy` to ship
+- **Keyword mappings** — `dev` → start server, `push` → commit, `deploy` → ship
 - **Component hierarchy** — ui, atom, template, block, micro
-- **MCP trigger table** — Which keyword activates which MCP server
-- **Slash command reference** — All available `/` commands
-- **Organization references** — How to reference other databayt repos
-- **React best practices** — Waterfall elimination, bundle optimization, server components
+- **MCP trigger table** — which keyword activates which server
+- **Slash command reference** — every available `/` command
+- **Organization references** — how to reference other repos
+- **Framework best practices** — performance, RTL, RSC patterns
 
 ## Writing Effective CLAUDE.md
 
@@ -63,22 +56,19 @@ Operational configuration: 100+ keyword-to-action mappings, MCP trigger table, s
 
 - Lead with preferences (model, stack, language)
 - Map keywords to actions (`say X → do Y`)
-- Define component hierarchy
+- Define the component hierarchy
 - Reference external repos and patterns
-- Include React/Next.js best practices
+- Include framework best practices
 
 ### Avoid
 
 - Implementation details (that's what agents and rules are for)
-- Long prose (tables and lists are better)
+- Long prose (tables and lists are clearer)
 - Duplicating what's in rules or agents
 - Sensitive information (use secrets instead)
 
 ## Installation
 
-CLAUDE.md files are installed by the Kun install script:
-
 ```bash
-# Installs ~/.claude/CLAUDE.md and project-level files
 cd ~/kun && bash .claude/scripts/install.sh
 ```
