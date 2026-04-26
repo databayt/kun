@@ -43,3 +43,6 @@ pnpm-debug.log*
 
 # Crawler state (downloaded blobs, manifest, reports)
 scripts/crawl-anthropic/state/
+
+# crawl-anthropic — large blob cache (regenerable from manifest)
+scripts/crawl-anthropic/state/staging/
