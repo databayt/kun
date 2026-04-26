@@ -1,0 +1,115 @@
+name: Auto status
+
+on:
+  create:
+  pull_request:
+    types: [opened, ready_for_review, closed]
+  issues:
+    types: [closed, reopened]
+
+permissions:
+  issues: write
+  pull-requests: read
+
+jobs:
+  branch-to-in-progress:
+    name: Branch created → status/in-progress
+    if: github.event_name == 'create' && github.event.ref_type == 'branch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract issue number from branch name
+        id: parse
+        env:
+          BRANCH: ${{ github.event.ref }}
+        run: |
+          if [[ "$BRANCH" =~ ^(feat|fix|chore|docs|refactor|test|perf|style|ci|build|revert|i18n|hotfix)\/([0-9]+)- ]]; then
+            echo "issue=${BASH_REMATCH[2]}" >> "$GITHUB_OUTPUT"
+            echo "Found issue #${BASH_REMATCH[2]} in branch $BRANCH"
+          else
+            echo "Branch '$BRANCH' has no issue number — skipping"
+            echo "issue=" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Flip status/triage → status/in-progress
+        if: steps.parse.outputs.issue != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE: ${{ steps.parse.outputs.issue }}
+        run: |
+          gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
+            --remove-label "status/triage" --add-label "status/in-progress" || true
+
+  pr-opened-to-in-review:
+    name: PR opened → status/in-review
+    if: github.event_name == 'pull_request' && (github.event.action == 'opened' || github.event.action == 'ready_for_review')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract issue number from PR body
+        id: parse
+        env:
+          BODY: ${{ github.event.pull_request.body }}
+        run: |
+          ISSUE=$(echo "$BODY" | grep -oiE '(Closes|Fixes|Resolves|Refs)[[:space:]]+#[0-9]+' | head -1 | grep -oE '[0-9]+' || true)
+          if [ -n "$ISSUE" ]; then
+            echo "issue=$ISSUE" >> "$GITHUB_OUTPUT"
+          else
+            echo "issue=" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Flip status/in-progress → status/in-review
+        if: steps.parse.outputs.issue != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE: ${{ steps.parse.outputs.issue }}
+        run: |
+          gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
+            --remove-label "status/triage,status/in-progress" --add-label "status/in-review" || true
+
+  pr-merged-to-done:
+    name: PR merged → status/done
+    if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract issue number from PR body
+        id: parse
+        env:
+          BODY: ${{ github.event.pull_request.body }}
+        run: |
+          ISSUE=$(echo "$BODY" | grep -oiE '(Closes|Fixes|Resolves)[[:space:]]+#[0-9]+' | head -1 | grep -oE '[0-9]+' || true)
+          if [ -n "$ISSUE" ]; then
+            echo "issue=$ISSUE" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Flip → status/done
+        if: steps.parse.outputs.issue != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE: ${{ steps.parse.outputs.issue }}
+        run: |
+          gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
+            --remove-label "status/triage,status/in-progress,status/in-review" \
+            --add-label "status/done" || true
+
+  issue-closed-to-done:
+    name: Issue closed manually → ensure status/done
+    if: github.event_name == 'issues' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ensure status/done label
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE: ${{ github.event.issue.number }}
+        run: |
+          gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
+            --remove-label "status/triage,status/in-progress,status/in-review" \
+            --add-label "status/done" || true
+
+  issue-reopened-to-in-progress:
+    name: Issue reopened → status/in-progress
+    if: github.event_name == 'issues' && github.event.action == 'reopened'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Flip → status/in-progress
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE: ${{ github.event.issue.number }}
+        run: |
+          gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
+            --remove-label "status/done" --add-label "status/in-progress" || true

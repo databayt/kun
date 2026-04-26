@@ -1,0 +1,66 @@
+name: Contribution declaration
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+    branches: [main]
+
+permissions:
+  pull-requests: read
+  issues: read
+  contents: read
+
+jobs:
+  validate:
+    name: Validate Contribution declaration block
+    runs-on: ubuntu-latest
+    steps:
+      - name: Parse declaration block from PR body
+        id: parse
+        env:
+          BODY: ${{ github.event.pull_request.body }}
+        run: |
+          # The declaration block is required.
+          if ! echo "$BODY" | grep -q '^## Contribution declaration'; then
+            echo "::error::PR body is missing the '## Contribution declaration' section."
+            echo "Use /pr to auto-fill it, or copy the block from .github/PULL_REQUEST_TEMPLATE.md"
+            exit 1
+          fi
+
+          # Closes/Refs #N is required (issue link).
+          if ! echo "$BODY" | grep -qiE '(Closes|Fixes|Resolves|Refs)[[:space:]]+#[0-9]+'; then
+            echo "::error::Contribution declaration must reference an issue: 'Closes #<n>' or 'Refs #<n>'."
+            exit 1
+          fi
+
+          ISSUE=$(echo "$BODY" | grep -oiE '(Closes|Fixes|Resolves|Refs)[[:space:]]+#[0-9]+' | head -1 | grep -oE '[0-9]+')
+          echo "issue=$ISSUE" >> "$GITHUB_OUTPUT"
+
+          # Author handle is required.
+          if ! echo "$BODY" | grep -qE '^- Author: @[a-zA-Z0-9_-]+'; then
+            echo "::error::Contribution declaration is missing 'Author: @<handle>'."
+            exit 1
+          fi
+
+          # Pair / Reviewers / Design / AI lines must be present (even if 'none').
+          for field in "Pair" "Design credit" "AI co-author"; do
+            if ! echo "$BODY" | grep -qE "^- $field"; then
+              echo "::error::Contribution declaration is missing '$field' line."
+              exit 1
+            fi
+          done
+
+          echo "Declaration block valid for issue #$ISSUE"
+
+      - name: Check linked issue exists and is open or recently closed
+        if: steps.parse.outputs.issue != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE: ${{ steps.parse.outputs.issue }}
+        run: |
+          if ! gh issue view "$ISSUE" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "::error::Linked issue #$ISSUE does not exist in $GITHUB_REPOSITORY"
+            exit 1
+          fi
+          STATE=$(gh issue view "$ISSUE" --repo "$GITHUB_REPOSITORY" --json state -q .state)
+          echo "Issue #$ISSUE state: $STATE"
