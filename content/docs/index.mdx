@@ -1,90 +1,56 @@
 ---
 title: Introduction
-description: Kun (كن) — The Databayt Engine
+description: Kun (كن) — the configuration engine for Claude Code
 ---
 
 # Kun (كن)
 
-> The optimal configuration that makes Claude Code, Claude Desktop, Cowork, and the Agent SDK work together as a single engine running both the technical and business sides of **Databayt**.
+> The configuration that makes Claude Code, Claude Desktop, Cowork, and the Agent SDK work together as a single engine — running both technical and business sides of a software company.
+
+<EngineCounts compact />
 
 ## What is Kun?
 
-Kun is not a server. Not a platform. It is the brain that coordinates **14 repositories**, **4 team members**, and every tool in the stack — from git commit to Stripe checkout to team standup.
+**Kun** (Arabic for *Be*) is not a server or a platform. It is the configuration layer — agents, skills, hooks, MCP servers, rules, and memory — that turns Anthropic's product suite into a unified operating system for a software organization.
 
 **One word, and it happens.**
 
-## The Company
-
-**Databayt** (داتابايت) builds products that automate real-world operations — schools, rentals, commerce, healthcare — using a shared component library and a unified configuration engine.
-
-- **Website**: [databayt.org](https://databayt.org)
-- **GitHub**: [github.com/databayt](https://github.com/databayt)
-- **License**: SSPL (open source, commercial use requires license)
-
 ## The Engine
 
-| Component | Count | Purpose |
-|-----------|-------|---------|
-| **Agents** | 28 | Specialized AI across 6 chains |
-| **Skills** | 17 | One-command workflows |
-| **MCP Servers** | 18 | External tool integrations |
-| **Rules** | 8 | Auto-activating guardrails |
-| **Hooks** | 5 | Guaranteed automation |
-| **Keywords** | 100+ | Single words → complete workflows |
+| Component | Purpose |
+|-----------|---------|
+| **Agents** | Specialized AI across business, product, and tech chains |
+| **Skills** | One-command workflows |
+| **MCP Servers** | External tool integrations |
+| **Rules** | Auto-activating guardrails on file patterns |
+| **Hooks** | Guaranteed automation on lifecycle events |
+| **Keywords** | Single words that map to complete workflows |
+
+Live counts come from `.claude/memory/kun-inventory.json` via `bash scripts/inventory.sh`.
 
 ## How It Works
 
 | You Say | What Happens |
-|---------|-------------|
-| `dev` | Kill port 3000 → start server → open Chrome |
+|---------|--------------|
+| `dev` | Kill port 3000 → start server → open browser |
 | `deploy` | Build → push to Vercel → retry until live |
-| `saas billing` | Schema → Actions → UI → Stripe integration |
-| `handover auth` | 5-pass QA across 2 environments |
-
-## The Team
-
-| Name | Role |
-|------|------|
-| **Abdout** | Builder |
-| **Ali** | QA Engineer + Sales |
-| **Samia** | R&D & Kun Caretaker |
-| **Sedon** | Executor |
-
-## The Products
-
-| Product | Type | Status |
-|---------|------|--------|
-| **[Hogwarts](https://ed.databayt.org)** | Education SaaS (FLAGSHIP) | Active daily |
-| **[Mkan](https://mkan.vercel.app)** | Rental marketplace | Phase 1 done |
-| **[Souq](https://souq-smoky.vercel.app)** | E-commerce | MVP, paused |
-| **[Shifa](https://shifa-lovat.vercel.app)** | Medical platform | Early, paused |
-| **[Codebase](https://base-coral.vercel.app)** | Pattern library | Active |
-
-## The Driver
-
-Establish real-world solutions. **$500/month burn**: Claude Code ($200) + services (~$300). **$5K capital** = 10 months runway.
-
-**Model**: Open source, sharing economy. Build in the open, push community to contribute, distribute revenue fairly.
-
-**First client**: Ahmed Baha, King Fahad Schools (interested, meeting April 4). Ali actively looking for schools, sponsors, investors, early adopters, contributors.
+| `saas billing` | Schema → actions → UI → payment integration |
+| `handover auth` | Multi-pass QA across environments |
 
 ## Three Phases
 
-### Phase 1: Developer Engine (Done)
+### Phase 1: Developer Engine (done)
+CLAUDE.md hierarchy, agent fleet, skills, MCP servers, rules, hooks, memory, keyword mappings — all operational.
 
-28 agents, 17 skills, 18 MCP servers, 8 rules, 5 hooks, 100+ keywords — all operational.
+### Phase 2: Team Engine (current)
+Role-based onboarding, shared settings via git, Agent Teams, CI/CD, business workflows.
 
-### Phase 2: Team Engine (Current)
-
-Team onboarding, Hogwarts pilot, Agent Teams, CI/CD, revenue workflows.
-
-### Phase 3: Company Engine (Future)
-
+### Phase 3: Company Engine (future)
 Agent SDK pipelines, cost optimization, multi-customer scaling, pattern distribution.
 
 ## Philosophy
 
-- **Configuration over infrastructure** — Don't build what Anthropic ships
-- **Architecture over vibe coding** — Humans design, AI generates within constraints
-- **Patterns as training data** — Every good component teaches the next generation
-- **Open source, shared economy** — Build in the open, sustain through value
+- **Configuration over infrastructure** — don't build what Anthropic ships
+- **Architecture over vibe coding** — humans design, AI generates within constraints
+- **Patterns as training data** — every good component teaches the next
+- **Open source** — build in the open, sustain through value
