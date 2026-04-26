@@ -1,6 +1,6 @@
 ---
 title: Issue
-description: Issue pipeline — from user report to auto-fix, including Report an Issue dialog, report agent, and scheduled automation
+description: Issue pipeline — from user report to auto-fix
 ---
 
 # Issue
@@ -9,44 +9,39 @@ The issue pipeline connects user-reported bugs to automated fixes. Users click "
 
 ## Report an Issue (User-Facing)
 
-Every hogwarts page has a "Report an Issue" link or icon. When clicked, a dialog opens with a textarea. On submit, a GitHub issue is created in `databayt/hogwarts` with the `report` label.
+Every product page has a "Report an Issue" link or icon. When clicked, a dialog opens with a textarea. On submit, a GitHub issue is created in the relevant repo with the `report` label.
 
 ### Where It Appears
 
-| Location | Variant | How |
-|----------|---------|-----|
-| SaaS marketing footer | `text` | Inline link next to "built by Databayt... GitHub" |
-| Application form wizard | `icon` | Bug icon in FormFooter next to Logo, Help, Save |
-| School marketing pages | `text` | Bottom of page |
-| School dashboard | `text` | Bottom of page |
-| SaaS dashboard | `text` | Bottom of page |
-| Auth pages | `text` | Absolute bottom-left |
-| Onboarding | `text` | Bottom of page |
-| Exam wizard | `text` | Absolute bottom-left |
+| Location | Variant |
+|----------|---------|
+| SaaS marketing footer | `text` |
+| Application form wizard | `icon` |
+| School marketing pages | `text` |
+| School dashboard | `text` |
+| SaaS dashboard | `text` |
+| Auth pages | `text` |
+| Onboarding | `text` |
 
 ### Component
 
-```
-src/components/report-issue.tsx
-```
+`src/components/report-issue.tsx`
 
 Two variants:
-- **`text`** (default) — underlined "Report an issue" link that opens the dialog
-- **`icon`** — Bug icon (`lucide-react`) that opens the same dialog
+- **`text`** (default) — underlined "Report an issue" link
+- **`icon`** — bug icon (`lucide-react`)
 
-The dialog contains only a textarea and submit button. Bilingual via `useDictionary()`.
+Bilingual via `useDictionary()`.
 
 ### Server Action
 
-```
-src/lib/actions/report-issue.ts
-```
+`src/lib/actions/report-issue.ts`
 
 On submit:
 1. Reads `GITHUB_PERSONAL_ACCESS_TOKEN` from env
-2. Reads auth session via `auth()` (for reporter identification)
+2. Reads auth session via `auth()`
 3. Creates GitHub issue with `report` label
-4. Posts acknowledgment comment: "Received. This report is queued for automated review and fix."
+4. Posts an acknowledgment comment
 
 ### Issue Body Format
 
@@ -55,8 +50,8 @@ On submit:
 
 ---
 
-**Page**: https://kingfahad.databayt.org/en/admissions
-**Time**: 2026-04-02T08:42:26Z
+**Page**: <product-url>
+**Time**: <ISO timestamp>
 ```
 
 Title is truncated to 80 characters from the description.
@@ -68,27 +63,22 @@ Translation keys in `en.json` / `ar.json` under `reportIssue`:
 | Key | English | Arabic |
 |-----|---------|--------|
 | `link` | Report an issue | الإبلاغ عن مشكلة |
-| `title` | Report an issue | الإبلاغ عن مشكلة |
 | `placeholder` | Describe the issue... | ...صف المشكلة |
 | `submit` | Submit | إرسال |
-| `submitting` | Submitting... | ...جاري الإرسال |
 | `success` | Submitted. Thank you! | !تم الإرسال. شكراً لك |
-| `error` | Something went wrong. Try again. | .حدث خطأ. حاول مرة أخرى |
 
 ## Report Agent (Auto-Fix)
 
-The report agent processes open `report`-labeled issues. Triggered manually by typing `report` in Claude Code, or by the session-start hook.
+The report agent processes open `report`-labeled issues. Triggered manually by `report` in Claude Code or by the session-start hook.
 
 ### Trigger
 
 ```bash
-# Manual
 report
-report hogwarts
-
-# Session-start hook (automatic)
-# Checks hogwarts + kun for open report issues on every session start
+report <product>
 ```
+
+Session-start hook checks repos for open report issues automatically.
 
 ### Pipeline
 
@@ -97,23 +87,21 @@ READ → LOCATE → CONTEXT → VALIDATE → FIX → BUILD → PUSH → CLOSE
 ```
 
 | Step | What It Does |
-|------|-------------|
+|------|--------------|
 | **READ** | `gh issue view` — extract description, page URL, time |
-| **LOCATE** | Map URL to route directory (`src/app/`) and component directory (`src/components/`) |
-| **CONTEXT** | Read `CLAUDE.md`, `README.md`, `ISSUE.md` in the component directory |
-| **VALIDATE** | Is it a real bug? Does it align with plans? Will the fix improve things? |
-| **FIX** | Edit minimum code needed, follow documented patterns |
+| **LOCATE** | Map URL to route + component directories |
+| **CONTEXT** | Read `CLAUDE.md`, `README.md`, `ISSUE.md` |
+| **VALIDATE** | Real bug? Aligned? Will the fix improve things? |
+| **FIX** | Edit minimum code, follow documented patterns |
 | **BUILD** | `pnpm build` — verify no regressions |
-| **PUSH** | `fix:` commit with `Closes #N`, push to main |
-| **CLOSE** | `gh issue close` with structured comment (root cause, fix, files, verification) |
+| **PUSH** | `fix:` commit with `Closes #N` |
+| **CLOSE** | Close with structured comment |
 
 ### Validation Gate
 
-Before writing any code, the agent answers three questions:
-
-1. **Is it a real bug?** — Can it reproduce from description + URL? If not → `cannot-reproduce` label
-2. **Is it aligned?** — Does it contradict `ISSUE.md` planned work? If feature request → `needs-human` label
-3. **Is the fix safe?** — Could it break shared code? When in doubt → `needs-human` label
+1. **Real bug?** — can it reproduce? If not → `cannot-reproduce`
+2. **Aligned?** — feature request? → `needs-human`
+3. **Safe fix?** — could it break shared code? → `needs-human`
 
 ### Escalation
 
@@ -123,57 +111,18 @@ Before writing any code, the agent answers three questions:
 | Server-side exception | Hand off to `sse` agent |
 | Performance issue | Hand off to `performance` agent |
 | Security concern | Hand off to `guardian` agent |
-| Needs architecture change | Comment + `needs-human` label |
-| Cannot reproduce | Comment + `cannot-reproduce` label |
+| Architecture change | `needs-human` label |
+| Cannot reproduce | `cannot-reproduce` label |
 
-### Agent Definition
+## Scheduled Trigger
 
-```
-.claude/agents/report.md
-```
-
-### Close Comment Format
-
-```markdown
-Fixed in abc1234.
-
-**What was wrong**: <root cause>
-**What was fixed**: <change summary>
-**Files changed**: <list>
-**Verified**: build passes, auto-deploying to production
-```
-
-## Scheduled Trigger (Paused)
-
-A remote trigger exists that runs the report agent every 2 hours in Anthropic's cloud. Currently **paused** — using manual `report` keyword until the feature stabilizes.
+A remote trigger can run the report agent on a schedule in Anthropic's cloud — typically every 2 hours.
 
 | Field | Value |
 |-------|-------|
-| **Name** | Report Auto-Fix (Every 2h) |
-| **ID** | `trig_01MFLRtUTfMMNTDGBBGQtZLq` |
 | **Schedule** | `0 */2 * * *` (every 2 hours) |
-| **Status** | Disabled |
-| **Repo** | `databayt/hogwarts` |
-| **Model** | claude-sonnet-4-6 |
+| **Model** | `claude-sonnet-4-6` |
 | **Manage** | https://claude.ai/code/scheduled |
-
-To re-enable when ready:
-```bash
-# In Claude Code
-schedule update trig_01MFLRtUTfMMNTDGBBGQtZLq --enabled true
-```
-
-## Session-Start Hook
-
-Every time Claude Code opens, the session-start hook checks for open report issues:
-
-```bash
-# In ~/.claude/settings.json (SessionStart hook)
-gh issue list --label report --state open --repo databayt/hogwarts
-gh issue list --label report --state open --repo databayt/kun
-```
-
-If found, the agent processes them immediately per the rule in `session-start.md`.
 
 ## Full Pipeline Flow
 
@@ -184,13 +133,9 @@ Dialog opens → user types description → Submit
     ↓
 Server action creates GitHub issue (label: report)
     ↓
-Acknowledgment comment posted: "Received. Queued for review."
+Acknowledgment comment posted
     ↓
-Next Claude Code session → hook detects → agent processes
-    OR
-User types "report" → agent processes manually
-    OR
-Scheduled trigger (when enabled) → agent processes every 2h
+Next Claude Code session OR /report keyword OR scheduled trigger
     ↓
 Agent: READ → LOCATE → CONTEXT → VALIDATE → FIX → BUILD → PUSH
     ↓
@@ -199,86 +144,33 @@ Issue closed with structured comment
 Vercel auto-deploys fix to production
 ```
 
-## Files
-
-### Hogwarts
-
-| File | Role |
-|------|------|
-| `src/components/report-issue.tsx` | UI component (text + icon variants) |
-| `src/lib/actions/report-issue.ts` | Server action (GitHub API + auth + ack comment) |
-| `src/components/form/footer.tsx` | FormFooter with `showReport` prop |
-| `src/components/internationalization/en.json` | English translations |
-| `src/components/internationalization/ar.json` | Arabic translations |
-
-### Kun (Engine)
-
-| File | Role |
-|------|------|
-| `.claude/agents/report.md` | Report agent definition (12-step pipeline) |
-| `.claude/rules/session-start.md` | Auto-process rule |
-| `content/docs/issue.mdx` | This documentation |
-
 ## Issue Creation (CLI)
 
-Issues can also be created from Claude Code or Slack, not just the dialog.
-
-### Usage
-
 ```bash
-# From Claude Code
-/issue "Login crashes on Safari mobile" --repo hogwarts
-
-# From keyword
-issue "Add dark mode to dashboard"
+/issue "Login crashes on Safari mobile" --repo <product>
 ```
 
 ### Repo Mapping
 
 | Repo | Scope |
 |------|-------|
-| `databayt/kun` | Engine: agents, skills, MCP, hooks, rules, memory |
-| `databayt/hogwarts` | Education: features, bugs, LMS, SIS, billing |
-| `databayt/souq` | E-commerce: vendors, cart, checkout |
-| `databayt/mkan` | Rentals: listings, booking, search |
-| `databayt/shifa` | Medical: appointments, patient records |
-| `databayt/codebase` | Shared: patterns, components, templates |
-| `databayt/shadcn` | UI: component library |
-| `databayt/swift-app` | Mobile: iOS app |
-| `databayt/marketing` | Marketing: landing pages |
+| `kun` | Engine: agents, skills, MCP, hooks, rules, memory |
+| `hogwarts` | Education: features, bugs, LMS, SIS, billing |
+| `souq` | E-commerce: vendors, cart, checkout |
+| `mkan` | Rentals: listings, booking, search |
+| `shifa` | Medical: appointments, patient records |
+| `codebase` | Shared: patterns, components, templates |
 
 ### Labels
-
-#### Priority
 
 | Label | When |
 |-------|------|
 | `P0-critical` | Production down, data loss, security |
-| `P1-high` | Blocks current sprint, customer-facing bug |
+| `P1-high` | Blocks current sprint |
 | `P2-medium` | Important but not blocking |
 | `P3-low` | Nice to have, cleanup |
-
-#### Type
-
-| Label | When |
-|-------|------|
-| `report` | User-reported via dialog — auto-processed by report agent |
+| `report` | User-reported via dialog |
 | `bug` | Something is broken |
 | `enhancement` | Improve existing feature |
-| `needs-human` | Agent can't fix, needs human judgment |
-| `cannot-reproduce` | Agent couldn't reproduce the reported issue |
-
-### Issue Body Template (CLI)
-
-```markdown
-## Context
-Why this matters — user impact, business context, or technical debt.
-
-## Action
-- [ ] Step 1
-- [ ] Step 2
-- [ ] Step 3
-
-## Verification
-How to confirm it's done — test commands, URLs to check, expected behavior.
-```
+| `needs-human` | Agent can't fix |
+| `cannot-reproduce` | Agent couldn't reproduce |
