@@ -1,0 +1,43 @@
+# CODEOWNERS — databayt/kun
+#
+# Default: founder reviews everything. Per-area entries narrow accountability
+# without blocking the default. Order matters: later rules win.
+
+* @abdout
+
+# Engine — captain & decision matrix
+/.claude/agents/captain.md           @abdout
+/.claude/captain/                     @abdout
+/.claude/memory/runway.json           @abdout
+/.claude/memory/captain-state.json    @abdout
+/.claude/memory/capacity.json         @abdout
+
+# Workflow & GitHub config — touches every repo
+/.github/                             @abdout
+/.husky/                              @abdout
+/commitlint.config.js                 @abdout
+/.lintstagedrc.json                   @abdout
+
+# Cost & routing
+/.claude/cost/                        @abdout
+
+# Skills that touch git/github directly
+/.claude/skills/issue/                @abdout
+/.claude/skills/branch/               @abdout
+/.claude/skills/commit/               @abdout
+/.claude/skills/pr/                   @abdout
+/.claude/skills/close/                @abdout
+/.claude/skills/report/               @abdout
+/.claude/skills/dispatch/             @abdout
+
+# Hooks scripts
+/scripts/hooks/                       @abdout
+/scripts/session-start.sh             @abdout
+/scripts/replicate-github-config.sh   @abdout
+/scripts/contribution-report.sh       @abdout
+
+# Docs site (published)
+/content/docs/                        @abdout
+
+# Org-wide rules
+/.claude/rules/                       @abdout

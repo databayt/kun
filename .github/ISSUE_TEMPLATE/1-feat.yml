@@ -1,0 +1,92 @@
+name: Feature
+description: Propose a new feature or enhancement
+title: "[Feat]: "
+labels: ["type/feat", "priority/p2", "status/triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for proposing a feature. This issue is the canonical record — every commit, PR, and review on this work links back here. Fill in enough that anyone (human or AI) can pick up the work cold.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What is the feature, and why does it matter? Include the user/system problem it solves.
+      placeholder: |
+        Currently the engine has no auto-issue creation hook, so prompts that should produce work-tracked items get lost.
+        We need a UserPromptSubmit hook that creates a GitHub issue and writes its number to .claude/state/active-issue.json.
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Markdown checklist. The PR is mergeable only when every box is checked.
+      value: |
+        - [ ] criterion 1 (specific, testable)
+        - [ ] criterion 2
+        - [ ] verification step (command + expected output, or URL + expected screenshot)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Which part of the engine does this touch?
+      options:
+        - agents
+        - skills
+        - rules
+        - hooks
+        - scripts
+        - memory
+        - mcp
+        - workflow
+        - docs
+        - other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: size
+    attributes:
+      label: Size estimate (story points)
+      description: Locked at status/ready. Drives Contribution Unit calculation in databayt/revenue.
+      options:
+        - "1 — trivial (single file, <30 min)"
+        - "2 — small (1-2 hours)"
+        - "3 — medium (half day)"
+        - "5 — large (full day)"
+        - "8 — heavy (multi-day, may need split)"
+        - "13 — epic (must split before status/ready)"
+    validations:
+      required: false
+
+  - type: textarea
+    id: design
+    attributes:
+      label: Design notes
+      description: Sketch of approach, file names, data flow, alternatives. Keep it tight — the PR is the canonical implementation.
+      placeholder: Files to create / modify; key contracts; non-obvious tradeoffs.
+
+  - type: textarea
+    id: linked
+    attributes:
+      label: Related
+      description: Other issues, PRs, or external docs this depends on or relates to.
+      placeholder: |
+        Refs #
+        Depends on #
+
+  - type: checkboxes
+    id: ready
+    attributes:
+      label: Submission checklist
+      options:
+        - label: I read CLAUDE.md and CONTRIBUTING.md
+          required: true
+        - label: I searched existing issues — this is not a duplicate
+          required: true

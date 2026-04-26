@@ -1,0 +1,63 @@
+# actions/labeler@v5 config — auto-applies area:* labels by file path on PR open/sync.
+# Format: <label>: [array of glob rules]
+# Each rule is `changed-files: [{ any-glob-to-any-file: [...]}]`.
+
+"area: agents":
+  - changed-files:
+      - any-glob-to-any-file:
+          - .claude/agents/**
+
+"area: skills":
+  - changed-files:
+      - any-glob-to-any-file:
+          - .claude/skills/**
+
+"area: rules":
+  - changed-files:
+      - any-glob-to-any-file:
+          - .claude/rules/**
+
+"area: hooks":
+  - changed-files:
+      - any-glob-to-any-file:
+          - scripts/hooks/**
+          - .claude/settings.json
+          - .claude/settings-windows.json
+
+"area: scripts":
+  - changed-files:
+      - any-glob-to-any-file:
+          - scripts/**
+          - "!scripts/hooks/**"
+
+"area: memory":
+  - changed-files:
+      - any-glob-to-any-file:
+          - .claude/memory/**
+
+"area: mcp":
+  - changed-files:
+      - any-glob-to-any-file:
+          - .claude/mcp*.json
+
+"area: workflow":
+  - changed-files:
+      - any-glob-to-any-file:
+          - .github/**
+          - .husky/**
+          - commitlint.config.js
+          - .lintstagedrc.json
+
+"area: docs":
+  - changed-files:
+      - any-glob-to-any-file:
+          - content/docs/**
+          - docs/**
+          - "**/*.md"
+          - "**/*.mdx"
+
+"area: deps":
+  - changed-files:
+      - any-glob-to-any-file:
+          - package.json
+          - pnpm-lock.yaml

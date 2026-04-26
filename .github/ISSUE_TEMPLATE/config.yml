@@ -1,1 +1,11 @@
-blank_issues_enabled: true
+blank_issues_enabled: false
+contact_links:
+  - name: Discussion / question
+    url: https://github.com/databayt/kun/discussions
+    about: Open-ended questions, ideas, RFCs go in Discussions — not Issues.
+  - name: Slack #dev
+    url: https://hogwarts-wve9301.slack.com
+    about: Real-time chat for the databayt team. Issues remain the canonical record.
+  - name: Documentation
+    url: https://kun.databayt.org/docs
+    about: Read the docs first — most "how do I…" answers live there.

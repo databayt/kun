@@ -1,0 +1,75 @@
+name: Report (in-product)
+description: Issue auto-filed by the in-product Report dialog. End users — please use the dialog instead.
+title: "[Report]: "
+labels: ["type/report", "priority/p1", "status/triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        > This template exists to receive automated reports from the in-product **Report an Issue** dialog. The `/report` skill processes issues with the `type/report` label and auto-fixes the smaller ones.
+        >
+        > End users: please use the in-product dialog. Maintainers: use this form only when you're manually replicating a report.
+
+  - type: input
+    id: page
+    attributes:
+      label: Page URL
+      placeholder: https://kingfahad.databayt.org/dashboard/students
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: User's description of the problem.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What was expected
+    validations:
+      required: false
+
+  - type: input
+    id: time
+    attributes:
+      label: Time observed (ISO)
+      placeholder: 2026-04-26T14:23:00Z
+    validations:
+      required: false
+
+  - type: input
+    id: browser
+    attributes:
+      label: Browser
+      placeholder: "Chrome 130 / Safari 18 / Firefox 131"
+
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: "macOS 14.5 / Windows 11 / iOS 18"
+
+  - type: dropdown
+    id: role
+    attributes:
+      label: Role
+      options:
+        - student
+        - teacher
+        - parent
+        - admin
+        - school-owner
+        - public
+        - other
+    validations:
+      required: false
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots / video
+      description: Drag and drop. Helps verify the bug.
