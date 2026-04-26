@@ -22,7 +22,7 @@ Three forces drive this rev:
 2. **The CEO-brain is documented, not operational.** Captain has no persistent state, no live observability, no scheduled wake-up, no escalation gate. Apple Notes channels referenced everywhere — no setup script creates them. The `bridge.md` Cowork ↔ Code handoff file does not exist. The Agile ceremonies in the 25 KB `docs/AGILE.md` (`/sprint-plan`, `/standup`, `/sprint-review`, `/refine`) have no command files.
 3. **Anthropic shipped a major 2026 capability surface that kun has not adopted.** Routines (cloud cron + API + GitHub triggers), Agent Teams, 28+ hook events (only 4 wired), the new SKILL.md format with rich frontmatter, Plugins with marketplaces, auto-memory at `~/.claude/projects/<project>/memory/`, path-scoped rules, the `Skill(name)` permission rule, the renamed Agent SDK with full feature parity, Opus 4.7.
 
-The intended outcome of v4 is a kun that knows what it actually contains, wakes itself weekly to allocate work across 4 humans and 14 repos, escalates only the decisions that genuinely require Abdout, stays inside the $200/mo Anthropic envelope on autopilot, and is installable as a single plugin so Ali / Samia / Sedon get the right subset by role.
+The intended outcome of v4 is a kun that knows what it actually contains, wakes itself weekly to allocate work across the team and 14 repos, escalates only the decisions that genuinely require the operator, stays inside the $200/mo Anthropic envelope on autopilot, and is installable as a single plugin so business / content / ops roles get the right subset by role.
 
 ---
 
@@ -83,7 +83,7 @@ Cross-platform installer + role-based MCP variants exist as `scripts/install.sh`
 
 ### Epic 8: Hogwarts Pilot 🔄 In Progress
 
-Active. Issue `databayt/hogwarts#115` is the live tracker (admission QA, ~100 checkboxes). Ahmed Baha meeting was 2026-04-04. Today is 2026-04-25; outcome ingestion gap closed by E18.
+Active. Issue `databayt/hogwarts#115` is the live tracker (admission QA, ~100 checkboxes). The pilot meeting outcome ingestion gap is closed by E18.
 
 ### Epic 9: Agent Teams & CI/CD → see E24 (Activation) + E27 (AGENTS.md) + E11 (SDK)
 
@@ -121,7 +121,7 @@ Cleans the docs/reality gap so subsequent phases have stable ground.
 
 #### Story 13.4: Promote captain + 9-agent leadership tier
 - [ ] Add captain, revenue, growth, support, product, analyst, tech-lead, ops, guardian as retro-stories under E2
-- [ ] Each entry: file path, line count, declared role, primary humans, model selection
+- [ ] Each entry: file path, line count, declared role, primary roles, model selection
 **Points**: 2 | **Priority**: P0
 
 #### Story 13.5: Settle the agent-count canonical
@@ -219,7 +219,7 @@ Cleans the docs/reality gap so subsequent phases have stable ground.
 
 #### Story 16.1: Captain auto-memory journal
 - [ ] Captain writes to `~/.claude/projects/-Users-abdout-kun/memory/captain_journal.md` every session
-- [ ] Logs decisions made, deferrals to Abdout, runway delta, pilot stage, what changed
+- [ ] Logs decisions made, deferrals to the operator, runway delta, pilot stage, what changed
 - [ ] First 200 lines load every session via auto-memory
 **Points**: 2 | **Priority**: P0
 
@@ -284,7 +284,7 @@ Cleans the docs/reality gap so subsequent phases have stable ground.
 
 #### Story 17.5: Routine — pilot health
 - [ ] Anthropic Routine, GitHub trigger on `pull_request.opened` in databayt/hogwarts AND scheduled hourly
-- [ ] Runs `qa` on `kingfahad.databayt.org/admission`
+- [ ] Runs `qa` on `the pilot product admission flow`
 - [ ] Posts results to issue #115
 **Points**: 3 | **Priority**: P0
 
@@ -292,7 +292,7 @@ Cleans the docs/reality gap so subsequent phases have stable ground.
 
 ### Epic 18: Pilot & Revenue Tracker
 
-**Goal**: Hogwarts King Fahad pilot has a structured tracker. Revenue and pipeline don't live in Apple Notes alone.
+**Goal**: the pilot product has a structured tracker. Revenue and pipeline don't live in Apple Notes alone.
 
 #### Story 18.1: Pilot stage machine
 - [ ] `.claude/memory/pilot-king-fahad.json` with stages: `interest → meeting → proposal → contract → onboarding → live → renewal`
@@ -346,7 +346,7 @@ Cleans the docs/reality gap so subsequent phases have stable ground.
 **Points**: 3 | **Priority**: P0
 
 #### Story 19.5: Accessibility-first profile
-- [ ] `kun-accessible` plugin (E25) tuned for Samia/Ali
+- [ ] `kun-accessible` plugin (E25) tuned for content + business roles
 - [ ] Verbose status output, semantic markers, mouse-free, ARIA-friendly
 **Points**: 3 | **Priority**: P1
 
@@ -478,7 +478,7 @@ Cleans the docs/reality gap so subsequent phases have stable ground.
 
 ### Epic 23: Routines Migration
 
-**Goal**: Move scheduled work from local `scheduled_tasks.lock` to Anthropic-managed Routines. Run when Abdout's MacBook is closed.
+**Goal**: Move scheduled work from local `scheduled_tasks.lock` to Anthropic-managed Routines. Run when the operator's MacBook is closed.
 
 #### Story 23.1: Routine 1 — Morning org pulse
 - [x] Done in E17.2
@@ -622,7 +622,7 @@ Cleans the docs/reality gap so subsequent phases have stable ground.
 **Goal**: Adopt Vercel's canonical AGENTS.md format per repo.
 
 #### Story 27.1: kun's AGENTS.md
-- [ ] Author `/Users/abdout/kun/AGENTS.md` per Vercel's 20-section structure
+- [ ] Author `<repo-root>/AGENTS.md` per Vercel's 20-section structure
 - [ ] CLAUDE.md keeps v3 content but adds `@AGENTS.md` import at top
 **Points**: 3 | **Priority**: P0
 

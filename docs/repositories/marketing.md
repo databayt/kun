@@ -67,5 +67,5 @@ Actively maintained for visual polish and SEO.
 ## What Kun Does for Marketing
 
 - Coordinates landing page content with product updates
-- Samia can contribute Arabic copywriting
-- Ali can use for business development outreach materials
+- Content role can contribute Arabic copywriting
+- Business role can use for outreach materials
