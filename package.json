@@ -9,7 +9,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "echo 'no test runner configured yet' && exit 0",
     "postinstall": "fumadocs-mdx",
+    "prepare": "husky",
     "setup:phase1": "bash scripts/phase1/setup.sh",
     "setup:phase2": "sudo bash scripts/phase2/setup.sh",
     "setup:phase3": "bash scripts/phase3/setup.sh",
@@ -51,10 +56,15 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@commitlint/cli": "^19.6.0",
+    "@commitlint/config-conventional": "^19.6.0",
     "@tailwindcss/postcss": "^4.2.2",
     "@types/node": "^25.5.2",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.10",
+    "prettier": "^3.4.2",
     "rehype-pretty-code": "^0.14.3",
     "tailwindcss": "^4.2.2",
     "typescript": "^6.0.2"
