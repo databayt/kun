@@ -20,7 +20,7 @@
 
 ## What It Does
 
-Mkan (مكان — Arabic for "place") is a rental marketplace connecting tenants with property managers. Airbnb-inspired design, Arabic-first, built for the MENA market.
+Mkan (مكان — Arabic for "place") is a rental marketplace connecting tenants with property managers. Airbnb-inspired design, Arabic-first, .
 
 ### Features
 
