@@ -5,35 +5,35 @@ description: Persistent files that carry context across sessions
 
 # Memory
 
-6 memory files that persist across conversations. They store component registries, team profiles, and project state — so Claude never forgets what was built, who's on the team, or what patterns exist.
+Memory files persist across conversations. They store component registries, project state, and references — so Claude remembers what was built and what patterns exist.
 
 ## Memory Files
 
 | File | Contents |
 |------|----------|
-| **preferences.json** | Port 3000, single .env, pnpm-only |
-| **repositories.json** | 14 databayt repos with paths + stacks |
-| **atom.json** | 59 atoms across 6 categories |
-| **template.json** | 31 templates across 5 categories |
-| **block.json** | 4 blocks (DataTable, Auth, Invoice, Report) |
-| **report.json** | T&C electrical report templates |
+| **preferences.json** | Port, environment policy, package manager |
+| **repositories.json** | Organization repos with paths + stacks |
+| **atom.json** | Atom registry (composed primitives) |
+| **template.json** | Template registry (full-page layouts) |
+| **block.json** | Block registry (UI + business logic) |
+| **report.json** | Report templates |
 
-## Project-Level Memory
+## Project-level Memory
 
-Stored at `~/.claude/projects/[project]/memory/`:
+Stored at `~/.claude/projects/<project>/memory/`:
 
-| File | Contents |
+| Slot | Contents |
 |------|----------|
-| Company profile | Databayt team, financials, products |
-| Active projects | Hogwarts pilot status, Ahmed Baha |
+| Project profile | Active project status, stack, references |
+| Active work | In-flight tasks, decisions, deadlines |
 | User preferences | Feedback, corrections, working style |
-| Team profiles | 4 members with equipment, access, strengths |
+| Capacity | Role assignments, availability |
 
 ## How Memory Works
 
-Memory files are JSON or markdown files in `~/.claude/memory/`. Claude reads them at the start of each conversation and updates them when new information is learned.
+Memory files are JSON or markdown in `~/.claude/memory/`. Claude reads them at the start of each conversation and updates them when new information is learned.
 
-### Auto-Memory
+### Auto-memory
 
 Claude automatically saves memories when it learns:
 - **User info** — role, preferences, expertise level
@@ -43,18 +43,18 @@ Claude automatically saves memories when it learns:
 
 ### Memory Index
 
-`MEMORY.md` is the index file — always loaded into context. Each entry is one line pointing to a memory file:
+`MEMORY.md` is the index file — always loaded into context. Each entry points to a memory file with a one-line description:
 
 ```markdown
 # Memory Index
 
-- [Company Profile](company_databayt.md) — Team of 4
-- [Team Profiles](team_profiles.md) — All 4 members
+- [Project Profile](project_profile.md) — Active products and status
+- [Capacity](capacity.md) — Role assignments
 ```
 
 ## Component Registry
 
-The atom, template, and block memory files serve as a registry of all components built across projects:
+The atom, template, and block memory files act as a registry across projects:
 
 ```json
 {
@@ -70,20 +70,20 @@ The atom, template, and block memory files serve as a registry of all components
 
 When you say `atom tabs`, Claude checks the registry first before creating something new.
 
-## Team Memory
+## Capacity Memory
 
-`team.json` stores profiles of all 4 team members:
+`capacity.json` stores role assignments so agents can tailor allocations:
 
 ```json
 {
-  "team": [
+  "roles": [
     {
-      "name": "Abdout",
-      "role": "founder-tech-lead",
-      "installRole": "engineer"
+      "id": "engineer-1",
+      "role": "engineer",
+      "focus": ["full-stack", "deployment"]
     }
   ]
 }
 ```
 
-This allows agents to tailor their output to each team member's role.
+Captain reads this on every weekly cycle to allocate work.
