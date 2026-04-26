@@ -1,230 +1,149 @@
 ---
 title: Architecture
-description: 5-layer Anthropic-native engine architecture for Databayt
+description: 5-layer engine architecture + ADRs
 ---
 
-# Architecture
+{/* Generated from docs/ARCHITECTURE.md by scripts/generate-public-docs.sh. Edit the source, not this file. */}
 
-Kun is a **configuration engine** — not a server. It sits as the configuration layer on top of Anthropic's product suite, running both technical and business sides of **Databayt**.
 
-<EngineCounts compact />
+Kun is a **configuration engine**, not a server. It sits as a configuration layer on top of Anthropic's product suite.
 
-> Counts auto-update from `.claude/memory/kun-inventory.json` via `bash scripts/inventory.sh`.
-
-## 5-Layer Architecture
+## Five Layers
 
 ```
 Layer 5: Company Operations
   Cowork | Claude Apps | Enterprise Connectors
-  Ali (business) | Samia (content) | Team coordination
 
 Layer 4: Coordination & Automation
   Agent Teams | Scheduled Tasks | CI/CD | Channels
 
-Layer 3: KUN CONFIGURATION ENGINE (core value)
-  CLAUDE.md | 40 Agents | 25 Skills | 18 MCP Servers
-  8 Rules  | 5 Hooks   | 6 Memory  | 100+ Keywords
+Layer 3: Kun Configuration Engine (the value)
+  CLAUDE.md | Agents | Skills | MCP | Rules | Hooks | Memory | Keywords
 
 Layer 2: Developer Surfaces (Anthropic-provided)
   CLI | VS Code | JetBrains | Desktop | Web | iOS
 
 Layer 1: Foundation (Anthropic-provided)
-  Opus 4.6 | Sonnet 4.6 | Haiku 4.5 | 1M Context | API
+  Opus | Sonnet | Haiku | 1M Context | API
 ```
 
-## Team Roles
-
-| Member | Role |
-|--------|------|
-| **Abdout** | Builder |
-| **Ali** | QA Engineer + Sales |
-| **Samia** | R&D & Kun Caretaker |
-| **Sedon** | Executor |
-
-## Layer 3: The Engine (Kun's Core)
+## Layer 3: The Engine
 
 ### CLAUDE.md Hierarchy
 
 ```
-Priority (High → Low):
-1. Project-level  ~/project/CLAUDE.md         — Project context
-2. Repo-level     ~/project/.claude/CLAUDE.md  — Keywords, workflows
-3. User-level     ~/.claude/CLAUDE.md          — Stack, preferences
-4. Pattern library /Users/abdout/codebase/     — Core patterns
+Priority (high → low):
+1. Project-level   <project>/CLAUDE.md         — Project context
+2. Repo-level      <project>/.claude/CLAUDE.md — Keywords, workflows
+3. User-level      ~/.claude/CLAUDE.md         — Stack, preferences
+4. Pattern library codebase repo               — Core patterns
 ```
 
-### Agent Fleet (40 agents, 4 tiers)
+### Agent Fleet (4 tiers)
 
 ```
-captain (Tier 0 — company brain)
+captain (Tier 0 — strategic brain)
 ├── Business (Tier 1): revenue, growth, support
-├── Product (Tier 2): product, analyst
-└── Tech Leadership (Tier 3): tech-lead, ops, guardian
-        └── orchestration → 31 specialist agents
+├── Product  (Tier 2): product, analyst
+└── Tech     (Tier 3): tech-lead, ops, guardian
+              └── orchestration → specialist agents
 ```
 
 | Tier | Agents | Domain |
 |------|--------|--------|
-| **Tier 0** (1) | captain | CEO brain, weekly allocation, revenue strategy |
-| **Tier 1** (3) | revenue, growth, support | Business operations |
-| **Tier 2** (2) | product, analyst | Product roadmap, market intelligence |
-| **Tier 3** (3) | tech-lead, ops, guardian | Architecture, infra, security |
-| **Stack** (7) | nextjs, react, typescript, tailwind, prisma, shadcn, authjs | Technology expertise |
-| **Design** (4) | orchestration, architecture, pattern, structure | System design |
-| **UI** (4) | shadcn, atom, template, block | Component hierarchy |
-| **DevOps** (3) | build, deploy, test | Development lifecycle |
-| **VCS** (2) | git, github | Version control |
-| **Specialized** (8) | middleware, i18n, semantic, sse, optimize, performance, comment, icon | Domain expertise |
-| **Reference** (4) | hogwarts, souq, mkan, shifa | Product-specific patterns |
+| **Tier 0** | captain | Weekly allocation, priorities |
+| **Tier 1** | revenue, growth, support | Business operations |
+| **Tier 2** | product, analyst | Roadmap, market intelligence |
+| **Tier 3** | tech-lead, ops, guardian | Architecture, infra, security |
+| **Stack** | nextjs, react, typescript, tailwind, prisma, shadcn, authjs | Technology |
+| **Design** | orchestration, architecture, pattern, structure | System design |
+| **UI** | shadcn, atom, template, block | Component hierarchy |
+| **DevOps** | build, deploy, test | Lifecycle |
+| **VCS** | git, github | Version control |
+| **Specialized** | middleware, i18n, semantic, sse, optimize, performance, comment | Domain |
+| **Reference** | hogwarts, souq, mkan, shifa | Product-specific |
 
-### MCP Ecosystem (18 servers)
+### MCP Ecosystem
 
 | Category | Servers |
 |----------|---------|
 | UI & Design | shadcn, figma, tailwind, a11y, storybook |
-| Testing | browser (headless), browser-headed |
+| Testing | browser, browser-headed |
 | DevOps | github, vercel, sentry, gcloud |
 | Data & Auth | neon, postgres, stripe, keychain |
 | Knowledge | ref, context7 |
-| Project Mgmt | linear |
+| Project | linear |
 
-### Rules Engine (8 rules)
-
-Auto-activate on file patterns: auth, i18n, prisma, tailwind, testing, deployment, multi-repo, org-refs.
-
-### Hook Automation (5 hooks)
+### Hook Automation
 
 | Event | Action |
 |-------|--------|
 | SessionStart | Print model + timestamp |
-| PreToolUse (pnpm dev) | Kill port 3000 |
-| PostToolUse (pnpm dev) | Open Chrome |
+| PreToolUse (`pnpm dev`) | Kill port 3000 |
+| PostToolUse (`pnpm dev`) | Open browser |
 | PostToolUse (Write/Edit) | Run Prettier |
 | Stop | Log session end |
 
 ## Layer 4: Coordination
 
-### Agent Teams (Experimental)
+### Agent Teams (experimental)
 
-Lead agent coordinates teammate agents, each in isolated git worktrees. No merge conflicts. Consolidated PR.
-
-### Cross-Device Flow
-
-```
-Phone (iOS) ──Dispatch──▶ Desktop App ──/teleport──▶ Terminal (CLI)
-     ◀──────── Remote Control ──────────────────────────────┘
-```
+A lead agent coordinates teammate agents in isolated git worktrees. Consolidated PR.
 
 ### Scheduled Tasks
 
 | Type | Runs On | Use Case |
 |------|---------|----------|
-| Cloud | Anthropic infra (computer off) | Health checks, dependency updates |
+| Cloud | Anthropic infra | Health checks, dependency updates |
 | Desktop | Local (app open) | Recurring builds |
-| /loop | Active session | Poll deploy status |
+| `/loop` | Active session | Poll deploy status |
 
-### 3-Channel Communication
+### Three-Channel Communication
 
-| Channel | Medium | Direction | Purpose |
-|---------|--------|-----------|---------|
-| **Dispatch** | Apple Notes → Dispatch (Captain, Cowork, Inbox) | Async, bidirectional | Updates, decisions, handoffs |
-| **GitHub Issues** | databayt/*/issues | Structured work items | Tasks with labels, milestones, assignees |
-| **Claude Native** | Code / Cowork / Voice | Real-time | Building, planning, quick decisions |
+| Channel | Medium | Purpose |
+|---------|--------|---------|
+| **Dispatch** | Apple Notes | Async updates, decisions |
+| **GitHub Issues** | Repo issues | Structured work items |
+| **Claude Native** | Code / Cowork / Voice | Real-time decisions |
 
-### Cowork ↔ Code Bridge
+## Layer 5: Operations
 
-```
-Cowork (think): plan → create issues → write to Dispatch/Cowork
-Code (do):      read Dispatch/Cowork → pick up issues → execute → report back
-```
+### Role Configurations
 
-Shared state: `~/.claude/` (agents, memory, settings, rules). Same brain, two modes.
-
-## Layer 5: Business Operations
-
-### Team Workflows
-
-| Member | Role | Primary Workflows |
-|--------|------|-------------------|
-| **Abdout** | Builder | dev → build → push → deploy |
-| **Ali** | QA + Sales | Testing, issue reports, outreach (sales@databayt.org) |
-| **Samia** | R&D | Claude/Anthropic research, sharing economy, Kun care |
-| **Sedon** | Executor | Clear task maps, Saudi operations |
-
-### Hogwarts Pilot (King Fahad Schools)
-
-```
-Developer: handover admission → 5-pass QA → deploy to ed.databayt.org
-Business:  Cowork → onboarding plan → Arabic welcome email → training agenda
-Content:   Cowork → Arabic user guide → screenshots → voiceover
-```
-
-## Repository Map
-
-```
-databayt/ (14 repos)
-├── Products
-│   ├── hogwarts     — Education SaaS (FLAGSHIP, daily commits)
-│   ├── mkan         — Rental marketplace (Phase 1 done)
-│   ├── souq         — E-commerce (MVP, paused)
-│   └── shifa        — Medical platform (early, paused)
-├── Libraries
-│   ├── codebase     — Pattern library (54 ui + 62 atoms + 31 templates)
-│   ├── shadcn       — UI components (shadcn/ui fork)
-│   └── radix        — UI primitives (Radix fork)
-├── Engine
-│   └── kun          — Configuration engine (this repo)
-├── Mobile & Marketing
-│   ├── swift-app    — iOS app (Swift 6/SwiftUI)
-│   └── marketing    — Landing pages
-└── Other
-    ├── spma         — Internal tool
-    ├── apple        — Design R&D
-    ├── distributed-computer — Rust/blockchain concept
-    └── .github      — Org profile
-```
+| Role | Focus |
+|------|-------|
+| **engineer** | Full stack — all surfaces |
+| **business** | Outreach, proposals, content |
+| **content** | Translation, docs, research |
+| **ops** | Deploys, monitoring, cost tracking |
 
 ## Security
 
 | Layer | Mechanism |
 |-------|-----------|
-| Anthropic | SSO/SCIM, audit logging, SOC 2, no training on data |
-| Kun config | 4 deny rules (rm -rf, DROP TABLE, etc.), 38 explicit allow rules |
-| Hooks | PreToolUse guards validate before execution |
+| Anthropic | SSO/SCIM, audit logging, SOC 2 |
+| Kun config | Deny rules block destructive operations |
+| Hooks | PreToolUse guards |
 | Secrets | macOS Keychain MCP, never in git |
-| Accessibility | Screen reader compatibility, VoiceOver testing |
 
-## Architecture Decision Records
+## Architecture Decisions
 
-### ADR-001: Configuration Over Infrastructure
+### Configuration over infrastructure
+Use Anthropic's products as-is. Don't maintain custom infrastructure when configuration suffices.
 
-**Decision**: Use Anthropic's products as-is, configure don't build.
-**Rationale**: 4-person team can't maintain custom infrastructure alongside 5 products.
+### Opus default
+Use Opus for all agents. Haiku for read-only exploration. Sonnet for fast iteration.
 
-### ADR-002: Opus 4.6 Default
+### Single subscription model
+One Max plan shared via Desktop/Web. Add Pro seats when team needs individual accounts.
 
-**Decision**: Use Opus for all agents, Haiku only for explore subagents.
-**Rationale**: Quality over speed for a small team where every output matters.
+### Shared component library
+Every product pulls from a single `codebase` repo so primitives, atoms, and templates aren't rebuilt.
 
-### ADR-003: Single Subscription Model
+## Principles
 
-**Decision**: One Max 20x ($200/month) shared via Desktop/Web.
-**Rationale**: $500/month burn with $5K capital = 10 months runway. Add Pro seats ($20) when revenue grows.
-
-### ADR-004: Hogwarts-First Development
-
-**Decision**: All engine features validated through Hogwarts pilot first.
-**Rationale**: King Fahad Schools is the revenue pipeline. Ship what pays.
-
-### ADR-005: Shared Component Library
-
-**Decision**: All products pull from databayt/codebase.
-**Rationale**: 54 UI + 62 atoms + 31 templates = don't rebuild across 5 products.
-
-## Architecture Principles
-
-1. **Configuration over infrastructure** — Don't build what Anthropic ships
-2. **Architecture-first** — Humans design, AI generates within constraints
-3. **Guardrails as training data** — CLAUDE.md, agents, rules shape output
-4. **Full spectrum** — Technical AND business operations
-5. **Anthropic-native** — Use products as designed
+1. **Configuration over infrastructure** — don't rebuild what Anthropic ships
+2. **Architecture-first** — humans design, AI generates within constraints
+3. **Guardrails as training data** — CLAUDE.md, agents, and rules shape output
+4. **Full spectrum** — technical AND business operations
+5. **Anthropic-native** — use products as designed

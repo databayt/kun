@@ -1,129 +1,98 @@
 ---
 title: Anthropic Products
-description: Complete product catalog mapped to Databayt's team and operations
+description: Product catalog + pricing + cost optimization
 ---
 
-# Anthropic Product Catalog
+{/* Generated from docs/PRODUCTS.md by scripts/generate-public-docs.sh. Edit the source, not this file. */}
 
-Every Anthropic product mapped to its role in Databayt's operations — who uses what and why.
+
+Every Anthropic product mapped to its role in the engine.
 
 ## Claude Code
 
-The primary development interface. Kun's configuration loads automatically on all surfaces.
+The primary development interface.
 
 ### Surfaces
 
 | Surface | Description |
 |---------|-------------|
-| **Terminal CLI** | Primary development interface |
-| **Desktop App** | Mac/Windows standalone app |
-| **claude.ai/code** | Browser-based access |
+| **Terminal CLI** | Primary interface |
+| **Desktop App** | Mac/Windows standalone |
+| **claude.ai/code** | Browser-based |
 | **iOS App** | Mobile access |
 | **VS Code Extension** | IDE integration |
 
-### Key Capabilities Kun Uses
+### Capabilities Used
 
-| Feature | Kun Usage |
-|---------|-----------|
-| **Hooks** (21 lifecycle events) | Auto-format, port management, session logging |
-| **Skills** | 17 skills for common workflows |
-| **Subagents** | 28 specialized agents |
-| **MCP** (3,000+ integrations) | 18 servers configured |
-| **Agent Teams** (Experimental) | Parallel feature development |
+| Feature | Usage |
+|---------|-------|
+| **Hooks** | Auto-format, port management, session logging |
+| **Skills** | One-command workflows |
+| **Subagents** | Specialized agents per domain |
+| **MCP** | External tool integrations |
+| **Agent Teams** (experimental) | Parallel feature development |
 | **Git Worktrees** | Isolated branches per agent |
 | **Remote Control / Dispatch** | Cross-device handoff |
-| **Scheduled Tasks** | Cloud, Desktop, or /loop |
+| **Scheduled Tasks** | Cloud, Desktop, or `/loop` |
 
 ## Claude Desktop App
 
-Standalone macOS/Windows application.
-
-| Feature | Databayt Usage |
-|---------|----------------|
+| Feature | Usage |
+|---------|-------|
 | **Chat** | General queries, planning |
 | **Cowork mode** | Business and content workflows |
 | **Code tab** | Visual diff review |
 | **Multiple sessions** | Parallel workstreams |
-| **Scheduled tasks** | Daily builds |
-| **Voice mode** | Accessibility and hands-free input |
+| **Voice mode** | Accessibility, hands-free |
 
-### Cowork Use Cases (Research Preview)
+### Cowork Use Cases
 
-| Role | Use Cases |
-|------|-----------|
-| **Business** | Client outreach, proposals, market research, financial analysis |
-| **R&D** | Arabic content, documentation, research, UX writing |
-| **Tech** | Project planning, architecture documents, specifications |
+| Posture | Use Cases |
+|---------|-----------|
+| **Business** | Outreach, proposals, market research |
+| **Content** | Translation, documentation, research |
+| **Engineering** | Project planning, architecture, specs |
 
 ## Agent SDK
 
-Build production AI agents. Python and TypeScript.
-
-### Databayt Roadmap
+Build production AI agents (Python and TypeScript).
 
 | Agent | Purpose | Phase |
 |-------|---------|-------|
-| PR Review | Auto-review every pull request | 2 |
+| PR Review | Auto-review every PR | 2 |
 | Deploy Verify | Post-deploy health check | 2 |
-| School Onboarding | Automated tenant setup | 3 |
-| Report Generator | Client reports | 3 |
+| Onboarding | Automated tenant setup | 3 |
+| Report Generator | Periodic client reports | 3 |
 
 ## Models
 
-| Model | Use Case | Cost (API) |
-|-------|----------|------------|
-| **Opus 4.6** | Architecture, complex features, review | $5 / $25 per MTok |
-| **Sonnet 4.6** | Fast iteration, routine changes | $3 / $15 per MTok |
-| **Haiku 4.5** | Search, lookups, exploration | $1 / $5 per MTok |
+| Model | Use Case |
+|-------|----------|
+| **Opus** | Architecture, complex features, review |
+| **Sonnet** | Fast iteration, routine changes |
+| **Haiku** | Search, lookups, exploration |
 
-Kun defaults to **Opus 4.6** for all agents. Haiku for explore subagents only.
+Kun defaults to **Opus**. Haiku for explore subagents only.
 
-## Databayt's Current Plan
+## Plans Reference
 
-| Item | Plan |
-|------|------|
-| **Primary** | Max 20x |
-| **Shared access** | Desktop/Web for team |
-
-### Growth Path
-
-| Stage | Plan | When |
-|-------|------|------|
-| **Now** | Max 20x (1 seat) | Current |
-| **Team grows** | + Pro seats | When team needs own accounts |
-| **Revenue stable** | Team Premium | When revenue target achieved |
-| **Scale** | Enterprise | Multiple products, clients |
+| Plan | Code | Cowork | Models |
+|------|------|--------|--------|
+| **Free** | Limited | — | Sonnet |
+| **Pro** | Yes | — | All |
+| **Max 5x** | Yes | Yes | All |
+| **Max 20x** | Yes | Yes | All + priority Opus |
+| **Team Premium** | Yes | — | All |
+| **Enterprise** | Yes | Yes | SSO/SCIM/Audit |
 
 ### Cost Optimization
 
-| Technique | Savings | When |
-|-----------|---------|------|
-| Prompt Caching | 90% | Repeated CLAUDE.md context |
-| Batch API | 50% | Async CI/CD reviews |
-| Caching + Batch | 95% | High-volume operations |
-| Haiku for exploration | 80% vs Opus | Search, lookups |
-
-## All Plans Reference
-
-| Plan | Price | Code | Cowork | Models |
-|------|-------|------|--------|--------|
-| **Free** | $0 | Limited | - | Sonnet |
-| **Pro** | $20/mo | Yes | - | All |
-| **Max 5x** | $100/mo | Yes | Yes | All |
-| **Max 20x** | $200/mo | Yes | Yes | All + priority Opus |
-| **Team Premium** | $125/seat/mo | Yes | - | All |
-| **Enterprise** | Custom | Yes | Yes | SSO/SCIM/Audit |
-
-## Feature Availability
-
-| Feature | Pro | Max | Team Premium | Enterprise |
-|---------|-----|-----|-------------|------------|
-| Claude Code | Yes | Yes | Yes | Yes |
-| Cowork | - | Yes | - | Yes |
-| Agent Teams | Yes | Yes | Yes | Yes |
-| Scheduled Cloud Tasks | Yes | Yes | Yes | Yes |
-| SSO/SCIM | - | - | - | Yes |
-| 1M Context | Beta | Yes | Yes | Yes |
+| Technique | Savings |
+|-----------|---------|
+| Prompt Caching | ~90% |
+| Batch API | ~50% |
+| Caching + Batch | ~95% |
+| Haiku for exploration | ~80% vs Opus |
 
 ## References
 
@@ -131,5 +100,4 @@ Kun defaults to **Opus 4.6** for all agents. Haiku for explore subagents only.
 - [Models](https://docs.anthropic.com/en/docs/about-claude/models)
 - [Agent SDK](https://docs.anthropic.com/en/docs/agent-sdk/overview)
 - [Pricing](https://claude.ai/pricing)
-- [Cowork](https://support.anthropic.com/en/articles/13345190-get-started-with-cowork)
 - [MCP Protocol](https://modelcontextprotocol.io)
