@@ -2,8 +2,6 @@
 
 Kun is a **configuration engine**, not a server. It sits as a configuration layer on top of Anthropic's product suite.
 
-> Counts auto-update from `.claude/memory/kun-inventory.json` via `bash scripts/inventory.sh`.
-
 ## Five Layers
 
 ```
@@ -47,17 +45,17 @@ captain (Tier 0 — strategic brain)
 
 | Tier | Agents | Domain |
 |------|--------|--------|
-| **Tier 0** | captain | Weekly allocation, priorities, delegation |
+| **Tier 0** | captain | Weekly allocation, priorities |
 | **Tier 1** | revenue, growth, support | Business operations |
 | **Tier 2** | product, analyst | Roadmap, market intelligence |
 | **Tier 3** | tech-lead, ops, guardian | Architecture, infra, security |
-| **Stack** | nextjs, react, typescript, tailwind, prisma, shadcn, authjs | Technology expertise |
+| **Stack** | nextjs, react, typescript, tailwind, prisma, shadcn, authjs | Technology |
 | **Design** | orchestration, architecture, pattern, structure | System design |
 | **UI** | shadcn, atom, template, block | Component hierarchy |
-| **DevOps** | build, deploy, test | Development lifecycle |
+| **DevOps** | build, deploy, test | Lifecycle |
 | **VCS** | git, github | Version control |
-| **Specialized** | middleware, i18n, semantic, sse, optimize, performance, comment | Domain expertise |
-| **Reference** | hogwarts, souq, mkan, shifa | Product-specific patterns |
+| **Specialized** | middleware, i18n, semantic, sse, optimize, performance, comment | Domain |
+| **Reference** | hogwarts, souq, mkan, shifa | Product-specific |
 
 ### MCP Ecosystem
 
@@ -69,10 +67,6 @@ captain (Tier 0 — strategic brain)
 | Data & Auth | neon, postgres, stripe, keychain |
 | Knowledge | ref, context7 |
 | Project | linear |
-
-### Rules Engine
-
-Path-scoped rules auto-activate on file pattern: auth, i18n, prisma, tailwind, testing, deployment, multi-repo, org-refs.
 
 ### Hook Automation
 
@@ -88,20 +82,13 @@ Path-scoped rules auto-activate on file pattern: auth, i18n, prisma, tailwind, t
 
 ### Agent Teams (experimental)
 
-A lead agent coordinates teammate agents in isolated git worktrees. No merge conflicts. Consolidated PR.
-
-### Cross-Device Flow
-
-```
-Phone (iOS) ──Dispatch──▶ Desktop App ──/teleport──▶ Terminal (CLI)
-     ◀──────── Remote Control ──────────────────────────┘
-```
+A lead agent coordinates teammate agents in isolated git worktrees. Consolidated PR.
 
 ### Scheduled Tasks
 
 | Type | Runs On | Use Case |
 |------|---------|----------|
-| Cloud | Anthropic infra (computer off) | Health checks, dependency updates |
+| Cloud | Anthropic infra | Health checks, dependency updates |
 | Desktop | Local (app open) | Recurring builds |
 | `/loop` | Active session | Poll deploy status |
 
@@ -109,24 +96,13 @@ Phone (iOS) ──Dispatch──▶ Desktop App ──/teleport──▶ Termina
 
 | Channel | Medium | Purpose |
 |---------|--------|---------|
-| **Dispatch** | Apple Notes | Async updates, decisions, handoffs |
+| **Dispatch** | Apple Notes | Async updates, decisions |
 | **GitHub Issues** | Repo issues | Structured work items |
 | **Claude Native** | Code / Cowork / Voice | Real-time decisions |
-
-### Cowork ↔ Code Bridge
-
-```
-Cowork (think): plan → create issues → write to channel
-Code   (do):    read channel → pick up issues → execute → report
-```
-
-Shared state lives in `~/.claude/` (agents, memory, settings, rules). Same brain, two postures.
 
 ## Layer 5: Operations
 
 ### Role Configurations
-
-Four roles ship out of the box, each with a tailored MCP set, skill subset, and agent index:
 
 | Role | Focus |
 |------|-------|
@@ -135,35 +111,14 @@ Four roles ship out of the box, each with a tailored MCP set, skill subset, and 
 | **content** | Translation, docs, research |
 | **ops** | Deploys, monitoring, cost tracking |
 
-### Repository Map
-
-```
-Org repos
-├── Products
-│   ├── hogwarts   — Education SaaS
-│   ├── mkan       — Rental marketplace
-│   ├── souq       — E-commerce
-│   └── shifa      — Medical platform
-├── Libraries
-│   ├── codebase   — Pattern library
-│   ├── shadcn     — UI components fork
-│   └── radix      — Primitives fork
-├── Engine
-│   └── kun        — This repo
-└── Mobile / Marketing
-    ├── swift-app  — iOS
-    └── marketing  — Landing pages
-```
-
 ## Security
 
 | Layer | Mechanism |
 |-------|-----------|
-| Anthropic | SSO/SCIM, audit logging, SOC 2, no training on data |
+| Anthropic | SSO/SCIM, audit logging, SOC 2 |
 | Kun config | Deny rules block destructive operations |
-| Hooks | PreToolUse guards validate before execution |
+| Hooks | PreToolUse guards |
 | Secrets | macOS Keychain MCP, never in git |
-| Accessibility | Screen reader compatibility |
 
 ## Architecture Decisions
 

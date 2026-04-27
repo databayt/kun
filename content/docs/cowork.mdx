@@ -5,7 +5,7 @@ description: Same brain, two postures — one thinks, one acts
 
 # Cowork
 
-Cowork and Claude Code are two postures of the same brain. They share everything in `~/.claude/` — agents, memory, settings, rules. The difference is what they do with it.
+Cowork and Claude Code are two postures of the same brain. They share everything in `~/.claude/` — agents, memory, settings, rules.
 
 ## Two Postures
 
@@ -30,19 +30,6 @@ Cowork and Claude Code are two postures of the same brain. They share everything
 3. Cowork writes to the Dispatch/Cowork note
 4. Code reads the note at session start
 5. Code picks up the issues and executes
-
-### Example
-
-```
-[Cowork session]
-"Plan the notification system"
-  → research patterns, design architecture, write stories
-  → create issues: #10, #11, #12
-  → dispatch.sh cowork "Notification system planned. 3 issues created."
-
-[Claude Code session]
-Captain: reads note → sees plan → starts executing #10
-```
 
 ## Handoff: Code → Cowork
 
@@ -81,11 +68,11 @@ Captain: reads note → sees plan → starts executing #10
 3. Plan next moves
 
 ### Code session
-1. `dispatch.sh read inbox` — check operator instructions
-2. `dispatch.sh read cowork` — check Cowork handoffs
-3. `gh issue list --state open` — check work queue
+1. `dispatch.sh read inbox`
+2. `dispatch.sh read cowork`
+3. `gh issue list --state open`
 4. Proceed with highest priority
 
 ## The Insight
 
-Cowork doesn't need to know how to code. Claude Code doesn't need to strategize. They share a brain through files, notes, and issues. The same person switches between them like switching between thinking and doing.
+Cowork doesn't need to know how to code. Claude Code doesn't need to strategize. They share a brain through files, notes, and issues.

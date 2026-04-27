@@ -11,7 +11,7 @@ Anthropic's native integrations that bring Claude into the tools your team alrea
 
 | App | Platform | Usage |
 |-----|----------|-------|
-| **Claude for Slack** | Slack workspace | Team Q&A, code review requests, incident alerts |
+| **Claude for Slack** | Slack workspace | Team Q&A, code review, incident alerts |
 | **Claude for Figma** | Figma plugin | Design-to-code, component suggestions |
 | **Claude for Asana** | Asana workspace | Task management |
 
@@ -22,12 +22,6 @@ Anthropic's native integrations that bring Claude into the tools your team alrea
 - Automated alerts from monitoring
 - Customer support escalation routing
 
-### Setup
-
-1. Install from the Slack App Directory
-2. Add to your workspace
-3. Configure channels for alerts
-
 ## Claude for Figma
 
 Design-to-code bridge:
@@ -36,17 +30,6 @@ Design-to-code bridge:
 - Checks existing shadcn/ui and atom components first
 - Outputs RTL-aware responsive code
 - Integrates with the `mirror` keyword for design matching
-
-### Workflow
-
-```
-Designer: creates frame in Figma
-Developer: "mirror <figma-url> /dashboard"
-  → Figma MCP: get_design_context + screenshot
-  → see: screenshot current implementation
-  → compare: pixel-level differences
-  → fix: edit components to match
-```
 
 ## Claude Desktop App
 

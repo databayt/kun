@@ -5,7 +5,7 @@ description: Four roles with tailored MCP configs and agent indexes
 
 # Roles
 
-Four roles, each with a tailored MCP config, skill set, and agent index — so every team member has exactly the tools they need, nothing more.
+Four roles, each with a tailored MCP config, skill set, and agent index.
 
 ## Roles
 
@@ -13,13 +13,13 @@ Four roles, each with a tailored MCP config, skill set, and agent index — so e
 Engineering. Architecture, full-stack, deployment. Full agent fleet, all MCP servers.
 
 ### Business
-Sales, outreach, proposals, customer communication. MCP set focused on github, slack, linear, stripe, notion, browser, context7.
+Sales, outreach, proposals. MCP set: github, slack, linear, stripe, notion, browser, context7.
 
 ### Content
-Translation, documentation, research, UX writing. MCP set focused on github, slack, notion, browser, figma, context7, ref.
+Translation, documentation, research. MCP set: github, slack, notion, browser, figma, context7, ref.
 
 ### Operations
-Deploys, monitoring, incident response, cost tracking. MCP set focused on github, slack, vercel, sentry, neon, stripe, browser, posthog.
+Deploys, monitoring, incident response, cost tracking. MCP set: github, slack, vercel, sentry, neon, stripe, browser, posthog.
 
 ## Role-Specific MCP Configs
 
@@ -33,36 +33,17 @@ Deploys, monitoring, incident response, cost tracking. MCP set focused on github
 ## Setup
 
 ```bash
-# macOS / Linux
 cd ~/kun && bash .claude/scripts/setup.sh engineer
 cd ~/kun && bash .claude/scripts/setup.sh business
 cd ~/kun && bash .claude/scripts/setup.sh content
 cd ~/kun && bash .claude/scripts/setup.sh ops
-
-# Windows (PowerShell)
-cd ~/kun; .\.claude\scripts\setup.ps1 -Role engineer
 ```
-
-### What Gets Installed
-
-| Layer | Common (all roles) | Scoped (per role) |
-|-------|--------------------|-------------------|
-| **CLAUDE.md** | Shared instructions | — |
-| **Agents** | All agent definitions | Role-specific index |
-| **Skills** | docs, repos, screenshot, codebase | Role-specific skills |
-| **Rules** | All rules | — |
-| **Memory** | Shared registries | — |
-| **Settings** | — | Hooks (engineer/ops) or minimal |
-| **MCP** | — | Role-specific server set |
 
 ## Daily Patterns
 
 ### Engineer
 ```
-> dev          # start dev server
-> build        # validate
-> push         # commit + push
-> deploy       # ship
+> dev → build → push → deploy
 ```
 
 ### Business
@@ -73,7 +54,7 @@ cd ~/kun; .\.claude\scripts\setup.ps1 -Role engineer
 
 ### Content
 ```
-> /translate src/.../en.json
+> /translate
 > /docs
 ```
 
@@ -91,7 +72,4 @@ bash ~/.claude/scripts/health.sh
 bash ~/.claude/scripts/health.sh --report
 ```
 
-Or `/health` inside Claude Code:
-- `/health` — local check + dashboard
-- `/health report` — post to GitHub
-- `/health all` — show all roles' latest status
+Or `/health` inside Claude Code.

@@ -1,92 +1,88 @@
 ---
 title: Skills
-description: 25 reusable skills with keyword triggers
+description: Reusable workflows triggered by keyword or slash command
 ---
 
 # Skills
 
-25 slash commands that trigger complete workflows. Say a keyword or type `/command` — the engine handles the rest.
+Slash commands that trigger complete workflows. Say a keyword or type `/command` — the engine handles the rest.
 
-## Workflow Skills
-
-| Skill | Trigger | What It Does |
-|-------|---------|-------------|
-| /dev | `dev` | Kill port 3000, start pnpm dev, open Chrome |
-| /build | `build` | pnpm build + TypeScript check + auto-fix |
-| /quick | `push` | Lint, fix, commit, push |
-| /deploy | `deploy`, `ship` | Vercel deploy with retry (max 5) |
-
-## Creation Skills
+## Workflow
 
 | Skill | Trigger | What It Does |
-|-------|---------|-------------|
-| /atom | `atom [name]` | Create/list/preview atom components |
-| /template | `template [name]` | Create/list/preview page layouts |
-| /block | `block [name]` | Create/refactor/audit with 100-point scoring |
-| /saas | `saas [feature]` | Schema + actions + UI + pages |
+|-------|---------|--------------|
+| `/dev` | `dev` | Kill port 3000, start `pnpm dev`, open browser |
+| `/build` | `build` | `pnpm build` + TypeScript check + auto-fix |
+| `/quick` | `push` | Lint, fix, commit, push |
+| `/deploy` | `deploy`, `ship` | Vercel deploy with retry |
 
-## Quality Skills
+## Creation
 
 | Skill | Trigger | What It Does |
-|-------|---------|-------------|
-| /test | `test [file]` | Vitest + Playwright tests |
-| /security | `security` | OWASP Top 10 + dependency scan |
-| /performance | `performance` | Core Web Vitals + bundle + DB queries |
-| /fix | `fix` | Auto-fix all TypeScript/lint/build errors |
+|-------|---------|--------------|
+| `/atom` | `atom [name]` | Create/list/preview atom components |
+| `/template` | `template [name]` | Create/list/preview page layouts |
+| `/block` | `block [name]` | Create/refactor/audit with quality scoring |
+| `/saas` | `saas [feature]` | Schema + actions + UI + pages |
 
-## Utility Skills
+## Quality
+
+| Skill | Trigger | What It Does |
+|-------|---------|--------------|
+| `/test` | `test [file]` | Vitest + Playwright tests |
+| `/security` | `security` | OWASP Top 10 + dependency scan |
+| `/performance` | `performance` | Core Web Vitals + bundle + DB queries |
+| `/fix` | `fix` | Auto-fix TypeScript/lint/build errors |
+
+## Utility
 
 | Skill | Trigger | Purpose |
 |-------|---------|---------|
-| /docs | `docs` | MDX, API docs, Storybook stories |
-| /codebase | `codebase` | Browse/search/copy patterns |
-| /repos | `repos` | Explore databayt repositories |
-| /screenshot | `screenshot` | View recent screenshot |
-| /motion | `motion` | Add Framer Motion animations |
-| /handover | `handover [block]` | 5-pass production QA |
+| `/docs` | `docs` | MDX, API docs, Storybook stories |
+| `/codebase` | `codebase` | Browse / search / copy patterns |
+| `/repos` | `repos` | Explore organization repositories |
+| `/screenshot` | `screenshot` | View recent screenshot |
+| `/motion` | `motion` | Add Framer Motion animations |
+| `/handover` | `handover [block]` | Multi-pass production QA |
 
-## Business Skills
-
-| Skill | Trigger | What It Does |
-|-------|---------|-------------|
-| /proposal | `proposal [client]` | Generate client proposal via revenue agent |
-| /pricing | `pricing [product]` | Calculate pricing tiers with competitor comparison |
-| /weekly | `weekly [plan/check/review]` | Captain's weekly review cycle |
-
-## Content Skills
+## Business
 
 | Skill | Trigger | What It Does |
-|-------|---------|-------------|
-| /translate | `translate [file]` | AR/EN translation with context preservation |
-| /content-calendar | `content-calendar` | Weekly content schedule across pillars |
+|-------|---------|--------------|
+| `/proposal` | `proposal [client]` | Generate client proposal via revenue agent |
+| `/pricing` | `pricing [product]` | Calculate pricing tiers with competitor compare |
+| `/weekly` | `weekly` | Captain weekly review cycle |
 
-## Ops Skills
+## Content
 
 | Skill | Trigger | What It Does |
-|-------|---------|-------------|
-| /monitor | `monitor` | Check deployments + costs + uptime across products |
-| /costs | `costs` | API spend breakdown and optimization |
-| /incident | `incident [severity]` | P0/P1/P2 incident response workflow |
+|-------|---------|--------------|
+| `/translate` | `translate [file]` | AR/EN translation with context preservation |
+| `/content-calendar` | `content-calendar` | Weekly content schedule across pillars |
+
+## Operations
+
+| Skill | Trigger | What It Does |
+|-------|---------|--------------|
+| `/monitor` | `monitor` | Cross-product deployment + cost + uptime |
+| `/costs` | `costs` | API spend breakdown and optimization |
+| `/incident` | `incident [severity]` | P0/P1/P2 incident response workflow |
 
 ## Role Availability
 
 | Role | Available Skills |
 |------|-----------------|
-| **engineer** | All 25 |
-| **business** | Core + business (proposal, pricing, weekly, docs, repos) |
-| **content** | Core + content (translate, content-calendar, docs, repos) |
-| **ops** | Core + ops (monitor, costs, incident, docs, repos) |
+| **engineer** | All |
+| **business** | Core + business (`/proposal`, `/pricing`, `/weekly`, `/docs`, `/repos`) |
+| **content** | Core + content (`/translate`, `/content-calendar`, `/docs`, `/repos`) |
+| **ops** | Core + ops (`/monitor`, `/costs`, `/incident`, `/docs`, `/repos`) |
 
 ## How Skills Work
 
-Skills are markdown files in `~/.claude/commands/` that expand into full prompts when invoked:
+Skills are SKILL.md files in `~/.claude/skills/<name>/` that expand into full prompts when invoked:
 
 ```bash
-# Type in Claude Code
-/proposal "King Fahad Schools"
-
-# Or say the keyword
-proposal King Fahad Schools
+/proposal "Acme Corp"
 ```
 
-The skill loads its template, invokes the relevant agents and MCP servers, and produces the output.
+The skill loads its template, invokes relevant agents and MCP servers, and produces output.

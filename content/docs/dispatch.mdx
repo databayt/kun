@@ -5,7 +5,7 @@ description: Apple Notes async communication — three channels for team coordin
 
 # Dispatch
 
-Async communication via Apple Notes. Three notes in a `Dispatch` folder, synced via iCloud across all Apple devices. Captain writes updates, Cowork bridges think/do, the operator leaves instructions.
+Async communication via Apple Notes. Three notes in a `Dispatch` folder, synced via iCloud across all Apple devices.
 
 ## Three Channels
 
@@ -26,54 +26,27 @@ dispatch.sh cowork "Architecture planned. Issues created: #10, #11, #12"
 
 ### Read
 ```bash
-dispatch.sh read inbox     # operator instructions
-dispatch.sh read cowork    # Cowork handoffs
-dispatch.sh read captain   # own dispatch log
+dispatch.sh read inbox
+dispatch.sh read cowork
+dispatch.sh read captain
 ```
 
 ### Priority Levels
 
 | Level | Prefix | When |
 |-------|--------|------|
-| `fyi` | Blue | Informational, no action needed |
+| `fyi` | Blue | Informational |
 | `normal` | Clipboard | Standard update |
 | `decision` | Yellow | Needs operator approval |
-| `urgent` | Red | Immediate attention required |
+| `urgent` | Red | Immediate attention |
 
 ## Session Start Protocol
 
-Every Claude Code session begins with:
-
-1. `dispatch.sh read inbox` — check operator instructions
-2. `dispatch.sh read cowork` — check Cowork handoffs
-3. `gh issue list --state open` — check work queue
+1. `dispatch.sh read inbox`
+2. `dispatch.sh read cowork`
+3. `gh issue list --state open`
 4. Proceed with highest priority
-
-## How It Works
-
-The dispatch system uses AppleScript to read/write Apple Notes:
-
-```bash
-# Write: append timestamped entry to a note
-osascript -e 'tell application "Notes"
-  tell folder "Dispatch"
-    set theNote to note "Captain"
-    set body of theNote to body & "<hr><p>message</p>"
-  end tell
-end tell'
-
-# Read: return plain text of a note
-osascript -e 'tell application "Notes"
-  tell folder "Dispatch"
-    return plaintext of note "Inbox"
-  end tell
-end tell'
-```
 
 ## iCloud Sync
 
-Notes sync via iCloud across devices. Dispatches can be read and written from anywhere.
-
-## Integration with GitHub Issues
-
-Dispatch handles async communication. GitHub Issues handles structured work.
+Notes sync via iCloud across devices. Read and write from anywhere.

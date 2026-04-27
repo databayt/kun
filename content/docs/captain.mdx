@@ -17,7 +17,7 @@ The apex agent. Captain is the strategic brain — it tracks every product, prio
 - Weekly sprint allocation
 - Priority ordering between products
 - Scope decisions (what's in MVP, what's deferred)
-- Resource rebalancing based on results
+- Resource rebalancing
 - Revenue target adjustments
 
 ### Escalate
@@ -49,7 +49,7 @@ The apex agent. Captain is the strategic brain — it tracks every product, prio
 2. Check revenue (Stripe MCP)
 3. Check product health (Sentry MCP)
 4. Set this week's priorities
-5. Allocate work across the team
+5. Allocate work
 
 ### Wednesday: Check
 1. On track?
@@ -60,34 +60,21 @@ The apex agent. Captain is the strategic brain — it tracks every product, prio
 ### Friday: Review
 1. What shipped this week?
 2. Revenue update
-3. Customer feedback summary
+3. Customer feedback
 4. Set up next Monday
-
-## Cross-Agent Coordination
-
-```
-"Ship feature X this week"
-captain:
-  → product: define scope + acceptance criteria
-  → tech-lead: verify architecture
-  → growth: prepare announcement
-  → support: prepare onboarding guide
-  → ops: verify deployment pipeline
-  → revenue: prepare invoice
-```
 
 ## Strategic Priorities
 
-1. **Pilot product → first revenue** — flagship must work end-to-end
-2. **Engine → team multiplier** — config makes a small team work like a large one
-3. **Adjacent products → pipeline** — next products build on the proven model
-4. **High-compliance products → future** — highest revenue potential, longest validation
-5. **Companion apps → after traction** — only after a core product proves itself
+1. **Pilot product → first revenue**
+2. **Engine → team multiplier**
+3. **Adjacent products → pipeline**
+4. **High-compliance products → future**
+5. **Companion apps → after traction**
 
 ## Communication
 
-Captain communicates through three channels:
+Three channels:
 
-1. **Dispatch** (Apple Notes) — async updates, decisions, handoffs
-2. **GitHub Issues** — structured work items with labels and milestones
-3. **Claude Native** — real-time via Code, Cowork, or Voice
+1. **Dispatch** (Apple Notes) — async updates
+2. **GitHub Issues** — structured work items
+3. **Claude Native** — real-time

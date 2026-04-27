@@ -1,12 +1,9 @@
 # Product Requirements: Kun (كن)
 
----
-
 ## 1. Overview
 
 ### Purpose
-
-Define the requirements for the Kun engine — the configuration layer that turns Anthropic's product suite into a unified operating system for a software organization.
+Define the requirements for the Kun engine — the configuration layer that turns Anthropic's product suite into a unified operating system.
 
 ### Scope
 
@@ -24,8 +21,6 @@ Define the requirements for the Kun engine — the configuration layer that turn
 | Revenue pipeline | Pilot product first |
 | License | SSPL (open source, commercial use requires license) |
 
----
-
 ## 2. Phase 1: Developer Engine (Done)
 
 | Requirement | Priority | Status |
@@ -38,15 +33,12 @@ Define the requirements for the Kun engine — the configuration layer that turn
 | UI chain (atom, template, block) | P0 | Done |
 | DevOps chain (build, deploy, test) | P0 | Done |
 | VCS chain (git, github) | P0 | Done |
-| Specialized agents (middleware, i18n, semantic, sse, optimize, performance, comment) | P1 | Done |
+| Specialized agents | P1 | Done |
 | Skill library with keyword triggers | P0 | Done |
 | MCP servers connected | P0 | Done |
 | Lifecycle hooks (format, port, session) | P0 | Done |
 | Path-scoped rules | P0 | Done |
 | Memory files persisting cross-session | P1 | Done |
-| Allow + deny permission rules | P0 | Done |
-
----
 
 ## 3. Phase 2: Team Engine (Current)
 
@@ -55,7 +47,7 @@ Define the requirements for the Kun engine — the configuration layer that turn
 | Requirement | Priority |
 |-------------|----------|
 | Shared `settings.json` via git | P0 |
-| Local override support (`.local.json`) | P0 |
+| Local override support | P0 |
 | One-command installer | P0 |
 | Role-based configs (engineer, business, content, ops) | P0 |
 | Accessibility: screen reader compatible outputs | P0 |
@@ -67,8 +59,7 @@ Define the requirements for the Kun engine — the configuration layer that turn
 | Flagship feature — multi-pass QA clean | P0 |
 | Notifications — SMS + in-app | P0 |
 | Messaging — internal communication | P1 |
-| Arabic RTL — complete, no LTR remnants | P0 |
-| Demo environment — stable | P0 |
+| Arabic RTL — complete | P0 |
 
 ### Agent Teams (experimental)
 
@@ -86,18 +77,6 @@ Define the requirements for the Kun engine — the configuration layer that turn
 | GitHub Actions code review via Agent SDK | P0 |
 | Pattern compliance check in CI | P0 |
 | Scheduled cloud tasks | P1 |
-| Auto-fix pipeline for trivial issues | P1 |
-
-### Business Operations
-
-| Requirement | Priority |
-|-------------|----------|
-| Cowork for business outreach + proposals | P1 |
-| Cowork for content + research | P1 |
-| Stripe MCP for financial tracking | P1 |
-| Claude Apps (Slack, Figma) | P2 |
-
----
 
 ## 4. Phase 3: Company Engine (Future)
 
@@ -108,7 +87,6 @@ Define the requirements for the Kun engine — the configuration layer that turn
 | CI/CD review agent in GitHub Actions | P0 |
 | Deploy verification agent | P0 |
 | Onboarding automation agent | P1 |
-| Client report generation agent | P1 |
 
 ### Enterprise & Optimization
 
@@ -120,21 +98,16 @@ Define the requirements for the Kun engine — the configuration layer that turn
 | Batch API for CI/CD | P0 |
 | Pattern distribution packaging | P1 |
 
----
-
 ## 5. Non-Functional Requirements
 
 | Category | Requirement | Target |
 |----------|-------------|--------|
-| Performance | Claude Code startup | < 5 seconds |
 | Performance | Keyword → workflow start | < 3 seconds |
 | Performance | Autopilot cycle | 100 turns |
 | Reliability | Configuration load | 100% success |
-| Reliability | Hook execution | Guaranteed |
 | Usability | Engineer onboarding | < 30 minutes |
 | Usability | Non-dev onboarding | < 1 hour |
-| Accessibility | Screen reader navigation | Full support |
-| Accessibility | VoiceOver mobile testing | Core workflow |
+| Accessibility | Screen reader | Full support |
 | Quality | Pattern compliance | 90%+ |
 | Security | Destructive commands | Always blocked |
 | Security | Secrets | Never in git |

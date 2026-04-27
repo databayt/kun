@@ -5,7 +5,7 @@ description: Cloud tag control room — sprint-aware, role-aware keyword dispatc
 
 # Context
 
-A cloud tag UI where any team member clicks a keyword and dispatches a workflow. The cloud adapts to who's viewing and what stories are active — keywords grow or shrink based on relevance.
+A cloud tag UI where any team member clicks a keyword and dispatches a workflow. The cloud adapts to who's viewing and what stories are active.
 
 **Route:** `/[lang]/context` (en + ar)
 
@@ -16,12 +16,10 @@ Team member visits /context
   → Selects their role — cloud re-weights for that role
   → Sees active stories as chips
   → Clicks a story — its keywords grow in the cloud
-  → Clicks a keyword (e.g. "report")
+  → Clicks a keyword
   → Modal: confirm repo + story context
   → Submit
-  → Server action creates GitHub Issue:
-      title: "dispatch: report admission"
-      label: dispatch
+  → Server action creates GitHub Issue (label: dispatch)
   → Claude Code picks it up → executes → closes issue
 ```
 
@@ -57,8 +55,6 @@ interface Story {
 }
 ```
 
-Update `src/components/root/context/config.ts` → `board.stories` as work progresses. The captain agent moves stories between statuses.
-
 ## Keyword Groups
 
 | Group | Keywords |
@@ -73,20 +69,3 @@ Update `src/components/root/context/config.ts` → `board.stories` as work progr
 Clicking a keyword calls the `dispatch` server action — creates a GitHub Issue with `dispatch` label. Claude Code picks it up via remote trigger or scheduled check.
 
 Requires `GITHUB_PERSONAL_ACCESS_TOKEN` in `.env` with `repo` scope.
-
-## Components
-
-```
-src/components/root/context/
-  config.ts            — board, stories, roles, keyword groups, weights
-  content.tsx          — main layout
-  cloud-tag.tsx        — weighted tag cloud rendering
-  contributor-bar.tsx  — clickable role bar
-  story-bar.tsx        — story chips with status
-  dispatch-modal.tsx   — run confirmation dialog
-  status-bar.tsx       — live repo status
-```
-
-## Mobile
-
-Touch targets 44px minimum. Cloud wraps with `flex-wrap`. Modal `sm:max-w-md`. Arabic RTL supported.

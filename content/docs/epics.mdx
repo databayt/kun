@@ -1,150 +1,123 @@
 ---
-title: Epics
-description: 57 stories across 12 epics with sprint plan for April-June 2026
+title: Epics & Stories (v3 archived)
+description: Historical v3 epic tracker — superseded by EPICS-V4
 ---
 
-# Epics & Stories
+{/* Generated from docs/EPICS.md by scripts/generate-public-docs.sh. Edit the source, not this file. */}
 
-57 stories across 12 epics, organized by phase. Sprints run April-June 2026.
+
+Stories organized by phase. Detailed roadmap lives in `EPICS-V4.md`; this is the high-level summary.
 
 ## Overview
 
-| Epic | Phase | Stories | Status |
-|------|-------|---------|--------|
-| E1: CLAUDE.md Configuration | 1 | 5 | Done |
-| E2: Agent Fleet | 1 | 6 | Done |
-| E3: Skill Library | 1 | 5 | Done |
-| E4: MCP Ecosystem | 1 | 5 | Done |
-| E5: Hook Automation | 1 | 4 | Done |
-| E6: Rules & Memory | 1 | 4 | Done |
-| E7: Team Configuration | 2 | 5 | Planned |
-| E8: Hogwarts Pilot | 2 | 5 | **In Progress** |
-| E9: Agent Teams & CI/CD | 2 | 4 | Planned |
-| E10: Revenue & Operations | 2 | 5 | Planned |
-| E11: Agent SDK Platform | 3 | 4 | Future |
-| E12: Enterprise & Optimization | 3 | 3 | Future |
+| Epic | Phase | Status |
+|------|-------|--------|
+| E1: CLAUDE.md Configuration | 1 | Done |
+| E2: Agent Fleet | 1 | Done |
+| E3: Skill Library | 1 | Done |
+| E4: MCP Ecosystem | 1 | Done |
+| E5: Hook Automation | 1 | Done |
+| E6: Rules & Memory | 1 | Done |
+| E7: Team Configuration | 2 | In Progress |
+| E8: Pilot Product | 2 | In Progress |
+| E9: Agent Teams & CI/CD | 2 | Planned |
+| E10: Revenue & Operations | 2 | Planned |
+| E11: Agent SDK Platform | 3 | Future |
+| E12: Enterprise & Optimization | 3 | Future |
 
 ## Phase 1: Developer Engine (Done)
 
 ### E1: CLAUDE.md Configuration
-
-- [x] User-level CLAUDE.md (stack, mode, preferences)
-- [x] Project-level CLAUDE.md (context, architecture)
-- [x] Repo-level CLAUDE.md (100+ keywords, workflows)
-- [x] Keyword system (dev, build, deploy, saas, test...)
+- [x] User-level CLAUDE.md
+- [x] Project-level CLAUDE.md
+- [x] Repo-level CLAUDE.md
+- [x] Keyword system
 - [x] Configuration hierarchy validation
 
 ### E2: Agent Fleet
-
-- [x] Stack chain (7): nextjs, react, typescript, tailwind, prisma, shadcn, authjs
-- [x] Design chain (4): orchestration, architecture, pattern, structure
-- [x] UI chain (4): shadcn, atom, template, block
-- [x] DevOps chain (3): build, deploy, test
-- [x] VCS chain (2): git, github
-- [x] Specialized (8): middleware, i18n, semantic, sse, optimize, performance, comment, icon
+- [x] Stack chain (nextjs, react, typescript, tailwind, prisma, shadcn, authjs)
+- [x] Design chain (orchestration, architecture, pattern, structure)
+- [x] UI chain (shadcn, atom, template, block)
+- [x] DevOps chain (build, deploy, test)
+- [x] VCS chain (git, github)
+- [x] Specialized agents
 
 ### E3: Skill Library
-
 - [x] Workflow: /dev, /build, /quick, /deploy
 - [x] Creation: /atom, /template, /block, /saas
 - [x] Quality: /test, /security, /performance, /fix
 - [x] Documentation: /docs, /codebase, /repos
-- [x] QA: /handover (5-pass across 2 environments)
+- [x] QA: /handover
 
 ### E4: MCP Ecosystem
-
-- [x] UI & Design: shadcn, figma, tailwind, a11y, storybook
-- [x] Testing: browser (headless), browser-headed
-- [x] DevOps: github, vercel, sentry, gcloud
-- [x] Data: neon, postgres, stripe, keychain
-- [x] Knowledge: ref, context7, linear
+- [x] UI & Design (shadcn, figma, tailwind, a11y, storybook)
+- [x] Testing (browser, browser-headed)
+- [x] DevOps (github, vercel, sentry, gcloud)
+- [x] Data (neon, postgres, stripe, keychain)
+- [x] Knowledge (ref, context7, linear)
 
 ### E5: Hook Automation
-
-- [x] Auto-format (Prettier on Write/Edit)
-- [x] Port management (kill 3000 before dev)
-- [x] Browser launch (Chrome after dev)
-- [x] Session logging (timestamps)
+- [x] Auto-format
+- [x] Port management
+- [x] Browser launch
+- [x] Session logging
 
 ### E6: Rules & Memory
-
-- [x] 8 path-scoped rules (auth, i18n, prisma, tailwind, testing, deployment, multi-repo, org-refs)
-- [x] Preference memory (port, env, pnpm)
-- [x] Component memory (59 atoms, 31 templates, 4 blocks)
-- [x] Repository memory (14 repos)
+- [x] Path-scoped rules
+- [x] Preference memory
+- [x] Component memory
+- [x] Repository memory
 
 ## Phase 2: Team Engine (Current)
 
 ### E7: Team Configuration
 
-| Story | Owner | Priority |
-|-------|-------|----------|
-| Shared settings.json via git | Abdout | P0 |
-| Role-based installer (engineer/business/content) | Abdout | P0 |
-| Windows setup guide + PowerShell installer | Sedon | P1 |
-| Onboarding documentation for all roles | Samia | P1 |
-| Local override support (.local.json) | Abdout | P0 |
+| Story | Priority |
+|-------|----------|
+| Shared settings.json via git | P0 |
+| Role-based installer | P0 |
+| Windows installer | P1 |
+| Onboarding documentation | P1 |
+| Local override support | P0 |
 
-### E8: Hogwarts Pilot (King Fahad Schools)
+### E8: Pilot Product
 
-| Story | Owner | Priority |
-|-------|-------|----------|
-| Admission block — 5-pass QA clean | Abdout | P0 |
-| Notification system — SMS + in-app for parents | Abdout | P0 |
-| Messaging — school-parent communication | Abdout | P1 |
-| Arabic content + user guide | Samia | P0 |
-| Client onboarding plan + training materials | Ali | P0 |
+| Story | Priority |
+|-------|----------|
+| Flagship feature — multi-pass QA | P0 |
+| Notification system | P0 |
+| Messaging | P1 |
+| Arabic content | P0 |
+| Onboarding plan | P0 |
 
 ### E9: Agent Teams & CI/CD
 
-| Story | Owner | Priority |
-|-------|-------|----------|
-| Agent Teams parallel feature build | Abdout | P0 |
-| GitHub Actions PR review (Agent SDK) | Abdout | P0 |
-| Scheduled cloud tasks (health, deps) | Abdout | P1 |
-| Pattern compliance CI check | Abdout | P1 |
+| Story | Priority |
+|-------|----------|
+| Agent Teams parallel build | P0 |
+| GitHub Actions PR review | P0 |
+| Scheduled cloud tasks | P1 |
+| Pattern compliance CI | P1 |
 
 ### E10: Revenue & Operations
 
-| Story | Owner | Priority |
-|-------|-------|----------|
-| Stripe billing integration for Hogwarts | Abdout | P0 |
-| Client outreach templates (Arabic) | Ali | P0 |
-| Financial tracking dashboard (Cowork + Stripe MCP) | Ali | P1 |
-| Arabic marketing content for ed.databayt.org | Samia | P1 |
-| Competitive analysis: school platforms in Sudan | Samia | P2 |
+| Story | Priority |
+|-------|----------|
+| Stripe billing integration | P0 |
+| Outreach templates | P0 |
+| Financial tracking | P1 |
+| Marketing content | P1 |
+| Competitive analysis | P2 |
 
 ## Phase 3: Company Engine (Future)
 
 ### E11: Agent SDK Platform
-
-- [ ] CI/CD review agent (auto-review every PR)
-- [ ] Deploy verification agent (post-deploy health)
-- [ ] School onboarding agent (automated tenant setup)
-- [ ] Client report agent (weekly status generation)
+- [ ] CI/CD review agent
+- [ ] Deploy verification agent
+- [ ] Onboarding agent
+- [ ] Client report agent
 
 ### E12: Enterprise & Optimization
-
 - [ ] SSO/SCIM + audit logging
-- [ ] Prompt caching + batch API (95% cost savings)
+- [ ] Prompt caching + batch API
 - [ ] Pattern distribution packaging
-
-## Sprint Plan (April-June 2026)
-
-| Sprint | Dates | Focus | Key Deliverables |
-|--------|-------|-------|-----------------|
-| **S1** | Apr 1-14 | Foundation | Installer scripts, role configs, fumadocs site |
-| **S2** | Apr 15-28 | Hogwarts QA | Admission 5-pass, notification system |
-| **S3** | May 1-14 | Team + Revenue | Cowork onboarding (Ali, Samia), Stripe billing |
-| **S4** | May 15-28 | Automation | Agent Teams, CI/CD, scheduled tasks |
-| **S5** | Jun 1-14 | Pilot Launch | King Fahad Schools go-live, monitoring |
-
-### Sprint 1 Detail (Current)
-
-| Task | Owner | Status |
-|------|-------|--------|
-| Refactor docs to Databayt context | Abdout | Done |
-| Update fumadocs MDX site | Abdout | In Progress |
-| Create role-based installer | Abdout | Planned |
-| Update repositories.json (11 → 14 repos) | Abdout | Planned |
-| Windows PowerShell installer | Sedon | Planned |
