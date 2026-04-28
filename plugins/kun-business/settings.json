@@ -1,0 +1,38 @@
+{
+  "_comment": "Business profile — captain + business skills only. For Ali (sales/QA + outreach).",
+  "permissions": {
+    "allow": [
+      "Skill(weekly *)",
+      "Skill(dispatch *)",
+      "Skill(monitor *)",
+      "Skill(costs *)",
+      "Skill(proposal *)",
+      "Skill(pricing *)",
+      "Skill(report *)",
+      "Skill(content-calendar *)",
+      "Skill(captain *)",
+      "Skill(standup *)",
+      "Skill(sprint-plan *)",
+      "Skill(sprint-review *)",
+      "Skill(refine *)",
+      "Skill(coverage *)",
+      "Skill(monitor *)",
+      "Skill(repos *)",
+      "Skill(codebase *)",
+      "Skill(screenshot *)",
+      "Skill(docs *)",
+      "Skill(idea *)",
+      "Skill(spec *)",
+      "Skill(issue *)",
+      "Skill(credentials *)"
+    ],
+    "deny": [
+      "Skill(deploy *)",
+      "Skill(ship *)",
+      "Skill(schema *)",
+      "Skill(code *)",
+      "Skill(wire *)",
+      "Skill(check *)"
+    ]
+  }
+}

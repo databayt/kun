@@ -1,55 +1,54 @@
 ---
 title: Agents
-description: 40 agents across 4 tiers — from captain to specialists
+description: Specialized AI organized in a four-tier hierarchy
 ---
 
 # Agents
 
-40 specialized agents organized in a 4-tier hierarchy. The top 9 leadership agents manage business, product, and technical strategy. The bottom 31 specialist agents handle execution across stack, design, UI, DevOps, VCS, and domain expertise.
+Specialized agents organized in a four-tier hierarchy. Leadership tiers (0–3) own strategy and delegation. Specialist tiers handle execution across stack, design, UI, DevOps, VCS, and domain expertise.
 
 ## Hierarchy
 
 ```
-captain (Tier 0 — company brain)
+captain (Tier 0 — strategic brain)
 ├── Business (Tier 1): revenue, growth, support
-├── Product (Tier 2): product, analyst
-└── Tech Leadership (Tier 3): tech-lead, ops, guardian
-        └── orchestration → 31 specialist agents
+├── Product  (Tier 2): product, analyst
+└── Tech     (Tier 3): tech-lead, ops, guardian
+              └── orchestration → specialists
 ```
 
 ## Tier 0 — Captain
 
 | Agent | Scope |
 |-------|-------|
-| **captain** | CEO brain — weekly allocation, revenue strategy, team coordination across 5 products and 4 humans. Never writes code. Always delegates. |
+| **captain** | Weekly allocation, priorities, delegation. Never writes code. |
 
-## Tier 1 — Business (3)
+## Tier 1 — Business
 
-| Agent | Scope | Primary Human |
-|-------|-------|---------------|
-| **revenue** | Pricing strategy, proposals, contracts, MRR tracking, Saudi payment setup | Ali, Sedon |
-| **growth** | Content strategy, SEO, social media, developer relations, Arabic-first content | Samia, Ali |
-| **support** | Customer onboarding, issue triage, knowledge base, SLA tracking | Sedon, Ali |
+| Agent | Scope |
+|-------|-------|
+| **revenue** | Pricing, proposals, contracts, MRR tracking |
+| **growth** | Content, SEO, social media, developer relations |
+| **support** | Onboarding, issue triage, knowledge base, SLA tracking |
 
-## Tier 2 — Product (2)
+## Tier 2 — Product
 
-| Agent | Scope | Primary Human |
-|-------|-------|---------------|
-| **product** | Roadmap across 5 products, user stories, ICE scoring, release planning | All |
-| **analyst** | Market intelligence per vertical, competitor analysis, usage analytics | Ali, Samia |
+| Agent | Scope |
+|-------|-------|
+| **product** | Roadmap across products, stories, ICE scoring, releases |
+| **analyst** | Market intelligence, competitor analysis, usage analytics |
 
-## Tier 3 — Tech Leadership (3)
+## Tier 3 — Tech Leadership
 
-| Agent | Scope | Primary Human |
-|-------|-------|---------------|
-| **tech-lead** | Architecture across 14 repos, shared patterns, breaking changes, tech debt | Abdout |
-| **ops** | CI/CD, deployment health, API spend tracking, cost optimization, uptime | Sedon, Abdout |
-| **guardian** | OWASP Top 10, performance budgets, SSPL compliance, medical data privacy | Abdout |
+| Agent | Scope |
+|-------|-------|
+| **tech-lead** | Cross-repo architecture, shared patterns, breaking changes |
+| **ops** | CI/CD, deployment health, API spend, uptime |
+| **guardian** | OWASP Top 10, performance budgets, compliance |
 
-## Specialist Agents (31 agents, 7 chains)
+## Specialist Chains
 
-### Stack Chain (7)
-
+### Stack
 | Agent | Domain |
 |-------|--------|
 | nextjs | App Router, Server Components, Server Actions |
@@ -57,44 +56,38 @@ captain (Tier 0 — company brain)
 | typescript | Strict mode, generics, advanced types |
 | tailwind | Semantic tokens, responsive, RTL/LTR |
 | prisma | PostgreSQL, migrations, query optimization |
-| shadcn | Radix primitives, registry, MCP |
+| shadcn | Radix primitives, registry |
 | authjs | JWT, OAuth, sessions |
 
-### Design Chain (4)
-
+### Design
 | Agent | Domain |
 |-------|--------|
-| orchestration | Master coordinator, multi-agent workflows |
-| architecture | Mirror pattern, multi-tenant (Hogwarts) |
+| orchestration | Multi-agent coordinator |
+| architecture | Mirror pattern, multi-tenant |
 | pattern | Code conventions, anti-patterns |
 | structure | File organization, naming |
 
-### UI Chain (4)
-
+### UI
 | Agent | Domain |
 |-------|--------|
-| shadcn | Radix primitives, registry |
 | atom | Compose 2+ shadcn/ui primitives |
 | template | Full-page layouts |
-| block | UI + business logic (DataTable, auth, payments) |
+| block | UI + business logic |
 
-### DevOps Chain (3)
-
+### DevOps
 | Agent | Domain |
 |-------|--------|
 | build | TypeScript validation, Turbopack |
 | deploy | Vercel, staging/production |
 | test | Vitest, Playwright, TDD |
 
-### VCS Chain (2)
-
+### VCS
 | Agent | Domain |
 |-------|--------|
 | git | Branching, commits, conventional format |
 | github | PRs, issues, Actions, code review |
 
-### Specialized (8)
-
+### Specialized
 | Agent | Domain |
 |-------|--------|
 | middleware | Auth, i18n, subdomain routing |
@@ -104,10 +97,8 @@ captain (Tier 0 — company brain)
 | optimize | Feature optimization, automation |
 | performance | Core Web Vitals, profiling |
 | comment | Code comments |
-| icon | SVG icon management |
 
-### Reference Chain (4)
-
+### Reference
 | Agent | Product |
 |-------|---------|
 | hogwarts | Education SaaS patterns |
@@ -123,33 +114,17 @@ Agents are markdown files in `~/.claude/agents/` with YAML frontmatter:
 ---
 name: agent-name
 description: What this agent does
-model: opus
+model: claude-opus-4-7
 ---
-
-# Agent Name
-
-Instructions, context, and domain knowledge...
 ```
 
-When invoked (via the Agent tool or keyword trigger), Claude loads the agent's instructions and delegates accordingly.
+When invoked, Claude loads the agent's instructions and delegates accordingly.
 
 ## Inter-Agent Routing
 
 ```
 "saas billing"
-  → orchestration agent
+  → orchestration
   → prisma (schema) + block (UI) + stripe MCP
-  → Complete billing feature
-
-"ship hogwarts admission"
-  → captain
-  → product (stories) → tech-lead (architecture)
-  → orchestration → specialists
-```
-
-## Installation
-
-```bash
-# All 40 agents installed to ~/.claude/agents/
-cd ~/kun && bash .claude/scripts/install.sh
+  → complete billing feature
 ```

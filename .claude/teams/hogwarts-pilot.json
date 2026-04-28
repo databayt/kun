@@ -1,0 +1,95 @@
+{
+  "$schema": "https://kun.databayt.org/schemas/team.v1.json",
+  "name": "hogwarts-pilot",
+  "description": "Predefined Agent Team for shipping the King Fahad admission flow. Spawned via /feature pilot-king-fahad or by direct captain instruction.",
+  "story": "24.3",
+  "lead": {
+    "agent": "captain",
+    "model": "claude-opus-4-7",
+    "permissionMode": "default",
+    "responsibilities": [
+      "Decompose admission feature into per-teammate tasks",
+      "Allocate tasks to teammates",
+      "Consolidate findings",
+      "Decide when to ship (or escalate to Abdout)",
+      "Final commit + PR open"
+    ]
+  },
+  "teammates": [
+    {
+      "name": "admission-flow",
+      "agent": "block",
+      "model": "claude-sonnet-4-6",
+      "isolation": "worktree",
+      "scope": [
+        "src/components/platform/admission/**",
+        "prisma/schema.prisma (admission models only)",
+        "src/app/[lang]/admission/**"
+      ],
+      "responsibilities": [
+        "Implement admission form steps (per Hogwarts conventions)",
+        "Wire file upload + OTP + status chain",
+        "Respect tenant scoping (schoolId on every query)",
+        "Bilingual (ar/en) with logical properties",
+        "Tests: integration on tenant-owned actions, E2E on flow"
+      ],
+      "definition_of_done": ".claude/dod/feature.md"
+    },
+    {
+      "name": "qa",
+      "agent": "quality-engineer",
+      "model": "claude-sonnet-4-6",
+      "isolation": "worktree",
+      "scope": [
+        "tests/e2e/admission/**",
+        "src/components/platform/admission/**.test.tsx"
+      ],
+      "responsibilities": [
+        "E2E flow coverage in /ar and /en",
+        "RTL visual regression at 3 breakpoints",
+        "Accessibility audit (per .claude/rules/i18n.md + accessibility skill)",
+        "Coverage ≥ 95% on tenant-owned actions",
+        "Sign off on databayt/hogwarts#115 checklist"
+      ],
+      "definition_of_done": ".claude/dod/feature.md"
+    },
+    {
+      "name": "support",
+      "agent": "support",
+      "model": "claude-sonnet-4-6",
+      "scope": [
+        "docs/onboarding/king-fahad/**",
+        ".claude/memory/pilot-king-fahad.json"
+      ],
+      "responsibilities": [
+        "Draft onboarding doc for King Fahad admins (Arabic-first)",
+        "Update pilot-king-fahad.json stage as flow stabilizes",
+        "Prepare client training materials"
+      ],
+      "definition_of_done": ".claude/dod/docs.md"
+    }
+  ],
+  "shared_resources": {
+    "task_list": "~/.claude/tasks/hogwarts-pilot/",
+    "mailbox": "Anthropic-managed (built-in)",
+    "memory": "~/.claude/projects/-Users-abdout-kun/memory/",
+    "tracker": "databayt/hogwarts#115"
+  },
+  "constraints": {
+    "max_runtime_hours": 8,
+    "max_teammates_concurrent": 3,
+    "auto_throttle_below_runway_weeks": 12,
+    "cost_budget_usd_per_session": 5.0
+  },
+  "outputs": {
+    "primary_pr": "databayt/hogwarts (claude/admission-king-fahad-{date})",
+    "kun_pr": "databayt/kun (captain_journal.md update)",
+    "dispatch": "Apple Notes Captain summary + Slack #dispatch"
+  },
+  "lifecycle": {
+    "spawn_command": "Spawn the hogwarts-pilot team to ship admission for King Fahad",
+    "cleanup_command": "Captain: clean up the hogwarts-pilot team",
+    "auto_cleanup_after_hours": 12
+  },
+  "_note": "This is a spec, not runtime state. Anthropic agent teams write runtime state to ~/.claude/teams/hogwarts-pilot/config.json — captain does not edit that file directly."
+}

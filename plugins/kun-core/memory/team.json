@@ -1,0 +1,32 @@
+{
+  "version": "1.0",
+  "updated": "2026-03-31",
+  "company": {
+    "name": "Databayt",
+    "license": "SSPL",
+    "products": ["hogwarts", "souq", "mkan", "shifa", "swift-app"],
+    "stack": "Next.js 16, React 19, Prisma 6, TypeScript 5, Tailwind CSS 4, shadcn/ui"
+  },
+  "team": [
+    {
+      "name": "Abdout",
+      "role": "founder-tech-lead",
+      "installRole": "engineer"
+    },
+    {
+      "name": "Ali",
+      "role": "business",
+      "installRole": "business"
+    },
+    {
+      "name": "Samia",
+      "role": "creative-content",
+      "installRole": "content"
+    },
+    {
+      "name": "Sedon",
+      "role": "facilitator-ops",
+      "installRole": "ops"
+    }
+  ]
+}

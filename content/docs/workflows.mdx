@@ -1,52 +1,43 @@
 ---
 title: Workflows
-description: How keywords chain together — from morning start to production deploy
+description: Technical + business operations playbook
 ---
 
-# Workflows
+{/* Generated from docs/WORKFLOWS.md by scripts/generate-public-docs.sh. Edit the source, not this file. */}
 
-How keywords chain together into complete operations. Single words are charms. Sequences are rituals.
 
-<SpellWorkflows />
+How keywords chain into complete operations. Single words trigger steps. Sequences become rituals.
 
----
-
-## Development Workflows
+## Development
 
 ### Feature Development
 
-Say a keyword, the orchestration agent routes, specialized agents execute, output code.
-
 ```
 "saas billing"
-  → orchestration agent
-  → prisma agent (schema) + block agent (UI) + stripe MCP
-  → Complete billing feature with all layers
+  → orchestration
+  → prisma (schema) + block (UI) + stripe MCP
+  → complete billing feature
 ```
 
 ### Dev Server (`dev`)
+1. **Hook** — kill port 3000
+2. **Run** — `pnpm dev`
+3. **Hook** — open browser to localhost:3000
+4. **Hook** — auto-format on every file change
 
-1. **Hook**: Kill port 3000
-2. **Run**: `pnpm dev`
-3. **Hook**: Open Chrome to localhost:3000
-4. **Hook**: Auto-format on every file change
-
-### Build and Validate (`build`)
-
+### Build (`build`)
 1. Run `pnpm build`
 2. Scan TypeScript errors
 3. Auto-fix lint + type errors
 4. Re-build and verify clean
 
 ### Commit and Push (`push` / `quick`)
-
-1. Lint check
-2. Auto-fix issues
-3. Git add + conventional commit
-4. Git push to remote
+1. Lint
+2. Auto-fix
+3. `git add` + conventional commit
+4. `git push` to remote
 
 ### Deployment (`deploy` / `ship`)
-
 1. Build verification
 2. Vercel MCP deploy
 3. Poll status
@@ -54,7 +45,6 @@ Say a keyword, the orchestration agent routes, specialized agents execute, outpu
 5. Report deployment URL
 
 ### Testing (`test [target]`)
-
 1. Read target code
 2. Generate Vitest + Playwright tests
 3. Execute test suite
@@ -62,7 +52,7 @@ Say a keyword, the orchestration agent routes, specialized agents execute, outpu
 
 ### Handover QA (`handover [block]`)
 
-5-pass testing on **both** localhost and production:
+Multi-pass testing on both localhost and production:
 
 | Pass | Tests |
 |------|-------|
@@ -72,169 +62,41 @@ Say a keyword, the orchestration agent routes, specialized agents execute, outpu
 | 4. RTL + i18n | Arabic layout mirrors correctly, no LTR remnants |
 | 5. Translation | No hardcoded English, no missing dictionary keys |
 
-Fix, re-test, loop until all 5 passes clean.
-
 ### Report to Fix (`report [repo]`)
 
-User submits "Report an Issue" dialog → GitHub issue created with `report` label → Claude Code auto-fixes.
+User submits "Report an Issue" → GitHub issue with `report` label → Claude Code auto-fixes.
 
 ```
-User clicks "Report an issue" (footer link on every page)
-        ↓
-GitHub Issue created (label: report)
-        ↓
-Session start: Claude checks for open report issues
-        ↓
-  ┌─────────────────────────┐
-  │  1. READ                │  gh issue view → page URL + description
-  │  2. LOCATE              │  URL → route dir + component dir
-  │  3. CONTEXT             │  CLAUDE.md, README.md, ISSUE.md
-  │  4. VALIDATE            │  Real bug? Planned? Safe to fix?
-  │  5. SEE + DEBUG         │  Screenshot + console errors
-  │  6. IDENTIFY            │  Root cause from report + visual + errors
-  │  7. FIX                 │  Minimum code change
-  │  8. BUILD               │  pnpm build — no regressions
-  │  9. PUSH                │  fix: commit + push to main
-  │  10. VERIFY             │  See page again after deploy
-  │  11. CLOSE              │  Close issue with fix summary
-  └─────────────────────────┘
+READ → LOCATE → CONTEXT → VALIDATE → SEE+DEBUG → IDENTIFY → FIX → BUILD → PUSH → VERIFY → CLOSE
 ```
 
-**Trigger**: say `report` (all repos) or `report hogwarts` (one repo).
+**Trigger**: say `report` (all repos) or `report <product>` (one repo).
 
 **Automatic**: every session checks for open `report` issues at start.
 
 **Escalation**: cannot reproduce → `cannot-reproduce` label. Needs judgment → `needs-human` label.
 
-**URL to directory mapping** (hogwarts example):
-
-| URL | Route Dir | Component Dir |
-|-----|-----------|---------------|
-| `/{lang}/dashboard` | `app/[lang]/(saas-dashboard)/` | `components/saas-dashboard/` |
-| `/{lang}` (public) | `app/[lang]/(saas-marketing)/` | `components/saas-marketing/` |
-| `{subdomain}/dashboard/*` | `app/[lang]/s/[subdomain]/(school-dashboard)/` | `components/school-dashboard/` |
-| `{subdomain}` (public) | `app/[lang]/s/[subdomain]/(school-marketing)/` | `components/school-marketing/` |
-
----
-
 ## Component Creation
 
 ### Atom (`atom [name]`)
-
 Check codebase, compose shadcn/ui primitives, style with Tailwind + RTL, type with TypeScript, register in memory.
 
 ### Template (`template [name]`)
-
 Check registry, design full-page layout, responsive breakpoints, mobile-first RTL, connect data layer, register.
 
 ### Block (`block [name]`)
-
-Check codebase, design UI + business logic, create component + actions + schema, 100-point quality scoring, test, register.
+Check codebase, design UI + business logic, create component + actions + schema, quality scoring, test, register.
 
 ### SaaS Feature (`saas [feature]`)
+Generate every layer: Prisma model, server actions, React components, Next.js pages, auth checks, i18n keys, tests.
 
-Generate all layers: Prisma model, Server Actions, React components, Next.js pages, auth checks, i18n keys, tests.
-
----
-
-## Hogwarts Pilot Workflows
-
-### Admission Block Development
+## Cross-Device
 
 ```
-Developer (Abdout):
-  > "handover admission"
-  1. Navigate admission pages (forms, tables, detail views)
-  2. Test enrollment workflow end-to-end
-  3. Verify at 375px, 768px, 1440px
-  4. Check Arabic RTL layout
-  5. Scan for missing translations
-  6. Fix → re-test until clean
-  7. Deploy to ed.databayt.org
-```
-
-### King Fahad Schools Onboarding
-
-```
-QA + Sales (Ali):
-  > Test admission flow end-to-end, report issues on GitHub
-  > Prepare pitch materials for Ahmed Baha
-  > Continue outreach: other schools, sponsors, investors, contributors
-
-R&D (Samia):
-  > Research sharing economy pitch framing
-  > Study open-source school solution positioning
-  > Arabic content for pitch and documentation
-```
-
----
-
-## Team Daily Workflows
-
-### Abdout — Builder
-
-```
-> "dev"                         # Start dev server
-> [feature development]         # Build with full agent fleet
-> "build"                       # Validate
-> "push"                        # Commit + push
-> "deploy"                      # Ship to Vercel
-```
-
-### Ali — QA + Sales
-
-```
-QA:
-  > Test features from URL checklists on GitHub Issues
-  > Report bugs as comments
-  > Re-verify fixes, check off boxes
-
-Sales (sales@databayt.org):
-  > Outreach: schools, sponsors, investors, early adopters, contributors
-  > Draft proposals, follow up leads
-```
-
-### Samia — R&D
-
-```
-Cowork:
-  > Research Claude/Anthropic products
-  > Study sharing economy models
-  > Investigate revenue distribution
-  > Take care of Kun engine
-```
-
-### Sedon — Executor
-
-```
-> [clear task map]               # Well-defined tasks with steps
-> Saudi operations               # Bank, payments, presence
-> Batch weekly                   # Monday map, Friday delivery
-```
-
----
-
-## Cross-Device Workflows
-
-### Desktop to Phone to Terminal
-
-```
-Desktop (CLI):  Start feature work → /desktop hand off
-Phone (iOS):    Remote Control to monitor → Dispatch: "finish and deploy"
+Desktop (CLI):  start feature work → /desktop hand off
+Phone (iOS):    Remote Control to monitor → Dispatch instruction
 Terminal:       /teleport pull session back → "handover" → run QA
 ```
-
-### Design to Code
-
-```
-"figma https://figma.com/design/abc/..."
-  → Figma MCP: get_design_context
-  → Map to existing shadcn/ui + atoms
-  → Generate components with Tailwind (RTL-aware)
-  → Deploy preview
-```
-
----
 
 ## Agent Teams (Parallel Development)
 
@@ -247,121 +109,38 @@ Terminal:       /teleport pull session back → "handover" → run QA
   → Lead merges → resolve conflicts → single PR → tests
 ```
 
----
-
 ## Scheduled Tasks
 
 | Type | Runs On | Examples |
-|------|---------|---------|
-| Cloud | Anthropic infra (computer off) | Daily health check, dependency audit |
-| Desktop | Local machine (app open) | Recurring builds, Sentry check |
-| /loop | Active session | Poll Vercel deploy status |
-
----
-
-## Business Workflows
-
-### Client Communication
-
-```
-Cowork (Ali):
-  > "Draft project update for Ahmed Baha"
-  1. GitHub MCP: Fetch merged PRs this week
-  2. Summarize features + fixes
-  3. Draft Arabic email
-  4. Output as artifact
-```
-
-### Financial Tracking
-
-```
-Cowork + Stripe MCP:
-  > "Monthly burn and runway report"
-  1. Track expenses: Claude ($200) + services (~$300)
-  2. Current burn: ~$500/month
-  3. Runway: $5K / $500 = 10 months
-  4. Revenue: track when it starts coming in
-```
-
-### Sharing Economy Research
-
-```
-Cowork (Samia):
-  > Study sharing economy models
-  > Investigate revenue distribution
-  > Research startup sustainability
-  > Design databayt's revenue model
-```
-
----
+|------|---------|----------|
+| Cloud | Anthropic infra (computer off) | Daily health, dependency audit |
+| Desktop | Local machine (app open) | Recurring builds, error check |
+| `/loop` | Active session | Poll deploy status |
 
 ## Captain Weekly Rhythm
 
-### Monday: Plan
-
-1. Check Abdout's instructions (Dispatch inbox)
-2. Check revenue (Stripe MCP)
-3. Check product health (Sentry MCP)
-4. Set weekly priorities
-5. Allocate team
-6. Dispatch plan
-
-### Wednesday: Check
-
-1. On track?
-2. Blockers?
-3. Adjust allocations
-4. Handle escalations
-
-### Friday: Review
-
-1. What shipped this week?
-2. Revenue update
-3. Customer feedback
-4. Set up next Monday
-
----
+- Monday: Plan
+- Wednesday: Check
+- Friday: Review
 
 ## Communication Channels
 
-### Channel 1: Dispatch (Apple Notes, Async)
-
-| Note | Direction | Purpose |
-|------|-----------|---------|
-| **Captain** | Captain to Abdout | Updates, decisions, summaries |
-| **Cowork** | Cowork to Code | Bridge between thinking and doing |
-| **Inbox** | Abdout to Captain | Instructions, approvals, priorities |
-
-### Channel 2: GitHub Issues (Structured Work)
-
-Every piece of work = a GitHub issue. 22 labels, 3 milestones (Phase 1/2/3).
-
-### Channel 3: Claude Native (Real-time)
-
-| Mode | When | How |
-|------|------|-----|
-| **Code** | Building, deploying, fixing | CLI or claude.ai/code |
-| **Cowork** | Planning, strategy, research | Desktop Cowork tab |
-| **Voice** | Quick decisions | Microphone button |
-
----
+| Channel | Medium | Purpose |
+|---------|--------|---------|
+| **Dispatch** | Apple Notes | Async updates, decisions, handoffs |
+| **GitHub Issues** | Repo issues | Structured work items |
+| **Claude Native** | Code / Cowork / Voice | Real-time decisions |
 
 ## Quick Reference
 
-| I Want To... | Say... | Who |
-|-------------|--------|-----|
-| Start dev server | `dev` | Abdout |
-| Build project | `build` | Abdout |
-| Push code | `push` / `quick` | Abdout |
-| Deploy | `deploy` / `ship` | Abdout |
-| Create component | `atom` / `template` / `block` | Abdout |
-| Generate feature | `saas [feature]` | Abdout |
-| Run tests | `test [target]` | Abdout |
-| QA testing | GitHub Issue checklists | Ali |
-| Report bugs | Comment on GitHub Issue | Ali |
-| Fix user reports | `report` / `report hogwarts` | Automatic |
-| Fix errors | `fix` | Abdout |
-| Client outreach | sales@databayt.org | Ali |
-| Sharing economy R&D | Cowork | Samia |
-| Claude/Anthropic R&D | Cowork | Samia |
-| Saudi operations | Clear task map | Sedon |
+| I Want To... | Say... |
+|--------------|--------|
+| Start dev server | `dev` |
+| Build project | `build` |
+| Push code | `push` / `quick` |
+| Deploy | `deploy` / `ship` |
+| Create component | `atom` / `template` / `block` |
+| Generate feature | `saas [feature]` |
+| Run tests | `test [target]` |
+| Fix user reports | `report` / `report <repo>` |
+| Fix errors | `fix` |

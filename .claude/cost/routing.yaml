@@ -1,0 +1,110 @@
+# Cost Routing Policy — Story 21.4 + 28.2 in docs/EPICS-V4.md
+#
+# Maps agent IDs to Claude model tiers. Captain reads this when delegating
+# and the inventory script audits agent frontmatter against it.
+#
+# Tier guidelines:
+#   opus-4.7   → strategic decisions, complex multi-step planning
+#   sonnet-4.6 → specialist execution (most agents)
+#   haiku-4.5  → research, audits, structured lookups
+#
+# Cost ratios (input / output per MTok):
+#   opus-4.7   $5 / $25
+#   sonnet-4.6 $3 / $15
+#   haiku-4.5  $1 / $5
+#
+# Switching specialists from opus → sonnet cuts ~40% spend with negligible
+# capability loss for execution work. Switching research → haiku cuts ~80%.
+
+version: "1.0"
+last_updated: "2026-04-25"
+
+models:
+  opus:    "claude-opus-4-7"
+  sonnet:  "claude-sonnet-4-6"
+  haiku:   "claude-haiku-4-5"
+
+assignments:
+
+  # opus-4.7 — strategic, never executes, deep reasoning ----------------------
+  opus:
+    - captain          # CEO brain, weekly cycle, decision matrix
+    - tech-lead        # cross-repo architecture, breaking-change calls
+    - architecture     # system-level design
+
+  # sonnet-4.6 — most specialists -------------------------------------------
+  sonnet:
+    # Leadership tier (delegates, doesn't execute)
+    - revenue
+    - growth
+    - support
+    - product
+    - ops
+    - guardian
+
+    # Stack chain
+    - nextjs
+    - react
+    - typescript
+    - tailwind
+    - prisma
+    - shadcn
+    - authjs
+
+    # Design / UI chain
+    - atom
+    - template
+    - block
+    - figma
+    - structure
+
+    # DevOps / VCS chain
+    - build
+    - deploy
+    - test
+    - package
+    - git
+    - github
+
+    # Specialized
+    - middleware
+    - internationalization
+    - sse
+    - performance
+
+    # Reference (product) agents
+    - hogwarts
+    - mkan
+    - shifa
+    - souq
+
+    # Coordination
+    - orchestration
+    - report
+    - quality-engineer
+
+  # haiku-4.5 — research, audits, structured lookups ------------------------
+  haiku:
+    - learn           # mines git history, no writes
+    - analyze         # repo config generator, structured output
+    - pattern         # pattern card lookups
+    - analyst         # market intel, structured queries
+    - semantic        # HTML/a11y audits
+    - optimize        # code-efficiency audits
+    - comment         # short writes only
+
+# Built-in subagents (Anthropic-provided) ----------------------------------
+builtin:
+  Explore:           haiku  # already haiku by default
+  Plan:              inherit  # uses session model
+  general-purpose:   inherit
+
+# Auto-throttle thresholds — see E28.5 ------------------------------------
+throttle:
+  # If forecasted monthly spend exceeds these, captain auto-downshifts.
+  if_forecast_exceeds_usd: 180
+  downshift:
+    - "captain → sonnet (was opus)"
+    - "tech-lead → sonnet"
+    - "architecture → sonnet"
+  resume_when_below_usd: 150

@@ -82,13 +82,12 @@ Hogwarts is a multi-tenant SaaS platform that automates school operations — fr
 
 ## Current Pipeline
 
-### King Fahad Schools (Ahmed Baha) — Pilot Customer
+## Pilot Customer
 
-- **Contact**: Ahmed Baha, owner of King Fahad Schools, Sudan
+- **Profile**: Interested school client
 - **Interest**: Admission block + notifications + messaging
 - **Potential**: May expand to full SaaS over time
-- **Status**: Post-meeting, interested in collaboration, pilot phase next
-- **Priority**: HIGHEST — first paying customer opportunity
+- **Priority**: First paying customer opportunity
 
 ---
 

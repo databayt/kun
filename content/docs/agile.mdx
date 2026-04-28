@@ -1,0 +1,193 @@
+---
+title: Agile
+description: Sprint ceremonies, ICE scoring, DoD
+---
+
+{/* Generated from docs/AGILE.md by scripts/generate-public-docs.sh. Edit the source, not this file. */}
+
+
+> **Framework**: Kun Agile — AI-Native Scrum for Small Teams
+
+## 1. Philosophy
+
+Kun-Agile combines proven Scrum practices with AI-native execution. The captain agent acts as an always-on Scrum Master; specialist agents do the work; humans set direction and approve outcomes.
+
+### Why Agile + AI
+
+- **Velocity matters more than process** — keep ceremonies short and outcome-focused
+- **AI handles execution** — humans set strategy, agents handle implementation
+- **Daily standups in 5 minutes** — captain agent generates dispatches automatically
+- **Sprint reviews double as customer demos** — every two weeks, ship something
+
+### Anti-patterns
+
+| Avoid | Prefer |
+|-------|--------|
+| Story points | T-shirt sizes (XS/S/M/L/XL) |
+| 30-minute standups | 5-minute auto-generated dispatches |
+| Hours of sprint planning | 30-minute review of captain's proposal |
+| Backlog grooming meetings | Continuous ICE scoring via /refine |
+| Ad-hoc priorities | Visible sprint goals with ICE-scored backlogs |
+
+## 2. Cadence
+
+**Sprint Length**: 2 weeks
+
+| Day | Ceremony | Length |
+|-----|----------|--------|
+| Monday wk 1 | Sprint Planning | 30 min |
+| Daily | Standup (auto-dispatch) | 5 min reading |
+| Wednesday wk 1 | Mid-sprint check | 15 min |
+| Friday wk 2 | Sprint Review + Demo | 1 hr |
+| Friday wk 2 | Retrospective | 30 min |
+| Friday wk 2 | Backlog Grooming | 30 min |
+
+Total ceremony time: ~3 hours per 2-week sprint.
+
+## 3. Roles
+
+| Role | Responsibility |
+|------|----------------|
+| **Product Owner** | Sprint goals, architecture, final approval |
+| **Scrum Master (Captain)** | Tracks velocity, removes blockers, dispatches, generates retros |
+| **Engineer** | Implementation, code reviews, deploys |
+| **Business** | QA, sales pipeline, client demos, customer feedback |
+| **Content** | Translation, documentation, accessibility |
+| **Operations** | Regional ops, batched tasks, scheduled work |
+
+The captain agent is the always-on Scrum Master. Humans approve, agents execute.
+
+## 4. Sprint Planning
+
+### Before the meeting
+
+The captain agent prepares a **proposed sprint** automatically:
+
+1. Reads `~/.claude/memory/capacity.json`
+2. Reads `~/.claude/memory/runway.json`
+3. Pulls top 10 ICE-scored backlog items
+4. Drafts sprint goal + selected stories + estimates
+5. Posts to `Dispatch/Captain` for review
+
+### During the meeting
+
+1. Review captain's proposed sprint (or override)
+2. Approve or adjust the sprint goal
+3. Approve or trim selected stories
+4. Identify dependencies and blockers
+5. Assign owners
+
+## 5. Daily Standup
+
+No meeting. Captain agent runs the daily standup as an **auto-dispatch** every morning at 09:00.
+
+The dispatch contains:
+- **Shipped**: what was completed
+- **Blocked**: what is stuck and why
+- **Next**: what is planned for today/tomorrow
+- **Anomalies**: anything unusual
+
+## 6. Sprint Review + Demo
+
+Friday afternoon, week 2. 1 hour.
+
+1. **What we shipped** (15 min) — sprint goal vs. actual outcomes
+2. **Live demo** (20 min) — show new features in production
+3. **Customer feedback** (10 min) — what business heard from clients
+4. **Metrics review** (10 min) — velocity, MRR, runway, deploy health
+5. **Next sprint preview** (5 min) — captain's draft
+
+## 7. Retrospective
+
+Immediately after Sprint Review.
+
+| Question | Format |
+|----------|--------|
+| What went well? | Each role: 1-2 wins |
+| What didn't? | Each role: 1-2 frictions |
+| What to try? | One action item |
+
+## 8. Stories and ICE Scoring
+
+### Story format
+
+```markdown
+## User Story
+As a <role>, I want <feature>, so that <outcome>.
+
+## Acceptance Criteria
+- [ ] <specific, testable condition>
+
+## ICE Score
+- Impact: <1-10>
+- Confidence: <1-10>
+- Ease: <1-10>
+- Total: <I × C × E>
+```
+
+### Size estimation
+
+| Size | Rough hours | Rough LOC |
+|------|-------------|-----------|
+| XS | < 1 hr | < 50 |
+| S | 1-4 hrs | 50-200 |
+| M | 4-8 hrs | 200-500 |
+| L | 1-2 days | 500-1000 |
+| XL | 2+ days | 1000+ |
+
+XL stories should be broken down.
+
+## 9. Definition of Done
+
+A story is "Done" when:
+
+- [ ] Code merged to `main` (PR approved, CI green)
+- [ ] Multi-pass QA clean
+- [ ] Arabic + English content
+- [ ] Mobile + desktop tested (375px, 768px, 1440px)
+- [ ] Production deploy verified
+- [ ] Issue closed with `Closes #N` in PR
+- [ ] Documentation updated
+- [ ] Memory updated if pattern is reusable
+
+## 10. Velocity Tracking
+
+| Metric | Target |
+|--------|--------|
+| Sprint completion rate | > 80% |
+| PR review turnaround | < 24h |
+| Bug introduction rate | < 5% of merged PRs |
+| Production incidents | 0 P0, < 2 P1 per sprint |
+| Customer demos | 1+ per sprint |
+
+## 11. Communication
+
+| Channel | Used For |
+|---------|----------|
+| Dispatch/Captain | Daily standups, sprint summaries |
+| Dispatch/Inbox | Operator → Captain instructions |
+| Dispatch/Cowork | Cowork ↔ Code handoffs |
+| GitHub Issues | Stories, bugs, decisions, retro actions |
+| Slack `#dev` | Real-time PR discussion, deploy alerts |
+| Slack `#dispatch` | Captain's posts, weekly summaries |
+
+## 12. Risk Management
+
+### Single-engineer risk
+
+When a small team has one primary engineer, that's the biggest risk.
+
+### Mitigations
+
+1. **Document everything** — CLAUDE.md, agent definitions, captain journal
+2. **Auto-memory** — every decision saved
+3. **Onboarding-ready** — anyone with the engineer role config can pick up
+4. **Bus factor backup** — at least one other role understands agents enough to direct via Cowork
+
+## 13. Principles
+
+1. **Sprint cycles produce customer demos.** Every 2 weeks, something ships.
+2. **The captain runs the meetings.** Humans review, approve, override.
+3. **Documentation is the memory.** Memory files, CLAUDE.md, dispatches are source of truth.
+4. **AI facilitates, humans decide.** The captain agent generates proposals. The owner approves.
+5. **Business work is real work.** Closing a sales lead is as valuable as shipping a feature.

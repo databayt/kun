@@ -40,3 +40,6 @@ pnpm-debug.log*
 .vercel
 .env*.local
 .playwright-mcp/
+
+# Crawler state (downloaded blobs, manifest, reports)
+scripts/crawl-anthropic/state/

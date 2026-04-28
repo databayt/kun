@@ -1,39 +1,50 @@
 ---
-title: The Standard Book of Spells
-description: 114 incantations that bend code to your will — the complete Kun spellbook
+title: Keywords
+description: 114 incantations — the standard book of spells
 ---
 
-# The Standard Book of Spells
+{/* Generated from docs/KEYWORDS.md by scripts/generate-public-docs.sh. Edit the source, not this file. */}
 
-> *"It does not do to dwell on documentation and forget to ship."*
 
-**Kun** (كن) is Arabic for *Be* — the divine command of creation. Say the word, and it is. Type `dev` and your server rises. Type `deploy` and your code travels across the world. Type `auth` and an entire authentication system assembles itself from nothing.
+> **Kun** (كن) is Arabic for *Be* — the divine command of creation. Type a keyword, and the engine responds.
 
-Every spell below reveals its **Order** — the hidden chain of agents, portals, hooks, and wards that mobilize the instant you speak. Click any spell to see its full execution sequence, connections, and dependencies.
+The complete keyword vocabulary. Every keyword reveals its **Order** — the chain of agents, MCP servers, hooks, and rules that mobilize the moment you speak.
 
-<SpellStats />
+## How Keywords Work
 
-<SpellbookLegend />
+When you type a keyword, the engine runs three steps:
 
-<Spellbook />
+1. **Recognition** — the word activates the corresponding agent or agent chain
+2. **Channeling** — relevant MCP servers open connections to external services
+3. **Manifestation** — the workflow runs: files written, servers started, code transformed
 
----
+Some keywords are simple — one word, one effect. Others are compound:
+- `test` runs your test suite
+- `test login` targets the login flow specifically
+- `saas billing` produces an entire billing feature: schema + API + UI + payment integration
+
+## Categories
+
+- **Pipeline** — idea-to-production keyword chain
+- **Tools** — standalone workflows (dev, build, deploy, test, …)
+- **Quality** — security, performance, fixes, reviews
+- **Sweep** — full-coverage sweeps with per-product ledger
+- **Services** — MCP server triggers (github, vercel, neon, stripe, figma, sentry)
+- **References** — cross-repo references (`like hogwarts`, `from codebase`)
 
 ## Mastery Levels
 
-Not all spells are equal. Here is the progression from first-year basics to post-graduate mastery.
+- **Tier 1 — Pipeline**: `feature`, `idea`, `spec`, `schema`, `code`, `wire`, `check`, `ship`, `watch`
+- **Tier 2 — Standalone Tools**: `dev`, `build`, `deploy`, `report`, `atom`, `block`, `template`, `test`
+- **Tier 2b — Coverage Sweeps**: `nextjs`, `react`, `typescript`, `tailwind`, `shadcn`, `prisma`, `accessibility`, `barrel`, `waterfall`, `skeleton`
+- **Tier 3 — Vocabulary**: UI patterns, features, animation, build, perf, services
 
-<SpellMastery />
+## Reading the Order
 
----
+Each keyword's **Order** lists which agents are invoked, which MCP servers participate, which hooks fire, and which rules apply.
 
-## Closing Words
+## Closing
 
-> *"Words are, in my not-so-humble opinion, our most inexhaustible source of magic."*
-> — Albus Dumbledore
-
-The magic is not in the words. It is in knowing *which* word, at *which* moment, for *which* purpose. A wizard who types `saas billing` without understanding billing will get a system they cannot maintain. A wizard who types `deploy` without first casting `test` will send broken magic into the world.
+The power isn't in the words — it's in knowing *which* word, at *which* moment, for *which* purpose.
 
 **Learn the words. Understand the intent. Then speak.**
-
-*كن — Be, and it is.*

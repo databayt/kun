@@ -1,0 +1,15 @@
+{
+  "_comment": "Accessibility-first profile. Layers on top of role profile (engineer/business/content/ops). For Samia and Ali (blind / screen-reader users).",
+  "env": {
+    "CLAUDE_CODE_VERBOSE": "1",
+    "CLAUDE_CODE_SEMANTIC_OUTPUT": "1",
+    "CLAUDE_CODE_NO_EMOJI": "1"
+  },
+  "_outputStyle": {
+    "verboseStatus": true,
+    "semanticMarkers": true,
+    "linearStructure": true,
+    "noTablesInTerseMode": false,
+    "preferOrderedLists": true
+  }
+}

@@ -1,0 +1,129 @@
+---
+title: Routines
+description: Anthropic-managed scheduled cloud agents. Captain wakes itself; org observability runs nightly without your laptop.
+---
+
+# Routines
+
+> **Story 23 in `docs/EPICS-V4.md`.** Routines are research preview at [claude.ai/code/routines](https://claude.ai/code/routines). Beta header: `experimental-cc-routine-2026-04-01`.
+
+A **routine** is a saved Claude Code session — prompt + repos + connectors + triggers — that runs on Anthropic-managed cloud infrastructure. Your laptop can be closed. No local cron. No tmux. No Tailscale.
+
+Kun ships 7 routines designed for an org-orchestrating CEO-brain captain.
+
+## The 7 routines
+
+| Routine | Schedule | Repo | Model | Cost/mo |
+|---------|----------|------|-------|---------|
+| `daily-org-pulse` | Daily 07:00 Asia/Riyadh | `databayt/kun` | sonnet-4.6 | $1.50 |
+| `weekly-captain-cycle` | Monday 08:00 | `databayt/kun` | opus-4.7 | $2.00 |
+| `fork-sync-watchdog` | Sunday 22:00 | `databayt/{shadcn,radix}` | haiku-4.5 | $0.40 |
+| `pilot-health` | Hourly + on PR opened | `databayt/hogwarts` | sonnet-4.6 | $9.00 |
+| `stripe-nightly` | Daily 23:30 | `databayt/kun` | haiku-4.5 | $0.60 |
+| `report-auto-fix` | On `report` label | `databayt/{kun,hogwarts,...}` | sonnet-4.6 | $16.00 |
+| `cost-watcher` | Daily 23:00 | `databayt/kun` | haiku-4.5 | $0.60 |
+| **Total** | | | | **~$25.50/mo** |
+
+Within the $200/mo Max plan envelope. Captain auto-throttles via E28.5 if forecast exceeds $180/mo.
+
+## Register a routine
+
+### List what's defined
+
+```bash
+bash scripts/setup-routines.sh --list
+```
+
+### Show a routine's prompt
+
+```bash
+bash scripts/setup-routines.sh --show daily-org-pulse
+```
+
+This prints the full prompt to copy/paste into the Anthropic console.
+
+### Register at claude.ai/code/routines
+
+1. Open [claude.ai/code/routines](https://claude.ai/code/routines)
+2. Click **New routine**
+3. Name: copy the routine `id` from `manifest.json`
+4. Prompt: paste from `bash scripts/setup-routines.sh --show <id>`
+5. Repos: from manifest `repos[]`
+6. Schedule: from manifest `schedule`
+7. Connectors: from manifest `connectors[]` (github, slack, stripe, etc.)
+8. Click **Create**
+
+### Register via CLI
+
+```bash
+# In any Claude Code session
+/schedule daily at 07:00 Asia/Riyadh — see .claude/routines/daily-org-pulse.md
+```
+
+The `/schedule` CLI supports cron triggers only. GitHub-event triggers (`pilot-health`, `report-auto-fix`) must be registered on the web.
+
+## Manifest
+
+Source of truth: [`.claude/routines/manifest.json`](https://github.com/databayt/kun/blob/main/.claude/routines/manifest.json).
+
+Each entry has:
+- `id` — kebab-case identifier
+- `story` — EPICS-V4 story number (17.x, 18.x, 23.x)
+- `name` — human-readable
+- `promptFile` — path to the prompt markdown
+- `schedule` — `null` for trigger-only, otherwise cron descriptor
+- `additionalTrigger` — GitHub or API trigger spec
+- `repos`, `connectors`, `model`
+- `branchPushAllowed` + `branchPattern`
+- `estimatedDailyCost` / `estimatedMonthlyCost`
+- `status` — `design` | `registered` | `paused`
+
+## Lifecycle
+
+### Pause
+
+```bash
+# In claude.ai/code/routines, toggle Repeats off.
+# In CLI:
+/schedule update <id> --paused
+```
+
+The cost watcher (`cost-watcher`) auto-pauses non-essential routines when monthly forecast > $180. See E28.5.
+
+### Update
+
+Routines are immutable on registration. To update a prompt, edit `.claude/routines/<id>.md` in this repo, push, then on the web edit the registered routine and paste the new prompt.
+
+### Delete
+
+`/schedule delete <id>` (CLI) or use the trash icon on the web.
+
+## Why Routines, not local cron
+
+| Local cron / tmux / Tailscale | Anthropic Routines |
+|-------------------------------|-------------------|
+| Stops when laptop sleeps | Runs in cloud |
+| Per-machine setup | Shared across team |
+| No GitHub event triggers | Native PR/issue triggers |
+| Hand-rolled retry/auth | Managed |
+| Setup time: hours | Setup time: minutes |
+| Failure mode: silent | Failure mode: dispatched alerts |
+
+Self-hosting is documented in `docs/SELF-HOSTING.md` for air-gapped scenarios. Routines is the default.
+
+## Costs
+
+Every routine has an `estimatedMonthlyCost` in the manifest. The actual cost is logged by `cost-watcher` to `~/.claude/memory/spend-daily.json`. Captain reads this on every weekly cycle.
+
+If the actual exceeds the estimate by > 50%:
+- Captain dispatches a decision-priority alert
+- E28.5 auto-throttle kicks in
+- Routines drop to lower-frequency cadence (hourly → 4h, daily → weekly)
+
+## Reference
+
+- Manifest: `.claude/routines/manifest.json`
+- Setup script: `scripts/setup-routines.sh`
+- Captain agent: `.claude/agents/captain.md`
+- Cost routing: `.claude/cost/routing.yaml`
+- Anthropic docs: [Routines overview](https://code.claude.com/docs/en/routines)

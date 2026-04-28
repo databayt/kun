@@ -1,0 +1,38 @@
+{
+  "$schema": "https://kun.databayt.org/schemas/report.v1.json",
+  "version": "1.0",
+  "lastUpdated": "2026-04-25",
+  "definition": "Auto-fix log for user-reported GitHub issues processed by the /report skill.",
+  "agent": ".claude/agents/report.md",
+  "skill": "/report",
+  "schema": {
+    "issue": {
+      "repo": "string — e.g. databayt/hogwarts",
+      "number": "number — issue #",
+      "title": "string",
+      "url": "string",
+      "openedAt": "ISO date",
+      "openedBy": "string — github username",
+      "label": "report"
+    },
+    "diagnosis": {
+      "verified": "boolean — could we reproduce?",
+      "category": "ui | logic | data | infra | unknown",
+      "rootCause": "string"
+    },
+    "fix": {
+      "files": ["array of string paths"],
+      "commit": "string — SHA",
+      "pr": "string — PR URL",
+      "buildPassed": "boolean"
+    },
+    "outcome": {
+      "status": "fixed | cannot-reproduce | needs-human | wontfix",
+      "closedAt": "ISO date | null",
+      "deployedAt": "ISO date | null",
+      "verifiedInProd": "boolean"
+    }
+  },
+  "history": [],
+  "_note": "Empty seed. Populated by Routine 23.3 (auto-fix report issues) and manual /report runs."
+}

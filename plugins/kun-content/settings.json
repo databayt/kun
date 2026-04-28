@@ -1,0 +1,33 @@
+{
+  "_comment": "Content profile — business + figma + translate + motion. For Samia (R&D, kun caretaker, Arabic content).",
+  "permissions": {
+    "allow": [
+      "Skill(weekly *)",
+      "Skill(dispatch *)",
+      "Skill(monitor *)",
+      "Skill(captain *)",
+      "Skill(standup *)",
+      "Skill(content-calendar *)",
+      "Skill(figma *)",
+      "Skill(translate *)",
+      "Skill(motion *)",
+      "Skill(docs *)",
+      "Skill(idea *)",
+      "Skill(repos *)",
+      "Skill(codebase *)",
+      "Skill(screenshot *)",
+      "Skill(crawl-anthropic *)",
+      "Skill(learn *)",
+      "Skill(analyze *)",
+      "Skill(pattern *)"
+    ],
+    "deny": [
+      "Skill(deploy *)",
+      "Skill(ship *)",
+      "Skill(schema *)",
+      "Skill(code *)",
+      "Skill(wire *)",
+      "Skill(check *)"
+    ]
+  }
+}

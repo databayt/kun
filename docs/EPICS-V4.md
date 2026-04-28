@@ -1,0 +1,793 @@
+# Epics and Stories: Kun (كن) v4
+
+> **Version**: 4.0
+> **Date**: 2026-04-25
+> **Total Stories**: 135 (57 existing reconciled + 78 new)
+> **Theme**: From "developer engine that documents a CEO-brain" to "engine that runs the databayt org"
+> **Supersedes**: `docs/EPICS.md` v3.0 (2026-03-30)
+
+---
+
+## Why v4
+
+Three forces drive this rev:
+
+1. **Reality has overtaken the spec.** v3 declared `28 agents / 17 skills / 18 MCP / 8 rules / 6 memory / 5 hooks / 38 allow / 4 deny`. The actual filesystem has **49 / 58 / 24 / 4 / 3 / 4 / 0 / 0**. Half the rules and memory files marked Done don't exist. The `permissions` block is missing entirely from `settings.json`. The captain agent — the most strategic file in the repo — is not in the v3 epic tracker.
+2. **The CEO-brain is documented, not operational.** Captain has no persistent state, no live observability, no scheduled wake-up, no escalation gate. Apple Notes channels referenced everywhere — no setup script creates them. The `bridge.md` Cowork ↔ Code handoff file does not exist. The Agile ceremonies in the 25 KB `docs/AGILE.md` (`/sprint-plan`, `/standup`, `/sprint-review`, `/refine`) have no command files.
+3. **Anthropic shipped a major 2026 capability surface that kun has not adopted.** Routines (cloud cron + API + GitHub triggers), Agent Teams, 28+ hook events (only 4 wired), the new SKILL.md format with rich frontmatter, Plugins with marketplaces, auto-memory at `~/.claude/projects/<project>/memory/`, path-scoped rules, the `Skill(name)` permission rule, the renamed Agent SDK with full feature parity, Opus 4.7.
+
+The intended outcome of v4 is a kun that knows what it actually contains, wakes itself weekly to allocate work across the team and 14 repos, escalates only the decisions that genuinely require the operator, stays inside the $200/mo Anthropic envelope on autopilot, and is installable as a single plugin so business / content / ops roles get the right subset by role.
+
+---
+
+## Epic Overview
+
+| Epic | Phase | Stories | Priority | Status |
+|------|-------|---------|----------|--------|
+| E1: CLAUDE.md Configuration | 1 | 5 | P0 | Done |
+| E2: Agent Fleet | 1 | 6 | P0 | Done (49 files; reconciled in E13) |
+| E3: Skill Library | 1 | 5 | P0 | Done (58 commands; migrated in E20) |
+| E4: MCP Ecosystem | 1 | 5 | P0 | Done (24 servers) |
+| E5: Hook Automation | 1 | 4 | P0 | Partial (SessionStart wired in E15.4) |
+| E6: Rules & Memory | 1 | 4 | P1 | **Phantom** — backfilled in E14 |
+| E7: Team Onboarding | 2 | 5 | P0 | Mostly built |
+| E8: Hogwarts Pilot | 2 | 5 | P0 | In Progress |
+| E9: Agent Teams & CI/CD | 2 | 5 | P0 | Replaced by E24 + E27 + E11 |
+| E10: Revenue & Operations | 2 | 5 | P0 | Replaced by E18 + E16 |
+| E11: Agent SDK Platform | 3 | 4 | P0 | Future |
+| E12: Scale & Optimization | 3 | 4 | P0 | Replaced by E25 + E28 |
+| **E13: Engine State Reconciliation** | **2.5** | **5** | **P0** | **New** |
+| **E14: Rules + Memory Backfill** | **2.5** | **6** | **P0** | **New** |
+| **E15: Permissions & Settings Hardening** | **2.5** | **5** | **P0** | **New** |
+| **E16: Captain v2 — Persistent State** | **3** | **6** | **P0** | **New** |
+| **E17: Org-Wide Observability (Routines)** | **3** | **5** | **P0** | **New** |
+| **E18: Pilot & Revenue Tracker** | **3** | **4** | **P0** | **New** |
+| **E19: Team Capacity + Dispatch Wiring** | **3** | **5** | **P0** | **New** |
+| **E20: Skills v2 (SKILL.md)** | **4** | **5** | **P0** | **New** |
+| **E21: Subagent Frontmatter Discipline** | **4** | **6** | **P0** | **New** |
+| **E22: Hook Expansion** | **4** | **6** | **P1** | **New** |
+| **E23: Routines Migration** | **4** | **4** | **P0** | **New** |
+| **E24: Agent Teams Activation** | **4** | **3** | **P1** | **New** |
+| **E25: Plugin Packaging** | **4** | **5** | **P0** | **New** |
+| **E26: Agile Ceremonies** | **5** | **5** | **P0** | **New** |
+| **E27: AGENTS.md Adoption** | **5** | **4** | **P1** | **New** |
+| **E28: Cost Optimization** | **6** | **5** | **P0** | **New** |
+| **E29: Documentation Reconciliation** | **6** | **4** | **P0** | **New** |
+
+---
+
+## Phase 1 — Developer Engine (Done)
+
+E1–E6 retained from v3.0 verbatim. See `docs/EPICS.md` v3 for original story bodies. v4 reconciliation:
+
+- **E1 ✓** All 5 stories complete. CLAUDE.md hierarchy operational at user / project / repo levels.
+- **E2 ✓** 49 agent files on disk (v3 said 28). Leadership tier (captain + revenue + growth + support + product + analyst + tech-lead + ops + guardian) added since v3 — promoted to first-class tracker entries in E13.4.
+- **E3 ✓** 58 command files on disk (v3 said 17). Pipeline + sweeps + business commands all built. Migration to SKILL.md format in E20.
+- **E4 ✓** 24 MCP servers + 3 role variants (mcp-business.json, mcp-content.json, mcp-ops.json).
+- **E5 ⚠** 4 of 5 hooks wired. SessionStart was marked Done in v3 but never wired — fixed in E15.4. Mac has Stop + Notification + Prettier + dev-port hooks; Windows is missing the Stop and Notification ports — fixed in E15.5.
+- **E6 ⚠ Phantom.** v3 declared "Path-Scoped Rules (8) — auth, i18n, prisma, tailwind, testing, deployment, multi-repo, org-refs" complete. Disk has 4 rule files: `cowork-bridge.md`, `figma.md`, `github-workflow.md`, `patterns.md` — none of which are the 8 declared. Memory file claim: `preferences, repositories, atom, template, block, report` — disk has 3: `team.json`, `repositories.json`, `figma_projects.json`. **E14 backfills both gaps.**
+
+---
+
+## Phase 2 — Team Engine (Current Focus)
+
+### Epic 7: Team Onboarding ✓ Mostly built
+
+Cross-platform installer + role-based MCP variants exist as `scripts/install.sh`, `install.ps1`, `onboarding-mac.sh`, `onboarding-windows.ps1`, `onboarding-iphone.md`, `onboarding-android.md`. The 4 role variants (engineer / business / content / ops) ship as `mcp-business.json`, `mcp-content.json`, `mcp-ops.json` + `_index-business.md` / `_index-content.md` / `_index-ops.md`. Replaced by plugins in E25.
+
+### Epic 8: Hogwarts Pilot 🔄 In Progress
+
+Active. Issue `databayt/hogwarts#115` is the live tracker (admission QA, ~100 checkboxes). The pilot meeting outcome ingestion gap is closed by E18.
+
+### Epic 9: Agent Teams & CI/CD → see E24 (Activation) + E27 (AGENTS.md) + E11 (SDK)
+
+### Epic 10: Revenue & Operations → see E18 (Pilot+Revenue Tracker) + E16 (Captain runway loop)
+
+---
+
+## Phase 2.5 — Foundation Repair (NEW)
+
+Cleans the docs/reality gap so subsequent phases have stable ground.
+
+### Epic 13: Engine State Reconciliation
+
+**Goal**: Single source of truth for what kun actually contains. Eliminate the 5-way agent count drift.
+
+#### Story 13.1: Generate authoritative inventory
+- [ ] `scripts/inventory.sh` scans `.claude/{agents,commands,hooks,rules,memory,coverage,patterns}` + `mcp.json` + `settings.json`
+- [ ] Writes `docs/INVENTORY.md` (counts + filenames + last-modified)
+- [ ] Writes `~/.claude/memory/kun-inventory.json` (machine-readable)
+- [ ] Runs in CI on every commit to `.claude/`
+- [ ] Idempotent
+**Points**: 2 | **Priority**: P0
+
+#### Story 13.2: Reconcile docs/EPICS.md to v4
+- [x] Replace v3 with v4 (this file)
+- [x] 12 prior epics retained, status revalidated against `INVENTORY.md`
+- [x] Epics E13–E29 added
+- [x] Total story count internally consistent (135, no drift)
+**Points**: 3 | **Priority**: P0
+
+#### Story 13.3: Reconcile content/docs/* counts
+- [ ] Update `architecture.mdx`, `configuration.mdx`, `agents.mdx`, `claude-code.mdx`, `index.mdx`, `commands.mdx` to match `INVENTORY.md`
+- [ ] Add `<EngineCounts />` MDX component reading `~/.claude/memory/kun-inventory.json`
+**Points**: 3 | **Priority**: P1
+
+#### Story 13.4: Promote captain + 9-agent leadership tier
+- [ ] Add captain, revenue, growth, support, product, analyst, tech-lead, ops, guardian as retro-stories under E2
+- [ ] Each entry: file path, line count, declared role, primary roles, model selection
+**Points**: 2 | **Priority**: P0
+
+#### Story 13.5: Settle the agent-count canonical
+- [ ] Decide canonical = filesystem
+- [ ] All docs derive from `kun-inventory.json`
+- [ ] Mark `_index-business.md` / `_index-content.md` / `_index-ops.md` for replacement by plugins (E25)
+**Points**: 1 | **Priority**: P1
+
+---
+
+### Epic 14: Rules + Memory Backfill
+
+**Goal**: Build the 4 missing rule files and 5 missing memory files that v3 marked Done but never wrote.
+
+#### Story 14.1: Path-scoped rule — auth
+- [ ] `.claude/rules/auth.md` with `paths: ["src/**/*auth*", "**/middleware.ts", "**/{login,register,session}/**"]`
+- [ ] Body: Auth.js v5 patterns (auth(), session shape, RBAC, tenant scoping)
+- [ ] Pulled from `agents/authjs.md` + hogwarts conventions
+- [ ] ≤200 lines
+**Points**: 2 | **Priority**: P0
+
+#### Story 14.2: Path-scoped rules — i18n, prisma, tailwind, testing, deployment
+- [ ] One rule file per topic, each with `paths:` scoping
+- [ ] Each ≤200 lines
+- [ ] Reference canonical agents (`internationalization.md`, `prisma.md`, `tailwind.md`, `test.md`, `deploy.md`)
+**Points**: 5 | **Priority**: P0
+
+#### Story 14.3: Path-scoped rules — multi-repo, org-refs
+- [ ] `multi-repo.md` for cross-repo work scenarios
+- [ ] `org-refs.md` for databayt repo references (migrated from `~/.claude/rules/`)
+**Points**: 2 | **Priority**: P1
+
+#### Story 14.4: Memory file — preferences.json
+- [ ] `.claude/memory/preferences.json` with port:3000, packageManager:pnpm, env:.env-only, languages:[ar,en], rtlDefault:true, model:opus-4.7
+- [ ] Loaded by captain + onboarding scripts
+**Points**: 1 | **Priority**: P0
+
+#### Story 14.5: Memory files — atom.json, template.json, block.json, report.json
+- [ ] `atom.json` from `~/codebase/__registry__` (62 atoms)
+- [ ] `template.json` from registry (31 templates)
+- [ ] `block.json` from registry (4 blocks)
+- [ ] `report.json` empty schema for tracking auto-fixed user issues
+**Points**: 3 | **Priority**: P1
+
+#### Story 14.6: Memory file — captain-state.json + bridge.md
+- [ ] `.claude/memory/captain-state.json` (sprint, MRR, runway weeks, blockers, last review)
+- [ ] `~/.claude/bridge.md` (Cowork ↔ Code handoff, schema: 3 sections)
+- [ ] Wire `dispatch.sh` to write both atomically
+**Points**: 2 | **Priority**: P0
+
+---
+
+### Epic 15: Permissions & Settings Hardening
+
+**Goal**: Move 38 allow / 4 deny rules from doc text into `settings.json`. Add `Skill(name)` permission syntax. Wire SessionStart so the engine self-bootstraps.
+
+#### Story 15.1: Allow rules
+- [ ] `permissions.allow` block in `.claude/settings.json` covering: `pnpm:*`, `git:*` (status/diff/log/add/commit/push), `gh:*` (issue/pr/repo), `npm:*`, `ls`, `find`, `grep`, `cat`, `Read`, `Glob`, `Grep`, `Edit`, `Write`
+- [ ] Mirror in `settings-windows.json`
+**Points**: 2 | **Priority**: P0
+
+#### Story 15.2: Deny rules
+- [ ] `permissions.deny` for `Bash(rm -rf /*)`, `Bash(curl * | sh)`, `Bash(sudo *)`, `Bash(chmod 777 *)`
+- [ ] `Skill(deploy *)` outside business hours via UserPromptExpansion hook
+**Points**: 1 | **Priority**: P0
+
+#### Story 15.3: Skill permissions
+- [ ] Use `Skill(name)` / `Skill(name *)` to constrain per role
+- [ ] Engineer: all skills
+- [ ] Business: `Skill(weekly)`, `Skill(proposal *)`, `Skill(pricing *)`, `Skill(monitor)`, `Skill(costs)`
+**Points**: 2 | **Priority**: P1
+
+#### Story 15.4: SessionStart hook wired
+- [ ] `SessionStart` hook runs `scripts/session-start.sh`
+- [ ] Reads `~/.claude/bridge.md`
+- [ ] Runs `dispatch.sh read inbox`
+- [ ] Runs `gh issue list --label report --repo databayt/{kun,hogwarts}`
+- [ ] Runs `gh issue list --label captain --state open`
+- [ ] Summarizes into `additionalContext`
+- [ ] Mac + Windows variants
+**Points**: 3 | **Priority**: P0
+
+#### Story 15.5: Hook parity Windows ↔ Mac
+- [ ] Port Mac Stop / Notification / Prettier hooks to PowerShell in `settings-windows.json`
+- [ ] Add `setup-windows.ps1` for Sticky Notes equivalent or GitHub-issue fallback
+**Points**: 3 | **Priority**: P1
+
+---
+
+## Phase 3 — CEO-Brain Captain (NEW)
+
+### Epic 16: Captain v2 — Persistent State + Decision Loop
+
+**Goal**: Captain remembers between sessions, knows what it knows, and only escalates when it must.
+
+#### Story 16.1: Captain auto-memory journal
+- [ ] Captain writes to `~/.claude/projects/-Users-abdout-kun/memory/captain_journal.md` every session
+- [ ] Logs decisions made, deferrals to the operator, runway delta, pilot stage, what changed
+- [ ] First 200 lines load every session via auto-memory
+**Points**: 2 | **Priority**: P0
+
+#### Story 16.2: Decision matrix as code
+- [ ] `.claude/captain/decision-matrix.yaml` — each row: `trigger`, `bound`, `action`, `escalation_channel`
+- [ ] Captain reads file, applies deterministically
+- [ ] Replaces text-only decision matrix in `agents/captain.md`
+**Points**: 3 | **Priority**: P0
+
+#### Story 16.3: Runway tracker
+- [ ] `scripts/runway.sh` reads `team.json` + Stripe MCP + costs.md output
+- [ ] Writes `~/.claude/memory/runway.json` (weeks_remaining, monthly_burn, mrr, capital, last_updated)
+- [ ] Captain consumes via Read
+**Points**: 2 | **Priority**: P0
+
+#### Story 16.4: Escalation gate
+- [ ] `dispatch.md` priority `decision` writes Apple Notes "Dispatch/Inbox" with `[DECISION NEEDED]` prefix + 24h deadline
+- [ ] No reply in 24h → re-dispatch with `urgent`
+- [ ] No reply in 72h → captain pauses non-essential work
+**Points**: 3 | **Priority**: P0
+
+#### Story 16.5: Captain inter-agent contract
+- [ ] Each leadership-tier agent gets explicit `tools`, `mcpServers`, `permissionMode` (see E21)
+- [ ] `captain.md` body adds explicit "I delegate X to Y, expecting Z output, in W timeframe" contracts
+**Points**: 3 | **Priority**: P1
+
+#### Story 16.6: Captain self-test
+- [ ] `/captain --dry-run` skill — runs the weekly cycle in plan mode without sending dispatches
+- [ ] Prints what it would do
+**Points**: 2 | **Priority**: P1
+
+---
+
+### Epic 17: Org-Wide Observability (Routines)
+
+**Goal**: Captain reads live state from every active databayt project without anyone asking.
+
+#### Story 17.1: Repository registry expansion
+- [ ] Update `.claude/memory/repositories.json` to all 13 live repos
+- [ ] Each entry: id, local path, stack, agent owner, primary human, last activity, deploy URL, MCP servers, status
+- [ ] Add swift-app, distributed-computer, apple, marketing, .github, shadcn, radix
+**Points**: 2 | **Priority**: P0
+
+#### Story 17.2: Routine — daily org pulse
+- [ ] Anthropic Routine, daily 7 AM Asia/Riyadh
+- [ ] Walks repository registry, calls `gh api /repos/databayt/<repo>` per repo
+- [ ] Writes `~/.claude/memory/org-pulse-<date>.json`
+- [ ] Posts summary to Slack `#dispatch`
+**Points**: 3 | **Priority**: P0
+
+#### Story 17.3: Routine — weekly captain cycle
+- [ ] Anthropic Routine, Monday 8 AM Asia/Riyadh
+- [ ] Triggers `/weekly plan` against kun repo
+- [ ] Opens draft PR against `databayt/kun` updating `captain_journal.md`
+**Points**: 2 | **Priority**: P0
+
+#### Story 17.4: Routine — fork sync watchdog
+- [ ] Anthropic Routine, weekly Sunday 22:00
+- [ ] Runs `merge-upstream` for shadcn + radix
+- [ ] Opens PR if conflicts; closes itself if clean
+**Points**: 2 | **Priority**: P1
+
+#### Story 17.5: Routine — pilot health
+- [ ] Anthropic Routine, GitHub trigger on `pull_request.opened` in databayt/hogwarts AND scheduled hourly
+- [ ] Runs `qa` on `the pilot product admission flow`
+- [ ] Posts results to issue #115
+**Points**: 3 | **Priority**: P0
+
+---
+
+### Epic 18: Pilot & Revenue Tracker
+
+**Goal**: the pilot product has a structured tracker. Revenue and pipeline don't live in Apple Notes alone.
+
+#### Story 18.1: Pilot stage machine
+- [ ] `.claude/memory/pilot-king-fahad.json` with stages: `interest → meeting → proposal → contract → onboarding → live → renewal`
+- [ ] Each stage: entry criteria, exit criteria, owner
+- [ ] Updated by support agent + captain
+**Points**: 2 | **Priority**: P0
+
+#### Story 18.2: Revenue ledger
+- [ ] `.claude/memory/revenue.json`: per-customer ARR, MRR, payment status
+- [ ] Pipeline: cold/warm/hot/proposal/contract/lost
+- [ ] Captain reads for runway calc (E16.3)
+**Points**: 3 | **Priority**: P0
+
+#### Story 18.3: Auto-update from Stripe
+- [ ] Routine: nightly Stripe MCP query → `revenue.json`
+- [ ] Triggers captain weekly cycle if MRR delta > 10%
+**Points**: 2 | **Priority**: P1
+
+#### Story 18.4: Outreach templates
+- [ ] `.claude/templates/outreach/{cold,warm,proposal,reminder}.md` Arabic + English
+- [ ] Used by `/proposal` skill
+- [ ] Variables: `{client.name}`, `{product}`, `{pricing_tier}`
+**Points**: 2 | **Priority**: P1
+
+---
+
+### Epic 19: Team Capacity + Dispatch Wiring
+
+**Goal**: Captain knows who has bandwidth this week. Apple Notes channels actually exist. Cowork ↔ Code bridge functions.
+
+#### Story 19.1: Capacity model
+- [ ] `.claude/memory/capacity.json`: per-human focus, hours-this-week, blockers, time-zone, hardware, accessibility
+- [ ] Updated weekly by `/standup` (E26)
+**Points**: 2 | **Priority**: P0
+
+#### Story 19.2: Apple Notes setup script
+- [ ] `scripts/setup-apple-notes.sh` creates "Dispatch" folder + 3 notes (Captain/Cowork/Inbox) via osascript
+- [ ] `setup-windows.ps1` creates Sticky Notes equivalent or GitHub-issue fallback
+**Points**: 2 | **Priority**: P0
+
+#### Story 19.3: Bridge file lifecycle
+- [ ] `~/.claude/bridge.md` created by setup script
+- [ ] Schema: 3 sections (Cowork → Code, Code → Cowork, Decisions Pending)
+- [ ] SessionStart hook reads it
+- [ ] SessionEnd hook can append
+**Points**: 2 | **Priority**: P0
+
+#### Story 19.4: Dispatch command upgrade
+- [ ] `/dispatch` skill (SKILL.md format per E20) gains `--priority {fyi,normal,decision,urgent}`, `--channel {captain,cowork,inbox}`, `--deadline 24h`
+- [ ] Writes Apple Notes + Slack + bridge.md atomically
+**Points**: 3 | **Priority**: P0
+
+#### Story 19.5: Accessibility-first profile
+- [ ] `kun-accessible` plugin (E25) tuned for content + business roles
+- [ ] Verbose status output, semantic markers, mouse-free, ARIA-friendly
+**Points**: 3 | **Priority**: P1
+
+---
+
+## Phase 4 — Engine 2026 (NEW)
+
+### Epic 20: Skills v2 — SKILL.md Format Adoption
+
+**Goal**: Migrate 58 commands from `commands/<name>.md` to `skills/<name>/SKILL.md` with full 2026 frontmatter.
+
+#### Story 20.1: Skill migration scaffolding
+- [ ] `scripts/migrate-commands-to-skills.sh` reads each `commands/<name>.md`
+- [ ] Generates `skills/<name>/SKILL.md` with `name`, `description`, `argument-hint`, `allowed-tools`
+- [ ] Preserves body
+- [ ] Idempotent
+- [ ] Existing `commands/<name>.md` left in place (Anthropic ships backwards-compat)
+**Points**: 3 | **Priority**: P0
+
+#### Story 20.2: Captain skills get fork isolation
+- [ ] `/weekly`, `/dispatch`, `/monitor`, `/costs`, `/health` get `context: fork` + `agent: general-purpose`
+- [ ] Captain main session stays clean
+**Points**: 2 | **Priority**: P0
+
+#### Story 20.3: Coverage sweeps get path scoping
+- [ ] `/nextjs`, `/react`, `/typescript`, `/tailwind`, `/shadcn`, `/prisma`, `/authjs`, `/accessibility`, `/barrel`, `/waterfall`, `/skeleton`, `/structure`, `/guard`, `/translate` get `paths:` frontmatter
+- [ ] Auto-load only when matching files open
+**Points**: 3 | **Priority**: P0
+
+#### Story 20.4: Skill-level hooks
+- [ ] `/deploy` gets `disable-model-invocation: true` + PreToolUse hook running `pnpm build`
+- [ ] `/ship` gets `disable-model-invocation: true` + Stop hook posting to Slack
+**Points**: 2 | **Priority**: P1
+
+#### Story 20.5: Vercel-style priority skill — react-best-practices
+- [ ] Port `vercel-labs/agent-skills/skills/react-best-practices` into `skills/react-best-practices/`
+- [ ] Adopt priority tier scheme (CRITICAL/HIGH/MEDIUM-HIGH/MEDIUM/LOW-MEDIUM/LOW)
+- [ ] Adopt area-prefixed filenames (`async-`, `bundle-`, `server-`, `client-`, `rerender-`, `rendering-`, `js-`, `advanced-`)
+**Points**: 3 | **Priority**: P1
+
+---
+
+### Epic 21: Subagent Frontmatter Discipline
+
+**Goal**: Every leadership and specialist agent declares `tools`, `mcpServers`, `model`, `permissionMode`, `memory`, `effort`. Role boundaries become real, not advisory.
+
+#### Story 21.1: Captain frontmatter
+- [ ] `captain.md` gets `tools: [Read, Glob, Grep, Bash(gh *), Bash(git status), Agent, AskUserQuestion]`
+- [ ] `disallowedTools: [Write, Edit]` (captain never executes)
+- [ ] `model: opus-4.7`
+- [ ] `permissionMode: default`
+- [ ] `memory: project`
+- [ ] `effort: high`
+**Points**: 2 | **Priority**: P0
+
+#### Story 21.2: Leadership tier frontmatter
+- [ ] revenue (`mcpServers: [stripe, github, notion]`)
+- [ ] growth (`mcpServers: [notion, figma, slack]`)
+- [ ] support (`mcpServers: [slack, github, notion]`)
+- [ ] product (`mcpServers: [linear, github, notion]`)
+- [ ] analyst (`mcpServers: [posthog, sentry, notion]`)
+- [ ] tech-lead (`mcpServers: [github, filesystem]` read-only)
+- [ ] ops (`mcpServers: [vercel, sentry, neon, posthog]`)
+- [ ] guardian (`mcpServers: [sentry, filesystem]` read-only)
+- [ ] All get `disallowedTools: [Write, Edit]`
+**Points**: 5 | **Priority**: P0
+
+#### Story 21.3: Specialist agents get worktree isolation
+- [ ] `nextjs`, `react`, `typescript`, `tailwind`, `prisma`, `shadcn`, `authjs` get `isolation: worktree`
+- [ ] Can't pollute main working tree during parallel sweeps
+**Points**: 3 | **Priority**: P1
+
+#### Story 21.4: Cost routing via model selection
+- [ ] `learn`, `analyze`, `pattern`, `Explore` get `model: haiku-4.5` (~80% spend cut on research)
+- [ ] `captain`, `architecture`, `tech-lead` stay `opus-4.7`
+- [ ] Most specialists `model: sonnet-4.6`
+**Points**: 2 | **Priority**: P0
+
+#### Story 21.5: Color coding
+- [ ] Each agent gets `color:` frontmatter
+- [ ] Leadership = purple, business = green, tech = blue, design = pink, ops = orange, learning = cyan
+**Points**: 1 | **Priority**: P2
+
+#### Story 21.6: Persistent memory for learn / analyze / captain
+- [ ] Set `memory: project` (or `user` for cross-org learning)
+- [ ] Insights accumulate
+**Points**: 2 | **Priority**: P1
+
+---
+
+### Epic 22: Hook Expansion (4 → 12 wired)
+
+**Goal**: Wire the hooks that turn the engine from reactive to autonomic.
+
+#### Story 22.1: SessionStart
+- [x] Done in E15.4
+**Points**: 0 (dependency)
+
+#### Story 22.2: UserPromptSubmit
+- [ ] Logs every prompt to `~/.claude/projects/-Users-abdout-kun/memory/prompts-<date>.jsonl`
+- [ ] `learn` agent mines later
+**Points**: 1 | **Priority**: P1
+
+#### Story 22.3: PostToolUseFailure
+- [ ] On Bash exit ≠ 0, append to `~/.claude/memory/failures.jsonl`
+- [ ] Surface to captain at end of session
+**Points**: 2 | **Priority**: P1
+
+#### Story 22.4: TaskCreated / TaskCompleted
+- [ ] Audit log per session in `.claude/audit/<session-id>.jsonl`
+**Points**: 1 | **Priority**: P2
+
+#### Story 22.5: TeammateIdle
+- [ ] Captain lead session re-dispatches teammates from shared task list
+- [ ] Required by E24
+**Points**: 2 | **Priority**: P0
+
+#### Story 22.6: FileChanged
+- [ ] Watch `.claude/coverage/keywords.json` and `.claude/memory/runway.json`
+- [ ] On change: invalidate captain cache, re-run `/captain --dry-run`
+**Points**: 2 | **Priority**: P1
+
+#### Story 22.7: PreCompact
+- [ ] Save full captain state to `captain-state-pre-compact.json`
+- [ ] Strategic context survives compaction
+**Points**: 2 | **Priority**: P1
+
+---
+
+### Epic 23: Routines Migration
+
+**Goal**: Move scheduled work from local `scheduled_tasks.lock` to Anthropic-managed Routines. Run when the operator's MacBook is closed.
+
+#### Story 23.1: Routine 1 — Morning org pulse
+- [x] Done in E17.2
+**Points**: 0 (dependency)
+
+#### Story 23.2: Routine 2 — Captain weekly cycle
+- [x] Done in E17.3
+**Points**: 0 (dependency)
+
+#### Story 23.3: Routine 3 — Auto-fix report issues
+- [ ] Anthropic Routine, GitHub trigger on `issue.labeled` filtered to `report` label
+- [ ] Across `databayt/{hogwarts,kun,souq,mkan,shifa,marketing}`
+- [ ] Runs existing `/report` pipeline
+- [ ] Replaces paused `trig_01MFLRtUTfMMNTDGBBGQtZLq`
+**Points**: 3 | **Priority**: P0
+
+#### Story 23.4: Routine 4 — Cost watcher
+- [ ] Daily 23:00 routine reads Anthropic API spend
+- [ ] Updates `runway.json`
+- [ ] Alerts if monthly forecast > $200
+**Points**: 3 | **Priority**: P1
+
+#### Story 23.5: Routine ledger + management
+- [ ] `.claude/routines/manifest.json` with id, schedule, repo binding, last run, status
+- [ ] `/schedule list` syncs it
+**Points**: 2 | **Priority**: P1
+
+---
+
+### Epic 24: Agent Teams Activation
+
+**Goal**: Enable lead+teammates parallel feature work.
+
+#### Story 24.1: Enable agent teams
+- [ ] Add `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: "1"` to settings.json env
+- [ ] Document opt-out for conflicting sessions
+**Points**: 1 | **Priority**: P0
+
+#### Story 24.2: Captain-as-lead pattern
+- [ ] `captain.md` body gains "Agent Team mode" section
+- [ ] When given end-to-end feature: spawns revenue + tech-lead + ops teammates, merges
+- [ ] Tested on hogwarts admission
+**Points**: 3 | **Priority**: P1
+
+#### Story 24.3: Hogwarts pilot agent team
+- [ ] Predefined team config: lead (captain) + teammates (admission-flow, qa, support)
+- [ ] Spawned by `/feature pilot-king-fahad`
+**Points**: 3 | **Priority**: P1
+
+#### Story 24.4: TeammateIdle re-dispatch
+- [x] Done in E22.5
+**Points**: 0 (dependency)
+
+#### Story 24.5: Cost guard
+- [ ] Hook checks `runway.json` before spawning teammates
+- [ ] If forecast > $200/mo: deny new teammates (max 1-2), suggest sequential mode
+**Points**: 2 | **Priority**: P0
+
+---
+
+### Epic 25: Plugin Packaging
+
+**Goal**: Kun ships as installable plugins. New team members get the right subset by role with one command.
+
+#### Story 25.1: kun-core plugin
+- [ ] `.claude-plugin/plugin.json` manifest
+- [ ] Bundles ~30 specialist agents, 20 most-used skills, 8 path-scoped rules, 3 critical hooks (SessionStart, PreToolUse Prettier, Stop log)
+- [ ] Namespace: `kun:`
+**Points**: 3 | **Priority**: P0
+
+#### Story 25.2: kun-captain plugin
+- [ ] Bundles captain + leadership tier (9 agents)
+- [ ] Captain skills (`/weekly`, `/dispatch`, `/monitor`, `/costs`, `/health`, `/incident`)
+- [ ] Captain hooks
+- [ ] Depends on `kun-core`
+**Points**: 2 | **Priority**: P0
+
+#### Story 25.3: kun-engineer / kun-business / kun-content / kun-ops profile plugins
+- [ ] Each: thin manifest + settings.json + skills allowlist
+- [ ] Engineer = full kun-core
+- [ ] Business = kun-core minus heavy specialists + kun-captain
+- [ ] Content = business + figma/translate
+- [ ] Ops = monitor/costs/incident/deploy
+- [ ] Replaces 4 `_index-*.md` files
+**Points**: 5 | **Priority**: P0
+
+#### Story 25.4: kun-accessible plugin
+- [ ] See E19.5
+- [ ] Output-style overrides + verbose-status hooks + a11y-tuned skills
+**Points**: 2 | **Priority**: P1
+
+#### Story 25.5: Plugin marketplace listing
+- [ ] Submit `kun-core` to `claude.ai/settings/plugins/submit` + `console.anthropic.com`
+- [ ] Doc page in `content/docs/plugin-install.mdx`
+**Points**: 2 | **Priority**: P2
+
+---
+
+## Phase 5 — Methodology (NEW)
+
+### Epic 26: Agile Ceremonies (BMAD/AGILE.md Wiring)
+
+**Goal**: The 25 KB `docs/AGILE.md` describes `/sprint-plan`, `/standup`, `/sprint-review`, `/refine`. Make them real.
+
+#### Story 26.1: /sprint-plan skill
+- [ ] `skills/sprint-plan/SKILL.md`
+- [ ] Inputs: previous sprint outcome, open issues across 14 repos, capacity (E19.1), runway (E16.3)
+- [ ] Output: `.claude/sprints/<num>.md` + GitHub Project board updates
+**Points**: 3 | **Priority**: P0
+
+#### Story 26.2: /standup skill
+- [ ] Daily skill
+- [ ] Reads each human's commits last 24h, open issues assigned, blockers from `captain-state.json`
+- [ ] Writes summary to Slack `#standup` + Apple Notes
+- [ ] Updates `capacity.json`
+**Points**: 2 | **Priority**: P0
+
+#### Story 26.3: /sprint-review skill
+- [ ] End-of-sprint: tally completed/incomplete stories
+- [ ] Update `captain_journal.md`
+- [ ] Compute velocity, post to Slack
+- [ ] Generate next sprint draft
+**Points**: 2 | **Priority**: P0
+
+#### Story 26.4: /refine skill
+- [ ] Backlog grooming
+- [ ] Apply ICE scoring (per `product.md`)
+- [ ] Propose priority changes
+- [ ] Open captain-decision dispatch if major
+**Points**: 2 | **Priority**: P1
+
+#### Story 26.5: BMAD Definition of Done
+- [ ] `.claude/dod/{feature,bug,docs,refactor}.md` — 4 DoD checklists from `docs/AGILE.md`
+- [ ] Skills reference via `paths:` frontmatter
+**Points**: 2 | **Priority**: P1
+
+---
+
+### Epic 27: AGENTS.md Adoption (Vercel Pattern)
+
+**Goal**: Adopt Vercel's canonical AGENTS.md format per repo.
+
+#### Story 27.1: kun's AGENTS.md
+- [ ] Author `<repo-root>/AGENTS.md` per Vercel's 20-section structure
+- [ ] CLAUDE.md keeps v3 content but adds `@AGENTS.md` import at top
+**Points**: 3 | **Priority**: P0
+
+#### Story 27.2: Per-repo AGENTS.md
+- [ ] Add AGENTS.md to `databayt/{hogwarts,souq,mkan,shifa,marketing,swift-app}` via `analyze` agent
+- [ ] One PR per repo
+**Points**: 5 | **Priority**: P1
+
+#### Story 27.3: Specialized Skills section convention
+- [ ] Each AGENTS.md links to `.agents/skills/` à la Vercel
+- [ ] Kun's `skills/` aliased
+**Points**: 1 | **Priority**: P2
+
+#### Story 27.4: AGENTS.md sync watchdog
+- [ ] Routine detects AGENTS.md ↔ CLAUDE.md drift
+- [ ] Opens issue
+**Points**: 2 | **Priority**: P2
+
+---
+
+## Phase 6 — Sustainability (NEW)
+
+### Epic 28: Cost Optimization
+
+**Goal**: NFR-C2 says ≤$400/mo. Currently uninstrumented. Stay inside the $200 envelope.
+
+#### Story 28.1: Cost telemetry baseline
+- [ ] Stop hook appends per-session token counts (input/output, cached, by model) to `~/.claude/memory/spend.jsonl`
+- [ ] Daily routine aggregates into `~/.claude/memory/spend-daily.json`
+**Points**: 2 | **Priority**: P0
+
+#### Story 28.2: Model-routing rules
+- [ ] `.claude/cost/routing.yaml`: explore/learn/analyze → haiku-4.5; routine specialists → sonnet-4.6; captain/architecture/tech-lead → opus-4.7
+- [ ] Enforced by subagent frontmatter (E21.4)
+**Points**: 2 | **Priority**: P0
+
+#### Story 28.3: Prompt caching enforcement
+- [ ] Heavy reference files (captain.md, repositories.json, large pattern cards) marked for caching
+- [ ] Target 90% cache hit rate
+**Points**: 3 | **Priority**: P1
+
+#### Story 28.4: Batch API for non-interactive routines
+- [ ] Routines that don't need <5min response (E17.4 fork sync, E23.4 cost watcher) use Batch API
+- [ ] 50% discount
+**Points**: 3 | **Priority**: P1
+
+#### Story 28.5: Auto-throttle
+- [ ] If `spend-daily.json` projected monthly > $180: pause E17.5 hourly pilot health and E22.2 prompt logging
+- [ ] Re-enable next month
+**Points**: 2 | **Priority**: P0
+
+---
+
+### Epic 29: Documentation Reconciliation
+
+**Goal**: `docs/` and `content/docs/` drift in 5 places. Make them one source.
+
+#### Story 29.1: Single-source counts
+- [ ] `<EngineCounts />` MDX component reads `~/.claude/memory/kun-inventory.json` (E13.1)
+- [ ] All published count claims become dynamic
+**Points**: 2 | **Priority**: P0
+
+#### Story 29.2: docs/ → content/docs/ generator
+- [ ] `scripts/generate-public-docs.sh` reads `docs/{EPICS,PRD,ARCHITECTURE,...}.md`
+- [ ] Writes/updates corresponding `.mdx` files
+- [ ] Routine runs on every push to main
+**Points**: 3 | **Priority**: P0
+
+#### Story 29.3: Captain pages
+- [ ] Update `content/docs/{captain,dispatch,connectors,context,issue,team,agents,commands,skills,hooks,memory,rules,mcp}.mdx` to v4 truth
+**Points**: 3 | **Priority**: P1
+
+#### Story 29.4: Demo video / screencast
+- [ ] Record captain weekly cycle (Routine wakes → ingests pulse → dispatches plan → escalates one decision)
+- [ ] Embed in `content/docs/claude-code.mdx`
+**Points**: 2 | **Priority**: P2
+
+---
+
+## Summary
+
+| Phase | Stories | P0 | P1 | P2 | Status |
+|-------|---------|----|----|-----|--------|
+| Phase 1: Developer Engine | 29 | 22 | 7 | 0 | Done (with E14 backfill) |
+| Phase 2: Team Engine | 20 | 13 | 7 | 0 | In Progress |
+| Phase 2.5: Foundation Repair | 16 | 12 | 4 | 0 | New |
+| Phase 3: CEO-Brain Captain | 20 | 14 | 6 | 0 | New |
+| Phase 4: Engine 2026 | 27 | 18 | 9 | 1 | New |
+| Phase 5: Methodology | 9 | 5 | 1 | 3 | New |
+| Phase 6: Sustainability | 9 | 5 | 4 | 1 | New |
+| **Total** | **130** | **89** | **38** | **5** | |
+
+(Story totals: 57 reconciled from v3 + 78 new = 135 master stories. Of those, 4 are dependency markers (22.1, 23.1, 23.2, 24.4) so net implementable count is **131**. The summary table reflects net-of-dependency counts.)
+
+---
+
+## Sprint Plan
+
+| Sprint | Window | Focus | Epics |
+|---|---|---|---|
+| **S1** | 2026-04-26 → 2026-05-09 | Foundation Repair | E13, E14, E15 |
+| **S2** | 2026-05-10 → 2026-05-23 | Captain v2 + Observability | E16, E17, E18, E19 |
+| **S3** | 2026-05-24 → 2026-06-06 | Engine 2026 part 1 | E20, E21, E22 |
+| **S4** | 2026-06-07 → 2026-06-20 | Engine 2026 part 2 + Methodology | E23, E24, E25, E26 |
+| **S5** | 2026-06-21 → 2026-07-04 | Sustainability + Polish | E27, E28, E29 |
+
+S1 is the dependency root — captain v2 (S2) cannot land cleanly until rules + memory + permissions exist. S3 cannot land until subagent frontmatter is in place. E27 (AGENTS.md) is parallelizable any time.
+
+---
+
+## Acceptance Criteria
+
+### Phase 2.5 Complete When
+- [ ] `bash scripts/inventory.sh` produces `docs/INVENTORY.md` and exits 0
+- [ ] `ls .claude/rules/ | wc -l` = 12 (existing 4 + 8 new)
+- [ ] `ls .claude/memory/*.json | wc -l` ≥ 12
+- [ ] `jq '.permissions' .claude/settings.json` returns the allow + deny block
+- [ ] Open any session: SessionStart hook prints captain bridge + open report issues
+
+### Phase 3 Complete When
+- [ ] `/captain --dry-run` outputs the week's planned dispatches
+- [ ] `cat .claude/memory/runway.json` shows current `weeks_remaining`
+- [ ] Routine "Morning org pulse" writes `org-pulse-<date>.json` and posts to Slack
+- [ ] Routine "Captain weekly cycle" opens draft PR Monday morning
+- [ ] Captain escalates pilot stage change to Apple Notes Inbox
+
+### Phase 4 Complete When
+- [ ] `claude --plugin-dir ./plugins/kun-engineer` starts session with all skills prefixed `kun:`
+- [ ] `claude --plugin-dir ./plugins/kun-business` denies `Skill(deploy)`
+- [ ] `/atom` then `/weekly` in same session — captain runs in `context: fork`
+- [ ] Agent team spawns 3 teammates for hogwarts admission, captain consolidates
+- [ ] `~/.claude/memory/spend-daily.json` shows haiku/sonnet/opus split
+
+### Phase 5 Complete When
+- [ ] Monday: `/sprint-plan` Routine fires, writes `.claude/sprints/<num>.md`
+- [ ] Daily standup posts to Slack `#standup`
+- [ ] End of sprint: `/sprint-review` writes velocity to `captain_journal.md`
+- [ ] AGENTS.md exists in kun + 6 product repos
+- [ ] CLAUDE.md ↔ AGENTS.md drift watcher catches its first drift
+
+### Phase 6 Complete When
+- [ ] 7-day average from `spend.jsonl` projects monthly cost ≤ $200
+- [ ] Trigger drift: edit captain.md → published `captain.mdx` regenerates next push
+- [ ] All declared rule counts (rules: 12, memory: 13+, skills: 58+, agents: 49) match across `docs/`, `content/docs/`, and `_index.md`
+
+---
+
+## Risks & Mitigations
+
+| Risk | Impact | Mitigation |
+|------|--------|------------|
+| Routines is research preview — API may change | E17, E23 break | Use beta header `experimental-cc-routine-2026-04-01`; capture response shape in routine ledger; fall back to local cron if API rev drops |
+| Agent Teams experimental — session resume incomplete | E24 unstable in long-running pilots | Keep Agent Teams off by default; opt-in per session; document `--no-agent-teams` flag |
+| Plugin marketplace approval lag | E25.5 delayed | E25.1-25.4 work via `--plugin-dir` without marketplace; ship there first |
+| Captain auto-memory grows unbounded | Context exhaustion | E16.1 caps journal at 200 lines for hot load; older entries archive to dated topic files |
+| Anthropic spend overshoot during S3 (heavy migration) | Burns weeks of runway | E28.5 auto-throttle activates if forecast > $180/mo |
+| Per-repo AGENTS.md (E27.2) needs 6 PR approvals | Stalls S5 | Use `analyze` agent to draft all 6 in parallel; submit as draft PRs for async review |
+| Memory location drift (kun/.claude/memory vs ~/.claude/projects/.../memory) | Inconsistent state | E13.1 inventory script reconciles; E16.1 commits to one canonical location |
+
+---
+
+## Reference
+
+- v3.0 epic doc: `docs/EPICS.md` (preserved for historical comparison)
+- Captain agent: `.claude/agents/captain.md`
+- Decision matrix (existing text): `content/docs/captain.mdx`
+- Plan file backing this rev: `~/.claude/plans/read-full-kun-and-whimsical-hammock.md`
+- Anthropic Routines: `https://code.claude.com/docs/en/routines`
+- Agent Teams: `https://code.claude.com/docs/en/agent-teams`
+- SKILL.md spec: `https://code.claude.com/docs/en/skills`
+- Plugins: `https://code.claude.com/docs/en/plugins`
+- Vercel react-best-practices: `https://github.com/vercel-labs/agent-skills/tree/main/skills/react-best-practices`
+- Vercel Next.js AGENTS.md: `https://github.com/vercel/next.js/blob/canary/AGENTS.md`
+- BMAD-METHOD: `https://github.com/bmad-code-org/BMAD-METHOD`

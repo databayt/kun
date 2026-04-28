@@ -1,0 +1,9 @@
+{
+  "name": "kun-ops",
+  "description": "Role profile: operations — /monitor, /costs, /incident, /deploy, /ship, /watch. For Sedon (Saudi ops + DevOps).",
+  "version": "4.0.0",
+  "author": { "name": "databayt", "url": "https://github.com/databayt" },
+  "homepage": "https://kun.databayt.org/team#ops",
+  "repository": "https://github.com/databayt/kun",
+  "license": "SSPL-1.0"
+}

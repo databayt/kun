@@ -1,0 +1,9 @@
+{
+  "name": "kun-business",
+  "description": "Role profile: business operations — captain skills + revenue/growth/support agents. Excludes heavy engineering specialists. For Ali (sales/QA).",
+  "version": "4.0.0",
+  "author": { "name": "databayt", "url": "https://github.com/databayt" },
+  "homepage": "https://kun.databayt.org/team#business",
+  "repository": "https://github.com/databayt/kun",
+  "license": "SSPL-1.0"
+}

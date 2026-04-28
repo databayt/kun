@@ -1,0 +1,40 @@
+{
+  "$schema": "https://kun.databayt.org/schemas/revenue.v1.json",
+  "version": "1.0",
+  "lastUpdated": "2026-04-25",
+  "totals": {
+    "mrr": 0,
+    "arr": 0,
+    "customerCount": 0,
+    "asOf": "2026-04-25"
+  },
+  "customers": [],
+  "pipeline": [
+    {
+      "id": "king-fahad",
+      "name": "King Fahad Schools",
+      "stage": "warm",
+      "estimatedArr": null,
+      "primaryContact": "ahmed-baha",
+      "owner": "abdout",
+      "lastTouch": "2026-04-04",
+      "nextStep": null,
+      "notes": "First pilot. Open-source pitch. Sudan."
+    }
+  ],
+  "stages": ["cold", "warm", "hot", "proposal", "contract", "won", "lost"],
+  "schema": {
+    "customer": {
+      "id": "string",
+      "name": "string",
+      "stripeCustomerId": "string | null",
+      "tier": "starter | growth | enterprise",
+      "mrr": "number (USD)",
+      "arr": "number (USD)",
+      "paymentStatus": "active | past_due | canceled",
+      "startedAt": "ISO date",
+      "renewalAt": "ISO date | null"
+    }
+  },
+  "_followUp": "Story 18.2 — populate from Stripe MCP query. Story 18.3 — auto-update nightly."
+}

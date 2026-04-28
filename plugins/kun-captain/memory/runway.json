@@ -1,0 +1,39 @@
+{
+  "$schema": "https://kun.databayt.org/schemas/runway.v1.json",
+  "version": "1.0",
+  "lastUpdated": "2026-04-25",
+  "capital": {
+    "amount": 5000,
+    "currency": "USD",
+    "asOf": "2026-04-25",
+    "source": "self-funded"
+  },
+  "burn": {
+    "monthly": 500,
+    "breakdown": {
+      "anthropic_max": 200,
+      "vercel": 0,
+      "neon": 0,
+      "namecheap": 50,
+      "other_services": 250,
+      "anthropic_actual_30d": 0
+    },
+    "asOf": "2026-04-25"
+  },
+  "revenue": {
+    "mrr": 0,
+    "arr": 0,
+    "customers": 0,
+    "asOf": "2026-04-25",
+    "source": "stripe MCP — pending wire"
+  },
+  "weeksRemaining": 43,
+  "monthsRemaining": 10.0,
+  "alertThresholds": {
+    "monthlyBurnAlert": 600,
+    "weeksRemainingAlert": 12,
+    "anthropicSpendAlert": 200
+  },
+  "_note": "Updated by scripts/runway.sh on demand and by Routine 23.4 (cost watcher) daily.",
+  "_followUp": "Story 16.3 — wire Stripe MCP query to populate revenue.mrr."
+}

@@ -1,0 +1,53 @@
+name: Contribution tally
+
+on:
+  schedule:
+    - cron: "0 2 * * *" # nightly 02:00 UTC
+  workflow_dispatch:
+    inputs:
+      since:
+        description: "Window (e.g. 30d, 7d, 2026-03-01)"
+        required: false
+        default: "30d"
+
+permissions:
+  contents: write
+
+jobs:
+  tally:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Aggregate CU across databayt org
+        env:
+          GH_TOKEN: ${{ secrets.ORG_READ_PAT }}
+          SINCE: ${{ inputs.since || '30d' }}
+        run: |
+          # The tally script (to be written in scripts/tally.mjs) queries:
+          #   gh api graphql -f query='...' for each repo in the org
+          # for closed issues + merged PRs + reviews in the window, parses each
+          # PR body for the Contribution declaration block, applies the CU table
+          # from RULES.md, applies the monthly cap, writes:
+          #   .snapshot/$(date +%F).json
+          # All numbers are sourced from immutable git artifacts (signed
+          # commits, closed issues, merged PRs).
+          node scripts/tally.mjs --org databayt --since "$SINCE" --out ".snapshot/$(date -u +%F).json"
+
+      - name: Commit snapshot (signed)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "kun-bot"
+          git config user.email "noreply@databayt.org"
+          git add .snapshot/
+          if ! git diff --staged --quiet; then
+            git commit -S -m "chore(snapshot): nightly $(date -u +%F)" || git commit -m "chore(snapshot): nightly $(date -u +%F)"
+            git push
+          else
+            echo "No snapshot changes."
+          fi

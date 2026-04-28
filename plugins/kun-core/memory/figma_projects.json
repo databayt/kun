@@ -1,0 +1,148 @@
+{
+  "$schema": "figma-projects-v1",
+  "description": "Figma project references for design-to-code workflows",
+  "lastUpdated": "2026-04-24T00:00:00Z",
+  "authentication": {
+    "method": "claude_ai_Figma_cloud",
+    "note": "Authenticated via Figma MCP cloud — no local token needed"
+  },
+  "projects": {
+    "design-system": [
+      {
+        "id": "apple-ios26",
+        "name": "Apple Design Resources — iOS 26",
+        "description": "Official Apple iOS 26 design kit with Liquid Glass, system colors, SF Pro typography, component library.",
+        "fileKey": "WJPT23xMx4B6oXrCavmHbQ",
+        "url": "https://www.figma.com/design/WJPT23xMx4B6oXrCavmHbQ/iso",
+        "type": "design-kit",
+        "contains": ["liquid-glass", "action-sheet", "alert", "list", "tab-bar", "sheet", "text-field", "header", "empty-states", "overlay"],
+        "nodeIds": {
+          "actionSheet": "1:58",
+          "list": "1:3049",
+          "alert": "7:2186",
+          "textFieldRow": "7:2112",
+          "sheet": "8:2369",
+          "tabBar": "12:2378",
+          "liquidGlassLarge": "16:3092",
+          "liquidGlassMedium": "16:3096",
+          "liquidGlassClear": "16:3105",
+          "overlay": "16:3081",
+          "emptyStates": "17:3252",
+          "header": "17:3294"
+        },
+        "usage": "Source of truth for mobile app atoms — both iOS (swift-app) and Android (kotlin-app)",
+        "notes": "Authenticated as Osman Abdout, Full seat Admin on Pro team. Code Connect BLOCKED — requires Org/Enterprise plan."
+      }
+    ],
+    "products": [
+      {
+        "id": "hogwarts-design",
+        "name": "Hogwarts Design",
+        "description": "Education SaaS design files (WhatsApp iOS screens, dashboard, auth, forms).",
+        "fileKey": "HqgFh4Lxp8QtTnW04czQQN",
+        "url": "https://www.figma.com/design/HqgFh4Lxp8QtTnW04czQQN/Hogwarts",
+        "product": "hogwarts",
+        "screens": {
+          "whatsappChatList": {
+            "nodeId": "124:1406",
+            "name": "Chat list - Full view",
+            "viewport": "393x1209",
+            "platforms": ["hogwarts:web-mobile", "kotlin-app", "swift-app"],
+            "tokenDump": "~/.claude/memory/whatsapp_tokens.json",
+            "cdnBase": "https://d1dlwtcfl0db67.cloudfront.net/icons",
+            "iconPrefix": "ic-wa-"
+          }
+        }
+      },
+      {
+        "id": "souq-design",
+        "name": "Souq Design",
+        "description": "E-commerce marketplace design files",
+        "fileKey": null,
+        "url": null,
+        "product": "souq"
+      },
+      {
+        "id": "mkan-design",
+        "name": "Mkan Design",
+        "description": "Rental marketplace design files",
+        "fileKey": null,
+        "url": null,
+        "product": "mkan"
+      },
+      {
+        "id": "shifa-design",
+        "name": "Shifa Design",
+        "description": "Healthcare platform design files",
+        "fileKey": null,
+        "url": null,
+        "product": "shifa"
+      }
+    ],
+    "shared": []
+  },
+  "keywords": {
+    "from figma": "Browse all connected Figma projects",
+    "figma apple": "Browse Apple Design Resources HIG kit",
+    "figma hogwarts": "Open hogwarts design files",
+    "figma souq": "Open souq design files",
+    "figma mkan": "Open mkan design files",
+    "figma shifa": "Open shifa design files",
+    "mirror": "Compare Figma design to implementation and fix drift"
+  },
+  "tokenMapping": {
+    "web": {
+      "colors": {
+        "Primary": "--primary",
+        "Secondary": "--secondary",
+        "Destructive": "--destructive",
+        "Muted": "--muted",
+        "Accent": "--accent",
+        "Background": "--background",
+        "Foreground": "--foreground",
+        "Card": "--card",
+        "Border": "--border",
+        "Input": "--input",
+        "Ring": "--ring"
+      },
+      "spacing": "tailwind-scale",
+      "typography": {
+        "Heading": "--font-heading",
+        "Body": "--font-sans",
+        "Mono": "--font-mono"
+      },
+      "radius": {
+        "Small": "rounded-sm",
+        "Medium": "rounded-md",
+        "Large": "rounded-lg",
+        "Full": "rounded-full"
+      }
+    },
+    "ios": {
+      "colors": {
+        "backgrounds/grouped/primary": "Color(uiColor: .systemGroupedBackground)",
+        "backgrounds/grouped/secondary": "Color(uiColor: .secondarySystemGroupedBackground)",
+        "labels/primary": ".primary",
+        "labels/secondary": ".secondary",
+        "accents/blue": "Color(uiColor: .systemBlue)",
+        "accents/green": "Color(uiColor: .systemGreen)",
+        "fills/tertiary": "Color(uiColor: .tertiarySystemFill)",
+        "separators/vibrant": "Color(uiColor: .separator)"
+      },
+      "file": "swift-app/hogwarts/shared/ui/design-system/hogwarts-colors.swift"
+    },
+    "android": {
+      "colors": {
+        "backgrounds/grouped/primary": "HogwartsBackground (#F2F2F7)",
+        "backgrounds/grouped/secondary": "HogwartsSurface (#FFFFFF)",
+        "labels/primary": "HogwartsOnSurface (#1C1C1E)",
+        "labels/secondary": "HogwartsOnSurfaceVariant (#8E8E93)",
+        "accents/blue": "AppleBlue (#0088FF)",
+        "accents/green": "AppleGreen (#34C759)",
+        "fills/tertiary": "AppleGray5 (#E5E5EA)",
+        "separators/vibrant": "DividerColor (#C6C6C8)"
+      },
+      "file": "kotlin-app/core/designsystem/.../theme/color.kt"
+    }
+  }
+}

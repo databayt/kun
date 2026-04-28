@@ -1,0 +1,256 @@
+# Captain Decision Matrix — Story 16.2
+#
+# Each row pairs a trigger with an action. Captain reads this file before any
+# strategic decision and applies it deterministically. Replaces the prose
+# decision matrix in `.claude/agents/captain.md`.
+#
+# Schema:
+#   id            — stable identifier
+#   trigger       — when this rule fires (regex on captain's working context)
+#   bound         — quantitative constraint (cost, time, scope)
+#   action        — act | escalate | delegate
+#   delegate_to   — agent name (only when action: delegate)
+#   escalation    — channel to use (only when action: escalate)
+#   priority      — fyi | normal | decision | urgent
+#   deadline      — how long captain waits before re-dispatching
+#   rationale     — why this rule exists
+#
+# Captain matches in document order. First match wins.
+
+version: "1.0"
+last_updated: "2026-04-25"
+captain_agent: ".claude/agents/captain.md"
+
+rules:
+
+  # ============ ESCALATE rules — anything requiring Abdout's call ============
+
+  - id: budget-increase
+    trigger: "spend.*\\$|budget.*increase|new subscription|paid plan upgrade"
+    bound: "monthly_cost_delta >= 50 USD"
+    action: escalate
+    escalation: apple-notes-inbox
+    priority: decision
+    deadline: 24h
+    rationale: |
+      Captain has budget authority up to $50/mo new spend. Above that
+      requires founder sign-off because runway math shifts.
+
+  - id: new-product-launch
+    trigger: "launch new product|sunset|discontinue|new repo|new vertical"
+    bound: null
+    action: escalate
+    escalation: apple-notes-inbox
+    priority: decision
+    deadline: 48h
+    rationale: |
+      Adding or removing a product changes the strategic surface.
+      Founder-only call.
+
+  - id: hiring
+    trigger: "hire|contractor|new team member|consultant"
+    bound: null
+    action: escalate
+    escalation: apple-notes-inbox
+    priority: decision
+    deadline: 72h
+    rationale: |
+      Headcount changes the burn rate model.
+
+  - id: license-change
+    trigger: "license|SSPL|MIT|Apache|relicense"
+    bound: null
+    action: escalate
+    escalation: apple-notes-inbox
+    priority: decision
+    deadline: 72h
+    rationale: |
+      Legal implications. Default license is SSPL. Changing it requires
+      review of every dependent product.
+
+  - id: partnership
+    trigger: "partnership|MOU|reseller|integration agreement"
+    bound: null
+    action: escalate
+    escalation: apple-notes-inbox
+    priority: decision
+    deadline: 72h
+    rationale: |
+      Captain's authority stops at marketing reach. Partnerships obligate
+      the company.
+
+  - id: payment-flow-change
+    trigger: "stripe.*price|pricing tier change|payment gateway swap"
+    bound: null
+    action: escalate
+    escalation: apple-notes-inbox
+    priority: decision
+    deadline: 48h
+    rationale: |
+      Pricing changes break customer expectations. Always founder approved.
+
+  - id: runway-critical
+    trigger: "runway < 12 weeks|monthlyBurn > 600|monthlyBurn projected > 600"
+    bound: "weeks_remaining <= 12 OR projected_monthly_burn >= 600"
+    action: escalate
+    escalation: apple-notes-inbox
+    priority: urgent
+    deadline: 12h
+    rationale: |
+      Below 12 weeks of runway is the existential threshold for this org.
+      Founder sees this in 12h or captain pauses non-essential routines.
+
+  - id: anthropic-spend-overshoot
+    trigger: "anthropic spend.*forecast > 200|api cost projected > 200"
+    bound: "anthropic_monthly_forecast >= 200"
+    action: escalate
+    escalation: apple-notes-inbox
+    priority: urgent
+    deadline: 12h
+    rationale: |
+      Max plan envelope is $200/mo. Overshoot triggers E28.5 auto-throttle
+      AND notifies Abdout so model routing can be re-tuned.
+
+  - id: pilot-stage-change
+    trigger: "pilot stage transition|king.fahad.*(proposal|contract|live)"
+    bound: null
+    action: escalate
+    escalation: apple-notes-inbox
+    priority: decision
+    deadline: 24h
+    rationale: |
+      Stage transitions through the pilot funnel are inflection points
+      that may need Abdout's direct input on terms.
+
+  # ============ ACT rules — captain's own authority =========================
+
+  - id: weekly-sprint-allocation
+    trigger: "weekly|sprint plan|allocation|monday plan"
+    bound: null
+    action: act
+    rationale: |
+      Captain runs the Monday allocation cycle. No founder sign-off needed.
+
+  - id: priority-ordering
+    trigger: "priority shuffle|reorder|deprioritize|elevate"
+    bound: "no_product_added_or_removed = true"
+    action: act
+    rationale: |
+      Captain may shuffle priorities within the existing product set.
+
+  - id: scope-cut
+    trigger: "cut scope|defer|move to next sprint|reduce MVP"
+    bound: null
+    action: act
+    rationale: |
+      Cutting feature scope to make a sprint date is captain's call.
+
+  - id: resource-rebalance
+    trigger: "rebalance|move ali to|samia switches to|reassign"
+    bound: null
+    action: act
+    rationale: |
+      Captain reassigns the 4 humans across products as needed. Hard
+      constraints (timezone, accessibility) loaded from capacity.json.
+
+  - id: revenue-target-adjust
+    trigger: "MRR target|ARR target|growth goal"
+    bound: "delta < 50% of prior_target"
+    action: act
+    rationale: |
+      Captain may tune revenue targets within ±50%. Bigger swings escalate.
+
+  # ============ DELEGATE rules — hand off to a leadership agent ============
+
+  - id: revenue-domain
+    trigger: "pricing|proposal|contract|billing|stripe|MRR.*calc"
+    bound: null
+    action: delegate
+    delegate_to: revenue
+    rationale: |
+      Revenue agent owns pricing logic, proposal drafts, contract review.
+
+  - id: growth-domain
+    trigger: "content|SEO|social|community|dev relations|outreach campaign"
+    bound: null
+    action: delegate
+    delegate_to: growth
+    rationale: |
+      Growth agent owns the marketing surface (Arabic-first content).
+
+  - id: support-domain
+    trigger: "customer issue|onboarding|SLA|help desk|knowledge base"
+    bound: null
+    action: delegate
+    delegate_to: support
+    rationale: |
+      Support agent owns the customer-facing operations.
+
+  - id: product-domain
+    trigger: "roadmap|story scoping|ICE score|release planning"
+    bound: null
+    action: delegate
+    delegate_to: product
+    rationale: |
+      Product agent owns prioritization and release planning across 5 products.
+
+  - id: analyst-domain
+    trigger: "market intel|competitor|usage analytics|churn analysis"
+    bound: null
+    action: delegate
+    delegate_to: analyst
+    rationale: |
+      Analyst agent owns the data and competitive intelligence.
+
+  - id: tech-lead-domain
+    trigger: "architecture|cross-repo|breaking change|tech debt|dependency upgrade"
+    bound: null
+    action: delegate
+    delegate_to: tech-lead
+    rationale: |
+      Tech-lead owns cross-repo architecture decisions.
+
+  - id: ops-domain
+    trigger: "deploy|CI/CD|cost optimization|infrastructure|uptime|incident"
+    bound: null
+    action: delegate
+    delegate_to: ops
+    rationale: |
+      Ops agent owns the delivery pipeline and infrastructure costs.
+
+  - id: guardian-domain
+    trigger: "OWASP|security audit|performance budget|SSPL compliance|dependency vuln"
+    bound: null
+    action: delegate
+    delegate_to: guardian
+    rationale: |
+      Guardian agent owns security and compliance.
+
+defaults:
+  unmatched_priority: normal
+  unmatched_action: delegate
+  unmatched_delegate_to: orchestration
+  unmatched_rationale: |
+    If no rule matches, captain hands off to the master orchestrator,
+    which routes to the most relevant chain.
+
+escalation_channels:
+  - id: apple-notes-inbox
+    description: Apple Notes "Dispatch/Inbox" folder, prefixed [DECISION NEEDED]
+    setup: scripts/setup-apple-notes.sh
+    fallback_windows: github-issue label:captain repo:databayt/kun
+
+  - id: slack-dm
+    description: Slack DM to Abdout via slack MCP
+    setup: ".env: SLACK_BOT_TOKEN required"
+
+  - id: github-issue
+    description: gh issue create --label captain --assignee abdout
+    setup: gh CLI authenticated
+
+# Captain re-dispatch policy
+re_dispatch:
+  no_response_after: 24h    # priority: decision
+  urgent_after: 24h          # bump to urgent
+  pause_after: 72h           # captain pauses non-essential routines
+  resume_on: any-response-from-abdout
