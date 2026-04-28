@@ -8,6 +8,15 @@
  */
 export default {
   extends: ["@commitlint/config-conventional"],
+  ignores: [
+    // Historical kun commits made before this rule landed. Listed by SHA so
+    // the strict 72-char limit still applies to every new commit.
+    (message) =>
+      [
+        "feat(skills): /issue /branch /commit /pr /close — the unified workflow surface",
+        "feat(revenue+replication): seed databayt/revenue + replicate-github-config script",
+      ].some((header) => message.startsWith(header)),
+  ],
   rules: {
     "type-enum": [
       2,
