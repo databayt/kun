@@ -12,6 +12,10 @@ jobs:
   verify:
     name: Every commit must be signed
     runs-on: ubuntu-latest
+    # Bootstrap mode: report unsigned commits but don't block the merge until
+    # all 4 active contributors have SSH signing configured. See CONTRIBUTING.md
+    # for setup. Flip to false after the org-wide signing is set up.
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
         with:
