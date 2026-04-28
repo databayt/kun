@@ -1,0 +1,74 @@
+name: Dispute
+description: Dispute a CU attribution, monthly report, or distribution event.
+title: "[Dispute]: "
+labels: ["dispute", "needs-review"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Disputes are public, append-only, and resolved on a 7-day window before the next distribution PR merges.
+        Be specific — link the artifact, name the period, propose the correction.
+
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What are you disputing?
+      options:
+        - "Monthly report — incorrect CU attribution"
+        - "Monthly report — missing contribution"
+        - "Distribution event — math error"
+        - "Distribution event — policy interpretation"
+        - "Anti-gaming flag — false positive"
+        - "RULES.md — proposed change"
+        - "Other"
+    validations:
+      required: true
+
+  - type: input
+    id: artifact
+    attributes:
+      label: Artifact link
+      description: URL to the report, distribution PR, contributor's PR, or RULES.md section.
+      placeholder: "https://github.com/databayt/revenue/blob/main/reports/monthly-report-2026-03.md"
+    validations:
+      required: true
+
+  - type: input
+    id: period
+    attributes:
+      label: Reporting period
+      placeholder: "2026-03"
+    validations:
+      required: true
+
+  - type: textarea
+    id: claim
+    attributes:
+      label: What you believe is wrong
+      description: Be specific — name the contributor, the issue/PR number, the CU value, the correct value.
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Links to the closed issues, merged PRs, signed commits, or RULES.md sections supporting your claim.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-fix
+    attributes:
+      label: Proposed correction
+      description: How you think it should be fixed — corrected CU value, an addendum to the report, a RULES.md change, etc.
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Acknowledgement
+      options:
+        - label: I read RULES.md and understand the CU model.
+          required: true
+        - label: I understand this dispute is public and append-only.
+          required: true
