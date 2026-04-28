@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Remote AI Development Infrastructure - كن (Be!)",
   "private": true,
+  "packageManager": "pnpm@9.15.0",
   "scripts": {
     "dev": "next dev",
     "dev:turbo": "next dev --turbopack",
