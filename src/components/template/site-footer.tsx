@@ -1,4 +1,4 @@
-import { ReportIssue } from "@/components/report-issue"
+import { ReportIssue } from "@/components/report-issue";
 
 export function SiteFooter() {
   return (
@@ -6,14 +6,14 @@ export function SiteFooter() {
       <div className="container-wrapper px-responsive">
         <div className="py-4">
           <div className="text-balance text-center text-sm leading-loose text-muted-foreground md:text-left rtl:md:text-right">
-            Built with{" "}
+            Built by{" "}
             <a
-              href="https://claude.ai/code"
+              href="https://databayt.org"
               target="_blank"
               rel="noreferrer"
               className="font-medium underline underline-offset-4"
             >
-              Claude Code
+              databayt
             </a>
             . The source code is available on{" "}
             <a
@@ -24,11 +24,10 @@ export function SiteFooter() {
             >
               GitHub
             </a>
-            .{" "}
-            <ReportIssue />
+            . <ReportIssue />
           </div>
         </div>
       </div>
     </footer>
-  )
+  );
 }
