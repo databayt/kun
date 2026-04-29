@@ -8,7 +8,113 @@
     "OSS_PATH": "/Users/abdout/oss",
     "GITHUB_USER": "abdout"
   },
+  "permissions": {
+    "allow": [
+      "Read",
+      "Glob",
+      "Grep",
+      "Edit",
+      "Write",
+      "WebFetch",
+      "WebSearch",
+
+      "Bash(pnpm:*)",
+      "Bash(npm run:*)",
+      "Bash(npm test:*)",
+      "Bash(npm install)",
+      "Bash(npx:*)",
+
+      "Bash(git status)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git pull:*)",
+      "Bash(git checkout:*)",
+      "Bash(git branch:*)",
+      "Bash(git fetch:*)",
+      "Bash(git remote:*)",
+      "Bash(git restore:*)",
+      "Bash(git stash:*)",
+      "Bash(git reflog:*)",
+      "Bash(git rev-parse:*)",
+      "Bash(git config:*)",
+      "Bash(git show:*)",
+
+      "Bash(gh issue:*)",
+      "Bash(gh pr:*)",
+      "Bash(gh repo:*)",
+      "Bash(gh api:*)",
+      "Bash(gh run:*)",
+      "Bash(gh workflow:*)",
+      "Bash(gh deployment:*)",
+      "Bash(gh search:*)",
+      "Bash(gh label:*)",
+      "Bash(gh release:*)",
+
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(cat:*)",
+      "Bash(jq:*)",
+      "Bash(echo:*)",
+      "Bash(pwd)",
+      "Bash(which:*)",
+      "Bash(file:*)",
+      "Bash(wc:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(chmod:*)",
+      "Bash(mkdir:*)",
+      "Bash(mktemp)",
+      "Bash(date:*)",
+      "Bash(sed:*)",
+      "Bash(awk:*)"
+    ],
+    "deny": [
+      "Bash(rm -rf /*)",
+      "Bash(rm -rf /)",
+      "Bash(rm -rf ~)",
+      "Bash(rm -rf ~/*)",
+      "Bash(curl * | sh)",
+      "Bash(curl * | bash)",
+      "Bash(wget * | sh)",
+      "Bash(sudo *)",
+      "Bash(chmod 777 *)",
+      "Bash(git push --force *main*)",
+      "Bash(git push -f *main*)",
+      "Bash(git reset --hard origin/main)",
+      "Bash(git rebase -i*)",
+      "Bash(gh repo delete:*)",
+      "Bash(gh release delete:*)"
+    ]
+  },
   "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR\"/scripts/session-start.sh 2>/dev/null; exit 0",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR\"/scripts/hooks/auto-issue.sh 2>/dev/null; exit 0",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
       {
         "matcher": "Bash(pnpm dev)",
@@ -38,6 +144,26 @@
             "command": "if [[ \"$FILE_PATH\" =~ \\.(ts|tsx|js|jsx|json|css|md)$ ]]; then npx prettier --write \"$FILE_PATH\" 2>/dev/null; fi; exit 0"
           }
         ]
+      },
+      {
+        "matcher": "Bash(git commit:*)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR\"/scripts/hooks/post-commit.sh 2>/dev/null; exit 0",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Bash(git push:*)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR\"/scripts/hooks/post-push.sh 2>/dev/null; exit 0",
+            "timeout": 10
+          }
+        ]
       }
     ],
     "Stop": [
@@ -46,7 +172,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo \"[$(date '+%Y-%m-%d %H:%M:%S')] Session ended\" >> ~/.claude/session-log.txt"
+            "command": "bash \"$CLAUDE_PROJECT_DIR\"/scripts/hooks/session-end.sh 2>/dev/null; echo \"[$(date '+%Y-%m-%d %H:%M:%S')] Session ended\" >> ~/.claude/session-log.txt; exit 0",
+            "timeout": 15
           }
         ]
       }

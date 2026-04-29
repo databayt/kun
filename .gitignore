@@ -40,3 +40,12 @@ pnpm-debug.log*
 .vercel
 .env*.local
 .playwright-mcp/
+
+# Crawler state (downloaded blobs, manifest, reports)
+scripts/crawl-anthropic/state/
+
+# Claude Code session state — per-repo active issue, daily counter, history
+.claude/state/
+
+# Stash for hooks
+.claude/scheduled_tasks.lock

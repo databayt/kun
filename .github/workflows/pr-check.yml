@@ -1,0 +1,126 @@
+name: PR Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [main]
+
+# Cancel in-flight runs when a new commit lands on the same PR
+concurrency:
+  group: pr-check-${{ github.head_ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  branch-name:
+    name: Branch name
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate branch follows <type>/<issue#>-<slug>
+        env:
+          BRANCH: ${{ github.head_ref }}
+        run: |
+          if [[ ! "$BRANCH" =~ ^(feat|fix|chore|docs|refactor|test|perf|style|ci|build|revert|i18n|hotfix)\/[0-9]+-[a-z0-9][a-z0-9-]*$ ]]; then
+            echo "::error::Branch '$BRANCH' violates convention <type>/<issue#>-<slug>"
+            echo "Examples: feat/42-add-dark-mode, fix/108-rtl-overlap, chore/9-bump-deps"
+            exit 1
+          fi
+          echo "Branch name OK: $BRANCH"
+
+  typecheck:
+    name: Typecheck
+    runs-on: ubuntu-latest
+    # Pre-existing TS errors in src/mdx-components.tsx — track in a follow-up issue.
+    # CI reports the failure but does not block the merge until that lands.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    # Pre-existing next-lint findings — track in a follow-up issue.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Run tests if any exist
+        run: |
+          if compgen -G "**/*.{test,spec}.{ts,tsx,js,jsx}" >/dev/null 2>&1; then
+            pnpm test
+          else
+            echo "No tests configured yet — skipping."
+          fi
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+
+  commit-lint:
+    name: Commit lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Validate every commit
+        run: pnpm exec commitlint --from origin/${{ github.base_ref }} --to HEAD --verbose
+
+  pr-body:
+    name: PR body has Closes #N
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR body for Closes/Refs
+        env:
+          BODY: ${{ github.event.pull_request.body }}
+        run: |
+          if echo "$BODY" | grep -qiE '(Closes|Fixes|Resolves|Refs)[[:space:]]+#[0-9]+'; then
+            echo "PR body links an issue."
+          else
+            echo "::error::PR body must contain 'Closes #N', 'Fixes #N', 'Resolves #N', or 'Refs #N'."
+            echo "Use Closes #N if this PR is the final commit on the issue; Refs #N for partial work."
+            exit 1
+          fi

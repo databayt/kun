@@ -1,0 +1,54 @@
+name: Docs
+description: Fix or improve documentation
+title: "[Docs]: "
+labels: ["type/docs", "priority/p3", "status/triage"]
+body:
+  - type: input
+    id: page
+    attributes:
+      label: Page or file
+      description: URL or repo path
+      placeholder: "https://kun.databayt.org/docs/keywords  OR  content/docs/keywords.mdx"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind
+      options:
+        - incorrect information
+        - missing information
+        - typo / grammar
+        - broken link
+        - unclear / hard to follow
+        - code example broken
+        - other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What's wrong, what's missing, or what could be clearer.
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggested
+    attributes:
+      label: Suggested fix
+      description: Optional — propose the wording or example you'd add.
+
+  - type: dropdown
+    id: size
+    attributes:
+      label: Size estimate
+      options:
+        - "1 — trivial (typo, one-line)"
+        - "2 — small (paragraph rewrite)"
+        - "3 — medium (section rewrite)"
+        - "5 — large (new doc page)"
+    validations:
+      required: false

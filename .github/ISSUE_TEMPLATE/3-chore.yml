@@ -1,0 +1,50 @@
+name: Chore
+description: Maintenance, dependencies, infrastructure, cleanup
+title: "[Chore]: "
+labels: ["type/chore", "priority/p3", "status/triage"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: What needs doing
+      description: The maintenance task and the reason it's needed.
+      placeholder: |
+        Bump @commitlint/cli from 19 to 20 — required for the new ESM config format.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Scope
+      options:
+        - deps
+        - ci
+        - infra
+        - cleanup
+        - tooling
+        - other
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      value: |
+        - [ ] criterion 1
+        - [ ] verification (command + expected output)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: size
+    attributes:
+      label: Size estimate
+      options:
+        - "1 — trivial"
+        - "2 — small"
+        - "3 — medium"
+        - "5 — large"
+    validations:
+      required: false

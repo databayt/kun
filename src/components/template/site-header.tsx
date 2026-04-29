@@ -1,49 +1,30 @@
-import Link from "next/link"
+import Link from "next/link";
 
-import { ModeSwitcher } from "./mode-switcher"
-import { LangSwitcher } from "./lang-switcher"
-import { GitHubLink } from "./github-link"
-import { UserButton } from "./user-button"
-import { Separator } from "@/components/ui/separator"
+import { ModeSwitcher } from "./mode-switcher";
+import { LangSwitcher } from "./lang-switcher";
+import { GitHubLink } from "./github-link";
+import { UserButton } from "./user-button";
+import { MainNav } from "./main-nav";
+import { MobileNav } from "./mobile-nav";
+import { Separator } from "@/components/ui/separator";
 
 interface SiteHeaderProps {
-  lang: string
+  lang: string;
 }
 
 export function SiteHeader({ lang }: SiteHeaderProps) {
   return (
     <header className="bg-background sticky top-0 z-50 w-full">
       <div className="container-wrapper">
-        <div className="flex h-(--header-height) items-center **:data-[slot=separator]:!h-4">
-          <Link href={`/${lang}`} className="flex items-center gap-1.5 me-6">
+        <div className="flex h-(--header-height) items-center gap-2 **:data-[slot=separator]:!h-4">
+          <MobileNav lang={lang} className="flex lg:hidden" />
+          <Link
+            href={`/${lang}`}
+            className="hidden items-center gap-1.5 me-6 lg:flex"
+          >
             <span className="font-bold">Kun</span>
           </Link>
-          <nav className="flex items-center gap-4 text-sm">
-            <Link
-              href={`/${lang}/docs`}
-              className="transition-colors hover:text-foreground/80 text-foreground/60"
-            >
-              Docs
-            </Link>
-            <Link
-              href={`/${lang}/incantations`}
-              className="transition-colors hover:text-foreground/80 text-foreground/60"
-            >
-              Incantations
-            </Link>
-            <Link
-              href={`/${lang}/team`}
-              className="transition-colors hover:text-foreground/80 text-foreground/60"
-            >
-              Team
-            </Link>
-            <Link
-              href={`/${lang}/context`}
-              className="transition-colors hover:text-foreground/80 text-foreground/60"
-            >
-              Context
-            </Link>
-          </nav>
+          <MainNav lang={lang} className="hidden lg:flex" />
           <div className="ms-auto flex items-center gap-2">
             <GitHubLink />
             <Separator orientation="vertical" />
@@ -54,5 +35,5 @@ export function SiteHeader({ lang }: SiteHeaderProps) {
         </div>
       </div>
     </header>
-  )
+  );
 }

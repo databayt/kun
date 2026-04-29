@@ -1,0 +1,139 @@
+{
+  "$schema": "https://kun.databayt.org/schemas/area-dropdowns.v1.json",
+  "version": "1.0.0",
+  "description": "Per-repo `area` dropdown options used in .github/ISSUE_TEMPLATE/*.yml. The replicate-github-config.sh script reads this when copying templates so each repo gets the right dropdown without manual editing.",
+  "lastUpdated": "2026-04-26",
+  "repos": {
+    "kun": [
+      "agents",
+      "skills",
+      "rules",
+      "hooks",
+      "scripts",
+      "memory",
+      "mcp",
+      "workflow",
+      "docs",
+      "other"
+    ],
+    "codebase": [
+      "components",
+      "registry",
+      "atoms",
+      "templates",
+      "blocks",
+      "agents",
+      "docs",
+      "other"
+    ],
+    "hogwarts": [
+      "platform",
+      "auth",
+      "students",
+      "teachers",
+      "parents",
+      "finance",
+      "attendance",
+      "timetable",
+      "exams",
+      "reports",
+      "settings",
+      "marketing",
+      "i18n",
+      "docs",
+      "other"
+    ],
+    "souq": [
+      "cart",
+      "checkout",
+      "vendor",
+      "catalog",
+      "orders",
+      "search",
+      "auth",
+      "payments",
+      "i18n",
+      "docs",
+      "other"
+    ],
+    "mkan": [
+      "listings",
+      "booking",
+      "search",
+      "calendar",
+      "reviews",
+      "payments",
+      "auth",
+      "host",
+      "guest",
+      "i18n",
+      "docs",
+      "other"
+    ],
+    "shifa": [
+      "appointments",
+      "patients",
+      "doctors",
+      "prescriptions",
+      "schedule",
+      "billing",
+      "auth",
+      "i18n",
+      "docs",
+      "other"
+    ],
+    "marketing": [
+      "landing",
+      "blog",
+      "i18n",
+      "seo",
+      "analytics",
+      "docs",
+      "other"
+    ],
+    "swift-app": [
+      "ios",
+      "watchos",
+      "auth",
+      "sync",
+      "ui",
+      "i18n",
+      "docs",
+      "other"
+    ],
+    "shadcn": [
+      "components",
+      "registry",
+      "themes",
+      "docs",
+      "other"
+    ],
+    "radix": [
+      "primitives",
+      "accessibility",
+      "docs",
+      "other"
+    ],
+    "apple": [
+      "design-tokens",
+      "patterns",
+      "docs",
+      "other"
+    ],
+    "distributed-computer": [
+      "p2p",
+      "token",
+      "consensus",
+      "infra",
+      "docs",
+      "other"
+    ],
+    ".github": [
+      "templates",
+      "workflows",
+      "profile",
+      "docs",
+      "other"
+    ]
+  }
+}

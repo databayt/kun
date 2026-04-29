@@ -1,0 +1,109 @@
+name: Fix
+description: Report a bug or regression
+title: "[Fix]: "
+labels: ["type/fix", "priority/p2", "status/triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. The clearer the reproduction, the faster the fix.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What's wrong
+      description: What happened? What did you expect? Include exact error messages if any.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Numbered steps. Anyone reading this should be able to hit the bug.
+      placeholder: |
+        1. Run `pnpm dev`
+        2. Navigate to /ar/dashboard
+        3. Click "Add student"
+        4. Observe console error: ...
+      render: bash
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected vs actual
+      placeholder: |
+        Expected: form submits, redirects to /students/<id>
+        Actual: form throws "tenantId not set"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - "critical — data loss, app down, security"
+        - "high — major feature broken, no workaround"
+        - "medium — feature partially broken, workaround exists"
+        - "low — cosmetic, minor inconvenience"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - agents
+        - skills
+        - rules
+        - hooks
+        - scripts
+        - memory
+        - mcp
+        - workflow
+        - docs
+        - other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: size
+    attributes:
+      label: Size estimate (story points)
+      description: Time-to-fix estimate. Locked at status/ready.
+      options:
+        - "1 — trivial (typo, one-line)"
+        - "2 — small (clear root cause, isolated fix)"
+        - "3 — medium (some investigation needed)"
+        - "5 — large (multi-file fix, needs tests)"
+        - "8 — heavy (deep investigation)"
+    validations:
+      required: false
+
+  - type: textarea
+    id: env
+    attributes:
+      label: Environment
+      placeholder: |
+        OS: macOS 14.5
+        Node: 22.10.0
+        pnpm: 9.12.0
+        Browser: Chrome 130
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / screenshots
+      description: Console output, network errors, screenshots. Drag and drop images.
+
+  - type: checkboxes
+    id: ready
+    attributes:
+      label: Submission checklist
+      options:
+        - label: I searched existing issues — this is not a duplicate
+          required: true

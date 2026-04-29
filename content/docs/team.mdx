@@ -1,129 +1,75 @@
 ---
-title: Team
-description: 4 roles with tailored MCP configs and agent indexes
+title: Roles
+description: Four roles with tailored MCP configs and agent indexes
 ---
 
-# Team
+# Roles
 
-4 humans with tailored tools. Each role gets a specific MCP config, skill set, and agent index — so everyone has exactly the tools they need, nothing more.
+Four roles, each with a tailored MCP config, skill set, and agent index.
 
-## Team Members
+## Roles
 
-### Abdout — Builder
-Engineering everything. Architecture, full-stack, deployment.
+### Engineer
+Engineering. Architecture, full-stack, deployment. Full agent fleet, all MCP servers.
 
-### Ali — QA Engineer + Sales
-Tests features (reports issues on GitHub), manages sales@databayt.org. Outreach for schools, sponsors, investors, early adopters, leads, clients, contributors.
+### Business
+Sales, outreach, proposals. MCP set: github, slack, linear, stripe, notion, browser, context7.
 
-### Samia — R&D & Kun Caretaker
-Research on Claude/Anthropic products, sharing economy models, revenue distribution. Taking care of Kun engine. Core vision contributor.
+### Content
+Translation, documentation, research. MCP set: github, slack, notion, browser, figma, context7, ref.
 
-### Sedon — Executor
-Clear task maps, reliable delivery. Saudi operations: bank account, physical presence, payments.
+### Operations
+Deploys, monitoring, incident response, cost tracking. MCP set: github, slack, vercel, sentry, neon, stripe, browser, posthog.
 
 ## Role-Specific MCP Configs
 
 | Role | Config File | Servers |
-|------|------------|---------|
-| **engineer** | mcp.json | github, vercel, neon, stripe, sentry, figma, shadcn, browser, + 10 more |
-| **business** | mcp-business.json | github, slack, linear, stripe, notion, browser, context7, memory-bank |
-| **content** | mcp-content.json | github, slack, notion, browser, figma, context7, memory-bank, ref |
-| **ops** | mcp-ops.json | github, slack, vercel, sentry, neon, stripe, browser, posthog, memory-bank |
+|------|-------------|---------|
+| **engineer** | `mcp.json` | All servers |
+| **business** | `mcp-business.json` | github, slack, linear, stripe, notion, browser, context7, memory-bank |
+| **content** | `mcp-content.json` | github, slack, notion, browser, figma, context7, memory-bank, ref |
+| **ops** | `mcp-ops.json` | github, slack, vercel, sentry, neon, stripe, browser, posthog, memory-bank |
 
 ## Setup
 
-One command per role — installs or updates config + runs health check:
-
 ```bash
-# macOS/Linux
 cd ~/kun && bash .claude/scripts/setup.sh engineer
 cd ~/kun && bash .claude/scripts/setup.sh business
 cd ~/kun && bash .claude/scripts/setup.sh content
 cd ~/kun && bash .claude/scripts/setup.sh ops
-
-# Windows (PowerShell)
-cd ~/kun; .\.claude\scripts\setup.ps1 -Role engineer
-cd ~/kun; .\.claude\scripts\setup.ps1 -Role business
-cd ~/kun; .\.claude\scripts\setup.ps1 -Role content
-cd ~/kun; .\.claude\scripts\setup.ps1 -Role ops
 ```
 
-Re-run anytime to update config after pulling latest from git.
+## Daily Patterns
 
-### What gets installed
-
-| Layer | Common (all roles) | Scoped (per role) |
-|-------|-------------------|-------------------|
-| **CLAUDE.md** | Shared instructions | — |
-| **Agents** | All 45 agent definitions | Role-specific index |
-| **Commands** | docs, repos, screenshot, codebase | Role-specific skills |
-| **Rules** | All rules | — |
-| **Memory** | Team, company data | — |
-| **Settings** | — | Hooks (engineer) or minimal |
-| **MCP** | — | Role-specific server set |
-
-## Daily Workflows
-
-### Abdout — Builder
-
+### Engineer
 ```
-> "dev"                    # Start dev server
-> [build features]         # Full agent fleet
-> "build"                  # Validate
-> "push"                   # Commit + push
-> "deploy"                 # Ship to Vercel
+> dev → build → push → deploy
 ```
 
-### Ali — QA + Sales
-
+### Business
 ```
-QA:
-> Test features from URL checklists on GitHub Issues
-> Report bugs as comments (not WhatsApp)
-> Re-verify fixes, check off boxes
-
-Sales (sales@databayt.org):
-> Outreach: schools, sponsors, investors, early adopters, contributors
-> Draft proposals, follow up leads
+> /proposal "client name"
+> /pricing
 ```
 
-### Samia — R&D
-
+### Content
 ```
-Cowork:
-> Research Claude/Anthropic products
-> Study sharing economy models
-> Investigate revenue distribution
-> Take care of Kun engine
+> /translate
+> /docs
 ```
 
-### Sedon — Executor
-
+### Operations
 ```
-> [clear task map]         # Well-defined tasks with steps
-> Saudi operations         # Bank, payments, physical presence
-> Batch weekly             # Monday map, Friday delivery
+> /monitor
+> /costs
+> /incident <severity>
 ```
 
-## Config Health Monitoring
-
-Each team member's config is verified continuously. Results report to a shared GitHub issue.
+## Config Health
 
 ```bash
-# Check local health
 bash ~/.claude/scripts/health.sh
-
-# Check + report to GitHub
 bash ~/.claude/scripts/health.sh --report
-
-# Windows
-.\.claude\scripts\health.ps1
-.\.claude\scripts\health.ps1 -Report
 ```
 
-Or use the `/health` command inside Claude Code:
-- `/health` — local check + team dashboard from GitHub
-- `/health report` — post local health to GitHub
-- `/health all` — show all team members' latest status
-
-Checks: core files exist, JSON valid, MCP count matches role, commands match scope, permissions correct, CLI installed, config staleness.
+Or `/health` inside Claude Code.
