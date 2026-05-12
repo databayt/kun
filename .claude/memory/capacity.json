@@ -1,0 +1,140 @@
+{
+  "$schema": "Team capacity — per-person focus, hours, blockers, accessibility, timezone",
+  "last_updated": "2026-05-12",
+  "last_updated_by": "captain-os-bootstrap",
+
+  "team": [
+    {
+      "id": "abdout",
+      "name": "Osman Abdout",
+      "category": "tech",
+      "role": "Founder & Tech Lead",
+      "email": "abdout@databayt.org",
+      "timezone": "Asia/Riyadh",
+      "hours_per_week": 60,
+      "current_focus": "Hogwarts admission flow + Kun captain operating system",
+      "primary_products": ["hogwarts", "kun"],
+      "strengths": ["Full-stack engineering", "System architecture", "Configuration design", "Long-term thinking"],
+      "weaknesses_to_manage": ["Context-switching across products", "Perfectionism on engineering at expense of customer development", "Tendency to build before talking to users"],
+      "task_relevant_maturity": {
+        "engineering": "high",
+        "architecture": "high",
+        "sales": "low",
+        "operations": "medium"
+      },
+      "blockers": [],
+      "device": "MacBook M4, iPhone 16e",
+      "background": "EE 10yr + SWE 4yr"
+    },
+    {
+      "id": "ibrahim",
+      "name": "Ibrahim",
+      "category": "tech",
+      "role": "Engineer",
+      "email": null,
+      "timezone": "Unknown",
+      "hours_per_week": null,
+      "current_focus": "TBD — needs onboarding",
+      "primary_products": [],
+      "strengths": ["Engineering (general)"],
+      "weaknesses_to_manage": ["Bandwidth and scope undefined"],
+      "task_relevant_maturity": {"engineering": "medium"},
+      "blockers": ["No defined area of ownership yet"],
+      "device": "Unknown",
+      "background": "Recently joined — needs full onboarding"
+    },
+    {
+      "id": "ali",
+      "name": "Ali Aseel",
+      "category": "business",
+      "role": "Sales + QA",
+      "email": "ali@databayt.org",
+      "sales_email": "sales@databayt.org",
+      "timezone": "Africa/Khartoum",
+      "hours_per_week": 30,
+      "current_focus": "Outreach for schools/sponsors/investors/early adopters/contributors + Hogwarts QA",
+      "primary_products": ["hogwarts"],
+      "strengths": ["Sales outreach", "QA testing", "Customer-facing communication"],
+      "weaknesses_to_manage": ["Role overload — sales AND QA AND outreach is too much for one person", "Needs structured CRM tooling"],
+      "task_relevant_maturity": {"sales": "medium", "qa": "high", "outreach": "medium"},
+      "blockers": ["Tooling for structured pipeline tracking", "Time split across sales + QA + outreach"],
+      "device": "Windows, Android",
+      "background": "CS + MBA"
+    },
+    {
+      "id": "mutaz",
+      "name": "Mutaz",
+      "category": "business",
+      "role": "General business",
+      "email": null,
+      "timezone": "Unknown",
+      "hours_per_week": null,
+      "current_focus": "TBD — needs scope",
+      "primary_products": [],
+      "strengths": ["Business operations (general)"],
+      "weaknesses_to_manage": ["Scope undefined"],
+      "task_relevant_maturity": {"business": "medium"},
+      "blockers": ["No defined area of ownership yet"],
+      "device": "Unknown",
+      "background": "Recently joined"
+    },
+    {
+      "id": "samia",
+      "name": "Samia Hamd",
+      "category": "rnd",
+      "role": "Research & Development",
+      "email": "samia@databayt.org",
+      "timezone": "Africa/Khartoum",
+      "hours_per_week": null,
+      "current_focus": "Sharing economy revenue distribution model, Anthropic product research, content/translations",
+      "primary_products": ["kun (advisory)", "growth (content)"],
+      "strengths": ["Strategic research", "Sharing economy thinking", "Languages (Arabic/English/etc.)", "Content"],
+      "weaknesses_to_manage": ["Bandwidth — research is long-form work"],
+      "task_relevant_maturity": {"research": "high", "content": "high", "operations": "medium"},
+      "accessibility": {
+        "blind": true,
+        "screen_reader_user": true,
+        "primary_screen_reader": "Unknown (likely NVDA on Windows)",
+        "workflow_implications": "Voice-first interaction preferred. UI changes must pass screen-reader testing. Documents must be properly headed (markdown headings, semantic HTML)."
+      },
+      "blockers": ["Some Anthropic product UIs not fully screen-reader-friendly"],
+      "device": "Dell Windows, iPhone 13 Mini",
+      "background": "Reads books on sharing economy and startups; was Kun caretaker, no longer in that role"
+    },
+    {
+      "id": "sedon",
+      "name": "Osman Sedon",
+      "category": "facilitator",
+      "role": "Saudi facilitator + Ali/Mutaz support",
+      "email": "sedon@databayt.org",
+      "timezone": "Asia/Riyadh",
+      "hours_per_week": 15,
+      "current_focus": "Saudi banking, MADA / STC Pay setup, physical-presence operations, batched support tasks (Mon/Wed/Fri)",
+      "primary_products": ["payments infrastructure", "support (batched)"],
+      "strengths": ["Reliable execution given a clear map", "Saudi operational presence", "Physical infrastructure"],
+      "weaknesses_to_manage": ["Part-time", "Not a strategic operator — needs explicit task maps", "Time-zone alignment with Sudan-based Ali"],
+      "task_relevant_maturity": {"saudi_ops": "high", "support_batched": "high", "strategy": "low"},
+      "blockers": ["Awaits clear Monday task map; delivers by Friday"],
+      "device": "HP Windows, Android",
+      "background": "Mechanical engineer, part-time"
+    }
+  ],
+
+  "team_total": {
+    "headcount": 6,
+    "category_breakdown": {"tech": 2, "business": 2, "rnd": 1, "facilitator": 1},
+    "total_weekly_hours": "~105-120 (Abdout 60 + Ali 30 + Sedon 15 + others variable)",
+    "salary_total_usd": 0,
+    "compensation_model": "Equity / sweat / Contribution Units (CU)"
+  },
+
+  "week_of": "2026-05-11",
+  "weekly_allocation": {
+    "abdout": "Captain OS bootstrap + Hogwarts admission polish",
+    "ibrahim": "Onboarding — needs scope discussion",
+    "ali": "Outreach (5 actions) + Hogwarts QA on admission",
+    "mutaz": "Onboarding — needs scope discussion",
+    "samia": "Sharing economy research continued + Arabic content for hogwarts",
+    "sedon": "MADA / STC Pay setup status + batched support"
+  }
+}

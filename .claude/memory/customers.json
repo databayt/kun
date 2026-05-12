@@ -1,0 +1,42 @@
+{
+  "$schema": "Customer roster — every named contact across all stages",
+  "last_updated": "2026-05-12",
+  "last_updated_by": "captain-os-bootstrap",
+
+  "customers": [
+    {
+      "id": "king-fahad-schools",
+      "name": "King Fahad Schools",
+      "primary_contact": {
+        "name": "Ahmed Baha",
+        "role": "Administrator",
+        "email": null,
+        "whatsapp": null,
+        "preferred_channel": "WhatsApp via Sedon"
+      },
+      "country": "Sudan",
+      "city": "Khartoum",
+      "product": "hogwarts",
+      "stage": "pilot",
+      "subscription_status": "free_pilot",
+      "monthly_value_usd": 0,
+      "subdomain": "kingfahad.databayt.org",
+      "first_contact_date": "2026-03-20",
+      "first_meeting_date": "2026-04-04",
+      "last_contact_date": null,
+      "owner": "ali",
+      "support_owner": "sedon",
+      "stage_history": [
+        {"date": "2026-03-20", "stage": "warm", "note": "Initial conversation about pilot interest"},
+        {"date": "2026-04-04", "stage": "hot", "note": "First meeting held"},
+        {"date": "2026-04-15", "stage": "pilot", "note": "Pilot subdomain deployed at kingfahad.databayt.org, seeded content active"}
+      ],
+      "conversion_blockers": [
+        "Pricing not yet proposed",
+        "Decision-maker timeline unclear",
+        "Need to validate admission flow works end-to-end (currently 31/33 tests pass)"
+      ],
+      "next_step": "Schedule conversion conversation by end of Q2 2026"
+    }
+  ]
+}

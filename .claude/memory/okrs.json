@@ -1,0 +1,134 @@
+{
+  "$schema": "Quarterly OKRs — 3-5 objectives, 3-5 key results each, graded 0.0-1.0",
+  "last_updated": "2026-05-12",
+  "last_updated_by": "captain-os-bootstrap",
+  "grading_rubric": {
+    "0.0": "Failed completely — no measurable progress",
+    "0.3": "Partial progress — under half the target",
+    "0.5": "Half done — meaningful but incomplete",
+    "0.7": "Stretch achieved — the right target for stretch goals",
+    "1.0": "Fully achieved or exceeded — sandbagging warning if too many at 1.0"
+  },
+
+  "current_quarter": "2026-Q2",
+  "quarter_start": "2026-04-01",
+  "quarter_end": "2026-06-30",
+
+  "objectives": [
+    {
+      "id": "O1-2026Q2",
+      "objective": "Convert King Fahad Schools from pilot to first paying customer",
+      "rationale": "North-star advance from 0 to 1. Unblocks the default-alive path.",
+      "owner": "ali",
+      "supporting_owners": ["abdout", "sedon"],
+      "key_results": [
+        {
+          "id": "KR1",
+          "result": "Hold a conversion conversation with Ahmed Baha by 2026-06-15",
+          "target": 1,
+          "current": 0,
+          "grade": null,
+          "due": "2026-06-15"
+        },
+        {
+          "id": "KR2",
+          "result": "Hogwarts admission flow at 33/33 tests pass",
+          "target": 33,
+          "current": 31,
+          "grade": null,
+          "due": "2026-06-01"
+        },
+        {
+          "id": "KR3",
+          "result": "Submit a formal proposal to King Fahad Schools",
+          "target": 1,
+          "current": 0,
+          "grade": null,
+          "due": "2026-06-22"
+        },
+        {
+          "id": "KR4",
+          "result": "First paid invoice generated and paid",
+          "target": 1,
+          "current": 0,
+          "grade": null,
+          "due": "2026-06-30"
+        }
+      ]
+    },
+    {
+      "id": "O2-2026Q2",
+      "objective": "Ship the Kun captain operating system — identity, state, cadence",
+      "rationale": "Make the captain a real CEO brain with persistent memory. Multiplies founder leverage.",
+      "owner": "abdout",
+      "supporting_owners": ["samia"],
+      "key_results": [
+        {
+          "id": "KR1",
+          "result": "Phase A complete — CONSTITUTION.md, PRINCIPLES.md, NORTH-STAR.md, all state files, captain.md refactored, /captain global skill",
+          "target": 1,
+          "current": 0,
+          "grade": null,
+          "due": "2026-05-19"
+        },
+        {
+          "id": "KR2",
+          "result": "Captain runs at least 3 weekly reviews using new state files (archive in weekly/)",
+          "target": 3,
+          "current": 0,
+          "grade": null,
+          "due": "2026-06-30"
+        },
+        {
+          "id": "KR3",
+          "result": "First monthly review run (rolls weekly archives + revenue + risk-delta)",
+          "target": 1,
+          "current": 0,
+          "grade": null,
+          "due": "2026-06-30"
+        }
+      ]
+    },
+    {
+      "id": "O3-2026Q2",
+      "objective": "Build customer-development discipline — at least one new prospect per week in pipeline",
+      "rationale": "Default-dead won't change without new prospects. Ali's outreach needs structure.",
+      "owner": "ali",
+      "supporting_owners": ["captain"],
+      "key_results": [
+        {
+          "id": "KR1",
+          "result": "5+ named prospects in pipeline.json by end of quarter",
+          "target": 5,
+          "current": 1,
+          "grade": null,
+          "due": "2026-06-30"
+        },
+        {
+          "id": "KR2",
+          "result": "≥1 customer interview per week (8 total in Q2)",
+          "target": 8,
+          "current": 0,
+          "grade": null,
+          "due": "2026-06-30"
+        },
+        {
+          "id": "KR3",
+          "result": "2 proposals sent",
+          "target": 2,
+          "current": 0,
+          "grade": null,
+          "due": "2026-06-30"
+        }
+      ]
+    }
+  ],
+
+  "previous_quarters": [],
+
+  "next_review": {
+    "mid_quarter_check": "2026-05-20",
+    "end_quarter_grade": "2026-06-30",
+    "next_quarter_set": "2026-07-01"
+  }
+}

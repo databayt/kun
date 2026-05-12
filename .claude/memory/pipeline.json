@@ -1,0 +1,48 @@
+{
+  "$schema": "Deal pipeline — every prospect, current stage, last contact",
+  "last_updated": "2026-05-12",
+  "last_updated_by": "captain-os-bootstrap",
+
+  "stages": {
+    "cold": "Identified prospect, no contact yet",
+    "warm": "First conversation held; interest expressed",
+    "hot": "Active conversation; needs assessment in progress",
+    "proposal": "Proposal sent; awaiting response",
+    "signed": "Contract signed; pre-launch",
+    "live": "Customer is live and using the product (paying or pilot)",
+    "lost": "Did not convert; reason logged"
+  },
+
+  "deals": [
+    {
+      "customer_id": "king-fahad-schools",
+      "stage": "pilot",
+      "product": "hogwarts",
+      "expected_mrr_usd": 99,
+      "owner": "ali",
+      "last_contact": "2026-04-15",
+      "days_since_contact": 27,
+      "next_action": "Conversion conversation",
+      "next_action_due": "2026-06-15"
+    }
+  ],
+
+  "weekly_targets": {
+    "new_warm_prospects": 1,
+    "outreach_actions": 5,
+    "customer_interviews": 1,
+    "proposals_sent": 0
+  },
+
+  "outreach_scope": {
+    "schools": "Sudan + Saudi private schools (Hogwarts beachhead)",
+    "vendors": "MENA SMB (Souq, future)",
+    "rentals": "Saudi/UAE short-term rental hosts (Mkan, future)",
+    "clinics": "Sudan/MENA private clinics (Shifa, future)",
+    "investors": "Long-term — not active",
+    "early_adopters": "Open-source community + Twitter/X + Discord",
+    "contributors": "Anyone willing to push commits / docs / translations",
+    "sponsors": "Open-source sponsors via GitHub Sponsors / Open Collective",
+    "owner": "ali (sales@databayt.org)"
+  }
+}
