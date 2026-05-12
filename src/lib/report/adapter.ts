@@ -155,5 +155,6 @@ function hashIp(ip: string): string {
 
 function normalizedPath(path: string): string {
   // strip trailing slash + query
-  return path.split("?")[0].replace(/\/$/, "") || "/";
+  const beforeQuery = path.split("?")[0] ?? path;
+  return beforeQuery.replace(/\/$/, "") || "/";
 }

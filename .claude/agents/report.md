@@ -59,6 +59,27 @@ Extract from body:
 - **Description**: what the user reported
 - **Page URL**: the `**Page**: `/path`` line
 - **Time**: when it was reported
+- **Reporter**: who filed (role + truncated id, or "Anonymous")
+- **Category**: visual / broken / data / slow / confusing / auth / i18n / other
+- **Viewport / Direction / Browser**: client context
+
+**Score block** — issues created on or after 2026-05-12 carry a machine-readable JSON block at the end of the body:
+
+```html
+<!-- score-block
+{
+  "score": 78,
+  "bucket": "verified-report",
+  "classification": "bug",
+  "severity": "medium",
+  "language": "ar",
+  "scores": { "R": 22, "Q": 18, "C": 8, "A": 27, "P": 3 },
+  "rationale": "..."
+}
+-->
+```
+
+Parse this block first. Its `bucket`, `classification`, `severity`, and `language` fields drive step 4 (VALIDATE) — you do not need to re-run AI triage. Legacy issues without this block fall through to the original three-question validation.
 
 ### 2. LOCATE — Find the two directories
 
@@ -129,21 +150,54 @@ Also read:
 - `.claude/rules/subdomain-urls.md` — never use `/s/${subdomain}` in client URLs
 - `.claude/rules/translation.md` — all UI text must use dictionary keys
 
-### 4. VALIDATE — Is this worth fixing?
+### 4. VALIDATE — Bucket-aware fast-path
 
-**Before writing any code**, answer three questions:
+The credibility scoring pipeline (see `/Users/abdout/kun/src/lib/report/score.ts` and friends, mirrored in hogwarts + mkan) labels each issue with one of:
+- `verified-report` — score ≥ 75, classification `bug` → pre-validated, safe to auto-fix
+- `needs-human` — score 55–74 or classification ∈ {feature, destructive} → STOP, requires human
+- `low-confidence` — score 30–54 → STOP, not worth the agent's time
+- (legacy bare `report` only) — no scoring metadata → fall through to manual validation
 
-**a) Is it a real bug?**
+**Branch on label**:
+
+#### a) `verified-report` present → fast-path
+Skip the three validation questions below. The scorer has already classified this as a bug and confirmed quality + reporter signals are strong. Proceed directly to step 5 (SEE). The `<!-- score-block -->` JSON in the body tells you `severity`, `language`, and the AI `rationale` — use these to prioritize.
+
+#### b) `needs-human` present → STOP
+Add a comment with the AI rationale and the destructive signals (if any), then move on. Never auto-process a `needs-human` issue.
+
+```bash
+gh issue comment <number> --repo <repo> --body "Flagged for human review.
+**Classification**: <from score-block>
+**Destructive signals**: <list>
+**AI rationale**: <rationale>
+Add the \`verified-report\` label to manually promote into the auto-fix queue."
+```
+
+#### c) `low-confidence` present → STOP
+Comment with the score breakdown and move on. The issue auto-closes after 14 days unless a human promotes it.
+
+```bash
+gh issue comment <number> --repo <repo> --body "Scored ${score}/100 — below the auto-process threshold (75).
+Breakdown: R=${R}, Q=${Q}, C=${C}, A=${A}, P=${P}.
+A human can promote by adding the \`verified-report\` label."
+```
+
+#### d) Legacy: bare `report` label only → manual validation
+
+For issues created before the scoring pipeline shipped (no `<!-- score-block -->` in the body), answer the original three questions:
+
+**i) Is it a real bug?**
 - Can you reproduce it from the description + URL?
 - Does `see` + `debug` confirm the reported behavior?
 - If not reproducible → comment + `cannot-reproduce` label → stop
 
-**b) Is it aligned with current plans?**
+**ii) Is it aligned with current plans?**
 - Read `ISSUE.md` in the component directory — is this issue already tracked?
 - If it contradicts planned work, the fix may be premature or wrong direction
 - If it's a feature request disguised as a bug → `needs-human` label → stop
 
-**c) Will this fix improve, not destroy?**
+**iii) Will this fix improve, not destroy?**
 - Does the fix respect existing patterns in CLAUDE.md and README.md?
 - Does it follow the QA scope rules (no schema changes, no auth changes)?
 - Could it break other features that share the same component?

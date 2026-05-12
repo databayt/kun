@@ -131,7 +131,7 @@ function reputationScore(reporter: ReporterContext): number {
     return 4; // base, only present if captcha already validated
   }
 
-  const base = ROLE_BASE[reporter.role.toUpperCase()] ?? ROLE_BASE.USER;
+  const base = ROLE_BASE[reporter.role.toUpperCase()] ?? ROLE_BASE.USER ?? 8;
 
   let bonus = 0;
   if (reporter.accountAgeDays >= 90) bonus += 3;
@@ -173,8 +173,12 @@ function contextScore(input: ReportInputParsed, hostIsProd: boolean): number {
   let score = 0;
 
   if (input.viewport && /^\d{2,5}x\d{2,5}$/.test(input.viewport)) {
-    const [w, h] = input.viewport.split("x").map(Number);
-    if (w >= 320 && w <= 7680 && h >= 240 && h <= 4320) score += 3;
+    const [wStr, hStr] = input.viewport.split("x");
+    const w = Number(wStr);
+    const h = Number(hStr);
+    if (Number.isFinite(w) && Number.isFinite(h) && w >= 320 && w <= 7680 && h >= 240 && h <= 4320) {
+      score += 3;
+    }
   }
 
   if (input.direction) {
