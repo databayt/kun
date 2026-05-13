@@ -1,0 +1,973 @@
+---
+title: Onboarding
+description: Land the latest full databayt config on a fresh Mac or Windows laptop
+---
+
+# Onboarding
+
+> Two parallel tracks, one end state. Pick the one that fits your plan and OS.
+
+Every databayt teammate gets the **same full config** — no role-gating, no subsets. By the end of this guide your laptop runs the Claude Code CLI, the complete `~/.claude/` tree (all agents, skills, MCP servers, rules, hooks), the `c` alias for friction-free operation, WebStorm with the Claude Code plugin, every active databayt repo cloned locally, and kun + hogwarts running on `localhost`.
+
+Pick a track in §4 and run top to bottom. Plan for 60–90 minutes including downloads.
+
+---
+
+## 1. About this guide
+
+This page replaces a per-person profile. It is the entry door for any new teammate, regardless of scope or focus area. Run it once on a new laptop; revisit any individual section when something drifts.
+
+The page is OS-aware — code blocks that differ between macOS and Windows are wrapped in tabs. Where shortcuts or UI menu paths differ between OSes, a single sentence calls out the difference.
+
+---
+
+## 2. What you'll have at the end
+
+- The latest [Claude Code CLI](https://code.claude.com/docs/en/overview) on `PATH`
+- A full `~/.claude/` config: all team agents, skills, rules, hooks, MCP servers, bin scripts
+- The `c` alias that runs Claude with `--dangerously-skip-permissions` for flow-without-prompts
+- WebStorm + the official Claude Code [Beta] plugin
+- Claude Desktop (Cowork) with the team filesystem context and the team's MCP connectors
+- All active databayt repos cloned to `~/projects/databayt/`
+- The `kun` docs site running on `http://localhost:3000`
+- The `hogwarts` SaaS running locally against the shared Neon dev database
+- Your shell profile auto-loading secrets from `~/.claude/.env` into every session
+
+---
+
+## 3. Accounts you need
+
+Three accounts. Use your `@databayt.org` email for all three.
+
+### 3.1 GitHub
+
+1. Open [github.com/signup](https://github.com/signup)
+2. Pick a short, lowercase username — it becomes your public handle
+3. Verify the email
+4. Enable 2FA: Settings → Password and authentication → Two-factor authentication → Authenticator app. Save the recovery codes in 1Password
+5. Generate a Personal Access Token (classic): Settings → Developer settings → Personal access tokens → Tokens (classic) → Generate. Scopes: `repo`, `read:org`, `workflow`, `gist`. Expiry: 90 days. Save in 1Password as `GITHUB_PERSONAL_ACCESS_TOKEN`
+6. Ask your team contact to add you to the `databayt` org
+
+### 3.2 JetBrains
+
+1. Open [account.jetbrains.com](https://account.jetbrains.com/login) → Sign up
+2. Ask your team contact for a seat on the team All Products Pack (gives WebStorm, IntelliJ, and all JetBrains IDEs)
+
+### 3.3 Claude (Anthropic)
+
+1. Open [claude.ai](https://claude.ai/login) → Sign up
+2. Ask your team contact for a paid seat — **Pro or Max if you want the Cowork-driven Track A** (computer use is Pro/Max only), otherwise any paid plan works for Track B. The free `claude.ai` tier does not authenticate the CLI
+3. The same login works for Claude Code CLI, Claude Desktop (Cowork), and the WebStorm plugin. Full reference: [Authentication](https://code.claude.com/docs/en/authentication)
+
+---
+
+## 4. Pick your track
+
+Both tracks land at the same end state. Pick by your Claude plan and your patience for manual typing.
+
+| Your situation | Recommended track |
+|----------------|-------------------|
+| Pro or Max plan, want the laptop to set itself up | **Track A** — Cowork drives it |
+| Team or Enterprise plan (computer use isn't available) | **Track B** — Manual |
+| Prefer typing every command yourself for trust | **Track B** — Manual |
+| First time, want to see what's happening before automating | **Track B** then **Track A** next time |
+
+Computer use is a [research preview](https://code.claude.com/docs/en/computer-use) — it may stumble on unusual app layouts or browser flows. Track B is the safety net.
+
+---
+
+## 5. Track A — Cowork drives it
+
+Claude Desktop's **Code tab** with **computer use** enabled can run the entire setup for you. It opens your terminal, runs install commands, pauses at OAuth screens for you to complete the auth, and asks for confirmation before destructive moves. You watch and approve.
+
+### 5.1 Install Claude Desktop
+
+<Tabs defaultValue="mac">
+  <TabsList>
+    <TabsTrigger value="mac">macOS</TabsTrigger>
+    <TabsTrigger value="windows">Windows</TabsTrigger>
+  </TabsList>
+  <TabsContent value="mac">
+
+Download the [universal macOS build](https://claude.ai/api/desktop/darwin/universal/dmg/latest/redirect) (Intel and Apple Silicon), or:
+
+```bash
+brew install --cask claude
+```
+
+  </TabsContent>
+  <TabsContent value="windows">
+
+Download the [Windows x64 installer](https://claude.ai/api/desktop/win32/x64/setup/latest/redirect) (or the [ARM64 build](https://claude.ai/api/desktop/win32/arm64/setup/latest/redirect)), or:
+
+```powershell
+winget install Anthropic.Claude
+```
+
+  </TabsContent>
+</Tabs>
+
+### 5.2 Sign in
+
+Launch the app and sign in with your `@databayt.org` Anthropic account. Confirm your plan in the bottom-left of the window — it must say **Pro** or **Max** for §5.3 to work.
+
+### 5.3 Enable computer use
+
+Settings → General → scroll to **Desktop app** → toggle **Allow Claude to use your computer**.
+
+On macOS, the first time Claude tries to control the screen, you'll be prompted to grant two permissions:
+
+- **Accessibility** — lets Claude click, type, scroll
+- **Screen Recording** — lets Claude see what's on screen
+
+Grant both and restart Claude Desktop. Full reference: [Computer use in Desktop](https://code.claude.com/docs/en/desktop#let-claude-use-your-computer).
+
+### 5.4 Open the Code tab
+
+Claude Desktop has three tabs: **Chat**, **Cowork**, and **Code**. Computer use lives in the **Code tab** — open a new session there. First time you ask Claude to control your terminal, the app shows an approval prompt with the apps Claude wants to control. Apps with shell access (Terminal, iTerm, WebStorm, VS Code) are flagged with an extra warning — approving them is equivalent to handing Claude a shell. That's the intent here.
+
+### 5.5 Paste this prompt
+
+Copy the block below into a fresh Code-tab session. Read it through first so you know what Claude will run.
+
+```text
+You're helping me set up my databayt dev environment with computer use.
+
+Goal: end with `claude --version` returning a value, `~/.claude/` populated
+with all agents/skills/MCPs, the `c` alias defined, WebStorm + Claude Code
+plugin installed, and every databayt repo cloned to ~/projects/databayt/.
+
+Walk me through these steps, asking for confirmation before any destructive
+command. Pause at every OAuth or browser screen for me to complete the auth.
+
+1. Detect my OS (`uname` on Mac, `$PSVersionTable.OS` on Windows) and adapt every
+   command. If you're unsure, ask me before guessing.
+2. Verify or install side-tools — git, node 22, pnpm, gh CLI:
+   - macOS: `brew install git node@22 pnpm gh`
+   - Windows: `winget install Git.Git OpenJS.NodeJS.LTS GitHub.cli` then
+     `npm install -g pnpm`
+3. Run `gh auth login` and let me complete the browser auth. Wait for me to
+   say "done" before continuing.
+4. Install Claude Code CLI:
+   - macOS: `brew install --cask claude-code`
+   - Windows: `winget install Anthropic.ClaudeCode`
+5. Run `claude` once to sign me in via browser. Wait for me to finish.
+6. Append a c-alias block to my shell profile so future sessions inherit it:
+   - macOS (~/.zshrc): `alias c='claude --dangerously-skip-permissions'`
+     plus an auto-loader for `~/.claude/.env`.
+   - Windows ($PROFILE): the function form `function c { claude --dangerously-skip-permissions $args }`
+     plus the env-var loader.
+7. Run the databayt config one-liner:
+   - macOS: `curl -fsSL https://raw.githubusercontent.com/databayt/codebase/main/.claude/scripts/install.sh | bash`
+   - Windows: `irm https://raw.githubusercontent.com/databayt/codebase/main/.claude/scripts/install.ps1 | iex`
+8. Load secrets from the team gist (ID 68453b25fa9d28c94426c55c179b3838):
+   - macOS: `~/.claude/scripts/secrets.sh 68453b25fa9d28c94426c55c179b3838`
+   - Windows: `& "$env:USERPROFILE\.claude\scripts\secrets.ps1" -GistId 68453b25fa9d28c94426c55c179b3838`
+9. Install WebStorm:
+   - macOS: `brew install --cask webstorm`
+   - Windows: `winget install JetBrains.WebStorm`
+   Open WebStorm once so I can sign in to JetBrains.
+10. Clone every active databayt repo:
+    - macOS: `~/.claude/scripts/sync-repos.sh`
+    - Windows: `& "$env:USERPROFILE\.claude\scripts\sync-repos.ps1"`
+11. Run `claude doctor` and screenshot the result for me.
+
+When done, summarize what installed, what's still pending, and which manual
+steps I owe (OAuth completions, paid-plan signins, WebStorm sign-in).
+```
+
+### 5.6 Watch and approve
+
+Claude pauses at three kinds of moments:
+
+- **Approval prompts** — first time Claude tries to control a new app per session, confirm with **Allow for this session**
+- **Browser auth** — Anthropic browsers are view-only in computer use, so Claude opens the OAuth page and waits. You complete the login, return to the chat, and tell Claude you're done
+- **Destructive commands** — the prompt asks Claude to confirm before any move that writes outside your home folder. Answer in the chat
+
+To abort at any point: press **`Esc`** anywhere on your screen. macOS shows a system notification that says *"Claude is using your computer · press Esc to stop."*
+
+When the run finishes, jump to §7 to verify.
+
+---
+
+## 6. Track B — Manual
+
+Same end state as Track A, you type every command. Works on any plan.
+
+### 6.1 Side-tools
+
+<Tabs defaultValue="mac">
+  <TabsList>
+    <TabsTrigger value="mac">macOS</TabsTrigger>
+    <TabsTrigger value="windows">Windows</TabsTrigger>
+  </TabsList>
+  <TabsContent value="mac">
+
+Install [Homebrew](https://brew.sh/) if it isn't already there:
+
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+Then the tools:
+
+```bash
+brew install git node@22 pnpm gh
+```
+
+Identify yourself to git (used on every commit):
+
+```bash
+git config --global user.name "Your Name"
+git config --global user.email "you@databayt.org"
+git config --global init.defaultBranch main
+```
+
+Authenticate the GitHub CLI:
+
+```bash
+gh auth login
+# Choose: GitHub.com → HTTPS → "Login with web browser"
+```
+
+  </TabsContent>
+  <TabsContent value="windows">
+
+Install via [winget](https://learn.microsoft.com/windows/package-manager/winget/):
+
+```powershell
+winget install Git.Git OpenJS.NodeJS.LTS GitHub.cli Microsoft.PowerShell
+npm install -g pnpm
+```
+
+Identify yourself to git:
+
+```powershell
+git config --global user.name "Your Name"
+git config --global user.email "you@databayt.org"
+git config --global init.defaultBranch main
+```
+
+Authenticate the GitHub CLI:
+
+```powershell
+gh auth login
+# Choose: GitHub.com → HTTPS → "Login with web browser"
+```
+
+Enable Developer Mode (required for symlinks during the config install): Settings → System → For developers → enable.
+
+  </TabsContent>
+</Tabs>
+
+### 6.2 Claude Code CLI
+
+<Tabs defaultValue="mac">
+  <TabsList>
+    <TabsTrigger value="mac">macOS</TabsTrigger>
+    <TabsTrigger value="windows">Windows</TabsTrigger>
+  </TabsList>
+  <TabsContent value="mac">
+
+```bash
+brew install --cask claude-code
+```
+
+Alternative (native installer that auto-updates in the background):
+
+```bash
+curl -fsSL https://claude.ai/install.sh | bash
+```
+
+  </TabsContent>
+  <TabsContent value="windows">
+
+```powershell
+winget install Anthropic.ClaudeCode
+```
+
+Alternatives:
+
+```powershell
+irm https://claude.ai/install.ps1 | iex
+# or
+npm install -g @anthropic-ai/claude-code
+```
+
+[Git for Windows](https://git-scm.com/downloads/win) is recommended so Claude Code can use the Bash tool. Without it, Claude falls back to PowerShell.
+
+  </TabsContent>
+</Tabs>
+
+Verify and sign in:
+
+```bash
+claude --version
+claude
+# First run opens a browser; sign in with your @databayt.org Anthropic account
+```
+
+Full install reference: [Anthropic — Advanced setup](https://code.claude.com/docs/en/setup).
+
+### 6.3 The `c` alias
+
+The default `claude` command prompts for permission on every Bash and Write call. Add a shorthand that skips prompts on your own trusted machine.
+
+<Tabs defaultValue="mac">
+  <TabsList>
+    <TabsTrigger value="mac">macOS</TabsTrigger>
+    <TabsTrigger value="windows">Windows</TabsTrigger>
+  </TabsList>
+  <TabsContent value="mac">
+
+Append to `~/.zshrc` (or `~/.bashrc` if you use bash):
+
+```bash
+# ── Claude Code — operator config ────────────────────────────────
+alias c='claude --dangerously-skip-permissions'   # default
+alias cc='claude'                                 # opt back into prompts
+
+# Auto-load ~/.claude/.env into every session
+[ -f "$HOME/.claude/.env" ] && export $(grep -v '^#' "$HOME/.claude/.env" | xargs)
+
+# Add ~/.claude/bin to PATH (custom MCP wrappers)
+export PATH="$HOME/.claude/bin:$PATH"
+```
+
+Reload:
+
+```bash
+source ~/.zshrc
+```
+
+  </TabsContent>
+  <TabsContent value="windows">
+
+Open your PowerShell profile (PowerShell creates the file if it doesn't exist):
+
+```powershell
+notepad $PROFILE
+```
+
+Paste at the bottom:
+
+```powershell
+# ── Claude Code — operator config ────────────────────────────────
+function c  { claude --dangerously-skip-permissions $args }   # default
+function cc { claude $args }                                  # opt back into prompts
+
+# Auto-load ~/.claude/.env into every session
+if (Test-Path "$env:USERPROFILE\.claude\.env") {
+    Get-Content "$env:USERPROFILE\.claude\.env" | ForEach-Object {
+        if ($_ -and -not $_.StartsWith("#")) {
+            $parts = $_ -split "=", 2
+            if ($parts.Length -eq 2) {
+                [Environment]::SetEnvironmentVariable($parts[0], $parts[1], "Process")
+            }
+        }
+    }
+}
+
+# Add ~/.claude/bin to PATH (custom MCP wrappers)
+$env:Path = "$env:USERPROFILE\.claude\bin;" + $env:Path
+```
+
+Reload:
+
+```powershell
+. $PROFILE
+```
+
+  </TabsContent>
+</Tabs>
+
+`--dangerously-skip-permissions` is fine on your own machine where you trust your prompts. Don't use it on a shared machine or with prompts from untrusted sources. Full flag reference: [CLI reference](https://code.claude.com/docs/en/cli-reference) · permission model: [Permissions](https://code.claude.com/docs/en/permissions).
+
+### 6.4 The databayt config — one-liner
+
+Installs the team's agents, skills, MCP servers, rules, hooks, and bin scripts.
+
+<Tabs defaultValue="mac">
+  <TabsList>
+    <TabsTrigger value="mac">macOS</TabsTrigger>
+    <TabsTrigger value="windows">Windows</TabsTrigger>
+  </TabsList>
+  <TabsContent value="mac">
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/databayt/codebase/main/.claude/scripts/install.sh | bash
+~/.claude/scripts/secrets.sh 68453b25fa9d28c94426c55c179b3838
+```
+
+  </TabsContent>
+  <TabsContent value="windows">
+
+```powershell
+irm https://raw.githubusercontent.com/databayt/codebase/main/.claude/scripts/install.ps1 | iex
+& "$env:USERPROFILE\.claude\scripts\secrets.ps1" -GistId 68453b25fa9d28c94426c55c179b3838
+```
+
+  </TabsContent>
+</Tabs>
+
+What this installs and the full directory layout: [Claude Code — team setup](/docs/claude-code).
+
+### 6.5 Clone the org
+
+<Tabs defaultValue="mac">
+  <TabsList>
+    <TabsTrigger value="mac">macOS</TabsTrigger>
+    <TabsTrigger value="windows">Windows</TabsTrigger>
+  </TabsList>
+  <TabsContent value="mac">
+
+```bash
+~/.claude/scripts/sync-repos.sh
+```
+
+  </TabsContent>
+  <TabsContent value="windows">
+
+```powershell
+& "$env:USERPROFILE\.claude\scripts\sync-repos.ps1"
+```
+
+  </TabsContent>
+</Tabs>
+
+Re-run anytime to pull the latest. Repo list lives in §10.
+
+---
+
+## 7. Verify the install
+
+Both tracks finish here. Every line below should pass.
+
+<Tabs defaultValue="mac">
+  <TabsList>
+    <TabsTrigger value="mac">macOS</TabsTrigger>
+    <TabsTrigger value="windows">Windows</TabsTrigger>
+  </TabsList>
+  <TabsContent value="mac">
+
+```bash
+claude --version                                            # CLI on PATH
+claude doctor                                               # config + MCP + creds all green
+ls ~/.claude/agents | wc -l                                 # agents installed
+ls ~/.claude/commands | wc -l                               # commands installed
+python3 -c "import json; json.load(open(f'{__import__(\"os\").path.expanduser(\"~\")}/.claude/mcp.json'))"   # MCP JSON valid (silent = pass)
+[ -n "$GITHUB_PERSONAL_ACCESS_TOKEN" ] && echo ok           # secrets loaded
+type c                                                      # alias resolves
+```
+
+  </TabsContent>
+  <TabsContent value="windows">
+
+```powershell
+claude --version                                                              # CLI on PATH
+claude doctor                                                                  # config + MCP + creds all green
+(Get-ChildItem $env:USERPROFILE\.claude\agents).Count                          # agents installed
+(Get-ChildItem $env:USERPROFILE\.claude\commands).Count                        # commands installed
+Get-Content $env:USERPROFILE\.claude\mcp.json | ConvertFrom-Json | Out-Null    # JSON valid (silent = pass)
+$env:GITHUB_PERSONAL_ACCESS_TOKEN -ne $null                                    # secrets loaded
+Get-Alias c, cc                                                                # function shorthand resolves
+```
+
+  </TabsContent>
+</Tabs>
+
+In a fresh session: `c "who am i"` — the brain should recognize your config and load every agent and skill.
+
+---
+
+## 8. WebStorm + Claude Code plugin
+
+WebStorm is the IDE for kun and hogwarts. The Claude Code plugin gives you an in-IDE chat panel sharing the same agents as the CLI.
+
+### 8.1 Install WebStorm
+
+<Tabs defaultValue="mac">
+  <TabsList>
+    <TabsTrigger value="mac">macOS</TabsTrigger>
+    <TabsTrigger value="windows">Windows</TabsTrigger>
+  </TabsList>
+  <TabsContent value="mac">
+
+```bash
+brew install --cask webstorm
+```
+
+Or use [JetBrains Toolbox](https://www.jetbrains.com/toolbox-app/) to manage multiple IDEs:
+
+```bash
+brew install --cask jetbrains-toolbox
+```
+
+  </TabsContent>
+  <TabsContent value="windows">
+
+```powershell
+winget install JetBrains.WebStorm
+```
+
+Or use Toolbox:
+
+```powershell
+winget install JetBrains.Toolbox
+```
+
+  </TabsContent>
+</Tabs>
+
+Sign in with your JetBrains account at first launch.
+
+### 8.2 Install the plugin
+
+1. File → Settings → Plugins (or `Cmd+,` on Mac, `Ctrl+Alt+S` on Windows)
+2. Click the **Marketplace** tab
+3. Search "Claude Code"
+4. Install **Claude Code [Beta]** (publisher: Anthropic) — direct link: [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/27310-claude-code-beta-)
+5. Restart WebStorm
+
+Full plugin reference: [Anthropic — JetBrains IDEs](https://code.claude.com/docs/en/jetbrains).
+
+### 8.3 Use it
+
+| Action | macOS | Windows |
+|--------|-------|---------|
+| Open Claude panel | `Cmd+Esc` or `Alt+Shift+C` | `Ctrl+Esc` or `Alt+Shift+C` |
+| Open via menu | View → Tool Windows → Claude | View → Tool Windows → Claude |
+| Insert file reference into prompt | `Cmd+Opt+K` | `Ctrl+Alt+K` |
+| Open the integrated terminal | `Opt+F12` | `Alt+F12` |
+
+When you run `c` from the integrated terminal, the IDE-sharing features still work — current selection, open tabs, and diagnostics are visible to Claude automatically.
+
+### 8.4 Fix the ESC-key terminal gotcha
+
+File → Settings → Tools → Terminal → uncheck **"Move focus to the editor with Escape"**.
+
+Without this fix, pressing ESC in WebStorm's integrated terminal jumps you to the editor instead of interrupting Claude's generation.
+
+---
+
+## 9. Configure Cowork further (context, connectors, MCPs)
+
+If you used Track A you already installed Cowork. If you came via Track B and want the chat companion to Code, install it now (§5.1) and continue.
+
+Cowork reads only the directories you scope to it. Add the team-standard context and connectors.
+
+### 9.1 Open the config file
+
+<Tabs defaultValue="mac">
+  <TabsList>
+    <TabsTrigger value="mac">macOS</TabsTrigger>
+    <TabsTrigger value="windows">Windows</TabsTrigger>
+  </TabsList>
+  <TabsContent value="mac">
+
+```bash
+open -e "$HOME/Library/Application Support/Claude/claude_desktop_config.json"
+```
+
+  </TabsContent>
+  <TabsContent value="windows">
+
+```powershell
+notepad $env:APPDATA\Claude\claude_desktop_config.json
+```
+
+  </TabsContent>
+</Tabs>
+
+### 9.2 Baseline config
+
+Paste this (replace `<your-pat>` with the GitHub PAT from §3.1):
+
+```json
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "~/.claude",
+        "~/projects/databayt"
+      ]
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "<your-pat>"
+      }
+    }
+  },
+  "preferences": {
+    "allowAllBrowserActions": true,
+    "coworkScheduledTasksEnabled": true,
+    "ccdScheduledTasksEnabled": true,
+    "sidebarMode": "task",
+    "coworkWebSearchEnabled": true,
+    "keepAwakeEnabled": true
+  }
+}
+```
+
+Save → fully quit and relaunch Claude Desktop. The filesystem scope appears under the **Context** pill in the chat input.
+
+On Windows, replace `~/.claude` and `~/projects/databayt` with `%USERPROFILE%\\.claude` and `%USERPROFILE%\\projects\\databayt` respectively.
+
+### 9.3 Team connector catalog
+
+Browse the official catalog at [Anthropic Directory](https://claude.ai/directory). Every server there uses the same MCP infrastructure and works with both Desktop and Code.
+
+The ones the team uses:
+
+| Connector | Purpose | Auth |
+|-----------|---------|------|
+| `filesystem` | Read/write inside scoped directories | none (scopes in JSON) |
+| `github` | Issues, PRs, code search across databayt | PAT in env |
+| `notion` | Team Notion workspace | `NOTION_API_KEY` |
+| `slack` | The team Slack workspace | `SLACK_BOT_TOKEN` |
+| `linear` | Issues and projects | OAuth on first call |
+| `figma` | Design files via local Figma desktop | runs at `127.0.0.1:3845` |
+| `playwright` | Browse + screenshot pages | none |
+| `context7` | Latest framework docs lookup | none |
+| `ref` | Internal reference index | `REF_API_KEY` |
+
+Add each block under `mcpServers` in the same `claude_desktop_config.json`. Restart Desktop after every save.
+
+The Code-side MCP config at `~/.claude/mcp.json` already has all 19 servers configured. Copy any block from there into Desktop. Full setup reference: [Anthropic — MCP](https://code.claude.com/docs/en/mcp).
+
+### 9.4 What's already running Code-side
+
+The install one-liner loaded all your Code MCPs. Inspect with:
+
+```bash
+claude doctor
+```
+
+The MCP section lists each server with status. `needs auth` entries (Vercel, Sentry, Linear, Stripe) open Anthropic's OAuth dialog on first call.
+
+---
+
+## 10. The databayt org on your laptop
+
+The installer ran `sync-repos.{sh,ps1}` and cloned every active repo to `~/projects/databayt/`.
+
+| Repo | What it is |
+|------|-----------|
+| `kun` | The engine — agents, skills, MCPs, this doc site |
+| `codebase` | Pattern library — atoms, templates, blocks |
+| `shadcn` | UI fork — shadcn/ui customized |
+| `radix` | UI primitives |
+| `hogwarts` | Education SaaS — multi-tenant, flagship product |
+| `souq` | E-commerce — multi-vendor |
+| `mkan` | Rentals — booking + listings |
+| `shifa` | Medical — appointments + records |
+| `marketing` | Landing pages |
+| `swift-app` | iOS companion |
+| `distributed-computer` | Rust infrastructure |
+
+See [repositories](/docs/repositories) for the full org map.
+
+---
+
+## 11. Run kun locally
+
+<Tabs defaultValue="mac">
+  <TabsList>
+    <TabsTrigger value="mac">macOS</TabsTrigger>
+    <TabsTrigger value="windows">Windows</TabsTrigger>
+  </TabsList>
+  <TabsContent value="mac">
+
+```bash
+cd ~/projects/databayt/kun
+cp .env.example .env
+pnpm install
+pnpm dev
+```
+
+  </TabsContent>
+  <TabsContent value="windows">
+
+```powershell
+cd $env:USERPROFILE\projects\databayt\kun
+Copy-Item .env.example .env
+pnpm install
+pnpm dev
+```
+
+  </TabsContent>
+</Tabs>
+
+Open `http://localhost:3000`. No database needed — kun is the docs and config engine.
+
+---
+
+## 12. Run hogwarts locally
+
+Hogwarts has no `.env.example`. Ask your team contact to share the `.env` via 1Password before continuing.
+
+<Tabs defaultValue="mac">
+  <TabsList>
+    <TabsTrigger value="mac">macOS</TabsTrigger>
+    <TabsTrigger value="windows">Windows</TabsTrigger>
+  </TabsList>
+  <TabsContent value="mac">
+
+```bash
+cd ~/projects/databayt/hogwarts
+# place the .env file you received at the repo root
+pnpm install
+pnpm prisma generate
+pnpm dev
+```
+
+  </TabsContent>
+  <TabsContent value="windows">
+
+```powershell
+cd $env:USERPROFILE\projects\databayt\hogwarts
+# place the .env file you received at the repo root
+pnpm install
+pnpm prisma generate
+pnpm dev
+```
+
+  </TabsContent>
+</Tabs>
+
+Open the URL Next.js prints. The database is **Neon (cloud Postgres)** — no local DB install. If kun is still running on `:3000`, set `PORT=3001` in the hogwarts `.env`.
+
+Never run `pnpm db:seed` (destructive); use `pnpm db:seed:single <name>` if seeding is needed.
+
+---
+
+## 13. Daily workflow
+
+Once installed, your daily entry points are the panel in WebStorm, the `c` alias in any terminal, and slash commands.
+
+| Action | Command |
+|--------|---------|
+| Open Claude in WebStorm | `Cmd+Esc` (Mac) · `Ctrl+Esc` (Windows) |
+| Start Claude in terminal | `c` |
+| Synthesize company status | `c "/captain"` |
+| Capture an idea as a GitHub issue | `c "/idea <description>"` |
+| Spec a feature on an issue | `c "/spec #<issue>"` |
+| Run the full pipeline | `c "/feature <name> [product]"` |
+| Log a formal decision | `c "/decide"` |
+| Premortem a risky move | `c "/premortem"` |
+| Cross-product health | `c "/monitor"` |
+| API + infra spend | `c "/costs"` |
+| Send a note to the team | `c "/dispatch <message>"` |
+| Open a GitHub issue | `c "/issue"` |
+| Auto-fix user reports | `c "/report"` |
+| Generate a proposal | `c "/proposal"` |
+| Pricing analysis | `c "/pricing"` |
+
+Full keyword list — 100+ entries — at [keywords](/docs/keywords).
+
+---
+
+## 14. Cowork vs Code — when to use which
+
+Same brain, two surfaces. Use them for different jobs.
+
+| Task | Tool |
+|------|------|
+| Plan, think, write, research, mobile sessions | **Cowork** (Claude Desktop, Chat or Cowork tab) |
+| Edit files, run scripts, deploy, anything that touches the repo | **Code** (Claude Code CLI or the WebStorm plugin) |
+| Carry decisions across sessions or surfaces | Both — via `~/.claude/bridge.md` |
+
+Code-only capabilities: editing files, running `pnpm`/`git`/`prisma`, hooks, slash commands like `/feature` and `/dispatch`, the `c` alias.
+
+Cowork-only capabilities: native web browsing, scheduled tasks, voice mode, mobile sync, **computer use** (§5).
+
+Neither shares chat history with the other. The bridge file and GitHub issues are the shared state. Full protocol: [cowork](/docs/cowork) · cross-surface session handoff: [Anthropic — Desktop](https://code.claude.com/docs/en/desktop) and [Remote Control](https://code.claude.com/docs/en/remote-control).
+
+---
+
+## 15. Contributing — the team workflow
+
+Every change in databayt follows this cycle. No exceptions, regardless of who made the change.
+
+```
+IDEA → ISSUE → BRANCH → COMMIT → PUSH → PR → REVIEW → MERGE → CLOSE → DEPLOY → VERIFY
+```
+
+Full protocol: `.claude/rules/github-workflow.md` in every repo. The condensed version:
+
+### 15.1 Open a GitHub issue first
+
+```bash
+gh issue create --repo databayt/<repo> --title "<type>: <description>" --body "<acceptance criteria>" --label "type:<type>,P<n>"
+```
+
+| Type | Label | Branch prefix |
+|------|-------|---------------|
+| Feature | `type:feature` | `feat/` |
+| Bug | `type:bug` | `fix/` |
+| Chore | `type:chore` | `chore/` |
+| Docs | `type:docs` | `docs/` |
+| Refactor | `type:refactor` | `refactor/` |
+
+Priority: `P0` drop-everything · `P1` high · `P2` medium · `P3` low.
+
+### 15.2 Branch from fresh main
+
+```bash
+git checkout main && git pull && git checkout -b feat/<short-name>
+```
+
+One issue = one branch = one PR. Delete the branch after merge.
+
+### 15.3 Atomic conventional commits
+
+```
+<type>: <description under 72 chars, present tense>
+
+<body — explain WHY, not what. The diff already shows what.>
+
+Refs #<N>
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+```
+
+Types: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `perf`, `style`.
+
+One logical unit per commit. Don't lump three concerns into one.
+
+### 15.4 Push and open a PR
+
+```bash
+git push -u origin <branch>
+gh pr create --title "<type>: <description>" --body "Closes #<N>"
+```
+
+`Closes #N` auto-closes the issue on merge. PR title matches the primary commit. Body has Summary, Changes, Test plan.
+
+### 15.5 Review with evidence
+
+Respond to **every** comment. Disagree only with evidence. Discussion lives on the PR, never in chat. When you fix a comment, reply "Fixed in `<commit-sha>`".
+
+### 15.6 Squash merge, delete branch
+
+```bash
+gh pr merge <N> --squash --delete-branch
+```
+
+CI must pass first. Vercel auto-deploys main. Run `c "/watch"` to verify the production deploy.
+
+### 15.7 The `/feature` pipeline
+
+For features that span data, logic, UI, and ship, one keyword chains every stage:
+
+```
+/feature <name> [product]
+    ↓
+IDEA → SPEC → SCHEMA → CODE → WIRE → CHECK → SHIP → WATCH
+```
+
+| Stage | Command | Exit gate |
+|-------|---------|-----------|
+| Capture | `/idea` | GitHub issue exists |
+| Specify | `/spec` | Spec on issue, approved |
+| Data | `/schema` | Migration applied, types compile |
+| Logic | `/code` | `tsc --noEmit` passes |
+| UI | `/wire` | `pnpm build` passes |
+| Quality | `/check` | All gates green |
+| Deploy | `/ship` | Vercel deployment Ready |
+| Monitor | `/watch` | No errors, issue closed |
+
+Enter at any stage: `/schema billing`, `/wire #42`, `/check`. Product scopes activate domain context: `hogwarts`, `souq`, `mkan`, `shifa`.
+
+### 15.8 Anti-patterns
+
+| Don't | Do |
+|-------|-----|
+| Commit directly to main | Branch + PR |
+| PR without an issue | Issue first |
+| Mega PR (20+ files) | Split into focused PRs |
+| Force-push to main | Never |
+| Merge with red CI | Fix CI first |
+| `fix stuff` commit message | Conventional commit with WHY in the body |
+| Close issue manually | `Closes #N` in the PR body |
+| Discuss on Slack instead of PR | Discussion on the PR |
+| Leave stale branches | Delete after merge |
+
+---
+
+## 16. Help
+
+If you're stuck, in this order:
+
+1. `claude doctor` — run first; copy the output
+2. `c "/dispatch I'm stuck on step <N>. Last output: <last line>. What I tried: <X>"` — async write to the team
+3. `c "/issue"` — open a GitHub issue for any repeatable bug
+4. Email the team alias with subject `blocked on <step>`
+
+---
+
+## 17. Reference
+
+### Inside databayt
+
+- [Claude Code — team install detail](/docs/claude-code)
+- [Captain — decision matrix and delegation](/docs/captain)
+- [Cowork ↔ Code bridge protocol](/docs/cowork)
+- [Voice across surfaces](/docs/voice)
+- [Credentials and secrets](/docs/credentials)
+- [Dispatch protocol](/docs/dispatch)
+- [Connectors — MCP server catalog](/docs/connectors)
+- [Apps — Slack, Figma, Linear surfaces](/docs/apps)
+- [Issue templates](/docs/issue)
+- [Keywords — full vocabulary](/docs/keywords)
+- [Team — roles and configs](/docs/team)
+- [Repositories — full org map](/docs/repositories)
+- [Stack — Next.js, React, Prisma, Tailwind, shadcn versions](/docs/stack)
+- [Self-hosting — optional Tailscale/tmux/Docker setup](/docs/self-hosting)
+
+### Anthropic — official docs (latest)
+
+- [Claude Code overview](https://code.claude.com/docs/en/overview)
+- [Quickstart](https://code.claude.com/docs/en/quickstart)
+- [Advanced setup](https://code.claude.com/docs/en/setup)
+- [Authentication](https://code.claude.com/docs/en/authentication)
+- [CLI reference](https://code.claude.com/docs/en/cli-reference)
+- [Settings](https://code.claude.com/docs/en/settings)
+- [Permissions](https://code.claude.com/docs/en/permissions)
+- [Memory and CLAUDE.md](https://code.claude.com/docs/en/memory)
+- [Skills](https://code.claude.com/docs/en/skills)
+- [Hooks](https://code.claude.com/docs/en/hooks)
+- [Sub-agents](https://code.claude.com/docs/en/sub-agents)
+- [MCP — Model Context Protocol](https://code.claude.com/docs/en/mcp)
+- [Anthropic Directory — connector catalog](https://claude.ai/directory)
+- [JetBrains IDEs](https://code.claude.com/docs/en/jetbrains) · [Marketplace plugin](https://plugins.jetbrains.com/plugin/27310-claude-code-beta-)
+- [VS Code](https://code.claude.com/docs/en/vs-code)
+- [Desktop app](https://code.claude.com/docs/en/desktop) · [Quickstart](https://code.claude.com/docs/en/desktop-quickstart)
+- [Computer use in CLI](https://code.claude.com/docs/en/computer-use)
+- [Computer use in Desktop](https://code.claude.com/docs/en/desktop#let-claude-use-your-computer)
+- [Web](https://code.claude.com/docs/en/claude-code-on-the-web)
+- [Remote Control](https://code.claude.com/docs/en/remote-control)
+- [Routines — cron / scheduled tasks](https://code.claude.com/docs/en/routines)
+- [Slack integration](https://code.claude.com/docs/en/slack)
+- [Agent SDK](https://code.claude.com/docs/en/agent-sdk/overview)
+- [Common workflows](https://code.claude.com/docs/en/common-workflows) · [Best practices](https://code.claude.com/docs/en/best-practices)
+- [Troubleshooting](https://code.claude.com/docs/en/troubleshooting)
+- [Anthropic pricing](https://claude.com/pricing) · [Claude Code product page](https://code.claude.com/)
+
+### External
+
+- [MCP protocol spec](https://modelcontextprotocol.io)
+- [Conventional Commits](https://www.conventionalcommits.org/)
+- [GitHub Flow](https://docs.github.com/en/get-started/quickstart/github-flow)
+- [Git for Windows download](https://git-scm.com/downloads/win)
+- [GitHub CLI manual](https://cli.github.com/manual/)
+- [WebStorm — JetBrains](https://www.jetbrains.com/webstorm/)
+- [pnpm docs](https://pnpm.io/installation)
+- [Node.js downloads](https://nodejs.org/en/download)
+- [Homebrew](https://brew.sh/)
+- [winget — Windows package manager](https://learn.microsoft.com/windows/package-manager/winget/)
