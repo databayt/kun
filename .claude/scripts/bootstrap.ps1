@@ -27,7 +27,7 @@ if (-not (Test-Path $libDir) -or -not (Get-ChildItem $libDir -ErrorAction Silent
     New-Item -ItemType Directory -Force -Path $libDir | Out-Null
     $libUrls = @(
         'Bootstrap-Common', 'Confirm-Admin', 'Install-Winget',
-        'Update-Path', 'Stage-OAuth', 'Fix-Shell', 'Drop-Plugin'
+        'Update-Path', 'Stage-OAuth', 'Fix-Shell', 'Drop-Plugin', 'Track-Issue'
     )
     foreach ($name in $libUrls) {
         $url = "https://raw.githubusercontent.com/databayt/kun/main/.claude/scripts/lib/$name.ps1"
@@ -40,7 +40,7 @@ if (-not (Test-Path $libDir) -or -not (Get-ChildItem $libDir -ErrorAction Silent
     }
 }
 
-foreach ($mod in 'Bootstrap-Common','Confirm-Admin','Install-Winget','Update-Path','Stage-OAuth','Fix-Shell','Drop-Plugin') {
+foreach ($mod in 'Bootstrap-Common','Confirm-Admin','Install-Winget','Update-Path','Stage-OAuth','Fix-Shell','Drop-Plugin','Track-Issue') {
     $p = Join-Path $libDir "$mod.ps1"
     if (Test-Path $p) { . $p }
 }
@@ -101,6 +101,19 @@ Write-Step 2 "Windows $($os.ToString()) · PowerShell $psVer" 'ok'
 # ── [3] Log dir (already created above) ──────────────────────────
 Write-Step 3 'Logs directory ready' 'ok' (Split-Path $logFile -Parent)
 
+# ── -Track: create GitHub tracking issue ─────────────────────────
+$trackingIssue = $null
+if ($Track -and -not $DryRun) {
+    $trackingIssue = New-TrackingIssue
+    if (-not $trackingIssue) {
+        Write-Host '  -Track requested but gh not authed yet — continuing without tracking issue' -ForegroundColor Yellow
+        Write-Host '  (you can re-run with -Track after gh auth login)' -ForegroundColor Gray
+    } else {
+        # Steps 0-3 are already complete; flip their checkboxes now
+        foreach ($i in 0..3) { Update-TrackingIssue -IssueNumber $trackingIssue -StepIndex $i }
+    }
+}
+
 # ── [4] winget bundle ────────────────────────────────────────────
 Write-Step 4 'Installing CLI tools via winget' 'start'
 $packages = @(
@@ -129,11 +142,13 @@ foreach ($pkg in $packages) {
         Write-Step 4 "  $($pkg.Name)" 'warn' "winget exit $($result.ExitCode)"
     }
 }
+if ($trackingIssue) { Update-TrackingIssue -IssueNumber $trackingIssue -StepIndex 4 }
 
 # ── [5] PATH refresh ─────────────────────────────────────────────
 Write-Step 5 'Refreshing PATH from registry' 'start'
 if (-not $DryRun) { Update-SessionPath }
 Write-Step 5 'PATH refreshed' 'ok'
+if ($trackingIssue) { Update-TrackingIssue -IssueNumber $trackingIssue -StepIndex 5 }
 
 # ── [6] pnpm via npm ─────────────────────────────────────────────
 Write-Step 6 'Installing pnpm globally' 'start'
@@ -149,6 +164,7 @@ if (Get-Command pnpm -ErrorAction SilentlyContinue) {
         Write-Step 6 'pnpm install failed (try again later)' 'warn'
     }
 }
+if ($trackingIssue) { Update-TrackingIssue -IssueNumber $trackingIssue -StepIndex 6 }
 
 # ── [7] WebStorm ─────────────────────────────────────────────────
 if (-not $SkipWebStorm) {
@@ -169,6 +185,7 @@ if (-not $SkipWebStorm) {
 } else {
     Write-Step 7 'WebStorm — skipped via flag' 'skip'
 }
+if ($trackingIssue) { Update-TrackingIssue -IssueNumber $trackingIssue -StepIndex 7 }
 
 # ── [8] Plugin pre-drop ──────────────────────────────────────────
 Write-Step 8 'Pre-dropping Claude Code [Beta] plugin' 'start'
@@ -184,6 +201,7 @@ if ($SkipWebStorm) {
         'fail' { Write-Step 8 'Plugin install failed (install from Marketplace inside WebStorm)' 'warn' $result.Reason }
     }
 }
+if ($trackingIssue) { Update-TrackingIssue -IssueNumber $trackingIssue -StepIndex 8 }
 
 # ── [9] Kun config (install.ps1) ─────────────────────────────────
 Write-Step 9 'Installing ~/.claude/ config via install.ps1' 'start'
@@ -198,12 +216,15 @@ if ($DryRun) {
         Write-Step 9 'install.ps1 done' 'ok'
     } catch {
         Write-Step 9 'install.ps1 failed' 'fail' $_.Exception.Message
+        if ($trackingIssue) { Close-TrackingIssue -IssueNumber $trackingIssue -Outcome failure -LogPath $logFile }
         exit 1
     }
 }
+if ($trackingIssue) { Update-TrackingIssue -IssueNumber $trackingIssue -StepIndex 9 }
 
 # ── [10] Auto-accept settings.json (informational — install.ps1 already wrote one) ──
 Write-Step 10 'settings.json (handled by install.ps1)' 'ok'
+if ($trackingIssue) { Update-TrackingIssue -IssueNumber $trackingIssue -StepIndex 10 }
 
 # ── [11] $PROFILE c/cc block ─────────────────────────────────────
 Write-Step 11 'Append c/cc functions to $PROFILE' 'start'
@@ -213,6 +234,7 @@ if ($DryRun) {
     $changed = Repair-Profile
     if ($changed) { Write-Step 11 '$PROFILE updated' 'ok' } else { Write-Step 11 '$PROFILE already has c/cc' 'skip' }
 }
+if ($trackingIssue) { Update-TrackingIssue -IssueNumber $trackingIssue -StepIndex 11 }
 
 # ── [12] OAuth batch ─────────────────────────────────────────────
 Write-Step 12 'OAuth batch (3 sign-ins)' 'start'
@@ -222,6 +244,16 @@ if ($DryRun) {
     Invoke-OAuthBatch -Skip:$SkipOAuth | Out-Null
     Write-Step 12 'OAuth batch complete' 'ok'
 }
+# Tracking issue may be created retroactively here if -Track was set but gh wasn't
+# authed at step 3. Now that step 12 has finished, gh should be authed.
+if ($Track -and -not $trackingIssue -and -not $DryRun) {
+    $trackingIssue = New-TrackingIssue
+    if ($trackingIssue) {
+        Write-Host "  Tracking issue created retroactively after OAuth: filling 0-12" -ForegroundColor Cyan
+        foreach ($i in 0..12) { Update-TrackingIssue -IssueNumber $trackingIssue -StepIndex $i }
+    }
+}
+if ($trackingIssue) { Update-TrackingIssue -IssueNumber $trackingIssue -StepIndex 12 }
 
 # ── [13] Secrets ─────────────────────────────────────────────────
 Write-Step 13 'Pulling .env via secrets.ps1' 'start'
@@ -238,6 +270,7 @@ if (-not (Test-Path $secretsScript)) {
         Write-Step 13 'secrets.ps1 failed' 'warn' $_.Exception.Message
     }
 }
+if ($trackingIssue) { Update-TrackingIssue -IssueNumber $trackingIssue -StepIndex 13 }
 
 # ── [14] Repo clone ──────────────────────────────────────────────
 Write-Step 14 'Cloning org repos via sync-repos.ps1' 'start'
@@ -254,6 +287,7 @@ if (-not (Test-Path $syncScript)) {
         Write-Step 14 'sync-repos.ps1 had errors (some repos may need re-clone)' 'warn'
     }
 }
+if ($trackingIssue) { Update-TrackingIssue -IssueNumber $trackingIssue -StepIndex 14 }
 
 # ── [15] maintain -Install ───────────────────────────────────────
 Write-Step 15 'Arming kun-maintain scheduled task' 'start'
@@ -270,6 +304,7 @@ if (-not (Test-Path $maintainScript)) {
         Write-Step 15 'scheduled task creation failed' 'warn' $_.Exception.Message
     }
 }
+if ($trackingIssue) { Update-TrackingIssue -IssueNumber $trackingIssue -StepIndex 15 }
 
 # ── [16] Final verify via doctor ─────────────────────────────────
 Write-Step 16 'Verifying via doctor.ps1' 'start'
@@ -313,5 +348,12 @@ Write-Host '  • Open a new PowerShell and type:  c              (starts Claude
 Write-Host '  • Or open WebStorm in any cloned repo, then Ctrl+Esc'
 Write-Host '  • Run `doctor` any time to re-check health'
 Write-Host ''
+
+# Close tracking issue with the final outcome
+if ($trackingIssue) {
+    Update-TrackingIssue -IssueNumber $trackingIssue -StepIndex 16
+    $outcome = if ($doctorExit -eq 0 -or $doctorExit -eq 3) { 'success' } else { 'failure' }
+    Close-TrackingIssue -IssueNumber $trackingIssue -Outcome $outcome -LogPath $logFile
+}
 
 exit $doctorExit
