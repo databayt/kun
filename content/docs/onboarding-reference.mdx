@@ -1,0 +1,187 @@
+---
+title: Onboarding reference
+description: Architecture, scripts, and continuous health behind the 3-action flow
+---
+
+# Onboarding reference
+
+> How the 3-action flow actually works, and what to do when it doesn't.
+
+Companion to [Onboarding](/docs/onboarding). If the happy path works, you don't need this page. Read it when something breaks, when you're rolling out v2 scripts, or when you want to understand why the flow looks the way it does.
+
+## Orchestration model
+
+Three layers, with a strict boundary between them.
+
+| Phase | Owner | Why |
+|---|---|---|
+| Cold start | **Cowork** in Claude Desktop | Only product that can drive Windows installer UI, click UAC, open Run, sequence OAuth tabs. |
+| Warm start | **Claude Code** in WebStorm or terminal | Sees the repo, edits files, runs scripts in an integrated terminal. |
+| Continuous | **Scheduled task → scripts → notify** | No agent at runtime; the next agent invocation reads the results. |
+| Health audit | **Claude Code with `doctor` skill** | Reads doctor output, explains failures, proposes fixes. |
+
+The split keeps each tool inside what it's best at. Cowork should never be asked to write code in WebStorm or paste into terminals — its security model blocks both. Claude Code should never be asked to install Windows apps — it can't drive an installer dialog.
+
+## Auto mode
+
+Three pieces of pre-config remove permission prompts from the steady-state experience.
+
+**Cowork** — Claude Desktop → Cowork settings:
+
+- Auto-accept tool calls: **ON**
+- Auto-accept computer-use permissions: **ON**
+- Auto-accept downloads: **OFF** — keep downloads explicit (minor friction, large safety win)
+
+**`c` / `cc` aliases** — append to your `$PROFILE`:
+
+```powershell
+function c  { claude --dangerously-skip-permissions $args }   # frictionless
+function cc { claude $args }                                   # prompts before tool runs
+```
+
+`c` is the team default — it skips per-tool confirmation. The rationale is that the team operates inside its own repos, where every action is reviewable via `git diff`. If you'd rather see every prompt, use `cc`.
+
+**`~/.claude/settings.json`** — example baseline:
+
+```json
+{
+  "permissions": "allow",
+  "telemetry": true,
+  "model": "claude-opus-4-7",
+  "allowedTools": ["bash", "edit", "read", "write", "grep", "glob"]
+}
+```
+
+Pre-authorizes the common tool set so even default `claude` doesn't prompt for routine reads and edits.
+
+## Scripts contract
+
+The executable layer lives at `~/.claude/scripts/`. Today's scripts are authoritative — Cowork and Claude Code only invoke them. The v2 column documents the bootstrap layer that will land in `databayt/codebase` to collapse the cold-start paste further.
+
+| Script | Status | Purpose |
+|---|---|---|
+| `install.ps1` | Shipping | Installs Claude Code CLI if missing, copies kun config to `~/.claude/`, clones `databayt/codebase` to `~/codebase`. Role-aware (`engineer`, `business`, `content`, `ops`). |
+| `secrets.ps1` | Shipping | Pulls `.env` from the team Gist into `~/.claude/.env`. Idempotent. |
+| `sync-repos.ps1` | Shipping | Clones all active org repos: `codebase` to `~/codebase`, others to `~/oss/<name>`. `--status` prints branch/commit per repo. |
+| `health.ps1` | Shipping | Audits `~/.claude/` — files exist, JSON valid, agent/command/MCP counts, config age. `-Report` posts to `databayt/kun#health`. |
+| `bootstrap.ps1` | Planned (v2) | Single-paste cold start: ExecutionPolicy fix, winget bundle, install, secrets, sync-repos, WebStorm via Toolbox, plugin pre-drop, scheduled task. Exits with codes documented in `databayt/codebase`. |
+| `finish.ps1` | Planned (v2) | Idempotent re-runner — same shape as bootstrap but skips installs if tools are already on PATH. Used to repair interrupted runs. |
+| `doctor.ps1` | Planned (v2) | Rename of `health.ps1` with extra org-specific checks: `.env` freshness, repo layout, scheduled task armed, plugin loaded in WebStorm. |
+| `maintain.ps1` | Planned (v2) | Daily scheduled task: sync-repos, self-update `~/.claude/`, run doctor, notify Slack on red. |
+
+Each shipping script lives in [databayt/codebase/.claude/scripts](https://github.com/databayt/codebase/tree/main/.claude/scripts). Any PR that changes a script must touch the matching row above.
+
+## `.claude` layout
+
+Two layers. Project-level overrides global on conflict.
+
+**Global — `~/.claude/`** (identity and shared tooling):
+
+```
+~/.claude/
+├── .env              # secrets pulled from org Gist
+├── settings.json     # auto-accept config
+├── CLAUDE.md         # org-wide preferences
+├── mcp.json          # role-scoped MCP servers
+├── bin/              # shared executables (prepended to PATH by $PROFILE)
+├── scripts/          # install / secrets / sync-repos / health
+├── agents/           # global custom agents
+├── commands/         # global slash commands
+├── rules/            # path-scoped rules
+└── memory/           # persistent state
+```
+
+**Project — `<repo>/.claude/`** (repo-specific context):
+
+```
+kun/
+├── .claude/
+│   ├── CLAUDE.md     # project-specific stack and conventions
+│   ├── agents/       # project agents
+│   ├── commands/     # project slash commands
+│   ├── rules/        # project rules (path-scoped)
+│   ├── coverage/     # sweep ledgers
+│   ├── patterns/     # canonical patterns
+│   └── scripts/      # source of truth — install.ps1 copies these out
+└── package.json
+```
+
+Global is what every Claude Code invocation sees, anywhere. Project is layered on top when Claude opens inside that repo. Conflicts resolve in favour of the project.
+
+## Continuous health
+
+Onboarding is "done" only as long as it keeps working.
+
+**On demand** — run the audit any time:
+
+```powershell
+& "$env:USERPROFILE\.claude\scripts\health.ps1"
+```
+
+Sample output:
+
+```
+✅ healthy — engineer @ HOSTNAME
+
+| | Check          | Detail              |
+|--|---------------|---------------------|
+| ✅ | CLAUDE.md     | exists              |
+| ✅ | settings.json | valid JSON          |
+| ✅ | mcp.json      | valid JSON          |
+| ✅ | agents/       | 29 files            |
+| ✅ | commands/     | 20 files            |
+| ✅ | claude CLI    | 1.0.x               |
+| ✅ | config age    | 1d old              |
+```
+
+Pass `-Report` to post the result as a comment on `databayt/kun#health` for the team-wide dashboard:
+
+```powershell
+& "$env:USERPROFILE\.claude\scripts\health.ps1" -Report
+```
+
+**Scheduled (planned)** — once `maintain.ps1` lands, a Windows scheduled task runs daily at 09:00 to sync repos, self-update `~/.claude/`, and run doctor. Failures notify in Slack via webhook from `.env`. The task is created by `bootstrap.ps1` as part of the cold-start flow.
+
+## What stays manual
+
+After every optimization, three things still require a human. None of them are negotiable.
+
+1. **Initial paste + UAC.** Windows requires user consent to elevate. MSI and scheduled-task workarounds trade clicks for SmartScreen + AV warnings — net loss.
+2. **OAuth flows.** Three accounts (GitHub, Claude, JetBrains) authenticate via browser. There is no automation-friendly OAuth path that doesn't require pre-issued tokens, and storing pre-issued tokens for new hires is worse for security than a one-time browser flow.
+3. **Plugin trust dialogs.** If WebStorm Marketplace shows a third-party plugin warning, the human clicks Trust. The planned `bootstrap.ps1` drops the plugin zip directly into `plugins/` to skip this in most cases.
+
+Anything else can be automated, and probably should be.
+
+## Migration order
+
+For the person rolling out the v2 scripts:
+
+1. Land scripts in `databayt/codebase/.claude/scripts/` (`bootstrap`, `finish`, `doctor`, `maintain`). They work standalone — the current doc keeps functioning while these exist alongside it.
+2. Cut a redirect at `kun.databayt.org/install` → `raw.githubusercontent.com/databayt/codebase/main/.claude/scripts/bootstrap.ps1`. Same for `/finish`.
+3. Collapse the [Onboarding](/docs/onboarding) paste block to the single-line `irm https://kun.databayt.org/install | iex`. Keep Manual fallback as the existing chain for Team/Enterprise plans.
+4. Update the team channel topic and joiner doc to point at the new flow.
+5. **Run the new bootstrap on one volunteer's fresh VM** before any new hire sees it. The current doc shipped without this step — that's how we ended up with the lessons below.
+
+## Lessons from first run
+
+Real failures from the first end-to-end attempt, each with the fix baked into the v2 spec.
+
+- **`npm install -g pnpm` errored with "running scripts is disabled."** Default PowerShell `ExecutionPolicy` is `Restricted`. Fix: `bootstrap.ps1` sets `RemoteSigned` for `CurrentUser` as step 0.
+- **"Node 22" in prose, but `OpenJS.NodeJS.LTS` installed Node 24.** The LTS alias drifts. Fix: pin a version, or use `fnm` + per-repo `.nvmrc`.
+- **Six separate UAC prompts during installs.** Each `winget install` re-elevates. Fix: bootstrap launches one elevated session; everything runs under it.
+- **`winget install JetBrains.WebStorm` produced a non-launching IDE.** Silent install skipped the `jbr/` component. Fix: install JetBrains Toolbox instead; Toolbox handles WebStorm + JBR cleanly.
+- **Agent burned tokens running each PowerShell line individually.** Agent acting as executor, not orchestrator. Fix: all multi-step work lives in `.ps1` scripts; the agent only invokes them.
+- **Agent could not type into WebStorm or PowerShell.** Computer-use security blocks typing into IDEs and terminals. Fix: don't try; use Cowork only for desktop launches and OAuth pauses.
+- **`webstorm64.exe installPlugins 27310` silently failed.** The CLI plugin install doesn't fetch beta-channel plugins reliably. Fix: drop the plugin zip directly into `%APPDATA%\JetBrains\...\plugins\`.
+- **`c` alias didn't exist after install.** The `$PROFILE` append step was skipped due to an earlier failure. Fix: bootstrap's last step appends it idempotently and dot-sources in-session.
+- **`claude` not on PATH in the launching shell.** PATH only refreshes in new shells. Fix: re-read machine+user PATH after each install.
+- **Repos not cloned because user got lost between OAuth flows.** OAuth interleaved with installs. Fix: batch all OAuth to the end; gate `sync-repos.ps1` on completion.
+
+## See also
+
+- [Onboarding](/docs/onboarding) — the 3-action flow
+- [Claude Code](/docs/claude-code) — install detail and team setup
+- [Cowork ↔ Code bridge](/docs/cowork) — how the two modes share state
+- [Secrets](/docs/secrets) — the Gist-based `.env` contract
+- [Repositories](/docs/repositories) — the active org repo list
+- [github-workflow rule](https://github.com/databayt/kun/blob/main/.claude/rules/github-workflow.md) — issue → branch → PR contract

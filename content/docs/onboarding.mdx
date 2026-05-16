@@ -1,42 +1,47 @@
 ---
 title: Onboarding
-description: Install Cowork, let it do the rest
+description: Three actions, ~90 minutes to your first PR
 ---
 
 # Onboarding
 
-> One install, one paste, one watch. Cowork drives every other step.
+> Three actions. Cowork drives the rest.
 
-The fastest path to running databayt on a fresh Windows laptop: install Claude Desktop (Cowork), turn on computer use, paste the team prompt, watch your machine set itself up.
-
-Plan ~60 minutes. **Pro or Max plan required** — computer use isn't on Team or Enterprise. Manual fallback at the bottom.
+The fastest path from a fresh Windows laptop to a databayt PR: install Claude Desktop, paste the team prompt into the Code tab, stay near the keyboard while it sets your machine up. Wall-clock ~90 minutes, mostly downloads. Human time ~10.
 
 ## What you end up with
 
 - Claude Code CLI on `PATH`
-- Full `~/.claude/` config — every agent, skill, MCP server, hook, bin script
+- Full `~/.claude/` config — every agent, command, MCP server, rule, hook, memory file
 - The `c` function — `claude --dangerously-skip-permissions` in one keystroke
 - WebStorm with the Claude Code [Beta] plugin
-- Every active databayt repo cloned to `%USERPROFILE%\projects\databayt\`
+- `databayt/codebase` cloned to `~\codebase`
+- Every other active org repo cloned under `~\oss\<name>`
 - `claude doctor` green
 
----
+## Before you start
 
-## 1. Install Cowork
+| Requirement | Why |
+|---|---|
+| **Pro or Max plan** | Computer use isn't on Team or Enterprise. Without it, jump to [Manual fallback](#manual-fallback). |
+| Windows 11, admin rights | `winget` installs and `$PROFILE` edits need them. |
+| ~3 GB free disk | Claude Desktop + Node + WebStorm + org repos. |
+
+If any row is missing, sort it before pasting — Cowork can't fix a Team plan.
+
+## The three actions
+
+### 1. Install Claude Desktop and turn on computer use
 
 Download and run the [Windows x64 installer](https://claude.ai/api/desktop/win32/x64/setup/latest/redirect) (or [ARM64](https://claude.ai/api/desktop/win32/arm64/setup/latest/redirect)).
 
-Launch it, sign in with your Anthropic account. Confirm the bottom-left shows **Pro** or **Max**.
+Launch it. Sign in with your Anthropic account. Confirm the bottom-left badge says **Pro** or **Max** — if it says Team or Enterprise, the rest of this flow won't work; use [Manual fallback](#manual-fallback).
 
-## 2. Turn on computer use
+Settings → General → scroll to **Desktop app** → toggle **Allow Claude to use your computer**. The first time Claude controls the screen, Windows prompts for accessibility access. Grant it. Reference: [Anthropic — computer use in Desktop](https://code.claude.com/docs/en/desktop#let-claude-use-your-computer).
 
-Settings → General → scroll to **Desktop app** → toggle **Allow Claude to use your computer**.
+### 2. Open the Code tab and paste the team prompt
 
-First time Claude tries to control the screen, Windows prompts for accessibility access. Grant it. Reference: [Anthropic — computer use in Desktop](https://code.claude.com/docs/en/desktop#let-claude-use-your-computer).
-
-## 3. Open the Code tab and paste this
-
-Claude Desktop has three tabs — **Chat**, **Cowork**, **Code**. Computer use lives in **Code**. Start a new Code session and paste the prompt below.
+Claude Desktop has three tabs — **Chat**, **Cowork**, **Code**. Computer use lives in Code. Start a new Code session. Paste the block below.
 
 ```text
 Set up this fresh Windows laptop for databayt with computer use.
@@ -49,6 +54,7 @@ End state I want:
 - The databayt config installed at %USERPROFILE%\.claude\ (install.ps1 + secrets.ps1)
 - WebStorm installed with the Claude Code [Beta] plugin
 - Every active databayt repo cloned via sync-repos.ps1
+  (codebase to ~\codebase, others to ~\oss\<name>)
 - `claude doctor` all green
 
 Walk me through each step. Open the right app for me. Pause at every OAuth
@@ -85,9 +91,36 @@ When done, run `claude doctor`, screenshot the result, and list anything
 still pending or anything I owe (OAuth completions, plan upgrades, etc.).
 ```
 
-Press **Esc** anywhere on screen to abort. Claude releases control and unhides your apps.
+### 3. Stay near the keyboard
 
----
+Cowork drives the installs. Your job is the irreducible human bits:
+
+- **One UAC prompt** when `winget` first elevates — click Yes.
+- **OAuth sign-ins.** Cowork pauses on browser screens for GitHub (`gh auth login` device code), Claude (`claude` sign-in), and JetBrains (WebStorm first launch). Type the codes, click Authorize, return to Code, tell it to continue.
+- **Plugin trust** if WebStorm prompts to trust the Claude Code [Beta] plugin.
+
+Total human time: ~10 minutes spread over ~30–45 minutes of installs. Press **Esc** anywhere on screen to abort — Claude releases control and unhides your apps.
+
+## When you're done
+
+Open a fresh PowerShell and run:
+
+```powershell
+claude --version             # CLI installed
+claude doctor                # all checks pass
+Get-Command c                # c function loaded from $PROFILE
+Test-Path ~\codebase         # codebase cloned
+(Get-ChildItem ~\oss).Count  # org repos cloned (>= 6)
+```
+
+If every line returns a non-empty result and `claude doctor` is green, you're done. Open WebStorm in any cloned repo and press `Ctrl+Esc` to start a Claude session in the IDE.
+
+## If something fails
+
+- **Esc aborts computer use** at any time. Apps unhide, control returns to you.
+- **`claude doctor` is the single source of truth.** Re-run it after any fix; the output names what's missing.
+- **Secrets out of date or missing?** Re-run `& "$env:USERPROFILE\.claude\scripts\secrets.ps1" -GistId 68453b25fa9d28c94426c55c179b3838` — it's idempotent.
+- **Deeper failures?** [Onboarding reference](/docs/onboarding-reference) covers the orchestration model, the scripts contract, and the lessons from the first real run.
 
 ## Manual fallback
 
@@ -134,9 +167,7 @@ claude doctor
 Get-Command c
 ```
 
-For hogwarts, your team contact shares the `.env` out-of-band (no `.env.example`).
-
----
+For hogwarts and other private secrets, your team contact shares the `.env` out-of-band.
 
 ## Daily entry points
 
@@ -153,17 +184,8 @@ For hogwarts, your team contact shares the `.env` out-of-band (no `.env.example`
 
 Full keyword list: [keywords](/docs/keywords).
 
----
+## Next
 
-## Reference
-
-- [Computer use in Desktop](https://code.claude.com/docs/en/desktop#let-claude-use-your-computer)
-- [Claude Code — install detail](/docs/claude-code)
-- [Captain — decisions and delegation](/docs/captain)
-- [Cowork ↔ Code bridge](/docs/cowork)
-- [Connectors — MCP catalog](/docs/connectors)
-- [Anthropic Directory](https://claude.ai/directory)
-- [Keywords — full vocabulary](/docs/keywords)
-- [Team — roles](/docs/team)
-- [Repositories — full org map](/docs/repositories)
-- [Contributing — github-workflow rule](https://github.com/databayt/kun/blob/main/.claude/rules/github-workflow.md)
+- [Onboarding reference](/docs/onboarding-reference) — orchestration model, scripts contract, continuous health
+- [Claude Code](/docs/claude-code) — install detail and team setup
+- [Cowork ↔ Code bridge](/docs/cowork) — how the two modes share state
