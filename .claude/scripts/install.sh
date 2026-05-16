@@ -98,11 +98,15 @@ fi
 echo "Installing memory..."
 cp "$KUN_DIR/.claude/memory/"*.json "$CLAUDE_DIR/memory/" 2>/dev/null || true
 
-# Copy scripts
+# Copy scripts (top-level files) + lib/ recursively for doctor.sh modules
 echo "Installing scripts..."
 cp "$KUN_DIR/.claude/scripts/"*.sh "$CLAUDE_DIR/scripts/" 2>/dev/null || true
 cp "$KUN_DIR/.claude/scripts/"*.ps1 "$CLAUDE_DIR/scripts/" 2>/dev/null || true
 cp "$KUN_DIR/.claude/scripts/"*.json "$CLAUDE_DIR/scripts/" 2>/dev/null || true
+if [ -d "$KUN_DIR/.claude/scripts/lib" ]; then
+    mkdir -p "$CLAUDE_DIR/scripts/lib"
+    cp -R "$KUN_DIR/.claude/scripts/lib/." "$CLAUDE_DIR/scripts/lib/" 2>/dev/null || true
+fi
 chmod +x "$CLAUDE_DIR/scripts/"*.sh 2>/dev/null || true
 
 # Install settings based on role
@@ -138,14 +142,23 @@ fi
 chmod 600 "$CLAUDE_DIR/settings.json" 2>/dev/null || true
 chmod 600 "$CLAUDE_DIR/mcp.json" 2>/dev/null || true
 
-# Update shell profile
+# Update shell rc: c/cc aliases + .env loader + ~/.claude/bin on PATH (idempotent)
 SHELL_RC="$HOME/.zshrc"
 [ -f "$HOME/.bashrc" ] && [ ! -f "$HOME/.zshrc" ] && SHELL_RC="$HOME/.bashrc"
+[ ! -f "$SHELL_RC" ] && touch "$SHELL_RC"
 
-if ! grep -q "claude" "$SHELL_RC" 2>/dev/null; then
-    echo "" >> "$SHELL_RC"
-    echo "# Claude Code (Kun Engine)" >> "$SHELL_RC"
-    echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$SHELL_RC"
+if ! grep -Eq '^[[:space:]]*alias[[:space:]]+c=' "$SHELL_RC" 2>/dev/null; then
+    cat >> "$SHELL_RC" << 'RC_EOF'
+
+# Claude Code (Kun Engine)
+alias c='claude --dangerously-skip-permissions'
+alias cc='claude'
+if [ -f "$HOME/.claude/.env" ]; then
+    set -a; . "$HOME/.claude/.env"; set +a
+fi
+export PATH="$HOME/.claude/bin:$PATH"
+RC_EOF
+    echo "  Appended c/cc aliases to $SHELL_RC — restart shell or: source $SHELL_RC"
 fi
 
 # Clone codebase reference (engineers only)
