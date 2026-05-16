@@ -128,13 +128,14 @@ if ($Role -eq "engineer") {
     Copy-Item "$KUN_DIR\.claude\mcp-ops.json" "$CLAUDE_DIR\mcp.json" -Force
 }
 
-# Add PowerShell alias
-$profilePath = $PROFILE.CurrentUserAllHosts
-if (-not (Test-Path $profilePath)) {
-    New-Item -ItemType File -Force -Path $profilePath | Out-Null
-}
-if (-not (Select-String -Path $profilePath -Pattern "claude" -Quiet -ErrorAction SilentlyContinue)) {
-    Add-Content -Path $profilePath -Value "`n# Claude Code (Kun Engine)"
+# Add PowerShell c/cc functions to $PROFILE via Fix-Shell.ps1 (idempotent)
+Write-Host "Installing c/cc functions to `$PROFILE..."
+$fixShell = "$CLAUDE_DIR\scripts\lib\Fix-Shell.ps1"
+if (Test-Path $fixShell) {
+    . $fixShell
+    try { Repair-Profile | Out-Null } catch { Write-Host "  Profile repair skipped: $_" -ForegroundColor Yellow }
+} else {
+    Write-Host "  Fix-Shell.ps1 missing — run doctor -Fix after install to add c function" -ForegroundColor Yellow
 }
 
 # Clone codebase reference (engineers only)
