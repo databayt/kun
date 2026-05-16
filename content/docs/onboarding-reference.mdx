@@ -56,20 +56,18 @@ Pre-authorizes the common tool set so even default `claude` doesn't prompt for r
 
 ## Scripts contract
 
-The executable layer lives at `~/.claude/scripts/`. Today's scripts are authoritative — Cowork and Claude Code only invoke them. The v2 column documents the bootstrap layer that will land in `databayt/codebase` to collapse the cold-start paste further.
+The executable layer lives at `~/.claude/scripts/`. All scripts are authoritative — Cowork and Claude Code only invoke them. Source of truth is [databayt/kun/.claude/scripts](https://github.com/databayt/kun/tree/main/.claude/scripts). Any PR that changes a script must touch the matching row below.
 
 | Script | Status | Purpose |
 |---|---|---|
-| `install.ps1` | Shipping | Installs Claude Code CLI if missing, copies kun config to `~/.claude/`, clones `databayt/codebase` to `~/codebase`. Role-aware (`engineer`, `business`, `content`, `ops`). |
+| `bootstrap.ps1` | Shipping | Single-paste cold start: ExecutionPolicy → self-elevate → winget bundle → PATH refresh → pnpm → WebStorm → plugin pre-drop → install.ps1 → `$PROFILE` → batched OAuth → secrets → sync-repos → `maintain -Install` → `doctor`. 16 idempotent steps. |
+| `install.ps1` | Shipping | Installs Claude Code CLI if missing, copies kun config to `~/.claude/`, clones `databayt/codebase` to `~/codebase`. Role-aware. Copies `lib/` recursively. |
 | `secrets.ps1` | Shipping | Pulls `.env` from the team Gist into `~/.claude/.env`. Idempotent. |
-| `sync-repos.ps1` | Shipping | Clones all active org repos: `codebase` to `~/codebase`, others to `~/oss/<name>`. `--status` prints branch/commit per repo. |
-| `health.ps1` | Shipping | Audits `~/.claude/` — files exist, JSON valid, agent/command/MCP counts, config age. `-Report` posts to `databayt/kun#health`. |
-| `bootstrap.ps1` | Planned (v2) | Single-paste cold start: ExecutionPolicy fix, winget bundle, install, secrets, sync-repos, WebStorm via Toolbox, plugin pre-drop, scheduled task. Exits with codes documented in `databayt/codebase`. |
-| `finish.ps1` | Planned (v2) | Idempotent re-runner — same shape as bootstrap but skips installs if tools are already on PATH. Used to repair interrupted runs. |
-| `doctor.ps1` | Planned (v2) | Rename of `health.ps1` with extra org-specific checks: `.env` freshness, repo layout, scheduled task armed, plugin loaded in WebStorm. |
-| `maintain.ps1` | Planned (v2) | Daily scheduled task: sync-repos, self-update `~/.claude/`, run doctor, notify Slack on red. |
-
-Each shipping script lives in [databayt/codebase/.claude/scripts](https://github.com/databayt/codebase/tree/main/.claude/scripts). Any PR that changes a script must touch the matching row above.
+| `sync-repos.ps1` | Shipping | Clones all active org repos. Reads `~/.claude/memory/repositories.json` as source of truth (with a hardcoded fallback for cold-bootstrap). |
+| `doctor.ps1` | Shipping | Health audit + update check + self-repair. 7 check modules (Core, Shell, Identity, Repos, Updates, Scheduled, IDE) + 1 fix module. Flags `-Fix`, `-Update`, `-Report`, `-Json`, `-Quiet`. Exits 0/1/2/3. |
+| `maintain.ps1` | Shipping | Daily Windows scheduled task. Composes `sync-repos → self-update → doctor → notify → log`. Silent on green; toast on warnings/updates; toast + Slack on errors. `-Install` / `-Uninstall` / `-Status` / `-Run` / `-DryRun`. |
+| `health.ps1` | Deprecated | 5-line back-compat shim → `doctor.ps1`. Removed in a follow-up after a 2-week co-existence window. |
+| `finish.ps1` | Planned | Alias for `bootstrap.ps1` (every step is already idempotent). Ships as a one-line wrapper. |
 
 ## `.claude` layout
 
@@ -154,13 +152,14 @@ Anything else can be automated, and probably should be.
 
 ## Migration order
 
-For the person rolling out the v2 scripts:
+The v2 rollout, mostly done. Remaining items are flagged.
 
-1. Land scripts in `databayt/codebase/.claude/scripts/` (`bootstrap`, `finish`, `doctor`, `maintain`). They work standalone — the current doc keeps functioning while these exist alongside it.
-2. Cut a redirect at `kun.databayt.org/install` → `raw.githubusercontent.com/databayt/codebase/main/.claude/scripts/bootstrap.ps1`. Same for `/finish`.
-3. Collapse the [Onboarding](/docs/onboarding) paste block to the single-line `irm https://kun.databayt.org/install | iex`. Keep Manual fallback as the existing chain for Team/Enterprise plans.
-4. Update the team channel topic and joiner doc to point at the new flow.
-5. **Run the new bootstrap on one volunteer's fresh VM** before any new hire sees it. The current doc shipped without this step — that's how we ended up with the lessons below.
+1. ✅ Land scripts in `databayt/kun/.claude/scripts/` — `bootstrap`, `doctor`, `maintain`, `install`, `secrets`, `sync-repos`, plus 9 lib modules. All idempotent, syntax-checked, smoke-tested.
+2. ✅ Redirect set in `next.config.ts`: `kun.databayt.org/install` → `raw.githubusercontent.com/databayt/kun/main/.claude/scripts/bootstrap.ps1`. Same for `/doctor` and `/finish`.
+3. ✅ Tombstone `databayt/codebase/.claude/scripts/install.ps1` — prevents duplicate-edit drift.
+4. ✅ [Onboarding](/docs/onboarding) collapsed to single-paste, with Cowork-driven and Manual as alternatives.
+5. ⏳ **Run on one volunteer's fresh Windows 11 VM** before pointing new hires at it. Validates: direct `winget install JetBrains.WebStorm` ships intact JBR (vs. needing Toolbox fallback), Marketplace plugin pre-drop loads on first IDE launch, OAuth batch survives the actual sign-in screens.
+6. ⏳ Update team channel topic + joiner doc to cite the new flow.
 
 ## Lessons from first run
 
