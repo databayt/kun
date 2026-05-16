@@ -27,7 +27,7 @@ if (-not (Test-Path $libDir) -or -not (Get-ChildItem $libDir -ErrorAction Silent
     New-Item -ItemType Directory -Force -Path $libDir | Out-Null
     $libUrls = @(
         'Bootstrap-Common', 'Confirm-Admin', 'Install-Winget',
-        'Update-Path', 'Stage-OAuth', 'Fix-Shell'
+        'Update-Path', 'Stage-OAuth', 'Fix-Shell', 'Drop-Plugin'
     )
     foreach ($name in $libUrls) {
         $url = "https://raw.githubusercontent.com/databayt/kun/main/.claude/scripts/lib/$name.ps1"
@@ -40,7 +40,7 @@ if (-not (Test-Path $libDir) -or -not (Get-ChildItem $libDir -ErrorAction Silent
     }
 }
 
-foreach ($mod in 'Bootstrap-Common','Confirm-Admin','Install-Winget','Update-Path','Stage-OAuth','Fix-Shell') {
+foreach ($mod in 'Bootstrap-Common','Confirm-Admin','Install-Winget','Update-Path','Stage-OAuth','Fix-Shell','Drop-Plugin') {
     $p = Join-Path $libDir "$mod.ps1"
     if (Test-Path $p) { . $p }
 }
@@ -171,10 +171,19 @@ if (-not $SkipWebStorm) {
 }
 
 # ── [8] Plugin pre-drop ──────────────────────────────────────────
-# TODO: implement Drop-Plugin.ps1 once stable plugin zip URL is verified.
-# For now, surface as manual step at end.
-Write-Step 8 'Claude Code [Beta] plugin — manual (open WebStorm → Marketplace)' 'warn' \
-    'auto pre-drop pending plugin URL verification'
+Write-Step 8 'Pre-dropping Claude Code [Beta] plugin' 'start'
+if ($SkipWebStorm) {
+    Write-Step 8 'Plugin — skipped (WebStorm skipped)' 'skip'
+} elseif ($DryRun) {
+    Write-Step 8 '[dry-run] would download + extract plugin into WebStorm/plugins/' 'skip'
+} else {
+    $result = Install-ClaudeCodePlugin
+    switch ($result.Status) {
+        'ok'   { Write-Step 8 'Plugin installed' 'ok' $result.Reason }
+        'skip' { Write-Step 8 'Plugin' 'skip' $result.Reason }
+        'fail' { Write-Step 8 'Plugin install failed (install from Marketplace inside WebStorm)' 'warn' $result.Reason }
+    }
+}
 
 # ── [9] Kun config (install.ps1) ─────────────────────────────────
 Write-Step 9 'Installing ~/.claude/ config via install.ps1' 'start'
