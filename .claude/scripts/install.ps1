@@ -139,17 +139,18 @@ if (Test-Path $fixShell) {
 }
 
 # Clone codebase reference (engineers only)
+# Try SSH first; on any non-zero exit (host key, no SSH agent, etc.) fall back to HTTPS.
+# git clone returns exit code rather than throwing, so try/catch doesn't catch SSH failures.
 if ($Role -eq "engineer") {
     $CODEBASE_DIR = "$env:USERPROFILE\codebase"
     if (-not (Test-Path $CODEBASE_DIR)) {
         Write-Host "Cloning pattern library to $CODEBASE_DIR..." -ForegroundColor Yellow
-        try {
-            git clone "git@github.com:databayt/codebase.git" $CODEBASE_DIR
-        } catch {
-            try {
-                git clone "https://github.com/databayt/codebase.git" $CODEBASE_DIR
-            } catch {
-                Write-Host "Could not clone codebase. Clone manually later." -ForegroundColor Yellow
+        git clone "git@github.com:databayt/codebase.git" $CODEBASE_DIR 2>$null
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "  SSH clone failed; falling back to HTTPS..." -ForegroundColor Yellow
+            git clone "https://github.com/databayt/codebase.git" $CODEBASE_DIR
+            if ($LASTEXITCODE -ne 0) {
+                Write-Host "  Could not clone codebase. Clone manually later." -ForegroundColor Red
             }
         }
     }
