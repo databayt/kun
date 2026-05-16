@@ -69,8 +69,11 @@ sync_repo() {
         echo -e "  Status: ${RED}not found${NC}"
         echo -e "  Action: cloning..."
 
-        git clone "$url" "$path"
-        echo -e "  ${GREEN}Cloned successfully${NC}"
+        if git clone "$url" "$path"; then
+            echo -e "  ${GREEN}Cloned successfully${NC}"
+        else
+            echo -e "  ${RED}Clone failed — re-run later${NC}"
+        fi
     fi
 
     echo ""

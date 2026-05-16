@@ -99,7 +99,11 @@ function Sync-Repo {
         Write-Host "  Action: cloning..."
 
         git clone $Url $Path
-        Write-Host "  Cloned successfully" -ForegroundColor Green
+        if ($LASTEXITCODE -eq 0 -and (Test-Path $Path)) {
+            Write-Host "  Cloned successfully" -ForegroundColor Green
+        } else {
+            Write-Host "  Clone failed (exit $LASTEXITCODE) — re-run later" -ForegroundColor Red
+        }
     }
 
     Write-Host ""
