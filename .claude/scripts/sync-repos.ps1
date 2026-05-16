@@ -20,20 +20,37 @@ if (-not (Test-Path $OssDir)) {
     New-Item -ItemType Directory -Path $OssDir -Force | Out-Null
 }
 
-# Repository definitions
-$Repos = @{
-    "codebase" = "$env:USERPROFILE\codebase"
-    "shadcn" = "$OssDir\shadcn"
-    "radix" = "$OssDir\radix"
-    "kun" = "$env:USERPROFILE\kun"
-    "hogwarts" = "$OssDir\hogwarts"
-    "souq" = "$OssDir\souq"
-    "mkan" = "$OssDir\mkan"
-    "shifa" = "$OssDir\shifa"
-    "swift-app" = "$OssDir\swift-app"
-    "distributed-computer" = "$OssDir\distributed-computer"
-    "marketing" = "$OssDir\marketing"
+# Repository definitions — read from ~/.claude/memory/repositories.json (source of truth)
+# Falls back to the hardcoded list for bootstrapping when memory isn't copied yet.
+function Get-RepoMap {
+    $memoryFile = "$env:USERPROFILE\.claude\memory\repositories.json"
+    if (Test-Path $memoryFile) {
+        try {
+            $data = Get-Content $memoryFile -Raw | ConvertFrom-Json
+            if ($data.repos) {
+                $map = @{}
+                foreach ($p in $data.repos.PSObject.Properties) {
+                    $map[$p.Name] = $ExecutionContext.InvokeCommand.ExpandString($p.Value)
+                }
+                return $map
+            }
+        } catch { }  # fall through to hardcoded fallback below
+    }
+    @{
+        "codebase" = "$env:USERPROFILE\codebase"
+        "shadcn" = "$OssDir\shadcn"
+        "radix" = "$OssDir\radix"
+        "kun" = "$env:USERPROFILE\kun"
+        "hogwarts" = "$OssDir\hogwarts"
+        "souq" = "$OssDir\souq"
+        "mkan" = "$OssDir\mkan"
+        "shifa" = "$OssDir\shifa"
+        "swift-app" = "$OssDir\swift-app"
+        "distributed-computer" = "$OssDir\distributed-computer"
+        "marketing" = "$OssDir\marketing"
+    }
 }
+$Repos = Get-RepoMap
 
 function Sync-Repo {
     param([string]$Name)
