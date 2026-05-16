@@ -2,6 +2,20 @@
   "$schema": "repository-registry-schema",
   "description": "Track all databayt organization repositories for deep reference",
   "lastUpdated": "2026-01-17T00:00:00Z",
+  "_comment": "The flat 'repos' map below is consumed by doctor.ps1 and sync-repos.ps1. The richer 'repositories' object is for other tooling.",
+  "repos": {
+    "codebase": "$env:USERPROFILE\\codebase",
+    "kun": "$env:USERPROFILE\\kun",
+    "shadcn": "$env:USERPROFILE\\oss\\shadcn",
+    "radix": "$env:USERPROFILE\\oss\\radix",
+    "hogwarts": "$env:USERPROFILE\\oss\\hogwarts",
+    "souq": "$env:USERPROFILE\\oss\\souq",
+    "mkan": "$env:USERPROFILE\\oss\\mkan",
+    "shifa": "$env:USERPROFILE\\oss\\shifa",
+    "swift-app": "$env:USERPROFILE\\oss\\swift-app",
+    "distributed-computer": "$env:USERPROFILE\\oss\\distributed-computer",
+    "marketing": "$env:USERPROFILE\\oss\\marketing"
+  },
   "organization": {
     "name": "databayt",
     "url": "https://github.com/databayt",
