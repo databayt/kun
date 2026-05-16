@@ -374,12 +374,11 @@ if [ ! -f "$MAINTAIN_SCRIPT" ]; then
     write_step 15 "maintain.sh missing — skipping" warn
 elif [ "$DRY_RUN" = true ]; then
     write_step 15 "[dry-run] would call maintain.sh --install" skip
-elif $IS_LINUX; then
-    write_step 15 "Linux scheduling not yet supported (use cron manually)" warn
 else
+    # maintain.sh handles macOS (launchd) and Linux (systemd --user)
     bash "$MAINTAIN_SCRIPT" --install >> "$LOG_FILE" 2>&1 && \
         write_step 15 "kun-maintain armed for daily 09:00" ok || \
-        write_step 15 "scheduled task creation failed" warn
+        write_step 15 "scheduled task creation failed (see log)" warn
 fi
 
 # ── [16] Final verify via doctor.sh ──────────────────────────────

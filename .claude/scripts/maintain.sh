@@ -7,8 +7,21 @@ set +e
 
 SCRIPTS_DIR="$HOME/.claude/scripts"
 LOGS_DIR="$HOME/.claude/logs"
+
+# macOS: launchd
 PLIST_LABEL='com.databayt.kun-maintain'
 PLIST_PATH="$HOME/Library/LaunchAgents/${PLIST_LABEL}.plist"
+
+# Linux: systemd user units
+SYSTEMD_DIR="$HOME/.config/systemd/user"
+SYSTEMD_UNIT='kun-maintain'
+
+# OS detection
+IS_MAC=false; IS_LINUX=false
+case "$(uname -s)" in
+    Darwin) IS_MAC=true ;;
+    Linux)  IS_LINUX=true ;;
+esac
 
 INSTALL=false; UNINSTALL=false; STATUS=false; DRY_RUN=false; SILENT=false
 SCHEDULE='09:00'
@@ -44,13 +57,13 @@ if [ "$INSTALL" = true ]; then
     hour="${SCHEDULE%:*}"
     minute="${SCHEDULE#*:}"
 
-    if [ "$DRY_RUN" = true ]; then
-        echo "DRY RUN — would write $PLIST_PATH for daily ${SCHEDULE}"
-        exit 0
-    fi
-
-    mkdir -p "$(dirname "$PLIST_PATH")"
-    cat > "$PLIST_PATH" << PLIST_EOF
+    if $IS_MAC; then
+        if [ "$DRY_RUN" = true ]; then
+            echo "DRY RUN — would write $PLIST_PATH for daily ${SCHEDULE}"
+            exit 0
+        fi
+        mkdir -p "$(dirname "$PLIST_PATH")"
+        cat > "$PLIST_PATH" << PLIST_EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -80,25 +93,85 @@ if [ "$INSTALL" = true ]; then
 </dict>
 </plist>
 PLIST_EOF
-
-    # Unload if already loaded, then load fresh — idempotent
-    launchctl unload "$PLIST_PATH" 2>/dev/null
-    if launchctl load "$PLIST_PATH" 2>/dev/null; then
-        echo "✅ Scheduled launchd agent '${PLIST_LABEL}' armed for daily ${SCHEDULE}"
-        echo "   plist: $PLIST_PATH"
-        exit 0
-    else
-        echo "❌ Failed to load launchd agent" >&2
-        echo "   plist written to $PLIST_PATH — try: launchctl load $PLIST_PATH" >&2
-        exit 5
+        # Unload if already loaded, then load fresh — idempotent
+        launchctl unload "$PLIST_PATH" 2>/dev/null
+        if launchctl load "$PLIST_PATH" 2>/dev/null; then
+            echo "✅ Scheduled launchd agent '${PLIST_LABEL}' armed for daily ${SCHEDULE}"
+            echo "   plist: $PLIST_PATH"
+            exit 0
+        else
+            echo "❌ Failed to load launchd agent" >&2
+            echo "   plist written to $PLIST_PATH — try: launchctl load $PLIST_PATH" >&2
+            exit 5
+        fi
     fi
+
+    if $IS_LINUX; then
+        # systemd user unit + timer
+        if ! command -v systemctl >/dev/null 2>&1; then
+            echo "❌ systemctl not found — install systemd or use cron manually" >&2
+            exit 5
+        fi
+        if [ "$DRY_RUN" = true ]; then
+            echo "DRY RUN — would write $SYSTEMD_DIR/${SYSTEMD_UNIT}.{service,timer} for daily ${SCHEDULE}"
+            exit 0
+        fi
+        mkdir -p "$SYSTEMD_DIR"
+        cat > "$SYSTEMD_DIR/${SYSTEMD_UNIT}.service" << SERVICE_EOF
+[Unit]
+Description=Kun engine daily heartbeat
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash ${SCRIPTS_DIR}/maintain.sh --run --silent
+StandardOutput=append:${LOGS_DIR}/maintain-systemd.out
+StandardError=append:${LOGS_DIR}/maintain-systemd.err
+SERVICE_EOF
+
+        cat > "$SYSTEMD_DIR/${SYSTEMD_UNIT}.timer" << TIMER_EOF
+[Unit]
+Description=Daily Kun engine heartbeat
+Requires=${SYSTEMD_UNIT}.service
+
+[Timer]
+OnCalendar=*-*-* ${SCHEDULE}:00
+Persistent=true
+Unit=${SYSTEMD_UNIT}.service
+
+[Install]
+WantedBy=timers.target
+TIMER_EOF
+
+        systemctl --user daemon-reload 2>/dev/null
+        if systemctl --user enable --now "${SYSTEMD_UNIT}.timer" 2>/dev/null; then
+            echo "✅ Scheduled systemd timer '${SYSTEMD_UNIT}.timer' armed for daily ${SCHEDULE}"
+            echo "   units: $SYSTEMD_DIR/${SYSTEMD_UNIT}.{service,timer}"
+            exit 0
+        else
+            echo "❌ systemctl --user enable failed" >&2
+            echo "   units written to $SYSTEMD_DIR — try: systemctl --user enable --now ${SYSTEMD_UNIT}.timer" >&2
+            exit 5
+        fi
+    fi
+
+    echo "❌ Unsupported OS for scheduling" >&2
+    exit 5
 fi
 
 # ── --uninstall ──────────────────────────────────────────────────
 if [ "$UNINSTALL" = true ]; then
-    launchctl unload "$PLIST_PATH" 2>/dev/null
-    rm -f "$PLIST_PATH"
-    echo "✅ Removed launchd agent '${PLIST_LABEL}' (idempotent)"
+    if $IS_MAC; then
+        launchctl unload "$PLIST_PATH" 2>/dev/null
+        rm -f "$PLIST_PATH"
+        echo "✅ Removed launchd agent '${PLIST_LABEL}' (idempotent)"
+    elif $IS_LINUX; then
+        if command -v systemctl >/dev/null 2>&1; then
+            systemctl --user disable --now "${SYSTEMD_UNIT}.timer" 2>/dev/null
+        fi
+        rm -f "$SYSTEMD_DIR/${SYSTEMD_UNIT}.service" "$SYSTEMD_DIR/${SYSTEMD_UNIT}.timer"
+        echo "✅ Removed systemd units '${SYSTEMD_UNIT}.{service,timer}' (idempotent)"
+    fi
     exit 0
 fi
 
@@ -106,11 +179,24 @@ fi
 if [ "$STATUS" = true ]; then
     echo ""
     echo "kun-maintain status"
-    if launchctl list 2>/dev/null | grep -q "$PLIST_LABEL"; then
-        echo "  State:    loaded"
-        echo "  Plist:    $PLIST_PATH"
-    else
-        echo "  State:    not loaded — run: maintain.sh --install"
+    if $IS_MAC; then
+        if launchctl list 2>/dev/null | grep -q "$PLIST_LABEL"; then
+            echo "  Backend:  launchd"
+            echo "  State:    loaded"
+            echo "  Plist:    $PLIST_PATH"
+        else
+            echo "  Backend:  launchd"
+            echo "  State:    not loaded — run: maintain.sh --install"
+        fi
+    elif $IS_LINUX; then
+        echo "  Backend:  systemd --user"
+        if systemctl --user is-enabled "${SYSTEMD_UNIT}.timer" >/dev/null 2>&1; then
+            echo "  State:    enabled"
+            next=$(systemctl --user list-timers --all --no-pager 2>/dev/null | grep "$SYSTEMD_UNIT" | awk '{print $1, $2}' | head -1)
+            [ -n "$next" ] && echo "  Next run: $next"
+        else
+            echo "  State:    not enabled — run: maintain.sh --install"
+        fi
     fi
     echo "  Log dir:  $LOGS_DIR"
     latest=$(ls -t "$LOGS_DIR"/maintain-*.log 2>/dev/null | head -1)
