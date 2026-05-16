@@ -14,9 +14,9 @@ const nextConfig: NextConfig = {
       //   Windows: irm https://kun.databayt.org/install | iex
       //   macOS:   curl -fsSL https://kun.databayt.org/install.sh | bash
       { source: "/install",    destination: `${RAW}/bootstrap.ps1`, permanent: false },
-      { source: "/install.sh", destination: `${RAW}/onboarding-mac.sh`, permanent: false },
+      { source: "/install.sh", destination: `${RAW}/bootstrap.sh`, permanent: false },
       { source: "/finish",     destination: `${RAW}/bootstrap.ps1`, permanent: false },
-      { source: "/finish.sh",  destination: `${RAW}/onboarding-mac.sh`, permanent: false },
+      { source: "/finish.sh",  destination: `${RAW}/bootstrap.sh`, permanent: false },
       { source: "/doctor",     destination: `${RAW}/doctor.ps1`, permanent: false },
       { source: "/doctor.sh",  destination: `${RAW}/doctor.sh`,  permanent: false },
     ];
