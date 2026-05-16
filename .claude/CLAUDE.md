@@ -66,6 +66,9 @@ Powerful workflows that run independently of the pipeline.
 | `learn` | Org intelligence — extract patterns, conventions, team dynamics |
 | `analyze` | Repo config generator — analyze patterns, generate config PR |
 | `profile` | Selective config loading — core, developer, security, per-person |
+| `doctor` | Audit `~/.claude/` — health + updates + self-repair. Exits 0/1/2/3. |
+| `maintain` | Daily heartbeat — sync repos, run doctor, notify on red. Scheduled task. |
+| `bootstrap` | Single-paste cold start for a fresh machine (Windows: `irm /install \| iex`) |
 
 ### Tier 2b — Coverage Sweeps
 
@@ -206,6 +209,9 @@ When implementing, check codebase first:
 | `/template <name>` | Create full-page layout |
 | `/test <file>` | Generate and run tests |
 | `/clone <source>` | Clone from codebase/GitHub |
+| `/doctor [fix\|update\|report]` | Audit `~/.claude/` health + updates |
+| `/maintain [install\|status\|run]` | Daily heartbeat scheduled task |
+| `/bootstrap [dry-run\|track]` | Single-paste cold start (or re-run) |
 
 ### Intelligence
 | Command | Purpose |
