@@ -9,6 +9,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "docs:check": "node scripts/check-docs-links.mjs",
     "postinstall": "fumadocs-mdx",
     "setup:phase1": "bash scripts/phase1/setup.sh",
     "setup:phase2": "sudo bash scripts/phase2/setup.sh",
