@@ -204,7 +204,7 @@ Extracted P conventions, selected Q agents, created R rules.
 
 Closes #<issue-number>
 
-Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
 
 # Push
 git push -u origin chore/analyze-config

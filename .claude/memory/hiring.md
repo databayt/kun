@@ -28,7 +28,7 @@
 | **MRR ≥ $30K** | Fourth paid hire | **Designer** OR **DevRel** | $2-3K/mo + CU |
 | **MRR ≥ $50K** | Fifth paid hire | **Ops/Finance** lead | $3K/mo + CU |
 
-Equity allocation per hire follows the CU + founder-reserve framework (TBD — see `databayt/revenue` repo when it exists).
+Equity allocation per hire follows the CU + founder-reserve framework. The **doctrine** is at [`docs/SHARE-ECONOMY-MODEL.md`](../../docs/SHARE-ECONOMY-MODEL.md) (references, vocabulary, reference→mechanism translation). The **measurement spec** is at [`hogwarts/content/docs-en/shared-economy.mdx`](https://github.com/databayt/hogwarts/blob/main/content/docs-en/shared-economy.mdx) (CU formulas, multipliers, $45/hr floor). The **operational spec** (pool sizing, founder reserve %, operating reserve %, per-repo weighting, multi-class CU) is owned by Samia for Q3 2026 and will live in the future `databayt/revenue` repo (not yet created — wait for Samia's draft).
 
 ---
 

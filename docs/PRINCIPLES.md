@@ -106,13 +106,13 @@ Hogwarts isn't bought; it's hired to make a school principal's job easier. Know 
 
 > *"It's much better to make a few users really love you than a lot of users sort of like you."* — Sam Altman, *Startup Playbook*
 
-Ahmed Baha's love is worth more than 100 leads who never sign. Concentrate. Pour effort into the pilot.
+The MENA-10 free pilot cohort is the operating expression of this principle in 2026. Ahmed Baha is the founding partner (slot 1 of 10), and nine more pilot schools fill the cohort — each receiving founder-level attention, weekly feedback calls, and co-design status. Ten schools we love is a different and stronger position than one school we love. See [`hogwarts/content/docs-en/pilot.mdx`](https://github.com/databayt/hogwarts/blob/main/content/docs-en/pilot.mdx) for the cohort plan.
 
 ### 15. Do things that don't scale
 
 > *"Do things that don't scale."* — Paul Graham
 
-Hand-onboard the first 10 schools. Personally answer the first 100 support tickets. Manually create the first 10 invoices. The unscalable work IS the strategy.
+Hand-onboard the first 10 schools (the MENA-10 cohort). Personally answer the first 100 support tickets. Manually create the first 10 invoices. The unscalable work IS the strategy. See [`hogwarts/content/docs-en/pilot.mdx`](https://github.com/databayt/hogwarts/blob/main/content/docs-en/pilot.mdx) for the operational play.
 
 ### 16. Pick a beachhead and topple it
 
@@ -160,6 +160,8 @@ Public repos. Public docs. Public roadmap. Public failures. SSPL is a posture. W
 
 The sharing-economy revenue model (Contribution Units) is not marketing; it is the strategic posture. Contributors are owners. The community is what makes Databayt impossible for a closed competitor to copy.
 
+Doctrine, references (Akbar / NMBD / Khedr / Islamic primitives), and the reference-to-mechanism translation are in [`docs/SHARE-ECONOMY-MODEL.md`](./SHARE-ECONOMY-MODEL.md). Operational spec (CU pool sizing, multi-class CU, conversion-to-cash) is Samia's Q3 2026 framework — see [`hogwarts/content/docs-en/shared-economy.mdx`](https://github.com/databayt/hogwarts/blob/main/content/docs-en/shared-economy.mdx) for the current measurement layer.
+
 ### 23. Architecture before vibe
 
 > *"The future of software is not just written. It's designed."* — Craig Adam, from `/Users/abdout/kun/CLAUDE.md`
@@ -192,3 +194,5 @@ Use `/principle add` skill to log new ones. Use `/principle review` quarterly to
 ## Last reviewed
 
 2026-05-12 — Founding 24 principles. Tier 6 (Databayt-specific) will grow fastest as we learn.
+
+2026-05-12 — Principles 14 + 15 revised under MENA-10 cohort strategy. The "make a few users love you" frame now reads as 10, not 1. See `hogwarts/content/docs-en/pilot.mdx`, `hogwarts/content/docs-en/gtm.mdx`, and `kun/.claude/memory/customers.json`.

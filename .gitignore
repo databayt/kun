@@ -40,3 +40,9 @@ pnpm-debug.log*
 .vercel
 .env*.local
 .playwright-mcp/
+
+# Claude runtime
+.claude/scheduled_tasks.lock
+
+# Anthropic crawler artifacts (runtime cache)
+scripts/crawl-anthropic/state/

@@ -1,7 +1,7 @@
 {
   "$schema": "Deal pipeline — every prospect, current stage, last contact",
   "last_updated": "2026-05-12",
-  "last_updated_by": "captain-os-bootstrap",
+  "last_updated_by": "pilot-audit-refresh",
 
   "stages": {
     "cold": "Identified prospect, no contact yet",
@@ -28,10 +28,27 @@
   ],
 
   "weekly_targets": {
-    "new_warm_prospects": 1,
-    "outreach_actions": 5,
-    "customer_interviews": 1,
-    "proposals_sent": 0
+    "new_warm_prospects": 3,
+    "outreach_actions": 10,
+    "customer_interviews": 2,
+    "proposals_sent": 1,
+    "_revised_2026-05-12": "Bumped from {1, 5, 1, 0} under MENA-10 cohort strategy. See /Users/abdout/hogwarts/content/docs-en/pilot.mdx + leads.mdx."
+  },
+
+  "pilot_recruitment": {
+    "cohort": "MENA-10",
+    "target_signed": 10,
+    "current_signed": 1,
+    "target_completion": "2026-08-31",
+    "monthly_target": 2,
+    "open_slots_by_country": {
+      "Sudan": 2,
+      "Saudi Arabia": 2,
+      "Egypt": 2,
+      "Jordan": 1,
+      "Morocco": 1,
+      "UAE": 1
+    }
   },
 
   "outreach_scope": {

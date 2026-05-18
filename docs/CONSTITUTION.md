@@ -81,6 +81,8 @@ When this conflicts with going faster verbally: write it down.
 
 The sharing-economy model isn't a marketing line; it is the strategic posture. Contributors are owners. CU credits compound. The community is what makes Databayt impossible to copy by a closed competitor. Process Power and Counter-Positioning (Helmer's 7 Powers) come from the community, not the code.
 
+The intellectual lineage and operational vocabulary of this posture — Akbar's Huquq, NMBD's production-solidarity, Khedr's MENA equity methodology, and the Islamic primitives (Mudaraba / Shirkat al-A'mal / Waqf-track / Zakat-aligned Needs Fund) — are documented in [`docs/SHARE-ECONOMY-MODEL.md`](./SHARE-ECONOMY-MODEL.md). Operational mechanics (CU pool sizing, founder/operating reserves, conversion to cash) are owned by Samia for Q3 2026 and will live in the future `databayt/revenue` repo.
+
 When this conflicts with closed advantage: community wins.
 
 ---

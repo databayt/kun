@@ -101,7 +101,7 @@ Append to issue: "Check stage complete. Build: pass. Visual: verified."
 
    Closes #<issue-number>
 
-   Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
+   Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
    ```
 2. Push to main
 3. Deploy to Vercel: `npx vercel --prod --yes`

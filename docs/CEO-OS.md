@@ -624,6 +624,40 @@ Plans A / B / Z — Plan Z is "what happens if everything fails."
 
 Personal mastery, mental models, shared vision, team learning, systems thinking.
 
+### I. Islamic & Sudanese economy references (the share-economy lineage)
+
+The four references below ground the company's "Open source, sharing economy" posture in a tradition broader than Silicon Valley operator canon. They are *complementary* to the Western canon above, not substitutes — the Western canon answers "how do we operate well?", this canon answers "in service of what?". Full doctrine: [`docs/SHARE-ECONOMY-MODEL.md`](./SHARE-ECONOMY-MODEL.md).
+
+**Khedr — *رائد الأعمال Inside Out* (2019)**
+
+> Discuss and document partnership equity before the company starts operating, not after.
+
+د. محمد حسام خضر (Egyptian engineer & practitioner, ~28 years; MBA Universitat Autònoma de Barcelona 2017; DBA 2025; founder of Internet Plus, Sun Games (acquired), Managing Partner at Endure Capital). Dar Don, 239pp, 30+ chapters, ISBN 9789778061598. The Equity Split chapter is the book's most-cited section. **Five Databayt-applicable contributions:** (1) two distinct equity methodologies — traditional vs startup; (2) **Khedr Helicopter** — staged-commitment expansion where stage-N commitment scales with stage-(N–1) traction (MENA-10 cohort = stage 1); (3) **pre-launch equity contract** for every partnership before first commit; (4) **partner-departure protocols** — bought-out vested CU, unvested returns to pool, structured cooling-off; (5) **Sharia-compliant non-compete templates** for MENA legal context. Reference: [إضاءات review](https://www.ida2at.com/entrepreneur-inside-out-book-overview/); YouTube **خضر و بزنس**.
+
+**Akbar — *قص الحق* (2014, 2nd ed. 2022, 1800pp) + the operational framework**
+
+> Islamic legal tradition organizes economic life around حقوق (Ḥuquq, "rights") rather than around property as exclusion. Western property → rules → bureaucracy → monopoly → stratification. Ḥuquq → access for all.
+
+جميل عبد القادر أكبر (Saudi architect, MIT PhD 1984 under Habraken, currently Fatih Sultan Mehmet Vakıf University Istanbul). The doctrine cites Akbar for the philosophical posture (rights > property) AND for three portable concepts from his operational framework: (1) **three claims (ownership / control / use) + five forms of submission (Unified / Dispersed / Permissive / Possessive / Trusteeship)** — Akbar's 1984 MIT thesis framework, directly portable to software (all five forms exist in Databayt today); (2) **three mechanisms** (collective solution-seeking, action precedes permission, refinement through conflict — Akbar 1999) — names what OSS practices already do; (3) **darar / dirar** — the Prophetic distinction between extractive harm (SSPL prevents) and gratuitous harm (trademark policy prevents). Most accessible English entry: Akbar's 2023 keynote *Property Rights (Ḥuquq) and Civilizations* (37pp, Ankara) and the 2024 Ummatics colloquium parts I & II.
+
+**NMBD — *ورقة الاقتصاد التشاركي***
+
+> *"التضامن في الإنتاج، لا في الاستهلاك فقط."*
+> Solidarity in production, not in consumption alone.
+
+الحركة الوطنية للبناء والتنمية (Sudanese reform movement). The single principle worth keeping: move solidarity from the consumption side of the economy to the production side. This is already the operative posture of the company (Ahmed Baha as partner-not-customer, MENA-10 cohort, contributors-as-owners); NMBD gives it a precise name. Doctrine cites the *paper* and the production-solidarity principle; lineage scope limited to safe civilizational figures (Bennabi, Hajj Hammad).
+
+**Islamic economy primitives — the operational vocabulary**
+
+Four primitives, each scoped narrowly:
+
+- **مضاربة (Mudaraba)** — silent partnership: capital + working partner, profit by ratio, loss to capital provider. Applies *only* to sponsored custom-build contracts.
+- **شِركة الأعمال (Shirkat al-A'mal)** — partnership of labor: contributors as owners by contribution. The CU spec is its operational expression. Honest divergence: we cap contributor downside.
+- **وقف (Waqf-track)** — perpetual community pool. Pledged 5% of revenue today, formal *waqf* instrument when activation triggers fire.
+- **زكاة (Zakat-aligned Needs Fund)** — 2.5% on net profits to a separately-named "Needs Fund / صندوق العون" for contributors in genuine need.
+
+Reference textbook: Iqbal & Mirakhor, *An Introduction to Islamic Finance: Theory and Practice* (2nd ed., Wiley, 2011). Standards: AAOIFI ([aaoifi.com](https://aaoifi.com/)).
+
 ---
 
 ## Part VI — How this OS is implemented in Kun
@@ -727,8 +761,9 @@ For Abdout personally — read in this order, one per week (12 weeks):
 10. **Jim Collins — *Good to Great*** (Level-5; hedgehog; flywheel)
 11. **Hamilton Helmer — *7 Powers*** (strategic moats)
 12. **Marshall Goldsmith — *What Got You Here Won't Get You There*** (founder behavioral self-improvement)
+13. **محمد حسام خضر — *رائد الأعمال Inside Out*** (MENA-Arab equity-allocation methodology; bridge from the Western canon into the share-economy doctrine — see Part V Section I and `docs/SHARE-ECONOMY-MODEL.md`)
 
-For Kun captain (loaded as memory context): the captain agent's frontmatter loads `CONSTITUTION.md`, `PRINCIPLES.md`, `NORTH-STAR.md`, and the state files. This document is read on demand at quarterly review or when the captain needs to ground a recommendation in canonical practice.
+For Kun captain (loaded as memory context): the captain agent's frontmatter loads `CONSTITUTION.md`, `PRINCIPLES.md`, `NORTH-STAR.md`, and the state files. This document is read on demand at quarterly review or when the captain needs to ground a recommendation in canonical practice. The share-economy doctrine (`docs/SHARE-ECONOMY-MODEL.md`) is reached via the `CONSTITUTION.md` §7 / `PRINCIPLES.md` #22 / Part V Section I cross-links — not auto-loaded.
 
 ---
 

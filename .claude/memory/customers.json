@@ -1,12 +1,22 @@
 {
-  "$schema": "Customer roster — every named contact across all stages",
+  "$schema": "Pilot + customer roster — MENA-10 free pilot cohort with 10 slots, plus paid customer roster. Slots are not first-come-first-served; each held until written commitment or 14-day silence.",
   "last_updated": "2026-05-12",
-  "last_updated_by": "captain-os-bootstrap",
+  "last_updated_by": "pilot-audit-refresh",
+  "cohort": {
+    "name": "MENA-10",
+    "description": "10 free pilots across MENA — 6 months each, weekly feedback call, case-study commitment at month 6, conversion offer at PRO 30%-off",
+    "target_completion": "2026-08-31",
+    "current_filled": 1,
+    "current_recruiting": 9
+  },
 
-  "customers": [
+  "pilots": [
     {
+      "slot": 1,
       "id": "king-fahad-schools",
       "name": "King Fahad Schools",
+      "country": "Sudan",
+      "city": "Khartoum",
       "primary_contact": {
         "name": "Ahmed Baha",
         "role": "Administrator",
@@ -14,8 +24,6 @@
         "whatsapp": null,
         "preferred_channel": "WhatsApp via Sedon"
       },
-      "country": "Sudan",
-      "city": "Khartoum",
       "product": "hogwarts",
       "stage": "pilot",
       "subscription_status": "free_pilot",
@@ -23,9 +31,12 @@
       "subdomain": "kingfahad.databayt.org",
       "first_contact_date": "2026-03-20",
       "first_meeting_date": "2026-04-04",
+      "pilot_start_date": "2026-04-15",
+      "pilot_end_date": "2026-10-15",
       "last_contact_date": null,
       "owner": "ali",
       "support_owner": "sedon",
+      "founding_partner": true,
       "stage_history": [
         {"date": "2026-03-20", "stage": "warm", "note": "Initial conversation about pilot interest"},
         {"date": "2026-04-04", "stage": "hot", "note": "First meeting held"},
@@ -36,7 +47,104 @@
         "Decision-maker timeline unclear",
         "Need to validate admission flow works end-to-end (currently 31/33 tests pass)"
       ],
-      "next_step": "Schedule conversion conversation by end of Q2 2026"
+      "next_step": "Conversion conversation by 2026-06-15 — pitch founding-partner status + paid Year-1 at PRO 30%-off ($1.05/student/month)",
+      "case_study_status": "draft (placeholders pending interview at month 3)"
+    },
+    {
+      "slot": 2,
+      "id": null,
+      "name": null,
+      "country": "Sudan",
+      "stage": "recruiting",
+      "owner": "ali",
+      "source_channel": "Ahmed Baha referrals",
+      "next_step": "Ask Ahmed Baha for 3 peer-school intros after conversion conversation"
+    },
+    {
+      "slot": 3,
+      "id": null,
+      "name": null,
+      "country": "Sudan",
+      "stage": "recruiting",
+      "owner": "ali",
+      "source_channel": "Ahmed Baha referrals",
+      "next_step": "Ask Ahmed Baha for 3 peer-school intros after conversion conversation"
+    },
+    {
+      "slot": 4,
+      "id": null,
+      "name": null,
+      "country": "Saudi Arabia",
+      "stage": "recruiting",
+      "owner": "sedon",
+      "source_channel": "LinkedIn + Sedon network",
+      "next_step": "Research 5 Riyadh private K-12 schools, draft Arabic LinkedIn DM"
+    },
+    {
+      "slot": 5,
+      "id": null,
+      "name": null,
+      "country": "Saudi Arabia",
+      "stage": "recruiting",
+      "owner": "sedon",
+      "source_channel": "LinkedIn + Sedon network",
+      "next_step": "Research 5 Jeddah Islamic schools"
+    },
+    {
+      "slot": 6,
+      "id": null,
+      "name": null,
+      "country": "Egypt",
+      "stage": "recruiting",
+      "owner": "ali",
+      "source_channel": "MSAR network + LinkedIn",
+      "next_step": "Build list of 10 Cairo language schools"
+    },
+    {
+      "slot": 7,
+      "id": null,
+      "name": null,
+      "country": "Egypt",
+      "stage": "recruiting",
+      "owner": "ali",
+      "source_channel": "MSAR network + LinkedIn",
+      "next_step": "Build list of 5 Alexandria private schools"
+    },
+    {
+      "slot": 8,
+      "id": null,
+      "name": null,
+      "country": "Jordan",
+      "stage": "recruiting",
+      "owner": "ali",
+      "source_channel": "Orange Corners alumni / 249Startups",
+      "next_step": "Tap 249Startups Jordan network for 3 intros"
+    },
+    {
+      "slot": 9,
+      "id": null,
+      "name": null,
+      "country": "Morocco",
+      "stage": "recruiting",
+      "owner": "ali",
+      "source_channel": "249Startups partner network",
+      "next_step": "Research 5 Casablanca private French/Arabic schools"
+    },
+    {
+      "slot": 10,
+      "id": null,
+      "name": null,
+      "country": "UAE",
+      "stage": "recruiting",
+      "owner": "ali",
+      "source_channel": "LinkedIn + Dubai school directory",
+      "next_step": "Build list of 10 Dubai/Sharjah international schools"
     }
-  ]
+  ],
+
+  "paid_customers": [],
+
+  "lost": [],
+
+  "_legacy_single_customer_schema_archived_at": "customers.legacy.json"
 }
