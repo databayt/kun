@@ -160,7 +160,7 @@ Public repos. Public docs. Public roadmap. Public failures. SSPL is a posture. W
 
 The sharing-economy revenue model (Contribution Units) is not marketing; it is the strategic posture. Contributors are owners. The community is what makes Databayt impossible for a closed competitor to copy.
 
-Doctrine, references (Akbar / NMBD / Khedr / Islamic primitives), and the reference-to-mechanism translation are in [`docs/SHARE-ECONOMY-MODEL.md`](./SHARE-ECONOMY-MODEL.md). Operational spec (CU pool sizing, multi-class CU, conversion-to-cash) is Samia's Q3 2026 framework — see [`hogwarts/content/docs-en/shared-economy.mdx`](https://github.com/databayt/hogwarts/blob/main/content/docs-en/shared-economy.mdx) for the current measurement layer.
+Doctrine, references (Akbar / NMBD / Khedr / Islamic primitives), and the reference-to-mechanism translation are in [`docs/SHARE-ECONOMY-MODEL.md`](./SHARE-ECONOMY-MODEL.md). The operational artifact — the smart-contract-shaped public-facing agreement with five Islamic-primitive clauses and five Khedr partnership-formation clauses — is at [`content/docs/share-economy.mdx`](../content/docs/share-economy.mdx). Operational spec (CU pool sizing, multi-class CU, conversion-to-cash) is Samia's Q3 2026 framework — see [`hogwarts/content/docs-en/shared-economy.mdx`](https://github.com/databayt/hogwarts/blob/main/content/docs-en/shared-economy.mdx) for the current measurement layer.
 
 ### 23. Architecture before vibe
 
