@@ -1,0 +1,223 @@
+---
+title: System
+description: End-to-end map of how bootstrap, install, doctor, maintain, sync-repos, and auto-sync fit together
+---
+
+> One paste sets up a new laptop. After that, six small scripts keep it healthy and in sync with GitHub forever.
+
+This page documents the **operational engine** that runs on every teammate's machine — what each script does, how they call each other, and the lifecycle from cold-start to daily steady-state.
+
+---
+
+## The six scripts
+
+| Script | Role | When it runs |
+|---|---|---|
+| [`bootstrap`](/docs/operations/bootstrap) | Orchestrator — runs 16 steps from a cold laptop to working machine | **Once** on fresh install, or via `/finish` to repair |
+| [`install`](/docs/installation/claude-code) | Copies `~/.claude/` config from kun repo — role-aware bundles | Called by bootstrap step 9 |
+| [`secrets`](/docs/reference/secrets) | Pulls `.env` from a private team Gist | Called by bootstrap step 13 |
+| [`sync-repos`](/docs/reference/repositories#sync) | Clones all 11 org repos to `~/<name>` (SSH-first, HTTPS fallback) | Called by bootstrap step 14 |
+| [`maintain`](/docs/operations/maintain) | Daily heartbeat — runs doctor + sync once at 09:00 | Scheduled via Task Scheduler / launchd / systemd user |
+| [`auto-sync`](/docs/operations/auto-sync) | Real-time per-repo git sync — pushes on commit, pulls every 60s | Logon-triggered background service |
+| [`doctor`](/docs/operations/doctor) | Health audit — 7 check categories, semantic exit codes | Called by bootstrap step 16 + maintain; manual anytime |
+
+---
+
+## The cold-start flow
+
+```
+                    paste one line in terminal
+              irm https://kun.databayt.org/install | iex
+                              |
+                              v
+              +-------------------------------+
+              | bootstrap.ps1 / bootstrap.sh  |
+              |                               |
+              | 16 numbered steps, ~20 min:   |
+              |  [0]  ExecutionPolicy         |
+              |  [1]  Elevate (UAC/sudo)      |
+              |  [2]  Verify OS + shell       |
+              |  [3]  Create ~/.claude/logs/  |
+              |  [4]  winget/brew bundle      |
+              |  [5]  Refresh PATH            |
+              |  [6]  pnpm via npm            |
+              |  [7]  WebStorm                |
+              |  [8]  Claude Code [Beta]      |
+              |       plugin pre-drop         |
+              |  [9]  install.ps1             |--> ~/.claude/{agents,commands,
+              |                               |     rules,memory,scripts,...}
+              | [10]  settings.json           |
+              | [11]  $PROFILE c/cc + bin     |
+              | [12]  OAuth batch             |--> GitHub, Claude, JetBrains
+              | [13]  secrets.ps1             |--> ~/.claude/.env
+              | [14]  sync-repos.ps1          |--> ~/codebase, ~/kun, ~/hogwarts,
+              |                               |     ~/souq, ~/mkan, ~/shifa,
+              |                               |     ~/shadcn, ~/radix, ~/swift-app,
+              |                               |     ~/distributed-computer, ~/marketing
+              | [15]  maintain -Install       |--> daily 09:00 task armed
+              | [16]  doctor                  |--> green / 0 1 2 3 exit code
+              +-------------------------------+
+                              |
+                              v
+                  KUN BOOTSTRAP COMPLETE
+                  Audit log: ~/.claude/logs/bootstrap-<ts>.log
+```
+
+After the cold-start, you have a fully-configured machine and the runtime services (`maintain`, `auto-sync`) take over.
+
+---
+
+## The steady-state loop
+
+```
+                Every day, every machine, every teammate:
+
+  09:00 ------> maintain  --> doctor (audit) --> sync-repos (catch drift)
+                   |              |
+                   |              v
+                   |        if exit != 0: notify (toast/log/issue comment)
+                   |
+                   +--> takes ~30s, then sleeps until tomorrow
+
+  Continuous --> auto-sync (background service)
+                   |
+                   v
+       FileSystemWatcher on each ~/<repo>/.git/refs/heads
+                   |
+                   v
+       Local commit detected --> debounce 2s --> git push
+                   |
+                   +--> every 60s --> git fetch + git pull --rebase per repo
+                                       (skip if working tree dirty)
+                                       (abort + log on conflict)
+```
+
+`maintain` is the safety net. `auto-sync` is the heartbeat. Together they keep every teammate's repos current with origin without manual `git push`/`git pull`.
+
+---
+
+## The `~/.claude/` artifact
+
+`install.ps1` produces this layout on every machine. Same structure on Windows, macOS, Linux.
+
+```
+~/.claude/
++-- CLAUDE.md                  global instructions (~600 lines, keyword grammar)
++-- CLAUDE.local.md             your personal overrides (not synced)
++-- .env                        pulled from Gist by secrets.ps1
++-- settings.json               env vars + hooks + permission allowlist
++-- mcp.json                    MCP server config (role-specific bundle)
++-- agents/                     28+ specialized agents
++-- commands/                   slash commands (/feature, /doctor, ...)
++-- rules/                      path-scoped rules
++-- memory/
+|   +-- repositories.json       canonical org repo map (read by sync, doctor)
+|   +-- atom.json, template.json, block.json, report.json
++-- scripts/
+|   +-- bootstrap.ps1 / .sh
+|   +-- install.ps1 / .sh
+|   +-- secrets.ps1 / .sh
+|   +-- sync-repos.ps1 / .sh
+|   +-- maintain.ps1 / .sh
+|   +-- doctor.ps1 / .sh
+|   +-- auto-sync.ps1 / .sh                  <-- continuous service
+|   +-- auto-sync-install.ps1 / .sh          <-- registers as background task
+|   +-- lib/
+|       +-- Check-Core.ps1, Check-Shell.ps1, Check-Identity.ps1,
+|           Check-Repos.ps1, Check-Updates.ps1, Check-Scheduled.ps1,
+|           Check-IDE.ps1                    <-- doctor's modular checks
+|       +-- Fix-Shell.ps1                    <-- doctor -Fix dispatcher
+|       +-- Bootstrap-Common.ps1, Confirm-Admin.ps1, Install-Winget.ps1,
+|           Update-Path.ps1, Stage-OAuth.ps1, Drop-Plugin.ps1, Track-Issue.ps1
++-- logs/
+    +-- bootstrap-<ts>.log
+    +-- maintain-<date>.log
+    +-- auto-sync-<date>.log
+```
+
+See [`installation/claude-code`](/docs/installation/claude-code) for the deeper breakdown.
+
+---
+
+## The repo layout
+
+Every databayt org repo lives at **`~/<name>`** on every machine, every OS. See [repositories — local layout](/docs/reference/repositories#local-layout).
+
+| OS | What `~` expands to |
+|---|---|
+| Windows | `C:\Users\<you>\<repo>` |
+| macOS | `/Users/<you>/<repo>` |
+| Linux | `/home/<you>/<repo>` |
+
+No `oss/` subdirectory, no `projects/` parent, no per-product folders. Tab-completion at `~/h` lands you in `hogwarts` on every teammate's machine.
+
+---
+
+## The friendly URLs
+
+`next.config.ts` redirects short URLs to raw GitHub script content. This is what makes a single-line install possible.
+
+| URL | Redirects to | Used by |
+|---|---|---|
+| `kun.databayt.org/install` | `bootstrap.ps1` raw on GitHub | Windows one-paste cold-start |
+| `kun.databayt.org/install.sh` | `bootstrap.sh` raw on GitHub | macOS/Linux one-paste cold-start |
+| `kun.databayt.org/finish[.sh]` | `bootstrap.{ps1,sh}` | Re-run / repair |
+| `kun.databayt.org/doctor[.sh]` | `doctor.{ps1,sh}` | Standalone health check |
+
+Source: `next.config.ts:11-23`.
+
+---
+
+## Daily commands
+
+After cold-start, these slash commands wrap the underlying scripts:
+
+| Say | Calls | Purpose |
+|---|---|---|
+| `c "/doctor"` | `doctor.ps1` | See system health (exit 0/1/2/3) |
+| `c "/doctor fix"` | `doctor -Fix` | Auto-repair fixable warnings |
+| `c "/doctor update"` | `doctor -Update` | Apply available updates |
+| `c "/maintain install"` | `maintain -Install` | Arm/re-arm the daily 09:00 task |
+| `c "/bootstrap"` | re-run bootstrap | Fresh install or full repair |
+| `c "/finish"` | re-run bootstrap | Same as `/bootstrap` |
+
+---
+
+## Exit code semantics (doctor)
+
+Every script that wraps `doctor` (maintain, bootstrap step 16, CI) relies on these codes:
+
+| Exit | Meaning | What to do |
+|---|---|---|
+| 0 | All green | Nothing |
+| 1 | At least one **fail** | `doctor -Fix` or read the report |
+| 2 | At least one **warn** (no fails) | Usually safe; review and address |
+| 3 | At least one **update** available | `doctor -Update` to apply |
+
+Precedence: fail > warn > update > pass.
+
+---
+
+## What's documented where
+
+| Topic | Doc |
+|---|---|
+| Cold-start flow + prerequisites | [installation/](/docs/installation) |
+| 16-step bootstrap detail | [operations/bootstrap](/docs/operations/bootstrap) |
+| Daily heartbeat (`maintain`) | [operations/maintain](/docs/operations/maintain) |
+| Health audit (`doctor`) | [operations/doctor](/docs/operations/doctor) |
+| Real-time sync (`auto-sync`) | [operations/auto-sync](/docs/operations/auto-sync) |
+| Repo locations + sync | [reference/repositories](/docs/reference/repositories) |
+| `.env` and gist setup | [reference/secrets](/docs/reference/secrets) |
+| Engine layers + team roles | [reference/architecture](/docs/reference/architecture) |
+
+---
+
+## Known gaps
+
+The engine has real but small rough edges worth tracking:
+
+1. **`Repair-Profile` is PowerShell-version-blind** — writes only to `$PROFILE.CurrentUserAllHosts` of the host that called it. If bootstrap ran from PS 7, Windows PowerShell 5 never gets the `c` function. Fix: iterate both `~/Documents/PowerShell/profile.ps1` and `~/Documents/WindowsPowerShell/profile.ps1`.
+2. **`Check-Shell.ps1` `~/.claude/bin` false positive** — looks for the literal expanded path `C:\Users\<you>\.claude\bin` in `$PROFILE`, but the profile uses `$env:USERPROFILE\.claude\bin` (unexpanded). Reports "not on PATH" even when it loads correctly.
+3. **`maintain -Install` needs admin on some Windows configs** — `schtasks /Create` may require elevation. Should self-elevate or fall back to a user-scoped task that doesn't trigger UAC.
+4. **`auto-sync` on Windows requires ASCII-only scripts** — `powershell.exe` (PS 5) reads .ps1 as Windows-1252 without a BOM. UTF-8 multibyte chars cause parse errors. All shipped auto-sync scripts are ASCII-clean; future contributors should grep for `[^\x00-\x7F]` before merging.

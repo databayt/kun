@@ -1,6 +1,7 @@
 {
   "title": "Reference",
   "pages": [
+    "system",
     "configuration",
     "architecture",
     "workflows",

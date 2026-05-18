@@ -1,0 +1,181 @@
+---
+title: Doctor
+description: System health audit — 7 categories, semantic exit codes, auto-fix slugs
+---
+
+> One command for health, updates, and self-repair. Green by default; specific and actionable when not.
+
+`doctor` runs 7 modular checks across the `~/.claude/` config, your shell, your identity, your repos, and your scheduled tasks. It reports per-item with one of five statuses and exits with a semantic code (0/1/2/3) that downstream tools (`maintain`, `bootstrap`, CI) rely on.
+
+---
+
+## Run it
+
+```powershell
+# Windows
+& "$env:USERPROFILE\.claude\scripts\doctor.ps1"
+```
+
+```bash
+# macOS / Linux
+~/.claude/scripts/doctor.sh
+```
+
+Or via skill: `c "/doctor"`.
+
+---
+
+## Flags
+
+| Flag | What it does |
+|------|--------------|
+| `-Fix` / `--fix` | Apply any registered auto-fixes (PROFILE missing c/cc, bin not on PATH, etc.) |
+| `-Update` / `--update` | Apply available updates (claude CLI bump, `git pull` on `~/kun` + `~/codebase`) |
+| `-Report` / `--report` | Post a comment to the `config-health` GitHub issue in `databayt/kun` |
+| `-Json` / `--json` | Emit results as JSON (machine-readable; same exit codes) |
+| `-Quiet` / `--quiet` | Suppress `pass` rows; only show warn/fail/update |
+| `-Deep` / `--deep` | Heavier checks (currently a placeholder for future expansion) |
+
+---
+
+## Status icons
+
+| Icon | Status | Meaning |
+|---|---|---|
+| ✅ | `pass` | Working as expected |
+| ⚠️ | `warn` | Off but not broken (stale, uncommitted, optional missing) |
+| ❌ | `fail` | Broken — fix required |
+| 🔄 | `update` | Newer version available |
+| ⏸ | `paused` | Optional thing not installed (not a problem) |
+
+---
+
+## Exit codes
+
+| Exit | Meaning | Used by |
+|---|---|---|
+| 0 | All green | `bootstrap` accepts; `maintain` silent |
+| 1 | At least one **fail** | `bootstrap` warns; `maintain` notifies |
+| 2 | At least one **warn** (no fails) | `bootstrap` accepts; `maintain` may notify |
+| 3 | At least one **update** available | `bootstrap` accepts; suggest `/doctor update` |
+
+Precedence: `fail > warn > update > pass`.
+
+---
+
+## The 7 check categories
+
+Each category is a separate `Check-*.ps1` module in `~/.claude/scripts/lib/`. Adding a new check = drop a `Test-X` function in a new module and add it to `doctor.ps1`'s `$results +=` chain.
+
+### CORE FILES (`Check-Core.ps1`)
+- ✅ `CLAUDE.md` present, < 30 days old
+- ✅ `settings.json` present, valid JSON, < 30 days old
+- ✅ `mcp.json` present, valid JSON, < 30 days old
+- ✅ `.env` present, < 7 days old (`Fix: rerun-secrets` if stale)
+- ✅ `agents/` ≥ N files (engineer 20 · business 10 · content 10 · ops 10)
+- ✅ `commands/` ≥ N files (engineer 15 · business 5 · content 5 · ops 7)
+
+### SHELL (`Check-Shell.ps1`)
+- ✅ `$PROFILE` file exists (`Fix: create-profile`)
+- ✅ `c` function defined as `claude --dangerously-skip-permissions` (`Fix: append-c-function`)
+- ✅ `~/.claude/bin` on PATH — live + persisted in `$PROFILE` (`Fix: prepend-bin-path`)
+
+### IDENTITY (`Check-Identity.ps1`)
+- ✅ `gh` CLI installed and `gh auth status` shows logged-in account
+- ✅ `claude` CLI installed; checks for `.credentials.json` or `session.json`
+
+### ORG REPOS (`Check-Repos.ps1`)
+For each repo in `~/.claude/memory/repositories.json` (or fallback list):
+- ✅ Cloned at expected `~/<name>` path
+- ✅ Git readable (branch + short commit)
+- ✅ Working tree clean (else ⚠️ "N uncommitted")
+- ❌ if not cloned (`Fix: clone-<name>`)
+
+### UPDATES (`Check-Updates.ps1`)
+- 🔄 **claude CLI** — semver compare against `api.github.com/repos/anthropics/claude-code/releases/latest`
+- 🔄 **`~/kun`** — `git fetch` then compare `@` vs `@{u}`; reports commits behind
+- 🔄 **`~/codebase`** — same as `~/kun`
+
+### SCHEDULED (`Check-Scheduled.ps1`)
+- ✅ `kun-maintain` task armed (Windows Task Scheduler) — shows next run + last exit
+- ⏸ if not armed (`maintain -Install`)
+
+### IDE (`Check-IDE.ps1`)
+- ✅ WebStorm detected (any `WebStorm*` config dir under `$env:APPDATA\JetBrains\`)
+- ✅ Claude Code [Beta] plugin loaded in `plugins/`
+- ⏸ if WebStorm not installed (optional)
+
+---
+
+## Auto-fixes (`-Fix`)
+
+`doctor -Fix` reads the `Fix:` slug on any failing check and dispatches:
+
+| Slug | Action |
+|---|---|
+| `create-profile` | Creates `$PROFILE.CurrentUserAllHosts` and appends the c/cc block |
+| `append-c-function` | Appends the c/cc block to existing `$PROFILE` |
+| `prepend-bin-path` | Same — runs `Repair-Profile` in `lib/Fix-Shell.ps1` |
+| `rerun-secrets` | Prints `secrets.ps1 -GistId <id>` hint (doesn't run — secrets need explicit trigger) |
+| `clone-<name>` | Prints `sync-repos.ps1 <name>` hint (doesn't run — clones touch the network) |
+
+Auto-fixes are conservative by design: they touch `$PROFILE` only, and never run network operations without the user explicitly invoking the underlying script.
+
+---
+
+## Sample green report
+
+```
+✅ healthy · engineer @ MACHINE · 2026-05-18 14:32
+
+CORE FILES
+  ✅ CLAUDE.md             exists · 3d old
+  ✅ settings.json         valid JSON · 3d old
+  ✅ mcp.json              valid JSON · 3d old
+  ✅ .env                  2d old
+  ✅ agents/               28 files
+  ✅ commands/             17 files
+
+SHELL
+  ✅ $PROFILE              defined in $PROFILE
+  ✅ c function            defined in $PROFILE
+  ✅ ~/.claude/bin         on PATH
+
+IDENTITY
+  ✅ gh                    logged in as @abdout
+  ✅ claude                signed in · 2.1.143
+
+ORG REPOS
+  ✅ codebase              clean · main · 475db80
+  ✅ kun                   clean · main · 3cc56d6
+  ✅ shadcn                clean · main · 1137b24a
+  ... (× 11 repos)
+
+UPDATES
+  ✅ claude CLI            up to date · 2.1.143
+  ✅ ~/kun                 up to date
+  ✅ ~/codebase            up to date
+
+SCHEDULED
+  ✅ kun-maintain          next 2026-05-19 09:00 · last run 05-18 09:00 (exit 0)
+
+IDE
+  ✅ WebStorm              2026.1 detected
+  ✅ Claude Code [Beta]    Claude-Code-0.x.y
+```
+
+---
+
+## Known false positives
+
+- **`~/.claude/bin not on PATH`** — `Check-Shell.ps1:29` looks for the literal expanded path `C:\Users\<you>\.claude\bin`, but `$PROFILE` uses the unexpanded `$env:USERPROFILE\.claude\bin`. If you see this warn but `c` works in a fresh terminal, the PATH is loading correctly; the regex just doesn't catch the variable form. Tracked in [system — known gaps](/docs/reference/system#known-gaps).
+
+---
+
+## Reference
+
+- [`doctor.ps1` source](https://github.com/databayt/kun/blob/main/.claude/scripts/doctor.ps1)
+- [`doctor.sh` source](https://github.com/databayt/kun/blob/main/.claude/scripts/doctor.sh)
+- [`Check-*.ps1` modules](https://github.com/databayt/kun/tree/main/.claude/scripts/lib)
+- [System map](/docs/reference/system) — how doctor fits with bootstrap, maintain, auto-sync
+- [Maintain](/docs/operations/maintain) — runs doctor daily at 09:00

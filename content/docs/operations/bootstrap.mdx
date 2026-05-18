@@ -1,0 +1,125 @@
+---
+title: Bootstrap
+description: 16-step single-paste cold-start from a fresh laptop to a green doctor
+---
+
+> One line in your terminal. 16 numbered steps. Three OAuth sign-ins. ~20 minutes. Green `doctor`.
+
+The orchestrator script that runs every other script. Called once on a fresh laptop; re-run via `/finish` to repair an existing install.
+
+See also: [installation overview](/docs/installation), [system map](/docs/reference/system).
+
+---
+
+## Run it
+
+```powershell
+# Windows
+irm https://kun.databayt.org/install | iex
+```
+
+```bash
+# macOS / Linux
+curl -fsSL https://kun.databayt.org/install.sh | bash
+```
+
+Approve UAC/sudo, watch the 16 numbered steps stream by.
+
+---
+
+## The 16 steps
+
+Each line prints `[N/16]` with one of `⏳ ✅ ⏭ ⚠️ ❌`. Output is teed to `~/.claude/logs/bootstrap-<ts>.log`.
+
+| # | Step | Notes |
+|---|------|-------|
+| 0  | ExecutionPolicy / shell check | Sets `RemoteSigned` (Windows) |
+| 1  | Elevate via UAC / sudo | Re-launches as admin if needed |
+| 2  | Verify OS + shell version | Windows 11 + PS 5.1+ or bash 3.2+ |
+| 3  | Create `~/.claude/logs/` | Audit log directory |
+| 4  | `winget` / `brew` bundle | git, Node LTS, gh, PS 7, Claude Code CLI, Claude Desktop |
+| 5  | Refresh `PATH` from registry | New binaries usable in current session |
+| 6  | `npm install -g pnpm` | |
+| 7  | WebStorm | Skip with `-SkipWebStorm` |
+| 8  | Claude Code [Beta] plugin | Pre-dropped into WebStorm `plugins/` |
+| 9  | `install.ps1` → `~/.claude/` | Copies CLAUDE.md, agents, skills, rules, memory, scripts, role-specific `mcp.json` |
+| 10 | `settings.json` | Engineer gets the full one; other roles get a minimal env block |
+| 11 | `$PROFILE` c/cc functions | Idempotent — runs `Repair-Profile` from `lib/Fix-Shell.ps1` |
+| 12 | **OAuth batch** | 3 sign-ins: GitHub, Claude, JetBrains |
+| 13 | `secrets.ps1 -GistId ...` | Pulls `.env` from the team Gist |
+| 14 | `sync-repos.ps1` | Clones all 11 repos to `~/<name>` |
+| 15 | `maintain -Install` | Arms the daily 09:00 heartbeat |
+| 16 | `doctor` | Exit 0 = green, 3 = updates available, 1/2 = needs fix |
+
+---
+
+## Flags
+
+| Flag | Windows | macOS/Linux | What it does |
+|------|---------|-------------|--------------|
+| Role | `-Role business` | `--role business` | Slim config — `engineer\|business\|content\|ops` |
+| Dry run | `-DryRun` | `--dry-run` | Print every step without executing |
+| Track | `-Track` | `--track` | Create a GitHub issue ticking each step as it completes |
+| Skip OAuth | `-SkipOAuth` | `--skip-oauth` | Leave sign-ins to the user |
+| Skip WebStorm | `-SkipWebStorm` | `--skip-ide` | No IDE install |
+| Skip Cowork | `-SkipCowork` | `--skip-desktop` | No Claude Desktop install |
+
+Pass flags via the one-liner by downloading first:
+
+```powershell
+irm https://kun.databayt.org/install -OutFile $env:TEMP\bootstrap.ps1
+& $env:TEMP\bootstrap.ps1 -Role business -DryRun
+```
+
+```bash
+curl -fsSL https://kun.databayt.org/install.sh -o /tmp/bootstrap.sh
+bash /tmp/bootstrap.sh --role business --dry-run
+```
+
+---
+
+## OAuth batch (step 12)
+
+You hear a single beep, then three sign-ins, press-Enter between each:
+
+1. **GitHub** — `gh auth login --web --git-protocol https`. Browser opens, paste device code.
+2. **Claude** — open a new PowerShell and run `claude`. Browser opens for sign-in. Press Enter when you see "Logged in".
+3. **JetBrains** — WebStorm opens. Sign in (or start trial). Press Enter when the project window appears.
+
+Each is skipped if already authenticated. Total ~5 minutes.
+
+---
+
+## Roles
+
+| Role | Includes | For |
+|------|----------|-----|
+| `engineer` | All agents · all MCPs · all skills | Building features |
+| `business` | `docs`, `repos`, `proposal`, `pricing`, `weekly` | Sales, revenue, partnerships |
+| `content` | `docs`, `repos`, `translate`, `content-calendar`, `weekly` | Writers, marketers |
+| `ops` | `docs`, `repos`, `monitor`, `costs`, `incident`, `weekly` | DevOps, infrastructure |
+
+Default is `engineer`.
+
+---
+
+## What you end up with
+
+See [installation/](/docs/installation) and [system overview](/docs/reference/system#what-you-end-up-with).
+
+- Claude Code CLI on PATH
+- `c` function in `$PROFILE`
+- Full `~/.claude/` config
+- All 11 repos at `~/<name>`
+- WebStorm + Claude Code [Beta] plugin
+- `maintain` armed for daily 09:00
+- `doctor` green
+- Audit log at `~/.claude/logs/bootstrap-<ts>.log`
+
+---
+
+## Reference
+
+- [`bootstrap.ps1` source](https://github.com/databayt/kun/blob/main/.claude/scripts/bootstrap.ps1)
+- [`bootstrap.sh` source](https://github.com/databayt/kun/blob/main/.claude/scripts/bootstrap.sh)
+- [System map](/docs/reference/system) — how bootstrap fits with maintain, doctor, auto-sync

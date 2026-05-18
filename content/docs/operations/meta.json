@@ -10,6 +10,11 @@
     "credentials",
     "connectors",
     "apps",
-    "issue"
+    "issue",
+    "---System---",
+    "bootstrap",
+    "doctor",
+    "maintain",
+    "auto-sync"
   ]
 }
