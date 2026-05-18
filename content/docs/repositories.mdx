@@ -5,6 +5,51 @@ description: "Reference guide for databayt repositories"
 
 Complete reference of all repositories in the databayt GitHub organization.
 
+## Local layout
+
+**Every databayt org repo lives at your user-home root — `~/<repo>` — on every machine, every OS.**
+
+```
+~/codebase                    # pattern library
+~/kun                         # this repo (config + docs)
+~/shadcn                      # UI fork
+~/radix                       # primitives fork
+~/hogwarts                    # education SaaS
+~/souq                        # e-commerce
+~/mkan                        # rentals
+~/shifa                       # healthcare
+~/swift-app                   # iOS
+~/distributed-computer        # Rust infra
+~/marketing                   # landing pages
+```
+
+| OS | What `~` expands to |
+|---|---|
+| Windows | `C:\Users\<you>\<repo>` |
+| macOS | `/Users/<you>/<repo>` |
+| Linux | `/home/<you>/<repo>` |
+
+No `oss/` subdirectory, no `projects/` parent, no per-product folders. Tab-completion at `~/h` lands you in `hogwarts` on every teammate's machine.
+
+**`bootstrap` does this for you** — step 14 (`sync-repos.{ps1,sh}`) clones all 11 repos to `~/<name>`. To re-sync at any time: `& "$env:USERPROFILE\.claude\scripts\sync-repos.ps1"` (Windows) or `~/.claude/scripts/sync-repos.sh` (macOS/Linux).
+
+**Migrating from the old `~/oss/*` layout**:
+
+```powershell
+# Windows
+Get-ChildItem $env:USERPROFILE\oss -Directory | ForEach-Object {
+    Move-Item $_.FullName $env:USERPROFILE\
+}
+Remove-Item $env:USERPROFILE\oss
+```
+
+```bash
+# macOS / Linux
+mv ~/oss/* ~/ && rmdir ~/oss
+```
+
+---
+
 ## Core Libraries
 
 ### codebase
