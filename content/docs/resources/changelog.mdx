@@ -1,0 +1,44 @@
+---
+title: Changelog
+description: Notable changes to the Kun engine and docs site
+---
+
+> Newest first. Older releases linked from each entry's commits.
+
+For the full machine-readable history, see `git log` on [databayt/kun](https://github.com/databayt/kun/commits/main).
+
+## Unreleased
+
+- Docs site restructured to shadcn-style hierarchical IA — `installation/`, `engine/`, `operations/`, `reference/`, `resources/` ([#39](https://github.com/databayt/kun/pull/39))
+- Canonical page template adopted on 5 flagship pages: installation, agents, skills, commands, captain ([#40](https://github.com/databayt/kun/pull/40))
+- `<LinkedCards>` MDX primitive — path-picker grid component with RTL-aware chevron
+- New resources section: FAQ, changelog, theming, CLI reference
+
+## 2026.05
+
+### Onboarding sharpened
+
+- Onboarding rewritten as Windows-only, Cowork-first single paste — no OS tabs, no manual fallback at the top ([#23](https://github.com/databayt/kun/pull/23))
+- Generic Onboarding page replaces the operator-specific Samia guide ([#21](https://github.com/databayt/kun/pull/21))
+- Samia full-control operator onboarding documented ([#18](https://github.com/databayt/kun/pull/18))
+
+### Engine integration
+
+- `/doctor`, `/maintain`, `/bootstrap` promoted to first-class commands
+- macOS/Linux port — `doctor.sh`, `maintain.sh`, `bootstrap.sh` mirror the PowerShell originals
+- `sync-repos.ps1` reads `repositories.json` (closes #26)
+- Plugin pre-drop + `/install` redirect wired up
+
+### Report pipeline
+
+- Credibility scoring pipeline for report-an-issue ([#16](https://github.com/databayt/kun/pull/16))
+
+## Earlier
+
+For releases prior to 2026.05, see [GitHub releases](https://github.com/databayt/kun/releases) or the full commit history on [main](https://github.com/databayt/kun/commits/main).
+
+## Related
+
+- [Repositories](/docs/reference/repositories) — full org map
+- [GitHub kun](https://github.com/databayt/kun) — source and issues
+- [Roadmap (PRD)](/docs/reference/prd) — what's planned next

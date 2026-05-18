@@ -1,0 +1,142 @@
+---
+title: FAQ
+description: Common questions about Kun, the engine, and daily use
+---
+
+> What people actually ask after their first 24 hours with Kun.
+
+## Getting started
+
+<Accordion type="single" collapsible>
+
+<AccordionItem value="plan">
+<AccordionTrigger>Which Claude plan do I need?</AccordionTrigger>
+<AccordionContent>
+**Pro** or **Max** for the recommended Cowork install (computer use is gated to those plans). Team and Enterprise can install manually — see [Installation](/docs/installation) "Manual PowerShell" tab.
+</AccordionContent>
+</AccordionItem>
+
+<AccordionItem value="os">
+<AccordionTrigger>Does Kun work on macOS or Linux?</AccordionTrigger>
+<AccordionContent>
+The engine config (`~/.claude/`) is cross-platform and works on any OS with Claude Code installed. The one-paste installer is currently Windows-focused — macOS/Linux users follow the [self-hosting guide](/docs/installation/self-hosting) or run the manual steps directly.
+</AccordionContent>
+</AccordionItem>
+
+<AccordionItem value="time">
+<AccordionTrigger>How long does a fresh install take?</AccordionTrigger>
+<AccordionContent>
+About 60 minutes with Cowork driving. Most of that is OAuth screens (GitHub, JetBrains, Anthropic) and one or two cloud syncs. The actual scripted work is under 10 minutes.
+</AccordionContent>
+</AccordionItem>
+
+<AccordionItem value="esc">
+<AccordionTrigger>How do I stop Cowork mid-install?</AccordionTrigger>
+<AccordionContent>
+Press **Esc** anywhere on screen. Claude releases control and unhides any apps it minimized. You can resume by telling it to continue.
+</AccordionContent>
+</AccordionItem>
+
+</Accordion>
+
+## Daily use
+
+<Accordion type="single" collapsible>
+
+<AccordionItem value="c">
+<AccordionTrigger>What does the `c` function do?</AccordionTrigger>
+<AccordionContent>
+`c` is `claude --dangerously-skip-permissions` bound to one keystroke. Use it for trusted local work. `cc` is the unflagged `claude` for sessions where you want permission prompts. Both are installed in your `$PROFILE` during setup.
+</AccordionContent>
+</AccordionItem>
+
+<AccordionItem value="keyword">
+<AccordionTrigger>What's the difference between keywords and slash commands?</AccordionTrigger>
+<AccordionContent>
+Same thing, different invocation. `c "/dev"` and `c "dev"` both trigger the dev command. Slash form is explicit; keyword form leans on Claude to route. See [Keywords](/docs/engine/keywords) for the full vocabulary.
+</AccordionContent>
+</AccordionItem>
+
+<AccordionItem value="captain">
+<AccordionTrigger>When should I talk to captain vs a specialist agent?</AccordionTrigger>
+<AccordionContent>
+Captain for company-wide decisions: weekly allocation, cross-product priority, scope cuts. Specialists for the actual work. Captain delegates — it never writes code. See [Captain](/docs/operations/captain) for the decision matrix.
+</AccordionContent>
+</AccordionItem>
+
+<AccordionItem value="multi-repo">
+<AccordionTrigger>How do I work across multiple databayt repos?</AccordionTrigger>
+<AccordionContent>
+Every active repo is cloned to `%USERPROFILE%\projects\databayt\` during install. Each repo has its own `.claude/` config layered over the global one. See [Repositories](/docs/reference/repositories).
+</AccordionContent>
+</AccordionItem>
+
+</Accordion>
+
+## Troubleshooting
+
+<Accordion type="single" collapsible>
+
+<AccordionItem value="doctor">
+<AccordionTrigger>`claude doctor` shows red — what now?</AccordionTrigger>
+<AccordionContent>
+Run `c "/doctor fix"` for auto-repair. If still red, check `~/.claude/.env` exists, your GitHub auth is valid (`gh auth status`), and the install scripts ran end-to-end. The doctor output names the failing check — search [issues](https://github.com/databayt/kun/issues) for that string.
+</AccordionContent>
+</AccordionItem>
+
+<AccordionItem value="uac">
+<AccordionTrigger>Windows UAC is blocking the install</AccordionTrigger>
+<AccordionContent>
+Re-run the install in PowerShell **as Administrator**. winget needs elevation for the side-tools (Git, Node, gh CLI, PowerShell 7). The `~/.claude/` install itself runs as your user, no admin needed.
+</AccordionContent>
+</AccordionItem>
+
+<AccordionItem value="gh">
+<AccordionTrigger>`gh auth login` won't open a browser</AccordionTrigger>
+<AccordionContent>
+Fall back to device-flow: `gh auth login --web=false`. It prints a code; paste it into github.com/login/device on any browser.
+</AccordionContent>
+</AccordionItem>
+
+<AccordionItem value="path">
+<AccordionTrigger>`c` not found in new terminals</AccordionTrigger>
+<AccordionContent>
+The `c` function lives in `$PROFILE`. Run `. $PROFILE` to reload, or open a new terminal. If still missing, check `Test-Path $PROFILE` and re-paste the `c`/`cc` block from [Installation](/docs/installation).
+</AccordionContent>
+</AccordionItem>
+
+</Accordion>
+
+## Engine internals
+
+<Accordion type="single" collapsible>
+
+<AccordionItem value="agents-vs-skills">
+<AccordionTrigger>What's the difference between agents and skills?</AccordionTrigger>
+<AccordionContent>
+**Agents** are domain specialists (markdown in `~/.claude/agents/`) with their own instructions, model, and context. **Skills** are slash commands (markdown in `~/.claude/commands/`) that expand into prompts. Skills invoke agents. See [Agents](/docs/engine/agents) and [Skills](/docs/engine/skills).
+</AccordionContent>
+</AccordionItem>
+
+<AccordionItem value="mcp">
+<AccordionTrigger>Which MCP servers ship by default?</AccordionTrigger>
+<AccordionContent>
+18 servers covering shadcn, GitHub, Vercel, Neon, Stripe, Sentry, Linear, PostHog, and more. Full catalogue at [MCP](/docs/engine/mcp). Add or remove per-machine in `~/.claude/.mcp.json`.
+</AccordionContent>
+</AccordionItem>
+
+<AccordionItem value="customize">
+<AccordionTrigger>How do I customize without forking?</AccordionTrigger>
+<AccordionContent>
+Local overrides go in `~/.claude/CLAUDE.md` and per-repo `<repo>/.claude/CLAUDE.md`. Profile-based selection (engineer/business/content/ops) is in [Profile](/docs/engine/skills). Org-wide changes land in [databayt/codebase](https://github.com/databayt/codebase) via PR.
+</AccordionContent>
+</AccordionItem>
+
+</Accordion>
+
+## Related
+
+- [Installation](/docs/installation) — full setup walkthrough
+- [Captain](/docs/operations/captain) — decision matrix and weekly rhythm
+- [Keywords](/docs/engine/keywords) — vocabulary that drives the engine
+- [GitHub issues](https://github.com/databayt/kun/issues) — bug reports and feature requests
