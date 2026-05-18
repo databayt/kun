@@ -10,13 +10,13 @@ Complete setup guide for the databayt team Kun engine configuration via Claude C
 ### macOS / Linux
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/databayt/codebase/main/.claude/scripts/install.sh | bash && ~/.claude/scripts/secrets.sh 68453b25fa9d28c94426c55c179b3838
+curl -fsSL https://raw.githubusercontent.com/databayt/kun/main/.claude/scripts/install.sh | bash && ~/.claude/scripts/secrets.sh 68453b25fa9d28c94426c55c179b3838
 ```
 
 ### Windows (PowerShell)
 
 ```powershell
-irm https://raw.githubusercontent.com/databayt/codebase/main/.claude/scripts/install.ps1 | iex; & "$env:USERPROFILE\.claude\scripts\secrets.ps1" -GistId 68453b25fa9d28c94426c55c179b3838
+irm https://raw.githubusercontent.com/databayt/kun/main/.claude/scripts/install.ps1 | iex; & "$env:USERPROFILE\.claude\scripts\secrets.ps1" -GistId 68453b25fa9d28c94426c55c179b3838
 ```
 
 This installs Claude Code CLI, downloads team configuration, and sets up secrets automatically.
@@ -58,12 +58,12 @@ claude --version
 
 **macOS / Linux**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/databayt/codebase/main/.claude/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/databayt/kun/main/.claude/scripts/install.sh | bash
 ```
 
 **Windows**
 ```powershell
-irm https://raw.githubusercontent.com/databayt/codebase/main/.claude/scripts/install.ps1 | iex
+irm https://raw.githubusercontent.com/databayt/kun/main/.claude/scripts/install.ps1 | iex
 ```
 
 ### Step 3: Setup Secrets
@@ -469,21 +469,13 @@ source ~/.zshrc
 
 ---
 
-## Config Sources
+## Config Source
 
-Configuration is available from two repositories:
-
-**Primary (codebase)**
-```
-https://github.com/databayt/codebase/tree/main/.claude
-```
-
-**Alternative (kun)**
 ```
 https://github.com/databayt/kun/tree/main/.claude
 ```
 
-Both contain identical configuration.
+The `databayt/codebase` repo previously mirrored this config; it no longer does. `databayt/kun` is the single source of truth.
 
 ---
 
