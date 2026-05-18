@@ -4,6 +4,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 
 import type { docsSource } from "@/lib/source"
+import { PAGES_NEW, PAGES_UPDATED } from "@/lib/docs"
 import {
   Sidebar,
   SidebarContent,
@@ -97,6 +98,8 @@ export function DocsSidebar({
   function renderLink(item: DocEntry) {
     const fullHref = `${prefix}${item.href}`
     const isActive = pathname === fullHref || pathname === item.href
+    const isNew = PAGES_NEW.includes(item.href)
+    const isUpdated = !isNew && PAGES_UPDATED.includes(item.href)
 
     return (
       <SidebarMenuItem key={item.href}>
@@ -105,7 +108,19 @@ export function DocsSidebar({
           isActive={isActive}
           className="relative h-[30px] w-full border border-transparent text-[0.8rem] font-medium p-0"
         >
-          <Link href={fullHref} className="block w-full">{item.label}</Link>
+          <Link href={fullHref} className="flex w-full items-center gap-2">
+            <span>{item.label}</span>
+            {isNew && (
+              <span className="ms-auto rounded-sm bg-primary/10 px-1.5 py-0.5 text-[0.65rem] font-medium text-primary">
+                New
+              </span>
+            )}
+            {isUpdated && (
+              <span className="ms-auto rounded-sm bg-muted px-1.5 py-0.5 text-[0.65rem] font-medium text-muted-foreground">
+                Updated
+              </span>
+            )}
+          </Link>
         </SidebarMenuButton>
       </SidebarMenuItem>
     )

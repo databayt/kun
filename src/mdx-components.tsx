@@ -24,6 +24,29 @@ import { LinkedCard, LinkedCards } from "@/components/docs/linked-card"
 
 // This file is required to use MDX in `app` directory.
 
+// Slug from heading text — keeps anchors stable across renders.
+function slugify(value: React.ReactNode): string | undefined {
+  if (value === undefined || value === null) return undefined
+  return value
+    .toString()
+    .replace(/ /g, "-")
+    .replace(/'/g, "")
+    .replace(/\?/g, "")
+    .toLowerCase()
+}
+
+function HeadingAnchor({ id }: { id: string }) {
+  return (
+    <a
+      href={`#${id}`}
+      aria-label={`Link to ${id.replace(/-/g, " ")}`}
+      className="text-muted-foreground ms-2 font-normal no-underline opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+    >
+      #
+    </a>
+  )
+}
+
 const mdxComponents = {
     // Allows customizing built-in components, e.g. to add styling.
     h1: ({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
@@ -35,42 +58,54 @@ const mdxComponents = {
         {...props}
       />
     ),
-    h2: ({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => {
-      const id = props.children
-        ?.toString()
-        .replace(/ /g, "-")
-        .replace(/'/g, "")
-        .replace(/\?/g, "")
-        .toLowerCase()
+    h2: ({ className, children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => {
+      const id = slugify(children)
       return (
         <h2
           id={id}
           className={cn(
-            "font-heading [&+]*:[code]:text-xl mt-10 scroll-m-28 text-xl font-medium tracking-tight first:mt-0 lg:mt-16 [&+.steps]:!mt-0 [&+.steps>h3]:!mt-4 [&+h3]:!mt-6 [&+p]:!mt-4",
+            "font-heading group [&+]*:[code]:text-xl mt-10 scroll-m-28 text-xl font-medium tracking-tight first:mt-0 lg:mt-16 [&+.steps]:!mt-0 [&+.steps>h3]:!mt-4 [&+h3]:!mt-6 [&+p]:!mt-4",
             className
           )}
           {...props}
-        />
+        >
+          {children}
+          {id && <HeadingAnchor id={id} />}
+        </h2>
       )
     },
-    h3: ({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
-      <h3
-        className={cn(
-          "font-heading mt-12 scroll-m-28 text-lg font-medium tracking-tight [&+p]:!mt-4 *:[code]:text-xl",
-          className
-        )}
-        {...props}
-      />
-    ),
-    h4: ({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
-      <h4
-        className={cn(
-          "font-heading mt-8 scroll-m-28 text-base font-medium tracking-tight",
-          className
-        )}
-        {...props}
-      />
-    ),
+    h3: ({ className, children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => {
+      const id = slugify(children)
+      return (
+        <h3
+          id={id}
+          className={cn(
+            "font-heading group mt-12 scroll-m-28 text-lg font-medium tracking-tight [&+p]:!mt-4 *:[code]:text-xl",
+            className
+          )}
+          {...props}
+        >
+          {children}
+          {id && <HeadingAnchor id={id} />}
+        </h3>
+      )
+    },
+    h4: ({ className, children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => {
+      const id = slugify(children)
+      return (
+        <h4
+          id={id}
+          className={cn(
+            "font-heading group mt-8 scroll-m-28 text-base font-medium tracking-tight",
+            className
+          )}
+          {...props}
+        >
+          {children}
+          {id && <HeadingAnchor id={id} />}
+        </h4>
+      )
+    },
     h5: ({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
       <h5
         className={cn(
