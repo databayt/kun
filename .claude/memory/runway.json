@@ -1,0 +1,54 @@
+{
+  "$schema": "Captain runway state — read at every weekly review",
+  "last_updated": "2026-05-12",
+  "last_updated_by": "captain-os-bootstrap",
+
+  "capital": {
+    "amount_usd": 5000,
+    "source": "founder",
+    "last_verified": "2026-04-02"
+  },
+
+  "burn": {
+    "monthly_usd": 500,
+    "breakdown": {
+      "anthropic": 200,
+      "vercel": 60,
+      "neon": 40,
+      "stripe": 0,
+      "domains": 30,
+      "aws_s3_cloudfront": 25,
+      "other_services": 145
+    },
+    "salary_usd": 0,
+    "salary_note": "Equity / sweat / Contribution Units phase. No cash salary."
+  },
+
+  "revenue": {
+    "mrr_usd": 0,
+    "arr_usd": 0,
+    "paying_customers": 0,
+    "last_invoice_date": null
+  },
+
+  "runway": {
+    "months_remaining": 10,
+    "weeks_remaining": 43,
+    "status": "default-dead",
+    "status_note": "Graham's question: 'At your current rate of growth, can you make it to profitability before you run out of money?' Answer: no — MRR is $0, growth rate is undefined. Default-dead until first paying customer.",
+    "exit_to_default_alive": {
+      "condition": "MRR ≥ monthly_burn × 0.85, with 3+ paying customers and ≥3 months of consecutive positive net",
+      "estimated_path": "3 paying Hogwarts schools at $99-149/mo each = $300-450 MRR → 85% of $500 burn"
+    }
+  },
+
+  "alerts": {
+    "trigger_at_6_months": "Review burn cuts + accelerate Ali outreach + consider pricing experiment",
+    "trigger_at_3_months": "Wartime CEO mode (Horowitz) — cut all non-pilot work, all hands on Hogwarts conversion",
+    "trigger_at_1_month": "Either close a paying customer this month or pause the company"
+  },
+
+  "history": [
+    {"date": "2026-04-02", "capital": 5000, "burn": 500, "mrr": 0, "months_remaining": 10}
+  ]
+}

@@ -1,0 +1,144 @@
+{
+  "$schema": "Captain risk register — existential and operational risks with mitigation status",
+  "last_updated": "2026-05-12",
+  "last_updated_by": "captain-os-bootstrap",
+  "review_cadence": "monthly",
+
+  "risks": [
+    {
+      "id": "R-001",
+      "title": "Anthropic price hike or service interruption",
+      "category": "vendor",
+      "description": "Anthropic raises Claude Max pricing or changes terms in a way that breaks the $200/mo envelope or makes the Kun engine unaffordable. Service outages could block the engine for hours/days.",
+      "likelihood": 3,
+      "impact": 4,
+      "score": 12,
+      "owner": "abdout",
+      "status": "open",
+      "mitigation": "Track spend in spend.jsonl (fix instrumentation). Maintain a Claude API fallback (Pay-as-you-go) and OSS LLM fallback design. Cost auto-throttle at $180/mo.",
+      "first_seen": "2026-05-12",
+      "last_reviewed": "2026-05-12"
+    },
+    {
+      "id": "R-002",
+      "title": "Abdout key-person risk",
+      "category": "people",
+      "description": "Abdout is the only full-stack engineer with deep context across all 14 repos. If he is unavailable (illness, injury, burnout, life event) for more than 2 weeks, every product's velocity drops to near-zero.",
+      "likelihood": 2,
+      "impact": 5,
+      "score": 10,
+      "owner": "abdout",
+      "status": "open",
+      "mitigation": "Onboard Ibrahim to second-engineer status. Document architecture (already done in docs/ARCHITECTURE.md, docs/STACK.md). Maintain Kun captain so partial autonomy is possible. Train Samia on operational basics. Long-term: hire a second senior engineer at MRR ≥ $3K.",
+      "first_seen": "2026-05-12",
+      "last_reviewed": "2026-05-12"
+    },
+    {
+      "id": "R-003",
+      "title": "Sudan banking / sanctions / currency",
+      "category": "regulatory",
+      "description": "Sudan-based clients (King Fahad Schools first) cannot easily pay in USD. Banking sanctions, currency depreciation (SDG), and PayPal/Stripe restrictions on Sudan complicate revenue collection.",
+      "likelihood": 4,
+      "impact": 4,
+      "score": 16,
+      "owner": "sedon",
+      "status": "open",
+      "mitigation": "Sedon's Saudi bank + MADA + STC Pay routes Sudan customer payments through KSA. Investigate Lemfi, Wise alternatives. Investigate USDT (stablecoin) for Sudan customers as last resort.",
+      "first_seen": "2026-05-12",
+      "last_reviewed": "2026-05-12"
+    },
+    {
+      "id": "R-004",
+      "title": "SSPL procurement rejection",
+      "category": "license",
+      "description": "Large institutional buyers (universities, ministries, district offices) may reject SSPL due to legal/procurement policies that disallow it. This caps the addressable market at private schools and SMBs.",
+      "likelihood": 3,
+      "impact": 3,
+      "score": 9,
+      "owner": "abdout",
+      "status": "monitored",
+      "mitigation": "Acceptable for now — private schools are the beachhead and SSPL is the strategic posture (Counter-Positioning per Helmer). If/when district sales become a priority, evaluate dual-license offering.",
+      "first_seen": "2026-05-12",
+      "last_reviewed": "2026-05-12"
+    },
+    {
+      "id": "R-005",
+      "title": "No paying customer within 6 months",
+      "category": "existential",
+      "description": "If King Fahad Schools doesn't convert and Ali's outreach yields no signed deal by 2026-11-12, runway drops below 4 months and default-dead becomes acute.",
+      "likelihood": 3,
+      "impact": 5,
+      "score": 15,
+      "owner": "captain",
+      "status": "open",
+      "mitigation": "Weekly review tracks weeks_remaining. At 6-month mark, captain dispatches wartime-mode escalation to Abdout (cut all non-pilot work, all hands on conversion). At 3-month mark, hard escalation. Conversion-conversation with Ahmed Baha scheduled by 2026-06-15.",
+      "first_seen": "2026-05-12",
+      "last_reviewed": "2026-05-12"
+    },
+    {
+      "id": "R-006",
+      "title": "Pilot fails silently — Ahmed Baha disengages",
+      "category": "customer",
+      "description": "King Fahad Schools pilot has been live for ~4 weeks. No structured check-in cadence. Risk of silent disengagement (he stops using the product, doesn't say why, doesn't convert).",
+      "likelihood": 3,
+      "impact": 5,
+      "score": 15,
+      "owner": "ali",
+      "status": "open",
+      "mitigation": "Add weekly Ahmed check-in to Ali's allocation. Track 'last_contact' in customers.json. If days_since_contact > 14, captain dispatches an alert to Ali + Sedon.",
+      "first_seen": "2026-05-12",
+      "last_reviewed": "2026-05-12"
+    },
+    {
+      "id": "R-007",
+      "title": "Sedon part-time bottleneck on Saudi ops",
+      "category": "people",
+      "description": "Sedon at 15 hrs/week is the only Saudi-resident operator. Payment setup, bank operations, physical mail, MADA, STC Pay — all funnel through him. He is also the bridge to Ali in Sudan for customer comms.",
+      "likelihood": 2,
+      "impact": 3,
+      "score": 6,
+      "owner": "sedon",
+      "status": "monitored",
+      "mitigation": "Document Sedon's procedures so others could pick up if needed. Batch his tasks Mon/Wed/Fri (already in place). At MRR ≥ $5K, consider a second Saudi operator (or paid PEO).",
+      "first_seen": "2026-05-12",
+      "last_reviewed": "2026-05-12"
+    },
+    {
+      "id": "R-008",
+      "title": "Captain dispatching errors (Apple Notes drift)",
+      "category": "operational",
+      "description": "The captain dispatches via Apple Notes (Dispatch/Captain, Dispatch/Cowork, Dispatch/Inbox). If Abdout doesn't check his iPhone for days, escalations stall. If Notes sync breaks, dispatches are lost.",
+      "likelihood": 3,
+      "impact": 2,
+      "score": 6,
+      "owner": "abdout",
+      "status": "open",
+      "mitigation": "24h/72h escalation gate — captain follows up if no response. Daily pulse routine surfaces unread Inbox count. Backup channel: Slack #dispatch for critical escalations.",
+      "first_seen": "2026-05-12",
+      "last_reviewed": "2026-05-12"
+    }
+  ],
+
+  "scoring_rubric": {
+    "likelihood": {
+      "1": "Very unlikely (<10%)",
+      "2": "Unlikely (10-30%)",
+      "3": "Possible (30-60%)",
+      "4": "Likely (60-85%)",
+      "5": "Almost certain (>85%)"
+    },
+    "impact": {
+      "1": "Minor (one week of work lost)",
+      "2": "Moderate (one month of work or $500-2K loss)",
+      "3": "Serious (one quarter lost or $2-10K loss)",
+      "4": "Severe (a product or relationship killed)",
+      "5": "Existential (the company stops)"
+    },
+    "score_thresholds": {
+      "1-5": "Low — monitor monthly",
+      "6-10": "Medium — active mitigation, weekly review",
+      "11-15": "High — captain dispatches alert if delta worsens",
+      "16-25": "Critical — wartime decision required"
+    }
+  }
+}

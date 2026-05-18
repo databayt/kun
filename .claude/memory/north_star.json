@@ -1,0 +1,23 @@
+{
+  "$schema": "North Star metric — single value tracked every weekly review",
+  "metric": "Active paying schools using Hogwarts",
+  "definition": "A school is counted if (a) subscription_status = 'active', (b) at least 5 student records exist, (c) any of {attendance recorded OR invoice generated} in the last 30 days, AND (d) the school has paid an invoice covering the current month or a future month.",
+  "last_updated": "2026-05-12",
+  "last_updated_by": "captain-os-bootstrap",
+  "source": "Hogwarts production database (neon MCP) — query: SELECT COUNT(*) FROM Tenant WHERE subscription_status = 'active' AND last_active_at > NOW() - INTERVAL '30 days'",
+
+  "current_value": 0,
+
+  "targets": [
+    {"horizon": "today", "date": "2026-05-12", "target": 0, "actual": 0, "status": "on-track", "note": "Ahmed Baha pilot; not yet paying"},
+    {"horizon": "Q3-2026", "date": "2026-09-30", "target": 1, "actual": null, "status": "open", "note": "King Fahad Schools converts at Professional tier ($99/mo)"},
+    {"horizon": "Q4-2026", "date": "2026-12-31", "target": 2, "actual": null, "status": "open", "note": "Second school via Ali's outreach"},
+    {"horizon": "12-months", "date": "2027-05-12", "target": 3, "actual": null, "status": "open", "note": "Default-alive boundary — 3 paying schools at avg $100/mo ≈ $300 MRR covers 60% of burn"},
+    {"horizon": "24-months", "date": "2028-05-12", "target": 10, "actual": null, "status": "open", "note": "$1K-1.5K MRR. First-hire trigger."},
+    {"horizon": "5-year", "date": "2031-05-12", "target": 50, "actual": null, "status": "open", "note": "Vision target — $5-10K MRR"}
+  ],
+
+  "weekly_history": [
+    {"week_of": "2026-05-11", "value": 0, "delta": 0, "note": "Baseline week — captain OS bootstrap"}
+  ]
+}

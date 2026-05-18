@@ -1,32 +1,65 @@
 {
-  "version": "1.0",
-  "updated": "2026-03-31",
+  "version": "1.1",
+  "updated": "2026-05-12",
   "company": {
     "name": "Databayt",
     "license": "SSPL",
     "products": ["hogwarts", "souq", "mkan", "shifa", "swift-app"],
-    "stack": "Next.js 16, React 19, Prisma 6, TypeScript 5, Tailwind CSS 4, shadcn/ui"
+    "stack": "Next.js 16, React 19, Prisma 6, TypeScript 5, Tailwind CSS 4, shadcn/ui",
+    "headcount": 6
   },
   "team": [
     {
-      "name": "Abdout",
-      "role": "founder-tech-lead",
-      "installRole": "engineer"
+      "id": "abdout",
+      "name": "Osman Abdout",
+      "category": "tech",
+      "role": "Founder & Tech Lead",
+      "installRole": "engineer",
+      "email": "abdout@databayt.org"
     },
     {
-      "name": "Ali",
-      "role": "business",
-      "installRole": "business"
+      "id": "ibrahim",
+      "name": "Ibrahim",
+      "category": "tech",
+      "role": "Engineer",
+      "installRole": "engineer",
+      "email": null
     },
     {
-      "name": "Samia",
-      "role": "creative-content",
-      "installRole": "content"
+      "id": "ali",
+      "name": "Ali Aseel",
+      "category": "business",
+      "role": "Sales + QA",
+      "installRole": "business",
+      "email": "ali@databayt.org"
     },
     {
-      "name": "Sedon",
-      "role": "facilitator-ops",
-      "installRole": "ops"
+      "id": "mutaz",
+      "name": "Mutaz",
+      "category": "business",
+      "role": "General business",
+      "installRole": "business",
+      "email": null
+    },
+    {
+      "id": "samia",
+      "name": "Samia Hamd",
+      "category": "rnd",
+      "role": "Research & Development",
+      "installRole": "content",
+      "email": "samia@databayt.org",
+      "accessibility": {
+        "blind": true,
+        "screen_reader_user": true
+      }
+    },
+    {
+      "id": "sedon",
+      "name": "Osman Sedon",
+      "category": "facilitator",
+      "role": "Saudi facilitator + Ali/Mutaz support",
+      "installRole": "ops",
+      "email": "sedon@databayt.org"
     }
   ]
 }

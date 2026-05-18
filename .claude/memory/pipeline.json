@@ -1,0 +1,65 @@
+{
+  "$schema": "Deal pipeline — every prospect, current stage, last contact",
+  "last_updated": "2026-05-12",
+  "last_updated_by": "pilot-audit-refresh",
+
+  "stages": {
+    "cold": "Identified prospect, no contact yet",
+    "warm": "First conversation held; interest expressed",
+    "hot": "Active conversation; needs assessment in progress",
+    "proposal": "Proposal sent; awaiting response",
+    "signed": "Contract signed; pre-launch",
+    "live": "Customer is live and using the product (paying or pilot)",
+    "lost": "Did not convert; reason logged"
+  },
+
+  "deals": [
+    {
+      "customer_id": "king-fahad-schools",
+      "stage": "pilot",
+      "product": "hogwarts",
+      "expected_mrr_usd": 99,
+      "owner": "ali",
+      "last_contact": "2026-04-15",
+      "days_since_contact": 27,
+      "next_action": "Conversion conversation",
+      "next_action_due": "2026-06-15"
+    }
+  ],
+
+  "weekly_targets": {
+    "new_warm_prospects": 3,
+    "outreach_actions": 10,
+    "customer_interviews": 2,
+    "proposals_sent": 1,
+    "_revised_2026-05-12": "Bumped from {1, 5, 1, 0} under MENA-10 cohort strategy. See /Users/abdout/hogwarts/content/docs-en/pilot.mdx + leads.mdx."
+  },
+
+  "pilot_recruitment": {
+    "cohort": "MENA-10",
+    "target_signed": 10,
+    "current_signed": 1,
+    "target_completion": "2026-08-31",
+    "monthly_target": 2,
+    "open_slots_by_country": {
+      "Sudan": 2,
+      "Saudi Arabia": 2,
+      "Egypt": 2,
+      "Jordan": 1,
+      "Morocco": 1,
+      "UAE": 1
+    }
+  },
+
+  "outreach_scope": {
+    "schools": "Sudan + Saudi private schools (Hogwarts beachhead)",
+    "vendors": "MENA SMB (Souq, future)",
+    "rentals": "Saudi/UAE short-term rental hosts (Mkan, future)",
+    "clinics": "Sudan/MENA private clinics (Shifa, future)",
+    "investors": "Long-term — not active",
+    "early_adopters": "Open-source community + Twitter/X + Discord",
+    "contributors": "Anyone willing to push commits / docs / translations",
+    "sponsors": "Open-source sponsors via GitHub Sponsors / Open Collective",
+    "owner": "ali (sales@databayt.org)"
+  }
+}
