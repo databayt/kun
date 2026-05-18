@@ -13,11 +13,15 @@ param(
     [int]$PollInterval = 60,
     [int]$Debounce = 2,
     [switch]$DryRun,
-    [switch]$Once,
-    [switch]$Verbose
+    [switch]$Once
 )
 
 $ErrorActionPreference = 'Continue'
+
+# -Verbose is auto-provided by [CmdletBinding()] as a common parameter;
+# detect via $VerbosePreference rather than declaring an explicit switch
+# (which would collide with the auto-binding and raise a runtime error).
+$IsVerbose = $VerbosePreference -ne 'SilentlyContinue'
 
 $LogDir = "$env:USERPROFILE\.claude\logs"
 if (-not (Test-Path $LogDir)) { New-Item -ItemType Directory -Force -Path $LogDir | Out-Null }
@@ -27,7 +31,7 @@ function Write-Log {
     param([string]$Repo, [string]$Level, [string]$Message)
     $line = "[{0}] [{1,-5}] [{2,-20}] {3}" -f (Get-Date -Format 'HH:mm:ss'), $Level, $Repo, $Message
     Add-Content -Path $LogFile -Value $line
-    if ($Verbose -or $Level -in 'WARN','ERROR','PUSH','PULL') {
+    if ($IsVerbose -or $Level -in 'WARN','ERROR','PUSH','PULL') {
         $color = switch ($Level) {
             'PUSH'  { 'Green' }
             'PULL'  { 'Cyan' }
