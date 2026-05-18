@@ -4,7 +4,7 @@
 . "$PSScriptRoot\Common.ps1"
 
 function Get-RepoMap {
-    $oss = "$env:USERPROFILE\oss"
+    $oss = "$env:USERPROFILE"  # repos live at user-home root, not under ~/oss anymore
     $userHome = $env:USERPROFILE
     $memoryFile = "$script:ClaudeDir\memory\repositories.json"
 

@@ -5,7 +5,7 @@
 
 set -e
 
-OSS_DIR="$HOME/oss"
+OSS_DIR="$HOME"  # repos live at user-home root, not under ~/oss anymore
 MEMORY_FILE="$HOME/.claude/memory/repositories.json"
 
 # Colors

@@ -27,7 +27,7 @@ Trigger when user says:
 |-------|-------|
 | **URL** | https://github.com/databayt/shifa |
 | **Stack** | Next.js, Prisma, TypeScript |
-| **Local** | /Users/abdout/oss/shifa (if cloned) |
+| **Local** | /Users/abdout/shifa (if cloned) |
 
 ## Core Patterns
 
@@ -317,7 +317,7 @@ When implementing features "like shifa":
 
 ```bash
 # Clone locally
-git clone https://github.com/databayt/shifa ~/oss/shifa
+git clone https://github.com/databayt/shifa ~/shifa
 
 # Reference via MCP
 mcp__github__get_file_contents(owner="databayt", repo="shifa", path="prisma/models/patient.prisma")

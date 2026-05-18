@@ -83,7 +83,7 @@ Each product repo has a dedicated agent:
 ```bash
 # Use Glob/Grep/Read tools on:
 /Users/abdout/codebase
-/Users/abdout/oss/<repo-name>
+/Users/abdout/<repo-name>
 ```
 
 **GitHub fallback**:

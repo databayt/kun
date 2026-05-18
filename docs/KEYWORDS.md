@@ -935,28 +935,28 @@ All performance spells are handled by general context in CLAUDE.md — no dedica
 > **The Order:**
 > **Familiar:** `hogwarts` | **Backup:** `architecture`, `prisma`, `authjs` | **Portal:** GitHub MCP | **Ward:** `org-refs`
 >
-> Reference: multi-tenant architecture (schoolId on all models), subdomain routing, RBAC per school, Stripe billing, LMS/SIS schemas. Local: `/Users/abdout/oss/hogwarts`. Remote: `databayt/hogwarts`.
+> Reference: multi-tenant architecture (schoolId on all models), subdomain routing, RBAC per school, Stripe billing, LMS/SIS schemas. Local: `/Users/abdout/hogwarts`. Remote: `databayt/hogwarts`.
 
 ### `like souq`
 
 > **The Order:**
 > **Familiar:** `souq` | **Backup:** `architecture`, `react`, `prisma` | **Portal:** GitHub MCP | **Ward:** `org-refs`
 >
-> Reference: multi-vendor marketplace, Redux cart, product catalog, order management, category trees. Local: `/Users/abdout/oss/souq`. Remote: `databayt/souq`.
+> Reference: multi-vendor marketplace, Redux cart, product catalog, order management, category trees. Local: `/Users/abdout/souq`. Remote: `databayt/souq`.
 
 ### `like mkan`
 
 > **The Order:**
 > **Familiar:** `mkan` | **Backup:** `architecture`, `prisma`, `nextjs` | **Portal:** GitHub MCP | **Ward:** `org-refs`
 >
-> Reference: property listings, booking system (date conflict checks), availability calendar, search/filters, review system. Local: `/Users/abdout/oss/mkan`. Remote: `databayt/mkan`.
+> Reference: property listings, booking system (date conflict checks), availability calendar, search/filters, review system. Local: `/Users/abdout/mkan`. Remote: `databayt/mkan`.
 
 ### `like shifa`
 
 > **The Order:**
 > **Familiar:** `shifa` | **Backup:** `architecture`, `prisma`, `authjs` | **Portal:** GitHub MCP | **Ward:** `org-refs`
 >
-> Reference: patient model, appointment system (time slot generation), doctor scheduling, medical records, prescription system. Local: `/Users/abdout/oss/shifa`. Remote: `databayt/shifa`.
+> Reference: patient model, appointment system (time slot generation), doctor scheduling, medical records, prescription system. Local: `/Users/abdout/shifa`. Remote: `databayt/shifa`.
 
 ### `repositories` / `oss` / `contribute`
 
