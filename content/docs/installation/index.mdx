@@ -1,0 +1,168 @@
+---
+title: Onboarding
+description: Install Cowork, let it do the rest
+---
+
+
+> One install, one paste, one watch. Cowork drives every other step.
+
+The fastest path to running databayt on a fresh Windows laptop: install Claude Desktop (Cowork), turn on computer use, paste the team prompt, watch your machine set itself up.
+
+Plan ~60 minutes. **Pro or Max plan required** — computer use isn't on Team or Enterprise. Manual fallback at the bottom.
+
+## What you end up with
+
+- Claude Code CLI on `PATH`
+- Full `~/.claude/` config — every agent, skill, MCP server, hook, bin script
+- The `c` function — `claude --dangerously-skip-permissions` in one keystroke
+- WebStorm with the Claude Code [Beta] plugin
+- Every active databayt repo cloned to `%USERPROFILE%\projects\databayt\`
+- `claude doctor` green
+
+---
+
+## 1. Install Cowork
+
+Download and run the [Windows x64 installer](https://claude.ai/api/desktop/win32/x64/setup/latest/redirect) (or [ARM64](https://claude.ai/api/desktop/win32/arm64/setup/latest/redirect)).
+
+Launch it, sign in with your Anthropic account. Confirm the bottom-left shows **Pro** or **Max**.
+
+## 2. Turn on computer use
+
+Settings → General → scroll to **Desktop app** → toggle **Allow Claude to use your computer**.
+
+First time Claude tries to control the screen, Windows prompts for accessibility access. Grant it. Reference: [Anthropic — computer use in Desktop](https://code.claude.com/docs/en/desktop#let-claude-use-your-computer).
+
+## 3. Open the Code tab and paste this
+
+Claude Desktop has three tabs — **Chat**, **Cowork**, **Code**. Computer use lives in **Code**. Start a new Code session and paste the prompt below.
+
+```text
+Set up this fresh Windows laptop for databayt with computer use.
+
+End state I want:
+- GitHub, JetBrains, and Claude (Pro/Max) accounts ready
+- Side-tools installed: git, Node 22, pnpm, gh CLI, PowerShell 7
+- Claude Code CLI installed and signed in
+- The `c` function added to my $PROFILE so it survives new terminals
+- The databayt config installed at %USERPROFILE%\.claude\ (install.ps1 + secrets.ps1)
+- WebStorm installed with the Claude Code [Beta] plugin
+- Every active databayt repo cloned via sync-repos.ps1
+- `claude doctor` all green
+
+Walk me through each step. Open the right app for me. Pause at every OAuth
+or browser screen so I sign in myself — your browser is view-only. Ask for
+my confirmation before any destructive command. I can press Esc to stop you.
+
+One-liners you can use when you reach them:
+
+  winget install Git.Git OpenJS.NodeJS.LTS GitHub.cli Microsoft.PowerShell
+  npm install -g pnpm
+  winget install Anthropic.ClaudeCode
+  irm https://raw.githubusercontent.com/databayt/codebase/main/.claude/scripts/install.ps1 | iex
+  & "$env:USERPROFILE\.claude\scripts\secrets.ps1" -GistId 68453b25fa9d28c94426c55c179b3838
+  winget install JetBrains.WebStorm
+  & "$env:USERPROFILE\.claude\scripts\sync-repos.ps1"
+
+The `c` function block for $PROFILE:
+
+  function c  { claude --dangerously-skip-permissions $args }
+  function cc { claude $args }
+  if (Test-Path "$env:USERPROFILE\.claude\.env") {
+      Get-Content "$env:USERPROFILE\.claude\.env" | ForEach-Object {
+          if ($_ -and -not $_.StartsWith("#")) {
+              $parts = $_ -split "=", 2
+              if ($parts.Length -eq 2) {
+                  [Environment]::SetEnvironmentVariable($parts[0], $parts[1], "Process")
+              }
+          }
+      }
+  }
+  $env:Path = "$env:USERPROFILE\.claude\bin;" + $env:Path
+
+When done, run `claude doctor`, screenshot the result, and list anything
+still pending or anything I owe (OAuth completions, plan upgrades, etc.).
+```
+
+Press **Esc** anywhere on screen to abort. Claude releases control and unhides your apps.
+
+---
+
+## Manual fallback
+
+For Team or Enterprise plans (no computer use), or when you'd rather type. Run these in PowerShell.
+
+```powershell
+# Side-tools
+winget install Git.Git OpenJS.NodeJS.LTS GitHub.cli Microsoft.PowerShell
+npm install -g pnpm
+gh auth login                                   # browser auth
+
+# Claude Code CLI
+winget install Anthropic.ClaudeCode
+claude                                          # browser sign-in
+
+# c function — paste into $PROFILE, then `. $PROFILE`
+function c  { claude --dangerously-skip-permissions $args }
+function cc { claude $args }
+if (Test-Path "$env:USERPROFILE\.claude\.env") {
+    Get-Content "$env:USERPROFILE\.claude\.env" | ForEach-Object {
+        if ($_ -and -not $_.StartsWith("#")) {
+            $parts = $_ -split "=", 2
+            if ($parts.Length -eq 2) {
+                [Environment]::SetEnvironmentVariable($parts[0], $parts[1], "Process")
+            }
+        }
+    }
+}
+$env:Path = "$env:USERPROFILE\.claude\bin;" + $env:Path
+
+# databayt config + secrets
+irm https://raw.githubusercontent.com/databayt/codebase/main/.claude/scripts/install.ps1 | iex
+& "$env:USERPROFILE\.claude\scripts\secrets.ps1" -GistId 68453b25fa9d28c94426c55c179b3838
+
+# WebStorm + plugin (install plugin from the Marketplace inside WebStorm)
+winget install JetBrains.WebStorm
+
+# Clone every active databayt repo
+& "$env:USERPROFILE\.claude\scripts\sync-repos.ps1"
+
+# Verify
+claude --version
+claude doctor
+Get-Command c
+```
+
+For hogwarts, your team contact shares the `.env` out-of-band (no `.env.example`).
+
+---
+
+## Daily entry points
+
+| Action | How |
+|--------|-----|
+| Open Claude in WebStorm | `Ctrl+Esc` or `Alt+Shift+C` |
+| Start Claude in any terminal | `c` |
+| Synthesize company status | `c "/captain"` |
+| Capture an idea | `c "/idea <description>"` |
+| Run the full pipeline | `c "/feature <name> [product]"` |
+| Send a note to the team | `c "/dispatch <message>"` |
+| Open a GitHub issue | `c "/issue"` |
+| Verify a production deploy | `c "/watch"` |
+
+Full keyword list: [keywords](/docs/engine/keywords).
+
+---
+
+## Reference
+
+- [Computer use in Desktop](https://code.claude.com/docs/en/desktop#let-claude-use-your-computer)
+- [Claude Code — install detail](/docs/installation/claude-code)
+- [Captain — decisions and delegation](/docs/operations/captain)
+- [Cowork ↔ Code bridge](/docs/operations/cowork)
+- [Connectors — MCP catalog](/docs/operations/connectors)
+- [Anthropic Directory](https://claude.ai/directory)
+- [Keywords — full vocabulary](/docs/engine/keywords)
+- [Team — roles](/docs/operations/team)
+- [Repositories — full org map](/docs/reference/repositories)
+- [Contributing — github-workflow rule](https://github.com/databayt/kun/blob/main/.claude/rules/github-workflow.md)

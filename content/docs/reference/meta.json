@@ -1,0 +1,16 @@
+{
+  "title": "Reference",
+  "pages": [
+    "configuration",
+    "architecture",
+    "workflows",
+    "products",
+    "prd",
+    "epics",
+    "repositories",
+    "projects",
+    "stack",
+    "slack",
+    "secrets"
+  ]
+}
