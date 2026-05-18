@@ -40,7 +40,7 @@ Kun's value is its configuration. This is the complete blueprint of every settin
 | Variable | Value | Purpose |
 |----------|-------|---------|
 | CODEBASE_PATH | /Users/abdout/codebase | Pattern library |
-| OSS_PATH | /Users/abdout/oss | Open source workspace |
+| OSS_PATH | /Users/abdout | Legacy env var — org repos live at user-home root (~/&lt;repo&gt;) |
 | GITHUB_USER | abdout | GitHub username |
 | CLAUDE_CODE_SUBAGENT_MODEL | opus | Subagent model |
 | DEV_PORT | 3000 | Development server port |

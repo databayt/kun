@@ -5,7 +5,7 @@
     "CODEBASE_OWNER": "databayt",
     "CODEBASE_NAME": "codebase",
     "DEV_PORT": "3000",
-    "OSS_PATH": "/Users/abdout/oss",
+    "OSS_PATH": "/Users/abdout",
     "GITHUB_USER": "abdout"
   },
   "hooks": {

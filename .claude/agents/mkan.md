@@ -27,7 +27,7 @@ Trigger when user says:
 |-------|-------|
 | **URL** | https://github.com/databayt/mkan |
 | **Stack** | Next.js, Prisma, NextAuth, Docker |
-| **Local** | /Users/abdout/oss/mkan (if cloned) |
+| **Local** | /Users/abdout/mkan (if cloned) |
 
 ## Core Patterns
 
@@ -295,7 +295,7 @@ When implementing features "like mkan":
 
 ```bash
 # Clone locally
-git clone https://github.com/databayt/mkan ~/oss/mkan
+git clone https://github.com/databayt/mkan ~/mkan
 
 # Reference via MCP
 mcp__github__get_file_contents(owner="databayt", repo="mkan", path="prisma/models/property.prisma")

@@ -50,7 +50,7 @@ That's it. Approve the UAC/sudo prompt, then watch the 16 numbered steps stream 
 - **`.env` secrets** pulled from the team Gist
 - **WebStorm** with the Claude Code [Beta] plugin pre-installed
 - **Pattern library** at `~/codebase`
-- **10 OSS repos** at `~/oss/{shadcn,radix,kun,hogwarts,souq,mkan,shifa,swift-app,distributed-computer,marketing}`
+- **11 org repos** at `~/{codebase,kun,shadcn,radix,hogwarts,souq,mkan,shifa,swift-app,distributed-computer,marketing}` (all at user-home root for direct access)
 - **`kun-maintain`** daily task armed for 09:00 (Task Scheduler / launchd / systemd user)
 - **`doctor`** returns green
 - **Audit log** at `~/.claude/logs/bootstrap-<timestamp>.log`
@@ -104,7 +104,7 @@ What `bootstrap` actually does, in order. Each line prints `[N/16]` with an ⏳/
 | 11 | `$PROFILE` c/cc functions | Idempotent — runs `Repair-Profile` from `lib/Fix-Shell.ps1` |
 | 12 | **OAuth batch** | 3 sign-ins — see below |
 | 13 | `secrets.ps1 -GistId ...` | Pulls `.env` from the team Gist |
-| 14 | `sync-repos.ps1` | Clones `~/codebase` + `~/oss/*` (10 OSS repos) |
+| 14 | `sync-repos.ps1` | Clones all 11 org repos to `~/<name>` |
 | 15 | `maintain -Install` | Arms the daily 09:00 heartbeat |
 | 16 | `doctor` | Exit 0 = green, 3 = updates available, 1/2 = needs fix |
 

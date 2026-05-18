@@ -282,7 +282,7 @@ if (-not (Test-Path $syncScript)) {
 } else {
     try {
         & $syncScript -RepoName all 2>&1 | Out-Null
-        Write-Step 14 'org repos cloned (~/codebase + ~/oss/*)' 'ok'
+        Write-Step 14 'org repos cloned (11 repos under ~/)' 'ok'
     } catch {
         Write-Step 14 'sync-repos.ps1 had errors (some repos may need re-clone)' 'warn'
     }

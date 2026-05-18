@@ -199,7 +199,7 @@ fi
 # Fallback hardcoded list if JSON didn't parse anything
 if [ ${#REPO_NAMES[@]} -eq 0 ]; then
     REPO_NAMES=(codebase kun shadcn radix hogwarts souq mkan shifa swift-app distributed-computer marketing)
-    REPO_PATHS=("$HOME/codebase" "$HOME/kun" "$HOME/oss/shadcn" "$HOME/oss/radix" "$HOME/oss/hogwarts" "$HOME/oss/souq" "$HOME/oss/mkan" "$HOME/oss/shifa" "$HOME/oss/swift-app" "$HOME/oss/distributed-computer" "$HOME/oss/marketing")
+    REPO_PATHS=("$HOME/codebase" "$HOME/kun" "$HOME/shadcn" "$HOME/radix" "$HOME/hogwarts" "$HOME/souq" "$HOME/mkan" "$HOME/shifa" "$HOME/swift-app" "$HOME/distributed-computer" "$HOME/marketing")
 fi
 
 for i in "${!REPO_NAMES[@]}"; do

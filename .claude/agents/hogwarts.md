@@ -26,7 +26,7 @@ Trigger when user says:
 |-------|-------|
 | **URL** | https://github.com/databayt/hogwarts |
 | **Stack** | Next.js 16, Prisma 6, NextAuth v5, Stripe |
-| **Local** | /Users/abdout/oss/hogwarts (if cloned) |
+| **Local** | /Users/abdout/hogwarts (if cloned) |
 
 ## Core Patterns
 
@@ -186,7 +186,7 @@ When implementing features "like hogwarts":
 
 ```bash
 # Clone locally
-git clone https://github.com/databayt/hogwarts ~/oss/hogwarts
+git clone https://github.com/databayt/hogwarts ~/hogwarts
 
 # Reference via MCP
 mcp__github__get_file_contents(owner="databayt", repo="hogwarts", path="src/auth.ts")

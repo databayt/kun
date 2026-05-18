@@ -9,7 +9,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-$OssDir = "$env:USERPROFILE\oss"
+$OssDir = "$env:USERPROFILE"  # repos live at user-home root, not under ~/oss anymore
 $MemoryFile = "$env:USERPROFILE\.claude\memory\repositories.json"
 
 Write-Host "=== databayt Repository Sync ===" -ForegroundColor Cyan

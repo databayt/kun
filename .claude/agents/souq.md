@@ -26,7 +26,7 @@ Trigger when user says:
 |-------|-------|
 | **URL** | https://github.com/databayt/souq |
 | **Stack** | Next.js, Redux Toolkit, Tailwind CSS |
-| **Local** | /Users/abdout/oss/souq (if cloned) |
+| **Local** | /Users/abdout/souq (if cloned) |
 
 ## Core Patterns
 
@@ -252,7 +252,7 @@ When implementing features "like souq":
 
 ```bash
 # Clone locally
-git clone https://github.com/databayt/souq ~/oss/souq
+git clone https://github.com/databayt/souq ~/souq
 
 # Reference via MCP
 mcp__github__get_file_contents(owner="databayt", repo="souq", path="src/store/cart-slice.ts")
