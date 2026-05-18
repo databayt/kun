@@ -1,14 +1,20 @@
 ---
-title: Onboarding
-description: Install Cowork, let it do the rest
+title: Installation
+description: One install, one paste, one watch. Cowork drives every step.
 ---
 
+> A fresh laptop becomes a working databayt machine in about 60 minutes.
 
-> One install, one paste, one watch. Cowork drives every other step.
+The fastest path is Cowork (computer use). It installs Claude Code, runs the config script, pulls every repo, and turns the laptop green on `claude doctor`. Manual PowerShell fallback is below for Team/Enterprise plans.
 
-The fastest path to running databayt on a fresh Windows laptop: install Claude Desktop (Cowork), turn on computer use, paste the team prompt, watch your machine set itself up.
-
-Plan ~60 minutes. **Pro or Max plan required** — computer use isn't on Team or Enterprise. Manual fallback at the bottom.
+<LinkedCards columns={2}>
+  <LinkedCard href="/docs/installation/claude-code" title="Claude Code setup">
+    Engine config, agents, skills, MCP servers — the team `~/.claude/` install
+  </LinkedCard>
+  <LinkedCard href="/docs/installation/self-hosting" title="Self-hosting">
+    Tailscale + tmux + Docker for air-gapped or remote setups
+  </LinkedCard>
+</LinkedCards>
 
 ## What you end up with
 
@@ -19,21 +25,30 @@ Plan ~60 minutes. **Pro or Max plan required** — computer use isn't on Team or
 - Every active databayt repo cloned to `%USERPROFILE%\projects\databayt\`
 - `claude doctor` green
 
----
+## Quick start
 
-## 1. Install Cowork
+<Tabs defaultValue="cowork">
+  <TabsList>
+    <TabsTrigger value="cowork">Cowork (recommended)</TabsTrigger>
+    <TabsTrigger value="manual">Manual PowerShell</TabsTrigger>
+  </TabsList>
+  <TabsContent value="cowork">
 
-Download and run the [Windows x64 installer](https://claude.ai/api/desktop/win32/x64/setup/latest/redirect) (or [ARM64](https://claude.ai/api/desktop/win32/arm64/setup/latest/redirect)).
+**Pro or Max plan required** — computer use isn't on Team or Enterprise.
 
-Launch it, sign in with your Anthropic account. Confirm the bottom-left shows **Pro** or **Max**.
+<Steps>
 
-## 2. Turn on computer use
+### Install Cowork
+
+Download and run the [Windows x64 installer](https://claude.ai/api/desktop/win32/x64/setup/latest/redirect) (or [ARM64](https://claude.ai/api/desktop/win32/arm64/setup/latest/redirect)). Sign in with your Anthropic account. Confirm the bottom-left shows **Pro** or **Max**.
+
+### Turn on computer use
 
 Settings → General → scroll to **Desktop app** → toggle **Allow Claude to use your computer**.
 
 First time Claude tries to control the screen, Windows prompts for accessibility access. Grant it. Reference: [Anthropic — computer use in Desktop](https://code.claude.com/docs/en/desktop#let-claude-use-your-computer).
 
-## 3. Open the Code tab and paste this
+### Open the Code tab and paste this
 
 Claude Desktop has three tabs — **Chat**, **Cowork**, **Code**. Computer use lives in **Code**. Start a new Code session and paste the prompt below.
 
@@ -86,9 +101,10 @@ still pending or anything I owe (OAuth completions, plan upgrades, etc.).
 
 Press **Esc** anywhere on screen to abort. Claude releases control and unhides your apps.
 
----
+</Steps>
 
-## Manual fallback
+  </TabsContent>
+  <TabsContent value="manual">
 
 For Team or Enterprise plans (no computer use), or when you'd rather type. Run these in PowerShell.
 
@@ -135,7 +151,8 @@ Get-Command c
 
 For hogwarts, your team contact shares the `.env` out-of-band (no `.env.example`).
 
----
+  </TabsContent>
+</Tabs>
 
 ## Daily entry points
 
@@ -152,17 +169,15 @@ For hogwarts, your team contact shares the `.env` out-of-band (no `.env.example`
 
 Full keyword list: [keywords](/docs/engine/keywords).
 
----
+## Related
 
-## Reference
-
-- [Computer use in Desktop](https://code.claude.com/docs/en/desktop#let-claude-use-your-computer)
 - [Claude Code — install detail](/docs/installation/claude-code)
 - [Captain — decisions and delegation](/docs/operations/captain)
 - [Cowork ↔ Code bridge](/docs/operations/cowork)
 - [Connectors — MCP catalog](/docs/operations/connectors)
-- [Anthropic Directory](https://claude.ai/directory)
 - [Keywords — full vocabulary](/docs/engine/keywords)
 - [Team — roles](/docs/operations/team)
 - [Repositories — full org map](/docs/reference/repositories)
+- [Computer use in Desktop](https://code.claude.com/docs/en/desktop#let-claude-use-your-computer)
+- [Anthropic Directory](https://claude.ai/directory)
 - [Contributing — github-workflow rule](https://github.com/databayt/kun/blob/main/.claude/rules/github-workflow.md)

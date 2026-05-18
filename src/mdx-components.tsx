@@ -20,6 +20,7 @@ import { BuildingBlocks, KunBuildingBlocks, BlockDiagram } from "@/components/do
 import { StackedBlocks, KunStackedBlocks } from "@/components/docs/arrangements/stacked-blocks"
 import { StepperFlow, Phase1SetupFlow, Phase2SetupFlow } from "@/components/docs/arrangements/stepper-flow"
 import { Spellbook, SpellSchool, SpellbookLegend, SpellWorkflows, SpellMastery, SpellStats } from "@/components/docs/spellbook"
+import { LinkedCard, LinkedCards } from "@/components/docs/linked-card"
 
 // This file is required to use MDX in `app` directory.
 
@@ -310,6 +311,9 @@ const mdxComponents = {
     SpellWorkflows,
     SpellMastery,
     SpellStats,
+    // Path-picker grid (shadcn-style)
+    LinkedCard,
+    LinkedCards,
 }
 
 export function useMDXComponents(components: Record<string, React.ComponentType<unknown>>): Record<string, React.ComponentType<unknown>> {
