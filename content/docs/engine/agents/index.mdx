@@ -1,28 +1,67 @@
 ---
 title: Agents
-description: 40 agents across 4 tiers — from captain to specialists
+description: 40 specialized agents across 4 tiers — from captain to specialists
 ---
 
+> One captain. Three leadership tiers. Thirty-one specialists. Every keyword routes to the right one.
 
-40 specialized agents organized in a 4-tier hierarchy. The top 9 leadership agents manage business, product, and technical strategy. The bottom 31 specialist agents handle execution across stack, design, UI, DevOps, VCS, and domain expertise.
+40 markdown agents in `~/.claude/agents/` give Claude domain expertise. The top 9 run business, product, and technical strategy. The bottom 31 execute across stack, design, UI, DevOps, VCS, and product references.
 
-## Hierarchy
+## Preview
 
+<BuildingBlocks
+  title="Agent fleet"
+  sections={[
+    { title: "Tier 0", items: ["captain"] },
+    { title: "Tier 1 — Business", items: ["revenue", "growth", "support"] },
+    { title: "Tier 2 — Product", items: ["product", "analyst"] },
+    { title: "Tier 3 — Tech Lead", items: ["tech-lead", "ops", "guardian"] },
+    { title: "Stack", items: ["nextjs", "react", "typescript", "tailwind", "prisma", "shadcn", "authjs"] },
+    { title: "Design", items: ["orchestration", "architecture", "pattern", "structure"] },
+    { title: "UI", items: ["atom", "template", "block"] },
+    { title: "DevOps", items: ["build", "deploy", "test"] },
+    { title: "VCS", items: ["git", "github"] },
+    { title: "Specialized", items: ["middleware", "i18n", "semantic", "sse", "optimize", "performance", "comment", "icon"] },
+    { title: "References", items: ["hogwarts", "souq", "mkan", "shifa"] }
+  ]}
+/>
+
+## Installation
+
+All 40 agents land at `~/.claude/agents/` during the standard install.
+
+```bash
+cd ~/kun && bash .claude/scripts/install.sh
 ```
-captain (Tier 0 — company brain)
-├── Business (Tier 1): revenue, growth, support
-├── Product (Tier 2): product, analyst
-└── Tech Leadership (Tier 3): tech-lead, ops, guardian
-        └── orchestration → 31 specialist agents
+
+See [Installation](/docs/installation) for the full setup walkthrough.
+
+## Usage
+
+Agents activate three ways: via the `Agent` tool, via keywords that map to them, or via natural language.
+
+```text
+@captain Plan this week's allocation
 ```
 
-## Tier 0 — Captain
+```text
+@orchestration ship hogwarts admission
+```
+
+```text
+table users like hogwarts
+# → block agent → DataTable pattern → prisma agent → schema
+```
+
+## Reference
+
+### Tier 0 — Captain
 
 | Agent | Scope |
 |-------|-------|
 | **captain** | CEO brain — weekly allocation, revenue strategy, team coordination across 5 products and 4 humans. Never writes code. Always delegates. |
 
-## Tier 1 — Business (3)
+### Tier 1 — Business (3)
 
 | Agent | Scope | Primary Human |
 |-------|-------|---------------|
@@ -30,14 +69,14 @@ captain (Tier 0 — company brain)
 | **growth** | Content strategy, SEO, social media, developer relations, Arabic-first content | Samia, Ali |
 | **support** | Customer onboarding, issue triage, knowledge base, SLA tracking | Sedon, Ali |
 
-## Tier 2 — Product (2)
+### Tier 2 — Product (2)
 
 | Agent | Scope | Primary Human |
 |-------|-------|---------------|
 | **product** | Roadmap across 5 products, user stories, ICE scoring, release planning | All |
 | **analyst** | Market intelligence per vertical, competitor analysis, usage analytics | Ali, Samia |
 
-## Tier 3 — Tech Leadership (3)
+### Tier 3 — Tech Leadership (3)
 
 | Agent | Scope | Primary Human |
 |-------|-------|---------------|
@@ -45,9 +84,9 @@ captain (Tier 0 — company brain)
 | **ops** | CI/CD, deployment health, API spend tracking, cost optimization, uptime | Sedon, Abdout |
 | **guardian** | OWASP Top 10, performance budgets, SSPL compliance, medical data privacy | Abdout |
 
-## Specialist Agents (31 agents, 7 chains)
+### Specialist chains (31 agents, 7 chains)
 
-### Stack Chain (7)
+#### Stack (7)
 
 | Agent | Domain |
 |-------|--------|
@@ -59,7 +98,7 @@ captain (Tier 0 — company brain)
 | shadcn | Radix primitives, registry, MCP |
 | authjs | JWT, OAuth, sessions |
 
-### Design Chain (4)
+#### Design (4)
 
 | Agent | Domain |
 |-------|--------|
@@ -68,16 +107,15 @@ captain (Tier 0 — company brain)
 | pattern | Code conventions, anti-patterns |
 | structure | File organization, naming |
 
-### UI Chain (4)
+#### UI (3)
 
 | Agent | Domain |
 |-------|--------|
-| shadcn | Radix primitives, registry |
 | atom | Compose 2+ shadcn/ui primitives |
 | template | Full-page layouts |
 | block | UI + business logic (DataTable, auth, payments) |
 
-### DevOps Chain (3)
+#### DevOps (3)
 
 | Agent | Domain |
 |-------|--------|
@@ -85,14 +123,14 @@ captain (Tier 0 — company brain)
 | deploy | Vercel, staging/production |
 | test | Vitest, Playwright, TDD |
 
-### VCS Chain (2)
+#### VCS (2)
 
 | Agent | Domain |
 |-------|--------|
 | git | Branching, commits, conventional format |
 | github | PRs, issues, Actions, code review |
 
-### Specialized (8)
+#### Specialized (8)
 
 | Agent | Domain |
 |-------|--------|
@@ -105,7 +143,7 @@ captain (Tier 0 — company brain)
 | comment | Code comments |
 | icon | SVG icon management |
 
-### Reference Chain (4)
+#### Product references (4)
 
 | Agent | Product |
 |-------|---------|
@@ -114,7 +152,7 @@ captain (Tier 0 — company brain)
 | mkan | Rental marketplace patterns |
 | shifa | Medical platform patterns |
 
-## How Agents Work
+## How agents work
 
 Agents are markdown files in `~/.claude/agents/` with YAML frontmatter:
 
@@ -125,30 +163,40 @@ description: What this agent does
 model: opus
 ---
 
-# Agent Name
-
 Instructions, context, and domain knowledge...
 ```
 
-When invoked (via the Agent tool or keyword trigger), Claude loads the agent's instructions and delegates accordingly.
+When invoked, Claude loads the agent's instructions and routes accordingly.
 
-## Inter-Agent Routing
+## Examples
 
-```
+### Inter-agent routing
+
+```text
 "saas billing"
   → orchestration agent
   → prisma (schema) + block (UI) + stripe MCP
   → Complete billing feature
+```
 
+```text
 "ship hogwarts admission"
   → captain
   → product (stories) → tech-lead (architecture)
   → orchestration → specialists
 ```
 
-## Installation
-
-```bash
-# All 40 agents installed to ~/.claude/agents/
-cd ~/kun && bash .claude/scripts/install.sh
+```text
+"table users from codebase"
+  → block agent
+  → DataTable pattern + prisma schema + shadcn ui/
+  → Working table with sort, filter, pagination
 ```
+
+## Related
+
+- [Skills](/docs/engine/skills) — Slash commands that invoke agents
+- [Captain](/docs/operations/captain) — Tier 0, never writes code, always delegates
+- [Workflows](/docs/reference/workflows) — Multi-agent chains
+- [Keywords](/docs/engine/keywords) — Vocabulary that routes to agents
+- [MCP](/docs/engine/mcp) — Tool servers agents call

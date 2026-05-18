@@ -1,12 +1,32 @@
 ---
 title: Commands
-description: Slash commands for rapid workflows
+description: Slash commands that trigger complete workflows
 ---
 
+> Type `/x` in Claude Code. Commands are the keyboard shortcuts of the engine.
 
-Type `/command` in Claude Code to trigger a complete workflow. Commands are markdown templates in `~/.claude/commands/` that expand into full prompts with agent routing and MCP integration.
+Commands are markdown templates in `~/.claude/commands/` that expand into full prompts with agent routing and MCP integration.
 
-## Core Commands
+## Usage
+
+```bash
+/dev
+/build
+/feature billing hogwarts
+/proposal "King Fahad Schools"
+```
+
+Or trigger via keywords without the leading slash:
+
+```text
+dev
+ship
+report
+```
+
+## Reference
+
+### Core
 
 | Command | Purpose |
 |---------|---------|
@@ -16,7 +36,21 @@ Type `/command` in Claude Code to trigger a complete workflow. Commands are mark
 | `/quick` | Fast commit (skip build validation) |
 | `/deploy` | Deploy to Vercel staging/production |
 
-## Creation Commands
+### Pipeline
+
+| Command | Purpose |
+|---------|---------|
+| `/feature <name> [product]` | Full pipeline — idea to production |
+| `/idea <name>` | Capture feature as GitHub issue |
+| `/spec #N` | Generate technical spec from issue |
+| `/schema #N` | Create Prisma model + migration + Zod |
+| `/code #N` | Create server actions + auth + validation |
+| `/wire #N` | Create pages + forms + tables + i18n |
+| `/check` | Quality gate — type-check + build + visual |
+| `/ship` | Commit + deploy to Vercel production |
+| `/watch` | Post-deploy health check |
+
+### Creation
 
 | Command | Purpose |
 |---------|---------|
@@ -26,7 +60,7 @@ Type `/command` in Claude Code to trigger a complete workflow. Commands are mark
 | `/saas [feature]` | Generate complete SaaS feature |
 | `/clone [source]` | Clone pattern from codebase or GitHub |
 
-## Quality Commands
+### Quality
 
 | Command | Purpose |
 |---------|---------|
@@ -36,7 +70,21 @@ Type `/command` in Claude Code to trigger a complete workflow. Commands are mark
 | `/performance` | Core Web Vitals performance audit |
 | `/handover [block]` | 5-pass production QA |
 
-## Business Commands
+### Coverage Sweeps
+
+| Command | Purpose |
+|---------|---------|
+| `/translate [block]` | Find and fix hardcoded strings |
+| `/nextjs [block]` | Enforce Next.js 16 App Router patterns |
+| `/react [block]` | Fix waterfalls, barrel imports, setState |
+| `/typescript [block]` | Remove `any`, fix types |
+| `/tailwind [block]` | Semantic tokens, logical properties for RTL |
+| `/shadcn [block]` | Replace raw HTML with ui/ primitives |
+| `/prisma [block]` | Audit queries — select, tenant, N+1 |
+| `/authjs [block]` | Audit auth — auth(), sessions, roles |
+| `/coverage [product] [keyword]` | Coverage report |
+
+### Business
 
 | Command | Purpose | Role |
 |---------|---------|------|
@@ -44,7 +92,7 @@ Type `/command` in Claude Code to trigger a complete workflow. Commands are mark
 | `/pricing [product]` | Calculate pricing tiers | business |
 | `/weekly [mode]` | Captain weekly review (plan/check/review) | all |
 
-## Content Commands
+### Content
 
 | Command | Purpose | Role |
 |---------|---------|------|
@@ -52,15 +100,18 @@ Type `/command` in Claude Code to trigger a complete workflow. Commands are mark
 | `/content-calendar` | Plan weekly content schedule | content |
 | `/docs` | Generate MDX documentation | all |
 
-## Ops Commands
+### Ops
 
 | Command | Purpose | Role |
 |---------|---------|------|
 | `/monitor` | Check deployments + costs + uptime | ops |
 | `/costs` | API spend breakdown | ops |
 | `/incident [severity]` | Incident response (P0/P1/P2) | ops |
+| `/doctor` | Audit `~/.claude/` health + updates | all |
+| `/maintain` | Daily heartbeat scheduled task | all |
+| `/bootstrap` | Single-paste cold start | all |
 
-## Communication Commands
+### Communication
 
 | Command | Purpose |
 |---------|---------|
@@ -68,7 +119,15 @@ Type `/command` in Claude Code to trigger a complete workflow. Commands are mark
 | `/issue [repo] [title]` | Create GitHub issue with labels |
 | `/credentials [action]` | Manage Keychain API keys |
 
-## Utility Commands
+### Intelligence
+
+| Command | Purpose |
+|---------|---------|
+| `/learn` | Org intelligence — full org, repos, team, conventions |
+| `/analyze <repo>` | Generate `.claude/` config PR from repo patterns |
+| `/profile [name]` | Show/switch/create configuration profiles |
+
+### Utility
 
 | Command | Purpose |
 |---------|---------|
@@ -77,7 +136,7 @@ Type `/command` in Claude Code to trigger a complete workflow. Commands are mark
 | `/screenshot` | View recent screenshot |
 | `/motion` | Add Framer Motion animations |
 
-## Creating Custom Commands
+## Creating custom commands
 
 Commands are markdown files with a simple structure:
 
@@ -94,3 +153,9 @@ Arguments: $ARGUMENTS
 ```
 
 Place in `~/.claude/commands/` and they become available as `/command-name`.
+
+## Related
+
+- [Skills](/docs/engine/skills) — How skills wrap commands with agent routing
+- [Keywords](/docs/engine/keywords) — Vocabulary triggering each command
+- [Agents](/docs/engine/agents) — Specialists commands route to
