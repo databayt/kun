@@ -1,140 +1,161 @@
 ---
 title: Onboarding
-description: Install Cowork, let it do the rest
+description: One paste. Watch it run. Doctor green.
 ---
 
 # Onboarding
 
-> One install, one paste, one watch. Cowork drives every other step.
+> One line in your terminal. 16 numbered steps. Three OAuth sign-ins. Done.
 
-The fastest path to running databayt on a fresh Windows laptop: install Claude Desktop (Cowork), turn on computer use, paste the team prompt, watch your machine set itself up.
+A fresh laptop becomes a working databayt machine in about 20 minutes. The bootstrap script does everything; you only press Enter for sign-ins. Works on Windows, macOS, and Linux.
 
-Plan ~60 minutes. **Pro or Max plan required** — computer use isn't on Team or Enterprise. Manual fallback at the bottom.
+---
+
+## Quick start
+
+### Before you start (~5 min)
+
+You need three accounts and a working laptop. The bootstrap walks you through the sign-ins — it can't create the accounts for you.
+
+- **GitHub** — sign up at [github.com](https://github.com), ping your team lead to be added to `databayt`.
+- **Anthropic** — sign up at [claude.ai](https://claude.ai). Free is fine for the CLI; **Pro or Max** only if you want the Cowork visual path.
+- **JetBrains** — free 30-day trial works; team licenses are pooled — ask your team lead.
+- **Laptop** — Windows 11, macOS 13+, or Linux with bash 3.2+. Admin/sudo access required.
+
+Don't have them all yet? Sign up now in browser tabs; bootstrap pauses at each OAuth step for you to finish.
+
+### Windows (PowerShell)
+
+```powershell
+irm https://kun.databayt.org/install | iex
+```
+
+### macOS / Linux
+
+```bash
+curl -fsSL https://kun.databayt.org/install.sh | bash
+```
+
+That's it. Approve the UAC/sudo prompt, then watch the 16 numbered steps stream by.
+
+**Stuck?** Drop the log path (`~/.claude/logs/bootstrap-<ts>.log`) into the team channel — someone will pick it up.
+
+---
 
 ## What you end up with
 
-- Claude Code CLI on `PATH`
-- Full `~/.claude/` config — every agent, skill, MCP server, hook, bin script
-- The `c` function — `claude --dangerously-skip-permissions` in one keystroke
-- WebStorm with the Claude Code [Beta] plugin
-- Every active databayt repo cloned to `%USERPROFILE%\projects\databayt\`
-- `claude doctor` green
+- **Claude Code CLI** on `PATH`
+- **`c` function** — `claude --dangerously-skip-permissions` in one keystroke (`cc` is the safe variant)
+- **Full `~/.claude/` config** — every agent, skill, MCP server, hook, bin script
+- **`.env` secrets** pulled from the team Gist
+- **WebStorm** with the Claude Code [Beta] plugin pre-installed
+- **Pattern library** at `~/codebase`
+- **10 OSS repos** at `~/oss/{shadcn,radix,kun,hogwarts,souq,mkan,shifa,swift-app,distributed-computer,marketing}`
+- **`kun-maintain`** daily task armed for 09:00 (Task Scheduler / launchd / systemd user)
+- **`doctor`** returns green
+- **Audit log** at `~/.claude/logs/bootstrap-<timestamp>.log`
 
 ---
 
-## 1. Install Cowork
+## Roles
 
-Download and run the [Windows x64 installer](https://claude.ai/api/desktop/win32/x64/setup/latest/redirect) (or [ARM64](https://claude.ai/api/desktop/win32/arm64/setup/latest/redirect)).
+Default is `engineer`. Pick another to install a slimmer MCP bundle and skill set.
 
-Launch it, sign in with your Anthropic account. Confirm the bottom-left shows **Pro** or **Max**.
+| Role | Includes | For |
+|------|----------|-----|
+| `engineer` | All agents · all MCPs · all skills | Building features |
+| `business` | `docs`, `repos`, `proposal`, `pricing`, `weekly` | Sales, revenue, partnerships |
+| `content` | `docs`, `repos`, `translate`, `content-calendar`, `weekly` | Writers, marketers |
+| `ops` | `docs`, `repos`, `monitor`, `costs`, `incident`, `weekly` | DevOps, infrastructure |
 
-## 2. Turn on computer use
-
-Settings → General → scroll to **Desktop app** → toggle **Allow Claude to use your computer**.
-
-First time Claude tries to control the screen, Windows prompts for accessibility access. Grant it. Reference: [Anthropic — computer use in Desktop](https://code.claude.com/docs/en/desktop#let-claude-use-your-computer).
-
-## 3. Open the Code tab and paste this
-
-Claude Desktop has three tabs — **Chat**, **Cowork**, **Code**. Computer use lives in **Code**. Start a new Code session and paste the prompt below.
-
-```text
-Set up this fresh Windows laptop for databayt with computer use.
-
-End state I want:
-- GitHub, JetBrains, and Claude (Pro/Max) accounts ready
-- Side-tools installed: git, Node 22, pnpm, gh CLI, PowerShell 7
-- Claude Code CLI installed and signed in
-- The `c` function added to my $PROFILE so it survives new terminals
-- The databayt config installed at %USERPROFILE%\.claude\ (install.ps1 + secrets.ps1)
-- WebStorm installed with the Claude Code [Beta] plugin
-- Every active databayt repo cloned via sync-repos.ps1
-- `claude doctor` all green
-
-Walk me through each step. Open the right app for me. Pause at every OAuth
-or browser screen so I sign in myself — your browser is view-only. Ask for
-my confirmation before any destructive command. I can press Esc to stop you.
-
-One-liners you can use when you reach them:
-
-  winget install Git.Git OpenJS.NodeJS.LTS GitHub.cli Microsoft.PowerShell
-  npm install -g pnpm
-  winget install Anthropic.ClaudeCode
-  irm https://raw.githubusercontent.com/databayt/codebase/main/.claude/scripts/install.ps1 | iex
-  & "$env:USERPROFILE\.claude\scripts\secrets.ps1" -GistId 68453b25fa9d28c94426c55c179b3838
-  winget install JetBrains.WebStorm
-  & "$env:USERPROFILE\.claude\scripts\sync-repos.ps1"
-
-The `c` function block for $PROFILE:
-
-  function c  { claude --dangerously-skip-permissions $args }
-  function cc { claude $args }
-  if (Test-Path "$env:USERPROFILE\.claude\.env") {
-      Get-Content "$env:USERPROFILE\.claude\.env" | ForEach-Object {
-          if ($_ -and -not $_.StartsWith("#")) {
-              $parts = $_ -split "=", 2
-              if ($parts.Length -eq 2) {
-                  [Environment]::SetEnvironmentVariable($parts[0], $parts[1], "Process")
-              }
-          }
-      }
-  }
-  $env:Path = "$env:USERPROFILE\.claude\bin;" + $env:Path
-
-When done, run `claude doctor`, screenshot the result, and list anything
-still pending or anything I owe (OAuth completions, plan upgrades, etc.).
-```
-
-Press **Esc** anywhere on screen to abort. Claude releases control and unhides your apps.
-
----
-
-## Manual fallback
-
-For Team or Enterprise plans (no computer use), or when you'd rather type. Run these in PowerShell.
+To pass a role to the one-liner, download first:
 
 ```powershell
-# Side-tools
-winget install Git.Git OpenJS.NodeJS.LTS GitHub.cli Microsoft.PowerShell
-npm install -g pnpm
-gh auth login                                   # browser auth
-
-# Claude Code CLI
-winget install Anthropic.ClaudeCode
-claude                                          # browser sign-in
-
-# c function — paste into $PROFILE, then `. $PROFILE`
-function c  { claude --dangerously-skip-permissions $args }
-function cc { claude $args }
-if (Test-Path "$env:USERPROFILE\.claude\.env") {
-    Get-Content "$env:USERPROFILE\.claude\.env" | ForEach-Object {
-        if ($_ -and -not $_.StartsWith("#")) {
-            $parts = $_ -split "=", 2
-            if ($parts.Length -eq 2) {
-                [Environment]::SetEnvironmentVariable($parts[0], $parts[1], "Process")
-            }
-        }
-    }
-}
-$env:Path = "$env:USERPROFILE\.claude\bin;" + $env:Path
-
-# databayt config + secrets
-irm https://raw.githubusercontent.com/databayt/codebase/main/.claude/scripts/install.ps1 | iex
-& "$env:USERPROFILE\.claude\scripts\secrets.ps1" -GistId 68453b25fa9d28c94426c55c179b3838
-
-# WebStorm + plugin (install plugin from the Marketplace inside WebStorm)
-winget install JetBrains.WebStorm
-
-# Clone every active databayt repo
-& "$env:USERPROFILE\.claude\scripts\sync-repos.ps1"
-
-# Verify
-claude --version
-claude doctor
-Get-Command c
+# Windows
+irm https://kun.databayt.org/install -OutFile $env:TEMP\bootstrap.ps1
+& $env:TEMP\bootstrap.ps1 -Role business
 ```
 
-For hogwarts, your team contact shares the `.env` out-of-band (no `.env.example`).
+```bash
+# macOS / Linux
+curl -fsSL https://kun.databayt.org/install.sh -o /tmp/bootstrap.sh
+bash /tmp/bootstrap.sh --role business
+```
+
+---
+
+## The 16 steps
+
+What `bootstrap` actually does, in order. Each line prints `[N/16]` with an ⏳/✅/⚠️/❌ icon.
+
+| # | Step | Notes |
+|---|------|-------|
+| 0  | ExecutionPolicy / shell check | Sets `RemoteSigned` (Windows) |
+| 1  | Elevate via UAC / sudo | Re-launches as admin if needed |
+| 2  | Verify OS + shell version | Windows 11 + PS 5.1+ (or bash 3.2+) |
+| 3  | Create `~/.claude/logs/` | All output is teed to a timestamped log |
+| 4  | `winget` / `brew` bundle | git, Node LTS, gh, PS 7, Claude Code CLI, Claude Desktop |
+| 5  | Refresh `PATH` from registry | New binaries usable in current session |
+| 6  | `npm install -g pnpm` | |
+| 7  | WebStorm | Skip with `-SkipWebStorm` |
+| 8  | Claude Code [Beta] plugin | Pre-dropped into WebStorm `plugins/` |
+| 9  | `install.ps1` → `~/.claude/` | Copies CLAUDE.md, agents, skills, rules, memory, scripts, role-specific `mcp.json` |
+| 10 | `settings.json` | Engineer gets the full one; other roles get a minimal env block |
+| 11 | `$PROFILE` c/cc functions | Idempotent — runs `Repair-Profile` from `lib/Fix-Shell.ps1` |
+| 12 | **OAuth batch** | 3 sign-ins — see below |
+| 13 | `secrets.ps1 -GistId ...` | Pulls `.env` from the team Gist |
+| 14 | `sync-repos.ps1` | Clones `~/codebase` + `~/oss/*` (10 OSS repos) |
+| 15 | `maintain -Install` | Arms the daily 09:00 heartbeat |
+| 16 | `doctor` | Exit 0 = green, 3 = updates available, 1/2 = needs fix |
+
+### The OAuth batch (step 12)
+
+You hear a single beep, then the script walks you through three sign-ins, press-Enter between each:
+
+1. **GitHub** — `gh auth login --web --git-protocol https`. Browser opens, paste device code.
+2. **Claude** — open a new PowerShell and run `claude`. Browser opens for sign-in. Press Enter when you see "Logged in".
+3. **JetBrains** — WebStorm opens. Sign in (or start trial). Press Enter when the project window appears.
+
+Each is skipped if it's already authenticated. Total ~5 minutes.
+
+---
+
+## Flags
+
+| Flag | Windows | mac/Linux | What it does |
+|------|---------|-----------|--------------|
+| Role | `-Role business` | `--role business` | Install a slimmer config |
+| Dry run | `-DryRun` | `--dry-run` | Print every step without executing |
+| Track | `-Track` | `--track` | Create a GitHub issue ticking each step as it completes |
+| Skip OAuth | `-SkipOAuth` | `--skip-oauth` | Leave sign-ins to the user |
+| Skip WebStorm | `-SkipWebStorm` | `--skip-ide` | No IDE install |
+| Skip Cowork | `-SkipCowork` | `--skip-desktop` | No Claude Desktop install |
+
+Pass `-Track` and bootstrap creates a GitHub issue in `databayt/kun` with a checkbox list of all 16 steps, ticking each as it completes. Useful for the team to see who's onboarding and where they got stuck.
+
+---
+
+## Watch it run (Cowork-driven, optional)
+
+If you're on **Pro or Max** and want to see Cowork drive your screen instead of the script doing it headless:
+
+1. Download and run the [Windows x64 installer](https://claude.ai/api/desktop/win32/x64/setup/latest/redirect) (or [ARM64](https://claude.ai/api/desktop/win32/arm64/setup/latest/redirect)). macOS users grab Claude Desktop from `claude.ai`.
+2. Settings → General → Desktop app → toggle **Allow Claude to use your computer**.
+3. Open the **Code** tab and paste:
+
+```text
+Run the kun bootstrap on this machine. Use the canonical one-liner:
+
+  irm https://kun.databayt.org/install | iex    (Windows)
+  curl -fsSL https://kun.databayt.org/install.sh | bash    (macOS/Linux)
+
+Pause at every OAuth/browser screen so I sign in myself. When done,
+run `doctor`, screenshot, and list anything still pending.
+```
+
+Press **Esc** anytime to abort and reclaim control. Reference: [computer use in Desktop](https://code.claude.com/docs/en/desktop#let-claude-use-your-computer).
+
+Not on Pro/Max? Computer use isn't available on Team or Enterprise — use the single-paste flow at the top.
 
 ---
 
@@ -150,20 +171,84 @@ For hogwarts, your team contact shares the `.env` out-of-band (no `.env.example`
 | Send a note to the team | `c "/dispatch <message>"` |
 | Open a GitHub issue | `c "/issue"` |
 | Verify a production deploy | `c "/watch"` |
+| Check system health | `c "/doctor"` (or `doctor` directly) |
+| Re-arm daily heartbeat | `c "/maintain install"` |
 
 Full keyword list: [keywords](/docs/keywords).
 
 ---
 
+## Troubleshooting
+
+| Symptom | Fix |
+|---------|-----|
+| UAC declined → bootstrap exits | Re-paste the one-liner, accept UAC. |
+| `gh auth` fails in step 12 | Re-run `gh auth login --web` after bootstrap finishes; nothing else depends on it mid-flow. |
+| `secrets.ps1` says "Gist not found" | Confirm Gist ID with team lead; re-run `& "$env:USERPROFILE\.claude\scripts\secrets.ps1" -GistId <id>`. |
+| `doctor` exits 3 | Updates available — `c "/doctor update"` to apply. |
+| `doctor` exits 1 or 2 | `c "/doctor"` shows what's red. Most issues auto-fix with `/doctor fix`. |
+| Plugin didn't drop | Open WebStorm → Marketplace → search "Claude Code [Beta]" → install. |
+| Repos cloned over HTTPS, not SSH | `bootstrap` tries SSH first, falls back to HTTPS. To switch, set up SSH keys and re-clone. |
+
+Full bootstrap log is at `~/.claude/logs/bootstrap-<timestamp>.log`.
+
+---
+
+## Manual fallback
+
+Skip the bootstrap and paste each step yourself. Useful for debugging or air-gapped setups.
+
+```powershell
+# Windows — side-tools
+winget install Git.Git OpenJS.NodeJS.LTS GitHub.cli Microsoft.PowerShell Anthropic.ClaudeCode JetBrains.WebStorm
+npm install -g pnpm
+gh auth login --web
+
+# Config + secrets (CORRECT URL — kun, not codebase)
+irm https://raw.githubusercontent.com/databayt/kun/main/.claude/scripts/install.ps1 | iex
+& "$env:USERPROFILE\.claude\scripts\secrets.ps1" -GistId 68453b25fa9d28c94426c55c179b3838
+
+# Repos + daily heartbeat
+& "$env:USERPROFILE\.claude\scripts\sync-repos.ps1"
+& "$env:USERPROFILE\.claude\scripts\maintain.ps1" -Install
+
+# Verify
+claude --version
+& "$env:USERPROFILE\.claude\scripts\doctor.ps1"
+```
+
+```bash
+# macOS — side-tools (Homebrew)
+brew install git node gh powershell pnpm
+brew install --cask claude jetbrains-toolbox
+
+# Config + secrets
+curl -fsSL https://raw.githubusercontent.com/databayt/kun/main/.claude/scripts/install.sh | bash
+~/.claude/scripts/secrets.sh 68453b25fa9d28c94426c55c179b3838
+
+# Repos + daily heartbeat
+~/.claude/scripts/sync-repos.sh
+~/.claude/scripts/maintain.sh --install
+
+# Verify
+claude --version
+~/.claude/scripts/doctor.sh
+```
+
+For hogwarts, your team contact shares the `.env` out-of-band (no `.env.example`).
+
+---
+
 ## Reference
 
-- [Computer use in Desktop](https://code.claude.com/docs/en/desktop#let-claude-use-your-computer)
-- [Claude Code — install detail](/docs/claude-code)
+- [Claude Code — installation detail](/docs/claude-code)
 - [Captain — decisions and delegation](/docs/captain)
 - [Cowork ↔ Code bridge](/docs/cowork)
 - [Connectors — MCP catalog](/docs/connectors)
-- [Anthropic Directory](https://claude.ai/directory)
 - [Keywords — full vocabulary](/docs/keywords)
 - [Team — roles](/docs/team)
 - [Repositories — full org map](/docs/repositories)
+- [Computer use in Desktop](https://code.claude.com/docs/en/desktop#let-claude-use-your-computer)
+- [Anthropic Directory](https://claude.ai/directory)
 - [Contributing — github-workflow rule](https://github.com/databayt/kun/blob/main/.claude/rules/github-workflow.md)
+- [bootstrap.ps1 source](https://github.com/databayt/kun/blob/main/.claude/scripts/bootstrap.ps1) · [bootstrap.sh source](https://github.com/databayt/kun/blob/main/.claude/scripts/bootstrap.sh)
