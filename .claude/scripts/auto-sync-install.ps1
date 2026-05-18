@@ -1,4 +1,4 @@
-# Kun auto-sync installer — registers auto-sync.ps1 as a logon-triggered
+# Kun auto-sync installer -- registers auto-sync.ps1 as a logon-triggered
 # scheduled task that restarts on failure. Runs hidden in the background.
 #
 # Usage:
@@ -43,7 +43,7 @@ if ($Uninstall) {
     try {
         Stop-ScheduledTask -TaskName $TaskName -ErrorAction SilentlyContinue
         Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false -ErrorAction Stop
-        Write-Host "✅ Unregistered kun-auto-sync" -ForegroundColor Green
+        Write-Host "[OK] Unregistered kun-auto-sync" -ForegroundColor Green
     } catch {
         Write-Host "kun-auto-sync was not installed" -ForegroundColor Yellow
     }
@@ -53,17 +53,17 @@ if ($Uninstall) {
 if ($Run) {
     try {
         Start-ScheduledTask -TaskName $TaskName -ErrorAction Stop
-        Write-Host "✅ Started kun-auto-sync" -ForegroundColor Green
+        Write-Host "[OK] Started kun-auto-sync" -ForegroundColor Green
     } catch {
-        Write-Host "❌ Task not installed — run with -Install first" -ForegroundColor Red
+        Write-Host "[FAIL] Task not installed -- run with -Install first" -ForegroundColor Red
         exit 1
     }
     return
 }
 
-# ── Install ────────────────────────────────────────────────────────
+# -- Install --------------------------------------------------------
 if (-not (Test-Path $ScriptPath)) {
-    Write-Host "❌ Script not found: $ScriptPath" -ForegroundColor Red
+    Write-Host "[FAIL] Script not found: $ScriptPath" -ForegroundColor Red
     Write-Host "   Run install.ps1 first to deploy ~/.claude/scripts/" -ForegroundColor Yellow
     exit 1
 }
@@ -102,7 +102,7 @@ try {
         -Force `
         -ErrorAction Stop | Out-Null
 
-    Write-Host "✅ Installed kun-auto-sync" -ForegroundColor Green
+    Write-Host "[OK] Installed kun-auto-sync" -ForegroundColor Green
     Write-Host ""
     Write-Host "Trigger: starts at every logon (current user only)"
     Write-Host "Script:  $ScriptPath"
@@ -112,6 +112,6 @@ try {
     Write-Host "Check state any time:           auto-sync-install.ps1 -Status"
     Write-Host "Stop and remove:                auto-sync-install.ps1 -Uninstall"
 } catch {
-    Write-Host "❌ Install failed: $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host "[FAIL] Install failed: $($_.Exception.Message)" -ForegroundColor Red
     exit 1
 }

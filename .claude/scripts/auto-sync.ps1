@@ -1,4 +1,4 @@
-# Kun auto-sync — real-time bidirectional git sync for all databayt repos.
+# Kun auto-sync -- real-time bidirectional git sync for all databayt repos.
 # Watches each repo at ~/<name> for local commits (push instantly) and polls
 # origin every 60s for new upstream commits (pull --rebase). Per-repo isolation:
 # one repo's failure never stops the others.
@@ -96,14 +96,14 @@ function Invoke-RepoPull {
         git fetch --quiet 2>$null
         $upstream = (git rev-parse '@{u}' 2>$null | Out-String).Trim()
         if (-not $upstream) {
-            Write-Log $Name 'WARN' 'no upstream — skipping fetch'
+            Write-Log $Name 'WARN' 'no upstream -- skipping fetch'
             return
         }
         $behind = (git rev-list --count 'HEAD..@{u}' 2>$null | Out-String).Trim()
         if (-not $behind -or $behind -eq '0') { return }
         $dirty = (git status --porcelain 2>$null | Measure-Object).Count
         if ($dirty -gt 0) {
-            Write-Log $Name 'WARN' "$behind behind but working tree dirty — skipping pull"
+            Write-Log $Name 'WARN' "$behind behind but working tree dirty -- skipping pull"
             return
         }
         if ($DryRun) {
@@ -124,12 +124,12 @@ function Invoke-RepoPull {
     }
 }
 
-# ── Setup ──────────────────────────────────────────────────────────
-Write-Log '_main_' 'INFO' "auto-sync starting · poll=${PollInterval}s · debounce=${Debounce}s · dry-run=$DryRun"
+# -- Setup ----------------------------------------------------------
+Write-Log '_main_' 'INFO' "auto-sync starting | poll=${PollInterval}s | debounce=${Debounce}s | dry-run=$DryRun"
 
 $repos = Get-RepoList | Where-Object { Test-RepoCloned $_.Path }
 if ($repos.Count -eq 0) {
-    Write-Log '_main_' 'ERROR' 'no cloned repos found — run sync-repos.ps1 first'
+    Write-Log '_main_' 'ERROR' 'no cloned repos found -- run sync-repos.ps1 first'
     exit 1
 }
 
@@ -158,7 +158,7 @@ foreach ($r in $repos) {
     $watchers += $watcher
 }
 
-# ── Main loop ──────────────────────────────────────────────────────
+# -- Main loop ------------------------------------------------------
 $lastPoll = Get-Date
 $tick = 0
 try {
@@ -188,7 +188,7 @@ try {
         }
     }
 } finally {
-    Write-Log '_main_' 'INFO' 'auto-sync stopping · cleaning up watchers'
+    Write-Log '_main_' 'INFO' 'auto-sync stopping | cleaning up watchers'
     foreach ($w in $watchers) {
         $w.EnableRaisingEvents = $false
         $w.Dispose()
