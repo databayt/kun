@@ -18,6 +18,22 @@
 
 ---
 
+## The contract page (the operational artifact)
+
+This document is the **doctrine** — lineage, references, intellectual posture. The operational artifact of the doctrine — the public-facing agreement between Databayt and its parties — is the **contract page** at [`kun/content/docs/share-economy.mdx`](../content/docs/share-economy.mdx) (Arabic mirror: [`share-economy.ar.mdx`](../content/docs/share-economy.ar.mdx)).
+
+The contract page is framed as a **smart contract in the structural sense** (public rules, self-execution, code enforcement — *not* on-chain, *not* a token, *not* a Turing-complete VM). It names five Islamic-primitive clauses (Shirkat al-A'mal, Mudaraba, Waqf, Needs Fund, Darar/dirar), five Khedr partnership-formation clauses (two equity methodologies, Khedr Helicopter, pre-launch equity contract, partner departure protocol, Sharia-compliant non-compete), and the enforcement matrix that ties each clause to a specific mechanism.
+
+Read the three layers in order when you join Databayt:
+
+1. **Doctrine** (this document) — *in service of what?* The intellectual lineage (Akbar, NMBD, Khedr, Islamic primitives) that makes the posture defensible.
+2. **Contract** ([`share-economy.mdx`](../content/docs/share-economy.mdx)) — *what is enforced?* The public agreement between Databayt and its parties.
+3. **Measurement spec** ([`hogwarts/.../shared-economy.mdx`](https://github.com/databayt/hogwarts/blob/main/content/docs-en/shared-economy.mdx)) — *how is contribution valued?* The CU formula, contribution matrix, anti-gaming controls, governance rules.
+
+The doctrine does not change CU formulas; the contract does not change operational specs; both defer numerical parameters to Samia's Q3 2026 framework in `databayt/revenue`.
+
+---
+
 ## Part I — What we mean by share economy
 
 > **التضامن في الإنتاج، لا في الاستهلاك فقط.**
