@@ -3,17 +3,18 @@ title: Cowork
 description: Same brain, two modes — one thinks, one acts
 ---
 
+> Cowork plans, Code executes. They share `~/.claude/` and hand off via Dispatch + GitHub Issues.
 
-Cowork and Claude Code are two modes of the same brain. They share everything in `~/.claude/` — agents, memory, settings, rules. The difference is posture.
+Cowork (Claude Desktop's computer-use mode) and Claude Code are two postures of the same brain. They share every agent, every memory file, every setting in `~/.claude/`. The only difference is whether the session is for thinking or for doing.
 
-## Two Modes
+## Two modes
 
 | Mode | Posture | Who |
 |------|---------|-----|
 | **Cowork** | Think. Plan. Research. Write. Decide. | Ali, Samia, Abdout |
 | **Claude Code** | Do. Build. Deploy. Fix. Ship. | Abdout, Sedon |
 
-## Shared State
+## Shared state
 
 Both modes read and write to:
 
@@ -21,10 +22,12 @@ Both modes read and write to:
 |----------|------|---------|
 | Agents | `~/.claude/agents/` | Same 40 agents in both modes |
 | Memory | `~/.claude/memory/` | Persistent state |
-| Dispatch/Cowork | Notes → Dispatch → Cowork | Handoff note |
-| GitHub Issues | databayt/*/issues | Shared work queue |
+| Dispatch | Apple Notes — Dispatch/Cowork | Handoff notes |
+| GitHub Issues | `databayt/*/issues` | Shared work queue |
 
-## Handoff: Cowork → Code
+## Usage
+
+### Cowork → Code handoff
 
 When work starts in Cowork (planning, strategy, research):
 
@@ -34,9 +37,7 @@ When work starts in Cowork (planning, strategy, research):
 4. Code reads Cowork note at session start
 5. Code picks up the issues and executes
 
-### Example
-
-```
+```text
 [Cowork session]
 Abdout: "Plan the hogwarts notification system"
 → Research patterns, design architecture, write stories
@@ -47,7 +48,7 @@ Abdout: "Plan the hogwarts notification system"
 Captain: reads Cowork note → sees plan → starts executing #10
 ```
 
-## Handoff: Code → Cowork
+### Code → Cowork handoff
 
 When Code finishes work that needs strategic review:
 
@@ -55,11 +56,26 @@ When Code finishes work that needs strategic review:
 2. Code creates a GitHub issue if follow-up is needed
 3. Cowork picks up in the next Desktop session
 
-## Cowork Use Cases
+### Session start protocol
+
+**Every Cowork session:**
+
+1. Check Dispatch/Cowork note for Code's output
+2. Review GitHub issues for completed/blocked items
+3. Plan next moves
+
+**Every Code session:**
+
+1. `dispatch.sh read inbox` — check Abdout's instructions
+2. `dispatch.sh read cowork` — check for Cowork handoffs
+3. `gh issue list --state open` — check work queue
+4. Proceed with highest priority
+
+## Examples
 
 ### Ali (QA + Sales)
 
-```
+```text
 > "Summarize this week's hogwarts progress for pitch materials"
 > "Draft proposal for King Fahad Schools — open source, sharing economy angle"
 > "Research schools, sponsors, investors in Sudan/MENA"
@@ -67,7 +83,7 @@ When Code finishes work that needs strategic review:
 
 ### Samia (R&D)
 
-```
+```text
 > "Translate these UI strings to Arabic"
 > "Write help documentation for the admission module"
 > "Research best practices for school notification systems"
@@ -75,29 +91,19 @@ When Code finishes work that needs strategic review:
 
 ### Abdout (Planning)
 
-```
+```text
 > "Plan the notification system architecture"
 > "Review the weekly revenue report"
 > "Design the multi-tenant billing flow"
 ```
 
-## Session Start Protocol
+## The key insight
 
-### Every Cowork Session
+Cowork doesn't need to know how to code. Claude Code doesn't need to strategize. They share a brain through files, notes, and issues. Abdout switches between them like switching between thinking and doing. Both are Captain — one thinks, one acts.
 
-1. Check Dispatch/Cowork note for Code's output
-2. Review GitHub issues for completed/blocked items
-3. Plan next moves
+## Related
 
-### Every Code Session
-
-1. `dispatch.sh read inbox` — check Abdout's instructions
-2. `dispatch.sh read cowork` — check for Cowork handoffs
-3. `gh issue list --state open` — check work queue
-4. Proceed with highest priority
-
-## The Key Insight
-
-Cowork doesn't need to know how to code. Claude Code doesn't need to strategize. They share a brain through files, notes, and issues.
-
-Abdout switches between them like switching between thinking and doing. Both are Captain — one thinks, one acts.
+- [Dispatch](/docs/operations/dispatch) — the file-based handoff channel
+- [Captain](/docs/operations/captain) — runs in both modes
+- [Team](/docs/operations/team) — who uses which mode
+- [Installation](/docs/installation) — turning on computer use to enable Cowork

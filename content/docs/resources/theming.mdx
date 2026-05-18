@@ -1,0 +1,106 @@
+---
+title: Theming
+description: OKLch tokens, dark mode, and RTL — how the docs site is themed
+---
+
+> One token set. Light, dark, LTR, RTL — every variant falls out of the same variables.
+
+The docs site uses Tailwind CSS 4 with OKLch color space. All colors flow through CSS custom properties defined in `src/app/globals.css`. Override them at `:root` for global change; override under `.dark` for dark-mode-only change.
+
+## Token reference
+
+| Token | Light | Dark | Purpose |
+|-------|-------|------|---------|
+| `--background` | `oklch(1 0 0)` | `oklch(0.145 0 0)` | Page surface |
+| `--foreground` | `oklch(0.145 0 0)` | `oklch(0.985 0 0)` | Body text |
+| `--card` | `oklch(1 0 0)` | `oklch(0.205 0 0)` | Card surface (LinkedCard, panels) |
+| `--card-foreground` | `oklch(0.145 0 0)` | `oklch(0.985 0 0)` | Text on cards |
+| `--popover` | `oklch(1 0 0)` | `oklch(0.205 0 0)` | Popover/dialog surface |
+| `--primary` | `oklch(0.205 0 0)` | `oklch(0.922 0 0)` | Buttons, links emphasis |
+| `--primary-foreground` | `oklch(0.985 0 0)` | `oklch(0.205 0 0)` | Text on primary |
+| `--secondary` | `oklch(0.97 0 0)` | `oklch(0.269 0 0)` | Secondary buttons |
+| `--muted` | `oklch(0.97 0 0)` | `oklch(0.269 0 0)` | Muted backgrounds |
+| `--muted-foreground` | `oklch(0.556 0 0)` | `oklch(0.708 0 0)` | Secondary text, chevrons |
+| `--accent` | `oklch(0.97 0 0)` | `oklch(0.269 0 0)` | Hover backgrounds |
+| `--accent-foreground` | `oklch(0.205 0 0)` | `oklch(0.985 0 0)` | Text on accent |
+| `--destructive` | `oklch(0.577 0.245 27.325)` | `oklch(0.704 0.191 22.216)` | Errors, danger |
+| `--border` | `oklch(0.922 0 0)` | `oklch(1 0 0 / 10%)` | All borders |
+| `--input` | `oklch(0.922 0 0)` | `oklch(1 0 0 / 15%)` | Input outlines |
+| `--ring` | `oklch(0.708 0 0)` | `oklch(0.556 0 0)` | Focus rings |
+| `--radius` | `0.65rem` | (same) | Base radius (derives `sm`/`md`/`lg`/`xl`) |
+
+Sidebar and chart tokens follow the same pattern — see `src/app/globals.css` for the full set.
+
+## Why OKLch
+
+OKLch is perceptually uniform — adjusting lightness gives equal visual steps across hues. Hex and HSL don't have this property. For dark-mode pairings, you can invert `L` while keeping `C` and `H` constant and get a balanced result.
+
+## Dark mode
+
+Toggle via the `dark` class on `<html>`. The `next-themes` package handles user preference and system sync. Class-based scoping means no JS flash, no FOUC.
+
+```tsx
+<html className={cn(theme === "dark" && "dark")}>
+```
+
+To add a new color variable, define it in both `:root` and `.dark` blocks, then add a `--color-<name>: var(--<name>)` alias inside `@theme inline`.
+
+## RTL support
+
+The docs render right-to-left for `lang=ar` via the `dir` attribute on `<html>`. Always use logical properties so layout flips correctly:
+
+| Don't | Use |
+|-------|-----|
+| `ml-4` | `ms-4` |
+| `mr-4` | `me-4` |
+| `pl-6` | `ps-6` |
+| `pr-6` | `pe-6` |
+| `border-l` | `border-s` |
+| `text-left` | `text-start` |
+| `text-right` | `text-end` |
+| `left-0` | `start-0` |
+| `right-0` | `end-0` |
+
+For icons that have direction (arrows, chevrons), use the `rtl:` variant:
+
+```tsx
+<ChevronRight className="rtl:rotate-180" />
+```
+
+## Container utilities
+
+`src/styles/container.css` defines responsive container classes that automatically pick `ps-`/`pe-` based on direction. Use `.container`, `.container-fluid`, `.container-grid`, or `.container-flex` instead of hand-rolling.
+
+## Examples
+
+### Card with semantic tokens
+
+```tsx
+<div className="rounded-xl border bg-card p-6 text-card-foreground hover:bg-accent hover:text-accent-foreground">
+  Hover me
+</div>
+```
+
+Never use `bg-white`, `bg-gray-100`, `text-black` directly. Always semantic tokens — they flip in dark mode for free.
+
+### Custom token
+
+```css
+:root {
+  --brand: oklch(0.7 0.18 240);
+}
+.dark {
+  --brand: oklch(0.55 0.22 240);
+}
+@theme inline {
+  --color-brand: var(--brand);
+}
+```
+
+Now `bg-brand`, `text-brand`, `border-brand` work.
+
+## Related
+
+- [shadcn — Theming](https://ui.shadcn.com/docs/theming) — the upstream reference
+- [Tailwind CSS 4](https://tailwindcss.com/docs) — utility class reference
+- [Stack](/docs/reference/stack) — what's in the docs site stack

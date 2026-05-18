@@ -1,12 +1,13 @@
 ---
 title: Dispatch
-description: Apple Notes async communication — 3 channels for team coordination
+description: Apple Notes async communication — three channels for team coordination
 ---
 
+> Async messages over iCloud. Captain writes updates, Cowork bridges think/do, Abdout leaves instructions.
 
-Async communication via Apple Notes. Three notes in a Dispatch folder, synced via iCloud to all Apple devices. Captain writes updates, Cowork bridges think/do, Abdout leaves instructions.
+Three notes in an Apple Notes folder named `Dispatch`, synced via iCloud to every Apple device. Each channel has a direction and a purpose. The `dispatch.sh` script reads and writes through AppleScript.
 
-## Three Channels
+## Channels
 
 | Note | Direction | Purpose |
 |------|-----------|---------|
@@ -32,7 +33,9 @@ dispatch.sh read cowork    # Check Cowork handoffs
 dispatch.sh read captain   # Review own dispatch log
 ```
 
-### Priority Levels
+## Reference
+
+### Priority levels
 
 | Level | Prefix | When |
 |-------|--------|------|
@@ -41,7 +44,7 @@ dispatch.sh read captain   # Review own dispatch log
 | `decision` | Yellow | Needs Abdout's approval |
 | `urgent` | Red | Immediate attention required |
 
-## Session Start Protocol
+### Session start protocol
 
 Every Claude Code session begins with:
 
@@ -50,9 +53,9 @@ Every Claude Code session begins with:
 3. `gh issue list --repo databayt/kun --state open` — check work queue
 4. Proceed with highest priority
 
-## How It Works
+## How it works
 
-The dispatch system uses AppleScript to read/write Apple Notes:
+The dispatch script uses AppleScript to read and write Apple Notes:
 
 ```bash
 # Write: appends timestamped entry to note
@@ -71,17 +74,47 @@ osascript -e 'tell application "Notes"
 end tell'
 ```
 
-## iCloud Sync
+iCloud sync makes notes available across devices instantly. Dispatches can be read and written from any Apple device.
 
-Notes sync via iCloud across devices. Dispatches can be read and written from anywhere.
+## Dispatch vs GitHub Issues
 
-## Integration with GitHub Issues
+Dispatch handles async communication. GitHub Issues handles structured work.
 
-Dispatch handles async communication. GitHub Issues handles structured work:
-
-```
+```text
 Dispatch: "Admission feature needed for pilot. See issues."
 GitHub:   databayt/hogwarts#10 — Implement admission form
           databayt/hogwarts#11 — Admission notification emails
           databayt/hogwarts#12 — Admission admin dashboard
 ```
+
+Captain writes the dispatch summary. Each issue is the actual unit of work.
+
+## Examples
+
+### Weekly review handoff
+
+```bash
+dispatch.sh captain "Week 18: Hogwarts admission shipped, MRR $0, pilot on track. Three blockers in dispatch/cowork."
+```
+
+### Approval request
+
+```bash
+dispatch.sh captain "Decision: bump Ali to Pro seat ($20/mo)" decision
+```
+
+### Cross-mode handoff
+
+```bash
+# In Cowork after planning session
+dispatch.sh cowork "Notification architecture complete. 3 GH issues, 1 ADR. Pick up at #10."
+
+# Next Code session reads it and proceeds
+```
+
+## Related
+
+- [Cowork](/docs/operations/cowork) — uses Dispatch/Cowork for the think→do handoff
+- [Captain](/docs/operations/captain) — writes Dispatch/Captain on weekly cadence
+- [Issue](/docs/operations/issue) — when to use a GitHub issue vs a dispatch note
+- [Connectors](/docs/operations/connectors) — other communication MCPs

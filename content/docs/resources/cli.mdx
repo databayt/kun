@@ -1,0 +1,159 @@
+---
+title: CLI
+description: Flag reference for bootstrap, doctor, maintain, and other engine scripts
+---
+
+> The shell-side surface of the engine. Each script ships PowerShell and bash variants.
+
+All CLI scripts live at `~/.claude/scripts/` after install. They're also runnable directly from raw GitHub URLs via the canonical paste shortcuts.
+
+## Canonical pastes
+
+| URL | What it does |
+|-----|--------------|
+| `https://kun.databayt.org/install` | Windows — downloads and runs `bootstrap.ps1` |
+| `https://kun.databayt.org/install.sh` | macOS/Linux — downloads and runs `bootstrap.sh` |
+| `https://kun.databayt.org/doctor` | Windows — downloads and runs `doctor.ps1` |
+| `https://kun.databayt.org/doctor.sh` | macOS/Linux — downloads and runs `doctor.sh` |
+
+```powershell
+# Windows
+irm https://kun.databayt.org/install | iex
+```
+
+```bash
+# macOS / Linux
+curl -fsSL https://kun.databayt.org/install.sh | bash
+```
+
+## bootstrap
+
+Single-paste cold start. Installs side-tools, Claude Code, the engine config, and clones every active databayt repo.
+
+| Flag | Default | What it does |
+|------|---------|--------------|
+| `-DryRun` | false | Print what would happen, change nothing |
+| `-Track` | false | Open a GitHub issue tracking this install for support |
+| `-GistId <id>` | `68453b25fa9d28c94426c55c179b3838` | Secrets gist ID (databayt-team default) |
+| `-SkipWinget` | false | Skip Windows side-tools (Git, Node, gh, PS7) |
+| `-SkipClaude` | false | Skip Claude Code CLI install |
+| `-SkipConfig` | false | Skip the `~/.claude/` config drop |
+| `-SkipRepos` | false | Skip `sync-repos.ps1` cloning step |
+
+```powershell
+# Standard
+irm https://kun.databayt.org/install | iex
+
+# Track this install for support
+& "$env:USERPROFILE\.claude\scripts\bootstrap.ps1" -Track
+
+# Re-run config only (after sync changes)
+& "$env:USERPROFILE\.claude\scripts\bootstrap.ps1" -SkipWinget -SkipClaude -SkipRepos
+```
+
+bash equivalents use `--dry-run`, `--track`, `--gist-id`, `--skip-winget`, `--skip-claude`, `--skip-config`, `--skip-repos`.
+
+## doctor
+
+Health check + auto-repair for `~/.claude/`. Exits 0 (all green), 1 (warning), 2 (degraded), 3 (broken).
+
+| Flag | Default | What it does |
+|------|---------|--------------|
+| `-Fix` | false | Auto-repair detected issues |
+| `-Update` | false | Pull latest config from databayt/codebase |
+| `-Report` | false | Print structured report (markdown) |
+| `-Quiet` | false | Errors only |
+| `-Json` | false | Machine-readable output |
+
+```powershell
+# Check
+claude doctor
+# or
+& "$env:USERPROFILE\.claude\scripts\doctor.ps1"
+
+# Check + auto-fix
+& "$env:USERPROFILE\.claude\scripts\doctor.ps1" -Fix
+
+# Pull latest + repair
+& "$env:USERPROFILE\.claude\scripts\doctor.ps1" -Fix -Update
+```
+
+## maintain
+
+Daily heartbeat. Syncs repos, runs doctor, notifies on red. Designed for scheduled-task / cron use.
+
+| Flag | Default | What it does |
+|------|---------|--------------|
+| `-Install` | false | Register as Windows Task Scheduler / cron job |
+| `-Status` | false | Show last-run summary |
+| `-Run` | false | Force one immediate run |
+| `-NoNotify` | false | Skip dispatch notifications |
+
+```powershell
+# Install scheduled task (runs at 9am daily)
+& "$env:USERPROFILE\.claude\scripts\maintain.ps1" -Install
+
+# Check last run
+& "$env:USERPROFILE\.claude\scripts\maintain.ps1" -Status
+
+# Force run now
+& "$env:USERPROFILE\.claude\scripts\maintain.ps1" -Run
+```
+
+## sync-repos
+
+Clone or update every active databayt repo. Reads `~/.claude/scripts/repositories.json` for the list.
+
+| Flag | Default | What it does |
+|------|---------|--------------|
+| `-Path <dir>` | `$env:USERPROFILE\projects\databayt` | Target directory |
+| `-DryRun` | false | Print what would clone/pull, change nothing |
+| `-Verbose` | false | Show git output |
+
+```powershell
+& "$env:USERPROFILE\.claude\scripts\sync-repos.ps1"
+& "$env:USERPROFILE\.claude\scripts\sync-repos.ps1" -DryRun
+```
+
+## secrets
+
+Drop `.env` files from a private gist into `~/.claude/.env` and per-repo `.env` locations.
+
+| Flag | Default | What it does |
+|------|---------|--------------|
+| `-GistId <id>` | required | Gist ID containing the team `.env` collection |
+| `-DryRun` | false | List which files would be written |
+
+```powershell
+& "$env:USERPROFILE\.claude\scripts\secrets.ps1" -GistId 68453b25fa9d28c94426c55c179b3838
+```
+
+## install (engine config)
+
+Drops the `~/.claude/` config (agents, skills, MCP, hooks, rules). Called by `bootstrap` but runnable on its own to refresh.
+
+```powershell
+irm https://raw.githubusercontent.com/databayt/codebase/main/.claude/scripts/install.ps1 | iex
+```
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/databayt/codebase/main/.claude/scripts/install.sh | bash
+```
+
+## Exit codes
+
+| Code | Meaning |
+|------|---------|
+| 0 | Success |
+| 1 | Warning — completed with non-fatal issues |
+| 2 | Degraded — partial completion, manual fix needed |
+| 3 | Broken — refused to run or failed early |
+
+Scripts emit a final line `Exit: <code>` so wrappers and CI can branch on it.
+
+## Related
+
+- [Installation](/docs/installation) — when to run which script
+- [Commands](/docs/engine/commands) — slash-command equivalents inside Claude Code
+- [Repositories](/docs/reference/repositories) — what `sync-repos` clones
+- [Secrets](/docs/reference/secrets) — gist layout and `.env` format
