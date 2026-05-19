@@ -1,0 +1,132 @@
+---
+title: Maintain
+description: Daily heartbeat — runs doctor + sync-repos at 09:00, notifies on red
+---
+
+> The morning check. Runs every weekday at 09:00. Calls `doctor`, syncs repos, posts a notification if anything is red.
+
+`maintain` is the daily safety net. While [`auto-sync`](/docs/operations/auto-sync) keeps repos fresh in real-time, `maintain` runs a comprehensive health check once a day and surfaces anything that needs attention.
+
+---
+
+## Install
+
+```powershell
+# Windows — Task Scheduler at 09:00
+& "$env:USERPROFILE\.claude\scripts\maintain.ps1" -Install
+```
+
+```bash
+# macOS — launchd at 09:00
+# Linux — systemd user timer at 09:00
+~/.claude/scripts/maintain.sh --install
+```
+
+Bootstrap step 15 calls this automatically. Run manually only if you re-armed the task or moved machines.
+
+---
+
+## Flags
+
+| Flag | What it does |
+|------|--------------|
+| `-Install` / `--install` | Register the scheduled task / launchd plist / systemd timer |
+| `-Uninstall` / `--uninstall` | Remove it |
+| `-Status` / `--status` | Show task state and next run time |
+| `-Run` / `--run` | Run maintain now (one-shot, doesn't register anything) |
+| `-DryRun` / `--dry-run` | Log what would happen without doing it |
+| `-Silent` / `--silent` | Suppress console output (still logs to file) |
+| `-Schedule HH:MM` / `--schedule=HH:MM` | Change the schedule from default 09:00 |
+
+---
+
+## What it does
+
+For every scheduled run:
+
+```
+   1. doctor (audit)
+            |
+            v
+   2. sync-repos (catch any drift auto-sync missed)
+            |
+            v
+   3. if doctor exit != 0:
+        - log to ~/.claude/logs/maintain-<date>.log
+        - desktop notification (toast on Windows, NSUserNotification on macOS)
+        - optionally: doctor -Report to comment on the config-health GitHub issue
+```
+
+Each run takes ~30 seconds end-to-end on a healthy machine. Idle the rest of the day.
+
+---
+
+## Backend per OS
+
+| OS | Mechanism | Path | Trigger |
+|---|---|---|---|
+| Windows | Task Scheduler | `\kun-maintain` | Daily at 09:00 (local time) |
+| macOS | launchd | `~/Library/LaunchAgents/com.databayt.kun-maintain.plist` | `StartCalendarInterval` 09:00 |
+| Linux | systemd --user | `~/.config/systemd/user/kun-maintain.{service,timer}` | `OnCalendar=*-*-* 09:00:00` |
+
+systemd timer uses `Persistent=true` so missed runs (laptop asleep) fire on wake — same effective behavior as launchd.
+
+---
+
+## Log format
+
+Each run appends to `~/.claude/logs/maintain-<date>.log`:
+
+```
+[2026-05-18T09:00:01Z] [INFO] maintain start
+[2026-05-18T09:00:01Z] [INFO] running doctor
+[2026-05-18T09:00:09Z] [INFO] doctor exit: 0 (green)
+[2026-05-18T09:00:09Z] [INFO] running sync-repos
+[2026-05-18T09:00:33Z] [INFO] sync-repos complete
+[2026-05-18T09:00:33Z] [INFO] maintain done · 32s
+```
+
+When doctor returns non-zero:
+
+```
+[2026-05-18T09:00:09Z] [WARN] doctor exit: 2 (warnings)
+[2026-05-18T09:00:09Z] [WARN]   IDE | Claude Code [Beta] | not loaded
+[2026-05-18T09:00:09Z] [WARN]   SHELL | ~/.claude/bin | not on PATH
+[2026-05-18T09:00:10Z] [INFO] notifying via toast
+```
+
+---
+
+## Relationship to `auto-sync`
+
+| | `maintain` | [`auto-sync`](/docs/operations/auto-sync) |
+|---|---|---|
+| Frequency | Once daily at 09:00 | Real-time + every 60s |
+| Scope | Doctor + full sync-repos sweep | Push on local commit, pull on poll |
+| Resource use | One-shot, ~30s | Always running, ~5-30MB RAM |
+| Failure mode | Logs + toast | Per-repo isolation, retries |
+| Purpose | Health audit + drift catcher | Active sync |
+
+`maintain` runs `sync-repos` which clones any missing repos and pulls everything. `auto-sync` only watches already-cloned repos. So if you cloned a new repo today, `auto-sync` won't see it until tomorrow's `maintain` run brings it into scope (or until you re-start `auto-sync`).
+
+---
+
+## Troubleshooting
+
+| Symptom | Fix |
+|---------|-----|
+| `-Install` fails with "Access denied" on Windows | Try opening PowerShell as Administrator; the user-scoped task should still work without elevation for most configs |
+| Linux: `systemctl --user is-active kun-maintain` says inactive | Run `loginctl enable-linger $USER` to keep user services running across sessions |
+| macOS: launchd loaded but never fires at 09:00 | macOS suppresses launchd jobs when the laptop is asleep at the trigger time; next wake should catch it |
+| Notifications not appearing | Windows: Task Scheduler runs hidden, toast may be suppressed — check the log directly. macOS: grant Terminal/iTerm notification permission. |
+| Want to disable for a day | Windows: `Disable-ScheduledTask -TaskName kun-maintain`. Linux: `systemctl --user stop kun-maintain.timer`. macOS: `launchctl unload ~/Library/LaunchAgents/com.databayt.kun-maintain.plist`. Re-enable with the opposite. |
+
+---
+
+## Reference
+
+- [`maintain.ps1` source](https://github.com/databayt/kun/blob/main/.claude/scripts/maintain.ps1)
+- [`maintain.sh` source](https://github.com/databayt/kun/blob/main/.claude/scripts/maintain.sh)
+- [System map](/docs/reference/system) — how maintain fits with bootstrap, doctor, auto-sync
+- [Doctor](/docs/operations/doctor) — what maintain runs daily
+- [Auto-sync](/docs/operations/auto-sync) — the real-time complement
