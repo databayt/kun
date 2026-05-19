@@ -575,7 +575,7 @@ The `CEO-OS.md` Part VII "Reading order" 12-week founder reading list (Grove →
 - `hogwarts/content/docs-en/business-model.mdx` — pricing tiers (FREE / PRO $1.50/student/mo / ENTERPRISE $1.00/student/mo) and equity terms.
 - `hogwarts/content/docs-en/contributing.mdx` — commit conventions and contributor tiers.
 - `hogwarts/LICENSE` (SSPL-1.0) + `hogwarts/docs/LICENSING.md` (dual-licensing) + `hogwarts/TRADEMARKS.md` — the license enforcement layer.
-- `kun/content/docs/share-economy.mdx` + `share-economy.ar.mdx` — the public-facing mirror of this doctrine on databayt.org.
+- `kun/content/docs/share-economy.mdx` + `share-economy.ar.mdx` — the public-facing contract on `kun.databayt.org/{en,ar}/docs/share-economy`.
 
 ### Future
 

@@ -1,21 +1,33 @@
 ---
 title: Share Economy
-description: A smart-contract-shaped agreement between Databayt and its parties. Public rules, code-enforced, Islamic-economy primitives, contributor-as-owner. Not crypto.
+description: A contract between Databayt and its parties. Open ledger, distributed tasks, task rates, git-enforced. Contributor-as-owner. Not crypto.
 ---
 
 # Share Economy
 
-> **التضامن في الإنتاج، لا في الاستهلاك فقط.**
-> *Solidarity in production, not in consumption alone.*
-> — الحركة الوطنية للبناء والتنمية, *ورقة الاقتصاد التشاركي*
+Every contribution is a transaction on an **open ledger**. Every task carries a **rate**. Every reward is provable from git history. No off-ledger work, no shadow contribution, no opaque allocation.
 
-A share-economy at Databayt is a **contract**, not a slogan. It has named parties, named clauses, and three enforcement layers — license, ledger, custody. Its substrate is Islamic-economy primitives (Mudaraba, Shirkat al-A'mal, Waqf, Zakat-aligned redistribution). Its operational grammar is Khedr (MENA-practitioner equity methodology) and Akbar (Huquq — rights-based access).
+This page is the **contract** between Databayt and its parties. The [doctrine](https://github.com/databayt/kun/blob/main/docs/SHARE-ECONOMY-MODEL.md) is the lineage. The [CU spec](https://github.com/databayt/hogwarts/blob/main/content/docs-en/shared-economy.mdx) is the measurement.
 
 > Every form of contribution is measurable, owned, and compensated; the value of the company is the sum of those contributions — never extracted from them.
 
-This page is the **contract**. The [doctrine](https://github.com/databayt/kun/blob/main/docs/SHARE-ECONOMY-MODEL.md) is the lineage. The [CU spec](https://github.com/databayt/hogwarts/blob/main/content/docs-en/shared-economy.mdx) is the measurement.
+## The operational primitives
 
-Akbar (Ummatics 2024) names exactly what this contract is for: *"The Umma can only be created through ḥuqūq — revival requires that its members understand and exercise their rights."* Where neoliberalism centers economy and leaves a vacuum over the role of governance, *Qaṣ al-Ḥaq* fills that vacuum with ḥuqūq as the centerpiece. The contract below is the rights structure that fills the same vacuum at the company scale.
+The contract executes on seven primitives that already exist in our toolchain — none invented for this purpose:
+
+| Primitive | What it is | Where it lives | What it enforces |
+|---|---|---|---|
+| **Open ledger** | Public, append-only record of every contribution event | `git log` across the [14 databayt repos](https://github.com/databayt) | Attribution. If your name isn't on the commit, you didn't make it. |
+| **Distributed tasks** | Work parceled into atomic, claimable units; no central allocator | GitHub Issues across `databayt/*` | Anyone can pick up any open issue. The system has no permission queue. |
+| **Task rates** | Each task carries a contribution-value rate (CU points × quality multipliers × impact factor) | Issue labels + the [CU formula](https://github.com/databayt/hogwarts/blob/main/content/docs-en/shared-economy.mdx) | Work is priced *before* it begins. No "we'll figure out value later." |
+| **Pull requests** | The unit of contribution; the contract instrument | GitHub PRs | Code review = refinement-through-conflict. Merge = accepted contribution into the ledger. |
+| **Reviews + CI checks** | The acceptance protocol | PR reviews + GitHub Actions + branch protection | Sybil resistance, quality gates, supermajority for canonical changes |
+| **Labels + milestones** | Categorization, scope-claim, weighting | GitHub labels + milestones + projects | Routing, deadlines, progress visibility — all public |
+| **Commit signatures** | Identity binding | `git commit -S` (GPG-signed commits) | Authorship cannot be repudiated or stolen |
+
+You don't need an employer, a salary negotiation, or permission to start. You need a GitHub account, a clean PR, and patience to refine through review. The toolchain — git, GitHub, CI — is the smart-contract VM.
+
+Akbar (Ummatics 2024) names exactly what this contract is for: *"The Umma can only be created through ḥuqūq — revival requires that its members understand and exercise their rights."* Where neoliberalism centers economy and leaves a vacuum over the role of governance, *Qaṣ al-Ḥaq* fills that vacuum with ḥuqūq as the centerpiece. The primitives above are the rights structure that fills the same vacuum at the company scale.
 
 ## The smart-contract framing
 
