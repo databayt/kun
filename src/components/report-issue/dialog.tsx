@@ -24,7 +24,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-import { REPORT_CATEGORY_LABELS, REPORT_DICTIONARY, type ReportLang } from "./dictionary";
+import { REPORT_DICTIONARY, type ReportLang } from "./dictionary";
 
 const REPORT_CATEGORIES = [
   "visual",
@@ -85,16 +85,9 @@ export function ReportIssueDialog({
 }: ReportIssueDialogProps): React.JSX.Element {
   const effectiveLang = lang ?? detectLang();
   const t = REPORT_DICTIONARY[effectiveLang];
-  const cats = REPORT_CATEGORY_LABELS[effectiveLang];
 
   const [open, setOpen] = React.useState(false);
-  const [category, setCategory] = React.useState<(typeof REPORT_CATEGORIES)[number]>("other");
   const [description, setDescription] = React.useState("");
-  const [showDetails, setShowDetails] = React.useState(false);
-  const [reproSteps, setReproSteps] = React.useState("");
-  const [expected, setExpected] = React.useState("");
-  const [actual, setActual] = React.useState("");
-  const [severity, setSeverity] = React.useState<(typeof SEVERITIES)[number] | "">("");
   const [captchaToken, setCaptchaToken] = React.useState<string | null>(null);
   const [status, setStatus] = React.useState<"idle" | "loading" | "success" | "error">("idle");
   const [issueNumber, setIssueNumber] = React.useState<number | undefined>(undefined);
@@ -113,11 +106,7 @@ export function ReportIssueDialog({
     const payload: ReportIssueSubmitInput = {
       description,
       pageUrl: typeof window !== "undefined" ? window.location.href : "",
-      category,
-      reproSteps: reproSteps.trim() || undefined,
-      expected: expected.trim() || undefined,
-      actual: actual.trim() || undefined,
-      severityHint: severity || undefined,
+      category: "other",
       viewport:
         typeof window !== "undefined"
           ? `${window.innerWidth}x${window.innerHeight}`
@@ -138,13 +127,7 @@ export function ReportIssueDialog({
         setIssueNumber(res.issueNumber);
         setLastSubmitAt(Date.now());
         setDescription("");
-        setReproSteps("");
-        setExpected("");
-        setActual("");
-        setCategory("other");
-        setSeverity("");
         setCaptchaToken(null);
-        setShowDetails(false);
         setTimeout(() => {
           setOpen(false);
           setStatus("idle");
@@ -186,19 +169,6 @@ export function ReportIssueDialog({
             <DialogTitle>{t.title}</DialogTitle>
           </DialogHeader>
 
-          <select
-            className={inputClass}
-            value={category}
-            onChange={(e) => setCategory(e.target.value as (typeof REPORT_CATEGORIES)[number])}
-            aria-label={t.categoryPlaceholder}
-          >
-            {REPORT_CATEGORIES.map((key) => (
-              <option key={key} value={key}>
-                {cats[key]}
-              </option>
-            ))}
-          </select>
-
           <textarea
             className={`${inputClass} min-h-[120px]`}
             placeholder={t.descriptionPlaceholder}
@@ -210,56 +180,6 @@ export function ReportIssueDialog({
           <p className="text-xs text-muted-foreground">
             {t.descriptionHint.replace("{count}", String(charCount))}
           </p>
-
-          <div>
-            <button
-              type="button"
-              onClick={() => setShowDetails((v) => !v)}
-              className="text-sm underline underline-offset-4"
-              aria-expanded={showDetails}
-            >
-              {t.addDetails}
-            </button>
-            {showDetails && (
-              <div className="space-y-2 pt-2">
-                <textarea
-                  className={`${inputClass} min-h-[80px]`}
-                  placeholder={t.reproPlaceholder}
-                  value={reproSteps}
-                  onChange={(e) => setReproSteps(e.target.value)}
-                  maxLength={1000}
-                />
-                <textarea
-                  className={`${inputClass} min-h-[60px]`}
-                  placeholder={t.expectedPlaceholder}
-                  value={expected}
-                  onChange={(e) => setExpected(e.target.value)}
-                  maxLength={500}
-                />
-                <textarea
-                  className={`${inputClass} min-h-[60px]`}
-                  placeholder={t.actualPlaceholder}
-                  value={actual}
-                  onChange={(e) => setActual(e.target.value)}
-                  maxLength={500}
-                />
-                <select
-                  className={inputClass}
-                  value={severity}
-                  onChange={(e) =>
-                    setSeverity(e.target.value as (typeof SEVERITIES)[number] | "")
-                  }
-                  aria-label={t.severityLabel}
-                >
-                  <option value="">{t.severityLabel}</option>
-                  <option value="low">{t.severityLow}</option>
-                  <option value="medium">{t.severityMedium}</option>
-                  <option value="high">{t.severityHigh}</option>
-                  <option value="critical">{t.severityCritical}</option>
-                </select>
-              </div>
-            )}
-          </div>
 
           {needsCaptcha && (
             <TurnstileSlot
