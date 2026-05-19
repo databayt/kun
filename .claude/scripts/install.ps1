@@ -89,10 +89,16 @@ Get-ChildItem "$KUN_DIR\.claude\memory\*.json" -ErrorAction SilentlyContinue | F
     Copy-Item $_.FullName "$CLAUDE_DIR\memory\" -Force
 }
 
-# Copy scripts
+# Copy scripts (top-level files) + lib/ recursively for doctor.ps1 modules
 Write-Host "Installing scripts..."
-Get-ChildItem "$KUN_DIR\.claude\scripts\*" -ErrorAction SilentlyContinue | ForEach-Object {
+Get-ChildItem "$KUN_DIR\.claude\scripts\*" -File -ErrorAction SilentlyContinue | ForEach-Object {
     Copy-Item $_.FullName "$CLAUDE_DIR\scripts\" -Force
+}
+$libSrc = "$KUN_DIR\.claude\scripts\lib"
+if (Test-Path $libSrc) {
+    $libDst = "$CLAUDE_DIR\scripts\lib"
+    if (-not (Test-Path $libDst)) { New-Item -ItemType Directory -Force -Path $libDst | Out-Null }
+    Copy-Item "$libSrc\*" $libDst -Recurse -Force
 }
 
 # Install settings based on role
@@ -158,8 +164,9 @@ Write-Host ""
 Write-Host "Next steps:" -ForegroundColor Yellow
 if ($Role -eq "engineer") {
     Write-Host "  1. Restart PowerShell"
-    Write-Host "  2. Run: .\$CLAUDE_DIR\scripts\secrets.ps1 -GistId <GIST_ID>"
-    Write-Host "  3. Run: claude"
+    Write-Host "  2. Run: & '$CLAUDE_DIR\scripts\secrets.ps1' -GistId <GIST_ID>"
+    Write-Host "  3. Run: & '$CLAUDE_DIR\scripts\doctor.ps1'    # verify health"
+    Write-Host "  4. Run: claude"
 } else {
     Write-Host "  1. Restart PowerShell"
     Write-Host "  2. Open Claude Desktop or claude.ai/code"
