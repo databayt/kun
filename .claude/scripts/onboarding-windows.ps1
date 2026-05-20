@@ -24,7 +24,9 @@ param(
     [string]$GistId,
     [switch]$Quiet,
     [string]$GitName,
-    [string]$GitEmail
+    [string]$GitEmail,
+    [switch]$EssentialsOnly,    # default: clone all org repos
+    [switch]$WithTailscale       # optional: enable Tailscale SSH
 )
 
 $ErrorActionPreference = "Stop"
@@ -262,6 +264,14 @@ Clone-Repo "kun"
 if ($Role -eq "engineer") {
     Clone-Repo "hogwarts"
     Clone-Repo "codebase"
+
+    # Sync remaining databayt org repos (idempotent)
+    if (-not $EssentialsOnly) {
+        Info "Syncing remaining databayt org repos..."
+        foreach ($repo in @("shadcn", "radix", "souq", "mkan", "shifa", "swift-app", "distributed-computer", "marketing")) {
+            Clone-Repo $repo
+        }
+    }
 }
 
 # =============================================================================
@@ -322,6 +332,25 @@ if ((Test-Path $kunClaudeMd) -and -not (Test-Path $kunAgentsMd)) {
     } catch {
         Copy-Item $kunClaudeMd $kunAgentsMd
         Pass "AGENTS.md copied from CLAUDE.md"
+    }
+}
+
+# Wire Claude Desktop MCP config to the same servers Claude Code uses
+$desktopCfgDir = "$env:APPDATA\Claude"
+$desktopCfg = "$desktopCfgDir\claude_desktop_config.json"
+$kunMcp = "$CLAUDE_DIR\mcp.json"
+if ((Test-Path $kunMcp) -and ((Test-Path "$HOME_DIR\AppData\Local\Programs\claude-desktop\Claude.exe") -or (Test-Path "${env:ProgramFiles}\Claude\Claude.exe"))) {
+    New-Item -ItemType Directory -Force -Path $desktopCfgDir | Out-Null
+    if (-not (Test-Path $desktopCfg)) {
+        try {
+            New-Item -ItemType SymbolicLink -Path $desktopCfg -Target $kunMcp -EA Stop | Out-Null
+            Pass "Claude Desktop MCP -> ~/.claude/mcp.json"
+        } catch {
+            Copy-Item $kunMcp $desktopCfg
+            Pass "Claude Desktop MCP config copied"
+        }
+    } else {
+        Info "Claude Desktop config exists - leaving in place"
     }
 }
 
@@ -441,6 +470,27 @@ if (Test-Path "$CLAUDE_DIR\settings.json")   { Pass "settings.json" }  else { Fa
 if (Test-Path "$CLAUDE_DIR\mcp.json")        { Pass "mcp.json" }      else { Fail "mcp.json" }
 
 # =============================================================================
+# PHASE 9 (OPTIONAL): Tailscale - remote SSH for mobile / web Code lane
+# =============================================================================
+if ($WithTailscale) {
+    Write-Host ""
+    Write-Host "[+] Tailscale - remote SSH (optional)" -ForegroundColor Cyan
+    $hasTailscale = Get-Command tailscale -EA SilentlyContinue
+    if (-not $hasTailscale) {
+        Info "Installing Tailscale..."
+        winget install --id Tailscale.Tailscale @WingetFlags 2>$null
+        if ($?) { Pass "Tailscale installed" } else { Info "Tailscale install skipped" }
+    } else {
+        Pass "Tailscale"
+    }
+    if ($Quiet) {
+        Info "Run 'tailscale up --ssh' after this completes (needs admin)"
+    } else {
+        Start-Process "tailscale" "up --ssh" -Wait -NoNewWindow 2>$null
+    }
+}
+
+# =============================================================================
 # Done
 # =============================================================================
 Write-Host ""
@@ -474,5 +524,18 @@ if ($Role -eq "engineer") {
     Write-Host "  http://localhost:3000"
     Write-Host "  Admin: admin@kingfahad.edu / 1234"
 }
+
+Write-Host ""
+Write-Host "Mobile (Claude on iPhone/Android):" -ForegroundColor Cyan
+Write-Host "  iOS:     https://apps.apple.com/app/claude-by-anthropic/id6473753684"
+Write-Host "  Android: https://play.google.com/store/apps/details?id=com.anthropic.claude"
+Write-Host "  Sign in with the same Anthropic account -> same projects everywhere"
+
+if (-not $WithTailscale) {
+    Write-Host ""
+    Write-Host "Remote SSH (optional):" -ForegroundColor Cyan
+    Write-Host "  Re-run with -WithTailscale to enable Tailscale SSH for mobile/remote control"
+}
+
 Write-Host ""
 Write-Host "Re-run: & ~\kun\.claude\scripts\onboarding-windows.ps1 -Role $Role" -ForegroundColor DarkGray

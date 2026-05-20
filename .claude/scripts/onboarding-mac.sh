@@ -26,14 +26,17 @@
 
 set -e
 
-# Parse args — supports positional <role> [gist_id] plus optional --quiet/--name/--email
+# Parse args — positional <role> [gist_id] plus optional flags
 ROLE="" GIST_ID="" QUIET=0 GIT_NAME_ARG="" GIT_EMAIL_ARG=""
+WITH_TAILSCALE=0 ALL_REPOS=1   # all-repos on by default; pass --essentials-only to skip
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --quiet) QUIET=1; shift ;;
-        --name)  GIT_NAME_ARG="$2"; shift 2 ;;
-        --email) GIT_EMAIL_ARG="$2"; shift 2 ;;
-        --*)     echo "Unknown flag: $1" >&2; exit 1 ;;
+        --quiet)            QUIET=1; shift ;;
+        --name)             GIT_NAME_ARG="$2"; shift 2 ;;
+        --email)            GIT_EMAIL_ARG="$2"; shift 2 ;;
+        --with-tailscale)   WITH_TAILSCALE=1; shift ;;
+        --essentials-only)  ALL_REPOS=0; shift ;;
+        --*)                echo "Unknown flag: $1" >&2; exit 1 ;;
         *)
             if [[ -z "$ROLE" ]]; then ROLE="$1"
             elif [[ -z "$GIST_ID" ]]; then GIST_ID="$1"
@@ -76,9 +79,11 @@ if [[ -z "$ROLE" ]]; then
     echo "  business  — Proposals, pricing, client workflows"
     echo ""
     echo "Flags:"
-    echo "  --quiet           Skip all terminal prompts (for wrapper/CI use)"
-    echo "  --name <name>     Pre-supply git identity (skips prompt)"
-    echo "  --email <email>   Pre-supply git email (skips prompt)"
+    echo "  --quiet            Skip all terminal prompts (for wrapper/CI use)"
+    echo "  --name <name>      Pre-supply git identity (skips prompt)"
+    echo "  --email <email>    Pre-supply git email (skips prompt)"
+    echo "  --essentials-only  Clone only kun/hogwarts/codebase (default: all org repos)"
+    echo "  --with-tailscale   Install Tailscale + 'tailscale up --ssh' for remote/mobile"
     echo ""
     echo "One-liner:"
     echo "  git clone https://github.com/databayt/kun.git ~/kun && bash ~/kun/.claude/scripts/onboarding-mac.sh engineer"
@@ -294,6 +299,14 @@ clone_repo "kun"
 if [[ "$ROLE" == "engineer" ]]; then
     clone_repo "hogwarts"
     clone_repo "codebase"
+
+    # Sync remaining databayt org repos via sync-repos.sh (idempotent — skips clones we already have)
+    if [[ "$ALL_REPOS" == "1" && -f "$HOME/kun/.claude/scripts/sync-repos.sh" ]]; then
+        info "Syncing remaining databayt org repos..."
+        for repo in shadcn radix souq mkan shifa swift-app distributed-computer marketing; do
+            bash "$HOME/kun/.claude/scripts/sync-repos.sh" "$repo" >/dev/null 2>&1 && pass "$repo" || info "$repo skipped"
+        done
+    fi
 fi
 
 # =============================================================================
@@ -345,6 +358,28 @@ fi
 if [[ -f "$HOME/kun/CLAUDE.md" && ! -e "$HOME/kun/AGENTS.md" ]]; then
     ln -sf "$HOME/kun/CLAUDE.md" "$HOME/kun/AGENTS.md"
     pass "AGENTS.md → CLAUDE.md symlink"
+fi
+
+# Wire Claude Desktop MCP config to the same servers Claude Code uses
+# So Desktop's Chat/Cowork/Code tabs see the kun MCP fleet (shadcn, neon, github, etc.)
+DESKTOP_CFG_DIR="$HOME/Library/Application Support/Claude"
+DESKTOP_CFG="$DESKTOP_CFG_DIR/claude_desktop_config.json"
+if [[ -d "/Applications/Claude.app" && -f "$HOME/.claude/mcp.json" ]]; then
+    mkdir -p "$DESKTOP_CFG_DIR"
+    if [[ ! -e "$DESKTOP_CFG" ]]; then
+        ln -sf "$HOME/.claude/mcp.json" "$DESKTOP_CFG"
+        pass "Claude Desktop MCP config → ~/.claude/mcp.json"
+    elif [[ -L "$DESKTOP_CFG" ]]; then
+        pass "Claude Desktop MCP config (already symlinked)"
+    else
+        info "Claude Desktop config exists — leaving in place (delete to re-link to kun)"
+    fi
+fi
+
+# Ensure Apple Notes "Dispatch" folder exists so dispatch.sh has somewhere to write
+if [[ -d "/Applications/Notes.app" ]]; then
+    osascript -e 'tell application "Notes" to if not (exists folder "Dispatch") then make new folder with properties {name:"Dispatch"}' 2>/dev/null && \
+        pass "Apple Notes Dispatch folder" || info "Apple Notes Dispatch folder skipped"
 fi
 
 # =============================================================================
@@ -467,6 +502,28 @@ fi
 [[ -f "$HOME/.claude/mcp.json" ]]          && pass "mcp.json"        || fail "mcp.json"
 
 # =============================================================================
+# PHASE 9 (OPTIONAL): Tailscale — remote SSH for the iPhone / web Code lane
+# =============================================================================
+if [[ "$WITH_TAILSCALE" == "1" ]]; then
+    echo ""
+    echo -e "${BD}[+]${NC} ${B}Tailscale — remote SSH (optional)${NC}"
+    if ! command -v tailscale &>/dev/null; then
+        info "Installing Tailscale..."
+        brew install --cask tailscale 2>/dev/null && pass "Tailscale installed" || info "Tailscale install skipped"
+    else
+        pass "Tailscale"
+    fi
+    # tailscale up needs auth; in quiet mode print the auth URL and continue
+    if command -v tailscale &>/dev/null; then
+        if [[ "$QUIET" == "1" ]]; then
+            info "Run 'sudo tailscale up --ssh' after this completes (needs admin + auth URL)"
+        else
+            sudo tailscale up --ssh 2>/dev/null && pass "Tailscale up" || info "Run 'sudo tailscale up --ssh' to enable"
+        fi
+    fi
+fi
+
+# =============================================================================
 # Done
 # =============================================================================
 echo ""
@@ -500,5 +557,18 @@ if [[ "$ROLE" == "engineer" ]]; then
     echo "  http://localhost:3000"
     echo "  Admin: admin@kingfahad.edu / 1234"
 fi
+
+echo ""
+echo -e "${BD}Mobile (Claude on iPhone/Android):${NC}"
+echo "  iOS:     https://apps.apple.com/app/claude-by-anthropic/id6473753684"
+echo "  Android: https://play.google.com/store/apps/details?id=com.anthropic.claude"
+echo "  Sign in with the same Anthropic account → same projects everywhere"
+
+if [[ "$WITH_TAILSCALE" != "1" ]]; then
+    echo ""
+    echo -e "${BD}Remote SSH (optional):${NC}"
+    echo "  Re-run with --with-tailscale to enable Tailscale SSH for mobile/remote control"
+fi
+
 echo ""
 echo -e "${D}Re-run: bash ~/kun/.claude/scripts/onboarding-mac.sh $ROLE${NC}"
