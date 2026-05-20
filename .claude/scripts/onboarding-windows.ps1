@@ -21,7 +21,10 @@
 param(
     [ValidateSet("engineer", "business", "content", "ops")]
     [string]$Role,
-    [string]$GistId
+    [string]$GistId,
+    [switch]$Quiet,
+    [string]$GitName,
+    [string]$GitEmail
 )
 
 $ErrorActionPreference = "Stop"
@@ -29,13 +32,18 @@ $ErrorActionPreference = "Stop"
 if (-not $Role) {
     Write-Host "Computer Onboarding — Windows" -ForegroundColor Cyan
     Write-Host ""
-    Write-Host "Usage: .\onboarding-windows.ps1 -Role <role> [-GistId <id>]"
+    Write-Host "Usage: .\onboarding-windows.ps1 -Role <role> [-GistId <id>] [-Quiet] [-GitName <n>] [-GitEmail <e>]"
     Write-Host ""
     Write-Host "Roles:"
     Write-Host "  engineer  — WebStorm, all repos, Claude Code CLI, hogwarts local dev"
     Write-Host "  content   — Claude Desktop, translation, content tools"
     Write-Host "  ops       — Monitoring, costs, incident tools"
     Write-Host "  business  — Proposals, pricing, client workflows"
+    Write-Host ""
+    Write-Host "Flags:"
+    Write-Host "  -Quiet                  Skip terminal prompts (for wrapper/CI use)"
+    Write-Host "  -GitName <name>         Pre-supply git identity (skips prompt)"
+    Write-Host "  -GitEmail <email>       Pre-supply git email (skips prompt)"
     Write-Host ""
     Write-Host "One-liner:"
     Write-Host '  git clone https://github.com/databayt/kun.git $HOME\kun; & $HOME\kun\.claude\scripts\onboarding-windows.ps1 -Role engineer'
@@ -50,11 +58,20 @@ $KUN_DIR = "$HOME_DIR\kun"
 function Pass($msg) { Write-Host "  + $msg" -ForegroundColor Green }
 function Fail($msg) { Write-Host "  x $msg" -ForegroundColor Red; $script:ERRORS++ }
 function Info($msg) { Write-Host "  . $msg" -ForegroundColor DarkGray }
-function Step($num, $msg) { Write-Host ""; Write-Host "[$num/8] $msg" -ForegroundColor Cyan }
+function Step($num, $msg) {
+    Write-Host ""
+    Write-Host "[$num/8] $msg" -ForegroundColor Cyan
+    # Machine-parseable progress line for wrapper UIs (stderr)
+    [Console]::Error.WriteLine("PROGRESS:${num}/8:${msg}")
+}
 function Pause-For($msg) {
+    if ($Quiet) { Info "$msg (quiet mode — skipped)"; return }
     Write-Host "  ! $msg" -ForegroundColor Yellow
     Read-Host "  Press Enter when done"
 }
+# Common winget flags; --silent + --disable-interactivity for unattended mode in -Quiet
+$WingetFlags = @("-e", "--accept-source-agreements", "--accept-package-agreements")
+if ($Quiet) { $WingetFlags += @("--silent", "--disable-interactivity") }
 
 Write-Host ""
 Write-Host "Computer Onboarding — Windows" -ForegroundColor Cyan
@@ -161,11 +178,18 @@ if (-not (Test-Path $chromePath) -and -not (Test-Path $chromePath86)) {
 # =============================================================================
 Step "3" "GitHub — SSH key, authentication, git config"
 
-# Git identity
+# Git identity — wrapper can pre-supply via -GitName/-GitEmail; quiet mode uses defaults if missing
 $gitName = git config --global user.name 2>$null
 if (-not $gitName) {
-    $gitName = Read-Host "  Full name (for git commits)"
-    $gitEmail = Read-Host "  Email (for git commits)"
+    if ($GitName) {
+        $gitName = $GitName; $gitEmail = $GitEmail
+    } elseif ($Quiet) {
+        $gitName = $env:USERNAME; $gitEmail = "$env:USERNAME@$env:COMPUTERNAME.local"
+        Info "Quiet mode — using placeholder git identity (override later via 'git config --global')"
+    } else {
+        $gitName = Read-Host "  Full name (for git commits)"
+        $gitEmail = Read-Host "  Email (for git commits)"
+    }
     git config --global user.name $gitName
     git config --global user.email $gitEmail
     Pass "Git config: $gitName <$gitEmail>"
