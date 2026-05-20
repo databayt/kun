@@ -107,6 +107,48 @@ GIT_NAME_ARG=$(state_get gitName)
 GIT_EMAIL_ARG=$(state_get gitEmail)
 WITH_TAILSCALE=$(state_get withTailscale)
 PRO_MAX=$(state_get proMax)
+REPOS_DIR=$(state_get reposDir)
+HAS_GITHUB=$(state_get hasGithub)
+HAS_ANTHROPIC=$(state_get hasAnthropic)
+
+# Accounts: confirm or guide creation
+if [[ -z "$HAS_GITHUB" ]]; then
+    ANS=$(ask_choice "Do you have a GitHub account?\n\n(You'll use it to clone repos and authenticate.)" "Yes, I have one" "No, create one" "Skip")
+    case "$ANS" in
+        "No, create one")
+            open "https://github.com/join"
+            ask_choice "GitHub sign-up opened in browser.\n\nCreate the account, then come back and click Done." "Done" "Skip" >/dev/null
+            ;;
+    esac
+    state_set hasGithub "1"
+fi
+
+if [[ -z "$HAS_ANTHROPIC" ]]; then
+    ANS=$(ask_choice "Do you have an Anthropic account?\n\n(For Claude Desktop sign-in and the Claude Code CLI.)" "Yes, I have one" "No, create one" "Skip")
+    case "$ANS" in
+        "No, create one")
+            open "https://claude.ai/login"
+            ask_choice "Anthropic sign-in opened.\n\nCreate the account (or sign in), then click Done.\n\nNote: Pro/Max sub unlocks Desktop Chat/Cowork/Code tabs." "Done" "Skip" >/dev/null
+            ;;
+    esac
+    state_set hasAnthropic "1"
+fi
+
+# Repos directory: ask where to save databayt org repos
+if [[ -z "$REPOS_DIR" ]]; then
+    CHOICE=$(ask_choice "Where do you want databayt org repos saved?\n\nDefault: home root (~/kun, ~/hogwarts, ...)" "Home root (~/)" "~/databayt/" "Custom...")
+    case "$CHOICE" in
+        "Home root (~/)")   REPOS_DIR="$HOME" ;;
+        "~/databayt/")      REPOS_DIR="$HOME/databayt"; mkdir -p "$REPOS_DIR" ;;
+        "Custom...")
+            CUSTOM=$(ask_text "Enter absolute path:" "$HOME/projects/databayt")
+            [[ -z "$CUSTOM" ]] && CUSTOM="$HOME"
+            REPOS_DIR="$CUSTOM"; mkdir -p "$REPOS_DIR"
+            ;;
+        *) REPOS_DIR="$HOME" ;;
+    esac
+    state_set reposDir "$REPOS_DIR"
+fi
 
 # Role: auto-detect from existing mcp.json, else ask
 if [[ -z "$ROLE" ]]; then
@@ -168,6 +210,7 @@ notify "Starting install..." "~15-20 minutes"
 BACKEND_ARGS=("$ROLE")
 [[ -n "$GIST_ID" ]] && BACKEND_ARGS+=("$GIST_ID")
 BACKEND_ARGS+=("--quiet" "--name" "$GIT_NAME_ARG" "--email" "$GIT_EMAIL_ARG")
+[[ -n "$REPOS_DIR" && "$REPOS_DIR" != "$HOME" ]] && BACKEND_ARGS+=("--repos-dir" "$REPOS_DIR")
 [[ "$WITH_TAILSCALE" == "1" ]] && BACKEND_ARGS+=("--with-tailscale")
 
 echo ""

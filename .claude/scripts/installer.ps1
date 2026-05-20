@@ -159,6 +159,43 @@ $gitName = Get-State gitName
 $gitEmail = Get-State gitEmail
 $withTailscale = Get-State withTailscale
 $proMax = Get-State proMax
+$reposDir = Get-State reposDir
+$hasGithub = Get-State hasGithub
+$hasAnthropic = Get-State hasAnthropic
+
+# Account guidance
+if (-not $hasGithub) {
+    $ans = Ask-Choice "Do you have a GitHub account?" "Yes, I have one" "No, create one" "Skip"
+    if ($ans -eq "No, create one") {
+        Start-Process "https://github.com/join"
+        Ask-Choice "GitHub sign-up opened in browser. Done when you've created the account." "Done" "Skip" | Out-Null
+    }
+    Set-State hasGithub "1"
+}
+if (-not $hasAnthropic) {
+    $ans = Ask-Choice "Do you have an Anthropic account?`n(For Claude Desktop sign-in + CLI.)" "Yes, I have one" "No, create one" "Skip"
+    if ($ans -eq "No, create one") {
+        Start-Process "https://claude.ai/login"
+        Ask-Choice "Anthropic sign-in opened. Done when you've created the account.`n`nNote: Pro/Max sub unlocks Desktop Chat/Cowork/Code tabs." "Done" "Skip" | Out-Null
+    }
+    Set-State hasAnthropic "1"
+}
+
+# Repos dir
+if (-not $reposDir) {
+    $choice = Ask-Choice "Where do you want databayt org repos saved?`n(Default: home root - C:\Users\<you>\)" "Home root" "%USERPROFILE%\databayt" "Custom..."
+    switch ($choice) {
+        "Home root"             { $reposDir = $env:USERPROFILE }
+        "%USERPROFILE%\databayt" { $reposDir = "$env:USERPROFILE\databayt"; New-Item -ItemType Directory -Force -Path $reposDir | Out-Null }
+        "Custom..."             {
+            $custom = Ask-Text "Enter absolute path:" "$env:USERPROFILE\projects\databayt"
+            if (-not $custom) { $custom = $env:USERPROFILE }
+            $reposDir = $custom; New-Item -ItemType Directory -Force -Path $reposDir | Out-Null
+        }
+        default { $reposDir = $env:USERPROFILE }
+    }
+    Set-State reposDir $reposDir
+}
 
 # Role: auto-detect from existing mcp.json
 if (-not $role) {
@@ -220,6 +257,7 @@ Notify "Installing" "~15-20 min in terminal"
 
 $backendArgs = @("-Role", $role, "-Quiet", "-GitName", $gitName, "-GitEmail", $gitEmail)
 if ($gistId) { $backendArgs += @("-GistId", $gistId) }
+if ($reposDir -and $reposDir -ne $env:USERPROFILE) { $backendArgs += @("-ReposDir", $reposDir) }
 if ($withTailscale -eq "1") { $backendArgs += @("-WithTailscale") }
 
 Write-Host ""

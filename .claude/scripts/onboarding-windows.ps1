@@ -26,7 +26,8 @@ param(
     [string]$GitName,
     [string]$GitEmail,
     [switch]$EssentialsOnly,    # default: clone all org repos
-    [switch]$WithTailscale       # optional: enable Tailscale SSH
+    [switch]$WithTailscale,      # optional: enable Tailscale SSH
+    [string]$ReposDir = $env:USERPROFILE
 )
 
 $ErrorActionPreference = "Stop"
@@ -244,10 +245,12 @@ if ($keyContent) {
 # =============================================================================
 Step "4" "Clone Repositories"
 
+if (-not (Test-Path $ReposDir)) { New-Item -ItemType Directory -Force -Path $ReposDir | Out-Null }
+
 function Clone-Repo($repo) {
-    $dir = "$HOME_DIR\$repo"
+    $dir = "$ReposDir\$repo"
     if (-not (Test-Path $dir)) {
-        Info "Cloning $repo..."
+        Info "Cloning $repo -> $dir..."
         git clone "git@github.com:databayt/$repo.git" $dir 2>$null
         if (-not $?) {
             git clone "https://github.com/databayt/$repo.git" $dir 2>$null
@@ -259,17 +262,24 @@ function Clone-Repo($repo) {
         Pass "$repo (exists)"
     }
 }
+function Symlink-Home($repo) {
+    if ($ReposDir -eq $HOME_DIR) { return }
+    $target = "$ReposDir\$repo"
+    $link = "$HOME_DIR\$repo"
+    if ((Test-Path $target) -and -not (Test-Path $link)) {
+        try { New-Item -ItemType SymbolicLink -Path $link -Target $target -EA Stop | Out-Null; Info "$link -> $target" } catch {}
+    }
+}
 
-Clone-Repo "kun"
+Clone-Repo "kun"; Symlink-Home "kun"
 if ($Role -eq "engineer") {
-    Clone-Repo "hogwarts"
-    Clone-Repo "codebase"
+    Clone-Repo "hogwarts"; Symlink-Home "hogwarts"
+    Clone-Repo "codebase"; Symlink-Home "codebase"
 
-    # Sync remaining databayt org repos (idempotent)
     if (-not $EssentialsOnly) {
-        Info "Syncing remaining databayt org repos..."
+        Info "Cloning remaining databayt org repos..."
         foreach ($repo in @("shadcn", "radix", "souq", "mkan", "shifa", "swift-app", "distributed-computer", "marketing")) {
-            Clone-Repo $repo
+            Clone-Repo $repo; Symlink-Home $repo
         }
     }
 }
@@ -383,7 +393,7 @@ if ($GistId) {
 # =============================================================================
 Step "7" "Hogwarts — dependencies, database, seed"
 
-$HOGWARTS_DIR = "$HOME_DIR\hogwarts"
+$HOGWARTS_DIR = "$ReposDir\hogwarts"
 
 if ($Role -eq "engineer" -and (Test-Path $HOGWARTS_DIR)) {
     Push-Location $HOGWARTS_DIR

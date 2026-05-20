@@ -28,12 +28,13 @@ set -e
 
 # Parse args — positional <role> [gist_id] plus optional flags
 ROLE="" GIST_ID="" QUIET=0 GIT_NAME_ARG="" GIT_EMAIL_ARG=""
-WITH_TAILSCALE=0 ALL_REPOS=1   # all-repos on by default; pass --essentials-only to skip
+WITH_TAILSCALE=0 ALL_REPOS=1 REPOS_DIR="$HOME"
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --quiet)            QUIET=1; shift ;;
         --name)             GIT_NAME_ARG="$2"; shift 2 ;;
-        --email)            GIT_EMAIL_ARG="$2"; shift 2 ;;
+        --email)             GIT_EMAIL_ARG="$2"; shift 2 ;;
+        --repos-dir)        REPOS_DIR="$2"; shift 2 ;;
         --with-tailscale)   WITH_TAILSCALE=1; shift ;;
         --essentials-only)  ALL_REPOS=0; shift ;;
         --*)                echo "Unknown flag: $1" >&2; exit 1 ;;
@@ -44,6 +45,7 @@ while [[ $# -gt 0 ]]; do
             shift ;;
     esac
 done
+mkdir -p "$REPOS_DIR" 2>/dev/null || true
 
 # Wrapper-friendly progress marker (parsed by installer.sh for the progress dialog)
 if [[ "$QUIET" == "1" ]]; then
@@ -83,6 +85,7 @@ if [[ -z "$ROLE" ]]; then
     echo "  --name <name>      Pre-supply git identity (skips prompt)"
     echo "  --email <email>    Pre-supply git email (skips prompt)"
     echo "  --essentials-only  Clone only kun/hogwarts/codebase (default: all org repos)"
+    echo "  --repos-dir <dir>  Where to save databayt org repos (default: \$HOME)"
     echo "  --with-tailscale   Install Tailscale + 'tailscale up --ssh' for remote/mobile"
     echo ""
     echo "One-liner:"
@@ -282,9 +285,9 @@ fi
 step "4" "Clone Repositories"
 
 clone_repo() {
-    local repo="$1" dir="$HOME/$repo"
+    local repo="$1" dir="$REPOS_DIR/$repo"
     if [[ ! -d "$dir" ]]; then
-        info "Cloning $repo..."
+        info "Cloning $repo → $dir..."
         git clone "git@github.com:databayt/$repo.git" "$dir" 2>/dev/null && \
             pass "$repo" || {
             git clone "https://github.com/databayt/$repo.git" "$dir" 2>/dev/null && \
@@ -295,16 +298,24 @@ clone_repo() {
     fi
 }
 
-clone_repo "kun"
-if [[ "$ROLE" == "engineer" ]]; then
-    clone_repo "hogwarts"
-    clone_repo "codebase"
+# Symlink helper — keeps ~/kun, ~/hogwarts etc working when REPOS_DIR is elsewhere
+symlink_home() {
+    local repo="$1"
+    [[ "$REPOS_DIR" == "$HOME" ]] && return
+    [[ -d "$REPOS_DIR/$repo" && ! -e "$HOME/$repo" ]] && \
+        ln -sf "$REPOS_DIR/$repo" "$HOME/$repo" && info "~/$repo → $REPOS_DIR/$repo"
+}
 
-    # Sync remaining databayt org repos via sync-repos.sh (idempotent — skips clones we already have)
-    if [[ "$ALL_REPOS" == "1" && -f "$HOME/kun/.claude/scripts/sync-repos.sh" ]]; then
-        info "Syncing remaining databayt org repos..."
+clone_repo "kun"; symlink_home "kun"
+
+if [[ "$ROLE" == "engineer" ]]; then
+    clone_repo "hogwarts"; symlink_home "hogwarts"
+    clone_repo "codebase"; symlink_home "codebase"
+
+    if [[ "$ALL_REPOS" == "1" ]]; then
+        info "Cloning remaining databayt org repos..."
         for repo in shadcn radix souq mkan shifa swift-app distributed-computer marketing; do
-            bash "$HOME/kun/.claude/scripts/sync-repos.sh" "$repo" >/dev/null 2>&1 && pass "$repo" || info "$repo skipped"
+            clone_repo "$repo"; symlink_home "$repo"
         done
     fi
 fi
@@ -408,7 +419,7 @@ fi
 # =============================================================================
 step "7" "Hogwarts — dependencies, database, seed"
 
-HOGWARTS_DIR="$HOME/hogwarts"
+HOGWARTS_DIR="$REPOS_DIR/hogwarts"
 
 if [[ "$ROLE" == "engineer" && -d "$HOGWARTS_DIR" ]]; then
     cd "$HOGWARTS_DIR"

@@ -30,12 +30,13 @@ set -e
 
 # ── Args ────────────────────────────────────────────────────────
 ROLE="" GIST_ID="" QUIET=0 GIT_NAME_ARG="" GIT_EMAIL_ARG=""
-WITH_TAILSCALE=0 ALL_REPOS=1
+WITH_TAILSCALE=0 ALL_REPOS=1 REPOS_DIR="$HOME"
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --quiet)            QUIET=1; shift ;;
         --name)             GIT_NAME_ARG="$2"; shift 2 ;;
         --email)            GIT_EMAIL_ARG="$2"; shift 2 ;;
+        --repos-dir)        REPOS_DIR="$2"; shift 2 ;;
         --with-tailscale)   WITH_TAILSCALE=1; shift ;;
         --essentials-only)  ALL_REPOS=0; shift ;;
         --*)                echo "Unknown flag: $1" >&2; exit 1 ;;
@@ -46,6 +47,7 @@ while [[ $# -gt 0 ]]; do
             shift ;;
     esac
 done
+mkdir -p "$REPOS_DIR" 2>/dev/null || true
 
 # ── Colors ──────────────────────────────────────────────────────
 R='\033[0;31m' G='\033[0;32m' Y='\033[1;33m' B='\033[0;34m'
@@ -74,6 +76,7 @@ if [[ -z "$ROLE" ]]; then
     echo "  --name <name>      Pre-supply git identity"
     echo "  --email <email>    Pre-supply git email"
     echo "  --essentials-only  Skip optional org repos"
+    echo "  --repos-dir <dir>  Where to save databayt repos (default: \$HOME)"
     echo "  --with-tailscale   Install Tailscale + 'up --ssh'"
     echo ""
     echo "One-liner:"
@@ -315,7 +318,7 @@ fi
 step "4" "Clone Repositories"
 
 clone_repo() {
-    local repo="$1" dir="$HOME/$repo"
+    local repo="$1" dir="$REPOS_DIR/$repo"
     if [[ ! -d "$dir" ]]; then
         git clone "git@github.com:databayt/$repo.git" "$dir" 2>/dev/null && pass "$repo" || {
             git clone "https://github.com/databayt/$repo.git" "$dir" 2>/dev/null && pass "$repo (HTTPS)" || fail "$repo clone failed"
@@ -324,14 +327,20 @@ clone_repo() {
         pass "$repo (exists)"
     fi
 }
+symlink_home() {
+    local repo="$1"
+    [[ "$REPOS_DIR" == "$HOME" ]] && return
+    [[ -d "$REPOS_DIR/$repo" && ! -e "$HOME/$repo" ]] && \
+        ln -sf "$REPOS_DIR/$repo" "$HOME/$repo" && info "~/$repo → $REPOS_DIR/$repo"
+}
 
-clone_repo "kun"
+clone_repo "kun"; symlink_home "kun"
 if [[ "$ROLE" == "engineer" ]]; then
-    clone_repo "hogwarts"
-    clone_repo "codebase"
+    clone_repo "hogwarts"; symlink_home "hogwarts"
+    clone_repo "codebase"; symlink_home "codebase"
     if [[ "$ALL_REPOS" == "1" ]]; then
         for repo in shadcn radix souq mkan shifa swift-app distributed-computer marketing; do
-            clone_repo "$repo"
+            clone_repo "$repo"; symlink_home "$repo"
         done
     fi
 fi
@@ -414,7 +423,7 @@ fi
 # =============================================================================
 step "7" "Hogwarts — dependencies, database, seed"
 
-HOGWARTS_DIR="$HOME/hogwarts"
+HOGWARTS_DIR="$REPOS_DIR/hogwarts"
 
 if [[ "$ROLE" == "engineer" && -d "$HOGWARTS_DIR" ]]; then
     cd "$HOGWARTS_DIR"
@@ -481,10 +490,10 @@ command -v opencode >/dev/null 2>&1 && pass "opencode" || info "opencode (option
 [[ -f "$HOME/.ssh/id_ed25519" ]]    && pass "SSH key"     || fail "SSH key"
 gh auth status >/dev/null 2>&1      && pass "GitHub auth" || fail "GitHub auth"
 
-[[ -d "$HOME/kun" ]]                && pass "kun repo"    || fail "kun"
+[[ -d "$REPOS_DIR/kun" ]]                && pass "kun repo"    || fail "kun"
 if [[ "$ROLE" == "engineer" ]]; then
-    [[ -d "$HOME/hogwarts" ]]       && pass "hogwarts"     || fail "hogwarts"
-    [[ -d "$HOME/codebase" ]]       && pass "codebase"     || fail "codebase"
+    [[ -d "$REPOS_DIR/hogwarts" ]]       && pass "hogwarts"     || fail "hogwarts"
+    [[ -d "$REPOS_DIR/codebase" ]]       && pass "codebase"     || fail "codebase"
 fi
 
 [[ -f "$HOME/.claude/CLAUDE.md" ]]   && pass "Kun CLAUDE.md"  || fail "Kun CLAUDE.md"
