@@ -252,9 +252,9 @@ if [[ "$ROLE" == "engineer" ]]; then
 fi
 
 # =============================================================================
-# PHASE 5: Claude Ecosystem
+# PHASE 5: Claude Ecosystem + OpenCode
 # =============================================================================
-step "5" "Claude — CLI + Desktop"
+step "5" "Claude — CLI + Desktop + OpenCode (OSS alternative)"
 
 # Claude Code CLI
 if ! command -v claude &>/dev/null; then
@@ -278,6 +278,28 @@ if [[ ! -d "/Applications/Claude.app" ]]; then
     pass "Claude Desktop"
 else
     pass "Claude Desktop"
+fi
+
+# OpenCode — OSS alternative CLI (works with Anthropic API key or other providers)
+if ! command -v opencode &>/dev/null; then
+    info "Installing OpenCode (OSS alternative)..."
+    curl -fsSL https://opencode.ai/install | bash 2>&1 | tail -3 || true
+    # OpenCode installs to ~/.opencode/bin by default
+    export PATH="$HOME/.opencode/bin:$PATH"
+    if ! grep -q ".opencode/bin" "$HOME/.zshrc" 2>/dev/null; then
+        echo '' >> "$HOME/.zshrc"
+        echo '# OpenCode' >> "$HOME/.zshrc"
+        echo 'export PATH="$HOME/.opencode/bin:$PATH"' >> "$HOME/.zshrc"
+    fi
+    command -v opencode &>/dev/null && pass "OpenCode" || info "OpenCode install needs manual verify"
+else
+    pass "OpenCode"
+fi
+
+# Symlink AGENTS.md in kun repo so OpenCode reads the same doctrine as Claude Code
+if [[ -f "$HOME/kun/CLAUDE.md" && ! -e "$HOME/kun/AGENTS.md" ]]; then
+    ln -sf "$HOME/kun/CLAUDE.md" "$HOME/kun/AGENTS.md"
+    pass "AGENTS.md → CLAUDE.md symlink"
 fi
 
 # =============================================================================
@@ -376,6 +398,7 @@ command -v node &>/dev/null       && pass "node"       || fail "node"
 command -v pnpm &>/dev/null       && pass "pnpm"       || fail "pnpm"
 command -v gh &>/dev/null         && pass "gh"         || fail "gh"
 command -v claude &>/dev/null     && pass "claude"     || fail "claude"
+command -v opencode &>/dev/null   && pass "opencode"   || info "opencode (optional)"
 
 # Auth
 [[ -f "$HOME/.ssh/id_ed25519" ]]  && pass "SSH key"    || fail "SSH key"
@@ -411,14 +434,21 @@ fi
 echo -e "${BD}════════════════════════════════════════════${NC}"
 echo ""
 echo -e "${BD}Next steps:${NC}"
-echo "  1. Restart terminal"
+echo "  1. Restart terminal (or: . ~/.zshrc)"
 echo "  2. Run 'claude' → log in with Anthropic account"
 echo "  3. Open Claude Desktop → sign in"
+if command -v opencode &>/dev/null; then
+    echo "  4. (Optional) Configure OpenCode: 'opencode' → /connect → paste API key"
+fi
 if [[ -z "$GIST_ID" ]]; then
-    echo "  4. Get secrets gist ID from Abdout:"
+    echo "  5. Load secrets when you have the gist ID:"
     echo "     bash ~/kun/.claude/scripts/secrets.sh <GIST_ID>"
 fi
 if [[ "$ROLE" == "engineer" ]]; then
+    echo ""
+    echo -e "${BD}IDE plugins (manual install from Marketplace):${NC}"
+    echo "  • WebStorm: Settings → Plugins → search 'Claude Code' → Install"
+    echo "  • VS Code: Extensions → search 'Claude Code' → Install"
     echo ""
     echo -e "${BD}Run hogwarts:${NC}"
     echo "  cd ~/hogwarts && pnpm dev"
