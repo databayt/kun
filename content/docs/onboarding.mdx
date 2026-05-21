@@ -5,235 +5,362 @@ description: Fresh machine to fully working dev environment in one paste
 
 # Onboarding
 
-> One install. One paste. One verify.
-> Every Claude surface working. Every tool installed. Every repo cloned. Every dotfile in place.
+> One paste. ~20 minutes mostly silent. ≤3 clicks at the end.
+> A fresh Mac, Windows, or Linux laptop becomes a fully provisioned databayt environment — every tool installed, every repo cloned, every Claude surface working.
 
-This guide takes a fresh laptop (Mac or Windows) to a fully provisioned databayt dev environment. The easy path uses Claude Desktop's computer-use to drive the rest. There is a script-driven path for engineers and a manual fallback that works without Pro/Max.
+This is the single source of truth for joining databayt. It covers every OS, every Claude surface, every dotfile, every external account. If something here doesn't match what you see on your machine, that's a bug — file an issue.
+
+---
+
+## The one-liner
+
+Paste in a terminal. The wizard takes over.
+
+| OS | Command |
+|---|---|
+| **macOS / Linux** | `curl -fsSL https://kun.databayt.org/install \| bash` |
+| **Windows** (PowerShell) | `iwr https://kun.databayt.org/install.ps1 \| iex` |
+
+The bootstrap URL auto-detects your OS and dispatches to the right installer. No need to pick. Re-run anytime — it auto-resumes from where it left off via a state file.
 
 ---
 
 ## What you end up with
 
+After the wizard finishes:
+
 | Category | What |
 |---|---|
-| **Side-tools** | git, Node 22, pnpm, gh CLI, Chrome |
-| **IDEs** | WebStorm (with Claude plugin), VS Code (with Claude extension) |
-| **Claude — official** | Desktop (Chat/Cowork/Code tabs), Claude Code CLI, IDE integrations, `claude.ai/code` in browser |
+| **Side-tools** | git, Node 22 LTS, pnpm, gh CLI, Chrome |
+| **IDEs** | WebStorm (+ Claude plugin), VS Code (+ Claude extension) |
+| **Claude — official** | Desktop (Chat / Cowork / Code tabs), Claude Code CLI, IDE integrations, `claude.ai/code` in browser, Mobile (iOS/Android) |
 | **Claude — OSS alternative** | OpenCode CLI (free, multi-provider via API key) |
-| **Dotfiles** | SSH key (uploaded to GitHub), `~/.zshrc` (or `$PROFILE` on Windows) with the `c` function, `~/.gitconfig`, `~/.ssh/config` (Keychain on Mac) |
-| **Config** | `~/.claude/` — full kun engine config: agents, skills, MCP servers, hooks, rules, memory |
-| **Repos** | databayt org cloned to `~/<repo>` — kun, hogwarts, codebase (engineer role) |
-| **Secrets** | `~/.claude/.env` populated from the team's private Gist |
-| **Verified** | `claude doctor` green · `bash ~/.claude/scripts/health.sh` passes |
+| **Dotfiles** | SSH key (uploaded to GitHub), `~/.zshrc` / `~/.bashrc` / `$PROFILE` with `c` function, `~/.gitconfig`, `~/.ssh/config` (Keychain on Mac) |
+| **Claude config** | `~/.claude/` — agents, skills, MCP servers, hooks, rules, memory; secrets in `~/.claude/.env` |
+| **Desktop ↔ CLI parity** | `claude_desktop_config.json` symlinked to `~/.claude/mcp.json` so Desktop tabs see the same MCP fleet |
+| **Repos** | The full databayt org cloned to your chosen directory (default: `~/<repo>`) — see [Repos table below](#which-repos-you-get) |
+| **Optional** | Tailscale SSH (remote control from phone/laptop), Apple Notes Dispatch folder (Mac) |
+| **Verified** | `claude doctor` green · `health.sh` reports 0 errors |
 
 ---
 
-## 0. Before you sit down (admin checklist)
+## Three paths
 
-What your inviter needs to grant or hand over *before* the install runs:
+Pick the one that fits.
+
+| Path | Time | Pro/Max needed? | Best for |
+|---|---|---|---|
+| **Wizard** (recommended) | ~5 min active, ~20 min wall | No | Anyone — guided UX, auto-resume, deep links to right OS surface |
+| **Script** | ~2 min active, ~15-20 min wall | No | Engineers who want one bash command, no dialogs |
+| **Manual** | ~60 min | No | Auditing what gets installed, or learning the parts |
+
+---
+
+## The wizard — three acts
+
+The wizard runs in three acts. Most is silent; you click only when a human is unavoidably needed.
+
+### Act 1 — Pre-flight (~60 seconds, dialog burst)
+
+The wizard auto-detects what it can and only asks for what it can't:
+
+| Question | Auto-detected when |
+|---|---|
+| Welcome / start | always shown |
+| GitHub account? | always asked (opens `github.com/join` if "No") |
+| Anthropic account? | always asked (opens `claude.ai/login` if "No") |
+| Role: engineer / business / content / ops | inferred from `~/.claude/mcp.json` if exists |
+| Full name, email (for git commits) | inferred from `git config --global` if set |
+| Secrets Gist ID | asked once, then persisted |
+| Pro/Max subscription? (affects Desktop tabs) | asked once |
+| Where to save databayt repos? | asked once: `Home root` / `~/databayt/` / `Custom...` |
+| Tailscale SSH? (remote control) | asked once |
+
+All answers persist in a state file. Re-runs skip questions already answered.
+
+### Act 2 — Silent batch (~15-20 minutes, progress notifications)
+
+Eight phases run in the background. You can minimize the terminal and do other work — the wizard fires native OS notifications as each phase advances.
+
+| Phase | What |
+|---|---|
+| 1 | System Foundation — build tools, git, Node 22 LTS, pnpm, gh CLI |
+| 2 | Applications — WebStorm, VS Code, Chrome (engineer role) |
+| 3 | GitHub — SSH key, `gh auth login --web`, key uploaded |
+| 4 | Clone Repositories — kun + (engineer: hogwarts, codebase, all org repos) |
+| 5 | Claude — Code CLI, Desktop (Mac/Win), OpenCode, Desktop MCP symlink, AGENTS.md, `c` function in shell |
+| 6 | Kun Engine — `setup.sh <role>` populates `~/.claude/`, `secrets.sh` pulls `.env` |
+| 7 | Hogwarts — pnpm install, prisma generate + push + seed, build verify (engineer only) |
+| 8 | Health Check — every tool / repo / config verified |
+| 9 (opt) | Tailscale — install + `up --ssh` if you opted in |
+
+Each phase emits `PROGRESS:N/8:label` to stderr; wrappers parse this and fire `osascript display notification` (Mac), `zenity --notification` (Linux), or `NotifyIcon` balloon (Windows).
+
+### Act 3 — Manual finishing (~3 clicks)
+
+What's left needs a human at the keyboard. Auto-polling OAuth means the only **manual clicks** are:
+
+| Step | Click count | Skipped when |
+|---|---|---|
+| Sign in to Claude Desktop | 1 (open + sign in) | not Pro/Max, or Linux |
+| Toggle computer-use in Desktop Settings | 1 | not Pro/Max, or Linux |
+| Install Claude Code plugin in WebStorm | 1 (if not auto) | not engineer role |
+| VS Code Claude extension | **0** | auto-installed via `code --install-extension` |
+| GitHub OAuth | **0** | `gh auth login --web` polls until done |
+| Anthropic CLI OAuth | **0** | `claude` first-run polls until done |
+
+The wizard uses **deep links** so each action button drops you exactly where you need to act:
+
+| Action | Mac | Windows | Linux |
+|---|---|---|---|
+| Accessibility settings | `open "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"` | `Start-Process ms-settings:easeofaccess` | `gnome-control-center privacy` |
+| Claude Desktop | `open -a Claude` | `Start-Process "Claude.exe"` | n/a (no Linux app) |
+| WebStorm | `open -a WebStorm` | `Start-Process webstorm64.exe` | `webstorm` or `snap run webstorm` |
+| GitHub device flow | `open "https://github.com/login/device"` | `Start-Process` | `xdg-open` |
+
+---
+
+## Before you sit down — admin checklist
+
+What the inviter needs to grant or hand over before paste-time:
 
 - [ ] **GitHub** — invite to the `databayt` org
-- [ ] **Anthropic account** — Pro/Max sub for the full Claude Desktop + CLI experience. Free is OK if you plan to use OpenCode + API key.
-- [ ] **Anthropic API key** — only if you'll use OpenCode (or want CLI access without Pro/Max)
+- [ ] **Anthropic account** — Pro/Max sub for full Desktop + CLI experience (free works with OpenCode + API key)
+- [ ] **Anthropic API key** — only if using OpenCode (or no Pro/Max)
 - [ ] **Secrets Gist ID** — handed over out-of-band (Signal, Notes, 1Password)
 - [ ] **Slack** — invite to `hogwarts-wve9301`
-- [ ] **AWS IAM** — `hogwarts-s3-uploader` access keys (engineer role only)
+- [ ] **AWS IAM** — `hogwarts-s3-uploader` keys (engineer role only)
 - [ ] **Vercel** — team invite (engineer role only)
 
-If something is missing you can still run the install — the script skips what it can't authenticate and lists what's left.
+If something's missing the wizard skips that step and lists it under "things to do later" at the end.
 
 ---
 
-## Choose your path
+## Which repos you get
 
-| Path | Time | Requires | Best for |
-|---|---|---|---|
-| **Cowork-driven** | ~30 min, hands-off | Pro/Max sub | Anyone with Pro/Max — paste a prompt, Cowork drives the rest |
-| **Script-driven** | ~15-20 min | Nothing | Engineers; full control, no Pro/Max needed |
-| **Manual** | ~60 min | Nothing | Auditing what gets installed, or learning what each step does |
+The wizard clones every active databayt org repo to your chosen directory (`~/`, `~/databayt/`, or custom). Engineer role gets everything; other roles get just `kun`.
+
+| Repo | Engineer | Business | Content | Ops |
+|---|:-:|:-:|:-:|:-:|
+| **kun** — the engine config | ✓ | ✓ | ✓ | ✓ |
+| **hogwarts** — multi-tenant LMS (flagship) | ✓ | | | |
+| **codebase** — patterns, agents, blocks | ✓ | | | |
+| **shadcn** — UI component library | ✓ | | | |
+| **radix** — UI primitives | ✓ | | | |
+| **souq** — e-commerce marketplace | ✓ | | | |
+| **mkan** — rentals + booking | ✓ | | | |
+| **shifa** — medical platform | ✓ | | | |
+| **swift-app** — iOS/Swift mobile | ✓ | | | |
+| **distributed-computer** — infra | ✓ | | | |
+| **marketing** — landing pages | ✓ | | | |
+
+When you pick a custom directory, the wizard symlinks `~/kun`, `~/hogwarts`, etc. back to it so all existing tooling that hard-codes `~/kun` keeps working.
+
+To skip the optional repos: pass `--essentials-only` (Mac/Linux) or `-EssentialsOnly` (Windows) — keeps just kun, hogwarts, codebase.
 
 ---
 
-## Path A — Cowork-driven (easiest)
+## The seven Claude surfaces
 
-### A.1 Install Claude Desktop
+After install you have **seven Claude surfaces** plus **OpenCode** as a parallel CLI. Each has a sweet spot:
 
-| OS | Installer |
+| Surface | When to use |
 |---|---|
-| Mac | [Universal](https://claude.ai/api/desktop/darwin/universal/setup/latest/redirect) |
-| Windows x64 | [x64](https://claude.ai/api/desktop/win32/x64/setup/latest/redirect) |
-| Windows ARM64 | [ARM64](https://claude.ai/api/desktop/win32/arm64/setup/latest/redirect) |
+| **Desktop Chat** | Quick question, no tools. Fastest reply. |
+| **Desktop Cowork** | Plan, research, strategize. Cloud agents — runs while you do other things. |
+| **Desktop Code** | Drive your own machine (install apps, fill forms, screenshots). Local computer-use. |
+| **Claude Code CLI** (`claude` / `c`) | Build, deploy, fix code in terminal. Full kun config — agents, MCP, hooks, memory. |
+| **VS Code extension** | Inline AI in your editor. `Cmd+Shift+P` → "Claude". |
+| **WebStorm plugin** | Inline AI in WebStorm. `Cmd+Esc` opens panel. |
+| **claude.ai/code** | Mobile, web, or shared link. Same projects as the CLI, no install needed. |
+| **OpenCode** (`opencode`) | OSS-aligned. Works with any LLM provider via API key. No Pro/Max needed. Reads kun's `AGENTS.md` (symlinked to `CLAUDE.md`) for project doctrine. |
 
-Sign in with your Anthropic account. Confirm the bottom-left shows **Pro** or **Max**.
+Cowork and Claude Code share `~/.claude/` — same brain, two modes. Handoff happens via `~/.claude/bridge.md` and GitHub Issues. See [Cowork ↔ Code bridge](/docs/cowork).
 
-### A.2 Enable computer-use in the Code tab
+Claude Desktop's three tabs share the same MCP fleet as the CLI because the wizard symlinks `claude_desktop_config.json` to `~/.claude/mcp.json`.
 
-Settings → General → scroll to **Desktop app** → toggle **Allow Claude to use your computer**. Grant accessibility access when prompted.
+---
 
-Reference: [Anthropic — computer use in Desktop](https://code.claude.com/docs/en/desktop#let-claude-use-your-computer).
+## Mobile (iOS + Android)
 
-### A.3 Open the Code tab and paste the prompt for your OS
+After Claude Desktop is signed in, install the Claude mobile app and sign in with the same Anthropic account — your projects, conversations, and Cowork sessions are available everywhere.
 
-Claude Desktop has three tabs — **Chat**, **Cowork**, **Code**. Computer-use lives in **Code**. Start a new Code session and paste:
+| Store | Link |
+|---|---|
+| iOS | https://apps.apple.com/app/claude-by-anthropic/id6473753684 |
+| Android | https://play.google.com/store/apps/details?id=com.anthropic.claude |
 
-#### Mac prompt
+Mobile is read-friendly for reviewing Cowork output on the go. For driving anything (typing prompts, kicking off agents), the desktop surfaces are still best.
 
-```text
-Set up this fresh Mac for databayt using computer-use.
+---
 
-End state I want:
-- git, Node 22, pnpm, gh CLI, Chrome, WebStorm, VS Code installed via Homebrew
-- SSH key generated and uploaded to GitHub
-- Claude Code CLI installed and signed in
-- OpenCode CLI installed (free OSS alternative)
-- Claude Desktop signed in (already done above)
-- Claude extension installed in VS Code
-- WebStorm opened so I can install the Claude plugin from the Marketplace
-- All databayt repos cloned to ~/
-- Kun engine config installed at ~/.claude/
-- Secrets loaded
-- `c` function added to ~/.zshrc
+## WebStorm Settings Sync
 
-One-liner to do most of the work:
+To share team-standardized editor settings (code style, keymaps, inspection profiles, file templates):
 
-  git clone https://github.com/databayt/kun.git ~/kun && \
-    bash ~/kun/.claude/scripts/onboarding-mac.sh engineer <GIST_ID>
+1. Open WebStorm → top-right account icon → **Sign in to your JetBrains Account**
+2. Sign in (your personal JetBrains account, or use the team account if you have one)
+3. Settings → **Backup and Sync** → **Enable Settings Sync** → choose what to sync
 
-Walk me through it. Pause at every OAuth or browser screen so I sign in myself.
-Press Esc to stop you anywhere. When done, run `claude doctor` and
-`bash ~/.claude/scripts/health.sh` and screenshot the results.
+Your settings then follow you to any machine where you sign in to the same JetBrains account. The team uses this for consistent code style across reviews — no need to re-configure per machine.
+
+Recommended sync scope: Code style, Inspection profiles, Live templates, Plugins, Keymaps. Skip system settings (per-machine).
+
+---
+
+## Remote control via Tailscale (optional)
+
+If you opt in (`--with-tailscale` / `-WithTailscale`), the wizard installs Tailscale and runs `tailscale up --ssh`. Once on the tailnet, you can:
+
+- SSH into your dev box from any device: `ssh you@<tailscale-name>`
+- Drive your laptop from your phone via Tailscale SSH + tmux
+- Run `claude` remotely as if you were at your desk
+
+Setup details: [Self-hosting — Tailscale / tmux / Docker](/docs/self-hosting).
+
+---
+
+## Apple Notes Dispatch (Mac only)
+
+The wizard creates a `Dispatch` folder in Apple Notes so `dispatch.sh` has somewhere to write captain-status notes. These sync to your iPhone via iCloud — you can read captain summaries on the go without opening Claude.
+
+See [Dispatch — Apple Notes bridge](/docs/dispatch).
+
+---
+
+## Script path (engineer)
+
+If you'd rather skip the wizard and run the silent backend directly:
+
+```bash
+# Mac
+git clone https://github.com/databayt/kun.git ~/kun && \
+  bash ~/kun/.claude/scripts/onboarding-mac.sh engineer <GIST_ID>
+
+# Linux
+git clone https://github.com/databayt/kun.git ~/kun && \
+  bash ~/kun/.claude/scripts/onboarding-linux.sh engineer <GIST_ID>
+
+# Windows (PowerShell)
+git clone https://github.com/databayt/kun.git $env:USERPROFILE\kun
+& $env:USERPROFILE\kun\.claude\scripts\onboarding-windows.ps1 -Role engineer -GistId <GIST_ID>
 ```
 
-#### Windows prompt
+Useful backend flags (Mac + Linux):
 
-```text
-Set up this fresh Windows laptop for databayt using computer-use.
+| Flag | Purpose |
+|---|---|
+| `--quiet` | Skip terminal prompts (wrapper/CI use) |
+| `--name <name>` / `--email <email>` | Pre-supply git identity |
+| `--repos-dir <path>` | Where to save databayt repos (default: `$HOME`) |
+| `--essentials-only` | Skip optional org repos (just kun/hogwarts/codebase) |
+| `--with-tailscale` | Install Tailscale + `up --ssh` |
 
-End state I want:
-- git, Node 22, pnpm, gh CLI, PowerShell 7, Chrome, WebStorm, VS Code installed
-- SSH key generated and uploaded to GitHub
-- Claude Code CLI installed and signed in
-- OpenCode CLI installed (free OSS alternative)
-- Claude Desktop signed in (already done above)
-- Claude extension installed in VS Code
-- WebStorm opened so I can install the Claude plugin from the Marketplace
-- All databayt repos cloned to %USERPROFILE%\
-- Kun engine config installed at %USERPROFILE%\.claude\
-- Secrets loaded
-- `c` function added to $PROFILE so it survives new terminals
+PowerShell equivalents: `-Quiet`, `-GitName`, `-GitEmail`, `-ReposDir`, `-EssentialsOnly`, `-WithTailscale`.
 
-One-liner to do most of the work:
-
-  git clone https://github.com/databayt/kun.git $env:USERPROFILE\kun
-  & $env:USERPROFILE\kun\.claude\scripts\onboarding-windows.ps1 -Role engineer -GistId <GIST_ID>
-
-Walk me through it. Pause at every OAuth or browser screen so I sign in myself.
-Press Esc to stop you anywhere. When done, run `claude doctor` and
-`bash $env:USERPROFILE\.claude\scripts\health.ps1` and screenshot the results.
-```
-
-Press **Esc** anywhere on screen to abort. Claude releases control and unhides your apps.
+Re-run anytime; idempotent.
 
 ---
 
 ## Path B — Script-driven (engineer-friendly)
 
-### Mac
+For learning what the wizard does, or if both other paths fail. Pick your OS.
+
+### macOS
 
 ```bash
-git clone https://github.com/databayt/kun.git ~/kun && \
-  bash ~/kun/.claude/scripts/onboarding-mac.sh engineer <GIST_ID>
-```
-
-### Windows
-
-```powershell
-git clone https://github.com/databayt/kun.git $env:USERPROFILE\kun
-& $env:USERPROFILE\kun\.claude\scripts\onboarding-windows.ps1 -Role engineer -GistId <GIST_ID>
-```
-
-The script runs 8 phases (~15-20 min): system foundation → applications → GitHub auth → clone repos → Claude + OpenCode → kun engine config → hogwarts local dev → health check.
-
-Re-run the same command anytime to update — it's idempotent.
-
-### Roles
-
-| Role | Skills | MCP servers | Hogwarts local | Best for |
-|---|---|---|---|---|
-| **engineer** | All 25 | All 18 | Yes | Building features, full agent fleet |
-| **business** | 11 (Cowork + Stripe + proposals) | 8 | No | Sales, deals, client workflows |
-| **content** | 11 (Cowork + translate + Figma) | 8 | No | Translation, content, R&D |
-| **ops** | 11 (monitor + costs + incident) | 9 | No | Infra, monitoring, incidents |
-
----
-
-## Path C — Manual fallback
-
-For Team/Enterprise plans (no computer-use), no Pro/Max sub, or auditing what's installed.
-
-### Mac
-
-```bash
-# Side-tools via Homebrew
+# Side-tools
 brew install git node pnpm gh
 brew install --cask google-chrome webstorm visual-studio-code claude
 
-# Claude Code CLI (official)
+# Claude Code CLI
 curl -fsSL https://claude.ai/install.sh | sh
 
-# OpenCode (OSS alternative — works with any LLM provider via API key)
+# OpenCode (OSS alternative)
 curl -fsSL https://opencode.ai/install | bash
 
-# Shell helpers — `c` function + PATH for Claude
+# Shell helpers
 cat >> ~/.zshrc <<'EOF'
-
 # Claude Code
 function c  { claude --dangerously-skip-permissions "$@"; }
 function cc { claude "$@"; }
-export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/.local/bin:$HOME/.opencode/bin:$PATH"
 [ -f "$HOME/.claude/.env" ] && set -a && . "$HOME/.claude/.env" && set +a
 EOF
 . ~/.zshrc
 
-# GitHub auth + SSH key
+# GitHub auth + SSH
 ssh-keygen -t ed25519 -C "you@databayt"
 gh auth login -p ssh -w
 gh ssh-key add ~/.ssh/id_ed25519.pub --title "databayt-$(hostname -s)"
 
-# Clone repos
+# Repos
 git clone git@github.com:databayt/kun.git ~/kun
 git clone git@github.com:databayt/hogwarts.git ~/hogwarts
 git clone git@github.com:databayt/codebase.git ~/codebase
 
-# Kun engine config (role-scoped)
+# Kun config + secrets
 cd ~/kun && bash .claude/scripts/setup.sh engineer
-
-# Secrets (from the team's private Gist)
 bash ~/kun/.claude/scripts/secrets.sh <GIST_ID>
+
+# Desktop MCP parity
+ln -sf ~/.claude/mcp.json "$HOME/Library/Application Support/Claude/claude_desktop_config.json"
 
 # Verify
 claude doctor
 bash ~/.claude/scripts/health.sh
 ```
 
-For Claude inside your editor: install the Claude extension from the VS Code Marketplace (`anthropic.claude-code`) and the Claude Code [Beta] plugin from the WebStorm Marketplace.
+### Linux (Debian/Ubuntu shown — adapt for your distro)
 
-### Windows
+```bash
+# Side-tools
+sudo apt update && sudo apt install -y git curl build-essential ca-certificates
+
+# Node 22 via nvm
+curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+export NVM_DIR="$HOME/.nvm"; . "$NVM_DIR/nvm.sh"
+nvm install --lts && nvm use --lts
+npm install -g pnpm
+
+# GitHub CLI (Debian/Ubuntu)
+curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list
+sudo apt update && sudo apt install -y gh
+
+# IDEs (snap)
+sudo snap install code --classic
+sudo snap install webstorm --classic
+
+# Claude Code + OpenCode (Claude Desktop NOT available on Linux)
+curl -fsSL https://claude.ai/install.sh | sh
+curl -fsSL https://opencode.ai/install | bash
+
+# Shell helpers (same as Mac block, but append to ~/.bashrc instead of ~/.zshrc)
+
+# GitHub auth, repos, kun config, secrets — same as Mac block
+
+# Verify
+claude doctor
+bash ~/.claude/scripts/health.sh
+```
+
+### Windows (PowerShell)
 
 ```powershell
-# Side-tools via winget
+# Side-tools
 winget install Git.Git OpenJS.NodeJS.LTS GitHub.cli Microsoft.PowerShell Google.Chrome
 winget install JetBrains.WebStorm Microsoft.VisualStudioCode
 npm install -g pnpm
 
 # Claude Code CLI (official)
 winget install Anthropic.ClaudeCode
-claude    # first-run browser sign-in
+claude    # browser sign-in
 
-# OpenCode (OSS alternative)
+# OpenCode
 scoop install opencode    # or: choco install opencode
 
-# Shell helpers — `c` function via $PROFILE
+# Shell helpers — append to $PROFILE
 @'
 
 # Claude Code
@@ -253,22 +380,7 @@ $env:Path = "$env:USERPROFILE\.claude\bin;" + $env:Path
 '@ | Add-Content $PROFILE
 . $PROFILE
 
-# GitHub auth + SSH key
-ssh-keygen -t ed25519 -C "you@databayt"
-gh auth login -p ssh -w
-gh ssh-key add "$env:USERPROFILE\.ssh\id_ed25519.pub" --title "databayt-$env:COMPUTERNAME"
-
-# Clone repos
-git clone git@github.com:databayt/kun.git $env:USERPROFILE\kun
-git clone git@github.com:databayt/hogwarts.git $env:USERPROFILE\hogwarts
-git clone git@github.com:databayt/codebase.git $env:USERPROFILE\codebase
-
-# Kun engine config (role-scoped)
-Set-Location $env:USERPROFILE\kun
-& .\.claude\scripts\setup.ps1 -Role engineer
-
-# Secrets
-& $env:USERPROFILE\kun\.claude\scripts\secrets.ps1 -GistId <GIST_ID>
+# GitHub auth, repos, kun config, secrets — see PowerShell parallels in onboarding-windows.ps1
 
 # Verify
 claude doctor
@@ -279,44 +391,25 @@ For hogwarts, your team contact shares the `.env` out-of-band — there is no `.
 
 ---
 
-## Surfaces — when to use which
-
-After install you have **seven Claude surfaces** plus **OpenCode** as a parallel CLI. Each has a sweet spot:
-
-| When you want to... | Use | Why |
-|---|---|---|
-| Plan, research, strategize | Desktop **Cowork** tab | Cloud agents — runs while you do other things |
-| Drive your own machine (install apps, fill forms, screenshots) | Desktop **Code** tab | Local computer-use |
-| Quick question, no tools | Desktop **Chat** | Fastest, no agents |
-| Build, deploy, fix code in terminal | **Claude Code CLI** — `claude` or `c` | Full kun config — agents, MCP, hooks, memory |
-| Inline AI in your editor | **VS Code** Claude extension or **WebStorm** Claude plugin | Edit + suggest in-place |
-| Mobile, web, or shared link | **claude.ai/code** in browser | Same projects as the CLI, no install needed |
-| OSS-aligned, multi-provider, pay-per-use | **OpenCode** — `opencode` | No Pro/Max needed; works with Anthropic API key, OpenAI, OpenRouter, others |
-
-Cowork and Claude Code share `~/.claude/` — same brain, two modes. Handoff happens via `~/.claude/bridge.md` and GitHub Issues. See [Cowork ↔ Code bridge](/docs/cowork).
-
-OpenCode reads `AGENTS.md` from the project root (kun ships one symlinked to `CLAUDE.md`). MCP servers configured in `~/.claude/mcp.json` work for both CLIs.
-
----
-
 ## Verify everything
 
 ```bash
 # Kun config (cross-platform, ~5 sec)
-bash ~/.claude/scripts/health.sh
+bash ~/.claude/scripts/health.sh         # Mac/Linux
+& $env:USERPROFILE\.claude\scripts\health.ps1     # Windows
 
 # Claude CLI
 claude doctor
 
-# OpenCode CLI
+# OpenCode
 opencode --version
 
 # Hogwarts (engineer)
 cd ~/hogwarts && pnpm dev
-# Open http://localhost:3000  — login: admin@kingfahad.edu / 1234
+# Open http://localhost:3000 — login: admin@kingfahad.edu / 1234
 ```
 
-`health.sh --report` posts your config status to a shared GitHub issue (`databayt/kun`, label `config-health`) for the team to see drift across machines.
+`health.sh --report` posts your config status to a shared GitHub issue (`databayt/kun`, label `config-health`) so the team can see drift across machines.
 
 ---
 
@@ -324,18 +417,49 @@ cd ~/hogwarts && pnpm dev
 
 | Action | How |
 |--------|-----|
-| Open Claude in WebStorm | `Cmd+Esc` (Mac) · `Ctrl+Esc` or `Alt+Shift+C` (Windows) |
+| Open Claude in WebStorm | `Cmd+Esc` (Mac) · `Ctrl+Esc` or `Alt+Shift+C` (Windows/Linux) |
 | Open Claude in VS Code | `Cmd+Shift+P` → `Claude: Chat` |
 | Start Claude in any terminal | `c` |
 | Synthesize company status | `c "/captain"` |
 | Capture an idea | `c "/idea <description>"` |
-| Run the full pipeline | `c "/feature <name> [product]"` |
+| Run the full feature pipeline | `c "/feature <name> [product]"` |
 | Send a note to the team | `c "/dispatch <message>"` |
 | Open a GitHub issue | `c "/issue"` |
 | Verify a production deploy | `c "/watch"` |
-| OSS alternative | `opencode` (in any repo with `AGENTS.md` or `CLAUDE.md`) |
+| OSS alternative CLI | `opencode` (in any repo with `AGENTS.md` or `CLAUDE.md`) |
+| Mobile / browser | https://claude.ai/code |
 
 Full keyword list: [keywords](/docs/keywords).
+
+---
+
+## Auto-resume
+
+The wizard persists every choice to a state file so re-runs skip what's done:
+
+| OS | State file path |
+|---|---|
+| macOS | `~/Library/Application Support/Databayt/installer-state.json` |
+| Linux | `${XDG_CONFIG_HOME:-~/.config}/databayt/installer-state.json` |
+| Windows | `%APPDATA%\Databayt\installer-state.json` |
+
+To reset and start fresh: delete the state file, then re-run the bootstrap.
+
+---
+
+## Troubleshooting
+
+| Symptom | Fix |
+|---|---|
+| "command not found: c" | Restart shell or `source ~/.zshrc` (Mac/Linux), `. $PROFILE` (Windows) |
+| `claude doctor` red | Re-run `claude` to re-auth; check `~/.claude/settings.json` exists |
+| Hogwarts won't build | Confirm `.env` is present; re-run `secrets.sh <GIST_ID>` |
+| Claude Desktop tabs missing MCP servers | Check `claude_desktop_config.json` is a symlink to `~/.claude/mcp.json`; if not, fix manually |
+| GitHub clone fails on private repos | Run `gh auth login -p ssh -w` again, confirm the SSH key is on your GitHub account |
+| Wizard dialogs not appearing on Linux | Install `zenity` (`sudo apt install zenity`) or pass `--no-gui` for terminal mode |
+| Windows: "running scripts is disabled" | Bootstrap uses `Set-ExecutionPolicy Bypass -Scope Process` automatically; for direct invocations: `powershell -ExecutionPolicy Bypass -File <script>` |
+
+For anything else, file an issue at https://github.com/databayt/kun/issues.
 
 ---
 
@@ -348,9 +472,9 @@ Full keyword list: [keywords](/docs/keywords).
 - [Connectors — MCP catalog](/docs/connectors)
 - [Secrets — Gist-based provisioning](/docs/secrets)
 - [Self-hosting — Tailscale / tmux / Docker (optional)](/docs/self-hosting)
+- [Dispatch — Apple Notes bridge](/docs/dispatch)
 - [Repositories — full org map](/docs/repositories)
 - [Keywords — full vocabulary](/docs/keywords)
-- [Computer-use in Desktop (Anthropic)](https://code.claude.com/docs/en/desktop#let-claude-use-your-computer)
 - [OpenCode](https://opencode.ai)
 - [Anthropic Directory](https://claude.ai/directory)
 - [Contributing — github-workflow rule](https://github.com/databayt/kun/blob/main/.claude/rules/github-workflow.md)

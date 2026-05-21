@@ -21,7 +21,13 @@
 param(
     [ValidateSet("engineer", "business", "content", "ops")]
     [string]$Role,
-    [string]$GistId
+    [string]$GistId,
+    [switch]$Quiet,
+    [string]$GitName,
+    [string]$GitEmail,
+    [switch]$EssentialsOnly,    # default: clone all org repos
+    [switch]$WithTailscale,      # optional: enable Tailscale SSH
+    [string]$ReposDir = $env:USERPROFILE
 )
 
 $ErrorActionPreference = "Stop"
@@ -29,13 +35,18 @@ $ErrorActionPreference = "Stop"
 if (-not $Role) {
     Write-Host "Computer Onboarding — Windows" -ForegroundColor Cyan
     Write-Host ""
-    Write-Host "Usage: .\onboarding-windows.ps1 -Role <role> [-GistId <id>]"
+    Write-Host "Usage: .\onboarding-windows.ps1 -Role <role> [-GistId <id>] [-Quiet] [-GitName <n>] [-GitEmail <e>]"
     Write-Host ""
     Write-Host "Roles:"
     Write-Host "  engineer  — WebStorm, all repos, Claude Code CLI, hogwarts local dev"
     Write-Host "  content   — Claude Desktop, translation, content tools"
     Write-Host "  ops       — Monitoring, costs, incident tools"
     Write-Host "  business  — Proposals, pricing, client workflows"
+    Write-Host ""
+    Write-Host "Flags:"
+    Write-Host "  -Quiet                  Skip terminal prompts (for wrapper/CI use)"
+    Write-Host "  -GitName <name>         Pre-supply git identity (skips prompt)"
+    Write-Host "  -GitEmail <email>       Pre-supply git email (skips prompt)"
     Write-Host ""
     Write-Host "One-liner:"
     Write-Host '  git clone https://github.com/databayt/kun.git $HOME\kun; & $HOME\kun\.claude\scripts\onboarding-windows.ps1 -Role engineer'
@@ -50,11 +61,20 @@ $KUN_DIR = "$HOME_DIR\kun"
 function Pass($msg) { Write-Host "  + $msg" -ForegroundColor Green }
 function Fail($msg) { Write-Host "  x $msg" -ForegroundColor Red; $script:ERRORS++ }
 function Info($msg) { Write-Host "  . $msg" -ForegroundColor DarkGray }
-function Step($num, $msg) { Write-Host ""; Write-Host "[$num/8] $msg" -ForegroundColor Cyan }
+function Step($num, $msg) {
+    Write-Host ""
+    Write-Host "[$num/8] $msg" -ForegroundColor Cyan
+    # Machine-parseable progress line for wrapper UIs (stderr)
+    [Console]::Error.WriteLine("PROGRESS:${num}/8:${msg}")
+}
 function Pause-For($msg) {
+    if ($Quiet) { Info "$msg (quiet mode — skipped)"; return }
     Write-Host "  ! $msg" -ForegroundColor Yellow
     Read-Host "  Press Enter when done"
 }
+# Common winget flags; --silent + --disable-interactivity for unattended mode in -Quiet
+$WingetFlags = @("-e", "--accept-source-agreements", "--accept-package-agreements")
+if ($Quiet) { $WingetFlags += @("--silent", "--disable-interactivity") }
 
 Write-Host ""
 Write-Host "Computer Onboarding — Windows" -ForegroundColor Cyan
@@ -161,11 +181,18 @@ if (-not (Test-Path $chromePath) -and -not (Test-Path $chromePath86)) {
 # =============================================================================
 Step "3" "GitHub — SSH key, authentication, git config"
 
-# Git identity
+# Git identity — wrapper can pre-supply via -GitName/-GitEmail; quiet mode uses defaults if missing
 $gitName = git config --global user.name 2>$null
 if (-not $gitName) {
-    $gitName = Read-Host "  Full name (for git commits)"
-    $gitEmail = Read-Host "  Email (for git commits)"
+    if ($GitName) {
+        $gitName = $GitName; $gitEmail = $GitEmail
+    } elseif ($Quiet) {
+        $gitName = $env:USERNAME; $gitEmail = "$env:USERNAME@$env:COMPUTERNAME.local"
+        Info "Quiet mode — using placeholder git identity (override later via 'git config --global')"
+    } else {
+        $gitName = Read-Host "  Full name (for git commits)"
+        $gitEmail = Read-Host "  Email (for git commits)"
+    }
     git config --global user.name $gitName
     git config --global user.email $gitEmail
     Pass "Git config: $gitName <$gitEmail>"
@@ -218,10 +245,12 @@ if ($keyContent) {
 # =============================================================================
 Step "4" "Clone Repositories"
 
+if (-not (Test-Path $ReposDir)) { New-Item -ItemType Directory -Force -Path $ReposDir | Out-Null }
+
 function Clone-Repo($repo) {
-    $dir = "$HOME_DIR\$repo"
+    $dir = "$ReposDir\$repo"
     if (-not (Test-Path $dir)) {
-        Info "Cloning $repo..."
+        Info "Cloning $repo -> $dir..."
         git clone "git@github.com:databayt/$repo.git" $dir 2>$null
         if (-not $?) {
             git clone "https://github.com/databayt/$repo.git" $dir 2>$null
@@ -233,11 +262,26 @@ function Clone-Repo($repo) {
         Pass "$repo (exists)"
     }
 }
+function Symlink-Home($repo) {
+    if ($ReposDir -eq $HOME_DIR) { return }
+    $target = "$ReposDir\$repo"
+    $link = "$HOME_DIR\$repo"
+    if ((Test-Path $target) -and -not (Test-Path $link)) {
+        try { New-Item -ItemType SymbolicLink -Path $link -Target $target -EA Stop | Out-Null; Info "$link -> $target" } catch {}
+    }
+}
 
-Clone-Repo "kun"
+Clone-Repo "kun"; Symlink-Home "kun"
 if ($Role -eq "engineer") {
-    Clone-Repo "hogwarts"
-    Clone-Repo "codebase"
+    Clone-Repo "hogwarts"; Symlink-Home "hogwarts"
+    Clone-Repo "codebase"; Symlink-Home "codebase"
+
+    if (-not $EssentialsOnly) {
+        Info "Cloning remaining databayt org repos..."
+        foreach ($repo in @("shadcn", "radix", "souq", "mkan", "shifa", "swift-app", "distributed-computer", "marketing")) {
+            Clone-Repo $repo; Symlink-Home $repo
+        }
+    }
 }
 
 # =============================================================================
@@ -301,6 +345,25 @@ if ((Test-Path $kunClaudeMd) -and -not (Test-Path $kunAgentsMd)) {
     }
 }
 
+# Wire Claude Desktop MCP config to the same servers Claude Code uses
+$desktopCfgDir = "$env:APPDATA\Claude"
+$desktopCfg = "$desktopCfgDir\claude_desktop_config.json"
+$kunMcp = "$CLAUDE_DIR\mcp.json"
+if ((Test-Path $kunMcp) -and ((Test-Path "$HOME_DIR\AppData\Local\Programs\claude-desktop\Claude.exe") -or (Test-Path "${env:ProgramFiles}\Claude\Claude.exe"))) {
+    New-Item -ItemType Directory -Force -Path $desktopCfgDir | Out-Null
+    if (-not (Test-Path $desktopCfg)) {
+        try {
+            New-Item -ItemType SymbolicLink -Path $desktopCfg -Target $kunMcp -EA Stop | Out-Null
+            Pass "Claude Desktop MCP -> ~/.claude/mcp.json"
+        } catch {
+            Copy-Item $kunMcp $desktopCfg
+            Pass "Claude Desktop MCP config copied"
+        }
+    } else {
+        Info "Claude Desktop config exists - leaving in place"
+    }
+}
+
 # =============================================================================
 # PHASE 6: Kun Engine
 # =============================================================================
@@ -330,7 +393,7 @@ if ($GistId) {
 # =============================================================================
 Step "7" "Hogwarts — dependencies, database, seed"
 
-$HOGWARTS_DIR = "$HOME_DIR\hogwarts"
+$HOGWARTS_DIR = "$ReposDir\hogwarts"
 
 if ($Role -eq "engineer" -and (Test-Path $HOGWARTS_DIR)) {
     Push-Location $HOGWARTS_DIR
@@ -417,6 +480,27 @@ if (Test-Path "$CLAUDE_DIR\settings.json")   { Pass "settings.json" }  else { Fa
 if (Test-Path "$CLAUDE_DIR\mcp.json")        { Pass "mcp.json" }      else { Fail "mcp.json" }
 
 # =============================================================================
+# PHASE 9 (OPTIONAL): Tailscale - remote SSH for mobile / web Code lane
+# =============================================================================
+if ($WithTailscale) {
+    Write-Host ""
+    Write-Host "[+] Tailscale - remote SSH (optional)" -ForegroundColor Cyan
+    $hasTailscale = Get-Command tailscale -EA SilentlyContinue
+    if (-not $hasTailscale) {
+        Info "Installing Tailscale..."
+        winget install --id Tailscale.Tailscale @WingetFlags 2>$null
+        if ($?) { Pass "Tailscale installed" } else { Info "Tailscale install skipped" }
+    } else {
+        Pass "Tailscale"
+    }
+    if ($Quiet) {
+        Info "Run 'tailscale up --ssh' after this completes (needs admin)"
+    } else {
+        Start-Process "tailscale" "up --ssh" -Wait -NoNewWindow 2>$null
+    }
+}
+
+# =============================================================================
 # Done
 # =============================================================================
 Write-Host ""
@@ -450,5 +534,18 @@ if ($Role -eq "engineer") {
     Write-Host "  http://localhost:3000"
     Write-Host "  Admin: admin@kingfahad.edu / 1234"
 }
+
+Write-Host ""
+Write-Host "Mobile (Claude on iPhone/Android):" -ForegroundColor Cyan
+Write-Host "  iOS:     https://apps.apple.com/app/claude-by-anthropic/id6473753684"
+Write-Host "  Android: https://play.google.com/store/apps/details?id=com.anthropic.claude"
+Write-Host "  Sign in with the same Anthropic account -> same projects everywhere"
+
+if (-not $WithTailscale) {
+    Write-Host ""
+    Write-Host "Remote SSH (optional):" -ForegroundColor Cyan
+    Write-Host "  Re-run with -WithTailscale to enable Tailscale SSH for mobile/remote control"
+}
+
 Write-Host ""
 Write-Host "Re-run: & ~\kun\.claude\scripts\onboarding-windows.ps1 -Role $Role" -ForegroundColor DarkGray

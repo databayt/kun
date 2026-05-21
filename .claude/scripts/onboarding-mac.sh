@@ -26,8 +26,33 @@
 
 set -e
 
-ROLE="${1:-}"
-GIST_ID="${2:-}"
+# Parse args — positional <role> [gist_id] plus optional flags
+ROLE="" GIST_ID="" QUIET=0 GIT_NAME_ARG="" GIT_EMAIL_ARG=""
+WITH_TAILSCALE=0 ALL_REPOS=1 REPOS_DIR="$HOME"
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --quiet)            QUIET=1; shift ;;
+        --name)             GIT_NAME_ARG="$2"; shift 2 ;;
+        --email)             GIT_EMAIL_ARG="$2"; shift 2 ;;
+        --repos-dir)        REPOS_DIR="$2"; shift 2 ;;
+        --with-tailscale)   WITH_TAILSCALE=1; shift ;;
+        --essentials-only)  ALL_REPOS=0; shift ;;
+        --*)                echo "Unknown flag: $1" >&2; exit 1 ;;
+        *)
+            if [[ -z "$ROLE" ]]; then ROLE="$1"
+            elif [[ -z "$GIST_ID" ]]; then GIST_ID="$1"
+            fi
+            shift ;;
+    esac
+done
+mkdir -p "$REPOS_DIR" 2>/dev/null || true
+
+# Wrapper-friendly progress marker (parsed by installer.sh for the progress dialog)
+if [[ "$QUIET" == "1" ]]; then
+    export NONINTERACTIVE=1
+    export HOMEBREW_NO_AUTO_UPDATE=1
+    export HOMEBREW_NO_ENV_HINTS=1
+fi
 
 # Colors
 R='\033[0;31m' G='\033[0;32m' Y='\033[1;33m' B='\033[0;34m'
@@ -36,19 +61,32 @@ D='\033[2m' BD='\033[1m' NC='\033[0m'
 pass() { echo -e "  ${G}✓${NC} $1"; }
 fail() { echo -e "  ${R}✗${NC} $1"; ERRORS=$((ERRORS + 1)); }
 info() { echo -e "  ${D}·${NC} $1"; }
-step() { echo ""; echo -e "${BD}[$1/8]${NC} ${B}$2${NC}"; }
+step() {
+    echo ""
+    echo -e "${BD}[$1/8]${NC} ${B}$2${NC}"
+    # Machine-parseable progress line for wrapper UIs (stderr so it doesn't pollute stdout)
+    echo "PROGRESS:$1/8:$2" >&2
+}
 
 # ── Validate ────────────────────────────────────────────────────
 if [[ -z "$ROLE" ]]; then
     echo -e "${BD}Computer Onboarding — macOS${NC}"
     echo ""
-    echo "Usage: bash onboarding-mac.sh <role> [gist_id]"
+    echo "Usage: bash onboarding-mac.sh <role> [gist_id] [--quiet] [--name <n>] [--email <e>]"
     echo ""
     echo "Roles:"
     echo "  engineer  — WebStorm, all repos, full Claude Code, hogwarts local dev"
     echo "  content   — Claude Desktop, translation, content tools"
     echo "  ops       — Monitoring, costs, incident tools"
     echo "  business  — Proposals, pricing, client workflows"
+    echo ""
+    echo "Flags:"
+    echo "  --quiet            Skip all terminal prompts (for wrapper/CI use)"
+    echo "  --name <name>      Pre-supply git identity (skips prompt)"
+    echo "  --email <email>    Pre-supply git email (skips prompt)"
+    echo "  --essentials-only  Clone only kun/hogwarts/codebase (default: all org repos)"
+    echo "  --repos-dir <dir>  Where to save databayt org repos (default: \$HOME)"
+    echo "  --with-tailscale   Install Tailscale + 'tailscale up --ssh' for remote/mobile"
     echo ""
     echo "One-liner:"
     echo "  git clone https://github.com/databayt/kun.git ~/kun && bash ~/kun/.claude/scripts/onboarding-mac.sh engineer"
@@ -81,9 +119,17 @@ step "1" "System Foundation — Xcode CLT, Homebrew, Git, Node.js, pnpm"
 # Xcode Command Line Tools
 if ! xcode-select -p &>/dev/null; then
     info "Installing Xcode Command Line Tools..."
-    xcode-select --install 2>/dev/null || true
-    echo -e "  ${Y}Xcode installer opened. Accept the license and wait for install.${NC}"
-    read -p "  Press Enter when done..."
+    if [[ "$QUIET" == "1" ]]; then
+        # Headless install — auto-accept license
+        touch /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress 2>/dev/null || true
+        PROD=$(softwareupdate -l 2>/dev/null | grep -E 'Command Line Tools' | awk -F'*' '{print $2}' | sed -e 's/^ *//' | head -1)
+        [[ -n "$PROD" ]] && softwareupdate -i "$PROD" --verbose 2>/dev/null || true
+        rm -f /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
+    else
+        xcode-select --install 2>/dev/null || true
+        echo -e "  ${Y}Xcode installer opened. Accept the license and wait for install.${NC}"
+        read -p "  Press Enter when done..."
+    fi
 else
     pass "Xcode CLT"
 fi
@@ -91,7 +137,7 @@ fi
 # Homebrew
 if ! command -v brew &>/dev/null; then
     info "Installing Homebrew..."
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     if [[ -f "/opt/homebrew/bin/brew" ]]; then
         eval "$(/opt/homebrew/bin/brew shellenv)"
         echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> "$HOME/.zprofile"
@@ -172,11 +218,18 @@ fi
 # =============================================================================
 step "3" "GitHub — SSH key, authentication, git config"
 
-# Git identity
+# Git identity — wrapper can pre-supply via --name/--email; quiet mode uses defaults if missing
 GIT_NAME=$(git config --global user.name 2>/dev/null || echo "")
 if [[ -z "$GIT_NAME" ]]; then
-    read -p "  Full name (for git commits): " GIT_NAME
-    read -p "  Email (for git commits): " GIT_EMAIL
+    if [[ -n "$GIT_NAME_ARG" ]]; then
+        GIT_NAME="$GIT_NAME_ARG"; GIT_EMAIL="$GIT_EMAIL_ARG"
+    elif [[ "$QUIET" == "1" ]]; then
+        GIT_NAME="$(whoami)"; GIT_EMAIL="$(whoami)@$(hostname -s).local"
+        info "Quiet mode — using placeholder git identity (override later via 'git config --global')"
+    else
+        read -p "  Full name (for git commits): " GIT_NAME
+        read -p "  Email (for git commits): " GIT_EMAIL
+    fi
     git config --global user.name "$GIT_NAME"
     git config --global user.email "$GIT_EMAIL"
     pass "Git config: $GIT_NAME <$GIT_EMAIL>"
@@ -232,9 +285,9 @@ fi
 step "4" "Clone Repositories"
 
 clone_repo() {
-    local repo="$1" dir="$HOME/$repo"
+    local repo="$1" dir="$REPOS_DIR/$repo"
     if [[ ! -d "$dir" ]]; then
-        info "Cloning $repo..."
+        info "Cloning $repo → $dir..."
         git clone "git@github.com:databayt/$repo.git" "$dir" 2>/dev/null && \
             pass "$repo" || {
             git clone "https://github.com/databayt/$repo.git" "$dir" 2>/dev/null && \
@@ -245,10 +298,26 @@ clone_repo() {
     fi
 }
 
-clone_repo "kun"
+# Symlink helper — keeps ~/kun, ~/hogwarts etc working when REPOS_DIR is elsewhere
+symlink_home() {
+    local repo="$1"
+    [[ "$REPOS_DIR" == "$HOME" ]] && return
+    [[ -d "$REPOS_DIR/$repo" && ! -e "$HOME/$repo" ]] && \
+        ln -sf "$REPOS_DIR/$repo" "$HOME/$repo" && info "~/$repo → $REPOS_DIR/$repo"
+}
+
+clone_repo "kun"; symlink_home "kun"
+
 if [[ "$ROLE" == "engineer" ]]; then
-    clone_repo "hogwarts"
-    clone_repo "codebase"
+    clone_repo "hogwarts"; symlink_home "hogwarts"
+    clone_repo "codebase"; symlink_home "codebase"
+
+    if [[ "$ALL_REPOS" == "1" ]]; then
+        info "Cloning remaining databayt org repos..."
+        for repo in shadcn radix souq mkan shifa swift-app distributed-computer marketing; do
+            clone_repo "$repo"; symlink_home "$repo"
+        done
+    fi
 fi
 
 # =============================================================================
@@ -302,6 +371,28 @@ if [[ -f "$HOME/kun/CLAUDE.md" && ! -e "$HOME/kun/AGENTS.md" ]]; then
     pass "AGENTS.md → CLAUDE.md symlink"
 fi
 
+# Wire Claude Desktop MCP config to the same servers Claude Code uses
+# So Desktop's Chat/Cowork/Code tabs see the kun MCP fleet (shadcn, neon, github, etc.)
+DESKTOP_CFG_DIR="$HOME/Library/Application Support/Claude"
+DESKTOP_CFG="$DESKTOP_CFG_DIR/claude_desktop_config.json"
+if [[ -d "/Applications/Claude.app" && -f "$HOME/.claude/mcp.json" ]]; then
+    mkdir -p "$DESKTOP_CFG_DIR"
+    if [[ ! -e "$DESKTOP_CFG" ]]; then
+        ln -sf "$HOME/.claude/mcp.json" "$DESKTOP_CFG"
+        pass "Claude Desktop MCP config → ~/.claude/mcp.json"
+    elif [[ -L "$DESKTOP_CFG" ]]; then
+        pass "Claude Desktop MCP config (already symlinked)"
+    else
+        info "Claude Desktop config exists — leaving in place (delete to re-link to kun)"
+    fi
+fi
+
+# Ensure Apple Notes "Dispatch" folder exists so dispatch.sh has somewhere to write
+if [[ -d "/Applications/Notes.app" ]]; then
+    osascript -e 'tell application "Notes" to if not (exists folder "Dispatch") then make new folder with properties {name:"Dispatch"}' 2>/dev/null && \
+        pass "Apple Notes Dispatch folder" || info "Apple Notes Dispatch folder skipped"
+fi
+
 # =============================================================================
 # PHASE 6: Kun Engine
 # =============================================================================
@@ -328,7 +419,7 @@ fi
 # =============================================================================
 step "7" "Hogwarts — dependencies, database, seed"
 
-HOGWARTS_DIR="$HOME/hogwarts"
+HOGWARTS_DIR="$REPOS_DIR/hogwarts"
 
 if [[ "$ROLE" == "engineer" && -d "$HOGWARTS_DIR" ]]; then
     cd "$HOGWARTS_DIR"
@@ -422,6 +513,28 @@ fi
 [[ -f "$HOME/.claude/mcp.json" ]]          && pass "mcp.json"        || fail "mcp.json"
 
 # =============================================================================
+# PHASE 9 (OPTIONAL): Tailscale — remote SSH for the iPhone / web Code lane
+# =============================================================================
+if [[ "$WITH_TAILSCALE" == "1" ]]; then
+    echo ""
+    echo -e "${BD}[+]${NC} ${B}Tailscale — remote SSH (optional)${NC}"
+    if ! command -v tailscale &>/dev/null; then
+        info "Installing Tailscale..."
+        brew install --cask tailscale 2>/dev/null && pass "Tailscale installed" || info "Tailscale install skipped"
+    else
+        pass "Tailscale"
+    fi
+    # tailscale up needs auth; in quiet mode print the auth URL and continue
+    if command -v tailscale &>/dev/null; then
+        if [[ "$QUIET" == "1" ]]; then
+            info "Run 'sudo tailscale up --ssh' after this completes (needs admin + auth URL)"
+        else
+            sudo tailscale up --ssh 2>/dev/null && pass "Tailscale up" || info "Run 'sudo tailscale up --ssh' to enable"
+        fi
+    fi
+fi
+
+# =============================================================================
 # Done
 # =============================================================================
 echo ""
@@ -455,5 +568,18 @@ if [[ "$ROLE" == "engineer" ]]; then
     echo "  http://localhost:3000"
     echo "  Admin: admin@kingfahad.edu / 1234"
 fi
+
+echo ""
+echo -e "${BD}Mobile (Claude on iPhone/Android):${NC}"
+echo "  iOS:     https://apps.apple.com/app/claude-by-anthropic/id6473753684"
+echo "  Android: https://play.google.com/store/apps/details?id=com.anthropic.claude"
+echo "  Sign in with the same Anthropic account → same projects everywhere"
+
+if [[ "$WITH_TAILSCALE" != "1" ]]; then
+    echo ""
+    echo -e "${BD}Remote SSH (optional):${NC}"
+    echo "  Re-run with --with-tailscale to enable Tailscale SSH for mobile/remote control"
+fi
+
 echo ""
 echo -e "${D}Re-run: bash ~/kun/.claude/scripts/onboarding-mac.sh $ROLE${NC}"
