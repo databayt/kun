@@ -136,7 +136,7 @@ Eight phases run in the background. You can minimize the terminal and do other w
 | 2 | Applications — WebStorm, VS Code, Chrome (engineer role) |
 | 3 | GitHub — SSH key, `gh auth login --web`, key uploaded |
 | 4 | Clone Repositories — kun + (engineer: hogwarts, codebase, all org repos) |
-| 5 | Claude — Code CLI, Desktop (Mac/Win), OpenCode, Desktop MCP symlink, AGENTS.md, `c` function in shell |
+| 5 | Claude — Code CLI, Desktop (Mac/Win), OpenCode, Desktop MCP symlink, AGENTS.md, `c` + `o` functions in shell |
 | 6 | Kun Engine — `setup.sh <role>` populates `~/.claude/`, `secrets.sh` pulls `.env` |
 | 7 | Hogwarts — pnpm install, prisma generate + push + seed, build verify (engineer only) |
 | 8 | Health Check — every tool / repo / config verified |
@@ -221,11 +221,27 @@ After install you have **seven Claude surfaces** plus **OpenCode** as a parallel
 | **VS Code extension** | Inline AI in your editor. `Cmd+Shift+P` → "Claude". |
 | **WebStorm plugin** | Inline AI in WebStorm. `Cmd+Esc` opens panel. |
 | **claude.ai/code** | Mobile, web, or shared link. Same projects as the CLI, no install needed. |
-| **OpenCode** (`opencode`) | OSS-aligned. Works with any LLM provider via API key. No Pro/Max needed. Reads kun's `AGENTS.md` (symlinked to `CLAUDE.md`) for project doctrine. |
+| **OpenCode** (`o` / `opencode`) | OSS-aligned. Works with any LLM provider via API key. No Pro/Max needed. Launch with `o` (auto-approves like `c`). Reads kun's `AGENTS.md` (symlinked to `CLAUDE.md`) for project doctrine. |
 
 Cowork and Claude Code share `~/.claude/` — same brain, two modes. Handoff happens via `~/.claude/bridge.md` and GitHub Issues. See [Cowork ↔ Code bridge](/docs/cowork).
 
 Claude Desktop's three tabs share the same MCP fleet as the CLI because the wizard symlinks `claude_desktop_config.json` to `~/.claude/mcp.json`.
+
+---
+
+## OpenCode setup
+
+OpenCode is the OSS second CLI — Claude Code stays primary; reach for `o` on easy/throwaway tasks where its free models keep cost at zero. The installer handles everything except a one-time sign-in.
+
+The `o` launcher and config files (`opencode.json`, `tui.json`) are provisioned automatically — `o` opens the TUI on the free **Big Pickle** model in Build mode, with your terminal's theme, and auto-approves like `c`.
+
+One manual step: the free models still authenticate through OpenCode Zen. The first time you run `o`, if you see **"Invalid API key"**:
+
+1. Run `/connect` in the TUI.
+2. Select **OpenCode Zen**.
+3. Sign in at [opencode.ai/auth](https://opencode.ai/auth), copy the key, paste it back.
+
+It persists after that. Switch models anytime with `/models`. Full reference — config, model options, and when to use `o` vs `c` — in [Claude Code → OpenCode](/docs/claude-code#opencode-oss-alternative-cli).
 
 ---
 
@@ -332,6 +348,8 @@ cat >> ~/.zshrc <<'EOF'
 # Claude Code
 function c  { claude --dangerously-skip-permissions "$@"; }
 function cc { claude "$@"; }
+# OpenCode (OSS alternative — auto-approves by default)
+function o  { opencode "$@"; }
 export PATH="$HOME/.local/bin:$HOME/.opencode/bin:$PATH"
 [ -f "$HOME/.claude/.env" ] && set -a && . "$HOME/.claude/.env" && set +a
 EOF
@@ -389,6 +407,8 @@ cat >> ~/.bashrc <<'EOF'
 # Claude Code
 function c  { claude --dangerously-skip-permissions "$@"; }
 function cc { claude "$@"; }
+# OpenCode (OSS alternative — auto-approves by default)
+function o  { opencode "$@"; }
 export PATH="$HOME/.local/bin:$HOME/.opencode/bin:$PATH"
 [ -f "$HOME/.claude/.env" ] && set -a && . "$HOME/.claude/.env" && set +a
 EOF
@@ -434,6 +454,8 @@ scoop install opencode    # or: choco install opencode
 # Claude Code
 function c  { claude --dangerously-skip-permissions $args }
 function cc { claude $args }
+# OpenCode (OSS alternative — auto-approves by default)
+function o  { opencode $args }
 if (Test-Path "$env:USERPROFILE\.claude\.env") {
     Get-Content "$env:USERPROFILE\.claude\.env" | ForEach-Object {
         if ($_ -and -not $_.StartsWith("#")) {
@@ -509,7 +531,7 @@ cd ~/hogwarts && pnpm dev
 | Send a note to the team | `c "/dispatch <message>"` |
 | Open a GitHub issue | `c "/issue"` |
 | Verify a production deploy | `c "/watch"` |
-| OSS alternative CLI | `opencode` (in any repo with `AGENTS.md` or `CLAUDE.md`) |
+| OSS alternative CLI | `o` (or `opencode`) — in any repo with `AGENTS.md` or `CLAUDE.md` |
 | Mobile / browser | https://claude.ai/code |
 
 Full keyword list: [keywords](/docs/keywords).

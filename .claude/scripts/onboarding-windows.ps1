@@ -331,6 +331,35 @@ if (-not $hasOpenCode) {
     Pass "OpenCode"
 }
 
+
+# OpenCode global config — auto-approve everywhere (parity with `c`)
+$ocCfgDir = "$HOME_DIR\.config\opencode"
+$ocCfg = "$ocCfgDir\opencode.json"
+if (-not (Test-Path $ocCfg)) {
+    New-Item -ItemType Directory -Force -Path $ocCfgDir | Out-Null
+    @'
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "opencode/big-pickle",
+  "default_agent": "build",
+  "permission": { "edit": "allow", "bash": "allow", "webfetch": "allow" }
+}
+'@ | Set-Content -Path $ocCfg -Encoding utf8
+    Pass "OpenCode global config (auto-approve)"
+}
+# OpenCode TUI config — match terminal theme (closest to Claude Code's look)
+$ocTui = "$ocCfgDir\tui.json"
+if (-not (Test-Path $ocTui)) {
+    New-Item -ItemType Directory -Force -Path $ocCfgDir | Out-Null
+    @'
+{
+  "$schema": "https://opencode.ai/tui.json",
+  "theme": "system"
+}
+'@ | Set-Content -Path $ocTui -Encoding utf8
+    Pass "OpenCode TUI config (theme: system)"
+}
+
 # Symlink AGENTS.md in kun repo so OpenCode reads the same doctrine as Claude Code
 $kunClaudeMd = "$KUN_DIR\CLAUDE.md"
 $kunAgentsMd = "$KUN_DIR\AGENTS.md"
@@ -343,6 +372,29 @@ if ((Test-Path $kunClaudeMd) -and -not (Test-Path $kunAgentsMd)) {
         Copy-Item $kunClaudeMd $kunAgentsMd
         Pass "AGENTS.md copied from CLAUDE.md"
     }
+}
+
+# `c` / `o` launcher functions in PowerShell $PROFILE
+if (-not (Test-Path $PROFILE)) { New-Item -ItemType File -Force -Path $PROFILE | Out-Null }
+$profileText = Get-Content $PROFILE -Raw -EA SilentlyContinue
+if ($profileText -notmatch 'function c ') {
+    Add-Content $PROFILE @'
+
+# Claude Code
+function c  { claude --dangerously-skip-permissions $args }
+function cc { claude $args }
+# OpenCode (OSS alternative — auto-approves by default)
+function o  { opencode $args }
+'@
+    Pass "Shell helpers (c, cc, o)"
+} elseif ($profileText -notmatch 'function o ') {
+    # Backfill `o` for machines provisioned before the OpenCode launcher existed
+    Add-Content $PROFILE @'
+
+# OpenCode (OSS alternative — auto-approves by default)
+function o  { opencode $args }
+'@
+    Pass "Shell helper (o) backfilled"
 }
 
 # Wire Claude Desktop MCP config to the same servers Claude Code uses
@@ -517,7 +569,7 @@ Write-Host "  1. Restart PowerShell (or: . `$PROFILE)"
 Write-Host "  2. Run 'claude' -> log in with Anthropic account"
 Write-Host "  3. Open Claude Desktop -> sign in"
 if (Get-Command opencode -EA SilentlyContinue) {
-    Write-Host "  4. (Optional) Configure OpenCode: 'opencode' -> /connect -> paste API key"
+    Write-Host "  4. (Optional) Configure OpenCode: run 'o' (or 'opencode') -> /connect -> paste API key"
 }
 if (-not $GistId) {
     Write-Host "  5. Load secrets when you have the gist ID:"
