@@ -25,9 +25,11 @@ The bootstrap URL auto-detects your OS and dispatches to the right installer. No
 
 ---
 
-## What you end up with
+## What You Get
 
-After the wizard finishes:
+Running the bootstrap line leaves your machine in this state. The deliverables, how to verify each one, how to change what's delivered, and what the baseline is for your profile.
+
+### Deliverables
 
 | Category | What |
 |---|---|
@@ -40,7 +42,53 @@ After the wizard finishes:
 | **Desktop ↔ CLI parity** | `claude_desktop_config.json` symlinked to `~/.claude/mcp.json` so Desktop tabs see the same MCP fleet |
 | **Repos** | The full databayt org cloned to your chosen directory (default: `~/<repo>`) — see [Repos table below](#which-repos-you-get) |
 | **Optional** | Tailscale SSH (remote control from phone/laptop), Apple Notes Dispatch folder (Mac) |
-| **Verified** | `claude doctor` green · `health.sh` reports 0 errors |
+
+### Verify what you got
+
+Provisioning lands in six layers. Run these to confirm each — all green means fully provisioned for your profile:
+
+| Layer | Verify command | Pass looks like |
+|---|---|---|
+| **Tools** | `for t in git node pnpm gh claude opencode; do command -v $t; done` | a path prints for each |
+| **Auth** | `gh auth status && ssh -T git@github.com` | "Logged in"; "successfully authenticated" |
+| **Code** | `ls ~/kun ~/hogwarts ~/codebase` *(engineer)* | directories exist |
+| **Config** | `bash ~/.claude/scripts/health.sh` | `✅ healthy` (0 errors) |
+| **Surfaces** | `claude doctor` | all checks green |
+| **Product** *(engineer)* | `cd ~/hogwarts && pnpm dev` → open `localhost:3000` | login works (`admin@kingfahad.edu` / `1234`) |
+
+`bash ~/.claude/scripts/health.sh` is the authoritative config gate but only audits `~/.claude/` — pair it with the other rows for a complete check.
+
+### Modify what's delivered
+
+Want a different result? Edit the source, then re-run the bootstrap (idempotent):
+
+| To change… | Edit / flag |
+|---|---|
+| Which repos clone | Phase 4 repo list in `onboarding-{mac,linux}.sh` / `foreach` in `onboarding-windows.ps1`; or pass `--essentials-only` for just kun/hogwarts/codebase |
+| Where repos land | `--repos-dir <path>` (Mac/Linux) / `-ReposDir <path>` (Windows), or the wizard's "where to save repos" prompt |
+| Which tools install | Phase 1–2 of the `onboarding-*` backend for your OS |
+| MCP servers per role | role `case` in `setup.sh` / `setup.ps1` + the `mcp-<role>.json` files |
+| Skills / commands per role | role `case` in `setup.sh` (`COMMON_CMDS` + per-role list) |
+| Agents available | all are copied — add/remove files in `.claude/agents/` |
+| Secrets / env | `secrets.sh <GIST_ID>` + the contents of the private Gist |
+| Tailscale on/off | `--with-tailscale` / `-WithTailscale` (default off) |
+| Role | re-run the wizard, or pass a different role arg to the backend |
+
+All installer scripts live in `~/kun/.claude/scripts/`. Print any backend's flags with no args (e.g. `bash ~/kun/.claude/scripts/onboarding-mac.sh`).
+
+### What each profile gets
+
+"Fully provisioned" is relative to your **role × OS × plan** — a missing surface may be correct for you, not a bug:
+
+| | engineer | business | content | ops |
+|---|:-:|:-:|:-:|:-:|
+| Repos | all org | kun | kun | kun |
+| MCP servers | ~18 | ~6 | ~6 | ~7 |
+| hogwarts local dev | ✓ | — | — | — |
+| Claude Desktop | Mac/Win | Mac/Win | Mac/Win | Mac/Win |
+
+- **Linux**: Claude Desktop doesn't exist on Linux — your surfaces are the CLI, `claude.ai/code` in the browser, and the IDE plugins. A Linux box with those is complete; don't expect the Chat/Cowork/Code tabs.
+- **No Pro/Max**: Desktop tabs are unavailable — the intended path is OpenCode + an `ANTHROPIC_API_KEY`.
 
 ---
 
@@ -336,11 +384,31 @@ sudo snap install webstorm --classic
 curl -fsSL https://claude.ai/install.sh | sh
 curl -fsSL https://opencode.ai/install | bash
 
-# Shell helpers (same as Mac block, but append to ~/.bashrc instead of ~/.zshrc)
+# Shell helpers
+cat >> ~/.bashrc <<'EOF'
+# Claude Code
+function c  { claude --dangerously-skip-permissions "$@"; }
+function cc { claude "$@"; }
+export PATH="$HOME/.local/bin:$HOME/.opencode/bin:$PATH"
+[ -f "$HOME/.claude/.env" ] && set -a && . "$HOME/.claude/.env" && set +a
+EOF
+. ~/.bashrc
 
-# GitHub auth, repos, kun config, secrets — same as Mac block
+# GitHub auth + SSH
+ssh-keygen -t ed25519 -C "you@databayt"
+gh auth login -p ssh -w
+gh ssh-key add ~/.ssh/id_ed25519.pub --title "databayt-$(hostname -s)"
 
-# Verify
+# Repos
+git clone git@github.com:databayt/kun.git ~/kun
+git clone git@github.com:databayt/hogwarts.git ~/hogwarts
+git clone git@github.com:databayt/codebase.git ~/codebase
+
+# Kun config + secrets
+cd ~/kun && bash .claude/scripts/setup.sh engineer
+bash ~/kun/.claude/scripts/secrets.sh <GIST_ID>
+
+# Verify (no Claude Desktop on Linux — CLI + browser + IDE plugins)
 claude doctor
 bash ~/.claude/scripts/health.sh
 ```
@@ -380,7 +448,22 @@ $env:Path = "$env:USERPROFILE\.claude\bin;" + $env:Path
 '@ | Add-Content $PROFILE
 . $PROFILE
 
-# GitHub auth, repos, kun config, secrets — see PowerShell parallels in onboarding-windows.ps1
+# GitHub auth + SSH
+ssh-keygen -t ed25519 -C "you@databayt"
+gh auth login -p ssh -w
+gh ssh-key add "$env:USERPROFILE\.ssh\id_ed25519.pub" --title "databayt-$env:COMPUTERNAME"
+
+# Repos
+git clone git@github.com:databayt/kun.git $env:USERPROFILE\kun
+git clone git@github.com:databayt/hogwarts.git $env:USERPROFILE\hogwarts
+git clone git@github.com:databayt/codebase.git $env:USERPROFILE\codebase
+
+# Kun config + secrets
+cd $env:USERPROFILE\kun; & .\.claude\scripts\setup.ps1 -Role engineer
+& $env:USERPROFILE\kun\.claude\scripts\secrets.ps1 -GistId <GIST_ID>
+
+# Desktop MCP parity (needs admin or Developer Mode for the symlink; falls back to copy)
+New-Item -ItemType SymbolicLink -Path "$env:APPDATA\Claude\claude_desktop_config.json" -Target "$env:USERPROFILE\.claude\mcp.json" -Force
 
 # Verify
 claude doctor
