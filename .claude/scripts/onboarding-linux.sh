@@ -376,7 +376,7 @@ else
     pass "OpenCode"
 fi
 
-# `c` function in shell rc (bash + zsh if present)
+# `c` / `o` functions in shell rc (bash + zsh if present)
 for RC in "$HOME/.bashrc" "$HOME/.zshrc"; do
     [[ ! -f "$RC" ]] && continue
     if ! grep -q "function c " "$RC" 2>/dev/null; then
@@ -385,11 +385,44 @@ for RC in "$HOME/.bashrc" "$HOME/.zshrc"; do
 # Claude Code
 function c  { claude --dangerously-skip-permissions "$@"; }
 function cc { claude "$@"; }
+# OpenCode (OSS alternative — auto-approves by default)
+function o  { opencode "$@"; }
 [ -f "$HOME/.claude/.env" ] && set -a && . "$HOME/.claude/.env" && set +a
 CFUNC
     fi
+    # Backfill `o` for machines provisioned before the OpenCode launcher existed
+    if grep -q "function c " "$RC" 2>/dev/null && ! grep -q "function o " "$RC" 2>/dev/null; then
+        printf '\n# OpenCode (OSS alternative — auto-approves by default)\nfunction o  { opencode "$@"; }\n' >> "$RC"
+    fi
 done
-pass "Shell helpers (c, cc)"
+pass "Shell helpers (c, cc, o)"
+
+
+# OpenCode global config — auto-approve everywhere (parity with `c`)
+OC_CFG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/opencode"
+if [[ ! -f "$OC_CFG_DIR/opencode.json" ]]; then
+    mkdir -p "$OC_CFG_DIR"
+    cat > "$OC_CFG_DIR/opencode.json" <<'OCJSON'
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "opencode/big-pickle",
+  "default_agent": "build",
+  "permission": { "edit": "allow", "bash": "allow", "webfetch": "allow" }
+}
+OCJSON
+    pass "OpenCode global config (auto-approve)"
+fi
+# OpenCode TUI config — match terminal theme (closest to Claude Code's look)
+if [[ ! -f "$OC_CFG_DIR/tui.json" ]]; then
+    mkdir -p "$OC_CFG_DIR"
+    cat > "$OC_CFG_DIR/tui.json" <<'OCTUI'
+{
+  "$schema": "https://opencode.ai/tui.json",
+  "theme": "system"
+}
+OCTUI
+    pass "OpenCode TUI config (theme: system)"
+fi
 
 # AGENTS.md symlink for OpenCode
 if [[ -f "$HOME/kun/CLAUDE.md" && ! -e "$HOME/kun/AGENTS.md" ]]; then
@@ -537,7 +570,7 @@ echo -e "${BD}Next steps:${NC}"
 echo "  1. Restart shell (or: source ~/.bashrc)"
 echo "  2. Run 'claude' → log in with Anthropic account"
 if command -v opencode >/dev/null 2>&1; then
-    echo "  3. (Optional) Configure OpenCode: 'opencode' → /connect → paste API key"
+    echo "  3. (Optional) Configure OpenCode: run 'o' (or 'opencode') → /connect → paste API key"
 fi
 if [[ -z "$GIST_ID" ]]; then
     echo "  4. Load secrets later: bash ~/kun/.claude/scripts/secrets.sh <GIST_ID>"
@@ -546,7 +579,7 @@ fi
 echo ""
 echo -e "${BD}Claude Desktop note:${NC}"
 echo "  Not available on Linux. Use:"
-echo "  • CLI: 'claude' / 'c' / 'opencode'"
+echo "  • CLI: 'claude' / 'c' / 'opencode' / 'o'"
 echo "  • Browser: https://claude.ai/code (same projects as CLI)"
 echo "  • IDE: install Claude plugin from VS Code/WebStorm Marketplace"
 
