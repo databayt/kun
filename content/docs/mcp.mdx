@@ -94,3 +94,54 @@ cd ~/kun && bash .claude/scripts/install.sh content
 # Ops role (9 servers)
 cd ~/kun && bash .claude/scripts/install.sh ops
 ```
+
+## Troubleshooting — Browser / Playwright MCP
+
+If `mcp__browser__*` tools disappear, return "tool not found", or you see "Playwright MCP is still disconnected" in any project, run **`/mcp-doctor`**. The skill at `~/.claude/skills/mcp-doctor/SKILL.md` is the single recovery entry point.
+
+**`/mcp-doctor` learns from history.** Every distinct error is logged once to `~/.claude/skills/mcp-doctor/ERRORS.md` with a permanent fix, mined from Claude Code's own browser MCP logs (`~/Library/Caches/claude-cli-nodejs/*/mcp-logs-browser/`). The doctor consults that ledger before improvising and appends a new entry whenever it solves something novel — so the same error is never debugged twice. Seven error classes are catalogued so far (E1 wrong package, E2 npm token, E3 connection-closed umbrella, E4 browser disconnect, E5 page timeout, E6 missing Chromium, E7 profile lock).
+
+### The six recurring root causes
+
+This setup has been burned by these defects more than once. Read this before patching anything else.
+
+**1. Project-level configs shadow the user-level one.** When Claude Code starts in a project (hogwarts, mkan, maid, iveco, codebase), any `browser` entry in that project's `.mcp.json` overrides `~/.claude/mcp.json`. Different projects have pointed to different packages (`@executeautomation/playwright-mcp-server`, `@anthropic-ai/mcp-server-playwright` — the latter doesn't exist on npm). **Rule: never define `browser` or `browser-headed` at project level. The user-level config is authoritative.**
+
+**2. Duplicate user-level definitions** (`~/.claude/mcp.json` plus `~/.mcp.json`) competed for the `browser` name. Whichever Claude client read first won. **Rule: `~/.claude/mcp.json` is the only file. No `~/.mcp.json`, no project-level `browser` entries.**
+
+**3. CLI flag silently overridden by config file.** If `~/.claude/playwright-mcp.config.json` sets `userDataDir`, it wins over the `--user-data-dir` flag in `~/.claude/mcp.json`. Two servers pointing at the same dir → Chromium `ProcessSingleton` lock. **Rule: CLI flag owns `--user-data-dir`. The config file's `userDataDir` key must not exist.**
+
+**4. `@latest` causes npx version churn.** `npx -y @playwright/mcp@latest` silently swaps between cached versions in `~/.npm/_npx/`. Each swap may pull a Playwright version requiring a Chromium revision not on disk → "browser executable not found". **Rule: pin an exact version (currently `@playwright/mcp@0.0.75`). Bump only by editing `~/.claude/mcp.json` AND `~/.claude/skills/mcp-doctor/SKILL.md` in lock-step.**
+
+**5. Stale `playwright-mcp` PIDs holding the profile dir.** Chromium locks `--user-data-dir` per OS-process. A crashed-but-still-running PID blocks every new launch. **Rule: `/mcp-doctor` step A (`pkill -f playwright-mcp`) clears it. Session-start hook warns when `pgrep -c playwright-mcp > 2`.**
+
+**6. Cache bloat (5+ GB across 10 Chromium revisions).** Not a failure cause per se, but slows first-launch and confuses diagnostics. **Rule: `/mcp-doctor` step D prunes.**
+
+Secondary concern: Node v25 is newer than Playwright officially supports (LTS 22/24). No workaround documented yet; flag if you see segfaults.
+
+### Canonical configuration
+
+| Concern | Value |
+|---|---|
+| Package | `@playwright/mcp` (Anthropic official) |
+| Version pin | `0.0.75` (exact, never `@latest`) |
+| Config file | `~/.claude/mcp.json` (user-level only) |
+| Runtime config | `~/.claude/playwright-mcp.config.json` (viewport, timeouts, launch args; **no `userDataDir`**) |
+| Headless profile | `~/.playwright-auth-headless` |
+| Headed profile | `~/.playwright-auth` |
+| Cache dir | `~/Library/Caches/ms-playwright` |
+| Recovery skill | `/mcp-doctor` |
+| Session-start ping | `~/.claude/hooks/session-start-reports.sh` warns on stale PIDs / SingletonLock |
+
+### Recovery quick-reference
+
+```bash
+# kill stale, clear locks, force-warm the pin
+pkill -f playwright-mcp
+rm -f ~/.playwright-auth/Singleton{Lock,Cookie,Socket}
+rm -f ~/.playwright-auth-headless/Singleton{Lock,Cookie,Socket}
+npx -y @playwright/mcp@0.0.75 --help >/dev/null
+# then restart Claude Code (MCP servers only spawn at session start)
+```
+
+For the full diagnostic + recovery flow, see `~/.claude/skills/mcp-doctor/SKILL.md` or invoke `/mcp-doctor` in any Claude Code session.
