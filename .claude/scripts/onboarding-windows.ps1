@@ -241,9 +241,9 @@ if ($Role -eq "engineer") {
 }
 
 # =============================================================================
-# PHASE 5: Claude Ecosystem
+# PHASE 5: Claude Ecosystem + OpenCode
 # =============================================================================
-Step "5" "Claude — CLI + Desktop"
+Step "5" "Claude — CLI + Desktop + OpenCode (OSS alternative)"
 
 # Claude Code CLI
 $hasClaude = Get-Command claude -EA SilentlyContinue
@@ -264,6 +264,41 @@ if (-not (Test-Path $claudeDesktop) -and -not (Test-Path $claudeDesktop2)) {
     if ($?) { Pass "Claude Desktop" } else { Info "Claude Desktop — install from claude.ai/download" }
 } else {
     Pass "Claude Desktop"
+}
+
+# OpenCode — OSS alternative CLI (works with Anthropic API key or other providers)
+$hasOpenCode = Get-Command opencode -EA SilentlyContinue
+if (-not $hasOpenCode) {
+    Info "Installing OpenCode (OSS alternative)..."
+    $hasScoop = Get-Command scoop -EA SilentlyContinue
+    if ($hasScoop) {
+        scoop install opencode 2>$null
+    } else {
+        # Try winget; fall back to manual instructions
+        winget install --id sst.opencode -e --accept-source-agreements --accept-package-agreements 2>$null
+    }
+    $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
+    if (Get-Command opencode -EA SilentlyContinue) {
+        Pass "OpenCode"
+    } else {
+        Info "OpenCode — install manually: scoop install opencode (or choco install opencode)"
+    }
+} else {
+    Pass "OpenCode"
+}
+
+# Symlink AGENTS.md in kun repo so OpenCode reads the same doctrine as Claude Code
+$kunClaudeMd = "$KUN_DIR\CLAUDE.md"
+$kunAgentsMd = "$KUN_DIR\AGENTS.md"
+if ((Test-Path $kunClaudeMd) -and -not (Test-Path $kunAgentsMd)) {
+    # SymbolicLink requires admin or Developer Mode; fall back to copy
+    try {
+        New-Item -ItemType SymbolicLink -Path $kunAgentsMd -Target $kunClaudeMd -EA Stop | Out-Null
+        Pass "AGENTS.md -> CLAUDE.md symlink"
+    } catch {
+        Copy-Item $kunClaudeMd $kunAgentsMd
+        Pass "AGENTS.md copied from CLAUDE.md"
+    }
 }
 
 # =============================================================================
@@ -360,6 +395,7 @@ if (Get-Command node -EA SilentlyContinue)   { Pass "node" }   else { Fail "node
 if (Get-Command pnpm -EA SilentlyContinue)   { Pass "pnpm" }   else { Fail "pnpm" }
 if (Get-Command gh -EA SilentlyContinue)     { Pass "gh" }     else { Fail "gh" }
 if (Get-Command claude -EA SilentlyContinue) { Pass "claude" } else { Fail "claude" }
+if (Get-Command opencode -EA SilentlyContinue) { Pass "opencode" } else { Info "opencode (optional)" }
 
 # Auth
 if (Test-Path "$HOME_DIR\.ssh\id_ed25519")   { Pass "SSH key" }    else { Fail "SSH key" }
@@ -393,14 +429,21 @@ if ($ERRORS -eq 0) {
 Write-Host ("=" * 45) -ForegroundColor Cyan
 Write-Host ""
 Write-Host "Next steps:" -ForegroundColor Cyan
-Write-Host "  1. Restart PowerShell"
+Write-Host "  1. Restart PowerShell (or: . `$PROFILE)"
 Write-Host "  2. Run 'claude' -> log in with Anthropic account"
 Write-Host "  3. Open Claude Desktop -> sign in"
+if (Get-Command opencode -EA SilentlyContinue) {
+    Write-Host "  4. (Optional) Configure OpenCode: 'opencode' -> /connect -> paste API key"
+}
 if (-not $GistId) {
-    Write-Host "  4. Get secrets gist ID from Abdout:"
+    Write-Host "  5. Load secrets when you have the gist ID:"
     Write-Host "     & ~\kun\.claude\scripts\secrets.ps1 -GistId <ID>"
 }
 if ($Role -eq "engineer") {
+    Write-Host ""
+    Write-Host "IDE plugins (manual install from Marketplace):" -ForegroundColor Cyan
+    Write-Host "  - WebStorm: Settings -> Plugins -> search 'Claude Code' -> Install"
+    Write-Host "  - VS Code:  Extensions -> search 'Claude Code' -> Install"
     Write-Host ""
     Write-Host "Run hogwarts:" -ForegroundColor Cyan
     Write-Host "  cd ~\hogwarts; pnpm dev"
