@@ -6,7 +6,7 @@
 # Wraps onboarding-mac.sh in osascript dialogs with deep-link action buttons.
 #
 # Bootstrap:
-#   curl -fsSL https://kun.databayt.com/install | bash
+#   curl -fsSL https://kun.databayt.org/install | bash
 # Direct:
 #   bash <(curl -fsSL https://raw.githubusercontent.com/databayt/kun/main/.claude/scripts/installer.sh)
 #

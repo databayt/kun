@@ -1,11 +1,11 @@
 # =============================================================================
 # Databayt - Windows installer dispatcher
 # =============================================================================
-# Hosted at https://kun.databayt.com/install.ps1
+# Hosted at https://kun.databayt.org/install.ps1
 # Downloads and runs the WPF installer wrapper.
 #
 # Bootstrap:
-#   iwr https://kun.databayt.com/install.ps1 | iex
+#   iwr https://kun.databayt.org/install.ps1 | iex
 # =============================================================================
 
 $ErrorActionPreference = "Stop"

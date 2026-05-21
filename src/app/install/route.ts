@@ -1,17 +1,10 @@
-#!/usr/bin/env bash
-# =============================================================================
-# Databayt — OS-detect installer dispatcher
-# =============================================================================
-# Hosted at https://kun.databayt.org/install
-# Detects uname and curl-pipes the right platform installer.
-#
-# Bootstrap (Mac / Linux):
-#   curl -fsSL https://kun.databayt.org/install | bash
-#
-# For Windows, use:
-#   iwr https://kun.databayt.org/install.ps1 | iex
-# =============================================================================
+// Serves the OS-detect bootstrap shim at https://kun.databayt.org/install
+//   curl -fsSL https://kun.databayt.org/install | bash
+// Canonical copy also lives at web/install.sh for reference.
 
+const SHIM = `#!/usr/bin/env bash
+# Databayt — OS-detect installer dispatcher
+# https://kun.databayt.org/install
 set -e
 
 REPO_RAW="https://raw.githubusercontent.com/databayt/kun/main"
@@ -38,5 +31,14 @@ case "$(uname -s)" in
         ;;
 esac
 
-# Stream the platform installer through bash. Pass any extra args via $@.
 curl -fsSL "$URL" | bash -s -- "$@"
+`;
+
+export function GET() {
+  return new Response(SHIM, {
+    headers: {
+      "Content-Type": "text/x-shellscript; charset=utf-8",
+      "Cache-Control": "no-cache, no-store, must-revalidate",
+    },
+  });
+}

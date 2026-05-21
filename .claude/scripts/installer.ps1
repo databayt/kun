@@ -5,7 +5,7 @@
 # ships with .NET on Win10/11). Wraps onboarding-windows.ps1 -Quiet.
 #
 # Bootstrap:
-#   iwr https://kun.databayt.com/install.ps1 | iex
+#   iwr https://kun.databayt.org/install.ps1 | iex
 # Direct:
 #   iwr https://raw.githubusercontent.com/databayt/kun/main/.claude/scripts/installer.ps1 | iex
 #
