@@ -1,25 +1,31 @@
 ---
 title: Team
-description: 4 roles with tailored MCP configs and agent indexes
+description: 6 humans with tailored MCP configs and agent indexes
 ---
 
 # Team
 
-4 humans with tailored tools. Each role gets a specific MCP config, skill set, and agent index — so everyone has exactly the tools they need, nothing more.
+6 humans with tailored tools. Each role gets a specific MCP config, skill set, and agent index — so everyone has exactly the tools they need, nothing more.
 
 ## Team Members
 
-### Abdout — Builder
+### Abdout — Founder & Tech Lead
 Engineering everything. Architecture, full-stack, deployment.
+
+### Ibrahim — Senior Fullstack Engineer
+Ships product features across the stack. Code review, architecture sparring, complex end-to-end work alongside Abdout.
 
 ### Ali — QA Engineer + Sales
 Tests features (reports issues on GitHub), manages sales@databayt.org. Outreach for schools, sponsors, investors, early adopters, leads, clients, contributors.
 
-### Samia — R&D & Kun Caretaker
-Research on Claude/Anthropic products, sharing economy models, revenue distribution. Taking care of Kun engine. Core vision contributor.
+### Mutaz — Product Engineer (business)
+Owns product surface AND operates as a business peer of Ali — turns ideas into shippable specs, runs customer-facing motion (sales + onboarding), tightens the engineer ↔ business loop.
 
-### Sedon — Executor
-Clear task maps, reliable delivery. Saudi operations: bank account, physical presence, payments.
+### Samia — R&D
+Research on Claude/Anthropic products, sharing economy models, revenue distribution. Core vision contributor.
+
+### Sedon — Facilitator
+Facilitates the business team (Ali + Mutaz) — clears blockers, runs the ops cadence. Saudi operations: bank account, physical presence, payments.
 
 ## Role-Specific MCP Configs
 
@@ -55,7 +61,7 @@ Re-run anytime to update config after pulling latest from git.
 | Layer | Common (all roles) | Scoped (per role) |
 |-------|-------------------|-------------------|
 | **CLAUDE.md** | Shared instructions | — |
-| **Agents** | All 45 agent definitions | Role-specific index |
+| **Agents** | All 40 agent definitions | Role-specific index |
 | **Commands** | docs, repos, screenshot, codebase | Role-specific skills |
 | **Rules** | All rules | — |
 | **Memory** | Team, company data | — |
@@ -74,6 +80,16 @@ Re-run anytime to update config after pulling latest from git.
 > "deploy"                 # Ship to Vercel
 ```
 
+### Ibrahim — Senior Fullstack
+
+```
+> "dev"                    # Start dev server
+> [build features]         # Full agent fleet
+> Code review on PRs       # Architecture + correctness pass
+> "build"                  # Validate
+> "push"                   # Commit + push
+```
+
 ### Ali — QA + Sales
 
 ```
@@ -87,6 +103,15 @@ Sales (sales@databayt.org):
 > Draft proposals, follow up leads
 ```
 
+### Mutaz — Product Engineer (business)
+
+```
+> Translate ideas → specs (issue + acceptance criteria)
+> Customer interviews / feedback synthesis
+> Partner with Ali on outbound + onboarding
+> Shape the engineer ↔ business handoff
+```
+
 ### Samia — R&D
 
 ```
@@ -94,13 +119,13 @@ Cowork:
 > Research Claude/Anthropic products
 > Study sharing economy models
 > Investigate revenue distribution
-> Take care of Kun engine
+> Contribute to core vision
 ```
 
-### Sedon — Executor
+### Sedon — Facilitator
 
 ```
-> [clear task map]         # Well-defined tasks with steps
+> Facilitate business team # Unblock Ali + Mutaz
 > Saudi operations         # Bank, payments, physical presence
 > Batch weekly             # Monday map, Friday delivery
 ```
