@@ -22,7 +22,7 @@
 #   git clone https://github.com/databayt/kun.git ~/kun && bash ~/kun/.claude/scripts/onboarding-linux.sh engineer
 #
 # NOTE: Claude Desktop is NOT available for Linux. Linux users get:
-#   Claude Code CLI, OpenCode CLI, claude.ai/code in browser,
+#   Claude Code CLI, claude.ai/code in browser,
 #   plus VS Code/WebStorm Claude plugins.
 # =============================================================================
 
@@ -349,7 +349,7 @@ fi
 # =============================================================================
 # PHASE 5: Claude Ecosystem (no Desktop on Linux)
 # =============================================================================
-step "5" "Claude — Code CLI + OpenCode (no Desktop on Linux)"
+step "5" "Claude — Code CLI (no Desktop on Linux)"
 
 # Claude Code CLI
 if ! command -v claude >/dev/null 2>&1; then
@@ -364,20 +364,7 @@ else
     pass "Claude Code CLI"
 fi
 
-# OpenCode (OSS alternative)
-if ! command -v opencode >/dev/null 2>&1; then
-    info "Installing OpenCode..."
-    curl -fsSL https://opencode.ai/install | bash >/dev/null 2>&1 || true
-    export PATH="$HOME/.opencode/bin:$PATH"
-    if ! grep -q ".opencode/bin" "$HOME/.bashrc" 2>/dev/null; then
-        printf '\n# OpenCode\nexport PATH="$HOME/.opencode/bin:$PATH"\n' >> "$HOME/.bashrc"
-    fi
-    command -v opencode >/dev/null 2>&1 && pass "OpenCode" || info "OpenCode install needs manual verify"
-else
-    pass "OpenCode"
-fi
-
-# `c` / `o` functions in shell rc (bash + zsh if present)
+# `c` functions in shell rc (bash + zsh if present)
 for RC in "$HOME/.bashrc" "$HOME/.zshrc"; do
     [[ ! -f "$RC" ]] && continue
     if ! grep -q "function c " "$RC" 2>/dev/null; then
@@ -386,50 +373,11 @@ for RC in "$HOME/.bashrc" "$HOME/.zshrc"; do
 # Claude Code
 function c  { claude --dangerously-skip-permissions "$@"; }
 function cc { claude "$@"; }
-# OpenCode (OSS alternative — auto-approves by default)
-function o  { opencode "$@"; }
 [ -f "$HOME/.claude/.env" ] && set -a && . "$HOME/.claude/.env" && set +a
 CFUNC
     fi
-    # Backfill `o` for machines provisioned before the OpenCode launcher existed
-    if grep -q "function c " "$RC" 2>/dev/null && ! grep -q "function o " "$RC" 2>/dev/null; then
-        printf '\n# OpenCode (OSS alternative — auto-approves by default)\nfunction o  { opencode "$@"; }\n' >> "$RC"
-    fi
 done
-pass "Shell helpers (c, cc, o)"
-
-
-# OpenCode global config — auto-approve everywhere (parity with `c`)
-OC_CFG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/opencode"
-if [[ ! -f "$OC_CFG_DIR/opencode.json" ]]; then
-    mkdir -p "$OC_CFG_DIR"
-    cat > "$OC_CFG_DIR/opencode.json" <<'OCJSON'
-{
-  "$schema": "https://opencode.ai/config.json",
-  "model": "opencode/big-pickle",
-  "default_agent": "build",
-  "permission": { "edit": "allow", "bash": "allow", "webfetch": "allow" }
-}
-OCJSON
-    pass "OpenCode global config (auto-approve)"
-fi
-# OpenCode TUI config — match terminal theme (closest to Claude Code's look)
-if [[ ! -f "$OC_CFG_DIR/tui.json" ]]; then
-    mkdir -p "$OC_CFG_DIR"
-    cat > "$OC_CFG_DIR/tui.json" <<'OCTUI'
-{
-  "$schema": "https://opencode.ai/tui.json",
-  "theme": "system"
-}
-OCTUI
-    pass "OpenCode TUI config (theme: system)"
-fi
-
-# AGENTS.md symlink for OpenCode
-if [[ -f "$HOME/kun/CLAUDE.md" && ! -e "$HOME/kun/AGENTS.md" ]]; then
-    ln -sf "$HOME/kun/CLAUDE.md" "$HOME/kun/AGENTS.md"
-    pass "AGENTS.md → CLAUDE.md symlink"
-fi
+pass "Shell helpers (c, cc)"
 
 # =============================================================================
 # PHASE 6: Kun Engine
@@ -518,7 +466,6 @@ command -v node >/dev/null 2>&1    && pass "node"     || fail "node"
 command -v pnpm >/dev/null 2>&1    && pass "pnpm"     || fail "pnpm"
 command -v gh >/dev/null 2>&1      && pass "gh"       || fail "gh"
 command -v claude >/dev/null 2>&1  && pass "claude"   || fail "claude"
-command -v opencode >/dev/null 2>&1 && pass "opencode" || info "opencode (optional)"
 
 [[ -f "$HOME/.ssh/id_ed25519" ]]    && pass "SSH key"     || fail "SSH key"
 gh auth status >/dev/null 2>&1      && pass "GitHub auth" || fail "GitHub auth"
@@ -567,17 +514,14 @@ echo ""
 echo -e "${BD}Next steps:${NC}"
 echo "  1. Restart shell (or: source ~/.bashrc)"
 echo "  2. Run 'claude' → log in with Anthropic account"
-if command -v opencode >/dev/null 2>&1; then
-    echo "  3. (Optional) Configure OpenCode: run 'o' (or 'opencode') → /connect → paste API key"
-fi
 if [[ -z "$GIST_ID" ]]; then
-    echo "  4. Load secrets later: bash ~/kun/.claude/scripts/secrets.sh <GIST_ID>"
+    echo "  3. Load secrets later: bash ~/kun/.claude/scripts/secrets.sh <GIST_ID>"
 fi
 
 echo ""
 echo -e "${BD}Claude Desktop note:${NC}"
 echo "  Not available on Linux. Use:"
-echo "  • CLI: 'claude' / 'c' / 'opencode' / 'o'"
+echo "  • CLI: 'claude' / 'c'"
 echo "  • Browser: https://claude.ai/code (same projects as CLI)"
 echo "  • IDE: install Claude plugin from VS Code/WebStorm Marketplace"
 

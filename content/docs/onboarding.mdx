@@ -10,7 +10,7 @@ description: Fresh machine to fully working dev environment in one paste
 
 This is the single source of truth for joining databayt. It covers every OS, every Claude surface, every dotfile, every external account.
 
-> **Ran this on a real machine?** Jot what you saw in [Field Notes](/docs/onboarding-notes) — what worked, what broke, what to change. That's how this page gets better each run.
+> **Ran this on a real machine?** Hit **Report an issue** in the footer of any [kun.databayt.org](https://kun.databayt.org) page and describe what you saw — what worked, what broke, what to change. It files a GitHub issue (no account-juggling, works mid-install from the browser). See [Issue pipeline](/docs/issue).
 
 ---
 
@@ -37,8 +37,7 @@ Running the bootstrap line leaves your machine in this state. The deliverables, 
 |---|---|
 | **Side-tools** | git, Node 22 LTS, pnpm, gh CLI, Chrome |
 | **IDEs** | WebStorm (+ Claude plugin), VS Code (+ Claude extension) |
-| **Claude — official** | Desktop (Chat / Cowork / Code tabs), Claude Code CLI, IDE integrations, `claude.ai/code` in browser, Mobile (iOS/Android) |
-| **Claude — OSS alternative** | OpenCode CLI (free, multi-provider via API key) |
+| **Claude** | Desktop (Chat / Cowork / Code tabs), Claude Code CLI, IDE integrations, `claude.ai/code` in browser, Mobile (iOS/Android) |
 | **Dotfiles** | SSH key (uploaded to GitHub), `~/.zshrc` / `~/.bashrc` / `$PROFILE` with `c` function, `~/.gitconfig`, `~/.ssh/config` (Keychain on Mac) |
 | **Claude config** | `~/.claude/` — agents, skills, MCP servers, hooks, rules, memory; secrets in `~/.claude/.env` |
 | **Desktop ↔ CLI parity** | `claude_desktop_config.json` symlinked to `~/.claude/mcp.json` so Desktop tabs see the same MCP fleet |
@@ -51,7 +50,7 @@ Provisioning lands in six layers. Run these to confirm each — all green means 
 
 | Layer | Verify command | Pass looks like |
 |---|---|---|
-| **Tools** | `for t in git node pnpm gh claude opencode; do command -v $t; done` | a path prints for each |
+| **Tools** | `for t in git node pnpm gh claude; do command -v $t; done` | a path prints for each |
 | **Auth** | `gh auth status && ssh -T git@github.com` | "Logged in"; "successfully authenticated" |
 | **Code** | `ls ~/kun ~/hogwarts ~/codebase` | directories exist (all org repos on every machine) |
 | **Config** | `bash ~/.claude/scripts/health.sh` | `✅ healthy` (0 errors) |
@@ -94,7 +93,7 @@ What still varies (and why):
 
 - **Secrets** — scoped, not by config but by which **Gist** you're handed. A machine only holds the keys it's trusted with; an MCP server without its key simply doesn't connect (harmless). Full config everywhere, contained blast radius.
 - **Linux**: Claude Desktop doesn't exist on Linux — surfaces are the CLI, `claude.ai/code` in the browser, and the IDE plugins. A Linux box with those is complete; don't expect the Chat/Cowork/Code tabs.
-- **No Pro/Max**: Desktop tabs are unavailable — the intended path is OpenCode + an `ANTHROPIC_API_KEY`.
+- **No Pro/Max**: Desktop tabs are unavailable — Claude Code can still bill through an `ANTHROPIC_API_KEY`, or upgrade to Pro/Max for the Desktop surfaces.
 
 ---
 
@@ -143,7 +142,7 @@ Eight phases run in the background. You can minimize the terminal and do other w
 | 2 | Applications — WebStorm, VS Code, Chrome (every machine) |
 | 3 | GitHub — SSH key, `gh auth login --web`, key uploaded |
 | 4 | Clone Repositories — the full databayt org (every machine) |
-| 5 | Claude — Code CLI, Desktop (Mac/Win), OpenCode, Desktop MCP symlink, AGENTS.md, `c` + `o` functions in shell |
+| 5 | Claude — Code CLI, Desktop (Mac/Win), Desktop MCP symlink, `c` function in shell |
 | 6 | Kun Engine — `setup.sh` installs the full config (agents, skills, MCP, hooks); `secrets.sh` pulls `.env` |
 | 7 | Hogwarts — pnpm install, prisma generate + push + seed, build verify (only with `--hogwarts-dev`) |
 | 8 | Health Check — every tool / repo / config verified |
@@ -180,8 +179,8 @@ The wizard uses **deep links** so each action button drops you exactly where you
 What the inviter needs to grant or hand over before paste-time:
 
 - [ ] **GitHub** — invite to the `databayt` org
-- [ ] **Anthropic account** — Pro/Max sub for full Desktop + CLI experience (free works with OpenCode + API key)
-- [ ] **Anthropic API key** — only if using OpenCode (or no Pro/Max)
+- [ ] **Anthropic account** — Pro/Max sub for the full Desktop + CLI experience
+- [ ] **Anthropic API key** — only if not on Pro/Max (Claude Code can bill via API key)
 - [ ] **Secrets Gist ID** — handed over out-of-band (Signal, Notes, 1Password)
 - [ ] **Slack** — invite to `hogwarts-wve9301`
 - [ ] **AWS IAM** — `hogwarts-s3-uploader` keys (engineer role only)
@@ -205,7 +204,7 @@ To clone only the essentials (kun, hogwarts, codebase): pass `--essentials-only`
 
 ## The seven Claude surfaces
 
-After install you have **seven Claude surfaces** plus **OpenCode** as a parallel CLI. Each has a sweet spot:
+After install you have **seven Claude surfaces**, each with a sweet spot:
 
 | Surface | When to use |
 |---|---|
@@ -216,27 +215,10 @@ After install you have **seven Claude surfaces** plus **OpenCode** as a parallel
 | **VS Code extension** | Inline AI in your editor. `Cmd+Shift+P` → "Claude". |
 | **WebStorm plugin** | Inline AI in WebStorm. `Cmd+Esc` opens panel. |
 | **claude.ai/code** | Mobile, web, or shared link. Same projects as the CLI, no install needed. |
-| **OpenCode** (`o` / `opencode`) | OSS-aligned. Works with any LLM provider via API key. No Pro/Max needed. Launch with `o` (auto-approves like `c`). Reads kun's `AGENTS.md` (symlinked to `CLAUDE.md`) for project doctrine. |
 
 Cowork and Claude Code share `~/.claude/` — same brain, two modes. Handoff happens via `~/.claude/bridge.md` and GitHub Issues. See [Cowork ↔ Code bridge](/docs/cowork).
 
 Claude Desktop's three tabs share the same MCP fleet as the CLI because the wizard symlinks `claude_desktop_config.json` to `~/.claude/mcp.json`.
-
----
-
-## OpenCode setup
-
-OpenCode is the OSS second CLI — Claude Code stays primary; reach for `o` on easy/throwaway tasks where its free models keep cost at zero. The installer handles everything except a one-time sign-in.
-
-The `o` launcher and config files (`opencode.json`, `tui.json`) are provisioned automatically — `o` opens the TUI on the free **Big Pickle** model in Build mode, with your terminal's theme, and auto-approves like `c`.
-
-One manual step: the free models still authenticate through OpenCode Zen. The first time you run `o`, if you see **"Invalid API key"**:
-
-1. Run `/connect` in the TUI.
-2. Select **OpenCode Zen**.
-3. Sign in at [opencode.ai/auth](https://opencode.ai/auth), copy the key, paste it back.
-
-It persists after that. Switch models anytime with `/models`. Full reference — config, model options, and when to use `o` vs `c` — in [Claude Code → OpenCode](/docs/claude-code#opencode-oss-alternative-cli).
 
 ---
 
@@ -335,17 +317,12 @@ brew install --cask google-chrome webstorm visual-studio-code claude
 # Claude Code CLI
 curl -fsSL https://claude.ai/install.sh | sh
 
-# OpenCode (OSS alternative)
-curl -fsSL https://opencode.ai/install | bash
-
 # Shell helpers
 cat >> ~/.zshrc <<'EOF'
 # Claude Code
 function c  { claude --dangerously-skip-permissions "$@"; }
 function cc { claude "$@"; }
-# OpenCode (OSS alternative — auto-approves by default)
-function o  { opencode "$@"; }
-export PATH="$HOME/.local/bin:$HOME/.opencode/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
 [ -f "$HOME/.claude/.env" ] && set -a && . "$HOME/.claude/.env" && set +a
 EOF
 . ~/.zshrc
@@ -393,18 +370,15 @@ sudo apt update && sudo apt install -y gh
 sudo snap install code --classic
 sudo snap install webstorm --classic
 
-# Claude Code + OpenCode (Claude Desktop NOT available on Linux)
+# Claude Code CLI (Claude Desktop NOT available on Linux)
 curl -fsSL https://claude.ai/install.sh | sh
-curl -fsSL https://opencode.ai/install | bash
 
 # Shell helpers
 cat >> ~/.bashrc <<'EOF'
 # Claude Code
 function c  { claude --dangerously-skip-permissions "$@"; }
 function cc { claude "$@"; }
-# OpenCode (OSS alternative — auto-approves by default)
-function o  { opencode "$@"; }
-export PATH="$HOME/.local/bin:$HOME/.opencode/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
 [ -f "$HOME/.claude/.env" ] && set -a && . "$HOME/.claude/.env" && set +a
 EOF
 . ~/.bashrc
@@ -440,17 +414,12 @@ npm install -g pnpm
 winget install Anthropic.ClaudeCode
 claude    # browser sign-in
 
-# OpenCode
-scoop install opencode    # or: choco install opencode
-
 # Shell helpers — append to $PROFILE
 @'
 
 # Claude Code
 function c  { claude --dangerously-skip-permissions $args }
 function cc { claude $args }
-# OpenCode (OSS alternative — auto-approves by default)
-function o  { opencode $args }
 if (Test-Path "$env:USERPROFILE\.claude\.env") {
     Get-Content "$env:USERPROFILE\.claude\.env" | ForEach-Object {
         if ($_ -and -not $_.StartsWith("#")) {
@@ -501,9 +470,6 @@ bash ~/.claude/scripts/health.sh         # Mac/Linux
 # Claude CLI
 claude doctor
 
-# OpenCode
-opencode --version
-
 # Hogwarts (engineer)
 cd ~/hogwarts && pnpm dev
 # Open http://localhost:3000 — login: admin@kingfahad.edu / 1234
@@ -526,7 +492,6 @@ cd ~/hogwarts && pnpm dev
 | Send a note to the team | `c "/dispatch <message>"` |
 | Open a GitHub issue | `c "/issue"` |
 | Verify a production deploy | `c "/watch"` |
-| OSS alternative CLI | `o` (or `opencode`) — in any repo with `AGENTS.md` or `CLAUDE.md` |
 | Mobile / browser | https://claude.ai/code |
 
 Full keyword list: [keywords](/docs/keywords).
@@ -568,7 +533,7 @@ For anything else, file an issue at https://github.com/databayt/kun/issues.
 This page is the front door. Once your machine is provisioned, branch out from here:
 
 **Set up & verify**
-- [Claude Code](/docs/claude-code) — CLI install detail + config (incl. OpenCode)
+- [Claude Code](/docs/claude-code) — CLI install detail + config
 - [MCP](/docs/mcp) — the server fleet + `/mcp-doctor` browser recovery
 - [Secrets](/docs/secrets) — Gist-based provisioning (which keys your machine holds)
 - [Self-hosting](/docs/self-hosting) — Tailscale / tmux / Docker (optional)
@@ -586,9 +551,9 @@ This page is the front door. Once your machine is provisioned, branch out from h
 - [Team](/docs/team) — the 6 humans + roles
 
 **Contribute**
-- [Field Notes](/docs/onboarding-notes) — jot what you observed running this on a real machine
+- [Issue pipeline](/docs/issue) — "Report an issue" (footer) → GitHub → optional auto-fix
 - [Repositories](/docs/repositories) — full org map
 - [Contributing](https://github.com/databayt/kun/blob/main/.claude/rules/github-workflow.md) — issue → branch → PR → merge
 
 **External**
-- [OpenCode](https://opencode.ai) · [Apps — Claude in Slack/Figma/Asana](/docs/apps) · [Connectors — MCP catalog](/docs/connectors) · [Anthropic Directory](https://claude.ai/directory)
+- [Apps — Claude in Slack/Figma/Asana](/docs/apps) · [Connectors — MCP catalog](/docs/connectors) · [Anthropic Directory](https://claude.ai/directory)

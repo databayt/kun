@@ -363,7 +363,7 @@ $healthScript = "$env:USERPROFILE\.claude\scripts\health.ps1"
 if (Test-Path $healthScript) { & $healthScript 2>&1 | Select-Object -Last 5 | Out-Host }
 
 $finalMsg = "Setup complete! Role: $role`n`n"
-$finalMsg += "Tools: git, node, pnpm, gh, claude, opencode`n"
+$finalMsg += "Tools: git, node, pnpm, gh, claude`n"
 $finalMsg += "Repos: $env:USERPROFILE\kun"
 if ($role -eq "engineer") { $finalMsg += ", \hogwarts, \codebase, +org repos" }
 $finalMsg += "`nConfig: $env:USERPROFILE\.claude\ (agents, skills, MCP)`n`n"
