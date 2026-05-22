@@ -1,13 +1,21 @@
 ---
-title: Roadmap
-description: "Hogwarts shipped state with maturity badges, plus what we ship next."
+title: Sprint Plan
+description: "Q3 2026 execution plan — epics to stories across tech and non-tech, with maturity, owners, machine-readiness, and the cash position."
 ---
 
-# Roadmap
+# Sprint Plan
 
-Hogwarts is the flagship, and it's far more built than a typical MVP. This is the team-facing view: what's **shipped** (with maturity badges) and what we **ship next**. The authoritative per-feature detail lives in the hogwarts docs — [MVP](https://ed.databayt.org/en/docs/mvp) (shipped state) and [Roadmap](https://ed.databayt.org/en/docs/roadmap) (direction); if anything here conflicts, those win. Strategy + cash context: [Epics](/docs/epics).
+This is the team's execution plan for the quarter — every epic we're moving, **tech and non-tech**, as **epics → stories** you can act on. Each epic carries a maturity badge, an owner, and a tracker; the stories under it are the open work.
 
-## Get your machine ready (do this first)
+[Epics](/docs/epics) is the companion page: it's the GitHub **tracker map**, where each issue is the source of truth. This page is the **execution plan** — owners, the machine-readiness prerequisites, the cash position, and the non-tech tracks (sales, fundraising, content) the tracker doesn't carry. Per-feature truth lives in the hogwarts docs — [MVP](https://ed.databayt.org/en/docs/mvp) and [Roadmap](https://ed.databayt.org/en/docs/roadmap); if anything here conflicts, those win.
+
+## Everyone: the warm-intro list
+
+The fastest path to a pilot is someone we already know — a warm intro from a real relationship converts far better than any scraped or cold lead. So this one is on everyone, not just sales:
+
+- [ ] **Everyone** — add every school owner, principal, or manager you personally know to the team warm-intro list. **Warm intros rank above scraped / cold leads.** Capture them in the [sales block](https://ed.databayt.org/en/sales); how-to in [Sales](https://ed.databayt.org/en/docs/sales) · [Leads](https://ed.databayt.org/en/docs/leads#lead-sources).
+
+## Get your machine ready
 
 Every block ships through the kun engine and one workflow — issue → branch → PR → merge. Full detail in **[Onboarding](/docs/onboarding)**.
 
@@ -45,85 +53,145 @@ c "/issue"
 | `Schema Only` | Prisma model exists, no UI yet |
 | `Vaporware` | Dictionary strings only, zero code |
 
-## Blocks at a glance
+## Epics at a glance
 
-Almost everything a school runs on daily is already shipped — demo and hand these over today.
+| # | Epic | Track | Bet | Maturity | Owner | Tracker |
+|---|------|-------|-----|----------|-------|---------|
+| 01 | Finance & billing | Tech | 1 | `Built+Polish` | Abdout | [hogwarts#313](https://github.com/databayt/hogwarts/issues/313) |
+| 02 | Admission | Tech | 1 | `Built` | Abdout / web | [hogwarts#314](https://github.com/databayt/hogwarts/issues/314) |
+| 03 | Exams & grading | Tech | — | `Built+Polish` | Abdout | [exams](https://ed.databayt.org/en/docs/exams) |
+| 04 | Attendance | Tech | — | `Built+Polish` | Abdout | [attendance](https://ed.databayt.org/en/docs/attendance) |
+| 05 | LMS / Stream | Tech | — | `Built+Polish` | Abdout | [clickview](https://ed.databayt.org/en/docs/clickview) |
+| 06 | Communication / Messaging | Tech | — | `Built+Polish` | Abdout | [messages](https://ed.databayt.org/en/docs/messages) |
+| 07 | Role-aware UI sweep | Tech | — | `In Progress` | Abdout | — |
+| 08 | Translation audit | Tech | — | `In Progress` | Samia | [translation](https://ed.databayt.org/en/docs/translation) |
+| 09 | Mobile API Layer | Tech | 2 | `In Progress` | Abdout + Ibrahim | [hogwarts#315](https://github.com/databayt/hogwarts/issues/315) |
+| 10 | iOS app | Tech | 2 | `In Progress` | Ibrahim | [swift-app#3](https://github.com/databayt/swift-app/issues/3) |
+| 11 | Android app | Tech | 2 | `Vaporware` | Ibrahim | `kotlin-app` *(repo TBD)* |
+| 12 | Sales & Pilots | Non-tech | both | `Built+Polish` | Mutaz / Ali | [hogwarts#316](https://github.com/databayt/hogwarts/issues/316) |
+| 13 | Fundraising | Non-tech | — | `In Progress` | Abdout | [fundraising](https://ed.databayt.org/en/docs/fundraising) |
+| 14 | Content & Marketing | Non-tech | — | `In Progress` | Samia | — |
 
-| Block | Maturity | Detail |
-|---|---|---|
-| Infrastructure / multi-tenancy | `Built+Polish` | [architecture](https://ed.databayt.org/en/docs/architecture) |
-| Authentication (8 roles, 2FA, CASL) | `Built` | [authentication](https://ed.databayt.org/en/docs/authentication) |
-| Onboarding / configuration (18-step wizard) | `Built+Polish` | [onboarding](https://ed.databayt.org/en/docs/onboarding) |
-| People — students · teachers · guardians · staff | `Built` | [students](https://ed.databayt.org/en/docs/students) |
-| Admission (AI doc review, OTP tracker, merit) | `Built` | [admission](https://ed.databayt.org/en/docs/admission) |
-| Attendance (11 capture modes) | `Built+Polish` | [attendance](https://ed.databayt.org/en/docs/attendance) |
-| Exams & grading (full lifecycle) | `Built+Polish` | [exams](https://ed.databayt.org/en/docs/exams) |
-| Timetable (visual builder, conflicts) | `Built` | [timetable](https://ed.databayt.org/en/docs/timetable) |
-| Finance & billing (double-entry, 6 gateways, payroll) | `Built+Polish` | [fees](https://ed.databayt.org/en/docs/fees) |
-| Communication — messages · notifications · WhatsApp | `Built+Polish` | [messages](https://ed.databayt.org/en/docs/messages) |
-| Stream / LMS | `Built+Polish` | [clickview](https://ed.databayt.org/en/docs/clickview) |
-| Library | `Built` | [library](https://ed.databayt.org/en/docs/library) |
-| Transport (geofence boarding) | `Built` | [structure](https://ed.databayt.org/en/docs/structure) |
-| Catalog (bridge pattern, Sudan curriculum) | `Built+Polish` | [catalog](https://ed.databayt.org/en/docs/catalog) |
-| Mobile — native iOS + Android | `In Progress` | [swift-app#3](https://github.com/databayt/swift-app/issues/3) — kun bet |
+_Owners are provisional where the tracking issue hasn't assigned one — confirm on review._
 
-## What we ship next
+## Epics
 
-**In priority order — top of the list ships first.** These are the real in-flight initiatives (from the hogwarts roadmap) plus our mobile bet. Each is polish/audit on a shipped block, not greenfield.
+### 01 — Finance & billing · Tech · `Built+Polish`
+[fees](https://ed.databayt.org/en/docs/fees) · [Epic hogwarts#313](https://github.com/databayt/hogwarts/issues/313)
 
-### Finance reorg · `Built+Polish`
-[fees](https://ed.databayt.org/en/docs/fees) · [README](https://github.com/databayt/hogwarts/blob/main/src/components/school-dashboard/finance/README.md) · [ISSUE.md](https://github.com/databayt/hogwarts/blob/main/src/components/school-dashboard/finance/ISSUE.md) · [Epic #313](https://github.com/databayt/hogwarts/issues/313)
+The payment-umbrella audit + fee auto-provisioning. Today only Stripe is end-to-end; the double-entry engine still has no callers.
 
-The payment-umbrella audit + fee auto-provisioning. Today only Stripe is E2E; Tap is a stub; the double-entry engine has no callers.
+- [ ] Payment-umbrella P0 — make the gateway abstraction real ([#263](https://github.com/databayt/hogwarts/issues/263))
+- [ ] Auto-provision fee structures at onboarding ([#264](https://github.com/databayt/hogwarts/issues/264), [#269](https://github.com/databayt/hogwarts/issues/269))
+- [ ] Fee-lifecycle QA + per-school currency ([#273](https://github.com/databayt/hogwarts/issues/273), [#305](https://github.com/databayt/hogwarts/issues/305))
 
-- [ ] Payment umbrella P0 ([#263](https://github.com/databayt/hogwarts/issues/263))
-- [ ] Fee auto-provisioning at onboarding ([#264](https://github.com/databayt/hogwarts/issues/264), [#269](https://github.com/databayt/hogwarts/issues/269))
-- [ ] Fee lifecycle QA ([#273](https://github.com/databayt/hogwarts/issues/273)) + per-school currency ([#305](https://github.com/databayt/hogwarts/issues/305))
+### 02 — Admission · Tech · `Built`
+[admission](https://ed.databayt.org/en/docs/admission) · [Epic hogwarts#314](https://github.com/databayt/hogwarts/issues/314)
 
-### Exam hardening · `Built+Polish`
-[exams](https://ed.databayt.org/en/docs/exams) · [README](https://github.com/databayt/hogwarts/blob/main/src/components/school-dashboard/exams/README.md) · [ISSUE.md](https://github.com/databayt/hogwarts/blob/main/src/components/school-dashboard/exams/ISSUE.md)
+Kill the onboarding friction the pilot reported first-hand — *make a few users love you*.
+
+- [ ] Fix pilot-reported onboarding friction ([#298–307](https://github.com/databayt/hogwarts/issues/314), [#254](https://github.com/databayt/hogwarts/issues/254))
+- [ ] Compute the merit score; wire the enrollment section-placement UI
+
+### 03 — Exams & grading · Tech · `Built+Polish`
+[exams](https://ed.databayt.org/en/docs/exams)
 
 Production audit: 14 P0 / 22 P1 / 18 P2.
 
-- [ ] Top P0s: `User.id`-as-`Student.id` submission bug, in-memory rate limiter on serverless, 17 models missing `lang`, RBAC + calculator test coverage
+- [ ] Top P0s — `User.id`-as-`Student.id` submission bug, in-memory rate limiter on serverless, `lang` missing on 17 models, RBAC + calculator test coverage
 
-### Role-aware UI sweep
+### 04 — Attendance · Tech · `Built+Polish`
+[attendance](https://ed.databayt.org/en/docs/attendance)
+
+The section-centric migration is deployed and DB-migrated; it needs end-to-end testing.
+
+- [ ] Playwright MCP testing on the section-centric attendance + timetable surfaces
+
+### 05 — LMS / Stream · Tech · `Built+Polish`
+[clickview](https://ed.databayt.org/en/docs/clickview)
+
+The school-scoped LMS is shipped — courses, chapters, lessons, enrollment, completion certificates, per-school storage quota. The remaining work is the asset wave.
+
+- [ ] Finish the ClickView CDN asset-download wave (the rest currently fall back to the ClickView CDN)
+- [ ] Per-school storage-quota QA (`videoStorageUsedBytes` / `videoStorageQuotaBytes`)
+
+### 06 — Communication / Messaging · Tech · `Built+Polish`
+[messages](https://ed.databayt.org/en/docs/messages)
+
+Announcements, real-time messages (Socket.io), notifications (in-app + email + push), and the WhatsApp Evolution bridge are all shipped. What's left is hardening + handover.
+
+- [ ] WhatsApp Evolution-API retry / backoff hardening
+- [ ] Scheduled-notification cron delivery QA
+- [ ] Demo the announcement + messaging surfaces and hand them to the pilot
+
+### 07 — Role-aware UI sweep · Tech · `In Progress`
 Sidebar / PageNav / Toolbar / row-action gating across the school dashboard.
 
-- [ ] Finance + school + sales surfaces (listings already wired with `permissions.ts`)
+- [ ] Gate the finance + school + sales surfaces (listings are already wired with `permissions.ts`)
 
-### Attendance Phase 2 · `Built+Polish`
-[attendance](https://ed.databayt.org/en/docs/attendance) · [README](https://github.com/databayt/hogwarts/blob/main/src/components/school-dashboard/attendance/README.md) · [ISSUE.md](https://github.com/databayt/hogwarts/blob/main/src/components/school-dashboard/attendance/ISSUE.md)
-
-Section-centric migration — deployed and DB-migrated; needs end-to-end testing.
-
-- [ ] Playwright MCP testing on section-centric attendance + timetable surfaces
-
-### Translation audit
+### 08 — Translation audit · Tech · `In Progress`
 [translation](https://ed.databayt.org/en/docs/translation)
 
 - [ ] Systematic per-page sweep for hardcoded English across the school dashboard
 
-### Admission polish · `Built`
-[admission](https://ed.databayt.org/en/docs/admission) · [README](https://github.com/databayt/hogwarts/blob/main/src/components/school-dashboard/admission/README.md) · [ISSUE.md](https://github.com/databayt/hogwarts/blob/main/src/components/school-dashboard/admission/ISSUE.md) · [Epic #314](https://github.com/databayt/hogwarts/issues/314)
+### 09 — Mobile API Layer · Tech · `In Progress`
+[Epic hogwarts#315](https://github.com/databayt/hogwarts/issues/315)
 
-- [ ] Onboarding friction from pilot feedback ([#298–307](https://github.com/databayt/hogwarts/issues/314), [#254](https://github.com/databayt/hogwarts/issues/254))
-- [ ] Compute the merit score; wire the enrollment section-placement UI
+The backend API layer the iOS + Android apps consume. Shares the finance domain (payments + invoices) with Bet 1.
 
-### Mobile — native iOS + Android · `In Progress` (kun bet)
-[swift-app#3](https://github.com/databayt/swift-app/issues/3) · mobile API [Epic #315](https://github.com/databayt/hogwarts/issues/315)
+- [ ] P0 store gates — account export, account delete, payments (Apple Pay + Stripe), invoices, consent ([hogwarts#315](https://github.com/databayt/hogwarts/issues/315))
+- [ ] P1 — grade entry, report cards, attendance, online exams, schedules, guardian write actions, universal search
 
-> ⚠️ **Divergence:** the hogwarts roadmap defers native mobile to 2027+ ("after PMF"). We keep it as a kun-side Q3 bet — intentional.
+### 10 — iOS app · Tech · `In Progress`
+[swift-app#3](https://github.com/databayt/swift-app/issues/3)
 
-- [ ] Mobile API P0/P1 ([#274–288](https://github.com/databayt/hogwarts/issues/315))
-- [ ] App shell + screens (Swift + Kotlin), consuming the API layer
-- [ ] Store compliance + submit + public launch
-- [ ] ⚠️ The Android repo `databayt/kotlin-app` does not exist yet — create + push it first
+Ship the Hogwarts app to the public App Store.
 
-### 2nd pilot
-[Epic #316](https://github.com/databayt/hogwarts/issues/316)
+- [ ] App shell + navigation; screens (auth, dashboard, attendance, fees) consuming the API layer
+- [ ] Store compliance (privacy, account export/delete, consent) → submit → public launch
 
-- [ ] Onboard a 2nd free MENA-10 pilot; both pilots actively using finance + mobile
+### 11 — Android app · Tech · `Vaporware`
+> ⚠️ The Android repo `databayt/kotlin-app` does not exist yet — create and push it first.
+
+- [ ] Create `databayt/kotlin-app`
+- [ ] App shell + screens (Kotlin) consuming the Mobile API Layer
+- [ ] Play Store compliance → submit → public launch
+
+### 12 — Sales & Pilots · Non-tech · `Built+Polish`
+[Sales](https://ed.databayt.org/en/docs/sales) · [Pilot](https://ed.databayt.org/en/docs/pilot) · [Epic hogwarts#316](https://github.com/databayt/hogwarts/issues/316)
+
+Two free MENA-10 pilots actively using finance + mobile, with a documented PMF signal that feeds the Q4 cash decision. The team's own network is the top of the funnel — start with [Everyone: the warm-intro list](#everyone-the-warm-intro-list) above.
+
+- [ ] King Fahad re-engagement + JTBD interviews
+- [ ] Source + onboard a 2nd free pilot (warm intros first, then a 3–5 school pipeline)
+- [ ] Usage tracking on both pilots
+- [ ] PMF write-up + case study → Q4 cash brief
+- [ ] Hold the weekly cadence — warm prospects, outreach, discovery calls (see [Sales](https://ed.databayt.org/en/docs/sales))
+
+### 13 — Fundraising · Non-tech · `In Progress`
+[Get support](https://ed.databayt.org/en/docs/fundraising)
+
+Non-dilutive first — vendor credits and grants before any equity. We're in Phase 2 (MENA-10 conversion): zero-equity accelerators plus a SAFE-cap only after the non-dilutive routes. See [Cash and runway](#cash-and-runway) below.
+
+- [ ] Claim vendor credits (Microsoft, Google, AWS, Anthropic, OpenAI, GitHub, Vercel)
+- [ ] Apply to priority grants (NTDP, Mastercard Foundation EdTech, UNESCO Sudan TEP)
+- [ ] Submit zero-equity accelerator + incubator applications (Sanabil 500, Misk500, Orange Corners, MSAR)
+
+### 14 — Content & Marketing · Non-tech · `In Progress`
+The creative that unblocks every sales conversation downstream.
+
+- [ ] Publish the King Fahad case study with real numbers
+- [ ] Record the 2-minute demo video with Arabic voiceover
+- [ ] Capture the screenshot pack (light + dark, Arabic + English)
+- [ ] Lock the Arabic + English taglines
+
+## Cash and runway
+
+We do not monetize this quarter — that is a Q4 decision. The plan is to prove product-market fit on two free pilots first, then choose how to fund the next leg.
+
+We're in **Phase 2** (MENA-10 conversion) and raise **non-dilutive first** — vendor credits and grants before any equity instrument. A small SAFE-cap from MENA-aware investors comes only after the non-dilutive routes are exhausted; a priced seed waits for 10 paying schools and meaningful MRR.
+
+Once PMF is proven, Q4 opens **the cash decision** — light monetization, a pre-seed bridge, a sponsored build, or cutting burn. The full instrument ladder, use-of-funds, and posture live in [Get support](https://ed.databayt.org/en/docs/fundraising).
 
 ## Not built yet
 
@@ -133,11 +201,12 @@ Section-centric migration — deployed and DB-migrated; needs end-to-end testing
 | Hostel | `Vaporware` | Dictionary mentions only |
 | Cafeteria | `Vaporware` | Dictionary mentions only |
 
-Native iOS/Android is `Schema Only`/`Vaporware` in the hogwarts roadmap (deferred to 2027+) — we promote it to a bet under *What we ship next* above. The divergence is deliberate.
+Native iOS / Android is `Vaporware` in the hogwarts roadmap (deferred to 2027+); we promote it to a Q3 bet as epics 09–11 above. The divergence is deliberate.
 
 ## See also
 
 - hogwarts [MVP](https://ed.databayt.org/en/docs/mvp) — shipped state across 14 epics with maturity badges
 - hogwarts [Roadmap](https://ed.databayt.org/en/docs/roadmap) — quarter outlook + active initiatives
 - hogwarts [PRD](https://ed.databayt.org/en/docs/prd) — requirements, role model, NFRs
-- kun [Epics](/docs/epics) · [Onboarding](/docs/onboarding) · [Issue pipeline](/docs/issue) · master tracker [kun#76](https://github.com/databayt/kun/issues/76)
+- hogwarts [Sales](https://ed.databayt.org/en/docs/sales) · [Get support](https://ed.databayt.org/en/docs/fundraising) — the non-tech execution detail
+- kun [Epics](/docs/epics) — the GitHub tracker map · [Onboarding](/docs/onboarding) · [Issue pipeline](/docs/issue) · master tracker [kun#76](https://github.com/databayt/kun/issues/76)
