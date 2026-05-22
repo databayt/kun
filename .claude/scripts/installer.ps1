@@ -250,6 +250,14 @@ if (-not $withTailscale) {
     Set-State withTailscale $withTailscale
 }
 
+# Hogwarts local dev — opt-in (heavy: pnpm + DB seed + build, ~10 min)
+$hogwartsDev = Get-State hogwartsDev
+if (-not $hogwartsDev) {
+    $ans = Ask-YesNo "Set up hogwarts local dev now? (pnpm + DB seed + build, ~10 min — skip if this machine won't run hogwarts locally)"
+    if ($ans -eq "Yes") { $hogwartsDev = "1" } else { $hogwartsDev = "0" }
+    Set-State hogwartsDev $hogwartsDev
+}
+
 # =============================================================================
 # ACT 2 - Silent batch
 # =============================================================================
@@ -259,6 +267,7 @@ $backendArgs = @("-Role", $role, "-Quiet", "-GitName", $gitName, "-GitEmail", $g
 if ($gistId) { $backendArgs += @("-GistId", $gistId) }
 if ($reposDir -and $reposDir -ne $env:USERPROFILE) { $backendArgs += @("-ReposDir", $reposDir) }
 if ($withTailscale -eq "1") { $backendArgs += @("-WithTailscale") }
+if ($hogwartsDev -eq "1") { $backendArgs += @("-HogwartsDev") }
 
 Write-Host ""
 Write-Host "════════════════════════════════════════════════════" -ForegroundColor Cyan

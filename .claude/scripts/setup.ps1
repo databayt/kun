@@ -74,69 +74,32 @@ Info "scripts"
 
 Write-Host ""
 
-# ── Scoped config ───────────────────────────────────────────────
-Write-Host "Scoped config ($Role)" -ForegroundColor Cyan
+# ── Full config (universal — every machine is a full autonomous worker) ──
+# Role no longer scopes capability; it's only a label + secrets-trust tier.
+# Secrets stay scoped via which Gist you're handed — MCP servers without a
+# key simply don't connect, so a full mcp.json is safe everywhere.
+Write-Host "Full config" -ForegroundColor Cyan
 
-$commonCmds = @("docs", "repos", "screenshot", "codebase")
-switch ($Role) {
-    "engineer" {
-        Get-ChildItem "$KUN_DIR\.claude\commands\*.md" -EA SilentlyContinue | ForEach-Object {
-            Copy-Item $_.FullName "$CLAUDE_DIR\commands\" -Force
-        }
-    }
-    "business" {
-        ($commonCmds + @("proposal", "pricing", "weekly")) | ForEach-Object {
-            $src = "$KUN_DIR\.claude\commands\$_.md"
-            if (Test-Path $src) { Copy-Item $src "$CLAUDE_DIR\commands\" -Force }
-        }
-    }
-    "content" {
-        ($commonCmds + @("translate", "content-calendar", "weekly")) | ForEach-Object {
-            $src = "$KUN_DIR\.claude\commands\$_.md"
-            if (Test-Path $src) { Copy-Item $src "$CLAUDE_DIR\commands\" -Force }
-        }
-    }
-    "ops" {
-        ($commonCmds + @("monitor", "costs", "incident", "weekly")) | ForEach-Object {
-            $src = "$KUN_DIR\.claude\commands\$_.md"
-            if (Test-Path $src) { Copy-Item $src "$CLAUDE_DIR\commands\" -Force }
-        }
-    }
+# All commands/skills
+Get-ChildItem "$KUN_DIR\.claude\commands\*.md" -EA SilentlyContinue | ForEach-Object {
+    Copy-Item $_.FullName "$CLAUDE_DIR\commands\" -Force
 }
 $cmdCount = (Get-ChildItem "$CLAUDE_DIR\commands\*.md" -EA SilentlyContinue).Count
 Info "commands ($cmdCount)"
 
-# Agent index
-$roleIndex = if ($Role -eq "engineer") { "$KUN_DIR\.claude\agents\_index.md" } else { "$KUN_DIR\.claude\agents\_index-$Role.md" }
-if (Test-Path $roleIndex) {
-    Copy-Item $roleIndex "$CLAUDE_DIR\agents\_index.md" -Force
+# Full agent index
+if (Test-Path "$KUN_DIR\.claude\agents\_index.md") {
+    Copy-Item "$KUN_DIR\.claude\agents\_index.md" "$CLAUDE_DIR\agents\_index.md" -Force
     Info "agent index (_index.md)"
 }
 
-# Settings
-if ($Role -eq "engineer") {
-    Copy-Item "$KUN_DIR\.claude\settings-windows.json" "$CLAUDE_DIR\settings.json" -Force
-    Info "settings (full + hooks)"
-} else {
-    @'
-{
-  "env": {
-    "DEV_PORT": "3000"
-  }
-}
-'@ | Set-Content "$CLAUDE_DIR\settings.json"
-    Info "settings (minimal)"
-}
+# Full settings + hooks
+Copy-Item "$KUN_DIR\.claude\settings-windows.json" "$CLAUDE_DIR\settings.json" -Force
+Info "settings (full + hooks)"
 
-# MCP
-$mcpFile = switch ($Role) {
-    "engineer" { "$KUN_DIR\.claude\mcp.json" }
-    "business" { "$KUN_DIR\.claude\mcp-business.json" }
-    "content"  { "$KUN_DIR\.claude\mcp-content.json" }
-    "ops"      { "$KUN_DIR\.claude\mcp-ops.json" }
-}
-if (Test-Path $mcpFile) {
-    Copy-Item $mcpFile "$CLAUDE_DIR\mcp.json" -Force
+# Full MCP fleet
+if (Test-Path "$KUN_DIR\.claude\mcp.json") {
+    Copy-Item "$KUN_DIR\.claude\mcp.json" "$CLAUDE_DIR\mcp.json" -Force
     $mcpCount = (Select-String -Path "$CLAUDE_DIR\mcp.json" -Pattern '"description"' -EA SilentlyContinue).Count
     Info "MCP servers ($mcpCount)"
 }

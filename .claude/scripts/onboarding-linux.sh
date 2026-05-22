@@ -30,7 +30,7 @@ set -e
 
 # ── Args ────────────────────────────────────────────────────────
 ROLE="" GIST_ID="" QUIET=0 GIT_NAME_ARG="" GIT_EMAIL_ARG=""
-WITH_TAILSCALE=0 ALL_REPOS=1 REPOS_DIR="$HOME"
+WITH_TAILSCALE=0 ALL_REPOS=1 REPOS_DIR="$HOME" HOGWARTS_DEV=0
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --quiet)            QUIET=1; shift ;;
@@ -39,6 +39,7 @@ while [[ $# -gt 0 ]]; do
         --repos-dir)        REPOS_DIR="$2"; shift 2 ;;
         --with-tailscale)   WITH_TAILSCALE=1; shift ;;
         --essentials-only)  ALL_REPOS=0; shift ;;
+        --hogwarts-dev)     HOGWARTS_DEV=1; shift ;;
         --*)                echo "Unknown flag: $1" >&2; exit 1 ;;
         *)
             if [[ -z "$ROLE" ]]; then ROLE="$1"
@@ -77,6 +78,7 @@ if [[ -z "$ROLE" ]]; then
     echo "  --email <email>    Pre-supply git email"
     echo "  --essentials-only  Skip optional org repos"
     echo "  --repos-dir <dir>  Where to save databayt repos (default: \$HOME)"
+    echo "  --hogwarts-dev     Set up hogwarts local dev (pnpm + DB seed + build)"
     echo "  --with-tailscale   Install Tailscale + 'up --ssh'"
     echo ""
     echo "One-liner:"
@@ -213,28 +215,27 @@ step "2" "Applications — VS Code, WebStorm, Chrome"
 HAS_SNAP=0
 command -v snap >/dev/null 2>&1 && HAS_SNAP=1
 
-if [[ "$ROLE" == "engineer" ]]; then
-    # VS Code
-    if ! command -v code >/dev/null 2>&1; then
-        if [[ "$HAS_SNAP" == "1" ]]; then
-            sudo snap install code --classic >/dev/null 2>&1 && pass "VS Code (snap)" || info "VS Code snap install failed — install manually"
-        else
-            info "snap not available — install VS Code manually from https://code.visualstudio.com/"
-        fi
+# IDEs on every machine — full workstation regardless of role
+# VS Code
+if ! command -v code >/dev/null 2>&1; then
+    if [[ "$HAS_SNAP" == "1" ]]; then
+        sudo snap install code --classic >/dev/null 2>&1 && pass "VS Code (snap)" || info "VS Code snap install failed — install manually"
     else
-        pass "VS Code"
+        info "snap not available — install VS Code manually from https://code.visualstudio.com/"
     fi
+else
+    pass "VS Code"
+fi
 
-    # WebStorm
-    if ! command -v webstorm >/dev/null 2>&1 && [[ ! -d "/snap/webstorm" ]]; then
-        if [[ "$HAS_SNAP" == "1" ]]; then
-            sudo snap install webstorm --classic >/dev/null 2>&1 && pass "WebStorm (snap)" || info "WebStorm snap install failed — install manually from jetbrains.com"
-        else
-            info "snap not available — install WebStorm manually from https://www.jetbrains.com/webstorm/"
-        fi
+# WebStorm
+if ! command -v webstorm >/dev/null 2>&1 && [[ ! -d "/snap/webstorm" ]]; then
+    if [[ "$HAS_SNAP" == "1" ]]; then
+        sudo snap install webstorm --classic >/dev/null 2>&1 && pass "WebStorm (snap)" || info "WebStorm snap install failed — install manually from jetbrains.com"
     else
-        pass "WebStorm"
+        info "snap not available — install WebStorm manually from https://www.jetbrains.com/webstorm/"
     fi
+else
+    pass "WebStorm"
 fi
 
 # Chrome — only via snap or manual install (no official package in most distros)
@@ -335,15 +336,14 @@ symlink_home() {
         ln -sf "$REPOS_DIR/$repo" "$HOME/$repo" && info "~/$repo → $REPOS_DIR/$repo"
 }
 
+# Every machine clones the full org — any machine can be any task.
 clone_repo "kun"; symlink_home "kun"
-if [[ "$ROLE" == "engineer" ]]; then
-    clone_repo "hogwarts"; symlink_home "hogwarts"
-    clone_repo "codebase"; symlink_home "codebase"
-    if [[ "$ALL_REPOS" == "1" ]]; then
-        for repo in shadcn radix souq mkan shifa swift-app distributed-computer marketing; do
-            clone_repo "$repo"; symlink_home "$repo"
-        done
-    fi
+clone_repo "hogwarts"; symlink_home "hogwarts"
+clone_repo "codebase"; symlink_home "codebase"
+if [[ "$ALL_REPOS" == "1" ]]; then
+    for repo in shadcn radix souq mkan shifa swift-app distributed-computer marketing; do
+        clone_repo "$repo"; symlink_home "$repo"
+    done
 fi
 
 # =============================================================================
@@ -459,7 +459,8 @@ step "7" "Hogwarts — dependencies, database, seed"
 
 HOGWARTS_DIR="$REPOS_DIR/hogwarts"
 
-if [[ "$ROLE" == "engineer" && -d "$HOGWARTS_DIR" ]]; then
+# Heavy local-dev setup is opt-in (--hogwarts-dev), not role-gated
+if [[ "$HOGWARTS_DEV" == "1" && -d "$HOGWARTS_DIR" ]]; then
     cd "$HOGWARTS_DIR"
 
     if [[ ! -f ".env" ]]; then
@@ -500,12 +501,10 @@ if [[ "$ROLE" == "engineer" && -d "$HOGWARTS_DIR" ]]; then
     fi
 
     cd "$HOME"
+elif [[ "$HOGWARTS_DEV" == "1" ]]; then
+    info "Hogwarts not cloned — skipped"
 else
-    if [[ "$ROLE" == "engineer" ]]; then
-        info "Hogwarts not cloned — skipped"
-    else
-        info "Hogwarts skipped (role: $ROLE)"
-    fi
+    info "Hogwarts local dev skipped (pass --hogwarts-dev to set it up)"
 fi
 
 # =============================================================================
@@ -525,10 +524,8 @@ command -v opencode >/dev/null 2>&1 && pass "opencode" || info "opencode (option
 gh auth status >/dev/null 2>&1      && pass "GitHub auth" || fail "GitHub auth"
 
 [[ -d "$REPOS_DIR/kun" ]]                && pass "kun repo"    || fail "kun"
-if [[ "$ROLE" == "engineer" ]]; then
-    [[ -d "$REPOS_DIR/hogwarts" ]]       && pass "hogwarts"     || fail "hogwarts"
-    [[ -d "$REPOS_DIR/codebase" ]]       && pass "codebase"     || fail "codebase"
-fi
+[[ -d "$REPOS_DIR/hogwarts" ]]           && pass "hogwarts"     || fail "hogwarts"
+[[ -d "$REPOS_DIR/codebase" ]]           && pass "codebase"     || fail "codebase"
 
 [[ -f "$HOME/.claude/CLAUDE.md" ]]   && pass "Kun CLAUDE.md"  || fail "Kun CLAUDE.md"
 [[ -f "$HOME/.claude/settings.json" ]] && pass "settings.json" || fail "settings.json"
@@ -584,7 +581,7 @@ echo "  • CLI: 'claude' / 'c' / 'opencode' / 'o'"
 echo "  • Browser: https://claude.ai/code (same projects as CLI)"
 echo "  • IDE: install Claude plugin from VS Code/WebStorm Marketplace"
 
-if [[ "$ROLE" == "engineer" ]]; then
+if [[ "$HOGWARTS_DEV" == "1" ]]; then
     echo ""
     echo -e "${BD}Run hogwarts:${NC}"
     echo "  cd ~/hogwarts && pnpm dev"

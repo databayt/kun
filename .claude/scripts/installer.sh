@@ -202,6 +202,14 @@ if [[ -z "$WITH_TAILSCALE" ]]; then
     state_set withTailscale "$WITH_TAILSCALE"
 fi
 
+# Hogwarts local dev — opt-in (heavy: pnpm + DB seed + build, ~10 min)
+HOGWARTS_DEV=$(state_get hogwartsDev)
+if [[ -z "$HOGWARTS_DEV" ]]; then
+    HD_ANS=$(ask_choice "Set up hogwarts local dev now? (pnpm + DB seed + build, ~10 min)\n\nSkip if this machine won't run hogwarts locally — you can add it later." "Yes" "No")
+    [[ "$HD_ANS" == "Yes" ]] && HOGWARTS_DEV="1" || HOGWARTS_DEV="0"
+    state_set hogwartsDev "$HOGWARTS_DEV"
+fi
+
 # =============================================================================
 # ACT 2 — Silent batch (in terminal; notifications on phase transitions)
 # =============================================================================
@@ -212,6 +220,7 @@ BACKEND_ARGS=("$ROLE")
 BACKEND_ARGS+=("--quiet" "--name" "$GIT_NAME_ARG" "--email" "$GIT_EMAIL_ARG")
 [[ -n "$REPOS_DIR" && "$REPOS_DIR" != "$HOME" ]] && BACKEND_ARGS+=("--repos-dir" "$REPOS_DIR")
 [[ "$WITH_TAILSCALE" == "1" ]] && BACKEND_ARGS+=("--with-tailscale")
+[[ "$HOGWARTS_DEV" == "1" ]] && BACKEND_ARGS+=("--hogwarts-dev")
 
 echo ""
 echo "════════════════════════════════════════════════════"
