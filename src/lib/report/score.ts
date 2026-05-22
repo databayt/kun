@@ -102,9 +102,15 @@ export function computeScore(
     }
   }
 
-  // AI failure cap
-  if (ctx.triage === null && bucket === "verified-report") {
-    bucket = "needs-human";
+  // AI failure handling — when triage is unavailable (no/invalid ANTHROPIC key
+  // or API error) we can't auto-assess, so never silently drop a report that
+  // already cleared the hard filters: cap the top (no auto-fix without AI
+  // confirmation) AND floor the bottom (a human reviews it). Everything that
+  // passed HF lands as needs-human. Mirrors the captcha-degradation principle:
+  // missing infra must never silently eat a legit report.
+  if (ctx.triage === null) {
+    if (bucket === "verified-report") bucket = "needs-human";
+    if (bucket === "silent-reject") bucket = "needs-human";
   }
 
   // Severity escalation
