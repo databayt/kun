@@ -291,13 +291,14 @@ fi
 
 # 3e. Final health check
 notify "Verifying..." "Running health check"
-HEALTH_OUT=""
+HEALTH_STATUS="(health.sh not found)"
 if [[ -f "$HOME/.claude/scripts/health.sh" ]]; then
-    HEALTH_OUT=$(bash "$HOME/.claude/scripts/health.sh" 2>&1 | tail -5 || true)
+    HEALTH_STATUS=$(bash "$HOME/.claude/scripts/health.sh" 2>&1 | head -1 || true)
 fi
 
 # Final dialog
 FINAL_MSG="Setup complete! Role: $ROLE\n\n"
+FINAL_MSG+="Config health: $HEALTH_STATUS\n\n"
 FINAL_MSG+="Tools: git, node, pnpm, gh, claude, opencode\n"
 FINAL_MSG+="Repos: ~/kun"
 [[ "$ROLE" == "engineer" ]] && FINAL_MSG+=", ~/hogwarts, ~/codebase, +org repos"
