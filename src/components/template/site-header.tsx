@@ -18,7 +18,8 @@ export function SiteHeader({ lang }: SiteHeaderProps) {
     <header className="bg-background sticky top-0 z-50 w-full">
       <div className="container-wrapper">
         <div className="flex h-(--header-height) items-center gap-2 md:gap-4 **:data-[slot=separator]:!h-4">
-          <Link href={`/${lang}`} className="flex items-center gap-1.5 me-6">
+          {/* Logo — hidden on mobile; the hamburger takes its place */}
+          <Link href={`/${lang}`} className="me-6 hidden items-center gap-1.5 md:flex">
             <span className="font-bold">Kun</span>
           </Link>
 
@@ -44,9 +45,9 @@ export function SiteHeader({ lang }: SiteHeaderProps) {
             <UserButton />
           </div>
 
-          {/* Mobile hamburger — visible below lg */}
+          {/* Mobile hamburger — at the start on mobile (logo's place), pushed right from md */}
           <MobileNav
-            className="ms-auto flex lg:hidden"
+            className="flex md:ms-auto lg:hidden"
             lang={lang}
             items={siteNav}
             sections={docsNav}
