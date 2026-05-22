@@ -308,7 +308,7 @@ fi
 # Final dialog
 FINAL_MSG="Setup complete! Role: $ROLE\n\n"
 FINAL_MSG+="Config health: $HEALTH_STATUS\n\n"
-FINAL_MSG+="Tools: git, node, pnpm, gh, claude, opencode\n"
+FINAL_MSG+="Tools: git, node, pnpm, gh, claude\n"
 FINAL_MSG+="Repos: ~/kun"
 [[ "$ROLE" == "engineer" ]] && FINAL_MSG+=", ~/hogwarts, ~/codebase, +org repos"
 FINAL_MSG+="\nConfig: ~/.claude/ (agents, skills, MCP, hooks)\n\n"

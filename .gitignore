@@ -46,7 +46,3 @@ pnpm-debug.log*
 
 # Anthropic crawler artifacts (runtime cache)
 scripts/crawl-anthropic/state/
-
-# OpenCode per-developer config (the installer writes a global one)
-opencode.json
-tui.json
