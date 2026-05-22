@@ -81,18 +81,14 @@ MCP servers are configured in `~/.claude/mcp.json`:
 
 ## Installation
 
+Every machine gets the full MCP fleet (all 18 servers) — access is scoped by secrets (the Gist you're handed), not by config. One command, role is just a label:
+
 ```bash
-# Engineer (all 18 servers)
-cd ~/kun && bash .claude/scripts/install.sh
+# macOS/Linux
+cd ~/kun && bash .claude/scripts/setup.sh engineer
 
-# Business role (8 servers)
-cd ~/kun && bash .claude/scripts/install.sh business
-
-# Content role (8 servers)
-cd ~/kun && bash .claude/scripts/install.sh content
-
-# Ops role (9 servers)
-cd ~/kun && bash .claude/scripts/install.sh ops
+# Windows (PowerShell)
+cd ~/kun; .\.claude\scripts\setup.ps1 -Role engineer
 ```
 
 ## Troubleshooting — Browser / Playwright MCP

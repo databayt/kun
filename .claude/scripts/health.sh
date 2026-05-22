@@ -67,30 +67,20 @@ RULE_COUNT=$(ls "$CLAUDE_DIR/rules/"*.md 2>/dev/null | wc -l | tr -d ' ')
 [ "$RULE_COUNT" -gt 0 ] && check pass "rules/" "$RULE_COUNT files" || check warn "rules/" "empty"
 [ -d "$CLAUDE_DIR/memory" ] && check pass "memory/" "exists" || check warn "memory/" "missing"
 
-# ── MCP server count ────────────────────────────────────────────
+# ── MCP server count (universal — every machine gets the full fleet) ──
+# Secrets are scoped, not config: a server without a key just doesn't
+# connect, so the full mcp.json is expected on every machine.
 if [ -f "$CLAUDE_DIR/mcp.json" ]; then
     MCP_COUNT=$(grep -c '"description"' "$CLAUDE_DIR/mcp.json" 2>/dev/null || echo 0)
-    case "$ROLE" in
-        engineer) EXPECTED=20; ;; # ~25 servers
-        business) EXPECTED=6; ;;
-        content)  EXPECTED=6; ;;
-        ops)      EXPECTED=7; ;;
-        *)        EXPECTED=1; ;;
-    esac
+    EXPECTED=18
     [ "$MCP_COUNT" -ge "$EXPECTED" ] && check pass "MCP servers" "$MCP_COUNT (expected ≥$EXPECTED)" || \
         check warn "MCP servers" "$MCP_COUNT (expected ≥$EXPECTED)"
 fi
 
-# ── Expected commands per role ───────────────────────────────────
-case "$ROLE" in
-    engineer) EXPECTED_CMDS=20; ;;
-    business) EXPECTED_CMDS=6; ;;
-    content)  EXPECTED_CMDS=6; ;;
-    ops)      EXPECTED_CMDS=7; ;;
-    *)        EXPECTED_CMDS=1; ;;
-esac
-[ "$CMD_COUNT" -ge "$EXPECTED_CMDS" ] && check pass "commands scope" "$CMD_COUNT (expected ≥$EXPECTED_CMDS)" || \
-    check warn "commands scope" "$CMD_COUNT (expected ≥$EXPECTED_CMDS)"
+# ── Expected commands (universal — full skill set on every machine) ──
+EXPECTED_CMDS=20
+[ "$CMD_COUNT" -ge "$EXPECTED_CMDS" ] && check pass "commands" "$CMD_COUNT (expected ≥$EXPECTED_CMDS)" || \
+    check warn "commands" "$CMD_COUNT (expected ≥$EXPECTED_CMDS)"
 
 # ── Permissions ──────────────────────────────────────────────────
 if [ -f "$CLAUDE_DIR/settings.json" ]; then

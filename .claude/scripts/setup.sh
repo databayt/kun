@@ -75,88 +75,49 @@ info "scripts"
 
 echo ""
 
-# ── Scoped config (role-specific) ───────────────────────────────
-echo -e "${B}Scoped config ($ROLE)${NC}"
+# ── Full config (universal — every machine is a full autonomous worker) ──
+# Role no longer scopes capability; it's only a label + secrets-trust tier.
+# Secrets stay scoped via which Gist you're handed — MCP servers without a
+# key simply don't connect, so a full mcp.json is safe everywhere.
+echo -e "${B}Full config${NC}"
 
-# Commands/skills per role
-COMMON_CMDS="docs repos screenshot codebase"
-case "$ROLE" in
-    engineer)
-        cp "$KUN_DIR/.claude/commands/"*.md "$CLAUDE_DIR/commands/" 2>/dev/null || true
-        ;;
-    business)
-        for cmd in $COMMON_CMDS proposal pricing weekly; do
-            cp "$KUN_DIR/.claude/commands/$cmd.md" "$CLAUDE_DIR/commands/" 2>/dev/null || true
-        done
-        ;;
-    content)
-        for cmd in $COMMON_CMDS translate content-calendar weekly; do
-            cp "$KUN_DIR/.claude/commands/$cmd.md" "$CLAUDE_DIR/commands/" 2>/dev/null || true
-        done
-        ;;
-    ops)
-        for cmd in $COMMON_CMDS monitor costs incident weekly; do
-            cp "$KUN_DIR/.claude/commands/$cmd.md" "$CLAUDE_DIR/commands/" 2>/dev/null || true
-        done
-        ;;
-esac
+# All commands/skills
+cp "$KUN_DIR/.claude/commands/"*.md "$CLAUDE_DIR/commands/" 2>/dev/null || true
 CMD_COUNT=$(ls "$CLAUDE_DIR/commands/"*.md 2>/dev/null | wc -l | tr -d ' ')
 info "commands ($CMD_COUNT)"
 
-# Agent index per role
-ROLE_INDEX="$KUN_DIR/.claude/agents/_index-${ROLE}.md"
-if [[ "$ROLE" == "engineer" ]]; then
-    ROLE_INDEX="$KUN_DIR/.claude/agents/_index.md"
-fi
-if [ -f "$ROLE_INDEX" ]; then
-    cp "$ROLE_INDEX" "$CLAUDE_DIR/agents/_index.md"
+# Full agent index
+if [ -f "$KUN_DIR/.claude/agents/_index.md" ]; then
+    cp "$KUN_DIR/.claude/agents/_index.md" "$CLAUDE_DIR/agents/_index.md"
     info "agent index (_index.md)"
 fi
 
-# Settings per role
-if [[ "$ROLE" == "engineer" ]]; then
-    if [[ "$(uname)" == "Darwin" ]]; then
-        cp "$KUN_DIR/.claude/settings.json" "$CLAUDE_DIR/settings.json"
-    else
-        cp "$KUN_DIR/.claude/settings-windows.json" "$CLAUDE_DIR/settings.json"
-    fi
-    info "settings (full + hooks)"
+# Full settings + hooks
+if [[ "$(uname)" == "Darwin" ]]; then
+    cp "$KUN_DIR/.claude/settings.json" "$CLAUDE_DIR/settings.json"
 else
-    cat > "$CLAUDE_DIR/settings.json" << 'SETTINGS'
-{
-  "env": {
-    "DEV_PORT": "3000"
-  }
-}
-SETTINGS
-    info "settings (minimal)"
+    cp "$KUN_DIR/.claude/settings-windows.json" "$CLAUDE_DIR/settings.json" 2>/dev/null || \
+        cp "$KUN_DIR/.claude/settings.json" "$CLAUDE_DIR/settings.json"
 fi
 chmod 600 "$CLAUDE_DIR/settings.json" 2>/dev/null || true
+info "settings (full + hooks)"
 
-# MCP per role
-case "$ROLE" in
-    engineer)  MCP_SRC="$KUN_DIR/.claude/mcp.json" ;;
-    business)  MCP_SRC="$KUN_DIR/.claude/mcp-business.json" ;;
-    content)   MCP_SRC="$KUN_DIR/.claude/mcp-content.json" ;;
-    ops)       MCP_SRC="$KUN_DIR/.claude/mcp-ops.json" ;;
-esac
-if [ -f "$MCP_SRC" ]; then
-    cp "$MCP_SRC" "$CLAUDE_DIR/mcp.json"
+# Full MCP fleet
+if [ -f "$KUN_DIR/.claude/mcp.json" ]; then
+    cp "$KUN_DIR/.claude/mcp.json" "$CLAUDE_DIR/mcp.json"
     chmod 600 "$CLAUDE_DIR/mcp.json" 2>/dev/null || true
     MCP_COUNT=$(grep -c '"description"' "$CLAUDE_DIR/mcp.json" 2>/dev/null || echo 0)
     info "MCP servers ($MCP_COUNT)"
 fi
 
-# Codebase clone (engineer only)
-if [[ "$ROLE" == "engineer" ]]; then
-    CODEBASE_DIR="$HOME/codebase"
-    if [ ! -d "$CODEBASE_DIR" ]; then
-        echo ""
-        echo -e "${Y}Cloning codebase...${NC}"
-        git clone git@github.com:databayt/codebase.git "$CODEBASE_DIR" 2>/dev/null || \
-        git clone https://github.com/databayt/codebase.git "$CODEBASE_DIR" 2>/dev/null || \
-        info "clone failed — run manually: git clone git@github.com:databayt/codebase.git ~/codebase"
-    fi
+# Codebase clone (every machine)
+CODEBASE_DIR="$HOME/codebase"
+if [ ! -d "$CODEBASE_DIR" ]; then
+    echo ""
+    echo -e "${Y}Cloning codebase...${NC}"
+    git clone git@github.com:databayt/codebase.git "$CODEBASE_DIR" 2>/dev/null || \
+    git clone https://github.com/databayt/codebase.git "$CODEBASE_DIR" 2>/dev/null || \
+    info "clone failed — run manually: git clone git@github.com:databayt/codebase.git ~/codebase"
 fi
 
 # Claude CLI (install if missing)

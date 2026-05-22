@@ -51,10 +51,10 @@ Provisioning lands in six layers. Run these to confirm each — all green means 
 |---|---|---|
 | **Tools** | `for t in git node pnpm gh claude opencode; do command -v $t; done` | a path prints for each |
 | **Auth** | `gh auth status && ssh -T git@github.com` | "Logged in"; "successfully authenticated" |
-| **Code** | `ls ~/kun ~/hogwarts ~/codebase` *(engineer)* | directories exist |
+| **Code** | `ls ~/kun ~/hogwarts ~/codebase` | directories exist (all org repos on every machine) |
 | **Config** | `bash ~/.claude/scripts/health.sh` | `✅ healthy` (0 errors) |
 | **Surfaces** | `claude doctor` | all checks green |
-| **Product** *(engineer)* | `cd ~/hogwarts && pnpm dev` → open `localhost:3000` | login works (`admin@kingfahad.edu` / `1234`) |
+| **Product** *(if `--hogwarts-dev`)* | `cd ~/hogwarts && pnpm dev` → open `localhost:3000` | login works (`admin@kingfahad.edu` / `1234`) |
 
 `bash ~/.claude/scripts/health.sh` is the authoritative config gate but only audits `~/.claude/` — pair it with the other rows for a complete check.
 
@@ -67,27 +67,31 @@ Want a different result? Edit the source, then re-run the bootstrap (idempotent)
 | Which repos clone | Phase 4 repo list in `onboarding-{mac,linux}.sh` / `foreach` in `onboarding-windows.ps1`; or pass `--essentials-only` for just kun/hogwarts/codebase |
 | Where repos land | `--repos-dir <path>` (Mac/Linux) / `-ReposDir <path>` (Windows), or the wizard's "where to save repos" prompt |
 | Which tools install | Phase 1–2 of the `onboarding-*` backend for your OS |
-| MCP servers per role | role `case` in `setup.sh` / `setup.ps1` + the `mcp-<role>.json` files |
-| Skills / commands per role | role `case` in `setup.sh` (`COMMON_CMDS` + per-role list) |
-| Agents available | all are copied — add/remove files in `.claude/agents/` |
-| Secrets / env | `secrets.sh <GIST_ID>` + the contents of the private Gist |
+| MCP servers (universal) | edit `.claude/mcp.json` — every machine gets the full fleet |
+| Skills / commands (universal) | add/remove files in `.claude/commands/` — copied in full to every machine |
+| Agents (universal) | add/remove files in `.claude/agents/` |
+| Which keys a machine holds | scoped by the **Gist** you hand someone (`secrets.sh <GIST_ID>`), not by config |
+| hogwarts local dev | `--hogwarts-dev` / `-HogwartsDev` (default off) |
 | Tailscale on/off | `--with-tailscale` / `-WithTailscale` (default off) |
-| Role | re-run the wizard, or pass a different role arg to the backend |
 
 All installer scripts live in `~/kun/.claude/scripts/`. Print any backend's flags with no args (e.g. `bash ~/kun/.claude/scripts/onboarding-mac.sh`).
 
-### What each profile gets
+### Every machine is a full autonomous worker
 
-"Fully provisioned" is relative to your **role × OS × plan** — a missing surface may be correct for you, not a bug:
+**Config is universal — the machine, not the person, is the unit of capability.** Every machine gets all agents, all skills, the full MCP fleet, all hooks, and the entire org's repos. Any machine can run any task. Your **role** is just a label + a *secrets-trust tier* — it does not limit what your computer can do.
 
-| | engineer | business | content | ops |
-|---|:-:|:-:|:-:|:-:|
-| Repos | all org | kun | kun | kun |
-| MCP servers | ~18 | ~6 | ~6 | ~7 |
-| hogwarts local dev | ✓ | — | — | — |
-| Claude Desktop | Mac/Win | Mac/Win | Mac/Win | Mac/Win |
+| What | Every machine |
+|---|---|
+| Agents / skills / hooks | full set |
+| MCP servers | full fleet (~18) |
+| Repos | all of the databayt org |
+| IDEs (WebStorm + VS Code) | installed |
+| hogwarts local dev | opt-in (`--hogwarts-dev` / wizard prompt) — not role-gated |
 
-- **Linux**: Claude Desktop doesn't exist on Linux — your surfaces are the CLI, `claude.ai/code` in the browser, and the IDE plugins. A Linux box with those is complete; don't expect the Chat/Cowork/Code tabs.
+What still varies (and why):
+
+- **Secrets** — scoped, not by config but by which **Gist** you're handed. A machine only holds the keys it's trusted with; an MCP server without its key simply doesn't connect (harmless). Full config everywhere, contained blast radius.
+- **Linux**: Claude Desktop doesn't exist on Linux — surfaces are the CLI, `claude.ai/code` in the browser, and the IDE plugins. A Linux box with those is complete; don't expect the Chat/Cowork/Code tabs.
 - **No Pro/Max**: Desktop tabs are unavailable — the intended path is OpenCode + an `ANTHROPIC_API_KEY`.
 
 ---
@@ -117,11 +121,12 @@ The wizard auto-detects what it can and only asks for what it can't:
 | Welcome / start | always shown |
 | GitHub account? | always asked (opens `github.com/join` if "No") |
 | Anthropic account? | always asked (opens `claude.ai/login` if "No") |
-| Role: engineer / business / content / ops | inferred from `~/.claude/mcp.json` if exists |
+| Role (label + secrets-trust tier — does *not* limit config) | inferred from `~/.claude/mcp.json` if exists |
 | Full name, email (for git commits) | inferred from `git config --global` if set |
 | Secrets Gist ID | asked once, then persisted |
 | Pro/Max subscription? (affects Desktop tabs) | asked once |
 | Where to save databayt repos? | asked once: `Home root` / `~/databayt/` / `Custom...` |
+| Set up hogwarts local dev? (heavy, opt-in) | asked once |
 | Tailscale SSH? (remote control) | asked once |
 
 All answers persist in a state file. Re-runs skip questions already answered.
@@ -133,12 +138,12 @@ Eight phases run in the background. You can minimize the terminal and do other w
 | Phase | What |
 |---|---|
 | 1 | System Foundation — build tools, git, Node 22 LTS, pnpm, gh CLI |
-| 2 | Applications — WebStorm, VS Code, Chrome (engineer role) |
+| 2 | Applications — WebStorm, VS Code, Chrome (every machine) |
 | 3 | GitHub — SSH key, `gh auth login --web`, key uploaded |
-| 4 | Clone Repositories — kun + (engineer: hogwarts, codebase, all org repos) |
+| 4 | Clone Repositories — the full databayt org (every machine) |
 | 5 | Claude — Code CLI, Desktop (Mac/Win), OpenCode, Desktop MCP symlink, AGENTS.md, `c` + `o` functions in shell |
-| 6 | Kun Engine — `setup.sh <role>` populates `~/.claude/`, `secrets.sh` pulls `.env` |
-| 7 | Hogwarts — pnpm install, prisma generate + push + seed, build verify (engineer only) |
+| 6 | Kun Engine — `setup.sh` installs the full config (agents, skills, MCP, hooks); `secrets.sh` pulls `.env` |
+| 7 | Hogwarts — pnpm install, prisma generate + push + seed, build verify (only with `--hogwarts-dev`) |
 | 8 | Health Check — every tool / repo / config verified |
 | 9 (opt) | Tailscale — install + `up --ssh` if you opted in |
 
@@ -152,7 +157,7 @@ What's left needs a human at the keyboard. Auto-polling OAuth means the only **m
 |---|---|---|
 | Sign in to Claude Desktop | 1 (open + sign in) | not Pro/Max, or Linux |
 | Toggle computer-use in Desktop Settings | 1 | not Pro/Max, or Linux |
-| Install Claude Code plugin in WebStorm | 1 (if not auto) | not engineer role |
+| Install Claude Code plugin in WebStorm | 1 (if not auto) | — (WebStorm is on every machine) |
 | VS Code Claude extension | **0** | auto-installed via `code --install-extension` |
 | GitHub OAuth | **0** | `gh auth login --web` polls until done |
 | Anthropic CLI OAuth | **0** | `claude` first-run polls until done |
@@ -186,25 +191,13 @@ If something's missing the wizard skips that step and lists it under "things to 
 
 ## Which repos you get
 
-The wizard clones every active databayt org repo to your chosen directory (`~/`, `~/databayt/`, or custom). Engineer role gets everything; other roles get just `kun`.
+**Every machine clones the full databayt org** to your chosen directory (`~/`, `~/databayt/`, or custom) — any machine can touch any repo:
 
-| Repo | Engineer | Business | Content | Ops |
-|---|:-:|:-:|:-:|:-:|
-| **kun** — the engine config | ✓ | ✓ | ✓ | ✓ |
-| **hogwarts** — multi-tenant LMS (flagship) | ✓ | | | |
-| **codebase** — patterns, agents, blocks | ✓ | | | |
-| **shadcn** — UI component library | ✓ | | | |
-| **radix** — UI primitives | ✓ | | | |
-| **souq** — e-commerce marketplace | ✓ | | | |
-| **mkan** — rentals + booking | ✓ | | | |
-| **shifa** — medical platform | ✓ | | | |
-| **swift-app** — iOS/Swift mobile | ✓ | | | |
-| **distributed-computer** — infra | ✓ | | | |
-| **marketing** — landing pages | ✓ | | | |
+`kun` (engine config), `hogwarts` (multi-tenant LMS), `codebase` (patterns, agents, blocks), `shadcn` (UI library), `radix` (UI primitives), `souq` (e-commerce), `mkan` (rentals), `shifa` (medical), `swift-app` (iOS/Swift), `distributed-computer` (infra), `marketing` (landing pages).
 
 When you pick a custom directory, the wizard symlinks `~/kun`, `~/hogwarts`, etc. back to it so all existing tooling that hard-codes `~/kun` keeps working.
 
-To skip the optional repos: pass `--essentials-only` (Mac/Linux) or `-EssentialsOnly` (Windows) — keeps just kun, hogwarts, codebase.
+To clone only the essentials (kun, hogwarts, codebase): pass `--essentials-only` (Mac/Linux) or `-EssentialsOnly` (Windows).
 
 ---
 

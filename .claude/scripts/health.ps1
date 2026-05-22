@@ -50,17 +50,18 @@ if ($ruleCount -gt 0) { Check pass "rules/" "$ruleCount files" } else { Check wa
 if (Test-Path "$CLAUDE_DIR\memory") { Check pass "memory/" "exists" } else { Check warn "memory/" "missing" }
 
 # ── MCP count ────────────────────────────────────────────────────
+# Universal — every machine gets the full fleet; scoped secrets, not config
 if (Test-Path "$CLAUDE_DIR\mcp.json") {
     $mcpCount = (Select-String -Path "$CLAUDE_DIR\mcp.json" -Pattern '"description"' -EA SilentlyContinue).Count
-    $expected = switch ($ROLE) { "engineer" { 20 } "business" { 6 } "content" { 6 } "ops" { 7 } default { 1 } }
+    $expected = 18
     if ($mcpCount -ge $expected) { Check pass "MCP servers" "$mcpCount (expected >=$expected)" }
     else { Check warn "MCP servers" "$mcpCount (expected >=$expected)" }
 }
 
-# ── Commands scope ───────────────────────────────────────────────
-$expectedCmds = switch ($ROLE) { "engineer" { 20 } "business" { 6 } "content" { 6 } "ops" { 7 } default { 1 } }
-if ($cmdCount -ge $expectedCmds) { Check pass "commands scope" "$cmdCount (expected >=$expectedCmds)" }
-else { Check warn "commands scope" "$cmdCount (expected >=$expectedCmds)" }
+# ── Commands (universal — full skill set on every machine) ───────
+$expectedCmds = 20
+if ($cmdCount -ge $expectedCmds) { Check pass "commands" "$cmdCount (expected >=$expectedCmds)" }
+else { Check warn "commands" "$cmdCount (expected >=$expectedCmds)" }
 
 # ── CLI ──────────────────────────────────────────────────────────
 $claude = Get-Command claude -EA SilentlyContinue

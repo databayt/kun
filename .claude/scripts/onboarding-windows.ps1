@@ -27,6 +27,7 @@ param(
     [string]$GitEmail,
     [switch]$EssentialsOnly,    # default: clone all org repos
     [switch]$WithTailscale,      # optional: enable Tailscale SSH
+    [switch]$HogwartsDev,        # optional: set up hogwarts local dev
     [string]$ReposDir = $env:USERPROFILE
 )
 
@@ -142,27 +143,26 @@ if (-not $hasPnpm) {
 # =============================================================================
 Step "2" "Applications"
 
-if ($Role -eq "engineer") {
-    # WebStorm
-    $wsPath = "${env:ProgramFiles}\JetBrains\WebStorm*"
-    $wsLocal = "$HOME_DIR\AppData\Local\JetBrains\Toolbox\apps\WebStorm"
-    if (-not (Test-Path $wsPath) -and -not (Test-Path $wsLocal)) {
-        Info "Installing WebStorm..."
-        winget install --id JetBrains.WebStorm -e --accept-source-agreements --accept-package-agreements 2>$null
-        if ($?) { Pass "WebStorm installed" } else { Info "WebStorm — install manually from jetbrains.com" }
-    } else {
-        Pass "WebStorm"
-    }
+# IDEs on every machine — full workstation regardless of role
+# WebStorm
+$wsPath = "${env:ProgramFiles}\JetBrains\WebStorm*"
+$wsLocal = "$HOME_DIR\AppData\Local\JetBrains\Toolbox\apps\WebStorm"
+if (-not (Test-Path $wsPath) -and -not (Test-Path $wsLocal)) {
+    Info "Installing WebStorm..."
+    winget install --id JetBrains.WebStorm -e --accept-source-agreements --accept-package-agreements 2>$null
+    if ($?) { Pass "WebStorm installed" } else { Info "WebStorm — install manually from jetbrains.com" }
+} else {
+    Pass "WebStorm"
+}
 
-    # VS Code
-    $hasCode = Get-Command code -EA SilentlyContinue
-    if (-not $hasCode) {
-        Info "Installing VS Code..."
-        winget install --id Microsoft.VisualStudioCode -e --accept-source-agreements --accept-package-agreements
-        Pass "VS Code installed"
-    } else {
-        Pass "VS Code"
-    }
+# VS Code
+$hasCode = Get-Command code -EA SilentlyContinue
+if (-not $hasCode) {
+    Info "Installing VS Code..."
+    winget install --id Microsoft.VisualStudioCode -e --accept-source-agreements --accept-package-agreements
+    Pass "VS Code installed"
+} else {
+    Pass "VS Code"
 }
 
 # Chrome
@@ -271,16 +271,15 @@ function Symlink-Home($repo) {
     }
 }
 
+# Every machine clones the full org — any machine can be any task.
 Clone-Repo "kun"; Symlink-Home "kun"
-if ($Role -eq "engineer") {
-    Clone-Repo "hogwarts"; Symlink-Home "hogwarts"
-    Clone-Repo "codebase"; Symlink-Home "codebase"
+Clone-Repo "hogwarts"; Symlink-Home "hogwarts"
+Clone-Repo "codebase"; Symlink-Home "codebase"
 
-    if (-not $EssentialsOnly) {
-        Info "Cloning remaining databayt org repos..."
-        foreach ($repo in @("shadcn", "radix", "souq", "mkan", "shifa", "swift-app", "distributed-computer", "marketing")) {
-            Clone-Repo $repo; Symlink-Home $repo
-        }
+if (-not $EssentialsOnly) {
+    Info "Cloning remaining databayt org repos..."
+    foreach ($repo in @("shadcn", "radix", "souq", "mkan", "shifa", "swift-app", "distributed-computer", "marketing")) {
+        Clone-Repo $repo; Symlink-Home $repo
     }
 }
 
@@ -447,7 +446,8 @@ Step "7" "Hogwarts — dependencies, database, seed"
 
 $HOGWARTS_DIR = "$ReposDir\hogwarts"
 
-if ($Role -eq "engineer" -and (Test-Path $HOGWARTS_DIR)) {
+# Heavy local-dev setup is opt-in (-HogwartsDev), not role-gated
+if ($HogwartsDev -and (Test-Path $HOGWARTS_DIR)) {
     Push-Location $HOGWARTS_DIR
 
     # .env
@@ -491,10 +491,10 @@ if ($Role -eq "engineer" -and (Test-Path $HOGWARTS_DIR)) {
     if ($LASTEXITCODE -eq 0) { Pass "Build passes" } else { Info "Build issues — run 'pnpm build'" }
 
     Pop-Location
-} elseif ($Role -eq "engineer") {
+} elseif ($HogwartsDev) {
     Info "Hogwarts not cloned — skipped"
 } else {
-    Info "Hogwarts skipped (role: $Role)"
+    Info "Hogwarts local dev skipped (pass -HogwartsDev to set it up)"
 }
 
 # =============================================================================
@@ -517,11 +517,11 @@ if (Test-Path "$HOME_DIR\.ssh\id_ed25519")   { Pass "SSH key" }    else { Fail "
 $ghCheck = gh auth status 2>&1
 if ($LASTEXITCODE -eq 0) { Pass "GitHub auth" } else { Fail "GitHub auth" }
 
-# Repos
+# Repos (universal)
 if (Test-Path "$KUN_DIR")                    { Pass "kun repo" }     else { Fail "kun" }
-if ($Role -eq "engineer") {
-    if (Test-Path "$HOGWARTS_DIR")            { Pass "hogwarts repo" } else { Fail "hogwarts" }
-    if (Test-Path "$HOME_DIR\codebase")       { Pass "codebase repo" } else { Fail "codebase" }
+if (Test-Path "$HOGWARTS_DIR")               { Pass "hogwarts repo" } else { Fail "hogwarts" }
+if (Test-Path "$ReposDir\codebase")          { Pass "codebase repo" } else { Fail "codebase" }
+if ($HogwartsDev) {
     if (Test-Path "$HOGWARTS_DIR\.env")       { Pass "hogwarts .env" } else { Info "hogwarts .env (need gist)" }
     if (Test-Path "$HOGWARTS_DIR\node_modules") { Pass "hogwarts deps" } else { Info "hogwarts deps" }
 }
@@ -575,11 +575,11 @@ if (-not $GistId) {
     Write-Host "  5. Load secrets when you have the gist ID:"
     Write-Host "     & ~\kun\.claude\scripts\secrets.ps1 -GistId <ID>"
 }
-if ($Role -eq "engineer") {
-    Write-Host ""
-    Write-Host "IDE plugins (manual install from Marketplace):" -ForegroundColor Cyan
-    Write-Host "  - WebStorm: Settings -> Plugins -> search 'Claude Code' -> Install"
-    Write-Host "  - VS Code:  Extensions -> search 'Claude Code' -> Install"
+Write-Host ""
+Write-Host "IDE plugins (manual install from Marketplace):" -ForegroundColor Cyan
+Write-Host "  - WebStorm: Settings -> Plugins -> search 'Claude Code' -> Install"
+Write-Host "  - VS Code:  Extensions -> search 'Claude Code' -> Install"
+if ($HogwartsDev) {
     Write-Host ""
     Write-Host "Run hogwarts:" -ForegroundColor Cyan
     Write-Host "  cd ~\hogwarts; pnpm dev"

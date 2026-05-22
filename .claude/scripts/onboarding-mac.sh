@@ -28,7 +28,7 @@ set -e
 
 # Parse args — positional <role> [gist_id] plus optional flags
 ROLE="" GIST_ID="" QUIET=0 GIT_NAME_ARG="" GIT_EMAIL_ARG=""
-WITH_TAILSCALE=0 ALL_REPOS=1 REPOS_DIR="$HOME"
+WITH_TAILSCALE=0 ALL_REPOS=1 REPOS_DIR="$HOME" HOGWARTS_DEV=0
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --quiet)            QUIET=1; shift ;;
@@ -37,6 +37,7 @@ while [[ $# -gt 0 ]]; do
         --repos-dir)        REPOS_DIR="$2"; shift 2 ;;
         --with-tailscale)   WITH_TAILSCALE=1; shift ;;
         --essentials-only)  ALL_REPOS=0; shift ;;
+        --hogwarts-dev)     HOGWARTS_DEV=1; shift ;;
         --*)                echo "Unknown flag: $1" >&2; exit 1 ;;
         *)
             if [[ -z "$ROLE" ]]; then ROLE="$1"
@@ -86,6 +87,7 @@ if [[ -z "$ROLE" ]]; then
     echo "  --email <email>    Pre-supply git email (skips prompt)"
     echo "  --essentials-only  Clone only kun/hogwarts/codebase (default: all org repos)"
     echo "  --repos-dir <dir>  Where to save databayt org repos (default: \$HOME)"
+    echo "  --hogwarts-dev     Set up hogwarts local dev (pnpm + DB seed + build)"
     echo "  --with-tailscale   Install Tailscale + 'tailscale up --ssh' for remote/mobile"
     echo ""
     echo "One-liner:"
@@ -184,24 +186,23 @@ fi
 # =============================================================================
 step "2" "Applications"
 
-if [[ "$ROLE" == "engineer" ]]; then
-    # WebStorm
-    if [[ ! -d "/Applications/WebStorm.app" ]]; then
-        info "Installing WebStorm..."
-        brew install --cask webstorm
-        pass "WebStorm installed"
-    else
-        pass "WebStorm"
-    fi
+# IDEs on every machine — full workstation regardless of role
+# WebStorm
+if [[ ! -d "/Applications/WebStorm.app" ]]; then
+    info "Installing WebStorm..."
+    brew install --cask webstorm
+    pass "WebStorm installed"
+else
+    pass "WebStorm"
+fi
 
-    # VS Code
-    if [[ ! -d "/Applications/Visual Studio Code.app" ]]; then
-        info "Installing VS Code..."
-        brew install --cask visual-studio-code
-        pass "VS Code installed"
-    else
-        pass "VS Code"
-    fi
+# VS Code
+if [[ ! -d "/Applications/Visual Studio Code.app" ]]; then
+    info "Installing VS Code..."
+    brew install --cask visual-studio-code
+    pass "VS Code installed"
+else
+    pass "VS Code"
 fi
 
 # Chrome
@@ -307,18 +308,16 @@ symlink_home() {
         ln -sf "$REPOS_DIR/$repo" "$HOME/$repo" && info "~/$repo → $REPOS_DIR/$repo"
 }
 
+# Every machine clones the full org — any machine can be any task.
 clone_repo "kun"; symlink_home "kun"
+clone_repo "hogwarts"; symlink_home "hogwarts"
+clone_repo "codebase"; symlink_home "codebase"
 
-if [[ "$ROLE" == "engineer" ]]; then
-    clone_repo "hogwarts"; symlink_home "hogwarts"
-    clone_repo "codebase"; symlink_home "codebase"
-
-    if [[ "$ALL_REPOS" == "1" ]]; then
-        info "Cloning remaining databayt org repos..."
-        for repo in shadcn radix souq mkan shifa swift-app distributed-computer marketing; do
-            clone_repo "$repo"; symlink_home "$repo"
-        done
-    fi
+if [[ "$ALL_REPOS" == "1" ]]; then
+    info "Cloning remaining databayt org repos..."
+    for repo in shadcn radix souq mkan shifa swift-app distributed-computer marketing; do
+        clone_repo "$repo"; symlink_home "$repo"
+    done
 fi
 
 # =============================================================================
@@ -470,7 +469,8 @@ step "7" "Hogwarts — dependencies, database, seed"
 
 HOGWARTS_DIR="$REPOS_DIR/hogwarts"
 
-if [[ "$ROLE" == "engineer" && -d "$HOGWARTS_DIR" ]]; then
+# Heavy local-dev setup is opt-in (--hogwarts-dev), not role-gated
+if [[ "$HOGWARTS_DEV" == "1" && -d "$HOGWARTS_DIR" ]]; then
     cd "$HOGWARTS_DIR"
 
     # .env
@@ -516,12 +516,10 @@ if [[ "$ROLE" == "engineer" && -d "$HOGWARTS_DIR" ]]; then
     fi
 
     cd "$HOME"
+elif [[ "$HOGWARTS_DEV" == "1" ]]; then
+    info "Hogwarts not cloned — skipped"
 else
-    if [[ "$ROLE" == "engineer" ]]; then
-        info "Hogwarts not cloned — skipped"
-    else
-        info "Hogwarts skipped (role: $ROLE)"
-    fi
+    info "Hogwarts local dev skipped (pass --hogwarts-dev to set it up)"
 fi
 
 # =============================================================================
@@ -548,10 +546,11 @@ gh auth status &>/dev/null 2>&1   && pass "GitHub auth" || fail "GitHub auth"
 [[ -d "/Applications/Google Chrome.app" ]] && pass "Chrome"         || info "Chrome"
 [[ -d "/Applications/Claude.app" ]]        && pass "Claude Desktop" || info "Claude Desktop"
 
-if [[ "$ROLE" == "engineer" ]]; then
-    [[ -d "/Applications/WebStorm.app" ]]  && pass "WebStorm"       || info "WebStorm"
-    [[ -d "$HOME/hogwarts" ]]              && pass "hogwarts repo"   || fail "hogwarts"
-    [[ -d "$HOME/codebase" ]]              && pass "codebase repo"   || fail "codebase"
+# Repos + IDEs are universal now
+[[ -d "/Applications/WebStorm.app" ]]  && pass "WebStorm"       || info "WebStorm"
+[[ -d "$HOME/hogwarts" ]]              && pass "hogwarts repo"   || fail "hogwarts"
+[[ -d "$HOME/codebase" ]]              && pass "codebase repo"   || fail "codebase"
+if [[ "$HOGWARTS_DEV" == "1" ]]; then
     [[ -f "$HOME/hogwarts/.env" ]]         && pass "hogwarts .env"   || info "hogwarts .env (need gist)"
     [[ -d "$HOME/hogwarts/node_modules" ]] && pass "hogwarts deps"   || info "hogwarts deps"
 fi
@@ -606,11 +605,11 @@ if [[ -z "$GIST_ID" ]]; then
     echo "  5. Load secrets when you have the gist ID:"
     echo "     bash ~/kun/.claude/scripts/secrets.sh <GIST_ID>"
 fi
-if [[ "$ROLE" == "engineer" ]]; then
-    echo ""
-    echo -e "${BD}IDE plugins (manual install from Marketplace):${NC}"
-    echo "  • WebStorm: Settings → Plugins → search 'Claude Code' → Install"
-    echo "  • VS Code: Extensions → search 'Claude Code' → Install"
+echo ""
+echo -e "${BD}IDE plugins (manual install from Marketplace):${NC}"
+echo "  • WebStorm: Settings → Plugins → search 'Claude Code' → Install"
+echo "  • VS Code: Extensions → search 'Claude Code' → Install"
+if [[ "$HOGWARTS_DEV" == "1" ]]; then
     echo ""
     echo -e "${BD}Run hogwarts:${NC}"
     echo "  cd ~/hogwarts && pnpm dev"

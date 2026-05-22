@@ -288,14 +288,11 @@ Operational configuration: 100+ keyword-to-action mappings, MCP trigger table, s
 | context7 | Up-to-date library docs |
 | linear | Issue tracking |
 
-### Role-Specific MCP Configs
+### MCP Config — Universal
 
-| Role | Config File | Servers |
-|------|------------|---------|
-| **engineer** | mcp.json | All 18 servers |
-| **business** | mcp-business.json | github, slack, linear, stripe, notion, browser, context7, memory-bank |
-| **content** | mcp-content.json | github, slack, notion, browser, figma, context7, memory-bank, ref |
-| **ops** | mcp-ops.json | github, slack, vercel, sentry, neon, stripe, browser, posthog, memory-bank |
+Every machine gets the **full `mcp.json`** (all 18 servers). The machine, not the person, is the unit of capability — any machine can run any task. Access is controlled by **secrets, not config**: a server whose API key isn't in your `~/.claude/.env` simply doesn't connect (harmless), and which keys you hold is scoped by the **Gist** you're handed.
+
+> The legacy role-scoped `mcp-business.json` / `mcp-content.json` / `mcp-ops.json` are used only by the deprecated `install.sh`. The canonical installer is `setup.sh`, which installs the full `mcp.json` for everyone.
 
 ## Rules Engine (8 rules)
 
@@ -348,12 +345,14 @@ cd ~/kun; .\.claude\scripts\install.ps1
 
 ### Roles
 
-| Role | Skills | MCP | Hooks | Primary Human |
-|------|--------|-----|-------|---------------|
-| **engineer** | All 25 | All 18 | All 5 | Abdout, Ibrahim |
-| **business** | 11 (core + business) | 8 (mcp-business.json) | Prettier only | Ali, Mutaz |
-| **content** | 11 (core + content) | 8 (mcp-content.json) | Prettier only | Samia |
-| **ops** | 11 (core + ops) | 9 (mcp-ops.json) | All 5 | Sedon |
+Every machine gets the **full config** — all 25 skills, all 18 MCP servers, all 5 hooks. Role is a label + secrets-trust tier, not a capability gate (the machine is the unit of capability — any machine can run any task). Which API keys a machine holds is scoped by the **Gist** that person is handed.
+
+| Role | Config | Primary Human |
+|------|--------|---------------|
+| **engineer** | full (all skills, MCP, hooks) | Abdout, Ibrahim |
+| **business** | full | Ali, Mutaz |
+| **content** | full | Samia |
+| **ops** | full | Sedon |
 
 ### What the Installer Does
 
