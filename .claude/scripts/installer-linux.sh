@@ -113,13 +113,36 @@ open_url() {
     fi
 }
 
-# ── Bootstrap: clone kun if not present ─────────────────────────
+# ── Bootstrap: ensure git, then clone kun ───────────────────────
+# git is needed to clone the repo that installs git, so the wrapper
+# must provide it first. The backend (onboarding-linux.sh) re-checks
+# and no-ops if git is already present. Fresh Linux images ship curl
+# but often not git — without this, the clone below fails with a
+# misleading "check network" message.
+if ! command -v git >/dev/null 2>&1; then
+    notify "Installing" "git (prerequisite for clone)"
+    if   command -v apt-get >/dev/null 2>&1; then sudo apt-get update -y >/dev/null 2>&1 && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y git >/dev/null 2>&1
+    elif command -v dnf     >/dev/null 2>&1; then sudo dnf install -y git >/dev/null 2>&1
+    elif command -v pacman  >/dev/null 2>&1; then sudo pacman -S --noconfirm --needed git >/dev/null 2>&1
+    elif command -v zypper  >/dev/null 2>&1; then sudo zypper install -y git >/dev/null 2>&1
+    fi
+fi
+if ! command -v git >/dev/null 2>&1; then
+    echo "git is required but could not be installed automatically." >&2
+    echo "Install git, then re-run:  curl -fsSL https://kun.databayt.org/install | bash" >&2
+    exit 1
+fi
+
+# ── Clone kun if not present ────────────────────────────────────
 if [[ ! -d "$HOME/kun" ]]; then
     notify "Cloning" "kun repo"
-    git clone https://github.com/databayt/kun.git "$HOME/kun" >/dev/null 2>&1 || {
-        echo "Could not clone databayt/kun. Check network and try again." >&2
+    if ! clone_err=$(git clone https://github.com/databayt/kun.git "$HOME/kun" 2>&1); then
+        echo "Could not clone databayt/kun:" >&2
+        echo "$clone_err" >&2
+        echo "If github.com is blocked on your network (proxy/VPN/firewall), that's the likely cause —" >&2
+        echo "raw.githubusercontent.com can stay reachable while github.com is blocked." >&2
         exit 1
-    }
+    fi
 fi
 
 BACKEND="$HOME/kun/.claude/scripts/onboarding-linux.sh"
