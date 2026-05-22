@@ -79,11 +79,28 @@ end try
 EOF
 }
 
-# ── Bootstrap: clone kun if not present ─────────────────────────
+# ── Bootstrap: ensure git, then clone kun ───────────────────────
+# git is needed to clone the repo that installs git, so the wrapper
+# must provide it first. On macOS, git ships with the Xcode Command
+# Line Tools; detect them prompt-free via `xcode-select -p` (same as
+# the backend, onboarding-mac.sh). Without this, the clone below fails
+# with a misleading "check network" alert on a fresh Mac.
+if ! xcode-select -p >/dev/null 2>&1; then
+    notify "Installing developer tools" "Xcode Command Line Tools (includes git)"
+    xcode-select --install >/dev/null 2>&1 || true
+    ask_choice "macOS is installing the Command Line Tools (this provides git).\n\nClick Install in the system dialog and wait for it to finish, then click Done here." "Done" "Skip" >/dev/null
+fi
+if ! command -v git >/dev/null 2>&1 || ! git --version >/dev/null 2>&1; then
+    osascript -e 'display alert "Setup needs git" message "git (Xcode Command Line Tools) is required but is not ready yet.\n\nFinish the Command Line Tools install, then re-run:\n\ncurl -fsSL https://kun.databayt.org/install | bash"' 2>/dev/null
+    exit 1
+fi
+
+# ── Clone kun if not present ────────────────────────────────────
 if [[ ! -d "$HOME/kun" ]]; then
     notify "Cloning kun repo..." "Setting up"
-    if ! git clone https://github.com/databayt/kun.git "$HOME/kun" >/dev/null 2>&1; then
-        osascript -e 'display alert "Setup failed" message "Could not clone databayt/kun. Check your network and try again."' 2>/dev/null
+    if ! clone_err=$(git clone https://github.com/databayt/kun.git "$HOME/kun" 2>&1); then
+        echo "$clone_err" >&2
+        osascript -e 'display alert "Setup failed" message "Could not clone databayt/kun. See the Terminal window for the exact git error.\n\nIf github.com is blocked on your network (proxy/VPN/firewall), that is the likely cause — the raw CDN can stay reachable while github.com is blocked."' 2>/dev/null
         exit 1
     fi
 fi
