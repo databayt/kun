@@ -52,14 +52,9 @@ description: 18 MCP servers connecting Claude Code to external services
 
 ## Role-Specific Configs
 
-Not every team member needs all 18 servers. Each role gets a tailored MCP config:
+**Every machine gets the full `mcp.json` (all 18 servers).** Config is universal — any machine can run any task. Access is scoped by **secrets, not config**: a server whose API key isn't in your `~/.claude/.env` simply doesn't connect, and which keys you hold is set by the **Gist** you're handed.
 
-| Role | Config File | Server Count |
-|------|------------|--------------|
-| **engineer** | mcp.json | All 18 |
-| **business** | mcp-business.json | 8 (github, slack, linear, stripe, notion, browser, context7, memory-bank) |
-| **content** | mcp-content.json | 8 (github, slack, notion, browser, figma, context7, memory-bank, ref) |
-| **ops** | mcp-ops.json | 9 (github, slack, vercel, sentry, neon, stripe, browser, posthog, memory-bank) |
+> The legacy role-scoped `mcp-business.json` / `mcp-content.json` / `mcp-ops.json` are used only by the deprecated `install.sh`. Canonical installer is `setup.sh` (full fleet for everyone).
 
 ## Configuration
 
