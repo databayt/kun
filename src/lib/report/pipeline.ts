@@ -37,7 +37,7 @@ export async function runReportPipeline(
   adapter: ReportAdapter,
   opts: { ip: string } = { ip: "0.0.0.0" }
 ): Promise<PipelineResult> {
-  const token = process.env.GITHUB_PERSONAL_ACCESS_TOKEN;
+  const token = process.env.GITHUB_PERSONAL_ACCESS_TOKEN?.trim();
   if (!token) {
     console.error("[report-pipeline] GITHUB_PERSONAL_ACCESS_TOKEN not configured");
     return { ok: false, error: "config" };
