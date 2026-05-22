@@ -131,12 +131,33 @@ function Notify($title, $body) {
 }
 Add-Type -AssemblyName Microsoft.VisualBasic   # for InputBox
 
-# ── Bootstrap: clone kun if missing ─────────────────────────────
+# ── Bootstrap: ensure git, then clone kun ───────────────────────
+# git is needed to clone the repo that installs git, so the wrapper
+# must provide it first. The backend (onboarding-windows.ps1) re-checks
+# and no-ops if git is already present. Windows ships no git by default —
+# without this, the clone below fails with a misleading "check network".
+if (-not (Get-Command git -EA SilentlyContinue)) {
+    if (Get-Command winget -EA SilentlyContinue) {
+        Notify "Installing" "git (prerequisite for clone)"
+        winget install --id Git.Git -e --accept-source-agreements --accept-package-agreements --silent
+        # Refresh PATH so git resolves in this session (same as backend)
+        $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
+    }
+}
+if (-not (Get-Command git -EA SilentlyContinue)) {
+    [System.Windows.MessageBox]::Show("git is required but could not be installed automatically.`n`nInstall Git for Windows (https://git-scm.com/download/win), then re-run:`n`niwr https://kun.databayt.org/install.ps1 | iex", "Setup needs git", "OK", "Error") | Out-Null
+    exit 1
+}
+
+# ── Clone kun if missing ────────────────────────────────────────
 if (-not (Test-Path "$env:USERPROFILE\kun")) {
     Notify "Cloning" "kun repo"
-    git clone https://github.com/databayt/kun.git "$env:USERPROFILE\kun" 2>&1 | Out-Null
-    if (-not $?) {
-        [System.Windows.MessageBox]::Show("Could not clone databayt/kun. Check network.", "Setup failed", "OK", "Error") | Out-Null
+    # Capture output and gate on $LASTEXITCODE — after a pipeline, $? reflects
+    # the last element (e.g. Out-Null), not the native command's exit code.
+    $cloneOut = git clone https://github.com/databayt/kun.git "$env:USERPROFILE\kun" 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        [Console]::Error.WriteLine(($cloneOut -join "`n"))
+        [System.Windows.MessageBox]::Show("Could not clone databayt/kun. See the terminal window for the exact git error.`n`nIf github.com is blocked on your network (proxy/VPN/firewall), that is the likely cause — the raw CDN can stay reachable while github.com is blocked.", "Setup failed", "OK", "Error") | Out-Null
         exit 1
     }
 }
