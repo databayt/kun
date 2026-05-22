@@ -1,25 +1,15 @@
 ---
 title: Roadmap
-description: "What we ship this quarter — Hogwarts feature blocks, ready-to-handover first."
+description: "Hogwarts shipped state with maturity badges, plus what we ship next."
 ---
 
 # Roadmap
 
-What we ship **this quarter (Jun–Aug 2026)** — organized by **Hogwarts feature block**, ready-to-hand-over first. The goal: put as many rich, working blocks in front of pilot schools as we can. Every block links its GitHub tracker. Strategy + cash context lives in [Epics](/docs/epics).
-
-## The call — chosen by readiness × client need
-
-A pilot school must run **daily operations on day one**, **enroll students**, and **collect fees**. That decides the order:
-
-1. **Hand over now** — the ready core a school runs on daily: Students, Teachers, Parents, **Attendance**, **Timetable**, Messaging, Notifications, Profile (plus **Transportation** if the school runs buses).
-2. **Finish first** — priority engineering, because client need is highest and both are near-ready: **Admission** (new-year enrollment) and **Finance — fees** (schools must collect money).
-3. **Finish next** — medium need, ship as capacity allows: Grades / report cards, Exams (wire routes), Classes (quick win).
-4. **Mobile** — parents/teachers app → public launch.
-5. **Parked** — low day-one need or not ready: LMS / Stream, Communication hub, Finance payroll + full ledger (Q4).
+Hogwarts is the flagship, and it's far more built than a typical MVP. This is the team-facing view: what's **shipped** (with maturity badges) and what we **ship next**. The authoritative per-feature detail lives in the hogwarts docs — [MVP](https://ed.databayt.org/en/docs/mvp) (shipped state) and [Roadmap](https://ed.databayt.org/en/docs/roadmap) (direction); if anything here conflicts, those win. Strategy + cash context: [Epics](/docs/epics).
 
 ## Get your machine ready (do this first)
 
-Every block ships through the kun engine and one workflow — issue → branch → PR → merge. A provisioned machine is the entry ticket; full detail in **[Onboarding](/docs/onboarding)**.
+Every block ships through the kun engine and one workflow — issue → branch → PR → merge. Full detail in **[Onboarding](/docs/onboarding)**.
 
 **1. Install everything** — one paste (macOS / Linux):
 
@@ -45,112 +35,109 @@ bash ~/.claude/scripts/health.sh && claude doctor
 c "/issue"
 ```
 
-## Ready to hand over (now)
+## Maturity badges
 
-Wired, tested, rich — demo these and hand them to pilot schools today.
+| Badge | Meaning |
+|---|---|
+| `Built` | Shipped end-to-end — backend, UI, i18n, tests |
+| `Built+Polish` | Shipped, with known polish, audit, or migration in flight |
+| `In Progress` | Backend or UI partial; tracked actively |
+| `Schema Only` | Prisma model exists, no UI yet |
+| `Vaporware` | Dictionary strings only, zero code |
 
-| Block | What you get | Status |
+## Blocks at a glance
+
+Almost everything a school runs on daily is already shipped — demo and hand these over today.
+
+| Block | Maturity | Detail |
 |---|---|---|
-| **Students** | Full SIS CRUD, ID cards, credentials (print + share), guardians, enrollment, bulk upload, RBAC | ✅ Ready |
-| **Teachers** | CRUD, departments, schedules, performance, wizard | ✅ Ready |
-| **Parents / Guardians** | CRUD, link-child, contact, wizard | ✅ Ready |
-| **Attendance** | Daily + per-period, QR + geofence marking, excuses, interventions, early-warning, gamification, analytics, kiosk | ✅ Ready |
-| **Transportation** | Fleet, drivers, routes (drag-drop stops), trips, boarding + geofence, per-role self-service, reports — 67/67 tests | ✅ Ready |
-| **Timetable** | Schedule builder, by-class/teacher/room views, conflict detection, auto-generate, substitutions, print | ✅ Ready |
-| **Messaging** | 1:1 + group realtime chat, read receipts, reactions, attachments, WhatsApp bridge | ✅ Ready |
-| **Notifications** | In-app center (24 types × 4 priorities) + email, per-channel preferences, realtime | ✅ Ready (in-app + email) |
-| **Profile** | Role-specific views, contribution graph, activity feed, avatar | ✅ Ready |
+| Infrastructure / multi-tenancy | `Built+Polish` | [architecture](https://ed.databayt.org/en/docs/architecture) |
+| Authentication (8 roles, 2FA, CASL) | `Built` | [authentication](https://ed.databayt.org/en/docs/authentication) |
+| Onboarding / configuration (18-step wizard) | `Built+Polish` | [onboarding](https://ed.databayt.org/en/docs/onboarding) |
+| People — students · teachers · guardians · staff | `Built` | [students](https://ed.databayt.org/en/docs/students) |
+| Admission (AI doc review, OTP tracker, merit) | `Built` | [admission](https://ed.databayt.org/en/docs/admission) |
+| Attendance (11 capture modes) | `Built+Polish` | [attendance](https://ed.databayt.org/en/docs/attendance) |
+| Exams & grading (full lifecycle) | `Built+Polish` | [exams](https://ed.databayt.org/en/docs/exams) |
+| Timetable (visual builder, conflicts) | `Built` | [timetable](https://ed.databayt.org/en/docs/timetable) |
+| Finance & billing (double-entry, 6 gateways, payroll) | `Built+Polish` | [fees](https://ed.databayt.org/en/docs/fees) |
+| Communication — messages · notifications · WhatsApp | `Built+Polish` | [messages](https://ed.databayt.org/en/docs/messages) |
+| Stream / LMS | `Built+Polish` | [clickview](https://ed.databayt.org/en/docs/clickview) |
+| Library | `Built` | [library](https://ed.databayt.org/en/docs/library) |
+| Transport (geofence boarding) | `Built` | [structure](https://ed.databayt.org/en/docs/structure) |
+| Catalog (bridge pattern, Sudan curriculum) | `Built+Polish` | [catalog](https://ed.databayt.org/en/docs/catalog) |
+| Mobile — native iOS + Android | `In Progress` | [swift-app#3](https://github.com/databayt/swift-app/issues/3) — kun bet |
 
-## Shipping this quarter
+## What we ship next
 
-**In priority order — what's at the top ships first.** Each block links its README, issue notes, and todos.
+**In priority order — top of the list ships first.** These are the real in-flight initiatives (from the hogwarts roadmap) plus our mobile bet. Each is polish/audit on a shipped block, not greenfield.
 
-### Admission
-[README](https://github.com/databayt/hogwarts/blob/main/src/components/school-dashboard/admission/README.md) · [ISSUE.md](https://github.com/databayt/hogwarts/blob/main/src/components/school-dashboard/admission/ISSUE.md) · [Epic #314](https://github.com/databayt/hogwarts/issues/314)
+### Finance reorg · `Built+Polish`
+[fees](https://ed.databayt.org/en/docs/fees) · [README](https://github.com/databayt/hogwarts/blob/main/src/components/school-dashboard/finance/README.md) · [ISSUE.md](https://github.com/databayt/hogwarts/blob/main/src/components/school-dashboard/finance/ISSUE.md) · [Epic #313](https://github.com/databayt/hogwarts/issues/313)
 
-The full funnel exists (campaigns, applications, merit, enrollment, public wizard) — close the gaps.
+The payment-umbrella audit + fee auto-provisioning. Today only Stripe is E2E; Tap is a stub; the double-entry engine has no callers.
 
-- [ ] Compute the merit score (it currently ranks on an uncomputed value)
-- [ ] Wire the enrollment section-placement UI
-- [ ] Expose the rest of admission settings (~12 of ~30 fields today)
-- [ ] Kill onboarding friction from the pilot's own feedback ([#298–307](https://github.com/databayt/hogwarts/issues/314), [#254](https://github.com/databayt/hogwarts/issues/254))
+- [ ] Payment umbrella P0 ([#263](https://github.com/databayt/hogwarts/issues/263))
+- [ ] Fee auto-provisioning at onboarding ([#264](https://github.com/databayt/hogwarts/issues/264), [#269](https://github.com/databayt/hogwarts/issues/269))
+- [ ] Fee lifecycle QA ([#273](https://github.com/databayt/hogwarts/issues/273)) + per-school currency ([#305](https://github.com/databayt/hogwarts/issues/305))
 
-### Finance — fees
-[README](https://github.com/databayt/hogwarts/blob/main/src/components/school-dashboard/finance/README.md) · [ISSUE.md](https://github.com/databayt/hogwarts/blob/main/src/components/school-dashboard/finance/ISSUE.md) · [Epic #313](https://github.com/databayt/hogwarts/issues/313)
+### Exam hardening · `Built+Polish`
+[exams](https://ed.databayt.org/en/docs/exams) · [README](https://github.com/databayt/hogwarts/blob/main/src/components/school-dashboard/exams/README.md) · [ISSUE.md](https://github.com/databayt/hogwarts/blob/main/src/components/school-dashboard/exams/ISSUE.md)
 
-Schools collect fees from parents. Ship the fee-collection slice; hold full ledger + payroll for Q4.
+Production audit: 14 P0 / 22 P1 / 18 P2.
 
-- [ ] Fee structures + auto-provision at onboarding ([#264](https://github.com/databayt/hogwarts/issues/264), [#269](https://github.com/databayt/hogwarts/issues/269))
-- [ ] Fee lifecycle QA: onboarding → student payment ([#273](https://github.com/databayt/hogwarts/issues/273))
-- [ ] Payment-path audit + gaps ([#263](https://github.com/databayt/hogwarts/issues/263))
-- [ ] Per-school currency ([#305](https://github.com/databayt/hogwarts/issues/305))
+- [ ] Top P0s: `User.id`-as-`Student.id` submission bug, in-memory rate limiter on serverless, 17 models missing `lang`, RBAC + calculator test coverage
 
-### Attendance — polish
-[README](https://github.com/databayt/hogwarts/blob/main/src/components/school-dashboard/attendance/README.md) · [ISSUE.md](https://github.com/databayt/hogwarts/blob/main/src/components/school-dashboard/attendance/ISSUE.md)
+### Role-aware UI sweep
+Sidebar / PageNav / Toolbar / row-action gating across the school dashboard.
 
-Already shippable (above). Quick wins:
+- [ ] Finance + school + sales surfaces (listings already wired with `permissions.ts`)
 
-- [ ] Confirm auto-marking + cron policies against the pilot's period structure
-- [ ] Arabic dictionary sweep on any remaining labels
+### Attendance Phase 2 · `Built+Polish`
+[attendance](https://ed.databayt.org/en/docs/attendance) · [README](https://github.com/databayt/hogwarts/blob/main/src/components/school-dashboard/attendance/README.md) · [ISSUE.md](https://github.com/databayt/hogwarts/blob/main/src/components/school-dashboard/attendance/ISSUE.md)
 
-### Exams — wire the routes
-[README](https://github.com/databayt/hogwarts/blob/main/src/components/school-dashboard/exams/README.md) · [ISSUE.md](https://github.com/databayt/hogwarts/blob/main/src/components/school-dashboard/exams/ISSUE.md)
+Section-centric migration — deployed and DB-migrated; needs end-to-end testing.
 
-Components are rich (question bank, paper generator, auto-mark, results PDF, exam wizard) but routes are not yet fully wired.
+- [ ] Playwright MCP testing on section-centric attendance + timetable surfaces
 
-- [ ] Wire the `/exams/*` routes end-to-end
-- [ ] Smoke-test the exam wizard + auto-mark on the pilot subdomain
+### Translation audit
+[translation](https://ed.databayt.org/en/docs/translation)
 
-### Grades & report cards
-[README](https://github.com/databayt/hogwarts/blob/main/src/components/school-dashboard/grades/README.md) · [ISSUE.md](https://github.com/databayt/hogwarts/blob/main/src/components/school-dashboard/grades/ISSUE.md)
+- [ ] Systematic per-page sweep for hardcoded English across the school dashboard
 
-Composable report-card / transcript templates exist; harden them.
+### Admission polish · `Built`
+[admission](https://ed.databayt.org/en/docs/admission) · [README](https://github.com/databayt/hogwarts/blob/main/src/components/school-dashboard/admission/README.md) · [ISSUE.md](https://github.com/databayt/hogwarts/blob/main/src/components/school-dashboard/admission/ISSUE.md) · [Epic #314](https://github.com/databayt/hogwarts/issues/314)
 
-- [ ] Verify report-card templates + transcript PDF
-- [ ] Promotion dashboard pass
+- [ ] Onboarding friction from pilot feedback ([#298–307](https://github.com/databayt/hogwarts/issues/314), [#254](https://github.com/databayt/hogwarts/issues/254))
+- [ ] Compute the merit score; wire the enrollment section-placement UI
 
-### Classes — wire the list route (quick win)
-[README](https://github.com/databayt/hogwarts/blob/main/src/components/school-dashboard/listings/classes/README.md) · [ISSUE.md](https://github.com/databayt/hogwarts/blob/main/src/components/school-dashboard/listings/classes/ISSUE.md)
+### Mobile — native iOS + Android · `In Progress` (kun bet)
+[swift-app#3](https://github.com/databayt/swift-app/issues/3) · mobile API [Epic #315](https://github.com/databayt/hogwarts/issues/315)
 
-Rich components, but the class **list view route is not wired** (only the add-wizard steps are).
+> ⚠️ **Divergence:** the hogwarts roadmap defers native mobile to 2027+ ("after PMF"). We keep it as a kun-side Q3 bet — intentional.
 
-- [ ] Add the `classes` list `page.tsx` + sidebar entry
-
-### Mobile API — P0
-[Epic #315](https://github.com/databayt/hogwarts/issues/315)
-
-Backend endpoints that gate the app + stores.
-
-- [ ] Ship the six P0 endpoints: [#274](https://github.com/databayt/hogwarts/issues/274) export · [#275](https://github.com/databayt/hogwarts/issues/275) delete · [#276](https://github.com/databayt/hogwarts/issues/276) translate · [#277](https://github.com/databayt/hogwarts/issues/277) payments · [#278](https://github.com/databayt/hogwarts/issues/278) invoices · [#279](https://github.com/databayt/hogwarts/issues/279) consent
-
-### Mobile public launch
-[Epic swift-app#3](https://github.com/databayt/swift-app/issues/3)
-
-Ship the iOS + Android app to the public stores.
-
-- [ ] Mobile API P1 ([#281–288](https://github.com/databayt/hogwarts/issues/315)): grades, report cards, attendance, admin, exams, schedule, guardian, search
+- [ ] Mobile API P0/P1 ([#274–288](https://github.com/databayt/hogwarts/issues/315))
 - [ ] App shell + screens (Swift + Kotlin), consuming the API layer
 - [ ] Store compliance + submit + public launch
+- [ ] ⚠️ The Android repo `databayt/kotlin-app` does not exist yet — create + push it first
 
 ### 2nd pilot
 [Epic #316](https://github.com/databayt/hogwarts/issues/316)
 
-- [ ] Onboard a 2nd free pilot school; both pilots actively using finance + mobile
+- [ ] Onboard a 2nd free MENA-10 pilot; both pilots actively using finance + mobile
 
-## Mobile
+## Not built yet
 
-Backend API layer ([#315](https://github.com/databayt/hogwarts/issues/315)) → iOS/Android app ([swift-app#3](https://github.com/databayt/swift-app/issues/3)) → public stores. ⚠️ The Android repo `databayt/kotlin-app` does not exist yet — create + push it before Android tracking moves there.
+| Module | Status | Notes |
+|---|---|---|
+| Health | `Schema Only` | `HealthRecord` on the student profile, no clinic UI |
+| Hostel | `Vaporware` | Dictionary mentions only |
+| Cafeteria | `Vaporware` | Dictionary mentions only |
 
-## Parked / later
+Native iOS/Android is `Schema Only`/`Vaporware` in the hogwarts roadmap (deferred to 2027+) — we promote it to a bet under *What we ship next* above. The divergence is deliberate.
 
-- **LMS / Stream** (courses, video lessons, certificates) — rich but stale; revisit after the pilot blocks land.
-- **Communication hub** — a thin aggregator over Messaging + Notifications; not a standalone ship.
-- **Finance — payroll + full ledger** — payroll is ~65% and several ledger posting paths are unwired; deferred to Q4 with monetization.
+## See also
 
-## How we track
-
-Every block is a GitHub issue or epic, and updates happen on the issue, not in chat. Master tracker: [kun#76](https://github.com/databayt/kun/issues/76). Ship path: issue → branch → PR → merge ([github-workflow](https://github.com/databayt/kun/blob/main/.claude/rules/github-workflow.md)).
-
-## Reference
-
-[Onboarding](/docs/onboarding) · [Epics](/docs/epics) · [Issue pipeline](/docs/issue) · [Workflows](/docs/workflows)
+- hogwarts [MVP](https://ed.databayt.org/en/docs/mvp) — shipped state across 14 epics with maturity badges
+- hogwarts [Roadmap](https://ed.databayt.org/en/docs/roadmap) — quarter outlook + active initiatives
+- hogwarts [PRD](https://ed.databayt.org/en/docs/prd) — requirements, role model, NFRs
+- kun [Epics](/docs/epics) · [Onboarding](/docs/onboarding) · [Issue pipeline](/docs/issue) · master tracker [kun#76](https://github.com/databayt/kun/issues/76)
