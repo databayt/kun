@@ -9,6 +9,18 @@ Spend this quarter's runway to buy **product-market-fit proof**: two Sudanese sc
 
 This is the living plan. Day-to-day work and discussion happen on the GitHub epics linked below; this page is the map.
 
+## Before the sprint — machines ready, one workflow
+
+Every sprint here is executed through the **kun engine**: we build by vibe coding *within architectural constraints* (humans design, AI generates — see [Architecture](/docs/architecture) and [Configuration](/docs/configuration)) and ship through **one unified workflow** (issue → branch → PR → merge). That only works when every machine is provisioned identically — so a ready machine is the entry ticket, not an afterthought.
+
+Before any sprint work begins, each teammate:
+
+1. **Provisions the machine** — [Onboarding](/docs/onboarding) is the single source of truth. One paste does it — `curl -fsSL https://kun.databayt.org/install | bash` (macOS/Linux) or `iwr https://kun.databayt.org/install.ps1 | iex` (Windows): every tool, every repo, the full Claude config.
+2. **Verifies green** — `bash ~/.claude/scripts/health.sh` and `claude doctor` (all checks green = ready). Steps in [Onboarding → Verify everything](/docs/onboarding#verify-everything).
+3. **Reads the workflow** — how we capture and ship work: the [Issue pipeline](/docs/issue), the [keyword vocabulary](/docs/keywords), and the [github-workflow rule](https://github.com/databayt/kun/blob/main/.claude/rules/github-workflow.md) (issue → branch → PR → merge).
+
+This is the **hard gate for Sprint 0**: Ibrahim + Mutaz fully onboarded and green by **May 31** — no feature work starts on an unprovisioned machine.
+
 ## Two bets
 
 | | Bet 1 — PMF via School Finance | Bet 2 — Mobile Public Launch |
@@ -54,7 +66,7 @@ Two-week cadence: Monday plan, Wednesday check, Friday review. Each sprint's **e
 ### Sprint 0 — Kickoff (now → May 31)
 **Goal:** onboard the team, stand up the issue map, clear debris.
 
-- Onboard **Ibrahim + Mutaz** (deadline May 31); run config-health checks on their machines.
+- Onboard **Ibrahim + Mutaz** (deadline May 31) via [Onboarding](/docs/onboarding) — one-paste install, then `health.sh` + `claude doctor` green (see *Before the sprint* above).
 - Create the epics *(done)*; refresh this page + the epics page to v4; log the north-star PMF reframe as a Type-1 decision.
 - **Hygiene:** triage the two security-P0 PRs (marketing#1 unauthenticated upload-auth, souq#1); triage 17 stale dependabot PRs; freeze the dormant repos (souq, shifa, mkan, marketing).
 - **Create `databayt/kotlin-app`** — the Android repo does not exist yet — and push the local code.
@@ -147,8 +159,12 @@ We spend ~$1.6K of runway to buy one asset: proof that two schools love running 
 
 ## How we track and communicate
 
-Every workstream is a GitHub issue, and updates and discussion happen on the issue, not in chat (see [Issues](/docs/issue)). Each epic is a checklist that links its child issues; cross-repo mentions create backlinks automatically. Standups are auto-generated from commits, issues, and deploys — humans intervene on exceptions. The weekly cadence (plan / check / review) reads the epics and posts summaries.
+Every workstream is a GitHub issue, and updates and discussion happen on the issue, not in chat (see [Issues](/docs/issue)). Each epic is a checklist that links its child issues; cross-repo mentions create backlinks automatically. Standups are auto-generated from commits, issues, and deploys — humans intervene on exceptions. The weekly cadence (plan / check / review) reads the epics and posts summaries. Code ships through one path — issue → branch → PR → merge (the [github-workflow rule](https://github.com/databayt/kun/blob/main/.claude/rules/github-workflow.md)).
 
 ## Reference
 
-[Epics](/docs/epics) · [Team](/docs/team) · [Captain](/docs/captain) · [Products](/docs/products) · [Share Economy](/docs/share-economy). Strategy lives in the kun repo `docs/`: [NORTH-STAR](https://github.com/databayt/kun/blob/main/docs/NORTH-STAR.md), [CONSTITUTION](https://github.com/databayt/kun/blob/main/docs/CONSTITUTION.md), [PRINCIPLES](https://github.com/databayt/kun/blob/main/docs/PRINCIPLES.md), [CEO-OS](https://github.com/databayt/kun/blob/main/docs/CEO-OS.md), [AGILE](https://github.com/databayt/kun/blob/main/docs/AGILE.md).
+**Set up & workflow:** [Onboarding](/docs/onboarding) (machine provisioning + install) · [Claude Code](/docs/claude-code) · [Configuration](/docs/configuration) · [Architecture](/docs/architecture) · [Workflows](/docs/workflows) · [Issue pipeline](/docs/issue) · [github-workflow rule](https://github.com/databayt/kun/blob/main/.claude/rules/github-workflow.md)
+
+**Operations:** [Epics](/docs/epics) · [Team](/docs/team) · [Captain](/docs/captain) · [Products](/docs/products) · [Share Economy](/docs/share-economy)
+
+**Strategy** (kun repo `docs/`): [NORTH-STAR](https://github.com/databayt/kun/blob/main/docs/NORTH-STAR.md) · [CONSTITUTION](https://github.com/databayt/kun/blob/main/docs/CONSTITUTION.md) · [PRINCIPLES](https://github.com/databayt/kun/blob/main/docs/PRINCIPLES.md) · [CEO-OS](https://github.com/databayt/kun/blob/main/docs/CEO-OS.md) · [AGILE](https://github.com/databayt/kun/blob/main/docs/AGILE.md)
