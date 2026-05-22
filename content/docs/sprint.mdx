@@ -1,170 +1,148 @@
 ---
-title: Sprint Plan
-description: "Q3 2026 (Jun-Aug) — the PMF quarter: two bets, seven sprints, six people."
+title: Roadmap
+description: "What we ship this quarter — Hogwarts feature blocks, ready-to-handover first."
 ---
 
-# Sprint Plan — Q3 2026 (Jun–Aug)
+# Roadmap
 
-Spend this quarter's runway to buy **product-market-fit proof**: two Sudanese schools running their **fees and payroll** through Hogwarts — on the web **and** a publicly launched mobile app — and defer all monetization to a **Q4 cash decision**.
+What we ship **this quarter (Jun–Aug 2026)** — organized by **Hogwarts feature block**, ready-to-hand-over first. The goal: put as many rich, working blocks in front of pilot schools as we can. Every block links its GitHub tracker. Strategy + cash context lives in [Epics](/docs/epics).
 
-This is the living plan. Day-to-day work and discussion happen on the GitHub epics linked below; this page is the map.
+## The call — chosen by readiness × client need
 
-## Before the sprint — machines ready, one workflow
+A pilot school must run **daily operations on day one**, **enroll students**, and **collect fees**. That decides the order:
 
-Every sprint here is executed through the **kun engine**: we build by vibe coding *within architectural constraints* (humans design, AI generates — see [Architecture](/docs/architecture) and [Configuration](/docs/configuration)) and ship through **one unified workflow** (issue → branch → PR → merge). That only works when every machine is provisioned identically — so a ready machine is the entry ticket, not an afterthought.
+1. **Hand over now** — the ready core a school runs on daily: Students, Teachers, Parents, **Attendance**, **Timetable**, Messaging, Notifications, Profile (plus **Transportation** if the school runs buses).
+2. **Finish first** — priority engineering, because client need is highest and both are near-ready: **Admission** (new-year enrollment) and **Finance — fees** (schools must collect money).
+3. **Finish next** — medium need, ship as capacity allows: Grades / report cards, Exams (wire routes), Classes (quick win).
+4. **Mobile** — parents/teachers app → public launch (August).
+5. **Parked** — low day-one need or not ready: LMS / Stream, Communication hub, Finance payroll + full ledger (Q4).
 
-Before any sprint work begins, each teammate:
+Detail by month below.
 
-1. **Provisions the machine** — [Onboarding](/docs/onboarding) is the single source of truth. One paste does it — `curl -fsSL https://kun.databayt.org/install | bash` (macOS/Linux) or `iwr https://kun.databayt.org/install.ps1 | iex` (Windows): every tool, every repo, the full Claude config.
-2. **Verifies green** — `bash ~/.claude/scripts/health.sh` and `claude doctor` (all checks green = ready). Steps in [Onboarding → Verify everything](/docs/onboarding#verify-everything).
-3. **Reads the workflow** — how we capture and ship work: the [Issue pipeline](/docs/issue), the [keyword vocabulary](/docs/keywords), and the [github-workflow rule](https://github.com/databayt/kun/blob/main/.claude/rules/github-workflow.md) (issue → branch → PR → merge).
+## Get your machine ready (do this first)
 
-This is the **hard gate for Sprint 0**: Ibrahim + Mutaz fully onboarded and green by **May 31** — no feature work starts on an unprovisioned machine.
+Every block ships through the kun engine and one workflow — issue → branch → PR → merge. A provisioned machine is the entry ticket; full detail in **[Onboarding](/docs/onboarding)**.
 
-## Two bets
+**1. Install everything** — one paste (macOS / Linux):
 
-| | Bet 1 — PMF via School Finance | Bet 2 — Mobile Public Launch |
+```bash
+curl -fsSL https://kun.databayt.org/install | bash
+```
+
+Windows (PowerShell):
+
+```powershell
+iwr https://kun.databayt.org/install.ps1 | iex
+```
+
+**2. Verify green:**
+
+```bash
+bash ~/.claude/scripts/health.sh && claude doctor
+```
+
+**3. Start work:**
+
+```bash
+c "/issue"
+```
+
+> **Hard gate:** Ibrahim + Mutaz fully onboarded and green by **May 31** — no feature work on an unprovisioned machine.
+
+## Ready to hand over (now)
+
+Wired, tested, rich — demo these and hand them to pilot schools today.
+
+| Block | What you get | Status |
 |---|---|---|
-| **Goal** | King Fahad + a 2nd free pilot run fees + payroll through Hogwarts and rely on it | iOS + Android live on the App Store + Google Play |
-| **Owner** | Abdout (engineering) · Mutaz/Ali (pilots) | Ibrahim (engineering) · Abdout (architecture) |
-| **Shared spine** | Mobile payments + invoices are the same finance domain — build the data layer once, expose to web and mobile | |
-| **Success** | 2 pilots actively using finance features; documented PMF signal | Public store presence; pilot staff and parents using the app |
-| **Not doing** | SaaS billing / Databayt collecting from schools (deferred to Q4+) | Web-only fallback — this is a full public launch |
+| **Students** | Full SIS CRUD, ID cards, credentials (print + share), guardians, enrollment, bulk upload, RBAC | ✅ Ready |
+| **Teachers** | CRUD, departments, schedules, performance, wizard | ✅ Ready |
+| **Parents / Guardians** | CRUD, link-child, contact, wizard | ✅ Ready |
+| **Attendance** | Daily + per-period, QR + geofence marking, excuses, interventions, early-warning, gamification, analytics, kiosk | ✅ Ready |
+| **Transportation** | Fleet, drivers, routes (drag-drop stops), trips, boarding + geofence, per-role self-service, reports — 67/67 tests | ✅ Ready |
+| **Timetable** | Schedule builder, by-class/teacher/room views, conflict detection, auto-generate, substitutions, print | ✅ Ready |
+| **Messaging** | 1:1 + group realtime chat, read receipts, reactions, attachments, WhatsApp bridge | ✅ Ready |
+| **Notifications** | In-app center (24 types × 4 priorities) + email, per-channel preferences, realtime | ✅ Ready (in-app + email) |
+| **Profile** | Role-specific views, contribution graph, activity feed, avatar | ✅ Ready |
 
-> **Why finance, even unpaid?** The system a school runs its money through is the stickiest seat in the building. The eventual business is monetizing the money-flow, not the software. Finance features now are the PMF wedge.
+## Shipping this quarter
 
-## Epics — the living checklists
+Rich blocks that need a finishing push before handover. Each links its tracker.
 
-All work rolls up to these GitHub tracking issues:
+### June
 
-| Epic | Bet | Tracks |
-|---|---|---|
-| [kun#76 — Q3 master tracker](https://github.com/databayt/kun/issues/76) | both | everything below + sprints + cash |
-| [hogwarts#313 — School Finance Module](https://github.com/databayt/hogwarts/issues/313) | 1 | fees, billing, salaries, payroll |
-| [hogwarts#314 — Onboarding Friction Kill](https://github.com/databayt/hogwarts/issues/314) | 1 | pilot field-feedback bugs |
-| [hogwarts#315 — Mobile API Layer](https://github.com/databayt/hogwarts/issues/315) | 2 | 6 P0 + 8 P1 endpoints |
-| [hogwarts#316 — PMF Pilots](https://github.com/databayt/hogwarts/issues/316) | both | King Fahad + 2nd pilot |
-| [swift-app#3 — Mobile Public Launch](https://github.com/databayt/swift-app/issues/3) | 2 | tooling → screens → stores |
+#### Admission · [#314](https://github.com/databayt/hogwarts/issues/314)
+The full funnel exists (campaigns, applications, merit, enrollment, public wizard) — close the gaps.
 
-## Team — long and short vision
+- [ ] Kill onboarding friction from the pilot's own feedback: [#298–307](https://github.com/databayt/hogwarts/issues/314), [#254](https://github.com/databayt/hogwarts/issues/254)
+- [ ] Compute the merit score (it currently ranks on an uncomputed value)
+- [ ] Wire the enrollment section-placement UI
+- [ ] Expose the rest of admission settings (~12 of ~30 fields today)
 
-Short = this quarter. Long = the 1–3 year trajectory.
+#### Finance — fees slice · [#313](https://github.com/databayt/hogwarts/issues/313)
+Schools collect fees from parents. Ship the fee-collection slice; hold full ledger + payroll for Q4.
 
-| Person | Role | Short (Q3) | Long |
-|---|---|---|---|
-| **Abdout** | Founder · CEO · Tech Lead | Finance-module architecture + billing/payroll spine; pair Ibrahim onto web; run the captain cadence; make the Q4 cash call | Shift from engineer-of-everything to CEO/allocator; end the bus factor; Databayt as the Arabic-first financial OS for schools |
-| **Ibrahim** | Engineer (mobile-strong) | Own Bet 2 end-to-end: tooling, the Swift + Kotlin apps, the mobile APIs with Abdout, public launch; contribute to Hogwarts web | Mobile + senior full-stack lead; the second load-bearing engineer; owner of the cross-platform surface |
-| **Mutaz** | Business lead (part-time) | Supervise Ali; run the pilot motion; design customer development; shape the Q4 monetization model | Head of business/commercial — go-to-market, monetization, edu-market expansion |
-| **Ali** | Sales + QA | QA the finance + mobile work; run pilot relationships; conduct customer-dev interviews; log everything on issues | Structured sales/customer-success operator; turns pilots into paying customers; future sales lead |
-| **Samia** | R&D · content · voiceover | Research the pattern behind each feature (catalog pattern, payroll best practices) ahead of build; sales content + voiceover | R&D lead + keeper of the share-economy / Contribution-Units model; the voice and content engine; the accessibility conscience |
-| **Sedon** | Facilitator · Ops (15h/wk) | Keep the business team unblocked (Mon/Wed/Fri); Saudi banking groundwork (MADA/STC Pay) for the future market; pilot logistics | Operations/facilitation lead, especially Saudi market entry |
+- [ ] Fee structures + auto-provision at onboarding ([#264](https://github.com/databayt/hogwarts/issues/264), [#269](https://github.com/databayt/hogwarts/issues/269))
+- [ ] Fee lifecycle QA: onboarding → student payment ([#273](https://github.com/databayt/hogwarts/issues/273))
+- [ ] Payment-path audit + gaps ([#263](https://github.com/databayt/hogwarts/issues/263))
+- [ ] Per-school currency ([#305](https://github.com/databayt/hogwarts/issues/305))
 
-## The sprints
+#### Attendance — polish
+Already shippable (above). Quick wins this month:
 
-Two-week cadence: Monday plan, Wednesday check, Friday review. Each sprint's **exit gate** follows the Definition of Done — `tsc --noEmit` and `pnpm build` pass, Arabic + English, RTL, responsive at 375 / 768 / 1440, a browser screenshot, deployed.
+- [ ] Confirm auto-marking + cron policies against the pilot's period structure
+- [ ] Arabic dictionary sweep on any remaining labels
 
-### Sprint 0 — Kickoff (now → May 31)
-**Goal:** onboard the team, stand up the issue map, clear debris.
+### July
 
-- Onboard **Ibrahim + Mutaz** (deadline May 31) via [Onboarding](/docs/onboarding) — one-paste install, then `health.sh` + `claude doctor` green (see *Before the sprint* above).
-- Create the epics *(done)*; refresh this page + the epics page to v4; log the north-star PMF reframe as a Type-1 decision.
-- **Hygiene:** triage the two security-P0 PRs (marketing#1 unauthenticated upload-auth, souq#1); triage 17 stale dependabot PRs; freeze the dormant repos (souq, shifa, mkan, marketing).
-- **Create `databayt/kotlin-app`** — the Android repo does not exist yet — and push the local code.
-- Samia kicks off pattern R&D.
+#### Exams — wire the routes
+Components are rich (question bank, paper generator, auto-mark, results PDF, exam wizard) but routes are not yet fully wired.
 
-**Exit gate:** six people onboarded and working; epics live; debris cleared.
+- [ ] Wire the `/exams/*` routes end-to-end
+- [ ] Smoke-test the exam wizard + auto-mark on the pilot subdomain
 
-### Sprint 5 — Foundations (Jun 1–14)
-**Goal:** remove onboarding friction; lay the finance and mobile foundations.
+#### Grades & report cards
+Composable report-card / transcript templates exist; harden them.
 
-- **Bet 1:** kill the onboarding bugs ([#298–307](https://github.com/databayt/hogwarts/issues/314), [#254](https://github.com/databayt/hogwarts/issues/254)); finance-module **architecture** (Abdout); harden fee structures ([#263](https://github.com/databayt/hogwarts/issues/263) / [#264](https://github.com/databayt/hogwarts/issues/264) / [#269](https://github.com/databayt/hogwarts/issues/269) / [#273](https://github.com/databayt/hogwarts/issues/273)).
-- **Bet 2:** **unblock mobile tooling** (JDK, Xcode simulator/SDK, Code Connect); scaffold the iOS + Android app shells; first P0 APIs ([#276](https://github.com/databayt/hogwarts/issues/276) translate, [#279](https://github.com/databayt/hogwarts/issues/279) consent).
-- **Pilots:** King Fahad re-engagement + JTBD interviews (Mutaz/Ali).
+- [ ] Verify report-card templates + transcript PDF
+- [ ] Promotion dashboard pass
 
-**Exit gate:** onboarding walkthrough clean; finance schema migrated and types compile; both app shells run.
+#### Classes — wire the list route (quick win)
+Rich components, but the class **list view route is not wired** (only the add-wizard steps are).
 
-### Sprint 6 — Core build (Jun 15–28)
-**Goal:** build the net-new finance pieces and the payment APIs.
+- [ ] Add the `classes` list `page.tsx` + sidebar entry
 
-- **Bet 1:** **payroll / salaries module v1** (net-new); polished fee-collection flows.
-- **Bet 2:** P0 APIs — [#277](https://github.com/databayt/hogwarts/issues/277) payments, [#278](https://github.com/databayt/hogwarts/issues/278) invoices, [#274](https://github.com/databayt/hogwarts/issues/274) / [#275](https://github.com/databayt/hogwarts/issues/275) account export + delete; atoms become core screens (auth, dashboard).
-- **Pilots:** source the 2nd free pilot (build a 3–5 school pipeline).
+#### Mobile API — P0 · [#315](https://github.com/databayt/hogwarts/issues/315)
+Backend endpoints that gate the app + stores.
 
-**Exit gate:** payroll v1 demoable; four of six P0 APIs done; core screens navigable.
+- [ ] Ship the six P0 endpoints: [#274](https://github.com/databayt/hogwarts/issues/274) export · [#275](https://github.com/databayt/hogwarts/issues/275) delete · [#276](https://github.com/databayt/hogwarts/issues/276) translate · [#277](https://github.com/databayt/hogwarts/issues/277) payments · [#278](https://github.com/databayt/hogwarts/issues/278) invoices · [#279](https://github.com/databayt/hogwarts/issues/279) consent
 
-### Sprint 7 — Integrate (Jun 29 – Jul 12)
-*Q2 ends Jun 30 — record the PMF reframe at the OKR checkpoint.*
+### August
 
-**Goal:** complete the P0 surface; connect mobile to finance.
+#### Mobile public launch · [swift-app#3](https://github.com/databayt/swift-app/issues/3)
+Ship the iOS + Android app to the public stores.
 
-- **Bet 1:** payroll v1 complete + finance reporting; pay down tech debt (the `ApplicationSession.userId` foreign-key migration).
-- **Bet 2:** all **6 P0 APIs done**; the mobile fee-payment flow (a parent pays via the app); begin P1 APIs ([#281–288](https://github.com/databayt/hogwarts/issues/315)).
-- **Pilots:** 2nd pilot identified; onboarding started.
+- [ ] Mobile API P1 ([#281–288](https://github.com/databayt/hogwarts/issues/315)): grades, report cards, attendance, admin, exams, schedule, guardian, search
+- [ ] App shell + screens (Swift + Kotlin), consuming the API layer
+- [ ] Store compliance + submit + public launch
 
-**Exit gate:** six of six P0 APIs; a parent can pay a fee through the app on a test tenant.
+#### 2nd pilot · [#316](https://github.com/databayt/hogwarts/issues/316)
+- [ ] Onboard a 2nd free pilot school; both pilots actively using finance + mobile
 
-### Sprint 8 — Feature-complete (Jul 13–26)
-**Goal:** both surfaces feature-complete.
+## Mobile
 
-- **Bet 1:** finance module **feature-complete on web** (fees + billing + salaries + payroll).
-- **Bet 2:** P1 APIs (attendance, grades, report cards, schedules, exams, admin, search); screens assembled; app feature-complete.
-- **Pilots:** both pilots actively running finance features.
+Backend API layer ([#315](https://github.com/databayt/hogwarts/issues/315)) → iOS/Android app ([swift-app#3](https://github.com/databayt/swift-app/issues/3)) → public stores. ⚠️ The Android repo `databayt/kotlin-app` does not exist yet — create + push it before Android tracking moves there.
 
-**Exit gate:** a feature-complete demo of web finance + the mobile app on a real tenant.
+## Parked / later
 
-### Sprint 9 — Harden + store submit (Jul 27 – Aug 9)
-**Goal:** production-harden and enter store review.
+- **LMS / Stream** (courses, video lessons, certificates) — rich but stale; revisit after the pilot blocks land.
+- **Communication hub** — a thin aggregator over Messaging + Notifications; not a standalone ship.
+- **Finance — payroll + full ledger** — payroll is ~65% and several ledger posting paths are unwired; deferred to Q4 with monetization.
 
-- **Bet 1:** QA sweep, edge cases, Arabic/RTL, a security sweep.
-- **Bet 2:** store compliance (privacy, account delete [#275](https://github.com/databayt/hogwarts/issues/275), consent [#279](https://github.com/databayt/hogwarts/issues/279)), screenshots, listings; **submit to the App Store + Google Play**.
-- **Pilots:** gather the PMF signal (usage, satisfaction); Samia drafts the case study.
+## How we track
 
-**Exit gate:** apps submitted to both stores; security sweep clean; PMF metrics instrumented.
-
-### Sprint 10 — Launch + PMF proof (Aug 10–23)
-**Goal:** public launch; document the PMF asset; prepare the Q4 cash decision.
-
-- **Bet 2:** respond to store review and **launch publicly** (iOS + Android).
-- **Bet 1:** production-ready finance; both pilots live.
-- **PMF:** document the proof (2 pilots on finance + mobile); prepare the **Q4 cash-decision brief** (Mutaz + Abdout).
-- Quarter review + retrospective.
-
-**Exit gate:** public store listings live; the PMF write-up and Q4 cash brief published.
-
-## Cash and runway
-
-This quarter is **deliberately cash-flow-negative** — pure PMF, no monetization.
-
-| | Today (May 22) | End of August |
-|---|---|---|
-| Revenue / MRR | $0 | $0 (intentional) |
-| Capital | ~$4.2K | ~$2.5K |
-| Runway | ~8 months | ~5 months (at the burn-cut trigger) |
-| North star | 1 pilot, 0 paying | 2 active pilots, PMF proven |
-
-We spend ~$1.6K of runway to buy one asset: proof that two schools love running their money through Databayt. Hold burn at $500/mo (prompt caching, Haiku for exploration, the Batch API, Oracle's free tier for messaging).
-
-**Q4 cash-decision menu** (to brief in Sprint 10): light monetization of the finance module (a thin transaction fee, or a founding-partner rate); a pre-seed/seed raise on the PMF story; a sponsored build (Mudaraba); or cut burn. **If the PMF signal is weak by Sprint 9, escalate the cash decision early.**
-
-## Risks and watch-outs
-
-| Risk | Mitigation |
-|---|---|
-| Public mobile launch by August is aggressive (store review is unpredictable) | Submit by early Sprint 9; keep TestFlight / Play internal track as the fallback "done" |
-| Single-engineer bus factor | Land Ibrahim's onboarding by May 31; pair on web; spec every feature so agents can execute |
-| Payroll is net-new and may carry Sudan tax nuance | Samia R&D de-risks ahead of build; scope v1 to the pilot's real needs |
-| Mutaz is part-time, so Ali can re-overload | Mutaz delegates and supervises rather than stacking work on Ali |
-| Runway pressure is unaddressed by design | An explicit Q4 decision point; the early-escalation rule if PMF is weak by Sprint 9 |
-| Accessibility | All issues and docs properly structured for a screen reader; voice for sync |
-
-## How we track and communicate
-
-Every workstream is a GitHub issue, and updates and discussion happen on the issue, not in chat (see [Issues](/docs/issue)). Each epic is a checklist that links its child issues; cross-repo mentions create backlinks automatically. Standups are auto-generated from commits, issues, and deploys — humans intervene on exceptions. The weekly cadence (plan / check / review) reads the epics and posts summaries. Code ships through one path — issue → branch → PR → merge (the [github-workflow rule](https://github.com/databayt/kun/blob/main/.claude/rules/github-workflow.md)).
+Every block is a GitHub issue or epic, and updates happen on the issue, not in chat. Master tracker: [kun#76](https://github.com/databayt/kun/issues/76). Ship path: issue → branch → PR → merge ([github-workflow](https://github.com/databayt/kun/blob/main/.claude/rules/github-workflow.md)).
 
 ## Reference
 
-**Set up & workflow:** [Onboarding](/docs/onboarding) (machine provisioning + install) · [Claude Code](/docs/claude-code) · [Configuration](/docs/configuration) · [Architecture](/docs/architecture) · [Workflows](/docs/workflows) · [Issue pipeline](/docs/issue) · [github-workflow rule](https://github.com/databayt/kun/blob/main/.claude/rules/github-workflow.md)
-
-**Operations:** [Epics](/docs/epics) · [Team](/docs/team) · [Captain](/docs/captain) · [Products](/docs/products) · [Share Economy](/docs/share-economy)
-
-**Strategy** (kun repo `docs/`): [NORTH-STAR](https://github.com/databayt/kun/blob/main/docs/NORTH-STAR.md) · [CONSTITUTION](https://github.com/databayt/kun/blob/main/docs/CONSTITUTION.md) · [PRINCIPLES](https://github.com/databayt/kun/blob/main/docs/PRINCIPLES.md) · [CEO-OS](https://github.com/databayt/kun/blob/main/docs/CEO-OS.md) · [AGILE](https://github.com/databayt/kun/blob/main/docs/AGILE.md)
+[Onboarding](/docs/onboarding) · [Epics](/docs/epics) · [Issue pipeline](/docs/issue) · [Workflows](/docs/workflows)
