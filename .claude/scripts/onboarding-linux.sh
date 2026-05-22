@@ -293,11 +293,35 @@ else
     pass "SSH key exists"
 fi
 
-# GitHub auth
+# GitHub auth — robust on headless/remote/piped (curl|bash) installs.
+# gh auth login is interactive; when this runs via `curl ... | bash`, stdin is
+# the script (not a terminal), so the device flow can't read input and "fails
+# to auth via web". Drive it from /dev/tty, with a token-paste fallback.
 if ! gh auth status >/dev/null 2>&1; then
-    info "Logging into GitHub (browser will open)..."
-    gh auth login -p ssh -w
-    pass "GitHub authenticated"
+    if [ -e /dev/tty ]; then
+        info "Logging into GitHub — you'll get a one-time code to enter at https://github.com/login/device (any browser, even your phone)."
+        gh auth login -p ssh -w </dev/tty >/dev/tty 2>&1 || true
+        if ! gh auth status >/dev/null 2>&1; then
+            {
+                echo ""
+                echo "Web/device auth didn't complete (common on headless/remote boxes)."
+                echo "Fallback — paste a GitHub Personal Access Token:"
+                echo "  1. https://github.com/settings/tokens (classic) -> Generate new token"
+                echo "  2. Scopes: repo, read:org, admin:public_key"
+                echo "  3. Paste below:"
+            } >/dev/tty
+            gh auth login -p ssh --with-token </dev/tty || true
+        fi
+    else
+        info "No terminal for interactive GitHub login."
+        echo "Run once in a real terminal, then re-run the installer:" >&2
+        echo "  gh auth login -p ssh        # device flow, no local browser needed" >&2
+    fi
+    if gh auth status >/dev/null 2>&1; then
+        pass "GitHub authenticated"
+    else
+        fail "GitHub auth not completed — run 'gh auth login -p ssh' then re-run"
+    fi
 else
     GH_USER=$(gh api user --jq '.login' 2>/dev/null || echo "unknown")
     pass "GitHub authenticated ($GH_USER)"
