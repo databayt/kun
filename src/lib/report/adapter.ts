@@ -26,8 +26,10 @@ import {
 } from "./adapters/adapter";
 import type { PipelineEvent, ReporterContext, ReportInput } from "./types";
 
-const REPO = process.env.GITHUB_REPO || "databayt/kun";
-const SALT = process.env.REPORT_IP_SALT || "kun-default-salt";
+// Trim env values — a stray trailing newline in GITHUB_REPO (e.g. "databayt/kun\n")
+// builds a malformed GitHub URL and silently breaks every report submission.
+const REPO = (process.env.GITHUB_REPO || "databayt/kun").trim();
+const SALT = (process.env.REPORT_IP_SALT || "kun-default-salt").trim();
 
 export const kunReportAdapter: ReportAdapter = {
   repo: REPO,
