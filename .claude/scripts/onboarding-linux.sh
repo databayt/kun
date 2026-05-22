@@ -318,7 +318,8 @@ fi
 step "4" "Clone Repositories"
 
 clone_repo() {
-    local repo="$1" dir="$REPOS_DIR/$repo"
+    local repo="$1"
+    local dir="$REPOS_DIR/$repo"
     if [[ ! -d "$dir" ]]; then
         git clone "git@github.com:databayt/$repo.git" "$dir" 2>/dev/null && pass "$repo" || {
             git clone "https://github.com/databayt/$repo.git" "$dir" 2>/dev/null && pass "$repo (HTTPS)" || fail "$repo clone failed"
