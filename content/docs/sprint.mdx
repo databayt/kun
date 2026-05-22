@@ -14,10 +14,8 @@ A pilot school must run **daily operations on day one**, **enroll students**, an
 1. **Hand over now** — the ready core a school runs on daily: Students, Teachers, Parents, **Attendance**, **Timetable**, Messaging, Notifications, Profile (plus **Transportation** if the school runs buses).
 2. **Finish first** — priority engineering, because client need is highest and both are near-ready: **Admission** (new-year enrollment) and **Finance — fees** (schools must collect money).
 3. **Finish next** — medium need, ship as capacity allows: Grades / report cards, Exams (wire routes), Classes (quick win).
-4. **Mobile** — parents/teachers app → public launch (August).
+4. **Mobile** — parents/teachers app → public launch.
 5. **Parked** — low day-one need or not ready: LMS / Stream, Communication hub, Finance payroll + full ledger (Q4).
-
-Detail by month below.
 
 ## Get your machine ready (do this first)
 
@@ -47,8 +45,6 @@ bash ~/.claude/scripts/health.sh && claude doctor
 c "/issue"
 ```
 
-> **Hard gate:** Ibrahim + Mutaz fully onboarded and green by **May 31** — no feature work on an unprovisioned machine.
-
 ## Ready to hand over (now)
 
 Wired, tested, rich — demo these and hand them to pilot schools today.
@@ -67,19 +63,21 @@ Wired, tested, rich — demo these and hand them to pilot schools today.
 
 ## Shipping this quarter
 
-Rich blocks that need a finishing push before handover. Each links its tracker.
+**In priority order — what's at the top ships first.** Each block links its README, issue notes, and todos.
 
-### June
+### Admission
+[README](https://github.com/databayt/hogwarts/blob/main/src/components/school-dashboard/admission/README.md) · [ISSUE.md](https://github.com/databayt/hogwarts/blob/main/src/components/school-dashboard/admission/ISSUE.md) · [Epic #314](https://github.com/databayt/hogwarts/issues/314)
 
-#### Admission · [#314](https://github.com/databayt/hogwarts/issues/314)
 The full funnel exists (campaigns, applications, merit, enrollment, public wizard) — close the gaps.
 
-- [ ] Kill onboarding friction from the pilot's own feedback: [#298–307](https://github.com/databayt/hogwarts/issues/314), [#254](https://github.com/databayt/hogwarts/issues/254)
 - [ ] Compute the merit score (it currently ranks on an uncomputed value)
 - [ ] Wire the enrollment section-placement UI
 - [ ] Expose the rest of admission settings (~12 of ~30 fields today)
+- [ ] Kill onboarding friction from the pilot's own feedback ([#298–307](https://github.com/databayt/hogwarts/issues/314), [#254](https://github.com/databayt/hogwarts/issues/254))
 
-#### Finance — fees slice · [#313](https://github.com/databayt/hogwarts/issues/313)
+### Finance — fees
+[README](https://github.com/databayt/hogwarts/blob/main/src/components/school-dashboard/finance/README.md) · [ISSUE.md](https://github.com/databayt/hogwarts/blob/main/src/components/school-dashboard/finance/ISSUE.md) · [Epic #313](https://github.com/databayt/hogwarts/issues/313)
+
 Schools collect fees from parents. Ship the fee-collection slice; hold full ledger + payroll for Q4.
 
 - [ ] Fee structures + auto-provision at onboarding ([#264](https://github.com/databayt/hogwarts/issues/264), [#269](https://github.com/databayt/hogwarts/issues/269))
@@ -87,46 +85,56 @@ Schools collect fees from parents. Ship the fee-collection slice; hold full ledg
 - [ ] Payment-path audit + gaps ([#263](https://github.com/databayt/hogwarts/issues/263))
 - [ ] Per-school currency ([#305](https://github.com/databayt/hogwarts/issues/305))
 
-#### Attendance — polish
-Already shippable (above). Quick wins this month:
+### Attendance — polish
+[README](https://github.com/databayt/hogwarts/blob/main/src/components/school-dashboard/attendance/README.md) · [ISSUE.md](https://github.com/databayt/hogwarts/blob/main/src/components/school-dashboard/attendance/ISSUE.md)
+
+Already shippable (above). Quick wins:
 
 - [ ] Confirm auto-marking + cron policies against the pilot's period structure
 - [ ] Arabic dictionary sweep on any remaining labels
 
-### July
+### Exams — wire the routes
+[README](https://github.com/databayt/hogwarts/blob/main/src/components/school-dashboard/exams/README.md) · [ISSUE.md](https://github.com/databayt/hogwarts/blob/main/src/components/school-dashboard/exams/ISSUE.md)
 
-#### Exams — wire the routes
 Components are rich (question bank, paper generator, auto-mark, results PDF, exam wizard) but routes are not yet fully wired.
 
 - [ ] Wire the `/exams/*` routes end-to-end
 - [ ] Smoke-test the exam wizard + auto-mark on the pilot subdomain
 
-#### Grades & report cards
+### Grades & report cards
+[README](https://github.com/databayt/hogwarts/blob/main/src/components/school-dashboard/grades/README.md) · [ISSUE.md](https://github.com/databayt/hogwarts/blob/main/src/components/school-dashboard/grades/ISSUE.md)
+
 Composable report-card / transcript templates exist; harden them.
 
 - [ ] Verify report-card templates + transcript PDF
 - [ ] Promotion dashboard pass
 
-#### Classes — wire the list route (quick win)
+### Classes — wire the list route (quick win)
+[README](https://github.com/databayt/hogwarts/blob/main/src/components/school-dashboard/listings/classes/README.md) · [ISSUE.md](https://github.com/databayt/hogwarts/blob/main/src/components/school-dashboard/listings/classes/ISSUE.md)
+
 Rich components, but the class **list view route is not wired** (only the add-wizard steps are).
 
 - [ ] Add the `classes` list `page.tsx` + sidebar entry
 
-#### Mobile API — P0 · [#315](https://github.com/databayt/hogwarts/issues/315)
+### Mobile API — P0
+[Epic #315](https://github.com/databayt/hogwarts/issues/315)
+
 Backend endpoints that gate the app + stores.
 
 - [ ] Ship the six P0 endpoints: [#274](https://github.com/databayt/hogwarts/issues/274) export · [#275](https://github.com/databayt/hogwarts/issues/275) delete · [#276](https://github.com/databayt/hogwarts/issues/276) translate · [#277](https://github.com/databayt/hogwarts/issues/277) payments · [#278](https://github.com/databayt/hogwarts/issues/278) invoices · [#279](https://github.com/databayt/hogwarts/issues/279) consent
 
-### August
+### Mobile public launch
+[Epic swift-app#3](https://github.com/databayt/swift-app/issues/3)
 
-#### Mobile public launch · [swift-app#3](https://github.com/databayt/swift-app/issues/3)
 Ship the iOS + Android app to the public stores.
 
 - [ ] Mobile API P1 ([#281–288](https://github.com/databayt/hogwarts/issues/315)): grades, report cards, attendance, admin, exams, schedule, guardian, search
 - [ ] App shell + screens (Swift + Kotlin), consuming the API layer
 - [ ] Store compliance + submit + public launch
 
-#### 2nd pilot · [#316](https://github.com/databayt/hogwarts/issues/316)
+### 2nd pilot
+[Epic #316](https://github.com/databayt/hogwarts/issues/316)
+
 - [ ] Onboard a 2nd free pilot school; both pilots actively using finance + mobile
 
 ## Mobile
