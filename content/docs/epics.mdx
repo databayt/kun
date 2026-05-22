@@ -1,150 +1,125 @@
 ---
 title: Epics
-description: 57 stories across 12 epics with sprint plan for April-June 2026
+description: "Q3 2026 PMF quarter — six epics across two bets, plus the engine already shipped."
 ---
 
 # Epics & Stories
 
-57 stories across 12 epics, organized by phase. Sprints run April-June 2026.
+The work, organized by epic. For the time-phased view — which sprint, when, with exit gates — see the **[Sprint Plan](/docs/sprint)**. Each epic below is a live GitHub tracking issue; that issue is the source of truth, this page is the map.
 
-## Overview
+> Refreshed for **Q3 2026 (Jun–Aug)**. The previous April–June plan is superseded — see the [Sprint Plan](/docs/sprint) for this quarter's context, team, and cash position.
 
-| Epic | Phase | Stories | Status |
-|------|-------|---------|--------|
-| E1: CLAUDE.md Configuration | 1 | 5 | Done |
-| E2: Agent Fleet | 1 | 6 | Done |
-| E3: Skill Library | 1 | 5 | Done |
-| E4: MCP Ecosystem | 1 | 5 | Done |
-| E5: Hook Automation | 1 | 4 | Done |
-| E6: Rules & Memory | 1 | 4 | Done |
-| E7: Team Configuration | 2 | 5 | Planned |
-| E8: Hogwarts Pilot | 2 | 5 | **In Progress** |
-| E9: Agent Teams & CI/CD | 2 | 4 | Planned |
-| E10: Revenue & Operations | 2 | 5 | Planned |
-| E11: Agent SDK Platform | 3 | 4 | Future |
-| E12: Enterprise & Optimization | 3 | 3 | Future |
+## This quarter (Q3 2026 · Jun–Aug)
 
-## Phase 1: Developer Engine (Done)
+The whole team is pointed at two bets — **PMF via school finance** and a **mobile public launch** — to prove product-market fit with two pilot schools. No monetization this quarter; that is a Q4 decision. Full framing, sprints, and runway live in the [Sprint Plan](/docs/sprint).
 
-### E1: CLAUDE.md Configuration
+| Epic | Bet | Owner | Tracker |
+|------|-----|-------|---------|
+| School Finance Module | 1 | Abdout | [hogwarts#313](https://github.com/databayt/hogwarts/issues/313) |
+| Onboarding Friction Kill | 1 | Abdout / web | [hogwarts#314](https://github.com/databayt/hogwarts/issues/314) |
+| PMF Pilots | both | Mutaz / Ali | [hogwarts#316](https://github.com/databayt/hogwarts/issues/316) |
+| Mobile API Layer | 2 | Abdout + Ibrahim | [hogwarts#315](https://github.com/databayt/hogwarts/issues/315) |
+| Mobile Public Launch | 2 | Ibrahim | [swift-app#3](https://github.com/databayt/swift-app/issues/3) |
+| Q3 master tracker | — | Abdout | [kun#76](https://github.com/databayt/kun/issues/76) |
 
-- [x] User-level CLAUDE.md (stack, mode, preferences)
-- [x] Project-level CLAUDE.md (context, architecture)
-- [x] Repo-level CLAUDE.md (100+ keywords, workflows)
-- [x] Keyword system (dev, build, deploy, saas, test...)
-- [x] Configuration hierarchy validation
+## Bet 1 — PMF via School Finance
 
-### E2: Agent Fleet
+### School Finance Module · [hogwarts#313](https://github.com/databayt/hogwarts/issues/313)
 
-- [x] Stack chain (7): nextjs, react, typescript, tailwind, prisma, shadcn, authjs
-- [x] Design chain (4): orchestration, architecture, pattern, structure
-- [x] UI chain (4): shadcn, atom, template, block
-- [x] DevOps chain (3): build, deploy, test
-- [x] VCS chain (2): git, github
-- [x] Specialized (8): middleware, i18n, semantic, sse, optimize, performance, comment, icon
+Build the school's **own** financial features — fee collection from parents, billing, salaries, payroll. The PMF wedge: the system a school runs its money through is the stickiest seat in the building. (Not Databayt-collects-from-schools billing — that is Q4+.)
 
-### E3: Skill Library
+- [ ] [#255](https://github.com/databayt/hogwarts/issues/255) Finance accounts: readiness & open work
+- [ ] [#263](https://github.com/databayt/hogwarts/issues/263) Payment system: end-to-end audit, gaps, phased roadmap
+- [ ] [#264](https://github.com/databayt/hogwarts/issues/264) Auto-provision fee structures at onboarding
+- [ ] [#269](https://github.com/databayt/hogwarts/issues/269) New fee structure: reuse the announcement approach
+- [ ] [#273](https://github.com/databayt/hogwarts/issues/273) QA: Fee Lifecycle end-to-end walkthrough
+- [ ] Salaries & payroll module v1 — *new, to be filed*
+- [ ] Finance reporting — *new, to be filed*
 
-- [x] Workflow: /dev, /build, /quick, /deploy
-- [x] Creation: /atom, /template, /block, /saas
-- [x] Quality: /test, /security, /performance, /fix
-- [x] Documentation: /docs, /codebase, /repos
-- [x] QA: /handover (5-pass across 2 environments)
+### Onboarding Friction Kill · [hogwarts#314](https://github.com/databayt/hogwarts/issues/314)
 
-### E4: MCP Ecosystem
+Eliminate the onboarding friction the pilot reported first-hand — *make a few users love you*.
 
-- [x] UI & Design: shadcn, figma, tailwind, a11y, storybook
-- [x] Testing: browser (headless), browser-headed
-- [x] DevOps: github, vercel, sentry, gcloud
-- [x] Data: neon, postgres, stripe, keychain
-- [x] Knowledge: ref, context7, linear
+- [ ] [#254](https://github.com/databayt/hogwarts/issues/254) Outlook/Hotmail not receiving OTP emails
+- [ ] [#298](https://github.com/databayt/hogwarts/issues/298) no middle-school option
+- [ ] [#299](https://github.com/databayt/hogwarts/issues/299) teacher count default (200) too high
+- [ ] [#300](https://github.com/databayt/hogwarts/issues/300) student count multiples-of-5 not practical
+- [ ] [#301](https://github.com/databayt/hogwarts/issues/301) / [#306](https://github.com/databayt/hogwarts/issues/306) responsive breakage
+- [ ] [#304](https://github.com/databayt/hogwarts/issues/304) back button slow
+- [ ] [#305](https://github.com/databayt/hogwarts/issues/305) add currency selection
+- [ ] [#307](https://github.com/databayt/hogwarts/issues/307) Next button stuck after fees
 
-### E5: Hook Automation
+### PMF Pilots · [hogwarts#316](https://github.com/databayt/hogwarts/issues/316)
 
-- [x] Auto-format (Prettier on Write/Edit)
-- [x] Port management (kill 3000 before dev)
-- [x] Browser launch (Chrome after dev)
-- [x] Session logging (timestamps)
+Two free pilots (King Fahad — Sudanese — plus a 2nd) actively using finance + mobile, with a documented PMF signal that feeds the Q4 cash decision.
 
-### E6: Rules & Memory
+- [ ] King Fahad re-engagement + JTBD interviews
+- [ ] Source 2nd free pilot (3–5 school pipeline)
+- [ ] 2nd pilot onboarding
+- [ ] Usage tracking on both pilots
+- [ ] PMF write-up + case study → Q4 cash brief
 
-- [x] 8 path-scoped rules (auth, i18n, prisma, tailwind, testing, deployment, multi-repo, org-refs)
-- [x] Preference memory (port, env, pnpm)
-- [x] Component memory (59 atoms, 31 templates, 4 blocks)
-- [x] Repository memory (14 repos)
+## Bet 2 — Mobile Public Launch
 
-## Phase 2: Team Engine (Current)
+### Mobile API Layer · [hogwarts#315](https://github.com/databayt/hogwarts/issues/315)
 
-### E7: Team Configuration
+Backend API layer for the iOS + Android apps. Shares the finance domain with Bet 1 (payments + invoices).
 
-| Story | Owner | Priority |
-|-------|-------|----------|
-| Shared settings.json via git | Abdout | P0 |
-| Role-based installer (engineer/business/content) | Abdout | P0 |
-| Windows setup guide + PowerShell installer | Sedon | P1 |
-| Onboarding documentation for all roles | Samia | P1 |
-| Local override support (.local.json) | Abdout | P0 |
+**P0 — store gates**
 
-### E8: Hogwarts Pilot (King Fahad Schools)
+- [ ] [#274](https://github.com/databayt/hogwarts/issues/274) account export (data portability)
+- [ ] [#275](https://github.com/databayt/hogwarts/issues/275) account delete
+- [ ] [#276](https://github.com/databayt/hogwarts/issues/276) translation cache
+- [ ] [#277](https://github.com/databayt/hogwarts/issues/277) payments (Apple Pay + Stripe)
+- [ ] [#278](https://github.com/databayt/hogwarts/issues/278) invoices
+- [ ] [#279](https://github.com/databayt/hogwarts/issues/279) consent (TOS, Privacy, COPPA, GDPR-K)
 
-| Story | Owner | Priority |
-|-------|-------|----------|
-| Admission block — 5-pass QA clean | Abdout | P0 |
-| Notification system — SMS + in-app for parents | Abdout | P0 |
-| Messaging — school-parent communication | Abdout | P1 |
-| Arabic content + user guide | Samia | P0 |
-| Client onboarding plan + training materials | Ali | P0 |
+**P1 — teacher / admin / guardian**
 
-### E9: Agent Teams & CI/CD
+- [ ] [#281](https://github.com/databayt/hogwarts/issues/281) grade entry
+- [ ] [#282](https://github.com/databayt/hogwarts/issues/282) report cards
+- [ ] [#283](https://github.com/databayt/hogwarts/issues/283) attendance
+- [ ] [#284](https://github.com/databayt/hogwarts/issues/284) admin staff + classes
+- [ ] [#285](https://github.com/databayt/hogwarts/issues/285) online exams
+- [ ] [#286](https://github.com/databayt/hogwarts/issues/286) teacher schedule
+- [ ] [#287](https://github.com/databayt/hogwarts/issues/287) guardian write actions
+- [ ] [#288](https://github.com/databayt/hogwarts/issues/288) universal search
 
-| Story | Owner | Priority |
-|-------|-------|----------|
-| Agent Teams parallel feature build | Abdout | P0 |
-| GitHub Actions PR review (Agent SDK) | Abdout | P0 |
-| Scheduled cloud tasks (health, deps) | Abdout | P1 |
-| Pattern compliance CI check | Abdout | P1 |
+### Mobile Public Launch · [swift-app#3](https://github.com/databayt/swift-app/issues/3)
 
-### E10: Revenue & Operations
+Ship the Hogwarts app to the public App Store (iOS) + Google Play (Android).
 
-| Story | Owner | Priority |
-|-------|-------|----------|
-| Stripe billing integration for Hogwarts | Abdout | P0 |
-| Client outreach templates (Arabic) | Ali | P0 |
-| Financial tracking dashboard (Cowork + Stripe MCP) | Ali | P1 |
-| Arabic marketing content for ed.databayt.org | Samia | P1 |
-| Competitive analysis: school platforms in Sudan | Samia | P2 |
+- [ ] Unblock tooling — JDK, Xcode simulator/SDK, Code Connect
+- [ ] App shell + navigation (Swift + Kotlin)
+- [ ] Atoms → screens (auth, dashboard, attendance, fees)
+- [ ] Consume the Mobile API Layer
+- [ ] Store compliance (privacy, account export/delete, consent)
+- [ ] Submit to both stores + public launch
+- [ ] ⚠️ **Prerequisite:** create `databayt/kotlin-app` — the Android repo does not exist yet
 
-## Phase 3: Company Engine (Future)
+## Already shipped — the engine
 
-### E11: Agent SDK Platform
+The kun engine that lets six people operate like twenty. Operational since Phase 1:
 
-- [ ] CI/CD review agent (auto-review every PR)
-- [ ] Deploy verification agent (post-deploy health)
-- [ ] School onboarding agent (automated tenant setup)
-- [ ] Client report agent (weekly status generation)
+| Capability | Count |
+|---|---|
+| Agents | 40 |
+| Skills | 25 |
+| MCP servers | 18 |
+| Rules | 8 |
+| Hooks | 5 |
+| Keywords | 100+ |
 
-### E12: Enterprise & Optimization
+Detail: [Configuration](/docs/configuration) · [Agents](/docs/agents) · [Architecture](/docs/architecture) · [Keywords](/docs/keywords).
 
-- [ ] SSO/SCIM + audit logging
-- [ ] Prompt caching + batch API (95% cost savings)
-- [ ] Pattern distribution packaging
+## Next — Q4 and beyond
 
-## Sprint Plan (April-June 2026)
+Once PMF is proven this quarter, Q4 opens:
 
-| Sprint | Dates | Focus | Key Deliverables |
-|--------|-------|-------|-----------------|
-| **S1** | Apr 1-14 | Foundation | Installer scripts, role configs, fumadocs site |
-| **S2** | Apr 15-28 | Hogwarts QA | Admission 5-pass, notification system |
-| **S3** | May 1-14 | Team + Revenue | Cowork onboarding (Ali, Samia), Stripe billing |
-| **S4** | May 15-28 | Automation | Agent Teams, CI/CD, scheduled tasks |
-| **S5** | Jun 1-14 | Pilot Launch | King Fahad Schools go-live, monitoring |
+- **The cash decision** — light monetization, a pre-seed raise, a sponsored build, or cut burn (see [Sprint Plan → Cash and runway](/docs/sprint#cash-and-runway)).
+- **Share-economy framework** — the Contribution-Units operational model and the future `databayt/revenue` repo (Samia-owned R&D; see [Share Economy](/docs/share-economy)).
+- **Deferred products** — Mkan soft launch and Souq reactivation, both parked behind Hogwarts this quarter.
 
-### Sprint 1 Detail (Current)
+---
 
-| Task | Owner | Status |
-|------|-------|--------|
-| Refactor docs to Databayt context | Abdout | Done |
-| Update fumadocs MDX site | Abdout | In Progress |
-| Create role-based installer | Abdout | Planned |
-| Update repositories.json (11 → 14 repos) | Abdout | Planned |
-| Windows PowerShell installer | Sedon | Planned |
+For the sprint-by-sprint timeline, exit gates, team long/short vision, and the machine-readiness prerequisites, see the **[Sprint Plan](/docs/sprint)**.
