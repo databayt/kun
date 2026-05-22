@@ -27,31 +27,22 @@ Research on Claude/Anthropic products, sharing economy models, revenue distribut
 ### Sedon — Facilitator
 Facilitates the business team (Ali + Mutaz) — clears blockers, runs the ops cadence. Saudi operations: bank account, physical presence, payments.
 
-## Role-Specific MCP Configs
+## Config — Universal
 
-| Role | Config File | Servers |
-|------|------------|---------|
-| **engineer** | mcp.json | github, vercel, neon, stripe, sentry, figma, shadcn, browser, + 10 more |
-| **business** | mcp-business.json | github, slack, linear, stripe, notion, browser, context7, memory-bank |
-| **content** | mcp-content.json | github, slack, notion, browser, figma, context7, memory-bank, ref |
-| **ops** | mcp-ops.json | github, slack, vercel, sentry, neon, stripe, browser, posthog, memory-bank |
+Every machine gets the **full config**: all agents, all 25 skills, the full MCP fleet (18 servers), all hooks. The machine — not the person — is the unit of capability, so any machine can run any task. Role is a label + a *secrets-trust tier*; it does not limit what the computer can do.
+
+What still varies: **which API keys a machine holds**, scoped by the Gist that person is handed. An MCP server without its key just doesn't connect (harmless).
 
 ## Setup
 
-One command per role — installs or updates config + runs health check:
+One command — installs or updates the full config + runs a health check. The role arg is just a label:
 
 ```bash
 # macOS/Linux
 cd ~/kun && bash .claude/scripts/setup.sh engineer
-cd ~/kun && bash .claude/scripts/setup.sh business
-cd ~/kun && bash .claude/scripts/setup.sh content
-cd ~/kun && bash .claude/scripts/setup.sh ops
 
 # Windows (PowerShell)
 cd ~/kun; .\.claude\scripts\setup.ps1 -Role engineer
-cd ~/kun; .\.claude\scripts\setup.ps1 -Role business
-cd ~/kun; .\.claude\scripts\setup.ps1 -Role content
-cd ~/kun; .\.claude\scripts\setup.ps1 -Role ops
 ```
 
 Re-run anytime to update config after pulling latest from git.
