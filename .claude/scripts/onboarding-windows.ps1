@@ -62,6 +62,16 @@ $KUN_DIR = "$HOME_DIR\kun"
 function Pass($msg) { Write-Host "  + $msg" -ForegroundColor Green }
 function Fail($msg) { Write-Host "  x $msg" -ForegroundColor Red; $script:ERRORS++ }
 function Info($msg) { Write-Host "  . $msg" -ForegroundColor DarkGray }
+
+# Open a URL in the user's default browser; silent on failure.
+function Open-Url($url) {
+    try { Start-Process $url -ErrorAction Stop | Out-Null } catch { }
+}
+# Copy text to the Windows clipboard.
+function Copy-Clipboard($text) {
+    try { Set-Clipboard -Value $text -ErrorAction Stop; return $true } catch { return $false }
+}
+
 function Step($num, $msg) {
     Write-Host ""
     Write-Host "[$num/8] $msg" -ForegroundColor Cyan
@@ -224,8 +234,32 @@ if (-not (Test-Path $sshKey)) {
 # GitHub auth
 $ghAuth = gh auth status 2>&1
 if ($LASTEXITCODE -ne 0) {
-    Info "Logging into GitHub (browser will open)..."
-    gh auth login -p ssh -w
+    Info "Connect your device to GitHub — opening the device page in your browser. If you don't have a GitHub account yet, sign up from that page (free)."
+    Open-Url "https://github.com/login/device"
+
+    # Capture gh's output via Tee-Object so a background watcher can pluck the
+    # XXXX-XXXX one-time code and copy it to the clipboard — saves the user
+    # from copying it by hand into the device page.
+    $ghOut = [System.IO.Path]::GetTempFileName()
+    $watcher = Start-Job -ScriptBlock {
+        param($path)
+        while ($true) {
+            Start-Sleep -Milliseconds 300
+            if (Test-Path $path) {
+                $content = Get-Content $path -Raw -ErrorAction SilentlyContinue
+                if ($content -and ($content -match '([A-Z0-9]{4}-[A-Z0-9]{4})')) {
+                    try { Set-Clipboard -Value $matches[1] -ErrorAction Stop } catch { }
+                    break
+                }
+            }
+        }
+    } -ArgumentList $ghOut
+
+    gh auth login -p ssh -w 2>&1 | Tee-Object -FilePath $ghOut
+    Stop-Job $watcher -ErrorAction SilentlyContinue
+    Remove-Job $watcher -ErrorAction SilentlyContinue
+    Remove-Item $ghOut -ErrorAction SilentlyContinue
+
     Pass "GitHub authenticated"
 } else {
     $ghUser = gh api user --jq '.login' 2>$null

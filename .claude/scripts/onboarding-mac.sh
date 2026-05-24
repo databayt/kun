@@ -62,6 +62,11 @@ D='\033[2m' BD='\033[1m' NC='\033[0m'
 pass() { echo -e "  ${G}✓${NC} $1"; }
 fail() { echo -e "  ${R}✗${NC} $1"; ERRORS=$((ERRORS + 1)); }
 info() { echo -e "  ${D}·${NC} $1"; }
+
+# Open a URL in the default browser; macOS has 'open' on every system.
+open_url() { open "$1" >/dev/null 2>&1 & }
+# Copy text to the macOS clipboard.
+copy_clipboard() { printf '%s' "$1" | pbcopy >/dev/null 2>&1; }
 step() {
     echo ""
     echo -e "${BD}[$1/8]${NC} ${B}$2${NC}"
@@ -262,8 +267,29 @@ fi
 
 # GitHub auth
 if ! gh auth status &>/dev/null 2>&1; then
-    info "Logging into GitHub (browser will open)..."
-    gh auth login -p ssh -w
+    info "Connect your device to GitHub — opening the device page in your browser. If you don't have a GitHub account yet, sign up from that page (free)."
+    open_url "https://github.com/login/device"
+
+    # Auto-copy the one-time XXXX-XXXX device code to the clipboard as soon
+    # as gh prints it, so the user only needs to paste on the device page.
+    ghout=$(mktemp)
+    (
+        while sleep 0.3; do
+            [ -s "$ghout" ] || continue
+            code=$(grep -oE '[A-Z0-9]{4}-[A-Z0-9]{4}' "$ghout" 2>/dev/null | head -1)
+            if [ -n "$code" ]; then
+                if copy_clipboard "$code"; then
+                    printf '\n  %b✓%b One-time code %s copied to clipboard — paste it on the page.\n\n' "${G}" "${NC}" "$code"
+                fi
+                exit 0
+            fi
+        done
+    ) &
+    watcher_pid=$!
+    gh auth login -p ssh -w 2>&1 | tee "$ghout"
+    kill "$watcher_pid" 2>/dev/null
+    wait "$watcher_pid" 2>/dev/null
+    rm -f "$ghout"
     pass "GitHub authenticated"
 else
     GH_USER=$(gh api user --jq '.login' 2>/dev/null || echo "unknown")
