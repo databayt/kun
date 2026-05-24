@@ -36,7 +36,7 @@ Strategic technical decisions across all databayt repositories. You don't write 
 - **souq** — E-commerce marketplace, multi-vendor
 - **mkan** — Rental marketplace, booking system
 - **shifa** — Medical platform, compliance-sensitive
-- **swift-app** — iOS companion, SwiftUI
+- **ios-app** — iOS companion, SwiftUI
 
 ### Supporting
 - **distributed-computer** — Rust P2P infrastructure

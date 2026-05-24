@@ -30,7 +30,7 @@ $Repos = @{
     "souq" = "$OssDir\souq"
     "mkan" = "$OssDir\mkan"
     "shifa" = "$OssDir\shifa"
-    "swift-app" = "$OssDir\swift-app"
+    "ios-app" = "$OssDir\ios-app"
     "distributed-computer" = "$OssDir\distributed-computer"
     "marketing" = "$OssDir\marketing"
 }

@@ -312,7 +312,7 @@ Clone-Repo "codebase"; Symlink-Home "codebase"
 
 if (-not $EssentialsOnly) {
     Info "Cloning remaining databayt org repos..."
-    foreach ($repo in @("shadcn", "radix", "souq", "mkan", "shifa", "swift-app", "distributed-computer", "marketing")) {
+    foreach ($repo in @("shadcn", "radix", "souq", "mkan", "shifa", "ios-app", "distributed-computer", "marketing")) {
         Clone-Repo $repo; Symlink-Home $repo
     }
 }

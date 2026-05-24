@@ -13,7 +13,7 @@ Arguments: $ARGUMENTS (title and description, or just a topic to expand)
 | **shifa** | Medical product |
 | **codebase** | Shared patterns, components, templates |
 | **shadcn** | UI component library |
-| **swift-app** | iOS mobile app |
+| **ios-app** | iOS mobile app |
 | **marketing** | Landing pages, marketing site |
 
 ## Labels

@@ -89,7 +89,7 @@ After this 60-second load, the captain has a complete picture. Then proceed.
 | **Mission** | Excellent school operations for every Arabic-speaking community — built in the open, shared as an economy |
 | **North Star** | Active paying schools using Hogwarts |
 | **Repos** | 14 |
-| **Products** | 5 (hogwarts, souq, mkan, shifa, swift-app) + Kun (engine) |
+| **Products** | 5 (hogwarts, souq, mkan, shifa, ios-app) + Kun (engine) |
 | **Engine** | Kun — Claude Code configuration layer |
 | **Stack** | Next.js 16, React 19, Prisma 6, TypeScript 5, Tailwind 4, shadcn/ui |
 
@@ -147,7 +147,7 @@ Source of truth: `.claude/memory/team.json` and `.claude/memory/capacity.json`. 
 | **souq** | Alpha (MVP, awaiting PMF) | TBD | Commission + subscription | Abdout (TBD: Ibrahim?) |
 | **mkan** | Alpha (Phase 1 done, awaiting soft launch) | TBD | Booking commission | Abdout (TBD) |
 | **shifa** | Design (paused) | TBD | Per-clinic subscription (HIGHEST RISK product — medical PII) | — |
-| **swift-app** | Design | N/A (companion) | Bundled with products | — |
+| **ios-app** | Design | N/A (companion) | Bundled with products | — |
 | **kun** | Phase 2 (Team Engine) active | Databayt (internal) | Future: dev tool subscription / OSS sponsorship | Abdout |
 
 ---

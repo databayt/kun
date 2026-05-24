@@ -1,6 +1,6 @@
-# Swift App — Hogwarts iOS
+# iOS App — Hogwarts Mobile Companion
 
-> **Native iOS companion for Hogwarts. Phase 2 in progress.**
+> **Native iOS companion for Hogwarts. Phase 2 in progress.** Repo was renamed from `swift-app` on 2026-05-24; old URL redirects.
 
 ---
 
@@ -8,11 +8,10 @@
 
 | Field | Value |
 |-------|-------|
-| **Repo** | [databayt/swift-app](https://github.com/databayt/swift-app) |
+| **Repo** | [databayt/ios-app](https://github.com/databayt/ios-app) |
 | **Language** | Swift |
-| **Size** | 442 KB |
 | **Created** | 2025-12-17 |
-| **Last Push** | 2026-02-10 |
+| **Sibling** | [databayt/android-app](https://github.com/databayt/android-app) (Kotlin/Compose, the lead mobile reference) |
 
 ---
 
@@ -67,9 +66,9 @@ Active development through sprints. Currently on Phase 2 — glass material desi
 
 ---
 
-## What Kun Does for Swift App
+## What Kun Does for iOS App
 
-- References swift-app patterns for iOS development
-- Coordinates with Hogwarts web for feature parity
+- References ios-app patterns for iOS development
+- Coordinates with Hogwarts web for feature parity, and mirrors android-app feature cadence
 - Primary development on macOS + iOS
 - Accessibility/VoiceOver testing on iOS
