@@ -11,9 +11,17 @@ This is the team's execution plan for the quarter — every epic we're moving, *
 
 ## Everyone: the warm-intro list
 
-The fastest path to a pilot is someone we already know — a warm intro from a real relationship converts far better than any scraped or cold lead. So this one is on everyone, not just sales:
+The fastest path to a pilot is someone we already know — a warm intro from a real relationship converts far better than any scraped or cold lead. So this one is on everyone, not just sales. The [sales block](https://ed.databayt.org/en/sales) now has a one-click **Network** filter (`source=REFERRAL` + `network` tag), and the current 11-school short list is seeded under `schoolId=platform` via `pnpm db:seed:single sales-network`.
 
-- [ ] **Everyone** — add every school owner, principal, or manager you personally know to the team warm-intro list. **Warm intros rank above scraped / cold leads.** Capture them in the [sales block](https://ed.databayt.org/en/sales); how-to in [Sales](https://ed.databayt.org/en/docs/sales) · [Leads](https://ed.databayt.org/en/docs/leads#lead-sources).
+Tier every contact with exactly one tag so the Network filter splits cleanly:
+
+| Tier | Meaning                                  | Tags                                     |
+| ---- | ---------------------------------------- | ---------------------------------------- |
+| A    | Warm — you have the direct relay today   | `network`, `tier-a`, `<country>`         |
+| B    | Warm but needs intro / more research     | `network`, `tier-b`, `<country>`         |
+| C    | Cold — research before any outreach      | `tier-c`, `<country>` _(no `network`)_   |
+
+- [ ] **Everyone** — add every school owner, principal, or manager you personally know to the [sales console](https://ed.databayt.org/en/sales) using the tier convention above. **Warm intros rank above scraped / cold leads.** First touch for Tier A uses the Arabic WhatsApp template in [Outreach T20](https://ed.databayt.org/en/docs/outreach#t20-school-first-touch-whatsapp-sudan-tier-a-arabic-primary). Full workstream in [Sales § 1](https://ed.databayt.org/en/docs/sales) · sources in [Leads](https://ed.databayt.org/en/docs/leads#lead-sources).
 
 ## Get your machine ready
 
