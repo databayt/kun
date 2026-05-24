@@ -80,13 +80,16 @@ Tasks marked *needs issue* don't have a GitHub issue yet — open one with `/iss
 | 05 | LMS / Stream | Tech | — | `Built+Polish` | [clickview](https://ed.databayt.org/en/docs/clickview) |
 | 06 | Communication / Messaging | Tech | — | `Built+Polish` | [messages](https://ed.databayt.org/en/docs/messages) |
 | 07 | Role-aware UI sweep | Tech | — | `In Progress` | — |
-| 08 | Translation audit | Tech | — | `In Progress` | [translation](https://ed.databayt.org/en/docs/translation) |
+| 08 | Internationalization & translation | Tech | — | `In Progress` | [translation](https://ed.databayt.org/en/docs/translation) |
 | 09 | Mobile API Layer | Tech | 2 | `In Progress` | [hogwarts#315](https://github.com/databayt/hogwarts/issues/315) |
 | 10 | iOS app | Tech | 2 | `In Progress` | [swift-app#3](https://github.com/databayt/swift-app/issues/3) |
 | 11 | Android app | Tech | 2 | `Vaporware` | `kotlin-app` *(repo TBD)* |
 | 12 | Sales & Pilots | Non-tech | both | `Built+Polish` | [hogwarts#316](https://github.com/databayt/hogwarts/issues/316) |
 | 13 | Fundraising | Non-tech | — | `In Progress` | [fundraising](https://ed.databayt.org/en/docs/fundraising) |
 | 14 | Content & Marketing | Non-tech | — | `In Progress` | — |
+| 15 | Global Catalog | Tech | — | `Vaporware` | — |
+| 16 | Letters & Proposals | Non-tech | both | `In Progress` | [proposal](https://ed.databayt.org/en/docs/proposal) · [outreach](https://ed.databayt.org/en/docs/outreach) |
+| 17 | Community | Non-tech | — | `In Progress` | [community](https://ed.databayt.org/en/community) |
 
 Owner-by-epic mapping lives in [Epics](/docs/epics) — that's the GitHub tracker map. This page is interest-first: pick by badge, not by name.
 
@@ -163,14 +166,28 @@ Sidebar / PageNav / Toolbar / row-action gating across the school dashboard.
 - `ui` `P1` `easy` — Gate the sales surfaces against `permissions.ts` · *needs issue*
 - `qa` `P2` `easy` — Role-matrix test: log in as each role, screenshot what's visible · *needs issue*
 
-### 08 — Translation audit · Tech · `In Progress`
+### 08 — Internationalization & translation · Tech · `In Progress`
 [translation](https://ed.databayt.org/en/docs/translation)
+
+Infrastructure is shipped — two-tier system (`ar.json` / `en.json` dictionaries for static UI, `getDisplayText()` + Google Translate + DB cache for dynamic content). The work left is closing adoption gaps and hardening the contributor workflow.
+
+**Infra hardening**
+
+- `i18n` `P1` `med` — Audit locale routing for edge cases (middleware redirects, RSC streaming, dynamic segments) · *needs issue*
+- `i18n` `P1` `easy` — Document the dictionary contract (`ar.json` / `en.json`) so contributors can add strings safely · *needs issue*
+- `i18n` `P1` `med` — Translator workflow doc: how a non-developer proposes string changes (issue → PR with `ar.json` patch) · *needs issue*
+- `i18n` `P2` `med` — Tooling: a script that flags missing AR keys when EN is touched (and vice versa) · *needs issue*
+- `i18n` `P2` `easy` — RTL framework polish — pages with mixed LTR content (numbers, code, English brand names) inside Arabic flow · *needs issue*
+- `i18n` `P2` `hard` — Plan a 3rd-language readiness pass (e.g., French for Maghreb / Urdu for South Asia) — no commitment, just a gap-list · *needs discussion*
+
+**String sweep**
 
 - `i18n` `P1` `easy` — Sweep the finance pages for hardcoded English · *needs issue*
 - `i18n` `P1` `easy` — Sweep the admission pages for hardcoded English · *needs issue*
 - `i18n` `P1` `easy` — Sweep the LMS pages for hardcoded English · *needs issue*
 - `i18n` `P1` `easy` — Sweep the messaging pages for hardcoded English · *needs issue*
 - `i18n` `P2` `easy` — RTL visual pass on each swept page (Arabic side-by-side with English)
+- `i18n` `P2` `easy` — Add Arabic equivalents for any T1–T19 outreach templates still English-only · cross-link to Epic 16 · *needs issue*
 
 ### 09 — Mobile API Layer · Tech · `In Progress`
 [Epic hogwarts#315](https://github.com/databayt/hogwarts/issues/315)
@@ -294,6 +311,97 @@ The artifacts only matter once they're in front of someone. These are the last-m
 - `content` `P1` `easy` — Schedule the Arabic + English social rollout (X, LinkedIn, WhatsApp Status) · *needs issue*
 - `sales` `P1` `easy` — Drop the demo + screenshots into the sales deck and re-export · *needs issue*
 
+### 15 — Global Catalog · Tech · `Vaporware`
+A platform-wide content catalog — curriculums, subjects, chapters, lessons, videos, textbooks, mock exams, qbanks — that any school can **bridge** into its own data. Today every school re-creates content from zero; the catalog flips that. Strong upstream of Epic 17 (Community), which exposes the catalog free to the public.
+
+#### Schema & data model
+
+- `backend` `P1` `hard` — Design the global catalog Prisma schema: `Curriculum`, `Subject`, `Chapter`, `Lesson`, `Resource` (video / textbook / mock-exam / qbank), `platform`-scoped vs. school-scoped boundary · *needs discussion*
+- `backend` `P1` `med` — Bridging model: how a school links one of its `Section`s to a `Curriculum` and inherits the tree · *needs issue*
+- `backend` `P1` `med` — Migration plan: take the King Fahad pilot's existing per-school content and re-attach to the platform catalog where it overlaps · *needs issue*
+
+#### Content seed
+
+- `content` `P1` `med` — Seed the Sudan national curriculum (subjects + chapters tree) · *needs issue*
+- `content` `P1` `med` — Seed the Saudi (Tatweer) curriculum spine · *needs issue*
+- `content` `P2` `med` — Seed the IGCSE / IB skeleton for international schools · *needs issue*
+- `content` `P2` `easy` — Source the first mock-exam pack (Arabic — math, Arabic, science — grades 6–9) · *needs issue*
+
+#### UI to consume the catalog
+
+- `ui` `P1` `med` — Catalog browse + bridge UI in the school admin (`/admin/catalog/bridge`) · *needs issue*
+- `ui` `P1` `easy` — Lesson detail view consuming `Resource` items (video / pdf / qbank) · *needs issue*
+- `ui` `P2` `easy` — "Add to my class" flow for teachers — pick a catalog lesson, attach to a section's timetable · *needs issue*
+
+#### Ops
+
+- `ops` `P1` `easy` — Storage strategy for catalog video/PDF — reuse the CDN from Epic 05 (LMS) · *needs issue*
+- `docs` `P2` `easy` — `/docs/catalog` page on hogwarts: what it is, schema, bridging guide · *needs issue*
+
+### 16 — Letters & Proposals · Non-tech · `In Progress`
+[Proposal](https://ed.databayt.org/en/docs/proposal) · [Outreach T1–T19](https://ed.databayt.org/en/docs/outreach)
+
+The templates library is mature. This epic is the **specific drafts** going out this quarter — each task names the target and the template it inherits from, so the work is fill-in-the-blanks, not write-from-scratch.
+
+#### Schools (pilot conversion)
+
+- `sales` `P0` `easy` — Draft the King Fahad paid-conversion proposal using the "paid-conversion" template · *needs issue*
+- `sales` `P1` `med` — Draft a free-pilot proposal (Arabic) for the next Tier-A warm-intro school · *needs issue*
+- `sales` `P2` `med` — Draft a multi-school bundle proposal for the Sudan diaspora school network · *needs issue*
+
+#### Investors (Phase 2)
+
+- `sales` `P1` `med` — Investor letter for the Sanabil 500 application using T7 · *needs issue*
+- `sales` `P1` `med` — Investor letter for Misk500 using T7 · *needs issue*
+- `sales` `P2` `med` — Cold-investor letter (3 MENA-aware angels, T6 variant) · *needs issue*
+
+#### Grants (non-dilutive)
+
+Sibling to Epic 13 — there we *apply*; here we *draft the narrative*.
+
+- `research` `P1` `hard` — NTDP grant narrative draft (impact + budget + timeline) · *needs issue*
+- `research` `P1` `hard` — Mastercard Foundation EdTech narrative draft · *needs issue*
+- `research` `P1` `hard` — UNESCO Sudan TEP narrative draft · *needs issue*
+
+#### Sponsors & ecosystem
+
+- `sales` `P2` `easy` — Sponsor letter for one MENA EdTech NGO using T11 · *needs issue*
+- `sales` `P2` `easy` — Press / advisor outreach using T15 to one MENA EdTech journalist · *needs issue*
+
+#### Library maintenance
+
+- `content` `P2` `easy` — Arabic versions of any T1–T19 still English-only · cross-link to Epic 08 · *needs issue*
+
+### 17 — Community · Non-tech · `In Progress`
+[community](https://ed.databayt.org/en/community)
+
+Offer the Catalog content (textbooks, mock exams, qbanks) **free** at `/en/community`. Free users come for the content, talk about it, and the school version converts. Most tasks block on Epic 15 (Catalog) — schema + seed must land before public consumption.
+
+#### Free-content surface
+
+- `ui` `P1` `med` — Public community browse UI (no auth) consuming the platform-scoped catalog · blocked on Epic 15 schema · *needs issue*
+- `ui` `P1` `easy` — Free textbook reader (PDF + bookmarks) · *needs issue*
+- `ui` `P1` `med` — Free mock-exam runner (timed, no auth, share-result page) · *needs issue*
+- `ui` `P1` `med` — Free qbank practice mode (topic filter, immediate feedback) · *needs issue*
+
+#### Conversion funnel
+
+- `ui` `P1` `easy` — "Use this in your school" CTA on every public lesson/exam → routes to the pilot intake form · *needs issue*
+- `backend` `P1` `easy` — Track community-→-school conversions in analytics (which free user converted which school) · *needs issue*
+- `content` `P2` `easy` — Onboarding email for free users who sign up (lightweight account, optional) · *needs issue*
+
+#### Marketing & word of mouth
+
+- `content` `P1` `easy` — Shareable result cards for mock exams ("I scored 87% on the Grade 9 Math mock") — Arabic + English · *needs issue*
+- `sales` `P2` `easy` — Brief one teacher influencer in Sudan + one in KSA on the free offering for a launch post · *needs discussion*
+- `content` `P2` `easy` — `/docs/community` doc on hogwarts: what's free, who's behind it, and the school product · *needs issue*
+
+#### Open-source contributor lane
+
+- `docs` `P2` `easy` — Publish `CONTRIBUTING.md` across hogwarts + kun (good-first-issue labels, dev-setup link) · *needs issue*
+- `ops` `P2` `easy` — Stand up a Discord or Slack as the chat home — pick one, link from `/en/community` · *needs discussion*
+- `content` `P2` `easy` — Monthly contributor spotlight on the marketing site · *needs issue*
+
 ## Cash and runway
 
 We do not monetize this quarter — that is a Q4 decision. The plan is to prove product-market fit on two free pilots first, then choose how to fund the next leg.
@@ -310,7 +418,7 @@ Once PMF is proven, Q4 opens **the cash decision** — light monetization, a pre
 | Hostel | `Vaporware` | Dictionary mentions only |
 | Cafeteria | `Vaporware` | Dictionary mentions only |
 
-Native iOS / Android is `Vaporware` in the hogwarts roadmap (deferred to 2027+); we promote it to a Q3 bet as epics 09–11 above. The divergence is deliberate.
+Native iOS / Android is `Vaporware` in the hogwarts roadmap (deferred to 2027+); we promote it to a Q3 bet as epics 09–11 above. The divergence is deliberate. The Global Catalog is also `Vaporware` today but now an active epic — see [Epic 15](#15--global-catalog--tech--vaporware) above.
 
 ## See also
 
