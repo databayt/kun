@@ -210,9 +210,9 @@ fi
 
 # Node.js via nvm (distro packages often lag — nvm gives us LTS reliably)
 if ! command -v node >/dev/null 2>&1; then
-    info "Installing nvm + Node 22 LTS..."
+    info "Installing nvm + Node 24 LTS..."
     if [[ ! -d "$HOME/.nvm" ]]; then
-        curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash >/dev/null 2>&1
+        curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash >/dev/null 2>&1
     fi
     export NVM_DIR="$HOME/.nvm"
     # shellcheck disable=SC1091

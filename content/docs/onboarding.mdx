@@ -42,7 +42,7 @@ Running the bootstrap line leaves your machine in this state. The deliverables, 
 
 | Category | What |
 |---|---|
-| **Side-tools** | git, Node 22 LTS, pnpm, gh CLI, Chrome |
+| **Side-tools** | git, Node 24 LTS (Krypton), pnpm, gh CLI, Chrome |
 | **IDEs** | WebStorm (+ Claude plugin), VS Code (+ Claude extension) |
 | **Claude** | Desktop (Chat / Cowork / Code tabs), Claude Code CLI, IDE integrations, `claude.ai/code` in browser, Mobile (iOS/Android) |
 | **Dotfiles** | SSH key (uploaded to GitHub), `~/.zshrc` / `~/.bashrc` / `$PROFILE` with `c` function, `~/.gitconfig`, `~/.ssh/config` (Keychain on Mac) |
@@ -145,7 +145,7 @@ Eight phases run in the background. You can minimize the terminal and do other w
 
 | Phase | What |
 |---|---|
-| 1 | System Foundation — build tools, git, Node 22 LTS, pnpm, gh CLI |
+| 1 | System Foundation — build tools, git, Node 24 LTS, pnpm, gh CLI |
 | 2 | Applications — WebStorm, VS Code, Chrome (every machine) |
 | 3 | GitHub — SSH key, `gh auth login --web`, key uploaded |
 | 4 | Clone Repositories — the full databayt org (every machine) |
@@ -362,8 +362,8 @@ bash ~/.claude/scripts/health.sh
 # Side-tools
 sudo apt update && sudo apt install -y git curl build-essential ca-certificates
 
-# Node 22 via nvm
-curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+# Node 24 LTS via nvm
+curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
 export NVM_DIR="$HOME/.nvm"; . "$NVM_DIR/nvm.sh"
 nvm install --lts && nvm use --lts
 npm install -g pnpm
