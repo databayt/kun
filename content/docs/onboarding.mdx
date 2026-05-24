@@ -42,7 +42,7 @@ Running the bootstrap line leaves your machine in this state. The deliverables, 
 
 | Category | What |
 |---|---|
-| **Side-tools** | git, Node 24 LTS (Krypton), pnpm, gh CLI, Chrome |
+| **Side-tools** | git, Node 24 LTS (Krypton), pnpm, gh CLI, Vercel CLI, Chrome |
 | **IDEs** | WebStorm (+ Claude plugin), VS Code (+ Claude extension) |
 | **Claude** | Desktop (Chat / Cowork / Code tabs), Claude Code CLI, IDE integrations, `claude.ai/code` in browser, Mobile (iOS/Android) |
 | **Dotfiles** | SSH key (uploaded to GitHub), `~/.zshrc` / `~/.bashrc` / `$PROFILE` with `c` function, `~/.gitconfig`, `~/.ssh/config` (Keychain on Mac) |
@@ -52,13 +52,15 @@ Running the bootstrap line leaves your machine in this state. The deliverables, 
 
 ### Verify what you got
 
-Provisioning lands in six layers. Run these to confirm each — all green means fully provisioned for your profile:
+Provisioning lands in seven layers. Run these to confirm each — all green means fully provisioned for your profile:
 
 | Layer | Verify command | Pass looks like |
 |---|---|---|
-| **Tools** | `for t in git node pnpm gh claude; do command -v $t; done` | a path prints for each |
+| **Tools** | `for t in git node pnpm gh claude vercel; do command -v $t; done` | a path prints for each |
 | **Auth** | `gh auth status && ssh -T git@github.com` | "Logged in"; "successfully authenticated" |
+| **Org gate** | `gh api user/memberships/orgs/databayt --jq .state` | `active` |
 | **Code** | `ls ~/kun ~/hogwarts ~/codebase` | directories exist (all org repos on every machine) |
+| **Per-product env** | `for d in kun hogwarts souq mkan shifa marketing codebase; do [[ -s ~/$d/.env ]] && echo "$d ✓"; done` | each cloned repo prints |
 | **Config** | `bash ~/.claude/scripts/health.sh` | `✅ healthy` (0 errors) |
 | **Surfaces** | `claude doctor` | all checks green |
 | **Product** *(if `--hogwarts-dev`)* | `cd ~/hogwarts && pnpm dev` → open `localhost:3000` | login works (`admin@kingfahad.edu` / `1234`) |
@@ -143,12 +145,12 @@ Eight phases run in the background. You can minimize the terminal and do other w
 
 | Phase | What |
 |---|---|
-| 1 | System Foundation — build tools, git, Node 24 LTS, pnpm, gh CLI |
+| 1 | System Foundation — build tools, git, Node 24 LTS, pnpm, gh CLI, Vercel CLI |
 | 2 | Applications — WebStorm, VS Code, Chrome (every machine) |
 | 3 | GitHub — SSH key, `gh auth login --web`, key uploaded, **verify databayt org membership + SSH push** |
 | 4 | Clone Repositories — the full databayt org (every machine) |
 | 5 | Claude — Code CLI, Desktop (Mac/Win), Desktop MCP symlink, `c` function in shell |
-| 6 | Kun Engine — `setup.sh` installs the full config (agents, skills, MCP, hooks); `secrets.sh` pulls `.env` |
+| 6 | Kun Engine — `setup.sh` installs full config; `secrets.sh` pulls `~/.claude/.env` from Gist; `vercel-pull.sh` populates per-product `.env` from Vercel team `databayt` |
 | 7 | Hogwarts — pnpm install, prisma generate + push + seed, build verify (only with `--hogwarts-dev`) |
 | 8 | Health Check — every tool / repo / config verified |
 

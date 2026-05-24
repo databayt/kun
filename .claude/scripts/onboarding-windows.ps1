@@ -147,6 +147,16 @@ if (-not $hasPnpm) {
     Pass "pnpm ($(pnpm --version))"
 }
 
+# Vercel CLI - needed for `vercel env pull` per-product .env (Phase 6)
+$hasVercel = Get-Command vercel -EA SilentlyContinue
+if (-not $hasVercel) {
+    Info "Installing Vercel CLI..."
+    npm install -g vercel
+    Pass "Vercel CLI installed"
+} else {
+    Pass "Vercel CLI"
+}
+
 # =============================================================================
 # PHASE 2: Applications
 # =============================================================================
@@ -420,6 +430,13 @@ if ($GistId) {
     }
 } else {
     Info "Secrets skipped — run later: .\.claude\scripts\secrets.ps1 -GistId <ID>"
+}
+
+# Vercel env pull - per-product .env from team databayt (warns + continues if
+# Vercel isn't logged in; teammate can run `vercel login` later and re-run).
+$VERCEL_PULL = Join-Path $KUN_DIR ".claude\scripts\vercel-pull.ps1"
+if (Test-Path $VERCEL_PULL) {
+    & $VERCEL_PULL -ReposDir $ReposDir
 }
 
 # =============================================================================

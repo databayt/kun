@@ -185,6 +185,14 @@ else
     pass "pnpm ($(pnpm --version))"
 fi
 
+# Vercel CLI — needed for `vercel env pull` per-product .env (Phase 6)
+if ! command -v vercel &>/dev/null; then
+    npm install -g vercel
+    pass "Vercel CLI installed"
+else
+    pass "Vercel CLI ($(vercel --version 2>/dev/null | head -1))"
+fi
+
 # =============================================================================
 # PHASE 2: Applications
 # =============================================================================
@@ -450,6 +458,13 @@ if [[ -n "$GIST_ID" && -f "$KUN_DIR/.claude/scripts/secrets.sh" ]]; then
     pass "Secrets loaded"
 else
     info "Secrets skipped — run later: bash ~/kun/.claude/scripts/secrets.sh <GIST_ID>"
+fi
+
+# Vercel env pull — per-product .env from team databayt (Gist → ~/.claude/.env;
+# Vercel → ~/<repo>/.env for each cloned product). Warns and continues if
+# Vercel isn't logged in; the teammate can run `vercel login` later and re-run.
+if [[ -f "$KUN_DIR/.claude/scripts/vercel-pull.sh" ]]; then
+    bash "$KUN_DIR/.claude/scripts/vercel-pull.sh" "$REPOS_DIR" || true
 fi
 
 # =============================================================================
