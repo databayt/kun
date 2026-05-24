@@ -1,3 +1,11 @@
+---
+name: typescript
+description: Full coverage sweep for TypeScript anti-patterns - any types, ts-ignore, non-null assertions, unsafe casts, missing return types
+model: sonnet
+paths: ["**/*.ts", "**/*.tsx", "**/tsconfig*.json"]
+argument-hint: "[block-name] | --status"
+---
+
 # TypeScript — Full Coverage Strict Mode Sweep
 
 Sweep every file for TypeScript anti-patterns: `any` types, `ts-ignore`, non-null assertions, unsafe casts, missing return types.

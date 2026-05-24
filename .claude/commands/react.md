@@ -1,3 +1,11 @@
+---
+name: react
+description: Full coverage sweep for React 19 anti-patterns - waterfalls, barrel imports, non-functional setState, derived state in useEffect, heavy RSC serialization
+model: sonnet
+paths: ["**/*.tsx", "**/*.jsx"]
+argument-hint: "[block-name] | --status"
+---
+
 # React — Full Coverage Best Practices Sweep
 
 Sweep every component for React 19 anti-patterns: request waterfalls, barrel imports, non-functional setState, derived-state-in-useEffect, heavy RSC serialization.

@@ -1,3 +1,11 @@
+---
+name: barrel
+description: Full coverage sweep for barrel imports that bloat bundles - from './index', from '@/components/icons', export * from
+model: haiku
+paths: ["**/index.ts", "**/index.tsx", "**/*.ts", "**/*.tsx"]
+argument-hint: "[block-name] | --status"
+---
+
 # Barrel — Full Coverage Import Sweep
 
 Sweep every file for barrel imports that bloat bundles: `from './index'`, `from '@/components/icons'`, `export * from`. Replace with direct imports.

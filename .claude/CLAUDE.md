@@ -42,11 +42,21 @@ Product scope: append `hogwarts`, `souq`, `mkan`, `shifa` to activate domain con
 
 ## Tier 2 — Standalone Tools
 
-Self-describing commands at `.claude/commands/<name>.md`:
+**Project commands** at `.claude/commands/<name>.md` (kun-specific, role-aware):
 
-`dev`, `build`, `deploy`, `report`, `atom`, `block`, `template`, `test`, `clone`,
-`incident`, `monitor`, `package`, `learn`, `analyze`, `profile`, `captain`, `weekly`,
-`screenshot`, `dispatch`, `pricing`, `costs`, `proposal`, `credentials`, `health`.
+`report`, `clone`, `incident`, `monitor`, `package`, `learn`, `analyze`, `profile`,
+`weekly`, `dispatch`, `pricing`, `costs`, `proposal`, `credentials`, `health`,
+`content-calendar`, `crawl-anthropic`, `issue`, `pattern`.
+
+**User skills** at `~/.claude/skills/<name>/SKILL.md` (reusable across all projects):
+
+`dev`, `build`, `deploy`, `atom`, `block`, `template`, `test`, `captain`, `screenshot`,
+`docs`, `fix`, `motion`, `performance`, `quick`, `repos`, `saas`, `security`,
+`codebase`, `decide`, `premortem`, `mcp-doctor`.
+
+> Skills override commands when both exist with the same `/name`. The `build` skill
+> at user level shadows any project `/build` command. To prefer the project version,
+> add it to `skillOverrides` in project `settings.json`.
 
 ## Tier 2b — Coverage Sweeps
 
@@ -79,6 +89,17 @@ Claude routes these keywords to the right agent + MCP without a dedicated comman
 **Cross-repo**: `from codebase`, `from shadcn`, `like hogwarts`, `like souq`, `like mkan`, `like shifa`
 **Operations**: `costs`, `pricing`, `weekly`, `dispatch`, `monitor`, `incident`, `credentials`
 **Intelligence**: `learn`, `analyze`, `profile`, `conventions`, `health`, `patterns`, `drift`
+
+### Anthropic-native vocabulary
+
+These keywords route to commands that wrap Anthropic's product surface
+(Claude Code skills, Claude API features, Agent SDK primitives). Each maps
+to a kun command or a built-in Claude Code skill.
+
+**Cost / perf**: `cache` → `/cache-audit` · `batch` → `/batch` (50% discount sweeps) · `think` → extended thinking · `fork` → conversation fork (Cmd+B, `/branch`) · `compact` → manual compaction · `route` → `/schedule` (cloud cron)
+**Tools**: `memory` → `/memory-bridge` · `web-search` → server tool · `web-fetch` → server tool · `code-exec` → server tool · `bash-tool` → built-in · `text-editor` → built-in · `files` → Files API
+**Workflow**: `goal` → `/goal <condition>` (built-in) · `routine` / `schedule` → `/schedule` (built-in cloud cron) · `sandbox` → `/sandbox` · `team` → agent teams (experimental) · `teleport` → bring web session into terminal · `ultraplan` / `ultrareview` → built-in · `autofix-pr` → `/autofix-pr` · `channel` → MCP push notifications
+**Insight**: `insights` → `/insights` (built-in) · `team-onboarding` → built-in · `agent-view` → `claude agents` CLI · `verify` → `/verify` (built-in)
 
 ---
 

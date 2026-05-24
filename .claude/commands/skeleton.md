@@ -1,3 +1,11 @@
+---
+name: skeleton
+description: Full coverage sweep for missing loading.tsx files - check every page directory has proper Skeleton components, create missing ones
+model: haiku
+paths: ["**/app/**/page.tsx", "**/app/**/loading.tsx"]
+argument-hint: "[block-name] | --status"
+---
+
 # Skeleton — Full Coverage Loading State Sweep
 
 Systematically check every page directory has a `loading.tsx` with proper Skeleton components. Creates missing loading files.

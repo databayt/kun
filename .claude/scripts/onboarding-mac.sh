@@ -170,9 +170,10 @@ else
     pass "GitHub CLI"
 fi
 
-# Node.js
+# Node.js — pin to LTS major (Node 24 Krypton as of 2026)
 if ! command -v node &>/dev/null; then
-    brew install node
+    brew install node@24
+    brew link --overwrite --force node@24 2>/dev/null || true
     pass "Node.js installed ($(node --version))"
 else
     pass "Node.js ($(node --version))"

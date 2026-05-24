@@ -66,7 +66,7 @@
         "windows": ".claude/scripts/onboarding-windows.ps1 -Role <r> -GistId <g> -Quiet -GitName -GitEmail [-WithTailscale]"
       },
       "phases": [
-        {"n": 1, "label": "System Foundation — build tools, git, Node 22, pnpm, gh CLI"},
+        {"n": 1, "label": "System Foundation — build tools, git, Node 24, pnpm, gh CLI"},
         {"n": 2, "label": "Applications — IDEs, Chrome"},
         {"n": 3, "label": "GitHub — SSH key, gh auth, upload key"},
         {"n": 4, "label": "Clone Repositories — kun + (engineer: hogwarts, codebase, all org repos)"},

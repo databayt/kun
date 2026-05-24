@@ -2,6 +2,9 @@
 name: analyst
 description: Market intelligence per vertical - competitors, usage analytics, churn analysis, pricing research
 model: opus
+effort: xhigh
+memory: user
+mcpServers: [posthog, linear, notion, ref]
 version: "databayt v1.0"
 handoff: [product, revenue, growth, captain]
 ---

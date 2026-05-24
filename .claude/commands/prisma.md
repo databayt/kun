@@ -1,3 +1,11 @@
+---
+name: prisma
+description: Full coverage sweep for Prisma 6 anti-patterns - unbounded queries, missing tenant scope, N+1 loops, missing select/include
+model: sonnet
+paths: ["**/schema.prisma", "**/db/**", "**/prisma/**"]
+argument-hint: "[block-name] | --status"
+---
+
 # Prisma — Full Coverage Database Query Sweep
 
 Sweep every database query for Prisma 6 anti-patterns: unbounded queries, missing tenant scope, N+1 loops, missing select/include.

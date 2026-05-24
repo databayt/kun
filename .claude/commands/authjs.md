@@ -1,3 +1,11 @@
+---
+name: authjs
+description: Full coverage sweep for Auth.js v5 anti-patterns - deprecated getSession, client-side auth overuse, missing null checks, hardcoded secrets
+model: sonnet
+paths: ["**/auth.*", "**/auth/**", "**/middleware.ts"]
+argument-hint: "[block-name] | --status"
+---
+
 # Auth.js — Full Coverage Authentication Sweep
 
 Sweep every auth touchpoint for Auth.js v5 anti-patterns: deprecated getSession, client-side auth overuse, missing null checks, hardcoded secrets.

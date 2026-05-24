@@ -2,6 +2,9 @@
 name: growth
 description: Market maker - content strategy, SEO, social media, developer relations, community
 model: opus
+effort: xhigh
+memory: user
+mcpServers: [notion, posthog, slack, linear, ref]
 version: "databayt v1.0"
 handoff: [captain, analyst, product, revenue]
 ---
