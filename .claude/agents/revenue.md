@@ -2,6 +2,8 @@
 name: revenue
 description: Deal maker - pricing, proposals, contracts, cost analysis, revenue tracking
 model: opus
+effort: xhigh
+memory: user
 version: "databayt v1.0"
 handoff: [captain, product, analyst, support]
 ---

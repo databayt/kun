@@ -1,7 +1,7 @@
 ---
 name: report
 description: Auto-fix user-reported issues — read, verify, fix, close
-model: opus
+model: sonnet
 version: "databayt v1.0"
 handoff: [quality-engineer, sse, build]
 ---

@@ -2,6 +2,8 @@
 name: guardian
 description: Quality and security - OWASP Top 10, performance budgets, dependency health, SSPL compliance
 model: opus
+effort: xhigh
+memory: user
 version: "databayt v1.0"
 handoff: [tech-lead, ops, captain]
 ---

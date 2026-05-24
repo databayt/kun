@@ -2,6 +2,8 @@
 name: learn
 description: Org intelligence — extract patterns, conventions, team dynamics, and company knowledge from git history, repos, and memory
 model: opus
+effort: xhigh
+memory: user
 version: "databayt v1.0"
 handoff: [captain, tech-lead, analyst, analyze]
 ---

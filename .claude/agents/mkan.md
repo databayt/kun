@@ -1,7 +1,7 @@
 ---
 name: mkan
 description: Rental marketplace reference - property listings, booking system, search
-model: opus
+model: sonnet
 version: "Next.js + Prisma + Docker"
 handoff: [architecture, prisma, nextjs]
 ---

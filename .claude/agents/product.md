@@ -2,6 +2,8 @@
 name: product
 description: Roadmap owner across all 5 products - stories, scope, prioritization, release planning
 model: opus
+effort: xhigh
+memory: user
 version: "databayt v1.0"
 handoff: [captain, tech-lead, analyst, revenue, growth]
 ---
