@@ -184,13 +184,15 @@ The wizard uses **deep links** so each action button drops you exactly where you
 
 What the inviter needs to grant or hand over before paste-time:
 
-- [ ] **GitHub** — invite to the `databayt` org
+- [ ] **GitHub** — invite to the `databayt` org (Phase 3 hard-gates on membership; without it the install can't clone private repos)
 - [ ] **Anthropic account** — Pro/Max sub for the full Desktop + CLI experience
 - [ ] **Anthropic API key** — only if not on Pro/Max (Claude Code can bill via API key)
-- [ ] **Secrets Gist ID** — handed over out-of-band (Signal, Notes, 1Password)
+- [ ] **Anthropic mobile app** — installed on the teammate's phone, signed in with the same account (native `PushNotification` dispatch from Claude Code)
+- [ ] **Secrets Gist ID** — handed over out-of-band (Signal, Notes, 1Password). Powers `~/.claude/.env` (MCP keys + cross-cutting tokens).
+- [ ] **Vercel** — team invite to `databayt` (**every role, not just engineer**) — needed for `vercel env pull` to populate per-product `.env` files
+- [ ] **Neon** — project access for any product whose `DATABASE_URL_*` you'll touch (engineer)
 - [ ] **Slack** — invite to `hogwarts-wve9301`
 - [ ] **AWS IAM** — `hogwarts-s3-uploader` keys (engineer role only)
-- [ ] **Vercel** — team invite (engineer role only)
 
 If something's missing the wizard skips that step and lists it under "things to do later" at the end.
 
