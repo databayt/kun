@@ -341,7 +341,7 @@ clone_repo "codebase"; symlink_home "codebase"
 
 if [[ "$ALL_REPOS" == "1" ]]; then
     info "Cloning remaining databayt org repos..."
-    for repo in shadcn radix souq mkan shifa swift-app distributed-computer marketing; do
+    for repo in shadcn radix souq mkan shifa ios-app distributed-computer marketing; do
         clone_repo "$repo"; symlink_home "$repo"
     done
 fi

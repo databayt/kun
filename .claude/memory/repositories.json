@@ -132,12 +132,12 @@
     ],
     "specialized": [
       {
-        "id": "swift-app",
-        "name": "Swift App",
-        "url": "https://github.com/databayt/swift-app",
-        "local": "/Users/abdout/oss/swift-app",
+        "id": "ios-app",
+        "name": "iOS App",
+        "url": "https://github.com/databayt/ios-app",
+        "local": "/Users/abdout/oss/ios-app",
         "description": "iOS application (Hogwarts mobile)",
-        "stack": ["Swift 5.9+", "SwiftUI", "iOS 17+"],
+        "stack": ["Swift 6", "SwiftUI", "iOS 18+"],
         "purpose": ["ios", "mobile", "swiftui"],
         "patterns": ["mvvm", "clean-architecture", "offline-sync", "bilingual"],
         "agent": null,

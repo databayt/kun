@@ -417,7 +417,7 @@ clone_repo "kun"; symlink_home "kun"
 clone_repo "hogwarts"; symlink_home "hogwarts"
 clone_repo "codebase"; symlink_home "codebase"
 if [[ "$ALL_REPOS" == "1" ]]; then
-    for repo in shadcn radix souq mkan shifa swift-app distributed-computer marketing; do
+    for repo in shadcn radix souq mkan shifa ios-app distributed-computer marketing; do
         clone_repo "$repo"; symlink_home "$repo"
     done
 fi
