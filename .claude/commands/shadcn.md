@@ -1,3 +1,11 @@
+---
+name: shadcn
+description: Full coverage sweep for raw HTML that should use shadcn/ui primitives - button, input, select, dialog, etc.
+model: sonnet
+paths: ["**/components/ui/**", "**/components.json", "**/*.tsx", "**/*.jsx"]
+argument-hint: "[block-name] | --status"
+---
+
 # shadcn — Full Coverage Component Primitives Sweep
 
 Sweep every component for raw HTML elements that should use shadcn/ui primitives: `<button>` → `<Button>`, `<input>` → `<Input>`, `<select>` → `<Select>`, etc.

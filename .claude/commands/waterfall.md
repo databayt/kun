@@ -1,3 +1,11 @@
+---
+name: waterfall
+description: Full coverage sweep for sequential data fetching that should be parallel - the highest-impact performance fix (2-10x improvement)
+model: sonnet
+paths: ["**/app/**/page.tsx", "**/app/**/layout.tsx", "**/actions/**", "**/server/**"]
+argument-hint: "[block-name] | --status"
+---
+
 # Waterfall — Full Coverage Data Fetching Sweep
 
 Sweep every server component and action for sequential data fetching that should be parallel. The single highest-impact performance fix (2-10x improvement).

@@ -1,3 +1,11 @@
+---
+name: translate
+description: Full coverage sweep for hardcoded English strings - find and fix every untranslated literal across the app or a specific block
+model: haiku
+paths: ["**/*-ar.json", "**/dictionaries/**", "**/i18n/**", "**/*.tsx", "**/*.jsx"]
+argument-hint: "[block-name] | --status"
+---
+
 # Translate — Full Coverage Translation Sweep
 
 Systematically find and fix every hardcoded English string across the entire app or a specific block.

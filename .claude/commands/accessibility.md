@@ -1,3 +1,11 @@
+---
+name: accessibility
+description: Full coverage sweep for accessibility anti-patterns - clickable divs, missing alt text, broken focus management, missing ARIA
+model: sonnet
+paths: ["**/*.tsx", "**/*.jsx", "**/*.html"]
+argument-hint: "[block-name] | --status"
+---
+
 # Accessibility — Full Coverage A11y Sweep
 
 Sweep every component for accessibility anti-patterns: clickable divs, missing alt text, broken focus management, missing ARIA.

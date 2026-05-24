@@ -1,3 +1,11 @@
+---
+name: tailwind
+description: Full coverage sweep for Tailwind CSS 4 anti-patterns - inline styles, hardcoded colors, non-logical properties breaking RTL, raw hex values
+model: sonnet
+paths: ["**/tailwind.config.*", "**/*.css", "**/components/**"]
+argument-hint: "[block-name] | --status"
+---
+
 # Tailwind — Full Coverage CSS Sweep
 
 Sweep every component for Tailwind CSS 4 anti-patterns: inline styles, hardcoded colors, non-logical properties (breaking RTL), raw hex values.

@@ -1,3 +1,11 @@
+---
+name: guard
+description: Full coverage security sweep - verify every route has auth checks, input validation, and tenant isolation; report gaps
+model: sonnet
+paths: ["**/actions/**", "**/api/**", "**/server/**", "**/auth/**"]
+argument-hint: "[block-name] | --status"
+---
+
 # Guard — Full Coverage Security Sweep
 
 Systematically verify every route has auth checks, input validation, and tenant isolation. Reports security gaps.

@@ -1,3 +1,11 @@
+---
+name: nextjs
+description: Full coverage sweep for Next.js 16 anti-patterns - Pages Router leftovers, deprecated APIs, raw HTML, client-side data fetching, missing metadata
+model: sonnet
+paths: ["**/app/**", "**/next.config.*", "**/middleware.ts"]
+argument-hint: "[block-name] | --status | migrate"
+---
+
 # Next.js — Full Coverage App Router Sweep
 
 Sweep every file for Next.js 16 anti-patterns: Pages Router leftovers, deprecated APIs, raw HTML instead of Next.js components, client-side data fetching, missing metadata.
