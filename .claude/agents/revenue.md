@@ -4,6 +4,7 @@ description: Deal maker - pricing, proposals, contracts, cost analysis, revenue 
 model: opus
 effort: xhigh
 memory: user
+mcpServers: [stripe, notion, linear, github]
 version: "databayt v1.0"
 handoff: [captain, product, analyst, support]
 ---

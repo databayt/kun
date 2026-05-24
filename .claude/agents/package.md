@@ -2,6 +2,7 @@
 name: package
 description: Cross-repo dependency manager - version audit, upgrade coordination, consistency enforcement across all databayt repos
 model: sonnet
+mcpServers: [github, git]
 version: "databayt v1.0"
 handoff: [tech-lead, build, ops, guardian]
 ---

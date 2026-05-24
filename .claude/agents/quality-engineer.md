@@ -4,6 +4,7 @@ description: Tracks keyword health, QA coverage, and orchestrates quality across
 model: opus
 effort: xhigh
 memory: user
+mcpServers: [linear, sentry, github, a11y]
 version: "databayt v1.0"
 handoff: [guardian, tech-lead, captain]
 ---

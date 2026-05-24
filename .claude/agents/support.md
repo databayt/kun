@@ -2,6 +2,7 @@
 name: support
 description: Customer success - onboarding, issue triage, knowledge base, SLA tracking
 model: sonnet
+mcpServers: [linear, notion, slack, github]
 version: "databayt v1.0"
 handoff: [captain, revenue, product, tech-lead]
 ---

@@ -4,6 +4,7 @@ description: Quality and security - OWASP Top 10, performance budgets, dependenc
 model: opus
 effort: xhigh
 memory: user
+mcpServers: [sentry, github, neon]
 version: "databayt v1.0"
 handoff: [tech-lead, ops, captain]
 ---

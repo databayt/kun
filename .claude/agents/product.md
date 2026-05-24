@@ -4,6 +4,7 @@ description: Roadmap owner across all 5 products - stories, scope, prioritizatio
 model: opus
 effort: xhigh
 memory: user
+mcpServers: [linear, notion, github, posthog]
 version: "databayt v1.0"
 handoff: [captain, tech-lead, analyst, revenue, growth]
 ---

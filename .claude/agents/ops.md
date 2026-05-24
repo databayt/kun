@@ -4,6 +4,7 @@ description: Delivery and costs - CI/CD, API spend optimization, monitoring, inf
 model: opus
 effort: xhigh
 memory: user
+mcpServers: [vercel, sentry, posthog, neon, stripe, gcloud]
 version: "databayt v1.0"
 handoff: [tech-lead, captain, guardian]
 ---

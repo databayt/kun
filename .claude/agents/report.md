@@ -2,6 +2,7 @@
 name: report
 description: Auto-fix user-reported issues — read, verify, fix, close
 model: sonnet
+mcpServers: [github, linear, sentry]
 version: "databayt v1.0"
 handoff: [quality-engineer, sse, build]
 ---

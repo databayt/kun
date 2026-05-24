@@ -4,6 +4,7 @@ description: Architecture across 14 repos - shared patterns, breaking changes, d
 model: opus
 effort: xhigh
 memory: user
+mcpServers: [github, neon, vercel, ref, context7]
 version: "databayt v1.0"
 handoff: [captain, product, ops, guardian, orchestration, architecture]
 ---
