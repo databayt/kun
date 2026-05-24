@@ -181,6 +181,7 @@ $gitEmail = Get-State gitEmail
 $proMax = Get-State proMax
 $reposDir = Get-State reposDir
 $hasGithub = Get-State hasGithub
+$hasDatabaytInvite = Get-State hasDatabaytInvite
 $hasAnthropic = Get-State hasAnthropic
 
 # Account guidance
@@ -191,6 +192,14 @@ if (-not $hasGithub) {
         Ask-Choice "GitHub sign-up opened in browser. Done when you've created the account." "Done" "Skip" | Out-Null
     }
     Set-State hasGithub "1"
+}
+if (-not $hasDatabaytInvite) {
+    $ans = Ask-Choice "Have you accepted the databayt org invite?`n(The installer can't clone private repos without it.)" "Yes" "Open invite page" "Skip - I'll handle later"
+    if ($ans -eq "Open invite page") {
+        Start-Process "https://github.com/orgs/databayt/invitations"
+        Ask-Choice "Accept the invite, then click Done." "Done" "Skip" | Out-Null
+    }
+    Set-State hasDatabaytInvite "1"
 }
 if (-not $hasAnthropic) {
     $ans = Ask-Choice "Do you have an Anthropic account?`n(For Claude Desktop sign-in + CLI.)" "Yes, I have one" "No, create one" "Skip"

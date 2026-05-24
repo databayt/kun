@@ -126,6 +126,7 @@ The wizard auto-detects what it can and only asks for what it can't:
 |---|---|
 | Welcome / start | always shown |
 | GitHub account? | always asked (opens `github.com/join` if "No") |
+| Accepted databayt org invite? | always asked (opens `github.com/orgs/databayt/invitations` if "No") |
 | Anthropic account? | always asked (opens `claude.ai/login` if "No") |
 | Role (label + secrets-trust tier — does *not* limit config) | inferred from `~/.claude/mcp.json` if exists |
 | Full name, email (for git commits) | inferred from `git config --global` if set |
@@ -144,7 +145,7 @@ Eight phases run in the background. You can minimize the terminal and do other w
 |---|---|
 | 1 | System Foundation — build tools, git, Node 24 LTS, pnpm, gh CLI |
 | 2 | Applications — WebStorm, VS Code, Chrome (every machine) |
-| 3 | GitHub — SSH key, `gh auth login --web`, key uploaded |
+| 3 | GitHub — SSH key, `gh auth login --web`, key uploaded, **verify databayt org membership + SSH push** |
 | 4 | Clone Repositories — the full databayt org (every machine) |
 | 5 | Claude — Code CLI, Desktop (Mac/Win), Desktop MCP symlink, `c` function in shell |
 | 6 | Kun Engine — `setup.sh` installs the full config (agents, skills, MCP, hooks); `secrets.sh` pulls `.env` |

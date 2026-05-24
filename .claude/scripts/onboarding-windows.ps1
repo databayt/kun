@@ -273,6 +273,30 @@ if ($keyContent) {
     if ($?) { Pass "SSH key on GitHub" } else { Info "SSH key may already be on GitHub" }
 }
 
+# Pre-clone gate: must be an active member of github.com/databayt to clone private repos.
+$state = (gh api user/memberships/orgs/databayt --jq .state 2>$null)
+if (-not $state) {
+    Fail "Cannot check databayt org membership (token may lack read:org scope)"
+    Info "Run: gh auth refresh -h github.com -s read:org -w   then re-run this script"
+    exit 1
+} elseif ($state -ne "active") {
+    Fail "Not an active member of github.com/databayt"
+    Info "Open the invite, accept it, then re-run this script (idempotent)"
+    Start-Process "https://github.com/orgs/databayt/invitations"
+    exit 1
+}
+Pass "databayt org membership active"
+
+# SSH push capability: ssh -T against github.com always exits non-zero, so grep the banner.
+$sshOut = (ssh -T -o StrictHostKeyChecking=accept-new -o BatchMode=yes git@github.com 2>&1 | Out-String)
+if ($sshOut -match "successfully authenticated") {
+    Pass "SSH push to GitHub works"
+} else {
+    Fail "SSH not authenticated to GitHub (clone+push will fail)"
+    Info "Re-run: gh auth login -p ssh -w   to upload your SSH key"
+    exit 1
+}
+
 # =============================================================================
 # PHASE 4: Clone Repositories
 # =============================================================================

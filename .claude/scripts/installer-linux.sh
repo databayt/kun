@@ -163,6 +163,7 @@ GIT_NAME_ARG=$(state_get gitName)
 GIT_EMAIL_ARG=$(state_get gitEmail)
 REPOS_DIR=$(state_get reposDir)
 HAS_GITHUB=$(state_get hasGithub)
+HAS_DATABAYT_INVITE=$(state_get hasDatabaytInvite)
 HAS_ANTHROPIC=$(state_get hasAnthropic)
 
 # Account guidance
@@ -173,6 +174,14 @@ if [[ -z "$HAS_GITHUB" ]]; then
         ask_choice "GitHub sign-up opened. Done when you've created the account." "Done" "Skip" >/dev/null
     fi
     state_set hasGithub "1"
+fi
+if [[ -z "$HAS_DATABAYT_INVITE" ]]; then
+    ANS=$(ask_choice "Have you accepted the databayt org invite?\n(The installer can't clone private repos without it.)" "Yes" "Open invite page" "Skip — I'll handle later")
+    if [[ "$ANS" == "Open invite page" ]]; then
+        open_url "https://github.com/orgs/databayt/invitations"
+        ask_choice "Accept the invite, then click Done." "Done" "Skip" >/dev/null
+    fi
+    state_set hasDatabaytInvite "1"
 fi
 if [[ -z "$HAS_ANTHROPIC" ]]; then
     ANS=$(ask_choice "Do you have an Anthropic account?\n(For Claude Code CLI + claude.ai/code in browser.)" "Yes, I have one" "No, create one" "Skip")

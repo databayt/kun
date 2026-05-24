@@ -139,6 +139,20 @@ if [[ -z "$HAS_GITHUB" ]]; then
     state_set hasGithub "1"
 fi
 
+# databayt org invite — required to clone private repos. Pre-flight check so the
+# installer fails fast in Phase 3 (auth gate) rather than silent 404 in Phase 4 (clone).
+HAS_DATABAYT_INVITE=$(state_get hasDatabaytInvite)
+if [[ -z "$HAS_DATABAYT_INVITE" ]]; then
+    ANS=$(ask_choice "Have you accepted the databayt org invite?\n\nThe installer can't clone private repos without it.\nNo invite yet? Ping the team — they send to your GitHub email." "Yes" "Open invite page" "Skip — I'll handle later")
+    case "$ANS" in
+        "Open invite page")
+            open "https://github.com/orgs/databayt/invitations"
+            ask_choice "Accept the invite, then click Done." "Done" "Skip" >/dev/null
+            ;;
+    esac
+    state_set hasDatabaytInvite "1"
+fi
+
 if [[ -z "$HAS_ANTHROPIC" ]]; then
     ANS=$(ask_choice "Do you have an Anthropic account?\n\n(For Claude Desktop sign-in and the Claude Code CLI.)" "Yes, I have one" "No, create one" "Skip")
     case "$ANS" in

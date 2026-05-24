@@ -49,6 +49,14 @@
           "platforms": ["mac", "windows"],
           "persistAs": "proMax",
           "note": "Skipped on Linux (no Claude Desktop)"
+        },
+        {
+          "id": "hasDatabaytInvite",
+          "type": "choice",
+          "prompt": "Have you accepted the databayt org invite?",
+          "options": ["Yes", "Open invite page", "Skip — I'll handle later"],
+          "persistAs": "hasDatabaytInvite",
+          "note": "Pre-flight check — Phase 3 fails fast if invite not accepted (gh api user/memberships/orgs/databayt)"
         }
       ]
     },
@@ -62,7 +70,7 @@
       "phases": [
         {"n": 1, "label": "System Foundation — build tools, git, Node 24, pnpm, gh CLI"},
         {"n": 2, "label": "Applications — IDEs, Chrome"},
-        {"n": 3, "label": "GitHub — SSH key, gh auth, upload key"},
+        {"n": 3, "label": "GitHub — SSH key, gh auth, upload key, verify databayt org membership + SSH push"},
         {"n": 4, "label": "Clone Repositories — kun + (engineer: hogwarts, codebase, all org repos)"},
         {"n": 5, "label": "Claude — Code CLI + Desktop (Mac/Win)"},
         {"n": 6, "label": "Kun Engine — setup.sh + secrets.sh"},
@@ -146,6 +154,9 @@
       "gitEmail": "string",
       "gistId": "string",
       "proMax": "0|1",
+      "hasGithub": "0|1",
+      "hasDatabaytInvite": "0|1",
+      "hasAnthropic": "0|1",
       "silentBatch": "done",
       "desktopSignedIn": "0|1",
       "computerUse": "0|1",
