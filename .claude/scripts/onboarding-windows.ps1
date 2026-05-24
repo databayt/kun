@@ -131,7 +131,7 @@ if (-not $hasGh) {
 $hasNode = Get-Command node -EA SilentlyContinue
 if (-not $hasNode) {
     Info "Installing Node.js..."
-    winget install --id OpenJS.NodeJS -e --accept-source-agreements --accept-package-agreements
+    winget install --id OpenJS.NodeJS.LTS -e --accept-source-agreements --accept-package-agreements
     $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
     Pass "Node.js installed"
 } else {
