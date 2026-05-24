@@ -90,6 +90,17 @@ Claude routes these keywords to the right agent + MCP without a dedicated comman
 **Operations**: `costs`, `pricing`, `weekly`, `dispatch`, `monitor`, `incident`, `credentials`
 **Intelligence**: `learn`, `analyze`, `profile`, `conventions`, `health`, `patterns`, `drift`
 
+### Anthropic-native vocabulary
+
+These keywords route to commands that wrap Anthropic's product surface
+(Claude Code skills, Claude API features, Agent SDK primitives). Each maps
+to a kun command or a built-in Claude Code skill.
+
+**Cost / perf**: `cache` → `/cache-audit` · `batch` → `/batch` (50% discount sweeps) · `think` → extended thinking · `fork` → conversation fork (Cmd+B, `/branch`) · `compact` → manual compaction · `route` → `/schedule` (cloud cron)
+**Tools**: `memory` → `/memory-bridge` · `web-search` → server tool · `web-fetch` → server tool · `code-exec` → server tool · `bash-tool` → built-in · `text-editor` → built-in · `files` → Files API
+**Workflow**: `goal` → `/goal <condition>` (built-in) · `routine` / `schedule` → `/schedule` (built-in cloud cron) · `sandbox` → `/sandbox` · `team` → agent teams (experimental) · `teleport` → bring web session into terminal · `ultraplan` / `ultrareview` → built-in · `autofix-pr` → `/autofix-pr` · `channel` → MCP push notifications
+**Insight**: `insights` → `/insights` (built-in) · `team-onboarding` → built-in · `agent-view` → `claude agents` CLI · `verify` → `/verify` (built-in)
+
 ---
 
 ## Behavior
