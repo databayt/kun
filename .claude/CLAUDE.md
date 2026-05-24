@@ -42,11 +42,21 @@ Product scope: append `hogwarts`, `souq`, `mkan`, `shifa` to activate domain con
 
 ## Tier 2 — Standalone Tools
 
-Self-describing commands at `.claude/commands/<name>.md`:
+**Project commands** at `.claude/commands/<name>.md` (kun-specific, role-aware):
 
-`dev`, `build`, `deploy`, `report`, `atom`, `block`, `template`, `test`, `clone`,
-`incident`, `monitor`, `package`, `learn`, `analyze`, `profile`, `captain`, `weekly`,
-`screenshot`, `dispatch`, `pricing`, `costs`, `proposal`, `credentials`, `health`.
+`report`, `clone`, `incident`, `monitor`, `package`, `learn`, `analyze`, `profile`,
+`weekly`, `dispatch`, `pricing`, `costs`, `proposal`, `credentials`, `health`,
+`content-calendar`, `crawl-anthropic`, `issue`, `pattern`.
+
+**User skills** at `~/.claude/skills/<name>/SKILL.md` (reusable across all projects):
+
+`dev`, `build`, `deploy`, `atom`, `block`, `template`, `test`, `captain`, `screenshot`,
+`docs`, `fix`, `motion`, `performance`, `quick`, `repos`, `saas`, `security`,
+`codebase`, `decide`, `premortem`, `mcp-doctor`.
+
+> Skills override commands when both exist with the same `/name`. The `build` skill
+> at user level shadows any project `/build` command. To prefer the project version,
+> add it to `skillOverrides` in project `settings.json`.
 
 ## Tier 2b — Coverage Sweeps
 
