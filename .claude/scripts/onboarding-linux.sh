@@ -58,6 +58,32 @@ ERRORS=0
 pass() { echo -e "  ${G}✓${NC} $1"; }
 fail() { echo -e "  ${R}✗${NC} $1"; ERRORS=$((ERRORS + 1)); }
 info() { echo -e "  ${D}·${NC} $1"; }
+
+# Open a URL in the user's default browser; best-effort, returns silently.
+# Covers desktop Linux (xdg-open), Wayland (wlview), Debian (sensible-browser),
+# and WSL (wslview) so the install one-liner works on every Linux flavor.
+open_url() {
+    local url="$1"
+    if command -v xdg-open >/dev/null 2>&1; then
+        xdg-open "$url" >/dev/null 2>&1 &
+    elif command -v wslview >/dev/null 2>&1; then
+        wslview "$url" >/dev/null 2>&1 &
+    elif command -v sensible-browser >/dev/null 2>&1; then
+        sensible-browser "$url" >/dev/null 2>&1 &
+    fi
+}
+
+# Copy text to the system clipboard; returns 0 if any backend worked.
+# Wayland first (modern default), then X11, then WSL's clip.exe.
+copy_clipboard() {
+    local text="$1"
+    if command -v wl-copy >/dev/null 2>&1 && printf '%s' "$text" | wl-copy >/dev/null 2>&1; then return 0; fi
+    if command -v xclip   >/dev/null 2>&1 && printf '%s' "$text" | xclip -selection clipboard >/dev/null 2>&1; then return 0; fi
+    if command -v xsel    >/dev/null 2>&1 && printf '%s' "$text" | xsel --clipboard --input >/dev/null 2>&1; then return 0; fi
+    if command -v clip.exe >/dev/null 2>&1 && printf '%s' "$text" | clip.exe >/dev/null 2>&1; then return 0; fi
+    return 1
+}
+
 step() {
     echo ""
     echo -e "${BD}[$1/8]${NC} ${B}$2${NC}"
@@ -299,8 +325,34 @@ fi
 # to auth via web". Drive it from /dev/tty, with a token-paste fallback.
 if ! gh auth status >/dev/null 2>&1; then
     if [ -e /dev/tty ]; then
-        info "Logging into GitHub — you'll get a one-time code to enter at https://github.com/login/device (any browser, even your phone)."
-        gh auth login -p ssh -w </dev/tty >/dev/tty 2>&1 || true
+        info "Connect your device to GitHub — opening the device page in your browser. If you don't have a GitHub account yet, sign up from that page (free)."
+        # Pre-open the device-flow URL so the user doesn't have to copy it
+        # from gh's output. The one-time code from gh is auto-copied to the
+        # clipboard below — user just pastes when the page asks for it.
+        open_url "https://github.com/login/device"
+
+        # Run gh interactively while tee'ing its output to a temp file. A
+        # background watcher pulls the XXXX-XXXX device code out of the file
+        # as soon as gh prints it and copies it to the clipboard.
+        ghout=$(mktemp)
+        (
+            while sleep 0.3; do
+                [ -s "$ghout" ] || continue
+                code=$(grep -oE '[A-Z0-9]{4}-[A-Z0-9]{4}' "$ghout" 2>/dev/null | head -1)
+                if [ -n "$code" ]; then
+                    if copy_clipboard "$code"; then
+                        printf '\n  %b✓%b One-time code %s copied to clipboard — paste it on the page.\n\n' "${G}" "${NC}" "$code" >/dev/tty
+                    fi
+                    exit 0
+                fi
+            done
+        ) &
+        watcher_pid=$!
+        gh auth login -p ssh -w </dev/tty 2>&1 | tee "$ghout" >/dev/tty || true
+        kill "$watcher_pid" 2>/dev/null
+        wait "$watcher_pid" 2>/dev/null
+        rm -f "$ghout"
+
         if ! gh auth status >/dev/null 2>&1; then
             {
                 echo ""
