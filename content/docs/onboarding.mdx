@@ -18,10 +18,17 @@ This is the single source of truth for joining databayt. It covers every OS, eve
 
 Paste in a terminal. The wizard takes over.
 
-| OS | Command |
-|---|---|
-| **macOS / Linux** | `curl -fsSL https://kun.databayt.org/install \| bash` |
-| **Windows** (PowerShell) | `iwr https://kun.databayt.org/install.ps1 \| iex` |
+**macOS / Linux**
+
+```bash
+curl -fsSL https://kun.databayt.org/install | bash
+```
+
+**Windows** (PowerShell)
+
+```powershell
+iwr https://kun.databayt.org/install.ps1 | iex
+```
 
 The bootstrap URL auto-detects your OS and dispatches to the right installer. No need to pick. Re-run anytime — it auto-resumes from where it left off via a state file.
 
