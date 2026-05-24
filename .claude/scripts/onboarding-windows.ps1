@@ -26,7 +26,6 @@ param(
     [string]$GitName,
     [string]$GitEmail,
     [switch]$EssentialsOnly,    # default: clone all org repos
-    [switch]$WithTailscale,      # optional: enable Tailscale SSH
     [switch]$HogwartsDev,        # optional: set up hogwarts local dev
     [string]$ReposDir = $env:USERPROFILE
 )
@@ -491,27 +490,6 @@ if (Test-Path "$CLAUDE_DIR\settings.json")   { Pass "settings.json" }  else { Fa
 if (Test-Path "$CLAUDE_DIR\mcp.json")        { Pass "mcp.json" }      else { Fail "mcp.json" }
 
 # =============================================================================
-# PHASE 9 (OPTIONAL): Tailscale - remote SSH for mobile / web Code lane
-# =============================================================================
-if ($WithTailscale) {
-    Write-Host ""
-    Write-Host "[+] Tailscale - remote SSH (optional)" -ForegroundColor Cyan
-    $hasTailscale = Get-Command tailscale -EA SilentlyContinue
-    if (-not $hasTailscale) {
-        Info "Installing Tailscale..."
-        winget install --id Tailscale.Tailscale @WingetFlags 2>$null
-        if ($?) { Pass "Tailscale installed" } else { Info "Tailscale install skipped" }
-    } else {
-        Pass "Tailscale"
-    }
-    if ($Quiet) {
-        Info "Run 'tailscale up --ssh' after this completes (needs admin)"
-    } else {
-        Start-Process "tailscale" "up --ssh" -Wait -NoNewWindow 2>$null
-    }
-}
-
-# =============================================================================
 # Done
 # =============================================================================
 Write-Host ""
@@ -548,12 +526,6 @@ Write-Host "Mobile (Claude on iPhone/Android):" -ForegroundColor Cyan
 Write-Host "  iOS:     https://apps.apple.com/app/claude-by-anthropic/id6473753684"
 Write-Host "  Android: https://play.google.com/store/apps/details?id=com.anthropic.claude"
 Write-Host "  Sign in with the same Anthropic account -> same projects everywhere"
-
-if (-not $WithTailscale) {
-    Write-Host ""
-    Write-Host "Remote SSH (optional):" -ForegroundColor Cyan
-    Write-Host "  Re-run with -WithTailscale to enable Tailscale SSH for mobile/remote control"
-}
 
 Write-Host ""
 Write-Host "Re-run: & ~\kun\.claude\scripts\onboarding-windows.ps1 -Role $Role" -ForegroundColor DarkGray

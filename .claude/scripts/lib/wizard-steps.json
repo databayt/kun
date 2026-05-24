@@ -49,21 +49,15 @@
           "platforms": ["mac", "windows"],
           "persistAs": "proMax",
           "note": "Skipped on Linux (no Claude Desktop)"
-        },
-        {
-          "id": "withTailscale",
-          "type": "yesno",
-          "prompt": "Enable Tailscale SSH? (Remote control from iPhone/laptop.)",
-          "persistAs": "withTailscale"
         }
       ]
     },
     "act2_silentBatch": {
       "description": "Run the 8-phase platform backend in --quiet/-Quiet mode",
       "backends": {
-        "mac": ".claude/scripts/onboarding-mac.sh <role> <gist> --quiet --name --email [--with-tailscale]",
-        "linux": ".claude/scripts/onboarding-linux.sh <role> <gist> --quiet --name --email [--with-tailscale]",
-        "windows": ".claude/scripts/onboarding-windows.ps1 -Role <r> -GistId <g> -Quiet -GitName -GitEmail [-WithTailscale]"
+        "mac": ".claude/scripts/onboarding-mac.sh <role> <gist> --quiet --name --email",
+        "linux": ".claude/scripts/onboarding-linux.sh <role> <gist> --quiet --name --email",
+        "windows": ".claude/scripts/onboarding-windows.ps1 -Role <r> -GistId <g> -Quiet -GitName -GitEmail"
       },
       "phases": [
         {"n": 1, "label": "System Foundation — build tools, git, Node 24, pnpm, gh CLI"},
@@ -73,8 +67,7 @@
         {"n": 5, "label": "Claude — Code CLI + Desktop (Mac/Win)"},
         {"n": 6, "label": "Kun Engine — setup.sh + secrets.sh"},
         {"n": 7, "label": "Hogwarts — pnpm install, prisma, seed, build (engineer only)"},
-        {"n": 8, "label": "Health Check"},
-        {"n": "9 (opt)", "label": "Tailscale — install + 'up --ssh' (--with-tailscale)"}
+        {"n": 8, "label": "Health Check"}
       ],
       "progressMarker": "PROGRESS:N/8:label streamed on stderr — wrappers parse for notifications"
     },
@@ -153,7 +146,6 @@
       "gitEmail": "string",
       "gistId": "string",
       "proMax": "0|1",
-      "withTailscale": "0|1",
       "silentBatch": "done",
       "desktopSignedIn": "0|1",
       "computerUse": "0|1",

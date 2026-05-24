@@ -122,7 +122,6 @@ ROLE=$(state_get role)
 GIST_ID=$(state_get gistId)
 GIT_NAME_ARG=$(state_get gitName)
 GIT_EMAIL_ARG=$(state_get gitEmail)
-WITH_TAILSCALE=$(state_get withTailscale)
 PRO_MAX=$(state_get proMax)
 REPOS_DIR=$(state_get reposDir)
 HAS_GITHUB=$(state_get hasGithub)
@@ -212,13 +211,6 @@ if [[ -z "$PRO_MAX" ]]; then
     state_set proMax "$PRO_MAX"
 fi
 
-# Tailscale: optional (default off)
-if [[ -z "$WITH_TAILSCALE" ]]; then
-    TS_ANS=$(ask_choice "Enable Tailscale SSH? (For remote control from iPhone/laptop.)\n\nCan be added later." "Yes" "No")
-    [[ "$TS_ANS" == "Yes" ]] && WITH_TAILSCALE="1" || WITH_TAILSCALE="0"
-    state_set withTailscale "$WITH_TAILSCALE"
-fi
-
 # Hogwarts local dev — opt-in (heavy: pnpm + DB seed + build, ~10 min)
 HOGWARTS_DEV=$(state_get hogwartsDev)
 if [[ -z "$HOGWARTS_DEV" ]]; then
@@ -236,7 +228,6 @@ BACKEND_ARGS=("$ROLE")
 [[ -n "$GIST_ID" ]] && BACKEND_ARGS+=("$GIST_ID")
 BACKEND_ARGS+=("--quiet" "--name" "$GIT_NAME_ARG" "--email" "$GIT_EMAIL_ARG")
 [[ -n "$REPOS_DIR" && "$REPOS_DIR" != "$HOME" ]] && BACKEND_ARGS+=("--repos-dir" "$REPOS_DIR")
-[[ "$WITH_TAILSCALE" == "1" ]] && BACKEND_ARGS+=("--with-tailscale")
 [[ "$HOGWARTS_DEV" == "1" ]] && BACKEND_ARGS+=("--hogwarts-dev")
 
 echo ""

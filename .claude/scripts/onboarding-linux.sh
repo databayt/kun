@@ -16,7 +16,6 @@
 #   --name <name>      Pre-supply git identity (skips prompt)
 #   --email <email>    Pre-supply git email (skips prompt)
 #   --essentials-only  Clone only kun/hogwarts/codebase (default: all org repos)
-#   --with-tailscale   Install Tailscale + 'tailscale up --ssh'
 #
 # One-liner:
 #   git clone https://github.com/databayt/kun.git ~/kun && bash ~/kun/.claude/scripts/onboarding-linux.sh engineer
@@ -30,14 +29,13 @@ set -e
 
 # ── Args ────────────────────────────────────────────────────────
 ROLE="" GIST_ID="" QUIET=0 GIT_NAME_ARG="" GIT_EMAIL_ARG=""
-WITH_TAILSCALE=0 ALL_REPOS=1 REPOS_DIR="$HOME" HOGWARTS_DEV=0
+ALL_REPOS=1 REPOS_DIR="$HOME" HOGWARTS_DEV=0
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --quiet)            QUIET=1; shift ;;
         --name)             GIT_NAME_ARG="$2"; shift 2 ;;
         --email)            GIT_EMAIL_ARG="$2"; shift 2 ;;
         --repos-dir)        REPOS_DIR="$2"; shift 2 ;;
-        --with-tailscale)   WITH_TAILSCALE=1; shift ;;
         --essentials-only)  ALL_REPOS=0; shift ;;
         --hogwarts-dev)     HOGWARTS_DEV=1; shift ;;
         --*)                echo "Unknown flag: $1" >&2; exit 1 ;;
@@ -105,7 +103,6 @@ if [[ -z "$ROLE" ]]; then
     echo "  --essentials-only  Skip optional org repos"
     echo "  --repos-dir <dir>  Where to save databayt repos (default: \$HOME)"
     echo "  --hogwarts-dev     Set up hogwarts local dev (pnpm + DB seed + build)"
-    echo "  --with-tailscale   Install Tailscale + 'up --ssh'"
     echo ""
     echo "One-liner:"
     echo "  git clone https://github.com/databayt/kun.git ~/kun && bash ~/kun/.claude/scripts/onboarding-linux.sh engineer"
@@ -555,27 +552,6 @@ gh auth status >/dev/null 2>&1      && pass "GitHub auth" || fail "GitHub auth"
 [[ -f "$HOME/.claude/mcp.json" ]]    && pass "mcp.json"        || fail "mcp.json"
 
 # =============================================================================
-# PHASE 9 (OPTIONAL): Tailscale
-# =============================================================================
-if [[ "$WITH_TAILSCALE" == "1" ]]; then
-    echo ""
-    echo -e "${BD}[+]${NC} ${B}Tailscale — remote SSH (optional)${NC}"
-    if ! command -v tailscale >/dev/null 2>&1; then
-        info "Installing Tailscale..."
-        curl -fsSL https://tailscale.com/install.sh | sh >/dev/null 2>&1 && pass "Tailscale installed" || info "Tailscale install skipped"
-    else
-        pass "Tailscale"
-    fi
-    if command -v tailscale >/dev/null 2>&1; then
-        if [[ "$QUIET" == "1" ]]; then
-            info "Run 'sudo tailscale up --ssh' after this completes (needs auth URL)"
-        else
-            sudo tailscale up --ssh 2>/dev/null && pass "Tailscale up" || info "Run 'sudo tailscale up --ssh' to enable"
-        fi
-    fi
-fi
-
-# =============================================================================
 # Done
 # =============================================================================
 echo ""
@@ -612,12 +588,6 @@ echo ""
 echo -e "${BD}Mobile (Claude on iPhone/Android):${NC}"
 echo "  iOS:     https://apps.apple.com/app/claude-by-anthropic/id6473753684"
 echo "  Android: https://play.google.com/store/apps/details?id=com.anthropic.claude"
-
-if [[ "$WITH_TAILSCALE" != "1" ]]; then
-    echo ""
-    echo -e "${BD}Remote SSH (optional):${NC}"
-    echo "  Re-run with --with-tailscale to enable Tailscale SSH"
-fi
 
 echo ""
 echo -e "${D}Re-run: bash ~/kun/.claude/scripts/onboarding-linux.sh $ROLE${NC}"

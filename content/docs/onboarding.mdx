@@ -49,7 +49,6 @@ Running the bootstrap line leaves your machine in this state. The deliverables, 
 | **Claude config** | `~/.claude/` — agents, skills, MCP servers, hooks, rules, memory; secrets in `~/.claude/.env` |
 | **Desktop ↔ CLI parity** | `claude_desktop_config.json` symlinked to `~/.claude/mcp.json` so Desktop tabs see the same MCP fleet |
 | **Repos** | The full databayt org cloned to your chosen directory (default: `~/<repo>`) — see [Repos table below](#which-repos-you-get) |
-| **Optional** | Tailscale SSH (remote control from phone/laptop), Apple Notes Dispatch folder (Mac) |
 
 ### Verify what you got
 
@@ -80,7 +79,6 @@ Want a different result? Edit the source, then re-run the bootstrap (idempotent)
 | Agents (universal) | add/remove files in `.claude/agents/` |
 | Which keys a machine holds | scoped by the **Gist** you hand someone (`secrets.sh <GIST_ID>`), not by config |
 | hogwarts local dev | `--hogwarts-dev` / `-HogwartsDev` (default off) |
-| Tailscale on/off | `--with-tailscale` / `-WithTailscale` (default off) |
 
 All installer scripts live in `~/kun/.claude/scripts/`. Print any backend's flags with no args (e.g. `bash ~/kun/.claude/scripts/onboarding-mac.sh`).
 
@@ -135,7 +133,6 @@ The wizard auto-detects what it can and only asks for what it can't:
 | Pro/Max subscription? (affects Desktop tabs) | asked once |
 | Where to save databayt repos? | asked once: `Home root` / `~/databayt/` / `Custom...` |
 | Set up hogwarts local dev? (heavy, opt-in) | asked once |
-| Tailscale SSH? (remote control) | asked once |
 
 All answers persist in a state file. Re-runs skip questions already answered.
 
@@ -153,7 +150,6 @@ Eight phases run in the background. You can minimize the terminal and do other w
 | 6 | Kun Engine — `setup.sh` installs the full config (agents, skills, MCP, hooks); `secrets.sh` pulls `.env` |
 | 7 | Hogwarts — pnpm install, prisma generate + push + seed, build verify (only with `--hogwarts-dev`) |
 | 8 | Health Check — every tool / repo / config verified |
-| 9 (opt) | Tailscale — install + `up --ssh` if you opted in |
 
 Each phase emits `PROGRESS:N/8:label` to stderr; wrappers parse this and fire `osascript display notification` (Mac), `zenity --notification` (Linux), or `NotifyIcon` balloon (Windows).
 
@@ -256,23 +252,19 @@ Recommended sync scope: Code style, Inspection profiles, Live templates, Plugins
 
 ---
 
-## Remote control via Tailscale (optional)
+## Remote control & async — native Anthropic surfaces
 
-If you opt in (`--with-tailscale` / `-WithTailscale`), the wizard installs Tailscale and runs `tailscale up --ssh`. Once on the tailnet, you can:
+No Tailscale, no Apple Notes. The mobile app + `claude.ai/code` + computer-use give you the same primitives natively — no extra services to install, no tokens to manage, same Anthropic account you already signed in with.
 
-- SSH into your dev box from any device: `ssh you@<tailscale-name>`
-- Drive your laptop from your phone via Tailscale SSH + tmux
-- Run `claude` remotely as if you were at your desk
+| Need | Native primitive | Where |
+|---|---|---|
+| Push when a Code task finishes | `PushNotification` tool from inside Claude Code → Anthropic mobile app | iOS / Android Claude app |
+| Drive your dev box from your phone | `claude.ai/code` in mobile browser — same projects, same Cowork sessions as desktop CLI | claude.ai/code |
+| Resume Code from a different machine | Cowork ↔ Code bridge (`~/.claude/bridge.md`) + GitHub Issues | desktop + mobile |
+| Browser-driven automation | Computer-use beta (Desktop **Code** tab on Pro/Max) | Claude Desktop |
+| Team async updates | GitHub Issues (always) · Slack MCP (`/slack send …`) — both pre-configured | repo + workspace `hogwarts-wve9301` |
 
-Setup details: [Self-hosting — Tailscale / tmux / Docker](/docs/self-hosting).
-
----
-
-## Apple Notes Dispatch (Mac only)
-
-The wizard creates a `Dispatch` folder in Apple Notes so `dispatch.sh` has somewhere to write captain-status notes. These sync to your iPhone via iCloud — you can read captain summaries on the go without opening Claude.
-
-See [Dispatch — Apple Notes bridge](/docs/dispatch).
+Sign in to the mobile app with the **same** Anthropic account as Desktop/CLI — your projects, Cowork sessions, and `~/.claude/bridge.md` handoffs follow you everywhere.
 
 ---
 
@@ -302,9 +294,9 @@ Useful backend flags (Mac + Linux):
 | `--name <name>` / `--email <email>` | Pre-supply git identity |
 | `--repos-dir <path>` | Where to save databayt repos (default: `$HOME`) |
 | `--essentials-only` | Skip optional org repos (just kun/hogwarts/codebase) |
-| `--with-tailscale` | Install Tailscale + `up --ssh` |
+| `--hogwarts-dev` | Set up hogwarts local dev (pnpm + DB seed + build) |
 
-PowerShell equivalents: `-Quiet`, `-GitName`, `-GitEmail`, `-ReposDir`, `-EssentialsOnly`, `-WithTailscale`.
+PowerShell equivalents: `-Quiet`, `-GitName`, `-GitEmail`, `-ReposDir`, `-EssentialsOnly`, `-HogwartsDev`.
 
 Re-run anytime; idempotent.
 
@@ -496,7 +488,6 @@ cd ~/hogwarts && pnpm dev
 | Synthesize company status | `c "/captain"` |
 | Capture an idea | `c "/idea <description>"` |
 | Run the full feature pipeline | `c "/feature <name> [product]"` |
-| Send a note to the team | `c "/dispatch <message>"` |
 | Open a GitHub issue | `c "/issue"` |
 | Verify a production deploy | `c "/watch"` |
 | Mobile / browser | https://claude.ai/code |
@@ -543,13 +534,12 @@ This page is the front door. Once your machine is provisioned, branch out from h
 - [Claude Code](/docs/claude-code) — CLI install detail + config
 - [MCP](/docs/mcp) — the server fleet + `/mcp-doctor` browser recovery
 - [Secrets](/docs/secrets) — Gist-based provisioning (which keys your machine holds)
-- [Self-hosting](/docs/self-hosting) — Tailscale / tmux / Docker (optional)
+- [Self-hosting](/docs/self-hosting) — tmux / Docker (optional, server use)
 
 **Daily use**
 - [Keywords](/docs/keywords) — the full vocabulary, one word → a workflow
 - [Captain](/docs/captain) — decisions, delegation, the weekly rhythm
 - [Cowork ↔ Code](/docs/cowork) — same brain, two modes
-- [Dispatch](/docs/dispatch) — Apple Notes bridge for async updates
 
 **Understand the engine**
 - [Configuration](/docs/configuration) — universal-config blueprint
