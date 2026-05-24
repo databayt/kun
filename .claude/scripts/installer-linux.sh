@@ -2,8 +2,9 @@
 # =============================================================================
 # Quiet Wizard — Linux Installer
 # =============================================================================
-# Three-act guided installer for Linux. Detects zenity → kdialog → TUI fallback.
-# Wraps onboarding-linux.sh with native dialogs and deep-link action buttons.
+# 2 dialogs (identity, hogwarts) → silent batch with 1 unavoidable click
+# (GitHub Authorize on the auto-opened device-flow page) → done panel.
+# Detects zenity → kdialog → TUI fallback.
 #
 # Bootstrap:
 #   curl -fsSL https://kun.databayt.org/install | bash
@@ -12,9 +13,8 @@
 #
 # State file: ${XDG_CONFIG_HOME:-~/.config}/databayt/installer-state.json
 #
-# NOTE: Claude Desktop is NOT available on Linux. Wrapper skips desktop
-# sign-in and computer-use toggle steps. Linux users use CLI + browser +
-# IDE plugins.
+# NOTE: Claude Desktop is NOT available on Linux. Linux users use CLI +
+# browser + IDE plugins.
 # =============================================================================
 
 set -e
@@ -69,7 +69,7 @@ ask_yesno() {
     esac
 }
 ask_choice() {
-    # ask_choice <prompt> <opt1> <opt2> [opt3] — TUI uses numbered menu
+    # 2-3 button choice
     local prompt="$1" opt1="$2" opt2="$3" opt3="${4:-}"
     case "$GUI" in
         zenity)
@@ -92,11 +92,30 @@ ask_choice() {
             ;;
     esac
 }
-ask_role() {
+ask_identity() {
+    # Identity card: ask name + email + role in ONE dialog when GUI supports it.
+    # Returns "name|email|role" or empty on cancel.
+    local default_name="$1" default_email="$2" default_role="${3:-engineer}"
     case "$GUI" in
-        zenity)  zenity --list --title="Databayt Setup" --text="Pick your role:" --column=Role engineer business content ops 2>/dev/null || echo "" ;;
-        kdialog) kdialog --title "Databayt Setup" --menu "Pick your role:" engineer engineer business business content content ops ops 2>/dev/null || echo "" ;;
-        *)       ask_choice "Pick your role:" engineer business content ops ;;
+        zenity)
+            zenity --forms --title="Databayt Setup" \
+                --text="Identity card — confirm your git identity and role." \
+                --add-entry="Full name (for git commits)" \
+                --add-entry="Email (for git commits)" \
+                --add-combo="Role" --combo-values="engineer|business|content|ops" \
+                2>/dev/null || echo ""
+            ;;
+        kdialog|*)
+            # kdialog / TUI: chain three prompts but treat as one logical step
+            local n="$default_name" e="$default_email" r="$default_role"
+            [[ -z "$n" ]] && n=$(ask_text "Identity 1/3 — full name (for git commits):")
+            [[ -z "$n" ]] && { echo ""; return; }
+            [[ -z "$e" ]] && e=$(ask_text "Identity 2/3 — email (for git commits):")
+            [[ -z "$e" ]] && { echo ""; return; }
+            [[ -z "$r" ]] && r=$(ask_choice "Identity 3/3 — role:" "engineer" "business" "content")
+            [[ -z "$r" ]] && r="engineer"
+            echo "$n|$e|$r"
+            ;;
     esac
 }
 notify() {
@@ -114,11 +133,6 @@ open_url() {
 }
 
 # ── Bootstrap: ensure git, then clone kun ───────────────────────
-# git is needed to clone the repo that installs git, so the wrapper
-# must provide it first. The backend (onboarding-linux.sh) re-checks
-# and no-ops if git is already present. Fresh Linux images ship curl
-# but often not git — without this, the clone below fails with a
-# misleading "check network" message.
 if ! command -v git >/dev/null 2>&1; then
     notify "Installing" "git (prerequisite for clone)"
     if   command -v apt-get >/dev/null 2>&1; then sudo apt-get update -y >/dev/null 2>&1 && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y git >/dev/null 2>&1
@@ -152,124 +166,72 @@ if [[ ! -f "$BACKEND" ]]; then
 fi
 
 # =============================================================================
-# ACT 1 — Pre-flight
+# ACT 1 — Two dialogs (or fewer, after autofill)
 # =============================================================================
-WELCOME=$(ask_choice "Welcome — this sets up a fresh Linux box for databayt.\n\nAbout 15-20 minutes (mostly silent downloads).\n\nReady?" "Start" "Cancel")
-[[ "$WELCOME" != "Start" ]] && { notify "Cancelled" "Run again anytime"; exit 0; }
+# Consent implied by `curl … | bash`. Ctrl+C aborts.
+echo ""
+echo "════════════════════════════════════════════════════"
+echo " Databayt Setup — ~15-20 min · 2 dialogs · 1 click"
+echo "════════════════════════════════════════════════════"
+echo " Press Ctrl+C any time to abort. State auto-saves."
+echo "════════════════════════════════════════════════════"
+echo ""
 
 ROLE=$(state_get role)
-GIST_ID=$(state_get gistId)
 GIT_NAME_ARG=$(state_get gitName)
 GIT_EMAIL_ARG=$(state_get gitEmail)
-WITH_TAILSCALE=$(state_get withTailscale)
-REPOS_DIR=$(state_get reposDir)
-HAS_GITHUB=$(state_get hasGithub)
-HAS_ANTHROPIC=$(state_get hasAnthropic)
-
-# Account guidance
-if [[ -z "$HAS_GITHUB" ]]; then
-    ANS=$(ask_choice "Do you have a GitHub account?" "Yes, I have one" "No, create one" "Skip")
-    if [[ "$ANS" == "No, create one" ]]; then
-        open_url "https://github.com/join"
-        ask_choice "GitHub sign-up opened. Done when you've created the account." "Done" "Skip" >/dev/null
-    fi
-    state_set hasGithub "1"
-fi
-if [[ -z "$HAS_ANTHROPIC" ]]; then
-    ANS=$(ask_choice "Do you have an Anthropic account?\n(For Claude Code CLI + claude.ai/code in browser.)" "Yes, I have one" "No, create one" "Skip")
-    if [[ "$ANS" == "No, create one" ]]; then
-        open_url "https://claude.ai/login"
-        ask_choice "Anthropic sign-in opened. Done when you've created the account." "Done" "Skip" >/dev/null
-    fi
-    state_set hasAnthropic "1"
-fi
-
-# Repos dir
-if [[ -z "$REPOS_DIR" ]]; then
-    CHOICE=$(ask_choice "Where do you want databayt org repos saved?\n(Default: home root)" "Home root (~/)" "~/databayt/" "Custom...")
-    case "$CHOICE" in
-        "Home root (~/)") REPOS_DIR="$HOME" ;;
-        "~/databayt/")    REPOS_DIR="$HOME/databayt"; mkdir -p "$REPOS_DIR" ;;
-        "Custom...")
-            CUSTOM=$(ask_text "Enter absolute path:" "$HOME/projects/databayt")
-            [[ -z "$CUSTOM" ]] && CUSTOM="$HOME"
-            REPOS_DIR="$CUSTOM"; mkdir -p "$REPOS_DIR" ;;
-        *) REPOS_DIR="$HOME" ;;
-    esac
-    state_set reposDir "$REPOS_DIR"
-fi
-
-# Role: auto-detect from existing mcp.json
-if [[ -z "$ROLE" ]]; then
-    if [[ -f "$HOME/.claude/mcp.json" ]]; then
-        if grep -q '"shadcn"' "$HOME/.claude/mcp.json" 2>/dev/null; then ROLE="engineer"
-        elif grep -q '"linear"' "$HOME/.claude/mcp.json" 2>/dev/null; then ROLE="business"
-        elif grep -q '"figma"' "$HOME/.claude/mcp.json" 2>/dev/null; then ROLE="content"
-        elif grep -q '"posthog"' "$HOME/.claude/mcp.json" 2>/dev/null; then ROLE="ops"
-        fi
-    fi
-    if [[ -z "$ROLE" ]]; then
-        ROLE=$(ask_role)
-        [[ -z "$ROLE" ]] && { notify "Cancelled" "No role"; exit 0; }
-    fi
-    state_set role "$ROLE"
-fi
-
-# Git identity
-if [[ -z "$GIT_NAME_ARG" ]]; then
-    EXISTING_NAME=$(git config --global user.name 2>/dev/null || echo "")
-    if [[ -n "$EXISTING_NAME" ]]; then
-        GIT_NAME_ARG="$EXISTING_NAME"
-        GIT_EMAIL_ARG=$(git config --global user.email 2>/dev/null || echo "")
-    else
-        GIT_NAME_ARG=$(ask_text "Your full name (for git commits):")
-        [[ -z "$GIT_NAME_ARG" ]] && { notify "Cancelled" "No name"; exit 0; }
-        GIT_EMAIL_ARG=$(ask_text "Your email (for git commits):")
-        [[ -z "$GIT_EMAIL_ARG" ]] && { notify "Cancelled" "No email"; exit 0; }
-    fi
-    state_set gitName "$GIT_NAME_ARG"
-    state_set gitEmail "$GIT_EMAIL_ARG"
-fi
-
-# Gist ID
-if [[ -z "$GIST_ID" ]]; then
-    GIST_ID=$(ask_text "Secrets Gist ID (or blank to skip):")
-    state_set gistId "$GIST_ID"
-fi
-
-# Tailscale
-if [[ -z "$WITH_TAILSCALE" ]]; then
-    TS_ANS=$(ask_yesno "Enable Tailscale SSH? (Remote control from iPhone/laptop.)")
-    [[ "$TS_ANS" == "Yes" ]] && WITH_TAILSCALE="1" || WITH_TAILSCALE="0"
-    state_set withTailscale "$WITH_TAILSCALE"
-fi
-
-# Hogwarts local dev — opt-in (heavy: pnpm + DB seed + build, ~10 min)
 HOGWARTS_DEV=$(state_get hogwartsDev)
-if [[ -z "$HOGWARTS_DEV" ]]; then
+
+# Autofill from git config + mcp.json
+[[ -z "$GIT_NAME_ARG"  ]] && GIT_NAME_ARG=$(git config --global user.name  2>/dev/null || echo "")
+[[ -z "$GIT_EMAIL_ARG" ]] && GIT_EMAIL_ARG=$(git config --global user.email 2>/dev/null || echo "")
+if [[ -z "$ROLE" && -f "$HOME/.claude/mcp.json" ]]; then
+    if   grep -q '"shadcn"'  "$HOME/.claude/mcp.json" 2>/dev/null; then ROLE="engineer"
+    elif grep -q '"linear"'  "$HOME/.claude/mcp.json" 2>/dev/null; then ROLE="business"
+    elif grep -q '"figma"'   "$HOME/.claude/mcp.json" 2>/dev/null; then ROLE="content"
+    elif grep -q '"posthog"' "$HOME/.claude/mcp.json" 2>/dev/null; then ROLE="ops"
+    fi
+fi
+
+# Identity card — single dialog (zenity --forms) or chained (kdialog/TUI)
+if [[ -z "$GIT_NAME_ARG" || -z "$GIT_EMAIL_ARG" || -z "$ROLE" ]]; then
+    IDENTITY=$(ask_identity "$GIT_NAME_ARG" "$GIT_EMAIL_ARG" "$ROLE")
+    if [[ -n "$IDENTITY" ]]; then
+        IFS='|' read -r N E R <<< "$IDENTITY"
+        [[ -n "$N" ]] && GIT_NAME_ARG="$N"
+        [[ -n "$E" ]] && GIT_EMAIL_ARG="$E"
+        [[ -n "$R" ]] && ROLE="$R"
+    fi
+    [[ -z "$GIT_NAME_ARG"  ]] && { notify "Cancelled" "No name";  exit 0; }
+    [[ -z "$GIT_EMAIL_ARG" ]] && { notify "Cancelled" "No email"; exit 0; }
+    [[ -z "$ROLE"          ]] && ROLE="engineer"
+fi
+state_set gitName  "$GIT_NAME_ARG"
+state_set gitEmail "$GIT_EMAIL_ARG"
+state_set role     "$ROLE"
+
+# Hogwarts local dev — engineer-only
+if [[ "$ROLE" == "engineer" && -z "$HOGWARTS_DEV" ]]; then
     HD_ANS=$(ask_yesno "Set up hogwarts local dev now? (pnpm + DB seed + build, ~10 min — skip if this machine won't run hogwarts locally)")
     [[ "$HD_ANS" == "Yes" ]] && HOGWARTS_DEV="1" || HOGWARTS_DEV="0"
     state_set hogwartsDev "$HOGWARTS_DEV"
 fi
 
 # =============================================================================
-# ACT 2 — Silent batch
+# ACT 2 — Silent batch (1 unavoidable Authorize click during Phase 3)
 # =============================================================================
-notify "Installing" "~15-20 min in terminal"
+notify "Installing" "1 GitHub Authorize click around minute 2"
 
 BACKEND_ARGS=("$ROLE")
-[[ -n "$GIST_ID" ]] && BACKEND_ARGS+=("$GIST_ID")
 BACKEND_ARGS+=("--quiet" "--name" "$GIT_NAME_ARG" "--email" "$GIT_EMAIL_ARG")
-[[ -n "$REPOS_DIR" && "$REPOS_DIR" != "$HOME" ]] && BACKEND_ARGS+=("--repos-dir" "$REPOS_DIR")
-[[ "$WITH_TAILSCALE" == "1" ]] && BACKEND_ARGS+=("--with-tailscale")
 [[ "$HOGWARTS_DEV" == "1" ]] && BACKEND_ARGS+=("--hogwarts-dev")
 
 echo ""
 echo "════════════════════════════════════════════════════"
-echo " Databayt Setup — Silent Install in Progress"
+echo " Installing — minimize the terminal and walk away"
+echo " (one Authorize click in the browser ~2 min in)"
 echo "════════════════════════════════════════════════════"
 echo " Role: $ROLE"
-echo " You can minimize this terminal and do other work."
 echo "════════════════════════════════════════════════════"
 echo ""
 
@@ -294,11 +256,11 @@ fi
 state_set silentBatch "done"
 
 # =============================================================================
-# ACT 3 — Manual finishing (no Claude Desktop on Linux)
+# ACT 3 — Done. No dialogs; auto-install what we can; list the rest.
 # =============================================================================
-notify "Almost done" "Final clicks"
+notify "Almost done" "Wrapping up"
 
-# 3a. VS Code Claude extension — auto-install
+# Silent: VS Code Claude extension
 if command -v code >/dev/null 2>&1 && [[ "$(state_get vsCodeExt)" != "1" ]]; then
     if code --list-extensions 2>/dev/null | grep -q "anthropic.claude-code"; then
         state_set vsCodeExt "1"
@@ -307,43 +269,29 @@ if command -v code >/dev/null 2>&1 && [[ "$(state_get vsCodeExt)" != "1" ]]; the
     fi
 fi
 
-# 3b. WebStorm Claude plugin (engineer)
-if [[ "$ROLE" == "engineer" ]] && command -v webstorm >/dev/null 2>&1 || [[ -d "/snap/webstorm" ]]; then
-    if [[ "$(state_get webstormPlugin)" != "1" ]]; then
-        ANS=$(ask_choice "(Optional) Install Claude Code plugin in WebStorm:\n\n1. Click [Open WebStorm]\n2. Settings → Plugins → Marketplace → 'Claude Code' → Install\n3. Click [Done]" "Open WebStorm" "Done" "Skip")
-        case "$ANS" in
-            "Open WebStorm")
-                if command -v webstorm >/dev/null 2>&1; then webstorm & else snap run webstorm & fi
-                ANS=$(ask_choice "Plugin installed?" "Done" "Skip")
-                ;;
-        esac
-        [[ "$ANS" == "Done" ]] && state_set webstormPlugin "1"
-    fi
-fi
-
-# 3c. Final verify
-notify "Verifying" "Health check"
+# Health check
 HEALTH_STATUS="(health.sh not found)"
 if [[ -f "$HOME/.claude/scripts/health.sh" ]]; then
     HEALTH_STATUS=$(bash "$HOME/.claude/scripts/health.sh" 2>&1 | head -1 || true)
 fi
 
-FINAL_MSG="Setup complete! Role: $ROLE\n\n"
-FINAL_MSG+="Config health: $HEALTH_STATUS\n\n"
-FINAL_MSG+="Tools: git, node, pnpm, gh, claude\n"
-FINAL_MSG+="Repos: ~/kun"
-[[ "$ROLE" == "engineer" ]] && FINAL_MSG+=", ~/hogwarts, ~/codebase, +org repos"
-FINAL_MSG+="\nConfig: ~/.claude/ (agents, skills, MCP)\n\n"
-FINAL_MSG+="Linux note: no Claude Desktop. Use:\n"
+# Final panel: one-shot summary + optional follow-ups
+FINAL_MSG="Setup complete · Role: $ROLE\n"
+FINAL_MSG+="Config: $HEALTH_STATUS\n\n"
+FINAL_MSG+="Linux note: no Claude Desktop — use:\n"
 FINAL_MSG+="  • CLI: 'claude' / 'c'\n"
 FINAL_MSG+="  • Browser: https://claude.ai/code\n"
 FINAL_MSG+="  • IDE: VS Code + WebStorm Claude plugins\n\n"
-FINAL_MSG+="Mobile: install Claude on iPhone/Android with the same account."
+FINAL_MSG+="Optional follow-ups (do later, in any order):\n"
+( command -v webstorm >/dev/null 2>&1 || [[ -d "/snap/webstorm" ]] ) && [[ "$ROLE" == "engineer" ]] && \
+    FINAL_MSG+="  • WebStorm plugin: Settings → Plugins → 'Claude Code'\n"
+FINAL_MSG+="  • Secrets from Gist: bash ~/kun/.claude/scripts/secrets.sh <GIST_ID>\n"
+FINAL_MSG+="  • Mobile / remote: install Claude on iOS/Android, or open claude.ai/code in any browser\n\n"
+FINAL_MSG+="Docs: https://kun.databayt.org/docs/onboarding"
 
-ask_choice "$FINAL_MSG" "Done" "View Docs" >/dev/null
-
-if [[ "$(ask_yesno "Open onboarding docs in browser?")" == "Yes" ]]; then
-    open_url "https://github.com/databayt/kun/blob/main/content/docs/onboarding.mdx"
+RESULT=$(ask_choice "$FINAL_MSG" "Done" "Open Docs")
+if [[ "$RESULT" == "Open Docs" ]]; then
+    open_url "https://kun.databayt.org/docs/onboarding"
 fi
 
 state_set lastStep "done"

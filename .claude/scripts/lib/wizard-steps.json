@@ -1,192 +1,113 @@
 {
   "$schema": "https://json-schema.org/draft-07/schema#",
   "title": "Databayt Quiet Wizard — Step Catalog",
-  "description": "Documentation-style catalog of every step the wrappers run. Wrappers currently hardcode these; future versions may read from this file. Source of truth for what each platform installer does.",
-  "version": 1,
+  "description": "Documentation-style catalog of every step the wrappers run. Source of truth for what each platform installer asks/does. Target shape: 2 dialogs in Act 1, 0 dialogs in Act 3, exactly 1 unavoidable browser click (GitHub device-flow Authorize).",
+  "version": 2,
   "acts": {
     "act1_preflight": {
-      "description": "Gather inputs; auto-detect existing state, dialog only what's missing",
+      "description": "Two dialogs — everything else is auto-detected or deferred.",
       "steps": [
         {
-          "id": "welcome",
-          "type": "choice",
-          "prompt": "Welcome — this sets up a fresh machine for databayt. ~20 min.",
-          "buttons": ["Start", "Cancel"]
+          "id": "identity",
+          "type": "form",
+          "prompt": "Identity card — confirm your git identity and role.",
+          "fields": [
+            { "name": "gitName",  "label": "Full name (for git commits)", "autoDetect": "git config --global user.name",  "persistAs": "gitName"  },
+            { "name": "gitEmail", "label": "Email (for git commits)",     "autoDetect": "git config --global user.email", "persistAs": "gitEmail" },
+            { "name": "role",     "label": "Role",                         "options": ["engineer", "business", "content", "ops"], "default": "engineer", "autoDetect": "Inspect ~/.claude/mcp.json: shadcn→engineer, linear→business, figma→content, posthog→ops", "persistAs": "role" }
+          ],
+          "rendering": {
+            "mac":     "two chained osascript display dialogs (name/email autofill skips dialog if git config set) + choose-from-list for role",
+            "linux":   "zenity --forms (single dialog with 3 fields) / kdialog menu / TUI fallback",
+            "windows": "WPF window with TextBox×2 + ComboBox"
+          },
+          "skipWhen": "All three values present in state file or auto-detectable"
         },
         {
-          "id": "role",
-          "type": "list",
-          "prompt": "Pick your role:",
-          "options": ["engineer", "business", "content", "ops"],
-          "autoDetect": "Inspect ~/.claude/mcp.json for shadcn/linear/figma/posthog → infer role",
-          "persistAs": "role"
-        },
-        {
-          "id": "gitName",
-          "type": "text",
-          "prompt": "Your full name (for git commits):",
-          "autoDetect": "git config --global user.name",
-          "persistAs": "gitName"
-        },
-        {
-          "id": "gitEmail",
-          "type": "text",
-          "prompt": "Your email (for git commits):",
-          "autoDetect": "git config --global user.email",
-          "persistAs": "gitEmail"
-        },
-        {
-          "id": "gistId",
-          "type": "text",
-          "prompt": "Secrets Gist ID (or blank to skip):",
-          "persistAs": "gistId",
-          "optional": true
-        },
-        {
-          "id": "proMax",
+          "id": "hogwartsDev",
           "type": "yesno",
-          "prompt": "Do you have a Claude Pro or Max subscription?",
-          "platforms": ["mac", "windows"],
-          "persistAs": "proMax",
-          "note": "Skipped on Linux (no Claude Desktop)"
-        },
-        {
-          "id": "withTailscale",
-          "type": "yesno",
-          "prompt": "Enable Tailscale SSH? (Remote control from iPhone/laptop.)",
-          "persistAs": "withTailscale"
+          "prompt": "Set up hogwarts local dev now? (pnpm + DB seed + build, ~10 min)",
+          "gate": "role == engineer",
+          "persistAs": "hogwartsDev"
         }
       ]
     },
     "act2_silentBatch": {
-      "description": "Run the 8-phase platform backend in --quiet/-Quiet mode",
+      "description": "Run the 8-phase platform backend in --quiet/-Quiet mode. One unavoidable click during Phase 3 (GitHub device-flow Authorize) — the script auto-opens the page and copies the code to clipboard.",
       "backends": {
-        "mac": ".claude/scripts/onboarding-mac.sh <role> <gist> --quiet --name --email [--with-tailscale]",
-        "linux": ".claude/scripts/onboarding-linux.sh <role> <gist> --quiet --name --email [--with-tailscale]",
-        "windows": ".claude/scripts/onboarding-windows.ps1 -Role <r> -GistId <g> -Quiet -GitName -GitEmail [-WithTailscale]"
+        "mac":     ".claude/scripts/onboarding-mac.sh <role> <gist> --quiet --name --email [--repos-dir] [--with-tailscale] [--hogwarts-dev]",
+        "linux":   ".claude/scripts/onboarding-linux.sh <role> <gist> --quiet --name --email [--repos-dir] [--with-tailscale] [--hogwarts-dev]",
+        "windows": ".claude/scripts/onboarding-windows.ps1 -Role <r> [-GistId <g>] -Quiet -GitName -GitEmail [-ReposDir] [-WithTailscale] [-HogwartsDev]"
       },
       "phases": [
         {"n": 1, "label": "System Foundation — build tools, git, Node 22, pnpm, gh CLI"},
         {"n": 2, "label": "Applications — IDEs, Chrome"},
-        {"n": 3, "label": "GitHub — SSH key, gh auth, upload key"},
-        {"n": 4, "label": "Clone Repositories — kun + (engineer: hogwarts, codebase, all org repos)"},
-        {"n": 5, "label": "Claude — Code CLI + Desktop (Mac/Win)"},
-        {"n": 6, "label": "Kun Engine — setup.sh + secrets.sh"},
-        {"n": 7, "label": "Hogwarts — pnpm install, prisma, seed, build (engineer only)"},
+        {"n": 3, "label": "GitHub — SSH key, gh auth (device-flow: 1 Authorize click), upload key", "userClick": "Authorize on github.com/login/device (code auto-copied)"},
+        {"n": 4, "label": "Clone Repositories — kun + full org (engineer)"},
+        {"n": 5, "label": "Claude — Code CLI + Desktop (Mac/Win) + VS Code extension"},
+        {"n": 6, "label": "Kun Engine — setup.sh + secrets.sh (if Gist supplied)"},
+        {"n": 7, "label": "Hogwarts — pnpm install, prisma, seed, build (hogwartsDev only)"},
         {"n": 8, "label": "Health Check"},
         {"n": "9 (opt)", "label": "Tailscale — install + 'up --ssh' (--with-tailscale)"}
       ],
-      "progressMarker": "PROGRESS:N/8:label streamed on stderr — wrappers parse for notifications"
+      "progressMarker": "PROGRESS:N/8:label streamed on stderr — wrappers parse for native notifications"
     },
-    "act3_manualFinishing": {
-      "description": "Deep-link dialogs only when human is unavoidably in the loop",
-      "steps": [
-        {
-          "id": "githubAuth",
-          "type": "auto-poll",
-          "command": "gh auth login --web",
-          "note": "Opens browser, blocks until success — no dialog needed"
-        },
-        {
-          "id": "anthropicAuth",
-          "type": "auto-poll",
-          "command": "claude (first-run opens browser)",
-          "note": "Same as GitHub — browser-based, no terminal prompt"
-        },
-        {
-          "id": "vsCodeExtension",
-          "type": "silent",
-          "command": "code --install-extension anthropic.claude-code",
-          "skip": "if extension already listed"
-        },
-        {
-          "id": "claudeDesktopSignIn",
-          "type": "dialog",
-          "platforms": ["mac", "windows"],
-          "prompt": "Sign in to Claude Desktop",
-          "buttons": ["Open Claude", "Done", "Skip"],
-          "deepLinks": {
-            "mac": "open -a Claude",
-            "windows": "Start-Process Claude.exe"
-          },
-          "gate": "proMax == 1"
-        },
-        {
-          "id": "computerUseToggle",
-          "type": "dialog",
-          "platforms": ["mac", "windows"],
-          "prompt": "Enable Claude Desktop computer-use (optional)",
-          "buttons": ["Open Settings", "Done", "Skip"],
-          "deepLinks": {
-            "mac": "open 'x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility'",
-            "windows": "Start-Process ms-settings:easeofaccess"
-          },
-          "gate": "proMax == 1"
-        },
-        {
-          "id": "webstormPlugin",
-          "type": "dialog",
-          "prompt": "Install Claude Code plugin in WebStorm (optional)",
-          "buttons": ["Open WebStorm", "Done", "Skip"],
-          "deepLinks": {
-            "mac": "open -a WebStorm",
-            "linux": "webstorm or snap run webstorm",
-            "windows": "Start-Process webstorm64.exe"
-          },
-          "gate": "role == engineer && WebStorm installed"
-        },
-        {
-          "id": "healthCheck",
-          "type": "auto",
-          "command": "bash ~/.claude/scripts/health.sh (Mac/Linux) or health.ps1 (Win)"
-        }
-      ]
+    "act3_done": {
+      "description": "No dialogs. Final 'All set' panel lists optional follow-ups with exact commands the user can run later.",
+      "panelContent": {
+        "verifyCommand": "bash ~/.claude/scripts/health.sh",
+        "optionalFollowUps": [
+          { "id": "claudeDesktopSignIn",  "label": "Sign in to Claude Desktop",         "command": "open -a Claude  /  Start-Process Claude.exe", "platforms": ["mac", "windows"], "gate": "Pro/Max sub" },
+          { "id": "webstormPlugin",       "label": "Install Claude Code plugin in WebStorm", "command": "WebStorm → Settings → Plugins → 'Claude Code'", "gate": "role == engineer && WebStorm installed" },
+          { "id": "computerUseToggle",    "label": "Enable Desktop computer-use",      "command": "Claude Desktop → Settings → General → 'Allow Claude to use your computer'", "platforms": ["mac", "windows"], "gate": "Pro/Max sub" },
+          { "id": "tailscale",            "label": "Tailscale SSH",                     "command": "bash ~/kun/.claude/scripts/onboarding-mac.sh --with-tailscale" },
+          { "id": "gistSecrets",          "label": "Load secrets from Gist",            "command": "bash ~/kun/.claude/scripts/secrets.sh <GIST_ID>" },
+          { "id": "appleNotesDispatch",   "label": "Apple Notes Dispatch folder",       "command": "Create 'Dispatch' folder in Notes — see /docs/dispatch", "platforms": ["mac"] }
+        ]
+      }
     }
+  },
+  "removedFromV1": {
+    "description": "Dialogs cut in v2 (down from 11 questions + 3 clicks to 2 questions + 1 click).",
+    "preflightCut": [
+      { "id": "welcome",      "reason": "Consent implied by curl|bash. Stderr 'Press Ctrl+C to abort' replaces dialog." },
+      { "id": "hasGithub",    "reason": "gh auth status answers; signup is inline on the device-flow page." },
+      { "id": "hasAnthropic", "reason": "Claude CLI first-run / Desktop sign-in handles account creation." },
+      { "id": "reposDir",     "reason": "Default $HOME; --repos-dir flag for the 1% who need a custom dir." },
+      { "id": "gistId",       "reason": "Deferred — surfaced as a copy-paste one-liner in the final panel." },
+      { "id": "proMax",       "reason": "Cut — final panel lists Desktop steps regardless; users skip what doesn't apply." },
+      { "id": "withTailscale","reason": "Deferred to optional follow-up (re-run with --with-tailscale)." }
+    ],
+    "act3DialogsCut": [
+      { "id": "claudeDesktopSignIn", "reason": "Moved to final-panel follow-up list. No longer blocks." },
+      { "id": "computerUseToggle",   "reason": "Niche power-user toggle. Moved to follow-up list." },
+      { "id": "webstormPlugin",      "reason": "Moved to follow-up list (silent install via JetBrains CLI is a future stretch)." }
+    ]
   },
   "stateFile": {
-    "mac": "~/Library/Application Support/Databayt/installer-state.json",
-    "linux": "${XDG_CONFIG_HOME:-~/.config}/databayt/installer-state.json",
+    "mac":     "~/Library/Application Support/Databayt/installer-state.json",
+    "linux":   "${XDG_CONFIG_HOME:-~/.config}/databayt/installer-state.json",
     "windows": "%APPDATA%\\Databayt\\installer-state.json",
     "schema": {
-      "role": "string",
-      "gitName": "string",
-      "gitEmail": "string",
-      "gistId": "string",
-      "proMax": "0|1",
-      "withTailscale": "0|1",
-      "silentBatch": "done",
-      "desktopSignedIn": "0|1",
-      "computerUse": "0|1",
-      "vsCodeExt": "0|1",
-      "webstormPlugin": "0|1",
-      "lastStep": "string",
-      "timestamp": "ISO-8601"
+      "role":         "engineer|business|content|ops",
+      "gitName":      "string",
+      "gitEmail":     "string",
+      "gistId":       "string (optional)",
+      "reposDir":     "string (optional, default $HOME)",
+      "withTailscale":"0|1 (optional, default 0)",
+      "hogwartsDev":  "0|1",
+      "silentBatch":  "done",
+      "lastStep":     "string",
+      "timestamp":    "ISO-8601"
     },
-    "behavior": "On wizard start, read state file. If present, skip already-completed steps."
+    "behavior": "On wizard start, read state file. If present, skip already-answered fields and resume from last completed phase."
   },
   "deepLinks": {
-    "accessibilitySettings": {
-      "mac": "open 'x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility'",
-      "windows": "Start-Process ms-settings:easeofaccess",
-      "linux": "gnome-control-center privacy || systemsettings5 kcm_accessibility"
-    },
-    "claudeDesktop": {
-      "mac": "open -a Claude",
-      "windows": "Start-Process Claude.exe",
-      "linux": "n/a — Claude Desktop not on Linux"
-    },
-    "vsCodeExtension": {
-      "all": "code --install-extension anthropic.claude-code || vscode:extension/anthropic.claude-code"
-    },
-    "githubDeviceFlow": {
-      "all": "gh auth login --web"
-    },
-    "anthropicConsole": {
-      "all": "https://console.anthropic.com/settings/keys"
-    },
-    "mobileApps": {
-      "iOS": "https://apps.apple.com/app/claude-by-anthropic/id6473753684",
-      "Android": "https://play.google.com/store/apps/details?id=com.anthropic.claude"
-    }
+    "githubDeviceFlow":     { "all": "https://github.com/login/device  — auto-opened, code auto-copied to clipboard" },
+    "claudeDesktop":        { "mac": "open -a Claude", "windows": "Start-Process Claude.exe", "linux": "n/a (no Claude Desktop on Linux)" },
+    "vsCodeExtension":      { "all": "code --install-extension anthropic.claude-code" },
+    "accessibilitySettings":{ "mac": "open 'x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility'", "windows": "Start-Process ms-settings:easeofaccess", "linux": "gnome-control-center privacy || systemsettings5 kcm_accessibility" },
+    "anthropicConsole":     { "all": "https://console.anthropic.com/settings/keys" },
+    "mobileApps":           { "iOS": "https://apps.apple.com/app/claude-by-anthropic/id6473753684", "Android": "https://play.google.com/store/apps/details?id=com.anthropic.claude" }
   }
 }
