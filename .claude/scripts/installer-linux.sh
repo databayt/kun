@@ -92,13 +92,6 @@ ask_choice() {
             ;;
     esac
 }
-ask_role() {
-    case "$GUI" in
-        zenity)  zenity --list --title="Databayt Setup" --text="Pick your role:" --column=Role engineer business content ops 2>/dev/null || echo "" ;;
-        kdialog) kdialog --title "Databayt Setup" --menu "Pick your role:" engineer engineer business business content content ops ops 2>/dev/null || echo "" ;;
-        *)       ask_choice "Pick your role:" engineer business content ops ;;
-    esac
-}
 notify() {
     case "$GUI" in
         zenity)  zenity --notification --text="$1: $2" 2>/dev/null || true ;;
@@ -154,17 +147,15 @@ fi
 # =============================================================================
 # ACT 1 — Pre-flight
 # =============================================================================
-WELCOME=$(ask_choice "Welcome — this sets up a fresh Linux box for databayt.\n\nAbout 15-20 minutes (mostly silent downloads).\n\nReady?" "Start" "Cancel")
-[[ "$WELCOME" != "Start" ]] && { notify "Cancelled" "Run again anytime"; exit 0; }
+# Role is universal — every machine gets the full config, so we never ask.
+ROLE="engineer"
 
-ROLE=$(state_get role)
-GIST_ID=$(state_get gistId)
-GIT_NAME_ARG=$(state_get gitName)
-GIT_EMAIL_ARG=$(state_get gitEmail)
+# Resume from state file (only fields the wizard still surfaces)
 REPOS_DIR=$(state_get reposDir)
 HAS_GITHUB=$(state_get hasGithub)
 HAS_DATABAYT_INVITE=$(state_get hasDatabaytInvite)
 HAS_ANTHROPIC=$(state_get hasAnthropic)
+HOGWARTS_DEV=$(state_get hogwartsDev)   # set via --hogwarts-dev flag only; no dialog
 
 # Account guidance
 if [[ -z "$HAS_GITHUB" ]]; then
@@ -184,10 +175,10 @@ if [[ -z "$HAS_DATABAYT_INVITE" ]]; then
     state_set hasDatabaytInvite "1"
 fi
 if [[ -z "$HAS_ANTHROPIC" ]]; then
-    ANS=$(ask_choice "Do you have an Anthropic account?\n(For Claude Code CLI + claude.ai/code in browser.)" "Yes, I have one" "No, create one" "Skip")
-    if [[ "$ANS" == "No, create one" ]]; then
+    ANS=$(ask_choice "Anthropic — company account (HR shares credentials + sends OTP).\nPing HR now; install proceeds in parallel while you wait." "I have creds" "Open Claude login" "Skip — finish later")
+    if [[ "$ANS" == "Open Claude login" ]]; then
         open_url "https://claude.ai/login"
-        ask_choice "Anthropic sign-in opened. Done when you've created the account." "Done" "Skip" >/dev/null
+        ask_choice "Claude login opened. Sign in when HR's OTP arrives — no rush, install continues in background." "Done / will finish later" "Skip" >/dev/null
     fi
     state_set hasAnthropic "1"
 fi
@@ -207,60 +198,15 @@ if [[ -z "$REPOS_DIR" ]]; then
     state_set reposDir "$REPOS_DIR"
 fi
 
-# Role: auto-detect from existing mcp.json
-if [[ -z "$ROLE" ]]; then
-    if [[ -f "$HOME/.claude/mcp.json" ]]; then
-        if grep -q '"shadcn"' "$HOME/.claude/mcp.json" 2>/dev/null; then ROLE="engineer"
-        elif grep -q '"linear"' "$HOME/.claude/mcp.json" 2>/dev/null; then ROLE="business"
-        elif grep -q '"figma"' "$HOME/.claude/mcp.json" 2>/dev/null; then ROLE="content"
-        elif grep -q '"posthog"' "$HOME/.claude/mcp.json" 2>/dev/null; then ROLE="ops"
-        fi
-    fi
-    if [[ -z "$ROLE" ]]; then
-        ROLE=$(ask_role)
-        [[ -z "$ROLE" ]] && { notify "Cancelled" "No role"; exit 0; }
-    fi
-    state_set role "$ROLE"
-fi
-
-# Git identity
-if [[ -z "$GIT_NAME_ARG" ]]; then
-    EXISTING_NAME=$(git config --global user.name 2>/dev/null || echo "")
-    if [[ -n "$EXISTING_NAME" ]]; then
-        GIT_NAME_ARG="$EXISTING_NAME"
-        GIT_EMAIL_ARG=$(git config --global user.email 2>/dev/null || echo "")
-    else
-        GIT_NAME_ARG=$(ask_text "Your full name (for git commits):")
-        [[ -z "$GIT_NAME_ARG" ]] && { notify "Cancelled" "No name"; exit 0; }
-        GIT_EMAIL_ARG=$(ask_text "Your email (for git commits):")
-        [[ -z "$GIT_EMAIL_ARG" ]] && { notify "Cancelled" "No email"; exit 0; }
-    fi
-    state_set gitName "$GIT_NAME_ARG"
-    state_set gitEmail "$GIT_EMAIL_ARG"
-fi
-
-# Gist ID
-if [[ -z "$GIST_ID" ]]; then
-    GIST_ID=$(ask_text "Secrets Gist ID (or blank to skip):")
-    state_set gistId "$GIST_ID"
-fi
-
-# Hogwarts local dev — opt-in (heavy: pnpm + DB seed + build, ~10 min)
-HOGWARTS_DEV=$(state_get hogwartsDev)
-if [[ -z "$HOGWARTS_DEV" ]]; then
-    HD_ANS=$(ask_yesno "Set up hogwarts local dev now? (pnpm + DB seed + build, ~10 min — skip if this machine won't run hogwarts locally)")
-    [[ "$HD_ANS" == "Yes" ]] && HOGWARTS_DEV="1" || HOGWARTS_DEV="0"
-    state_set hogwartsDev "$HOGWARTS_DEV"
-fi
-
 # =============================================================================
 # ACT 2 — Silent batch
 # =============================================================================
 notify "Installing" "~15-20 min in terminal"
 
-BACKEND_ARGS=("$ROLE")
-[[ -n "$GIST_ID" ]] && BACKEND_ARGS+=("$GIST_ID")
-BACKEND_ARGS+=("--quiet" "--name" "$GIT_NAME_ARG" "--email" "$GIT_EMAIL_ARG")
+# Backend gets: role (positional, universal), --quiet, plus opt-in flags.
+# No --name/--email passed — backend auto-derives git identity from gh api user
+# after Phase 3 auth. No GIST_ID passed — secrets pulled manually later.
+BACKEND_ARGS=("$ROLE" "--quiet")
 [[ -n "$REPOS_DIR" && "$REPOS_DIR" != "$HOME" ]] && BACKEND_ARGS+=("--repos-dir" "$REPOS_DIR")
 [[ "$HOGWARTS_DEV" == "1" ]] && BACKEND_ARGS+=("--hogwarts-dev")
 
@@ -268,7 +214,6 @@ echo ""
 echo "════════════════════════════════════════════════════"
 echo " Databayt Setup — Silent Install in Progress"
 echo "════════════════════════════════════════════════════"
-echo " Role: $ROLE"
 echo " You can minimize this terminal and do other work."
 echo "════════════════════════════════════════════════════"
 echo ""
@@ -307,8 +252,8 @@ if command -v code >/dev/null 2>&1 && [[ "$(state_get vsCodeExt)" != "1" ]]; the
     fi
 fi
 
-# 3b. WebStorm Claude plugin (engineer)
-if [[ "$ROLE" == "engineer" ]] && command -v webstorm >/dev/null 2>&1 || [[ -d "/snap/webstorm" ]]; then
+# 3b. WebStorm Claude plugin (only if WebStorm is installed)
+if command -v webstorm >/dev/null 2>&1 || [[ -d "/snap/webstorm" ]]; then
     if [[ "$(state_get webstormPlugin)" != "1" ]]; then
         ANS=$(ask_choice "(Optional) Install Claude Code plugin in WebStorm:\n\n1. Click [Open WebStorm]\n2. Settings → Plugins → Marketplace → 'Claude Code' → Install\n3. Click [Done]" "Open WebStorm" "Done" "Skip")
         case "$ANS" in
@@ -328,16 +273,19 @@ if [[ -f "$HOME/.claude/scripts/health.sh" ]]; then
     HEALTH_STATUS=$(bash "$HOME/.claude/scripts/health.sh" 2>&1 | head -1 || true)
 fi
 
-FINAL_MSG="Setup complete! Role: $ROLE\n\n"
+FINAL_MSG="Setup complete!\n\n"
 FINAL_MSG+="Config health: $HEALTH_STATUS\n\n"
-FINAL_MSG+="Tools: git, node, pnpm, gh, claude\n"
-FINAL_MSG+="Repos: ~/kun"
-[[ "$ROLE" == "engineer" ]] && FINAL_MSG+=", ~/hogwarts, ~/codebase, +org repos"
-FINAL_MSG+="\nConfig: ~/.claude/ (agents, skills, MCP)\n\n"
+FINAL_MSG+="Tools: git, node, pnpm, gh, vercel, claude\n"
+FINAL_MSG+="Repos: ~/kun, ~/hogwarts, ~/codebase, +org repos\n"
+FINAL_MSG+="Config: ~/.claude/ (agents, skills, MCP)\n\n"
 FINAL_MSG+="Linux note: no Claude Desktop. Use:\n"
 FINAL_MSG+="  • CLI: 'claude' / 'c'\n"
 FINAL_MSG+="  • Browser: https://claude.ai/code\n"
 FINAL_MSG+="  • IDE: VS Code + WebStorm Claude plugins\n\n"
+FINAL_MSG+="Next:\n"
+FINAL_MSG+="  1. If HR's OTP arrived, finish Anthropic sign-in: run 'claude' or open claude.ai/code\n"
+FINAL_MSG+="  2. Load secrets when you have the Gist ID:\n"
+FINAL_MSG+="     bash ~/kun/.claude/scripts/secrets.sh <GIST_ID>\n\n"
 FINAL_MSG+="Mobile: install Claude on iPhone/Android with the same account."
 
 ask_choice "$FINAL_MSG" "Done" "View Docs" >/dev/null

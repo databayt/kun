@@ -66,19 +66,6 @@ EOF
 notify() {
     osascript -e "display notification \"$1\" with title \"Databayt Setup\" subtitle \"$2\"" 2>/dev/null || true
 }
-ask_role() {
-    osascript <<'EOF' 2>/dev/null
-set roles to {"engineer", "business", "content", "ops"}
-try
-    set r to choose from list roles with prompt "Pick your role:" default items {"engineer"} with title "Databayt Setup"
-    if r is false then return ""
-    return item 1 of r
-on error
-    return ""
-end try
-EOF
-}
-
 # ── Bootstrap: ensure git, then clone kun ───────────────────────
 # git is needed to clone the repo that installs git, so the wrapper
 # must provide it first. On macOS, git ships with the Xcode Command
@@ -114,18 +101,14 @@ fi
 # =============================================================================
 # ACT 1 — Pre-flight (auto-detect, dialog only what's missing)
 # =============================================================================
-WELCOME=$(ask_choice "Welcome — this sets up a fresh Mac for databayt.\n\nAbout 20 minutes (mostly silent downloads).\n\nReady?" "Start" "Cancel")
-[[ "$WELCOME" != "Start" ]] && { notify "Setup cancelled" "Run again anytime"; exit 0; }
+# Role is universal — every machine gets the full config, so we never ask.
+ROLE="engineer"
 
-# Resume from state file if present
-ROLE=$(state_get role)
-GIST_ID=$(state_get gistId)
-GIT_NAME_ARG=$(state_get gitName)
-GIT_EMAIL_ARG=$(state_get gitEmail)
-PRO_MAX=$(state_get proMax)
+# Resume from state file (only fields the wizard still surfaces)
 REPOS_DIR=$(state_get reposDir)
 HAS_GITHUB=$(state_get hasGithub)
 HAS_ANTHROPIC=$(state_get hasAnthropic)
+HOGWARTS_DEV=$(state_get hogwartsDev)   # set via --hogwarts-dev flag only; no dialog
 
 # Accounts: confirm or guide creation
 if [[ -z "$HAS_GITHUB" ]]; then
@@ -154,11 +137,11 @@ if [[ -z "$HAS_DATABAYT_INVITE" ]]; then
 fi
 
 if [[ -z "$HAS_ANTHROPIC" ]]; then
-    ANS=$(ask_choice "Do you have an Anthropic account?\n\n(For Claude Desktop sign-in and the Claude Code CLI.)" "Yes, I have one" "No, create one" "Skip")
+    ANS=$(ask_choice "Anthropic — company account (HR shares credentials + sends OTP).\n\nPing HR now if you don't have them yet — install proceeds in parallel while you wait. You'll finish sign-in after the install when HR's OTP arrives." "I have creds" "Open Claude login" "Skip — finish later")
     case "$ANS" in
-        "No, create one")
+        "Open Claude login")
             open "https://claude.ai/login"
-            ask_choice "Anthropic sign-in opened.\n\nCreate the account (or sign in), then click Done.\n\nNote: Pro/Max sub unlocks Desktop Chat/Cowork/Code tabs." "Done" "Skip" >/dev/null
+            ask_choice "Claude login opened. Sign in with the company creds + OTP when HR sends them — no rush, install continues in background." "Done / will finish later" "Skip" >/dev/null
             ;;
     esac
     state_set hasAnthropic "1"
@@ -180,67 +163,15 @@ if [[ -z "$REPOS_DIR" ]]; then
     state_set reposDir "$REPOS_DIR"
 fi
 
-# Role: auto-detect from existing mcp.json, else ask
-if [[ -z "$ROLE" ]]; then
-    if [[ -f "$HOME/.claude/mcp.json" ]]; then
-        if grep -q '"shadcn"' "$HOME/.claude/mcp.json" 2>/dev/null; then ROLE="engineer"
-        elif grep -q '"linear"' "$HOME/.claude/mcp.json" 2>/dev/null; then ROLE="business"
-        elif grep -q '"figma"' "$HOME/.claude/mcp.json" 2>/dev/null; then ROLE="content"
-        elif grep -q '"posthog"' "$HOME/.claude/mcp.json" 2>/dev/null; then ROLE="ops"
-        fi
-    fi
-    if [[ -z "$ROLE" ]]; then
-        ROLE=$(ask_role)
-        [[ -z "$ROLE" ]] && { notify "Cancelled" "No role selected"; exit 0; }
-    fi
-    state_set role "$ROLE"
-fi
-
-# Git identity: auto-detect, else ask
-if [[ -z "$GIT_NAME_ARG" ]]; then
-    EXISTING_NAME=$(git config --global user.name 2>/dev/null || echo "")
-    if [[ -n "$EXISTING_NAME" ]]; then
-        GIT_NAME_ARG="$EXISTING_NAME"
-        GIT_EMAIL_ARG=$(git config --global user.email 2>/dev/null || echo "")
-    else
-        GIT_NAME_ARG=$(ask_text "Your full name (for git commits):")
-        [[ -z "$GIT_NAME_ARG" ]] && { notify "Cancelled" "No name given"; exit 0; }
-        GIT_EMAIL_ARG=$(ask_text "Your email (for git commits):")
-        [[ -z "$GIT_EMAIL_ARG" ]] && { notify "Cancelled" "No email given"; exit 0; }
-    fi
-    state_set gitName "$GIT_NAME_ARG"
-    state_set gitEmail "$GIT_EMAIL_ARG"
-fi
-
-# Gist ID: ask once, persist; can skip
-if [[ -z "$GIST_ID" ]]; then
-    GIST_ID=$(ask_text "Secrets Gist ID (or leave blank to skip — you can load later):")
-    state_set gistId "$GIST_ID"
-fi
-
-# Pro/Max: affects Act 3 (Claude Desktop sign-in, computer-use toggle)
-if [[ -z "$PRO_MAX" ]]; then
-    PM_ANS=$(ask_choice "Do you have a Claude Pro or Max subscription?\n\n(Affects whether you get the Desktop Chat/Cowork/Code tabs.)" "Yes" "No")
-    [[ "$PM_ANS" == "Yes" ]] && PRO_MAX="1" || PRO_MAX="0"
-    state_set proMax "$PRO_MAX"
-fi
-
-# Hogwarts local dev — opt-in (heavy: pnpm + DB seed + build, ~10 min)
-HOGWARTS_DEV=$(state_get hogwartsDev)
-if [[ -z "$HOGWARTS_DEV" ]]; then
-    HD_ANS=$(ask_choice "Set up hogwarts local dev now? (pnpm + DB seed + build, ~10 min)\n\nSkip if this machine won't run hogwarts locally — you can add it later." "Yes" "No")
-    [[ "$HD_ANS" == "Yes" ]] && HOGWARTS_DEV="1" || HOGWARTS_DEV="0"
-    state_set hogwartsDev "$HOGWARTS_DEV"
-fi
-
 # =============================================================================
 # ACT 2 — Silent batch (in terminal; notifications on phase transitions)
 # =============================================================================
 notify "Starting install..." "~15-20 minutes"
 
-BACKEND_ARGS=("$ROLE")
-[[ -n "$GIST_ID" ]] && BACKEND_ARGS+=("$GIST_ID")
-BACKEND_ARGS+=("--quiet" "--name" "$GIT_NAME_ARG" "--email" "$GIT_EMAIL_ARG")
+# Backend gets: role (positional, universal), --quiet, plus opt-in flags.
+# No --name/--email passed — backend auto-derives git identity from gh api user
+# after Phase 3 auth. No GIST_ID passed — secrets pulled manually later.
+BACKEND_ARGS=("$ROLE" "--quiet")
 [[ -n "$REPOS_DIR" && "$REPOS_DIR" != "$HOME" ]] && BACKEND_ARGS+=("--repos-dir" "$REPOS_DIR")
 [[ "$HOGWARTS_DEV" == "1" ]] && BACKEND_ARGS+=("--hogwarts-dev")
 
@@ -248,7 +179,6 @@ echo ""
 echo "════════════════════════════════════════════════════"
 echo " Databayt Setup — Silent Install in Progress"
 echo "════════════════════════════════════════════════════"
-echo " Role: $ROLE"
 echo " You can minimize this terminal and do other work."
 echo "════════════════════════════════════════════════════"
 echo ""
@@ -280,17 +210,18 @@ state_set silentBatch "done"
 # =============================================================================
 notify "Almost done" "Final clicks coming up"
 
-# 3a. Claude Desktop sign-in (Pro/Max only)
-if [[ "$PRO_MAX" == "1" && -d "/Applications/Claude.app" ]] && [[ "$(state_get desktopSignedIn)" != "1" ]]; then
-    ANS=$(ask_choice "Sign in to Claude Desktop:\n\nClicking [Open Claude] launches the app. Sign in with your Anthropic account, then click [Done]." "Open Claude" "Done" "Skip")
+# 3a. Claude Desktop sign-in (only if Desktop installed — works without Pro/Max too;
+#     just won't unlock the Chat/Cowork/Code tabs on free tier)
+if [[ -d "/Applications/Claude.app" ]] && [[ "$(state_get desktopSignedIn)" != "1" ]]; then
+    ANS=$(ask_choice "Sign in to Claude Desktop:\n\nUse the company creds + OTP from HR (same account as Claude Code CLI). No rush — skip if HR hasn't sent the OTP yet, finish later from the app." "Open Claude" "Done" "Skip")
     case "$ANS" in
         "Open Claude") open -a Claude; ANS=$(ask_choice "Signed in?" "Done" "Skip");;
     esac
     [[ "$ANS" == "Done" ]] && state_set desktopSignedIn "1"
 fi
 
-# 3b. Computer-use toggle (Pro/Max only)
-if [[ "$PRO_MAX" == "1" ]] && [[ "$(state_get computerUse)" != "1" ]]; then
+# 3b. Computer-use toggle (only if Desktop installed)
+if [[ -d "/Applications/Claude.app" ]] && [[ "$(state_get computerUse)" != "1" ]]; then
     ANS=$(ask_choice "(Optional) Enable Claude Desktop's computer-use:\n\n1. Click [Open Settings] below\n2. In Claude Desktop → Settings → General, toggle 'Allow Claude to use your computer'\n3. Click [Done]" "Open Settings" "Done" "Skip")
     case "$ANS" in
         "Open Settings")
@@ -311,8 +242,8 @@ if command -v code >/dev/null 2>&1 && [[ "$(state_get vsCodeExt)" != "1" ]]; the
     fi
 fi
 
-# 3d. WebStorm Claude plugin (engineer)
-if [[ "$ROLE" == "engineer" && -d "/Applications/WebStorm.app" ]] && [[ "$(state_get webstormPlugin)" != "1" ]]; then
+# 3d. WebStorm Claude plugin (only if WebStorm is installed)
+if [[ -d "/Applications/WebStorm.app" ]] && [[ "$(state_get webstormPlugin)" != "1" ]]; then
     ANS=$(ask_choice "(Optional) Install Claude Code plugin in WebStorm:\n\n1. Click [Open WebStorm]\n2. Settings → Plugins → Marketplace → search 'Claude Code' → Install\n3. Click [Done]" "Open WebStorm" "Done" "Skip")
     case "$ANS" in
         "Open WebStorm") open -a WebStorm; ANS=$(ask_choice "Plugin installed?" "Done" "Skip");;
@@ -328,13 +259,16 @@ if [[ -f "$HOME/.claude/scripts/health.sh" ]]; then
 fi
 
 # Final dialog
-FINAL_MSG="Setup complete! Role: $ROLE\n\n"
+FINAL_MSG="Setup complete!\n\n"
 FINAL_MSG+="Config health: $HEALTH_STATUS\n\n"
-FINAL_MSG+="Tools: git, node, pnpm, gh, claude\n"
-FINAL_MSG+="Repos: ~/kun"
-[[ "$ROLE" == "engineer" ]] && FINAL_MSG+=", ~/hogwarts, ~/codebase, +org repos"
-FINAL_MSG+="\nConfig: ~/.claude/ (agents, skills, MCP, hooks)\n\n"
-FINAL_MSG+="Next: open a new terminal and type 'c' to start Claude Code.\n\n"
+FINAL_MSG+="Tools: git, node, pnpm, gh, vercel, claude\n"
+FINAL_MSG+="Repos: ~/kun, ~/hogwarts, ~/codebase, +org repos\n"
+FINAL_MSG+="Config: ~/.claude/ (agents, skills, MCP, hooks)\n\n"
+FINAL_MSG+="Next:\n"
+FINAL_MSG+="  1. Open a new terminal and type 'c' to start Claude Code\n"
+FINAL_MSG+="  2. If HR's OTP arrived, finish Anthropic sign-in (mobile app + Desktop)\n"
+FINAL_MSG+="  3. Load secrets when you have the Gist ID:\n"
+FINAL_MSG+="     bash ~/kun/.claude/scripts/secrets.sh <GIST_ID>\n\n"
 FINAL_MSG+="Mobile: install Claude on iPhone/Android with the same Anthropic account."
 
 ask_choice "$FINAL_MSG" "Done" "View Docs" >/dev/null

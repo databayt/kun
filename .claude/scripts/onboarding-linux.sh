@@ -89,10 +89,10 @@ step() {
 }
 
 # ── Validate ────────────────────────────────────────────────────
-if [[ -z "$ROLE" ]]; then
+if false; then  # usage block kept for reference; no longer triggered (role defaults to "engineer")
     echo -e "${BD}Computer Onboarding — Linux${NC}"
     echo ""
-    echo "Usage: bash onboarding-linux.sh <role> [gist_id] [flags]"
+    echo "Usage: bash onboarding-linux.sh [role] [flags]"
     echo ""
     echo "Roles: engineer | business | content | ops"
     echo ""
@@ -114,9 +114,15 @@ if [[ "$(uname -s)" != "Linux" ]]; then
     exit 1
 fi
 
+# Role is a label only — every machine gets the full config. Default to "engineer"
+# when omitted, keep validating explicit values for backward compat with old callers.
+if [[ -z "$ROLE" ]]; then
+    ROLE="engineer"
+fi
+
 if [[ "$ROLE" != "engineer" && "$ROLE" != "business" && "$ROLE" != "content" && "$ROLE" != "ops" ]]; then
     echo -e "${R}Invalid role: $ROLE${NC}"
-    echo "Valid: engineer, business, content, ops"
+    echo "Valid: engineer (default), business, content, ops"
     exit 1
 fi
 
@@ -292,31 +298,16 @@ fi
 # =============================================================================
 step "3" "GitHub — SSH key, authentication, git config"
 
-# Git identity
-GIT_NAME=$(git config --global user.name 2>/dev/null || echo "")
-if [[ -z "$GIT_NAME" ]]; then
-    if [[ -n "$GIT_NAME_ARG" ]]; then
-        GIT_NAME="$GIT_NAME_ARG"; GIT_EMAIL="$GIT_EMAIL_ARG"
-    elif [[ "$QUIET" == "1" ]]; then
-        GIT_NAME="$(whoami)"; GIT_EMAIL="$(whoami)@$(hostname -s).local"
-        info "Quiet mode — placeholder git identity (override via 'git config --global')"
-    else
-        read -p "  Full name (for git commits): " GIT_NAME
-        read -p "  Email (for git commits): " GIT_EMAIL
-    fi
-    git config --global user.name "$GIT_NAME"
-    git config --global user.email "$GIT_EMAIL"
-    pass "Git config: $GIT_NAME <$GIT_EMAIL>"
-else
-    pass "Git config: $GIT_NAME"
-fi
+# Remember if git identity is already set; we'll backfill from gh api user later
+# (after auth) if it isn't. Placing this after auth lets the universal wizard skip
+# asking for name/email up front.
+EXISTING_GIT_NAME=$(git config --global user.name 2>/dev/null || echo "")
 
-# SSH key
+# SSH key — comment is metadata only; gh auth ties it to the right user later
 if [[ ! -f "$HOME/.ssh/id_ed25519" ]]; then
-    GIT_EMAIL_USE=$(git config --global user.email)
     mkdir -p "$HOME/.ssh"
     chmod 700 "$HOME/.ssh"
-    ssh-keygen -t ed25519 -C "$GIT_EMAIL_USE" -f "$HOME/.ssh/id_ed25519" -N "" >/dev/null
+    ssh-keygen -t ed25519 -C "databayt-onboarding-$(hostname -s)" -f "$HOME/.ssh/id_ed25519" -N "" >/dev/null
     eval "$(ssh-agent -s)" >/dev/null
     ssh-add "$HOME/.ssh/id_ed25519" 2>/dev/null
     pass "SSH key generated"
@@ -392,6 +383,38 @@ if ! gh ssh-key list 2>/dev/null | grep -q "$KEY_FP"; then
         pass "SSH key on GitHub" || info "SSH key may already be on GitHub"
 else
     pass "SSH key on GitHub"
+fi
+
+# Git identity — set only if not already configured. Priority:
+#   1. --name/--email installer args (legacy compat)
+#   2. existing ~/.gitconfig (idempotent re-runs)
+#   3. gh api user (auto-derive from the GitHub account just authed)
+#   4. $(whoami) fallback (quiet mode + gh unreachable)
+if [[ -z "$EXISTING_GIT_NAME" ]]; then
+    if [[ -n "$GIT_NAME_ARG" ]]; then
+        GIT_NAME="$GIT_NAME_ARG"; GIT_EMAIL="$GIT_EMAIL_ARG"
+        info "Git identity from installer args"
+    else
+        GH_LOGIN=$(gh api user --jq '.login' 2>/dev/null || echo "")
+        GH_NAME=$(gh api user --jq '.name // .login' 2>/dev/null || echo "")
+        if [[ -n "$GH_LOGIN" ]]; then
+            GIT_NAME="$GH_NAME"
+            GIT_EMAIL="${GH_LOGIN}@users.noreply.github.com"
+            info "Git identity auto-derived from GitHub ($GH_LOGIN)"
+        elif [[ "$QUIET" == "1" ]]; then
+            GIT_NAME="$(whoami)"; GIT_EMAIL="$(whoami)@$(hostname -s).local"
+            info "Quiet mode — placeholder git identity (override via 'git config --global')"
+        else
+            read -p "  Full name (for git commits): " GIT_NAME
+            read -p "  Email (for git commits): " GIT_EMAIL
+        fi
+    fi
+    git config --global user.name "$GIT_NAME"
+    git config --global user.email "$GIT_EMAIL"
+    pass "Git config: $GIT_NAME <$GIT_EMAIL>"
+else
+    GIT_EMAIL=$(git config --global user.email 2>/dev/null || echo "")
+    pass "Git config: $EXISTING_GIT_NAME <$GIT_EMAIL>"
 fi
 
 # Pre-clone gate: must be an active member of github.com/databayt to clone private repos.

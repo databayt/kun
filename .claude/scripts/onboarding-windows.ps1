@@ -32,26 +32,9 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-if (-not $Role) {
-    Write-Host "Computer Onboarding — Windows" -ForegroundColor Cyan
-    Write-Host ""
-    Write-Host "Usage: .\onboarding-windows.ps1 -Role <role> [-GistId <id>] [-Quiet] [-GitName <n>] [-GitEmail <e>]"
-    Write-Host ""
-    Write-Host "Roles:"
-    Write-Host "  engineer  — WebStorm, all repos, Claude Code CLI, hogwarts local dev"
-    Write-Host "  content   — Claude Desktop, translation, content tools"
-    Write-Host "  ops       — Monitoring, costs, incident tools"
-    Write-Host "  business  — Proposals, pricing, client workflows"
-    Write-Host ""
-    Write-Host "Flags:"
-    Write-Host "  -Quiet                  Skip terminal prompts (for wrapper/CI use)"
-    Write-Host "  -GitName <name>         Pre-supply git identity (skips prompt)"
-    Write-Host "  -GitEmail <email>       Pre-supply git email (skips prompt)"
-    Write-Host ""
-    Write-Host "One-liner:"
-    Write-Host '  git clone https://github.com/databayt/kun.git $HOME\kun; & $HOME\kun\.claude\scripts\onboarding-windows.ps1 -Role engineer'
-    exit 0
-}
+# Role is a label only - every machine gets the full config. Default to "engineer"
+# when omitted, keep ValidateSet above for backward compat with explicit callers.
+if (-not $Role) { $Role = "engineer" }
 
 $ERRORS = 0
 $HOME_DIR = $env:USERPROFILE
@@ -200,32 +183,17 @@ if (-not (Test-Path $chromePath) -and -not (Test-Path $chromePath86)) {
 # =============================================================================
 Step "3" "GitHub — SSH key, authentication, git config"
 
-# Git identity — wrapper can pre-supply via -GitName/-GitEmail; quiet mode uses defaults if missing
-$gitName = git config --global user.name 2>$null
-if (-not $gitName) {
-    if ($GitName) {
-        $gitName = $GitName; $gitEmail = $GitEmail
-    } elseif ($Quiet) {
-        $gitName = $env:USERNAME; $gitEmail = "$env:USERNAME@$env:COMPUTERNAME.local"
-        Info "Quiet mode — using placeholder git identity (override later via 'git config --global')"
-    } else {
-        $gitName = Read-Host "  Full name (for git commits)"
-        $gitEmail = Read-Host "  Email (for git commits)"
-    }
-    git config --global user.name $gitName
-    git config --global user.email $gitEmail
-    Pass "Git config: $gitName <$gitEmail>"
-} else {
-    Pass "Git config: $gitName"
-}
+# Remember if git identity is already set; we'll backfill from gh api user later
+# (after auth) if it isn't. Placing this after auth lets the universal wizard skip
+# asking for name/email up front.
+$ExistingGitName = git config --global user.name 2>$null
 
-# SSH key
+# SSH key — comment is metadata only; gh auth ties it to the right user later
 $sshKey = "$HOME_DIR\.ssh\id_ed25519"
 if (-not (Test-Path $sshKey)) {
-    $gitEmail = git config --global user.email
     Info "Generating SSH key..."
     New-Item -ItemType Directory -Force -Path "$HOME_DIR\.ssh" | Out-Null
-    ssh-keygen -t ed25519 -C $gitEmail -f $sshKey -N '""'
+    ssh-keygen -t ed25519 -C "databayt-onboarding-$env:COMPUTERNAME" -f $sshKey -N '""'
     # Start ssh-agent service
     $sshAgent = Get-Service ssh-agent -EA SilentlyContinue
     if ($sshAgent) {
@@ -281,6 +249,39 @@ if ($keyContent) {
     $hostname = $env:COMPUTERNAME
     gh ssh-key add "$sshKey.pub" --title "databayt-$hostname" 2>$null
     if ($?) { Pass "SSH key on GitHub" } else { Info "SSH key may already be on GitHub" }
+}
+
+# Git identity - set only if not already configured. Priority:
+#   1. -GitName/-GitEmail installer args (legacy compat)
+#   2. existing ~/.gitconfig (idempotent re-runs)
+#   3. gh api user (auto-derive from the GitHub account just authed)
+#   4. $env:USERNAME fallback (quiet mode + gh unreachable)
+if (-not $ExistingGitName) {
+    if ($GitName) {
+        $gitName = $GitName; $gitEmail = $GitEmail
+        Info "Git identity from installer args"
+    } else {
+        $ghLogin = gh api user --jq '.login' 2>$null
+        $ghName = gh api user --jq '.name // .login' 2>$null
+        if ($ghLogin) {
+            $gitName = $ghName
+            $gitEmail = "$ghLogin@users.noreply.github.com"
+            Info "Git identity auto-derived from GitHub ($ghLogin)"
+        } elseif ($Quiet) {
+            $gitName = $env:USERNAME
+            $gitEmail = "$env:USERNAME@$env:COMPUTERNAME.local"
+            Info "Quiet mode - placeholder git identity (override via 'git config --global')"
+        } else {
+            $gitName = Read-Host "  Full name (for git commits)"
+            $gitEmail = Read-Host "  Email (for git commits)"
+        }
+    }
+    git config --global user.name $gitName
+    git config --global user.email $gitEmail
+    Pass "Git config: $gitName <$gitEmail>"
+} else {
+    $gitEmail = git config --global user.email 2>$null
+    Pass "Git config: $ExistingGitName <$gitEmail>"
 }
 
 # Pre-clone gate: must be an active member of github.com/databayt to clone private repos.

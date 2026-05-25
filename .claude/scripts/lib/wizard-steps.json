@@ -5,50 +5,15 @@
   "version": 1,
   "acts": {
     "act1_preflight": {
-      "description": "Gather inputs; auto-detect existing state, dialog only what's missing",
+      "description": "Gather inputs; only 4 dialogs — everything else is auto-detected or derived after auth",
       "steps": [
         {
-          "id": "welcome",
+          "id": "hasGithub",
           "type": "choice",
-          "prompt": "Welcome — this sets up a fresh machine for databayt. ~20 min.",
-          "buttons": ["Start", "Cancel"]
-        },
-        {
-          "id": "role",
-          "type": "list",
-          "prompt": "Pick your role:",
-          "options": ["engineer", "business", "content", "ops"],
-          "autoDetect": "Inspect ~/.claude/mcp.json for shadcn/linear/figma/posthog → infer role",
-          "persistAs": "role"
-        },
-        {
-          "id": "gitName",
-          "type": "text",
-          "prompt": "Your full name (for git commits):",
-          "autoDetect": "git config --global user.name",
-          "persistAs": "gitName"
-        },
-        {
-          "id": "gitEmail",
-          "type": "text",
-          "prompt": "Your email (for git commits):",
-          "autoDetect": "git config --global user.email",
-          "persistAs": "gitEmail"
-        },
-        {
-          "id": "gistId",
-          "type": "text",
-          "prompt": "Secrets Gist ID (or blank to skip):",
-          "persistAs": "gistId",
-          "optional": true
-        },
-        {
-          "id": "proMax",
-          "type": "yesno",
-          "prompt": "Do you have a Claude Pro or Max subscription?",
-          "platforms": ["mac", "windows"],
-          "persistAs": "proMax",
-          "note": "Skipped on Linux (no Claude Desktop)"
+          "prompt": "Do you have a GitHub account?",
+          "options": ["Yes, I have one", "No, create one", "Skip"],
+          "persistAs": "hasGithub",
+          "note": "'No, create one' opens https://github.com/join"
         },
         {
           "id": "hasDatabaytInvite",
@@ -57,20 +22,44 @@
           "options": ["Yes", "Open invite page", "Skip — I'll handle later"],
           "persistAs": "hasDatabaytInvite",
           "note": "Pre-flight check — Phase 3 fails fast if invite not accepted (gh api user/memberships/orgs/databayt)"
+        },
+        {
+          "id": "hasAnthropic",
+          "type": "choice",
+          "prompt": "Anthropic — company account (HR shares credentials + sends OTP).",
+          "options": ["I have creds", "Open Claude login", "Skip — finish later"],
+          "persistAs": "hasAnthropic",
+          "note": "Company account — HR sends OTP via Slack/email. Install proceeds in parallel; teammate finishes sign-in (Claude Code first-run + mobile/Desktop) once OTP arrives. Act 3 manual finishing surfaces the sign-in dialog again at end."
+        },
+        {
+          "id": "reposDir",
+          "type": "choice",
+          "prompt": "Where do you want databayt org repos saved?",
+          "options": ["Home root (~/)", "~/databayt/", "Custom..."],
+          "persistAs": "reposDir",
+          "note": "Custom branch falls back to a text input asking for the absolute path"
         }
+      ],
+      "removedAsOf2026_05_25": [
+        "welcome — install starts immediately on paste",
+        "role — every machine gets the full config; backends default to 'engineer'",
+        "gitName + gitEmail — auto-derived from `gh api user` after Phase 3 auth (name = .name||.login, email = <login>@users.noreply.github.com); falls back to $(whoami) in quiet mode + no gh",
+        "gistId — install completes without; teammate runs secrets.sh manually later (final dialog reminds them)",
+        "proMax — Act 3 Desktop dialogs now gate on /Applications/Claude.app existing instead",
+        "hogwartsDev — defaults to off; --hogwarts-dev / -HogwartsDev CLI flag still opts in"
       ]
     },
     "act2_silentBatch": {
       "description": "Run the 8-phase platform backend in --quiet/-Quiet mode",
       "backends": {
-        "mac": ".claude/scripts/onboarding-mac.sh <role> <gist> --quiet --name --email",
-        "linux": ".claude/scripts/onboarding-linux.sh <role> <gist> --quiet --name --email",
-        "windows": ".claude/scripts/onboarding-windows.ps1 -Role <r> -GistId <g> -Quiet -GitName -GitEmail"
+        "mac": ".claude/scripts/onboarding-mac.sh [role] --quiet [--repos-dir <path>] [--hogwarts-dev]",
+        "linux": ".claude/scripts/onboarding-linux.sh [role] --quiet [--repos-dir <path>] [--hogwarts-dev]",
+        "windows": ".claude/scripts/onboarding-windows.ps1 [-Role <r>] -Quiet [-ReposDir <path>] [-HogwartsDev]"
       },
       "phases": [
         {"n": 1, "label": "System Foundation — build tools, git, Node 24, pnpm, gh CLI"},
         {"n": 2, "label": "Applications — IDEs, Chrome"},
-        {"n": 3, "label": "GitHub — SSH key, gh auth, upload key, verify databayt org membership + SSH push"},
+        {"n": 3, "label": "GitHub — SSH key, gh auth, upload key, auto-set git identity from gh api user, verify databayt org membership + SSH push"},
         {"n": 4, "label": "Clone Repositories — kun + (engineer: hogwarts, codebase, all org repos)"},
         {"n": 5, "label": "Claude — Code CLI + Desktop (Mac/Win)"},
         {"n": 6, "label": "Kun Engine — setup.sh + secrets.sh"},
@@ -92,7 +81,7 @@
           "id": "anthropicAuth",
           "type": "auto-poll",
           "command": "claude (first-run opens browser)",
-          "note": "Same as GitHub — browser-based, no terminal prompt"
+          "note": "Company account — credentials + OTP from HR. Non-blocking: install completes regardless. If HR's OTP hasn't arrived, teammate runs `claude` after install."
         },
         {
           "id": "vsCodeExtension",
@@ -104,13 +93,13 @@
           "id": "claudeDesktopSignIn",
           "type": "dialog",
           "platforms": ["mac", "windows"],
-          "prompt": "Sign in to Claude Desktop",
+          "prompt": "Sign in to Claude Desktop (company creds + OTP from HR)",
           "buttons": ["Open Claude", "Done", "Skip"],
           "deepLinks": {
             "mac": "open -a Claude",
             "windows": "Start-Process Claude.exe"
           },
-          "gate": "proMax == 1"
+          "gate": "/Applications/Claude.app exists (mac) or Claude.exe installed (win)"
         },
         {
           "id": "computerUseToggle",
@@ -122,7 +111,7 @@
             "mac": "open 'x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility'",
             "windows": "Start-Process ms-settings:easeofaccess"
           },
-          "gate": "proMax == 1"
+          "gate": "Claude Desktop installed"
         },
         {
           "id": "webstormPlugin",
@@ -134,7 +123,7 @@
             "linux": "webstorm or snap run webstorm",
             "windows": "Start-Process webstorm64.exe"
           },
-          "gate": "role == engineer && WebStorm installed"
+          "gate": "WebStorm installed"
         },
         {
           "id": "healthCheck",
@@ -149,11 +138,8 @@
     "linux": "${XDG_CONFIG_HOME:-~/.config}/databayt/installer-state.json",
     "windows": "%APPDATA%\\Databayt\\installer-state.json",
     "schema": {
-      "role": "string",
-      "gitName": "string",
-      "gitEmail": "string",
-      "gistId": "string",
-      "proMax": "0|1",
+      "reposDir": "string",
+      "hogwartsDev": "0|1",
       "hasGithub": "0|1",
       "hasDatabaytInvite": "0|1",
       "hasAnthropic": "0|1",
