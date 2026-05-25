@@ -72,6 +72,16 @@ Get-ChildItem "$KUN_DIR\.claude\scripts\*" -EA SilentlyContinue | ForEach-Object
 }
 Info "scripts"
 
+# Hooks — SessionStart drift warning + future hook scripts
+if (Test-Path "$KUN_DIR\.claude\hooks") {
+    New-Item -ItemType Directory -Force -Path "$CLAUDE_DIR\hooks" | Out-Null
+    Get-ChildItem "$KUN_DIR\.claude\hooks\*" -EA SilentlyContinue | ForEach-Object {
+        Copy-Item $_.FullName "$CLAUDE_DIR\hooks\" -Force
+    }
+    $hookCount = (Get-ChildItem "$CLAUDE_DIR\hooks\*" -EA SilentlyContinue).Count
+    Info "hooks ($hookCount)"
+}
+
 Write-Host ""
 
 # ── Full config (universal — every machine is a full autonomous worker) ──
