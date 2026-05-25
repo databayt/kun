@@ -16,26 +16,10 @@ description: Optional infrastructure for air-gapped or dedicated server deployme
 | Data residency compliance | Maybe | Enterprise plan (regional) |
 | Mobile access | No | iOS app, claude.ai/code |
 | Persistent sessions | No | Desktop app, cloud tasks |
-| Cross-device | No | Remote Control, Dispatch |
+| Cross-device | No | Mobile app + claude.ai/code |
 | Team isolation | No | Team/Enterprise RBAC |
 
 **Databayt's position**: We use Anthropic-native products. This appendix exists for future scenarios or external teams with different constraints.
-
-## Tailscale VPN
-
-Secure mesh VPN for remote access without port forwarding.
-
-```bash
-curl -fsSL https://tailscale.com/install.sh | sh
-sudo tailscale up --ssh
-```
-
-### ACL Summary
-
-| Role | Access |
-|------|--------|
-| Admin | All ports, root + non-root SSH |
-| Developer | Port 22, non-root SSH |
 
 ## tmux Sessions
 
@@ -46,8 +30,8 @@ Persistent terminal sessions that survive disconnects.
 tmux new-session -d -s claude -n claude
 tmux send-keys -t claude:claude 'claude' Enter
 
-# Attach from any device
-ssh [tailscale-ip]
+# Attach from any device (via your preferred SSH transport — Anthropic recommends claude.ai/code instead)
+ssh user@host
 tmux attach -t claude
 ```
 
@@ -55,7 +39,7 @@ tmux attach -t claude
 
 ```bash
 sudo apt update && sudo apt install -y git curl tmux build-essential openssh-server
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash -
 sudo apt install -y nodejs
 npm install -g pnpm @anthropic-ai/claude-code
 ```

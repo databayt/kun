@@ -28,14 +28,13 @@ set -e
 
 # Parse args — positional <role> [gist_id] plus optional flags
 ROLE="" GIST_ID="" QUIET=0 GIT_NAME_ARG="" GIT_EMAIL_ARG=""
-WITH_TAILSCALE=0 ALL_REPOS=1 REPOS_DIR="$HOME" HOGWARTS_DEV=0
+ALL_REPOS=1 REPOS_DIR="$HOME" HOGWARTS_DEV=0
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --quiet)            QUIET=1; shift ;;
         --name)             GIT_NAME_ARG="$2"; shift 2 ;;
         --email)             GIT_EMAIL_ARG="$2"; shift 2 ;;
         --repos-dir)        REPOS_DIR="$2"; shift 2 ;;
-        --with-tailscale)   WITH_TAILSCALE=1; shift ;;
         --essentials-only)  ALL_REPOS=0; shift ;;
         --hogwarts-dev)     HOGWARTS_DEV=1; shift ;;
         --*)                echo "Unknown flag: $1" >&2; exit 1 ;;
@@ -93,7 +92,6 @@ if [[ -z "$ROLE" ]]; then
     echo "  --essentials-only  Clone only kun/hogwarts/codebase (default: all org repos)"
     echo "  --repos-dir <dir>  Where to save databayt org repos (default: \$HOME)"
     echo "  --hogwarts-dev     Set up hogwarts local dev (pnpm + DB seed + build)"
-    echo "  --with-tailscale   Install Tailscale + 'tailscale up --ssh' for remote/mobile"
     echo ""
     echo "One-liner:"
     echo "  git clone https://github.com/databayt/kun.git ~/kun && bash ~/kun/.claude/scripts/onboarding-mac.sh engineer"
@@ -170,9 +168,10 @@ else
     pass "GitHub CLI"
 fi
 
-# Node.js
+# Node.js — pin to LTS major (Node 24 Krypton as of 2026)
 if ! command -v node &>/dev/null; then
-    brew install node
+    brew install node@24
+    brew link --overwrite --force node@24 2>/dev/null || true
     pass "Node.js installed ($(node --version))"
 else
     pass "Node.js ($(node --version))"
@@ -184,6 +183,14 @@ if ! command -v pnpm &>/dev/null; then
     pass "pnpm installed"
 else
     pass "pnpm ($(pnpm --version))"
+fi
+
+# Vercel CLI — needed for `vercel env pull` per-product .env (Phase 6)
+if ! command -v vercel &>/dev/null; then
+    npm install -g vercel
+    pass "Vercel CLI installed"
+else
+    pass "Vercel CLI ($(vercel --version 2>/dev/null | head -1))"
 fi
 
 # =============================================================================
@@ -306,6 +313,32 @@ else
     pass "SSH key on GitHub"
 fi
 
+# Pre-clone gate: must be an active member of github.com/databayt to clone private repos.
+# Default gh scopes already include read:org, so this just needs the API call to succeed.
+state=$(gh api user/memberships/orgs/databayt --jq .state 2>/dev/null || echo "")
+if [[ -z "$state" ]]; then
+    fail "Cannot check databayt org membership (token may lack read:org scope)"
+    info "Run: gh auth refresh -h github.com -s read:org -w   then re-run this script"
+    exit 1
+elif [[ "$state" != "active" ]]; then
+    fail "Not an active member of github.com/databayt"
+    info "Open the invite, accept it, then re-run this script (idempotent)"
+    open "https://github.com/orgs/databayt/invitations" 2>/dev/null || true
+    exit 1
+fi
+pass "databayt org membership active"
+
+# SSH push capability: cloning over SSH and pushing both need this. ssh -T against
+# github.com always exits non-zero (they block shell), so grep the banner.
+ssh_out=$(ssh -T -o StrictHostKeyChecking=accept-new -o BatchMode=yes git@github.com 2>&1 || true)
+if [[ "$ssh_out" == *"successfully authenticated"* ]]; then
+    pass "SSH push to GitHub works"
+else
+    fail "SSH not authenticated to GitHub (clone+push will fail)"
+    info "Re-run: gh auth login -p ssh -w   to upload your SSH key"
+    exit 1
+fi
+
 # =============================================================================
 # PHASE 4: Clone Repositories
 # =============================================================================
@@ -406,12 +439,6 @@ if [[ -d "/Applications/Claude.app" && -f "$HOME/.claude/mcp.json" ]]; then
     fi
 fi
 
-# Ensure Apple Notes "Dispatch" folder exists so dispatch.sh has somewhere to write
-if [[ -d "/Applications/Notes.app" ]]; then
-    osascript -e 'tell application "Notes" to if not (exists folder "Dispatch") then make new folder with properties {name:"Dispatch"}' 2>/dev/null && \
-        pass "Apple Notes Dispatch folder" || info "Apple Notes Dispatch folder skipped"
-fi
-
 # =============================================================================
 # PHASE 6: Kun Engine
 # =============================================================================
@@ -431,6 +458,13 @@ if [[ -n "$GIST_ID" && -f "$KUN_DIR/.claude/scripts/secrets.sh" ]]; then
     pass "Secrets loaded"
 else
     info "Secrets skipped — run later: bash ~/kun/.claude/scripts/secrets.sh <GIST_ID>"
+fi
+
+# Vercel env pull — per-product .env from team databayt (Gist → ~/.claude/.env;
+# Vercel → ~/<repo>/.env for each cloned product). Warns and continues if
+# Vercel isn't logged in; the teammate can run `vercel login` later and re-run.
+if [[ -f "$KUN_DIR/.claude/scripts/vercel-pull.sh" ]]; then
+    bash "$KUN_DIR/.claude/scripts/vercel-pull.sh" "$REPOS_DIR" || true
 fi
 
 # =============================================================================
@@ -531,28 +565,6 @@ fi
 [[ -f "$HOME/.claude/mcp.json" ]]          && pass "mcp.json"        || fail "mcp.json"
 
 # =============================================================================
-# PHASE 9 (OPTIONAL): Tailscale — remote SSH for the iPhone / web Code lane
-# =============================================================================
-if [[ "$WITH_TAILSCALE" == "1" ]]; then
-    echo ""
-    echo -e "${BD}[+]${NC} ${B}Tailscale — remote SSH (optional)${NC}"
-    if ! command -v tailscale &>/dev/null; then
-        info "Installing Tailscale..."
-        brew install --cask tailscale 2>/dev/null && pass "Tailscale installed" || info "Tailscale install skipped"
-    else
-        pass "Tailscale"
-    fi
-    # tailscale up needs auth; in quiet mode print the auth URL and continue
-    if command -v tailscale &>/dev/null; then
-        if [[ "$QUIET" == "1" ]]; then
-            info "Run 'sudo tailscale up --ssh' after this completes (needs admin + auth URL)"
-        else
-            sudo tailscale up --ssh 2>/dev/null && pass "Tailscale up" || info "Run 'sudo tailscale up --ssh' to enable"
-        fi
-    fi
-fi
-
-# =============================================================================
 # Done
 # =============================================================================
 echo ""
@@ -589,12 +601,6 @@ echo -e "${BD}Mobile (Claude on iPhone/Android):${NC}"
 echo "  iOS:     https://apps.apple.com/app/claude-by-anthropic/id6473753684"
 echo "  Android: https://play.google.com/store/apps/details?id=com.anthropic.claude"
 echo "  Sign in with the same Anthropic account → same projects everywhere"
-
-if [[ "$WITH_TAILSCALE" != "1" ]]; then
-    echo ""
-    echo -e "${BD}Remote SSH (optional):${NC}"
-    echo "  Re-run with --with-tailscale to enable Tailscale SSH for mobile/remote control"
-fi
 
 echo ""
 echo -e "${D}Re-run: bash ~/kun/.claude/scripts/onboarding-mac.sh $ROLE${NC}"

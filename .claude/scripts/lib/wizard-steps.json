@@ -51,30 +51,31 @@
           "note": "Skipped on Linux (no Claude Desktop)"
         },
         {
-          "id": "withTailscale",
-          "type": "yesno",
-          "prompt": "Enable Tailscale SSH? (Remote control from iPhone/laptop.)",
-          "persistAs": "withTailscale"
+          "id": "hasDatabaytInvite",
+          "type": "choice",
+          "prompt": "Have you accepted the databayt org invite?",
+          "options": ["Yes", "Open invite page", "Skip — I'll handle later"],
+          "persistAs": "hasDatabaytInvite",
+          "note": "Pre-flight check — Phase 3 fails fast if invite not accepted (gh api user/memberships/orgs/databayt)"
         }
       ]
     },
     "act2_silentBatch": {
       "description": "Run the 8-phase platform backend in --quiet/-Quiet mode",
       "backends": {
-        "mac": ".claude/scripts/onboarding-mac.sh <role> <gist> --quiet --name --email [--with-tailscale]",
-        "linux": ".claude/scripts/onboarding-linux.sh <role> <gist> --quiet --name --email [--with-tailscale]",
-        "windows": ".claude/scripts/onboarding-windows.ps1 -Role <r> -GistId <g> -Quiet -GitName -GitEmail [-WithTailscale]"
+        "mac": ".claude/scripts/onboarding-mac.sh <role> <gist> --quiet --name --email",
+        "linux": ".claude/scripts/onboarding-linux.sh <role> <gist> --quiet --name --email",
+        "windows": ".claude/scripts/onboarding-windows.ps1 -Role <r> -GistId <g> -Quiet -GitName -GitEmail"
       },
       "phases": [
-        {"n": 1, "label": "System Foundation — build tools, git, Node 22, pnpm, gh CLI"},
+        {"n": 1, "label": "System Foundation — build tools, git, Node 24, pnpm, gh CLI"},
         {"n": 2, "label": "Applications — IDEs, Chrome"},
-        {"n": 3, "label": "GitHub — SSH key, gh auth, upload key"},
+        {"n": 3, "label": "GitHub — SSH key, gh auth, upload key, verify databayt org membership + SSH push"},
         {"n": 4, "label": "Clone Repositories — kun + (engineer: hogwarts, codebase, all org repos)"},
         {"n": 5, "label": "Claude — Code CLI + Desktop (Mac/Win)"},
         {"n": 6, "label": "Kun Engine — setup.sh + secrets.sh"},
         {"n": 7, "label": "Hogwarts — pnpm install, prisma, seed, build (engineer only)"},
-        {"n": 8, "label": "Health Check"},
-        {"n": "9 (opt)", "label": "Tailscale — install + 'up --ssh' (--with-tailscale)"}
+        {"n": 8, "label": "Health Check"}
       ],
       "progressMarker": "PROGRESS:N/8:label streamed on stderr — wrappers parse for notifications"
     },
@@ -153,7 +154,9 @@
       "gitEmail": "string",
       "gistId": "string",
       "proMax": "0|1",
-      "withTailscale": "0|1",
+      "hasGithub": "0|1",
+      "hasDatabaytInvite": "0|1",
+      "hasAnthropic": "0|1",
       "silentBatch": "done",
       "desktopSignedIn": "0|1",
       "computerUse": "0|1",

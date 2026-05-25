@@ -42,24 +42,25 @@ Running the bootstrap line leaves your machine in this state. The deliverables, 
 
 | Category | What |
 |---|---|
-| **Side-tools** | git, Node 22 LTS, pnpm, gh CLI, Chrome |
+| **Side-tools** | git, Node 24 LTS (Krypton), pnpm, gh CLI, Vercel CLI, Chrome |
 | **IDEs** | WebStorm (+ Claude plugin), VS Code (+ Claude extension) |
 | **Claude** | Desktop (Chat / Cowork / Code tabs), Claude Code CLI, IDE integrations, `claude.ai/code` in browser, Mobile (iOS/Android) |
 | **Dotfiles** | SSH key (uploaded to GitHub), `~/.zshrc` / `~/.bashrc` / `$PROFILE` with `c` function, `~/.gitconfig`, `~/.ssh/config` (Keychain on Mac) |
 | **Claude config** | `~/.claude/` — agents, skills, MCP servers, hooks, rules, memory; secrets in `~/.claude/.env` |
 | **Desktop ↔ CLI parity** | `claude_desktop_config.json` symlinked to `~/.claude/mcp.json` so Desktop tabs see the same MCP fleet |
 | **Repos** | The full databayt org cloned to your chosen directory (default: `~/<repo>`) — see [Repos table below](#which-repos-you-get) |
-| **Optional** | Tailscale SSH (remote control from phone/laptop), Apple Notes Dispatch folder (Mac) |
 
 ### Verify what you got
 
-Provisioning lands in six layers. Run these to confirm each — all green means fully provisioned for your profile:
+Provisioning lands in seven layers. Run these to confirm each — all green means fully provisioned for your profile:
 
 | Layer | Verify command | Pass looks like |
 |---|---|---|
-| **Tools** | `for t in git node pnpm gh claude; do command -v $t; done` | a path prints for each |
+| **Tools** | `for t in git node pnpm gh claude vercel; do command -v $t; done` | a path prints for each |
 | **Auth** | `gh auth status && ssh -T git@github.com` | "Logged in"; "successfully authenticated" |
+| **Org gate** | `gh api user/memberships/orgs/databayt --jq .state` | `active` |
 | **Code** | `ls ~/kun ~/hogwarts ~/codebase` | directories exist (all org repos on every machine) |
+| **Per-product env** | `for d in kun hogwarts souq mkan shifa marketing codebase; do [[ -s ~/$d/.env ]] && echo "$d ✓"; done` | each cloned repo prints |
 | **Config** | `bash ~/.claude/scripts/health.sh` | `✅ healthy` (0 errors) |
 | **Surfaces** | `claude doctor` | all checks green |
 | **Product** *(if `--hogwarts-dev`)* | `cd ~/hogwarts && pnpm dev` → open `localhost:3000` | login works (`admin@kingfahad.edu` / `1234`) |
@@ -80,7 +81,6 @@ Want a different result? Edit the source, then re-run the bootstrap (idempotent)
 | Agents (universal) | add/remove files in `.claude/agents/` |
 | Which keys a machine holds | scoped by the **Gist** you hand someone (`secrets.sh <GIST_ID>`), not by config |
 | hogwarts local dev | `--hogwarts-dev` / `-HogwartsDev` (default off) |
-| Tailscale on/off | `--with-tailscale` / `-WithTailscale` (default off) |
 
 All installer scripts live in `~/kun/.claude/scripts/`. Print any backend's flags with no args (e.g. `bash ~/kun/.claude/scripts/onboarding-mac.sh`).
 
@@ -128,6 +128,7 @@ The wizard auto-detects what it can and only asks for what it can't:
 |---|---|
 | Welcome / start | always shown |
 | GitHub account? | always asked (opens `github.com/join` if "No") |
+| Accepted databayt org invite? | always asked (opens `github.com/orgs/databayt/invitations` if "No") |
 | Anthropic account? | always asked (opens `claude.ai/login` if "No") |
 | Role (label + secrets-trust tier — does *not* limit config) | inferred from `~/.claude/mcp.json` if exists |
 | Full name, email (for git commits) | inferred from `git config --global` if set |
@@ -135,7 +136,6 @@ The wizard auto-detects what it can and only asks for what it can't:
 | Pro/Max subscription? (affects Desktop tabs) | asked once |
 | Where to save databayt repos? | asked once: `Home root` / `~/databayt/` / `Custom...` |
 | Set up hogwarts local dev? (heavy, opt-in) | asked once |
-| Tailscale SSH? (remote control) | asked once |
 
 All answers persist in a state file. Re-runs skip questions already answered.
 
@@ -145,15 +145,14 @@ Eight phases run in the background. You can minimize the terminal and do other w
 
 | Phase | What |
 |---|---|
-| 1 | System Foundation — build tools, git, Node 22 LTS, pnpm, gh CLI |
+| 1 | System Foundation — build tools, git, Node 24 LTS, pnpm, gh CLI, Vercel CLI |
 | 2 | Applications — WebStorm, VS Code, Chrome (every machine) |
-| 3 | GitHub — SSH key, `gh auth login --web`, key uploaded |
+| 3 | GitHub — SSH key, `gh auth login --web`, key uploaded, **verify databayt org membership + SSH push** |
 | 4 | Clone Repositories — the full databayt org (every machine) |
 | 5 | Claude — Code CLI, Desktop (Mac/Win), Desktop MCP symlink, `c` function in shell |
-| 6 | Kun Engine — `setup.sh` installs the full config (agents, skills, MCP, hooks); `secrets.sh` pulls `.env` |
+| 6 | Kun Engine — `setup.sh` installs full config; `secrets.sh` pulls `~/.claude/.env` from Gist; `vercel-pull.sh` populates per-product `.env` from Vercel team `databayt` |
 | 7 | Hogwarts — pnpm install, prisma generate + push + seed, build verify (only with `--hogwarts-dev`) |
 | 8 | Health Check — every tool / repo / config verified |
-| 9 (opt) | Tailscale — install + `up --ssh` if you opted in |
 
 Each phase emits `PROGRESS:N/8:label` to stderr; wrappers parse this and fire `osascript display notification` (Mac), `zenity --notification` (Linux), or `NotifyIcon` balloon (Windows).
 
@@ -185,13 +184,15 @@ The wizard uses **deep links** so each action button drops you exactly where you
 
 What the inviter needs to grant or hand over before paste-time:
 
-- [ ] **GitHub** — invite to the `databayt` org
+- [ ] **GitHub** — invite to the `databayt` org (Phase 3 hard-gates on membership; without it the install can't clone private repos)
 - [ ] **Anthropic account** — Pro/Max sub for the full Desktop + CLI experience
 - [ ] **Anthropic API key** — only if not on Pro/Max (Claude Code can bill via API key)
-- [ ] **Secrets Gist ID** — handed over out-of-band (Signal, Notes, 1Password)
+- [ ] **Anthropic mobile app** — installed on the teammate's phone, signed in with the same account (native `PushNotification` dispatch from Claude Code)
+- [ ] **Secrets Gist ID** — handed over out-of-band (Signal, Notes, 1Password). Powers `~/.claude/.env` (MCP keys + cross-cutting tokens).
+- [ ] **Vercel** — team invite to `databayt` (**every role, not just engineer**) — needed for `vercel env pull` to populate per-product `.env` files
+- [ ] **Neon** — project access for any product whose `DATABASE_URL_*` you'll touch (engineer)
 - [ ] **Slack** — invite to `hogwarts-wve9301`
 - [ ] **AWS IAM** — `hogwarts-s3-uploader` keys (engineer role only)
-- [ ] **Vercel** — team invite (engineer role only)
 
 If something's missing the wizard skips that step and lists it under "things to do later" at the end.
 
@@ -256,23 +257,19 @@ Recommended sync scope: Code style, Inspection profiles, Live templates, Plugins
 
 ---
 
-## Remote control via Tailscale (optional)
+## Remote control & async — native Anthropic surfaces
 
-If you opt in (`--with-tailscale` / `-WithTailscale`), the wizard installs Tailscale and runs `tailscale up --ssh`. Once on the tailnet, you can:
+No Tailscale, no Apple Notes. The mobile app + `claude.ai/code` + computer-use give you the same primitives natively — no extra services to install, no tokens to manage, same Anthropic account you already signed in with.
 
-- SSH into your dev box from any device: `ssh you@<tailscale-name>`
-- Drive your laptop from your phone via Tailscale SSH + tmux
-- Run `claude` remotely as if you were at your desk
+| Need | Native primitive | Where |
+|---|---|---|
+| Push when a Code task finishes | `PushNotification` tool from inside Claude Code → Anthropic mobile app | iOS / Android Claude app |
+| Drive your dev box from your phone | `claude.ai/code` in mobile browser — same projects, same Cowork sessions as desktop CLI | claude.ai/code |
+| Resume Code from a different machine | Cowork ↔ Code bridge (`~/.claude/bridge.md`) + GitHub Issues | desktop + mobile |
+| Browser-driven automation | Computer-use beta (Desktop **Code** tab on Pro/Max) | Claude Desktop |
+| Team async updates | GitHub Issues (always) · Slack MCP (`/slack send …`) — both pre-configured | repo + workspace `hogwarts-wve9301` |
 
-Setup details: [Self-hosting — Tailscale / tmux / Docker](/docs/self-hosting).
-
----
-
-## Apple Notes Dispatch (Mac only)
-
-The wizard creates a `Dispatch` folder in Apple Notes so `dispatch.sh` has somewhere to write captain-status notes. These sync to your iPhone via iCloud — you can read captain summaries on the go without opening Claude.
-
-See [Dispatch — Apple Notes bridge](/docs/dispatch).
+Sign in to the mobile app with the **same** Anthropic account as Desktop/CLI — your projects, Cowork sessions, and `~/.claude/bridge.md` handoffs follow you everywhere.
 
 ---
 
@@ -302,9 +299,9 @@ Useful backend flags (Mac + Linux):
 | `--name <name>` / `--email <email>` | Pre-supply git identity |
 | `--repos-dir <path>` | Where to save databayt repos (default: `$HOME`) |
 | `--essentials-only` | Skip optional org repos (just kun/hogwarts/codebase) |
-| `--with-tailscale` | Install Tailscale + `up --ssh` |
+| `--hogwarts-dev` | Set up hogwarts local dev (pnpm + DB seed + build) |
 
-PowerShell equivalents: `-Quiet`, `-GitName`, `-GitEmail`, `-ReposDir`, `-EssentialsOnly`, `-WithTailscale`.
+PowerShell equivalents: `-Quiet`, `-GitName`, `-GitEmail`, `-ReposDir`, `-EssentialsOnly`, `-HogwartsDev`.
 
 Re-run anytime; idempotent.
 
@@ -362,8 +359,8 @@ bash ~/.claude/scripts/health.sh
 # Side-tools
 sudo apt update && sudo apt install -y git curl build-essential ca-certificates
 
-# Node 22 via nvm
-curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+# Node 24 LTS via nvm
+curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
 export NVM_DIR="$HOME/.nvm"; . "$NVM_DIR/nvm.sh"
 nvm install --lts && nvm use --lts
 npm install -g pnpm
@@ -496,7 +493,6 @@ cd ~/hogwarts && pnpm dev
 | Synthesize company status | `c "/captain"` |
 | Capture an idea | `c "/idea <description>"` |
 | Run the full feature pipeline | `c "/feature <name> [product]"` |
-| Send a note to the team | `c "/dispatch <message>"` |
 | Open a GitHub issue | `c "/issue"` |
 | Verify a production deploy | `c "/watch"` |
 | Mobile / browser | https://claude.ai/code |
@@ -543,13 +539,12 @@ This page is the front door. Once your machine is provisioned, branch out from h
 - [Claude Code](/docs/claude-code) — CLI install detail + config
 - [MCP](/docs/mcp) — the server fleet + `/mcp-doctor` browser recovery
 - [Secrets](/docs/secrets) — Gist-based provisioning (which keys your machine holds)
-- [Self-hosting](/docs/self-hosting) — Tailscale / tmux / Docker (optional)
+- [Self-hosting](/docs/self-hosting) — tmux / Docker (optional, server use)
 
 **Daily use**
 - [Keywords](/docs/keywords) — the full vocabulary, one word → a workflow
 - [Captain](/docs/captain) — decisions, delegation, the weekly rhythm
 - [Cowork ↔ Code](/docs/cowork) — same brain, two modes
-- [Dispatch](/docs/dispatch) — Apple Notes bridge for async updates
 
 **Understand the engine**
 - [Configuration](/docs/configuration) — universal-config blueprint

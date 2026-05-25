@@ -46,7 +46,7 @@ Self-describing commands at `.claude/commands/<name>.md`:
 
 `dev`, `build`, `deploy`, `report`, `atom`, `block`, `template`, `test`, `clone`,
 `incident`, `monitor`, `package`, `learn`, `analyze`, `profile`, `captain`, `weekly`,
-`screenshot`, `dispatch`, `pricing`, `costs`, `proposal`, `credentials`, `health`.
+`screenshot`, `pricing`, `costs`, `proposal`, `credentials`, `health`.
 
 ## Tier 2b — Coverage Sweeps
 
@@ -77,7 +77,7 @@ Claude routes these keywords to the right agent + MCP without a dedicated comman
 **React perf**: `parallelize`, `bundle`, `lazy`, `suspense`, `memo`, `streaming`, `dedup`
 **Services**: `github`, `figma`, `linear`, `slack`, `stripe`, `vercel`, `sentry`, `neon`, `analytics`
 **Cross-repo**: `from codebase`, `from shadcn`, `like hogwarts`, `like souq`, `like mkan`, `like shifa`
-**Operations**: `costs`, `pricing`, `weekly`, `dispatch`, `monitor`, `incident`, `credentials`
+**Operations**: `costs`, `pricing`, `weekly`, `monitor`, `incident`, `credentials`
 **Intelligence**: `learn`, `analyze`, `profile`, `conventions`, `health`, `patterns`, `drift`
 
 ---

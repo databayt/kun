@@ -26,7 +26,6 @@ param(
     [string]$GitName,
     [string]$GitEmail,
     [switch]$EssentialsOnly,    # default: clone all org repos
-    [switch]$WithTailscale,      # optional: enable Tailscale SSH
     [switch]$HogwartsDev,        # optional: set up hogwarts local dev
     [string]$ReposDir = $env:USERPROFILE
 )
@@ -131,7 +130,7 @@ if (-not $hasGh) {
 $hasNode = Get-Command node -EA SilentlyContinue
 if (-not $hasNode) {
     Info "Installing Node.js..."
-    winget install --id OpenJS.NodeJS -e --accept-source-agreements --accept-package-agreements
+    winget install --id OpenJS.NodeJS.LTS -e --accept-source-agreements --accept-package-agreements
     $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
     Pass "Node.js installed"
 } else {
@@ -146,6 +145,16 @@ if (-not $hasPnpm) {
     Pass "pnpm installed"
 } else {
     Pass "pnpm ($(pnpm --version))"
+}
+
+# Vercel CLI - needed for `vercel env pull` per-product .env (Phase 6)
+$hasVercel = Get-Command vercel -EA SilentlyContinue
+if (-not $hasVercel) {
+    Info "Installing Vercel CLI..."
+    npm install -g vercel
+    Pass "Vercel CLI installed"
+} else {
+    Pass "Vercel CLI"
 }
 
 # =============================================================================
@@ -274,6 +283,30 @@ if ($keyContent) {
     if ($?) { Pass "SSH key on GitHub" } else { Info "SSH key may already be on GitHub" }
 }
 
+# Pre-clone gate: must be an active member of github.com/databayt to clone private repos.
+$state = (gh api user/memberships/orgs/databayt --jq .state 2>$null)
+if (-not $state) {
+    Fail "Cannot check databayt org membership (token may lack read:org scope)"
+    Info "Run: gh auth refresh -h github.com -s read:org -w   then re-run this script"
+    exit 1
+} elseif ($state -ne "active") {
+    Fail "Not an active member of github.com/databayt"
+    Info "Open the invite, accept it, then re-run this script (idempotent)"
+    Start-Process "https://github.com/orgs/databayt/invitations"
+    exit 1
+}
+Pass "databayt org membership active"
+
+# SSH push capability: ssh -T against github.com always exits non-zero, so grep the banner.
+$sshOut = (ssh -T -o StrictHostKeyChecking=accept-new -o BatchMode=yes git@github.com 2>&1 | Out-String)
+if ($sshOut -match "successfully authenticated") {
+    Pass "SSH push to GitHub works"
+} else {
+    Fail "SSH not authenticated to GitHub (clone+push will fail)"
+    Info "Re-run: gh auth login -p ssh -w   to upload your SSH key"
+    exit 1
+}
+
 # =============================================================================
 # PHASE 4: Clone Repositories
 # =============================================================================
@@ -399,6 +432,13 @@ if ($GistId) {
     Info "Secrets skipped — run later: .\.claude\scripts\secrets.ps1 -GistId <ID>"
 }
 
+# Vercel env pull - per-product .env from team databayt (warns + continues if
+# Vercel isn't logged in; teammate can run `vercel login` later and re-run).
+$VERCEL_PULL = Join-Path $KUN_DIR ".claude\scripts\vercel-pull.ps1"
+if (Test-Path $VERCEL_PULL) {
+    & $VERCEL_PULL -ReposDir $ReposDir
+}
+
 # =============================================================================
 # PHASE 7: Hogwarts Local Dev
 # =============================================================================
@@ -491,27 +531,6 @@ if (Test-Path "$CLAUDE_DIR\settings.json")   { Pass "settings.json" }  else { Fa
 if (Test-Path "$CLAUDE_DIR\mcp.json")        { Pass "mcp.json" }      else { Fail "mcp.json" }
 
 # =============================================================================
-# PHASE 9 (OPTIONAL): Tailscale - remote SSH for mobile / web Code lane
-# =============================================================================
-if ($WithTailscale) {
-    Write-Host ""
-    Write-Host "[+] Tailscale - remote SSH (optional)" -ForegroundColor Cyan
-    $hasTailscale = Get-Command tailscale -EA SilentlyContinue
-    if (-not $hasTailscale) {
-        Info "Installing Tailscale..."
-        winget install --id Tailscale.Tailscale @WingetFlags 2>$null
-        if ($?) { Pass "Tailscale installed" } else { Info "Tailscale install skipped" }
-    } else {
-        Pass "Tailscale"
-    }
-    if ($Quiet) {
-        Info "Run 'tailscale up --ssh' after this completes (needs admin)"
-    } else {
-        Start-Process "tailscale" "up --ssh" -Wait -NoNewWindow 2>$null
-    }
-}
-
-# =============================================================================
 # Done
 # =============================================================================
 Write-Host ""
@@ -548,12 +567,6 @@ Write-Host "Mobile (Claude on iPhone/Android):" -ForegroundColor Cyan
 Write-Host "  iOS:     https://apps.apple.com/app/claude-by-anthropic/id6473753684"
 Write-Host "  Android: https://play.google.com/store/apps/details?id=com.anthropic.claude"
 Write-Host "  Sign in with the same Anthropic account -> same projects everywhere"
-
-if (-not $WithTailscale) {
-    Write-Host ""
-    Write-Host "Remote SSH (optional):" -ForegroundColor Cyan
-    Write-Host "  Re-run with -WithTailscale to enable Tailscale SSH for mobile/remote control"
-}
 
 Write-Host ""
 Write-Host "Re-run: & ~\kun\.claude\scripts\onboarding-windows.ps1 -Role $Role" -ForegroundColor DarkGray

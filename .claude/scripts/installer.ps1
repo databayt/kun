@@ -178,10 +178,10 @@ $role = Get-State role
 $gistId = Get-State gistId
 $gitName = Get-State gitName
 $gitEmail = Get-State gitEmail
-$withTailscale = Get-State withTailscale
 $proMax = Get-State proMax
 $reposDir = Get-State reposDir
 $hasGithub = Get-State hasGithub
+$hasDatabaytInvite = Get-State hasDatabaytInvite
 $hasAnthropic = Get-State hasAnthropic
 
 # Account guidance
@@ -192,6 +192,14 @@ if (-not $hasGithub) {
         Ask-Choice "GitHub sign-up opened in browser. Done when you've created the account." "Done" "Skip" | Out-Null
     }
     Set-State hasGithub "1"
+}
+if (-not $hasDatabaytInvite) {
+    $ans = Ask-Choice "Have you accepted the databayt org invite?`n(The installer can't clone private repos without it.)" "Yes" "Open invite page" "Skip - I'll handle later"
+    if ($ans -eq "Open invite page") {
+        Start-Process "https://github.com/orgs/databayt/invitations"
+        Ask-Choice "Accept the invite, then click Done." "Done" "Skip" | Out-Null
+    }
+    Set-State hasDatabaytInvite "1"
 }
 if (-not $hasAnthropic) {
     $ans = Ask-Choice "Do you have an Anthropic account?`n(For Claude Desktop sign-in + CLI.)" "Yes, I have one" "No, create one" "Skip"
@@ -264,13 +272,6 @@ if (-not $proMax) {
     Set-State proMax $proMax
 }
 
-# Tailscale
-if (-not $withTailscale) {
-    $ans = Ask-YesNo "Enable Tailscale SSH? (Remote control from iPhone/laptop.)"
-    if ($ans -eq "Yes") { $withTailscale = "1" } else { $withTailscale = "0" }
-    Set-State withTailscale $withTailscale
-}
-
 # Hogwarts local dev — opt-in (heavy: pnpm + DB seed + build, ~10 min)
 $hogwartsDev = Get-State hogwartsDev
 if (-not $hogwartsDev) {
@@ -287,7 +288,6 @@ Notify "Installing" "~15-20 min in terminal"
 $backendArgs = @("-Role", $role, "-Quiet", "-GitName", $gitName, "-GitEmail", $gitEmail)
 if ($gistId) { $backendArgs += @("-GistId", $gistId) }
 if ($reposDir -and $reposDir -ne $env:USERPROFILE) { $backendArgs += @("-ReposDir", $reposDir) }
-if ($withTailscale -eq "1") { $backendArgs += @("-WithTailscale") }
 if ($hogwartsDev -eq "1") { $backendArgs += @("-HogwartsDev") }
 
 Write-Host ""
