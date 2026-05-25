@@ -147,14 +147,16 @@ Agents like `captain`, `ops`, and `support` can use Slack for:
 - **Support**: Customer issue updates to #hogwarts
 - **Growth**: Content announcements to #general
 
-### Dispatch Integration
+### Captain Async via Slack
 
-The dispatch system can route messages through Slack:
+For team-visible captain summaries (Friday review, Monday plan), use the slack MCP directly:
 
-```bash
-# Captain dispatch goes to both Apple Notes and Slack
-dispatch slack "Weekly: revenue at $X, 3 PRs merged, hogwarts demo Thursday"
 ```
+# Captain posts to #general via slack MCP
+/slack send #general "Weekly: revenue at $X, 3 PRs merged, hogwarts demo Thursday"
+```
+
+For founder-direct pings, the captain uses `PushNotification` (Anthropic mobile) instead — Slack for team, push for Abdout.
 
 ## Cowork Bridge
 

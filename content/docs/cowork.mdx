@@ -22,7 +22,7 @@ Both modes read and write to:
 |----------|------|---------|
 | Agents | `~/.claude/agents/` | Same 40 agents in both modes |
 | Memory | `~/.claude/memory/` | Persistent state |
-| Dispatch/Cowork | Notes → Dispatch → Cowork | Handoff note |
+| Bridge file | `~/.claude/bridge.md` | Cowork ↔ Code handoff note |
 | GitHub Issues | databayt/*/issues | Shared work queue |
 
 ## Handoff: Cowork → Code
@@ -31,8 +31,8 @@ When work starts in Cowork (planning, strategy, research):
 
 1. Cowork produces a deliverable: plan, architecture, stories
 2. Cowork creates GitHub issues for actionable items
-3. Cowork writes to Dispatch/Cowork note
-4. Code reads Cowork note at session start
+3. Cowork appends to `~/.claude/bridge.md`
+4. Code reads `bridge.md` at session start
 5. Code picks up the issues and executes
 
 ### Example
@@ -42,17 +42,17 @@ When work starts in Cowork (planning, strategy, research):
 Abdout: "Plan the hogwarts notification system"
 → Research patterns, design architecture, write stories
 → Create issues: databayt/hogwarts#10, #11, #12
-→ dispatch.sh cowork "Notification system planned. 3 issues created."
+→ Append to ~/.claude/bridge.md: "Notification system planned. Issues: #10, #11, #12."
 
 [Claude Code session]
-Captain: reads Cowork note → sees plan → starts executing #10
+Captain: reads bridge.md → sees plan → starts executing #10
 ```
 
 ## Handoff: Code → Cowork
 
 When Code finishes work that needs strategic review:
 
-1. Code writes to Dispatch/Cowork
+1. Code writes to `~/.claude/bridge.md`
 2. Code creates a GitHub issue if follow-up is needed
 3. Cowork picks up in the next Desktop session
 
@@ -86,19 +86,19 @@ When Code finishes work that needs strategic review:
 
 ### Every Cowork Session
 
-1. Check Dispatch/Cowork note for Code's output
-2. Review GitHub issues for completed/blocked items
+1. Read `~/.claude/bridge.md` for Code's latest output
+2. Review GitHub issues for completed/blocked items (label `from-code` or `priority/blocking`)
 3. Plan next moves
 
 ### Every Code Session
 
-1. `dispatch.sh read inbox` — check Abdout's instructions
-2. `dispatch.sh read cowork` — check for Cowork handoffs
-3. `gh issue list --state open` — check work queue
+1. Read `~/.claude/bridge.md` — check for Cowork handoffs
+2. `gh issue list --state open --label "from-abdout,priority/blocking"` — check Abdout's instructions + blockers
+3. `gh issue list --state open` — full work queue
 4. Proceed with highest priority
 
 ## The Key Insight
 
-Cowork doesn't need to know how to code. Claude Code doesn't need to strategize. They share a brain through files, notes, and issues.
+Cowork doesn't need to know how to code. Claude Code doesn't need to strategize. They share a brain through `bridge.md` + GitHub Issues + native push notifications.
 
 Abdout switches between them like switching between thinking and doing. Both are Captain — one thinks, one acts.

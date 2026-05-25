@@ -324,13 +324,13 @@ Cowork (Samia):
 
 ## Communication Channels
 
-### Channel 1: Dispatch (Apple Notes, Async)
+### Channel 1: Native Push + Cowork Bridge (Async)
 
-| Note | Direction | Purpose |
+| Surface | Direction | Purpose |
 |------|-----------|---------|
-| **Captain** | Captain to Abdout | Updates, decisions, summaries |
-| **Cowork** | Cowork to Code | Bridge between thinking and doing |
-| **Inbox** | Abdout to Captain | Instructions, approvals, priorities |
+| **`PushNotification` tool** | Captain → Abdout | Decisions, escalations, weekly summary pings (Anthropic mobile app receives) |
+| **`~/.claude/bridge.md`** | Cowork ↔ Code | Bridge between thinking and doing (file both modes read+write) |
+| **GitHub issue (`from-abdout` label)** | Abdout → Captain | Instructions, approvals, priorities — filed via `claude.ai/code` mobile or `/issue` |
 
 ### Channel 2: GitHub Issues (Structured Work)
 

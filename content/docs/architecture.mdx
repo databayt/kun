@@ -125,15 +125,15 @@ Phone (iOS) ──Dispatch──▶ Desktop App ──/teleport──▶ Termina
 
 | Channel | Medium | Direction | Purpose |
 |---------|--------|-----------|---------|
-| **Dispatch** | Apple Notes → Dispatch (Captain, Cowork, Inbox) | Async, bidirectional | Updates, decisions, handoffs |
+| **Native push + bridge** | `PushNotification` (Anthropic mobile) + `~/.claude/bridge.md` + GitHub Issues (`from-captain` / `from-abdout`) | Async, bidirectional | Updates, decisions, handoffs |
 | **GitHub Issues** | databayt/*/issues | Structured work items | Tasks with labels, milestones, assignees |
 | **Claude Native** | Code / Cowork / Voice | Real-time | Building, planning, quick decisions |
 
 ### Cowork ↔ Code Bridge
 
 ```
-Cowork (think): plan → create issues → write to Dispatch/Cowork
-Code (do):      read Dispatch/Cowork → pick up issues → execute → report back
+Cowork (think): plan → create issues → append to ~/.claude/bridge.md
+Code (do):      read bridge.md → pick up issues → execute → write results back to bridge.md
 ```
 
 Shared state: `~/.claude/` (agents, memory, settings, rules). Same brain, two modes.
