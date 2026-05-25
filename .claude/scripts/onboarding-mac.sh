@@ -66,6 +66,47 @@ info() { echo -e "  ${D}·${NC} $1"; }
 open_url() { open "$1" >/dev/null 2>&1 & }
 # Copy text to the macOS clipboard.
 copy_clipboard() { printf '%s' "$1" | pbcopy >/dev/null 2>&1; }
+
+# Smart brew install — skip if up-to-date, upgrade if outdated, install if missing.
+# Most teammates already have Chrome/WebStorm/VS Code; this avoids reinstall churn
+# while still keeping everything current. Pass "--cask" as $2 for cask installs.
+brew_smart() {
+    local pkg="$1"
+    local cask=""
+    [[ "$2" == "--cask" ]] && cask="--cask"
+    if brew list $cask "$pkg" &>/dev/null; then
+        if brew outdated $cask "$pkg" 2>/dev/null | grep -q "^$pkg"; then
+            info "$pkg outdated — upgrading..."
+            brew upgrade $cask "$pkg" &>/dev/null && pass "$pkg upgraded" || pass "$pkg present (upgrade failed)"
+        else
+            pass "$pkg up to date"
+        fi
+    else
+        info "Installing $pkg..."
+        brew install $cask "$pkg" &>/dev/null && pass "$pkg installed" || fail "$pkg install failed"
+    fi
+}
+
+# Smart npm -g install — always pulls @latest (idempotent: noop if already latest,
+# upgrade otherwise). Prints before→after so re-runs are honest about churn.
+npm_global_smart() {
+    local pkg="$1" cmd="${2:-$1}"
+    local before=""
+    command -v "$cmd" &>/dev/null && before=$("$cmd" --version 2>/dev/null | head -1)
+    npm install -g "${pkg}@latest" --silent >/dev/null 2>&1
+    if command -v "$cmd" &>/dev/null; then
+        local after=$("$cmd" --version 2>/dev/null | head -1)
+        if [[ -z "$before" ]]; then
+            pass "$cmd installed ($after)"
+        elif [[ "$before" != "$after" ]]; then
+            pass "$cmd upgraded ($before → $after)"
+        else
+            pass "$cmd up to date ($after)"
+        fi
+    else
+        fail "$cmd install failed"
+    fi
+}
 step() {
     echo ""
     echo -e "${BD}[$1/8]${NC} ${B}$2${NC}"
@@ -138,79 +179,31 @@ else
     pass "Homebrew"
 fi
 
-# Git
-if ! command -v git &>/dev/null; then
-    brew install git
-    pass "Git installed"
-else
-    pass "Git ($(git --version | cut -d' ' -f3))"
-fi
+# Git (ships with Xcode CLT but brew can keep it fresher)
+brew_smart git
 
 # GitHub CLI
-if ! command -v gh &>/dev/null; then
-    brew install gh
-    pass "GitHub CLI installed"
-else
-    pass "GitHub CLI"
-fi
+brew_smart gh
 
-# Node.js — pin to LTS major (Node 24 Krypton as of 2026)
-if ! command -v node &>/dev/null; then
-    brew install node@24
-    brew link --overwrite --force node@24 2>/dev/null || true
-    pass "Node.js installed ($(node --version))"
-else
-    pass "Node.js ($(node --version))"
-fi
+# Node.js — pin to LTS major (Node 24 Krypton as of 2026). brew_smart handles
+# install + upgrade; the link step is idempotent so safe to run every time.
+brew_smart node@24
+brew link --overwrite --force node@24 &>/dev/null || true
 
-# pnpm
-if ! command -v pnpm &>/dev/null; then
-    npm install -g pnpm
-    pass "pnpm installed"
-else
-    pass "pnpm ($(pnpm --version))"
-fi
-
-# Vercel CLI — needed for `vercel env pull` per-product .env (Phase 6)
-if ! command -v vercel &>/dev/null; then
-    npm install -g vercel
-    pass "Vercel CLI installed"
-else
-    pass "Vercel CLI ($(vercel --version 2>/dev/null | head -1))"
-fi
+# pnpm + Vercel CLI — @latest is idempotent (noop if already latest)
+npm_global_smart pnpm
+npm_global_smart vercel
 
 # =============================================================================
 # PHASE 2: Applications
 # =============================================================================
 step "2" "Applications"
 
-# IDEs on every machine — full workstation regardless of role
-# WebStorm
-if [[ ! -d "/Applications/WebStorm.app" ]]; then
-    info "Installing WebStorm..."
-    brew install --cask webstorm
-    pass "WebStorm installed"
-else
-    pass "WebStorm"
-fi
-
-# VS Code
-if [[ ! -d "/Applications/Visual Studio Code.app" ]]; then
-    info "Installing VS Code..."
-    brew install --cask visual-studio-code
-    pass "VS Code installed"
-else
-    pass "VS Code"
-fi
-
-# Chrome
-if [[ ! -d "/Applications/Google Chrome.app" ]]; then
-    info "Installing Chrome..."
-    brew install --cask google-chrome
-    pass "Chrome installed"
-else
-    pass "Chrome"
-fi
+# IDEs + browser on every machine — full workstation regardless of role.
+# brew_smart skips if already present + up-to-date, upgrades if outdated.
+brew_smart webstorm --cask
+brew_smart visual-studio-code --cask
+brew_smart google-chrome --cask
 
 # =============================================================================
 # PHASE 3: GitHub
@@ -387,29 +380,25 @@ fi
 # =============================================================================
 step "5" "Claude — CLI + Desktop"
 
-# Claude Code CLI
+# Claude Code CLI — native installer (auto-updates in background, per
+# code.claude.com/docs/en/setup). curl install.sh is idempotent: re-runs detect
+# existing install and just refresh.
 if ! command -v claude &>/dev/null; then
     info "Installing Claude Code CLI..."
-    curl -fsSL https://claude.ai/install.sh | sh
+    curl -fsSL https://claude.ai/install.sh | bash
     export PATH="$HOME/.local/bin:$PATH"
     if ! grep -q ".local/bin" "$HOME/.zshrc" 2>/dev/null; then
         echo '' >> "$HOME/.zshrc"
         echo '# Claude Code' >> "$HOME/.zshrc"
         echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME/.zshrc"
     fi
-    pass "Claude Code CLI"
+    pass "Claude Code CLI installed ($(claude --version 2>/dev/null | head -1))"
 else
-    pass "Claude Code CLI"
+    pass "Claude Code CLI ($(claude --version 2>/dev/null | head -1)) — auto-updates in background"
 fi
 
-# Claude Desktop
-if [[ ! -d "/Applications/Claude.app" ]]; then
-    info "Installing Claude Desktop..."
-    brew install --cask claude
-    pass "Claude Desktop"
-else
-    pass "Claude Desktop"
-fi
+# Claude Desktop — install/upgrade/skip via brew_smart
+brew_smart claude --cask
 
 # `c` launcher functions in shell rc (zsh default; bash if present)
 for RC in "$HOME/.zshrc" "$HOME/.bashrc"; do

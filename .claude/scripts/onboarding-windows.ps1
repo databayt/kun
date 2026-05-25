@@ -69,6 +69,44 @@ function Pause-For($msg) {
 $WingetFlags = @("-e", "--accept-source-agreements", "--accept-package-agreements")
 if ($Quiet) { $WingetFlags += @("--silent", "--disable-interactivity") }
 
+# Smart winget install - skip if up-to-date, upgrade if outdated, install if missing.
+# Most teammates already have Chrome/WebStorm/VS Code; this avoids reinstall churn
+# while still keeping everything current.
+function Winget-Smart($pkgId) {
+    # winget list exits 0 if installed, non-zero otherwise
+    winget list --id $pkgId -e --accept-source-agreements 2>$null | Out-Null
+    if ($LASTEXITCODE -eq 0) {
+        winget upgrade --id $pkgId @WingetFlags 2>$null | Out-Null
+        if ($LASTEXITCODE -eq 0) { Pass "$pkgId upgraded (or already latest)" } else { Pass "$pkgId present" }
+    } else {
+        winget install --id $pkgId @WingetFlags 2>$null | Out-Null
+        if ($LASTEXITCODE -eq 0) {
+            $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
+            Pass "$pkgId installed"
+        } else {
+            Fail "$pkgId install failed"
+        }
+    }
+}
+
+# Smart npm -g install - always pulls @latest (idempotent: noop if already latest).
+function Npm-Global-Smart($pkg, $cmd = $null) {
+    if (-not $cmd) { $cmd = $pkg }
+    $before = $null
+    if (Get-Command $cmd -EA SilentlyContinue) {
+        $before = (& $cmd --version 2>$null | Select-Object -First 1)
+    }
+    npm install -g "$pkg@latest" --silent 2>$null | Out-Null
+    if (Get-Command $cmd -EA SilentlyContinue) {
+        $after = (& $cmd --version 2>$null | Select-Object -First 1)
+        if (-not $before)             { Pass "$cmd installed ($after)" }
+        elseif ($before -ne $after)   { Pass "$cmd upgraded ($before -> $after)" }
+        else                          { Pass "$cmd up to date ($after)" }
+    } else {
+        Fail "$cmd install failed"
+    }
+}
+
 Write-Host ""
 Write-Host "Computer Onboarding — Windows" -ForegroundColor Cyan
 Write-Host "Role: $Role" -ForegroundColor Green
@@ -86,97 +124,24 @@ if (-not $hasWinget) {
     Pause-For "Install 'App Installer' from Microsoft Store, then press Enter"
 }
 
-# Git
-$hasGit = Get-Command git -EA SilentlyContinue
-if (-not $hasGit) {
-    Info "Installing Git..."
-    winget install --id Git.Git -e --accept-source-agreements --accept-package-agreements
-    # Refresh PATH
-    $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
-    Pass "Git installed"
-} else {
-    Pass "Git ($(git --version))"
-}
+# Git + GitHub CLI + Node.js LTS via Winget-Smart (install/upgrade/skip)
+Winget-Smart "Git.Git"
+Winget-Smart "GitHub.cli"
+Winget-Smart "OpenJS.NodeJS.LTS"
 
-# GitHub CLI
-$hasGh = Get-Command gh -EA SilentlyContinue
-if (-not $hasGh) {
-    Info "Installing GitHub CLI..."
-    winget install --id GitHub.cli -e --accept-source-agreements --accept-package-agreements
-    $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
-    Pass "GitHub CLI installed"
-} else {
-    Pass "GitHub CLI"
-}
-
-# Node.js
-$hasNode = Get-Command node -EA SilentlyContinue
-if (-not $hasNode) {
-    Info "Installing Node.js..."
-    winget install --id OpenJS.NodeJS.LTS -e --accept-source-agreements --accept-package-agreements
-    $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
-    Pass "Node.js installed"
-} else {
-    Pass "Node.js ($(node --version))"
-}
-
-# pnpm
-$hasPnpm = Get-Command pnpm -EA SilentlyContinue
-if (-not $hasPnpm) {
-    Info "Installing pnpm..."
-    npm install -g pnpm
-    Pass "pnpm installed"
-} else {
-    Pass "pnpm ($(pnpm --version))"
-}
-
-# Vercel CLI - needed for `vercel env pull` per-product .env (Phase 6)
-$hasVercel = Get-Command vercel -EA SilentlyContinue
-if (-not $hasVercel) {
-    Info "Installing Vercel CLI..."
-    npm install -g vercel
-    Pass "Vercel CLI installed"
-} else {
-    Pass "Vercel CLI"
-}
+# pnpm + Vercel CLI — @latest is idempotent (noop if already latest)
+Npm-Global-Smart "pnpm"
+Npm-Global-Smart "vercel"
 
 # =============================================================================
 # PHASE 2: Applications
 # =============================================================================
 Step "2" "Applications"
 
-# IDEs on every machine — full workstation regardless of role
-# WebStorm
-$wsPath = "${env:ProgramFiles}\JetBrains\WebStorm*"
-$wsLocal = "$HOME_DIR\AppData\Local\JetBrains\Toolbox\apps\WebStorm"
-if (-not (Test-Path $wsPath) -and -not (Test-Path $wsLocal)) {
-    Info "Installing WebStorm..."
-    winget install --id JetBrains.WebStorm -e --accept-source-agreements --accept-package-agreements 2>$null
-    if ($?) { Pass "WebStorm installed" } else { Info "WebStorm — install manually from jetbrains.com" }
-} else {
-    Pass "WebStorm"
-}
-
-# VS Code
-$hasCode = Get-Command code -EA SilentlyContinue
-if (-not $hasCode) {
-    Info "Installing VS Code..."
-    winget install --id Microsoft.VisualStudioCode -e --accept-source-agreements --accept-package-agreements
-    Pass "VS Code installed"
-} else {
-    Pass "VS Code"
-}
-
-# Chrome
-$chromePath = "${env:ProgramFiles}\Google\Chrome\Application\chrome.exe"
-$chromePath86 = "${env:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe"
-if (-not (Test-Path $chromePath) -and -not (Test-Path $chromePath86)) {
-    Info "Installing Chrome..."
-    winget install --id Google.Chrome -e --accept-source-agreements --accept-package-agreements
-    Pass "Chrome installed"
-} else {
-    Pass "Chrome"
-}
+# IDEs + browser on every machine via Winget-Smart
+Winget-Smart "JetBrains.WebStorm"
+Winget-Smart "Microsoft.VisualStudioCode"
+Winget-Smart "Google.Chrome"
 
 # =============================================================================
 # PHASE 3: GitHub
@@ -356,26 +321,24 @@ if (-not $EssentialsOnly) {
 # =============================================================================
 Step "5" "Claude — CLI + Desktop"
 
-# Claude Code CLI
+# Claude Code CLI — native installer (auto-updates in background, per
+# code.claude.com/docs/en/setup). irm install.ps1 is idempotent.
 $hasClaude = Get-Command claude -EA SilentlyContinue
 if (-not $hasClaude) {
     Info "Installing Claude Code CLI..."
     irm https://claude.ai/install.ps1 | iex
-    Pass "Claude Code CLI"
+    $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
+    if (Get-Command claude -EA SilentlyContinue) {
+        Pass "Claude Code CLI installed ($((claude --version 2>$null | Select-Object -First 1)))"
+    } else {
+        Fail "Claude Code CLI install failed"
+    }
 } else {
-    Pass "Claude Code CLI"
+    Pass "Claude Code CLI ($((claude --version 2>$null | Select-Object -First 1))) — auto-updates in background"
 }
 
-# Claude Desktop
-$claudeDesktop = "$HOME_DIR\AppData\Local\Programs\claude-desktop\Claude.exe"
-$claudeDesktop2 = "${env:ProgramFiles}\Claude\Claude.exe"
-if (-not (Test-Path $claudeDesktop) -and -not (Test-Path $claudeDesktop2)) {
-    Info "Installing Claude Desktop..."
-    winget install --id Anthropic.Claude -e --accept-source-agreements --accept-package-agreements 2>$null
-    if ($?) { Pass "Claude Desktop" } else { Info "Claude Desktop — install from claude.ai/download" }
-} else {
-    Pass "Claude Desktop"
-}
+# Claude Desktop via Winget-Smart (install/upgrade/skip)
+Winget-Smart "Anthropic.Claude"
 
 # `c` launcher functions in PowerShell $PROFILE
 if (-not (Test-Path $PROFILE)) { New-Item -ItemType File -Force -Path $PROFILE | Out-Null }
