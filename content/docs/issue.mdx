@@ -199,6 +199,82 @@ Issue closed with structured comment
 Vercel auto-deploys fix to production
 ```
 
+## Component Trio (CLAUDE.md · README.md · ISSUE.md)
+
+Every block under `src/components/<feature>/` carries a trio of markdown files. The `CONTEXT` step of the report pipeline reads all three before writing a fix, and the [Sprint Plan](/docs/sprint) links each epic to its trio. The trio is the single source of code-side truth — agents read it instead of grepping prose.
+
+| File | Purpose | Audience |
+|------|---------|----------|
+| `README.md` | What the feature does — overview, routes, file structure, status | Humans + agents |
+| `ISSUE.md` | What's still open — MVP checklist, P0/P1/P2, resolved log | Live tracker |
+| `CLAUDE.md` | How to work on it safely — key decisions, danger zones, after-finish | Agents only |
+
+### Frontmatter schema
+
+Every trio file opens with the same YAML block so agents can read epic metadata without parsing prose:
+
+```yaml
+---
+epic: 02                                # sprint.mdx epic number (01–14)
+sprint: Q3-2026                         # quarter identifier
+title: Admission                        # short feature label
+file_type: readme | issue | claude
+owner: Abdout                           # primary owner from sprint.mdx
+maturity: Built                         # Built | Built+Polish | In Progress | Schema Only | Vaporware
+completion: 75                          # integer 0–100; matches ISSUE.md
+tracker: https://github.com/databayt/hogwarts/issues/314
+docs: https://ed.databayt.org/en/docs/admission
+last_audited: 2026-05-25                # ISO date of last cross-check vs git
+---
+```
+
+`/report` reads `owner` + `tracker` + `maturity` to route fixes; the `last_audited` date tells the agent when the live state was last reconciled with `git log`.
+
+### Section schema — README.md
+
+```
+## <Feature> — <one-line tagline>
+### Overview                    (prose, 2–4 sentences)
+### Capabilities by Role        (table: role × access)
+### Routes                      (table: route × page × status)
+### API Routes                  (table: route × purpose; omit if none)
+### File Structure              (code block tree)
+### Status                      (Completion% + blockers)
+### Integration Points          (cross-links to neighbor READMEs)
+### Agents & Skills             (agents/skills that operate on this feature)
+```
+
+### Section schema — ISSUE.md
+
+```
+# <Feature> — Production Readiness Tracker
+
+## MVP Checklist                 (- [ ] / - [x] — the live work list)
+## Known Issues
+### P0 — Critical                (drop-everything bugs)
+### P1 — High                    (this sprint)
+### P2 — Medium                  (this quarter)
+## Resolved Issues               (chronological close log)
+## Enhancements (Post-MVP)       (deferred to next quarter+)
+```
+
+### Section schema — CLAUDE.md
+
+```
+# <Feature> Block
+
+## Context                       (what it is, completion, blockers)
+## Before You Start              (which files to read first)
+## Key Decisions                 (architectural invariants)
+## Danger Zones                  (places not to break)
+## Related Blocks                (cross-links to neighbor CLAUDE.md)
+## After You Finish              (update ISSUE.md, run build, etc.)
+```
+
+### Canonical seed
+
+`hogwarts/src/components/onboarding/{README,ISSUE,CLAUDE}.md` is the reference implementation — copy from there when bootstrapping a new feature's trio.
+
 ## Files
 
 ### Hogwarts
@@ -210,6 +286,7 @@ Vercel auto-deploys fix to production
 | `src/components/form/footer.tsx` | FormFooter with `showReport` prop |
 | `src/components/internationalization/en.json` | English translations |
 | `src/components/internationalization/ar.json` | Arabic translations |
+| `src/components/<feature>/{README,ISSUE,CLAUDE}.md` | Component trio (per Sprint Plan epic) |
 
 ### Kun (Engine)
 
@@ -218,6 +295,7 @@ Vercel auto-deploys fix to production
 | `.claude/agents/report.md` | Report agent definition (12-step pipeline) |
 | `.claude/rules/session-start.md` | Auto-process rule |
 | `content/docs/issue.mdx` | This documentation |
+| `content/docs/sprint.mdx` | Maps each epic to its hogwarts trio |
 
 ## Issue Creation (CLI)
 
