@@ -66,6 +66,47 @@ info() { echo -e "  ${D}·${NC} $1"; }
 open_url() { open "$1" >/dev/null 2>&1 & }
 # Copy text to the macOS clipboard.
 copy_clipboard() { printf '%s' "$1" | pbcopy >/dev/null 2>&1; }
+
+# Smart brew install — skip if up-to-date, upgrade if outdated, install if missing.
+# Most teammates already have Chrome/WebStorm/VS Code; this avoids reinstall churn
+# while still keeping everything current. Pass "--cask" as $2 for cask installs.
+brew_smart() {
+    local pkg="$1"
+    local cask=""
+    [[ "$2" == "--cask" ]] && cask="--cask"
+    if brew list $cask "$pkg" &>/dev/null; then
+        if brew outdated $cask "$pkg" 2>/dev/null | grep -q "^$pkg"; then
+            info "$pkg outdated — upgrading..."
+            brew upgrade $cask "$pkg" &>/dev/null && pass "$pkg upgraded" || pass "$pkg present (upgrade failed)"
+        else
+            pass "$pkg up to date"
+        fi
+    else
+        info "Installing $pkg..."
+        brew install $cask "$pkg" &>/dev/null && pass "$pkg installed" || fail "$pkg install failed"
+    fi
+}
+
+# Smart npm -g install — always pulls @latest (idempotent: noop if already latest,
+# upgrade otherwise). Prints before→after so re-runs are honest about churn.
+npm_global_smart() {
+    local pkg="$1" cmd="${2:-$1}"
+    local before=""
+    command -v "$cmd" &>/dev/null && before=$("$cmd" --version 2>/dev/null | head -1)
+    npm install -g "${pkg}@latest" --silent >/dev/null 2>&1
+    if command -v "$cmd" &>/dev/null; then
+        local after=$("$cmd" --version 2>/dev/null | head -1)
+        if [[ -z "$before" ]]; then
+            pass "$cmd installed ($after)"
+        elif [[ "$before" != "$after" ]]; then
+            pass "$cmd upgraded ($before → $after)"
+        else
+            pass "$cmd up to date ($after)"
+        fi
+    else
+        fail "$cmd install failed"
+    fi
+}
 step() {
     echo ""
     echo -e "${BD}[$1/8]${NC} ${B}$2${NC}"
@@ -74,28 +115,10 @@ step() {
 }
 
 # ── Validate ────────────────────────────────────────────────────
+# Role is a label only — every machine gets the full config. Default to "engineer"
+# when omitted, keep validating explicit values for backward compat with old callers.
 if [[ -z "$ROLE" ]]; then
-    echo -e "${BD}Computer Onboarding — macOS${NC}"
-    echo ""
-    echo "Usage: bash onboarding-mac.sh <role> [gist_id] [--quiet] [--name <n>] [--email <e>]"
-    echo ""
-    echo "Roles:"
-    echo "  engineer  — WebStorm, all repos, full Claude Code, hogwarts local dev"
-    echo "  content   — Claude Desktop, translation, content tools"
-    echo "  ops       — Monitoring, costs, incident tools"
-    echo "  business  — Proposals, pricing, client workflows"
-    echo ""
-    echo "Flags:"
-    echo "  --quiet            Skip all terminal prompts (for wrapper/CI use)"
-    echo "  --name <name>      Pre-supply git identity (skips prompt)"
-    echo "  --email <email>    Pre-supply git email (skips prompt)"
-    echo "  --essentials-only  Clone only kun/hogwarts/codebase (default: all org repos)"
-    echo "  --repos-dir <dir>  Where to save databayt org repos (default: \$HOME)"
-    echo "  --hogwarts-dev     Set up hogwarts local dev (pnpm + DB seed + build)"
-    echo ""
-    echo "One-liner:"
-    echo "  git clone https://github.com/databayt/kun.git ~/kun && bash ~/kun/.claude/scripts/onboarding-mac.sh engineer"
-    exit 0
+    ROLE="engineer"
 fi
 
 if [[ "$(uname)" != "Darwin" ]]; then
@@ -105,7 +128,11 @@ fi
 
 if [[ "$ROLE" != "engineer" && "$ROLE" != "business" && "$ROLE" != "content" && "$ROLE" != "ops" ]]; then
     echo -e "${R}Invalid role: $ROLE${NC}"
-    echo "Valid: engineer, business, content, ops"
+    echo "Valid: engineer (default), business, content, ops"
+    echo ""
+    echo "Usage: bash onboarding-mac.sh [role] [--quiet] [--repos-dir <dir>] [--hogwarts-dev]"
+    echo "One-liner:"
+    echo "  git clone https://github.com/databayt/kun.git ~/kun && bash ~/kun/.claude/scripts/onboarding-mac.sh"
     exit 1
 fi
 
@@ -152,110 +179,47 @@ else
     pass "Homebrew"
 fi
 
-# Git
-if ! command -v git &>/dev/null; then
-    brew install git
-    pass "Git installed"
-else
-    pass "Git ($(git --version | cut -d' ' -f3))"
-fi
+# Git (ships with Xcode CLT but brew can keep it fresher)
+brew_smart git
 
 # GitHub CLI
-if ! command -v gh &>/dev/null; then
-    brew install gh
-    pass "GitHub CLI installed"
-else
-    pass "GitHub CLI"
-fi
+brew_smart gh
 
-# Node.js — pin to LTS major (Node 24 Krypton as of 2026)
-if ! command -v node &>/dev/null; then
-    brew install node@24
-    brew link --overwrite --force node@24 2>/dev/null || true
-    pass "Node.js installed ($(node --version))"
-else
-    pass "Node.js ($(node --version))"
-fi
+# Node.js — pin to LTS major (Node 24 Krypton as of 2026). brew_smart handles
+# install + upgrade; the link step is idempotent so safe to run every time.
+brew_smart node@24
+brew link --overwrite --force node@24 &>/dev/null || true
 
-# pnpm
-if ! command -v pnpm &>/dev/null; then
-    npm install -g pnpm
-    pass "pnpm installed"
-else
-    pass "pnpm ($(pnpm --version))"
-fi
-
-# Vercel CLI — needed for `vercel env pull` per-product .env (Phase 6)
-if ! command -v vercel &>/dev/null; then
-    npm install -g vercel
-    pass "Vercel CLI installed"
-else
-    pass "Vercel CLI ($(vercel --version 2>/dev/null | head -1))"
-fi
+# pnpm + Vercel CLI — @latest is idempotent (noop if already latest)
+npm_global_smart pnpm
+npm_global_smart vercel
 
 # =============================================================================
 # PHASE 2: Applications
 # =============================================================================
 step "2" "Applications"
 
-# IDEs on every machine — full workstation regardless of role
-# WebStorm
-if [[ ! -d "/Applications/WebStorm.app" ]]; then
-    info "Installing WebStorm..."
-    brew install --cask webstorm
-    pass "WebStorm installed"
-else
-    pass "WebStorm"
-fi
-
-# VS Code
-if [[ ! -d "/Applications/Visual Studio Code.app" ]]; then
-    info "Installing VS Code..."
-    brew install --cask visual-studio-code
-    pass "VS Code installed"
-else
-    pass "VS Code"
-fi
-
-# Chrome
-if [[ ! -d "/Applications/Google Chrome.app" ]]; then
-    info "Installing Chrome..."
-    brew install --cask google-chrome
-    pass "Chrome installed"
-else
-    pass "Chrome"
-fi
+# IDEs + browser on every machine — full workstation regardless of role.
+# brew_smart skips if already present + up-to-date, upgrades if outdated.
+brew_smart webstorm --cask
+brew_smart visual-studio-code --cask
+brew_smart google-chrome --cask
 
 # =============================================================================
 # PHASE 3: GitHub
 # =============================================================================
 step "3" "GitHub — SSH key, authentication, git config"
 
-# Git identity — wrapper can pre-supply via --name/--email; quiet mode uses defaults if missing
-GIT_NAME=$(git config --global user.name 2>/dev/null || echo "")
-if [[ -z "$GIT_NAME" ]]; then
-    if [[ -n "$GIT_NAME_ARG" ]]; then
-        GIT_NAME="$GIT_NAME_ARG"; GIT_EMAIL="$GIT_EMAIL_ARG"
-    elif [[ "$QUIET" == "1" ]]; then
-        GIT_NAME="$(whoami)"; GIT_EMAIL="$(whoami)@$(hostname -s).local"
-        info "Quiet mode — using placeholder git identity (override later via 'git config --global')"
-    else
-        read -p "  Full name (for git commits): " GIT_NAME
-        read -p "  Email (for git commits): " GIT_EMAIL
-    fi
-    git config --global user.name "$GIT_NAME"
-    git config --global user.email "$GIT_EMAIL"
-    pass "Git config: $GIT_NAME <$GIT_EMAIL>"
-else
-    pass "Git config: $GIT_NAME"
-fi
+# Remember if git identity is already set; we'll backfill from gh api user later
+# (after auth) if it isn't. Placing this after auth lets the universal wizard skip
+# asking for name/email up front.
+EXISTING_GIT_NAME=$(git config --global user.name 2>/dev/null || echo "")
 
-# SSH key
+# SSH key — comment is metadata only; gh auth ties it to the right user later
 if [[ ! -f "$HOME/.ssh/id_ed25519" ]]; then
-    GIT_EMAIL=$(git config --global user.email)
     info "Generating SSH key..."
     mkdir -p "$HOME/.ssh"
-    ssh-keygen -t ed25519 -C "$GIT_EMAIL" -f "$HOME/.ssh/id_ed25519" -N ""
+    ssh-keygen -t ed25519 -C "databayt-onboarding-$(hostname -s)" -f "$HOME/.ssh/id_ed25519" -N ""
     eval "$(ssh-agent -s)" &>/dev/null
     ssh-add "$HOME/.ssh/id_ed25519" 2>/dev/null
     # macOS: add to ssh config for Keychain persistence
@@ -311,6 +275,38 @@ if ! gh ssh-key list 2>/dev/null | grep -q "$KEY_FP"; then
         pass "SSH key added to GitHub" || info "SSH key may already exist on GitHub"
 else
     pass "SSH key on GitHub"
+fi
+
+# Git identity — set only if not already configured. Priority:
+#   1. --name/--email installer args (legacy compat)
+#   2. existing ~/.gitconfig (idempotent re-runs)
+#   3. gh api user (auto-derive from the GitHub account just authed)
+#   4. $(whoami) fallback (quiet mode + gh unreachable)
+if [[ -z "$EXISTING_GIT_NAME" ]]; then
+    if [[ -n "$GIT_NAME_ARG" ]]; then
+        GIT_NAME="$GIT_NAME_ARG"; GIT_EMAIL="$GIT_EMAIL_ARG"
+        info "Git identity from installer args"
+    else
+        GH_LOGIN=$(gh api user --jq '.login' 2>/dev/null || echo "")
+        GH_NAME=$(gh api user --jq '.name // .login' 2>/dev/null || echo "")
+        if [[ -n "$GH_LOGIN" ]]; then
+            GIT_NAME="$GH_NAME"
+            GIT_EMAIL="${GH_LOGIN}@users.noreply.github.com"
+            info "Git identity auto-derived from GitHub ($GH_LOGIN)"
+        elif [[ "$QUIET" == "1" ]]; then
+            GIT_NAME="$(whoami)"; GIT_EMAIL="$(whoami)@$(hostname -s).local"
+            info "Quiet mode — using placeholder git identity (override later via 'git config --global')"
+        else
+            read -p "  Full name (for git commits): " GIT_NAME
+            read -p "  Email (for git commits): " GIT_EMAIL
+        fi
+    fi
+    git config --global user.name "$GIT_NAME"
+    git config --global user.email "$GIT_EMAIL"
+    pass "Git config: $GIT_NAME <$GIT_EMAIL>"
+else
+    GIT_EMAIL=$(git config --global user.email 2>/dev/null || echo "")
+    pass "Git config: $EXISTING_GIT_NAME <$GIT_EMAIL>"
 fi
 
 # Pre-clone gate: must be an active member of github.com/databayt to clone private repos.
@@ -384,29 +380,25 @@ fi
 # =============================================================================
 step "5" "Claude — CLI + Desktop"
 
-# Claude Code CLI
+# Claude Code CLI — native installer (auto-updates in background, per
+# code.claude.com/docs/en/setup). curl install.sh is idempotent: re-runs detect
+# existing install and just refresh.
 if ! command -v claude &>/dev/null; then
     info "Installing Claude Code CLI..."
-    curl -fsSL https://claude.ai/install.sh | sh
+    curl -fsSL https://claude.ai/install.sh | bash
     export PATH="$HOME/.local/bin:$PATH"
     if ! grep -q ".local/bin" "$HOME/.zshrc" 2>/dev/null; then
         echo '' >> "$HOME/.zshrc"
         echo '# Claude Code' >> "$HOME/.zshrc"
         echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME/.zshrc"
     fi
-    pass "Claude Code CLI"
+    pass "Claude Code CLI installed ($(claude --version 2>/dev/null | head -1))"
 else
-    pass "Claude Code CLI"
+    pass "Claude Code CLI ($(claude --version 2>/dev/null | head -1)) — auto-updates in background"
 fi
 
-# Claude Desktop
-if [[ ! -d "/Applications/Claude.app" ]]; then
-    info "Installing Claude Desktop..."
-    brew install --cask claude
-    pass "Claude Desktop"
-else
-    pass "Claude Desktop"
-fi
+# Claude Desktop — install/upgrade/skip via brew_smart
+brew_smart claude --cask
 
 # `c` launcher functions in shell rc (zsh default; bash if present)
 for RC in "$HOME/.zshrc" "$HOME/.bashrc"; do

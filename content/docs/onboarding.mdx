@@ -120,24 +120,29 @@ Pick the one that fits.
 
 The wizard runs in three acts. Most is silent; you click only when a human is unavoidably needed.
 
-### Act 1 — Pre-flight (~60 seconds, dialog burst)
+### Act 1 — Pre-flight (~30 seconds, 4 dialogs)
 
-The wizard auto-detects what it can and only asks for what it can't:
+The wizard asks four things. Everything else is auto-detected, derived after auth, or skipped silently.
 
-| Question | Auto-detected when |
+| Question | Notes |
 |---|---|
-| Welcome / start | always shown |
-| GitHub account? | always asked (opens `github.com/join` if "No") |
-| Accepted databayt org invite? | always asked (opens `github.com/orgs/databayt/invitations` if "No") |
-| Anthropic account? | always asked (opens `claude.ai/login` if "No") |
-| Role (label + secrets-trust tier — does *not* limit config) | inferred from `~/.claude/mcp.json` if exists |
-| Full name, email (for git commits) | inferred from `git config --global` if set |
-| Secrets Gist ID | asked once, then persisted |
-| Pro/Max subscription? (affects Desktop tabs) | asked once |
-| Where to save databayt repos? | asked once: `Home root` / `~/databayt/` / `Custom...` |
-| Set up hogwarts local dev? (heavy, opt-in) | asked once |
+| GitHub account? | Yes / No, create one (opens `github.com/join`) / Skip |
+| Accepted databayt org invite? | Yes / Open invite page (`github.com/orgs/databayt/invitations`) / Skip |
+| **Anthropic — company account** | Company creds + OTP from HR. Yes / Open Claude login / Skip — finish later. **Non-blocking**: install proceeds in parallel while HR sends OTP; sign-in finishes in Act 3 or later via `claude`/Desktop. |
+| Where to save databayt repos? | Home root (`~/`) / `~/databayt/` / Custom… |
 
 All answers persist in a state file. Re-runs skip questions already answered.
+
+**What's no longer asked** (and why):
+
+| Removed | What happens instead |
+|---|---|
+| Welcome / Start gate | Install starts immediately when you paste. |
+| Role (engineer/business/content/ops) | Every machine gets the full config. Backends default to `engineer`; role is a label only. |
+| Full name + email (for git) | Auto-derived after Phase 3 from `gh api user` — name = `.name`, email = `<login>@users.noreply.github.com` (GitHub's privacy-friendly default). Falls back to `$(whoami)` only if `gh` is unreachable in quiet mode. |
+| Secrets Gist ID | Install completes without it. Final dialog reminds you to run `bash ~/kun/.claude/scripts/secrets.sh <GIST_ID>` once HR/admin shares the ID. |
+| Pro/Max subscription? | Act 3 Desktop sign-in dialog now gates on whether `Claude.app` is installed, not on subscription. |
+| Hogwarts local dev? | Defaults to off. Opt in with `--hogwarts-dev` (Mac/Linux) or `-HogwartsDev` (Windows) on the CLI. |
 
 ### Act 2 — Silent batch (~15-20 minutes, progress notifications)
 
@@ -147,7 +152,7 @@ Eight phases run in the background. You can minimize the terminal and do other w
 |---|---|
 | 1 | System Foundation — build tools, git, Node 24 LTS, pnpm, gh CLI, Vercel CLI |
 | 2 | Applications — WebStorm, VS Code, Chrome (every machine) |
-| 3 | GitHub — SSH key, `gh auth login --web`, key uploaded, **verify databayt org membership + SSH push** |
+| 3 | GitHub — SSH key, `gh auth login --web`, key uploaded, **auto-set git identity from `gh api user`** (name + `<login>@users.noreply.github.com`), **verify databayt org membership + SSH push** |
 | 4 | Clone Repositories — the full databayt org (every machine) |
 | 5 | Claude — Code CLI, Desktop (Mac/Win), Desktop MCP symlink, `c` function in shell |
 | 6 | Kun Engine — `setup.sh` installs full config; `secrets.sh` pulls `~/.claude/.env` from Gist; `vercel-pull.sh` populates per-product `.env` from Vercel team `databayt` |
@@ -360,7 +365,7 @@ bash ~/.claude/scripts/health.sh
 sudo apt update && sudo apt install -y git curl build-essential ca-certificates
 
 # Node 24 LTS via nvm
-curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash
 export NVM_DIR="$HOME/.nvm"; . "$NVM_DIR/nvm.sh"
 nvm install --lts && nvm use --lts
 npm install -g pnpm

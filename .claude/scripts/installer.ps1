@@ -97,28 +97,6 @@ function Ask-Choice($prompt, $opt1, $opt2, $opt3 = $null) {
     $window.ShowDialog() | Out-Null
     return $script:result
 }
-function Ask-Role() {
-    if ($NoGui) { return Ask-Choice "Pick your role:" "engineer" "business" "content" }
-    $roles = @("engineer", "business", "content", "ops")
-    $window = New-Object System.Windows.Window
-    $window.Title = "Databayt Setup"; $window.Width = 360; $window.Height = 280
-    $window.WindowStartupLocation = "CenterScreen"; $window.ResizeMode = "NoResize"
-    $stack = New-Object System.Windows.Controls.StackPanel; $stack.Margin = "20"
-    $lbl = New-Object System.Windows.Controls.TextBlock; $lbl.Text = "Pick your role:"; $lbl.Margin = "0,0,0,10"; $lbl.FontSize = 13
-    $stack.Children.Add($lbl) | Out-Null
-    $list = New-Object System.Windows.Controls.ListBox
-    foreach ($r in $roles) { $list.Items.Add($r) | Out-Null }
-    $list.SelectedIndex = 0; $list.Height = 120
-    $stack.Children.Add($list) | Out-Null
-    $btn = New-Object System.Windows.Controls.Button
-    $btn.Content = "OK"; $btn.Width = 80; $btn.Margin = "0,15,0,0"; $btn.HorizontalAlignment = "Right"
-    $script:result = ""
-    $btn.Add_Click({ $script:result = $list.SelectedItem; $window.Close() })
-    $stack.Children.Add($btn) | Out-Null
-    $window.Content = $stack
-    $window.ShowDialog() | Out-Null
-    return $script:result
-}
 function Notify($title, $body) {
     if ($NoGui) { Write-Host "[$title] $body" -ForegroundColor Cyan; return }
     # BalloonTip via NotifyIcon — fire and forget
@@ -171,18 +149,15 @@ if (-not (Test-Path $Backend)) {
 # =============================================================================
 # ACT 1 - Pre-flight
 # =============================================================================
-$welcome = Ask-Choice "Welcome - this sets up a fresh Windows laptop for databayt.`n`nAbout 20 minutes (mostly silent downloads).`n`nReady?" "Start" "Cancel"
-if ($welcome -ne "Start") { Notify "Cancelled" "Run again anytime"; exit 0 }
+# Role is universal — every machine gets the full config, so we never ask.
+$role = "engineer"
 
-$role = Get-State role
-$gistId = Get-State gistId
-$gitName = Get-State gitName
-$gitEmail = Get-State gitEmail
-$proMax = Get-State proMax
+# Resume from state file (only fields the wizard still surfaces)
 $reposDir = Get-State reposDir
 $hasGithub = Get-State hasGithub
 $hasDatabaytInvite = Get-State hasDatabaytInvite
 $hasAnthropic = Get-State hasAnthropic
+$hogwartsDev = Get-State hogwartsDev   # set via -HogwartsDev flag only; no dialog
 
 # Account guidance
 if (-not $hasGithub) {
@@ -202,10 +177,10 @@ if (-not $hasDatabaytInvite) {
     Set-State hasDatabaytInvite "1"
 }
 if (-not $hasAnthropic) {
-    $ans = Ask-Choice "Do you have an Anthropic account?`n(For Claude Desktop sign-in + CLI.)" "Yes, I have one" "No, create one" "Skip"
-    if ($ans -eq "No, create one") {
+    $ans = Ask-Choice "Anthropic - company account (HR shares credentials + sends OTP).`nPing HR now; install proceeds in parallel while you wait." "I have creds" "Open Claude login" "Skip - finish later"
+    if ($ans -eq "Open Claude login") {
         Start-Process "https://claude.ai/login"
-        Ask-Choice "Anthropic sign-in opened. Done when you've created the account.`n`nNote: Pro/Max sub unlocks Desktop Chat/Cowork/Code tabs." "Done" "Skip" | Out-Null
+        Ask-Choice "Claude login opened. Sign in when HR's OTP arrives - no rush, install continues in background." "Done / will finish later" "Skip" | Out-Null
     }
     Set-State hasAnthropic "1"
 }
@@ -226,67 +201,15 @@ if (-not $reposDir) {
     Set-State reposDir $reposDir
 }
 
-# Role: auto-detect from existing mcp.json
-if (-not $role) {
-    $mcp = "$env:USERPROFILE\.claude\mcp.json"
-    if (Test-Path $mcp) {
-        $content = Get-Content $mcp -Raw
-        if ($content -match '"shadcn"') { $role = "engineer" }
-        elseif ($content -match '"linear"') { $role = "business" }
-        elseif ($content -match '"figma"') { $role = "content" }
-        elseif ($content -match '"posthog"') { $role = "ops" }
-    }
-    if (-not $role) {
-        $role = Ask-Role
-        if (-not $role) { Notify "Cancelled" "No role"; exit 0 }
-    }
-    Set-State role $role
-}
-
-# Git identity
-if (-not $gitName) {
-    $existingName = git config --global user.name 2>$null
-    if ($existingName) {
-        $gitName = $existingName
-        $gitEmail = git config --global user.email 2>$null
-    } else {
-        $gitName = Ask-Text "Your full name (for git commits):"
-        if (-not $gitName) { Notify "Cancelled" "No name"; exit 0 }
-        $gitEmail = Ask-Text "Your email (for git commits):"
-        if (-not $gitEmail) { Notify "Cancelled" "No email"; exit 0 }
-    }
-    Set-State gitName $gitName
-    Set-State gitEmail $gitEmail
-}
-
-# Gist ID
-if (-not $gistId) {
-    $gistId = Ask-Text "Secrets Gist ID (or blank to skip):"
-    Set-State gistId $gistId
-}
-
-# Pro/Max
-if (-not $proMax) {
-    $ans = Ask-YesNo "Do you have a Claude Pro or Max subscription?`n`n(Affects Desktop Chat/Cowork/Code tabs.)"
-    if ($ans -eq "Yes") { $proMax = "1" } else { $proMax = "0" }
-    Set-State proMax $proMax
-}
-
-# Hogwarts local dev — opt-in (heavy: pnpm + DB seed + build, ~10 min)
-$hogwartsDev = Get-State hogwartsDev
-if (-not $hogwartsDev) {
-    $ans = Ask-YesNo "Set up hogwarts local dev now? (pnpm + DB seed + build, ~10 min — skip if this machine won't run hogwarts locally)"
-    if ($ans -eq "Yes") { $hogwartsDev = "1" } else { $hogwartsDev = "0" }
-    Set-State hogwartsDev $hogwartsDev
-}
-
 # =============================================================================
 # ACT 2 - Silent batch
 # =============================================================================
 Notify "Installing" "~15-20 min in terminal"
 
-$backendArgs = @("-Role", $role, "-Quiet", "-GitName", $gitName, "-GitEmail", $gitEmail)
-if ($gistId) { $backendArgs += @("-GistId", $gistId) }
+# Backend gets: -Role (universal), -Quiet, plus opt-in flags. No -GitName/-GitEmail
+# passed - backend auto-derives git identity from `gh api user` after Phase 3 auth.
+# No -GistId passed - secrets pulled manually later via secrets.ps1.
+$backendArgs = @("-Role", $role, "-Quiet")
 if ($reposDir -and $reposDir -ne $env:USERPROFILE) { $backendArgs += @("-ReposDir", $reposDir) }
 if ($hogwartsDev -eq "1") { $backendArgs += @("-HogwartsDev") }
 
@@ -294,7 +217,6 @@ Write-Host ""
 Write-Host "════════════════════════════════════════════════════" -ForegroundColor Cyan
 Write-Host " Databayt Setup - Silent Install in Progress"
 Write-Host "════════════════════════════════════════════════════"
-Write-Host " Role: $role"
 Write-Host " Minimize this window and do other work."
 Write-Host "════════════════════════════════════════════════════"
 Write-Host ""
@@ -332,11 +254,11 @@ Set-State silentBatch "done"
 # =============================================================================
 Notify "Almost done" "Final clicks"
 
-# 3a. Claude Desktop sign-in (Pro/Max)
+# 3a. Claude Desktop sign-in (only if Desktop installed)
 $claudeApp = "$env:LOCALAPPDATA\Programs\claude-desktop\Claude.exe"
 $claudeApp2 = "${env:ProgramFiles}\Claude\Claude.exe"
-if ($proMax -eq "1" -and ((Test-Path $claudeApp) -or (Test-Path $claudeApp2)) -and (Get-State desktopSignedIn) -ne "1") {
-    $ans = Ask-Choice "Sign in to Claude Desktop:`n`n1. Click [Open Claude]`n2. Sign in with your Anthropic account`n3. Click [Done]" "Open Claude" "Done" "Skip"
+if (((Test-Path $claudeApp) -or (Test-Path $claudeApp2)) -and (Get-State desktopSignedIn) -ne "1") {
+    $ans = Ask-Choice "Sign in to Claude Desktop:`n`nUse the company creds + OTP from HR (same account as Claude Code CLI). No rush - skip if HR hasn't sent the OTP yet, finish later from the app." "Open Claude" "Done" "Skip"
     if ($ans -eq "Open Claude") {
         if (Test-Path $claudeApp) { Start-Process $claudeApp } else { Start-Process $claudeApp2 }
         $ans = Ask-Choice "Signed in?" "Done" "Skip"
@@ -344,8 +266,8 @@ if ($proMax -eq "1" -and ((Test-Path $claudeApp) -or (Test-Path $claudeApp2)) -a
     if ($ans -eq "Done") { Set-State desktopSignedIn "1" }
 }
 
-# 3b. Computer-use toggle (Pro/Max)
-if ($proMax -eq "1" -and (Get-State computerUse) -ne "1") {
+# 3b. Computer-use toggle (only if Desktop installed)
+if (((Test-Path $claudeApp) -or (Test-Path $claudeApp2)) -and (Get-State computerUse) -ne "1") {
     $ans = Ask-Choice "(Optional) Enable Claude Desktop computer-use:`n`n1. Click [Open Settings]`n2. Claude Desktop -> Settings -> General -> Toggle 'Allow Claude to use your computer'`n3. Click [Done]" "Open Settings" "Done" "Skip"
     if ($ans -eq "Open Settings") {
         if (Test-Path $claudeApp) { Start-Process $claudeApp } elseif (Test-Path $claudeApp2) { Start-Process $claudeApp2 }
@@ -367,9 +289,9 @@ if ($hasCode -and (Get-State vsCodeExt) -ne "1") {
     }
 }
 
-# 3d. WebStorm Claude plugin (engineer)
+# 3d. WebStorm Claude plugin (only if WebStorm is installed)
 $wsPath = "${env:ProgramFiles}\JetBrains\WebStorm*"
-if ($role -eq "engineer" -and (Test-Path $wsPath) -and (Get-State webstormPlugin) -ne "1") {
+if ((Test-Path $wsPath) -and (Get-State webstormPlugin) -ne "1") {
     $ans = Ask-Choice "(Optional) Install Claude Code plugin in WebStorm:`n`n1. Click [Open WebStorm]`n2. Settings -> Plugins -> Marketplace -> 'Claude Code' -> Install`n3. Click [Done]" "Open WebStorm" "Done" "Skip"
     if ($ans -eq "Open WebStorm") {
         Start-Process (Get-ChildItem "$wsPath\bin\webstorm64.exe" | Select-Object -First 1).FullName 2>$null
@@ -383,12 +305,15 @@ Notify "Verifying" "Health check"
 $healthScript = "$env:USERPROFILE\.claude\scripts\health.ps1"
 if (Test-Path $healthScript) { & $healthScript 2>&1 | Select-Object -Last 5 | Out-Host }
 
-$finalMsg = "Setup complete! Role: $role`n`n"
-$finalMsg += "Tools: git, node, pnpm, gh, claude`n"
-$finalMsg += "Repos: $env:USERPROFILE\kun"
-if ($role -eq "engineer") { $finalMsg += ", \hogwarts, \codebase, +org repos" }
-$finalMsg += "`nConfig: $env:USERPROFILE\.claude\ (agents, skills, MCP)`n`n"
-$finalMsg += "Next: open a new PowerShell and type 'c' to start Claude Code.`n`n"
+$finalMsg = "Setup complete!`n`n"
+$finalMsg += "Tools: git, node, pnpm, gh, vercel, claude`n"
+$finalMsg += "Repos: $env:USERPROFILE\kun, \hogwarts, \codebase, +org repos`n"
+$finalMsg += "Config: $env:USERPROFILE\.claude\ (agents, skills, MCP)`n`n"
+$finalMsg += "Next:`n"
+$finalMsg += "  1. Open a new PowerShell and type 'c' to start Claude Code`n"
+$finalMsg += "  2. If HR's OTP arrived, finish Anthropic sign-in (mobile app + Desktop)`n"
+$finalMsg += "  3. Load secrets when you have the Gist ID:`n"
+$finalMsg += "     & ~\kun\.claude\scripts\secrets.ps1 -GistId <ID>`n`n"
 $finalMsg += "Mobile: install Claude on iPhone/Android with same Anthropic account."
 
 Ask-Choice $finalMsg "Done" "View Docs" | Out-Null

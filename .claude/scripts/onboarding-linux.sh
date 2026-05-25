@@ -82,6 +82,57 @@ copy_clipboard() {
     return 1
 }
 
+# Smart apt install — skip if up-to-date, upgrade if outdated, install if missing.
+# Most teammates already have git/curl/ca-certificates; this avoids reinstall churn.
+apt_smart() {
+    local pkg="$1"
+    if dpkg-query -W -f='${Status}' "$pkg" 2>/dev/null | grep -q "install ok installed"; then
+        if apt list --upgradable 2>/dev/null | grep -q "^$pkg/"; then
+            sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --only-upgrade "$pkg" >/dev/null 2>&1 \
+                && pass "$pkg upgraded" || pass "$pkg present (upgrade failed)"
+        else
+            pass "$pkg up to date"
+        fi
+    else
+        sudo DEBIAN_FRONTEND=noninteractive apt-get install -y "$pkg" >/dev/null 2>&1 \
+            && pass "$pkg installed" || fail "$pkg install failed"
+    fi
+}
+
+# Smart snap install — refresh if installed, install if missing. Pass --classic as $2.
+snap_smart() {
+    local pkg="$1"
+    local classic=""
+    [[ "$2" == "--classic" ]] && classic="--classic"
+    if snap list "$pkg" &>/dev/null; then
+        sudo snap refresh "$pkg" >/dev/null 2>&1 \
+            && pass "$pkg refreshed (or already latest)" || pass "$pkg present"
+    else
+        sudo snap install $classic "$pkg" >/dev/null 2>&1 \
+            && pass "$pkg installed" || fail "$pkg install failed"
+    fi
+}
+
+# Smart npm -g install — always pulls @latest (idempotent: noop if already latest).
+npm_global_smart() {
+    local pkg="$1" cmd="${2:-$1}"
+    local before=""
+    command -v "$cmd" &>/dev/null && before=$("$cmd" --version 2>/dev/null | head -1)
+    npm install -g "${pkg}@latest" --silent >/dev/null 2>&1
+    if command -v "$cmd" &>/dev/null; then
+        local after=$("$cmd" --version 2>/dev/null | head -1)
+        if [[ -z "$before" ]]; then
+            pass "$cmd installed ($after)"
+        elif [[ "$before" != "$after" ]]; then
+            pass "$cmd upgraded ($before → $after)"
+        else
+            pass "$cmd up to date ($after)"
+        fi
+    else
+        fail "$cmd install failed"
+    fi
+}
+
 step() {
     echo ""
     echo -e "${BD}[$1/8]${NC} ${B}$2${NC}"
@@ -89,10 +140,10 @@ step() {
 }
 
 # ── Validate ────────────────────────────────────────────────────
-if [[ -z "$ROLE" ]]; then
+if false; then  # usage block kept for reference; no longer triggered (role defaults to "engineer")
     echo -e "${BD}Computer Onboarding — Linux${NC}"
     echo ""
-    echo "Usage: bash onboarding-linux.sh <role> [gist_id] [flags]"
+    echo "Usage: bash onboarding-linux.sh [role] [flags]"
     echo ""
     echo "Roles: engineer | business | content | ops"
     echo ""
@@ -114,9 +165,15 @@ if [[ "$(uname -s)" != "Linux" ]]; then
     exit 1
 fi
 
+# Role is a label only — every machine gets the full config. Default to "engineer"
+# when omitted, keep validating explicit values for backward compat with old callers.
+if [[ -z "$ROLE" ]]; then
+    ROLE="engineer"
+fi
+
 if [[ "$ROLE" != "engineer" && "$ROLE" != "business" && "$ROLE" != "content" && "$ROLE" != "ops" ]]; then
     echo -e "${R}Invalid role: $ROLE${NC}"
-    echo "Valid: engineer, business, content, ops"
+    echo "Valid: engineer (default), business, content, ops"
     exit 1
 fi
 
@@ -177,65 +234,58 @@ case "$PKG" in
 esac
 pass "Build tools"
 
-# Git
-if ! command -v git >/dev/null 2>&1; then
-    $PKG_INSTALL git >/dev/null 2>&1
-    pass "Git installed"
-else
-    pass "Git ($(git --version | cut -d' ' -f3))"
-fi
+# Git — apt_smart handles install + upgrade idempotently (apt-only; other distros
+# use their package manager directly since apt_smart is apt-specific)
+case "$PKG" in
+    apt) apt_smart git ;;
+    *)   $PKG_INSTALL git >/dev/null 2>&1 && pass "Git" || fail "Git install failed" ;;
+esac
 
-# GitHub CLI (gh)
+# GitHub CLI (gh) — apt needs custom repo for current version
 if ! command -v gh >/dev/null 2>&1; then
     info "Installing GitHub CLI..."
     case "$PKG" in
         apt)
-            # Use the official gh apt repo for current version
-            (type -p curl >/dev/null) && \
+            # Official gh apt repo
             curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg >/dev/null 2>&1 && \
             sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg && \
             echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null && \
             sudo apt-get update -y >/dev/null 2>&1 && \
-            $PKG_INSTALL gh >/dev/null 2>&1
+            apt_smart gh
             ;;
-        *)  $PKG_INSTALL "$(pkg_name gh)" >/dev/null 2>&1 ;;
+        *)  $PKG_INSTALL "$(pkg_name gh)" >/dev/null 2>&1 && pass "GitHub CLI" ;;
     esac
-    pass "GitHub CLI installed"
+elif [[ "$PKG" == "apt" ]]; then
+    # Already installed via apt — let apt_smart check for upgrades
+    apt_smart gh
 else
-    pass "GitHub CLI"
+    pass "GitHub CLI ($(gh --version 2>/dev/null | head -1))"
 fi
 
-# Node.js via nvm (distro packages often lag — nvm gives us LTS reliably)
-if ! command -v node >/dev/null 2>&1; then
+# Node.js via nvm (distro packages often lag — nvm gives us LTS reliably).
+# nvm install --lts is idempotent: noop if already on latest LTS, upgrades otherwise.
+if [[ ! -d "$HOME/.nvm" ]]; then
     info "Installing nvm + Node 24 LTS..."
-    if [[ ! -d "$HOME/.nvm" ]]; then
-        curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash >/dev/null 2>&1
-    fi
-    export NVM_DIR="$HOME/.nvm"
-    # shellcheck disable=SC1091
-    [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-    nvm install --lts >/dev/null 2>&1
-    nvm use --lts >/dev/null 2>&1
-    pass "Node.js installed ($(node --version))"
+    curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash >/dev/null 2>&1
+fi
+export NVM_DIR="$HOME/.nvm"
+# shellcheck disable=SC1091
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+NODE_BEFORE=$(node --version 2>/dev/null || echo "none")
+nvm install --lts >/dev/null 2>&1
+nvm use --lts >/dev/null 2>&1
+NODE_AFTER=$(node --version 2>/dev/null || echo "")
+if [[ "$NODE_BEFORE" == "none" ]]; then
+    pass "Node.js installed ($NODE_AFTER)"
+elif [[ "$NODE_BEFORE" != "$NODE_AFTER" ]]; then
+    pass "Node.js upgraded ($NODE_BEFORE → $NODE_AFTER)"
 else
-    pass "Node.js ($(node --version))"
+    pass "Node.js up to date ($NODE_AFTER)"
 fi
 
-# pnpm
-if ! command -v pnpm >/dev/null 2>&1; then
-    npm install -g pnpm >/dev/null 2>&1
-    pass "pnpm installed"
-else
-    pass "pnpm ($(pnpm --version))"
-fi
-
-# Vercel CLI — needed for `vercel env pull` per-product .env (Phase 6)
-if ! command -v vercel >/dev/null 2>&1; then
-    npm install -g vercel >/dev/null 2>&1
-    pass "Vercel CLI installed"
-else
-    pass "Vercel CLI ($(vercel --version 2>/dev/null | head -1))"
-fi
+# pnpm + Vercel CLI — @latest is idempotent (noop if already latest)
+npm_global_smart pnpm
+npm_global_smart vercel
 
 # =============================================================================
 # PHASE 2: Applications (snap-first; fall back to direct install)
@@ -246,27 +296,13 @@ step "2" "Applications — VS Code, WebStorm, Chrome"
 HAS_SNAP=0
 command -v snap >/dev/null 2>&1 && HAS_SNAP=1
 
-# IDEs on every machine — full workstation regardless of role
-# VS Code
-if ! command -v code >/dev/null 2>&1; then
-    if [[ "$HAS_SNAP" == "1" ]]; then
-        sudo snap install code --classic >/dev/null 2>&1 && pass "VS Code (snap)" || info "VS Code snap install failed — install manually"
-    else
-        info "snap not available — install VS Code manually from https://code.visualstudio.com/"
-    fi
+# IDEs on every machine — snap_smart handles install + refresh idempotently
+if [[ "$HAS_SNAP" == "1" ]]; then
+    snap_smart code --classic
+    snap_smart webstorm --classic
 else
-    pass "VS Code"
-fi
-
-# WebStorm
-if ! command -v webstorm >/dev/null 2>&1 && [[ ! -d "/snap/webstorm" ]]; then
-    if [[ "$HAS_SNAP" == "1" ]]; then
-        sudo snap install webstorm --classic >/dev/null 2>&1 && pass "WebStorm (snap)" || info "WebStorm snap install failed — install manually from jetbrains.com"
-    else
-        info "snap not available — install WebStorm manually from https://www.jetbrains.com/webstorm/"
-    fi
-else
-    pass "WebStorm"
+    command -v code      >/dev/null 2>&1 && pass "VS Code (manual)"  || info "snap missing — install VS Code from https://code.visualstudio.com/"
+    command -v webstorm  >/dev/null 2>&1 && pass "WebStorm (manual)" || info "snap missing — install WebStorm from https://www.jetbrains.com/webstorm/"
 fi
 
 # Chrome — only via snap or manual install (no official package in most distros)
@@ -292,31 +328,16 @@ fi
 # =============================================================================
 step "3" "GitHub — SSH key, authentication, git config"
 
-# Git identity
-GIT_NAME=$(git config --global user.name 2>/dev/null || echo "")
-if [[ -z "$GIT_NAME" ]]; then
-    if [[ -n "$GIT_NAME_ARG" ]]; then
-        GIT_NAME="$GIT_NAME_ARG"; GIT_EMAIL="$GIT_EMAIL_ARG"
-    elif [[ "$QUIET" == "1" ]]; then
-        GIT_NAME="$(whoami)"; GIT_EMAIL="$(whoami)@$(hostname -s).local"
-        info "Quiet mode — placeholder git identity (override via 'git config --global')"
-    else
-        read -p "  Full name (for git commits): " GIT_NAME
-        read -p "  Email (for git commits): " GIT_EMAIL
-    fi
-    git config --global user.name "$GIT_NAME"
-    git config --global user.email "$GIT_EMAIL"
-    pass "Git config: $GIT_NAME <$GIT_EMAIL>"
-else
-    pass "Git config: $GIT_NAME"
-fi
+# Remember if git identity is already set; we'll backfill from gh api user later
+# (after auth) if it isn't. Placing this after auth lets the universal wizard skip
+# asking for name/email up front.
+EXISTING_GIT_NAME=$(git config --global user.name 2>/dev/null || echo "")
 
-# SSH key
+# SSH key — comment is metadata only; gh auth ties it to the right user later
 if [[ ! -f "$HOME/.ssh/id_ed25519" ]]; then
-    GIT_EMAIL_USE=$(git config --global user.email)
     mkdir -p "$HOME/.ssh"
     chmod 700 "$HOME/.ssh"
-    ssh-keygen -t ed25519 -C "$GIT_EMAIL_USE" -f "$HOME/.ssh/id_ed25519" -N "" >/dev/null
+    ssh-keygen -t ed25519 -C "databayt-onboarding-$(hostname -s)" -f "$HOME/.ssh/id_ed25519" -N "" >/dev/null
     eval "$(ssh-agent -s)" >/dev/null
     ssh-add "$HOME/.ssh/id_ed25519" 2>/dev/null
     pass "SSH key generated"
@@ -394,6 +415,38 @@ else
     pass "SSH key on GitHub"
 fi
 
+# Git identity — set only if not already configured. Priority:
+#   1. --name/--email installer args (legacy compat)
+#   2. existing ~/.gitconfig (idempotent re-runs)
+#   3. gh api user (auto-derive from the GitHub account just authed)
+#   4. $(whoami) fallback (quiet mode + gh unreachable)
+if [[ -z "$EXISTING_GIT_NAME" ]]; then
+    if [[ -n "$GIT_NAME_ARG" ]]; then
+        GIT_NAME="$GIT_NAME_ARG"; GIT_EMAIL="$GIT_EMAIL_ARG"
+        info "Git identity from installer args"
+    else
+        GH_LOGIN=$(gh api user --jq '.login' 2>/dev/null || echo "")
+        GH_NAME=$(gh api user --jq '.name // .login' 2>/dev/null || echo "")
+        if [[ -n "$GH_LOGIN" ]]; then
+            GIT_NAME="$GH_NAME"
+            GIT_EMAIL="${GH_LOGIN}@users.noreply.github.com"
+            info "Git identity auto-derived from GitHub ($GH_LOGIN)"
+        elif [[ "$QUIET" == "1" ]]; then
+            GIT_NAME="$(whoami)"; GIT_EMAIL="$(whoami)@$(hostname -s).local"
+            info "Quiet mode — placeholder git identity (override via 'git config --global')"
+        else
+            read -p "  Full name (for git commits): " GIT_NAME
+            read -p "  Email (for git commits): " GIT_EMAIL
+        fi
+    fi
+    git config --global user.name "$GIT_NAME"
+    git config --global user.email "$GIT_EMAIL"
+    pass "Git config: $GIT_NAME <$GIT_EMAIL>"
+else
+    GIT_EMAIL=$(git config --global user.email 2>/dev/null || echo "")
+    pass "Git config: $EXISTING_GIT_NAME <$GIT_EMAIL>"
+fi
+
 # Pre-clone gate: must be an active member of github.com/databayt to clone private repos.
 state=$(gh api user/memberships/orgs/databayt --jq .state 2>/dev/null || echo "")
 if [[ -z "$state" ]]; then
@@ -456,17 +509,19 @@ fi
 # =============================================================================
 step "5" "Claude — Code CLI (no Desktop on Linux)"
 
-# Claude Code CLI
+# Claude Code CLI — native installer (auto-updates in background, per
+# code.claude.com/docs/en/setup). curl install.sh is idempotent: re-runs detect
+# existing install and just refresh.
 if ! command -v claude >/dev/null 2>&1; then
     info "Installing Claude Code CLI..."
-    curl -fsSL https://claude.ai/install.sh | sh >/dev/null 2>&1
+    curl -fsSL https://claude.ai/install.sh | bash >/dev/null 2>&1
     export PATH="$HOME/.local/bin:$PATH"
     if ! grep -q ".local/bin" "$HOME/.bashrc" 2>/dev/null; then
         printf '\n# Claude Code\nexport PATH="$HOME/.local/bin:$PATH"\n' >> "$HOME/.bashrc"
     fi
-    pass "Claude Code CLI"
+    pass "Claude Code CLI installed ($(claude --version 2>/dev/null | head -1))"
 else
-    pass "Claude Code CLI"
+    pass "Claude Code CLI ($(claude --version 2>/dev/null | head -1)) — auto-updates in background"
 fi
 
 # `c` functions in shell rc (bash + zsh if present)
