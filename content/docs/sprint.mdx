@@ -21,10 +21,10 @@ Every block ships through the kun engine and one workflow — issue → branch �
 curl -fsSL https://kun.databayt.org/install | bash
 ```
 
-Windows (PowerShell):
+Windows (PowerShell or cmd.exe):
 
 ```powershell
-iwr https://kun.databayt.org/install.ps1 | iex
+powershell -ExecutionPolicy Bypass -Command "iwr https://kun.databayt.org/install.ps1 | iex"
 ```
 
 **2. Verify green:**

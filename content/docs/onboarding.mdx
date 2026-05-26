@@ -24,10 +24,10 @@ Paste in a terminal. The wizard takes over.
 curl -fsSL https://kun.databayt.org/install | bash
 ```
 
-**Windows** (PowerShell)
+**Windows** (PowerShell or cmd.exe)
 
 ```powershell
-iwr https://kun.databayt.org/install.ps1 | iex
+powershell -ExecutionPolicy Bypass -Command "iwr https://kun.databayt.org/install.ps1 | iex"
 ```
 
 The bootstrap URL auto-detects your OS and dispatches to the right installer. No need to pick. Re-run anytime — it auto-resumes from where it left off via a state file.
@@ -531,6 +531,7 @@ To reset and start fresh: delete the state file, then re-run the bootstrap.
 | GitHub clone fails on private repos | Run `gh auth login -p ssh -w` again, confirm the SSH key is on your GitHub account |
 | Wizard dialogs not appearing on Linux | Install `zenity` (`sudo apt install zenity`) or pass `--no-gui` for terminal mode |
 | Windows: "running scripts is disabled" | Bootstrap uses `Set-ExecutionPolicy Bypass -Scope Process` automatically; for direct invocations: `powershell -ExecutionPolicy Bypass -File <script>` |
+| Windows: `'iwr' is not recognized as an internal or external command` | You pasted into `cmd.exe`. Use the universal form: `powershell -ExecutionPolicy Bypass -Command "iwr https://kun.databayt.org/install.ps1 | iex"`. Or open **PowerShell** (Start → "PowerShell") and re-run the original line. |
 
 For anything else, file an issue at https://github.com/databayt/kun/issues.
 
