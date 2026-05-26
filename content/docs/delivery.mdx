@@ -1,0 +1,175 @@
+---
+title: "Delivery Models"
+description: "From community SaaS to fully private enterprise — the spectrum of how databayt products ship to customers."
+---
+
+When a school, group, or government asks "how can we use hogwarts?", the answer isn't a single product — it's a spectrum. This page walks that spectrum from the loosest end (multi-tenant community SaaS, free, open-source) to the tightest (fully private, dedicated infra, multi-year contract, certified compliance). Use it to recommend the right shape for a given customer and to keep the team's language consistent across deals.
+
+Customer-specific applications live in their own docs — e.g., [aldar](/docs/aldar) for the tier-1 Aldar Education engagement. This page stays generic.
+
+## The five levers
+
+Most customers (and most of us) conflate these. Stating them as separate concepts is the doc's most useful contribution — license, contract, and compliance are independent of where the bits actually run.
+
+| Lever | Loose end | Tight end |
+|---|---|---|
+| **Hosting** | SaaS multi-tenant on our infra | Private — customer's own infra, dedicated DB, dedicated servers |
+| **License** | SSPL-1.0 (default, OSS) | Commercial enterprise license (no network-copyleft trigger) |
+| **Contract** | No contract (community use) | Multi-year enterprise contract with SLA + indemnification + escrow |
+| **Code organisation** | Unified `databayt/hogwarts` repo | Separate `databayt/hogwarts-enterprise` repo or long-lived branch |
+| **Compliance posture** | Best-effort, no certifications | Signed DPA + PDPL + ISO 27001 + SOC 2 + pen-tested |
+
+Each lever moves independently. A customer can want hosted SaaS (loose hosting) with a signed DPA (tight compliance), or self-hosting (tight hosting) with no contract (loose contract). The five packages below are the compositions that come up most often in conversation.
+
+## The spectrum
+
+### 1. Community SaaS — the default
+
+**What:** Multi-tenant SaaS on our infra. SSPL-1.0 on GitHub. No contract. Best-effort uptime. PDPL alignment by product design but no formal DPA.
+
+**For:** Independent schools, community users, evaluators, early-stage pilots, anyone trying the product before commercial conversation.
+
+**Pros**
+
+- Zero onboarding friction — sign up and start
+- Updates land for everyone simultaneously; no upgrade decisions
+- No infrastructure burden on the customer
+- Free or very low cost
+
+**Cons**
+
+- Customer data co-located with other tenants — logical isolation via `getTenantContext`, not physical
+- No SLA, no indemnification, no escrow
+- Customisation constrained to what shipping product supports
+- Not appropriate for regulators that demand data residency or certified compliance
+
+**Trigger to step up:** Customer requires a signed DPA, named-contact support SLA, or formal procurement vendor onboarding.
+
+### 2. Hosted SaaS with contract
+
+**What:** Same multi-tenant SaaS, plus an annual contract, signed DPA, named support contact, agreed SLA, and an opt-in PDPL/ISO roadmap they fund as part of the deal.
+
+**For:** Mid-size school groups whose procurement won't accept community terms but who don't need physical isolation.
+
+**Pros**
+
+- Customer gets procurement-acceptable terms without the cost of running infra
+- We get predictable annual revenue
+- Updates still ship to everyone — single SaaS to operate
+- Lighter delivery lift than on-prem
+
+**Cons**
+
+- Still multi-tenant — no physical isolation
+- Compliance certifications take time we may not have yet (sequence ISO before SOC 2)
+- Custom modules still constrained to "would benefit other tenants" criteria
+
+**Trigger to step up:** Customer requires data on their own infrastructure, dedicated database isolation, or a regulator (ADEK, KHDA) demanding in-country physical hosting.
+
+### 3. Self-hosted standalone (community)
+
+**What:** Customer runs our Docker/K8s stack on their own infrastructure. Still SSPL-1.0 — they get the same code as the community. No annual contract; community support via GitHub Discussions.
+
+**For:** Technical schools / school networks comfortable running their own stack. OSS-curious customers, universities, NGOs, school networks with capable in-house IT.
+
+**Pros**
+
+- Full data residency in the customer's environment
+- Customer can modify (SSPL terms still apply if they expose the modified version over the network)
+- We don't operate their infrastructure — no ops burden on us
+- Tracks community release cadence
+
+**Cons**
+
+- SSPL's network-copyleft trigger blocks them from monetising hogwarts as a service to third parties
+- No SLA, no escrow, no indemnification
+- They carry full ops burden — backups, upgrades, monitoring
+- We can't see telemetry to help them when things break
+
+**Trigger to step up:** Customer wants to remove the SSPL copyleft trigger, needs commercial indemnification, or wants a named-contact SLA.
+
+### 4. Standalone + commercial license
+
+**What:** Self-hosted, but with a commercial enterprise license that removes SSPL's network-copyleft trigger and adds indemnification (capped at 12 months license fees). Annual subscription. Still no per-customer code branch — they consume tagged releases from the unified codebase.
+
+**For:** Mid-to-large school networks who want their own infra plus procurement-clean license terms but who don't need bespoke modules or certified compliance.
+
+**Pros**
+
+- Customer can run hogwarts internally without SSPL obligations
+- Indemnification plus a named-contact SLA
+- We get recurring revenue from on-prem deployments
+- Single codebase still — no parity-with-SaaS drift
+
+**Cons**
+
+- They still take community releases — customisation requires upstreaming
+- We don't operate their infrastructure — backups, upgrades, monitoring remain customer responsibility (or contracted separately)
+- Source-code escrow recommended but optional at this tier
+
+**Trigger to step up:** Customer demands custom modules, a dedicated branch or repo, full certifications, multi-year contract, or full source-code escrow.
+
+### 5. Private enterprise — fully isolated
+
+**What:** Customer's own infrastructure, dedicated DB, dedicated servers, commercial enterprise license, multi-year contract, signed DPA, ISO 27001 + SOC 2 + pen-test artifacts delivered, source-code escrow with named agent (NCC Group Middle East for MENA), custom-module track, optional dedicated branch or sibling repo, named TAM + CSM, 24/7 support tier available. This is the [aldar](/docs/aldar) shape.
+
+**For:** Tier-1 enterprise — Aldar-class school groups, government education arms, large religious-school networks, anywhere procurement is a strategic gate not a checkbox.
+
+**Pros**
+
+- Maximum procurement comfort — every concern has an artifact answering it
+- Customer can specify exit terms, IP terms, audit rights
+- We can do bespoke work without polluting the SaaS code
+- Highest revenue per customer; multi-year ARR commitment
+
+**Cons**
+
+- Highest cost to deliver — engineering, support, compliance overhead
+- Custom branch or repo creates parity-with-SaaS drift risk
+- Sales cycle is months, not weeks
+- Founder-led delivery does not work at this tier — needs the team
+
+This is also where the [License &amp; isolation](/docs/aldar#license--isolation) question lives. Sibling repo vs long-lived branch is a sub-decision of this tier; the trigger to decide is the first paying on-prem customer or Aldar Wave 2, whichever comes first.
+
+## Recommendation matrix
+
+Quick map from customer profile to recommended package:
+
+| Customer profile | Recommended |
+|---|---|
+| Single school evaluating | 1. Community SaaS |
+| Single school in production | 2. Hosted SaaS with contract |
+| Technical 2–5 school network | 3. Self-hosted community **or** 2. Hosted SaaS |
+| 5+ school group with light procurement | 4. Standalone + commercial license |
+| 5+ school group in regulated emirate | 5. Private enterprise |
+| Tier-1 enterprise (Aldar-class) | 5. Private enterprise |
+| Government education arm | 5. Private enterprise |
+| Religious or charitable school network | 1. Community SaaS (often the right answer) |
+
+The doctrine is **start loose, ratchet tight only when something forces it**. The triggers section of each package above names the forcing function.
+
+## What's settled vs what's open
+
+**Settled** (don't re-litigate per customer):
+
+- License model is open-core — SSPL core + commercial license for on-prem (per [share-economy](/docs/share-economy))
+- Multi-tenancy is production-grade in `src/lib/multi-tenant-prisma-adapter.ts` — every package builds on the same isolation primitives
+- Escrow agent default for MENA: NCC Group Middle East
+- Indemnification cap default: 12 months of license fees
+
+**Open** (resolve per deal):
+
+- Hosting region — G42 Cloud, Etisalat AWS me-central-1, or customer's own data centre
+- Branch vs separate repo for the standalone enterprise track (the [License &amp; isolation](/docs/aldar#license--isolation) question — Aldar Wave 2 or first paying on-prem customer forces the call)
+- Custom-module IP terms (per deal — default: hogwarts retains copyright, customer gets perpetual irrevocable use)
+- Compliance certification timing (per deal — ISO 27001 default sequence: month 12; SOC 2 Type 1: month 18)
+- Custom branding ("Powered by databayt" removal) — included at tier 5, paid option at tier 4
+
+## See also
+
+- [share-economy](/docs/share-economy) — open-source doctrine underlying the license posture
+- [aldar](/docs/aldar) — the tier-1 enterprise prospect driving the standalone track
+- [self-hosting](/docs/self-hosting) — operational doc for self-hosted deployments
+- [repositories](/docs/repositories) — the codebase layout each package builds on
+- [team](/docs/team) — who owns delivery for each package
+- [sprint](/docs/sprint) — current quarter work
