@@ -335,7 +335,7 @@ Aldar's reality — 13 disparate SIS underneath Salesforce + MuleSoft. Approach 
 
 1. **Week 1** — map source SIS schema → field-mapping spreadsheet signed by school IT.
 2. **Weeks 3–4** — idempotent CSV importers for students, parents, staff, sections, timetables, 1-year historical attendance, 1-year historical grades, fee balances.
-3. **Weeks 8–12** — parallel run with daily reconciliation report. <1% discrepancy by Week 10 = green light.
+3. **Weeks 8–12** — parallel run with daily reconciliation report. &lt;1% discrepancy by Week 10 = green light.
 4. **Week 13** — source SIS goes read-only.
 5. **Week 14** — hogwarts is system-of-record. Salesforce continues reading via MuleSoft.
 
@@ -384,7 +384,7 @@ Offer to co-fund a Publicis Sapient bridge engagement to update MuleSoft connect
 | **W7** | Contract signature; 50% upfront paid | Docker Compose deployed to Aldar staging; license-key live | **G3: PO issued** |
 | **W8** | Pilot kickoff at Yasmina BA; hire DevOps + mobile (post-PO ramp) | Migration discovery; field mapping signed | |
 | **W9–10** | | Bulk import students/parents/staff/timetable; teacher training | |
-| **W11–12** | | Parallel run; daily reconciliation; LiveKit in-region | **G4: <1% data discrepancy** |
+| **W11–12** | | Parallel run; daily reconciliation; LiveKit in-region | **G4: &lt;1% data discrepancy** |
 | **W13** | | ADEK CSV submission tested end-to-end with Aldar compliance | |
 | **W14** | Reference case study draft begins | Cut-over: Yasmina BA on hogwarts as system-of-record | **G5: Pilot go-live** |
 
@@ -408,7 +408,7 @@ Offer to co-fund a Publicis Sapient bridge engagement to update MuleSoft connect
 | **G1** | Aldar agrees to pilot scoping | W2 | Return to sales mode |
 | **G2** | Pilot term sheet accepted in principle | W4 | Renegotiate scope or walk |
 | **G3** | PO issued; 50% paid | W7 | If past W10, raise external capital |
-| **G4** | Data reconciliation <1% | W12 | Extend parallel run 2 weeks |
+| **G4** | Data reconciliation &lt;1% | W12 | Extend parallel run 2 weeks |
 | **G5** | Yasmina BA cut-over | W14 | Biggest milestone of databayt's history |
 | **G6** | Aldar internal review → green-light Wave 1 | M5 | This is where AED 2.7M ARR is won |
 | **G7** | ISO 27001 issued | M12 | Removes procurement risk for years |
@@ -464,8 +464,8 @@ Offer to co-fund a Publicis Sapient bridge engagement to update MuleSoft connect
 
 ### Product KPIs (visible to Aldar from day 1)
 
-- Daily ADEK attendance submission — 100% target, <0.1% failure tolerance
-- Attendance entry latency — median <2s, P95 <5s
+- Daily ADEK attendance submission — 100% target, &lt;0.1% failure tolerance
+- Attendance entry latency — median &lt;2s, P95 &lt;5s
 - LiveKit class join success rate — >99%
 - Parent portal monthly active rate — >70% of households
 - Fee payment success rate — >97%
@@ -473,8 +473,8 @@ Offer to co-fund a Publicis Sapient bridge engagement to update MuleSoft connect
 ### Internal KPIs (visible to us)
 
 - Implementation hours per school — Wave 1: 350h, Wave 2: 220h, Wave 3: 130h
-- Defects per month per school — <3 P2+, <1 P1
-- P1 time-to-resolution — <4h business hours
+- Defects per month per school — &lt;3 P2+, &lt;1 P1
+- P1 time-to-resolution — &lt;4h business hours
 - Telemetry beacon uptime — >99.9%
 - Net Revenue Retention Wave 1 → Wave 2 — >120%
 
@@ -555,7 +555,7 @@ Before Week 13 cut-over, verify each requirement against the actual school conte
    - Verify license-key validation — replace with expired key → product shows warning, attendance still writeable
    - Verify outbound telemetry reaches `telemetry.databayt.org` with metadata only (capture and inspect payloads)
    - Trigger `databayt-cli upgrade` to a new minor version → confirm migration + health check + rollback path
-   - Run a Postgres failover drill → confirm <60s recovery and zero data loss
+   - Run a Postgres failover drill → confirm &lt;60s recovery and zero data loss
 
 6. **Compliance posture**
    - Confirm PDPL parental consent workflow captures consent for every student
@@ -564,7 +564,7 @@ Before Week 13 cut-over, verify each requirement against the actual school conte
    - Run pen test #1 (Help AG or DTS) and remediate findings before cut-over
 
 7. **Migration accuracy**
-   - Final reconciliation report at Week 12 — students, parents, staff, sections, timetables, 1-year attendance, 1-year grades, fee balances — discrepancy <1% across every category
+   - Final reconciliation report at Week 12 — students, parents, staff, sections, timetables, 1-year attendance, 1-year grades, fee balances — discrepancy &lt;1% across every category
    - Sign-off from Yasmina IT before cut-over
 
 If any of these verification steps fail at the pilot stage, **do not cut over.** Slipping G5 by 2 weeks is recoverable; cutting over broken is not.
