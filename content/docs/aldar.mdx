@@ -1,0 +1,636 @@
+---
+title: "Aldar Education"
+description: "Tier-1 UAE enterprise prospect — 29 schools, 33K+ students, on-premise hogwarts deal."
+---
+
+Aldar Education is databayt's largest active prospect — the education arm of [Aldar Properties PJSC](https://www.aldar.com) (ADX:ALDAR), operating 29 schools across the UAE with 33,000+ students and 3,000+ educators. The deal shape: on-premise deployment of [hogwarts](/docs/repositories) with annual commercial licensing across the group, beginning with a 1-school pilot. Strategy plan approved 2026-05-26.
+
+This page is the canonical, team-shareable record of the prospect — strategy, commercial structure, technical delivery, timeline, risks. It synthesises the private strategy plan and memory files (see [References](#references)). Updates flow `meeting → memory → re-sync this doc`.
+
+## Strategic posture
+
+Three choices, made 2026-05-26, that shape everything downstream:
+
+| Lever | Choice | Why |
+|---|---|---|
+| **Team** | Phased — UAE advisor on retainer from Week 1; engineering hires only after PO lands | Preserves runway; advisor solves "too small" optics cheapest |
+| **Pilot pricing** | Aggressive — **AED 180K total** (AED 120K impl + AED 60K license) to win the logo | Trade margin for tier-1 MENA reference; recoup on Wave 1 at list |
+| **License model** | Open-core — hogwarts stays SSPL on GitHub; Aldar buys a commercial enterprise license for on-prem use without SSPL's network-copyleft trigger | Preserves [share-economy doctrine](/docs/share-economy); industry-standard OSS-to-enterprise pattern |
+
+## Aldar at a glance
+
+| | |
+|---|---|
+| **Schools** | 29 across UAE |
+| **Students** | 33,000+ |
+| **Educators** | 3,000+ |
+| **Nationalities** | 100+ |
+| **Parent company** | [Aldar Properties PJSC](https://www.aldar.com) (ADX:ALDAR) |
+| **Parent revenue FY24** | AED 23bn (+62% YoY) |
+| **Education investment 2023–24** | AED 350M+ |
+| **Three-year education commitment** | AED 1bn |
+| **Regulator** | [ADEK](https://www.adek.gov.ae) (Abu Dhabi Department of Education and Knowledge) |
+| **Procurement** | SAP Ariba supplier registration mandatory |
+| **Current tech stack signal** | Salesforce Experience Cloud + MuleSoft (Publicis Sapient build, live Dec 2024) unifying 13 disparate legacy SIS systems |
+
+### Brand portfolio
+
+| Brand | Curriculum | Notes |
+|---|---|---|
+| **Aldar Academies** (7 own-brand schools) | Mixed | Core operated segment |
+| **Cranleigh Abu Dhabi** | British (premium) | Outstanding-rated 2022–23 |
+| **Muna British Academy** | British | Three consecutive Outstanding ratings 2015–23 |
+| **Yasmina British Academy** | British | Outstanding 2025 — **pilot recommendation** |
+| **Yasmina American Academy / Yas American** | American | |
+| **ADNOC partnership schools** (4) | Mixed | Strategic ADNOC tie-up |
+| **Charter Schools** | UAE national | ADEK-mandated network |
+| **Kent College Dubai** | British | KHDA-regulated (Dubai, not ADEK) |
+| **Recent acquisitions** | — | Al Shohub, Virginia School |
+
+## Stakeholders
+
+| Person | Role | What they care about | Our move |
+|---|---|---|---|
+| **Sahar Cooper** | CEO, Aldar Education (ex-GEMS) | Outcomes for 33K students; defensible vs ADEK; protect the Salesforce investment | Executive 1-pager + 1 reference call. Meet only after pilot is scoped. |
+| **Andrew Turner** | Group Head of EdTech | A partner he can shape; speed; not vendor-lock; demonstrable wins | **This is our champion.** Weekly cadence. Build the relationship asymmetrically. |
+| **Talal Al Dhiyebi** | Aldar Vice-Chairman | UAE-native strategic partner story | We don't pitch him. Andrew + Sahar do. We arm them. |
+| **CFO / Procurement** | SAP Ariba gate | Predictable costs; UAE data residency; exit clauses; escrow | Ariba registration by Week 2. Commercial structure ready Week 4. |
+| **3 Outstanding-rated principals** (Muna, Cranleigh, Yasmina) | Pilot influencers | Won't disrupt teaching; bilingual; ADEK-clean | Pilot at one. Win them, the rest follow. |
+| **CISO / IT** | Architecture veto | On-prem, audit trail, PDPL, ISO roadmap | Architecture deck at Meeting 3. Tech-deep-dive Week 6. |
+
+## Their five requirements vs hogwarts today
+
+| # | Requirement | Status | Maturity | Gap to close |
+|---|---|---|---|---|
+| 1 | Attendance management + **daily submission to ADEK** | 🟡 Partial | Production schema; bulk APIs; no ADEK connector | 3–4 weeks (eSIS bridge) |
+| 2 | Fee payments — card, Apple Pay, offline bank transfer, ATM | 🟡 Partial | Stripe + Tap + Bankak; Apple Pay enum declared; AED not finalised end-to-end | 1–2 weeks (parent UI + AED audit) |
+| 3 | Built-in video conferencing via **LiveKit on dedicated servers** | 🔴 Missing | Zero — no LiveKit, no WebRTC | 4–6 weeks (full build) |
+| 4 | Parent portal — communication, child progress, grades, downloadable reports | 🟢 Yes | Routes + APIs + notifications live; needs polish | 1 week (PDF + threaded messaging) |
+| 5 | Private/on-premise deployment + annual licensing | 🟡 Partial | Multi-tenant production-grade; Docker only for socket-server; no license infra | 3–4 weeks (Docker stack + license keys) |
+
+**Pitch framing:** *"Salesforce gives Aldar a unified front door. Hogwarts gives Aldar a unified school floor. MuleSoft connects them."*
+
+## Sales & engagement
+
+### The next four meetings
+
+**Meeting 2 — Solution Discovery (within 2 weeks)**
+- **From us:** Osman + UAE advisor (newly retained, framed as "Aldar Engagement Lead").
+- **Ask from them:** Andrew Turner + 1 principal + 1 IT representative + 1 finance person.
+- **Bring:** green/amber/red feature matrix, live demo on `aldar-pilot.databayt.org`, on-prem architecture diagram, first-pass commercial range.
+- **Ask them:**
+  - *"If we did a 1-school pilot, which school and which exact KPIs would prove success?"*
+  - *"What does your eSIS submission look like today — file upload, API, or manual?"*
+  - *"Who in procurement do we need to onboard via Ariba? Can we start paperwork this week?"*
+  - *"What security artifacts — ISO 27001 plan, SOC 2, pen test — do we need for your CISO?"*
+  - *"Can we test LiveKit from inside an Aldar school WiFi at Meeting 3?"* (critical — UAE throttles VoIP)
+
+**Meeting 3 — Technical Deep Dive + Pilot Term Sheet (~4 weeks)**
+- **From us:** Osman + advisor + (if hired pre-PO) 1 senior engineer.
+- **Bring:** on-prem reference architecture, LiveKit design for UAE, ADEK eSIS triple-track plan, pilot term sheet, King Fahad Academy reference letter.
+- **Outcome target:** verbal yes on 14-week pilot at one school.
+
+**Meeting 4 — Procurement & Contract (~6–8 weeks)**
+- Founder steps back. Advisor + lawyer lead.
+- Negotiate residency, escrow, support SLAs, exit terms.
+- **Outcome target:** PO issued via Ariba. 50% pilot fee upfront on signature.
+
+### Why-us pitch — three messages in order
+
+1. **MENA-native.** Bilingual AR/EN with RTL is in our DNA, not a translation pack. *"Our Arabic is default, not added."*
+2. **Built for the actual classroom workflow.** Period-level attendance, intervention escalation, hall passes, gamification — deeper SIS than Aldar has today.
+3. **We ship.** Tiny team is a feature framed correctly: *"You get the founder on Slack. Decisions in hours. Releases weekly. The architect is in the room."*
+
+### Neutralising the "too small" objection
+
+- UAE advisor on retainer from Week 1 (~AED 12K/mo). Cheapest credibility we can buy.
+- King Fahad Academy reference letter in hand by Meeting 3 (in next 14 days).
+- Source code escrow offer from Meeting 2. *"If databayt disappears tomorrow, you own the code."*
+- Security roadmap on paper (ISO 27001 within 12mo, SOC 2 Type 1 within 18mo, PDPL aligned now).
+- Open-core narrative — Aldar can audit the entire codebase on GitHub.
+
+## Commercial structure
+
+### Pilot — aggressive logo strategy
+
+**School:** Yasmina British Academy (Outstanding-rated, Aldar-owned brand, British curriculum we model well, mid-size, principal influence cascades).
+
+**Duration:** 14 weeks (4 build + 4 parallel-run + 6 cut-over and stabilise).
+
+**Scope:** all core SIS for one school. Attendance (CSV/RPA ADEK path), gradebook, timetable, parent portal, fee payments (Tap + Apple Pay + bank transfer), 2 LiveKit-powered online classes per day.
+
+**Out of pilot scope:** full eSIS API integration; transportation; deep payroll.
+
+| Component | Price (AED) | Notes |
+|---|---|---|
+| Pilot implementation fee | **120,000** | Discounted from list AED 350K |
+| Pilot software license | **60,000** | 14-week proration, ~1,200 students |
+| **Total** | **180,000** (~USD 49K) | Funds advisor + 1 senior engineer for ~4 months |
+
+**Non-negotiable conditions tied to the discount:**
+
+1. **Right-of-first-refusal on Wave 1** — if pilot KPIs hit, Aldar commits to negotiate Wave 1 (5 schools) within 90 days at list pricing. Written into the pilot SOW.
+2. **Co-marketed reference** — signed case study + 1 quote from Yasmina principal + 1 quote from Andrew Turner.
+3. **50% upfront on signature** — AED 90K within 7 days of PO. Critical for runway.
+4. **No further discounts** on Wave 1 or full rollout.
+
+### Full rollout pricing model
+
+**Base license — per student per year (tiered):**
+
+| Students | AED/student/year |
+|---|---|
+| 0–10,000 | 45 |
+| 10,000–25,000 | 38 |
+| 25,000+ | 32 |
+
+Aldar at 33K students × AED 32 = **AED 1,056,000/year base.**
+
+**Module add-ons — per school per year:**
+
+| Module | AED/school/year |
+|---|---|
+| LiveKit video conferencing (SFU hosting + recording + bandwidth) | 18,000 |
+| Advanced finance (fees + invoices + payroll + budgeting) | 22,000 |
+| Exams + AI question bank | 14,000 |
+| Transportation | 9,000 |
+
+**Group-level add-ons:**
+
+| Item | AED/year |
+|---|---|
+| ADEK eSIS deep integration (post-API) | 60,000 (group-wide) |
+| 24/7 Premium support | +250,000 |
+| Dedicated CSM | +180,000 |
+| Source code escrow (NCC Group ME) | +50,000 |
+
+**Year-1 full-rollout estimated ARR:** AED 1.05M (base) + AED 1.57M (modules) + AED 0.06M (eSIS) = **~AED 2.7M ARR (~USD 730K).**
+
+### Implementation fees (one-time, post-pilot)
+
+| Wave | Schools | Per-school fee (AED) | Subtotal (AED) |
+|---|---|---|---|
+| Wave 1 (same brand) | 4 | 80,000 | 320,000 |
+| Wave 2 (mixed brands) | 10 | 55,000 | 550,000 |
+| Wave 3 (remaining) | 14 | 35,000 | 490,000 |
+| **Total** | **28** | — | **~1,360,000** |
+
+### Commercial license terms (open-core)
+
+Hogwarts core remains under **SSPL-1.0** on GitHub. Aldar's commercial license grants:
+
+- On-premise use within Aldar's group without SSPL's network-trigger copyleft
+- Right to modify for internal use; modifications are Aldar's IP
+- Removal of "powered by databayt" branding (paid option, included for Aldar)
+- Indemnification, capped at 12 months license fees
+
+Aldar **cannot** redistribute, sub-license, resell, or SaaS-host hogwarts to non-affiliated entities. Cross-link: [share-economy doctrine](/docs/share-economy).
+
+### UAE-specific contract clauses
+
+- **Data residency** — all student PII on Aldar's UAE infrastructure. We never replicate to non-UAE regions. Outbound telemetry is metadata-only (counts, errors, version).
+- **PDPL compliance** — explicit DPA, parental-consent workflows in product, defined retention windows. Effective 1 January 2027 — pilot delivers PDPL-ready.
+- **Exit/termination** — 90-day data-handover obligation; full database dump + decrypted blob storage + read-only API for 6 months post-termination; AED 80K one-time handover fee.
+- **Source code escrow** — NCC Group Middle East. Released on databayt liquidation, unannounced change of control, unresolved P1 outage >30 days, or material SLA breach >90 days.
+- **Liability cap** — 12 months of license fees. Hold the line.
+- **Dispute resolution** — ADGM courts or DIFC arbitration, English language. Not Dubai courts.
+- **Anti-bribery** — mirror Aldar's Ariba supplier code.
+
+### Realistic 3-year contract value
+
+| Scenario | 3yr value (AED) | 3yr value (USD) | Probability today |
+|---|---|---|---|
+| Pilot only, no rollout | 0.18M | 49K | 30% |
+| Pilot + Wave 1 (5 schools, 2 years) | 5.0M | 1.4M | 35% |
+| Pilot + Full rollout (29 schools, modest modules) | 10.5M | 2.9M | 25% |
+| Pilot + Full rollout + Premium support + Modules | 14.5M | 3.9M | 10% |
+
+**Expected value: ~AED 7.2M / USD 1.95M over 3 years.** This is the optimisation target.
+
+## Technical delivery
+
+### What hogwarts already has (verified in `databayt/hogwarts`)
+
+| Area | Existing assets | Gap |
+|---|---|---|
+| **Attendance** | `prisma/models/attendance.prisma` + `attendance-enhanced.prisma` (method enum, intervention escalation, streaks); bulk API at `src/app/api/mobile/attendance/bulk/route.ts`; cron scaffolding in `vercel.json` | No ADEK eSIS connector |
+| **Payments** | Stripe webhook; Tap + Bankak (UAE processors); payment-method enum includes `CARD`, `APPLE_PAY`, `BANK_ACCOUNT`, `MANUAL` in `prisma/models/subscription.prisma` | Parent-facing Apple Pay UI; AED end-to-end audit |
+| **Parent portal** | Routes at `src/app/[lang]/parent/{announcements,attendance,events}`; grades + report-cards APIs; email + WhatsApp notification crons | Parent-side grades/report-card UI; downloadable PDFs |
+| **Multi-tenancy** | Production-grade isolation via `src/lib/multi-tenant-prisma-adapter.ts` with `@@unique([email, schoolId])` and `getTenantContext` enforcement | Extend `getTenantContext` to support Aldar HQ group-level views |
+| **Video** | Zero LiveKit integration | Full build required |
+| **Deployment** | Vercel + cron today; Docker only for `socket-server/` | Top-level Dockerfile, docker-compose, license-key infra |
+
+### Phased build order
+
+**Phase 0 — Foundation (Weeks 1–4, parallel with sales)**
+
+- AED localisation audit and finalisation end-to-end (display, invoicing, fee structures)
+- Apple Pay activation via Tap `src_all` source picker — wire into parent UI and test
+- Parent portal gap analysis and grades/report-card UI for parent role
+- Top-level Dockerfile for the Next.js app (standalone output pattern)
+- License-key + telemetry library design (no implementation yet)
+- **Decision required Week 2:** file formal ADEK eSIS inquiry via Aldar's compliance team
+
+**Phase 1 — Pilot scope (Weeks 5–14, Yasmina BA)**
+
+- **ADEK eSIS bridge v1** — CSV export job, scheduled daily 14:00 GST. Submission tracked in `audit.prisma` extended with `eventType = "ESIS_SUBMITTED"`. RPA fallback (Playwright bot) if Aldar wants automation.
+- **LiveKit v1** — single dedicated SFU in UAE (G42 Cloud or Etisalat AWS me-central-1). New `LiveClass` Prisma model + room provisioning + simple teacher/parent/student UI. Recording to MinIO.
+- **On-prem packaging v1** — Docker Compose with `web` (Next.js standalone), `socket-server`, `postgres`, `redis`, `livekit-server`, `livekit-egress`, `minio`, `caddy`, `prometheus + grafana + loki`. License-key mounted as Docker secret.
+- **License-key + telemetry** — signed JWT-style license file, validated on boot + every 6h. Outbound telemetry (school count, user count, error count, version) hourly to `telemetry.databayt.org`. 30-day grace period at expiry; never blocks attendance writes (we never block the school day).
+- **Parent portal completion** — grades view, downloadable report-card PDFs, fee payment with all methods, video class join, attendance with excuse submission.
+- **Data migration kit** — CSV/Excel ingestion mapped to Yasmina BA's source SIS schema.
+- **PDPL workflows in product** — parental consent capture, retention policies, data-export endpoints.
+
+**Phase 2 — Wave 1 (Months 5–10, 5 schools cumulative)**
+
+- **ADEK eSIS API integration** if documented by then; otherwise robust Playwright-based RPA with encrypted credentials per tenant.
+- **High-availability on-prem** — Postgres primary/replica + auto-failover, LiveKit multi-node SFU.
+- **K8s migration path** — Helm chart for Aldar's central data centre.
+- **Multi-school admin console** — group-level views (estate-wide attendance, grade distributions, fee collection). Extend `getTenantContext` for Aldar HQ users spanning multiple `schoolId`s.
+- **MuleSoft connector** — publish OpenAPI spec; co-develop adapter for student/staff/parent record sync into Salesforce.
+- **Advanced finance modules** rolled per school.
+
+**Phase 3 — Wave 2 & 3 (Months 11–24)**
+
+- Remaining 23 schools at ~3–4/month.
+- ISO 27001 audit and certification.
+- SOC 2 Type 1 in parallel.
+- CREST-accredited pen test (Help AG or DTS UAE).
+- Localised AI — Arabic-first AI tutoring extension, ADEK-aware analytics (5% / 15-consecutive / 30-annual rules built in).
+
+### ADEK eSIS — triple-track integration
+
+**Track 1 — Official path (target):**
+
+- Week 1: file formal inquiry to ADEK via Aldar's existing relationship manager. Request API documentation, OAuth credentials, test tenant for Yasmina BA.
+- If documented: build `adek-esis-connector` package — typed client, retry/backoff, daily idempotent submission of `Attendance` records joined with `Student` + `Section`, formatted to ADEK schema. Audit log via `audit.prisma`.
+
+**Track 2 — Piggyback (likely fastest):**
+
+- Aldar already has eSIS tenant credentials at the group level. We get permission to use those credentials via their compliance team. Skips months of regulatory back-and-forth. **Ask in Meeting 2.**
+
+**Track 3 — RPA contingency (definitely works):**
+
+- Daily CSV export from hogwarts in eSIS-expected schema.
+- Manual upload by Aldar admin in pilot week 1.
+- Headless-browser RPA (Playwright) by pilot week 6: logs into [esis.adek.gov.ae](https://esis.adek.gov.ae), uploads file, captures receipt, stores in `FileRecord`. Credentials in encrypted Postgres column or HashiCorp Vault.
+
+**Pitch in Meeting 2:** *"We commit to ADEK submission on time every school day. Whichever path ADEK gives us, the parent UX, the teacher UX, and the audit trail are identical."*
+
+### LiveKit deployment design
+
+- **SFU topology** — single SFU node UAE-region for pilot (G42 Cloud preferred for full UAE residency; Etisalat AWS me-central-1 secondary). Scale to 3 nodes active-active by full rollout.
+- **Capacity sizing** — 29 schools × 30% concurrent classes × 30 students = ~8,700 worst-case concurrent participants. One node handles ~3–5K. 3 nodes by Wave 2.
+- **Recording** — LiveKit Egress → MinIO → `LiveClassRecording` model. Retention 90 days default, configurable per school for PDPL.
+- **Network** — UAE throttles VoIP. **Test inside an Aldar school WiFi at Meeting 3 — non-negotiable.** TURN over 443 TCP fallback. Pre-warm with G42 if needed.
+- **Auth** — LiveKit JWT signed by our server; token issuance gated by `getTenantContext` so cross-tenant access is impossible even with a stolen token.
+- **Playback** — signed S3/MinIO URLs (we already use `@aws-sdk/cloudfront-signer` patterns).
+
+### On-prem architecture
+
+**Tier A — Docker Compose (pilot through ~5 schools):**
+
+```text
+[Aldar UAE Data Center]
+  caddy (TLS, reverse proxy)
+    web (Next.js standalone, 4 replicas)
+    socket-server
+    livekit-server + livekit-egress
+    minio (S3-compatible)
+    redis (cache, queue)
+    postgres (primary + replica) OR connect to Aldar's existing PG
+    prometheus + grafana + loki (observability)
+    backup (nightly pg_dump + minio sync → Aldar cold storage)
+    licensed (license validator + telemetry beacon)
+```
+
+**Tier B — Kubernetes (full rollout, multi-school HA):**
+
+- Helm chart, HPA on `web`, Postgres via CloudNativePG operator, LiveKit StatefulSet (3 SFU replicas), Velero backups.
+
+**What's in Aldar's data centre:** everything that touches student data. PII never leaves UAE.
+
+**What we monitor remotely:** anonymised metrics only — version, uptime, request counts by endpoint, error rates, license validity. Outbound HTTPS to `telemetry.databayt.org`. No content, no IDs.
+
+**Version updates:** `databayt-cli upgrade --version 2026.07.0` — pulls signed Docker images, runs migrations, rolls forward with health checks. Monthly minor, quarterly major. 2-week staging window for Aldar.
+
+### Security posture — roadmap with dates
+
+| Artifact | Target | Budget (AED) |
+|---|---|---|
+| ISO 27001 | Audit complete by Month 12 | 280K (BSI Middle East) |
+| SOC 2 Type 1 | Audit complete by Month 18 | 220K |
+| Pen test #1 | Month 4 (during pilot) | 90K (Help AG or DTS) |
+| PDPL DPA | Signed at contract | 30K legal |
+| Threat model | Pilot kickoff | internal |
+| Vuln scanning | Continuous from Week 1 | Dependabot + Snyk + Trivy |
+| MFA | Mandatory for staff/admin roles | included |
+| Background checks on engineers | Required for prod access | 1.5K/person |
+
+Aldar will accept "in flight" if the roadmap is dated and funded. Roll these costs into the rollout budget once Wave 1 closes.
+
+### Migration from Aldar's existing SIS
+
+Aldar's reality — 13 disparate SIS underneath Salesforce + MuleSoft. Approach per school:
+
+1. **Week 1** — map source SIS schema → field-mapping spreadsheet signed by school IT.
+2. **Weeks 3–4** — idempotent CSV importers for students, parents, staff, sections, timetables, 1-year historical attendance, 1-year historical grades, fee balances.
+3. **Weeks 8–12** — parallel run with daily reconciliation report. <1% discrepancy by Week 10 = green light.
+4. **Week 13** — source SIS goes read-only.
+5. **Week 14** — hogwarts is system-of-record. Salesforce continues reading via MuleSoft.
+
+Offer to co-fund a Publicis Sapient bridge engagement to update MuleSoft connectors — Aldar's CFO loves this because it protects their existing investment.
+
+## ADEK regulatory context
+
+**ADEK** = Abu Dhabi Department of Education and Knowledge (formerly ADEC). Regulates public + private schools in the Emirate of Abu Dhabi. Inspection framework: **Irtiqaa** (biennial, 6 standards: achievement, development, teaching, curriculum, wellbeing, leadership). Main site: [adek.gov.ae](https://www.adek.gov.ae).
+
+### eSIS — the mandatory submission system
+
+- Portal: [esis.adek.gov.ae](https://esis.adek.gov.ae) and `esispasa.adek.gov.ae`
+- User guide: [guides.adek.gov.ae/Esis/tc/0](https://guides.adek.gov.ae/Esis/tc/0)
+- **API/integration mechanism is not publicly documented** — black box
+- Schools must upload daily attendance reports
+- For new vendor integration: formal inquiry to ADEK procurement/IT required
+- Large operators (like Aldar) likely have group-level tenant credentials we can piggyback on
+
+### 2025/26 attendance rules
+
+- **Daily upload mandatory** to eSIS
+- Schools must contact parents **within 2 hours** of unreported absence
+- Categories: authorised (medical with DOH cert after 3 days; up to 12 days/yr parent note; religious/exam leave), unauthorised (family holidays in term), "cause for concern" flagged at >5% absences (9 days G1–12, 18 KG)
+- **No promotion** if >15 consecutive or >30 total annual absences
+- Consequences — tied to Irtiqaa findings; schools rated below "Good" face intervention plans; license risk under new licensing policy (60-day renewal buffer)
+
+### Data residency / compliance
+
+- UAE PDPL (Personal Data Protection Law) effective **1 January 2027**
+- Minors require enhanced protections + parental consent
+- Cross-border data transfers require UAE Data Office approval
+- Assume UAE-only hosting expected
+
+## Timeline
+
+### Week-by-week through pilot go-live
+
+| Week | Sales/Commercial | Technical | Gate |
+|---|---|---|---|
+| **W1** | Schedule Meeting 2; begin Ariba registration; retain UAE advisor | Phase 0: AED audit, Apple Pay, parent UI gap-fill | |
+| **W2** | Meeting 2 (discovery); file ADEK inquiry via Aldar | Dockerfile for web app; license-key library prototype | **G1: Aldar agrees to pilot scoping** |
+| **W3** | Send pilot proposal | Apple Pay live; AED end-to-end | |
+| **W4** | Meeting 3 (technical deep dive + term sheet) | LiveKit single-node POC running; record + playback works | **G2: Pilot term sheet verbal yes** |
+| **W5** | Contract drafting (Ariba + legal); hire 1 senior engineer (post-PO conditional) | Docker Compose v1 working in staging | |
+| **W6** | Meeting 4 (procurement); CISO security walkthrough | Parent portal grades + report-card UI complete | |
+| **W7** | Contract signature; 50% upfront paid | Docker Compose deployed to Aldar staging; license-key live | **G3: PO issued** |
+| **W8** | Pilot kickoff at Yasmina BA; hire DevOps + mobile (post-PO ramp) | Migration discovery; field mapping signed | |
+| **W9–10** | | Bulk import students/parents/staff/timetable; teacher training | |
+| **W11–12** | | Parallel run; daily reconciliation; LiveKit in-region | **G4: <1% data discrepancy** |
+| **W13** | | ADEK CSV submission tested end-to-end with Aldar compliance | |
+| **W14** | Reference case study draft begins | Cut-over: Yasmina BA on hogwarts as system-of-record | **G5: Pilot go-live** |
+
+### Quarter-by-quarter through full rollout
+
+| Quarter | Milestone | Schools live | Cumulative ARR (AED) |
+|---|---|---|---|
+| **Q3 2026** | Pilot go-live + Wave 1 contract negotiation | 1 | 0.06M |
+| **Q4 2026** | Wave 1 signed; 4 schools in build; ISO 27001 kickoff | 1 | 0.5M |
+| **Q1 2027** | Wave 1 live; pen test #1; MuleSoft connector live | 5 | 0.9M |
+| **Q2 2027** | Wave 2 build; ADEK eSIS API (if available); SOC 2 kickoff | 5 | 1.0M |
+| **Q3 2027** | Wave 2 live; K8s migration; HA architecture | 15 | 1.6M |
+| **Q4 2027** | Wave 3 build; ISO 27001 cert issued | 15 | 1.6M |
+| **Q1 2028** | Wave 3 partial; Aldar group dashboard for Sahar | 22 | 2.1M |
+| **Q2 2028** | Full rollout complete | **29** | **2.7M** |
+
+### Approval gates
+
+| # | Gate | When | Miss-consequence |
+|---|---|---|---|
+| **G1** | Aldar agrees to pilot scoping | W2 | Return to sales mode |
+| **G2** | Pilot term sheet accepted in principle | W4 | Renegotiate scope or walk |
+| **G3** | PO issued; 50% paid | W7 | If past W10, raise external capital |
+| **G4** | Data reconciliation <1% | W12 | Extend parallel run 2 weeks |
+| **G5** | Yasmina BA cut-over | W14 | Biggest milestone of databayt's history |
+| **G6** | Aldar internal review → green-light Wave 1 | M5 | This is where AED 2.7M ARR is won |
+| **G7** | ISO 27001 issued | M12 | Removes procurement risk for years |
+
+## Team plan
+
+**Pre-PO (Weeks 1–7):** Osman + UAE advisor only. Total burn: ~AED 12K/mo retainer.
+**Post-PO ramp (Week 7+):** funded by AED 90K upfront pilot payment.
+
+| Hire | Cost (AED/mo) | When | Why |
+|---|---|---|---|
+| **UAE Engagement Advisor** (retainer, ~4–8h/week) | 12K | **Week 1** | Credibility; Aldar politics; warm intros |
+| **Senior Full-Stack Engineer** (contract) | 20K | Week 5 (PO imminent) | LiveKit + parent portal + ADEK bridge |
+| **DevOps / SRE** (contract) | 18K | Week 8 (PO landed) | On-prem Docker/K8s packaging |
+| **Mobile + UI Engineer** (contract) | 16K | Week 8 | Parent UI polish, Apple Pay flow, video classes |
+| **Project Manager / TAM** (contract part-time) | 10K | Week 8 | Pilot delivery + customer-facing |
+| **Compliance / Legal** (project-based) | 30K one-time | Week 4 | PDPL DPA, ISO scoping, escrow setup |
+| **QA / UAT Pilot** (contract, on-the-ground) | 8K | Week 10 | Local UAT at Yasmina BA |
+
+**Run-rate during pilot delivery (Weeks 8–22):** ~AED 84K/mo. Funded from AED 180K pilot fee + advisor retainer carryforward. Tight but solvent.
+
+**Post-Wave-1 (Month 8):** convert 2–3 contractors to FTEs as Wave 1 revenue lands. See [team capacity](/docs/team) for current ledger.
+
+## Risks & mitigations
+
+| # | Risk | Likelihood × Impact | Mitigation |
+|---|---|---|---|
+| **1** | ADEK eSIS API doesn't exist / undocumented | High × High | Triple-track: official inquiry + Aldar credentials piggyback + RPA. Commit to outcome (submission), not method. |
+| **2** | Cash crunch — $5K/10mo runway insufficient | High × Critical | AED 90K upfront on signature is the lifeline. Walk-away trigger: G3 slips past Week 10 → raise external capital. |
+| **3** | "Too small" objection at procurement | High × High | UAE advisor Week 1; senior engineer in Meeting 3; KFA reference letter; escrow offer day 1; ISO roadmap on paper. |
+| **4** | Salesforce/MuleSoft turf war | Medium × High | Position as below-the-line SIS, not above. Co-build MuleSoft connector. Offer to fund Publicis Sapient bridge work. |
+| **5** | On-prem complexity overruns delivery | Medium × High | Docker Compose first (boring + works). K8s in Wave 2. Practice deploy on a VM before Aldar's data centre. |
+| **6** | LiveKit fails inside Aldar network (UAE VoIP throttling) | Medium × High | Test inside Aldar school in Meeting 3 BEFORE signing. TURN over 443 TCP. G42 Cloud as primary host. |
+| **7** | Andrew Turner leaves Aldar | Low × Critical | Build second relationship (one principal + one IT leader). Document in writing — emails, term sheets, not handshakes. |
+| **8** | Scope creep on pilot | High × Medium | Strict pilot SOW. Anything new = change order at day rate. |
+| **9** | Aggressive pilot discount becomes Wave 1 anchor | Medium × High | Pilot SOW explicitly states "introductory rate; Wave 1 at list." Right-of-first-refusal clause anchors expectation. |
+| **10** | PDPL Jan 2027 changes break us mid-rollout | Medium × Medium | Engage UAE data-protection lawyer Q3 2026. Build PDPL into pilot, not retrofit. |
+| **11** | Open-core misunderstanding ("you'll just open-source our customisations") | Medium × Medium | Crystal-clear commercial license terms. Aldar-specific work is Aldar IP; hogwarts core stays SSPL with Aldar's commercial exception. |
+| **12** | Migration data quality from source SIS | High × Medium | Don't quote fixed-fee on migration beyond pilot. Per-school discovery week + field-mapping signoff. |
+
+## Success criteria
+
+### What "yes" looks like at each phase
+
+| Phase | Celebration |
+|---|---|
+| Meeting 2 done | Aldar agrees to 1-school pilot at one of the 3 Outstanding-rated brands; procurement contact secured |
+| Pilot signed | PO via Ariba; AED 90K upfront paid; Yasmina principal aligned |
+| Pilot go-live | First school day where hogwarts is system-of-record; ADEK submission lands on time; no parent complaints in week 1 |
+| Wave 1 signed | 5 schools committed; AED 0.5M+ ARR booked; first reference call from Yasmina principal |
+| Wave 2 live | 15 schools; AED 1.6M ARR; contractors converted to FTEs; ISO 27001 in audit |
+| Full rollout | 29 schools; AED 2.7M+ ARR; named reference in databayt's pitch deck; case study published |
+
+### Product KPIs (visible to Aldar from day 1)
+
+- Daily ADEK attendance submission — 100% target, <0.1% failure tolerance
+- Attendance entry latency — median <2s, P95 <5s
+- LiveKit class join success rate — >99%
+- Parent portal monthly active rate — >70% of households
+- Fee payment success rate — >97%
+
+### Internal KPIs (visible to us)
+
+- Implementation hours per school — Wave 1: 350h, Wave 2: 220h, Wave 3: 130h
+- Defects per month per school — <3 P2+, <1 P1
+- P1 time-to-resolution — <4h business hours
+- Telemetry beacon uptime — >99.9%
+- Net Revenue Retention Wave 1 → Wave 2 — >120%
+
+### What kills vs slows the deal
+
+**Kills (P0 — drop everything):**
+
+- Visible founder-quality bug at Yasmina BA in first 30 days
+- Data leak across two Aldar schools (multi-tenant failure)
+- ADEK submission failure for 2+ consecutive school days
+- Security incident before ISO audit
+- LiveKit unusable in Aldar network at scale
+
+**Slows (P1 — fix urgently):**
+
+- Procurement (Ariba) friction → onboard early, weekly follow-up
+- Andrew Turner unavailable 2+ weeks → escalate to Sahar
+- Migration data quality issue → extend parallel run
+
+**Accept slow, don't accept stop:**
+
+- ISO 27001 audit timeline drift by 2–3 months
+- PDPL Jan 2027 implementation overrun by a quarter
+- Wave 2 starts 1 quarter late — renegotiate ramp
+
+## Critical files
+
+These exist today in [databayt/hogwarts](https://github.com/databayt/hogwarts) and form the foundation — build outward, don't greenfield.
+
+| Path | Why it matters | What to change |
+|---|---|---|
+| `prisma/models/attendance.prisma` + `attendance-enhanced.prisma` | Production attendance schema with method enum, intervention escalation, streaks | Add `EsisSubmission` model; extend `audit.prisma` with `eventType = "ESIS_SUBMITTED"` |
+| `src/app/api/mobile/attendance/bulk/route.ts` | Bulk submission pattern | Reuse pattern for daily ADEK eSIS batch export job |
+| `prisma/models/subscription.prisma` | Payment methods enum + billing history + reconciliation | Wire `APPLE_PAY` through parent UI; ensure `currency` defaults to AED for Aldar tenants |
+| `src/lib/payment/providers/tap.ts` | Tap UAE payment processor | Activate Apple Pay via `src_all` source picker; AED end-to-end |
+| `src/lib/multi-tenant-prisma-adapter.ts` | Production multi-tenant isolation | Extend `getTenantContext` to support Aldar HQ users spanning multiple `schoolId`s |
+| `socket-server/Dockerfile` | Existing Docker pattern | Reference for new top-level `Dockerfile` + `docker-compose.yaml` for on-prem |
+| `vercel.json` (cron defs) | Daily cron pattern | Reimplement crons inside Docker Compose using `ofelia` or similar |
+| `src/app/[lang]/parent/` | Parent portal routes | Complete grades view, downloadable report-card PDFs, fee payment, video class join |
+| `src/app/api/mobile/report-cards/route.ts` | Report-card API | Extend with PDF generation via `@react-pdf/renderer` |
+
+### New components to build
+
+- `packages/adek-esis-connector/` — typed client + CSV exporter + RPA fallback (Playwright)
+- `packages/license-key/` — JWT-style license file + boot/refresh validation
+- `packages/telemetry/` — outbound metric beacon
+- `prisma/models/live-class.prisma` — LiveKit room + recording schema
+- Top-level `Dockerfile` (Next.js standalone) + `docker-compose.aldar.yaml` + Helm chart for Wave 2
+- `infra/aldar/` directory with environment-specific config, runbooks, backup scripts
+
+## Verification — end-to-end before Yasmina BA cut-over
+
+Before Week 13 cut-over, verify each requirement against the actual school context, not a synthetic environment:
+
+1. **ADEK attendance submission**
+   - Run a full school day with attendance captured in hogwarts at Yasmina BA
+   - Verify the daily 14:00 GST export contains every student, with correct ADEK-mandated absence categories
+   - Confirm Aldar's compliance team can upload (or our RPA submits) before ADEK's deadline
+   - Check audit trail shows the submission with timestamp and receipt in `audit.prisma`
+
+2. **Fee payments**
+   - Test a real AED 500 payment via credit card (Tap), Apple Pay (Tap), offline bank transfer (manual recording with reconciliation), ATM deposit (manual recording with reference)
+   - Verify the parent portal shows updated balance, receipt PDF generates, accounting reconciles in `BillingHistory`
+
+3. **LiveKit video conferencing**
+   - **Inside Aldar school WiFi** at Yasmina BA, host a class with 1 teacher + 25 students simultaneously
+   - Verify video quality, screen-share, recording captures and stores in MinIO, replay works
+   - Test TURN-over-443-TCP fallback by forcing it on
+   - Confirm token security — a student token from Yasmina cannot join a Cranleigh room
+
+4. **Parent portal**
+   - Have a real Yasmina parent (with consent) log in
+   - Verify they can see child's attendance, grades, download report card PDF, message a teacher, pay fees, join a live class
+   - Test in both Arabic (RTL) and English (LTR)
+
+5. **On-premise deployment**
+   - Deploy the Docker Compose stack to Aldar's staging VM
+   - Verify license-key validation — replace with expired key → product shows warning, attendance still writeable
+   - Verify outbound telemetry reaches `telemetry.databayt.org` with metadata only (capture and inspect payloads)
+   - Trigger `databayt-cli upgrade` to a new minor version → confirm migration + health check + rollback path
+   - Run a Postgres failover drill → confirm <60s recovery and zero data loss
+
+6. **Compliance posture**
+   - Confirm PDPL parental consent workflow captures consent for every student
+   - Confirm data residency — spot-check production logs, traces, and storage to ensure no PII leaves UAE
+   - Confirm `audit.prisma` records every admin action on PII
+   - Run pen test #1 (Help AG or DTS) and remediate findings before cut-over
+
+7. **Migration accuracy**
+   - Final reconciliation report at Week 12 — students, parents, staff, sections, timetables, 1-year attendance, 1-year grades, fee balances — discrepancy <1% across every category
+   - Sign-off from Yasmina IT before cut-over
+
+If any of these verification steps fail at the pilot stage, **do not cut over.** Slipping G5 by 2 weeks is recoverable; cutting over broken is not.
+
+## Recommendations — opinionated
+
+1. **Start the UAE advisor retainer this week.** AED 12K/mo. Cheapest credibility we can buy.
+2. **Pilot at Yasmina British Academy.** Outstanding-rated, Aldar-owned brand, British curriculum, mid-size — best risk-reward profile.
+3. **Don't fight Salesforce.** Eat the bottom of the stack. MuleSoft is our friend. Co-fund the connector.
+4. **Be honest about gaps in Meeting 2.** Green/amber/red feature matrix builds trust. LiveKit is red today; admit it and show our build plan.
+5. **Lock right-of-first-refusal on Wave 1 in the pilot SOW.** The discount is the anchor; the commitment is the conversion.
+6. **Triple-track ADEK from day 1.** API + RPA + Aldar credentials. Don't bet on any single path.
+7. **AED 180K pilot, AED 2.7M Wave-2 ARR target.** Hold these numbers. The deal is the rollout.
+8. **Get a written King Fahad Academy reference in the next 14 days.** Even one paragraph in Arabic and English.
+9. **Treat this as the pivot from solo-founder to small-team.** Whether or not Aldar signs, the contractors hired to chase this deal are the company databayt becomes.
+10. **Test LiveKit inside an Aldar school WiFi at Meeting 3.** Non-negotiable. UAE VoIP throttling could kill the deal post-signature if not validated upfront.
+
+## References
+
+### Private source-of-truth artifacts (Abdout's `~/.claude/`)
+
+These are the authoritative source records. This doc is the team-shareable synthesis.
+
+- Strategy plan: `~/.claude/plans/a-very-good-company-peppy-frost.md`
+- Project memory (status snapshot): `~/.claude/projects/-Users-abdout-kun/memory/project_aldar_prospect.md`
+- ADEK regulatory reference: `~/.claude/projects/-Users-abdout-kun/memory/reference_adek.md`
+- Open-core licensing posture: `~/.claude/projects/-Users-abdout-kun/memory/feedback_enterprise_licensing_open_core.md`
+- Memory index: `~/.claude/projects/-Users-abdout-kun/memory/MEMORY.md`
+
+### Related kun docs
+
+- [share-economy](/docs/share-economy) — open-source doctrine the licensing decision flows from
+- [repositories](/docs/repositories) — hogwarts repo reference
+- [sprint](/docs/sprint) — Q3 2026 14 epics, MENA-10 pilot conversion context
+- [products](/docs/products) — hogwarts product positioning
+- [projects](/docs/projects) — active project ledger
+- [team](/docs/team) — capacity for advisor + contractor hires
+- [architecture](/docs/architecture) — multi-tenant + on-prem patterns
+- [self-hosting](/docs/self-hosting) — deployment infrastructure
+- [credentials](/docs/credentials) — secrets management for tenant credentials
+- [captain](/docs/captain) — CEO brain that surfaces deal-level signals
+
+### External authoritative sources
+
+**Aldar Education + Group**
+
+- [Aldar Education](https://www.aldar.com/education) — official education arm page
+- [Aldar Properties PJSC](https://www.aldar.com) — parent company
+- [Aldar–ADEK Emiratisation Partnership announcement](https://www.mediaoffice.abudhabi/en/education/abu-dhabi-department-of-education-and-knowledge-partners-with-aldar-to-advance-emiratisation-in-education-sector/)
+- [Publicis Sapient Aldar Salesforce case study](https://www.publicissapient.com/work/how-salesforce-transformed-the-student-and-parent-experience-with-a-digitized-education-ecosystem)
+- [Aldar Sustainability Report 2024](https://cdn.aldar.com/-/media/project/aldar-tenant/aldar2/sustainability-report/sustainability-report-2024.pdf)
+- [Aldar Ariba Supplier Registration Guide](https://sourcing.aldar.com/PDF/RegistrationGuideforSuppliers.pdf)
+
+**ADEK + regulatory**
+
+- [ADEK](https://www.adek.gov.ae) — Abu Dhabi Department of Education and Knowledge
+- [ADEK School Policies](https://www.adek.gov.ae/en/Education-System/Education-Policies/School-Policies)
+- [Irtiqaa Inspections Programme](https://www.adek.gov.ae/en/Education-System/Private-Schools/Irtiqaa-Programme-Improving-Schools-performance)
+- [eSIS Portal](https://esis.adek.gov.ae)
+- [eSIS User Guide](https://guides.adek.gov.ae/Esis/tc/0)
+- [ADEK Student Administrative Affairs Policy](https://www.adek.gov.ae/-/media/Project/TAMM/ADEK/Policies/School-Policies/Teaching-and-Learning/ADEK_S_Student-Administrative-Affairs-Policy_EN_1_2.pdf)
+- [TAMM Abu Dhabi](https://www.tamm.abudhabi) — government services portal
+- [UAE PDPL framework](https://u.ae/en/about-the-uae/digital-uae/data/data-protection-laws)
+
+## Updates log
+
+| Date | Update |
+|---|---|
+| 2026-05-26 | Initial documentation. Strategy plan approved. Team posture: phased. Pilot pricing: aggressive (AED 180K). License: open-core. Pilot school recommendation: Yasmina British Academy. |
