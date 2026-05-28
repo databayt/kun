@@ -70,6 +70,8 @@ Environments: localhost:3000 (default) or --env staging
 Tool: browser-headed MCP (visible Playwright)
 Report: .claude/handover-reports/<block>-<timestamp>/
 Loop: --fix flag for translation + RTL automated fixes
+
+Next step: "release [block]" — see 1.9
 ```
 
 ### 1.8 Security & Performance
@@ -77,6 +79,33 @@ Loop: --fix flag for translation + RTL automated fixes
 ```
 "security" → OWASP Top 10 + dependency scan + secrets check + report
 "performance" → Core Web Vitals + bundle + DB queries + report
+```
+
+### 1.9 Release to client
+
+```
+"release [block]"  →  .claude/commands/release.md
+
+The one-spell client handoff. Chains:
+
+  /handover [block]   (5-pass Playwright QA, scoped)
+    └→ /check         (typecheck + build + visual)
+       └→ /ship       (vercel --prod, auto-fix retry)
+          └→ /watch <prod-url>   (smoke test in production)
+             └→ gh issue comment + close   (auto-post URL + verdict)
+
+Pre-conditions: working tree clean, on main, up to date with origin
+Issue resolution: --issue #N flag, then HEAD commit Closes/Refs,
+                  then fuzzy title match on type/feat issues
+Optional: --notify-slack <channel> via slack MCP
+Sentinel cache: .claude/release-state.json — re-runs skip stages
+                that passed within the last 10 minutes
+
+When NOT to use:
+  - Mid-implementation → use /check for the tight loop
+  - Hotfix from a non-main branch → use /ship directly
+  - QA only, not shipping → use /handover alone
+  - Investigating a prod issue → use /watch + /incident
 ```
 
 ---
