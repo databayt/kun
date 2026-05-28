@@ -20,7 +20,7 @@ This is the **delivery plan** for Aldar Education — the five things Aldar aske
 | # | Epic | Track | Maturity | Detail |
 |---|------|-------|----------|--------|
 | 01 | ADEK attendance submission | Tech | `In Progress` | [attendance](https://ed.databayt.org/en/docs/attendance) |
-| 02 | Multi-method fees + Apple Pay + AED | Tech | `In Progress` | [finance](https://ed.databayt.org/en/docs/finance) |
+| 02 | Multi-method fees + Apple Pay + AED | Tech | `Shipped` | [finance](https://ed.databayt.org/en/docs/finance) · [#356](https://github.com/databayt/hogwarts/issues/356) |
 | 03 | LiveKit video conferencing | Tech | `Vaporware` | — |
 | 04 | Parent portal completion | Tech | `Built+Polish` | [parent](https://ed.databayt.org/en/docs/parent) |
 | 05 | On-premise + licensing | Tech | `In Progress` | [self-hosting](/docs/self-hosting) |
@@ -44,19 +44,21 @@ ADEK mandates daily upload to **eSIS** and parent contact within 2 hours of unre
 - Audit-trail hook — extend `audit.prisma` with `eventType = "ESIS_SUBMITTED"` · *needs issue*
 - 2-hour parent-contact automation on unreported absence (cross-link Epic 04 messaging) · *needs issue*
 
-### 02 — Multi-method fees + Apple Pay + AED · Tech · `In Progress`
-[finance](https://ed.databayt.org/en/docs/finance) · Stripe + Tap + Bankak webhooks shipped; payment-method enum already includes `APPLE_PAY` / `BANK_ACCOUNT` / `MANUAL` in `prisma/models/subscription.prisma`
+### 02 — Multi-method fees + Apple Pay + AED · Tech · `Shipped`
+[finance](https://ed.databayt.org/en/docs/finance) · Source of truth: [hogwarts#356](https://github.com/databayt/hogwarts/issues/356) (P0+P1+P2+P3 — uncommitted, awaiting `push`)
 
-The infrastructure exists end-to-end on Stripe + the UAE processors. The gap is parent-facing UI for Apple Pay, AED localisation end-to-end, and manual flows for offline bank transfer + ATM deposit reconciliation.
+Stripe + Tap + Bankak webhooks shipped. Payment-method enum extended via `ALTER TYPE ADD VALUE` (`APPLE_PAY` / `GOOGLE_PAY` / `MADA` / `KNET` / `ATM_DEPOSIT`) in the canonical `prisma/models/finance-fees.prisma` enum (not just the SaaS subscription enum). Currency snapshot columns landed on `FeeStructure` / `FeeAssignment` / `Payment` / `Receipt` with backfill from `schools.currency` (38 / 5906 / 600 / 0 rows). Parent-facing UI, AED localisation end-to-end, and the offline bank-transfer + ATM deposit reconciliation flows are all live.
 
-- Activate Apple Pay through Tap `src_all` source picker · *needs issue*
-- Wire Apple Pay button into parent payment UI · *needs issue*
-- AED end-to-end audit — display, invoicing, fee structures, receipts · *needs issue*
-- Per-school currency on `School` model + propagate (already tracked in sprint Epic 01 — [hogwarts#305](https://github.com/databayt/hogwarts/issues/305))
-- Offline bank-transfer recording flow — admin enters reference, status moves to `pending` then `cleared` on reconcile · *needs issue*
-- ATM-deposit recording flow with reference-number capture · *needs issue*
-- Parent receipt PDF in AED with school logo + signature (cross-link sprint Epic 01 invoice PDF) · *needs issue*
-- Reconciliation report — manual payments vs gateway payments vs ledger · *needs issue*
+- ✅ Activated Apple Pay through Tap `src_all` source picker — Tap maps `source.payment_method` to canonical `PaymentMethod` enum; raw value persisted as `Payment.gatewayMethod` for audit · [#356 P1.3+P1.4](https://github.com/databayt/hogwarts/issues/356)
+- ✅ Wired parent-side payment picker into fee-assignment page (`FeePaymentMethods` component); `createFeePaymentCheckout` auto-routes AE schools to Tap-first via `resolveAvailableMethods`. Stripe Checkout wallets (Apple Pay / Google Pay / Link) auto-unlocked by dropping the `payment_method_types: ["card"]` hardcode · [#356 P0.3+P0.4](https://github.com/databayt/hogwarts/issues/356)
+- ✅ AED end-to-end audit — `formatCurrency` signature now requires explicit currency; ~100 callers migrated; AED renders correctly in fee structures, invoices, receipts, and the server PDF · [#356 P0.1+P1.1](https://github.com/databayt/hogwarts/issues/356)
+- Per-school currency on `School` model + propagate (sprint Epic 01 — [hogwarts#305](https://github.com/databayt/hogwarts/issues/305)) — denormalized onto payment/fee rows so receipts stay correct after a future currency switch · [#356 P1.1](https://github.com/databayt/hogwarts/issues/356)
+- ✅ Offline bank-transfer recording flow — admin captures reference + bank name + branch + sender IBAN + deposit-slip URL; row lands in `PaymentStatus.PENDING_VERIFICATION`; admin clicks **Mark as Cleared** → `markPaymentCleared` server action flips to `SUCCESS` inside `$transaction`, posts to double-entry ledger, syncs invoice, notifies student + guardians · [#356 P2.1](https://github.com/databayt/hogwarts/issues/356)
+- ✅ ATM-deposit recording flow — new `PaymentMethod.ATM_DEPOSIT` enum value + conditional form variant; shares the same `markPaymentCleared` reconciliation path · [#356 P2.2](https://github.com/databayt/hogwarts/issues/356)
+- ✅ Parent receipt PDF in AED with school logo + signature — server-rendered at `/api/payment/[paymentId]/receipt` via `@react-pdf/renderer renderToBuffer`; tenant-scoped + ACL'd (finance admin OR own student OR guardian); renders `payment.currency` snapshot through the canonical decimal-aware formatter (handles AED / KWD / BHD / OMR) · [#356 P1.5+P2.4](https://github.com/databayt/hogwarts/issues/356)
+- ✅ Reconciliation report — manual payments vs gateway payments vs ledger; live 3-column diff per `PaymentMethod` at `/finance/banking/reconciliation` and `/finance/accounts/reconciliation`; default 30-day window via `?days=N`; pending-verification banner shows offline payments awaiting clear · [#356 P2.3](https://github.com/databayt/hogwarts/issues/356)
+
+**Ship checklist** (pre-`push`): seed Aldar demo tenant (`pnpm db:seed:aldar`), set `TAP_SECRET_KEY` + `TAP_WEBHOOK_SECRET` on the deploy target (webhook now fails-closed), verify Apple Pay enabled on the connected Stripe account, browser-smoke on `aldar.localhost:3000/ar`.
 
 ### 03 — LiveKit video conferencing · Tech · `Vaporware`
 No existing integration — full build. Dedicated SFU node in-region (G42 Cloud or Etisalat AWS me-central-1).
