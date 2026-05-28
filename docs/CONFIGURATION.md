@@ -84,7 +84,6 @@ Kun's value is its configuration. This is the complete blueprint of every settin
 | Package manager | pnpm |
 | Stack | Next.js 16, React 19, Prisma 6, TypeScript 5, Tailwind CSS 4, shadcn/ui |
 | Languages | Arabic (RTL default), English (LTR) |
-| Mode | Full Autopilot (100-turn cycles) |
 | Port | Always 3000 |
 | Environment | Single .env only |
 | Component hierarchy | ui → atom → template → block → micro |

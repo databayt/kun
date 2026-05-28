@@ -58,7 +58,7 @@ Keyword: "saas billing" or "table users" or "auth"
 ### 1.7 Handover QA
 
 ```
-"handover [block]"
+"handover [block]"  →  .claude/commands/handover.md
 
 Pass 1: Bug-free — navigate everything, check console
 Pass 2: Flow — complete user journeys, data persistence
@@ -66,9 +66,10 @@ Pass 3: Responsive — 375px, 768px, 1440px
 Pass 4: RTL + i18n — Arabic layout mirrors, no LTR remnants
 Pass 5: Translation — no hardcoded English, no missing keys
 
-Environments: demo.localhost:3000 AND demo.databayt.org
-Tool: Playwright MCP browser-headed
-Loop: Fix → re-test until clean
+Environments: localhost:3000 (default) or --env staging
+Tool: browser-headed MCP (visible Playwright)
+Report: .claude/handover-reports/<block>-<timestamp>/
+Loop: --fix flag for translation + RTL automated fixes
 ```
 
 ### 1.8 Security & Performance

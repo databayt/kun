@@ -209,7 +209,7 @@ export const schools: School[] = [
     subtitle: "Everyday practical magic",
     description:
       "The spells you cast most often. Reliable, essential, and dangerously easy to take for granted. Professor Flitwick would be proud.",
-    quote: "dev is your Lumos — the first spell each morning. validate is your Nox — the last before rest.",
+    quote: "dev is your Lumos — the first spell each morning. check is your Nox — the last before rest.",
     spells: [
       {
         name: "dev",
@@ -236,7 +236,7 @@ export const schools: School[] = [
           "pnpm build (production build)",
           "Post-build analysis: bundle size, warnings",
         ],
-        connects: ["deploy", "fix", "validate"],
+        connects: ["deploy", "fix", "check"],
         depends: [],
       },
       {
@@ -291,16 +291,17 @@ export const schools: School[] = [
         depends: ["build", "test"],
       },
       {
-        name: "validate",
-        effect: "Run every quality check — lint, types, tests, security",
-        order: [f("build"), f("test"), f("typescript"), w("testing")],
+        name: "check",
+        effect: "Pre-ship quality gate — typecheck, build, visual, tests",
+        order: [f("build"), f("typescript"), p("Browser"), s("/check")],
         steps: [
-          "pnpm tsc --noEmit (type check)",
-          "pnpm lint (ESLint)",
-          "pnpm test (run tests)",
-          "Report pass/fail for all gates",
+          "pnpm tsc --noEmit (type check, auto-fix loop max 5)",
+          "pnpm build (production build, auto-fix loop max 5)",
+          "Navigate route, screenshot, console-clean verify",
+          "Run existing tests (--passWithNoTests)",
+          "Verdict: READY TO SHIP / BLOCKED",
         ],
-        connects: ["build", "test", "security"],
+        connects: ["build", "ship", "handover"],
         depends: [],
       },
     ],
@@ -613,6 +614,7 @@ export const schools: School[] = [
         depends: [],
       },
       { name: "e2e", effect: "End-to-end tests across all browsers", order: [f("test"), p("Browser"), w("testing")], steps: ["Playwright all browsers", "browser-headed MCP for auth flows", "Visual regression"], connects: ["test", "handover"], depends: [] },
+      { name: "handover", effect: "Pre-demo multi-pass QA — bug-free, flow, responsive, RTL, translation", order: [f("quality-engineer"), p("Browser"), s("/handover")], steps: ["Discover routes in the block", "Five passes per route at 375/768/1440", "Capture console + network + a11y", "Verify RTL mirror + translation completeness", "Report: BLOCKED or READY FOR DEMO"], connects: ["e2e", "check", "test"], depends: [] },
       { name: "coverage", effect: "Reveal test coverage — the Marauder's Map", order: [f("test"), w("testing")], steps: ["pnpm test --coverage", "V8 provider", "Lines, branches, functions, statements"], connects: ["test"], depends: ["test"] },
       { name: "review", effect: "Code review — examining decisions", order: [f("pattern"), f("architecture"), f("typescript"), f("react")], steps: ["Server/client boundaries", "Sequential data fetching", "Form validation", "Multi-tenant schoolId", "Semantic tokens"], connects: ["audit", "security"], depends: [] },
       {
