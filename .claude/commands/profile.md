@@ -154,7 +154,7 @@ For Ali's testing workflow.
 name: qa
 description: QA and testing workflow
 agents:
-  - quality-engineer
+  - quality
   - report
   - test
   - guardian
@@ -252,7 +252,7 @@ Profile: ali (QA + Sales)
 Extends: qa
 
 Agents (12):
-  quality-engineer, report, test, guardian, build, sse,
+  quality, report, test, guardian, build, sse,
   revenue, support, analyst
 
 Commands (10):

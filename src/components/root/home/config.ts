@@ -120,11 +120,11 @@ export const homeItems: HomeItem[] = [
     href: "/engine/credentials",
   },
   {
-    id: "quality-engineer",
-    title: "Quality Engineer",
-    description: "Tracks 19 keywords, orchestrates QA, monitors coverage.",
+    id: "quality",
+    title: "Quality",
+    description: "Routes 17 niche keywords; owns qa, /handover, /release orchestrators.",
     icon: "GuardianIcon",
-    href: "/engine/quality-engineer",
+    href: "/engine/quality",
   },
   {
     id: "tips",

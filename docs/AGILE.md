@@ -56,7 +56,7 @@ Everything that already works stays untouched:
 | Agile Role | Person | Core Duty | AI Delegation |
 |------------|--------|-----------|---------------|
 | **Product Owner** | Abdout | Sprint goals, architecture, final approval | `product` agent writes stories and ICE scores; Abdout approves |
-| **QA Lead** | Ali | Judgment QA, client demos, sales pipeline | `quality-engineer` agent runs automated QA; Ali does human judgment passes |
+| **QA Lead** | Ali | Judgment QA, client demos, sales pipeline | `quality` agent runs automated QA; Ali does human judgment passes |
 | **Research Lead** | Samia | Vision input, R&D, Kun caretaking | `growth` agent drafts content; Samia reviews and directs via screen reader |
 | **Operations Lead** | Sedon | Saudi ops, physical tasks, reliable delivery | `ops` agent monitors infrastructure; Sedon executes physical tasks |
 | **Scrum Facilitator** | captain agent | Runs all ceremonies, tracks metrics, generates reports | N/A — IS the AI |
@@ -403,7 +403,7 @@ HANDOVER → 5-PASS QA → FILE BUGS → RE-VERIFY → APPROVE
 
 Existing handover pipeline. Sprint-committed — Ali gets a list of URLs and checklists each sprint.
 
-**Owner**: Ali (human judgment) + `quality-engineer` agent (automated checks)
+**Owner**: Ali (human judgment) + `quality` agent (automated checks)
 **Tracking**: GitHub Issue with `qa` label + checklist
 
 ### 6.4 Sales Work (NEW)

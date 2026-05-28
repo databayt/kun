@@ -62,7 +62,7 @@ Claude routes these to the right agent + MCP without a dedicated command.
 **UI**: `table`, `form`, `modal`, `card`, `sidebar`, `header`, `footer`, `hero`, `navbar`, `menu`
 **Features**: `auth`, `dashboard`, `landing`, `checkout`, `settings`, `profile`, `admin`, `onboarding`
 **Animation**: `motion`, `animation`, `transition`, `gesture`, `scroll`
-**Quality dimensions** (17 niche keywords — see `.claude/agents/quality-engineer.md`):
+**Quality dimensions** (17 niche keywords — see `.claude/agents/quality.md`):
   - Browser: `see`, `flow`, `debug`, `responsive`, `lang`, `fast`
   - Code: `guard`, `architecture`, `structure`, `pattern`, `design`, `stack`
   - Deep: `trace`, `performance`, `efficient`

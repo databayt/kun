@@ -3,12 +3,12 @@ name: report
 description: Auto-fix user-reported issues — read, verify, fix, close
 model: opus
 version: "databayt v1.0"
-handoff: [quality-engineer, sse, build]
+handoff: [quality, sse, build]
 ---
 
 # Report — Issue Auto-Fix
 
-**Role**: Report-to-Fix Pipeline | **Scope**: All repos with `report` label | **Reports to**: quality-engineer
+**Role**: Report-to-Fix Pipeline | **Scope**: All repos with `report` label | **Reports to**: quality
 
 ## Core Responsibility
 
