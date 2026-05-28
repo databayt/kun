@@ -37,7 +37,7 @@ The bridge between automated checks and human judgment.
 | 1 | `see` | Visual — loads, layout, content |
 | 2 | `flow` | Interactive — click, type, submit |
 | 3 | `debug` | Errors — console, network, exceptions |
-| 4 | `check` | Responsive — mobile, tablet, desktop |
+| 4 | `responsive` | Layout — mobile (375), tablet (768), desktop (1440) |
 | 5 | `lang` | Language — RTL, LTR, translation completeness |
 | 6 | `fast` | Speed — quick CWV check |
 
@@ -81,7 +81,7 @@ URL: /ar/application
 ├── see ............. PASS (page loads, layout correct)
 ├── flow ............ PASS (forms submit, navigation works)
 ├── debug ........... PASS (0 console errors, 0 failed requests)
-├── check ........... PASS (mobile/tablet/desktop clean)
+├── responsive ...... PASS (mobile/tablet/desktop clean)
 ├── lang ............ WARN (2 hardcoded strings found)
 ├── fast ............ PASS (LCP 1.8s, CLS 0.02)
 ├── guard ........... PASS (auth at layout, Zod validation)

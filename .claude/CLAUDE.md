@@ -9,7 +9,6 @@
 - **Package Manager**: pnpm
 - **Stack**: Next.js 16 · React 19 · Prisma 6 · TypeScript 5 · Tailwind CSS 4 · shadcn/ui
 - **Languages**: Arabic (RTL default) · English (LTR)
-- **Mode**: Full Autopilot (100-turn cycles)
 - **Commit footer**: `Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>`
 
 > Project rules auto-load from `.claude/rules/`:
@@ -17,9 +16,9 @@
 
 ---
 
-## Tier 1 — Pipeline (idea → production)
+## Pipeline — idea → production
 
-`feature <name> [product]` chains every stage. Each is also a standalone command.
+`/feature <name> [product]` chains every stage. Each is also a standalone command.
 
 ```
 IDEA → SPEC → SCHEMA → CODE → WIRE → CHECK → SHIP → WATCH
@@ -32,66 +31,61 @@ IDEA → SPEC → SCHEMA → CODE → WIRE → CHECK → SHIP → WATCH
 | Data | `/schema` | Migration applied, types compile |
 | Logic | `/code` | `tsc --noEmit` passes |
 | UI | `/wire` | `pnpm build` passes |
-| Quality | `/check` | All gates green |
-| Deploy | `/ship` | Vercel deployment Ready |
+| Quality | `/check` | TypeScript + build + visual green |
+| Deploy | `/ship` | Vercel production Ready |
 | Monitor | `/watch` | No errors, issue closed |
 
 Product scope: append `hogwarts`, `souq`, `mkan`, `shifa` to activate domain context.
 
+Pre-demo gate (deeper than `/check`, scoped to a feature block): **`/handover <block>`** — five-pass Playwright QA.
+
 ---
 
-## Tier 2 — Standalone Tools
+## Tools — standalone commands
 
-Self-describing commands at `.claude/commands/<name>.md`:
+Surface verbs available in any session. See `.claude/commands/<name>.md` (project) or `~/.claude/skills/<name>/SKILL.md` (user) for the spec.
 
-`dev`, `build`, `deploy`, `report`, `atom`, `block`, `template`, `test`, `clone`,
-`incident`, `monitor`, `package`, `learn`, `analyze`, `profile`, `captain`, `weekly`,
-`screenshot`, `pricing`, `costs`, `proposal`, `credentials`, `health`.
+**Lifecycle**: `dev`, `build`, `deploy`, `ship`, `watch`, `quick`, `fix`
+**Quality**: `check`, `handover`, `report`
+**Components**: `atom`, `block`, `template`
+**Pipeline stages**: `idea`, `spec`, `schema`, `code`, `wire`, `feature`
+**Ops**: `incident`, `monitor`, `costs`, `pricing`, `proposal`, `credentials`
+**Org**: `captain`, `weekly`, `health`, `learn`, `analyze`, `profile`
+**Utility**: `clone`, `package`, `screenshot`, `issue`, `crawl-anthropic`
 
-## Tier 2b — Coverage Sweeps
+---
 
-All accept `[block]` for scoped runs and `--status` for reports.
-Ledger at `<product>/.claude/coverage/ledger.json`, protocol at `.claude/coverage/sweep-protocol.md`.
+## Vocabulary — keywords routed to agents
 
-| Sweep | Mode | Sweep | Mode |
-|-------|------|-------|------|
-| `/nextjs` | fix | `/prisma` | report |
-| `/react` | fix | `/authjs` | report |
-| `/typescript` | fix | `/translate` | fix |
-| `/tailwind` | fix | `/skeleton` | fix |
-| `/shadcn` | fix | `/structure` | fix |
-| `/accessibility` | fix | `/guard` | fix |
-| `/barrel` | fix | `/waterfall` | fix |
-
-`/coverage [product] [keyword]` for the report.
-
-## Tier 3 — Vocabulary
-
-Claude routes these keywords to the right agent + MCP without a dedicated command.
+Claude routes these to the right agent + MCP without a dedicated command.
 
 **UI**: `table`, `form`, `modal`, `card`, `sidebar`, `header`, `footer`, `hero`, `navbar`, `menu`
 **Features**: `auth`, `dashboard`, `landing`, `checkout`, `settings`, `profile`, `admin`, `onboarding`
 **Animation**: `motion`, `animation`, `transition`, `gesture`, `scroll`
-**Quality**: `security`, `performance`, `review`, `audit`, `e2e`
-**Build**: `fix`, `error`, `lint`, `format`, `type-check`, `deps`, `outdated`
+**Quality dimensions** (17 niche keywords — see `.claude/agents/quality-engineer.md`):
+  - Browser: `see`, `flow`, `debug`, `responsive`, `lang`, `fast`
+  - Code: `guard`, `architecture`, `structure`, `pattern`, `design`, `stack`
+  - Deep: `trace`, `performance`, `efficient`
+  - Compare: `mirror`, `diff`
+**Build**: `error`, `lint`, `format`, `type-check`, `deps`, `outdated`
 **React perf**: `parallelize`, `bundle`, `lazy`, `suspense`, `memo`, `streaming`, `dedup`
 **Services**: `github`, `figma`, `linear`, `slack`, `stripe`, `vercel`, `sentry`, `neon`, `analytics`
 **Cross-repo**: `from codebase`, `from shadcn`, `like hogwarts`, `like souq`, `like mkan`, `like shifa`
-**Operations**: `costs`, `pricing`, `weekly`, `monitor`, `incident`, `credentials`
-**Intelligence**: `learn`, `analyze`, `profile`, `conventions`, `health`, `patterns`, `drift`
+**Operations**: `weekly`, `monitor`, `incident`, `credentials`
+**Intelligence**: `learn`, `analyze`, `conventions`, `health`, `patterns`, `drift`
 
 ---
 
 ## Behavior
 
 When you see a keyword:
-1. **Pipeline keyword** → run the corresponding stage command
-2. **Sweep keyword** → run full sweep (or scoped to block arg)
+1. **Pipeline stage** → run the corresponding stage command
+2. **Tool verb** → invoke the command/skill
 3. **Vocabulary keyword** → activate the right agent + MCP
 4. **`from <repo>` / `like <product>`** → reference patterns from the named source
 
 Bug fixes → `/report`. New features → `/feature <name>`. Components → `/atom`, `/block`, `/template`.
-Enterprise-scale planning still lives at `~/.claude/bmad/`.
+Pre-demo quality pass → `/handover <block>`.
 
 ## Lookups
 
