@@ -39,6 +39,8 @@ Product scope: append `hogwarts`, `souq`, `mkan`, `shifa` to activate domain con
 
 Pre-demo gate (deeper than `/check`, scoped to a feature block): **`/handover <block>`** — five-pass Playwright QA.
 
+One-spell client handoff: **`/release <block>`** — chains `/handover` → `/check` → `/ship` → `/watch`, auto-comments the production URL on the related GitHub issue, and closes it. Requires main branch + clean tree.
+
 ---
 
 ## Tools — standalone commands
@@ -46,7 +48,7 @@ Pre-demo gate (deeper than `/check`, scoped to a feature block): **`/handover <b
 Surface verbs available in any session. See `.claude/commands/<name>.md` (project) or `~/.claude/skills/<name>/SKILL.md` (user) for the spec.
 
 **Lifecycle**: `dev`, `build`, `deploy`, `ship`, `watch`, `quick`, `fix`
-**Quality**: `check`, `handover`, `report`
+**Quality**: `check`, `handover`, `release`, `report`
 **Components**: `atom`, `block`, `template`
 **Pipeline stages**: `idea`, `spec`, `schema`, `code`, `wire`, `feature`
 **Ops**: `incident`, `monitor`, `costs`, `pricing`, `proposal`, `credentials`
@@ -85,7 +87,7 @@ When you see a keyword:
 4. **`from <repo>` / `like <product>`** → reference patterns from the named source
 
 Bug fixes → `/report`. New features → `/feature <name>`. Components → `/atom`, `/block`, `/template`.
-Pre-demo quality pass → `/handover <block>`.
+Pre-demo quality pass → `/handover <block>`. **Send to client (one spell) → `/release <block>`.**
 
 ## Lookups
 
