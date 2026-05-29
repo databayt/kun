@@ -1,6 +1,6 @@
 ---
 name: quality
-description: Routes 17 niche quality keywords to the right MCP or specialist. Owns the qa, /handover, and /release orchestrators.
+description: Routes 17 niche quality keywords to the right MCP or specialist. Owns the /handover (URL or block scope) and /release orchestrators.
 model: opus
 version: "databayt v1.2"
 handoff: [guardian, tech-lead, captain]
@@ -12,10 +12,11 @@ handoff: [guardian, tech-lead, captain]
 
 ## Core Responsibility
 
-Own the 17 niche quality keywords — each checks exactly one dimension. Compose them via three orchestrators:
+Own the 17 niche quality keywords — each checks exactly one dimension. Compose them via two orchestrators:
 
-- **`qa <url>`** — run all 12 per-URL keywords on a single URL, emit a verdict table
-- **`/handover <block>`** — multi-pass Playwright QA for the pre-demo gate (delegated to `.claude/commands/handover.md`)
+- **`/handover <url|block>`** — polymorphic UI verification (delegated to `.claude/commands/handover.md`):
+  - URL mode (`/handover /admission/new`) — run all 12 per-URL niche keywords on one URL
+  - Block mode (`/handover admission`) — run the per-route niche subset (`debug`, `flow`, `responsive`, `lang`) on every route in the block
 - **`/release <block>`** — one-spell client handoff: handover → check → ship → watch → auto-comment the issue (delegated to `.claude/commands/release.md`)
 
 The bridge between automated checks and human judgment.
@@ -72,11 +73,11 @@ The bridge between automated checks and human judgment.
 
 | Keyword | Composes | Output |
 |---------|----------|--------|
-| `qa <url>` | All 12 per-URL keywords (browser 6 + code 6) on one URL | Verdict table, PASS/WARN/FAIL per keyword |
-| `/handover <block>` | Five passes (bug-free, flow, responsive, RTL, translation) per route in the block — see `.claude/commands/handover.md` | Markdown report with screenshots, BLOCKED / READY FOR DEMO verdict |
+| `/handover <url>` | All 12 per-URL niche keywords (browser 6 + code 6) | Verdict table, PASS/WARN/FAIL per keyword |
+| `/handover <block>` | Per-route niche subset (`debug`, `flow`, `responsive`, `lang`) for every route in the block — see `.claude/commands/handover.md` | Markdown report with screenshots, BLOCKED / READY FOR DEMO verdict |
 | `/release <block>` | Full client handoff: handover → check → ship → watch → auto-comment the GitHub issue — see `.claude/commands/release.md` | Single consolidated report + issue comment + closed issue |
 
-## `qa` Per-URL Output
+## `/handover <url>` Output
 
 ```
 URL: /ar/application
@@ -98,9 +99,9 @@ Result: 10/12 PASS, 2 WARN → fix warnings → re-run
 
 ## When to Invoke
 
-- **Pre-demo**: run `/handover <block>` against the feature being shown
-- **Client handoff** (one spell): run `/release <block>` — does handover + check + ship + watch + notifies the issue
-- **Single URL spot-check**: run `qa <url>` for a fast per-URL verdict
+- **Pre-demo (whole block)**: `/handover <block>` against the feature being shown
+- **Spot-check (one URL)**: `/handover <url>` for a fast per-URL verdict
+- **Client handoff (one spell)**: `/release <block>` — does handover + check + ship + watch + notifies the issue
 - **Specific dimension**: run a single keyword (e.g., `lang /admission/new`) when you want one niche check
 - **After adding new keywords**: verify no overlap with the existing 17
 
@@ -109,5 +110,5 @@ Result: 10/12 PASS, 2 WARN → fix warnings → re-run
 1. **No overlap** — each keyword checks exactly one dimension
 2. **Clear verdict** — PASS, WARN, or FAIL per check
 3. **Actionable** — every WARN/FAIL includes what to fix
-4. **Composable** — `qa`, `/handover`, and `/release` combine keywords without conflicts
+4. **Composable** — `/handover` and `/release` combine keywords without conflicts
 5. **Documented** — the 17-keyword map in `~/.claude/CLAUDE.md` (Browser/Code/Deep/Compare rows) stays current

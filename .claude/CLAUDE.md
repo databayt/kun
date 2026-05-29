@@ -37,7 +37,7 @@ IDEA → SPEC → SCHEMA → CODE → WIRE → CHECK → SHIP → WATCH
 
 Product scope: append `hogwarts`, `souq`, `mkan`, `shifa` to activate domain context.
 
-Pre-demo gate (deeper than `/check`, scoped to a feature block): **`/handover <block>`** — five-pass Playwright QA.
+UI verification gate (deeper than `/check`): **`/handover <url|block>`** — polymorphic on argument. URL mode runs the 12 per-URL niche keywords; block mode runs the per-route subset on every route in the block.
 
 One-spell client handoff: **`/release <block>`** — chains `/handover` → `/check` → `/ship` → `/watch`, auto-comments the production URL on the related GitHub issue, and closes it. Requires main branch + clean tree.
 
