@@ -33,9 +33,10 @@ Promote a `/check`-passed build to **production** on Vercel. The pipeline's fina
    - Refuse if current branch is not `main` and user did not pass `--from-branch`
    - Confirm branch is up to date with `origin/main`
 
-2. **Quality gate**
-   - If `/check` has not run in this session, run it inline (`pnpm tsc --noEmit` + `pnpm build`)
-   - Block on failure — production should never receive a build that does not compile locally
+2. **Quality gate** (sentinel-aware)
+   - Read `.claude/session-state.json`. If `check.status == PASS` and `check.at` is within the last 10 minutes, skip the inline gate.
+   - Otherwise run `pnpm tsc --noEmit` + `pnpm build` inline. Write the sentinel on PASS.
+   - Block on failure — production should never receive a build that does not compile locally.
 
 #### Phase 2 — Deploy
 

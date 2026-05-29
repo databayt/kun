@@ -35,15 +35,14 @@ Refuse to proceed if any of these fail. Each check should print the offending st
    ```
    If any check fails: stop with the specific reason (behind, ahead, or wrong branch). Suggest the fix.
 
-3. **Sentinel cache**
-   Read `.claude/release-state.json` if it exists. For each stage, if its sentinel is `PASS` and the timestamp is within the last 10 minutes, mark it `SKIP`. This makes re-runs idempotent after fixing one stage.
+3. **Sentinel cache** (shared session state)
+   Read `.claude/session-state.json` if it exists. Each gate command writes its own key (`handover`, `check`) on PASS. For each stage, if its sentinel is `PASS` and the timestamp is within the last 10 minutes, mark it `SKIP`. This makes re-runs idempotent after fixing one stage — and lets `/ship` and `/check` invoked alone earlier in the session contribute their results here.
 
    Sentinel shape:
    ```json
    {
-     "block": "admission",
-     "handover": { "status": "PASS", "at": "2026-05-28T14:30:00Z" },
-     "check":    { "status": "PASS", "at": "2026-05-28T14:32:00Z" }
+     "handover": { "scope": "block", "block": "admission", "status": "PASS", "at": "2026-05-29T14:30:00Z" },
+     "check":    { "status": "PASS", "at": "2026-05-29T14:32:00Z" }
    }
    ```
 
@@ -65,20 +64,23 @@ Capture `$ISSUE_NUMBER` for Phase 6.
 
 ### Phase 3 — Stage 1: /handover
 
-Delegate to `.claude/commands/handover.md`:
+Delegate to `.claude/commands/handover.md` in block mode:
 
-- Run `/handover <block>` against localhost:3000 (default) or `--env staging` if passed
-- Wait for the verdict
-- If `BLOCKED`: write sentinel `FAIL`, stop, surface findings with file:line references
-- If `READY FOR DEMO`: write sentinel `PASS`, continue
+- Skip if sentinel says `handover.status == PASS` and `block` matches and `at` is within 10 min
+- Otherwise run `/handover <block>` against localhost:3000 (default) or `--env staging` if passed
+- `/handover` writes its own sentinel on PASS
+- If `BLOCKED`: stop, surface findings with file:line references
+- If `READY FOR DEMO`: continue
 
 ### Phase 4 — Stage 2: /check
 
 Delegate to `.claude/commands/check.md`:
 
-- Run `/check` (inherits the auto-fix loop, max 5 attempts)
-- If `BLOCKED`: write sentinel `FAIL`, stop, surface the failing gate
-- If `READY TO SHIP`: write sentinel `PASS`, continue
+- Skip if sentinel says `check.status == PASS` and `at` is within 10 min
+- Otherwise run `/check` (inherits the auto-fix loop, max 5 attempts)
+- `/check` writes its own sentinel on PASS
+- If `BLOCKED`: stop, surface the failing gate
+- If `READY TO SHIP`: continue
 
 ### Phase 5 — Stage 3: /ship
 
@@ -170,7 +172,7 @@ Total elapsed: <duration>
 - All four stages report PASS
 - Issue comment posted, issue closed
 - Optional Slack post dispatched (if `--notify-slack`)
-- Sentinel cache cleared (so next /release starts fresh)
+- Sentinel keys for this release cleared from `.claude/session-state.json` (other gates' sentinels untouched)
 
 ## When to use
 

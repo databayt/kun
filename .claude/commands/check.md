@@ -95,6 +95,23 @@ Output a structured report:
 **Verdict**: READY TO SHIP / BLOCKED
 ```
 
+### 6. SENTINEL — Cache the pass
+
+On verdict `READY TO SHIP`, write to the shared session sentinel at `.claude/session-state.json`:
+
+```json
+{
+  "check": {
+    "status": "PASS",
+    "at": "<ISO timestamp>"
+  }
+}
+```
+
+Merge with existing keys — do not overwrite the file. `/ship` and `/release` read this and skip their inline `/check` if the timestamp is within 10 minutes.
+
+Skip the sentinel on BLOCKED.
+
 ## Error Recovery
 
 | Error | Fix | Max Retries |
