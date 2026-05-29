@@ -1,86 +1,97 @@
-# Handover — Pre-Demo Quality Pass
+# Handover — UI Verification
 
-Multi-pass Playwright QA for "before client demo." Heavier than `/check`, lighter than a release. Scoped to a feature block.
+Run the niche quality keywords against a route or every route in a block. Composes — does not redefine — the per-URL checks the `quality` agent already owns.
 
-Use this when a feature is "done" and you want it inspected at three breakpoints, in both languages, with the console clean and translations complete — the things a client will notice five minutes in.
+`/handover` has two modes, detected by argument shape:
+
+- **URL mode** — argument starts with `/`. Runs the 12 per-URL niche keywords (browser 6 + code 6) on that route. *Replaces the old `qa <url>` orchestrator.*
+- **Block mode** — argument is a bare word. Runs the per-route subset (`debug`, `flow`, `responsive`, `lang`) on every route discovered in the block.
 
 ## Usage
-- `/handover admission` — full pass against the admission block
-- `/handover admission --env staging` — run against `ed.databayt.org` instead of localhost
-- `/handover admission --pass responsive` — single pass (bug-free, flow, responsive, rtl, translation)
+- `/handover /admission/new` — URL mode: 12 niche checks on one URL
+- `/handover admission` — block mode: per-route niche checks on the admission block
+- `/handover admission --env staging` — block mode against `ed.databayt.org`
+- `/handover admission --fix` — auto-fix the safe categories (translation, RTL classes)
 
 ## Argument: $ARGUMENTS
 
 ## Instructions
 
-### Phase 1 — Discover routes
+### Phase 1 — Detect mode
 
-Scope to the block argument:
+If `$ARGUMENTS` begins with `/` → URL mode. Skip to Phase 2A.
+Otherwise → block mode. Continue to Phase 2B.
+
+### Phase 2A — URL mode
+
+Run the 12 per-URL niche keywords (browser 6 + code 6) defined in `.claude/agents/quality.md`:
+
+- Browser: `see`, `flow`, `debug`, `responsive`, `lang`, `fast`
+- Code: `guard`, `architecture`, `structure`, `pattern`, `design`, `stack`
+
+For each keyword, invoke the keyword's own definition. Collect verdicts (PASS / WARN / FAIL).
+
+Output a verdict table:
+
+```
+URL: /admission/new
+├── see ............. PASS
+├── flow ............ PASS
+├── debug ........... PASS (0 console errors)
+├── responsive ...... WARN (form overflows at 375px)
+├── lang ............ FAIL (3 untranslated keys)
+├── fast ............ PASS (LCP 1.8s)
+├── guard ........... PASS
+├── architecture .... PASS
+├── structure ....... PASS
+├── pattern ......... PASS
+├── design .......... PASS
+└── stack ........... PASS
+
+Result: 10/12 PASS, 1 WARN, 1 FAIL
+```
+
+Stop here. URL mode does not write a sentinel — it's a spot-check.
+
+### Phase 2B — Block mode
+
+**Discover routes** in the block:
 
 ```bash
 find src/app -name "page.tsx" -not -path "*/node_modules/*" | sort
 ```
 
-Group by extracting the first meaningful path segment after stripping route groups `(parentheses)`, `[lang]`, `s`, and `[subdomain]`. Filter to routes whose group matches the `[block]` argument (fuzzy match).
+Group by stripping route groups `(parens)`, `[lang]`, `s`, `[subdomain]`. Filter to routes whose group matches the `[block]` argument (fuzzy).
 
-If zero routes match, stop and ask the user to confirm the block name.
+Stop and ask if zero routes match.
 
-### Phase 2 — Pre-flight
+**Pre-flight:**
+- Ensure dev server is running on port 3000 (default) or `--env` target is reachable
+- Create the report directory: `.claude/handover-reports/<block>-<YYYYMMDD-HHmm>/`
 
-1. Ensure the dev server is running on port 3000 (default) or that the `--env` flag points at a reachable URL
-2. Reuse `browser-headed` MCP — this is meant to be watched, not headless
-3. Resize: 375 (mobile), 768 (tablet), 1440 (desktop)
-4. Create the report directory: `.claude/handover-reports/<block>-<YYYYMMDD-HHmm>/`
+**For each route, run the per-route niche subset:**
 
-### Phase 3 — Five passes per route
+| Pass | Niche keyword | What it does |
+|---|---|---|
+| 1 | `debug` | Console + network — fail on errors, warn on failed requests |
+| 2 | `flow` | Primary interaction — click, type, submit, verify post-state |
+| 3 | `responsive` | 375 / 768 / 1440 breakpoints — fail on overflow or broken layout |
+| 4 | `lang` (RTL portion) | `/ar/` variant — verify logical-property flip, LTR exemptions |
+| 5 | `lang` (translation portion) | Hardcoded-string scan + dictionary key resolution |
 
-For each discovered route, run the passes below. Save screenshots to the report directory. Tag each verdict `PASS`, `WARN`, or `FAIL`.
+These keywords are defined in `.claude/agents/quality.md`. Block mode invokes each keyword per route — it does not redefine the check logic here.
 
-#### Pass 1 — Bug-free
-- `browser_navigate` to the route
-- Wait for load, then `browser_console_messages`
-- `FAIL` if any console error (red). `WARN` if any failed network request. `PASS` otherwise.
-
-#### Pass 2 — Flow
-- `browser_snapshot` and identify the primary interaction (form, button, link)
-- Drive the happy path: click → type → submit. Verify the post-state (toast, navigation, data row)
-- `FAIL` if the primary flow does not complete. `PASS` if it lands on the expected state.
-
-#### Pass 3 — Responsive
-- `browser_resize` to 375, then 768, then 1440
-- `browser_take_screenshot` at each
-- Visually compare: no horizontal scroll, no overlapping elements, no truncated text on mobile
-- `FAIL` on overflow or broken layout. `WARN` on minor visual issues.
-
-#### Pass 4 — RTL + i18n
-- Navigate to the `/ar/` version of the route
-- Verify logical properties flip: spacing, alignment, icon direction
-- Check that LTR-exempt elements (phone numbers, emails, code blocks) stay LTR
-- `FAIL` if layout does not mirror or if Arabic text is cut off
-
-#### Pass 5 — Translation
-- Grep the route's component files for hardcoded English (use the patterns below)
-- Confirm every dictionary key referenced resolves in both `dictionaries/en.json` and `dictionaries/ar.json`
-- `FAIL` on missing keys. `WARN` on hardcoded strings.
-
-Hardcoded-string patterns (apply to `.tsx` files under the block):
-```
-<FormLabel>[A-Za-z][^{<]+</FormLabel>
-toast\.(success|error|warning|info)\(["'][A-Za-z]
-<Button[^>]*>[A-Za-z][^{<]+</Button>
-placeholder=["'][A-Z][^"'{]+["']
-```
-
-### Phase 4 — Report
+### Phase 3 — Report
 
 Write `report.md` to the report directory:
 
 ```
 ## Handover — <block> — <timestamp>
+Mode: block | URL
 Environment: <localhost:3000 | ed.databayt.org>
 Routes inspected: N
 
-| Route | Bug-free | Flow | Responsive | RTL | Translation |
+| Route | debug | flow | responsive | lang (RTL) | lang (translation) |
 |---|---|---|---|---|---|
 | /admission | PASS | PASS | WARN | PASS | FAIL (3 keys) |
 | /admission/[id] | PASS | PASS | PASS | PASS | PASS |
@@ -89,37 +100,52 @@ Routes inspected: N
 Verdict: BLOCKED (1 FAIL, 2 WARN)
 
 ## Findings
-- /admission @ 375px: form overflows on the right
-- /admission translation: "Submit application" hardcoded (form.tsx:42, footer.tsx:18, button.tsx:31)
-...
-
-Screenshots: .claude/handover-reports/<block>-<timestamp>/
+- /admission @ 375px: form overflows on the right (responsive)
+- /admission: "Submit application" hardcoded (form.tsx:42, footer.tsx:18, button.tsx:31)
 ```
 
-### Phase 5 — Fix loop (optional)
+### Phase 4 — Fix loop (optional, `--fix`)
 
-If the user runs `/handover <block> --fix`, attempt automated fixes for WARN/FAIL:
-- Translation FAIL → replace hardcoded strings with dictionary keys, add to en.json + ar.json
-- RTL FAIL → swap physical Tailwind classes (`ml-`, `pr-`) for logical (`ms-`, `pe-`)
-- Bug-free FAIL → triage the console error, classify, fix or surface for user
+Auto-fix the safe categories — each delegated to the niche keyword that defined the rule:
 
-Do **not** auto-fix Flow or Responsive failures — those need human judgment.
+- `lang` FAIL → replace hardcoded strings with dictionary keys (translation portion)
+- `lang` (RTL) FAIL → swap physical Tailwind classes (`ml-`, `pr-`) for logical (`ms-`, `pe-`)
+- `debug` FAIL → triage the console error and surface it for human judgment
+
+`flow` and `responsive` failures stay manual — they need human judgment.
 
 After fixes, re-run the affected passes only. Append a "Fix round N" section to the report.
 
+### Phase 5 — Sentinel (block mode only)
+
+On overall PASS or WARN (no FAIL), write to `.claude/session-state.json`:
+
+```json
+{
+  "handover": {
+    "scope": "block",
+    "block": "<block>",
+    "status": "PASS",
+    "at": "<ISO timestamp>"
+  }
+}
+```
+
+`/release` reads this sentinel and skips Stage 1 if recent (within 10 minutes).
+
 ## Exit gate
 
-- All five passes report PASS or WARN on every route in the block
+- Every route reports PASS or WARN across all niche checks
 - Zero FAIL verdicts
 - Verdict: `READY FOR DEMO`
 
-If any FAIL persists after `--fix`: surface the blocking issues with file:line references and stop.
+If any FAIL persists after `--fix`: surface the blocking findings with file:line references and stop.
 
 ## When to use
 
-- Before a scheduled client demo (King Fahad, Ahmed Baha, etc.)
+- **URL mode** — quick spot-check on one route: "is this URL clean across all 12 dimensions?"
+- **Block mode** — before a client demo: "is the whole admission feature ready to show?"
 - Before merging a large block to `main`
 - After a refactor that touched routing, layouts, or i18n
-- When you suspect a regression but cannot pinpoint it
 
-Not a replacement for `/check`. Run `/check` first to confirm the code compiles; run `/handover` to confirm it behaves.
+Not a replacement for `/check`. `/check` is the typecheck + build gate; `/handover` is the UI verification gate. Both feed `/release`.
