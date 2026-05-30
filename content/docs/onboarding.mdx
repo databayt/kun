@@ -520,6 +520,30 @@ To reset and start fresh: delete the state file, then re-run the bootstrap.
 
 ---
 
+## Staying current
+
+After your initial paste, four things drift on different cadences. **One command** refreshes the three that need refreshing:
+
+```bash
+c /update              # engine + repos + verify (~30 sec)
+c /update --tools      # also re-run smart-install for Node/gh/IDEs/Chrome/etc. (~5 min)
+```
+
+| Layer | Source of truth | How `/update` refreshes it | When to use `--tools` |
+|---|---|---|---|
+| **Engine config** (`~/.claude/*`) | `databayt/kun` repo | `git -C ~/kun pull` → `setup.sh` copies agents, commands, rules, memory, scripts, **hooks**, settings | always |
+| **Org repos** (`~/<repo>/`) | each repo's `main` | `sync-repos.sh all` (stash → fetch → pull --rebase) | always |
+| **Tools** (Node, pnpm, gh CLI, Vercel CLI, IDEs, Chrome, Claude Desktop) | brew / apt / winget / npm | `installer.sh --quiet` — PR #113 smart helpers upgrade in place (skip-if-fresh, upgrade-if-outdated) | weekly, or when warned |
+| **Claude Code CLI** | `claude.ai/install.sh` | auto-updates in background — no action needed | never |
+
+**Drift visibility.** A SessionStart hook (`~/.claude/hooks/session-start-kun-drift.sh`, installed by `setup.sh`) silently `git fetch`es `~/kun` and prints `⚠️ ~/kun is N commits behind` at session start when there's drift. The hook **never auto-pulls** — you decide when to run `/update`. Silent on offline machines and when up to date.
+
+**MCP versions stay pinned.** `/update` does not bump pinned MCP versions (e.g., `@playwright/mcp@0.0.75` in `~/.claude/mcp.json`). Per `mcp.mdx`, those bump in lock-step with `mcp-doctor` only. Auto-bumping would cause the version churn the engine is explicitly defended against.
+
+**Per-product `.env` stays in sync** with Vercel. `/update` does not run `vercel-pull.sh` automatically — env-var changes on the Vercel team don't normally require pulling. Run `bash ~/kun/.claude/scripts/vercel-pull.sh` after a secret rotation or when a teammate adds a new env var.
+
+---
+
 ## Troubleshooting
 
 | Symptom | Fix |
