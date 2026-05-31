@@ -1,0 +1,22 @@
+{
+  "name": "kun-stack",
+  "version": "1.0.0",
+  "description": "Portable stack fleet — Next.js 16, React 19, Prisma 6, TypeScript 5, Tailwind v4 agents + build/dev/test skills",
+  "author": {
+    "name": "Databayt",
+    "email": "hello@databayt.org",
+    "url": "https://databayt.org"
+  },
+  "homepage": "https://kun.databayt.org",
+  "repository": "https://github.com/databayt/kun",
+  "license": "SSPL-1.0",
+  "keywords": [
+    "claude-code",
+    "nextjs",
+    "react",
+    "prisma",
+    "tailwind",
+    "typescript",
+    "shadcn"
+  ]
+}

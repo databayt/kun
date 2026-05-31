@@ -1,0 +1,37 @@
+{
+  "name": "kun",
+  "metadata": {
+    "description": "Databayt's Kun engine — two installable plugins: a portable stack fleet and the company operating fleet.",
+    "version": "1.0.0"
+  },
+  "owner": {
+    "name": "Databayt",
+    "email": "hello@databayt.org",
+    "url": "https://kun.databayt.org"
+  },
+  "plugins": [
+    {
+      "name": "kun-stack",
+      "source": "./kun-stack",
+      "description": "Portable stack fleet — Next.js 16, React 19, Prisma 6, TypeScript 5, Tailwind v4 agents + build/dev/test skills. Install on any repo using the stack.",
+      "version": "1.0.0",
+      "license": "SSPL-1.0",
+      "keywords": [
+        "nextjs",
+        "react",
+        "prisma",
+        "tailwind",
+        "typescript",
+        "shadcn"
+      ]
+    },
+    {
+      "name": "kun-company",
+      "source": "./kun-company",
+      "description": "Databayt's leadership + pipeline fleet — captain, tech-lead, quality, product/business agents, the idea→ship pipeline commands, and canonical pattern cards. A reference operating model, not install-and-run.",
+      "version": "1.0.0",
+      "license": "SSPL-1.0",
+      "keywords": ["databayt", "pipeline", "agents", "saas", "operating-system"]
+    }
+  ]
+}

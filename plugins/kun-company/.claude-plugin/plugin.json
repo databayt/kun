@@ -1,0 +1,14 @@
+{
+  "name": "kun-company",
+  "version": "1.0.0",
+  "description": "Databayt's leadership + pipeline fleet — captain, tech-lead, quality agents, the idea→ship pipeline, and canonical pattern cards",
+  "author": {
+    "name": "Databayt",
+    "email": "hello@databayt.org",
+    "url": "https://databayt.org"
+  },
+  "homepage": "https://kun.databayt.org",
+  "repository": "https://github.com/databayt/kun",
+  "license": "SSPL-1.0",
+  "keywords": ["claude-code", "databayt", "pipeline", "agents", "saas"]
+}

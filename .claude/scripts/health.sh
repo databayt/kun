@@ -149,6 +149,13 @@ if [ -f "$ENGINE_JSON" ] && command -v jq &> /dev/null; then
     else
         check pass "engine doc counts" "current"
     fi
+    if [ -f "$KUN_ROOT/.claude/scripts/build-plugin.sh" ]; then
+        if bash "$KUN_ROOT/.claude/scripts/build-plugin.sh" --check >/dev/null 2>&1; then
+            check pass "plugin parity" "kun-stack + kun-company in sync"
+        else
+            check warn "plugin parity" "plugins drifted — run build-plugin.sh"
+        fi
+    fi
 fi
 
 # ── Build status line ────────────────────────────────────────────
