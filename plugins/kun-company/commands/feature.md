@@ -22,15 +22,17 @@ Parse arguments:
 
 - First word = feature name (or `#N` for existing issue)
 - Second word = product scope (hogwarts, souq, mkan, shifa) — optional
-- `--from <stage>` = skip to a specific stage (idea, spec, schema, code, wire, check, ship, watch)
+- `--from <stage>` = skip to a specific stage (idea, spec, plan, tasks, schema, code, wire, check, ship, watch)
 
 ### Pipeline
 
 Execute stages in order. Each stage appends progress to the GitHub issue. Stop on failure after max retries.
 
 ```
-IDEA → SPEC → [human approval] → SCHEMA → CODE → WIRE → CHECK → SHIP → WATCH
+IDEA → SPEC → [human approval] → PLAN → TASKS → SCHEMA → CODE → WIRE → CHECK → SHIP → WATCH
 ```
+
+PLAN and TASKS are **optional** — they add architecture rigor for non-trivial features, but a typo fix or single-field change should skip straight to SCHEMA (or be a `/report`, not a `/feature`). For a small change, note "trivial — skipping plan/tasks" on the issue and continue.
 
 ### Stage 1: IDEA — Capture
 
@@ -61,6 +63,26 @@ If no spec exists, execute the `spec` workflow:
 **PAUSE**: Ask the human — "Spec ready. Proceed with implementation? (Y/n)"
 
 If denied, stop. The issue has the spec for later.
+
+### Stage 2.5: PLAN — Architecture (optional)
+
+For non-trivial features, execute the `plan` workflow (`.claude/commands/plan.md`):
+
+1. Read the approved spec from the issue
+2. Delegate architecture judgment to `tech-lead` + `architecture`
+3. Append an `## Implementation Plan` comment (pattern choices, decisions, mirror target, tradeoffs, risks)
+
+Skip for trivial changes — note "trivial — skipping plan" on the issue.
+
+### Stage 2.6: TASKS — Breakdown (optional)
+
+For non-trivial features, execute the `tasks` workflow (`.claude/commands/tasks.md`):
+
+1. Read the plan from the issue
+2. Decompose into dependency-ordered tasks mapped to stages
+3. Append a `## Task Breakdown` checklist comment
+
+Skip for trivial changes — note "trivial — skipping tasks" on the issue.
 
 ### Stage 3: SCHEMA — Data Layer
 

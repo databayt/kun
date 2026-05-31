@@ -21,19 +21,23 @@
 `/feature <name> [product]` chains every stage. Each is also a standalone command.
 
 ```
-IDEA → SPEC → SCHEMA → CODE → WIRE → CHECK → SHIP → WATCH
+IDEA → SPEC → PLAN → TASKS → SCHEMA → CODE → WIRE → CHECK → SHIP → WATCH
 ```
 
-| Stage   | Command   | Exit gate                         |
-| ------- | --------- | --------------------------------- |
-| Capture | `/idea`   | GitHub issue exists               |
-| Specify | `/spec`   | Spec approved on issue            |
-| Data    | `/schema` | Migration applied, types compile  |
-| Logic   | `/code`   | `tsc --noEmit` passes             |
-| UI      | `/wire`   | `pnpm build` passes               |
-| Quality | `/check`  | TypeScript + build + visual green |
-| Deploy  | `/ship`   | Vercel production Ready           |
-| Monitor | `/watch`  | No errors, issue closed           |
+| Stage   | Command   | Exit gate                           |
+| ------- | --------- | ----------------------------------- |
+| Capture | `/idea`   | GitHub issue exists                 |
+| Specify | `/spec`   | Spec approved on issue (human gate) |
+| Plan    | `/plan`   | Architecture plan on issue (opt.)   |
+| Tasks   | `/tasks`  | Ordered breakdown on issue (opt.)   |
+| Data    | `/schema` | Migration applied, types compile    |
+| Logic   | `/code`   | `tsc --noEmit` passes               |
+| UI      | `/wire`   | `pnpm build` passes                 |
+| Quality | `/check`  | TypeScript + build + visual green   |
+| Deploy  | `/ship`   | Vercel production Ready             |
+| Monitor | `/watch`  | No errors, issue closed             |
+
+`/plan` + `/tasks` are optional rigor for non-trivial features (spec-kit-style: spec = _what_, plan = _how_, tasks = _ordered work_); trivial changes skip them. They sit after the single human approval gate at `/spec`.
 
 Product scope: append `hogwarts`, `souq`, `mkan`, `shifa` to activate domain context.
 
@@ -50,7 +54,7 @@ Surface verbs available in any session. See `.claude/commands/<name>.md` (projec
 **Lifecycle**: `dev`, `build`, `deploy`, `ship`, `watch`, `quick`, `fix`
 **Quality**: `check`, `handover`, `release`, `report`
 **Components**: `atom`, `block`, `template`
-**Pipeline stages**: `idea`, `spec`, `schema`, `code`, `wire`, `feature`
+**Pipeline stages**: `idea`, `spec`, `plan`, `tasks`, `schema`, `code`, `wire`, `feature`
 **Ops**: `incident`, `monitor`, `costs`, `pricing`, `proposal`, `credentials`
 **Org**: `captain`, `weekly`, `health`, `learn`, `analyze`, `profile`
 **Utility**: `clone`, `package`, `screenshot`, `issue`, `crawl-anthropic`
