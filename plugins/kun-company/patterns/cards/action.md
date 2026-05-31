@@ -114,3 +114,11 @@ const { form, isPending, handleSubmit } = useActionStateBridge({
 **From REST API (souq):**
 1. Convert API routes to server actions with "use server"
 2. Keep REST routes only for external API consumers
+
+## Modern idioms
+
+Enforceable version rules — cite in review:
+- `rules/next-16/server-actions-for-mutations.md` — mutations are Server Actions, not client fetches
+- `rules/next-16/revalidate-after-write.md` — revalidateTag/updateTag after a write
+- `rules/authjs/action-authz-check.md` — re-check session+role in every mutating action
+- `rules/prisma-6/tenant-scope-every-query.md` — scope writes to the session tenant

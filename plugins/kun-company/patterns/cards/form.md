@@ -185,3 +185,11 @@ const { TeacherWizardProvider, useTeacherWizard } = createWizardProvider(config)
 1. Add react-hook-form + @hookform/resolvers + zod
 2. Install form block
 3. Convert plain React state forms to InputField/SelectField pattern
+
+## Modern idioms
+
+Enforceable version rules live in the rule corpus — cite these in review:
+- `rules/react-19/use-action-state.md` — useActionState for pending/error (not useState+onSubmit)
+- `rules/react-19/actions-return-not-throw.md` — return typed errors, don't throw
+- `rules/react-19/use-optimistic.md` — optimistic UI for instant feedback
+- `rules/next-16/server-actions-for-mutations.md` · `rules/next-16/revalidate-after-write.md`

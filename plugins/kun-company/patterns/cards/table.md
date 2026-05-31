@@ -166,3 +166,11 @@ export default async function UsersContent({ searchParams }) {
 2. Create columns.tsx with getColumns() factory
 3. Create table.tsx with useDataTable hook
 4. Create content.tsx as server component for data fetching
+
+## Modern idioms
+
+Enforceable version rules — cite in review:
+- `rules/next-16/use-cache-directive.md` — cache server-side reads with 'use cache'
+- `rules/next-16/minimize-client-boundary.md` — fetch in Server Components, keep 'use client' at leaves
+- `rules/prisma-6/select-not-overfetch.md` — select only needed columns
+- `rules/tailwind-v4/logical-properties-rtl.md` — logical properties for RTL-correct tables

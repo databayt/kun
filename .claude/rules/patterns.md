@@ -24,3 +24,18 @@ When building a new feature that involves one of these keywords:
 - User says "create a form for invoices" → read `form.md`, use InputField/SelectField atoms with useActionStateBridge
 - User says "add auth" → read `auth.md`, follow the five-step flow structure
 - User says "multi-step wizard for onboarding" → read `wizard.md`, use createWizardProvider factory
+
+## Rule Corpus — keyword → rule directory
+
+The code-side quality keywords (see `.claude/agents/quality.md`) cite atomic, severity-tagged rules under `.claude/rules/<domain>/`. Each rule has frontmatter (`domain`, `severity`, `applies-to`, `since`) and Good/Bad/Fix sections. When a keyword runs, read the matching domain dir(s) and cite findings as `rule-id (severity)`.
+
+| Keyword   | Rule directories                                                                                                                                |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `stack`   | all of `react-19/`, `next-16/`, `typescript-strict/`, `tailwind-v4/`, `prisma-6/`, `authjs/`, `neon/`, `s3/` (version/import/deprecation rules) |
+| `pattern` | `.claude/patterns/cards/` + `next-16/` + `react-19/`                                                                                            |
+| `design`  | `tailwind-v4/` (tokens, OKLCH, logical properties) + component-hierarchy cards                                                                  |
+| `guard`   | `authjs/` + `prisma-6/` (tenant scope) + `s3/` (presigned URLs)                                                                                 |
+
+Domains (29 rules total): `react-19` (5), `next-16` (5), `typescript-strict` (4), `tailwind-v4` (4), `prisma-6` (4), `authjs` (3), `neon` (2), `s3` (2).
+
+Adding a rule: drop a new `<slug>.md` in the right domain dir with the standard frontmatter + Good/Bad/Fix. No agent changes needed — the keyword reads the whole dir.

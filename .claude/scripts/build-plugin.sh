@@ -67,6 +67,12 @@ done
 for f in "$ROOT"/.claude/commands/*.md; do copy_one "$f" "$CO/commands/$(basename "$f")"; done
 for f in "$ROOT"/.claude/patterns/cards/*.md; do copy_one "$f" "$CO/patterns/cards/$(basename "$f")"; done
 for f in "$ROOT"/.claude/rules/*.md; do copy_one "$f" "$CO/rules/$(basename "$f")"; done
+# Rule corpus — domain subdirs (react-19/, next-16/, ...) with atomic severity-tagged rules
+for f in "$ROOT"/.claude/rules/*/*.md; do
+  [ -e "$f" ] || continue
+  rel="${f#$ROOT/.claude/rules/}"
+  copy_one "$f" "$CO/rules/$rel"
+done
 
 # ── Secret guard — plugin files must carry placeholders only ────────
 if grep -REn 'sk-[A-Za-z0-9]{16}|ghp_[A-Za-z0-9]{16}|AKIA[A-Z0-9]{12}' "$ROOT/plugins" 2>/dev/null | grep -v '\${'; then

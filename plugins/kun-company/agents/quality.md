@@ -23,59 +23,61 @@ The bridge between automated checks and human judgment.
 
 ## Team
 
-| Person | Role | Interaction |
-|--------|------|-------------|
-| **Abdout** | Builder | Defines keyword behavior, reviews verdicts |
-| **Ali** | QA Engineer + Sales | Primary user of `qa`, reports bugs on issues |
-| **Samia** | R&D | Uses `lang` keyword for translation QA |
-| **Sedon** | Executor | Uses `fast`/`trace` for production monitoring |
+| Person     | Role                | Interaction                                   |
+| ---------- | ------------------- | --------------------------------------------- |
+| **Abdout** | Builder             | Defines keyword behavior, reviews verdicts    |
+| **Ali**    | QA Engineer + Sales | Primary user of `qa`, reports bugs on issues  |
+| **Samia**  | R&D                 | Uses `lang` keyword for translation QA        |
+| **Sedon**  | Executor            | Uses `fast`/`trace` for production monitoring |
 
 ## Keyword Registry
 
 ### Browser-Side — test URLs via browser MCP
 
-| # | Keyword | Niche |
-|---|---------|-------|
-| 1 | `see` | Visual — loads, layout, content |
-| 2 | `flow` | Interactive — click, type, submit |
-| 3 | `debug` | Errors — console, network, exceptions |
-| 4 | `responsive` | Layout — mobile (375), tablet (768), desktop (1440) |
-| 5 | `lang` | Language — RTL, LTR, translation completeness |
-| 6 | `fast` | Speed — quick CWV check |
+| #   | Keyword      | Niche                                               |
+| --- | ------------ | --------------------------------------------------- |
+| 1   | `see`        | Visual — loads, layout, content                     |
+| 2   | `flow`       | Interactive — click, type, submit                   |
+| 3   | `debug`      | Errors — console, network, exceptions               |
+| 4   | `responsive` | Layout — mobile (375), tablet (768), desktop (1440) |
+| 5   | `lang`       | Language — RTL, LTR, translation completeness       |
+| 6   | `fast`       | Speed — quick CWV check                             |
 
 ### Code-Side — review files via Glob/Grep/Read
 
-| # | Keyword | Niche |
-|---|---------|-------|
-| 7 | `guard` | Security — auth, validation, tenant scope |
-| 8 | `architecture` | Architecture — mirror pattern, boundaries, data flow |
-| 9 | `structure` | Files — naming, directory, placement |
-| 10 | `pattern` | Conventions — page, actions, form standards |
-| 11 | `design` | Components — ui/atom/template hierarchy |
-| 12 | `stack` | Technology — versions, imports, deprecated APIs |
+| #   | Keyword        | Niche                                                | Rule corpus                      |
+| --- | -------------- | ---------------------------------------------------- | -------------------------------- |
+| 7   | `guard`        | Security — auth, validation, tenant scope            | `authjs/` + `prisma-6/` + `s3/`  |
+| 8   | `architecture` | Architecture — mirror pattern, boundaries, data flow | `next-16/`                       |
+| 9   | `structure`    | Files — naming, directory, placement                 | —                                |
+| 10  | `pattern`      | Conventions — page, actions, form standards          | cards + `next-16/` + `react-19/` |
+| 11  | `design`       | Components — ui/atom/template hierarchy              | `tailwind-v4/`                   |
+| 12  | `stack`        | Technology — versions, imports, deprecated APIs      | all `rules/<domain>/`            |
+
+> Code-side keywords cite the atomic rules under `.claude/rules/<domain>/` (frontmatter: `domain`, `severity`, `applies-to`, `since`; Good/Bad/Fix body). Report each finding as `rule-id (severity)` — e.g. `use-action-state (error)`. Full mapping: `.claude/rules/patterns.md` § Rule Corpus.
 
 ### Deep — investigation + optimization
 
-| # | Keyword | Niche |
-|---|---------|-------|
-| 13 | `trace` | Deep performance investigation + fix |
-| 14 | `performance` | Core Web Vitals optimization |
-| 15 | `efficient` | Code efficiency, API call reduction |
+| #   | Keyword       | Niche                                |
+| --- | ------------- | ------------------------------------ |
+| 13  | `trace`       | Deep performance investigation + fix |
+| 14  | `performance` | Core Web Vitals optimization         |
+| 15  | `efficient`   | Code efficiency, API call reduction  |
 
 ### Compare
 
-| # | Keyword | Niche |
-|---|---------|-------|
-| 16 | `mirror` | Figma design vs implementation |
-| 17 | `diff` | URL vs URL visual compare |
+| #   | Keyword  | Niche                          |
+| --- | -------- | ------------------------------ |
+| 16  | `mirror` | Figma design vs implementation |
+| 17  | `diff`   | URL vs URL visual compare      |
 
 ## Orchestrators
 
-| Keyword | Composes | Output |
-|---------|----------|--------|
-| `/handover <url>` | All 12 per-URL niche keywords (browser 6 + code 6) | Verdict table, PASS/WARN/FAIL per keyword |
+| Keyword             | Composes                                                                                                                         | Output                                                             |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| `/handover <url>`   | All 12 per-URL niche keywords (browser 6 + code 6)                                                                               | Verdict table, PASS/WARN/FAIL per keyword                          |
 | `/handover <block>` | Per-route niche subset (`debug`, `flow`, `responsive`, `lang`) for every route in the block — see `.claude/commands/handover.md` | Markdown report with screenshots, BLOCKED / READY FOR DEMO verdict |
-| `/release <block>` | Full client handoff: handover → check → ship → watch → auto-comment the GitHub issue — see `.claude/commands/release.md` | Single consolidated report + issue comment + closed issue |
+| `/release <block>`  | Full client handoff: handover → check → ship → watch → auto-comment the GitHub issue — see `.claude/commands/release.md`         | Single consolidated report + issue comment + closed issue          |
 
 ## `/handover <url>` Output
 
