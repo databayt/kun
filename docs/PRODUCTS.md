@@ -128,7 +128,7 @@ Build production AI agents programmatically. Python and TypeScript.
 
 | Model | Input/MTok | Output/MTok |
 |-------|-----------|-------------|
-| **Opus 4.6** | $5 | $25 |
+| **Opus 4.8** | $5 | $25 |
 | **Sonnet 4.6** | $3 | $15 |
 | **Haiku 4.5** | $1 | $5 |
 
@@ -157,9 +157,9 @@ Build production AI agents programmatically. Python and TypeScript.
 
 | Task | Model | Rationale |
 |------|-------|-----------|
-| Architecture design | Opus 4.6 | Deepest reasoning |
-| Complex features | Opus 4.6 | Highest code quality |
-| Code review | Opus 4.6 | Catches subtle issues |
+| Architecture design | Opus 4.8 | Deepest reasoning |
+| Complex features | Opus 4.8 | Highest code quality |
+| Code review | Opus 4.8 | Catches subtle issues |
 | Routine changes | Sonnet 4.6 | Fast, good enough |
 | Exploration/search | Haiku 4.5 | Cheapest, fast |
 | Documentation | Sonnet 4.6 | Good writing, fast |
@@ -168,7 +168,7 @@ Build production AI agents programmatically. Python and TypeScript.
 
 | Agent Chain | Default Model |
 |-------------|--------------|
-| Stack, Design, UI, DevOps, VCS | Opus 4.6 |
+| Stack, Design, UI, DevOps, VCS | Opus 4.8 |
 | Explore subagents | Haiku 4.5 |
 
 ---
@@ -184,7 +184,7 @@ Build production AI agents programmatically. Python and TypeScript.
 | Agent SDK | API key | API key | API key | API key | API key |
 | SSO/SCIM | - | - | - | - | Yes |
 | 1M Context | - | Beta | Yes | Yes | Yes |
-| Opus 4.6 Priority | - | - | 20x only | - | Yes |
+| Opus 4.8 Priority | - | - | 20x only | - | Yes |
 
 ---
 

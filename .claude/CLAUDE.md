@@ -5,11 +5,11 @@
 
 ## Preferences
 
-- **Model**: `claude-opus-4-7` (Opus 4.7, 1M context)
+- **Model**: `claude-opus-4-8` (Opus 4.8, 1M context)
 - **Package Manager**: pnpm
 - **Stack**: Next.js 16 · React 19 · Prisma 6 · TypeScript 5 · Tailwind CSS 4 · shadcn/ui
 - **Languages**: Arabic (RTL default) · English (LTR)
-- **Commit footer**: `Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>`
+- **Commit footer**: `Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>`
 
 > Project rules auto-load from `.claude/rules/`:
 > `cowork-bridge.md`, `github-workflow.md`, `patterns.md`.

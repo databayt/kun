@@ -1,0 +1,20 @@
+{
+  "$comment": "Single source of truth for kun engine metadata. Prose/docs reference this file instead of hardcoding numbers. /health (.claude/scripts/health.sh) reads it and warns when docs or reality drift from these values. Agent frontmatter stays `model: opus` (the alias) — never pin a number there.",
+  "model": "claude-opus-4-8",
+  "model_label": "Opus 4.8",
+  "model_context": "1M",
+  "engine_version": "databayt v3.1",
+  "updated": "2026-05-31",
+  "counts": {
+    "project_agents": 18,
+    "user_agents": 28,
+    "commands": 29,
+    "project_skills": 1,
+    "user_skills": 22,
+    "pattern_cards": 10,
+    "project_rules": 3,
+    "project_mcp": 25,
+    "user_mcp": 19
+  },
+  "commit_footer": "Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>"
+}

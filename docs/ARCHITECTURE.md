@@ -1,7 +1,7 @@
 # Architecture: Kun (كن)
 
-> **Version**: 3.0
-> **Date**: 2026-03-30
+> **Version**: 3.1
+> **Date**: 2026-05-31
 
 ---
 
@@ -26,8 +26,8 @@ Kun is a **configuration engine** — not a server, not a platform. It sits as t
 │                                                                  │
 │  Layer 3: KUN CONFIGURATION ENGINE (core value)                 │
 │  ┌────────────────────────────────────────────────────────────┐ │
-│  │ CLAUDE.md   │ 28 Agents  │ 17 Skills  │ 18 MCP Servers   │ │
-│  │ 8 Rules     │ 5 Hooks    │ 6 Memory   │ 100+ Keywords    │ │
+│  │ CLAUDE.md   │ 18 Agents  │ 29 Commands │ 25 MCP Servers   │ │
+│  │ 3 Rules     │ 5 Hooks    │ 10 Cards   │ 100+ Keywords    │ │
 │  └────────────────────────────────────────────────────────────┘ │
 │                                                                  │
 │  Layer 2: Developer Surfaces (Anthropic-provided)               │
@@ -37,7 +37,7 @@ Kun is a **configuration engine** — not a server, not a platform. It sits as t
 │                                                                  │
 │  Layer 1: Foundation (Anthropic-provided)                       │
 │  ┌────────────────────────────────────────────────────────────┐ │
-│  │ Opus 4.6 │ Sonnet 4.6 │ Haiku 4.5 │ 1M Context │ API    │ │
+│  │ Opus 4.8 │ Sonnet 4.6 │ Haiku 4.5 │ 1M Context │ API    │ │
 │  └────────────────────────────────────────────────────────────┘ │
 │                                                                  │
 └─────────────────────────────────────────────────────────────────┘
@@ -53,7 +53,7 @@ The models and API that power everything. Kun selects optimally within this laye
 
 | Model | Use Case | Kun Usage |
 |-------|----------|-----------|
-| **Opus 4.6** | Architecture, complex features, code review | Default for all agents and skills |
+| **Opus 4.8** | Architecture, complex features, code review | Default for all agents and skills |
 | **Sonnet 4.6** | Fast iteration, routine changes | Quick fixes, exploration |
 | **Haiku 4.5** | Search, lookups, simple queries | Explore subagent type |
 
@@ -143,7 +143,7 @@ Priority (High → Low):
 
 ### 4.2 Agent Fleet
 
-28 specialized agents organized in 6 chains:
+**28 user-level stack agents** (`~/.claude/agents/`) organized in 6 chains — distinct from the **18 project-level leadership/product agents** (`.claude/agents/`):
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -193,7 +193,7 @@ Priority (High → Low):
 
 ### 4.4 MCP Ecosystem
 
-18 MCP servers providing external tool integration:
+25 project + 19 user MCP servers providing external tool integration:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -402,9 +402,9 @@ All products and workflows must be accessible:
 
 **Rationale**: Git provides versioning, diffing, branching, and PR review. Same workflow as code.
 
-### ADR-003: Opus 4.6 as Default Model
+### ADR-003: Opus 4.8 as Default Model
 
-**Decision**: Default to Opus 4.6 for all agents and primary work. Haiku 4.5 for exploration subagents only.
+**Decision**: Default to Opus 4.8 for all agents and primary work. Haiku 4.5 for exploration subagents only.
 
 **Rationale**: Architecture-first approach values output quality over cost. Max plan ($200/mo) makes this cost-effective.
 

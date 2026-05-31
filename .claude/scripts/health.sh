@@ -118,6 +118,39 @@ if [ -f "$CLAUDE_DIR/CLAUDE.md" ]; then
     fi
 fi
 
+# ── Engine consistency (kun repo) ────────────────────────────────
+# Reads the kun repo's .claude/engine.json (single source of truth) and warns
+# when docs or repo reality drift from it. Skipped on machines without ~/kun.
+KUN_ROOT="${KUN_ROOT:-$HOME/kun}"
+ENGINE_JSON="$KUN_ROOT/.claude/engine.json"
+if [ -f "$ENGINE_JSON" ] && command -v jq &> /dev/null; then
+    EC_AGENTS=$(jq -r '.counts.project_agents' "$ENGINE_JSON")
+    EC_CMDS=$(jq -r '.counts.commands' "$ENGINE_JSON")
+    EC_CARDS=$(jq -r '.counts.pattern_cards' "$ENGINE_JSON")
+    EC_RULES=$(jq -r '.counts.project_rules' "$ENGINE_JSON")
+    EC_MCP=$(jq -r '.counts.project_mcp' "$ENGINE_JSON")
+    ER_AGENTS=$(find "$KUN_ROOT/.claude/agents" -maxdepth 1 -name '*.md' ! -name '_index*' 2>/dev/null | wc -l | tr -d ' ')
+    ER_CMDS=$(find "$KUN_ROOT/.claude/commands" -maxdepth 1 -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
+    ER_CARDS=$(find "$KUN_ROOT/.claude/patterns/cards" -maxdepth 1 -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
+    ER_RULES=$(find "$KUN_ROOT/.claude/rules" -maxdepth 1 -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
+    ER_MCP=$(jq '.mcpServers | length' "$KUN_ROOT/.claude/mcp.json" 2>/dev/null || echo "?")
+    [ "$EC_AGENTS" = "$ER_AGENTS" ] && check pass "engine agents" "$ER_AGENTS" || check warn "engine agents" "engine.json=$EC_AGENTS actual=$ER_AGENTS"
+    [ "$EC_CMDS" = "$ER_CMDS" ] && check pass "engine commands" "$ER_CMDS" || check warn "engine commands" "engine.json=$EC_CMDS actual=$ER_CMDS"
+    [ "$EC_CARDS" = "$ER_CARDS" ] && check pass "engine cards" "$ER_CARDS" || check warn "engine cards" "engine.json=$EC_CARDS actual=$ER_CARDS"
+    [ "$EC_RULES" = "$ER_RULES" ] && check pass "engine rules" "$ER_RULES" || check warn "engine rules" "engine.json=$EC_RULES actual=$ER_RULES"
+    [ "$EC_MCP" = "$ER_MCP" ] && check pass "engine mcp" "$ER_MCP" || check warn "engine mcp" "engine.json=$EC_MCP actual=$ER_MCP"
+    if grep -rq "Opus 4\.6\|Opus 4\.7\|claude-opus-4-6\|claude-opus-4-7" "$KUN_ROOT/docs" "$KUN_ROOT/.claude/CLAUDE.md" 2>/dev/null; then
+        check warn "engine model refs" "stale Opus 4.6/4.7 in docs"
+    else
+        check pass "engine model refs" "$(jq -r '.model_label' "$ENGINE_JSON") canonical"
+    fi
+    if grep -q "28 Agents\|17 Skills\|18 MCP Servers" "$KUN_ROOT/docs/ARCHITECTURE.md" 2>/dev/null; then
+        check warn "engine doc counts" "stale count box in ARCHITECTURE.md"
+    else
+        check pass "engine doc counts" "current"
+    fi
+fi
+
 # ── Build status line ────────────────────────────────────────────
 if [ $ERRORS -gt 0 ]; then
     STATUS="❌ $ERRORS errors"

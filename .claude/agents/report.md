@@ -254,7 +254,7 @@ git commit -m "fix: <description from issue title>
 
 Closes #<issue-number>
 
-Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
+Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>"
 git push -u origin fix/report-<issue-number>
 gh pr create --title "fix: <description>" --body "Closes #<issue-number>" --label report
 ```

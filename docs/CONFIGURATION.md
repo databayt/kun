@@ -1,7 +1,7 @@
 # Configuration Blueprint: Kun (كن)
 
-> **Version**: 2.0
-> **Date**: 2026-03-30
+> **Version**: 2.1
+> **Date**: 2026-05-31
 > **Purpose**: The complete specification of Databayt's configuration engine
 
 ---
@@ -16,8 +16,8 @@ Kun's value is its configuration. This is the complete blueprint of every settin
 |-----------|-------|----------|
 | CLAUDE.md files | 3 layers | ~/.claude/, CLAUDE.md, .claude/CLAUDE.md |
 | Agents | 28 | ~/.claude/agents/ |
-| Skills | 17 | ~/.claude/skills/ |
-| MCP Servers | 18 | ~/.claude/mcp.json |
+| Skills | 22 | ~/.claude/skills/ |
+| MCP Servers | 19 | ~/.claude/mcp.json |
 | Rules | 8 | ~/.claude/rules/ |
 | Hooks | 5 | ~/.claude/settings.json |
 | Memory files | 6 | ~/.claude/memory/ |
@@ -32,7 +32,7 @@ Kun's value is its configuration. This is the complete blueprint of every settin
 ### Model
 
 ```json
-{ "model": "claude-opus-4-6" }
+{ "model": "claude-opus-4-8" }
 ```
 
 ### Environment Variables
@@ -80,7 +80,7 @@ Kun's value is its configuration. This is the complete blueprint of every settin
 
 | Setting | Value |
 |---------|-------|
-| Model | Opus 4.6 |
+| Model | Opus 4.8 |
 | Package manager | pnpm |
 | Stack | Next.js 16, React 19, Prisma 6, TypeScript 5, Tailwind CSS 4, shadcn/ui |
 | Languages | Arabic (RTL default), English (LTR) |

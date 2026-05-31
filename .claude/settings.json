@@ -35,7 +35,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [[ \"$FILE_PATH\" =~ \\.(ts|tsx|js|jsx|json|css|md)$ ]]; then npx prettier --write \"$FILE_PATH\" 2>/dev/null; fi; exit 0"
+            "command": "json=$(cat); p=$(printf '%s' \"$json\" | jq -r '.tool_input.file_path // empty' 2>/dev/null); [ -z \"$p\" ] && p=\"${FILE_PATH:-}\"; if [ -n \"$p\" ] && [[ \"$p\" =~ \\.(ts|tsx|js|jsx|json|css|md)$ ]]; then npx prettier --write \"$p\" 2>/dev/null; fi; exit 0"
           }
         ]
       }
