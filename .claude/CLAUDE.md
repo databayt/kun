@@ -24,16 +24,16 @@
 IDEA → SPEC → SCHEMA → CODE → WIRE → CHECK → SHIP → WATCH
 ```
 
-| Stage | Command | Exit gate |
-|-------|---------|-----------|
-| Capture | `/idea` | GitHub issue exists |
-| Specify | `/spec` | Spec approved on issue |
-| Data | `/schema` | Migration applied, types compile |
-| Logic | `/code` | `tsc --noEmit` passes |
-| UI | `/wire` | `pnpm build` passes |
-| Quality | `/check` | TypeScript + build + visual green |
-| Deploy | `/ship` | Vercel production Ready |
-| Monitor | `/watch` | No errors, issue closed |
+| Stage   | Command   | Exit gate                         |
+| ------- | --------- | --------------------------------- |
+| Capture | `/idea`   | GitHub issue exists               |
+| Specify | `/spec`   | Spec approved on issue            |
+| Data    | `/schema` | Migration applied, types compile  |
+| Logic   | `/code`   | `tsc --noEmit` passes             |
+| UI      | `/wire`   | `pnpm build` passes               |
+| Quality | `/check`  | TypeScript + build + visual green |
+| Deploy  | `/ship`   | Vercel production Ready           |
+| Monitor | `/watch`  | No errors, issue closed           |
 
 Product scope: append `hogwarts`, `souq`, `mkan`, `shifa` to activate domain context.
 
@@ -65,22 +65,24 @@ Claude routes these to the right agent + MCP without a dedicated command.
 **Features**: `auth`, `dashboard`, `landing`, `checkout`, `settings`, `profile`, `admin`, `onboarding`
 **Animation**: `motion`, `animation`, `transition`, `gesture`, `scroll`
 **Quality dimensions** (17 niche keywords — see `.claude/agents/quality.md`):
-  - Browser: `see`, `flow`, `debug`, `responsive`, `lang`, `fast`
-  - Code: `guard`, `architecture`, `structure`, `pattern`, `design`, `stack`
-  - Deep: `trace`, `performance`, `efficient`
-  - Compare: `mirror`, `diff`
-**Build**: `error`, `lint`, `format`, `type-check`, `deps`, `outdated`
-**React perf**: `parallelize`, `bundle`, `lazy`, `suspense`, `memo`, `streaming`, `dedup`
-**Services**: `github`, `figma`, `linear`, `slack`, `stripe`, `vercel`, `sentry`, `neon`, `analytics`
-**Cross-repo**: `from codebase`, `from shadcn`, `like hogwarts`, `like souq`, `like mkan`, `like shifa`
-**Operations**: `weekly`, `monitor`, `incident`, `credentials`
-**Intelligence**: `learn`, `analyze`, `conventions`, `health`, `patterns`, `drift`
+
+- Browser: `see`, `flow`, `debug`, `responsive`, `lang`, `fast`
+- Code: `guard`, `architecture`, `structure`, `pattern`, `design`, `stack`
+- Deep: `trace`, `performance`, `efficient`
+- Compare: `mirror`, `diff`
+  **Build**: `error`, `lint`, `format`, `type-check`, `deps`, `outdated`
+  **React perf**: `parallelize`, `bundle`, `lazy`, `suspense`, `memo`, `streaming`, `dedup`
+  **Services**: `github`, `figma`, `linear`, `slack`, `stripe`, `vercel`, `sentry`, `neon`, `analytics`
+  **Cross-repo**: `from codebase`, `from shadcn`, `like hogwarts`, `like souq`, `like mkan`, `like shifa`
+  **Operations**: `weekly`, `monitor`, `incident`, `credentials`
+  **Intelligence**: `learn`, `analyze`, `conventions`, `health`, `patterns`, `drift`
 
 ---
 
 ## Behavior
 
 When you see a keyword:
+
 1. **Pipeline stage** → run the corresponding stage command
 2. **Tool verb** → invoke the command/skill
 3. **Vocabulary keyword** → activate the right agent + MCP
@@ -96,3 +98,12 @@ Pre-demo quality pass → `/handover <block>`. **Send to client (one spell) → 
 - **Skill spec**: `.claude/skills/<name>/SKILL.md` or `~/.claude/skills/<name>/SKILL.md`
 - **Pattern card**: `.claude/patterns/cards/<keyword>.md`
 - **MCP servers**: `.claude/mcp.json` (project, 25 servers) + `~/.claude/mcp.json` (user, 19 servers)
+
+---
+
+## Command vs Skill — which is which
+
+- **Command** (`.claude/commands/<name>.md`) — a verb a human types, with `$ARGUMENTS`, a pipeline position, and an exit gate. Invoked explicitly (`/feature`, `/release`, `/spec`). Now carry frontmatter (`description`, `argument-hint`, optional `model`) for `/help` discoverability and model auto-invocation.
+- **Skill** (`~/.claude/skills/<name>/SKILL.md`) — a capability the model _pulls in_ when relevant (progressive disclosure, reusable across repos, keyword-triggered). E.g. `build`, `security`, `motion`.
+- **Heuristic**: has `$ARGUMENTS` + an exit gate → command; "teach the model to do X well, surfaced automatically" → skill.
+- `allowed-tools` is intentionally omitted from commands for now — they inherit the full toolset; add per-command later if least-privilege hardening is wanted.

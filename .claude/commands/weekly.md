@@ -1,3 +1,8 @@
+---
+description: Run the captain's weekly Monday-plan / Wednesday-check / Friday-review cycle
+argument-hint: [plan|check|review]
+---
+
 Run the captain's weekly review.
 
 Arguments: $ARGUMENTS (optional: "plan" for Monday planning, "check" for Wednesday, "review" for Friday)
@@ -5,6 +10,7 @@ Arguments: $ARGUMENTS (optional: "plan" for Monday planning, "check" for Wednesd
 Default behavior (no args): Full weekly review.
 
 Steps:
+
 1. Check git activity across all product repos (github MCP)
 2. Check deployment health (vercel MCP if available)
 3. Check error rates (sentry MCP if available)

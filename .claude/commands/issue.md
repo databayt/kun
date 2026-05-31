@@ -1,33 +1,43 @@
+---
+description: Create a GitHub issue in the appropriate databayt repo
+argument-hint: <title> [description]
+model: sonnet
+---
+
 Create a GitHub issue in the appropriate databayt repo.
 
 Arguments: $ARGUMENTS (title and description, or just a topic to expand)
 
 ## Repos
 
-| Repo | Use for |
-|------|---------|
-| **kun** | Engine config: agents, skills, MCP, hooks, rules, memory, scripts |
-| **hogwarts** | Education product: features, bugs, improvements |
-| **souq** | E-commerce product |
-| **mkan** | Rental product |
-| **shifa** | Medical product |
-| **codebase** | Shared patterns, components, templates |
-| **shadcn** | UI component library |
-| **swift-app** | iOS mobile app |
-| **marketing** | Landing pages, marketing site |
+| Repo          | Use for                                                           |
+| ------------- | ----------------------------------------------------------------- |
+| **kun**       | Engine config: agents, skills, MCP, hooks, rules, memory, scripts |
+| **hogwarts**  | Education product: features, bugs, improvements                   |
+| **souq**      | E-commerce product                                                |
+| **mkan**      | Rental product                                                    |
+| **shifa**     | Medical product                                                   |
+| **codebase**  | Shared patterns, components, templates                            |
+| **shadcn**    | UI component library                                              |
+| **swift-app** | iOS mobile app                                                    |
+| **marketing** | Landing pages, marketing site                                     |
 
 ## Labels
 
 ### Priority
+
 P0-critical, P1-high, P2-medium, P3-low
 
 ### Type
+
 type:agent, type:skill, type:mcp, type:hook, type:rule, type:memory, type:docs, type:infra, bug, enhancement
 
 ### Scope
+
 scope:captain, scope:business, scope:product, scope:tech, scope:specialist, scope:cross-repo
 
 ### Assignment
+
 assign:abdout, assign:ali, assign:samia, assign:sedon, assign:captain
 
 ## Steps

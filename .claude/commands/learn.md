@@ -1,8 +1,14 @@
+---
+description: Extract organizational patterns and conventions from repos + history
+argument-hint: [repo] [--since DATE]
+---
+
 # Learn — Organizational Intelligence
 
 Extract patterns, conventions, team dynamics, and company knowledge from git history and code.
 
 ## Usage
+
 - `/learn` — Full org scan (all databayt repos)
 - `/learn hogwarts` — Deep dive into a single repo
 - `/learn team` — People patterns and work dynamics
@@ -14,6 +20,7 @@ Extract patterns, conventions, team dynamics, and company knowledge from git his
 ## Instructions
 
 Parse arguments:
+
 - No args → full org scan
 - Repo name → single repo deep dive (hogwarts, souq, mkan, shifa, kun, codebase)
 - `team` → people patterns
@@ -23,6 +30,7 @@ Parse arguments:
 ### Mode: Full Org Scan (no args)
 
 1. List all repos:
+
    ```bash
    gh repo list databayt --limit 50 --json name,pushedAt,isArchived --jq '.[] | select(.isArchived == false)'
    ```
@@ -45,33 +53,36 @@ Parse arguments:
 ### Mode: Single Repo (`/learn <repo>`)
 
 1. Navigate to repo (local path or clone):
+
    ```bash
    cd /Users/abdout/<repo>  # or gh repo clone databayt/<repo> /tmp/learn-<repo>
    ```
 
 2. Git history analysis:
+
    ```bash
    # Recent activity
    git log --oneline -50
-   
+
    # Commit patterns
    git log --format='%s' -100 | head -20
-   
+
    # Hotspot files
    git log --format=format: --name-only -200 | sort | uniq -c | sort -rn | head -20
-   
+
    # Author activity
    git log --format='%an' -200 | sort | uniq -c | sort -rn
-   
+
    # Fix:feature ratio
    git log --oneline -200 | grep -c "feat:" ; git log --oneline -200 | grep -c "fix:"
    ```
 
 3. Structure analysis:
+
    ```bash
    # Directory layout
    find . -type d -maxdepth 3 -not -path '*/node_modules/*' -not -path '*/.git/*' -not -path '*/.next/*'
-   
+
    # Key files
    cat package.json | jq '{name, dependencies, devDependencies}'
    ls -la prisma/schema.prisma 2>/dev/null
@@ -92,6 +103,7 @@ Parse arguments:
 ### Mode: Team (`/learn team`)
 
 1. Scan all repos for author patterns:
+
    ```bash
    for repo in hogwarts souq mkan shifa kun codebase; do
      echo "=== $repo ==="
@@ -119,13 +131,14 @@ Parse arguments:
    - i18n handling
 
 2. Output as candidate rules (not memory — rules are actionable):
+
    ```
    Observed: 94% of server actions follow auth→validate→execute→revalidate
    → Candidate rule: rules/server-actions.md
-   
+
    Observed: 100% use conventional commits
    → Already documented in CLAUDE.md ✓
-   
+
    Observed: 3 repos use barrel imports, 1 doesn't
    → Candidate rule: rules/no-barrel-imports.md (with migration note)
    ```
@@ -135,6 +148,7 @@ Parse arguments:
 ### Mode: Health (`/learn health`)
 
 1. Numbers only — across all repos:
+
    ```
    | Repo      | Commits/30d | Fix:Feat | Hotspot File            | Last Push  |
    |-----------|-------------|----------|-------------------------|------------|

@@ -1,8 +1,14 @@
+---
+description: Load a selective config profile by role (engineer/business/content/ops)
+argument-hint: <role>
+---
+
 # Profile — Selective Config Loading
 
 Manage configuration profiles that control which agents, skills, and rules are active.
 
 ## Usage
+
 - `/profile` — show current profile and available profiles
 - `/profile core` — switch to core profile
 - `/profile security` — switch to security profile
@@ -15,6 +21,7 @@ Manage configuration profiles that control which agents, skills, and rules are a
 ## Instructions
 
 Parse arguments:
+
 - No args → show current profile + list available profiles
 - Profile name → activate that profile
 - `create <name>` → create new profile interactively
@@ -29,6 +36,7 @@ Profiles are stored in `~/.claude/profiles/` as YAML files.
 ### Built-in Profiles
 
 #### `core` — Minimum viable engine
+
 The essentials for any developer on any repo.
 
 ```yaml
@@ -48,10 +56,11 @@ commands:
   - build
   - deploy
   - clone
-rules: []  # all rules always apply
+rules: [] # all rules always apply
 ```
 
 #### `developer` — Full development toolkit
+
 Everything a developer needs, minus business agents.
 
 ```yaml
@@ -102,6 +111,7 @@ rules: all
 ```
 
 #### `security` — Security and compliance focus
+
 For security audits and auth work.
 
 ```yaml
@@ -123,6 +133,7 @@ rules: all
 ```
 
 #### `business` — Non-technical operations
+
 For Ali, Samia, Sedon — business operations via Cowork.
 
 ```yaml
@@ -148,6 +159,7 @@ rules: []
 ```
 
 #### `qa` — Quality assurance
+
 For Ali's testing workflow.
 
 ```yaml
@@ -171,6 +183,7 @@ rules: all
 ```
 
 #### `full` — Everything
+
 All agents, all skills, all rules. Default for Abdout.
 
 ```yaml
@@ -184,12 +197,14 @@ rules: all
 ### Personal Profiles
 
 #### `abdout` — Builder (alias for full)
+
 ```yaml
 name: abdout
 extends: full
 ```
 
 #### `ali` — QA + Sales
+
 ```yaml
 name: ali
 extends: qa
@@ -204,6 +219,7 @@ commands_add:
 ```
 
 #### `samia` — R&D + Kun Care
+
 ```yaml
 name: samia
 extends: business
@@ -218,6 +234,7 @@ commands_add:
 ```
 
 #### `sedon` — Executor
+
 ```yaml
 name: sedon
 extends: business
@@ -276,6 +293,7 @@ When `/analyze` generates config for a repo, it includes profile recommendations
 
 ```markdown
 ## Recommended Profiles
+
 - **core**: nextjs, typescript, build, deploy — for quick fixes
 - **full**: + prisma, tailwind, shadcn, test, i18n — for feature work
 ```
@@ -283,11 +301,13 @@ When `/analyze` generates config for a repo, it includes profile recommendations
 ### How Profiles Work (Current)
 
 Profiles are **advisory** in Phase 1:
+
 - The YAML files define what should be loaded
 - Agents read the active profile and scope their work accordingly
 - The captain uses profiles for team allocation
 
 Profiles become **enforced** in Phase 2:
+
 - Settings.json `allowedTools` maps to profile
 - Only agents in the active profile get spawned
 - Hook validates agent spawning against profile

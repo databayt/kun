@@ -1,8 +1,15 @@
+---
+description: API spend breakdown and cost-optimization analysis
+argument-hint: [monthly|<service>]
+model: sonnet
+---
+
 API spend breakdown and cost optimization analysis.
 
 Arguments: $ARGUMENTS (optional: "monthly" for full report, or specific service like "vercel", "neon", "stripe")
 
 Steps:
+
 1. Gather cost data:
    - Claude Max subscription: $200/mo (fixed)
    - Vercel: Check usage tier and bandwidth (vercel MCP)

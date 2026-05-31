@@ -1,32 +1,42 @@
+---
+description: Clone a pattern or component from a source repo
+argument-hint: <what> [from <source>]
+---
+
 # Clone from Source
 
 Clone and adapt code from various sources — including pixel-perfect Figma designs.
 
 ## Arguments
+
 - `$1`: Source (figma URL, github:owner/repo/path, shadcn:component, codebase:path)
 - `$2`: (optional) Target path for generated code
 
 ## Sources
 
 ### Figma (pixel-perfect design-to-code)
+
 ```
 /clone https://figma.com/design/abc/File?node-id=1-234
 /clone https://figma.com/design/abc/File?node-id=1-234 src/components/messaging/
 ```
 
 ### GitHub
+
 ```
 /clone github:vercel/ai/examples/next-openai
 /clone github:shadcn-ui/ui/apps/www/components/ui/button
 ```
 
 ### shadcn Registry
+
 ```
 /clone shadcn:button
 /clone shadcn:data-table
 ```
 
 ### Local Codebase
+
 ```
 /clone codebase:src/components/atom/stat-card
 /clone codebase:src/registry/new-york/templates/hero-01

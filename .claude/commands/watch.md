@@ -1,8 +1,14 @@
+---
+description: Post-deploy verification — visual + console + smoke test
+argument-hint: [url] [product]
+---
+
 # Watch — Post-Deploy Monitor
 
 Verify the deployment is healthy in production. The final stage — confirm the customer can actually use it.
 
 ## Usage
+
 - `/watch` — check the latest deployment
 - `/watch https://kingfahad.databayt.org/admission` — check a specific production URL
 - `/watch #42` — check the deployment for a feature issue
@@ -20,6 +26,7 @@ Determine the target:
 **If `$ARGUMENTS` is `#N`**: read the issue, find the deployment URL from the latest comment.
 
 **If no argument**: check the latest Vercel deployment:
+
 ```bash
 npx vercel list --yes --limit 1
 ```
@@ -27,11 +34,13 @@ npx vercel list --yes --limit 1
 ### 2. DEPLOYMENT STATUS — Verify Vercel
 
 Check deployment health:
+
 ```bash
 npx vercel inspect <deployment-url>
 ```
 
 Verify:
+
 - Status is "Ready" (not "Error" or "Building")
 - All domains/aliases are assigned
 - No build warnings that indicate runtime issues
@@ -66,6 +75,7 @@ Navigate to the production URL with browser MCP:
 ### 5. SMOKE — Basic interaction test
 
 If the feature has interactive elements:
+
 1. Click the primary action (e.g., "Create" button)
 2. Verify the form/dialog opens
 3. Close without submitting
@@ -76,6 +86,7 @@ This is a quick smoke test, not a full flow test.
 ### 6. VERDICT — Pass or escalate
 
 **If healthy:**
+
 ```
 ## Watch Report — HEALTHY
 
@@ -90,6 +101,7 @@ Feature is live and verified.
 ```
 
 If this is part of the feature pipeline, close the issue:
+
 ```bash
 gh issue close <number> --repo <repo> --comment "Feature verified in production.
 
@@ -100,6 +112,7 @@ gh issue close <number> --repo <repo> --comment "Feature verified in production.
 ```
 
 **If unhealthy:**
+
 ```
 ## Watch Report — ISSUES FOUND
 
@@ -117,6 +130,7 @@ If part of the pipeline: do NOT close the issue. Label `pipeline:watch-failed`. 
 ## Error Recovery
 
 This stage does not fix code. It only observes and reports. If issues are found:
+
 - Report them clearly
 - If in pipeline context, delegate fixing back to earlier stages
 - If standalone, provide diagnosis for the human

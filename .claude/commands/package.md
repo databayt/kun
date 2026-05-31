@@ -1,8 +1,14 @@
+---
+description: Cross-repo dependency audit and upgrade coordination
+argument-hint: [audit|upgrade <dep>] [repo]
+---
+
 # Package Management Command
 
 Audit, update, and align dependencies across all databayt repositories.
 
 ## Usage
+
 - `/package` - Full audit: scan all 7 repos, compare against latest npm versions, report gaps
 - `/package audit` - Quick consistency check across repos (no npm lookups)
 - `/package update <repo>` - Update all deps in one repo (e.g., `/package update hogwarts`)
@@ -15,6 +21,7 @@ Audit, update, and align dependencies across all databayt repositories.
 ## Instructions
 
 ### Repository Paths
+
 - kun: `/Users/abdout/kun`
 - hogwarts: `/Users/abdout/hogwarts`
 - souq: `/Users/abdout/souq`
@@ -44,6 +51,7 @@ Audit, update, and align dependencies across all databayt repositories.
 ### If argument starts with "update" — Update Mode
 
 **Single repo** (e.g., `update hogwarts`):
+
 1. `cd /Users/abdout/<repo>`
 2. `pnpm outdated` — see what's behind
 3. `pnpm update` — apply safe updates (minor/patch)
@@ -51,6 +59,7 @@ Audit, update, and align dependencies across all databayt repositories.
 5. Report what changed
 
 **Single package** (e.g., `update lucide-react`):
+
 1. Find all repos using that package
 2. `npm view <package> version` — get latest
 3. For each repo: update package.json, run `pnpm install`
@@ -73,11 +82,13 @@ Audit, update, and align dependencies across all databayt repositories.
 ### Shared Packages (MUST be aligned)
 
 **Exact alignment required:**
+
 - next, react, react-dom, typescript, tailwindcss
 - @prisma/client, prisma, zod
 - next-auth, @auth/prisma-adapter
 
 **Minor alignment required (same major.minor):**
+
 - lucide-react, class-variance-authority, clsx, tailwind-merge
 - framer-motion, sonner, cmdk, vaul, embla-carousel-react
 - date-fns, bcryptjs, uuid, react-hook-form, @hookform/resolvers

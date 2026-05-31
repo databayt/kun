@@ -1,8 +1,14 @@
+---
+description: Logic layer — server actions with auth, validation, tenant isolation
+argument-hint: <feature> [product]
+---
+
 # Code — Logic Layer
 
 Create server actions and business logic: auth-guarded, validated, tenant-scoped CRUD operations.
 
 ## Usage
+
 - `/code #42` — from issue spec
 - `/code billing` — from feature name
 - `/code` — from most recent feature issue
@@ -14,11 +20,13 @@ Create server actions and business logic: auth-guarded, validated, tenant-scoped
 ### 1. READ — Load context
 
 Read the spec and schema stage output:
+
 ```bash
 gh issue view <number> --repo <repo> --comments
 ```
 
 Also read:
+
 - The Prisma model created in the schema stage
 - The Zod validation schemas from `src/components/{scope}/{name}/validation.ts`
 - Existing server actions in the same product for pattern reference
@@ -107,6 +115,7 @@ export async function delete{Name}(id: string) {
 ```
 
 **Adapt to the product's actual patterns:**
+
 - Read 2-3 existing action files in the same product
 - Match the auth pattern (session structure, tenant field name)
 - Match the error handling pattern
@@ -122,7 +131,7 @@ import { type Session } from "next-auth";
 
 export function can{Name}(session: Session, action: "create" | "read" | "update" | "delete") {
   const role = session.user.role;
-  
+
   switch (action) {
     case "read": return true; // All authenticated users
     case "create": return ["admin", "manager"].includes(role);
@@ -147,6 +156,7 @@ pnpm tsc --noEmit
 ```
 
 **Error recovery:**
+
 - Import path errors → fix paths → retry
 - Type mismatch with Prisma → regenerate client or fix types → retry
 - Auth type errors → match session type from product → retry
@@ -165,12 +175,12 @@ gh issue comment <number> --repo <repo> --body "## Code Stage Complete
 
 ## Error Recovery
 
-| Error | Fix | Max Retries |
-|-------|-----|-------------|
-| Import not found | Fix import paths, check barrel exports | 3 |
-| Prisma type mismatch | Run `prisma generate`, fix field names | 3 |
-| Auth type error | Read product's auth types, match interface | 3 |
-| Zod parse type error | Align Zod schema with action parameters | 3 |
+| Error                | Fix                                        | Max Retries |
+| -------------------- | ------------------------------------------ | ----------- |
+| Import not found     | Fix import paths, check barrel exports     | 3           |
+| Prisma type mismatch | Run `prisma generate`, fix field names     | 3           |
+| Auth type error      | Read product's auth types, match interface | 3           |
+| Zod parse type error | Align Zod schema with action parameters    | 3           |
 
 ## Exit Gate
 

@@ -1,8 +1,14 @@
+---
+description: Incident response workflow for production issues
+argument-hint: <description>
+---
+
 Incident response workflow for production issues.
 
 Arguments: $ARGUMENTS (description of the incident, e.g., "hogwarts login page returning 500")
 
 Steps:
+
 1. Classify severity:
    - P0: Service completely down, customers affected
    - P1: Service degraded, some features broken

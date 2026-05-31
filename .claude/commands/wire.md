@@ -1,8 +1,14 @@
+---
+description: UI layer — page (mirror pattern), content, form, table columns, i18n
+argument-hint: <feature> [product]
+---
+
 # Wire — UI Layer
 
 Wire everything together: pages, content components, forms, tables, and i18n. The layer users actually see.
 
 ## Usage
+
 - `/wire #42` — from issue spec
 - `/wire billing` — from feature name
 - `/wire` — from most recent feature issue
@@ -14,11 +20,13 @@ Wire everything together: pages, content components, forms, tables, and i18n. Th
 ### 1. READ — Load context
 
 Read the spec, schema output, and code output from the issue:
+
 ```bash
 gh issue view <number> --repo <repo> --comments
 ```
 
 Also read:
+
 - The server actions from `src/components/{scope}/{name}/actions.ts`
 - The Zod schemas from `src/components/{scope}/{name}/validation.ts`
 - An existing similar feature's UI files for pattern reference (e.g., content.tsx, form.tsx, columns.tsx)
@@ -38,6 +46,7 @@ export default function {Name}Page() {
 The page is a thin wrapper — all logic lives in the content component (mirror pattern).
 
 Match the product's existing page patterns:
+
 - Route group structure (e.g., `(school-dashboard)`, `(saas-marketing)`)
 - Metadata exports if used
 - Layout inheritance
@@ -54,7 +63,7 @@ import { {Name}Form } from "./form";
 
 export async function Content() {
   const data = await get{Name}List();
-  
+
   return (
     <div>
       <div className="flex items-center justify-between">
@@ -68,6 +77,7 @@ export async function Content() {
 ```
 
 Adapt to what the spec requires:
+
 - List view → DataTable + columns
 - Detail view → single record display
 - Dashboard → stats + charts
@@ -153,6 +163,7 @@ Only create if the feature has a list view.
 Add keys to both dictionaries:
 
 **`src/dictionaries/en.json`** (or wherever the product keeps dictionaries):
+
 ```json
 {
   "{name}": {
@@ -166,6 +177,7 @@ Add keys to both dictionaries:
 ```
 
 **`src/dictionaries/ar.json`**:
+
 ```json
 {
   "{name}": {
@@ -189,6 +201,7 @@ pnpm build
 ```
 
 **Error recovery loop (max 5 attempts):**
+
 1. Parse build error output
 2. Common fixes:
    - Missing import → add import
@@ -213,13 +226,13 @@ gh issue comment <number> --repo <repo> --body "## Wire Stage Complete
 
 ## Error Recovery
 
-| Error | Fix | Max Retries |
-|-------|-----|-------------|
-| Build failure | Parse error, apply targeted fix | 5 |
-| Missing component | Check import path, verify component exists | 3 |
-| Type mismatch in props | Align with action return types | 3 |
-| i18n key not found | Add missing dictionary key | 2 |
-| Server/client boundary | Move "use client" or restructure component | 3 |
+| Error                  | Fix                                        | Max Retries |
+| ---------------------- | ------------------------------------------ | ----------- |
+| Build failure          | Parse error, apply targeted fix            | 5           |
+| Missing component      | Check import path, verify component exists | 3           |
+| Type mismatch in props | Align with action return types             | 3           |
+| i18n key not found     | Add missing dictionary key                 | 2           |
+| Server/client boundary | Move "use client" or restructure component | 3           |
 
 ## Exit Gate
 

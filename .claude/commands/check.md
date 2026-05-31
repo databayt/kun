@@ -1,8 +1,14 @@
+---
+description: Quality gate — typecheck + build + visual verify before shipping
+argument-hint: [feature] [--visual <route>]
+---
+
 # Check — Quality Gate
 
 The gate between building and shipping. Type-check, build, and visually verify before anything goes to production.
 
 ## Usage
+
 - `/check` — full quality gate on current working directory
 - `/check billing` — focused on a specific feature's files
 - `/check --visual /billing` — include visual verification of a route
@@ -18,6 +24,7 @@ pnpm tsc --noEmit
 ```
 
 **If errors found — fix loop (max 5 attempts):**
+
 1. Read the error output
 2. Categorize errors:
    - Missing import → add the import
@@ -36,6 +43,7 @@ pnpm build
 ```
 
 **If build fails — fix loop (max 5 attempts):**
+
 1. Parse the build error output
 2. Categorize errors:
    - Server/client boundary violation → add "use client" or restructure
@@ -114,12 +122,12 @@ Skip the sentinel on BLOCKED.
 
 ## Error Recovery
 
-| Error | Fix | Max Retries |
-|-------|-----|-------------|
-| TypeScript errors | Auto-fix types, imports | 5 |
-| Build errors | Auto-fix server/client boundary, imports | 5 |
-| Visual blank page | Check route exists, check component exports | 3 |
-| Test failures | Read failure, fix code | 3 |
+| Error             | Fix                                         | Max Retries |
+| ----------------- | ------------------------------------------- | ----------- |
+| TypeScript errors | Auto-fix types, imports                     | 5           |
+| Build errors      | Auto-fix server/client boundary, imports    | 5           |
+| Visual blank page | Check route exists, check component exports | 3           |
+| Test failures     | Read failure, fix code                      | 3           |
 
 If all retries exhausted on any check: report BLOCKED with the remaining errors.
 

@@ -1,3 +1,8 @@
+---
+description: One spell — handover, check, ship, watch, then comment + close the issue
+argument-hint: <block> [--issue #N] [--notify-slack #channel]
+---
+
 # Release — Give Away to Client
 
 One spell to take a finished feature block from local-on-main to live-in-production-and-verified. Orchestrates `/handover` → `/check` → `/ship` → `/watch`, then auto-comments the production URL + verdict on the related GitHub issue.
@@ -21,28 +26,38 @@ This is the **"send it to the client"** verb. Four sharp tools, one invocation.
 Refuse to proceed if any of these fail. Each check should print the offending state clearly.
 
 1. **Working tree clean**
+
    ```bash
    git status --short
    ```
-   If any output: stop with *"Working tree has uncommitted changes. Commit, stash, or discard before /release."*
+
+   If any output: stop with _"Working tree has uncommitted changes. Commit, stash, or discard before /release."_
 
 2. **On main, up-to-date**
+
    ```bash
    git rev-parse --abbrev-ref HEAD     # must be 'main'
    git fetch origin main
    git rev-list --count HEAD..origin/main   # must be 0 (not behind)
    git rev-list --count origin/main..HEAD   # must be 0 (not ahead)
    ```
+
    If any check fails: stop with the specific reason (behind, ahead, or wrong branch). Suggest the fix.
 
 3. **Sentinel cache** (shared session state)
    Read `.claude/session-state.json` if it exists. Each gate command writes its own key (`handover`, `check`) on PASS. For each stage, if its sentinel is `PASS` and the timestamp is within the last 10 minutes, mark it `SKIP`. This makes re-runs idempotent after fixing one stage — and lets `/ship` and `/check` invoked alone earlier in the session contribute their results here.
 
    Sentinel shape:
+
    ```json
    {
-     "handover": { "scope": "block", "block": "admission", "status": "PASS", "at": "2026-05-29T14:30:00Z" },
-     "check":    { "status": "PASS", "at": "2026-05-29T14:32:00Z" }
+     "handover": {
+       "scope": "block",
+       "block": "admission",
+       "status": "PASS",
+       "at": "2026-05-29T14:30:00Z"
+     },
+     "check": { "status": "PASS", "at": "2026-05-29T14:32:00Z" }
    }
    ```
 
@@ -122,6 +137,7 @@ EOF
 ```
 
 Then close the issue if it is still open:
+
 ```bash
 gh issue close $ISSUE_NUMBER --repo <repo>
 ```
@@ -129,6 +145,7 @@ gh issue close $ISSUE_NUMBER --repo <repo>
 ### Phase 8 — Optional Slack
 
 If `--notify-slack <channel>` was passed:
+
 - Use the `slack` MCP (`mcp__slack__slack_post_message`) to post the same summary to the channel
 - Include the production URL as a link
 - This is opt-in; default is no Slack post
@@ -155,17 +172,17 @@ Total elapsed: <duration>
 
 ## Failure modes
 
-| Stage | Failure | What /release does |
-|---|---|---|
-| Pre-flight | Dirty tree | Stop; instruct user to commit/stash |
-| Pre-flight | Wrong branch / behind / ahead | Stop; print the rev-list output |
-| Resolve issue | None found | Stop; ask the user for `--issue #N` |
-| Handover | Translation FAIL / RTL FAIL | Stop; suggest `/handover <block> --fix` |
-| Handover | Flow FAIL / Responsive FAIL | Stop; surface findings — human judgment |
-| Check | Build error after auto-fix | Stop; print remaining errors |
-| Ship | Deploy error after auto-fix | Stop; print the full error trail |
-| Watch | Issues found | Stop; do not auto-revert — alert the user |
-| Notify | gh CLI fails | Print the comment body so the user can paste it manually |
+| Stage         | Failure                       | What /release does                                       |
+| ------------- | ----------------------------- | -------------------------------------------------------- |
+| Pre-flight    | Dirty tree                    | Stop; instruct user to commit/stash                      |
+| Pre-flight    | Wrong branch / behind / ahead | Stop; print the rev-list output                          |
+| Resolve issue | None found                    | Stop; ask the user for `--issue #N`                      |
+| Handover      | Translation FAIL / RTL FAIL   | Stop; suggest `/handover <block> --fix`                  |
+| Handover      | Flow FAIL / Responsive FAIL   | Stop; surface findings — human judgment                  |
+| Check         | Build error after auto-fix    | Stop; print remaining errors                             |
+| Ship          | Deploy error after auto-fix   | Stop; print the full error trail                         |
+| Watch         | Issues found                  | Stop; do not auto-revert — alert the user                |
+| Notify        | gh CLI fails                  | Print the comment body so the user can paste it manually |
 
 ## Exit gate
 

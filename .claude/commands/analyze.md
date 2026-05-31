@@ -1,8 +1,14 @@
+---
+description: Analyze a repo's patterns and generate a tailored Claude Code config
+argument-hint: [repo-path] [--pr]
+---
+
 # Analyze — Repo Config Generator
 
 Analyze any repo's patterns and generate a complete `.claude/` configuration as a pull request.
 
 ## Usage
+
 - `/analyze hogwarts` — analyze hogwarts, create config PR
 - `/analyze databayt/souq` — analyze from GitHub
 - `/analyze .` — analyze current directory
@@ -15,6 +21,7 @@ Analyze any repo's patterns and generate a complete `.claude/` configuration as 
 ## Instructions
 
 Parse arguments:
+
 - First arg = repo (name, path, or GitHub URL)
 - `--dry-run` = output to stdout, no PR
 - `--update` = diff against existing `.claude/`, update stale config
@@ -34,7 +41,7 @@ Issue → Branch → Analyze → Commit → Push → PR → Review → Merge →
 # Local repo
 if [ -d "/Users/abdout/$REPO" ]; then
   cd /Users/abdout/$REPO
-# GitHub repo  
+# GitHub repo
 elif echo "$REPO" | grep -q "/"; then
   gh repo clone $REPO /tmp/analyze-$REPO
   cd /tmp/analyze-$REPO
@@ -77,6 +84,7 @@ cat package.json | jq '{
 ```
 
 Map to technologies:
+
 - `next` → Next.js (check version)
 - `react` → React (check version)
 - `prisma` → Prisma (check version)
@@ -113,6 +121,7 @@ Read 10 representative files and extract patterns:
 6. **1 layout** → metadata, providers, guards
 
 For each file, note:
+
 - Imports (barrel vs direct, package choices)
 - Patterns (auth checks, error handling, data fetching)
 - Naming (files, variables, functions, components)
@@ -141,15 +150,19 @@ Create `.claude/` directory and files:
 # <Repo Name>
 
 ## Stack
+
 <detected technologies with versions>
 
 ## Conventions
+
 <extracted patterns — only what's actually observed>
 
 ## Structure
+
 <directory layout conventions>
 
 ## Keywords
+
 <relevant subset from Kun's keyword map>
 ```
 
@@ -159,18 +172,18 @@ Create `.claude/` directory and files:
 
 Only include agents the repo needs. Use this mapping:
 
-| Detected | Agents |
-|----------|--------|
-| Next.js | nextjs, react, middleware |
-| TypeScript | typescript, build |
-| Prisma | prisma, architecture |
+| Detected        | Agents                     |
+| --------------- | -------------------------- |
+| Next.js         | nextjs, react, middleware  |
+| TypeScript      | typescript, build          |
+| Prisma          | prisma, architecture       |
 | Tailwind/shadcn | tailwind, shadcn, semantic |
-| Auth.js | authjs, guardian |
-| i18n | internationalization |
-| Tests | test |
-| Components dir | atom, template, block |
-| Vercel deploy | deploy, ops |
-| Git/GitHub | git, github |
+| Auth.js         | authjs, guardian           |
+| i18n            | internationalization       |
+| Tests           | test                       |
+| Components dir  | atom, template, block      |
+| Vercel deploy   | deploy, ops                |
+| Git/GitHub      | git, github                |
 
 Create a minimal `_index.md` listing selected agents with reasons.
 
@@ -180,6 +193,7 @@ Each rule = one observed convention worth enforcing:
 
 ```markdown
 # rules/<convention>.md
+
 <what the convention is>
 <evidence: "observed in N/M sampled files">
 ```
@@ -265,6 +279,7 @@ Filter generated config to only include agents, rules, and commands relevant to 
 ## Quality Gates
 
 Before creating PR:
+
 - [ ] CLAUDE.md is valid markdown, under 500 lines
 - [ ] Agent frontmatter has name, description, model
 - [ ] Rules reference actual observed patterns (not aspirational)

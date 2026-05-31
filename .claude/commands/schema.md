@@ -1,8 +1,14 @@
+---
+description: Data layer — Prisma model, migration, and Zod validation
+argument-hint: <model> [product]
+---
+
 # Schema — Data Layer
 
 Create the data foundation: Prisma model, migration, Zod validation, TypeScript types.
 
 ## Usage
+
 - `/schema #42` — from issue spec
 - `/schema billing` — from feature name
 - `/schema` — from most recent feature issue
@@ -14,6 +20,7 @@ Create the data foundation: Prisma model, migration, Zod validation, TypeScript 
 ### 1. READ — Load the spec
 
 Find the feature issue and read the spec comment:
+
 ```bash
 gh issue view <number> --repo <repo> --comments
 ```
@@ -46,11 +53,13 @@ pnpm prisma migrate dev --name add-{feature-name}
 ```
 
 **Error recovery:**
+
 - If migration fails due to schema error → read error → fix model → retry
 - If migration fails due to data conflict → read error → adjust model → retry
 - Max 3 attempts. If still failing, report the error and stop.
 
 Then generate the client:
+
 ```bash
 pnpm prisma generate
 ```
@@ -90,6 +99,7 @@ pnpm tsc --noEmit
 ```
 
 **Error recovery:**
+
 - If type errors → read errors → fix imports/types → retry
 - Max 3 attempts
 
@@ -110,12 +120,12 @@ Files created:
 
 ## Error Recovery
 
-| Error | Fix | Max Retries |
-|-------|-----|-------------|
-| Migration syntax error | Read Prisma error, fix model definition | 3 |
-| Relation conflict | Check existing models, fix relation names | 3 |
-| Type compilation error | Fix imports, adjust types | 3 |
-| Prisma generate failure | Check schema validity, fix | 3 |
+| Error                   | Fix                                       | Max Retries |
+| ----------------------- | ----------------------------------------- | ----------- |
+| Migration syntax error  | Read Prisma error, fix model definition   | 3           |
+| Relation conflict       | Check existing models, fix relation names | 3           |
+| Type compilation error  | Fix imports, adjust types                 | 3           |
+| Prisma generate failure | Check schema validity, fix                | 3           |
 
 If all retries exhausted: stop, report error on issue, label `pipeline:blocked`.
 

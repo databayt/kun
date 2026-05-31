@@ -1,3 +1,8 @@
+---
+description: Crawl and snapshot Anthropic docs/assets
+argument-hint: [url] [--section S]
+---
+
 # Crawl Anthropic Assets
 
 Re-crawl all Anthropic web properties and update the asset catalog at `src/components/root/anthropic/data.ts`.

@@ -1,8 +1,14 @@
+---
+description: Plan and review the content calendar
+argument-hint: [plan|review] [date-range]
+---
+
 Plan and review the content calendar.
 
 Arguments: $ARGUMENTS (optional: "plan" for next week, "review" for this week, or a specific date range)
 
 Steps:
+
 1. Check what products are shipping soon (product agent context)
 2. Check recent competitor moves (analyst agent context)
 3. Review growth agent's content pillars:

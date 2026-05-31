@@ -1,8 +1,15 @@
+---
+description: Calculate and compare pricing tiers for a databayt product
+argument-hint: <product>
+model: sonnet
+---
+
 Calculate and compare pricing tiers for a databayt product.
 
 Arguments: $ARGUMENTS (product name, e.g., "hogwarts" or "souq")
 
 Steps:
+
 1. Load pricing strategy from .claude/agents/revenue.md
 2. Use analyst agent to pull competitor pricing benchmarks
 3. Calculate cost structure from .claude/agents/ops.md cost tracking

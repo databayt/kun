@@ -1,3 +1,8 @@
+---
+description: Promote a checked build to production (Vercel --prod)
+argument-hint: [product]
+---
+
 # Ship — Production Deploy
 
 Promote a `/check`-passed build to **production** on Vercel. The pipeline's final commit-to-live step.
@@ -5,6 +10,7 @@ Promote a `/check`-passed build to **production** on Vercel. The pipeline's fina
 `/ship` is for production. For staging/preview, use `/deploy preview`.
 
 ## Usage
+
 - `/ship` — deploy current branch to production
 - `/ship logs` — fetch and analyze the latest production deployment's logs
 - `/ship status` — show the last 5 production deployments
@@ -14,12 +20,14 @@ Promote a `/check`-passed build to **production** on Vercel. The pipeline's fina
 ## Instructions
 
 ### If argument is `logs`
+
 1. `npx vercel list --prod --yes`
 2. Identify the most recent failed production deployment
 3. `npx vercel inspect <url> --logs` and surface the error with root cause
 4. Suggest the fix; do not auto-apply
 
 ### If argument is `status`
+
 1. `npx vercel list --prod --yes`
 2. Show status of the last 5 production deployments
 3. Report current alias mapping (`databayt.org`, product subdomains)
@@ -46,6 +54,7 @@ Promote a `/check`-passed build to **production** on Vercel. The pipeline's fina
 #### Phase 3 — Auto-fix loop (max 5 attempts)
 
 If status is `Error`:
+
 1. Fetch logs: `npx vercel inspect <url> --logs`
 2. Parse the error category:
    - TypeScript → fix types, re-run
@@ -60,9 +69,10 @@ If status is `Error`:
 #### Phase 4 — Hand-off
 
 On `Ready`:
+
 1. Print deployment URL + commit SHA
 2. Print production aliases (`databayt.org`, product subdomain)
-3. Suggest `/watch` next: *"Production is live. Run `/watch` to verify the customer-facing flow."*
+3. Suggest `/watch` next: _"Production is live. Run `/watch` to verify the customer-facing flow."_
 
 ## Exit gate
 
@@ -73,10 +83,10 @@ On `Ready`:
 
 ## Common errors and fixes
 
-| Error | Fix | Retries |
-|---|---|---|
-| TypeScript | Auto-fix types, imports | 5 |
-| Server/client boundary | `"use client"` or restructure | 5 |
-| Env var missing | Stop — never invent prod env vars | 0 |
-| Prisma client missing | Ensure `prisma generate` in build script | 3 |
-| Build timeout | Suggest splitting components; do not retry blindly | 0 |
+| Error                  | Fix                                                | Retries |
+| ---------------------- | -------------------------------------------------- | ------- |
+| TypeScript             | Auto-fix types, imports                            | 5       |
+| Server/client boundary | `"use client"` or restructure                      | 5       |
+| Env var missing        | Stop — never invent prod env vars                  | 0       |
+| Prisma client missing  | Ensure `prisma generate` in build script           | 3       |
+| Build timeout          | Suggest splitting components; do not retry blindly | 0       |

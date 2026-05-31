@@ -1,8 +1,14 @@
+---
+description: Look up a canonical cross-repo pattern (form, table, auth, ...)
+argument-hint: <name> [product]
+---
+
 # Pattern — Cross-Repo Pattern Reference
 
 Show canonical patterns for reusable code across all databayt repositories.
 
 ## Usage
+
 - `/pattern` — list all patterns with status
 - `/pattern form` — show the form pattern card
 - `/pattern form --status` — show per-repo adoption
@@ -15,6 +21,7 @@ Show canonical patterns for reusable code across all databayt repositories.
 ### Parse arguments
 
 Extract `keyword` and optional flags from `$ARGUMENTS`:
+
 - No args → show index
 - Single word (e.g., `form`) → show that pattern card
 - Word + `--status` → show adoption status
@@ -51,6 +58,7 @@ If the keyword is not found in the registry, suggest the closest match.
 ### --status — Adoption Status
 
 Read the registry entry for the keyword. For each repo, show:
+
 - Whether the canonical pattern files exist
 - Current pattern name vs canonical
 - Maturity level
@@ -59,6 +67,7 @@ Read the registry entry for the keyword. For each repo, show:
 ### --diff — Gap Analysis
 
 Compare current repo's implementation against the canonical:
+
 1. Read registry to find canonical path and repo
 2. Check if current repo has the keyword's pattern
 3. List: missing files, divergent patterns, extra dependencies
@@ -67,5 +76,6 @@ Compare current repo's implementation against the canonical:
 ### After showing any pattern
 
 Remind the user:
+
 - `/clone pattern:{keyword}` to clone the canonical pattern
 - The pattern card location for reference

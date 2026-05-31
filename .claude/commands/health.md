@@ -1,3 +1,8 @@
+---
+description: Check Claude Code config health across the team + engine drift
+argument-hint: [local|all|report]
+---
+
 Check Claude Code config health for all team members.
 
 Arguments: $ARGUMENTS (optional: "local" for local-only check, or "all" for team dashboard)

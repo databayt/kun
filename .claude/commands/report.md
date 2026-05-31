@@ -1,8 +1,14 @@
+---
+description: Auto-fix a user-reported issue end to end
+argument-hint: [#N] [repo]
+---
+
 # Report — Auto-Fix User-Reported Issues
 
 Process GitHub issues labeled `report`. Read, verify, fix, close.
 
 ## Usage
+
 - `/report` - Process all repos with open report issues
 - `/report hogwarts` - Process only databayt/hogwarts
 - `/report kun` - Process only databayt/kun
@@ -59,23 +65,23 @@ Process each issue (oldest first) using the **report agent pipeline**:
 
 ### Repo Paths
 
-| Repo | Local Path | Production |
-|------|-----------|------------|
-| hogwarts | `/Users/abdout/hogwarts` | `*.databayt.org` |
-| kun | `/Users/abdout/kun` | `kun.databayt.org` |
-| souq | `/Users/abdout/souq` | `souq.databayt.org` |
-| mkan | `/Users/abdout/mkan` | `mkan.databayt.org` |
-| shifa | `/Users/abdout/shifa` | `shifa.databayt.org` |
+| Repo     | Local Path               | Production           |
+| -------- | ------------------------ | -------------------- |
+| hogwarts | `/Users/abdout/hogwarts` | `*.databayt.org`     |
+| kun      | `/Users/abdout/kun`      | `kun.databayt.org`   |
+| souq     | `/Users/abdout/souq`     | `souq.databayt.org`  |
+| mkan     | `/Users/abdout/mkan`     | `mkan.databayt.org`  |
+| shifa    | `/Users/abdout/shifa`    | `shifa.databayt.org` |
 
 ### Escalation
 
-| Situation | Action |
-|-----------|--------|
-| Cannot reproduce | Comment + `cannot-reproduce` label, leave open |
-| Feature request | Comment + `needs-human` label, leave open |
-| Needs schema/auth change | Comment + `needs-human` label, leave open |
-| Build error | Hand off to `build` agent |
-| Server exception | Hand off to `sse` agent |
+| Situation                | Action                                         |
+| ------------------------ | ---------------------------------------------- |
+| Cannot reproduce         | Comment + `cannot-reproduce` label, leave open |
+| Feature request          | Comment + `needs-human` label, leave open      |
+| Needs schema/auth change | Comment + `needs-human` label, leave open      |
+| Build error              | Hand off to `build` agent                      |
+| Server exception         | Hand off to `sse` agent                        |
 
 ### Rules
 

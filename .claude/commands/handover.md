@@ -1,13 +1,19 @@
+---
+description: UI verification — runs niche quality keywords on a URL or block
+argument-hint: <url>|<block> [--env staging] [--fix]
+---
+
 # Handover — UI Verification
 
 Run the niche quality keywords against a route or every route in a block. Composes — does not redefine — the per-URL checks the `quality` agent already owns.
 
 `/handover` has two modes, detected by argument shape:
 
-- **URL mode** — argument starts with `/`. Runs the 12 per-URL niche keywords (browser 6 + code 6) on that route. *Replaces the old `qa <url>` orchestrator.*
+- **URL mode** — argument starts with `/`. Runs the 12 per-URL niche keywords (browser 6 + code 6) on that route. _Replaces the old `qa <url>` orchestrator._
 - **Block mode** — argument is a bare word. Runs the per-route subset (`debug`, `flow`, `responsive`, `lang`) on every route discovered in the block.
 
 ## Usage
+
 - `/handover /admission/new` — URL mode: 12 niche checks on one URL
 - `/handover admission` — block mode: per-route niche checks on the admission block
 - `/handover admission --env staging` — block mode against `ed.databayt.org`
@@ -66,18 +72,19 @@ Group by stripping route groups `(parens)`, `[lang]`, `s`, `[subdomain]`. Filter
 Stop and ask if zero routes match.
 
 **Pre-flight:**
+
 - Ensure dev server is running on port 3000 (default) or `--env` target is reachable
 - Create the report directory: `.claude/handover-reports/<block>-<YYYYMMDD-HHmm>/`
 
 **For each route, run the per-route niche subset:**
 
-| Pass | Niche keyword | What it does |
-|---|---|---|
-| 1 | `debug` | Console + network — fail on errors, warn on failed requests |
-| 2 | `flow` | Primary interaction — click, type, submit, verify post-state |
-| 3 | `responsive` | 375 / 768 / 1440 breakpoints — fail on overflow or broken layout |
-| 4 | `lang` (RTL portion) | `/ar/` variant — verify logical-property flip, LTR exemptions |
-| 5 | `lang` (translation portion) | Hardcoded-string scan + dictionary key resolution |
+| Pass | Niche keyword                | What it does                                                     |
+| ---- | ---------------------------- | ---------------------------------------------------------------- |
+| 1    | `debug`                      | Console + network — fail on errors, warn on failed requests      |
+| 2    | `flow`                       | Primary interaction — click, type, submit, verify post-state     |
+| 3    | `responsive`                 | 375 / 768 / 1440 breakpoints — fail on overflow or broken layout |
+| 4    | `lang` (RTL portion)         | `/ar/` variant — verify logical-property flip, LTR exemptions    |
+| 5    | `lang` (translation portion) | Hardcoded-string scan + dictionary key resolution                |
 
 These keywords are defined in `.claude/agents/quality.md`. Block mode invokes each keyword per route — it does not redefine the check logic here.
 

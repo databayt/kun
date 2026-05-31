@@ -1,8 +1,14 @@
+---
+description: Full pipeline — idea to production (chains every stage)
+argument-hint: <name> [product] [--from <stage>]
+---
+
 # Feature Pipeline — Idea to Production
 
 The compound orchestrator. Chains all pipeline stages to take a feature from idea to customer's hands.
 
 ## Usage
+
 - `/feature billing` — full pipeline for "billing" feature
 - `/feature billing hogwarts` — scoped to hogwarts product
 - `/feature #42` — resume pipeline from existing issue
@@ -13,6 +19,7 @@ The compound orchestrator. Chains all pipeline stages to take a feature from ide
 ## Instructions
 
 Parse arguments:
+
 - First word = feature name (or `#N` for existing issue)
 - Second word = product scope (hogwarts, souq, mkan, shifa) — optional
 - `--from <stage>` = skip to a specific stage (idea, spec, schema, code, wire, check, ship, watch)
@@ -30,11 +37,13 @@ IDEA → SPEC → [human approval] → SCHEMA → CODE → WIRE → CHECK → SH
 If `$ARGUMENTS` is `#N`, read that issue and skip to Stage 2.
 
 Otherwise, check if an issue already exists:
+
 ```bash
 gh issue list --repo <repo> --search "<feature-name> type:feature" --state open
 ```
 
 If no issue exists, execute the `idea` workflow:
+
 1. Create structured GitHub issue with feature name, user story, acceptance criteria
 2. Label with `type:feature` and product scope
 3. Capture the issue number for subsequent stages
@@ -44,6 +53,7 @@ If no issue exists, execute the `idea` workflow:
 Check if the issue already has a spec comment (look for `## Technical Spec` in comments).
 
 If no spec exists, execute the `spec` workflow:
+
 1. Read the target product's schema, page structure, and CLAUDE.md
 2. Generate: data model sketch, file plan, acceptance criteria
 3. Append spec as comment on the issue
@@ -55,6 +65,7 @@ If denied, stop. The issue has the spec for later.
 ### Stage 3: SCHEMA — Data Layer
 
 Execute the `schema` workflow:
+
 1. Read spec from issue comments
 2. Create Prisma model + migration
 3. Create Zod validation schemas
@@ -65,6 +76,7 @@ Append to issue: "Schema stage complete. Models: [list]. Migration: [name]."
 ### Stage 4: CODE — Logic Layer
 
 Execute the `code` workflow:
+
 1. Read schema and types from Stage 3
 2. Create server actions with auth + validation + tenant isolation
 3. Create authorization rules
@@ -75,6 +87,7 @@ Append to issue: "Code stage complete. Actions: [list]."
 ### Stage 5: WIRE — UI Layer
 
 Execute the `wire` workflow:
+
 1. Read actions and types from Stage 4
 2. Create page (mirror pattern), content component, form, table columns
 3. Add i18n dictionary keys (en + ar)
@@ -85,6 +98,7 @@ Append to issue: "Wire stage complete. Pages: [list]. Components: [list]."
 ### Stage 6: CHECK — Quality Gate
 
 Execute the `check` workflow:
+
 1. `pnpm tsc --noEmit` (fix loop, max 5)
 2. `pnpm build` (fix loop, max 5)
 3. Navigate to the new page with browser MCP, screenshot, verify it renders
@@ -95,6 +109,7 @@ Append to issue: "Check stage complete. Build: pass. Visual: verified."
 ### Stage 7: SHIP — Deploy
 
 1. Stage and commit all new files:
+
    ```bash
    git add <all files created in stages 3-5>
    git commit -m "feat: add <feature-name>
@@ -103,6 +118,7 @@ Append to issue: "Check stage complete. Build: pass. Visual: verified."
 
    Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>"
    ```
+
 2. Push to main
 3. Deploy to Vercel: `npx vercel --prod --yes`
 4. Poll deployment status until Ready (max 10 minutes)
@@ -120,6 +136,7 @@ Append to issue: "Ship stage complete. Deployment: [URL]."
 6. If clean: close the issue with a summary comment
 
 Close issue:
+
 ```bash
 gh issue close <number> --repo <repo> --comment "Feature shipped.
 
@@ -132,6 +149,7 @@ gh issue close <number> --repo <repo> --comment "Feature shipped.
 ### Error Recovery
 
 If any stage fails after max retries:
+
 1. Append failure report to the issue
 2. Label the issue with `pipeline:blocked` and the failing stage name
 3. Report to the human: which stage failed, what the error was, what was tried
@@ -140,6 +158,7 @@ If any stage fails after max retries:
 ### Product Context
 
 When a product is specified, read that product's context:
+
 - `hogwarts` → read `/Users/abdout/hogwarts/CLAUDE.md`, use hogwarts agent patterns (multi-tenant, subdomain routing)
 - `souq` → read `/Users/abdout/souq/CLAUDE.md`, use souq agent patterns (multi-vendor marketplace)
 - `mkan` → read `/Users/abdout/mkan/CLAUDE.md`, use mkan agent patterns (rental marketplace)
