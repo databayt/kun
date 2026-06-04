@@ -1,7 +1,7 @@
 ---
 domain: typescript-strict
 severity: error
-applies-to: ["**/actions.ts", "**/validation.ts", "**/*.ts", "**/*.tsx"]
+paths: ["**/actions.ts", "**/validation.ts", "**/*.ts", "**/*.tsx"]
 since: "TypeScript 5.0"
 ---
 

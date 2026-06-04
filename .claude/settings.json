@@ -18,6 +18,15 @@
             "command": "lsof -ti:3000 | xargs kill -9 2>/dev/null; exit 0"
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/block-destructive-bash.sh\""
+          }
+        ]
       }
     ],
     "PostToolUse": [

@@ -1,7 +1,7 @@
 ---
 domain: tailwind-v4
 severity: warn
-applies-to: ["**/*.css", "**/globals.css", "**/theme.css"]
+paths: ["**/*.css", "**/globals.css", "**/theme.css"]
 since: "Tailwind 4.0"
 ---
 

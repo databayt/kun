@@ -1,7 +1,7 @@
 ---
 domain: prisma-6
 severity: error
-applies-to:
+paths:
   [
     "**/schema.prisma",
     "**/package.json",

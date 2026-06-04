@@ -1,7 +1,7 @@
 ---
 domain: neon
 severity: warn
-applies-to: ["**/db.ts", "**/prisma.ts", "**/lib/db.ts", "**/actions.ts"]
+paths: ["**/db.ts", "**/prisma.ts", "**/lib/db.ts", "**/actions.ts"]
 since: "Neon"
 ---
 

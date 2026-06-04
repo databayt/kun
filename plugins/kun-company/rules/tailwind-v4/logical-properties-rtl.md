@@ -1,7 +1,7 @@
 ---
 domain: tailwind-v4
 severity: error
-applies-to:
+paths:
   ["**/*.tsx", "**/page.tsx", "**/content.tsx", "**/form.tsx", "**/*.css"]
 since: "Tailwind 4.0"
 ---

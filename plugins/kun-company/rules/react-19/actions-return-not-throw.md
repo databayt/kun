@@ -1,7 +1,7 @@
 ---
 domain: react-19
 severity: error
-applies-to: ["**/actions.ts", "**/actions.tsx", "**/*.action.ts"]
+paths: ["**/actions.ts", "**/actions.tsx", "**/*.action.ts"]
 since: "React 19.0"
 ---
 

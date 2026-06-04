@@ -1,0 +1,28 @@
+name: config-drift
+
+# Keeps the kun plugin trees (plugins/) in sync with their canonical sources in
+# .claude/. build-plugin.sh --check fully verifies the kun-company plugin (its
+# sources live in the repo) and gracefully skips kun-stack (whose sources live in
+# ~/.claude, absent in CI — verify that one locally before pushing).
+#
+# health.sh is intentionally NOT run here: it audits the whole local Claude Code
+# environment (~/.claude, MCP servers, team configs) and is a developer tool, not
+# a CI gate. The script is also non-destructive in --check mode (no rm -rf).
+
+on:
+  pull_request:
+    paths:
+      - ".claude/**"
+      - "plugins/**"
+      - ".github/workflows/config-drift.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify plugins are in sync with .claude/ sources
+        run: bash .claude/scripts/build-plugin.sh --check

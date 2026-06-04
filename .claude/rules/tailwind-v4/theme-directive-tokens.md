@@ -1,7 +1,7 @@
 ---
 domain: tailwind-v4
 severity: error
-applies-to:
+paths:
   ["**/*.css", "**/globals.css", "**/theme.css", "**/tailwind.config.*"]
 since: "Tailwind 4.0"
 ---

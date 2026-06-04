@@ -1,7 +1,7 @@
 ---
 domain: authjs
 severity: error
-applies-to: ["**/actions.ts", "**/actions/*.ts"]
+paths: ["**/actions.ts", "**/actions/*.ts"]
 since: "Auth.js 5.0"
 ---
 

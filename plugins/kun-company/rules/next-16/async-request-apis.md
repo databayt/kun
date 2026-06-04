@@ -1,7 +1,7 @@
 ---
 domain: next-16
 severity: error
-applies-to:
+paths:
   [
     "**/page.tsx",
     "**/layout.tsx",

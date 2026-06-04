@@ -1,7 +1,7 @@
 ---
 domain: next-16
 severity: warn
-applies-to: ["**/page.tsx", "**/content.tsx", "**/*.tsx"]
+paths: ["**/page.tsx", "**/content.tsx", "**/*.tsx"]
 since: "Next.js 16.0"
 ---
 

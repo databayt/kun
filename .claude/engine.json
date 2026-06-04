@@ -1,10 +1,10 @@
 {
-  "$comment": "Single source of truth for kun engine metadata. Prose/docs reference this file instead of hardcoding numbers. /health (.claude/scripts/health.sh) reads it and warns when docs or reality drift from these values. Agent frontmatter stays `model: opus` (the alias) — never pin a number there.",
+  "$comment": "Single source of truth for kun engine metadata. Prose/docs reference this file instead of hardcoding numbers. /health (.claude/scripts/health.sh) reads it and warns when docs or reality drift from these values. Agent frontmatter uses a model alias (`opus`/`sonnet`/`haiku` per `model_tiers`) — never pin a version number there.",
   "model": "claude-opus-4-8",
   "model_label": "Opus 4.8",
   "model_context": "1M",
   "engine_version": "databayt v3.1",
-  "updated": "2026-05-31",
+  "updated": "2026-06-04",
   "counts": {
     "project_agents": 18,
     "user_agents": 27,
@@ -13,8 +13,15 @@
     "user_skills": 22,
     "pattern_cards": 10,
     "project_rules": 3,
+    "domain_rules": 29,
     "project_mcp": 25,
     "user_mcp": 19
+  },
+  "model_tiers": {
+    "$comment": "Per-agent model alias by task type. The portable stack fleet (~/.claude/agents) follows this; the project fleet defaults to opus (quality-over-speed) except purely mechanical agents.",
+    "opus": "architecture, orchestration, deep reasoning, code review/fixes, and strategy/leadership agents",
+    "sonnet": "standard build agents + the mechanical project agent (package)",
+    "haiku": "routine/formatting agents (comment, git, icon, github, semantic, sse, structure)"
   },
   "commit_footer": "Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>"
 }

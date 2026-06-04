@@ -54,7 +54,7 @@ The bridge between automated checks and human judgment.
 | 11  | `design`       | Components — ui/atom/template hierarchy              | `tailwind-v4/`                   |
 | 12  | `stack`        | Technology — versions, imports, deprecated APIs      | all `rules/<domain>/`            |
 
-> Code-side keywords cite the atomic rules under `.claude/rules/<domain>/` (frontmatter: `domain`, `severity`, `applies-to`, `since`; Good/Bad/Fix body). Report each finding as `rule-id (severity)` — e.g. `use-action-state (error)`. Full mapping: `.claude/rules/patterns.md` § Rule Corpus.
+> Code-side keywords cite the atomic rules under `.claude/rules/<domain>/` (frontmatter: `domain`, `severity`, `paths`, `since`; Good/Bad/Fix body). Report each finding as `rule-id (severity)` — e.g. `use-action-state (error)`. Full mapping: `.claude/rules/patterns.md` § Rule Corpus.
 
 ### Deep — investigation + optimization
 

@@ -1,7 +1,7 @@
 ---
 domain: prisma-6
 severity: warn
-applies-to:
+paths:
   ["**/actions.ts", "**/content.tsx", "**/page.tsx", "**/*.queries.ts"]
 since: "Prisma 6.0"
 ---

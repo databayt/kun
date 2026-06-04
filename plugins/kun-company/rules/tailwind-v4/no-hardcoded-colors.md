@@ -1,7 +1,7 @@
 ---
 domain: tailwind-v4
 severity: warn
-applies-to:
+paths:
   ["**/*.tsx", "**/page.tsx", "**/content.tsx", "**/form.tsx", "**/table.tsx"]
 since: "Tailwind 4.0"
 ---

@@ -1,7 +1,7 @@
 ---
 domain: s3
 severity: warn
-applies-to: ["**/actions.ts", "**/content.tsx", "**/page.tsx", "**/columns.tsx"]
+paths: ["**/actions.ts", "**/content.tsx", "**/page.tsx", "**/columns.tsx"]
 since: "AWS S3"
 ---
 

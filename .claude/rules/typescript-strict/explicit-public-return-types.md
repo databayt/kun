@@ -1,7 +1,7 @@
 ---
 domain: typescript-strict
 severity: warn
-applies-to: ["**/actions.ts", "**/lib/**/*.ts", "**/data/**/*.ts", "**/*.ts"]
+paths: ["**/actions.ts", "**/lib/**/*.ts", "**/data/**/*.ts", "**/*.ts"]
 since: "TypeScript 5.0"
 ---
 

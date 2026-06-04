@@ -1,7 +1,7 @@
 ---
 domain: neon
 severity: info
-applies-to:
+paths:
   [
     "**/prisma/schema.prisma",
     "**/prisma/migrations/**",

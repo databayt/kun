@@ -1,7 +1,7 @@
 ---
 domain: typescript-strict
 severity: error
-applies-to: ["tsconfig.json", "**/tsconfig.json", ".github/workflows/*.yml"]
+paths: ["tsconfig.json", "**/tsconfig.json", ".github/workflows/*.yml"]
 since: "TypeScript 5.0"
 ---
 

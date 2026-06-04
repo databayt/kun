@@ -1,7 +1,7 @@
 ---
 domain: react-19
 severity: info
-applies-to: ["**/*.tsx", "**/components/**/*.tsx"]
+paths: ["**/*.tsx", "**/components/**/*.tsx"]
 since: "React 19.0"
 ---
 

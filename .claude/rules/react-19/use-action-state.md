@@ -1,7 +1,7 @@
 ---
 domain: react-19
 severity: error
-applies-to: ["**/form.tsx", "**/*-form.tsx", "**/components/**/form/*.tsx"]
+paths: ["**/form.tsx", "**/*-form.tsx", "**/components/**/form/*.tsx"]
 since: "React 19.0"
 ---
 

@@ -128,16 +128,19 @@ if [ -f "$ENGINE_JSON" ] && command -v jq &> /dev/null; then
     EC_CMDS=$(jq -r '.counts.commands' "$ENGINE_JSON")
     EC_CARDS=$(jq -r '.counts.pattern_cards' "$ENGINE_JSON")
     EC_RULES=$(jq -r '.counts.project_rules' "$ENGINE_JSON")
+    EC_DOMAIN_RULES=$(jq -r '.counts.domain_rules' "$ENGINE_JSON")
     EC_MCP=$(jq -r '.counts.project_mcp' "$ENGINE_JSON")
     ER_AGENTS=$(find "$KUN_ROOT/.claude/agents" -maxdepth 1 -name '*.md' ! -name '_index*' 2>/dev/null | wc -l | tr -d ' ')
     ER_CMDS=$(find "$KUN_ROOT/.claude/commands" -maxdepth 1 -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
     ER_CARDS=$(find "$KUN_ROOT/.claude/patterns/cards" -maxdepth 1 -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
     ER_RULES=$(find "$KUN_ROOT/.claude/rules" -maxdepth 1 -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
+    ER_DOMAIN_RULES=$(find "$KUN_ROOT/.claude/rules" -mindepth 2 -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
     ER_MCP=$(jq '.mcpServers | length' "$KUN_ROOT/.claude/mcp.json" 2>/dev/null || echo "?")
     [ "$EC_AGENTS" = "$ER_AGENTS" ] && check pass "engine agents" "$ER_AGENTS" || check warn "engine agents" "engine.json=$EC_AGENTS actual=$ER_AGENTS"
     [ "$EC_CMDS" = "$ER_CMDS" ] && check pass "engine commands" "$ER_CMDS" || check warn "engine commands" "engine.json=$EC_CMDS actual=$ER_CMDS"
     [ "$EC_CARDS" = "$ER_CARDS" ] && check pass "engine cards" "$ER_CARDS" || check warn "engine cards" "engine.json=$EC_CARDS actual=$ER_CARDS"
     [ "$EC_RULES" = "$ER_RULES" ] && check pass "engine rules" "$ER_RULES" || check warn "engine rules" "engine.json=$EC_RULES actual=$ER_RULES"
+    [ "$EC_DOMAIN_RULES" = "$ER_DOMAIN_RULES" ] && check pass "engine domain-rules" "$ER_DOMAIN_RULES" || check warn "engine domain-rules" "engine.json=$EC_DOMAIN_RULES actual=$ER_DOMAIN_RULES"
     [ "$EC_MCP" = "$ER_MCP" ] && check pass "engine mcp" "$ER_MCP" || check warn "engine mcp" "engine.json=$EC_MCP actual=$ER_MCP"
     if grep -rq "Opus 4\.6\|Opus 4\.7\|claude-opus-4-6\|claude-opus-4-7" "$KUN_ROOT/docs" "$KUN_ROOT/.claude/CLAUDE.md" 2>/dev/null; then
         check warn "engine model refs" "stale Opus 4.6/4.7 in docs"

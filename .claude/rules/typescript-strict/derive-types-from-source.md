@@ -1,7 +1,7 @@
 ---
 domain: typescript-strict
 severity: info
-applies-to:
+paths:
   [
     "**/validation.ts",
     "**/actions.ts",

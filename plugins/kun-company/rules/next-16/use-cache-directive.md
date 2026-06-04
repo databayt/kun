@@ -1,7 +1,7 @@
 ---
 domain: next-16
 severity: warn
-applies-to:
+paths:
   [
     "**/actions.ts",
     "**/page.tsx",

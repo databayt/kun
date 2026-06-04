@@ -1,0 +1,17 @@
+{
+  "$comment": "Auto-discovered when kun-company is installed. Bundles the destructive-bash safety guard so it travels with installs (the project .claude/settings.json wires the same canonical script for in-repo work). Exec form per the plugins reference: ${CLAUDE_PLUGIN_ROOT} is passed as an args element, not interpolated into a shell string.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash",
+            "args": ["${CLAUDE_PLUGIN_ROOT}/hooks/block-destructive-bash.sh"]
+          }
+        ]
+      }
+    ]
+  }
+}

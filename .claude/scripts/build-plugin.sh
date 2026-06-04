@@ -73,6 +73,14 @@ for f in "$ROOT"/.claude/rules/*/*.md; do
   rel="${f#$ROOT/.claude/rules/}"
   copy_one "$f" "$CO/rules/$rel"
 done
+# Safety hooks — bundle the destructive-bash guard so kun-company installs get it
+# too (the project .claude/settings.json wires the same canonical script in-repo).
+# Only the script syncs from source; hooks/hooks.json is a stable committed asset.
+[ "$CHECK" = 0 ] && mkdir -p "$CO/hooks"
+for f in "$ROOT"/.claude/hooks/*.sh; do
+  [ -e "$f" ] || continue
+  copy_one "$f" "$CO/hooks/$(basename "$f")"
+done
 
 # ── Secret guard — plugin files must carry placeholders only ────────
 if grep -REn 'sk-[A-Za-z0-9]{16}|ghp_[A-Za-z0-9]{16}|AKIA[A-Z0-9]{12}' "$ROOT/plugins" 2>/dev/null | grep -v '\${'; then

@@ -1,7 +1,7 @@
 ---
 domain: react-19
 severity: warn
-applies-to:
+paths:
   ["**/page.tsx", "**/layout.tsx", "**/content.tsx", "**/components/**/*.tsx"]
 since: "React 19.0"
 ---

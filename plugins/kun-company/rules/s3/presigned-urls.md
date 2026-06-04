@@ -1,7 +1,7 @@
 ---
 domain: s3
 severity: error
-applies-to: ["**/actions.ts", "**/upload/**/*.ts", "**/lib/s3.ts"]
+paths: ["**/actions.ts", "**/upload/**/*.ts", "**/lib/s3.ts"]
 since: "AWS S3"
 ---
 

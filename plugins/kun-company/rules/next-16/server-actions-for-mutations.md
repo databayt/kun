@@ -1,7 +1,7 @@
 ---
 domain: next-16
 severity: error
-applies-to: ["**/actions.ts", "**/form.tsx", "**/*.client.tsx"]
+paths: ["**/actions.ts", "**/form.tsx", "**/*.client.tsx"]
 since: "Next.js 16.0"
 ---
 
