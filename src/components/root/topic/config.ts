@@ -1,25 +1,25 @@
 export interface Reference {
-  title: string
-  url: string
-  type: 'docs' | 'repo' | 'video' | 'article' | 'tool' | 'social'
+  title: string;
+  url: string;
+  type: "docs" | "repo" | "video" | "article" | "tool" | "social";
 }
 
 export interface TopicDetail {
-  id: string
-  title: string
-  description: string
-  icon: string
-  overview: string
-  officialDocs: string
-  status: 'current' | 'review' | 'behind'
-  lastReviewed: string
-  progress: string[]
-  improvements: string[]
-  references: Reference[]
-  setup: string[]
-  usage: string[]
-  configPaths: string[]
-  kunDocs: string
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  overview: string;
+  officialDocs: string;
+  status: "current" | "review" | "behind";
+  lastReviewed: string;
+  progress: string[];
+  improvements: string[];
+  references: Reference[];
+  setup: string[];
+  usage: string[];
+  configPaths: string[];
+  kunDocs: string;
 }
 
 export const topicDetails: Record<string, TopicDetail> = {
@@ -45,11 +45,31 @@ export const topicDetails: Record<string, TopicDetail> = {
       "Keyword-to-agent mappings could be auto-validated",
     ],
     references: [
-      { title: "Claude Code Memory", url: "https://docs.anthropic.com/en/docs/claude-code/memory", type: "docs" },
-      { title: "Claude Code Overview", url: "https://docs.anthropic.com/en/docs/claude-code/overview", type: "docs" },
-      { title: "anthropics/claude-code", url: "https://github.com/anthropics/claude-code", type: "repo" },
-      { title: "Anthropic Cookbook", url: "https://github.com/anthropics/anthropic-cookbook", type: "repo" },
-      { title: "Claude Code Best Practices", url: "https://docs.anthropic.com/en/docs/claude-code/tips-and-tricks", type: "article" },
+      {
+        title: "Claude Code Memory",
+        url: "https://docs.anthropic.com/en/docs/claude-code/memory",
+        type: "docs",
+      },
+      {
+        title: "Claude Code Overview",
+        url: "https://docs.anthropic.com/en/docs/claude-code/overview",
+        type: "docs",
+      },
+      {
+        title: "anthropics/claude-code",
+        url: "https://github.com/anthropics/claude-code",
+        type: "repo",
+      },
+      {
+        title: "Anthropic Cookbook",
+        url: "https://github.com/anthropics/anthropic-cookbook",
+        type: "repo",
+      },
+      {
+        title: "Claude Code Best Practices",
+        url: "https://docs.anthropic.com/en/docs/claude-code/tips-and-tricks",
+        type: "article",
+      },
     ],
     setup: [
       "Create CLAUDE.md at your repo root with project conventions",
@@ -64,15 +84,11 @@ export const topicDetails: Record<string, TopicDetail> = {
       "Reference external repos and codebase lookup order",
       "Define component hierarchy levels (ui > atom > template > block)",
     ],
-    configPaths: [
-      "CLAUDE.md",
-      ".claude/CLAUDE.md",
-      "~/.claude/CLAUDE.md",
-    ],
+    configPaths: ["CLAUDE.md", ".claude/CLAUDE.md", "~/.claude/CLAUDE.md"],
     kunDocs: "/docs/claude-md",
   },
 
-  "rules": {
+  rules: {
     id: "rules",
     title: "Rules",
     description: "Path-scoped wards that activate on file touch.",
@@ -93,8 +109,16 @@ export const topicDetails: Record<string, TopicDetail> = {
       "Could add rule for Playwright test patterns",
     ],
     references: [
-      { title: "Claude Code Memory — Rules", url: "https://docs.anthropic.com/en/docs/claude-code/memory", type: "docs" },
-      { title: "anthropics/claude-code", url: "https://github.com/anthropics/claude-code", type: "repo" },
+      {
+        title: "Claude Code Memory — Rules",
+        url: "https://docs.anthropic.com/en/docs/claude-code/memory",
+        type: "docs",
+      },
+      {
+        title: "anthropics/claude-code",
+        url: "https://github.com/anthropics/claude-code",
+        type: "repo",
+      },
     ],
     setup: [
       "Create .claude/rules/ directory in your repo",
@@ -109,21 +133,19 @@ export const topicDetails: Record<string, TopicDetail> = {
       "i18n.md — Arabic/English dictionaries, RTL/LTR layout rules",
       "testing.md — Vitest config, Playwright patterns, coverage thresholds",
     ],
-    configPaths: [
-      ".claude/rules/*.md",
-      "~/.claude/rules/*.md",
-    ],
+    configPaths: [".claude/rules/*.md", "~/.claude/rules/*.md"],
     kunDocs: "/docs/rules",
   },
 
-  "commands": {
+  commands: {
     id: "commands",
     title: "Commands",
     description: "Slash commands for rapid workflows.",
     icon: "CommandsIcon",
     overview:
       "Custom slash commands are markdown files in .claude/commands/ that define reusable prompts triggered by /command-name. We use them for repetitive workflows — /dev starts the dev server, /build runs smart builds, /deploy ships to Vercel. Commands can accept arguments via $ARGUMENTS and compose multiple tools into a single action.",
-    officialDocs: "https://docs.anthropic.com/en/docs/claude-code/slash-commands",
+    officialDocs:
+      "https://docs.anthropic.com/en/docs/claude-code/slash-commands",
     status: "current",
     lastReviewed: "2026-03-31",
     progress: [
@@ -138,8 +160,16 @@ export const topicDetails: Record<string, TopicDetail> = {
       "Missing /changelog and /release commands for version management",
     ],
     references: [
-      { title: "Custom Slash Commands", url: "https://docs.anthropic.com/en/docs/claude-code/slash-commands", type: "docs" },
-      { title: "anthropics/claude-code", url: "https://github.com/anthropics/claude-code", type: "repo" },
+      {
+        title: "Custom Slash Commands",
+        url: "https://docs.anthropic.com/en/docs/claude-code/slash-commands",
+        type: "docs",
+      },
+      {
+        title: "anthropics/claude-code",
+        url: "https://github.com/anthropics/claude-code",
+        type: "repo",
+      },
     ],
     setup: [
       "Create .claude/commands/ directory",
@@ -154,14 +184,11 @@ export const topicDetails: Record<string, TopicDetail> = {
       "/atom <name> — Create an atom component from 2+ primitives",
       "/test <file> — Generate and run tests for a file",
     ],
-    configPaths: [
-      ".claude/commands/*.md",
-      "~/.claude/commands/*.md",
-    ],
+    configPaths: [".claude/commands/*.md", "~/.claude/commands/*.md"],
     kunDocs: "/docs/commands",
   },
 
-  "agents": {
+  agents: {
     id: "agents",
     title: "Agents",
     description: "40 agents across 4 tiers — captain to specialists.",
@@ -184,11 +211,31 @@ export const topicDetails: Record<string, TopicDetail> = {
       "Some agents have overlapping scope — need clearer boundaries",
     ],
     references: [
-      { title: "Sub-agents", url: "https://docs.anthropic.com/en/docs/claude-code/sub-agents", type: "docs" },
-      { title: "Agent SDK Overview", url: "https://docs.anthropic.com/en/docs/agent-sdk/overview", type: "docs" },
-      { title: "anthropics/claude-code", url: "https://github.com/anthropics/claude-code", type: "repo" },
-      { title: "anthropics/agent-sdk", url: "https://github.com/anthropics/agent-sdk", type: "repo" },
-      { title: "Agent Patterns Cookbook", url: "https://github.com/anthropics/anthropic-cookbook", type: "repo" },
+      {
+        title: "Sub-agents",
+        url: "https://docs.anthropic.com/en/docs/claude-code/sub-agents",
+        type: "docs",
+      },
+      {
+        title: "Agent SDK Overview",
+        url: "https://docs.anthropic.com/en/docs/agent-sdk/overview",
+        type: "docs",
+      },
+      {
+        title: "anthropics/claude-code",
+        url: "https://github.com/anthropics/claude-code",
+        type: "repo",
+      },
+      {
+        title: "anthropics/agent-sdk",
+        url: "https://github.com/anthropics/agent-sdk",
+        type: "repo",
+      },
+      {
+        title: "Agent Patterns Cookbook",
+        url: "https://github.com/anthropics/anthropic-cookbook",
+        type: "repo",
+      },
     ],
     setup: [
       "Create .claude/agents/ directory",
@@ -204,14 +251,11 @@ export const topicDetails: Record<string, TopicDetail> = {
       "Tech-lead agent handles architecture across all 14 repos",
       "Product agents (analyst, guardian) run quality and market checks",
     ],
-    configPaths: [
-      ".claude/agents/*.md",
-      "~/.claude/agents/*.md",
-    ],
+    configPaths: [".claude/agents/*.md", "~/.claude/agents/*.md"],
     kunDocs: "/docs/agents",
   },
 
-  "hooks": {
+  hooks: {
     id: "hooks",
     title: "Hooks",
     description: "Silent enchantments that cast themselves.",
@@ -233,9 +277,21 @@ export const topicDetails: Record<string, TopicDetail> = {
       "Could add notification hook for long-running operations",
     ],
     references: [
-      { title: "Hooks", url: "https://docs.anthropic.com/en/docs/claude-code/hooks", type: "docs" },
-      { title: "Settings Configuration", url: "https://docs.anthropic.com/en/docs/claude-code/settings", type: "docs" },
-      { title: "anthropics/claude-code", url: "https://github.com/anthropics/claude-code", type: "repo" },
+      {
+        title: "Hooks",
+        url: "https://docs.anthropic.com/en/docs/claude-code/hooks",
+        type: "docs",
+      },
+      {
+        title: "Settings Configuration",
+        url: "https://docs.anthropic.com/en/docs/claude-code/settings",
+        type: "docs",
+      },
+      {
+        title: "anthropics/claude-code",
+        url: "https://github.com/anthropics/claude-code",
+        type: "repo",
+      },
     ],
     setup: [
       "Configure hooks in .claude/settings.json or ~/.claude/settings.json",
@@ -250,21 +306,19 @@ export const topicDetails: Record<string, TopicDetail> = {
       "Lint gate: Run eslint before commits",
       "Pre-submit: Validate prompt before sending",
     ],
-    configPaths: [
-      ".claude/settings.json",
-      "~/.claude/settings.json",
-    ],
+    configPaths: [".claude/settings.json", "~/.claude/settings.json"],
     kunDocs: "/docs/hooks",
   },
 
-  "skills": {
+  skills: {
     id: "skills",
     title: "Skills",
     description: "17 reusable incantations with keyword triggers.",
     icon: "SkillsIcon",
     overview:
       "Skills are enhanced slash commands that combine multiple tools, agents, and MCP servers into single-word workflows. Unlike basic commands, skills are keyword-triggered — say 'dev' and the dev skill activates, say 'deploy' and the deployment pipeline runs. Our 17 skills cover the full development lifecycle from creation (/atom, /template, /block) through quality (/test, /security) to delivery (/build, /deploy).",
-    officialDocs: "https://docs.anthropic.com/en/docs/claude-code/slash-commands",
+    officialDocs:
+      "https://docs.anthropic.com/en/docs/claude-code/slash-commands",
     status: "current",
     lastReviewed: "2026-03-31",
     progress: [
@@ -280,9 +334,21 @@ export const topicDetails: Record<string, TopicDetail> = {
       "Missing /migrate skill for Prisma schema changes",
     ],
     references: [
-      { title: "Custom Slash Commands", url: "https://docs.anthropic.com/en/docs/claude-code/slash-commands", type: "docs" },
-      { title: "Claude Code Overview", url: "https://docs.anthropic.com/en/docs/claude-code/overview", type: "docs" },
-      { title: "anthropics/claude-code", url: "https://github.com/anthropics/claude-code", type: "repo" },
+      {
+        title: "Custom Slash Commands",
+        url: "https://docs.anthropic.com/en/docs/claude-code/slash-commands",
+        type: "docs",
+      },
+      {
+        title: "Claude Code Overview",
+        url: "https://docs.anthropic.com/en/docs/claude-code/overview",
+        type: "docs",
+      },
+      {
+        title: "anthropics/claude-code",
+        url: "https://github.com/anthropics/claude-code",
+        type: "repo",
+      },
     ],
     setup: [
       "Skills are pre-configured in .claude/commands/",
@@ -299,14 +365,11 @@ export const topicDetails: Record<string, TopicDetail> = {
       "/test — Generate and run tests with coverage",
       "/security — OWASP Top 10 audit",
     ],
-    configPaths: [
-      ".claude/commands/*.md",
-      "~/.claude/commands/*.md",
-    ],
+    configPaths: [".claude/commands/*.md", "~/.claude/commands/*.md"],
     kunDocs: "/docs/skills",
   },
 
-  "mcp": {
+  mcp: {
     id: "mcp",
     title: "MCP",
     description: "18 portals to external realms.",
@@ -330,12 +393,36 @@ export const topicDetails: Record<string, TopicDetail> = {
       "Server health monitoring not automated",
     ],
     references: [
-      { title: "MCP in Claude Code", url: "https://docs.anthropic.com/en/docs/claude-code/mcp-servers", type: "docs" },
-      { title: "MCP Protocol Spec", url: "https://modelcontextprotocol.io/introduction", type: "docs" },
-      { title: "MCP Servers Registry", url: "https://github.com/modelcontextprotocol/servers", type: "repo" },
-      { title: "modelcontextprotocol/spec", url: "https://github.com/modelcontextprotocol/specification", type: "repo" },
-      { title: "MCP Inspector", url: "https://github.com/modelcontextprotocol/inspector", type: "tool" },
-      { title: "Building MCP Servers", url: "https://modelcontextprotocol.io/quickstart/server", type: "article" },
+      {
+        title: "MCP in Claude Code",
+        url: "https://docs.anthropic.com/en/docs/claude-code/mcp-servers",
+        type: "docs",
+      },
+      {
+        title: "MCP Protocol Spec",
+        url: "https://modelcontextprotocol.io/introduction",
+        type: "docs",
+      },
+      {
+        title: "MCP Servers Registry",
+        url: "https://github.com/modelcontextprotocol/servers",
+        type: "repo",
+      },
+      {
+        title: "modelcontextprotocol/spec",
+        url: "https://github.com/modelcontextprotocol/specification",
+        type: "repo",
+      },
+      {
+        title: "MCP Inspector",
+        url: "https://github.com/modelcontextprotocol/inspector",
+        type: "tool",
+      },
+      {
+        title: "Building MCP Servers",
+        url: "https://modelcontextprotocol.io/quickstart/server",
+        type: "article",
+      },
     ],
     setup: [
       "Configure MCP servers in .claude/settings.json under mcpServers",
@@ -360,7 +447,7 @@ export const topicDetails: Record<string, TopicDetail> = {
     kunDocs: "/docs/mcp",
   },
 
-  "connectors": {
+  connectors: {
     id: "connectors",
     title: "Connectors",
     description: "GitHub, Figma, Slack, Linear integrations.",
@@ -382,9 +469,21 @@ export const topicDetails: Record<string, TopicDetail> = {
       "Figma connector needs Code Connect mappings for components",
     ],
     references: [
-      { title: "Claude Code Integrations", url: "https://docs.anthropic.com/en/docs/claude-code/integrations", type: "docs" },
-      { title: "GitHub MCP Server", url: "https://github.com/modelcontextprotocol/servers", type: "repo" },
-      { title: "MCP Protocol", url: "https://modelcontextprotocol.io", type: "docs" },
+      {
+        title: "Claude Code Integrations",
+        url: "https://docs.anthropic.com/en/docs/claude-code/integrations",
+        type: "docs",
+      },
+      {
+        title: "GitHub MCP Server",
+        url: "https://github.com/modelcontextprotocol/servers",
+        type: "repo",
+      },
+      {
+        title: "MCP Protocol",
+        url: "https://modelcontextprotocol.io",
+        type: "docs",
+      },
     ],
     setup: [
       "GitHub: Authenticate with gh auth login, add github MCP server",
@@ -398,13 +497,11 @@ export const topicDetails: Record<string, TopicDetail> = {
       "Slack — Post updates, read channels, send notifications",
       "Linear — Create issues, update status, sync with sprints",
     ],
-    configPaths: [
-      ".claude/settings.json (mcpServers)",
-    ],
+    configPaths: [".claude/settings.json (mcpServers)"],
     kunDocs: "/docs/connectors",
   },
 
-  "apps": {
+  apps: {
     id: "apps",
     title: "Apps",
     description: "Claude in Slack, Figma, and Asana.",
@@ -425,9 +522,21 @@ export const topicDetails: Record<string, TopicDetail> = {
       "Anthropic keeps adding new app integrations — check monthly",
     ],
     references: [
-      { title: "Build with Claude", url: "https://docs.anthropic.com/en/docs/build-with-claude", type: "docs" },
-      { title: "Anthropic API Reference", url: "https://docs.anthropic.com/en/api", type: "docs" },
-      { title: "Claude for Slack", url: "https://www.anthropic.com/claude-for-slack", type: "tool" },
+      {
+        title: "Build with Claude",
+        url: "https://docs.anthropic.com/en/docs/build-with-claude",
+        type: "docs",
+      },
+      {
+        title: "Anthropic API Reference",
+        url: "https://docs.anthropic.com/en/api",
+        type: "docs",
+      },
+      {
+        title: "Claude for Slack",
+        url: "https://www.anthropic.com/claude-for-slack",
+        type: "tool",
+      },
     ],
     setup: [
       "Install Claude app from the marketplace of each platform",
@@ -447,7 +556,7 @@ export const topicDetails: Record<string, TopicDetail> = {
     kunDocs: "/docs/apps",
   },
 
-  "memory": {
+  memory: {
     id: "memory",
     title: "Memory",
     description: "Pensieve files that persist across sessions.",
@@ -470,8 +579,16 @@ export const topicDetails: Record<string, TopicDetail> = {
       "Team members need their own memory contexts per machine",
     ],
     references: [
-      { title: "Claude Code Memory", url: "https://docs.anthropic.com/en/docs/claude-code/memory", type: "docs" },
-      { title: "anthropics/claude-code", url: "https://github.com/anthropics/claude-code", type: "repo" },
+      {
+        title: "Claude Code Memory",
+        url: "https://docs.anthropic.com/en/docs/claude-code/memory",
+        type: "docs",
+      },
+      {
+        title: "anthropics/claude-code",
+        url: "https://github.com/anthropics/claude-code",
+        type: "repo",
+      },
     ],
     setup: [
       "Memory directory is auto-created at ~/.claude/projects/<path>/memory/",
@@ -493,7 +610,7 @@ export const topicDetails: Record<string, TopicDetail> = {
     kunDocs: "/docs/memory",
   },
 
-  "dispatch": {
+  dispatch: {
     id: "dispatch",
     title: "Dispatch",
     description: "Notes -> Dispatch — async team communication.",
@@ -516,8 +633,16 @@ export const topicDetails: Record<string, TopicDetail> = {
       "Dispatch history not archived — old notes get lost",
     ],
     references: [
-      { title: "Apple Notes Automation", url: "https://support.apple.com/notes", type: "docs" },
-      { title: "Shortcuts for Notes", url: "https://support.apple.com/guide/shortcuts/", type: "docs" },
+      {
+        title: "Apple Notes Automation",
+        url: "https://support.apple.com/notes",
+        type: "docs",
+      },
+      {
+        title: "Shortcuts for Notes",
+        url: "https://support.apple.com/guide/shortcuts/",
+        type: "docs",
+      },
     ],
     setup: [
       "Create Dispatch folder in Apple Notes",
@@ -538,7 +663,7 @@ export const topicDetails: Record<string, TopicDetail> = {
     kunDocs: "/docs/dispatch",
   },
 
-  "voice": {
+  voice: {
     id: "voice",
     title: "Voice",
     description: "Speak incantations instead of typing them.",
@@ -559,9 +684,21 @@ export const topicDetails: Record<string, TopicDetail> = {
       "Claude Desktop voice quality varies with background noise",
     ],
     references: [
-      { title: "Claude Desktop", url: "https://claude.ai/download", type: "tool" },
-      { title: "Claude iOS App", url: "https://apps.apple.com/app/claude/id6473753684", type: "tool" },
-      { title: "Claude Code Overview", url: "https://docs.anthropic.com/en/docs/claude-code/overview", type: "docs" },
+      {
+        title: "Claude Desktop",
+        url: "https://claude.ai/download",
+        type: "tool",
+      },
+      {
+        title: "Claude iOS App",
+        url: "https://apps.apple.com/app/claude/id6473753684",
+        type: "tool",
+      },
+      {
+        title: "Claude Code Overview",
+        url: "https://docs.anthropic.com/en/docs/claude-code/overview",
+        type: "docs",
+      },
     ],
     setup: [
       "Install Claude Desktop app for macOS/Windows",
@@ -576,14 +713,11 @@ export const topicDetails: Record<string, TopicDetail> = {
       "Create issues by voice — 'Create an issue for hogwarts about X'",
       "Works in both Cowork (planning) and Code (execution) modes",
     ],
-    configPaths: [
-      "Claude Desktop app settings",
-      "iOS app settings",
-    ],
+    configPaths: ["Claude Desktop app settings", "iOS app settings"],
     kunDocs: "/docs/voice",
   },
 
-  "cowork": {
+  cowork: {
     id: "cowork",
     title: "Cowork",
     description: "Same brain, two modes — one thinks, one acts.",
@@ -605,8 +739,16 @@ export const topicDetails: Record<string, TopicDetail> = {
       "Need to evaluate Cowork's latest features — Anthropic updates frequently",
     ],
     references: [
-      { title: "Claude Code Overview", url: "https://docs.anthropic.com/en/docs/claude-code/overview", type: "docs" },
-      { title: "Anthropic Products", url: "https://www.anthropic.com/products", type: "docs" },
+      {
+        title: "Claude Code Overview",
+        url: "https://docs.anthropic.com/en/docs/claude-code/overview",
+        type: "docs",
+      },
+      {
+        title: "Anthropic Products",
+        url: "https://www.anthropic.com/products",
+        type: "docs",
+      },
     ],
     setup: [
       "Cowork and Claude Code share ~/.claude/ configuration",
@@ -628,7 +770,7 @@ export const topicDetails: Record<string, TopicDetail> = {
     kunDocs: "/docs/cowork",
   },
 
-  "captain": {
+  captain: {
     id: "captain",
     title: "Captain",
     description: "CEO brain — delegates across 40 agents and 4 humans.",
@@ -651,9 +793,21 @@ export const topicDetails: Record<string, TopicDetail> = {
       "Delegation patterns not documented — new team members can't follow",
     ],
     references: [
-      { title: "Sub-agents", url: "https://docs.anthropic.com/en/docs/claude-code/sub-agents", type: "docs" },
-      { title: "Agent SDK", url: "https://docs.anthropic.com/en/docs/agent-sdk/overview", type: "docs" },
-      { title: "databayt/kun", url: "https://github.com/databayt/kun", type: "repo" },
+      {
+        title: "Sub-agents",
+        url: "https://docs.anthropic.com/en/docs/claude-code/sub-agents",
+        type: "docs",
+      },
+      {
+        title: "Agent SDK",
+        url: "https://docs.anthropic.com/en/docs/agent-sdk/overview",
+        type: "docs",
+      },
+      {
+        title: "databayt/kun",
+        url: "https://github.com/databayt/kun",
+        type: "repo",
+      },
     ],
     setup: [
       "Captain agent defined in .claude/agents/captain.md",
@@ -668,14 +822,11 @@ export const topicDetails: Record<string, TopicDetail> = {
       "Team coordination — Knows each member's strengths and capacity",
       "Never writes code — always delegates to specialist agents",
     ],
-    configPaths: [
-      ".claude/agents/captain.md",
-      "~/.claude/commands/weekly.md",
-    ],
+    configPaths: [".claude/agents/captain.md", "~/.claude/commands/weekly.md"],
     kunDocs: "/docs/captain",
   },
 
-  "team": {
+  team: {
     id: "team",
     title: "Team",
     description: "4 members — profiles, roles, social links, and capacity.",
@@ -698,11 +849,31 @@ export const topicDetails: Record<string, TopicDetail> = {
       "Missing onboarding guide for non-technical members",
     ],
     references: [
-      { title: "Abdout — GitHub", url: "https://github.com/abdout", type: "social" },
-      { title: "Abdout — LinkedIn", url: "https://linkedin.com/in/abdout", type: "social" },
-      { title: "Ali — GitHub", url: "https://github.com/alitaworkem", type: "social" },
-      { title: "Team Setup Docs", url: "https://docs.anthropic.com/en/docs/claude-code/team", type: "docs" },
-      { title: "anthropics/claude-code", url: "https://github.com/anthropics/claude-code", type: "repo" },
+      {
+        title: "Abdout — GitHub",
+        url: "https://github.com/abdout",
+        type: "social",
+      },
+      {
+        title: "Abdout — LinkedIn",
+        url: "https://linkedin.com/in/abdout",
+        type: "social",
+      },
+      {
+        title: "Ali — GitHub",
+        url: "https://github.com/alitaworkem",
+        type: "social",
+      },
+      {
+        title: "Team Setup Docs",
+        url: "https://docs.anthropic.com/en/docs/claude-code/team",
+        type: "docs",
+      },
+      {
+        title: "anthropics/claude-code",
+        url: "https://github.com/anthropics/claude-code",
+        type: "repo",
+      },
     ],
     setup: [
       "Run the team setup script: .claude/setup/team-setup.sh",
@@ -723,10 +894,11 @@ export const topicDetails: Record<string, TopicDetail> = {
     kunDocs: "/docs/team",
   },
 
-  "quality": {
+  quality: {
     id: "quality",
     title: "Quality",
-    description: "Routes 17 niche keywords; owns qa, /handover, /release orchestrators.",
+    description:
+      "Routes 17 niche keywords; owns qa, /handover, /release orchestrators.",
     icon: "GuardianIcon",
     overview:
       "The Quality agent owns 17 niche QA keywords plus three orchestrators. Each niche keyword has a single dimension (no overlap), runs against URLs (browser) or code (file analysis), and produces a clear verdict: PASS, WARN, or FAIL. `qa` composes the 12 per-URL keywords. `/handover` runs a 5-pass Playwright QA for the pre-demo gate. `/release` chains the full client handoff: handover → check → ship → watch → notify.",
@@ -751,10 +923,26 @@ export const topicDetails: Record<string, TopicDetail> = {
       "Add keyword versioning for breaking changes",
     ],
     references: [
-      { title: "Keywords in CLAUDE.md", url: "https://github.com/databayt/kun/blob/main/.claude/CLAUDE.md", type: "docs" },
-      { title: "Quality Agent Definition", url: "https://github.com/databayt/kun/blob/main/.claude/agents/quality.md", type: "docs" },
-      { title: "Hogwarts QA Issue", url: "https://github.com/databayt/hogwarts/issues/115", type: "tool" },
-      { title: "QA Scope Rule", url: "https://github.com/databayt/hogwarts/blob/main/.claude/rules/qa-scope.md", type: "docs" },
+      {
+        title: "Keywords in CLAUDE.md",
+        url: "https://github.com/databayt/kun/blob/main/.claude/CLAUDE.md",
+        type: "docs",
+      },
+      {
+        title: "Quality Agent Definition",
+        url: "https://github.com/databayt/kun/blob/main/.claude/agents/quality.md",
+        type: "docs",
+      },
+      {
+        title: "Hogwarts QA Issue",
+        url: "https://github.com/databayt/hogwarts/issues/115",
+        type: "tool",
+      },
+      {
+        title: "QA Scope Rule",
+        url: "https://github.com/databayt/hogwarts/blob/main/.claude/rules/qa-scope.md",
+        type: "docs",
+      },
     ],
     setup: [
       "Keywords defined in ~/.claude/CLAUDE.md under ## Keyword Vocabulary",
@@ -780,7 +968,7 @@ export const topicDetails: Record<string, TopicDetail> = {
     kunDocs: "/docs/quality",
   },
 
-  "credentials": {
+  credentials: {
     id: "credentials",
     title: "Credentials",
     description: "Keychain-based API key management for 18 services.",
@@ -803,8 +991,16 @@ export const topicDetails: Record<string, TopicDetail> = {
       "Could add key expiration tracking",
     ],
     references: [
-      { title: "Settings & Environment", url: "https://docs.anthropic.com/en/docs/claude-code/settings", type: "docs" },
-      { title: "macOS Keychain", url: "https://support.apple.com/guide/keychain-access/", type: "docs" },
+      {
+        title: "Settings & Environment",
+        url: "https://docs.anthropic.com/en/docs/claude-code/settings",
+        type: "docs",
+      },
+      {
+        title: "macOS Keychain",
+        url: "https://support.apple.com/guide/keychain-access/",
+        type: "docs",
+      },
     ],
     setup: [
       "Run .claude/setup/secrets.sh to configure API keys",
@@ -826,17 +1022,19 @@ export const topicDetails: Record<string, TopicDetail> = {
     kunDocs: "/docs/credentials",
   },
 
-  "tips": {
+  tips: {
     id: "tips",
     title: "Tips",
     description: "Master-level techniques and hidden spells.",
     icon: "TipsIcon",
     overview:
       "Advanced techniques that make Claude Code dramatically more effective. These are patterns learned through heavy usage — prompt engineering tricks, context window management, parallel agent execution, worktree isolation for safe experiments, and keyboard shortcuts that save hours. The team should review these regularly to keep skills sharp.",
-    officialDocs: "https://docs.anthropic.com/en/docs/claude-code/tips-and-tricks",
+    officialDocs:
+      "https://docs.anthropic.com/en/docs/claude-code/tips-and-tricks",
     status: "current",
-    lastReviewed: "2026-03-31",
+    lastReviewed: "2026-06-05",
     progress: [
+      "Feature of the week: /loop babysits a PR till it merges — captured",
       "Core tips documented: effort levels, compact, worktrees, parallel agents",
       "Keyboard shortcuts mapped and practiced",
       "Visual keywords (see, debug, check, trace) fully operational",
@@ -849,10 +1047,26 @@ export const topicDetails: Record<string, TopicDetail> = {
       "Could create a quick-reference cheat sheet",
     ],
     references: [
-      { title: "Tips and Tricks", url: "https://docs.anthropic.com/en/docs/claude-code/tips-and-tricks", type: "docs" },
-      { title: "Best Practices", url: "https://docs.anthropic.com/en/docs/claude-code/best-practices", type: "docs" },
-      { title: "Claude Code Overview", url: "https://docs.anthropic.com/en/docs/claude-code/overview", type: "docs" },
-      { title: "anthropics/claude-code", url: "https://github.com/anthropics/claude-code", type: "repo" },
+      {
+        title: "Tips and Tricks",
+        url: "https://docs.anthropic.com/en/docs/claude-code/tips-and-tricks",
+        type: "docs",
+      },
+      {
+        title: "Best Practices",
+        url: "https://docs.anthropic.com/en/docs/claude-code/best-practices",
+        type: "docs",
+      },
+      {
+        title: "Claude Code Overview",
+        url: "https://docs.anthropic.com/en/docs/claude-code/overview",
+        type: "docs",
+      },
+      {
+        title: "anthropics/claude-code",
+        url: "https://github.com/anthropics/claude-code",
+        type: "repo",
+      },
     ],
     setup: [
       "Read the tips docs page for the full collection",
@@ -861,6 +1075,7 @@ export const topicDetails: Record<string, TopicDetail> = {
       "Master the effort levels — /effort min, /effort max",
     ],
     usage: [
+      "/loop — Babysit a PR till it merges: poll CI on an interval, auto-fix red checks, stop on merge (feature of the week)",
       "/effort max — Deep reasoning for complex architecture decisions",
       "/compact — Compress context when hitting limits",
       "Worktree isolation — Safe experiments without affecting main branch",
@@ -868,13 +1083,11 @@ export const topicDetails: Record<string, TopicDetail> = {
       "! prefix — Run shell commands inline from the prompt",
       "Image paste — Drop screenshots directly into the conversation",
     ],
-    configPaths: [
-      "No config — these are usage patterns",
-    ],
+    configPaths: ["No config — these are usage patterns"],
     kunDocs: "/docs/tips",
   },
 
-  "tweets": {
+  tweets: {
     id: "tweets",
     title: "Tweets",
     description: "Track Claude updates and tips on X.",
@@ -897,10 +1110,26 @@ export const topicDetails: Record<string, TopicDetail> = {
       "Missing Twitter list for Claude Code community accounts",
     ],
     references: [
-      { title: "@AnthropicAI on X", url: "https://x.com/AnthropicAI", type: "tool" },
-      { title: "Anthropic Blog", url: "https://www.anthropic.com/blog", type: "article" },
-      { title: "Anthropic Research", url: "https://www.anthropic.com/research", type: "article" },
-      { title: "Claude Changelog", url: "https://docs.anthropic.com/en/docs/changelog", type: "docs" },
+      {
+        title: "@AnthropicAI on X",
+        url: "https://x.com/AnthropicAI",
+        type: "tool",
+      },
+      {
+        title: "Anthropic Blog",
+        url: "https://www.anthropic.com/blog",
+        type: "article",
+      },
+      {
+        title: "Anthropic Research",
+        url: "https://www.anthropic.com/research",
+        type: "article",
+      },
+      {
+        title: "Claude Changelog",
+        url: "https://docs.anthropic.com/en/docs/changelog",
+        type: "docs",
+      },
     ],
     setup: [
       "Follow @AnthropicAI on X for official announcements",
@@ -915,17 +1144,15 @@ export const topicDetails: Record<string, TopicDetail> = {
       "Share discoveries in team Dispatch notes",
       "Update topic statuses when new features are announced",
     ],
-    configPaths: [
-      "No config — external tracking",
-    ],
+    configPaths: ["No config — external tracking"],
     kunDocs: "/docs/tweets",
   },
-}
+};
 
 export function getTopicDetail(slug: string): TopicDetail | undefined {
-  return topicDetails[slug]
+  return topicDetails[slug];
 }
 
 export function getAllTopicSlugs(): string[] {
-  return Object.keys(topicDetails)
+  return Object.keys(topicDetails);
 }

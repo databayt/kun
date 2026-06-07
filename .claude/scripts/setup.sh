@@ -110,6 +110,14 @@ if [ -f "$KUN_DIR/.claude/mcp.json" ]; then
     info "MCP servers ($MCP_COUNT)"
 fi
 
+# Antigravity bridge — the secondary agent (`agy`) reuses the same MCP fleet,
+# skills, and playbook. Ship the doctrine template, then wire ~/.gemini/.
+mkdir -p "$CLAUDE_DIR/antigravity"
+cp "$KUN_DIR/.claude/antigravity/"* "$CLAUDE_DIR/antigravity/" 2>/dev/null || true
+if [ -f "$KUN_DIR/.claude/scripts/antigravity-sync.sh" ]; then
+    bash "$KUN_DIR/.claude/scripts/antigravity-sync.sh"
+fi
+
 # Codebase clone (every machine)
 CODEBASE_DIR="$HOME/codebase"
 if [ ! -d "$CODEBASE_DIR" ]; then
@@ -125,6 +133,14 @@ if ! command -v claude &> /dev/null; then
     echo ""
     echo -e "${Y}Installing Claude Code CLI...${NC}"
     curl -fsSL https://claude.ai/install.sh | sh
+    export PATH="$HOME/.local/bin:$PATH"
+fi
+
+# Antigravity CLI — secondary agent (install if missing)
+if ! command -v agy &> /dev/null; then
+    echo ""
+    echo -e "${Y}Installing Antigravity CLI (secondary agent)...${NC}"
+    curl -fsSL https://antigravity.google/cli/install.sh | bash
     export PATH="$HOME/.local/bin:$PATH"
 fi
 
@@ -149,6 +165,16 @@ if [ -f "$CLAUDE_DIR/mcp.json" ]; then
         pass "mcp.json valid JSON" || fail "mcp.json invalid JSON"
 fi
 
+# Antigravity bridge (~/.gemini — secondary agent reuses the kun config)
+if [ -f "$HOME/.gemini/config/mcp_config.json" ]; then
+    python3 -c "import json; json.load(open('$HOME/.gemini/config/mcp_config.json'))" 2>/dev/null && \
+        pass "antigravity mcp_config.json valid JSON" || fail "antigravity mcp_config.json invalid JSON"
+else
+    info "antigravity mcp_config.json missing (run antigravity-sync.sh)"
+fi
+[ -e "$HOME/.gemini/AGENTS.md" ] && pass "antigravity AGENTS.md → playbook" || info "antigravity AGENTS.md missing"
+[ -e "$HOME/.gemini/skills" ]    && pass "antigravity skills → ~/.claude/skills" || info "antigravity skills missing"
+
 # Directories
 [ -d "$CLAUDE_DIR/agents" ] && [ "$(ls "$CLAUDE_DIR/agents/"*.md 2>/dev/null | wc -l)" -gt 0 ] && \
     pass "agents/ ($AGENT_COUNT files)" || fail "agents/ empty"
@@ -169,6 +195,7 @@ MCP_PERM=$(stat -f "%Lp" "$CLAUDE_DIR/mcp.json" 2>/dev/null || stat -c "%a" "$CL
 
 # CLI
 command -v claude &> /dev/null && pass "claude CLI installed" || fail "claude CLI not found"
+command -v agy &> /dev/null && pass "agy CLI (secondary)" || info "agy CLI not installed (optional)"
 
 echo ""
 

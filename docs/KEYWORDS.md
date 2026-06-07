@@ -1,14 +1,13 @@
-
 # The Standard Book of Spells
 
-> *"It does not do to dwell on documentation and forget to ship."*
+> _"It does not do to dwell on documentation and forget to ship."_
 > — Albus Dumbledore, probably
 
 Every witch and wizard knows that magic begins with a word. Not a paragraph. Not a committee. A single, well-chosen word spoken with intent — and the universe rearranges itself.
 
 **Kun** (كن) is Arabic for "Be" — the divine command of creation. Say the word, and it is. This is not metaphor. Type `dev` and your server rises. Type `deploy` and your code travels across the world. Type `auth` and an entire authentication system assembles itself from nothing.
 
-This spellbook contains **114 incantations** across 15 schools of magic. Each has been tested, refined, and proven in production. Some are gentle charms for daily work. Others are powerful enchantments that orchestrate dozens of agents and services. A few are dangerous enough to warrant warnings.
+This spellbook contains **115 incantations** across 15 schools of magic. Each has been tested, refined, and proven in production. Some are gentle charms for daily work. Others are powerful enchantments that orchestrate dozens of agents and services. A few are dangerous enough to warrant warnings.
 
 Learn them well. A wizard who knows the right word at the right moment is worth a hundred who know only how to type.
 
@@ -30,20 +29,20 @@ The incantation must be spoken clearly. No wand-waving required.
 
 Every spell in this book reveals its **Order** — the hidden chain of familiars, portals, enchantments, and wards that activate behind the scenes. Like the Order of the Phoenix working invisibly to protect the wizarding world, these forces mobilize the instant you speak.
 
-| Symbol | Meaning |
-|--------|---------|
-| **Familiar** | Agent summoned to do the work |
-| **Portal** | MCP server opened to an external realm |
-| **Skill** | Slash command executed (`/dev`, `/build`, `/deploy`...) |
-| **Hook** | Silent enchantment that fires automatically |
-| **Ward** | Rule that activates based on files touched |
-| **Step** | The sequence of what happens, in order |
+| Symbol       | Meaning                                                 |
+| ------------ | ------------------------------------------------------- |
+| **Familiar** | Agent summoned to do the work                           |
+| **Portal**   | MCP server opened to an external realm                  |
+| **Skill**    | Slash command executed (`/dev`, `/build`, `/deploy`...) |
+| **Hook**     | Silent enchantment that fires automatically             |
+| **Ward**     | Rule that activates based on files touched              |
+| **Step**     | The sequence of what happens, in order                  |
 
 ---
 
 ## I. Charm Work
 
-*Everyday practical magic. The spells you will cast most often — reliable, essential, and dangerously easy to take for granted. Professor Flitwick would be proud.*
+_Everyday practical magic. The spells you will cast most often — reliable, essential, and dangerously easy to take for granted. Professor Flitwick would be proud._
 
 These are the spells that keep your workshop running. Cast them a hundred times a day and they never dull.
 
@@ -59,7 +58,7 @@ Extinguishes whatever haunts port 3000, summons the development server, and open
 > 3. `pnpm dev` starts Turbopack
 > 4. Hook confirms Chrome is watching
 
-*This is your Lumos — the first spell you cast each morning.*
+_This is your Lumos — the first spell you cast each morning._
 
 ### `build`
 
@@ -136,13 +135,25 @@ Runs every quality check in the arsenal — lint, types, tests, security — and
 > 3. `pnpm test` — run tests
 > 4. Report pass/fail for all quality gates
 
-> *Charm Tip: `dev` is your Lumos — the first spell you cast each morning. `validate` is your Nox — the last spell before you rest.*
+> _Charm Tip: `dev` is your Lumos — the first spell you cast each morning. `validate` is your Nox — the last spell before you rest._
 
 ---
 
 ## II. Transfiguration
 
-*The art of creating something from nothing, or transforming one thing into another. These spells conjure new files, components, and entire features into existence.*
+_The art of creating something from nothing, or transforming one thing into another. These spells conjure new files, components, and entire features into existence._
+
+### `convert`
+
+Transfigures a document or web page into clean Markdown — PDF, Office, images, audio, HTML, even YouTube links.
+
+> **The Order:**
+> **Familiar:** none (direct tool) | **Portal:** MarkItDown MCP (`markitdown`, via `uvx`) | **Skill:** `/convert`
+>
+> 1. Resolve `$1` to a `file://` URI (local file) or pass the `http(s)://` URL through
+> 2. Call `convert_to_markdown(uri)` on the MarkItDown portal
+> 3. Write `<basename>.md` next to the source (or to `$2`; `-` prints to the session)
+> 4. Spot-check headings/tables survived — image-only PDFs need OCR, audio needs `ffmpeg`
 
 ### `component`
 
@@ -240,13 +251,13 @@ Sculpts a new Prisma migration — reshaping your database without losing a sing
 > 3. `pnpm prisma generate` — regenerate client
 > 4. Verify with Neon MCP if remote database
 
-> *Transfiguration Warning: A poorly conceived `block` is like a half-transfigured hedgehog — functional but unsettling. Plan before you cast.*
+> _Transfiguration Warning: A poorly conceived `block` is like a half-transfigured hedgehog — functional but unsettling. Plan before you cast._
 
 ---
 
 ## III. Ancient Runes
 
-*The foundational magic that underpins all modern spellwork. These incantations invoke the deep frameworks — the ancient languages upon which everything else is built.*
+_The foundational magic that underpins all modern spellwork. These incantations invoke the deep frameworks — the ancient languages upon which everything else is built._
 
 ### `nextjs`
 
@@ -295,20 +306,20 @@ Activates Tailwind CSS 4 — semantic tokens, responsive incantations, RTL/LTR a
 
 ### `shadcn`
 
-Summons components from the shadcn/ui registry — Radix primitives refined and ready.
+Summons components from the shadcn/ui registry — Radix primitives refined and ready. Speak it alone to load the full knowledge pack — CLI, MCP, registry, skills, directory, and every reference link, no website lookup needed. Speak `shadcn docs` to conjure the docs-block pattern: shadcn's MDX anatomy (`ComponentPreview` → CLI/Manual `Installation` → `Usage` → `API Reference`) on fumadocs catch-all routes.
 
 > **The Order:**
-> **Familiar:** `shadcn` | **Backup:** `atom`, `template`, `block`, `tailwind` | **Portal:** shadcn MCP
+> **Familiar:** `shadcn` | **Backup:** `atom`, `template`, `block`, `tailwind` | **Portal:** shadcn MCP | **Skill:** `/shadcn` (`~/.claude/skills/shadcn/`)
 >
-> Uses MCP to search/install: `search_items`, `view_items`, `get_add_command`, `list_items`, `get_examples`. Installs to `src/components/ui/`.
+> Uses MCP to search/install: `search_items`, `view_items`, `get_add_command`, `list_items`, `get_examples`. Installs to `src/components/ui/`. The skill embeds the CLI verb set (`init/add/view/search/build/info/docs/migrate/eject/mcp`), the `registry-item` spec, and the docs-block reference; heavy build/customize work hands to the `shadcn` familiar.
 
-> *These are not spells you cast lightly. Each carries the weight of an entire framework. When you say `prisma`, you invoke not just a tool but a philosophy of data.*
+> _These are not spells you cast lightly. Each carries the weight of an entire framework. When you say `prisma`, you invoke not just a tool but a philosophy of data._
 
 ---
 
 ## IV. Conjuration
 
-*The art of summoning UI elements into existence. Each incantation calls forth a specific pattern — complete, styled, and ready for use.*
+_The art of summoning UI elements into existence. Each incantation calls forth a specific pattern — complete, styled, and ready for use._
 
 All conjuration spells share a common Order foundation, then diverge by pattern:
 
@@ -375,13 +386,13 @@ Erects a top navigation bar — the enchanted ceiling that follows you everywher
 
 > **Familiar:** `template` | Uses NavigationMenu from Radix. Dropdown menus, mobile sheet, auth state.
 
-> *Conjuration Mastery: Combine with a noun — `table users`, `form settings`, `modal confirm` — and the spell adapts to your intent.*
+> _Conjuration Mastery: Combine with a noun — `table users`, `form settings`, `modal confirm` — and the spell adapts to your intent._
 
 ---
 
 ## V. The Dark Arts of Features
 
-*Not dark in nature, but dark in complexity. These are N.E.W.T.-level enchantments that weave together multiple agents, MCP servers, and spell chains. Each one creates an entire system.*
+_Not dark in nature, but dark in complexity. These are N.E.W.T.-level enchantments that weave together multiple agents, MCP servers, and spell chains. Each one creates an entire system._
 
 ### `auth`
 
@@ -448,13 +459,13 @@ Each creates its respective system — forms, tabs, role-based access, user data
 >
 > Mirror-pattern page creation with forms, server actions, auth checks. `admin` adds role guard (`role === "ADMIN"`).
 
-> *Proceed with Care: `saas billing` is the Patronus Charm of this spellbook — immensely powerful, but requiring clear intent and genuine need.*
+> _Proceed with Care: `saas billing` is the Patronus Charm of this spellbook — immensely powerful, but requiring clear intent and genuine need._
 
 ---
 
 ## VI. Animation Charms
 
-*The spells that give life to stillness. In the Muggle world, they call it "motion design." We know better — it is the ancient art of making the inanimate move with purpose.*
+_The spells that give life to stillness. In the Muggle world, they call it "motion design." We know better — it is the ancient art of making the inanimate move with purpose._
 
 All animation charms share:
 
@@ -491,13 +502,13 @@ Triggers animations on scroll — spells that activate as the viewer journeys do
 
 > `whileInView` with `viewport({ once: true })`. Intersection Observer under the hood.
 
-> *Animation Warning: Like the Weasley twins' fireworks, animation is magnificent in moderation and catastrophic in excess.*
+> _Animation Warning: Like the Weasley twins' fireworks, animation is magnificent in moderation and catastrophic in excess._
 
 ---
 
 ## VII. Defense Against the Dark Arts
 
-*The spells that protect your code from the dark forces: bugs, vulnerabilities, regressions, and the slow entropy of neglect.*
+_The spells that protect your code from the dark forces: bugs, vulnerabilities, regressions, and the slow entropy of neglect._
 
 ### `test`
 
@@ -576,13 +587,13 @@ Measures Core Web Vitals — the precise diagnostic, like Madam Pomfrey taking v
 > 5. Memory leak detection
 > 6. Report with 7 quality gates
 
-> *"Constant vigilance!" — These spells are your shield. A codebase without tests is a castle without wards.*
+> _"Constant vigilance!" — These spells are your shield. A codebase without tests is a castle without wards._
 
 ---
 
 ## VIII. Reparo
 
-*The mending spells. When things break — and they will — these incantations diagnose and repair with surgical precision.*
+_The mending spells. When things break — and they will — these incantations diagnose and repair with surgical precision._
 
 ### `fix`
 
@@ -638,13 +649,13 @@ Runs TypeScript strict checking — the Veritaserum of type safety.
 >
 > `pnpm tsc --noEmit` → report errors with file locations. No JavaScript emitted, pure validation.
 
-> *A true master does not fear errors. They cast `fix` and move on.*
+> _A true master does not fear errors. They cast `fix` and move on._
 
 ---
 
 ## IX. Quill Charms
 
-*The spells of documentation — often neglected, always essential. Like Madam Pince guarding the library, these incantations ensure knowledge is preserved and accessible.*
+_The spells of documentation — often neglected, always essential. Like Madam Pince guarding the library, these incantations ensure knowledge is preserved and accessible._
 
 All quill charms share:
 
@@ -681,13 +692,13 @@ Updates the changelog — the historical record of everything that changed and w
 
 > Parses conventional commit history. Groups by type (feat, fix, refactor).
 
-> *The Quill Charms are the Memory Charms done right. Instead of erasing knowledge, they preserve it.*
+> _The Quill Charms are the Memory Charms done right. Instead of erasing knowledge, they preserve it._
 
 ---
 
 ## X. Geminio
 
-*The duplication and summoning spells. Why build from scratch when excellent work already exists?*
+_The duplication and summoning spells. Why build from scratch when excellent work already exists?_
 
 ### `clone`
 
@@ -729,13 +740,13 @@ Synchronizes with the upstream source — staying current with the original.
 >
 > `git fetch origin` → `git rebase origin/main` → resolve conflicts → push.
 
-> *Geminio Note: `clone table from codebase` summons the DataTable. `clone vercel/ai` reaches across GitHub. The spell adapts to the source.*
+> _Geminio Note: `clone table from codebase` summons the DataTable. `clone vercel/ai` reaches across GitHub. The spell adapts to the source._
 
 ---
 
 ## XI. Summoning Charms
 
-*Accio, GitHub! These incantations open portals to external realms through MCP servers — each word connecting you to a powerful service beyond your local machine.*
+_Accio, GitHub! These incantations open portals to external realms through MCP servers — each word connecting you to a powerful service beyond your local machine._
 
 Each summoning charm activates its corresponding MCP portal. No agents are required — the portal itself is the magic.
 
@@ -789,13 +800,13 @@ Each summoning charm activates its corresponding MCP portal. No agents are requi
 > **Portal:** Neon MCP | **Familiar:** `prisma` agent
 > Tools: `run_sql`, `create_branch`, `prepare_database_migration`, `complete_database_migration`, `explain_sql_statement`, `list_slow_queries`, `get_connection_string`.
 
-> *Each portal stays open for the duration of your session. Use them freely.*
+> _Each portal stays open for the duration of your session. Use them freely._
 
 ---
 
 ## XII. Divination
 
-*The art of seeing ahead — planning, architecting, predicting what must be built before the first line is written.*
+_The art of seeing ahead — planning, architecting, predicting what must be built before the first line is written._
 
 All divination spells channel the **BMAD method** installed at `~/.claude/bmad/`:
 
@@ -834,13 +845,13 @@ All divination spells channel the **BMAD method** installed at `~/.claude/bmad/`
 
 > Continuous iteration — the Divination that never ends. Recurring cycle.
 
-> *Professor Trelawney was wrong about most things, but right about one: the future belongs to those who prepare for it. `plan` before you `implement`.*
+> _Professor Trelawney was wrong about most things, but right about one: the future belongs to those who prepare for it. `plan` before you `implement`._
 
 ---
 
 ## XIII. Advanced Spellwork — Performance Magic
 
-*N.E.W.T.-level incantations for the performance-obsessed. These spells do not create — they refine.*
+_N.E.W.T.-level incantations for the performance-obsessed. These spells do not create — they refine._
 
 All performance spells are handled by general context in CLAUDE.md — no dedicated skills or slash commands. They activate the `react` and `performance` familiars.
 
@@ -897,13 +908,13 @@ All performance spells are handled by general context in CLAUDE.md — no dedica
 > Deduplicates with `React.cache()` — the spell that remembers, so the server doesn't repeat itself.
 > **Technique:** Wrap shared data fetching functions in `React.cache()` for request-level memoization.
 
-> *These spells have measurable impact. `parallelize` alone can improve performance 2-10x. This is not abstract theory — it is power.*
+> _These spells have measurable impact. `parallelize` alone can improve performance 2-10x. This is not abstract theory — it is power._
 
 ---
 
 ## XIV. Portkeys
 
-*Touch a Portkey and you are transported. Speak a reference incantation and your context shifts to another repository.*
+_Touch a Portkey and you are transported. Speak a reference incantation and your context shifts to another repository._
 
 ### `from codebase`
 
@@ -965,25 +976,25 @@ All performance spells are handled by general context in CLAUDE.md — no dedica
 >
 > `repositories` shows all 14 Databayt repos. `oss` browses open source. `contribute` starts the fork → branch → PR workflow.
 
-> *Portkey Examples: "auth like hogwarts" transports the Hogwarts auth pattern. "table from codebase" summons the DataTable. The destination adapts to your origin.*
+> _Portkey Examples: "auth like hogwarts" transports the Hogwarts auth pattern. "table from codebase" summons the DataTable. The destination adapts to your origin._
 
 ---
 
 ## XV. The Unforgivable Commands
 
-*Some operations are forbidden by default. The Kun engine will refuse them — not out of spite, but out of care. These are the spells that cannot be undone.*
+_Some operations are forbidden by default. The Kun engine will refuse them — not out of spite, but out of care. These are the spells that cannot be undone._
 
 These are enforced by **deny rules** in `settings.json` — no agent, skill, or charm can override them:
 
-| Forbidden Operation | The Ward That Blocks It |
-|--------------------|------------------------|
-| `rm -rf *` | Deny rule: catastrophic deletion — the Avada Kedavra of filesystems |
-| `prisma migrate reset` | Deny rule: wipes entire database — every table, every record, gone |
-| `prisma db push --accept-data-loss` | Deny rule: accepts data loss — a sacrifice no spell should demand |
-| `DROP TABLE` via Neon | Deny rule: destroys table through MCP portal — forbidden even through portals |
-| `git push --force` to main | Convention: overwrites shared history — the Imperius Curse of version control |
+| Forbidden Operation                 | The Ward That Blocks It                                                       |
+| ----------------------------------- | ----------------------------------------------------------------------------- |
+| `rm -rf *`                          | Deny rule: catastrophic deletion — the Avada Kedavra of filesystems           |
+| `prisma migrate reset`              | Deny rule: wipes entire database — every table, every record, gone            |
+| `prisma db push --accept-data-loss` | Deny rule: accepts data loss — a sacrifice no spell should demand             |
+| `DROP TABLE` via Neon               | Deny rule: destroys table through MCP portal — forbidden even through portals |
+| `git push --force` to main          | Convention: overwrites shared history — the Imperius Curse of version control |
 
-> *These restrictions exist because some magic, once cast, cannot be taken back. The Ministry of Magic had its reasons. So does Kun.*
+> _These restrictions exist because some magic, once cast, cannot be taken back. The Ministry of Magic had its reasons. So does Kun._
 
 ---
 
@@ -991,18 +1002,18 @@ These are enforced by **deny rules** in `settings.json` — no agent, skill, or 
 
 The true power of this system lies in combination. Single words are charms. Pairs are spells. Sequences are rituals.
 
-| You Speak | The Order That Mobilizes | What Manifests |
-|-----------|-------------------------|---------------|
-| `dev` | `/dev` skill → Port Guardian hook → Chrome Opener hook | Server rises, Chrome opens |
-| `table users` | `block` + `prisma` familiars → shadcn MCP → Neon MCP | A DataTable shaped for your users |
-| `auth like hogwarts` | `authjs` + `hogwarts` familiars → GitHub MCP → `auth` ward | Hogwarts auth materializes in your project |
-| `saas billing` | `orchestration` → 6 familiars → Stripe + Neon + shadcn MCPs | Entire billing system from two words |
-| `test login` | `test` familiar → Browser MCP → `testing` ward | Vitest + Playwright converge on login |
-| `motion hero` | `/motion` skill → `react` + `tailwind` familiars | Hero section learns to breathe |
-| `clone vercel/ai` | `/clone` skill → GitHub MCP → `org-refs` ward | Component travels from Vercel to you |
-| `handover auth` | `guardian` familiar → Browser MCP (headed) → all wards | 5-pass QA across 2 environments |
-| `parallelize` | `react` + `performance` familiars | Sequential code bends time |
-| `deploy` | `/deploy` skill → `deploy` familiar → Vercel MCP → `deployment` ward | Code travels to the edge of the world |
+| You Speak            | The Order That Mobilizes                                             | What Manifests                             |
+| -------------------- | -------------------------------------------------------------------- | ------------------------------------------ |
+| `dev`                | `/dev` skill → Port Guardian hook → Chrome Opener hook               | Server rises, Chrome opens                 |
+| `table users`        | `block` + `prisma` familiars → shadcn MCP → Neon MCP                 | A DataTable shaped for your users          |
+| `auth like hogwarts` | `authjs` + `hogwarts` familiars → GitHub MCP → `auth` ward           | Hogwarts auth materializes in your project |
+| `saas billing`       | `orchestration` → 6 familiars → Stripe + Neon + shadcn MCPs          | Entire billing system from two words       |
+| `test login`         | `test` familiar → Browser MCP → `testing` ward                       | Vitest + Playwright converge on login      |
+| `motion hero`        | `/motion` skill → `react` + `tailwind` familiars                     | Hero section learns to breathe             |
+| `clone vercel/ai`    | `/clone` skill → GitHub MCP → `org-refs` ward                        | Component travels from Vercel to you       |
+| `handover auth`      | `guardian` familiar → Browser MCP (headed) → all wards               | 5-pass QA across 2 environments            |
+| `parallelize`        | `react` + `performance` familiars                                    | Sequential code bends time                 |
+| `deploy`             | `/deploy` skill → `deploy` familiar → Vercel MCP → `deployment` ward | Code travels to the edge of the world      |
 
 ---
 
@@ -1014,66 +1025,66 @@ Behind every spell stands an enchanted object — the agents, servers, and syste
 
 Your agents are like Dumbledore's phoenix, Fawkes — intelligent, loyal, and capable of extraordinary things when called upon. There are 28 of them, organized into 6 chains:
 
-| Chain | Count | Domain |
-|-------|-------|--------|
-| **Stack** | 7 | Next.js, React, TypeScript, Tailwind, Prisma, shadcn, Auth |
-| **Design** | 4 | Orchestration, architecture, patterns, structure |
-| **UI** | 4 | shadcn, atoms, templates, blocks |
-| **DevOps** | 3 | Build, deploy, test |
-| **VCS** | 2 | Git, GitHub |
-| **Specialized** | 8 | Middleware, i18n, performance, diagnostics, and more |
+| Chain           | Count | Domain                                                     |
+| --------------- | ----- | ---------------------------------------------------------- |
+| **Stack**       | 7     | Next.js, React, TypeScript, Tailwind, Prisma, shadcn, Auth |
+| **Design**      | 4     | Orchestration, architecture, patterns, structure           |
+| **UI**          | 4     | shadcn, atoms, templates, blocks                           |
+| **DevOps**      | 3     | Build, deploy, test                                        |
+| **VCS**         | 2     | Git, GitHub                                                |
+| **Specialized** | 8     | Middleware, i18n, performance, diagnostics, and more       |
 
 ### Portals (18 MCP Servers)
 
 Each MCP server is a permanent portal to an external realm — like the Floo Network, but for code:
 
-| Realm | Portal |
-|-------|--------|
-| **UI & Design** | shadcn, figma, tailwind, a11y, storybook |
-| **Testing** | browser (headless), browser-headed (visible) |
-| **DevOps** | github, vercel, sentry, gcloud |
-| **Data** | neon, postgres, stripe, keychain |
-| **Knowledge** | ref, context7, linear |
+| Realm           | Portal                                       |
+| --------------- | -------------------------------------------- |
+| **UI & Design** | shadcn, figma, tailwind, a11y, storybook     |
+| **Testing**     | browser (headless), browser-headed (visible) |
+| **DevOps**      | github, vercel, sentry, gcloud               |
+| **Data**        | neon, postgres, stripe, keychain             |
+| **Knowledge**   | ref, context7, linear                        |
 
 ### Protective Wards (8 Rules)
 
 Rules activate automatically when you touch certain files — like the protective enchantments around Hogwarts:
 
-| Ward | Activates When | Protects |
-|------|---------------|----------|
-| auth | Touching auth files or middleware | NextAuth v5 patterns, session scoping |
-| i18n | Editing Arabic/English dictionaries | RTL, single-language storage, on-demand translation |
-| prisma | Modifying `.prisma` files | schoolId inclusion, `$extends`, regenerate client |
-| tailwind | Changing CSS files | CSS-first v4, OKLCH colors, no physical properties |
-| testing | Writing test files | Playwright/Vitest conventions, chrome-error skip |
-| deployment | Editing vercel.json | pnpm, tsc before builds |
-| multi-repo | Always loaded | Codebase paths, fork workflows |
-| org-refs | Always loaded | Priority: codebase > shadcn > radix |
+| Ward       | Activates When                      | Protects                                            |
+| ---------- | ----------------------------------- | --------------------------------------------------- |
+| auth       | Touching auth files or middleware   | NextAuth v5 patterns, session scoping               |
+| i18n       | Editing Arabic/English dictionaries | RTL, single-language storage, on-demand translation |
+| prisma     | Modifying `.prisma` files           | schoolId inclusion, `$extends`, regenerate client   |
+| tailwind   | Changing CSS files                  | CSS-first v4, OKLCH colors, no physical properties  |
+| testing    | Writing test files                  | Playwright/Vitest conventions, chrome-error skip    |
+| deployment | Editing vercel.json                 | pnpm, tsc before builds                             |
+| multi-repo | Always loaded                       | Codebase paths, fork workflows                      |
+| org-refs   | Always loaded                       | Priority: codebase > shadcn > radix                 |
 
 ### Silent Enchantments (5 Hooks)
 
 Hooks are nonverbal magic — they cast themselves without any incantation:
 
-| Enchantment | When | Effect |
-|-------------|------|--------|
-| Session Start | You begin | Prints your model and timestamp |
-| Port Guardian | Before `pnpm dev` | `lsof -ti:3000 \| xargs kill -9` |
-| Chrome Opener | After `pnpm dev` | `open -a "Google Chrome" http://localhost:3000` |
-| Auto-Format | After Write or Edit | Prettier on `.ts/.tsx/.js/.jsx/.json/.css/.md` |
-| Session End | You finish | Log to `~/.claude/session-log.txt` |
+| Enchantment   | When                | Effect                                          |
+| ------------- | ------------------- | ----------------------------------------------- |
+| Session Start | You begin           | Prints your model and timestamp                 |
+| Port Guardian | Before `pnpm dev`   | `lsof -ti:3000 \| xargs kill -9`                |
+| Chrome Opener | After `pnpm dev`    | `open -a "Google Chrome" http://localhost:3000` |
+| Auto-Format   | After Write or Edit | Prettier on `.ts/.tsx/.js/.jsx/.json/.css/.md`  |
+| Session End   | You finish          | Log to `~/.claude/session-log.txt`              |
 
 ### The Pensieve (Memory)
 
 Six memory files preserve knowledge across sessions — like Dumbledore's Pensieve:
 
-| Memory | Contains |
-|--------|----------|
-| preferences | Your settings, your ways |
+| Memory       | Contains                                |
+| ------------ | --------------------------------------- |
+| preferences  | Your settings, your ways                |
 | repositories | The 14 repos, their paths, their stacks |
-| atom | 59 atoms across 6 categories |
-| template | 31 templates across 5 categories |
-| block | 4 blocks with their patterns |
-| report | T&C electrical templates |
+| atom         | 59 atoms across 6 categories            |
+| template     | 31 templates across 5 categories        |
+| block        | 4 blocks with their patterns            |
+| report       | T&C electrical templates                |
 
 ---
 
@@ -1082,43 +1093,48 @@ Six memory files preserve knowledge across sessions — like Dumbledore's Pensie
 Not all spells are equal in difficulty. Here is the progression:
 
 ### First Year — The Basics
+
 `dev`, `build`, `push`, `fix`, `format`, `lint`
 
-*You will cast these every day. They are reflexes, not decisions.*
+_You will cast these every day. They are reflexes, not decisions._
 
 ### Third Year — Creating
+
 `component`, `page`, `form`, `table`, `card`, `modal`, `test`
 
-*You begin to conjure. Each spell creates something real.*
+_You begin to conjure. Each spell creates something real._
 
 ### Fifth Year (O.W.L.) — Compound Magic
+
 `atom`, `template`, `deploy`, `security`, `docs`, `motion`
 
-*You combine primitives. Your spells have structure and ambition.*
+_You combine primitives. Your spells have structure and ambition._
 
 ### Seventh Year (N.E.W.T.) — System Magic
+
 `block`, `saas`, `auth`, `feature`, `handover`
 
-*You create entire systems. One word, dozens of files, complete functionality.*
+_You create entire systems. One word, dozens of files, complete functionality._
 
 ### Beyond Hogwarts — Performance Mastery
+
 `parallelize`, `waterfall`, `bundle`, `streaming`, `dedup`
 
-*You no longer just create — you optimize. You see the invisible chains of latency and break them.*
+_You no longer just create — you optimize. You see the invisible chains of latency and break them._
 
 ---
 
 ## Closing Words
 
-> *"Words are, in my not-so-humble opinion, our most inexhaustible source of magic. Capable of both inflicting injury, and remedying it."*
+> _"Words are, in my not-so-humble opinion, our most inexhaustible source of magic. Capable of both inflicting injury, and remedying it."_
 > — Albus Dumbledore
 
-This spellbook contains 114 incantations. Together, they can build, test, deploy, secure, optimize, and document an entire software company.
+This spellbook contains 115 incantations. Together, they can build, test, deploy, secure, optimize, and document an entire software company.
 
-But remember: the magic is not in the words. It is in knowing *which* word, at *which* moment, for *which* purpose.
+But remember: the magic is not in the words. It is in knowing _which_ word, at _which_ moment, for _which_ purpose.
 
 A wizard who types `saas billing` without understanding what billing means will get a billing system they cannot maintain. A wizard who types `deploy` without first casting `test` will send broken magic into the world.
 
 **Learn the words. Understand the intent. Then speak — and watch the world rearrange itself.**
 
-*كن — Be, and it is.*
+_كن — Be, and it is._

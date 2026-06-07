@@ -1,0 +1,110 @@
+---
+title: Antigravity (secondary agent)
+description: Google's Antigravity CLI as kun's fallback agent — same MCP fleet, skills, and playbook, reached with `a`
+---
+
+# Antigravity — the secondary agent
+
+> **Claude Code (`c`) is primary. Antigravity (`a`) is secondary.** Same brain, cheaper lane.
+
+[Antigravity](https://antigravity.google) is Google's terminal coding agent (`agy`, Gemini-powered). kun installs it alongside Claude Code as a **secondary** agent for two jobs:
+
+1. **Fallback** — when `claude` is down, unauthenticated, or rate-limited, reach for `a` and keep moving.
+2. **Easy / cheap tasks** — quick edits, lookups, renames, one-file changes. Antigravity defaults to **Gemini Flash** (fast + cheap), so offloading trivial work here saves the primary agent's budget for the hard problems.
+
+It is not a different toolchain. The onboarding wizard wires it to the **same MCP fleet, the same skills, and the same databayt playbook** Claude Code uses — so `a` behaves like kun, just on a lighter model. Reach for Claude Code (`c`) for anything beyond "easy": architecture, multi-step features, schema/migration work, anything risky.
+
+---
+
+## The `a` launcher
+
+The installer adds a shell launcher mirroring `c`:
+
+```bash
+# what the onboarding scripts write to ~/.zshrc / ~/.bashrc / $PROFILE
+function c { claude --dangerously-skip-permissions "$@"; }   # primary
+function a { agy --dangerously-skip-permissions "$@"; }       # secondary
+```
+
+- `c` → Claude Code, permissions skipped (the daily driver).
+- `a` → Antigravity, permissions skipped.
+- The binary itself stays reachable as plain `agy` (e.g. `agy --help`, `agy mcp list`).
+
+> The old `cc` helper (safe `claude` *with* prompts) was removed — `c` is the only Claude launcher.
+
+`agy --help` is the source of truth for Antigravity's flags. If `--dangerously-skip-permissions` ever differs in a new release, update the launcher in `.claude/scripts/onboarding-*` to match.
+
+---
+
+## Shared configuration
+
+Everything lives under `~/.gemini/`, wired to the kun config already in `~/.claude/` by
+[`.claude/scripts/antigravity-sync.sh`](https://github.com/databayt/kun/blob/main/.claude/scripts/antigravity-sync.sh) (called from `setup.sh`, re-run on every setup):
+
+| What | Antigravity path | Source | How |
+|---|---|---|---|
+| **MCP fleet** | `~/.gemini/config/mcp_config.json` | `~/.claude/mcp.json` | **Transformed** — see below |
+| **Skills** | `~/.gemini/skills/` | `~/.claude/skills/` | Symlink (same `SKILL.md` layout) |
+| **Playbook** | `~/.gemini/AGENTS.md` | `~/.claude/CLAUDE.md` | Symlink (one brain) |
+| **Doctrine** | `~/.gemini/GEMINI.md` | `.claude/antigravity/GEMINI.md` | Copy (Antigravity-specific overrides) |
+
+### Why the MCP fleet is transformed, not symlinked
+
+Antigravity reads the same shape as Claude — top-level `mcpServers`, `command`/`args`/`env` for local stdio servers — **but remote servers use `serverUrl`** instead of Claude's `type: http|sse` + `url`, and it ignores Claude's `registries` block. So a plain symlink would silently break the ~5 remote servers (vercel, sentry, linear, stripe, figma). `antigravity-sync.sh` rewrites them:
+
+```jsonc
+// ~/.claude/mcp.json (Claude)        →  ~/.gemini/config/mcp_config.json (Antigravity)
+"vercel": { "type": "http",           "vercel": { "serverUrl":
+            "url": "https://..." }                "https://..." }
+"shadcn": { "command": "npx",         "shadcn": { "command": "npx",      // stdio: unchanged
+            "args": ["shadcn","mcp"] }            "args": ["shadcn","mcp"] }
+```
+
+`AGENTS.md` carries the shared playbook; `GEMINI.md` holds only the Antigravity-specific "you are the secondary agent" doctrine and takes precedence where the two overlap.
+
+---
+
+## Install & verify
+
+Antigravity installs automatically in **Phase 5** of [onboarding](/docs/onboarding) (the same phase as Claude Code). To set it up on a machine that already has the kun config:
+
+```bash
+# install the CLI (idempotent native installer → ~/.local/bin/agy)
+curl -fsSL https://antigravity.google/cli/install.sh | bash      # macOS / Linux
+# windows: irm https://antigravity.google/cli/install.ps1 | iex
+
+# wire it to the kun config (MCP + skills + playbook + doctrine)
+bash ~/kun/.claude/scripts/antigravity-sync.sh
+```
+
+Verify:
+
+| Check | Command | Pass |
+|---|---|---|
+| Binary | `command -v agy` | a path prints |
+| Launcher | `type a` | wraps `agy --dangerously-skip-permissions` |
+| `cc` gone | `type cc` | not found |
+| MCP fleet | `python3 -c "import json;print(len(json.load(open('$HOME/.gemini/config/mcp_config.json'))['mcpServers']))"` | server count (~20–26) |
+| Bridge | `ls -l ~/.gemini/AGENTS.md ~/.gemini/skills` | resolve to `~/.claude/CLAUDE.md` / `~/.claude/skills` |
+| Smoke | `a "summarize this repo's README"` | answers on Gemini Flash |
+
+---
+
+## Troubleshooting
+
+| Symptom | Fix |
+|---|---|
+| `command not found: a` | Restart shell or `source ~/.zshrc` (Mac/Linux) / `. $PROFILE` (Windows) |
+| `a` can't see the MCP servers | Re-run `bash ~/kun/.claude/scripts/antigravity-sync.sh`; check `~/.gemini/config/mcp_config.json` is valid JSON |
+| A remote server (vercel/figma/…) won't connect | Confirm it became `serverUrl` (not `type`/`url`) in `mcp_config.json` — re-run the sync if not |
+| Flag rejected by `agy` | Run `agy --help`; if the skip-permissions flag changed, update `.claude/scripts/onboarding-*` |
+| `~/.gemini/skills` not picked up | Antigravity reads `~/.gemini/skills/{name}/SKILL.md`; confirm the symlink resolves and isn't a stale real directory |
+
+---
+
+## Where to go next
+
+- [Onboarding](/docs/onboarding) — the one-paste setup that installs both agents
+- [Claude Code](/docs/claude-code) — the primary agent
+- [MCP](/docs/mcp) — the server fleet both agents share
+- [Cowork ↔ Code](/docs/cowork) — Claude's two modes, same `~/.claude/`

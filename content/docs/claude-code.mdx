@@ -139,11 +139,16 @@ c
 Add to `~/.zshrc` or `~/.bashrc`:
 ```bash
 export PATH="$HOME/.local/bin:$HOME/.claude/bin:$PATH"
-alias c='claude --dangerously-skip-permissions'
+alias c='claude --dangerously-skip-permissions'   # primary agent
+alias a='agy --dangerously-skip-permissions'       # secondary agent — Antigravity
 
 # Auto-load secrets
 [ -f "$HOME/.claude/.env" ] && export $(grep -v "^#" "$HOME/.claude/.env" | xargs)
 ```
+
+The installer writes these as shell functions, not aliases — same effect. `a` is the
+[secondary agent](/docs/antigravity): the fallback when `claude` is unavailable, and the
+cheap lane for easy tasks.
 
 Reload: `source ~/.zshrc`
 
@@ -151,11 +156,9 @@ Reload: `source ~/.zshrc`
 
 Add to `$PROFILE`:
 ```powershell
-# Claude Code alias
-Set-Alias -Name c -Value claude
-
-# Quick start with permissions
-function cc { claude --dangerously-skip-permissions $args }
+# Agent launchers
+function c { claude --dangerously-skip-permissions $args }   # primary
+function a { agy --dangerously-skip-permissions $args }       # secondary — Antigravity
 
 # Auto-load secrets
 if (Test-Path "$env:USERPROFILE\.claude\.env") {

@@ -7,6 +7,18 @@ description: Master-level techniques and advanced workflows
 
 Advanced techniques for getting the most out of Claude Code and the Kun engine.
 
+## Feature of the Week
+
+**`/loop` can babysit a PR till it merges.**
+
+Hand `/loop` a PR and a goal and it polls on a recurring interval — re-checking CI, fixing red checks, re-requesting review — then stops itself the moment the PR merges. No more refreshing the GitHub tab.
+
+```
+/loop 10m watch PR #142 — if CI is red, pull the branch and fix it; stop when merged
+```
+
+Omit the interval to let Claude self-pace between checks. Pair it with `--dangerously-skip-permissions` for a fully hands-off merge babysitter.
+
 ## Keywords Are Everything
 
 One word triggers an entire workflow. Master the keywords and you 10x your speed:

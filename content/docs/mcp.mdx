@@ -74,6 +74,10 @@ MCP servers are configured in `~/.claude/mcp.json`:
 }
 ```
 
+### Shared with the secondary agent
+
+The [Antigravity](/docs/antigravity) CLI (`a`) reuses this exact fleet. During `setup.sh`, `antigravity-sync.sh` transforms `~/.claude/mcp.json` into `~/.gemini/config/mcp_config.json` — stdio servers pass through unchanged; remote servers are rewritten from Claude's `type: http|sse` + `url` to Antigravity's `serverUrl` key (and the `registries` block is dropped). Edit `~/.claude/mcp.json`, re-run setup, and both agents stay in sync.
+
 ## Installation
 
 Every machine gets the full MCP fleet (all 18 servers) — access is scoped by secrets (the Gist you're handed), not by config. One command, role is just a label:
@@ -117,12 +121,35 @@ Secondary concern: Node v25+ is newer than Playwright officially supports (LTS 2
 | Package | `@playwright/mcp` (Anthropic official) |
 | Version pin | `0.0.75` (exact, never `@latest`) |
 | Config file | `~/.claude/mcp.json` (user-level only) |
-| Runtime config | `~/.claude/playwright-mcp.config.json` (viewport, timeouts, launch args; **no `userDataDir`**) |
+| Runtime config | `~/.claude/playwright-mcp.config.json` (viewport, timeouts, launch args, determinism context options, `outputDir`, `testIdAttribute`; **no `userDataDir`**) |
 | Headless profile | `~/.playwright-auth-headless` |
 | Headed profile | `~/.playwright-auth` |
 | Cache dir | `~/Library/Caches/ms-playwright` |
 | Recovery skill | `/mcp-doctor` |
 | Session-start ping | `~/.claude/hooks/session-start-reports.sh` warns on stale PIDs / SingletonLock |
+
+### Enriched runtime config
+
+`~/.claude/playwright-mcp.config.json` is the single shared tuning surface for both `browser` and `browser-headed`. It is validated against the `@playwright/mcp@0.0.75` `Config` type (nested `browser.launchOptions` / `browser.contextOptions`, top-level `outputDir` / `snapshot` / `console` / `testIdAttribute` / `timeouts`). Beyond viewport + timeouts it pins **determinism** for repeatable QA — the same screenshot twice, no analytics noise, stable dates:
+
+- `contextOptions.reducedMotion: "reduce"` — freeze animations/transitions (clean `see` / `responsive` / `mirror` shots).
+- `contextOptions.serviceWorkers: "block"` — no service-worker cache nondeterminism between runs.
+- `contextOptions.colorScheme: "light"` + `locale: "en-US"` + `timezoneId: "Asia/Dubai"` — fixed default render; RTL is exercised per-call via `/ar/` routes, not a hardcoded locale.
+- `outputDir` — predictable home for the `pdf` cap and any `--save-session`.
+- `testIdAttribute: "data-testid"` — matches the stack's Playwright / Testing-Library convention.
+
+`--caps vision,pdf` and `--user-data-dir` stay on the **CLI** (proven; the config-file `capabilities` enum can replace rather than augment the core toolset, and the CLI flag owns the profile dir). The three deprecated role configs (`mcp-business/ops/content.json`) no longer define `browser` — they inherit the user-level servers, restoring root-cause #1 + #4 compliance.
+
+**Opt-in power knobs** (off by default — enable per task):
+
+| Need | How |
+|---|---|
+| Lock network to known origins | add `"network": { "allowedOrigins": ["https://*.databayt.org", "http://localhost:*"] }` (aborts other requests, so it muddies the `debug` / `watch` network view — use only for locked-down runs) |
+| Emulate a real device | `--device "iPhone 15"` on the server args |
+| Replay a pre-authenticated session | `--storage-state <file.json>` |
+| Persist the Playwright session | `--save-session` (lands in `outputDir`) |
+| Auto-grant geolocation/notifications | `--grant-permissions` |
+| DevTools / perf tooling | add `devtools` to `--caps` for `performance` / `trace` work |
 
 ### Recovery quick-reference
 

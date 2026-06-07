@@ -476,16 +476,23 @@ fi
 # =============================================================================
 step "4" "Clone Repositories"
 
-clone_repo() {
-    local repo="$1"
-    local dir="$REPOS_DIR/$repo"
-    if [[ ! -d "$dir" ]]; then
-        git clone "git@github.com:databayt/$repo.git" "$dir" 2>/dev/null && pass "$repo" || {
-            git clone "https://github.com/databayt/$repo.git" "$dir" 2>/dev/null && pass "$repo (HTTPS)" || fail "$repo clone failed"
-        }
-    else
-        pass "$repo (exists)"
+# clone_one — silent worker. Records "<repo>\t<status>" (ok|https|exists|fail) to the
+# results file. Never prints, never touches ERRORS, and ALWAYS returns 0 so a failed
+# clone can't trip `set -e` when reaped by `wait`. Short lines are < PIPE_BUF, so the
+# concurrent O_APPEND writes stay atomic and never interleave.
+clone_one() {
+    local results="$1" repo="$2" dir="$REPOS_DIR/$2"
+    if [[ -d "$dir" ]]; then
+        printf '%s\texists\n' "$repo" >> "$results"; return 0
     fi
+    if git clone "git@github.com:databayt/$repo.git" "$dir" >/dev/null 2>&1; then
+        printf '%s\tok\n' "$repo" >> "$results"
+    elif git clone "https://github.com/databayt/$repo.git" "$dir" >/dev/null 2>&1; then
+        printf '%s\thttps\n' "$repo" >> "$results"
+    else
+        printf '%s\tfail\n' "$repo" >> "$results"
+    fi
+    return 0
 }
 symlink_home() {
     local repo="$1"
@@ -494,20 +501,41 @@ symlink_home() {
         ln -sf "$REPOS_DIR/$repo" "$HOME/$repo" && info "~/$repo → $REPOS_DIR/$repo"
 }
 
-# Every machine clones the full org — any machine can be any task.
-clone_repo "kun"; symlink_home "kun"
-clone_repo "hogwarts"; symlink_home "hogwarts"
-clone_repo "codebase"; symlink_home "codebase"
-if [[ "$ALL_REPOS" == "1" ]]; then
-    for repo in shadcn radix souq mkan shifa swift-app distributed-computer marketing; do
-        clone_repo "$repo"; symlink_home "$repo"
+# clone_parallel — clone every repo concurrently in bounded batches, then report +
+# symlink sequentially in canonical order. Fixed-size batches (not `wait -n`) keep this
+# portable across bash versions. pass/fail/ERRORS run only in this parent shell.
+clone_parallel() {
+    local cap=4 results; results="$(mktemp)"
+    local -a all=("$@"); local i n=${#all[@]} repo status
+    info "Cloning $n repos (up to $cap in parallel)..."
+    for (( i=0; i<n; i+=cap )); do
+        for repo in "${all[@]:i:cap}"; do clone_one "$results" "$repo" & done
+        wait
     done
+    for repo in "$@"; do
+        status="$(awk -F'\t' -v r="$repo" '$1==r{print $2; exit}' "$results")"
+        case "$status" in
+            ok)     pass "$repo" ;;
+            https)  pass "$repo (HTTPS)" ;;
+            exists) pass "$repo (exists)" ;;
+            *)      fail "$repo clone failed" ;;
+        esac
+        symlink_home "$repo"
+    done
+    rm -f "$results"
+}
+
+# Every machine clones the full org — any machine can be any task.
+if [[ "$ALL_REPOS" == "1" ]]; then
+    clone_parallel kun hogwarts codebase shadcn radix souq mkan shifa swift-app distributed-computer marketing
+else
+    clone_parallel kun hogwarts codebase
 fi
 
 # =============================================================================
 # PHASE 5: Claude Ecosystem (no Desktop on Linux)
 # =============================================================================
-step "5" "Claude — Code CLI (no Desktop on Linux)"
+step "5" "Claude + Antigravity — Code CLIs (no Desktop on Linux)"
 
 # Claude Code CLI — native installer (auto-updates in background, per
 # code.claude.com/docs/en/setup). curl install.sh is idempotent: re-runs detect
@@ -524,20 +552,45 @@ else
     pass "Claude Code CLI ($(claude --version 2>/dev/null | head -1)) — auto-updates in background"
 fi
 
-# `c` functions in shell rc (bash + zsh if present)
+# Antigravity CLI — secondary agent (`agy`). Fallback when Claude Code is
+# unavailable + handles easy/cheap tasks (Gemini Flash). Idempotent installer,
+# lands in ~/.local/bin (already on PATH from the Claude step above).
+if ! command -v agy >/dev/null 2>&1; then
+    info "Installing Antigravity CLI (secondary agent)..."
+    curl -fsSL https://antigravity.google/cli/install.sh | bash >/dev/null 2>&1
+    export PATH="$HOME/.local/bin:$PATH"
+    if command -v agy >/dev/null 2>&1; then
+        pass "Antigravity CLI installed ($(agy --version 2>/dev/null | head -1))"
+    else
+        info "Antigravity CLI not ready (secondary agent — optional); re-run later or see docs/antigravity"
+    fi
+else
+    pass "Antigravity CLI ($(agy --version 2>/dev/null | head -1))"
+fi
+
+# Launcher functions in shell rc (bash + zsh if present):
+#   c → Claude Code (primary)   ·   a → Antigravity (secondary)
 for RC in "$HOME/.bashrc" "$HOME/.zshrc"; do
     [[ ! -f "$RC" ]] && continue
+    # Drop the deprecated `cc` helper if an earlier run added it.
+    grep -q "function cc " "$RC" 2>/dev/null && sed -i '/function cc /d' "$RC"
     if ! grep -q "function c " "$RC" 2>/dev/null; then
         cat >> "$RC" <<'CFUNC'
 
-# Claude Code
-function c  { claude --dangerously-skip-permissions "$@"; }
-function cc { claude "$@"; }
+# Claude Code (primary)
+function c { claude --dangerously-skip-permissions "$@"; }
 [ -f "$HOME/.claude/.env" ] && set -a && . "$HOME/.claude/.env" && set +a
 CFUNC
     fi
+    if ! grep -q "function a " "$RC" 2>/dev/null; then
+        cat >> "$RC" <<'AFUNC'
+
+# Antigravity (secondary)
+function a { agy --dangerously-skip-permissions "$@"; }
+AFUNC
+    fi
 done
-pass "Shell helpers (c, cc)"
+pass "Shell helpers (c, a)"
 
 # =============================================================================
 # PHASE 6: Kun Engine
@@ -632,6 +685,7 @@ command -v node >/dev/null 2>&1    && pass "node"     || fail "node"
 command -v pnpm >/dev/null 2>&1    && pass "pnpm"     || fail "pnpm"
 command -v gh >/dev/null 2>&1      && pass "gh"       || fail "gh"
 command -v claude >/dev/null 2>&1  && pass "claude"   || fail "claude"
+command -v agy >/dev/null 2>&1      && pass "agy (secondary)" || info "agy (secondary)"
 
 [[ -f "$HOME/.ssh/id_ed25519" ]]    && pass "SSH key"     || fail "SSH key"
 gh auth status >/dev/null 2>&1      && pass "GitHub auth" || fail "GitHub auth"
@@ -659,6 +713,7 @@ echo ""
 echo -e "${BD}Next steps:${NC}"
 echo "  1. Restart shell (or: source ~/.bashrc)"
 echo "  2. Run 'claude' → log in with Anthropic account"
+echo "     Launchers: 'c' = Claude Code (primary) · 'a' = Antigravity (secondary)"
 if [[ -z "$GIST_ID" ]]; then
     echo "  3. Load secrets later: bash ~/kun/.claude/scripts/secrets.sh <GIST_ID>"
 fi
@@ -666,7 +721,7 @@ fi
 echo ""
 echo -e "${BD}Claude Desktop note:${NC}"
 echo "  Not available on Linux. Use:"
-echo "  • CLI: 'claude' / 'c'"
+echo "  • CLI: 'claude' / 'c' (primary) · 'agy' / 'a' (secondary)"
 echo "  • Browser: https://claude.ai/code (same projects as CLI)"
 echo "  • IDE: install Claude plugin from VS Code/WebStorm Marketplace"
 

@@ -40,11 +40,6 @@
       "url": "https://mcp.stripe.com",
       "description": "Payment processing, fee tracking"
     },
-    "browser": {
-      "command": "npx",
-      "args": ["-y", "@playwright/mcp@latest", "--headless"],
-      "description": "Headless browser for uptime checks and site verification"
-    },
     "posthog": {
       "type": "http",
       "url": "https://mcp.posthog.com",
