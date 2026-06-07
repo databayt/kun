@@ -1,46 +1,58 @@
-# GitHub Workflow Cycle
+# Workflow Cycle — Work Directly on Main
 
-State-of-the-art GitHub workflow for all databayt repos. Every change follows this chain.
+> **No branches. No worktrees. No PRs.** Every change is committed and pushed straight to `main`.
+> This is a standing, deliberate decision — **do not reintroduce branch / PR / worktree steps.**
 
 ```
-IDEA → ISSUE → BRANCH → COMMIT → PUSH → PR → REVIEW → MERGE → CLOSE → DEPLOY → VERIFY
+IDEA → (ISSUE — optional) → EDIT → COMMIT → PUSH (main) → DEPLOY → VERIFY
 ```
+
+## Why main-only
+
+Multiple concurrent sessions working across git worktrees kept resetting `main` under
+each other — `git reset --hard origin/main` and "merge-all-worktrees" deploys repeatedly
+orphaned commits and wiped uncommitted work. For a solo / small team, branches + PRs +
+worktrees added coordination cost and real data-loss risk without buying meaningful review
+value. So: **one working tree, one branch (`main`), commit early and often.**
 
 ## The Rules
 
-### 1. IDEA → ISSUE
+### 1. Stay on `main`
 
-Every change starts as a GitHub issue. No exceptions.
+You are always on `main`. Never `git checkout -b`. Never `git worktree add`. If a session
+finds itself on another branch or in a worktree, switch back to the main working tree on
+`main` before doing anything else. Verify right before every commit:
+
+```bash
+git branch --show-current   # must print: main
+```
+
+### 2. (Optional) Issue for tracking
+
+Issues are for _tracking visible work_, not a gate. Create one when it helps someone else
+see what's happening; skip it for routine edits.
 
 ```bash
 gh issue create --repo databayt/<repo> \
   --title "<type>: <description>" \
   --body "<details, acceptance criteria>" \
-  --label "type:<type>,P<n>" \
-  --assignee "<person>"
+  --label "type:<type>,P<n>"
 ```
 
-| Type | Label | Branch prefix |
-|------|-------|---------------|
-| Feature | `type:feature` | `feat/` |
-| Bug fix | `type:bug` | `fix/` |
-| Chore | `type:chore` | `chore/` |
-| Docs | `type:docs` | `docs/` |
-| Refactor | `type:refactor` | `refactor/` |
+| Type     | Label           |
+| -------- | --------------- |
+| Feature  | `type:feature`  |
+| Bug fix  | `type:bug`      |
+| Chore    | `type:chore`    |
+| Docs     | `type:docs`     |
+| Refactor | `type:refactor` |
 
 **Priority**: `P0` (drop everything) · `P1` (this week) · `P2` (this sprint) · `P3` (backlog)
 
-### 2. ISSUE → BRANCH
+### 3. Commit — conventional, atomic, often
 
-```bash
-git checkout -b <type>/<short-description>   # e.g. feat/admission-form
-```
-
-Rules: branch from fresh `main`, one issue = one branch = one PR, delete after merge.
-
-### 3. BRANCH → COMMITS
-
-Conventional, atomic commits:
+Small commits on `main` are the safety net that replaces branches. Uncommitted work is the
+thing that gets lost — so commit _frequently_, not at the end.
 
 ```
 <type>: <description (≤72 chars, present tense)>
@@ -54,87 +66,44 @@ Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
 
 **Types**: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `perf`, `style`
 
-### 4. COMMITS → PUSH
+`Closes #N` in a commit body auto-closes the issue when the commit lands on `main`.
+
+### 4. Push to `main`
 
 ```bash
-git push -u origin <branch-name>
+git pull --rebase origin main   # take others' commits first, replay yours on top
+git push origin main
 ```
 
-### 5. PUSH → PR
+Rebase-pull before pushing so concurrent commits stack cleanly instead of forcing a merge.
+**Never force-push `main`.**
 
-```bash
-gh pr create --title "<type>: <desc>" --body "$(cat <<'EOF'
-## Summary
-<1-3 bullets: what changed and why>
+### 5. Deploy
 
-## Changes
-- <area>: <what changed>
+Vercel auto-deploys `main` on push. Nothing to do.
 
-## Test plan
-- [ ] <how to verify>
+### 6. Verify
 
-Closes #<N>
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-EOF
-)"
-```
-
-Rules: title = primary commit msg · `Closes #N` auto-closes the issue · summary is human-readable, not a commit log dump.
-
-### 6. PR → REVIEW
-
-```bash
-gh pr edit <N> --add-reviewer <person>
-gh pr comment <N> --body "Addressed feedback: changed X to Y because Z"
-gh api repos/databayt/<repo>/pulls/<N>/reviews   # view review comments
-```
-
-Rules: respond to every review comment · disagree only with evidence · discussion happens ON the PR, not Slack.
-
-### 7. REVIEW → MERGE
-
-```bash
-gh pr merge <N> --squash --delete-branch
-```
-
-Rules: squash merge · CI must pass · ≥1 approval (or self-merge for solo work, with explanation in PR).
-
-### 8. MERGE → CLOSE + DEPLOY
-
-`Closes #N` auto-closes the issue. Vercel auto-deploys `main`. Verify:
-
-```bash
-gh issue view <N> --repo databayt/<repo>
-gh api repos/databayt/<repo>/deployments --jq '.[0].statuses_url'
-```
-
-### 9. DEPLOY → VERIFY
-
-Use `/watch` — screenshot prod, check console + network, confirm fix/feature works.
+Use `/watch` — screenshot prod, check console + network, confirm the change works.
 
 ## Anti-Patterns
 
-| Don't | Do |
-|-------|-----|
-| Commit directly to `main` | Branch + PR |
-| PR without issue | Create issue first |
-| Mega PR (20+ files) | Split into focused PRs |
-| Force push to `main` | Never |
-| Merge with red CI | Fix CI first |
-| Leave stale branches | Delete after merge |
-| "fix stuff" commit msg | Conventional commit |
-| Manually close issue | `Closes #N` in PR |
+| Don't                                                   | Do                                        |
+| ------------------------------------------------------- | ----------------------------------------- |
+| `git checkout -b feat/...`                              | Stay on `main`                            |
+| `git worktree add ...`                                  | One working tree                          |
+| Open a PR                                               | Commit + push to `main`                   |
+| Hold work uncommitted across a session                  | Commit early + often                      |
+| `git reset --hard origin/main` with others' WIP present | Pull `--rebase`; never blow away the tree |
+| Force-push `main`                                       | Never                                     |
+| "fix stuff" commit msg                                  | Conventional commit                       |
 
 ## Quick Reference
 
-| Action | Command |
-|--------|---------|
-| Issue | `gh issue create --repo databayt/<repo>` |
-| Branch | `git checkout -b feat/<name>` |
-| Commit | `git commit -m "feat: …"` |
-| Push | `git push -u origin <branch>` |
-| PR | `gh pr create --title "feat: X" --body "Closes #N"` |
-| Review | `gh pr review <N> --approve` |
-| Merge | `gh pr merge <N> --squash --delete-branch` |
-| Verify | `gh issue view <N>` + `/watch` |
+| Action           | Command                                                 |
+| ---------------- | ------------------------------------------------------- |
+| Confirm on main  | `git branch --show-current`                             |
+| Issue (optional) | `gh issue create --repo databayt/<repo>`                |
+| Commit           | `git commit -m "feat: …"`                               |
+| Sync + push      | `git pull --rebase origin main && git push origin main` |
+| Verify           | `/watch`                                                |

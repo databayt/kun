@@ -10,22 +10,22 @@
 3. Reference `docs/CONFIGURATION.md` for engine blueprint
 4. Follow patterns from `/Users/abdout/codebase/`
 5. Conventional commits — see `.claude/rules/github-workflow.md`
-6. PR workflow — no direct commits to `main`
+6. Work directly on `main` — no branches, no worktrees, no PRs (see `.claude/rules/github-workflow.md`)
 
 ## Documentation
 
 Full project information lives in `docs/`:
 
-| Doc | Purpose |
-|-----|---------|
-| `PROJECT-BRIEF.md` | Vision, goals, Anthropic product mapping |
-| `ARCHITECTURE.md` | 5-layer engine architecture |
-| `PRD.md` · `EPICS.md` | Configuration requirements + stories |
-| `CONFIGURATION.md` | Full engine blueprint |
-| `WORKFLOWS.md` | Technical + business operations |
-| `STACK.md` · `PRINCIPLES.md` · `CONSTITUTION.md` · `NORTH-STAR.md` | Decision framework |
-| `CEO-OS.md` · `AGILE.md` · `KEYWORDS.md` · `PRODUCTS.md` | Operating model |
-| `SELF-HOSTING.md` | Tailscale/tmux/Docker setup |
+| Doc                                                                | Purpose                                  |
+| ------------------------------------------------------------------ | ---------------------------------------- |
+| `PROJECT-BRIEF.md`                                                 | Vision, goals, Anthropic product mapping |
+| `ARCHITECTURE.md`                                                  | 5-layer engine architecture              |
+| `PRD.md` · `EPICS.md`                                              | Configuration requirements + stories     |
+| `CONFIGURATION.md`                                                 | Full engine blueprint                    |
+| `WORKFLOWS.md`                                                     | Technical + business operations          |
+| `STACK.md` · `PRINCIPLES.md` · `CONSTITUTION.md` · `NORTH-STAR.md` | Decision framework                       |
+| `CEO-OS.md` · `AGILE.md` · `KEYWORDS.md` · `PRODUCTS.md`           | Operating model                          |
+| `SELF-HOSTING.md`                                                  | Tailscale/tmux/Docker setup              |
 
 ## Operating Configuration
 

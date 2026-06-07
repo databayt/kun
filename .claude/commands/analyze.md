@@ -1,18 +1,18 @@
 ---
 description: Analyze a repo's patterns and generate a tailored Claude Code config
-argument-hint: [repo-path] [--pr]
+argument-hint: [repo-path] [--dry-run]
 ---
 
 # Analyze — Repo Config Generator
 
-Analyze any repo's patterns and generate a complete `.claude/` configuration as a pull request.
+Analyze any repo's patterns and generate a complete `.claude/` configuration, committed straight to `main`.
 
 ## Usage
 
-- `/analyze hogwarts` — analyze hogwarts, create config PR
+- `/analyze hogwarts` — analyze hogwarts, commit config to `main`
 - `/analyze databayt/souq` — analyze from GitHub
 - `/analyze .` — analyze current directory
-- `/analyze hogwarts --dry-run` — preview without creating PR
+- `/analyze hogwarts --dry-run` — preview without committing
 - `/analyze hogwarts --update` — refresh existing config
 - `/analyze hogwarts --profile core` — generate for specific profile
 
@@ -23,16 +23,16 @@ Analyze any repo's patterns and generate a complete `.claude/` configuration as 
 Parse arguments:
 
 - First arg = repo (name, path, or GitHub URL)
-- `--dry-run` = output to stdout, no PR
+- `--dry-run` = output to stdout, no commit
 - `--update` = diff against existing `.claude/`, update stale config
 - `--profile <name>` = generate for specific profile (core, security, developer, full)
 
 ### The Clean GitHub Cycle
 
-Every analyze run follows this workflow:
+Work directly on `main` — no branches, no worktrees, no PRs. Every analyze run follows this workflow:
 
 ```
-Issue → Branch → Analyze → Commit → Push → PR → Review → Merge → Close
+Issue (opt.) → Analyze → Commit → Push `main` → Verify → Close
 ```
 
 ### Step 1: Resolve Repo
@@ -48,7 +48,7 @@ elif echo "$REPO" | grep -q "/"; then
 fi
 ```
 
-### Step 2: Create Tracking Issue
+### Step 2: Create Tracking Issue (optional)
 
 ```bash
 gh issue create \
@@ -65,10 +65,13 @@ gh issue create \
 Triggered by \`/analyze\` command."
 ```
 
-### Step 3: Create Branch
+### Step 3: Verify Branch
+
+Work happens directly on `main` — there is no branch step. Just confirm you are on `main` and up to date:
 
 ```bash
-git checkout -b chore/analyze-config
+git branch --show-current        # must print `main`
+git pull --rebase origin main
 ```
 
 ### Step 4: Run Analysis Pipeline
@@ -204,73 +207,49 @@ Only create rules for patterns with >80% consistency. Inconsistent patterns get 
 
 Only commands that match the repo's workflow. Always include: `dev`, `build`. Conditionally include based on detected stack.
 
-### Step 6: Commit + PR
+### Step 6: Commit + Push to `main`
+
+Commit straight to `main` — no branch, no PR. Put the analysis summary in the commit body.
 
 ```bash
 # Stage all generated config
 git add .claude/
 
-# Commit
+# Commit (summary lives in the body)
 git commit -m "chore: generate repo config from pattern analysis
 
-Analyzed N commits, M files across K directories.
-Extracted P conventions, selected Q agents, created R rules.
+Auto-generated .claude/ configuration from repository pattern analysis.
+
+Analysis scope: <N> commits analyzed, <M> files sampled, <P> conventions extracted.
+
+Generated config:
+- CLAUDE.md — project instructions (<lines> lines)
+- agents/ — <N> agents selected (of 44 available)
+- rules/ — <N> rules from observed patterns
+- commands/ — <N> skills mapped to workflow
+
+Recommended profiles: core (<list>) / security (<list>) / full (<list>).
+Review each file — a starting point, not gospel.
 
 Closes #<issue-number>
 
 Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>"
 
-# Push
-git push -u origin chore/analyze-config
-
-# Create PR
-gh pr create \
-  --title "chore: generate repo config from pattern analysis" \
-  --body "$(cat <<'EOF'
-## Summary
-Auto-generated `.claude/` configuration from repository pattern analysis.
-
-### Analysis scope
-- **Commits analyzed**: <N>
-- **Files sampled**: <M>
-- **Conventions extracted**: <P>
-
-### Generated config
-| File | Purpose |
-|------|---------|
-| `CLAUDE.md` | Project instructions (<lines> lines) |
-| `agents/` | <N> agents selected (of 44 available) |
-| `rules/` | <N> rules from observed patterns |
-| `commands/` | <N> skills mapped to workflow |
-
-### Detected conventions
-<bulleted list of key findings>
-
-### Recommended profiles
-- **core**: <list> — daily development
-- **security**: <list> — auth and validation focus
-- **full**: <list> — everything relevant
-
-> Review each file. This is a starting point, not gospel.
-
-Closes #<issue-number>
-
-🤖 Generated with [Kun Engine](https://github.com/databayt/kun)
-EOF
-)"
+# Push to main (Vercel/CI deploys automatically)
+git push origin main
 ```
 
 ### --dry-run Mode
 
-Skip steps 2, 3, 6. Output generated config to stdout with clear section headers. No files written, no PR created.
+Skip steps 2 and 6. Output generated config to stdout with clear section headers. No files written, no commit.
 
 ### --update Mode
 
 1. Read existing `.claude/` config
 2. Run analysis pipeline
 3. Diff generated vs existing
-4. Only include changes in PR (new conventions, removed stale rules, updated agents)
-5. PR title: `chore: update repo config — N conventions added, M stale removed`
+4. Commit only the changes to `main` (new conventions, removed stale rules, updated agents)
+5. Commit title: `chore: update repo config — N conventions added, M stale removed`
 
 ### --profile Mode
 
@@ -278,7 +257,7 @@ Filter generated config to only include agents, rules, and commands relevant to 
 
 ## Quality Gates
 
-Before creating PR:
+Before committing to `main`:
 
 - [ ] CLAUDE.md is valid markdown, under 500 lines
 - [ ] Agent frontmatter has name, description, model
