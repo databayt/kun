@@ -6,7 +6,7 @@ When you encounter a Tier 3 vocabulary keyword that has a pattern card, load the
 
 These keywords have canonical patterns documented in `.claude/patterns/cards/`:
 
-`form`, `table`, `modal`, `auth`, `validation`, `action`, `columns`, `wizard`, `sidebar`, `header`
+`form`, `table`, `modal`, `auth`, `validation`, `action`, `columns`, `wizard`, `sidebar`, `header`, `e2e`
 
 ## Behavior
 
@@ -24,6 +24,7 @@ When building a new feature that involves one of these keywords:
 - User says "create a form for invoices" → read `form.md`, use InputField/SelectField atoms with useActionStateBridge
 - User says "add auth" → read `auth.md`, follow the five-step flow structure
 - User says "multi-step wizard for onboarding" → read `wizard.md`, use createWizardProvider factory
+- User says "add E2E tests" or "playwright" → read `e2e.md`, clone the setup-project auth config (storageState + desktop/mobile/Arabic-RTL projects)
 
 ## Rule Corpus — keyword → rule directory
 

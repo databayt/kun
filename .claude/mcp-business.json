@@ -35,11 +35,6 @@
       },
       "description": "Documentation sync, proposals, knowledge base"
     },
-    "browser": {
-      "command": "npx",
-      "args": ["-y", "@playwright/mcp@latest", "--headless"],
-      "description": "Headless browser for market research and competitor analysis"
-    },
     "context7": {
       "command": "npx",
       "args": ["-y", "@upstash/context7-mcp@latest"],

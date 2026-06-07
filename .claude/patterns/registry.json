@@ -472,6 +472,53 @@
           "notes": "Single navbar component — JavaScript"
         }
       }
+    },
+    "e2e": {
+      "canonical": "kun",
+      "canonicalPath": ".claude/patterns/cards/e2e.md",
+      "maturity": "blueprint",
+      "fileCount": 3,
+      "description": "Canonical Playwright E2E config — setup-project auth (storageState), desktop + mobile + Arabic-RTL projects, sharded CI with blob merge. Targets @playwright/test 1.60.",
+      "dependencies": ["@playwright/test"],
+      "cloneCommand": "/clone pattern:e2e",
+      "card": ".claude/patterns/cards/e2e.md",
+      "implementations": {
+        "kun": {
+          "path": ".claude/patterns/cards/e2e.md",
+          "pattern": "blueprint",
+          "fileCount": 3,
+          "maturity": "canonical",
+          "notes": "Authoritative blueprint: playwright.config.ts (6 projects) + e2e/auth.setup.ts (storageState) + sharded CI with blob merge. kun ships it; kun itself does not run E2E."
+        },
+        "hogwarts": {
+          "path": "n/a",
+          "pattern": "none",
+          "fileCount": 0,
+          "maturity": "none",
+          "notes": "To adopt — not yet verified"
+        },
+        "souq": {
+          "path": "n/a",
+          "pattern": "none",
+          "fileCount": 0,
+          "maturity": "none",
+          "notes": "To adopt — not yet verified"
+        },
+        "mkan": {
+          "path": "n/a",
+          "pattern": "none",
+          "fileCount": 0,
+          "maturity": "none",
+          "notes": "To adopt — not yet verified"
+        },
+        "shifa": {
+          "path": "n/a",
+          "pattern": "none",
+          "fileCount": 0,
+          "maturity": "none",
+          "notes": "To adopt — not yet verified"
+        }
+      }
     }
   }
 }

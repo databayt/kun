@@ -27,7 +27,7 @@ CHECK=0
 STACK_AGENTS="architecture atom authjs block build comment deploy git github icon internationalization middleware nextjs optimize orchestration pattern performance prisma react semantic shadcn sse structure tailwind template test typescript"
 
 # Stack skills bundled with kun-stack (cross-cutting build/dev know-how).
-STACK_SKILLS="atom block template build deploy dev fix quick saas test docs motion performance security"
+STACK_SKILLS="atom block template shadcn build deploy dev fix quick saas test docs motion performance security"
 
 say() { printf "  %s\n" "$1"; }
 
@@ -54,7 +54,14 @@ for a in $STACK_AGENTS; do
   [ -f "$USER_AGENTS/$a.md" ] && copy_one "$USER_AGENTS/$a.md" "$STACK/agents/$a.md" || say "skip (missing): agent $a"
 done
 for s in $STACK_SKILLS; do
-  [ -f "$USER_SKILLS/$s/SKILL.md" ] && copy_one "$USER_SKILLS/$s/SKILL.md" "$STACK/skills/$s/SKILL.md" || say "skip (missing): skill $s"
+  if [ -f "$USER_SKILLS/$s/SKILL.md" ]; then
+    # copy the whole skill dir (SKILL.md + any references/ assets)
+    while IFS= read -r f; do
+      copy_one "$f" "$STACK/skills/$s/${f#"$USER_SKILLS/$s/"}"
+    done < <(find "$USER_SKILLS/$s" -type f)
+  else
+    say "skip (missing): skill $s"
+  fi
 done
 
 # ── kun-company ────────────────────────────────────────────────────

@@ -280,20 +280,19 @@ Step "4" "Clone Repositories"
 
 if (-not (Test-Path $ReposDir)) { New-Item -ItemType Directory -Force -Path $ReposDir | Out-Null }
 
-function Clone-Repo($repo) {
-    $dir = "$ReposDir\$repo"
-    if (-not (Test-Path $dir)) {
-        Info "Cloning $repo -> $dir..."
-        git clone "git@github.com:databayt/$repo.git" $dir 2>$null
-        if (-not $?) {
-            git clone "https://github.com/databayt/$repo.git" $dir 2>$null
-            if ($?) { Pass "$repo (HTTPS)" } else { Fail "$repo clone failed" }
-        } else {
-            Pass "$repo"
-        }
-    } else {
-        Pass "$repo (exists)"
-    }
+# $cloneJobScript — runs in a background job. Clones silently and returns a status
+# object {Repo,Status} (ok|https|exists|fail). Never calls Pass/Fail/$ERRORS; the parent
+# reports after Wait-Job. Start-Job/Wait-Job is Windows PowerShell 5.1-safe (unlike
+# ForEach-Object -Parallel, which needs PS7+). The child inherits PATH, so git resolves.
+$cloneJobScript = {
+    param($repo, $reposDir)
+    $dir = Join-Path $reposDir $repo
+    if (Test-Path $dir) { return [pscustomobject]@{ Repo = $repo; Status = 'exists' } }
+    git clone "git@github.com:databayt/$repo.git" $dir 2>$null
+    if ($?) { return [pscustomobject]@{ Repo = $repo; Status = 'ok' } }
+    git clone "https://github.com/databayt/$repo.git" $dir 2>$null
+    if ($?) { return [pscustomobject]@{ Repo = $repo; Status = 'https' } }
+    return [pscustomobject]@{ Repo = $repo; Status = 'fail' }
 }
 function Symlink-Home($repo) {
     if ($ReposDir -eq $HOME_DIR) { return }
@@ -304,22 +303,45 @@ function Symlink-Home($repo) {
     }
 }
 
-# Every machine clones the full org — any machine can be any task.
-Clone-Repo "kun"; Symlink-Home "kun"
-Clone-Repo "hogwarts"; Symlink-Home "hogwarts"
-Clone-Repo "codebase"; Symlink-Home "codebase"
-
-if (-not $EssentialsOnly) {
-    Info "Cloning remaining databayt org repos..."
-    foreach ($repo in @("shadcn", "radix", "souq", "mkan", "shifa", "swift-app", "distributed-computer", "marketing")) {
-        Clone-Repo $repo; Symlink-Home $repo
+# Clone-Parallel — launch up to $cap clone jobs at once, drain, then report + symlink
+# sequentially in canonical order so output stays clean and $ERRORS counts in the parent.
+function Clone-Parallel([string[]]$repos) {
+    $cap = 4
+    $started = @()
+    Info "Cloning $($repos.Count) repos (up to $cap in parallel)..."
+    foreach ($repo in $repos) {
+        while (@(Get-Job -State Running).Count -ge $cap) { Start-Sleep -Milliseconds 200 }
+        $started += [pscustomobject]@{ Repo = $repo; Job = (Start-Job -ScriptBlock $cloneJobScript -ArgumentList $repo, $ReposDir) }
     }
+    $null = Wait-Job -Job ($started.Job)
+    $result = @{}
+    foreach ($s in $started) {
+        $out = Receive-Job -Job $s.Job
+        Remove-Job -Job $s.Job
+        if ($out) { $result[$s.Repo] = $out.Status } else { $result[$s.Repo] = 'fail' }
+    }
+    foreach ($repo in $repos) {
+        switch ($result[$repo]) {
+            'ok'     { Pass "$repo" }
+            'https'  { Pass "$repo (HTTPS)" }
+            'exists' { Pass "$repo (exists)" }
+            default  { Fail "$repo clone failed" }
+        }
+        Symlink-Home $repo
+    }
+}
+
+# Every machine clones the full org — any machine can be any task.
+if (-not $EssentialsOnly) {
+    Clone-Parallel @("kun", "hogwarts", "codebase", "shadcn", "radix", "souq", "mkan", "shifa", "swift-app", "distributed-computer", "marketing")
+} else {
+    Clone-Parallel @("kun", "hogwarts", "codebase")
 }
 
 # =============================================================================
 # PHASE 5: Claude Ecosystem
 # =============================================================================
-Step "5" "Claude — CLI + Desktop"
+Step "5" "Claude + Antigravity — CLIs + Desktop"
 
 # Claude Code CLI — native installer (auto-updates in background, per
 # code.claude.com/docs/en/setup). irm install.ps1 is idempotent.
@@ -337,21 +359,48 @@ if (-not $hasClaude) {
     Pass "Claude Code CLI ($((claude --version 2>$null | Select-Object -First 1))) — auto-updates in background"
 }
 
+# Antigravity CLI — secondary agent (`agy`): fallback when Claude Code is
+# unavailable + easy/cheap tasks (Gemini Flash). Idempotent installer.
+if (-not (Get-Command agy -EA SilentlyContinue)) {
+    Info "Installing Antigravity CLI (secondary agent)..."
+    irm https://antigravity.google/cli/install.ps1 | iex
+    $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
+    if (Get-Command agy -EA SilentlyContinue) {
+        Pass "Antigravity CLI installed ($((agy --version 2>$null | Select-Object -First 1)))"
+    } else {
+        Info "Antigravity CLI install incomplete — re-run later"
+    }
+} else {
+    Pass "Antigravity CLI ($((agy --version 2>$null | Select-Object -First 1)))"
+}
+
 # Claude Desktop via Winget-Smart (install/upgrade/skip)
 Winget-Smart "Anthropic.Claude"
 
-# `c` launcher functions in PowerShell $PROFILE
+# Launcher functions in PowerShell $PROFILE:
+#   c -> Claude Code (primary)   ·   a -> Antigravity (secondary)
 if (-not (Test-Path $PROFILE)) { New-Item -ItemType File -Force -Path $PROFILE | Out-Null }
 $profileText = Get-Content $PROFILE -Raw -EA SilentlyContinue
+# Drop the deprecated `cc` helper if an earlier run added it.
+if ($profileText -match 'function cc ') {
+    (Get-Content $PROFILE) | Where-Object { $_ -notmatch 'function cc ' } | Set-Content $PROFILE
+    $profileText = Get-Content $PROFILE -Raw -EA SilentlyContinue
+}
 if ($profileText -notmatch 'function c ') {
     Add-Content $PROFILE @'
 
-# Claude Code
-function c  { claude --dangerously-skip-permissions $args }
-function cc { claude $args }
+# Claude Code (primary)
+function c { claude --dangerously-skip-permissions $args }
 '@
-    Pass "Shell helpers (c, cc)"
 }
+if ($profileText -notmatch 'function a ') {
+    Add-Content $PROFILE @'
+
+# Antigravity (secondary)
+function a { agy --dangerously-skip-permissions $args }
+'@
+}
+Pass "Shell helpers (c, a)"
 
 # Wire Claude Desktop MCP config to the same servers Claude Code uses
 $desktopCfgDir = "$env:APPDATA\Claude"
@@ -474,6 +523,7 @@ if (Get-Command node -EA SilentlyContinue)   { Pass "node" }   else { Fail "node
 if (Get-Command pnpm -EA SilentlyContinue)   { Pass "pnpm" }   else { Fail "pnpm" }
 if (Get-Command gh -EA SilentlyContinue)     { Pass "gh" }     else { Fail "gh" }
 if (Get-Command claude -EA SilentlyContinue) { Pass "claude" } else { Fail "claude" }
+if (Get-Command agy -EA SilentlyContinue) { Pass "agy (secondary)" } else { Info "agy (secondary)" }
 
 # Auth
 if (Test-Path "$HOME_DIR\.ssh\id_ed25519")   { Pass "SSH key" }    else { Fail "SSH key" }
@@ -509,6 +559,7 @@ Write-Host ""
 Write-Host "Next steps:" -ForegroundColor Cyan
 Write-Host "  1. Restart PowerShell (or: . `$PROFILE)"
 Write-Host "  2. Run 'claude' -> log in with Anthropic account"
+Write-Host "     Launchers: 'c' = Claude Code (primary) - 'a' = Antigravity (secondary)"
 Write-Host "  3. Open Claude Desktop -> sign in"
 if (-not $GistId) {
     Write-Host "  4. Load secrets when you have the gist ID:"

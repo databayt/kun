@@ -2,6 +2,7 @@
   "title": "Documentation",
   "pages": [
     "index",
+    "onboarding",
     "---Engine---",
     "claude-md",
     "agents",
@@ -17,7 +18,6 @@
     "sprint",
     "share-economy",
     "delivery",
-    "onboarding",
     "dispatch",
     "context",
     "cowork",
@@ -39,6 +39,7 @@
     "prd",
     "epics",
     "claude-code",
+    "antigravity",
     "secrets",
     "slack",
     "stack",

@@ -127,7 +127,11 @@
     },
     "filesystem": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/Users/abdout"],
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/Users/abdout"
+      ],
       "description": "Direct file system access"
     },
     "git": {
@@ -160,6 +164,11 @@
     "keychain": {
       "command": "/Users/abdout/.claude/bin/keychain-mcp.sh",
       "description": "macOS Keychain - stored credentials"
+    },
+    "markitdown": {
+      "command": "uvx",
+      "args": ["markitdown-mcp"],
+      "description": "MarkItDown — convert PDF, Office, images, audio, HTML, URLs to Markdown"
     }
   }
 }

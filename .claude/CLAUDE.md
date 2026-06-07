@@ -14,6 +14,11 @@
 > Project rules auto-load from `.claude/rules/`:
 > `cowork-bridge.md`, `github-workflow.md`, `patterns.md`.
 
+## Agents — primary & secondary
+
+- **`c` — Claude Code (primary).** The default agent for everything: features, architecture, multi-step work, anything risky. (`c` = `claude --dangerously-skip-permissions`.)
+- **`a` — Antigravity (secondary).** Google's `agy` CLI, reached via `a` = `agy --dangerously-skip-permissions`. Use it as the **fallback** when Claude Code is unavailable, and as the **cheap lane** (Gemini Flash) for easy/one-file tasks. It shares this exact config — same MCP fleet (`~/.gemini/config/mcp_config.json`), skills (`~/.gemini/skills/`), and playbook (`~/.gemini/AGENTS.md` → this file). Defer anything beyond "easy" back to `c`. See `content/docs/antigravity.mdx`.
+
 ---
 
 ## Pipeline — idea → production
@@ -57,7 +62,7 @@ Surface verbs available in any session. See `.claude/commands/<name>.md` (projec
 **Pipeline stages**: `idea`, `spec`, `plan`, `tasks`, `schema`, `code`, `wire`, `feature`
 **Ops**: `incident`, `monitor`, `costs`, `pricing`, `proposal`, `credentials`
 **Org**: `captain`, `weekly`, `health`, `learn`, `analyze`, `profile`
-**Utility**: `clone`, `package`, `screenshot`, `issue`, `crawl-anthropic`
+**Utility**: `clone`, `convert`, `package`, `screenshot`, `issue`, `crawl-anthropic`
 
 ---
 
@@ -76,10 +81,11 @@ Claude routes these to the right agent + MCP without a dedicated command.
 - Compare: `mirror`, `diff`
   **Build**: `error`, `lint`, `format`, `type-check`, `deps`, `outdated`
   **React perf**: `parallelize`, `bundle`, `lazy`, `suspense`, `memo`, `streaming`, `dedup`
-  **Services**: `github`, `figma`, `linear`, `slack`, `stripe`, `vercel`, `sentry`, `neon`, `analytics`
+  **Services**: `github`, `figma`, `linear`, `slack`, `stripe`, `vercel`, `sentry`, `neon`, `analytics`, `markitdown` (aliases `convert`/`markdown` → file or URL to Markdown)
   **Cross-repo**: `from codebase`, `from shadcn`, `like hogwarts`, `like souq`, `like mkan`, `like shifa`
   **Operations**: `weekly`, `monitor`, `incident`, `credentials`
   **Intelligence**: `learn`, `analyze`, `conventions`, `health`, `patterns`, `drift`
+  **Decisions/CEO** (passive — no slash): `canon` + any leadership/strategy decision (`hiring`, `pricing`, `positioning`, `strategy`, `prioritize`, `fundraise`, `runway`, `customer development`, "should we build…", "what do I do about…") → consult `docs/CANON.md`, surface the book + one operating move grounded in principle `#N`
 
 ---
 
@@ -91,9 +97,11 @@ When you see a keyword:
 2. **Tool verb** → invoke the command/skill
 3. **Vocabulary keyword** → activate the right agent + MCP
 4. **`from <repo>` / `like <product>`** → reference patterns from the named source
+5. **Business/leadership/strategy decision** (natural conversation, _no slash_) → consult `docs/CANON.md`; surface the relevant book + one operating move, grounded in principle `#N`. Don't wait for `/canon`. Keep it brief — one book, one move — and skip trivial or purely-technical choices.
 
 Bug fixes → `/report`. New features → `/feature <name>`. Components → `/atom`, `/block`, `/template`.
 Pre-demo quality pass → `/handover <block>`. **Send to client (one spell) → `/release <block>`.**
+Facing a CEO/business/strategy decision → surface the relevant **canon** move passively (no slash; see `docs/CANON.md`).
 
 ## Lookups
 
@@ -101,7 +109,7 @@ Pre-demo quality pass → `/handover <block>`. **Send to client (one spell) → 
 - **Agent detail**: `.claude/agents/<name>.md` (project) or `~/.claude/agents/<name>.md` (user)
 - **Skill spec**: `.claude/skills/<name>/SKILL.md` or `~/.claude/skills/<name>/SKILL.md`
 - **Pattern card**: `.claude/patterns/cards/<keyword>.md`
-- **MCP servers**: `.claude/mcp.json` (project, 25 servers) + `~/.claude/mcp.json` (user, 19 servers)
+- **MCP servers**: `.claude/mcp.json` (project, 26 servers) + `~/.claude/mcp.json` (user, 20 servers)
 
 ---
 

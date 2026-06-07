@@ -25,11 +25,6 @@
       },
       "description": "Content management, editorial calendar, knowledge base"
     },
-    "browser": {
-      "command": "npx",
-      "args": ["-y", "@playwright/mcp@latest", "--headless"],
-      "description": "Headless browser for research and reference screenshots"
-    },
     "figma": {
       "type": "http",
       "url": "http://127.0.0.1:3845/mcp",
@@ -52,6 +47,11 @@
         "REF_API_KEY": "${REF_API_KEY}"
       },
       "description": "Search curated technical documentation"
+    },
+    "markitdown": {
+      "command": "uvx",
+      "args": ["markitdown-mcp"],
+      "description": "MarkItDown — convert documents and URLs to Markdown for the content pipeline"
     }
   }
 }

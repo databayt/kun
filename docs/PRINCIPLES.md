@@ -1,6 +1,8 @@
 # Founder Operating Principles
 
 > A growing list. Numbered, dated, sourced. The captain reads this at session start. Abdout edits when a lesson is learned.
+>
+> **The 10 books behind these 24 principles** — and the portable moves they imply — live in [`CANON.md`](./CANON.md) (the operative layer). The fuller 30-book bibliography is [`CEO-OS.md` Part V](./CEO-OS.md#part-v--the-bibliography-heavy-with-passages).
 
 This is Databayt's operating manual — what we believe about how to build a company, refined from the best founders and operators, plus our own lessons. Each principle has a source. Each one is actionable.
 
@@ -12,19 +14,19 @@ When a principle conflicts with another, the lower-numbered one wins (priority o
 
 ### 1. People, products, profits — in that order
 
-> *"Take care of the people, the products, and the profits — in that order."* — Ben Horowitz, *The Hard Thing About Hard Things*
+> _"Take care of the people, the products, and the profits — in that order."_ — Ben Horowitz, _The Hard Thing About Hard Things_
 
 If a teammate is unwell, the product gets delayed. If the product is broken, the revenue gets delayed. Reverse this order and you lose all three.
 
 ### 2. Output = Activity × Leverage
 
-> *"The output of a manager is the output of the organizational units under his or her supervision or influence."* — Andy Grove, *High Output Management*
+> _"The output of a manager is the output of the organizational units under his or her supervision or influence."_ — Andy Grove, _High Output Management_
 
 The captain's job is leverage, not activity. The founder's job is leverage, not activity. Busy ≠ productive. Maximize leverage every week.
 
 ### 3. Quality over speed
 
-> *"Don't care about starting slow, care about establishing real-world solutions."* — Captain agent, Databayt founding principle
+> _"Don't care about starting slow, care about establishing real-world solutions."_ — Captain agent, Databayt founding principle
 
 We have 10 months of runway and we are not in a rush. Ship when the work is honest. Cut scope, not standards.
 
@@ -40,7 +42,7 @@ We exist to make excellent school operations accessible to every Arabic-speaking
 
 ### 5. Type-1 decisions slow, Type-2 decisions fast
 
-> *"Some decisions are consequential and irreversible — one-way doors — and these decisions must be made methodically, carefully, slowly. Other decisions are changeable, reversible — they're two-way doors."* — Jeff Bezos, 1997 shareholder letter
+> _"Some decisions are consequential and irreversible — one-way doors — and these decisions must be made methodically, carefully, slowly. Other decisions are changeable, reversible — they're two-way doors."_ — Jeff Bezos, 1997 shareholder letter
 
 Hires, license changes, product launches, public commitments → Type 1. Write the decision down in `decisions/` before acting. Premortem first.
 
@@ -48,19 +50,19 @@ Sprint priorities, feature scope, daily ops → Type 2. Decide fast. Reverse if 
 
 ### 6. Default alive or default dead?
 
-> *"At your current rate of growth, can you make it to profitability before you run out of money?"* — Paul Graham, *Default Alive or Default Dead?*
+> _"At your current rate of growth, can you make it to profitability before you run out of money?"_ — Paul Graham, _Default Alive or Default Dead?_
 
 Every weekly review answers this. Today: default dead. The number doesn't dictate panic, but it dictates focus — only customer-development and pilot work move the runway question.
 
 ### 7. Invert, always invert
 
-> *"It is remarkable how much long-term advantage people like us have gotten by trying to be consistently not stupid."* — Charlie Munger
+> _"It is remarkable how much long-term advantage people like us have gotten by trying to be consistently not stupid."_ — Charlie Munger
 
 For every Type-1 decision, ask: "How would this fail?" before "How would this succeed?" Then write the premortem.
 
 ### 8. Decisions ≠ outcomes
 
-> *"Good decisions can have bad outcomes. Bad decisions can have good outcomes."* — Annie Duke, *Thinking in Bets*
+> _"Good decisions can have bad outcomes. Bad decisions can have good outcomes."_ — Annie Duke, _Thinking in Bets_
 
 Log the decision, log the expected outcome, log the actual outcome 30 days later. Grade the decision (good/bad), not the outcome. This is the only way to learn from luck.
 
@@ -70,25 +72,25 @@ Log the decision, log the expected outcome, log the actual outcome 30 days later
 
 ### 9. Empathy is the most underrated leadership skill
 
-> *"Empathy is the most important and underrated leadership skill."* — Andrew Bosworth
+> _"Empathy is the most important and underrated leadership skill."_ — Andrew Bosworth
 
 Customer empathy → JTBD. Teammate empathy → accessibility (Samia screen-reader, Sedon part-time Saudi, Ali overload). Founder empathy → Abdout's time and energy are strategic resources.
 
 ### 10. Hire for talent density; ask the keeper test
 
-> *"Which of my people, if they told me they were leaving for a similar job at a competitor, would I fight hard to keep?"* — Reed Hastings, *No Rules Rules*
+> _"Which of my people, if they told me they were leaving for a similar job at a competitor, would I fight hard to keep?"_ — Reed Hastings, _No Rules Rules_
 
 Every six months, run the keeper test on each teammate (silently, in a journal entry). If "no", the question is what to do — coach, reassign, or part ways. Talent density compounds.
 
 ### 11. 1:1s are the principal medium of management
 
-> *"The one-on-one is the meeting between a manager and his subordinate, and is the principal way their business relationship is maintained."* — Andy Grove
+> _"The one-on-one is the meeting between a manager and his subordinate, and is the principal way their business relationship is maintained."_ — Andy Grove
 
 Weekly 1:1 with each teammate. Running notes in `1on1/<person>.md`. The agenda is theirs, not yours.
 
 ### 12. Feedforward, not feedback
 
-> *"Try to remove judgmental language ('no/but/however') from your vocabulary."* — Marshall Goldsmith, *What Got You Here Won't Get You There*
+> _"Try to remove judgmental language ('no/but/however') from your vocabulary."_ — Marshall Goldsmith, _What Got You Here Won't Get You There_
 
 Ask people for future suggestions, not past critique. "How would you improve this next time?" beats "What did you do wrong?"
 
@@ -98,25 +100,25 @@ Ask people for future suggestions, not past critique. "How would you improve thi
 
 ### 13. Customers hire products to do a job
 
-> *"Customers don't buy products; they hire them to do a job."* — Clay Christensen
+> _"Customers don't buy products; they hire them to do a job."_ — Clay Christensen
 
 Hogwarts isn't bought; it's hired to make a school principal's job easier. Know the job. The job is not the feature list.
 
 ### 14. Make a few users love you, not a lot of users like you
 
-> *"It's much better to make a few users really love you than a lot of users sort of like you."* — Sam Altman, *Startup Playbook*
+> _"It's much better to make a few users really love you than a lot of users sort of like you."_ — Sam Altman, _Startup Playbook_
 
 The MENA-10 free pilot cohort is the operating expression of this principle in 2026. Ahmed Baha is the founding partner (slot 1 of 10), and nine more pilot schools fill the cohort — each receiving founder-level attention, weekly feedback calls, and co-design status. Ten schools we love is a different and stronger position than one school we love. See [`hogwarts/content/docs-en/pilot.mdx`](https://github.com/databayt/hogwarts/blob/main/content/docs-en/pilot.mdx) for the cohort plan.
 
 ### 15. Do things that don't scale
 
-> *"Do things that don't scale."* — Paul Graham
+> _"Do things that don't scale."_ — Paul Graham
 
 Hand-onboard the first 10 schools (the MENA-10 cohort). Personally answer the first 100 support tickets. Manually create the first 10 invoices. The unscalable work IS the strategy. See [`hogwarts/content/docs-en/pilot.mdx`](https://github.com/databayt/hogwarts/blob/main/content/docs-en/pilot.mdx) for the operational play.
 
 ### 16. Pick a beachhead and topple it
 
-> *"Pick a bowling pin — the first segment to target — and topple it before the next."* — Geoffrey Moore, *Crossing the Chasm*
+> _"Pick a bowling pin — the first segment to target — and topple it before the next."_ — Geoffrey Moore, _Crossing the Chasm_
 
 Hogwarts → King Fahad Schools → similar Sudan private schools → MENA private schools. Don't skip pins.
 
@@ -126,25 +128,25 @@ Hogwarts → King Fahad Schools → similar Sudan private schools → MENA priva
 
 ### 17. The score takes care of itself
 
-> *"The score takes care of itself when you take care of the effort that precedes the score."* — Bill Walsh, *The Score Takes Care of Itself*
+> _"The score takes care of itself when you take care of the effort that precedes the score."_ — Bill Walsh, _The Score Takes Care of Itself_
 
 Don't manage to the metric. Manage to the Standard of Performance. Quality, discipline, urgency, learning rate — these produce the metric.
 
 ### 18. Memos > slides. Written > spoken.
 
-> *"Memos are powerful. They force the writer to think much more deeply than slides do."* — Jeff Bezos
+> _"Memos are powerful. They force the writer to think much more deeply than slides do."_ — Jeff Bezos
 
 If a decision matters, write the memo first. If it doesn't matter enough to write, it doesn't matter enough to act on.
 
 ### 19. Manage your psychology
 
-> *"By far the most difficult skill I learned as CEO was the ability to manage my own psychology."* — Ben Horowitz
+> _"By far the most difficult skill I learned as CEO was the ability to manage my own psychology."_ — Ben Horowitz
 
 Mood compounds. A panicked founder makes panicked decisions. Sleep, exercise, eat, walk — these are leadership tools, not personal preferences.
 
 ### 20. Play long-term games with long-term people
 
-> *"Play long-term games with long-term people."* — Naval Ravikant
+> _"Play long-term games with long-term people."_ — Naval Ravikant
 
 Contributors who push monthly for a year > viral tweet. Partners who pay for two years > 10× faster signup with no retention. Compounding > velocity.
 
@@ -164,13 +166,13 @@ Doctrine, references (Akbar / NMBD / Khedr / Islamic primitives), and the refere
 
 ### 23. Architecture before vibe
 
-> *"The future of software is not just written. It's designed."* — Craig Adam, from `/Users/abdout/kun/CLAUDE.md`
+> _"The future of software is not just written. It's designed."_ — Craig Adam, from `/Users/abdout/kun/CLAUDE.md`
 
 Configure intent. Don't vibe-code. The captain agent, the rules, the patterns ARE the engine.
 
 ### 24. The captain has conscience, not panic
 
-> *"Think like a CEO with conscience. Long-term, not short-term. Quality, not speed. Community, not just customers."* — Captain agent
+> _"Think like a CEO with conscience. Long-term, not short-term. Quality, not speed. Community, not just customers."_ — Captain agent
 
 The captain is calm. Urgency without panic. Action without thrashing. When the team is panicked, the captain is the slow one in the room.
 
@@ -179,11 +181,13 @@ The captain is calm. Urgency without panic. Action without thrashing. When the t
 ## How this document grows
 
 A new principle is added when:
+
 - A lesson is learned in a journal entry that generalizes beyond the one situation.
 - A founder essay or operating manual sharpens a belief we already hold.
 - A teammate proposes one and Abdout approves.
 
 A principle is removed when:
+
 - It is wrong in practice (with a written decision recording the removal).
 - It is subsumed by a clearer formulation.
 

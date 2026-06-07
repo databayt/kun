@@ -26,7 +26,7 @@ Kun is a **configuration engine** — not a server, not a platform. It sits as t
 │                                                                  │
 │  Layer 3: KUN CONFIGURATION ENGINE (core value)                 │
 │  ┌────────────────────────────────────────────────────────────┐ │
-│  │ CLAUDE.md   │ 18 Agents  │ 29 Commands │ 25 MCP Servers   │ │
+│  │ CLAUDE.md   │ 18 Agents  │ 29 Commands │ 26 MCP Servers   │ │
 │  │ 3 Rules     │ 5 Hooks    │ 10 Cards   │ 100+ Keywords    │ │
 │  └────────────────────────────────────────────────────────────┘ │
 │                                                                  │
@@ -51,21 +51,21 @@ The models and API that power everything. Kun selects optimally within this laye
 
 ### Model Selection Strategy
 
-| Model | Use Case | Kun Usage |
-|-------|----------|-----------|
-| **Opus 4.8** | Architecture, complex features, code review | Default for all agents and skills |
-| **Sonnet 4.6** | Fast iteration, routine changes | Quick fixes, exploration |
-| **Haiku 4.5** | Search, lookups, simple queries | Explore subagent type |
+| Model          | Use Case                                    | Kun Usage                         |
+| -------------- | ------------------------------------------- | --------------------------------- |
+| **Opus 4.8**   | Architecture, complex features, code review | Default for all agents and skills |
+| **Sonnet 4.6** | Fast iteration, routine changes             | Quick fixes, exploration          |
+| **Haiku 4.5**  | Search, lookups, simple queries             | Explore subagent type             |
 
 ### Cost Context
 
 Databayt runs on a single Max 20x plan ($200/month). Model selection matters for staying within usage limits.
 
-| Technique | Savings | Application |
-|-----------|---------|-------------|
-| Prompt Caching | 90% | CLAUDE.md cached across sessions |
-| Batch API | 50% | CI/CD review pipelines (Phase 2) |
-| Haiku for exploration | 80% vs Opus | Search, lookups |
+| Technique             | Savings     | Application                      |
+| --------------------- | ----------- | -------------------------------- |
+| Prompt Caching        | 90%         | CLAUDE.md cached across sessions |
+| Batch API             | 50%         | CI/CD review pipelines (Phase 2) |
+| Haiku for exploration | 80% vs Opus | Search, lookups                  |
 
 ---
 
@@ -75,12 +75,12 @@ Every surface Anthropic provides. Kun's configuration loads automatically regard
 
 ### Team Roles
 
-| Member | Role |
-|--------|------|
-| Abdout | Builder |
-| Ali | QA Engineer + Sales |
-| Samia | R&D & Kun Caretaker |
-| Sedon | Executor |
+| Member | Role                |
+| ------ | ------------------- |
+| Abdout | Builder             |
+| Ali    | QA Engineer + Sales |
+| Samia  | R&D & Kun Caretaker |
+| Sedon  | Executor            |
 
 ### Surface Capabilities
 
@@ -108,13 +108,13 @@ Every surface Anthropic provides. Kun's configuration loads automatically regard
 
 ### Cross-Device Handoff
 
-| Feature | Description | Status |
-|---------|-------------|--------|
-| **Remote Control** | Continue session from another device | GA |
-| **Dispatch** | Send task from phone, opens Desktop session | GA |
-| **/teleport** | Pull web/iOS session into terminal | GA |
-| **/desktop** | Hand off terminal to Desktop for visual review | GA |
-| **Agent Teams** | Lead + teammate parallel coordination | Experimental |
+| Feature            | Description                                    | Status       |
+| ------------------ | ---------------------------------------------- | ------------ |
+| **Remote Control** | Continue session from another device           | GA           |
+| **Dispatch**       | Send task from phone, opens Desktop session    | GA           |
+| **/teleport**      | Pull web/iOS session into terminal             | GA           |
+| **/desktop**       | Hand off terminal to Desktop for visual review | GA           |
+| **Agent Teams**    | Lead + teammate parallel coordination          | Experimental |
 
 ---
 
@@ -183,13 +183,13 @@ Priority (High → Low):
 
 17 skills triggered by keywords or slash commands:
 
-| Category | Skills | Trigger Keywords |
-|----------|--------|-----------------|
-| **Workflow** | /dev, /build, /quick, /deploy | dev, build, push, ship |
-| **Creation** | /atom, /template, /block, /saas | atom, template, block, saas |
-| **Quality** | /test, /security, /performance, /fix | test, security, performance, fix |
-| **Documentation** | /docs, /codebase, /repos | docs, codebase, repos |
-| **Utilities** | /screenshot, /motion | screenshot, motion |
+| Category          | Skills                               | Trigger Keywords                 |
+| ----------------- | ------------------------------------ | -------------------------------- |
+| **Workflow**      | /dev, /build, /quick, /deploy        | dev, build, push, ship           |
+| **Creation**      | /atom, /template, /block, /saas      | atom, template, block, saas      |
+| **Quality**       | /test, /security, /performance, /fix | test, security, performance, fix |
+| **Documentation** | /docs, /codebase, /repos             | docs, codebase, repos            |
+| **Utilities**     | /screenshot, /motion                 | screenshot, motion               |
 
 ### 4.4 MCP Ecosystem
 
@@ -223,37 +223,37 @@ Priority (High → Low):
 
 **8 Rules** — Path-scoped, auto-activate on file patterns:
 
-| Rule | Activates On | Enforces |
-|------|-------------|----------|
-| auth | `**/auth/**`, `**/middleware.*` | NextAuth v5, session scoping |
-| i18n | `**/*-ar.json`, `**/dictionaries/**` | Arabic RTL, on-demand translation |
-| prisma | `**/*.prisma` | schoolId inclusion, $extends |
-| tailwind | `**/*.css`, `**/styles/**` | CSS-first v4, OKLCH, RTL logical |
-| testing | `**/tests/**`, `**/*.spec.*` | Playwright/Vitest conventions |
-| deployment | `**/vercel.json` | pnpm, tsc before builds |
-| multi-repo | (global) | Codebase paths, fork workflows |
-| org-refs | (global) | Repo priority: codebase → shadcn → radix |
+| Rule       | Activates On                         | Enforces                                 |
+| ---------- | ------------------------------------ | ---------------------------------------- |
+| auth       | `**/auth/**`, `**/middleware.*`      | NextAuth v5, session scoping             |
+| i18n       | `**/*-ar.json`, `**/dictionaries/**` | Arabic RTL, on-demand translation        |
+| prisma     | `**/*.prisma`                        | schoolId inclusion, $extends             |
+| tailwind   | `**/*.css`, `**/styles/**`           | CSS-first v4, OKLCH, RTL logical         |
+| testing    | `**/tests/**`, `**/*.spec.*`         | Playwright/Vitest conventions            |
+| deployment | `**/vercel.json`                     | pnpm, tsc before builds                  |
+| multi-repo | (global)                             | Codebase paths, fork workflows           |
+| org-refs   | (global)                             | Repo priority: codebase → shadcn → radix |
 
 **5 Hooks** — Guaranteed execution at lifecycle events:
 
-| Hook | Event | Action |
-|------|-------|--------|
-| SessionStart | Session begins | Print model info + timestamp |
-| PreToolUse | Before `pnpm dev` | Kill port 3000 |
-| PostToolUse | After `pnpm dev` | Open Chrome |
-| PostToolUse | After Write/Edit | Auto-run Prettier |
-| Stop | Agent finishes | Log session end |
+| Hook         | Event             | Action                       |
+| ------------ | ----------------- | ---------------------------- |
+| SessionStart | Session begins    | Print model info + timestamp |
+| PreToolUse   | Before `pnpm dev` | Kill port 3000               |
+| PostToolUse  | After `pnpm dev`  | Open Chrome                  |
+| PostToolUse  | After Write/Edit  | Auto-run Prettier            |
+| Stop         | Agent finishes    | Log session end              |
 
 **6 Memory Files** — Cross-session learning:
 
-| Memory | Contents |
-|--------|----------|
-| preferences.json | Port 3000, single .env, pnpm-only |
-| repositories.json | 14 databayt repos with paths, stacks |
-| atom.json | 59 atoms across 6 categories |
-| template.json | 31 templates across 5 categories |
-| block.json | 4 blocks (DataTable, Auth, Invoice, Report) |
-| report.json | T&C electrical report templates |
+| Memory            | Contents                                    |
+| ----------------- | ------------------------------------------- |
+| preferences.json  | Port 3000, single .env, pnpm-only           |
+| repositories.json | 14 databayt repos with paths, stacks        |
+| atom.json         | 59 atoms across 6 categories                |
+| template.json     | 31 templates across 5 categories            |
+| block.json        | 4 blocks (DataTable, Auth, Invoice, Report) |
+| report.json       | T&C electrical report templates             |
 
 ---
 
@@ -315,11 +315,11 @@ Kun coordinates 14 repositories under github.com/databayt:
 
 ### 5.3 Scheduled Tasks
 
-| Type | Runs On | Use Case |
-|------|---------|----------|
-| **Cloud** | Anthropic infrastructure | Daily health checks, dependency updates |
-| **Desktop** | Local machine (app open) | Recurring builds, test runs |
-| **In-session** | Active session (/loop) | Poll deploy status, watch CI |
+| Type           | Runs On                  | Use Case                                |
+| -------------- | ------------------------ | --------------------------------------- |
+| **Cloud**      | Anthropic infrastructure | Daily health checks, dependency updates |
+| **Desktop**    | Local machine (app open) | Recurring builds, test runs             |
+| **In-session** | Active session (/loop)   | Poll deploy status, watch CI            |
 
 ### 5.4 CI/CD Integration (Phase 2)
 
@@ -337,28 +337,29 @@ Pull Request ──▶ GitHub Actions ──▶ Agent SDK Review
 
 ### 6.1 Team Workflows
 
-| Member | Role | Primary Workflow |
-|--------|------|-----------------|
-| **Abdout** | Builder | code → build → deploy |
-| **Ali** | QA + Sales | testing, issue reports, outreach (sales@databayt.org) |
-| **Samia** | R&D | Claude/Anthropic research, sharing economy, Kun care |
-| **Sedon** | Executor | clear task maps, Saudi operations |
-| **Kun** | Engine | coordination, follow-up, optimization |
+| Member     | Role       | Primary Workflow                                      |
+| ---------- | ---------- | ----------------------------------------------------- |
+| **Abdout** | Builder    | code → build → deploy                                 |
+| **Ali**    | QA + Sales | testing, issue reports, outreach (sales@databayt.org) |
+| **Samia**  | R&D        | Claude/Anthropic research, sharing economy, Kun care  |
+| **Sedon**  | Executor   | clear task maps, Saudi operations                     |
+| **Kun**    | Engine     | coordination, follow-up, optimization                 |
 
 ### 6.2 Business Operations via Cowork
 
-| Function | How |
-|----------|-----|
-| Project management | Cowork + Linear MCP |
-| Documentation | Artifacts + /docs skill |
+| Function             | How                     |
+| -------------------- | ----------------------- |
+| Project management   | Cowork + Linear MCP     |
+| Documentation        | Artifacts + /docs skill |
 | Client communication | Cowork + email drafting |
-| Financial tracking | Stripe MCP + Cowork |
-| Content creation | Cowork (Arabic/English) |
-| Research | Web search + synthesis |
+| Financial tracking   | Stripe MCP + Cowork     |
+| Content creation     | Cowork (Arabic/English) |
+| Research             | Web search + synthesis  |
 
 ### 6.3 Accessibility
 
 All products and workflows must be accessible:
+
 - VoiceOver compatibility on iOS/macOS
 - NVDA/JAWS on Windows
 - a11y MCP for automated accessibility audits
@@ -370,21 +371,21 @@ All products and workflows must be accessible:
 
 ### Anthropic-Native Security
 
-| Layer | Mechanism |
-|-------|-----------|
-| **Data** | SOC 2 Type II, no training on customer data |
-| **Network** | Encrypted in transit (TLS 1.3) |
-| **Compliance** | GDPR compliant |
+| Layer          | Mechanism                                   |
+| -------------- | ------------------------------------------- |
+| **Data**       | SOC 2 Type II, no training on customer data |
+| **Network**    | Encrypted in transit (TLS 1.3)              |
+| **Compliance** | GDPR compliant                              |
 
 ### Kun-Level Security
 
-| Mechanism | Implementation |
-|-----------|---------------|
-| **Deny rules** | rm -rf, prisma reset, DROP TABLE, TRUNCATE blocked |
-| **Hook guards** | PreToolUse hooks validate before execution |
-| **Secrets** | macOS Keychain MCP, never in git |
-| **Permissions** | 38 explicit allow rules, everything else prompts |
-| **/security skill** | OWASP Top 10 audit on demand |
+| Mechanism           | Implementation                                     |
+| ------------------- | -------------------------------------------------- |
+| **Deny rules**      | rm -rf, prisma reset, DROP TABLE, TRUNCATE blocked |
+| **Hook guards**     | PreToolUse hooks validate before execution         |
+| **Secrets**         | macOS Keychain MCP, never in git                   |
+| **Permissions**     | 38 explicit allow rules, everything else prompts   |
+| **/security skill** | OWASP Top 10 audit on demand                       |
 
 ---
 

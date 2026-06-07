@@ -8,7 +8,7 @@ handoff: [atom, template, block, tailwind]
 
 # shadcn/ui Expert
 
-**Docs**: https://ui.shadcn.com | **Registry**: 82+ sources | **MCP**: shadcn@latest
+**Docs**: https://ui.shadcn.com | **Registry**: 82+ sources | **MCP**: shadcn@latest | **Skill**: `~/.claude/skills/shadcn/` (say `shadcn`)
 
 ## Core Responsibility
 
@@ -17,20 +17,29 @@ Expert in shadcn/ui component library including Radix UI primitives, copy-paste 
 ## Key Concepts
 
 ### Philosophy
+
 - **Copy-paste architecture**: Components are copied to your codebase, not installed as dependencies
 - **Full ownership**: Modify components freely
 - **Built on Radix**: Accessible, unstyled primitives
 - **Tailwind CSS**: Utility-first styling
 
 ### Registry System
+
 - 82+ component registries available
 - MCP server for AI-powered installation
 - Custom registries supported
 - JSON-based component definitions
 
+### Newer surfaces (2025+)
+
+- **Skills** — `pnpm dlx skills add shadcn/ui` installs a per-repo, project-aware skill into `.claude/skills/` (activates on `components.json`, runs `shadcn info --json`). The user-level `shadcn` skill (`~/.claude/skills/shadcn/`) is the always-on umbrella.
+- **Directory** — community registries built into the CLI, addressed by `@namespace`; configure in `components.json` → `registries`.
+- **Expanded CLI** — `view`, `search`/`list`, `build`, `info`, `docs`, `migrate` (`rtl`|`radix`|`icons`), `eject`, `mcp init --client claude`.
+
 ## Patterns (Full Examples)
 
 ### 1. Component Installation
+
 ```bash
 # Using CLI
 npx shadcn@latest add button
@@ -44,6 +53,7 @@ npx shadcn@latest add button card dialog drawer sheet
 ```
 
 ### 2. Registry Configuration
+
 ```json
 // components.json
 {
@@ -70,22 +80,27 @@ npx shadcn@latest add button card dialog drawer sheet
 ```
 
 ### 3. Button Component
+
 ```tsx
 // src/components/ui/button.tsx
-import * as React from "react"
-import { Slot } from "@radix-ui/react-slot"
-import { cva, type VariantProps } from "class-variance-authority"
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import { Slot } from "@radix-ui/react-slot";
+import { cva, type VariantProps } from "class-variance-authority";
+import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground shadow hover:bg-primary/90",
-        destructive: "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
-        outline: "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
-        secondary: "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
+        default:
+          "bg-primary text-primary-foreground shadow hover:bg-primary/90",
+        destructive:
+          "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
+        outline:
+          "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
+        secondary:
+          "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
       },
@@ -100,33 +115,35 @@ const buttonVariants = cva(
       variant: "default",
       size: "default",
     },
-  }
-)
+  },
+);
 
 export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+  extends
+    React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
-  asChild?: boolean
+  asChild?: boolean;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {
-    const Comp = asChild ? Slot : "button"
+    const Comp = asChild ? Slot : "button";
     return (
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
         {...props}
       />
-    )
-  }
-)
-Button.displayName = "Button"
+    );
+  },
+);
+Button.displayName = "Button";
 
-export { Button, buttonVariants }
+export { Button, buttonVariants };
 ```
 
 ### 4. Dialog Component
+
 ```tsx
 // Usage pattern
 import {
@@ -137,20 +154,16 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 
 export function ConfirmDialog({ onConfirm, children }) {
   return (
     <Dialog>
-      <DialogTrigger asChild>
-        {children}
-      </DialogTrigger>
+      <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Are you sure?</DialogTitle>
-          <DialogDescription>
-            This action cannot be undone.
-          </DialogDescription>
+          <DialogDescription>This action cannot be undone.</DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <Button variant="outline">Cancel</Button>
@@ -160,15 +173,16 @@ export function ConfirmDialog({ onConfirm, children }) {
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
 ```
 
 ### 5. Form with React Hook Form
+
 ```tsx
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import {
   Form,
   FormControl,
@@ -177,14 +191,14 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 const formSchema = z.object({
   username: z.string().min(2).max(50),
   email: z.string().email(),
-})
+});
 
 export function ProfileForm() {
   const form = useForm<z.infer<typeof formSchema>>({
@@ -193,10 +207,10 @@ export function ProfileForm() {
       username: "",
       email: "",
     },
-  })
+  });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values)
+    console.log(values);
   }
 
   return (
@@ -234,11 +248,12 @@ export function ProfileForm() {
         <Button type="submit">Submit</Button>
       </form>
     </Form>
-  )
+  );
 }
 ```
 
 ### 6. Data Table
+
 ```tsx
 import {
   Table,
@@ -248,7 +263,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/table";
 
 export function DataTable({ data, columns }) {
   return (
@@ -271,11 +286,12 @@ export function DataTable({ data, columns }) {
         ))}
       </TableBody>
     </Table>
-  )
+  );
 }
 ```
 
 ### 7. Theme Configuration
+
 ```css
 /* globals.css */
 @layer base {
@@ -327,37 +343,39 @@ export function DataTable({ data, columns }) {
 ```
 
 ### 8. MCP Integration
+
 ```typescript
 // Search for components
 mcp__shadcn__search_items_in_registries({
   registries: ["@shadcn"],
-  query: "button"
-})
+  query: "button",
+});
 
 // View component details
 mcp__shadcn__view_items_in_registries({
-  items: ["@shadcn/button", "@shadcn/card"]
-})
+  items: ["@shadcn/button", "@shadcn/card"],
+});
 
 // Get examples
 mcp__shadcn__get_item_examples_from_registries({
   registries: ["@shadcn"],
-  query: "button-demo"
-})
+  query: "button-demo",
+});
 
 // Get install command
 mcp__shadcn__get_add_command_for_items({
-  items: ["@shadcn/button", "@shadcn/card", "@shadcn/dialog"]
-})
+  items: ["@shadcn/button", "@shadcn/card", "@shadcn/dialog"],
+});
 
 // List all available items
 mcp__shadcn__list_items_in_registries({
   registries: ["@shadcn"],
-  limit: 50
-})
+  limit: 50,
+});
 ```
 
 ### 9. Custom Registry
+
 ```json
 // components.json - Custom registries
 {
@@ -374,14 +392,15 @@ mcp__shadcn__list_items_in_registries({
 ```
 
 ### 10. Component Extension
+
 ```tsx
 // Extend existing component
-import { Button, ButtonProps } from "@/components/ui/button"
-import { Loader2 } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { Button, ButtonProps } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface LoadingButtonProps extends ButtonProps {
-  loading?: boolean
+  loading?: boolean;
 }
 
 export function LoadingButton({
@@ -400,27 +419,28 @@ export function LoadingButton({
       {loading && <Loader2 className="h-4 w-4 animate-spin" />}
       {children}
     </Button>
-  )
+  );
 }
 ```
 
 ### 11. Component Composition
+
 ```tsx
 // Compose multiple components
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 interface UserCardProps {
   user: {
-    name: string
-    email: string
-    image?: string
-    role: string
-    status: "active" | "inactive"
-  }
-  onEdit?: () => void
+    name: string;
+    email: string;
+    image?: string;
+    role: string;
+    status: "active" | "inactive";
+  };
+  onEdit?: () => void;
 }
 
 export function UserCard({ user, onEdit }: UserCardProps) {
@@ -448,17 +468,18 @@ export function UserCard({ user, onEdit }: UserCardProps) {
         )}
       </CardContent>
     </Card>
-  )
+  );
 }
 ```
 
 ### 12. Radix UI Primitives
+
 ```tsx
 // Direct Radix usage
-import * as Dialog from "@radix-ui/react-dialog"
-import * as DropdownMenu from "@radix-ui/react-dropdown-menu"
-import * as Tooltip from "@radix-ui/react-tooltip"
-import * as Select from "@radix-ui/react-select"
+import * as Dialog from "@radix-ui/react-dialog";
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import * as Tooltip from "@radix-ui/react-tooltip";
+import * as Select from "@radix-ui/react-select";
 
 // Primitive structure
 <Dialog.Root>
@@ -471,24 +492,25 @@ import * as Select from "@radix-ui/react-select"
       <Dialog.Close />
     </Dialog.Content>
   </Dialog.Portal>
-</Dialog.Root>
+</Dialog.Root>;
 ```
 
 ### 13. Sonner Toast
+
 ```tsx
 // Toast notifications with Sonner
-import { toast } from "sonner"
+import { toast } from "sonner";
 
 // Success toast
-toast.success("Profile updated successfully")
+toast.success("Profile updated successfully");
 
 // Error toast
-toast.error("Failed to save changes")
+toast.error("Failed to save changes");
 
 // Loading toast
-const toastId = toast.loading("Saving...")
+const toastId = toast.loading("Saving...");
 // Later...
-toast.success("Saved!", { id: toastId })
+toast.success("Saved!", { id: toastId });
 
 // Action toast
 toast("Event created", {
@@ -496,17 +518,18 @@ toast("Event created", {
     label: "Undo",
     onClick: () => undoAction(),
   },
-})
+});
 
 // Promise toast
 toast.promise(saveData(), {
   loading: "Saving...",
   success: "Data saved!",
   error: "Failed to save",
-})
+});
 ```
 
 ### 14. Command Palette
+
 ```tsx
 import {
   Command,
@@ -518,21 +541,21 @@ import {
   CommandList,
   CommandSeparator,
   CommandShortcut,
-} from "@/components/ui/command"
+} from "@/components/ui/command";
 
 export function CommandMenu() {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault()
-        setOpen((open) => !open)
+        e.preventDefault();
+        setOpen((open) => !open);
       }
-    }
-    document.addEventListener("keydown", down)
-    return () => document.removeEventListener("keydown", down)
-  }, [])
+    };
+    document.addEventListener("keydown", down);
+    return () => document.removeEventListener("keydown", down);
+  }, []);
 
   return (
     <CommandDialog open={open} onOpenChange={setOpen}>
@@ -551,29 +574,103 @@ export function CommandMenu() {
         </CommandGroup>
       </CommandList>
     </CommandDialog>
-  )
+  );
 }
 ```
+
+### 15. Skills (project-aware knowledge packs)
+
+```bash
+pnpm dlx skills add shadcn/ui   # installs into .claude/skills/ (per-repo)
+```
+
+Activates when a `components.json` is present, runs `shadcn info --json`, and injects the project's style / aliases / registries so generated code matches the repo. The user-level `shadcn` skill (`~/.claude/skills/shadcn/`) is the always-on umbrella above it.
+
+### 16. Directory & Namespaced Registries
+
+Community registries are built into the CLI and addressed by `@namespace`:
+
+```bash
+npx shadcn@latest add @acme/login-form
+npx shadcn@latest search @acme --query auth
+```
+
+Register your own (or private) in `components.json`:
+
+```json
+{
+  "registries": {
+    "@acme": "https://acme.com/r/{name}.json",
+    "@internal": {
+      "url": "https://internal.co/{name}.json",
+      "headers": { "Authorization": "Bearer ${REGISTRY_TOKEN}" }
+    }
+  }
+}
+```
+
+Directory: https://ui.shadcn.com/docs/directory. Always review third-party code on install.
+
+### 17. registry.json / registry-item.json spec
+
+Distribute components as JSON. Item types: `registry:ui|block|component|lib|hook|page|file|style|theme` (+ org `registry:atom|template`).
+
+```json
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "hello",
+  "type": "registry:block",
+  "registryDependencies": ["button", "@acme/utils"],
+  "files": [
+    {
+      "path": "registry/new-york/hello/page.tsx",
+      "type": "registry:page",
+      "target": "app/hello/page.tsx"
+    },
+    {
+      "path": "registry/new-york/hello/card.tsx",
+      "type": "registry:ui",
+      "target": "@ui/card.tsx"
+    }
+  ],
+  "cssVars": {
+    "light": { "brand": "oklch(0.6 0.2 25)" },
+    "dark": { "brand": "oklch(0.7 0.18 25)" }
+  }
+}
+```
+
+- `files[].target` — placeholders `@components/ @ui/ @lib/ @hooks/` (alias-resolved), `~` = root. Required for `registry:page` / `registry:file`.
+- `registryDependencies` — shadcn slugs or `@ns/name`, resolved recursively.
+- `cssVars` / `css` — injected into the theme on install (OKLCH for us). `docs` — a CLI install message.
+- Build: `npx shadcn@latest build` → JSON under `public/r/`, installable via `add @acme/{name}`.
+
+Full reference: `~/.claude/skills/shadcn/references/registry-and-cli.md`.
 
 ## Component Categories
 
 ### Form Components
+
 - Input, Textarea, Select, Checkbox, Radio, Switch
 - DatePicker, Slider, Toggle, Form
 
 ### Layout Components
+
 - Card, Sheet, Drawer, Dialog, Popover
 - Collapsible, Accordion, Tabs, Separator
 
 ### Data Display
+
 - Table, Avatar, Badge, Calendar
 - Carousel, Skeleton, Progress
 
 ### Navigation
+
 - Command, Menubar, NavigationMenu
 - Breadcrumb, Pagination, Tabs
 
 ### Feedback
+
 - Alert, AlertDialog, Toast (Sonner)
 - Tooltip, HoverCard
 
@@ -591,6 +688,7 @@ export function CommandMenu() {
 ## Anti-Patterns
 
 ### 1. Modifying node_modules
+
 ```bash
 # BAD - Changes will be lost
 # Edit node_modules/@radix-ui/...
@@ -601,6 +699,7 @@ npx shadcn@latest add button
 ```
 
 ### 2. Hardcoded Colors
+
 ```tsx
 // BAD
 <div className="bg-white text-black">
@@ -610,6 +709,7 @@ npx shadcn@latest add button
 ```
 
 ### 3. Missing cn() Helper
+
 ```tsx
 // BAD
 <Button className={`${variant} ${className}`}>
@@ -620,6 +720,7 @@ import { cn } from "@/lib/utils"
 ```
 
 ### 4. Ignoring Accessibility
+
 ```tsx
 // BAD
 <div onClick={handleClick}>Click me</div>
@@ -631,19 +732,21 @@ import { cn } from "@/lib/utils"
 ## Edge Cases
 
 ### Server Components
+
 ```tsx
 // Most shadcn components work in Server Components
 // But interactive components need "use client"
 
 // Server Component (no "use client")
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card";
 
 // Client Component (needs "use client")
-"use client"
-import { Dialog, DialogTrigger } from "@/components/ui/dialog"
+("use client");
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 ```
 
 ### asChild Prop
+
 ```tsx
 // Merge props with child element
 <Button asChild>
@@ -655,12 +758,14 @@ import { Dialog, DialogTrigger } from "@/components/ui/dialog"
 
 ## Handoffs
 
-| Situation | Hand to |
-|-----------|---------|
-| Component composition | `atom` |
-| Page layouts | `template` |
-| Data-driven blocks | `block` |
-| Styling issues | `tailwind` |
+| Situation                          | Hand to                                     |
+| ---------------------------------- | ------------------------------------------- |
+| Component composition              | `atom`                                      |
+| Page layouts                       | `template`                                  |
+| Data-driven blocks                 | `block`                                     |
+| Styling issues                     | `tailwind`                                  |
+| Knowledge pack / reference / links | `shadcn` skill (`~/.claude/skills/shadcn/`) |
+| Docs-block pages                   | `shadcn docs` (`references/docs-block.md`)  |
 
 ## Self-Improvement
 
@@ -675,24 +780,33 @@ npx shadcn@latest --version    # Check CLI version
 ## Quick Reference
 
 ### Core Components
-| Component | Purpose |
-|-----------|---------|
-| Button | Actions and links |
-| Card | Content containers |
-| Dialog | Modal windows |
-| Form | Form validation |
-| Input | Text input |
-| Select | Dropdown selection |
-| Table | Data display |
-| Tabs | Tab navigation |
-| Toast | Notifications |
+
+| Component | Purpose            |
+| --------- | ------------------ |
+| Button    | Actions and links  |
+| Card      | Content containers |
+| Dialog    | Modal windows      |
+| Form      | Form validation    |
+| Input     | Text input         |
+| Select    | Dropdown selection |
+| Table     | Data display       |
+| Tabs      | Tab navigation     |
+| Toast     | Notifications      |
 
 ### Installation Commands
+
 ```bash
-npx shadcn@latest init          # Initialize project
-npx shadcn@latest add [name]    # Add component
-npx shadcn@latest add --all     # Add all components
-npx shadcn@latest diff [name]   # Show component changes
+npx shadcn@latest init             # Scaffold components.json + deps
+npx shadcn@latest add [name]       # Add component (namespaced: @acme/name)
+npx shadcn@latest add --all        # Add all components
+npx shadcn@latest view [items...]  # Print item(s) from a registry
+npx shadcn@latest search @reg -q x # Search a registry
+npx shadcn@latest build            # Compile registry → public/r/*.json
+npx shadcn@latest info --json      # Project config (skills read this)
+npx shadcn@latest docs [name]      # Docs / API reference
+npx shadcn@latest migrate rtl      # Codemods: rtl | radix | icons
+npx shadcn@latest mcp init --client claude   # Register the MCP server
+npx shadcn@latest diff [name]      # Show component changes
 ```
 
 **Rule**: Copy-paste architecture. Semantic tokens. Full customization. Accessible by default.
