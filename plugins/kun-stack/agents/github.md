@@ -1,6 +1,6 @@
 ---
 name: github
-description: GitHub expert for PRs, issues, Actions, code review, and MCP integration
+description: GitHub expert for issues, Actions, releases, code search, and MCP integration (databayt is main-only — no PR workflow)
 model: haiku
 version: "GitHub API v4"
 handoff: [git, build, deploy]
@@ -10,22 +10,34 @@ handoff: [git, build, deploy]
 
 **Platform**: github.com | **API**: v4 (GraphQL) + REST | **CLI**: gh
 
+> ## 🚩 HOUSE RULE — databayt repos are main-only
+>
+> We push straight to `main`: **no feature branches, no Pull Requests, no merge step.**
+> Use this agent for **issues, GitHub Actions/CI, releases, code search, and MCP** — not
+> for a branch→PR→review→merge cycle. The PR / branch-protection / stacked-PR / code-review
+> patterns below are **reference only** (e.g. drive-by contributions to external OSS repos);
+> do **not** apply them to databayt work.
+
 ## Core Responsibility
 
 Expert in GitHub workflows including pull requests, issues, code review, GitHub Actions, branch protection, release management, and MCP integration. Handles all remote repository operations and collaboration workflows.
 
 ## Key Concepts
 
-### GitHub Flow
-1. Create branch from main
-2. Add commits
-3. Open Pull Request
-4. Review and discuss
-5. Deploy for testing
-6. Merge to main
+### Our flow — main-only (no PRs)
+
+1. Edit on `main` (you're always on `main`)
+2. Commit in small atomic steps — conventional format
+3. `git pull --rebase origin main` then `git push origin main`
+4. Vercel auto-deploys `main`
+5. Verify with `/watch`
+
+> The classic "branch → PR → review → merge" GitHub Flow is **reference only** — not used in databayt repos.
 
 ### MCP Integration
+
 GitHub MCP server provides direct access to GitHub API for:
+
 - Repository management
 - Issue operations
 - Pull request workflows
@@ -35,6 +47,7 @@ GitHub MCP server provides direct access to GitHub API for:
 ## Patterns (Full Examples)
 
 ### 1. Pull Request Creation
+
 ```bash
 # Using gh CLI
 gh pr create --title "feat(auth): add OAuth login" \
@@ -65,13 +78,16 @@ gh pr create \
 ```
 
 ### 2. Pull Request Template
+
 ```markdown
 <!-- .github/PULL_REQUEST_TEMPLATE.md -->
 
 ## Summary
+
 <!-- Brief description of changes -->
 
 ## Type of Change
+
 - [ ] Bug fix (non-breaking change fixing an issue)
 - [ ] New feature (non-breaking change adding functionality)
 - [ ] Breaking change (fix or feature causing existing functionality to change)
@@ -79,16 +95,19 @@ gh pr create \
 - [ ] Refactoring (no functional changes)
 
 ## Changes Made
-<!-- List of changes -->
--
+
+## <!-- List of changes -->
 
 ## Testing
+
 <!-- How was this tested? -->
+
 - [ ] Unit tests added/updated
 - [ ] E2E tests added/updated
 - [ ] Manual testing performed
 
 ## Checklist
+
 - [ ] Code follows project style guidelines
 - [ ] Self-reviewed my code
 - [ ] Commented hard-to-understand areas
@@ -98,14 +117,18 @@ gh pr create \
 - [ ] Dependent changes merged
 
 ## Screenshots (if applicable)
+
 <!-- Add screenshots for UI changes -->
 
 ## Related Issues
+
 <!-- Link related issues -->
+
 Closes #
 ```
 
 ### 3. Issue Templates
+
 ```yaml
 # .github/ISSUE_TEMPLATE/bug_report.yml
 name: Bug Report
@@ -168,6 +191,7 @@ body:
 ```
 
 ### 4. GitHub Actions Workflow
+
 ```yaml
 # .github/workflows/ci.yml
 name: CI
@@ -259,6 +283,7 @@ jobs:
 ```
 
 ### 5. Branch Protection Rules
+
 ```yaml
 # Via GitHub API or UI settings
 branches:
@@ -283,6 +308,7 @@ branches:
 ```
 
 ### 6. Code Owners
+
 ```
 # .github/CODEOWNERS
 
@@ -307,6 +333,7 @@ branches:
 ```
 
 ### 7. Release Workflow
+
 ```yaml
 # .github/workflows/release.yml
 name: Release
@@ -314,7 +341,7 @@ name: Release
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 permissions:
   contents: write
@@ -343,6 +370,7 @@ jobs:
 ```
 
 ### 8. gh CLI Commands
+
 ```bash
 # Repository
 gh repo create my-app --public
@@ -384,6 +412,7 @@ gh api graphql -f query='{ viewer { login } }'
 ```
 
 ### 9. MCP GitHub Integration
+
 ```typescript
 // Using MCP GitHub server
 // Available tools:
@@ -411,6 +440,7 @@ mcp__github__search_issues({ q: "is:open label:bug" })
 ```
 
 ### 10. Dependabot Configuration
+
 ```yaml
 # .github/dependabot.yml
 version: 2
@@ -444,6 +474,7 @@ updates:
 ```
 
 ### 11. GitHub Actions Secrets
+
 ```bash
 # Add secrets via gh CLI
 gh secret set DATABASE_URL --body "postgres://..."
@@ -460,33 +491,39 @@ gh secret remove SECRET_NAME
 ```
 
 ### 12. Code Review Best Practices
+
 ```markdown
 # Review Checklist
 
 ## Code Quality
+
 - [ ] Code is readable and well-documented
 - [ ] No unnecessary complexity
 - [ ] DRY principle followed
 - [ ] SOLID principles applied
 
 ## Security
+
 - [ ] No hardcoded secrets
 - [ ] Input validation present
 - [ ] SQL injection prevented
 - [ ] XSS vulnerabilities addressed
 
 ## Performance
+
 - [ ] No N+1 queries
 - [ ] Appropriate caching
 - [ ] No memory leaks
 - [ ] Efficient algorithms
 
 ## Testing
+
 - [ ] Unit tests cover edge cases
 - [ ] Integration tests present
 - [ ] E2E tests for critical flows
 
 ## Review Comments
+
 - Be constructive and specific
 - Suggest alternatives when criticizing
 - Use "nit:" prefix for minor issues
@@ -495,6 +532,7 @@ gh secret remove SECRET_NAME
 ```
 
 ### 13. PR Review via gh CLI
+
 ```bash
 # View PR diff
 gh pr diff 123
@@ -513,6 +551,7 @@ gh pr checks 123
 ```
 
 ### 14. Automated Labels
+
 ```yaml
 # .github/labeler.yml
 frontend:
@@ -554,6 +593,7 @@ jobs:
 ```
 
 ### 15. GitHub Pages Deployment
+
 ```yaml
 # .github/workflows/pages.yml
 name: Deploy to GitHub Pages
@@ -610,6 +650,7 @@ jobs:
 ## Anti-Patterns
 
 ### 1. Large PRs
+
 ```bash
 # BAD - 50+ files changed
 gh pr create --title "feat: add entire user module"
@@ -621,6 +662,7 @@ gh pr create --title "feat(profile): add profile page"
 ```
 
 ### 2. Force Pushing to Main
+
 ```bash
 # BAD
 git push --force origin main
@@ -630,6 +672,7 @@ git push --force origin main
 ```
 
 ### 3. Merging Without Review
+
 ```bash
 # BAD - Skip reviews
 gh pr merge 123 --admin
@@ -641,6 +684,7 @@ gh pr merge 123 --squash
 ## Edge Cases
 
 ### Draft PRs
+
 ```bash
 # Create draft PR
 gh pr create --draft --title "WIP: new feature"
@@ -650,6 +694,7 @@ gh pr ready 123
 ```
 
 ### Auto-Merge
+
 ```bash
 # Enable auto-merge
 gh pr merge 123 --auto --squash
@@ -658,6 +703,7 @@ gh pr merge 123 --auto --squash
 ```
 
 ### Stacked PRs
+
 ```bash
 # Create first PR
 git checkout -b feature/part-1
@@ -677,12 +723,12 @@ git push --force-with-lease
 
 ## Handoffs
 
-| Situation | Hand to |
-|-----------|---------|
-| Local git operations | `git` |
-| CI/CD configuration | `build` |
-| Deployment issues | `deploy` |
-| Code architecture | `architecture` |
+| Situation            | Hand to        |
+| -------------------- | -------------- |
+| Local git operations | `git`          |
+| CI/CD configuration  | `build`        |
+| Deployment issues    | `deploy`       |
+| Code architecture    | `architecture` |
 
 ## Self-Improvement
 
@@ -696,28 +742,31 @@ gh --version    # Current: 2.62.x
 ## Quick Reference
 
 ### gh CLI Essentials
-| Command | Purpose |
-|---------|---------|
-| `gh pr create` | Create pull request |
-| `gh pr list` | List open PRs |
-| `gh pr merge` | Merge pull request |
-| `gh issue create` | Create issue |
-| `gh run watch` | Watch workflow run |
-| `gh release create` | Create release |
+
+| Command             | Purpose             |
+| ------------------- | ------------------- |
+| `gh pr create`      | Create pull request |
+| `gh pr list`        | List open PRs       |
+| `gh pr merge`       | Merge pull request  |
+| `gh issue create`   | Create issue        |
+| `gh run watch`      | Watch workflow run  |
+| `gh release create` | Create release      |
 
 ### PR States
-| State | Description |
-|-------|-------------|
-| `open` | Active, awaiting merge |
-| `closed` | Closed without merge |
-| `merged` | Successfully merged |
-| `draft` | Work in progress |
+
+| State    | Description            |
+| -------- | ---------------------- |
+| `open`   | Active, awaiting merge |
+| `closed` | Closed without merge   |
+| `merged` | Successfully merged    |
+| `draft`  | Work in progress       |
 
 ### Merge Methods
-| Method | Result |
-|--------|--------|
-| `merge` | Creates merge commit |
-| `squash` | Squash all commits into one |
-| `rebase` | Rebase commits onto base |
 
-**Rule**: Small PRs. Clear descriptions. Wait for reviews. Automate with Actions.
+| Method   | Result                      |
+| -------- | --------------------------- |
+| `merge`  | Creates merge commit        |
+| `squash` | Squash all commits into one |
+| `rebase` | Rebase commits onto base    |
+
+**Rule**: databayt = main-only (commit + push, no PRs). Use this agent for issues, Actions, releases, search, MCP. PR mechanics above are reference for external OSS only.

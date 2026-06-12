@@ -1,4 +1,5 @@
 {
+  "fallbackModel": ["claude-opus-4-8", "claude-sonnet-4-6"],
   "env": {
     "CODEBASE_PATH": "/Users/abdout/codebase",
     "CODEBASE_REPO": "databayt/codebase",

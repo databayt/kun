@@ -51,15 +51,15 @@ The models and API that power everything. Kun selects optimally within this laye
 
 ### Model Selection Strategy
 
-| Model          | Use Case                                    | Kun Usage                         |
-| -------------- | ------------------------------------------- | --------------------------------- |
-| **Opus 4.8**   | Architecture, complex features, code review | Default for all agents and skills |
-| **Sonnet 4.6** | Fast iteration, routine changes             | Quick fixes, exploration          |
-| **Haiku 4.5**  | Search, lookups, simple queries             | Explore subagent type             |
+| Model          | Use Case                                    | Kun Usage                                        |
+| -------------- | ------------------------------------------- | ------------------------------------------------ |
+| **Opus 4.8**   | Architecture, complex features, code review | Default for all agents and skills                |
+| **Sonnet 4.6** | Fast iteration, routine changes             | Quick fixes, standard build agents               |
+| **Haiku 4.5**  | Search, lookups, simple queries             | Explore subagent type, routine/formatting agents |
 
 ### Cost Context
 
-Databayt runs on a single Max 20x plan ($200/month). Model selection matters for staying within usage limits.
+Databayt runs on a single Max 5x plan ($100/month, for the time being) and is subscription-only — no usage credits, no API-key spend. Model selection matters for staying within usage limits.
 
 | Technique             | Savings     | Application                      |
 | --------------------- | ----------- | -------------------------------- |
@@ -403,11 +403,11 @@ All products and workflows must be accessible:
 
 **Rationale**: Git provides versioning, diffing, branching, and PR review. Same workflow as code.
 
-### ADR-003: Opus 4.8 as Default Model
+### ADR-003: Opus 4.8 as Default Model (amended 2026-06-12)
 
-**Decision**: Default to Opus 4.8 for all agents and primary work. Haiku 4.5 for exploration subagents only.
+**Decision**: Default to Opus 4.8 for all agents and primary work; Sonnet 4.6 for standard build agents; Haiku 4.5 for exploration/routine. Fallback chain in settings (`fallbackModel: opus-4-8 → sonnet-4-6`). Source of truth: `.claude/engine.json` → `model_tiers`.
 
-**Rationale**: Architecture-first approach values output quality over cost. Max plan ($200/mo) makes this cost-effective.
+**Rationale**: Architecture-first approach values output quality over cost. Max 5x plan ($100/mo), subscription-only — tiering and fallbacks keep the engine inside plan caps with zero per-token spend.
 
 ### ADR-004: Hogwarts-First Product Strategy
 

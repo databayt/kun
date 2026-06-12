@@ -5,7 +5,8 @@
 
 ## Preferences
 
-- **Model**: `claude-opus-4-8` (Opus 4.8, 1M context)
+- **Model**: `claude-opus-4-8` (Opus 4.8, 1M context) — fallbacks per `engine.json`
+- **Billing**: Claude Max $100/mo, subscription-only — no usage credits, no API-key spend (change requires `/decide` + Abdout approval); check `/usage` weekly
 - **Package Manager**: pnpm
 - **Stack**: Next.js 16 · React 19 · Prisma 6 · TypeScript 5 · Tailwind CSS 4 · shadcn/ui
 - **Languages**: Arabic (RTL default) · English (LTR)

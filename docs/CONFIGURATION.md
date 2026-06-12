@@ -12,18 +12,18 @@ Kun's value is its configuration. This is the complete blueprint of every settin
 
 ### Configuration Inventory
 
-| Component | Count | Location |
-|-----------|-------|----------|
+| Component       | Count    | Location                                 |
+| --------------- | -------- | ---------------------------------------- |
 | CLAUDE.md files | 3 layers | ~/.claude/, CLAUDE.md, .claude/CLAUDE.md |
-| Agents | 28 | ~/.claude/agents/ |
-| Skills | 22 | ~/.claude/skills/ |
-| MCP Servers | 19 | ~/.claude/mcp.json |
-| Rules | 8 | ~/.claude/rules/ |
-| Hooks | 5 | ~/.claude/settings.json |
-| Memory files | 6 | ~/.claude/memory/ |
-| Allow rules | 38 | ~/.claude/settings.json |
-| Deny rules | 4 | ~/.claude/settings.json |
-| Keywords | 100+ | .claude/CLAUDE.md |
+| Agents          | 28       | ~/.claude/agents/                        |
+| Skills          | 22       | ~/.claude/skills/                        |
+| MCP Servers     | 19       | ~/.claude/mcp.json                       |
+| Rules           | 8        | ~/.claude/rules/                         |
+| Hooks           | 5        | ~/.claude/settings.json                  |
+| Memory files    | 6        | ~/.claude/memory/                        |
+| Allow rules     | 38       | ~/.claude/settings.json                  |
+| Deny rules      | 4        | ~/.claude/settings.json                  |
+| Keywords        | 100+     | .claude/CLAUDE.md                        |
 
 ---
 
@@ -32,18 +32,23 @@ Kun's value is its configuration. This is the complete blueprint of every settin
 ### Model
 
 ```json
-{ "model": "claude-opus-4-8" }
+{
+  "model": "claude-opus-4-8",
+  "fallbackModel": ["claude-opus-4-8", "claude-sonnet-4-6"]
+}
 ```
+
+Default: Opus 4.8 (`.claude/engine.json` → `model_tiers`). `fallbackModel` (array, max 3) kicks in on overload/unavailability.
 
 ### Environment Variables
 
-| Variable | Value | Purpose |
-|----------|-------|---------|
-| CODEBASE_PATH | /Users/abdout/codebase | Pattern library |
-| OSS_PATH | /Users/abdout/oss | Open source workspace |
-| GITHUB_USER | abdout | GitHub username |
-| CLAUDE_CODE_SUBAGENT_MODEL | opus | Subagent model |
-| DEV_PORT | 3000 | Development server port |
+| Variable                   | Value                  | Purpose                 |
+| -------------------------- | ---------------------- | ----------------------- |
+| CODEBASE_PATH              | /Users/abdout/codebase | Pattern library         |
+| OSS_PATH                   | /Users/abdout/oss      | Open source workspace   |
+| GITHUB_USER                | abdout                 | GitHub username         |
+| CLAUDE_CODE_SUBAGENT_MODEL | opus                   | Subagent model          |
+| DEV_PORT                   | 3000                   | Development server port |
 
 ### Permission Allow Rules (38)
 
@@ -55,22 +60,22 @@ Kun's value is its configuration. This is the complete blueprint of every settin
 
 ### Permission Deny Rules (4)
 
-| Rule | Reason |
-|------|--------|
-| `Bash(rm -rf *)` | Prevent catastrophic deletion |
-| `Bash(prisma migrate reset *)` | Prevent database wipe |
-| `Bash(prisma db push --accept-data-loss *)` | Prevent data loss |
-| `mcp__neon__run_sql(DROP TABLE *)` | Prevent table deletion |
+| Rule                                        | Reason                        |
+| ------------------------------------------- | ----------------------------- |
+| `Bash(rm -rf *)`                            | Prevent catastrophic deletion |
+| `Bash(prisma migrate reset *)`              | Prevent database wipe         |
+| `Bash(prisma db push --accept-data-loss *)` | Prevent data loss             |
+| `mcp__neon__run_sql(DROP TABLE *)`          | Prevent table deletion        |
 
 ### Hooks
 
-| Hook | Event | Action |
-|------|-------|--------|
-| SessionStart | Session begins | Print model + timestamp |
-| PreToolUse(pnpm dev) | Before dev server | Kill port 3000 |
-| PostToolUse(pnpm dev) | After dev server | Open Chrome |
-| PostToolUse(Write\|Edit) | After file change | Run Prettier |
-| Stop | Agent finishes | Log session end |
+| Hook                     | Event             | Action                  |
+| ------------------------ | ----------------- | ----------------------- |
+| SessionStart             | Session begins    | Print model + timestamp |
+| PreToolUse(pnpm dev)     | Before dev server | Kill port 3000          |
+| PostToolUse(pnpm dev)    | After dev server  | Open Chrome             |
+| PostToolUse(Write\|Edit) | After file change | Run Prettier            |
+| Stop                     | Agent finishes    | Log session end         |
 
 ---
 
@@ -78,20 +83,21 @@ Kun's value is its configuration. This is the complete blueprint of every settin
 
 ### Layer 1: User-Level (`~/.claude/CLAUDE.md`)
 
-| Setting | Value |
-|---------|-------|
-| Model | Opus 4.8 |
-| Package manager | pnpm |
-| Stack | Next.js 16, React 19, Prisma 6, TypeScript 5, Tailwind CSS 4, shadcn/ui |
-| Languages | Arabic (RTL default), English (LTR) |
-| Port | Always 3000 |
-| Environment | Single .env only |
-| Component hierarchy | ui → atom → template → block → micro |
-| Reference codebase | /Users/abdout/codebase |
+| Setting             | Value                                                                   |
+| ------------------- | ----------------------------------------------------------------------- |
+| Model               | Opus 4.8                                                                |
+| Package manager     | pnpm                                                                    |
+| Stack               | Next.js 16, React 19, Prisma 6, TypeScript 5, Tailwind CSS 4, shadcn/ui |
+| Languages           | Arabic (RTL default), English (LTR)                                     |
+| Port                | Always 3000                                                             |
+| Environment         | Single .env only                                                        |
+| Component hierarchy | ui → atom → template → block → micro                                    |
+| Reference codebase  | /Users/abdout/codebase                                                  |
 
 ### Layer 2: Project-Level (`CLAUDE.md`)
 
 Project-specific context per product:
+
 - **Hogwarts**: Multi-tenant education SaaS, school modules, SSPL license
 - **Mkan**: Rental marketplace, Airbnb-inspired, booking flow
 - **Kun**: Configuration engine, documentation site, 3-phase roadmap
@@ -99,6 +105,7 @@ Project-specific context per product:
 ### Layer 3: Repo-Level (`.claude/CLAUDE.md`)
 
 Operational configuration:
+
 - 100+ keyword-to-action mappings
 - MCP trigger table
 - Slash command reference
@@ -113,70 +120,70 @@ Operational configuration:
 
 ### Stack Chain (7)
 
-| Agent | Domain |
-|-------|--------|
-| nextjs | App Router, Server Components, Server Actions |
-| react | Hooks, concurrent features, performance |
-| typescript | Strict mode, generics, advanced types |
-| tailwind | Semantic tokens, responsive, RTL/LTR |
-| prisma | PostgreSQL, migrations, query optimization |
-| shadcn | Radix primitives, registry, MCP |
-| authjs | JWT, OAuth, sessions |
+| Agent      | Domain                                        |
+| ---------- | --------------------------------------------- |
+| nextjs     | App Router, Server Components, Server Actions |
+| react      | Hooks, concurrent features, performance       |
+| typescript | Strict mode, generics, advanced types         |
+| tailwind   | Semantic tokens, responsive, RTL/LTR          |
+| prisma     | PostgreSQL, migrations, query optimization    |
+| shadcn     | Radix primitives, registry, MCP               |
+| authjs     | JWT, OAuth, sessions                          |
 
 ### Design Chain (4)
 
-| Agent | Domain |
-|-------|--------|
+| Agent         | Domain                                    |
+| ------------- | ----------------------------------------- |
 | orchestration | Master coordinator, multi-agent workflows |
-| architecture | Mirror pattern, multi-tenant (Hogwarts) |
-| pattern | Code conventions, anti-patterns |
-| structure | File organization, naming |
+| architecture  | Mirror pattern, multi-tenant (Hogwarts)   |
+| pattern       | Code conventions, anti-patterns           |
+| structure     | File organization, naming                 |
 
 ### UI Chain (4)
 
-| Agent | Domain |
-|-------|--------|
-| shadcn | Radix primitives, registry |
-| atom | Compose 2+ shadcn/ui primitives |
-| template | Full-page layouts |
-| block | UI + business logic (DataTable, auth, payments) |
+| Agent    | Domain                                          |
+| -------- | ----------------------------------------------- |
+| shadcn   | Radix primitives, registry                      |
+| atom     | Compose 2+ shadcn/ui primitives                 |
+| template | Full-page layouts                               |
+| block    | UI + business logic (DataTable, auth, payments) |
 
 ### DevOps Chain (3)
 
-| Agent | Domain |
-|-------|--------|
-| build | TypeScript validation, Turbopack |
-| deploy | Vercel, staging/production |
-| test | Vitest, Playwright, TDD |
+| Agent  | Domain                           |
+| ------ | -------------------------------- |
+| build  | TypeScript validation, Turbopack |
+| deploy | Vercel, staging/production       |
+| test   | Vitest, Playwright, TDD          |
 
 ### VCS Chain (2)
 
-| Agent | Domain |
-|-------|--------|
-| git | Branching, commits, conventional format |
-| github | PRs, issues, Actions, code review |
+| Agent  | Domain                                  |
+| ------ | --------------------------------------- |
+| git    | Branching, commits, conventional format |
+| github | PRs, issues, Actions, code review       |
 
 ### Specialized (8)
 
-| Agent | Domain |
-|-------|--------|
-| middleware | Auth, i18n, subdomain routing |
+| Agent                | Domain                                |
+| -------------------- | ------------------------------------- |
+| middleware           | Auth, i18n, subdomain routing         |
 | internationalization | Arabic/English, RTL/LTR, dictionaries |
-| semantic | HTML, color tokens, accessibility |
-| sse | Server-side exception diagnosis |
-| optimize | Feature optimization, automation |
-| performance | Core Web Vitals, profiling |
-| comment | Code comments |
-| icon | SVG icon management |
+| semantic             | HTML, color tokens, accessibility     |
+| sse                  | Server-side exception diagnosis       |
+| optimize             | Feature optimization, automation      |
+| performance          | Core Web Vitals, profiling            |
+| comment              | Code comments                         |
+| icon                 | SVG icon management                   |
 
 ### Reference Chain (4 product agents)
 
-| Agent | Product |
-|-------|---------|
-| hogwarts | Education SaaS patterns |
-| souq | E-commerce patterns |
-| mkan | Rental marketplace patterns |
-| shifa | Medical platform patterns |
+| Agent    | Product                     |
+| -------- | --------------------------- |
+| hogwarts | Education SaaS patterns     |
+| souq     | E-commerce patterns         |
+| mkan     | Rental marketplace patterns |
+| shifa    | Medical platform patterns   |
 
 ---
 
@@ -184,45 +191,45 @@ Operational configuration:
 
 ### Workflow Skills
 
-| Skill | Trigger | What It Does |
-|-------|---------|-------------|
-| /dev | "dev" | Kill port 3000 → pnpm dev → Open Chrome |
-| /build | "build" | pnpm build + TypeScript check + auto-fix |
-| /quick | "push" | Lint → fix → commit → push |
-| /deploy | "deploy" | Vercel deploy with retry (max 5) |
+| Skill   | Trigger  | What It Does                             |
+| ------- | -------- | ---------------------------------------- |
+| /dev    | "dev"    | Kill port 3000 → pnpm dev → Open Chrome  |
+| /build  | "build"  | pnpm build + TypeScript check + auto-fix |
+| /quick  | "push"   | Lint → fix → commit → push               |
+| /deploy | "deploy" | Vercel deploy with retry (max 5)         |
 
 ### Creation Skills
 
-| Skill | Trigger | What It Does |
-|-------|---------|-------------|
-| /atom | "atom [name]" | Create/list/preview atom components |
-| /template | "template [name]" | Create/list/preview page layouts |
-| /block | "block [name]" | Create/refactor/audit with quality scoring |
-| /saas | "saas [feature]" | Generate schema + actions + UI + pages |
+| Skill     | Trigger           | What It Does                               |
+| --------- | ----------------- | ------------------------------------------ |
+| /atom     | "atom [name]"     | Create/list/preview atom components        |
+| /template | "template [name]" | Create/list/preview page layouts           |
+| /block    | "block [name]"    | Create/refactor/audit with quality scoring |
+| /saas     | "saas [feature]"  | Generate schema + actions + UI + pages     |
 
 ### Quality Skills
 
-| Skill | Trigger | What It Does |
-|-------|---------|-------------|
-| /test | "test [file]" | Generate Vitest + Playwright tests |
-| /security | "security" | OWASP Top 10 + dependency scan |
-| /performance | "performance" | Core Web Vitals + bundle + DB audit |
-| /fix | "fix" | Auto-fix TypeScript, lint, build errors |
+| Skill        | Trigger       | What It Does                            |
+| ------------ | ------------- | --------------------------------------- |
+| /test        | "test [file]" | Generate Vitest + Playwright tests      |
+| /security    | "security"    | OWASP Top 10 + dependency scan          |
+| /performance | "performance" | Core Web Vitals + bundle + DB audit     |
+| /fix         | "fix"         | Auto-fix TypeScript, lint, build errors |
 
 ### Documentation & Utility Skills
 
-| Skill | Trigger | What It Does |
-|-------|---------|-------------|
-| /docs | "docs" | Generate MDX, API docs, Storybook |
-| /codebase | "codebase" | Browse/search/copy from pattern library |
-| /repos | "repos" | Explore databayt organization |
-| /screenshot | "screenshot" | View recent screenshot |
-| /motion | "motion" | Add Framer Motion animations |
+| Skill       | Trigger      | What It Does                            |
+| ----------- | ------------ | --------------------------------------- |
+| /docs       | "docs"       | Generate MDX, API docs, Storybook       |
+| /codebase   | "codebase"   | Browse/search/copy from pattern library |
+| /repos      | "repos"      | Explore databayt organization           |
+| /screenshot | "screenshot" | View recent screenshot                  |
+| /motion     | "motion"     | Add Framer Motion animations            |
 
 ### Custom Commands
 
-| Command | Trigger | What It Does |
-|---------|---------|-------------|
+| Command   | Trigger            | What It Does                        |
+| --------- | ------------------ | ----------------------------------- |
 | /handover | "handover [block]" | 5-pass QA on localhost + production |
 
 ---
@@ -233,46 +240,46 @@ Operational configuration:
 
 #### UI & Design (5)
 
-| Server | Purpose |
-|--------|---------|
-| shadcn | Component registry |
-| figma | Design file access (127.0.0.1:3845) |
-| tailwind | CSS utilities, docs |
-| a11y | Accessibility audits (WCAG 2.1 AA) |
-| storybook | Visual testing |
+| Server    | Purpose                             |
+| --------- | ----------------------------------- |
+| shadcn    | Component registry                  |
+| figma     | Design file access (127.0.0.1:3845) |
+| tailwind  | CSS utilities, docs                 |
+| a11y      | Accessibility audits (WCAG 2.1 AA)  |
+| storybook | Visual testing                      |
 
 #### Testing (2)
 
-| Server | Purpose |
-|--------|---------|
-| browser | Headless Chromium (1920x1080) |
+| Server         | Purpose                       |
+| -------------- | ----------------------------- |
+| browser        | Headless Chromium (1920x1080) |
 | browser-headed | Visible Chromium (auth flows) |
 
 #### DevOps & Infra (4)
 
-| Server | Purpose |
-|--------|---------|
+| Server | Purpose                     |
+| ------ | --------------------------- |
 | github | Repos, issues, PRs, Actions |
-| vercel | Deployments, logs |
-| sentry | Error monitoring |
-| gcloud | Google Cloud CLI |
+| vercel | Deployments, logs           |
+| sentry | Error monitoring            |
+| gcloud | Google Cloud CLI            |
 
 #### Data & Auth (4)
 
-| Server | Purpose |
-|--------|---------|
-| neon | Neon PostgreSQL branching |
-| postgres | Database queries (dbhub) |
-| stripe | Payments, subscriptions |
+| Server   | Purpose                    |
+| -------- | -------------------------- |
+| neon     | Neon PostgreSQL branching  |
+| postgres | Database queries (dbhub)   |
+| stripe   | Payments, subscriptions    |
 | keychain | macOS Keychain credentials |
 
 #### Knowledge & PM (3)
 
-| Server | Purpose |
-|--------|---------|
-| ref | Technical documentation |
+| Server   | Purpose                 |
+| -------- | ----------------------- |
+| ref      | Technical documentation |
 | context7 | Up-to-date library docs |
-| linear | Issue tracking |
+| linear   | Issue tracking          |
 
 ---
 
@@ -280,16 +287,16 @@ Operational configuration:
 
 8 path-scoped rules:
 
-| Rule | Glob Patterns | Key Enforcements |
-|------|--------------|------------------|
-| auth | `**/auth/**`, `**/middleware.*` | NextAuth v5, session.user.schoolId |
-| i18n | `**/*-ar.json`, `**/dictionaries/**` | Single-language storage, RTL logical |
-| prisma | `**/*.prisma`, `**/prisma/**` | Always include schoolId, $extends |
-| tailwind | `**/*.css`, `**/styles/**` | CSS-first v4, OKLCH, RTL logical |
-| testing | `**/tests/**`, `**/*.spec.*` | Playwright in tests/, Vitest co-located |
-| deployment | `**/vercel.json` | pnpm, tsc before builds |
-| multi-repo | (global) | CODEBASE_PATH, fork workflows |
-| org-refs | (global) | Priority: codebase → shadcn → radix |
+| Rule       | Glob Patterns                        | Key Enforcements                        |
+| ---------- | ------------------------------------ | --------------------------------------- |
+| auth       | `**/auth/**`, `**/middleware.*`      | NextAuth v5, session.user.schoolId      |
+| i18n       | `**/*-ar.json`, `**/dictionaries/**` | Single-language storage, RTL logical    |
+| prisma     | `**/*.prisma`, `**/prisma/**`        | Always include schoolId, $extends       |
+| tailwind   | `**/*.css`, `**/styles/**`           | CSS-first v4, OKLCH, RTL logical        |
+| testing    | `**/tests/**`, `**/*.spec.*`         | Playwright in tests/, Vitest co-located |
+| deployment | `**/vercel.json`                     | pnpm, tsc before builds                 |
+| multi-repo | (global)                             | CODEBASE_PATH, fork workflows           |
+| org-refs   | (global)                             | Priority: codebase → shadcn → radix     |
 
 ---
 
@@ -297,18 +304,19 @@ Operational configuration:
 
 ### 6 Persistent Files
 
-| File | Contents |
-|------|----------|
-| preferences.json | Port 3000, single .env, pnpm-only |
+| File              | Contents                                          |
+| ----------------- | ------------------------------------------------- |
+| preferences.json  | Port 3000, single .env, pnpm-only                 |
 | repositories.json | 14 databayt repos with paths, stacks, sync config |
-| atom.json | 59 atoms across 6 categories |
-| template.json | 31 templates across 5 categories |
-| block.json | 4 blocks (DataTable, Auth, Invoice, Report) |
-| report.json | T&C electrical report templates |
+| atom.json         | 59 atoms across 6 categories                      |
+| template.json     | 31 templates across 5 categories                  |
+| block.json        | 4 blocks (DataTable, Auth, Invoice, Report)       |
+| report.json       | T&C electrical report templates                   |
 
 ### Project-Level Memory
 
 Stored at `~/.claude/projects/[project]/memory/`:
+
 - Company profile (team, financials)
 - Active project status (Hogwarts pilot)
 - User preferences and feedback
@@ -341,11 +349,11 @@ cd ~/kun; .\.claude\scripts\install.ps1 -Role content
 
 ### Roles
 
-| Role | Skills | MCP | Hooks | Codebase Clone |
-|------|--------|-----|-------|----------------|
-| **engineer** | All 17 | All 18 | All 5 | Yes |
-| **business** | docs, repos, screenshot, codebase | None | None | No |
-| **content** | docs, repos, screenshot, codebase | None | None | No |
+| Role         | Skills                            | MCP    | Hooks | Codebase Clone |
+| ------------ | --------------------------------- | ------ | ----- | -------------- |
+| **engineer** | All 17                            | All 18 | All 5 | Yes            |
+| **business** | docs, repos, screenshot, codebase | None   | None  | No             |
+| **content**  | docs, repos, screenshot, codebase | None   | None  | No             |
 
 ### What the Installer Does
 
@@ -363,14 +371,14 @@ cd ~/kun; .\.claude\scripts\install.ps1 -Role content
 
 ## 10. Keyword Quick Reference
 
-| Say | What Happens |
-|-----|-------------|
-| "dev" | Kill port 3000 → pnpm dev → Chrome |
-| "push" | git add → commit → push |
-| "deploy" | Vercel deploy → retry → report |
-| "table users" | block agent → DataTable → prisma |
-| "auth" | authjs agent → NextAuth setup |
-| "saas billing" | orchestrate → stripe MCP → schema + UI |
-| "test login" | test agent → Vitest + Playwright |
-| "handover auth" | 5-pass QA → both environments |
-| "clone vercel/ai" | GitHub MCP → clone → adapt |
+| Say               | What Happens                           |
+| ----------------- | -------------------------------------- |
+| "dev"             | Kill port 3000 → pnpm dev → Chrome     |
+| "push"            | git add → commit → push                |
+| "deploy"          | Vercel deploy → retry → report         |
+| "table users"     | block agent → DataTable → prisma       |
+| "auth"            | authjs agent → NextAuth setup          |
+| "saas billing"    | orchestrate → stripe MCP → schema + UI |
+| "test login"      | test agent → Vitest + Playwright       |
+| "handover auth"   | 5-pass QA → both environments          |
+| "clone vercel/ai" | GitHub MCP → clone → adapt             |

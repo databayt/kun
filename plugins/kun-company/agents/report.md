@@ -56,6 +56,7 @@ gh issue view <number> --repo <repo>
 ```
 
 Extract from body:
+
 - **Description**: what the user reported
 - **Page URL**: the `**Page**: `/path`` line
 - **Time**: when it was reported
@@ -99,6 +100,7 @@ URL: /{lang}/about              → school-marketing/about
 ```
 
 **Route directory** (thin wrapper — page.tsx, layout.tsx, metadata):
+
 ```
 src/app/[lang]/s/[subdomain]/(school-dashboard)/{feature}/
 src/app/[lang]/s/[subdomain]/(school-marketing)/{feature}/
@@ -107,6 +109,7 @@ src/app/[lang]/(saas-marketing)/{feature}/
 ```
 
 **Component directory** (all business logic, UI, actions):
+
 ```
 src/components/school-dashboard/{feature}/
 src/components/school-marketing/{feature}/
@@ -120,12 +123,12 @@ The mirror pattern: `app/.../admission/page.tsx` imports from `components/school
 
 Determine the entry point from the URL context:
 
-| URL Pattern | Entry Point | Route Base | Component Base |
-|-------------|-------------|------------|----------------|
-| `{subdomain}.databayt.org/{lang}/dashboard/*` | school-dashboard | `app/[lang]/s/[subdomain]/(school-dashboard)/` | `components/school-dashboard/` |
+| URL Pattern                                      | Entry Point      | Route Base                                     | Component Base                 |
+| ------------------------------------------------ | ---------------- | ---------------------------------------------- | ------------------------------ |
+| `{subdomain}.databayt.org/{lang}/dashboard/*`    | school-dashboard | `app/[lang]/s/[subdomain]/(school-dashboard)/` | `components/school-dashboard/` |
 | `{subdomain}.databayt.org/{lang}` (public pages) | school-marketing | `app/[lang]/s/[subdomain]/(school-marketing)/` | `components/school-marketing/` |
-| `databayt.org/{lang}/dashboard/*` | saas-dashboard | `app/[lang]/(saas-dashboard)/` | `components/saas-dashboard/` |
-| `databayt.org/{lang}` (public pages) | saas-marketing | `app/[lang]/(saas-marketing)/` | `components/saas-marketing/` |
+| `databayt.org/{lang}/dashboard/*`                | saas-dashboard   | `app/[lang]/(saas-dashboard)/`                 | `components/saas-dashboard/`   |
+| `databayt.org/{lang}` (public pages)             | saas-marketing   | `app/[lang]/(saas-marketing)/`                 | `components/saas-marketing/`   |
 
 ### 3. CONTEXT — Read the documentation
 
@@ -145,6 +148,7 @@ components/{entry-point}/{feature}/
 ```
 
 Also read:
+
 - `.claude/rules/qa-scope.md` — bug fixes only, no schema/auth/middleware changes
 - `.claude/rules/accounts.md` — NEVER change protected test accounts
 - `.claude/rules/subdomain-urls.md` — never use `/s/${subdomain}` in client URLs
@@ -153,6 +157,7 @@ Also read:
 ### 4. VALIDATE — Bucket-aware fast-path
 
 The credibility scoring pipeline (see `/Users/abdout/kun/src/lib/report/score.ts` and friends, mirrored in hogwarts + mkan) labels each issue with one of:
+
 - `verified-report` — score ≥ 75, classification `bug` → pre-validated, safe to auto-fix
 - `needs-human` — score 55–74 or classification ∈ {feature, destructive} → STOP, requires human
 - `low-confidence` — score 30–54 → STOP, not worth the agent's time
@@ -161,9 +166,11 @@ The credibility scoring pipeline (see `/Users/abdout/kun/src/lib/report/score.ts
 **Branch on label**:
 
 #### a) `verified-report` present → fast-path
+
 Skip the three validation questions below. The scorer has already classified this as a bug and confirmed quality + reporter signals are strong. Proceed directly to step 5 (SEE). The `<!-- score-block -->` JSON in the body tells you `severity`, `language`, and the AI `rationale` — use these to prioritize.
 
 #### b) `needs-human` present → STOP
+
 Add a comment with the AI rationale and the destructive signals (if any), then move on. Never auto-process a `needs-human` issue.
 
 ```bash
@@ -175,6 +182,7 @@ Add the \`verified-report\` label to manually promote into the auto-fix queue."
 ```
 
 #### c) `low-confidence` present → STOP
+
 Comment with the score breakdown and move on. The issue auto-closes after 14 days unless a human promotes it.
 
 ```bash
@@ -188,16 +196,19 @@ A human can promote by adding the \`verified-report\` label."
 For issues created before the scoring pipeline shipped (no `<!-- score-block -->` in the body), answer the original three questions:
 
 **i) Is it a real bug?**
+
 - Can you reproduce it from the description + URL?
 - Does `see` + `debug` confirm the reported behavior?
 - If not reproducible → comment + `cannot-reproduce` label → stop
 
 **ii) Is it aligned with current plans?**
+
 - Read `ISSUE.md` in the component directory — is this issue already tracked?
 - If it contradicts planned work, the fix may be premature or wrong direction
 - If it's a feature request disguised as a bug → `needs-human` label → stop
 
 **iii) Will this fix improve, not destroy?**
+
 - Does the fix respect existing patterns in CLAUDE.md and README.md?
 - Does it follow the QA scope rules (no schema changes, no auth changes)?
 - Could it break other features that share the same component?
@@ -207,6 +218,7 @@ For issues created before the scoring pipeline shipped (no `<!-- score-block -->
 ### 5. SEE — Visual verification
 
 Navigate to the page URL (localhost for local, production URL for prod):
+
 - Take screenshot
 - Check accessibility snapshot
 - Look for the reported issue visually
@@ -221,6 +233,7 @@ Navigate to the page URL (localhost for local, production URL for prod):
 ### 7. IDENTIFY — Root cause
 
 From the visual + errors + description + context docs, determine:
+
 - Which file(s) in the **component directory** need changes
 - What the fix is
 - Whether it's a code bug, data issue, or config problem
@@ -243,33 +256,28 @@ pnpm build
 
 If build fails, fix the build error. If the fix breaks other things, revert and comment on the issue.
 
-### 10. PUSH — Branch + PR
+### 10. PUSH — Commit straight to `main`
 
-Create a branch, commit, and open a PR. For single-file i18n fixes, auto-merge.
+Work directly on `main` — no branches, no worktrees, no PRs. Commit the fix and push.
 
 ```bash
-git checkout -b fix/report-<issue-number>
+git branch --show-current        # verify: must print `main`
+git pull --rebase origin main
 git add <changed-files>
 git commit -m "fix: <description from issue title>
 
 Closes #<issue-number>
 
 Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>"
-git push -u origin fix/report-<issue-number>
-gh pr create --title "fix: <description>" --body "Closes #<issue-number>" --label report
+git push origin main
 ```
 
-**Auto-merge criteria** (all must be true):
-- Single file changed (e.g., dictionary/translation fix)
-- No business logic touched
-- Build passes
-
-If auto-merge: `gh pr merge <number> --squash --delete-branch`
-If multi-file or logic change: leave PR open, add comment with fix summary.
+`Closes #<issue-number>` in the commit body auto-closes the issue once `main` deploys. After pushing, add a comment on the issue with the fix summary (single-file i18n fixes need no extra review; multi-file or logic changes get a fuller summary).
 
 ### 11. VERIFY — Post-deploy check
 
 After Vercel deploys (check deployment status):
+
 - `see` the page again
 - Confirm the reported issue is fixed
 - If not fixed, iterate
@@ -289,28 +297,28 @@ gh issue close <number> --repo <repo> --comment "Fixed in <commit-sha>.
 
 The `GITHUB_REPO` env var and issue body tell you which repo to work in:
 
-| Repo | Local Path | Production URL |
-|------|-----------|----------------|
-| hogwarts | `/Users/abdout/hogwarts` | `*.databayt.org` |
-| kun | `/Users/abdout/kun` | `kun.databayt.org` |
-| souq | `/Users/abdout/souq` | `souq.databayt.org` |
-| mkan | `/Users/abdout/mkan` | `mkan.databayt.org` |
-| shifa | `/Users/abdout/shifa` | `shifa.databayt.org` |
+| Repo     | Local Path               | Production URL       |
+| -------- | ------------------------ | -------------------- |
+| hogwarts | `/Users/abdout/hogwarts` | `*.databayt.org`     |
+| kun      | `/Users/abdout/kun`      | `kun.databayt.org`   |
+| souq     | `/Users/abdout/souq`     | `souq.databayt.org`  |
+| mkan     | `/Users/abdout/mkan`     | `mkan.databayt.org`  |
+| shifa    | `/Users/abdout/shifa`    | `shifa.databayt.org` |
 
 ## Escalation
 
 If the fix is beyond straightforward:
 
-| Situation | Action |
-|-----------|--------|
-| Build error after fix | Hand off to `build` agent |
-| Server-side exception | Hand off to `sse` agent |
-| Performance issue | Hand off to `performance` agent |
-| Security concern | Hand off to `guardian` agent |
-| Contradicts ISSUE.md plans | Comment + `needs-human` label |
-| Needs architecture change | Comment + `needs-human` label |
-| Cannot reproduce | Comment + `cannot-reproduce` label |
-| Feature request, not bug | Comment + `needs-human` label |
+| Situation                  | Action                             |
+| -------------------------- | ---------------------------------- |
+| Build error after fix      | Hand off to `build` agent          |
+| Server-side exception      | Hand off to `sse` agent            |
+| Performance issue          | Hand off to `performance` agent    |
+| Security concern           | Hand off to `guardian` agent       |
+| Contradicts ISSUE.md plans | Comment + `needs-human` label      |
+| Needs architecture change  | Comment + `needs-human` label      |
+| Cannot reproduce           | Comment + `cannot-reproduce` label |
+| Feature request, not bug   | Comment + `needs-human` label      |
 
 ## Rules
 

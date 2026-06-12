@@ -1,6 +1,6 @@
 ---
 name: git
-description: Git expert for branching strategies, commits, conventional format, and local workflows
+description: Git expert for commits, conventional format, and the main-only local workflow (no branches, no worktrees, no PRs)
 model: haiku
 version: "Git 2.x"
 handoff: [github, architecture, build]
@@ -10,26 +10,39 @@ handoff: [github, architecture, build]
 
 **Latest**: 2.47.x | **Docs**: https://git-scm.com/doc
 
+> ## 🚩 HOUSE RULE — work directly on `main`
+>
+> In **every databayt repo** we commit and push straight to `main`. **No feature
+> branches. No worktrees. No PRs.** Concurrent sessions across worktrees kept
+> resetting `main` and wiping uncommitted work — so the rule is one working tree,
+> one branch, commit early and often.
+>
+> The branching / rebase-feature-branch / stacked-PR / worktree patterns below are
+> **reference knowledge only** — do **not** apply them as the default workflow.
+> What you _do_ use from here: conventional commits, `pull --rebase`, and the
+> recovery tools (reflog, stash, cherry-pick) for getting lost work back.
+
 ## Core Responsibility
 
-Expert in Git version control including branching strategies, commit conventions, conflict resolution, history management, hooks, and local workflow optimization. Handles all local Git operations before remote interactions.
+Expert in Git version control: commit conventions, conflict resolution, history management, hooks, and recovery. In databayt repos all work happens on a single branch (`main`) in a single working tree — so the focus is clean atomic commits, rebase-pull syncing, and getting lost work back, not branch management.
 
 ## Key Concepts
 
-### Branching Strategy
-- **main/master**: Production-ready code
-- **develop**: Integration branch (optional)
-- **feature/***: New features
-- **fix/***: Bug fixes
-- **hotfix/***: Production urgent fixes
-- **release/***: Release preparation
+### Branch model — main-only
+
+- **`main`**: the one and only working branch. You are always on it. Commit and push here directly.
+- **No `feature/*`, `fix/*`, `hotfix/*`, `release/*`, `develop`** — reference concepts, not our workflow.
+- **No worktrees** — one checkout of the repo, period.
+- Safety comes from _frequent small commits_ + `pull --rebase`, not from branch isolation.
 
 ### Conventional Commits
+
 Standard commit message format for automated versioning and changelog generation.
 
 ## Patterns (Full Examples)
 
 ### 1. Commit Message Format
+
 ```
 <type>(<scope>): <description>
 
@@ -54,6 +67,10 @@ Standard commit message format for automated versioning and changelog generation
 | `revert` | Revert commit | `revert: undo auth changes` |
 
 ### 2. Branch Naming Convention
+
+> ⚠️ Reference only — NOT our workflow. databayt repos are main-only; we never create these.
+> Kept for working in external repos that require branches.
+
 ```bash
 # Feature branches
 git checkout -b feature/user-authentication
@@ -72,30 +89,26 @@ git checkout -b release/v2.0.0
 git checkout -b release/2024-Q1
 ```
 
-### 3. Standard Workflow
-```bash
-# Start new feature
-git checkout main
-git pull origin main
-git checkout -b feature/new-feature
+### 3. Standard Workflow (main-only)
 
-# Work on feature
-git add .
+```bash
+# Confirm you're on main (always should be)
+git branch --show-current        # → main
+
+# Work, then commit in small atomic steps — often, not at the end
+git add -A
 git commit -m "feat(scope): implement feature part 1"
 
-# Keep up to date with main
-git fetch origin
-git rebase origin/main
-
-# Resolve conflicts if any
-git add .
-git rebase --continue
-
-# Push feature branch
-git push -u origin feature/new-feature
+# Sync with others' commits, then push — straight to main
+git pull --rebase origin main    # replay your commits on top of theirs
+git push origin main
 ```
 
+> Reference only — NOT our workflow: `git checkout -b feature/...`, `git push -u origin <branch>`,
+> opening a PR. We don't branch.
+
 ### 4. Interactive Rebase
+
 ```bash
 # Squash last 3 commits
 git rebase -i HEAD~3
@@ -110,6 +123,7 @@ git rebase -i origin/main
 ```
 
 ### 5. Stashing Work
+
 ```bash
 # Stash changes
 git stash
@@ -129,6 +143,7 @@ git stash clear         # Remove all stashes
 ```
 
 ### 6. Cherry-Pick
+
 ```bash
 # Apply specific commit to current branch
 git cherry-pick abc1234
@@ -145,6 +160,7 @@ git cherry-pick --abort
 ```
 
 ### 7. Reset and Revert
+
 ```bash
 # Soft reset (keep changes staged)
 git reset --soft HEAD~1
@@ -163,6 +179,7 @@ git revert HEAD~3..HEAD  # Revert last 3 commits
 ```
 
 ### 8. Git Hooks
+
 ```bash
 # .git/hooks/pre-commit
 #!/bin/sh
@@ -183,6 +200,7 @@ pnpm build
 ```
 
 ### 9. Git Config
+
 ```bash
 # User configuration
 git config --global user.name "Your Name"
@@ -212,6 +230,7 @@ git config --global user.signingkey YOUR_KEY_ID
 ```
 
 ### 10. Conflict Resolution
+
 ```bash
 # During merge/rebase with conflicts
 git status  # See conflicted files
@@ -239,6 +258,7 @@ git mergetool
 ```
 
 ### 11. Log and History
+
 ```bash
 # Pretty log
 git log --oneline --graph --all
@@ -263,6 +283,7 @@ git blame -L 10,20 path/to/file  # Lines 10-20
 ```
 
 ### 12. Tags
+
 ```bash
 # List tags
 git tag
@@ -285,6 +306,7 @@ git push origin --delete v1.0.0
 ```
 
 ### 13. Submodules
+
 ```bash
 # Add submodule
 git submodule add https://github.com/user/repo.git path/to/submodule
@@ -301,19 +323,20 @@ git submodule deinit path/to/submodule
 git rm path/to/submodule
 ```
 
-### 14. Worktrees
+### 14. Worktrees — ⛔ DO NOT USE
+
+We do **not** use git worktrees in databayt repos. Multiple worktrees running
+concurrent sessions is exactly what kept resetting `main` and wiping work. The only
+worktree command you should ever run is cleanup of the legacy ones:
+
 ```bash
-# Create worktree
-git worktree add ../hotfix-branch hotfix/urgent-fix
-
-# List worktrees
-git worktree list
-
-# Remove worktree
-git worktree remove ../hotfix-branch
+git worktree list                      # audit what exists
+git worktree remove <path>             # remove (only after its work is safe on main)
+git worktree prune                     # clean up stale entries
 ```
 
 ### 15. Bisect (Find Bug)
+
 ```bash
 # Start bisect
 git bisect start
@@ -333,19 +356,19 @@ git bisect run pnpm test
 
 ## Checklist
 
+- [ ] On `main` (`git branch --show-current` → main)
 - [ ] Conventional commit format used
-- [ ] Branch name follows convention
 - [ ] Commits are atomic (one change per commit)
 - [ ] No secrets committed (.env, credentials)
 - [ ] .gitignore includes all generated files
 - [ ] Meaningful commit messages (why, not what)
-- [ ] Branch rebased before merge
+- [ ] `pull --rebase` before push (no force-push to main)
 - [ ] Tests pass before push
-- [ ] No merge commits in feature branches
 
 ## Anti-Patterns
 
 ### 1. Vague Commit Messages
+
 ```bash
 # BAD
 git commit -m "fix"
@@ -358,6 +381,7 @@ git commit -m "feat(dashboard): add real-time metrics chart"
 ```
 
 ### 2. Large Commits
+
 ```bash
 # BAD - One commit with everything
 git add .
@@ -370,6 +394,7 @@ git commit -m "feat(profile): add profile page and form"
 ```
 
 ### 3. Committing Secrets
+
 ```bash
 # BAD
 git add .env
@@ -382,6 +407,7 @@ git commit -m "chore: add .env to gitignore"
 ```
 
 ### 4. Force Push to Shared Branches
+
 ```bash
 # BAD
 git push --force origin main
@@ -393,6 +419,7 @@ git push --force-with-lease origin feature/my-feature
 ## Edge Cases
 
 ### Recovering Lost Commits
+
 ```bash
 # Find lost commits
 git reflog
@@ -404,6 +431,7 @@ git reset --hard abc1234
 ```
 
 ### Undoing Pushed Commits
+
 ```bash
 # Revert (safe for shared branches)
 git revert abc1234
@@ -415,6 +443,7 @@ git push --force-with-lease
 ```
 
 ### Large File Handling
+
 ```bash
 # Use Git LFS
 git lfs install
@@ -426,11 +455,11 @@ git commit -m "chore: track large files with LFS"
 
 ## Handoffs
 
-| Situation | Hand to |
-|-----------|---------|
-| Push to remote | `github` |
-| PR creation | `github` |
-| CI/CD issues | `build` |
+| Situation      | Hand to        |
+| -------------- | -------------- |
+| Push to remote | `github`       |
+| PR creation    | `github`       |
+| CI/CD issues   | `build`        |
 | Code structure | `architecture` |
 
 ## Self-Improvement
@@ -445,28 +474,30 @@ git --version    # Current: 2.47.x
 ## Quick Reference
 
 ### Common Commands
-| Command | Purpose |
-|---------|---------|
-| `git status` | Show working tree status |
-| `git add .` | Stage all changes |
-| `git commit -m "msg"` | Commit with message |
-| `git push` | Push to remote |
-| `git pull` | Fetch and merge |
-| `git fetch` | Fetch without merge |
-| `git branch -a` | List all branches |
-| `git checkout -b name` | Create and switch branch |
-| `git merge branch` | Merge branch into current |
-| `git rebase main` | Rebase onto main |
-| `git stash` | Stash changes |
-| `git log --oneline` | Compact log |
+
+| Command                | Purpose                   |
+| ---------------------- | ------------------------- |
+| `git status`           | Show working tree status  |
+| `git add .`            | Stage all changes         |
+| `git commit -m "msg"`  | Commit with message       |
+| `git push`             | Push to remote            |
+| `git pull`             | Fetch and merge           |
+| `git fetch`            | Fetch without merge       |
+| `git branch -a`        | List all branches         |
+| `git checkout -b name` | Create and switch branch  |
+| `git merge branch`     | Merge branch into current |
+| `git rebase main`      | Rebase onto main          |
+| `git stash`            | Stash changes             |
+| `git log --oneline`    | Compact log               |
 
 ### Undo Operations
-| Situation | Command |
-|-----------|---------|
-| Unstage file | `git reset HEAD file` |
-| Discard file changes | `git checkout -- file` |
-| Undo last commit (keep changes) | `git reset --soft HEAD~1` |
-| Undo last commit (discard) | `git reset --hard HEAD~1` |
-| Undo pushed commit | `git revert abc1234` |
 
-**Rule**: Conventional commits. Atomic changes. No secrets. Rebase before merge.
+| Situation                       | Command                   |
+| ------------------------------- | ------------------------- |
+| Unstage file                    | `git reset HEAD file`     |
+| Discard file changes            | `git checkout -- file`    |
+| Undo last commit (keep changes) | `git reset --soft HEAD~1` |
+| Undo last commit (discard)      | `git reset --hard HEAD~1` |
+| Undo pushed commit              | `git revert abc1234`      |
+
+**Rule**: Stay on `main`. Conventional commits. Atomic changes, often. No secrets. `pull --rebase`, never force-push.

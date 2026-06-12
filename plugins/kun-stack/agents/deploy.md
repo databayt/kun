@@ -16,12 +16,16 @@ Expert in deployment workflows including Vercel configuration, staging/productio
 
 ## Key Concepts
 
-### Deployment Pipeline
-1. **Preview** - PR deployments for review
-2. **Staging** - Pre-production testing
-3. **Production** - Live environment
+### Deployment Pipeline (main-only)
+
+1. **Production** - `main` auto-deploys to the live environment on every push
+2. **Staging** - optional pre-production environment for risky changes (not branch-driven)
+
+> No PR-preview deployments — databayt repos are main-only. The safeguard before a prod
+> deploy is the **pre-push quality gate** (typecheck + build), not a PR review.
 
 ### Environment Strategy
+
 - **Development**: Local with local/dev database
 - **Preview**: Vercel preview deployments
 - **Staging**: staging.databayt.org
@@ -30,6 +34,7 @@ Expert in deployment workflows including Vercel configuration, staging/productio
 ## Patterns (Full Examples)
 
 ### 1. Vercel Configuration
+
 ```json
 // vercel.json
 {
@@ -71,6 +76,7 @@ Expert in deployment workflows including Vercel configuration, staging/productio
 ```
 
 ### 2. Environment Variables
+
 ```bash
 # Vercel environment variables
 
@@ -94,6 +100,7 @@ vercel env pull .env.local
 ```
 
 ### 3. Deployment Workflow
+
 ```bash
 # Deploy to preview (from PR)
 vercel
@@ -112,6 +119,7 @@ vercel alias set deployment-url.vercel.app custom-domain.com
 ```
 
 ### 4. GitHub Actions Deployment
+
 ```yaml
 # .github/workflows/deploy.yml
 name: Deploy
@@ -187,6 +195,7 @@ jobs:
 ```
 
 ### 5. Database Migration Strategy
+
 ```bash
 # Development - Direct push (no migration)
 pnpm prisma db push
@@ -224,6 +233,7 @@ jobs:
 ```
 
 ### 6. Rollback Strategy
+
 ```bash
 # Vercel rollback
 vercel rollback                    # Rollback to previous
@@ -251,10 +261,11 @@ echo "Rollback complete!"
 ```
 
 ### 7. Monitoring Setup
+
 ```typescript
 // Sentry configuration
 // sentry.client.config.ts
-import * as Sentry from "@sentry/nextjs"
+import * as Sentry from "@sentry/nextjs";
 
 Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
@@ -263,40 +274,41 @@ Sentry.init({
   beforeSend(event) {
     // Filter sensitive data
     if (event.request?.headers) {
-      delete event.request.headers["authorization"]
+      delete event.request.headers["authorization"];
     }
-    return event
+    return event;
   },
-})
+});
 
 // sentry.server.config.ts
-import * as Sentry from "@sentry/nextjs"
+import * as Sentry from "@sentry/nextjs";
 
 Sentry.init({
   dsn: process.env.SENTRY_DSN,
   tracesSampleRate: 0.1,
   environment: process.env.NODE_ENV,
-})
+});
 
 // sentry.edge.config.ts
-import * as Sentry from "@sentry/nextjs"
+import * as Sentry from "@sentry/nextjs";
 
 Sentry.init({
   dsn: process.env.SENTRY_DSN,
   tracesSampleRate: 0.1,
-})
+});
 ```
 
 ### 8. Health Check Endpoint
+
 ```typescript
 // app/api/health/route.ts
-import { db } from "@/lib/db"
-import { NextResponse } from "next/server"
+import { db } from "@/lib/db";
+import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
     // Check database connection
-    await db.$queryRaw`SELECT 1`
+    await db.$queryRaw`SELECT 1`;
 
     return NextResponse.json({
       status: "healthy",
@@ -305,7 +317,7 @@ export async function GET() {
         database: "up",
         api: "up",
       },
-    })
+    });
   } catch (error) {
     return NextResponse.json(
       {
@@ -313,13 +325,14 @@ export async function GET() {
         timestamp: new Date().toISOString(),
         error: "Database connection failed",
       },
-      { status: 503 }
-    )
+      { status: 503 },
+    );
   }
 }
 ```
 
 ### 9. Preview Deployment Configuration
+
 ```json
 // vercel.json - Preview specific
 {
@@ -337,6 +350,7 @@ export async function GET() {
 ```
 
 ### 10. Multi-Tenant Domain Configuration
+
 ```typescript
 // next.config.ts
 const nextConfig: NextConfig = {
@@ -355,9 +369,9 @@ const nextConfig: NextConfig = {
           destination: "/en/s/:subdomain/:path*",
         },
       ],
-    }
+    };
   },
-}
+};
 ```
 
 ```bash
@@ -370,6 +384,7 @@ vercel domains inspect databayt.org
 ```
 
 ### 11. Deployment Checklist Script
+
 ```bash
 #!/bin/bash
 # scripts/pre-deploy.sh
@@ -425,6 +440,7 @@ echo "\n✨ All checks passed! Ready to deploy."
 ```
 
 ### 12. Zero-Downtime Deployment
+
 ```yaml
 # Vercel handles zero-downtime automatically with:
 # 1. Build new version
@@ -455,18 +471,23 @@ echo "\n✨ All checks passed! Ready to deploy."
 
 ## Anti-Patterns
 
-### 1. Direct Production Pushes
-```bash
-# BAD - Push directly to production
-git push origin main  # Triggers prod deploy
+### 1. Pushing broken code to main
 
-# GOOD - Use PR workflow
-git checkout -b feature/new-feature
-git push -u origin feature/new-feature
-# Create PR, review, then merge
+```bash
+# BAD - push to main without verifying it builds
+git push origin main   # ships a red build straight to prod
+
+# GOOD - gate first, then push to main (this IS our workflow)
+pnpm tsc --noEmit && pnpm build   # pre-push quality gate
+git pull --rebase origin main
+git push origin main              # main auto-deploys
 ```
 
+> We push to `main` directly by design. The risk to avoid is shipping _unverified_ code,
+> not pushing to main — so always pass the build gate first. No branches, no PRs.
+
 ### 2. Skipping Staging
+
 ```bash
 # BAD - Deploy to prod without staging
 vercel --prod
@@ -478,6 +499,7 @@ vercel --prod  # Then production
 ```
 
 ### 3. Missing Rollback Plan
+
 ```bash
 # BAD - Deploy without knowing how to rollback
 vercel --prod
@@ -491,6 +513,7 @@ vercel --prod
 ## Edge Cases
 
 ### Database Schema Changes
+
 ```bash
 # Safe migration pattern:
 # 1. Add new column with default value
@@ -504,6 +527,7 @@ prisma migrate dev --name remove_old_column
 ```
 
 ### Large Migrations
+
 ```bash
 # For large data migrations:
 # 1. Create background job
@@ -515,12 +539,12 @@ prisma migrate dev --name remove_old_column
 
 ## Handoffs
 
-| Situation | Hand to |
-|-----------|---------|
-| Build failures | `build` |
-| GitHub Actions | `github` |
-| Database design | `architecture` |
-| Monitoring alerts | `sse` |
+| Situation         | Hand to        |
+| ----------------- | -------------- |
+| Build failures    | `build`        |
+| GitHub Actions    | `github`       |
+| Database design   | `architecture` |
+| Monitoring alerts | `sse`          |
 
 ## Self-Improvement
 
@@ -534,20 +558,21 @@ vercel --version    # Check CLI version
 ## Quick Reference
 
 ### Vercel CLI
-| Command | Purpose |
-|---------|---------|
-| `vercel` | Deploy preview |
-| `vercel --prod` | Deploy production |
+
+| Command           | Purpose             |
+| ----------------- | ------------------- |
+| `vercel`          | Deploy preview      |
+| `vercel --prod`   | Deploy production   |
 | `vercel rollback` | Rollback deployment |
-| `vercel env ls` | List env vars |
-| `vercel logs` | View logs |
-| `vercel domains` | Manage domains |
+| `vercel env ls`   | List env vars       |
+| `vercel logs`     | View logs           |
+| `vercel domains`  | Manage domains      |
 
 ### Deployment Types
-| Type | Trigger | URL Pattern |
-|------|---------|-------------|
-| Preview | PR | pr-123.vercel.app |
-| Staging | develop branch | staging.domain.com |
-| Production | main branch | domain.com |
 
-**Rule**: Test in staging. Use PR workflow. Always have rollback plan. Monitor after deploy.
+| Type               | Trigger        | URL Pattern        |
+| ------------------ | -------------- | ------------------ |
+| Production         | push to `main` | domain.com         |
+| Staging (optional) | manual deploy  | staging.domain.com |
+
+**Rule**: Pass the build gate before pushing to `main`. Always have a rollback plan. Monitor after deploy. (Main-only — no PR/preview workflow.)

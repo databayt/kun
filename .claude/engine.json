@@ -3,23 +3,39 @@
   "model": "claude-opus-4-8",
   "model_label": "Opus 4.8",
   "model_context": "1M",
-  "engine_version": "databayt v3.1",
-  "updated": "2026-06-07",
+  "fallback_models": ["claude-opus-4-8", "claude-sonnet-4-6"],
+  "engine_version": "databayt v3.2",
+  "updated": "2026-06-12",
+  "billing": {
+    "plan": "claude-max-100",
+    "$comment": "Max 5x ($100/mo) for the time being — corrected from Max 20x on 2026-06-12. Subscription-ONLY posture: no usage-based credits, no API-key per-token spend — changing this requires a /decide entry + Abdout approval (captain ESCALATE gate: budget > $50/mo). Check /usage per-category weekly to stay inside plan caps."
+  },
+  "anthropic_sync": {
+    "$comment": "Self-update loop stamp. /sync-anthropic refreshes this; captain session-start flags staleness > 7 days. Material adoption notes live in docs/CONFIG-BENCHMARK.md → Adoption log.",
+    "last": "2026-06-12",
+    "claude_code_version": "2.1.175",
+    "sources": [
+      "https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md",
+      "https://platform.claude.com/docs/en/release-notes/api",
+      "https://www.anthropic.com/news"
+    ]
+  },
   "counts": {
     "project_agents": 18,
     "user_agents": 27,
-    "commands": 31,
+    "commands": 32,
     "project_skills": 1,
     "user_skills": 23,
     "pattern_cards": 10,
     "project_rules": 3,
     "domain_rules": 29,
     "project_mcp": 25,
-    "user_mcp": 19
+    "user_mcp": 19,
+    "workflows": 1
   },
   "model_tiers": {
     "$comment": "Per-agent model alias by task type. The portable stack fleet (~/.claude/agents) follows this; the project fleet defaults to opus (quality-over-speed) except purely mechanical agents.",
-    "opus": "architecture, orchestration, deep reasoning, code review/fixes, and strategy/leadership agents",
+    "opus": "architecture, orchestration, deep reasoning, code review/fixes, and strategy/leadership agents (incl. captain)",
     "sonnet": "standard build agents + the mechanical project agent (package)",
     "haiku": "routine/formatting agents (comment, git, icon, github, semantic, sse, structure)"
   },
