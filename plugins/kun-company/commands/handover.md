@@ -30,6 +30,8 @@ Otherwise → block mode. Continue to Phase 2B.
 
 ### Phase 2A — URL mode
 
+**Deterministic fan-out (preferred)**: run the saved workflow — `Workflow({ name: "handover", args: "<url>" })` (or `args: { url, base }` for `--env` targets). It sweeps all 12 keywords as parallel subagents and adversarially verifies every FAIL before it can block, then returns the verdict table to render. This `/handover` invocation is the multi-agent opt-in. Fall back to the serial in-session pass below only if the Workflow tool is unavailable.
+
 Run the 12 per-URL niche keywords (browser 6 + code 6) defined in `.claude/agents/quality.md`:
 
 - Browser: `see`, `flow`, `debug`, `responsive`, `lang`, `fast`
