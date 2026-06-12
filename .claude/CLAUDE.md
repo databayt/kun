@@ -87,6 +87,7 @@ Claude routes these to the right agent + MCP without a dedicated command.
   **Operations**: `weekly`, `monitor`, `incident`, `credentials`
   **Intelligence**: `learn`, `analyze`, `conventions`, `health`, `patterns`, `drift`, `sync` (→ `/sync` — Anthropic/stack/services/practice releases)
   **Decisions/CEO** (passive — no slash): `canon` + any leadership/strategy decision (`hiring`, `pricing`, `positioning`, `strategy`, `prioritize`, `fundraise`, `runway`, `customer development`, "should we build…", "what do I do about…") → consult `docs/CANON.md`, surface the book + one operating move grounded in principle `#N`
+  **Blocks** (passive, per-repo): every feature block in the repo's `.claude/blocks.json` is a keyword (hogwarts: `timetable`, `attendance`, `exams`, `grades`, `admission`, `finance`, `table`, `docs`, … 72 keys) → **block protocol**: before work, read the block's `README.md` + `ISSUE.md` + `CLAUDE.md` and the related GitHub issue (skip for quick small tasks); after work, update those records + `content/docs-*/<block>.mdx` and comment/close the issue. Hook-enforced: `block-context` (prompt inject), `block-touch` + `block-guard` (Stop nudge when 2+ code files change without record/docs updates). Regenerate registry: `node .claude/scripts/generate-blocks.mjs <repo-root>` (canonical hook copies in `.claude/scripts/hooks/`, installed at `~/.claude/hooks/`).
 
 ---
 
