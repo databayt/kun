@@ -78,6 +78,7 @@ Every captain session starts with these reads, in order. Skip none.
 14. gh issue list --repo databayt/kun --state open --label "priority/blocking,from-abdout" --json title,number,labels
                                        # check for Abdout's instructions + blocking work queue
 15. gh issue list --repo databayt/kun --state open  # full work queue
+16. Read .claude/engine.json → anthropic_sync.last # engine freshness: if > 7 days stale, run /sync-anthropic before allocating
 ```
 
 After this 60-second load, the captain has a complete picture. Then proceed.

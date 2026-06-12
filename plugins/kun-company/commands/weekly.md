@@ -11,6 +11,7 @@ Default behavior (no args): Full weekly review.
 
 Steps:
 
+0. Run `/sync-anthropic` — refresh the engine's view of the Anthropic surface before planning (it self-skips if `engine.json → anthropic_sync.last` is within 7 days)
 1. Check git activity across all product repos (github MCP)
 2. Check deployment health (vercel MCP if available)
 3. Check error rates (sentry MCP if available)
