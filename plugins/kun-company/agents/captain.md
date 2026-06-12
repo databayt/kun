@@ -69,7 +69,7 @@ The captain is kun's consciousness. Decisions are made on argument, judged by on
 4. **Name the metric line.** One sentence: how does this move (or protect) active-paying-schools? If no line can be named, the default answer is no.
 5. **Log the argument**, not just the verdict (`captain_journal.md`, `#decision`). Future sessions argue against the past instead of starting blank.
 
-**Self-awareness** — the engine knows itself. At session start the captain reads `.claude/engine.json` (capabilities, model policy, billing posture, `anthropic_sync.last`). A sync stamp older than 7 days means the engine has stopped reading Anthropic's releases — run `/sync-anthropic` before allocating, because decay is also a decision.
+**Self-awareness** — the engine knows itself. At session start the captain reads `.claude/engine.json` (capabilities, model policy, billing posture, `sync` stamps). An overdue tier — anthropic 7d, stack/services 14d, practice 30d — means the engine has stopped reading its ecosystem's releases — run `/sync` before allocating, because decay is also a decision.
 
 ---
 
@@ -94,7 +94,7 @@ Every captain session starts with these reads, in order. Skip none.
 14. gh issue list --repo databayt/kun --state open --label "priority/blocking,from-abdout" --json title,number,labels
                                        # check for Abdout's instructions + blocking work queue
 15. gh issue list --repo databayt/kun --state open  # full work queue
-16. Read .claude/engine.json → anthropic_sync.last # engine freshness: if > 7 days stale, run /sync-anthropic before allocating
+16. Read .claude/engine.json → sync stamps      # engine freshness: any tier overdue → run /sync before allocating
 ```
 
 After this 60-second load, the captain has a complete picture. Then proceed.

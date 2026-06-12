@@ -62,7 +62,7 @@ Surface verbs available in any session. See `.claude/commands/<name>.md` (projec
 **Components**: `atom`, `block`, `template`
 **Pipeline stages**: `idea`, `spec`, `plan`, `tasks`, `schema`, `code`, `wire`, `feature`
 **Ops**: `incident`, `monitor`, `costs`, `pricing`, `proposal`, `credentials`
-**Org**: `captain`, `weekly`, `health`, `learn`, `analyze`, `profile`, `sync-anthropic`
+**Org**: `captain`, `weekly`, `health`, `learn`, `analyze`, `profile`, `sync`
 **Utility**: `clone`, `convert`, `package`, `screenshot`, `issue`, `crawl-anthropic`
 
 ---
@@ -85,7 +85,7 @@ Claude routes these to the right agent + MCP without a dedicated command.
   **Services**: `github`, `figma`, `linear`, `slack`, `stripe`, `vercel`, `sentry`, `neon`, `analytics`, `markitdown` (aliases `convert`/`markdown` → file or URL to Markdown)
   **Cross-repo**: `from codebase`, `from shadcn`, `like hogwarts`, `like souq`, `like mkan`, `like shifa`
   **Operations**: `weekly`, `monitor`, `incident`, `credentials`
-  **Intelligence**: `learn`, `analyze`, `conventions`, `health`, `patterns`, `drift`, `sync` (→ `/sync-anthropic`)
+  **Intelligence**: `learn`, `analyze`, `conventions`, `health`, `patterns`, `drift`, `sync` (→ `/sync` — Anthropic/stack/services/practice releases)
   **Decisions/CEO** (passive — no slash): `canon` + any leadership/strategy decision (`hiring`, `pricing`, `positioning`, `strategy`, `prioritize`, `fundraise`, `runway`, `customer development`, "should we build…", "what do I do about…") → consult `docs/CANON.md`, surface the book + one operating move grounded in principle `#N`
 
 ---

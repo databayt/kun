@@ -54,9 +54,10 @@ reset`, `--accept-data-loss`, `git reset --hard`, force-push, `DROP/TRUNCATE`. N
 
 ## Re-benchmark 2026-06-12 — the June surface
 
-Second pass, produced by the new `/sync-anthropic` loop (which makes re-benchmarking continuous
-instead of episodic). Surface verified against the Claude Code CHANGELOG (v2.1.129 → v2.1.175)
-and the platform release notes.
+Second pass, produced by the new `/sync` loop (which makes re-benchmarking continuous instead
+of episodic — four tiers: anthropic weekly, stack + services biweekly, agent-practice monthly).
+Surface verified against the Claude Code CHANGELOG (v2.1.129 → v2.1.175) and the platform
+release notes.
 
 | Capability (version)                                                                 | What it is                                                                         | kun decision                                                                                                 |
 | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
@@ -78,14 +79,14 @@ The feature-parity survey above answers "is kun configured to the frontier?". Th
 "is the engine actually working?". Measured by the captain every Friday review from native
 surfaces, recorded in `.claude/memory/weekly/<date>.md`.
 
-| #   | KPI                                                                     | Source                                  | Target                            |
-| --- | ----------------------------------------------------------------------- | --------------------------------------- | --------------------------------- |
-| 1   | **Freshness** — days since Anthropic sync                               | `engine.json` → `anthropic_sync.last`   | ≤ 7                               |
-| 2   | **Drift** — config vs reality                                           | `health.sh` + `build-plugin.sh --check` | 0 warnings                        |
-| 3   | **Cycle time** — `/idea` issue open → `/watch` close                    | GitHub issue timestamps                 | ≤ 7 days p50                      |
-| 4   | **Plan discipline** — usage inside subscription                         | `/usage` per-category, weekly           | inside Max-100 caps, $0 per-token |
-| 5   | **Autonomy** — human unblocks needed per shipped feature                | session observation + `/insights`       | trending ↓                        |
-| 6   | **North-star linkage** — allocations that name their line to the metric | `weekly/<date>.md`                      | 100%                              |
+| #   | KPI                                                                                 | Source                                  | Target                            |
+| --- | ----------------------------------------------------------------------------------- | --------------------------------------- | --------------------------------- |
+| 1   | **Freshness** — sync tiers overdue (anthropic 7d, stack/services 14d, practice 30d) | `engine.json` → `sync.*`                | 0 overdue                         |
+| 2   | **Drift** — config vs reality                                                       | `health.sh` + `build-plugin.sh --check` | 0 warnings                        |
+| 3   | **Cycle time** — `/idea` issue open → `/watch` close                                | GitHub issue timestamps                 | ≤ 7 days p50                      |
+| 4   | **Plan discipline** — usage inside subscription                                     | `/usage` per-category, weekly           | inside Max-100 caps, $0 per-token |
+| 5   | **Autonomy** — human unblocks needed per shipped feature                            | session observation + `/insights`       | trending ↓                        |
+| 6   | **North-star linkage** — allocations that name their line to the metric             | `weekly/<date>.md`                      | 100%                              |
 
 KPI 6 is the conscience clause: the engine exists to make databayt profitable and sustainable
 (`NORTH-STAR.md`). An engine improvement that cannot articulate its line to active-paying-schools
@@ -93,11 +94,12 @@ is bench polish, not benchmark push.
 
 ## Adoption log
 
-- **2026-06-12** — `/sync-anthropic` self-update loop; first deterministic workflow
-  (`.claude/workflows/handover.js` — 12-keyword fan-out + adversarial FAIL verification);
-  `fallbackModel` chain; engine KPIs defined; captain conscience block (argument protocol +
-  engine self-awareness); billing posture corrected to Max 5x $100/mo, subscription-only.
-  Engine v3.2.
+- **2026-06-12** — `/sync` self-update loop (four tiers: anthropic + stack + services +
+  agent-practice, incl. BMAD-method tracking; keyword `sync` routes to it passively); first
+  deterministic workflow (`.claude/workflows/handover.js` — 12-keyword fan-out + adversarial
+  FAIL verification); `fallbackModel` chain; engine KPIs defined; captain conscience block
+  (argument protocol + engine self-awareness); billing posture corrected to Max 5x $100/mo,
+  subscription-only. Engine v3.2.
 - **2026-06-04** — founding benchmark (this doc): path-scoped rule corpus, drift CI,
   destructive-bash hook, model tiering codified. Engine v3.1.
 
