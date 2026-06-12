@@ -92,6 +92,8 @@ Claude routes these to the right agent + MCP without a dedicated command.
 
 ## Behavior
 
+Abdout prompts in natural language — he won't type slash commands. Pick the keywords out of the prose and activate the right config automatically; passive activation is the engine's job, not his.
+
 When you see a keyword:
 
 1. **Pipeline stage** → run the corresponding stage command
