@@ -120,14 +120,17 @@ c
 │   ├── report.json
 │   └── repositories.json       # All org repos with monitoring
 └── scripts/
-    ├── install.sh              # macOS/Linux installer
-    ├── install.ps1             # Windows installer
-    ├── sync.sh                 # macOS/Linux config sync
-    ├── sync.ps1                # Windows config sync
-    ├── secrets.sh        # macOS/Linux secrets setup
-    ├── secrets.ps1       # Windows secrets setup
-    ├── sync-repos.sh           # Sync all org repos locally
-    └── sync-repos.ps1          # Windows repo sync
+    ├── installer.sh            # macOS guided installer (Act 1 dialogs → onboarding-mac.sh)
+    ├── installer-linux.sh      # Linux guided installer
+    ├── installer.ps1           # Windows guided installer
+    ├── onboarding-mac.sh       # macOS backend (8 phases, smart-install helpers)
+    ├── onboarding-linux.sh     # Linux backend
+    ├── onboarding-windows.ps1  # Windows backend
+    ├── setup.sh / setup.ps1    # Sync ~/kun/.claude/* → ~/.claude/* (engine config update)
+    ├── secrets.sh / secrets.ps1 # Pull MCP + cross-cutting keys from Gist into ~/.claude/.env
+    ├── vercel-pull.sh / .ps1   # Pull per-product .env from Vercel team databayt
+    ├── sync-repos.sh / .ps1    # Sync all org repos locally
+    └── health.sh / health.ps1  # Verify config
 ```
 
 ---
@@ -337,26 +340,23 @@ Sync all organization repositories locally for deep reference:
 
 ## Configuration Sync
 
-To get latest team configuration updates:
+Use **`/update`** — single command, all-in-one:
 
-**macOS / Linux**
 ```bash
-~/.claude/scripts/sync.sh
+c /update              # engine config + org repos + health verify (~30 sec)
+c /update --tools      # also re-run smart-install for tools (~5 min)
 ```
 
-**Windows**
-```powershell
-& "$env:USERPROFILE\.claude\scripts\sync.ps1"
-```
+`/update` chains:
+1. `git -C ~/kun pull --ff-only origin main` — pull latest engine
+2. `bash ~/kun/.claude/scripts/setup.sh` — sync `~/kun/.claude/*` → `~/.claude/*` (CLAUDE.md, agents, commands, rules, memory, scripts, hooks, settings)
+3. `bash ~/.claude/scripts/sync-repos.sh all` — pull all 11 org repos
+4. `bash ~/.claude/scripts/health.sh` — verify
+5. *(only with `--tools`)* re-run smart-install bootstrap for brew/apt/winget/npm tools
 
-This updates:
-- CLAUDE.md (keywords, patterns)
-- Agents (29 files)
-- Commands (17 files)
-- Memory files
-- Scripts
+Counts are discovered dynamically — no hardcoded lists. Your `CLAUDE.local.md` is preserved (setup.sh doesn't touch it).
 
-Your `CLAUDE.local.md` is preserved.
+**SessionStart drift hook** at `~/.claude/hooks/session-start-kun-drift.sh` prints `⚠️ ~/kun is N commits behind` when you open Claude Code on a stale machine. Hook never auto-pulls — you decide when to run `/update`.
 
 ---
 

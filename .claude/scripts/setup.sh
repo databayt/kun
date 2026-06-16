@@ -73,6 +73,15 @@ cp "$KUN_DIR/.claude/scripts/"*.md "$CLAUDE_DIR/scripts/" 2>/dev/null || true
 chmod +x "$CLAUDE_DIR/scripts/"*.sh 2>/dev/null || true
 info "scripts"
 
+# Hooks — SessionStart drift warning + future hook scripts
+if [ -d "$KUN_DIR/.claude/hooks" ]; then
+    mkdir -p "$CLAUDE_DIR/hooks"
+    cp "$KUN_DIR/.claude/hooks/"*.sh "$CLAUDE_DIR/hooks/" 2>/dev/null || true
+    chmod +x "$CLAUDE_DIR/hooks/"*.sh 2>/dev/null || true
+    HOOK_COUNT=$(ls "$CLAUDE_DIR/hooks/"*.sh 2>/dev/null | wc -l | tr -d ' ')
+    info "hooks ($HOOK_COUNT)"
+fi
+
 echo ""
 
 # ── Full config (universal — every machine is a full autonomous worker) ──
