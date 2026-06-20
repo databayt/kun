@@ -7,6 +7,8 @@ This is the team's execution plan for the quarter — every epic we're moving, *
 
 [Epics](/docs/epics) is the companion page: it's the GitHub **tracker map**, where each issue is the source of truth. This page is the **execution plan** — the machine-readiness prerequisites, the cash position, and the non-tech tracks (sales, fundraising, content) the tracker doesn't carry. Per-feature truth lives in the hogwarts docs — [MVP](https://ed.databayt.org/en/docs/mvp) and [Roadmap](https://ed.databayt.org/en/docs/roadmap); if anything here conflicts, those win.
 
+> **Reconciled 2026-06-20** against hogwarts `origin/main` @ `febb7da3b`. Since the last reconcile a large amount shipped — transportation Phase 2–5 (route optimization, live GPS, hazards), the conference notification/attendance integration, the public features + community hubs, exam-and-grade automation, the stream/LMS optimize pass, saas-dashboard de-fabrication, and timetable production-readiness — so **most tech epics are now code-complete**. The quarter therefore narrows to a single **[launch sprint](#launch-sprint-4-weeks)** below: four weeks of correctness fixes, database confirmation, ops/credential activation, and a QA pass, ending with a launch gate for **King Fahad, public SaaS, and Aldar at once**. The hogwarts-side execution-truth version (with file-level evidence) is [hogwarts/sprint](https://ed.databayt.org/en/docs/sprint). The per-epic backlog below is the open work that feeds the sprint — and the long tail after it.
+
 ## Everyone: the warm-intro list
 
 The fastest path to a pilot is someone we already know — a warm intro from a real relationship converts far better than any scraped or cold lead. So this one is on everyone, not just sales. The [sales block](https://ed.databayt.org/en/sales) now has a one-click Network filter — add/edit every school owner, principal, or manager you personally know.
@@ -50,31 +52,57 @@ Tasks marked *needs issue* don't have a GitHub issue yet — open one with `/iss
 | # | Epic | Track | Bet | Maturity | Detail |
 |---|------|-------|-----|----------|--------|
 | 01 | Finance & billing | Tech | 1 | `Built+Polish` | [hogwarts#313](https://github.com/databayt/hogwarts/issues/313) |
-| 02 | Admission | Tech | 1 | `Built` | [hogwarts#314](https://github.com/databayt/hogwarts/issues/314) |
+| 02 | Admission | Tech | 1 | `Built+Polish` | [hogwarts#314](https://github.com/databayt/hogwarts/issues/314) |
 | 03 | Exams & grading | Tech | — | `Built+Polish` | [exams](https://ed.databayt.org/en/docs/exams) |
 | 04 | Attendance | Tech | — | `Built+Polish` | [attendance](https://ed.databayt.org/en/docs/attendance) |
-| 05 | LMS / Stream | Tech | — | `Built+Polish` | [clickview](https://ed.databayt.org/en/docs/clickview) |
+| 05 | LMS / Stream | Tech | — | `Built+Polish` | [catalog](https://ed.databayt.org/en/docs/catalog) |
 | 06 | Communication / Messaging | Tech | — | `Built+Polish` | [messages](https://ed.databayt.org/en/docs/messages) |
-| 07 | Role-aware UI sweep | Tech | — | `In Progress` | — |
-| 08 | Internationalization & translation | Tech | — | `In Progress` | [translation](https://ed.databayt.org/en/docs/translation) |
-| 09 | Mobile API Layer | Tech | 2 | `In Progress` | [hogwarts#315](https://github.com/databayt/hogwarts/issues/315) |
-| 10 | iOS app | Tech | 2 | `In Progress` | [swift-app#3](https://github.com/databayt/swift-app/issues/3) |
+| 06b | Transportation | Tech | — | `Built+Polish` | [transportation](https://ed.databayt.org/en/docs/transportation) |
+| 07 | Role-aware UI sweep | Tech | — | `Built+Polish` | — |
+| 08 | Internationalization & translation | Tech | — | `Built+Polish` | [translation](https://ed.databayt.org/en/docs/translation) |
+| 09 | Mobile API Layer | Tech | 2 | `Built+Polish` | [hogwarts#315](https://github.com/databayt/hogwarts/issues/315) |
+| 10 | iOS app | Tech | 2 | `Built` (stalled) | [swift-app#3](https://github.com/databayt/swift-app/issues/3) |
 | 11 | Android app | Tech | 2 | `Vaporware` | `kotlin-app` *(repo TBD)* |
 | 12 | Sales & Pilots | Non-tech | both | `Built+Polish` | [hogwarts#316](https://github.com/databayt/hogwarts/issues/316) |
 | 13 | Fundraising | Non-tech | — | `In Progress` | [fundraising](https://ed.databayt.org/en/docs/fundraising) |
 | 14 | Content & Marketing | Non-tech | — | `In Progress` | — |
-| 15 | Global Catalog | Tech | — | `Vaporware` | — |
+| 15 | Global Catalog | Tech | — | `Built+Polish` | [catalog](https://ed.databayt.org/en/docs/catalog) |
 | 16 | Letters & Proposals | Non-tech | both | `In Progress` | [proposal](https://ed.databayt.org/en/docs/proposal) · [outreach](https://ed.databayt.org/en/docs/outreach) |
 | 17 | Community | Non-tech | — | `In Progress` | [community](https://ed.databayt.org/en/community) |
 
 Owner-by-epic mapping lives in [Epics](/docs/epics) — that's the GitHub tracker map. This page is interest-first: pick by topic, not by name.
+
+## Launch sprint (4 weeks)
+
+The epics above are mostly `Built+Polish` — code-complete, deployed, tested. So the quarter's spine is one focused sprint that ends with **launch for all three audiences at once**: the **King Fahad** pilot (Sudan, Sept 2026), the **public SaaS** at `ed.databayt.org`, and the **Aldar** enterprise pilot (UAE). File-level evidence for every line lives in [hogwarts/sprint](https://ed.databayt.org/en/docs/sprint); this is the org view.
+
+Five tracks run in parallel across all four weeks: **A** Code, **B** Data, **C** Ops/Infra, **D** QA/Proof, **E** Polish.
+
+| Week | Theme | Exit gate |
+|---|---|---|
+| 1 | Reachable & Truthful | Every shipped feature has a URL, CI runs e2e, prod has error visibility, DB confirmed |
+| 2 | Money & Messaging | Every financial event posts a balanced ledger entry; real-time + WhatsApp live for all tenants |
+| 3 | Conference & Proof | LiveKit live (network-test scheduled), e2e green in CI, Arabic RTL clean |
+| 4 | Harden & Launch | Launch gate green for all three audiences |
+
+**Week 1 — Reachable & Truthful.** Fix the Playwright CI command (`playwright tests` → `playwright test`, `playwright.yml:52`) so e2e actually runs · make `STRIPE_API_KEY` optional in `/api/health` so school-only deploys report healthy · add the `manage/` + `paper/` exam index pages · audit Neon prod vs Prisma and apply any additive drift Neon-branch-first (transportation + conference DB already landed at their 2026-06-20 deploys) · set Sentry + Upstash env in Vercel.
+
+**Week 2 — Money & Messaging.** Wire the 4 orphaned ledger posters (`postInvoicePayment` / `postExpensePayment` / `postSalaryPayment` / `postFeeAssignment`) into their mutation paths, make `postFeePayment` transactional with rollback, add a debit=credit invariant test · replace payroll's hardcoded 15% with the `config.ts` brackets · wire invoice PDF + branded RTL email · stand up the Oracle VM + Evolution API (real-time + WhatsApp for every tenant; per-school QR for King Fahad + Albayan) · set Tap (AED) + FCM env · **file the ADEK eSIS inquiry now** (longest external lead time).
+
+**Week 3 — Conference & Proof.** LiveKit 6-gate provisioning (`conference/RUNBOOK.md`); schedule the in-school network test to a King Fahad / Aldar site visit · real e2e pass now that CI runs (triage the `test.skip` backlog, add a named section-grid case, give assertion-less specs real `expect()`s) · i18n RTL Arabic pass + parent-portal dictionary migration · exams schema cleanup (bilingual → `lang`, reconcile `Result`/`ExamResult`, harden the certificate cascade).
+
+**Week 4 — Harden & Launch.** Drain the highest-value saas-dashboard backlog (delete the dead Kanban/Products route pages, invoice state-machine guard, catalog TOCTOU, i18n sweep) · exams RBAC + calculator test coverage + AI cost cap · per-pilot smoke on King Fahad + Albayan · load + rate-limit verification · final security pass · wire the hardcoded-string ratchet into the PR gate · **run the launch gate**.
+
+**Launch gate** — the sprint ends when this is green. All critical-path code merged · Neon prod confirmed against Prisma · Sentry + Upstash + FCM set and Sentry receiving · `playwright test` green in CI · finance debit=credit invariant passes (all 6 posters wired) · King Fahad + Albayan smoke-clean · Oracle VM live + WhatsApp QR scanned · Tap keys set *(UAE/Aldar)* · LiveKit network-test passes inside school WiFi *(Aldar)* · ADEK status acceptable — DRY_RUN is fine for King Fahad/SaaS; live submission only gates Aldar compliance *(Aldar)*.
+
+**External blockers** (outside the team's keyboard — launch is not falsely gated on them): ADEK eSIS credentials (Aldar compliance team; DRY_RUN meanwhile), the LiveKit in-school network test (needs physical school WiFi; external pasted-link conferencing works meanwhile), and per-school WhatsApp QR scans (each school admin).
 
 ## Epics
 
 ### 01 — Finance & billing · Tech · `Built+Polish`
 [finance](https://ed.databayt.org/en/docs/finance) · [Epic hogwarts#313](https://github.com/databayt/hogwarts/issues/313)
 
-The 14-sub-block finance system — fees, invoice, salary, payroll, ledger, the lot. Block-level ~79% ready (see the [honest status matrix](https://ed.databayt.org/en/docs/finance#honest-status-matrix)). Top blockers: 5 of 6 ledger posting functions are orphaned (only `postFeePayment` is wired), no finance Prisma model has a `lang` field, 11 sub-modules still need the `ValidationHelper` migration, and 11 sub-modules have zero tests. Every line below is a step toward making this block fully production-ready end-to-end.
+The 14-sub-block finance system — fees, invoice, salary, payroll, ledger, the lot. Block-level ~88% ready (self-reported in the block's `ISSUE.md`, 2026-06-13; see the [honest status matrix](https://ed.databayt.org/en/docs/finance#honest-status-matrix)). Top blockers: 4 of 6 ledger posting functions are still orphaned (`postFeePayment` + `postWalletTopup` are wired — and the ledger now actually posts after a fix to a silent bug where `postFeePayment` queried a non-existent `accountCode` column and wrote nothing), no finance Prisma model has a `lang` field, 11 sub-modules still need the `ValidationHelper` migration, and 11 sub-modules have zero tests. Every line below is a step toward making this block fully production-ready end-to-end.
 
 #### Fees · 85%
 [fees](https://ed.databayt.org/en/docs/fees)
@@ -82,7 +110,7 @@ The 14-sub-block finance system — fees, invoice, salary, payroll, ledger, the 
 The most feature-rich sub-block — structures, assignments, payments, fines, scholarships, sibling-discount calc, dictionary-driven notifications. What's left is hardening + the long tail of polish.
 
 - Migrate `validation.ts` to `ValidationHelper` · *needs issue*
-- Fee defaulters list — [#56](https://github.com/databayt/hogwarts/issues/56)
+- Fee defaulters list · *needs issue*
 - Add `lang` field to `Fine` so `reason` can use `getDisplayText()` · *needs issue*
 - Translate fine-type enum badges (`LATE FEE`, `DAMAGE FINE`, `LIBRARY FINE`, `DISCIPLINE FINE`) on AR via `dictionary.finance.fees.fineTypes.*` · *needs issue*
 - Translate fines overview card titles (currently hardcoded English in `content.tsx`) · *needs issue*
@@ -121,7 +149,6 @@ The most feature-rich sub-block — structures, assignments, payments, fines, sc
 - Migrate `InvoiceSchemaZod` consumers to `createInvoiceSchema(dictionary)` (6 files) · *needs issue*
 - Migrate `onboardingSchema` consumers to `createOnboardingSchema(dictionary)` (2 files) · *needs issue*
 - Recurring-invoice scheduling (data model already in `util.ts.calculatePaymentSchedule`) · *needs issue*
-- Partial-payment tracking — `amountPaid` exists in PDF template, missing in Prisma model · *needs issue*
 - Invoice duplication (clone existing) · *needs issue*
 - Invoice preview before email send · *needs issue*
 - Public share-link generation · *needs issue*
@@ -198,7 +225,7 @@ Chart of accounts + the double-entry engine. Only `postFeePayment` reaches the l
 #### Wallet · 75%
 [finance-wallet](https://ed.databayt.org/en/docs/finance-wallet)
 
-- Wire `postWalletTopup` to the ledger (today: orphaned) · *needs issue*
+- Make the wired `postWalletTopup` ledger post transactional with rollback (today: fire-and-forget) · *needs issue*
 - Wallet-to-wallet transfer (parent → child) · *needs issue*
 - Wallet auto-top-up rules · *needs issue*
 - Transaction-history export per wallet · *needs issue*
@@ -272,128 +299,138 @@ Chart of accounts + the double-entry engine. Only `postFeePayment` reaches the l
 - Migrate `validation.ts` to `ValidationHelper` across the 11 remaining sub-modules · *needs issue*
 - E2E happy path: fee → invoice → pay → receipt → ledger entry · *needs issue*
 - E2E happy path: salary → timesheet → payroll-run → payslip → disbursement → ledger entry · *needs issue*
-- Per-school currency on `School` model + propagate to invoices, salary, payroll — [#305](https://github.com/databayt/hogwarts/issues/305)
-- Currency selector in school settings (paired with the per-school currency task) · *needs issue*
+- ✅ Per-school currency on `School` model + propagate to invoices, salary, payroll — [#305](https://github.com/databayt/hogwarts/issues/305) *(closed 2026-05-26; `School.currency` + currency snapshots on FeeStructure/FeeAssignment/Payment/Receipt)*
+- ✅ Currency selector in school settings — landed in the onboarding form + price step with MENA currencies (`61c2f470a`)
 - Field-level encryption for sensitive financial data · *needs issue*
 
 #### Payment gateways
 
-- Payment-umbrella P0 — make the gateway abstraction real so Stripe + a second provider share one interface — [#263](https://github.com/databayt/hogwarts/issues/263)
-- Auto-provision default fee structures on school create — [#264](https://github.com/databayt/hogwarts/issues/264)
+- ✅ Payment-umbrella P0 — gateway abstraction — [#263](https://github.com/databayt/hogwarts/issues/263) *(closed 2026-05-30)*: `src/lib/payment/provider.ts` registry behind one `PaymentProvider` interface, **6 providers** (stripe, tap, bank-transfer, bankak, cash, mobile-money)
+- ✅ Auto-provision default fee structures on school create — [#264](https://github.com/databayt/hogwarts/issues/264) *(closed 2026-05-30)*: `completeOnboarding()` + `repairProvisioning()`, `PricingRule` model added
 - Fee-structure preview screen at onboarding — [#269](https://github.com/databayt/hogwarts/issues/269)
-- Playwright the fee-lifecycle happy path (create → invoice → pay → receipt) — [#273](https://github.com/databayt/hogwarts/issues/273)
+- Playwright the fee-lifecycle happy path (create → invoice → pay → receipt) · *needs issue* — the manual QA walkthrough [#273](https://github.com/databayt/hogwarts/issues/273) closed 2026-06-02, but **no automated spec exists yet** (`e2e/lifecycle` stops at `06-attendance`)
 - Apple Pay on the mobile gateway (cross-link Epic 09) · *needs issue*
-- Local MENA gateway integrations (HyperPay, Tap, Moyasar) · *needs issue*
-- Webhook idempotency hardening across all providers · *needs issue*
+- Local MENA gateway integrations — **Tap is live** (`src/lib/payment/providers/tap.ts`, with MADA/KNET); HyperPay / Moyasar still · *needs issue*
+- Webhook idempotency hardening — **partially done** at the data layer (`@@unique([schoolId, transactionId])` on `Payment`, idempotent `createJournalEntry`, per-tenant journal numbering); finish the remaining providers · *needs issue*
 
-### 02 — Admission · Tech · `Built`
+### 02 — Admission · Tech · `Built+Polish`
 [admission](https://ed.databayt.org/en/docs/admission) · [Epic hogwarts#314](https://github.com/databayt/hogwarts/issues/314)
 
-Kill the onboarding friction the pilot reported first-hand — *make a few users love you*.
+Kill the onboarding friction the pilot reported first-hand — *make a few users love you*. The friction sweep is done; the epic moved into the admission↔finance integration.
 
-- Walk [#298–307](https://github.com/databayt/hogwarts/issues/314) and fix each pilot-reported friction one PR at a time
-- Resolve the `#254` blocker — [#254](https://github.com/databayt/hogwarts/issues/254)
-- Compute the merit score from the application form · *needs issue*
-- Section-placement UI on enrollment using the merit score · *needs issue*
+- ✅ Walk [#298–307](https://github.com/databayt/hogwarts/issues/314) and fix each pilot-reported friction one PR at a time — **all closed** (last #306 on 2026-06-05); OTP/onboarding fixes shipped (incl. [#332](https://github.com/databayt/hogwarts/issues/332) MENA currencies)
+- ✅ Resolve the `#254` blocker — [#254](https://github.com/databayt/hogwarts/issues/254) *(closed 2026-05-29)*
+- ✅ Compute the merit score from the application form + section-placement UI on enrollment — shipped via the production-ready admission+application flow with full finance wiring (`9db3523c0`)
+- Tick or close the [#314](https://github.com/databayt/hogwarts/issues/314) epic — every child issue is closed but its checklist boxes are still unchecked · *needs cleanup*
 - Re-test the full admission flow on staging after the friction fixes land
 
 ### 03 — Exams & grading · Tech · `Built+Polish`
-[exams](https://ed.databayt.org/en/docs/exams)
+[exams](https://ed.databayt.org/en/docs/exams) · [Epic hogwarts#321](https://github.com/databayt/hogwarts/issues/321)
 
-Production audit: 14 P0 / 22 P1 / 18 P2.
+Production audit: 9 P0 / 22 P1 / 18 P2 (was 14 P0 — Phase-1 correctness fixes applied, ~70% complete per the block's `PRODUCTION-AUDIT.md`). **Grade-certificates** shipped prod-ready alongside (public verify at `/certificate/[shareToken]`, favorite template, auto-generate + PDF cron, ~215 tests); an `exam-reminders` cron landed too.
 
-- Fix the `User.id`-as-`Student.id` submission bug · *needs issue*
-- Replace the in-memory rate limiter (breaks on serverless) with Upstash / KV · *needs issue*
-- Add `lang` to the 17 models missing it · *needs issue*
-- RBAC test coverage on the grade-entry endpoints · *needs issue*
-- Unit tests for the grade calculator edge cases · *needs issue*
+- ✅ Fix the `User.id`-as-`Student.id` submission bug — fixed 2026-05-08, now transactional
+- ✅ Replace the in-memory rate limiter — fixed with distributed Redis + in-memory fallback
+- ✅ RBAC test coverage on the grade-entry endpoints — [#342](https://github.com/databayt/hogwarts/issues/342) merged 2026-05-26
+- ✅ Unit tests for the grade calculator edge cases — [#334](https://github.com/databayt/hogwarts/issues/334) merged 2026-05-26 (22 fns, 61 cases)
+- Add bilingual / `lang` fields to the exam + qbank content models still missing them (`school-exam.prisma`, `school-qbank.prisma`) — remaining audit P0 · [#321](https://github.com/databayt/hogwarts/issues/321)
+- Reconcile the two parallel writable result models (`Result` & `ExamResult`) on one exam — remaining audit P0 · [#321](https://github.com/databayt/hogwarts/issues/321)
+- Tighten the `Class → SchoolExam → ExamResult → ExamCertificate` all-`Cascade` delete chain — remaining audit P0 · [#321](https://github.com/databayt/hogwarts/issues/321)
+- Fix the `ExamResult.marksObtained Int` vs `MarkingResult.pointsAwarded Decimal(5,2)` mismatch — remaining audit P0 · [#321](https://github.com/databayt/hogwarts/issues/321)
 
 ### 04 — Attendance · Tech · `Built+Polish`
 [attendance](https://ed.databayt.org/en/docs/attendance)
 
-The section-centric migration is deployed and DB-migrated; it needs end-to-end testing.
+The section-centric migration is deployed and DB-migrated — `sectionId` is now the primary reference (`b2272a146`, `b741e8ea1`), threaded through bulk / manual / analytics / period marking with new hot-path indexes. **Timetable** is now production-ready in its own right (section-first slot lifecycle, student visibility, `classId` retirement, cross-tenant fixes, atomic transactions — merged to main). What's left is live e2e coverage: the Playwright specs were **authored and merged** but every test is `test.skip`d on a dev-environment "Protocol mismatch", so the harness exists but does not yet run.
 
-- Playwright MCP run on the section-centric attendance grid · *needs issue*
-- Playwright MCP run on the section-centric timetable surface · *needs issue*
+- Resolve the dev-environment "Protocol mismatch" that `test.skip`s every attendance e2e spec (`admin-marks-manual`, `overview-rbac`, `student-views-records`, `compliance-settings`, `06-attendance`) · *needs issue*
+- Add a true section-grid Playwright case (the current specs cover generic manual-marking + RBAC, none target the section grid by name) · *needs issue*
 - Polish any rough edges the QA pass surfaces · *needs issue per finding*
 
 ### 05 — LMS / Stream · Tech · `Built+Polish`
-[clickview](https://ed.databayt.org/en/docs/clickview)
+[catalog](https://ed.databayt.org/en/docs/catalog) · [Epic hogwarts#323](https://github.com/databayt/hogwarts/issues/323)
 
-The school-scoped LMS is shipped — courses, chapters, lessons, enrollment, completion certificates, per-school storage quota. The remaining work is the asset wave.
+The school-scoped LMS is shipped — courses, chapters, lessons, enrollment, completion certificates, per-school storage quota. "ClickView" terminology has been **retired repo-wide** (the surface is now the catalog/stream block; `clickview*` columns renamed to `subjectGroupId`/`sourceUrl`/`coverId`). The asset wave terminated on our own CDN and quota enforcement is live; what's left is content uploads + the admin meter.
 
-- Finish the ClickView CDN asset-download wave (the rest currently fall back to the ClickView CDN) · *needs issue*
-- Verify per-school storage quota enforcement (`videoStorageUsedBytes` / `videoStorageQuotaBytes`) · *needs issue*
+- ✅ Finish the ClickView CDN asset-download wave — **done**: curriculum/concept art now resolves from `cdn.databayt.org`; the only residual gap is external **content** uploads (real mp4s, textbook PDFs, book covers — AWS-creds-gated) · [#323](https://github.com/databayt/hogwarts/issues/323)
+- ✅ Verify per-school storage quota enforcement (`videoStorageUsedBytes` / `videoStorageQuotaBytes`) — `checkSchoolVideoQuota` wired + tested (`ba2945277`)
 - Storage quota indicator in the school admin surface · *needs issue*
 
 ### 06 — Communication / Messaging · Tech · `Built+Polish`
-[messages](https://ed.databayt.org/en/docs/messages)
+[messages](https://ed.databayt.org/en/docs/messages) · [Epic hogwarts#324](https://github.com/databayt/hogwarts/issues/324)
 
-Announcements, real-time messages (Socket.io), notifications (in-app + email + push), and the WhatsApp Evolution bridge are all shipped. What's left is hardening + handover.
+Announcements, in-app + email notifications, and the messaging / Socket.io + WhatsApp Evolution **code** are all shipped (incl. group delivery, FTS message search, webhook hardening). Push is **scaffolded only** (FCM-creds-gated — `push-fcm.ts` throws until `firebase-admin` is installed). The real-time + WhatsApp surface is code-ready but **ops-gated on the Oracle Always-Free VM** (DNS + TLS + per-school QR + Vercel prod secrets). What's left is that activation + handover.
 
-- WhatsApp Evolution-API retry + exponential backoff · *needs issue*
-- Scheduled-notification cron delivery test (in-app + email + push) · *needs issue*
+- ✅ WhatsApp Evolution-API retry + exponential backoff — **done**: 5-attempt backoff (5m base, ×2) + dead-letter marker in `lib/whatsapp/dispatch.ts`
+- Stand up the Oracle VM activation path (socket-server + Evolution API v2.1.1 + Postgres + Redis compose, multi-tenant CORS) — the true blocker · *needs issue*
+- Scheduled-notification cron delivery test — in-app + email cron + test landed (`bc0c2f86a`); push still pending FCM creds · *needs issue*
 - Demo the announcement + messaging surfaces to the pilot and capture feedback · *needs issue*
 - One-page user guide for school admins on broadcasts vs. direct messages · *needs issue*
 
-### 07 — Role-aware UI sweep · Tech · `In Progress`
-Sidebar / PageNav / Toolbar / row-action gating across the school dashboard.
+### 06b — Transportation · Tech · `Built+Polish`
+[transportation](https://ed.databayt.org/en/docs/transportation)
 
-- Gate the finance surfaces against `permissions.ts` · *needs issue*
-- Gate the school-settings surfaces against `permissions.ts` · *needs issue*
-- Gate the sales surfaces against `permissions.ts` · *needs issue*
-- Role-matrix test: log in as each role, screenshot what's visible · *needs issue*
+Fleet management shipped (merged to main, `63316257c`) — vehicles, routes, stops, drivers, student-route assignments, trips with a state machine, geofence-boarding webhook, transportation fees, reports, and a parent/driver `me` surface. The **Phase 2–5 advanced upgrade then shipped 2026-06-20 (`febb7da3b`)**: Mapbox + Haversine route optimization, per-student transport profiles, bell-time ETAs, guardian skip-pickup + approvals, live GPS tracking (driver + guardian maps + location ingest), road hazards, and 2 new crons. Multi-tenant (`schoolId` on every model), 331 tests, hardened across 6 security dimensions (IDOR, trip-strand recovery, CSV-injection guard, webhook rate-limit). Additive DB landed on Neon prod at deploy.
 
-### 08 — Internationalization & translation · Tech · `In Progress`
+- Open a master tracker issue (the block currently has none) · *needs issue*
+- Set `MAPBOX_SERVER_TOKEN` for paid traffic-aware ETA tiers (Haversine fallback works without it) · *needs issue*
+- Mobile / driver clock-in surface (cross-link Epic 09/10) · *needs issue*
+- Weather-aware routing (designed, needs `OPENWEATHER_API_KEY`) · *deferred*
+- Long-tail polish from a QA pass · *needs issue per finding*
+
+### 07 — Role-aware UI sweep · Tech · `Built+Polish`
+Sidebar / PageNav / Toolbar / row-action gating across the school dashboard. Backed by `src/lib/rbac/ui-permissions.ts` + per-block `permissions.ts` (finance, sales, admission, exams, school, attendance, timetable, conference, notifications).
+
+- ✅ Gate the finance surfaces against `permissions.ts` — 12+ finance route layouts use `FINANCE_VIEW_ROLES` / `getFinanceRootTabs`
+- ✅ Gate the school-settings surfaces against `permissions.ts` — `school/layout.tsx` → `getTabsForRole`
+- ✅ Gate the sales surfaces against `permissions.ts` — `sales/layout.tsx` → `getTabsForRole`
+- ✅ Role-matrix test: log in as each role — [#342](https://github.com/databayt/hogwarts/issues/342) merged 2026-05-26
+- Extend gating to any remaining surfaces a role-matrix screenshot pass flags · *needs issue per finding*
+
+### 08 — Internationalization & translation · Tech · `Built+Polish`
 [translation](https://ed.databayt.org/en/docs/translation)
 
-Infrastructure is shipped — two-tier system (`ar.json` / `en.json` dictionaries for static UI, `getDisplayText()` + Google Translate + DB cache for dynamic content). The work left is closing adoption gaps and hardening the contributor workflow.
+Infrastructure is shipped **and hardened** — two-tier system (per-feature `ar`/`en` dictionaries for static UI; the batched `localize()` engine — LRU → `Translation` table → Google Translate, with prewarm-on-write — for dynamic content, replacing the old per-row `getDisplayText()` N+1s). Drift can no longer ship: en/ar key parity, untranslated placeholders, hardcoded-string ratchets, and RTL physical-class counts are all gated in `pnpm test` + CI. The work left is the long-tail hardcoded-string sweep (ratchet baselines) and a 3rd-language readiness plan.
 
 **Infra hardening**
 
-- Audit locale routing for edge cases (middleware redirects, RSC streaming, dynamic segments) · *needs issue*
-- Document the dictionary contract (`ar.json` / `en.json`) so contributors can add strings safely · *needs issue*
-- Translator workflow doc: how a non-developer proposes string changes (issue → PR with `ar.json` patch) · *needs issue*
-- Tooling: a script that flags missing AR keys when EN is touched (and vice versa) · *needs issue*
-- RTL framework polish — pages with mixed LTR content (numbers, code, English brand names) inside Arabic flow · *needs issue*
+- ✅ Audit locale routing for edge cases (middleware redirects, RSC streaming, dynamic segments) — `middleware.test.ts` merged, ambient `x-locale` resolution shipped, [#261](https://github.com/databayt/hogwarts/issues/261) closed
+- ✅ Document the dictionary contract so contributors can add strings safely — `translation-guide.mdx` (en+ar): generic field naming, parity gate, `pnpm i18n:fix` scaffold
+- Translator workflow doc: how a non-developer proposes string changes (issue → PR with a dictionary patch) — `In Progress`: contract + tooling documented; the non-developer issue→PR prose is still unwritten
+- ✅ Tooling: a script that flags missing AR keys when EN is touched (and vice versa) — `dev-i18n-sync.ts` (`--check/--fix/--verify`) + `dictionary-parity.test.ts` CI gate, [#343](https://github.com/databayt/hogwarts/issues/343) closed
+- ✅ RTL framework polish — repo-wide RTL ratchet at **ZERO** physical classes (`rtl-physical-class.test.ts`); per-page visual passes under [#326](https://github.com/databayt/hogwarts/issues/326)
 - Plan a 3rd-language readiness pass (e.g., French for Maghreb / Urdu for South Asia) — no commitment, just a gap-list · *needs discussion*
 
-**String sweep**
+**String sweep** — [Epic hogwarts#326](https://github.com/databayt/hogwarts/issues/326) (owner Samia)
 
-- Sweep the finance pages for hardcoded English · *needs issue*
-- Sweep the admission pages for hardcoded English · *needs issue*
-- Sweep the LMS pages for hardcoded English · *needs issue*
-- Sweep the messaging pages for hardcoded English · *needs issue*
-- RTL visual pass on each swept page (Arabic side-by-side with English)
-- Add Arabic equivalents for any T1–T19 outreach templates still English-only · cross-link to Epic 16 · *needs issue*
+- ✅ Sweep the finance pages for hardcoded English — finance dictionary wired (en/ar), Tier-1 routes incl. receipt/manage-plan fixed
+- ✅ Sweep the admission pages for hardcoded English — admission + listings covered per `AUDIT.md`
+- ✅ Sweep the LMS pages for hardcoded English — stream/LMS dictionary-wired (teacher dashboard, lesson-player, batched localize)
+- ✅ Sweep the messaging pages for hardcoded English — messaging dictionary-wired (error codes, mobile previews, RTL-verified)
+- RTL visual pass on each swept page (Arabic side-by-side with English) — under [#326](https://github.com/databayt/hogwarts/issues/326)
+- Add Arabic equivalents for any T1–T19 outreach templates still English-only — `In Progress`: whatsapp/sales dictionaries exist; T1–T19 Arabic equivalence is part of [#326](https://github.com/databayt/hogwarts/issues/326) exit criteria · cross-link to Epic 16
 
-### 09 — Mobile API Layer · Tech · `In Progress`
+### 09 — Mobile API Layer · Tech · `Built+Polish`
 [Epic hogwarts#315](https://github.com/databayt/hogwarts/issues/315)
 
-The backend API layer the iOS + Android apps consume. Shares the finance domain (payments + invoices) with Bet 1.
+The backend API layer the iOS + Android apps consume — **95 `/api/mobile/*` routes are shipped on main**. Shares the finance domain (payments + invoices) with Bet 1. **Scope change (2026-06-03):** the entire store-gate compliance suite (account export/delete, consent, mobile invoices, universal search) was closed `NOT_PLANNED` — it no longer blocks App Store submission and is removed from the plan below.
 
-- Account-export endpoint (store-gate) — [#315](https://github.com/databayt/hogwarts/issues/315)
-- Account-delete endpoint (store-gate) · *needs issue*
-- Apple Pay + Stripe payment endpoint (store-gate) · *needs issue*
-- Invoice list + detail endpoints (store-gate) · *needs issue*
-- Consent capture endpoint (store-gate) · *needs issue*
-- Grade-entry + report-card endpoints · *needs issue*
-- Attendance + online-exam + schedule endpoints · *needs issue*
+- ✅ Auth, dashboard, attendance, grades, fees (read), exams, report-cards, conversations, guardian-children, teacher schedule, admin — all on main
+- ✅ Grade-entry + online-exam + teacher-attendance write endpoints — `POST .../teacher/classes/:id/{grades,attendance}`, `POST .../exams/:id/answers`, `GET .../report-cards` all on main (issues [#282](https://github.com/databayt/hogwarts/issues/282)/[#283](https://github.com/databayt/hogwarts/issues/283) still OPEN despite shipped code — close them)
+- Apple Pay + Stripe payment endpoint (store-gate) — the genuine remaining work · *needs issue*
 - Guardian write-action endpoints · *needs issue*
-- Universal-search endpoint · *needs issue*
+- ~~Account export/delete, consent capture, invoice list, universal search~~ — **descoped `NOT_PLANNED` 2026-06-03** ([#274](https://github.com/databayt/hogwarts/issues/274)/[#275](https://github.com/databayt/hogwarts/issues/275)/[#278](https://github.com/databayt/hogwarts/issues/278)/[#279](https://github.com/databayt/hogwarts/issues/279)/[#288](https://github.com/databayt/hogwarts/issues/288))
 
-### 10 — iOS app · Tech · `In Progress`
+### 10 — iOS app · Tech · `Built` (stalled — last commit 2026-02-10)
 [swift-app#3](https://github.com/databayt/swift-app/issues/3)
 
-Ship the Hogwarts app to the public App Store.
+Ship the Hogwarts app to the public App Store. The app is well past skeleton — 99 Swift files across 9 feature modules (Sprint-1..7 + Phase 1–6, offline-first, CI, privacy manifest, TestFlight distribution) — but **no commits since 2026-02-10**, so this is built-but-stalled, not actively progressing.
 
-- App shell + bottom navigation skeleton · *needs issue*
-- Auth screen consuming the API layer · *needs issue*
-- Dashboard screen consuming the API layer · *needs issue*
-- Attendance screen consuming the API layer · *needs issue*
-- Fees screen consuming the API layer · *needs issue*
-- Privacy + account export/delete + consent screens for store review · *needs issue*
-- App Store submission package + first review reply · *needs issue*
+- ✅ App shell + bottom navigation (`TabView` in `app/hogwarts-app.swift`)
+- ✅ Auth + dashboard + attendance + grades + profile + timetable + messages screens consuming the API layer
+- Fees screen consuming the API layer · `Vaporware` — not built yet
+- ~~Privacy + account export/delete + consent screens for store review~~ — **blocked / descoped**: backing endpoints cut `NOT_PLANNED` (Epic 09)
+- App Store submission package + first review reply — `In Progress`: TestFlight distribution set up; public submission remains · *needs issue*
 
 ### 11 — Android app · Tech · `Vaporware`
 > ⚠️ The Android repo `databayt/kotlin-app` does not exist yet — create and push it first.
@@ -408,11 +445,12 @@ Ship the Hogwarts app to the public App Store.
 ### 12 — Sales & Pilots · Non-tech · `Built+Polish`
 [Sales](https://ed.databayt.org/en/docs/sales) · [Pilot](https://ed.databayt.org/en/docs/pilot) · [Epic hogwarts#316](https://github.com/databayt/hogwarts/issues/316)
 
-Two free MENA-10 pilots actively using finance + mobile, with a documented PMF signal that feeds the Q4 cash decision. The team's own network is the top of the funnel — start with [Everyone: the warm-intro list](#everyone-the-warm-intro-list) above.
+Two free MENA-10 pilots — **King Fahad** (Sudan, 3 branches, Sept 2026 go-live) and **Albayan** (البيان · Khartoum · onboarded 2026-06-03 · `albayan.databayt.org`) — being driven to *actively* use finance + mobile, toward a documented PMF signal that feeds the Q4 cash decision. The track's tooling is built; the [#316](https://github.com/databayt/hogwarts/issues/316) workstreams (re-engagement, usage tracking, PMF write-up) are still open. The team's own network is the top of the funnel — start with [Everyone: the warm-intro list](#everyone-the-warm-intro-list) above.
 
 - Send the King Fahad re-engagement message and book a call · *needs issue*
 - Run the King Fahad JTBD interview and write up the notes · *needs issue*
 - Build a 3–5 school pipeline of warm-intro candidates from the Network filter · *needs issue*
+- ✅ Source + onboard the 2nd free pilot — **Albayan** onboarded 2026-06-03 (live on main: US curriculum + timetable seeds + sidebar gating + live classes)
 - First-touch WhatsApp message to each Tier-A candidate (Outreach T20 template)
 - Discovery call with one new school + onboarding kickoff
 - Wire usage tracking on both pilots (login frequency, feature touches) · *needs issue*
@@ -489,32 +527,40 @@ The artifacts only matter once they're in front of someone. These are the last-m
 - Schedule the Arabic + English social rollout (X, LinkedIn, WhatsApp Status) · *needs issue*
 - Drop the demo + screenshots into the sales deck and re-export · *needs issue*
 
-### 15 — Global Catalog · Tech · `Vaporware`
-A platform-wide content catalog — curriculums, subjects, chapters, lessons, videos, textbooks, mock exams, qbanks — that any school can **bridge** into its own data. Today every school re-creates content from zero; the catalog flips that. Strong upstream of Epic 17 (Community), which exposes the catalog free to the public.
+### 15 — Global Catalog · Tech · `Built+Polish`
+[catalog](https://ed.databayt.org/en/docs/catalog)
+
+A platform-wide content catalog — curriculums, subjects, chapters, lessons, videos, textbooks, mock exams, qbanks — that any school can **bridge** into its own data. **This shipped to `main` this quarter** (post-dating the last sprint reconcile): the global `catalog_*` tables (no `schoolId`), the `school_*` bridge rows, 12 seeded curricula, the operator + school bridge UI, a proposal→approval governance layer, and the public community surface are all wired in production (`catalog.mdx` self-reports "Wired — production"). Strong upstream of Epic 17 (Community), which now exposes the catalog free to the public.
 
 #### Schema & data model
 
-- Design the global catalog Prisma schema: `Curriculum`, `Subject`, `Chapter`, `Lesson`, `Resource` (video / textbook / mock-exam / qbank), `platform`-scoped vs. school-scoped boundary · *needs discussion*
-- Bridging model: how a school links one of its `Section`s to a `Curriculum` and inherits the tree · *needs issue*
-- Migration plan: take the King Fahad pilot's existing per-school content and re-attach to the platform catalog where it overlaps · *needs issue*
+- ✅ Global catalog Prisma schema — `Curriculum`, `Subject`, `Chapter`, `Lesson` + Resource models (`Video`, `Material`, `Question`/qbank, `Book`/`Textbook`); `catalog_*` tables carry **no `schoolId`** (platform-scoped), `school_*` bridges carry it (migration `20250814_add_catalog_system`)
+- ✅ Bridging model — a school links a grade/stream to a catalog `Subject` and inherits the tree (`SubjectSelection` + `ContentOverride` / `InstructorPreference` / `BookSelection`; `toggleSubjectSelection` / `bulkSelectSubjects` actions)
+- Migration plan: re-attach the King Fahad pilot's per-school content where it overlaps the platform catalog — `In Progress` (general bridge re-attach + backfill script exist; the King-Fahad-specific overlap migration is not separately evidenced) · *needs issue*
 
 #### Content seed
 
-- Seed the Sudan national curriculum (subjects + chapters tree) · *needs issue*
-- Seed the Saudi (Tatweer) curriculum spine · *needs issue*
-- Seed the IGCSE / IB skeleton for international schools · *needs issue*
-- Source the first mock-exam pack (Arabic — math, Arabic, science — grades 6–9) · *needs issue*
+- ✅ Seed the Sudan national curriculum — full subjects + chapters + lessons tree (`sd.ts`, the authoritative seed)
+- ✅ Seed the Saudi curriculum — subjects-only (`sa.ts`); chapter/lesson tree still to author · *needs issue*
+- ✅ Seed the IGCSE / IB skeleton — IGCSE (`caie-igcse.ts`) + IB-DP (`ib.ts`); **12 curricula total** (also AE, CBSE, EG, GB, JO, KW, QA, US)
+- Source the first mock-exam pack (Arabic — math, Arabic, science — grades 6–9) — exam templates seeded (`exam-templates.ts`: `ExamBlueprint`/`ExamTemplate`/`PaperTemplate`); a discrete Arabic grade-6–9 pack is not yet broken out · *needs issue*
 
 #### UI to consume the catalog
 
-- Catalog browse + bridge UI in the school admin (`/admin/catalog/bridge`) · *needs issue*
-- Lesson detail view consuming `Resource` items (video / pdf / qbank) · *needs issue*
-- "Add to my class" flow for teachers — pick a catalog lesson, attach to a section's timetable · *needs issue*
+- ✅ Catalog browse + bridge UI — school side at `/s/<subdomain>/subjects/catalog` (subject picker, topic overrides, school customization) + an operator catalog dashboard at `/catalog` (subjects, books, materials, questions, approvals, analytics, proposals, assignments)
+- ✅ Lesson detail consuming Resource items (video / pdf / qbank) — via the stream/LMS lesson player
+- "Add to my class" — `toggleSubjectSelection` bridges at the grade/stream level today; an explicit per-lesson → section-timetable attach is the residual · *needs issue*
 
 #### Ops
 
-- Storage strategy for catalog video/PDF — reuse the CDN from Epic 05 (LMS) · *needs issue*
-- `/docs/catalog` page on hogwarts: what it is, schema, bridging guide · *needs issue*
+- ✅ Storage strategy for catalog video/PDF — concept/curriculum art served from `cdn.databayt.org` (the clickview-keys asset wave); paid videos via signed CloudFront + null-URL gating
+- ✅ `/docs/catalog` page on hogwarts — shipped (en + ar): consolidated hub covering what it is, full schema (global + bridge), provisioning, proposal→approval, paid content; five older pages folded in with redirects
+
+#### Beyond the original scope (also shipped)
+
+- Proposal → approval workflow — schools propose subjects/content, operator review queue, publish + notify + pinned picker
+- Per-curriculum academic provisioning (`setupCatalogForSchool`, infer + 4-step fallback + lazy self-heal) + a provisioning "doctor" that repairs partial provisioning
+- Mobile catalog API (`/api/mobile/catalog/subjects`) feeding the iOS app; a 12-test catalog suite
 
 ### 16 — Letters & Proposals · Non-tech · `In Progress`
 [Proposal](https://ed.databayt.org/en/docs/proposal) · [Outreach T1–T19](https://ed.databayt.org/en/docs/outreach)
@@ -553,11 +599,11 @@ Sibling to Epic 13 — there we *apply*; here we *draft the narrative*.
 ### 17 — Community · Non-tech · `In Progress`
 [community](https://ed.databayt.org/en/community)
 
-Offer the Catalog content (textbooks, mock exams, qbanks) **free** at `/en/community`. Free users come for the content, talk about it, and the school version converts. Most tasks block on Epic 15 (Catalog) — schema + seed must land before public consumption.
+Offer the Catalog content (textbooks, mock exams, qbanks) **free** at `/en/community`. Free users come for the content, talk about it, and the school version converts. The Epic 15 (Catalog) precondition is now met — schema + 12-curriculum seed are merged and a no-auth public browse hub already ships on main; remaining work is the dedicated readers/runners, the conversion funnel, and distribution.
 
 #### Free-content surface
 
-- Public community browse UI (no auth) consuming the platform-scoped catalog · blocked on Epic 15 schema · *needs issue*
+- ✅ Public community browse UI (no auth) consuming the platform-scoped catalog — **shipped** on main: `/[lang]/community` hub + `[slug]` subject detail (MVP — public deep links into school-only routes still 404)
 - Free textbook reader (PDF + bookmarks) · *needs issue*
 - Free mock-exam runner (timed, no auth, share-result page) · *needs issue*
 - Free qbank practice mode (topic filter, immediate feedback) · *needs issue*
@@ -576,7 +622,7 @@ Offer the Catalog content (textbooks, mock exams, qbanks) **free** at `/en/commu
 
 #### Open-source contributor lane
 
-- Publish `CONTRIBUTING.md` across hogwarts + kun (good-first-issue labels, dev-setup link) · *needs issue*
+- Publish `CONTRIBUTING.md` across hogwarts + kun (good-first-issue labels, dev-setup link) — ✅ done on hogwarts (`CONTRIBUTING.md` + `content/docs-{en,ar}/contributing.mdx`); kun side still · *needs issue*
 - Stand up a Discord or Slack as the chat home — pick one, link from `/en/community` · *needs discussion*
 - Monthly contributor spotlight on the marketing site · *needs issue*
 
@@ -596,7 +642,7 @@ Once PMF is proven, Q4 opens **the cash decision** — light monetization, a pre
 | Hostel | `Vaporware` | Dictionary mentions only |
 | Cafeteria | `Vaporware` | Dictionary mentions only |
 
-Native iOS / Android is `Vaporware` in the hogwarts roadmap (deferred to 2027+); we promote it to a Q3 bet as epics 09–11 above. The divergence is deliberate. The Global Catalog is also `Vaporware` today but now an active epic — see [Epic 15](#15--global-catalog--tech--vaporware) above.
+Native iOS / Android is `Vaporware` in the hogwarts roadmap (deferred to 2027+); we promote it to a Q3 bet as epics 09–11 above. The divergence is deliberate. The Global Catalog **shipped to production this quarter** — see [Epic 15](#15--global-catalog--tech--builtpolish) above.
 
 ## See also
 
