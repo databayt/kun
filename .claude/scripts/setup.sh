@@ -86,6 +86,14 @@ cp "$KUN_DIR/.claude/commands/"*.md "$CLAUDE_DIR/commands/" 2>/dev/null || true
 CMD_COUNT=$(ls "$CLAUDE_DIR/commands/"*.md 2>/dev/null | wc -l | tr -d ' ')
 info "commands ($CMD_COUNT)"
 
+# All workflows (saved multi-agent scripts: handover.js, qa.js — resolved by Workflow({ name }))
+if [ -d "$KUN_DIR/.claude/workflows" ]; then
+    mkdir -p "$CLAUDE_DIR/workflows"
+    cp "$KUN_DIR/.claude/workflows/"*.js "$CLAUDE_DIR/workflows/" 2>/dev/null || true
+    WF_COUNT=$(ls "$CLAUDE_DIR/workflows/"*.js 2>/dev/null | wc -l | tr -d ' ')
+    info "workflows ($WF_COUNT)"
+fi
+
 # All kun-authored skills (each is a dir: SKILL.md + optional scripts/ + references/)
 if [ -d "$KUN_DIR/.claude/skills" ]; then
     cp -r "$KUN_DIR/.claude/skills/"* "$CLAUDE_DIR/skills/" 2>/dev/null || true

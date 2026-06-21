@@ -167,9 +167,9 @@ if (!routes.length)
   );
 
 const gate = await agent(
-  `Run kun's /check gate (origin only — do NOT deploy) for the "${block}" block.\n` +
-    `Read .claude/commands/check.md and execute steps 1–2: \`pnpm tsc --noEmit\`, then \`pnpm build\`, ` +
-    `each with the documented 5-attempt auto-fix loop.\n` +
+  `Run the /check gate (origin only — do NOT deploy) for the "${block}" block.\n` +
+    `Execute \`pnpm tsc --noEmit\`, then \`pnpm build\` (the /check steps — check.md lives in ./.claude/commands ` +
+    `or ~/.claude/commands), each with the documented 5-attempt auto-fix loop.\n` +
     `Verify you are on main (\`git branch --show-current\` → main) and commit any fixes atomically as ` +
     `\`fix(${block}): typecheck/build [qa]\` with the footer:\n` +
     `  Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>\n` +
@@ -209,9 +209,10 @@ const detectPrompt = (u) =>
   (u.kind === "route"
     ? `the route ${u.target}. Drive the browser MCP against the live page (resolve the navigable URL for this ` +
       `logical route under ${base} — fill in the default lang + the dev tenant). `
-    : `the block source dir ${u.target}. Read the source plus the matching rule directories per ` +
-      `.claude/rules/patterns.md and cite each finding as rule-id (severity). `) +
-  `\nFirst read .claude/agents/quality.md for the "${u.keyword}" definition AND its §Fix-Tier Matrix, then execute ` +
+    : `the block source dir ${u.target}. Read the source plus the matching rule corpus (the rule directories ` +
+      `mapped in patterns.md — ./.claude/rules or ~/.claude/rules) and cite each finding as rule-id (severity). `) +
+  `\nFirst read the quality agent (quality.md, in ./.claude/agents or ~/.claude/agents) for the "${u.keyword}" ` +
+  `definition AND its §Fix-Tier Matrix, then execute ` +
   `exactly that check. For EVERY finding, classify its fix-tier (A safe-autofix / B risky-build-gated / C human-only) ` +
   `and set fixable accordingly (tier C ⇒ fixable=false). An empty findings array is the correct PASS.`;
 
@@ -374,7 +375,7 @@ const matrix = rows.map((r) => ({
 }));
 const issue = await agent(
   `Open ONE GitHub issue in ${repo} handing the "${block}" block to a human QA reviewer (verdict: ${verdict}).\n` +
-    `Use the issue template in .claude/commands/qa.md §"Human-QA handoff issue". ` +
+    `Use the issue template in qa.md §"Human-QA handoff issue" (./.claude/commands or ~/.claude/commands). ` +
     `Labels: ${verdict === "CLEAN" ? "qa-signoff" : "qa-blocked"}, P1, block:${block}. ` +
     `First ensure each label exists — \`gh label create <name> --force\` (qa-signoff color green, qa-blocked red, ` +
     `block:${block} blue) — gh issue create fails on a missing label.\n` +
@@ -443,8 +444,8 @@ function fixer(f, tier) {
     `You are auto-fixing ONE QA finding in the "${block}" block (repo ${repo}), tier ${tier}.\n` +
       `Finding: [${f.keyword}] ${f.title} — ${f.detail} (${f.target || "n/a"})${f.rule ? ` · rule ${f.rule}` : ""}.\n\n` +
       (f.rule
-        ? `Read .claude/rules/**/${f.rule}.md and apply its **Fix** section exactly.\n`
-        : `Apply the minimal mechanical fix per .claude/agents/quality.md §Fix-Tier Matrix for "${f.keyword}".\n`) +
+        ? `Read the rule ${f.rule}.md (under ./.claude/rules/** or ~/.claude/rules/**) and apply its **Fix** section exactly.\n`
+        : `Apply the minimal mechanical fix per the quality agent §Fix-Tier Matrix (quality.md, ./.claude/agents or ~/.claude/agents) for "${f.keyword}".\n`) +
       `TIER A (mechanical): make the edit only — lang key, RTL physical→logical class swap, hardcoded-color→token, ` +
       `missing revalidatePath, deprecated-import swap, file move, lint/format.\n` +
       `TIER B (risky — auth / tenant-scope / data-wiring): after editing you MUST (a) re-read the changed code and ` +
