@@ -46,3 +46,4 @@ pnpm-debug.log*
 
 # Anthropic crawler artifacts (runtime cache)
 scripts/crawl-anthropic/state/
+.clone/
