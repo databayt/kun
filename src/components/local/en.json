@@ -4,7 +4,8 @@
     "description": "Magic begins with a word. Not a paragraph. Not a committee. A single, well-chosen word spoken with intent — no wand-waving required."
   },
   "announcement": {
-    "text": "In-house engine for Anthropic products"
+    "text": "Claude Opus 4.8 — now with a 1M-token context window",
+    "href": "https://x.com/AnthropicAI"
   },
   "actions": {
     "getStarted": "Get Started",

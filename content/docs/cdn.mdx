@@ -1,0 +1,268 @@
+---
+title: CDN
+description: The org-wide asset namespace for cdn.databayt.org — taxonomy, catalog scheme, helper API, and migration policy
+---
+
+# CDN
+
+`cdn.databayt.org` is the single content-delivery surface for every Databayt
+repository. This document is the **vision and standard** for how assets are
+organized on it. It is documentation only — the questions of _where_ the shared
+helper and crawler get built are still open (see [Open decisions](#open-decisions)).
+
+## Why this exists
+
+The CDN grew organically. Today the bucket root is a flat grab-bag —
+`anthropic/`, `icons/`, `illustrations/`, `photos/`, `media/`, `wallpapers/`,
+`catalog/`, `profiles/` all sit at the same level with no rule for what belongs
+where. Hogwarts alone has three different URL generators and hardcoded
+`d1dlwtcfl0db67.cloudfront.net` literals, and no other repo has a shared way to
+reach the CDN.
+
+The goal: a clean, scalable, **org-wide namespace where the first path segment of
+every URL tells you exactly what kind of asset it is**, plus one reusable helper
+that every repo imports.
+
+## Current structure
+
+The bucket layout, down to representative full key paths — one flat level mixing
+vendor mirrors, shared primitives, product media, and content. The bucket is named
+**`databayt-cdn`** (renamed from `hogwarts-databayt`); vendor mirrors are **flat**
+(`anthropic/<file>`, no category subfolders). The `→ hogwarts/…` notes mark product
+media still at root that the migration
+([Migration policy](#migration-policy--additive-copy-not-delete)) would move. The
+live S3 rename + anthropic-flatten are executed by that migration pass.
+
+<CdnStructure />
+
+## Assets we have
+
+A live sample of what's hosted today — every tile links to its real
+`cdn.databayt.org` URL.
+
+<CdnAssets />
+
+## The taxonomy — four reserved tiers
+
+CloudFront's origin is the bucket root, so **the URL path _is_ the S3 key**. One
+flat namespace, four reserved kinds of first segment:
+
+| Tier | Top-level segments | What lives here | Populated by |
+|------|--------------------|-----------------|--------------|
+| **1. Vendor mirrors** | `anthropic/` `airbnb/` `apple/` … | Third-party brand / press / design-system assets we mirror — **flat** (`<brand>/<file>`, no category subfolders) | the crawler |
+| **2. Shared primitives** | `icons/` `illustrations/` `animations/` | Cross-repo raw design assets, product-agnostic | the design system |
+| **3. Product media** | `hogwarts/` `souq/` `mkan/` `shifa/` `kun/` | A product's own photos, videos, banners, uploads | the owning app |
+| **4. Content collections** | `catalog/` (+ future structured sets) | Structured reference content keyed by domain attributes | the content pipeline |
+
+### The decision rule — "who owns this pixel?"
+
+1. Third-party brand asset we mirror → **vendor** (`<brand>/…`)
+2. Generic design primitive reused across products → **shared** (`icons/`, `illustrations/`, `animations/`)
+3. Structured reference content browsable by domain keys → **content** (`catalog/…`)
+4. Otherwise a single product's own media → **product** (`<repo>/…`)
+
+Tie-breaker: default to the **product** tier. Shared and content are opt-in, not a
+dumping ground.
+
+> **Why `catalog/` is top-level, not `hogwarts/catalog/`** — the curriculum
+> catalog (textbooks, subject thumbnails, lesson videos) is shared educational
+> content any education product could consume; it is not one school's media, so it
+> earns its own namespace.
+
+### URL examples
+
+```
+# Vendor mirrors (tier 1) — flat: cdn.databayt.org/<brand>/<file>, no category subfolders
+cdn.databayt.org/anthropic/hand-abacus.svg
+cdn.databayt.org/anthropic/wordmark.svg
+cdn.databayt.org/airbnb/belo-mark.svg
+cdn.databayt.org/apple/apple-logo.svg
+
+# Shared primitives (tier 2)
+cdn.databayt.org/icons/visa.svg
+cdn.databayt.org/illustrations/empty-state.svg
+cdn.databayt.org/animations/confetti.json
+
+# Product media (tier 3)
+cdn.databayt.org/hogwarts/photos/campus.jpeg
+cdn.databayt.org/hogwarts/media/story.mp4
+cdn.databayt.org/souq/banners/ramadan-sale.webp
+
+# Content collections (tier 4)
+cdn.databayt.org/catalog/sd/g1/math/thumbnail-md.webp
+```
+
+## Catalog key scheme
+
+Catalog is the one tier whose keys are **persisted in the database** (the
+`thumbnail` / `url` columns; the reader appends `-{size}.webp` to the stored key).
+The scheme must therefore be deterministic, and any change requires a DB backfill.
+Current keys are slug-based and inconsistent:
+`catalog/concepts/g{grade}-{concept}/banner-{size}.webp`,
+`catalog/lessons/{slug}/video/{id}.mp4`,
+`catalog/textbooks/{slug}/textbook.pdf`.
+
+Three candidate schemes:
+
+| Option | Shape | Pros | Cons |
+|--------|-------|------|------|
+| **A. Flat by asset-type** | `catalog/thumbnail/{slug}.webp`, `catalog/textbook/{slug}.pdf` | simple | opaque slug; can't browse by grade/subject; no curriculum dimension |
+| **B. Current slug-based** | `catalog/concepts/{slug}/banner-{size}.webp` | already deployed | inconsistent prefixes; grade+concept encoded ad-hoc; not queryable |
+| **C. Hierarchical by attribute** _(recommended)_ | `catalog/{curriculum}/{grade}/{subject}/{asset}[-{size}].{ext}` | URL reconstructable from DB attributes; browsable; localizes by curriculum; scales to new curricula | requires a one-time DB backfill |
+
+### Recommended — Option C
+
+```
+catalog/{curriculum}/{grade}/{subject}/thumbnail-{sm|md|lg}.webp
+catalog/{curriculum}/{grade}/{subject}/banner-{sm|md|lg}.webp
+catalog/{curriculum}/{grade}/{subject}/textbook.pdf
+catalog/{curriculum}/{grade}/{subject}/lessons/{lesson-slug}/video.mp4
+```
+
+Examples: `catalog/sd/g1/math/thumbnail-md.webp` ·
+`catalog/us/g5/science/textbook.pdf` ·
+`catalog/sd/g3/arabic/lessons/intro-letters/video.mp4`.
+
+`curriculum` is the natural top partition (Sudan `sd`, US `us`, … — also the
+Arabic / English split), then grade, then subject. A CDN URL becomes a pure
+function of `(curriculum, grade, subject, assetType, size)` — no opaque slug, the
+helper builds it deterministically, and the catalog can be listed by walking the
+tree. **This is an open decision** (see below) — adopting it means a gated DB
+backfill, so it is the last thing to move.
+
+## Infrastructure
+
+| Resource | Value |
+|----------|-------|
+| S3 bucket | `databayt-cdn` (us-east-1) — renamed from `hogwarts-databayt` |
+| CloudFront distribution | `E3PHDXTDSBCQSJ` |
+| Custom domain | `cdn.databayt.org` (+ legacy `d1dlwtcfl0db67.cloudfront.net`) |
+| DNS | `databayt.org` on Vercel (`vercel dns …`) |
+| Cache header on upload | `Cache-Control: public, max-age=31536000, immutable` |
+
+The bucket is **`databayt-cdn`**, renamed from the legacy `hogwarts-databayt` (which
+read as product-specific for what's now shared infrastructure).
+
+A bare `cdn` isn't an option: S3 bucket names are globally unique across all of
+AWS, so `cdn` was claimed years ago — and it carries no org namespace anyway. But
+the name people actually see **already is `cdn`**, via `cdn.databayt.org`
+(CloudFront) — the only name users, code, and these docs ever touch. So the `cdn`
+name lives where it counts; only the hidden backend bucket is `databayt-cdn`.
+
+S3 can't rename in place ("rename" = create-new `databayt-cdn` + copy-everything +
+repoint the CloudFront origin + update every `Bucket:` / IAM-ARN reference + delete
+the old). So it is **not a standalone errand** — it rides along with the
+[restructure copy pass](#migration-policy--additive-copy-not-delete), which already
+copies every object (and flattens `anthropic/`), making the bucket move free.
+
+> **Heads-up (verify before migrating):** from this environment neither
+> `cdn.databayt.org` **nor** the CloudFront domain `d1dlwtcfl0db67.cloudfront.net`
+> resolves, while other hosts do — which suggests the distribution may be disabled
+> or deleted. You can't repoint a dead origin, so confirm the distribution is alive
+> first.
+
+### Immutability & versioning
+
+Every object is immutable and served with a one-year `immutable` cache header.
+**Never overwrite an existing key.** When an asset's content changes, write a new
+key with a `-vN` suffix and point references at it. Because keys are never
+overwritten, CloudFront never serves stale content and **no invalidation is ever
+needed**.
+
+## The helper (proposed)
+
+A single helper builds every CDN URL so the host and the namespace live in exactly
+one place. Host and this-repo's product segment come from env, so the file is
+**byte-identical across every repo** (no per-repo edits, no drift):
+
+```
+NEXT_PUBLIC_CDN_DOMAIN    = cdn.databayt.org
+NEXT_PUBLIC_CDN_NAMESPACE = hogwarts | souq | mkan | shifa | kun
+```
+
+```ts
+const HOST = process.env.NEXT_PUBLIC_CDN_DOMAIN?.trim()
+  ? `https://${process.env.NEXT_PUBLIC_CDN_DOMAIN.trim()}` : ""
+const NS = process.env.NEXT_PUBLIC_CDN_NAMESPACE?.trim() || ""
+const SHARED = ["icons", "illustrations", "animations"] as const
+
+const join = (...s: string[]) =>
+  `${HOST}/${s.map(x => x.replace(/^\/+|\/+$/g, "")).filter(Boolean).join("/")}`
+
+export const cdn = {
+  vendor:  (brand: string, file: string) => join(brand, file),            // flat: /anthropic/<file>  /airbnb/<file>
+  shared:  (ns: (typeof SHARED)[number], path: string) => join(ns, path), // /icons/…  /illustrations/…
+  product: (path: string) => join(NS, path),                              // /<NS>/…  (this repo's media)
+  catalog: (p: { curriculum: string; grade: string; subject: string; asset: string }) =>
+    join("catalog", p.curriculum, p.grade, p.subject, p.asset),           // /catalog/{curriculum}/…
+}
+
+/** @deprecated raw passthrough — kept so existing callers don't break */
+export const asset = (path: string) =>
+  `${HOST}${path.startsWith("/") ? path : `/${path}`}`
+```
+
+Usage:
+
+```ts
+cdn.vendor("anthropic", "hand-abacus.svg")     // flat — no category subfolder
+cdn.shared("icons", "visa.svg")
+cdn.product("photos/campus.jpeg")            // → /hogwarts/photos/… when NS=hogwarts
+cdn.catalog({ curriculum: "sd", grade: "g1", subject: "math", asset: "thumbnail-md.webp" })
+```
+
+## Vendor mirrors & the crawler
+
+Vendor assets are mirrored from third-party sites into the `<brand>/` namespace by
+a crawler (today: anthropic-only, in kun, modular by stage — fetch → extract →
+download → categorize → dedup → upload → emit). Generalizing it to additional
+vendors means extracting a per-vendor config (seed URLs, allowed CDN hosts, S3
+prefix, category map) and selecting it with a `--vendor` flag.
+
+> **Licensing** — mirroring third-party brand imagery has copyright / trademark /
+> ToS implications. Scope any new vendor (airbnb, apple, …) to **brand / press-kit
+> / design-system** assets, **not** product photography, honor `robots.txt`, and
+> confirm ToS before uploading.
+
+## Migration policy — additive, copy-not-delete
+
+Reorganizing existing keys (e.g. moving `photos/` → `hogwarts/photos/`) is done by
+**copying, never deleting**:
+
+- Copy each key to its new namespace, preserving content-type, metadata, and the
+  immutable cache header; skip if the destination already matches (idempotent).
+- **Old keys keep serving forever**, so nothing 404s and code can flip references
+  at any time after the copy.
+- New keys are brand-new immutable objects → no CloudFront invalidation, no cutover
+  window.
+- Retire old root keys only far in the future, separately, once nothing references
+  them.
+
+The four shared/vendor prefixes — `anthropic/`, `icons/`, `illustrations/`,
+`animations/` — already sit correctly at root and **do not move**.
+
+## Adopting the standard (per repo)
+
+When a repo adopts the CDN helper:
+
+1. Add the helper and set `NEXT_PUBLIC_CDN_DOMAIN` + `NEXT_PUBLIC_CDN_NAMESPACE`.
+2. Replace hardcoded `*.cloudfront.net` literals and ad-hoc path strings with
+   `cdn.vendor` / `cdn.shared` / `cdn.product` / `cdn.catalog`.
+3. Point new uploads at the repo's own `<namespace>/` prefix; copy existing
+   product media over additively.
+4. Leave shared (`icons/…`) and vendor (`anthropic/…`) references untouched — every
+   repo reads those from the one bucket.
+
+## Open decisions
+
+These are deliberately unresolved until we decide where to build what:
+
+1. **Where the shared helper lives** — a copy-on-install registry item in
+   `codebase` (`pnpm codebase add cdn`), a published `@databayt/cdn` package, or a
+   per-repo copy. The helper is env-driven, so all three yield an identical file.
+2. **Where the crawler lives** and whether to generalize it to airbnb / apple now
+   or keep it anthropic-only.
+3. **Catalog key scheme** — confirm Option C
+   (`catalog/{curriculum}/{grade}/{subject}/…`) before the gated DB backfill.
+4. **Showroom** — whether to ship a gallery page that browses the CDN (vendors /
+   shared / catalog) and, if so, in which repo.

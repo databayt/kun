@@ -1,8 +1,8 @@
-import { PageHeader } from '@/components/atom/page-header';
-import { Announcement } from '@/components/atom/announcement';
-import { TwoButtons } from '@/components/atom/two-buttons';
-import type { getDictionary } from '@/components/local/dictionaries';
-import type { Locale } from '@/components/local/config';
+import { PageHeader } from "@/components/atom/page-header";
+import { Announcement } from "@/components/atom/announcement";
+import { TwoButtons } from "@/components/atom/two-buttons";
+import type { getDictionary } from "@/components/local/dictionaries";
+import type { Locale } from "@/components/local/config";
 
 interface HeroProps {
   dictionary: Awaited<ReturnType<typeof getDictionary>>;
@@ -14,12 +14,18 @@ export default function Hero({ dictionary, params }: HeroProps) {
     <PageHeader
       announcement={
         <Announcement
-          text={dictionary.announcement?.text || "Configuration engine for Anthropic products"}
-          href={`/${params.lang}/docs`}
+          text={
+            dictionary.announcement?.text ||
+            "Claude Opus 4.8 — now with a 1M-token context window"
+          }
+          href={dictionary.announcement?.href || "https://x.com/AnthropicAI"}
         />
       }
       heading={dictionary.homepage?.heading || "The Databayt Engine"}
-      description={dictionary.homepage?.description || "28 agents, 17 skills, 18 MCP servers, 100+ keywords — configured to run both technical and business operations from a single word."}
+      description={
+        dictionary.homepage?.description ||
+        "28 agents, 17 skills, 18 MCP servers, 100+ keywords — configured to run both technical and business operations from a single word."
+      }
       actions={
         <TwoButtons
           primaryLabel={dictionary.actions?.getStarted || "Get Started"}

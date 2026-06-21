@@ -5,7 +5,7 @@ description: "Aldar (29 schools, 33K students) conversion plan — five requirem
 
 This is the **delivery plan** for Aldar Education — the five things Aldar asked for, shaped as epics and stories you can pick and ship. Sales, commercial structure, timeline, risks, and 3-year value scenarios live in personal artifacts cited under [See also](#see-also) — this page stays focused on the work.
 
-> **Status reconciled 2026-06-05** against `origin/main` @ `b6113dd2c`. Epics 01–04 are **merged to `main`** (eSIS connector, multi-method payments, dual-provider live classes, parent portal). Epic 03's built-in LiveKit and Epic 01's eSIS submission are **gated on external infra/credentials, not code**. Epic 05 (on-premise) is the one genuinely-unstarted engineering build. Per-epic master trackers: [#1](https://github.com/databayt/hogwarts/issues/1) (01) · [#356](https://github.com/databayt/hogwarts/issues/356) (02) · [#3](https://github.com/databayt/hogwarts/issues/3) (03) · [#4](https://github.com/databayt/hogwarts/issues/4) (04) · [#5](https://github.com/databayt/hogwarts/issues/5) (05). Epics 06–07 have no tracker yet (unscoped).
+> **Status reconciled 2026-06-15** against `origin/main` @ `8fcea24d1`. Epics 01–04 remain **merged to `main`** (eSIS connector, multi-method payments + per-school currency, multi-provider conferencing, parent portal — the portal is now fully AR-RTL-wired and security-hardened). Epic 03's built-in LiveKit and Epic 01's eSIS submission stay **gated on external infra/credentials, not code**. Epic 05 (on-premise) is no longer un-started: its Phase 0–2 scaffold — standalone `Dockerfile`, `docker-compose.aldar.yaml`, and an Ed25519 license-key library — is **built in-flight on branch `fix/stream-production-ready`, not yet merged to `main`**. Two product-wide renames since the last reconcile touch this doc: LiveClass→**Conference** and the ClickView LMS de-brand. Per-epic master trackers: [#1](https://github.com/databayt/hogwarts/issues/1) (01) · [#356](https://github.com/databayt/hogwarts/issues/356) (02) · [#3](https://github.com/databayt/hogwarts/issues/3) (03) · [#4](https://github.com/databayt/hogwarts/issues/4) (04) · [#5](https://github.com/databayt/hogwarts/issues/5) (05). Epics 06–07 have no tracker yet (unscoped).
 
 ## Their five requirements
 
@@ -13,7 +13,7 @@ This is the **delivery plan** for Aldar Education — the five things Aldar aske
 |---|---|---|
 | 1 | Daily attendance submission to ADEK | [Epic 01](#01--adek-attendance-submission--tech--built) |
 | 2 | Fee payment — cards, Apple Pay, offline bank transfer, ATM | [Epic 02](#02--multi-method-fees--apple-pay--aed--tech--shipped) |
-| 3 | Built-in video conferencing via LiveKit on dedicated servers | [Epic 03](#03--livekit-video-conferencing--tech--built) |
+| 3 | Built-in video conferencing via LiveKit on dedicated servers | [Epic 03](#03--conference-video-conferencing--tech--built) |
 | 4 | Parent portal — comms, progress, grades, downloadable reports | [Epic 04](#04--parent-portal-completion--tech--shipped) |
 | 5 | Private/on-premise deployment + annual licensing | [Epic 05](#05--on-premise--licensing--tech--in-progress) |
 
@@ -23,7 +23,7 @@ This is the **delivery plan** for Aldar Education — the five things Aldar aske
 |---|------|-------|----------|--------|
 | 01 | ADEK attendance submission | Tech | `Built` (external-gated) | [attendance](https://ed.databayt.org/en/docs/attendance) · [#1](https://github.com/databayt/hogwarts/issues/1) |
 | 02 | Multi-method fees + Apple Pay + AED | Tech | `Shipped` | [finance](https://ed.databayt.org/en/docs/finance) · [#356](https://github.com/databayt/hogwarts/issues/356) |
-| 03 | LiveKit video conferencing | Tech | `Built` (external live · LiveKit infra-gated) | [live-classes](https://ed.databayt.org/en/docs/live-classes) · [#3](https://github.com/databayt/hogwarts/issues/3) · [#361](https://github.com/databayt/hogwarts/issues/361) |
+| 03 | Conference (video conferencing) | Tech | `Built` (external + native live · LiveKit SFU infra-gated) | [conference](https://ed.databayt.org/en/docs/conference) · [#3](https://github.com/databayt/hogwarts/issues/3) · [#361](https://github.com/databayt/hogwarts/issues/361) |
 | 04 | Parent portal completion | Tech | `Shipped` | [parent](https://ed.databayt.org/en/docs/parent) · [#4](https://github.com/databayt/hogwarts/issues/4) |
 | 05 | On-premise + licensing | Tech | `In Progress` | [self-hosting](/docs/self-hosting) · [#5](https://github.com/databayt/hogwarts/issues/5) |
 | 06 | Data migration from existing SIS | Tech | `Vaporware` | — |
@@ -32,7 +32,7 @@ This is the **delivery plan** for Aldar Education — the five things Aldar aske
 ## Epics
 
 ### 01 — ADEK attendance submission · Tech · `Built`
-[attendance](https://ed.databayt.org/en/docs/attendance) · framework at `src/lib/compliance/`; models at `prisma/models/{attendance,compliance}.prisma`; tracker [hogwarts#1](https://github.com/databayt/hogwarts/issues/1) (632 tests)
+[attendance](https://ed.databayt.org/en/docs/attendance) · framework at `src/lib/compliance/`; models at `prisma/models/{attendance,compliance}.prisma`; tracker [hogwarts#1](https://github.com/databayt/hogwarts/issues/1) (~600 attendance+compliance tests; #1 still open)
 
 ADEK mandates daily upload to **eSIS** and parent contact within 2 hours of unreported absence. **The connector is built and merged to `main`** — all three submission paths (official API, Aldar credential piggyback, Playwright RPA) plus a DRY_RUN mode, the daily eSIS export cron, and the 2-hour parent-contact SLA cron. The only remaining work is **external**: Aldar/ADEK must hand over real eSIS access. Until then the connector runs in DRY_RUN.
 
@@ -47,36 +47,38 @@ ADEK mandates daily upload to **eSIS** and parent contact within 2 hours of unre
 - 🔴 eSIS portal access to capture Playwright RPA selectors — **external, unblocks path C**
 
 ### 02 — Multi-method fees + Apple Pay + AED · Tech · `Shipped`
-[finance](https://ed.databayt.org/en/docs/finance) · Source of truth: [hogwarts#356](https://github.com/databayt/hogwarts/issues/356) (P0+P1+P2+P3 — **merged to `main`**; p1+p2 migrations + currency snapshot columns live on Neon)
+[finance](https://ed.databayt.org/en/docs/finance) · Source of truth: [hogwarts#356](https://github.com/databayt/hogwarts/issues/356) (P0+P1+P2+P3+P4 — **merged to `main`**; p1+p2 migrations + currency snapshot columns live on Neon; per-school currency [#305](https://github.com/databayt/hogwarts/issues/305) closed)
 
-Stripe + Tap + Bankak webhooks shipped. Payment-method enum extended via `ALTER TYPE ADD VALUE` (`APPLE_PAY` / `GOOGLE_PAY` / `MADA` / `KNET` / `ATM_DEPOSIT`) in the canonical `prisma/models/finance-fees.prisma` enum (not just the SaaS subscription enum). Currency snapshot columns landed on `FeeStructure` / `FeeAssignment` / `Payment` / `Receipt` with backfill from `schools.currency` (38 / 5906 / 600 / 0 rows). Parent-facing UI, AED localisation end-to-end, and the offline bank-transfer + ATM deposit reconciliation flows are all live.
+Stripe + Tap + Bankak webhooks shipped. Payment-method enum extended via `ALTER TYPE ADD VALUE` (`APPLE_PAY` / `GOOGLE_PAY` / `MADA` / `KNET` / `ATM_DEPOSIT`) in the canonical `prisma/models/fees.prisma` enum (renamed from `finance-fees.prisma` on `main`; not just the SaaS subscription enum). Currency snapshot columns landed on `FeeStructure` / `FeeAssignment` / `Payment` / `Receipt` with backfill from `schools.currency` (38 / 5906 / 600 / 0 rows). Parent-facing UI, AED localisation end-to-end, and the offline bank-transfer + ATM deposit reconciliation flows are all live.
 
 - ✅ Activated Apple Pay through Tap `src_all` source picker — Tap maps `source.payment_method` to canonical `PaymentMethod` enum; raw value persisted as `Payment.gatewayMethod` for audit · [#356 P1.3+P1.4](https://github.com/databayt/hogwarts/issues/356)
 - ✅ Wired parent-side payment picker into fee-assignment page (`FeePaymentMethods` component); `createFeePaymentCheckout` auto-routes AE schools to Tap-first via `resolveAvailableMethods`. Stripe Checkout wallets (Apple Pay / Google Pay / Link) auto-unlocked by dropping the `payment_method_types: ["card"]` hardcode · [#356 P0.3+P0.4](https://github.com/databayt/hogwarts/issues/356)
 - ✅ AED end-to-end audit — `formatCurrency` signature now requires explicit currency; ~100 callers migrated; AED renders correctly in fee structures, invoices, receipts, and the server PDF · [#356 P0.1+P1.1](https://github.com/databayt/hogwarts/issues/356)
-- Per-school currency on `School` model + propagate (sprint Epic 01 — [hogwarts#305](https://github.com/databayt/hogwarts/issues/305)) — denormalized onto payment/fee rows so receipts stay correct after a future currency switch · [#356 P1.1](https://github.com/databayt/hogwarts/issues/356)
+- ✅ Per-school currency on `School` model (`School.currency String @default("USD")`) + propagate (shipped via sprint Epic 01 — [hogwarts#305](https://github.com/databayt/hogwarts/issues/305), closed 2026-05-26) — denormalized onto fee/payment rows so receipts stay correct after a currency switch · [#356 P1.1](https://github.com/databayt/hogwarts/issues/356)
 - ✅ Offline bank-transfer recording flow — admin captures reference + bank name + branch + sender IBAN + deposit-slip URL; row lands in `PaymentStatus.PENDING_VERIFICATION`; admin clicks **Mark as Cleared** → `markPaymentCleared` server action flips to `SUCCESS` inside `$transaction`, posts to double-entry ledger, syncs invoice, notifies student + guardians · [#356 P2.1](https://github.com/databayt/hogwarts/issues/356)
 - ✅ ATM-deposit recording flow — new `PaymentMethod.ATM_DEPOSIT` enum value + conditional form variant; shares the same `markPaymentCleared` reconciliation path · [#356 P2.2](https://github.com/databayt/hogwarts/issues/356)
 - ✅ Parent receipt PDF in AED with school logo + signature — server-rendered at `/api/payment/[paymentId]/receipt` via `@react-pdf/renderer renderToBuffer`; tenant-scoped + ACL'd (finance admin OR own student OR guardian); renders `payment.currency` snapshot through the canonical decimal-aware formatter (handles AED / KWD / BHD / OMR) · [#356 P1.5+P2.4](https://github.com/databayt/hogwarts/issues/356)
 - ✅ Reconciliation report — manual payments vs gateway payments vs ledger; live 3-column diff per `PaymentMethod` at `/finance/banking/reconciliation` and `/finance/accounts/reconciliation`; default 30-day window via `?days=N`; pending-verification banner shows offline payments awaiting clear · [#356 P2.3](https://github.com/databayt/hogwarts/issues/356)
 
-**Ship checklist** (deploy target): seed Aldar demo tenant (`pnpm db:seed:aldar`), set `TAP_SECRET_KEY` + `TAP_WEBHOOK_SECRET` on the deploy target (webhook now fails-closed), verify Apple Pay enabled on the connected Stripe account, browser-smoke on `aldar.localhost:3000/ar`. Remaining: per-school currency switch ([hogwarts#305](https://github.com/databayt/hogwarts/issues/305)).
+**Ship checklist** (deploy target): seed Aldar demo tenant (`pnpm db:seed:aldar`), set `TAP_SECRET_KEY` + `TAP_WEBHOOK_SECRET` on the deploy target (webhook now fails-closed), verify Apple Pay enabled on the connected Stripe account, browser-smoke on `aldar.localhost:3000/ar`. No code remaining — per-school currency ([hogwarts#305](https://github.com/databayt/hogwarts/issues/305)) closed 2026-05-26.
 
-### 03 — LiveKit video conferencing · Tech · `Built`
-[live-classes](https://ed.databayt.org/en/docs/live-classes) · block at `src/components/school-dashboard/live-classes/` + `src/lib/livekit/`; master [hogwarts#3](https://github.com/databayt/hogwarts/issues/3) · [#355](https://github.com/databayt/hogwarts/issues/355) (closed build tracker) · [#361](https://github.com/databayt/hogwarts/issues/361) (release)
+### 03 — Conference (video conferencing) · Tech · `Built`
+[conference](https://ed.databayt.org/en/docs/conference) · block at `src/components/school-dashboard/conference/` (LiveKit lib now at `conference/livekit/`); master [hogwarts#3](https://github.com/databayt/hogwarts/issues/3) · [#355](https://github.com/databayt/hogwarts/issues/355) (closed build tracker) · [#361](https://github.com/databayt/hogwarts/issues/361) (release)
 
-Shipped **dual-provider**. The **external-link provider** (teacher pastes a Meet / Zoom / Teams URL with set-once recurring link; students join from one button on their timetable) is **live on `main`** today — no infra, runs on Vercel. The **built-in LiveKit provider** is fully built (schema on Neon, token / room / egress / webhook lib, dedicated room UI, recording pipeline, 2 crons, 54+ tests) but **production-gated on `LIVEKIT_*` env + a UAE-region SFU**. What remains is infrastructure + the Meeting-3 in-school network test — not code.
+> The block was renamed and consolidated **LiveClass → Conference** on `main` (merge `d086ad6d1`); old `/live-classes` paths now redirect, DB tables preserved via `@@map`. Aldar still gets the LiveKit-on-dedicated-servers requirement they named — LiveKit is now one of three back-ends.
 
-- ✅ `LiveClassSession` / `LiveClassParticipant` / `LiveClassRecording` / `LiveClassEvent` schema + retention/capacity columns on `School`, on Neon `br-small-tooth-adscsfmb` · [#355](https://github.com/databayt/hogwarts/issues/355)
+Shipped **multi-provider** — three meeting back-ends behind one UI. The **external pasted-link provider** (teacher pastes a Meet / Zoom / Teams URL with a set-once recurring link; students join from one button on their timetable) is **live on `main`** today — no infra, runs on Vercel. The **native Meet / Zoom / Teams adapters** (`createMeeting` wired through each vendor's API, dark until per-provider OAuth creds land) are also merged. The **built-in LiveKit SFU** is fully built (schema on Neon, token / room / egress / webhook lib, dedicated room UI, recording pipeline, 2 crons, full test suite) but dormant, **production-gated on `LIVEKIT_*` env + a UAE-region SFU**. What remains is infrastructure + the Meeting-3 in-school network test — not code.
+
+- ✅ `Conference` / `ConferenceParticipant` / `ConferenceRecording` / `ConferenceEvent` + `ConferenceLink` (recurring carry-forward) schema + retention/capacity columns on `School`, on Neon `br-small-tooth-adscsfmb`; DB tables preserved via `@@map` (zero-change rename) · [#355](https://github.com/databayt/hogwarts/issues/355)
 - ✅ LiveKit lib — room provisioning + JWT tokens gated by `getTenantContext`, Egress, webhook (HMAC + idempotent), signed recording URLs, deterministic room naming · [#355](https://github.com/databayt/hogwarts/issues/355)
-- ✅ Teacher "Start class" + student/parent "Join class" surfaces, timetable Join button, dedicated full-screen `(live-room)` page · [#355](https://github.com/databayt/hogwarts/issues/355) · [#361](https://github.com/databayt/hogwarts/issues/361)
+- ✅ Teacher "Start class" + student/parent "Join class" surfaces, timetable Join button, dedicated full-screen conference room page; plus HOST moderation (kick = SFU evict + DB status) and a per-section recording opt-out · [#355](https://github.com/databayt/hogwarts/issues/355) · [#361](https://github.com/databayt/hogwarts/issues/361)
 - ✅ Recording pipeline — Egress → S3 `me-central-1` (per-school `s3Bucket`/`s3Region` supports MinIO fallback), retention cron, reminders cron · [#355](https://github.com/databayt/hogwarts/issues/355)
 - 🟡 Provision G42 Cloud SFU + coturn TURN-over-443-TCP + S3 bucket; set `LIVEKIT_*` env — **infra, P0 for built-in video**
-- 🔴 Meeting-3 network test inside an Aldar school WiFi (`/live-classes/network-test`) — **non-negotiable pre-signature gate**; block on TURN/443 failure
+- 🔴 Meeting-3 network test inside an Aldar school WiFi (`/conference/network-test`) — **non-negotiable pre-signature gate**; block on TURN/443 failure (see the conference block's `RUNBOOK.md` 6-gate activation sequence)
 - ⚪ Capacity — single SFU pilot (~3-5K concurrent) → 3-node active-active by Wave 2 · *future*
 
 ### 04 — Parent portal completion · Tech · `Shipped`
-[parent](https://ed.databayt.org/en/docs/parent) · routes at `src/app/[lang]/s/[subdomain]/(school-dashboard)/parent/*`; tracker [hogwarts#4](https://github.com/databayt/hogwarts/issues/4) (former ~~#357~~ consolidated; 182 tests)
+[parent](https://ed.databayt.org/en/docs/parent) · routes at `src/app/[lang]/s/[subdomain]/(school-dashboard)/parent/*`; tracker [hogwarts#4](https://github.com/databayt/hogwarts/issues/4) (former ~~#357~~ consolidated; ~186 tests, post-reconcile security-hardened)
 
 All 7 phases shipped to `main`. Every parent-facing surface Aldar asked for — "communicate, follow up on children's progress, view grades, download reports" — is live.
 
@@ -88,16 +90,18 @@ All 7 phases shipped to `main`. Every parent-facing surface Aldar asked for — 
 - ✅ Attendance excuse submission (`<ExcuseForm>`) · [#4](https://github.com/databayt/hogwarts/issues/4)
 - ✅ Push (FCM no-op scaffold, ops opt-in) + email + WhatsApp notification preferences per parent, with per-channel quiet hours · [#4](https://github.com/databayt/hogwarts/issues/4)
 - ✅ Public transcript verification (`/verify/transcript/[code]`) + term-end report-card cron · [#4](https://github.com/databayt/hogwarts/issues/4)
-- ⚪ AR (RTL) Playwright polish pass + FCM SDK opt-in — *deferred, non-blocking*
+- ✅ Post-reconcile security hardening (`e23bea936`) — mobile excuse IDOR gate (`canAccessStudent` + Zod), fail-closed `isAuthorizedCron` on the report-card cron, `parent/layout.tsx` GUARDIAN/DEVELOPER route gate, per-IP rate-limit on public transcript verify, `schoolId`-scoped fee `updateMany` · [#4](https://github.com/databayt/hogwarts/issues/4)
+- ✅ AR (RTL) i18n wiring — new `parentPortal` namespace (en+ar), all 4 child views dictionary-wired, STATIC-GAP ratchet at 0 · [#4](https://github.com/databayt/hogwarts/issues/4)
+- ⚪ Parent-portal RTL Playwright e2e polish pass + FCM SDK opt-in (still a no-op scaffold at `src/lib/notifications/push-fcm.ts`) — *deferred, non-blocking*
 
 ### 05 — On-premise + licensing · Tech · `In Progress`
-[self-hosting](/docs/self-hosting) · master [hogwarts#5](https://github.com/databayt/hogwarts/issues/5) (12 sub-epics) · multi-tenant adapter at `src/lib/multi-tenant-prisma-adapter.ts` is production-grade; only `socket-server/Dockerfile` exists today; deployment is Vercel-only
+[self-hosting](/docs/self-hosting) · master [hogwarts#5](https://github.com/databayt/hogwarts/issues/5) (12 sub-epics) · multi-tenant adapter at `src/lib/multi-tenant-prisma-adapter.ts` is production-grade. On `main`, deployment is still Vercel-only (Dockerfiles present: `socket-server/Dockerfile`, `tools/adek-rpa-worker/Dockerfile`). The Phase 0–2 on-prem scaffold is **built in-flight on branch `fix/stream-production-ready` — not yet merged to `main`**.
 
 Aldar wants the platform on their UAE infrastructure with annual licensing. Build in the **unified hogwarts codebase** for now; the SaaS/standalone split is its own decision — see [License &amp; isolation](#license--isolation).
 
-- Top-level `Dockerfile` for the Next.js app (standalone output pattern) · *needs issue*
-- `docker-compose.aldar.yaml` — web, socket-server, postgres, redis, livekit-server, livekit-egress, minio, caddy, observability stack · *needs issue*
-- License-key library — signed JWT-style file, validated on boot + every 6h, 30-day grace · *needs issue*
+- ✅ Top-level `Dockerfile` for the Next.js app (standalone output pattern, gated `BUILD_STANDALONE=true` so Vercel is unaffected) · `Built` in-flight on `fix/stream-production-ready` (`455f3d158`), **not yet merged to `main`**
+- ✅ `docker-compose.aldar.yaml` — web, socket-server, postgres, redis, livekit, livekit-egress, minio, caddy + `deploy/Caddyfile` & LiveKit/Egress configs · `Built` in-flight (`bf4288756`), **not merged**; **observability stack still not included**
+- ✅ License-key library (`src/lib/licensing/license.ts`) — Ed25519-signed envelope, validated on boot + every 6h, 30-day grace, `DEPLOY_MODE=onprem` gate, 9 tests · `Built` in-flight (`27a7ffacc`), **not yet merged to `main`**
 - Telemetry beacon — hourly outbound metadata-only payloads to `telemetry.databayt.org` (no PII) · *needs issue*
 - `databayt-cli upgrade --version X.Y.Z` — pull signed images, run migrations, rollback path · *needs issue*
 - Backup runbook — nightly `pg_dump` + WAL archive + MinIO replication · *needs issue*
@@ -108,11 +112,13 @@ Aldar wants the platform on their UAE infrastructure with annual licensing. Buil
 ### 06 — Data migration from existing SIS · Tech · `Vaporware`
 Per-school work — Aldar has 13 disparate SIS systems underneath their Salesforce + MuleSoft layer.
 
+A generic bulk-onboarding CSV importer (students / parents / staff) already ships in hogwarts — `src/components/file/import/csv-import.ts` (`importStudents`/`importTeachers`/`importStaff`/`importGuardians`), hardened 2026-06-15 with crypto-secure temp-credential minting — and is the reuse base for the migration kit. Everything else below (discovery, field-mapping, section/timetable/historical/fee importers, reconciliation, cut-over) is still unbuilt, so the epic stays `Vaporware`.
+
 For the Yasmina BA pilot we need a per-school discovery + import workflow. Without it the cut-over is impossible. The MuleSoft connector is the longer arc; the importers are the immediate need.
 
 - Discover Yasmina BA's source SIS (likely SchoolBase, iSAMS, or Engage) · *needs discussion*
 - Field-mapping spreadsheet template (signed by school IT before any import) · *needs issue*
-- Idempotent CSV importers — students, parents, staff, sections, timetables, 1-year historical attendance, 1-year historical grades, fee balances · *needs issue*
+- Idempotent CSV importers — **students, parents, staff already exist** (generic bulk-onboarding, reusable as the migration base); *still needed for SIS migration*: sections, timetables, 1-year historical attendance, 1-year historical grades, fee balances · *needs issue*
 - Daily reconciliation report during parallel run · *needs issue*
 - Cut-over runbook — source SIS → read-only, hogwarts → system-of-record, &lt;1% discrepancy gate · *needs issue*
 - MuleSoft connector — OpenAPI spec + adapter for student/staff/parent record sync into Salesforce (Wave 2) · *needs issue*
@@ -139,7 +145,7 @@ Two of the epics ride on tool choices that need a real comparison, not a default
 
 ### Video conferencing stack (Epic 03)
 
-Current lean is **LiveKit self-hosted on a UAE-region SFU** because Aldar explicitly named LiveKit and dedicated servers, and because LiveKit's licensing (Apache 2.0) fits the open-core posture. Worth confirming the alternatives are *worse* before committing — UAE network behaviour can change the calculus.
+Current lean is **LiveKit self-hosted on a UAE-region SFU** because Aldar explicitly named LiveKit and dedicated servers, and because LiveKit's licensing (Apache 2.0) fits the open-core posture. Worth confirming the alternatives are *worse* before committing — UAE network behaviour can change the calculus. Note: as of the Conference consolidation the product also ships **native Meet / Zoom / Teams adapters** (real meetings via each vendor's API, dark until OAuth creds) as a complementary link-based tier alongside the LiveKit SFU — so the Meet/Zoom/Teams rows below are no longer just "don't pick / vendor-lock", they're a fallback already implemented.
 
 | Option | License | UAE / MENA fit | Open-core compatible | Notes |
 |---|---|---|---|---|
@@ -187,7 +193,7 @@ What's **not** settled is how we organise the code for the two delivery shapes:
 | **A — Standalone project** (founder-preferred) | Sibling repo `hogwarts-enterprise` consuming hogwarts core. Own DB, dedicated servers, licensing, compliance posture. SaaS continues independently. | Clean separation; enterprise can move at procurement speed; SaaS stays nimble | Two codebases to maintain; feature drift risk; harder to keep parity |
 | **B — Long-lived enterprise branch** | Same repo, `main` (SaaS) + `enterprise` branch. Development stays unified. | Single source of truth; backports trivial; one CI; team context | Branch divergence over time; cherry-pick fatigue; complex release matrix |
 
-**Stance for now:** keep features in the unified `databayt/hogwarts` codebase (Epic 05 lives there), defer the split until we have signal. The next signal that forces the call: **first paying on-prem customer signs** or **before Aldar Wave 2 rollout**, whichever comes first.
+**Stance for now:** keep features in the unified `databayt/hogwarts` codebase (Epic 05 lives there — the commercial license-key library `src/lib/licensing/license.ts` is now scaffolded in-flight on `fix/stream-production-ready` with SSPL-1.0 header + Ed25519 commercial-license validation, operationalising the open-core model above), defer the split until we have signal. The next signal that forces the call: **first paying on-prem customer signs** or **before Aldar Wave 2 rollout**, whichever comes first.
 
 - Pick A or B before Aldar Wave 2 kickoff (~Month 5 post-pilot) · *needs discussion*
 - If A: scaffold `databayt/hogwarts-enterprise` repo from the hogwarts standalone Docker output · *needs issue (post-decision)*
