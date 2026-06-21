@@ -115,14 +115,18 @@ COMPONENT: ${draft.componentPath}
 PREVIEW ROUTE: ${draft.previewRoute} (file: ${draft.previewFile})
 ORIGINAL SHOTS: ${snapshotDir}/shots/375.png, /768.png, /1440.png  (these are GROUND TRUTH)
 
+SCRATCH FILES: write EVERY screenshot, crop, and diff image you produce into ${snapshotDir}/reconcile/ (create it — it is gitignored under .clone/). NEVER write scratch images to the repo root or src/ — that litters the project.
+
 STEPS:
 1. Ensure the dev server is running on port 3000 (start "pnpm dev" in the background if needed; wait until ready). NEVER use another port.
-2. For each breakpoint 375, 768, 1440: resize the browser to that width and navigate to http://localhost:3000${draft.previewRoute}; take a screenshot (use the browser MCP — mcp__browser__*).
+2. For each breakpoint 375, 768, 1440: resize the browser to that width and navigate to http://localhost:3000${draft.previewRoute}; screenshot into ${snapshotDir}/reconcile/ (browser MCP — mcp__browser__*).
 3. Compare your screenshot to the matching ${snapshotDir}/shots/<bp>.png. Look for differences in: color, spacing/padding, font size/weight/line-height, border-radius, shadow, alignment, and layout/wrapping.
 4. For each real difference, edit ${draft.componentPath} to fix it — adjust the arbitrary Tailwind values toward the captured ones in ${snapshotDir}/styles.json. Re-screenshot and re-compare.
-5. Loop at most 3 iterations. Stop when all 3 breakpoints are within tolerance (minor anti-aliasing/text-render differences are acceptable; structural/color/spacing differences are not).
+5. Loop at most 3 iterations. Stop when all 3 breakpoints are within tolerance.
 
-Return matched=true only if all three breakpoints visually match. List any remaining diffs honestly if not.`,
+TOLERANCE: minor anti-aliasing/text-render differences are acceptable; structural/color/spacing differences are not. IMPORTANT: if the source uses a proprietary font (e.g. Anthropic Sans, SF Pro) that you substitute with the nearest web font, text line-wrapping and line-count may differ because the substitute has different metrics — that is an acceptable FONT artifact, NOT a structural diff to chase. Match layout/columns/sizing/spacing; report any wrap difference honestly as a font-metrics note rather than distorting sizes to force it.
+
+Return matched=true only if all three breakpoints match structurally (font-metric wrap differences noted but allowed). List any remaining diffs honestly.`,
   { label: "reconcile", phase: "Reconcile", model: "sonnet", effort: "medium", schema: RECONCILE_SCHEMA }
 );
 
@@ -142,7 +146,7 @@ TARGET LEVEL: ${into}   (if "auto": decide by size/complexity — a single compo
 
 STEPS:
 1. Move/rename the component to its final hierarchy location for level "${into}". Fix imports/exports. Follow this repo's existing naming + folder conventions (look at neighbors).
-2. Remove the scratch preview route file (${draft.previewFile}) and any now-empty scratch folders. Do NOT leave clone-preview wired in.
+2. Remove the scratch preview route file (${draft.previewFile}) and any now-empty scratch folders. Do NOT leave clone-preview wired in. Then SWEEP scratch artifacts: delete any reconcile screenshots left in the repo root (clone-check*.png, shot-*.png, *-crop.png, *-iter*.png) and the ${snapshotDir}/reconcile/ dir. Run \`git status --short\` and confirm the only new file is the landed component (the .clone/ snapshot is gitignored and stays).
 3. Run "pnpm build" (or "pnpm tsc --noEmit" if a full build is too slow) and confirm it passes. Fix any type errors you introduced.
 4. Return finalPath, the level you chose, buildPassed, and a one-paragraph summary: where it landed, exact-value count, fonts substituted, any token equivalences worth adopting later, and any reconcile diffs left unresolved.
 

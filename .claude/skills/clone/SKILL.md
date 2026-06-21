@@ -128,3 +128,8 @@ adopting later, and any unresolved diffs. The `.clone/<slug>` snapshot stays as 
   The one idiomatic concession is logical RTL properties (lossless in LTR).
 - chrome-devtools MCP is the `--devtools` escalation (logins, network waterfall, CSS cascade),
   not the default capture path — the headless script is.
+- **Proprietary fonts can't pixel-match text wrapping.** When the source uses a closed font
+  (Anthropic Sans, SF Pro, …), the nearest `next/font` substitute has different metrics, so
+  line-count/wrapping can differ even when sizing, columns, and spacing are exact. This is a
+  font artifact, not a structural miss — reconcile reports it and moves on; consumers wire the
+  substituted `--font-*` variables on an ancestor.
