@@ -34,6 +34,11 @@ Replaces the manual "open Inspect, copy HTML + computed styles, rebuild by hand"
 deterministic capture + a tiered-model translate. The capture spends **zero model tokens**;
 only translate (Opus) and reconcile (Sonnet) cost reasoning.
 
+> **Don't set `/effort max` for clone.** The Workflow already pins Opus·high on translate
+> (the only fidelity-critical phase) and Sonnet·medium/low on the rest. A session-wide `max`
+> just inflates the cost of the deterministic capture + orchestration glue — the exact tax this
+> design removes. Leave session effort at its default; the per-phase tiers do the right thing.
+
 This is the url-mode of `/clone`. (Source-mode — Figma/GitHub/shadcn/codebase — stays in the
 command.) Invoked when the argument is a non-Figma `http(s)://` URL.
 
@@ -67,9 +72,15 @@ node ~/.claude/skills/clone/scripts/clone-capture.mjs \
 
 Section selection (most → least automated, per the user's preference):
 
-- **No section** → full-page capture; the script writes `sections.json`. Show the user that
-  index (headings + sample copy) and let them **name** the section. Then re-run with
+- **No section** → full-page capture; the script writes `sections.json` (heading-anchored,
+  script-stripped — usable even on pages that wrap everything in one `<main>` child). Show the
+  user that index (headings + sample copy) and let them **name** the section. Then re-run with
   `--section "<their text>"` for a focused snapshot.
+  - **A full page is NOT one clone unit.** If `manifest.capped === true` (the page exceeded the
+    node cap — typical for store/marketing pages), do **not** translate the whole page. Present
+    the section index and clone **one section at a time** (`--section`), each landing as its own
+    atom/template. A focused section stays well under the cap and yields a faithful component;
+    the whole page in one translate does not.
 - **`--section "<text>"`** → resolves the smallest element containing the copy/heading, climbs
   to the nearest semantic ancestor.
 - **`--pick`** → opens a **headed** browser; hover highlights, click selects (the watchable

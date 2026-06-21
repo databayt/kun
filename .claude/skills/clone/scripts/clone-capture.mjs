@@ -237,16 +237,22 @@ function pageExtract({ rootSelector, captureProps, nodeCap }) {
     return 'image';
   }
 
-  // Fonts (@font-face) catalog
-  const fonts = [];
+  // Fonts (@font-face) catalog — collapse weight-suffixed variants ("SF Pro Display 200"
+  // → "SF Pro Display") into one entry per base family, so 49 noisy rules become a few.
+  const fontMap = {};
   for (const sheet of Array.from(document.styleSheets)) {
     let rules; try { rules = sheet.cssRules; } catch { continue; }
     for (const r of Array.from(rules || [])) {
       if (r.constructor && r.constructor.name === 'CSSFontFaceRule') {
-        fonts.push({ family: r.style.getPropertyValue('font-family'), weight: r.style.getPropertyValue('font-weight'), src: r.style.getPropertyValue('src').slice(0, 300) });
+        const raw = (r.style.getPropertyValue('font-family') || '').trim();
+        const base = raw.replace(/['"]/g, '').replace(/\s+\d{2,3}\b/g, '').trim(); // strip weight suffix
+        const w = r.style.getPropertyValue('font-weight') || '400';
+        if (!fontMap[base]) fontMap[base] = { family: base, weights: new Set(), src: r.style.getPropertyValue('src').slice(0, 200) };
+        fontMap[base].weights.add(w);
       }
     }
   }
+  const fonts = Object.values(fontMap).map((f) => ({ family: f.family, weights: Array.from(f.weights), src: f.src }));
 
   document.body.removeChild(baselineHost);
   return { nodes, tokens, assets, fonts, nodeCount: count, capped: count >= nodeCap, rootRect: root.getBoundingClientRect() };
@@ -270,25 +276,53 @@ function pageSignature(rootSelector) {
 }
 
 // ── Section index for full-page mode (named-section picking).
+// Heading-anchored + semantic-landmark based, script/style stripped, nested-deduped —
+// so real pages (which wrap everything in one <main> child) still yield usable sections.
 function pageSectionIndex() {
-  const host = document.querySelector('main') || document.body;
-  const out = [];
-  let i = 0;
-  for (const el of Array.from(host.children)) {
+  const stripText = (el) => {
+    const c = el.cloneNode(true);
+    c.querySelectorAll('script,style,noscript,template,svg').forEach((n) => n.remove());
+    return (c.textContent || '').replace(/\s+/g, ' ').trim();
+  };
+  const cand = new Set();
+  // explicit landmarks
+  document.querySelectorAll('section, header, footer, article, [role="region"], [aria-label]').forEach((el) => cand.add(el));
+  // heading-anchored: climb each major heading to its sizable block container
+  document.querySelectorAll('h1, h2, [role="heading"]').forEach((h) => {
+    let n = h;
+    for (let d = 0; n && d < 6; d++) {
+      const r = n.getBoundingClientRect();
+      if (r.height >= 200 && r.width >= 240) { cand.add(n); break; }
+      n = n.parentElement;
+    }
+  });
+  // fallback: direct children of main/body
+  if (cand.size === 0) {
+    const host = document.querySelector('main') || document.body;
+    Array.from(host.children).forEach((el) => cand.add(el));
+  }
+  let list = Array.from(cand).filter((el) => {
+    if (['SCRIPT', 'STYLE', 'NOSCRIPT', 'TEMPLATE', 'SVG'].includes(el.tagName)) return false;
     const r = el.getBoundingClientRect();
-    if (r.height < 80) continue;
+    return r.height >= 120 && r.width >= 120 && stripText(el).length > 0;
+  });
+  // keep outermost only (drop sections fully nested in another candidate)
+  list = list.filter((el) => !list.some((o) => o !== el && o.contains(el)));
+  list.sort((a, b) => (a.getBoundingClientRect().y + window.scrollY) - (b.getBoundingClientRect().y + window.scrollY));
+  return list.slice(0, 40).map((el, index) => {
+    const r = el.getBoundingClientRect();
     const heading = el.querySelector('h1,h2,h3,[role=heading]');
-    out.push({
-      index: i++,
+    return {
+      index,
       tag: el.tagName.toLowerCase(),
       id: el.id || undefined,
-      classes: (el.getAttribute('class') || '').trim() || undefined,
-      heading: heading ? heading.textContent.trim().slice(0, 120) : undefined,
-      sampleText: el.textContent.trim().replace(/\s+/g, ' ').slice(0, 160),
+      label: el.getAttribute('aria-label') || undefined,
+      classes: (el.getAttribute('class') || '').trim().slice(0, 80) || undefined,
+      heading: heading ? heading.textContent.replace(/\s+/g, ' ').trim().slice(0, 120) : undefined,
+      sampleText: stripText(el).slice(0, 140),
       rect: { y: Math.round(r.y + window.scrollY), height: Math.round(r.height) },
-    });
-  }
-  return out;
+    };
+  });
 }
 
 // ── Resolve a section by visible text → nearest semantic ancestor.
@@ -352,7 +386,8 @@ async function main() {
   await page.goto(args.url, { waitUntil: 'networkidle', timeout: PW_CONFIG.navigationTimeout }).catch(async () => {
     await page.goto(args.url, { waitUntil: 'domcontentloaded', timeout: PW_CONFIG.navigationTimeout });
   });
-  await page.waitForTimeout(800); // settle lazy content
+  await page.waitForTimeout(800); // settle
+  await autoScroll(page); // trigger lazy-loaded (below-fold) content before extraction
 
   // ── Determine the target selector
   let rootSelector = null;
@@ -387,8 +422,21 @@ async function main() {
     await page.waitForTimeout(250);
     const shotPath = join(args.out, 'shots', `${bp}.png`);
     try {
-      const loc = rootSelector ? page.locator(rootSelector).first() : page.locator('body');
-      await loc.screenshot({ path: shotPath, timeout: 8000 });
+      if (rootSelector) {
+        // focused section: capture the element, but cap height so a tall section
+        // can't balloon into a multi-MB image.
+        const loc = page.locator(rootSelector).first();
+        const bx = await loc.boundingBox({ timeout: 8000 });
+        if (bx && bx.height > 4000) {
+          await page.screenshot({ path: shotPath, clip: { x: bx.x, y: bx.y, width: bx.width, height: 4000 } });
+        } else {
+          await loc.screenshot({ path: shotPath, timeout: 8000 });
+        }
+      } else {
+        // full-page mode is for the section INDEX, not translation — a viewport
+        // shot is the reference (avoids 10 MB full-body captures).
+        await page.screenshot({ path: shotPath, fullPage: false });
+      }
     } catch {
       await page.screenshot({ path: shotPath, fullPage: false });
     }
@@ -501,6 +549,24 @@ async function main() {
     shots: args.breakpoints.map((b) => `shots/${b}.png`),
     sections: sectionsIndex ? sectionsIndex.map((s) => ({ index: s.index, heading: s.heading, sample: s.sampleText })) : undefined,
   }, null, 2));
+}
+
+// ── Trigger lazy-loaded content by scrolling through the page once, then reset.
+// Capped (max ~16k px) so infinite-scroll pages can't loop forever.
+async function autoScroll(page) {
+  try {
+    await page.evaluate(async () => {
+      await new Promise((resolve) => {
+        let total = 0; const step = 800, max = 16000;
+        const t = setInterval(() => {
+          window.scrollBy(0, step); total += step;
+          if (total >= document.body.scrollHeight - window.innerHeight || total >= max) { clearInterval(t); resolve(); }
+        }, 80);
+      });
+      window.scrollTo(0, 0);
+    });
+    await page.waitForTimeout(400);
+  } catch { /* non-fatal */ }
 }
 
 // ── Interactive pick: inject overlay, resolve a unique selector on click.
