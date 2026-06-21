@@ -208,9 +208,17 @@ const detectPrompt = (u) =>
   `Run the niche quality keyword "${u.keyword}" from kun's quality fleet against ` +
   (u.kind === "route"
     ? `the route ${u.target}. Drive the browser MCP against the live page (resolve the navigable URL for this ` +
-      `logical route under ${base} — fill in the default lang + the dev tenant). `
+      `logical route under ${base} — fill in the default lang + the dev tenant). ` +
+      `SETUP before assessing: (1) if the route redirects to a login page, authenticate using the repo's ` +
+      `documented dev/test credentials — check .claude/rules/accounts.md or content/docs*/accounts — then ` +
+      `continue to the callbackUrl; (2) dismiss any first-visit onboarding/tour modal so you assess the page, ` +
+      `not the overlay. For "debug" specifically, inspect FAILED NETWORK REQUESTS (404 assets/images), not just ` +
+      `the console — a broken image logs no console error. `
     : `the block source dir ${u.target}. Read the source plus the matching rule corpus (the rule directories ` +
-      `mapped in patterns.md — ./.claude/rules or ~/.claude/rules) and cite each finding as rule-id (severity). `) +
+      `mapped in patterns.md — ./.claude/rules or ~/.claude/rules) and cite each finding as rule-id (severity). ` +
+      `For "guard" specifically, enumerate the exported server actions and verify EACH one calls its authz ` +
+      `assertion, sources schoolId/tenant from the session (never from params), and null-guards it — a single ` +
+      `unasserted action is a real finding. `) +
   `\nFirst read the quality agent (quality.md, in ./.claude/agents or ~/.claude/agents) for the "${u.keyword}" ` +
   `definition AND its §Fix-Tier Matrix, then execute ` +
   `exactly that check. For EVERY finding, classify its fix-tier (A safe-autofix / B risky-build-gated / C human-only) ` +
