@@ -63,13 +63,17 @@ Stop here. URL mode does not write a sentinel — it's a spot-check.
 
 ### Phase 2B — Block mode
 
-**Discover routes** in the block:
+**Discover routes** in the block — prefer the pre-computed registry:
+
+Read `.claude/blocks.json` and use `blocks[<block>].routes` (populated by `generate-blocks.mjs`). If that key
+is absent or empty, fall back to deriving them:
 
 ```bash
 find src/app -name "page.tsx" -not -path "*/node_modules/*" | sort
 ```
 
-Group by stripping route groups `(parens)`, `[lang]`, `s`, `[subdomain]`. Filter to routes whose group matches the `[block]` argument (fuzzy).
+Group by stripping route groups `(parens)`, `[lang]`, `s`, `[subdomain]` (keep dynamic `[id]`/`[slug]`).
+Filter to routes whose first segment matches the `[block]` argument (fuzzy — singular/plural).
 
 Stop and ask if zero routes match.
 
@@ -158,3 +162,5 @@ If any FAIL persists after `--fix`: surface the blocking findings with file:line
 - After a refactor that touched routing, layouts, or i18n
 
 Not a replacement for `/check`. `/check` is the typecheck + build gate; `/handover` is the UI verification gate. Both feed `/release`.
+
+For an **autonomous fix-and-handoff** (detect → adversarially verify → auto-fix the safe tiers → open a human-signoff issue), use **`/qa <block>`**. `/handover` reports; `/qa` reports, fixes, and persists a per-block QA verdict.

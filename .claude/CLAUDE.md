@@ -30,24 +30,27 @@
 IDEA → SPEC → PLAN → TASKS → SCHEMA → CODE → WIRE → CHECK → SHIP → WATCH
 ```
 
-| Stage   | Command   | Exit gate                           |
-| ------- | --------- | ----------------------------------- |
-| Capture | `/idea`   | GitHub issue exists                 |
-| Specify | `/spec`   | Spec approved on issue (human gate) |
-| Plan    | `/plan`   | Architecture plan on issue (opt.)   |
-| Tasks   | `/tasks`  | Ordered breakdown on issue (opt.)   |
-| Data    | `/schema` | Migration applied, types compile    |
-| Logic   | `/code`   | `tsc --noEmit` passes               |
-| UI      | `/wire`   | `pnpm build` passes                 |
-| Quality | `/check`  | TypeScript + build + visual green   |
-| Deploy  | `/ship`   | Vercel production Ready             |
-| Monitor | `/watch`  | No errors, issue closed             |
+| Stage   | Command   | Exit gate                              |
+| ------- | --------- | -------------------------------------- |
+| Capture | `/idea`   | GitHub issue exists                    |
+| Specify | `/spec`   | Spec approved on issue (human gate)    |
+| Plan    | `/plan`   | Architecture plan on issue (opt.)      |
+| Tasks   | `/tasks`  | Ordered breakdown on issue (opt.)      |
+| Data    | `/schema` | Migration applied, types compile       |
+| Logic   | `/code`   | `tsc --noEmit` passes                  |
+| UI      | `/wire`   | `pnpm build` passes                    |
+| Quality | `/check`  | TypeScript + build + visual green      |
+| QA      | `/qa`     | Block CLEAN; `qa-signoff` issue opened |
+| Deploy  | `/ship`   | Vercel production Ready                |
+| Monitor | `/watch`  | No errors, issue closed                |
 
 `/plan` + `/tasks` are optional rigor for non-trivial features (spec-kit-style: spec = _what_, plan = _how_, tasks = _ordered work_); trivial changes skip them. They sit after the single human approval gate at `/spec`.
 
 Product scope: append `hogwarts`, `souq`, `mkan`, `shifa` to activate domain context.
 
 UI verification gate (deeper than `/check`): **`/handover <url|block>`** — polymorphic on argument. URL mode runs the 12 per-URL niche keywords; block mode runs the per-route subset on every route in the block.
+
+Autonomous QA gate (fix-and-handoff): **`/qa <block>`** — detects across every route + the block source, adversarially verifies (every FAIL refuted before it gates), auto-fixes the safe + build-gated tiers, persists a per-block verdict to `blocks.json`, and opens **one** human-signoff issue carrying only the residual a human must judge. Run before `/release`; the signoff issue is `/release`'s advisory gate. The goal: human QA is almost free because the loop already caught and fixed the mechanical + verifiable surface.
 
 One-spell client handoff: **`/release <block>`** — chains `/handover` → `/check` → `/ship` → `/watch`, auto-comments the production URL on the related GitHub issue, and closes it. Requires main branch + clean tree.
 
@@ -58,7 +61,7 @@ One-spell client handoff: **`/release <block>`** — chains `/handover` → `/ch
 Surface verbs available in any session. See `.claude/commands/<name>.md` (project) or `~/.claude/skills/<name>/SKILL.md` (user) for the spec.
 
 **Lifecycle**: `dev`, `build`, `deploy`, `ship`, `watch`, `quick`, `fix`
-**Quality**: `check`, `handover`, `release`, `report`
+**Quality**: `check`, `qa`, `handover`, `release`, `report`
 **Components**: `atom`, `block`, `template`
 **Pipeline stages**: `idea`, `spec`, `plan`, `tasks`, `schema`, `code`, `wire`, `feature`
 **Ops**: `incident`, `monitor`, `costs`, `pricing`, `proposal`, `credentials`
@@ -104,7 +107,7 @@ When you see a keyword:
 5. **Business/leadership/strategy decision** (natural conversation, _no slash_) → consult `docs/CANON.md`; surface the relevant book + one operating move, grounded in principle `#N`. Don't wait for `/canon`. Keep it brief — one book, one move — and skip trivial or purely-technical choices.
 
 Bug fixes → `/report`. New features → `/feature <name>`. Components → `/atom`, `/block`, `/template`.
-Pre-demo quality pass → `/handover <block>`. **Send to client (one spell) → `/release <block>`.**
+Pre-demo quality pass → `/handover <block>`. Autonomous QA + human-signoff issue → `/qa <block>` (passive: saying **"qa admission"** in prose activates `/qa admission` — no slash needed). **Send to client (one spell) → `/release <block>`.**
 Facing a CEO/business/strategy decision → surface the relevant **canon** move passively (no slash; see `docs/CANON.md`).
 
 ## Lookups

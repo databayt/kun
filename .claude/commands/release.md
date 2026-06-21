@@ -63,6 +63,20 @@ Refuse to proceed if any of these fail. Each check should print the offending st
 
    Explicit `--skip-handover` or `--skip-check` flags override the cache.
 
+4. **QA signoff (advisory — warn, do not block)**
+   Resolve the block's QA signoff issue: read `blocks.json[block].qa.issue`, or search by label
+   `qa-signoff` + `block:<block>`. Then:
+
+   - **Open** (a human hasn't ticked acceptance) → print
+     `⚠️  QA signoff issue #N is still open — a human hasn't signed off. Proceeding anyway.` and **continue**.
+   - **`qa-blocked`** → print `⚠️  Block is qa-blocked (#N) — autonomous QA couldn't reach CLEAN. Proceeding anyway.`
+     and **continue**.
+   - **Closed** (signed off) → note `QA signoff #N closed — clear to ship.` and continue.
+   - **None found** → note `No QA signoff issue — block was not run through /qa.` and continue.
+
+   This is advisory by design: `/qa` is the place that gates on quality; `/release` only surfaces the
+   signoff state so the human knows what they're shipping. Run `/qa <block>` first for the full gate.
+
 ### Phase 2 — Resolve the GitHub issue
 
 `/release` needs to know which issue to comment on. Resolve in this order:
@@ -172,17 +186,18 @@ Total elapsed: <duration>
 
 ## Failure modes
 
-| Stage         | Failure                       | What /release does                                       |
-| ------------- | ----------------------------- | -------------------------------------------------------- |
-| Pre-flight    | Dirty tree                    | Stop; instruct user to commit/stash                      |
-| Pre-flight    | Wrong branch / behind / ahead | Stop; print the rev-list output                          |
-| Resolve issue | None found                    | Stop; ask the user for `--issue #N`                      |
-| Handover      | Translation FAIL / RTL FAIL   | Stop; suggest `/handover <block> --fix`                  |
-| Handover      | Flow FAIL / Responsive FAIL   | Stop; surface findings — human judgment                  |
-| Check         | Build error after auto-fix    | Stop; print remaining errors                             |
-| Ship          | Deploy error after auto-fix   | Stop; print the full error trail                         |
-| Watch         | Issues found                  | Stop; do not auto-revert — alert the user                |
-| Notify        | gh CLI fails                  | Print the comment body so the user can paste it manually |
+| Stage         | Failure                       | What /release does                                                   |
+| ------------- | ----------------------------- | -------------------------------------------------------------------- |
+| Pre-flight    | Dirty tree                    | Stop; instruct user to commit/stash                                  |
+| Pre-flight    | Wrong branch / behind / ahead | Stop; print the rev-list output                                      |
+| Pre-flight    | QA signoff issue open/blocked | **Warn and proceed** — advisory only; run `/qa <block>` for the gate |
+| Resolve issue | None found                    | Stop; ask the user for `--issue #N`                                  |
+| Handover      | Translation FAIL / RTL FAIL   | Stop; suggest `/handover <block> --fix`                              |
+| Handover      | Flow FAIL / Responsive FAIL   | Stop; surface findings — human judgment                              |
+| Check         | Build error after auto-fix    | Stop; print remaining errors                                         |
+| Ship          | Deploy error after auto-fix   | Stop; print the full error trail                                     |
+| Watch         | Issues found                  | Stop; do not auto-revert — alert the user                            |
+| Notify        | gh CLI fails                  | Print the comment body so the user can paste it manually             |
 
 ## Exit gate
 

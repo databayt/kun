@@ -54,7 +54,7 @@
   "counts": {
     "project_agents": 18,
     "user_agents": 27,
-    "commands": 32,
+    "commands": 33,
     "project_skills": 1,
     "user_skills": 23,
     "pattern_cards": 10,
@@ -62,7 +62,7 @@
     "domain_rules": 29,
     "project_mcp": 25,
     "user_mcp": 19,
-    "workflows": 1
+    "workflows": 2
   },
   "model_tiers": {
     "$comment": "Per-agent model alias by task type. The portable stack fleet (~/.claude/agents) follows this; the project fleet defaults to opus (quality-over-speed) except purely mechanical agents.",

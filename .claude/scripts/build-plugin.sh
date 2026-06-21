@@ -80,6 +80,12 @@ for f in "$ROOT"/.claude/rules/*/*.md; do
   rel="${f#$ROOT/.claude/rules/}"
   copy_one "$f" "$CO/rules/$rel"
 done
+# Workflows — saved multi-agent scripts the command verbs invoke (handover.js, qa.js).
+# Bundled so kun-company installs can resolve Workflow({ name: "..." }) for /handover + /qa.
+for f in "$ROOT"/.claude/workflows/*.js; do
+  [ -e "$f" ] || continue
+  copy_one "$f" "$CO/workflows/$(basename "$f")"
+done
 # Safety hooks — bundle the destructive-bash guard so kun-company installs get it
 # too (the project .claude/settings.json wires the same canonical script in-repo).
 # Only the script syncs from source; hooks/hooks.json is a stable committed asset.
