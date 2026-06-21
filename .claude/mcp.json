@@ -169,6 +169,11 @@
       "command": "uvx",
       "args": ["markitdown-mcp"],
       "description": "MarkItDown — convert PDF, Office, images, audio, HTML, URLs to Markdown"
+    },
+    "chrome-devtools": {
+      "command": "npx",
+      "args": ["-y", "chrome-devtools-mcp@1.3.0"],
+      "description": "Chrome DevTools Protocol — real-Chrome capture, network/asset waterfall, CSS cascade, performance (clone --devtools escalation; pinned 1.3.0)"
     }
   }
 }

@@ -47,7 +47,7 @@ echo ""
 # ── Common config (all roles) ───────────────────────────────────
 echo -e "${B}Common config${NC}"
 
-mkdir -p "$CLAUDE_DIR"/{agents,commands,rules,memory,scripts}
+mkdir -p "$CLAUDE_DIR"/{agents,commands,rules,memory,scripts,skills}
 info "directories"
 
 cp "$KUN_DIR/.claude/CLAUDE.md" "$CLAUDE_DIR/CLAUDE.md"
@@ -81,10 +81,17 @@ echo ""
 # key simply don't connect, so a full mcp.json is safe everywhere.
 echo -e "${B}Full config${NC}"
 
-# All commands/skills
+# All commands
 cp "$KUN_DIR/.claude/commands/"*.md "$CLAUDE_DIR/commands/" 2>/dev/null || true
 CMD_COUNT=$(ls "$CLAUDE_DIR/commands/"*.md 2>/dev/null | wc -l | tr -d ' ')
 info "commands ($CMD_COUNT)"
+
+# All kun-authored skills (each is a dir: SKILL.md + optional scripts/ + references/)
+if [ -d "$KUN_DIR/.claude/skills" ]; then
+    cp -r "$KUN_DIR/.claude/skills/"* "$CLAUDE_DIR/skills/" 2>/dev/null || true
+    SKILL_COUNT=$(ls -d "$CLAUDE_DIR/skills/"*/ 2>/dev/null | wc -l | tr -d ' ')
+    info "skills ($SKILL_COUNT)"
+fi
 
 # Full agent index
 if [ -f "$KUN_DIR/.claude/agents/_index.md" ]; then

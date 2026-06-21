@@ -63,7 +63,7 @@ Surface verbs available in any session. See `.claude/commands/<name>.md` (projec
 **Pipeline stages**: `idea`, `spec`, `plan`, `tasks`, `schema`, `code`, `wire`, `feature`
 **Ops**: `incident`, `monitor`, `costs`, `pricing`, `proposal`, `credentials`
 **Org**: `captain`, `weekly`, `health`, `learn`, `analyze`, `profile`, `sync`
-**Utility**: `clone`, `convert`, `package`, `screenshot`, `issue`, `crawl-anthropic`
+**Utility**: `clone` (polymorphic: live-URL **pixel-exact** section mirror + Figma/GitHub/shadcn/codebase source-to-code; url-mode = deterministic capture script → tiered Workflow [Opus·high → Sonnet·medium/low], `--devtools` via the `chrome-devtools` MCP), `convert`, `package`, `screenshot`, `issue`, `crawl-anthropic`
 
 ---
 

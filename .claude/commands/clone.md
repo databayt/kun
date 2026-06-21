@@ -1,18 +1,37 @@
 ---
-description: Clone a pattern or component from a source repo
-argument-hint: <what> [from <source>]
+description: Clone a pattern/component from a source repo OR mirror a live URL section pixel-exact
+argument-hint: <url|figma|github:|shadcn:|codebase:|pattern:> [section|target] [--pick] [--devtools] [--into atom|template|block]
 ---
 
-# Clone from Source
+# Clone
 
-Clone and adapt code from various sources — including pixel-perfect Figma designs.
+Polymorphic. Two families of source:
+
+- **Live URL** (any non-Figma `http(s)://`) → **url-mode**: deterministically capture a section's
+  DOM + exact computed styles and mirror it **pixel-exact** into the house stack. Replaces the
+  manual Inspect-and-rebuild loop. Handled by the `clone` skill.
+- **Source-to-code** (Figma / GitHub / shadcn / codebase / pattern) → adapt existing code/design.
 
 ## Arguments
 
-- `$1`: Source (figma URL, github:owner/repo/path, shadcn:component, codebase:path)
-- `$2`: (optional) Target path for generated code
+- `$1`: Source — a live URL, a figma URL, `github:owner/repo/path`, `shadcn:component`,
+  `codebase:path`, or `pattern:keyword`
+- `$2`: (optional) For url-mode: the **section** name (heading/copy text) to target, or a target
+  path. For source-mode: target path for generated code.
+- Flags (url-mode): `--pick` (click the section in a headed browser), `--devtools` (real Chrome
+  for logins / network / CSS cascade), `--into atom|template|block` (landing level).
 
 ## Sources
+
+### Live URL (pixel-exact section mirror)
+
+```
+/clone https://stripe.com                      # full page → name a section
+/clone https://stripe.com "Pricing"            # target a section by heading/copy
+/clone https://stripe.com --pick               # click the section in a headed browser
+/clone https://linear.app "hero" --into atom   # land as an atom
+/clone https://app.example.com/dash --devtools # logged-in page via real Chrome
+```
 
 ### Figma (pixel-perfect design-to-code)
 
@@ -43,6 +62,21 @@ Clone and adapt code from various sources — including pixel-perfect Figma desi
 ```
 
 ## Process
+
+**Mode detection** (check `$1` in this order):
+
+1. `http(s)://` containing `figma.com` → Figma branch (below).
+2. any other `http(s)://` → **url-mode**: invoke the `clone` skill.
+3. `figma:` / `github:` / `shadcn:` / `codebase:` / `pattern:` / bare path → source branches.
+
+### If source is a live URL (http/https, not figma.com):
+
+Invoke the **`clone` skill** (`~/.claude/skills/clone/SKILL.md`), passing the URL, the optional
+section text (`$2` when it isn't a path), and any flags (`--pick`, `--devtools`, `--into`). The
+skill runs: Setup → deterministic Capture (`clone-capture.mjs`, zero model tokens) → tiered
+Workflow (Translate Opus·high → Reconcile Sonnet·medium → Land Sonnet·low) → report. Pixel-exact
+fidelity (arbitrary Tailwind values from `getComputedStyle`, logical RTL properties). Do not
+hand-crawl or copy styles yourself — the skill + script own that.
 
 ### If source is a Figma URL (contains `figma.com`):
 
@@ -106,5 +140,12 @@ Clone and adapt code from various sources — including pixel-perfect Figma desi
 3. Adapt imports to local structure
 4. Apply project conventions (shadcn/ui, RTL-first, Tailwind CSS 4)
 5. Update registry if component
+
+## Exit Gate
+
+- **url-mode**: `pnpm build` passes **and** the reconcile phase reports all 3 breakpoints
+  (375 / 768 / 1440) within tolerance of the captured screenshots.
+- **source-mode**: `pnpm build` passes; for Figma, the implementation is visually
+  indistinguishable from the design screenshot.
 
 Clone source: $ARGUMENTS
