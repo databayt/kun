@@ -1,12 +1,9 @@
 export const meta = {
   name: "qa",
   description:
-    "Autonomous block QA — static gate, honest detection (every FAIL adversarially refuted), " +
-    "fix-until-dry within safe tiers, persist the verdict, open one human-signoff issue.",
+    "Autonomous block QA — static gate, honest detection (every FAIL adversarially refuted), fix-until-dry within safe tiers, persist the verdict, open one human-signoff issue.",
   whenToUse:
-    "Invoked by /qa <block>. The command invocation is the multi-agent opt-in. Detects across every " +
-    "route + the block source, fixes tiers A (mechanical) and B (risky-but-build-gated), hands the " +
-    "minimal residual to a human. Not for a single URL — that is /handover <url>.",
+    "Invoked by /qa <block>. The command invocation is the multi-agent opt-in. Detects across every route + the block source, fixes tiers A (mechanical) and B (risky-but-build-gated), hands the minimal residual to a human. Not for a single URL — that is /handover <url>.",
   phases: [
     {
       title: "Static",
@@ -116,6 +113,47 @@ const RECHECK = {
   properties: { isReal: { type: "boolean" }, reason: { type: "string" } },
   required: ["isReal", "reason"],
 };
+// Batched recheck: ONE verifier rechecks all of a check's findings at once
+// (replaces the per-finding fan-out). Keyed by finding title.
+const RECHECK_BATCH = {
+  type: "object",
+  properties: {
+    verdicts: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          title: { type: "string" },
+          isReal: { type: "boolean" },
+          reason: { type: "string" },
+        },
+        required: ["title", "isReal"],
+      },
+    },
+  },
+  required: ["verdicts"],
+};
+// Multi-keyword browser result: ONE agent assesses every browser keyword in a
+// single session and returns a verdict per keyword (collapses the 6× per-route
+// page-load fan-out — the dominant token cost).
+const MULTI = {
+  type: "object",
+  properties: {
+    checks: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          keyword: { type: "string" },
+          verdict: { type: "string", enum: ["PASS", "WARN", "FAIL"] },
+          findings: { type: "array", items: FINDING },
+        },
+        required: ["keyword", "verdict", "findings"],
+      },
+    },
+  },
+  required: ["checks"],
+};
 const FIXRESULT = {
   type: "object",
   properties: {
@@ -169,15 +207,18 @@ if (!routes.length)
 const gate = await agent(
   `Run the /check gate (origin only — do NOT deploy) for the "${block}" block.\n` +
     `Execute \`pnpm tsc --noEmit\`, then \`pnpm build\` (the /check steps — check.md lives in ./.claude/commands ` +
-    `or ~/.claude/commands), each with the documented 5-attempt auto-fix loop.\n` +
-    `Verify you are on main (\`git branch --show-current\` → main) and commit any fixes atomically as ` +
-    `\`fix(${block}): typecheck/build [qa]\` with the footer:\n` +
-    `  Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>\n` +
+    `or ~/.claude/commands)` +
+    (AUDIT
+      ? ` — READ-ONLY: do NOT auto-fix, do NOT commit, do NOT switch branches; just run both and report.\n`
+      : `, each with the documented 5-attempt auto-fix loop.\n` +
+        `Verify you are on main (\`git branch --show-current\` → main) and commit any fixes atomically as ` +
+        `\`fix(${block}): typecheck/build [qa]\` with the footer:\n` +
+        `  Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>\n`) +
     `Return ok=true only if BOTH pass; otherwise ok=false with the remaining errors.`,
   {
     label: "static:check",
     phase: "Static",
-    model: "opus",
+    model: "sonnet",
     schema: {
       type: "object",
       properties: {
@@ -203,82 +244,130 @@ if (!gate || !gate.ok) {
   });
 }
 
-// ── Detector (fan-out + adversarial verify), reused every round ───────────────
-const detectPrompt = (u) =>
-  `Run the niche quality keyword "${u.keyword}" from kun's quality fleet against ` +
-  (u.kind === "route"
-    ? `the route ${u.target}. Drive the browser MCP against the live page (resolve the navigable URL for this ` +
-      `logical route under ${base} — fill in the default lang + the dev tenant). ` +
-      `SETUP before assessing: (1) if the route redirects to a login page, authenticate using the repo's ` +
-      `documented dev/test credentials — check .claude/rules/accounts.md or content/docs*/accounts — then ` +
-      `continue to the callbackUrl; (2) dismiss any first-visit onboarding/tour modal so you assess the page, ` +
-      `not the overlay. For "debug" specifically, inspect FAILED NETWORK REQUESTS (404 assets/images), not just ` +
-      `the console — a broken image logs no console error. `
-    : `the block source dir ${u.target}. Read the source plus the matching rule corpus (the rule directories ` +
-      `mapped in patterns.md — ./.claude/rules or ~/.claude/rules) and cite each finding as rule-id (severity). ` +
-      `For "guard" specifically, enumerate the exported server actions and verify EACH one calls its authz ` +
-      `assertion, sources schoolId/tenant from the session (never from params), and null-guards it — a single ` +
-      `unasserted action is a real finding. `) +
-  `\nFirst read the quality agent (quality.md, in ./.claude/agents or ~/.claude/agents) for the "${u.keyword}" ` +
-  `definition AND its §Fix-Tier Matrix, then execute ` +
-  `exactly that check. For EVERY finding, classify its fix-tier (A safe-autofix / B risky-build-gated / C human-only) ` +
-  `and set fixable accordingly (tier C ⇒ fixable=false). An empty findings array is the correct PASS.`;
+// ── Detectors ─────────────────────────────────────────────────────────────────
+// Token model: the old per-(route×keyword) fan-out loaded each page 6× and ran
+// every check on opus. Now ONE browser agent per route assesses all browser
+// keywords in a single session (one navigate+auth+snapshot), and models are
+// tiered — reasoning-heavy code checks get opus, observation runs on sonnet.
+const CODE_MODEL = {
+  guard: "opus",
+  architecture: "opus",
+  pattern: "opus",
+  stack: "sonnet",
+  design: "sonnet",
+  structure: "sonnet",
+};
 
-const recheckPrompt = (res, f) =>
-  `Adversarially verify this "${res.keyword}" finding on ${res.target} — actively try to REFUTE it before accepting it:\n` +
-  `${f.title}: ${f.detail}${f.target ? ` (${f.target})` : ""}\n` +
-  `Reproduce it (browser MCP for browser checks, read the cited source for code checks). ` +
-  `If you cannot reproduce or evidence it, return isReal=false.`;
+const browserPrompt = (route) =>
+  `QA the route ${route} for the "${block}" block by driving the browser MCP. In ONE browser session, assess ALL ` +
+  `of these niche quality keywords from kun's quality fleet: ${BROWSER.join(", ")}.\n` +
+  `SETUP ONCE: resolve the navigable URL for this logical route under ${base} (fill in the default lang + the dev ` +
+  `tenant); if it redirects to login, authenticate with the repo's documented dev/test creds (.claude/rules/accounts.md ` +
+  `or content/docs*/accounts) and continue to the callbackUrl; dismiss any first-visit onboarding/tour modal. Then ` +
+  `assess EVERY keyword from the SAME loaded page — reuse the one navigation; do NOT reload per keyword.\n` +
+  `Read the quality agent (quality.md, ./.claude/agents or ~/.claude/agents) for each keyword's definition AND its ` +
+  `§Fix-Tier Matrix. "debug" → inspect FAILED NETWORK REQUESTS (404 assets/images log no console error) but IGNORE ` +
+  `dev-environment noise — do NOT report: HMR/websocket (:3001, webpack-hmr, _next/webpack-hmr), RSC prefetch aborts ` +
+  `(?_rsc requests cancelled on navigation), browser-extension requests (Google Translate, etc.), source-map 404s, and ` +
+  `Next.js dev-overlay requests; flag ONLY first-party app assets/APIs that genuinely fail. "responsive" ` +
+  `→ resize to 375/768/1440 within the same session; "lang" → check the RTL/Arabic variant; if a modal/dialog is part ` +
+  `of the page, open it before judging its contents.\n` +
+  `TOKEN DISCIPLINE (matters): prefer the text accessibility snapshot over screenshots; take AT MOST ONE screenshot ` +
+  `total, and only if a visual finding genuinely needs evidence; never save screenshots or scratch files to disk.\n` +
+  `Return one "checks" entry per keyword (verdict + findings); classify each finding A/B/C with fixable set ` +
+  `accordingly (tier C ⇒ fixable=false). An empty findings array is the correct PASS.`;
 
-const detect = (units) =>
-  pipeline(
-    units,
-    (u) =>
-      agent(detectPrompt(u), {
-        label: `detect:${u.keyword}`,
-        phase: "Detect",
-        model: "opus",
-        schema: VERDICT,
-      }).then((r) => r && { ...r, keyword: u.keyword, target: u.target }),
-    (res) => {
-      if (!res || res.verdict !== "FAIL" || !res.findings.length) return res;
-      // Every FAIL is refuted before it can gate — flaky browser checks downgrade FAIL→WARN.
-      return parallel(
-        res.findings.map(
-          (f) => () =>
-            agent(recheckPrompt(res, f), {
-              label: `verify:${res.keyword}`,
-              phase: "Verify",
-              model: "opus",
-              schema: RECHECK,
-            }).then((v) => ({
-              ...f,
-              isReal: v ? v.isReal : false,
-              verifyReason: v && v.reason,
-            })),
-        ),
-      ).then((checked) => {
-        const real = checked.filter((f) => f.isReal);
-        return {
-          ...res,
-          findings: real,
-          verdict: real.length ? "FAIL" : "WARN",
-        };
-      });
-    },
+const codePrompt = (keyword) =>
+  `Run the niche quality keyword "${keyword}" against the block source dir ${blockPath}. Read the source plus the ` +
+  `matching rule corpus (the rule directories mapped in patterns.md — ./.claude/rules or ~/.claude/rules) and cite ` +
+  `each finding as rule-id (severity). For "guard" specifically, enumerate the exported server actions and verify ` +
+  `EACH one calls its authz assertion, sources schoolId/tenant from the session (never from params), and null-guards ` +
+  `it — a single unasserted action is a real finding.\n` +
+  `First read the quality agent (quality.md) for the "${keyword}" definition AND its §Fix-Tier Matrix, then execute ` +
+  `exactly that check. Classify every finding's fix-tier (A/B/C) and set fixable (tier C ⇒ fixable=false). ` +
+  `An empty findings array is the correct PASS.`;
+
+const recheckPrompt = (keyword, target, findings) =>
+  `Adversarially verify these "${keyword}" findings on ${target} — actively try to REFUTE each before accepting it. ` +
+  `Reproduce with the browser MCP (browser checks) or by reading the cited source (code checks). Return isReal=false ` +
+  `for any finding you cannot reproduce/evidence; key each verdict by the finding's exact title.\n` +
+  findings
+    .map(
+      (f, i) =>
+        `${i + 1}. ${f.title}: ${f.detail}${f.target ? ` (${f.target})` : ""}`,
+    )
+    .join("\n");
+
+// One BATCHED verify per FAILing check. A verifier that DIES (null) must NOT read
+// as "refuted": its findings are retained, the check downgrades FAIL→WARN, and
+// they are flagged unverified so they reach the human residual — never dropped.
+const verify = (row) => {
+  if (!row || row.verdict !== "FAIL" || !(row.findings || []).length)
+    return Promise.resolve(row);
+  const isBrowser = BROWSER.includes(row.keyword);
+  return agent(recheckPrompt(row.keyword, row.target, row.findings), {
+    label: `verify:${row.keyword}`,
+    phase: "Verify",
+    model: isBrowser ? "sonnet" : CODE_MODEL[row.keyword] || "opus",
+    schema: RECHECK_BATCH,
+  }).then((v) => {
+    if (!v || !Array.isArray(v.verdicts)) {
+      return {
+        ...row,
+        verdict: "WARN",
+        unverified: true,
+        findings: row.findings.map((f) => ({ ...f, unverified: true })),
+      };
+    }
+    const byTitle = new Map(v.verdicts.map((d) => [d.title, d]));
+    const real = row.findings.filter((f) => {
+      const d = byTitle.get(f.title);
+      return d ? d.isReal : true; // unmatched verdict → keep (conservative)
+    });
+    return { ...row, findings: real, verdict: real.length ? "FAIL" : "WARN" };
+  });
+};
+
+// Browser units expand to one row per keyword from a single session; code units
+// yield one row each. Every FAILing row is batch-verified (model-tiered, death-safe).
+const detectBrowser = (route) =>
+  agent(browserPrompt(route), {
+    label: "detect:browser",
+    phase: "Detect",
+    model: "sonnet",
+    schema: MULTI,
+  }).then((r) =>
+    r && Array.isArray(r.checks)
+      ? r.checks.map((c) => ({
+          keyword: c.keyword,
+          target: route,
+          verdict: c.verdict,
+          findings: c.findings || [],
+        }))
+      : [],
   );
+
+const detectCode = (keyword) =>
+  agent(codePrompt(keyword), {
+    label: `detect:${keyword}`,
+    phase: "Detect",
+    model: CODE_MODEL[keyword] || "sonnet",
+    schema: VERDICT,
+  }).then((r) => (r ? [{ ...r, keyword, target: blockPath }] : []));
+
+// rts: routes to (re)scan with the browser; codeKws: code keywords to (re)scan.
+const detect = async (rts, codeKws) => {
+  const thunks = [
+    ...(rts || []).map((r) => () => detectBrowser(r)),
+    ...(codeKws || []).map((k) => () => detectCode(k)),
+  ];
+  const found = (await parallel(thunks)).flat().filter(Boolean);
+  return pipeline(found, (row) => verify(row));
+};
 
 // ── Phase: Detect (initial full fan-out) ──────────────────────────────────────
 phase("Detect");
-const unitsFor = (rts, withCode) => [
-  ...rts.flatMap((r) =>
-    BROWSER.map((kw) => ({ kind: "route", target: r, keyword: kw })),
-  ),
-  ...(withCode
-    ? CODE.map((kw) => ({ kind: "file", target: blockPath, keyword: kw }))
-    : []),
-];
-let rows = (await detect(unitsFor(routes, true))).filter(Boolean);
+let rows = (await detect(routes, CODE)).filter(Boolean);
 
 // ── Phase: Fix — fix-until-dry, affected-only re-detection, round cap ──────────
 const allFixed = [];
@@ -351,11 +440,12 @@ if (!AUDIT) {
       ),
     ];
     const touchedCode = done.some((x) => !isRoute(x.finding.target));
-    const reUnits = unitsFor(fixedRoutes, touchedCode);
-    if (!reUnits.length) break;
+    if (!fixedRoutes.length && !touchedCode) break;
 
-    const fresh = (await detect(reUnits)).filter(Boolean);
-    const reKeys = new Set(reUnits.map((u) => `${u.keyword}@${u.target}`));
+    const fresh = (await detect(fixedRoutes, touchedCode ? CODE : [])).filter(
+      Boolean,
+    );
+    const reKeys = new Set(fresh.map((r) => `${r.keyword}@${r.target}`));
     rows = rows
       .filter((r) => !reKeys.has(`${r.keyword}@${r.target}`))
       .concat(fresh);
@@ -369,71 +459,90 @@ if (!AUDIT) {
 // ── Verdict + residual (pure) ─────────────────────────────────────────────────
 const verdict = computeVerdict(rows);
 const residual = residualOf(rows, escalated);
+// A verifier death (e.g. token-limit) downgrades real FAILs to WARN+unverified.
+// Surface that the run was DEGRADED so a CLEAN verdict is never claimed silently.
+const unverifiedCount = rows.reduce(
+  (n, r) => n + (r.findings || []).filter((f) => f.unverified).length,
+  0,
+);
+const degraded = unverifiedCount > 0;
 log(
-  `${block}: ${verdict} — ${summarize(rows)} · auto-fixed ${allFixed.length} · residual ${residual.length}`,
+  `${block}: ${verdict}${degraded ? ` (DEGRADED — ${unverifiedCount} unverified)` : ""} — ${summarize(rows)} · auto-fixed ${allFixed.length} · residual ${residual.length}`,
 );
 
 // ── Phase: Handoff — open ONE signoff issue (or update the existing one) ───────
-phase("Handoff");
 const matrix = rows.map((r) => ({
   keyword: r.keyword,
   target: r.target,
   verdict: r.verdict,
   findings: r.findings || [],
 }));
-const issue = await agent(
-  `Open ONE GitHub issue in ${repo} handing the "${block}" block to a human QA reviewer (verdict: ${verdict}).\n` +
-    `Use the issue template in qa.md §"Human-QA handoff issue" (./.claude/commands or ~/.claude/commands). ` +
-    `Labels: ${verdict === "CLEAN" ? "qa-signoff" : "qa-blocked"}, P1, block:${block}. ` +
-    `First ensure each label exists — \`gh label create <name> --force\` (qa-signoff color green, qa-blocked red, ` +
-    `block:${block} blue) — gh issue create fails on a missing label.\n` +
-    `Body MUST contain: (1) the verified matrix (routes × keywords) from the data below, (2) the auto-fixed list with ` +
-    `commit SHAs, (3) the minimal "residual for human" checklist (ONLY the tier-C + escalated items below — each line: ` +
-    `route/file · what to check · why a human is needed), (4) the tick-box acceptance checklist.\n` +
-    `If an open issue labelled qa-signoff/qa-blocked + block:${block} already exists, UPDATE it (edit body + reconcile ` +
-    `labels) instead of opening a duplicate. Return its number + url.\n\n` +
-    `MATRIX:\n${JSON.stringify(matrix, null, 2)}\n\nAUTO-FIXED:\n${JSON.stringify(allFixed, null, 2)}\n\nRESIDUAL:\n${JSON.stringify(residual, null, 2)}`,
-  {
-    label: "handoff",
-    phase: "Handoff",
-    model: "sonnet",
-    schema: {
-      type: "object",
-      properties: { number: { type: "number" }, url: { type: "string" } },
-      required: ["number"],
+let issue = null;
+if (AUDIT) {
+  log(
+    "audit mode — skipping Handoff (no issue) + Persist (no commit); returning matrix only",
+  );
+} else {
+  phase("Handoff");
+  issue = await agent(
+    `Open ONE GitHub issue in ${repo} handing the "${block}" block to a human QA reviewer (verdict: ${verdict}` +
+      `${degraded ? ` — DEGRADED: ${unverifiedCount} finding(s) could NOT be adversarially verified (verifier hit a limit)` : ""}).\n` +
+      `Use the issue template in qa.md §"Human-QA handoff issue" (./.claude/commands or ~/.claude/commands). ` +
+      `Labels: ${verdict === "CLEAN" ? "qa-signoff" : "qa-blocked"}, P1, block:${block}${degraded ? ", qa-degraded" : ""}. ` +
+      `First ensure each label exists — \`gh label create <name> --force\` (qa-signoff green, qa-blocked red, ` +
+      `qa-degraded orange, block:${block} blue) — gh issue create fails on a missing label.\n` +
+      (degraded
+        ? `Put a prominent note at the TOP: this audit was DEGRADED — ${unverifiedCount} finding(s) are unverified and MUST be confirmed manually; do not treat CLEAN as final.\n`
+        : "") +
+      `Body MUST contain: (1) the verified matrix (routes × keywords) from the data below, (2) the auto-fixed list with ` +
+      `commit SHAs, (3) the "residual for human" checklist — the tier-C, escalated, AND unverified items below (mark each ` +
+      `unverified one "⚠️ unverified — verifier hit a limit, confirm manually"); each line: route/file · what to check · ` +
+      `why a human is needed, (4) the tick-box acceptance checklist.\n` +
+      `If an open issue labelled qa-signoff/qa-blocked + block:${block} already exists, UPDATE it (edit body + reconcile ` +
+      `labels) instead of opening a duplicate. Return its number + url.\n\n` +
+      `MATRIX:\n${JSON.stringify(matrix, null, 2)}\n\nAUTO-FIXED:\n${JSON.stringify(allFixed, null, 2)}\n\nRESIDUAL:\n${JSON.stringify(residual, null, 2)}`,
+    {
+      label: "handoff",
+      phase: "Handoff",
+      model: "sonnet",
+      schema: {
+        type: "object",
+        properties: { number: { type: "number" }, url: { type: "string" } },
+        required: ["number"],
+      },
     },
-  },
-);
+  );
 
-// ── Phase: Persist — write blocks.json .qa + README frontmatter ────────────────
-phase("Persist");
-const qa = {
-  status: verdict,
-  verified_by: "qa.js@opus-4-8",
-  rounds: roundsRun,
-  fixed_count: allFixed.length,
-  residual_count: residual.length,
-  issue: issue ? issue.number : null,
-};
-await agent(
-  `Persist the QA verdict for block "${block}" (repo ${repo}).\n` +
-    `1. In .claude/blocks.json, set blocks["${block}"].qa to ${JSON.stringify(qa)} PLUS a verified_at field set to the ` +
-    `current UTC ISO timestamp (run \`date -u +%Y-%m-%dT%H:%M:%SZ\`). Merge — preserve path/context/docs/routes and every other block.\n` +
-    `2. In ${blockPath}/README.md frontmatter, set last_audited to today's date and qa_status to "${verdict}". ` +
-    `Leave the rest of the frontmatter untouched.\n` +
-    `Commit on main as \`chore(${block}): record qa verdict ${verdict} [qa]\` with the standard Co-Authored-By footer. ` +
-    `Return the files you changed.`,
-  {
-    label: "persist",
-    phase: "Persist",
-    model: "sonnet",
-    schema: {
-      type: "object",
-      properties: { files: { type: "array", items: { type: "string" } } },
-      required: ["files"],
+  // ── Phase: Persist — write blocks.json .qa + README frontmatter ────────────────
+  phase("Persist");
+  const qa = {
+    status: verdict,
+    verified_by: "qa.js@opus-4-8",
+    rounds: roundsRun,
+    fixed_count: allFixed.length,
+    residual_count: residual.length,
+    issue: issue ? issue.number : null,
+  };
+  await agent(
+    `Persist the QA verdict for block "${block}" (repo ${repo}).\n` +
+      `1. In .claude/blocks.json, set blocks["${block}"].qa to ${JSON.stringify(qa)} PLUS a verified_at field set to the ` +
+      `current UTC ISO timestamp (run \`date -u +%Y-%m-%dT%H:%M:%SZ\`). Merge — preserve path/context/docs/routes and every other block.\n` +
+      `2. In ${blockPath}/README.md frontmatter, set last_audited to today's date and qa_status to "${verdict}". ` +
+      `Leave the rest of the frontmatter untouched.\n` +
+      `Commit on main as \`chore(${block}): record qa verdict ${verdict} [qa]\` with the standard Co-Authored-By footer. ` +
+      `Return the files you changed.`,
+    {
+      label: "persist",
+      phase: "Persist",
+      model: "sonnet",
+      schema: {
+        type: "object",
+        properties: { files: { type: "array", items: { type: "string" } } },
+        required: ["files"],
+      },
     },
-  },
-);
+  );
+}
 
 return finalize({
   verdict,
@@ -499,7 +608,7 @@ function residualOf(rs, esc) {
         target: f.target || r.target,
       })),
     )
-    .filter((f) => f.tier === "C");
+    .filter((f) => f.tier === "C" || f.unverified);
   const seen = new Set();
   return [...fromRows, ...esc].filter((f) => {
     const k = `${f.keyword}|${f.target}|${f.title}`;
