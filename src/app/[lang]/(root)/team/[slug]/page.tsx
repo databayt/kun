@@ -4,7 +4,7 @@ import { getTeamMember, team } from "@/components/root/team/config"
 import { type Locale } from "@/components/local/config"
 
 interface TeamMemberPageProps {
-  params: Promise<{ lang: Locale; slug: string }>
+  params: Promise<{ lang: string; slug: string }>
 }
 
 export function generateStaticParams() {
@@ -19,9 +19,10 @@ export async function generateMetadata({ params }: TeamMemberPageProps) {
 
 export default async function TeamMemberPage({ params }: TeamMemberPageProps) {
   const { lang, slug } = await params
+  const locale = lang as Locale
   const member = getTeamMember(slug)
 
   if (!member) notFound()
 
-  return <TeamDetail member={member} lang={lang} />
+  return <TeamDetail member={member} lang={locale} />
 }

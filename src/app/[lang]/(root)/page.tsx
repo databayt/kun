@@ -7,12 +7,13 @@ export const metadata = {
 }
 
 interface HomePageProps {
-  params: Promise<{ lang: Locale }>;
+  params: Promise<{ lang: string }>;
 }
 
 export default async function HomePage({ params }: HomePageProps) {
   const { lang } = await params;
-  const dictionary = await getDictionary(lang);
+  const locale = lang as Locale;
+  const dictionary = await getDictionary(locale);
 
-  return <HomeContent dictionary={dictionary} params={{ lang }} />;
+  return <HomeContent dictionary={dictionary} params={{ lang: locale }} />;
 }

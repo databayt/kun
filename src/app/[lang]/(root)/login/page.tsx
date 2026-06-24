@@ -6,11 +6,12 @@ export const metadata = {
 }
 
 interface LoginPageProps {
-  params: Promise<{ lang: Locale }>
+  params: Promise<{ lang: string }>
 }
 
 export default async function LoginPage({ params }: LoginPageProps) {
   const { lang } = await params
+  const locale = lang as Locale
 
-  return <LoginContent lang={lang} />
+  return <LoginContent lang={locale} />
 }

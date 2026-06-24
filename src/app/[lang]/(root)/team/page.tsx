@@ -6,11 +6,12 @@ export const metadata = {
 }
 
 interface TeamPageProps {
-  params: Promise<{ lang: Locale }>
+  params: Promise<{ lang: string }>
 }
 
 export default async function TeamPage({ params }: TeamPageProps) {
   const { lang } = await params
+  const locale = lang as Locale
 
-  return <TeamContent lang={lang} />
+  return <TeamContent lang={locale} />
 }

@@ -6,11 +6,12 @@ export const metadata = {
 }
 
 interface ContextPageProps {
-  params: Promise<{ lang: Locale }>
+  params: Promise<{ lang: string }>
 }
 
 export default async function ContextPage({ params }: ContextPageProps) {
   const { lang } = await params
+  const locale = lang as Locale
 
-  return <ContextContent lang={lang} />
+  return <ContextContent lang={locale} />
 }

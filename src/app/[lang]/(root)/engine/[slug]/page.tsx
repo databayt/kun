@@ -18,7 +18,7 @@ export function generateStaticParams() {
 }
 
 export async function generateMetadata(props: {
-  params: Promise<{ slug: string; lang: Locale }>
+  params: Promise<{ slug: string; lang: string }>
 }): Promise<Metadata> {
   const { slug } = await props.params
   const topic = getTopicDetail(slug)
@@ -32,12 +32,13 @@ export async function generateMetadata(props: {
 }
 
 export default async function TopicPage(props: {
-  params: Promise<{ slug: string; lang: Locale }>
+  params: Promise<{ slug: string; lang: string }>
 }) {
   const { slug, lang } = await props.params
+  const locale = lang as Locale
   const topic = getTopicDetail(slug)
 
   if (!topic) notFound()
 
-  return <TopicDetailPage topic={topic} lang={lang} />
+  return <TopicDetailPage topic={topic} lang={locale} />
 }

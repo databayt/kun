@@ -348,8 +348,8 @@ const mdxComponents = {
 };
 
 export function useMDXComponents(
-  components: Record<string, React.ComponentType<unknown>>,
-): Record<string, React.ComponentType<unknown>> {
+  components: Record<string, any>,
+): Record<string, any> {
   return {
     ...mdxComponents,
     ...components,
