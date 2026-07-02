@@ -37,7 +37,6 @@ IDEA → SPEC (human gate) → [PLAN → TASKS] → SCHEMA → CODE → WIRE →
 ## Vocabulary — keywords routed to skills, agents, MCP
 
 <!-- BEGIN vocabulary (generated) -->
-
 Claude routes these to the right skill + agent + MCP without a dedicated command. Registry: `.claude/vocabulary.json` (edit it, then `node .claude/scripts/generate-vocab.mjs`); browsable at kun.databayt.org/en/docs/keywords.
 
 **The Pipeline** — idea to production in one word: `feature`, `idea`, `spec`, `schema`, `ready`, `code`, `wire`, `check`, `ship`, `watch`
