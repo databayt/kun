@@ -212,8 +212,9 @@ function agentExists(name) {
 function validateTargets() {
   const errors = [];
   const warnings = [];
-  // Portals may live in the project mcp.json OR the user one (~/.claude/mcp.json
-  // is authoritative for `browser` by doctrine) — merge both key sets.
+  // Portals may live in the project mcp.json, the user one, OR ~/.claude.json —
+  // the last is where `claude mcp add` actually registers servers (mcp.json files
+  // are kun's declared fleet; the runtime reads ~/.claude.json). Merge all three.
   const mcpKeys = new Set();
   for (const mcpPath of [join(ROOT, ".claude/mcp.json"), join(HOME, ".claude/mcp.json")]) {
     try {
@@ -222,6 +223,15 @@ function validateTargets() {
     } catch {
       /* unreadable — that file contributes nothing */
     }
+  }
+  try {
+    const cj = JSON.parse(readFileSync(join(HOME, ".claude.json"), "utf8"));
+    for (const k of Object.keys(cj.mcpServers || {})) mcpKeys.add(k.toLowerCase());
+    for (const proj of Object.values(cj.projects || {})) {
+      for (const k of Object.keys(proj.mcpServers || {})) mcpKeys.add(k.toLowerCase());
+    }
+  } catch {
+    /* no ~/.claude.json — fine */
   }
   for (const sc of vocab.schools) {
     for (const sp of sc.spells) {

@@ -50,8 +50,21 @@ echo -e "${B}Common config${NC}"
 mkdir -p "$CLAUDE_DIR"/{agents,commands,rules,memory,scripts,skills}
 info "directories"
 
-cp "$KUN_DIR/.claude/CLAUDE.md" "$CLAUDE_DIR/CLAUDE.md"
-info "CLAUDE.md"
+# User-global CLAUDE.md — install from the TEMPLATE only if missing. Never
+# clobber: ~/.claude/CLAUDE.md is the teammate's personal global config
+# (Component Hierarchy, imports, machine quirks); the kun PROJECT CLAUDE.md
+# loads separately inside the repo and must not overwrite it.
+if [ ! -f "$CLAUDE_DIR/CLAUDE.md" ]; then
+    if [ -f "$KUN_DIR/.claude/templates/user-CLAUDE.md" ]; then
+        cp "$KUN_DIR/.claude/templates/user-CLAUDE.md" "$CLAUDE_DIR/CLAUDE.md"
+        info "CLAUDE.md (installed from template)"
+    else
+        cp "$KUN_DIR/.claude/CLAUDE.md" "$CLAUDE_DIR/CLAUDE.md"
+        info "CLAUDE.md (template missing — used project copy)"
+    fi
+else
+    info "CLAUDE.md (existing — left untouched)"
+fi
 
 cp "$KUN_DIR/.claude/agents/"*.md "$CLAUDE_DIR/agents/" 2>/dev/null || true
 AGENT_COUNT=$(ls "$CLAUDE_DIR/agents/"*.md 2>/dev/null | wc -l | tr -d ' ')
