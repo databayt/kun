@@ -55,8 +55,8 @@ export const team: TeamMember[] = [
     slug: "sedon",
     name: "Sedon",
     nameAr: "سدن",
-    role: "Facilitator",
-    roleAr: "تنسيق",
+    role: "DevOps & Facilitation",
+    roleAr: "عمليات وتنسيق",
   },
 ];
 

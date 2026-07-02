@@ -2,7 +2,6 @@
   "$schema": "Team capacity — per-person focus, hours, blockers, accessibility, timezone",
   "last_updated": "2026-07-02",
   "last_updated_by": "engine-boost-refresh",
-
   "team": [
     {
       "id": "abdout",
@@ -13,7 +12,10 @@
       "timezone": "Asia/Riyadh",
       "hours_per_week": 60,
       "current_focus": "Hogwarts admission flow + Kun captain operating system",
-      "primary_products": ["hogwarts", "kun"],
+      "primary_products": [
+        "hogwarts",
+        "kun"
+      ],
       "strengths": [
         "Full-stack engineering",
         "System architecture",
@@ -45,14 +47,23 @@
       "timezone": "Unknown",
       "hours_per_week": null,
       "current_focus": "Mobile public launch (ios-app + android-app) + hogwarts fullstack",
-      "primary_products": ["ios-app", "android-app", "hogwarts"],
+      "primary_products": [
+        "ios-app",
+        "android-app",
+        "hogwarts"
+      ],
       "strengths": [
         "Fullstack web engineering",
         "Mobile engineering (iOS + Android)",
         "High skill ceiling"
       ],
-      "weaknesses_to_manage": ["Bandwidth and scope still settling"],
-      "task_relevant_maturity": { "engineering": "high", "mobile": "high" },
+      "weaknesses_to_manage": [
+        "Bandwidth and scope still settling"
+      ],
+      "task_relevant_maturity": {
+        "engineering": "high",
+        "mobile": "high"
+      },
       "blockers": [],
       "device": "Unknown",
       "background": "Highly skilled fullstack web and mobile engineer"
@@ -60,19 +71,24 @@
     {
       "id": "moutaz",
       "name": "Moutaz",
-      "aka": ["mutaz"],
+      "aka": [
+        "mutaz"
+      ],
       "category": "tech",
-      "role": "Product Engineer (business + sales + AI)",
+      "role": "Product Engineer (business + sales + AI + network)",
       "email": "moutaz@databayt.org",
       "timezone": "Unknown",
       "hours_per_week": null,
       "current_focus": "Albayan pilot (owner) + product engineering",
-      "primary_products": ["hogwarts"],
+      "primary_products": [
+        "hogwarts"
+      ],
       "strengths": [
         "Experienced software engineering",
         "Business",
         "Sales",
-        "AI"
+        "AI",
+        "Network"
       ],
       "weaknesses_to_manage": [
         "Split focus between engineering and business lanes"
@@ -81,7 +97,8 @@
         "engineering": "high",
         "business": "high",
         "sales": "medium",
-        "ai": "high"
+        "ai": "high",
+        "network": "high"
       },
       "blockers": [],
       "device": "Unknown",
@@ -90,7 +107,9 @@
     {
       "id": "aseel",
       "name": "Ali Aseel",
-      "aka": ["ali"],
+      "aka": [
+        "ali"
+      ],
       "category": "business",
       "role": "Sales + QA",
       "email": "aseel@databayt.org",
@@ -98,7 +117,9 @@
       "timezone": "Africa/Khartoum",
       "hours_per_week": 30,
       "current_focus": "Outreach for schools/sponsors/investors/early adopters/contributors + Hogwarts QA",
-      "primary_products": ["hogwarts"],
+      "primary_products": [
+        "hogwarts"
+      ],
       "strengths": [
         "Sales outreach",
         "QA testing",
@@ -114,14 +135,18 @@
         "qa": "high",
         "outreach": "medium"
       },
-      "blockers": ["Time split across sales + QA + outreach"],
+      "blockers": [
+        "Time split across sales + QA + outreach"
+      ],
       "device": "Windows, Android",
       "background": "CS + MBA, educated in India (current tech scene)"
     },
     {
       "id": "moed",
       "name": "Moed",
-      "aka": ["moad"],
+      "aka": [
+        "moad"
+      ],
       "category": "business",
       "role": "Business Development + Copywriting + Network",
       "email": "moed@databayt.org",
@@ -136,13 +161,17 @@
         "Networking",
         "Well-read"
       ],
-      "weaknesses_to_manage": ["New — no defined ownership yet"],
+      "weaknesses_to_manage": [
+        "New — no defined ownership yet"
+      ],
       "task_relevant_maturity": {
         "business": "medium",
         "copywriting": "high",
         "networking": "high"
       },
-      "blockers": ["No defined area of ownership yet"],
+      "blockers": [
+        "No defined area of ownership yet"
+      ],
       "device": "Unknown",
       "background": "Well educated, loves reading; strong in business, sales, copywriting, and network"
     },
@@ -155,16 +184,22 @@
       "timezone": "Africa/Khartoum",
       "hours_per_week": null,
       "current_focus": "Sharing economy revenue distribution model, Anthropic product research, content/translations, voice-over",
-      "primary_products": ["kun (advisory)", "growth (content)"],
+      "primary_products": [
+        "kun (advisory)",
+        "growth (content)"
+      ],
       "strengths": [
         "Strategic research",
         "Sharing economy thinking",
         "Languages (Arabic/English/etc.)",
         "Voice-over",
         "Copywriting",
-        "Brainstorming"
+        "Brainstorming",
+        "Argument (steelmanning, debate)"
       ],
-      "weaknesses_to_manage": ["Bandwidth — research is long-form work"],
+      "weaknesses_to_manage": [
+        "Bandwidth — research is long-form work"
+      ],
       "task_relevant_maturity": {
         "research": "high",
         "content": "high",
@@ -185,14 +220,18 @@
     {
       "id": "sedon",
       "name": "Osman Sedon",
-      "category": "facilitator",
-      "role": "Saudi facilitator + practical reality-check",
+      "category": "ops",
+      "role": "DevOps + Saudi facilitator",
       "email": "sedon@databayt.org",
       "timezone": "Asia/Riyadh",
       "hours_per_week": 15,
       "current_focus": "Saudi banking, MADA / STC Pay setup, physical-presence operations, batched support tasks (Mon/Wed/Fri)",
-      "primary_products": ["payments infrastructure", "support (batched)"],
+      "primary_products": [
+        "payments infrastructure",
+        "support (batched)"
+      ],
       "strengths": [
+        "DevOps — deploys, infra cadence, environment upkeep",
         "Reliable execution given a clear map",
         "Saudi operational presence",
         "Practical reality-check thinking",
@@ -204,34 +243,34 @@
         "Time-zone alignment with Sudan-based teammates"
       ],
       "task_relevant_maturity": {
+        "devops": "medium",
         "saudi_ops": "high",
         "support_batched": "high",
         "strategy": "low"
       },
-      "blockers": ["Awaits clear Monday task map; delivers by Friday"],
+      "blockers": [
+        "Awaits clear Monday task map; delivers by Friday"
+      ],
       "device": "HP Windows, Android",
-      "background": "Mechanical engineer, part-time; very smart, known for practical thinking"
+      "background": "Mechanical engineer, part-time; very smart, reality-driven"
     }
   ],
-
   "team_total": {
     "headcount": 7,
     "category_breakdown": {
       "tech": 3,
       "business": 2,
       "rnd": 1,
-      "facilitator": 1
+      "ops": 1
     },
     "total_weekly_hours": "~105-120 confirmed (Abdout 60 + Aseel 30 + Sedon 15) + Ibrahim/Moutaz/Moed variable",
     "salary_total_usd": 0,
     "compensation_model": "Equity / sweat / Contribution Units (CU)"
   },
-
   "shared_infra": {
     "crm": "One login per member <id>@databayt.org across all 4 workspaces (mkan/hogwarts/sijillee/moallimee .crm.databayt.org) — see .claude/memory/crm.json",
     "slack": "databayt-sh workspace, same identity"
   },
-
   "week_of": "2026-06-29",
   "weekly_allocation": {
     "abdout": "Kun engine boost + Hogwarts admission polish",

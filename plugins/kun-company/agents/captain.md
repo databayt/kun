@@ -137,10 +137,10 @@ Source of truth: `.claude/memory/team.json` and `.claude/memory/capacity.json`. 
 - _Does_: Fullstack web + mobile (ios-app, android-app). Highly skilled; complex end-to-end work alongside Abdout.
 - _Note_: The mobile lane is his natural ownership.
 
-**Moutaz (aka Mutaz)** — Product Engineer (business + sales + AI)
+**Moutaz (aka Mutaz)** — Product Engineer (business + sales + AI + network)
 
-- _Does_: Experienced software engineer with strong business, sales, and AI skills. Owns the Albayan pilot. Turns ideas into shippable specs, runs customer-facing motion.
-- _Note_: Bridges the engineer ↔ business loop — allocate him where that seam is weakest.
+- _Does_: Experienced software engineer with strong business, sales, AI, and network skills. Owns the Albayan pilot. Turns ideas into shippable specs, runs customer-facing motion.
+- _Note_: Bridges the engineer ↔ business loop — allocate him where that seam is weakest. His network is a pipeline asset.
 
 ### Business (2)
 
@@ -160,16 +160,16 @@ Source of truth: `.claude/memory/team.json` and `.claude/memory/capacity.json`. 
 
 **Samia (Samia Hamd)** — Research & Development
 
-- _Does_: Sharing economy revenue distribution research, Anthropic product research, Arabic content/translations, voice-over, copywriting, brainstorming.
-- _Note_: The most talented and gifted on the team. Core vision contributor. No longer Kun caretaker.
+- _Does_: Sharing economy revenue distribution research, Anthropic product research, Arabic content/translations, voice-over, copywriting, brainstorming, argument.
+- _Note_: The most talented and gifted on the team — well-read; use her to steelman both sides of a hard decision (argument protocol step 1). Core vision contributor. No longer Kun caretaker.
 - _Accessibility_: Blind, screen-reader user. Voice-first interaction; written follow-ups must be properly headed (markdown headings).
 
-### Facilitator (1)
+### Ops (1)
 
-**Sedon (Osman Sedon)** — Saudi facilitator + practical reality-check
+**Sedon (Osman Sedon)** — DevOps + Saudi facilitator
 
-- _Does_: Saudi banking (MADA + STC Pay), physical-presence ops, payments routing, batched support tasks Mon/Wed/Fri.
-- _Note_: Part-time (~15 hrs/week). "Give him a clear map on Monday, he delivers by Friday." Very smart, practical, brings a different perspective — use him to reality-check plans before they ship.
+- _Does_: DevOps lane (deploys, infra cadence, environment upkeep), Saudi banking (MADA + STC Pay), physical-presence ops, payments routing, batched support tasks Mon/Wed/Fri.
+- _Note_: Part-time (~15 hrs/week). "Give him a clear map on Monday, he delivers by Friday." Reality-driven — very smart, practical, brings a different perspective; use him to reality-check plans before they ship.
 - _Background_: Mechanical engineer, part-time.
 
 ---
