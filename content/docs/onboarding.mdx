@@ -5,10 +5,10 @@ description: Fresh machine to fully working dev environment in one paste
 
 # Onboarding
 
-> One paste. One browser sign-in part-way through. Everything else silent — ≤3 clicks at the end.
-> ~20 min on a Mac that already has Xcode; budget ~45 min on a bare machine (the first Command-Line-Tools download dominates). A fresh Mac, Windows, or Linux laptop becomes a fully provisioned databayt environment — every tool installed, every repo cloned, every Claude surface working.
+> One paste. **Scan first, install only the delta.** One browser sign-in part-way through, ≤3 clicks at the end.
+> ~20 min on a Mac that already has Xcode; budget ~45 min on a bare machine (the first Command-Line-Tools download dominates). A fresh Mac, Windows, or Linux laptop becomes a fully provisioned databayt environment — every tool installed, every repo cloned, every agent lane working.
 
-This is the single source of truth for joining databayt. It covers every OS, every Claude surface, every dotfile, every external account.
+This is the single source of truth for joining databayt. It covers every OS, every agent (Claude Code, Claude Desktop, Antigravity, opencode, OpenClaw), every dotfile, every external account.
 
 > **Ran this on a real machine?** Hit **Report an issue** in the footer of any [kun.databayt.org](https://kun.databayt.org) page and describe what you saw — what worked, what broke, what to change. It files a GitHub issue (no account-juggling, works mid-install from the browser). See [Issue pipeline](/docs/issue).
 
@@ -34,6 +34,50 @@ The bootstrap URL auto-detects your OS and dispatches to the right installer. No
 
 ---
 
+## Scan first
+
+Before anything installs, the wizard prints a scan of what's already on the machine — versions, launchers, config — and only installs the delta. Already-provisioned machines sail through with 1–2 dialogs:
+
+```
+Scan — system
+  ✓ os               Darwin arm64 (26.4)
+  ✓ brew             Homebrew 6.0.1
+  ✓ node             v25.1.0
+  ✓ gh               gh version 2.83.1
+
+Scan — agents
+  ✓ claude           2.1.198 (Claude Code)
+  ✓   alias c        bypass launcher
+  ✓ claude desktop   app + MCP config
+  ✓ agy              1.0.14
+  ○ opencode         1.17.13 · bypass config not set
+  ○ openclaw         not installed (optional gateway)
+  ✓ ~/.claude        engine installed
+```
+
+Run the scan alone anytime (changes nothing):
+
+```bash
+bash ~/kun/.claude/scripts/onboarding-mac.sh --detect-only     # scan table
+bash ~/kun/.claude/scripts/onboarding-mac.sh --dry-run         # what a run would install
+```
+
+## The agents
+
+Five lanes, one launcher letter each — pick which to install in the wizard's multi-select (default: **all**):
+
+| Agent | Launcher | Role | Bypass-permissions semantics |
+|---|---|---|---|
+| **Claude Code** | `c` | Primary — everything serious | `c` = `claude --dangerously-skip-permissions` |
+| **Claude Desktop** | — | Chat / Cowork / Code tabs | n/a (app) |
+| **Antigravity** (`agy`) | `a` | Secondary — fallback + cheap lane | `a` = `agy --dangerously-skip-permissions` |
+| **opencode** | `o` | Tertiary — open-source terminal agent | **Config-level**: the installer writes `"permission": "allow"` into `~/.config/opencode/opencode.json` (no flag exists — this is the `o`-lane equivalent of `--dangerously-skip-permissions`, and it is just as permissive) |
+| **OpenClaw** | `claw` | Optional **assistant gateway** (WhatsApp/Telegram/Slack channels) — NOT a coding CLI | n/a — its interactive setup (`openclaw onboard --install-daemon`) runs later, never headless |
+
+The launchers live in one managed block in `~/.zshrc` / `~/.bashrc` (`# BEGIN databayt agents … # END databayt agents`) — idempotent across re-runs; legacy `function c` lines migrate in automatically.
+
+---
+
 ## What you get
 
 Running the bootstrap line leaves your machine fully provisioned. Here's what lands, how to verify it, and how to change what's delivered.
@@ -46,7 +90,9 @@ Running the bootstrap line leaves your machine fully provisioned. Here's what la
 | **IDEs** | WebStorm (+ Claude plugin), VS Code (+ Claude extension) |
 | **Claude** | Desktop (Chat / Cowork / Code tabs), Claude Code CLI, IDE integrations, `claude.ai/code` in browser, Mobile (iOS/Android) |
 | **Antigravity** *(secondary)* | `agy` CLI + `a` launcher; `~/.gemini/` wired to the same MCP fleet, skills, and playbook — fallback for Claude Code + cheap lane for easy tasks. See [Antigravity](/docs/antigravity). |
-| **Dotfiles** | SSH key (uploaded to GitHub), `~/.zshrc` / `~/.bashrc` / `$PROFILE` with `c` + `a` launchers, `~/.gitconfig`, `~/.ssh/config` (Keychain on Mac) |
+| **opencode** *(tertiary)* | `opencode` CLI + `o` launcher; permissive config written (see [The agents](#the-agents)) |
+| **OpenClaw** *(optional)* | `openclaw` npm package + `claw` launcher; daemon setup stays manual (interactive) |
+| **Dotfiles** | SSH key (uploaded to GitHub), one managed launcher block (`c` / `a` / `o` / `claw`) in `~/.zshrc` / `~/.bashrc` / `$PROFILE`, `~/.gitconfig`, `~/.ssh/config` (Keychain on Mac) |
 | **Claude config** | `~/.claude/` — agents, skills, MCP servers, hooks, rules, memory; secrets in `~/.claude/.env` |
 | **Desktop ↔ CLI parity** | `claude_desktop_config.json` symlinked to `~/.claude/mcp.json` so Desktop tabs see the same MCP fleet; Antigravity's `~/.gemini/config/mcp_config.json` is transformed from the same source |
 | **Repos** | The full databayt org cloned to your chosen directory (default: `~/<repo>`) — see [Which repos you get](#which-repos-you-get) |
@@ -57,7 +103,8 @@ Run these to confirm each layer — all green means fully provisioned:
 
 | Layer | Verify command | Pass looks like |
 |---|---|---|
-| **Tools** | `for t in git node pnpm gh claude vercel; do command -v $t; done` | a path prints for each |
+| **Tools** | `for t in git node pnpm gh claude agy opencode vercel; do command -v $t; done` | a path prints for each |
+| **Agent scan** | `bash ~/kun/.claude/scripts/onboarding-mac.sh --detect-only` | all lanes ✓ (or ○ for optional ones you skipped) |
 | **Auth** | `gh auth status && ssh -T git@github.com` | "Logged in"; "successfully authenticated" |
 | **Org gate** | `gh api user/memberships/orgs/databayt --jq .state` | `active` |
 | **Code** | `ls ~/kun ~/hogwarts ~/codebase` | directories exist |
@@ -77,7 +124,8 @@ Want a different result? Edit the source, then re-run the bootstrap (idempotent)
 | Which repos clone | Phase 4 repo list in `onboarding-{mac,linux}.sh` / `Clone-Parallel` list in `onboarding-windows.ps1`; or pass `--essentials-only` for just kun/hogwarts/codebase |
 | Where repos land | `--repos-dir <path>` (Mac/Linux) / `-ReposDir <path>` (Windows), or the wizard's "where to save repos" prompt |
 | Which tools install | Phase 1–2 of the `onboarding-*` backend for your OS |
-| MCP / skills / commands / agents (universal) | edit `.claude/mcp.json`, `.claude/commands/`, `.claude/agents/` — every machine gets the full set |
+| Which agents install | `--agents=all\|code,desktop,agy,opencode,openclaw` (default all), or the wizard's multi-select |
+| MCP / skills / agents (universal) | edit `.claude/mcp.json`, `.claude/skills/`, `.claude/agents/` — every machine gets the full set (commands are retired — skills carry the verbs) |
 | Which keys a machine holds | scoped by the **Gist** you hand someone (`secrets.sh <GIST_ID>`), not by config |
 | hogwarts local dev | `--hogwarts-dev` / `-HogwartsDev` (default off) |
 
@@ -112,16 +160,17 @@ Neither needs Pro/Max.
 
 Three acts. Most is silent; you click only when a human is unavoidably needed. The one unavoidable pause is a browser sign-in to GitHub part-way through (Act 2, Phase 3).
 
-### Act 1 — Pre-flight (~30 seconds, 4 dialogs)
+### Act 1 — Pre-flight (~30 seconds, usually 1–2 dialogs)
 
-The wizard asks four things. Everything else is auto-detected, derived after auth, or skipped silently.
+The wizard **scans first** and auto-answers what detection can settle; it dialogs only the rest. On a bare machine that's five questions; on a machine with any history it's usually just the agents pick.
 
-| Question | Notes |
+| Question | Auto-skipped when |
 |---|---|
-| GitHub account? | Yes / No, create one (opens `github.com/join`) / Skip |
-| Accepted databayt org invite? | Yes / Open invite page / Skip |
-| **Anthropic — company account** | Company creds + OTP from HR. Yes / Open Claude login / Skip — finish later. The backend runs sequentially, so this OAuth step is the one place you can step away; sign-in can finish in Act 3 or later via `claude`/Desktop. |
-| Where to save databayt repos? | Home root (`~/`) / `~/databayt/` / Custom… |
+| GitHub account? | `gh auth status` already succeeds |
+| Accepted databayt org invite? | `gh api user/memberships/orgs/databayt` → `active` |
+| **Anthropic — company account** | `claude` installed + already signed in (`~/.claude.json`) |
+| Where to save databayt repos? | `~/kun` + `~/hogwarts` already at home root |
+| **Which agents?** (multi-select) | never skipped on first run — All (default) / Claude Code / Claude Desktop / Antigravity / opencode / OpenClaw |
 
 All answers persist in a state file. Re-runs skip questions already answered.
 
@@ -143,7 +192,7 @@ Eight phases run back-to-back. You can minimize the terminal — the wizard fire
 | 2 | Applications — WebStorm, VS Code, Chrome |
 | 3 | GitHub — SSH key, **browser sign-in** (`gh auth login --web`), key uploaded, git identity auto-set, verify databayt org membership + SSH push |
 | 4 | Clone Repositories — the full databayt org, **cloned concurrently** |
-| 5 | Claude & Antigravity — Claude Code CLI + Desktop (Mac/Win) + Desktop MCP symlink + `c`; Antigravity `agy` CLI + `a`, with `~/.gemini/` bridged to the same MCP fleet / skills / playbook |
+| 5 | Agents — the selected lanes from the multi-select: Claude Code CLI + Desktop (Mac/Win) + MCP symlink, Antigravity (`~/.gemini/` bridged to the same fleet), opencode (+ permissive config), OpenClaw (npm only); one managed launcher block `c`/`a`/`o`/`claw` |
 | 6 | Kun Engine — `setup.sh` installs full config; `secrets.sh` pulls `~/.claude/.env` from Gist; `vercel-pull.sh` populates per-product `.env` |
 | 7 | Hogwarts — pnpm install, prisma generate + push + seed, build verify (only with `--hogwarts-dev`) |
 | 8 | Health Check — every tool / repo / config verified |
@@ -208,7 +257,7 @@ After install you have **seven Claude surfaces**, each with a sweet spot:
 
 Cowork and Claude Code share `~/.claude/` — same brain, two modes; handoff happens via `~/.claude/bridge.md` + GitHub Issues. See [Cowork ↔ Code](/docs/cowork). Desktop's three tabs share the CLI's MCP fleet because the wizard symlinks `claude_desktop_config.json` → `~/.claude/mcp.json`.
 
-**Secondary agent.** Beside Claude Code sits **Antigravity** (`a` = `agy --dangerously-skip-permissions`) — Google's terminal agent, wired to the same MCP fleet, skills, and playbook via `~/.gemini/`. Reach for it as the fallback when Claude Code is unavailable, or as the cheap lane (Gemini Flash) for easy tasks; keep architecture and complex work on `c`. Full detail: [Antigravity](/docs/antigravity).
+**The other lanes.** Beside Claude Code sit three more agents (see [The agents](#the-agents)): **Antigravity** (`a`) — Google's terminal agent wired to the same MCP fleet/skills/playbook via `~/.gemini/`, the fallback + cheap lane (full detail: [Antigravity](/docs/antigravity)); **opencode** (`o`) — open-source terminal agent, tertiary; and **OpenClaw** (`claw`) — the optional chat-app gateway. Keep architecture and complex work on `c`.
 
 ### Away from the keyboard
 
@@ -250,6 +299,9 @@ Useful backend flags (Mac + Linux):
 
 | Flag | Purpose |
 |---|---|
+| `--detect-only` | Print the scan table and exit — changes nothing |
+| `--dry-run` | Print what a run would install (agent delta) and exit |
+| `--agents=all\|code,desktop,agy,opencode,openclaw` | Which agent lanes to install (default `all`) |
 | `--quiet` | Skip terminal prompts (wrapper/CI use) |
 | `--name <name>` / `--email <email>` | Pre-supply git identity |
 | `--repos-dir <path>` | Where to save databayt repos (default: `$HOME`) |
@@ -280,6 +332,8 @@ For hogwarts, your team contact shares the `.env` out-of-band — there is no `.
 | Open Claude in VS Code | `Cmd+Shift+P` → `Claude: Chat` |
 | Start Claude in any terminal | `c` |
 | Secondary agent (fallback / easy task) | `a` |
+| Tertiary agent (opencode) | `o` |
+| OpenClaw gateway status | `claw gateway status` |
 | Synthesize company status | `c "/captain"` |
 | Capture an idea | `c "/idea <description>"` |
 | Run the full feature pipeline | `c "/feature <name> [product]"` |
@@ -308,7 +362,9 @@ To reset and start fresh: delete the state file, then re-run the bootstrap.
 
 | Symptom | Fix |
 |---|---|
-| "command not found: c" or "command not found: a" | Restart shell or `source ~/.zshrc` (Mac/Linux), `. $PROFILE` (Windows) |
+| "command not found" for `c` `a` `o` or `claw` | Restart shell or `source ~/.zshrc` (Mac/Linux), `. $PROFILE` (Windows); the launchers live in the `# BEGIN databayt agents` block |
+| `o` runs but asks permission for everything | Re-run onboarding (writes `"permission": "allow"` to `~/.config/opencode/opencode.json`) — or accept the prompts if you prefer guardrails |
+| `claw` installed but no channels | OpenClaw daemon setup is interactive by design: `openclaw onboard --install-daemon` |
 | `a` (Antigravity) can't see the MCP servers | Re-run `bash ~/kun/.claude/scripts/antigravity-sync.sh`; see [Antigravity](/docs/antigravity) |
 | `claude doctor` red | Re-run `claude` to re-auth; check `~/.claude/settings.json` exists |
 | Hogwarts won't build | Confirm `.env` is present; re-run `secrets.sh <GIST_ID>` |
