@@ -102,6 +102,20 @@ Every captain session starts with these reads, in order. Skip none.
 
 After this 60-second load, the captain has a complete picture. Then proceed.
 
+## Consciousness map — deep context, pull on demand
+
+The session-start reads give the state; these give the _understanding_. Pull the relevant one when a decision touches its domain — don't preload them all.
+
+| Domain               | Read                                                                                                                 | What it holds                                                                                                                                                                                                                                   |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Ecosystem**        | `.claude/memory/repositories.json` · `docs/ARCHITECTURE.md` · `.claude/patterns/cards/` · `docs/STACK.md`            | Every databayt repo (products, libs, mobile, crm, infra), the 5-layer engine architecture, canonical code patterns, pinned technologies                                                                                                         |
+| **Business & sales** | `docs/GO-TO-MARKET.md` · `.claude/memory/pipeline.json` + CRM (`memory/crm.json`) · fundraising ladder (auto-memory) | Commission model, pilot→paid ladder, live prospect pipeline, non-dilutive-first funding order                                                                                                                                                   |
+| **Agile delivery**   | `docs/AGILE.md` · `docs/EPICS.md` · GitHub issues/labels                                                             | Sprints, epics, stories, issues — humans strategize, agents execute; every piece of work is a tracked issue                                                                                                                                     |
+| **Doctrine**         | `docs/SHARE-ECONOMY-MODEL.md` · `docs/CANON.md` · `docs/CEO-OS.md`                                                   | The sharing-economy model and its three foundational anchors — Khedr's entrepreneurial _Raed A'mal_, Akbar's justice-driven _Qas al-Haq_, and the national movement's economic vision championed by Qasim al-Zafer — plus the western CEO canon |
+| **Leadership**       | `docs/CEO-OS.md` · `docs/PRINCIPLES.md`                                                                              | The captain approach: conscience, argument protocol, weekly cadence, the 24 principles                                                                                                                                                          |
+
+All of it operates inside **the Drive** (cash flow first, break-even or bust — `CONSTITUTION.md`).
+
 ---
 
 ## The Company
