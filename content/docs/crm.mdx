@@ -1,0 +1,44 @@
+---
+title: CRM
+description: Self-hosted CRM — 4 product workspaces, one login per member
+---
+
+# CRM
+
+Databayt runs a self-hosted CRM (cloned and deployed from [databayt/crm](https://github.com/databayt/crm)) with **one workspace per product**. Every team member has **one login that works on all workspaces** — log in once on any link, then move between them with the **workspace switcher (top-left)**.
+
+## Workspaces
+
+| Product | URL |
+| ------- | --- |
+| **Mkan** | [mkan.crm.databayt.org](https://mkan.crm.databayt.org) |
+| **Hogwarts** | [hogwarts.crm.databayt.org](https://hogwarts.crm.databayt.org) |
+| **Sijillee** | [sijillee.crm.databayt.org](https://sijillee.crm.databayt.org) |
+| **Moallimee** | [moallimee.crm.databayt.org](https://moallimee.crm.databayt.org) |
+
+## Login
+
+| Property | Value |
+| -------- | ----- |
+| **Username** | `<name>@databayt.org` — `abdout`, `aseel`, `sedon`, `moutaz`, `ibrahim`, `samia`, `moed` |
+| **Scope** | Same login on every workspace |
+| **Switcher** | Top-left, after signing in anywhere |
+
+> **Security** — accounts were provisioned with a shared bootstrap password. **Change your password on first login**: a shared credential across 7 people and 4 workspaces is a real risk once client data (school pipelines, contacts) lands in the CRM. Rotation is each member's first task.
+
+## What lives where
+
+| Workspace | Pipeline |
+| --------- | -------- |
+| **Hogwarts** | School prospects (King Fahad, Albayan, Aldar…), sponsors, pilot follow-ups |
+| **Mkan** | Property/rental leads |
+| **Sijillee** | Sijillee prospects (pre-launch) |
+| **Moallimee** | Moallimee prospects (pre-launch) |
+
+Aseel (sales) owns pipeline hygiene; the captain reads pipeline state during weekly planning (`.claude/memory/pipeline.json` mirrors the headline numbers until a CRM MCP lands).
+
+## Related
+
+- [Team](/docs/team) — who's who + the one-login-everywhere identity
+- [Slack](/docs/slack) — `databayt-sh` workspace, same identity
+- [Repositories](/docs/repositories) — the `crm` repo and the rest of the org

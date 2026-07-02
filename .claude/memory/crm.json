@@ -1,0 +1,30 @@
+{
+  "$schema": "Databayt CRM — self-hosted, one workspace per product, one login per member",
+  "updated": "2026-07-02",
+  "source_repo": "https://github.com/databayt/crm",
+  "login_convention": "<member-id>@databayt.org — same credential on every workspace; workspace switcher top-left",
+  "members": ["abdout", "aseel", "sedon", "moutaz", "ibrahim", "samia", "moed"],
+  "security_note": "Provisioned with a shared bootstrap password — each member must rotate on first login. Never store the shared password here or in docs.",
+  "workspaces": [
+    { "product": "mkan", "url": "https://mkan.crm.databayt.org" },
+    {
+      "product": "hogwarts",
+      "url": "https://hogwarts.crm.databayt.org",
+      "pipeline": "schools, sponsors, pilots"
+    },
+    {
+      "product": "sijillee",
+      "url": "https://sijillee.crm.databayt.org",
+      "status": "pre-launch"
+    },
+    {
+      "product": "moallimee",
+      "url": "https://moallimee.crm.databayt.org",
+      "status": "pre-launch"
+    }
+  ],
+  "ownership": {
+    "pipeline_hygiene": "aseel",
+    "weekly_read": "captain (mirrors headline numbers into .claude/memory/pipeline.json)"
+  }
+}
