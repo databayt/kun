@@ -1,0 +1,5064 @@
+{
+  "$schema": "kun-vocabulary-v1",
+  "$comment": "Single source of truth for the kun keyword vocabulary. Edit THIS file, then run: node .claude/scripts/generate-vocab.mjs — it regenerates the Vocabulary block in .claude/CLAUDE.md and src/components/docs/spellbook-data.ts. health.sh runs generate-vocab.mjs --check to flag drift. Spell fields: name (the keyword), effect (one-line), order (routing chain: familiar=agent, portal=MCP, skill=/skill-or-command, hook, ward=rule, memory), steps, connects, depends, and optional mergedInto (keyword retired into another).",
+  "version": 1,
+  "updated": "2026-07-02",
+  "orderTypeLabels": {
+    "familiar": "Agent",
+    "portal": "MCP",
+    "skill": "Skill",
+    "hook": "Hook",
+    "ward": "Ward",
+    "memory": "Memory"
+  },
+  "schools": [
+    {
+      "id": "pipeline",
+      "number": "0",
+      "name": "The Pipeline",
+      "subtitle": "Idea to production in one word",
+      "description": "The most powerful magic in Kun. Each keyword is a complete pipeline stage. Chain them with `feature` to go from idea to customer's hands in minutes.",
+      "quote": "feature billing hogwarts — one line, eight stages, live in production.",
+      "spells": [
+        {
+          "name": "feature",
+          "effect": "Chain all pipeline stages — idea to production",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "orchestration"
+            },
+            {
+              "type": "familiar",
+              "name": "architecture"
+            },
+            {
+              "type": "familiar",
+              "name": "prisma"
+            },
+            {
+              "type": "familiar",
+              "name": "nextjs"
+            },
+            {
+              "type": "familiar",
+              "name": "react"
+            },
+            {
+              "type": "portal",
+              "name": "GitHub"
+            },
+            {
+              "type": "portal",
+              "name": "Vercel"
+            },
+            {
+              "type": "portal",
+              "name": "Neon"
+            },
+            {
+              "type": "portal",
+              "name": "Browser"
+            },
+            {
+              "type": "skill",
+              "name": "/feature"
+            }
+          ],
+          "steps": [
+            "IDEA: Create structured GitHub issue with acceptance criteria",
+            "SPEC: Data model sketch + file plan + refined criteria",
+            "PAUSE: Human approves the spec",
+            "SCHEMA: Prisma model + migration + Zod validation",
+            "CODE: Server actions with auth + validation + tenant isolation",
+            "WIRE: Pages + forms + tables + i18n wired to actions",
+            "CHECK: Type-check + build + visual verification",
+            "SHIP: Commit + push + Vercel deploy",
+            "WATCH: Post-deploy health check + issue closed"
+          ],
+          "connects": [
+            "idea",
+            "spec",
+            "schema",
+            "code",
+            "wire",
+            "check",
+            "ship",
+            "watch"
+          ],
+          "depends": []
+        },
+        {
+          "name": "idea",
+          "effect": "Capture a feature as a structured GitHub issue",
+          "order": [
+            {
+              "type": "portal",
+              "name": "GitHub"
+            },
+            {
+              "type": "skill",
+              "name": "/idea"
+            }
+          ],
+          "steps": [
+            "Parse feature name + optional product scope",
+            "Deduplicate: check for existing issues",
+            "Read product context: existing pages, models, components",
+            "Generate structured body: user story, acceptance criteria, scope",
+            "Create issue with type:feature label"
+          ],
+          "connects": [
+            "spec"
+          ],
+          "depends": []
+        },
+        {
+          "name": "spec",
+          "effect": "Technical specification — data model, file plan, human approval",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "architecture"
+            },
+            {
+              "type": "familiar",
+              "name": "prisma"
+            },
+            {
+              "type": "portal",
+              "name": "GitHub"
+            },
+            {
+              "type": "skill",
+              "name": "/spec"
+            }
+          ],
+          "steps": [
+            "Read the feature issue",
+            "Survey codebase: schema, routes, components, product CLAUDE.md",
+            "Design: Prisma model sketch, file plan, refined acceptance criteria",
+            "Publish spec as comment on the issue",
+            "PAUSE: Human approves before implementation begins"
+          ],
+          "connects": [
+            "idea",
+            "schema"
+          ],
+          "depends": [
+            "idea"
+          ]
+        },
+        {
+          "name": "schema",
+          "effect": "Prisma model + migration + Zod validation schemas",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "prisma"
+            },
+            {
+              "type": "familiar",
+              "name": "typescript"
+            },
+            {
+              "type": "portal",
+              "name": "Neon"
+            },
+            {
+              "type": "skill",
+              "name": "/schema"
+            }
+          ],
+          "steps": [
+            "Read spec from issue comments",
+            "Create Prisma model with relations and tenant isolation",
+            "Run prisma migrate dev",
+            "Run prisma generate",
+            "Create Zod validation schemas + TypeScript types",
+            "Verify: pnpm tsc --noEmit"
+          ],
+          "connects": [
+            "spec",
+            "code"
+          ],
+          "depends": [
+            "spec"
+          ]
+        },
+        {
+          "name": "ready",
+          "effect": "Pre-code readiness gate — validates spec, schema, and dependencies",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "product"
+            },
+            {
+              "type": "familiar",
+              "name": "architecture"
+            },
+            {
+              "type": "familiar",
+              "name": "typescript"
+            }
+          ],
+          "steps": [
+            "Check spec exists on issue with acceptance criteria",
+            "Check schema is migrated and types compile",
+            "Check dependencies are resolved (no blocking issues)",
+            "Check Definition of Ready checklist is met",
+            "Verdict: PASS / CONCERNS / FAIL with reasons"
+          ],
+          "connects": [
+            "schema",
+            "code"
+          ],
+          "depends": [
+            "schema"
+          ]
+        },
+        {
+          "name": "code",
+          "effect": "Server actions with auth + Zod validation + tenant scoping",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "nextjs"
+            },
+            {
+              "type": "familiar",
+              "name": "typescript"
+            },
+            {
+              "type": "familiar",
+              "name": "prisma"
+            },
+            {
+              "type": "skill",
+              "name": "/code"
+            },
+            {
+              "type": "ward",
+              "name": "auth"
+            }
+          ],
+          "steps": [
+            "Read schema and types from previous stage",
+            "Create server actions: create, list, get, update, delete",
+            "Each action: auth check → Zod validate → Prisma query → revalidate",
+            "Create authorization rules (RBAC if product uses it)",
+            "Verify: pnpm tsc --noEmit"
+          ],
+          "connects": [
+            "ready",
+            "wire"
+          ],
+          "depends": [
+            "ready"
+          ]
+        },
+        {
+          "name": "wire",
+          "effect": "Pages + forms + tables + i18n — the layer users see",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "nextjs"
+            },
+            {
+              "type": "familiar",
+              "name": "react"
+            },
+            {
+              "type": "familiar",
+              "name": "shadcn"
+            },
+            {
+              "type": "familiar",
+              "name": "tailwind"
+            },
+            {
+              "type": "portal",
+              "name": "shadcn"
+            },
+            {
+              "type": "skill",
+              "name": "/wire"
+            },
+            {
+              "type": "hook",
+              "name": "Auto-Format"
+            }
+          ],
+          "steps": [
+            "Create page.tsx (mirror pattern: thin wrapper)",
+            "Create content.tsx (server component, data fetching)",
+            "Create form.tsx (client, React Hook Form + Zod + server actions)",
+            "Create columns.tsx (table column definitions if list view)",
+            "Add i18n dictionary keys (en + ar)",
+            "Add navigation entry if needed",
+            "Verify: pnpm build"
+          ],
+          "connects": [
+            "code",
+            "check"
+          ],
+          "depends": [
+            "code"
+          ]
+        },
+        {
+          "name": "check",
+          "effect": "Quality gate — type-check + build + visual verification",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "build"
+            },
+            {
+              "type": "familiar",
+              "name": "typescript"
+            },
+            {
+              "type": "portal",
+              "name": "Browser"
+            },
+            {
+              "type": "skill",
+              "name": "/check"
+            }
+          ],
+          "steps": [
+            "pnpm tsc --noEmit (fix loop, max 5)",
+            "pnpm build (fix loop, max 5)",
+            "Navigate to page with browser → screenshot → verify renders",
+            "Run existing tests if present",
+            "Report: all gates green or list failures"
+          ],
+          "connects": [
+            "wire",
+            "ship",
+            "release"
+          ],
+          "depends": [
+            "wire"
+          ]
+        },
+        {
+          "name": "ship",
+          "effect": "Commit + push + deploy to Vercel production + verify",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "git"
+            },
+            {
+              "type": "familiar",
+              "name": "deploy"
+            },
+            {
+              "type": "portal",
+              "name": "GitHub"
+            },
+            {
+              "type": "portal",
+              "name": "Vercel"
+            },
+            {
+              "type": "skill",
+              "name": "/deploy"
+            }
+          ],
+          "steps": [
+            "Stage and commit with conventional message + Closes #N",
+            "Push to main",
+            "Deploy: npx vercel --prod --yes",
+            "Poll deployment status until Ready (max 10 min)",
+            "If Error: fetch logs, diagnose, fix, redeploy (max 3)"
+          ],
+          "connects": [
+            "check",
+            "watch",
+            "release"
+          ],
+          "depends": [
+            "check"
+          ]
+        },
+        {
+          "name": "watch",
+          "effect": "Post-deploy health check — confirm customer can use it",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "deploy"
+            },
+            {
+              "type": "portal",
+              "name": "Vercel"
+            },
+            {
+              "type": "portal",
+              "name": "Browser"
+            },
+            {
+              "type": "skill",
+              "name": "/watch"
+            }
+          ],
+          "steps": [
+            "Verify Vercel deployment status: Ready",
+            "Navigate to production URL → screenshot",
+            "Check console for JS errors",
+            "Check network for failed requests",
+            "Quick smoke test: click primary action, verify",
+            "If clean: close feature issue with summary"
+          ],
+          "connects": [
+            "ship",
+            "release"
+          ],
+          "depends": [
+            "ship"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "charm-work",
+      "number": "I",
+      "name": "Charm Work",
+      "subtitle": "Everyday practical magic",
+      "description": "The spells you cast most often. Reliable, essential, and dangerously easy to take for granted. Professor Flitwick would be proud.",
+      "quote": "dev is your Lumos — the first spell each morning. check is your Nox — the last before rest.",
+      "spells": [
+        {
+          "name": "dev",
+          "effect": "Kill port 3000, start server, open Chrome",
+          "order": [
+            {
+              "type": "skill",
+              "name": "/dev"
+            },
+            {
+              "type": "hook",
+              "name": "Port Guardian"
+            },
+            {
+              "type": "hook",
+              "name": "Chrome Opener"
+            }
+          ],
+          "steps": [
+            "Hook kills port 3000 (lsof -ti:3000 | xargs kill -9)",
+            "Chrome opens to localhost:3000",
+            "pnpm dev starts Turbopack",
+            "Hook confirms Chrome is watching"
+          ],
+          "connects": [
+            "build",
+            "deploy"
+          ],
+          "depends": []
+        },
+        {
+          "name": "build",
+          "effect": "Compile project, scan TypeScript errors, auto-repair",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "build"
+            },
+            {
+              "type": "familiar",
+              "name": "typescript"
+            },
+            {
+              "type": "skill",
+              "name": "/build"
+            },
+            {
+              "type": "hook",
+              "name": "Auto-Format"
+            },
+            {
+              "type": "ward",
+              "name": "deployment"
+            }
+          ],
+          "steps": [
+            "pnpm tsc --noEmit (type check)",
+            "If errors: analyze, auto-fix, re-check (up to 5 attempts)",
+            "pnpm prisma generate",
+            "pnpm lint (ESLint pass)",
+            "pnpm build (production build)",
+            "Post-build analysis: bundle size, warnings"
+          ],
+          "connects": [
+            "deploy",
+            "fix",
+            "check"
+          ],
+          "depends": []
+        },
+        {
+          "name": "push",
+          "effect": "Stage changes, conventional commit, push to remote",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "git"
+            },
+            {
+              "type": "familiar",
+              "name": "github"
+            },
+            {
+              "type": "portal",
+              "name": "GitHub"
+            }
+          ],
+          "steps": [
+            "git status — survey changes",
+            "git add — stage worthy files",
+            "git commit -m \"type(scope): message\"",
+            "git push — dispatch to remote"
+          ],
+          "connects": [
+            "deploy",
+            "quick"
+          ],
+          "depends": []
+        },
+        {
+          "name": "quick",
+          "effect": "Fast commit and push — skip build validation",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "git"
+            },
+            {
+              "type": "familiar",
+              "name": "github"
+            },
+            {
+              "type": "portal",
+              "name": "GitHub"
+            },
+            {
+              "type": "skill",
+              "name": "/quick"
+            }
+          ],
+          "steps": [
+            "Quick lint check",
+            "Auto-fix trivial issues",
+            "git add + commit (skip build)",
+            "git push"
+          ],
+          "connects": [
+            "push",
+            "deploy"
+          ],
+          "depends": []
+        },
+        {
+          "name": "deploy",
+          "effect": "Deploy to Vercel staging, retry up to 5 times",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "deploy"
+            },
+            {
+              "type": "familiar",
+              "name": "build"
+            },
+            {
+              "type": "portal",
+              "name": "Vercel"
+            },
+            {
+              "type": "portal",
+              "name": "Neon"
+            },
+            {
+              "type": "skill",
+              "name": "/deploy"
+            },
+            {
+              "type": "ward",
+              "name": "deployment"
+            }
+          ],
+          "steps": [
+            "Check for uncommitted changes",
+            "pnpm tsc --noEmit",
+            "pnpm build (verify locally)",
+            "Fix errors if any (loop up to 5x)",
+            "npx vercel --yes (preview deploy)",
+            "Poll status every 30 seconds",
+            "If Error: fetch logs, diagnose, fix, redeploy",
+            "If Ready: report URL and aliases"
+          ],
+          "connects": [
+            "build",
+            "ship",
+            "push"
+          ],
+          "depends": [
+            "build"
+          ]
+        },
+        {
+          "name": "ship",
+          "effect": "Deploy straight to production — no staging",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "deploy"
+            },
+            {
+              "type": "familiar",
+              "name": "build"
+            },
+            {
+              "type": "portal",
+              "name": "Vercel"
+            },
+            {
+              "type": "skill",
+              "name": "/deploy"
+            },
+            {
+              "type": "ward",
+              "name": "deployment"
+            }
+          ],
+          "steps": [
+            "Same as deploy but: npx vercel --prod --yes"
+          ],
+          "connects": [
+            "deploy",
+            "build",
+            "release"
+          ],
+          "depends": [
+            "build",
+            "test"
+          ]
+        },
+        {
+          "name": "check",
+          "effect": "Pre-ship quality gate — typecheck, build, visual, tests",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "build"
+            },
+            {
+              "type": "familiar",
+              "name": "typescript"
+            },
+            {
+              "type": "portal",
+              "name": "Browser"
+            },
+            {
+              "type": "skill",
+              "name": "/check"
+            }
+          ],
+          "steps": [
+            "pnpm tsc --noEmit (type check, auto-fix loop max 5)",
+            "pnpm build (production build, auto-fix loop max 5)",
+            "Navigate route, screenshot, console-clean verify",
+            "Run existing tests (--passWithNoTests)",
+            "Verdict: READY TO SHIP / BLOCKED"
+          ],
+          "connects": [
+            "build",
+            "ship",
+            "handover",
+            "release"
+          ],
+          "depends": []
+        },
+        {
+          "name": "release",
+          "effect": "Give away to client — one spell, four stages, durable record",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "quality"
+            },
+            {
+              "type": "portal",
+              "name": "Browser"
+            },
+            {
+              "type": "portal",
+              "name": "Vercel"
+            },
+            {
+              "type": "portal",
+              "name": "GitHub"
+            },
+            {
+              "type": "skill",
+              "name": "/release"
+            }
+          ],
+          "steps": [
+            "Pre-flight: clean tree + on main + up to date",
+            "Stage 1: /handover <block> (5-pass Playwright QA, scoped)",
+            "Stage 2: /check (typecheck + build + visual)",
+            "Stage 3: /ship (vercel --prod with auto-fix)",
+            "Stage 4: /watch <prod-url> (smoke test in production)",
+            "Resolve issue from --issue flag, HEAD commit, or fuzzy title match",
+            "Comment production URL + verdict on the issue; close it",
+            "Optional --notify-slack <channel> via slack MCP"
+          ],
+          "connects": [
+            "handover",
+            "check",
+            "ship",
+            "watch"
+          ],
+          "depends": []
+        }
+      ]
+    },
+    {
+      "id": "transfiguration",
+      "number": "II",
+      "name": "Transfiguration",
+      "subtitle": "Creating something from nothing",
+      "description": "These spells conjure new files, components, and entire features into existence. From a single component to a full feature with database, API, and UI.",
+      "quote": "A poorly conceived block is like a half-transfigured hedgehog — functional but unsettling. Plan before you cast.",
+      "spells": [
+        {
+          "name": "component",
+          "effect": "Conjure a new React component with proper structure",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "react"
+            },
+            {
+              "type": "familiar",
+              "name": "shadcn"
+            },
+            {
+              "type": "portal",
+              "name": "shadcn"
+            },
+            {
+              "type": "hook",
+              "name": "Auto-Format"
+            },
+            {
+              "type": "ward",
+              "name": "tailwind"
+            }
+          ],
+          "steps": [
+            "Create component file",
+            "Server Component by default",
+            "Add 'use client' only if hooks needed"
+          ],
+          "connects": [
+            "atom",
+            "page"
+          ],
+          "depends": []
+        },
+        {
+          "name": "page",
+          "effect": "Create a new Next.js App Router page",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "nextjs"
+            },
+            {
+              "type": "familiar",
+              "name": "architecture"
+            },
+            {
+              "type": "familiar",
+              "name": "structure"
+            },
+            {
+              "type": "hook",
+              "name": "Auto-Format"
+            }
+          ],
+          "steps": [
+            "Create app/[lang]/.../<name>/page.tsx",
+            "Create loading.tsx (loading state)",
+            "Create components/platform/<name>/content.tsx (mirror pattern)",
+            "Create components/platform/<name>/actions.ts (server actions)"
+          ],
+          "connects": [
+            "component",
+            "api",
+            "template"
+          ],
+          "depends": []
+        },
+        {
+          "name": "api",
+          "effect": "Materialize a Server Action with validation",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "nextjs"
+            },
+            {
+              "type": "familiar",
+              "name": "typescript"
+            },
+            {
+              "type": "hook",
+              "name": "Auto-Format"
+            },
+            {
+              "type": "ward",
+              "name": "auth"
+            },
+            {
+              "type": "ward",
+              "name": "prisma"
+            }
+          ],
+          "steps": [
+            "\"use server\" directive",
+            "Auth check (getServerSession)",
+            "Zod validation",
+            "Prisma query with schoolId",
+            "revalidatePath"
+          ],
+          "connects": [
+            "page",
+            "prisma",
+            "auth"
+          ],
+          "depends": [
+            "prisma"
+          ]
+        },
+        {
+          "name": "atom",
+          "effect": "Fuse 2+ shadcn/ui primitives into a reusable component",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "atom"
+            },
+            {
+              "type": "familiar",
+              "name": "shadcn"
+            },
+            {
+              "type": "portal",
+              "name": "shadcn"
+            },
+            {
+              "type": "skill",
+              "name": "/atom"
+            },
+            {
+              "type": "hook",
+              "name": "Auto-Format"
+            },
+            {
+              "type": "ward",
+              "name": "tailwind"
+            },
+            {
+              "type": "memory",
+              "name": "atom.json"
+            }
+          ],
+          "steps": [
+            "Check if atom exists in src/components/atom/",
+            "Identify required shadcn/ui primitives (min 2)",
+            "Create src/components/atom/{name}.tsx",
+            "Apply design rules: single purpose, typed, className prop, RTL",
+            "Register in src/registry/atoms-index.ts",
+            "Generate MDX docs"
+          ],
+          "connects": [
+            "template",
+            "component",
+            "shadcn"
+          ],
+          "depends": [
+            "shadcn"
+          ]
+        },
+        {
+          "name": "template",
+          "effect": "Assemble a complete page layout from established patterns",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "template"
+            },
+            {
+              "type": "familiar",
+              "name": "atom"
+            },
+            {
+              "type": "portal",
+              "name": "shadcn"
+            },
+            {
+              "type": "skill",
+              "name": "/template"
+            },
+            {
+              "type": "hook",
+              "name": "Auto-Format"
+            },
+            {
+              "type": "ward",
+              "name": "tailwind"
+            },
+            {
+              "type": "memory",
+              "name": "template.json"
+            }
+          ],
+          "steps": [
+            "Check src/registry/default/templates/{name}/",
+            "Identify category (hero, header, sidebar, footer, login, dashboard)",
+            "Create page.tsx with naming {type}-{number}",
+            "Register in src/registry/registry-templates.ts",
+            "pnpm build:templates (rebuild registry)"
+          ],
+          "connects": [
+            "atom",
+            "block",
+            "page"
+          ],
+          "depends": [
+            "atom"
+          ]
+        },
+        {
+          "name": "block",
+          "effect": "Full UI component with business logic, data fetching, state",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "block"
+            },
+            {
+              "type": "familiar",
+              "name": "atom"
+            },
+            {
+              "type": "familiar",
+              "name": "prisma"
+            },
+            {
+              "type": "portal",
+              "name": "shadcn"
+            },
+            {
+              "type": "portal",
+              "name": "GitHub"
+            },
+            {
+              "type": "portal",
+              "name": "Neon"
+            },
+            {
+              "type": "skill",
+              "name": "/block"
+            },
+            {
+              "type": "hook",
+              "name": "Auto-Format"
+            },
+            {
+              "type": "ward",
+              "name": "prisma"
+            },
+            {
+              "type": "ward",
+              "name": "auth"
+            },
+            {
+              "type": "memory",
+              "name": "block.json"
+            }
+          ],
+          "steps": [
+            "Identify source type (github:, shadcn:, internal:)",
+            "Fetch and analyze source",
+            "Transform imports to project paths",
+            "Adapt: Auth.js, Prisma, OKLCH, RTL",
+            "Create mirror-pattern structure",
+            "Add i18n (Arabic + English)",
+            "Register in block.json",
+            "pnpm tsc --noEmit (validate)",
+            "Quality audit (100-point score)"
+          ],
+          "connects": [
+            "template",
+            "atom",
+            "saas"
+          ],
+          "depends": [
+            "atom",
+            "prisma"
+          ]
+        },
+        {
+          "name": "feature",
+          "effect": "Plan and create entire feature end-to-end",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "orchestration"
+            },
+            {
+              "type": "familiar",
+              "name": "architecture"
+            },
+            {
+              "type": "familiar",
+              "name": "nextjs"
+            },
+            {
+              "type": "familiar",
+              "name": "prisma"
+            },
+            {
+              "type": "familiar",
+              "name": "react"
+            },
+            {
+              "type": "familiar",
+              "name": "test"
+            },
+            {
+              "type": "familiar",
+              "name": "build"
+            }
+          ],
+          "steps": [
+            "Architecture (schema design)",
+            "Database (migration)",
+            "Backend (server actions)",
+            "Frontend (components)",
+            "Styling (tailwind)",
+            "Testing (vitest + playwright)",
+            "Build validation"
+          ],
+          "connects": [
+            "saas",
+            "block",
+            "migration",
+            "test"
+          ],
+          "depends": [
+            "plan"
+          ]
+        },
+        {
+          "name": "migration",
+          "effect": "Create Prisma migration — reshape database safely",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "prisma"
+            },
+            {
+              "type": "familiar",
+              "name": "architecture"
+            },
+            {
+              "type": "portal",
+              "name": "Neon"
+            },
+            {
+              "type": "hook",
+              "name": "Auto-Format"
+            },
+            {
+              "type": "ward",
+              "name": "prisma"
+            }
+          ],
+          "steps": [
+            "Modify prisma/models/*.prisma",
+            "pnpm prisma migrate dev --name <desc>",
+            "pnpm prisma generate",
+            "Verify with Neon MCP if remote"
+          ],
+          "connects": [
+            "prisma",
+            "feature",
+            "saas"
+          ],
+          "depends": [
+            "prisma"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ancient-runes",
+      "number": "III",
+      "name": "Ancient Runes",
+      "subtitle": "The foundational frameworks",
+      "description": "The ancient languages upon which everything else is built. Each carries the weight of an entire framework.",
+      "quote": "When you say prisma, you invoke not just a tool but a philosophy of data.",
+      "spells": [
+        {
+          "name": "nextjs",
+          "effect": "Apply Next.js 16 patterns — App Router, Server Components",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "nextjs"
+            },
+            {
+              "type": "familiar",
+              "name": "react"
+            },
+            {
+              "type": "familiar",
+              "name": "middleware"
+            },
+            {
+              "type": "familiar",
+              "name": "nextjs"
+            }
+          ],
+          "steps": [
+            "Async params/searchParams",
+            "Server Components by default",
+            "Server Actions with 'use server'",
+            "Streaming with Suspense"
+          ],
+          "connects": [
+            "react",
+            "typescript",
+            "page"
+          ],
+          "depends": []
+        },
+        {
+          "name": "react",
+          "effect": "Channel React 19 — hooks, concurrent features",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "react"
+            },
+            {
+              "type": "familiar",
+              "name": "nextjs"
+            },
+            {
+              "type": "familiar",
+              "name": "typescript"
+            }
+          ],
+          "steps": [
+            "useActionState",
+            "useOptimistic",
+            "use() hook",
+            "React Hook Form + Zod"
+          ],
+          "connects": [
+            "nextjs",
+            "component",
+            "typescript"
+          ],
+          "depends": []
+        },
+        {
+          "name": "typescript",
+          "effect": "Enforce strict mode — no any, Zod schemas, type guards",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "typescript"
+            },
+            {
+              "type": "familiar",
+              "name": "react"
+            },
+            {
+              "type": "familiar",
+              "name": "nextjs"
+            }
+          ],
+          "steps": [
+            "No any allowed",
+            "Zod at boundaries",
+            "Discriminated unions",
+            "Prisma type integration"
+          ],
+          "connects": [
+            "react",
+            "nextjs",
+            "build"
+          ],
+          "depends": []
+        },
+        {
+          "name": "prisma",
+          "effect": "Database oracle — queries, relations, Prisma 6",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "prisma"
+            },
+            {
+              "type": "familiar",
+              "name": "architecture"
+            },
+            {
+              "type": "portal",
+              "name": "Neon"
+            },
+            {
+              "type": "ward",
+              "name": "prisma"
+            }
+          ],
+          "steps": [
+            "Multi-tenant schoolId",
+            "Relations + indexes",
+            "CRUD operations",
+            "$extends patterns"
+          ],
+          "connects": [
+            "migration",
+            "neon",
+            "api"
+          ],
+          "depends": []
+        },
+        {
+          "name": "tailwind",
+          "effect": "Tailwind CSS 4 — semantic tokens, responsive, RTL",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "tailwind"
+            },
+            {
+              "type": "familiar",
+              "name": "shadcn"
+            },
+            {
+              "type": "familiar",
+              "name": "semantic"
+            },
+            {
+              "type": "ward",
+              "name": "tailwind"
+            }
+          ],
+          "steps": [
+            "OKLCH colors",
+            "CSS-first config (no JS)",
+            "RTL logical properties (ms/me/ps/pe)",
+            "Container queries"
+          ],
+          "connects": [
+            "shadcn",
+            "component",
+            "template"
+          ],
+          "depends": []
+        },
+        {
+          "name": "shadcn",
+          "effect": "Load the shadcn/ui knowledge pack — registry, CLI, MCP, docs-block",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "shadcn"
+            },
+            {
+              "type": "familiar",
+              "name": "atom"
+            },
+            {
+              "type": "familiar",
+              "name": "tailwind"
+            },
+            {
+              "type": "portal",
+              "name": "shadcn"
+            },
+            {
+              "type": "skill",
+              "name": "/shadcn"
+            }
+          ],
+          "steps": [
+            "Say 'shadcn' → load CLI/MCP/registry/skills/directory + links",
+            "Search registry via MCP",
+            "Install to src/components/ui/",
+            "Say 'shadcn docs' → the docs-block MDX pattern"
+          ],
+          "connects": [
+            "atom",
+            "component",
+            "tailwind"
+          ],
+          "depends": []
+        }
+      ]
+    },
+    {
+      "id": "conjuration",
+      "number": "IV",
+      "name": "Conjuration",
+      "subtitle": "Summoning UI elements",
+      "description": "Each incantation calls forth a specific UI pattern — complete, styled, ready. Combine with a noun and the spell adapts.",
+      "quote": "table users, form settings, modal confirm — the spell adapts to your intent.",
+      "spells": [
+        {
+          "name": "table",
+          "effect": "DataTable with sorting, filtering, pagination",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "block"
+            },
+            {
+              "type": "familiar",
+              "name": "prisma"
+            },
+            {
+              "type": "portal",
+              "name": "shadcn"
+            }
+          ],
+          "steps": [
+            "@tanstack/react-table",
+            "Column definitions",
+            "Server-side filtering",
+            "Row actions"
+          ],
+          "connects": [
+            "block",
+            "prisma"
+          ],
+          "depends": [
+            "shadcn"
+          ]
+        },
+        {
+          "name": "header",
+          "effect": "Page header with navigation",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "template"
+            },
+            {
+              "type": "portal",
+              "name": "shadcn"
+            }
+          ],
+          "steps": [
+            "Sticky top",
+            "Responsive",
+            "Mobile hamburger"
+          ],
+          "connects": [
+            "navbar",
+            "template"
+          ],
+          "depends": [
+            "shadcn"
+          ]
+        },
+        {
+          "name": "menu",
+          "effect": "Navigation menu or sidebar",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "template"
+            },
+            {
+              "type": "portal",
+              "name": "shadcn"
+            }
+          ],
+          "steps": [
+            "Collapsible",
+            "Icon + label",
+            "Active state"
+          ],
+          "connects": [
+            "sidebar",
+            "navbar"
+          ],
+          "depends": [
+            "shadcn"
+          ]
+        },
+        {
+          "name": "form",
+          "effect": "Form with validation",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "react"
+            },
+            {
+              "type": "familiar",
+              "name": "block"
+            },
+            {
+              "type": "portal",
+              "name": "shadcn"
+            }
+          ],
+          "steps": [
+            "React Hook Form + Zod",
+            "shadcn Form component",
+            "Server Action on submit"
+          ],
+          "connects": [
+            "api",
+            "block"
+          ],
+          "depends": [
+            "shadcn",
+            "react"
+          ]
+        },
+        {
+          "name": "modal",
+          "effect": "Dialog — appears exactly when needed",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "shadcn"
+            },
+            {
+              "type": "familiar",
+              "name": "atom"
+            },
+            {
+              "type": "portal",
+              "name": "shadcn"
+            }
+          ],
+          "steps": [
+            "Radix Dialog",
+            "ConfirmDialog pattern",
+            "Keyboard dismiss"
+          ],
+          "connects": [
+            "form",
+            "atom"
+          ],
+          "depends": [
+            "shadcn"
+          ]
+        },
+        {
+          "name": "card",
+          "effect": "Card variations with flexible content",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "atom"
+            },
+            {
+              "type": "portal",
+              "name": "shadcn"
+            }
+          ],
+          "steps": [
+            "Card + Badge + Avatar",
+            "Semantic tokens",
+            "Responsive grid"
+          ],
+          "connects": [
+            "atom",
+            "template"
+          ],
+          "depends": [
+            "shadcn"
+          ]
+        },
+        {
+          "name": "sidebar",
+          "effect": "Sidebar navigation — collapsible",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "template"
+            },
+            {
+              "type": "portal",
+              "name": "shadcn"
+            }
+          ],
+          "steps": [
+            "SidebarProvider",
+            "Collapsible groups",
+            "Keyboard toggle"
+          ],
+          "connects": [
+            "menu",
+            "dashboard"
+          ],
+          "depends": [
+            "shadcn"
+          ]
+        },
+        {
+          "name": "footer",
+          "effect": "Footer component — multi-column layout",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "template"
+            },
+            {
+              "type": "portal",
+              "name": "shadcn"
+            }
+          ],
+          "steps": [
+            "Multi-column responsive",
+            "Social links",
+            "Copyright"
+          ],
+          "connects": [
+            "template",
+            "landing"
+          ],
+          "depends": [
+            "shadcn"
+          ]
+        },
+        {
+          "name": "hero",
+          "effect": "Hero section — the grand entrance",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "template"
+            },
+            {
+              "type": "portal",
+              "name": "shadcn"
+            }
+          ],
+          "steps": [
+            "Centered/split/gradient",
+            "CTA buttons",
+            "Responsive typography"
+          ],
+          "connects": [
+            "landing",
+            "template"
+          ],
+          "depends": [
+            "shadcn"
+          ]
+        },
+        {
+          "name": "navbar",
+          "effect": "Top navigation bar",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "template"
+            },
+            {
+              "type": "portal",
+              "name": "shadcn"
+            }
+          ],
+          "steps": [
+            "NavigationMenu from Radix",
+            "Dropdown menus",
+            "Mobile sheet",
+            "Auth state"
+          ],
+          "connects": [
+            "header",
+            "auth"
+          ],
+          "depends": [
+            "shadcn"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "dark-arts",
+      "number": "V",
+      "name": "The Dark Arts of Features",
+      "subtitle": "N.E.W.T.-level system enchantments",
+      "description": "Not dark in nature, but dark in complexity. Each creates an entire system — multiple agents, MCP servers, and spell chains working in concert.",
+      "quote": "saas billing orchestrates 6 familiars, opens 3 portals, and generates an entire billing system. From two words.",
+      "spells": [
+        {
+          "name": "auth",
+          "effect": "Complete authentication — NextAuth v5, JWT, OAuth, middleware",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "authjs"
+            },
+            {
+              "type": "familiar",
+              "name": "middleware"
+            },
+            {
+              "type": "familiar",
+              "name": "prisma"
+            },
+            {
+              "type": "familiar",
+              "name": "nextjs"
+            },
+            {
+              "type": "ward",
+              "name": "auth"
+            }
+          ],
+          "steps": [
+            "Configure auth.ts with PrismaAdapter",
+            "Set up OAuth + Credentials providers",
+            "JWT/session callbacks (id, role, schoolId)",
+            "Route handler at api/auth/[...nextauth]",
+            "Middleware for route protection",
+            "SessionProvider in layout",
+            "Type extensions in next-auth.d.ts"
+          ],
+          "connects": [
+            "middleware",
+            "prisma",
+            "admin"
+          ],
+          "depends": [
+            "prisma"
+          ]
+        },
+        {
+          "name": "saas",
+          "effect": "Database schema + server actions + UI + billing integration",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "orchestration"
+            },
+            {
+              "type": "familiar",
+              "name": "architecture"
+            },
+            {
+              "type": "familiar",
+              "name": "prisma"
+            },
+            {
+              "type": "familiar",
+              "name": "nextjs"
+            },
+            {
+              "type": "familiar",
+              "name": "shadcn"
+            },
+            {
+              "type": "familiar",
+              "name": "react"
+            },
+            {
+              "type": "portal",
+              "name": "Stripe"
+            },
+            {
+              "type": "portal",
+              "name": "Neon"
+            },
+            {
+              "type": "portal",
+              "name": "shadcn"
+            },
+            {
+              "type": "skill",
+              "name": "/saas"
+            },
+            {
+              "type": "ward",
+              "name": "prisma"
+            },
+            {
+              "type": "ward",
+              "name": "auth"
+            }
+          ],
+          "steps": [
+            "Database schema (Prisma model)",
+            "Relations + migration",
+            "Server actions with CRUD + Zod",
+            "UI: DataTable, Forms, Detail views",
+            "Pages: App Router routes",
+            "Integrations: Stripe, auth, analytics"
+          ],
+          "connects": [
+            "block",
+            "migration",
+            "deploy"
+          ],
+          "depends": [
+            "prisma",
+            "auth"
+          ]
+        },
+        {
+          "name": "dashboard",
+          "effect": "Dashboard layout with charts, metrics, data viz",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "template"
+            },
+            {
+              "type": "familiar",
+              "name": "block"
+            },
+            {
+              "type": "familiar",
+              "name": "react"
+            },
+            {
+              "type": "familiar",
+              "name": "prisma"
+            },
+            {
+              "type": "portal",
+              "name": "shadcn"
+            }
+          ],
+          "steps": [
+            "Sidebar layout",
+            "Stat cards (atom)",
+            "Charts (lazy loaded)",
+            "Data tables (block)",
+            "Promise.all for parallel fetch"
+          ],
+          "connects": [
+            "sidebar",
+            "table",
+            "card"
+          ],
+          "depends": [
+            "auth",
+            "prisma"
+          ]
+        },
+        {
+          "name": "landing",
+          "effect": "Landing page — hero, features, pricing, testimonials, footer",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "template"
+            },
+            {
+              "type": "familiar",
+              "name": "atom"
+            },
+            {
+              "type": "familiar",
+              "name": "tailwind"
+            },
+            {
+              "type": "portal",
+              "name": "shadcn"
+            }
+          ],
+          "steps": [
+            "Compose multiple template sections",
+            "Each section is a Server Component",
+            "Responsive design"
+          ],
+          "connects": [
+            "hero",
+            "footer",
+            "template"
+          ],
+          "depends": []
+        },
+        {
+          "name": "checkout",
+          "effect": "Payment checkout flow — cart, Stripe, confirmation",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "block"
+            },
+            {
+              "type": "familiar",
+              "name": "architecture"
+            },
+            {
+              "type": "familiar",
+              "name": "prisma"
+            },
+            {
+              "type": "portal",
+              "name": "Stripe"
+            },
+            {
+              "type": "ward",
+              "name": "auth"
+            },
+            {
+              "type": "ward",
+              "name": "prisma"
+            }
+          ],
+          "steps": [
+            "Stripe integration",
+            "Order model",
+            "Checkout form",
+            "Payment processing",
+            "Webhook handler"
+          ],
+          "connects": [
+            "stripe",
+            "auth",
+            "saas"
+          ],
+          "depends": [
+            "auth",
+            "prisma",
+            "stripe"
+          ]
+        },
+        {
+          "name": "settings",
+          "effect": "Settings page — forms, tabs, preferences",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "nextjs"
+            },
+            {
+              "type": "familiar",
+              "name": "template"
+            },
+            {
+              "type": "familiar",
+              "name": "react"
+            },
+            {
+              "type": "ward",
+              "name": "auth"
+            }
+          ],
+          "steps": [
+            "Mirror-pattern page",
+            "Tab sections",
+            "Server actions",
+            "Auth checks"
+          ],
+          "connects": [
+            "profile",
+            "auth"
+          ],
+          "depends": [
+            "auth"
+          ]
+        },
+        {
+          "name": "profile",
+          "effect": "User profile — avatar, details, activity",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "nextjs"
+            },
+            {
+              "type": "familiar",
+              "name": "template"
+            },
+            {
+              "type": "familiar",
+              "name": "react"
+            },
+            {
+              "type": "ward",
+              "name": "auth"
+            }
+          ],
+          "steps": [
+            "Mirror-pattern page",
+            "Avatar upload",
+            "Form editing",
+            "Activity history"
+          ],
+          "connects": [
+            "settings",
+            "auth"
+          ],
+          "depends": [
+            "auth"
+          ]
+        },
+        {
+          "name": "admin",
+          "effect": "Admin panel — user management, analytics",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "nextjs"
+            },
+            {
+              "type": "familiar",
+              "name": "template"
+            },
+            {
+              "type": "familiar",
+              "name": "react"
+            },
+            {
+              "type": "ward",
+              "name": "auth"
+            }
+          ],
+          "steps": [
+            "Role guard (ADMIN)",
+            "User management",
+            "Analytics dashboard",
+            "Configuration"
+          ],
+          "connects": [
+            "dashboard",
+            "auth"
+          ],
+          "depends": [
+            "auth"
+          ]
+        },
+        {
+          "name": "onboarding",
+          "effect": "User onboarding — steps, progress, completion",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "nextjs"
+            },
+            {
+              "type": "familiar",
+              "name": "template"
+            },
+            {
+              "type": "familiar",
+              "name": "react"
+            }
+          ],
+          "steps": [
+            "Multi-step wizard",
+            "Progress indicator",
+            "Completion callback",
+            "First-use detection"
+          ],
+          "connects": [
+            "auth",
+            "dashboard"
+          ],
+          "depends": [
+            "auth"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "animation",
+      "number": "VI",
+      "name": "Animation Charms",
+      "subtitle": "Giving life to stillness",
+      "description": "The ancient art of making the inanimate move with purpose. Framer Motion is the wand, intent is the magic.",
+      "quote": "Like the Weasley twins' fireworks — magnificent in moderation, catastrophic in excess.",
+      "spells": [
+        {
+          "name": "motion",
+          "effect": "Breathe Framer Motion into components",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "react"
+            },
+            {
+              "type": "familiar",
+              "name": "tailwind"
+            },
+            {
+              "type": "skill",
+              "name": "/motion"
+            },
+            {
+              "type": "hook",
+              "name": "Auto-Format"
+            }
+          ],
+          "steps": [
+            "motion.div with initial/animate/exit",
+            "Variants for orchestrated sequences",
+            "Layout animations"
+          ],
+          "connects": [
+            "animation",
+            "transition"
+          ],
+          "depends": []
+        },
+        {
+          "name": "animation",
+          "effect": "CSS or Framer animations",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "react"
+            },
+            {
+              "type": "familiar",
+              "name": "tailwind"
+            },
+            {
+              "type": "skill",
+              "name": "/motion"
+            }
+          ],
+          "steps": [
+            "@keyframes for simple effects",
+            "Framer Motion for complex choreography"
+          ],
+          "connects": [
+            "motion",
+            "scroll"
+          ],
+          "depends": []
+        },
+        {
+          "name": "transition",
+          "effect": "Page transitions — smooth apparition between views",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "react"
+            },
+            {
+              "type": "familiar",
+              "name": "nextjs"
+            },
+            {
+              "type": "skill",
+              "name": "/motion"
+            }
+          ],
+          "steps": [
+            "AnimatePresence wrapping routes",
+            "Exit animations before new page mounts"
+          ],
+          "connects": [
+            "motion",
+            "page"
+          ],
+          "depends": []
+        },
+        {
+          "name": "gesture",
+          "effect": "Touch and drag interactions",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "react"
+            },
+            {
+              "type": "skill",
+              "name": "/motion"
+            }
+          ],
+          "steps": [
+            "whileHover, whileTap",
+            "drag with dragConstraints",
+            "Spring physics"
+          ],
+          "connects": [
+            "motion",
+            "animation"
+          ],
+          "depends": []
+        },
+        {
+          "name": "scroll",
+          "effect": "Scroll-triggered animations",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "react"
+            },
+            {
+              "type": "skill",
+              "name": "/motion"
+            }
+          ],
+          "steps": [
+            "whileInView with viewport({ once: true })",
+            "Intersection Observer"
+          ],
+          "connects": [
+            "motion",
+            "hero"
+          ],
+          "depends": []
+        }
+      ]
+    },
+    {
+      "id": "defense",
+      "number": "VII",
+      "name": "Defense Against the Dark Arts",
+      "subtitle": "Protection from bugs and entropy",
+      "description": "The spells that protect your code from dark forces: bugs, vulnerabilities, regressions, and the slow entropy of neglect.",
+      "quote": "Constant vigilance! A codebase without tests is a castle without wards.",
+      "spells": [
+        {
+          "name": "test",
+          "effect": "Generate tests — Vitest for units, Playwright for journeys",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "test"
+            },
+            {
+              "type": "familiar",
+              "name": "react"
+            },
+            {
+              "type": "familiar",
+              "name": "nextjs"
+            },
+            {
+              "type": "portal",
+              "name": "Browser"
+            },
+            {
+              "type": "skill",
+              "name": "/test"
+            },
+            {
+              "type": "ward",
+              "name": "testing"
+            }
+          ],
+          "steps": [
+            "Vitest unit/component tests",
+            "Playwright E2E (chromium/firefox/webkit/mobile)",
+            "95%+ coverage target",
+            "Test accounts with configured credentials"
+          ],
+          "connects": [
+            "e2e",
+            "coverage",
+            "build"
+          ],
+          "depends": []
+        },
+        {
+          "name": "e2e",
+          "effect": "End-to-end tests across all browsers",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "test"
+            },
+            {
+              "type": "portal",
+              "name": "Browser"
+            },
+            {
+              "type": "ward",
+              "name": "testing"
+            }
+          ],
+          "steps": [
+            "Playwright all browsers",
+            "browser-headed MCP for auth flows",
+            "Visual regression"
+          ],
+          "connects": [
+            "test",
+            "handover"
+          ],
+          "depends": []
+        },
+        {
+          "name": "handover",
+          "effect": "UI verification — runs the niche keywords on a URL or every route in a block",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "quality"
+            },
+            {
+              "type": "portal",
+              "name": "Browser"
+            },
+            {
+              "type": "skill",
+              "name": "/handover"
+            }
+          ],
+          "steps": [
+            "Detect mode: argument starts with / → URL mode (12 niche keywords)",
+            "Bare word → block mode (debug, flow, responsive, lang per route)",
+            "Delegate each pass to the niche keyword definition",
+            "Collect verdicts, write sentinel on PASS",
+            "Report: BLOCKED or READY FOR DEMO"
+          ],
+          "connects": [
+            "e2e",
+            "check",
+            "test",
+            "release"
+          ],
+          "depends": []
+        },
+        {
+          "name": "coverage",
+          "effect": "Reveal test coverage — the Marauder's Map",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "test"
+            },
+            {
+              "type": "ward",
+              "name": "testing"
+            }
+          ],
+          "steps": [
+            "pnpm test --coverage",
+            "V8 provider",
+            "Lines, branches, functions, statements"
+          ],
+          "connects": [
+            "test"
+          ],
+          "depends": [
+            "test"
+          ]
+        },
+        {
+          "name": "review",
+          "effect": "Code review — examining decisions",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "pattern"
+            },
+            {
+              "type": "familiar",
+              "name": "architecture"
+            },
+            {
+              "type": "familiar",
+              "name": "typescript"
+            },
+            {
+              "type": "familiar",
+              "name": "react"
+            }
+          ],
+          "steps": [
+            "Server/client boundaries",
+            "Sequential data fetching",
+            "Form validation",
+            "Multi-tenant schoolId",
+            "Semantic tokens"
+          ],
+          "connects": [
+            "audit",
+            "security"
+          ],
+          "depends": []
+        },
+        {
+          "name": "security",
+          "effect": "OWASP Top 10 security audit",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "guardian"
+            },
+            {
+              "type": "familiar",
+              "name": "authjs"
+            },
+            {
+              "type": "familiar",
+              "name": "pattern"
+            },
+            {
+              "type": "portal",
+              "name": "Sentry"
+            },
+            {
+              "type": "skill",
+              "name": "/security"
+            },
+            {
+              "type": "ward",
+              "name": "auth"
+            }
+          ],
+          "steps": [
+            "OWASP Top 10 scan",
+            "Input validation + output encoding",
+            "Auth flow analysis",
+            "pnpm audit (dependencies)",
+            "Environment check"
+          ],
+          "connects": [
+            "audit",
+            "auth",
+            "review"
+          ],
+          "depends": []
+        },
+        {
+          "name": "audit",
+          "effect": "Full quality audit — security + performance + quality",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "guardian"
+            },
+            {
+              "type": "familiar",
+              "name": "pattern"
+            },
+            {
+              "type": "familiar",
+              "name": "performance"
+            },
+            {
+              "type": "familiar",
+              "name": "test"
+            }
+          ],
+          "steps": [
+            "Security sweep",
+            "Performance check",
+            "Code quality",
+            "Accessibility",
+            "Testing coverage"
+          ],
+          "connects": [
+            "security",
+            "performance",
+            "test"
+          ],
+          "depends": []
+        },
+        {
+          "name": "analyze",
+          "effect": "Cross-artifact consistency — spec vs schema vs code vs tests",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "product"
+            },
+            {
+              "type": "familiar",
+              "name": "architecture"
+            },
+            {
+              "type": "familiar",
+              "name": "typescript"
+            },
+            {
+              "type": "familiar",
+              "name": "prisma"
+            }
+          ],
+          "steps": [
+            "Read spec acceptance criteria",
+            "Compare schema to spec data model",
+            "Verify code implements all spec actions",
+            "Check tests cover acceptance criteria",
+            "Report: consistent / drift / missing"
+          ],
+          "connects": [
+            "review",
+            "ready",
+            "audit"
+          ],
+          "depends": []
+        },
+        {
+          "name": "constitution",
+          "effect": "Read or update project constitution — immutable governance principles",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "architecture"
+            },
+            {
+              "type": "familiar",
+              "name": "pattern"
+            },
+            {
+              "type": "memory",
+              "name": "preferences"
+            }
+          ],
+          "steps": [
+            "Read current CLAUDE.md governance sections",
+            "Compare against constitution principles",
+            "Flag violations or drift",
+            "Propose updates if principles evolved",
+            "Write updated constitution to CLAUDE.md"
+          ],
+          "connects": [
+            "review",
+            "analyze"
+          ],
+          "depends": []
+        },
+        {
+          "name": "accessibility",
+          "effect": "WCAG 2.1 AA compliance check",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "semantic"
+            },
+            {
+              "type": "familiar",
+              "name": "tailwind"
+            },
+            {
+              "type": "familiar",
+              "name": "shadcn"
+            }
+          ],
+          "steps": [
+            "Semantic HTML",
+            "ARIA labels",
+            "Keyboard navigation",
+            "Color contrast",
+            "Focus management"
+          ],
+          "connects": [
+            "audit",
+            "review"
+          ],
+          "depends": []
+        },
+        {
+          "name": "optimize",
+          "effect": "Performance optimization",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "performance"
+            },
+            {
+              "type": "familiar",
+              "name": "nextjs"
+            },
+            {
+              "type": "familiar",
+              "name": "react"
+            },
+            {
+              "type": "portal",
+              "name": "Vercel"
+            }
+          ],
+          "steps": [
+            "Identify bottlenecks",
+            "Apply optimizations",
+            "Verify improvement"
+          ],
+          "connects": [
+            "performance",
+            "build"
+          ],
+          "depends": []
+        },
+        {
+          "name": "performance",
+          "effect": "Core Web Vitals diagnostic",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "performance"
+            },
+            {
+              "type": "familiar",
+              "name": "nextjs"
+            },
+            {
+              "type": "familiar",
+              "name": "react"
+            },
+            {
+              "type": "familiar",
+              "name": "prisma"
+            },
+            {
+              "type": "portal",
+              "name": "Vercel"
+            },
+            {
+              "type": "portal",
+              "name": "Neon"
+            },
+            {
+              "type": "skill",
+              "name": "/performance"
+            }
+          ],
+          "steps": [
+            "Core Web Vitals (LCP <2.5s, INP <200ms, CLS <0.1)",
+            "Bundle analysis (ANALYZE=true)",
+            "DB query optimization (N+1, indexes)",
+            "React rendering profiling",
+            "Memory leak detection",
+            "7 quality gates report"
+          ],
+          "connects": [
+            "optimize",
+            "build",
+            "deploy"
+          ],
+          "depends": []
+        }
+      ]
+    },
+    {
+      "id": "reparo",
+      "number": "VIII",
+      "name": "Reparo",
+      "subtitle": "The mending spells",
+      "description": "When things break — and they will — these incantations diagnose and repair with surgical precision.",
+      "quote": "A true master does not fear errors. They cast fix and move on.",
+      "spells": [
+        {
+          "name": "fix",
+          "effect": "Auto-repair all lint, type, and build errors",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "build"
+            },
+            {
+              "type": "familiar",
+              "name": "typescript"
+            },
+            {
+              "type": "skill",
+              "name": "/fix"
+            },
+            {
+              "type": "hook",
+              "name": "Auto-Format"
+            }
+          ],
+          "steps": [
+            "TypeScript check",
+            "Auto-fix type errors",
+            "Lint fix",
+            "Build verify"
+          ],
+          "connects": [
+            "build",
+            "error"
+          ],
+          "depends": []
+        },
+        {
+          "name": "error",
+          "effect": "Scan for errors and fix them",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "build"
+            },
+            {
+              "type": "familiar",
+              "name": "sse"
+            },
+            {
+              "type": "familiar",
+              "name": "typescript"
+            },
+            {
+              "type": "portal",
+              "name": "Sentry"
+            }
+          ],
+          "steps": [
+            "204+ error patterns",
+            "Dictionary access, Prisma types",
+            "Missing schoolId, hooks in server components",
+            "95% auto-fix rate"
+          ],
+          "connects": [
+            "fix",
+            "scan"
+          ],
+          "depends": []
+        },
+        {
+          "name": "scan",
+          "effect": "Sweep entire codebase for issues",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "build"
+            },
+            {
+              "type": "familiar",
+              "name": "sse"
+            },
+            {
+              "type": "familiar",
+              "name": "typescript"
+            }
+          ],
+          "steps": [
+            "Anti-patterns",
+            "Type errors",
+            "Unused imports",
+            "Dead code"
+          ],
+          "connects": [
+            "fix",
+            "error",
+            "lint"
+          ],
+          "depends": []
+        },
+        {
+          "name": "lint",
+          "effect": "Run ESLint",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "build"
+            }
+          ],
+          "steps": [
+            "pnpm lint",
+            "Report issues with file paths and lines"
+          ],
+          "connects": [
+            "fix",
+            "format"
+          ],
+          "depends": []
+        },
+        {
+          "name": "format",
+          "effect": "Run Prettier",
+          "order": [
+            {
+              "type": "hook",
+              "name": "Auto-Format"
+            }
+          ],
+          "steps": [
+            "npx prettier --write",
+            "Auto-Format hook already runs on every edit"
+          ],
+          "connects": [
+            "lint",
+            "fix"
+          ],
+          "depends": []
+        },
+        {
+          "name": "type-check",
+          "effect": "TypeScript strict checking — Veritaserum for types",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "typescript"
+            }
+          ],
+          "steps": [
+            "pnpm tsc --noEmit",
+            "Report errors with locations",
+            "No JS emitted, pure validation"
+          ],
+          "connects": [
+            "build",
+            "fix"
+          ],
+          "depends": []
+        },
+        {
+          "name": "report",
+          "effect": "Auto-fix user-reported issues — read, verify, fix, close",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "report"
+            },
+            {
+              "type": "familiar",
+              "name": "quality"
+            },
+            {
+              "type": "familiar",
+              "name": "sse"
+            },
+            {
+              "type": "familiar",
+              "name": "build"
+            },
+            {
+              "type": "portal",
+              "name": "GitHub"
+            },
+            {
+              "type": "portal",
+              "name": "Browser"
+            }
+          ],
+          "steps": [
+            "Session start: check open report issues across all repos",
+            "READ: gh issue view → extract page URL + description",
+            "LOCATE: URL → route directory (src/app/) + component directory (src/components/)",
+            "CONTEXT: read CLAUDE.md, README.md, ISSUE.md for the feature",
+            "VALIDATE: real bug? aligned with plans? safe to fix?",
+            "SEE + DEBUG: screenshot page, check console errors, network failures",
+            "IDENTIFY: correlate report + visual + errors → root cause",
+            "FIX: edit minimum code in component directory",
+            "BUILD: pnpm build — verify no regressions",
+            "PUSH: conventional commit (fix: ...) + push to main",
+            "VERIFY: see the page again after deploy",
+            "CLOSE: close issue with fix summary"
+          ],
+          "connects": [
+            "fix",
+            "error",
+            "build",
+            "deploy"
+          ],
+          "depends": []
+        }
+      ]
+    },
+    {
+      "id": "quill",
+      "number": "IX",
+      "name": "Quill Charms",
+      "subtitle": "The spells of documentation",
+      "description": "Often neglected, always essential. Like Madam Pince guarding the library, these preserve knowledge.",
+      "quote": "The Memory Charms done right — instead of erasing knowledge, they preserve it.",
+      "spells": [
+        {
+          "name": "docs",
+          "effect": "Generate MDX documentation",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "comment"
+            },
+            {
+              "type": "familiar",
+              "name": "pattern"
+            },
+            {
+              "type": "skill",
+              "name": "/docs"
+            },
+            {
+              "type": "hook",
+              "name": "Auto-Format"
+            }
+          ],
+          "steps": [
+            "Installation",
+            "Usage",
+            "Props table",
+            "Examples",
+            "API reference"
+          ],
+          "connects": [
+            "readme",
+            "storybook"
+          ],
+          "depends": []
+        },
+        {
+          "name": "readme",
+          "effect": "Create or update the README",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "comment"
+            },
+            {
+              "type": "skill",
+              "name": "/docs"
+            }
+          ],
+          "steps": [
+            "Project description",
+            "Installation",
+            "Quick start",
+            "Contributing"
+          ],
+          "connects": [
+            "docs",
+            "changelog"
+          ],
+          "depends": []
+        },
+        {
+          "name": "api-docs",
+          "effect": "API documentation — every endpoint",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "comment"
+            },
+            {
+              "type": "familiar",
+              "name": "typescript"
+            },
+            {
+              "type": "skill",
+              "name": "/docs"
+            }
+          ],
+          "steps": [
+            "Endpoint descriptions",
+            "Request/response schemas",
+            "Auth requirements",
+            "Error codes"
+          ],
+          "connects": [
+            "docs",
+            "api"
+          ],
+          "depends": []
+        },
+        {
+          "name": "storybook",
+          "effect": "Component stories",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "comment"
+            },
+            {
+              "type": "skill",
+              "name": "/docs"
+            }
+          ],
+          "steps": [
+            "*.stories.tsx files",
+            "Default + variant stories",
+            "Interactive args table"
+          ],
+          "connects": [
+            "docs",
+            "component"
+          ],
+          "depends": []
+        },
+        {
+          "name": "changelog",
+          "effect": "Update changelog from commit history",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "comment"
+            },
+            {
+              "type": "skill",
+              "name": "/docs"
+            }
+          ],
+          "steps": [
+            "Parse conventional commits",
+            "Group by type (feat, fix, refactor)"
+          ],
+          "connects": [
+            "docs",
+            "push"
+          ],
+          "depends": []
+        }
+      ]
+    },
+    {
+      "id": "geminio",
+      "number": "X",
+      "name": "Geminio",
+      "subtitle": "Duplication and summoning",
+      "description": "Why build from scratch? These clone, copy, and adapt existing work — the Geminio charm applied to code.",
+      "quote": "clone table from codebase summons the DataTable. clone vercel/ai reaches across GitHub.",
+      "spells": [
+        {
+          "name": "clone",
+          "effect": "Clone from codebase or any GitHub repo",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "github"
+            },
+            {
+              "type": "familiar",
+              "name": "shadcn"
+            },
+            {
+              "type": "portal",
+              "name": "GitHub"
+            },
+            {
+              "type": "portal",
+              "name": "shadcn"
+            },
+            {
+              "type": "skill",
+              "name": "/clone"
+            },
+            {
+              "type": "hook",
+              "name": "Auto-Format"
+            },
+            {
+              "type": "ward",
+              "name": "org-refs"
+            }
+          ],
+          "steps": [
+            "Fetch source (GitHub, shadcn, or local)",
+            "Analyze dependencies",
+            "Adapt imports to local structure",
+            "Apply conventions (OKLCH, RTL, Auth.js, Prisma)",
+            "Update registry"
+          ],
+          "connects": [
+            "copy",
+            "fork",
+            "extend"
+          ],
+          "depends": []
+        },
+        {
+          "name": "copy",
+          "effect": "Copy a component — identical but independent",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "github"
+            },
+            {
+              "type": "hook",
+              "name": "Auto-Format"
+            },
+            {
+              "type": "ward",
+              "name": "org-refs"
+            }
+          ],
+          "steps": [
+            "Same as clone, source always local"
+          ],
+          "connects": [
+            "clone"
+          ],
+          "depends": []
+        },
+        {
+          "name": "fork",
+          "effect": "Create a variant — free to diverge",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "github"
+            },
+            {
+              "type": "hook",
+              "name": "Auto-Format"
+            },
+            {
+              "type": "ward",
+              "name": "org-refs"
+            }
+          ],
+          "steps": [
+            "Same as clone + rename",
+            "Original untouched"
+          ],
+          "connects": [
+            "clone",
+            "extend"
+          ],
+          "depends": []
+        },
+        {
+          "name": "extend",
+          "effect": "Inherit and modify — building on giants",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "github"
+            },
+            {
+              "type": "hook",
+              "name": "Auto-Format"
+            },
+            {
+              "type": "ward",
+              "name": "org-refs"
+            }
+          ],
+          "steps": [
+            "Wrap/extend rather than duplicate",
+            "Preserve base interface"
+          ],
+          "connects": [
+            "clone",
+            "fork"
+          ],
+          "depends": []
+        },
+        {
+          "name": "sync",
+          "effect": "Synchronize with upstream source",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "git"
+            },
+            {
+              "type": "familiar",
+              "name": "github"
+            },
+            {
+              "type": "portal",
+              "name": "GitHub"
+            },
+            {
+              "type": "ward",
+              "name": "multi-repo"
+            }
+          ],
+          "steps": [
+            "git fetch origin",
+            "git rebase origin/main",
+            "Resolve conflicts",
+            "Push"
+          ],
+          "connects": [
+            "upstream",
+            "clone"
+          ],
+          "depends": []
+        },
+        {
+          "name": "upstream",
+          "effect": "Pull changes from upstream",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "git"
+            },
+            {
+              "type": "familiar",
+              "name": "github"
+            },
+            {
+              "type": "portal",
+              "name": "GitHub"
+            },
+            {
+              "type": "ward",
+              "name": "multi-repo"
+            }
+          ],
+          "steps": [
+            "Fetch upstream changes",
+            "Merge or rebase",
+            "Resolve conflicts"
+          ],
+          "connects": [
+            "sync",
+            "clone"
+          ],
+          "depends": []
+        }
+      ]
+    },
+    {
+      "id": "summoning",
+      "number": "XI",
+      "name": "Summoning Charms",
+      "subtitle": "Portals to external realms",
+      "description": "Each word opens a portal to a powerful service beyond your machine. The Floo Network, but for code.",
+      "quote": "Each portal stays open for the duration of your session. Use them freely.",
+      "spells": [
+        {
+          "name": "github",
+          "effect": "Repos, PRs, issues, Actions, code search",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "github"
+            },
+            {
+              "type": "portal",
+              "name": "GitHub"
+            }
+          ],
+          "steps": [
+            "Repository management",
+            "Pull request workflows",
+            "Issue tracking",
+            "Code search across repos"
+          ],
+          "connects": [
+            "push",
+            "clone",
+            "deploy"
+          ],
+          "depends": []
+        },
+        {
+          "name": "figma",
+          "effect": "Design files, components, visual truth",
+          "order": [
+            {
+              "type": "portal",
+              "name": "Figma"
+            }
+          ],
+          "steps": [
+            "get_design_context",
+            "get_screenshot",
+            "get_metadata",
+            "create_design_system_rules"
+          ],
+          "connects": [
+            "component",
+            "template"
+          ],
+          "depends": []
+        },
+        {
+          "name": "linear",
+          "effect": "Issues, projects, sprint tracking",
+          "order": [
+            {
+              "type": "portal",
+              "name": "Linear"
+            }
+          ],
+          "steps": [
+            "Issue management",
+            "Project tracking",
+            "Sprint planning"
+          ],
+          "connects": [
+            "plan",
+            "story"
+          ],
+          "depends": []
+        },
+        {
+          "name": "slack",
+          "effect": "Messages, channels, team communication",
+          "order": [
+            {
+              "type": "portal",
+              "name": "Slack"
+            }
+          ],
+          "steps": [
+            "Send messages",
+            "Read channels",
+            "Team notifications"
+          ],
+          "connects": [],
+          "depends": []
+        },
+        {
+          "name": "notion",
+          "effect": "Documents, databases, wikis",
+          "order": [
+            {
+              "type": "portal",
+              "name": "Notion"
+            }
+          ],
+          "steps": [
+            "Page creation",
+            "Database queries",
+            "Wiki management"
+          ],
+          "connects": [
+            "docs"
+          ],
+          "depends": []
+        },
+        {
+          "name": "sentry",
+          "effect": "Error monitoring, exception traces",
+          "order": [
+            {
+              "type": "portal",
+              "name": "Sentry"
+            },
+            {
+              "type": "familiar",
+              "name": "sse"
+            }
+          ],
+          "steps": [
+            "Error monitoring",
+            "Exception traces",
+            "Release tracking"
+          ],
+          "connects": [
+            "error",
+            "debug"
+          ],
+          "depends": []
+        },
+        {
+          "name": "stripe",
+          "effect": "Payments, subscriptions, invoices",
+          "order": [
+            {
+              "type": "portal",
+              "name": "Stripe"
+            }
+          ],
+          "steps": [
+            "Payment processing",
+            "Subscription management",
+            "Webhook events",
+            "Customer management"
+          ],
+          "connects": [
+            "checkout",
+            "saas"
+          ],
+          "depends": []
+        },
+        {
+          "name": "vercel",
+          "effect": "Deployments, domains, the edge",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "deploy"
+            },
+            {
+              "type": "portal",
+              "name": "Vercel"
+            }
+          ],
+          "steps": [
+            "Deploy management",
+            "Build logs",
+            "Runtime logs",
+            "Domain configuration"
+          ],
+          "connects": [
+            "deploy",
+            "ship"
+          ],
+          "depends": []
+        },
+        {
+          "name": "analytics",
+          "effect": "User behavior, funnels, feature flags",
+          "order": [
+            {
+              "type": "portal",
+              "name": "PostHog"
+            }
+          ],
+          "steps": [
+            "User behavior tracking",
+            "Funnel analysis",
+            "Session recordings",
+            "Feature flags"
+          ],
+          "connects": [
+            "performance"
+          ],
+          "depends": []
+        },
+        {
+          "name": "neon",
+          "effect": "PostgreSQL branches, database management",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "prisma"
+            },
+            {
+              "type": "portal",
+              "name": "Neon"
+            }
+          ],
+          "steps": [
+            "run_sql",
+            "create_branch",
+            "prepare_database_migration",
+            "explain_sql_statement",
+            "list_slow_queries"
+          ],
+          "connects": [
+            "prisma",
+            "migration"
+          ],
+          "depends": []
+        }
+      ]
+    },
+    {
+      "id": "divination",
+      "number": "XII",
+      "name": "Divination",
+      "subtitle": "Seeing ahead",
+      "description": "Planning, architecting, predicting what must be built. Not all wizards believe, but the best ones practice daily.",
+      "quote": "Trelawney was wrong about most things, but right about one: prepare for the future.",
+      "spells": [
+        {
+          "name": "bmad",
+          "effect": "Show BMAD menu — choose planning track",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "orchestration"
+            }
+          ],
+          "steps": [
+            "Display all workflow options",
+            "Quick Flow (~5 min)",
+            "BMad Method (~15 min)",
+            "Enterprise (~30 min)"
+          ],
+          "connects": [
+            "flow",
+            "plan"
+          ],
+          "depends": []
+        },
+        {
+          "name": "flow",
+          "effect": "Quick Flow — five minutes to a working plan",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "orchestration"
+            }
+          ],
+          "steps": [
+            "*bmad-quick-flow",
+            "Rapid assessment",
+            "Action items"
+          ],
+          "connects": [
+            "plan",
+            "implement"
+          ],
+          "depends": []
+        },
+        {
+          "name": "plan",
+          "effect": "Enter planning phase — architecture first",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "orchestration"
+            },
+            {
+              "type": "familiar",
+              "name": "architecture"
+            }
+          ],
+          "steps": [
+            "*2-plan-workflows",
+            "Requirements gathering",
+            "Architecture design",
+            "Story mapping"
+          ],
+          "connects": [
+            "architect",
+            "story"
+          ],
+          "depends": []
+        },
+        {
+          "name": "architect",
+          "effect": "Design system architecture",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "orchestration"
+            },
+            {
+              "type": "familiar",
+              "name": "architecture"
+            }
+          ],
+          "steps": [
+            "*3-solutioning",
+            "System design",
+            "Data modeling",
+            "API design"
+          ],
+          "connects": [
+            "plan",
+            "implement"
+          ],
+          "depends": [
+            "plan"
+          ]
+        },
+        {
+          "name": "implement",
+          "effect": "Execute the plan",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "orchestration"
+            },
+            {
+              "type": "familiar",
+              "name": "architecture"
+            }
+          ],
+          "steps": [
+            "*4-implementation",
+            "Code generation",
+            "Testing",
+            "Deployment"
+          ],
+          "connects": [
+            "architect",
+            "cycle"
+          ],
+          "depends": [
+            "architect"
+          ]
+        },
+        {
+          "name": "story",
+          "effect": "Create user stories",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "orchestration"
+            }
+          ],
+          "steps": [
+            "User personas",
+            "Acceptance criteria",
+            "Story points"
+          ],
+          "connects": [
+            "plan",
+            "feature"
+          ],
+          "depends": []
+        },
+        {
+          "name": "cycle",
+          "effect": "Full development cycle",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "orchestration"
+            }
+          ],
+          "steps": [
+            "Plan",
+            "Architect",
+            "Implement",
+            "Test",
+            "Deploy"
+          ],
+          "connects": [
+            "plan",
+            "deploy"
+          ],
+          "depends": []
+        },
+        {
+          "name": "loop",
+          "effect": "Continuous iteration — never ends",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "orchestration"
+            }
+          ],
+          "steps": [
+            "Recurring cycle",
+            "Feedback integration",
+            "Improvement"
+          ],
+          "connects": [
+            "cycle"
+          ],
+          "depends": []
+        }
+      ]
+    },
+    {
+      "id": "performance-magic",
+      "number": "XIII",
+      "name": "Advanced Spellwork",
+      "subtitle": "Performance magic",
+      "description": "N.E.W.T.-level incantations. They don't create — they refine. Faster, smaller, sharper.",
+      "quote": "parallelize alone can improve performance 2-10x. This is not theory — it is power.",
+      "spells": [
+        {
+          "name": "parallelize",
+          "effect": "Sequential to Promise.all() — the Time-Turner",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "react"
+            },
+            {
+              "type": "familiar",
+              "name": "performance"
+            }
+          ],
+          "steps": [
+            "Find sequential await chains",
+            "Convert to Promise.all()",
+            "Verify no dependencies between calls"
+          ],
+          "connects": [
+            "waterfall",
+            "performance"
+          ],
+          "depends": []
+        },
+        {
+          "name": "waterfall",
+          "effect": "Detect and eliminate request waterfalls",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "performance"
+            },
+            {
+              "type": "familiar",
+              "name": "react"
+            }
+          ],
+          "steps": [
+            "Profile with React DevTools",
+            "Identify sequential fetches",
+            "Restructure to parallel"
+          ],
+          "connects": [
+            "parallelize",
+            "performance"
+          ],
+          "depends": []
+        },
+        {
+          "name": "bundle",
+          "effect": "Analyze bundle, recommend splits — Reducio",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "build"
+            },
+            {
+              "type": "familiar",
+              "name": "performance"
+            }
+          ],
+          "steps": [
+            "ANALYZE=true pnpm build",
+            "Identify large dependencies",
+            "Suggest code splits",
+            "Tree-shaking opportunities"
+          ],
+          "connects": [
+            "lazy",
+            "barrel"
+          ],
+          "depends": []
+        },
+        {
+          "name": "lazy",
+          "effect": "Dynamic imports — appear only when summoned",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "react"
+            },
+            {
+              "type": "familiar",
+              "name": "nextjs"
+            }
+          ],
+          "steps": [
+            "next/dynamic with { ssr: false }",
+            "For heavy components (Monaco, charts, maps)"
+          ],
+          "connects": [
+            "bundle",
+            "suspense"
+          ],
+          "depends": []
+        },
+        {
+          "name": "suspense",
+          "effect": "Suspense boundaries — progressive loading",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "react"
+            },
+            {
+              "type": "familiar",
+              "name": "nextjs"
+            }
+          ],
+          "steps": [
+            "<Suspense fallback={...}>",
+            "Wrap async Server Components",
+            "Show skeleton while loading"
+          ],
+          "connects": [
+            "streaming",
+            "lazy"
+          ],
+          "depends": []
+        },
+        {
+          "name": "memo",
+          "effect": "useMemo/useCallback — preserve computations",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "react"
+            }
+          ],
+          "steps": [
+            "Profile first to prove need",
+            "React Compiler handles most cases",
+            "Manual memo for remaining hotspots"
+          ],
+          "connects": [
+            "react",
+            "optimize"
+          ],
+          "depends": []
+        },
+        {
+          "name": "server-component",
+          "effect": "Convert to Server Component",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "nextjs"
+            },
+            {
+              "type": "familiar",
+              "name": "react"
+            }
+          ],
+          "steps": [
+            "Remove \"use client\"",
+            "Extract hooks into child Client Components",
+            "Reduce client bundle"
+          ],
+          "connects": [
+            "nextjs",
+            "bundle"
+          ],
+          "depends": []
+        },
+        {
+          "name": "streaming",
+          "effect": "Streaming with Suspense — progressive results",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "nextjs"
+            },
+            {
+              "type": "familiar",
+              "name": "react"
+            }
+          ],
+          "steps": [
+            "Parallel async Server Components",
+            "Each wrapped in Suspense",
+            "Results arrive as ready"
+          ],
+          "connects": [
+            "suspense",
+            "parallelize"
+          ],
+          "depends": []
+        },
+        {
+          "name": "barrel",
+          "effect": "Fix barrel imports — eliminate 200-800ms curse",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "build"
+            },
+            {
+              "type": "familiar",
+              "name": "structure"
+            }
+          ],
+          "steps": [
+            "Replace import { X } from '@/components'",
+            "Use import { X } from '@/components/ui/x'",
+            "Direct imports only"
+          ],
+          "connects": [
+            "bundle",
+            "build"
+          ],
+          "depends": []
+        },
+        {
+          "name": "dedup",
+          "effect": "React.cache() — the spell that remembers",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "react"
+            }
+          ],
+          "steps": [
+            "Wrap shared fetching in React.cache()",
+            "Request-level memoization",
+            "No duplicate server calls"
+          ],
+          "connects": [
+            "server-component",
+            "performance"
+          ],
+          "depends": []
+        }
+      ]
+    },
+    {
+      "id": "portkeys",
+      "number": "XIV",
+      "name": "Portkeys",
+      "subtitle": "Teleportation to other repos",
+      "description": "Speak a reference incantation and your context shifts to another repository — its patterns, its hard-won wisdom.",
+      "quote": "auth like hogwarts transports the auth pattern. table from codebase summons the DataTable.",
+      "spells": [
+        {
+          "name": "from codebase",
+          "effect": "The pattern library — 54 primitives, 62 atoms, 31 templates",
+          "order": [
+            {
+              "type": "skill",
+              "name": "/codebase"
+            },
+            {
+              "type": "portal",
+              "name": "GitHub"
+            },
+            {
+              "type": "ward",
+              "name": "org-refs"
+            }
+          ],
+          "steps": [
+            "Search local /Users/abdout/codebase first",
+            "Check src/components/ then __registry__/ then src/registry/",
+            "Fallback to GitHub MCP: databayt/codebase"
+          ],
+          "connects": [
+            "from shadcn",
+            "clone"
+          ],
+          "depends": []
+        },
+        {
+          "name": "from shadcn",
+          "effect": "shadcn/ui fork — refined for Databayt",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "shadcn"
+            },
+            {
+              "type": "portal",
+              "name": "shadcn"
+            },
+            {
+              "type": "ward",
+              "name": "org-refs"
+            }
+          ],
+          "steps": [
+            "Search shadcn registry via MCP",
+            "View component details",
+            "Install to src/components/ui/"
+          ],
+          "connects": [
+            "from codebase",
+            "from radix"
+          ],
+          "depends": []
+        },
+        {
+          "name": "from radix",
+          "effect": "Radix primitives — the raw building blocks",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "shadcn"
+            },
+            {
+              "type": "portal",
+              "name": "shadcn"
+            },
+            {
+              "type": "ward",
+              "name": "org-refs"
+            }
+          ],
+          "steps": [
+            "Reference Radix primitives",
+            "Dialog.Root, DropdownMenu.Root, etc."
+          ],
+          "connects": [
+            "from shadcn",
+            "shadcn"
+          ],
+          "depends": []
+        },
+        {
+          "name": "like hogwarts",
+          "effect": "Education SaaS — multi-tenant, LMS, billing",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "hogwarts"
+            },
+            {
+              "type": "familiar",
+              "name": "architecture"
+            },
+            {
+              "type": "familiar",
+              "name": "prisma"
+            },
+            {
+              "type": "portal",
+              "name": "GitHub"
+            },
+            {
+              "type": "ward",
+              "name": "org-refs"
+            }
+          ],
+          "steps": [
+            "Multi-tenant (schoolId)",
+            "Subdomain routing",
+            "RBAC per school",
+            "Stripe billing",
+            "LMS/SIS schemas"
+          ],
+          "connects": [
+            "like souq",
+            "auth",
+            "prisma"
+          ],
+          "depends": []
+        },
+        {
+          "name": "like souq",
+          "effect": "Marketplace — vendors, carts, products",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "souq"
+            },
+            {
+              "type": "familiar",
+              "name": "architecture"
+            },
+            {
+              "type": "portal",
+              "name": "GitHub"
+            },
+            {
+              "type": "ward",
+              "name": "org-refs"
+            }
+          ],
+          "steps": [
+            "Multi-vendor",
+            "Redux cart",
+            "Product catalog",
+            "Order management",
+            "Category trees"
+          ],
+          "connects": [
+            "like hogwarts",
+            "like mkan"
+          ],
+          "depends": []
+        },
+        {
+          "name": "like mkan",
+          "effect": "Rental platform — listings, bookings, search",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "mkan"
+            },
+            {
+              "type": "familiar",
+              "name": "architecture"
+            },
+            {
+              "type": "portal",
+              "name": "GitHub"
+            },
+            {
+              "type": "ward",
+              "name": "org-refs"
+            }
+          ],
+          "steps": [
+            "Property listings",
+            "Booking system",
+            "Date conflict checks",
+            "Availability calendar",
+            "Search/filters"
+          ],
+          "connects": [
+            "like souq",
+            "like shifa"
+          ],
+          "depends": []
+        },
+        {
+          "name": "like shifa",
+          "effect": "Medical system — appointments, patient records",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "shifa"
+            },
+            {
+              "type": "familiar",
+              "name": "architecture"
+            },
+            {
+              "type": "portal",
+              "name": "GitHub"
+            },
+            {
+              "type": "ward",
+              "name": "org-refs"
+            }
+          ],
+          "steps": [
+            "Patient model",
+            "Appointment system",
+            "Doctor scheduling",
+            "Medical records",
+            "Prescriptions"
+          ],
+          "connects": [
+            "like mkan",
+            "like hogwarts"
+          ],
+          "depends": []
+        },
+        {
+          "name": "like sijillee",
+          "effect": "Sijillee — repo pending; context lives in the CRM workspace + catalog only",
+          "order": [
+            {
+              "type": "memory",
+              "name": "memory/repositories.json"
+            }
+          ],
+          "steps": [
+            "Read the sijillee entry in memory/repositories.json",
+            "No GitHub repo yet — skip clone and code search",
+            "Pull product context from the CRM workspace + catalog",
+            "Borrow the nearest patterns from hogwarts until the repo lands"
+          ],
+          "connects": [
+            "like moallimee",
+            "like hogwarts"
+          ],
+          "depends": []
+        },
+        {
+          "name": "like moallimee",
+          "effect": "Moallimee — repo pending; context lives in the CRM workspace + catalog only",
+          "order": [
+            {
+              "type": "memory",
+              "name": "memory/repositories.json"
+            }
+          ],
+          "steps": [
+            "Read the moallimee entry in memory/repositories.json",
+            "No GitHub repo yet — skip clone and code search",
+            "Pull product context from the CRM workspace + catalog",
+            "Borrow the nearest patterns from hogwarts until the repo lands"
+          ],
+          "connects": [
+            "like sijillee",
+            "like hogwarts"
+          ],
+          "depends": []
+        }
+      ]
+    },
+    {
+      "id": "unforgivable",
+      "number": "XV",
+      "name": "The Unforgivable Commands",
+      "subtitle": "Forbidden by the engine",
+      "description": "Denied by settings.json. No agent, skill, or charm can override them. Some magic cannot be undone.",
+      "quote": "The Ministry had its reasons. So does Kun.",
+      "spells": [
+        {
+          "name": "rm -rf *",
+          "effect": "Catastrophic deletion — the Avada Kedavra of filesystems",
+          "order": [
+            {
+              "type": "ward",
+              "name": "deny: settings.json"
+            }
+          ],
+          "steps": [
+            "Blocked by deny rule in settings.json",
+            "No override possible"
+          ],
+          "connects": [],
+          "depends": []
+        },
+        {
+          "name": "prisma migrate reset",
+          "effect": "Wipes entire database — every table, every record",
+          "order": [
+            {
+              "type": "ward",
+              "name": "deny: settings.json"
+            }
+          ],
+          "steps": [
+            "Blocked by deny rule",
+            "Use prisma migrate dev instead"
+          ],
+          "connects": [],
+          "depends": []
+        },
+        {
+          "name": "prisma db push --accept-data-loss",
+          "effect": "Accepts data loss",
+          "order": [
+            {
+              "type": "ward",
+              "name": "deny: settings.json"
+            }
+          ],
+          "steps": [
+            "Blocked by deny rule",
+            "Never accept data loss"
+          ],
+          "connects": [],
+          "depends": []
+        },
+        {
+          "name": "DROP TABLE",
+          "effect": "Destroy table via Neon MCP",
+          "order": [
+            {
+              "type": "ward",
+              "name": "deny: settings.json"
+            }
+          ],
+          "steps": [
+            "Blocked even through MCP portals"
+          ],
+          "connects": [],
+          "depends": []
+        },
+        {
+          "name": "git push --force main",
+          "effect": "Overwrite shared history",
+          "order": [
+            {
+              "type": "ward",
+              "name": "convention"
+            }
+          ],
+          "steps": [
+            "Convention enforced, not deny rule",
+            "Overwrites upstream work"
+          ],
+          "connects": [],
+          "depends": []
+        }
+      ]
+    },
+    {
+      "id": "auror-office",
+      "number": "16",
+      "name": "The Auror Office",
+      "subtitle": "One keyword, one quality dimension",
+      "description": "The niche inspectors. Each spell checks exactly one dimension of quality — six through the browser, six through the code, two deep, two comparative. The quality familiar routes them all; handover casts them together.",
+      "quote": "handover /admission/new — twelve inspections, one verdict table.",
+      "spells": [
+        {
+          "name": "see",
+          "effect": "Visual check — page loads, layout holds, content renders",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "quality"
+            },
+            {
+              "type": "portal",
+              "name": "Browser"
+            }
+          ],
+          "steps": [
+            "Navigate to the URL and screenshot",
+            "Verify the page loads — no blank or broken sections",
+            "Check layout, spacing, and content render as intended",
+            "Verdict: PASS / WARN / FAIL with what to fix"
+          ],
+          "connects": [
+            "responsive",
+            "mirror",
+            "handover"
+          ],
+          "depends": []
+        },
+        {
+          "name": "flow",
+          "effect": "Interactive check — click, type, submit through the user journey",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "quality"
+            },
+            {
+              "type": "portal",
+              "name": "Browser"
+            }
+          ],
+          "steps": [
+            "Walk the journey — click, type, submit",
+            "Verify navigation and form submissions land",
+            "Confirm success and error states surface",
+            "Verdict names the exact step that broke"
+          ],
+          "connects": [
+            "debug",
+            "see",
+            "handover"
+          ],
+          "depends": []
+        },
+        {
+          "name": "debug",
+          "effect": "Error check — console, network, uncaught exceptions",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "quality"
+            },
+            {
+              "type": "portal",
+              "name": "Browser"
+            }
+          ],
+          "steps": [
+            "Open the route via the browser MCP",
+            "Collect console errors and warnings",
+            "Inspect network requests for failures",
+            "Report zero-error PASS or list each exception with its source"
+          ],
+          "connects": [
+            "flow",
+            "handover"
+          ],
+          "depends": []
+        },
+        {
+          "name": "responsive",
+          "effect": "Layout check at mobile 375, tablet 768, desktop 1440",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "quality"
+            },
+            {
+              "type": "portal",
+              "name": "Browser"
+            }
+          ],
+          "steps": [
+            "Resize to 375, 768, and 1440",
+            "Screenshot each breakpoint",
+            "Check overflow, wrapping, and contested space",
+            "Verdict per breakpoint"
+          ],
+          "connects": [
+            "see",
+            "handover"
+          ],
+          "depends": []
+        },
+        {
+          "name": "lang",
+          "effect": "Language check — RTL, LTR, translation completeness",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "quality"
+            },
+            {
+              "type": "portal",
+              "name": "Browser"
+            }
+          ],
+          "steps": [
+            "Load the route in both ar and en locales",
+            "Check RTL mirroring — direction, logical properties",
+            "Scan for hardcoded strings missing from dictionaries",
+            "List every untranslated string in the verdict"
+          ],
+          "connects": [
+            "see",
+            "handover"
+          ],
+          "depends": []
+        },
+        {
+          "name": "fast",
+          "effect": "Speed check — quick Core Web Vitals health",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "quality"
+            },
+            {
+              "type": "portal",
+              "name": "Browser"
+            }
+          ],
+          "steps": [
+            "Load the page and sample Core Web Vitals",
+            "Check LCP, CLS, INP against budget",
+            "Flag oversized payloads and blocking requests",
+            "PASS, or hand the deep work to trace"
+          ],
+          "connects": [
+            "trace",
+            "handover"
+          ],
+          "depends": []
+        },
+        {
+          "name": "guard",
+          "effect": "Security check — auth, validation, tenant scope",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "quality"
+            },
+            {
+              "type": "ward",
+              "name": "rules/authjs"
+            },
+            {
+              "type": "ward",
+              "name": "rules/prisma-6"
+            },
+            {
+              "type": "ward",
+              "name": "rules/s3"
+            }
+          ],
+          "steps": [
+            "Read the route's layout, actions, and queries",
+            "Verify auth guard at the boundary + per-action authz",
+            "Verify Zod validation and tenant scoping on every query",
+            "Check S3 access uses presigned URLs via CloudFront",
+            "Cite each finding as rule-id (severity)"
+          ],
+          "connects": [
+            "stack",
+            "handover"
+          ],
+          "depends": []
+        },
+        {
+          "name": "architecture",
+          "effect": "Architecture check — mirror pattern, boundaries, data flow",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "quality"
+            },
+            {
+              "type": "ward",
+              "name": "rules/next-16"
+            }
+          ],
+          "steps": [
+            "Trace the route's data flow from page to query",
+            "Verify mirror pattern and server/client boundaries",
+            "Hunt sequential fetch waterfalls",
+            "Cite each finding as rule-id (severity)"
+          ],
+          "connects": [
+            "structure",
+            "pattern",
+            "handover"
+          ],
+          "depends": []
+        },
+        {
+          "name": "structure",
+          "effect": "File check — naming, directory, placement",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "quality"
+            }
+          ],
+          "steps": [
+            "Map the block's files against the mirror-pattern layout",
+            "Check naming conventions and directory placement",
+            "Flag each misplaced or misnamed file with its correct location"
+          ],
+          "connects": [
+            "architecture",
+            "handover"
+          ],
+          "depends": []
+        },
+        {
+          "name": "pattern",
+          "effect": "Convention check — page, actions, form against the canonical cards",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "quality"
+            },
+            {
+              "type": "ward",
+              "name": "rules/next-16"
+            },
+            {
+              "type": "ward",
+              "name": "rules/react-19"
+            }
+          ],
+          "steps": [
+            "Load the matching pattern cards",
+            "Compare page, actions, and form to the canonical triplet",
+            "Check revalidatePath/revalidateTag after every write",
+            "Cite drift as rule-id (severity)"
+          ],
+          "connects": [
+            "design",
+            "architecture",
+            "handover"
+          ],
+          "depends": []
+        },
+        {
+          "name": "design",
+          "effect": "Component check — ui/atom/template hierarchy and token discipline",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "quality"
+            },
+            {
+              "type": "ward",
+              "name": "rules/tailwind-v4"
+            }
+          ],
+          "steps": [
+            "Check ui/atom/template hierarchy usage",
+            "Verify tokens — OKLCH colors, no hardcoded values",
+            "Verify logical properties for RTL",
+            "Cite each finding as rule-id (severity)"
+          ],
+          "connects": [
+            "pattern",
+            "handover"
+          ],
+          "depends": []
+        },
+        {
+          "name": "stack",
+          "effect": "Technology check — versions, imports, deprecated APIs across every rule domain",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "quality"
+            },
+            {
+              "type": "ward",
+              "name": "rules/react-19"
+            },
+            {
+              "type": "ward",
+              "name": "rules/next-16"
+            },
+            {
+              "type": "ward",
+              "name": "rules/typescript-strict"
+            },
+            {
+              "type": "ward",
+              "name": "rules/tailwind-v4"
+            },
+            {
+              "type": "ward",
+              "name": "rules/prisma-6"
+            },
+            {
+              "type": "ward",
+              "name": "rules/authjs"
+            },
+            {
+              "type": "ward",
+              "name": "rules/neon"
+            },
+            {
+              "type": "ward",
+              "name": "rules/s3"
+            }
+          ],
+          "steps": [
+            "Scan imports for deprecated APIs and wrong versions",
+            "Check React 19 / Next 16 / Prisma 6 / Tailwind 4 idioms",
+            "Sweep all eight rule domains",
+            "Cite each hit as rule-id (severity)"
+          ],
+          "connects": [
+            "guard",
+            "handover"
+          ],
+          "depends": []
+        },
+        {
+          "name": "trace",
+          "effect": "Deep performance investigation — find the bottleneck and fix it",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "quality"
+            },
+            {
+              "type": "portal",
+              "name": "Browser"
+            }
+          ],
+          "steps": [
+            "Record a performance trace on the slow route",
+            "Isolate the bottleneck — query, waterfall, bundle, or render",
+            "Fix it",
+            "Re-trace to prove the gain"
+          ],
+          "connects": [
+            "fast",
+            "efficient",
+            "handover"
+          ],
+          "depends": []
+        },
+        {
+          "name": "efficient",
+          "effect": "Code efficiency — cut duplicate work and reduce API calls",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "quality"
+            }
+          ],
+          "steps": [
+            "Count API calls and queries per interaction",
+            "Find duplicate fetches and overfetching",
+            "Propose the reduction — dedup, batch, select, cache"
+          ],
+          "connects": [
+            "trace",
+            "handover"
+          ],
+          "depends": []
+        },
+        {
+          "name": "mirror",
+          "effect": "Compare Figma design against the live implementation",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "quality"
+            },
+            {
+              "type": "portal",
+              "name": "Figma"
+            },
+            {
+              "type": "portal",
+              "name": "Browser"
+            }
+          ],
+          "steps": [
+            "Pull the Figma frame — screenshot + design context",
+            "Screenshot the implementation at the same size",
+            "Diff spacing, type, color, and structure",
+            "Report each divergence — a human judges intent"
+          ],
+          "connects": [
+            "diff",
+            "see",
+            "handover"
+          ],
+          "depends": []
+        },
+        {
+          "name": "diff",
+          "effect": "Compare URL against URL — visual divergence report",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "quality"
+            },
+            {
+              "type": "portal",
+              "name": "Browser"
+            }
+          ],
+          "steps": [
+            "Screenshot both URLs at the same breakpoints",
+            "Diff layout, spacing, color, and copy",
+            "Report each divergence side by side"
+          ],
+          "connects": [
+            "mirror",
+            "handover"
+          ],
+          "depends": []
+        }
+      ]
+    },
+    {
+      "id": "ministry",
+      "number": "17",
+      "name": "The Ministry of Magic",
+      "subtitle": "Operations and intelligence",
+      "description": "The spells that keep the company running and learning — weekly cadence, production watch, incident response, credential vaults, and the intelligence that extracts the org's own patterns from its history.",
+      "quote": "monitor watches production while weekly plans the week — the Ministry never sleeps.",
+      "spells": [
+        {
+          "name": "weekly",
+          "effect": "The captain's cadence — Monday plan, Wednesday check, Friday review",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "captain"
+            },
+            {
+              "type": "skill",
+              "name": "/weekly"
+            }
+          ],
+          "steps": [
+            "Monday: allocate the week — people, priorities, value-at-stake",
+            "Wednesday: check progress against the plan",
+            "Friday: review, coach, rotate a canon principle",
+            "Archive the cycle"
+          ],
+          "connects": [
+            "health",
+            "monitor",
+            "canon"
+          ],
+          "depends": []
+        },
+        {
+          "name": "monitor",
+          "effect": "Deployments, costs, and uptime across every databayt product",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "ops"
+            },
+            {
+              "type": "portal",
+              "name": "Vercel"
+            },
+            {
+              "type": "skill",
+              "name": "/monitor"
+            }
+          ],
+          "steps": [
+            "Check Vercel deployment status for all products",
+            "Sample production URLs for uptime",
+            "Sum API + infra spend against budget",
+            "Escalate anything red to incident"
+          ],
+          "connects": [
+            "incident",
+            "weekly"
+          ],
+          "depends": []
+        },
+        {
+          "name": "incident",
+          "effect": "Production incident response — classify, diagnose, fix, postmortem",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "ops"
+            },
+            {
+              "type": "portal",
+              "name": "Sentry"
+            },
+            {
+              "type": "skill",
+              "name": "/incident"
+            }
+          ],
+          "steps": [
+            "Classify severity — P0 drop-everything to P3",
+            "Pull Sentry traces + Vercel logs to diagnose",
+            "Fix or roll back, verify recovery",
+            "Write the postmortem on a GitHub issue"
+          ],
+          "connects": [
+            "monitor",
+            "report"
+          ],
+          "depends": []
+        },
+        {
+          "name": "credentials",
+          "effect": "Databayt credentials — API keys via Keychain, web logins via Safari",
+          "order": [
+            {
+              "type": "portal",
+              "name": "Keychain"
+            },
+            {
+              "type": "skill",
+              "name": "/credentials"
+            }
+          ],
+          "steps": [
+            "status: show which keys and passwords are configured",
+            "setup: store a new API key in the Keychain",
+            "login: drive Safari autofill for web services",
+            "export: surface a key for env wiring"
+          ],
+          "connects": [
+            "monitor"
+          ],
+          "depends": []
+        },
+        {
+          "name": "health",
+          "effect": "Config health across the team + engine drift check",
+          "order": [
+            {
+              "type": "skill",
+              "name": "/health"
+            }
+          ],
+          "steps": [
+            "Run health.sh — MCP, hooks, skills, agents",
+            "Diff reality against engine.json counts and model refs",
+            "Warn on doc rot — drift is warn-only, never a gate",
+            "Report per-teammate config status"
+          ],
+          "connects": [
+            "drift",
+            "weekly"
+          ],
+          "depends": []
+        },
+        {
+          "name": "learn",
+          "effect": "Extract organizational patterns and conventions from repos + history",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "learn"
+            },
+            {
+              "type": "skill",
+              "name": "/learn"
+            }
+          ],
+          "steps": [
+            "Scan git history across the databayt repos",
+            "Extract patterns, conventions, and team dynamics",
+            "Write findings to memory for reuse",
+            "Feed the conventions, patterns, and drift surfaces"
+          ],
+          "connects": [
+            "conventions",
+            "patterns",
+            "drift",
+            "analyze"
+          ],
+          "depends": []
+        },
+        {
+          "name": "conventions",
+          "effect": "Alias of learn — surface the org's coding conventions on demand",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "learn"
+            }
+          ],
+          "steps": [
+            "Route to the learn surface",
+            "Filter for naming, structure, and style conventions",
+            "Answer with examples from real repos"
+          ],
+          "connects": [
+            "learn"
+          ],
+          "depends": []
+        },
+        {
+          "name": "patterns",
+          "effect": "Alias of learn — list the recurring patterns across the org's repos",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "learn"
+            }
+          ],
+          "steps": [
+            "Route to the learn surface",
+            "Rank patterns by adoption across repos",
+            "Point to the canonical card when one exists"
+          ],
+          "connects": [
+            "learn",
+            "pattern"
+          ],
+          "depends": []
+        },
+        {
+          "name": "drift",
+          "effect": "Alias of the learn/health surface — spot config and docs drifting from reality",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "learn"
+            }
+          ],
+          "steps": [
+            "Route to the learn/health surface",
+            "Diff engine.json against repo reality and docs",
+            "List each drifted count, model ref, or stale doc"
+          ],
+          "connects": [
+            "learn",
+            "health"
+          ],
+          "depends": []
+        }
+      ]
+    },
+    {
+      "id": "pensieve",
+      "number": "18",
+      "name": "The Pensieve",
+      "subtitle": "Judgment and conversion",
+      "description": "Dip into stored wisdom. canon pulls the right CEO book into a live decision — passively, mid-conversation; convert distills any file or URL into Markdown the engine can read.",
+      "quote": "\"should we build it?\" — the Pensieve surfaces The Lean Startup before you finish the sentence.",
+      "spells": [
+        {
+          "name": "canon",
+          "effect": "Surface the right book + one operating move for a business or leadership decision — passive, no slash needed",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "captain"
+            },
+            {
+              "type": "memory",
+              "name": "docs/CANON.md"
+            }
+          ],
+          "steps": [
+            "Detect the decision type in natural conversation — hiring, pricing, positioning, runway, build-or-not",
+            "Map it via the retrieval index to one of the 10 books",
+            "Surface one book + one operating move, grounded in principle #N",
+            "Keep it brief; skip trivial or purely technical choices"
+          ],
+          "connects": [
+            "weekly"
+          ],
+          "depends": []
+        },
+        {
+          "name": "convert",
+          "effect": "File or URL to Markdown — PDF, Office, images, audio, web",
+          "order": [
+            {
+              "type": "portal",
+              "name": "MarkItDown"
+            },
+            {
+              "type": "skill",
+              "name": "/convert"
+            }
+          ],
+          "steps": [
+            "Detect the source — local file or URL",
+            "Convert via the MarkItDown MCP",
+            "Return clean Markdown ready for docs or memory"
+          ],
+          "connects": [
+            "docs"
+          ],
+          "depends": []
+        }
+      ]
+    }
+  ],
+  "workflows": [
+    {
+      "id": "feature-pipeline",
+      "name": "Feature Pipeline",
+      "description": "The full pipeline — idea to customer's hands",
+      "steps": [
+        {
+          "keyword": "idea",
+          "action": "Structured GitHub issue with acceptance criteria"
+        },
+        {
+          "keyword": "spec",
+          "action": "Data model + file plan + human approval"
+        },
+        {
+          "keyword": "schema",
+          "action": "Prisma model + migration + Zod validation"
+        },
+        {
+          "keyword": "code",
+          "action": "Server actions with auth + tenant isolation"
+        },
+        {
+          "keyword": "wire",
+          "action": "Pages + forms + tables + i18n"
+        },
+        {
+          "keyword": "check",
+          "action": "Type-check + build + visual verify"
+        },
+        {
+          "keyword": "ship",
+          "action": "Commit + deploy to production"
+        },
+        {
+          "keyword": "watch",
+          "action": "Health check + close issue"
+        }
+      ]
+    },
+    {
+      "id": "morning-start",
+      "name": "Morning Start",
+      "description": "Begin your day",
+      "steps": [
+        {
+          "keyword": "dev",
+          "action": "Server rises, Chrome opens"
+        },
+        {
+          "keyword": "code",
+          "action": "Write your changes"
+        },
+        {
+          "keyword": "build",
+          "action": "Verify everything compiles"
+        }
+      ]
+    },
+    {
+      "id": "quick-fix",
+      "name": "Quick Fix",
+      "description": "Patch and ship fast",
+      "steps": [
+        {
+          "keyword": "fix",
+          "action": "Auto-repair errors"
+        },
+        {
+          "keyword": "build",
+          "action": "Verify clean"
+        },
+        {
+          "keyword": "quick",
+          "action": "Fast commit + push"
+        }
+      ]
+    },
+    {
+      "id": "report-fix",
+      "name": "Report to Fix",
+      "description": "User reports issue → auto-fix → close",
+      "steps": [
+        {
+          "keyword": "report",
+          "action": "Find open report issues"
+        },
+        {
+          "keyword": "see",
+          "action": "Screenshot the reported page"
+        },
+        {
+          "keyword": "debug",
+          "action": "Console errors, network failures"
+        },
+        {
+          "keyword": "fix",
+          "action": "Edit minimum code needed"
+        },
+        {
+          "keyword": "build",
+          "action": "Verify no regressions"
+        },
+        {
+          "keyword": "push",
+          "action": "Commit + push to main"
+        }
+      ]
+    },
+    {
+      "id": "design-to-code",
+      "name": "Design to Code",
+      "description": "Figma to production",
+      "steps": [
+        {
+          "keyword": "figma",
+          "action": "Get design context"
+        },
+        {
+          "keyword": "component",
+          "action": "Create React component"
+        },
+        {
+          "keyword": "atom",
+          "action": "Compose primitives"
+        },
+        {
+          "keyword": "template",
+          "action": "Assemble layout"
+        },
+        {
+          "keyword": "block",
+          "action": "Add business logic"
+        }
+      ]
+    },
+    {
+      "id": "quality-gate",
+      "name": "Quality Gate",
+      "description": "Full audit before release",
+      "steps": [
+        {
+          "keyword": "test",
+          "action": "Run all tests"
+        },
+        {
+          "keyword": "security",
+          "action": "OWASP Top 10"
+        },
+        {
+          "keyword": "performance",
+          "action": "Core Web Vitals"
+        },
+        {
+          "keyword": "check",
+          "action": "Build + visual verify"
+        }
+      ]
+    },
+    {
+      "id": "clone-adapt",
+      "name": "Clone and Adapt",
+      "description": "Reuse existing work",
+      "steps": [
+        {
+          "keyword": "clone",
+          "action": "Fetch from source"
+        },
+        {
+          "keyword": "extend",
+          "action": "Adapt to project"
+        },
+        {
+          "keyword": "build",
+          "action": "Verify integration"
+        },
+        {
+          "keyword": "test",
+          "action": "Confirm behavior"
+        }
+      ]
+    }
+  ]
+}

@@ -72,25 +72,33 @@ Surface verbs available in any session. See `.claude/commands/<name>.md` (projec
 
 ## Vocabulary — keywords routed to agents
 
-Claude routes these to the right agent + MCP without a dedicated command.
+<!-- BEGIN vocabulary (generated) -->
+Claude routes these to the right skill + agent + MCP without a dedicated command. Registry: `.claude/vocabulary.json` (edit it, then `node .claude/scripts/generate-vocab.mjs`); browsable at kun.databayt.org/en/docs/keywords.
 
-**UI**: `table`, `form`, `modal`, `card`, `sidebar`, `header`, `footer`, `hero`, `navbar`, `menu`
-**Features**: `auth`, `dashboard`, `landing`, `checkout`, `settings`, `profile`, `admin`, `onboarding`
-**Animation**: `motion`, `animation`, `transition`, `gesture`, `scroll`
-**Quality dimensions** (17 niche keywords — see `.claude/agents/quality.md`):
+**The Pipeline** — idea to production in one word: `feature`, `idea`, `spec`, `schema`, `ready`, `code`, `wire`, `check`, `ship`, `watch`
+**Charm Work** — everyday practical magic: `dev`, `build`, `push`, `quick`, `deploy`, `ship`, `check`, `release`
+**Transfiguration** — creating something from nothing: `component`, `page`, `api`, `atom`, `template`, `block`, `feature`, `migration`
+**Ancient Runes** — the foundational frameworks: `nextjs`, `react`, `typescript`, `prisma`, `tailwind`, `shadcn`
+**Conjuration** — summoning ui elements: `table`, `header`, `menu`, `form`, `modal`, `card`, `sidebar`, `footer`, `hero`, `navbar`
+**The Dark Arts of Features** — n.e.w.t.-level system enchantments: `auth`, `saas`, `dashboard`, `landing`, `checkout`, `settings`, `profile`, `admin`, `onboarding`
+**Animation Charms** — giving life to stillness: `motion`, `animation`, `transition`, `gesture`, `scroll`
+**Defense Against the Dark Arts** — protection from bugs and entropy: `test`, `e2e`, `handover`, `coverage`, `review`, `security`, `audit`, `analyze`, `constitution`, `accessibility`, `optimize`, `performance`
+**Reparo** — the mending spells: `fix`, `error`, `scan`, `lint`, `format`, `type-check`, `report`
+**Quill Charms** — the spells of documentation: `docs`, `readme`, `api-docs`, `storybook`, `changelog`
+**Geminio** — duplication and summoning: `clone`, `copy`, `fork`, `extend`, `sync`, `upstream`
+**Summoning Charms** — portals to external realms: `github`, `figma`, `linear`, `slack`, `notion`, `sentry`, `stripe`, `vercel`, `analytics`, `neon`
+**Divination** — seeing ahead: `bmad`, `flow`, `plan`, `architect`, `implement`, `story`, `cycle`, `loop`
+**Advanced Spellwork** — performance magic: `parallelize`, `waterfall`, `bundle`, `lazy`, `suspense`, `memo`, `server-component`, `streaming`, `barrel`, `dedup`
+**Portkeys** — teleportation to other repos: `from codebase`, `from shadcn`, `from radix`, `like hogwarts`, `like souq`, `like mkan`, `like shifa`, `like sijillee`, `like moallimee`
+**The Unforgivable Commands** — forbidden by the engine: `rm -rf *`, `prisma migrate reset`, `prisma db push --accept-data-loss`, `DROP TABLE`, `git push --force main`
+**The Auror Office** — one keyword, one quality dimension: `see`, `flow`, `debug`, `responsive`, `lang`, `fast`, `guard`, `architecture`, `structure`, `pattern`, `design`, `stack`, `trace`, `efficient`, `mirror`, `diff`
+**The Ministry of Magic** — operations and intelligence: `weekly`, `monitor`, `incident`, `credentials`, `health`, `learn`, `conventions`, `patterns`, `drift`
+**The Pensieve** — judgment and conversion: `canon`, `convert`
+<!-- END vocabulary (generated) -->
 
-- Browser: `see`, `flow`, `debug`, `responsive`, `lang`, `fast`
-- Code: `guard`, `architecture`, `structure`, `pattern`, `design`, `stack`
-- Deep: `trace`, `performance`, `efficient`
-- Compare: `mirror`, `diff`
-  **Build**: `error`, `lint`, `format`, `type-check`, `deps`, `outdated`
-  **React perf**: `parallelize`, `bundle`, `lazy`, `suspense`, `memo`, `streaming`, `dedup`
-  **Services**: `github`, `figma`, `linear`, `slack`, `stripe`, `vercel`, `sentry`, `neon`, `analytics`, `markitdown` (aliases `convert`/`markdown` → file or URL to Markdown)
-  **Cross-repo**: `from codebase`, `from shadcn`, `like hogwarts`, `like souq`, `like mkan`, `like shifa`, `like sijillee`, `like moallimee` (last two: repo pending — CRM + catalog only)
-  **Operations**: `weekly`, `monitor`, `incident`, `credentials`
-  **Intelligence**: `learn`, `analyze`, `conventions`, `health`, `patterns`, `drift`, `sync` (→ `/sync` — Anthropic/stack/services/practice releases)
-  **Decisions/CEO** (passive — no slash): `canon` + any leadership/strategy decision (`hiring`, `pricing`, `positioning`, `strategy`, `prioritize`, `fundraise`, `runway`, `customer development`, "should we build…", "what do I do about…") → consult `docs/CANON.md`, surface the book + one operating move grounded in principle `#N`
-  **Blocks** (passive, per-repo): every feature block in the repo's `.claude/blocks.json` is a keyword (hogwarts: `timetable`, `attendance`, `exams`, `grades`, `admission`, `finance`, `table`, `docs`, … 72 keys) → **block protocol**: before work, read the block's `README.md` + `ISSUE.md` + `CLAUDE.md` and the related GitHub issue (skip for quick small tasks); after work, update those records + `content/docs-*/<block>.mdx` and comment/close the issue. Hook-enforced: `block-context` (prompt inject), `block-touch` + `block-guard` (Stop nudge when 2+ code files change without record/docs updates). Regenerate registry: `node .claude/scripts/generate-blocks.mjs <repo-root>` (canonical hook copies in `.claude/scripts/hooks/`, installed at `~/.claude/hooks/`).
+**Quality dimensions** route through `.claude/agents/quality.md`; `/handover` orchestrates all of them on a URL or block.
+**Decisions/CEO** (passive — no slash): `canon` + any leadership/strategy decision (`hiring`, `pricing`, `positioning`, `strategy`, `prioritize`, `fundraise`, `runway`, `customer development`, "should we build…", "what do I do about…") → consult `docs/CANON.md`, surface the book + one operating move grounded in principle `#N`
+**Blocks** (passive, per-repo): every feature block in the repo's `.claude/blocks.json` is a keyword (hogwarts: `timetable`, `attendance`, `exams`, `grades`, `admission`, `finance`, `table`, `docs`, … 72 keys) → **block protocol**: before work, read the block's `README.md` + `ISSUE.md` + `CLAUDE.md` and the related GitHub issue (skip for quick small tasks); after work, update those records + `content/docs-*/<block>.mdx` and comment/close the issue. Hook-enforced: `block-context` (prompt inject), `block-touch` + `block-guard` (Stop nudge when 2+ code files change without record/docs updates). Regenerate registry: `node .claude/scripts/generate-blocks.mjs <repo-root>` (canonical hook copies in `.claude/scripts/hooks/`, installed at `~/.claude/hooks/`).
 
 ---
 

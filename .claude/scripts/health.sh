@@ -159,6 +159,13 @@ if [ -f "$ENGINE_JSON" ] && command -v jq &> /dev/null; then
             check warn "plugin parity" "plugins drifted — run build-plugin.sh"
         fi
     fi
+    if [ -f "$KUN_ROOT/.claude/scripts/generate-vocab.mjs" ] && command -v node &> /dev/null; then
+        if node "$KUN_ROOT/.claude/scripts/generate-vocab.mjs" --check >/dev/null 2>&1; then
+            check pass "vocabulary" "registry ↔ CLAUDE.md ↔ spellbook in sync"
+        else
+            check warn "vocabulary" "drift or dangling targets — run generate-vocab.mjs"
+        fi
+    fi
 fi
 
 # ── Build status line ────────────────────────────────────────────

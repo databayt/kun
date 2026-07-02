@@ -1,11 +1,10 @@
+// GENERATED FILE — DO NOT EDIT.
+// Source of truth: .claude/vocabulary.json
+// Regenerate: node .claude/scripts/generate-vocab.mjs   (health.sh flags drift)
+
 // Types
 export type OrderType =
-  | "familiar"
-  | "portal"
-  | "skill"
-  | "hook"
-  | "ward"
-  | "memory";
+  "familiar" | "portal" | "skill" | "hook" | "ward" | "memory";
 
 export interface OrderItem {
   type: OrderType;
@@ -591,7 +590,7 @@ export const schools: School[] = [
       {
         name: "nextjs",
         effect: "Apply Next.js 16 patterns — App Router, Server Components",
-        order: [f("nextjs"), f("react"), f("middleware"), s("/nextjs")],
+        order: [f("nextjs"), f("react"), f("middleware"), f("nextjs")],
         steps: [
           "Async params/searchParams",
           "Server Components by default",
@@ -1939,6 +1938,34 @@ export const schools: School[] = [
         connects: ["like mkan", "like hogwarts"],
         depends: [],
       },
+      {
+        name: "like sijillee",
+        effect:
+          "Sijillee — repo pending; context lives in the CRM workspace + catalog only",
+        order: [m("memory/repositories.json")],
+        steps: [
+          "Read the sijillee entry in memory/repositories.json",
+          "No GitHub repo yet — skip clone and code search",
+          "Pull product context from the CRM workspace + catalog",
+          "Borrow the nearest patterns from hogwarts until the repo lands",
+        ],
+        connects: ["like moallimee", "like hogwarts"],
+        depends: [],
+      },
+      {
+        name: "like moallimee",
+        effect:
+          "Moallimee — repo pending; context lives in the CRM workspace + catalog only",
+        order: [m("memory/repositories.json")],
+        steps: [
+          "Read the moallimee entry in memory/repositories.json",
+          "No GitHub repo yet — skip clone and code search",
+          "Pull product context from the CRM workspace + catalog",
+          "Borrow the nearest patterns from hogwarts until the repo lands",
+        ],
+        connects: ["like sijillee", "like hogwarts"],
+        depends: [],
+      },
     ],
   },
   {
@@ -1994,6 +2021,414 @@ export const schools: School[] = [
           "Overwrites upstream work",
         ],
         connects: [],
+        depends: [],
+      },
+    ],
+  },
+  {
+    id: "auror-office",
+    number: "16",
+    name: "The Auror Office",
+    subtitle: "One keyword, one quality dimension",
+    description:
+      "The niche inspectors. Each spell checks exactly one dimension of quality — six through the browser, six through the code, two deep, two comparative. The quality familiar routes them all; handover casts them together.",
+    quote: "handover /admission/new — twelve inspections, one verdict table.",
+    spells: [
+      {
+        name: "see",
+        effect: "Visual check — page loads, layout holds, content renders",
+        order: [f("quality"), p("Browser")],
+        steps: [
+          "Navigate to the URL and screenshot",
+          "Verify the page loads — no blank or broken sections",
+          "Check layout, spacing, and content render as intended",
+          "Verdict: PASS / WARN / FAIL with what to fix",
+        ],
+        connects: ["responsive", "mirror", "handover"],
+        depends: [],
+      },
+      {
+        name: "flow",
+        effect:
+          "Interactive check — click, type, submit through the user journey",
+        order: [f("quality"), p("Browser")],
+        steps: [
+          "Walk the journey — click, type, submit",
+          "Verify navigation and form submissions land",
+          "Confirm success and error states surface",
+          "Verdict names the exact step that broke",
+        ],
+        connects: ["debug", "see", "handover"],
+        depends: [],
+      },
+      {
+        name: "debug",
+        effect: "Error check — console, network, uncaught exceptions",
+        order: [f("quality"), p("Browser")],
+        steps: [
+          "Open the route via the browser MCP",
+          "Collect console errors and warnings",
+          "Inspect network requests for failures",
+          "Report zero-error PASS or list each exception with its source",
+        ],
+        connects: ["flow", "handover"],
+        depends: [],
+      },
+      {
+        name: "responsive",
+        effect: "Layout check at mobile 375, tablet 768, desktop 1440",
+        order: [f("quality"), p("Browser")],
+        steps: [
+          "Resize to 375, 768, and 1440",
+          "Screenshot each breakpoint",
+          "Check overflow, wrapping, and contested space",
+          "Verdict per breakpoint",
+        ],
+        connects: ["see", "handover"],
+        depends: [],
+      },
+      {
+        name: "lang",
+        effect: "Language check — RTL, LTR, translation completeness",
+        order: [f("quality"), p("Browser")],
+        steps: [
+          "Load the route in both ar and en locales",
+          "Check RTL mirroring — direction, logical properties",
+          "Scan for hardcoded strings missing from dictionaries",
+          "List every untranslated string in the verdict",
+        ],
+        connects: ["see", "handover"],
+        depends: [],
+      },
+      {
+        name: "fast",
+        effect: "Speed check — quick Core Web Vitals health",
+        order: [f("quality"), p("Browser")],
+        steps: [
+          "Load the page and sample Core Web Vitals",
+          "Check LCP, CLS, INP against budget",
+          "Flag oversized payloads and blocking requests",
+          "PASS, or hand the deep work to trace",
+        ],
+        connects: ["trace", "handover"],
+        depends: [],
+      },
+      {
+        name: "guard",
+        effect: "Security check — auth, validation, tenant scope",
+        order: [
+          f("quality"),
+          w("rules/authjs"),
+          w("rules/prisma-6"),
+          w("rules/s3"),
+        ],
+        steps: [
+          "Read the route's layout, actions, and queries",
+          "Verify auth guard at the boundary + per-action authz",
+          "Verify Zod validation and tenant scoping on every query",
+          "Check S3 access uses presigned URLs via CloudFront",
+          "Cite each finding as rule-id (severity)",
+        ],
+        connects: ["stack", "handover"],
+        depends: [],
+      },
+      {
+        name: "architecture",
+        effect: "Architecture check — mirror pattern, boundaries, data flow",
+        order: [f("quality"), w("rules/next-16")],
+        steps: [
+          "Trace the route's data flow from page to query",
+          "Verify mirror pattern and server/client boundaries",
+          "Hunt sequential fetch waterfalls",
+          "Cite each finding as rule-id (severity)",
+        ],
+        connects: ["structure", "pattern", "handover"],
+        depends: [],
+      },
+      {
+        name: "structure",
+        effect: "File check — naming, directory, placement",
+        order: [f("quality")],
+        steps: [
+          "Map the block's files against the mirror-pattern layout",
+          "Check naming conventions and directory placement",
+          "Flag each misplaced or misnamed file with its correct location",
+        ],
+        connects: ["architecture", "handover"],
+        depends: [],
+      },
+      {
+        name: "pattern",
+        effect:
+          "Convention check — page, actions, form against the canonical cards",
+        order: [f("quality"), w("rules/next-16"), w("rules/react-19")],
+        steps: [
+          "Load the matching pattern cards",
+          "Compare page, actions, and form to the canonical triplet",
+          "Check revalidatePath/revalidateTag after every write",
+          "Cite drift as rule-id (severity)",
+        ],
+        connects: ["design", "architecture", "handover"],
+        depends: [],
+      },
+      {
+        name: "design",
+        effect:
+          "Component check — ui/atom/template hierarchy and token discipline",
+        order: [f("quality"), w("rules/tailwind-v4")],
+        steps: [
+          "Check ui/atom/template hierarchy usage",
+          "Verify tokens — OKLCH colors, no hardcoded values",
+          "Verify logical properties for RTL",
+          "Cite each finding as rule-id (severity)",
+        ],
+        connects: ["pattern", "handover"],
+        depends: [],
+      },
+      {
+        name: "stack",
+        effect:
+          "Technology check — versions, imports, deprecated APIs across every rule domain",
+        order: [
+          f("quality"),
+          w("rules/react-19"),
+          w("rules/next-16"),
+          w("rules/typescript-strict"),
+          w("rules/tailwind-v4"),
+          w("rules/prisma-6"),
+          w("rules/authjs"),
+          w("rules/neon"),
+          w("rules/s3"),
+        ],
+        steps: [
+          "Scan imports for deprecated APIs and wrong versions",
+          "Check React 19 / Next 16 / Prisma 6 / Tailwind 4 idioms",
+          "Sweep all eight rule domains",
+          "Cite each hit as rule-id (severity)",
+        ],
+        connects: ["guard", "handover"],
+        depends: [],
+      },
+      {
+        name: "trace",
+        effect:
+          "Deep performance investigation — find the bottleneck and fix it",
+        order: [f("quality"), p("Browser")],
+        steps: [
+          "Record a performance trace on the slow route",
+          "Isolate the bottleneck — query, waterfall, bundle, or render",
+          "Fix it",
+          "Re-trace to prove the gain",
+        ],
+        connects: ["fast", "efficient", "handover"],
+        depends: [],
+      },
+      {
+        name: "efficient",
+        effect: "Code efficiency — cut duplicate work and reduce API calls",
+        order: [f("quality")],
+        steps: [
+          "Count API calls and queries per interaction",
+          "Find duplicate fetches and overfetching",
+          "Propose the reduction — dedup, batch, select, cache",
+        ],
+        connects: ["trace", "handover"],
+        depends: [],
+      },
+      {
+        name: "mirror",
+        effect: "Compare Figma design against the live implementation",
+        order: [f("quality"), p("Figma"), p("Browser")],
+        steps: [
+          "Pull the Figma frame — screenshot + design context",
+          "Screenshot the implementation at the same size",
+          "Diff spacing, type, color, and structure",
+          "Report each divergence — a human judges intent",
+        ],
+        connects: ["diff", "see", "handover"],
+        depends: [],
+      },
+      {
+        name: "diff",
+        effect: "Compare URL against URL — visual divergence report",
+        order: [f("quality"), p("Browser")],
+        steps: [
+          "Screenshot both URLs at the same breakpoints",
+          "Diff layout, spacing, color, and copy",
+          "Report each divergence side by side",
+        ],
+        connects: ["mirror", "handover"],
+        depends: [],
+      },
+    ],
+  },
+  {
+    id: "ministry",
+    number: "17",
+    name: "The Ministry of Magic",
+    subtitle: "Operations and intelligence",
+    description:
+      "The spells that keep the company running and learning — weekly cadence, production watch, incident response, credential vaults, and the intelligence that extracts the org's own patterns from its history.",
+    quote:
+      "monitor watches production while weekly plans the week — the Ministry never sleeps.",
+    spells: [
+      {
+        name: "weekly",
+        effect:
+          "The captain's cadence — Monday plan, Wednesday check, Friday review",
+        order: [f("captain"), s("/weekly")],
+        steps: [
+          "Monday: allocate the week — people, priorities, value-at-stake",
+          "Wednesday: check progress against the plan",
+          "Friday: review, coach, rotate a canon principle",
+          "Archive the cycle",
+        ],
+        connects: ["health", "monitor", "canon"],
+        depends: [],
+      },
+      {
+        name: "monitor",
+        effect: "Deployments, costs, and uptime across every databayt product",
+        order: [f("ops"), p("Vercel"), s("/monitor")],
+        steps: [
+          "Check Vercel deployment status for all products",
+          "Sample production URLs for uptime",
+          "Sum API + infra spend against budget",
+          "Escalate anything red to incident",
+        ],
+        connects: ["incident", "weekly"],
+        depends: [],
+      },
+      {
+        name: "incident",
+        effect:
+          "Production incident response — classify, diagnose, fix, postmortem",
+        order: [f("ops"), p("Sentry"), s("/incident")],
+        steps: [
+          "Classify severity — P0 drop-everything to P3",
+          "Pull Sentry traces + Vercel logs to diagnose",
+          "Fix or roll back, verify recovery",
+          "Write the postmortem on a GitHub issue",
+        ],
+        connects: ["monitor", "report"],
+        depends: [],
+      },
+      {
+        name: "credentials",
+        effect:
+          "Databayt credentials — API keys via Keychain, web logins via Safari",
+        order: [p("Keychain"), s("/credentials")],
+        steps: [
+          "status: show which keys and passwords are configured",
+          "setup: store a new API key in the Keychain",
+          "login: drive Safari autofill for web services",
+          "export: surface a key for env wiring",
+        ],
+        connects: ["monitor"],
+        depends: [],
+      },
+      {
+        name: "health",
+        effect: "Config health across the team + engine drift check",
+        order: [s("/health")],
+        steps: [
+          "Run health.sh — MCP, hooks, skills, agents",
+          "Diff reality against engine.json counts and model refs",
+          "Warn on doc rot — drift is warn-only, never a gate",
+          "Report per-teammate config status",
+        ],
+        connects: ["drift", "weekly"],
+        depends: [],
+      },
+      {
+        name: "learn",
+        effect:
+          "Extract organizational patterns and conventions from repos + history",
+        order: [f("learn"), s("/learn")],
+        steps: [
+          "Scan git history across the databayt repos",
+          "Extract patterns, conventions, and team dynamics",
+          "Write findings to memory for reuse",
+          "Feed the conventions, patterns, and drift surfaces",
+        ],
+        connects: ["conventions", "patterns", "drift", "analyze"],
+        depends: [],
+      },
+      {
+        name: "conventions",
+        effect:
+          "Alias of learn — surface the org's coding conventions on demand",
+        order: [f("learn")],
+        steps: [
+          "Route to the learn surface",
+          "Filter for naming, structure, and style conventions",
+          "Answer with examples from real repos",
+        ],
+        connects: ["learn"],
+        depends: [],
+      },
+      {
+        name: "patterns",
+        effect:
+          "Alias of learn — list the recurring patterns across the org's repos",
+        order: [f("learn")],
+        steps: [
+          "Route to the learn surface",
+          "Rank patterns by adoption across repos",
+          "Point to the canonical card when one exists",
+        ],
+        connects: ["learn", "pattern"],
+        depends: [],
+      },
+      {
+        name: "drift",
+        effect:
+          "Alias of the learn/health surface — spot config and docs drifting from reality",
+        order: [f("learn")],
+        steps: [
+          "Route to the learn/health surface",
+          "Diff engine.json against repo reality and docs",
+          "List each drifted count, model ref, or stale doc",
+        ],
+        connects: ["learn", "health"],
+        depends: [],
+      },
+    ],
+  },
+  {
+    id: "pensieve",
+    number: "18",
+    name: "The Pensieve",
+    subtitle: "Judgment and conversion",
+    description:
+      "Dip into stored wisdom. canon pulls the right CEO book into a live decision — passively, mid-conversation; convert distills any file or URL into Markdown the engine can read.",
+    quote:
+      '"should we build it?" — the Pensieve surfaces The Lean Startup before you finish the sentence.',
+    spells: [
+      {
+        name: "canon",
+        effect:
+          "Surface the right book + one operating move for a business or leadership decision — passive, no slash needed",
+        order: [f("captain"), m("docs/CANON.md")],
+        steps: [
+          "Detect the decision type in natural conversation — hiring, pricing, positioning, runway, build-or-not",
+          "Map it via the retrieval index to one of the 10 books",
+          "Surface one book + one operating move, grounded in principle #N",
+          "Keep it brief; skip trivial or purely technical choices",
+        ],
+        connects: ["weekly"],
+        depends: [],
+      },
+      {
+        name: "convert",
+        effect: "File or URL to Markdown — PDF, Office, images, audio, web",
+        order: [p("MarkItDown"), s("/convert")],
+        steps: [
+          "Detect the source — local file or URL",
+          "Convert via the MarkItDown MCP",
+          "Return clean Markdown ready for docs or memory",
+        ],
+        connects: ["docs"],
         depends: [],
       },
     ],

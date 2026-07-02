@@ -1,5 +1,7 @@
 # The Standard Book of Spells
 
+> **Non-normative lore.** The LIVE keyword registry is `.claude/vocabulary.json` — edit it, then run `node .claude/scripts/generate-vocab.mjs` (regenerates the CLAUDE.md routing block + the site spellbook). Browse it at [kun.databayt.org/en/docs/keywords](https://kun.databayt.org/en/docs/keywords). This book is the themed narrative and may lag behind.
+
 > _"It does not do to dwell on documentation and forget to ship."_
 > — Albus Dumbledore, probably
 
