@@ -68,7 +68,7 @@ If denied, stop. The issue has the spec for later.
 
 ### Stage 2.5: PLAN — Architecture (optional)
 
-For non-trivial features, execute the `plan` workflow (`.claude/commands/plan.md`):
+For non-trivial features, execute the `plan` workflow (`.claude/skills/plan/SKILL.md`):
 
 1. Read the approved spec from the issue
 2. Delegate architecture judgment to `tech-lead` + `architecture`
@@ -78,7 +78,7 @@ Skip for trivial changes — note "trivial — skipping plan" on the issue.
 
 ### Stage 2.6: TASKS — Breakdown (optional)
 
-For non-trivial features, execute the `tasks` workflow (`.claude/commands/tasks.md`):
+For non-trivial features, execute the `tasks` workflow (`.claude/skills/tasks/SKILL.md`):
 
 1. Read the plan from the issue
 2. Decompose into dependency-ordered tasks mapped to stages

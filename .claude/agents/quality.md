@@ -14,10 +14,10 @@ handoff: [guardian, tech-lead, captain]
 
 Own the 17 niche quality keywords — each checks exactly one dimension. Compose them via two orchestrators:
 
-- **`/handover <url|block>`** — polymorphic UI verification (delegated to `.claude/commands/handover.md`):
+- **`/handover <url|block>`** — polymorphic UI verification (delegated to `.claude/skills/handover/SKILL.md`):
   - URL mode (`/handover /admission/new`) — run all 12 per-URL niche keywords on one URL
   - Block mode (`/handover admission`) — run the per-route niche subset (`debug`, `flow`, `responsive`, `lang`) on every route in the block
-- **`/release <block>`** — one-spell client handoff: handover → check → ship → watch → auto-comment the issue (delegated to `.claude/commands/release.md`)
+- **`/release <block>`** — one-spell client handoff: handover → check → ship → watch → auto-comment the issue (delegated to `.claude/skills/release/SKILL.md`)
 
 The bridge between automated checks and human judgment.
 
@@ -76,9 +76,9 @@ The bridge between automated checks and human judgment.
 | Keyword             | Composes                                                                                                                                                                      | Output                                                               |
 | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
 | `/handover <url>`   | All 12 per-URL niche keywords (browser 6 + code 6)                                                                                                                            | Verdict table, PASS/WARN/FAIL per keyword                            |
-| `/handover <block>` | Per-route niche subset (`debug`, `flow`, `responsive`, `lang`) for every route in the block — see `.claude/commands/handover.md`                                              | Markdown report with screenshots, BLOCKED / READY FOR DEMO verdict   |
-| `/qa <block>`       | Autonomous block QA: static gate → detect (browser×routes + code×source) → adversarial-verify → fix (tiers A+B) → persist → open signoff issue — see `.claude/commands/qa.md` | `qa-signoff` issue + `blocks.json[block].qa` + CLEAN/BLOCKED verdict |
-| `/release <block>`  | Full client handoff: handover → check → ship → watch → auto-comment the GitHub issue — see `.claude/commands/release.md`                                                      | Single consolidated report + issue comment + closed issue            |
+| `/handover <block>` | Per-route niche subset (`debug`, `flow`, `responsive`, `lang`) for every route in the block — see `.claude/skills/handover/SKILL.md`                                              | Markdown report with screenshots, BLOCKED / READY FOR DEMO verdict   |
+| `/qa <block>`       | Autonomous block QA: static gate → detect (browser×routes + code×source) → adversarial-verify → fix (tiers A+B) → persist → open signoff issue — see `.claude/skills/qa/SKILL.md` | `qa-signoff` issue + `blocks.json[block].qa` + CLEAN/BLOCKED verdict |
+| `/release <block>`  | Full client handoff: handover → check → ship → watch → auto-comment the GitHub issue — see `.claude/skills/release/SKILL.md`                                                      | Single consolidated report + issue comment + closed issue            |
 
 ## `/handover <url>` Output
 

@@ -95,7 +95,7 @@ Capture `$ISSUE_NUMBER` for Phase 6.
 
 ### Phase 3 — Stage 1: /handover
 
-Delegate to `.claude/commands/handover.md` in block mode:
+Delegate to `.claude/skills/handover/SKILL.md` in block mode:
 
 - Skip if sentinel says `handover.status == PASS` and `block` matches and `at` is within 10 min
 - Otherwise run `/handover <block>` against localhost:3000 (default) or `--env staging` if passed
@@ -105,7 +105,7 @@ Delegate to `.claude/commands/handover.md` in block mode:
 
 ### Phase 4 — Stage 2: /check
 
-Delegate to `.claude/commands/check.md`:
+Delegate to `.claude/skills/check/SKILL.md`:
 
 - Skip if sentinel says `check.status == PASS` and `at` is within 10 min
 - Otherwise run `/check` (inherits the auto-fix loop, max 5 attempts)
@@ -115,7 +115,7 @@ Delegate to `.claude/commands/check.md`:
 
 ### Phase 5 — Stage 3: /ship
 
-Delegate to `.claude/commands/ship.md`:
+Delegate to `.claude/skills/ship/SKILL.md`:
 
 - Run `/ship` (inherits the auto-fix retry loop, max 5)
 - Capture the production URL + commit SHA from the ship report
@@ -123,7 +123,7 @@ Delegate to `.claude/commands/ship.md`:
 
 ### Phase 6 — Stage 4: /watch
 
-Delegate to `.claude/commands/watch.md`:
+Delegate to `.claude/skills/watch/SKILL.md`:
 
 - Run `/watch <production-url>` with the URL from Stage 3
 - If `ISSUES FOUND` (console errors, network failures, smoke test fail): stop, do **not** auto-revert — surface for human judgment
