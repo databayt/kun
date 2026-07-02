@@ -17,6 +17,8 @@
 
 When you face the decision on the left, the book on the right has the move — surfaced automatically when that decision comes up (`/canon <keyword>` also works).
 
+> **The Drive outranks the books.** Cash flow first, break-even or bust (`CONSTITUTION.md`). When two book-moves point in different directions, the one closer to revenue wins — canon informs the argument; the Drive settles it.
+
 | When you're deciding…                                   | Go to                                   | Powers       |
 | ------------------------------------------------------- | --------------------------------------- | ------------ |
 | Who to hire / fire / who does what                      | 1. CEO Excellence · 5. High Output Mgmt | #2, #10, #11 |

@@ -3,6 +3,10 @@
 > Project-level overrides for the kun engine. User defaults live in `~/.claude/CLAUDE.md`
 > (Component Hierarchy, Reference Codebase, Imported Rules).
 
+## The Drive
+
+**Cash flow first. Break-even or bust.** This drive governs every decision and settles every argument — without it, we're gone, and so is the engine. When two options tie on the canon, the one closer to revenue wins. Metric: `docs/NORTH-STAR.md` (active paying schools); enforcement: the captain's argument protocol.
+
 ## Preferences
 
 - **Model**: `claude-opus-4-8` (Opus 4.8, 1M context) — fallbacks per `engine.json`
@@ -33,6 +37,7 @@ IDEA → SPEC (human gate) → [PLAN → TASKS] → SCHEMA → CODE → WIRE →
 ## Vocabulary — keywords routed to skills, agents, MCP
 
 <!-- BEGIN vocabulary (generated) -->
+
 Claude routes these to the right skill + agent + MCP without a dedicated command. Registry: `.claude/vocabulary.json` (edit it, then `node .claude/scripts/generate-vocab.mjs`); browsable at kun.databayt.org/en/docs/keywords.
 
 **The Pipeline** — idea to production in one word: `feature`, `idea`, `spec`, `schema`, `ready`, `code`, `wire`, `check`, `ship`, `watch`

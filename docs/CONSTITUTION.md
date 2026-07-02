@@ -4,6 +4,16 @@
 
 ---
 
+## The Drive — what governs everything
+
+**Cash flow first. Break-even or bust.**
+
+This drive governs every decision and settles every argument. Without it, we're gone — the mission, the model, the engine, all of it. It is not a value among values; it is the constraint the values operate inside. When the seven values below tie, the option closer to revenue wins. The metric it points at is the North Star (`NORTH-STAR.md`: active paying schools); the enforcement lives in the captain's argument protocol (step 0).
+
+The Drive does not mean "ship junk for money" — Quality over speed still governs _how_ we build. It means the _what_ and the _when_ answer to cash flow: the next thing built is the thing closest to a paying school.
+
+---
+
 ## Mission — why we exist
 
 **To make excellent school operations accessible to every Arabic-speaking community — built in the open, shared as an economy.**
@@ -12,9 +22,9 @@ We exist because:
 
 - **MENA schools are underserved by software.** Incumbents (Classera, Noon, Blackboard for the international tier) are either expensive, foreign-flavored, or closed. Public schools in Sudan, Yemen, Egypt, and rural Saudi rely on paper, WhatsApp, and Excel.
 - **Open source can win this market.** Schools want sovereignty over their data. SSPL + community contribution + transparent revenue is the model that no proprietary incumbent can copy without burning their existing business.
-- **The four of us can do this.** Six humans, forty agents, one engine. Quality over speed. Mission over survival.
+- **The seven of us can do this.** Seven humans, the agent fleet, one engine. Quality over speed — inside the Drive.
 
-Our pilot is **Hogwarts at King Fahad Schools** (Sudan) with Ahmed Baha. Our flagship product is **Hogwarts**. Our beachhead is **Sudan private schools**. Our adjacent products (Souq, Mkan, Shifa, Swift-app, Kun) compose into a portfolio that serves the same pattern: vertical SaaS for the Arabic-speaking community, owned by the community that uses it.
+Our pilot is **Hogwarts at King Fahad Schools** (Sudan) with Ahmed Baha. Our flagship product is **Hogwarts**. Our beachhead is **Sudan private schools**. Our adjacent products (Souq, Mkan, Shifa, Sijillee, Moallimee, the mobile apps, Kun) compose into a portfolio that serves the same pattern: vertical SaaS for the Arabic-speaking community, owned by the community that uses it.
 
 ---
 
@@ -39,7 +49,7 @@ Seven values, in priority order. Each value is a tie-breaker for the one below i
 
 ### 1. Quality over speed
 
-We build solid. We don't ship to hit a date — we ship when the work is honest. *"Don't care about starting slow, care about establishing real-world solutions."* This is the line in the captain agent and it stays.
+We build solid. We don't ship to hit a date — we ship when the work is honest. _"Don't care about starting slow, care about establishing real-world solutions."_ This is the line in the captain agent and it stays.
 
 When this conflicts with speed: speed loses.
 
@@ -49,11 +59,11 @@ Build in the open. Public repos. Public docs. Public roadmap. Public failures. S
 
 When this conflicts with closed: closed needs to defend itself in writing.
 
-### 3. Mission > Survival
+### 3. Break-even or bust
 
-We have 10 months of runway and $0 MRR. We are still in **building mode, not survival mode**. Every weekly review answers Paul Graham's question — *default alive or default dead?* — but the answer doesn't change what we build, it changes what we cut.
+The Drive, applied weekly. Every weekly review answers Paul Graham's question — _default alive or default dead?_ — and the answer decides what gets built next: the thing closest to a paying school. Runway is not a countdown to accept; it is the argument the Drive settles.
 
-When this conflicts with revenue urgency: we cut scope, not standards.
+When this conflicts with revenue urgency: we cut scope, not standards — but we cut.
 
 ### 4. Long games with long people
 
@@ -63,7 +73,7 @@ When this conflicts with short-term gain: we play the long game.
 
 ### 5. Empathy as discipline
 
-Bosworth — *empathy is the most important and underrated leadership skill.* Apply it three ways:
+Bosworth — _empathy is the most important and underrated leadership skill._ Apply it three ways:
 
 - **Customer empathy** — Why does Ahmed actually want Hogwarts? What is his real job-to-be-done?
 - **Teammate empathy** — Samia is blind and uses a screen reader. Sedon is part-time and in Saudi Arabia. Ali carries QA + sales + outreach (overload). These constraints shape the work; ignoring them is a leadership failure.
@@ -73,7 +83,7 @@ When this conflicts with efficiency: empathy wins.
 
 ### 6. Truth in writing
 
-Bezos / Stripe / GitLab — *if it's not written down, it didn't happen.* Decisions in journal entries. Plans in markdown. Customer interviews in transcripts. Weekly reviews archived. Memos > slides. Async > meeting.
+Bezos / Stripe / GitLab — _if it's not written down, it didn't happen._ Decisions in journal entries. Plans in markdown. Customer interviews in transcripts. Weekly reviews archived. Memos > slides. Async > meeting.
 
 When this conflicts with going faster verbally: write it down.
 

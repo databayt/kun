@@ -1,6 +1,7 @@
 # North Star
 
 > One metric. Every weekly review tracks it. Every quarterly OKR ladders up to it.
+> It serves **the Drive**: cash flow first, break-even or bust (`CONSTITUTION.md`, the governing article). The metric is how the Drive is measured; the Drive is why the metric matters.
 
 ---
 
@@ -32,14 +33,14 @@ Alternative metrics rejected:
 
 ## Targets
 
-| Horizon | Target | Why |
-|---|---|---|
-| **Today** (2026-05-12) | 0 | Ahmed Baha (King Fahad Schools) is pilot, not yet paying. |
-| **Q3 2026** (Sep) | 1 | King Fahad Schools converts. First paying school. |
-| **Q4 2026** (Dec) | 2 | Second school via Ali's outreach. |
-| **12 months** (May 2027) | 3 | "Default alive" boundary — 3 paying schools at $99-149/mo ≈ $300-450 MRR. Covers ~85% of burn. |
-| **24 months** (May 2028) | 10 | $1K-1.5K MRR. Profitable on burn. First hire trigger. |
-| **5 years** (2031) | 50 | $5-10K MRR. The vision target. |
+| Horizon                  | Target | Why                                                                                            |
+| ------------------------ | ------ | ---------------------------------------------------------------------------------------------- |
+| **Today** (2026-05-12)   | 0      | Ahmed Baha (King Fahad Schools) is pilot, not yet paying.                                      |
+| **Q3 2026** (Sep)        | 1      | King Fahad Schools converts. First paying school.                                              |
+| **Q4 2026** (Dec)        | 2      | Second school via Ali's outreach.                                                              |
+| **12 months** (May 2027) | 3      | "Default alive" boundary — 3 paying schools at $99-149/mo ≈ $300-450 MRR. Covers ~85% of burn. |
+| **24 months** (May 2028) | 10     | $1K-1.5K MRR. Profitable on burn. First hire trigger.                                          |
+| **5 years** (2031)       | 50     | $5-10K MRR. The vision target.                                                                 |
 
 These targets are gates, not goalposts. A miss triggers a review (premortem, pivot, persevere). A beat triggers an investment decision (where to deploy the slack).
 
@@ -59,6 +60,7 @@ These targets are gates, not goalposts. A miss triggers a review (premortem, piv
 It changes only at the annual strategy off-site (or in an exceptional `decisions/<date>-amend-north-star.md`). The metric is supposed to be uncomfortable; you don't change it just because the number is moving slowly.
 
 **Pre-conditions to change**:
+
 - Hogwarts hits 10+ paying schools AND
 - A second product (Souq, Mkan, Shifa) reaches Beta + first paying customer AND
 - The team decides Databayt is now a portfolio company, not a school-software company.
