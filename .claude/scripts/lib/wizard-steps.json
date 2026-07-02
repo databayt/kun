@@ -5,14 +5,21 @@
   "version": 1,
   "acts": {
     "act1_preflight": {
-      "description": "Gather inputs; only 4 dialogs — everything else is auto-detected or derived after auth",
+      "description": "Scan first (lib/agents.sh), then dialog ONLY what detection can't answer — usually 1-2 dialogs on a machine with any history, 5 on a bare one",
       "steps": [
+        {
+          "id": "scan",
+          "type": "auto",
+          "command": "agents_detect_all (lib/agents.sh)",
+          "note": "Detect-first: prints the system + agent scan table before anything installs; agents_detect_json feeds the auto-skips below"
+        },
         {
           "id": "hasGithub",
           "type": "choice",
           "prompt": "Do you have a GitHub account?",
           "options": ["Yes, I have one", "No, create one", "Skip"],
           "persistAs": "hasGithub",
+          "autoSkipWhen": "gh auth status succeeds",
           "note": "'No, create one' opens https://github.com/join"
         },
         {
@@ -21,14 +28,20 @@
           "prompt": "Have you accepted the databayt org invite?",
           "options": ["Yes", "Open invite page", "Skip — I'll handle later"],
           "persistAs": "hasDatabaytInvite",
+          "autoSkipWhen": "gh api user/memberships/orgs/databayt → active",
           "note": "Pre-flight check — Phase 3 fails fast if invite not accepted (gh api user/memberships/orgs/databayt)"
         },
         {
           "id": "hasAnthropic",
           "type": "choice",
           "prompt": "Anthropic — company account (HR shares credentials + sends OTP).",
-          "options": ["I have creds", "Open Claude login", "Skip — finish later"],
+          "options": [
+            "I have creds",
+            "Open Claude login",
+            "Skip — finish later"
+          ],
           "persistAs": "hasAnthropic",
+          "autoSkipWhen": "claude CLI installed AND ~/.claude.json exists (already signed in)",
           "note": "Company account — HR sends OTP via Slack/email. Install proceeds in parallel; teammate finishes sign-in (Claude Code first-run + mobile/Desktop) once OTP arrives. Act 3 manual finishing surfaces the sign-in dialog again at end."
         },
         {
@@ -37,7 +50,24 @@
           "prompt": "Where do you want databayt org repos saved?",
           "options": ["Home root (~/)", "~/databayt/", "Custom..."],
           "persistAs": "reposDir",
+          "autoSkipWhen": "~/kun and ~/hogwarts already exist at home root",
           "note": "Custom branch falls back to a text input asking for the absolute path"
+        },
+        {
+          "id": "agents",
+          "type": "multi-choice",
+          "prompt": "Which agents should this machine get?",
+          "options": [
+            "All agents",
+            "Claude Code",
+            "Claude Desktop",
+            "Antigravity CLI",
+            "opencode",
+            "OpenClaw (gateway)"
+          ],
+          "default": "All agents",
+          "persistAs": "agents",
+          "note": "Maps to --agents=all|code,desktop,agy,opencode,openclaw. Launchers: c/a/o/claw. opencode bypass is config-level (permission: allow); OpenClaw is an assistant gateway, not a coding CLI"
         }
       ],
       "removedAsOf2026_05_25": [
@@ -52,19 +82,34 @@
     "act2_silentBatch": {
       "description": "Run the 8-phase platform backend in --quiet/-Quiet mode",
       "backends": {
-        "mac": ".claude/scripts/onboarding-mac.sh [role] --quiet [--repos-dir <path>] [--hogwarts-dev]",
-        "linux": ".claude/scripts/onboarding-linux.sh [role] --quiet [--repos-dir <path>] [--hogwarts-dev]",
-        "windows": ".claude/scripts/onboarding-windows.ps1 [-Role <r>] -Quiet [-ReposDir <path>] [-HogwartsDev]"
+        "mac": ".claude/scripts/onboarding-mac.sh [role] --quiet --agents=<sel> [--repos-dir <path>] [--hogwarts-dev] [--detect-only] [--dry-run]",
+        "linux": ".claude/scripts/onboarding-linux.sh [role] --quiet --agents=<sel> [--repos-dir <path>] [--hogwarts-dev] [--detect-only] [--dry-run]",
+        "windows": ".claude/scripts/onboarding-windows.ps1 [-Role <r>] -Quiet [-Agents <sel>] [-ReposDir <path>] [-HogwartsDev]"
       },
       "phases": [
-        {"n": 1, "label": "System Foundation — build tools, git, Node 24, pnpm, gh CLI"},
-        {"n": 2, "label": "Applications — IDEs, Chrome"},
-        {"n": 3, "label": "GitHub — SSH key, gh auth, upload key, auto-set git identity from gh api user, verify databayt org membership + SSH push"},
-        {"n": 4, "label": "Clone Repositories — kun + (engineer: hogwarts, codebase, all org repos)"},
-        {"n": 5, "label": "Claude — Code CLI + Desktop (Mac/Win)"},
-        {"n": 6, "label": "Kun Engine — setup.sh + secrets.sh"},
-        {"n": 7, "label": "Hogwarts — pnpm install, prisma, seed, build (engineer only)"},
-        {"n": 8, "label": "Health Check"}
+        {
+          "n": 1,
+          "label": "System Foundation — build tools, git, Node 24, pnpm, gh CLI"
+        },
+        { "n": 2, "label": "Applications — IDEs, Chrome" },
+        {
+          "n": 3,
+          "label": "GitHub — SSH key, gh auth, upload key, auto-set git identity from gh api user, verify databayt org membership + SSH push"
+        },
+        {
+          "n": 4,
+          "label": "Clone Repositories — kun + (engineer: hogwarts, codebase, all org repos)"
+        },
+        {
+          "n": 5,
+          "label": "Agents — c/a/o/claw fleet per --agents selection (Claude Code + Desktop, Antigravity, opencode, OpenClaw)"
+        },
+        { "n": 6, "label": "Kun Engine — setup.sh + secrets.sh" },
+        {
+          "n": 7,
+          "label": "Hogwarts — pnpm install, prisma, seed, build (engineer only)"
+        },
+        { "n": 8, "label": "Health Check" }
       ],
       "progressMarker": "PROGRESS:N/8:label streamed on stderr — wrappers parse for notifications"
     },
@@ -114,6 +159,15 @@
           "gate": "Claude Desktop installed"
         },
         {
+          "id": "openclawDaemon",
+          "type": "dialog",
+          "prompt": "(Optional) OpenClaw daemon — interactive setup: openclaw onboard --install-daemon",
+          "buttons": ["Done — I ran it", "Skip"],
+          "gate": "openclaw installed AND openclaw selected in agents",
+          "persistAs": "openclawOnboarded",
+          "note": "Never run headless — OpenClaw's guided onboarding wires chat channels interactively"
+        },
+        {
           "id": "webstormPlugin",
           "type": "dialog",
           "prompt": "Install Claude Code plugin in WebStorm (optional)",
@@ -143,11 +197,13 @@
       "hasGithub": "0|1",
       "hasDatabaytInvite": "0|1",
       "hasAnthropic": "0|1",
+      "agents": "all | csv of code,desktop,agy,opencode,openclaw",
       "silentBatch": "done",
       "desktopSignedIn": "0|1",
       "computerUse": "0|1",
       "vsCodeExt": "0|1",
       "webstormPlugin": "0|1",
+      "openclawOnboarded": "0|1",
       "lastStep": "string",
       "timestamp": "ISO-8601"
     },

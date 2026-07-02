@@ -99,16 +99,39 @@ if [[ ! -f "$BACKEND" ]]; then
 fi
 
 # =============================================================================
-# ACT 1 — Pre-flight (auto-detect, dialog only what's missing)
+# ACT 1 — Pre-flight (scan first, dialog only what detection can't answer)
 # =============================================================================
 # Role is universal — every machine gets the full config, so we never ask.
 ROLE="engineer"
+
+# Scan — the agent fleet library answers most pre-flight questions without dialogs.
+# shellcheck disable=SC1090
+. "$HOME/kun/.claude/scripts/lib/agents.sh" 2>/dev/null || true
+if command -v agents_detect_all >/dev/null 2>&1; then
+    agents_detect_all || true
+fi
 
 # Resume from state file (only fields the wizard still surfaces)
 REPOS_DIR=$(state_get reposDir)
 HAS_GITHUB=$(state_get hasGithub)
 HAS_ANTHROPIC=$(state_get hasAnthropic)
 HOGWARTS_DEV=$(state_get hogwartsDev)   # set via --hogwarts-dev flag only; no dialog
+
+# Auto-skip: detection answers the account questions when it can.
+if [[ -z "$HAS_GITHUB" ]] && gh auth status >/dev/null 2>&1; then
+    state_set hasGithub "1"; HAS_GITHUB="1"
+fi
+if [[ -z "$(state_get hasDatabaytInvite)" ]] && \
+   [[ "$(gh api user/memberships/orgs/databayt --jq .state 2>/dev/null)" == "active" ]]; then
+    state_set hasDatabaytInvite "1"
+fi
+if [[ -z "$HAS_ANTHROPIC" ]] && command -v claude >/dev/null 2>&1 && [[ -f "$HOME/.claude.json" ]]; then
+    state_set hasAnthropic "1"; HAS_ANTHROPIC="1"
+fi
+if [[ -z "$REPOS_DIR" && -d "$HOME/kun" && -d "$HOME/hogwarts" ]]; then
+    # Repo layout already established at home root — don't re-ask.
+    state_set reposDir "$HOME"; REPOS_DIR="$HOME"
+fi
 
 # Accounts: confirm or guide creation
 if [[ -z "$HAS_GITHUB" ]]; then
@@ -163,6 +186,44 @@ if [[ -z "$REPOS_DIR" ]]; then
     state_set reposDir "$REPOS_DIR"
 fi
 
+# Agents: which lanes to install (multi-select; default = all).
+ask_agents() {
+    osascript 2>/dev/null <<'EOF'
+try
+    set opts to {"All agents", "Claude Code", "Claude Desktop", "Antigravity CLI", "opencode", "OpenClaw (gateway)"}
+    set r to choose from list opts with title "Databayt Setup" with prompt "Which agents should this machine get?
+
+- Claude Code: primary (c)
+- Claude Desktop: Chat/Cowork/Code tabs
+- Antigravity: secondary CLI (a)
+- opencode: tertiary CLI (o)
+- OpenClaw: optional chat-app gateway (claw)" default items {"All agents"} with multiple selections allowed
+    if r is false then return "All agents"
+    set AppleScript's text item delimiters to ","
+    return r as text
+on error
+    return "All agents"
+end try
+EOF
+}
+AGENTS_SEL=$(state_get agents)
+if [[ -z "$AGENTS_SEL" ]]; then
+    PICKED=$(ask_agents)
+    if [[ -z "$PICKED" || "$PICKED" == *"All agents"* ]]; then
+        AGENTS_SEL="all"
+    else
+        AGENTS_SEL=""
+        [[ "$PICKED" == *"Claude Code"* ]]      && AGENTS_SEL="$AGENTS_SEL,code"
+        [[ "$PICKED" == *"Claude Desktop"* ]]   && AGENTS_SEL="$AGENTS_SEL,desktop"
+        [[ "$PICKED" == *"Antigravity CLI"* ]]  && AGENTS_SEL="$AGENTS_SEL,agy"
+        [[ "$PICKED" == *"opencode"* ]]         && AGENTS_SEL="$AGENTS_SEL,opencode"
+        [[ "$PICKED" == *"OpenClaw"* ]]         && AGENTS_SEL="$AGENTS_SEL,openclaw"
+        AGENTS_SEL="${AGENTS_SEL#,}"
+        [[ -z "$AGENTS_SEL" ]] && AGENTS_SEL="all"
+    fi
+    state_set agents "$AGENTS_SEL"
+fi
+
 # =============================================================================
 # ACT 2 — Silent batch (in terminal; notifications on phase transitions)
 # =============================================================================
@@ -171,7 +232,7 @@ notify "Starting install..." "~15-20 minutes"
 # Backend gets: role (positional, universal), --quiet, plus opt-in flags.
 # No --name/--email passed — backend auto-derives git identity from gh api user
 # after Phase 3 auth. No GIST_ID passed — secrets pulled manually later.
-BACKEND_ARGS=("$ROLE" "--quiet")
+BACKEND_ARGS=("$ROLE" "--quiet" "--agents=${AGENTS_SEL:-all}")
 [[ -n "$REPOS_DIR" && "$REPOS_DIR" != "$HOME" ]] && BACKEND_ARGS+=("--repos-dir" "$REPOS_DIR")
 [[ "$HOGWARTS_DEV" == "1" ]] && BACKEND_ARGS+=("--hogwarts-dev")
 
@@ -251,7 +312,14 @@ if [[ -d "/Applications/WebStorm.app" ]] && [[ "$(state_get webstormPlugin)" != 
     [[ "$ANS" == "Done" ]] && state_set webstormPlugin "1"
 fi
 
-# 3e. Final health check
+# 3e. OpenClaw daemon onboarding (only if selected + installed; interactive by design)
+if command -v openclaw >/dev/null 2>&1 && [[ "$(state_get openclawOnboarded)" != "1" ]] && \
+   { [[ "$AGENTS_SEL" == "all" ]] || [[ ",$AGENTS_SEL," == *",openclaw,"* ]]; }; then
+    ANS=$(ask_choice "(Optional) OpenClaw is installed — it's an assistant GATEWAY (WhatsApp/Telegram/Slack), not a coding CLI.\n\nIts guided setup is interactive: run\n\n    openclaw onboard --install-daemon\n\nin a terminal when you want to wire channels. Skip if unsure." "Done — I ran it" "Skip")
+    [[ "$ANS" == "Done — I ran it" ]] && state_set openclawOnboarded "1"
+fi
+
+# 3f. Final health check
 notify "Verifying..." "Running health check"
 HEALTH_STATUS="(health.sh not found)"
 if [[ -f "$HOME/.claude/scripts/health.sh" ]]; then
@@ -261,8 +329,8 @@ fi
 # Final dialog
 FINAL_MSG="Setup complete!\n\n"
 FINAL_MSG+="Config health: $HEALTH_STATUS\n\n"
-FINAL_MSG+="Tools: git, node, pnpm, gh, vercel, claude, agy\n"
-FINAL_MSG+="Agents: 'c' = Claude Code (primary) · 'a' = Antigravity (secondary)\n"
+FINAL_MSG+="Tools: git, node, pnpm, gh, vercel\n"
+FINAL_MSG+="Agents: 'c' = Claude Code · 'a' = Antigravity · 'o' = opencode · 'claw' = OpenClaw\n"
 FINAL_MSG+="Repos: ~/kun, ~/hogwarts, ~/codebase, +org repos\n"
 FINAL_MSG+="Config: ~/.claude/ (agents, skills, MCP, hooks)\n\n"
 FINAL_MSG+="Next:\n"

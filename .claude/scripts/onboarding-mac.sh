@@ -5,12 +5,19 @@
 # Fresh Mac to fully working dev environment in one command.
 #
 # Usage:
-#   bash onboarding-mac.sh <role> [gist_id]
+#   bash onboarding-mac.sh <role> [gist_id] [flags]
+#
+# Flags:
+#   --agents=all|code,desktop,agy,opencode,openclaw   which agents to install (default all)
+#   --detect-only                                     print the scan table and exit
+#   --dry-run                                         print what would install and exit
+#   --quiet --repos-dir <p> --essentials-only --hogwarts-dev --name --email
 #
 # Examples:
-#   bash onboarding-mac.sh engineer abc123    # Full dev + secrets
-#   bash onboarding-mac.sh engineer           # Full dev, secrets later
-#   bash onboarding-mac.sh content            # Cowork-focused
+#   bash onboarding-mac.sh engineer abc123              # Full dev + secrets
+#   bash onboarding-mac.sh --detect-only                # Scan, change nothing
+#   bash onboarding-mac.sh --dry-run --agents=opencode,openclaw
+#   bash onboarding-mac.sh engineer --agents=code,desktop
 #
 # Roles:
 #   engineer — WebStorm, all repos, Claude Code CLI, hogwarts local dev
@@ -29,6 +36,7 @@ set -e
 # Parse args — positional <role> [gist_id] plus optional flags
 ROLE="" GIST_ID="" QUIET=0 GIT_NAME_ARG="" GIT_EMAIL_ARG=""
 ALL_REPOS=1 REPOS_DIR="$HOME" HOGWARTS_DEV=0
+AGENTS_SEL="all" DETECT_ONLY=0 DRY_RUN=0
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --quiet)            QUIET=1; shift ;;
@@ -37,6 +45,10 @@ while [[ $# -gt 0 ]]; do
         --repos-dir)        REPOS_DIR="$2"; shift 2 ;;
         --essentials-only)  ALL_REPOS=0; shift ;;
         --hogwarts-dev)     HOGWARTS_DEV=1; shift ;;
+        --agents=*)         AGENTS_SEL="${1#--agents=}"; shift ;;
+        --agents)           AGENTS_SEL="$2"; shift 2 ;;
+        --detect-only)      DETECT_ONLY=1; shift ;;
+        --dry-run)          DRY_RUN=1; shift ;;
         --*)                echo "Unknown flag: $1" >&2; exit 1 ;;
         *)
             if [[ -z "$ROLE" ]]; then ROLE="$1"
@@ -138,10 +150,33 @@ fi
 
 ERRORS=0
 
+# Agent fleet library — detection, alias block, opencode bypass config
+# shellcheck disable=SC1090
+. "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib/agents.sh"
+
 echo ""
 echo -e "${BD}Computer Onboarding — macOS${NC}"
-echo -e "Role: ${G}$ROLE${NC}"
-echo ""
+echo -e "Role: ${G}$ROLE${NC} · Agents: ${G}$AGENTS_SEL${NC}"
+
+# =============================================================================
+# PHASE 0: Scan — detect first, install only the delta
+# =============================================================================
+agents_detect_all
+
+if [[ "$DETECT_ONLY" == "1" ]]; then
+    exit 0
+fi
+if [[ "$DRY_RUN" == "1" ]]; then
+    echo -e "${BD}Dry run — a real run with --agents=$AGENTS_SEL would install:${NC}"
+    DELTA=$(agents_delta "$AGENTS_SEL")
+    if [[ -n "$DELTA" ]]; then
+        echo "$DELTA" | sed 's/^/  · /'
+    else
+        echo "  (nothing — the selected agents are already fully provisioned)"
+    fi
+    echo -e "${D}Plus the standard idempotent phases: system tools, apps, GitHub auth, repo clones, kun engine, health.${NC}"
+    exit 0
+fi
 
 # =============================================================================
 # PHASE 1: System Foundation
@@ -399,69 +434,89 @@ else
 fi
 
 # =============================================================================
-# PHASE 5: Claude Ecosystem
+# PHASE 5: Agents — Claude Code + Desktop, Antigravity, opencode, OpenClaw
 # =============================================================================
-step "5" "Claude + Antigravity — CLIs + Desktop"
+step "5" "Agents — the c/a/o/claw fleet (selected: $AGENTS_SEL)"
 
 # Claude Code CLI — native installer (auto-updates in background, per
 # code.claude.com/docs/en/setup). curl install.sh is idempotent: re-runs detect
 # existing install and just refresh.
-if ! command -v claude &>/dev/null; then
-    info "Installing Claude Code CLI..."
-    curl -fsSL https://claude.ai/install.sh | bash
-    export PATH="$HOME/.local/bin:$PATH"
-    if ! grep -q ".local/bin" "$HOME/.zshrc" 2>/dev/null; then
-        echo '' >> "$HOME/.zshrc"
-        echo '# Claude Code' >> "$HOME/.zshrc"
-        echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME/.zshrc"
+if agents_selected_contains "$AGENTS_SEL" code; then
+    if ! command -v claude &>/dev/null; then
+        info "Installing Claude Code CLI..."
+        curl -fsSL https://claude.ai/install.sh | bash
+        export PATH="$HOME/.local/bin:$PATH"
+        if ! grep -q ".local/bin" "$HOME/.zshrc" 2>/dev/null; then
+            echo '' >> "$HOME/.zshrc"
+            echo '# Claude Code' >> "$HOME/.zshrc"
+            echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME/.zshrc"
+        fi
+        pass "Claude Code CLI installed ($(claude --version 2>/dev/null | head -1))"
+    else
+        pass "Claude Code CLI ($(claude --version 2>/dev/null | head -1)) — auto-updates in background"
     fi
-    pass "Claude Code CLI installed ($(claude --version 2>/dev/null | head -1))"
 else
-    pass "Claude Code CLI ($(claude --version 2>/dev/null | head -1)) — auto-updates in background"
+    info "Claude Code skipped (not in --agents)"
 fi
 
 # Antigravity CLI — secondary agent (`agy`). Fallback when Claude Code is
 # unavailable + handles easy/cheap tasks (Gemini Flash). Native installer is
 # idempotent and lands in ~/.local/bin (already on PATH from the step above).
-if ! command -v agy >/dev/null 2>&1; then
-    info "Installing Antigravity CLI (secondary agent)..."
-    curl -fsSL https://antigravity.google/cli/install.sh | bash
-    export PATH="$HOME/.local/bin:$PATH"
-    if command -v agy >/dev/null 2>&1; then
-        pass "Antigravity CLI installed ($(agy --version 2>/dev/null | head -1))"
+if agents_selected_contains "$AGENTS_SEL" agy; then
+    if ! command -v agy >/dev/null 2>&1; then
+        info "Installing Antigravity CLI (secondary agent)..."
+        curl -fsSL https://antigravity.google/cli/install.sh | bash
+        export PATH="$HOME/.local/bin:$PATH"
+        if command -v agy >/dev/null 2>&1; then
+            pass "Antigravity CLI installed ($(agy --version 2>/dev/null | head -1))"
+        else
+            info "Antigravity CLI not ready (secondary agent — optional); re-run later or see docs/antigravity"
+        fi
     else
-        info "Antigravity CLI not ready (secondary agent — optional); re-run later or see docs/antigravity"
+        pass "Antigravity CLI ($(agy --version 2>/dev/null | head -1))"
     fi
-else
-    pass "Antigravity CLI ($(agy --version 2>/dev/null | head -1))"
+fi
+
+# opencode — tertiary agent. Its permission bypass is CONFIG-LEVEL (no
+# --dangerously-skip-permissions flag exists): we write "permission": "allow"
+# into ~/.config/opencode/opencode.json (merged, never clobbering other keys).
+if agents_selected_contains "$AGENTS_SEL" opencode; then
+    if ! command -v opencode >/dev/null 2>&1; then
+        info "Installing opencode (tertiary agent)..."
+        curl -fsSL https://opencode.ai/install | bash || info "opencode installer failed — optional lane, continuing"
+        export PATH="$HOME/.opencode/bin:$PATH"
+    fi
+    if command -v opencode >/dev/null 2>&1; then
+        agents_configure_opencode
+        pass "opencode ($(opencode --version 2>/dev/null | head -1)) · bypass = permission:allow in ~/.config/opencode/opencode.json"
+    fi
+fi
+
+# OpenClaw — OPTIONAL assistant gateway (WhatsApp/Telegram/Slack channels), not
+# a coding CLI. npm install only; the daemon onboarding is interactive by design
+# and never runs in quiet mode — finish later with: openclaw onboard --install-daemon
+if agents_selected_contains "$AGENTS_SEL" openclaw; then
+    if ! command -v openclaw >/dev/null 2>&1; then
+        npm_global_smart openclaw
+        info "OpenClaw daemon not started — interactive by design. Later: openclaw onboard --install-daemon"
+    else
+        pass "OpenClaw ($(openclaw --version 2>/dev/null | head -1))"
+    fi
 fi
 
 # Claude Desktop — install/upgrade/skip via brew_smart
-brew_smart claude --cask
+if agents_selected_contains "$AGENTS_SEL" desktop; then
+    brew_smart claude --cask
+fi
 
-# Launcher functions in shell rc (zsh default; bash if present):
-#   c → Claude Code (primary)   ·   a → Antigravity (secondary)
+# Launchers — one managed block in the shell rc (c / a / o / claw per selection).
+# Migrates the legacy function/alias lines; idempotent across re-runs.
 for RC in "$HOME/.zshrc" "$HOME/.bashrc"; do
     [[ ! -f "$RC" ]] && continue
-    # Drop the deprecated `cc` helper if an earlier run added it.
     grep -q "function cc " "$RC" 2>/dev/null && sed -i '' '/function cc /d' "$RC"
-    if ! grep -q "function c " "$RC" 2>/dev/null; then
-        cat >> "$RC" <<'CFUNC'
-
-# Claude Code (primary)
-function c { claude --dangerously-skip-permissions "$@"; }
-[ -f "$HOME/.claude/.env" ] && set -a && . "$HOME/.claude/.env" && set +a
-CFUNC
-    fi
-    if ! grep -q "function a " "$RC" 2>/dev/null; then
-        cat >> "$RC" <<'AFUNC'
-
-# Antigravity (secondary)
-function a { agy --dangerously-skip-permissions "$@"; }
-AFUNC
-    fi
 done
-pass "Shell helpers (c, a)"
+agents_write_alias_block "$AGENTS_SEL"
+pass "Shell launchers (managed block: c, a, o, claw per selection)"
 
 # Wire Claude Desktop MCP config to the same servers Claude Code uses
 # So Desktop's Chat/Cowork/Code tabs see the kun MCP fleet (shadcn, neon, github, etc.)
@@ -582,6 +637,8 @@ command -v pnpm &>/dev/null       && pass "pnpm"       || fail "pnpm"
 command -v gh &>/dev/null         && pass "gh"         || fail "gh"
 command -v claude &>/dev/null     && pass "claude"     || fail "claude"
 command -v agy &>/dev/null         && pass "agy (secondary)" || info "agy (secondary)"
+command -v opencode &>/dev/null    && pass "opencode (tertiary)" || info "opencode (tertiary)"
+command -v openclaw &>/dev/null    && pass "openclaw (gateway)"  || info "openclaw (gateway, optional)"
 
 # Auth
 [[ -f "$HOME/.ssh/id_ed25519" ]]  && pass "SSH key"    || fail "SSH key"
@@ -620,8 +677,11 @@ echo ""
 echo -e "${BD}Next steps:${NC}"
 echo "  1. Restart terminal (or: . ~/.zshrc)"
 echo "  2. Run 'claude' → log in with Anthropic account"
-echo "     Launchers: 'c' = Claude Code (primary) · 'a' = Antigravity (secondary)"
+echo "     Launchers: 'c' = Claude Code · 'a' = Antigravity · 'o' = opencode · 'claw' = OpenClaw gateway"
 echo "  3. Open Claude Desktop → sign in"
+if command -v openclaw &>/dev/null && [[ ! -f "$HOME/.openclaw/openclaw.json" ]]; then
+    echo "  •  OpenClaw daemon (optional): openclaw onboard --install-daemon"
+fi
 if [[ -z "$GIST_ID" ]]; then
     echo "  4. Load secrets when you have the gist ID:"
     echo "     bash ~/kun/.claude/scripts/secrets.sh <GIST_ID>"
