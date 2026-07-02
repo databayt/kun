@@ -1,53 +1,83 @@
 ---
-name: Clone (URL mirror)
-description: Mirror a live URL section's DOM + exact computed styles into the house stack (Next 16 / React 19 / Tailwind v4 / shadcn-ui), pixel-exact, RTL-ready. Deterministic Playwright capture; tiered-model Workflow for translate/reconcile/land.
-argument-hint: "<url> [section text] [--pick] [--devtools] [--into atom|template|block]"
-model: claude-opus-4-8
-allowed-tools:
-  [
-    "Bash(node *)",
-    "Bash(npx playwright *)",
-    "Bash(npm *)",
-    "Bash(pnpm *)",
-    "Bash(ls *)",
-    "Bash(cat *)",
-    "Bash(grep *)",
-    "Read",
-    "Write",
-    "Edit",
-    "Glob",
-    "Grep",
-    "Agent",
-    "Workflow",
-    "mcp__browser__*",
-    "mcp__browser-headed__*",
-    "mcp__chrome-devtools__*",
-    "mcp__shadcn__*",
-    "mcp__tailwind__*",
-  ]
+name: clone
+description: Clone a pattern/component from a source repo OR mirror a live URL section pixel-exact
+when_to_use: "Use when reproducing something that already exists somewhere else — a live site section to mirror pixel-exact into the house stack (url-mode: deterministic Playwright capture → tiered Workflow), a Figma frame to implement, or code to adapt from github:/shadcn:/codebase:/pattern: sources. Triggers on: clone <url>, clone this section, make ours look like <site>, clone the figma design, clone shadcn:<component>, pattern:<keyword>. Distinct from /atom or /template (net-new components) — clone always starts from an existing source."
+argument-hint: "<url|figma|github:|shadcn:|codebase:|pattern:> [section|target] [--pick] [--devtools] [--into atom|template|block]"
+model: opus
 ---
 
-# Clone — live-URL section mirror
+# Clone
+
+Polymorphic. Two families of source:
+
+- **Live URL** (any non-Figma `http(s)://`) → **url-mode**: deterministically capture a section's
+  DOM + exact computed styles and mirror it **pixel-exact** into the house stack. Replaces the
+  manual Inspect-and-rebuild loop. Playbook below.
+- **Source-to-code** (Figma / GitHub / shadcn / codebase / pattern) → adapt existing code/design.
+
+## Argument: $ARGUMENTS
+
+**Mode detection** (check `$1` in this order):
+
+1. `http(s)://` containing `figma.com` → Figma branch (below).
+2. any other `http(s)://` → **url-mode** playbook (below).
+3. `figma:` / `github:` / `shadcn:` / `codebase:` / `pattern:` / bare path → source branches.
+
+## Sources
+
+### Live URL (pixel-exact section mirror)
+
+```
+/clone https://stripe.com                      # full page → name a section
+/clone https://stripe.com "Pricing"            # target a section by heading/copy
+/clone https://stripe.com --pick               # click the section in a headed browser
+/clone https://linear.app "hero" --into atom   # land as an atom
+/clone https://app.example.com/dash --devtools # logged-in page via real Chrome
+```
+
+### Figma (pixel-perfect design-to-code)
+
+```
+/clone https://figma.com/design/abc/File?node-id=1-234
+/clone https://figma.com/design/abc/File?node-id=1-234 src/components/messaging/
+```
+
+### GitHub
+
+```
+/clone github:vercel/ai/examples/next-openai
+/clone github:shadcn-ui/ui/apps/www/components/ui/button
+```
+
+### shadcn Registry
+
+```
+/clone shadcn:button
+/clone shadcn:data-table
+```
+
+### Local Codebase
+
+```
+/clone codebase:src/components/atom/stat-card
+/clone codebase:src/registry/new-york/templates/hero-01
+```
+
+---
+
+## URL-mode playbook — live-URL section mirror
 
 Point at a live URL and faithfully reproduce a section in the house stack — **pixel-exact**.
-Replaces the manual "open Inspect, copy HTML + computed styles, rebuild by hand" loop with a
-deterministic capture + a tiered-model translate. The capture spends **zero model tokens**;
-only translate (Opus) and reconcile (Sonnet) cost reasoning.
+The capture spends **zero model tokens**; only translate (Opus) and reconcile (Sonnet) cost
+reasoning.
 
 > **Don't set `/effort max` for clone.** The Workflow already pins Opus·high on translate
 > (the only fidelity-critical phase) and Sonnet·medium/low on the rest. A session-wide `max`
 > just inflates the cost of the deterministic capture + orchestration glue — the exact tax this
 > design removes. Leave session effort at its default; the per-phase tiers do the right thing.
 
-This is the url-mode of `/clone`. (Source-mode — Figma/GitHub/shadcn/codebase — stays in the
-command.) Invoked when the argument is a non-Figma `http(s)://` URL.
-
-## Argument: $ARGUMENTS
-
 Parse: the URL; an optional **section name** (heading/copy text to target); flags `--pick`,
 `--devtools`, `--into atom|template|block`.
-
-## Process
 
 ### 1. Setup
 
@@ -117,11 +147,81 @@ Relay the Workflow result: final component path + level, build pass/fail, whethe
 breakpoints matched, exact-value class count, fonts substituted, any token equivalences worth
 adopting later, and any unresolved diffs. The `.clone/<slug>` snapshot stays as the scratch record.
 
+---
+
+## Source-mode branches
+
+### If source is a Figma URL (contains `figma.com`):
+
+1. **Parse URL** — Extract `fileKey` and `nodeId` from the Figma URL:
+   - `figma.com/design/:fileKey/:fileName?node-id=:nodeId` → convert `-` to `:` in nodeId
+   - `figma.com/design/:fileKey/branch/:branchKey/:fileName` → use branchKey as fileKey
+
+2. **Read design** — Call these tools in parallel:
+   - `mcp__claude_ai_Figma__get_design_context` with fileKey, nodeId, clientFrameworks="react,nextjs", clientLanguages="typescript,css"
+   - `mcp__claude_ai_Figma__get_screenshot` with fileKey, nodeId (visual reference)
+
+3. **Extract tokens** — If the design uses variables:
+   - `mcp__claude_ai_Figma__get_variable_defs` with fileKey, nodeId
+   - Map Figma tokens to project tokens:
+     - Colors → existing CSS variables (`--msg-*`, `--color-*`) or Tailwind tokens
+     - Spacing → Tailwind spacing scale (p-4, gap-2, etc.)
+     - Typography → project font variables (`--font-heading`, `--font-sans`)
+     - Border radius → Tailwind rounded scale
+
+4. **Check component mappings**:
+   - `mcp__claude_ai_Figma__get_code_connect_map` — resolve Figma components to existing codebase imports
+   - Prioritize: shadcn/ui primitives → atom compositions → new components
+
+5. **Generate code** at target path (or infer from design context):
+   - Use existing shadcn/ui primitives (Button, Avatar, Input, ScrollArea, Badge, etc.)
+   - Compose into atoms when 2+ primitives combine
+   - Tailwind CSS 4 classes with semantic tokens — NO hardcoded hex colors
+   - RTL-first: logical properties only (`ms`, `me`, `ps`, `pe`, `start`, `end`)
+   - Responsive: mobile-first breakpoints
+   - Adapt the Figma output to match project patterns (not raw copy)
+
+6. **Build check** — Run `pnpm build` to verify TypeScript compilation
+
+7. **Visual verify** — If dev server is running:
+   - Navigate browser to the page showing the component
+   - Take screenshot of implementation
+   - Compare side-by-side with Figma screenshot
+   - Identify pixel differences (spacing, colors, sizing, alignment)
+
+8. **Iterate** — Fix differences and repeat steps 7-8 until visually indistinguishable:
+   - Color mismatch → check token mapping
+   - Spacing mismatch → check Tailwind scale conversion
+   - Layout mismatch → check flex/grid structure
+   - Font mismatch → check font-family and weight
+
+### If source starts with `pattern:`:
+
+1. Read `.claude/patterns/registry.json`
+2. Look up the keyword (e.g., `pattern:form` → keyword `form`)
+3. Resolve to canonical repo + path (e.g., hogwarts → `src/components/form/`)
+4. Read the pattern card at `.claude/patterns/cards/{keyword}.md` for context
+5. Clone from the canonical local path: `/Users/abdout/{repo}/{path}`
+6. Adapt imports: replace canonical repo paths with current project paths
+7. Generalize tenant-specific code (e.g., `schoolId` → parameterized)
+8. Apply project conventions (shadcn/ui, RTL-first, Tailwind CSS 4)
+
+### If source is GitHub/shadcn/codebase:
+
+1. Fetch source code
+2. Analyze dependencies
+3. Adapt imports to local structure
+4. Apply project conventions (shadcn/ui, RTL-first, Tailwind CSS 4)
+5. Update registry if component
+
 ## Exit Gate
 
-`pnpm build` passes **and** reconcile reports all 3 breakpoints (375/768/1440) within tolerance.
+- **url-mode**: `pnpm build` passes **and** the reconcile phase reports all 3 breakpoints
+  (375 / 768 / 1440) within tolerance of the captured screenshots.
+- **source-mode**: `pnpm build` passes; for Figma, the implementation is visually
+  indistinguishable from the design screenshot.
 
-## Notes
+## Notes (url-mode)
 
 - **Port 3000 only** for the reconcile dev server — never switch ports.
 - **Pixel-exact** means arbitrary Tailwind values from `getComputedStyle`, not token-snapping.

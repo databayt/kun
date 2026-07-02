@@ -58,8 +58,8 @@
   "counts": {
     "project_agents": 19,
     "user_agents": 27,
-    "commands": 17,
-    "project_skills": 19,
+    "commands": 0,
+    "project_skills": 35,
     "user_skills": 23,
     "pattern_cards": 11,
     "project_rules": 3,

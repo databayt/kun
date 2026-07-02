@@ -59,11 +59,11 @@ fi
 
 # ── Directories ──────────────────────────────────────────────────
 AGENT_COUNT=$(ls "$CLAUDE_DIR/agents/"*.md 2>/dev/null | wc -l | tr -d ' ')
-CMD_COUNT=$(ls "$CLAUDE_DIR/commands/"*.md 2>/dev/null | wc -l | tr -d ' ')
+SKILL_COUNT=$(ls -d "$CLAUDE_DIR/skills/"*/ 2>/dev/null | wc -l | tr -d ' ')
 RULE_COUNT=$(ls "$CLAUDE_DIR/rules/"*.md 2>/dev/null | wc -l | tr -d ' ')
 
 [ "$AGENT_COUNT" -gt 0 ] && check pass "agents/" "$AGENT_COUNT files" || check fail "agents/" "empty"
-[ "$CMD_COUNT" -gt 0 ] && check pass "commands/" "$CMD_COUNT files" || check fail "commands/" "empty"
+[ "$SKILL_COUNT" -gt 0 ] && check pass "skills/" "$SKILL_COUNT dirs" || check fail "skills/" "empty"
 [ "$RULE_COUNT" -gt 0 ] && check pass "rules/" "$RULE_COUNT files" || check warn "rules/" "empty"
 [ -d "$CLAUDE_DIR/memory" ] && check pass "memory/" "exists" || check warn "memory/" "missing"
 
@@ -77,10 +77,13 @@ if [ -f "$CLAUDE_DIR/mcp.json" ]; then
         check warn "MCP servers" "$MCP_COUNT (expected ≥$EXPECTED)"
 fi
 
-# ── Expected commands (universal — full skill set on every machine) ──
-EXPECTED_CMDS=20
-[ "$CMD_COUNT" -ge "$EXPECTED_CMDS" ] && check pass "commands" "$CMD_COUNT (expected ≥$EXPECTED_CMDS)" || \
-    check warn "commands" "$CMD_COUNT (expected ≥$EXPECTED_CMDS)"
+# ── Expected skills (universal — full skill set on every machine; commands retired) ──
+EXPECTED_SKILLS=30
+[ "$SKILL_COUNT" -ge "$EXPECTED_SKILLS" ] && check pass "skills" "$SKILL_COUNT (expected ≥$EXPECTED_SKILLS)" || \
+    check warn "skills" "$SKILL_COUNT (expected ≥$EXPECTED_SKILLS)"
+LEFTOVER_CMDS=$(ls "$CLAUDE_DIR/commands/"*.md 2>/dev/null | wc -l | tr -d ' ')
+[ "$LEFTOVER_CMDS" = "0" ] && check pass "commands retired" "none left" || \
+    check warn "commands retired" "$LEFTOVER_CMDS stale file(s) in ~/.claude/commands — re-run setup.sh to prune"
 
 # ── Permissions ──────────────────────────────────────────────────
 if [ -f "$CLAUDE_DIR/settings.json" ]; then
@@ -125,19 +128,19 @@ KUN_ROOT="${KUN_ROOT:-$HOME/kun}"
 ENGINE_JSON="$KUN_ROOT/.claude/engine.json"
 if [ -f "$ENGINE_JSON" ] && command -v jq &> /dev/null; then
     EC_AGENTS=$(jq -r '.counts.project_agents' "$ENGINE_JSON")
-    EC_CMDS=$(jq -r '.counts.commands' "$ENGINE_JSON")
+    EC_SKILLS=$(jq -r '.counts.project_skills' "$ENGINE_JSON")
     EC_CARDS=$(jq -r '.counts.pattern_cards' "$ENGINE_JSON")
     EC_RULES=$(jq -r '.counts.project_rules' "$ENGINE_JSON")
     EC_DOMAIN_RULES=$(jq -r '.counts.domain_rules' "$ENGINE_JSON")
     EC_MCP=$(jq -r '.counts.project_mcp' "$ENGINE_JSON")
     ER_AGENTS=$(find "$KUN_ROOT/.claude/agents" -maxdepth 1 -name '*.md' ! -name '_index*' 2>/dev/null | wc -l | tr -d ' ')
-    ER_CMDS=$(find "$KUN_ROOT/.claude/commands" -maxdepth 1 -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
+    ER_SKILLS=$(find "$KUN_ROOT/.claude/skills" -mindepth 2 -maxdepth 2 -name 'SKILL.md' 2>/dev/null | wc -l | tr -d ' ')
     ER_CARDS=$(find "$KUN_ROOT/.claude/patterns/cards" -maxdepth 1 -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
     ER_RULES=$(find "$KUN_ROOT/.claude/rules" -maxdepth 1 -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
     ER_DOMAIN_RULES=$(find "$KUN_ROOT/.claude/rules" -mindepth 2 -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
     ER_MCP=$(jq '.mcpServers | length' "$KUN_ROOT/.claude/mcp.json" 2>/dev/null || echo "?")
     [ "$EC_AGENTS" = "$ER_AGENTS" ] && check pass "engine agents" "$ER_AGENTS" || check warn "engine agents" "engine.json=$EC_AGENTS actual=$ER_AGENTS"
-    [ "$EC_CMDS" = "$ER_CMDS" ] && check pass "engine commands" "$ER_CMDS" || check warn "engine commands" "engine.json=$EC_CMDS actual=$ER_CMDS"
+    [ "$EC_SKILLS" = "$ER_SKILLS" ] && check pass "engine skills" "$ER_SKILLS" || check warn "engine skills" "engine.json=$EC_SKILLS actual=$ER_SKILLS"
     [ "$EC_CARDS" = "$ER_CARDS" ] && check pass "engine cards" "$ER_CARDS" || check warn "engine cards" "engine.json=$EC_CARDS actual=$ER_CARDS"
     [ "$EC_RULES" = "$ER_RULES" ] && check pass "engine rules" "$ER_RULES" || check warn "engine rules" "engine.json=$EC_RULES actual=$ER_RULES"
     [ "$EC_DOMAIN_RULES" = "$ER_DOMAIN_RULES" ] && check pass "engine domain-rules" "$ER_DOMAIN_RULES" || check warn "engine domain-rules" "engine.json=$EC_DOMAIN_RULES actual=$ER_DOMAIN_RULES"

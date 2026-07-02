@@ -23,7 +23,7 @@ if [[ -z "$ROLE" ]]; then
     echo "Usage: bash .claude/scripts/setup.sh <role>"
     echo ""
     echo "Roles:"
-    echo "  engineer  — full agent fleet, all MCPs, all commands, hooks"
+    echo "  engineer  — full agent fleet, all MCPs, all skills, hooks"
     echo "  business  — Cowork, Stripe, proposals, client workflows"
     echo "  content   — Cowork, translation, content calendar, Figma"
     echo "  ops       — monitoring, costs, incidents, Sentry, Vercel"
@@ -81,10 +81,18 @@ echo ""
 # key simply don't connect, so a full mcp.json is safe everywhere.
 echo -e "${B}Full config${NC}"
 
-# All commands
-cp "$KUN_DIR/.claude/commands/"*.md "$CLAUDE_DIR/commands/" 2>/dev/null || true
-CMD_COUNT=$(ls "$CLAUDE_DIR/commands/"*.md 2>/dev/null | wc -l | tr -d ' ')
-info "commands ($CMD_COUNT)"
+# Commands are retired — kun verbs are skills now (a same-named skill shadows a
+# command anyway). Prune stale ~/.claude/commands copies of migrated names.
+PRUNED=0
+for stale in "$CLAUDE_DIR/commands/"*.md; do
+    [ -e "$stale" ] || continue
+    base="$(basename "$stale" .md)"
+    if [ -f "$KUN_DIR/.claude/skills/$base/SKILL.md" ]; then
+        rm -f "$stale"
+        PRUNED=$((PRUNED + 1))
+    fi
+done
+[ "$PRUNED" -gt 0 ] && info "pruned $PRUNED shadowed command(s)"
 
 # All workflows (saved multi-agent scripts: handover.js, qa.js — resolved by Workflow({ name }))
 if [ -d "$KUN_DIR/.claude/workflows" ]; then
@@ -193,8 +201,8 @@ fi
 # Directories
 [ -d "$CLAUDE_DIR/agents" ] && [ "$(ls "$CLAUDE_DIR/agents/"*.md 2>/dev/null | wc -l)" -gt 0 ] && \
     pass "agents/ ($AGENT_COUNT files)" || fail "agents/ empty"
-[ -d "$CLAUDE_DIR/commands" ] && [ "$(ls "$CLAUDE_DIR/commands/"*.md 2>/dev/null | wc -l)" -gt 0 ] && \
-    pass "commands/ ($CMD_COUNT files)" || fail "commands/ empty"
+[ -d "$CLAUDE_DIR/skills" ] && [ "$(ls -d "$CLAUDE_DIR/skills/"*/ 2>/dev/null | wc -l)" -gt 0 ] && \
+    pass "skills/ ($SKILL_COUNT dirs)" || fail "skills/ empty"
 [ -d "$CLAUDE_DIR/rules" ] && pass "rules/" || fail "rules/ missing"
 [ -d "$CLAUDE_DIR/memory" ] && pass "memory/" || fail "memory/ missing"
 
