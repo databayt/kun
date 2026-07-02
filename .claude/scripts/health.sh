@@ -95,12 +95,41 @@ if [ -f "$CLAUDE_DIR/mcp.json" ]; then
     [[ "$PERM" == "600" ]] && check pass "mcp perms" "600" || check warn "mcp perms" "$PERM (should be 600)"
 fi
 
-# ── CLI ──────────────────────────────────────────────────────────
+# ── CLI + agent matrix ───────────────────────────────────────────
 if command -v claude &> /dev/null; then
     CLI_VERSION=$(claude --version 2>/dev/null | head -1 || echo "unknown")
     check pass "claude CLI" "$CLI_VERSION"
 else
     check fail "claude CLI" "not installed"
+fi
+
+# Agent fleet matrix (c/a/o/claw) — claude is required, the rest are lanes.
+AGENTS_LIB="$(dirname "${BASH_SOURCE[0]}")/lib/agents.sh"
+[ -f "$AGENTS_LIB" ] || AGENTS_LIB="$HOME/kun/.claude/scripts/lib/agents.sh"
+if [ -f "$AGENTS_LIB" ]; then
+    # shellcheck disable=SC1090
+    . "$AGENTS_LIB"
+    command -v agy &>/dev/null && check pass "agent: agy" "$(agy --version 2>/dev/null | head -1)" || check warn "agent: agy" "not installed (secondary lane)"
+    if command -v opencode &>/dev/null; then
+        if _ag_opencode_bypass; then
+            check pass "agent: opencode" "$(opencode --version 2>/dev/null | head -1) · permission: allow"
+        else
+            check warn "agent: opencode" "installed, bypass config not set (run onboarding or agents_configure_opencode)"
+        fi
+    else
+        check warn "agent: opencode" "not installed (tertiary lane)"
+    fi
+    command -v openclaw &>/dev/null && check pass "agent: openclaw" "$(openclaw --version 2>/dev/null | head -1) (gateway)" || check warn "agent: openclaw" "not installed (optional gateway)"
+    if _ag_alias_present c claude && _ag_alias_present a agy && _ag_alias_present o opencode && _ag_alias_present claw openclaw; then
+        check pass "agent aliases" "c a o claw"
+    else
+        MISSING_ALIASES=""
+        _ag_alias_present c claude || MISSING_ALIASES="$MISSING_ALIASES c"
+        _ag_alias_present a agy || MISSING_ALIASES="$MISSING_ALIASES a"
+        _ag_alias_present o opencode || MISSING_ALIASES="$MISSING_ALIASES o"
+        _ag_alias_present claw openclaw || MISSING_ALIASES="$MISSING_ALIASES claw"
+        check warn "agent aliases" "missing:$MISSING_ALIASES — onboarding writes the block"
+    fi
 fi
 
 # ── Staleness (CLAUDE.md age) ────────────────────────────────────
