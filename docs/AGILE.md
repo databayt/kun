@@ -10,7 +10,7 @@
 
 ### The 4+40 Principle
 
-Databayt is not a 4-person team. It is 4 humans + 40 AI agents. The humans are strategists — they decide what to build, verify quality, close deals, and handle the physical world. The agents are executors — they write code, run QA, generate reports, and facilitate ceremonies.
+Databayt is not a 7-person team. It is 7 humans + the AI agent fleet. The humans are strategists — they decide what to build, verify quality, close deals, and handle the physical world. The agents are executors — they write code, run QA, generate reports, and facilitate ceremonies.
 
 **Agile ceremonies exist for human coordination, not agent management.**
 

@@ -12,7 +12,7 @@ Kun is a **configuration engine** — not a server. It sits as the configuration
 ```
 Layer 5: Company Operations
   Cowork | Claude Apps | Enterprise Connectors
-  Ali (business) | Samia (content) | Team coordination
+  Business (Aseel, Moutaz, Moed) | Content (Samia) | Ops (Sedon)
 
 Layer 4: Coordination & Automation
   Agent Teams | Scheduled Tasks | CI/CD | Channels
@@ -34,9 +34,10 @@ Layer 1: Foundation (Anthropic-provided)
 | Member | Role |
 |--------|------|
 | **Abdout** | Founder & Tech Lead |
-| **Ibrahim** | Senior Fullstack Engineer |
-| **Ali** | QA Engineer + Sales |
-| **Mutaz** | Product Engineer (business) |
+| **Ibrahim** | Senior Fullstack & Mobile Engineer |
+| **Moutaz** | Product Engineer (business + sales + AI) |
+| **Ali Aseel** | QA + Sales |
+| **Moed** | Business Development + Copywriting |
 | **Samia** | R&D |
 | **Sedon** | Facilitator |
 
@@ -146,11 +147,12 @@ Shared state: `~/.claude/` (agents, memory, settings, rules). Same brain, two mo
 | Member | Role | Primary Workflows |
 |--------|------|-------------------|
 | **Abdout** | Founder & Tech Lead | dev → build → push → deploy |
-| **Ibrahim** | Senior Fullstack | feature build, code review, architecture |
-| **Ali** | QA + Sales | Testing, issue reports, outreach (sales@databayt.org) |
-| **Mutaz** | Product Engineer (business) | Specs, customer feedback, sales+onboarding alongside Ali |
-| **Samia** | R&D | Claude/Anthropic research, sharing economy |
-| **Sedon** | Facilitator | Facilitates business team (Ali + Mutaz), clears blockers |
+| **Ibrahim** | Senior Fullstack & Mobile | feature build, mobile lane, code review |
+| **Moutaz** | Product Engineer | Specs, Albayan pilot, customer feedback |
+| **Ali Aseel** | QA + Sales | Testing, issue reports, outreach (sales@databayt.org), CRM pipeline |
+| **Moed** | Business Development | Copywriting, networking, outbound with Aseel |
+| **Samia** | R&D | Claude/Anthropic research, sharing economy, voice-over |
+| **Sedon** | Facilitator | Facilitates business team, reality-checks, clears blockers |
 
 ### Hogwarts Pilot (King Fahad Schools)
 
@@ -163,7 +165,7 @@ Content:   Cowork → Arabic user guide → screenshots → voiceover
 ## Repository Map
 
 ```
-databayt/ (14 repos)
+databayt/ (17 repos)
 ├── Products
 │   ├── hogwarts     — Education SaaS (FLAGSHIP, daily commits)
 │   ├── mkan         — Rental marketplace (Phase 1 done)
@@ -203,7 +205,7 @@ databayt/ (14 repos)
 ### ADR-001: Configuration Over Infrastructure
 
 **Decision**: Use Anthropic's products as-is, configure don't build.
-**Rationale**: 4-person team can't maintain custom infrastructure alongside 5 products.
+**Rationale**: 7-person team can't maintain custom infrastructure alongside 5+ products.
 
 ### ADR-002: Opus Default
 

@@ -10,7 +10,7 @@
 
 ## Hiring philosophy
 
-1. **Talent density before headcount.** Reed Hastings — keep only those who pass the keeper test. We are 6 humans + 40 agents; a wrong hire is more costly than a missing one.
+1. **Talent density before headcount.** Reed Hastings — keep only those who pass the keeper test. We are 7 humans + the agent fleet; a wrong hire is more costly than a missing one.
 2. **MRR triggers, not calendar triggers.** Hire when revenue justifies it, not because "we should have grown by now."
 3. **First paid hire is part-time content/sales, not engineering.** Engineering is the founder's strength + Ibrahim. The bottleneck is customer development, not code.
 4. **Hire local before remote.** Sudan + Saudi + MENA before US/EU. Cost-efficient, mission-aligned, community-coherent.

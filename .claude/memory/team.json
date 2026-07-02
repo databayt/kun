@@ -1,12 +1,22 @@
 {
-  "version": "1.1",
-  "updated": "2026-05-12",
+  "version": "2.0",
+  "updated": "2026-07-02",
+  "$comment": "ids = CRM/workspace logins (<id>@databayt.org works on every *.crm.databayt.org workspace and Slack databayt-sh).",
   "company": {
     "name": "Databayt",
     "license": "SSPL",
-    "products": ["hogwarts", "souq", "mkan", "shifa", "swift-app"],
+    "products": [
+      "hogwarts",
+      "souq",
+      "mkan",
+      "shifa",
+      "sijillee",
+      "moallimee",
+      "ios-app",
+      "android-app"
+    ],
     "stack": "Next.js 16, React 19, Prisma 6, TypeScript 5, Tailwind CSS 4, shadcn/ui",
-    "headcount": 6
+    "headcount": 7
   },
   "team": [
     {
@@ -14,6 +24,7 @@
       "name": "Osman Abdout",
       "category": "tech",
       "role": "Founder & Tech Lead",
+      "traits": "Visionary",
       "installRole": "engineer",
       "email": "abdout@databayt.org"
     },
@@ -21,31 +32,48 @@
       "id": "ibrahim",
       "name": "Ibrahim",
       "category": "tech",
-      "role": "Engineer",
+      "role": "Senior Fullstack Engineer (web + mobile)",
+      "traits": "Highly skilled fullstack web and mobile engineer",
       "installRole": "engineer",
-      "email": null
+      "email": "ibrahim@databayt.org"
     },
     {
-      "id": "ali",
+      "id": "moutaz",
+      "name": "Moutaz",
+      "aka": ["mutaz"],
+      "category": "tech",
+      "role": "Product Engineer (business + sales + AI)",
+      "traits": "Experienced software engineer with strong business, sales, and AI skills; owns the Albayan pilot",
+      "installRole": "engineer",
+      "email": "moutaz@databayt.org"
+    },
+    {
+      "id": "aseel",
       "name": "Ali Aseel",
+      "aka": ["ali"],
       "category": "business",
       "role": "Sales + QA",
+      "traits": "Young, well educated (India — current tech scene), MBA + CS degree, strong in business",
       "installRole": "business",
-      "email": "ali@databayt.org"
+      "email": "aseel@databayt.org",
+      "sales_email": "sales@databayt.org"
     },
     {
-      "id": "mutaz",
-      "name": "Mutaz",
+      "id": "moed",
+      "name": "Moed",
+      "aka": ["moad"],
       "category": "business",
-      "role": "General business",
+      "role": "Business Development + Copywriting + Network",
+      "traits": "Well educated, loves reading; good at business, sales, copywriting, and networking",
       "installRole": "business",
-      "email": null
+      "email": "moed@databayt.org"
     },
     {
       "id": "samia",
       "name": "Samia Hamd",
       "category": "rnd",
       "role": "Research & Development",
+      "traits": "Most talented and gifted — languages, voice-over, copywriting, brainstorming",
       "installRole": "content",
       "email": "samia@databayt.org",
       "accessibility": {
@@ -57,7 +85,8 @@
       "id": "sedon",
       "name": "Osman Sedon",
       "category": "facilitator",
-      "role": "Saudi facilitator + Ali/Mutaz support",
+      "role": "Saudi facilitator + practical reality-check",
+      "traits": "Practical thinking grounded in reality, very smart, brings a different perspective",
       "installRole": "ops",
       "email": "sedon@databayt.org"
     }

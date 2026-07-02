@@ -2,7 +2,7 @@
 
 > **Read this monthly. Live by it daily.**
 >
-> The reference document for the founder, the captain, and the team. State-of-the-art tech-CEO practice distilled for a 6-person, open-source, sharing-economy company.
+> The reference document for the founder, the captain, and the team. State-of-the-art tech-CEO practice distilled for a 7-person, open-source, sharing-economy company.
 
 **Audience**: Abdout (founder, primary), Kun captain agent (loads as memory context), team (contributors and teammates), public (mirror at `/content/docs/ceo-os.mdx`).
 
@@ -128,7 +128,7 @@ Reviewed-by: [date 30/60/90 days out for Type 1; 7-14 days for Type 2]
 
 **Plausible Powers** (Helmer's 7 Powers, applied to Databayt):
 - **Counter-Positioning**: open-source SSPL + sharing-economy revenue distribution. A closed competitor can't copy without burning their existing model.
-- **Process Power**: the Kun engine itself — the configuration layer that makes 6 humans operate as 20.
+- **Process Power**: the Kun engine itself — the configuration layer that makes 7 humans operate as 20.
 - **Cornered Resource** (potential): Arabic-first + Sudan/MENA-rooted teams that competitors can't easily acquire.
 
 ### Skill 5 — Storytelling
@@ -142,7 +142,7 @@ Reviewed-by: [date 30/60/90 days out for Type 1; 7-14 days for Type 2]
 **Databayt's stories** (work in progress):
 - **Founder narrative**: EE 10yr + SWE 4yr Sudanese-Saudi engineer building an open-source operating system for the underserved.
 - **Product story (Hogwarts)**: "the win horse" — flagship for school operations in Arabic.
-- **Company story**: 4 humans + 40 agents + 1 engine + 14 repos + the sharing-economy revenue distribution model.
+- **Company story**: 7 humans + the agent fleet + 1 engine + the databayt org + the sharing-economy revenue distribution model.
 
 ### Skill 6 — Operating cadence
 

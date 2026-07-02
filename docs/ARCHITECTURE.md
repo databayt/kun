@@ -419,7 +419,7 @@ All products and workflows must be accessible:
 
 **Decision**: All products inherit from databayt/codebase. No product builds UI primitives from scratch.
 
-**Rationale**: With a team of 4 (2 full-time engineers), code reuse is survival. Every atom built once serves all products.
+**Rationale**: With a team of 7 (3 engineers), code reuse is survival. Every atom built once serves all products.
 
 ---
 

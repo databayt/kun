@@ -49,7 +49,7 @@ Make databayt visible. Own content strategy, SEO, social media, developer relati
 ### 4. Founder Story (Abdout + team)
 
 - Building in Saudi Arabia
-- 4-person team with AI agents
+- 7-person team with AI agents
 - From electrical engineering to software
 - Arabic tech entrepreneurship
 

@@ -530,7 +530,7 @@ This is a constitutional-level document. Amendments follow Constitution-amendmen
 
 These references are **complementary** to the founder reading list in `CEO-OS.md` Part V (Grove, Horowitz, Graham, Bezos, Helmer, Naval, Hastings, Christensen, etc.), not substitutes. The two canons answer different questions:
 
-- The Western canon: *"How do we operate well as a 6-person open-source bootstrapped company?"* — fundamentals of management, decision-making, hiring, prioritization, strategy, customer development, runway discipline.
+- The Western canon: *"How do we operate well as a 7-person open-source bootstrapped company?"* — fundamentals of management, decision-making, hiring, prioritization, strategy, customer development, runway discipline.
 - This canon: *"In service of what?"* — the economic-philosophical orientation that makes the operational discipline meaningful.
 
 A founder who reads only the Western canon will build a company that operates well but does not know what it is for. A founder who reads only this canon will know what it is for but not know how to build it. Read both.

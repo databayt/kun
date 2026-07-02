@@ -1,35 +1,57 @@
 ---
 title: Team
-description: 6 humans with tailored MCP configs and agent indexes
+description: 7 humans, one shared engine — universal config, one login everywhere
 ---
 
 # Team
 
-6 humans with tailored tools. Each role gets a specific MCP config, skill set, and agent index — so everyone has exactly the tools they need, nothing more.
+7 humans with one shared engine. Every machine gets the full config; identity is one login (`<name>@databayt.org`) that works across the CRM workspaces and Slack.
 
 ## Team Members
 
 ### Abdout — Founder & Tech Lead
-Engineering everything. Architecture, full-stack, deployment.
 
-### Ibrahim — Senior Fullstack Engineer
-Ships product features across the stack. Code review, architecture sparring, complex end-to-end work alongside Abdout.
+Visionary. Engineering everything: architecture, full-stack, deployment, the kun engine itself.
 
-### Ali — QA Engineer + Sales
-Tests features (reports issues on GitHub), manages sales@databayt.org. Outreach for schools, sponsors, investors, early adopters, leads, clients, contributors.
+### Ibrahim — Senior Fullstack & Mobile Engineer
 
-### Mutaz — Product Engineer (business)
-Owns product surface AND operates as a business peer of Ali — turns ideas into shippable specs, runs customer-facing motion (sales + onboarding), tightens the engineer ↔ business loop.
+Highly skilled fullstack web and mobile engineer. Ships product features across the stack and owns the mobile lane (ios-app + android-app). Code review, architecture sparring, complex end-to-end work alongside Abdout.
+
+### Moutaz — Product Engineer (business + sales + AI)
+
+Experienced software engineer with strong business, sales, and AI skills. Turns ideas into shippable specs, runs customer-facing motion, owns the Albayan pilot, and tightens the engineer ↔ business loop.
+
+### Ali Aseel — QA + Sales
+
+MBA + CS, educated in India's current tech scene — strong in business. Tests features (reports issues on GitHub), manages sales@databayt.org. Outreach for schools, sponsors, investors, early adopters, leads, clients, contributors. Login: `aseel@databayt.org`.
+
+### Moed — Business Development + Copywriting
+
+Well educated and loves to read. Good in business, sales, copywriting, and networking — the words-and-relationships lane of the business team.
 
 ### Samia — R&D
-Research on Claude/Anthropic products, sharing economy models, revenue distribution. Core vision contributor.
+
+The most talented and gifted on the team: languages, voice-over, copywriting, brainstorming. Research on Claude/Anthropic products, sharing economy models, revenue distribution. Core vision contributor.
 
 ### Sedon — Facilitator
-Facilitates the business team (Ali + Mutaz) — clears blockers, runs the ops cadence. Saudi operations: bank account, physical presence, payments.
+
+Known for practical thinking grounded in reality — very smart, brings a different perspective. Facilitates the business team, clears blockers, runs the ops cadence. Saudi operations: bank account, physical presence, payments.
+
+## One Login Everywhere
+
+Each member has **one identity — `<name>@databayt.org`** — that works on every workspace:
+
+| Surface | Where |
+| ------- | ----- |
+| **CRM** | [mkan](https://mkan.crm.databayt.org) · [hogwarts](https://hogwarts.crm.databayt.org) · [sijillee](https://sijillee.crm.databayt.org) · [moallimee](https://moallimee.crm.databayt.org) — log in once, switch via the workspace switcher (top-left). See [CRM](/docs/crm). |
+| **Slack** | `databayt-sh` workspace — see [Slack](/docs/slack) |
+| **GitHub** | Personal account + `databayt` org membership |
+
+Logins: `abdout, aseel, sedon, moutaz, ibrahim, samia, moed`.
 
 ## Config — Universal
 
-Every machine gets the **full config**: all agents, all 25 skills, the full MCP fleet (18 servers), all hooks. The machine — not the person — is the unit of capability, so any machine can run any task. Role is a label + a *secrets-trust tier*; it does not limit what the computer can do.
+Every machine gets the **full config**: all agents, all skills, the full MCP fleet, all hooks (live counts: `.claude/engine.json`). The machine — not the person — is the unit of capability, so any machine can run any task. Role is a label + a _secrets-trust tier_; it does not limit what the computer can do.
 
 What still varies: **which API keys a machine holds**, scoped by the Gist that person is handed. An MCP server without its key just doesn't connect (harmless).
 
@@ -45,19 +67,7 @@ cd ~/kun && bash .claude/scripts/setup.sh engineer
 cd ~/kun; .\.claude\scripts\setup.ps1 -Role engineer
 ```
 
-Re-run anytime to update config after pulling latest from git.
-
-### What gets installed
-
-| Layer | Common (all roles) | Scoped (per role) |
-|-------|-------------------|-------------------|
-| **CLAUDE.md** | Shared instructions | — |
-| **Agents** | All 40 agent definitions | Role-specific index |
-| **Commands** | docs, repos, screenshot, codebase | Role-specific skills |
-| **Rules** | All rules | — |
-| **Memory** | Team, company data | — |
-| **Settings** | — | Hooks (engineer) or minimal |
-| **MCP** | — | Role-specific server set |
+Re-run anytime to update config after pulling latest from git. Fresh machine? Start from [Onboarding](/docs/onboarding) instead — one paste does everything.
 
 ## Daily Workflows
 
@@ -71,17 +81,26 @@ Re-run anytime to update config after pulling latest from git.
 > "deploy"                 # Ship to Vercel
 ```
 
-### Ibrahim — Senior Fullstack
+### Ibrahim — Fullstack & Mobile
 
 ```
 > "dev"                    # Start dev server
-> [build features]         # Full agent fleet
-> Code review on PRs       # Architecture + correctness pass
+> [build features]         # Full agent fleet, web + mobile
+> Code review on changes   # Architecture + correctness pass
 > "build"                  # Validate
 > "push"                   # Commit + push
 ```
 
-### Ali — QA + Sales
+### Moutaz — Product Engineer
+
+```
+> Translate ideas → specs (issue + acceptance criteria)
+> Albayan pilot ownership  # Walkthroughs, feedback loop
+> Customer interviews / feedback synthesis
+> Shape the engineer ↔ business handoff
+```
+
+### Ali Aseel — QA + Sales
 
 ```
 QA:
@@ -91,16 +110,15 @@ QA:
 
 Sales (sales@databayt.org):
 > Outreach: schools, sponsors, investors, early adopters, contributors
-> Draft proposals, follow up leads
+> Track pipeline in the CRM (hogwarts workspace)
 ```
 
-### Mutaz — Product Engineer (business)
+### Moed — Business Development
 
 ```
-> Translate ideas → specs (issue + acceptance criteria)
-> Customer interviews / feedback synthesis
-> Partner with Ali on outbound + onboarding
-> Shape the engineer ↔ business handoff
+> Copywriting              # Proposals, outreach copy, product messaging
+> Network building         # Partners, communities, leads
+> Partner with Aseel on outbound
 ```
 
 ### Samia — R&D
@@ -109,14 +127,15 @@ Sales (sales@databayt.org):
 Cowork:
 > Research Claude/Anthropic products
 > Study sharing economy models
-> Investigate revenue distribution
+> Voice-over + Arabic content
 > Contribute to core vision
 ```
 
 ### Sedon — Facilitator
 
 ```
-> Facilitate business team # Unblock Ali + Mutaz
+> Facilitate business team # Unblock Aseel + Moutaz + Moed
+> Reality-check plans      # The different perspective
 > Saudi operations         # Bank, payments, physical presence
 > Batch weekly             # Monday map, Friday delivery
 ```
@@ -138,8 +157,9 @@ bash ~/.claude/scripts/health.sh --report
 ```
 
 Or use the `/health` command inside Claude Code:
+
 - `/health` — local check + team dashboard from GitHub
 - `/health report` — post local health to GitHub
 - `/health all` — show all team members' latest status
 
-Checks: core files exist, JSON valid, MCP count matches role, commands match scope, permissions correct, CLI installed, config staleness.
+Checks: core files exist, JSON valid, engine counts match `engine.json`, permissions correct, CLI + agent fleet installed, config staleness.

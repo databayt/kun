@@ -32,7 +32,7 @@
 
 | Agent       | Purpose                                         | Scope                        |
 | ----------- | ----------------------------------------------- | ---------------------------- |
-| **captain** | CEO brain — weekly allocation, revenue strategy | All 5 products, all 4 humans |
+| **captain** | CEO brain — weekly allocation, revenue strategy | All products, all 7 humans |
 
 ### Tier 1 — Business (3)
 

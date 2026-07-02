@@ -134,7 +134,7 @@ export const homeItems: HomeItem[] = [
   {
     id: "captain",
     title: "Captain",
-    description: "CEO brain — delegates across 40 agents and 4 humans.",
+    description: "CEO brain — delegates across the agent fleet and 7 humans.",
     icon: "CaptainIcon",
     image: "ceo.png",
     href: "/engine/captain",

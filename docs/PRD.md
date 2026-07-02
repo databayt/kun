@@ -9,21 +9,21 @@
 
 ### Purpose
 
-Define the requirements for the Kun engine — the configuration layer that transforms Anthropic's product suite into Databayt's operating system, serving 4 team members across 14 repositories. Open source, sharing economy model.
+Define the requirements for the Kun engine — the configuration layer that transforms Anthropic's product suite into Databayt's operating system, serving 7 team members across the databayt org. Open source, sharing economy model.
 
 ### Scope
 
 | Phase                     | Scope                                      | Users                  | Status |
 | ------------------------- | ------------------------------------------ | ---------------------- | ------ |
 | Phase 1: Developer Engine | Individual developer configuration         | Tech lead (primary)    | Done   |
-| Phase 2: Team Engine      | Shared config + coordination for 4 members | Full Databayt team     | Next   |
+| Phase 2: Team Engine      | Shared config + coordination for 7 members | Full Databayt team     | Next   |
 | Phase 3: Company Engine   | Full operations + custom automation        | Team + CI/CD + clients | Future |
 
 ### Constraints
 
 | Constraint      | Value                                                              |
 | --------------- | ------------------------------------------------------------------ |
-| Team size       | 4 (1 builder, 1 QA+sales, 1 R&D, 1 executor)                       |
+| Team size       | 7 (3 tech, 2 business, 1 R&D, 1 facilitator)                       |
 | Budget          | $100/month Claude Code Max 5x (subscription-only) + ~$300 services |
 | Capital         | $5,000 remaining (~10 months runway)                               |
 | Monthly burn    | ~$500                                                              |
@@ -81,13 +81,13 @@ Define the requirements for the Kun engine — the configuration layer that tran
 
 ## 3. Phase 2: Team Engine (Next)
 
-Grounded in Databayt's actual team: 4 members, 3 on Windows, 1 on macOS.
+Grounded in Databayt's actual team: 7 members, mostly Windows, 1 on macOS.
 
 ### FR-2.1: Team Onboarding
 
 | ID       | Requirement              | Priority | Acceptance Criteria                                               |
 | -------- | ------------------------ | -------- | ----------------------------------------------------------------- |
-| FR-2.1.1 | Cross-platform installer | P0       | install.sh (macOS) + install.ps1 (Windows) work for all 4 members |
+| FR-2.1.1 | Cross-platform installer | P0       | install.sh (macOS) + install.ps1 (Windows) work for all 7 members |
 | FR-2.1.2 | Shared settings.json     | P0       | `.claude/settings.json` in git, team-wide allow/deny rules        |
 | FR-2.1.3 | Local overrides          | P0       | `.claude/settings.local.json` for personal preferences            |
 | FR-2.1.4 | Accessibility setup      | P0       | Screen reader compatibility verified for Samia                    |

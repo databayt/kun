@@ -773,10 +773,10 @@ export const topicDetails: Record<string, TopicDetail> = {
   captain: {
     id: "captain",
     title: "Captain",
-    description: "CEO brain — delegates across 40 agents and 4 humans.",
+    description: "CEO brain — delegates across the agent fleet and 7 humans.",
     icon: "CaptainIcon",
     overview:
-      "Captain is the Tier 0 agent — the CEO brain. It never writes code. It manages weekly allocation, revenue strategy, and team coordination across 5 products (Hogwarts, Souq, Mkan, Shifa, Marketing) and 4 humans (Abdout, Ali, Samia, Sedon). Captain reads all dispatches, checks GitHub across repos, and delegates to the right specialist agents and team members.",
+      "Captain is the Tier 0 agent — the CEO brain. It never writes code. It manages weekly allocation, revenue strategy, and team coordination across the products (Hogwarts, Souq, Mkan, Shifa, Sijillee, Moallimee) and 7 humans (Abdout, Ibrahim, Moutaz, Aseel, Moed, Samia, Sedon). Captain reads all dispatches, checks GitHub across repos, and delegates to the right specialist agents and team members.",
     officialDocs: "https://docs.anthropic.com/en/docs/claude-code/sub-agents",
     status: "current",
     lastReviewed: "2026-03-31",

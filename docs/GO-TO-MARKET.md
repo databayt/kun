@@ -6,7 +6,7 @@
 
 ## Executive summary
 
-Databayt is a ~6-person team with a built, production-ready school platform. The first pilot — **King Fahad Schools (Sudan, 3 branches)** — goes live by **September 2026** and becomes our proof of concept. We run commission-based sales **in parallel** so that by the time King Fahad proves the model, a pipeline of schools is ready to convert.
+Databayt is a 7-person team with a built, production-ready school platform. The first pilot — **King Fahad Schools (Sudan, 3 branches)** — goes live by **September 2026** and becomes our proof of concept. We run commission-based sales **in parallel** so that by the time King Fahad proves the model, a pipeline of schools is ready to convert.
 
 The model: **free 3-month pilot → annual contract**, sold through a small bench of commission salespeople with existing school relationships in **Sudan and Saudi Arabia**. Target: **5 signed schools** before we decide whether to build a salaried sales team.
 
