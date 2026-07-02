@@ -4,19 +4,20 @@
   "model_label": "Opus 4.8",
   "model_context": "1M",
   "fallback_models": ["claude-opus-4-8", "claude-sonnet-4-6"],
-  "engine_version": "databayt v3.2",
-  "updated": "2026-06-12",
+  "engine_version": "databayt v3.3",
+  "updated": "2026-07-02",
+  "min_claude_code_version": "2.1.190",
   "billing": {
     "plan": "claude-max-100",
     "$comment": "Max 5x ($100/mo) for the time being — corrected from Max 20x on 2026-06-12. Subscription-ONLY posture: no usage-based credits, no API-key per-token spend — changing this requires a /decide entry + Abdout approval (captain ESCALATE gate: budget > $50/mo). Check /usage per-category weekly to stay inside plan caps."
   },
   "sync": {
     "$comment": "Self-update stamps per tier — /sync refreshes them; the captain flags overdue tiers at session start. null = never synced (due immediately). Sources of the form gh:owner/repo are read via `gh api .../releases`. Material adoptions land in docs/CONFIG-BENCHMARK.md → Adoption log.",
-    "anthropic": "2026-06-12",
+    "anthropic": "2026-07-02",
     "stack": null,
     "services": null,
-    "practice": null,
-    "claude_code_version": "2.1.175",
+    "practice": "2026-07-02",
+    "claude_code_version": "2.1.198",
     "cadence_days": {
       "anthropic": 7,
       "stack": 14,
@@ -52,15 +53,15 @@
     }
   },
   "counts": {
-    "project_agents": 18,
+    "project_agents": 19,
     "user_agents": 27,
     "commands": 33,
-    "project_skills": 1,
+    "project_skills": 3,
     "user_skills": 23,
-    "pattern_cards": 10,
+    "pattern_cards": 11,
     "project_rules": 3,
     "domain_rules": 29,
-    "project_mcp": 25,
+    "project_mcp": 27,
     "user_mcp": 19,
     "workflows": 2
   },
