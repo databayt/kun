@@ -66,12 +66,23 @@ done
 
 # ── kun-company ────────────────────────────────────────────────────
 CO="$ROOT/plugins/kun-company"
-[ "$CHECK" = 0 ] && { rm -rf "$CO/agents" "$CO/commands" "$CO/patterns" "$CO/rules"; mkdir -p "$CO/agents" "$CO/commands" "$CO/patterns/cards" "$CO/rules"; }
+[ "$CHECK" = 0 ] && { rm -rf "$CO/agents" "$CO/commands" "$CO/skills" "$CO/patterns" "$CO/rules"; mkdir -p "$CO/agents" "$CO/commands" "$CO/skills" "$CO/patterns/cards" "$CO/rules"; }
 for f in "$ROOT"/.claude/agents/*.md; do
   base="$(basename "$f")"; case "$base" in _index*) continue;; esac
   copy_one "$f" "$CO/agents/$base"
 done
-for f in "$ROOT"/.claude/commands/*.md; do copy_one "$f" "$CO/commands/$(basename "$f")"; done
+for f in "$ROOT"/.claude/commands/*.md; do
+  [ -e "$f" ] || continue   # commands are migrating to skills; dir may be empty
+  copy_one "$f" "$CO/commands/$(basename "$f")"
+done
+# Project skills (the migrated command verbs + canon/clone/build) — whole dirs
+for d in "$ROOT"/.claude/skills/*/; do
+  [ -d "$d" ] || continue
+  sname="$(basename "$d")"
+  while IFS= read -r f; do
+    copy_one "$f" "$CO/skills/$sname/${f#"$d"}"
+  done < <(find "$d" -type f)
+done
 for f in "$ROOT"/.claude/patterns/cards/*.md; do copy_one "$f" "$CO/patterns/cards/$(basename "$f")"; done
 for f in "$ROOT"/.claude/rules/*.md; do copy_one "$f" "$CO/rules/$(basename "$f")"; done
 # Rule corpus — domain subdirs (react-19/, next-16/, ...) with atomic severity-tagged rules
@@ -104,4 +115,4 @@ if [ "$CHECK" = 1 ]; then
   [ "$DRIFT" = 0 ] && { echo "plugins in sync with sources"; exit 0; } || { echo "$DRIFT file(s) drifted — run: bash .claude/scripts/build-plugin.sh"; exit 1; }
 fi
 
-echo "built kun-stack ($(ls "$STACK/agents" 2>/dev/null | wc -l | tr -d ' ') agents, $(ls -d "$STACK"/skills/*/ 2>/dev/null | wc -l | tr -d ' ') skills) + kun-company ($(ls "$CO/agents" 2>/dev/null | wc -l | tr -d ' ') agents, $(ls "$CO/commands" 2>/dev/null | wc -l | tr -d ' ') commands)"
+echo "built kun-stack ($(ls "$STACK/agents" 2>/dev/null | wc -l | tr -d ' ') agents, $(ls -d "$STACK"/skills/*/ 2>/dev/null | wc -l | tr -d ' ') skills) + kun-company ($(ls "$CO/agents" 2>/dev/null | wc -l | tr -d ' ') agents, $(ls "$CO/commands" 2>/dev/null | wc -l | tr -d ' ') commands, $(ls -d "$CO"/skills/*/ 2>/dev/null | wc -l | tr -d ' ') skills)"

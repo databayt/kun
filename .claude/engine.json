@@ -3,7 +3,10 @@
   "model": "claude-opus-4-8",
   "model_label": "Opus 4.8",
   "model_context": "1M",
-  "fallback_models": ["claude-opus-4-8", "claude-sonnet-4-6"],
+  "fallback_models": [
+    "claude-opus-4-8",
+    "claude-sonnet-4-6"
+  ],
   "engine_version": "databayt v3.3",
   "updated": "2026-07-02",
   "min_claude_code_version": "2.1.190",
@@ -55,8 +58,8 @@
   "counts": {
     "project_agents": 19,
     "user_agents": 27,
-    "commands": 33,
-    "project_skills": 3,
+    "commands": 17,
+    "project_skills": 19,
     "user_skills": 23,
     "pattern_cards": 11,
     "project_rules": 3,

@@ -1,0 +1,17 @@
+{
+  "name": "clone-capture",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Deterministic live-URL section capture for the /clone url-mode skill.",
+  "bin": {
+    "clone-capture": "./clone-capture.mjs"
+  },
+  "scripts": {
+    "bootstrap": "npm install && npx playwright install chromium"
+  },
+  "comment": "On machines WITHOUT a global @playwright/mcp install, run `npm run bootstrap` here once. Where @playwright/mcp is already installed (the kun default), clone-capture.mjs resolves Playwright from it with zero install — this dependency is the portable fallback only.",
+  "dependencies": {
+    "playwright": "^1.50.0"
+  }
+}
