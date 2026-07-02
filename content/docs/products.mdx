@@ -70,26 +70,27 @@ Build production AI agents. Python and TypeScript.
 
 ## Models
 
-| Model | Use Case | Cost (API) |
-|-------|----------|------------|
-| **Opus 4.6** | Architecture, complex features, review | $5 / $25 per MTok |
-| **Sonnet 4.6** | Fast iteration, routine changes | $3 / $15 per MTok |
-| **Haiku 4.5** | Search, lookups, exploration | $1 / $5 per MTok |
+| Model | Use Case |
+|-------|----------|
+| **Opus 4.8** (1M context) | Architecture, complex features, review |
+| **Sonnet 5** (1M context, Claude Code default) | Fast iteration, routine changes |
+| **Haiku 4.5** | Search, lookups, exploration |
+| **Fable 5** | Top-tier reasoning (Mythos class) |
 
-Kun defaults to **Opus 4.6** for all agents. Haiku for explore subagents only.
+Kun defaults to **Opus 4.8** for all agents (canonical in `.claude/engine.json`). Haiku for explore subagents only. API prices live at [platform.claude.com pricing](https://platform.claude.com/docs/en/about-claude/pricing) — we don't hardcode them here; billing is subscription-only anyway.
 
 ## Databayt's Current Plan
 
 | Item | Plan |
 |------|------|
-| **Primary** | Max 20x |
+| **Primary** | Max 5x ($100/mo) — subscription-only, no API spend |
 | **Shared access** | Desktop/Web for team |
 
 ### Growth Path
 
 | Stage | Plan | When |
 |-------|------|------|
-| **Now** | Max 20x (1 seat) | Current |
+| **Now** | Max 5x (1 seat) | Current |
 | **Team grows** | + Pro seats | When team needs own accounts |
 | **Revenue stable** | Team Premium | When revenue target achieved |
 | **Scale** | Enterprise | Multiple products, clients |

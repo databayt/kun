@@ -4,8 +4,8 @@
 
 ## Quick Stats
 
-- **Total Agents**: 43 (9 leadership + 34 specialists)
-- **Model**: opus (all agents)
+- **Total Agents**: 46 (19 project + 27 user) — canonical counts live in `kun/.claude/engine.json` → `counts`; `/health` flags drift
+- **Model**: per `engine.json` → `model_tiers` (opus default; sonnet/haiku for mechanical agents)
 - **Stack**: Next.js 16 + React 19 + Prisma 6 + TypeScript 5
 
 ---
@@ -25,37 +25,37 @@
                     /    \
               learn → analyze                         (Learning)
                       |
-                 33 specialists                       (Execution)
+              specialist fleet (~/.claude/agents)     (Execution)
 ```
 
 ### Tier 0 — Captain (1)
 
-| Agent | Purpose | Scope |
-|-------|---------|-------|
+| Agent       | Purpose                                         | Scope                        |
+| ----------- | ----------------------------------------------- | ---------------------------- |
 | **captain** | CEO brain — weekly allocation, revenue strategy | All 5 products, all 4 humans |
 
 ### Tier 1 — Business (3)
 
-| Agent | Purpose | Primary Human |
-|-------|---------|---------------|
-| **revenue** | Pricing, proposals, contracts, cost analysis | Ali + Sedon |
-| **growth** | Content, SEO, social, developer relations | Samia + Ali |
-| **support** | Onboarding, issue triage, knowledge base | Sedon + Ali |
+| Agent       | Purpose                                      | Primary Human |
+| ----------- | -------------------------------------------- | ------------- |
+| **revenue** | Pricing, proposals, contracts, cost analysis | Ali + Sedon   |
+| **growth**  | Content, SEO, social, developer relations    | Samia + Ali   |
+| **support** | Onboarding, issue triage, knowledge base     | Sedon + Ali   |
 
 ### Tier 2 — Product (2)
 
-| Agent | Purpose | Primary Human |
-|-------|---------|---------------|
-| **product** | Roadmap across all 5 products, stories, prioritization | All team |
-| **analyst** | Market intelligence, competitors, analytics | Ali + Samia |
+| Agent       | Purpose                                                | Primary Human |
+| ----------- | ------------------------------------------------------ | ------------- |
+| **product** | Roadmap across all 5 products, stories, prioritization | All team      |
+| **analyst** | Market intelligence, competitors, analytics            | Ali + Samia   |
 
 ### Tier 3 — Tech Leadership (3)
 
-| Agent | Purpose | Primary Human |
-|-------|---------|---------------|
-| **tech-lead** | Architecture across 14 repos, shared patterns | Abdout |
-| **ops** | CI/CD, costs, monitoring, infrastructure | Sedon + Abdout |
-| **guardian** | Security, performance budgets, compliance | Abdout |
+| Agent         | Purpose                                       | Primary Human  |
+| ------------- | --------------------------------------------- | -------------- |
+| **tech-lead** | Architecture across 14 repos, shared patterns | Abdout         |
+| **ops**       | CI/CD, costs, monitoring, infrastructure      | Sedon + Abdout |
+| **guardian**  | Security, performance budgets, compliance     | Abdout         |
 
 ---
 
@@ -63,68 +63,68 @@
 
 ### Stack (7)
 
-| Agent | Purpose | Version |
-|-------|---------|---------|
-| **nextjs** | App Router, Server Components, Server Actions | 16.0.7 |
-| **react** | Hooks, Suspense, Concurrent Features | 19.2.0 |
-| **typescript** | Strict Mode, Generics, Zod Validation | 5.x |
-| **tailwind** | Semantic Tokens, RTL/LTR, Responsive | 4.x |
-| **prisma** | Schema Design, Queries, Multi-tenant | 6.16.2 |
-| **shadcn** | Registry (82 Sources), MCP, Radix | latest |
-| **authjs** | NextAuth v5, OAuth, JWT, Sessions | 5.x |
+| Agent          | Purpose                                       | Version |
+| -------------- | --------------------------------------------- | ------- |
+| **nextjs**     | App Router, Server Components, Server Actions | 16.0.7  |
+| **react**      | Hooks, Suspense, Concurrent Features          | 19.2.0  |
+| **typescript** | Strict Mode, Generics, Zod Validation         | 5.x     |
+| **tailwind**   | Semantic Tokens, RTL/LTR, Responsive          | 4.x     |
+| **prisma**     | Schema Design, Queries, Multi-tenant          | 6.16.2  |
+| **shadcn**     | Registry (82 Sources), MCP, Radix             | latest  |
+| **authjs**     | NextAuth v5, OAuth, JWT, Sessions             | 5.x     |
 
 ### Design (4)
 
-| Agent | Purpose | Handoff |
-|-------|---------|---------|
-| **orchestration** | Multi-agent coordination, complex tasks | all agents |
-| **architecture** | Mirror pattern, Prisma, multi-tenant design | pattern, structure |
-| **pattern** | Code conventions, anti-patterns, best practices | structure |
-| **structure** | File organization, naming, project layout | nextjs |
+| Agent             | Purpose                                         | Handoff            |
+| ----------------- | ----------------------------------------------- | ------------------ |
+| **orchestration** | Multi-agent coordination, complex tasks         | all agents         |
+| **architecture**  | Mirror pattern, Prisma, multi-tenant design     | pattern, structure |
+| **pattern**       | Code conventions, anti-patterns, best practices | structure          |
+| **structure**     | File organization, naming, project layout       | nextjs             |
 
 ### UI (4)
 
-| Agent | Purpose | Handoff |
-|-------|---------|---------|
-| **shadcn** | Registry, Radix primitives, MCP | atom |
-| **atom** | Composed components (2+ UI primitives) | template |
-| **template** | Page layouts (hero, sidebar, auth) | block |
-| **block** | Functional UI (DataTable, Forms, Wizards) | - |
+| Agent        | Purpose                                   | Handoff  |
+| ------------ | ----------------------------------------- | -------- |
+| **shadcn**   | Registry, Radix primitives, MCP           | atom     |
+| **atom**     | Composed components (2+ UI primitives)    | template |
+| **template** | Page layouts (hero, sidebar, auth)        | block    |
+| **block**    | Functional UI (DataTable, Forms, Wizards) | -        |
 
 ### DevOps (4)
 
-| Agent | Purpose | Handoff |
-|-------|---------|---------|
-| **build** | Turbopack, TypeScript validation, bundles | deploy |
-| **deploy** | Vercel, monitoring, rollback, staging | - |
-| **test** | Vitest, Playwright, 95% coverage target | - |
+| Agent       | Purpose                                          | Handoff          |
+| ----------- | ------------------------------------------------ | ---------------- |
+| **build**   | Turbopack, TypeScript validation, bundles        | deploy           |
+| **deploy**  | Vercel, monitoring, rollback, staging            | -                |
+| **test**    | Vitest, Playwright, 95% coverage target          | -                |
 | **package** | Cross-repo dependency audit, upgrades, alignment | tech-lead, build |
 
 ### VCS (2)
 
-| Agent | Purpose | Handoff |
-|-------|---------|---------|
-| **git** | Branching, commits, conventional format | github |
-| **github** | PRs, Issues, Actions, MCP integration | - |
+| Agent      | Purpose                                 | Handoff |
+| ---------- | --------------------------------------- | ------- |
+| **git**    | Branching, commits, conventional format | github  |
+| **github** | PRs, Issues, Actions, MCP integration   | -       |
 
 ### Specialized (7)
 
-| Agent | Purpose | Handoff |
-|-------|---------|---------|
-| **middleware** | Edge runtime, auth checks, i18n routing | nextjs |
-| **internationalization** | Arabic RTL, English LTR, dictionaries | - |
-| **semantic** | Semantic HTML, color tokens, accessibility | tailwind |
-| **sse** | Server-side exception diagnosis, debugging | nextjs, react |
-| **optimize** | Feature automation, integration, time savings | architecture, prisma |
-| **performance** | Core Web Vitals, profiling, runtime optimization | nextjs, react, prisma, build, tailwind |
-| **comment** | Code comments, WHY over WHAT, Clean Code | pattern, typescript |
+| Agent                    | Purpose                                          | Handoff                                |
+| ------------------------ | ------------------------------------------------ | -------------------------------------- |
+| **middleware**           | Edge runtime, auth checks, i18n routing          | nextjs                                 |
+| **internationalization** | Arabic RTL, English LTR, dictionaries            | -                                      |
+| **semantic**             | Semantic HTML, color tokens, accessibility       | tailwind                               |
+| **sse**                  | Server-side exception diagnosis, debugging       | nextjs, react                          |
+| **optimize**             | Feature automation, integration, time savings    | architecture, prisma                   |
+| **performance**          | Core Web Vitals, profiling, runtime optimization | nextjs, react, prisma, build, tailwind |
+| **comment**              | Code comments, WHY over WHAT, Clean Code         | pattern, typescript                    |
 
 ### Learning (2)
 
-| Agent | Purpose | Handoff |
-|-------|---------|---------|
-| **learn** | Org intelligence — extract patterns, conventions, team dynamics from git history | captain, tech-lead, analyze |
-| **analyze** | Repo config generator — analyze patterns, generate CLAUDE.md + agents + rules as PR | learn, tech-lead, github |
+| Agent       | Purpose                                                                             | Handoff                     |
+| ----------- | ----------------------------------------------------------------------------------- | --------------------------- |
+| **learn**   | Org intelligence — extract patterns, conventions, team dynamics from git history    | captain, tech-lead, analyze |
+| **analyze** | Repo config generator — analyze patterns, generate CLAUDE.md + agents + rules as PR | learn, tech-lead, github    |
 
 ---
 
@@ -208,19 +208,21 @@ Cross-references:
 
 ## Technology Versions
 
-Keep agents updated with latest stable versions:
+The pinned stack is Next.js 16 / React 19 / TypeScript 5 / Tailwind 4 / Prisma 6 (see
+`~/.claude/CLAUDE.md` Preferences). Don't hardcode "latest" numbers here — they rot.
+To check what's current before an upgrade decision (`/package` owns upgrades):
 
-| Technology | Latest | Check Command |
-|------------|--------|---------------|
-| Next.js | 16.2.2 | `npm view next version` |
-| React | 19.2.4 | `npm view react version` |
-| TypeScript | 6.0.2 | `npm view typescript version` |
-| Tailwind | 4.2.2 | `npm view tailwindcss version` |
-| Prisma | 7.6.0 | `npm view prisma version` |
-| Zod | 4.3.6 | `npm view zod version` |
-| NextAuth | 5.0.0-beta.30 | `npm view next-auth@beta version` |
-| Vercel AI SDK | 6.0.145 | `npm view ai version` |
-| lucide-react | 1.7.0 | `npm view lucide-react version` |
+| Technology    | Check Command                     |
+| ------------- | --------------------------------- |
+| Next.js       | `npm view next version`           |
+| React         | `npm view react version`          |
+| TypeScript    | `npm view typescript version`     |
+| Tailwind      | `npm view tailwindcss version`    |
+| Prisma        | `npm view prisma version`         |
+| Zod           | `npm view zod version`            |
+| NextAuth      | `npm view next-auth@beta version` |
+| Vercel AI SDK | `npm view ai version`             |
+| lucide-react  | `npm view lucide-react version`   |
 
 ---
 
@@ -267,30 +269,30 @@ Use the build agent to fix TypeScript errors.
 
 ### Quick Reference
 
-| Need | Use Agent |
-|------|-----------|
-| New page/route | nextjs |
-| Component optimization | react |
-| Type errors | typescript |
-| Styling/tokens | tailwind |
-| Database schema | prisma |
-| UI components | shadcn |
-| Authentication | authjs |
-| System design | architecture |
-| File organization | structure |
-| Code review | pattern |
-| Build issues | build |
-| Deployment | deploy |
-| Testing | test |
-| Git workflow | git, github |
-| i18n/RTL | internationalization |
-| Server errors | sse |
-| Feature optimization | optimize |
-| Runtime performance | performance |
-| Code comments | comment |
-| Dependency management | package |
-| Org intelligence | learn |
-| Repo config generation | analyze |
+| Need                   | Use Agent            |
+| ---------------------- | -------------------- |
+| New page/route         | nextjs               |
+| Component optimization | react                |
+| Type errors            | typescript           |
+| Styling/tokens         | tailwind             |
+| Database schema        | prisma               |
+| UI components          | shadcn               |
+| Authentication         | authjs               |
+| System design          | architecture         |
+| File organization      | structure            |
+| Code review            | pattern              |
+| Build issues           | build                |
+| Deployment             | deploy               |
+| Testing                | test                 |
+| Git workflow           | git, github          |
+| i18n/RTL               | internationalization |
+| Server errors          | sse                  |
+| Feature optimization   | optimize             |
+| Runtime performance    | performance          |
+| Code comments          | comment              |
+| Dependency management  | package              |
+| Org intelligence       | learn                |
+| Repo config generation | analyze              |
 
 ---
 

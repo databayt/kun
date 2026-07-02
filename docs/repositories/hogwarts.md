@@ -118,7 +118,7 @@ Very active — multiple commits per day. Primary development focus.
 
 ## iOS Companion
 
-The [swift-app](./swift-app.md) repository is the native iOS companion for Hogwarts, built with Swift 6/SwiftUI, following the same module structure.
+The [ios-app](./ios-app.md) repository is the native iOS companion for Hogwarts, built with Swift 6/SwiftUI, following the same module structure.
 
 ---
 

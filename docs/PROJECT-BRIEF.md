@@ -149,7 +149,7 @@ Ahmed Baha is an interested client. The pitch is partnership, not sales:
 | **[kun](./repositories/kun.md)** | Configuration engine — this project | Coordinates everything |
 | **[shadcn](./repositories/shadcn.md)** | UI component library (shadcn/ui fork) | Shared UI primitives |
 | **[radix](./repositories/radix.md)** | Radix UI primitives fork | Foundation for shadcn |
-| **[swift-app](./repositories/swift-app.md)** | iOS companion for Hogwarts | Native Swift/SwiftUI |
+| **[ios-app](./repositories/ios-app.md)** | iOS companion for Hogwarts (Android sibling: android-app) | Native Swift/SwiftUI |
 | **[marketing](./repositories/marketing.md)** | Landing pages for all products | Company website |
 | **[spma](./repositories/spma.md)** | Project management tool | Internal use |
 | **[apple](./repositories/apple.md)** | Apple design experiments | R&D |
@@ -322,7 +322,7 @@ Email accounts: [team]@databayt.org
 | [kun](./repositories/kun.md) | Engine | Active | 2026-03-30 | This project |
 | [shadcn](./repositories/shadcn.md) | Library | Fork sync | 2025-12-01 | UI components |
 | [radix](./repositories/radix.md) | Library | Fork sync | 2025-12-07 | UI primitives |
-| [swift-app](./repositories/swift-app.md) | Mobile | Phase 2 | 2026-02-10 | iOS app |
+| [ios-app](./repositories/ios-app.md) | Mobile | Phase 2 | 2026-02-10 | iOS app (+ android-app) |
 | [marketing](./repositories/marketing.md) | Website | Active | 2026-01-29 | Landing pages |
 | [spma](./repositories/spma.md) | Internal | Early | 2026-02-23 | Project management |
 | [apple](./repositories/apple.md) | R&D | Experiment | 2026-02-06 | Design lab |

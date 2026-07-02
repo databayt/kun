@@ -31,7 +31,8 @@ declare -A REPOS=(
     ["souq"]="$OSS_DIR/souq"
     ["mkan"]="$OSS_DIR/mkan"
     ["shifa"]="$OSS_DIR/shifa"
-    ["swift-app"]="$OSS_DIR/swift-app"
+    ["ios-app"]="$OSS_DIR/ios-app"
+    ["android-app"]="$OSS_DIR/android-app"
     ["distributed-computer"]="$OSS_DIR/distributed-computer"
     ["marketing"]="$OSS_DIR/marketing"
 )

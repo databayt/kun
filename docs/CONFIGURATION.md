@@ -1,7 +1,7 @@
 # Configuration Blueprint: Kun (كن)
 
-> **Version**: 2.1
-> **Date**: 2026-05-31
+> **Version**: 2.2
+> **Date**: 2026-07-02
 > **Purpose**: The complete specification of Databayt's configuration engine
 
 ---
@@ -12,18 +12,20 @@ Kun's value is its configuration. This is the complete blueprint of every settin
 
 ### Configuration Inventory
 
-| Component       | Count    | Location                                 |
-| --------------- | -------- | ---------------------------------------- |
-| CLAUDE.md files | 3 layers | ~/.claude/, CLAUDE.md, .claude/CLAUDE.md |
-| Agents          | 28       | ~/.claude/agents/                        |
-| Skills          | 22       | ~/.claude/skills/                        |
-| MCP Servers     | 19       | ~/.claude/mcp.json                       |
-| Rules           | 8        | ~/.claude/rules/                         |
-| Hooks           | 5        | ~/.claude/settings.json                  |
-| Memory files    | 6        | ~/.claude/memory/                        |
-| Allow rules     | 38       | ~/.claude/settings.json                  |
-| Deny rules      | 4        | ~/.claude/settings.json                  |
-| Keywords        | 100+     | .claude/CLAUDE.md                        |
+> Counts are canonical in **`.claude/engine.json` → `counts`** — `/health` warns when this
+> table, the docs, or repo reality drift from it. Numbers below are the 2026-07-02 snapshot.
+
+| Component       | Count                              | Location                                 |
+| --------------- | ---------------------------------- | ---------------------------------------- |
+| CLAUDE.md files | 3 layers                           | ~/.claude/, CLAUDE.md, .claude/CLAUDE.md |
+| Agents          | 19 project + 27 user               | .claude/agents/, ~/.claude/agents/       |
+| Skills          | 3 project + 23 user                | .claude/skills/, ~/.claude/skills/       |
+| MCP Servers     | 27 project + 19 user               | .claude/mcp.json, ~/.claude/mcp.json     |
+| Rules           | 3 project + 29 domain              | .claude/rules/                           |
+| Hooks           | 5 events                           | .claude/settings.json                    |
+| Workflows       | 2 executable                       | .claude/workflows/                       |
+| Pattern cards   | 11                                 | .claude/patterns/cards/                  |
+| Keywords        | ~114 (registry rework in progress) | .claude/CLAUDE.md                        |
 
 ---
 

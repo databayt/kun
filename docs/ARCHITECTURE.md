@@ -284,7 +284,7 @@ Kun coordinates 14 repositories under github.com/databayt:
 │  ├── kun (THIS — configuration engine)                          │
 │  ├── shadcn (shadcn/ui fork)                                   │
 │  ├── radix (Radix UI primitives fork)                          │
-│  ├── swift-app (iOS companion for Hogwarts)                    │
+│  ├── ios-app + android-app (mobile companions for Hogwarts)                    │
 │  ├── marketing (landing pages)                                  │
 │  ├── spma (project management, early)                          │
 │  ├── apple (design R&D)                                        │

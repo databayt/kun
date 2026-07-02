@@ -527,7 +527,7 @@ clone_parallel() {
 
 # Every machine clones the full org — any machine can be any task.
 if [[ "$ALL_REPOS" == "1" ]]; then
-    clone_parallel kun hogwarts codebase shadcn radix souq mkan shifa swift-app distributed-computer marketing
+    clone_parallel kun hogwarts codebase shadcn radix souq mkan shifa ios-app android-app crm distributed-computer marketing
 else
     clone_parallel kun hogwarts codebase
 fi

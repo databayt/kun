@@ -333,7 +333,7 @@ function Clone-Parallel([string[]]$repos) {
 
 # Every machine clones the full org — any machine can be any task.
 if (-not $EssentialsOnly) {
-    Clone-Parallel @("kun", "hogwarts", "codebase", "shadcn", "radix", "souq", "mkan", "shifa", "swift-app", "distributed-computer", "marketing")
+    Clone-Parallel @("kun", "hogwarts", "codebase", "shadcn", "radix", "souq", "mkan", "shifa", "ios-app", "android-app", "crm", "distributed-computer", "marketing")
 } else {
     Clone-Parallel @("kun", "hogwarts", "codebase")
 }

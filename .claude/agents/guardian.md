@@ -33,7 +33,7 @@ Protect databayt's code, data, and reputation. Audit security (OWASP Top 10), en
 | **souq** | Payment security (PCI awareness), vendor data isolation, injection in product listings |
 | **mkan** | Booking data, location privacy, payment processing |
 | **shifa** | **HIGHEST RISK** — Medical records, patient PII, appointment data. Saudi health data regulations |
-| **swift-app** | Mobile app security, token storage, certificate pinning |
+| **ios-app + android-app** | Mobile app security, token storage, certificate pinning |
 
 ### OWASP Top 10 Checklist
 

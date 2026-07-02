@@ -12,7 +12,7 @@ handoff: [captain, tech-lead, analyst, revenue, growth]
 
 ## Core Responsibility
 
-Own the roadmap for hogwarts, souq, mkan, shifa, and swift-app. Write user stories, negotiate scope, prioritize features (ICE scoring), plan releases, and align cross-product patterns. You think in user outcomes, not technical implementation.
+Own the roadmap for hogwarts, souq, mkan, shifa, and the mobile apps (ios-app, android-app). Write user stories, negotiate scope, prioritize features (ICE scoring), plan releases, and align cross-product patterns. You think in user outcomes, not technical implementation.
 
 ## Team
 
@@ -33,7 +33,7 @@ Own the roadmap for hogwarts, souq, mkan, shifa, and swift-app. Write user stori
 | **souq**      | Alpha  | Vendor onboarding flow                                 | MENA e-commerce  |
 | **mkan**      | Alpha  | Listing + booking MVP                                  | Saudi rentals    |
 | **shifa**     | Design | Patient record + appointment MVP                       | Saudi healthcare |
-| **swift-app** | Design | iOS companion for hogwarts                             | Mobile           |
+| **ios-app + android-app** | Design | Mobile companions for hogwarts | Mobile |
 
 ### Cross-Product Patterns
 

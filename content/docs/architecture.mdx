@@ -18,14 +18,15 @@ Layer 4: Coordination & Automation
   Agent Teams | Scheduled Tasks | CI/CD | Channels
 
 Layer 3: KUN CONFIGURATION ENGINE (core value)
-  CLAUDE.md | 40 Agents | 25 Skills | 18 MCP Servers
-  8 Rules  | 5 Hooks   | 6 Memory  | 100+ Keywords
+  CLAUDE.md | Agents | Skills | MCP Servers
+  Rules | Hooks | Memory | Keywords
+  (live counts: .claude/engine.json — /health flags drift)
 
 Layer 2: Developer Surfaces (Anthropic-provided)
   CLI | VS Code | JetBrains | Desktop | Web | iOS
 
 Layer 1: Foundation (Anthropic-provided)
-  Opus 4.6 | Sonnet 4.6 | Haiku 4.5 | 1M Context | API
+  Opus 4.8 | Sonnet 5 | Haiku 4.5 | 1M Context | Subscription
 ```
 
 ## Team Roles
@@ -175,11 +176,14 @@ databayt/ (14 repos)
 ├── Engine
 │   └── kun          — Configuration engine (this repo)
 ├── Mobile & Marketing
-│   ├── swift-app    — iOS app (Swift 6/SwiftUI)
+│   ├── ios-app      — iOS app (Swift/SwiftUI)
+│   ├── android-app  — Android app (Kotlin)
 │   └── marketing    — Landing pages
 └── Other
+    ├── crm          — Self-hosted CRM (4 workspaces on *.crm.databayt.org)
     ├── spma         — Internal tool
     ├── apple        — Design R&D
+    ├── lab          — Experiments
     ├── distributed-computer — Rust/blockchain concept
     └── .github      — Org profile
 ```
@@ -201,14 +205,14 @@ databayt/ (14 repos)
 **Decision**: Use Anthropic's products as-is, configure don't build.
 **Rationale**: 4-person team can't maintain custom infrastructure alongside 5 products.
 
-### ADR-002: Opus 4.6 Default
+### ADR-002: Opus Default
 
-**Decision**: Use Opus for all agents, Haiku only for explore subagents.
+**Decision**: Use Opus (currently 4.8) for all agents, Haiku only for explore subagents.
 **Rationale**: Quality over speed for a small team where every output matters.
 
 ### ADR-003: Single Subscription Model
 
-**Decision**: One Max 20x ($200/month) shared via Desktop/Web.
+**Decision**: One Max 5x ($100/month) shared via Desktop/Web — subscription-only, no API-key spend.
 **Rationale**: $500/month burn with $5K capital = 10 months runway. Add Pro seats ($20) when revenue grows.
 
 ### ADR-004: Hogwarts-First Development
