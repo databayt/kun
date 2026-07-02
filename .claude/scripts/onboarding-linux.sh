@@ -30,6 +30,7 @@ set -e
 # ── Args ────────────────────────────────────────────────────────
 ROLE="" GIST_ID="" QUIET=0 GIT_NAME_ARG="" GIT_EMAIL_ARG=""
 ALL_REPOS=1 REPOS_DIR="$HOME" HOGWARTS_DEV=0
+AGENTS_SEL="all" DETECT_ONLY=0 DRY_RUN=0
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --quiet)            QUIET=1; shift ;;
@@ -38,6 +39,10 @@ while [[ $# -gt 0 ]]; do
         --repos-dir)        REPOS_DIR="$2"; shift 2 ;;
         --essentials-only)  ALL_REPOS=0; shift ;;
         --hogwarts-dev)     HOGWARTS_DEV=1; shift ;;
+        --agents=*)         AGENTS_SEL="${1#--agents=}"; shift ;;
+        --agents)           AGENTS_SEL="$2"; shift 2 ;;
+        --detect-only)      DETECT_ONLY=1; shift ;;
+        --dry-run)          DRY_RUN=1; shift ;;
         --*)                echo "Unknown flag: $1" >&2; exit 1 ;;
         *)
             if [[ -z "$ROLE" ]]; then ROLE="$1"
@@ -214,8 +219,31 @@ pkg_name() {
 
 echo ""
 echo -e "${BD}Computer Onboarding — Linux ($DISTRO_ID / $PKG)${NC}"
-echo -e "Role: ${G}$ROLE${NC}"
-echo ""
+echo -e "Role: ${G}$ROLE${NC} · Agents: ${G}$AGENTS_SEL${NC}"
+
+# =============================================================================
+# PHASE 0: Scan — detect first, install only the delta
+# =============================================================================
+# Agent fleet library — detection, alias block, opencode bypass config.
+# (Desktop rows report against /Applications on mac; on Linux the Desktop
+# lane is the optional beta — the scan simply shows it missing.)
+# shellcheck disable=SC1090
+. "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib/agents.sh"
+
+agents_detect_all
+if [[ "$DETECT_ONLY" == "1" ]]; then
+    exit 0
+fi
+if [[ "$DRY_RUN" == "1" ]]; then
+    echo -e "${BD}Dry run — a real run with --agents=$AGENTS_SEL would install:${NC}"
+    DELTA=$(agents_delta "$AGENTS_SEL")
+    if [[ -n "$DELTA" ]]; then
+        echo "$DELTA" | sed 's/^/  · /'
+    else
+        echo "  (nothing — the selected agents are already fully provisioned)"
+    fi
+    exit 0
+fi
 
 # =============================================================================
 # PHASE 1: System Foundation
@@ -533,64 +561,84 @@ else
 fi
 
 # =============================================================================
-# PHASE 5: Claude Ecosystem (no Desktop on Linux)
+# PHASE 5: Agents — c/a/o/claw fleet (no Claude Desktop on Linux; the
+# Desktop beta is manual — https://code.claude.com/docs/en/desktop-linux)
 # =============================================================================
-step "5" "Claude + Antigravity — Code CLIs (no Desktop on Linux)"
+step "5" "Agents — the c/a/o/claw fleet (selected: $AGENTS_SEL)"
 
 # Claude Code CLI — native installer (auto-updates in background, per
 # code.claude.com/docs/en/setup). curl install.sh is idempotent: re-runs detect
 # existing install and just refresh.
-if ! command -v claude >/dev/null 2>&1; then
-    info "Installing Claude Code CLI..."
-    curl -fsSL https://claude.ai/install.sh | bash >/dev/null 2>&1
-    export PATH="$HOME/.local/bin:$PATH"
-    if ! grep -q ".local/bin" "$HOME/.bashrc" 2>/dev/null; then
-        printf '\n# Claude Code\nexport PATH="$HOME/.local/bin:$PATH"\n' >> "$HOME/.bashrc"
+if agents_selected_contains "$AGENTS_SEL" code; then
+    if ! command -v claude >/dev/null 2>&1; then
+        info "Installing Claude Code CLI..."
+        curl -fsSL https://claude.ai/install.sh | bash >/dev/null 2>&1
+        export PATH="$HOME/.local/bin:$PATH"
+        if ! grep -q ".local/bin" "$HOME/.bashrc" 2>/dev/null; then
+            printf '\n# Claude Code\nexport PATH="$HOME/.local/bin:$PATH"\n' >> "$HOME/.bashrc"
+        fi
+        pass "Claude Code CLI installed ($(claude --version 2>/dev/null | head -1))"
+    else
+        pass "Claude Code CLI ($(claude --version 2>/dev/null | head -1)) — auto-updates in background"
     fi
-    pass "Claude Code CLI installed ($(claude --version 2>/dev/null | head -1))"
 else
-    pass "Claude Code CLI ($(claude --version 2>/dev/null | head -1)) — auto-updates in background"
+    info "Claude Code skipped (not in --agents)"
 fi
 
 # Antigravity CLI — secondary agent (`agy`). Fallback when Claude Code is
 # unavailable + handles easy/cheap tasks (Gemini Flash). Idempotent installer,
 # lands in ~/.local/bin (already on PATH from the Claude step above).
-if ! command -v agy >/dev/null 2>&1; then
-    info "Installing Antigravity CLI (secondary agent)..."
-    curl -fsSL https://antigravity.google/cli/install.sh | bash >/dev/null 2>&1
-    export PATH="$HOME/.local/bin:$PATH"
-    if command -v agy >/dev/null 2>&1; then
-        pass "Antigravity CLI installed ($(agy --version 2>/dev/null | head -1))"
+if agents_selected_contains "$AGENTS_SEL" agy; then
+    if ! command -v agy >/dev/null 2>&1; then
+        info "Installing Antigravity CLI (secondary agent)..."
+        curl -fsSL https://antigravity.google/cli/install.sh | bash >/dev/null 2>&1
+        export PATH="$HOME/.local/bin:$PATH"
+        if command -v agy >/dev/null 2>&1; then
+            pass "Antigravity CLI installed ($(agy --version 2>/dev/null | head -1))"
+        else
+            info "Antigravity CLI not ready (secondary agent — optional); re-run later or see docs/antigravity"
+        fi
     else
-        info "Antigravity CLI not ready (secondary agent — optional); re-run later or see docs/antigravity"
+        pass "Antigravity CLI ($(agy --version 2>/dev/null | head -1))"
     fi
-else
-    pass "Antigravity CLI ($(agy --version 2>/dev/null | head -1))"
 fi
 
-# Launcher functions in shell rc (bash + zsh if present):
-#   c → Claude Code (primary)   ·   a → Antigravity (secondary)
+# opencode — tertiary agent. Bypass is CONFIG-LEVEL (no flag): merged into
+# ~/.config/opencode/opencode.json as "permission": "allow".
+if agents_selected_contains "$AGENTS_SEL" opencode; then
+    if ! command -v opencode >/dev/null 2>&1; then
+        info "Installing opencode (tertiary agent)..."
+        curl -fsSL https://opencode.ai/install | bash >/dev/null 2>&1 || info "opencode installer failed — optional lane, continuing"
+        export PATH="$HOME/.opencode/bin:$PATH"
+    fi
+    if command -v opencode >/dev/null 2>&1; then
+        agents_configure_opencode
+        pass "opencode ($(opencode --version 2>/dev/null | head -1)) · bypass = permission:allow"
+    fi
+fi
+
+# OpenClaw — OPTIONAL assistant gateway (chat channels), not a coding CLI.
+# npm install only; daemon onboarding is interactive and never runs headless.
+if agents_selected_contains "$AGENTS_SEL" openclaw; then
+    if ! command -v openclaw >/dev/null 2>&1; then
+        npm install -g openclaw@latest --silent >/dev/null 2>&1 && \
+            pass "OpenClaw installed ($(openclaw --version 2>/dev/null | head -1))" || \
+            info "OpenClaw install failed — optional gateway, continuing"
+        command -v openclaw >/dev/null 2>&1 && \
+            info "OpenClaw daemon not started — interactive by design. Later: openclaw onboard --install-daemon"
+    else
+        pass "OpenClaw ($(openclaw --version 2>/dev/null | head -1))"
+    fi
+fi
+
+# Launchers — one managed block in the shell rc (c / a / o / claw per selection).
+# Migrates the legacy function lines; idempotent across re-runs.
 for RC in "$HOME/.bashrc" "$HOME/.zshrc"; do
     [[ ! -f "$RC" ]] && continue
-    # Drop the deprecated `cc` helper if an earlier run added it.
     grep -q "function cc " "$RC" 2>/dev/null && sed -i '/function cc /d' "$RC"
-    if ! grep -q "function c " "$RC" 2>/dev/null; then
-        cat >> "$RC" <<'CFUNC'
-
-# Claude Code (primary)
-function c { claude --dangerously-skip-permissions "$@"; }
-[ -f "$HOME/.claude/.env" ] && set -a && . "$HOME/.claude/.env" && set +a
-CFUNC
-    fi
-    if ! grep -q "function a " "$RC" 2>/dev/null; then
-        cat >> "$RC" <<'AFUNC'
-
-# Antigravity (secondary)
-function a { agy --dangerously-skip-permissions "$@"; }
-AFUNC
-    fi
 done
-pass "Shell helpers (c, a)"
+agents_write_alias_block "$AGENTS_SEL"
+pass "Shell launchers (managed block: c, a, o, claw per selection)"
 
 # =============================================================================
 # PHASE 6: Kun Engine
@@ -686,6 +734,8 @@ command -v pnpm >/dev/null 2>&1    && pass "pnpm"     || fail "pnpm"
 command -v gh >/dev/null 2>&1      && pass "gh"       || fail "gh"
 command -v claude >/dev/null 2>&1  && pass "claude"   || fail "claude"
 command -v agy >/dev/null 2>&1      && pass "agy (secondary)" || info "agy (secondary)"
+command -v opencode >/dev/null 2>&1 && pass "opencode (tertiary)" || info "opencode (tertiary)"
+command -v openclaw >/dev/null 2>&1 && pass "openclaw (gateway)" || info "openclaw (gateway, optional)"
 
 [[ -f "$HOME/.ssh/id_ed25519" ]]    && pass "SSH key"     || fail "SSH key"
 gh auth status >/dev/null 2>&1      && pass "GitHub auth" || fail "GitHub auth"

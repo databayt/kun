@@ -27,8 +27,14 @@ param(
     [string]$GitEmail,
     [switch]$EssentialsOnly,    # default: clone all org repos
     [switch]$HogwartsDev,        # optional: set up hogwarts local dev
-    [string]$ReposDir = $env:USERPROFILE
+    [string]$ReposDir = $env:USERPROFILE,
+    [string]$Agents = "all"      # all | csv of code,desktop,agy,opencode,openclaw
 )
+
+function Agent-Selected([string]$name) {
+    if ($Agents -eq "all") { return $true }
+    return (",$Agents," -like "*,$name,*")
+}
 
 $ErrorActionPreference = "Stop"
 
@@ -400,7 +406,56 @@ if ($profileText -notmatch 'function a ') {
 function a { agy --dangerously-skip-permissions $args }
 '@
 }
-Pass "Shell helpers (c, a)"
+
+# opencode — tertiary agent. Bypass is CONFIG-LEVEL (no flag exists): write
+# "permission": "allow" into ~/.config/opencode/opencode.json (merged).
+if (Agent-Selected "opencode") {
+    if (-not (Get-Command opencode -EA SilentlyContinue)) {
+        npm install -g opencode-ai@latest --silent 2>$null | Out-Null
+    }
+    if (Get-Command opencode -EA SilentlyContinue) {
+        $ocDir = "$HOME_DIR\.config\opencode"
+        $ocCfg = "$ocDir\opencode.json"
+        New-Item -ItemType Directory -Force -Path $ocDir | Out-Null
+        $oc = @{}
+        if (Test-Path $ocCfg) {
+            try { $oc = Get-Content $ocCfg -Raw | ConvertFrom-Json -AsHashtable } catch { $oc = @{} }
+        }
+        if (-not $oc.ContainsKey('$schema')) { $oc['$schema'] = "https://opencode.ai/config.json" }
+        $oc['permission'] = "allow"
+        $oc | ConvertTo-Json -Depth 8 | Set-Content $ocCfg
+        Pass "opencode ($((opencode --version 2>$null | Select-Object -First 1))) · bypass = permission:allow"
+        $profileText = Get-Content $PROFILE -Raw -EA SilentlyContinue
+        if ($profileText -notmatch 'function o ') {
+            Add-Content $PROFILE @'
+
+# opencode (tertiary — bypass lives in ~/.config/opencode/opencode.json)
+function o { opencode $args }
+'@
+        }
+    }
+}
+
+# OpenClaw — OPTIONAL assistant gateway (chat channels), not a coding CLI.
+# npm install only; the daemon onboarding is interactive — run it yourself:
+#   openclaw onboard --install-daemon
+if (Agent-Selected "openclaw") {
+    if (-not (Get-Command openclaw -EA SilentlyContinue)) {
+        npm install -g openclaw@latest --silent 2>$null | Out-Null
+    }
+    if (Get-Command openclaw -EA SilentlyContinue) {
+        Pass "OpenClaw ($((openclaw --version 2>$null | Select-Object -First 1))) — daemon setup stays manual (interactive)"
+        $profileText = Get-Content $PROFILE -Raw -EA SilentlyContinue
+        if ($profileText -notmatch 'function claw ') {
+            Add-Content $PROFILE @'
+
+# OpenClaw gateway (optional)
+function claw { openclaw $args }
+'@
+        }
+    }
+}
+Pass "Shell helpers (c, a, o, claw per selection)"
 
 # Wire Claude Desktop MCP config to the same servers Claude Code uses
 $desktopCfgDir = "$env:APPDATA\Claude"
