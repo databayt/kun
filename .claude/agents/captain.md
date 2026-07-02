@@ -179,7 +179,9 @@ Source of truth: `.claude/memory/team.json` and `.claude/memory/capacity.json`. 
 | **souq**                  | Alpha (MVP, awaiting PMF)                  | TBD                             | Commission + subscription                                    | Abdout (TBD: Ibrahim?) |
 | **mkan**                  | Alpha (Phase 1 done, awaiting soft launch) | TBD                             | Booking commission                                           | Abdout (TBD)           |
 | **shifa**                 | Design (paused)                            | TBD                             | Per-clinic subscription (HIGHEST RISK product — medical PII) | —                      |
-| **ios-app / android-app** | Design                                     | N/A (companion)                 | Bundled with products                                        | —                      |
+| **ios-app / android-app** | Design                                     | N/A (companion)                 | Bundled with products                                        | Ibrahim                |
+| **sijillee**              | Planned (CRM workspace live, repo pending) | TBD                             | TBD                                                          | —                      |
+| **moallimee**             | Planned (CRM workspace live, repo pending) | TBD                             | TBD                                                          | —                      |
 | **kun**                   | Phase 2 (Team Engine) active               | Databayt (internal)             | Future: dev tool subscription / OSS sponsorship              | Abdout                 |
 
 ---

@@ -1,7 +1,7 @@
 {
   "$schema": "repository-registry-schema",
   "description": "Track all databayt organization repositories for deep reference",
-  "lastUpdated": "2026-01-17T00:00:00Z",
+  "lastUpdated": "2026-07-02T00:00:00Z",
   "organization": {
     "name": "databayt",
     "url": "https://github.com/databayt",
@@ -15,7 +15,13 @@
         "url": "https://github.com/databayt/codebase",
         "local": "/Users/abdout/codebase",
         "description": "Component library and patterns source of truth",
-        "stack": ["Next.js 16", "React 19", "TypeScript 5", "Tailwind CSS 4", "Prisma 6"],
+        "stack": [
+          "Next.js 16",
+          "React 19",
+          "TypeScript 5",
+          "Tailwind CSS 4",
+          "Prisma 6"
+        ],
         "purpose": ["patterns", "agents", "templates", "blocks", "registry"],
         "agent": null,
         "priority": 1,
@@ -77,7 +83,12 @@
         "description": "Education SaaS platform - multi-tenant, LMS, billing",
         "stack": ["Next.js", "Prisma", "NextAuth", "Stripe"],
         "purpose": ["multi-tenant", "lms", "sis", "billing", "sms"],
-        "patterns": ["multi-tenant-architecture", "role-based-access", "stripe-billing", "subdomain-routing"],
+        "patterns": [
+          "multi-tenant-architecture",
+          "role-based-access",
+          "stripe-billing",
+          "subdomain-routing"
+        ],
         "agent": "hogwarts",
         "priority": 2,
         "status": "active",
@@ -92,7 +103,12 @@
         "description": "E-commerce marketplace - multi-vendor",
         "stack": ["Next.js", "Redux Toolkit", "Tailwind CSS"],
         "purpose": ["e-commerce", "multi-vendor", "cart", "checkout"],
-        "patterns": ["redux-cart", "vendor-dashboard", "product-catalog", "order-management"],
+        "patterns": [
+          "redux-cart",
+          "vendor-dashboard",
+          "product-catalog",
+          "order-management"
+        ],
         "agent": "souq",
         "priority": 2,
         "status": "active",
@@ -107,12 +123,21 @@
         "description": "Rental marketplace - Airbnb-style",
         "stack": ["Next.js", "Prisma", "NextAuth", "Docker"],
         "purpose": ["rentals", "booking", "listings", "search"],
-        "patterns": ["property-listings", "booking-system", "availability-calendar", "search-filters"],
+        "patterns": [
+          "property-listings",
+          "booking-system",
+          "availability-calendar",
+          "search-filters"
+        ],
         "agent": "mkan",
         "priority": 2,
         "status": "active",
         "lastSync": null,
-        "watchPaths": ["src/components/search/", "src/lib/booking.ts", "prisma/models/"]
+        "watchPaths": [
+          "src/components/search/",
+          "src/lib/booking.ts",
+          "prisma/models/"
+        ]
       },
       {
         "id": "shifa",
@@ -122,22 +147,61 @@
         "description": "Medical/healthcare platform",
         "stack": ["Next.js", "Prisma", "TypeScript"],
         "purpose": ["healthcare", "appointments", "patients", "prescriptions"],
-        "patterns": ["appointment-scheduling", "patient-records", "doctor-schedule", "prescription-system"],
+        "patterns": [
+          "appointment-scheduling",
+          "patient-records",
+          "doctor-schedule",
+          "prescription-system"
+        ],
         "agent": "shifa",
         "priority": 2,
         "status": "active",
         "lastSync": null,
-        "watchPaths": ["src/app/clinic/", "src/lib/appointments.ts", "prisma/models/"]
+        "watchPaths": [
+          "src/app/clinic/",
+          "src/lib/appointments.ts",
+          "prisma/models/"
+        ]
+      },
+      {
+        "id": "sijillee",
+        "name": "Sijillee",
+        "url": null,
+        "local": null,
+        "description": "Sijillee — new product; repo not yet in the org. CRM workspace live at sijillee.crm.databayt.org; public catalog: databayt.org/en",
+        "stack": ["Next.js 16", "React 19", "Prisma 6", "TypeScript 5"],
+        "purpose": ["pre-launch"],
+        "crm": "https://sijillee.crm.databayt.org",
+        "agent": null,
+        "priority": 3,
+        "status": "planned",
+        "lastSync": null,
+        "watchPaths": []
+      },
+      {
+        "id": "moallimee",
+        "name": "Moallimee",
+        "url": null,
+        "local": null,
+        "description": "Moallimee — new product; repo not yet in the org. CRM workspace live at moallimee.crm.databayt.org; public catalog: databayt.org/en",
+        "stack": ["Next.js 16", "React 19", "Prisma 6", "TypeScript 5"],
+        "purpose": ["pre-launch"],
+        "crm": "https://moallimee.crm.databayt.org",
+        "agent": null,
+        "priority": 3,
+        "status": "planned",
+        "lastSync": null,
+        "watchPaths": []
       }
     ],
     "specialized": [
       {
-        "id": "swift-app",
-        "name": "Swift App",
-        "url": "https://github.com/databayt/swift-app",
-        "local": "/Users/abdout/oss/swift-app",
-        "description": "iOS application (Hogwarts mobile)",
-        "stack": ["Swift 5.9+", "SwiftUI", "iOS 17+"],
+        "id": "ios-app",
+        "name": "iOS App",
+        "url": "https://github.com/databayt/ios-app",
+        "local": "/Users/abdout/oss/ios-app",
+        "description": "iOS application (Hogwarts mobile) — successor of swift-app",
+        "stack": ["Swift 6", "SwiftUI", "iOS 18+"],
         "purpose": ["ios", "mobile", "swiftui"],
         "patterns": ["mvvm", "clean-architecture", "offline-sync", "bilingual"],
         "agent": null,
@@ -147,6 +211,35 @@
         "watchPaths": ["Sources/"]
       },
       {
+        "id": "android-app",
+        "name": "Android App",
+        "url": "https://github.com/databayt/android-app",
+        "local": "/Users/abdout/oss/android-app",
+        "description": "Android application (Hogwarts mobile)",
+        "stack": ["Kotlin", "Jetpack Compose"],
+        "purpose": ["android", "mobile", "compose"],
+        "patterns": ["mirrors-ios-module-structure", "bilingual"],
+        "agent": null,
+        "priority": 3,
+        "status": "active",
+        "lastSync": null,
+        "watchPaths": ["app/src/"]
+      },
+      {
+        "id": "crm",
+        "name": "CRM",
+        "url": "https://github.com/databayt/crm",
+        "local": "/Users/abdout/oss/crm",
+        "description": "Self-hosted CRM — 4 product workspaces on *.crm.databayt.org (see memory/crm.json)",
+        "stack": ["TypeScript"],
+        "purpose": ["crm", "sales-pipeline", "multi-workspace"],
+        "agent": null,
+        "priority": 3,
+        "status": "active",
+        "lastSync": null,
+        "watchPaths": []
+      },
+      {
         "id": "distributed-computer",
         "name": "Distributed Computer",
         "url": "https://github.com/databayt/distributed-computer",
@@ -154,7 +247,11 @@
         "description": "Rust infrastructure for fair compensation",
         "stack": ["Rust", "libp2p", "DHT"],
         "purpose": ["p2p", "token", "infrastructure"],
-        "patterns": ["rust-crate-organization", "p2p-networking", "token-economics"],
+        "patterns": [
+          "rust-crate-organization",
+          "p2p-networking",
+          "token-economics"
+        ],
         "agent": null,
         "priority": 3,
         "status": "active",
@@ -179,14 +276,24 @@
     ]
   },
   "keywords": {
-    "from codebase": {"repo": "codebase", "action": "clone-pattern"},
-    "from shadcn": {"repo": "shadcn", "action": "use-component"},
-    "from radix": {"repo": "radix", "action": "use-primitive"},
-    "like hogwarts": {"repo": "hogwarts", "action": "reference-patterns"},
-    "like souq": {"repo": "souq", "action": "reference-patterns"},
-    "like mkan": {"repo": "mkan", "action": "reference-patterns"},
-    "like shifa": {"repo": "shifa", "action": "reference-patterns"},
-    "repositories": {"action": "show-documentation"}
+    "from codebase": { "repo": "codebase", "action": "clone-pattern" },
+    "from shadcn": { "repo": "shadcn", "action": "use-component" },
+    "from radix": { "repo": "radix", "action": "use-primitive" },
+    "like hogwarts": { "repo": "hogwarts", "action": "reference-patterns" },
+    "like souq": { "repo": "souq", "action": "reference-patterns" },
+    "like mkan": { "repo": "mkan", "action": "reference-patterns" },
+    "like shifa": { "repo": "shifa", "action": "reference-patterns" },
+    "like sijillee": {
+      "repo": "sijillee",
+      "action": "reference-product",
+      "note": "repo pending — CRM workspace + catalog entry only"
+    },
+    "like moallimee": {
+      "repo": "moallimee",
+      "action": "reference-product",
+      "note": "repo pending — CRM workspace + catalog entry only"
+    },
+    "repositories": { "action": "show-documentation" }
   },
   "monitoring": {
     "enabled": true,
@@ -224,13 +331,13 @@
     "lastFullSync": null,
     "syncScript": "~/.claude/scripts/sync-repos.sh",
     "repos": {
-      "codebase": {"synced": false, "hash": null},
-      "shadcn": {"synced": false, "hash": null},
-      "radix": {"synced": false, "hash": null},
-      "hogwarts": {"synced": false, "hash": null},
-      "souq": {"synced": false, "hash": null},
-      "mkan": {"synced": false, "hash": null},
-      "shifa": {"synced": false, "hash": null}
+      "codebase": { "synced": false, "hash": null },
+      "shadcn": { "synced": false, "hash": null },
+      "radix": { "synced": false, "hash": null },
+      "hogwarts": { "synced": false, "hash": null },
+      "souq": { "synced": false, "hash": null },
+      "mkan": { "synced": false, "hash": null },
+      "shifa": { "synced": false, "hash": null }
     }
   },
   "preferences": {

@@ -86,7 +86,7 @@ Claude routes these to the right agent + MCP without a dedicated command.
   **Build**: `error`, `lint`, `format`, `type-check`, `deps`, `outdated`
   **React perf**: `parallelize`, `bundle`, `lazy`, `suspense`, `memo`, `streaming`, `dedup`
   **Services**: `github`, `figma`, `linear`, `slack`, `stripe`, `vercel`, `sentry`, `neon`, `analytics`, `markitdown` (aliases `convert`/`markdown` → file or URL to Markdown)
-  **Cross-repo**: `from codebase`, `from shadcn`, `like hogwarts`, `like souq`, `like mkan`, `like shifa`
+  **Cross-repo**: `from codebase`, `from shadcn`, `like hogwarts`, `like souq`, `like mkan`, `like shifa`, `like sijillee`, `like moallimee` (last two: repo pending — CRM + catalog only)
   **Operations**: `weekly`, `monitor`, `incident`, `credentials`
   **Intelligence**: `learn`, `analyze`, `conventions`, `health`, `patterns`, `drift`, `sync` (→ `/sync` — Anthropic/stack/services/practice releases)
   **Decisions/CEO** (passive — no slash): `canon` + any leadership/strategy decision (`hiring`, `pricing`, `positioning`, `strategy`, `prioritize`, `fundraise`, `runway`, `customer development`, "should we build…", "what do I do about…") → consult `docs/CANON.md`, surface the book + one operating move grounded in principle `#N`

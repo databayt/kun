@@ -21,7 +21,7 @@ The compound orchestrator. Chains all pipeline stages to take a feature from ide
 Parse arguments:
 
 - First word = feature name (or `#N` for existing issue)
-- Second word = product scope (hogwarts, souq, mkan, shifa) — optional
+- Second word = product scope — optional. Valid ids = any product in `.claude/memory/repositories.json` (currently hogwarts, souq, mkan, shifa, sijillee, moallimee); products with `status: "planned"` have no repo yet, so scope them for naming/spec only and say so.
 - `--from <stage>` = skip to a specific stage (idea, spec, plan, tasks, schema, code, wire, check, ship, watch)
 
 ### Pipeline
@@ -179,12 +179,13 @@ If any stage fails after max retries:
 
 ### Product Context
 
-When a product is specified, read that product's context:
+Product scope is data-driven — resolve it from `.claude/memory/repositories.json`:
 
-- `hogwarts` → read `/Users/abdout/hogwarts/CLAUDE.md`, use hogwarts agent patterns (multi-tenant, subdomain routing)
-- `souq` → read `/Users/abdout/souq/CLAUDE.md`, use souq agent patterns (multi-vendor marketplace)
-- `mkan` → read `/Users/abdout/mkan/CLAUDE.md`, use mkan agent patterns (rental marketplace)
-- `shifa` → read `/Users/abdout/shifa/CLAUDE.md`, use shifa agent patterns (medical platform)
+1. Look up the product id under `repositories.products`.
+2. If it has a `local` path, read `<local>/CLAUDE.md` and use the matching product agent (hogwarts → multi-tenant/subdomain patterns, souq → multi-vendor marketplace, mkan → rental marketplace, shifa → medical platform).
+3. If `status: "planned"` (no repo yet — e.g. sijillee, moallimee), there is no codebase to touch: run the idea/spec stages against the kun repo, note the pending repo in the issue, and stop before schema.
+
+Adding a future product = one entry in `repositories.json`; this command needs no edits.
 
 ### Exit Gate
 
