@@ -11,6 +11,29 @@
     "GITHUB_USER": "abdout"
   },
   "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/session-engine-context.sh\""
+          }
+        ]
+      }
+    ],
+    "ConfigChange": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"${CLAUDE_PROJECT_DIR}\" && { node .claude/scripts/generate-vocab.mjs --check >/dev/null 2>&1 || echo 'vocabulary drifted — run: node .claude/scripts/generate-vocab.mjs'; bash .claude/scripts/build-plugin.sh --check >/dev/null 2>&1 || echo 'plugins drifted — run: bash .claude/scripts/build-plugin.sh'; }; exit 0",
+            "async": true
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
       {
         "matcher": "Bash(pnpm dev)",
