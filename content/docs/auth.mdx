@@ -1,0 +1,156 @@
+---
+title: Auth
+description: How Claude logs into websites and CLIs on your behalf — the session vault, greenlist, and Keychain identities
+---
+
+# Auth
+
+How Claude Code authenticates to any web service or CLI as you — permanently, in the
+background, without you watching it struggle at a login wall.
+
+The one idea: **reuse sessions, don't replay passwords.** Automated password logins from a blank
+browser profile trip CAPTCHAs and one-time codes because they look exactly like a bot. Instead,
+Claude drives the *same* persistent browser you log into by hand. Log into a site once — CAPTCHA
+and OTP included, as a human — and the session persists for weeks. Claude reuses it with zero
+re-login.
+
+This is a **user-level** capability: it lives in the kun source of truth and installs to
+`~/.claude/`, so every project (mkan, hogwarts, souq, …) inherits it.
+
+## The session vault
+
+A single persistent Chrome — the "session vault" — runs in the background and is both the
+browser you log into and the browser Claude attaches to.
+
+| Piece | What it is | Path |
+|-------|-----------|------|
+| **LaunchAgent** | Keeps the vault Chrome alive on `127.0.0.1:9222` across reboots | `~/Library/LaunchAgents/com.databayt.chrome-session.plist` |
+| **Vault profile** | Persistent Chrome profile holding your sessions | `~/.claude/chrome-debug-profile` |
+| **MCP wrapper** | Auto-attaches the `chrome-devtools` MCP to the vault (falls back to a throwaway profile if the vault is down, so tooling never breaks) | `~/.claude/bin/chrome-devtools-mcp.sh` |
+| **Greenlist** | The set of sites Claude has live-session access to | `~/.claude/greenlist.json` (URLs only) |
+| **Keychain** | Encrypted store for the two identities + API keys | macOS login Keychain |
+
+Because the MCP attaches to the vault, when Claude drives Chrome it *is* the browser where you
+logged in. No separate profile, no fresh login, no CAPTCHA.
+
+## Greenlisting a site
+
+"Greenlisting" = opening a site once in the vault and logging in by hand. After that the session
+persists and Claude reuses it.
+
+```bash
+# Open a site in the vault and record it — then log in once in the window that opens
+~/.claude/bin/greenlist.sh add https://console.aws.amazon.com/  AWS
+
+# See what Claude can reach
+~/.claude/bin/greenlist.sh list
+
+# Show the live tabs / sessions in the vault
+~/.claude/bin/greenlist.sh probe
+
+# Just open a greenlisted site (no record)
+~/.claude/bin/greenlist.sh open https://www.airbnb.com/hosting
+```
+
+The manifest (`~/.claude/greenlist.json`) stores **URLs only** — never cookies or passwords.
+
+### The flow for "Claude, do X on <site>"
+
+1. Claude navigates to the site in the attached vault.
+2. If the session is live → it proceeds.
+3. If it redirects to a login wall → Claude runs `greenlist.sh add <url>` and asks you to log in
+   that once. It never re-runs an automated login on a site the vault already holds.
+
+## Managing the background agent
+
+```bash
+~/.claude/bin/chrome-session-agent.sh install     # write + load the LaunchAgent
+~/.claude/bin/chrome-session-agent.sh status      # is it loaded / is the vault up?
+~/.claude/bin/chrome-session-agent.sh uninstall   # unload + stop the vault
+```
+
+The agent starts the vault at login and restarts it if it crashes. A normal `Cmd-Q` is respected
+(it won't fight you) and comes back at next login, or immediately via `chrome-debug.sh`.
+
+<Callout type="warn">
+After first enabling the vault, **restart Claude Code once** so the `chrome-devtools` MCP picks
+up the wrapper. After that, attachment is automatic.
+</Callout>
+
+## The two identities (Keychain)
+
+Credentials live in the macOS Keychain as generic passwords — encrypted, never in a file, never
+committed. Two identities share one password.
+
+| Keychain service | Account | Role |
+|------------------|---------|------|
+| `databayt-primary` | `osmanabdout@hotmail.com` | Default for most logins |
+| `databayt-secondary` | `osmanabdout.jr@gmail.com` | Google ecosystem + fallback |
+
+```bash
+# Retrieve at point of use (never echoed to a file or the chat)
+security find-generic-password -s databayt-primary -w
+
+# Seed / rotate
+security add-generic-password -s databayt-primary -a "osmanabdout@hotmail.com" -w "<pwd>" -U
+```
+
+With the session vault, these are mostly a **fallback** — for form-fills on low-protection sites,
+signups, and API/CLI keys. Most greenlisted sites need no stored password at all.
+
+## CLI authentication
+
+Command-line tools persist their own tokens after one login (in the Keychain or their config),
+so they authenticate once and stay authenticated:
+
+| Tool | Login |
+|------|-------|
+| `gh` | `gh auth login` (keyring) |
+| `vercel` | `vercel login` |
+| `neonctl` | `neonctl auth` |
+| `aws` | `aws configure` / SSO |
+| `gcloud` | `bash ~/.claude/bin/gcloud-mcp.sh auth-login` (gmail identity) |
+| `stripe` | `stripe login` |
+
+## OTP / CAPTCHA
+
+The one irreducible step. Bot-protected sites challenge automated logins with a puzzle CAPTCHA
+and/or an email code. Claude **never tries to solve a CAPTCHA**. Because the vault login is done
+by a human, this only happens **once per site**:
+
+- **CAPTCHA** → solve it in the open vault window (it's your normal login).
+- **Email OTP** → the code goes to the identity's inbox (`osmanabdout@hotmail.com` for the
+  primary). Enter it in the vault window, or hand it to Claude. Hotmail isn't machine-readable
+  here, so this code always comes from you.
+
+## Security posture
+
+- The vault exposes a debugging port on `127.0.0.1` only (localhost). On a trusted personal
+  machine this is acceptable; any local process could attach, so don't run it on shared machines.
+- Credentials are read from the Keychain at point of use, never written to a repo, log, or chat.
+- The greenlist manifest holds URLs only — no cookies, no secrets.
+- Sessions harvested for asset-fetching are transient; used in the moment, never persisted.
+
+## File map
+
+Source of truth is `kun/.claude/`; the installer copies to `~/.claude/`.
+
+```
+kun/.claude/
+├── skills/auth/SKILL.md            # the playbook Claude follows
+├── bin/
+│   ├── chrome-session-agent.sh     # LaunchAgent manager
+│   ├── chrome-debug.sh             # canonical vault launcher
+│   ├── chrome-devtools-mcp.sh      # MCP wrapper (auto-attach)
+│   ├── greenlist.sh                # add/list/open/probe sites
+│   ├── keychain-mcp.sh             # Keychain read/write helper
+│   └── gcloud-mcp.sh               # gcloud OAuth helper
+└── mcp.json                        # chrome-devtools → the wrapper
+
+~/.claude/
+├── greenlist.json                  # the greenlist manifest (URLs only)
+└── chrome-debug-profile/           # the persistent vault profile
+```
+
+See also: [Credentials](/docs/credentials) (API-key management), [MCP](/docs/mcp),
+[Skills](/docs/skills).
