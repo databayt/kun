@@ -66,10 +66,25 @@ elif [[ "$ROLE" == "ops" && -f "$KUN_DIR/.claude/agents/_index-ops.md" ]]; then
     cp "$KUN_DIR/.claude/agents/_index-ops.md" "$CLAUDE_DIR/agents/_index.md"
 fi
 
-# Copy commands/skills based on role
-echo "Installing skills for $ROLE..."
+# Copy skills (all roles get the full skill set — skills self-gate via when_to_use)
+echo "Installing skills..."
+if [ -d "$KUN_DIR/.claude/skills" ]; then
+    mkdir -p "$CLAUDE_DIR/skills"
+    cp -R "$KUN_DIR/.claude/skills/"* "$CLAUDE_DIR/skills/" 2>/dev/null || true
+fi
+
+# Copy bin helpers (keychain-mcp.sh, gcloud-mcp.sh — auth skill depends on these)
+echo "Installing bin helpers..."
+if [ -d "$KUN_DIR/.claude/bin" ]; then
+    mkdir -p "$CLAUDE_DIR/bin"
+    cp "$KUN_DIR/.claude/bin/"*.sh "$CLAUDE_DIR/bin/" 2>/dev/null || true
+    chmod +x "$CLAUDE_DIR/bin/"*.sh 2>/dev/null || true
+fi
+
+# Copy commands based on role
+echo "Installing commands for $ROLE..."
 if [[ "$ROLE" == "engineer" ]]; then
-    # Engineers get all skills
+    # Engineers get all commands
     cp "$KUN_DIR/.claude/commands/"*.md "$CLAUDE_DIR/commands/" 2>/dev/null || true
 elif [[ "$ROLE" == "business" ]]; then
     # Business: docs, repos, screenshot, codebase + proposal, pricing, weekly
@@ -157,6 +172,18 @@ if [[ "$ROLE" == "engineer" ]]; then
             echo -e "${YELLOW}SSH clone failed, trying HTTPS...${NC}"
             git clone https://github.com/databayt/codebase.git "$CODEBASE_DIR" || true
         }
+    fi
+fi
+
+# Keychain readiness check for the auth skill (macOS only)
+if command -v security &> /dev/null; then
+    if ! security find-generic-password -s databayt-primary -w &> /dev/null; then
+        echo -e "${YELLOW}Auth skill: Keychain identities not seeded.${NC}"
+        echo "  Seed once (values go into the encrypted Keychain, never a file):"
+        echo '    security add-generic-password -s databayt-primary   -a "osmanabdout@hotmail.com"  -w "<password>" -U'
+        echo '    security add-generic-password -s databayt-secondary -a "osmanabdout.jr@gmail.com" -w "<password>" -U'
+    else
+        echo -e "${GREEN}Auth skill: Keychain identities present.${NC}"
     fi
 fi
 
