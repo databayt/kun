@@ -93,20 +93,27 @@ sessions. A successful login therefore only has to happen **once per service** �
 navigating to a protected page just works. Check for an existing session before ever filling a
 login form.
 
-### CAPTCHA on automated login → use the real-Chrome path
+### CAPTCHA / OTP on automated login → the real-Chrome path (auto-wired)
 
-Bot-detecting sites (Airbnb, Google, Cloudflare-fronted apps) may throw a puzzle/"security
-check" CAPTCHA when an automation profile logs in. Per the rules below, **never try to solve a
-CAPTCHA** — instead switch to the identity Abdout already holds in a real browser:
+Bot-detecting sites (Airbnb, Google, Cloudflare-fronted apps) throw a puzzle/"security check"
+CAPTCHA — and often an email OTP ("Confirm it's you") — when an automation profile logs in.
+**Never try to solve a CAPTCHA.** Instead let the login happen once in a real Chrome, then reuse
+its session automatically:
 
-1. Preferred — **attach to Abdout's real Chrome** where he's already logged in manually:
-   `bash ~/.claude/bin/chrome-debug.sh` launches Chrome with remote debugging on `:9222` using a
-   dedicated persistent profile. Log into it once (by hand, no CAPTCHA because it's a normal
-   browser), then add `"--browserUrl", "http://127.0.0.1:9222"` to the chrome-devtools MCP args
-   in `mcp.json` and restart Claude Code. The automation now inherits that live session — zero
-   automated login, zero CAPTCHA.
-2. Fallback — leave the visible automation window on the CAPTCHA and ask Abdout to complete the
-   one-time "security check" in it; the persistent profile keeps the resulting session.
+1. `bash ~/.claude/bin/chrome-debug.sh` launches Chrome with remote debugging on `:9222` using a
+   dedicated persistent profile (`~/.claude/chrome-debug-profile`), opening the target's login.
+2. Abdout completes the login **by hand, once** — including any CAPTCHA and the email OTP (the
+   code goes to `osmanabdout@hotmail.com` for the primary identity, which is not machine-readable
+   here). This is his normal manual login; the persistent profile keeps the session.
+3. The chrome-devtools MCP command is the wrapper `~/.claude/bin/chrome-devtools-mcp.sh`, which
+   **auto-attaches** to `:9222` whenever that Chrome is running (else falls back to the default
+   profile). So after logging in, just restart Claude Code — no `mcp.json` edit needed — and the
+   automation drives the authenticated site directly.
+
+You (Claude) can pre-fill the email/password over CDP with Playwright
+(`chromium.connectOverCDP('http://127.0.0.1:9222')`, credentials from Keychain via env) to save
+Abdout typing, but the CAPTCHA + OTP still need him. Detect the OTP screen ("Confirm it's you"),
+report which identity's inbox holds the code, and stop for it.
 
 ### 2FA / OTP (autonomous-first)
 
