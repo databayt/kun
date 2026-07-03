@@ -13,6 +13,31 @@ This capability is global. It lives in the kun source of truth at
 `kun/.claude/skills/auth/` and is installed to `~/.claude/skills/auth/`, so **every project
 inherits it** — not just mkan.
 
+## The permanent path — the session vault (greenlist)
+
+**Prefer this over automated form-fill for anything bot-protected** (Airbnb, AWS, Namecheap,
+Facebook, Oracle, Google consoles, hogwarts, …). Automated password login from a blank profile
+trips CAPTCHAs and OTP because it looks like a bot. The fix is session reuse, not credentials:
+
+- A single **persistent Chrome** (the "session vault") runs in the background on
+  `127.0.0.1:9222`, kept alive by a LaunchAgent (`~/.claude/bin/chrome-session-agent.sh`,
+  label `com.databayt.chrome-session`). Its profile is `~/.claude/chrome-debug-profile`.
+- The chrome-devtools MCP command is the wrapper `~/.claude/bin/chrome-devtools-mcp.sh`, which
+  **auto-attaches** to that vault. So Claude drives the same browser Abdout logs into by hand.
+- **Greenlisting a site** = `bash ~/.claude/bin/greenlist.sh add <url>` opens it in the vault;
+  Abdout logs in **once** (CAPTCHA + OTP included, as a human); the session persists for
+  weeks/months. Claude reuses it with zero re-login. `greenlist.sh list` shows the set;
+  `greenlist.sh probe` shows live tabs; the manifest is `~/.claude/greenlist.json` (URLs only,
+  never cookies/passwords).
+
+So the flow for "Claude, do X on <site>": check `greenlist.sh probe` / just navigate — if the
+session is live, proceed. If it 302s to a login wall, run `greenlist.sh add <url>` and ask
+Abdout to log in that once. Never re-run an automated login on a site the vault already holds.
+
+Restart Claude Code after first enabling the vault so the MCP picks up the wrapper; after that
+it's automatic. If the vault is down, the wrapper falls back to a throwaway profile (login walls
+return) — bring it back with `chrome-session-agent.sh install` or `chrome-debug.sh`.
+
 ## Credentials (macOS Keychain)
 
 Two identities, **same password**, stored as generic passwords:
