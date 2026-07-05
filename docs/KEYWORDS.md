@@ -157,6 +157,18 @@ Transfigures a document or web page into clean Markdown — PDF, Office, images,
 > 3. Write `<basename>.md` next to the source (or to `$2`; `-` prints to the session)
 > 4. Spot-check headings/tables survived — image-only PDFs need OCR, audio needs `ffmpeg`
 
+### `higgs`
+
+Generates and edits photos and videos for databayt org ads, promotions, and marketing using Higgsfield AI's models.
+
+> **The Order:**
+> **Familiar:** none | **Portal:** Higgs MCP (`higgs` via HTTP) | **Skill:** `/higgs`
+>
+> 1. Detect if the prompt outlines a photo, video, or style edit instruction.
+> 2. If a video reference URL is provided, download it locally and upload it to Higgsfield as reference.
+> 3. Call the Higgsfield CLI or MCP server tool with style prompt parameters.
+> 4. Save and return the generated image/video link to the session.
+
 ### `component`
 
 Conjures a new React component with proper structure and typing.

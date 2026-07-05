@@ -4874,6 +4874,30 @@
             "docs"
           ],
           "depends": []
+        },
+        {
+          "name": "higgs",
+          "effect": "Generate and edit photos and videos for databayt org ads/marketing via Higgsfield AI CLI/MCP",
+          "order": [
+            {
+              "type": "portal",
+              "name": "Higgs"
+            },
+            {
+              "type": "skill",
+              "name": "/higgs"
+            }
+          ],
+          "steps": [
+            "Detect prompt instructions for photo/video",
+            "Fetch and download video if URL reference is supplied",
+            "Generate/tweak media assets via Higgsfield CLI or MCP",
+            "Deliver result and save output to disk"
+          ],
+          "connects": [
+            "marketing"
+          ],
+          "depends": []
         }
       ]
     }
