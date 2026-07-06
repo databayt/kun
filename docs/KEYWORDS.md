@@ -159,15 +159,17 @@ Transfigures a document or web page into clean Markdown — PDF, Office, images,
 
 ### `higgs`
 
-Generates and edits photos and videos for databayt org ads, promotions, and marketing using Higgsfield AI's models.
+Generates and edits photos and videos for databayt org ads, promotions, and marketing using Higgsfield AI's models — high output, zero questions: models, costs, ratios, brand style, and the databayt brand kit are pre-decided in the skill.
 
 > **The Order:**
-> **Familiar:** none | **Portal:** Higgs MCP (`higgs` via HTTP) | **Skill:** `/higgs`
+> **Familiar:** none | **Portal:** Higgs MCP (registered; CLI is the primary lane) | **Skill:** `/higgs`
 >
-> 1. Detect if the prompt outlines a photo, video, or style edit instruction.
-> 2. If a video reference URL is provided, download it locally and upload it to Higgsfield as reference.
-> 3. Call the Higgsfield CLI or MCP server tool with style prompt parameters.
-> 4. Save and return the generated image/video link to the session.
+> 1. Preflight `higgsfield account status`; self-heal auth (`auth login`) + workspace if needed.
+> 2. Pick recipe + model from the skill's verified defaults (draft `z_image` 0.15 cr → final `nano_banana_flash` → video `kling3_0_turbo`; video-reference tweaks via seedance only). Never ask about style/model/ratio.
+> 3. Estimate free (`generate cost`, `--cost-only`, `--enhance-only`), then batch-generate with `--json` (`--count`, `--batch-size`).
+> 4. Parse `.[].result_url`, download to `~/Downloads/higgs/`, deliver the file with spend + remaining balance.
+>
+> Branded ad sets use the pre-fetched databayt.org brand kit (`ms dtc-ads generate --brand-kit-id …`); a URL-referenced video routes through `~/.claude/scripts/higgs-tweak.sh`.
 
 ### `component`
 

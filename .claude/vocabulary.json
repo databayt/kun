@@ -108,9 +108,7 @@
             "Generate structured body: user story, acceptance criteria, scope",
             "Create issue with type:feature label"
           ],
-          "connects": [
-            "spec"
-          ],
+          "connects": ["spec"],
           "depends": []
         },
         {
@@ -141,13 +139,8 @@
             "Publish spec as comment on the issue",
             "PAUSE: Human approves before implementation begins"
           ],
-          "connects": [
-            "idea",
-            "schema"
-          ],
-          "depends": [
-            "idea"
-          ]
+          "connects": ["idea", "schema"],
+          "depends": ["idea"]
         },
         {
           "name": "schema",
@@ -178,13 +171,8 @@
             "Create Zod validation schemas + TypeScript types",
             "Verify: pnpm tsc --noEmit"
           ],
-          "connects": [
-            "spec",
-            "code"
-          ],
-          "depends": [
-            "spec"
-          ]
+          "connects": ["spec", "code"],
+          "depends": ["spec"]
         },
         {
           "name": "ready",
@@ -210,13 +198,8 @@
             "Check Definition of Ready checklist is met",
             "Verdict: PASS / CONCERNS / FAIL with reasons"
           ],
-          "connects": [
-            "schema",
-            "code"
-          ],
-          "depends": [
-            "schema"
-          ]
+          "connects": ["schema", "code"],
+          "depends": ["schema"]
         },
         {
           "name": "code",
@@ -250,13 +233,8 @@
             "Create authorization rules (RBAC if product uses it)",
             "Verify: pnpm tsc --noEmit"
           ],
-          "connects": [
-            "ready",
-            "wire"
-          ],
-          "depends": [
-            "ready"
-          ]
+          "connects": ["ready", "wire"],
+          "depends": ["ready"]
         },
         {
           "name": "wire",
@@ -300,13 +278,8 @@
             "Add navigation entry if needed",
             "Verify: pnpm build"
           ],
-          "connects": [
-            "code",
-            "check"
-          ],
-          "depends": [
-            "code"
-          ]
+          "connects": ["code", "check"],
+          "depends": ["code"]
         },
         {
           "name": "check",
@@ -336,14 +309,8 @@
             "Run existing tests if present",
             "Report: all gates green or list failures"
           ],
-          "connects": [
-            "wire",
-            "ship",
-            "release"
-          ],
-          "depends": [
-            "wire"
-          ]
+          "connects": ["wire", "ship", "release"],
+          "depends": ["wire"]
         },
         {
           "name": "ship",
@@ -377,14 +344,8 @@
             "Poll deployment status until Ready (max 10 min)",
             "If Error: fetch logs, diagnose, fix, redeploy (max 3)"
           ],
-          "connects": [
-            "check",
-            "watch",
-            "release"
-          ],
-          "depends": [
-            "check"
-          ]
+          "connects": ["check", "watch", "release"],
+          "depends": ["check"]
         },
         {
           "name": "watch",
@@ -415,13 +376,8 @@
             "Quick smoke test: click primary action, verify",
             "If clean: close feature issue with summary"
           ],
-          "connects": [
-            "ship",
-            "release"
-          ],
-          "depends": [
-            "ship"
-          ]
+          "connects": ["ship", "release"],
+          "depends": ["ship"]
         }
       ]
     },
@@ -456,10 +412,7 @@
             "pnpm dev starts Turbopack",
             "Hook confirms Chrome is watching"
           ],
-          "connects": [
-            "build",
-            "deploy"
-          ],
+          "connects": ["build", "deploy"],
           "depends": []
         },
         {
@@ -495,11 +448,7 @@
             "pnpm build (production build)",
             "Post-build analysis: bundle size, warnings"
           ],
-          "connects": [
-            "deploy",
-            "fix",
-            "check"
-          ],
+          "connects": ["deploy", "fix", "check"],
           "depends": []
         },
         {
@@ -525,10 +474,7 @@
             "git commit -m \"type(scope): message\"",
             "git push — dispatch to remote"
           ],
-          "connects": [
-            "deploy",
-            "quick"
-          ],
+          "connects": ["deploy", "quick"],
           "depends": []
         },
         {
@@ -558,10 +504,7 @@
             "git add + commit (skip build)",
             "git push"
           ],
-          "connects": [
-            "push",
-            "deploy"
-          ],
+          "connects": ["push", "deploy"],
           "depends": []
         },
         {
@@ -603,14 +546,8 @@
             "If Error: fetch logs, diagnose, fix, redeploy",
             "If Ready: report URL and aliases"
           ],
-          "connects": [
-            "build",
-            "ship",
-            "push"
-          ],
-          "depends": [
-            "build"
-          ]
+          "connects": ["build", "ship", "push"],
+          "depends": ["build"]
         },
         {
           "name": "ship",
@@ -637,18 +574,9 @@
               "name": "deployment"
             }
           ],
-          "steps": [
-            "Same as deploy but: npx vercel --prod --yes"
-          ],
-          "connects": [
-            "deploy",
-            "build",
-            "release"
-          ],
-          "depends": [
-            "build",
-            "test"
-          ]
+          "steps": ["Same as deploy but: npx vercel --prod --yes"],
+          "connects": ["deploy", "build", "release"],
+          "depends": ["build", "test"]
         },
         {
           "name": "check",
@@ -678,12 +606,7 @@
             "Run existing tests (--passWithNoTests)",
             "Verdict: READY TO SHIP / BLOCKED"
           ],
-          "connects": [
-            "build",
-            "ship",
-            "handover",
-            "release"
-          ],
+          "connects": ["build", "ship", "handover", "release"],
           "depends": []
         },
         {
@@ -721,12 +644,7 @@
             "Comment production URL + verdict on the issue; close it",
             "Optional --notify-slack <channel> via slack MCP"
           ],
-          "connects": [
-            "handover",
-            "check",
-            "ship",
-            "watch"
-          ],
+          "connects": ["handover", "check", "ship", "watch"],
           "depends": []
         }
       ]
@@ -769,10 +687,7 @@
             "Server Component by default",
             "Add 'use client' only if hooks needed"
           ],
-          "connects": [
-            "atom",
-            "page"
-          ],
+          "connects": ["atom", "page"],
           "depends": []
         },
         {
@@ -802,11 +717,7 @@
             "Create components/platform/<name>/content.tsx (mirror pattern)",
             "Create components/platform/<name>/actions.ts (server actions)"
           ],
-          "connects": [
-            "component",
-            "api",
-            "template"
-          ],
+          "connects": ["component", "api", "template"],
           "depends": []
         },
         {
@@ -841,14 +752,8 @@
             "Prisma query with schoolId",
             "revalidatePath"
           ],
-          "connects": [
-            "page",
-            "prisma",
-            "auth"
-          ],
-          "depends": [
-            "prisma"
-          ]
+          "connects": ["page", "prisma", "auth"],
+          "depends": ["prisma"]
         },
         {
           "name": "atom",
@@ -891,14 +796,8 @@
             "Register in src/registry/atoms-index.ts",
             "Generate MDX docs"
           ],
-          "connects": [
-            "template",
-            "component",
-            "shadcn"
-          ],
-          "depends": [
-            "shadcn"
-          ]
+          "connects": ["template", "component", "shadcn"],
+          "depends": ["shadcn"]
         },
         {
           "name": "template",
@@ -940,14 +839,8 @@
             "Register in src/registry/registry-templates.ts",
             "pnpm build:templates (rebuild registry)"
           ],
-          "connects": [
-            "atom",
-            "block",
-            "page"
-          ],
-          "depends": [
-            "atom"
-          ]
+          "connects": ["atom", "block", "page"],
+          "depends": ["atom"]
         },
         {
           "name": "block",
@@ -1009,15 +902,8 @@
             "pnpm tsc --noEmit (validate)",
             "Quality audit (100-point score)"
           ],
-          "connects": [
-            "template",
-            "atom",
-            "saas"
-          ],
-          "depends": [
-            "atom",
-            "prisma"
-          ]
+          "connects": ["template", "atom", "saas"],
+          "depends": ["atom", "prisma"]
         },
         {
           "name": "feature",
@@ -1061,15 +947,8 @@
             "Testing (vitest + playwright)",
             "Build validation"
           ],
-          "connects": [
-            "saas",
-            "block",
-            "migration",
-            "test"
-          ],
-          "depends": [
-            "plan"
-          ]
+          "connects": ["saas", "block", "migration", "test"],
+          "depends": ["plan"]
         },
         {
           "name": "migration",
@@ -1102,14 +981,8 @@
             "pnpm prisma generate",
             "Verify with Neon MCP if remote"
           ],
-          "connects": [
-            "prisma",
-            "feature",
-            "saas"
-          ],
-          "depends": [
-            "prisma"
-          ]
+          "connects": ["prisma", "feature", "saas"],
+          "depends": ["prisma"]
         }
       ]
     },
@@ -1148,11 +1021,7 @@
             "Server Actions with 'use server'",
             "Streaming with Suspense"
           ],
-          "connects": [
-            "react",
-            "typescript",
-            "page"
-          ],
+          "connects": ["react", "typescript", "page"],
           "depends": []
         },
         {
@@ -1178,11 +1047,7 @@
             "use() hook",
             "React Hook Form + Zod"
           ],
-          "connects": [
-            "nextjs",
-            "component",
-            "typescript"
-          ],
+          "connects": ["nextjs", "component", "typescript"],
           "depends": []
         },
         {
@@ -1208,11 +1073,7 @@
             "Discriminated unions",
             "Prisma type integration"
           ],
-          "connects": [
-            "react",
-            "nextjs",
-            "build"
-          ],
+          "connects": ["react", "nextjs", "build"],
           "depends": []
         },
         {
@@ -1242,11 +1103,7 @@
             "CRUD operations",
             "$extends patterns"
           ],
-          "connects": [
-            "migration",
-            "neon",
-            "api"
-          ],
+          "connects": ["migration", "neon", "api"],
           "depends": []
         },
         {
@@ -1276,11 +1133,7 @@
             "RTL logical properties (ms/me/ps/pe)",
             "Container queries"
           ],
-          "connects": [
-            "shadcn",
-            "component",
-            "template"
-          ],
+          "connects": ["shadcn", "component", "template"],
           "depends": []
         },
         {
@@ -1314,11 +1167,7 @@
             "Install to src/components/ui/",
             "Say 'shadcn docs' → the docs-block MDX pattern"
           ],
-          "connects": [
-            "atom",
-            "component",
-            "tailwind"
-          ],
+          "connects": ["atom", "component", "tailwind"],
           "depends": []
         }
       ]
@@ -1354,13 +1203,8 @@
             "Server-side filtering",
             "Row actions"
           ],
-          "connects": [
-            "block",
-            "prisma"
-          ],
-          "depends": [
-            "shadcn"
-          ]
+          "connects": ["block", "prisma"],
+          "depends": ["shadcn"]
         },
         {
           "name": "header",
@@ -1375,18 +1219,9 @@
               "name": "shadcn"
             }
           ],
-          "steps": [
-            "Sticky top",
-            "Responsive",
-            "Mobile hamburger"
-          ],
-          "connects": [
-            "navbar",
-            "template"
-          ],
-          "depends": [
-            "shadcn"
-          ]
+          "steps": ["Sticky top", "Responsive", "Mobile hamburger"],
+          "connects": ["navbar", "template"],
+          "depends": ["shadcn"]
         },
         {
           "name": "menu",
@@ -1401,18 +1236,9 @@
               "name": "shadcn"
             }
           ],
-          "steps": [
-            "Collapsible",
-            "Icon + label",
-            "Active state"
-          ],
-          "connects": [
-            "sidebar",
-            "navbar"
-          ],
-          "depends": [
-            "shadcn"
-          ]
+          "steps": ["Collapsible", "Icon + label", "Active state"],
+          "connects": ["sidebar", "navbar"],
+          "depends": ["shadcn"]
         },
         {
           "name": "form",
@@ -1436,14 +1262,8 @@
             "shadcn Form component",
             "Server Action on submit"
           ],
-          "connects": [
-            "api",
-            "block"
-          ],
-          "depends": [
-            "shadcn",
-            "react"
-          ]
+          "connects": ["api", "block"],
+          "depends": ["shadcn", "react"]
         },
         {
           "name": "modal",
@@ -1467,13 +1287,8 @@
             "ConfirmDialog pattern",
             "Keyboard dismiss"
           ],
-          "connects": [
-            "form",
-            "atom"
-          ],
-          "depends": [
-            "shadcn"
-          ]
+          "connects": ["form", "atom"],
+          "depends": ["shadcn"]
         },
         {
           "name": "card",
@@ -1493,13 +1308,8 @@
             "Semantic tokens",
             "Responsive grid"
           ],
-          "connects": [
-            "atom",
-            "template"
-          ],
-          "depends": [
-            "shadcn"
-          ]
+          "connects": ["atom", "template"],
+          "depends": ["shadcn"]
         },
         {
           "name": "sidebar",
@@ -1514,18 +1324,9 @@
               "name": "shadcn"
             }
           ],
-          "steps": [
-            "SidebarProvider",
-            "Collapsible groups",
-            "Keyboard toggle"
-          ],
-          "connects": [
-            "menu",
-            "dashboard"
-          ],
-          "depends": [
-            "shadcn"
-          ]
+          "steps": ["SidebarProvider", "Collapsible groups", "Keyboard toggle"],
+          "connects": ["menu", "dashboard"],
+          "depends": ["shadcn"]
         },
         {
           "name": "footer",
@@ -1540,18 +1341,9 @@
               "name": "shadcn"
             }
           ],
-          "steps": [
-            "Multi-column responsive",
-            "Social links",
-            "Copyright"
-          ],
-          "connects": [
-            "template",
-            "landing"
-          ],
-          "depends": [
-            "shadcn"
-          ]
+          "steps": ["Multi-column responsive", "Social links", "Copyright"],
+          "connects": ["template", "landing"],
+          "depends": ["shadcn"]
         },
         {
           "name": "hero",
@@ -1571,13 +1363,8 @@
             "CTA buttons",
             "Responsive typography"
           ],
-          "connects": [
-            "landing",
-            "template"
-          ],
-          "depends": [
-            "shadcn"
-          ]
+          "connects": ["landing", "template"],
+          "depends": ["shadcn"]
         },
         {
           "name": "navbar",
@@ -1598,13 +1385,8 @@
             "Mobile sheet",
             "Auth state"
           ],
-          "connects": [
-            "header",
-            "auth"
-          ],
-          "depends": [
-            "shadcn"
-          ]
+          "connects": ["header", "auth"],
+          "depends": ["shadcn"]
         }
       ]
     },
@@ -1650,14 +1432,8 @@
             "SessionProvider in layout",
             "Type extensions in next-auth.d.ts"
           ],
-          "connects": [
-            "middleware",
-            "prisma",
-            "admin"
-          ],
-          "depends": [
-            "prisma"
-          ]
+          "connects": ["middleware", "prisma", "admin"],
+          "depends": ["prisma"]
         },
         {
           "name": "saas",
@@ -1720,15 +1496,8 @@
             "Pages: App Router routes",
             "Integrations: Stripe, auth, analytics"
           ],
-          "connects": [
-            "block",
-            "migration",
-            "deploy"
-          ],
-          "depends": [
-            "prisma",
-            "auth"
-          ]
+          "connects": ["block", "migration", "deploy"],
+          "depends": ["prisma", "auth"]
         },
         {
           "name": "dashboard",
@@ -1762,15 +1531,8 @@
             "Data tables (block)",
             "Promise.all for parallel fetch"
           ],
-          "connects": [
-            "sidebar",
-            "table",
-            "card"
-          ],
-          "depends": [
-            "auth",
-            "prisma"
-          ]
+          "connects": ["sidebar", "table", "card"],
+          "depends": ["auth", "prisma"]
         },
         {
           "name": "landing",
@@ -1798,11 +1560,7 @@
             "Each section is a Server Component",
             "Responsive design"
           ],
-          "connects": [
-            "hero",
-            "footer",
-            "template"
-          ],
+          "connects": ["hero", "footer", "template"],
           "depends": []
         },
         {
@@ -1841,16 +1599,8 @@
             "Payment processing",
             "Webhook handler"
           ],
-          "connects": [
-            "stripe",
-            "auth",
-            "saas"
-          ],
-          "depends": [
-            "auth",
-            "prisma",
-            "stripe"
-          ]
+          "connects": ["stripe", "auth", "saas"],
+          "depends": ["auth", "prisma", "stripe"]
         },
         {
           "name": "settings",
@@ -1879,13 +1629,8 @@
             "Server actions",
             "Auth checks"
           ],
-          "connects": [
-            "profile",
-            "auth"
-          ],
-          "depends": [
-            "auth"
-          ]
+          "connects": ["profile", "auth"],
+          "depends": ["auth"]
         },
         {
           "name": "profile",
@@ -1914,13 +1659,8 @@
             "Form editing",
             "Activity history"
           ],
-          "connects": [
-            "settings",
-            "auth"
-          ],
-          "depends": [
-            "auth"
-          ]
+          "connects": ["settings", "auth"],
+          "depends": ["auth"]
         },
         {
           "name": "admin",
@@ -1949,13 +1689,8 @@
             "Analytics dashboard",
             "Configuration"
           ],
-          "connects": [
-            "dashboard",
-            "auth"
-          ],
-          "depends": [
-            "auth"
-          ]
+          "connects": ["dashboard", "auth"],
+          "depends": ["auth"]
         },
         {
           "name": "onboarding",
@@ -1980,13 +1715,8 @@
             "Completion callback",
             "First-use detection"
           ],
-          "connects": [
-            "auth",
-            "dashboard"
-          ],
-          "depends": [
-            "auth"
-          ]
+          "connects": ["auth", "dashboard"],
+          "depends": ["auth"]
         }
       ]
     },
@@ -2024,10 +1754,7 @@
             "Variants for orchestrated sequences",
             "Layout animations"
           ],
-          "connects": [
-            "animation",
-            "transition"
-          ],
+          "connects": ["animation", "transition"],
           "depends": []
         },
         {
@@ -2051,10 +1778,7 @@
             "@keyframes for simple effects",
             "Framer Motion for complex choreography"
           ],
-          "connects": [
-            "motion",
-            "scroll"
-          ],
+          "connects": ["motion", "scroll"],
           "depends": []
         },
         {
@@ -2078,10 +1802,7 @@
             "AnimatePresence wrapping routes",
             "Exit animations before new page mounts"
           ],
-          "connects": [
-            "motion",
-            "page"
-          ],
+          "connects": ["motion", "page"],
           "depends": []
         },
         {
@@ -2102,10 +1823,7 @@
             "drag with dragConstraints",
             "Spring physics"
           ],
-          "connects": [
-            "motion",
-            "animation"
-          ],
+          "connects": ["motion", "animation"],
           "depends": []
         },
         {
@@ -2125,10 +1843,7 @@
             "whileInView with viewport({ once: true })",
             "Intersection Observer"
           ],
-          "connects": [
-            "motion",
-            "hero"
-          ],
+          "connects": ["motion", "hero"],
           "depends": []
         }
       ]
@@ -2176,11 +1891,7 @@
             "95%+ coverage target",
             "Test accounts with configured credentials"
           ],
-          "connects": [
-            "e2e",
-            "coverage",
-            "build"
-          ],
+          "connects": ["e2e", "coverage", "build"],
           "depends": []
         },
         {
@@ -2205,10 +1916,7 @@
             "browser-headed MCP for auth flows",
             "Visual regression"
           ],
-          "connects": [
-            "test",
-            "handover"
-          ],
+          "connects": ["test", "handover"],
           "depends": []
         },
         {
@@ -2235,12 +1943,7 @@
             "Collect verdicts, write sentinel on PASS",
             "Report: BLOCKED or READY FOR DEMO"
           ],
-          "connects": [
-            "e2e",
-            "check",
-            "test",
-            "release"
-          ],
+          "connects": ["e2e", "check", "test", "release"],
           "depends": []
         },
         {
@@ -2261,12 +1964,8 @@
             "V8 provider",
             "Lines, branches, functions, statements"
           ],
-          "connects": [
-            "test"
-          ],
-          "depends": [
-            "test"
-          ]
+          "connects": ["test"],
+          "depends": ["test"]
         },
         {
           "name": "review",
@@ -2296,10 +1995,7 @@
             "Multi-tenant schoolId",
             "Semantic tokens"
           ],
-          "connects": [
-            "audit",
-            "security"
-          ],
+          "connects": ["audit", "security"],
           "depends": []
         },
         {
@@ -2338,11 +2034,7 @@
             "pnpm audit (dependencies)",
             "Environment check"
           ],
-          "connects": [
-            "audit",
-            "auth",
-            "review"
-          ],
+          "connects": ["audit", "auth", "review"],
           "depends": []
         },
         {
@@ -2373,11 +2065,7 @@
             "Accessibility",
             "Testing coverage"
           ],
-          "connects": [
-            "security",
-            "performance",
-            "test"
-          ],
+          "connects": ["security", "performance", "test"],
           "depends": []
         },
         {
@@ -2408,11 +2096,7 @@
             "Check tests cover acceptance criteria",
             "Report: consistent / drift / missing"
           ],
-          "connects": [
-            "review",
-            "ready",
-            "audit"
-          ],
+          "connects": ["review", "ready", "audit"],
           "depends": []
         },
         {
@@ -2439,10 +2123,7 @@
             "Propose updates if principles evolved",
             "Write updated constitution to CLAUDE.md"
           ],
-          "connects": [
-            "review",
-            "analyze"
-          ],
+          "connects": ["review", "analyze"],
           "depends": []
         },
         {
@@ -2469,10 +2150,7 @@
             "Color contrast",
             "Focus management"
           ],
-          "connects": [
-            "audit",
-            "review"
-          ],
+          "connects": ["audit", "review"],
           "depends": []
         },
         {
@@ -2501,10 +2179,7 @@
             "Apply optimizations",
             "Verify improvement"
           ],
-          "connects": [
-            "performance",
-            "build"
-          ],
+          "connects": ["performance", "build"],
           "depends": []
         },
         {
@@ -2548,11 +2223,7 @@
             "Memory leak detection",
             "7 quality gates report"
           ],
-          "connects": [
-            "optimize",
-            "build",
-            "deploy"
-          ],
+          "connects": ["optimize", "build", "deploy"],
           "depends": []
         }
       ]
@@ -2592,10 +2263,7 @@
             "Lint fix",
             "Build verify"
           ],
-          "connects": [
-            "build",
-            "error"
-          ],
+          "connects": ["build", "error"],
           "depends": []
         },
         {
@@ -2625,10 +2293,7 @@
             "Missing schoolId, hooks in server components",
             "95% auto-fix rate"
           ],
-          "connects": [
-            "fix",
-            "scan"
-          ],
+          "connects": ["fix", "scan"],
           "depends": []
         },
         {
@@ -2654,11 +2319,7 @@
             "Unused imports",
             "Dead code"
           ],
-          "connects": [
-            "fix",
-            "error",
-            "lint"
-          ],
+          "connects": ["fix", "error", "lint"],
           "depends": []
         },
         {
@@ -2670,14 +2331,8 @@
               "name": "build"
             }
           ],
-          "steps": [
-            "pnpm lint",
-            "Report issues with file paths and lines"
-          ],
-          "connects": [
-            "fix",
-            "format"
-          ],
+          "steps": ["pnpm lint", "Report issues with file paths and lines"],
+          "connects": ["fix", "format"],
           "depends": []
         },
         {
@@ -2693,10 +2348,7 @@
             "npx prettier --write",
             "Auto-Format hook already runs on every edit"
           ],
-          "connects": [
-            "lint",
-            "fix"
-          ],
+          "connects": ["lint", "fix"],
           "depends": []
         },
         {
@@ -2713,10 +2365,7 @@
             "Report errors with locations",
             "No JS emitted, pure validation"
           ],
-          "connects": [
-            "build",
-            "fix"
-          ],
+          "connects": ["build", "fix"],
           "depends": []
         },
         {
@@ -2762,12 +2411,7 @@
             "VERIFY: see the page again after deploy",
             "CLOSE: close issue with fix summary"
           ],
-          "connects": [
-            "fix",
-            "error",
-            "build",
-            "deploy"
-          ],
+          "connects": ["fix", "error", "build", "deploy"],
           "depends": []
         }
       ]
@@ -2808,10 +2452,7 @@
             "Examples",
             "API reference"
           ],
-          "connects": [
-            "readme",
-            "storybook"
-          ],
+          "connects": ["readme", "storybook"],
           "depends": []
         },
         {
@@ -2833,10 +2474,7 @@
             "Quick start",
             "Contributing"
           ],
-          "connects": [
-            "docs",
-            "changelog"
-          ],
+          "connects": ["docs", "changelog"],
           "depends": []
         },
         {
@@ -2862,10 +2500,7 @@
             "Auth requirements",
             "Error codes"
           ],
-          "connects": [
-            "docs",
-            "api"
-          ],
+          "connects": ["docs", "api"],
           "depends": []
         },
         {
@@ -2886,10 +2521,7 @@
             "Default + variant stories",
             "Interactive args table"
           ],
-          "connects": [
-            "docs",
-            "component"
-          ],
+          "connects": ["docs", "component"],
           "depends": []
         },
         {
@@ -2909,10 +2541,7 @@
             "Parse conventional commits",
             "Group by type (feat, fix, refactor)"
           ],
-          "connects": [
-            "docs",
-            "push"
-          ],
+          "connects": ["docs", "push"],
           "depends": []
         }
       ]
@@ -2965,11 +2594,7 @@
             "Apply conventions (OKLCH, RTL, Auth.js, Prisma)",
             "Update registry"
           ],
-          "connects": [
-            "copy",
-            "fork",
-            "extend"
-          ],
+          "connects": ["copy", "fork", "extend"],
           "depends": []
         },
         {
@@ -2989,12 +2614,8 @@
               "name": "org-refs"
             }
           ],
-          "steps": [
-            "Same as clone, source always local"
-          ],
-          "connects": [
-            "clone"
-          ],
+          "steps": ["Same as clone, source always local"],
+          "connects": ["clone"],
           "depends": []
         },
         {
@@ -3014,14 +2635,8 @@
               "name": "org-refs"
             }
           ],
-          "steps": [
-            "Same as clone + rename",
-            "Original untouched"
-          ],
-          "connects": [
-            "clone",
-            "extend"
-          ],
+          "steps": ["Same as clone + rename", "Original untouched"],
+          "connects": ["clone", "extend"],
           "depends": []
         },
         {
@@ -3045,10 +2660,7 @@
             "Wrap/extend rather than duplicate",
             "Preserve base interface"
           ],
-          "connects": [
-            "clone",
-            "fork"
-          ],
+          "connects": ["clone", "fork"],
           "depends": []
         },
         {
@@ -3078,10 +2690,7 @@
             "Resolve conflicts",
             "Push"
           ],
-          "connects": [
-            "upstream",
-            "clone"
-          ],
+          "connects": ["upstream", "clone"],
           "depends": []
         },
         {
@@ -3110,10 +2719,7 @@
             "Merge or rebase",
             "Resolve conflicts"
           ],
-          "connects": [
-            "sync",
-            "clone"
-          ],
+          "connects": ["sync", "clone"],
           "depends": []
         }
       ]
@@ -3145,11 +2751,7 @@
             "Issue tracking",
             "Code search across repos"
           ],
-          "connects": [
-            "push",
-            "clone",
-            "deploy"
-          ],
+          "connects": ["push", "clone", "deploy"],
           "depends": []
         },
         {
@@ -3167,10 +2769,7 @@
             "get_metadata",
             "create_design_system_rules"
           ],
-          "connects": [
-            "component",
-            "template"
-          ],
+          "connects": ["component", "template"],
           "depends": []
         },
         {
@@ -3182,15 +2781,8 @@
               "name": "Linear"
             }
           ],
-          "steps": [
-            "Issue management",
-            "Project tracking",
-            "Sprint planning"
-          ],
-          "connects": [
-            "plan",
-            "story"
-          ],
+          "steps": ["Issue management", "Project tracking", "Sprint planning"],
+          "connects": ["plan", "story"],
           "depends": []
         },
         {
@@ -3202,11 +2794,7 @@
               "name": "Slack"
             }
           ],
-          "steps": [
-            "Send messages",
-            "Read channels",
-            "Team notifications"
-          ],
+          "steps": ["Send messages", "Read channels", "Team notifications"],
           "connects": [],
           "depends": []
         },
@@ -3219,14 +2807,8 @@
               "name": "Notion"
             }
           ],
-          "steps": [
-            "Page creation",
-            "Database queries",
-            "Wiki management"
-          ],
-          "connects": [
-            "docs"
-          ],
+          "steps": ["Page creation", "Database queries", "Wiki management"],
+          "connects": ["docs"],
           "depends": []
         },
         {
@@ -3242,15 +2824,8 @@
               "name": "sse"
             }
           ],
-          "steps": [
-            "Error monitoring",
-            "Exception traces",
-            "Release tracking"
-          ],
-          "connects": [
-            "error",
-            "debug"
-          ],
+          "steps": ["Error monitoring", "Exception traces", "Release tracking"],
+          "connects": ["error", "debug"],
           "depends": []
         },
         {
@@ -3268,10 +2843,7 @@
             "Webhook events",
             "Customer management"
           ],
-          "connects": [
-            "checkout",
-            "saas"
-          ],
+          "connects": ["checkout", "saas"],
           "depends": []
         },
         {
@@ -3293,10 +2865,7 @@
             "Runtime logs",
             "Domain configuration"
           ],
-          "connects": [
-            "deploy",
-            "ship"
-          ],
+          "connects": ["deploy", "ship"],
           "depends": []
         },
         {
@@ -3314,9 +2883,7 @@
             "Session recordings",
             "Feature flags"
           ],
-          "connects": [
-            "performance"
-          ],
+          "connects": ["performance"],
           "depends": []
         },
         {
@@ -3339,10 +2906,7 @@
             "explain_sql_statement",
             "list_slow_queries"
           ],
-          "connects": [
-            "prisma",
-            "migration"
-          ],
+          "connects": ["prisma", "migration"],
           "depends": []
         }
       ]
@@ -3370,10 +2934,7 @@
             "BMad Method (~15 min)",
             "Enterprise (~30 min)"
           ],
-          "connects": [
-            "flow",
-            "plan"
-          ],
+          "connects": ["flow", "plan"],
           "depends": []
         },
         {
@@ -3385,15 +2946,8 @@
               "name": "orchestration"
             }
           ],
-          "steps": [
-            "*bmad-quick-flow",
-            "Rapid assessment",
-            "Action items"
-          ],
-          "connects": [
-            "plan",
-            "implement"
-          ],
+          "steps": ["*bmad-quick-flow", "Rapid assessment", "Action items"],
+          "connects": ["plan", "implement"],
           "depends": []
         },
         {
@@ -3415,10 +2969,7 @@
             "Architecture design",
             "Story mapping"
           ],
-          "connects": [
-            "architect",
-            "story"
-          ],
+          "connects": ["architect", "story"],
           "depends": []
         },
         {
@@ -3440,13 +2991,8 @@
             "Data modeling",
             "API design"
           ],
-          "connects": [
-            "plan",
-            "implement"
-          ],
-          "depends": [
-            "plan"
-          ]
+          "connects": ["plan", "implement"],
+          "depends": ["plan"]
         },
         {
           "name": "implement",
@@ -3467,13 +3013,8 @@
             "Testing",
             "Deployment"
           ],
-          "connects": [
-            "architect",
-            "cycle"
-          ],
-          "depends": [
-            "architect"
-          ]
+          "connects": ["architect", "cycle"],
+          "depends": ["architect"]
         },
         {
           "name": "story",
@@ -3484,15 +3025,8 @@
               "name": "orchestration"
             }
           ],
-          "steps": [
-            "User personas",
-            "Acceptance criteria",
-            "Story points"
-          ],
-          "connects": [
-            "plan",
-            "feature"
-          ],
+          "steps": ["User personas", "Acceptance criteria", "Story points"],
+          "connects": ["plan", "feature"],
           "depends": []
         },
         {
@@ -3504,17 +3038,8 @@
               "name": "orchestration"
             }
           ],
-          "steps": [
-            "Plan",
-            "Architect",
-            "Implement",
-            "Test",
-            "Deploy"
-          ],
-          "connects": [
-            "plan",
-            "deploy"
-          ],
+          "steps": ["Plan", "Architect", "Implement", "Test", "Deploy"],
+          "connects": ["plan", "deploy"],
           "depends": []
         },
         {
@@ -3526,14 +3051,8 @@
               "name": "orchestration"
             }
           ],
-          "steps": [
-            "Recurring cycle",
-            "Feedback integration",
-            "Improvement"
-          ],
-          "connects": [
-            "cycle"
-          ],
+          "steps": ["Recurring cycle", "Feedback integration", "Improvement"],
+          "connects": ["cycle"],
           "depends": []
         }
       ]
@@ -3564,10 +3083,7 @@
             "Convert to Promise.all()",
             "Verify no dependencies between calls"
           ],
-          "connects": [
-            "waterfall",
-            "performance"
-          ],
+          "connects": ["waterfall", "performance"],
           "depends": []
         },
         {
@@ -3588,10 +3104,7 @@
             "Identify sequential fetches",
             "Restructure to parallel"
           ],
-          "connects": [
-            "parallelize",
-            "performance"
-          ],
+          "connects": ["parallelize", "performance"],
           "depends": []
         },
         {
@@ -3613,10 +3126,7 @@
             "Suggest code splits",
             "Tree-shaking opportunities"
           ],
-          "connects": [
-            "lazy",
-            "barrel"
-          ],
+          "connects": ["lazy", "barrel"],
           "depends": []
         },
         {
@@ -3636,10 +3146,7 @@
             "next/dynamic with { ssr: false }",
             "For heavy components (Monaco, charts, maps)"
           ],
-          "connects": [
-            "bundle",
-            "suspense"
-          ],
+          "connects": ["bundle", "suspense"],
           "depends": []
         },
         {
@@ -3660,10 +3167,7 @@
             "Wrap async Server Components",
             "Show skeleton while loading"
           ],
-          "connects": [
-            "streaming",
-            "lazy"
-          ],
+          "connects": ["streaming", "lazy"],
           "depends": []
         },
         {
@@ -3680,10 +3184,7 @@
             "React Compiler handles most cases",
             "Manual memo for remaining hotspots"
           ],
-          "connects": [
-            "react",
-            "optimize"
-          ],
+          "connects": ["react", "optimize"],
           "depends": []
         },
         {
@@ -3704,10 +3205,7 @@
             "Extract hooks into child Client Components",
             "Reduce client bundle"
           ],
-          "connects": [
-            "nextjs",
-            "bundle"
-          ],
+          "connects": ["nextjs", "bundle"],
           "depends": []
         },
         {
@@ -3728,10 +3226,7 @@
             "Each wrapped in Suspense",
             "Results arrive as ready"
           ],
-          "connects": [
-            "suspense",
-            "parallelize"
-          ],
+          "connects": ["suspense", "parallelize"],
           "depends": []
         },
         {
@@ -3752,10 +3247,7 @@
             "Use import { X } from '@/components/ui/x'",
             "Direct imports only"
           ],
-          "connects": [
-            "bundle",
-            "build"
-          ],
+          "connects": ["bundle", "build"],
           "depends": []
         },
         {
@@ -3772,10 +3264,7 @@
             "Request-level memoization",
             "No duplicate server calls"
           ],
-          "connects": [
-            "server-component",
-            "performance"
-          ],
+          "connects": ["server-component", "performance"],
           "depends": []
         }
       ]
@@ -3810,10 +3299,7 @@
             "Check src/components/ then __registry__/ then src/registry/",
             "Fallback to GitHub MCP: databayt/codebase"
           ],
-          "connects": [
-            "from shadcn",
-            "clone"
-          ],
+          "connects": ["from shadcn", "clone"],
           "depends": []
         },
         {
@@ -3838,10 +3324,7 @@
             "View component details",
             "Install to src/components/ui/"
           ],
-          "connects": [
-            "from codebase",
-            "from radix"
-          ],
+          "connects": ["from codebase", "from radix"],
           "depends": []
         },
         {
@@ -3865,10 +3348,7 @@
             "Reference Radix primitives",
             "Dialog.Root, DropdownMenu.Root, etc."
           ],
-          "connects": [
-            "from shadcn",
-            "shadcn"
-          ],
+          "connects": ["from shadcn", "shadcn"],
           "depends": []
         },
         {
@@ -3903,11 +3383,7 @@
             "Stripe billing",
             "LMS/SIS schemas"
           ],
-          "connects": [
-            "like souq",
-            "auth",
-            "prisma"
-          ],
+          "connects": ["like souq", "auth", "prisma"],
           "depends": []
         },
         {
@@ -3938,10 +3414,7 @@
             "Order management",
             "Category trees"
           ],
-          "connects": [
-            "like hogwarts",
-            "like mkan"
-          ],
+          "connects": ["like hogwarts", "like mkan"],
           "depends": []
         },
         {
@@ -3972,10 +3445,7 @@
             "Availability calendar",
             "Search/filters"
           ],
-          "connects": [
-            "like souq",
-            "like shifa"
-          ],
+          "connects": ["like souq", "like shifa"],
           "depends": []
         },
         {
@@ -4006,10 +3476,7 @@
             "Medical records",
             "Prescriptions"
           ],
-          "connects": [
-            "like mkan",
-            "like hogwarts"
-          ],
+          "connects": ["like mkan", "like hogwarts"],
           "depends": []
         },
         {
@@ -4027,10 +3494,7 @@
             "Pull product context from the CRM workspace + catalog",
             "Borrow the nearest patterns from hogwarts until the repo lands"
           ],
-          "connects": [
-            "like moallimee",
-            "like hogwarts"
-          ],
+          "connects": ["like moallimee", "like hogwarts"],
           "depends": []
         },
         {
@@ -4048,10 +3512,7 @@
             "Pull product context from the CRM workspace + catalog",
             "Borrow the nearest patterns from hogwarts until the repo lands"
           ],
-          "connects": [
-            "like sijillee",
-            "like hogwarts"
-          ],
+          "connects": ["like sijillee", "like hogwarts"],
           "depends": []
         }
       ]
@@ -4089,10 +3550,7 @@
               "name": "deny: settings.json"
             }
           ],
-          "steps": [
-            "Blocked by deny rule",
-            "Use prisma migrate dev instead"
-          ],
+          "steps": ["Blocked by deny rule", "Use prisma migrate dev instead"],
           "connects": [],
           "depends": []
         },
@@ -4105,10 +3563,7 @@
               "name": "deny: settings.json"
             }
           ],
-          "steps": [
-            "Blocked by deny rule",
-            "Never accept data loss"
-          ],
+          "steps": ["Blocked by deny rule", "Never accept data loss"],
           "connects": [],
           "depends": []
         },
@@ -4121,9 +3576,7 @@
               "name": "deny: settings.json"
             }
           ],
-          "steps": [
-            "Blocked even through MCP portals"
-          ],
+          "steps": ["Blocked even through MCP portals"],
           "connects": [],
           "depends": []
         },
@@ -4172,11 +3625,7 @@
             "Check layout, spacing, and content render as intended",
             "Verdict: PASS / WARN / FAIL with what to fix"
           ],
-          "connects": [
-            "responsive",
-            "mirror",
-            "handover"
-          ],
+          "connects": ["responsive", "mirror", "handover"],
           "depends": []
         },
         {
@@ -4198,11 +3647,7 @@
             "Confirm success and error states surface",
             "Verdict names the exact step that broke"
           ],
-          "connects": [
-            "debug",
-            "see",
-            "handover"
-          ],
+          "connects": ["debug", "see", "handover"],
           "depends": []
         },
         {
@@ -4224,10 +3669,7 @@
             "Inspect network requests for failures",
             "Report zero-error PASS or list each exception with its source"
           ],
-          "connects": [
-            "flow",
-            "handover"
-          ],
+          "connects": ["flow", "handover"],
           "depends": []
         },
         {
@@ -4249,10 +3691,7 @@
             "Check overflow, wrapping, and contested space",
             "Verdict per breakpoint"
           ],
-          "connects": [
-            "see",
-            "handover"
-          ],
+          "connects": ["see", "handover"],
           "depends": []
         },
         {
@@ -4274,10 +3713,7 @@
             "Scan for hardcoded strings missing from dictionaries",
             "List every untranslated string in the verdict"
           ],
-          "connects": [
-            "see",
-            "handover"
-          ],
+          "connects": ["see", "handover"],
           "depends": []
         },
         {
@@ -4299,10 +3735,7 @@
             "Flag oversized payloads and blocking requests",
             "PASS, or hand the deep work to trace"
           ],
-          "connects": [
-            "trace",
-            "handover"
-          ],
+          "connects": ["trace", "handover"],
           "depends": []
         },
         {
@@ -4333,10 +3766,7 @@
             "Check S3 access uses presigned URLs via CloudFront",
             "Cite each finding as rule-id (severity)"
           ],
-          "connects": [
-            "stack",
-            "handover"
-          ],
+          "connects": ["stack", "handover"],
           "depends": []
         },
         {
@@ -4358,11 +3788,7 @@
             "Hunt sequential fetch waterfalls",
             "Cite each finding as rule-id (severity)"
           ],
-          "connects": [
-            "structure",
-            "pattern",
-            "handover"
-          ],
+          "connects": ["structure", "pattern", "handover"],
           "depends": []
         },
         {
@@ -4379,10 +3805,7 @@
             "Check naming conventions and directory placement",
             "Flag each misplaced or misnamed file with its correct location"
           ],
-          "connects": [
-            "architecture",
-            "handover"
-          ],
+          "connects": ["architecture", "handover"],
           "depends": []
         },
         {
@@ -4408,11 +3831,7 @@
             "Check revalidatePath/revalidateTag after every write",
             "Cite drift as rule-id (severity)"
           ],
-          "connects": [
-            "design",
-            "architecture",
-            "handover"
-          ],
+          "connects": ["design", "architecture", "handover"],
           "depends": []
         },
         {
@@ -4434,10 +3853,7 @@
             "Verify logical properties for RTL",
             "Cite each finding as rule-id (severity)"
           ],
-          "connects": [
-            "pattern",
-            "handover"
-          ],
+          "connects": ["pattern", "handover"],
           "depends": []
         },
         {
@@ -4487,10 +3903,7 @@
             "Sweep all eight rule domains",
             "Cite each hit as rule-id (severity)"
           ],
-          "connects": [
-            "guard",
-            "handover"
-          ],
+          "connects": ["guard", "handover"],
           "depends": []
         },
         {
@@ -4512,11 +3925,7 @@
             "Fix it",
             "Re-trace to prove the gain"
           ],
-          "connects": [
-            "fast",
-            "efficient",
-            "handover"
-          ],
+          "connects": ["fast", "efficient", "handover"],
           "depends": []
         },
         {
@@ -4533,10 +3942,7 @@
             "Find duplicate fetches and overfetching",
             "Propose the reduction — dedup, batch, select, cache"
           ],
-          "connects": [
-            "trace",
-            "handover"
-          ],
+          "connects": ["trace", "handover"],
           "depends": []
         },
         {
@@ -4562,11 +3968,7 @@
             "Diff spacing, type, color, and structure",
             "Report each divergence — a human judges intent"
           ],
-          "connects": [
-            "diff",
-            "see",
-            "handover"
-          ],
+          "connects": ["diff", "see", "handover"],
           "depends": []
         },
         {
@@ -4587,10 +3989,7 @@
             "Diff layout, spacing, color, and copy",
             "Report each divergence side by side"
           ],
-          "connects": [
-            "mirror",
-            "handover"
-          ],
+          "connects": ["mirror", "handover"],
           "depends": []
         }
       ]
@@ -4622,11 +4021,7 @@
             "Friday: review, coach, rotate a canon principle",
             "Archive the cycle"
           ],
-          "connects": [
-            "health",
-            "monitor",
-            "canon"
-          ],
+          "connects": ["health", "monitor", "canon"],
           "depends": []
         },
         {
@@ -4652,10 +4047,7 @@
             "Sum API + infra spend against budget",
             "Escalate anything red to incident"
           ],
-          "connects": [
-            "incident",
-            "weekly"
-          ],
+          "connects": ["incident", "weekly"],
           "depends": []
         },
         {
@@ -4681,10 +4073,7 @@
             "Fix or roll back, verify recovery",
             "Write the postmortem on a GitHub issue"
           ],
-          "connects": [
-            "monitor",
-            "report"
-          ],
+          "connects": ["monitor", "report"],
           "depends": []
         },
         {
@@ -4706,9 +4095,7 @@
             "login: drive Safari autofill for web services",
             "export: surface a key for env wiring"
           ],
-          "connects": [
-            "monitor"
-          ],
+          "connects": ["monitor"],
           "depends": []
         },
         {
@@ -4726,10 +4113,7 @@
             "Warn on doc rot — drift is warn-only, never a gate",
             "Report per-teammate config status"
           ],
-          "connects": [
-            "drift",
-            "weekly"
-          ],
+          "connects": ["drift", "weekly"],
           "depends": []
         },
         {
@@ -4751,12 +4135,7 @@
             "Write findings to memory for reuse",
             "Feed the conventions, patterns, and drift surfaces"
           ],
-          "connects": [
-            "conventions",
-            "patterns",
-            "drift",
-            "analyze"
-          ],
+          "connects": ["conventions", "patterns", "drift", "analyze"],
           "depends": []
         },
         {
@@ -4773,9 +4152,7 @@
             "Filter for naming, structure, and style conventions",
             "Answer with examples from real repos"
           ],
-          "connects": [
-            "learn"
-          ],
+          "connects": ["learn"],
           "depends": []
         },
         {
@@ -4792,10 +4169,7 @@
             "Rank patterns by adoption across repos",
             "Point to the canonical card when one exists"
           ],
-          "connects": [
-            "learn",
-            "pattern"
-          ],
+          "connects": ["learn", "pattern"],
           "depends": []
         },
         {
@@ -4812,10 +4186,7 @@
             "Diff engine.json against repo reality and docs",
             "List each drifted count, model ref, or stale doc"
           ],
-          "connects": [
-            "learn",
-            "health"
-          ],
+          "connects": ["learn", "health"],
           "depends": []
         }
       ]
@@ -4847,9 +4218,7 @@
             "Surface one book + one operating move, grounded in principle #N",
             "Keep it brief; skip trivial or purely technical choices"
           ],
-          "connects": [
-            "weekly"
-          ],
+          "connects": ["weekly"],
           "depends": []
         },
         {
@@ -4870,14 +4239,12 @@
             "Convert via the MarkItDown MCP",
             "Return clean Markdown ready for docs or memory"
           ],
-          "connects": [
-            "docs"
-          ],
+          "connects": ["docs"],
           "depends": []
         },
         {
           "name": "higgs",
-          "effect": "Generate and edit photos and videos for databayt org ads/marketing via Higgsfield AI CLI/MCP",
+          "effect": "Generate and edit photos and videos for databayt org ads/marketing via the Higgsfield CLI — zero-question recipes, brand kit pre-wired, batch-first",
           "order": [
             {
               "type": "portal",
@@ -4889,14 +4256,12 @@
             }
           ],
           "steps": [
-            "Detect prompt instructions for photo/video",
-            "Fetch and download video if URL reference is supplied",
-            "Generate/tweak media assets via Higgsfield CLI or MCP",
-            "Deliver result and save output to disk"
+            "Preflight: account status; self-heal auth + workspace if needed",
+            "Pick the recipe + model from the skill's verified defaults (never ask)",
+            "Estimate free (generate cost / --cost-only / --enhance-only), then batch-generate with --json",
+            "Parse .[].result_url, download to ~/Downloads/higgs/, deliver via SendUserFile with spend + balance"
           ],
-          "connects": [
-            "marketing"
-          ],
+          "connects": ["marketing"],
           "depends": []
         }
       ]

@@ -2431,6 +2431,20 @@ export const schools: School[] = [
         connects: ["docs"],
         depends: [],
       },
+      {
+        name: "higgs",
+        effect:
+          "Generate and edit photos and videos for databayt org ads/marketing via the Higgsfield CLI — zero-question recipes, brand kit pre-wired, batch-first",
+        order: [p("Higgs"), s("/higgs")],
+        steps: [
+          "Preflight: account status; self-heal auth + workspace if needed",
+          "Pick the recipe + model from the skill's verified defaults (never ask)",
+          "Estimate free (generate cost / --cost-only / --enhance-only), then batch-generate with --json",
+          "Parse .[].result_url, download to ~/Downloads/higgs/, deliver via SendUserFile with spend + balance",
+        ],
+        connects: ["marketing"],
+        depends: [],
+      },
     ],
   },
 ];
