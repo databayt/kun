@@ -1,26 +1,43 @@
 #!/bin/bash
 # Kun Engine Setup — install, update, and verify Claude Code config
-# Usage: cd ~/kun && bash .claude/scripts/setup.sh <role>
+# Usage: cd ~/kun && bash .claude/scripts/setup.sh <role> [--quiet]
 # Roles: engineer, business, content, ops
+# The role persists to ~/.claude/.kun-role, so refresh runs (and the daily
+# maintain heartbeat) can omit it: bash .claude/scripts/setup.sh --quiet
 
 set -e
 
-ROLE="${1:-}"
+QUIET=0
+ROLE=""
+for arg in "$@"; do
+    case "$arg" in
+        --quiet) QUIET=1 ;;
+        --*) echo "Unknown flag: $arg" >&2; exit 1 ;;
+        *) [ -z "$ROLE" ] && ROLE="$arg" ;;
+    esac
+done
+
 KUN_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 CLAUDE_DIR="$HOME/.claude"
 MODE="install"
 
 # Colors
 R='\033[0;31m' G='\033[0;32m' Y='\033[1;33m' B='\033[0;34m' D='\033[2m' NC='\033[0m'
-pass() { echo -e "  ${G}✓${NC} $1"; }
+pass() { [ "$QUIET" = 1 ] || echo -e "  ${G}✓${NC} $1"; }
 fail() { echo -e "  ${R}✗${NC} $1"; ERRORS=$((ERRORS + 1)); }
-info() { echo -e "  ${D}·${NC} $1"; }
+info() { [ "$QUIET" = 1 ] || echo -e "  ${D}·${NC} $1"; }
+say()  { [ "$QUIET" = 1 ] || echo -e "$1"; }
 
 # ── Role validation ──────────────────────────────────────────────
+# Fall back to the persisted role so unattended refreshes need no args.
+if [[ -z "$ROLE" && -f "$CLAUDE_DIR/.kun-role" ]]; then
+    ROLE="$(tr -d '[:space:]' < "$CLAUDE_DIR/.kun-role")"
+fi
+
 if [[ -z "$ROLE" ]]; then
     echo -e "${B}Kun Engine Setup${NC}"
     echo ""
-    echo "Usage: bash .claude/scripts/setup.sh <role>"
+    echo "Usage: bash .claude/scripts/setup.sh <role> [--quiet]"
     echo ""
     echo "Roles:"
     echo "  engineer  — full agent fleet, all MCPs, all skills, hooks"
@@ -41,13 +58,14 @@ fi
 
 [ -d "$CLAUDE_DIR/agents" ] && MODE="update"
 
-echo -e "${B}Kun Engine Setup${NC} — ${G}$ROLE${NC} ($MODE)"
-echo ""
+say "${B}Kun Engine Setup${NC} — ${G}$ROLE${NC} ($MODE)"
+say ""
 
 # ── Common config (all roles) ───────────────────────────────────
-echo -e "${B}Common config${NC}"
+say "${B}Common config${NC}"
 
-mkdir -p "$CLAUDE_DIR"/{agents,commands,rules,memory,scripts,skills}
+mkdir -p "$CLAUDE_DIR"/{agents,commands,rules,memory,scripts,skills,hooks}
+echo "$ROLE" > "$CLAUDE_DIR/.kun-role"
 info "directories"
 
 # User-global CLAUDE.md — install from the TEMPLATE only if missing. Never
@@ -86,13 +104,29 @@ cp "$KUN_DIR/.claude/scripts/"*.md "$CLAUDE_DIR/scripts/" 2>/dev/null || true
 chmod +x "$CLAUDE_DIR/scripts/"*.sh 2>/dev/null || true
 info "scripts"
 
-echo ""
+# Shared script libs (health.sh sources lib/agents.sh — keep the installed
+# copy self-contained instead of leaning on the ~/kun fallback)
+if [ -d "$KUN_DIR/.claude/scripts/lib" ]; then
+    mkdir -p "$CLAUDE_DIR/scripts/lib"
+    cp "$KUN_DIR/.claude/scripts/lib/"* "$CLAUDE_DIR/scripts/lib/" 2>/dev/null || true
+    info "scripts/lib"
+fi
+
+# User-global hooks (e.g. session-maintain-status.sh runs in EVERY project,
+# so it must live under ~/.claude/hooks, not only inside the kun repo)
+if [ -d "$KUN_DIR/.claude/hooks" ]; then
+    cp "$KUN_DIR/.claude/hooks/"*.sh "$CLAUDE_DIR/hooks/" 2>/dev/null || true
+    chmod +x "$CLAUDE_DIR/hooks/"*.sh 2>/dev/null || true
+    info "hooks"
+fi
+
+say ""
 
 # ── Full config (universal — every machine is a full autonomous worker) ──
 # Role no longer scopes capability; it's only a label + secrets-trust tier.
 # Secrets stay scoped via which Gist you're handed — MCP servers without a
 # key simply don't connect, so a full mcp.json is safe everywhere.
-echo -e "${B}Full config${NC}"
+say "${B}Full config${NC}"
 
 # Commands are retired — kun verbs are skills now (a same-named skill shadows a
 # command anyway). Prune stale ~/.claude/commands copies of migrated names.
@@ -122,21 +156,110 @@ if [ -d "$KUN_DIR/.claude/skills" ]; then
     info "skills ($SKILL_COUNT)"
 fi
 
+# ── Manifest prune ───────────────────────────────────────────────
+# ~/.claude mixes engine-managed items with personal ones. The manifest
+# records what THIS installer shipped; a manifest-listed item that has since
+# left the kun source gets pruned. Personal (non-manifest) items are never
+# touched, and the first run (no manifest yet) prunes nothing.
+MANIFEST="$CLAUDE_DIR/.kun-manifest.json"
+PRUNE_OUT=$(python3 - "$KUN_DIR" "$CLAUDE_DIR" "$MANIFEST" <<'PYEOF'
+import json, os, shutil, sys, time
+
+kun, claude, manifest_path = sys.argv[1], sys.argv[2], sys.argv[3]
+
+def names(path, kind):
+    if not os.path.isdir(path):
+        return []
+    if kind == "dir":
+        return sorted(d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d)))
+    return sorted(f for f in os.listdir(path) if f.endswith(kind))
+
+src = {
+    "skills":    names(os.path.join(kun, ".claude/skills"), "dir"),
+    "agents":    names(os.path.join(kun, ".claude/agents"), ".md"),
+    "workflows": names(os.path.join(kun, ".claude/workflows"), ".js"),
+    "rules":     names(os.path.join(kun, ".claude/rules"), ".md"),
+}
+
+pruned = []
+if os.path.isfile(manifest_path):
+    try:
+        with open(manifest_path) as f:
+            old = json.load(f)
+    except Exception:
+        old = {}
+    targets = {
+        "skills":    (os.path.join(claude, "skills"), True),
+        "agents":    (os.path.join(claude, "agents"), False),
+        "workflows": (os.path.join(claude, "workflows"), False),
+        "rules":     (os.path.join(claude, "rules"), False),
+    }
+    for key, (base, is_dir) in targets.items():
+        for name in old.get(key, []):
+            if name in src[key]:
+                continue  # still shipped by the engine
+            target = os.path.join(base, name)
+            if is_dir and os.path.isdir(target):
+                shutil.rmtree(target)
+                pruned.append(f"{key}/{name}")
+            elif not is_dir and os.path.isfile(target):
+                os.remove(target)
+                pruned.append(f"{key}/{name}")
+
+new = {"schema": 1, "ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), **src}
+tmp = manifest_path + ".tmp"
+with open(tmp, "w") as f:
+    json.dump(new, f, indent=2)
+    f.write("\n")
+os.replace(tmp, manifest_path)
+
+print(len(pruned))
+for p in pruned:
+    print(p)
+PYEOF
+) || PRUNE_OUT="0"
+PRUNE_COUNT=$(echo "$PRUNE_OUT" | head -1)
+if [ "${PRUNE_COUNT:-0}" -gt 0 ] 2>/dev/null; then
+    info "pruned $PRUNE_COUNT stale engine item(s): $(echo "$PRUNE_OUT" | tail -n +2 | tr '\n' ' ')"
+else
+    info "manifest current (no stale engine items)"
+fi
+
 # Full agent index
 if [ -f "$KUN_DIR/.claude/agents/_index.md" ]; then
     cp "$KUN_DIR/.claude/agents/_index.md" "$CLAUDE_DIR/agents/_index.md"
     info "agent index (_index.md)"
 fi
 
-# Full settings + hooks
-if [[ "$(uname)" == "Darwin" ]]; then
-    cp "$KUN_DIR/.claude/settings.json" "$CLAUDE_DIR/settings.json"
-else
-    cp "$KUN_DIR/.claude/settings-windows.json" "$CLAUDE_DIR/settings.json" 2>/dev/null || \
-        cp "$KUN_DIR/.claude/settings.json" "$CLAUDE_DIR/settings.json"
+# Full settings + hooks — engine-defined keys win, but personal top-level
+# keys the engine doesn't define (model, effortLevel, voice, …) survive the
+# refresh. Anything deeper than top level is engine territory.
+SRC_SETTINGS="$KUN_DIR/.claude/settings.json"
+if [[ "$(uname)" != "Darwin" ]] && [ -f "$KUN_DIR/.claude/settings-windows.json" ]; then
+    SRC_SETTINGS="$KUN_DIR/.claude/settings-windows.json"
 fi
+python3 - "$SRC_SETTINGS" "$CLAUDE_DIR/settings.json" <<'PYEOF' || cp "$SRC_SETTINGS" "$CLAUDE_DIR/settings.json"
+import json, os, sys
+src_path, dst_path = sys.argv[1], sys.argv[2]
+with open(src_path) as f:
+    merged = json.load(f)
+if os.path.isfile(dst_path):
+    try:
+        with open(dst_path) as f:
+            old = json.load(f)
+        for key, value in old.items():
+            if key not in merged:
+                merged[key] = value  # personal key — preserve
+    except Exception:
+        pass  # unreadable old settings — engine copy wins wholesale
+tmp = dst_path + ".tmp"
+with open(tmp, "w") as f:
+    json.dump(merged, f, indent=2)
+    f.write("\n")
+os.replace(tmp, dst_path)
+PYEOF
 chmod 600 "$CLAUDE_DIR/settings.json" 2>/dev/null || true
-info "settings (full + hooks)"
+info "settings (engine keys refreshed, personal keys preserved)"
 
 # Full MCP fleet
 if [ -f "$KUN_DIR/.claude/mcp.json" ]; then
@@ -151,14 +274,18 @@ fi
 mkdir -p "$CLAUDE_DIR/antigravity"
 cp "$KUN_DIR/.claude/antigravity/"* "$CLAUDE_DIR/antigravity/" 2>/dev/null || true
 if [ -f "$KUN_DIR/.claude/scripts/antigravity-sync.sh" ]; then
-    bash "$KUN_DIR/.claude/scripts/antigravity-sync.sh"
+    if [ "$QUIET" = 1 ]; then
+        bash "$KUN_DIR/.claude/scripts/antigravity-sync.sh" >/dev/null 2>&1 || true
+    else
+        bash "$KUN_DIR/.claude/scripts/antigravity-sync.sh"
+    fi
 fi
 
 # Codebase clone (every machine)
 CODEBASE_DIR="$HOME/codebase"
 if [ ! -d "$CODEBASE_DIR" ]; then
-    echo ""
-    echo -e "${Y}Cloning codebase...${NC}"
+    say ""
+    say "${Y}Cloning codebase...${NC}"
     git clone git@github.com:databayt/codebase.git "$CODEBASE_DIR" 2>/dev/null || \
     git clone https://github.com/databayt/codebase.git "$CODEBASE_DIR" 2>/dev/null || \
     info "clone failed — run manually: git clone git@github.com:databayt/codebase.git ~/codebase"
@@ -166,24 +293,30 @@ fi
 
 # Claude CLI (install if missing)
 if ! command -v claude &> /dev/null; then
-    echo ""
-    echo -e "${Y}Installing Claude Code CLI...${NC}"
+    say ""
+    say "${Y}Installing Claude Code CLI...${NC}"
     curl -fsSL https://claude.ai/install.sh | sh
     export PATH="$HOME/.local/bin:$PATH"
 fi
 
 # Antigravity CLI — secondary agent (install if missing)
 if ! command -v agy &> /dev/null; then
-    echo ""
-    echo -e "${Y}Installing Antigravity CLI (secondary agent)...${NC}"
+    say ""
+    say "${Y}Installing Antigravity CLI (secondary agent)...${NC}"
     curl -fsSL https://antigravity.google/cli/install.sh | bash
     export PATH="$HOME/.local/bin:$PATH"
 fi
 
-echo ""
+# Arm the daily maintain heartbeat (pull → refresh → health → report)
+if [ -f "$KUN_DIR/.claude/scripts/maintain.sh" ]; then
+    bash "$KUN_DIR/.claude/scripts/maintain.sh" --install --quiet || info "maintain scheduling failed (non-fatal)"
+    info "maintain heartbeat armed"
+fi
+
+say ""
 
 # ── Health check ─────────────────────────────────────────────────
-echo -e "${B}Health check${NC}"
+say "${B}Health check${NC}"
 ERRORS=0
 
 # Core files
@@ -223,6 +356,9 @@ fi
 [ -f "$CLAUDE_DIR/agents/_index.md" ] && \
     pass "agent index" || info "no agent index (using all agents)"
 
+# Manifest
+[ -f "$MANIFEST" ] && pass "manifest (.kun-manifest.json)" || fail "manifest missing"
+
 # Permissions
 SETTINGS_PERM=$(stat -f "%Lp" "$CLAUDE_DIR/settings.json" 2>/dev/null || stat -c "%a" "$CLAUDE_DIR/settings.json" 2>/dev/null)
 MCP_PERM=$(stat -f "%Lp" "$CLAUDE_DIR/mcp.json" 2>/dev/null || stat -c "%a" "$CLAUDE_DIR/mcp.json" 2>/dev/null)
@@ -233,15 +369,15 @@ MCP_PERM=$(stat -f "%Lp" "$CLAUDE_DIR/mcp.json" 2>/dev/null || stat -c "%a" "$CL
 command -v claude &> /dev/null && pass "claude CLI installed" || fail "claude CLI not found"
 command -v agy &> /dev/null && pass "agy CLI (secondary)" || info "agy CLI not installed (optional)"
 
-echo ""
+say ""
 
 # ── Summary ──────────────────────────────────────────────────────
 if [ $ERRORS -eq 0 ]; then
-    echo -e "${G}Setup complete${NC} — $ROLE ($MODE)"
+    say "${G}Setup complete${NC} — $ROLE ($MODE)"
 else
     echo -e "${Y}Setup complete with $ERRORS issue(s)${NC} — $ROLE ($MODE)"
 fi
 
-echo ""
-echo -e "${D}Config: $CLAUDE_DIR${NC}"
-echo -e "${D}Re-run anytime: cd ~/kun && bash .claude/scripts/setup.sh $ROLE${NC}"
+say ""
+say "${D}Config: $CLAUDE_DIR${NC}"
+say "${D}Re-run anytime: cd ~/kun && bash .claude/scripts/setup.sh $ROLE${NC}"
