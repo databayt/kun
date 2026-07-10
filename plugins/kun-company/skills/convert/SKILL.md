@@ -15,8 +15,8 @@ a knowledge base, or the content pipeline as Markdown the model can read.
 ## Arguments
 
 - `$1`: Source — a local file path **or** a URL.
-  - Local: any format MarkItDown supports (PDF, DOCX, PPTX, XLSX, PNG/JPG,
-    MP3/WAV, HTML, CSV/JSON/XML, EPub, ZIP).
+  - Local: any format MarkItDown supports (PDF, DOCX, PPTX, XLSX/XLS, Outlook
+    `.msg`, PNG/JPG, MP3/WAV, HTML, CSV/JSON/XML, EPub, ZIP).
   - URL: any `http(s)://…` page, including YouTube links.
 - `$2` _(optional)_: Output target.
   - Omitted → write Markdown to `<source-basename>.md` next to a local source,
@@ -57,5 +57,9 @@ a knowledge base, or the content pipeline as Markdown the model can read.
 - Plain-language requests like "convert this PDF to markdown: <path>" route to
   the same `markitdown` tool without typing `/convert`.
 - Audio transcription needs `ffmpeg`; image EXIF needs `exiftool` (`brew install`).
+- Image-only/scanned PDFs: upstream ships a `markitdown-ocr` plugin
+  (`--use-plugins --llm-client … --llm-model …`) — it needs an OpenAI-compatible
+  API key, which the subscription-only billing posture forbids; adopting it
+  requires a `/decide`. Until then, flag scanned sections as unconverted.
 
 Convert source: $ARGUMENTS

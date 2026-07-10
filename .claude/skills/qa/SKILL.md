@@ -1,7 +1,7 @@
 ---
 name: qa
 description: Autonomous block QA — detect, adversarially verify, fix safe tiers, hand the residual to a human
-when_to_use: "Use when a feature block needs autonomous QA — detect across every route + the block source, adversarially verify every FAIL, auto-fix the safe (tier A) and build-gated (tier B) tiers, persist the verdict to blocks.json, and open one human-signoff issue carrying only the residual — triggering on qa <block> (e.g. \"qa admission\" in prose, no slash needed), \"QA this block\", pre-release verification, or a code-complete-but-unverified block; block-scope only — a single URL spot-check is handover's job, the typecheck/build gate alone is check's, and a user-reported bug is report's."
+when_to_use: 'Use when a feature block needs autonomous QA — detect across every route + the block source, adversarially verify every FAIL, auto-fix the safe (tier A) and build-gated (tier B) tiers, persist the verdict to blocks.json, and open one human-signoff issue carrying only the residual — triggering on qa <block> (e.g. "qa admission" in prose, no slash needed), "QA this block", pre-release verification, or a code-complete-but-unverified block; block-scope only — a single URL spot-check is handover''s job, the typecheck/build gate alone is check''s, and a user-reported bug is report''s.'
 argument-hint: <block> [--env staging] [--audit] [--rounds N]
 ---
 
@@ -37,6 +37,14 @@ stop and list near matches. The workflow itself resolves the block's `path` + pr
 Pre-flight: ensure the dev server is running on **port 3000** (or the `--env` target is reachable) and you
 are on `main` (`git branch --show-current` → `main`) — the loop commits fixes straight to main per the
 github-workflow rule.
+
+**Baseline smoke before any edit**: load one representative route of the block end-to-end _before_ the
+workflow starts fixing. If the block is already broken at baseline, record that state in the run log —
+pre-existing breakage must never be attributed to (or hidden by) this run's fixes.
+
+**Verdict contract**: `blocks.json[block].qa` is written by the workflow's Persist phase **only**. It is
+unacceptable for any other flow — a fixer agent, a report run, a manual edit — to flip a block's QA verdict;
+they may only append findings. The verdict field is the engine's ground truth for `/release`.
 
 ### Phase 2 — Run the workflow (multi-agent opt-in)
 

@@ -1,8 +1,7 @@
 ---
 domain: tailwind-v4
 severity: error
-paths:
-  ["**/*.tsx", "**/page.tsx", "**/content.tsx", "**/form.tsx", "**/*.css"]
+paths: ["**/*.tsx", "**/page.tsx", "**/content.tsx", "**/form.tsx", "**/*.css"]
 since: "Tailwind 4.0"
 ---
 
@@ -35,3 +34,5 @@ Databayt ships Arabic (RTL default) and English (LTR). Physical utilities (`ml-`
 ## Fix
 
 Swap physical for logical: `ml-→ms-`, `mr-→me-`, `pl-→ps-`, `pr-→pe-`, `left/right-→start/end-`, `text-left→text-start`.
+
+> Tailwind 4.3 (May 2026) expanded the logical-property utility set and added first-party scrollbar utilities — prefer the logical variants there too (`since: Tailwind 4.3`).

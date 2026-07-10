@@ -30,13 +30,14 @@ When building a new feature that involves one of these keywords:
 
 The code-side quality keywords (see `.claude/agents/quality.md`) cite atomic, severity-tagged rules under `.claude/rules/<domain>/`. Each rule has frontmatter (`domain`, `severity`, `paths`, `since`) and Good/Bad/Fix sections. `paths` is Claude Code's native path-scoping field (quoted glob array), so each rule auto-loads only when Claude touches a matching file — the 3 cross-cutting rules at `.claude/rules/*.md` carry no `paths` and load unconditionally. When a keyword runs, read the matching domain dir(s) and cite findings as `rule-id (severity)`.
 
-| Keyword   | Rule directories                                                                                                                                |
-| --------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `stack`   | all of `react-19/`, `next-16/`, `typescript-strict/`, `tailwind-v4/`, `prisma-6/`, `authjs/`, `neon/`, `s3/` (version/import/deprecation rules) |
-| `pattern` | `.claude/patterns/cards/` + `next-16/` + `react-19/`                                                                                            |
-| `design`  | `tailwind-v4/` (tokens, OKLCH, logical properties) + component-hierarchy cards                                                                  |
-| `guard`   | `authjs/` + `prisma-6/` (tenant scope) + `s3/` (presigned URLs)                                                                                 |
+| Keyword               | Rule directories                                                                                                                                               |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `stack`               | all of `react-19/`, `react-perf/`, `next-16/`, `typescript-strict/`, `tailwind-v4/`, `prisma-6/`, `authjs/`, `neon/`, `s3/` (version/import/deprecation rules) |
+| `pattern`             | `.claude/patterns/cards/` + `next-16/` + `react-19/`                                                                                                           |
+| `design`              | `tailwind-v4/` (tokens, OKLCH, logical properties) + component-hierarchy cards                                                                                 |
+| `guard`               | `authjs/` + `prisma-6/` (tenant scope) + `s3/` (presigned URLs)                                                                                                |
+| `trace` / `efficient` | `react-perf/` (parallelization, bundle, RSC-boundary rules — impact-tagged)                                                                                    |
 
-Domains (29 rules total): `react-19` (5), `next-16` (5), `typescript-strict` (4), `tailwind-v4` (4), `prisma-6` (4), `authjs` (3), `neon` (2), `s3` (2).
+Domains (37 rules total): `react-19` (5), `react-perf` (8 — vendored from vercel-labs/agent-skills, 2026-07-10), `next-16` (5), `typescript-strict` (4), `tailwind-v4` (4), `prisma-6` (4), `authjs` (3), `neon` (2), `s3` (2).
 
 Adding a rule: drop a new `<slug>.md` in the right domain dir with the standard frontmatter (`domain` / `severity` / `paths` glob array / `since`) + Good/Bad/Fix. No agent changes needed — the keyword reads the whole dir, and `paths` scopes the ambient auto-load.

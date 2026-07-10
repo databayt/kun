@@ -9,12 +9,12 @@
 
 ## Preferences
 
-- **Model**: `claude-opus-4-8` (Opus 4.8, 1M context) — fallbacks per `engine.json`
+- **Model**: `claude-fable-5` (Fable 5 — session default since 2026-07-10) — fallbacks per `engine.json` (`claude-opus-4-8` → `claude-sonnet-5`)
 - **Billing**: Claude Max $100/mo, subscription-only — no usage credits, no API-key spend (change requires `/decide` + Abdout approval); check `/usage` weekly
 - **Package Manager**: pnpm
 - **Stack**: Next.js 16 · React 19 · Prisma 6 · TypeScript 5 · Tailwind CSS 4 · shadcn/ui
 - **Languages**: Arabic (RTL default) · English (LTR)
-- **Commit footer**: `Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>`
+- **Commit footer**: `Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>`
 
 > Project rules auto-load from `.claude/rules/`:
 > `cowork-bridge.md`, `github-workflow.md`, `patterns.md`, `block-protocol.md`, `engine-parity.md`.
@@ -39,25 +39,25 @@ IDEA → SPEC (human gate) → [PLAN → TASKS] → SCHEMA → CODE → WIRE →
 <!-- BEGIN vocabulary (generated) -->
 Claude routes these to the right skill + agent + MCP without a dedicated command. Registry: `.claude/vocabulary.json` (edit it, then `node .claude/scripts/generate-vocab.mjs`); browsable at kun.databayt.org/en/docs/keywords.
 
-**The Pipeline** — idea to production in one word: `feature`, `idea`, `spec`, `schema`, `ready`, `code`, `wire`, `check`, `ship`, `watch`
-**Charm Work** — everyday practical magic: `dev`, `build`, `push`, `quick`, `deploy`, `ship`, `check`, `release`
-**Transfiguration** — creating something from nothing: `component`, `page`, `api`, `atom`, `template`, `block`, `feature`, `migration`
+**The Pipeline** — idea to production in one word: `feature`, `idea`, `spec`, `plan`, `tasks`, `schema`, `ready`, `code`, `wire`, `check`, `ship`, `watch`
+**Charm Work** — everyday practical magic: `dev`, `build`, `push`, `quick`, `deploy`, `release`
+**Transfiguration** — creating something from nothing: `component`, `page`, `api`, `atom`, `template`, `block`, `migration`
 **Ancient Runes** — the foundational frameworks: `nextjs`, `react`, `typescript`, `prisma`, `tailwind`, `shadcn`
 **Conjuration** — summoning ui elements: `table`, `header`, `menu`, `form`, `modal`, `card`, `sidebar`, `footer`, `hero`, `navbar`
 **The Dark Arts of Features** — n.e.w.t.-level system enchantments: `auth`, `saas`, `dashboard`, `landing`, `checkout`, `settings`, `profile`, `admin`, `onboarding`
 **Animation Charms** — giving life to stillness: `motion`, `animation`, `transition`, `gesture`, `scroll`
-**Defense Against the Dark Arts** — protection from bugs and entropy: `test`, `e2e`, `handover`, `coverage`, `review`, `security`, `audit`, `analyze`, `constitution`, `accessibility`, `optimize`, `performance`
+**Defense Against the Dark Arts** — protection from bugs and entropy: `test`, `e2e`, `handover`, `qa`, `coverage`, `review`, `security`, `audit`, `analyze`, `constitution`, `accessibility`, `optimize`, `performance`
 **Reparo** — the mending spells: `fix`, `error`, `scan`, `lint`, `format`, `type-check`, `report`
 **Quill Charms** — the spells of documentation: `docs`, `readme`, `api-docs`, `storybook`, `changelog`
-**Geminio** — duplication and summoning: `clone`, `copy`, `fork`, `extend`, `sync`, `upstream`
+**Geminio** — duplication and summoning: `clone`, `copy`, `fork`, `extend`, `upstream`
 **Summoning Charms** — portals to external realms: `github`, `figma`, `linear`, `slack`, `notion`, `sentry`, `stripe`, `vercel`, `analytics`, `neon`
-**Divination** — seeing ahead: `bmad`, `flow`, `plan`, `architect`, `implement`, `story`, `cycle`, `loop`
+**Divination** — seeing ahead: `story`, `loop`, `goal`, `schedule`, `workflow`
 **Advanced Spellwork** — performance magic: `parallelize`, `waterfall`, `bundle`, `lazy`, `suspense`, `memo`, `server-component`, `streaming`, `barrel`, `dedup`
 **Portkeys** — teleportation to other repos: `from codebase`, `from shadcn`, `from radix`, `like hogwarts`, `like souq`, `like mkan`, `like shifa`, `like sijillee`, `like moallimee`
 **The Unforgivable Commands** — forbidden by the engine: `rm -rf *`, `prisma migrate reset`, `prisma db push --accept-data-loss`, `DROP TABLE`, `git push --force main`
 **The Auror Office** — one keyword, one quality dimension: `see`, `flow`, `debug`, `responsive`, `lang`, `fast`, `guard`, `architecture`, `structure`, `pattern`, `design`, `stack`, `trace`, `efficient`, `mirror`, `diff`
-**The Ministry of Magic** — operations and intelligence: `weekly`, `monitor`, `incident`, `credentials`, `health`, `learn`, `conventions`, `patterns`, `drift`
-**The Pensieve** — judgment and conversion: `canon`, `convert`, `higgs`, `social`
+**The Ministry of Magic** — operations and intelligence: `captain`, `weekly`, `monitor`, `incident`, `issue`, `credentials`, `health`, `sync`, `learn`, `conventions`, `patterns`, `drift`
+**The Pensieve** — judgment and conversion: `canon`, `decide`, `premortem`, `convert`, `higgs`, `social`
 <!-- END vocabulary (generated) -->
 
 **Quality dimensions** route through `.claude/agents/quality.md`; `/handover` orchestrates all of them on a URL or block.

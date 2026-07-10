@@ -20,6 +20,7 @@ Steps:
 4. Review revenue status (stripe MCP if available)
 5. Summarize what shipped vs what was planned
 6. Identify blockers and risks
+   6.5. **Decision-review sweep (Friday / full review only)** — scan the decision journal (`.claude/memory/decisions/` and `/decide` entries) for entries whose reviewed-by date has passed: grade the prediction against what actually happened, write the lesson as a `feedback_*` memory, and mark the entry reviewed. Predictions that are never graded never compound.
 7. Recommend next week's allocation:
    - Abdout: [technical focus]
    - Ali: [business focus]

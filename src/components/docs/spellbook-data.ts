@@ -77,6 +77,8 @@ export const schools: School[] = [
           "IDEA: Create structured GitHub issue with acceptance criteria",
           "SPEC: Data model sketch + file plan + refined criteria",
           "PAUSE: Human approves the spec",
+          "PLAN: Architecture decisions — patterns, mirror target, tradeoffs",
+          "TASKS: Dependency-ordered work list on the issue",
           "SCHEMA: Prisma model + migration + Zod validation",
           "CODE: Server actions with auth + validation + tenant isolation",
           "WIRE: Pages + forms + tables + i18n wired to actions",
@@ -87,6 +89,8 @@ export const schools: School[] = [
         connects: [
           "idea",
           "spec",
+          "plan",
+          "tasks",
           "schema",
           "code",
           "wire",
@@ -124,6 +128,33 @@ export const schools: School[] = [
         ],
         connects: ["idea", "schema"],
         depends: ["idea"],
+      },
+      {
+        name: "plan",
+        effect:
+          "Architecture plan from the approved spec — patterns, tradeoffs, risks",
+        order: [f("architecture"), p("GitHub"), s("/plan")],
+        steps: [
+          "Read the approved spec from the issue",
+          "Choose patterns: mirror target, pattern cards, data flow",
+          "Record architecture decisions + tradeoffs + risks",
+          "Append the plan as a comment on the feature issue",
+        ],
+        connects: ["spec", "tasks"],
+        depends: ["spec"],
+      },
+      {
+        name: "tasks",
+        effect: "Dependency-ordered task breakdown from the approved plan",
+        order: [f("product"), p("GitHub"), s("/tasks")],
+        steps: [
+          "Read the plan from the issue",
+          "Decompose into atomic, dependency-aware tasks",
+          "Order by dependency; mark parallelizable work",
+          "Publish the checklist on the issue",
+        ],
+        connects: ["plan", "schema"],
+        depends: ["plan"],
       },
       {
         name: "schema",
@@ -216,7 +247,7 @@ export const schools: School[] = [
       {
         name: "ship",
         effect: "Commit + push + deploy to Vercel production + verify",
-        order: [f("git"), f("deploy"), p("GitHub"), p("Vercel"), s("/deploy")],
+        order: [f("git"), f("deploy"), p("GitHub"), p("Vercel"), s("/ship")],
         steps: [
           "Stage and commit with conventional message + Closes #N",
           "Push to main",
@@ -252,7 +283,7 @@ export const schools: School[] = [
     description:
       "The spells you cast most often. Reliable, essential, and dangerously easy to take for granted. Professor Flitwick would be proud.",
     quote:
-      "dev is your Lumos — the first spell each morning. check is your Nox — the last before rest.",
+      "dev is your Lumos — the first spell each morning. build is your Nox — the last before rest.",
     spells: [
       {
         name: "dev",
@@ -337,34 +368,6 @@ export const schools: School[] = [
         ],
         connects: ["build", "ship", "push"],
         depends: ["build"],
-      },
-      {
-        name: "ship",
-        effect: "Deploy straight to production — no staging",
-        order: [
-          f("deploy"),
-          f("build"),
-          p("Vercel"),
-          s("/deploy"),
-          w("deployment"),
-        ],
-        steps: ["Same as deploy but: npx vercel --prod --yes"],
-        connects: ["deploy", "build", "release"],
-        depends: ["build", "test"],
-      },
-      {
-        name: "check",
-        effect: "Pre-ship quality gate — typecheck, build, visual, tests",
-        order: [f("build"), f("typescript"), p("Browser"), s("/check")],
-        steps: [
-          "pnpm tsc --noEmit (type check, auto-fix loop max 5)",
-          "pnpm build (production build, auto-fix loop max 5)",
-          "Navigate route, screenshot, console-clean verify",
-          "Run existing tests (--passWithNoTests)",
-          "Verdict: READY TO SHIP / BLOCKED",
-        ],
-        connects: ["build", "ship", "handover", "release"],
-        depends: [],
       },
       {
         name: "release",
@@ -531,30 +534,6 @@ export const schools: School[] = [
         ],
         connects: ["template", "atom", "saas"],
         depends: ["atom", "prisma"],
-      },
-      {
-        name: "feature",
-        effect: "Plan and create entire feature end-to-end",
-        order: [
-          f("orchestration"),
-          f("architecture"),
-          f("nextjs"),
-          f("prisma"),
-          f("react"),
-          f("test"),
-          f("build"),
-        ],
-        steps: [
-          "Architecture (schema design)",
-          "Database (migration)",
-          "Backend (server actions)",
-          "Frontend (components)",
-          "Styling (tailwind)",
-          "Testing (vitest + playwright)",
-          "Build validation",
-        ],
-        connects: ["saas", "block", "migration", "test"],
-        depends: ["plan"],
       },
       {
         name: "migration",
@@ -1078,6 +1057,21 @@ export const schools: School[] = [
         depends: [],
       },
       {
+        name: "qa",
+        effect:
+          "Autonomous block QA — detect, adversarially verify, fix safe tiers, one signoff issue",
+        order: [f("quality"), p("Browser"), s("/qa")],
+        steps: [
+          "Detect across every route + the block source",
+          "Adversarially verify every FAIL — refute or confirm",
+          "Auto-fix tier A (mechanical) and tier B (build-gated)",
+          "Persist the verdict to blocks.json",
+          "Open ONE human-signoff issue carrying only the residual",
+        ],
+        connects: ["handover", "check", "release"],
+        depends: [],
+      },
+      {
         name: "coverage",
         effect: "Reveal test coverage — the Marauder's Map",
         order: [f("test"), w("testing")],
@@ -1454,19 +1448,6 @@ export const schools: School[] = [
         depends: [],
       },
       {
-        name: "sync",
-        effect: "Synchronize with upstream source",
-        order: [f("git"), f("github"), p("GitHub"), w("multi-repo")],
-        steps: [
-          "git fetch origin",
-          "git rebase origin/main",
-          "Resolve conflicts",
-          "Push",
-        ],
-        connects: ["upstream", "clone"],
-        depends: [],
-      },
-      {
         name: "upstream",
         effect: "Pull changes from upstream",
         order: [f("git"), f("github"), p("GitHub"), w("multi-repo")],
@@ -1609,92 +1590,75 @@ export const schools: School[] = [
     name: "Divination",
     subtitle: "Seeing ahead",
     description:
-      "Planning, architecting, predicting what must be built. Not all wizards believe, but the best ones practice daily.",
+      "Planning and time itself — user stories, recurring loops, goals that outlive a turn, cloud routines that run while you sleep, and deterministic multi-agent workflows.",
     quote:
-      "Trelawney was wrong about most things, but right about one: prepare for the future.",
+      "schedule a routine before bed; wake to a finished sweep. The best divination is automation.",
     spells: [
       {
-        name: "bmad",
-        effect: "Show BMAD menu — choose planning track",
-        order: [f("orchestration")],
-        steps: [
-          "Display all workflow options",
-          "Quick Flow (~5 min)",
-          "BMad Method (~15 min)",
-          "Enterprise (~30 min)",
-        ],
-        connects: ["flow", "plan"],
-        depends: [],
-      },
-      {
-        name: "flow",
-        effect: "Quick Flow — five minutes to a working plan",
-        order: [f("orchestration")],
-        steps: ["*bmad-quick-flow", "Rapid assessment", "Action items"],
-        connects: ["plan", "implement"],
-        depends: [],
-      },
-      {
-        name: "plan",
-        effect: "Enter planning phase — architecture first",
-        order: [f("orchestration"), f("architecture")],
-        steps: [
-          "*2-plan-workflows",
-          "Requirements gathering",
-          "Architecture design",
-          "Story mapping",
-        ],
-        connects: ["architect", "story"],
-        depends: [],
-      },
-      {
-        name: "architect",
-        effect: "Design system architecture",
-        order: [f("orchestration"), f("architecture")],
-        steps: [
-          "*3-solutioning",
-          "System design",
-          "Data modeling",
-          "API design",
-        ],
-        connects: ["plan", "implement"],
-        depends: ["plan"],
-      },
-      {
-        name: "implement",
-        effect: "Execute the plan",
-        order: [f("orchestration"), f("architecture")],
-        steps: [
-          "*4-implementation",
-          "Code generation",
-          "Testing",
-          "Deployment",
-        ],
-        connects: ["architect", "cycle"],
-        depends: ["architect"],
-      },
-      {
         name: "story",
-        effect: "Create user stories",
-        order: [f("orchestration")],
-        steps: ["User personas", "Acceptance criteria", "Story points"],
-        connects: ["plan", "feature"],
-        depends: [],
-      },
-      {
-        name: "cycle",
-        effect: "Full development cycle",
-        order: [f("orchestration")],
-        steps: ["Plan", "Architect", "Implement", "Test", "Deploy"],
-        connects: ["plan", "deploy"],
+        effect: "Capture a user story — persona, acceptance criteria, scope",
+        order: [f("orchestration"), p("GitHub"), s("/idea")],
+        steps: [
+          "Frame as a user story — as a <persona>, I can <action>",
+          "Write acceptance criteria",
+          "Land it as a structured issue via the idea stage",
+        ],
+        connects: ["idea", "plan"],
         depends: [],
       },
       {
         name: "loop",
-        effect: "Continuous iteration — never ends",
-        order: [f("orchestration")],
-        steps: ["Recurring cycle", "Feedback integration", "Improvement"],
-        connects: ["cycle"],
+        effect:
+          "Recurring execution — fixed interval or self-paced (built-in /loop)",
+        order: [s("/loop")],
+        steps: [
+          "/loop 5m <prompt> — fixed interval (cron-style)",
+          "/loop <prompt> — self-paced; Claude picks each delay",
+          "Bare /loop — built-in maintenance list (customize via .claude/loop.md)",
+          "Session-scoped: Esc stops it; recurring tasks expire in 7 days",
+        ],
+        connects: ["goal", "schedule"],
+        depends: [],
+      },
+      {
+        name: "goal",
+        effect:
+          "Work across turns until a completion condition is met (built-in /goal)",
+        order: [s("/goal")],
+        steps: [
+          "State the completion condition up front",
+          "Claude iterates — fix, verify, repeat — until it holds",
+          "Report the evidence that the goal is met",
+        ],
+        connects: ["loop"],
+        depends: [],
+      },
+      {
+        name: "schedule",
+        effect:
+          "Cloud routines — scheduled, API, or GitHub-triggered agent runs (built-in /schedule)",
+        order: [s("/schedule")],
+        steps: [
+          "Recurring cron or one-off timestamp — runs on Anthropic infra",
+          "API trigger: POST /routines/{id}/fire with a bearer token",
+          "GitHub triggers: PR opened/merged, issue labeled — with filters",
+          "Usage draws from the subscription; daily per-account cap",
+        ],
+        connects: ["loop", "monitor"],
+        depends: [],
+      },
+      {
+        name: "workflow",
+        effect:
+          "Deterministic multi-agent orchestration — saved scripts fan out subagents",
+        order: [f("orchestration"), m(".claude/workflows/")],
+        steps: [
+          "Explicit opt-in only — workflows can spawn dozens of agents",
+          "Saved: handover.js (12-keyword fan-out), qa.js (block QA)",
+          "pipeline() by default; parallel() only for true barriers",
+          "Resume a paused run via its runId — cached stages replay free",
+        ],
+        connects: ["handover", "qa"],
         depends: [],
       },
     ],
@@ -2191,6 +2155,7 @@ export const schools: School[] = [
           "Technology check — versions, imports, deprecated APIs across every rule domain",
         order: [
           f("quality"),
+          w("rules/react-perf"),
           w("rules/react-19"),
           w("rules/next-16"),
           w("rules/typescript-strict"),
@@ -2203,7 +2168,7 @@ export const schools: School[] = [
         steps: [
           "Scan imports for deprecated APIs and wrong versions",
           "Check React 19 / Next 16 / Prisma 6 / Tailwind 4 idioms",
-          "Sweep all eight rule domains",
+          "Sweep all nine rule domains",
           "Cite each hit as rule-id (severity)",
         ],
         connects: ["guard", "handover"],
@@ -2273,6 +2238,20 @@ export const schools: School[] = [
       "monitor watches production while weekly plans the week — the Ministry never sleeps.",
     spells: [
       {
+        name: "captain",
+        effect:
+          "CEO brain — synthesize identity + state + journal, surface the next action",
+        order: [f("captain"), s("/captain")],
+        steps: [
+          "Read identity (CONSTITUTION, NORTH-STAR, CANON) + current state",
+          "Weigh options against the drive — cash flow first",
+          "Surface the one next action with its line to revenue",
+          "Escalate to Abdout only on genuine gates",
+        ],
+        connects: ["weekly", "canon"],
+        depends: [],
+      },
+      {
         name: "weekly",
         effect:
           "The captain's cadence — Monday plan, Wednesday check, Friday review",
@@ -2314,6 +2293,20 @@ export const schools: School[] = [
         depends: [],
       },
       {
+        name: "issue",
+        effect:
+          "File a tracked GitHub issue in the right repo — labels, body, Slack ping",
+        order: [p("GitHub"), s("/issue")],
+        steps: [
+          "Resolve the right databayt repo",
+          "Compose Context / Action / Verification body",
+          "Apply priority + type + scope labels",
+          "Notify #dev via the slack MCP",
+        ],
+        connects: ["idea", "report"],
+        depends: [],
+      },
+      {
         name: "credentials",
         effect:
           "Databayt credentials — API keys via Keychain, web logins via Safari",
@@ -2338,6 +2331,19 @@ export const schools: School[] = [
           "Report per-teammate config status",
         ],
         connects: ["drift", "weekly"],
+        depends: [],
+      },
+      {
+        name: "sync",
+        effect: "Self-update the engine — release feeds → diff → adopt → stamp",
+        order: [s("/sync")],
+        steps: [
+          "Read the four tier feeds: anthropic 7d, stack + services 14d, practice 30d",
+          "Diff findings against the engine",
+          "Adopt mechanical wins; propose the rest",
+          "Stamp sync dates in engine.json; log adoptions in CONFIG-BENCHMARK",
+        ],
+        connects: ["health", "drift", "weekly"],
         depends: [],
       },
       {
@@ -2401,7 +2407,7 @@ export const schools: School[] = [
     name: "The Pensieve",
     subtitle: "Judgment and conversion",
     description:
-      "Dip into stored wisdom. canon pulls the right CEO book into a live decision — passively, mid-conversation; convert distills any file or URL into Markdown the engine can read.",
+      "Dip into stored wisdom. canon pulls the right CEO book into a live decision; decide journals it; premortem stress-tests it; convert distills any file or URL into Markdown the engine can read.",
     quote:
       '"should we build it?" — the Pensieve surfaces The Lean Startup before you finish the sentence.',
     spells: [
@@ -2417,6 +2423,34 @@ export const schools: School[] = [
           "Keep it brief; skip trivial or purely technical choices",
         ],
         connects: ["weekly"],
+        depends: [],
+      },
+      {
+        name: "decide",
+        effect:
+          "Decision journal — Type 1/2 classification, premortem, expected outcome, review date",
+        order: [f("captain"), s("/decide")],
+        steps: [
+          "Classify: Type 1 (one-way door) or Type 2 (reversible)",
+          "Run the premortem on Type 1 decisions",
+          "Record expected outcome + reviewed-by date",
+          "File the journal entry",
+        ],
+        connects: ["premortem", "canon"],
+        depends: [],
+      },
+      {
+        name: "premortem",
+        effect:
+          "Klein premortem — assume it failed, write the story, surface the risks",
+        order: [f("captain"), s("/premortem")],
+        steps: [
+          "Assume the decision failed spectacularly",
+          "Write the failure story backwards",
+          "Extract the risks the optimism hid",
+          "Feed them into the decision journal",
+        ],
+        connects: ["decide"],
         depends: [],
       },
       {
@@ -2477,6 +2511,8 @@ export const workflows: Workflow[] = [
         action: "Structured GitHub issue with acceptance criteria",
       },
       { keyword: "spec", action: "Data model + file plan + human approval" },
+      { keyword: "plan", action: "Architecture decisions + tradeoffs" },
+      { keyword: "tasks", action: "Dependency-ordered work list" },
       {
         keyword: "schema",
         action: "Prisma model + migration + Zod validation",
@@ -2556,6 +2592,17 @@ export const workflows: Workflow[] = [
       { keyword: "extend", action: "Adapt to project" },
       { keyword: "build", action: "Verify integration" },
       { keyword: "test", action: "Confirm behavior" },
+    ],
+  },
+  {
+    id: "release-chain",
+    name: "Release",
+    description: "One spell — verified, shipped, watched, recorded",
+    steps: [
+      { keyword: "handover", action: "Niche-keyword QA on the block" },
+      { keyword: "check", action: "Typecheck + build + visual" },
+      { keyword: "ship", action: "Vercel --prod with auto-fix" },
+      { keyword: "watch", action: "Production smoke test" },
     ],
   },
 ];

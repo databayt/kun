@@ -73,6 +73,38 @@ release notes.
 | `/reload-skills` + SessionStart `reloadSkills` (v2.1.152)                            | Skills available same-session after generation                                     | TRACK — useful when `/analyze` generates configs mid-session                                                 |
 | Hook upgrades: exec-form `args`, `$CLAUDE_EFFORT`, `terminalSequence` (v2.1.133–141) | Safer spawning, effort-aware hooks, notification sequences                         | TRACK — current hook kit is sufficient; adopt exec-form on next hook edit                                    |
 
+## Re-benchmark 2026-07-10 — the July surface (engine v4.0)
+
+Third pass — a full four-tier `/sync` (anthropic + stack + services + practice, all stamped
+2026-07-10) plus a deep sweep of the reference configs Abdout named: vercel-labs/agent-skills +
+agent-browser, garrytan/gstack, bmad-method v6.10, github/spec-kit v0.12.9, microsoft/markitdown
+v0.1.6, hermes-agent v0.18.2, Claude Design, and the harness-engineering + solo-leverage
+literature. Verified against CHANGELOG 2.1.199→2.1.206 and the July docs.
+
+| Finding (source)                                                                            | kun decision                                                                                                                                                  |
+| ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Claude 5 family GA; Fable 5 set as session default via `/model`                             | **ADOPTED** — engine model `claude-fable-5`, fallbacks `opus-4-8 → sonnet-5`; agent alias tiers unchanged                                                     |
+| spec-kit `clarify` (taxonomy scan + ≤5 questions before the gate)                           | **ADOPTED** — CLARIFY step in `/spec` (≤3 questions, answers encoded into the spec comment)                                                                   |
+| spec-kit `analyze` gate semantics (read-only, constitution conflict = CRITICAL)             | **ADOPTED** — READY stage wired into `/feature` (Stage 2.7): coverage + conflict + constitution, FAIL blocks the pipeline                                     |
+| Vercel react-best-practices rule pack (impact-tagged, per-rule files)                       | **ADOPTED** — new `react-perf/` domain, 8 rules vendored + `_template.md` + `impactDescription` frontmatter; feeds `stack`/`trace`/`efficient`                |
+| Claude Design: `design` plugin (knowledge-work-plugins) + canvas MCP, Max-covered           | **ADOPTED** — onboarding Phase 5 wires both; `claude-design` added to the declared MCP fleet; `/design-login` is a deferred manual click                      |
+| Anthropic harness engineering (initializer/worker, evaluator ≠ generator, JSON state)       | **ADOPTED** — `/sync` harness-audit step (retire dead scaffolds on model releases), `/qa` baseline smoke + `blocks.json` verdict contract, CEO-OS Direction 8 |
+| Second-brain / one-person-$1M operating moves                                               | **ADOPTED** — NORTH-STAR "enough" line, CEO-OS cash mechanics + custom-work rule, `/weekly` decision-review sweep, memory TL;DR/archive practice              |
+| Vocabulary drift: duplicate `feature`/`check`/`ship`, dead BMAD v4 spells, `sync` collision | **ADOPTED** — vocabulary v2: deduped, stale spells pruned, Anthropic-native automation school (`loop`/`goal`/`schedule`/`workflow`), 12 missing spells added  |
+| Hermes docs drift (`gateway run` vs `start`; Slack event subscriptions)                     | **ADOPTED** — hermes.mdx corrected against the v0.18.2 official docs                                                                                          |
+| TypeScript 7.0 native (Go) stable 2026-07-08; TS 6.0 current JS release                     | TRACK — hold products until **7.1** restores the JS API (typescript-eslint blocked); STACK.md updated                                                         |
+| Prisma 6.x maintenance tail ended (6.19.3, Apr 2026); Prisma 7 requires driver adapters     | **PROPOSE** — `/decide` + `/package`-driven migration plan; marketing (already 7.2.0) is the proof path                                                       |
+| shadcn/ui defaults to Base UI (Jul 2026); Radix demoted to `-b radix`                       | **PROPOSE** — `/decide` Base-UI-vs-Radix; affects the databayt/radix fork, codebase atoms, shadcn skill pack                                                  |
+| vercel-labs/agent-browser (Rust CDP daemon, CLI-first, MCP profiles)                        | TRACK — pilot on one niche keyword before any Playwright swap; no independent benchmark, deep `~/.playwright-auth` wiring stays                               |
+| gstack eval infra (LLM-judge skill evals, diff-based selection, gate/periodic tiers)        | TRACK — highest-leverage QA idea seen; costs plan usage, scope to 3–5 pipeline skills when piloted                                                            |
+| Cloud routines API/GitHub triggers (P0-labeled issue → auto `/report` session)              | **PROPOSE** — one routine + stored bearer token; removes polling from incident response                                                                       |
+| Stacked skills (2.1.199+), MCP `request_timeout_ms`, hook `prompt_id`                       | TRACK — adopt opportunistically on next touch of each surface                                                                                                 |
+
+Ceremony rejected on the cash-flow filter: BMAD party-mode/PRFAQ/sprint-status.yaml, spec-kit
+`checklist`/`taskstoissues`/personas, BenAI's n8n/Airtable stack, gstack wholesale (worktree+PR
+flow contradicts main-only). Both spec frameworks stop where kun's leverage begins — ship, watch,
+incident, browser QA, and the business brain remain kun advantages.
+
 ## Engine KPIs — what "pushing the benchmark" means
 
 The feature-parity survey above answers "is kun configured to the frontier?". These KPIs answer
@@ -94,6 +126,15 @@ is bench polish, not benchmark push.
 
 ## Adoption log
 
+- **2026-07-10** — engine v4.0 benchmark pass: model → Fable 5 (fallbacks opus-4-8 → sonnet-5);
+  vocabulary v2 (deduped keywords, BMAD-era spells pruned, `loop`/`goal`/`schedule`/`workflow`
+  wired, +12 spells for existing skills); `/spec` CLARIFY + `/feature` READY gate (spec-kit
+  semantics); `react-perf/` rule domain (8 rules vendored from vercel-labs/agent-skills);
+  Claude Design plugin + MCP in onboarding Phase 5 + declared fleet; onboarding `--doctor`
+  mode (all 3 OS backends) + `setup.sh` role default; `/sync` harness-audit + `/qa` verdict
+  contract + `/weekly` decision sweep; hermes.mdx corrected to v0.18.2; STACK.md refreshed
+  (TS 6/7-native, Prisma 7, shadcn→Base UI, Next 16.3 agent-native); NORTH-STAR "enough" line +
+  CEO-OS cash mechanics/custom-work/Direction 8. All four sync tiers stamped 2026-07-10.
 - **2026-06-12** — `/sync` self-update loop (four tiers: anthropic + stack + services +
   agent-practice, incl. BMAD-method tracking; keyword `sync` routes to it passively); first
   deterministic workflow (`.claude/workflows/handover.js` — 12-keyword fan-out + adversarial

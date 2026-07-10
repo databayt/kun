@@ -31,10 +31,10 @@ Parse arguments:
 Execute stages in order. Each stage appends progress to the GitHub issue. Stop on failure after max retries.
 
 ```
-IDEA → SPEC → [human approval] → PLAN → TASKS → SCHEMA → CODE → WIRE → CHECK → SHIP → WATCH
+IDEA → SPEC → [human approval] → PLAN → TASKS → READY → SCHEMA → CODE → WIRE → CHECK → SHIP → WATCH
 ```
 
-PLAN and TASKS are **optional** — they add architecture rigor for non-trivial features, but a typo fix or single-field change should skip straight to SCHEMA (or be a `/report`, not a `/feature`). For a small change, note "trivial — skipping plan/tasks" on the issue and continue.
+PLAN, TASKS, and READY are **optional as a trio** — they add architecture rigor for non-trivial features, but a typo fix or single-field change should skip straight to SCHEMA (or be a `/report`, not a `/feature`). For a small change, note "trivial — skipping plan/tasks/ready" on the issue and continue.
 
 ### Stage 1: IDEA — Capture
 
@@ -85,6 +85,17 @@ For non-trivial features, execute the `tasks` workflow (`.claude/skills/tasks/SK
 3. Append a `## Task Breakdown` checklist comment
 
 Skip for trivial changes — note "trivial — skipping tasks" on the issue.
+
+### Stage 2.7: READY — Cross-artifact gate (runs whenever PLAN/TASKS ran)
+
+A **read-only** consistency check before any code — spec-kit's `analyze` semantics, wired into the chain:
+
+1. **Coverage** — every acceptance criterion maps to ≥1 task; every task traces back to the spec (no orphans, no gaps)
+2. **Conflict** — plan and tasks against the approved spec; silent drift is a finding
+3. **Constitution** — any conflict with the `.claude/rules/` corpus or the product's CLAUDE.md constraints is automatically **CRITICAL**; fix the artifact, never dilute the rule
+4. **Verdict** — `PASS` → continue silently · `CONCERNS` → list findings on the issue, continue · `FAIL` (any CRITICAL) → stop, label `pipeline:blocked`, report
+
+Never edit artifacts during READY — remediation happens in the stage that owns the artifact (spec/plan/tasks), then READY re-runs.
 
 ### Stage 3: SCHEMA — Data Layer
 
@@ -140,7 +151,7 @@ Append to issue: "Check stage complete. Build: pass. Visual: verified."
 
    Closes #<issue-number>
 
-   Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>"
+   Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
    ```
 
 2. Push to main

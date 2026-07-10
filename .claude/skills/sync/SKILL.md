@@ -57,6 +57,10 @@ Standing constraints veto adoption regardless of class:
 
 Stack findings diff against reality, not memory: product `package.json` versions + the rule corpus (`.claude/rules/<domain>/`, `since:` frontmatter). A breaking change with no matching rule → write the rule (ADOPT-SAFE). A version bump for products → ADOPT-DECIDE, executed via `/package`.
 
+### 3.5 Harness audit (on model releases only)
+
+When the anthropic tier surfaces a **new model** (or a major Claude Code version), run the reverse pass: every rule, hook, gate, and fix-loop in the engine encodes an assumption about what the model _couldn't_ do when it was written. Sample the highest-friction ones (fix loops with retry caps, mandatory verification passes, deny-list breadth) and ask: does the new model still need this scaffold? Propose removals as ADOPT-DECIDE — guardrails get retired, not just added. (Anthropic harness-engineering guidance, adopted 2026-07-10.)
+
 ### 4. Apply + record
 
 1. Apply ADOPT-SAFE to canonical sources; regenerate plugins if any plugin source changed (`bash .claude/scripts/build-plugin.sh`)

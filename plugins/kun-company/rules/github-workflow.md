@@ -61,7 +61,7 @@ thing that gets lost — so commit _frequently_, not at the end.
 
 [Refs #N | Closes #N]
 
-Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
+Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>
 ```
 
 **Types**: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `perf`, `style`

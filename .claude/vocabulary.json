@@ -1,7 +1,7 @@
 {
   "$schema": "kun-vocabulary-v1",
-  "$comment": "Single source of truth for the kun keyword vocabulary. Edit THIS file, then run: node .claude/scripts/generate-vocab.mjs — it regenerates the Vocabulary block in .claude/CLAUDE.md and src/components/docs/spellbook-data.ts. health.sh runs generate-vocab.mjs --check to flag drift. Spell fields: name (the keyword), effect (one-line), order (routing chain: familiar=agent, portal=MCP, skill=/skill-or-command, hook, ward=rule, memory), steps, connects, depends, and optional mergedInto (keyword retired into another).",
-  "version": 1,
+  "$comment": "Single source of truth for the kun keyword vocabulary. Edit THIS file, then run: node .claude/scripts/generate-vocab.mjs — it regenerates the Vocabulary block in .claude/CLAUDE.md and src/components/docs/spellbook-data.ts. health.sh runs generate-vocab.mjs --check to flag drift. v2 (2026-07-10): deduped cross-school keywords, retired stale BMAD spells, wired Anthropic-native automation (loop/goal/schedule/workflow). Spell fields: name (the keyword), effect (one-line), order (routing chain: familiar=agent, portal=MCP, skill=/skill-or-command, hook, ward=rule, memory), steps, connects, depends, and optional mergedInto (keyword retired into another).",
+  "version": 2,
   "updated": "2026-07-10",
   "orderTypeLabels": {
     "familiar": "Agent",
@@ -69,6 +69,8 @@
             "IDEA: Create structured GitHub issue with acceptance criteria",
             "SPEC: Data model sketch + file plan + refined criteria",
             "PAUSE: Human approves the spec",
+            "PLAN: Architecture decisions — patterns, mirror target, tradeoffs",
+            "TASKS: Dependency-ordered work list on the issue",
             "SCHEMA: Prisma model + migration + Zod validation",
             "CODE: Server actions with auth + validation + tenant isolation",
             "WIRE: Pages + forms + tables + i18n wired to actions",
@@ -79,6 +81,8 @@
           "connects": [
             "idea",
             "spec",
+            "plan",
+            "tasks",
             "schema",
             "code",
             "wire",
@@ -141,6 +145,58 @@
           ],
           "connects": ["idea", "schema"],
           "depends": ["idea"]
+        },
+        {
+          "name": "plan",
+          "effect": "Architecture plan from the approved spec — patterns, tradeoffs, risks",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "architecture"
+            },
+            {
+              "type": "portal",
+              "name": "GitHub"
+            },
+            {
+              "type": "skill",
+              "name": "/plan"
+            }
+          ],
+          "steps": [
+            "Read the approved spec from the issue",
+            "Choose patterns: mirror target, pattern cards, data flow",
+            "Record architecture decisions + tradeoffs + risks",
+            "Append the plan as a comment on the feature issue"
+          ],
+          "connects": ["spec", "tasks"],
+          "depends": ["spec"]
+        },
+        {
+          "name": "tasks",
+          "effect": "Dependency-ordered task breakdown from the approved plan",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "product"
+            },
+            {
+              "type": "portal",
+              "name": "GitHub"
+            },
+            {
+              "type": "skill",
+              "name": "/tasks"
+            }
+          ],
+          "steps": [
+            "Read the plan from the issue",
+            "Decompose into atomic, dependency-aware tasks",
+            "Order by dependency; mark parallelizable work",
+            "Publish the checklist on the issue"
+          ],
+          "connects": ["plan", "schema"],
+          "depends": ["plan"]
         },
         {
           "name": "schema",
@@ -334,7 +390,7 @@
             },
             {
               "type": "skill",
-              "name": "/deploy"
+              "name": "/ship"
             }
           ],
           "steps": [
@@ -387,7 +443,7 @@
       "name": "Charm Work",
       "subtitle": "Everyday practical magic",
       "description": "The spells you cast most often. Reliable, essential, and dangerously easy to take for granted. Professor Flitwick would be proud.",
-      "quote": "dev is your Lumos — the first spell each morning. check is your Nox — the last before rest.",
+      "quote": "dev is your Lumos — the first spell each morning. build is your Nox — the last before rest.",
       "spells": [
         {
           "name": "dev",
@@ -548,66 +604,6 @@
           ],
           "connects": ["build", "ship", "push"],
           "depends": ["build"]
-        },
-        {
-          "name": "ship",
-          "effect": "Deploy straight to production — no staging",
-          "order": [
-            {
-              "type": "familiar",
-              "name": "deploy"
-            },
-            {
-              "type": "familiar",
-              "name": "build"
-            },
-            {
-              "type": "portal",
-              "name": "Vercel"
-            },
-            {
-              "type": "skill",
-              "name": "/deploy"
-            },
-            {
-              "type": "ward",
-              "name": "deployment"
-            }
-          ],
-          "steps": ["Same as deploy but: npx vercel --prod --yes"],
-          "connects": ["deploy", "build", "release"],
-          "depends": ["build", "test"]
-        },
-        {
-          "name": "check",
-          "effect": "Pre-ship quality gate — typecheck, build, visual, tests",
-          "order": [
-            {
-              "type": "familiar",
-              "name": "build"
-            },
-            {
-              "type": "familiar",
-              "name": "typescript"
-            },
-            {
-              "type": "portal",
-              "name": "Browser"
-            },
-            {
-              "type": "skill",
-              "name": "/check"
-            }
-          ],
-          "steps": [
-            "pnpm tsc --noEmit (type check, auto-fix loop max 5)",
-            "pnpm build (production build, auto-fix loop max 5)",
-            "Navigate route, screenshot, console-clean verify",
-            "Run existing tests (--passWithNoTests)",
-            "Verdict: READY TO SHIP / BLOCKED"
-          ],
-          "connects": ["build", "ship", "handover", "release"],
-          "depends": []
         },
         {
           "name": "release",
@@ -904,51 +900,6 @@
           ],
           "connects": ["template", "atom", "saas"],
           "depends": ["atom", "prisma"]
-        },
-        {
-          "name": "feature",
-          "effect": "Plan and create entire feature end-to-end",
-          "order": [
-            {
-              "type": "familiar",
-              "name": "orchestration"
-            },
-            {
-              "type": "familiar",
-              "name": "architecture"
-            },
-            {
-              "type": "familiar",
-              "name": "nextjs"
-            },
-            {
-              "type": "familiar",
-              "name": "prisma"
-            },
-            {
-              "type": "familiar",
-              "name": "react"
-            },
-            {
-              "type": "familiar",
-              "name": "test"
-            },
-            {
-              "type": "familiar",
-              "name": "build"
-            }
-          ],
-          "steps": [
-            "Architecture (schema design)",
-            "Database (migration)",
-            "Backend (server actions)",
-            "Frontend (components)",
-            "Styling (tailwind)",
-            "Testing (vitest + playwright)",
-            "Build validation"
-          ],
-          "connects": ["saas", "block", "migration", "test"],
-          "depends": ["plan"]
         },
         {
           "name": "migration",
@@ -1947,6 +1898,33 @@
           "depends": []
         },
         {
+          "name": "qa",
+          "effect": "Autonomous block QA — detect, adversarially verify, fix safe tiers, one signoff issue",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "quality"
+            },
+            {
+              "type": "portal",
+              "name": "Browser"
+            },
+            {
+              "type": "skill",
+              "name": "/qa"
+            }
+          ],
+          "steps": [
+            "Detect across every route + the block source",
+            "Adversarially verify every FAIL — refute or confirm",
+            "Auto-fix tier A (mechanical) and tier B (build-gated)",
+            "Persist the verdict to blocks.json",
+            "Open ONE human-signoff issue carrying only the residual"
+          ],
+          "connects": ["handover", "check", "release"],
+          "depends": []
+        },
+        {
           "name": "coverage",
           "effect": "Reveal test coverage — the Marauder's Map",
           "order": [
@@ -2664,36 +2642,6 @@
           "depends": []
         },
         {
-          "name": "sync",
-          "effect": "Synchronize with upstream source",
-          "order": [
-            {
-              "type": "familiar",
-              "name": "git"
-            },
-            {
-              "type": "familiar",
-              "name": "github"
-            },
-            {
-              "type": "portal",
-              "name": "GitHub"
-            },
-            {
-              "type": "ward",
-              "name": "multi-repo"
-            }
-          ],
-          "steps": [
-            "git fetch origin",
-            "git rebase origin/main",
-            "Resolve conflicts",
-            "Push"
-          ],
-          "connects": ["upstream", "clone"],
-          "depends": []
-        },
-        {
           "name": "upstream",
           "effect": "Pull changes from upstream",
           "order": [
@@ -2916,143 +2864,107 @@
       "number": "XII",
       "name": "Divination",
       "subtitle": "Seeing ahead",
-      "description": "Planning, architecting, predicting what must be built. Not all wizards believe, but the best ones practice daily.",
-      "quote": "Trelawney was wrong about most things, but right about one: prepare for the future.",
+      "description": "Planning and time itself — user stories, recurring loops, goals that outlive a turn, cloud routines that run while you sleep, and deterministic multi-agent workflows.",
+      "quote": "schedule a routine before bed; wake to a finished sweep. The best divination is automation.",
       "spells": [
         {
-          "name": "bmad",
-          "effect": "Show BMAD menu — choose planning track",
-          "order": [
-            {
-              "type": "familiar",
-              "name": "orchestration"
-            }
-          ],
-          "steps": [
-            "Display all workflow options",
-            "Quick Flow (~5 min)",
-            "BMad Method (~15 min)",
-            "Enterprise (~30 min)"
-          ],
-          "connects": ["flow", "plan"],
-          "depends": []
-        },
-        {
-          "name": "flow",
-          "effect": "Quick Flow — five minutes to a working plan",
-          "order": [
-            {
-              "type": "familiar",
-              "name": "orchestration"
-            }
-          ],
-          "steps": ["*bmad-quick-flow", "Rapid assessment", "Action items"],
-          "connects": ["plan", "implement"],
-          "depends": []
-        },
-        {
-          "name": "plan",
-          "effect": "Enter planning phase — architecture first",
-          "order": [
-            {
-              "type": "familiar",
-              "name": "orchestration"
-            },
-            {
-              "type": "familiar",
-              "name": "architecture"
-            }
-          ],
-          "steps": [
-            "*2-plan-workflows",
-            "Requirements gathering",
-            "Architecture design",
-            "Story mapping"
-          ],
-          "connects": ["architect", "story"],
-          "depends": []
-        },
-        {
-          "name": "architect",
-          "effect": "Design system architecture",
-          "order": [
-            {
-              "type": "familiar",
-              "name": "orchestration"
-            },
-            {
-              "type": "familiar",
-              "name": "architecture"
-            }
-          ],
-          "steps": [
-            "*3-solutioning",
-            "System design",
-            "Data modeling",
-            "API design"
-          ],
-          "connects": ["plan", "implement"],
-          "depends": ["plan"]
-        },
-        {
-          "name": "implement",
-          "effect": "Execute the plan",
-          "order": [
-            {
-              "type": "familiar",
-              "name": "orchestration"
-            },
-            {
-              "type": "familiar",
-              "name": "architecture"
-            }
-          ],
-          "steps": [
-            "*4-implementation",
-            "Code generation",
-            "Testing",
-            "Deployment"
-          ],
-          "connects": ["architect", "cycle"],
-          "depends": ["architect"]
-        },
-        {
           "name": "story",
-          "effect": "Create user stories",
+          "effect": "Capture a user story — persona, acceptance criteria, scope",
           "order": [
             {
               "type": "familiar",
               "name": "orchestration"
-            }
-          ],
-          "steps": ["User personas", "Acceptance criteria", "Story points"],
-          "connects": ["plan", "feature"],
-          "depends": []
-        },
-        {
-          "name": "cycle",
-          "effect": "Full development cycle",
-          "order": [
+            },
             {
-              "type": "familiar",
-              "name": "orchestration"
+              "type": "portal",
+              "name": "GitHub"
+            },
+            {
+              "type": "skill",
+              "name": "/idea"
             }
           ],
-          "steps": ["Plan", "Architect", "Implement", "Test", "Deploy"],
-          "connects": ["plan", "deploy"],
+          "steps": [
+            "Frame as a user story — as a <persona>, I can <action>",
+            "Write acceptance criteria",
+            "Land it as a structured issue via the idea stage"
+          ],
+          "connects": ["idea", "plan"],
           "depends": []
         },
         {
           "name": "loop",
-          "effect": "Continuous iteration — never ends",
+          "effect": "Recurring execution — fixed interval or self-paced (built-in /loop)",
+          "order": [
+            {
+              "type": "skill",
+              "name": "/loop"
+            }
+          ],
+          "steps": [
+            "/loop 5m <prompt> — fixed interval (cron-style)",
+            "/loop <prompt> — self-paced; Claude picks each delay",
+            "Bare /loop — built-in maintenance list (customize via .claude/loop.md)",
+            "Session-scoped: Esc stops it; recurring tasks expire in 7 days"
+          ],
+          "connects": ["goal", "schedule"],
+          "depends": []
+        },
+        {
+          "name": "goal",
+          "effect": "Work across turns until a completion condition is met (built-in /goal)",
+          "order": [
+            {
+              "type": "skill",
+              "name": "/goal"
+            }
+          ],
+          "steps": [
+            "State the completion condition up front",
+            "Claude iterates — fix, verify, repeat — until it holds",
+            "Report the evidence that the goal is met"
+          ],
+          "connects": ["loop"],
+          "depends": []
+        },
+        {
+          "name": "schedule",
+          "effect": "Cloud routines — scheduled, API, or GitHub-triggered agent runs (built-in /schedule)",
+          "order": [
+            {
+              "type": "skill",
+              "name": "/schedule"
+            }
+          ],
+          "steps": [
+            "Recurring cron or one-off timestamp — runs on Anthropic infra",
+            "API trigger: POST /routines/{id}/fire with a bearer token",
+            "GitHub triggers: PR opened/merged, issue labeled — with filters",
+            "Usage draws from the subscription; daily per-account cap"
+          ],
+          "connects": ["loop", "monitor"],
+          "depends": []
+        },
+        {
+          "name": "workflow",
+          "effect": "Deterministic multi-agent orchestration — saved scripts fan out subagents",
           "order": [
             {
               "type": "familiar",
               "name": "orchestration"
+            },
+            {
+              "type": "memory",
+              "name": ".claude/workflows/"
             }
           ],
-          "steps": ["Recurring cycle", "Feedback integration", "Improvement"],
-          "connects": ["cycle"],
+          "steps": [
+            "Explicit opt-in only — workflows can spawn dozens of agents",
+            "Saved: handover.js (12-keyword fan-out), qa.js (block QA)",
+            "pipeline() by default; parallel() only for true barriers",
+            "Resume a paused run via its runId — cached stages replay free"
+          ],
+          "connects": ["handover", "qa"],
           "depends": []
         }
       ]
@@ -3866,6 +3778,10 @@
             },
             {
               "type": "ward",
+              "name": "rules/react-perf"
+            },
+            {
+              "type": "ward",
               "name": "rules/react-19"
             },
             {
@@ -3900,7 +3816,7 @@
           "steps": [
             "Scan imports for deprecated APIs and wrong versions",
             "Check React 19 / Next 16 / Prisma 6 / Tailwind 4 idioms",
-            "Sweep all eight rule domains",
+            "Sweep all nine rule domains",
             "Cite each hit as rule-id (severity)"
           ],
           "connects": ["guard", "handover"],
@@ -4003,6 +3919,28 @@
       "quote": "monitor watches production while weekly plans the week — the Ministry never sleeps.",
       "spells": [
         {
+          "name": "captain",
+          "effect": "CEO brain — synthesize identity + state + journal, surface the next action",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "captain"
+            },
+            {
+              "type": "skill",
+              "name": "/captain"
+            }
+          ],
+          "steps": [
+            "Read identity (CONSTITUTION, NORTH-STAR, CANON) + current state",
+            "Weigh options against the drive — cash flow first",
+            "Surface the one next action with its line to revenue",
+            "Escalate to Abdout only on genuine gates"
+          ],
+          "connects": ["weekly", "canon"],
+          "depends": []
+        },
+        {
           "name": "weekly",
           "effect": "The captain's cadence — Monday plan, Wednesday check, Friday review",
           "order": [
@@ -4077,6 +4015,28 @@
           "depends": []
         },
         {
+          "name": "issue",
+          "effect": "File a tracked GitHub issue in the right repo — labels, body, Slack ping",
+          "order": [
+            {
+              "type": "portal",
+              "name": "GitHub"
+            },
+            {
+              "type": "skill",
+              "name": "/issue"
+            }
+          ],
+          "steps": [
+            "Resolve the right databayt repo",
+            "Compose Context / Action / Verification body",
+            "Apply priority + type + scope labels",
+            "Notify #dev via the slack MCP"
+          ],
+          "connects": ["idea", "report"],
+          "depends": []
+        },
+        {
           "name": "credentials",
           "effect": "Databayt credentials — API keys via Keychain, web logins via Safari",
           "order": [
@@ -4114,6 +4074,24 @@
             "Report per-teammate config status"
           ],
           "connects": ["drift", "weekly"],
+          "depends": []
+        },
+        {
+          "name": "sync",
+          "effect": "Self-update the engine — release feeds → diff → adopt → stamp",
+          "order": [
+            {
+              "type": "skill",
+              "name": "/sync"
+            }
+          ],
+          "steps": [
+            "Read the four tier feeds: anthropic 7d, stack + services 14d, practice 30d",
+            "Diff findings against the engine",
+            "Adopt mechanical wins; propose the rest",
+            "Stamp sync dates in engine.json; log adoptions in CONFIG-BENCHMARK"
+          ],
+          "connects": ["health", "drift", "weekly"],
           "depends": []
         },
         {
@@ -4196,7 +4174,7 @@
       "number": "18",
       "name": "The Pensieve",
       "subtitle": "Judgment and conversion",
-      "description": "Dip into stored wisdom. canon pulls the right CEO book into a live decision — passively, mid-conversation; convert distills any file or URL into Markdown the engine can read.",
+      "description": "Dip into stored wisdom. canon pulls the right CEO book into a live decision; decide journals it; premortem stress-tests it; convert distills any file or URL into Markdown the engine can read.",
       "quote": "\"should we build it?\" — the Pensieve surfaces The Lean Startup before you finish the sentence.",
       "spells": [
         {
@@ -4219,6 +4197,50 @@
             "Keep it brief; skip trivial or purely technical choices"
           ],
           "connects": ["weekly"],
+          "depends": []
+        },
+        {
+          "name": "decide",
+          "effect": "Decision journal — Type 1/2 classification, premortem, expected outcome, review date",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "captain"
+            },
+            {
+              "type": "skill",
+              "name": "/decide"
+            }
+          ],
+          "steps": [
+            "Classify: Type 1 (one-way door) or Type 2 (reversible)",
+            "Run the premortem on Type 1 decisions",
+            "Record expected outcome + reviewed-by date",
+            "File the journal entry"
+          ],
+          "connects": ["premortem", "canon"],
+          "depends": []
+        },
+        {
+          "name": "premortem",
+          "effect": "Klein premortem — assume it failed, write the story, surface the risks",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "captain"
+            },
+            {
+              "type": "skill",
+              "name": "/premortem"
+            }
+          ],
+          "steps": [
+            "Assume the decision failed spectacularly",
+            "Write the failure story backwards",
+            "Extract the risks the optimism hid",
+            "Feed them into the decision journal"
+          ],
+          "connects": ["decide"],
           "depends": []
         },
         {
@@ -4303,6 +4325,14 @@
         {
           "keyword": "spec",
           "action": "Data model + file plan + human approval"
+        },
+        {
+          "keyword": "plan",
+          "action": "Architecture decisions + tradeoffs"
+        },
+        {
+          "keyword": "tasks",
+          "action": "Dependency-ordered work list"
         },
         {
           "keyword": "schema",
@@ -4469,6 +4499,29 @@
         {
           "keyword": "test",
           "action": "Confirm behavior"
+        }
+      ]
+    },
+    {
+      "id": "release-chain",
+      "name": "Release",
+      "description": "One spell — verified, shipped, watched, recorded",
+      "steps": [
+        {
+          "keyword": "handover",
+          "action": "Niche-keyword QA on the block"
+        },
+        {
+          "keyword": "check",
+          "action": "Typecheck + build + visual"
+        },
+        {
+          "keyword": "ship",
+          "action": "Vercel --prod with auto-fix"
+        },
+        {
+          "keyword": "watch",
+          "action": "Production smoke test"
         }
       ]
     }
