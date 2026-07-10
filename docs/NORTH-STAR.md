@@ -44,6 +44,10 @@ Alternative metrics rejected:
 
 These targets are gates, not goalposts. A miss triggers a review (premortem, pivot, persevere). A beat triggers an investment decision (where to deploy the slack).
 
+## The "enough" line
+
+**Break-even = paying schools × price/mo ≥ $500/mo burn** — at $99–149/mo pricing, that is **4–5 active paying schools**. This line is the _Company of One_ discipline (adopted 2026-07-10): growth that adds complexity — a new product, a bespoke feature, a hire — without moving the count toward this line gets refused by default. The captain cites this line when saying no.
+
 ---
 
 ## How it's tracked
