@@ -28,7 +28,8 @@ param(
     [switch]$EssentialsOnly,    # default: clone all org repos
     [switch]$HogwartsDev,        # optional: set up hogwarts local dev
     [string]$ReposDir = $env:USERPROFILE,
-    [string]$Agents = "all"      # all | csv of code,desktop,agy,opencode,hermes
+    [string]$Agents = "all",     # all | csv of code,desktop,agy,opencode,hermes
+    [switch]$Doctor              # scan + health audit + fix hints, change nothing
 )
 
 function Agent-Selected([string]$name) {
@@ -55,6 +56,24 @@ function Info($msg) { Write-Host "  . $msg" -ForegroundColor DarkGray }
 function Open-Url($url) {
     try { Start-Process $url -ErrorAction Stop | Out-Null } catch { }
 }
+# Doctor mode — full health audit + fix hints; diagnoses everything, changes nothing.
+if ($Doctor) {
+    Write-Host "Doctor — engine health" -ForegroundColor Cyan
+    $healthPs = "$CLAUDE_DIR\scripts\health.ps1"
+    if (Test-Path $healthPs) {
+        & $healthPs
+    } else {
+        Info "~/.claude not provisioned yet — run this script without -Doctor to install"
+    }
+    Write-Host ""
+    Write-Host "Fix hints" -ForegroundColor Cyan
+    Info "missing agent lane  -> re-run with -Agents <lane>"
+    Info "engine config drift -> cd ~\kun; git pull; .\.claude\scripts\setup.ps1 -Quiet"
+    Info "stale heartbeat     -> .\.claude\scripts\maintain.ps1 -Install"
+    Info "CLI self-check      -> claude doctor"
+    exit 0
+}
+
 # Copy text to the Windows clipboard.
 function Copy-Clipboard($text) {
     try { Set-Clipboard -Value $text -ErrorAction Stop; return $true } catch { return $false }
@@ -363,6 +382,14 @@ if (-not $hasClaude) {
     }
 } else {
     Pass "Claude Code CLI ($((claude --version 2>$null | Select-Object -First 1))) — auto-updates in background"
+}
+
+# Claude Design — plugin + canvas MCP bridge. Idempotent; subscription-covered.
+if (Get-Command claude -EA SilentlyContinue) {
+    claude plugin marketplace add anthropics/knowledge-work-plugins 2>$null | Out-Null
+    claude plugin install design@knowledge-work-plugins 2>$null | Out-Null
+    claude mcp add --scope user --transport http claude-design https://api.anthropic.com/v1/design/mcp 2>$null | Out-Null
+    Pass "Claude Design — plugin + canvas MCP wired (auth later: /design-login)"
 }
 
 # Antigravity CLI — secondary agent (`agy`): fallback when Claude Code is

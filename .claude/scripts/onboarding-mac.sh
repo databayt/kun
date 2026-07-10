@@ -11,6 +11,7 @@
 #   --agents=all|code,desktop,agy,opencode,hermes   which agents to install (default all)
 #   --detect-only                                     print the scan table and exit
 #   --dry-run                                         print what would install and exit
+#   --doctor                                          scan + full health audit + fix hints, change nothing
 #   --quiet --repos-dir <p> --essentials-only --hogwarts-dev --name --email
 #
 # Examples:
@@ -36,7 +37,7 @@ set -e
 # Parse args — positional <role> [gist_id] plus optional flags
 ROLE="" GIST_ID="" QUIET=0 GIT_NAME_ARG="" GIT_EMAIL_ARG=""
 ALL_REPOS=1 REPOS_DIR="$HOME" HOGWARTS_DEV=0
-AGENTS_SEL="all" DETECT_ONLY=0 DRY_RUN=0
+AGENTS_SEL="all" DETECT_ONLY=0 DRY_RUN=0 DOCTOR=0
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --quiet)            QUIET=1; shift ;;
@@ -49,6 +50,7 @@ while [[ $# -gt 0 ]]; do
         --agents)           AGENTS_SEL="$2"; shift 2 ;;
         --detect-only)      DETECT_ONLY=1; shift ;;
         --dry-run)          DRY_RUN=1; shift ;;
+        --doctor)           DOCTOR=1; shift ;;
         --*)                echo "Unknown flag: $1" >&2; exit 1 ;;
         *)
             if [[ -z "$ROLE" ]]; then ROLE="$1"
@@ -164,6 +166,25 @@ echo -e "Role: ${G}$ROLE${NC} · Agents: ${G}$AGENTS_SEL${NC}"
 agents_detect_all
 
 if [[ "$DETECT_ONLY" == "1" ]]; then
+    exit 0
+fi
+if [[ "$DOCTOR" == "1" ]]; then
+    # Doctor = the scan above + the full engine health audit + targeted fix
+    # hints. Diagnoses everything, changes nothing.
+    echo ""
+    echo -e "${BD}Doctor — engine health${NC}"
+    if [[ -f "$HOME/.claude/scripts/health.sh" ]]; then
+        bash "$HOME/.claude/scripts/health.sh" || true
+    else
+        info "~/.claude not provisioned yet — run this script without --doctor to install"
+    fi
+    echo ""
+    echo -e "${BD}Fix hints${NC}"
+    echo -e "  ${D}missing agent lane      → re-run with --agents=<lane>${NC}"
+    echo -e "  ${D}engine config drift     → cd ~/kun && git pull && bash .claude/scripts/setup.sh --quiet${NC}"
+    echo -e "  ${D}stale heartbeat         → bash ~/.claude/scripts/maintain.sh --install${NC}"
+    echo -e "  ${D}browser MCP down        → /mcp-doctor inside Claude Code${NC}"
+    echo -e "  ${D}CLI self-check          → claude doctor${NC}"
     exit 0
 fi
 if [[ "$DRY_RUN" == "1" ]]; then
@@ -455,6 +476,16 @@ if agents_selected_contains "$AGENTS_SEL" code; then
     else
         pass "Claude Code CLI ($(claude --version 2>/dev/null | head -1)) — auto-updates in background"
     fi
+
+    # Claude Design — the design plugin (critique/handoff/accessibility beside the
+    # quality keywords) + the Labs canvas MCP bridge. Idempotent; subscription-
+    # covered on Max, no API spend. /design-login happens later, interactively.
+    if command -v claude >/dev/null 2>&1; then
+        claude plugin marketplace add anthropics/knowledge-work-plugins >/dev/null 2>&1 || true
+        claude plugin install design@knowledge-work-plugins >/dev/null 2>&1 || true
+        claude mcp add --scope user --transport http claude-design https://api.anthropic.com/v1/design/mcp >/dev/null 2>&1 || true
+        pass "Claude Design — plugin + canvas MCP wired (auth later: /design-login)"
+    fi
 else
     info "Claude Code skipped (not in --agents)"
 fi
@@ -506,6 +537,8 @@ if agents_selected_contains "$AGENTS_SEL" hermes; then
     else
         pass "Hermes ($(hermes --version 2>/dev/null | head -1))"
     fi
+    command -v hermes >/dev/null 2>&1 && \
+        info "ex-OpenClaw machine? one-shot config import: hermes claw migrate"
 fi
 
 # Claude Desktop — install/upgrade/skip via brew_smart

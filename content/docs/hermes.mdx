@@ -34,8 +34,9 @@ The gateway is a single background process that runs all configured platform ada
 
 ```bash
 hermes gateway setup     # interactive wizard — select Slack when prompted
-hermes gateway start     # run in foreground
+hermes gateway run       # run in foreground (this terminal)
 hermes gateway install   # install as a user service (persists across reboots)
+hermes gateway start     # start the installed service
 hermes gateway status    # is it up?
 ```
 
@@ -103,8 +104,8 @@ The kun site's Social Hub talks to a Hermes endpoint via env vars (see `.env.exa
 | Symptom | Fix |
 |---|---|
 | `h` / `hermes` not found | Restart the shell; the installer adds Hermes to PATH — or re-run the install one-liner |
-| Bot doesn't see channel messages | The app is missing `channels:history` / `groups:history` — re-create from the manifest and **reinstall the app to the workspace** |
+| Bot doesn't see channel messages | The #1 setup issue is missing **event subscriptions** (`message.channels` / `message.groups`), not just the `channels:history` / `groups:history` scopes — re-create from the manifest (it carries both) and **reinstall the app to the workspace** |
 | DMs blocked | Enable the **Messages Tab** in the Slack app's App Home settings |
 | Messages silently ignored | Your Member ID isn't in `SLACK_ALLOWED_USERS`, or the channel isn't in `SLACK_ALLOWED_CHANNELS` |
 | Scope/event changes not taking effect | Reinstall the app to the workspace (Slack requires it) |
-| Gateway dies on reboot | You ran `hermes gateway start` (foreground) — use `hermes gateway install` for a persistent user service |
+| Gateway dies on reboot | You ran `hermes gateway run` (foreground) — use `hermes gateway install` for a persistent user service, then `hermes gateway start` |

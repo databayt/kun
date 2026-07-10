@@ -34,20 +34,11 @@ if [[ -z "$ROLE" && -f "$CLAUDE_DIR/.kun-role" ]]; then
     ROLE="$(tr -d '[:space:]' < "$CLAUDE_DIR/.kun-role")"
 fi
 
+# Minimal interaction: role is a label only (every machine gets the full
+# config), so a bare `setup.sh` just works — default to engineer.
 if [[ -z "$ROLE" ]]; then
-    echo -e "${B}Kun Engine Setup${NC}"
-    echo ""
-    echo "Usage: bash .claude/scripts/setup.sh <role> [--quiet]"
-    echo ""
-    echo "Roles:"
-    echo "  engineer  — full agent fleet, all MCPs, all skills, hooks"
-    echo "  business  — Cowork, Stripe, proposals, client workflows"
-    echo "  content   — Cowork, translation, content calendar, Figma"
-    echo "  ops       — monitoring, costs, incidents, Sentry, Vercel"
-    echo ""
-    echo "One-liner:"
-    echo "  cd ~/kun && bash .claude/scripts/setup.sh engineer"
-    exit 0
+    ROLE="engineer"
+    say "${D}No role given — defaulting to engineer (role is a label; config is universal)${NC}"
 fi
 
 if [[ "$ROLE" != "engineer" && "$ROLE" != "business" && "$ROLE" != "content" && "$ROLE" != "ops" ]]; then

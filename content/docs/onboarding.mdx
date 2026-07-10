@@ -46,7 +46,7 @@ Scan — system
   ✓ gh               gh version 2.83.1
 
 Scan — agents
-  ✓ claude           2.1.198 (Claude Code)
+  ✓ claude           2.1.206 (Claude Code)
   ✓   alias c        bypass launcher
   ✓ claude desktop   app + MCP config
   ✓ agy              1.0.14
@@ -60,7 +60,10 @@ Run the scan alone anytime (changes nothing):
 ```bash
 bash ~/kun/.claude/scripts/onboarding-mac.sh --detect-only     # scan table
 bash ~/kun/.claude/scripts/onboarding-mac.sh --dry-run         # what a run would install
+bash ~/kun/.claude/scripts/onboarding-mac.sh --doctor          # scan + full health audit + fix hints
 ```
+
+`--doctor` is the diagnostics mode (Windows: `-Doctor`): the scan table, then the full engine health audit (`health.sh`), then a targeted fix hint for every red row — missing lane, config drift, stale heartbeat, dead browser MCP. It diagnoses everything and changes nothing.
 
 ## The agents
 
@@ -89,6 +92,7 @@ Running the bootstrap line leaves your machine fully provisioned. Here's what la
 | **Side-tools** | git, Node 24 LTS (Krypton), pnpm, gh CLI, Vercel CLI, Chrome |
 | **IDEs** | WebStorm (+ Claude plugin), VS Code (+ Claude extension) |
 | **Claude** | Desktop (Chat / Cowork / Code tabs), Claude Code CLI, IDE integrations, `claude.ai/code` in browser, Mobile (iOS/Android) |
+| **Claude Design** | The `design` plugin (`/critique`, `/accessibility`, `/handoff`, `/ux-copy` — beside kun's quality keywords) + the Labs canvas MCP (`claude.ai/design`; decks, mockups, prototypes). Subscription-covered on Max. Sign in later with `/design-login`. |
 | **Antigravity** *(secondary)* | `agy` CLI + `a` launcher; `~/.gemini/` wired to the same MCP fleet, skills, and playbook — fallback for Claude Code + cheap lane for easy tasks. See [Antigravity](/docs/antigravity). |
 | **opencode** *(tertiary)* | `opencode` CLI + `o` launcher; permissive config written (see [The agents](#the-agents)) |
 | **Hermes** *(optional)* | `hermes` CLI (official installer) + `h` launcher; gateway setup stays manual (interactive) — see [Hermes](/docs/hermes) |
@@ -194,7 +198,7 @@ Eight phases run back-to-back. You can minimize the terminal — the wizard fire
 | 2 | Applications — WebStorm, VS Code, Chrome |
 | 3 | GitHub — SSH key, **browser sign-in** (`gh auth login --web`), key uploaded, git identity auto-set, verify databayt org membership + SSH push |
 | 4 | Clone Repositories — the full databayt org, **cloned concurrently** |
-| 5 | Agents — the selected lanes from the multi-select: Claude Code CLI + Desktop (Mac/Win) + MCP symlink, Antigravity (`~/.gemini/` bridged to the same fleet), opencode (+ permissive config), Hermes (CLI only); one managed launcher block `c`/`a`/`o`/`h` |
+| 5 | Agents — the selected lanes from the multi-select: Claude Code CLI + Desktop (Mac/Win) + MCP symlink, **Claude Design** (the `design` plugin + canvas MCP, auth deferred to `/design-login`), Antigravity (`~/.gemini/` bridged to the same fleet), opencode (+ permissive config), Hermes (CLI only; ex-OpenClaw machines: `hermes claw migrate`); one managed launcher block `c`/`a`/`o`/`h` |
 | 6 | Kun Engine — `setup.sh` installs full config; `secrets.sh` pulls `~/.claude/.env` from Gist; `vercel-pull.sh` populates per-product `.env` |
 | 7 | Hogwarts — pnpm install, prisma generate + push + seed, build verify (only with `--hogwarts-dev`) |
 | 8 | Health Check — every tool / repo / config verified |
@@ -210,6 +214,7 @@ Auto-polling OAuth means the only **manual clicks** left are:
 | Sign in to Claude Desktop | 1 | not Pro/Max, or Linux |
 | Toggle computer-use in Desktop Settings | 1 | not Pro/Max, or Linux |
 | Install Claude Code plugin in WebStorm | 1 (if not auto) | — |
+| `/design-login` (Claude Design canvas auth) | 1 | not Pro/Max, or Design not needed yet |
 
 VS Code extension (`code --install-extension`), GitHub OAuth (`--web` polls), and Anthropic CLI OAuth (`claude` first-run polls) are all **0 clicks**. Each action button is a **deep link** that drops you exactly where you need to act — Desktop, WebStorm, or the GitHub device page — on your OS.
 
@@ -303,6 +308,7 @@ Useful backend flags (Mac + Linux):
 |---|---|
 | `--detect-only` | Print the scan table and exit — changes nothing |
 | `--dry-run` | Print what a run would install (agent delta) and exit |
+| `--doctor` | Scan + full health audit + fix hints — diagnoses everything, changes nothing |
 | `--agents=all\|code,desktop,agy,opencode,hermes` | Which agent lanes to install (default `all`) |
 | `--quiet` | Skip terminal prompts (wrapper/CI use) |
 | `--name <name>` / `--email <email>` | Pre-supply git identity |
