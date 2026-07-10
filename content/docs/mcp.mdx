@@ -50,11 +50,9 @@ description: 18 MCP servers connecting Claude Code to external services
 | **context7** | Up-to-date library docs | `latest docs` |
 | **linear** | Issue tracking | `linear`, `task` |
 
-## Role-Specific Configs
+## Universal Config
 
-**Every machine gets the full `mcp.json` (all 18 servers).** Config is universal — any machine can run any task. Access is scoped by **secrets, not config**: a server whose API key isn't in your `~/.claude/.env` simply doesn't connect, and which keys you hold is set by the **Gist** you're handed.
-
-> The legacy role-scoped `mcp-business.json` / `mcp-content.json` / `mcp-ops.json` are used only by the deprecated `install.sh`. Canonical installer is `setup.sh` (full fleet for everyone).
+**Every machine gets the full `mcp.json`.** Config is universal — any machine can run any task. Access is scoped by **secrets, not config**: a server whose API key isn't in your `~/.claude/.env` simply doesn't connect, and which keys you hold is set by the **Gist** you're handed. Canonical installer: `setup.sh`.
 
 ## Configuration
 

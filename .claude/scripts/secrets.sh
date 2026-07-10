@@ -1,6 +1,7 @@
 #!/bin/bash
 # Setup secrets from private GitHub gist
-# Usage: curl -fsSL https://raw.githubusercontent.com/databayt/codebase/main/.claude/scripts/secrets.sh | bash -s -- <GIST_ID>
+# Usage: bash ~/.claude/scripts/secrets.sh <GIST_ID>
+# Or: curl -fsSL https://raw.githubusercontent.com/databayt/kun/main/.claude/scripts/secrets.sh | bash -s -- <GIST_ID>
 
 set -e
 
@@ -26,7 +27,7 @@ if [ -z "$GIST_ID" ]; then
     echo "  ~/.claude/scripts/secrets.sh <GIST_ID>"
     echo ""
     echo "Or with curl:"
-    echo "  curl -fsSL https://raw.githubusercontent.com/databayt/codebase/main/.claude/scripts/secrets.sh | bash -s -- <GIST_ID>"
+    echo "  curl -fsSL https://raw.githubusercontent.com/databayt/kun/main/.claude/scripts/secrets.sh | bash -s -- <GIST_ID>"
     echo ""
     echo "Get the Gist ID from your team lead."
     exit 1

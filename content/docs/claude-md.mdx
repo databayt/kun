@@ -76,9 +76,11 @@ Operational configuration: 100+ keyword-to-action mappings, MCP trigger table, s
 
 ## Installation
 
-CLAUDE.md files are installed by the Kun install script:
+CLAUDE.md files are installed by the Kun setup script:
 
 ```bash
-# Installs ~/.claude/CLAUDE.md and project-level files
-cd ~/kun && bash .claude/scripts/install.sh
+# Seeds ~/.claude/CLAUDE.md from the template only if missing — never overwritten
+cd ~/kun && bash .claude/scripts/setup.sh engineer
 ```
+
+`~/.claude/CLAUDE.md` is your personal global config; the kun project CLAUDE.md loads separately inside the repo and never replaces it.

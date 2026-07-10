@@ -1,6 +1,6 @@
 # Setup secrets from private GitHub gist (Windows PowerShell)
 # Usage: & "$env:USERPROFILE\.claude\scripts\secrets.ps1" -GistId "<GIST_ID>"
-# Or: irm https://raw.githubusercontent.com/databayt/codebase/main/.claude/scripts/secrets.ps1 | iex
+# Or: irm https://raw.githubusercontent.com/databayt/kun/main/.claude/scripts/secrets.ps1 | iex
 
 param(
     [Parameter(Mandatory=$false)]

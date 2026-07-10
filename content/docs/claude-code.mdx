@@ -10,28 +10,31 @@ Complete setup guide for the databayt team Kun engine configuration via Claude C
 ### macOS / Linux
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/databayt/codebase/main/.claude/scripts/install.sh | bash && ~/.claude/scripts/secrets.sh 68453b25fa9d28c94426c55c179b3838
+curl -fsSL https://kun.databayt.org/install | bash
 ```
 
 ### Windows (PowerShell)
 
 ```powershell
-irm https://raw.githubusercontent.com/databayt/codebase/main/.claude/scripts/install.ps1 | iex; & "$env:USERPROFILE\.claude\scripts\secrets.ps1" -GistId 68453b25fa9d28c94426c55c179b3838
+powershell -ExecutionPolicy Bypass -Command "iwr https://kun.databayt.org/install.ps1 | iex"
 ```
 
-This installs Claude Code CLI, downloads team configuration, and sets up secrets automatically.
+The wizard installs the Claude Code CLI, clones `~/kun`, installs the team configuration, and prompts for your personal secrets Gist ID — each teammate is handed their own (see [Secrets](/docs/secrets)). Full walkthrough: [Onboarding](/docs/onboarding).
 
 ---
 
 ## What Gets Installed
 
-| Component | Count | Description |
-|-----------|-------|-------------|
-| **Agents** | 29 | Architecture, React, Prisma, product repos (hogwarts, souq, mkan, shifa), etc. |
-| **Commands** | 17 | `/repos`, `/atom`, `/template`, `/block`, `/build`, `/deploy`, etc. |
-| **Memory** | 5 | atoms, templates, blocks, reports, repositories |
-| **MCP Servers** | 28 | GitHub, Neon, shadcn, browser, Vercel, Stripe, etc. |
-| **Scripts** | 6 | install, sync, setup-secrets, sync-repos (macOS + Windows) |
+| Component | Description |
+|-----------|-------------|
+| **Agents** | Architecture, React, Prisma, product repos (hogwarts, souq, mkan, shifa), leadership fleet |
+| **Skills** | `/check`, `/ship`, `/handover`, `/qa`, `/release`, `/health`, `/sync`, … — commands are retired, skills carry the verbs |
+| **Rules** | Cross-cutting + path-scoped domain rules (React 19, Next 16, Prisma 6, Tailwind 4, …) |
+| **Memory** | team, capacity, repositories, component snapshots |
+| **MCP Servers** | GitHub, Neon, shadcn, browser, Vercel, Stripe, Slack, … — full fleet, universal |
+| **Scripts** | setup, secrets, sync-repos, health (macOS + Windows) |
+
+> Live counts are declared in `kun/.claude/engine.json` — `/health` flags drift.
 
 ---
 
@@ -54,28 +57,32 @@ irm https://claude.ai/install.ps1 | iex
 claude --version
 ```
 
-### Step 2: Download Team Config
+### Step 2: Install Team Config
 
 **macOS / Linux**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/databayt/codebase/main/.claude/scripts/install.sh | bash
+git clone https://github.com/databayt/kun.git ~/kun 2>/dev/null || git -C ~/kun pull
+bash ~/kun/.claude/scripts/setup.sh engineer
 ```
 
 **Windows**
 ```powershell
-irm https://raw.githubusercontent.com/databayt/codebase/main/.claude/scripts/install.ps1 | iex
+git clone https://github.com/databayt/kun.git "$env:USERPROFILE\kun"
+& "$env:USERPROFILE\kun\.claude\scripts\setup.ps1" -Role engineer
 ```
 
 ### Step 3: Setup Secrets
 
+Each teammate is handed a personal Gist ID — never share yours.
+
 **macOS / Linux**
 ```bash
-~/.claude/scripts/secrets.sh 68453b25fa9d28c94426c55c179b3838
+~/.claude/scripts/secrets.sh <YOUR_GIST_ID>
 ```
 
 **Windows**
 ```powershell
-& "$env:USERPROFILE\.claude\scripts\secrets.ps1" -GistId 68453b25fa9d28c94426c55c179b3838
+& "$env:USERPROFILE\.claude\scripts\secrets.ps1" -GistId <YOUR_GIST_ID>
 ```
 
 ### Step 4: Restart Terminal & Run
@@ -92,13 +99,11 @@ c
 
 ```
 ~/.claude/                      # Windows: %USERPROFILE%\.claude\
-├── CLAUDE.md                   # Global instructions (468 lines, 90+ keywords)
-├── CLAUDE.local.md             # Your personal overrides (not synced)
-├── settings.json               # Environment & hooks (macOS/Linux)
-├── settings-windows.json       # Windows-specific hooks
-├── mcp.json                    # 28 MCP server configurations
+├── CLAUDE.md                   # Personal global config — seeded from template once, never overwritten
+├── settings.json               # Environment & hooks (from settings-windows.json on Windows)
+├── mcp.json                    # Full MCP server fleet (universal)
 ├── .env                        # Secrets (auto-generated, DO NOT COMMIT)
-├── agents/                     # 29 custom agents
+├── agents/                     # Specialist + leadership agents
 │   ├── architecture.md
 │   ├── hogwarts.md             # Education SaaS patterns
 │   ├── souq.md                 # E-commerce patterns
@@ -107,27 +112,21 @@ c
 │   ├── react.md
 │   ├── prisma.md
 │   └── ...
-├── commands/                   # 17 slash commands
-│   ├── repos.md                # Repository explorer
-│   ├── atom.md
-│   ├── template.md
-│   ├── block.md
+├── skills/                     # Skills carry the verbs (commands are retired)
+│   ├── check/SKILL.md
+│   ├── ship/SKILL.md
+│   ├── health/SKILL.md
 │   └── ...
+├── rules/                      # Cross-cutting + path-scoped domain rules
 ├── memory/                     # Persistent memory files
-│   ├── atom.json
-│   ├── template.json
-│   ├── block.json
-│   ├── report.json
+│   ├── team.json
+│   ├── capacity.json
 │   └── repositories.json       # All org repos with monitoring
 └── scripts/
-    ├── install.sh              # macOS/Linux installer
-    ├── install.ps1             # Windows installer
-    ├── sync.sh                 # macOS/Linux config sync
-    ├── sync.ps1                # Windows config sync
-    ├── secrets.sh        # macOS/Linux secrets setup
-    ├── secrets.ps1       # Windows secrets setup
-    ├── sync-repos.sh           # Sync all org repos locally
-    └── sync-repos.ps1          # Windows repo sync
+    ├── setup.sh / setup.ps1    # Canonical installer (kun/.claude → ~/.claude)
+    ├── secrets.sh / .ps1       # Secrets from your personal Gist
+    ├── sync-repos.sh / .ps1    # Sync all org repos locally
+    └── health.sh / .ps1        # Config health check
 ```
 
 ---
@@ -273,10 +272,10 @@ alias use-codebase='export DATABASE_URL=$DATABASE_URL_CODEBASE'
 
 ### Update Secrets
 
-1. Go to: https://gist.github.com/abdout/68453b25fa9d28c94426c55c179b3838
+1. Open your personal secrets Gist (each teammate is handed their own Gist ID)
 2. Click **Edit**
 3. Update values
-4. Team members run setup-secrets again to get updates
+4. Re-run `~/.claude/scripts/secrets.sh <YOUR_GIST_ID>` to pull the updates
 
 ### Manual Override
 
@@ -342,22 +341,17 @@ To get latest team configuration updates:
 
 **macOS / Linux**
 ```bash
-~/.claude/scripts/sync.sh
+git -C ~/kun pull && bash ~/kun/.claude/scripts/setup.sh engineer
 ```
 
 **Windows**
 ```powershell
-& "$env:USERPROFILE\.claude\scripts\sync.ps1"
+git -C "$env:USERPROFILE\kun" pull; & "$env:USERPROFILE\kun\.claude\scripts\setup.ps1" -Role engineer
 ```
 
-This updates:
-- CLAUDE.md (keywords, patterns)
-- Agents (29 files)
-- Commands (17 files)
-- Memory files
-- Scripts
+This refreshes agents, skills, rules, memory, scripts, settings, and the MCP fleet from the kun repo — the single source of truth.
 
-Your `CLAUDE.local.md` is preserved.
+Your `~/.claude/CLAUDE.md` is personal and never overwritten.
 
 ---
 
@@ -426,22 +420,13 @@ Each product repo has a dedicated agent with patterns:
 
 ## Local Customizations
 
-Create `~/.claude/CLAUDE.local.md` for personal overrides:
+Your personal config lives in files the engine never touches:
 
-```markdown
-# My Local Settings
+- `~/.claude/CLAUDE.md` — your global instructions (seeded from a template on first install, then yours: preferences, machine quirks, personal keywords)
+- `.claude/settings.local.json` — per-project personal settings overrides
+- `~/.claude/.env` — your secrets
 
-## Additional Preferences
-- My preferred editor: VSCode
-- Custom project paths: /path/to/my/projects
-
-## Personal Keywords
-| Keyword | Action |
-|---------|--------|
-| `myproject` | cd to my main project |
-```
-
-This file is never overwritten by sync.
+Everything else (agents, skills, rules, `settings.json`, `mcp.json`) is engine-managed and refreshed from the kun repo on every setup run.
 
 ---
 
@@ -475,19 +460,12 @@ source ~/.zshrc
 
 ## Config Sources
 
-Configuration is available from two repositories:
-
-**Primary (codebase)**
-```
-https://github.com/databayt/codebase/tree/main/.claude
-```
-
-**Alternative (kun)**
+**Canonical (kun)**
 ```
 https://github.com/databayt/kun/tree/main/.claude
 ```
 
-Both contain identical configuration.
+The kun repo is the single source of truth. `setup.sh` installs it to `~/.claude/`, and every machine refreshes from it — nothing installs from other repos.
 
 ---
 

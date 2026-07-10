@@ -330,32 +330,23 @@ Stored at `~/.claude/projects/[project]/memory/`:
 ### New Team Member Setup
 
 ```bash
-# macOS (engineer role is default)
+# One-liner (auto-detects OS, wizard handles everything)
+curl -fsSL https://kun.databayt.org/install | bash
+
+# Manual path — macOS/Linux
 git clone git@github.com:databayt/kun.git ~/kun
-cd ~/kun && bash .claude/scripts/install.sh
+cd ~/kun && bash .claude/scripts/setup.sh engineer   # or business / content / ops
 bash .claude/scripts/secrets.sh <GIST_ID>
 
-# macOS (business or content role)
-cd ~/kun && bash .claude/scripts/install.sh business
-cd ~/kun && bash .claude/scripts/install.sh content
-
-# Windows (PowerShell)
-git clone git@github.com:databayt/kun.git ~/kun
-cd ~/kun; .\.claude\scripts\install.ps1
+# Manual path — Windows (PowerShell)
+git clone git@github.com:databayt/kun.git "$env:USERPROFILE\kun"
+cd ~/kun; .\.claude\scripts\setup.ps1 -Role engineer
 .\.claude\scripts\secrets.ps1 -GistId <GIST_ID>
-
-# Windows (business or content role)
-cd ~/kun; .\.claude\scripts\install.ps1 -Role business
-cd ~/kun; .\.claude\scripts\install.ps1 -Role content
 ```
 
 ### Roles
 
-| Role         | Skills                            | MCP    | Hooks | Codebase Clone |
-| ------------ | --------------------------------- | ------ | ----- | -------------- |
-| **engineer** | All 17                            | All 18 | All 5 | Yes            |
-| **business** | docs, repos, screenshot, codebase | None   | None  | No             |
-| **content**  | docs, repos, screenshot, codebase | None   | None  | No             |
+Every machine gets the **full config** — all skills, all MCP servers, all hooks. Role is a label + secrets-trust tier, not a capability gate: which API keys a machine holds is scoped by the **Gist** that person is handed, and a server without its key simply doesn't connect.
 
 ### What the Installer Does
 

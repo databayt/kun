@@ -292,7 +292,7 @@ Operational configuration: 100+ keyword-to-action mappings, MCP trigger table, s
 
 Every machine gets the **full `mcp.json`** (all 18 servers). The machine, not the person, is the unit of capability — any machine can run any task. Access is controlled by **secrets, not config**: a server whose API key isn't in your `~/.claude/.env` simply doesn't connect (harmless), and which keys you hold is scoped by the **Gist** you're handed.
 
-> The legacy role-scoped `mcp-business.json` / `mcp-content.json` / `mcp-ops.json` are used only by the deprecated `install.sh`. The canonical installer is `setup.sh`, which installs the full `mcp.json` for everyone.
+> The canonical installer is `setup.sh`, which installs the full `mcp.json` for everyone.
 
 ## Rules Engine (8 rules)
 
@@ -328,18 +328,17 @@ Stored at `~/.claude/projects/[project]/memory/`:
 ## Installation (~5 minutes)
 
 ```bash
-# macOS (engineer role is default)
+# One-liner (auto-detects OS, wizard handles everything)
+curl -fsSL https://kun.databayt.org/install | bash
+
+# Manual path — macOS/Linux
 git clone git@github.com:databayt/kun.git ~/kun
-cd ~/kun && bash .claude/scripts/install.sh
+cd ~/kun && bash .claude/scripts/setup.sh engineer   # or business / content / ops
 bash .claude/scripts/secrets.sh <GIST_ID>
 
-# macOS (business or content role)
-cd ~/kun && bash .claude/scripts/install.sh business
-cd ~/kun && bash .claude/scripts/install.sh content
-
-# Windows (PowerShell)
-git clone git@github.com:databayt/kun.git ~/kun
-cd ~/kun; .\.claude\scripts\install.ps1
+# Manual path — Windows (PowerShell)
+git clone git@github.com:databayt/kun.git "$env:USERPROFILE\kun"
+cd ~/kun; .\.claude\scripts\setup.ps1 -Role engineer
 .\.claude\scripts\secrets.ps1 -GistId <GIST_ID>
 ```
 
