@@ -1,4 +1,12 @@
 {
   "title": "Social",
-  "pages": ["index", "databayt", "hogwarts", "mkan", "moallimee", "sijillee"]
+  "pages": [
+    "index",
+    "strategy",
+    "databayt",
+    "hogwarts",
+    "mkan",
+    "moallimee",
+    "sijillee"
+  ]
 }

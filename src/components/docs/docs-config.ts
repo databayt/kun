@@ -43,6 +43,7 @@ export const docsNav: (DocEntry | DocSection)[] = [
     title: "Social",
     items: [
       { href: "/docs/social", label: "Overview" },
+      { href: "/docs/social/strategy", label: "Strategy" },
       { href: "/docs/social/databayt", label: "Databayt" },
       { href: "/docs/social/hogwarts", label: "Hogwarts" },
       { href: "/docs/social/mkan", label: "Mkan" },

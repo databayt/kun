@@ -38,6 +38,10 @@ developer docs / current industry sources, 2026.
 - **One-time review, then free:** **Facebook, Instagram, LinkedIn.** Meta business verification
   and LinkedIn's Community Management API approval are paperwork gates, not money gates. Worth it
   for Hogwarts (FB/IG), Mkan (IG), Sijillee (FB), Databayt (LinkedIn).
+- **LinkedIn caveat (2026):** company-page organic reach is ~2–5% and falling; **personal
+  profiles reach ~70% more than pages**. The working LinkedIn strategy is Ali's personal profile
+  with the page as storefront — which lowers the urgency of the Community Management API
+  (personal posting isn't automatable anyway; a human posts it).
 - **Heavy gate:** **TikTok** — a multi-week audit with strict UX requirements; posts are private
   until you pass. Plan for human-posting or an aggregator in the interim.
 - **No clean path:** **Snapchat** (allowlist via a Snap rep) and **WhatsApp** (no organic-post
@@ -85,6 +89,17 @@ Aggregator = fast breadth, someone else maintains the gating, recurring cost.
 
 Spelled out so the follow-up is turnkey — none of this ships in the docs-only session.
 
+### Design driver — the repurposing multiplier
+
+The binding constraint is **content capacity, not channel count**: Samia carries 2–3 core pieces
+a week (growth.md), Abdout occasional technical posts. 5 brands × 8 channels is only feasible if
+the pipeline treats a post as **one core piece → N platform-native variants** (Claude adapts
+hook, length, caption, hashtags, ratio, AR/EN per platform; `/higgs` re-ratios the media). So the
+`/social` skill and the eventual `SocialPost` model must be **variant-aware from day one**: a
+parent `piece` with per-platform child `variants`, not 8 disconnected posts. ~3 core pieces/week
+→ ~15–20 platform posts. This is what the automation is _for_; strategy detail in
+`content/docs/social/strategy.mdx`.
+
 ### Engine config (`/social` capability)
 
 - `.claude/skills/social/SKILL.md` — the workflow skill (resolve → draft → media → stage → publish).
@@ -109,9 +124,46 @@ Spelled out so the follow-up is turnkey — none of this ships in the docs-only 
 
 ### Persistence, scheduling, metrics
 
-- Prisma `SocialPost` / `ScheduledPost` (brand, channels, status, scheduled_for, result).
+- Prisma `SocialPost` / `ScheduledPost` — **variant-aware**: parent piece + per-platform variants
+  (brand, channel, status, scheduled_for, result, `aiGenerated` flag — see moral gate below).
 - `/schedule` (Vercel cron or the harness scheduler) for timed publishing.
 - PostHog events + per-platform analytics for attribution; UTM on every link.
+
+### AI-disclosure mapping (the moral gate's compliance half)
+
+The publish payload carries `aiGenerated: boolean` (set whenever media came from `/higgs`). The
+gate maps it per platform — duties verified against official platform docs, July 2026:
+
+| Platform         | Duty (2026)                                                                                                                        | Wire-up                                                                                                                                  |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| **TikTok**       | Labeling **realistic AIGC is mandatory**; unlabeled risks removal/restriction                                                      | Set `is_aigc: true` in the Content Posting API                                                                                           |
+| **Meta (FB/IG)** | Self-disclosure required **only for photorealistic video / realistic audio**; C2PA/IPTC metadata auto-triggers the "AI Info" label | **No organic API flag exists** — comply by policy: never publish photorealistic synthetic people/events; keep C2PA metadata when present |
+| **X**            | No duty for ordinary marketing images (policy bites only on deceptive + harmful media)                                             | Nothing to wire                                                                                                                          |
+| **LinkedIn**     | No duty; displays a C2PA "CR" badge when metadata survives                                                                         | Nothing to wire                                                                                                                          |
+| **Snapchat**     | Disclosure required for **monetized** content only                                                                                 | Caption disclosure if Spotlight-monetized                                                                                                |
+
+House rule stays stricter than every platform floor: AI media is labeled by default, and we never
+publish photoreal fakes of people or places (the brand style is deliberately non-photoreal —
+charcoal/cyan, text-free). Don't rely on C2PA surviving upload — most platforms strip manifests;
+the API flag and caption are the reliable lanes. The gate's other checks (truthfulness, Arabic
+correctness, cultural fit, consent for faces) live in the L4 guardrail spec (doctrine conflict #3).
+
+## Payoff governance (cash-flow-first applied to social)
+
+Effort is a cost. Social must be accountable to the drive like everything else:
+
+- **Organic-only by default.** $0 ad budget; any paid experiment (boosts, ads, aggregator SaaS)
+  is a billing change → `/decide` + captain.
+- **Timeline honesty.** 0–3 months of consistent posting = silence is normal; 3–6 months = first
+  signal expected; 6–12 months = compounding or cut. Set this expectation up front so nobody
+  panic-quits at week 6 or zombie-posts at month 9.
+- **Kill criteria.** A channel earns its slot: zero signal (reach, clicks, DMs, pipeline
+  mentions) after **3 months** of consistent posting → drop to monthly maintenance or park it.
+  Review quarterly in the captain's cadence.
+- **Payoff map** (fastest revenue-linkage first): Hogwarts social = trust asset for Ali's sales
+  calls; Mkan = direct consumer funnel (fast feedback); databayt dev-rel = talent/contributor/
+  partner pipeline (long-tail); Sijillee = market education (slow, cheap). Measure UTM → PostHog
+  → CRM pipeline → North Star (active paying schools).
 
 ## Phasing
 
