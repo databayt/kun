@@ -64,9 +64,22 @@ Aggregator = fast breadth, someone else maintains the gating, recurring cost.
 
 ## Credential inventory & wiring plan
 
-**Slack is the first wired channel** (Hermes gateway: `SLACK_BOT_TOKEN`/`SLACK_APP_TOKEN` in
-`~/.hermes/.env`, proactive posts via `SLACK_HOME_CHANNEL`). `.env.example` documents
-`HERMES_API_URL` / `HERMES_API_KEY` / `NEXT_PUBLIC_HERMES_API_URL` for the site's Social Hub.
+**Wired channels: Telegram (direct Bot API) + Slack (Hermes gateway).** Slack:
+`SLACK_BOT_TOKEN`/`SLACK_APP_TOKEN` in `~/.hermes/.env`, proactive posts via
+`SLACK_HOME_CHANNEL`. Telegram: `TELEGRAM_BOT_TOKEN`/`TELEGRAM_CHANNEL_ID` in the site's `.env`
+(+ Vercel env for prod). `.env.example` documents both plus
+`HERMES_API_URL` / `HERMES_API_KEY` / `NEXT_PUBLIC_HERMES_API_URL`.
+
+> **Telegram account task (Abdout, ~5 min — code is ready, nothing posts until this exists):**
+>
+> 1. Telegram → `@BotFather` → `/newbot` → name it (e.g. `databayt bot`) → copy the token →
+>    `TELEGRAM_BOT_TOKEN`.
+> 2. Create the public brand channel (e.g. `@databayt`) → add the bot as **channel admin**
+>    (post-messages right).
+> 3. Set `TELEGRAM_CHANNEL_ID=@databayt` (or the `-100…` numeric id) — local `.env` + Vercel.
+>
+> Then the Social Hub's Telegram row goes green and publish works; per-brand channels later
+> repeat step 2–3 (the per-brand channel map arrives with the `SocialPost` persistence phase).
 
 - Track accounts per **brand × channel** (5 × 8 = up to 40). Some pages are already opened; audit
   which exist, which are dormant (`@databayt` on X), and which are still to claim.
@@ -177,7 +190,10 @@ Effort is a cost. Social must be accountable to the drive like everything else:
    `brand.mdx` + this roadmap. No code, no credentials.
 2. **Phase 2 — engine config + WIP harden** — ✅ done 2026-07-10; the `/social` keyword is live
    (health green, plugin parity, 39 skills).
-3. **Phase 3 — Telegram live** — free, trivial; human-staged (L2). First real automated channel.
+3. **Phase 3 — Telegram live** — ✅ done 2026-07-10 (code): direct Bot API egress
+   (`src/lib/telegram.ts`), per-transport dispatch in the publish action, dual status +
+   gating in the hub, `scripts/post-to-telegram.mjs` headless lane, L2 staged. Pending only
+   the 5-min account task above (bot + channel + env) to go live.
 4. **Phase 4 — multi-channel** — FB/IG/LinkedIn (review gates) + X (`/decide` on cost); aggregator
    decision for TikTok/Snapchat. WhatsApp stays community-broadcast, not automated.
 5. **Phase 5 — L4 full-auto** — only after the guardrail layer (LLM-judge gate + rate limit +

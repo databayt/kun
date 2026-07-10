@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/atom/page-header";
 import {
   verifyHermesConnection,
+  verifyTelegramConnection,
   publishPostDirect,
 } from "@/actions/post-social";
 import { CHANNELS, type ChannelId } from "@/components/root/social/config";
@@ -38,25 +39,33 @@ const channelIcons: Partial<
   telegram: TelegramIcon,
 };
 
+type ConnState = {
+  status: "idle" | "checking" | "connected" | "disconnected";
+  detail?: string;
+  error?: string;
+};
+
 const translations = {
   en: {
     title: "Social Hub",
     description:
-      "Stage and publish approved posts to social channels through the Hermes gateway.",
-    connectionStatus: "Hermes Gateway Status",
+      "Stage and publish approved posts to social channels through the wired relays.",
+    connectionStatus: "Egress Status",
+    hermesRow: "Hermes Gateway",
+    telegramRow: "Telegram Bot",
     connected: "Connected",
     disconnected: "Disconnected",
-    checking: "Checking connection...",
-    testConnection: "Test Connection",
+    checking: "Checking...",
+    testConnection: "Test Connections",
     apiUrl: "Gateway URL",
     notConfigured: "not configured",
     composerTitle: "Post Composer",
     composerDesc:
-      "Paste the approved copy, pick the channels, and publish. Hermes relays — it never writes.",
+      "Paste the approved copy, pick the channels, and publish. The relays only deliver — they never write.",
     textareaPlaceholder: "Paste the approved post copy here…",
     targetChannels: "Target Platforms",
     comingSoon: "soon",
-    postDirect: "Publish via Hermes",
+    postDirect: "Publish",
     posting: "Publishing...",
     draftHintTitle: "Where do drafts come from?",
     draftHintBody:
@@ -67,21 +76,23 @@ const translations = {
   ar: {
     title: "ملتقى التواصل",
     description:
-      "جهّز وانشر المنشورات المعتمدة على قنوات التواصل عبر بوابة Hermes.",
-    connectionStatus: "حالة بوابة Hermes",
+      "جهّز وانشر المنشورات المعتمدة على قنوات التواصل عبر النواقل الموصولة.",
+    connectionStatus: "حالة النشر",
+    hermesRow: "بوابة Hermes",
+    telegramRow: "بوت تيليجرام",
     connected: "متصل",
     disconnected: "غير متصل",
-    checking: "جاري فحص الاتصال...",
-    testConnection: "فحص الاتصال",
+    checking: "جاري الفحص...",
+    testConnection: "فحص الاتصالات",
     apiUrl: "رابط البوابة",
     notConfigured: "غير مُهيّأ",
     composerTitle: "منشئ المنشورات",
     composerDesc:
-      "الصق النص المعتمد، اختر القنوات، ثم انشر. Hermes ناقلٌ فقط — لا يكتب.",
+      "الصق النص المعتمد، اختر القنوات، ثم انشر. النواقل توصّل فقط — لا تكتب.",
     textareaPlaceholder: "الصق نص المنشور المعتمد هنا…",
     targetChannels: "المنصات المستهدفة",
     comingSoon: "قريباً",
-    postDirect: "نشر عبر Hermes",
+    postDirect: "نشر",
     posting: "جاري النشر...",
     draftHintTitle: "من أين تأتي المسودات؟",
     draftHintBody:
@@ -91,45 +102,106 @@ const translations = {
   },
 };
 
+function StatusIndicator({
+  state,
+  t,
+}: {
+  state: ConnState;
+  t: (typeof translations)["en"];
+}) {
+  if (state.status === "checking" || state.status === "idle") {
+    return (
+      <div className="flex items-center gap-2">
+        <span className="relative flex h-2 w-2">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+        </span>
+        <span className="text-xs text-amber-500 font-medium">{t.checking}</span>
+      </div>
+    );
+  }
+  if (state.status === "connected") {
+    return (
+      <div className="flex items-center gap-2">
+        <span className="relative flex h-2 w-2">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+        </span>
+        <span className="text-xs text-emerald-500 font-medium">
+          {t.connected} {state.detail && <span dir="ltr">{state.detail}</span>}
+        </span>
+      </div>
+    );
+  }
+  return (
+    <div className="flex items-center gap-2">
+      <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+      <span className="text-xs text-rose-500 font-medium">
+        {t.disconnected}
+      </span>
+    </div>
+  );
+}
+
 export default function SocialDashboard({ lang }: SocialDashboardProps) {
   const t = translations[lang] || translations.en;
   const isRightToLeft = isRTL(lang);
 
-  // Connection State
-  const [connection, setConnection] = useState<{
-    status: "idle" | "checking" | "connected" | "disconnected";
-    version?: string;
-    error?: string;
-  }>({ status: "idle" });
+  // Egress state — one per transport
+  const [hermes, setHermes] = useState<ConnState>({ status: "idle" });
+  const [telegram, setTelegram] = useState<ConnState>({ status: "idle" });
 
   // Composer State
   const [postText, setPostText] = useState("");
   const [selectedChannels, setSelectedChannels] = useState<ChannelId[]>([
-    "slack",
+    "telegram",
   ]);
   const [isPosting, setIsPosting] = useState(false);
   const [postSuccess, setPostSuccess] = useState<string | null>(null);
   const [postError, setPostError] = useState<string | null>(null);
 
-  const checkConnection = async () => {
-    setConnection({ status: "checking" });
-    try {
-      const res = await verifyHermesConnection();
-      if (res.connected) {
-        setConnection({ status: "connected", version: res.version });
-      } else {
-        setConnection({ status: "disconnected", error: res.error });
-      }
-    } catch (err: unknown) {
-      setConnection({
+  const checkConnections = async () => {
+    setHermes({ status: "checking" });
+    setTelegram({ status: "checking" });
+
+    const [hermesRes, telegramRes] = await Promise.allSettled([
+      verifyHermesConnection(),
+      verifyTelegramConnection(),
+    ]);
+
+    if (hermesRes.status === "fulfilled" && hermesRes.value.connected) {
+      setHermes({
+        status: "connected",
+        detail: hermesRes.value.version && `v${hermesRes.value.version}`,
+      });
+    } else {
+      setHermes({
         status: "disconnected",
-        error: err instanceof Error ? err.message : String(err),
+        error:
+          hermesRes.status === "fulfilled"
+            ? hermesRes.value.error
+            : String(hermesRes.reason),
+      });
+    }
+
+    if (telegramRes.status === "fulfilled" && telegramRes.value.connected) {
+      setTelegram({
+        status: "connected",
+        detail: telegramRes.value.username && `@${telegramRes.value.username}`,
+      });
+    } else {
+      setTelegram({
+        status: "disconnected",
+        error:
+          telegramRes.status === "fulfilled"
+            ? telegramRes.value.error
+            : String(telegramRes.reason),
       });
     }
   };
 
   useEffect(() => {
-    checkConnection();
+    checkConnections();
   }, []);
 
   const handleChannelToggle = (channel: ChannelId) => {
@@ -139,6 +211,18 @@ export default function SocialDashboard({ lang }: SocialDashboardProps) {
         : [...prev, channel],
     );
   };
+
+  // Publish is gated per transport: only the relays the selection actually
+  // needs must be connected.
+  const needsHermes = selectedChannels.some(
+    (id) => CHANNELS.find((c) => c.id === id)?.transport === "hermes",
+  );
+  const needsTelegram = selectedChannels.some(
+    (id) => CHANNELS.find((c) => c.id === id)?.transport === "telegram",
+  );
+  const transportsReady =
+    (!needsHermes || hermes.status === "connected") &&
+    (!needsTelegram || telegram.status === "connected");
 
   const handlePublishDirect = async () => {
     setIsPosting(true);
@@ -261,7 +345,7 @@ export default function SocialDashboard({ lang }: SocialDashboardProps) {
                     isPosting ||
                     !postText.trim() ||
                     selectedChannels.length === 0 ||
-                    connection.status !== "connected"
+                    !transportsReady
                   }
                   className="flex items-center gap-2 font-medium"
                 >
@@ -309,57 +393,42 @@ export default function SocialDashboard({ lang }: SocialDashboardProps) {
               </div>
 
               <div className="flex items-center justify-between py-2">
-                <span className="text-xs text-muted-foreground">Status</span>
-                <div className="flex items-center gap-2">
-                  {connection.status === "checking" && (
-                    <>
-                      <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
-                      </span>
-                      <span className="text-xs text-amber-500 font-medium">
-                        {t.checking}
-                      </span>
-                    </>
-                  )}
-                  {connection.status === "connected" && (
-                    <>
-                      <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                      </span>
-                      <span className="text-xs text-emerald-500 font-medium">
-                        {t.connected}{" "}
-                        {connection.version && `v${connection.version}`}
-                      </span>
-                    </>
-                  )}
-                  {connection.status === "disconnected" && (
-                    <>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
-                      <span className="text-xs text-rose-500 font-medium">
-                        {t.disconnected}
-                      </span>
-                    </>
-                  )}
-                </div>
+                <span className="text-xs text-muted-foreground">
+                  {t.hermesRow}
+                </span>
+                <StatusIndicator state={hermes} t={t} />
               </div>
 
-              {connection.error && (
+              <div className="flex items-center justify-between py-2 border-t border-border/40">
+                <span className="text-xs text-muted-foreground">
+                  {t.telegramRow}
+                </span>
+                <StatusIndicator state={telegram} t={t} />
+              </div>
+
+              {hermes.error && (
                 <p className="text-xs text-rose-500 bg-rose-500/5 p-3 rounded-lg border border-rose-500/10 break-words leading-relaxed">
-                  {connection.error}
+                  {t.hermesRow}: {hermes.error}
+                </p>
+              )}
+
+              {telegram.error && (
+                <p className="text-xs text-rose-500 bg-rose-500/5 p-3 rounded-lg border border-rose-500/10 break-words leading-relaxed">
+                  {t.telegramRow}: {telegram.error}
                 </p>
               )}
 
               <Button
-                onClick={checkConnection}
-                disabled={connection.status === "checking"}
+                onClick={checkConnections}
+                disabled={
+                  hermes.status === "checking" || telegram.status === "checking"
+                }
                 variant="outline"
                 size="sm"
                 className="w-full flex items-center justify-center gap-2 mt-2"
               >
                 <RefreshCw
-                  className={`h-3 w-3 ${connection.status === "checking" ? "animate-spin" : ""}`}
+                  className={`h-3 w-3 ${hermes.status === "checking" || telegram.status === "checking" ? "animate-spin" : ""}`}
                 />
                 <span>{t.testConnection}</span>
               </Button>

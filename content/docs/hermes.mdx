@@ -96,6 +96,8 @@ hermes gateway install   # persist as a user service
 
 The kun site's Social Hub talks to a Hermes endpoint via env vars (see `.env.example`): `HERMES_API_URL`, `HERMES_API_KEY`, and the client-visible `NEXT_PUBLIC_HERMES_API_URL`. The egress contract is evolving with hermes-agent — the honest boundary stays the same as it was under OpenClaw: **Claude writes the copy; Hermes only relays it**. See [Social](/docs/social).
 
+> **Telegram is not routed through Hermes.** The brand-channel posting lane (`telegram` in the Social Hub) calls the official Bot API directly from the site (`TELEGRAM_BOT_TOKEN`/`TELEGRAM_CHANNEL_ID`) — a plain HTTPS call that works from Vercel with no local gateway. A future Hermes **Telegram adapter** is the other pipe: chatting with your machine's agent *from* Telegram. Same distinction as Hermes-Slack vs Slack-MCP above.
+
 ## Troubleshooting
 
 | Symptom | Fix |

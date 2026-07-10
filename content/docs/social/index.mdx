@@ -52,8 +52,8 @@ live on its page:
 ```
  idea ──► draft ──► media ──► approve ──► schedule ──► publish ──► measure
   │        │         │          │           │            │           │
-content   Claude    /higgs    human       queue        Hermes     PostHog
-calendar  native   text-free   gate    (phase 2)      gateway     + UTM
+content   Claude    /higgs    human       queue       telegram    PostHog
+calendar  native   text-free   gate    (phase 2)    API | Hermes   + UTM
 ```
 
 | Stage | Owner | Notes |
@@ -63,7 +63,7 @@ calendar  native   text-free   gate    (phase 2)      gateway     + UTM
 | **Media** | `/higgs` | Text-free visuals, brand kit `b0a3f528…`; copy is overlaid in-post, never rendered |
 | **Approve** | human (Abdout / Ali / Samia) | The gate — see [Autonomy ladder](#autonomy-ladder) |
 | **Schedule** | queue (phase 2) | Manual today; `SocialPost`/`ScheduledPost` + cron later |
-| **Publish** | **Hermes** gateway ([hermes-agent](/docs/hermes)) | Egress only — a dumb relay, never the LLM |
+| **Publish** | **Egress layer** — Telegram direct Bot API · other channels via the [Hermes](/docs/hermes) gateway | Egress only — dumb relays, never the LLM |
 | **Measure** | PostHog + per-platform analytics | UTM-tagged links → attribution |
 
 ## Layer boundaries
@@ -78,7 +78,7 @@ gateway with the "anthropic-native over self-hosted" doctrine.
 | Write the copy | Claude (in Claude Code / Cowork) | Best model, brand-aware, bilingual — never Hermes' LLM |
 | Make the image/video | `/higgs` → Higgsfield CLI | Already governed by budget + brand kit |
 | Decide it's good | Human (→ automated gate at L4) | Brand accounts are public and irreversible |
-| Reach the platform | Hermes gateway ([wiring](/docs/hermes)) | The one thing Claude can't do natively — Slack today via `SLACK_HOME_CHANNEL`; other channels as adapters land |
+| Reach the platform | Egress layer, routed per channel | **Telegram: direct Bot API** (a plain HTTPS call — works from Vercel). Chat networks via the [Hermes](/docs/hermes) gateway (Slack today via `SLACK_HOME_CHANNEL`); more adapters as they land |
 | Prove it worked | PostHog + UTM | Attribution back to site traffic / conversions |
 
 > **Done (Phase 2, 2026-07-10).** The old `generateAndPublishPost` action drafted via the
@@ -94,7 +94,7 @@ at all. Build order follows feasibility, not wish-list:
 
 | Channel | Posting API | Effort | Note |
 |---------|-------------|--------|------|
-| **Telegram** | Bot API | Trivial | Free, instant — **automate first** |
+| **Telegram** | Bot API | Trivial | **Live** — wired direct (2026-07-10); needs the bot token + channel |
 | **X** | API v2 | Easy (paid) | Pay-per-use since Feb 2026 (~$0.015/post) → `/decide` |
 | **Facebook** | Graph API | Medium | App review + business verification |
 | **Instagram** | Graph API | Medium | Business account linked to a FB Page |
@@ -110,7 +110,8 @@ roadmap. Per-brand channel priorities are on each [brand page](#brand-pages).
 
 The north star is fully autonomous publishing. We climb to it in stages — not because autonomy
 is hard to code, but because handing a public brand account to an unsupervised bot needs
-guardrails first. We are at **L0/L1** today.
+guardrails first. We are at **L2 on Telegram** (staged: compose → one-click publish) and
+**L1 elsewhere** today.
 
 | Level | What runs | Human role |
 |-------|-----------|------------|
@@ -144,7 +145,8 @@ Saying "social post" (or «منشور تواصل») in prose activates it — no
 The Social Hub at [`/engine/social`](/engine/social) is hardened (Phase 2, 2026-07-10):
 
 - **Works** — bilingual (en/ar, RTL) composer with a config-driven channel registry (9 channels;
-  **Slack live**, the rest marked *soon* until their Hermes adapters land), gateway health check,
+  **Telegram live via direct Bot API + Slack via Hermes**, the rest marked *soon* until their
+  adapters land), per-transport health checks and publish gating,
   Zod-validated publish, a contributor re-check inside the action (JWT sessions outlive allowlist
   removal), and a server-boundary auth guard on the page.
 - **Removed** — the in-app AI draft card: gateway-LLM drafting violated the layer boundary, so
