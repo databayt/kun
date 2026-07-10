@@ -60,7 +60,7 @@ Say ""
 # ── Common config (all roles) ────────────────────────────────────
 Say "Common config" Cyan
 
-@("agents", "commands", "rules", "memory", "scripts", "skills") | ForEach-Object {
+@("agents", "commands", "rules", "memory", "scripts", "skills", "hooks") | ForEach-Object {
     New-Item -ItemType Directory -Force -Path "$CLAUDE_DIR\$_" | Out-Null
 }
 Set-Content -Path "$CLAUDE_DIR\.kun-role" -Value $Role
@@ -114,6 +114,15 @@ if (Test-Path "$KUN_DIR\.claude\scripts\lib") {
         Copy-Item $_.FullName "$CLAUDE_DIR\scripts\lib\" -Force
     }
     Info "scripts/lib"
+}
+
+# User-global hooks (session-maintain-status.ps1 runs in EVERY project, so it
+# must live under ~/.claude/hooks, not only inside the kun repo)
+if (Test-Path "$KUN_DIR\.claude\hooks") {
+    Get-ChildItem "$KUN_DIR\.claude\hooks\*.ps1" -EA SilentlyContinue | ForEach-Object {
+        Copy-Item $_.FullName "$CLAUDE_DIR\hooks\" -Force
+    }
+    Info "hooks"
 }
 
 Say ""

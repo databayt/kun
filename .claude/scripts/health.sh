@@ -1,7 +1,9 @@
 #!/bin/bash
 # Kun Config Health Check — verify and report Claude Code config health
 # Usage: bash ~/.claude/scripts/health.sh [--report]
-# --report: post results to GitHub issue databayt/kun#health
+# --report: post results to the Config Health Dashboard issue in databayt/kun
+#           (discovered by label `config-health`; created if absent).
+# The daily maintain heartbeat (maintain.sh) runs this and posts weekly/on-RED.
 
 set -e
 
@@ -9,7 +11,6 @@ CLAUDE_DIR="$HOME/.claude"
 REPORT="${1:-}"
 TIMESTAMP=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
 HOSTNAME=$(hostname -s 2>/dev/null || echo "unknown")
-WHO=$(whoami)
 OS=$(uname -s)
 ERRORS=0
 WARNINGS=0
@@ -69,16 +70,22 @@ RULE_COUNT=$(ls "$CLAUDE_DIR/rules/"*.md 2>/dev/null | wc -l | tr -d ' ')
 
 # ── MCP server count (universal — every machine gets the full fleet) ──
 # Secrets are scoped, not config: a server without a key just doesn't
-# connect, so the full mcp.json is expected on every machine.
+# connect, so the full mcp.json is expected on every machine. Expectations
+# come from engine.json (the declared truth) with hardcoded fallbacks.
+EXPECTED=18
+EXPECTED_SKILLS=30
+ENGINE_JSON_SRC="${KUN_ROOT:-$HOME/kun}/.claude/engine.json"
+if [ -f "$ENGINE_JSON_SRC" ] && command -v jq &> /dev/null; then
+    EXPECTED=$(jq -r '.counts.project_mcp // 18' "$ENGINE_JSON_SRC")
+    EXPECTED_SKILLS=$(jq -r '.counts.project_skills // 30' "$ENGINE_JSON_SRC")
+fi
 if [ -f "$CLAUDE_DIR/mcp.json" ]; then
     MCP_COUNT=$(grep -c '"description"' "$CLAUDE_DIR/mcp.json" 2>/dev/null || echo 0)
-    EXPECTED=18
     [ "$MCP_COUNT" -ge "$EXPECTED" ] && check pass "MCP servers" "$MCP_COUNT (expected ≥$EXPECTED)" || \
         check warn "MCP servers" "$MCP_COUNT (expected ≥$EXPECTED)"
 fi
 
 # ── Expected skills (universal — full skill set on every machine; commands retired) ──
-EXPECTED_SKILLS=30
 [ "$SKILL_COUNT" -ge "$EXPECTED_SKILLS" ] && check pass "skills" "$SKILL_COUNT (expected ≥$EXPECTED_SKILLS)" || \
     check warn "skills" "$SKILL_COUNT (expected ≥$EXPECTED_SKILLS)"
 LEFTOVER_CMDS=$(ls "$CLAUDE_DIR/commands/"*.md 2>/dev/null | wc -l | tr -d ' ')
@@ -130,6 +137,26 @@ if [ -f "$AGENTS_LIB" ]; then
         _ag_alias_present claw openclaw || MISSING_ALIASES="$MISSING_ALIASES claw"
         check warn "agent aliases" "missing:$MISSING_ALIASES — onboarding writes the block"
     fi
+fi
+
+# ── Maintain heartbeat (the machine supervises itself) ──────────
+MAINTAIN_STATE="$CLAUDE_DIR/.kun-maintain.json"
+if [ -f "$MAINTAIN_STATE" ] && command -v python3 &> /dev/null; then
+    M_TS=$(python3 -c "import json;print(json.load(open('$MAINTAIN_STATE')).get('ts',''))" 2>/dev/null)
+    M_VERDICT=$(python3 -c "import json;print(json.load(open('$MAINTAIN_STATE')).get('verdict',''))" 2>/dev/null)
+    if [ -n "$M_TS" ]; then
+        M_EPOCH=$(date -j -u -f "%Y-%m-%dT%H:%M:%SZ" "$M_TS" +%s 2>/dev/null || date -u -d "$M_TS" +%s 2>/dev/null || echo 0)
+        M_AGE_H=$(( ($(date +%s) - M_EPOCH) / 3600 ))
+        if [ "$M_AGE_H" -le 48 ]; then
+            check pass "maintain heartbeat" "last run ${M_AGE_H}h ago ($M_VERDICT)"
+        else
+            check warn "maintain heartbeat" "stale — ${M_AGE_H}h since last run; check the scheduler (maintain.sh --status)"
+        fi
+    else
+        check warn "maintain heartbeat" "state unreadable — run: bash ~/.claude/scripts/maintain.sh"
+    fi
+else
+    check warn "maintain heartbeat" "never ran — arm it: bash ~/.claude/scripts/maintain.sh --install"
 fi
 
 # ── Staleness (CLAUDE.md age) ────────────────────────────────────
@@ -234,12 +261,14 @@ if [[ "$REPORT" == "--report" ]]; then
 $(echo -e "$CHECKS")
 ---"
 
-    # Find or create the health issue
+    # Find or create the health issue (label must exist before issue create).
+    # On create, parse the issue number from the printed URL — re-listing
+    # immediately after create races GitHub's eventually-consistent index.
     ISSUE_NUM=$(gh issue list --repo databayt/kun --label config-health --state open --json number -q '.[0].number' 2>/dev/null || echo "")
 
     if [ -z "$ISSUE_NUM" ]; then
-        # Create the issue
-        gh issue create --repo databayt/kun \
+        gh label create config-health --repo databayt/kun --force >/dev/null 2>&1 || true
+        ISSUE_URL=$(gh issue create --repo databayt/kun \
             --title "Config Health Dashboard" \
             --label "config-health" \
             --body "$(cat <<'ISSUEBODY'
@@ -249,11 +278,11 @@ Automated health reports from all team members' Claude Code configurations.
 
 Each comment below is a health check from a team member's machine. Latest comment = latest status.
 
-**Setup**: each member runs `bash ~/.claude/scripts/health.sh --report`
-**Schedule**: runs automatically via Claude Code `/schedule` or manually
+**Setup**: armed automatically by `setup.sh` / `setup.ps1` — the daily maintain heartbeat (`maintain.sh` / `maintain.ps1`) posts here weekly and immediately on RED
+**Manual**: `bash ~/.claude/scripts/health.sh --report` (Windows: `health.ps1 -Report`)
 ISSUEBODY
-)"
-        ISSUE_NUM=$(gh issue list --repo databayt/kun --label config-health --state open --json number -q '.[0].number' 2>/dev/null)
+)" 2>/dev/null)
+        ISSUE_NUM="${ISSUE_URL##*/}"
     fi
 
     if [ -n "$ISSUE_NUM" ]; then

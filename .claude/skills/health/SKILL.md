@@ -32,7 +32,9 @@ Steps:
 
 5. If any member has errors, suggest: `tell [member] to run: cd ~/kun && bash .claude/scripts/setup.sh [role]`
 
-Each team member should set up recurring health reports:
+Reporting is automatic — the **maintain heartbeat** supervises every machine:
 
-- macOS: `bash ~/.claude/scripts/health.sh --report` (via /schedule or cron)
-- Windows: `.\.claude\scripts\health.ps1 -Report` (via Task Scheduler)
+- `setup.sh` / `setup.ps1` arm a daily scheduler (macOS launchd `com.databayt.kun-maintain` 09:17 · Windows Scheduled Task `kun-maintain` · Linux cron)
+- Each heartbeat: pull `~/kun` → refresh `~/.claude` → health check → state to `~/.claude/.kun-maintain.json` → post to the dashboard weekly and immediately on RED
+- Status on any machine: `bash ~/.claude/scripts/maintain.sh --status` (Windows: `maintain.ps1 -Status`)
+- A stale heartbeat (>48h) or RED verdict surfaces automatically at session start via the `session-maintain-status` hook — in every project, not just kun

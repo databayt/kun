@@ -18,6 +18,10 @@
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/session-engine-context.sh\""
+          },
+          {
+            "type": "command",
+            "command": "[ -f \"$HOME/.claude/hooks/session-maintain-status.sh\" ] && bash \"$HOME/.claude/hooks/session-maintain-status.sh\"; exit 0"
           }
         ]
       }
