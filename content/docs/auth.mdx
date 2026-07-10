@@ -54,7 +54,7 @@ persists and Claude reuses it.
 
 The manifest (`~/.claude/greenlist.json`) stores **URLs only** — never cookies or passwords.
 
-### The flow for "Claude, do X on <site>"
+### The flow for "Claude, do X on `<site>`"
 
 1. Claude navigates to the site in the attached vault.
 2. If the session is live → it proceeds.
@@ -72,10 +72,10 @@ The manifest (`~/.claude/greenlist.json`) stores **URLs only** — never cookies
 The agent starts the vault at login and restarts it if it crashes. A normal `Cmd-Q` is respected
 (it won't fight you) and comes back at next login, or immediately via `chrome-debug.sh`.
 
-<Callout type="warn">
-After first enabling the vault, **restart Claude Code once** so the `chrome-devtools` MCP picks
-up the wrapper. After that, attachment is automatic.
-</Callout>
+> [!WARNING]
+> After first enabling the vault, **restart Claude Code once** so the `chrome-devtools` MCP picks
+> up the wrapper. After that, attachment is automatic.
+
 
 ## The two identities (Keychain)
 
