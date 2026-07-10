@@ -12,8 +12,8 @@ Autonomy is **L1 (assisted)** — nothing auto-publishes to a brand account. Str
 and the autonomy ladder: `content/docs/social/` (public) · `docs/SOCIAL-AUTOMATION.md` (internal).
 
 Arguments: $ARGUMENTS — brand (`databayt|hogwarts|mkan|moallimee|sijillee`), the idea/news,
-optional `--channels` (default `slack` — the only wired channel today), optional `--publish`
-(dispatch after explicit approval).
+optional `--channels` (default `telegram`; wired today: `telegram` direct Bot API + `slack` via
+Hermes), optional `--publish` (dispatch after explicit approval).
 
 ## Doctrine (non-negotiable)
 
@@ -32,15 +32,17 @@ optional `--channels` (default `slack` — the only wired channel today), option
 
 1. **Resolve context** — brand, audience, channels. Read the brand's page
    (`content/docs/social/<brand>.mdx`); check channel wiring in
-   `src/components/root/social/config.ts` (`wired: true` = Hermes adapter live; slack today).
+   `src/components/root/social/config.ts` (`wired: true` + `transport`: telegram = direct Bot
+   API, others relay via Hermes).
 2. **Draft** the core piece + per-channel variants (AR first, EN second). UTM on every link
    (`?utm_source=<channel>&utm_medium=social&utm_campaign=<slug>`).
 3. **Media** if the post needs it — pick the `/higgs` recipe (og image / social card / reel),
    text-free, brand style blocks.
 4. **Stage for approval** — show copy variants + media paths to Abdout/Ali/Samia. Stop here.
 5. **Publish** (only after explicit approval, or `--publish` given after the gate):
-   - Dashboard: `/engine/social` composer (contributors-only, Zod-validated).
-   - Headless: `node scripts/post-to-hermes.mjs --text "<approved copy>" --channels slack`.
+   - Dashboard: `/engine/social` composer (contributors-only, Zod-validated, per-transport).
+   - Headless telegram: `node scripts/post-to-telegram.mjs --text "<approved copy>"`.
+   - Headless hermes channels: `node scripts/post-to-hermes.mjs --text "<approved copy>" --channels slack`.
 6. **Log** — note the post + slot in the content calendar; UTM lands in PostHog for the
    quarterly payoff review (kill criteria live in `content/docs/social/strategy.mdx`).
 

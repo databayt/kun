@@ -92,8 +92,8 @@ autonomy: **L1 (assisted)** — the ladder to L4 full-auto is in `content/docs/s
 
 - **The multiplier**: one core piece → per-channel variants (hook/length/ratio/AR-EN). ~3 core
   pieces/week ≈ 15–20 platform posts. Capacity (Samia 2–3/wk) is the constraint, not channels.
-- **Channels**: slack wired today; telegram next (free Bot API); X is pay-per-use (`/decide`);
-  the full 8-channel reality lives in `docs/SOCIAL-AUTOMATION.md` (internal).
+- **Channels**: telegram (direct Bot API) + slack (Hermes) wired today; X is pay-per-use
+  (`/decide`); the full 8-channel reality lives in `docs/SOCIAL-AUTOMATION.md` (internal).
 - **Hard rules**: human gate before any brand-account publish; label AI media; correct Arabic;
   UTM on every link → PostHog; 3-month zero-signal kill criteria per channel.
 
