@@ -1,6 +1,6 @@
 ---
 title: Social Automation
-description: How databayt drafts, approves, and broadcasts social posts across eight platforms — the Claude-native + OpenClaw pipeline, one brand at a time.
+description: How databayt drafts, approves, and broadcasts social posts across eight platforms — the Claude-native + Hermes pipeline, one brand at a time.
 ---
 
 # Social Automation
@@ -52,8 +52,8 @@ live on its page:
 ```
  idea ──► draft ──► media ──► approve ──► schedule ──► publish ──► measure
   │        │         │          │           │            │           │
-content   Claude    /higgs    human       queue       OpenClaw    PostHog
-calendar  native   text-free   gate    (phase 2)      /webhook    + UTM
+content   Claude    /higgs    human       queue        Hermes     PostHog
+calendar  native   text-free   gate    (phase 2)      gateway     + UTM
 ```
 
 | Stage | Owner | Notes |
@@ -63,25 +63,25 @@ calendar  native   text-free   gate    (phase 2)      /webhook    + UTM
 | **Media** | `/higgs` | Text-free visuals, brand kit `b0a3f528…`; copy is overlaid in-post, never rendered |
 | **Approve** | human (Abdout / Ali / Samia) | The gate — see [Autonomy ladder](#autonomy-ladder) |
 | **Schedule** | queue (phase 2) | Manual today; `SocialPost`/`ScheduledPost` + cron later |
-| **Publish** | **OpenClaw** `POST /webhook {event:"social_post"}` | Egress only — a dumb relay, never the LLM |
+| **Publish** | **Hermes** gateway ([hermes-agent](/docs/hermes)) | Egress only — a dumb relay, never the LLM |
 | **Measure** | PostHog + per-platform analytics | UTM-tagged links → attribution |
 
 ## Layer boundaries
 
-The one rule that keeps the architecture honest: **OpenClaw is a broadcast relay, not a brain.**
+The one rule that keeps the architecture honest: **Hermes is a broadcast relay, not a brain.**
 Anthropic offers no native "post to X" primitive, so a self-hosted last-mile gateway is a
 legitimate egress — but the writing stays Claude-native. This is what reconciles a self-hosted
-daemon with the "anthropic-native over self-hosted" doctrine.
+gateway with the "anthropic-native over self-hosted" doctrine.
 
 | Concern | Layer | Why here |
 |---------|-------|----------|
-| Write the copy | Claude (in Claude Code / Cowork) | Best model, brand-aware, bilingual — never OpenClaw's LLM |
+| Write the copy | Claude (in Claude Code / Cowork) | Best model, brand-aware, bilingual — never Hermes' LLM |
 | Make the image/video | `/higgs` → Higgsfield CLI | Already governed by budget + brand kit |
 | Decide it's good | Human (→ automated gate at L4) | Brand accounts are public and irreversible |
-| Reach the platform | OpenClaw `/webhook` | The one thing Claude can't do natively |
+| Reach the platform | Hermes gateway ([wiring](/docs/hermes)) | The one thing Claude can't do natively — Slack today via `SLACK_HOME_CHANNEL`; other channels as adapters land |
 | Prove it worked | PostHog + UTM | Attribution back to site traffic / conversions |
 
-> **Planned rename.** The current WIP action `generateAndPublishPost` drafts via OpenClaw's own
+> **Planned rename.** The current WIP action `generateAndPublishPost` drafts via the gateway's own
 > LLM and does *not* publish — a name that lies twice. Phase 2 renames it `draftPost` and
 > re-points drafting to Claude-native. Tracked in the internal roadmap.
 
@@ -142,11 +142,12 @@ the plugin, `health.sh` green — one commit). Until then, the workflow runs by 
 
 A "Social Hub" exists at [`/engine/social`](/engine/social):
 
-- **Works** — bilingual (en/ar, RTL) dashboard, channel toggles, an OpenClaw connection
+- **Works** — bilingual (en/ar, RTL) dashboard, channel toggles, a Hermes connection
   health check, and a draft flow (prompt → draft → load into composer).
-- **Stubbed** — the *actual posting* lives outside this repo in the OpenClaw daemon (not yet
-  built/documented here). No persistence, no scheduling, no analytics. Only 4 of the 8 channels
-  are wired in the UI. The auth is presence-only and the actions lack Zod validation.
+- **Stubbed** — the *actual posting* lives outside this repo in the Hermes gateway (Slack is
+  wired via `SLACK_HOME_CHANNEL`; the other channels await adapters — see [Hermes](/docs/hermes)).
+  No persistence, no scheduling, no analytics. Only 4 of the 8 channels are wired in the UI.
+  The auth is presence-only and the actions lack Zod validation.
 
 Bringing that code to convention and building the daemon + credential wiring is the deferred work
 in `docs/SOCIAL-AUTOMATION.md`.

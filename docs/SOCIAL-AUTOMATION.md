@@ -57,19 +57,21 @@ Snapchat, Telegram — and eats the TikTok/Snapchat gating for us. It does **not
 for multi-brand. **Postiz** is open-source/self-hostable and covers the mainstream set — a fit if
 we want to run the aggregation layer ourselves (aligns with self-hosting + no-SaaS-spend).
 
-**Open Phase-2 `/decide`:** build per-channel adapters inside OpenClaw, or wrap an aggregator
+**Open Phase-2 `/decide`:** build per-channel adapters on the Hermes gateway (its adapter set
+already covers Slack/Telegram/Discord/WhatsApp/Signal — see `/docs/hermes`), or wrap an aggregator
 (Ayrshare paid vs. Postiz self-hosted). Adapters = more work, no per-brand SaaS fee, full control.
 Aggregator = fast breadth, someone else maintains the gating, recurring cost.
 
 ## Credential inventory & wiring plan
 
-**Nothing is wired today.** `.env.example` has only `OPENCLAW_API_URL` / `OPENCLAW_API_KEY`.
+**Slack is the first wired channel** (Hermes gateway: `SLACK_BOT_TOKEN`/`SLACK_APP_TOKEN` in
+`~/.hermes/.env`, proactive posts via `SLACK_HOME_CHANNEL`). `.env.example` documents
+`HERMES_API_URL` / `HERMES_API_KEY` / `NEXT_PUBLIC_HERMES_API_URL` for the site's Social Hub.
 
 - Track accounts per **brand × channel** (5 × 8 = up to 40). Some pages are already opened; audit
   which exist, which are dormant (`@databayt` on X), and which are still to claim.
 - All platform tokens live **server-side only** — never `NEXT_PUBLIC`. The one browser-exposed
-  value is `NEXT_PUBLIC_OPENCLAW_API_URL` (the health-check URL), which must be documented in
-  `.env.example` (currently the client reads it but it's undocumented).
+  value is `NEXT_PUBLIC_HERMES_API_URL` (the health-check URL).
 - Keys go in the central `.env` / Keychain per the credentials skill, not scattered files.
 
 ## Doctrine conflicts (each needs a call)
@@ -77,9 +79,9 @@ Aggregator = fast breadth, someone else maintains the gating, recurring cost.
 1. **Paid social APIs vs. subscription-only / no-new-API-spend.** X is now metered per post;
    aggregators are monthly SaaS. Both are billing changes → **`/decide` + Abdout**, per the
    engine's billing doctrine. Telegram (free) sidesteps this — which is why it's first.
-2. **Self-hosted OpenClaw vs. anthropic-native.** Mitigated by scoping OpenClaw to **egress
+2. **Self-hosted Hermes vs. anthropic-native.** Mitigated by scoping Hermes to **egress
    only** — Anthropic has no "post to X" primitive, so a relay is legitimate. The brain (drafting)
-   stays Claude-native. Document the boundary so OpenClaw never creeps into being the LLM.
+   stays Claude-native. Document the boundary so Hermes never creeps into being the LLM.
 3. **Full-auto publishing to real brand accounts is a Type-1 (public, hard-to-reverse) decision.**
    L4 autonomy needs an automated guardrail layer _before_ it ships: an LLM-judge content +
    Arabic-correctness gate (the brand's no-broken-Arabic rule), per-channel rate limits, and a
@@ -103,7 +105,7 @@ parent `piece` with per-platform child `variants`, not 8 disconnected posts. ~3 
 ### Engine config (`/social` capability)
 
 - `.claude/skills/social/SKILL.md` — the workflow skill (resolve → draft → media → stage → publish).
-- Extend `.claude/agents/growth.md` — add a Social Automation section + `openclaw`/`posthog` tool
+- Extend `.claude/agents/growth.md` — add a Social Automation section + `hermes`/`posthog` tool
   rows + a decision-matrix row (auto-publish → human gate + `/decide`). (Don't add a new agent —
   growth already owns "social media.")
 - `.claude/vocabulary.json` — a `social` spell in the Pensieve school:
@@ -116,11 +118,11 @@ parent `piece` with per-platform child `variants`, not 8 disconnected posts. ~3 
 
 - `src/actions/post-social.ts` — Zod schemas + `unknown` inputs, typed errors (drop `any`), a
   role check (`authjs/action-authz-check`), rename `generateAndPublishPost → draftPost`.
-- `src/lib/openclaw.ts` — `err: unknown` narrowed; `metadata: Record<string, unknown>`.
+- `src/lib/hermes.ts` — `err: unknown` narrowed; `metadata: Record<string, unknown>`.
 - `src/components/root/social/config.ts` (new) — a `CHANNELS` allowlist shared by the dashboard
   toggles and the Zod channel enum; replace the hardcoded 4-channel list, extend toward the 8.
 - `src/app/[lang]/(root)/engine/social/page.tsx` — a page-level `auth()` guard.
-- `.env.example` — document `NEXT_PUBLIC_OPENCLAW_API_URL` (health-check URL; key stays server-side).
+- `.env.example` — document `NEXT_PUBLIC_HERMES_API_URL` (health-check URL; key stays server-side). ✅ done
 
 ### Persistence, scheduling, metrics
 

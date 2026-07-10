@@ -1,0 +1,108 @@
+---
+title: "Hermes"
+description: "The optional gateway lane — NousResearch's hermes-agent bridges Slack (and other chat apps) to the machine. Install, gateway setup, and the full Slack wiring."
+---
+
+**Hermes** ([hermes-agent](https://github.com/nousresearch/hermes-agent) · [site](https://hermes-agent.nousresearch.com) · MIT) is the engine's optional **assistant gateway** — the `h` lane. It is NOT a coding CLI: it bridges chat apps (Slack, WhatsApp, Telegram, Discord, Signal, Email, …) to an agent running on your machine, so you can reach the engine from wherever the conversation already is. **Slack is databayt's wired channel.**
+
+Hermes replaced OpenClaw as the gateway lane. If a machine previously ran OpenClaw, Hermes imports its persona, memories, skills, and platform configs in one command:
+
+```bash
+hermes claw migrate --dry-run   # preview
+hermes claw migrate             # import from OpenClaw
+```
+
+## Install
+
+The onboarding wizard installs Hermes when the **Hermes (gateway)** lane is selected (default: all lanes). Manually:
+
+```bash
+# macOS / Linux / WSL2
+curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash
+```
+
+```powershell
+# Windows (PowerShell)
+iex (irm https://hermes-agent.nousresearch.com/install.ps1)
+```
+
+Installs to `~/.hermes` (Windows: `%LOCALAPPDATA%\hermes`), CLI binary `hermes`, launcher alias `h` (written into the managed `# BEGIN databayt agents` block). First-time model/provider setup: `hermes setup`.
+
+## Gateway — wire the channels
+
+The gateway is a single background process that runs all configured platform adapters at once. Setup is **interactive by design** — onboarding never runs it headless:
+
+```bash
+hermes gateway setup     # interactive wizard — select Slack when prompted
+hermes gateway start     # run in foreground
+hermes gateway install   # install as a user service (persists across reboots)
+hermes gateway status    # is it up?
+```
+
+Diagnostics: `hermes doctor`.
+
+## Slack wiring (databayt's channel)
+
+Hermes connects to Slack over **Socket Mode** (WebSocket) — your machine needs no public endpoint.
+
+**1. Create the Slack app from the Hermes manifest:**
+
+```bash
+hermes slack manifest --write    # writes ~/.hermes/slack-manifest.json
+```
+
+Then at [api.slack.com/apps](https://api.slack.com/apps) → **Create New App** → **From an app manifest** → pick the `databayt-sh` workspace → paste the manifest JSON → create. The manifest carries the required scopes (`chat:write`, `app_mentions:read`, `channels:history`, `groups:history`, `im:*`, `files:*`, …) — without `channels:history` the bot cannot see channel messages.
+
+**2. Collect both tokens** and put them in `~/.hermes/.env`:
+
+```bash
+SLACK_BOT_TOKEN=xoxb-...     # OAuth & Permissions → Bot User OAuth Token
+SLACK_APP_TOKEN=xapp-...     # Basic Information → App-Level Tokens (connections:write)
+```
+
+**3. Allowlist yourself** (required — Hermes ignores everyone else):
+
+```bash
+SLACK_ALLOWED_USERS=U01ABC2DEF3        # your Slack Member ID (profile → ⋮ → Copy member ID)
+```
+
+**4. Optional — proactive notifications.** A home channel lets Hermes *send* (not just reply): scheduled results, background-task completions, broadcasts:
+
+```bash
+SLACK_HOME_CHANNEL=C01234567890        # channel details → bottom → Channel ID
+```
+
+Invite the bot to any channel it should live in: `/invite @Hermes Agent`. Then:
+
+```bash
+hermes gateway setup     # select Slack
+hermes gateway install   # persist as a user service
+```
+
+> **Hermes-Slack vs Slack-MCP — two different pipes.** The **Slack MCP** (`~/.claude/mcp.json` → `mcp.slack.com`) lets *Claude* post to Slack as a tool (`/slack send …`). The **Hermes gateway** lets *you* talk to an agent on your machine *from* Slack, and lets that agent push proactive notifications back. They coexist; neither replaces the other.
+
+## Daily use
+
+| Action | How |
+|---|---|
+| Talk to Hermes in the terminal | `h` |
+| Gateway up? | `hermes gateway status` |
+| Adapter states (from CLI) | `/platforms` inside `h` |
+| Diagnose | `hermes doctor` |
+| Change model/provider | `hermes model` |
+| Refresh Slack slash commands | `hermes slack manifest --write`, then reinstall the app |
+
+## Kun site integration (social egress)
+
+The kun site's Social Hub talks to a Hermes endpoint via env vars (see `.env.example`): `HERMES_API_URL`, `HERMES_API_KEY`, and the client-visible `NEXT_PUBLIC_HERMES_API_URL`. The egress contract is evolving with hermes-agent — the honest boundary stays the same as it was under OpenClaw: **Claude writes the copy; Hermes only relays it**. See [Social](/docs/social).
+
+## Troubleshooting
+
+| Symptom | Fix |
+|---|---|
+| `h` / `hermes` not found | Restart the shell; the installer adds Hermes to PATH — or re-run the install one-liner |
+| Bot doesn't see channel messages | The app is missing `channels:history` / `groups:history` — re-create from the manifest and **reinstall the app to the workspace** |
+| DMs blocked | Enable the **Messages Tab** in the Slack app's App Home settings |
+| Messages silently ignored | Your Member ID isn't in `SLACK_ALLOWED_USERS`, or the channel isn't in `SLACK_ALLOWED_CHANNELS` |
+| Scope/event changes not taking effect | Reinstall the app to the workspace (Slack requires it) |
+| Gateway dies on reboot | You ran `hermes gateway start` (foreground) — use `hermes gateway install` for a persistent user service |
