@@ -63,11 +63,11 @@
             "Claude Desktop",
             "Antigravity CLI",
             "opencode",
-            "OpenClaw (gateway)"
+            "Hermes (gateway)"
           ],
           "default": "All agents",
           "persistAs": "agents",
-          "note": "Maps to --agents=all|code,desktop,agy,opencode,openclaw. Launchers: c/a/o/claw. opencode bypass is config-level (permission: allow); OpenClaw is an assistant gateway, not a coding CLI"
+          "note": "Maps to --agents=all|code,desktop,agy,opencode,hermes (legacy state token 'openclaw' is normalized to 'hermes'). Launchers: c/a/o/h. opencode bypass is config-level (permission: allow); Hermes is an assistant gateway (NousResearch), not a coding CLI"
         }
       ],
       "removedAsOf2026_05_25": [
@@ -102,7 +102,7 @@
         },
         {
           "n": 5,
-          "label": "Agents — c/a/o/claw fleet per --agents selection (Claude Code + Desktop, Antigravity, opencode, OpenClaw)"
+          "label": "Agents — c/a/o/h fleet per --agents selection (Claude Code + Desktop, Antigravity, opencode, Hermes)"
         },
         { "n": 6, "label": "Kun Engine — setup.sh + secrets.sh" },
         {
@@ -159,13 +159,13 @@
           "gate": "Claude Desktop installed"
         },
         {
-          "id": "openclawDaemon",
+          "id": "hermesGateway",
           "type": "dialog",
-          "prompt": "(Optional) OpenClaw daemon — interactive setup: openclaw onboard --install-daemon",
+          "prompt": "(Optional) Hermes gateway — interactive setup: hermes gateway setup && hermes gateway start",
           "buttons": ["Done — I ran it", "Skip"],
-          "gate": "openclaw installed AND openclaw selected in agents",
-          "persistAs": "openclawOnboarded",
-          "note": "Never run headless — OpenClaw's guided onboarding wires chat channels interactively"
+          "gate": "hermes installed AND hermes selected in agents",
+          "persistAs": "hermesOnboarded",
+          "note": "Never run headless — Hermes' guided onboarding wires chat channels (Slack) interactively; ex-OpenClaw machines migrate with `hermes claw migrate`"
         },
         {
           "id": "webstormPlugin",
@@ -197,13 +197,13 @@
       "hasGithub": "0|1",
       "hasDatabaytInvite": "0|1",
       "hasAnthropic": "0|1",
-      "agents": "all | csv of code,desktop,agy,opencode,openclaw",
+      "agents": "all | csv of code,desktop,agy,opencode,hermes (legacy 'openclaw' normalized on read)",
       "silentBatch": "done",
       "desktopSignedIn": "0|1",
       "computerUse": "0|1",
       "vsCodeExt": "0|1",
       "webstormPlugin": "0|1",
-      "openclawOnboarded": "0|1",
+      "hermesOnboarded": "0|1",
       "lastStep": "string",
       "timestamp": "ISO-8601"
     },

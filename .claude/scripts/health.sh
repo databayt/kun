@@ -126,15 +126,15 @@ if [ -f "$AGENTS_LIB" ]; then
     else
         check warn "agent: opencode" "not installed (tertiary lane)"
     fi
-    command -v openclaw &>/dev/null && check pass "agent: openclaw" "$(openclaw --version 2>/dev/null | head -1) (gateway)" || check warn "agent: openclaw" "not installed (optional gateway)"
-    if _ag_alias_present c claude && _ag_alias_present a agy && _ag_alias_present o opencode && _ag_alias_present claw openclaw; then
-        check pass "agent aliases" "c a o claw"
+    command -v hermes &>/dev/null && check pass "agent: hermes" "$(hermes --version 2>/dev/null | head -1) (gateway)" || check warn "agent: hermes" "not installed (optional gateway)"
+    if _ag_alias_present c claude && _ag_alias_present a agy && _ag_alias_present o opencode && _ag_alias_present h hermes; then
+        check pass "agent aliases" "c a o h"
     else
         MISSING_ALIASES=""
         _ag_alias_present c claude || MISSING_ALIASES="$MISSING_ALIASES c"
         _ag_alias_present a agy || MISSING_ALIASES="$MISSING_ALIASES a"
         _ag_alias_present o opencode || MISSING_ALIASES="$MISSING_ALIASES o"
-        _ag_alias_present claw openclaw || MISSING_ALIASES="$MISSING_ALIASES claw"
+        _ag_alias_present h hermes || MISSING_ALIASES="$MISSING_ALIASES h"
         check warn "agent aliases" "missing:$MISSING_ALIASES — onboarding writes the block"
     fi
 fi

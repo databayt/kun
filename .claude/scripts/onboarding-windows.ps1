@@ -28,7 +28,7 @@ param(
     [switch]$EssentialsOnly,    # default: clone all org repos
     [switch]$HogwartsDev,        # optional: set up hogwarts local dev
     [string]$ReposDir = $env:USERPROFILE,
-    [string]$Agents = "all"      # all | csv of code,desktop,agy,opencode,openclaw
+    [string]$Agents = "all"      # all | csv of code,desktop,agy,opencode,hermes
 )
 
 function Agent-Selected([string]$name) {
@@ -436,26 +436,32 @@ function o { opencode $args }
     }
 }
 
-# OpenClaw — OPTIONAL assistant gateway (chat channels), not a coding CLI.
-# npm install only; the daemon onboarding is interactive — run it yourself:
-#   openclaw onboard --install-daemon
-if (Agent-Selected "openclaw") {
-    if (-not (Get-Command openclaw -EA SilentlyContinue)) {
-        npm install -g openclaw@latest --silent 2>$null | Out-Null
+# Hermes — OPTIONAL assistant gateway (chat channels), not a coding CLI.
+# CLI install only; the gateway onboarding is interactive — run it yourself:
+#   hermes gateway setup
+if (Agent-Selected "hermes") {
+    if (-not (Get-Command hermes -EA SilentlyContinue)) {
+        try { iex (irm https://hermes-agent.nousresearch.com/install.ps1) } catch { }
+        $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
     }
-    if (Get-Command openclaw -EA SilentlyContinue) {
-        Pass "OpenClaw ($((openclaw --version 2>$null | Select-Object -First 1))) — daemon setup stays manual (interactive)"
+    if (Get-Command hermes -EA SilentlyContinue) {
+        Pass "Hermes ($((hermes --version 2>$null | Select-Object -First 1))) — gateway setup stays manual (interactive)"
         $profileText = Get-Content $PROFILE -Raw -EA SilentlyContinue
-        if ($profileText -notmatch 'function claw ') {
+        # Migrate the legacy OpenClaw launcher, then write the Hermes one
+        if ($profileText -match 'function claw ') {
+            (Get-Content $PROFILE) | Where-Object { $_ -notmatch 'function claw |# OpenClaw gateway' } | Set-Content $PROFILE
+            $profileText = Get-Content $PROFILE -Raw -EA SilentlyContinue
+        }
+        if ($profileText -notmatch 'function h ') {
             Add-Content $PROFILE @'
 
-# OpenClaw gateway (optional)
-function claw { openclaw $args }
+# Hermes gateway (optional)
+function h { hermes $args }
 '@
         }
     }
 }
-Pass "Shell helpers (c, a, o, claw per selection)"
+Pass "Shell helpers (c, a, o, h per selection)"
 
 # Wire Claude Desktop MCP config to the same servers Claude Code uses
 $desktopCfgDir = "$env:APPDATA\Claude"

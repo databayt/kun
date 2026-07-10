@@ -24,7 +24,7 @@
 - **`c` — Claude Code (primary).** Default for everything: features, architecture, multi-step work, anything risky. (`c` = `claude --dangerously-skip-permissions`.)
 - **`a` — Antigravity (secondary).** Google's `agy` CLI (`a` = `agy --dangerously-skip-permissions`) — fallback when Claude Code is unavailable + cheap lane (Gemini Flash) for easy one-file tasks. Shares this config via `~/.gemini/` bridge. See `content/docs/antigravity.mdx`.
 - **`o` — opencode (tertiary).** Open-source terminal agent; bypass is **config-level** (`~/.config/opencode/opencode.json` → `"permission": "allow"` — the `o`-lane equivalent of `--dangerously-skip-permissions`; no flag exists).
-- **`claw` — OpenClaw (optional gateway).** Assistant gateway (WhatsApp/Telegram/Slack channels), NOT a coding CLI — reach the engine from chat apps; daemon onboarding is interactive (`openclaw onboard`).
+- **`h` — Hermes (optional gateway).** NousResearch's [hermes-agent](https://github.com/nousresearch/hermes-agent) — assistant gateway (Slack/WhatsApp/Telegram channels), NOT a coding CLI; reach the engine from chat apps, Slack is our wired channel. Gateway onboarding is interactive (`hermes gateway setup` → `hermes gateway start`); ex-OpenClaw machines migrate with `hermes claw migrate`. See `content/docs/hermes.mdx`.
 
 ## Pipeline — idea → production
 

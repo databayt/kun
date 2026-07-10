@@ -6,16 +6,17 @@
 # (Phase 0 scan + Phase 5 installs), and health.sh (agent matrix).
 #
 # The fleet (one login-alias per lane):
-#   c    — Claude Code (primary)      bypass: --dangerously-skip-permissions
-#   a    — Antigravity `agy` (second) bypass: --dangerously-skip-permissions
-#   o    — opencode (tertiary)        bypass: config-level "permission": "allow"
-#   claw — OpenClaw (optional)        assistant GATEWAY, not a coding CLI
+#   c — Claude Code (primary)       bypass: --dangerously-skip-permissions
+#   a — Antigravity `agy` (second)  bypass: --dangerously-skip-permissions
+#   o — opencode (tertiary)         bypass: config-level "permission": "allow"
+#   h — Hermes (optional)           assistant GATEWAY (NousResearch), not a coding CLI
 #
 # Source it:  . "$(dirname "$0")/lib/agents.sh"
 # Functions:  agents_detect_all | agents_detect_json | agents_delta <sel>
 #             agents_write_alias_block <sel> | agents_configure_opencode
 #             agents_selected_contains <sel> <name>
-# <sel> is "all" or a csv of: code,desktop,agy,opencode,openclaw
+# <sel> is "all" or a csv of: code,desktop,agy,opencode,hermes
+# (legacy token "openclaw" in persisted wizard state is normalized to "hermes")
 # =============================================================================
 
 # Colors (guard: don't clobber a sourcing script's palette)
@@ -43,6 +44,7 @@ _ag_opencode_bypass() { # opencode's yolo is config-level, not a flag
 
 agents_selected_contains() { # agents_selected_contains "<sel>" <name>
     local sel="${1:-all}" name="$2"
+    sel="${sel//openclaw/hermes}"  # legacy token from pre-Hermes wizard state
     [ "$sel" = "all" ] && return 0
     case ",$sel," in *",$name,"*) return 0 ;; *) return 1 ;; esac
 }
@@ -93,17 +95,17 @@ agents_detect_all() {
         _ag_row "opencode" miss
     fi
     _ag_alias_present o opencode && _ag_row "  alias o" ok "launcher" || _ag_row "  alias o" miss "no launcher"
-    # OpenClaw
-    if _ag_has openclaw; then _ag_row "openclaw" ok "$(_ag_ver openclaw) (gateway)"; else _ag_row "openclaw" warn "not installed (optional gateway)"; fi
-    _ag_alias_present claw openclaw && _ag_row "  alias claw" ok "launcher" || _ag_row "  alias claw" miss "no launcher"
+    # Hermes (gateway)
+    if _ag_has hermes; then _ag_row "hermes" ok "$(_ag_ver hermes) (gateway)"; else _ag_row "hermes" warn "not installed (optional gateway)"; fi
+    _ag_alias_present h hermes && _ag_row "  alias h" ok "launcher" || _ag_row "  alias h" miss "no launcher"
     # Engine
     if [ -f "$HOME/.claude/CLAUDE.md" ]; then _ag_row "~/.claude" ok "engine installed"; else _ag_row "~/.claude" miss "engine not installed"; fi
     echo ""
 }
 
 agents_detect_json() { # machine-readable for wrappers (installer.sh)
-    local claude_v agy_v oc_v claw_v
-    claude_v=$(_ag_ver claude); agy_v=$(_ag_ver agy); oc_v=$(_ag_ver opencode); claw_v=$(_ag_ver openclaw)
+    local claude_v agy_v oc_v hermes_v
+    claude_v=$(_ag_ver claude); agy_v=$(_ag_ver agy); oc_v=$(_ag_ver opencode); hermes_v=$(_ag_ver hermes)
     printf '{'
     printf '"claude":{"installed":%s,"version":"%s","alias":%s},' \
         "$(_ag_has claude && echo true || echo false)" "$claude_v" "$(_ag_alias_present c claude && echo true || echo false)"
@@ -114,8 +116,8 @@ agents_detect_json() { # machine-readable for wrappers (installer.sh)
         "$(_ag_has agy && echo true || echo false)" "$agy_v" "$(_ag_alias_present a agy && echo true || echo false)"
     printf '"opencode":{"installed":%s,"version":"%s","alias":%s,"bypass":%s},' \
         "$(_ag_has opencode && echo true || echo false)" "$oc_v" "$(_ag_alias_present o opencode && echo true || echo false)" "$(_ag_opencode_bypass && echo true || echo false)"
-    printf '"openclaw":{"installed":%s,"version":"%s","alias":%s},' \
-        "$(_ag_has openclaw && echo true || echo false)" "$claw_v" "$(_ag_alias_present claw openclaw && echo true || echo false)"
+    printf '"hermes":{"installed":%s,"version":"%s","alias":%s},' \
+        "$(_ag_has hermes && echo true || echo false)" "$hermes_v" "$(_ag_alias_present h hermes && echo true || echo false)"
     printf '"gh_auth":%s,' "$(gh auth status >/dev/null 2>&1 && echo true || echo false)"
     printf '"databayt_member":%s,' "$([ "$(gh api user/memberships/orgs/databayt --jq .state 2>/dev/null)" = "active" ] && echo true || echo false)"
     printf '"kun_repo":%s,' "$([ -d "$HOME/kun" ] && echo true || echo false)"
@@ -129,9 +131,9 @@ agents_delta() { # agents_delta <sel> — list what a run WOULD install (dry-run
     agents_selected_contains "$sel" desktop  && [ ! -d /Applications/Claude.app ] && echo "claude-desktop"
     agents_selected_contains "$sel" agy      && ! _ag_has agy      && echo "antigravity"
     agents_selected_contains "$sel" opencode && ! _ag_has opencode && echo "opencode"
-    agents_selected_contains "$sel" openclaw && ! _ag_has openclaw && echo "openclaw"
+    agents_selected_contains "$sel" hermes   && ! _ag_has hermes   && echo "hermes"
     agents_selected_contains "$sel" opencode && ! _ag_opencode_bypass && echo "opencode-bypass-config"
-    _ag_alias_present c claude && _ag_alias_present a agy && _ag_alias_present o opencode && _ag_alias_present claw openclaw || echo "alias-block"
+    _ag_alias_present c claude && _ag_alias_present a agy && _ag_alias_present o opencode && _ag_alias_present h hermes || echo "alias-block"
 }
 
 # ── Aliases ──────────────────────────────────────────────────────
@@ -169,8 +171,8 @@ agents_write_alias_block() {
             if agents_selected_contains "$sel" opencode; then
                 echo "alias o='opencode'                                # opencode (bypass lives in ~/.config/opencode/opencode.json)"
             fi
-            if agents_selected_contains "$sel" openclaw; then
-                echo "alias claw='openclaw'                             # OpenClaw gateway (optional)"
+            if agents_selected_contains "$sel" hermes; then
+                echo "alias h='hermes'                                  # Hermes gateway (optional)"
             fi
             echo "# END databayt agents"
         } >> "$tmp"

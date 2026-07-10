@@ -8,7 +8,7 @@
 #   bash onboarding-mac.sh <role> [gist_id] [flags]
 #
 # Flags:
-#   --agents=all|code,desktop,agy,opencode,openclaw   which agents to install (default all)
+#   --agents=all|code,desktop,agy,opencode,hermes   which agents to install (default all)
 #   --detect-only                                     print the scan table and exit
 #   --dry-run                                         print what would install and exit
 #   --quiet --repos-dir <p> --essentials-only --hogwarts-dev --name --email
@@ -16,7 +16,7 @@
 # Examples:
 #   bash onboarding-mac.sh engineer abc123              # Full dev + secrets
 #   bash onboarding-mac.sh --detect-only                # Scan, change nothing
-#   bash onboarding-mac.sh --dry-run --agents=opencode,openclaw
+#   bash onboarding-mac.sh --dry-run --agents=opencode,hermes
 #   bash onboarding-mac.sh engineer --agents=code,desktop
 #
 # Roles:
@@ -434,9 +434,9 @@ else
 fi
 
 # =============================================================================
-# PHASE 5: Agents — Claude Code + Desktop, Antigravity, opencode, OpenClaw
+# PHASE 5: Agents — Claude Code + Desktop, Antigravity, opencode, Hermes
 # =============================================================================
-step "5" "Agents — the c/a/o/claw fleet (selected: $AGENTS_SEL)"
+step "5" "Agents — the c/a/o/h fleet (selected: $AGENTS_SEL)"
 
 # Claude Code CLI — native installer (auto-updates in background, per
 # code.claude.com/docs/en/setup). curl install.sh is idempotent: re-runs detect
@@ -492,15 +492,19 @@ if agents_selected_contains "$AGENTS_SEL" opencode; then
     fi
 fi
 
-# OpenClaw — OPTIONAL assistant gateway (WhatsApp/Telegram/Slack channels), not
-# a coding CLI. npm install only; the daemon onboarding is interactive by design
-# and never runs in quiet mode — finish later with: openclaw onboard --install-daemon
-if agents_selected_contains "$AGENTS_SEL" openclaw; then
-    if ! command -v openclaw >/dev/null 2>&1; then
-        npm_global_smart openclaw
-        info "OpenClaw daemon not started — interactive by design. Later: openclaw onboard --install-daemon"
+# Hermes — OPTIONAL assistant gateway (Slack/WhatsApp/Telegram channels), not
+# a coding CLI. CLI install only; the gateway onboarding is interactive by
+# design and never runs in quiet mode — finish later with:
+#   hermes gateway setup && hermes gateway start
+if agents_selected_contains "$AGENTS_SEL" hermes; then
+    if ! command -v hermes >/dev/null 2>&1; then
+        curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash || \
+            info "Hermes install failed — optional gateway, continuing"
+        export PATH="$HOME/.local/bin:$PATH"
+        command -v hermes >/dev/null 2>&1 && \
+            info "Hermes gateway not wired — interactive by design. Later: hermes gateway setup && hermes gateway start"
     else
-        pass "OpenClaw ($(openclaw --version 2>/dev/null | head -1))"
+        pass "Hermes ($(hermes --version 2>/dev/null | head -1))"
     fi
 fi
 
@@ -509,7 +513,7 @@ if agents_selected_contains "$AGENTS_SEL" desktop; then
     brew_smart claude --cask
 fi
 
-# Launchers — one managed block in the shell rc (c / a / o / claw per selection).
+# Launchers — one managed block in the shell rc (c / a / o / h per selection).
 # Migrates the legacy function/alias lines; idempotent across re-runs.
 for RC in "$HOME/.zshrc" "$HOME/.bashrc"; do
     [[ ! -f "$RC" ]] && continue
@@ -638,7 +642,7 @@ command -v gh &>/dev/null         && pass "gh"         || fail "gh"
 command -v claude &>/dev/null     && pass "claude"     || fail "claude"
 command -v agy &>/dev/null         && pass "agy (secondary)" || info "agy (secondary)"
 command -v opencode &>/dev/null    && pass "opencode (tertiary)" || info "opencode (tertiary)"
-command -v openclaw &>/dev/null    && pass "openclaw (gateway)"  || info "openclaw (gateway, optional)"
+command -v hermes &>/dev/null      && pass "hermes (gateway)"    || info "hermes (gateway, optional)"
 
 # Auth
 [[ -f "$HOME/.ssh/id_ed25519" ]]  && pass "SSH key"    || fail "SSH key"
@@ -677,10 +681,10 @@ echo ""
 echo -e "${BD}Next steps:${NC}"
 echo "  1. Restart terminal (or: . ~/.zshrc)"
 echo "  2. Run 'claude' → log in with Anthropic account"
-echo "     Launchers: 'c' = Claude Code · 'a' = Antigravity · 'o' = opencode · 'claw' = OpenClaw gateway"
+echo "     Launchers: 'c' = Claude Code · 'a' = Antigravity · 'o' = opencode · 'h' = Hermes gateway"
 echo "  3. Open Claude Desktop → sign in"
-if command -v openclaw &>/dev/null && [[ ! -f "$HOME/.openclaw/openclaw.json" ]]; then
-    echo "  •  OpenClaw daemon (optional): openclaw onboard --install-daemon"
+if command -v hermes &>/dev/null; then
+    echo "  •  Hermes gateway (optional): hermes gateway setup && hermes gateway start — Slack wiring: kun.databayt.org/docs/hermes"
 fi
 if [[ -z "$GIST_ID" ]]; then
     echo "  4. Load secrets when you have the gist ID:"

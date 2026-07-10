@@ -190,14 +190,14 @@ fi
 ask_agents() {
     osascript 2>/dev/null <<'EOF'
 try
-    set opts to {"All agents", "Claude Code", "Claude Desktop", "Antigravity CLI", "opencode", "OpenClaw (gateway)"}
+    set opts to {"All agents", "Claude Code", "Claude Desktop", "Antigravity CLI", "opencode", "Hermes (gateway)"}
     set r to choose from list opts with title "Databayt Setup" with prompt "Which agents should this machine get?
 
 - Claude Code: primary (c)
 - Claude Desktop: Chat/Cowork/Code tabs
 - Antigravity: secondary CLI (a)
 - opencode: tertiary CLI (o)
-- OpenClaw: optional chat-app gateway (claw)" default items {"All agents"} with multiple selections allowed
+- Hermes: optional chat-app gateway (h)" default items {"All agents"} with multiple selections allowed
     if r is false then return "All agents"
     set AppleScript's text item delimiters to ","
     return r as text
@@ -217,12 +217,14 @@ if [[ -z "$AGENTS_SEL" ]]; then
         [[ "$PICKED" == *"Claude Desktop"* ]]   && AGENTS_SEL="$AGENTS_SEL,desktop"
         [[ "$PICKED" == *"Antigravity CLI"* ]]  && AGENTS_SEL="$AGENTS_SEL,agy"
         [[ "$PICKED" == *"opencode"* ]]         && AGENTS_SEL="$AGENTS_SEL,opencode"
-        [[ "$PICKED" == *"OpenClaw"* ]]         && AGENTS_SEL="$AGENTS_SEL,openclaw"
+        [[ "$PICKED" == *"Hermes"* ]]           && AGENTS_SEL="$AGENTS_SEL,hermes"
         AGENTS_SEL="${AGENTS_SEL#,}"
         [[ -z "$AGENTS_SEL" ]] && AGENTS_SEL="all"
     fi
     state_set agents "$AGENTS_SEL"
 fi
+# Legacy token from pre-Hermes wizard state (resume path)
+AGENTS_SEL="${AGENTS_SEL//openclaw/hermes}"
 
 # =============================================================================
 # ACT 2 — Silent batch (in terminal; notifications on phase transitions)
@@ -312,11 +314,11 @@ if [[ -d "/Applications/WebStorm.app" ]] && [[ "$(state_get webstormPlugin)" != 
     [[ "$ANS" == "Done" ]] && state_set webstormPlugin "1"
 fi
 
-# 3e. OpenClaw daemon onboarding (only if selected + installed; interactive by design)
-if command -v openclaw >/dev/null 2>&1 && [[ "$(state_get openclawOnboarded)" != "1" ]] && \
-   { [[ "$AGENTS_SEL" == "all" ]] || [[ ",$AGENTS_SEL," == *",openclaw,"* ]]; }; then
-    ANS=$(ask_choice "(Optional) OpenClaw is installed — it's an assistant GATEWAY (WhatsApp/Telegram/Slack), not a coding CLI.\n\nIts guided setup is interactive: run\n\n    openclaw onboard --install-daemon\n\nin a terminal when you want to wire channels. Skip if unsure." "Done — I ran it" "Skip")
-    [[ "$ANS" == "Done — I ran it" ]] && state_set openclawOnboarded "1"
+# 3e. Hermes gateway onboarding (only if selected + installed; interactive by design)
+if command -v hermes >/dev/null 2>&1 && [[ "$(state_get hermesOnboarded)" != "1" ]] && \
+   { [[ "$AGENTS_SEL" == "all" ]] || [[ ",$AGENTS_SEL," == *",hermes,"* ]]; }; then
+    ANS=$(ask_choice "(Optional) Hermes is installed — it's an assistant GATEWAY (Slack/WhatsApp/Telegram), not a coding CLI.\n\nIts guided setup is interactive: run\n\n    hermes gateway setup\n    hermes gateway start\n\nin a terminal when you want to wire channels (Slack is our channel — see kun.databayt.org/docs/hermes). Skip if unsure." "Done — I ran it" "Skip")
+    [[ "$ANS" == "Done — I ran it" ]] && state_set hermesOnboarded "1"
 fi
 
 # 3f. Final health check
@@ -330,7 +332,7 @@ fi
 FINAL_MSG="Setup complete!\n\n"
 FINAL_MSG+="Config health: $HEALTH_STATUS\n\n"
 FINAL_MSG+="Tools: git, node, pnpm, gh, vercel\n"
-FINAL_MSG+="Agents: 'c' = Claude Code · 'a' = Antigravity · 'o' = opencode · 'claw' = OpenClaw\n"
+FINAL_MSG+="Agents: 'c' = Claude Code · 'a' = Antigravity · 'o' = opencode · 'h' = Hermes\n"
 FINAL_MSG+="Repos: ~/kun, ~/hogwarts, ~/codebase, +org repos\n"
 FINAL_MSG+="Config: ~/.claude/ (agents, skills, MCP, hooks)\n\n"
 FINAL_MSG+="Next:\n"

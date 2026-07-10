@@ -617,21 +617,22 @@ if agents_selected_contains "$AGENTS_SEL" opencode; then
     fi
 fi
 
-# OpenClaw — OPTIONAL assistant gateway (chat channels), not a coding CLI.
-# npm install only; daemon onboarding is interactive and never runs headless.
-if agents_selected_contains "$AGENTS_SEL" openclaw; then
-    if ! command -v openclaw >/dev/null 2>&1; then
-        npm install -g openclaw@latest --silent >/dev/null 2>&1 && \
-            pass "OpenClaw installed ($(openclaw --version 2>/dev/null | head -1))" || \
-            info "OpenClaw install failed — optional gateway, continuing"
-        command -v openclaw >/dev/null 2>&1 && \
-            info "OpenClaw daemon not started — interactive by design. Later: openclaw onboard --install-daemon"
+# Hermes — OPTIONAL assistant gateway (chat channels), not a coding CLI.
+# CLI install only; gateway onboarding is interactive and never runs headless.
+if agents_selected_contains "$AGENTS_SEL" hermes; then
+    if ! command -v hermes >/dev/null 2>&1; then
+        curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash >/dev/null 2>&1 && \
+            pass "Hermes installed ($(hermes --version 2>/dev/null | head -1))" || \
+            info "Hermes install failed — optional gateway, continuing"
+        export PATH="$HOME/.local/bin:$PATH"
+        command -v hermes >/dev/null 2>&1 && \
+            info "Hermes gateway not wired — interactive by design. Later: hermes gateway setup && hermes gateway start"
     else
-        pass "OpenClaw ($(openclaw --version 2>/dev/null | head -1))"
+        pass "Hermes ($(hermes --version 2>/dev/null | head -1))"
     fi
 fi
 
-# Launchers — one managed block in the shell rc (c / a / o / claw per selection).
+# Launchers — one managed block in the shell rc (c / a / o / h per selection).
 # Migrates the legacy function lines; idempotent across re-runs.
 for RC in "$HOME/.bashrc" "$HOME/.zshrc"; do
     [[ ! -f "$RC" ]] && continue
@@ -735,7 +736,7 @@ command -v gh >/dev/null 2>&1      && pass "gh"       || fail "gh"
 command -v claude >/dev/null 2>&1  && pass "claude"   || fail "claude"
 command -v agy >/dev/null 2>&1      && pass "agy (secondary)" || info "agy (secondary)"
 command -v opencode >/dev/null 2>&1 && pass "opencode (tertiary)" || info "opencode (tertiary)"
-command -v openclaw >/dev/null 2>&1 && pass "openclaw (gateway)" || info "openclaw (gateway, optional)"
+command -v hermes >/dev/null 2>&1   && pass "hermes (gateway)"   || info "hermes (gateway, optional)"
 
 [[ -f "$HOME/.ssh/id_ed25519" ]]    && pass "SSH key"     || fail "SSH key"
 gh auth status >/dev/null 2>&1      && pass "GitHub auth" || fail "GitHub auth"
