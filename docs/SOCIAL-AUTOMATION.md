@@ -102,7 +102,7 @@ parent `piece` with per-platform child `variants`, not 8 disconnected posts. ~3 
 → ~15–20 platform posts. This is what the automation is _for_; strategy detail in
 `content/docs/social/strategy.mdx`.
 
-### Engine config (`/social` capability)
+### Engine config (`/social` capability) — ✅ done 2026-07-10
 
 - `.claude/skills/social/SKILL.md` — the workflow skill (resolve → draft → media → stage → publish).
 - Extend `.claude/agents/growth.md` — add a Social Automation section + `hermes`/`posthog` tool
@@ -114,15 +114,19 @@ parent `piece` with per-platform child `variants`, not 8 disconnected posts. ~3 
 - Run `node .claude/scripts/generate-vocab.mjs` + `bash .claude/scripts/build-plugin.sh`, then
   `bash .claude/scripts/health.sh` green — **one commit** (engine-parity rule).
 
-### WIP harden (the existing Social Hub)
+### WIP harden (the existing Social Hub) — ✅ done 2026-07-10
 
-- `src/actions/post-social.ts` — Zod schemas + `unknown` inputs, typed errors (drop `any`), a
-  role check (`authjs/action-authz-check`), rename `generateAndPublishPost → draftPost`.
-- `src/lib/hermes.ts` — `err: unknown` narrowed; `metadata: Record<string, unknown>`.
-- `src/components/root/social/config.ts` (new) — a `CHANNELS` allowlist shared by the dashboard
-  toggles and the Zod channel enum; replace the hardcoded 4-channel list, extend toward the 8.
-- `src/app/[lang]/(root)/engine/social/page.tsx` — a page-level `auth()` guard.
-- `.env.example` — document `NEXT_PUBLIC_HERMES_API_URL` (health-check URL; key stays server-side). ✅ done
+- `src/actions/post-social.ts` — Zod schema + `unknown` input, contributor re-check at action
+  time (JWT sessions outlive allowlist removal); the gateway-LLM draft action was **removed**
+  (stricter than the planned `draftPost` rename — drafting is Claude-native via `/social`). ✅
+- `src/lib/hermes.ts` — `err: unknown` narrowed; `metadata: Record<string, unknown>`; env reads
+  trimmed (Vercel trailing-`\n` gotcha); dead chat endpoint deleted. ✅
+- `src/components/root/social/config.ts` — `CHANNELS` registry (9 channels with `wired` flags;
+  slack live, rest _soon_) shared by the dashboard toggles and the Zod enum. ✅
+- `src/app/[lang]/(root)/engine/social/page.tsx` — server-boundary `auth()` guard → `/login`. ✅
+- `scripts/post-to-hermes.mjs` — `--prompt` draft-and-blast lane removed; now a pure
+  pre-approved dispatcher, default channel `slack`. ✅
+- `.env.example` — documents `NEXT_PUBLIC_HERMES_API_URL` (health-check URL; key stays server-side). ✅
 
 ### Persistence, scheduling, metrics
 
@@ -171,7 +175,8 @@ Effort is a cost. Social must be accountable to the drive like everything else:
 
 1. **Phase 1 — docs & R&D** _(this session)_ — the public `social/` section + brand pages +
    `brand.mdx` + this roadmap. No code, no credentials.
-2. **Phase 2 — engine config + WIP harden** — one health-green commit; the `/social` keyword goes live.
+2. **Phase 2 — engine config + WIP harden** — ✅ done 2026-07-10; the `/social` keyword is live
+   (health green, plugin parity, 39 skills).
 3. **Phase 3 — Telegram live** — free, trivial; human-staged (L2). First real automated channel.
 4. **Phase 4 — multi-channel** — FB/IG/LinkedIn (review gates) + X (`/decide` on cost); aggregator
    decision for TikTok/Snapchat. WhatsApp stays community-broadcast, not automated.

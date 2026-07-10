@@ -81,9 +81,10 @@ gateway with the "anthropic-native over self-hosted" doctrine.
 | Reach the platform | Hermes gateway ([wiring](/docs/hermes)) | The one thing Claude can't do natively — Slack today via `SLACK_HOME_CHANNEL`; other channels as adapters land |
 | Prove it worked | PostHog + UTM | Attribution back to site traffic / conversions |
 
-> **Planned rename.** The current WIP action `generateAndPublishPost` drafts via the gateway's own
-> LLM and does *not* publish — a name that lies twice. Phase 2 renames it `draftPost` and
-> re-points drafting to Claude-native. Tracked in the internal roadmap.
+> **Done (Phase 2, 2026-07-10).** The old `generateAndPublishPost` action drafted via the
+> gateway's own LLM and never published — a name that lied twice. Rather than rename it, Phase 2
+> **removed the in-app draft lane entirely**: drafting is Claude-native via the `/social` skill,
+> and the hub is compose → stage → publish only.
 
 ## The eight channels
 
@@ -123,34 +124,33 @@ guardrails first. We are at **L0/L1** today.
 content + Arabic-correctness check, per-channel rate limits, and a kill switch. Autonomy without
 that layer is not a feature — it's an incident waiting to happen.
 
-## The `/social` keyword (planned)
+## The `/social` keyword
 
-Not yet wired. The intended engine config, spec'd so the follow-up is turnkey:
+**Wired (2026-07-10)** per the engine-parity recipe — skill + agent + vocabulary + counts +
+regenerated artifacts, health green:
 
-- **Skill** — `.claude/skills/social/SKILL.md`: resolve context → draft (Claude) → media
-  (`/higgs`) → stage for approval → publish (phase 2). References the `growth` agent.
-- **Agent** — extend `.claude/agents/growth.md` (already owns "social media") with a Social
-  Automation section, rather than adding a new agent.
-- **Vocabulary** — a `social` spell in the *Pensieve* school, next to `higgs`:
+- **Skill** — `.claude/skills/social/SKILL.md`: resolve brand + channels → draft (Claude,
+  Arabic-first variants per channel) → media (`/higgs`) → **human approval gate** → publish via
+  the composer or `scripts/post-to-hermes.mjs`.
+- **Agent** — `.claude/agents/growth.md` gained a Social Automation section (it already owned
+  "social media"); no new agent.
+- **Vocabulary** — the `social` spell lives in the *Pensieve* school next to `higgs`:
   `order: [{familiar, growth}, {skill, /social}]`.
 
-Adding it follows the engine-parity recipe (bump `engine.json` counts, regenerate vocab, rebuild
-the plugin, `health.sh` green — one commit). Until then, the workflow runs by invoking `growth` +
-`/higgs` by hand.
+Saying "social post" (or «منشور تواصل») in prose activates it — no slash needed.
 
 ## Current status
 
-A "Social Hub" exists at [`/engine/social`](/engine/social):
+The Social Hub at [`/engine/social`](/engine/social) is hardened (Phase 2, 2026-07-10):
 
-- **Works** — bilingual (en/ar, RTL) dashboard, channel toggles, a Hermes connection
-  health check, and a draft flow (prompt → draft → load into composer).
-- **Stubbed** — the *actual posting* lives outside this repo in the Hermes gateway (Slack is
-  wired via `SLACK_HOME_CHANNEL`; the other channels await adapters — see [Hermes](/docs/hermes)).
-  No persistence, no scheduling, no analytics. Only 4 of the 8 channels are wired in the UI.
-  The auth is presence-only and the actions lack Zod validation.
-
-Bringing that code to convention and building the daemon + credential wiring is the deferred work
-in `docs/SOCIAL-AUTOMATION.md`.
+- **Works** — bilingual (en/ar, RTL) composer with a config-driven channel registry (9 channels;
+  **Slack live**, the rest marked *soon* until their Hermes adapters land), gateway health check,
+  Zod-validated publish, a contributor re-check inside the action (JWT sessions outlive allowlist
+  removal), and a server-boundary auth guard on the page.
+- **Removed** — the in-app AI draft card: gateway-LLM drafting violated the layer boundary, so
+  drafting now lives in the `/social` skill (Claude-native).
+- **Still pending** — adapters beyond Slack (see [Hermes](/docs/hermes)), persistence
+  (`SocialPost`), scheduling, and metrics pull-back — tracked in `docs/SOCIAL-AUTOMATION.md`.
 
 ## See also
 

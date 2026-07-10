@@ -159,6 +159,15 @@ export const homeItems: HomeItem[] = [
     group: "integrations",
   },
   {
+    id: "social-hub",
+    title: "Social Hub",
+    description: "Manage social posts and auto-publish via Hermes.",
+    icon: "TwitterIcon",
+    image: "twitter.png",
+    href: "/engine/social",
+    group: "integrations",
+  },
+  {
     id: "quality",
     title: "Quality",
     description:
