@@ -4,6 +4,8 @@
 
 > Last updated 2026-06-04.
 
+> **Related:** social-media marketing build plan lives in [`docs/SOCIAL-AUTOMATION.md`](./SOCIAL-AUTOMATION.md) (channel-feasibility matrix, credential plan, phasing). Public social docs: `content/docs/social/`.
+
 ## Executive summary
 
 Databayt is a 7-person team with a built, production-ready school platform. The first pilot — **King Fahad Schools (Sudan, 3 branches)** — goes live by **September 2026** and becomes our proof of concept. We run commission-based sales **in parallel** so that by the time King Fahad proves the model, a pipeline of schools is ready to convert.

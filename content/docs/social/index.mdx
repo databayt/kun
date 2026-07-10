@@ -1,0 +1,151 @@
+---
+title: Social Automation
+description: How databayt drafts, approves, and broadcasts social posts across eight platforms — the Claude-native + OpenClaw pipeline, one brand at a time.
+---
+
+# Social Automation
+
+How databayt turns an idea into a published social post across eight platforms — with Claude
+writing the copy, `/higgs` making the media, and a thin gateway doing the broadcast. Each brand
+(databayt, Hogwarts, Mkan, Moallimee, Sijillee) runs its own presence off this shared pipeline.
+The brand rules every post obeys are in [Brand & Voice](/docs/brand); the build roadmap and
+credential plan are internal (`docs/SOCIAL-AUTOMATION.md`).
+
+## Business models → who we're talking to
+
+databayt runs on [four business models](https://databayt.org/about). Social marketing serves
+each one differently — B2B storytelling for the first three, B2C reach for the SaaS products.
+
+| Model | Type | What it sells | Social job |
+|-------|------|---------------|------------|
+| **Per Project** | B2B | Custom automation builds for partners | Show the work — case studies, "automate the boring" proof |
+| **Partners** | B2B | Outsourced product dev + specialized talent | Attract teams & talent — founder story, capability posts |
+| **Codebase** | B2B / B2C | Reusable components, contributor revenue-share (the sharing economy) | Grow the contributor community — open-source, dev-rel |
+| **SaaS** | B2C / B2B | Ready-to-deploy products (Hogwarts, Mkan, Souq, Shifa, …) | Sell the product — per-brand consumer & buyer marketing |
+
+The first three are the **databayt umbrella** story (B2B, developer- and partner-facing). The
+fourth is where the **product brands** live — each with its own audience, channel mix, and voice.
+
+## Brand pages
+
+Every brand has its own presence. Its audience, channel mix, content pillars, and account status
+live on its page:
+
+- [Databayt](/docs/social/databayt) — the umbrella: open source, sharing economy, Kun & dev-rel (B2B)
+- [Hogwarts](/docs/social/hogwarts) — school management SaaS (B2B schools + B2C parents)
+- [Mkan](/docs/social/mkan) — property rentals (B2C renters + B2B hosts)
+- [Moallimee](/docs/social/moallimee) — teachers & tutoring *(pre-launch)*
+- [Sijillee](/docs/social/sijillee) — Sudan business accounting *(pre-launch)* (B2B)
+
+> Souq and Shifa are live SaaS products but are not in the current priority-5 social push. When
+> they join, they get a page on this same template.
+
+## The pipeline
+
+```
+ idea ──► draft ──► media ──► approve ──► schedule ──► publish ──► measure
+  │        │         │          │           │            │           │
+content   Claude    /higgs    human       queue       OpenClaw    PostHog
+calendar  native   text-free   gate    (phase 2)      /webhook    + UTM
+```
+
+| Stage | Owner | Notes |
+|-------|-------|-------|
+| **Idea** | `content-calendar` skill · `weekly` cadence · `growth` agent pillars | What to say, to whom, when |
+| **Draft** | **Claude, natively** | Arabic-first bilingual copy, written against [Brand & Voice](/docs/brand) |
+| **Media** | `/higgs` | Text-free visuals, brand kit `b0a3f528…`; copy is overlaid in-post, never rendered |
+| **Approve** | human (Abdout / Ali / Samia) | The gate — see [Autonomy ladder](#autonomy-ladder) |
+| **Schedule** | queue (phase 2) | Manual today; `SocialPost`/`ScheduledPost` + cron later |
+| **Publish** | **OpenClaw** `POST /webhook {event:"social_post"}` | Egress only — a dumb relay, never the LLM |
+| **Measure** | PostHog + per-platform analytics | UTM-tagged links → attribution |
+
+## Layer boundaries
+
+The one rule that keeps the architecture honest: **OpenClaw is a broadcast relay, not a brain.**
+Anthropic offers no native "post to X" primitive, so a self-hosted last-mile gateway is a
+legitimate egress — but the writing stays Claude-native. This is what reconciles a self-hosted
+daemon with the "anthropic-native over self-hosted" doctrine.
+
+| Concern | Layer | Why here |
+|---------|-------|----------|
+| Write the copy | Claude (in Claude Code / Cowork) | Best model, brand-aware, bilingual — never OpenClaw's LLM |
+| Make the image/video | `/higgs` → Higgsfield CLI | Already governed by budget + brand kit |
+| Decide it's good | Human (→ automated gate at L4) | Brand accounts are public and irreversible |
+| Reach the platform | OpenClaw `/webhook` | The one thing Claude can't do natively |
+| Prove it worked | PostHog + UTM | Attribution back to site traffic / conversions |
+
+> **Planned rename.** The current WIP action `generateAndPublishPost` drafts via OpenClaw's own
+> LLM and does *not* publish — a name that lies twice. Phase 2 renames it `draftPost` and
+> re-points drafting to Claude-native. Tracked in the internal roadmap.
+
+## The eight channels
+
+The full set: **Facebook, Instagram, Telegram, TikTok, Snapchat, X, LinkedIn, WhatsApp.** Each
+has a very different posting-API reality — some trivial, some paid, some with no organic-post API
+at all. Build order follows feasibility, not wish-list:
+
+| Channel | Posting API | Effort | Note |
+|---------|-------------|--------|------|
+| **Telegram** | Bot API | Trivial | Free, instant — **automate first** |
+| **X** | API v2 | Easy (paid) | Pay-per-use since Feb 2026 (~$0.015/post) → `/decide` |
+| **Facebook** | Graph API | Medium | App review + business verification |
+| **Instagram** | Graph API | Medium | Business account linked to a FB Page |
+| **LinkedIn** | Posts API | Medium | Community Management API approval + page admin |
+| **TikTok** | Content Posting API | Hard | App audit (~1–4 wks); posts private until passed |
+| **Snapchat** | Public Profile API | Limited | Allowlist-only via a Snap contact |
+| **WhatsApp** | *(none)* | Limited | No official organic-post API — community broadcast only |
+
+Full matrix, costs, and the aggregator option (Ayrshare covers 7 of 8) are in the internal
+roadmap. Per-brand channel priorities are on each [brand page](#brand-pages).
+
+## Autonomy ladder
+
+The north star is fully autonomous publishing. We climb to it in stages — not because autonomy
+is hard to code, but because handing a public brand account to an unsupervised bot needs
+guardrails first. We are at **L0/L1** today.
+
+| Level | What runs | Human role |
+|-------|-----------|------------|
+| **L0 — Manual** | Human writes and posts | Everything |
+| **L1 — Assisted** | Claude drafts + `/higgs` media | Human posts manually |
+| **L2 — Staged** | kun stages copy+media to the dashboard | One-click approve → publish |
+| **L3 — Semi-auto** | Auto-publish low-risk channels (Telegram); gate brand channels | Approves brand posts only |
+| **L4 — Full-auto** | Autonomous end-to-end | None — replaced by an **automated gate** |
+
+**L4 is gated behind `/decide` + credentials + an automated guardrail layer**: an LLM-judge
+content + Arabic-correctness check, per-channel rate limits, and a kill switch. Autonomy without
+that layer is not a feature — it's an incident waiting to happen.
+
+## The `/social` keyword (planned)
+
+Not yet wired. The intended engine config, spec'd so the follow-up is turnkey:
+
+- **Skill** — `.claude/skills/social/SKILL.md`: resolve context → draft (Claude) → media
+  (`/higgs`) → stage for approval → publish (phase 2). References the `growth` agent.
+- **Agent** — extend `.claude/agents/growth.md` (already owns "social media") with a Social
+  Automation section, rather than adding a new agent.
+- **Vocabulary** — a `social` spell in the *Pensieve* school, next to `higgs`:
+  `order: [{familiar, growth}, {skill, /social}]`.
+
+Adding it follows the engine-parity recipe (bump `engine.json` counts, regenerate vocab, rebuild
+the plugin, `health.sh` green — one commit). Until then, the workflow runs by invoking `growth` +
+`/higgs` by hand.
+
+## Current status
+
+A "Social Hub" exists at [`/engine/social`](/engine/social):
+
+- **Works** — bilingual (en/ar, RTL) dashboard, channel toggles, an OpenClaw connection
+  health check, and a draft flow (prompt → draft → load into composer).
+- **Stubbed** — the *actual posting* lives outside this repo in the OpenClaw daemon (not yet
+  built/documented here). No persistence, no scheduling, no analytics. Only 4 of the 8 channels
+  are wired in the UI. The auth is presence-only and the actions lack Zod validation.
+
+Bringing that code to convention and building the daemon + credential wiring is the deferred work
+in `docs/SOCIAL-AUTOMATION.md`.
+
+## See also
+
+- [Brand & Voice](/docs/brand) — the rules every post obeys.
+- [Connectors](/docs/connectors) — the MCP-backed service integrations.
+- `/higgs` skill — media generation · `content-calendar` skill · `growth` agent.

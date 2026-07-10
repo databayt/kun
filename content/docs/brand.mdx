@@ -1,0 +1,101 @@
+---
+title: Brand & Voice
+description: Databayt visual identity, tone, and the rules every social post and generated asset must follow.
+---
+
+# Brand & Voice
+
+The rules every social post, generated image, and marketing asset must follow. If a draft or
+a render breaks one of these, it does not ship. This is the shared reference for everyone who
+writes or generates on databayt's behalf — Samia, Ali, Abdout, Sedon, and the `/social` and
+`/higgs` skills.
+
+## Visual identity
+
+A minimal, premium, developer-tool aesthetic. Restraint over decoration. Space over clutter.
+
+| Token | Value | Use |
+|-------|-------|-----|
+| **Base** | deep charcoal / dark background | Every backdrop. We are dark-mode-first. |
+| **Accent** | restrained **cyan** | One accent, used sparingly — a single highlight, never a rainbow. |
+| **Rim (cinematic)** | warm **sunset-orange** rim light | Ads, reels, promos only — glassmorphic, shallow depth of field. |
+| **Texture** | soft studio light, subtle film grain | Photorealistic, generous negative space. |
+
+Two style presets drive all generated media (see `/higgs`):
+
+- **`minimal`** — og images, hero shots, product shots, docs. *"minimal premium developer-tool
+  aesthetic, deep charcoal background, generous negative space, soft studio light, subtle film
+  grain, monochrome with one restrained cyan accent, no text."*
+- **`cinematic`** — ads, reels, promos. *"high-end glassmorphic panels, deep dark mode backdrop,
+  electric cyan and warm sunset-orange rim light, shallow depth of field, slow tracking shot,
+  cinematic studio lighting, photorealistic, no text."*
+
+## The hard rule — no text inside generated visuals
+
+**AI typography breaks. Arabic doubly so.** Never bake copy into a generated image or video.
+Generate text-free, then overlay copy in the post composer or editor. The only exception is the
+Higgsfield `dtc-ads` path, whose backend does brand-kit typography and colours natively.
+
+This rule is non-negotiable because a broken Arabic glyph in a public brand post is a credibility
+hit we cannot take back.
+
+## Voice doctrine
+
+- **Arabic first, English second.** Write Arabic first, then the English version — not a
+  translation afterthought. Our audience is MENA; our language is theirs.
+- **The open-source, sharing-economy story is our strongest pitch.** Lead with it. We run a
+  software company with Claude Code, in the open, on an SSPL license. That is the differentiator.
+- **Tone by audience:**
+  - *Schools / administrators* (Hogwarts) — trustworthy, calm, outcomes-focused. Not hype.
+  - *Consumers / merchants* (Souq, Mkan, Shifa) — warm, practical, benefit-first.
+  - *Developers* (Kun, open source) — precise, technical, generous with detail.
+- Every piece should **rank, educate, or attract contributors** — if it does none of the three,
+  cut it.
+
+## Per-product taglines
+
+| Product | Tagline | Audience |
+|---------|---------|----------|
+| **Hogwarts** | Modern school management for Saudi / MENA schools | Schools, administrators, parents |
+| **Souq** | Build your MENA marketplace | Merchants, multi-vendor sellers |
+| **Mkan** | Saudi property rentals, simplified | Hosts, renters |
+| **Shifa** | Clinic management built for Saudi healthcare | Clinics, practitioners |
+| **Kun** | How we run a software company with Claude Code | Developers, contributors |
+
+## Channels & handles
+
+| Platform | Handle | Status |
+|----------|--------|--------|
+| **X / Twitter** | `@databayt` | Claimed, dormant — dev-rel + launches |
+| **LinkedIn** | databayt (Ali's channel) | B2B / school-sales, founder story |
+| **Telegram** | databayt | Community / broadcast |
+| **WhatsApp** | databayt | Community / broadcast lists (not feed posts) |
+| **Instagram** | to claim / audit | Consumer, visual products |
+| **TikTok** | to claim / audit | Consumer, short-form |
+| **Snapchat** | to claim / audit | Consumer, MENA reach |
+| **Facebook** | to claim / audit | Schools (parents), consumer |
+
+Account claiming and credential status is tracked in the internal `docs/SOCIAL-AUTOMATION.md`.
+
+## Higgsfield anchors
+
+Media is generated through the `/higgs` skill (Higgsfield CLI). Fixed references:
+
+| Anchor | Value |
+|--------|-------|
+| Brand kit (databayt.org) | `b0a3f528-0397-41f7-85be-0b44a458a01f` |
+| Web product (databayt.org) | `6933f3b2-5611-4548-b015-2c963d054dc4` |
+| Workspace | `1d67d842-bc70-40d8-8c03-576cb1b141df` |
+
+Recipes for og image / social card / hero shot / promo reel / branded ad set live in the `/higgs`
+skill. Re-fetch the brand kit any time the site restyles:
+
+```bash
+higgsfield ms brand-kits fetch --url https://databayt.org --wait --json
+```
+
+## See also
+
+- [Social Automation](/docs/social) — the pipeline that consumes these rules.
+- `/higgs` skill — the media-generation engine.
+- `.claude/agents/growth.md` — the Market Maker agent that owns content strategy.

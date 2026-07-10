@@ -3,8 +3,8 @@
 // hamburger (template/mobile-nav.tsx) so the two never drift.
 // Order must match content/docs/meta.json.
 
-export type DocEntry = { href: string; label: string }
-export type DocSection = { title: string; items: DocEntry[] }
+export type DocEntry = { href: string; label: string };
+export type DocSection = { title: string; items: DocEntry[] };
 
 export const docsNav: (DocEntry | DocSection)[] = [
   { href: "/docs", label: "Introduction" },
@@ -40,9 +40,21 @@ export const docsNav: (DocEntry | DocSection)[] = [
     ],
   },
   {
+    title: "Social",
+    items: [
+      { href: "/docs/social", label: "Overview" },
+      { href: "/docs/social/databayt", label: "Databayt" },
+      { href: "/docs/social/hogwarts", label: "Hogwarts" },
+      { href: "/docs/social/mkan", label: "Mkan" },
+      { href: "/docs/social/moallimee", label: "Moallimee" },
+      { href: "/docs/social/sijillee", label: "Sijillee" },
+    ],
+  },
+  {
     title: "Reference",
     items: [
       { href: "/docs/keywords", label: "Keywords" },
+      { href: "/docs/brand", label: "Brand & Voice" },
       { href: "/docs/tips", label: "Tips" },
       { href: "/docs/tweets", label: "Tweets" },
       { href: "/docs/configuration", label: "Configuration" },
@@ -60,4 +72,4 @@ export const docsNav: (DocEntry | DocSection)[] = [
       { href: "/docs/self-hosting", label: "Self-Hosting" },
     ],
   },
-]
+];
