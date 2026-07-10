@@ -2,7 +2,7 @@
   "$schema": "kun-vocabulary-v1",
   "$comment": "Single source of truth for the kun keyword vocabulary. Edit THIS file, then run: node .claude/scripts/generate-vocab.mjs — it regenerates the Vocabulary block in .claude/CLAUDE.md and src/components/docs/spellbook-data.ts. health.sh runs generate-vocab.mjs --check to flag drift. Spell fields: name (the keyword), effect (one-line), order (routing chain: familiar=agent, portal=MCP, skill=/skill-or-command, hook, ward=rule, memory), steps, connects, depends, and optional mergedInto (keyword retired into another).",
   "version": 1,
-  "updated": "2026-07-02",
+  "updated": "2026-07-10",
   "orderTypeLabels": {
     "familiar": "Agent",
     "portal": "MCP",
@@ -4261,7 +4261,30 @@
             "Estimate free (generate cost / --cost-only / --enhance-only), then batch-generate with --json",
             "Parse .[].result_url, download to ~/Downloads/higgs/, deliver via SendUserFile with spend + balance"
           ],
-          "connects": ["marketing"],
+          "connects": ["social"],
+          "depends": []
+        },
+        {
+          "name": "social",
+          "effect": "Draft, stage, and publish brand social posts — Claude drafts bilingual copy, /higgs renders media, a human approves, Hermes relays to the channel",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "growth"
+            },
+            {
+              "type": "skill",
+              "name": "/social"
+            }
+          ],
+          "steps": [
+            "Resolve brand + channels from content/docs/social/ and the channel config (slack wired today)",
+            "Draft Arabic-first copy + per-channel variants (Claude-native, never the gateway LLM) with UTM links",
+            "Render text-free media via /higgs; label AI media",
+            "Stage for human approval — stop; no approval, no publish",
+            "Publish via /engine/social composer or scripts/post-to-hermes.mjs; log UTM → PostHog for payoff review"
+          ],
+          "connects": ["higgs", "weekly"],
           "depends": []
         }
       ]

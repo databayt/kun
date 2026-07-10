@@ -57,7 +57,7 @@ Claude routes these to the right skill + agent + MCP without a dedicated command
 **The Unforgivable Commands** — forbidden by the engine: `rm -rf *`, `prisma migrate reset`, `prisma db push --accept-data-loss`, `DROP TABLE`, `git push --force main`
 **The Auror Office** — one keyword, one quality dimension: `see`, `flow`, `debug`, `responsive`, `lang`, `fast`, `guard`, `architecture`, `structure`, `pattern`, `design`, `stack`, `trace`, `efficient`, `mirror`, `diff`
 **The Ministry of Magic** — operations and intelligence: `weekly`, `monitor`, `incident`, `credentials`, `health`, `learn`, `conventions`, `patterns`, `drift`
-**The Pensieve** — judgment and conversion: `canon`, `convert`, `higgs`
+**The Pensieve** — judgment and conversion: `canon`, `convert`, `higgs`, `social`
 <!-- END vocabulary (generated) -->
 
 **Quality dimensions** route through `.claude/agents/quality.md`; `/handover` orchestrates all of them on a URL or block.

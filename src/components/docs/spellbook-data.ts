@@ -2442,7 +2442,22 @@ export const schools: School[] = [
           "Estimate free (generate cost / --cost-only / --enhance-only), then batch-generate with --json",
           "Parse .[].result_url, download to ~/Downloads/higgs/, deliver via SendUserFile with spend + balance",
         ],
-        connects: ["marketing"],
+        connects: ["social"],
+        depends: [],
+      },
+      {
+        name: "social",
+        effect:
+          "Draft, stage, and publish brand social posts — Claude drafts bilingual copy, /higgs renders media, a human approves, Hermes relays to the channel",
+        order: [f("growth"), s("/social")],
+        steps: [
+          "Resolve brand + channels from content/docs/social/ and the channel config (slack wired today)",
+          "Draft Arabic-first copy + per-channel variants (Claude-native, never the gateway LLM) with UTM links",
+          "Render text-free media via /higgs; label AI media",
+          "Stage for human approval — stop; no approval, no publish",
+          "Publish via /engine/social composer or scripts/post-to-hermes.mjs; log UTM → PostHog for payoff review",
+        ],
+        connects: ["higgs", "weekly"],
         depends: [],
       },
     ],

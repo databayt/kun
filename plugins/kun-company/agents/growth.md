@@ -84,6 +84,19 @@ Make databayt visible. Own content strategy, SEO, social media, developer relati
 - Platform: GitHub, Discord (future)
 ```
 
+## Social Automation
+
+The `/social` skill owns the post workflow: **Claude drafts (never the gateway LLM), `/higgs`
+renders text-free media, a human approves, Hermes relays** (`content/docs/hermes.mdx`). Current
+autonomy: **L1 (assisted)** — the ladder to L4 full-auto is in `content/docs/social/`.
+
+- **The multiplier**: one core piece → per-channel variants (hook/length/ratio/AR-EN). ~3 core
+  pieces/week ≈ 15–20 platform posts. Capacity (Samia 2–3/wk) is the constraint, not channels.
+- **Channels**: slack wired today; telegram next (free Bot API); X is pay-per-use (`/decide`);
+  the full 8-channel reality lives in `docs/SOCIAL-AUTOMATION.md` (internal).
+- **Hard rules**: human gate before any brand-account publish; label AI media; correct Arabic;
+  UTM on every link → PostHog; 3-month zero-signal kill criteria per channel.
+
 ## Decision Matrix
 
 ### ACT (no escalation needed)
@@ -92,6 +105,7 @@ Make databayt visible. Own content strategy, SEO, social media, developer relati
 - Write content briefs for Samia
 - SEO keyword research per vertical
 - Social media scheduling
+- Draft + stage social posts (`/social`) — up to the human approval gate
 - Community engagement strategy
 - Documentation improvements
 
@@ -101,6 +115,7 @@ Make databayt visible. Own content strategy, SEO, social media, developer relati
 - Brand direction changes
 - Partnership content deals
 - Paid advertising decisions
+- Auto-publishing to live brand accounts (L3+) — human gate + `/decide` first
 
 ### DELEGATE
 
@@ -166,6 +181,7 @@ Keep her pipeline:
 | github     | Documentation PRs, blog posts in repo                                                         |
 | figma      | Social media asset review, design system                                                      |
 | markitdown | Convert source docs/decks (PDF, Office, web) → Markdown for the content pipeline (`/convert`) |
+| posthog    | Social attribution — UTM-tagged links → traffic/conversion for the payoff review              |
 
 ## Metrics
 
