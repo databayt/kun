@@ -1,17 +1,20 @@
 {
-  "$comment": "Single source of truth for kun engine metadata. Prose/docs reference this file instead of hardcoding numbers. /health (.claude/scripts/health.sh) reads it and warns when docs or reality drift from these values. Agent frontmatter uses a model alias (`opus`/`sonnet`/`haiku` per `model_tiers`) — never pin a version number there.",
+  "$comment": "Single source of truth for kun engine metadata. Prose/docs reference this file instead of hardcoding numbers. /health (.claude/scripts/health.sh) reads it and warns when docs or reality drift from these values. Agent frontmatter uses a model alias (`opus`/`sonnet`/`haiku` per `model_tiers`) \u2014 never pin a version number there.",
   "model": "claude-fable-5",
   "model_label": "Fable 5",
-  "fallback_models": ["claude-opus-4-8", "claude-sonnet-5"],
+  "fallback_models": [
+    "claude-opus-4-8",
+    "claude-sonnet-5"
+  ],
   "engine_version": "databayt v4.0",
   "updated": "2026-07-10",
   "min_claude_code_version": "2.1.190",
   "billing": {
     "plan": "claude-max-100",
-    "$comment": "Max 5x ($100/mo) for the time being — corrected from Max 20x on 2026-06-12. Subscription-ONLY posture: no usage-based credits, no API-key per-token spend — changing this requires a /decide entry + Abdout approval (captain ESCALATE gate: budget > $50/mo). Check /usage per-category weekly to stay inside plan caps."
+    "$comment": "Max 5x ($100/mo) for the time being \u2014 corrected from Max 20x on 2026-06-12. Subscription-ONLY posture: no usage-based credits, no API-key per-token spend \u2014 changing this requires a /decide entry + Abdout approval (captain ESCALATE gate: budget > $50/mo). Check /usage per-category weekly to stay inside plan caps."
   },
   "sync": {
-    "$comment": "Self-update stamps per tier — /sync refreshes them; the captain flags overdue tiers at session start. null = never synced (due immediately). Sources of the form gh:owner/repo are read via `gh api .../releases`. Material adoptions land in docs/CONFIG-BENCHMARK.md → Adoption log.",
+    "$comment": "Self-update stamps per tier \u2014 /sync refreshes them; the captain flags overdue tiers at session start. null = never synced (due immediately). Sources of the form gh:owner/repo are read via `gh api .../releases`. Material adoptions land in docs/CONFIG-BENCHMARK.md \u2192 Adoption log.",
     "anthropic": "2026-07-10",
     "stack": "2026-07-10",
     "services": "2026-07-10",
@@ -47,7 +50,7 @@
         "https://www.anthropic.com/engineering",
         "https://agents.md",
         "gh:bmad-code-org/BMAD-METHOD",
-        "community Claude Code configs — survey set in docs/CONFIG-BENCHMARK.md → Sources"
+        "community Claude Code configs \u2014 survey set in docs/CONFIG-BENCHMARK.md \u2192 Sources"
       ]
     }
   },
@@ -60,13 +63,13 @@
     "pattern_cards": 11,
     "project_rules": 5,
     "domain_rules": 37,
-    "project_mcp": 28,
+    "project_mcp": 29,
     "user_mcp": 19,
     "workflows": 2
   },
   "model_tiers": {
     "$comment": "Per-agent model alias by task type. The portable stack fleet (~/.claude/agents) follows this; the project fleet defaults to opus (quality-over-speed) except purely mechanical agents.",
-    "fable": "the main loop — interactive sessions and captain-grade judgment (session default since 2026-07-10); agents stay on the alias tiers below",
+    "fable": "the main loop \u2014 interactive sessions and captain-grade judgment (session default since 2026-07-10); agents stay on the alias tiers below",
     "opus": "architecture, orchestration, deep reasoning, code review/fixes, and strategy/leadership agents (incl. captain)",
     "sonnet": "standard build agents + the mechanical project agent (package)",
     "haiku": "routine/formatting agents (comment, git, icon, github, semantic, sse, structure)"
