@@ -25,10 +25,10 @@ export default async function CarouselPage({
   searchParams,
 }: {
   params: Promise<{ lang: string; brand: string; slug: string }>;
-  searchParams: Promise<{ slide?: string; size?: string }>;
+  searchParams: Promise<{ slide?: string; size?: string; view?: string }>;
 }) {
   const { lang: rawLang, brand, slug } = await params;
-  const { slide, size } = await searchParams;
+  const { slide, size, view } = await searchParams;
   const lang: DeckLang = rawLang === "ar" ? "ar" : "en";
 
   let deck: Deck;
@@ -59,6 +59,40 @@ export default async function CarouselPage({
         >
           <SlideRenderer slide={current} lang={lang} index={index - 1} />
         </SlideFrame>
+      </main>
+    );
+  }
+
+  // Figma board — every slide at FULL size, each its own [data-frame], laid
+  // out in one row. generate_figma_design imports these as individual,
+  // movable frames (one small frame per carousel page) on the product file's
+  // "carousels" page.
+  if (view === "board") {
+    return (
+      <main className="w-max p-16">
+        <p className="text-muted-foreground pb-8 text-xl">
+          {deck.brand}/{deck.slug} · {lang} · {w}×{h}
+        </p>
+        <div className="flex w-max items-start gap-16">
+          {deck.slides.map((s, i) => (
+            <figure key={i} className="w-max">
+              <figcaption className="text-muted-foreground pb-4 text-lg">
+                {i + 1} · {s.type}
+              </figcaption>
+              <SlideFrame
+                w={w}
+                h={h}
+                index={i + 1}
+                total={total}
+                brand={deck.brand}
+                theme={s.theme}
+                lang={lang}
+              >
+                <SlideRenderer slide={s} lang={lang} index={i} />
+              </SlideFrame>
+            </figure>
+          ))}
+        </div>
       </main>
     );
   }
