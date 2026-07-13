@@ -38,12 +38,13 @@ TOPIC ─► COPY (AR-first) ─► DECK (zod JSON) ─► RENDER (route + Playw
 - **CTA last**, one verb («اطلب عرضًا تجريبيًا» / "Book a demo").
 - Budgets: eyebrow ≤ 24 chars · headline ≤ 48 (AR) / 56 (EN) · body ≤ 140 · step ≤ 60 ·
   caption ≤ 1024 (Telegram cap).
-- Arabic typography: **Thmanyah** (خط ثمانية) is the Arabic voice — Serif Display 400 for
-  headlines (never synthetic-bold a display face), Sans for body/eyebrow/footer; wired as
+- Arabic typography: **Thmanyah** (خط ثمانية) is the Arabic voice — Serif Display **Black
+  900 + `font-feature-settings: "ss01"`** for headlines (the site's signature recipe; never
+  synthetic-bold a display face), Sans for body/eyebrows; wired as
   `--font-thmanyah-*` in `src/components/atom/fonts.ts`, files fetched from the official
   host by `scripts/fetch-thmanyah.mjs` (license forbids redistribution — never commit the
   woff2 files or rehost them on the CDN). No letter-spacing ever (connected script); Latin
-  digits in copy (Gulf marketing norm); Arabic-Indic digits only in the slide counter.
+  digits in copy (Gulf marketing norm).
 - Voice per brand: `content/docs/brand.mdx` + `content/docs/social/<brand>.mdx`. hogwarts =
   calm, benefit-led, HP flavor **light** ("every spell", "غرفة الاحتياج") — never lore-deep.
 
@@ -52,7 +53,7 @@ TOPIC ─► COPY (AR-first) ─► DECK (zod JSON) ─► RENDER (route + Playw
 | Piece                | Path                                                                                                                                                          |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Deck schema (zod v4) | `src/components/root/carousel/schema.ts`                                                                                                                      |
-| Decks                | `content/carousels/<brand>/<slug>.json`                                                                                                                       |
+| Decks                | the brand repo's `carousels/<slug>.json` (`BRANDS[brand].deckDir`, e.g. `~/hogwarts/carousels/`); kun `content/carousels/<brand>/` is the fallback for repo-less brands                                                                                                                       |
 | Render route         | `/[lang]/carousel/[brand]/[slug]?slide=N&size=1080x1350` (no `slide` → review sheet)                                                                          |
 | Slide archetypes     | `cover · point · stat · quote · steps · cta` × themes `ivory · dark · clay · oat`                                                                             |
 | Palette              | Anthropic catalog (`root/anthropic/data.ts` COLORS) — Clay/Ivory/Ink/Oat                                                                                      |
@@ -67,16 +68,16 @@ Slides per deck: 3–10 (10 = Telegram album cap; IG allows 20 but 10 keeps deck
 ## Steps
 
 1. **Resolve** — brand (or hogwarts block: read the block's README/ISSUE/docs first, set
-   `block` in the deck) + topic + angle. Check the "databayt — social carousels" Figma file
-   before inventing new layouts (figma-first memory, 2026-02-01).
+   `block` in the deck) + topic + angle. Check the brand's Figma file (`BRANDS[brand].figma`) before
+   inventing new layouts (figma-first memory, 2026-02-01).
 2. **Copy** — write the deck AR-first against the framework above; every text field carries
    `{ar, en}`.
-3. **Deck** — `content/carousels/<brand>/<slug>.json`; validate:
+3. **Deck** — `<deckDir>/<slug>.json` in the brand repo (commit it there, main-only); validate:
    `pnpm carousel:render <brand>/<slug> --validate` (needs `pnpm dev` on port 3000).
 4. **Render** — `pnpm carousel:render <brand>/<slug>` → PNGs (2160×2700 @2x) + PDF +
    `caption-<lang>-<channel>.txt` + `manifest.json`.
 5. **Visual verify** — browser MCP on the review sheet (`/ar/...` and `/en/...`, no `slide`
-   param): Arabic wraps, diacritic clearance, art placement, footer counter, both themes.
+   param): Arabic wraps, diacritic clearance, art placement, brand mark on all four themes.
 6. **Art-direct (optional)** — see "Design round-trip" below. `/higgs product-photoshoot
 --mode social_carousel` only when the Anthropic library lacks a subject; label AI media.
 7. **Stage — STOP** — SendUserFile the cover PNGs + PDF + captions; set deck `status:

@@ -12,7 +12,7 @@ export const meta = {
     {
       title: "Draft",
       detail:
-        "one agent per block writes content/carousels/<brand>/block-<name>.json",
+        "one agent per block writes a deck into the brand repo's carousels/ dir",
     },
     {
       title: "QA",
@@ -36,6 +36,7 @@ const _a =
       : {};
 const brand = _a.brand || "hogwarts";
 const repoPath = _a.repoPath || `/Users/abdout/${brand}`;
+const deckDir = _a.deckDir || `${repoPath}/carousels`; // decks live with the product
 const base = _a.base || "http://localhost:3000";
 const LIMIT = _a.limit ?? 6; // decks per run — keep runs reviewable
 const wanted = _a.blocks && _a.blocks !== "all" ? _a.blocks : null;
@@ -96,7 +97,7 @@ const qaResults = await pipeline(
       `Write a bilingual carousel deck for the "${b.name}" block of ${brand}.
 Context: ${b.context}
 ${DECK_RULES}
-Write the file to /Users/abdout/kun/content/carousels/${brand}/block-${b.name}.json and
+Write the file to ${deckDir}/block-${b.name}.json and
 return {"slug":"block-${b.name}","written":true}.`,
       {
         label: `draft:${b.name}`,
@@ -113,7 +114,7 @@ return {"slug":"block-${b.name}","written":true}.`,
     ),
   (draft, b) =>
     agent(
-      `Adversarially review the carousel deck /Users/abdout/kun/content/carousels/${brand}/block-${b.name}.json.
+      `Adversarially review the carousel deck ${deckDir}/block-${b.name}.json.
 Attack: Arabic correctness and naturalness (is it crafted or translated?), hook strength
 (<=12 words, pain/promise?), one-idea-per-slide, budget overflows (headline 48 AR / 56 EN,
 body 140), CTA clarity, art choice sanity. If ANY finding, FIX the file in place (minimum

@@ -22,7 +22,7 @@ Keyword: **`carousel`** (also كاروسيل / سلايدات) — routed by
 
 ## The deck
 
-Decks live at `content/carousels/<brand>/<slug>.json`, validated by the zod contract in
+Decks live in the brand repo's own `carousels/` dir (e.g. `~/hogwarts/carousels/<slug>.json`; registry `BRANDS[brand].deckDir`, kun `content/carousels/` as fallback), validated by the zod contract in
 `src/components/root/carousel/schema.ts`. Every text field carries `{ar, en}` — language
 parity is structural. Six slide archetypes (`cover · point · stat · quote · steps · cta`),
 four canvases (`ivory · dark · clay · oat`) drawn from the Anthropic color catalog, and an

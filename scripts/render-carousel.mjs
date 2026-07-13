@@ -77,7 +77,15 @@ const outRoot = String(args.out || path.join(os.homedir(), 'Downloads', 'carouse
 const wantPdf = !args['no-pdf'];
 
 // ── deck ────────────────────────────────────────────────────────────────
-const deckPath = path.join(rootDir, 'content', 'carousels', brand, `${slug}.json`);
+// Decks live with their product (mirrors BRANDS[brand].deckDir in
+// src/components/root/carousel/brands.ts); kun's content/carousels/<brand>/
+// is the fallback for brands without a repo.
+const DECK_DIRS = {
+  hogwarts: '/Users/abdout/hogwarts/carousels',
+};
+const deckPath = DECK_DIRS[brand]
+  ? path.join(DECK_DIRS[brand], `${slug}.json`)
+  : path.join(rootDir, 'content', 'carousels', brand, `${slug}.json`);
 if (!fs.existsSync(deckPath)) {
   console.error(`❌ Deck not found: ${deckPath}`);
   process.exit(1);

@@ -17,6 +17,14 @@ export interface BrandInfo {
    * frame per slide (?view=board).
    */
   figma?: { fileKey: string; carouselsNodeId: string };
+  /**
+   * Absolute path of the brand repo's own `carousels/` dir — decks live with
+   * their product (`<deckDir>/<slug>.json`). Brands without a repo fall back
+   * to kun's `content/carousels/<brand>/<slug>.json`. Local-machine paths:
+   * the deployed kun site cannot read sibling repos, so the render route is
+   * a local surface for these brands.
+   */
+  deckDir?: string;
 }
 
 export const BRANDS: Record<Deck["brand"], BrandInfo> = {
@@ -25,6 +33,7 @@ export const BRANDS: Record<Deck["brand"], BrandInfo> = {
     domain: "ed.databayt.org",
     logo: "/brands/hogwarts.png",
     figma: { fileKey: "HqgFh4Lxp8QtTnW04czQQN", carouselsNodeId: "251-2" },
+    deckDir: "/Users/abdout/hogwarts/carousels",
   },
   databayt: { wordmark: "databayt", domain: "databayt.org" },
   mkan: { wordmark: "mkan", domain: "mkan.databayt.org" },
