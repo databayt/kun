@@ -92,6 +92,9 @@ autonomy: **L1 (assisted)** — the ladder to L4 full-auto is in `content/docs/s
 
 - **The multiplier**: one core piece → per-channel variants (hook/length/ratio/AR-EN). ~3 core
   pieces/week ≈ 15–20 platform posts. Capacity (Samia 2–3/wk) is the constraint, not channels.
+- **Carousels**: `/carousel <brand> <topic>` — bilingual deck JSON → kun render route
+  (Anthropic art + palette, AR/EN) → Playwright PNGs + LinkedIn PDF + captions → human gate →
+  Telegram albums (client DMs) / feed channels. Spec: `.claude/skills/carousel/SKILL.md`.
 - **Channels**: telegram (direct Bot API) + slack (Hermes) wired today; X is pay-per-use
   (`/decide`); the full 8-channel reality lives in `docs/SOCIAL-AUTOMATION.md` (internal).
 - **Hard rules**: human gate before any brand-account publish; label AI media; correct Arabic;
@@ -106,6 +109,7 @@ autonomy: **L1 (assisted)** — the ladder to L4 full-auto is in `content/docs/s
 - SEO keyword research per vertical
 - Social media scheduling
 - Draft + stage social posts (`/social`) — up to the human approval gate
+- Draft + render + stage carousels (`/carousel`) — up to the human approval gate
 - Community engagement strategy
 - Documentation improvements
 

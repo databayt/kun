@@ -1,0 +1,69 @@
+---
+title: Carousel
+description: Multi-slide bilingual brand carousels — deck JSON in, platform-ready slides out, human gate before any channel
+---
+
+Carousels are the strategy's second core format (see [strategy](/en/docs/social/strategy) —
+"short vertical video + carousels"). The engine renders them from code: one deck JSON
+becomes Anthropic-styled slides in Arabic and English at exact platform sizes, plus a PDF
+and per-channel captions. A human approves before anything is published or DM'd.
+
+## Pipeline
+
+```
+TOPIC ─► COPY (AR-first) ─► DECK (zod JSON) ─► RENDER (route + Playwright)
+  ─► VISUAL VERIFY ─► [Figma / Claude Design art-direction] ─► STAGE (STOP)
+  ─► PUBLISH (IG/FB export · LinkedIn PDF · Telegram album DM) ─► LOG
+```
+
+Keyword: **`carousel`** (also كاروسيل / سلايدات) — routed by
+`.claude/skills/carousel/SKILL.md` under the growth agent. Batch per-block sweeps:
+`.claude/workflows/carousel.js`.
+
+## The deck
+
+Decks live at `content/carousels/<brand>/<slug>.json`, validated by the zod contract in
+`src/components/root/carousel/schema.ts`. Every text field carries `{ar, en}` — language
+parity is structural. Six slide archetypes (`cover · point · stat · quote · steps · cta`),
+four canvases (`ivory · dark · clay · oat`) drawn from the Anthropic color catalog, and an
+optional illustration per slide from the Anthropic art mirror
+(`public/carousel-art/` → fallback `cdn.databayt.org/anthropic/<file>`). Illustrations
+only — never Anthropic or Claude logomarks.
+
+## Render
+
+```bash
+pnpm dev                                      # port 3000, house rule
+pnpm carousel:render hogwarts/hogwarts-intro  # → ~/Downloads/carousels/hogwarts/hogwarts-intro/
+```
+
+Output per language: 8 PNGs at 2160×2700 (2× of 1080×1350), one PDF, five caption files
+(instagram, facebook, linkedin, telegram, whatsapp) with the UTM link swapped per channel,
+and a `manifest.json`. Review in the browser at
+`/[lang]/carousel/[brand]/[slug]` (all slides) or `?slide=N&size=1080x1350` (exact frame).
+
+## Sizes and platform notes
+
+| Target | Size | Notes |
+| --- | --- | --- |
+| Instagram / Facebook feed | 1080×1350 (4:5) | up to 20 slides allowed; decks cap at 10 |
+| Square | 1080×1080 | `--sizes 1080x1080` |
+| Stories / TikTok | 1080×1920 | `--sizes 1080x1920` |
+| LinkedIn | PDF | LinkedIn carousels are PDF document posts |
+| Telegram DM / channel | album | 2–10 photos, caption on the first item, ≤1024 chars |
+| WhatsApp | manual | no organic API — send the PDF or album by hand |
+
+Only Telegram is API-wired today (`scripts/post-to-telegram.mjs --media <dir>
+--caption-file <txt> [--chat <client>]`). Instagram/Facebook/LinkedIn exports are
+upload-ready by design. **No approval, no publish** — the human gate is the same one
+[/social](/en/docs/social) enforces.
+
+## Design round-trip
+
+- **Code → Figma**: `generate_figma_design` pushes the templates into the
+  "databayt — social carousels" file (writes are quota-free); `upload_assets` attaches
+  rendered PNGs.
+- **Figma → Code**: prefer the desktop MCP lane (quota-free with the app open); the hosted
+  lane's 6 reads/month are reserved for critical pulls.
+- **Claude Design**: the archetypes mirror to a canvas project for visual iteration; git
+  keeps the TSX truth.

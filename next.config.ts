@@ -6,6 +6,9 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   reactStrictMode: false,
+  // The carousel render route is screenshotted by Playwright — the dev
+  // indicator badge would land inside the captured slides.
+  devIndicators: false,
   // The install routes read web/install.{sh,ps1} at runtime; trace them into
   // the serverless bundle so the read works on Vercel, not just locally.
   outputFileTracingIncludes: {

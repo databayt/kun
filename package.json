@@ -14,7 +14,8 @@
     "setup:phase2": "sudo bash scripts/phase2/setup.sh",
     "setup:phase3": "bash scripts/phase3/setup.sh",
     "health": "bash scripts/monitoring/health-check.sh",
-    "status": "bash scripts/status.sh"
+    "status": "bash scripts/status.sh",
+    "carousel:render": "node scripts/render-carousel.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.68.0",
@@ -59,6 +60,8 @@
     "@types/node": "^25.5.2",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "pdf-lib": "^1.17.1",
+    "playwright-core": "^1.61.1",
     "rehype-pretty-code": "^0.14.3",
     "tailwindcss": "^4.2.2",
     "typescript": "^6.0.2"

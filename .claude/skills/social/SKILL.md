@@ -37,7 +37,8 @@ Hermes), optional `--publish` (dispatch after explicit approval).
 2. **Draft** the core piece + per-channel variants (AR first, EN second). UTM on every link
    (`?utm_source=<channel>&utm_medium=social&utm_campaign=<slug>`).
 3. **Media** if the post needs it — pick the `/higgs` recipe (og image / social card / reel),
-   text-free, brand style blocks.
+   text-free, brand style blocks. Multi-slide posts → `/carousel` (deck → rendered slides →
+   the same approval gate; Telegram albums double as client DMs).
 4. **Stage for approval** — show copy variants + media paths to Abdout/Ali/Samia. Stop here.
 5. **Publish** (only after explicit approval, or `--publish` given after the gate):
    - Dashboard: `/engine/social` composer (contributors-only, Zod-validated, per-transport).

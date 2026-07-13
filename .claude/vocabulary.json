@@ -4306,7 +4306,35 @@
             "Stage for human approval — stop; no approval, no publish",
             "Publish via /engine/social composer, scripts/post-to-telegram.mjs, or scripts/post-to-hermes.mjs; UTM → PostHog"
           ],
-          "connects": ["higgs", "weekly"],
+          "connects": ["higgs", "weekly", "carousel"],
+          "depends": []
+        },
+        {
+          "name": "carousel",
+          "effect": "Multi-slide bilingual brand carousels — Claude writes the deck, the kun render route draws Anthropic-styled slides, Playwright captures exact platform sizes, a human approves before any channel sees it",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "growth"
+            },
+            {
+              "type": "skill",
+              "name": "/carousel"
+            },
+            {
+              "type": "portal",
+              "name": "Figma"
+            }
+          ],
+          "steps": [
+            "Resolve brand + topic from content/docs/social/<brand>.mdx and brand.mdx (block-scoped decks read the block records)",
+            "Write the bilingual deck (AR crafted first, never translated) into content/carousels/<brand>/<slug>.json — hook cover, one idea per slide, CTA close",
+            "Render: pnpm carousel:render <brand>/<slug> — PNGs per language and size, PDF variant, per-channel captions with UTM",
+            "Art-direct (optional): push templates to Figma (writes are quota-free) or the claude-design canvas; hosted Figma pulls respect the 6-read budget",
+            "Stage for human approval — deliver slides + captions and STOP; no approval, no publish",
+            "After approval: Telegram album via scripts/post-to-telegram.mjs --media; IG/FB from the exported files; LinkedIn takes the PDF; log to the calendar"
+          ],
+          "connects": ["social", "higgs"],
           "depends": []
         }
       ]
