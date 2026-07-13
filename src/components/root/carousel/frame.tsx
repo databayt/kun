@@ -56,8 +56,13 @@ export function SlideFrame({
         backgroundColor: c.bg,
         color: c.ink,
         // Arabic slides speak Thmanyah (Sans base; headlines opt into Serif
-        // Display in slides.tsx). English stays on the house Geist.
-        fontFamily: lang === "ar" ? "var(--font-thmanyah-sans)" : undefined,
+        // Display in slides.tsx). English stays on the house Geist. The real
+        // family name comes first so Figma captures bind to the installed
+        // desktop font; the next/font variable is the loading fallback.
+        fontFamily:
+          lang === "ar"
+            ? '"Thmanyah sans 1.2", var(--font-thmanyah-sans)'
+            : undefined,
       }}
     >
       <div

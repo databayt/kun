@@ -23,7 +23,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const outDir = path.resolve(__dirname, '..', 'src', 'fonts', 'thmanyah');
+const outDir = path.resolve(__dirname, '..', 'public', 'fonts', 'thmanyah');
 
 // Pinned from the @font-face rules on font.thmanyah.com (version 1.2, 2026-07-13).
 const MANIFEST = {

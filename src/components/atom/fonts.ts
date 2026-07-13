@@ -27,13 +27,13 @@ export const fontRubik = Rubik({
 // Thmanyah — خط ثمانية (Arabic + Latin), the databayt Arabic voice.
 // Files are git-ignored and fetched from the official host by
 // scripts/fetch-thmanyah.mjs (predev/prebuild) — the license permits
-// embedding but forbids redistribution. See src/fonts/thmanyah/README.md.
+// embedding but forbids redistribution. See public/fonts/thmanyah/README.md.
 export const fontThmanyahSans = localFont({
   src: [
-    { path: "../../fonts/thmanyah/thmanyah-sans-300.woff2", weight: "300" },
-    { path: "../../fonts/thmanyah/thmanyah-sans-400.woff2", weight: "400" },
-    { path: "../../fonts/thmanyah/thmanyah-sans-500.woff2", weight: "500" },
-    { path: "../../fonts/thmanyah/thmanyah-sans-700.woff2", weight: "700" },
+    { path: "../../../public/fonts/thmanyah/thmanyah-sans-300.woff2", weight: "300" },
+    { path: "../../../public/fonts/thmanyah/thmanyah-sans-400.woff2", weight: "400" },
+    { path: "../../../public/fonts/thmanyah/thmanyah-sans-500.woff2", weight: "500" },
+    { path: "../../../public/fonts/thmanyah/thmanyah-sans-700.woff2", weight: "700" },
   ],
   variable: "--font-thmanyah-sans",
   display: "swap",
@@ -42,7 +42,7 @@ export const fontThmanyahSans = localFont({
 export const fontThmanyahDisplay = localFont({
   src: [
     {
-      path: "../../fonts/thmanyah/thmanyah-serif-display-400.woff2",
+      path: "../../../public/fonts/thmanyah/thmanyah-serif-display-400.woff2",
       weight: "400",
     },
   ],
@@ -53,23 +53,23 @@ export const fontThmanyahDisplay = localFont({
 export const fontThmanyahText = localFont({
   src: [
     {
-      path: "../../fonts/thmanyah/thmanyah-serif-text-300.woff2",
+      path: "../../../public/fonts/thmanyah/thmanyah-serif-text-300.woff2",
       weight: "300",
     },
     {
-      path: "../../fonts/thmanyah/thmanyah-serif-text-400.woff2",
+      path: "../../../public/fonts/thmanyah/thmanyah-serif-text-400.woff2",
       weight: "400",
     },
     {
-      path: "../../fonts/thmanyah/thmanyah-serif-text-500.woff2",
+      path: "../../../public/fonts/thmanyah/thmanyah-serif-text-500.woff2",
       weight: "500",
     },
     {
-      path: "../../fonts/thmanyah/thmanyah-serif-text-700.woff2",
+      path: "../../../public/fonts/thmanyah/thmanyah-serif-text-700.woff2",
       weight: "700",
     },
     {
-      path: "../../fonts/thmanyah/thmanyah-serif-text-900.woff2",
+      path: "../../../public/fonts/thmanyah/thmanyah-serif-text-900.woff2",
       weight: "900",
     },
   ],

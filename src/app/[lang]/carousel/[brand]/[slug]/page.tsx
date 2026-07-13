@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import "@/components/root/carousel/fonts.css";
 import { readDeck } from "@/components/root/carousel/content";
 import { SlideFrame } from "@/components/root/carousel/frame";
 import { SlideRenderer } from "@/components/root/carousel/slides";

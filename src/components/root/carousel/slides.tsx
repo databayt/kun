@@ -37,7 +37,8 @@ function headlineStyle(size: number, lang: DeckLang): CSSProperties {
         // carries headline weight on its own; synthetic bolding would ruin it.
         // It also sets more compact than the Latin Geist, so Arabic keeps the
         // full size for equal hierarchy.
-        fontFamily: "var(--font-thmanyah-display)",
+        fontFamily:
+          '"Thmanyah serif display 1.2", var(--font-thmanyah-display)',
         fontSize: size,
         fontWeight: 400,
         lineHeight: 1.42,
