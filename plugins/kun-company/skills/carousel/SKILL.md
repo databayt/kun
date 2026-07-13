@@ -88,9 +88,16 @@ Slides per deck: 3–10 (10 = Telegram album cap; IG allows 20 but 10 keeps deck
 
 ## Design round-trip (both ways)
 
-- **Code → Figma** (writes are quota-free on Starter): `create_new_file` "databayt — social
-  carousels" (once) → `generate_figma_design` from the review sheet / slide HTML →
-  `upload_assets` the rendered PNGs as references. Abdout art-directs in Figma.
+- **The convention: one Figma file per repo/product, each with a `carousels` page.** The
+  registry is `BRANDS[brand].figma` in `src/components/root/carousel/brands.ts`
+  ({ fileKey, carouselsNodeId }) — hogwarts is wired; when a new brand gets its file, ask
+  Abdout for the URL once and record it there.
+- **Code → Figma** (writes are quota-free on Starter): capture the **board view** —
+  `/[lang]/carousel/[brand]/[slug]?view=board` renders every slide full-size as its own
+  `[data-frame]`, so `generate_figma_design` (fileKey + nodeId = carouselsNodeId, one
+  capture per language) lands individual movable frames on the product's carousels page.
+  Fire `captureForDesign` WITHOUT awaiting its promise (it can hang), wait ~20s, then poll
+  the tool with the captureId. `upload_assets` the rendered PNGs as references if useful.
 - **Figma → Code** (hosted reads are 6/month — scarce): prefer the `figma-desktop` local
   server (Figma app open, quota-free) or window screenshots; hosted
   `get_design_context`/`get_screenshot` only on an explicit "pull from figma". Translate
