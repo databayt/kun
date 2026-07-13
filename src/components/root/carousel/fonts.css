@@ -1,67 +1,100 @@
 /*
  * Thmanyah under its REAL family names — the same names the desktop TTFs
  * carry in their name tables, so Figma captures of the carousel bind to the
- * locally-installed fonts instead of next/font's scoped aliases. Files are
- * git-ignored; scripts/fetch-thmanyah.mjs populates public/fonts/thmanyah/
- * on predev/prebuild.
+ * locally-installed fonts instead of next/font's scoped aliases.
+ *
+ * Generation: ORIGINAL (what font.thmanyah.com itself typesets with — its
+ * headlines are serif display Black + ss01). Files are git-ignored;
+ * scripts/fetch-thmanyah.mjs populates public/fonts/thmanyah/ on
+ * predev/prebuild.
  */
 
 @font-face {
-  font-family: "Thmanyah sans 1.2";
+  font-family: "thmanyah sans";
   src: url("/fonts/thmanyah/thmanyah-sans-300.woff2") format("woff2");
   font-weight: 300;
   font-display: swap;
 }
 @font-face {
-  font-family: "Thmanyah sans 1.2";
+  font-family: "thmanyah sans";
   src: url("/fonts/thmanyah/thmanyah-sans-400.woff2") format("woff2");
   font-weight: 400;
   font-display: swap;
 }
 @font-face {
-  font-family: "Thmanyah sans 1.2";
+  font-family: "thmanyah sans";
   src: url("/fonts/thmanyah/thmanyah-sans-500.woff2") format("woff2");
   font-weight: 500;
   font-display: swap;
 }
 @font-face {
-  font-family: "Thmanyah sans 1.2";
+  font-family: "thmanyah sans";
   src: url("/fonts/thmanyah/thmanyah-sans-700.woff2") format("woff2");
   font-weight: 700;
   font-display: swap;
 }
 @font-face {
-  font-family: "Thmanyah serif display 1.2";
+  font-family: "thmanyah sans";
+  src: url("/fonts/thmanyah/thmanyah-sans-900.woff2") format("woff2");
+  font-weight: 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: "thmanyah serif display";
+  src: url("/fonts/thmanyah/thmanyah-serif-display-300.woff2") format("woff2");
+  font-weight: 300;
+  font-display: swap;
+}
+@font-face {
+  font-family: "thmanyah serif display";
   src: url("/fonts/thmanyah/thmanyah-serif-display-400.woff2") format("woff2");
   font-weight: 400;
   font-display: swap;
 }
 @font-face {
-  font-family: "Thmanyah serif text 1.2";
+  font-family: "thmanyah serif display";
+  src: url("/fonts/thmanyah/thmanyah-serif-display-500.woff2") format("woff2");
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: "thmanyah serif display";
+  src: url("/fonts/thmanyah/thmanyah-serif-display-700.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: "thmanyah serif display";
+  src: url("/fonts/thmanyah/thmanyah-serif-display-900.woff2") format("woff2");
+  font-weight: 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: "thmanyah serif text";
   src: url("/fonts/thmanyah/thmanyah-serif-text-300.woff2") format("woff2");
   font-weight: 300;
   font-display: swap;
 }
 @font-face {
-  font-family: "Thmanyah serif text 1.2";
+  font-family: "thmanyah serif text";
   src: url("/fonts/thmanyah/thmanyah-serif-text-400.woff2") format("woff2");
   font-weight: 400;
   font-display: swap;
 }
 @font-face {
-  font-family: "Thmanyah serif text 1.2";
+  font-family: "thmanyah serif text";
   src: url("/fonts/thmanyah/thmanyah-serif-text-500.woff2") format("woff2");
   font-weight: 500;
   font-display: swap;
 }
 @font-face {
-  font-family: "Thmanyah serif text 1.2";
+  font-family: "thmanyah serif text";
   src: url("/fonts/thmanyah/thmanyah-serif-text-700.woff2") format("woff2");
   font-weight: 700;
   font-display: swap;
 }
 @font-face {
-  font-family: "Thmanyah serif text 1.2";
+  font-family: "thmanyah serif text";
   src: url("/fonts/thmanyah/thmanyah-serif-text-900.woff2") format("woff2");
   font-weight: 900;
   font-display: swap;

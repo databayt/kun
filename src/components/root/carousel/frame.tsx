@@ -61,7 +61,7 @@ export function SlideFrame({
         // desktop font; the next/font variable is the loading fallback.
         fontFamily:
           lang === "ar"
-            ? '"Thmanyah sans 1.2", var(--font-thmanyah-sans)'
+            ? '"thmanyah sans", var(--font-thmanyah-sans)'
             : undefined,
       }}
     >

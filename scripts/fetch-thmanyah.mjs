@@ -25,22 +25,42 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const outDir = path.resolve(__dirname, '..', 'public', 'fonts', 'thmanyah');
 
-// Pinned from the @font-face rules on font.thmanyah.com (version 1.2, 2026-07-13).
+// Pinned from the @font-face rules on font.thmanyah.com (2026-07-13).
+// ORIGINAL generation — the families the specimen site itself typesets with
+// (its headlines are "thmanyah serif display" Black + ss01). The "1.2" files
+// on the same page are a partial improvement preview (display only ships 400
+// there) and do NOT match the site's look; switch only when Thmanyah rolls
+// 1.2 out across all weights.
+const MANIFEST_VERSION = 'original-2026-07-13';
 const MANIFEST = {
-  'thmanyah-sans-300.woff2': 'https://framerusercontent.com/assets/2MgF2LENj0ar3gdEjyf3HoLd6iw.woff2',
-  'thmanyah-sans-400.woff2': 'https://framerusercontent.com/assets/Ej0k3h4Mi5O7TSo2w2JaDCPRgvo.woff2',
-  'thmanyah-sans-500.woff2': 'https://framerusercontent.com/assets/3XGelYpTgxSxBXN4Oieg9Dt3bc.woff2',
-  'thmanyah-sans-700.woff2': 'https://framerusercontent.com/assets/JUv6rms2ye2kYL3UI3O9YyExQcQ.woff2',
-  'thmanyah-serif-display-400.woff2': 'https://framerusercontent.com/assets/gUSrlMNsoOIspcnYhQl24uNZZo.woff2',
-  'thmanyah-serif-text-300.woff2': 'https://framerusercontent.com/assets/3oNNmhaqdwdOlTnrXg8UrU8.woff2',
-  'thmanyah-serif-text-400.woff2': 'https://framerusercontent.com/assets/pTIPpIhdyoUL1Tl7cDpv1Ze80uQ.woff2',
-  'thmanyah-serif-text-500.woff2': 'https://framerusercontent.com/assets/oVoRwZKk5rDtzCpYG0Ol1gigl5s.woff2',
-  'thmanyah-serif-text-700.woff2': 'https://framerusercontent.com/assets/kzVXDC4kJxZgS0rOVcbdPBBC5sw.woff2',
-  'thmanyah-serif-text-900.woff2': 'https://framerusercontent.com/assets/e1GJ2wtz2b2fMo8i7AbRPck4Qo.woff2',
+  'thmanyah-sans-300.woff2': 'https://framerusercontent.com/assets/Lh8puxCFq405qBv7dKpg9NsHZNk.woff2',
+  'thmanyah-sans-400.woff2': 'https://framerusercontent.com/assets/x6EBzvXf1Fi35XhsRoHxePDVo.woff2',
+  'thmanyah-sans-500.woff2': 'https://framerusercontent.com/assets/oE98mOPE28KTzUeptOLRIaqW1I.woff2',
+  'thmanyah-sans-700.woff2': 'https://framerusercontent.com/assets/LZvgFRUsP7pGWYj3tKxMUrKuhSY.woff2',
+  'thmanyah-sans-900.woff2': 'https://framerusercontent.com/assets/ulQLGTktcl2Qq4AmD6RuVgELZKg.woff2',
+  'thmanyah-serif-display-300.woff2': 'https://framerusercontent.com/assets/zmxf3YlIwMxBTz61cviQtq5n3zU.woff2',
+  'thmanyah-serif-display-400.woff2': 'https://framerusercontent.com/assets/s1q2LvVNWBbqzMxMBxsexY73tE.woff2',
+  'thmanyah-serif-display-500.woff2': 'https://framerusercontent.com/assets/ahIxG21c1088n0jA0bPQBjKu6M.woff2',
+  'thmanyah-serif-display-700.woff2': 'https://framerusercontent.com/assets/AAY5hsAWwWmVC7qlScZUGjzCgE8.woff2',
+  'thmanyah-serif-display-900.woff2': 'https://framerusercontent.com/assets/a9r2dKNoQcqFiTkwxTUnXgAfjws.woff2',
+  'thmanyah-serif-text-300.woff2': 'https://framerusercontent.com/assets/pXAhTrUNoEDB4CTUcjXvXy1gFAc.woff2',
+  'thmanyah-serif-text-400.woff2': 'https://framerusercontent.com/assets/3WPjrTAizPcMoDaKDtKdNB0Jo50.woff2',
+  'thmanyah-serif-text-500.woff2': 'https://framerusercontent.com/assets/bsVNF5mKouPfUJiPWsBKDU324NM.woff2',
+  'thmanyah-serif-text-700.woff2': 'https://framerusercontent.com/assets/L62MixAFhJojtLTRD19wOsCnFg.woff2',
+  'thmanyah-serif-text-900.woff2': 'https://framerusercontent.com/assets/z8brS6Wjld2pvgVBkmzMQpyPO4.woff2',
 };
 
 async function main() {
   fs.mkdirSync(outDir, { recursive: true });
+  // Generation bump invalidates previously fetched files under the same names.
+  const versionFile = path.join(outDir, '.manifest-version');
+  const currentVersion = fs.existsSync(versionFile) ? fs.readFileSync(versionFile, 'utf8').trim() : '';
+  if (currentVersion !== MANIFEST_VERSION) {
+    for (const file of fs.readdirSync(outDir)) {
+      if (file.endsWith('.woff2')) fs.unlinkSync(path.join(outDir, file));
+    }
+    fs.writeFileSync(versionFile, MANIFEST_VERSION);
+  }
   const missing = Object.entries(MANIFEST).filter(([file]) => !fs.existsSync(path.join(outDir, file)));
   if (!missing.length) {
     console.log(`✅ Thmanyah fonts present (${Object.keys(MANIFEST).length} files)`);

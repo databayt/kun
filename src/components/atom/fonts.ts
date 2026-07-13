@@ -30,10 +30,26 @@ export const fontRubik = Rubik({
 // embedding but forbids redistribution. See public/fonts/thmanyah/README.md.
 export const fontThmanyahSans = localFont({
   src: [
-    { path: "../../../public/fonts/thmanyah/thmanyah-sans-300.woff2", weight: "300" },
-    { path: "../../../public/fonts/thmanyah/thmanyah-sans-400.woff2", weight: "400" },
-    { path: "../../../public/fonts/thmanyah/thmanyah-sans-500.woff2", weight: "500" },
-    { path: "../../../public/fonts/thmanyah/thmanyah-sans-700.woff2", weight: "700" },
+    {
+      path: "../../../public/fonts/thmanyah/thmanyah-sans-300.woff2",
+      weight: "300",
+    },
+    {
+      path: "../../../public/fonts/thmanyah/thmanyah-sans-400.woff2",
+      weight: "400",
+    },
+    {
+      path: "../../../public/fonts/thmanyah/thmanyah-sans-500.woff2",
+      weight: "500",
+    },
+    {
+      path: "../../../public/fonts/thmanyah/thmanyah-sans-700.woff2",
+      weight: "700",
+    },
+    {
+      path: "../../../public/fonts/thmanyah/thmanyah-sans-900.woff2",
+      weight: "900",
+    },
   ],
   variable: "--font-thmanyah-sans",
   display: "swap",
@@ -42,8 +58,24 @@ export const fontThmanyahSans = localFont({
 export const fontThmanyahDisplay = localFont({
   src: [
     {
+      path: "../../../public/fonts/thmanyah/thmanyah-serif-display-300.woff2",
+      weight: "300",
+    },
+    {
       path: "../../../public/fonts/thmanyah/thmanyah-serif-display-400.woff2",
       weight: "400",
+    },
+    {
+      path: "../../../public/fonts/thmanyah/thmanyah-serif-display-500.woff2",
+      weight: "500",
+    },
+    {
+      path: "../../../public/fonts/thmanyah/thmanyah-serif-display-700.woff2",
+      weight: "700",
+    },
+    {
+      path: "../../../public/fonts/thmanyah/thmanyah-serif-display-900.woff2",
+      weight: "900",
     },
   ],
   variable: "--font-thmanyah-display",

@@ -33,14 +33,15 @@ function eyebrowStyle(c: ThemeColors, lang: DeckLang): CSSProperties {
 function headlineStyle(size: number, lang: DeckLang): CSSProperties {
   return lang === "ar"
     ? {
-        // Thmanyah Serif Display ships as a single 400 — a display face that
-        // carries headline weight on its own; synthetic bolding would ruin it.
-        // It also sets more compact than the Latin Geist, so Arabic keeps the
-        // full size for equal hierarchy.
-        fontFamily:
-          '"Thmanyah serif display 1.2", var(--font-thmanyah-display)',
+        // The font.thmanyah.com headline recipe: serif display BLACK with the
+        // ss01 stylistic set — that pairing is the signature calligraphic
+        // look; without ss01 the alternates stay off and the face reads
+        // generic. Display sets more compact than the Latin Geist, so Arabic
+        // keeps the full size for equal hierarchy.
+        fontFamily: '"thmanyah serif display", var(--font-thmanyah-display)',
         fontSize: size,
-        fontWeight: 400,
+        fontWeight: 900,
+        fontFeatureSettings: '"ss01"',
         lineHeight: 1.42,
       }
     : {
