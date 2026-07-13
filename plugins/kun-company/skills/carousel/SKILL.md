@@ -92,14 +92,22 @@ Slides per deck: 3–10 (10 = Telegram album cap; IG allows 20 but 10 keeps deck
   registry is `BRANDS[brand].figma` in `src/components/root/carousel/brands.ts`
   ({ fileKey, carouselsNodeId }) — hogwarts is wired; when a new brand gets its file, ask
   Abdout for the URL once and record it there.
-- **Code → Figma** (writes are quota-free on Starter): capture the **board view** —
-  `/[lang]/carousel/[brand]/[slug]?view=board` renders every slide full-size as its own
-  `[data-frame]`, so `generate_figma_design` (fileKey + nodeId = carouselsNodeId, one
-  capture per language) lands individual movable frames on the product's carousels page.
-  Fire `captureForDesign` WITHOUT awaiting its promise (it can hang), wait ~20s, then poll
-  the tool with the captureId. `upload_assets` the rendered PNGs as references if useful.
+- **Code → Figma**: capture the **board view** — `?view=board` renders BOTH languages,
+  every slide a standalone full-size `[data-frame]`: row 1 Arabic, row 2 English, nothing
+  else. ONE `generate_figma_design` capture (fileKey + nodeId = carouselsNodeId) imports the
+  whole deck as a single container; one Ungroup in Figma leaves 16 standalone frames.
+  **Boards REPLACE, never stack** — delete the previous board container before/after each
+  push (Abdout by hand, or use_figma where the plan allows). Fire `captureForDesign`
+  WITHOUT awaiting its promise (it can hang), wait ~20s, then poll the tool with the
+  captureId.
+- **Starter-plan reality (learned 2026-07-13)**: the docs' "exempt" list is soft — once the
+  account trips the monthly cap, EVERY hosted tool 429s, including `generate_figma_design`
+  and `use_figma` (so in-place frame edits are effectively unavailable on Starter/View).
+  When rate-limited: finish the code side, hand Abdout the one manual step, retry after the
+  monthly reset — or he toggles the Figma desktop app's local MCP server (a fresh session
+  then gets the `figma-desktop` lane) / upgrades the plan (a `/decide` spend).
 - **Figma → Code** (hosted reads are 6/month — scarce): prefer the `figma-desktop` local
-  server (Figma app open, quota-free) or window screenshots; hosted
+  server (Figma app open) or window screenshots; hosted
   `get_design_context`/`get_screenshot` only on an explicit "pull from figma". Translate
   pulled refinements into `slides.tsx`/`frame.tsx` by hand.
 - **Claude Design** (Max-covered; one-time `/design-login`): `create_project`
