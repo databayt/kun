@@ -51,3 +51,26 @@ export const THEMES: Record<SlideTheme, ThemeColors> = {
     hairline: "rgba(250, 249, 245, 0.35)",
   },
 };
+
+/**
+ * Anthropic's own section-theming trick: illustrations sit on soft tinted
+ * plates, cycled from the accent family (see ILLUSTRATION_COLORS in
+ * root/anthropic/data.ts). Cycled by slide index; a plate that matches the
+ * canvas skips to its neighbor.
+ */
+const PLATE_CYCLE: string[] = [
+  hex("Oat"),
+  hex("Coral"),
+  hex("Cactus"),
+  hex("Heather"),
+  hex("Tag Tan"),
+  hex("Tag Periwinkle"),
+];
+
+export function plateColor(index: number, canvasBg: string): string {
+  const plate = PLATE_CYCLE[index % PLATE_CYCLE.length];
+  if (plate.toLowerCase() === canvasBg.toLowerCase()) {
+    return PLATE_CYCLE[(index + 1) % PLATE_CYCLE.length];
+  }
+  return plate;
+}

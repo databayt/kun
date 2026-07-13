@@ -57,7 +57,7 @@ export default async function CarouselPage({
           theme={current.theme}
           lang={lang}
         >
-          <SlideRenderer slide={current} lang={lang} />
+          <SlideRenderer slide={current} lang={lang} index={index - 1} />
         </SlideFrame>
       </main>
     );
@@ -104,7 +104,7 @@ export default async function CarouselPage({
                   theme={s.theme}
                   lang={lang}
                 >
-                  <SlideRenderer slide={s} lang={lang} />
+                  <SlideRenderer slide={s} lang={lang} index={i} />
                 </SlideFrame>
               </div>
             </div>
