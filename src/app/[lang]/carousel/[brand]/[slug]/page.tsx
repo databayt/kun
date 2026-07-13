@@ -64,36 +64,38 @@ export default async function CarouselPage({
     );
   }
 
-  // Figma board — every slide at FULL size, each its own [data-frame], laid
-  // out in one row. generate_figma_design imports these as individual,
-  // movable frames (one small frame per carousel page) on the product file's
-  // "carousels" page.
+  // Figma board — BOTH languages, every slide at FULL size as its own
+  // [data-frame]: row 1 Arabic, row 2 English, nothing else (no labels, no
+  // chrome). One generate_figma_design capture imports the whole deck; a
+  // single Ungroup in Figma leaves 16 standalone frames on the carousels
+  // page. Each new push REPLACES the previous board container — delete the
+  // old one, never stack.
   if (view === "board") {
+    const rows: DeckLang[] = ["ar", "en"];
     return (
-      <main className="w-max p-16">
-        <p className="text-muted-foreground pb-8 text-xl">
-          {deck.brand}/{deck.slug} · {lang} · {w}×{h}
-        </p>
-        <div className="flex w-max items-start gap-16">
-          {deck.slides.map((s, i) => (
-            <figure key={i} className="w-max">
-              <figcaption className="text-muted-foreground pb-4 text-lg">
-                {i + 1} · {s.type}
-              </figcaption>
+      <main className="flex w-max flex-col" style={{ gap: 120 }}>
+        {rows.map((rowLang) => (
+          <div
+            key={rowLang}
+            className="flex w-max items-start"
+            style={{ gap: 64 }}
+          >
+            {deck.slides.map((s, i) => (
               <SlideFrame
+                key={i}
                 w={w}
                 h={h}
                 index={i + 1}
                 total={total}
                 brand={deck.brand}
                 theme={s.theme}
-                lang={lang}
+                lang={rowLang}
               >
-                <SlideRenderer slide={s} lang={lang} index={i} />
+                <SlideRenderer slide={s} lang={rowLang} index={i} />
               </SlideFrame>
-            </figure>
-          ))}
-        </div>
+            ))}
+          </div>
+        ))}
       </main>
     );
   }
