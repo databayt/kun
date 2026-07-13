@@ -52,8 +52,6 @@ export default async function CarouselPage({
         <SlideFrame
           w={w}
           h={h}
-          index={index}
-          total={total}
           brand={deck.brand}
           theme={current.theme}
           lang={lang}
@@ -85,8 +83,6 @@ export default async function CarouselPage({
                 key={i}
                 w={w}
                 h={h}
-                index={i + 1}
-                total={total}
                 brand={deck.brand}
                 theme={s.theme}
                 lang={rowLang}
@@ -135,8 +131,6 @@ export default async function CarouselPage({
                 <SlideFrame
                   w={w}
                   h={h}
-                  index={i + 1}
-                  total={total}
                   brand={deck.brand}
                   theme={s.theme}
                   lang={lang}

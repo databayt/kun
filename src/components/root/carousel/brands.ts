@@ -5,6 +5,12 @@ export interface BrandInfo {
   wordmark: string;
   domain: string;
   /**
+   * Brand mark under public/brands/ — replaces the slide footer (monochrome
+   * ink; inverted automatically on dark/clay canvases). Falls back to the
+   * wordmark text when absent.
+   */
+  logo?: string;
+  /**
    * The product's own Figma file — the org convention is one Figma file per
    * repo/product, each with a "carousels" page. Carousel boards are captured
    * into it via generate_figma_design (fileKey + carouselsNodeId), one small
@@ -17,6 +23,7 @@ export const BRANDS: Record<Deck["brand"], BrandInfo> = {
   hogwarts: {
     wordmark: "hogwarts",
     domain: "ed.databayt.org",
+    logo: "/brands/hogwarts.png",
     figma: { fileKey: "HqgFh4Lxp8QtTnW04czQQN", carouselsNodeId: "251-2" },
   },
   databayt: { wordmark: "databayt", domain: "databayt.org" },

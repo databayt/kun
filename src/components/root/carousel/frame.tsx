@@ -9,29 +9,24 @@ export const FRAME_PAD = 72;
 export interface SlideFrameProps {
   w: number;
   h: number;
-  /** 1-based slide position. */
-  index: number;
-  total: number;
   brand: Deck["brand"];
   theme: SlideTheme;
   lang: DeckLang;
   children: ReactNode;
 }
 
-function toArabicDigits(n: number): string {
-  return String(n).replace(/\d/g, (d) => "٠١٢٣٤٥٦٧٨٩"[Number(d)]);
-}
-
 /**
  * The exact-pixel artboard every archetype renders inside. Palette is inline
  * (print-like artifact — immune to site theme); direction is self-contained
  * so a frame renders correctly regardless of the surrounding page.
+ *
+ * The brand mark sits alone at the bottom start — no footer strip (Abdout,
+ * 2026-07-13: "use logo instead of footer"). Monochrome-ink logos invert to
+ * ivory on the dark and clay canvases.
  */
 export function SlideFrame({
   w,
   h,
-  index,
-  total,
   brand,
   theme,
   lang,
@@ -39,10 +34,7 @@ export function SlideFrame({
 }: SlideFrameProps): ReactElement {
   const c = THEMES[theme];
   const info = BRANDS[brand];
-  const counter =
-    lang === "ar"
-      ? `${toArabicDigits(index)} / ${toArabicDigits(total)}`
-      : `${index} / ${total}`;
+  const invertLogo = theme === "dark" || theme === "clay";
 
   return (
     <div
@@ -72,26 +64,31 @@ export function SlideFrame({
         {children}
       </div>
       <footer
-        className="flex shrink-0 items-center justify-between"
+        className="flex shrink-0 items-center"
         style={{
-          marginInline: FRAME_PAD,
-          height: 92,
-          borderBlockStart: `2px solid ${c.hairline}`,
+          paddingInline: FRAME_PAD,
+          paddingBlockEnd: FRAME_PAD - 16,
+          height: 120,
         }}
       >
-        <span
-          style={{ fontSize: 27, fontWeight: 600, letterSpacing: "-0.01em" }}
-        >
-          {info.wordmark}
-        </span>
-        <span className="flex items-baseline gap-5">
-          <span dir="ltr" style={{ fontSize: 23, color: c.muted }}>
-            {info.domain}
+        {info.logo ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={info.logo}
+            alt=""
+            style={{
+              height: 64,
+              width: "auto",
+              filter: invertLogo ? "invert(1)" : undefined,
+            }}
+          />
+        ) : (
+          <span
+            style={{ fontSize: 27, fontWeight: 600, letterSpacing: "-0.01em" }}
+          >
+            {info.wordmark}
           </span>
-          <span style={{ fontSize: 23, fontWeight: 600, color: c.accent }}>
-            {counter}
-          </span>
-        </span>
+        )}
       </footer>
     </div>
   );

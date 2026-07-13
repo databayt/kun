@@ -49,16 +49,17 @@ TOPIC ─► COPY (AR-first) ─► DECK (zod JSON) ─► RENDER (route + Playw
 
 ## The pieces
 
-| Piece                | Path                                                                                  |
-| -------------------- | ------------------------------------------------------------------------------------- |
-| Deck schema (zod v4) | `src/components/root/carousel/schema.ts`                                              |
-| Decks                | `content/carousels/<brand>/<slug>.json`                                               |
-| Render route         | `/[lang]/carousel/[brand]/[slug]?slide=N&size=1080x1350` (no `slide` → review sheet)  |
-| Slide archetypes     | `cover · point · stat · quote · steps · cta` × themes `ivory · dark · clay · oat`     |
-| Palette              | Anthropic catalog (`root/anthropic/data.ts` COLORS) — Clay/Ivory/Ink/Oat              |
-| Art                  | `public/carousel-art/*.svg` (vendored) → fallback `cdn.databayt.org/anthropic/<file>` |
-| Renderer CLI         | `pnpm carousel:render <brand>/<slug>` → `~/Downloads/carousels/<brand>/<slug>/`       |
-| DM / album           | `node scripts/post-to-telegram.mjs --media <dir> --caption-file <txt> [--chat <id>]`  |
+| Piece                | Path                                                                                                                                                          |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Deck schema (zod v4) | `src/components/root/carousel/schema.ts`                                                                                                                      |
+| Decks                | `content/carousels/<brand>/<slug>.json`                                                                                                                       |
+| Render route         | `/[lang]/carousel/[brand]/[slug]?slide=N&size=1080x1350` (no `slide` → review sheet)                                                                          |
+| Slide archetypes     | `cover · point · stat · quote · steps · cta` × themes `ivory · dark · clay · oat`                                                                             |
+| Palette              | Anthropic catalog (`root/anthropic/data.ts` COLORS) — Clay/Ivory/Ink/Oat                                                                                      |
+| Brand mark           | `BRANDS[brand].logo` (`public/brands/*.png`) at the bottom start — replaces the footer (no domain/counter strips); monochrome ink, auto-inverted on dark/clay |
+| Art                  | `public/carousel-art/*.svg` (vendored) → fallback `cdn.databayt.org/anthropic/<file>`                                                                         |
+| Renderer CLI         | `pnpm carousel:render <brand>/<slug>` → `~/Downloads/carousels/<brand>/<slug>/`                                                                               |
+| DM / album           | `node scripts/post-to-telegram.mjs --media <dir> --caption-file <txt> [--chat <id>]`                                                                          |
 
 Sizes: `1080x1350` (4:5 feed, default) · `1080x1080` (square) · `1080x1920` (story).
 Slides per deck: 3–10 (10 = Telegram album cap; IG allows 20 but 10 keeps decks portable).
@@ -86,30 +87,32 @@ Slides per deck: 3–10 (10 = Telegram album cap; IG allows 20 but 10 keeps deck
    API). Set `status: "published"`.
 9. **Log** — content calendar (`/content-calendar`), UTM shows up in PostHog.
 
-## Design round-trip (both ways)
+## Design round-trip (the doctrine that holds on the free tier)
 
-- **The convention: one Figma file per repo/product, each with a `carousels` page.** The
-  registry is `BRANDS[brand].figma` in `src/components/root/carousel/brands.ts`
-  ({ fileKey, carouselsNodeId }) — hogwarts is wired; when a new brand gets its file, ask
-  Abdout for the URL once and record it there.
-- **Code → Figma**: capture the **board view** — `?view=board` renders BOTH languages,
-  every slide a standalone full-size `[data-frame]`: row 1 Arabic, row 2 English, nothing
-  else. ONE `generate_figma_design` capture (fileKey + nodeId = carouselsNodeId) imports the
-  whole deck as a single container; one Ungroup in Figma leaves 16 standalone frames.
-  **Boards REPLACE, never stack** — delete the previous board container before/after each
-  push (Abdout by hand, or use_figma where the plan allows). Fire `captureForDesign`
-  WITHOUT awaiting its promise (it can hang), wait ~20s, then poll the tool with the
-  captureId.
-- **Starter-plan reality (learned 2026-07-13)**: the docs' "exempt" list is soft — once the
-  account trips the monthly cap, EVERY hosted tool 429s, including `generate_figma_design`
-  and `use_figma` (so in-place frame edits are effectively unavailable on Starter/View).
-  When rate-limited: finish the code side, hand Abdout the one manual step, retry after the
-  monthly reset — or he toggles the Figma desktop app's local MCP server (a fresh session
-  then gets the `figma-desktop` lane) / upgrades the plan (a `/decide` spend).
-- **Figma → Code** (hosted reads are 6/month — scarce): prefer the `figma-desktop` local
-  server (Figma app open) or window screenshots; hosted
-  `get_design_context`/`get_screenshot` only on an explicit "pull from figma". Translate
-  pulled refinements into `slides.tsx`/`frame.tsx` by hand.
+- **PNG/PDF is the source of truth.** Iterate in code + renders — free, fast, exact.
+- **Figma holds a flat PNG snapshot**, hand-refreshed (drag the 16 renders in via the
+  desktop app, or Cowork's computer-use does it — zero quota). Name it honestly, e.g.
+  `hogwarts-intro — PNG snapshot <date> (flat, not editable)`, 8×2 grid: row 1 AR 01→08,
+  row 2 EN 01→08. **Snapshots REPLACE, never stack.**
+- **Editable Figma frames are a deliberate quota spend.** When someone genuinely needs to
+  edit in Figma: ONE `generate_figma_design` capture of `?view=board` (renders BOTH
+  languages, every slide a standalone full-size `[data-frame]`, row AR + row EN, zero
+  chrome) into `BRANDS[brand].figma` ({ fileKey, carouselsNodeId } in `brands.ts`); one
+  Ungroup leaves 16 standalone frames. Fire `captureForDesign` WITHOUT awaiting its promise
+  (it can hang), wait ~20s, then poll with the captureId.
+- **Starter-plan reality (verified 2026-07-13)**: the docs' "exempt" list is soft — once
+  the account trips the monthly cap, EVERY hosted tool 429s, including
+  `generate_figma_design` and `use_figma`. **The Figma desktop MCP server is NOT a bypass:
+  it is paywalled on Starter** ("No access to the Dev Mode MCP server") — the desktop
+  toggle and a paid seat are the same purchase. When rate-limited: finish the code side,
+  refresh the flat snapshot by hand, wait for the monthly reset; upgrading is a `/decide`
+  spend.
+- **Figma → Code** (hosted reads are 6/month — scarce): window screenshots of the Figma app
+  are the everyday read lane; hosted `get_design_context`/`get_screenshot` only on an
+  explicit "pull from figma". Translate pulled refinements into `slides.tsx`/`frame.tsx` by
+  hand.
+- **Never assume the carousels page is all ours** — inventory before any delete (Abdout's
+  own layers, e.g. `logo 2`, live there too).
 - **Claude Design** (Max-covered; one-time `/design-login`): `create_project`
   "carousel-templates-<brand>" → `write_files` a self-contained HTML/CSS mirror of the six
   archetypes → `render_preview` → iterate on the claude.ai/design canvas → `read_file` and
