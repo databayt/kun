@@ -47,3 +47,6 @@ pnpm-debug.log*
 # Anthropic crawler artifacts (runtime cache)
 scripts/crawl-anthropic/state/
 .clone/
+
+# Thmanyah fonts — license forbids redistribution; fetched from the official host by scripts/fetch-thmanyah.mjs
+src/fonts/thmanyah/*.woff2

@@ -38,8 +38,12 @@ TOPIC ─► COPY (AR-first) ─► DECK (zod JSON) ─► RENDER (route + Playw
 - **CTA last**, one verb («اطلب عرضًا تجريبيًا» / "Book a demo").
 - Budgets: eyebrow ≤ 24 chars · headline ≤ 48 (AR) / 56 (EN) · body ≤ 140 · step ≤ 60 ·
   caption ≤ 1024 (Telegram cap).
-- Arabic typography: no letter-spacing ever (connected script); Latin digits in copy
-  (Gulf marketing norm); Arabic-Indic digits only in the slide counter.
+- Arabic typography: **Thmanyah** (خط ثمانية) is the Arabic voice — Serif Display 400 for
+  headlines (never synthetic-bold a display face), Sans for body/eyebrow/footer; wired as
+  `--font-thmanyah-*` in `src/components/atom/fonts.ts`, files fetched from the official
+  host by `scripts/fetch-thmanyah.mjs` (license forbids redistribution — never commit the
+  woff2 files or rehost them on the CDN). No letter-spacing ever (connected script); Latin
+  digits in copy (Gulf marketing norm); Arabic-Indic digits only in the slide counter.
 - Voice per brand: `content/docs/brand.mdx` + `content/docs/social/<brand>.mdx`. hogwarts =
   calm, benefit-led, HP flavor **light** ("every spell", "غرفة الاحتياج") — never lore-deep.
 

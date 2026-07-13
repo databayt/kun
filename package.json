@@ -4,8 +4,10 @@
   "description": "Remote AI Development Infrastructure - كن (Be!)",
   "private": true,
   "scripts": {
+    "predev": "node scripts/fetch-thmanyah.mjs",
     "dev": "next dev",
     "dev:turbo": "next dev --turbopack",
+    "prebuild": "node scripts/fetch-thmanyah.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

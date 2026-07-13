@@ -50,7 +50,15 @@ export function SlideFrame({
       dir={lang === "ar" ? "rtl" : "ltr"}
       lang={lang}
       className="relative flex flex-col overflow-hidden"
-      style={{ width: w, height: h, backgroundColor: c.bg, color: c.ink }}
+      style={{
+        width: w,
+        height: h,
+        backgroundColor: c.bg,
+        color: c.ink,
+        // Arabic slides speak Thmanyah (Sans base; headlines opt into Serif
+        // Display in slides.tsx). English stays on the house Geist.
+        fontFamily: lang === "ar" ? "var(--font-thmanyah-sans)" : undefined,
+      }}
     >
       <div
         className="flex min-h-0 flex-1 flex-col"

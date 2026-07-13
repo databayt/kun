@@ -31,12 +31,23 @@ function eyebrowStyle(c: ThemeColors, lang: DeckLang): CSSProperties {
 }
 
 function headlineStyle(size: number, lang: DeckLang): CSSProperties {
-  return {
-    fontSize: lang === "ar" ? Math.round(size * 0.93) : size,
-    fontWeight: 650,
-    lineHeight: lang === "ar" ? 1.38 : 1.1,
-    letterSpacing: lang === "ar" ? undefined : "-0.025em",
-  };
+  return lang === "ar"
+    ? {
+        // Thmanyah Serif Display ships as a single 400 — a display face that
+        // carries headline weight on its own; synthetic bolding would ruin it.
+        // It also sets more compact than the Latin Geist, so Arabic keeps the
+        // full size for equal hierarchy.
+        fontFamily: "var(--font-thmanyah-display)",
+        fontSize: size,
+        fontWeight: 400,
+        lineHeight: 1.42,
+      }
+    : {
+        fontSize: size,
+        fontWeight: 650,
+        lineHeight: 1.1,
+        letterSpacing: "-0.025em",
+      };
 }
 
 function bodyStyle(c: ThemeColors, lang: DeckLang, size = 32): CSSProperties {
