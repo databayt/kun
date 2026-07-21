@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import { getContributorByEmail } from "@/components/root/context/config";
 import { checkHermesHealth, sendSocialPost } from "@/lib/hermes";
 import { checkTelegramHealth, sendTelegramPost } from "@/lib/telegram";
+import { checkFacebookHealth, sendFacebookPost } from "@/lib/facebook";
 import { CHANNELS, CHANNEL_IDS } from "@/components/root/social/config";
 
 // Authorization: session presence isn't enough — JWT sessions outlive removal
@@ -57,6 +58,26 @@ export async function verifyTelegramConnection(): Promise<TelegramConnectionStat
   };
 }
 
+export interface FacebookConnectionStatus {
+  connected: boolean;
+  name?: string;
+  error?: string;
+}
+
+export async function verifyFacebookConnection(): Promise<FacebookConnectionStatus> {
+  const session = await auth();
+  if (!session?.user) {
+    return { connected: false, error: "Unauthorized: Please sign in." };
+  }
+
+  const result = await checkFacebookHealth();
+  return {
+    connected: result.ok,
+    name: result.name,
+    error: result.error,
+  };
+}
+
 export interface PostResult {
   ok: boolean;
   error?: string;
@@ -94,13 +115,16 @@ export async function publishPostDirect(input: unknown): Promise<PostResult> {
 
   const { text, channels } = parsed.data;
 
-  // Route per transport: telegram goes straight to the Bot API, everything
-  // else relays through the Hermes gateway in one webhook call.
+  // Route per transport: telegram and facebook go straight to their official
+  // APIs, everything else relays through the Hermes gateway in one webhook call.
   const hermesChannels = channels.filter(
     (id) => CHANNELS.find((c) => c.id === id)?.transport === "hermes",
   );
   const wantsTelegram = channels.some(
     (id) => CHANNELS.find((c) => c.id === id)?.transport === "telegram",
+  );
+  const wantsFacebook = channels.some(
+    (id) => CHANNELS.find((c) => c.id === id)?.transport === "facebook",
   );
 
   const failures: string[] = [];
@@ -108,6 +132,11 @@ export async function publishPostDirect(input: unknown): Promise<PostResult> {
   if (wantsTelegram) {
     const res = await sendTelegramPost(text);
     if (!res.ok) failures.push(`telegram: ${res.error}`);
+  }
+
+  if (wantsFacebook) {
+    const res = await sendFacebookPost(text);
+    if (!res.ok) failures.push(`facebook: ${res.error}`);
   }
 
   if (hermesChannels.length > 0) {
