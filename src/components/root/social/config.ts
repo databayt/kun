@@ -56,9 +56,7 @@ export const CHANNELS = [
     id: "facebook",
     label: "Facebook",
     labelAr: "فيسبوك",
-    // Transport is implemented (lib/facebook.ts + direct Graph API). Flip `wired`
-    // to true once FACEBOOK_PAGE_ID + FACEBOOK_PAGE_ACCESS_TOKEN are set in Vercel
-    // env — see twenty-deploy/SOCIAL-SETUP.md.
+    // Transport is implemented (lib/facebook.ts + direct Graph API).
     wired: true,
     transport: "facebook",
   },
