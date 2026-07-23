@@ -1,15 +1,29 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { isRTL, type Locale } from "@/components/local/config";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/atom/page-header";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   verifyHermesConnection,
   verifyTelegramConnection,
+  verifyFacebookConnection,
   publishPostDirect,
 } from "@/actions/post-social";
 import { CHANNELS, type ChannelId } from "@/components/root/social/config";
+import {
+  PRODUCTS,
+  DEFAULT_PRODUCT,
+  productChannelWired,
+  type ProductId,
+} from "@/components/root/social/products";
 import {
   TwitterIcon,
   LinkedinIcon,
@@ -50,9 +64,12 @@ const translations = {
     title: "Social Hub",
     description:
       "Stage and publish approved posts to social channels through the wired relays.",
+    product: "Product",
+    selectProduct: "Select a product",
     connectionStatus: "Egress Status",
     hermesRow: "Hermes Gateway",
     telegramRow: "Telegram Bot",
+    facebookRow: "Facebook Page",
     connected: "Connected",
     disconnected: "Disconnected",
     checking: "Checking...",
@@ -72,14 +89,18 @@ const translations = {
       "Claude writes the copy — say “social post” in Claude Code (the /social skill) to draft Arabic-first variants per channel, generate media via /higgs, and get it approved. This composer is the last mile only.",
     successMsg: "Successfully posted!",
     errorMsg: "Failed to process: ",
+    noChannels: "No channel is wired for this product yet.",
   },
   ar: {
     title: "ملتقى التواصل",
     description:
       "جهّز وانشر المنشورات المعتمدة على قنوات التواصل عبر النواقل الموصولة.",
+    product: "المنتج",
+    selectProduct: "اختر منتجاً",
     connectionStatus: "حالة النشر",
     hermesRow: "بوابة Hermes",
     telegramRow: "بوت تيليجرام",
+    facebookRow: "صفحة فيسبوك",
     connected: "متصل",
     disconnected: "غير متصل",
     checking: "جاري الفحص...",
@@ -99,6 +120,7 @@ const translations = {
       "Claude يكتب النص — قل «منشور تواصل» في Claude Code (مهارة ‎/social) لصياغة نسخ عربية-أولاً لكل قناة، وتوليد الوسائط عبر ‎/higgs، ثم الاعتماد. هذا المنشئ هو الميل الأخير فقط.",
     successMsg: "تم النشر بنجاح!",
     errorMsg: "فشلت العملية: ",
+    noChannels: "لا توجد قناة موصولة لهذا المنتج بعد.",
   },
 };
 
@@ -147,26 +169,52 @@ export default function SocialDashboard({ lang }: SocialDashboardProps) {
   const t = translations[lang] || translations.en;
   const isRightToLeft = isRTL(lang);
 
+  // Which brand we're publishing as. Every channel toggle, health check, and
+  // publish call below is scoped to it — Facebook resolves a different Page and
+  // a different permanent token per product.
+  const [product, setProduct] = useState<ProductId>(DEFAULT_PRODUCT);
+
   // Egress state — one per transport
   const [hermes, setHermes] = useState<ConnState>({ status: "idle" });
   const [telegram, setTelegram] = useState<ConnState>({ status: "idle" });
+  const [facebook, setFacebook] = useState<ConnState>({ status: "idle" });
 
   // Composer State
   const [postText, setPostText] = useState("");
-  const [selectedChannels, setSelectedChannels] = useState<ChannelId[]>([
-    "telegram",
-  ]);
+  const [selectedChannels, setSelectedChannels] = useState<ChannelId[]>([]);
   const [isPosting, setIsPosting] = useState(false);
   const [postSuccess, setPostSuccess] = useState<string | null>(null);
   const [postError, setPostError] = useState<string | null>(null);
 
-  const checkConnections = async () => {
+  // Publishable for THIS brand: the global transport is wired AND the brand has
+  // its own destination on it (its own Page, its own channel).
+  const wiredForProduct = useMemo(
+    () =>
+      CHANNELS.filter((ch) =>
+        productChannelWired(product, ch.id, ch.wired),
+      ).map((ch) => ch.id as ChannelId),
+    [product],
+  );
+
+  // Switching brand must never carry a selection the new brand can't publish to.
+  useEffect(() => {
+    setSelectedChannels((prev) => {
+      const kept = prev.filter((id) => wiredForProduct.includes(id));
+      return kept.length > 0 ? kept : wiredForProduct.slice(0, 1);
+    });
+    setPostSuccess(null);
+    setPostError(null);
+  }, [wiredForProduct]);
+
+  const checkConnections = useCallback(async () => {
     setHermes({ status: "checking" });
     setTelegram({ status: "checking" });
+    setFacebook({ status: "checking" });
 
-    const [hermesRes, telegramRes] = await Promise.allSettled([
+    const [hermesRes, telegramRes, facebookRes] = await Promise.allSettled([
       verifyHermesConnection(),
       verifyTelegramConnection(),
+      verifyFacebookConnection(product),
     ]);
 
     if (hermesRes.status === "fulfilled" && hermesRes.value.connected) {
@@ -198,11 +246,25 @@ export default function SocialDashboard({ lang }: SocialDashboardProps) {
             : String(telegramRes.reason),
       });
     }
-  };
+
+    // The Page name is the proof the selected product resolved to the right
+    // Page — it's the only pre-publish signal that the token isn't crossed.
+    if (facebookRes.status === "fulfilled" && facebookRes.value.connected) {
+      setFacebook({ status: "connected", detail: facebookRes.value.name });
+    } else {
+      setFacebook({
+        status: "disconnected",
+        error:
+          facebookRes.status === "fulfilled"
+            ? facebookRes.value.error
+            : String(facebookRes.reason),
+      });
+    }
+  }, [product]);
 
   useEffect(() => {
     checkConnections();
-  }, []);
+  }, [checkConnections]);
 
   const handleChannelToggle = (channel: ChannelId) => {
     setSelectedChannels((prev) =>
@@ -214,15 +276,14 @@ export default function SocialDashboard({ lang }: SocialDashboardProps) {
 
   // Publish is gated per transport: only the relays the selection actually
   // needs must be connected.
-  const needsHermes = selectedChannels.some(
-    (id) => CHANNELS.find((c) => c.id === id)?.transport === "hermes",
-  );
-  const needsTelegram = selectedChannels.some(
-    (id) => CHANNELS.find((c) => c.id === id)?.transport === "telegram",
-  );
+  const transportNeeded = (transport: string) =>
+    selectedChannels.some(
+      (id) => CHANNELS.find((c) => c.id === id)?.transport === transport,
+    );
   const transportsReady =
-    (!needsHermes || hermes.status === "connected") &&
-    (!needsTelegram || telegram.status === "connected");
+    (!transportNeeded("hermes") || hermes.status === "connected") &&
+    (!transportNeeded("telegram") || telegram.status === "connected") &&
+    (!transportNeeded("facebook") || facebook.status === "connected");
 
   const handlePublishDirect = async () => {
     setIsPosting(true);
@@ -230,6 +291,7 @@ export default function SocialDashboard({ lang }: SocialDashboardProps) {
     setPostError(null);
     try {
       const res = await publishPostDirect({
+        product,
         text: postText,
         channels: selectedChannels,
       });
@@ -248,11 +310,47 @@ export default function SocialDashboard({ lang }: SocialDashboardProps) {
     }
   };
 
+  const anyChecking =
+    hermes.status === "checking" ||
+    telegram.status === "checking" ||
+    facebook.status === "checking";
+
   return (
-    <div className="space-y-8" dir={isRightToLeft ? "rtl" : "ltr"}>
+    <div dir={isRightToLeft ? "rtl" : "ltr"}>
       <PageHeader heading={t.title} description={t.description} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {/* Product bar — same rhythm as the homepage tab bar, but a select:
+          brands are a single choice, not a filter you flip through. */}
+      <div className="border-b-[0.5px] py-3">
+        <label htmlFor="product-selector" className="sr-only">
+          {t.product}
+        </label>
+        <Select
+          value={product}
+          onValueChange={(value) => setProduct(value as ProductId)}
+        >
+          <SelectTrigger
+            id="product-selector"
+            className="bg-secondary text-secondary-foreground border-secondary h-8 w-auto justify-start shadow-none"
+          >
+            <span className="font-medium">{t.product}:</span>
+            <SelectValue placeholder={t.selectProduct} />
+          </SelectTrigger>
+          <SelectContent align={isRightToLeft ? "end" : "start"}>
+            {PRODUCTS.map((p) => (
+              <SelectItem
+                key={p.id}
+                value={p.id}
+                className="data-[state=checked]:opacity-50"
+              >
+                {isRightToLeft ? p.labelAr : p.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 py-8">
         {/* Main Columns */}
         <div className="lg:col-span-2 space-y-8">
           {/* Composer */}
@@ -278,6 +376,11 @@ export default function SocialDashboard({ lang }: SocialDashboardProps) {
                 </label>
                 <div className="flex flex-wrap gap-3">
                   {CHANNELS.map((ch) => {
+                    const available = productChannelWired(
+                      product,
+                      ch.id,
+                      ch.wired,
+                    );
                     const isSelected = selectedChannels.includes(ch.id);
                     const Icon = channelIcons[ch.id];
                     const name = isRightToLeft ? ch.labelAr : ch.label;
@@ -285,10 +388,10 @@ export default function SocialDashboard({ lang }: SocialDashboardProps) {
                       <button
                         key={ch.id}
                         onClick={() => handleChannelToggle(ch.id)}
-                        disabled={!ch.wired}
-                        title={ch.wired ? name : `${name} — ${t.comingSoon}`}
+                        disabled={!available}
+                        title={available ? name : `${name} — ${t.comingSoon}`}
                         className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium transition-all ${
-                          !ch.wired
+                          !available
                             ? "bg-input/10 border-border/50 text-muted-foreground/50 cursor-not-allowed"
                             : isSelected
                               ? "bg-primary border-primary text-primary-foreground shadow-sm shadow-primary/30"
@@ -303,7 +406,7 @@ export default function SocialDashboard({ lang }: SocialDashboardProps) {
                           </span>
                         )}
                         <span>{name}</span>
-                        {!ch.wired && (
+                        {!available && (
                           <span className="text-[10px] opacity-70">
                             {t.comingSoon}
                           </span>
@@ -312,6 +415,11 @@ export default function SocialDashboard({ lang }: SocialDashboardProps) {
                     );
                   })}
                 </div>
+                {wiredForProduct.length === 0 && (
+                  <p className="text-xs text-muted-foreground mt-3">
+                    {t.noChannels}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -394,6 +502,13 @@ export default function SocialDashboard({ lang }: SocialDashboardProps) {
 
               <div className="flex items-center justify-between py-2">
                 <span className="text-xs text-muted-foreground">
+                  {t.facebookRow}
+                </span>
+                <StatusIndicator state={facebook} t={t} />
+              </div>
+
+              <div className="flex items-center justify-between py-2 border-t border-border/40">
+                <span className="text-xs text-muted-foreground">
                   {t.hermesRow}
                 </span>
                 <StatusIndicator state={hermes} t={t} />
@@ -405,6 +520,12 @@ export default function SocialDashboard({ lang }: SocialDashboardProps) {
                 </span>
                 <StatusIndicator state={telegram} t={t} />
               </div>
+
+              {facebook.error && (
+                <p className="text-xs text-rose-500 bg-rose-500/5 p-3 rounded-lg border border-rose-500/10 break-words leading-relaxed">
+                  {t.facebookRow}: {facebook.error}
+                </p>
+              )}
 
               {hermes.error && (
                 <p className="text-xs text-rose-500 bg-rose-500/5 p-3 rounded-lg border border-rose-500/10 break-words leading-relaxed">
@@ -420,15 +541,13 @@ export default function SocialDashboard({ lang }: SocialDashboardProps) {
 
               <Button
                 onClick={checkConnections}
-                disabled={
-                  hermes.status === "checking" || telegram.status === "checking"
-                }
+                disabled={anyChecking}
                 variant="outline"
                 size="sm"
                 className="w-full flex items-center justify-center gap-2 mt-2"
               >
                 <RefreshCw
-                  className={`h-3 w-3 ${hermes.status === "checking" || telegram.status === "checking" ? "animate-spin" : ""}`}
+                  className={`h-3 w-3 ${anyChecking ? "animate-spin" : ""}`}
                 />
                 <span>{t.testConnection}</span>
               </Button>

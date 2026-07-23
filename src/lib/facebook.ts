@@ -4,10 +4,16 @@
 // hopping through the Hermes gateway. Doctrine unchanged: this layer only relays
 // approved copy — Claude writes it (the /social skill), a human approves.
 //
-// Setup (one-time, Abdout): create the Facebook Page; create a Meta app (dev
-// mode is enough to post to a Page you admin — no App Review); generate a
-// long-lived Page access token; set FACEBOOK_PAGE_ID + FACEBOOK_PAGE_ACCESS_TOKEN.
-// See the manual checklist in twenty-deploy/SOCIAL-SETUP.md.
+// Setup (one-time, Abdout): create the Facebook Page; create a Meta **Business**
+// app (a Consumer app can never request Pages permissions); grant
+// pages_manage_posts + pages_read_engagement + pages_show_list; exchange for a
+// permanent Page access token (expires_at: 0). See the checklist in
+// docs/SOCIAL-AUTOMATION.md.
+//
+// Per-product: every brand has its own Page, so config resolves from
+// FACEBOOK_PAGE_ID_<PRODUCT> / FACEBOOK_PAGE_ACCESS_TOKEN_<PRODUCT> (product id
+// uppercased — HOGWARTS, MKAN, DATABAYT). The legacy unsuffixed pair is the
+// hogwarts fallback, kept so an env that predates the split still posts.
 
 const GRAPH_VERSION = "v21.0";
 
@@ -16,12 +22,29 @@ export interface FacebookConfig {
   token: string;
 }
 
-export async function getFacebookConfig(): Promise<FacebookConfig> {
-  // .trim() guards against the stray trailing \n Vercel env vars can carry.
+// .trim() guards against the stray trailing \n Vercel env vars can carry.
+function env(name: string): string {
+  return (process.env[name] ?? "").trim();
+}
+
+export async function getFacebookConfig(
+  product?: string,
+): Promise<FacebookConfig> {
+  const id = (product ?? "hogwarts").toUpperCase();
+  // The legacy unsuffixed vars are hogwarts's — only that product falls back.
+  const legacy = id === "HOGWARTS";
   return {
-    pageId: (process.env.FACEBOOK_PAGE_ID ?? "").trim(),
-    token: (process.env.FACEBOOK_PAGE_ACCESS_TOKEN ?? "").trim(),
+    pageId:
+      env(`FACEBOOK_PAGE_ID_${id}`) || (legacy ? env("FACEBOOK_PAGE_ID") : ""),
+    token:
+      env(`FACEBOOK_PAGE_ACCESS_TOKEN_${id}`) ||
+      (legacy ? env("FACEBOOK_PAGE_ACCESS_TOKEN") : ""),
   };
+}
+
+function notConfigured(product?: string): string {
+  const id = (product ?? "hogwarts").toUpperCase();
+  return `FACEBOOK_PAGE_ID_${id} / FACEBOOK_PAGE_ACCESS_TOKEN_${id} not set — see /docs/social`;
 }
 
 // Graph errors look like { error: { message: "..." } } — surface the message,
@@ -33,45 +56,47 @@ async function facebookError(res: Response): Promise<string> {
   return body?.error?.message ?? `Facebook Graph API error ${res.status}`;
 }
 
-export async function checkFacebookHealth(): Promise<{
+export async function checkFacebookHealth(product?: string): Promise<{
   ok: boolean;
   name?: string;
   error?: string;
 }> {
-  const { pageId, token } = await getFacebookConfig();
+  const { pageId, token } = await getFacebookConfig(product);
   if (!token || !pageId) {
-    return {
-      ok: false,
-      error: "FACEBOOK_PAGE_ID / FACEBOOK_PAGE_ACCESS_TOKEN not set — see /docs/social",
-    };
+    return { ok: false, error: notConfigured(product) };
   }
   try {
-    const url = new URL(`https://graph.facebook.com/${GRAPH_VERSION}/${pageId}`);
+    const url = new URL(
+      `https://graph.facebook.com/${GRAPH_VERSION}/${pageId}`,
+    );
     url.searchParams.set("fields", "name");
     url.searchParams.set("access_token", token);
     const res = await fetch(url, { signal: AbortSignal.timeout(3000) });
     if (!res.ok) {
       return { ok: false, error: await facebookError(res) };
     }
-    const data = (await res.json().catch(() => null)) as { name?: string } | null;
+    const data = (await res.json().catch(() => null)) as {
+      name?: string;
+    } | null;
     return { ok: true, name: data?.name };
   } catch (err: unknown) {
     return {
       ok: false,
-      error: err instanceof Error ? err.message : "Failed to reach the Facebook Graph API",
+      error:
+        err instanceof Error
+          ? err.message
+          : "Failed to reach the Facebook Graph API",
     };
   }
 }
 
 export async function sendFacebookPost(
   text: string,
+  product?: string,
 ): Promise<{ ok: boolean; error?: string }> {
-  const { pageId, token } = await getFacebookConfig();
+  const { pageId, token } = await getFacebookConfig(product);
   if (!token || !pageId) {
-    return {
-      ok: false,
-      error: "FACEBOOK_PAGE_ID / FACEBOOK_PAGE_ACCESS_TOKEN not set — see /docs/social",
-    };
+    return { ok: false, error: notConfigured(product) };
   }
   try {
     const res = await fetch(

@@ -25,8 +25,9 @@ export default async function SocialPage({ params }: SocialPageProps) {
     redirect(`/${lang}/login`);
   }
 
+  // Same shell as the homepage — PageHeader + a bar under it, one rhythm.
   return (
-    <div className="container mx-auto max-w-5xl py-8 px-4 sm:px-6 lg:px-8">
+    <div className="px-responsive lg:px-0">
       <SocialDashboard lang={locale} />
     </div>
   );

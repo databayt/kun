@@ -136,10 +136,52 @@ parent `piece` with per-platform child `variants`, not 8 disconnected posts. ~3 
   trimmed (Vercel trailing-`\n` gotcha); dead chat endpoint deleted. ✅
 - `src/components/root/social/config.ts` — `CHANNELS` registry (9 channels with `wired` flags;
   slack live, rest _soon_) shared by the dashboard toggles and the Zod enum. ✅
-- `src/app/[lang]/(root)/engine/social/page.tsx` — server-boundary `auth()` guard → `/login`. ✅
+- `src/app/[lang]/(root)/social/page.tsx` — server-boundary `auth()` guard → `/login`. ✅
 - `scripts/post-to-hermes.mjs` — `--prompt` draft-and-blast lane removed; now a pure
   pre-approved dispatcher, default channel `slack`. ✅
 - `.env.example` — documents `NEXT_PUBLIC_HERMES_API_URL` (health-check URL; key stays server-side). ✅
+
+### Multi-product + auto-post — ✅ done 2026-07-23
+
+The hub went from "one brand's channels" to "5 brands × 9 channels", and grew a draft-and-approve
+cron. What landed:
+
+- `src/components/root/social/products.ts` — the `PRODUCTS` registry (hogwarts · mkan · databayt ·
+  sijillee · moalimee) with per-product channel wiring, and `productChannelWired(product, channel,
+globalWired)` — the AND of "transport exists" and "this brand has a destination on it". ✅
+- `src/lib/facebook.ts` — product-aware: `FACEBOOK_PAGE_ID_<PRODUCT>` /
+  `FACEBOOK_PAGE_ACCESS_TOKEN_<PRODUCT>`, with the legacy unsuffixed pair kept as the **hogwarts**
+  fallback only. `checkFacebookHealth(product)` / `sendFacebookPost(text, product)`. ✅
+- `src/lib/social-publish.ts` — the egress fan-out extracted so the Server Action and the approval
+  route take the identical transport path and re-check per-product wiring at the last gate. ✅
+- `src/actions/post-social.ts` — `product` in the Zod schema (enum over `PRODUCT_IDS`) plus a
+  per-product wired-only refine; `verifyFacebookConnection(product)`. Contributor re-check
+  unchanged. ✅
+- `src/components/root/social/social-dashboard.tsx` — a product `Select` (the shadcn theme-selector
+  pattern, from `databayt/codebase`) in a `border-b-[0.5px] py-3` bar under `PageHeader`, matching
+  the homepage rhythm. Selection is clamped on product switch so an unwired channel can never stay
+  selected. Facebook joins the Egress panel and names the resolved Page. ✅
+- Route moved `/[lang]/engine/social` → `/[lang]/social`, with 308s from the old paths in
+  `next.config.ts`. ✅
+
+**Auto-post — draft, approve, then publish.** No unattended publishing to public brand pages.
+
+| Piece                                 | What it does                                                                                                                                                  |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `vercel.json` `crons`                 | Daily `GET /api/social/cron` at 06:00 UTC                                                                                                                     |
+| `src/app/api/social/cron/route.ts`    | `CRON_SECRET` bearer (timing-safe) → one draft per opted-in product → review message with a signed Publish link                                               |
+| `src/lib/social-draft.ts`             | `SOCIAL_DRAFT_SOURCE=hermes` (default, doctrine-pure) or `=anthropic` (opt-in, because billing is subscription-only)                                          |
+| `src/lib/social-token.ts`             | HMAC-SHA256 approval token keyed by `CRON_SECRET`; 12h TTL; carries `{product, channels, text}`; text capped at 1200 chars so the link survives a chat client |
+| `src/lib/social-review.ts`            | Hermes/Slack first, else a **private** `TELEGRAM_REVIEW_CHAT_ID` — never `TELEGRAM_CHANNEL_ID`, which is the public brand channel                             |
+| `src/app/api/social/publish/route.ts` | Verifies the token, delivers, logs, echoes the outcome back to the review channel                                                                             |
+
+Known limits, stated rather than hidden: the approval link is **replayable until it expires**
+(stateless by design — no `SocialPost` table yet), and anyone holding the link can publish, so the
+review channel must stay private. Both go away when persistence lands.
+
+Env: `CRON_SECRET` (required), `SOCIAL_AUTOPOST_PRODUCTS` (empty = nothing auto-posts),
+`SOCIAL_DRAFT_SOURCE`, `SOCIAL_DRAFT_MODEL`, `SOCIAL_DRAFT_LOCALE`, `SOCIAL_REVIEW_CHANNEL`,
+`TELEGRAM_REVIEW_CHAT_ID`, `SOCIAL_PUBLIC_URL`.
 
 ### Persistence, scheduling, metrics
 
@@ -194,8 +236,10 @@ Effort is a cost. Social must be accountable to the drive like everything else:
    (`src/lib/telegram.ts`), per-transport dispatch in the publish action, dual status +
    gating in the hub, `scripts/post-to-telegram.mjs` headless lane, L2 staged. Pending only
    the 5-min account task above (bot + channel + env) to go live.
-4. **Phase 4 — multi-channel** — FB/IG/LinkedIn (review gates) + X (`/decide` on cost); aggregator
-   decision for TikTok/Snapchat. WhatsApp stays community-broadcast, not automated.
+4. **Phase 4 — multi-channel** — Facebook ✅ live 2026-07-11, multi-product ✅ 2026-07-23 (hogwarts,
+   mkan, databayt each on their own Page + token; sijillee/moalimee await Pages). Draft-and-approve
+   auto-post cron ✅ 2026-07-23. Remaining: IG/LinkedIn (review gates) + X (`/decide` on cost);
+   aggregator decision for TikTok/Snapchat. WhatsApp stays community-broadcast, not automated.
 5. **Phase 5 — L4 full-auto** — only after the guardrail layer (LLM-judge gate + rate limit +
    kill switch) exists and `/decide` signs off.
 

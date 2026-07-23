@@ -142,17 +142,32 @@ Saying "social post" (or «منشور تواصل») in prose activates it — no
 
 ## Current status
 
-The Social Hub at [`/engine/social`](/engine/social) is hardened (Phase 2, 2026-07-10):
+The Social Hub at [`/social`](/social) is multi-product (Phase 3, 2026-07-23):
 
-- **Works** — bilingual (en/ar, RTL) composer with a config-driven channel registry (9 channels;
-  **Telegram live via direct Bot API + Slack via Hermes**, the rest marked *soon* until their
-  adapters land), per-transport health checks and publish gating,
-  Zod-validated publish, a contributor re-check inside the action (JWT sessions outlive allowlist
-  removal), and a server-boundary auth guard on the page.
+- **Works** — bilingual (en/ar, RTL) composer with a config-driven channel registry (9 channels)
+  **× a product registry** (hogwarts · mkan · databayt · sijillee · moalimee). A product select
+  — same visual language as the shadcn theme selector — scopes the whole page: channel toggles,
+  health checks, and publish all carry the chosen brand.
+- **Per-product Facebook** — each brand has its own Page and its own permanent Page token, read
+  from `FACEBOOK_PAGE_ID_<PRODUCT>` / `FACEBOOK_PAGE_ACCESS_TOKEN_<PRODUCT>`. The Egress panel
+  names the Page the token resolved to, which is how you catch a crossed token before publishing.
+  Live for hogwarts, mkan, and databayt; sijillee and moalimee have no Page yet.
+- **Per-product wiring** — a channel is publishable only when the global transport *and* that
+  brand's own destination are wired (`productChannelWired`). Telegram and Slack stay `databayt`-only:
+  there is exactly one Telegram channel and one Slack channel, both org-level, so claiming them for
+  a product brand would post "as Hogwarts" into the org channel.
+- **Auto-post is draft-and-approve** — a daily Vercel cron (`/api/social/cron`, `CRON_SECRET`-guarded)
+  drafts per opted-in product and sends the draft to a private review channel with a signed,
+  12-hour, one-click Publish link. Nothing publishes unattended. Opt in per product with
+  `SOCIAL_AUTOPOST_PRODUCTS`; empty (the default) means the cron does nothing.
+- **Drafting stays out of the relays** — `SOCIAL_DRAFT_SOURCE=hermes` (default) hands the ask to
+  Hermes; `=anthropic` drafts server-side via the API and is opt-in because the engine's billing
+  posture is subscription-only.
 - **Removed** — the in-app AI draft card: gateway-LLM drafting violated the layer boundary, so
   drafting now lives in the `/social` skill (Claude-native).
 - **Still pending** — adapters beyond Slack (see [Hermes](/docs/hermes)), persistence
-  (`SocialPost`), scheduling, and metrics pull-back — tracked in `docs/SOCIAL-AUTOMATION.md`.
+  (`SocialPost`), per-brand Telegram/Slack channels, and metrics pull-back — tracked in
+  `docs/SOCIAL-AUTOMATION.md`.
 
 ## See also
 

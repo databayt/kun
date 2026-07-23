@@ -25,6 +25,17 @@ const nextConfig: NextConfig = {
         destination: "/en/docs/:path*",
         permanent: false,
       },
+      // The Social Hub moved up out of /engine — keep old links alive.
+      {
+        source: "/:lang/engine/social",
+        destination: "/:lang/social",
+        permanent: true,
+      },
+      {
+        source: "/engine/social",
+        destination: "/en/social",
+        permanent: true,
+      },
     ];
   },
 };

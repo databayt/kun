@@ -61,10 +61,17 @@ export async function checkTelegramHealth(): Promise<{
   }
 }
 
+// `chatIdOverride` exists so internal traffic (draft reviews carrying a publish
+// link) can be addressed to a private chat instead of TELEGRAM_CHANNEL_ID, which
+// is the public brand channel. Callers must pass it deliberately — the default
+// stays the brand channel.
 export async function sendTelegramPost(
   text: string,
+  chatIdOverride?: string,
 ): Promise<{ ok: boolean; error?: string }> {
-  const { token, chatId } = await getTelegramConfig();
+  const config = await getTelegramConfig();
+  const token = config.token;
+  const chatId = (chatIdOverride ?? config.chatId).trim();
   if (!token) {
     return {
       ok: false,

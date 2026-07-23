@@ -41,7 +41,10 @@ Hermes), optional `--publish` (dispatch after explicit approval).
    the same approval gate; Telegram albums double as client DMs).
 4. **Stage for approval** — show copy variants + media paths to Abdout/Ali/Samia. Stop here.
 5. **Publish** (only after explicit approval, or `--publish` given after the gate):
-   - Dashboard: `/engine/social` composer (contributors-only, Zod-validated, per-transport).
+   - Dashboard: `/social` composer (contributors-only, Zod-validated, per-transport,
+     **per-product** — pick the brand in the Product select; Facebook resolves that
+     brand's own Page + token, and a channel is only publishable when the brand is
+     wired for it).
    - Headless telegram: `node scripts/post-to-telegram.mjs --text "<approved copy>"`.
    - Headless hermes channels: `node scripts/post-to-hermes.mjs --text "<approved copy>" --channels slack`.
 6. **Log** — note the post + slot in the content calendar; UTM lands in PostHog for the

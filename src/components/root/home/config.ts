@@ -164,7 +164,7 @@ export const homeItems: HomeItem[] = [
     description: "Manage social posts and auto-publish via Hermes.",
     icon: "TwitterIcon",
     image: "twitter.png",
-    href: "/engine/social",
+    href: "/social",
     group: "integrations",
   },
   {

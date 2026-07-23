@@ -4304,7 +4304,7 @@
             "Draft Arabic-first copy + per-channel variants (Claude-native, never the gateway LLM) with UTM links",
             "Render text-free media via /higgs; label AI media",
             "Stage for human approval — stop; no approval, no publish",
-            "Publish via /engine/social composer, scripts/post-to-telegram.mjs, or scripts/post-to-hermes.mjs; UTM → PostHog"
+            "Publish via /social composer, scripts/post-to-telegram.mjs, or scripts/post-to-hermes.mjs; UTM → PostHog"
           ],
           "connects": ["higgs", "weekly", "carousel"],
           "depends": []
