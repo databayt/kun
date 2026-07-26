@@ -1,0 +1,67 @@
+name: Social drain
+
+# Publishes variants whose scheduledFor has passed.
+#
+# Here rather than in vercel.json because a drain needs to run every few
+# minutes and Vercel cron frequency is a plan-tier limit — kun is on Hobby and
+# already spends its cron slot on the 06:00 drafting run. Actions is free at
+# this cadence, so scheduling does not block on a Vercel Pro upgrade.
+#
+# GitHub schedules are best-effort and can lag under load, so treat the
+# interval as "at least every 15 minutes", never as an exact clock. Anything
+# missed is simply picked up by the next run — the drain is idempotent, and a
+# variant it cannot claim is skipped rather than double-posted.
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  # Never two drains at once. The conditional claim would stop a double post
+  # anyway, but not overlapping is cheaper than racing.
+  group: social-drain
+  cancel-in-progress: false
+
+jobs:
+  drain:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish due variants
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: ${{ vars.SITE_URL || 'https://kun.databayt.org' }}
+        run: |
+          if [ -z "$CRON_SECRET" ]; then
+            echo "CRON_SECRET secret is not set — refusing to call the drain."
+            exit 1
+          fi
+
+          response=$(mktemp)
+          code=$(curl -sS -o "$response" -w '%{http_code}' --max-time 120 \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            "$SITE_URL/api/social/drain")
+
+          echo "HTTP $code"
+          cat "$response"
+          echo
+
+          # A 503 means the deployment has no CRON_SECRET — worth surfacing, but
+          # it is a config gap rather than a failed publish, so do not fail the
+          # run and page someone every 15 minutes over it.
+          if [ "$code" = "503" ]; then
+            echo "::warning::Drain disabled on the deployment (no CRON_SECRET)."
+            exit 0
+          fi
+
+          if [ "$code" != "200" ]; then
+            echo "::error::Drain returned HTTP $code"
+            exit 1
+          fi
+
+          # 200 with ok:false means a variant exhausted its retries. The review
+          # channel already got the detail; flag it here so the run is visibly
+          # not-green without failing the schedule.
+          if grep -q '"ok":false' "$response"; then
+            echo "::warning::A scheduled post failed permanently — see the review channel."
+          fi
