@@ -1,0 +1,152 @@
+---
+title: Interconnection
+description: How every piece connects — kun engine, machines, Hermes, CRM, and the four Claude surfaces — and how to reuse or contribute to the map
+---
+
+# Interconnection
+
+How the whole system holds together: the **kun engine**, the **machine fleet**, the **Hermes gateway**, the **self-hosted CRM**, and the four surfaces you touch Claude from (terminal, chat, Cowork, phone).
+
+> **The core insight: nothing talks machine-to-machine.** Every machine talks to a small set of shared cloud services — GitHub, Slack, Vercel, the CRM — and those services *are* the interconnection. No VPN, no port-forwarding, no server administration for the team.
+
+## The big picture
+
+```
+                        ┌─────────────────────────────────────────┐
+                        │            SHARED FABRIC                │
+                        │                                         │
+                        │  GitHub ── code + issues + kun config   │
+                        │  Slack ─── databayt-sh (human bus)      │
+                        │  Vercel ── kun.databayt.org + products  │
+                        │  CRM ───── *.crm.databayt.org           │
+                        └────────▲──────────▲──────────▲──────────┘
+                                 │          │          │
+              git pull/push      │          │          │   browser login
+         ┌───────────────────────┘          │          └──────────────────┐
+         │                                  │                             │
+┌────────┴─────────────┐          ┌─────────┴──────────┐        ┌─────────┴────────┐
+│  HOST MACHINE        │          │  TEAMMATE MACHINES │        │  PHONES          │
+│  (Abdout's Mac)      │          │  (× 6)             │        │                  │
+│                      │          │                    │        │  Anthropic app   │
+│  Claude Code (c)     │          │  Claude Code +     │        │  ← PushNotif     │
+│  Cowork (Desktop)    │          │  kun config clone  │        │  Slack → Hermes  │
+│  Hermes gateway (h)  │◄─────────┼────────────────────┼────────│  claude.ai/code  │
+│   ↑ Socket Mode      │  (never  │                    │ direct)│                  │
+└──────────────────────┘          └────────────────────┘        └──────────────────┘
+```
+
+Machines never connect to each other directly. The arrows all point at the shared fabric.
+
+## Layer 1 — Kun engine: a repo, not a service
+
+Kun is the shared brain, and it propagates through **git**. The `.claude/` tree (skills, agents, rules, vocabulary, memory, hooks) *is* the engine; any machine that clones `databayt/kun` and runs [onboarding](/docs/onboarding) becomes an engine node.
+
+```
+databayt/kun (.claude/ config)
+     │
+     │  clone + daily pull (maintain heartbeat)
+     ├────────────────► Abdout's Mac ──┐
+     └────────────────► 6 teammate  ───┤  heartbeat status
+                        machines       │
+                                       ▼
+                        Dashboard issue (kun#133)
+```
+
+- **Propagation** = `git pull`. There is no config server.
+- **The maintain heartbeat** runs daily on every machine: pull → refresh → health-check → report status to the shared dashboard issue. Fleet health is visible without touching anyone's laptop.
+- **Drift detection**: `.claude/engine.json` holds the expected counts; `/health` flags divergence.
+
+## Layer 2 — The machine fleet
+
+| Machine | Runs | Hosts services? |
+| ------- | ---- | --------------- |
+| **Host machine** (Abdout's Mac) | Claude Code (`c` lane) · Cowork · Hermes gateway (`h` lane) | Yes — Hermes |
+| **Teammate machines** (× 6) | Claude Code + kun config clone | No — consume everything by URL |
+| **Phones** | Anthropic app · Slack · claude.ai/code | No — thin remote controls |
+
+Only the host machine runs a long-lived service (Hermes). Everyone else consumes the shared fabric with a browser and a terminal.
+
+## Layer 3 — Hermes: one binary, two pipes
+
+Hermes ([hermes-agent](https://github.com/nousresearch/hermes-agent), the `h` lane) runs on the host machine and is **a relay, never the LLM** — Claude writes every word. It carries two unrelated flows:
+
+```
+PIPE 1 — inbound gateway (talk to the machine)
+  Phone / Slack app ──DM──► Slack ──Socket Mode──► Hermes ──► machine's agent
+                                    (outbound WS,             acts, replies,
+                                     no public endpoint)      pushes proactively
+
+PIPE 2 — social egress (the machine talks out)
+  kun.databayt.org Social Hub ──HERMES_API_URL──► Hermes ──► Slack / X channels
+        (on Vercel)           ──direct Bot/Graph API──────► Telegram + Facebook
+                                                             (no Hermes needed)
+```
+
+> **Hermes-Slack ≠ Slack MCP.** Hermes lets *you* talk to your machine from Slack; the Slack MCP lets *Claude* post to Slack as a tool. Both coexist — neither replaces the other. Full wiring: [Hermes](/docs/hermes).
+
+Telegram and Facebook deliberately bypass Hermes — the site calls their official APIs directly over HTTPS, which works from Vercel with no local gateway.
+
+## Layer 4 — CRM: the business memory
+
+Self-hosted from `databayt/crm`, served at four product subdomains. It never runs on teammate machines — everyone reaches it by browser with **one identity** (`<id>@databayt.org`, the same login as Slack).
+
+| Workspace | URL | Pipeline |
+| --------- | --- | -------- |
+| Hogwarts | hogwarts.crm.databayt.org | Schools, sponsors, pilots |
+| Mkan | mkan.crm.databayt.org | Property/rental leads |
+| Sijillee | sijillee.crm.databayt.org | Pre-launch prospects |
+| Moallimee | moallimee.crm.databayt.org | Pre-launch prospects |
+
+Business state flows back into the engine through a human-paced loop: Aseel keeps pipelines clean → the captain reads headline numbers weekly into `kun/.claude/memory/pipeline.json` → the engine's weekly planning sees real pipeline data. Details: [CRM](/docs/crm).
+
+## Layer 5 — The four surfaces
+
+| Surface | Where | Role | Connects via |
+| ------- | ----- | ---- | ------------ |
+| **Claude Code** | Terminal, every machine | The *doing* lane — builds, ships, fixes | git/GitHub, MCPs, hooks, skills |
+| **Claude chat** | claude.ai + mobile app | Thinking anywhere; claude.ai/code runs repo sessions from the phone | GitHub cloud sessions, push notifications |
+| **Cowork** | Claude Desktop | The *planning* lane — no shell, no hooks | Shares `~/.claude/` by filesystem MCP; hands off via `bridge.md` + issues |
+| **Phone** | iPhone/Android | Receive + steer on the go | PushNotification · Slack → Hermes → machine · claude.ai/code |
+
+> **Cowork and Code never share conversations.** They share only files (`~/.claude/`), GitHub issues, and push notifications. The bridge is deliberately file-shaped — `~/.claude/bridge.md` for short handoffs — so either side picks up where the other left off at session start. Details: [Cowork](/docs/cowork).
+
+## The connective tissue, one line each
+
+| Bus | Carries |
+| --- | ------- |
+| **GitHub** | Code, kun config, work queue (issues), heartbeat dashboard — the durable bus everything settles onto |
+| **Slack** | The human bus — team talk, Hermes inbound gateway, Claude's MCP egress |
+| **Vercel** | The deploy plane — pushing `main` auto-deploys; also serves the databayt.org DNS |
+| **bridge.md** | Local Cowork ↔ Code handoff on the same machine |
+| **PushNotification** | The instant machine-to-pocket channel |
+
+## Reuse it — run this map for your own team
+
+Everything above is configuration, not product. To stand up the same topology:
+
+1. **Fork [`databayt/kun`](https://github.com/databayt/kun)** — the `.claude/` tree is the engine. Strip `docs/` and `.claude/memory/` of databayt-specific state; keep the structure.
+2. **Pick your fabric** — a GitHub org (code + issues + config bus), a Slack workspace (human bus), a Vercel team (deploy plane). Free tiers cover a small team.
+3. **Run onboarding on each machine** — clone, `setup.sh`, and every laptop becomes an engine node. See [Onboarding](/docs/onboarding).
+4. **Optional lanes** — wire [Hermes](/docs/hermes) on one always-on machine if you want chat-to-machine access; self-host a CRM if you have a sales pipeline. Neither is required for the core loop.
+5. **Adopt the heartbeat** — a daily pull + health report per machine keeps a distributed team's config from drifting. The scripts live in `.claude/scripts/`.
+
+What's genuinely databayt-specific: the vocabulary (our keywords), the memory (our clients), the docs (our decisions). What's generic and reusable: the layer model, the git-propagated config, the bus discipline, the heartbeat, the Cowork bridge, the Hermes two-pipe pattern.
+
+## Contribute to it
+
+**Team** — work directly on `main`, no branches, no PRs (see the workflow rule in `.claude/rules/github-workflow.md`). Docs live in `content/docs/`; config in `.claude/`. Commit small and often; Vercel deploys on push. When you change the topology (new service, new lane, new bus), update **this page** in the same commit — the map is only useful while it's true.
+
+**Community** — the repos are public under [github.com/databayt](https://github.com/databayt):
+
+- **Questions and ideas** → open an issue on `databayt/kun`.
+- **Fixes and additions** → fork and open a PR; a maintainer reviews and lands it on `main` (the no-PR rule is internal discipline, not a door closed to outside contributions).
+- **Reusing the engine** → you don't need permission; it's open source. If you adapt the map for your team, an issue telling us what you changed makes the pattern better for everyone.
+
+## Related
+
+- [Architecture](/docs/architecture) — the 5-layer engine model this map runs on
+- [Onboarding](/docs/onboarding) — become an engine node
+- [Hermes](/docs/hermes) — the gateway lane, full Slack wiring
+- [CRM](/docs/crm) — workspaces, identity, pipeline hygiene
+- [Cowork](/docs/cowork) — the planning lane + bridge protocol
+- [Self-Hosting](/docs/self-hosting) — when (and when not) to run your own servers
