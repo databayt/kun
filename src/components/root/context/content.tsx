@@ -1,58 +1,60 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useSession, signIn } from "next-auth/react"
-import { type Spell } from "@/components/docs/spellbook-data"
+import { useState, useEffect } from "react";
+import { useSession, signIn } from "next-auth/react";
+import { type Spell } from "@/components/docs/spellbook-data";
+// The email-free list — ./config is server-only, and importing it here would
+// ship the login allowlist to the browser.
 import {
-  contributors as allContributors,
-  type Contributor,
-} from "./config"
-import { CloudTag } from "./cloud-tag"
-import { KeywordCard } from "./keyword-card"
-import {
-  Dialog,
-  DialogContent,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
+  contributorsPublic as allContributors,
+  type ContributorPublic,
+} from "./contributors-public";
+import { CloudTag } from "./cloud-tag";
+import { KeywordCard } from "./keyword-card";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 interface ContextContentProps {
-  lang: string
+  lang: string;
 }
 
 export default function ContextContent({ lang }: ContextContentProps) {
-  const isAr = lang === "ar"
-  const { data: session, status: authStatus } = useSession()
+  const isAr = lang === "ar";
+  const { data: session, status: authStatus } = useSession();
 
-  const [selectedSpell, setSelectedSpell] = useState<Spell | null>(null)
+  const [selectedSpell, setSelectedSpell] = useState<Spell | null>(null);
 
   // Login form state
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [error, setError] = useState("")
-  const [loading, setLoading] = useState(false)
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   // Resolve contributor from session
-  const contributor: Contributor | null =
-    allContributors.find((c) => c.id === (session?.user as { contributorId?: string })?.contributorId) || null
+  const contributor: ContributorPublic | null =
+    allContributors.find(
+      (c) =>
+        c.id === (session?.user as { contributorId?: string })?.contributorId,
+    ) || null;
 
   async function handleLogin(e: React.FormEvent) {
-    e.preventDefault()
-    setError("")
-    setLoading(true)
+    e.preventDefault();
+    setError("");
+    setLoading(true);
 
     const result = await signIn("credentials", {
       email,
       password,
       redirect: false,
-    })
+    });
 
     if (result?.error) {
-      setError(isAr ? "بيانات خاطئة" : "invalid credentials")
-      setLoading(false)
-      return
+      setError(isAr ? "بيانات خاطئة" : "invalid credentials");
+      setLoading(false);
+      return;
     }
 
-    window.location.reload()
+    window.location.reload();
   }
 
   // Loading or not authenticated — skeleton cloud
@@ -63,22 +65,21 @@ export default function ContextContent({ lang }: ContextContentProps) {
           <CloudTag selectedStory={null} contributor={null} skeleton />
         </div>
       </div>
-    )
+    );
   }
 
   if (!contributor) {
     return (
       <div className="container-wrapper h-[calc(100vh-var(--header-height)-var(--footer-height))]">
         <div className="mx-auto max-w-xl flex h-full flex-col items-center justify-center px-6">
-          <CloudTag
-            selectedStory={null}
-            contributor={null}
-            skeleton
-          />
+          <CloudTag selectedStory={null} contributor={null} skeleton />
         </div>
 
         <Dialog open onOpenChange={() => {}}>
-          <DialogContent className="max-w-xs p-6 gap-0 [&>button]:hidden" onPointerDownOutside={(e) => e.preventDefault()}>
+          <DialogContent
+            className="max-w-xs p-6 gap-0 [&>button]:hidden"
+            onPointerDownOutside={(e) => e.preventDefault()}
+          >
             <button
               type="button"
               onClick={() => window.history.back()}
@@ -108,20 +109,20 @@ export default function ContextContent({ lang }: ContextContentProps) {
 
               {error && <p className="text-xs text-red-500">{error}</p>}
 
-              <Button
-                type="submit"
-                disabled={loading}
-                className="w-full"
-              >
+              <Button type="submit" disabled={loading} className="w-full">
                 {loading
-                  ? isAr ? "جاري..." : "signing in..."
-                  : isAr ? "دخول" : "sign in"}
+                  ? isAr
+                    ? "جاري..."
+                    : "signing in..."
+                  : isAr
+                    ? "دخول"
+                    : "sign in"}
               </Button>
             </form>
           </DialogContent>
         </Dialog>
       </div>
-    )
+    );
   }
 
   return (
@@ -140,5 +141,5 @@ export default function ContextContent({ lang }: ContextContentProps) {
         lang={lang}
       />
     </div>
-  )
+  );
 }

@@ -2,9 +2,9 @@
 
 import { cn } from "@/lib/utils"
 import { type Spell } from "@/components/docs/spellbook-data"
+import { type ContributorPublic } from "./contributors-public"
 import {
   type Story,
-  type Contributor,
   type Weight,
   keywordGroups,
   getSpellsForGroup,
@@ -13,7 +13,7 @@ import {
 
 interface CloudTagProps {
   selectedStory: Story | null
-  contributor: Contributor | null
+  contributor: ContributorPublic | null
   onSelect?: (spell: Spell) => void
   skeleton?: boolean
 }

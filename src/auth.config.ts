@@ -1,6 +1,6 @@
 import type { NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { contributors } from "@/components/root/context/config";
+import { contributors } from "@/components/root/context/contributors.server";
 import { dummyVerify, verifyPassword } from "@/lib/password";
 
 // Per-contributor scrypt hash, keyed off the contributor id:

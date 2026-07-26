@@ -1,6 +1,6 @@
 import NextAuth from "next-auth"
 import type { DefaultSession } from "next-auth"
-import { contributors } from "@/components/root/context/config"
+import { contributors } from "@/components/root/context/contributors.server"
 import authConfig from "./auth.config"
 
 const allowedEmails = contributors.map((c) => c.email)

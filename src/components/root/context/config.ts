@@ -1,4 +1,7 @@
 import { schools, type Spell } from "@/components/docs/spellbook-data"
+// The email-free contributor shape. This module is imported by client
+// components, so it must never reach for the server-only list.
+import { type ContributorPublic } from "./contributors-public"
 
 // ─── Repos ──────────────────────────────────────────────────────────────────────
 
@@ -19,40 +22,6 @@ export const repos: RepoConfig[] = [
 
 export function getRepo(id: string): RepoConfig | undefined {
   return repos.find((r) => r.id === id)
-}
-
-// ─── Contributors ───────────────────────────────────────────────────────────────
-
-export interface Contributor {
-  id: string
-  name: string
-  nameAr: string
-  email: string
-  role: "engineer" | "qa" | "research" | "ops"
-  keywords: string[]
-}
-
-export const contributors: Contributor[] = [
-  {
-    id: "abdout", name: "Abdout", nameAr: "عبدوت", email: "abdout@databayt.org", role: "engineer",
-    keywords: ["feature", "spec", "schema", "ready", "code", "wire", "check", "ship", "deploy", "build", "dev", "fix", "performance", "analyze"],
-  },
-  {
-    id: "ali", name: "Ali", nameAr: "علي", email: "ali@databayt.org", role: "qa",
-    keywords: ["report", "check", "review", "test", "deploy", "monitor", "handover", "security"],
-  },
-  {
-    id: "samia", name: "Samia", nameAr: "سامية", email: "samia@databayt.org", role: "research",
-    keywords: ["translate", "docs", "clone", "review", "constitution"],
-  },
-  {
-    id: "sedon", name: "Sedon", nameAr: "سدن", email: "sedon@databayt.org", role: "ops",
-    keywords: ["monitor", "deploy", "incident"],
-  },
-]
-
-export function getContributorByEmail(email: string): Contributor | undefined {
-  return contributors.find((c) => c.email === email)
 }
 
 // ─── Stories (Kanban Board) ─────────────────────────────────────────────────────
@@ -180,7 +149,7 @@ export type Weight = 1 | 2 | 3 | 4 | 5
 export function computeWeight(
   keyword: string,
   selectedStory: Story | null,
-  contributor: Contributor | null,
+  contributor: ContributorPublic | null,
 ): Weight {
   let w = 2
 

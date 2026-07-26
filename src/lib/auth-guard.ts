@@ -9,7 +9,7 @@
 // shape most authorization bugs take.
 
 import { auth } from "@/auth";
-import { getContributorByEmail } from "@/components/root/context/config";
+import { getContributorByEmail } from "@/components/root/context/contributors.server";
 
 export async function requireContributor(): Promise<boolean> {
   const session = await auth();
