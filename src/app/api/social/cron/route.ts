@@ -52,7 +52,9 @@ function baseUrl(request: Request): string {
 interface ProductOutcome {
   product: string;
   channels: string[];
-  status: "review_sent" | "skipped" | "failed";
+  // handoff — draft request delivered to Hermes; reply arrives async.
+  // skipped — Hermes down (transient) or nothing to do; retry next run.
+  status: "review_sent" | "handoff" | "skipped" | "failed";
   detail?: string;
 }
 
@@ -118,10 +120,16 @@ export async function GET(request: Request): Promise<Response> {
       locale,
     });
     if (!draft.ok) {
+      // A Hermes hand-off and a transient outage are not failures — only a
+      // genuine error should flip the run's `ok` to false and read as broken.
       results.push({
         product: productId,
         channels,
-        status: "failed",
+        status: draft.handoff
+          ? "handoff"
+          : draft.transient
+            ? "skipped"
+            : "failed",
         detail: draft.error,
       });
       continue;

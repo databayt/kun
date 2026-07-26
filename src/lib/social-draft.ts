@@ -22,7 +22,11 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 
-import { getHermesConfig, sendSocialPost } from "@/lib/hermes";
+import {
+  checkHermesHealth,
+  getHermesConfig,
+  sendSocialPost,
+} from "@/lib/hermes";
 import { MAX_TOKEN_TEXT } from "@/lib/social-token";
 
 // Opus 4.8 by default — brand copy is the last thing to cheap out on. Override
@@ -39,7 +43,12 @@ export interface DraftRequest {
 }
 
 export type DraftResult =
-  { ok: true; text: string; source: string } | { ok: false; error: string };
+  | { ok: true; text: string; source: string }
+  // Three distinct non-ok shapes the cron must tell apart:
+  //   transient — Hermes is configured but unreachable right now; retry later.
+  //   handoff   — the ask reached Hermes; the reply arrives async in the channel.
+  //   (neither) — a genuine failure worth flagging.
+  | { ok: false; error: string; transient?: boolean; handoff?: boolean };
 
 const SYSTEM_PROMPT = `You write social-media copy for databayt, a Sudanese open-source software house building SaaS products for the MENA region.
 
@@ -131,6 +140,30 @@ async function draftViaHermes(req: DraftRequest): Promise<DraftResult> {
         "HERMES_API_URL not set — Hermes is the default draft source and is not reachable from this deployment. Set SOCIAL_DRAFT_SOURCE=anthropic to draft server-side instead (accepts API spend).",
     };
   }
+
+  // Hermes runs on a personal machine and is expected to flap. Probe before
+  // relying on it: a machine that's merely asleep must read as "skipped, retry
+  // next run", not as a config error (which is permanent) or a hard failure
+  // (which reads as something to fix). Without this, a laptop lid closing at
+  // 06:00 UTC looks identical to a broken deployment.
+  const health = await checkHermesHealth();
+  if (!health.ok) {
+    // Opt-in fallback, gated exactly like SOCIAL_DRAFT_SOURCE=anthropic: only
+    // spend on the API when a human has accepted the cost via /decide. Off by
+    // default, so a Hermes outage never silently starts billing.
+    if (
+      draftFallbackAnthropic() &&
+      (process.env.ANTHROPIC_API_KEY ?? "").trim()
+    ) {
+      return draftViaAnthropic(req);
+    }
+    return {
+      ok: false,
+      transient: true,
+      error: `Hermes is configured but unreachable right now (${health.error ?? "no response"}). Draft skipped — it'll retry next run. Set SOCIAL_DRAFT_FALLBACK=anthropic to draft server-side while it's down (accepts API spend).`,
+    };
+  }
+
   // Hermes answers asynchronously in its own channel — the relay call only
   // delivers the ask. The cron reports the hand-off; the reply comes back to the
   // humans watching that channel, who then paste it into /social.
@@ -144,8 +177,12 @@ async function draftViaHermes(req: DraftRequest): Promise<DraftResult> {
     metadata: { kind: "draft_request", ...req },
   });
   if (!res.ok) return { ok: false, error: res.error ?? "Hermes relay failed." };
+  // Not a failure — the ask landed. Flagged so the cron reports a hand-off
+  // rather than counting it as a failed draft (which it did before, flipping
+  // the whole run's `ok` to false on the expected happy path).
   return {
     ok: false,
+    handoff: true,
     error:
       "Draft request handed to Hermes — reply lands in the review channel.",
   };
@@ -160,6 +197,16 @@ export function draftSource(): "hermes" | "anthropic" {
     "anthropic"
     ? "anthropic"
     : "hermes";
+}
+
+// Whether a Hermes outage may fall back to server-side drafting. Opt-in, and
+// deliberately separate from SOCIAL_DRAFT_SOURCE: the default source stays
+// Hermes (free), and only an explicit flag lets a downtime spend API money.
+export function draftFallbackAnthropic(): boolean {
+  return (
+    (process.env.SOCIAL_DRAFT_FALLBACK ?? "").trim().toLowerCase() ===
+    "anthropic"
+  );
 }
 
 export async function draftPost(req: DraftRequest): Promise<DraftResult> {
