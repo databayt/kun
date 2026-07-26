@@ -1,96 +1,42 @@
 "use server";
 
+import { headers } from "next/headers";
 import { z } from "zod";
 import { auth } from "@/auth";
-import { getContributorByEmail } from "@/components/root/context/config";
-import { checkHermesHealth } from "@/lib/hermes";
-import { checkTelegramHealth } from "@/lib/telegram";
-import { checkFacebookHealth } from "@/lib/facebook";
-import { deliverPost } from "@/lib/social-publish";
+import { requireContributor } from "@/lib/auth-guard";
+import { deliverPost, type ChannelOutcome } from "@/lib/social-publish";
+import { getEgressStatus, type EgressStatus } from "@/lib/social-status";
+import { sendReview } from "@/lib/social-review";
+import { createApprovalToken, MAX_TOKEN_TEXT } from "@/lib/social-token";
 import { CHANNELS, CHANNEL_IDS } from "@/components/root/social/config";
 import {
   PRODUCT_IDS,
   productChannelWired,
 } from "@/components/root/social/products";
 
-// Authorization: session presence isn't enough — JWT sessions outlive removal
-// from the contributors allowlist, so every mutating action re-resolves the
-// email against the contributors config at call time.
-async function requireContributor(): Promise<boolean> {
-  const session = await auth();
-  const email = session?.user?.email;
-  if (!email) return false;
-  return Boolean(getContributorByEmail(email));
-}
+export type { EgressStatus } from "@/lib/social-status";
 
-export interface HermesConnectionStatus {
-  connected: boolean;
-  version?: string;
-  error?: string;
-}
-
-export async function verifyHermesConnection(): Promise<HermesConnectionStatus> {
-  const session = await auth();
-  if (!session?.user) {
-    return { connected: false, error: "Unauthorized: Please sign in." };
-  }
-
-  const result = await checkHermesHealth();
-  return {
-    connected: result.ok,
-    version: result.version,
-    error: result.error,
-  };
-}
-
-export interface TelegramConnectionStatus {
-  connected: boolean;
-  username?: string;
-  error?: string;
-}
-
-export async function verifyTelegramConnection(): Promise<TelegramConnectionStatus> {
-  const session = await auth();
-  if (!session?.user) {
-    return { connected: false, error: "Unauthorized: Please sign in." };
-  }
-
-  const result = await checkTelegramHealth();
-  return {
-    connected: result.ok,
-    username: result.username,
-    error: result.error,
-  };
-}
-
-export interface FacebookConnectionStatus {
-  connected: boolean;
-  name?: string;
-  error?: string;
-}
-
-// Facebook is per-brand — the health check names the Page the token resolves to,
-// which is how the dashboard proves the selected product is pointed at the right
-// Page before anyone hits Publish.
-export async function verifyFacebookConnection(
+// One action for all three transports. Three separate actions meant three
+// POSTs and three `auth()` resolutions to paint one status panel; the probes
+// were already parallel server-side, so only the round trips were wasted.
+export async function verifyConnections(
   product?: string,
-): Promise<FacebookConnectionStatus> {
+): Promise<EgressStatus> {
   const session = await auth();
   if (!session?.user) {
-    return { connected: false, error: "Unauthorized: Please sign in." };
+    const denied = {
+      connected: false,
+      error: "Unauthorized: Please sign in.",
+    };
+    return { hermes: denied, telegram: denied, facebook: denied };
   }
-
-  const result = await checkFacebookHealth(product);
-  return {
-    connected: result.ok,
-    name: result.name,
-    error: result.error,
-  };
+  return getEgressStatus(product);
 }
 
 export interface PostResult {
   ok: boolean;
   error?: string;
+  results?: ChannelOutcome[];
 }
 
 const publishSchema = z
@@ -108,6 +54,18 @@ const publishSchema = z
         (ids) => ids.every((id) => CHANNELS.find((c) => c.id === id)?.wired),
         "A selected channel is not wired yet.",
       ),
+    // Platforms fetch the image themselves, so it has to be a public URL — a
+    // CDN render from /higgs, not a blob or a localhost path.
+    mediaUrl: z
+      .string()
+      .trim()
+      .url("Media must be a full URL.")
+      .refine(
+        (value) => /^https?:\/\//i.test(value),
+        "Media URL must start with http(s)://",
+      )
+      .optional()
+      .or(z.literal("").transform(() => undefined)),
   })
   // Wired-only, per brand: the global transport existing isn't enough — this
   // product must have its own destination on that channel.
@@ -138,6 +96,77 @@ export async function publishPostDirect(input: unknown): Promise<PostResult> {
     };
   }
 
-  const { product, text, channels } = parsed.data;
-  return deliverPost({ product, text, channels: [...channels] });
+  const { product, text, channels, mediaUrl } = parsed.data;
+  return deliverPost({ product, text, channels: [...channels], mediaUrl });
+}
+
+export interface ReviewResult {
+  ok: boolean;
+  /** Which relay carried the draft, e.g. "hermes:slack". */
+  via?: string;
+  error?: string;
+}
+
+// The other half of the human gate. The cron already drafts → review → signed
+// link; this lets a contributor push their own copy down the same path instead
+// of publishing straight to a brand page — useful when someone else approves.
+export async function stageForReview(input: unknown): Promise<ReviewResult> {
+  if (!(await requireContributor())) {
+    return { ok: false, error: "Forbidden: contributors only." };
+  }
+
+  const parsed = publishSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      ok: false,
+      error: parsed.error.issues[0]?.message ?? "Invalid input.",
+    };
+  }
+
+  const { product, text, channels, mediaUrl } = parsed.data;
+
+  // The approval token carries the copy inside the URL, so an over-long draft
+  // would mint a link that a chat client silently truncates into a 404.
+  if (text.length > MAX_TOKEN_TEXT) {
+    return {
+      ok: false,
+      error: `Too long to stage for review (${text.length} > ${MAX_TOKEN_TEXT} chars). Shorten it, or publish directly.`,
+    };
+  }
+
+  let link: string;
+  try {
+    const token = createApprovalToken(
+      { p: product, c: [...channels], t: text, m: mediaUrl },
+      12 * 60 * 60,
+    );
+    const configured = (process.env.SOCIAL_PUBLIC_URL ?? "").trim();
+    const origin = configured
+      ? configured.replace(/\/$/, "")
+      : `https://${(await headers()).get("host")}`;
+    link = `${origin}/api/social/publish?token=${encodeURIComponent(token)}`;
+  } catch (err: unknown) {
+    // createApprovalToken throws when CRON_SECRET is unset — an unsigned link
+    // would be a publish endpoint anyone could forge.
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : "Could not sign the link.",
+    };
+  }
+
+  // The media URL is signed into the token (so approving publishes the image,
+  // not just the caption) and repeated in the message so the reviewer can see
+  // what they're about to approve.
+  return sendReview(
+    [
+      `📝 Draft for ${product} → ${channels.join(", ")}`,
+      "",
+      text,
+      ...(mediaUrl ? ["", `Media: ${mediaUrl}`] : []),
+      "",
+      "— staged from /social. Publish (expires in 12h):",
+      link,
+    ].join("\n"),
+    `social draft: ${product}`,
+  );
 }
