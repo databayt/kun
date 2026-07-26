@@ -20,18 +20,10 @@ export type Severity = "low" | "medium" | "high" | "critical";
 export type Language = "ar" | "en" | "mixed" | "other";
 
 export type Classification =
-  | "bug"
-  | "feature"
-  | "question"
-  | "spam"
-  | "destructive"
-  | "duplicate";
+  "bug" | "feature" | "question" | "spam" | "destructive" | "duplicate";
 
 export type Bucket =
-  | "silent-reject"
-  | "low-confidence"
-  | "needs-human"
-  | "verified-report";
+  "silent-reject" | "low-confidence" | "needs-human" | "verified-report";
 
 /**
  * Raw input from the client dialog. Validated by {@link reportSchema}.
@@ -88,7 +80,12 @@ export interface AITriageResult {
 
 export type DuplicateMatch =
   | { found: false }
-  | { found: true; issueNumber: number; similarity: number; existingScore?: number };
+  | {
+      found: true;
+      issueNumber: number;
+      similarity: number;
+      existingScore?: number;
+    };
 
 export interface ScoringBreakdown {
   R: number; // reputation 0..30
@@ -154,4 +151,13 @@ export interface PipelineEvent {
   ipHash: string;
   host: string;
   path: string;
+  /**
+   * The HF9 dedup ledger key, `user:<id>` or `ip:<hash>`.
+   *
+   * Carried on the event rather than rebuilt in the adapter: the write side
+   * used to derive its own key and picked `user:<ipHash>` while the read side
+   * used `user:<userId>`, so dedup never fired for authenticated reporters.
+   * One value, computed once, used by both.
+   */
+  dedupIdentifier?: string;
 }

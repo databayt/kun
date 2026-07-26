@@ -58,14 +58,30 @@ export class RateLimitError extends Error {
 
 export async function assertRateLimit(
   limiterType: keyof typeof rateLimiters,
-  identifier: string
+  identifier: string,
 ): Promise<void> {
-  if (process.env.NODE_ENV === "development" || !redis) return;
+  // Development runs without Upstash on purpose.
+  if (process.env.NODE_ENV === "development") return;
+
+  // Production must fail CLOSED. Returning here on a missing config meant a
+  // deploy without Upstash silently accepted unlimited submissions — the abuse
+  // pipeline looked healthy while enforcing nothing.
+  if (!redis) {
+    throw new Error(
+      "Rate limiting is not configured (UPSTASH_REDIS_REST_URL / UPSTASH_REDIS_REST_TOKEN). Refusing the request rather than accepting it unlimited.",
+    );
+  }
   const limiter = rateLimiters[limiterType];
-  if (!limiter) return;
+  if (!limiter) {
+    throw new Error(
+      `Rate limiter "${limiterType}" is not configured. Refusing the request.`,
+    );
+  }
   const res = await limiter.limit(identifier);
   if (!res.success) {
-    throw new RateLimitError(Math.max(1, Math.ceil((res.reset - Date.now()) / 1000)));
+    throw new RateLimitError(
+      Math.max(1, Math.ceil((res.reset - Date.now()) / 1000)),
+    );
   }
 }
 

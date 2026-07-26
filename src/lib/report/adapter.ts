@@ -20,10 +20,7 @@ import {
   RateLimitError as KunRateLimitError,
 } from "@/lib/rate-limit";
 
-import {
-  RateLimitError,
-  type ReportAdapter,
-} from "./adapters/adapter";
+import { RateLimitError, type ReportAdapter } from "./adapters/adapter";
 import type { PipelineEvent, ReporterContext, ReportInput } from "./types";
 
 // Trim env values — a stray trailing newline in GITHUB_REPO (e.g. "databayt/kun\n")
@@ -74,12 +71,16 @@ export const kunReportAdapter: ReportAdapter = {
     }
   },
 
-  async getRecentSelfSubmissions(identifier: string, withinSec: number): Promise<string[]> {
+  async getRecentSelfSubmissions(
+    identifier: string,
+    withinSec: number,
+  ): Promise<string[]> {
     const redis = getRedis();
     if (!redis) return [];
     const key = `report:dedup:${identifier}`;
     // List of "ts|head" entries pushed on each accepted submission.
-    const raw = (await redis.lrange<string>(key, 0, 19).catch(() => null)) ?? [];
+    const raw =
+      (await redis.lrange<string>(key, 0, 19).catch(() => null)) ?? [];
     const cutoff = Date.now() - withinSec * 1000;
     return raw
       .map((s) => {
@@ -92,7 +93,11 @@ export const kunReportAdapter: ReportAdapter = {
       .filter((v): v is string => v !== null);
   },
 
-  async getCorroborationCount(host: string, path: string, withinDays: number): Promise<number> {
+  async getCorroborationCount(
+    host: string,
+    path: string,
+    withinDays: number,
+  ): Promise<number> {
     const redis = getRedis();
     if (!redis) return 0;
     const key = `report:page:${host}:${normalizedPath(path)}`;
@@ -122,12 +127,15 @@ export const kunReportAdapter: ReportAdapter = {
     if (!redis) return;
 
     // Maintain HF9 ledger — push the description head onto the reporter's list.
-    if (event.outcome !== "silent-reject" && event.outcome !== "duplicate-corroborated") {
-      const id =
-        event.reporterKind === "authenticated"
-          ? `user:${event.ipHash}` // we don't have userId here; ipHash is a proxy
-          : `ip:${event.ipHash}`;
-      const key = `report:dedup:${id}`;
+    if (
+      event.dedupIdentifier &&
+      event.outcome !== "silent-reject" &&
+      event.outcome !== "duplicate-corroborated"
+    ) {
+      // Use the identifier the pipeline computed. Deriving it again here is
+      // what caused the write to key on `user:<ipHash>` while the read keyed on
+      // `user:<userId>` — the ledger was written but never found.
+      const key = `report:dedup:${event.dedupIdentifier}`;
       const entry = `${Date.now()}|${event.path.slice(0, 60)}`;
       await redis.lpush(key, entry).catch(() => {});
       await redis.ltrim(key, 0, 19).catch(() => {});
@@ -139,10 +147,24 @@ export const kunReportAdapter: ReportAdapter = {
       const key = `report:page:${event.host}:${normalizedPath(event.path)}`;
       await redis.incr(key).catch(() => {});
       await redis.expire(key, 60 * 60 * 24 * 7).catch(() => {}); // 7-day window
+
+      // Remember which issue covers this URL so the next report about the same
+      // page corroborates it instead of opening a duplicate. findExistingForUrl
+      // has always read this key and nothing ever wrote it, which made the
+      // whole corroboration path dead code.
+      if (event.issueNumber) {
+        const issueKey = `report:issue:${event.host}:${normalizedPath(event.path)}`;
+        await redis
+          .set(issueKey, event.issueNumber, { ex: 60 * 60 * 24 * 30 })
+          .catch(() => {});
+      }
     }
   },
 
-  async findExistingForUrl(host: string, path: string): Promise<{ issueNumber: number } | null> {
+  async findExistingForUrl(
+    host: string,
+    path: string,
+  ): Promise<{ issueNumber: number } | null> {
     const redis = getRedis();
     if (!redis) return null;
     const key = `report:issue:${host}:${normalizedPath(path)}`;
@@ -152,7 +174,10 @@ export const kunReportAdapter: ReportAdapter = {
 };
 
 function hashIp(ip: string): string {
-  return createHash("sha256").update(`${ip}:${SALT}`).digest("hex").slice(0, 16);
+  return createHash("sha256")
+    .update(`${ip}:${SALT}`)
+    .digest("hex")
+    .slice(0, 16);
 }
 
 function normalizedPath(path: string): string {
