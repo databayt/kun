@@ -27,10 +27,14 @@ import {
   getHermesConfig,
   sendSocialPost,
 } from "@/lib/hermes";
-import { MAX_TOKEN_TEXT } from "@/lib/social-token";
 
 // Opus 4.8 by default — brand copy is the last thing to cheap out on. Override
 // per-deployment if the bill says otherwise.
+// A drafting target, not a hard limit. This used to be the approval-link cap
+// (the copy rode inside the URL); now the token carries only a variant id, so
+// the number is purely about what reads well in a feed.
+const TARGET_CHARS = 1200;
+
 const DEFAULT_MODEL = "claude-opus-4-8";
 const MAX_TOKENS = 2000;
 const TIMEOUT_MS = 30_000;
@@ -63,7 +67,7 @@ House voice: plain, concrete, confident without hype. No emoji walls, no growth-
 
 Hard rules:
 - Return ONLY the post body. No preamble, no quotes around it, no markdown headings.
-- Maximum ${MAX_TOKEN_TEXT} characters. Aim for far shorter — 300-600 characters reads best.
+- Maximum ${TARGET_CHARS} characters. Aim for far shorter — 300-600 characters reads best.
 - Never invent a metric, a customer name, a price, a launch date, or a feature that was not given to you. If you have no news, write something evergreen and true about the product's purpose.
 - At most 3 hashtags, and only where the channel expects them.
 - Never include a link unless one was supplied.`;
@@ -170,7 +174,7 @@ async function draftViaHermes(req: DraftRequest): Promise<DraftResult> {
   const res = await sendSocialPost({
     text: [
       `Draft request — ${req.product} / ${req.channel} (${req.locale}).`,
-      `Reply with post copy only, under ${MAX_TOKEN_TEXT} characters, house voice.`,
+      `Reply with post copy only, under ${TARGET_CHARS} characters, house voice.`,
     ].join("\n"),
     channels: [reviewChannel()],
     title: `social draft request: ${req.product}`,

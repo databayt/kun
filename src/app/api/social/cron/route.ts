@@ -17,7 +17,8 @@ import {
 } from "@/components/root/social/products";
 import { draftPost, draftSource } from "@/lib/social-draft";
 import { sendReview } from "@/lib/social-review";
-import { createApprovalToken, MAX_TOKEN_TEXT } from "@/lib/social-token";
+import { createApprovalToken } from "@/lib/social-token";
+import { db } from "@/lib/db";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -126,23 +127,33 @@ export async function GET(request: Request): Promise<Response> {
       continue;
     }
 
-    // The token carries the copy, so an over-long draft can't be approved by
-    // link. Surface it rather than truncating someone's brand post.
-    if (draft.text.length > MAX_TOKEN_TEXT) {
-      results.push({
-        product: productId,
-        channels,
-        status: "failed",
-        detail: `Draft is ${draft.text.length} chars (max ${MAX_TOKEN_TEXT}) — publish it manually from /en/social.`,
-      });
-      continue;
-    }
+    // One piece, one variant per channel this brand is wired for. The draft is
+    // the same text everywhere for now; making the variants real rows is what
+    // lets a later pass adapt them per platform without a migration.
+    const piece = await db.socialPiece.create({
+      data: {
+        brand: productId,
+        locale,
+        source: draft.source,
+        variants: {
+          create: channels.map((channel) => ({
+            channel,
+            text: draft.text,
+            status: "pending" as const,
+          })),
+        },
+      },
+      include: { variants: true },
+    });
 
-    const token = createApprovalToken(
-      { p: productId, c: channels, t: draft.text },
-      APPROVAL_TTL_SECONDS,
+    // A link per variant, so a reviewer can approve Telegram and hold Facebook.
+    // Each one publishes exactly once — the publish route claims the row.
+    const links = piece.variants.map(
+      (variant) =>
+        `${variant.channel}: ${origin}/api/social/publish?token=${encodeURIComponent(
+          createApprovalToken(variant.id, APPROVAL_TTL_SECONDS),
+        )}`,
     );
-    const link = `${origin}/api/social/publish?token=${encodeURIComponent(token)}`;
 
     const review = await sendReview(
       [
@@ -150,11 +161,17 @@ export async function GET(request: Request): Promise<Response> {
         "",
         draft.text,
         "",
-        `— drafted by ${draft.source}. Publish (expires in 12h):`,
-        link,
+        `— drafted by ${draft.source}. Each link publishes once (expires in 12h):`,
+        ...links,
       ].join("\n"),
       `social draft: ${product.label}`,
     );
+
+    // A draft nobody can be told about is a draft nobody will approve — drop
+    // the rows rather than leave them pending forever.
+    if (!review.ok) {
+      await db.socialPiece.delete({ where: { id: piece.id } }).catch(() => {});
+    }
 
     results.push({
       product: productId,

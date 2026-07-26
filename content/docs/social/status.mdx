@@ -75,7 +75,8 @@ returns `drafted: 0`.
 - **Configuration** — the largest gap and the cheapest to close. Being handled by Cowork, which can drive the platform consoles directly.
 - **Hermes** — down, no production config, and the outbound draft lane dead-ends silently when it is.
 - **Measurement** — none. No PostHog wiring, no UTM capture, no reach or click pull-back.
-- **Persistence** — kun has no database at all. That means no scheduling, approval links that stay replayable until they expire, nowhere to attach metrics, no variant model, **and nowhere for work to wait while Hermes is down**.
+- **Scheduling** — the queue exists (`SocialPiece` / `SocialVariant` / `SocialMetric` on Neon, added 2026-07-26) and approval links are now single-use, but nothing drains `scheduledFor` yet, so there is still no way to pick a date and time.
+- **Metrics** — the table is there; nothing writes to it.
 - **Variant-awareness** — the cron drafts one text and fans it to every channel, which contradicts the *one core piece → N platform-native variants* multiplier the [strategy](/docs/social/strategy) depends on.
 
 ## The honest constraints

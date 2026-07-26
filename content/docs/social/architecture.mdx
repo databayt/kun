@@ -107,9 +107,11 @@ Vercel Cron 06:00 UTC ──► GET /api/social/cron   (Bearer CRON_SECRET, timi
 - **Human sits:** in the review channel, clicking the link.
 - **Opt-in:** `SOCIAL_AUTOPOST_PRODUCTS` is **empty by default** — the cron authenticates, does
   nothing, and says so.
-- **Known limits, stated rather than hidden:** the link is **replayable until it expires**
-  (clicking twice posts twice) and anyone holding it can publish. Both are consequences of having
-  no `SocialPost` table yet. Keep the review channel private.
+- **Single use.** The link names a `SocialVariant`, and publishing is a conditional status
+  transition, so a second click finds the row no longer `pending` and gets a 409. Two people
+  clicking at the same moment race on one UPDATE and exactly one wins. Until persistence landed
+  (2026-07-26) the link was replayable and clicking twice genuinely posted twice.
+- **Still true:** anyone holding a live link can publish it once. Keep the review channel private.
 
 ### Loop C — Hermes inbound relay
 
@@ -155,6 +157,7 @@ Real scheduling needs persistence — a `SocialPost` / `ScheduledPost` model wit
 `status`, and a result column. **kun has no database at all** (no Prisma, no schema), so this is a
 genuine build, not a config change. It is the documented next phase, and it is what also removes
 the replayable-link limitation, because approval becomes a row transition instead of a URL.
+*(Landed 2026-07-26 — see the single-use note above.)*
 
 ## Cron jobs
 

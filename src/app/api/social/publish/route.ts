@@ -1,14 +1,20 @@
 // The human gate. A cron-drafted post only reaches a public brand page when
 // someone clicks the signed link from the private review channel.
 //
-// This route can't require a session — it's a link click from a chat client, so
-// there's no cookie to trust and no way to bounce through /login without losing
-// the payload. Authority comes from the HMAC in the token instead (see
-// lib/social-token.ts): unguessable, short-lived, and scoped to exactly one
-// (product, channels, text) triple. Every publish is logged, and the outcome is
-// echoed back into the review channel so the click is never silent.
+// This route cannot require a session — it is a link click from a chat client,
+// so there is no cookie to trust and no way to bounce through /login without
+// losing the payload. Authority comes from the HMAC in the token instead (see
+// lib/social-token.ts).
+//
+// The token names a variant rather than carrying the copy, which is what makes
+// the link SINGLE USE: publishing is a conditional status transition, so a
+// second click finds the row no longer `pending` and refuses. Two people
+// clicking the same link at the same moment race on one UPDATE and exactly one
+// wins. Before persistence this was replayable by design and posting twice was
+// a real outcome.
 
 import type { ChannelId } from "@/components/root/social/config";
+import { db } from "@/lib/db";
 import { deliverPost } from "@/lib/social-publish";
 import { sendReview } from "@/lib/social-review";
 import { verifyApprovalToken } from "@/lib/social-token";
@@ -58,28 +64,62 @@ export async function GET(request: Request): Promise<Response> {
     return page("Link rejected", escapeHtml(verified.error), 403);
   }
 
-  const { p: product, c: channels, t: text } = verified.payload;
+  const variantId = verified.payload.v;
+  const variant = await db.socialVariant.findUnique({
+    where: { id: variantId },
+    include: { piece: true },
+  });
+  if (!variant) {
+    return page("Not found", "This draft no longer exists.", 404);
+  }
+
+  // The claim. `status: "pending"` in the WHERE is the whole guarantee — a
+  // second click, or a concurrent one, matches zero rows and stops here.
+  const claimed = await db.socialVariant.updateMany({
+    where: { id: variantId, status: "pending" },
+    data: { status: "publishing", attempts: { increment: 1 } },
+  });
+  if (claimed.count === 0) {
+    console.log(
+      `[social/publish] refused replay variant=${variantId} status=${variant.status}`,
+    );
+    return page(
+      "Already handled",
+      `This draft is "${variant.status}" — a link publishes once.`,
+      409,
+    );
+  }
 
   const result = await deliverPost({
-    product,
-    text,
-    channels: channels as ChannelId[],
+    product: variant.piece.brand,
+    text: variant.text,
+    channels: [variant.channel as ChannelId],
+    mediaUrl: variant.mediaUrl ?? undefined,
   });
 
-  // Log the decision either way — the signed link is the only audit trail this
-  // flow has, so the server-side record matters.
+  await db.socialVariant.update({
+    where: { id: variantId },
+    data: {
+      status: result.ok ? "published" : "failed",
+      publishedAt: result.ok ? new Date() : null,
+      result: result.ok ? "ok" : (result.error ?? "unknown error"),
+    },
+  });
+
+  // Log the decision either way — with the row now carrying the outcome, this
+  // is the operator-facing trail rather than the only one.
   console.log(
-    `[social/publish] ${result.ok ? "published" : "failed"} product=${product} channels=${channels.join(",")} chars=${text.length}${result.ok ? "" : ` error=${result.error}`}`,
+    `[social/publish] ${result.ok ? "published" : "failed"} variant=${variantId} brand=${variant.piece.brand} channel=${variant.channel} chars=${variant.text.length}${result.ok ? "" : ` error=${result.error}`}`,
   );
 
   await sendReview(
     result.ok
-      ? `✅ Published to ${product} → ${channels.join(", ")}.`
-      : `❌ Publish failed for ${product} → ${channels.join(", ")}: ${result.error}`,
-    `social publish: ${product}`,
+      ? `✅ Published ${variant.piece.brand} → ${variant.channel}.`
+      : `❌ Publish failed for ${variant.piece.brand} → ${variant.channel}: ${result.error}`,
+    `social publish: ${variant.piece.brand}`,
   );
 
   return result.ok
-    ? page("Published", `${product} → ${channels.join(", ")}`, 200)
+    ? page("Published", `${variant.piece.brand} → ${variant.channel}`, 200)
     : page("Publish failed", escapeHtml(result.error ?? "Unknown error."), 502);
 }

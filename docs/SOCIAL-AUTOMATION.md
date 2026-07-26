@@ -175,7 +175,9 @@ globalWired)` — the AND of "transport exists" and "this brand has a destinatio
 | `src/lib/social-review.ts`            | Hermes/Slack first, else a **private** `TELEGRAM_REVIEW_CHAT_ID` — never `TELEGRAM_CHANNEL_ID`, which is the public brand channel                             |
 | `src/app/api/social/publish/route.ts` | Verifies the token, delivers, logs, echoes the outcome back to the review channel                                                                             |
 
-Known limits, stated rather than hidden: the approval link is **replayable until it expires**
+~~Known limits: the approval link is **replayable until it expires**~~ — **fixed 2026-07-26**;
+the token now names a variant and publishing is a conditional status transition, so a link
+publishes once. Historical note follows: the approval link was **replayable until it expired**
 (stateless by design — no `SocialPost` table yet), and anyone holding the link can publish, so the
 review channel must stay private. Both go away when persistence lands.
 

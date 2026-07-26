@@ -1,35 +1,31 @@
 // Signed approval tokens for the draft → approve → publish loop.
 //
-// The cron can't ask a human to log in, and a Slack/Telegram message can't carry
-// a session. So the approval link carries its own authority: an HMAC-SHA256
-// signature over the payload, keyed by CRON_SECRET. Nothing is stored — the
-// draft text rides inside the token, which is why the text is length-capped.
+// The cron cannot ask a human to log in, and a Slack or Telegram message cannot
+// carry a session. So the approval link carries its own authority: an HMAC-SHA256
+// signature over the payload, keyed by CRON_SECRET.
 //
-// Threat model, stated plainly:
-//   - The token is unguessable (HMAC over a server-only secret) and short-lived.
-//   - It is single-purpose: it publishes exactly the text it carries, to exactly
-//     the (product, channel) pair it carries. It grants nothing else.
-//   - It is REPLAYABLE until it expires — clicking twice posts twice. Stateless
-//     is the trade; the review channel is private and the window is hours.
-//   - Anyone with the link can publish. Keep the review channel private.
+// The token references a SocialVariant by id; it does not carry the copy. That
+// change buys two things the previous stateless design could not have:
+//
+//   - **Single use.** Publishing is a conditional status transition, so the
+//     second click finds the variant no longer `pending` and refuses. Before
+//     persistence the link was replayable until it expired — clicking twice
+//     posted twice, and that was a documented, unavoidable flaw.
+//   - **No length cap.** The copy used to ride inside the URL, so a draft over
+//     ~1200 characters minted a link that chat clients silently truncated into
+//     a 404. An id is 25 characters whatever the post says.
+//
+// Still true: anyone holding a live link can publish it once. Keep the review
+// channel private.
 
 import crypto from "node:crypto";
 
 export interface ApprovalPayload {
-  /** product id */
-  p: string;
-  /** channel ids */
-  c: string[];
-  /** post text */
-  t: string;
-  /** expiry, epoch seconds */
+  /** SocialVariant id. */
+  v: string;
+  /** Expiry, epoch seconds. */
   e: number;
 }
-
-// A 4000-char post base64s into a URL long enough to get truncated by a chat
-// client or a proxy. Auto-drafts are short by design; refuse anything that
-// wouldn't survive the round trip rather than minting a link that silently 404s.
-export const MAX_TOKEN_TEXT = 1200;
 
 function b64url(buf: Buffer): string {
   return buf.toString("base64url");
@@ -47,16 +43,11 @@ function sign(body: string): string {
 }
 
 export function createApprovalToken(
-  payload: Omit<ApprovalPayload, "e">,
+  variantId: string,
   ttlSeconds: number,
 ): string {
-  if (payload.t.length > MAX_TOKEN_TEXT) {
-    throw new Error(
-      `Draft too long for an approval link (${payload.t.length} > ${MAX_TOKEN_TEXT} chars)`,
-    );
-  }
   const full: ApprovalPayload = {
-    ...payload,
+    v: variantId,
     e: Math.floor(Date.now() / 1000) + ttlSeconds,
   };
   const body = b64url(Buffer.from(JSON.stringify(full), "utf8"));
@@ -101,7 +92,7 @@ export function verifyApprovalToken(token: string): VerifyResult {
   ) {
     return { ok: false, error: "This approval link has expired." };
   }
-  if (!payload.p || !Array.isArray(payload.c) || !payload.t) {
+  if (typeof payload?.v !== "string" || !payload.v) {
     return { ok: false, error: "Incomplete payload." };
   }
 

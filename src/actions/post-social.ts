@@ -7,12 +7,17 @@ import { requireContributor } from "@/lib/auth-guard";
 import { deliverPost, type ChannelOutcome } from "@/lib/social-publish";
 import { getEgressStatus, type EgressStatus } from "@/lib/social-status";
 import { sendReview } from "@/lib/social-review";
-import { createApprovalToken, MAX_TOKEN_TEXT } from "@/lib/social-token";
+import { createApprovalToken } from "@/lib/social-token";
+import { db } from "@/lib/db";
 import { CHANNELS, CHANNEL_IDS } from "@/components/root/social/config";
 import {
   PRODUCT_IDS,
   productChannelWired,
 } from "@/components/root/social/products";
+
+// Long enough for a human to see it in the morning, short enough that a
+// leaked link goes stale before it is useful. Matches the cron.
+const APPROVAL_TTL_SECONDS = 12 * 60 * 60;
 
 export type { EgressStatus } from "@/lib/social-status";
 
@@ -125,38 +130,56 @@ export async function stageForReview(input: unknown): Promise<ReviewResult> {
 
   const { product, text, channels, mediaUrl } = parsed.data;
 
-  // The approval token carries the copy inside the URL, so an over-long draft
-  // would mint a link that a chat client silently truncates into a 404.
-  if (text.length > MAX_TOKEN_TEXT) {
+  // One piece, one variant per selected channel. Each gets its own approval
+  // link so a reviewer can take Telegram and hold Facebook — previously a
+  // single token covered the whole fan-out, so it was all or nothing.
+  let piece;
+  try {
+    piece = await db.socialPiece.create({
+      data: {
+        brand: product,
+        source: "human",
+        aiGenerated: Boolean(mediaUrl),
+        variants: {
+          create: channels.map((channel) => ({
+            channel,
+            text,
+            mediaUrl,
+            status: "pending" as const,
+          })),
+        },
+      },
+      include: { variants: true },
+    });
+  } catch (err: unknown) {
     return {
       ok: false,
-      error: `Too long to stage for review (${text.length} > ${MAX_TOKEN_TEXT} chars). Shorten it, or publish directly.`,
+      error: err instanceof Error ? err.message : "Could not stage the draft.",
     };
   }
 
-  let link: string;
+  let links: string[];
   try {
-    const token = createApprovalToken(
-      { p: product, c: [...channels], t: text, m: mediaUrl },
-      12 * 60 * 60,
-    );
     const configured = (process.env.SOCIAL_PUBLIC_URL ?? "").trim();
     const origin = configured
       ? configured.replace(/\/$/, "")
       : `https://${(await headers()).get("host")}`;
-    link = `${origin}/api/social/publish?token=${encodeURIComponent(token)}`;
+    links = piece.variants.map((variant) => {
+      const token = createApprovalToken(variant.id, APPROVAL_TTL_SECONDS);
+      return `${variant.channel}: ${origin}/api/social/publish?token=${encodeURIComponent(token)}`;
+    });
   } catch (err: unknown) {
     // createApprovalToken throws when CRON_SECRET is unset — an unsigned link
-    // would be a publish endpoint anyone could forge.
+    // would be a publish endpoint anyone could forge. Drop the staged rows
+    // rather than leave drafts nobody can ever approve.
+    await db.socialPiece.delete({ where: { id: piece.id } }).catch(() => {});
     return {
       ok: false,
       error: err instanceof Error ? err.message : "Could not sign the link.",
     };
   }
 
-  // The media URL is signed into the token (so approving publishes the image,
-  // not just the caption) and repeated in the message so the reviewer can see
-  // what they're about to approve.
+  // Each link publishes exactly one channel, exactly once.
   return sendReview(
     [
       `📝 Draft for ${product} → ${channels.join(", ")}`,
@@ -164,8 +187,8 @@ export async function stageForReview(input: unknown): Promise<ReviewResult> {
       text,
       ...(mediaUrl ? ["", `Media: ${mediaUrl}`] : []),
       "",
-      "— staged from /social. Publish (expires in 12h):",
-      link,
+      "— staged from /social. Each link publishes once (expires in 12h):",
+      ...links,
     ].join("\n"),
     `social draft: ${product}`,
   );
