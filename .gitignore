@@ -50,3 +50,6 @@ scripts/crawl-anthropic/state/
 
 # Thmanyah fonts — license forbids redistribution; fetched from the official host by scripts/fetch-thmanyah.mjs
 public/fonts/thmanyah/*.woff2
+
+# Prisma generated client — regenerated on install, never committed
+src/generated/
