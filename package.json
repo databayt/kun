@@ -1,7 +1,7 @@
 {
   "name": "kun",
   "version": "1.0.0",
-  "description": "Remote AI Development Infrastructure - كن (Be!)",
+  "description": "Remote AI Development Infrastructure - \u0643\u0646 (Be!)",
   "private": true,
   "scripts": {
     "predev": "node scripts/fetch-thmanyah.mjs",
@@ -10,14 +10,16 @@
     "prebuild": "node scripts/fetch-thmanyah.mjs",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
     "postinstall": "fumadocs-mdx",
     "setup:phase1": "bash scripts/phase1/setup.sh",
     "setup:phase2": "sudo bash scripts/phase2/setup.sh",
     "setup:phase3": "bash scripts/phase3/setup.sh",
     "health": "bash scripts/monitoring/health-check.sh",
     "status": "bash scripts/status.sh",
-    "carousel:render": "node scripts/render-carousel.mjs"
+    "carousel:render": "node scripts/render-carousel.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.68.0",
@@ -66,7 +68,8 @@
     "playwright-core": "^1.61.1",
     "rehype-pretty-code": "^0.14.3",
     "tailwindcss": "^4.2.2",
-    "typescript": "^6.0.2"
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.10"
   },
   "keywords": [
     "claude-code",

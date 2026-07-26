@@ -84,9 +84,22 @@ async function main() {
   }
   if (failed) {
     console.error(
-      `❌ ${failed} file(s) failed — Thmanyah may have shipped a new version; refresh MANIFEST from the @font-face rules on https://font.thmanyah.com`,
+      `${failed} file(s) failed — Thmanyah may have shipped a new version; refresh MANIFEST from the @font-face rules on https://font.thmanyah.com`,
     );
-    process.exit(1);
+    // Only fail the build if we have nothing usable. When every font is already
+    // on disk from a previous run, a fetch failure is a network blip and must
+    // not take the build down with it — the fonts are deliberately not
+    // committed (the license forbids redistribution), so CI and offline builds
+    // depend on this degradation.
+    const stillMissing = Object.keys(MANIFEST).filter(
+      (file) => !fs.existsSync(path.join(outDir, file)),
+    );
+    if (stillMissing.length) {
+      console.error(`\u274c No local copy of: ${stillMissing.join(', ')}`);
+      process.exit(1);
+    }
+    console.warn('\u26a0\ufe0f  Fetch failed but existing font files are present — continuing.');
+    return;
   }
   console.log('✅ Thmanyah fonts ready');
 }

@@ -17,7 +17,7 @@
 // not an approver: a valid CRON_SECRET bearer means "a human already said yes."
 // Treat the secret accordingly — whoever holds it can post to a brand page.
 
-import crypto from "node:crypto";
+import { isAuthorizedBearer } from "@/lib/cron-auth";
 
 import {
   CHANNELS,
@@ -37,15 +37,6 @@ export const dynamic = "force-dynamic";
 // malformed body can't tie up the function.
 const MAX_RELAY_TEXT = 5000;
 
-function authorized(request: Request): boolean {
-  const secret = (process.env.CRON_SECRET ?? "").trim();
-  if (!secret) return false;
-  const provided = (request.headers.get("authorization") ?? "").trim();
-  const expected = `Bearer ${secret}`;
-  const a = Buffer.from(provided);
-  const b = Buffer.from(expected);
-  return a.length === b.length && crypto.timingSafeEqual(a, b);
-}
 
 function bad(error: string, status: number): Response {
   return Response.json({ ok: false, error }, { status });
@@ -55,7 +46,7 @@ export async function POST(request: Request): Promise<Response> {
   if (!(process.env.CRON_SECRET ?? "").trim()) {
     return bad("CRON_SECRET not set — the relay lane is disabled.", 503);
   }
-  if (!authorized(request)) {
+  if (!isAuthorizedBearer(request)) {
     return bad("Unauthorized.", 401);
   }
 

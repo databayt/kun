@@ -8,7 +8,7 @@
 // Opt-in is explicit and empty by default: SOCIAL_AUTOPOST_PRODUCTS=hogwarts,databayt.
 // With the var unset, this route authenticates, does nothing, and says so.
 
-import crypto from "node:crypto";
+import { isAuthorizedBearer } from "@/lib/cron-auth";
 
 import { CHANNELS, type ChannelId } from "@/components/root/social/config";
 import {
@@ -26,15 +26,6 @@ export const dynamic = "force-dynamic";
 // leaked link goes stale before it's useful.
 const APPROVAL_TTL_SECONDS = 12 * 60 * 60;
 
-function authorized(request: Request): boolean {
-  const secret = (process.env.CRON_SECRET ?? "").trim();
-  if (!secret) return false;
-  const provided = (request.headers.get("authorization") ?? "").trim();
-  const expected = `Bearer ${secret}`;
-  const a = Buffer.from(provided);
-  const b = Buffer.from(expected);
-  return a.length === b.length && crypto.timingSafeEqual(a, b);
-}
 
 function autopostProducts(): string[] {
   return (process.env.SOCIAL_AUTOPOST_PRODUCTS ?? "")
@@ -65,7 +56,7 @@ export async function GET(request: Request): Promise<Response> {
       { status: 503 },
     );
   }
-  if (!authorized(request)) {
+  if (!isAuthorizedBearer(request)) {
     return Response.json(
       { ok: false, error: "Unauthorized." },
       { status: 401 },

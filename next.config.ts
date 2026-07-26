@@ -2,16 +2,13 @@ import type { NextConfig } from "next";
 import { createMDX } from "fumadocs-mdx/next";
 
 const nextConfig: NextConfig = {
-  typescript: {
-    ignoreBuildErrors: true,
-  },
   // Barrel entry points re-export thousands of modules, so importing three
   // icons pulls the whole library into the graph. Next rewrites these to
   // direct imports at build time — ergonomic imports, without the cold-start tax.
   experimental: {
     optimizePackageImports: ["lucide-react"],
   },
-  reactStrictMode: false,
+  reactStrictMode: true,
   // The carousel render route is screenshotted by Playwright — the dev
   // indicator badge would land inside the captured slides.
   devIndicators: false,

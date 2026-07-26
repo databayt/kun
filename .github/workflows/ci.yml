@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm typecheck
+
+      - run: pnpm test
+
+      # `prebuild` fetches the Thmanyah fonts. They are gitignored (the license
+      # forbids redistribution), so a fresh checkout has none and a font-CDN
+      # outage WILL fail this step. That is the accepted trade: the alternative
+      # is committing files we are not licensed to redistribute. The script's
+      # degrade-to-warning path only covers local and offline rebuilds, where
+      # the files already exist on disk.
+      - run: pnpm build
+        env:
+          # Not secrets — the build only needs these to exist. Real values live
+          # in Vercel; CI is proving the code compiles, not deploying it.
+          AUTH_SECRET: ci-placeholder-not-a-real-secret
