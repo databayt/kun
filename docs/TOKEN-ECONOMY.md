@@ -74,10 +74,14 @@ Off-pool first, then the lightest shared surface, then Code.
 6. **Verification targets in the prompt** — expected output/tests let Claude self-check instead of round-tripping.
 7. **`/usage` weekly** (already engine doctrine) — the breakdown flags long-context and cache-miss behaviors at ≥10% with per-item tips; `/context` shows what fills the current session.
 
+## Adopted 2026-07-26 (were standing proposals)
+
+- **MCP trim** ✅: removed `sequential-thinking`, `storybook`, `a11y` (was dead), `tailwind`, `git` (Bash covers git) from user-scope registration and both catalogs (29 → 25). Re-add anytime: `claude mcp add <name> ...` per the catalog entry in git history. Prefer CLIs where they exist: `gh`, `vercel`, `sentry-cli` cost zero preamble.
+- **CLAUDE.md diet** ✅: user CLAUDE.md 11.5KB → 3.3KB (keyword table → compact pointer; registry + skill `when_to_use` are the routing truth). Template matched.
+- **Rules dedupe** ✅ (found during adoption): the four cross-repo rules (`cowork-bridge`, `github-workflow`, `patterns`, `block-protocol`) double-loaded in every kun session — once from `~/.claude/rules/` (setup.sh install) and once from project `.claude/rules/`. They now live in `.claude/rules-global/` (dist-only, no auto-load) and load exactly once at user level; `engine-parity.md` stays project-side only. ~12KB per kun session saved.
+
 ## Standing proposals (Abdout's call, not auto-applied)
 
-- **MCP trim**: 25 global servers registered; the rarely-used ones (e.g. `sequential-thinking`, `storybook`, `a11y`, `tailwind`, `git` — Bash covers git) each tax every session's preamble. `claude mcp remove <name>` is reversible. Prefer CLIs where they exist: `gh`, `vercel`, `sentry-cli` cost zero preamble.
-- **CLAUDE.md diet**: always-loaded config (user CLAUDE.md + rules + project CLAUDE.md + rules) is ~35KB ≈ 10–12k tokens per session before work starts. The official guidance is <200 lines; the keyword tables and playbook detail could move into skills (on-demand) with one-line pointers left behind.
 - **Hooks as preprocessors**: a PreToolUse hook can filter test/log output to failures-only before Claude reads it (the costs doc ships a ready `filter-test-output.sh` pattern).
 - **Code intelligence plugin**: typed-language plugins replace grep-then-read-candidates with one go-to-definition call.
 

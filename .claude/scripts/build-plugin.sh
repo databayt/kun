@@ -85,6 +85,8 @@ for d in "$ROOT"/.claude/skills/*/; do
 done
 for f in "$ROOT"/.claude/patterns/cards/*.md; do copy_one "$f" "$CO/patterns/cards/$(basename "$f")"; done
 for f in "$ROOT"/.claude/rules/*.md; do copy_one "$f" "$CO/rules/$(basename "$f")"; done
+# Cross-repo rules ship from rules-global/ (installed to ~/.claude/rules by setup.sh)
+for f in "$ROOT"/.claude/rules-global/*.md; do [ -e "$f" ] || continue; copy_one "$f" "$CO/rules/$(basename "$f")"; done
 # Rule corpus — domain subdirs (react-19/, next-16/, ...) with atomic severity-tagged rules
 for f in "$ROOT"/.claude/rules/*/*.md; do
   [ -e "$f" ] || continue

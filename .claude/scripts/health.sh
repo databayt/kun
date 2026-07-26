@@ -192,7 +192,7 @@ if [ -f "$ENGINE_JSON" ] && command -v jq &> /dev/null; then
     ER_AGENTS=$(find "$KUN_ROOT/.claude/agents" -maxdepth 1 -name '*.md' ! -name '_index*' 2>/dev/null | wc -l | tr -d ' ')
     ER_SKILLS=$(find "$KUN_ROOT/.claude/skills" -mindepth 2 -maxdepth 2 -name 'SKILL.md' 2>/dev/null | wc -l | tr -d ' ')
     ER_CARDS=$(find "$KUN_ROOT/.claude/patterns/cards" -maxdepth 1 -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
-    ER_RULES=$(find "$KUN_ROOT/.claude/rules" -maxdepth 1 -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
+    ER_RULES=$(find "$KUN_ROOT/.claude/rules" "$KUN_ROOT/.claude/rules-global" -maxdepth 1 -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
     ER_DOMAIN_RULES=$(find "$KUN_ROOT/.claude/rules" -mindepth 2 -name '*.md' ! -name '_*' 2>/dev/null | wc -l | tr -d ' ')
     ER_MCP=$(jq '.mcpServers | length' "$KUN_ROOT/.claude/mcp.json" 2>/dev/null || echo "?")
     [ "$EC_AGENTS" = "$ER_AGENTS" ] && check pass "engine agents" "$ER_AGENTS" || check warn "engine agents" "engine.json=$EC_AGENTS actual=$ER_AGENTS"

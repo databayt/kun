@@ -16,8 +16,9 @@
 - **Languages**: Arabic (RTL default) · English (LTR)
 - **Commit footer**: `Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>`
 
-> Project rules auto-load from `.claude/rules/`:
-> `cowork-bridge.md`, `github-workflow.md`, `patterns.md`, `block-protocol.md`, `engine-parity.md`.
+> Project rules: `.claude/rules/engine-parity.md` (auto-loads, path-scoped). Cross-repo rules
+> (`cowork-bridge`, `github-workflow`, `patterns`, `block-protocol`) ship from `.claude/rules-global/`
+> to `~/.claude/rules/` via setup.sh — loaded once at user level, never duplicated project-side.
 
 ## Agents — the four lanes
 
@@ -62,7 +63,7 @@ Claude routes these to the right skill + agent + MCP without a dedicated command
 
 **Quality dimensions** route through `.claude/agents/quality.md`; `/handover` orchestrates all of them on a URL or block.
 **Decisions/CEO** (passive — no slash): `canon` + any leadership/strategy decision (`hiring`, `pricing`, `positioning`, `strategy`, `prioritize`, `fundraise`, `runway`, `customer development`, "should we build…", "what do I do about…") → consult `docs/CANON.md`, surface the book + one operating move grounded in principle `#N`
-**Blocks** (passive, per-repo): every feature block in a repo's `.claude/blocks.json` is a keyword → follow the **block protocol** rule (`.claude/rules/block-protocol.md`).
+**Blocks** (passive, per-repo): every feature block in a repo's `.claude/blocks.json` is a keyword → follow the **block protocol** rule (`.claude/rules-global/block-protocol.md`).
 
 ## Behavior
 

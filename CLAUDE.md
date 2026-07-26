@@ -9,8 +9,8 @@
 2. Reference `docs/ARCHITECTURE.md` for design decisions
 3. Reference `docs/CONFIGURATION.md` for engine blueprint
 4. Follow patterns from `/Users/abdout/codebase/`
-5. Conventional commits — see `.claude/rules/github-workflow.md`
-6. Work directly on `main` — no branches, no worktrees, no PRs (see `.claude/rules/github-workflow.md`)
+5. Conventional commits — see `.claude/rules-global/github-workflow.md`
+6. Work directly on `main` — no branches, no worktrees, no PRs (see `.claude/rules-global/github-workflow.md`)
 
 ## Documentation
 

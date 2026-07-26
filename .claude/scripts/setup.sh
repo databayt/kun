@@ -79,8 +79,11 @@ cp "$KUN_DIR/.claude/agents/"*.md "$CLAUDE_DIR/agents/" 2>/dev/null || true
 AGENT_COUNT=$(ls "$CLAUDE_DIR/agents/"*.md 2>/dev/null | wc -l | tr -d ' ')
 info "agents ($AGENT_COUNT)"
 
-if [ -d "$KUN_DIR/.claude/rules" ]; then
-    cp "$KUN_DIR/.claude/rules/"*.md "$CLAUDE_DIR/rules/" 2>/dev/null || true
+# Cross-repo rules ship from rules-global/ ONLY — they land in ~/.claude/rules
+# (loaded once, everywhere). Project rules (.claude/rules/) stay repo-side and are
+# NOT installed user-level: that duplicated them into every kun session (token tax).
+if [ -d "$KUN_DIR/.claude/rules-global" ]; then
+    cp "$KUN_DIR/.claude/rules-global/"*.md "$CLAUDE_DIR/rules/" 2>/dev/null || true
 fi
 RULE_COUNT=$(ls "$CLAUDE_DIR/rules/"*.md 2>/dev/null | wc -l | tr -d ' ')
 info "rules ($RULE_COUNT)"
@@ -169,7 +172,7 @@ src = {
     "skills":    names(os.path.join(kun, ".claude/skills"), "dir"),
     "agents":    names(os.path.join(kun, ".claude/agents"), ".md"),
     "workflows": names(os.path.join(kun, ".claude/workflows"), ".js"),
-    "rules":     names(os.path.join(kun, ".claude/rules"), ".md"),
+    "rules":     names(os.path.join(kun, ".claude/rules-global"), ".md"),
 }
 
 pruned = []
