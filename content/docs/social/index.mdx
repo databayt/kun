@@ -52,8 +52,8 @@ live on its page:
 ```
  idea ──► draft ──► media ──► approve ──► schedule ──► publish ──► measure
   │        │         │          │           │            │           │
-content   Claude    /higgs    human       queue       telegram    PostHog
-calendar  native   text-free   gate    (phase 2)    API | Hermes   + UTM
+content   Claude    /higgs    human      cron slot   telegram|fb   PostHog
+calendar  native   text-free   gate    (one, 06:00)  direct|Hermes  + UTM
 ```
 
 | Stage | Owner | Notes |
@@ -62,9 +62,13 @@ calendar  native   text-free   gate    (phase 2)    API | Hermes   + UTM
 | **Draft** | **Claude, natively** | Arabic-first bilingual copy, written against [Brand & Voice](/docs/brand) |
 | **Media** | `/higgs` | Text-free visuals, brand kit `b0a3f528…`; copy is overlaid in-post, never rendered |
 | **Approve** | human (Abdout / Ali / Samia) | The gate — see [Autonomy ladder](#autonomy-ladder) |
-| **Schedule** | queue (phase 2) | Manual today; `SocialPost`/`ScheduledPost` + cron later |
-| **Publish** | **Egress layer** — Telegram direct Bot API · other channels via the [Hermes](/docs/hermes) gateway | Egress only — dumb relays, never the LLM |
+| **Schedule** | one daily cron slot | No date-picker: `0 6 * * *` + a 12h approval window. Real scheduling needs `SocialPost`/`ScheduledPost` persistence |
+| **Publish** | **Egress layer** — Telegram + Facebook direct APIs · other channels via the [Hermes](/docs/hermes) gateway | Egress only — dumb relays, never the LLM |
 | **Measure** | PostHog + per-platform analytics | UTM-tagged links → attribution |
+
+Which of the **three loops** a post travels — Hub, cron draft-and-approve, or the inbound Hermes
+relay — plus the actor map, the cron inventory, and the keyword table, are on
+[Architecture & Loops](/docs/social/architecture).
 
 ## Layer boundaries
 
@@ -160,17 +164,32 @@ The Social Hub at [`/social`](/social) is multi-product (Phase 3, 2026-07-23):
   drafts per opted-in product and sends the draft to a private review channel with a signed,
   12-hour, one-click Publish link. Nothing publishes unattended. Opt in per product with
   `SOCIAL_AUTOPOST_PRODUCTS`; empty (the default) means the cron does nothing.
+- **Inbound relay** — because Vercel can never reach Hermes on `localhost`, `/api/social/relay`
+  inverts the arrow: Hermes drafts, a human approves in Slack, Hermes POSTs the approved text to
+  kun, and kun delivers with its own tokens. Hermes never holds a Page token.
 - **Drafting stays out of the relays** — `SOCIAL_DRAFT_SOURCE=hermes` (default) hands the ask to
   Hermes; `=anthropic` drafts server-side via the API and is opt-in because the engine's billing
   posture is subscription-only.
+- **Media** — an optional public image URL (typically a `/higgs` render on the CDN) rides the
+  whole chain: Facebook switches to the `/photos` edge with a caption, Telegram to `sendPhoto`
+  (spilling over-long copy into a follow-up message rather than truncating it), and the signed
+  approval token carries the media so approving a staged draft publishes the image, not just text.
+- **Multi-channel, with per-channel truth** — the picker selects any subset of a brand's wired
+  channels, the three transports fan out in parallel, and the result names each channel
+  individually. A half-landed post no longer reads as one flat failure.
+- **Stage for review from the Hub** — the composer can push your own copy down the cron's
+  approval path (signed 12h link into the private review channel) instead of publishing directly,
+  for when someone else signs off.
 - **Removed** — the in-app AI draft card: gateway-LLM drafting violated the layer boundary, so
   drafting now lives in the `/social` skill (Claude-native).
 - **Still pending** — adapters beyond Slack (see [Hermes](/docs/hermes)), persistence
-  (`SocialPost`), per-brand Telegram/Slack channels, and metrics pull-back — tracked in
-  `docs/SOCIAL-AUTOMATION.md`.
+  (`SocialPost`) and therefore real scheduling, per-brand Telegram/Slack channels, and metrics
+  pull-back — tracked in `docs/SOCIAL-AUTOMATION.md`.
 
 ## See also
 
+- [Status](/docs/social/status) — what is configured and live right now, versus what is merely wired.
+- [Channel Setup](/docs/social/channels) — per-platform setup guides, written to be usable on your own accounts.
 - [Brand & Voice](/docs/brand) — the rules every post obeys.
 - [Connectors](/docs/connectors) — the MCP-backed service integrations.
 - `/higgs` skill — media generation · `content-calendar` skill · `growth` agent.

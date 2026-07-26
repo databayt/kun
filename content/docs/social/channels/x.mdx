@@ -1,0 +1,113 @@
+---
+title: X / Twitter
+description: Researched setup — trivial to build, but pay-per-post since February 2026. The only channel here where the decision is financial rather than technical.
+---
+
+# X / Twitter
+
+🔍 **Researched** — the API shape is stable and well documented; **not walked end to end** because
+the cost decision comes first.
+
+## The decision before the setup
+
+X is the only channel in this set where **the blocker is money, not paperwork**. Technically it
+is among the easiest integrations available — a single POST with OAuth 1.0a or OAuth 2.0. But:
+
+- Since **February 2026**, posting is **pay-per-use**: roughly **$0.015 per post**, rising to about **$0.20 if the post contains a link**
+- There is **no free tier for new developers**
+
+Links cost more than plain posts, which is exactly backwards from how a marketing pipeline wants
+to use it — a post driving traffic to your site is the expensive kind. At ~15–20 posts a week
+with links, that is real recurring spend for a channel whose value you have not yet proven.
+
+**Decide the spend before you build.** For an organization running a subscription-only or
+no-new-API-spend posture, this is a budget change that needs an explicit decision, not a config
+tweak. In our engine that means a `/decide` entry before the credentials are ever created.
+
+A reasonable middle path: post to X **manually** until the channel demonstrates signal, then
+automate once it has earned the line item.
+
+## What you get
+
+Post text (up to 280 characters, or longer with a paid account tier), images, and video to an X
+account via API v2.
+
+## Prerequisites
+
+- An X account for the brand
+- A developer account with a paid plan
+- A payment method that X accepts
+
+## Steps
+
+### 1. Create a developer app
+
+[developer.x.com](https://developer.x.com) → developer portal → create a project and an app. Pick
+a paid tier; the free tier does not permit posting.
+
+### 2. Set app permissions
+
+App settings → *User authentication settings* → permissions **Read and write**.
+
+Set this **before** generating tokens. Tokens minted under read-only permissions stay read-only
+even after you change the setting — you have to regenerate them.
+
+### 3. Generate credentials
+
+For posting as your own brand account, OAuth 1.0a user context is simplest — no redirect flow:
+
+- API Key + API Secret (the app)
+- Access Token + Access Token Secret (the account)
+
+All four are generated in the portal under *Keys and tokens*.
+
+### 4. Post
+
+```bash
+# OAuth 1.0a signing required — most HTTP clients have a helper
+curl -s -X POST "https://api.x.com/2/tweets" \
+  -H 'Content-Type: application/json' \
+  -d '{"text":"pipeline test"}'
+```
+
+## The traps
+
+**Regenerate tokens after changing permissions.** The most common X integration bug: permissions
+were flipped to read-write but the existing tokens were minted earlier and remain read-only. The
+error says "unauthorized", not "stale token".
+
+**Links cost ~13× a plain post.** Budget accordingly, and consider whether every post genuinely
+needs a URL.
+
+**OAuth 1.0a request signing is fiddly.** Use a library. Hand-rolled signature bases fail on
+percent-encoding edge cases and the error messages are unhelpful.
+
+**Media upload uses a different host and API version** (`upload.x.com`, v1.1 endpoints) than
+posting (`api.x.com`, v2). Upload first, then reference the returned `media_id`.
+
+**Rate limits are tier-dependent and change.** Check the limits for your specific plan rather
+than assuming; they have been revised repeatedly.
+
+## Environment variables
+
+| Variable | Required |
+|----------|:--------:|
+| `X_API_KEY` | Yes |
+| `X_API_SECRET` | Yes |
+| `X_ACCESS_TOKEN_<PRODUCT>` | Yes — per brand account |
+| `X_ACCESS_TOKEN_SECRET_<PRODUCT>` | Yes |
+
+## Verify
+
+```bash
+# OAuth 1.0a signed
+curl -s "https://api.x.com/2/users/me"
+# → the brand account's id and username
+```
+
+## Limits
+
+- **Text:** 280 characters on the free/basic account tier; longer with X Premium
+- **Media:** up to 4 images, or 1 video, per post
+- **Cost:** ~$0.015/post, ~$0.20/post with a link — verify current pricing, it has changed twice
+- **Rate:** plan-dependent

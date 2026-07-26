@@ -1,0 +1,78 @@
+---
+title: Channel Setup
+description: How to configure each social platform for automated posting — the steps, the traps, and the environment variables each one produces. Written to be usable on your own accounts.
+---
+
+# Channel Setup
+
+One page per platform: what it takes to get programmatic posting working, what will trip you up,
+and which environment variables come out the other end.
+
+These are written for **anyone** configuring their own accounts, not just databayt. The env-var
+names are ours, but the platform steps and the traps are universal — most of the pain in social
+automation is platform paperwork, and none of it is documented in one place. Take what's useful.
+
+## Provenance — read this first
+
+Setup guides rot. Console UIs move, permission names change, review processes tighten. So every
+page carries a badge saying how much to trust it:
+
+| Badge | Meaning |
+|-------|---------|
+| ✅ **Verified** | We configured this ourselves and posted through it. Steps are battle-tested. |
+| 🔍 **Researched** | Written from the platform's current official docs, but **nobody has walked it yet**. The shape is right; exact button names may differ. |
+| ⛔ **No self-serve path** | There is no way to just sign up and post. The page explains the gate and the honest workaround. |
+
+A page gets promoted from Researched to Verified by someone actually completing it and
+correcting what was wrong. If you walk one, please fix it —
+[open an issue](https://github.com/databayt/kun/issues/new).
+
+## The channels
+
+| Channel | Status | Cost | Difficulty | Guide |
+|---------|--------|------|------------|-------|
+| **Telegram** | ✅ Verified | Free | Trivial — minutes | [Set up →](/docs/social/channels/telegram) |
+| **Facebook** | ✅ Verified | Free | Medium — app review | [Set up →](/docs/social/channels/facebook) |
+| **Slack** (via Hermes) | ✅ Verified | Free | Easy | [Set up →](/docs/social/channels/slack) |
+| **Instagram** | 🔍 Researched | Free | Medium — inherits Facebook's gates | [Set up →](/docs/social/channels/instagram) |
+| **LinkedIn** | 🔍 Researched | Free | Medium — org verification | [Set up →](/docs/social/channels/linkedin) |
+| **X / Twitter** | 🔍 Researched | **Paid per post** | Easy to build, costs money | [Set up →](/docs/social/channels/x) |
+| **TikTok** | ⛔ Gated | Free | Hard — multi-week audit | [Read the reality →](/docs/social/channels/tiktok) |
+| **Snapchat** | ⛔ Gated | Free | Allowlist-only | [Read the reality →](/docs/social/channels/snapchat) |
+| **WhatsApp** | ⛔ No API | n/a | Impossible (for posting) | [Read the reality →](/docs/social/channels/whatsapp) |
+
+All environment variables in one table: [Environment reference](/docs/social/channels/env).
+
+## Where to start
+
+If you are wiring a brand from zero, this order costs the least and delivers soonest:
+
+1. **Telegram** — free, instant, no review. Do it today; it proves your pipeline end to end.
+2. **Facebook** — the paperwork gate is real but one-time, and it unlocks Instagram.
+3. **Instagram** — mostly free once Facebook is done; they share the app and the review.
+4. **LinkedIn** — if you sell B2B. Worth knowing company-page reach is low; a personal profile usually outperforms the page.
+5. **X** — only after deciding you accept per-post costs.
+6. **TikTok / Snapchat / WhatsApp** — plan for a human to post, or use an aggregator.
+
+## The pattern behind all of them
+
+Every platform that allows programmatic posting works roughly the same way, and knowing the
+shape makes each new one faster:
+
+1. **An app** registered with the platform (the identity making API calls)
+2. **A review** proving your app deserves the permissions it asks for — usually the slow part
+3. **A long-lived token** scoped to the account you post as, not to your personal login
+4. **An endpoint** that takes text and optionally media
+
+The differences that matter in practice are: how long the review takes, whether the token
+expires, and whether media has to be a public URL the platform fetches (Facebook, Instagram,
+Telegram) or bytes you upload (X, LinkedIn).
+
+## A note on tokens
+
+Every token below posts publicly as a brand. Treat them the way you would treat a password that
+cannot be un-leaked:
+
+- **Server-side only.** Never a `NEXT_PUBLIC_*` variable, never in client code, never committed.
+- **Per-brand, not shared.** One leaked token should not compromise every account.
+- **Long-lived, not eternal.** Even "permanent" tokens get revoked when a password changes, an admin leaves, or an app's permissions are re-reviewed. Something should notice before a post fails.

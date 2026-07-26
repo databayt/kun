@@ -1,0 +1,160 @@
+---
+title: Facebook
+description: Verified setup — a Business-type Meta app, Pages permissions, and a permanent Page token. Includes the Consumer-app trap that costs people a full day.
+---
+
+# Facebook
+
+✅ **Verified** — configured and posting for three brands.
+
+Free to post, but the paperwork is real. Budget a day of calendar time, most of it waiting.
+Doing it also unlocks [Instagram](/docs/social/channels/instagram), which shares the same app
+and review.
+
+## What you get
+
+Post text, images, video, Reels, and multi-photo posts to a **Facebook Page you administer**,
+via the Graph API, using a token that does not expire.
+
+You cannot post to a personal profile programmatically. Pages only. This is a deliberate Meta
+policy, not a gap you can work around.
+
+## Prerequisites
+
+- A Facebook Page (create one first — you need its id)
+- A Facebook account with an **admin** role on that Page
+- For production access: a business that can pass Meta's Business Verification
+
+## Steps
+
+### 1. Create the Page
+
+facebook.com → Pages → Create. Note its numeric id from *Settings → Page transparency*, or read
+it later from the API. That is `FACEBOOK_PAGE_ID`.
+
+### 2. Create a **Business**-type app
+
+[developers.facebook.com](https://developers.facebook.com) → *My Apps* → *Create App*.
+
+**When it asks what type of app, choose "Business".** Read the trap below before clicking
+anything else — this choice is effectively irreversible and picking wrong wastes a day.
+
+### 3. Add Pages permissions
+
+In the app, request:
+
+| Permission | Why |
+|------------|-----|
+| `pages_manage_posts` | Create posts |
+| `pages_read_engagement` | Read the Page and its metrics |
+| `pages_show_list` | Enumerate which Pages you administer |
+
+### 4. Get a Page access token
+
+Use the [Graph API Explorer](https://developers.facebook.com/tools/explorer/):
+
+1. Select your app, then *Get Token → Get Page Access Token*
+2. Grant the permissions and pick your Page
+3. You now hold a **short-lived user** token — not what you want
+
+Exchange it for a permanent Page token:
+
+```bash
+# 1. short-lived user token → long-lived user token (~60 days)
+curl -s "https://graph.facebook.com/v21.0/oauth/access_token\
+?grant_type=fb_exchange_token\
+&client_id=<APP_ID>\
+&client_secret=<APP_SECRET>\
+&fb_exchange_token=<SHORT_LIVED_USER_TOKEN>"
+
+# 2. long-lived user token → PAGE token (this one does not expire)
+curl -s "https://graph.facebook.com/v21.0/me/accounts?access_token=<LONG_LIVED_USER_TOKEN>"
+# → find your Page in the array; its `access_token` is the permanent one
+```
+
+Confirm it is genuinely permanent:
+
+```bash
+curl -s "https://graph.facebook.com/debug_token\
+?input_token=<PAGE_TOKEN>&access_token=<APP_TOKEN>"
+# → "expires_at": 0   ← 0 means never. Anything else means you skipped step 1.
+```
+
+That token is `FACEBOOK_PAGE_ACCESS_TOKEN`.
+
+### 5. Business Verification + App Review
+
+While your app is in development mode it can only post to Pages owned by people with a role on
+the app. To post to a real Page in production you need **Advanced Access**, which requires
+**Business Verification** — submitting real business documents to Meta.
+
+Start this early. It is the long pole, and it is waiting rather than working.
+
+## The traps
+
+**A Consumer-type app can *never* request Pages permissions.** This is the expensive one. If you
+pick "Consumer" at app creation, the Pages permissions simply do not appear in the permissions
+list, and any OAuth attempt returns **"Invalid Scopes: pages_manage_posts"**. Nothing in the
+error tells you the app *type* is the cause, and you cannot change the type after creation — you
+create a new **Business** app and start over. We lost a day to this.
+
+**`expires_at: 0` is the only proof of a permanent token.** It is easy to end up with a
+60-day user token and believe you are done. Two months later, posting breaks with an
+authentication error, long after you remember why. Always run `debug_token`.
+
+**Never log the request URL.** Graph takes `access_token` as a query parameter, so any logging
+middleware or error handler that echoes the URL writes a live Page token into your logs. Log the
+error message only.
+
+**Text and photo posts are different endpoints with different field names.** `/{page-id}/feed`
+takes `message`; `/{page-id}/photos` takes `url` + `caption`. Posting a caption to `/feed` and an
+image separately produces two posts.
+
+**Media is fetched by Meta, not uploaded.** The `url` must be publicly reachable from Meta's
+servers. `localhost`, signed-expiring URLs, and anything behind auth will fail. Put media on a
+CDN first.
+
+**Photo posts take longer.** Meta downloads the image before responding, so a timeout tuned for
+text posts will fire spuriously on media. We use 10s for text and 25s for photos.
+
+## Environment variables
+
+Per brand, with the product id uppercased:
+
+| Variable | Example | Required |
+|----------|---------|:--------:|
+| `FACEBOOK_PAGE_ID_<PRODUCT>` | `FACEBOOK_PAGE_ID_HOGWARTS` | Yes |
+| `FACEBOOK_PAGE_ACCESS_TOKEN_<PRODUCT>` | `FACEBOOK_PAGE_ACCESS_TOKEN_HOGWARTS` | Yes |
+| `FACEBOOK_PAGE_ID` | unsuffixed legacy pair | Fallback for one brand only |
+| `FACEBOOK_PAGE_ACCESS_TOKEN` | " | " |
+
+Each brand has its own Page and its own token. The unsuffixed pair is a legacy fallback for a
+single default brand — new brands should always use the suffixed form.
+
+## Verify
+
+The Page name is the useful check, because it proves *which* Page the token actually resolves
+to — which is how you catch a token pasted into the wrong brand's variable:
+
+```bash
+curl -s "https://graph.facebook.com/v21.0/<PAGE_ID>?fields=name&access_token=<PAGE_TOKEN>"
+# → {"name":"Your Page Name","id":"..."}
+```
+
+Post a test:
+
+```bash
+curl -s -X POST "https://graph.facebook.com/v21.0/<PAGE_ID>/feed" \
+  -H 'Content-Type: application/json' \
+  -d '{"message":"pipeline test","access_token":"<PAGE_TOKEN>"}'
+```
+
+In kun: the Social Hub's status dialog **names the resolved Page** for the selected brand. Check
+it before publishing — it is the only pre-publish signal that a token isn't crossed.
+
+## Limits
+
+- **Rate:** generous for organic posting; Meta throttles per-app rather than per-post. Normal cadence never approaches it.
+- **Media:** images fetched by URL; video supported; Reels have their own endpoint.
+- **Cost:** free.
+- **AI disclosure:** no organic API flag exists. Meta's self-disclosure duty applies to photorealistic synthetic video and realistic audio; C2PA metadata in an upload can auto-trigger an "AI Info" label, though most platforms strip manifests. Comply by policy rather than by flag.

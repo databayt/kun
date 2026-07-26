@@ -1,0 +1,59 @@
+---
+title: Snapchat
+description: Gated — allowlist-only. There is no self-serve route to programmatic posting; you need a Snap representative to enable your client.
+---
+
+# Snapchat
+
+⛔ **Gated** — no self-serve path exists.
+
+## The reality
+
+Snapchat's Public Profile API can post Stories, Saved Stories, and Spotlight content. You cannot
+turn it on yourself.
+
+Access is **allowlist-only**: you set up a Snap Business account, and then a Snap
+representative must explicitly allowlist your client id. There is no application form that
+resolves on its own timeline, no developer tier you can pay for, and no documented SLA. In
+practice it requires a commercial relationship — which usually means an ad-spend conversation.
+
+## What this means practically
+
+For most small teams Snapchat is a **human-posting channel**, indefinitely. Treat it that way in
+planning rather than leaving it as a perpetually-blocked automation ticket.
+
+If Snapchat is genuinely central to your audience — and for some consumer segments in MENA it is
+— the realistic options are:
+
+1. **Post manually.** Generate the media with your pipeline, a human posts it.
+2. **Use an aggregator.** Ayrshare and similar services have the relationship already and expose Snapchat through their API.
+3. **Open the commercial conversation.** If you are spending on Snap ads, ask your rep about Public Profile API access as part of that.
+
+## How to start, if you want to try
+
+1. Create a **Snap Business account** at [business.snapchat.com](https://business.snapchat.com)
+2. Create a Public Profile for the brand
+3. Register an app in the Snap Developer portal
+4. **Contact a Snap representative** to request allowlisting for the Public Profile API
+
+Step 4 is the whole thing. Steps 1–3 take an afternoon and get you nowhere without it.
+
+## The traps
+
+**Don't confuse the APIs.** Snap's *Marketing API* (ads) and *Conversions API* (measurement) are
+self-serve and well documented. Neither posts organic content. It is easy to read the developer
+site and conclude access is available when the organic-posting piece is the one part that isn't.
+
+**Don't build against it speculatively.** Without allowlisting you cannot test anything
+end to end, so code written in advance is unverifiable and will likely need rework once real
+access arrives.
+
+## Environment variables
+
+None — nothing to configure until allowlisted.
+
+## Limits
+
+- **Media:** Stories, Saved Stories, Spotlight
+- **Cost:** free (the API), but effectively gated behind a commercial relationship
+- **AI disclosure:** required for **monetized** content; caption disclosure if you are Spotlight-monetized

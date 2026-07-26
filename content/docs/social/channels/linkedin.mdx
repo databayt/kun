@@ -1,0 +1,132 @@
+---
+title: LinkedIn
+description: Researched setup — Community Management API approval, a registered legal entity, and an honest note on why company-page automation may not be worth it.
+---
+
+# LinkedIn
+
+🔍 **Researched** — written from LinkedIn's current developer docs. **Not walked end to end
+yet.** The approval process in particular is described from documentation, not experience.
+
+## Read this before you start
+
+LinkedIn is the one channel where **the automation may not be worth the effort**, and it's
+better to know that up front than after a three-week approval wait.
+
+Company-page organic reach on LinkedIn currently runs around **2–5%**, while personal profiles
+reach substantially more of their network. For a small B2B company, one founder posting from a
+personal profile typically outperforms a fully-automated company page — and personal-profile
+posting **cannot be automated** anyway (the API does not permit it, and you should not try).
+
+So the honest strategy for most small teams is: **a human posts from a personal profile, and the
+company page is a storefront** that gets occasional automated posts for completeness. Wire this
+channel if you want the storefront kept warm automatically. Don't wire it expecting reach.
+
+## What you get
+
+Post text, images, video, documents (carousels), and polls to a **LinkedIn company page** via the
+Posts API.
+
+## Prerequisites
+
+- A LinkedIn company page
+- A **Super Admin** or **Content Admin** role on that page
+- A **registered legal entity** — LinkedIn verifies this, so a personal side project will not pass
+- Community Management API approval
+
+## Steps
+
+### 1. Create a developer app
+
+[linkedin.com/developers](https://www.linkedin.com/developers/) → *Create app*. Associate it with
+your company page — LinkedIn requires you to verify the association from the page itself.
+
+### 2. Request the Community Management API
+
+*Products* tab → request **Community Management API**. This is the approval gate. You submit
+company details and a description of the use case; expect a wait measured in days to weeks.
+
+Until approved, you can only post to pages associated with the app's own developers.
+
+### 3. Add OAuth scopes
+
+| Scope | Why |
+|-------|-----|
+| `w_organization_social` | Post as the organization |
+| `r_organization_social` | Read the organization's posts |
+| `rw_organization_admin` | Manage the page |
+
+### 4. Complete the OAuth flow
+
+LinkedIn uses standard three-legged OAuth. Access tokens last **60 days**; refresh tokens last a
+year. Unlike Facebook there is no permanent token — you must implement refresh.
+
+### 5. Find the organization URN
+
+```bash
+curl -s -H "Authorization: Bearer <TOKEN>" \
+  "https://api.linkedin.com/v2/organizationAcls?q=roleAssignee"
+# → look for "organization": "urn:li:organization:12345678"
+```
+
+### 6. Post
+
+```bash
+curl -s -X POST "https://api.linkedin.com/rest/posts" \
+  -H "Authorization: Bearer <TOKEN>" \
+  -H "LinkedIn-Version: 202601" \
+  -H "X-Restli-Protocol-Version: 2.0.0" \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "author": "urn:li:organization:12345678",
+    "commentary": "Your post text",
+    "visibility": "PUBLIC",
+    "distribution": {"feedDistribution": "MAIN_FEED"},
+    "lifecycleState": "PUBLISHED"
+  }'
+```
+
+## The traps
+
+**Tokens expire at 60 days and there is no permanent option.** This is the biggest operational
+difference from Facebook. You must implement refresh-token rotation, or posting silently breaks
+two months after you set it up. Build the refresh before you build the posting.
+
+**The `LinkedIn-Version` header is mandatory** on the versioned `/rest/` endpoints, formatted
+`YYYYMM`. Omitting it returns an opaque error. LinkedIn deprecates versions on a rolling
+schedule, so this is a value you will have to bump periodically.
+
+**A registered legal entity is genuinely required.** Community Management API approval asks for
+verifiable company information. There is no hobbyist path.
+
+**Media upload is a three-step dance** — register the upload, PUT the bytes to the returned URL,
+then reference the returned asset URN in the post. Unlike Meta, LinkedIn does not fetch from your
+URL.
+
+**Personal profile posting is not available.** Do not look for a workaround; automating a
+personal profile violates the User Agreement and risks the account.
+
+## Environment variables
+
+| Variable | Example | Required |
+|----------|---------|:--------:|
+| `LINKEDIN_ORG_URN_<PRODUCT>` | `urn:li:organization:12345678` | Yes |
+| `LINKEDIN_ACCESS_TOKEN_<PRODUCT>` | 60-day token | Yes |
+| `LINKEDIN_REFRESH_TOKEN_<PRODUCT>` | year-long refresh token | Yes — without it posting dies at 60 days |
+| `LINKEDIN_CLIENT_ID` / `LINKEDIN_CLIENT_SECRET` | app credentials | Yes, for refresh |
+
+## Verify
+
+```bash
+curl -s -H "Authorization: Bearer <TOKEN>" \
+  -H "LinkedIn-Version: 202601" \
+  "https://api.linkedin.com/rest/organizations/12345678"
+```
+
+## Limits
+
+- **Rate:** ~150 posts per day per organization — far above any sensible cadence
+- **Text:** 3,000 characters
+- **Media:** images, video, and multi-page PDF documents (the native "carousel")
+- **Cost:** free
+- **Token lifetime:** 60 days, refresh required

@@ -1,0 +1,109 @@
+---
+title: Status
+description: Where social automation actually stands — wired vs configured vs live, per channel and per loop, with the gaps named honestly.
+---
+
+# Status
+
+**Last verified: 2026-07-26** (against Vercel production env and live endpoint probes).
+
+The code is in good shape. The configuration is not. This page exists because
+[the overview](/docs/social) describes what the pipeline *can* do, and it is easy to read that
+as what it *is* doing. It isn't — yet.
+
+> **One-line summary:** 1 of 9 channels is live, 1 of 3 loops works, and the daily cron has been
+> a no-op since it shipped.
+
+## Three words that mean different things
+
+| Term | Means |
+|------|-------|
+| **Wired** | The code path exists and is tested |
+| **Configured** | Credentials are present in Vercel production |
+| **Live** | A post can actually reach the platform |
+
+Most of the gap on this page is between *wired* and *configured*. That is the good kind of gap —
+it closes with credentials, not engineering.
+
+## Channels
+
+| Channel | Wired | Configured | Live | Blocker |
+|---------|:-----:|:----------:|:----:|---------|
+| **Facebook** — hogwarts · mkan · databayt | ✅ | ✅ | **✅** | — |
+| **Telegram** | ✅ | ❌ | ❌ | Bot exists and is valid, but its token was never pushed to Vercel and no `TELEGRAM_CHANNEL_ID` exists anywhere |
+| **Slack** (via Hermes) | ✅ | ❌ | ❌ | No `HERMES_API_URL` in production — and Hermes is down |
+| **Facebook** — sijillee · moalimee | ✅ | ❌ | ❌ | No Facebook Page created yet |
+| **Instagram** | registry only | ❌ | ❌ | Business account + App Review |
+| **LinkedIn** | registry only | ❌ | ❌ | Community Management API approval |
+| **X** | registry only | ❌ | ❌ | Pay-per-use since Feb 2026 — needs `/decide` |
+| **TikTok** | registry only | ❌ | ❌ | Full app audit, 1–4 weeks |
+| **Snapchat** | registry only | ❌ | ❌ | Allowlist-only via a Snap contact |
+| **WhatsApp** | registry only | ❌ | ❌ | No organic posting API exists |
+
+**Live: 1 of 9 channels, for 3 of 5 brands.**
+
+Telegram is the notable one. It is free, has no platform gate, the bot already exists and
+answers `getMe`, and the code has been ready since 2026-07-10. It is switched off for want of
+two environment variables. Setup steps: [Telegram guide](/docs/social/channels/telegram).
+
+## Loops
+
+The three publish paths are described in [Architecture & Loops](/docs/social/architecture).
+Their current state:
+
+| Loop | State | Why |
+|------|-------|-----|
+| **A — Hub** | **Works** (Facebook only) | The one working path. Compose in `/social`, publish directly. |
+| **B — Cron** | **Dead** — three independent blockers | ① `SOCIAL_AUTOPOST_PRODUCTS` is unset, so the cron is a no-op. ② Even if set, `SOCIAL_DRAFT_SOURCE` defaults to `hermes`, which Vercel cannot reach. ③ Even if a draft existed, no review destination is configured, so `sendReview` fails. |
+| **C — Hermes relay** | **Unverified** | The endpoint is deployed and authenticating, but Hermes is currently down and this path has never been observed end to end. |
+
+Both `/api/social/cron` and `/api/social/relay` return **401** to an unauthenticated request —
+which confirms they are deployed and `CRON_SECRET` is set. The cron fires daily at 06:00 UTC and
+returns `drafted: 0`.
+
+## What's done
+
+- **Egress** — per-channel results, three transports in parallel, media through the whole chain (Facebook `/photos`, Telegram `sendPhoto`, media signed into the approval token)
+- **Per-product Facebook** — its own Page and permanent token per brand, with the resolved Page name shown before you publish, which is how a crossed token gets caught
+- **Registry** — 5 products × 9 channels, AND-gated so a channel is publishable only when the transport *and* that brand's destination are both wired
+- **Approval** — signed HMAC links, 12h TTL, contributor re-checked inside every mutating action
+- **Hub** — bilingual en/ar with RTL, Server-Component header, one-round-trip status probe
+- **Docs** — overview, architecture, strategy, five brand pages, and the channel guides
+
+## What's not
+
+- **Configuration** — the largest gap and the cheapest to close. Being handled by Cowork, which can drive the platform consoles directly.
+- **Hermes** — down, no production config, and the outbound draft lane dead-ends silently when it is.
+- **Measurement** — none. No PostHog wiring, no UTM capture, no reach or click pull-back.
+- **Persistence** — kun has no database at all. That means no scheduling, approval links that stay replayable until they expire, nowhere to attach metrics, no variant model, **and nowhere for work to wait while Hermes is down**.
+- **Variant-awareness** — the cron drafts one text and fans it to every channel, which contradicts the *one core piece → N platform-native variants* multiplier the [strategy](/docs/social/strategy) depends on.
+
+## The honest constraints
+
+**Hermes flaps.** Vercel can never call into it — it listens on `localhost` with no public
+route — and it will be up and down unpredictably. So kun is the source of truth and Hermes is a
+client that pulls work and pushes results. Any design where kun must reach Hermes to make
+progress is the wrong shape.
+
+**Which makes persistence load-bearing.** Today, a Hermes outage during the 06:00 cron loses that
+day's draft outright. With a queue, it just waits.
+
+**Scheduling can't ride on Vercel cron.** A drain needs to run every few minutes; cron
+granularity is a plan-tier limit and kun already uses a slot. GitHub Actions is free, runs at
+~5-minute granularity, and the endpoints are already bearer-token authenticated for exactly this
+— so it also keeps a Vercel Pro upgrade off the critical path.
+
+## Highest-leverage next moves
+
+Ordered by value ÷ cost, not by size:
+
+1. **Three environment variables revive an entire loop.** A review destination, a draft source, and an opt-in list turn Loop B from dead to working. No code.
+2. **Turn Telegram on.** Free, instant, no gate, bot already exists — doubles the live-channel count.
+3. **Wire measurement.** The [strategy](/docs/social/strategy) sets kill criteria at "zero signal after 3 months of consistent posting." That decision cannot currently be made, because nothing is measured.
+4. **Add persistence.** Unlocks scheduling, single-use approvals, metrics, and Hermes flap-tolerance in one move.
+
+## See also
+
+- [Architecture & Loops](/docs/social/architecture) — who talks to whom, and in which direction
+- [Channel guides](/docs/social/channels) — how to configure each one
+- [Strategy](/docs/social/strategy) — cadence, the multiplier, and the kill criteria

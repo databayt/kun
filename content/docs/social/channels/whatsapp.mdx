@@ -1,0 +1,69 @@
+---
+title: WhatsApp
+description: No posting API exists. What WhatsApp actually offers, why Channels can't be automated, and the one thing you must not do.
+---
+
+# WhatsApp
+
+⛔ **No organic posting API exists.** This is not a gate you can pass. It is a capability that is
+not offered.
+
+## The reality
+
+WhatsApp has no "post to your feed" concept in the way every other channel here does, and no API
+that broadcasts to followers.
+
+What actually exists:
+
+| Thing | What it is | Automatable |
+|-------|-----------|:-----------:|
+| **Cloud API** (Business Platform) | 1:1 conversational and template messaging with people who contacted you or opted in | ✅ but it is messaging, not posting |
+| **WhatsApp Channels** | The one-to-many broadcast feature that looks like what you want | ❌ **no official API at all** |
+| **Broadcast lists / Groups** | Manual, in-app, capped | ❌ |
+| **Status** | 24-hour stories | ❌ |
+
+The thing people mean when they say "automate WhatsApp posting" is **Channels**, and Meta has
+published no API for it.
+
+## The one thing you must not do
+
+There are npm packages and services that reverse-engineer WhatsApp Web to automate Channels,
+groups, and Status. **Do not use them.**
+
+- They violate WhatsApp's Terms of Service
+- They get numbers **banned**, frequently and permanently
+- A banned number takes your customer support line with it — and for a business whose customers reach you on WhatsApp, that is a far worse outcome than not posting
+
+This is not a compliance-theatre warning. Number bans are common and are not reversible on any
+useful timeline.
+
+## What to do instead
+
+WhatsApp is genuinely important in many markets — in Sudan and much of MENA it is where business
+actually happens. The right model is **conversation, not broadcast**:
+
+1. **Cloud API for real messaging.** Order updates, appointment reminders, support. This is well supported, officially sanctioned, and worth building — it just isn't marketing posts. Note it is priced per conversation.
+2. **Channels, posted by a human.** If you want a WhatsApp Channel presence, someone posts to it manually. Generate the content with your pipeline; a person does the last step.
+3. **Click-to-WhatsApp as the destination, not the source.** Put `wa.me` links in your other channels' posts so WhatsApp is where the conversation *lands*, rather than another feed to fill. This plays to the platform's actual strength.
+
+## For a school, clinic, or shop
+
+The highest-value WhatsApp automation is almost never marketing. It is:
+
+- Attendance or appointment notifications to parents and patients
+- Invoice and payment reminders
+- Support conversations
+
+All of that is Cloud API territory and is a genuinely good build. It just belongs in your product
+roadmap, not your social calendar.
+
+## Environment variables
+
+None for posting. If you build Cloud API messaging, that is a separate integration with its own
+credentials (`WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_ACCESS_TOKEN`) and its own per-conversation
+pricing.
+
+## Limits
+
+- **Organic posting:** not available at any price
+- **Cloud API:** per-conversation pricing, requires opt-in or a user-initiated conversation, template messages need pre-approval

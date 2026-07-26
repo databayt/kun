@@ -2,6 +2,9 @@
   "title": "Social",
   "pages": [
     "index",
+    "status",
+    "architecture",
+    "channels",
     "strategy",
     "carousel",
     "databayt",

@@ -183,6 +183,34 @@ Env: `CRON_SECRET` (required), `SOCIAL_AUTOPOST_PRODUCTS` (empty = nothing auto-
 `SOCIAL_DRAFT_SOURCE`, `SOCIAL_DRAFT_MODEL`, `SOCIAL_DRAFT_LOCALE`, `SOCIAL_REVIEW_CHANNEL`,
 `TELEGRAM_REVIEW_CHAT_ID`, `SOCIAL_PUBLIC_URL`.
 
+### Hub optimization + media + loop C — ✅ done 2026-07-26
+
+The hub's last-mile got faster, honest about partial failure, and media-capable. The public
+architecture (actors, the three loops, cron inventory, keywords) is now
+`content/docs/social/architecture.mdx`.
+
+- `src/lib/social-publish.ts` — the three transports ran **sequentially**, so a multi-channel post
+  paid every timeout back to back; now one `Promise.all`. Returns per-channel `results` alongside
+  the existing `ok`/`error`, so the three callers (action, approval route, relay) were untouched. ✅
+- `src/lib/facebook.ts` / `telegram.ts` / `hermes.ts` — `mediaUrl` support. Facebook uses the
+  `/photos` edge (`url` + `caption`, not `message`) with a longer timeout since Graph fetches the
+  image; Telegram uses `sendPhoto` and, because its caption caps at 1024 vs 4096 for text, sends
+  an over-long caption as a follow-up message rather than truncating approved copy. ✅
+- `src/lib/social-token.ts` — the approval payload gained `m?` (media), validated as http(s) on
+  verify. Without it a staged draft published its caption and silently dropped the image. ✅
+- `src/lib/social-status.ts` — **new**: one `EgressStatus` shape for the first paint and the
+  refresh button, so the panel can't disagree with itself. ✅
+- `src/actions/post-social.ts` — three verify actions → one `verifyConnections` (painting the
+  status panel was 3 POSTs + 3 `auth()` resolutions for probes that were already parallel
+  server-side). Added `stageForReview`: pushes composer copy down the cron's approval path. ✅
+- UI split — `social-dashboard.tsx` 599 → ~180 lines (orchestrator only); `composer.tsx`,
+  `channel-picker.tsx`, `egress-status.tsx`, `dictionary.ts` extracted; `page.tsx` became a real
+  Server Component (header never reaches the bundle); orphaned `icons.tsx` deleted;
+  `optimizePackageImports: ["lucide-react"]` added. ✅
+- **Regression fixed**: the WIP refactor had replaced the channel chips with a single-value
+  `<Select>`, so you could pick one channel or all — never two of three. Restored as a
+  `DropdownMenuCheckboxItem` multi-select. ✅
+
 ### Persistence, scheduling, metrics
 
 - Prisma `SocialPost` / `ScheduledPost` — **variant-aware**: parent piece + per-platform variants

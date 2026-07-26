@@ -1,0 +1,16 @@
+{
+  "title": "Channel Setup",
+  "pages": [
+    "index",
+    "telegram",
+    "facebook",
+    "slack",
+    "instagram",
+    "linkedin",
+    "x",
+    "tiktok",
+    "snapchat",
+    "whatsapp",
+    "env"
+  ]
+}

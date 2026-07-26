@@ -1,0 +1,238 @@
+---
+title: Architecture & Loops
+description: Who talks to whom — kun, Hermes, the platforms, and the marketing team — the three publish loops, the generate→approve→schedule→publish chain, the cron jobs, and the keywords that drive them.
+---
+
+# Architecture & Loops
+
+[Social Automation](/docs/social) describes *what* the pipeline does. This page describes *who
+talks to whom*, in which direction, and which of the three loops a given post actually travels.
+If you are wiring a new channel, adding a cron, or wondering why a draft did not publish, start
+here.
+
+## The four actors
+
+| Actor | Where it runs | Holds | Can call out to | Can be called by |
+|-------|---------------|-------|-----------------|------------------|
+| **kun** | Vercel (public HTTPS) | Every platform token (`FACEBOOK_PAGE_ACCESS_TOKEN_*`, `TELEGRAM_BOT_TOKEN`), `CRON_SECRET` | Platform APIs · Anthropic API | The internet · Vercel Cron · Hermes |
+| **Hermes** | Abdout's Linux desktop, `localhost:18789` | Slack bot/app tokens | The internet (outbound) · Slack · kun | **Nothing** — not publicly routable |
+| **Platforms** | Facebook, Telegram, Slack, … | The published post | — | kun (direct API) · Hermes (adapters) |
+| **Marketing team** | Humans (Abdout · Samia · Ali · Moutaz) | Judgment, the approval decision | The Hub, Slack, Claude Code | Slack · the review channel |
+
+### The asymmetry that shapes everything
+
+**Vercel can never call into Hermes.** Hermes listens on `localhost` behind a home connection —
+there is no public route to it. Two consequences that explain most of the surprising behaviour:
+
+- The Hermes row in the Hub's status dialog is **red in production and green only on Abdout's
+  machine**. That is correct, not a bug.
+- `SOCIAL_DRAFT_SOURCE=hermes` (the default) is a **half-loop on Vercel** — the cron can hand a
+  drafting request *out*, but the reply never comes back in-band.
+
+Loop C below exists precisely to invert that arrow.
+
+```
+                    ┌──────────────── writes copy ─────────────────┐
+                    │                                              │
+              Claude Code                                    Marketing team
+             (/social skill)                            Abdout · Samia · Ali
+                    │                                         │        ▲
+                    │ paste                          approves │        │ reviews
+                    ▼                                         ▼        │
+   ┌────────────────────────────────────────────────────────────────────────┐
+   │                        kun  ·  Vercel  ·  public                       │
+   │   /social Hub    /api/social/cron    /api/social/publish   /relay      │
+   │                        holds every platform token                      │
+   └───────────┬──────────────────────────────────────────────▲────────────┘
+               │ direct API (Graph, Bot)                      │ POST + CRON_SECRET
+               ▼                                              │
+      ┌─────────────────┐                          ┌──────────────────────┐
+      │   Platforms     │◄──── Slack adapter ──────│  Hermes · localhost  │
+      │ Facebook·Telegram│                         │  (outbound only)     │
+      └─────────────────┘                          └──────────────────────┘
+```
+
+## The three loops
+
+They differ in one thing: **where the human sits, and who holds the tokens.**
+
+### Loop A — Hub (human-composed)
+
+The everyday lane. Nothing scheduled, nothing autonomous.
+
+```
+Claude Code (/social) ──► human pastes into /social Hub ──► picks brand + channels
+   └─ drafts AR/EN copy          └─ optional media URL from /higgs
+                                       │
+                                       ▼
+                            publishPostDirect (Server Action)
+                            contributor re-check → Zod → deliverPost
+                                       │
+                    ┌──────────────────┼──────────────────┐
+                    ▼                  ▼                  ▼
+              Telegram Bot API   Facebook Graph API   Hermes /webhook
+                                                       (Slack, …)
+```
+
+- **Human sits:** at the composer, before Publish.
+- **Guard:** session + contributor allowlist re-checked *inside* the action (JWT sessions outlive
+  removal from the allowlist).
+- **Result:** per-channel — a fan-out that half-lands reports exactly which channel failed and why.
+
+### Loop B — Cron (draft-and-approve)
+
+The only *scheduled* lane today. Drafts unattended; **never publishes unattended.**
+
+```
+Vercel Cron 06:00 UTC ──► GET /api/social/cron   (Bearer CRON_SECRET, timing-safe)
+                               │
+                               ▼
+                     for each SOCIAL_AUTOPOST_PRODUCTS
+                               │
+                          draftPost()  ── SOCIAL_DRAFT_SOURCE
+                               │          ├─ "hermes"    → hands the ask out (half-loop on Vercel)
+                               │          └─ "anthropic" → drafts server-side (opt-in, costs money)
+                               ▼
+                     sendReview() → PRIVATE review channel
+                     message carries a signed 12h one-click link
+                               │
+                     ┌─────────┴─────────┐
+                     │   human clicks    │  ◄── the gate
+                     └─────────┬─────────┘
+                               ▼
+                  GET /api/social/publish?token=…
+                  verify HMAC → deliverPost → echo outcome back to review channel
+```
+
+- **Human sits:** in the review channel, clicking the link.
+- **Opt-in:** `SOCIAL_AUTOPOST_PRODUCTS` is **empty by default** — the cron authenticates, does
+  nothing, and says so.
+- **Known limits, stated rather than hidden:** the link is **replayable until it expires**
+  (clicking twice posts twice) and anyone holding it can publish. Both are consequences of having
+  no `SocialPost` table yet. Keep the review channel private.
+
+### Loop C — Hermes inbound relay
+
+Written because Loop B's Hermes path can't complete on Vercel. This one **inverts the arrow**.
+
+```
+Hermes (Abdout's desktop, its own cron)
+   └─ drafts copy ──► shows it in Slack ──► human approves in Slack   ◄── the gate
+                                                  │
+                                                  ▼
+                              POST /api/social/relay   (Bearer CRON_SECRET)
+                              { product, text, channels? }
+                                                  │
+                                                  ▼
+                              kun delivers with ITS OWN tokens
+```
+
+Why it matters: **Hermes never holds a Facebook Page token.** The secrets stay in Vercel env, and
+Hermes only ever sends approved text. The bearer secret means "a human already said yes" — so
+whoever holds `CRON_SECRET` can post to a brand page. Treat it as a publishing credential.
+
+## generate → approve → schedule → publish
+
+The chain the whole system is built around, and where each stage actually lives:
+
+| Stage | Who / what | Code | Loop | State today |
+|-------|-----------|------|------|-------------|
+| **Generate** | Claude (`/social` skill) · `/higgs` for media | `lib/social-draft.ts` (cron lane only) | A · B · C | Claude-native. The relays never write copy. |
+| **Approve** | Human — Abdout, Samia, or Ali | composer button · signed link · Slack | A · B · C | **Always required.** L2 on the wired channels. |
+| **Schedule** | Vercel Cron | `vercel.json` → `crons` | B only | **The weak link — see below.** |
+| **Publish** | Egress fan-out, per transport, in parallel | `lib/social-publish.ts` → `deliverPost` | A · B · C | One code path for all three loops. |
+| **Measure** | PostHog + UTM | — | — | Not wired back yet. |
+
+### Scheduling is the honest gap
+
+There is **no scheduling in the product sense** — you cannot pick a date and time for a post.
+What exists:
+
+- **One fixed slot**: `0 6 * * *` (06:00 UTC daily), hard-coded in `vercel.json`.
+- **One time window**: the approval token's 12-hour TTL. Miss it and the draft is gone.
+
+Real scheduling needs persistence — a `SocialPost` / `ScheduledPost` model with `scheduled_for`,
+`status`, and a result column. **kun has no database at all** (no Prisma, no schema), so this is a
+genuine build, not a config change. It is the documented next phase, and it is what also removes
+the replayable-link limitation, because approval becomes a row transition instead of a URL.
+
+## Cron jobs
+
+### Running today
+
+| Path | Schedule | Auth | Does |
+|------|----------|------|------|
+| `/api/social/cron` | `0 6 * * *` (06:00 UTC) | `Bearer CRON_SECRET`, timing-safe compare | One draft per opted-in product → review message with signed link. **Never publishes.** |
+
+### Candidates, and what each needs first
+
+Listed so the follow-up is turnkey — none of these exist yet.
+
+| Candidate | What it would do | Blocked on |
+|-----------|------------------|------------|
+| **Scheduled publish** | Drain a queue of approved posts at their `scheduled_for` | `ScheduledPost` persistence |
+| **Metrics pull-back** | Fetch reach/clicks per post → PostHog → the payoff review | Persistence (needs a post id to attach to) |
+| **Token health canary** | Daily probe of every per-product Page token; alert before expiry | Nothing — buildable now on `getEgressStatus` |
+| **Weekly content nudge** | Friday: what shipped vs the calendar, into Slack | `content-calendar` structure |
+| **Kill-switch watchdog** | Halt auto-post on an error-rate or complaint spike | L4 guardrail layer |
+| **Per-brand cadence** | Different days/times per brand rather than one 06:00 sweep | Persistence + per-brand config |
+
+> A cron that publishes without a human is **L4** and is gated behind `/decide` plus the guardrail
+> layer (LLM-judge content + Arabic gate, rate limits, kill switch). Do not add one casually.
+
+## Who does what — the marketing team
+
+| Person | Role | In this pipeline |
+|--------|------|------------------|
+| **Abdout** | Founder, Tech Lead | Owns credentials + `/decide` on anything that costs money or touches a brand account. Final approver. |
+| **Samia** | R&D / content | Carries 2–3 core pieces a week — the input the multiplier runs on. |
+| **Ali Aseel** | QA + Sales | Business/LinkedIn content; Hogwarts social doubles as the trust asset for his sales calls. |
+| **Moutaz** | Product Engineer | Business + network reach. |
+| **`growth` agent** | The lane, not a person | Owns content strategy and pillars; `/social` is its publish arm. |
+
+The binding constraint is **content capacity, not channel count** — which is why the pipeline is
+built around *one core piece → N platform-native variants* rather than N independent posts.
+
+## Keywords
+
+Say these in prose — no slash needed. The engine routes them.
+
+| Keyword | Routes to | Use for |
+|---------|-----------|---------|
+| **`social`** · «منشور تواصل» | `/social` skill → `growth` agent | Draft, stage, or publish a brand post |
+| **`higgs`** | `/higgs` skill → Higgsfield | Generate the image/video for a post |
+| **`carousel`** | `/carousel` skill | Multi-slide bilingual decks (Instagram, LinkedIn PDF) |
+| **`content-calendar`** | `content-calendar` skill | Plan or review what's publishing when |
+| **`weekly`** | `captain` cadence | Monday plan / Friday review — where social gets allocated |
+| **`decide`** | `/decide` | Any billing or Type-1 (public, hard-to-reverse) call — paid APIs, L4 autonomy |
+
+Headless lanes, when you want no UI:
+
+```bash
+node scripts/post-to-telegram.mjs --text "<approved copy>"
+node scripts/post-to-facebook.mjs --text "<approved copy>" --product <brand>
+node scripts/post-to-hermes.mjs   --text "<approved copy>" --channels slack
+node scripts/generate-social-media.mjs --product <brand> --prompt "<topic>"
+node scripts/social-cron-sync.mjs        # kun ↔ Hermes health validator
+```
+
+## Reading the failure modes
+
+| Symptom | Where to look |
+|---------|---------------|
+| Hermes row red in production | Expected — Vercel can't reach `localhost`. Use Loop C. |
+| Cron ran, nothing in the review channel | `SOCIAL_AUTOPOST_PRODUCTS` empty, or no review destination (`HERMES_API_URL` / `TELEGRAM_REVIEW_CHAT_ID`) |
+| "Draft is N chars (max 1200)" | The copy rides inside the approval URL — shorten it or publish from the Hub |
+| Approval link 403 | Expired (>12h) or `CRON_SECRET` changed since it was minted |
+| Facebook posts to the wrong Page | The status dialog names the resolved Page — check it before publishing; per-product tokens are `FACEBOOK_PAGE_*_<PRODUCT>` |
+| Some channels published, others didn't | Per-channel results in the composer name each failure; the post is already public where it succeeded |
+
+## See also
+
+- [Status](/docs/social/status) — what is actually configured and live right now
+- [Channel Setup](/docs/social/channels) — how to configure each platform, and the traps
+- [Environment reference](/docs/social/channels/env) — every variable, its default, and whether production has it
+- [Social Automation](/docs/social) — the pipeline overview and channel reality
+- [Strategy](/docs/social/strategy) — six lenses, cadence, kill criteria
+- [Hermes](/docs/hermes) — the gateway itself
+- [Brand & Voice](/docs/brand) — the rules every post obeys

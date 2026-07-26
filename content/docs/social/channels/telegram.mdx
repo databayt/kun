@@ -1,0 +1,114 @@
+---
+title: Telegram
+description: Verified setup — a bot, a channel, two environment variables. The easiest programmatic posting on the internet, and the one most people skip.
+---
+
+# Telegram
+
+✅ **Verified** — configured and posted through.
+
+The lowest-friction posting API in existence: no app review, no business verification, no cost,
+no rate-limit anxiety. If you are testing a publishing pipeline, do Telegram first — it proves
+the whole chain end to end in about five minutes.
+
+## What you get
+
+Post text, images, video, and albums to a public channel via a plain HTTPS call. Works from any
+server, including serverless — no local gateway, no OAuth dance, no token refresh.
+
+## Prerequisites
+
+A Telegram account. That's it.
+
+## Steps
+
+### 1. Create the bot
+
+Message [`@BotFather`](https://t.me/BotFather) → `/newbot` → give it a display name and a
+username ending in `bot`. He replies with a token shaped like `123456789:AAF...`.
+
+That token is `TELEGRAM_BOT_TOKEN`. Anyone holding it controls the bot — treat it as a password.
+
+### 2. Create the channel
+
+Telegram → new **Channel** (not a group). Public if you want a `@handle`; private works too but
+you'll need the numeric id.
+
+### 3. Make the bot an admin
+
+This is the step everyone misses. Channel → *Administrators* → *Add Admin* → search your bot's
+username → grant at minimum **Post Messages**.
+
+A bot that is merely a *member* of a channel cannot post to it and the API error does not say so
+clearly.
+
+### 4. Get the channel id
+
+- **Public channel:** the handle works directly — `@yourchannel`
+- **Private channel:** you need the numeric form, which looks like `-1001234567890`. Post any message in the channel, forward it to [`@userinfobot`](https://t.me/userinfobot), and read the chat id. Note the `-100` prefix is part of the id, not a typo.
+
+That value is `TELEGRAM_CHANNEL_ID`.
+
+### 5. Create a separate private review chat
+
+Only needed if you use the draft-and-approve loop. Create a **private** group or channel, add
+the bot as admin the same way, and take its numeric id as `TELEGRAM_REVIEW_CHAT_ID`.
+
+## The traps
+
+**The bot must be an *admin*, not a member.** The single most common failure. Adding the bot to
+the channel is not enough.
+
+**`TELEGRAM_REVIEW_CHAT_ID` must never equal `TELEGRAM_CHANNEL_ID`.** The review chat receives
+draft messages carrying one-click publish links whose only protection is being unguessable. Send
+those to your public brand channel and you have published a button that lets any reader post as
+your brand. Our code deliberately refuses to default the review chat to the brand channel for
+exactly this reason.
+
+**Captions cap at 1024 characters; plain messages allow 4096.** Attach an image to a longer post
+and the API rejects it. Our Telegram client handles this by sending the photo first and the full
+text as a follow-up message rather than truncating approved copy — worth replicating.
+
+**Don't use `parse_mode` on arbitrary copy.** Markdown and HTML parse modes throw on unescaped
+characters that appear naturally in real writing — underscores, asterisks, brackets. We post as
+plain text on purpose.
+
+**The `-100` prefix.** A numeric channel id without it silently addresses a different chat type.
+
+## Environment variables
+
+| Variable | Example | Required | Notes |
+|----------|---------|:--------:|-------|
+| `TELEGRAM_BOT_TOKEN` | `123456789:AAF...` | Yes | From BotFather. Server-side only. |
+| `TELEGRAM_CHANNEL_ID` | `@databayt` or `-1001234567890` | Yes | The public brand channel |
+| `TELEGRAM_REVIEW_CHAT_ID` | `-1009876543210` | For the approval loop | A **private** chat, never the brand channel |
+
+## Verify
+
+Check the bot is alive and the token is valid:
+
+```bash
+curl -s "https://api.telegram.org/bot<TOKEN>/getMe"
+# → {"ok":true,"result":{"username":"your_bot",...}}
+```
+
+Post a test message:
+
+```bash
+curl -s -X POST "https://api.telegram.org/bot<TOKEN>/sendMessage" \
+  -H 'Content-Type: application/json' \
+  -d '{"chat_id":"@yourchannel","text":"pipeline test"}'
+```
+
+`{"ok":false,"description":"chat not found"}` almost always means the bot is not an admin, or
+the id is missing its `-100` prefix.
+
+In kun: the Social Hub's status dialog shows the Telegram row green with the resolved
+`@username` once both variables are set.
+
+## Limits
+
+- **Rate:** ~30 messages/second overall, and roughly 20 messages/minute to the same chat. Far above any real posting cadence.
+- **Message length:** 4096 characters; captions 1024.
+- **Media:** photos up to 10 MB by URL, video up to 50 MB. Telegram fetches the URL itself, so it must be publicly reachable.
+- **Cost:** free, with no announced plan to change.

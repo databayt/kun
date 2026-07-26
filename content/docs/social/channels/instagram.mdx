@@ -1,0 +1,126 @@
+---
+title: Instagram
+description: Researched setup — Business account linked to a Facebook Page, two-step publishing, and media that must live at a public URL.
+---
+
+# Instagram
+
+🔍 **Researched** — written from Meta's current developer docs. **Nobody here has walked it
+end to end yet**, so treat the sequence as correct in shape and verify the button names as you
+go. Corrections welcome.
+
+## What you get
+
+Publish images, videos, Reels, carousels, and stories to an **Instagram Business or Creator
+account** via the Graph API Content Publishing endpoints.
+
+Personal Instagram accounts cannot be posted to programmatically.
+
+## Prerequisites
+
+Instagram is not really a separate integration — it rides on Facebook's. Do
+[Facebook](/docs/social/channels/facebook) first:
+
+- An Instagram **Business** or **Creator** account
+- A Facebook Page, with the Instagram account **linked** to it
+- The same Meta **Business**-type app, with App Review and Business Verification
+
+If Facebook is done, most of the cost here is already paid.
+
+## Steps
+
+### 1. Convert the Instagram account
+
+Instagram app → *Settings → Account type and tools → Switch to professional account* → Business.
+
+### 2. Link it to the Facebook Page
+
+Facebook Page → *Settings → Linked accounts → Instagram* → connect.
+
+The link is what makes the account visible to the Graph API at all.
+
+### 3. Add Instagram permissions to the app
+
+On the same Business app used for Facebook:
+
+| Permission | Why |
+|------------|-----|
+| `instagram_basic` | Read the account |
+| `instagram_content_publish` | Publish posts |
+| `pages_show_list` | Resolve the linked Page |
+
+### 4. Find the Instagram account id
+
+```bash
+curl -s "https://graph.facebook.com/v21.0/<PAGE_ID>\
+?fields=instagram_business_account&access_token=<PAGE_TOKEN>"
+# → {"instagram_business_account":{"id":"178414..."}}
+```
+
+That id is `INSTAGRAM_ACCOUNT_ID`. The Page token you already have is the credential.
+
+### 5. Publish — two steps, always
+
+Unlike Facebook, publishing is never a single call. Create a media container, then publish it:
+
+```bash
+# 1. create the container
+curl -s -X POST "https://graph.facebook.com/v21.0/<IG_ACCOUNT_ID>/media" \
+  -d "image_url=https://cdn.example.com/post.jpg" \
+  -d "caption=Your caption here" \
+  -d "access_token=<PAGE_TOKEN>"
+# → {"id":"17895695668004550"}   ← container id, NOT a published post
+
+# 2. publish it
+curl -s -X POST "https://graph.facebook.com/v21.0/<IG_ACCOUNT_ID>/media_publish" \
+  -d "creation_id=17895695668004550" \
+  -d "access_token=<PAGE_TOKEN>"
+```
+
+## The traps
+
+**Media must be a public URL. There is no upload endpoint.** Instagram fetches the file from your
+URL, so it has to be reachable from Meta's servers — a CDN, not `localhost`, not a signed URL
+that expires in 60 seconds, not anything behind auth. This is the most common integration
+failure.
+
+**Two steps, not one.** A container id is not a post. Code that stops after `/media` silently
+publishes nothing, and the response looks successful.
+
+**Video containers are asynchronous.** For video and Reels the container is not immediately
+publishable — poll `status_code` on the container until it reads `FINISHED` before calling
+`/media_publish`. Publishing too early fails.
+
+**A publishing limit applies.** Roughly 50 posts per 24 hours per account. Not a constraint for
+brand posting, but it is a real ceiling for anything bulk.
+
+**Carousels need a container per item**, then a parent container with `media_type=CAROUSEL` and
+the children's ids.
+
+**Stories and Reels are separate media types**, not flags on a normal post.
+
+## Environment variables
+
+| Variable | Example | Required |
+|----------|---------|:--------:|
+| `INSTAGRAM_ACCOUNT_ID_<PRODUCT>` | `INSTAGRAM_ACCOUNT_ID_MKAN` | Yes |
+| `FACEBOOK_PAGE_ACCESS_TOKEN_<PRODUCT>` | reused from Facebook | Yes |
+
+No separate token — Instagram authenticates with the linked Page's token.
+
+## Verify
+
+```bash
+curl -s "https://graph.facebook.com/v21.0/<IG_ACCOUNT_ID>\
+?fields=username,followers_count&access_token=<PAGE_TOKEN>"
+```
+
+Getting the username back confirms the link, the permissions, and the token together.
+
+## Limits
+
+- **Rate:** ~50 published posts per 24h per account
+- **Media:** images by public URL; video by public URL with async processing; carousels up to 10 items
+- **Caption:** 2,200 characters, up to 30 hashtags
+- **Cost:** free
+- **AI disclosure:** same posture as Facebook — no organic API flag; comply by policy for photorealistic synthetic media

@@ -1,0 +1,167 @@
+---
+title: Slack (via Hermes)
+description: Verified setup — a Slack app in Socket Mode driven by the Hermes gateway, and why the traffic direction is inverted compared to every other channel.
+---
+
+# Slack — via the Hermes gateway
+
+✅ **Verified** — configured and relaying.
+
+Slack is the only channel here that is **not** reached directly from the web app. It goes
+through [Hermes](/docs/hermes), a self-hosted agent gateway, and understanding *why* explains the
+whole shape of the integration.
+
+## What you get
+
+Post to a Slack workspace channel, and — more usefully — a **human control surface**: review
+drafts, approve or reject them, and drive the pipeline from chat.
+
+## Why this one is different
+
+Every other channel is a plain HTTPS call from the server to a public API. Slack via Hermes is
+not, because **Hermes runs on a personal machine and is not publicly routable.**
+
+```
+Other channels:   kun (Vercel) ──────────► Platform API
+Slack via Hermes: kun (Vercel) ◄────────── Hermes (localhost)
+```
+
+The arrow points the wrong way, and that has consequences you cannot design around:
+
+- A cloud deployment can **never** call into Hermes. Its health check will always read red from production, and that is correct rather than broken.
+- Hermes will go down — a laptop closes, a network drops. **Anything that requires kun to reach Hermes in order to make progress is the wrong design.**
+
+So the working pattern is inverted: **Hermes pulls work and pushes results.** kun stays the
+source of truth; Hermes is an intermittent client. When it's down, work waits in a queue instead
+of being lost.
+
+## Prerequisites
+
+- A Slack workspace where you can install apps
+- Hermes installed and running on a machine with outbound internet ([Hermes docs](/docs/hermes))
+
+## Steps
+
+### 1. Create the Slack app
+
+[api.slack.com/apps](https://api.slack.com/apps) → *Create New App* → *From scratch*. Pick the
+workspace.
+
+### 2. Enable Socket Mode
+
+*Settings → Socket Mode* → toggle on. Slack generates an **app-level token** (`xapp-...`) — that
+is `SLACK_APP_TOKEN`.
+
+Socket Mode is what makes this work from a machine with no public URL: Slack opens a WebSocket to
+*you*, so no inbound port or tunnel is needed.
+
+### 3. Add bot scopes
+
+*OAuth & Permissions → Bot Token Scopes*:
+
+| Scope | Why |
+|-------|-----|
+| `chat:write` | Post messages |
+| `chat:write.public` | Post to channels the bot hasn't joined |
+| `channels:read` | Resolve channel names to ids |
+| `files:write` | Upload media |
+
+For interactive approve/reject buttons, also enable *Interactivity & Shortcuts*.
+
+### 4. Install and collect the bot token
+
+*Install to Workspace*. You get a bot token (`xoxb-...`) — that is `SLACK_BOT_TOKEN`.
+
+### 5. Invite the bot and pick a home channel
+
+In Slack: `/invite @yourbot` in the target channel. Its name or id becomes `SLACK_HOME_CHANNEL`.
+
+### 6. Configure Hermes
+
+These live in Hermes's own environment (`~/.hermes/.env`), **not** in the web app's:
+
+```bash
+SLACK_BOT_TOKEN=xoxb-...
+SLACK_APP_TOKEN=xapp-...
+SLACK_HOME_CHANNEL=#social
+```
+
+Then run the gateway **as a service**, not in the foreground:
+
+```bash
+hermes gateway setup    # interactive, once
+hermes gateway start    # service — survives restarts
+```
+
+`hermes gateway run` is foreground and dies with the terminal. Use `start` and put it under a
+supervisor (systemd or launchd) so a crash self-heals. Given the gateway is expected to flap,
+auto-restart is the single cheapest reliability win available.
+
+## The traps
+
+**Socket Mode needs *both* tokens.** `xoxb-` (bot) authenticates API calls; `xapp-` (app-level)
+opens the socket. Missing either produces a confusing "not authed" that points at the wrong one.
+
+**Tokens live with Hermes, not with the web app.** Putting `SLACK_BOT_TOKEN` in your Vercel
+environment does nothing — the web app never calls Slack directly. This surprises people.
+
+**The gateway health check reads red in production. That is correct.** Do not "fix" it by
+exposing Hermes to the internet: that would put a personal machine on the public internet holding
+brand credentials. The inverted design exists precisely to avoid that.
+
+**Never give Hermes the platform tokens.** Hermes should hold Slack credentials only. Facebook
+and Telegram tokens stay in the web app's server environment, so the gateway machine is never
+worth compromising for them. Hermes sends approved *text*; kun does the publishing.
+
+**A bearer secret shared with Hermes is a publishing credential.** When Hermes calls back into
+kun with the shared secret, that call means "a human already approved this." Whoever holds the
+secret can post to a brand page — scope and rotate it accordingly.
+
+## Environment variables
+
+On the **Hermes** machine:
+
+| Variable | Example | Required |
+|----------|---------|:--------:|
+| `SLACK_BOT_TOKEN` | `xoxb-...` | Yes |
+| `SLACK_APP_TOKEN` | `xapp-...` | Yes (Socket Mode) |
+| `SLACK_HOME_CHANNEL` | `#social` | Yes |
+| `KUN_API_URL` | `https://kun.databayt.org` | To call back |
+| `CRON_SECRET` | shared with kun | To authenticate the callback |
+
+In the **web app**:
+
+| Variable | Notes |
+|----------|-------|
+| `HERMES_API_URL` | Only useful where Hermes is actually reachable — i.e. local dev |
+| `HERMES_API_KEY` | Optional bearer for that direction |
+| `NEXT_PUBLIC_HERMES_API_URL` | Display-only, shown in the status panel |
+| `SOCIAL_REVIEW_CHANNEL` | Which Slack channel drafts go to (default `slack`) |
+
+## Verify
+
+Bot token:
+
+```bash
+curl -s -H "Authorization: Bearer xoxb-..." https://slack.com/api/auth.test
+# → {"ok":true,"team":"...","user":"..."}
+```
+
+Post a message:
+
+```bash
+curl -s -X POST https://slack.com/api/chat.postMessage \
+  -H "Authorization: Bearer xoxb-..." \
+  -H 'Content-Type: application/json' \
+  -d '{"channel":"#social","text":"pipeline test"}'
+```
+
+End to end, the real test is the **flap test**: queue work while Hermes is stopped, start it, and
+confirm the queue drains with nothing lost and nothing duplicated.
+
+## Limits
+
+- **Rate:** ~1 message/second per channel, bursts tolerated. Never a constraint for posting.
+- **Message length:** 40,000 characters, though ~3,000 renders sensibly.
+- **Cost:** free on any Slack plan.
+- **Availability:** bounded by your gateway machine, not by Slack. This is the weakest link in the chain, and the reason for the queue.

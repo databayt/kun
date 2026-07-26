@@ -1,0 +1,78 @@
+---
+title: TikTok
+description: Gated — a multi-week app audit stands between you and public posting, and your posts stay private until it passes.
+---
+
+# TikTok
+
+⛔ **Gated** — there is a self-serve path, but it ends in a wall you cannot schedule around.
+
+## The reality
+
+TikTok's Content Posting API exists and is documented. You can build against it in an afternoon.
+What you cannot do is **publish publicly** until TikTok audits your app.
+
+Until the audit passes:
+
+- Every post you create is **`SELF_ONLY`** — visible to the posting account and nobody else
+- You are capped at **5 authorized users**
+- There is no "limited public" middle ground
+
+The audit takes roughly **one to four weeks** and has strict requirements about how your app
+presents the TikTok account (username and avatar must be displayed to the user in specific
+ways). Apps are rejected for UX details, and each rejection restarts the wait.
+
+## What this means practically
+
+For a small team, TikTok is a **human-posting channel** until the audit clears. Plan for that
+rather than treating the API as imminent:
+
+- Generate the video with your normal pipeline
+- A human uploads it through the app
+- Automate only after the audit passes
+
+The alternative is an **aggregator** (see below), which absorbs the gating on your behalf.
+
+## If you want to start the audit anyway
+
+1. [developers.tiktok.com](https://developers.tiktok.com) → create an app
+2. Request the **Content Posting API** product
+3. Implement the Direct Post flow, honouring the creator-info and UX requirements exactly as specified
+4. Submit for audit and wait
+5. Until it passes, test with `SELF_ONLY` posts on your own account
+
+## The traps
+
+**`SELF_ONLY` posts look successful.** The API returns 200 and a post id. Nothing indicates the
+post is invisible to the world. Teams have shipped "working" TikTok integrations that published
+to an audience of one for weeks.
+
+**The UX requirements are audited literally.** Displaying the connected account's username and
+avatar, and how the publish confirmation is worded, are part of what gets reviewed. Read the
+current requirements rather than inferring them.
+
+**AI labeling is mandatory, not optional.** TikTok requires realistic AI-generated content to be
+labeled; unlabeled AIGC risks removal or account restriction. Set `is_aigc: true` on anything
+generated. This is the strictest AI-disclosure regime of any channel here.
+
+**Rejections restart the clock.** Get it right the first time; a resubmission is another multi-week wait.
+
+## The aggregator option
+
+Services like **Ayrshare** cover TikTok (along with most other channels) and have already passed
+the audit, so you inherit their access. That trades a recurring fee — Premium starts around
+$149/month, multi-brand plans considerably more — for skipping the gate entirely.
+
+Worth it if TikTok is central to your strategy and a multi-week wait is expensive. Not worth it
+just to avoid paperwork on a channel you are unsure about.
+
+## Environment variables
+
+None yet — nothing to configure until an audit passes.
+
+## Limits
+
+- **Media:** video and photo
+- **Cost:** free (the API; the audit costs time)
+- **Public posting:** blocked until audit
+- **AI disclosure:** `is_aigc` mandatory for realistic AI-generated content
