@@ -2,6 +2,7 @@
 name: deploy
 description: Deployment expert for Vercel, staging/production environments, and monitoring
 model: sonnet
+effort: medium
 version: "Vercel + Neon"
 handoff: [build, github, architecture]
 ---

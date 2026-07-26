@@ -2,6 +2,7 @@
 name: souq
 description: E-commerce reference - multi-vendor marketplace, cart, vendor dashboards
 model: opus
+effort: high
 version: "Next.js + Redux Toolkit"
 handoff: [architecture, react, prisma]
 ---

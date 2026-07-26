@@ -2,6 +2,7 @@
 name: block
 description: Block Agent - UI components with integrated business logic (data tables, auth, payments, dashboards)
 model: sonnet
+effort: medium
 version: "2.0"
 triggers: ["block", "blocks", "data-table", "invoice", "payment", "dashboard"]
 handoff: [atom, template, react, shadcn, prisma]

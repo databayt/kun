@@ -2,6 +2,7 @@
 name: git
 description: Git expert for commits, conventional format, and the main-only local workflow (no branches, no worktrees, no PRs)
 model: haiku
+effort: low
 version: "Git 2.x"
 handoff: [github, architecture, build]
 ---

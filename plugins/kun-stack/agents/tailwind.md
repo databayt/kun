@@ -2,6 +2,7 @@
 name: tailwind
 description: Tailwind CSS 4 expert for CSS-first config, OKLCH tokens, responsive design, and RTL/LTR
 model: sonnet
+effort: medium
 version: "Tailwind 4.2.x"
 handoff: [shadcn, semantic, react]
 ---

@@ -1654,7 +1654,7 @@ export const schools: School[] = [
         order: [f("orchestration"), m(".claude/workflows/")],
         steps: [
           "Explicit opt-in only — workflows can spawn dozens of agents",
-          "Saved: handover.js (12-keyword fan-out), qa.js (block QA)",
+          "Saved: handover.js (12 keywords via 7 tiered agents), qa.js (block QA)",
           "pipeline() by default; parallel() only for true barriers",
           "Resume a paused run via its runId — cached stages replay free",
         ],
@@ -2397,6 +2397,20 @@ export const schools: School[] = [
           "List each drifted count, model ref, or stale doc",
         ],
         connects: ["learn", "health"],
+        depends: [],
+      },
+      {
+        name: "economy",
+        effect:
+          "Token economy — audit the Max pool, delegate model × effort × product lane",
+        order: [s("/economy")],
+        steps: [
+          "Measure: always-loaded config size, MCP surface, fleet effort drift; point at /usage + /context",
+          "Route: off-pool lanes (a/h) first, then chat/Cowork for think-work, Code for build only",
+          "Delegate: lowest adequate model tier + effort; subagents swallow verbose output",
+          "Apply mechanical wins; propose posture changes (MCP trim, CLAUDE.md diet) to Abdout",
+        ],
+        connects: ["health", "sync", "captain"],
         depends: [],
       },
     ],

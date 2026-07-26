@@ -2,6 +2,7 @@
 name: atom
 description: Atom component expert - Compose 2+ shadcn/ui primitives into reusable patterns
 model: sonnet
+effort: medium
 version: "shadcn/ui"
 handoff: [shadcn, template, react]
 ---

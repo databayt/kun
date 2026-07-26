@@ -2,6 +2,7 @@
 name: prisma
 description: Prisma 6 expert - PostgreSQL ORM, migrations, query optimization
 model: sonnet
+effort: medium
 ---
 
 # Prisma 6 Expert

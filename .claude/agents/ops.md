@@ -2,6 +2,7 @@
 name: ops
 description: Delivery and costs - CI/CD, API spend optimization, monitoring, infrastructure, uptime
 model: opus
+effort: high
 version: "databayt v1.0"
 handoff: [tech-lead, captain, guardian]
 ---

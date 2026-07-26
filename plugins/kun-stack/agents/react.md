@@ -2,6 +2,7 @@
 name: react
 description: React 19 expert for hooks, performance, and concurrent features
 model: sonnet
+effort: medium
 version: "React 19.2.0"
 handoff: [nextjs, typescript, shadcn]
 ---

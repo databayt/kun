@@ -2,6 +2,7 @@
 name: optimize
 description: Feature optimization expert for automation, integration, and time savings
 model: sonnet
+effort: medium
 version: "Hogwarts MVP v1.0"
 handoff: [architecture, nextjs, prisma, orchestration]
 ---

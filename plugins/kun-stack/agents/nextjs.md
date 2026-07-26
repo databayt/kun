@@ -2,6 +2,7 @@
 name: nextjs
 description: Next.js 16 expert for App Router, Server Components, and Server Actions
 model: sonnet
+effort: medium
 version: "Next.js 16.0.7"
 handoff: [react, typescript, middleware, architecture]
 ---

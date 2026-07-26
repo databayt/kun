@@ -2,6 +2,7 @@
 name: structure
 description: File organization expert for naming conventions, directory structure, and project layout
 model: haiku
+effort: low
 version: "Next.js 16.0.7"
 handoff: [architecture, pattern, nextjs]
 ---

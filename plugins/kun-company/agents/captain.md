@@ -2,6 +2,7 @@
 name: captain
 description: CEO brain — weekly allocation, revenue strategy, team coordination across all products and 7 humans
 model: opus
+effort: xhigh
 version: "databayt v2.0"
 handoff: [revenue, growth, support, product, tech-lead, analyst, ops, guardian]
 tools:

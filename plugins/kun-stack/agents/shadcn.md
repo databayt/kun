@@ -2,6 +2,7 @@
 name: shadcn
 description: shadcn/ui expert for Radix primitives, registry system, and MCP integration
 model: sonnet
+effort: medium
 version: "shadcn/ui latest"
 handoff: [atom, template, block, tailwind]
 ---

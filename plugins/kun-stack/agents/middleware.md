@@ -2,6 +2,7 @@
 name: middleware
 description: Next.js middleware expert for auth, i18n, subdomain routing, and runtime
 model: sonnet
+effort: medium
 version: "Next.js 16 Runtime"
 handoff: [nextjs, architecture, deploy]
 ---

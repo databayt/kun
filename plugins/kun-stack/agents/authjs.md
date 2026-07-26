@@ -2,6 +2,7 @@
 name: authjs
 description: Auth.js v5 (NextAuth) expert - JWT, OAuth, sessions
 model: sonnet
+effort: medium
 ---
 
 # Auth.js v5 Expert (NextAuth)

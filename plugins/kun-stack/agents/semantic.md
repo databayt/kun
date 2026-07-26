@@ -2,6 +2,7 @@
 name: semantic
 description: Semantic HTML and color token expert for accessibility and theming
 model: haiku
+effort: low
 version: "HTML5 + CSS Variables"
 handoff: [tailwind, shadcn, react]
 ---

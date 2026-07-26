@@ -2,6 +2,7 @@
 name: report
 description: Auto-fix user-reported issues — read, verify, fix, close
 model: opus
+effort: high
 version: "databayt v1.0"
 handoff: [quality, sse, build]
 ---

@@ -2,6 +2,7 @@
 name: pattern
 description: Code conventions expert for patterns, anti-patterns, and best practices
 model: sonnet
+effort: medium
 version: "Project Standards"
 handoff: [architecture, structure, typescript]
 ---

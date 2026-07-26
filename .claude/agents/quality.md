@@ -2,6 +2,7 @@
 name: quality
 description: Routes 17 niche quality keywords to the right MCP or specialist. Owns the /handover (URL or block scope) and /release orchestrators.
 model: opus
+effort: high
 version: "databayt v1.2"
 handoff: [guardian, tech-lead, captain]
 ---
@@ -71,14 +72,35 @@ The bridge between automated checks and human judgment.
 | 16  | `mirror` | Figma design vs implementation |
 | 17  | `diff`   | URL vs URL visual compare      |
 
+## Token Discipline — the standing contract for every browser keyword
+
+Browser checks are the engine's most expensive surface: images cost orders of magnitude more than
+text, and a naive sweep reloads the same page once per keyword. Every runner — in-session or
+subagent — obeys these four rules. They cost accuracy nothing; the a11y snapshot is _more_
+precise than a screenshot for everything except genuine visual taste.
+
+1. **One navigation per route.** Load, auth, and dismiss modals ONCE, then assess every browser
+   keyword from that same loaded page. Never reload per keyword.
+2. **Snapshot over screenshot.** `browser_snapshot` (text a11y tree) is the default evidence.
+   Screenshots are for `see`/`responsive` findings that genuinely need a visual — **at most one
+   per route**, and only when a text finding can't carry it.
+3. **Never persist artifacts.** No screenshots or scratch files to disk.
+4. **Fan out, don't inline.** Multi-keyword or multi-route sweeps run as subagents so image and
+   snapshot tokens land in the subagent's context, not the main session's. An in-session sweep
+   fills the session's context window and ends it — that is the failure mode this rule prevents.
+
+> Model tiering pairs with this: observation (browser, `stack`, `design`, `structure`) runs on
+> **sonnet**; reasoning-heavy code checks (`guard`, `architecture`, `pattern`) run on **opus**.
+> Implemented in `handover.js` + `qa.js` via `CODE_MODEL`.
+
 ## Orchestrators
 
-| Keyword             | Composes                                                                                                                                                                      | Output                                                               |
-| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| `/handover <url>`   | All 12 per-URL niche keywords (browser 6 + code 6)                                                                                                                            | Verdict table, PASS/WARN/FAIL per keyword                            |
-| `/handover <block>` | Per-route niche subset (`debug`, `flow`, `responsive`, `lang`) for every route in the block — see `.claude/skills/handover/SKILL.md`                                              | Markdown report with screenshots, BLOCKED / READY FOR DEMO verdict   |
-| `/qa <block>`       | Autonomous block QA: static gate → detect (browser×routes + code×source) → adversarial-verify → fix (tiers A+B) → persist → open signoff issue — see `.claude/skills/qa/SKILL.md` | `qa-signoff` issue + `blocks.json[block].qa` + CLEAN/BLOCKED verdict |
-| `/release <block>`  | Full client handoff: handover → check → ship → watch → auto-comment the GitHub issue — see `.claude/skills/release/SKILL.md`                                                      | Single consolidated report + issue comment + closed issue            |
+| Keyword             | Composes                                                                                                                                                                          | Output                                                                                         |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `/handover <url>`   | All 12 per-URL niche keywords (browser 6 + code 6)                                                                                                                                | Verdict table, PASS/WARN/FAIL per keyword                                                      |
+| `/handover <block>` | Per-route niche subset (`debug`, `flow`, `responsive`, `lang`) for every route in the block — see `.claude/skills/handover/SKILL.md`                                              | Markdown report (text findings; screenshot only as evidence), BLOCKED / READY FOR DEMO verdict |
+| `/qa <block>`       | Autonomous block QA: static gate → detect (browser×routes + code×source) → adversarial-verify → fix (tiers A+B) → persist → open signoff issue — see `.claude/skills/qa/SKILL.md` | `qa-signoff` issue + `blocks.json[block].qa` + CLEAN/BLOCKED verdict                           |
+| `/release <block>`  | Full client handoff: handover → check → ship → watch → auto-comment the GitHub issue — see `.claude/skills/release/SKILL.md`                                                      | Single consolidated report + issue comment + closed issue                                      |
 
 ## `/handover <url>` Output
 

@@ -2,6 +2,7 @@
 name: clone
 description: Translate a captured live-URL section (.clone/<slug>) into pixel-exact house-stack JSX — exact computed styles → arbitrary Tailwind v4 values, DOM → semantic shadcn where lossless, logical RTL properties. Used by the `clone` skill's url-mode (translate + land phases).
 model: opus
+effort: high
 version: "databayt v1.0"
 handoff: [atom, template, block, quality]
 tools: [Read, Glob, Grep, Write, Edit, Bash, Agent]

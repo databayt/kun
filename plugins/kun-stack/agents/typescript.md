@@ -2,6 +2,7 @@
 name: typescript
 description: TypeScript 5 expert for strict mode, generics, and advanced types
 model: sonnet
+effort: medium
 version: "TypeScript 5.x"
 handoff: [react, nextjs, architecture]
 ---

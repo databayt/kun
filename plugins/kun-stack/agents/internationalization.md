@@ -2,6 +2,7 @@
 name: internationalization
 description: i18n expert - Arabic/English, RTL/LTR, dictionaries, locale-aware formatting, Next.js App Router
 model: sonnet
+effort: medium
 ---
 
 # Internationalization Expert

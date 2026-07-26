@@ -1,7 +1,7 @@
 ---
 name: handover
 description: UI verification — runs niche quality keywords on a URL or block
-when_to_use: "Use when Abdout wants a UI verification pass before a demo, merge, or client handoff — polymorphic on argument, where URL mode (argument starts with /) runs all 12 per-URL niche quality keywords (browser 6 + code 6) on one route, and block mode (bare word) runs the per-route subset (debug, flow, responsive, lang) on every route in the block. Triggers on: handover <url|block>, pre-demo quality pass, run the niche quality keywords, \"is this URL clean\", \"is the whole block ready to show\"."
+when_to_use: 'Use when Abdout wants a UI verification pass before a demo, merge, or client handoff — polymorphic on argument, where URL mode (argument starts with /) runs all 12 per-URL niche quality keywords (browser 6 + code 6) on one route, and block mode (bare word) runs the per-route subset (debug, flow, responsive, lang) on every route in the block. Triggers on: handover <url|block>, pre-demo quality pass, run the niche quality keywords, "is this URL clean", "is the whole block ready to show".'
 argument-hint: <url>|<block> [--env staging] [--fix]
 ---
 
@@ -32,7 +32,9 @@ Otherwise → block mode. Continue to Phase 2B.
 
 ### Phase 2A — URL mode
 
-**Deterministic fan-out (preferred)**: run the saved workflow — `Workflow({ name: "handover", args: "<url>" })` (or `args: { url, base }` for `--env` targets). It sweeps all 12 keywords as parallel subagents and adversarially verifies every FAIL before it can block, then returns the verdict table to render. This `/handover` invocation is the multi-agent opt-in. Fall back to the serial in-session pass below only if the Workflow tool is unavailable.
+**Deterministic fan-out (preferred)**: run the saved workflow — `Workflow({ name: "handover", args: "<url>" })` (or `args: { url, base }` for `--env` targets). It covers all 12 keywords with 7 model-tiered subagents — one browser session assessing all 6 browser keywords, plus one per code keyword — and batch-verifies every FAIL adversarially before it can block, then returns the verdict table to render. This `/handover` invocation is the multi-agent opt-in. Fall back to the in-session pass below only if the Workflow tool is unavailable.
+
+**In-session fallback (token-expensive — prefer the workflow).** If you must run it here, batch the 6 browser keywords into a **single** browser session (one navigate + auth, then all 6 assessed against that same loaded page) and obey **§Token Discipline** in `.claude/agents/quality.md`: snapshot over screenshot, ≤1 screenshot total, nothing written to disk. Running the keywords serially with a reload each is what exhausts the session's context.
 
 Run the 12 per-URL niche keywords (browser 6 + code 6) defined in `.claude/agents/quality.md`:
 
@@ -84,7 +86,7 @@ Stop and ask if zero routes match.
 - Ensure dev server is running on port 3000 (default) or `--env` target is reachable
 - Create the report directory: `.claude/handover-reports/<block>-<YYYYMMDD-HHmm>/`
 
-**For each route, run the per-route niche subset:**
+**For each route, run the per-route niche subset — ONE subagent per route, not one per pass:**
 
 | Pass | Niche keyword                | What it does                                                     |
 | ---- | ---------------------------- | ---------------------------------------------------------------- |
@@ -95,6 +97,19 @@ Stop and ask if zero routes match.
 | 5    | `lang` (translation portion) | Hardcoded-string scan + dictionary key resolution                |
 
 These keywords are defined in `.claude/agents/quality.md`. Block mode invokes each keyword per route — it does not redefine the check logic here.
+
+**Execution shape (token-critical).** Dispatch **one `sonnet` subagent per route** that assesses all
+five passes from a **single** browser session — one navigate + auth + modal-dismiss, then every pass
+against that same loaded page. Do **not** run the passes inline in this session, and do **not** spawn
+one subagent per pass:
+
+- Inline execution puts every snapshot and screenshot into the main context — a 6-route block ends
+  the session before the report is written. Subagent results come back as compact verdicts.
+- Per-pass subagents reload the same route 5×, paying the navigate + auth cost 5 times over.
+
+Each route subagent obeys **§Token Discipline** in `.claude/agents/quality.md` (snapshot over
+screenshot, ≤1 screenshot per route, nothing written to disk). Collect the returned verdicts and
+build the report table from them.
 
 ### Phase 3 — Report
 

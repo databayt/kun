@@ -2,6 +2,7 @@
 name: github
 description: GitHub expert for issues, Actions, releases, code search, and MCP integration (databayt is main-only — no PR workflow)
 model: haiku
+effort: low
 version: "GitHub API v4"
 handoff: [git, build, deploy]
 ---

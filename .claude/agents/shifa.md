@@ -2,6 +2,7 @@
 name: shifa
 description: Medical platform reference - appointments, patient records, healthcare workflows
 model: opus
+effort: high
 version: "Next.js + Prisma + TypeScript"
 handoff: [architecture, prisma, authjs]
 ---
