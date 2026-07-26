@@ -5,6 +5,12 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  // Barrel entry points re-export thousands of modules, so importing three
+  // icons pulls the whole library into the graph. Next rewrites these to
+  // direct imports at build time — ergonomic imports, without the cold-start tax.
+  experimental: {
+    optimizePackageImports: ["lucide-react"],
+  },
   reactStrictMode: false,
   // The carousel render route is screenshotted by Playwright — the dev
   // indicator badge would land inside the captured slides.
@@ -14,6 +20,9 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/install": ["./web/install.sh"],
     "/install.ps1": ["./web/install.ps1"],
+    // The Second Brain graph derives its notes layer by reading the docs
+    // corpus at runtime; trace it into the serverless bundle.
+    "/[lang]/graph": ["./content/docs/**/*"],
   },
   // Locale-less docs URLs (e.g. shared links like /docs/onboarding) redirect
   // to the default locale. The docs render under /[lang]/docs/[[...slug]], so

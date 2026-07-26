@@ -22,6 +22,11 @@
   --color-chart-3: var(--chart-3);
   --color-chart-2: var(--chart-2);
   --color-chart-1: var(--chart-1);
+  --color-graph-5: var(--graph-5);
+  --color-graph-4: var(--graph-4);
+  --color-graph-3: var(--graph-3);
+  --color-graph-2: var(--graph-2);
+  --color-graph-1: var(--graph-1);
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -75,6 +80,21 @@
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
+
+  /* Graph categoricals — five node kinds shown simultaneously in a node-link
+     diagram, so they are validated on the ALL-PAIRS list, not adjacent-only.
+     The shadcn --chart-* ramp fails that gate (chart-4 ↔ chart-5 sit at
+     normal-vision ΔE 7.4, well under the 15 floor). This set clears every hard
+     gate in both modes: worst all-pairs CVD ΔE 15.4 light / 11.5 dark (≥8),
+     normal-vision ΔE 25.4 light / 21.4 dark (≥15). One hue skeleton
+     (202°/277°/334°/44°/120°), stepped per surface. Two light steps fall under
+     3:1 contrast — the relief rule is met by node labels, the named filter
+     chips, the inspector, and the screen-reader node list. */
+  --graph-1: oklch(0.727 0.124 202.2); /* school */
+  --graph-2: oklch(0.6 0.22 277.2); /* spell */
+  --graph-3: oklch(0.443 0.198 333.8); /* agent */
+  --graph-4: oklch(0.754 0.157 44.5); /* MCP portal */
+  --graph-5: oklch(0.493 0.117 119.5); /* workflow */
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
@@ -117,6 +137,14 @@
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
+
+  /* Same five hues, re-stepped for the dark surface — a selected column, not
+     an automatic flip. All five clear 3:1 against the dark background. */
+  --graph-1: oklch(0.646 0.11 202.6); /* school */
+  --graph-2: oklch(0.537 0.261 277.3); /* spell */
+  --graph-3: oklch(0.526 0.174 333.4); /* agent */
+  --graph-4: oklch(0.658 0.108 44.3); /* MCP portal */
+  --graph-5: oklch(0.493 0.117 119.5); /* workflow */
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);
