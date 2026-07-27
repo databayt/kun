@@ -35,13 +35,17 @@ export const SOCIAL_DICTIONARY = {
     selectChannel: "Select channels",
     channelCount: "{count} channels",
     comingSoon: "soon",
+    // Why Slack is absent from an audience picker — stated so it reads as
+    // deliberate rather than missing.
+    reviewHint: "Approvals and notices go to #social",
     postDirect: "Publish",
     posting: "Publishing...",
     scheduleLabel: "Schedule for",
     scheduleAction: "Schedule",
     scheduling: "Scheduling...",
     scheduledMsg: "Scheduled {count} channel(s) for {at}",
-    scheduleHint: "Leave empty to publish now. Scheduled posts go out within ~15 minutes of the chosen time.",
+    scheduleHint:
+      "Leave empty to publish now. Scheduled posts go out within ~15 minutes of the chosen time.",
     stageForReview: "Send for review",
     staging: "Sending...",
     stagedMsg:
@@ -95,13 +99,15 @@ export const SOCIAL_DICTIONARY = {
     textareaPlaceholder: "الصق نص المنشور المعتمد هنا…",
     all: "الكل",
     comingSoon: "قريباً",
+    reviewHint: "الاعتمادات والإشعارات تذهب إلى ‎#social",
     postDirect: "نشر",
     posting: "جاري النشر...",
     scheduleLabel: "جدولة في",
     scheduleAction: "جدولة",
     scheduling: "جاري الجدولة...",
     scheduledMsg: "تمت جدولة {count} قناة في {at}",
-    scheduleHint: "اتركه فارغاً للنشر الآن. المنشورات المجدولة تُنشر خلال ~15 دقيقة من الوقت المحدد.",
+    scheduleHint:
+      "اتركه فارغاً للنشر الآن. المنشورات المجدولة تُنشر خلال ~15 دقيقة من الوقت المحدد.",
     stageForReview: "إرسال للمراجعة",
     staging: "جاري الإرسال...",
     stagedMsg: "تم الإرسال للاعتماد — رابط النشر في قناة المراجعة",

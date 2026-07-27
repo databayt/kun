@@ -12,7 +12,7 @@
 
 import { isAuthorizedBearer } from "@/lib/cron-auth";
 import {
-  HERMES_CHANNEL_IDS,
+  DRAIN_CHANNEL_IDS,
   type ChannelId,
 } from "@/components/root/social/config";
 import { db } from "@/lib/db";
@@ -59,10 +59,13 @@ export async function GET(request: Request): Promise<Response> {
     where: {
       status: "scheduled",
       scheduledFor: { lte: new Date() },
-      // Hermes-transport channels are delivered by the gateway pulling from
-      // /api/social/queue. Draining them here would race it, and would fail
-      // anyway — the webhook is unreachable from a cloud deployment.
-      channel: { notIn: HERMES_CHANNEL_IDS },
+      // Allow-list, not a deny-list. Hermes-transport channels are delivered
+      // by the gateway pulling from /api/social/queue — draining them here
+      // would race it and fail anyway, since the webhook is unreachable from a
+      // cloud deployment. Manual channels have nothing to execute at all.
+      // Naming what this lane CAN do means a transport added later waits
+      // visibly in `scheduled` instead of being attempted and silently lost.
+      channel: { in: DRAIN_CHANNEL_IDS },
     },
     orderBy: { scheduledFor: "asc" },
     take: BATCH,

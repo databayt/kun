@@ -9,7 +9,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { CHANNELS, type ChannelId } from "@/components/root/social/config";
+import {
+  CHANNELS,
+  DISTRIBUTION_CHANNELS,
+  type ChannelId,
+} from "@/components/root/social/config";
 import { productChannelWired } from "@/components/root/social/products";
 import { fill, type SocialDict } from "@/components/root/social/dictionary";
 
@@ -28,6 +32,10 @@ interface ChannelPickerProps {
  * A plain <Select> can only hold one value, which quietly removed the ability
  * to publish to two channels but not a third — the whole point of the fan-out.
  * Checkbox items keep the compact toolbar shape and give the selection back.
+ *
+ * Lists DISTRIBUTION_CHANNELS, not CHANNELS: this picker chooses an audience,
+ * and Slack is not one. Approvals and notices reach #social unconditionally via
+ * sendReview, so there is nothing here to toggle.
  */
 export function ChannelPicker({
   product,
@@ -89,7 +97,7 @@ export function ChannelPicker({
           {allSelected && <Check className="size-4" />}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        {CHANNELS.map((ch) => {
+        {DISTRIBUTION_CHANNELS.map((ch) => {
           const available = productChannelWired(product, ch.id, ch.wired);
           const name = isRTL ? ch.labelAr : ch.label;
           return (
@@ -109,6 +117,10 @@ export function ChannelPicker({
             </DropdownMenuCheckboxItem>
           );
         })}
+        <DropdownMenuSeparator />
+        <p className="text-muted-foreground px-2 py-1.5 text-xs">
+          {t.reviewHint}
+        </p>
       </DropdownMenuContent>
     </DropdownMenu>
   );

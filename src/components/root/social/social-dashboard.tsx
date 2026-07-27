@@ -11,7 +11,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { verifyConnections } from "@/actions/post-social";
-import { CHANNELS, type ChannelId } from "@/components/root/social/config";
+import {
+  CHANNELS,
+  DISTRIBUTION_CHANNELS,
+  type ChannelId,
+} from "@/components/root/social/config";
 import {
   PRODUCTS,
   DEFAULT_PRODUCT,
@@ -47,10 +51,11 @@ export default function SocialDashboard({ lang }: SocialDashboardProps) {
   const [checking, setChecking] = useState(true);
 
   // Publishable for THIS brand: the global transport is wired AND the brand has
-  // its own destination on it (its own Page, its own channel).
+  // its own destination on it (its own Page, its own channel). Distribution
+  // only — a communication channel is never an audience destination.
   const wiredForProduct = useMemo(
     () =>
-      CHANNELS.filter((ch) =>
+      DISTRIBUTION_CHANNELS.filter((ch) =>
         productChannelWired(product, ch.id, ch.wired),
       ).map((ch) => ch.id as ChannelId),
     [product],

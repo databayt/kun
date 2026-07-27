@@ -9,7 +9,10 @@ import { getEgressStatus, type EgressStatus } from "@/lib/social-status";
 import { sendReview } from "@/lib/social-review";
 import { createApprovalToken } from "@/lib/social-token";
 import { db } from "@/lib/db";
-import { CHANNELS, CHANNEL_IDS } from "@/components/root/social/config";
+import {
+  CHANNELS,
+  DISTRIBUTION_CHANNEL_IDS,
+} from "@/components/root/social/config";
 import {
   PRODUCT_IDS,
   productChannelWired,
@@ -52,8 +55,11 @@ const publishSchema = z
       .trim()
       .min(1, "Post content cannot be empty.")
       .max(4000, "Post is too long (max 4000 characters)."),
+    // Distribution channels only. Slack is the communication channel — it
+    // receives approvals and notices via sendReview, and is never addressed
+    // as an audience, so it is rejected here at the write gate.
     channels: z
-      .array(z.enum(CHANNEL_IDS))
+      .array(z.enum(DISTRIBUTION_CHANNEL_IDS))
       .min(1, "Select at least one channel.")
       .refine(
         (ids) => ids.every((id) => CHANNELS.find((c) => c.id === id)?.wired),
@@ -175,7 +181,8 @@ export async function schedulePost(input: unknown): Promise<ScheduleResult> {
   } catch (err: unknown) {
     return {
       ok: false,
-      error: err instanceof Error ? err.message : "Could not schedule the post.",
+      error:
+        err instanceof Error ? err.message : "Could not schedule the post.",
     };
   }
 }

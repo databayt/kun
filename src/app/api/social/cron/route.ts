@@ -10,7 +10,10 @@
 
 import { isAuthorizedBearer } from "@/lib/cron-auth";
 
-import { CHANNELS, type ChannelId } from "@/components/root/social/config";
+import {
+  DISTRIBUTION_CHANNELS,
+  type ChannelId,
+} from "@/components/root/social/config";
 import {
   PRODUCTS,
   productChannelWired,
@@ -26,7 +29,6 @@ export const dynamic = "force-dynamic";
 // Long enough for a human to see the message in the morning, short enough that a
 // leaked link goes stale before it's useful.
 const APPROVAL_TTL_SECONDS = 12 * 60 * 60;
-
 
 function autopostProducts(): string[] {
   return (process.env.SOCIAL_AUTOPOST_PRODUCTS ?? "")
@@ -92,7 +94,7 @@ export async function GET(request: Request): Promise<Response> {
 
     // One draft per product, delivered to every channel that brand is wired for
     // — same shape as the composer, where one approved text fans out.
-    const channels = CHANNELS.filter((ch) =>
+    const channels = DISTRIBUTION_CHANNELS.filter((ch) =>
       productChannelWired(productId, ch.id, ch.wired),
     ).map((ch) => ch.id as ChannelId);
 

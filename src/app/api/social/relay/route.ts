@@ -20,8 +20,9 @@
 import { isAuthorizedBearer } from "@/lib/cron-auth";
 
 import {
-  CHANNELS,
   CHANNEL_IDS,
+  COMMUNICATION_CHANNEL_IDS,
+  DISTRIBUTION_CHANNELS,
   type ChannelId,
 } from "@/components/root/social/config";
 import {
@@ -36,7 +37,6 @@ export const dynamic = "force-dynamic";
 // A brand post, not an essay. Far above any real caption, low enough that a
 // malformed body can't tie up the function.
 const MAX_RELAY_TEXT = 5000;
-
 
 function bad(error: string, status: number): Response {
   return Response.json({ ok: false, error }, { status });
@@ -76,7 +76,7 @@ export async function POST(request: Request): Promise<Response> {
 
   // Omitting channels means "every channel this brand is wired for" — the same
   // fan-out the cron and the composer use.
-  const wiredForProduct = CHANNELS.filter((ch) =>
+  const wiredForProduct = DISTRIBUTION_CHANNELS.filter((ch) =>
     productChannelWired(productId, ch.id, ch.wired),
   ).map((ch) => ch.id as ChannelId);
 
@@ -87,11 +87,24 @@ export async function POST(request: Request): Promise<Response> {
     Array.isArray(body.channels) &&
     body.channels.every((c): c is string => typeof c === "string")
   ) {
+    // Checked against CHANNEL_IDS, the read contract, so a communication
+    // channel is still *recognised* here — that is what lets the next check
+    // name it precisely instead of calling it unknown.
     const unknownChannels = body.channels.filter(
       (c) => !(CHANNEL_IDS as readonly string[]).includes(c),
     );
     if (unknownChannels.length > 0) {
       return bad(`Unknown channel: ${unknownChannels.join(", ")}.`, 400);
+    }
+    const internal = body.channels.filter((c) =>
+      (COMMUNICATION_CHANNEL_IDS as readonly string[]).includes(c),
+    );
+    if (internal.length > 0) {
+      return bad(
+        `${internal.join(", ")} is a communication channel, not a publish destination. ` +
+          `Approvals and notices are relayed there automatically.`,
+        400,
+      );
     }
     channels = body.channels as ChannelId[];
   } else {
@@ -118,6 +131,11 @@ export async function POST(request: Request): Promise<Response> {
   );
 
   return result.ok
-    ? Response.json({ ok: true, product: productId, channels, chars: text.length })
+    ? Response.json({
+        ok: true,
+        product: productId,
+        channels,
+        chars: text.length,
+      })
     : bad(result.error ?? "Unknown error.", 502);
 }

@@ -6,21 +6,24 @@
 // own permanent Page access token, read from FACEBOOK_PAGE_ID_<PRODUCT> /
 // FACEBOOK_PAGE_ACCESS_TOKEN_<PRODUCT> (see lib/facebook.ts).
 //
-// Telegram and Slack are NOT per-brand today — there is exactly one Telegram
-// channel (TELEGRAM_CHANNEL_ID) and one Slack workspace channel (Hermes's
-// SLACK_HOME_CHANNEL), both org-level databayt destinations. They stay wired for
-// `databayt` only; claiming them for the product brands would send a "post as
+// Telegram is NOT per-brand today — there is exactly one Telegram channel
+// (TELEGRAM_CHANNEL_ID), an org-level databayt destination. It stays wired for
+// `databayt` only; claiming it for a product brand would send a "post as
 // Hogwarts" into the org channel. Flip a product's flag to true the day that
 // brand gets its own channel and its own per-product transport config.
+//
+// Slack does not appear here at all: it is the communication channel, not a
+// distribution one. The type below makes re-adding it a compile error.
 
-import type { ChannelId } from "./config";
+import { CHANNELS, type DistributionChannelId } from "./config";
 
 export interface SocialProduct {
   id: string; // stable key; matches the env var suffix (uppercased)
   label: string;
   labelAr: string;
-  // channelId -> wired for this product
-  channels: Partial<Record<ChannelId, boolean>>;
+  // channelId -> wired for this product. Distribution channels only —
+  // a communication channel is structurally excluded from audience reach.
+  channels: Partial<Record<DistributionChannelId, boolean>>;
 }
 
 export const PRODUCTS = [
@@ -40,7 +43,7 @@ export const PRODUCTS = [
     id: "databayt",
     label: "Databayt",
     labelAr: "داتابايت",
-    channels: { facebook: true, telegram: true, slack: true },
+    channels: { facebook: true, telegram: true },
   },
   {
     id: "sijillee",
@@ -76,8 +79,15 @@ export function productChannelWired(
   channelId: string,
   channelGlobalWired: boolean,
 ): boolean {
+  // A communication channel is never an audience destination, whatever a
+  // per-brand map or a stored row claims. Slack is the team surface — its
+  // approvals and notices are sent by sendReview, not by selecting it here.
+  // Checked at runtime because callers pass a bare string from the database.
+  if (CHANNELS.find((c) => c.id === channelId)?.kind === "communication") {
+    return false;
+  }
   const product = getProduct(productId);
   return Boolean(
-    channelGlobalWired && product?.channels[channelId as ChannelId],
+    channelGlobalWired && product?.channels[channelId as DistributionChannelId],
   );
 }
