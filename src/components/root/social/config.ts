@@ -93,3 +93,10 @@ export const CHANNEL_IDS = CHANNELS.map((c) => c.id) as [
 export const WIRED_CHANNEL_IDS: ChannelId[] = CHANNELS.filter(
   (c) => c.wired,
 ).map((c) => c.id);
+
+// Channels kun cannot post to directly — Hermes owns their delivery and pulls
+// them from /api/social/queue. The drain must skip these or it races the
+// gateway and burns their retry budget on a webhook it cannot reach.
+export const HERMES_CHANNEL_IDS: ChannelId[] = CHANNELS.filter(
+  (c) => c.transport === "hermes",
+).map((c) => c.id);

@@ -98,3 +98,17 @@ model SocialMetric {
 
   @@index([variantId, fetchedAt])
 }
+
+/// Last-seen timestamps for components that call in rather than being called.
+///
+/// Hermes runs on a personal machine with no public route, so kun can never
+/// probe it — the Hub's "Hermes" row only ever showed reachability FROM Vercel,
+/// which is permanently false in production and says nothing about whether the
+/// gateway is actually alive. A heartbeat written when Hermes polls is the only
+/// honest liveness signal available.
+model SystemHeartbeat {
+  /// Component name, e.g. "hermes".
+  key    String   @id
+  at     DateTime @updatedAt
+  detail String?
+}

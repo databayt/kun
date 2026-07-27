@@ -97,6 +97,45 @@ hermes gateway start    # service — survives restarts
 supervisor (systemd or launchd) so a crash self-heals. Given the gateway is expected to flap,
 auto-restart is the single cheapest reliability win available.
 
+## The queue contract (what Hermes must implement)
+
+kun cannot call into Hermes, so the gateway pulls. Both endpoints take
+`Authorization: Bearer $CRON_SECRET`.
+
+**Poll for work** — safe to call as often as you like; it claims nothing.
+
+```bash
+curl -H "Authorization: Bearer $CRON_SECRET" \
+  https://kun.databayt.org/api/social/queue
+# → { ok: true, count: 1, items: [ { id, brand, channel, text, mediaUrl, locale, attempts } ] }
+```
+
+**Report the outcome** — this is what claims the item.
+
+```bash
+curl -X POST -H "Authorization: Bearer $CRON_SECRET" \
+  -H 'Content-Type: application/json' \
+  -d '{"id":"<variant id>","ok":true,"externalId":"C123:1699999999.001"}' \
+  https://kun.databayt.org/api/social/queue
+# → { ok: true, duplicate: false }
+```
+
+Three properties worth relying on:
+
+- **Polling never claims.** If Hermes dies between poll and report, the item is
+  still offered next time. A poll that claimed would strand work as `publishing`
+  forever, and this gateway dies routinely.
+- **Delivery is at-least-once.** An item stays in the queue until reported, so
+  Hermes may see it twice. Report every attempt.
+- **Reporting is idempotent.** A repeat report answers `duplicate: true` and
+  changes nothing — it will not flip a published row back, double-count an
+  attempt, or overwrite `externalId`. Treat `duplicate: true` as success and
+  drop the item.
+
+Send `externalId` whenever the platform returns one (for Slack, `channel:ts`).
+Without it the post cannot be found again, so it cannot be retracted and metrics
+have nothing to attach to.
+
 ## The traps
 
 **Socket Mode needs *both* tokens.** `xoxb-` (bot) authenticates API calls; `xapp-` (app-level)

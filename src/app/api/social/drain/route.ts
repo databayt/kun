@@ -11,7 +11,10 @@
 // moved earlier in the chain; it did not disappear.
 
 import { isAuthorizedBearer } from "@/lib/cron-auth";
-import type { ChannelId } from "@/components/root/social/config";
+import {
+  HERMES_CHANNEL_IDS,
+  type ChannelId,
+} from "@/components/root/social/config";
 import { db } from "@/lib/db";
 import { deliverPost } from "@/lib/social-publish";
 import { sendReview } from "@/lib/social-review";
@@ -53,7 +56,14 @@ export async function GET(request: Request): Promise<Response> {
   }
 
   const due = await db.socialVariant.findMany({
-    where: { status: "scheduled", scheduledFor: { lte: new Date() } },
+    where: {
+      status: "scheduled",
+      scheduledFor: { lte: new Date() },
+      // Hermes-transport channels are delivered by the gateway pulling from
+      // /api/social/queue. Draining them here would race it, and would fail
+      // anyway — the webhook is unreachable from a cloud deployment.
+      channel: { notIn: HERMES_CHANNEL_IDS },
+    },
     orderBy: { scheduledFor: "asc" },
     take: BATCH,
     include: { piece: true },
