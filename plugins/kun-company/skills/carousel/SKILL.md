@@ -50,17 +50,17 @@ TOPIC ─► COPY (AR-first) ─► DECK (zod JSON) ─► RENDER (route + Playw
 
 ## The pieces
 
-| Piece                | Path                                                                                                                                                          |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Deck schema (zod v4) | `src/components/root/carousel/schema.ts`                                                                                                                      |
-| Decks                | the brand repo's `carousels/<slug>.json` (`BRANDS[brand].deckDir`, e.g. `~/hogwarts/carousels/`); kun `content/carousels/<brand>/` is the fallback for repo-less brands                                                                                                                       |
-| Render route         | `/[lang]/carousel/[brand]/[slug]?slide=N&size=1080x1350` (no `slide` → review sheet)                                                                          |
-| Slide archetypes     | `cover · point · stat · quote · steps · cta` × themes `ivory · dark · clay · oat`                                                                             |
-| Palette              | Anthropic catalog (`root/anthropic/data.ts` COLORS) — Clay/Ivory/Ink/Oat                                                                                      |
-| Brand mark           | `BRANDS[brand].logo` (`public/brands/*.png`) at the bottom start — replaces the footer (no domain/counter strips); monochrome ink, auto-inverted on dark/clay |
-| Art                  | `public/carousel-art/*.svg` (vendored) → fallback `cdn.databayt.org/anthropic/<file>`                                                                         |
-| Renderer CLI         | `pnpm carousel:render <brand>/<slug>` → `~/Downloads/carousels/<brand>/<slug>/`                                                                               |
-| DM / album           | `node scripts/post-to-telegram.mjs --media <dir> --caption-file <txt> [--chat <id>]`                                                                          |
+| Piece                | Path                                                                                                                                                                    |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Deck schema (zod v4) | `src/components/root/carousel/schema.ts`                                                                                                                                |
+| Decks                | the brand repo's `carousels/<slug>.json` (`BRANDS[brand].deckDir`, e.g. `~/hogwarts/carousels/`); kun `content/carousels/<brand>/` is the fallback for repo-less brands |
+| Render route         | `/[lang]/carousel/[brand]/[slug]?slide=N&size=1080x1350` (no `slide` → review sheet)                                                                                    |
+| Slide archetypes     | `cover · point · stat · quote · steps · cta` × themes `ivory · dark · clay · oat`                                                                                       |
+| Palette              | Anthropic catalog (`root/anthropic/data.ts` COLORS) — Clay/Ivory/Ink/Oat                                                                                                |
+| Brand mark           | `BRANDS[brand].logo` (`public/brands/*.png`) at the bottom start — replaces the footer (no domain/counter strips); monochrome ink, auto-inverted on dark/clay           |
+| Art                  | `public/carousel-art/*.svg` (vendored) → fallback `cdn.databayt.org/anthropic/<file>`                                                                                   |
+| Renderer CLI         | `pnpm carousel:render <brand>/<slug>` → `~/Downloads/carousels/<brand>/<slug>/`                                                                                         |
+| DM / album           | `node scripts/post-to-telegram.mjs --media <dir> --caption-file <txt> [--chat <id>]`                                                                                    |
 
 Sizes: `1080x1350` (4:5 feed, default) · `1080x1080` (square) · `1080x1920` (story).
 Slides per deck: 3–10 (10 = Telegram album cap; IG allows 20 but 10 keeps decks portable).
@@ -86,7 +86,7 @@ Slides per deck: 3–10 (10 = Telegram album cap; IG allows 20 but 10 keeps deck
    `--chat`); Instagram/Facebook: upload the exported PNGs + matching caption file (no API
    wired today); LinkedIn: the PDF as a document post; WhatsApp: manual send (no organic
    API). Set `status: "published"`.
-9. **Log** — content calendar (`/content-calendar`), UTM shows up in PostHog.
+9. **Log** — content calendar (`/calendar`), UTM shows up in PostHog.
 
 ## Design round-trip (the doctrine that holds on the free tier)
 

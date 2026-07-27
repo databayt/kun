@@ -2421,7 +2421,7 @@ export const schools: School[] = [
     name: "The Pensieve",
     subtitle: "Judgment and conversion",
     description:
-      "Dip into stored wisdom. canon pulls the right CEO book into a live decision; decide journals it; premortem stress-tests it; convert distills any file or URL into Markdown the engine can read.",
+      "Dip into stored wisdom, then act on it. canon pulls the right CEO book into a live decision; decide journals it; premortem stress-tests it; convert distills any file or URL into Markdown. The social lane runs alongside: calendar picks the slot, draft writes it Arabic-first, higgs renders the media, approve gates it, publish delivers it, measure reads the numbers back.",
     quote:
       '"should we build it?" — the Pensieve surfaces The Lean Startup before you finish the sentence.',
     spells: [
@@ -2480,6 +2480,37 @@ export const schools: School[] = [
         depends: [],
       },
       {
+        name: "calendar",
+        effect:
+          "Plan the content calendar — which brand publishes what, on which day, and what slipped",
+        order: [f("growth"), s("/calendar")],
+        steps: [
+          "Read strategy cadence + growth pillars, then each brand's page under content/docs/social/",
+          "Diff the previous period's plan against what actually shipped (SocialPiece + SocialVariant)",
+          "Allocate one idea per slot — brand, topic, channel set (distribution only), owner",
+          "Reschedule or explicitly drop every slipped slot; never silently",
+          "Emit the dated markdown calendar and name the gaps",
+        ],
+        connects: ["social", "draft", "weekly", "measure"],
+        depends: [],
+      },
+      {
+        name: "draft",
+        effect:
+          "Write the core piece and its per-channel variants — Arabic crafted first, English mirrored, UTM on every link",
+        order: [f("growth"), s("/draft")],
+        steps: [
+          "Resolve the brand against PRODUCT_IDS (accepts both moallimee spellings)",
+          "Read content/docs/brand.mdx voice doctrine + the brand's social page",
+          "Resolve channels from DISTRIBUTION_CHANNELS — Slack is never a draft target",
+          "Write the core piece Arabic-first, then adapt per channel: hook, length, hashtags, CTA",
+          "UTM every link as utm_source=<channel>&utm_medium=social&utm_campaign=<brand>",
+          "Run the moral gate — no invented metric, customer, price, or date",
+        ],
+        connects: ["social", "calendar", "higgs", "approve", "carousel"],
+        depends: [],
+      },
+      {
         name: "higgs",
         effect:
           "Generate and edit photos and videos for databayt org ads/marketing via the Higgsfield CLI — zero-question recipes, brand kit pre-wired, batch-first",
@@ -2490,22 +2521,78 @@ export const schools: School[] = [
           "Estimate free (generate cost / --cost-only / --enhance-only), then batch-generate with --json",
           "Parse .[].result_url, download to ~/Downloads/higgs/, deliver via SendUserFile with spend + balance",
         ],
-        connects: ["social"],
+        connects: ["social", "draft", "approve", "carousel"],
         depends: [],
+      },
+      {
+        name: "approve",
+        effect:
+          "The human gate — stage copy and media into #social with a signed one-click link, then stop",
+        order: [f("growth"), s("/approve"), p("Slack")],
+        steps: [
+          "Assemble copy + media per channel, exactly as it will appear",
+          "Pre-flight: Arabic glyphs, no text baked into a render, AI media labelled, consent for faces",
+          "Stage via stageForReview or POST /api/social/relay — one pending variant + one 12h signed link per channel",
+          "STOP. Deliver the links and wait; the gate never times out into a publish",
+          "Record the decision per channel — approved, held, or rejected",
+        ],
+        connects: ["draft", "higgs", "publish", "carousel"],
+        depends: [],
+      },
+      {
+        name: "publish",
+        effect:
+          "Deliver approved copy to the channels — drained where an API exists, copy-out where none does",
+        order: [f("growth"), s("/publish")],
+        steps: [
+          "Verify the gate — refuse without a pending variant or a recorded human yes",
+          "Partition by lane: DRAIN (telegram, facebook), HERMES (gateway pulls), MANUAL (whatsapp)",
+          "Drain lane: click the signed link, or schedulePost with --at and let /api/social/drain deliver",
+          "Manual lane: render the copy-out block for a human to forward; never mark it published",
+          "Record externalId per channel, then log the slot back to /calendar",
+        ],
+        connects: ["approve", "measure", "social", "calendar"],
+        depends: ["approve"],
+      },
+      {
+        name: "measure",
+        effect:
+          "Read the numbers back — platform reach and engagement plus UTM attribution, per post and per brand",
+        order: [f("growth"), s("/measure"), p("PostHog")],
+        steps: [
+          "Refresh via /api/social/metrics with the CRON_SECRET bearer, or read what is stored",
+          "Read SocialMetric as a time series — latest row per variant plus the delta from the previous",
+          "Name the channels with no metric lane instead of showing them as zero",
+          "Surface metricsGaveUp rows, distinguishing a missing scope from a retired metric name",
+          "Report UTM as tagged-but-not-yet-consumed; judge the strategy's kill criteria honestly",
+        ],
+        connects: ["publish", "calendar", "social", "analytics"],
+        depends: ["publish"],
       },
       {
         name: "social",
         effect:
-          "Draft, stage, and publish brand social posts — Claude drafts bilingual copy, /higgs renders media, a human approves, Hermes relays to the channel",
+          "One spell — calendar, draft, media, approve, publish, measure for a brand post. Eight distribution channels reach an audience; Slack is the one internal channel",
         order: [f("growth"), s("/social")],
         steps: [
-          "Resolve brand + channels from content/docs/social/ and the channel config (wired: telegram direct + slack via Hermes)",
-          "Draft Arabic-first copy + per-channel variants (Claude-native, never the gateway LLM) with UTM links",
-          "Render text-free media via /higgs; label AI media",
-          "Stage for human approval — stop; no approval, no publish",
-          "Publish via /social composer, scripts/post-to-telegram.mjs, or scripts/post-to-hermes.mjs; UTM → PostHog",
+          "Pre-flight: resolve the brand and its wired DISTRIBUTION_CHANNELS; refuse Slack as a destination and say why",
+          "Stage 1 /calendar — pick the slot (skipped when the topic arrived as an argument)",
+          "Stage 2 /draft — Arabic-first core piece plus one platform-native variant per channel",
+          "Stage 3 /higgs — text-free media on --media; a failure downgrades to a text post, it does not stop the chain",
+          "Stage 4 /approve — HARD STOP. No human approval, no publish, ever",
+          "Stage 5 /publish — drain lane, hermes lane, or a copy-out block for whatsapp",
+          "Stage 6 /measure — deferred; numbers do not exist for an hour",
         ],
-        connects: ["higgs", "weekly", "carousel"],
+        connects: [
+          "calendar",
+          "draft",
+          "higgs",
+          "approve",
+          "publish",
+          "measure",
+          "carousel",
+          "weekly",
+        ],
         depends: [],
       },
       {
@@ -2521,7 +2608,7 @@ export const schools: School[] = [
           "Stage for human approval — deliver slides + captions and STOP; no approval, no publish",
           "After approval: Telegram album via scripts/post-to-telegram.mjs --media; IG/FB from the exported files; LinkedIn takes the PDF; log to the calendar",
         ],
-        connects: ["social", "higgs"],
+        connects: ["social", "higgs", "approve", "publish", "calendar"],
         depends: [],
       },
     ],

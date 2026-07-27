@@ -154,7 +154,7 @@ commands:
   - costs
   - pricing
   - proposal
-  - content-calendar
+  - calendar
   - dispatch
   - issue
 rules: []
