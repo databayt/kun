@@ -25,6 +25,27 @@ What actually exists:
 The thing people mean when they say "automate WhatsApp posting" is **Channels**, and Meta has
 published no API for it.
 
+## How the pipeline treats it
+
+WhatsApp is a real distribution channel — **primary by audience value, manual by transport**. The
+two are different axes, and naming both dissolves the apparent contradiction between this page
+("no API") and the brand pages that rank WhatsApp *Primary*.
+
+In the registry (`src/components/root/social/config.ts`) it is `kind: "distribution"`,
+`transport: "manual"`, `wired: false`. That is a deliberate state, not an oversight:
+
+- **Draft, media, and approval treat it like any channel.** `/draft` writes a WhatsApp-shaped
+  variant, `/higgs` renders its media, `/approve` gates it. It rides the whole pipeline.
+- **Only publishing differs.** `/publish` renders a **copy-out block** — the exact UTM-tagged
+  text, the media path, the destination — for a human to forward. `deliverPost` refuses a manual
+  channel outright, so it can never be marked "published" having reached no one.
+- **It never enters the Hermes queue or the drain.** The drain's allow-list and the queue's
+  transport filter both exclude it structurally. It was previously registered `transport: "hermes"`
+  — a lane that could never deliver it — which this corrects.
+
+So the pipeline gives WhatsApp everything except the final automated send, because that one step
+is the thing Meta does not offer.
+
 ## The one thing you must not do
 
 There are npm packages and services that reverse-engineer WhatsApp Web to automate Channels,

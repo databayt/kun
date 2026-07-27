@@ -50,21 +50,25 @@ live on its page:
 ## The pipeline
 
 ```
- idea ──► draft ──► media ──► approve ──► schedule ──► publish ──► measure
-  │        │         │          │           │            │           │
-content   Claude    /higgs    human      cron slot   telegram|fb   PostHog
-calendar  native   text-free   gate    (one, 06:00)  direct|Hermes  + UTM
+calendar ─► draft ─► media ─► approve ─► publish ─────────► measure
+    │         │        │         │          │                  │
+  which     Claude   /higgs    human    drain | hermes    SocialMetric
+brand,when  AR-first text-free  gate    | copy-out         + UTM tags
+                              ▲ HARD STOP
 ```
 
 | Stage | Owner | Notes |
 |-------|-------|-------|
-| **Idea** | `content-calendar` skill · `weekly` cadence · `growth` agent pillars | What to say, to whom, when |
-| **Draft** | **Claude, natively** | Arabic-first bilingual copy, written against [Brand & Voice](/docs/brand) |
+| **Idea** | `calendar` skill · `weekly` cadence · `growth` agent pillars | What to say, to whom, when |
+| **Draft** | `draft` skill — **Claude, natively** | Arabic-first bilingual copy, one variant per channel, written against [Brand & Voice](/docs/brand) |
 | **Media** | `/higgs` | Text-free visuals, brand kit `b0a3f528…`; copy is overlaid in-post, never rendered |
-| **Approve** | human (Abdout / Ali / Samia) | The gate — see [Autonomy ladder](#autonomy-ladder) |
-| **Schedule** | one daily cron slot | No date-picker: `0 6 * * *` + a 12h approval window. Real scheduling needs `SocialPost`/`ScheduledPost` persistence |
-| **Publish** | **Egress layer** — Telegram + Facebook direct APIs · other channels via the [Hermes](/docs/hermes) gateway | Egress only — dumb relays, never the LLM |
-| **Measure** | PostHog + per-platform analytics | UTM-tagged links → attribution |
+| **Approve** | `approve` skill → human (Abdout / Ali / Samia) | The gate — see [Autonomy ladder](#autonomy-ladder) |
+| **Schedule** | `SocialVariant.scheduledFor` + `/api/social/drain` | The composer takes a date and time; the drain publishes due variants every ~15 minutes from GitHub Actions |
+| **Publish** | `publish` skill → **egress layer** — Telegram + Facebook direct APIs · Hermes-transport channels via the [gateway](/docs/hermes) · WhatsApp as a copy-out block | Egress only — dumb relays, never the LLM |
+| **Measure** | `measure` skill → `/api/social/metrics` → `SocialMetric` | Facebook reach + engagement, six-hourly. UTM tags are applied but not yet consumed — no PostHog in the app |
+
+Each stage is also its own keyword: say "draft a post for hogwarts" and only that stage runs.
+`social` is the orchestrator that chains all six.
 
 Which of the **three loops** a post travels — Hub, cron draft-and-approve, or the inbound Hermes
 relay — plus the actor map, the cron inventory, and the keyword table, are on
@@ -82,8 +86,11 @@ gateway with the "anthropic-native over self-hosted" doctrine.
 | Write the copy | Claude (in Claude Code / Cowork) | Best model, brand-aware, bilingual — never Hermes' LLM |
 | Make the image/video | `/higgs` → Higgsfield CLI | Already governed by budget + brand kit |
 | Decide it's good | Human (→ automated gate at L4) | Brand accounts are public and irreversible |
-| Reach the platform | Egress layer, routed per channel | **Telegram: direct Bot API** (a plain HTTPS call — works from Vercel). Chat networks via the [Hermes](/docs/hermes) gateway (Slack today via `SLACK_HOME_CHANNEL`); more adapters as they land |
-| Prove it worked | PostHog + UTM | Attribution back to site traffic / conversions |
+| Reach the platform | Egress layer, routed per transport | **Telegram and Facebook: direct APIs** (plain HTTPS — works from Vercel), drained by kun. Other channels via the [Hermes](/docs/hermes) gateway, which pulls its own work. WhatsApp: no API exists, so a copy-out block |
+| Prove it worked | `/api/social/metrics` + UTM | Facebook reach and engagement into `SocialMetric`; UTM tags attribute traffic at our own site |
+
+Note what is *not* in that table: Slack. It is where approvals and notices are relayed, which is
+a different job from reaching an audience — see [the channel model](#and-one-channel-that-is-not-one-of-them).
 
 > **Done (Phase 2, 2026-07-10).** The old `generateAndPublishPost` action drafted via the
 > gateway's own LLM and never published — a name that lied twice. Rather than rename it, Phase 2
@@ -98,14 +105,30 @@ at all. Build order follows feasibility, not wish-list:
 
 | Channel | Posting API | Effort | Note |
 |---------|-------------|--------|------|
-| **Telegram** | Bot API | Trivial | **Live** — wired direct (2026-07-10); needs the bot token + channel |
+| **Telegram** | Bot API | Trivial | Wired direct (2026-07-10) but **not configured** — the token was never pushed to Vercel and no `TELEGRAM_CHANNEL_ID` exists. Two variables from live |
 | **X** | API v2 | Easy (paid) | Pay-per-use since Feb 2026 (~$0.015/post) → `/decide` |
-| **Facebook** | Graph API | Medium | App review + business verification |
+| **Facebook** | Graph API | Medium | **The one live channel** — hogwarts, mkan, databayt |
 | **Instagram** | Graph API | Medium | Business account linked to a FB Page |
 | **LinkedIn** | Posts API | Medium | Community Management API approval + page admin |
 | **TikTok** | Content Posting API | Hard | App audit (~1–4 wks); posts private until passed |
 | **Snapchat** | Public Profile API | Limited | Allowlist-only via a Snap contact |
-| **WhatsApp** | *(none)* | Limited | No official organic-post API — community broadcast only |
+| **WhatsApp** | *(none, ever)* | Manual | No organic posting API for Channels or broadcast lists — not a gate to pass, a capability Meta does not offer. Modelled as `transport: "manual"`: drafted, rendered, and approved like any channel, then handed out as a copy-out block for a human to forward |
+
+Per-channel state — wired vs configured vs live — is on [Status](/docs/social/status), which is
+the page to trust when the two disagree.
+
+### And one channel that is not one of them
+
+**Slack is the communication channel**, not a distribution channel. It is the team surface where
+approvals and notices land, and it is deliberately absent from the table above: counting an
+internal chat as audience reach is how "1 of 9 channels live" came to describe a system with one
+live audience channel. The composer does not offer it, the write gate rejects it, and
+`/api/social/relay` refuses it by name. Nothing needs selecting — `sendReview` routes there
+unconditionally.
+
+The registry expresses this directly: a channel carries a `kind` (`distribution` |
+`communication`) that says what it is *for*, orthogonal to the `transport` that says how its
+bytes move.
 
 Full matrix, costs, and the aggregator option (Ayrshare covers 7 of 8) are in the internal
 roadmap. Per-brand channel priorities are on each [brand page](#brand-pages).
@@ -114,8 +137,10 @@ roadmap. Per-brand channel priorities are on each [brand page](#brand-pages).
 
 The north star is fully autonomous publishing. We climb to it in stages — not because autonomy
 is hard to code, but because handing a public brand account to an unsupervised bot needs
-guardrails first. We are at **L2 on Telegram** (staged: compose → one-click publish) and
-**L1 elsewhere** today.
+guardrails first. We are at **L2 on Facebook** — the one live channel: compose or schedule in the
+Hub, one-click publish from a signed approval link, drain delivers — and **L1 elsewhere**. (This
+previously read "L2 on Telegram", which had the ladder pointing at the channel that cannot
+publish at all rather than the one that can.)
 
 | Level | What runs | Human role |
 |-------|-----------|------------|
@@ -129,37 +154,47 @@ guardrails first. We are at **L2 on Telegram** (staged: compose → one-click pu
 content + Arabic-correctness check, per-channel rate limits, and a kill switch. Autonomy without
 that layer is not a feature — it's an incident waiting to happen.
 
-## The `/social` keyword
+## The keywords
 
-**Wired (2026-07-10)** per the engine-parity recipe — skill + agent + vocabulary + counts +
-regenerated artifacts, health green:
+Six stages, six words. Each runs on its own; `social` chains all of them.
 
-- **Skill** — `.claude/skills/social/SKILL.md`: resolve brand + channels → draft (Claude,
-  Arabic-first variants per channel) → media (`/higgs`) → **human approval gate** → publish via
-  the composer or `scripts/post-to-hermes.mjs`.
-- **Agent** — `.claude/agents/growth.md` gained a Social Automation section (it already owned
-  "social media"); no new agent.
-- **Vocabulary** — the `social` spell lives in the *Pensieve* school next to `higgs`:
-  `order: [{familiar, growth}, {skill, /social}]`.
+| Keyword | Stage | Say |
+|---------|-------|-----|
+| **`calendar`** | Plan | "what are we publishing next week" |
+| **`draft`** | Write | "draft a post for hogwarts about admission" |
+| **`higgs`** | Media | "make the image for it" |
+| **`approve`** | Gate | "send it for review" |
+| **`publish`** | Deliver | "publish it" · "schedule it for tomorrow" |
+| **`measure`** | Read back | "how did the post do" |
+| **`social`** | All six | "social post for mkan about the new listings" |
 
-Saying "social post" (or «منشور تواصل») in prose activates it — no slash needed.
+They were split out (2026-07-27) because the pipeline above had named these stages and assigned
+them owners for months while four of them had no keyword — and Abdout types prose, not slash
+commands, so a stage with no name is a stage that cannot be reached. Each skill's `when_to_use`
+carries an explicit *negative* clause naming its siblings, which is what stops "publish it" from
+routing to `/ship`.
+
+The `growth` agent owns the strategy layer above them; `.claude/vocabulary.json` holds all six in
+the *Pensieve* school. No slash needed — say the word.
 
 ## Current status
 
 The Social Hub at [`/social`](/social) is multi-product (Phase 3, 2026-07-23):
 
-- **Works** — bilingual (en/ar, RTL) composer with a config-driven channel registry (9 channels)
-  **× a product registry** (hogwarts · mkan · databayt · sijillee · moalimee). A product select
-  — same visual language as the shadcn theme selector — scopes the whole page: channel toggles,
-  health checks, and publish all carry the chosen brand.
+- **Works** — bilingual (en/ar, RTL) composer with a config-driven channel registry (8
+  distribution channels, plus Slack as the one communication channel, which the picker does not
+  offer) **× a product registry** (hogwarts · mkan · databayt · sijillee · moallimee). A product
+  select — same visual language as the shadcn theme selector — scopes the whole page: channel
+  toggles, health checks, and publish all carry the chosen brand.
 - **Per-product Facebook** — each brand has its own Page and its own permanent Page token, read
   from `FACEBOOK_PAGE_ID_<PRODUCT>` / `FACEBOOK_PAGE_ACCESS_TOKEN_<PRODUCT>`. The Egress panel
   names the Page the token resolved to, which is how you catch a crossed token before publishing.
-  Live for hogwarts, mkan, and databayt; sijillee and moalimee have no Page yet.
+  Live for hogwarts, mkan, and databayt; sijillee and moallimee have no Page yet.
 - **Per-product wiring** — a channel is publishable only when the global transport *and* that
-  brand's own destination are wired (`productChannelWired`). Telegram and Slack stay `databayt`-only:
-  there is exactly one Telegram channel and one Slack channel, both org-level, so claiming them for
-  a product brand would post "as Hogwarts" into the org channel.
+  brand's own destination are wired (`productChannelWired`). Telegram stays `databayt`-only: there
+  is exactly one Telegram channel, org-level, so claiming it for a product brand would post "as
+  Hogwarts" into the org channel. Slack is excluded structurally rather than per-brand — it is a
+  communication channel, and `productChannelWired` refuses it for every product.
 - **Auto-post is draft-and-approve** — a daily Vercel cron (`/api/social/cron`, `CRON_SECRET`-guarded)
   drafts per opted-in product and sends the draft to a private review channel with a signed,
   12-hour, one-click Publish link. Nothing publishes unattended. Opt in per product with
@@ -180,11 +215,19 @@ The Social Hub at [`/social`](/social) is multi-product (Phase 3, 2026-07-23):
 - **Stage for review from the Hub** — the composer can push your own copy down the cron's
   approval path (signed 12h link into the private review channel) instead of publishing directly,
   for when someone else signs off.
+- **Scheduling and the drain** — the composer takes a date and time; variants land as `scheduled`
+  and `/api/social/drain` publishes them from GitHub Actions every ~15 minutes, claiming each row
+  before delivering so two overlapping runs cannot double-post. Its channel filter is an
+  allow-list, so a transport added later waits visibly in the queue rather than being attempted
+  and silently lost.
+- **Metrics** — `/api/social/metrics` reads Facebook reach and engagement back into
+  `SocialMetric` six-hourly. A missing scope or a retired metric name is terminal on the first
+  attempt with a named remedy, rather than retried forever.
 - **Removed** — the in-app AI draft card: gateway-LLM drafting violated the layer boundary, so
-  drafting now lives in the `/social` skill (Claude-native).
-- **Still pending** — adapters beyond Slack (see [Hermes](/docs/hermes)), persistence
-  (`SocialPost`) and therefore real scheduling, per-brand Telegram/Slack channels, and metrics
-  pull-back — tracked in `docs/SOCIAL-AUTOMATION.md`.
+  drafting now lives in the `draft` skill (Claude-native).
+- **Still pending** — adapters beyond Slack (see [Hermes](/docs/hermes)), per-brand Telegram
+  channels, a PostHog destination to consume the UTMs, and per-channel drafting in the cron —
+  tracked in `docs/SOCIAL-AUTOMATION.md`.
 
 ## See also
 
@@ -192,4 +235,4 @@ The Social Hub at [`/social`](/social) is multi-product (Phase 3, 2026-07-23):
 - [Channel Setup](/docs/social/channels) — per-platform setup guides, written to be usable on your own accounts.
 - [Brand & Voice](/docs/brand) — the rules every post obeys.
 - [Connectors](/docs/connectors) — the MCP-backed service integrations.
-- `/higgs` skill — media generation · `content-calendar` skill · `growth` agent.
+- `/higgs` skill — media generation · `calendar` · `draft` · `approve` · `publish` · `measure` · `growth` agent.

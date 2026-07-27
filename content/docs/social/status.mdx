@@ -5,14 +5,14 @@ description: Where social automation actually stands — wired vs configured vs 
 
 # Status
 
-**Last verified: 2026-07-26** (against Vercel production env and live endpoint probes).
+**Last verified: 2026-07-27** (against Vercel production env and live endpoint probes).
 
 The code is in good shape. The configuration is not. This page exists because
 [the overview](/docs/social) describes what the pipeline *can* do, and it is easy to read that
 as what it *is* doing. It isn't — yet.
 
-> **One-line summary:** 1 of 9 channels is live, 1 of 3 loops works, and the daily cron has been
-> a no-op since it shipped.
+> **One-line summary:** 1 of 8 distribution channels is live, 1 of 3 loops works, and the daily
+> cron has been a no-op since it shipped.
 
 ## Three words that mean different things
 
@@ -27,20 +27,36 @@ it closes with credentials, not engineering.
 
 ## Channels
 
+Two tiers, and keeping them apart is what makes the numbers on this page mean anything.
+**Distribution** channels carry marketing to an audience and count as reach. **Slack** is the
+one communication channel — the team surface where approvals and notices land. It used to sit
+in this table as a peer, which put a team chat in a marketing-reach denominator.
+
+### Distribution — the eight
+
 | Channel | Wired | Configured | Live | Blocker |
 |---------|:-----:|:----------:|:----:|---------|
 | **Facebook** — hogwarts · mkan · databayt | ✅ | ✅ | **✅** | — |
 | **Telegram** | ✅ | ❌ | ❌ | Bot exists and is valid, but its token was never pushed to Vercel and no `TELEGRAM_CHANNEL_ID` exists anywhere |
-| **Slack** (via Hermes) | ✅ | ❌ | ❌ | No `HERMES_API_URL` in production — and Hermes is down |
-| **Facebook** — sijillee · moalimee | ✅ | ❌ | ❌ | No Facebook Page created yet |
+| **Facebook** — sijillee · moallimee | ✅ | ❌ | ❌ | No Facebook Page created yet |
 | **Instagram** | registry only | ❌ | ❌ | Business account + App Review |
 | **LinkedIn** | registry only | ❌ | ❌ | Community Management API approval |
 | **X** | registry only | ❌ | ❌ | Pay-per-use since Feb 2026 — needs `/decide` |
 | **TikTok** | registry only | ❌ | ❌ | Full app audit, 1–4 weeks |
 | **Snapchat** | registry only | ❌ | ❌ | Allowlist-only via a Snap contact |
-| **WhatsApp** | registry only | ❌ | ❌ | No organic posting API exists |
+| **WhatsApp** | ✅ *(manual)* | n/a | n/a | No organic posting API exists — and none is coming. Carried through draft, media, and approval like any channel; `/publish` hands out a copy-out block a human forwards |
 
-**Live: 1 of 9 channels, for 3 of 5 brands.**
+**Live: 1 of 8 distribution channels, for 3 of 5 brands.**
+
+### Communication — the one
+
+| Channel | Wired | Configured | Live | Blocker |
+|---------|:-----:|:----------:|:----:|---------|
+| **Slack** (via Hermes) | ✅ | ❌ | ❌ | No `HERMES_API_URL` in production — and Hermes is down |
+
+Slack is never a publish destination: the composer does not offer it, the Zod write gate
+rejects it, and `/api/social/relay` refuses it by name. Approvals and notices reach `#social`
+unconditionally through `sendReview` — there is nothing to select.
 
 Telegram is the notable one. It is free, has no platform gate, the bot already exists and
 answers `getMe`, and the code has been ready since 2026-07-10. It is switched off for want of
@@ -65,7 +81,8 @@ returns `drafted: 0`.
 
 - **Egress** — per-channel results, three transports in parallel, media through the whole chain (Facebook `/photos`, Telegram `sendPhoto`, media signed into the approval token)
 - **Per-product Facebook** — its own Page and permanent token per brand, with the resolved Page name shown before you publish, which is how a crossed token gets caught
-- **Registry** — 5 products × 9 channels, AND-gated so a channel is publishable only when the transport *and* that brand's destination are both wired
+- **Registry** — 5 products × 8 distribution channels, AND-gated so a channel is publishable only when the transport *and* that brand's destination are both wired. A communication channel is refused whatever a per-brand map says
+- **Taxonomy** — `kind` separates what a channel is *for* from how its bytes move, and a test asserts every channel lands in exactly one delivery lane (drain · hermes · manual), so a transport added later cannot silently fall through all three
 - **Approval** — signed HMAC links, 12h TTL, contributor re-checked inside every mutating action
 - **Hub** — bilingual en/ar with RTL, Server-Component header, one-round-trip status probe
 - **Docs** — overview, architecture, strategy, five brand pages, and the channel guides
@@ -74,14 +91,15 @@ returns `drafted: 0`.
 
 - **Configuration** — the largest gap and the cheapest to close. Being handled by Cowork, which can drive the platform consoles directly.
 - **Hermes** — down, no production config, and the outbound draft lane dead-ends silently when it is.
-- **Measurement — half available, and the blocked half is a permissions problem, not an engineering one.**
-  - ✅ **UTM tagging works.** Every outbound link is tagged at delivery with `utm_source=<channel>`, `utm_medium=social`, `utm_campaign=<brand>`, so traffic is attributable *at our own site* — which is the only lane that does not depend on a platform choosing to share numbers. Already-tagged links are left alone.
-  - ❌ **Platform-side numbers are not fetchable.** The Facebook Page token carries `pages_show_list`, `pages_read_engagement`, `pages_manage_posts`. Reading impressions additionally needs **`read_insights`**; reading reactions, comments and shares needs **`pages_read_user_content`**. Neither is granted, so a metrics job would return errors on every call — it is deliberately not built until the scopes exist.
+- **Measurement — now wired on Facebook, and the remaining gap is analytics, not permissions.**
+  - ✅ **UTM tagging works.** Every outbound link is tagged at delivery with `utm_source=<channel>`, `utm_medium=social`, `utm_campaign=<brand>`, so traffic is attributable *at our own site* — the only lane that does not depend on a platform choosing to share numbers. Already-tagged links are left alone.
+  - ✅ **Platform-side numbers are fetchable.** `read_insights` and `pages_read_user_content` were **granted 2026-07-27** and verified returning real numbers against a live Hogwarts post (Page `1228948003637000`). Both turned out to be Standard Access — no App Review, no Business Verification. What was actually blocking them was neither: a permission has to be added to the app's **Use Case** (Dashboard → Use cases → Customize → Permissions and features) before it appears anywhere else in the console. Skip that and the Graph API Explorer answers "Found 0 results", which reads exactly like Meta having withdrawn the permission.
+  - ⚠️ **The scopes were never the whole story.** Meta retired the entire `post_impressions*` family during 2025, so even a correctly-scoped token gets `(#100)` from the old names — a *metric* error, not a permissions one. The live names are `post_media_view` and `post_total_media_view_unique`. Granting a scope does not resurrect a retired name, and re-probing with the old names after a grant looks exactly like the grant having failed. `classifyGraphError` exists so that mistake is not repeatable.
+  - ⚠️ **Verified on one token.** hogwarts only. mkan and databayt have their own Pages and their own unverified scope state; sijillee and moallimee have no Page at all. `/api/social/metrics` degrades per product rather than globally, and gives up permanently on a permission failure rather than retrying it forever.
   - ❌ **No analytics destination.** There is no PostHog dependency or key in the app, so nothing consumes the UTMs yet. The tags are still worth having: they are recorded in the platform link and in any downstream analytics added later.
-  - **`SocialMetric` exists and `externalId` is populated**, so posts are addressable the moment the scopes land.
-- **Scheduling** — the queue exists (`SocialPiece` / `SocialVariant` / `SocialMetric` on Neon, added 2026-07-26) and approval links are now single-use, but nothing drains `scheduledFor` yet, so there is still no way to pick a date and time.
-- **Metrics** — the table is there; nothing writes to it.
-- **Variant-awareness** — the cron drafts one text and fans it to every channel, which contradicts the *one core piece → N platform-native variants* multiplier the [strategy](/docs/social/strategy) depends on.
+- **Scheduling** — the queue exists (`SocialPiece` / `SocialVariant` / `SocialMetric` on Neon, added 2026-07-26), approval links are single-use, and `/api/social/drain` publishes due variants every ~15 minutes from GitHub Actions. The composer takes a date and time.
+- **Metrics** — `/api/social/metrics` writes `SocialMetric` on a six-hourly schedule. **Its workflow ships with the schedule commented out** pending one manual run per brand, since the scopes are confirmed on one token only.
+- **Variant-awareness** — still the honest gap. The cron drafts one text and fans it to every channel, which contradicts the *one core piece → N platform-native variants* multiplier the [strategy](/docs/social/strategy) depends on. The `draft` skill owns the correct shape; teaching the cron to use it is a separate change with its own drafting-cost implications.
 
 ## The honest constraints
 
@@ -103,9 +121,11 @@ granularity is a plan-tier limit and kun already uses a slot. GitHub Actions is 
 Ordered by value ÷ cost, not by size:
 
 1. **Three environment variables revive an entire loop.** A review destination, a draft source, and an opt-in list turn Loop B from dead to working. No code.
-2. **Turn Telegram on.** Free, instant, no gate, bot already exists — doubles the live-channel count.
-3. **Wire measurement.** The [strategy](/docs/social/strategy) sets kill criteria at "zero signal after 3 months of consistent posting." That decision cannot currently be made, because nothing is measured.
-4. **Add persistence.** Unlocks scheduling, single-use approvals, metrics, and Hermes flap-tolerance in one move.
+2. **Turn Telegram on.** Free, instant, no gate, bot already exists — doubles the live distribution-channel count. Two environment variables.
+3. **Run `/api/social/metrics` once per brand by hand**, then uncomment the schedule. The scopes are verified on the hogwarts token only; one dispatch tells you what mkan and databayt actually return.
+4. **Teach the cron to draft per channel.** The last structural gap between the pipeline and the strategy it claims to serve.
+
+Done since this page was first written: persistence, real scheduling with a drain, single-use approval links, and the metrics lane.
 
 ## See also
 

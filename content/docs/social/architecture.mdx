@@ -16,7 +16,8 @@ here.
 |-------|---------------|-------|-----------------|------------------|
 | **kun** | Vercel (public HTTPS) | Every platform token (`FACEBOOK_PAGE_ACCESS_TOKEN_*`, `TELEGRAM_BOT_TOKEN`), `CRON_SECRET` | Platform APIs · Anthropic API | The internet · Vercel Cron · Hermes |
 | **Hermes** | Abdout's Linux desktop, `localhost:18789` | Slack bot/app tokens | The internet (outbound) · Slack · kun | **Nothing** — not publicly routable |
-| **Platforms** | Facebook, Telegram, Slack, … | The published post | — | kun (direct API) · Hermes (adapters) |
+| **Distribution platforms** | Facebook, Telegram, … (the eight) | The published post | — | kun (direct API) · Hermes (adapters) |
+| **Slack** | The one communication channel | Approvals, notices — never a published post | — | kun · Hermes (review relay) |
 | **Marketing team** | Humans (Abdout · Samia · Ali · Moutaz) | Judgment, the approval decision | The Hub, Slack, Claude Code | Slack · the review channel |
 
 ### The asymmetry that shapes everything
@@ -140,7 +141,7 @@ The chain the whole system is built around, and where each stage actually lives:
 | Stage | Who / what | Code | Loop | State today |
 |-------|-----------|------|------|-------------|
 | **Generate** | Claude (`/social` skill) · `/higgs` for media | `lib/social-draft.ts` (cron lane only) | A · B · C | Claude-native. The relays never write copy. |
-| **Approve** | Human — Abdout, Samia, or Ali | composer button · signed link · Slack | A · B · C | **Always required.** L2 on the wired channels. |
+| **Approve** | Human — Abdout, Samia, or Ali | composer button · signed link · Slack | A · B · C | **Always required.** L2 on Facebook — the one live channel; L1 elsewhere. |
 | **Schedule** | Vercel Cron | `vercel.json` → `crons` | B only | **The weak link — see below.** |
 | **Publish** | Egress fan-out, per transport, in parallel | `lib/social-publish.ts` → `deliverPost` | A · B · C | One code path for all three loops. |
 | **Measure** | PostHog + UTM | — | — | Not wired back yet. |
@@ -176,7 +177,7 @@ Listed so the follow-up is turnkey — none of these exist yet.
 | **Scheduled publish** | Drain a queue of approved posts at their `scheduled_for` | `ScheduledPost` persistence |
 | **Metrics pull-back** | Fetch reach/clicks per post → PostHog → the payoff review | Persistence (needs a post id to attach to) |
 | **Token health canary** | Daily probe of every per-product Page token; alert before expiry | Nothing — buildable now on `getEgressStatus` |
-| **Weekly content nudge** | Friday: what shipped vs the calendar, into Slack | `content-calendar` structure |
+| **Weekly content nudge** | Friday: what shipped vs the calendar, into Slack | `calendar` structure |
 | **Kill-switch watchdog** | Halt auto-post on an error-rate or complaint spike | L4 guardrail layer |
 | **Per-brand cadence** | Different days/times per brand rather than one 06:00 sweep | Persistence + per-brand config |
 
@@ -202,21 +203,29 @@ Say these in prose — no slash needed. The engine routes them.
 
 | Keyword | Routes to | Use for |
 |---------|-----------|---------|
-| **`social`** · «منشور تواصل» | `/social` skill → `growth` agent | Draft, stage, or publish a brand post |
+| **`social`** · «منشور تواصل» | `/social` skill → `growth` agent | The whole chain for one brand post — chains the six below |
+| **`calendar`** | `/calendar` skill | Plan or review which brand publishes what, when |
+| **`draft`** | `/draft` skill | Write the copy — Arabic-first, one variant per channel |
 | **`higgs`** | `/higgs` skill → Higgsfield | Generate the image/video for a post |
+| **`approve`** | `/approve` skill | Stage for human sign-off, then stop |
+| **`publish`** | `/publish` skill | Deliver approved copy — drain, gateway, or copy-out |
+| **`measure`** | `/measure` skill | Read reach and engagement back off a published post |
 | **`carousel`** | `/carousel` skill | Multi-slide bilingual decks (Instagram, LinkedIn PDF) |
-| **`content-calendar`** | `content-calendar` skill | Plan or review what's publishing when |
 | **`weekly`** | `captain` cadence | Monday plan / Friday review — where social gets allocated |
 | **`decide`** | `/decide` | Any billing or Type-1 (public, hard-to-reverse) call — paid APIs, L4 autonomy |
 
 Headless lanes, when you want no UI:
 
 ```bash
+# Publish to a distribution channel:
 node scripts/post-to-telegram.mjs --text "<approved copy>"
 node scripts/post-to-facebook.mjs --text "<approved copy>" --product <brand>
-node scripts/post-to-hermes.mjs   --text "<approved copy>" --channels slack
+
+# Relay a draft into #social for review — NOT a publish; Slack is the
+# communication channel, and this is the review lane, not an audience one:
+node scripts/post-to-hermes.mjs   --text "<draft copy>" --channels slack
+
 node scripts/generate-social-media.mjs --product <brand> --prompt "<topic>"
-node scripts/social-cron-sync.mjs        # kun ↔ Hermes health validator
 ```
 
 ## Reading the failure modes

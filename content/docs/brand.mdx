@@ -46,21 +46,34 @@ hit we cannot take back.
 - **The open-source, sharing-economy story is our strongest pitch.** Lead with it. We run a
   software company with Claude Code, in the open, on an SSPL license. That is the differentiator.
 - **Tone by audience:**
-  - *Schools / administrators* (Hogwarts) — trustworthy, calm, outcomes-focused. Not hype.
-  - *Consumers / merchants* (Souq, Mkan, Shifa) — warm, practical, benefit-first.
-  - *Developers* (Kun, open source) — precise, technical, generous with detail.
+  - *Schools / administrators* (Hogwarts, Moallimee) — trustworthy, calm, outcomes-focused. Not hype.
+  - *Consumers / merchants* (Mkan, Sijillee, and Souq / Shifa when they join) — warm, practical, benefit-first.
+  - *Developers* (databayt, Kun, open source) — precise, technical, generous with detail.
 - Every piece should **rank, educate, or attract contributors** — if it does none of the three,
   cut it.
 
-## Per-product taglines
+## Per-brand taglines
 
-| Product | Tagline | Audience |
-|---------|---------|----------|
+These are the five brands with a social presence — the same five the pipeline, the product
+registry, and every page under [Social](/docs/social) use. `/draft` reads this table for voice,
+so a brand missing here is a brand it cannot write for.
+
+| Brand | Tagline | Audience |
+|-------|---------|----------|
+| **databayt** | How we run a software company with Claude Code | Developers, contributors, partners |
 | **Hogwarts** | Modern school management for Saudi / MENA schools | Schools, administrators, parents |
-| **Souq** | Build your MENA marketplace | Merchants, multi-vendor sellers |
 | **Mkan** | Saudi property rentals, simplified | Hosts, renters |
-| **Shifa** | Clinic management built for Saudi healthcare | Clinics, practitioners |
-| **Kun** | How we run a software company with Claude Code | Developers, contributors |
+| **Moallimee** | Teachers and tutoring, matched | Tutors, students, parents *(pre-launch)* |
+| **Sijillee** | Accounting built for Sudanese business | SMEs, accountants *(pre-launch)* |
+
+> **Souq** (Build your MENA marketplace) and **Shifa** (Clinic management for Saudi healthcare)
+> are live SaaS products but are **not in the current priority-5 social push**. They keep their
+> taglines and their voice; they just have no channel presence yet. When they join, they get a
+> brand page on the same template.
+
+**Registry-id note:** Moallimee's stable id is `moalimee`, single L — it is the `FACEBOOK_PAGE_ID_MOALIMEE`
+env-var suffix and the stored `SocialPiece.brand` value, so renaming it would orphan rows. The
+double-L spelling is canonical in prose and in every doc. `/draft` and `/publish` accept both.
 
 ## Channels & handles
 
@@ -69,13 +82,16 @@ hit we cannot take back.
 | **X / Twitter** | `@databayt` | Claimed, dormant — dev-rel + launches |
 | **LinkedIn** | databayt (Ali's channel) | B2B / school-sales, founder story |
 | **Telegram** | databayt | Community / broadcast |
-| **WhatsApp** | databayt | Community / broadcast lists (not feed posts) |
+| **WhatsApp** | databayt | Community / broadcast lists — `transport: manual`, no organic posting API |
 | **Instagram** | to claim / audit | Consumer, visual products |
 | **TikTok** | to claim / audit | Consumer, short-form |
 | **Snapchat** | to claim / audit | Consumer, MENA reach |
 | **Facebook** | to claim / audit | Schools (parents), consumer |
 
-Account claiming and credential status is tracked in the internal `docs/SOCIAL-AUTOMATION.md`.
+These are the eight *distribution* channels. Slack is not among them by design — it is the
+internal communication channel, where drafts are approved and notices land, never a place a brand
+posts to an audience. Account claiming and credential status is tracked in the internal
+`docs/SOCIAL-AUTOMATION.md`.
 
 ## Higgsfield anchors
 
