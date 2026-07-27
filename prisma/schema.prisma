@@ -74,6 +74,19 @@ model SocialVariant {
   /// Platform-side id, where the API returns one.
   externalId   String?
 
+  /// Last successful metrics read. Null means never fetched.
+  metricsFetchedAt DateTime?
+  /// Bounded, so a transport failure cannot retry forever.
+  metricsAttempts  Int       @default(0)
+  /// The last metrics failure verbatim, for a human reading the row.
+  metricsError     String?
+  /// Terminal: a missing permission, a retired metric name, or no Page token.
+  /// Retrying cannot help — the fix is a token or a code change. A boolean
+  /// rather than `attempts >= MAX` because the two exhaustion rules differ: a
+  /// permission failure is terminal at the first attempt, a transport failure
+  /// is not terminal until the last.
+  metricsGaveUp    Boolean   @default(false)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -81,18 +94,37 @@ model SocialVariant {
 
   /// The drain query: due, eligible work in scheduled order.
   @@index([status, scheduledFor])
+  /// The metrics query: published variants due for a numbers refresh.
+  @@index([status, metricsFetchedAt])
   @@index([pieceId])
 }
 
-/// Reach and clicks pulled back per variant. Without this the strategy's
+/// Reach and engagement pulled back per variant. Without this the strategy's
 /// "zero signal after 3 months" kill criteria cannot be evaluated at all.
+///
+/// A TIME SERIES, deliberately — there is no @@unique([variantId]), and the
+/// index is [variantId, fetchedAt]. Reach grows: two readings at two times are
+/// both true and the delta between them is the interesting number. Adding a
+/// unique constraint to enable an upsert would flatten the growth curve to a
+/// single point. Insert, never upsert.
 model SocialMetric {
   id        String        @id @default(cuid())
   variant   SocialVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
   variantId String
 
-  reach  Int @default(0)
+  /// post_total_media_view_unique — closest available stand-in for reach.
+  /// Not comparable to a pre-2025 figure; see lib/facebook-metrics.ts.
+  reach Int @default(0)
+  /// post_media_view — total media views.
+  views Int @default(0)
+  /// UTM-attributed clicks. Written as 0 until an analytics destination is
+  /// wired, rather than invented from a platform number that means something
+  /// else.
   clicks Int @default(0)
+
+  reactions Int @default(0)
+  comments  Int @default(0)
+  shares    Int @default(0)
 
   fetchedAt DateTime @default(now())
 
