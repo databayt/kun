@@ -11,6 +11,7 @@ import { productChannelWired } from "@/components/root/social/products";
 import { sendTelegramPost } from "@/lib/telegram";
 import { sendFacebookPost } from "@/lib/facebook";
 import { sendSocialPost } from "@/lib/hermes";
+import { applyUtm } from "@/lib/social-utm";
 
 export interface DeliverInput {
   product: string;
@@ -88,15 +89,26 @@ export async function deliverPost({
 
   // The three transports are independent destinations — running them in
   // sequence made a multi-channel post pay every timeout back to back.
+  // Tagged per channel, not once for the batch: utm_source is precisely what
+  // makes Telegram and Facebook traffic separable at the far end.
+  const utm = (channel: string) => applyUtm(text, { channel, brand: product });
+
   const [telegramOut, facebookOut, hermesOut] = await Promise.all([
     telegramChannels.length > 0
-      ? sendTelegramPost(text, undefined, mediaUrl)
+      ? sendTelegramPost(utm("telegram"), undefined, mediaUrl)
       : null,
     facebookChannels.length > 0
-      ? sendFacebookPost(text, product, mediaUrl)
+      ? sendFacebookPost(utm("facebook"), product, mediaUrl)
       : null,
     hermesChannels.length > 0
-      ? sendSocialPost({ text, channels: hermesChannels, mediaUrl })
+      ? sendSocialPost({
+          // One relay call covers N channels, so the first is the honest
+          // attribution; per-channel tagging for these arrives with the queue
+          // lane, which hands Hermes one variant at a time.
+          text: utm(hermesChannels[0]),
+          channels: hermesChannels,
+          mediaUrl,
+        })
       : null,
   ]);
 

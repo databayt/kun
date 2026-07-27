@@ -15,6 +15,7 @@
 import { isAuthorizedBearer } from "@/lib/cron-auth";
 import { HERMES_CHANNEL_IDS } from "@/components/root/social/config";
 import { db } from "@/lib/db";
+import { applyUtm } from "@/lib/social-utm";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -71,7 +72,9 @@ export async function GET(request: Request): Promise<Response> {
       id: v.id,
       brand: v.piece.brand,
       channel: v.channel,
-      text: v.text,
+      // Tagged here rather than by Hermes: attribution should not depend on
+      // a client we do not control remembering to do it.
+      text: applyUtm(v.text, { channel: v.channel, brand: v.piece.brand }),
       mediaUrl: v.mediaUrl,
       locale: v.piece.locale,
       attempts: v.attempts,

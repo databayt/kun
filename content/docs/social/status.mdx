@@ -74,7 +74,11 @@ returns `drafted: 0`.
 
 - **Configuration** — the largest gap and the cheapest to close. Being handled by Cowork, which can drive the platform consoles directly.
 - **Hermes** — down, no production config, and the outbound draft lane dead-ends silently when it is.
-- **Measurement** — none. No PostHog wiring, no UTM capture, no reach or click pull-back.
+- **Measurement — half available, and the blocked half is a permissions problem, not an engineering one.**
+  - ✅ **UTM tagging works.** Every outbound link is tagged at delivery with `utm_source=<channel>`, `utm_medium=social`, `utm_campaign=<brand>`, so traffic is attributable *at our own site* — which is the only lane that does not depend on a platform choosing to share numbers. Already-tagged links are left alone.
+  - ❌ **Platform-side numbers are not fetchable.** The Facebook Page token carries `pages_show_list`, `pages_read_engagement`, `pages_manage_posts`. Reading impressions additionally needs **`read_insights`**; reading reactions, comments and shares needs **`pages_read_user_content`**. Neither is granted, so a metrics job would return errors on every call — it is deliberately not built until the scopes exist.
+  - ❌ **No analytics destination.** There is no PostHog dependency or key in the app, so nothing consumes the UTMs yet. The tags are still worth having: they are recorded in the platform link and in any downstream analytics added later.
+  - **`SocialMetric` exists and `externalId` is populated**, so posts are addressable the moment the scopes land.
 - **Scheduling** — the queue exists (`SocialPiece` / `SocialVariant` / `SocialMetric` on Neon, added 2026-07-26) and approval links are now single-use, but nothing drains `scheduledFor` yet, so there is still no way to pick a date and time.
 - **Metrics** — the table is there; nothing writes to it.
 - **Variant-awareness** — the cron drafts one text and fans it to every channel, which contradicts the *one core piece → N platform-native variants* multiplier the [strategy](/docs/social/strategy) depends on.
