@@ -61,14 +61,53 @@ export async function checkTelegramHealth(): Promise<{
   }
 }
 
+// Telegram caps a photo caption at 1024 chars while a plain message allows 4096.
+// Rather than truncate someone's approved copy, an over-long caption is sent as
+// a follow-up message under an uncaptioned photo — nothing is lost either way.
+const MAX_CAPTION = 1024;
+
+async function callTelegram(
+  token: string,
+  method: string,
+  body: Record<string, unknown>,
+  timeoutMs: number,
+): Promise<{ ok: boolean; error?: string; externalId?: string }> {
+  const res = await fetch(`https://api.telegram.org/bot${token}/${method}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(timeoutMs),
+  });
+  if (!res.ok) {
+    return { ok: false, error: await telegramError(res) };
+  }
+  // Deleting a Telegram message needs the chat AND the message id, so the
+  // identifier has to carry both — a bare message_id addresses nothing.
+  const body_ = (await res.json().catch(() => null)) as {
+    result?: { message_id?: number; chat?: { id?: number | string } };
+  } | null;
+  const messageId = body_?.result?.message_id;
+  const chatId = body_?.result?.chat?.id;
+  return {
+    ok: true,
+    externalId:
+      messageId !== undefined && chatId !== undefined
+        ? `${chatId}:${messageId}`
+        : undefined,
+  };
+}
+
 // `chatIdOverride` exists so internal traffic (draft reviews carrying a publish
 // link) can be addressed to a private chat instead of TELEGRAM_CHANNEL_ID, which
 // is the public brand channel. Callers must pass it deliberately — the default
 // stays the brand channel.
+//
+// `mediaUrl` must be publicly reachable — Telegram fetches the image itself.
 export async function sendTelegramPost(
   text: string,
   chatIdOverride?: string,
-): Promise<{ ok: boolean; error?: string }> {
+  mediaUrl?: string,
+): Promise<{ ok: boolean; error?: string; externalId?: string }> {
   const config = await getTelegramConfig();
   const token = config.token;
   const chatId = (chatIdOverride ?? config.chatId).trim();
@@ -85,20 +124,38 @@ export async function sendTelegramPost(
     };
   }
   try {
-    const res = await fetch(
-      `https://api.telegram.org/bot${token}/sendMessage`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        // Plain text on purpose: parse_mode entities break on arbitrary copy.
-        body: JSON.stringify({ chat_id: chatId, text }),
-        signal: AbortSignal.timeout(10000),
-      },
-    );
-    if (!res.ok) {
-      return { ok: false, error: await telegramError(res) };
+    if (mediaUrl) {
+      const captionFits = text.length <= MAX_CAPTION;
+      // Telegram is strict about ordering — the photo has to land before the
+      // spill-over text or the channel reads backwards.
+      const photo = await callTelegram(
+        token,
+        "sendPhoto",
+        {
+          chat_id: chatId,
+          photo: mediaUrl,
+          ...(captionFits ? { caption: text } : {}),
+        },
+        25000,
+      );
+      if (!photo.ok || captionFits) return photo;
+      // Caption spilled into a follow-up message. The photo is the post, so its
+      // id is the one worth keeping.
+      const spill = await callTelegram(
+        token,
+        "sendMessage",
+        { chat_id: chatId, text },
+        10000,
+      );
+      return spill.ok ? { ...spill, externalId: photo.externalId } : spill;
     }
-    return { ok: true };
+    // Plain text on purpose: parse_mode entities break on arbitrary copy.
+    return await callTelegram(
+      token,
+      "sendMessage",
+      { chat_id: chatId, text },
+      10000,
+    );
   } catch (err: unknown) {
     return {
       ok: false,

@@ -90,32 +90,76 @@ export async function checkFacebookHealth(product?: string): Promise<{
   }
 }
 
+// `mediaUrl` must be a PUBLICLY reachable image URL — Graph fetches it itself
+// (that's why /higgs output lands on the CDN before it gets here). A photo post
+// is a different edge with different field names: /photos takes `url` +
+// `caption`, /feed takes `message`. Posting the caption to /feed and the image
+// separately would produce two posts, so it's one call either way.
 export async function sendFacebookPost(
   text: string,
   product?: string,
-): Promise<{ ok: boolean; error?: string }> {
+  mediaUrl?: string,
+): Promise<{ ok: boolean; error?: string; externalId?: string }> {
   const { pageId, token } = await getFacebookConfig(product);
   if (!token || !pageId) {
     return { ok: false, error: notConfigured(product) };
   }
+  const edge = mediaUrl ? "photos" : "feed";
+  const payload = mediaUrl
+    ? { url: mediaUrl, caption: text, access_token: token }
+    : { message: text, access_token: token };
   try {
     const res = await fetch(
-      `https://graph.facebook.com/${GRAPH_VERSION}/${pageId}/feed`,
+      `https://graph.facebook.com/${GRAPH_VERSION}/${pageId}/${edge}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text, access_token: token }),
-        signal: AbortSignal.timeout(10000),
+        body: JSON.stringify(payload),
+        // Graph downloads the image server-side before it answers, so a photo
+        // post legitimately takes longer than a text one.
+        signal: AbortSignal.timeout(mediaUrl ? 25000 : 10000),
       },
     );
     if (!res.ok) {
       return { ok: false, error: await facebookError(res) };
     }
-    return { ok: true };
+    // Keep the id. Without it a published post cannot be found again, so it
+    // cannot be deleted or have metrics attached — /photos answers with both a
+    // photo `id` and the feed `post_id`, and the feed one is what addresses
+    // the actual post.
+    const body = (await res.json().catch(() => null)) as {
+      id?: string;
+      post_id?: string;
+    } | null;
+    return { ok: true, externalId: body?.post_id ?? body?.id };
   } catch (err: unknown) {
     return {
       ok: false,
       error: err instanceof Error ? err.message : "Failed to send to Facebook",
+    };
+  }
+}
+
+/** Retract a published post. `externalId` is what sendFacebookPost returned. */
+export async function deleteFacebookPost(
+  externalId: string,
+  product?: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const { token } = await getFacebookConfig(product);
+  if (!token) return { ok: false, error: notConfigured(product) };
+  try {
+    const res = await fetch(
+      `https://graph.facebook.com/${GRAPH_VERSION}/${externalId}`,
+      { method: "DELETE", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ access_token: token }),
+        signal: AbortSignal.timeout(10000) },
+    );
+    if (!res.ok) return { ok: false, error: await facebookError(res) };
+    return { ok: true };
+  } catch (err: unknown) {
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : "Failed to delete the post",
     };
   }
 }

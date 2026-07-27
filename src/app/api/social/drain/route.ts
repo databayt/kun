@@ -91,7 +91,12 @@ export async function GET(request: Request): Promise<Response> {
     if (result.ok) {
       await db.socialVariant.update({
         where: { id: variant.id },
-        data: { status: "published", publishedAt: new Date(), result: "ok" },
+        data: {
+          status: "published",
+          publishedAt: new Date(),
+          result: "ok",
+          externalId: result.results[0]?.externalId,
+        },
       });
       results.push({ ...base, status: "published" });
       continue;

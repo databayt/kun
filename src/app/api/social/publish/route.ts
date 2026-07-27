@@ -103,6 +103,7 @@ export async function GET(request: Request): Promise<Response> {
       status: result.ok ? "published" : "failed",
       publishedAt: result.ok ? new Date() : null,
       result: result.ok ? "ok" : (result.error ?? "unknown error"),
+      externalId: result.results[0]?.externalId,
     },
   });
 
