@@ -28,8 +28,30 @@ function createClient(): PrismaClient {
   });
 }
 
-export const db: PrismaClient = globalForPrisma.prisma ?? createClient();
-
-if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = db;
+function getClient(): PrismaClient {
+  if (globalForPrisma.prisma) return globalForPrisma.prisma;
+  const client = createClient();
+  if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = client;
+  return client;
 }
+
+// Constructed on first *use*, not on import. `next build` imports every route
+// module to read its `runtime`/`dynamic` exports, so an eager client turned a
+// missing DATABASE_URL into a build failure for the whole site — routes that
+// never touch the database included. Lazily, a missing URL fails only the
+// request that actually needs a query.
+export const db: PrismaClient = new Proxy({} as PrismaClient, {
+  get(_target, prop) {
+    const client = getClient();
+    const value = Reflect.get(client, prop, client);
+    return typeof value === "function" ? value.bind(client) : value;
+  },
+  has: (_target, prop) => Reflect.has(getClient(), prop),
+  ownKeys: () => Reflect.ownKeys(getClient()),
+  getOwnPropertyDescriptor: (_target, prop) => {
+    const descriptor = Reflect.getOwnPropertyDescriptor(getClient(), prop);
+    // A proxy may only report a non-configurable prop if the target has one,
+    // and the target here is an empty object — so soften it.
+    return descriptor && { ...descriptor, configurable: true };
+  },
+});
