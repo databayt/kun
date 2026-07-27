@@ -71,6 +71,13 @@ const publishSchema = z
       )
       .optional()
       .or(z.literal("").transform(() => undefined)),
+    // ISO string from the composer's datetime input. Optional — absent means
+    // publish or stage now.
+    scheduledFor: z
+      .string()
+      .trim()
+      .optional()
+      .or(z.literal("").transform(() => undefined)),
   })
   // Wired-only, per brand: the global transport existing isn't enough — this
   // product must have its own destination on that channel.
@@ -103,6 +110,74 @@ export async function publishPostDirect(input: unknown): Promise<PostResult> {
 
   const { product, text, channels, mediaUrl } = parsed.data;
   return deliverPost({ product, text, channels: [...channels], mediaUrl });
+}
+
+export interface ScheduleResult {
+  ok: boolean;
+  /** How many channel variants were queued. */
+  count?: number;
+  /** When they will publish, ISO. */
+  at?: string;
+  error?: string;
+}
+
+// The producer the drain has been waiting for. Writes variants straight to
+// `scheduled` — no approval link, because scheduling IS the approval: a
+// contributor picked the copy, the channels, and the moment.
+export async function schedulePost(input: unknown): Promise<ScheduleResult> {
+  if (!(await requireContributor())) {
+    return { ok: false, error: "Forbidden: contributors only." };
+  }
+
+  const parsed = publishSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      ok: false,
+      error: parsed.error.issues[0]?.message ?? "Invalid input.",
+    };
+  }
+
+  const { product, text, channels, mediaUrl, scheduledFor } = parsed.data;
+  if (!scheduledFor) {
+    return { ok: false, error: "Pick a date and time first." };
+  }
+
+  const when = new Date(scheduledFor);
+  if (Number.isNaN(when.getTime())) {
+    return { ok: false, error: "That date could not be read." };
+  }
+  // A minute of slack: the drain runs on a ~15 minute cadence, and a time
+  // already in the past would publish on the very next run, which is not what
+  // anyone picking a time means.
+  if (when.getTime() < Date.now() - 60_000) {
+    return { ok: false, error: "That time is in the past." };
+  }
+
+  try {
+    const piece = await db.socialPiece.create({
+      data: {
+        brand: product,
+        source: "human",
+        aiGenerated: Boolean(mediaUrl),
+        variants: {
+          create: channels.map((channel) => ({
+            channel,
+            text,
+            mediaUrl,
+            status: "scheduled" as const,
+            scheduledFor: when,
+          })),
+        },
+      },
+      include: { variants: true },
+    });
+    return { ok: true, count: piece.variants.length, at: when.toISOString() };
+  } catch (err: unknown) {
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : "Could not schedule the post.",
+    };
+  }
 }
 
 export interface ReviewResult {
