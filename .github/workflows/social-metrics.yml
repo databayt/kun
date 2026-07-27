@@ -1,0 +1,78 @@
+name: Social metrics
+
+# Reads reach and engagement back off published posts.
+#
+# Here rather than in vercel.json for the same reason as the drain: Vercel cron
+# frequency is a plan-tier limit, kun is on Hobby, and the one slot is already
+# spent on the 06:00 drafting run.
+#
+# Six-hourly, not every 15 minutes. Reach moves on a scale of hours, Graph rate
+# limits per app, and a thirty-day refresh window at this cadence is already
+# ~120 reads per post. The interval must stay in step with REFRESH_EVERY_MS in
+# the route; a faster schedule just selects zero rows and burns a run.
+#
+# THE SCHEDULE IS DELIBERATELY COMMENTED OUT. The Facebook scopes are verified
+# on the hogwarts Page token only — mkan and databayt have their own tokens and
+# their own unverified scope state, and sijillee and moalimee have no Page at
+# all. Dispatch this manually first, read the JSON, confirm what each brand
+# actually returns, then enable the schedule.
+
+on:
+  # schedule:
+  #   - cron: "0 */6 * * *"
+  workflow_dispatch:
+
+concurrency:
+  # A separate group from the drain so a metrics run never queues behind a
+  # publish, and vice versa.
+  group: social-metrics
+  cancel-in-progress: false
+
+jobs:
+  metrics:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Refresh post metrics
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: ${{ vars.SITE_URL || 'https://kun.databayt.org' }}
+        run: |
+          if [ -z "$CRON_SECRET" ]; then
+            echo "CRON_SECRET secret is not set — refusing to call the metrics route."
+            exit 1
+          fi
+
+          response=$(mktemp)
+          code=$(curl -sS -o "$response" -w '%{http_code}' --max-time 120 \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            "$SITE_URL/api/social/metrics")
+
+          echo "HTTP $code"
+          cat "$response"
+          echo
+
+          # A 503 means the deployment has no CRON_SECRET — a config gap rather
+          # than a failed read, so surface it without failing the run.
+          if [ "$code" = "503" ]; then
+            echo "::warning::Metrics disabled on the deployment (no CRON_SECRET)."
+            exit 0
+          fi
+
+          if [ "$code" != "200" ]; then
+            echo "::error::Metrics returned HTTP $code"
+            exit 1
+          fi
+
+          # 200 with ok:false means a variant stopped being read — a missing
+          # scope, a retired metric name, or a brand with no Page. The review
+          # channel has the detail and the remedy; flag it here so the run is
+          # visibly not-green without failing the schedule.
+          #
+          # To resume after fixing the cause:
+          #   UPDATE "SocialVariant"
+          #      SET "metricsGaveUp" = false, "metricsAttempts" = 0,
+          #          "metricsError" = NULL
+          #    WHERE "metricsGaveUp" = true;
+          if grep -q '"ok":false' "$response"; then
+            echo "::warning::Metrics gave up on a variant — see the review channel."
+          fi

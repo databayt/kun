@@ -1,16 +1,23 @@
 // UTM tagging for outbound links.
 //
 // This is the measurement lane that works regardless of platform APIs. Reach
-// and engagement have to be read back from each platform — and today none of
-// them will tell us: the Facebook token would need `read_insights` for
-// impressions and `pages_read_user_content` for reactions, and neither is
-// granted. UTM parameters sidestep that entirely by measuring at the
-// destination we own instead of at the platform.
+// and engagement have to be read back from each platform, and on Facebook that
+// lane is now open: `read_insights` and `pages_read_user_content` were granted
+// on 2026-07-27 — Standard Access, no App Review, no Business Verification —
+// and both were verified returning real numbers against a live Hogwarts post
+// (kun#139). The client that reads them is `lib/facebook-metrics.ts`.
 //
-// That matters beyond convenience. The strategy's kill criteria are "zero
-// signal after 3 months of consistent posting", and a click that lands on our
-// own site is the signal that survives however a platform feels about sharing
-// its numbers.
+// The scopes were never the whole story. Meta retired the `post_impressions*`
+// metric family during 2025, so even a correctly-scoped token gets `(#100)`
+// from the old names — see the retirement table in `lib/facebook-metrics.ts`.
+//
+// UTM stays the primary signal regardless, because it measures at the
+// destination we own instead of at the platform. A platform can retire a
+// metric, gate it behind a permission, or answer with an approximate count
+// carrying a debug notice — all three of those happened here, on one feature,
+// inside one year. The strategy's kill criteria are "zero signal after 3 months
+// of consistent posting", and that verdict should not rest on a number whose
+// definition someone else can change underneath it.
 //
 // Applied at delivery, not when the copy is written: the stored text and the
 // review message stay readable, and a link only grows parameters at the moment
