@@ -1,155 +1,121 @@
 ---
 title: Agents
-description: 40 agents across 4 tiers — from captain to specialists
+description: 46 agents in two fleets — 19 company, 27 stack
 ---
 
 # Agents
 
-40 specialized agents organized in a 4-tier hierarchy. The top 9 leadership agents manage business, product, and technical strategy. The bottom 31 specialist agents handle execution across stack, design, UI, DevOps, VCS, and domain expertise.
+The engine ships **46 agents** in two fleets. The **company fleet** (19) runs the business: strategy, revenue, quality, product references. The **stack fleet** (27) writes the code: one agent per framework, layer, or tool.
 
-## Hierarchy
+Each fleet is a plugin, which is how it reaches other machines — see [Onboarding](/docs/onboarding).
 
-```
-captain (Tier 0 — company brain)
-├── Business (Tier 1): revenue, growth, support
-├── Product (Tier 2): product, analyst
-└── Tech Leadership (Tier 3): tech-lead, ops, guardian
-        └── orchestration → 31 specialist agents
-```
+| Fleet | Plugin | Agents | Lives in |
+|-------|--------|--------|----------|
+| Company | `kun-company` | 19 | `.claude/agents/` |
+| Stack | `kun-stack` | 27 | installed to `~/.claude/agents/` |
 
-## Tier 0 — Captain
+## Company fleet (19)
+
+The captain sits above everything and never writes code — it allocates, decides, and delegates.
 
 | Agent | Scope |
 |-------|-------|
-| **captain** | CEO brain — weekly allocation, revenue strategy, team coordination across the products and 7 humans. Never writes code. Always delegates. |
+| **captain** | CEO brain — weekly allocation, revenue strategy, coordination across products and the 7 humans |
 
-## Tier 1 — Business (3)
+### Business (4)
 
-| Agent | Scope | Primary Human |
-|-------|-------|---------------|
-| **revenue** | Pricing strategy, proposals, contracts, MRR tracking, Saudi payment setup | Ali, Sedon |
-| **growth** | Content strategy, SEO, social media, developer relations, Arabic-first content | Samia, Ali |
-| **support** | Customer onboarding, issue triage, knowledge base, SLA tracking | Sedon, Ali |
+| Agent | Scope |
+|-------|-------|
+| **revenue** | Pricing, proposals, contracts, cost analysis, revenue tracking |
+| **growth** | Content strategy, SEO, social, developer relations, community |
+| **support** | Customer onboarding, issue triage, knowledge base, SLA tracking |
+| **analyst** | Market intelligence per vertical, competitors, usage analytics, churn |
 
-## Tier 2 — Product (2)
+### Product & delivery (4)
 
-| Agent | Scope | Primary Human |
-|-------|-------|---------------|
-| **product** | Roadmap across 5 products, user stories, ICE scoring, release planning | All |
-| **analyst** | Market intelligence per vertical, competitor analysis, usage analytics | Ali, Samia |
+| Agent | Scope |
+|-------|-------|
+| **product** | Roadmap across the 5 products — stories, scope, prioritization, releases |
+| **tech-lead** | Architecture across the repos — shared patterns, breaking changes, tech debt |
+| **ops** | CI/CD, API spend, monitoring, infrastructure, uptime |
+| **guardian** | OWASP Top 10, performance budgets, dependency health, SSPL compliance |
 
-## Tier 3 — Tech Leadership (3)
+### Engine maintenance (6)
 
-| Agent | Scope | Primary Human |
-|-------|-------|---------------|
-| **tech-lead** | Architecture across 14 repos, shared patterns, breaking changes, tech debt | Abdout |
-| **ops** | CI/CD, deployment health, API spend tracking, cost optimization, uptime | Sedon, Abdout |
-| **guardian** | OWASP Top 10, performance budgets, SSPL compliance, medical data privacy | Abdout |
+| Agent | Scope |
+|-------|-------|
+| **quality** | Routes the 17 niche quality keywords; owns `/handover` and `/release` |
+| **report** | Auto-fixes user-reported issues — read, verify, fix, close |
+| **analyze** | Generates a tailored Claude Code config for any repo |
+| **learn** | Extracts patterns, conventions, and team dynamics into memory |
+| **package** | Cross-repo dependency audit and upgrade coordination |
+| **clone** | Translates a captured live-URL section into house-stack JSX |
 
-## Specialist Agents (31 agents, 7 chains)
+### Product references (4)
 
-### Stack Chain (7)
-
-| Agent | Domain |
-|-------|--------|
-| nextjs | App Router, Server Components, Server Actions |
-| react | Hooks, concurrent features, performance |
-| typescript | Strict mode, generics, advanced types |
-| tailwind | Semantic tokens, responsive, RTL/LTR |
-| prisma | PostgreSQL, migrations, query optimization |
-| shadcn | Radix primitives, registry, MCP |
-| authjs | JWT, OAuth, sessions |
-
-### Design Chain (4)
-
-| Agent | Domain |
-|-------|--------|
-| orchestration | Master coordinator, multi-agent workflows |
-| architecture | Mirror pattern, multi-tenant (Hogwarts) |
-| pattern | Code conventions, anti-patterns |
-| structure | File organization, naming |
-
-### UI Chain (4)
-
-| Agent | Domain |
-|-------|--------|
-| shadcn | Radix primitives, registry |
-| atom | Compose 2+ shadcn/ui primitives |
-| template | Full-page layouts |
-| block | UI + business logic (DataTable, auth, payments) |
-
-### DevOps Chain (3)
-
-| Agent | Domain |
-|-------|--------|
-| build | TypeScript validation, Turbopack |
-| deploy | Vercel, staging/production |
-| test | Vitest, Playwright, TDD |
-
-### VCS Chain (2)
-
-| Agent | Domain |
-|-------|--------|
-| git | Branching, commits, conventional format |
-| github | PRs, issues, Actions, code review |
-
-### Specialized (8)
-
-| Agent | Domain |
-|-------|--------|
-| middleware | Auth, i18n, subdomain routing |
-| internationalization | Arabic/English, RTL/LTR, dictionaries |
-| semantic | HTML, color tokens, accessibility |
-| sse | Server-side exception diagnosis |
-| optimize | Feature optimization, automation |
-| performance | Core Web Vitals, profiling |
-| comment | Code comments |
-| icon | SVG icon management |
-
-### Reference Chain (4)
+Read-only pattern sources — ask them how an existing product solved something.
 
 | Agent | Product |
 |-------|---------|
-| hogwarts | Education SaaS patterns |
-| souq | E-commerce patterns |
-| mkan | Rental marketplace patterns |
-| shifa | Medical platform patterns |
+| **hogwarts** | Education SaaS — multi-tenant, LMS, SIS, billing |
+| **souq** | E-commerce — multi-vendor marketplace, cart, vendor dashboards |
+| **mkan** | Rentals — property listings, booking, search |
+| **shifa** | Medical — appointments, patient records, healthcare workflows |
 
-## How Agents Work
+## Stack fleet (27)
 
-Agents are markdown files in `~/.claude/agents/` with YAML frontmatter:
+| Group | Agents |
+|-------|--------|
+| **Framework** | `nextjs` · `react` · `typescript` · `tailwind` · `prisma` · `authjs` · `shadcn` |
+| **Design** | `architecture` · `orchestration` · `pattern` · `structure` |
+| **UI** | `atom` · `template` · `block` · `icon` · `semantic` |
+| **DevOps** | `build` · `deploy` · `test` · `git` · `github` |
+| **Platform** | `middleware` · `internationalization` · `sse` · `optimize` · `performance` · `comment` |
+
+## How an agent is defined
+
+An agent is a markdown file with YAML frontmatter:
 
 ```markdown
 ---
-name: agent-name
-description: What this agent does
-model: opus
+name: prisma
+description: Prisma 6 expert — PostgreSQL ORM, migrations, query optimization
+model: sonnet
+effort: medium
 ---
-
-# Agent Name
 
 Instructions, context, and domain knowledge...
 ```
 
-When invoked (via the Agent tool or keyword trigger), Claude loads the agent's instructions and delegates accordingly.
+`model` is always an **alias** (`opus` / `sonnet` / `haiku`), never a pinned version — the alias resolves through `model_tiers` in `.claude/engine.json`, so upgrading the fleet is a one-line change. `effort` sets the reasoning budget per [`delegation.efforts`](/docs/configuration).
 
-## Inter-Agent Routing
+| Tier | Used for |
+|------|----------|
+| **opus** | Architecture, orchestration, review, strategy, leadership |
+| **sonnet** | Standard build agents with known patterns |
+| **haiku** | Mechanical work — `comment`, `git`, `icon`, `github`, `semantic`, `sse`, `structure` |
+
+The main loop itself runs **Fable 5**; agents stay on the aliases above.
+
+## Routing
+
+You don't name agents. You say a keyword and the engine routes:
 
 ```
 "saas billing"
-  → orchestration agent
-  → prisma (schema) + block (UI) + stripe MCP
-  → Complete billing feature
+  → orchestration → prisma (schema) + block (UI) + stripe MCP
 
 "ship hogwarts admission"
-  → captain
-  → product (stories) → tech-lead (architecture)
-  → orchestration → specialists
+  → captain → product (stories) → tech-lead (architecture)
+            → orchestration → stack specialists
 ```
+
+See [Keywords](/docs/keywords) for the full registry.
 
 ## Installation
 
 ```bash
-# Full agent fleet installed to ~/.claude/agents/
 cd ~/kun && bash .claude/scripts/setup.sh engineer
 ```
+
+Every machine gets both fleets. Role is a label and a secrets-trust tier, not a capability gate.

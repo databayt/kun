@@ -25,13 +25,14 @@ Global preferences that apply to every project and every conversation.
 
 | Setting | Value |
 |---------|-------|
-| Model | Opus 4.8 (1M context) |
+| Model | Fable 5 (`claude-fable-5`) |
+| Fallbacks | Opus 4.8 → Sonnet 5 |
+| Billing | Claude Max 5x ($100/mo), subscription-only |
 | Package manager | pnpm |
 | Stack | Next.js 16, React 19, Prisma 6, TypeScript 5, Tailwind CSS 4, shadcn/ui |
 | Languages | Arabic (RTL default), English (LTR) |
-| Mode | Full Autopilot (100-turn cycles) |
 | Port | Always 3000 |
-| Environment | Single .env only |
+| Environment | Central `.env` only |
 | Component hierarchy | ui, atom, template, block, micro |
 
 ## Layer 2: Project-Level (`CLAUDE.md`)
@@ -46,7 +47,7 @@ Project-specific context per product:
 
 ## Layer 3: Repo-Level (`.claude/CLAUDE.md`)
 
-Operational configuration: 100+ keyword-to-action mappings, MCP trigger table, slash command reference, organization repository references, React best practices from Vercel.
+Operational configuration: 160 keyword-to-action mappings, MCP trigger table, the pipeline stages, organization repository references, and React best practices from Vercel.
 
 ### What It Contains
 

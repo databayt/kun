@@ -42,6 +42,14 @@ const nextConfig: NextConfig = {
         destination: "/en/social",
         permanent: true,
       },
+      // Same locale-less courtesy as /docs — the Hub renders under
+      // /[lang]/social, so a bare /social (shared link, docs cross-ref) 404s
+      // without this.
+      {
+        source: "/social",
+        destination: "/en/social",
+        permanent: false,
+      },
     ];
   },
 };

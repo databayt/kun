@@ -1,87 +1,128 @@
 ---
 title: Skills
-description: 25 reusable skills with keyword triggers
+description: 55 skills across two plugins — say the word, not the command
 ---
 
 # Skills
 
-25 slash commands that trigger complete workflows. Say a keyword or type `/command` — the engine handles the rest.
+A skill is a packaged workflow: one word in, a complete multi-step job out. The engine ships **55** of them across two plugins — 41 in `kun-company`, 15 in `kun-stack` (`build` ships in both).
 
-## Workflow Skills
+You don't type slash commands. Say the keyword in prose and the engine routes — see [Keywords](/docs/keywords).
 
-| Skill | Trigger | What It Does |
-|-------|---------|-------------|
-| /dev | `dev` | Kill port 3000, start pnpm dev, open Chrome |
-| /build | `build` | pnpm build + TypeScript check + auto-fix |
-| /quick | `push` | Lint, fix, commit, push |
-| /deploy | `deploy`, `ship` | Vercel deploy with retry (max 5) |
+## The pipeline
 
-## Creation Skills
+Idea to production, one stage per skill. `/feature` chains all of them.
 
-| Skill | Trigger | What It Does |
-|-------|---------|-------------|
-| /atom | `atom [name]` | Create/list/preview atom components |
-| /template | `template [name]` | Create/list/preview page layouts |
-| /block | `block [name]` | Create/refactor/audit with 100-point scoring |
-| /saas | `saas [feature]` | Schema + actions + UI + pages |
-
-## Quality Skills
-
-| Skill | Trigger | What It Does |
-|-------|---------|-------------|
-| /test | `test [file]` | Vitest + Playwright tests |
-| /security | `security` | OWASP Top 10 + dependency scan |
-| /performance | `performance` | Core Web Vitals + bundle + DB queries |
-| /fix | `fix` | Auto-fix all TypeScript/lint/build errors |
-
-## Utility Skills
-
-| Skill | Trigger | Purpose |
-|-------|---------|---------|
-| /docs | `docs` | MDX, API docs, Storybook stories |
-| /codebase | `codebase` | Browse/search/copy patterns |
-| /repos | `repos` | Explore databayt repositories |
-| /screenshot | `screenshot` | View recent screenshot |
-| /motion | `motion` | Add Framer Motion animations |
-| /handover | `handover [block]` | 5-pass production QA |
-
-## Business Skills
-
-| Skill | Trigger | What It Does |
-|-------|---------|-------------|
-| /proposal | `proposal [client]` | Generate client proposal via revenue agent |
-| /pricing | `pricing [product]` | Calculate pricing tiers with competitor comparison |
-| /weekly | `weekly [plan/check/review]` | Captain's weekly review cycle |
-
-## Content Skills
-
-| Skill | Trigger | What It Does |
-|-------|---------|-------------|
-| /translate | `translate [file]` | AR/EN translation with context preservation |
-| /content-calendar | `content-calendar` | Weekly content schedule across pillars |
-
-## Ops Skills
-
-| Skill | Trigger | What It Does |
-|-------|---------|-------------|
-| /monitor | `monitor` | Check deployments + costs + uptime across products |
-| /costs | `costs` | API spend breakdown and optimization |
-| /incident | `incident [severity]` | P0/P1/P2 incident response workflow |
-
-## Availability — Universal
-
-**Every machine gets all 25 skills.** Config is universal — the machine, not the person, is the unit of capability, so any machine can run any skill. Role is a label + secrets-trust tier, not a skill gate (a skill that calls a service whose key you don't hold simply can't complete that call).
-
-## How Skills Work
-
-Skills are markdown files in `~/.claude/commands/` that expand into full prompts when invoked:
-
-```bash
-# Type in Claude Code
-/proposal "King Fahad Schools"
-
-# Or say the keyword
-proposal King Fahad Schools
+```
+IDEA → SPEC → [PLAN → TASKS] → SCHEMA → CODE → WIRE → CHECK → SHIP → WATCH
+              └─ human gate ─┘
 ```
 
-The skill loads its template, invokes the relevant agents and MCP servers, and produces the output.
+| Skill | Stage |
+|-------|-------|
+| `idea` | Capture a feature idea as a structured GitHub issue |
+| `spec` | Technical spec — data model, file plan, acceptance criteria (**human approval gate**) |
+| `plan` | Architecture decisions from the approved spec |
+| `tasks` | Dependency-ordered work list |
+| `schema` | Data layer — Prisma model, migration, Zod validation |
+| `code` | Logic layer — server actions with auth, validation, tenant isolation |
+| `wire` | UI layer — page, content, form, table columns, i18n |
+| `check` | Quality gate — typecheck + build + visual verify |
+| `ship` | Promote the checked build to Vercel production |
+| `watch` | Post-deploy verification — visual + console + smoke |
+| `feature` | Chains every stage above |
+
+## Everyday
+
+| Skill | What it does |
+|-------|-------------|
+| `dev` | Kill port 3000, start the dev server, open Chrome |
+| `build` | `tsc` + production build with an auto-fix loop |
+| `quick` | Lint, fix, commit, push |
+| `deploy` | Vercel deploy (staging/preview) |
+| `release` | One spell: handover → check → ship → watch → close the issue |
+| `fix` | Auto-fix TypeScript, lint, and build errors |
+
+## Quality
+
+| Skill | What it does |
+|-------|-------------|
+| `handover` | Runs the niche quality keywords on a URL or a whole block |
+| `qa` | Autonomous block QA — detect, verify, fix safe tiers, hand the residual to a human |
+| `report` | Auto-fix a user-reported issue end to end |
+| `test` | Vitest + Playwright generation and runs |
+| `security` | OWASP Top 10 + dependency scan |
+| `performance` | Core Web Vitals, bundle, database queries |
+
+## Creation
+
+| Skill | What it does |
+|-------|-------------|
+| `atom` | Compose 2+ shadcn/ui primitives |
+| `template` | Full-page layouts |
+| `block` | UI with integrated business logic |
+| `saas` | Schema + actions + UI + pages in one pass |
+| `clone` | Mirror a live URL section, a Figma frame, or code from another repo |
+| `shadcn` | Load the full shadcn/ui knowledge pack |
+
+## Business & operations
+
+| Skill | What it does |
+|-------|-------------|
+| `captain` | CEO brain — synthesize state, suggest the next action |
+| `weekly` | Monday plan · Wednesday check · Friday review |
+| `canon` | The right CEO book + one operating move for a decision |
+| `decide` · `premortem` | Decision journal (Type 1/2) and Klein-style premortem |
+| `proposal` · `pricing` | Client proposals and tier calculation |
+| `monitor` · `incident` · `health` | Deploy sweep, P0–P3 response, engine drift check |
+| `costs` · `economy` | Spend breakdown; token audit and delegation |
+| `issue` | File a GitHub issue in the right repo |
+
+## Content & media
+
+| Skill | What it does |
+|-------|-------------|
+| `social` | Draft, stage, and publish brand posts — see [Social](/docs/social) |
+| `carousel` | Multi-slide bilingual brand carousels |
+| `higgs` | Generate marketing images and video via Higgsfield |
+| `convert` | Any file or URL → clean Markdown |
+| `docs` | Component MDX, API docs, Storybook stories |
+| `content-calendar` | Plan and review the content calendar |
+
+## Engine maintenance
+
+| Skill | What it does |
+|-------|-------------|
+| `sync` | Read upstream releases, diff against the engine, adopt or propose |
+| `learn` | Mine repos and git history into memory |
+| `analyze` | Generate a tailored config for any repo |
+| `pattern` | Look up a canonical cross-repo pattern card |
+| `package` | Cross-repo dependency audit |
+| `auth` · `credentials` | Authenticate to a service; manage keys via Keychain |
+| `profile` | Load a role-scoped config profile |
+
+## How a skill is defined
+
+A skill is a directory holding `SKILL.md` — frontmatter plus the playbook:
+
+```markdown
+---
+name: check
+description: Quality gate — typecheck + build + visual verify before shipping
+when_to_use: Use when work is about to ship and needs the pre-ship gate...
+---
+
+Steps, exit gates, and failure handling...
+```
+
+| Scope | Path |
+|-------|------|
+| Project | `.claude/skills/<name>/SKILL.md` |
+| User | `~/.claude/skills/<name>/SKILL.md` |
+| Plugin | `plugins/<plugin>/skills/<name>/SKILL.md` |
+
+The `when_to_use` field is the routing truth — it's what lets Claude activate a skill from prose instead of a typed command.
+
+## Availability
+
+**Every machine gets every skill.** Config is universal — the machine, not the person, is the unit of capability. Role is a label and a secrets-trust tier; a skill that calls a service whose key you don't hold simply can't complete that call.

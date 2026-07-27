@@ -53,16 +53,23 @@
   },
   "counts": {
     "project_agents": 19,
-    "user_agents": 27,
+    "user_agents": 46,
     "commands": 0,
     "project_skills": 41,
-    "user_skills": 23,
+    "user_skills": 62,
     "pattern_cards": 11,
     "project_rules": 5,
     "domain_rules": 37,
     "project_mcp": 25,
-    "user_mcp": 19,
-    "workflows": 3
+    "user_mcp": 25,
+    "hooks": 9,
+    "vocabulary_spells": 160,
+    "workflows": 3,
+    "$plugins_comment": "The two plugins are how the fleet reaches other machines. kun-company also carries the rules, pattern cards, hooks, and workflows. Union of both skill sets is 55 (build ships in both).",
+    "plugin_kun_company_agents": 19,
+    "plugin_kun_company_skills": 41,
+    "plugin_kun_stack_agents": 27,
+    "plugin_kun_stack_skills": 15
   },
   "model_tiers": {
     "$comment": "Per-agent model alias by task type. The portable stack fleet (~/.claude/agents) follows this; the project fleet defaults to opus (quality-over-speed) except purely mechanical agents. Every agent also carries `effort:` frontmatter per delegation.efforts (added 2026-07-26).",

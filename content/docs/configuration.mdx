@@ -1,377 +1,157 @@
 ---
 title: Configuration
-description: The engine blueprint — every setting, agent, skill, hook, MCP, rule, and memory
+description: The engine blueprint — which file controls what, and in what order
 ---
 
 # Configuration Blueprint
 
-This IS the engine. Every setting, agent, skill, hook, MCP server, rule, and memory file that transforms Anthropic's products into Databayt's operating system.
+This *is* the engine. Not a service to operate — a set of markdown and JSON files that turn Anthropic's products into Databayt's operating system.
 
-## Inventory
+This page is the map: which file controls what, and which wins when two disagree. For the inventories themselves, follow the links — they're maintained in one place each, so they can't drift apart.
 
-| Component | Count | Location |
-|-----------|-------|----------|
-| CLAUDE.md files | 3 layers | ~/.claude/, CLAUDE.md, .claude/CLAUDE.md |
-| Agents | 40 | ~/.claude/agents/ |
-| Skills | 25 | ~/.claude/commands/ |
-| MCP Servers | 18 | ~/.claude/mcp.json + 3 role configs |
-| Rules | 8 | ~/.claude/rules/ |
-| Hooks | 5 | ~/.claude/settings.json |
-| Memory files | 6 | ~/.claude/memory/ |
-| Allow rules | 38 | ~/.claude/settings.json |
-| Deny rules | 4 | ~/.claude/settings.json |
-| Keywords | 100+ | .claude/CLAUDE.md |
+## Where everything lives
 
-## Settings (`~/.claude/settings.json`)
+| Component | Canonical location | Detail |
+|-----------|-------------------|--------|
+| Instructions | `~/.claude/CLAUDE.md`, `CLAUDE.md`, `.claude/CLAUDE.md` | [CLAUDE.md](/docs/claude-md) |
+| Agents | `.claude/agents/`, `plugins/*/agents/` | [Agents](/docs/agents) |
+| Skills | `.claude/skills/<name>/SKILL.md` | [Skills](/docs/skills) |
+| MCP servers | `~/.claude.json` (catalog: `.claude/mcp.json`) | [MCP](/docs/mcp) |
+| Rules | `.claude/rules/`, `.claude/rules-global/` | [Rules](/docs/rules) |
+| Hooks | `.claude/settings.json` | [Hooks](/docs/hooks) |
+| Keywords | `.claude/vocabulary.json` | [Keywords](/docs/keywords) |
+| Pattern cards | `.claude/patterns/cards/` | [Patterns](/docs/keywords) |
+| Memory | `.claude/memory/`, `~/.claude/memory/` | [Memory](/docs/memory) |
+| Engine truth | `.claude/engine.json` | counts, model, sync stamps |
 
-### Model & Environment
+**`.claude/engine.json` is the single source of truth** for model, counts, and sync stamps. Prose references it rather than hardcoding numbers; `/health` warns when documentation and reality drift apart.
 
-| Setting | Value |
-|---------|-------|
-| Model | claude-opus-4-6 |
-| CODEBASE_PATH | /Users/abdout/codebase |
-| GITHUB_USER | abdout |
-| DEV_PORT | 3000 |
-| CLAUDE_CODE_SUBAGENT_MODEL | opus |
+## Precedence
 
-### Permissions
+Three layers of instructions, most specific wins:
 
-**Allow (38 rules)**: git, pnpm, npx, node, Read, Edit, Write, Glob, Grep, Agent, WebFetch, WebSearch, + 17 MCP server wildcards.
+```
+1. Repo-level     .claude/CLAUDE.md    — keywords, pipeline, project overrides
+2. Project-level  CLAUDE.md            — what this repo is, where its docs are
+3. User-level     ~/.claude/CLAUDE.md  — stack, preferences, component hierarchy
+```
 
-**Deny (4 rules)**:
-- `rm -rf *` — prevent catastrophic deletion
-- `prisma migrate reset *` — prevent database wipe
-- `prisma db push --accept-data-loss *` — prevent data loss
-- `DROP TABLE *` — prevent table deletion via Neon MCP
+Rules load *on top of* all three, scoped by their `paths` glob. Skills and agents load on demand.
 
-### Hooks
-
-| Hook | Event | Action |
-|------|-------|--------|
-| SessionStart | Session begins | Print model + timestamp |
-| PreToolUse | Before `pnpm dev` | Kill port 3000 |
-| PostToolUse | After `pnpm dev` | Open Chrome to localhost:3000 |
-| PostToolUse | After Write/Edit | Auto-run Prettier |
-| Stop | Agent finishes | Log session end |
-
-## CLAUDE.md Hierarchy
-
-### Layer 1: User-Level (`~/.claude/CLAUDE.md`)
+### Layer 1 — User (`~/.claude/CLAUDE.md`)
 
 | Setting | Value |
 |---------|-------|
-| Model | Opus 4.8 (1M context) |
+| Model | Fable 5 (`claude-fable-5`) |
+| Fallbacks | Opus 4.8 → Sonnet 5 |
 | Package manager | pnpm |
-| Stack | Next.js 16, React 19, Prisma 6, TypeScript 5, Tailwind CSS 4, shadcn/ui |
+| Stack | Next.js 16 · React 19 · Prisma 6 · TypeScript 5 · Tailwind CSS 4 · shadcn/ui |
 | Languages | Arabic (RTL default), English (LTR) |
-| Mode | Full Autopilot (100-turn cycles) |
 | Port | Always 3000 |
-| Environment | Single .env only |
+| Environment | Central `.env` only — never `.env.local` or `.env.<x>` |
 | Component hierarchy | ui → atom → template → block → micro |
 
-### Layer 2: Project-Level (`CLAUDE.md`)
+### Layer 2 — Project (`CLAUDE.md`)
 
-Project-specific context per product:
-- **Hogwarts**: Multi-tenant education SaaS, school modules, SSPL license
-- **Mkan**: Rental marketplace, Airbnb-inspired, booking flow
-- **Kun**: Configuration engine, documentation site, 3-phase roadmap
+What the repo is and where its documentation lives. One per product:
 
-### Layer 3: Repo-Level (`.claude/CLAUDE.md`)
+- **Hogwarts** — multi-tenant education SaaS, school modules, SSPL
+- **Mkan** — rental marketplace, booking flow
+- **Kun** — the configuration engine and this documentation site
 
-Operational configuration: 100+ keyword-to-action mappings, MCP trigger table, slash command reference, organization repository references, React best practices.
+### Layer 3 — Repo (`.claude/CLAUDE.md`)
 
-## Agent Fleet (40 agents, 4 tiers)
+The operational layer: the drive, the pipeline, the keyword vocabulary, the four agent lanes, and lookup paths.
 
-### Tier 0 — Captain
+## Settings (`.claude/settings.json`)
 
-| Agent | Scope |
-|-------|-------|
-| captain | CEO brain — weekly allocation, revenue strategy, team coordination across the products and 7 humans |
+```json
+{
+  "fallbackModel": ["claude-opus-4-8", "claude-sonnet-5"],
+  "env": {
+    "CODEBASE_PATH": "/Users/abdout/codebase",
+    "OSS_PATH": "/Users/abdout/oss",
+    "GITHUB_USER": "abdout",
+    "DEV_PORT": "3000"
+  },
+  "hooks": { }
+}
+```
 
-### Tier 1 — Business (3)
+The user-level `~/.claude/settings.json` adds `effortLevel`, `advisorModel`, and voice settings.
 
-| Agent | Scope |
-|-------|-------|
-| revenue | Pricing strategy, proposals, contracts, MRR tracking, Saudi payment setup |
-| growth | Content strategy, SEO, social media, developer relations, Arabic-first content |
-| support | Customer onboarding, issue triage, knowledge base, SLA tracking |
+### Destructive-command guard
 
-### Tier 2 — Product (2)
+There is **no permissions allow/deny list**. Dangerous commands are blocked by the `PreToolUse` hook `block-destructive-bash.sh` — the Unforgivable Commands:
 
-| Agent | Scope |
-|-------|-------|
-| product | Roadmap across 5 products, user stories, ICE scoring, release planning |
-| analyst | Market intelligence per vertical, competitor analysis, usage analytics |
+- `rm -rf *`
+- `prisma migrate reset`
+- `prisma db push --accept-data-loss`
+- `DROP TABLE`
+- `git push --force main`
 
-### Tier 3 — Tech Leadership (3)
+A hook is used rather than a deny list because it can inspect the composed command string, not just the tool name.
 
-| Agent | Scope |
-|-------|-------|
-| tech-lead | Architecture across 14 repos, shared patterns, breaking changes, tech debt |
-| ops | CI/CD, deployment health, API spend tracking, cost optimization, uptime |
-| guardian | OWASP Top 10, performance budgets, SSPL compliance, medical data privacy |
+## Model routing
 
-### Specialist Agents (31 agents, 7 chains)
+Three axes: **model tier × effort × product lane**. The main loop runs Fable 5; agents resolve a tier alias.
 
-### Stack Chain (7)
+| Tier | Effort | Used for |
+|------|--------|----------|
+| `opus` | high–xhigh | Architecture, orchestration, review, strategy, captain |
+| `sonnet` | medium | Standard build agents with known patterns |
+| `haiku` | low | Mechanical work — comment, git, icon, github, semantic, sse, structure |
 
-| Agent | Domain |
-|-------|--------|
-| nextjs | App Router, Server Components, Server Actions |
-| react | Hooks, concurrent features, performance |
-| typescript | Strict mode, generics, advanced types |
-| tailwind | Semantic tokens, responsive, RTL/LTR |
-| prisma | PostgreSQL, migrations, query optimization |
-| shadcn | Radix primitives, registry, MCP |
-| authjs | JWT, OAuth, sessions |
+Agent frontmatter carries a **tier alias**, never a pinned version — so upgrading the fleet is one line in `engine.json`. Playbook: `docs/TOKEN-ECONOMY.md`; on-demand audit: `/economy`.
 
-### Design Chain (4)
+**Billing posture**: Claude Max 5x, $100/month, subscription-only. No usage credits, no API-key per-token spend. Changing that requires a `/decide` entry plus Abdout's approval.
 
-| Agent | Domain |
-|-------|--------|
-| orchestration | Master coordinator, multi-agent workflows |
-| architecture | Mirror pattern, multi-tenant (Hogwarts) |
-| pattern | Code conventions, anti-patterns |
-| structure | File organization, naming |
+## Memory
 
-### UI Chain (4)
+| Scope | Path | Holds |
+|-------|------|-------|
+| Project | `.claude/memory/` | `team.json`, `capacity.json`, `crm.json`, `pipeline.json`, `revenue.json`, `runway.json`, `okrs.json`, `risks.json`, `north_star.json`, `repositories.json`, `captain_journal.md`, `decisions/` |
+| User | `~/.claude/memory/` | Component registries (`atom.json`, `template.json`, `block.json`) + shared business state |
+| Session | `~/.claude/projects/<project>/memory/` | Durable facts across conversations, indexed by `MEMORY.md` |
 
-| Agent | Domain |
-|-------|--------|
-| shadcn | Radix primitives, registry |
-| atom | Compose 2+ shadcn/ui primitives |
-| template | Full-page layouts |
-| block | UI + business logic (DataTable, auth, payments) |
-
-### DevOps Chain (3)
-
-| Agent | Domain |
-|-------|--------|
-| build | TypeScript validation, Turbopack |
-| deploy | Vercel, staging/production |
-| test | Vitest, Playwright, TDD |
-
-### VCS Chain (2)
-
-| Agent | Domain |
-|-------|--------|
-| git | Branching, commits, conventional format |
-| github | PRs, issues, Actions, code review |
-
-### Specialized (8)
-
-| Agent | Domain |
-|-------|--------|
-| middleware | Auth, i18n, subdomain routing |
-| internationalization | Arabic/English, RTL/LTR, dictionaries |
-| semantic | HTML, color tokens, accessibility |
-| sse | Server-side exception diagnosis |
-| optimize | Feature optimization, automation |
-| performance | Core Web Vitals, profiling |
-| comment | Code comments |
-| icon | SVG icon management |
-
-### Reference Chain (4 product agents)
-
-| Agent | Product |
-|-------|---------|
-| hogwarts | Education SaaS patterns |
-| souq | E-commerce patterns |
-| mkan | Rental marketplace patterns |
-| shifa | Medical platform patterns |
-
-## Skill Library (25 skills)
-
-### Workflow
-
-| Skill | Trigger | What It Does |
-|-------|---------|-------------|
-| /dev | `dev` | Kill port → pnpm dev → Chrome |
-| /build | `build` | pnpm build + TypeScript check + auto-fix |
-| /quick | `push` | Lint → fix → commit → push |
-| /deploy | `deploy`, `ship` | Vercel deploy with retry (max 5) |
-
-### Creation
-
-| Skill | Trigger | What It Does |
-|-------|---------|-------------|
-| /atom | `atom [name]` | Create/list/preview atom components |
-| /template | `template [name]` | Create/list/preview page layouts |
-| /block | `block [name]` | Create/refactor/audit with 100-point scoring |
-| /saas | `saas [feature]` | Schema + actions + UI + pages |
-
-### Quality
-
-| Skill | Trigger | What It Does |
-|-------|---------|-------------|
-| /test | `test [file]` | Vitest + Playwright tests |
-| /security | `security` | OWASP Top 10 + dependency scan |
-| /performance | `performance` | Core Web Vitals + bundle + DB queries |
-| /fix | `fix` | Auto-fix all TypeScript/lint/build errors |
-
-### Other
-
-| Skill | Trigger | Purpose |
-|-------|---------|---------|
-| /docs | `docs` | MDX, API docs, Storybook stories |
-| /codebase | `codebase` | Browse/search/copy patterns |
-| /repos | `repos` | Explore databayt repositories |
-| /screenshot | `screenshot` | View recent screenshot |
-| /motion | `motion` | Add Framer Motion animations |
-| /handover | `handover [block]` | 5-pass production QA |
-
-### Business
-
-| Skill | Trigger | What It Does |
-|-------|---------|-------------|
-| /proposal | `proposal [client]` | Generate client proposal via revenue agent |
-| /pricing | `pricing [product]` | Calculate pricing tiers with competitor comparison |
-| /weekly | `weekly [plan/check/review]` | Captain's weekly review cycle |
-
-### Content
-
-| Skill | Trigger | What It Does |
-|-------|---------|-------------|
-| /translate | `translate [file]` | AR/EN translation with context preservation |
-| /content-calendar | `content-calendar` | Weekly content schedule across pillars |
-
-### Ops
-
-| Skill | Trigger | What It Does |
-|-------|---------|-------------|
-| /monitor | `monitor` | Check deployments + costs + uptime across products |
-| /costs | `costs` | API spend breakdown and optimization |
-| /incident | `incident [severity]` | P0/P1/P2 incident response workflow |
-
-## MCP Ecosystem (18 servers)
-
-### UI & Design (5)
-
-| Server | Purpose |
-|--------|---------|
-| shadcn | Component registry |
-| figma | Design file access (127.0.0.1:3845) |
-| tailwind | CSS utilities, docs |
-| a11y | Accessibility audits (WCAG 2.1 AA) |
-| storybook | Visual testing |
-
-### Testing (2)
-
-| Server | Purpose |
-|--------|---------|
-| browser | Headless Chromium (1920x1080) |
-| browser-headed | Visible Chromium (auth flows) |
-
-### DevOps & Infra (4)
-
-| Server | Purpose |
-|--------|---------|
-| github | Repos, issues, PRs, Actions |
-| vercel | Deployments, logs |
-| sentry | Error monitoring |
-| gcloud | Google Cloud CLI |
-
-### Data & Auth (4)
-
-| Server | Purpose |
-|--------|---------|
-| neon | Neon PostgreSQL branching |
-| postgres | Database queries (dbhub) |
-| stripe | Payments, subscriptions |
-| keychain | macOS Keychain credentials |
-
-### Knowledge & PM (3)
-
-| Server | Purpose |
-|--------|---------|
-| ref | Technical documentation |
-| context7 | Up-to-date library docs |
-| linear | Issue tracking |
-
-### MCP Config — Universal
-
-Every machine gets the **full `mcp.json`** (all 18 servers). The machine, not the person, is the unit of capability — any machine can run any task. Access is controlled by **secrets, not config**: a server whose API key isn't in your `~/.claude/.env` simply doesn't connect (harmless), and which keys you hold is scoped by the **Gist** you're handed.
-
-> The canonical installer is `setup.sh`, which installs the full `mcp.json` for everyone.
-
-## Rules Engine (8 rules)
-
-| Rule | Activates On | Enforces |
-|------|-------------|----------|
-| auth | `**/auth/**`, `**/middleware.*` | NextAuth v5, session scoping |
-| i18n | `**/*-ar.json`, `**/dictionaries/**` | Single-language storage, RTL |
-| prisma | `**/*.prisma` | schoolId inclusion, $extends |
-| tailwind | `**/*.css`, `**/styles/**` | CSS-first v4, OKLCH, RTL logical |
-| testing | `**/tests/**`, `**/*.spec.*` | Playwright/Vitest conventions |
-| deployment | `**/vercel.json` | pnpm, tsc before builds |
-| multi-repo | (global) | Codebase paths, fork workflows |
-| org-refs | (global) | Repo priority lookup |
-
-## Memory System (6 files)
-
-| File | Contents |
-|------|----------|
-| preferences.json | Port 3000, single .env, pnpm-only |
-| repositories.json | 14 databayt repos with paths + stacks |
-| atom.json | 59 atoms across 6 categories |
-| template.json | 31 templates across 5 categories |
-| block.json | 4 blocks (DataTable, Auth, Invoice, Report) |
-| report.json | T&C electrical report templates |
-
-### Project-Level Memory
-
-Stored at `~/.claude/projects/[project]/memory/`:
-- Company profile (team, financials)
-- Active project status (Hogwarts pilot)
-- User preferences and feedback
-
-## Installation (~5 minutes)
+## Installation
 
 ```bash
-# One-liner (auto-detects OS, wizard handles everything)
+# One-liner — auto-detects OS
 curl -fsSL https://kun.databayt.org/install | bash
 
-# Manual path — macOS/Linux
+# macOS/Linux
 git clone git@github.com:databayt/kun.git ~/kun
-cd ~/kun && bash .claude/scripts/setup.sh engineer   # or business / content / ops
+cd ~/kun && bash .claude/scripts/setup.sh engineer
 bash .claude/scripts/secrets.sh <GIST_ID>
 
-# Manual path — Windows (PowerShell)
+# Windows (PowerShell)
 git clone git@github.com:databayt/kun.git "$env:USERPROFILE\kun"
 cd ~/kun; .\.claude\scripts\setup.ps1 -Role engineer
 .\.claude\scripts\secrets.ps1 -GistId <GIST_ID>
 ```
 
+Full walkthrough: [Onboarding](/docs/onboarding).
+
 ### Roles
 
-Every machine gets the **full config** — all 25 skills, all 18 MCP servers, all 5 hooks. Role is a label + secrets-trust tier, not a capability gate (the machine is the unit of capability — any machine can run any task). Which API keys a machine holds is scoped by the **Gist** that person is handed.
+Every machine gets the **full config** — every agent, skill, rule, and hook. The machine, not the person, is the unit of capability, so any machine can run any task.
 
-| Role | Config | Primary Human |
-|------|--------|---------------|
-| **engineer** | full (all skills, MCP, hooks) | Abdout, Ibrahim |
-| **business** | full | Ali, Mutaz |
-| **content** | full | Samia |
-| **ops** | full | Sedon |
+Role is a label plus a **secrets-trust tier**, not a capability gate. Access is scoped by secrets: a server whose key you don't hold simply doesn't connect. Which keys you hold is set by the Gist you're handed.
 
-### What the Installer Does
+| Role | Primary human |
+|------|--------------|
+| `engineer` | Abdout, Ibrahim |
+| `business` | Aseel, Moutaz, Moed |
+| `content` | Samia |
+| `ops` | Sedon |
 
-1. Copies agents to `~/.claude/agents/`
-2. Copies skills to `~/.claude/commands/` (role-filtered)
-3. Copies rules to `~/.claude/rules/`
-4. Installs settings into `~/.claude/settings.json` (role-specific)
-5. Sets up MCP servers in `~/.claude/mcp.json` (engineer only)
-6. Creates memory directory with component registry
-7. Clones databayt/codebase to ~/codebase (engineer only)
+## Keeping it honest
 
-## Keyword Quick Reference
+| Check | Command |
+|-------|---------|
+| Config vs reality drift | `/health` |
+| Upstream releases vs engine | `/sync` |
+| Keyword registry regenerate | `node .claude/scripts/generate-vocab.mjs` |
 
-| Say | What Happens |
-|-----|-------------|
-| `dev` | Kill port 3000 → pnpm dev → Chrome |
-| `push` | git add → commit → push |
-| `deploy` | Vercel deploy → retry → report |
-| `table users` | block agent → DataTable → prisma |
-| `auth` | authjs agent → NextAuth setup |
-| `saas billing` | orchestrate → stripe MCP → schema + UI |
-| `test login` | test agent → Vitest + Playwright |
-| `handover auth` | 5-pass QA → both environments |
+The `ConfigChange` hook warns automatically when `vocabulary.json` drifts from its generated documentation.

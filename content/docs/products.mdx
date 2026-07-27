@@ -26,11 +26,12 @@ The primary development interface. Kun's configuration loads automatically on al
 | Feature | Kun Usage |
 |---------|-----------|
 | **Hooks** (21 lifecycle events) | Auto-format, port management, session logging |
-| **Skills** | 17 skills for common workflows |
-| **Subagents** | 28 specialized agents |
-| **MCP** (3,000+ integrations) | 18 servers configured |
+| **Skills** | 55 skills across two plugins |
+| **Subagents** | 46 specialized agents |
+| **MCP** (3,000+ integrations) | 20 servers live |
+| **Plugins** | `kun-company` + `kun-stack` distribute the fleets |
 | **Agent Teams** (Experimental) | Parallel feature development |
-| **Git Worktrees** | Isolated branches per agent |
+| **Git Worktrees** | Transient agent isolation only — the repo workflow stays main-only |
 | **Remote Control / Dispatch** | Cross-device handoff |
 | **Scheduled Tasks** | Cloud, Desktop, or /loop |
 
@@ -72,12 +73,12 @@ Build production AI agents. Python and TypeScript.
 
 | Model | Use Case |
 |-------|----------|
-| **Opus 4.8** (1M context) | Architecture, complex features, review |
-| **Sonnet 5** (1M context, Claude Code default) | Fast iteration, routine changes |
-| **Haiku 4.5** | Search, lookups, exploration |
-| **Fable 5** | Top-tier reasoning (Mythos class) |
+| **Fable 5** (Mythos class) | The main loop — interactive sessions, captain-grade judgment |
+| **Opus 4.8** (1M context) | Architecture, orchestration, review, strategy agents |
+| **Sonnet 5** (1M context) | Standard build agents, fast iteration |
+| **Haiku 4.5** | Mechanical agents, search, lookups, exploration |
 
-Kun defaults to **Opus 4.8** for all agents (canonical in `.claude/engine.json`). Haiku for explore subagents only. API prices live at [platform.claude.com pricing](https://platform.claude.com/docs/en/about-claude/pricing) — we don't hardcode them here; billing is subscription-only anyway.
+Kun runs **Fable 5** in the main loop (canonical in `.claude/engine.json`), with Opus 4.8 → Sonnet 5 as fallbacks. Agents carry a **tier alias** (`opus` / `sonnet` / `haiku`), never a pinned version, so the fleet upgrades in one line. API prices live at [platform.claude.com pricing](https://platform.claude.com/docs/en/about-claude/pricing) — we don't hardcode them; billing is subscription-only anyway.
 
 ## Databayt's Current Plan
 

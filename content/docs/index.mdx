@@ -5,90 +5,110 @@ description: Kun (كن) — The Databayt Engine
 
 # Kun (كن)
 
-> The optimal configuration that makes Claude Code, Claude Desktop, Cowork, and the Agent SDK work together as a single engine running both the technical and business sides of **Databayt**.
+> The configuration layer that makes Claude Code, Claude Desktop, Cowork, and the Agent SDK work as one engine — running both the technical and the business side of **Databayt**.
 
-## What is Kun?
+Kun is not a server and not a platform. It is the brain that coordinates 14 repositories, 7 people, and every tool in the stack — from git commit to Stripe checkout to Monday planning.
 
-Kun is not a server. Not a platform. It is the brain that coordinates **14 repositories**, **6 team members**, and every tool in the stack — from git commit to Stripe checkout to team standup.
+**Say the word. It happens.**
 
-**One word, and it happens.**
+> **New here? Start with [Onboarding](/docs/onboarding).** One paste takes a fresh Mac, Windows, or Linux machine to a fully provisioned databayt workstation.
 
-> **New here? Start with [Onboarding](/docs/onboarding).** One paste takes a fresh Mac, Windows, or Linux machine to a fully provisioned databayt workstation — then it links you to everything else.
+## The core insight
 
-## The Company
+Don't build what Anthropic ships — **configure it**. Every capability below is a markdown file or a JSON entry, not a service to operate.
 
-**Databayt** (داتابايت) builds products that automate real-world operations — schools, rentals, commerce, healthcare — using a shared component library and a unified configuration engine.
+| Layer | Count | What it is |
+|-------|-------|-----------|
+| [**Agents**](/docs/agents) | 46 | 19 company + 27 stack specialists, in two plugins |
+| [**Skills**](/docs/skills) | 55 | One word in, a complete workflow out |
+| [**Keywords**](/docs/keywords) | 160 | The vocabulary that routes prose to config |
+| [**MCP**](/docs/mcp) | 20 | Live connections to external services |
+| [**Rules**](/docs/rules) | 37 | Atomic guardrails that auto-load on file touch |
+| [**Hooks**](/docs/hooks) | 9 | Automation the engine can't forget to run |
 
-- **Website**: [databayt.org](https://databayt.org)
-- **GitHub**: [github.com/databayt](https://github.com/databayt)
-- **License**: SSPL (open source, commercial use requires license)
+Canonical values live in `.claude/engine.json`; `/health` flags drift between it and reality.
 
-## The Engine
+## How it works
 
-| Component | Count | Purpose |
-|-----------|-------|---------|
-| **Agents** | 40 | Specialized AI across 7 chains |
-| **Skills** | 25 | One-command workflows |
-| **MCP Servers** | 18 | External tool integrations |
-| **Rules** | 8 | Auto-activating guardrails |
-| **Hooks** | 5 | Guaranteed automation |
-| **Keywords** | 100+ | Single words → complete workflows |
+You don't type slash commands. You write prose, and the engine picks the keywords out of it.
 
-## How It Works
-
-| You Say | What Happens |
+| You say | What happens |
 |---------|-------------|
-| `dev` | Kill port 3000 → start server → open Chrome |
-| `deploy` | Build → push to Vercel → retry until live |
-| `saas billing` | Schema → Actions → UI → Stripe integration |
-| `handover auth` | 5-pass QA across 2 environments |
+| `dev` | Kill port 3000 → start the server → open Chrome |
+| `ship` | Check → deploy to Vercel production → verify |
+| `qa admission` | Detect → verify → fix safe tiers → one signoff issue |
+| `release auth` | Handover → check → ship → watch → close the issue |
 
-## The Team
+## The pipeline
+
+Idea to production, one stage per skill, one human gate.
+
+```
+IDEA → SPEC → [PLAN → TASKS] → SCHEMA → CODE → WIRE → CHECK → SHIP → WATCH
+              └─ human gate ─┘
+```
+
+`/feature <name>` chains every stage. Each is also a standalone skill with its own exit gate.
+
+## The drive
+
+**Cash flow first. Break-even or bust.** This governs every decision and settles every argument — when two options tie on the canon, the one closer to revenue wins.
+
+- **Burn**: ~$500/month — Claude Max 5x ($100) + services (~$300). No salaries yet.
+- **Capital**: $5K, ~10 months runway.
+- **Posture**: subscription-only. No usage credits, no API-key spend.
+- **Metric**: active paying schools — `docs/NORTH-STAR.md`.
+
+## The team
+
+Seven people. IDs are CRM and Slack logins (`<id>@databayt.org`).
 
 | Name | Role |
 |------|------|
-| **Abdout** | Founder & Tech Lead |
-| **Ibrahim** | Senior Fullstack Engineer |
-| **Ali** | QA Engineer + Sales |
-| **Mutaz** | Product Engineer (business) |
-| **Samia** | R&D |
-| **Sedon** | Facilitator |
+| **Abdout** | Founder & Tech Lead — the visionary |
+| **Ibrahim** | Senior Fullstack & Mobile Engineer — owns the iOS/Android lane |
+| **Moutaz** | Product Engineer — bridges engineering and business; owns the Albayan pilot |
+| **Aseel** | Sales & QA — owns CRM pipeline hygiene |
+| **Moed** | Business Development — outreach, copy, network |
+| **Samia** | R&D — languages, voice, copywriting, steelmanning |
+| **Sedon** | Ops — DevOps, reality-driven execution |
 
-## The Products
+## The products
 
 | Product | Type | Status |
 |---------|------|--------|
-| **[Hogwarts](https://ed.databayt.org)** | Education SaaS (FLAGSHIP) | Active daily |
-| **[Mkan](https://mkan.vercel.app)** | Rental marketplace | Phase 1 done |
-| **[Souq](https://souq-smoky.vercel.app)** | E-commerce | MVP, paused |
-| **[Shifa](https://shifa-lovat.vercel.app)** | Medical platform | Early, paused |
-| **[Codebase](https://base-coral.vercel.app)** | Pattern library | Active |
+| [**Hogwarts**](https://ed.databayt.org) | Education SaaS — **flagship** | Active, two pilots |
+| [**Mkan**](https://mkan.vercel.app) | Rental marketplace | Phase 1 done |
+| [**Souq**](https://souq-smoky.vercel.app) | E-commerce | MVP, paused |
+| [**Shifa**](https://shifa-lovat.vercel.app) | Medical platform | Early, paused |
+| [**Codebase**](https://base-coral.vercel.app) | Pattern library | Active |
 
-## The Driver
+## Pilots
 
-Establish real-world solutions. **$500/month burn**: Claude Code ($200) + services (~$300). **$5K capital** = 10 months runway.
+| Pilot | Where | Status |
+|-------|-------|--------|
+| **King Fahad** | Sudan, 3 branches | Go-live target September 2026 — the proof-of-concept case study |
+| **Albayan** | Khartoum, Sudan | Onboarded June 2026, free MENA-10 |
+| **[Aldar](/docs/aldar)** | Abu Dhabi, 29 schools | Prospect — AED 180K pilot proposed |
 
-**Model**: Open source, sharing economy. Build in the open, push community to contribute, distribute revenue fairly.
+Sprint goal: two free MENA-10 pilots with documented PMF signal. That gates the Q4 cash decision.
 
-**First client**: Ahmed Baha, King Fahad Schools (interested, meeting April 4). Ali actively looking for schools, sponsors, investors, early adopters, contributors.
+## The company
 
-## Three Phases
+**Databayt** (داتابايت) builds products that automate real-world operations — schools, rentals, commerce, healthcare — on a shared component library and one configuration engine.
 
-### Phase 1: Developer Engine (Done)
+- **Website**: [databayt.org](https://databayt.org)
+- **GitHub**: [github.com/databayt](https://github.com/databayt) — 14 repos, all public
+- **License**: SSPL — open source; commercial use requires a license
 
-40 agents, 25 skills, 18 MCP servers, 8 rules, 5 hooks, 100+ keywords — all operational.
+## Principles
 
-### Phase 2: Team Engine (Current)
+- **Configure over build** — don't rebuild what Anthropic ships
+- **Architecture over vibe coding** — humans design, AI generates within constraints
+- **Guardrails as training data** — every good component teaches the next one
+- **Full spectrum** — the engine runs the business, not just the build
+- **Open source, shared economy** — build in the open, sustain through value
 
-Team onboarding, Hogwarts pilot, Agent Teams, CI/CD, revenue workflows.
+Deeper: [Architecture](/docs/architecture) · [Configuration](/docs/configuration) · [Captain](/docs/captain)
 
-### Phase 3: Company Engine (Future)
-
-Agent SDK pipelines, cost optimization, multi-customer scaling, pattern distribution.
-
-## Philosophy
-
-- **Configuration over infrastructure** — Don't build what Anthropic ships
-- **Architecture over vibe coding** — Humans design, AI generates within constraints
-- **Patterns as training data** — Every good component teaches the next generation
-- **Open source, shared economy** — Build in the open, sustain through value
+The decision framework itself is not yet published — it lives in the repo as `docs/PRINCIPLES.md`, `docs/CONSTITUTION.md`, `docs/CANON.md`, and `docs/NORTH-STAR.md`.

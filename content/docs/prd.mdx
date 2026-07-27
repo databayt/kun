@@ -23,32 +23,29 @@ Requirements for Kun — the configuration engine running Databayt's operations 
 |-------------|----------|--------|
 | User-level CLAUDE.md with stack preferences | P0 | Done |
 | Project-level CLAUDE.md with context | P0 | Done |
-| Repo-level CLAUDE.md with 100+ keywords | P0 | Done |
+| Repo-level CLAUDE.md with the keyword vocabulary (160 spells) | P0 | Done |
 | Configuration hierarchy respected | P0 | Done |
 
 ### Agent Fleet
 
 | Requirement | Priority | Status |
 |-------------|----------|--------|
-| Stack chain (7): nextjs, react, typescript, tailwind, prisma, shadcn, authjs | P0 | Done |
-| Design chain (4): orchestration, architecture, pattern, structure | P0 | Done |
-| UI chain (4): shadcn, atom, template, block | P0 | Done |
-| DevOps chain (3): build, deploy, test | P0 | Done |
-| VCS chain (2): git, github | P0 | Done |
-| Specialized (8): middleware, i18n, semantic, sse, optimize, performance, comment, icon | P1 | Done |
-| Reference chain (4): hogwarts, souq, mkan, shifa product agents | P1 | Done |
+| Company fleet (19): captain, business, delivery, engine, product references | P0 | Done |
+| Stack fleet (27): framework, design, UI, DevOps, platform specialists | P0 | Done |
+| Both fleets distributable as plugins (`kun-company`, `kun-stack`) | P1 | Done |
+| Tier aliases instead of pinned model versions | P0 | Done |
 | Handoff protocol between agents | P0 | Done |
 
 ### Skills, MCP, Hooks, Rules, Memory
 
 | Requirement | Priority | Status |
 |-------------|----------|--------|
-| 17 skills with keyword triggers | P0 | Done |
-| 18 MCP servers connected | P0 | Done |
-| 5 hooks (format, port, session) | P0 | Done |
-| 8 path-scoped rules | P0 | Done |
-| 6 memory files persisting cross-session | P1 | Done |
-| 38 allow + 4 deny permission rules | P0 | Done |
+| Skills with keyword triggers (55 shipped) | P0 | Done |
+| MCP servers connected (20 live) | P0 | Done |
+| Hooks for format, port, session, guards (9) | P0 | Done |
+| Path-scoped rules (37 domain + 5 cross-cutting) | P0 | Done |
+| Memory files persisting cross-session | P1 | Done |
+| Destructive-command guard on `PreToolUse` | P0 | Done |
 
 ## Phase 2: Team Engine (Current)
 

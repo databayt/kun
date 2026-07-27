@@ -1,25 +1,37 @@
 ---
 title: Hooks
-description: Lifecycle automations that trigger on events
+description: Nine lifecycle automations the engine can't forget to run
 ---
 
 # Hooks
 
-5 hooks that automate repetitive actions across the development lifecycle. They fire on specific events — before a tool runs, after a file changes, when a session ends.
+Hooks are the part of the engine that survives forgetting. A rule can be ignored and a skill can go uninvoked, but a hook is executed by the harness — not by Claude — so it fires whether or not anyone remembers it.
 
-## Active Hooks
+**9 hooks across 6 events**, configured in `.claude/settings.json`.
 
-| Hook | Event | Action |
-|------|-------|--------|
-| **Port Guard** | Before `pnpm dev` | Kill anything on port 3000 |
-| **Browser Open** | After `pnpm dev` | Open Chrome to localhost:3000 |
-| **Auto-Format** | After Write/Edit | Run Prettier on changed files |
-| **Session Log** | Agent finishes | Log timestamp to session log |
-| **Notification** | Agent needs attention | macOS notification via osascript |
+## Active hooks
 
-## How Hooks Work
+| Event | Matcher | What it does |
+|-------|---------|-------------|
+| `SessionStart` | `*` | Inject engine context — sync drift, bridge handoffs, open report items |
+| `SessionStart` | `*` | Nag if the machine's maintain heartbeat is stale or RED |
+| `ConfigChange` | `*` | Warn when `vocabulary.json` drifts from the generated docs |
+| `PreToolUse` | `Bash(pnpm dev)` | Kill anything holding port 3000 |
+| `PreToolUse` | `Bash` | Block destructive commands (the Unforgivable list) |
+| `PostToolUse` | `Bash(pnpm dev)` | Open Chrome to `localhost:3000` |
+| `PostToolUse` | `Write\|Edit` | Prettier the changed file |
+| `Stop` | `*` | Append a timestamp to `~/.claude/session-log.txt` |
+| `Notification` | `*` | macOS notification when Claude needs attention |
 
-Hooks are shell commands configured in `~/.claude/settings.json` under the `hooks` key:
+Hook scripts live in `.claude/hooks/` and are installed to `~/.claude/hooks/`:
+
+| Script | Purpose |
+|--------|---------|
+| `session-engine-context.sh` | Session-start engine context |
+| `session-maintain-status.sh` · `.ps1` | Maintain heartbeat (macOS/Linux · Windows) |
+| `block-destructive-bash.sh` | The guard on `rm -rf`, `migrate reset`, `DROP TABLE`, force-push |
+
+## Configuration
 
 ```json
 {
@@ -34,50 +46,37 @@ Hooks are shell commands configured in `~/.claude/settings.json` under the `hook
           }
         ]
       }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "Write|Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "npx prettier --write \"$FILE_PATH\" 2>/dev/null; exit 0"
-          }
-        ]
-      }
     ]
   }
 }
 ```
 
-## Hook Events
+Every hook ends in `exit 0` (or swallows its own failure). A hook that exits non-zero blocks the tool call it was attached to — useful for `block-destructive-bash.sh`, fatal for a formatter.
 
-| Event | When It Fires | Common Use |
-|-------|--------------|------------|
-| **PreToolUse** | Before a tool executes | Port cleanup, validation |
-| **PostToolUse** | After a tool completes | Formatting, browser open |
-| **Stop** | When agent finishes | Logging, cleanup |
-| **Notification** | Agent pauses for input | Desktop alerts |
+## Events
 
-## Matcher Patterns
+| Event | Fires | Used for |
+|-------|-------|----------|
+| `SessionStart` | New session begins | Context injection, drift warnings |
+| `ConfigChange` | Config file changes | Regeneration checks |
+| `PreToolUse` | Before a tool runs | Validation, guards, cleanup |
+| `PostToolUse` | After a tool completes | Formatting, browser open |
+| `Stop` | Agent finishes a turn | Logging, protocol nudges |
+| `Notification` | Claude pauses for input | Desktop alerts |
 
-- `Bash(pnpm dev)` — matches specific bash commands
-- `Write|Edit` — matches multiple tools with pipe
-- `*` — matches everything
+## Matchers
 
-## Role Availability
+| Pattern | Matches |
+|---------|---------|
+| `Bash(pnpm dev)` | One specific bash command |
+| `Bash` | Every bash call |
+| `Write\|Edit` | Multiple tools, pipe-separated |
+| `*` | Everything (events without a tool) |
 
-| Role | Hooks |
-|------|-------|
-| **engineer** | All 5 |
-| **business** | Prettier only |
-| **content** | Prettier only |
-| **ops** | All 5 |
+## Block protocol enforcement
 
-## Adding Custom Hooks
+The [block protocol](/docs/rules) is hook-enforced rather than trusted to memory: `block-context` injects a block's records on prompt, and `block-touch` + `block-guard` raise a `Stop` nudge when two or more code files change without the matching record and docs updates.
 
-Edit `~/.claude/settings.json` to add new hooks. Each hook needs:
+## Adding a hook
 
-1. **Event** — when to fire (PreToolUse, PostToolUse, Stop, Notification)
-2. **Matcher** — which tool/command to match
-3. **Command** — shell command to execute
+Edit `.claude/settings.json` — event, matcher, command. Keep the command idempotent and non-blocking unless blocking is the point.

@@ -1,84 +1,94 @@
 ---
 title: MCP
-description: 18 MCP servers connecting Claude Code to external services
+description: 20 live MCP servers — and the config file Claude Code actually reads
 ---
 
 # MCP Servers
 
-18 Model Context Protocol servers that connect Claude Code to external services — from design tools to databases to deployment platforms.
+Model Context Protocol servers connect Claude Code to external services. **20 are live** at user scope, plus the claude.ai connectors.
 
-## UI and Design (5)
+## Where config actually lives
 
-| Server | Purpose | Trigger |
-|--------|---------|---------|
-| **shadcn** | Component registry, install components | `ui`, `component`, `atom` |
-| **figma** | Design file access (127.0.0.1:3845) | `figma`, design URLs |
-| **tailwind** | CSS utilities, documentation | `tailwind`, `css` |
-| **a11y** | Accessibility audits (WCAG 2.1 AA) | `accessibility`, `a11y` |
-| **storybook** | Visual testing | `storybook` |
+Read this first. Getting it wrong is not a small mistake — it silently produces an engine with no tools.
 
-## Testing (2)
+Claude Code reads MCP servers from **three** places only:
 
-| Server | Purpose | Trigger |
-|--------|---------|---------|
-| **browser** | Headless Chromium (1920x1080) | `test`, `e2e`, `see` |
-| **browser-headed** | Visible Chromium for auth flows | `see headed` |
+| Source | Scope | Written by |
+|--------|-------|-----------|
+| `~/.claude.json` → `mcpServers` | User | `claude mcp add -s user` |
+| `~/.claude.json` → `projects["<path>"].mcpServers` | Local | `claude mcp add` (default) |
+| `.mcp.json` at a project root | Project | Hand-edited, gated by `enabledMcpjsonServers` |
+| claude.ai connectors | Account | OAuth, managed in the `/mcp` TUI |
 
-## DevOps and Infra (4)
+It does **not** read `~/.claude/mcp.json` or `<repo>/.claude/mcp.json`.
 
-| Server | Purpose | Trigger |
-|--------|---------|---------|
-| **github** | Repos, issues, PRs, Actions | `push`, `pr`, `issue` |
-| **vercel** | Deployments, logs | `deploy`, `ship` |
-| **sentry** | Error monitoring | `error`, `debug` |
-| **gcloud** | Google Cloud CLI | `gcloud` |
+> Those two kun files are **catalogs** — the intended fleet, version-controlled and reviewable. They are not configuration Claude Code consumes. `setup.sh` used to "install" MCP by copying the catalog to `~/.claude/mcp.json`, a file Claude Code ignores, so the fleet never loaded. Registration must go through `claude mcp add-json "<name>" '<json>' -s user` — single-quote the JSON so literal `${VAR}` survives.
 
-## Data and Auth (4)
+## Live fleet (20)
 
-| Server | Purpose | Trigger |
-|--------|---------|---------|
-| **neon** | Neon PostgreSQL branching | `prisma`, `migration`, `db` |
-| **postgres** | Database queries (dbhub) | `sql`, `query` |
-| **stripe** | Payments, subscriptions | `payment`, `billing` |
-| **keychain** | macOS Keychain credentials | `credentials` |
+| Server | Purpose | Transport |
+|--------|---------|-----------|
+| **browser** | Headless Chromium — `see`, `flow`, `responsive` | stdio |
+| **browser-headed** | Visible Chromium for auth flows | stdio |
+| **chrome-devtools** | Traces, Lighthouse, network — `trace`, `fast` | stdio |
+| **github** | Repos, issues, Actions, code search | http |
+| **figma** · **figma-desktop** | Design context, screenshots, Code Connect | http |
+| **shadcn** | Component registry and install commands | stdio |
+| **Neon** | Postgres branching, migrations, query tuning | http |
+| **sentry** | Error monitoring and issue triage | http |
+| **stripe** | Payments and subscriptions | http |
+| **linear** | Issue tracking | http |
+| **slack** | Team messaging | http |
+| **notion** | Docs and databases | http |
+| **posthog** | Product analytics | http |
+| **ref** · **context7** | Technical and library documentation | stdio |
+| **markitdown** | Any file or URL → Markdown | stdio |
+| **filesystem** | Local file access | stdio |
+| **higgs** | Higgsfield media generation | http |
+| **claude-design** | Claude Labs design canvas | http |
 
-## Knowledge and PM (3)
+### claude.ai connectors
 
-| Server | Purpose | Trigger |
-|--------|---------|---------|
-| **ref** | Technical documentation | `docs`, `lookup` |
-| **context7** | Up-to-date library docs | `latest docs` |
-| **linear** | Issue tracking | `linear`, `task` |
+Gmail, Google Calendar, Google Drive, PlanetScale, Vercel, Indeed. OAuth-managed in-app — **not tool-drivable**. Their `authenticate` tool returns "run `/mcp` and select X"; you must use the TUI.
 
-## Universal Config
+### Catalog entries that are not registered
 
-**Every machine gets the full `mcp.json`.** Config is universal — any machine can run any task. Access is scoped by **secrets, not config**: a server whose API key isn't in your `~/.claude/.env` simply doesn't connect, and which keys you hold is set by the **Gist** you're handed. Canonical installer: `setup.sh`.
+The catalogs hold 25 entries; 8 are deliberately not live:
 
-## Configuration
+| Entry | Why |
+|-------|-----|
+| `gcloud` · `keychain` | Shell wrappers, not MCP servers — they `case "$1"` and exit |
+| `postgres` | dbhub reads `DSN` not `DATABASE_URL`, no `pg` driver, redundant with Neon |
+| `algolia` · `design-system-analyzer` · `memory-bank` | No published package |
+| `airtable` | Wrong package name — `airtable-mcp-server`, not `@airtable/mcp-server` |
+| `vercel` | Deduplicated — the claude.ai Vercel connector already covers it |
 
-MCP servers are configured in `~/.claude/mcp.json`:
+Trimmed for token economy on 2026-07-26 and **not to be re-added without Abdout**: `sequential-thinking`, `storybook`, `tailwind`, `git` (Bash covers it), `a11y`. Rationale and re-add path: `docs/TOKEN-ECONOMY.md`.
 
-```json
-{
-  "mcpServers": {
-    "github": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-github"],
-      "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": ""
-      }
-    }
-  }
-}
+## Secrets
+
+`${VAR}` in a `~/.claude.json` definition expands from Claude Code's **launch environment**, not from `kun/.env` — nothing sources it. Two working options:
+
+```bash
+# bake the value at registration (writes mode-600)
+claude mcp add -e REF_API_KEY=... -s user ref ...
+
+# or source the central .env in the launch shell
 ```
 
-### Shared with the secondary agent
+Config is universal; access is scoped by **secrets, not config**. A server whose key you don't hold simply doesn't connect. Which keys you hold is set by the Gist you're handed.
 
-The [Antigravity](/docs/antigravity) CLI (`a`) reuses this exact fleet. During `setup.sh`, `antigravity-sync.sh` transforms `~/.claude/mcp.json` into `~/.gemini/config/mcp_config.json` — stdio servers pass through unchanged; remote servers are rewritten from Claude's `type: http|sse` + `url` to Antigravity's `serverUrl` key (and the `registries` block is dropped). Edit `~/.claude/mcp.json`, re-run setup, and both agents stay in sync.
+## OAuth
+
+Remote HTTP servers expose `mcp__<srv>__authenticate` — it returns an OAuth URL with a `localhost:<port>/callback` redirect, and approving completes in-session. `mcp__<srv>__complete_authentication` is the paste-the-callback-URL fallback. Drivable this way: `higgs`, `sentry`, `stripe`, `notion`, `posthog`.
+
+A config change needs a **session relaunch** to take effect — a running session keeps the stale tool definitions.
+
+## Shared with the secondary agent
+
+The [Antigravity](/docs/antigravity) CLI (`a`) reuses this fleet. During `setup.sh`, `antigravity-sync.sh` transforms the catalog into `~/.gemini/config/mcp_config.json` — stdio servers pass through unchanged; remote servers are rewritten from Claude's `type: http|sse` + `url` to Antigravity's `serverUrl` key.
 
 ## Installation
-
-Every machine gets the full MCP fleet (all 18 servers) — access is scoped by secrets (the Gist you're handed), not by config. One command, role is just a label:
 
 ```bash
 # macOS/Linux
@@ -88,76 +98,71 @@ cd ~/kun && bash .claude/scripts/setup.sh engineer
 cd ~/kun; .\.claude\scripts\setup.ps1 -Role engineer
 ```
 
-## Troubleshooting — Browser / Playwright MCP
+---
 
-If `mcp__browser__*` tools disappear, return "tool not found", or you see "Playwright MCP is still disconnected" in any project, run **`/mcp-doctor`**. The skill at `~/.claude/skills/mcp-doctor/SKILL.md` is the single recovery entry point.
+## Troubleshooting: Browser / Playwright
 
-**`/mcp-doctor` learns from history.** Every distinct error is logged once to `~/.claude/skills/mcp-doctor/ERRORS.md` with a permanent fix, mined from Claude Code's own browser MCP logs (`~/Library/Caches/claude-cli-nodejs/*/mcp-logs-browser/`). The doctor consults that ledger before improvising and appends a new entry whenever it solves something novel — so the same error is never debugged twice. Seven error classes are catalogued so far (E1 wrong package, E2 npm token, E3 connection-closed umbrella, E4 browser disconnect, E5 page timeout, E6 missing Chromium, E7 profile lock).
+If `mcp__browser__*` tools disappear, return "tool not found", or report "still disconnected", run **`/mcp-doctor`** — the single recovery entry point.
 
-### The six recurring root causes
+The doctor **learns**. Every distinct error is logged once to `~/.claude/skills/mcp-doctor/ERRORS.md` with a permanent fix, mined from Claude Code's own logs (`~/Library/Caches/claude-cli-nodejs/*/mcp-logs-browser/`). It consults that ledger before improvising and appends new entries — so the same error is never debugged twice. Seven classes catalogued: E1 wrong package, E2 npm token, E3 connection-closed, E4 browser disconnect, E5 page timeout, E6 missing Chromium, E7 profile lock.
 
-This setup has been burned by these defects more than once. Read this before patching anything else.
+### Recurring root causes
 
-**1. Project-level configs shadow the user-level one.** When Claude Code starts in a project (hogwarts, mkan, maid, iveco, codebase), any `browser` entry in that project's `.mcp.json` overrides `~/.claude/mcp.json`. Different projects have pointed to different packages (`@executeautomation/playwright-mcp-server`, `@anthropic-ai/mcp-server-playwright` — the latter doesn't exist on npm). **Rule: never define `browser` or `browser-headed` at project level. The user-level config is authoritative.**
+**1. Project configs shadow user scope.** A `browser` entry in a project's `.mcp.json` overrides user scope. Different projects have pointed at different packages, including `@anthropic-ai/mcp-server-playwright`, which doesn't exist on npm. **Never define `browser` or `browser-headed` at project level.**
 
-**2. Duplicate user-level definitions** (`~/.claude/mcp.json` plus `~/.mcp.json`) competed for the `browser` name. Whichever Claude client read first won. **Rule: `~/.claude/mcp.json` is the only file. No `~/.mcp.json`, no project-level `browser` entries.**
+**2. Duplicate user-level definitions.** `~/.claude.json` plus a stray `~/.mcp.json` competed for the `browser` name; whichever was read first won. **`~/.claude.json` is the only store.**
 
-**3. CLI flag silently overridden by config file.** If `~/.claude/playwright-mcp.config.json` sets `userDataDir`, it wins over the `--user-data-dir` flag in `~/.claude/mcp.json`. Two servers pointing at the same dir → Chromium `ProcessSingleton` lock. **Rule: CLI flag owns `--user-data-dir`. The config file's `userDataDir` key must not exist.**
+**3. CLI flag silently overridden.** If `~/.claude/playwright-mcp.config.json` sets `userDataDir`, it beats the `--user-data-dir` flag. Two servers on one dir → Chromium `ProcessSingleton` lock. **The CLI flag owns the profile dir; the config key must not exist.**
 
-**4. `@latest` causes npx version churn.** `npx -y @playwright/mcp@latest` silently swaps between cached versions in `~/.npm/_npx/`. Each swap may pull a Playwright version requiring a Chromium revision not on disk → "browser executable not found". **Rule: pin an exact version (currently `@playwright/mcp@0.0.75`). Bump only by editing `~/.claude/mcp.json` AND `~/.claude/skills/mcp-doctor/SKILL.md` in lock-step.**
+**4. `@latest` version churn.** `npx -y @playwright/mcp@latest` swaps between cached versions in `~/.npm/_npx/`, and a swap can demand a Chromium revision that isn't on disk. **Pin exactly — currently `@playwright/mcp@0.0.75`.** Bump the registration and `mcp-doctor/SKILL.md` in lock-step.
 
-**5. Stale `playwright-mcp` PIDs holding the profile dir.** Chromium locks `--user-data-dir` per OS-process. A crashed-but-still-running PID blocks every new launch. **Rule: `/mcp-doctor` step A (`pkill -f playwright-mcp`) clears it. Session-start hook warns when `pgrep -c playwright-mcp > 2`.**
+**5. Stale PIDs holding the profile.** Chromium locks `--user-data-dir` per process; a crashed-but-running PID blocks every launch. `/mcp-doctor` step A (`pkill -f playwright-mcp`) clears it.
 
-**6. Cache bloat (5+ GB across 10 Chromium revisions).** Not a failure cause per se, but slows first-launch and confuses diagnostics. **Rule: `/mcp-doctor` step D prunes.**
+**6. Cache bloat.** 5+ GB across a dozen Chromium revisions slows first launch and confuses diagnostics. `/mcp-doctor` step D prunes.
 
-Secondary concern: Node v25+ is newer than Playwright officially supports (LTS 24 Krypton). No workaround documented yet; flag if you see segfaults.
+Secondary: Node v25+ is newer than Playwright officially supports (LTS 24). Flag any segfaults.
 
 ### Canonical configuration
 
 | Concern | Value |
 |---|---|
-| Package | `@playwright/mcp` (Anthropic official) |
-| Version pin | `0.0.75` (exact, never `@latest`) |
-| Config file | `~/.claude/mcp.json` (user-level only) |
-| Runtime config | `~/.claude/playwright-mcp.config.json` (viewport, timeouts, launch args, determinism context options, `outputDir`, `testIdAttribute`; **no `userDataDir`**) |
+| Package | `@playwright/mcp` (official) |
+| Version pin | `0.0.75` — exact, never `@latest` |
+| Registration | `~/.claude.json`, user scope |
+| Runtime config | `~/.claude/playwright-mcp.config.json` — **no `userDataDir`** |
 | Headless profile | `~/.playwright-auth-headless` |
 | Headed profile | `~/.playwright-auth` |
-| Cache dir | `~/Library/Caches/ms-playwright` |
-| Recovery skill | `/mcp-doctor` |
-| Session-start ping | `~/.claude/hooks/session-start-reports.sh` warns on stale PIDs / SingletonLock |
+| Cache | `~/Library/Caches/ms-playwright` |
+| Recovery | `/mcp-doctor` |
 
-### Enriched runtime config
+### Determinism
 
-`~/.claude/playwright-mcp.config.json` is the single shared tuning surface for both `browser` and `browser-headed`. It is validated against the `@playwright/mcp@0.0.75` `Config` type (nested `browser.launchOptions` / `browser.contextOptions`, top-level `outputDir` / `snapshot` / `console` / `testIdAttribute` / `timeouts`). Beyond viewport + timeouts it pins **determinism** for repeatable QA — the same screenshot twice, no analytics noise, stable dates:
+`playwright-mcp.config.json` is the shared tuning surface for both browsers, validated against the `0.0.75` `Config` type. Beyond viewport and timeouts it pins repeatability — the same screenshot twice, no analytics noise, stable dates:
 
-- `contextOptions.reducedMotion: "reduce"` — freeze animations/transitions (clean `see` / `responsive` / `mirror` shots).
-- `contextOptions.serviceWorkers: "block"` — no service-worker cache nondeterminism between runs.
-- `contextOptions.colorScheme: "light"` + `locale: "en-US"` + `timezoneId: "Asia/Dubai"` — fixed default render; RTL is exercised per-call via `/ar/` routes, not a hardcoded locale.
-- `outputDir` — predictable home for the `pdf` cap and any `--save-session`.
-- `testIdAttribute: "data-testid"` — matches the stack's Playwright / Testing-Library convention.
+- `reducedMotion: "reduce"` — frozen animations for clean `see` / `responsive` / `mirror` shots
+- `serviceWorkers: "block"` — no cache nondeterminism between runs
+- `colorScheme: "light"`, `locale: "en-US"`, `timezoneId: "Asia/Dubai"` — fixed default render; RTL is exercised per-call via `/ar/` routes, never a hardcoded locale
+- `testIdAttribute: "data-testid"` — matches the stack's Playwright convention
 
-`--caps vision,pdf` and `--user-data-dir` stay on the **CLI** (proven; the config-file `capabilities` enum can replace rather than augment the core toolset, and the CLI flag owns the profile dir). The three deprecated role configs (`mcp-business/ops/content.json`) no longer define `browser` — they inherit the user-level servers, restoring root-cause #1 + #4 compliance.
+`--caps vision,pdf` and `--user-data-dir` stay on the **CLI**: the config-file `capabilities` enum can replace rather than augment the core toolset.
 
-**Opt-in power knobs** (off by default — enable per task):
+**Opt-in knobs** (off by default):
 
 | Need | How |
 |---|---|
-| Lock network to known origins | add `"network": { "allowedOrigins": ["https://*.databayt.org", "http://localhost:*"] }` (aborts other requests, so it muddies the `debug` / `watch` network view — use only for locked-down runs) |
-| Emulate a real device | `--device "iPhone 15"` on the server args |
-| Replay a pre-authenticated session | `--storage-state <file.json>` |
-| Persist the Playwright session | `--save-session` (lands in `outputDir`) |
-| Auto-grant geolocation/notifications | `--grant-permissions` |
-| DevTools / perf tooling | add `devtools` to `--caps` for `performance` / `trace` work |
+| Lock network to known origins | `"network": { "allowedOrigins": [...] }` — aborts other requests, so it muddies `debug` / `watch` |
+| Emulate a device | `--device "iPhone 15"` |
+| Replay an authenticated session | `--storage-state <file.json>` |
+| Persist the session | `--save-session` |
+| Auto-grant permissions | `--grant-permissions` |
+| DevTools / perf | add `devtools` to `--caps` |
 
-### Recovery quick-reference
+### Recovery
 
 ```bash
-# kill stale, clear locks, force-warm the pin
 pkill -f playwright-mcp
 rm -f ~/.playwright-auth/Singleton{Lock,Cookie,Socket}
 rm -f ~/.playwright-auth-headless/Singleton{Lock,Cookie,Socket}
 npx -y @playwright/mcp@0.0.75 --help >/dev/null
-# then restart Claude Code (MCP servers only spawn at session start)
+# then restart Claude Code — MCP servers only spawn at session start
 ```
-
-For the full diagnostic + recovery flow, see `~/.claude/skills/mcp-doctor/SKILL.md` or invoke `/mcp-doctor` in any Claude Code session.
