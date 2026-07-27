@@ -94,12 +94,31 @@ const deck = JSON.parse(fs.readFileSync(deckPath, 'utf8'));
 const total = deck.slides.length;
 
 // ── captions ────────────────────────────────────────────────────────────
-const CHANNELS = ['instagram', 'facebook', 'linkedin', 'telegram', 'whatsapp'];
+// Mirror of DISTRIBUTION_CHANNEL_IDS in src/components/root/social/config.ts.
+// This is plain node and cannot import the TS registry, so the list is
+// duplicated — but src/lib/__tests__/carousel-channels.test.ts reads this
+// literal and asserts it equals the registry, so the duplication cannot rot
+// silently. Slack is absent by design: it is the communication channel, never a
+// carousel destination.
+const CHANNELS = [
+  'facebook',
+  'instagram',
+  'telegram',
+  'whatsapp',
+  'x',
+  'linkedin',
+  'tiktok',
+  'snapchat',
+];
 
 function utmLink(channel) {
   const link = deck.captions.link;
   const sep = link.includes('?') ? '&' : '?';
-  return `${link}${sep}utm_source=${channel}&utm_medium=social&utm_campaign=${deck.slug}`;
+  // utm_campaign is the BRAND, matching src/lib/social-utm.ts, so carousel
+  // traffic and post traffic aggregate together by brand. The deck slug goes in
+  // utm_content — which is exactly what utm_content is for — so the two stay
+  // separable without being two campaign taxonomies.
+  return `${link}${sep}utm_source=${channel}&utm_medium=social&utm_campaign=${brand}&utm_content=${slug}`;
 }
 
 function captionFor(channel, lang) {
