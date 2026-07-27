@@ -11,11 +11,17 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { execSync } from 'child_process';
+import { execSync, execFileSync } from 'child_process';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '..');
 const outputDir = path.join(rootDir, 'public', 'social', 'media');
+const libraryScript = path.join(__dirname, 'higgs-library.mjs');
+
+// Cheapest model that still produces a publishable card. nano_banana_flash (1.5cr)
+// was the old default; nano_banana_2_lite is 1cr for the same job.
+const CARD_MODEL = 'nano_banana_2_lite';
+const CARD_COST = 1;
 
 // Per-brand visual style tokens (text-free as per /higgs doctrine)
 const BRAND_PRESETS = {
@@ -108,47 +114,117 @@ function generateSvgFallback(product, title, filename) {
   return `/social/media/${filename}`;
 }
 
+function runLibrary(argv) {
+  try {
+    const out = execFileSync('node', [libraryScript, ...argv], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
+    return JSON.parse(out.trim().split('\n').pop());
+  } catch {
+    return null; // library is an optimization, never a hard dependency
+  }
+}
+
+/**
+ * Why can't we generate? Returns null when the account is ready to spend, or a
+ * {code, message} explaining what is actually wrong. The old code collapsed every
+ * cause into "unavailable or unauthed" and shipped a placeholder marked ✅.
+ */
+function diagnoseAccount(needed) {
+  let status;
+  try {
+    status = execFileSync('higgsfield', ['account', 'status'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
+  } catch (err) {
+    const text = `${err.stderr || ''}${err.stdout || ''}`;
+    if (err.code === 'ENOENT') return { code: 'cli-missing', message: 'higgsfield CLI is not installed (brew install higgsfield)' };
+    if (/not authenticated|unauthorized|login/i.test(text)) return { code: 'unauthed', message: 'higgsfield is not authenticated — run: higgsfield auth login' };
+    if (/workspace/i.test(text)) return { code: 'no-workspace', message: 'no workspace selected — run: higgsfield workspace set <id>' };
+    return { code: 'cli-error', message: `higgsfield account status failed: ${text.trim() || err.message}` };
+  }
+
+  const balance = Number((status.match(/([\d.]+)\s*credits?/i) || [])[1]);
+  if (Number.isNaN(balance)) return { code: 'unknown-balance', message: `could not read balance from: "${status}"` };
+  if (balance < needed) {
+    return {
+      code: 'insufficient-credits',
+      message: `needs ${needed} credits, balance is ${balance} — top up at https://higgsfield.ai/pricing`,
+      balance,
+    };
+  }
+  return null;
+}
+
 async function main() {
   ensureOutputDir();
   const args = parseArgs();
   const product = (args.product || 'databayt').toLowerCase();
   const preset = BRAND_PRESETS[product] || BRAND_PRESETS.databayt;
   const promptText = `${args.prompt}, ${preset.promptSuffix}`;
+  const ratio = args.format === '1:1' ? '1:1' : '16:9';
   const timestamp = Date.now();
   const slug = `${product}-${timestamp}`;
-  const svgFilename = `${slug}.svg`;
 
   console.log(`🎨 Generating visual social card for [${product.toUpperCase()}]...`);
   console.log(`📝 Higgs Prompt: "${promptText}"`);
 
-  // Attempt Higgsfield CLI execution if installed
-  let higgsSuccess = false;
-  let mediaUrl = '';
-
-  try {
-    const cmd = `higgsfield generate create nano_banana_flash --prompt "${promptText.replace(/"/g, '\\"')}" --aspect_ratio ${args.format === '1:1' ? '1:1' : '16:9'} --wait --json`;
-    console.log(`🚀 Executing Higgsfield CLI...`);
-    const output = execSync(cmd, { encoding: 'utf8', timeout: 30000, stdio: ['pipe', 'pipe', 'ignore'] });
-    const parsed = JSON.parse(output);
-    if (Array.isArray(parsed) && parsed[0]?.result_url) {
-      const imgUrl = parsed[0].result_url;
-      const pngFilename = `${slug}.png`;
-      const localPath = path.join(outputDir, pngFilename);
-      execSync(`curl -sL -o "${localPath}" "${imgUrl}"`);
-      mediaUrl = `/social/media/${pngFilename}`;
-      higgsSuccess = true;
-      console.log(`✅ Higgsfield visual card generated: ${mediaUrl}`);
+  // 1. Already paid for this exact shot? Reuse it — zero credits.
+  const cached = runLibrary(['lookup', '--prompt', promptText, '--model', CARD_MODEL, '--ratio', ratio]);
+  if (cached?.hit && (cached.localPath || cached.cdnUrl)) {
+    let mediaUrl = cached.cdnUrl;
+    if (cached.localPath) {
+      const reusedName = `${slug}${path.extname(cached.file)}`;
+      fs.copyFileSync(cached.localPath, path.join(outputDir, reusedName));
+      mediaUrl = `/social/media/${reusedName}`;
     }
+    console.log(`♻️  Library hit — reused ${cached.file}, saved ${cached.creditsSaved ?? 0} credits`);
+    console.log(JSON.stringify({ ok: true, source: 'library', product, mediaUrl, prompt: promptText, creditsSpent: 0, creditsSaved: cached.creditsSaved ?? 0 }));
+    return;
+  }
+
+  // 2. Can we actually spend? Fail loudly with the real reason if not.
+  const blocker = diagnoseAccount(CARD_COST);
+  if (blocker) {
+    const mediaUrl = generateSvgFallback(product, args.prompt, `${slug}.svg`);
+    console.error(`❌ Higgsfield unavailable: ${blocker.message}`);
+    console.error(`   Wrote an SVG placeholder — this is NOT a generated card. Do not publish it as one.`);
+    console.log(JSON.stringify({ ok: false, source: 'svg-fallback', reason: blocker.code, message: blocker.message, product, mediaUrl, prompt: promptText, creditsSpent: 0 }));
+    process.exit(args['allow-fallback'] ? 0 : 1);
+  }
+
+  // 3. Spend.
+  try {
+    console.log(`🚀 Generating via ${CARD_MODEL} (${CARD_COST} cr)...`);
+    const output = execFileSync('higgsfield', [
+      'generate', 'create', CARD_MODEL,
+      '--prompt', promptText,
+      '--aspect_ratio', ratio,
+      '--wait', '--wait-timeout', '10m', '--json',
+    ], { encoding: 'utf8', timeout: 11 * 60 * 1000, stdio: ['ignore', 'pipe', 'pipe'] });
+
+    const parsed = JSON.parse(output);
+    const imgUrl = Array.isArray(parsed) ? parsed[0]?.result_url : parsed?.result_url;
+    if (!imgUrl) throw new Error(`job returned no result_url: ${output.slice(0, 300)}`);
+
+    const pngFilename = `${slug}.png`;
+    const localPath = path.join(outputDir, pngFilename);
+    execFileSync('curl', ['-sSL', '-o', localPath, imgUrl]);
+
+    // Record it so the next identical request is free.
+    const inbox = path.join(process.env.HOME, 'Downloads', 'higgs');
+    fs.mkdirSync(inbox, { recursive: true });
+    const archived = path.join(inbox, `${new Date().toISOString().slice(0, 10)}-${slug}.png`);
+    fs.copyFileSync(localPath, archived);
+    runLibrary(['add', archived, '--prompt', promptText, '--model', CARD_MODEL, '--ratio', ratio, '--brand', product, '--credits', String(CARD_COST)]);
+
+    const mediaUrl = `/social/media/${pngFilename}`;
+    console.log(`✅ Higgsfield visual card generated: ${mediaUrl}`);
+    console.log(JSON.stringify({ ok: true, source: 'higgsfield', product, mediaUrl, prompt: promptText, creditsSpent: CARD_COST }));
   } catch (err) {
-    console.warn(`💡 Higgsfield CLI unavailable or unauthed (${err.message}). Using SVG brand fallback card.`);
+    const detail = `${err.stderr || ''}`.trim() || err.message;
+    const mediaUrl = generateSvgFallback(product, args.prompt, `${slug}.svg`);
+    console.error(`❌ Generation failed: ${detail}`);
+    console.error(`   Wrote an SVG placeholder — this is NOT a generated card. Do not publish it as one.`);
+    console.log(JSON.stringify({ ok: false, source: 'svg-fallback', reason: 'generation-failed', message: detail, product, mediaUrl, prompt: promptText, creditsSpent: 0 }));
+    process.exit(args['allow-fallback'] ? 0 : 1);
   }
-
-  if (!higgsSuccess) {
-    mediaUrl = generateSvgFallback(product, args.prompt, svgFilename);
-    console.log(`✅ SVG Brand Fallback Card generated: ${mediaUrl}`);
-  }
-
-  console.log(JSON.stringify({ ok: true, product, mediaUrl, prompt: promptText }));
 }
 
 main();

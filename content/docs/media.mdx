@@ -1,0 +1,106 @@
+---
+title: Media
+description: Photo and video generation for databayt marketing via Higgsfield AI
+---
+
+# Media
+
+Marketing visuals — ads, og images, social cards, hero shots, promo reels — are generated
+through [Higgsfield AI](https://higgsfield.ai) instead of commissioned per asset. The `/higgs`
+skill wraps the CLI in a zero-question playbook: it picks the model, aspect ratio, and style
+from pre-made tables, prices the job before spending, and downloads the result. Finished media
+feeds the [Social Hub](/docs/social), which stages the post for human approval before any
+channel sees it.
+
+## The doctrine
+
+| Rule | Why |
+|------|-----|
+| **Reuse before you buy** | The asset library answers "do we already own this shot?" for free. |
+| **Never ask model / style / ratio** | The tables decide. Only credits or a genuinely ambiguous deliverable stop a run. |
+| **No text inside generated visuals** | AI typography breaks, Arabic doubly so. Generate text-free, overlay copy in post. |
+| **Estimate free, then spend** | `generate cost` and the `--cost-only` / `--enhance-only` previews cost nothing. |
+| **Batch in one command** | `--count` / `--batch-size` beat N separate invocations. |
+| **Image first, then animate** | Video is 50-150× the price of a draft image. Iterate cheap, animate the winner. |
+
+## Model defaults
+
+Costs are per job, re-verified 2026-07-27 with `higgsfield generate cost`.
+
+| Use | Model | Cost |
+|-----|-------|------|
+| Image draft / iteration | `z_image` | 0.15 |
+| **Image final (default)** | `nano_banana_2_lite` | 1 |
+| Image final (alt look) | `seedream_v5_lite` | 1 |
+| Image final (rich refs) | `nano_banana_flash` | 1.5 |
+| Image hero / 4k / 21:9 | `nano_banana_pro` | 2 |
+| Video default | `kling3_0_turbo` | 7.5 |
+| Video higher fidelity | `kling3_0` / `kling2_6` | 10 |
+| Video from a reference video | `seedance_2_0_mini` | 12.5 |
+| Video premium | `seedance_2_0` | 22.5 |
+
+> **Naming trap**: `nano_banana_flash` is Nano Banana **2**; `nano_banana_pro` is Nano Banana
+> **Pro**. There is no `nano_banana_2` job type — that ID was retired and now errors. Only the
+> seedance family accepts `--video-references`.
+
+## Workflow
+
+```bash
+higgsfield account status                            # preflight — re-auth only if this fails
+node scripts/higgs-library.mjs lookup \
+  --prompt "..." --model z_image --ratio 16:9        # free — already own it?
+higgsfield generate cost z_image --prompt "..."      # free estimate
+higgsfield generate create z_image --prompt "..." --aspect_ratio 16:9 --wait --json
+higgsfield generate create kling3_0_turbo --prompt "..." --start-image <winner> --wait --json
+```
+
+`generate` has exactly six subcommands — `cost`, `create`, `get`, `list`, `wait`, `workflow`.
+Every job goes through `create`; there is no `generate image` or `generate video`.
+
+Results are JSON arrays carrying `result_url`; outputs land in `~/Downloads/higgs/` as
+`YYYY-MM-DD-<slug>.<ext>`.
+
+## Asset library
+
+Every paid job is fingerprinted by (prompt, model, ratio, resolution) in
+`content/media/library.json` and mirrored to object storage, so the same shot is never bought
+twice and assets survive a cleared Downloads folder.
+
+```bash
+node scripts/higgs-library.mjs lookup --prompt "..." --model M --ratio 16:9
+node scripts/higgs-library.mjs add <file> --prompt "..." --model M --brand hogwarts --credits 1
+node scripts/higgs-library.mjs import    # register whatever is already on disk
+node scripts/higgs-library.mjs push      # mirror to the serving origin
+node scripts/higgs-library.mjs stats     # assets, credits spent, credits saved
+```
+
+Prompts are normalized before hashing, so trivial rewording still hits; a different ratio or
+model is correctly a miss. `/social --media` consults the library before spending a credit.
+
+## Setup
+
+1. Install the `higgsfield` CLI (aliases `higgs`, `hf`).
+2. `higgsfield auth login` — browser OAuth, completes hands-free.
+3. `higgsfield workspace set <workspace-id>` — required after every re-auth.
+4. Brand kit and web product IDs are pinned in the skill so output stays on-brand.
+
+Credentials live in the Keychain, never in a repo — see [Credentials](/docs/credentials).
+
+## Known limits
+
+- **The balance is 0.7 credits** (2026-07-27). Only `z_image` drafts still run; every final
+  image, hero, and video is unaffordable until the workspace is topped up. Free-plan credits
+  look like a one-time grant, not a monthly refill.
+- The Plus trial requires a working card — currently blocked by the Mada rejection.
+- The Higgsfield MCP endpoint is registered but unauthenticated; the CLI is the primary lane.
+- `cdn.databayt.org` returns 403 for every key in the bucket — a CloudFront fault that
+  predates the library. Assets are served from the S3 origin until it is fixed; the library
+  re-links in place with `push --base` once it is.
+- Video is entirely untested — no clip has ever been generated.
+- Arabic creative still needs manual typography in post.
+
+## Related
+
+- [Social Automation](/docs/social) — where generated media gets published
+- [Brand & Voice](/docs/brand) — the rules every visual obeys
+- [Credentials](/docs/credentials) — where the Higgsfield session lives

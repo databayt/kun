@@ -26,15 +26,17 @@ CLI: `higgsfield` (aliases `higgs`, `hf`), authed via `auth login` (OAuth token 
 6. Video is expensive (7.5–22.5 cr) — iterate composition as a cheap image first
    (`z_image`, 0.15 cr), then animate the winning frame via `--start-image`.
 
-## Account (verified 2026-07-06)
+## Account (re-verified 2026-07-27)
 
 | Fact                       | Value                                            |
 | -------------------------- | ------------------------------------------------ |
 | Account                    | `osmanabdout@hotmail.com` — free plan            |
+| **Balance**                | **0.7 credits** — drafts only, see budget ladder |
 | Workspace                  | `1d67d842-bc70-40d8-8c03-576cb1b141df` (Private) |
 | Brand kit (databayt.org)   | `b0a3f528-0397-41f7-85be-0b44a458a01f`           |
 | Web product (databayt.org) | `6933f3b2-5611-4548-b015-2c963d054dc4`           |
 | Output dir                 | `~/Downloads/higgs/YYYY-MM-DD-<slug>.<ext>`      |
+| Library manifest           | `kun/content/media/library.json`                 |
 
 ## Preflight (one call, fix only what fails)
 
@@ -46,21 +48,30 @@ higgsfield account status || { higgsfield auth login; higgsfield workspace set 1
 hands-free). MCP `https://mcp.higgsfield.ai/mcp` is registered but unauthenticated — the CLI
 is the primary lane; don't detour through MCP.
 
-## Model defaults (costs verified per 1 job)
+## Model defaults (costs re-verified 2026-07-27 via `generate cost`)
 
-**Naming trap**: `nano_banana_2` = Nano Banana **Pro**; `nano_banana_flash` = Nano Banana 2.
+**Naming trap**: `nano_banana_flash` = Nano Banana **2**; `nano_banana_pro` = Nano Banana
+**Pro**. There is **no `nano_banana_2` job type** — that ID was retired; using it errors.
 
-| Use                         | Model                 | Cost | Notes                                                  |
-| --------------------------- | --------------------- | ---- | ------------------------------------------------------ |
-| Image draft / iteration     | `z_image`             | 0.15 | ratios 1:1,4:3,3:4,16:9,9:16                           |
-| Image final                 | `nano_banana_flash`   | 1.5  | +21:9, 2:3, 4:5…; `--resolution 1k/2k/4k`; image refs  |
-| Image hero / 4k / 21:9      | `nano_banana_2` (Pro) | 2    | same params as flash                                   |
-| Video default               | `kling3_0_turbo`      | 7.5  | 5s 720p 16:9/9:16/1:1; `--start-image`                 |
-| Video from reference video  | `seedance_2_0_mini`   | 12.5 | only seedance takes `--video-references`; 480/720p     |
-| Video premium (`--premium`) | `seedance_2_0`        | 22.5 | 4k, audio, genre, ≤9 img+3 vid+3 audio refs (12 total) |
+| Use                         | Model                | Cost | Notes                                                  |
+| --------------------------- | -------------------- | ---- | ------------------------------------------------------ |
+| Image draft / iteration     | `z_image`            | 0.15 | ratios 1:1,4:3,3:4,16:9,9:16                           |
+| **Image final (default)**   | `nano_banana_2_lite` | 1    | cheapest publishable tier — prefer over flash          |
+| Image final (alt)           | `seedream_v5_lite`   | 1    | different look; same price                             |
+| Image final (rich refs)     | `nano_banana_flash`  | 1.5  | +21:9, 2:3, 4:5…; `--resolution 1k/2k/4k`; image refs  |
+| Image hero / 4k / 21:9      | `nano_banana_pro`    | 2    | same params as flash                                   |
+| Image hero (alt)            | `seedream_v5_pro`    | 3    | only when Pro's look misses                            |
+| Video default               | `kling3_0_turbo`     | 7.5  | 5s 720p 16:9/9:16/1:1; `--start-image`                 |
+| Video higher fidelity       | `kling3_0`           | 10   | `kling2_6` also 10                                     |
+| Video from reference video  | `seedance_2_0_mini`  | 12.5 | only seedance takes `--video-references`; 480/720p     |
+| Video premium (`--premium`) | `seedance_2_0`       | 22.5 | 4k, audio, genre, ≤9 img+3 vid+3 audio refs (12 total) |
+
+`seedance1_5` (Seedance 1.5 Pro) exists but takes **duration 4/8/12 only** — it rejects the
+5s default. Pro specialist variants (`nano_banana_2_ai_stylist`, `_skin_enhancer`, `_shots`)
+are available at Pro pricing for styling / portrait / multi-shot jobs.
 
 Refresh after Higgsfield ships new models: `higgsfield model list`, params via
-`higgsfield model get <job_type>`.
+`higgsfield model get <job_type>`, price via `higgsfield generate cost <model> --prompt x` (free).
 
 ## Brand style blocks (append to every prompt)
 
@@ -74,14 +85,17 @@ slow tracking shot, cinematic studio lighting, photorealistic, no text"`
 ## Recipes (copy-paste; swap prompt subject)
 
 ```bash
+# 0. ALWAYS FIRST — do we already own this shot? A hit costs 0 credits.
+node ~/kun/scripts/higgs-library.mjs lookup --prompt "<full prompt>" --model <model> --ratio 16:9
+
 # Draft grid — explore 4 compositions for ~0.6 cr
 for r in 1:1 16:9 9:16 4:3; do higgsfield generate create z_image --prompt "<subject>, <minimal>" --aspect_ratio $r --wait --json; done
 
 # OG image / hero banner (final)
-higgsfield generate create nano_banana_flash --prompt "<subject>, <minimal>" --aspect_ratio 16:9 --resolution 2k --wait --json
+higgsfield generate create nano_banana_pro --prompt "<subject>, <minimal>" --aspect_ratio 16:9 --resolution 2k --wait --json
 
 # Social square / story
-higgsfield generate create nano_banana_flash --prompt "<subject>, <cinematic>" --aspect_ratio 1:1 --wait --json   # story: 9:16
+higgsfield generate create nano_banana_2_lite --prompt "<subject>, <cinematic>" --aspect_ratio 1:1 --wait --json   # story: 9:16
 
 # Promo clip (5s, default video)
 higgsfield generate create kling3_0_turbo --prompt "<scene>, <cinematic>" --aspect_ratio 16:9 --wait --wait-timeout 20m --json
@@ -113,21 +127,60 @@ higgsfield product-photoshoot create --mode hero_banner --prompt "<intent>" --im
 `[{"id", "status": "completed", "result_url": "<full-res png/mp4>", "min_result_url": "<preview webp>", ...}]`
 
 ```bash
-higgsfield generate create <model> --prompt "..." --wait --json \
+higgsfield generate create <model> --prompt "$P" --wait --json \
   | jq -r '.[].result_url' \
-  | while read -r u; do curl -sL -o ~/Downloads/higgs/$(date +%F)-<slug>-$RANDOM.${u##*.} "$u"; done
+  | while read -r u; do
+      f=~/Downloads/higgs/$(date +%F)-<slug>-$RANDOM.${u##*.}
+      curl -sL -o "$f" "$u"
+      # Register it, or the next identical request pays again.
+      node ~/kun/scripts/higgs-library.mjs add "$f" --prompt "$P" --model <model> --brand <brand> --credits <cost>
+    done
+node ~/kun/scripts/higgs-library.mjs push   # mirror to the CDN origin
 ```
 
 Async batch (fire many, wait once): capture `.[].id` per create (no `--wait`), then
 `higgsfield generate wait <id> --json`. List recent: `higgsfield generate list`.
 
-## Budget ladder (free plan ≈ 10 cr — treat credits as scarce)
+## Asset library — generate once, reuse forever
 
-- Drafts are ~free (66 z_images / 10 cr); video ≥ 7.5 cr — confirm before multi-video runs.
-- If a job costs more than the remaining balance, stop and report: asset plan, per-job cost,
-  balance, and that the workspace needs an upgrade (https://higgsfield.ai/pricing) — a
-  billing change, so it's Abdout's call (subscription doctrine).
-- `higgsfield account transactions --size 20` audits spend.
+`scripts/higgs-library.mjs` fingerprints every paid job by (prompt, model, ratio,
+resolution) and mirrors the file to S3, so the same shot is never bought twice and assets
+outlive `~/Downloads`. Manifest: `content/media/library.json` (git-tracked).
+
+```bash
+node scripts/higgs-library.mjs lookup --prompt "..." --model M --ratio 16:9   # before spending
+node scripts/higgs-library.mjs add <file> --prompt "..." --model M --brand hogwarts --credits 1
+node scripts/higgs-library.mjs import        # register anything already in ~/Downloads/higgs
+node scripts/higgs-library.mjs push          # mirror new assets to the CDN origin
+node scripts/higgs-library.mjs stats         # assets, credits spent, credits saved by reuse
+```
+
+**Lookup before every paid job.** Prompts are normalized (case, whitespace, punctuation), so
+trivial rewording still hits. A different ratio or model is correctly a miss.
+
+Serving origin: `https://hogwarts-databayt.s3.amazonaws.com/media/<brand>/<id>-<file>`.
+`cdn.databayt.org` 403s on **every** key in this bucket (pre-existing CloudFront fault, not
+caused by the library) — once fixed, `push --base https://cdn.databayt.org` re-links all URLs
+in place with no re-upload.
+
+## Budget ladder — **balance is 0.7 cr as of 2026-07-27**
+
+At 0.7 credits only `z_image` drafts (0.15) still run — 4 of them. Every final image (≥1),
+hero (2), and all video (≥7.5) is unaffordable. **Check `higgsfield account status` before
+promising any paid asset**, and lead with the library, which costs nothing.
+
+- Free-plan credits appear to be a **one-time ~10 cr grant**, not a monthly refill — all 25
+  transactions to date are `spend`, no credit-in row in three weeks.
+- Spent to date: **9.3 cr over 25 jobs / 24 assets** (~0.39 cr each) — 22 × z_image (3.3) +
+  3 × Nano Banana Pro (6.0). No video has ever been generated; that lane is untested.
+- If a job costs more than the balance, stop and report: asset plan, per-job cost, balance,
+  and that the workspace needs an upgrade (https://higgsfield.ai/pricing) — a billing change,
+  so it's Abdout's call (subscription doctrine).
+- **Trial economics**: the only free path is a 3-Day Plus Trial = 100 cr, $0 today, **card
+  required**, auto-renews to Plus $49/mo unless cancelled. Trial credits are MCP/CLI-only.
+  Disciplined play: start → front-load a full batch in 3 days → cancel before day 3 = true $0.
+  Blocked on a working card (Mada rejection).
+- `higgsfield account transactions --size 100` audits spend.
 
 ## Recovery
 
