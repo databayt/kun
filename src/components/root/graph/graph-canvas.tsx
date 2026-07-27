@@ -4,7 +4,6 @@ import * as React from "react";
 import Link from "next/link";
 import {
   ArrowUpRight,
-  Compass,
   Focus,
   RotateCcw,
   SlidersHorizontal,
@@ -83,13 +82,14 @@ function readPalette(el: HTMLElement): Palette {
     background: v("--background", "#fff"),
     font: cs.fontFamily || "ui-monospace, monospace",
     kind: {
-      school: v("--graph-1", "#00bdc8"),
-      spell: v("--graph-2", "#6667ff"),
-      agent: v("--graph-3", "#8d007f"),
-      portal: v("--graph-4", "#ff8b55"),
-      workflow: v("--graph-5", "#5a6a00"),
-      // Ungrouped base layer — same neutral Obsidian gives plain notes.
-      note: v("--muted-foreground", "#888"),
+      // Obsidian monochrome: one dark gray for the engine, one light gray for
+      // the notes vault, one green accent for MCP portals.
+      school: v("--graph-node", "#4d4d4d"),
+      spell: v("--graph-node", "#4d4d4d"),
+      agent: v("--graph-node", "#4d4d4d"),
+      portal: v("--graph-accent", "#2ab24a"),
+      workflow: v("--graph-node", "#4d4d4d"),
+      note: v("--graph-note", "#c4c4c4"),
     },
   };
 }
@@ -101,12 +101,12 @@ function readPalette(el: HTMLElement): Palette {
  * without collapsing them into one another.
  */
 const LINK_PHYSICS: Record<EdgeKind, { strength: number; distance: number }> = {
-  teaches: { strength: 2.6, distance: 22 },
-  connects: { strength: 0.3, distance: 90 },
-  depends: { strength: 0.45, distance: 70 },
-  routes: { strength: 0.35, distance: 80 },
-  composes: { strength: 0.35, distance: 80 },
-  references: { strength: 0.3, distance: 85 },
+  teaches: { strength: 2.6, distance: 34 },
+  connects: { strength: 0.3, distance: 110 },
+  depends: { strength: 0.45, distance: 90 },
+  routes: { strength: 0.35, distance: 100 },
+  composes: { strength: 0.35, distance: 100 },
+  references: { strength: 0.3, distance: 110 },
 };
 
 // ── Visibility tiers ──────────────────────────────────────────────────────
@@ -115,9 +115,6 @@ const HIDDEN = 0;
 const DIM = 1;
 const NORMAL = 2;
 const FOCUS = 3;
-
-/** Influence percentile that earns a permanent label at rest. */
-const LABEL_INFLUENCE = 0.12;
 
 const MIN_ZOOM = 0.25;
 const MAX_ZOOM = 4;
@@ -181,11 +178,6 @@ export function GraphCanvas({ nodes, edges, lang }: GraphCanvasProps) {
   );
   const [panelOpen, setPanelOpen] = React.useState(false);
 
-  React.useEffect(() => {
-    // Obsidian keeps the panel open on desktop; phones start collapsed.
-    setPanelOpen(window.innerWidth >= 768);
-  }, []);
-
   // ── Mutable render state ────────────────────────────────────────────────
   const paletteRef = React.useRef<Palette | null>(null);
   const transformRef = React.useRef<Transform>({ k: 1, x: 0, y: 0 });
@@ -214,13 +206,10 @@ export function GraphCanvas({ nodes, edges, lang }: GraphCanvasProps) {
   }, []);
 
   // ── Simulation (built once) ─────────────────────────────────────────────
+  // Size is purely connectivity, the Obsidian way: "the more nodes that
+  // reference a given node, the bigger it gets" — no per-kind privileges.
   const radii = React.useMemo(
-    () =>
-      nodes.map((node) => {
-        const base =
-          node.kind === "school" ? 7 : node.kind === "workflow" ? 6 : 4;
-        return Math.min(base + Math.sqrt(node.degree) * 1.7, 20);
-      }),
+    () => nodes.map((node) => Math.min(2.5 + Math.sqrt(node.degree) * 1.6, 14)),
     [nodes],
   );
 
@@ -249,8 +238,8 @@ export function GraphCanvas({ nodes, edges, lang }: GraphCanvasProps) {
     settingsRef.current = settings;
     const sim = simRef.current;
     if (sim) {
-      sim.centerStrength = settings.centerForce * 0.004;
-      sim.charge = -(8 + settings.repelForce * 72);
+      sim.centerStrength = settings.centerForce * 0.006;
+      sim.charge = -(8 + settings.repelForce * 110);
       sim.linkForceScale = settings.linkForce * 2;
       sim.linkDistanceScale = 0.5 + settings.linkDistance * 1.5;
 
@@ -414,9 +403,12 @@ export function GraphCanvas({ nodes, edges, lang }: GraphCanvasProps) {
       }
       if (!Number.isFinite(minX)) return;
 
-      const pad = 48;
+      const pad = 64;
+      // Fit only ever zooms OUT. Zooming in past 1 would cross the text-fade
+      // threshold and cover the rest state with labels — the reference rests
+      // as pure dots in generous whitespace.
       const k = Math.min(
-        MAX_ZOOM,
+        1,
         Math.max(
           MIN_ZOOM,
           Math.min(
@@ -514,7 +506,7 @@ export function GraphCanvas({ nodes, edges, lang }: GraphCanvasProps) {
         if (ea < 0.02) continue;
         const isAccent =
           focus !== null && (source === focus || target === focus);
-        const alpha = ea * (isAccent ? 0.9 : 0.2);
+        const alpha = ea * (isAccent ? 0.9 : 0.85);
         const bucket = Math.min(BUCKETS - 1, Math.floor(alpha * BUCKETS));
         (isAccent ? accentBuckets : normalBuckets)[bucket].push(i);
       }
@@ -540,8 +532,9 @@ export function GraphCanvas({ nodes, edges, lang }: GraphCanvasProps) {
           ctx.stroke();
         }
       };
-      strokeBuckets(normalBuckets, palette.muted, 1);
-      strokeBuckets(accentBuckets, palette.foreground, 1.6);
+      // Whisper-thin hairlines in the border tone — the reference look.
+      strokeBuckets(normalBuckets, palette.border, 0.75);
+      strokeBuckets(accentBuckets, palette.foreground, 1.4);
 
       // ── Nodes ───────────────────────────────────────────────────────────
       const focusMode = focus !== null;
@@ -568,34 +561,23 @@ export function GraphCanvas({ nodes, edges, lang }: GraphCanvasProps) {
         ctx.fill();
         ctx.restore();
 
+        // Flat discs, exactly like the reference — no rings, no outlines.
+        // Only the hovered/selected node earns a foreground stroke.
         if (isHot) {
           ctx.lineWidth = 2 / k;
           ctx.strokeStyle = palette.foreground;
-          ctx.stroke();
-        } else if (node.degree === 0) {
-          // Orphans read as outlines — a visible gap in the brain.
-          ctx.globalAlpha = alpha * 0.9;
-          ctx.lineWidth = 1.5 / k;
-          ctx.strokeStyle = palette.muted;
-          ctx.stroke();
-        } else if (alpha > 0.5) {
-          // Surface-coloured ring: a 2px gap between touching marks, so a
-          // dense cluster reads as many nodes rather than one blob.
-          ctx.lineWidth = 2 / k;
-          ctx.strokeStyle = palette.background;
           ctx.stroke();
         }
       }
 
       // ── Labels ──────────────────────────────────────────────────────────
-      // Obsidian's text-fade: labels materialize as you zoom in. At rest only
-      // cluster names and the highest-influence bridges are named; everything
-      // else earns a label by focus, adjacency, or zoom.
+      // The reference rests as pure dots — zero text. Labels exist only
+      // through Obsidian's text-fade (zoom past the threshold) or focus
+      // (hover/selection lights the constellation's names).
       ctx.textAlign = "center";
       ctx.textBaseline = "top";
       const threshold = 2.0 - textFade * 1.8;
       const zoomAlpha = Math.min(1, Math.max(0, (k - threshold) / 0.35));
-      const influenceCutoff = width < 640 ? Infinity : LABEL_INFLUENCE;
 
       for (let i = 0; i < nodes.length; i++) {
         const nodeAlpha = alphas[i];
@@ -605,15 +587,7 @@ export function GraphCanvas({ nodes, edges, lang }: GraphCanvasProps) {
         const isHot = i === hover || i === active;
         const inFocus = focusMode && (i === focus || focusSet.has(i));
 
-        let labelAlpha = zoomAlpha;
-        if (isHot || inFocus) labelAlpha = 1;
-        else if (node.kind === "school")
-          // A phone-width canvas can't seat 19 cluster names at once — there
-          // they obey the zoom fade like everyone else.
-          labelAlpha = width < 640 ? zoomAlpha : Math.max(zoomAlpha, 0.85);
-        else if (node.influence >= influenceCutoff)
-          labelAlpha = Math.max(zoomAlpha, 0.7);
-
+        const labelAlpha = isHot || inFocus ? 1 : zoomAlpha;
         const finalAlpha = labelAlpha * nodeAlpha;
         if (finalAlpha < 0.04) continue;
 
@@ -879,217 +853,207 @@ export function GraphCanvas({ nodes, edges, lang }: GraphCanvasProps) {
   const matchCount = matches?.size ?? null;
 
   return (
+    // Full-bleed stage — no site chrome, the brain owns the first screen.
+    // `full-bleed` escapes the layout-container's inline padding (RTL-safe),
+    // otherwise the 100vw canvas shifts and drags the end-anchored UI
+    // off-screen in Arabic.
     <div
       dir={isAr ? "rtl" : "ltr"}
-      className="flex h-[calc(100vh-var(--header-height)-var(--footer-height))] flex-col overflow-hidden bg-background"
+      ref={shellRef}
+      className="full-bleed relative h-screen w-screen overflow-hidden bg-background"
     >
-      {/* ── Top bar ───────────────────────────────────────────────────── */}
-      <div className="z-10 flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-border/60 px-4 py-3 sm:px-6">
-        <div className="flex min-w-0 items-center gap-2.5">
-          <Compass className="size-4 shrink-0 text-muted-foreground" />
-          <div className="min-w-0">
-            <h1 className="truncate font-mono text-sm font-semibold">
-              {t("title")}
-            </h1>
-            <p className="truncate text-xs text-muted-foreground">
-              {t("subtitle")}
-            </p>
-          </div>
-        </div>
+      <canvas
+        ref={canvasRef}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+        role="img"
+        aria-label={t("a11yCanvas")}
+        className="size-full touch-none font-mono [cursor:grab] active:[cursor:grabbing]"
+      />
 
-        <div className="flex flex-1 items-center justify-end gap-3">
-          <div className="flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground">
+      {/* Floating chrome — the reference is all whitespace, so the UI is. */}
+      <div className="pointer-events-none absolute bottom-4 start-4 z-10 font-mono text-[11px] text-muted-foreground">
+        <span className="font-semibold text-foreground">{t("title")}</span>
+        <span aria-hidden> · </span>
+        <span>
+          {nodes.length} {t("nodes")}
+        </span>
+        <span aria-hidden> · </span>
+        <span>
+          {edges.length} {t("links")}
+        </span>
+        {orphanCount > 0 && (
+          <>
+            <span aria-hidden> · </span>
             <span>
-              {nodes.length} {t("nodes")}
+              {orphanCount} {t("orphans")}
             </span>
-            <span aria-hidden>·</span>
-            <span>
-              {edges.length} {t("links")}
-            </span>
-            {orphanCount > 0 && (
-              <>
-                <span aria-hidden>·</span>
-                <span>
-                  {orphanCount} {t("orphans")}
-                </span>
-              </>
-            )}
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setPanelOpen((open) => !open)}
-            aria-pressed={panelOpen}
-            title={t("settings")}
-            aria-label={t("settings")}
-            className={cn(
-              "inline-flex size-7 cursor-pointer items-center justify-center rounded-lg border transition-colors",
-              panelOpen
-                ? "border-foreground/30 text-foreground"
-                : "border-border text-muted-foreground hover:text-foreground",
-            )}
-          >
-            <SlidersHorizontal className="size-3.5" />
-          </button>
-
-          <button
-            type="button"
-            onClick={resetView}
-            title={t("reset")}
-            aria-label={t("reset")}
-            className="inline-flex size-7 cursor-pointer items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors hover:text-foreground"
-          >
-            <RotateCcw className="size-3.5" />
-          </button>
-        </div>
+          </>
+        )}
       </div>
 
-      {/* ── Stage ─────────────────────────────────────────────────────── */}
-      <div ref={shellRef} className="relative flex-1 overflow-hidden">
-        <canvas
-          ref={canvasRef}
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
-          onPointerCancel={handlePointerUp}
-          role="img"
-          aria-label={t("a11yCanvas")}
-          className="size-full touch-none font-mono [cursor:grab] active:[cursor:grabbing]"
-        />
+      <div className="absolute end-4 top-4 z-10 flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setPanelOpen((open) => !open)}
+          aria-pressed={panelOpen}
+          title={t("settings")}
+          aria-label={t("settings")}
+          className={cn(
+            "inline-flex size-7 cursor-pointer items-center justify-center rounded-lg border bg-background/85 backdrop-blur-sm transition-colors",
+            panelOpen
+              ? "border-foreground/30 text-foreground"
+              : "border-border text-muted-foreground hover:text-foreground",
+          )}
+        >
+          <SlidersHorizontal className="size-3.5" />
+        </button>
 
-        {matchCount === 0 && (
-          <p className="pointer-events-none absolute inset-x-0 top-1/2 text-center font-mono text-xs text-muted-foreground">
-            {t("noMatches")}
-          </p>
-        )}
+        <button
+          type="button"
+          onClick={resetView}
+          title={t("reset")}
+          aria-label={t("reset")}
+          className="inline-flex size-7 cursor-pointer items-center justify-center rounded-lg border border-border bg-background/85 text-muted-foreground backdrop-blur-sm transition-colors hover:text-foreground"
+        >
+          <RotateCcw className="size-3.5" />
+        </button>
+      </div>
 
-        {/* Settings panel — Obsidian anatomy: Filters / Groups / Display / Forces */}
-        {panelOpen && (
-          <div className="absolute start-4 top-4 z-20 max-h-[calc(100%-2rem)]">
-            <GraphControls
-              lang={lang}
-              settings={settings}
-              onChange={patchSettings}
-              kinds={kinds}
-              onToggleKind={toggleKind}
-              counts={counts}
-              onClose={() => setPanelOpen(false)}
-            />
-          </div>
-        )}
+      {matchCount === 0 && (
+        <p className="pointer-events-none absolute inset-x-0 top-1/2 text-center font-mono text-xs text-muted-foreground">
+          {t("noMatches")}
+        </p>
+      )}
 
-        {!activeNode && (
-          <p className="pointer-events-none absolute bottom-4 end-4 font-mono text-[10px] text-muted-foreground">
-            {t("focusHint")}
-          </p>
-        )}
+      {/* Settings panel — Obsidian anatomy: Filters / Groups / Display / Forces */}
+      {panelOpen && (
+        <div className="absolute start-4 top-4 z-20 max-h-[calc(100%-2rem)]">
+          <GraphControls
+            lang={lang}
+            settings={settings}
+            onChange={patchSettings}
+            kinds={kinds}
+            onToggleKind={toggleKind}
+            counts={counts}
+            onClose={() => setPanelOpen(false)}
+          />
+        </div>
+      )}
 
-        {/* ── Inspector ───────────────────────────────────────────────── */}
-        {activeNode && (
-          <aside
-            className="absolute end-4 top-4 z-20 flex max-h-[calc(100%-2rem)] w-72 flex-col gap-3 overflow-y-auto rounded-xl border border-border bg-background/95 p-4 shadow-lg backdrop-blur-sm"
-            aria-live="polite"
-          >
-            <div className="flex items-start justify-between gap-2">
-              <div className="min-w-0">
-                <span className="mb-1 inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                  <span
-                    aria-hidden
-                    className="size-2 rounded-full"
-                    style={{ backgroundColor: kindColor(activeNode.kind) }}
-                  />
-                  {isAr
-                    ? KIND_LABELS[activeNode.kind].ar
-                    : KIND_LABELS[activeNode.kind].en}
-                </span>
-                <h2 className="break-words font-mono text-sm font-semibold">
-                  {activeNode.label}
-                </h2>
-              </div>
-              {selected !== null && (
-                <button
-                  type="button"
-                  onClick={() => setSelected(null)}
-                  aria-label={t("reset")}
-                  className="shrink-0 cursor-pointer text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  <X className="size-3.5" />
-                </button>
-              )}
+      {!activeNode && (
+        <p className="pointer-events-none absolute bottom-4 end-4 font-mono text-[10px] text-muted-foreground">
+          {t("focusHint")}
+        </p>
+      )}
+
+      {/* ── Inspector ───────────────────────────────────────────────── */}
+      {activeNode && (
+        <aside
+          className="absolute end-4 top-4 z-20 flex max-h-[calc(100%-2rem)] w-72 flex-col gap-3 overflow-y-auto rounded-xl border border-border bg-background/95 p-4 shadow-lg backdrop-blur-sm"
+          aria-live="polite"
+        >
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <span className="mb-1 inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                <span
+                  aria-hidden
+                  className="size-2 rounded-full"
+                  style={{ backgroundColor: kindColor(activeNode.kind) }}
+                />
+                {isAr
+                  ? KIND_LABELS[activeNode.kind].ar
+                  : KIND_LABELS[activeNode.kind].en}
+              </span>
+              <h2 className="break-words font-mono text-sm font-semibold">
+                {activeNode.label}
+              </h2>
             </div>
-
-            {activeNode.detail && (
-              <p className="text-xs leading-relaxed text-muted-foreground">
-                {activeNode.detail}
-              </p>
-            )}
-
-            {activeNode.href && (
-              <Link
-                href={`/${lang}${activeNode.href}`}
-                className="inline-flex w-fit items-center gap-1 rounded-md border border-border bg-muted/40 px-2 py-1 font-mono text-[11px] transition-colors hover:border-foreground/30"
+            {selected !== null && (
+              <button
+                type="button"
+                onClick={() => setSelected(null)}
+                aria-label={t("reset")}
+                className="shrink-0 cursor-pointer text-muted-foreground transition-colors hover:text-foreground"
               >
-                {t("openNote")}
-                <ArrowUpRight className="size-3 rtl:-scale-x-100" />
-              </Link>
+                <X className="size-3.5" />
+              </button>
             )}
+          </div>
 
-            <dl className="flex gap-4 font-mono text-[11px]">
-              <div>
-                <dt className="text-muted-foreground">{t("degree")}</dt>
-                <dd className="font-semibold">{activeNode.degree}</dd>
-              </div>
-              <div>
-                <dt className="text-muted-foreground">{t("influence")}</dt>
-                <dd className="font-semibold">
-                  {(activeNode.influence * 100).toFixed(0)}%
-                </dd>
-              </div>
-            </dl>
+          {activeNode.detail && (
+            <p className="text-xs leading-relaxed text-muted-foreground">
+              {activeNode.detail}
+            </p>
+          )}
 
-            {relations.map(([kind, others]) => (
-              <div key={kind}>
-                <p className="mb-1.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                  {isAr ? EDGE_LABELS[kind].ar : EDGE_LABELS[kind].en}
-                </p>
-                <div className="flex flex-wrap gap-1">
-                  {others.map((other) => (
-                    <button
-                      key={other}
-                      type="button"
-                      onClick={() => setSelected(other)}
-                      className="cursor-pointer rounded-md border border-border bg-muted/40 px-1.5 py-0.5 font-mono text-[11px] transition-colors hover:border-foreground/30"
-                    >
-                      {nodes[other].label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ))}
+          {activeNode.href && (
+            <Link
+              href={`/${lang}${activeNode.href}`}
+              className="inline-flex w-fit items-center gap-1 rounded-md border border-border bg-muted/40 px-2 py-1 font-mono text-[11px] transition-colors hover:border-foreground/30"
+            >
+              {t("openNote")}
+              <ArrowUpRight className="size-3 rtl:-scale-x-100" />
+            </Link>
+          )}
 
-            {secondOrder.length > 0 && (
-              <div>
-                <p className="mb-1.5 flex items-center gap-1 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                  <Focus aria-hidden className="size-3" />
-                  {t("secondOrder")}
-                </p>
-                <div className="flex flex-wrap gap-1">
-                  {secondOrder.map((other) => (
-                    <button
-                      key={other}
-                      type="button"
-                      onClick={() => setSelected(other)}
-                      className="cursor-pointer rounded-md border border-dashed border-border px-1.5 py-0.5 font-mono text-[11px] text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground"
-                    >
-                      {nodes[other].label}
-                    </button>
-                  ))}
-                </div>
+          <dl className="flex gap-4 font-mono text-[11px]">
+            <div>
+              <dt className="text-muted-foreground">{t("degree")}</dt>
+              <dd className="font-semibold">{activeNode.degree}</dd>
+            </div>
+            <div>
+              <dt className="text-muted-foreground">{t("influence")}</dt>
+              <dd className="font-semibold">
+                {(activeNode.influence * 100).toFixed(0)}%
+              </dd>
+            </div>
+          </dl>
+
+          {relations.map(([kind, others]) => (
+            <div key={kind}>
+              <p className="mb-1.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                {isAr ? EDGE_LABELS[kind].ar : EDGE_LABELS[kind].en}
+              </p>
+              <div className="flex flex-wrap gap-1">
+                {others.map((other) => (
+                  <button
+                    key={other}
+                    type="button"
+                    onClick={() => setSelected(other)}
+                    className="cursor-pointer rounded-md border border-border bg-muted/40 px-1.5 py-0.5 font-mono text-[11px] transition-colors hover:border-foreground/30"
+                  >
+                    {nodes[other].label}
+                  </button>
+                ))}
               </div>
-            )}
-          </aside>
-        )}
-      </div>
+            </div>
+          ))}
+
+          {secondOrder.length > 0 && (
+            <div>
+              <p className="mb-1.5 flex items-center gap-1 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                <Focus aria-hidden className="size-3" />
+                {t("secondOrder")}
+              </p>
+              <div className="flex flex-wrap gap-1">
+                {secondOrder.map((other) => (
+                  <button
+                    key={other}
+                    type="button"
+                    onClick={() => setSelected(other)}
+                    className="cursor-pointer rounded-md border border-dashed border-border px-1.5 py-0.5 font-mono text-[11px] text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground"
+                  >
+                    {nodes[other].label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </aside>
+      )}
 
       {/* Keyboard and screen-reader path into the same graph. */}
       <nav aria-label={t("a11yList")} className="sr-only">

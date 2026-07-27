@@ -38,20 +38,20 @@ export const DEFAULT_SETTINGS: GraphSettings = {
   nodeScale: 1,
   linkWidth: 1,
   centerForce: 0.3,
-  repelForce: 0.36,
+  repelForce: 0.5,
   linkForce: 0.5,
   linkDistance: 0.33,
 };
 
+// Obsidian monochrome: the engine is one dark gray, notes are the light
+// ungrouped layer, and MCP portals carry the single green accent.
 const KIND_COLOR_VAR: Record<NodeKind, string> = {
-  school: "var(--graph-1)",
-  spell: "var(--graph-2)",
-  agent: "var(--graph-3)",
-  portal: "var(--graph-4)",
-  workflow: "var(--graph-5)",
-  // Ungrouped base layer — Obsidian renders plain notes in the theme's muted
-  // gray; only "groups" get categorical color.
-  note: "var(--muted-foreground)",
+  school: "var(--graph-node)",
+  spell: "var(--graph-node)",
+  agent: "var(--graph-node)",
+  portal: "var(--graph-accent)",
+  workflow: "var(--graph-node)",
+  note: "var(--graph-note)",
 };
 
 export const kindColor = (kind: NodeKind): string => KIND_COLOR_VAR[kind];
