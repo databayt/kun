@@ -66,6 +66,8 @@ export interface PostPayload {
   text: string;
   channels: string[];
   title?: string;
+  /** Publicly reachable image URL; the adapter fetches it per platform. */
+  mediaUrl?: string;
   metadata?: Record<string, unknown>;
 }
 

@@ -19,6 +19,7 @@ export default function Hero({ dictionary, params }: HeroProps) {
             "Claude Opus 4.8 — now with a 1M-token context window"
           }
           href={dictionary.announcement?.href || "https://x.com/AnthropicAI"}
+          badgeClassName="px-0"
         />
       }
       heading={dictionary.homepage?.heading || "The Databayt Engine"}
