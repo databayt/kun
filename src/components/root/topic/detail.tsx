@@ -1,10 +1,22 @@
-import Link from "next/link"
-import { ArrowLeft, ExternalLink, BookOpen, Video, GitFork, FileText, Terminal, Wrench, CircleCheck, CircleAlert, Users } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
-import type { TopicDetail, Reference } from "./config"
-import type { Locale } from "@/components/local/config"
+import Link from "next/link";
+import {
+  ArrowLeft,
+  ExternalLink,
+  BookOpen,
+  Video,
+  GitFork,
+  FileText,
+  Terminal,
+  Wrench,
+  CircleCheck,
+  CircleAlert,
+  Users,
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import type { TopicDetail, Reference } from "./config";
+import type { Locale } from "@/components/local/config";
 import {
   ClaudeMdIcon,
   RulesIcon,
@@ -24,8 +36,9 @@ import {
   CredentialsIcon,
   TipsIcon,
   TwitterIcon,
+  MediaIcon,
   GuardianIcon,
-} from "@/components/atom/icons"
+} from "@/components/atom/icons";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   ClaudeMdIcon,
@@ -46,8 +59,9 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   CredentialsIcon,
   TipsIcon,
   TwitterIcon,
+  MediaIcon,
   GuardianIcon,
-}
+};
 
 const refTypeIcon: Record<Reference["type"], React.ReactNode> = {
   docs: <BookOpen className="size-4" />,
@@ -56,7 +70,7 @@ const refTypeIcon: Record<Reference["type"], React.ReactNode> = {
   article: <FileText className="size-4" />,
   tool: <Wrench className="size-4" />,
   social: <Users className="size-4" />,
-}
+};
 
 const refTypeLabel: Record<Reference["type"], string> = {
   docs: "Documentation",
@@ -65,22 +79,28 @@ const refTypeLabel: Record<Reference["type"], string> = {
   article: "Article",
   tool: "Tool",
   social: "Social",
-}
+};
 
-const statusConfig: Record<TopicDetail["status"], { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
+const statusConfig: Record<
+  TopicDetail["status"],
+  {
+    label: string;
+    variant: "default" | "secondary" | "destructive" | "outline";
+  }
+> = {
   current: { label: "Current", variant: "default" },
   review: { label: "Needs Review", variant: "secondary" },
   behind: { label: "Behind", variant: "destructive" },
-}
+};
 
 interface TopicDetailPageProps {
-  topic: TopicDetail
-  lang: Locale
+  topic: TopicDetail;
+  lang: Locale;
 }
 
 export default function TopicDetailPage({ topic, lang }: TopicDetailPageProps) {
-  const IconComponent = iconMap[topic.icon]
-  const statusInfo = statusConfig[topic.status]
+  const IconComponent = iconMap[topic.icon];
+  const statusInfo = statusConfig[topic.status];
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-8 lg:px-0">
@@ -102,20 +122,30 @@ export default function TopicDetailPage({ topic, lang }: TopicDetailPageProps) {
             </div>
           )}
           <div>
-            <h1 className="text-3xl font-semibold tracking-tight">{topic.title}</h1>
-            <p className="text-muted-foreground mt-1 text-base">{topic.description}</p>
+            <h1 className="text-3xl font-semibold tracking-tight">
+              {topic.title}
+            </h1>
+            <p className="text-muted-foreground mt-1 text-base">
+              {topic.description}
+            </p>
           </div>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1">
           <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>
-          <span className="text-muted-foreground text-xs">Reviewed {topic.lastReviewed}</span>
+          <span className="text-muted-foreground text-xs">
+            Reviewed {topic.lastReviewed}
+          </span>
         </div>
       </div>
 
       {/* Quick links */}
       <div className="mt-6 flex flex-wrap gap-3">
         <Button variant="outline" size="sm" asChild>
-          <a href={topic.officialDocs} target="_blank" rel="noopener noreferrer">
+          <a
+            href={topic.officialDocs}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <ExternalLink className="size-4" />
             Official Docs
           </a>
@@ -185,7 +215,9 @@ export default function TopicDetailPage({ topic, lang }: TopicDetailPageProps) {
               </div>
               <div className="min-w-0">
                 <p className="truncate text-sm font-medium">{ref.title}</p>
-                <p className="text-muted-foreground mt-0.5 text-xs">{refTypeLabel[ref.type]}</p>
+                <p className="text-muted-foreground mt-0.5 text-xs">
+                  {refTypeLabel[ref.type]}
+                </p>
               </div>
               <ExternalLink className="text-muted-foreground ms-auto mt-0.5 size-3 shrink-0" />
             </a>
@@ -235,5 +267,5 @@ export default function TopicDetailPage({ topic, lang }: TopicDetailPageProps) {
         </div>
       </section>
     </div>
-  )
+  );
 }

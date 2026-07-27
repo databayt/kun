@@ -1147,6 +1147,62 @@ export const topicDetails: Record<string, TopicDetail> = {
     configPaths: ["No config — external tracking"],
     kunDocs: "/docs/tweets",
   },
+
+  media: {
+    id: "media",
+    title: "Media",
+    description: "Photo and video generation via Higgsfield.",
+    icon: "MediaIcon",
+    overview:
+      "Marketing media — ads, og images, social cards, hero shots, promo reels — is generated through Higgsfield AI rather than commissioned per asset. The /higgs skill is a zero-question playbook: it picks the model, aspect ratio, and style from pre-made tables, estimates cost before spending, and downloads the result. Images iterate cheap (z_image at 0.15 credits) and only the winning frame gets animated, because video runs 7.5-22.5 credits a job. Media never carries baked-in text — AI typography breaks, Arabic doubly so — so copy is overlaid in post. Output feeds the Social Hub, which stages the post for human approval before any channel sees it.",
+    officialDocs: "https://higgsfield.ai",
+    status: "current",
+    lastReviewed: "2026-07-26",
+    progress: [
+      "higgsfield CLI authed via browser OAuth; workspace pinned",
+      "databayt brand kit + web product registered for on-brand generation",
+      "Model + cost table verified per job — no guessing at spend",
+      "Image-first workflow: draft on z_image, animate only the winner",
+      "Outputs land in ~/Downloads/higgs/ and flow into the Social Hub",
+    ],
+    improvements: [
+      "Free plan credits are thin — video work needs a paid lane",
+      "Plus trial requires a card, blocked by the Mada rejection",
+      "Higgsfield MCP is registered but unauthenticated — CLI only",
+      "No generated-asset library yet; results are re-generated, not reused",
+      "Arabic creative still needs manual typography in post",
+    ],
+    references: [
+      {
+        title: "Higgsfield AI",
+        url: "https://higgsfield.ai",
+        type: "tool",
+      },
+      {
+        title: "Social Automation",
+        url: "https://kun.databayt.org/en/docs/social",
+        type: "docs",
+      },
+    ],
+    setup: [
+      "Install the higgsfield CLI (aliases: higgs, hf)",
+      "higgsfield auth login — browser OAuth, completes hands-free",
+      "higgsfield workspace set <workspace-id> after any re-auth",
+      "Verify with higgsfield account status before a batch",
+    ],
+    usage: [
+      "Say higgs (or any media verb) — the skill picks model, ratio, and style",
+      "generate cost <model> estimates spend for free before committing",
+      "Batch in one command with --count / --batch-size, never N invocations",
+      "Draft as an image first, then animate it with --start-image",
+      "Generate text-free; overlay copy in post",
+    ],
+    configPaths: [
+      ".claude/skills/higgs/SKILL.md",
+      "~/Downloads/higgs/ (output dir)",
+    ],
+    kunDocs: "/docs/media",
+  },
 };
 
 export function getTopicDetail(slug: string): TopicDetail | undefined {
