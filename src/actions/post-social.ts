@@ -115,7 +115,60 @@ export async function publishPostDirect(input: unknown): Promise<PostResult> {
   }
 
   const { product, text, channels, mediaUrl } = parsed.data;
-  return deliverPost({ product, text, channels: [...channels], mediaUrl });
+  const result = await deliverPost({
+    product,
+    text,
+    channels: [...channels],
+    mediaUrl,
+  });
+
+  // Record what just happened. Without this a direct publish left no trace at
+  // all — no piece, no variant, no stored externalId — so the post could never
+  // be found again, could not be retracted, and /api/social/metrics could not
+  // see it. The composer's most-used button was the one whose posts could not
+  // be counted, which is why the metrics route reported zero work while two
+  // Hogwarts posts sat live on the Page.
+  //
+  // Deliberately AFTER delivery and deliberately non-fatal: the post is already
+  // public by this point, and surfacing a database error here would invite a
+  // re-publish that double-posts. A lost row is recoverable; a duplicate brand
+  // post is not.
+  //
+  // Only recorded when at least one channel landed. A total refusal (unwired,
+  // copy-out, transport down) never reached a platform, the contributor sees
+  // the error immediately, and writing a row nothing will ever act on would
+  // just accumulate noise the drain and metrics both have to filter past.
+  if (result.results.some((outcome) => outcome.ok)) {
+    try {
+      await db.socialPiece.create({
+        data: {
+          brand: product,
+          source: "human",
+          aiGenerated: Boolean(mediaUrl),
+          variants: {
+            create: result.results.map((outcome) => ({
+              channel: outcome.channel,
+              text,
+              mediaUrl,
+              status: outcome.ok ? ("published" as const) : ("failed" as const),
+              publishedAt: outcome.ok ? new Date() : null,
+              externalId: outcome.externalId,
+              result: outcome.ok ? "ok" : (outcome.error ?? "failed"),
+              attempts: 1,
+            })),
+          },
+        },
+      });
+    } catch (err: unknown) {
+      console.error(
+        `[social] published ${product} → ${channels.join(", ")} but could not record it: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+      );
+    }
+  }
+
+  return result;
 }
 
 export interface ScheduleResult {
