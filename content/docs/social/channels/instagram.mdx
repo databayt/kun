@@ -1,55 +1,128 @@
 ---
 title: Instagram
-description: Researched setup — Business account linked to a Facebook Page, two-step publishing, and media that must live at a public URL.
+description: Partly verified — the account model, the Page link that gates everything, and the two-step publish. Includes the link failure that cost five attempts and a day.
 ---
 
 # Instagram
 
-🔍 **Researched** — written from Meta's current developer docs. **Nobody here has walked it
-end to end yet**, so treat the sequence as correct in shape and verify the button names as you
-go. Corrections welcome.
+⚠️ **Partly verified.** The account-and-linking half was walked end to end on 2026-07-28: one
+brand linked successfully, one brand failed five times, one was blocked upstream. The
+**publishing half is still researched only**, written from Meta's developer docs — nobody here
+has published through the API yet.
+
+Instagram is the hardest of the free channels, and almost none of the difficulty is in the code.
+Publishing is two HTTP calls. Getting an account into a state where those two calls are *allowed*
+is where the days go.
+
+## The account model — read this before anything else
+
+Facebook and Instagram have opposite identity models. Assuming they match is the root of most of
+the pain, and it is the thing that scales badly across brands.
+
+| | Facebook | Instagram |
+|---|---|---|
+| Identity | One personal profile administers **many** Pages | Each professional profile is **its own account** |
+| Email | One email covers every Page | **A unique email per account** |
+| Reusing an email | Fine | Rejected — *"Another account is using the same email."* |
+| Cost of a new brand | Create a Page, 2 minutes | Create an account, verify an email, convert to professional, link it |
+
+Five brands therefore means **one** Facebook identity and **five** Instagram accounts on five
+distinct email addresses. Decide the address scheme before you create the first account —
+retrofitting it means re-creating accounts. See
+[Ownership & accounts](/docs/social/ownership) for the recommended scheme.
+
+## The six gates
+
+Linking is the gate everyone remembers, because it is the one that fights back. It is the first
+of six. Do not plan the work as if the link is the finish line.
+
+| # | Gate | What it takes |
+|---|:----|---------------|
+| 1 | Instagram account exists on its own email | Mobile app or web signup |
+| 2 | Account is **professional** (Business or Creator) | Mobile app, one screen |
+| 3 | Account is **linked to the brand's Facebook Page** | The flow below — the hard one |
+| 4 | Page and account owned by the same **business portfolio** | Business Settings |
+| 5 | App holds `instagram_basic` + `instagram_content_publish`, with Advanced Access | App Review + **Business Verification** |
+| 6 | `INSTAGRAM_ACCOUNT_ID_<BRAND>` in Vercel, publish path wired | Env var + code |
+
+Gates 1–4 are per brand. Gates 5–6 are paid once for all brands.
 
 ## What you get
 
-Publish images, videos, Reels, carousels, and stories to an **Instagram Business or Creator
-account** via the Graph API Content Publishing endpoints.
-
-Personal Instagram accounts cannot be posted to programmatically.
+Publish images, videos, Reels, carousels, and stories to an Instagram **Business or Creator**
+account via the Graph API Content Publishing endpoints. Personal accounts cannot be posted to
+programmatically, and there is no workaround.
 
 ## Prerequisites
 
 Instagram is not really a separate integration — it rides on Facebook's. Do
-[Facebook](/docs/social/channels/facebook) first:
-
-- An Instagram **Business** or **Creator** account
-- A Facebook Page, with the Instagram account **linked** to it
-- The same Meta **Business**-type app, with App Review and Business Verification
-
-If Facebook is done, most of the cost here is already paid.
+[Facebook](/docs/social/channels/facebook) first. You need its Page, its business portfolio, its
+Business-type app, and its Page token; Instagram adds no credential of its own.
 
 ## Steps
 
-### 1. Convert the Instagram account
+### 1. Create the account on its own email
 
-Instagram app → *Settings → Account type and tools → Switch to professional account* → Business.
+Instagram signup, with an address nobody else has used on Instagram. If the address is already
+attached to any Instagram account — including a dormant personal one — signup fails at the email
+step with *"Another account is using the same email."*
 
-### 2. Link it to the Facebook Page
+### 2. Switch it to professional
 
-Facebook Page → *Settings → Linked accounts → Instagram* → connect.
+Instagram **mobile app** → *Settings → Account type and tools → Switch to professional account* →
+**Business**. Pick a category; it is editable later.
 
-The link is what makes the account visible to the Graph API at all.
+Confirming afterwards that it really is professional is less obvious than it should be. The
+*Professional dashboard* button on the **web** profile only renders when the account's
+**"Display category label"** setting is on. Its absence is not evidence the account is personal —
+we chased that false signal for hours. Check the account type in the mobile app's settings, or
+trust the Business Settings asset pane.
 
-### 3. Add Instagram permissions to the app
+### 3. Put the Facebook Page in a business portfolio
 
-On the same Business app used for Facebook:
+Business Settings → *Accounts → Pages → Add → Add an existing Page*. Both the Page and the
+Instagram account must end up owned by the **same** portfolio. See
+[Ownership & accounts](/docs/social/ownership).
 
-| Permission | Why |
-|------------|-----|
-| `instagram_basic` | Read the account |
-| `instagram_content_publish` | Publish posts |
-| `pages_show_list` | Resolve the linked Page |
+### 4. Link the account to the Page
 
-### 4. Find the Instagram account id
+Three entry points exist and they are not equivalent. All three open the same Instagram OIDC
+consent screen, so they look identical from the outside; they do different things.
+
+| Entry point | Where | What it actually does |
+|-------------|-------|-----------------------|
+| Page home → **Connect Instagram** | Business Suite home header | The intended flow. Worked for one brand, failed four times for another |
+| Business Settings → Instagram accounts → **Add → Claim an Instagram account** | Business Settings | **Claims the account as a portfolio asset.** Useful and reliable — but it does *not* create a Page↔account link |
+| Page asset → **Connect assets → Instagram account** | Business Settings → Pages → *Page* → Connect assets | Same intent as the first, different code path. Also failed |
+
+Do the claim first — it is the reliable one and it is a prerequisite for gate 4 anyway. Then do
+the link. Then **verify**, because this flow lies.
+
+### 5. Verify the link — the only trustworthy signal
+
+The consent screen self-closes identically whether the link succeeded or silently failed, and no
+error is ever shown. Do not trust it. Check the asset instead:
+
+```
+Business Settings → Accounts → Pages → <the Page> → Connected assets
+```
+
+- **Linked:** *"1 asset is connected to this Facebook Page"*, the Instagram username, and a
+  **Disconnect** button.
+- **Not linked:** *"No connected assets"*.
+
+Two secondary tells, useful as a cross-check:
+
+- The Page home header flips from **"Connect Instagram"** to **"Edit Instagram profile"**, and an
+  **Instagram followers** counter appears next to Facebook followers.
+- The portfolio's **People** list gains Instagram-badged business users named after the account.
+  A successful link created two; a failed link created none. This is the sharpest diagnostic we
+  found — a link that produced no business user did not happen, whatever the UI implied.
+
+The **double-avatar cluster** on the Page header — two overlapping circles, one Facebook-badged,
+one Instagram-badged — is **not** a tell. An unlinked Page shows it too.
+
+### 6. Find the Instagram account id
 
 ```bash
 curl -s "https://graph.facebook.com/v21.0/<PAGE_ID>\
@@ -57,11 +130,14 @@ curl -s "https://graph.facebook.com/v21.0/<PAGE_ID>\
 # → {"instagram_business_account":{"id":"178414..."}}
 ```
 
-That id is `INSTAGRAM_ACCOUNT_ID`. The Page token you already have is the credential.
+The field is **silently omitted** if your token lacks `instagram_basic` — you get a 200 with the
+field simply missing. That looks exactly like "this Page has no Instagram account". Check your
+token's scopes before concluding anything from an absent field.
 
-### 5. Publish — two steps, always
+The id is also readable without any token: Business Settings → *Instagram accounts* → the
+account → **ID**.
 
-Unlike Facebook, publishing is never a single call. Create a media container, then publish it:
+### 7. Publish — two steps, always
 
 ```bash
 # 1. create the container
@@ -79,25 +155,42 @@ curl -s -X POST "https://graph.facebook.com/v21.0/<IG_ACCOUNT_ID>/media_publish"
 
 ## The traps
 
+**The link fails silently.** This is the expensive one. The OIDC consent tab shows *"Log in as
+&lt;handle&gt;"*, accepts the click, and closes itself — the same behaviour as success. Nothing is
+created and no error surfaces anywhere. Five attempts across three entry points produced five
+identical "successes" and zero links. **Always verify against Connected assets**, and treat the
+consent screen as carrying no information at all.
+
+**Claiming is not linking.** *Claim an Instagram account* puts the account in your portfolio.
+People read that as done. The Page is still unconnected, and every downstream check still fails.
+
+**Instagram web has no linking surface.** Not in *Professional account tools*, not in *Business
+tools and controls*, not in *Edit profile*. All three were read in full. If the Business Suite
+side refuses, the **mobile app** (*Profile → Edit profile → Page → Connect an existing Page*) is
+the only remaining route — there is no third option to look for.
+
+**Business Suite's inline "Create a new Instagram profile" is broken.** It returns *"Unable to
+create an account… please create a new account on Instagram"*. Create the account on Instagram
+first, then come back and link it.
+
+**A Page in someone else's portfolio cannot be linked at all.** Meta refuses with *"you need full
+control of the … business portfolio that the Page belongs to"*. There is no per-Page override;
+you resolve the portfolio, or you move the Page.
+
 **Media must be a public URL. There is no upload endpoint.** Instagram fetches the file from your
-URL, so it has to be reachable from Meta's servers — a CDN, not `localhost`, not a signed URL
-that expires in 60 seconds, not anything behind auth. This is the most common integration
-failure.
+URL, so it must be reachable from Meta's servers — a CDN, not `localhost`, not a signed URL that
+expires in 60 seconds, not anything behind auth. The most common code-level failure.
 
-**Two steps, not one.** A container id is not a post. Code that stops after `/media` silently
-publishes nothing, and the response looks successful.
+**Two steps, not one.** A container id is not a post. Code that stops after `/media` publishes
+nothing and looks successful.
 
-**Video containers are asynchronous.** For video and Reels the container is not immediately
-publishable — poll `status_code` on the container until it reads `FINISHED` before calling
-`/media_publish`. Publishing too early fails.
+**Video containers are asynchronous.** Poll `status_code` on the container until `FINISHED`
+before calling `/media_publish`.
 
-**A publishing limit applies.** Roughly 50 posts per 24 hours per account. Not a constraint for
-brand posting, but it is a real ceiling for anything bulk.
+**A publishing limit applies** — roughly 50 posts per 24 hours per account.
 
-**Carousels need a container per item**, then a parent container with `media_type=CAROUSEL` and
-the children's ids.
-
-**Stories and Reels are separate media types**, not flags on a normal post.
+**Carousels need a container per item**, then a parent with `media_type=CAROUSEL` and the
+children's ids. **Stories and Reels are separate media types**, not flags on a normal post.
 
 ## Environment variables
 
@@ -106,7 +199,8 @@ the children's ids.
 | `INSTAGRAM_ACCOUNT_ID_<PRODUCT>` | `INSTAGRAM_ACCOUNT_ID_MKAN` | Yes |
 | `FACEBOOK_PAGE_ACCESS_TOKEN_<PRODUCT>` | reused from Facebook | Yes |
 
-No separate token — Instagram authenticates with the linked Page's token.
+No separate token — Instagram authenticates with the linked Page's token. Which also means a
+crossed Facebook token silently posts to the wrong brand's Instagram.
 
 ## Verify
 
@@ -115,7 +209,8 @@ curl -s "https://graph.facebook.com/v21.0/<IG_ACCOUNT_ID>\
 ?fields=username,followers_count&access_token=<PAGE_TOKEN>"
 ```
 
-Getting the username back confirms the link, the permissions, and the token together.
+Getting the username back confirms the link, the permissions, and the token together — it is the
+one check that exercises all three at once.
 
 ## Limits
 

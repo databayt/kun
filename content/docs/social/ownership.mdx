@@ -1,0 +1,209 @@
+---
+title: Ownership & accounts
+description: Who actually owns the brand accounts, why that is a problem, how team members get access, and the per-brand email scheme Instagram forces on us.
+---
+
+# Ownership & accounts
+
+**Last verified: 2026-07-28** (read directly from Meta Business Settings).
+
+Every other page here describes a pipeline. This one describes who holds the keys — which turns
+out to be the binding constraint on Instagram, and a real bus-factor risk on everything else.
+
+> **One-line summary:** all five brands' social identity currently hangs off one personal
+> Facebook account and an auto-created, unnamed, unverified business portfolio. That portfolio
+> cannot pass Business Verification, and Business Verification is what Instagram publishing needs.
+
+## How Meta ownership actually works
+
+Three layers, and conflating them is why this got messy:
+
+| Layer | What it is | Who can own it |
+|-------|------------|----------------|
+| **Personal profile** | A human's Facebook account | A person. Always. |
+| **Business portfolio** | The container that owns Pages, Instagram accounts, apps, ad accounts | Owned *by* the portfolio; **administered by** personal profiles |
+| **Asset** | A Page, an Instagram account, an app | A portfolio, or a bare personal profile |
+
+The important consequence: **there is no such thing as an org-owned Meta account.** You cannot
+sign a business portfolio over to `databayt.org`. A portfolio is always administered by human
+profiles. "Databayt owns this" translates concretely to three things:
+
+1. The portfolio is **named** Databayt and carries the **legal business name** and address.
+2. It has passed **Business Verification** against real company documents.
+3. **More than one human** has Full access, so no single person's account is a single point of
+   failure.
+
+None of the three is true today.
+
+## Where we actually are
+
+### The portfolio
+
+| Field | Value |
+|-------|-------|
+| Name | `Mkan` |
+| Created | 27 Jul 2026 — **by the Instagram linking flow, not by a person** |
+| Legal business name | *(none)* |
+| Address / phone / website | *(none)* |
+| Primary Page | *(none)* |
+| Business verification | **Unverified** |
+| Two-factor requirement | **No one** |
+
+That "created by the linking flow" line is not a guess. The Instagram OIDC link carries
+`create_business_manager: true` in its state, so connecting an Instagram account to a Page
+**silently created a business portfolio** and named it after the Instagram account. Every brand
+Page we have since added lives inside an artefact of that side effect.
+
+### The people
+
+Three entries, and only one is human:
+
+| Who | Type | Access |
+|-----|------|--------|
+| The founder's personal Facebook profile | Human | Full access, everything |
+| `Mkan @mkan.sd` | Instagram-backed system user | Full access, everything |
+| `UnclaimedBusinessUser FromPool @mkan.sd` | Instagram-backed system user | Full access, everything |
+
+**No teammate has ever been invited.** Not Ali, not Aseel, not Osman Sedon. If the founder's
+account is locked, recovered, or lost, every brand Page and both Instagram accounts go with it.
+
+### The assets
+
+| Asset | In the portfolio? |
+|-------|-------------------|
+| Hogwarts Page | ✅ |
+| Mkan مكان Page | ✅ |
+| Databayt داتابيت Page | ❌ — sits in a **separate "Databayt" portfolio** we do not have full control of |
+| Instagram `@mkan.sd` | ✅ claimed, and linked to the Mkan Page |
+| Instagram `@osmanabdout` | ✅ claimed, **not** linked to any Page |
+| Moallimee, Sijillee | ❌ no Page, no Instagram account |
+
+The split is itself a problem: the Databayt Page cannot be linked to any Instagram account until
+its portfolio is under full control, and Meta gives no per-Page override.
+
+## Why this blocks Instagram, not just tidiness
+
+Instagram's `instagram_content_publish` permission needs **Advanced Access**, which needs **App
+Review**, which needs **Business Verification** — and Business Verification is verification of a
+*legal business*: registration documents, a matching legal name, an address, a verifiable phone
+or domain.
+
+A portfolio with no legal name, no address, and a name inherited from an Instagram handle has
+nothing to verify. So the ownership question is not housekeeping deferred until later; it sits
+directly on the critical path to Instagram publishing, and it is worth doing **before** more
+brands are onboarded into the wrong container.
+
+Facebook posting works today without it, because the app posts to Pages its own admin controls.
+Instagram does not get the same grace.
+
+## Target state
+
+1. **One portfolio per company, not per accident.** Create (or rename) a portfolio to
+   **Databayt**, set the legal business name, address, phone, and website to the registered
+   entity's real details.
+2. **Move every Page and Instagram account into it.** *Business Settings → Accounts → Pages →
+   Add → Add an existing Page* — the same wizard that worked for Hogwarts. Resolve the existing
+   "Databayt" portfolio first: either take full control of it or move the Page out of it.
+3. **Submit Business Verification** early. It is waiting, not working, and everything behind it
+   is blocked while it queues.
+4. **At least two humans with Full access.** One is a bus factor, not an owner.
+5. **Require two-factor** for the portfolio, and set a primary Page.
+6. Only then onboard Moallimee and Sijillee, so they are created inside the right container
+   instead of being migrated later.
+
+## Inviting the team
+
+*Business Settings → Users → People → **Invite people***. Invitations go by email address and
+the invitee needs a Facebook profile to accept — there is no "invite a domain" and no seat that
+exists without a human behind it.
+
+Suggested roles, adjustable per person:
+
+| Person | Portfolio access | Assets |
+|--------|------------------|--------|
+| Founder | Full access | Everything |
+| One backup admin | **Full access** | Everything — this is the bus-factor fix |
+| Everyone else | Partial / Employee access | Only the Pages and Instagram accounts they work on |
+
+Two things to know before sending invitations:
+
+- **Full access is total.** It includes billing, deleting the portfolio, and removing other
+  people. Give it deliberately, to two people, not to the whole team.
+- **Assign assets, not just seats.** A person with portfolio access and no asset assignment can
+  see nothing useful. Assets are assigned per Page and per Instagram account, on each asset's
+  detail pane. (Our own `@osmanabdout` Instagram asset currently has **0 people assigned**,
+  including the founder — worth fixing regardless of the link.)
+
+## The email problem
+
+Instagram forces a scheme on us that Facebook does not.
+
+**One Facebook identity administers every Page.** **Every Instagram professional account needs
+its own unique email address** — reuse is rejected outright with *"Another account is using the
+same email."* Five brands means five addresses that must exist, must be able to receive a
+verification code, and should not be someone's personal mailbox.
+
+Using personal addresses is what got us here: the accounts are on a `hotmail.com` address, which
+means they are personally rather than organisationally held, and they are not recoverable by the
+company.
+
+### Options for `<brand>@databayt.org`
+
+| Option | Cost | Can receive | Can send / reply | Requirement |
+|--------|------|:-----------:|:----------------:|-------------|
+| **Cloudflare Email Routing** | **Free** | ✅ | ❌ *(forwarding only)* | `databayt.org` must use **Cloudflare as its authoritative DNS** — the domain stays registered at Namecheap, only the nameservers move |
+| **Namecheap Private Email** | Launch $14.88/yr (1 mailbox, +$8.88/yr each) · Expand $41.88/yr (3, +$25.88) · Scale $71.88/yr (5, +$39.88) | ✅ | ✅ | Nothing — the domain is already there |
+| **Google Workspace / Zoho** | Per user per month | ✅ | ✅ | DNS records |
+
+Cloudflare Email Routing allows **200 routing rules per domain** and **200 verified destination
+addresses per account** — vastly more than five brands need, at no cost. It forwards inbound mail
+to a real inbox you already own; it does not give you a mailbox you can send *from*.
+
+### Recommendation
+
+**Cloudflare Email Routing for the signup lane, a real mailbox only where a brand must send.**
+
+Every Instagram account needs to *receive* a verification code exactly once, and then receive
+security and password-reset mail forever. None of that requires the ability to send. Free,
+instant, and it puts the addresses on a company domain where they can be re-pointed when people
+change — which is the actual goal.
+
+Add a real mailbox later, per brand, only when someone needs to answer mail as that brand.
+
+Two things to check before switching:
+
+- **`databayt.org` already handles mail.** At least one address on it (`hi@databayt.org`) is
+  already attached to an existing Instagram account. Enabling Cloudflare Email Routing requires
+  removing the domain's existing `MX` records and having no other email service active on it —
+  so audit what currently serves `databayt.org` mail, and where `hi@` lands, before touching DNS.
+- **Moving nameservers to Cloudflare moves all DNS**, not just mail. Inventory the existing
+  records first; a missed record takes a site down, and this domain fronts production.
+
+### Naming
+
+Whatever scheme is chosen, choose it **once and before creating more accounts** — changing an
+Instagram account's email later is possible but changing the *scheme* means recreating accounts.
+
+| Scheme | Example | Note |
+|--------|---------|------|
+| `<brand>@databayt.org` | `hogwarts@databayt.org` | Cleanest, but consumes the human-friendly alias |
+| `ig.<brand>@databayt.org` | `ig.hogwarts@databayt.org` | Keeps the plain alias free; obvious what it is for |
+| `social.<brand>@databayt.org` | `social.hogwarts@databayt.org` | Same, and covers non-Instagram channels that also want a unique address |
+
+`ig.<brand>@` is the safer default: one address per brand per platform, so the next platform that
+demands a unique email does not collide with Instagram's.
+
+## Open decisions
+
+These need a human call, not a default:
+
+1. Rename and legally register the existing `Mkan` portfolio as **Databayt**, or create a fresh
+   Databayt portfolio and migrate the assets into it?
+2. Resolve the separate **"Databayt"** portfolio holding the Databayt Page — take control of it,
+   or move the Page out?
+3. Who is the **second Full-access admin**?
+4. **Cloudflare Email Routing** (free, forward-only, moves DNS) vs **Namecheap Private Email**
+   (paid, real mailboxes, no DNS move)?
+5. Which naming scheme?
+
+Tracked in [kun#141](https://github.com/databayt/kun/issues/141).

@@ -23,7 +23,42 @@ policy, not a gap you can work around.
 
 - A Facebook Page (create one first — you need its id)
 - A Facebook account with an **admin** role on that Page
+- A **business portfolio** that owns the Page — see the next section
 - For production access: a business that can pass Meta's Business Verification
+
+## Before the Page: the business portfolio
+
+This is the step everybody skips, and it is the step that comes back later. Read
+[Ownership & accounts](/docs/social/ownership) for the full picture; the short version is here
+because getting it wrong costs a migration.
+
+Meta has three layers, and only the middle one is the company:
+
+| Layer | What it is | Who can hold it |
+|-------|-----------|-----------------|
+| Personal profile | A human's Facebook login | A person, always |
+| **Business portfolio** | The container that *owns* Pages, Instagram accounts, ad accounts and apps | Administered by personal profiles |
+| Asset | A Page, an Instagram account, an app | Owned by a portfolio |
+
+There is no such thing as an account owned by a company email or a domain. "The company owns
+this" means, concretely: one named portfolio carrying the legal business name and address, that
+portfolio verified, and **more than one human holding Full access** to it.
+
+**Create the portfolio deliberately, before the first Page.** If you don't, Meta will create one
+for you as a side effect the first time you link an Instagram account — unnamed, with no legal
+details, and named after whatever handle triggered it. That is exactly what happened here.
+
+**Put every Page in the same portfolio.** *Business Settings → Accounts → Pages → Add → Add an
+existing Page*. A Page that sits in a different portfolio cannot be linked to an Instagram
+account from your side at all — the connect dialog replaces the button with *"you need full
+control of the … business portfolio that the Page belongs to"* and offers only to send a request
+to whoever does. Recovering from that means chasing a human, so check portfolio membership
+before you build on a Page.
+
+**Fill in the legal details early.** *Business Settings → Business info*: legal business name,
+address, phone, website, primary Page. Business Verification checks these against real
+registration documents. An unnamed portfolio has nothing to verify, and verification is what
+gates Advanced Access — which is what gates Instagram publishing.
 
 ## Steps
 
@@ -31,6 +66,9 @@ policy, not a gap you can work around.
 
 facebook.com → Pages → Create. Note its numeric id from *Settings → Page transparency*, or read
 it later from the API. That is `FACEBOOK_PAGE_ID`.
+
+Then add it to the portfolio (previous section) rather than leaving it owned by your personal
+profile.
 
 ### 2. Create a **Business**-type app
 
@@ -117,6 +155,19 @@ CDN first.
 **Photo posts take longer.** Meta downloads the image before responding, so a timeout tuned for
 text posts will fire spuriously on media. We use 10s for text and 25s for photos.
 
+**Ownership debt is invisible until Instagram.** Facebook posting works fine from a personal
+profile with a Page role and an unverified portfolio — the app posts to Pages its own admin
+controls, so nothing complains. Instagram gets no such grace: it needs Advanced Access → App
+Review → Business Verification → a real, named, registered business. So a Facebook setup that
+looks finished can still be a dead end for the rest of the pipeline. Fix ownership while it is
+cheap. See [Ownership & accounts](/docs/social/ownership).
+
+**A single-admin portfolio is a bus factor of one.** Full access includes billing and portfolio
+deletion, and there is no recovery path if the only admin loses their account. Invite a second
+human with Full access on day one: *Business Settings → Users → People → Invite people*. Note
+the URL — `/latest/settings/people` silently redirects to the Business Suite home; the working
+path is `/latest/settings/business_users`.
+
 ## Environment variables
 
 Per brand, with the product id uppercased:
@@ -151,6 +202,20 @@ curl -s -X POST "https://graph.facebook.com/v21.0/<PAGE_ID>/feed" \
 
 In kun: the Social Hub's status dialog **names the resolved Page** for the selected brand. Check
 it before publishing — it is the only pre-publish signal that a token isn't crossed.
+
+To check the portfolio side — that the Page is where you think it is, and what it is linked to:
+
+```
+https://business.facebook.com/latest/settings/pages/
+  ?business_id=<BUSINESS_ID>
+  &selected_asset_id=<PAGE_ID>
+  &selected_asset_type=page
+  &detail_view_tab=CONNECTED_ASSETS
+```
+
+The **Connected assets** tab is the only trustworthy signal for whether a Page has an Instagram
+account attached. Navigate straight to it with the `detail_view_tab` parameter — clicking the
+tab in the UI frequently swallows the first click.
 
 ## Limits
 

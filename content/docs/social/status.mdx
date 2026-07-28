@@ -5,7 +5,8 @@ description: Where social automation actually stands — wired vs configured vs 
 
 # Status
 
-**Last verified: 2026-07-27** (against Vercel production env and live endpoint probes).
+**Last verified: 2026-07-28** (against Vercel production env, live endpoint probes, and a full
+read of the Meta business portfolio).
 
 The code is in good shape. The configuration is not. This page exists because
 [the overview](/docs/social) describes what the pipeline *can* do, and it is easy to read that
@@ -39,7 +40,7 @@ in this table as a peer, which put a team chat in a marketing-reach denominator.
 | **Facebook** — hogwarts · mkan · databayt | ✅ | ✅ | **✅** | — |
 | **Telegram** | ✅ | ❌ | ❌ | Bot exists and is valid, but its token was never pushed to Vercel and no `TELEGRAM_CHANNEL_ID` exists anywhere |
 | **Facebook** — sijillee · moallimee | ✅ | ❌ | ❌ | No Facebook Page created yet |
-| **Instagram** | registry only | ❌ | ❌ | Business account + App Review |
+| **Instagram** | registry only | ❌ | ❌ | **Ownership.** 1 of 5 brands has an IG account linked to its Page; publishing needs Advanced Access → App Review → Business Verification, and the portfolio cannot pass verification yet — see [Ownership](/docs/social/ownership) |
 | **LinkedIn** | registry only | ❌ | ❌ | Community Management API approval |
 | **X** | registry only | ❌ | ❌ | Pay-per-use since Feb 2026 — needs `/decide` |
 | **TikTok** | registry only | ❌ | ❌ | Full app audit, 1–4 weeks |
@@ -47,6 +48,22 @@ in this table as a peer, which put a team chat in a marketing-reach denominator.
 | **WhatsApp** | ✅ *(manual)* | n/a | n/a | No organic posting API exists — and none is coming. Carried through draft, media, and approval like any channel; `/publish` hands out a copy-out block a human forwards |
 
 **Live: 1 of 8 distribution channels, for 3 of 5 brands.**
+
+Instagram in detail, because it is the nearest channel to going live and the one whose blocker is
+most often misread as "App Review":
+
+| Brand | Facebook Page | IG account | Linked to the Page |
+|-------|:-------------:|-----------|:------------------:|
+| Mkan مكان | ✅ | `@mkan.sd` | ✅ |
+| Hogwarts | ✅ | `@osmanabdout` | ❌ — 5 failed web attempts; needs the IG mobile app |
+| Databayt داتابيت | ✅ | — | ⛔ Page sits in a different business portfolio |
+| Moallimee | ❌ | ❌ | ❌ |
+| Sijillee | ❌ | ❌ | ❌ |
+
+The per-brand link is the cheap half. The expensive half is shared: Business Verification, which
+verifies a *legal business*, and the portfolio currently has no legal name, no address and no
+verification because Meta auto-created it as a side effect of the first Instagram link.
+Tracked in [kun#141](https://github.com/databayt/kun/issues/141).
 
 ### Communication — the one
 
@@ -90,6 +107,7 @@ returns `drafted: 0`.
 ## What's not
 
 - **Configuration** — the largest gap and the cheapest to close. Being handled by Cowork, which can drive the platform consoles directly.
+- **Ownership** — newly named, and the only gap on this page that is *not* cheap to close. Every brand's social identity hangs off one personal Facebook account inside an unnamed, unverified business portfolio with a bus factor of one, and no teammate has ever been invited. It blocks Instagram outright rather than merely being untidy. See [Ownership & accounts](/docs/social/ownership).
 - **Hermes** — down, no production config, and the outbound draft lane dead-ends silently when it is.
 - **Measurement — now wired on Facebook, and the remaining gap is analytics, not permissions.**
   - ✅ **UTM tagging works.** Every outbound link is tagged at delivery with `utm_source=<channel>`, `utm_medium=social`, `utm_campaign=<brand>`, so traffic is attributable *at our own site* — the only lane that does not depend on a platform choosing to share numbers. Already-tagged links are left alone.
@@ -123,12 +141,14 @@ Ordered by value ÷ cost, not by size:
 1. **Three environment variables revive an entire loop.** A review destination, a draft source, and an opt-in list turn Loop B from dead to working. No code.
 2. **Turn Telegram on.** Free, instant, no gate, bot already exists — doubles the live distribution-channel count. Two environment variables.
 3. **Run `/api/social/metrics` once per brand by hand**, then uncomment the schedule. The scopes are verified on the hogwarts token only; one dispatch tells you what mkan and databayt actually return.
-4. **Teach the cron to draft per channel.** The last structural gap between the pipeline and the strategy it claims to serve.
+4. **Name and verify the business portfolio, and invite a second admin.** Nothing on the Instagram half can start until Business Verification is in flight, and verification is waiting rather than working — so the cost of starting it late is paid in calendar days. See [Ownership & accounts](/docs/social/ownership).
+5. **Teach the cron to draft per channel.** The last structural gap between the pipeline and the strategy it claims to serve.
 
 Done since this page was first written: persistence, real scheduling with a drain, single-use approval links, and the metrics lane.
 
 ## See also
 
+- [Ownership & accounts](/docs/social/ownership) — who owns the brand accounts, and why it gates Instagram
 - [Architecture & Loops](/docs/social/architecture) — who talks to whom, and in which direction
 - [Channel guides](/docs/social/channels) — how to configure each one
 - [Strategy](/docs/social/strategy) — cadence, the multiplier, and the kill criteria

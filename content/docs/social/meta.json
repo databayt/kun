@@ -3,6 +3,7 @@
   "pages": [
     "index",
     "status",
+    "ownership",
     "architecture",
     "channels",
     "strategy",
