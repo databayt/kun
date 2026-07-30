@@ -17,6 +17,7 @@ import {
 } from "@/components/root/social/config";
 import { db } from "@/lib/db";
 import { deliverPost } from "@/lib/social-publish";
+import { REAP_AFTER_MS, reapDecision } from "@/lib/social-reap";
 import { sendReview } from "@/lib/social-review";
 
 export const runtime = "nodejs";
@@ -37,8 +38,61 @@ interface DrainOutcome {
   variant: string;
   brand: string;
   channel: string;
-  status: "published" | "retrying" | "failed" | "lost-race";
+  status: "published" | "retrying" | "failed" | "lost-race" | "reaped";
   detail?: string;
+}
+
+// Recover rows stranded in `publishing` by a killed function — see
+// lib/social-reap.ts for the full rationale and the accepted residual risk.
+async function reapStuck(): Promise<DrainOutcome[]> {
+  const reaped: DrainOutcome[] = [];
+  const stuck = await db.socialVariant.findMany({
+    where: {
+      status: "publishing",
+      updatedAt: { lte: new Date(Date.now() - REAP_AFTER_MS) },
+    },
+    take: BATCH,
+    include: { piece: true },
+  });
+
+  for (const row of stuck) {
+    const decision = reapDecision(
+      { scheduledFor: row.scheduledFor, attempts: row.attempts },
+      new Date(),
+      MAX_ATTEMPTS,
+    );
+    // Conditional, like every transition here: the terminal write may have
+    // landed between the read above and now.
+    const claimed = await db.socialVariant.updateMany({
+      where: { id: row.id, status: "publishing" },
+      data:
+        decision.status === "failed"
+          ? { status: "failed", result: "reaped: stuck in publishing" }
+          : decision.status === "pending"
+            ? { status: "pending", result: "reaped: returned to pending" }
+            : {
+                status: "scheduled",
+                scheduledFor: decision.scheduledFor,
+                result: "reaped: returned to schedule",
+              },
+    });
+    if (claimed.count === 0) continue;
+
+    reaped.push({
+      variant: row.id,
+      brand: row.piece.brand,
+      channel: row.channel,
+      status: "reaped",
+      detail: `→ ${decision.status}`,
+    });
+    if (decision.status === "failed") {
+      await sendReview(
+        `⚠️ Reaped a stuck publish after ${MAX_ATTEMPTS} attempts — ${row.piece.brand} → ${row.channel}.`,
+        `social drain: ${row.piece.brand}`,
+      );
+    }
+  }
+  return reaped;
 }
 
 export async function GET(request: Request): Promise<Response> {
@@ -54,6 +108,8 @@ export async function GET(request: Request): Promise<Response> {
       { status: 401 },
     );
   }
+
+  const reaped = await reapStuck();
 
   const due = await db.socialVariant.findMany({
     where: {
@@ -147,16 +203,19 @@ export async function GET(request: Request): Promise<Response> {
     );
   }
 
-  if (results.length) {
+  if (results.length || reaped.length) {
     console.log(
-      `[social/drain] ${results.map((r) => `${r.channel}:${r.status}`).join(" ")}`,
+      `[social/drain] ${[...reaped, ...results].map((r) => `${r.channel}:${r.status}${r.status === "reaped" ? r.detail : ""}`).join(" ")}`,
     );
   }
 
   return Response.json({
+    // A reap is recovery, not a fresh failure — only a delivery that gave up
+    // this run flips ok.
     ok: results.every((r) => r.status !== "failed"),
     due: due.length,
     published: results.filter((r) => r.status === "published").length,
-    results,
+    reaped: reaped.length,
+    results: [...reaped, ...results],
   });
 }
