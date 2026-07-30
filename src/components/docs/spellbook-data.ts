@@ -2532,7 +2532,7 @@ export const schools: School[] = [
         steps: [
           "Assemble copy + media per channel, exactly as it will appear",
           "Pre-flight: Arabic glyphs, no text baked into a render, AI media labelled, consent for faces",
-          "Stage via stageForReview or POST /api/social/relay — one pending variant + one 12h signed link per channel",
+          "Stage via stageForReview — the only staging lane — one pending variant + one 12h signed link per channel (never /api/social/relay: it publishes immediately)",
           "STOP. Deliver the links and wait; the gate never times out into a publish",
           "Record the decision per channel — approved, held, or rejected",
         ],

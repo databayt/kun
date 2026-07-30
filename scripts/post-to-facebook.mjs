@@ -30,7 +30,9 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-const GRAPH_VERSION = 'v21.0';
+// v25.0 matches src/lib/facebook.ts — Meta silently serves sub-floor versions
+// from the app's configured version, so a stale pin here never errors, it lies.
+const GRAPH_VERSION = 'v25.0';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '..');
 
