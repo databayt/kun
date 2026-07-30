@@ -368,7 +368,9 @@ export function DraftAgent({
                   onFocus={() => setIsInputFocused(true)}
                   onBlur={() => setIsInputFocused(false)}
                   placeholder={
-                    collapsed ? t.agentPlaceholderMore : t.agentPlaceholder
+                    collapsed
+                      ? t.agentPlaceholderMore
+                      : fill(t.agentPlaceholder, { brand: brandLabel })
                   }
                   disabled={busy}
                   className={cn(

@@ -84,7 +84,9 @@ export const SOCIAL_DICTIONARY = {
     // The heading's second line: lead sentence, then the words of the scroll link.
     agentLead: "Describe the post, or",
     agentScrollText: "see what's already published",
-    agentPlaceholder: "draft a post for [brand] about ..",
+    // {brand} is filled with whatever the product select is showing, so the
+    // prompt always names the brand the ask will actually be filed under.
+    agentPlaceholder: "draft a post for {brand} about ..",
     agentPlaceholderMore: "Draft another…",
     agentDrafting: "Queued — Claude is writing it.",
     agentQueuedHint:
@@ -194,7 +196,8 @@ export const SOCIAL_DICTIONARY = {
       "كلما كان الموجز أدقّ، كان النص أفضل: الخبر، ولمن هو، وما المطلوب من القارئ، وأي تاريخ أو اسم أو رابط يجب أن يظهر. يكتبه Claude على اشتراك الفريق، بالعربية أولًا ومعها الإنجليزية.",
     agentLead: "صِف المنشور، أو",
     agentScrollText: "اطّلع على ما نُشر بالفعل",
-    agentPlaceholder: "اكتب منشوراً لـ [العلامة] عن ..",
+    // The token stays ASCII — `fill` matches {\w+}, which Arabic letters are not.
+    agentPlaceholder: "اكتب منشوراً لـ {brand} عن ..",
     agentPlaceholderMore: "صياغة أخرى…",
     agentDrafting: "في الانتظار — Claude يكتبه الآن.",
     agentQueuedHint:

@@ -4,12 +4,19 @@ import { useEffect, useState } from "react";
 import {
   CalendarClock,
   CheckCircle2,
+  Paperclip,
   Send,
   Share2,
   XCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 import {
   publishPostDirect,
   schedulePost,
@@ -173,184 +180,230 @@ export function Composer({
     return isRTL ? channel.labelAr : channel.label;
   };
 
+  // The pill controls in the editor's toolbar, matching the agent window's.
+  const pill =
+    "border-input bg-muted text-muted-foreground hover:text-foreground hover:bg-accent inline-flex h-8 items-center justify-center gap-1.5 rounded-full border px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors duration-100 ease-in-out hover:border-transparent disabled:pointer-events-none disabled:opacity-50";
+
   return (
-    <div
-      id="composer"
-      className="border-border bg-card/40 rounded-xl border p-6 shadow-lg backdrop-blur-md transition-all duration-300 hover:shadow-xl"
-    >
-      <div className="mb-2 flex items-center gap-3">
-        <div className="bg-primary/10 text-primary rounded-lg p-2">
-          <Send className="h-5 w-5" />
-        </div>
-        <div>
-          <h3 className="text-primary text-lg font-medium">
-            {t.composerTitle}
-          </h3>
-          <p className="text-muted-foreground text-sm font-light">
-            {t.composerDesc}
-          </p>
-        </div>
-      </div>
-
-      <div className="mt-6 space-y-4">
-        {wiredForProduct.length === 0 && (
-          <p className="text-muted-foreground border-border rounded-lg border border-dashed p-3 text-xs">
-            {t.noChannels}
-          </p>
-        )}
-
-        <div>
-          <textarea
-            value={postText}
-            onChange={(e) => setPostText(e.target.value)}
-            placeholder={t.textareaPlaceholder}
-            rows={6}
-            maxLength={MAX_TEXT}
-            className="border-border bg-input/10 focus:border-primary w-full rounded-lg border p-4 text-base transition-colors focus:outline-none"
-          />
-          <div className="mt-1 flex items-center justify-between gap-3">
-            <span
-              className={`text-xs ${
-                overReviewLimit ? "text-amber-500" : "text-muted-foreground"
-              }`}
-            >
-              {overReviewLimit
-                ? fill(t.overCaptionLimit, { max: MAX_REVIEW_TEXT })
-                : ""}
-            </span>
-            <span
-              className="text-muted-foreground shrink-0 font-mono text-xs"
-              dir="ltr"
-            >
-              {fill(t.charCount, { count: trimmed.length, max: MAX_TEXT })}
-            </span>
+    <section className="full-bleed from-background to-muted/20 flex flex-col bg-gradient-to-b py-16 md:py-24">
+      <div className="mx-auto flex w-full max-w-4xl flex-col items-center px-4">
+        <div className="w-full text-center">
+          <div className="mb-8">
+            <h2 className="text-2xl font-semibold tracking-tight">
+              {t.composerTitle}
+            </h2>
+            <p className="text-muted-foreground mx-auto mt-4 max-w-xl text-lg font-light">
+              {t.composerDesc}
+            </p>
           </div>
-        </div>
 
-        <div>
-          <label
-            htmlFor="social-media-url"
-            className="text-muted-foreground mb-1 block text-xs font-medium"
-          >
-            {t.mediaLabel}
-          </label>
-          <Input
-            id="social-media-url"
-            type="url"
-            dir="ltr"
-            value={mediaUrl}
-            onChange={(e) => setMediaUrl(e.target.value)}
-            placeholder={t.mediaPlaceholder}
-            className="font-mono text-sm"
-          />
-          <p className="text-muted-foreground mt-1 text-xs">{t.mediaHint}</p>
-        </div>
+          {wiredForProduct.length === 0 && (
+            <p className="text-muted-foreground border-border mx-auto mb-4 max-w-3xl rounded-lg border border-dashed p-3 text-xs">
+              {t.noChannels}
+            </p>
+          )}
 
-        <div>
-          <label
-            htmlFor="social-scheduled-for"
-            className="text-muted-foreground mb-1 block text-xs font-medium"
-          >
-            {t.scheduleLabel}
-          </label>
-          <Input
-            id="social-scheduled-for"
-            type="datetime-local"
-            dir="ltr"
-            value={scheduledFor}
-            onChange={(e) => setScheduledFor(e.target.value)}
-            className="w-auto text-sm"
-          />
-          <p className="text-muted-foreground mt-1 text-xs">{t.scheduleHint}</p>
-        </div>
+          {/* The editor surface — the agent window's pill, sized for writing
+              rather than for a one-line brief. Media and schedule collapse into
+              toolbar pills so the copy is the only thing with weight. */}
+          <div id="composer" className="relative mx-auto w-full max-w-3xl">
+            <div className="group border-muted-foreground/10 bg-muted focus-within:border-foreground/20 hover:border-foreground/10 focus-within:hover:border-foreground/20 flex w-full flex-col gap-2 rounded-[2rem] border p-3 text-base shadow-sm transition-all duration-300 ease-in-out">
+              <textarea
+                value={postText}
+                onChange={(e) => setPostText(e.target.value)}
+                placeholder={t.textareaPlaceholder}
+                maxLength={MAX_TEXT}
+                className="placeholder:text-muted-foreground min-h-[220px] w-full flex-1 resize-none bg-transparent px-2 py-2 text-start text-[16px] leading-relaxed focus:bg-transparent focus:outline-none"
+              />
 
-        {notice && (
-          <div className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-500">
-            <CheckCircle2 className="h-4 w-4 shrink-0" />
-            <span>{notice}</span>
-          </div>
-        )}
+              <div className="flex flex-wrap items-center gap-1">
+                <Popover>
+                  <PopoverTrigger
+                    className={cn(pill, mediaUrl.trim() && "text-foreground")}
+                    aria-label={t.mediaLabel}
+                  >
+                    <Paperclip className="size-4 shrink-0" />
+                    <span className="hidden md:flex">{t.mediaLabel}</span>
+                    {mediaUrl.trim() && (
+                      <span className="bg-primary size-1.5 rounded-full" />
+                    )}
+                  </PopoverTrigger>
+                  <PopoverContent
+                    align={isRTL ? "end" : "start"}
+                    className="w-80 text-start"
+                  >
+                    <label
+                      htmlFor="social-media-url"
+                      className="text-muted-foreground mb-1 block text-xs font-medium"
+                    >
+                      {t.mediaLabel}
+                    </label>
+                    <Input
+                      id="social-media-url"
+                      type="url"
+                      dir="ltr"
+                      value={mediaUrl}
+                      onChange={(e) => setMediaUrl(e.target.value)}
+                      placeholder={t.mediaPlaceholder}
+                      className="font-mono text-sm"
+                    />
+                    <p className="text-muted-foreground mt-2 text-xs">
+                      {t.mediaHint}
+                    </p>
+                  </PopoverContent>
+                </Popover>
 
-        {error && (
-          <div className="flex items-center gap-2 rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-500">
-            <XCircle className="h-4 w-4 shrink-0" />
-            <span>{error}</span>
-          </div>
-        )}
+                <Popover>
+                  <PopoverTrigger
+                    className={cn(pill, scheduledFor && "text-foreground")}
+                    aria-label={t.scheduleLabel}
+                  >
+                    <CalendarClock className="size-4 shrink-0" />
+                    <span className="hidden md:flex">
+                      {scheduledFor
+                        ? new Date(scheduledFor).toLocaleString()
+                        : t.scheduleLabel}
+                    </span>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    align={isRTL ? "end" : "start"}
+                    className="w-80 text-start"
+                  >
+                    <label
+                      htmlFor="social-scheduled-for"
+                      className="text-muted-foreground mb-1 block text-xs font-medium"
+                    >
+                      {t.scheduleLabel}
+                    </label>
+                    <Input
+                      id="social-scheduled-for"
+                      type="datetime-local"
+                      dir="ltr"
+                      value={scheduledFor}
+                      onChange={(e) => setScheduledFor(e.target.value)}
+                      className="text-sm"
+                    />
+                    <p className="text-muted-foreground mt-2 text-xs">
+                      {t.scheduleHint}
+                    </p>
+                  </PopoverContent>
+                </Popover>
 
-        {/* Per-channel truth: a fan-out that half-landed used to read as one
-            flat failure, which hid that the post is already public somewhere. */}
-        {outcomes && outcomes.length > 0 && (
-          <ul className="border-border divide-border/60 divide-y rounded-lg border text-sm">
-            {outcomes.map((outcome) => (
-              <li
-                key={outcome.channel}
-                className="flex items-start justify-between gap-3 p-3"
-              >
-                <span className="flex items-center gap-2">
-                  {outcome.ok ? (
-                    <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
-                  ) : (
-                    <XCircle className="h-4 w-4 shrink-0 text-rose-500" />
+                <span
+                  className={cn(
+                    "shrink-0 px-2 font-mono text-xs",
+                    overReviewLimit
+                      ? "text-amber-500"
+                      : "text-muted-foreground",
                   )}
-                  <span>{channelLabel(outcome.channel)}</span>
+                  dir="ltr"
+                >
+                  {fill(t.charCount, { count: trimmed.length, max: MAX_TEXT })}
                 </span>
-                {!outcome.ok && outcome.error && (
-                  <span className="text-muted-foreground text-end text-xs break-words">
-                    {outcome.error}
-                  </span>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
 
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-          <span className="text-muted-foreground text-xs">
-            {blockedReason ?? ""}
-          </span>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              onClick={handleSchedule}
-              disabled={
-                pending !== null ||
-                !trimmed ||
-                selectedChannels.length === 0 ||
-                !scheduledFor
-              }
-              className="flex items-center gap-2 font-medium"
-            >
-              <CalendarClock className="h-4 w-4" />
-              <span>
-                {pending === "schedule" ? t.scheduling : t.scheduleAction}
-              </span>
-            </Button>
-            <Button
-              variant="outline"
-              onClick={handleStage}
-              disabled={
-                pending !== null ||
-                !trimmed ||
-                selectedChannels.length === 0 ||
-                overReviewLimit
-              }
-              className="flex items-center gap-2 font-medium"
-            >
-              <Share2 className="h-4 w-4" />
-              <span>{pending === "review" ? t.staging : t.stageForReview}</span>
-            </Button>
-            <Button
-              onClick={handlePublish}
-              disabled={pending !== null || blockedReason !== null}
-              className="flex items-center gap-2 font-medium"
-            >
-              <Send className="h-4 w-4" />
-              <span>{pending === "publish" ? t.posting : t.postDirect}</span>
-            </Button>
+                <div className="ms-auto flex items-center gap-1 md:gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleSchedule}
+                    disabled={
+                      pending !== null ||
+                      !trimmed ||
+                      selectedChannels.length === 0 ||
+                      !scheduledFor
+                    }
+                    className="h-8 rounded-full"
+                  >
+                    {pending === "schedule" ? t.scheduling : t.scheduleAction}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleStage}
+                    disabled={
+                      pending !== null ||
+                      !trimmed ||
+                      selectedChannels.length === 0 ||
+                      overReviewLimit
+                    }
+                    className="h-8 gap-1.5 rounded-full"
+                  >
+                    <Share2 className="size-4" />
+                    <span className="hidden md:flex">
+                      {pending === "review" ? t.staging : t.stageForReview}
+                    </span>
+                  </Button>
+                  <Button
+                    onClick={handlePublish}
+                    disabled={pending !== null || blockedReason !== null}
+                    className="h-8 gap-1.5 rounded-full"
+                    size="sm"
+                  >
+                    <Send className="size-4" />
+                    <span>
+                      {pending === "publish" ? t.posting : t.postDirect}
+                    </span>
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Everything the editor has to say back, under it. */}
+          <div className="mx-auto mt-4 w-full max-w-3xl space-y-3 text-start">
+            {overReviewLimit && (
+              <p className="text-xs text-amber-500">
+                {fill(t.overCaptionLimit, { max: MAX_REVIEW_TEXT })}
+              </p>
+            )}
+
+            {blockedReason && (
+              <p className="text-muted-foreground text-xs">{blockedReason}</p>
+            )}
+
+            {notice && (
+              <div className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-500">
+                <CheckCircle2 className="h-4 w-4 shrink-0" />
+                <span>{notice}</span>
+              </div>
+            )}
+
+            {error && (
+              <div className="flex items-center gap-2 rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-500">
+                <XCircle className="h-4 w-4 shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
+
+            {/* Per-channel truth: a fan-out that half-landed used to read as one
+                flat failure, which hid that the post is already public somewhere. */}
+            {outcomes && outcomes.length > 0 && (
+              <ul className="border-border divide-border/60 divide-y rounded-lg border text-sm">
+                {outcomes.map((outcome) => (
+                  <li
+                    key={outcome.channel}
+                    className="flex items-start justify-between gap-3 p-3"
+                  >
+                    <span className="flex items-center gap-2">
+                      {outcome.ok ? (
+                        <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
+                      ) : (
+                        <XCircle className="h-4 w-4 shrink-0 text-rose-500" />
+                      )}
+                      <span>{channelLabel(outcome.channel)}</span>
+                    </span>
+                    {!outcome.ok && outcome.error && (
+                      <span className="text-muted-foreground text-end text-xs break-words">
+                        {outcome.error}
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

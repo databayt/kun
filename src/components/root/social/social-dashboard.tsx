@@ -189,58 +189,17 @@ export default function SocialDashboard({
 
   return (
     <>
-      {/* Top bar — product, channels, and status side-by-side at start */}
+      {/* Top bar — the pipeline at the start, its context at the end. Logical
+          properties throughout, so the whole row mirrors under RTL. */}
       <div className="flex flex-wrap items-center justify-start gap-3 border-b-[0.5px] py-3">
-        <label htmlFor="product-selector" className="sr-only">
-          {t.product}
-        </label>
-        <Select
-          value={product}
-          onValueChange={(value) => setProduct(value as ProductId)}
-        >
-          <SelectTrigger
-            id="product-selector"
-            className="h-8 w-auto justify-start border-0 bg-transparent shadow-none dark:bg-transparent dark:hover:bg-transparent"
-          >
-            <SelectValue placeholder={t.selectProduct} />
-          </SelectTrigger>
-          <SelectContent align={isRightToLeft ? "end" : "start"}>
-            {PRODUCTS.map((p) => (
-              <SelectItem
-                key={p.id}
-                value={p.id}
-                className="data-[state=checked]:opacity-50"
-              >
-                {isRightToLeft ? p.labelAr : p.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <ChannelPicker
-          product={product}
-          selected={selectedChannels}
-          wiredForProduct={wiredForProduct}
-          onChange={setSelectedChannels}
-          isRTL={isRightToLeft}
-          t={t}
-        />
-
-        <StatusDialog
-          status={status}
-          checking={checking}
-          onRefresh={checkConnections}
-          t={t}
-        />
-
-        {/* The pipeline, as tabs. The row above them is context that spans every
-            stage — brand especially, since it selects the Page and the token. */}
+        {/* The pipeline, as tabs. Everything after them is context that spans
+            every stage — brand especially, since it selects the Page and token. */}
         <div
           role="tablist"
           aria-label={t.tabsLabel}
           aria-orientation="horizontal"
           onKeyDown={onTablistKeyDown}
-          className="ms-auto flex items-center gap-1"
+          className="flex items-center gap-1"
         >
           {STAGES.map((s) => (
             <button
@@ -258,6 +217,57 @@ export default function SocialDashboard({
               {t[STAGE_LABEL_KEY[s]]}
             </button>
           ))}
+        </div>
+
+        {/* The stage's context, travelling to the end as one group so the brand
+            select lands last. `ms-auto` on the group, not the first child —
+            ChannelPicker takes no className, and one wrapper beats a prop added
+            for alignment. */}
+        <div className="ms-auto flex flex-wrap items-center gap-3">
+          <ChannelPicker
+            product={product}
+            selected={selectedChannels}
+            wiredForProduct={wiredForProduct}
+            onChange={setSelectedChannels}
+            isRTL={isRightToLeft}
+            t={t}
+          />
+
+          <StatusDialog
+            status={status}
+            checking={checking}
+            onRefresh={checkConnections}
+            t={t}
+          />
+
+          <label htmlFor="product-selector" className="sr-only">
+            {t.product}
+          </label>
+          <Select
+            value={product}
+            onValueChange={(value) => setProduct(value as ProductId)}
+          >
+            <SelectTrigger
+              id="product-selector"
+              className="h-8 w-auto justify-start border-0 bg-transparent shadow-none dark:bg-transparent dark:hover:bg-transparent"
+            >
+              <SelectValue placeholder={t.selectProduct} />
+            </SelectTrigger>
+            {/* Aligned to the trigger's far edge now that it sits at the end of
+                the row — the previous values pinned the menu to the page edge it
+                no longer touches. */}
+            <SelectContent align={isRightToLeft ? "start" : "end"}>
+              {PRODUCTS.map((p) => (
+                <SelectItem
+                  key={p.id}
+                  value={p.id}
+                  className="data-[state=checked]:opacity-50"
+                >
+                  {isRightToLeft ? p.labelAr : p.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -298,17 +308,15 @@ export default function SocialDashboard({
       {/* Approve, Schedule and Publish are one composer with three buttons, so
           they are one stage here rather than three tabs over the same form. */}
       <Panel stage="publish" active={stage}>
-        <div className="space-y-8 py-8">
-          <Composer
-            product={product}
-            selectedChannels={selectedChannels}
-            wiredForProduct={wiredForProduct}
-            transportsReady={transportsReady}
-            isRTL={isRightToLeft}
-            t={t}
-            prefill={prefill}
-          />
-        </div>
+        <Composer
+          product={product}
+          selectedChannels={selectedChannels}
+          wiredForProduct={wiredForProduct}
+          transportsReady={transportsReady}
+          isRTL={isRightToLeft}
+          t={t}
+          prefill={prefill}
+        />
       </Panel>
 
       <Panel stage="measure" active={stage}>
