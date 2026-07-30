@@ -1,7 +1,7 @@
 ---
 name: approve
 description: The human gate — stage copy and media for sign-off, then stop
-when_to_use: "Use when drafted copy and media are ready for a human to say yes before anything reaches a public brand page — staging into #social with a signed one-click link, or recording an in-session approval. This is the gate, not the send: it never writes copy (/draft), never makes media (/higgs), and never delivers to a platform (/publish, which refuses to run without the artifact this stage produces). Triggers on: stage for review, send for approval, get sign-off, ready for review, اعتماد, أرسل للمراجعة."
+when_to_use: "Use when drafted copy and media are ready for a human to say yes before anything reaches a public brand page — staging into #social with a signed single-use link (it opens a confirm page; only its button publishes), or recording an in-session approval. This is the gate, not the send: it never writes copy (/draft), never makes media (/higgs), and never delivers to a platform (/publish, which refuses to run without the artifact this stage produces). Triggers on: stage for review, send for approval, get sign-off, ready for review, اعتماد, أرسل للمراجعة."
 argument-hint: "<brand> [--channels ...] [--media <url>] [--reviewer <name>]"
 ---
 
@@ -34,11 +34,16 @@ Arguments: $ARGUMENTS — brand, the channels being approved, the media URL if a
 3. **Stage** — push each channel down the approval path so it gets its own
    `SocialVariant` in `pending` and its own signed, single-use, 12-hour link:
    - From the Hub: the composer's **Send for review** (`stageForReview` in
-     `src/actions/post-social.ts`).
-   - From a machine: `POST /api/social/relay`.
+     `src/actions/post-social.ts`). This is the only staging lane.
+   - **`POST /api/social/relay` is NOT staging — it publishes immediately.**
+     The relay's contract is "a human already said yes upstream, in Slack";
+     pointing an unapproved draft at it bypasses this gate entirely.
 
    Per-channel variants are deliberate — a reviewer can take Telegram and hold
    Facebook. One token covering the whole fan-out was all-or-nothing.
+   The link opens a read-only confirm page; only its **Approve & publish**
+   button (a POST) delivers, so a chat client's link preview can never consume
+   the approval — and its **Reject** button records `rejected` on the row.
 
 4. **Where it lands**: the review destination, `#social` via Hermes by default
    (`SOCIAL_REVIEW_CHANNEL`), falling back to a **private** `TELEGRAM_REVIEW_CHAT_ID`.
@@ -47,8 +52,9 @@ Arguments: $ARGUMENTS — brand, the channels being approved, the media URL if a
    brand.
 5. **STOP.** Deliver the links and wait. Do not proceed to `/publish` in the same
    breath.
-6. **Record the decision** per channel — approved, held, or rejected. A held
-   channel is named in the report, never silently dropped.
+6. **Record the decision** per channel — approved, held, or rejected. The
+   link's Reject button persists `rejected` on the variant itself; an
+   in-session hold is named in the report, never silently dropped.
 
 ## Exit gate
 
