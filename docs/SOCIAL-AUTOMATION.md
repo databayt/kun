@@ -213,12 +213,33 @@ architecture (actors, the three loops, cron inventory, keywords) is now
   `<Select>`, so you could pick one channel or all — never two of three. Restored as a
   `DropdownMenuCheckboxItem` multi-select. ✅
 
-### Persistence, scheduling, metrics
+### Persistence, scheduling, metrics — ⚠️ mostly done 2026-07-26 … 07-30
 
-- Prisma `SocialPost` / `ScheduledPost` — **variant-aware**: parent piece + per-platform variants
-  (brand, channel, status, scheduled_for, result, `aiGenerated` flag — see moral gate below).
-- `/schedule` (Vercel cron or the harness scheduler) for timed publishing.
-- PostHog events + per-platform analytics for attribution; UTM on every link.
+- ✅ Prisma **variant-aware** persistence: `SocialPiece` → `SocialVariant` → `SocialMetric`
+  (brand, channel, status, `scheduledFor`, result, `aiGenerated` — see moral gate below).
+- ✅ Timed publishing: the composer takes a date and time, `schedulePost` writes `scheduled`
+  variants, and `/api/social/drain` publishes due ones every ~15 min from GitHub Actions (not
+  Vercel cron — granularity is a plan-tier limit).
+- ✅ UTM on every link, applied at delivery by `lib/social-utm.ts`.
+- ❌ **PostHog events + per-platform analytics for attribution.** Still open: there is no PostHog
+  dependency or key in the app, so nothing consumes the UTMs. The tags are still recorded in the
+  platform link for whatever is added later.
+
+### Draft queue — the Hub's Draft tab needs a drain
+
+The Social Agent window (2026-07-30) is the front door for a teammate with no Claude Code session:
+the ask lands in `SocialDraftRequest` as `pending` and a session answers it on the Max pool through
+`draft`'s queue mode (`scripts/social-drafts.mjs`). **Nothing drains it on a schedule**, so an ask
+waits for whenever someone next runs a session, and the window polls without a timeout — from the
+Hub, an undrained queue and an outage look identical.
+
+- A scheduled drain — folded into the daily maintain heartbeat, or a scheduled cloud agent (which
+  would need `DATABASE_URL` reachable from that sandbox; unverified).
+- A "waiting longer than expected" state in the window, so a stall reads as a stall.
+- Reconnecting a window to an in-flight request: the request id lives in React state only, so
+  closing the tab orphans the answer — the row is answered but nothing surfaces it.
+
+No new spend in any of these: the answering is Max-pool, not API.
 
 ### AI-disclosure mapping (the moral gate's compliance half)
 

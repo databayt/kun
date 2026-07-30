@@ -62,9 +62,16 @@ They differ in one thing: **where the human sits, and who holds the tokens.**
 The everyday lane. Nothing scheduled, nothing autonomous.
 
 ```
-Claude Code (/social) ──► human pastes into /social Hub ──► picks brand + channels
+Claude Code (/social) ──► human pastes into the Hub's Publish tab ──► brand + channels
    └─ drafts AR/EN copy          └─ optional media URL from /higgs
                                        │
+   ── or, without a session ──►  Hub's Draft tab ──► SocialDraftRequest (pending)
+                                       │                      ▲        │
+                                       │        answers ──────┘        │ polls
+                                       │   Claude Code, Max pool       │
+                                       │   (`draft` queue mode)        │
+                                       │◄─────────────────────────────-┘
+                                       │   "Use Arabic" → Publish tab, copy in the editor
                                        ▼
                             publishPostDirect (Server Action)
                             contributor re-check → Zod → deliverPost
@@ -75,7 +82,11 @@ Claude Code (/social) ──► human pastes into /social Hub ──► picks br
                                                        (Slack, …)
 ```
 
-- **Human sits:** at the composer, before Publish.
+The second path is Loop C's inverted arrow again, for the same reason: Vercel holds no funded
+Anthropic key (D-20260730 shipped, then 401'd), so the machine that writes reaches in rather than
+being called. Asynchronous — minutes, and only while some session is draining the queue.
+
+- **Human sits:** at the editor, before Publish.
 - **Guard:** session + contributor allowlist re-checked *inside* the action (JWT sessions outlive
   removal from the allowlist).
 - **Result:** per-channel — a fan-out that half-lands reports exactly which channel failed and why.
@@ -140,7 +151,7 @@ The chain the whole system is built around, and where each stage actually lives:
 
 | Stage | Who / what | Code | Loop | State today |
 |-------|-----------|------|------|-------------|
-| **Generate** | Claude (`/social` skill) · `/higgs` for media | `lib/social-draft.ts` (cron lane only) | A · B · C | Claude-native. The relays never write copy. |
+| **Generate** | Claude (`/social` skill) · the Hub's **Draft** tab · `/higgs` for media | `lib/social-draft.ts` (cron lane) · `SocialDraftRequest` + `draft` queue mode (Hub lane) | A · B · C | Claude-native. The relays never write copy. The Hub lane needs a session draining the queue — nothing does it on a schedule yet. |
 | **Approve** | Human — Abdout, Samia, or Ali | composer button · signed link · Slack | A · B · C | **Always required.** L2 on Facebook — the one live channel; L1 elsewhere. |
 | **Schedule** | Contributor — the composer's date-time field | `schedulePost` → `scheduled` variants → `/api/social/drain` | A | Real: pick a moment, the drain publishes within ~15 min of it. |
 | **Publish** | Egress fan-out, per transport, in parallel | `lib/social-publish.ts` → `deliverPost` | A · B · C | One code path for all three loops. |

@@ -94,7 +94,7 @@ subscription. It has two halves and **both have to run**:
 
 | Who | Where | Does |
 |-----|-------|------|
-| Any contributor | `/social` | Picks the brand, writes a brief, presses send. The ask becomes a `SocialDraftRequest` and the window polls |
+| Any contributor | `/social` → **Draft** | Picks the brand, writes a brief, presses send. The ask becomes a `SocialDraftRequest` and the window polls |
 | Any Claude Code session | the repo | Says **`draft`** with no topic → queue mode drains the pending asks through the same brand-voice doctrine, and writes the copy back |
 
 ```bash
@@ -273,21 +273,29 @@ The Social Hub at [`/social`](/social) is multi-product (Phase 3, 2026-07-23):
 - **Ledger** — `/social` renders the last 20 variants server-side (brand, channel, copy, status,
   time, latest reach/views), so pending approvals, scheduled posts, and publishes are visible
   without SQL.
-- **The Social Agent window** (2026-07-30) — `/social` now opens on the agent, full height: describe
-  the post and Claude drafts it, Arabic first with its English sibling; one press drops the copy into
-  the composer. It is the same ai block as the [sales agent](https://demo.databayt.org/en/sales) —
-  `atom/agent-heading`, `atom/prompt-input`, `atom/ai-response-display` — ported from hogwarts, so
-  the two windows read as one product.
+- **The Social Agent window** (2026-07-30) — the Hub's **Draft** tab: describe the post and Claude
+  drafts it, Arabic first with its English sibling; one press moves the Hub to **Publish** with the
+  copy in the editor. It is the same ai block as the
+  [sales agent](https://demo.databayt.org/en/sales) — `atom/agent-heading`, `atom/prompt-input`,
+  `atom/ai-response-display`, ported from hogwarts — so the two windows read as one product.
+  The prompt names the selected brand, and says what a good brief contains, because the brand and
+  the brief are the *only* things the answering session receives.
   **Asynchronous by design.** The window records a `SocialDraftRequest` and polls; a Claude Code
-  session on the Max pool answers it. The API lane of
+  session on the Max pool answers it through `draft`'s queue mode. The API lane of
   `.claude/memory/decisions/2026-07-30-in-app-draft-spend.md` shipped but is blocked — no funded key
-  exists behind `ANTHROPIC_API_KEY` — so the queue is the live path and the reasoning panel says so
-  rather than performing invented thinking. The cron's no-spend default is untouched.
+  exists behind `ANTHROPIC_API_KEY` — so the queue is the live path, and the reasoning panel
+  describes that queue rather than performing invented thinking.
   This is not the old gateway-LLM draft card coming back: that card was removed (2026-07-23) because
   a *relay* was writing copy; here the writer is Claude itself.
+- **The composer is an editor** (2026-07-30) — the **Publish** tab wears the agent's shape: the same
+  band, heading and rounded surface, sized for writing. Media URL and schedule collapsed from stacked
+  labelled inputs into two popover pills, so the copy is the only thing on the page with weight.
+  Behaviour unchanged — same three actions, same validation, same per-channel outcome list.
 - **Still pending** — adapters beyond Slack (see [Hermes](/docs/hermes)), per-brand Telegram
-  channels, a PostHog destination to consume the UTMs, and per-channel drafting in the cron —
-  tracked in `docs/SOCIAL-AUTOMATION.md`.
+  channels, a PostHog destination to consume the UTMs, per-channel drafting in the cron, and
+  **nothing draining the draft queue on a schedule** — an ask waits for the next session someone
+  happens to run, and the window polls without a timeout, so "nobody ran a session today" and "the
+  app is broken" look identical from the Hub. Tracked in `docs/SOCIAL-AUTOMATION.md`.
 
 ## See also
 
