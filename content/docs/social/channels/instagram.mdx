@@ -43,7 +43,7 @@ of six. Do not plan the work as if the link is the finish line.
 | 3 | Account is **linked to the brand's Facebook Page** | The flow below — the hard one |
 | 4 | Page and account owned by the same **business portfolio** | Business Settings |
 | 5 | App holds `instagram_basic` + `instagram_content_publish` | Use-Case grant + token re-mint — **possibly nothing more; see the hypothesis below** |
-| 6 | `INSTAGRAM_ACCOUNT_ID_<BRAND>` in Vercel, publish path wired | Env var + code |
+| 6 | `INSTAGRAM_USER_ID_<BRAND>` in Vercel, publish path wired | Env var only — the code shipped 2026-07-30 (`lib/instagram.ts`, gated `wired: false`) |
 
 Gates 1–4 are per brand. Gates 5–6 are paid once for all brands.
 
@@ -69,11 +69,14 @@ The ~10-minute test, via Mkan (the one brand whose gates 1–4 are done):
 3. `POST /{ig-account-id}/media` with a test image → `POST /{ig-account-id}/media_publish`
    against `@mkan.sd` (`17841444144779316`).
 
-If it publishes, gate 5 was never a programme blocker and Instagram is per-brand work plus env
-vars. If Meta refuses with a permission error naming Advanced Access, the
-[ownership chapter](/docs/social/ownership)'s verification path stands as written — and either
-way that chapter's work (naming, verification, second admin, per-brand emails) remains worth
-doing for durability.
+If it publishes, gate 5 was never a programme blocker and Instagram go-live is exactly this:
+paste the re-minted token into `FACEBOOK_PAGE_ACCESS_TOKEN_MKAN`, set
+`INSTAGRAM_USER_ID_MKAN=17841444144779316`, and flip the channel's `wired` flag in
+`src/components/root/social/config.ts` — the adapter, the transport, the image-required
+refusal, and the health row all shipped 2026-07-30 behind that flag. If Meta refuses with a
+permission error naming Advanced Access, the [ownership chapter](/docs/social/ownership)'s
+verification path stands as written — and either way that chapter's work (naming,
+verification, second admin, per-brand emails) remains worth doing for durability.
 
 ## What you get
 
