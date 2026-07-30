@@ -44,10 +44,13 @@ function autopostProducts(): string[] {
     .filter(Boolean);
 }
 
-function baseUrl(request: Request): string {
+// Never derived from the request — the URL a caller reaches us on is not a
+// host we necessarily own, and an approval link minted onto a foreign origin
+// would carry a valid token there. Same canonical the GitHub workflows use.
+function baseUrl(): string {
   const configured = (process.env.SOCIAL_PUBLIC_URL ?? "").trim();
   if (configured) return configured.replace(/\/$/, "");
-  return new URL(request.url).origin;
+  return "https://kun.databayt.org";
 }
 
 interface ProductOutcome {
@@ -84,7 +87,7 @@ export async function GET(request: Request): Promise<Response> {
 
   const locale =
     (process.env.SOCIAL_DRAFT_LOCALE ?? "").trim() === "en" ? "en" : "ar";
-  const origin = baseUrl(request);
+  const origin = baseUrl();
   const results: ProductOutcome[] = [];
   const startedAt = Date.now();
 

@@ -1,6 +1,5 @@
 "use server";
 
-import { headers } from "next/headers";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { requireContributor } from "@/lib/auth-guard";
@@ -299,10 +298,13 @@ export async function stageForReview(input: unknown): Promise<ReviewResult> {
 
   let links: string[];
   try {
+    // The Host header is attacker-controlled on a direct request — an approval
+    // link must never be minted onto a host we do not own. Fall back to the
+    // canonical origin instead (the same one the GitHub workflows default to).
     const configured = (process.env.SOCIAL_PUBLIC_URL ?? "").trim();
     const origin = configured
       ? configured.replace(/\/$/, "")
-      : `https://${(await headers()).get("host")}`;
+      : "https://kun.databayt.org";
     links = piece.variants.map((variant) => {
       const token = createApprovalToken(variant.id, APPROVAL_TTL_SECONDS);
       return `${variant.channel}: ${origin}/api/social/publish?token=${encodeURIComponent(token)}`;
