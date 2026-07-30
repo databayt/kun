@@ -163,7 +163,7 @@ export async function GET(request: Request): Promise<Response> {
         "",
         draft.text,
         "",
-        `— drafted by ${draft.source}. Each link publishes once (expires in 12h):`,
+        `— drafted by ${draft.source}. Each link opens a one-tap confirm page — publishes once (expires in 12h):`,
         ...links,
       ].join("\n"),
       `social draft: ${product.label}`,

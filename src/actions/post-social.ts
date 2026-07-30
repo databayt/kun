@@ -322,7 +322,7 @@ export async function stageForReview(input: unknown): Promise<ReviewResult> {
       text,
       ...(mediaUrl ? ["", `Media: ${mediaUrl}`] : []),
       "",
-      "— staged from /social. Each link publishes once (expires in 12h):",
+      "— staged from /social. Each link opens a one-tap confirm page — publishes once (expires in 12h):",
       ...links,
     ].join("\n"),
     `social draft: ${product}`,
