@@ -40,6 +40,9 @@ export const SOCIAL_DICTIONARY = {
     facebookRow: "Facebook Page",
     connected: "Connected",
     disconnected: "Disconnected",
+    // Deliberately unconfigured (Hermes parked, Telegram deferred) — a choice,
+    // not a failure, so it must not read as red.
+    parked: "Parked — not configured",
     checking: "Checking...",
     lastSeen: "last polled",
     testConnection: "Test Connections",
@@ -69,6 +72,15 @@ export const SOCIAL_DICTIONARY = {
     staging: "Sending...",
     stagedMsg:
       "Staged for approval — the publish link is in the review channel",
+    // The Hub-as-review-surface path: no relay carried the links, the stage
+    // still stands, and the human hands them over.
+    stagedLocalMsg:
+      "Staged. No review relay is configured — hand these links to the approver yourself.",
+    reviewLinksTitle:
+      "Approval links — each publishes one channel, once; expires in 12h",
+    copyLink: "Copy",
+    copiedLink: "Copied",
+    openLink: "Open",
     mediaLabel: "Media URL",
     mediaPlaceholder: "https://cdn.databayt.org/… (optional, from /higgs)",
     mediaHint:
@@ -162,6 +174,7 @@ export const SOCIAL_DICTIONARY = {
     facebookRow: "صفحة فيسبوك",
     connected: "متصل",
     disconnected: "غير متصل",
+    parked: "متوقف — غير مُهيّأ",
     checking: "جاري الفحص...",
     lastSeen: "آخر اتصال",
     testConnection: "فحص الاتصالات",
@@ -185,6 +198,13 @@ export const SOCIAL_DICTIONARY = {
     stageForReview: "إرسال للمراجعة",
     staging: "جاري الإرسال...",
     stagedMsg: "تم الإرسال للاعتماد — رابط النشر في قناة المراجعة",
+    stagedLocalMsg:
+      "تم التجهيز. لا توجد قناة مراجعة مُهيّأة — سلِّم هذه الروابط للمعتمِد بنفسك.",
+    reviewLinksTitle:
+      "روابط الاعتماد — كل رابط ينشر قناة واحدة، مرة واحدة؛ ينتهي خلال 12 ساعة",
+    copyLink: "نسخ",
+    copiedLink: "تم النسخ",
+    openLink: "فتح",
     mediaLabel: "رابط الوسائط",
     mediaPlaceholder: "https://cdn.databayt.org/… (اختياري، من ‎/higgs)",
     mediaHint: "يجب أن يكون رابط صورة عاماً — المنصات تجلبه بنفسها.",

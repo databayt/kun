@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import {
   CalendarClock,
   CheckCircle2,
+  Copy,
+  ExternalLink,
   Paperclip,
   Send,
   Share2,
@@ -21,6 +23,7 @@ import {
   publishPostDirect,
   schedulePost,
   stageForReview,
+  type ReviewLink,
 } from "@/actions/post-social";
 import { CHANNELS, type ChannelId } from "@/components/root/social/config";
 import { fill, type SocialDict } from "@/components/root/social/dictionary";
@@ -64,6 +67,9 @@ export function Composer({
   const [outcomes, setOutcomes] = useState<ChannelOutcome[] | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // The review artifact when no relay carried it — the Hub is the destination.
+  const [reviewLinks, setReviewLinks] = useState<ReviewLink[] | null>(null);
+  const [copiedChannel, setCopiedChannel] = useState<string | null>(null);
 
   // The agent window's hand-off. Deliberately overwrites whatever is in the
   // box — pressing "Use …" is the explicit choice to take the draft.
@@ -87,6 +93,8 @@ export function Composer({
     setOutcomes(null);
     setNotice(null);
     setError(null);
+    setReviewLinks(null);
+    setCopiedChannel(null);
   };
 
   const payload = () => ({
@@ -159,7 +167,15 @@ export function Composer({
     try {
       const res = await stageForReview(payload());
       if (res.ok) {
-        setNotice(`${t.stagedMsg}${res.via ? ` (${res.via})` : ""}`);
+        // Undelivered is the production norm (Hermes parked, Telegram
+        // deferred): the stage stands and the links render below for a human
+        // to carry to the approver.
+        setNotice(
+          res.delivered
+            ? `${t.stagedMsg}${res.via ? ` (${res.via})` : ""}`
+            : t.stagedLocalMsg,
+        );
+        setReviewLinks(res.links ?? null);
         setPostText("");
         setMediaUrl("");
       } else {
@@ -171,6 +187,16 @@ export function Composer({
       );
     } finally {
       setPending(null);
+    }
+  };
+
+  const copyLink = async (link: ReviewLink) => {
+    try {
+      await navigator.clipboard.writeText(link.url);
+      setCopiedChannel(link.channel);
+      setTimeout(() => setCopiedChannel(null), 2000);
+    } catch {
+      // Clipboard can be denied — the URL text stays select-all as fallback.
     }
   };
 
@@ -362,16 +388,74 @@ export function Composer({
             )}
 
             {notice && (
-              <div className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-500">
+              <div
+                role="status"
+                className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-500"
+              >
                 <CheckCircle2 className="h-4 w-4 shrink-0" />
                 <span>{notice}</span>
               </div>
             )}
 
             {error && (
-              <div className="flex items-center gap-2 rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-500">
+              <div
+                role="alert"
+                className="flex items-center gap-2 rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-500"
+              >
                 <XCircle className="h-4 w-4 shrink-0" />
                 <span>{error}</span>
+              </div>
+            )}
+
+            {/* The approval links, when the Hub is the review destination.
+                Each is the whole artifact — whoever holds it can publish that
+                one channel, once, within 12h. */}
+            {reviewLinks && reviewLinks.length > 0 && (
+              <div className="border-border rounded-lg border p-3">
+                <p className="text-muted-foreground mb-2 text-xs">
+                  {t.reviewLinksTitle}
+                </p>
+                <ul className="space-y-2">
+                  {reviewLinks.map((link) => (
+                    <li key={link.channel} className="flex items-center gap-2">
+                      <span className="w-20 shrink-0 text-xs">
+                        {channelLabel(link.channel as ChannelId)}
+                      </span>
+                      <span
+                        dir="ltr"
+                        className="text-muted-foreground min-w-0 flex-1 truncate font-mono text-xs select-all"
+                      >
+                        {link.url}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => copyLink(link)}
+                        className="h-7 gap-1 rounded-full px-2 text-xs"
+                      >
+                        {copiedChannel === link.channel ? (
+                          <CheckCircle2 className="size-3.5 text-emerald-500" />
+                        ) : (
+                          <Copy className="size-3.5" />
+                        )}
+                        <span className="hidden md:flex">
+                          {copiedChannel === link.channel
+                            ? t.copiedLink
+                            : t.copyLink}
+                        </span>
+                      </Button>
+                      <a
+                        href={link.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-muted-foreground hover:text-foreground inline-flex h-7 items-center gap-1 rounded-full px-2 text-xs font-medium transition-colors"
+                      >
+                        <ExternalLink className="size-3.5" />
+                        <span className="hidden md:flex">{t.openLink}</span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
               </div>
             )}
 

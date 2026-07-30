@@ -43,6 +43,18 @@ function StatusIndicator({ state, checking, t }: StatusIndicatorProps) {
       </div>
     );
   }
+  // Parked reads neutral: a deliberately unconfigured transport is a decision,
+  // and rendering it red taught everyone to ignore the dot.
+  if (state.parked) {
+    return (
+      <div className="flex items-center gap-2">
+        <span className="bg-muted-foreground/40 relative inline-flex h-2 w-2 rounded-full" />
+        <span className="text-muted-foreground text-xs font-medium">
+          {t.parked}
+        </span>
+      </div>
+    );
+  }
   return (
     <div className="flex items-center gap-2">
       <span className="relative inline-flex h-2 w-2 rounded-full bg-rose-500" />
@@ -108,10 +120,12 @@ function StatusBody({ status, checking, onRefresh, t }: StatusProps) {
         </p>
       )}
 
+      {/* A parked row's "error" is just its unset env named back — noise. */}
       {!checking &&
         rows.map(
           (row) =>
-            row.state?.error && (
+            row.state?.error &&
+            !row.state.parked && (
               <p
                 key={`${row.key}-error`}
                 className="text-xs leading-relaxed break-words rounded-lg border border-rose-500/10 bg-rose-500/5 p-3 text-rose-500"
@@ -142,8 +156,15 @@ function StatusBody({ status, checking, onRefresh, t }: StatusProps) {
  */
 export function StatusDialog({ status, checking, onRefresh, t }: StatusProps) {
   const rows = transportRows(status, t);
+  // Parked transports don't vote: the dot answers "is anything that SHOULD be
+  // up, down?" — with Hermes parked and Telegram deferred, counting them kept
+  // the dot red forever and it stopped meaning anything.
   const allConnected =
-    !checking && status !== null && rows.every((row) => row.state?.connected);
+    !checking &&
+    status !== null &&
+    rows
+      .filter((row) => !row.state?.parked)
+      .every((row) => row.state?.connected);
 
   return (
     <Dialog>

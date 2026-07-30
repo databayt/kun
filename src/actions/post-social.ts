@@ -336,10 +336,21 @@ export async function schedulePost(input: unknown): Promise<ScheduleResult> {
   }
 }
 
+export interface ReviewLink {
+  channel: string;
+  url: string;
+}
+
 export interface ReviewResult {
   ok: boolean;
   /** Which relay carried the draft, e.g. "hermes:slack". */
   via?: string;
+  /** One signed single-use link per channel — the review artifact itself. */
+  links?: ReviewLink[];
+  /** True when a review relay actually carried the links somewhere. */
+  delivered?: boolean;
+  /** Why delivery failed, when it did. `error` stays "the stage failed". */
+  deliveryError?: string;
   error?: string;
 }
 
@@ -390,7 +401,7 @@ export async function stageForReview(input: unknown): Promise<ReviewResult> {
     };
   }
 
-  let links: string[];
+  let links: ReviewLink[];
   try {
     // The Host header is attacker-controlled on a direct request — an approval
     // link must never be minted onto a host we do not own. Fall back to the
@@ -401,7 +412,10 @@ export async function stageForReview(input: unknown): Promise<ReviewResult> {
       : "https://kun.databayt.org";
     links = piece.variants.map((variant) => {
       const token = createApprovalToken(variant.id, APPROVAL_TTL_SECONDS);
-      return `${variant.channel}: ${origin}/api/social/publish?token=${encodeURIComponent(token)}`;
+      return {
+        channel: variant.channel,
+        url: `${origin}/api/social/publish?token=${encodeURIComponent(token)}`,
+      };
     });
   } catch (err: unknown) {
     // createApprovalToken throws when CRON_SECRET is unset — an unsigned link
@@ -415,7 +429,7 @@ export async function stageForReview(input: unknown): Promise<ReviewResult> {
   }
 
   // Each link publishes exactly one channel, exactly once.
-  return sendReview(
+  const sent = await sendReview(
     [
       `📝 Draft for ${product} → ${channels.join(", ")}`,
       "",
@@ -423,8 +437,17 @@ export async function stageForReview(input: unknown): Promise<ReviewResult> {
       ...(mediaUrl ? ["", `Media: ${mediaUrl}`] : []),
       "",
       "— staged from /social. Each link opens a one-tap confirm page — publishes once (expires in 12h):",
-      ...links,
+      ...links.map((link) => `${link.channel}: ${link.url}`),
     ].join("\n"),
     `social draft: ${product}`,
   );
+  if (sent.ok) return { ok: true, via: sent.via, delivered: true, links };
+
+  // No relay carried it — Hermes is parked and Telegram is deferred, which is
+  // the production norm. The stage still stands: the caller renders these links
+  // and a human hands them to the approver. Deleting the rows here would make
+  // approval impossible exactly when there is no chat destination. Handing the
+  // links back to the stager grants nothing new — the same contributor gate
+  // already offers direct publish one button over.
+  return { ok: true, delivered: false, links, deliveryError: sent.error };
 }
