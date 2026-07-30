@@ -11,15 +11,17 @@ name: Social metrics
 # ~120 reads per post. The interval must stay in step with REFRESH_EVERY_MS in
 # the route; a faster schedule just selects zero rows and burns a run.
 #
-# THE SCHEDULE IS DELIBERATELY COMMENTED OUT. The Facebook scopes are verified
-# on the hogwarts Page token only — mkan and databayt have their own tokens and
-# their own unverified scope state, and sijillee and moalimee have no Page at
-# all. Dispatch this manually first, read the JSON, confirm what each brand
-# actually returns, then enable the schedule.
+# Enabled 2026-07-30 after the gate it shipped behind was cleared: all three
+# brand tokens (hogwarts, mkan, databayt) were re-minted 2026-07-27 and
+# Debugger-verified carrying read_insights + pages_read_user_content, and two
+# manual dispatches on 2026-07-28 returned real numbers (hogwarts reach/views
+# recorded into SocialMetric). Brands without a Page (sijillee, moalimee) are
+# a not-configured skip inside the route, silent by design. A brand that stops
+# being readable surfaces as ::warning:: below — never a red schedule.
 
 on:
-  # schedule:
-  #   - cron: "0 */6 * * *"
+  schedule:
+    - cron: "0 */6 * * *"
   workflow_dispatch:
 
 concurrency:
