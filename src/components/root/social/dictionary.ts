@@ -58,12 +58,14 @@ export const SOCIAL_DICTIONARY = {
     overCaptionLimit:
       "Over {max} characters — too long to stage for review; publish directly instead.",
     agentTitle: "Social Agent",
+    // Under the prompt, before the first ask. The only place a contributor is
+    // told what a good brief contains — and the copy is only as good as the brief.
     agentHint:
-      "Describe the post and Claude drafts it — Arabic first, English beside it. Pick a version and it lands in the composer below.",
+      "The more concrete the brief, the better the copy: the fact, who it's for, what they should do, and any date, name or link that must appear. Claude writes it on the team's subscription, Arabic first with English beside it.",
     // The heading's second line: lead sentence, then the words of the scroll link.
     agentLead: "Describe the post, or",
     agentScrollText: "see what's already published",
-    agentPlaceholder: "Describe the post — topic, news, angle…",
+    agentPlaceholder: "What happened, who it's for, what they should do…",
     agentPlaceholderMore: "Draft another…",
     agentDrafting: "Queued — Claude is writing it.",
     agentQueuedHint:
@@ -156,10 +158,10 @@ export const SOCIAL_DICTIONARY = {
       "تجاوز {max} حرفاً — طويل جداً للمراجعة؛ انشر مباشرة بدلاً من ذلك.",
     agentTitle: "وكيل التواصل",
     agentHint:
-      "صِف المنشور ويكتبه Claude — بالعربية أولًا ومعها الإنجليزية. اختر نسخة وستهبط في المنشئ بالأسفل.",
+      "كلما كان الموجز أدقّ، كان النص أفضل: الخبر، ولمن هو، وما المطلوب من القارئ، وأي تاريخ أو اسم أو رابط يجب أن يظهر. يكتبه Claude على اشتراك الفريق، بالعربية أولًا ومعها الإنجليزية.",
     agentLead: "صِف المنشور، أو",
     agentScrollText: "اطّلع على ما نُشر بالفعل",
-    agentPlaceholder: "صِف المنشور — الموضوع، الخبر، الزاوية…",
+    agentPlaceholder: "ما الذي حدث، لمن، وما المطلوب منهم…",
     agentPlaceholderMore: "صياغة أخرى…",
     agentDrafting: "في الانتظار — Claude يكتبه الآن.",
     agentQueuedHint:

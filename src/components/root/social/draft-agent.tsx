@@ -457,6 +457,16 @@ export function DraftAgent({ product, onUse, isRTL, t }: DraftAgentProps) {
                 </div>
               )}
             </PromptInput>
+
+            {/* What a good brief contains. Shown once, before the first ask: the
+                answering session gets the brand and this text and nothing else,
+                so the brief is the whole input and most contributors will never
+                read the skill that says so. */}
+            {!hasInteracted && (
+              <p className="text-muted-foreground/70 mx-auto mt-4 max-w-xl text-center text-xs leading-relaxed">
+                {t.agentHint}
+              </p>
+            )}
           </div>
         </div>
       </div>
