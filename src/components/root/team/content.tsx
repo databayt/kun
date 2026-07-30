@@ -1,13 +1,13 @@
-import Link from "next/link"
-import { team } from "./config"
-import type { Locale } from "@/components/local/config"
+import Link from "next/link";
+import { team } from "./config";
+import type { Locale } from "@/components/local/config";
 
 interface TeamContentProps {
-  lang: Locale
+  lang: Locale;
 }
 
 export default function TeamContent({ lang }: TeamContentProps) {
-  const isAr = lang === "ar"
+  const isAr = lang === "ar";
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-16 lg:px-0">
@@ -27,7 +27,7 @@ export default function TeamContent({ lang }: TeamContentProps) {
             href={`/${lang}/team/${member.slug}`}
             className="border-border hover:border-primary rounded-lg border p-6 transition-colors"
           >
-            <div className="bg-muted flex size-10 items-center justify-center rounded-full text-lg font-semibold">
+            <div className="bg-foreground text-background flex size-10 items-center justify-center rounded-full text-lg font-semibold">
               {member.name[0]}
             </div>
             <h2 className="mt-4 text-lg font-semibold">
@@ -40,5 +40,5 @@ export default function TeamContent({ lang }: TeamContentProps) {
         ))}
       </div>
     </div>
-  )
+  );
 }

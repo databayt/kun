@@ -1,15 +1,15 @@
-import Link from "next/link"
-import { ArrowLeft } from "lucide-react"
-import type { TeamMember } from "./config"
-import type { Locale } from "@/components/local/config"
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
+import type { TeamMember } from "./config";
+import type { Locale } from "@/components/local/config";
 
 interface TeamDetailProps {
-  member: TeamMember
-  lang: Locale
+  member: TeamMember;
+  lang: Locale;
 }
 
 export default function TeamDetail({ member, lang }: TeamDetailProps) {
-  const isAr = lang === "ar"
+  const isAr = lang === "ar";
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-8 lg:px-0">
@@ -22,7 +22,7 @@ export default function TeamDetail({ member, lang }: TeamDetailProps) {
       </Link>
 
       <div className="mt-6 flex items-start gap-4">
-        <div className="bg-muted flex size-14 items-center justify-center rounded-full text-2xl font-semibold">
+        <div className="bg-foreground text-background flex size-14 items-center justify-center rounded-full text-2xl font-semibold">
           {member.name[0]}
         </div>
         <div>
@@ -35,5 +35,5 @@ export default function TeamDetail({ member, lang }: TeamDetailProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }
