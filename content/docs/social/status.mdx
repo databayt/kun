@@ -38,9 +38,9 @@ in this table as a peer, which put a team chat in a marketing-reach denominator.
 | Channel | Wired | Configured | Live | Blocker |
 |---------|:-----:|:----------:|:----:|---------|
 | **Facebook** — hogwarts · mkan · databayt | ✅ | ✅ | **✅** | — |
-| **Telegram** | ✅ | ❌ | ❌ | Bot exists and is valid, but its token was never pushed to Vercel and no `TELEGRAM_CHANNEL_ID` exists anywhere |
+| **Telegram** | ✅ | ❌ | ❌ | **Deferred by decision 2026-07-30** — the channel focus is Facebook + Instagram. Bot valid, code ready; two env variables whenever the focus widens |
 | **Facebook** — sijillee · moallimee | ✅ | ❌ | ❌ | No Facebook Page created yet |
-| **Instagram** | registry only | ❌ | ❌ | **Ownership.** 1 of 5 brands has an IG account linked to its Page. Publishing is documented as Advanced Access → App Review → Business Verification — but the 2026-07-27 insights result proved Standard Access covers own-asset use for the read scopes, so test the same for `instagram_content_publish` before treating verification as the gate: [the hypothesis](/docs/social/channels/instagram#standard-access-hypothesis). The portfolio still cannot pass verification — see [Ownership](/docs/social/ownership) |
+| **Instagram** | ✅ *(gated)* | ❌ | ❌ | **The lane shipped 2026-07-30** (`lib/instagram.ts`, two-step Graph publish, image required, health row) behind `wired: false`. The gate is the ~10-minute [Standard-Access test](/docs/social/channels/instagram#standard-access-hypothesis) via Mkan plus a token re-minted with `instagram_content_publish` and `INSTAGRAM_USER_ID_MKAN` — runbook on [kun#141](https://github.com/databayt/kun/issues/141). If the test fails, verification via [Ownership](/docs/social/ownership) is the long pole |
 | **LinkedIn** | registry only | ❌ | ❌ | Community Management API approval |
 | **X** | registry only | ❌ | ❌ | Pay-per-use since Feb 2026 — needs `/decide` |
 | **TikTok** | registry only | ❌ | ❌ | Full app audit, 1–4 weeks |
@@ -80,9 +80,11 @@ Slack is never a publish destination: the composer does not offer it, the Zod wr
 rejects it, and `/api/social/relay` refuses it by name. Approvals and notices reach `#social`
 unconditionally through `sendReview` — there is nothing to select.
 
-Telegram is the notable one. It is free, has no platform gate, the bot already exists and
-answers `getMe`, and the code has been ready since 2026-07-10. It is switched off for want of
-two environment variables. Setup steps: [Telegram guide](/docs/social/channels/telegram).
+Telegram stays the cheapest channel on the board — free, no platform gate, bot answering
+`getMe`, code ready since 2026-07-10, two environment variables from live. It is off by
+**decision** (2026-07-30: Facebook + Instagram first), not by blocker, and the status panel
+renders it as parked-neutral rather than red for exactly that reason. Setup when wanted:
+[Telegram guide](/docs/social/channels/telegram).
 
 One thing the table above cannot show, because it has no column for it: every channel resolves to
 **one** destination per brand. For Telegram and WhatsApp that undercounts the work rather than the
@@ -98,9 +100,9 @@ Their current state:
 
 | Loop | State | Why |
 |------|-------|-----|
-| **A — Hub** | **Works** (Facebook only) | The one working path. Write in `/social`'s Publish editor and publish directly — or ask on the Draft tab and take the copy across, which needs a session draining the queue. |
-| **B — Cron** | **Dead** — three independent blockers | ① `SOCIAL_AUTOPOST_PRODUCTS` is unset, so the cron is a no-op. ② Even if set, `SOCIAL_DRAFT_SOURCE` defaults to `hermes`, which Vercel cannot reach. ③ Even if a draft existed, no review destination is configured, so `sendReview` fails. |
-| **C — Hermes relay** | **Unverified** | The endpoint is deployed and authenticating, but Hermes is currently down and this path has never been observed end to end. |
+| **A — Hub** | **Works** (Facebook only) | The one working path, now whole: write in `/social`'s Publish editor and publish directly, or ask on the Draft tab — the queue drains on a 5-minute launchd tick, and staging returns the signed approval links right in the composer, so no chat relay is needed to run the human gate. |
+| **B — Cron** | **Parked** — deliberately | The three blockers stand (`SOCIAL_AUTOPOST_PRODUCTS` unset · draft source unreachable · billing), but the reason it stays parked is structural: it drafts ONE text and fans it to every channel, which contradicts the one-core-piece→N-variants multiplier the strategy depends on. Do not revive it as designed — per-channel drafting first. |
+| **C — Hermes relay** | **Parked** | Hermes is down, never observed end to end, and since 2026-07-30 nothing depends on it: reviews carry through the Hub's own links. Revisit only when a hermes-transport channel actually goes live. |
 
 Both `/api/social/cron` and `/api/social/relay` return **401** to an unauthenticated request —
 which confirms they are deployed and `CRON_SECRET` is set. The cron fires daily at 06:00 UTC and
@@ -141,9 +143,9 @@ returns `drafted: 0`.
 
 - **Configuration** — the largest gap and the cheapest to close. Being handled by Cowork, which can drive the platform consoles directly.
 - **Ownership** — newly named, and the only gap on this page that is *not* cheap to close. Every brand's social identity hangs off one personal Facebook account inside an unnamed, unverified business portfolio with a bus factor of one, and no teammate has ever been invited. It blocks Instagram outright rather than merely being untidy. See [Ownership & accounts](/docs/social/ownership).
-- **Hermes** — down, no production config, and the outbound draft lane dead-ends silently when it is.
+- **Hermes** — parked (down, no production config), and since 2026-07-30 nothing user-facing depends on it: the approve stage returns its links in the composer, and the status panel shows the lane as parked-neutral instead of permanently red. Tracked in [kun#143](https://github.com/databayt/kun/issues/143).
 - **Measurement — now wired on Facebook, and the remaining gap is analytics, not permissions.**
-  - ✅ **UTM tagging works.** Every outbound link is tagged at delivery with `utm_source=<channel>`, `utm_medium=social`, `utm_campaign=<brand>`, so traffic is attributable *at our own site* — the only lane that does not depend on a platform choosing to share numbers. Already-tagged links are left alone.
+  - ✅ **UTM tagging works — and since 2026-07-30 something consumes it.** Every outbound link is tagged at delivery with `utm_source=<channel>`, `utm_medium=social`, `utm_campaign=<brand>`, and posthog-js on the hogwarts site (EU project 221194) autocaptures the tags on every pageview — `/measure` reads them back over the PostHog MCP with HogQL. Coverage is per-site and named honestly: hogwarts counts; kun and mkan don't carry the snippet yet, so their zeros mean "nobody counted".
   - ✅ **Platform-side numbers are fetchable.** `read_insights` and `pages_read_user_content` were **granted 2026-07-27** and verified returning real numbers against a live Hogwarts post (Page `1228948003637000`). Both turned out to be Standard Access — no App Review, no Business Verification. What was actually blocking them was neither: a permission has to be added to the app's **Use Case** (Dashboard → Use cases → Customize → Permissions and features) before it appears anywhere else in the console. Skip that and the Graph API Explorer answers "Found 0 results", which reads exactly like Meta having withdrawn the permission.
   - ⚠️ **The scopes were never the whole story.** Meta retired the entire `post_impressions*` family during 2025, so even a correctly-scoped token gets `(#100)` from the old names — a *metric* error, not a permissions one. The live names are `post_media_view` and `post_total_media_view_unique`. Granting a scope does not resurrect a retired name, and re-probing with the old names after a grant looks exactly like the grant having failed. `classifyGraphError` exists so that mistake is not repeatable.
   - ✅ **Verified on all three tokens.** Re-minted 2026-07-27 and Debugger-confirmed carrying `read_insights` + `pages_read_user_content` (hogwarts, mkan, databayt); hogwarts additionally proven end to end with real reads into `SocialMetric` (2026-07-28). sijillee and moallimee have no Page at all. `/api/social/metrics` degrades per product rather than globally, and gives up permanently on a permission failure rather than retrying it forever.
