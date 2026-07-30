@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Sparkles } from "lucide-react";
 import { isRTL, type Locale } from "@/components/local/config";
 import {
   Select,
@@ -25,6 +24,7 @@ import {
 import { getSocialDict } from "@/components/root/social/dictionary";
 import { ChannelPicker } from "@/components/root/social/channel-picker";
 import { Composer } from "@/components/root/social/composer";
+import { DraftAgent } from "@/components/root/social/draft-agent";
 import { StatusDialog } from "@/components/root/social/status";
 import type { EgressStatus } from "@/lib/social-status";
 
@@ -49,6 +49,12 @@ export default function SocialDashboard({ lang }: SocialDashboardProps) {
   const [selectedChannels, setSelectedChannels] = useState<ChannelId[]>([]);
   const [status, setStatus] = useState<EgressStatus | null>(null);
   const [checking, setChecking] = useState(true);
+  // A draft the agent window hands to the composer. The nonce makes re-using
+  // the same text a fresh injection rather than a no-op.
+  const [prefill, setPrefill] = useState<{
+    text: string;
+    nonce: number;
+  } | null>(null);
 
   // Publishable for THIS brand: the global transport is wired AND the brand has
   // its own destination on it (its own Page, its own channel). Distribution
@@ -155,6 +161,15 @@ export default function SocialDashboard({ lang }: SocialDashboardProps) {
       {/* One column now — status moved into the toolbar dialog, so the composer
           no longer shares the row with a permanent sidebar. */}
       <div className="space-y-8 py-8">
+        {/* The agent window replaced the "go draft in Claude Code" hint card —
+            the brain is still Claude, now reachable from the page itself. */}
+        <DraftAgent
+          product={product}
+          onUse={(text) => setPrefill({ text, nonce: Date.now() })}
+          isRTL={isRightToLeft}
+          t={t}
+        />
+
         <Composer
           product={product}
           selectedChannels={selectedChannels}
@@ -162,24 +177,8 @@ export default function SocialDashboard({ lang }: SocialDashboardProps) {
           transportsReady={transportsReady}
           isRTL={isRightToLeft}
           t={t}
+          prefill={prefill}
         />
-
-        {/* Drafting hint — the brain lives in Claude, not here */}
-        <div className="border-border bg-card/30 rounded-xl border p-6 shadow-md backdrop-blur-md">
-          <div className="flex items-start gap-3">
-            <div className="rounded-lg bg-amber-500/10 p-2 text-amber-500">
-              <Sparkles className="h-5 w-5" />
-            </div>
-            <div>
-              <h3 className="text-primary text-base font-medium">
-                {t.draftHintTitle}
-              </h3>
-              <p className="text-muted-foreground mt-1 text-sm leading-relaxed font-light">
-                {t.draftHintBody}
-              </p>
-            </div>
-          </div>
-        </div>
       </div>
     </>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   CalendarClock,
   CheckCircle2,
@@ -35,6 +35,8 @@ interface ComposerProps {
   transportsReady: boolean;
   isRTL: boolean;
   t: SocialDict;
+  /** A draft handed over by the agent window; the nonce forces re-injection. */
+  prefill?: { text: string; nonce: number } | null;
 }
 
 export function Composer({
@@ -44,6 +46,7 @@ export function Composer({
   transportsReady,
   isRTL,
   t,
+  prefill,
 }: ComposerProps) {
   const [postText, setPostText] = useState("");
   const [mediaUrl, setMediaUrl] = useState("");
@@ -54,6 +57,12 @@ export function Composer({
   const [outcomes, setOutcomes] = useState<ChannelOutcome[] | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // The agent window's hand-off. Deliberately overwrites whatever is in the
+  // box — pressing "Use …" is the explicit choice to take the draft.
+  useEffect(() => {
+    if (prefill) setPostText(prefill.text);
+  }, [prefill]);
 
   const trimmed = postText.trim();
   const overReviewLimit = trimmed.length > MAX_REVIEW_TEXT;

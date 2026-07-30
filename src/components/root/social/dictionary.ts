@@ -57,9 +57,17 @@ export const SOCIAL_DICTIONARY = {
     charCount: "{count} / {max}",
     overCaptionLimit:
       "Over {max} characters — too long to stage for review; publish directly instead.",
-    draftHintTitle: "Where do drafts come from?",
-    draftHintBody:
-      "Claude writes the copy — say “social post” in Claude Code (the /social skill) to draft Arabic-first variants per channel, generate media via /higgs, and get it approved. This composer is the last mile only.",
+    agentTitle: "Social Agent",
+    agentHint:
+      "Describe the post and Claude drafts it — Arabic first, English beside it. Pick a version and it lands in the composer below.",
+    agentPlaceholder: "Describe the post — topic, news, angle…",
+    agentPlaceholderMore: "Draft another…",
+    agentDrafting: "Drafting…",
+    agentUseAr: "Use Arabic",
+    agentUseEn: "Use English",
+    agentUseBoth: "Use both",
+    agentStartNew: "Start new",
+    agentError: "Drafting failed:",
     successMsg: "Successfully posted!",
     partialMsg: "Published with failures:",
     errorMsg: "Failed to process: ",
@@ -126,9 +134,17 @@ export const SOCIAL_DICTIONARY = {
     charCount: "{count} / {max}",
     overCaptionLimit:
       "تجاوز {max} حرفاً — طويل جداً للمراجعة؛ انشر مباشرة بدلاً من ذلك.",
-    draftHintTitle: "من أين تأتي المسودات؟",
-    draftHintBody:
-      "Claude يكتب النص — قل «منشور تواصل» في Claude Code (مهارة ‎/social) لصياغة نسخ عربية-أولاً لكل قناة، وتوليد الوسائط عبر ‎/higgs، ثم الاعتماد. هذا المنشئ هو الميل الأخير فقط.",
+    agentTitle: "وكيل التواصل",
+    agentHint:
+      "صِف المنشور ويكتبه Claude — بالعربية أولًا ومعها الإنجليزية. اختر نسخة وستهبط في المنشئ بالأسفل.",
+    agentPlaceholder: "صِف المنشور — الموضوع، الخبر، الزاوية…",
+    agentPlaceholderMore: "صياغة أخرى…",
+    agentDrafting: "جاري الصياغة…",
+    agentUseAr: "استخدم العربية",
+    agentUseEn: "استخدم الإنجليزية",
+    agentUseBoth: "استخدم الاثنتين",
+    agentStartNew: "ابدأ من جديد",
+    agentError: "فشلت الصياغة:",
     successMsg: "تم النشر بنجاح!",
     partialMsg: "تم النشر مع إخفاقات:",
     errorMsg: "فشلت العملية: ",
