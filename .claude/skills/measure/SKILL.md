@@ -53,11 +53,31 @@ numbers rather than read stored ones.
     WHERE "metricsGaveUp" = true;
    ```
 
-5. **Report UTM honestly.** Links are tagged at delivery
-   (`utm_source=<channel>&utm_medium=social&utm_campaign=<brand>`), but there is no
-   PostHog dependency in the app, so nothing consumes them yet. The tags are still
-   recorded in the platform link and in any analytics added later — say that rather
-   than implying attribution exists.
+5. **Report UTM attribution from PostHog.** Links are tagged at delivery
+   (`utm_source=<channel>&utm_medium=social&utm_campaign=<brand>`), and since
+   2026-07-30 the hogwarts site consumes them — posthog-js in
+   `analytics-provider.tsx` (EU project 221194) autocaptures `utm_*` on every
+   `$pageview`. Query via the PostHog MCP with HogQL:
+
+   ```sql
+   SELECT properties.utm_campaign AS brand,
+          properties.utm_source   AS channel,
+          count() AS pageviews
+     FROM events
+    WHERE event = '$pageview'
+      AND properties.utm_medium = 'social'
+      AND timestamp > now() - INTERVAL 30 DAY
+    GROUP BY 1, 2
+    ORDER BY 3 DESC
+   ```
+
+   Coverage is per-site and must be named: **hogwarts carries the snippet; kun
+   and mkan do not yet**, so a zero for a campaign landing elsewhere means
+   "nobody counted", not "nobody came". `SocialMetric.clicks` stays 0 by
+   design — report platform reach and PostHog pageviews side by side, never
+   merged. (Clicks backfill from PostHog into SocialMetric is a named
+   follow-up, only if MCP-side reads prove insufficient.)
+
 6. **Judge the kill criteria** — and say plainly whether the data can yet support
    the judgement. Scope coverage is per-product: verified on the hogwarts Page
    token, unverified on mkan and databayt, and sijillee and moalimee have no Page.
