@@ -25,10 +25,17 @@ import { db } from "@/lib/db";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+// See the drain route for why 60 is the pin on every social route.
+export const maxDuration = 60;
 
 // Long enough for a human to see the message in the morning, short enough that a
 // leaked link goes stale before it's useful.
 const APPROVAL_TTL_SECONDS = 12 * 60 * 60;
+// Stop STARTING new products past this point — a draft can take the full 30s
+// Anthropic timeout plus a review send. The first product always starts; a
+// deferred one is named in the results instead of silently dropped, and the
+// next daily run picks it up.
+const BUDGET_MS = 20_000;
 
 function autopostProducts(): string[] {
   return (process.env.SOCIAL_AUTOPOST_PRODUCTS ?? "")
@@ -79,8 +86,19 @@ export async function GET(request: Request): Promise<Response> {
     (process.env.SOCIAL_DRAFT_LOCALE ?? "").trim() === "en" ? "en" : "ar";
   const origin = baseUrl(request);
   const results: ProductOutcome[] = [];
+  const startedAt = Date.now();
 
   for (const productId of products) {
+    if (Date.now() - startedAt > BUDGET_MS) {
+      results.push({
+        product: productId,
+        channels: [],
+        status: "skipped",
+        detail: "Time budget reached — drafts on the next run.",
+      });
+      continue;
+    }
+
     const product = PRODUCTS.find((p) => p.id === productId);
     if (!product) {
       results.push({

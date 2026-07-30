@@ -22,12 +22,20 @@ import { sendReview } from "@/lib/social-review";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+// Vercel Hobby caps a function at 60s without Fluid Compute and allows more
+// with it. 60 is the one value that deploys under both, so every social route
+// pins it and the loop routes budget their work to finish inside it.
+export const maxDuration = 60;
 
 // Bounded so one permanently broken channel cannot retry forever.
 const MAX_ATTEMPTS = 3;
 // Keeps a backlog from running past the function timeout. Anything left over is
 // picked up by the next run, which is 15 minutes away.
 const BATCH = 25;
+// Stop STARTING new work past this point: the worst single item is a 25s
+// Facebook photo call plus writes, so an item started at the buzzer still
+// finishes inside maxDuration. The budget, not BATCH, is the real bound.
+const BUDGET_MS = 30_000;
 
 /** 5 min, then 25 — long enough for a transient platform outage to pass. */
 function backoffMs(attempts: number): number {
@@ -109,6 +117,7 @@ export async function GET(request: Request): Promise<Response> {
     );
   }
 
+  const startedAt = Date.now();
   const reaped = await reapStuck();
 
   const due = await db.socialVariant.findMany({
@@ -129,8 +138,11 @@ export async function GET(request: Request): Promise<Response> {
   });
 
   const results: DrainOutcome[] = [];
+  let processed = 0;
 
   for (const variant of due) {
+    if (Date.now() - startedAt > BUDGET_MS) break;
+    processed += 1;
     const base = {
       variant: variant.id,
       brand: variant.piece.brand,
@@ -216,6 +228,7 @@ export async function GET(request: Request): Promise<Response> {
     due: due.length,
     published: results.filter((r) => r.status === "published").length,
     reaped: reaped.length,
+    deferred: due.length - processed,
     results: [...reaped, ...results],
   });
 }

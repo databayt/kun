@@ -35,6 +35,8 @@ import { deliverPost } from "@/lib/social-publish";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+// See the drain route for why 60 is the pin on every social route.
+export const maxDuration = 60;
 
 // A brand post, not an essay. Far above any real caption, low enough that a
 // malformed body can't tie up the function.

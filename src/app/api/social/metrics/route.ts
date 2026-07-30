@@ -30,8 +30,13 @@ import { sendReview } from "@/lib/social-review";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+// See the drain route for why 60 is the pin on every social route.
+export const maxDuration = 60;
 
 const BATCH = 25;
+// Stop STARTING new work past this point — the worst item is a pair of 10s
+// Graph calls in parallel plus writes, comfortably inside the remaining 15s.
+const BUDGET_MS = 45_000;
 /** Transport failures only. The other kinds are terminal at the first attempt. */
 const MAX_ATTEMPTS = 5;
 /** A post under an hour old has noise, not numbers. */
@@ -93,6 +98,7 @@ export async function GET(request: Request): Promise<Response> {
     );
   }
 
+  const startedAt = Date.now();
   const now = Date.now();
   const due = await db.socialVariant.findMany({
     where: {
@@ -129,7 +135,11 @@ export async function GET(request: Request): Promise<Response> {
   // twenty-five.
   const alerts = new Map<string, string>();
 
+  let processed = 0;
+
   for (const variant of due) {
+    if (Date.now() - startedAt > BUDGET_MS) break;
+    processed += 1;
     const base = {
       variant: variant.id,
       brand: variant.piece.brand,
@@ -264,6 +274,7 @@ export async function GET(request: Request): Promise<Response> {
     ok: results.every((r) => r.status !== "gave-up"),
     due: due.length,
     fetched: results.filter((r) => r.status === "fetched").length,
+    deferred: due.length - processed,
     results,
   });
 }

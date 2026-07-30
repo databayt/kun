@@ -29,6 +29,8 @@ import { verifyApprovalToken } from "@/lib/social-token";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+// See the drain route for why 60 is the pin on every social route.
+export const maxDuration = 60;
 
 function html(body: string, status: number): Response {
   return new Response(body, {

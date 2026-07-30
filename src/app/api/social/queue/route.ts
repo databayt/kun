@@ -19,6 +19,8 @@ import { applyUtm } from "@/lib/social-utm";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+// See the drain route for why 60 is the pin on every social route.
+export const maxDuration = 60;
 
 const BATCH = 25;
 
