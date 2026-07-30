@@ -146,6 +146,12 @@ export async function GET(request: Request): Promise<Response> {
       channel: variant.channel,
     };
 
+    // The where clause filters externalId != null; this narrows it for TS
+    // without an assertion, and skips defensively if a raw SQL edit ever
+    // violates the invariant.
+    const externalId = variant.externalId;
+    if (!externalId) continue;
+
     // Claim on the field we already read. Reading metrics twice is harmless, so
     // this needs no status of its own — it just makes an overlapping run a
     // no-op instead of a duplicate write.
@@ -164,7 +170,7 @@ export async function GET(request: Request): Promise<Response> {
 
     const attempts = variant.metricsAttempts + 1;
     const { engagement, reach } = await getFacebookPostMetrics(
-      variant.externalId!,
+      externalId,
       variant.piece.brand,
     );
 
