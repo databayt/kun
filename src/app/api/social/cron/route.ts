@@ -150,21 +150,38 @@ export async function GET(request: Request): Promise<Response> {
     // One piece, one variant per channel this brand is wired for. The draft is
     // the same text everywhere for now; making the variants real rows is what
     // lets a later pass adapt them per platform without a migration.
-    const piece = await db.socialPiece.create({
-      data: {
-        brand: productId,
-        locale,
-        source: draft.source,
-        variants: {
-          create: channels.map((channel) => ({
-            channel,
-            text: draft.text,
-            status: "pending" as const,
-          })),
+    //
+    // Wrapped so one product's DB failure costs one product — unwrapped, a
+    // single create error 500'd the whole handler and discarded every
+    // remaining product's already-paid-for draft.
+    let piece;
+    try {
+      piece = await db.socialPiece.create({
+        data: {
+          brand: productId,
+          locale,
+          source: draft.source,
+          variants: {
+            create: channels.map((channel) => ({
+              channel,
+              text: draft.text,
+              status: "pending" as const,
+            })),
+          },
         },
-      },
-      include: { variants: true },
-    });
+        include: { variants: true },
+      });
+    } catch (err: unknown) {
+      results.push({
+        product: productId,
+        channels,
+        status: "failed",
+        detail: `draft written but not persisted: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+      });
+      continue;
+    }
 
     // A link per variant, so a reviewer can approve Telegram and hold Facebook.
     // Each one publishes exactly once — the publish route claims the row.
