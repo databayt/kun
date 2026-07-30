@@ -58,11 +58,16 @@ export default async function SocialPage({ params }: SocialPageProps) {
           />
         }
       />
-      <SocialDashboard lang={locale} />
-      {/* The DB read streams in behind the interactive dashboard. */}
-      <Suspense fallback={null}>
-        <SocialLedger lang={locale} />
-      </Suspense>
+      {/* The ledger is the Measure tab's panel, so it goes in as a prop — still a
+          Server Component, still streaming behind its Suspense boundary. */}
+      <SocialDashboard
+        lang={locale}
+        ledger={
+          <Suspense fallback={null}>
+            <SocialLedger lang={locale} />
+          </Suspense>
+        }
+      />
     </div>
   );
 }

@@ -21,24 +21,56 @@ import {
   productChannelWired,
   type ProductId,
 } from "@/components/root/social/products";
-import { getSocialDict } from "@/components/root/social/dictionary";
+import {
+  getSocialDict,
+  type SocialDict,
+} from "@/components/root/social/dictionary";
 import { ChannelPicker } from "@/components/root/social/channel-picker";
 import { Composer } from "@/components/root/social/composer";
 import { DraftAgent } from "@/components/root/social/draft-agent";
+import { StageNote } from "@/components/root/social/stage-note";
 import { StatusDialog } from "@/components/root/social/status";
 import type { EgressStatus } from "@/lib/social-status";
 
+/**
+ * The Hub's tabs are the documented pipeline (docs/social), in its order. Seven
+ * stages, five tabs: Approve · Schedule · Publish are one composer with three
+ * buttons, so splitting them would be three tabs over one form.
+ */
+const STAGES = ["calendar", "draft", "media", "publish", "measure"] as const;
+
+type Stage = (typeof STAGES)[number];
+
+const STAGE_LABEL_KEY = {
+  calendar: "tabCalendar",
+  draft: "tabDraft",
+  media: "tabMedia",
+  publish: "tabPublish",
+  measure: "tabMeasure",
+} as const satisfies Record<Stage, keyof SocialDict>;
+
 interface SocialDashboardProps {
   lang: Locale;
+  /**
+   * The activity ledger, behind the Measure tab. A Server Component passed as a
+   * prop rather than rendered in page.tsx, because a tab panel has to sit inside
+   * the component that owns the tab state. Passing it keeps the DB read on the
+   * server — its markup is serialized in, never bundled.
+   */
+  ledger: React.ReactNode;
 }
 
 /**
- * The interactive shell. Holds the two pieces of state every child reads — which
- * brand we publish as, and which channels are selected — and nothing else; the
- * composer, the picker, and the status panel own their own concerns. The page
- * header above it is static, so it stays a Server Component in page.tsx.
+ * The interactive shell. Holds what every child reads — which brand we publish
+ * as, which channels are selected, and which pipeline stage is open — and
+ * nothing else; the composer, the picker, and the status panel own their own
+ * concerns. The page header above it is static, so it stays a Server Component
+ * in page.tsx.
  */
-export default function SocialDashboard({ lang }: SocialDashboardProps) {
+export default function SocialDashboard({
+  lang,
+  ledger,
+}: SocialDashboardProps) {
   const t = getSocialDict(lang);
   const isRightToLeft = isRTL(lang);
 
@@ -49,12 +81,56 @@ export default function SocialDashboard({ lang }: SocialDashboardProps) {
   const [selectedChannels, setSelectedChannels] = useState<ChannelId[]>([]);
   const [status, setStatus] = useState<EgressStatus | null>(null);
   const [checking, setChecking] = useState(true);
+  const [stage, setStage] = useState<Stage>("draft");
   // A draft the agent window hands to the composer. The nonce makes re-using
   // the same text a fresh injection rather than a no-op.
   const [prefill, setPrefill] = useState<{
     text: string;
     nonce: number;
   } | null>(null);
+
+  // Taking a draft is a stage transition: the composer lives behind Publish, so
+  // handing it copy without switching would drop the text into a hidden panel.
+  // The scroll waits for the panel to be shown — on the click it is still
+  // `hidden`, and scrollIntoView on a display:none element does nothing.
+  const useDraft = useCallback((text: string) => {
+    setPrefill({ text, nonce: Date.now() });
+    setStage("publish");
+  }, []);
+
+  useEffect(() => {
+    if (stage !== "publish" || !prefill) return;
+    const id = requestAnimationFrame(() => {
+      document
+        .getElementById("composer")
+        ?.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+    return () => cancelAnimationFrame(id);
+  }, [stage, prefill]);
+
+  // Arrow keys move along the tablist, which is what makes it one — a row of
+  // buttons that only responds to clicks is a row of buttons. Left and right are
+  // swapped under RTL so "next" always means the direction the eye travels.
+  const onTablistKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    const forward = isRightToLeft ? "ArrowLeft" : "ArrowRight";
+    const back = isRightToLeft ? "ArrowRight" : "ArrowLeft";
+    const step =
+      event.key === forward
+        ? 1
+        : event.key === back
+          ? -1
+          : event.key === "Home"
+            ? -STAGES.length
+            : event.key === "End"
+              ? STAGES.length
+              : 0;
+    if (step === 0) return;
+    event.preventDefault();
+    const at = STAGES.indexOf(stage);
+    const next = Math.min(STAGES.length - 1, Math.max(0, at + step));
+    setStage(STAGES[next]);
+    document.getElementById(`stage-tab-${STAGES[next]}`)?.focus();
+  };
 
   // Publishable for THIS brand: the global transport is wired AND the brand has
   // its own destination on it (its own Page, its own channel). Distribution
@@ -156,31 +232,115 @@ export default function SocialDashboard({ lang }: SocialDashboardProps) {
           onRefresh={checkConnections}
           t={t}
         />
+
+        {/* The pipeline, as tabs. The row above them is context that spans every
+            stage — brand especially, since it selects the Page and the token. */}
+        <div
+          role="tablist"
+          aria-label={t.tabsLabel}
+          aria-orientation="horizontal"
+          onKeyDown={onTablistKeyDown}
+          className="ms-auto flex items-center gap-1"
+        >
+          {STAGES.map((s) => (
+            <button
+              key={s}
+              type="button"
+              role="tab"
+              id={`stage-tab-${s}`}
+              aria-selected={stage === s}
+              aria-controls={`stage-panel-${s}`}
+              tabIndex={stage === s ? 0 : -1}
+              onClick={() => setStage(s)}
+              data-active={stage === s}
+              className="hover:text-primary data-[active=true]:bg-muted data-[active=true]:text-primary flex h-7 items-center justify-center rounded-full px-4 text-center text-sm transition-colors"
+            >
+              {t[STAGE_LABEL_KEY[s]]}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* The agent window — the brain is Claude, reachable from the page itself.
-          It sits under the header and the toolbar rather than opening the page,
-          so /social still introduces itself before handing over the prompt. */}
-      <DraftAgent
-        product={product}
-        onUse={(text) => setPrefill({ text, nonce: Date.now() })}
-        isRTL={isRightToLeft}
-        t={t}
-      />
+      {/* Every panel stays mounted and is hidden rather than unmounted. The
+          agent polls a queue for minutes at a time and the composer holds typed
+          copy: unmounting on a tab switch would throw both away, which is the
+          bug a contributor would hit first. */}
+      <Panel stage="calendar" active={stage}>
+        <StageNote
+          title={t.calendarNoteTitle}
+          body={t.calendarNoteBody}
+          keyword={`content calendar for ${product}`}
+          docsHref={`/${lang}/docs/social/strategy`}
+          t={t}
+        />
+      </Panel>
 
-      {/* One column now — status moved into the toolbar dialog, so the composer
-          no longer shares the row with a permanent sidebar. */}
-      <div className="space-y-8 py-8">
-        <Composer
+      <Panel stage="draft" active={stage}>
+        <DraftAgent
           product={product}
-          selectedChannels={selectedChannels}
-          wiredForProduct={wiredForProduct}
-          transportsReady={transportsReady}
+          onUse={useDraft}
+          onSeePublished={() => setStage("measure")}
           isRTL={isRightToLeft}
           t={t}
-          prefill={prefill}
         />
-      </div>
+      </Panel>
+
+      <Panel stage="media" active={stage}>
+        <StageNote
+          title={t.mediaNoteTitle}
+          body={t.mediaNoteBody}
+          keyword={`higgs an image for ${product}`}
+          docsHref={`/${lang}/docs/social/carousel`}
+          t={t}
+        />
+      </Panel>
+
+      {/* Approve, Schedule and Publish are one composer with three buttons, so
+          they are one stage here rather than three tabs over the same form. */}
+      <Panel stage="publish" active={stage}>
+        <div className="space-y-8 py-8">
+          <Composer
+            product={product}
+            selectedChannels={selectedChannels}
+            wiredForProduct={wiredForProduct}
+            transportsReady={transportsReady}
+            isRTL={isRightToLeft}
+            t={t}
+            prefill={prefill}
+          />
+        </div>
+      </Panel>
+
+      <Panel stage="measure" active={stage}>
+        {ledger}
+      </Panel>
     </>
+  );
+}
+
+/**
+ * One stage's panel. `hidden` rather than a conditional render, so an inactive
+ * panel keeps its state: the agent's poll survives a tab switch and the composer
+ * keeps its typed copy. `display: none` still runs effects and intervals, which
+ * is exactly what the poll needs.
+ */
+function Panel({
+  stage,
+  active,
+  children,
+}: {
+  stage: Stage;
+  active: Stage;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      role="tabpanel"
+      id={`stage-panel-${stage}`}
+      aria-labelledby={`stage-tab-${stage}`}
+      hidden={stage !== active}
+    >
+      {children}
+    </div>
   );
 }

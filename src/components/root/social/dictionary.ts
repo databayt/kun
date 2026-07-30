@@ -16,6 +16,25 @@ export const SOCIAL_DICTIONARY = {
     product: "Product",
     selectProduct: "Select a product",
     status: "Status",
+    // The Hub's tabs are the documented pipeline (docs/social), all seven stages
+    // across five tabs: Approve · Schedule · Publish are one composer with three
+    // buttons, so they are one tab. Plan and Media have no in-app state — the
+    // calendar produces a table and /higgs writes to the CDN — so their tabs say
+    // where the stage actually runs instead of faking a surface for it.
+    tabCalendar: "Calendar",
+    tabDraft: "Draft",
+    tabMedia: "Media",
+    tabPublish: "Publish",
+    tabMeasure: "Measure",
+    tabsLabel: "Pipeline stage",
+    calendarNoteTitle: "Planning happens in the session, not here",
+    calendarNoteBody:
+      "The calendar decides which brand publishes what, on which day, against each brand's cadence and content pillars. It produces a dated table — brand, topic, channels, owner — and the Hub has nowhere to keep one, so it is not faked here.",
+    mediaNoteTitle: "Media is generated, then pasted",
+    mediaNoteBody:
+      "Higgsfield renders the visual and pushes it to the CDN. Copy is never rendered into the image — it is overlaid in the post. Bring the resulting URL to the Publish tab's Media field.",
+    stageNoteKeyword: "Say this in a Claude Code session:",
+    stageNoteDocs: "Read the stage docs",
     hermesRow: "Hermes Gateway",
     telegramRow: "Telegram Bot",
     facebookRow: "Facebook Page",
@@ -65,7 +84,7 @@ export const SOCIAL_DICTIONARY = {
     // The heading's second line: lead sentence, then the words of the scroll link.
     agentLead: "Describe the post, or",
     agentScrollText: "see what's already published",
-    agentPlaceholder: "What happened, who it's for, what they should do…",
+    agentPlaceholder: "draft a post for [brand] about ..",
     agentPlaceholderMore: "Draft another…",
     agentDrafting: "Queued — Claude is writing it.",
     agentQueuedHint:
@@ -118,6 +137,20 @@ export const SOCIAL_DICTIONARY = {
     secondaryAction: "اطلب ميزة",
     product: "المنتج",
     selectProduct: "اختر منتجاً",
+    tabCalendar: "التقويم",
+    tabDraft: "الصياغة",
+    tabMedia: "الوسائط",
+    tabPublish: "النشر",
+    tabMeasure: "القياس",
+    tabsLabel: "مرحلة المسار",
+    calendarNoteTitle: "التخطيط يجري في الجلسة، لا هنا",
+    calendarNoteBody:
+      "التقويم يحدّد أي علامة تنشر ماذا وفي أي يوم، وفق وتيرة كل علامة ومحاور محتواها. ناتجه جدول مؤرَّخ — العلامة، الموضوع، القنوات، المسؤول — ولا مكان في اللوحة لحفظه، فلم نصطنع له واجهة.",
+    mediaNoteTitle: "الوسائط تُولَّد ثم تُلصق",
+    mediaNoteBody:
+      "Higgsfield يصنع الصورة ويدفعها إلى الـCDN. النص لا يُرسم داخل الصورة أبداً — بل يُكتب في المنشور نفسه. أحضر الرابط الناتج إلى حقل الوسائط في تبويب النشر.",
+    stageNoteKeyword: "قل هذا في جلسة Claude Code:",
+    stageNoteDocs: "اقرأ توثيق المرحلة",
     channel: "القناة",
     selectChannel: "اختر القنوات",
     channelCount: "{count} قنوات",
@@ -161,7 +194,7 @@ export const SOCIAL_DICTIONARY = {
       "كلما كان الموجز أدقّ، كان النص أفضل: الخبر، ولمن هو، وما المطلوب من القارئ، وأي تاريخ أو اسم أو رابط يجب أن يظهر. يكتبه Claude على اشتراك الفريق، بالعربية أولًا ومعها الإنجليزية.",
     agentLead: "صِف المنشور، أو",
     agentScrollText: "اطّلع على ما نُشر بالفعل",
-    agentPlaceholder: "ما الذي حدث، لمن، وما المطلوب منهم…",
+    agentPlaceholder: "اكتب منشوراً لـ [العلامة] عن ..",
     agentPlaceholderMore: "صياغة أخرى…",
     agentDrafting: "في الانتظار — Claude يكتبه الآن.",
     agentQueuedHint:

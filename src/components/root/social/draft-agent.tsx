@@ -51,8 +51,13 @@ import { cn } from "@/lib/utils";
 
 interface DraftAgentProps {
   product: ProductId;
-  /** Hands a chosen draft to the composer. */
+  /**
+   * Hands a chosen draft to the composer. The dashboard owns what that means —
+   * the composer is behind another tab, so this is a stage change, not a scroll.
+   */
   onUse: (text: string) => void;
+  /** The heading's "see what's already published" — opens the Measure stage. */
+  onSeePublished: () => void;
   isRTL: boolean;
   t: SocialDict;
 }
@@ -87,7 +92,13 @@ const RESPONSE_CONTAINER_ID = "ai-response-container";
 
 type Reveal = "ar" | "en" | "done" | null;
 
-export function DraftAgent({ product, onUse, isRTL, t }: DraftAgentProps) {
+export function DraftAgent({
+  product,
+  onUse,
+  onSeePublished,
+  isRTL,
+  t,
+}: DraftAgentProps) {
   const [prompt, setPrompt] = useState("");
   const [busy, setBusy] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
@@ -190,12 +201,9 @@ export function DraftAgent({ product, onUse, isRTL, t }: DraftAgentProps) {
     }
   };
 
-  const useDraft = (text: string) => {
-    onUse(text);
-    document
-      .getElementById("composer")
-      ?.scrollIntoView({ behavior: "smooth", block: "center" });
-  };
+  // No scroll here any more: the composer sits behind the Publish tab, so where
+  // the copy goes and how the page gets there is the dashboard's to decide.
+  const useDraft = onUse;
 
   const reset = () => {
     if (pollRef.current) clearInterval(pollRef.current);
@@ -239,8 +247,8 @@ export function DraftAgent({ product, onUse, isRTL, t }: DraftAgentProps) {
               <AgentHeading
                 title={t.agentTitle}
                 lead={t.agentLead}
-                scrollTarget="social-ledger"
                 scrollText={t.agentScrollText}
+                onNavigate={onSeePublished}
               />
             </div>
           )}

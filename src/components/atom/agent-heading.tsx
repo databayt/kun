@@ -13,10 +13,15 @@ interface AgentHeadingProps {
   title: string;
   /** The sentence that precedes the scroll link, e.g. "Draft a post, or". */
   lead: string;
-  /** id of the element the link scrolls to. */
-  scrollTarget: string;
+  /** id of the element the link scrolls to. Ignored when `onNavigate` is given. */
+  scrollTarget?: string;
   /** The link's own words, e.g. "explore what's already published". */
   scrollText: string;
+  /**
+   * Takes over from the scroll when the destination is not simply further down
+   * the page — a tab panel, say, which cannot be scrolled to while it is hidden.
+   */
+  onNavigate?: () => void;
   className?: string;
 }
 
@@ -25,6 +30,7 @@ export default function AgentHeading({
   lead,
   scrollTarget,
   scrollText,
+  onNavigate,
   className,
 }: AgentHeadingProps) {
   return (
@@ -35,9 +41,15 @@ export default function AgentHeading({
         <button
           type="button"
           onClick={() => {
-            document
-              .getElementById(scrollTarget)
-              ?.scrollIntoView({ behavior: "smooth" });
+            if (onNavigate) {
+              onNavigate();
+              return;
+            }
+            if (scrollTarget) {
+              document
+                .getElementById(scrollTarget)
+                ?.scrollIntoView({ behavior: "smooth" });
+            }
           }}
           className="text-primary inline items-center gap-1 hover:underline"
         >

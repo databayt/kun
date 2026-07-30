@@ -119,11 +119,16 @@ returns `drafted: 0`.
 - **Recovery** — the drain reaps variants a killed function left stuck in `publishing`; every
   batch route pins `maxDuration` and stops starting work on an elapsed budget, deferring the rest
   to its next run
-- **Hub** — bilingual en/ar with RTL, Server-Component header, one-round-trip status probe, and a
-  read-only ledger of the last 20 variants (status, time, latest reach/views) under the composer
+- **Hub** — bilingual en/ar with RTL, Server-Component header, one-round-trip status probe, and the
+  pipeline as five tabs (Calendar · Draft · Media · Publish · Measure) with brand, channels and
+  status as context above them. Panels are hidden rather than unmounted, so a queued draft keeps
+  polling and typed copy survives a tab switch
 - **The Social Agent window** — in-page drafting (2026-07-30): a brief in, AR+EN copy out, one
-  press into the composer. Contributor-gated; the one decided API-spend surface (D-20260730) —
-  the cron's no-spend default is untouched
+  press into the composer. Contributor-gated. **It does not call the API** — D-20260730's spend lane
+  shipped and is blocked (`ANTHROPIC_API_KEY` in Vercel returns 401, and subscription-only billing
+  means there are no credits behind it), so the window records a `SocialDraftRequest` and a Claude
+  Code session answers it on the Max pool via `draft`'s queue mode. The cron's no-spend default is
+  untouched. Nothing drains the queue on a schedule yet, and the window polls without a timeout
 - **Docs** — overview, status (this page), ownership, architecture, strategy, carousel, five
   brand pages, the channel guides, and the groups/destinations design
 
