@@ -61,6 +61,10 @@ export const CHANNELS = [
     labelAr: "تيليجرام",
     kind: "distribution",
     wired: true,
+    // Resolves to the one org channel (TELEGRAM_CHANNEL_ID). The transport can
+    // already address any chat id, so reaching the groups where prospects
+    // actually are needs a destination registry and guardrails, not new
+    // transport work — planned, unbuilt: /docs/social/channels/groups.
     transport: "telegram",
   },
   {

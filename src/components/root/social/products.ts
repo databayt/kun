@@ -12,6 +12,12 @@
 // Hogwarts" into the org channel. Flip a product's flag to true the day that
 // brand gets its own channel and its own per-product transport config.
 //
+// That boolean assumes one destination per (brand, channel), which holds for a
+// Page but not for Telegram/WhatsApp — their real audience sits in many groups
+// run by other people, selected per post. Replacing the flag with a destination
+// registry is designed and deliberately unbuilt; do not widen this map to model
+// groups. See /docs/social/channels/groups.
+//
 // Slack does not appear here at all: it is the communication channel, not a
 // distribution one. The type below makes re-adding it a compile error.
 

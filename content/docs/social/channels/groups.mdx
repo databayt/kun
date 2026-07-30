@@ -1,0 +1,225 @@
+---
+title: Groups & Destinations
+description: Planned, not built — modelling Telegram and WhatsApp as many rooms rather than one feed, why a guest posts differently from a page owner, and the guardrails that have to exist before the first group post.
+---
+
+# Groups & Destinations
+
+📋 **Planned — deliberately not started.** Nothing on this page is implemented. It is written now
+so the shape is agreed before anyone builds it, and scheduled for after Facebook is live across
+all five brands. See [Order of play](#order-of-play).
+
+## The gap this closes
+
+Every channel in the registry today resolves to exactly **one** place:
+
+| Channel | Destination | How it resolves |
+|---------|-------------|-----------------|
+| Facebook | the brand's Page | `FACEBOOK_PAGE_ID_<PRODUCT>` |
+| Instagram | the linked IG account | `INSTAGRAM_ACCOUNT_ID_<PRODUCT>` |
+| Telegram | one org channel | `TELEGRAM_CHANNEL_ID` |
+| WhatsApp | — | nothing; copy-out block |
+
+Selecting "Telegram" in the composer therefore means *the* Telegram destination. That is right for
+a Page and wrong for Telegram and WhatsApp, where the audience worth reaching is not sitting in a
+channel we own — it is spread across **groups other people run**: the Khartoum school-admins group,
+the Sudanese property listings group, the MENA edtech community. Those rooms are where potential
+clients already are.
+
+So the model needs a level that does not exist yet:
+
+```
+brand  ──▶  channel  ──▶  destination(s)
+hogwarts    facebook      Hogwarts Page                        (1)
+hogwarts    telegram      school-admins-khartoum,              (N)
+                          sudan-private-schools,
+                          edu-tech-mena
+mkan        whatsapp      khartoum-rentals,                    (N, manual)
+                          bahri-landlords
+```
+
+**A channel is a platform and a transport. A destination is a specific place within it.** Facebook
+simply has one destination per brand; Telegram and WhatsApp have many. Introducing the concept
+does not special-case them — it unifies what is currently implicit.
+
+## Owned, rented, borrowed
+
+The [strategy](/docs/social/strategy) already distinguishes **owned** reach (our Telegram channel,
+our WhatsApp list — 100% delivery, algorithm-proof) from **rented** reach (a Facebook or Instagram
+page, where the algorithm decides who sees it). Groups are a third thing, and collapsing it into
+"owned" is the mistake this page exists to prevent:
+
+| | **Owned** | **Rented** | **Borrowed** |
+|---|---|---|---|
+| Example | our Telegram channel | Facebook Page | someone's Telegram/WhatsApp group |
+| Who joined, and why | for us | for us | for **their own** reasons |
+| Who controls delivery | we do | the algorithm | **a human admin** |
+| Cardinality per brand | 1 | 1 | many |
+| Worst case of a bad post | unsubscribes | low reach | **ejection, and the room is closed forever** |
+| Right cadence | whenever we have something | whenever we have something | **rarely, and only when it fits** |
+
+That bottom row is the whole design constraint. A weak Facebook post costs a little reach. A
+tone-deaf post into a community group gets the bot removed by an admin — and we lose access to the
+exact room we wanted, permanently, along with whatever goodwill the account had. Reach in a
+borrowed room is **spendable**, not renewable.
+
+Which means the feature cannot be "check Telegram, blast to twenty groups." Blasting identical
+brand copy across twenty rooms is the definition of spam, and it is self-defeating: the fan-out
+that looks like the value is the thing that destroys the asset.
+
+## Data model — proposed
+
+### `SocialDestination`
+
+A destination is **curated knowledge**, not configuration. Which room, who runs it, whether we are
+allowed to post there, and what happened last time we did. That does not belong in an environment
+variable — a growing, annotated, per-brand list needs a record.
+
+```
+SocialDestination
+  id
+  channel            telegram | whatsapp   (channel id from config.ts)
+  slug               stable key; used in utm_content
+  label / labelAr    human name of the room
+  platformId         Telegram chat id ("-100…"). Null for WhatsApp — no API.
+  products[]         which brands this room is relevant to
+  language           ar | en
+  audienceNote       who is actually in here, in one line
+  permission         admin | allowed | ask-first | forbidden
+  minIntervalDays    the floor between two posts from us
+  active             soft-delete; keeps the history when we stop posting
+  adminContact       the human to ask, when permission is `ask-first`
+  notes              the room's own rules, in its own words
+```
+
+**Why a table and not a checked-in registry** like `products.ts`: this repo is public. A curated
+list of the rooms where our prospects gather — with chat ids — is business intelligence and a
+handed-over target list. It also needs editing by whoever does the curation, which is not
+necessarily an engineer. The static-registry pattern is right for products and channels, which are
+public facts; it is wrong for this.
+
+### `SocialDelivery`
+
+Today `SocialVariant` carries `status`, `externalId`, `attempts`, and `result` — fields that assume
+**one send**. Fanning one variant to six groups needs six independent outcomes, or one group's
+failure marks the whole variant failed and the other five become invisible.
+
+```
+SocialDelivery
+  variantId        → SocialVariant
+  destinationId    → SocialDestination
+  status · publishedAt · attempts · result · externalId
+  metricsFetchedAt
+```
+
+This is the same per-channel-degradation principle `/api/social/metrics` and `deliverPost` already
+follow, applied one level down. The variant keeps the copy; the delivery keeps what happened.
+
+`SocialVariant`'s existing send fields stay valid for single-destination channels, so Facebook is
+untouched by this change.
+
+### One variant, many rooms — and the drafting cost
+
+[kun#142](https://github.com/databayt/kun/issues/142) §6 already wants the cron to draft **per
+channel** rather than fanning one text everywhere. Per *destination* drafting on top of that
+multiplies the cost by the group count, which is the direction the whole strategy's economics
+break.
+
+**Proposed rule: one variant per channel, plus an optional per-destination preamble** — a single
+sentence of context for that room ("posting this here because a few of you asked about attendance
+reporting last week"), written at approval time. It is the line that makes a post read as a member
+rather than an advertiser, it is cheap, and it is the only part that genuinely has to differ.
+
+## Selection — what the composer does
+
+When a channel has more than one destination, checking the channel expands a list of its rooms:
+
+```
+☑ Telegram
+    ☐  School admins — Khartoum          ar · 1.2k · last posted 3d ago  ⚠ min gap 14d
+    ☐  Sudan private schools             ar · 480  · never posted
+    ☐  EdTech MENA                       en · 3.1k · last posted 21d ago
+    ☐  Databayt announcements  (owned)   ar · 90   · last posted 2d ago
+☐ WhatsApp                                          → copy-out checklist
+```
+
+Four properties that are guardrails, not decoration:
+
+- **Nothing is selected by default.** Fail-closed. The current model's implicit destination becomes
+  an explicit choice.
+- **There is no "select all"** for borrowed rooms. Its absence is the point.
+- **Last-posted and the minimum gap are shown at the moment of choosing**, where they can change
+  the decision — not buried in a settings page.
+- **`permission` is enforced server-side** in `deliverPost`, not only in the UI. A `forbidden` or
+  `ask-first` room cannot be posted to by a queued variant, a drain run, or a cron.
+
+## Guardrails
+
+| Guardrail | Why |
+|-----------|-----|
+| Per-destination `minIntervalDays`, enforced in `deliverPost` | The single strongest anti-spam control, and it has to survive the UI being bypassed |
+| Fan-out cap per publish | An accident should cost one room, not the whole list |
+| Staggered sends, not a burst | Simultaneous identical posts across groups are trivially recognisable as automated, by admins and by Telegram |
+| `permission` state per room, defaulting to `ask-first` | Being in a group is not permission to advertise in it. Someone asks the admin first, and records the answer |
+| Every destination carries `utm_content` | Without it, no room can be judged — see below |
+| WhatsApp destinations never automate | `transport: "manual"` is structural. See [WhatsApp](/docs/social/channels/whatsapp) |
+
+## Attribution — the reason to bother
+
+`applyUtm` currently tags `utm_source` (channel) and `utm_campaign` (brand). With one destination
+per channel that is complete. With many, it is not: twelve groups collapse into one
+`utm_source=telegram` and there is no way to tell the room that sends real enquiries from the
+eleven where we are merely tolerated.
+
+**Add `utm_content=<destination.slug>`.** That single field is what turns the group list from a
+blast surface into a curated one: prune the rooms that never convert, post more carefully in the
+ones that do, and have an actual answer to *is this worth the ejection risk*. Without per-room
+attribution there is no basis for the pruning, and the list only ever grows.
+
+## WhatsApp specifically
+
+WhatsApp groups are the highest-value rooms in our markets and the ones we can never automate.
+Nothing here changes that — [the reasoning](/docs/social/channels/whatsapp) is unchanged and the
+ban risk takes the support line down with it.
+
+What the destination model gives WhatsApp is not automation but **a checklist**: `/publish` renders
+the copy-out block once per selected group, in order, with each room's preamble and its own
+UTM-tagged link, and records which ones a human confirmed sending. That is a real improvement over
+one undifferentiated block — it makes manual delivery trackable and measurable — and it stops short
+of the line that gets numbers banned.
+
+## Telegram groups vs the Telegram channel
+
+Worth stating because it is the cheap part: a Telegram **channel** (broadcast, what
+`TELEGRAM_CHANNEL_ID` points at) and a Telegram **group** (a room) are both addressed by a chat id
+through the same Bot API. `sendTelegramPost` already takes a chat override. So Telegram needs **no
+new transport work** — only the destination registry, the selection UI, and the guardrails.
+
+The bot must be an admin with *Post Messages* in each group, exactly as it is for the channel, and
+a bot that is merely a member fails with an error that does not say so. That trap is documented on
+the [Telegram page](/docs/social/channels/telegram) and applies per room.
+
+## Order of play
+
+This work sits **last**, behind everything in
+[kun#142](https://github.com/databayt/kun/issues/142). Telegram and WhatsApp are the lowest-priority
+channels by importance, and borrowed-room posting is the highest-risk kind of posting we could do —
+which is the worst possible combination to build first.
+
+Preconditions before starting:
+
+1. Facebook live for all five brands, not three
+2. Instagram unblocked ([kun#141](https://github.com/databayt/kun/issues/141))
+3. Per-channel drafting shipped (kun#142 §6) — per-destination preambles build on it
+4. At least one group curated by hand, posted to by hand, and judged worth repeating
+
+That fourth one matters most. The manual version of this should prove itself in a handful of rooms
+before any of it is automated. If hand-posting into three groups does not produce enquiries, the
+feature is not worth building — and that is a much cheaper way to find out.
+
+## Related
+
+- [Telegram setup](/docs/social/channels/telegram) — the bot, the channel, the admin trap
+- [WhatsApp reality](/docs/social/channels/whatsapp) — why manual is permanent
+- [Strategy](/docs/social/strategy) — owned vs rented reach, and the content multiplier
+- [Status](/docs/social/status) — what is actually live today

@@ -16,6 +16,22 @@ the whole chain end to end in about five minutes.
 Post text, images, video, and albums to a public channel via a plain HTTPS call. Works from any
 server, including serverless — no local gateway, no OAuth dance, no token refresh.
 
+## One channel today, many rooms later
+
+This page sets up the **channel we own** — a broadcast surface people subscribe to, addressed by
+`TELEGRAM_CHANNEL_ID`. That is the whole Telegram destination today.
+
+The audience actually worth reaching on Telegram is mostly not there. It is in **groups other
+people run** — the rooms where potential clients already gather — and posting into a room you are
+a guest in is a different act from posting to your own channel, with a different failure mode:
+an admin removes you and the room is closed for good.
+
+Both are addressed by chat id through the same Bot API, so this transport already covers them; what
+is missing is a destination registry, a per-room selection step at publish time, and the guardrails
+that keep a fan-out from reading as spam. That is designed but **not built** —
+[Groups & Destinations](/docs/social/channels/groups) has the model and the reasoning, and it is
+scheduled behind Facebook.
+
 ## Prerequisites
 
 A Telegram account. That's it.
