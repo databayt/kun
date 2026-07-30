@@ -29,6 +29,8 @@ import {
   PRODUCTS,
   productChannelWired,
 } from "@/components/root/social/products";
+import { db } from "@/lib/db";
+import { detectSocialLocale } from "@/lib/social-locale";
 import { deliverPost } from "@/lib/social-publish";
 
 export const runtime = "nodejs";
@@ -124,6 +126,44 @@ export async function POST(request: Request): Promise<Response> {
 
   const result = await deliverPost({ product: productId, text, channels });
 
+  // Record what just landed — same doctrine as publishPostDirect: without a
+  // piece and its variants, a relay post has no externalId (so it can never be
+  // retracted) and /api/social/metrics cannot see it. Deliberately AFTER
+  // delivery and deliberately non-fatal: the post is already public, and a DB
+  // error here must read as "published but unrecorded", never as a failure
+  // that invites a double post. The relay body carries no mediaUrl, so none is
+  // recorded.
+  let recorded = false;
+  if (result.results.some((outcome) => outcome.ok)) {
+    try {
+      await db.socialPiece.create({
+        data: {
+          brand: productId,
+          source: "hermes",
+          locale: detectSocialLocale(text),
+          variants: {
+            create: result.results.map((outcome) => ({
+              channel: outcome.channel,
+              text,
+              status: outcome.ok ? ("published" as const) : ("failed" as const),
+              publishedAt: outcome.ok ? new Date() : null,
+              externalId: outcome.externalId,
+              result: outcome.ok ? "ok" : (outcome.error ?? "failed"),
+              attempts: 1,
+            })),
+          },
+        },
+      });
+      recorded = true;
+    } catch (err: unknown) {
+      console.error(
+        `[social/relay] published ${productId} but could not record it: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+      );
+    }
+  }
+
   // The relay has no review channel to echo into — the server log is the audit
   // trail, and the JSON below is Hermes's confirmation.
   console.log(
@@ -136,6 +176,17 @@ export async function POST(request: Request): Promise<Response> {
         product: productId,
         channels,
         chars: text.length,
+        recorded,
       })
-    : bad(result.error ?? "Unknown error.", 502);
+    : Response.json(
+        {
+          ok: false,
+          error: result.error ?? "Unknown error.",
+          // A partial fan-out is already public on the channels that landed —
+          // Hermes needs to see which, not just the headline failure.
+          results: result.results,
+          recorded,
+        },
+        { status: 502 },
+      );
 }
