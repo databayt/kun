@@ -131,6 +131,53 @@ model SocialMetric {
   @@index([variantId, fetchedAt])
 }
 
+enum DraftRequestStatus {
+  /// Waiting for a Claude Code session to answer it.
+  pending
+  /// Copy is written and readable in `ar` / `en`.
+  answered
+  /// Whoever picked it up could not write it; `note` says why.
+  failed
+}
+
+/// A contributor's ask for copy, waiting on the Max pool.
+///
+/// The Hub's agent window does NOT call the Anthropic API: the engine's billing
+/// posture is subscription-only, so there are no credits for an API key to
+/// spend (a live test on 2026-07-30 confirmed the key in Vercel is rejected —
+/// see .claude/memory/decisions/2026-07-30-in-app-draft-spend.md). Instead the
+/// window records the ask here and a Claude Code session on a human's machine
+/// answers it against the Max subscription — the same inverted arrow the cron
+/// uses for Hermes, for the same reason: Vercel cannot reach the thing that
+/// does the writing, so the thing that does the writing reaches in.
+///
+/// Deliberately not a SocialPiece: nothing has been written yet, and a piece
+/// with no copy would pollute the ledger the Hub and metrics both read.
+model SocialDraftRequest {
+  id String @id @default(cuid())
+
+  /// Product registry id — hogwarts · mkan · databayt · sijillee · moalimee.
+  brand String
+  /// The contributor's ask, verbatim.
+  brief String
+  /// Who asked, for the answering session's context. Contributor email.
+  requestedBy String?
+
+  status DraftRequestStatus @default(pending)
+
+  /// The answer: Arabic crafted first, English as its sibling.
+  ar String?
+  en String?
+  /// Who answered, e.g. "claude-code:abdout". Or why it failed.
+  note String?
+
+  createdAt  DateTime  @default(now())
+  answeredAt DateTime?
+
+  /// The queue read: oldest pending first.
+  @@index([status, createdAt])
+}
+
 /// Last-seen timestamps for components that call in rather than being called.
 ///
 /// Hermes runs on a personal machine with no public route, so kun can never

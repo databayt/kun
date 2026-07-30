@@ -1,15 +1,19 @@
 "use client";
 
 // The agent window — the hogwarts sales-block prompt UI, repurposed: describe
-// the post, Claude drafts it server-side (the decided per-draft spend lane in
-// actions/post-social.ts), and the copy drops into the composer below. Single
-// turn by design, like the original: one brief, one bilingual draft, no chat
-// history. The "reasoning" theatre of the original was deliberately not
-// ported — the only status shown is the true one.
+// the post, Claude writes it, and the copy drops into the composer below.
+//
+// ASYNCHRONOUS on purpose. The window queues the brief as a SocialDraftRequest
+// and polls for the answer; a Claude Code session on a human's machine writes
+// it against the Max subscription. It does not call the Anthropic API —
+// subscription-only billing means no key has credits to spend (verified in
+// production 2026-07-30; see the decision record). So the honest status is
+// "queued", not a spinner pretending to be inference — and the "reasoning"
+// theatre of the original was deliberately not ported either.
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Sparkles } from "lucide-react";
-import { draftSocialCopy } from "@/actions/post-social";
+import { readSocialDraft, requestSocialDraft } from "@/actions/post-social";
 import {
   PromptInput,
   PromptInputSubmit,
@@ -83,26 +87,65 @@ export function DraftAgent({ product, onUse, isRTL, t }: DraftAgentProps) {
   const [draft, setDraft] = useState<DraftPair | null>(null);
   const [arDone, setArDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [requestId, setRequestId] = useState<string | null>(null);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Poll the queued ask until a session answers it. Cleared on unmount, on a
+  // terminal status, and before any new ask — a stale interval would keep
+  // writing into a window the contributor has moved on from.
+  useEffect(() => {
+    if (!requestId) return;
+    let cancelled = false;
+
+    const tick = async () => {
+      const res = await readSocialDraft(requestId).catch(() => null);
+      if (cancelled || !res) return;
+      if (!res.ok) {
+        setError(res.error ?? "Could not read the draft.");
+        setBusy(false);
+        setRequestId(null);
+        return;
+      }
+      if (res.status === "answered" && res.ar && res.en) {
+        setDraft({ ar: res.ar, en: res.en });
+        setBusy(false);
+        setRequestId(null);
+      } else if (res.status === "failed") {
+        setError(res.note ?? "The draft could not be written.");
+        setBusy(false);
+        setRequestId(null);
+      }
+    };
+
+    void tick();
+    pollRef.current = setInterval(tick, 5000);
+    return () => {
+      cancelled = true;
+      if (pollRef.current) clearInterval(pollRef.current);
+    };
+  }, [requestId]);
 
   const handleSubmit = async ({ text }: PromptInputMessage) => {
     const brief = text.trim();
     if (!brief || busy) return;
+    if (pollRef.current) clearInterval(pollRef.current);
     setBusy(true);
     setHasInteracted(true);
     setError(null);
     setDraft(null);
     setArDone(false);
+    setRequestId(null);
     try {
-      const res = await draftSocialCopy({ product, brief });
-      if (res.ok && res.ar && res.en) {
-        setDraft({ ar: res.ar, en: res.en });
+      const res = await requestSocialDraft({ product, brief });
+      if (res.ok && res.id) {
+        setRequestId(res.id);
         setPrompt("");
       } else {
         setError(res.error ?? "Unknown error.");
+        setBusy(false);
       }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : String(err));
-    } finally {
       setBusy(false);
     }
   };
@@ -115,11 +158,14 @@ export function DraftAgent({ product, onUse, isRTL, t }: DraftAgentProps) {
   };
 
   const reset = () => {
+    if (pollRef.current) clearInterval(pollRef.current);
     setDraft(null);
     setError(null);
     setArDone(false);
     setHasInteracted(false);
     setPrompt("");
+    setRequestId(null);
+    setBusy(false);
   };
 
   const collapsed = hasInteracted && !focused;
@@ -150,9 +196,14 @@ export function DraftAgent({ product, onUse, isRTL, t }: DraftAgentProps) {
           )}
         >
           {busy && (
-            <p className="text-muted-foreground animate-pulse text-sm">
-              {t.agentDrafting}
-            </p>
+            <div className="space-y-1">
+              <p className="text-muted-foreground animate-pulse text-sm">
+                {t.agentDrafting}
+              </p>
+              <p className="text-muted-foreground/70 text-xs">
+                {t.agentQueuedHint}
+              </p>
+            </div>
           )}
           {error && (
             <p className="text-destructive text-sm">

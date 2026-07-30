@@ -62,7 +62,9 @@ export const SOCIAL_DICTIONARY = {
       "Describe the post and Claude drafts it — Arabic first, English beside it. Pick a version and it lands in the composer below.",
     agentPlaceholder: "Describe the post — topic, news, angle…",
     agentPlaceholderMore: "Draft another…",
-    agentDrafting: "Drafting…",
+    agentDrafting: "Queued — Claude is writing it.",
+    agentQueuedHint:
+      "Drafting runs on the team's Claude subscription, so it lands within minutes rather than seconds. Leave this page open — it updates itself.",
     agentUseAr: "Use Arabic",
     agentUseEn: "Use English",
     agentUseBoth: "Use both",
@@ -139,7 +141,9 @@ export const SOCIAL_DICTIONARY = {
       "صِف المنشور ويكتبه Claude — بالعربية أولًا ومعها الإنجليزية. اختر نسخة وستهبط في المنشئ بالأسفل.",
     agentPlaceholder: "صِف المنشور — الموضوع، الخبر، الزاوية…",
     agentPlaceholderMore: "صياغة أخرى…",
-    agentDrafting: "جاري الصياغة…",
+    agentDrafting: "في الانتظار — Claude يكتبه الآن.",
+    agentQueuedHint:
+      "الصياغة تعمل على اشتراك الفريق في Claude، فتصل في دقائق لا ثوانٍ. اترك الصفحة مفتوحة — تُحدّث نفسها.",
     agentUseAr: "استخدم العربية",
     agentUseEn: "استخدم الإنجليزية",
     agentUseBoth: "استخدم الاثنتين",

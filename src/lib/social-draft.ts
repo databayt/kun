@@ -224,10 +224,17 @@ export type BriefResult =
   | { ok: true; ar: string; en: string; source: string }
   | { ok: false; error: string };
 
-// The agent window's lane (the /social page). Always Anthropic, deliberately —
-// this is the decided per-draft spend lane (2026-07-30), so it never consults
-// SOCIAL_DRAFT_SOURCE: the cron's no-spend default must not gain a side door,
-// and the window must not silently dead-end on Hermes from a cloud deployment.
+// The FUNDED lane for a contributor's brief — currently unused.
+//
+// The Hub's agent window does not call this: a live production test on
+// 2026-07-30 found no API key with credits behind it (subscription-only
+// billing, so there is nothing for one to spend — see
+// .claude/memory/decisions/2026-07-30-in-app-draft-spend.md). Briefs are queued
+// as SocialDraftRequest rows and answered by a Claude Code session on the Max
+// pool instead. This function is kept, tested, and one funded key away: if
+// credits are ever bought, wire requestSocialDraft to call it and the window
+// drafts inline again. Always Anthropic by design — never SOCIAL_DRAFT_SOURCE,
+// so the cron's no-spend default gains no side door.
 export async function draftBrief(req: BriefRequest): Promise<BriefResult> {
   const apiKey = (process.env.ANTHROPIC_API_KEY ?? "").trim();
   if (!apiKey) {

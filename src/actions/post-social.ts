@@ -3,7 +3,6 @@
 import { z } from "zod";
 import { auth } from "@/auth";
 import { requireContributor } from "@/lib/auth-guard";
-import { draftBrief } from "@/lib/social-draft";
 import { detectSocialLocale } from "@/lib/social-locale";
 import { deliverPost, type ChannelOutcome } from "@/lib/social-publish";
 import { getEgressStatus, type EgressStatus } from "@/lib/social-status";
@@ -109,21 +108,33 @@ const draftCopySchema = z.object({
     .max(2000, "Brief is too long (max 2000 characters)."),
 });
 
-export interface DraftCopyResult {
+export interface DraftRequestResult {
   ok: boolean;
-  ar?: string;
-  en?: string;
-  source?: string;
+  /** SocialDraftRequest id to poll with readSocialDraft. */
+  id?: string;
   error?: string;
 }
 
-// The agent window's brain — the one drafting action in this file, and still
-// Claude writing the copy: it calls the Anthropic lane in lib/social-draft
-// directly (the decided per-draft spend lane), never a gateway LLM and never
-// the cron's draftSource() switch. The relays below remain delivery-only.
-export async function draftSocialCopy(
+export interface DraftReadResult {
+  ok: boolean;
+  status?: "pending" | "answered" | "failed";
+  ar?: string;
+  en?: string;
+  note?: string;
+  error?: string;
+}
+
+// The agent window's ask. It does NOT call the Anthropic API: the engine's
+// billing posture is subscription-only, so no API key has credits to spend
+// (verified against production 2026-07-30 — see the decision record). The ask
+// is queued here and a Claude Code session on a human's machine answers it
+// against the Max pool, then the window reads the answer back. Same inverted
+// arrow as the Hermes draft lane, same reason.
+export async function requestSocialDraft(
   input: unknown,
-): Promise<DraftCopyResult> {
+): Promise<DraftRequestResult> {
+  const session = await auth();
+  const email = session?.user?.email ?? undefined;
   if (!(await requireContributor())) {
     return { ok: false, error: "Forbidden: contributors only." };
   }
@@ -136,10 +147,52 @@ export async function draftSocialCopy(
     };
   }
 
-  const result = await draftBrief(parsed.data);
-  return result.ok
-    ? { ok: true, ar: result.ar, en: result.en, source: result.source }
-    : { ok: false, error: result.error };
+  try {
+    const row = await db.socialDraftRequest.create({
+      data: {
+        brand: parsed.data.product,
+        brief: parsed.data.brief,
+        requestedBy: email,
+      },
+    });
+    return { ok: true, id: row.id };
+  } catch (err: unknown) {
+    return {
+      ok: false,
+      error:
+        err instanceof Error ? err.message : "Could not queue the draft ask.",
+    };
+  }
+}
+
+/** The window's poll. Contributor-gated like everything else on this surface. */
+export async function readSocialDraft(id: unknown): Promise<DraftReadResult> {
+  if (!(await requireContributor())) {
+    return { ok: false, error: "Forbidden: contributors only." };
+  }
+  if (typeof id !== "string" || !id) {
+    return { ok: false, error: "Invalid request id." };
+  }
+
+  try {
+    const row = await db.socialDraftRequest.findUnique({
+      where: { id },
+      select: { status: true, ar: true, en: true, note: true },
+    });
+    if (!row) return { ok: false, error: "That draft ask no longer exists." };
+    return {
+      ok: true,
+      status: row.status,
+      ar: row.ar ?? undefined,
+      en: row.en ?? undefined,
+      note: row.note ?? undefined,
+    };
+  } catch (err: unknown) {
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : "Could not read the draft.",
+    };
+  }
 }
 
 export async function publishPostDirect(input: unknown): Promise<PostResult> {
