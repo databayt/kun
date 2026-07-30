@@ -1,28 +1,52 @@
 "use client";
 
-// The agent window — the hogwarts sales-block prompt UI, repurposed: describe
-// the post, Claude writes it, and the copy drops into the composer below.
+// The agent window — the hogwarts sales block's Lead Agent (hogwarts
+// src/components/sales/prompt.tsx), rebuilt for social drafting on the same ai
+// block: AgentHeading over a full-height hero, the rounded-[2rem] prompt pill
+// with its toolbar, and AIResponseDisplay for the answer. Same geometry, same
+// collapse-to-a-pill-after-the-first-ask behaviour, same response container.
 //
 // ASYNCHRONOUS on purpose. The window queues the brief as a SocialDraftRequest
-// and polls for the answer; a Claude Code session on a human's machine writes
-// it against the Max subscription. It does not call the Anthropic API —
+// and polls for the answer; a Claude Code session on a human's machine writes it
+// against the Max subscription. It does not call the Anthropic API —
 // subscription-only billing means no key has credits to spend (verified in
-// production 2026-07-30; see the decision record). So the honest status is
-// "queued", not a spinner pretending to be inference — and the "reasoning"
-// theatre of the original was deliberately not ported either.
+// production 2026-07-30; see the decision record). So the reasoning panel
+// describes the real queue rather than performing invented thinking, and the
+// "Thought for 3 seconds" of the original is a genuine measured wait here.
 
-import { useEffect, useRef, useState } from "react";
-import { Sparkles } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { readSocialDraft, requestSocialDraft } from "@/actions/post-social";
+import AgentHeading from "@/components/atom/agent-heading";
+import { AIResponseDisplay } from "@/components/atom/ai-response-display";
+import {
+  AIBrainIcon,
+  AttachIcon,
+  PlusIcon,
+  SendUpIcon,
+  VoiceWaveIcon,
+} from "@/components/atom/icons";
 import {
   PromptInput,
+  PromptInputActionAddAttachments,
+  PromptInputActionMenu,
+  PromptInputActionMenuContent,
+  PromptInputActionMenuTrigger,
+  PromptInputAttachment,
+  PromptInputAttachments,
+  PromptInputButton,
+  PromptInputModelSelect,
+  PromptInputModelSelectContent,
+  PromptInputModelSelectItem,
+  PromptInputModelSelectTrigger,
+  PromptInputModelSelectValue,
   PromptInputSubmit,
   PromptInputTextarea,
+  usePromptInputAttachments,
   type PromptInputMessage,
 } from "@/components/atom/prompt-input";
 import { Button } from "@/components/ui/button";
-import type { SocialDict } from "@/components/root/social/dictionary";
-import type { ProductId } from "@/components/root/social/products";
+import { fill, type SocialDict } from "@/components/root/social/dictionary";
+import { PRODUCTS, type ProductId } from "@/components/root/social/products";
 import { cn } from "@/lib/utils";
 
 interface DraftAgentProps {
@@ -38,57 +62,52 @@ interface DraftPair {
   en: string;
 }
 
-// Character-interval reveal — presentation only, the text is already complete.
-function StreamingText({
-  text,
-  dir,
-  onDone,
-}: {
-  text: string;
-  dir: "rtl" | "ltr";
-  onDone?: () => void;
-}) {
-  const [count, setCount] = useState(0);
+/**
+ * The model chain from .claude/engine.json. Presentational for now: the queue
+ * carries a brand and a brief, not a model, so the answering session uses its
+ * own session default. Wiring it needs a `model` column on SocialDraftRequest
+ * plus a pass-through in requestSocialDraft — deliberately not done here.
+ */
+const MODELS = [
+  { id: "claude-fable-5", label: "Fable 5" },
+  { id: "claude-opus-4-8", label: "Opus 4.8" },
+  { id: "claude-sonnet-5", label: "Sonnet 5" },
+] as const;
 
-  useEffect(() => {
-    setCount(0);
-    const id = setInterval(() => {
-      setCount((current) => {
-        if (current >= text.length) {
-          clearInterval(id);
-          return current;
-        }
-        return Math.min(current + 3, text.length);
-      });
-    }, 12);
-    return () => clearInterval(id);
-  }, [text]);
+/**
+ * Mirrors draftCopySchema's cap in actions/post-social.ts. An attachment is
+ * folded into the brief rather than uploaded — the queue has a brief column, not
+ * a file one — so the fold-in has to fit under the same ceiling the action
+ * enforces. Overshooting it would answer "attach a transcript" with the server's
+ * "Brief is too long", which explains nothing.
+ */
+const MAX_BRIEF_CHARS = 2000;
 
-  const done = count >= text.length;
-  useEffect(() => {
-    if (done) onDone?.();
-  }, [done, onDone]);
+const RESPONSE_CONTAINER_ID = "ai-response-container";
 
-  return (
-    <p
-      dir={dir}
-      className="text-start text-sm leading-relaxed whitespace-pre-wrap"
-    >
-      {text.slice(0, count)}
-    </p>
-  );
-}
+type Reveal = "ar" | "en" | "done" | null;
 
 export function DraftAgent({ product, onUse, isRTL, t }: DraftAgentProps) {
   const [prompt, setPrompt] = useState("");
   const [busy, setBusy] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
-  const [focused, setFocused] = useState(false);
+  const [isInputFocused, setIsInputFocused] = useState(false);
+  const [model, setModel] = useState<string>(MODELS[0].id);
   const [draft, setDraft] = useState<DraftPair | null>(null);
-  const [arDone, setArDone] = useState(false);
+  const [reveal, setReveal] = useState<Reveal>(null);
   const [error, setError] = useState<string | null>(null);
   const [requestId, setRequestId] = useState<string | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const brandLabel =
+    PRODUCTS.find((p) => p.id === product)?.[isRTL ? "labelAr" : "label"] ??
+    product;
+
+  // Only ever forward, so a late onStreamComplete from a block that already
+  // finished cannot rewind the reveal and replay it.
+  const advance = useCallback((from: Reveal, to: Reveal) => {
+    setReveal((current) => (current === from ? to : current));
+  }, []);
 
   // Poll the queued ask until a session answers it. Cleared on unmount, on a
   // terminal status, and before any new ask — a stale interval would keep
@@ -108,6 +127,7 @@ export function DraftAgent({ product, onUse, isRTL, t }: DraftAgentProps) {
       }
       if (res.status === "answered" && res.ar && res.en) {
         setDraft({ ar: res.ar, en: res.en });
+        setReveal("ar");
         setBusy(false);
         setRequestId(null);
       } else if (res.status === "failed") {
@@ -125,15 +145,35 @@ export function DraftAgent({ product, onUse, isRTL, t }: DraftAgentProps) {
     };
   }, [requestId]);
 
-  const handleSubmit = async ({ text }: PromptInputMessage) => {
-    const brief = text.trim();
+  const handleSubmit = async ({ text, files }: PromptInputMessage) => {
+    let brief = (text ?? "").trim();
+
+    // An attachment is context for the brief, so read it in rather than posting
+    // a file the queue has no column for. Only what fits under the cap goes in.
+    const separator = "\n\n---\n\n";
+    const room = MAX_BRIEF_CHARS - brief.length - separator.length;
+    if (files?.length && room > 0) {
+      const parts = await Promise.all(
+        files.map(async (file) => {
+          try {
+            const body = await fetch(file.url).then((res) => res.text());
+            return `${file.filename ?? "attachment"}:\n${body.trim()}`;
+          } catch {
+            return "";
+          }
+        }),
+      );
+      const attached = parts.filter(Boolean).join("\n\n").slice(0, room).trim();
+      if (attached) brief = `${brief}${separator}${attached}`;
+    }
+
     if (!brief || busy) return;
     if (pollRef.current) clearInterval(pollRef.current);
     setBusy(true);
     setHasInteracted(true);
     setError(null);
     setDraft(null);
-    setArDone(false);
+    setReveal(null);
     setRequestId(null);
     try {
       const res = await requestSocialDraft({ product, brief });
@@ -160,65 +200,94 @@ export function DraftAgent({ product, onUse, isRTL, t }: DraftAgentProps) {
   const reset = () => {
     if (pollRef.current) clearInterval(pollRef.current);
     setDraft(null);
+    setReveal(null);
     setError(null);
-    setArDone(false);
     setHasInteracted(false);
     setPrompt("");
     setRequestId(null);
     setBusy(false);
   };
 
-  const collapsed = hasInteracted && !focused;
+  // The pill collapses to a single row once the window has been used, and
+  // expands again on focus — the sales agent's behaviour exactly.
+  const collapsed = hasInteracted && !isInputFocused;
+  const reasoningLabels = {
+    thinking: t.agentThinking,
+    thought: t.agentThought,
+  };
+  const responseLabels = {
+    streaming: t.agentPipStreaming,
+    done: t.agentPipDone,
+    failed: t.agentPipFailed,
+    rejected: t.agentPipRejected,
+  };
 
+  // full-bleed: the page wraps its children in px-responsive, and a gradient
+  // that stops at that padding reads as a panel rather than a hero. The utility
+  // (styles/container.css) breaks out RTL-safely.
   return (
-    <section className="border-border bg-card/40 rounded-xl border p-6 shadow-lg backdrop-blur-md">
-      {!hasInteracted && (
-        <div className="mb-5 text-center">
-          <div className="mb-2 flex items-center justify-center gap-2">
-            <span className="rounded-lg bg-amber-500/10 p-2 text-amber-500">
-              <Sparkles className="h-5 w-5" />
-            </span>
-            <h3 className="text-primary text-base font-medium">
-              {t.agentTitle}
-            </h3>
-          </div>
-          <p className="text-muted-foreground mx-auto max-w-md text-sm leading-relaxed font-light">
-            {t.agentHint}
-          </p>
-        </div>
-      )}
-
-      {hasInteracted && (
-        <div
-          className={cn(
-            "mb-4 space-y-4 overflow-y-auto transition-all",
-            focused ? "max-h-[200px]" : "max-h-[500px]",
-          )}
-        >
-          {busy && (
-            <div className="space-y-1">
-              <p className="text-muted-foreground animate-pulse text-sm">
-                {t.agentDrafting}
-              </p>
-              <p className="text-muted-foreground/70 text-xs">
-                {t.agentQueuedHint}
-              </p>
+    <section className="full-bleed from-background to-muted/20 flex min-h-screen flex-col bg-gradient-to-b">
+      <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col items-center justify-center px-4">
+        <div className="flex w-full flex-1 flex-col items-center justify-center text-center">
+          {!hasInteracted && (
+            <div className="mb-8">
+              <AgentHeading
+                title={t.agentTitle}
+                lead={t.agentLead}
+                scrollTarget="social-ledger"
+                scrollText={t.agentScrollText}
+              />
             </div>
           )}
-          {error && (
-            <p className="text-destructive text-sm">
-              {t.agentError} {error}
-            </p>
-          )}
-          {draft && (
-            <div className="space-y-4">
-              <StreamingText
-                text={draft.ar}
+
+          {hasInteracted && (
+            <div
+              id={RESPONSE_CONTAINER_ID}
+              className={cn(
+                "relative w-full max-w-3xl flex-1 space-y-4 overflow-x-hidden overflow-y-auto rounded-lg",
+                isInputFocused ? "max-h-[200px]" : "max-h-[500px]",
+              )}
+            >
+              <AIResponseDisplay
+                reasoning={fill(t.agentReasoning, { brand: brandLabel })}
+                response={draft?.ar ?? ""}
+                isStreaming={busy || reveal === "ar"}
                 dir="rtl"
-                onDone={() => setArDone(true)}
+                className="mb-4 pe-3"
+                streamDelay={10}
+                reasoningLabels={reasoningLabels}
+                responseLabels={responseLabels}
+                scrollContainerId={RESPONSE_CONTAINER_ID}
+                onStreamComplete={() => advance("ar", "en")}
               />
-              {arDone && <StreamingText text={draft.en} dir="ltr" />}
-              {arDone && (
+
+              {draft && reveal !== "ar" && (
+                <AIResponseDisplay
+                  response={draft.en}
+                  isStreaming={reveal === "en"}
+                  showReasoning={false}
+                  dir="ltr"
+                  className="mb-4 pe-3"
+                  streamDelay={10}
+                  responseLabels={responseLabels}
+                  scrollContainerId={RESPONSE_CONTAINER_ID}
+                  onStreamComplete={() => advance("en", "done")}
+                />
+              )}
+
+              {error && (
+                <p className="text-destructive text-start text-sm">
+                  {t.agentError} {error}
+                </p>
+              )}
+
+              {busy && (
+                <p className="text-muted-foreground/70 text-start text-xs">
+                  {t.agentQueuedHint}
+                </p>
+              )}
+
+              {draft && reveal === "done" && (
                 <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
                   <Button size="sm" onClick={() => useDraft(draft.ar)}>
                     {t.agentUseAr}
@@ -244,38 +313,168 @@ export function DraftAgent({ product, onUse, isRTL, t }: DraftAgentProps) {
               )}
             </div>
           )}
-        </div>
-      )}
 
-      <PromptInput
-        onSubmit={handleSubmit}
-        className={cn(
-          "border-border mx-auto max-w-2xl rounded-[2rem] transition-all",
-          collapsed ? "flex h-14 flex-row items-center gap-2 px-3" : "p-4",
-        )}
-      >
-        <PromptInputTextarea
-          value={prompt}
-          onChange={(event) => setPrompt(event.target.value)}
-          onFocus={() => setFocused(true)}
-          onBlur={() => setFocused(false)}
-          placeholder={collapsed ? t.agentPlaceholderMore : t.agentPlaceholder}
-          disabled={busy}
-          className={collapsed ? "min-h-0 py-1" : "min-h-16"}
-        />
-        <div
-          className={cn(
-            "flex items-center",
-            collapsed ? "shrink-0" : "justify-end pt-2",
-          )}
-        >
-          <PromptInputSubmit
-            status={busy ? "streaming" : "ready"}
-            disabled={busy || !prompt.trim()}
-            aria-label={isRTL ? "أرسل" : "Send"}
-          />
+          <div className="relative w-full max-w-3xl">
+            <PromptInput
+              onSubmit={handleSubmit}
+              className={cn(
+                "group border-muted-foreground/10 bg-muted focus-within:border-foreground/20 hover:border-foreground/10 focus-within:hover:border-foreground/20 flex w-full gap-2 rounded-[2rem] border text-base shadow-sm transition-all duration-300 ease-in-out",
+                collapsed ? "h-14 items-center p-2" : "flex-col p-3",
+              )}
+              multiple
+              accept="text/plain,text/markdown,text/csv,.txt,.md,.csv"
+              maxFiles={5}
+              maxFileSize={5 * 1024 * 1024}
+            >
+              <div
+                className={cn(
+                  "relative flex items-center",
+                  collapsed ? "flex-1 gap-2" : "flex-1",
+                )}
+              >
+                {collapsed && (
+                  <PromptInputActionMenu>
+                    <PromptInputActionMenuTrigger className="bg-muted hover:bg-accent h-8 w-8 rounded-full p-0">
+                      <PlusIcon className="h-5 w-5" />
+                    </PromptInputActionMenuTrigger>
+                    <PromptInputActionMenuContent>
+                      <PromptInputActionAddAttachments
+                        label={t.agentAttachItem}
+                      />
+                    </PromptInputActionMenuContent>
+                  </PromptInputActionMenu>
+                )}
+
+                <PromptInputAttachments>
+                  {(attachment) => <PromptInputAttachment data={attachment} />}
+                </PromptInputAttachments>
+
+                <PromptInputTextarea
+                  value={prompt}
+                  onChange={(event) => setPrompt(event.target.value)}
+                  onFocus={() => setIsInputFocused(true)}
+                  onBlur={() => setIsInputFocused(false)}
+                  placeholder={
+                    collapsed ? t.agentPlaceholderMore : t.agentPlaceholder
+                  }
+                  disabled={busy}
+                  className={cn(
+                    "placeholder:text-muted-foreground flex w-full flex-1 resize-none bg-transparent text-[16px] focus:bg-transparent",
+                    collapsed
+                      ? "max-h-[40px] min-h-0 !px-2 py-0 leading-[40px]"
+                      : "max-h-[200px] min-h-20 !px-0 py-2 leading-snug",
+                  )}
+                />
+
+                {collapsed && (
+                  <div className="flex items-center gap-1">
+                    <PromptInputButton
+                      className="bg-muted hover:bg-accent h-8 w-8 rounded-full"
+                      disabled
+                      title={t.agentVoiceTitle}
+                      aria-label={t.agentVoiceTitle}
+                    >
+                      <VoiceWaveIcon className="h-5 w-5" />
+                    </PromptInputButton>
+
+                    <PromptInputSubmit
+                      disabled={busy || !prompt.trim()}
+                      status={busy ? "submitted" : "ready"}
+                      className="h-8 w-8 rounded-full"
+                      aria-label={isRTL ? "أرسل" : "Send"}
+                    >
+                      <SendUpIcon className="h-5 w-5" />
+                    </PromptInputSubmit>
+                  </div>
+                )}
+              </div>
+
+              {!collapsed && (
+                <div className="flex flex-wrap items-center gap-1">
+                  <PromptInputActionMenu>
+                    <PromptInputActionMenuTrigger className="border-input bg-muted text-muted-foreground hover:text-foreground hover:bg-accent inline-flex h-8 w-8 items-center justify-center gap-1.5 rounded-full border p-0 text-sm font-medium whitespace-nowrap transition-colors duration-100 ease-in-out hover:border-transparent">
+                      <PlusIcon className="text-muted-foreground h-5 w-5 shrink-0" />
+                    </PromptInputActionMenuTrigger>
+                    <PromptInputActionMenuContent>
+                      <PromptInputActionAddAttachments
+                        label={t.agentAttachItem}
+                      />
+                    </PromptInputActionMenuContent>
+                  </PromptInputActionMenu>
+
+                  <AttachButton label={t.agentAttach} />
+
+                  <PromptInputModelSelect
+                    value={model}
+                    onValueChange={setModel}
+                  >
+                    <PromptInputModelSelectTrigger
+                      aria-label={t.agentModelLabel}
+                      className="border-input bg-muted text-muted-foreground hover:text-foreground hover:bg-accent inline-flex h-8 items-center justify-center gap-1.5 rounded-full border px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors duration-100 ease-in-out hover:border-transparent"
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <PromptInputModelSelectValue />
+                      </div>
+                    </PromptInputModelSelectTrigger>
+                    <PromptInputModelSelectContent
+                      align={isRTL ? "end" : "start"}
+                    >
+                      {MODELS.map((m) => (
+                        <PromptInputModelSelectItem key={m.id} value={m.id}>
+                          <div className="flex items-center gap-2">
+                            <AIBrainIcon className="h-4 w-4" />
+                            <span>{m.label}</span>
+                          </div>
+                        </PromptInputModelSelectItem>
+                      ))}
+                    </PromptInputModelSelectContent>
+                  </PromptInputModelSelect>
+
+                  <div className="ms-auto flex items-center gap-1 md:gap-2">
+                    <PromptInputButton
+                      className="border-input bg-muted text-muted-foreground hover:text-foreground hover:bg-accent flex h-8 w-8 items-center justify-center rounded-full border p-0 hover:border-transparent"
+                      disabled
+                      title={t.agentVoiceTitle}
+                      aria-label={t.agentVoiceTitle}
+                    >
+                      <VoiceWaveIcon className="h-5 w-5 shrink-0" />
+                    </PromptInputButton>
+
+                    <PromptInputSubmit
+                      disabled={busy || !prompt.trim()}
+                      status={busy ? "submitted" : "ready"}
+                      className="h-8 w-8 rounded-full"
+                      aria-label={isRTL ? "أرسل" : "Send"}
+                    >
+                      <SendUpIcon className="h-5 w-5 shrink-0" />
+                    </PromptInputSubmit>
+                  </div>
+                </div>
+              )}
+            </PromptInput>
+          </div>
         </div>
-      </PromptInput>
+      </div>
     </section>
+  );
+}
+
+/**
+ * The toolbar's second attach affordance. The sales agent points its copy at a
+ * hand-rolled hidden `<input id="file-upload">` that nothing reads, so files
+ * picked through it vanish; this one opens the real dialog behind PromptInput.
+ */
+function AttachButton({ label }: { label: string }) {
+  const attachments = usePromptInputAttachments();
+
+  return (
+    <PromptInputButton
+      size="default"
+      className="border-input bg-muted text-muted-foreground hover:text-foreground hover:bg-accent inline-flex h-8 items-center justify-center gap-1.5 rounded-full border px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors duration-100 ease-in-out hover:border-transparent"
+      onClick={attachments.openFileDialog}
+    >
+      <AttachIcon className="h-4 w-4 shrink-0" />
+      <span className="hidden md:flex">{label}</span>
+    </PromptInputButton>
   );
 }

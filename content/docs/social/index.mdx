@@ -60,7 +60,7 @@ brand,when  AR-first visuals    gate    | copy-out         + UTM tags
 | Stage | Owner | Notes |
 |-------|-------|-------|
 | **Plan** | `calendar` skill · `weekly` cadence · `growth` agent pillars | What to say, to whom, when |
-| **Draft** | `draft` skill — **Claude, natively** — or the **Social Agent window** on `/social` | Arabic-first bilingual copy against [Brand & Voice](/docs/brand). The window drafts server-side via the API — the one decided spend lane (D-20260730), contributor-gated |
+| **Draft** | `draft` skill — **Claude, natively** — or the **Social Agent window** on `/social` | Arabic-first bilingual copy against [Brand & Voice](/docs/brand). The window queues the brief and a Claude Code session on the Max pool answers it — the API lane of D-20260730 has no funded key, so drafting stays on the subscription. Contributor-gated |
 | **Media** | `/higgs` | Text-free visuals, brand kit `b0a3f528…`; copy is overlaid in-post, never rendered |
 | **Approve** | `approve` skill → human (Abdout / Ali / Samia) | The gate — see [Autonomy ladder](#autonomy-ladder) |
 | **Schedule** | `SocialVariant.scheduledFor` + `/api/social/drain` | The composer takes a date and time; the drain publishes due variants every ~15 minutes from GitHub Actions. No keyword of its own — it is `publish`'s second verb ("schedule it for tomorrow") |
@@ -231,13 +231,18 @@ The Social Hub at [`/social`](/social) is multi-product (Phase 3, 2026-07-23):
 - **Ledger** — `/social` renders the last 20 variants server-side (brand, channel, copy, status,
   time, latest reach/views), so pending approvals, scheduled posts, and publishes are visible
   without SQL.
-- **The Social Agent window** (2026-07-30) — describe the post on `/social` and Claude drafts it
-  server-side, Arabic first with its English sibling; one press drops the copy into the composer.
-  Any contributor, no Claude Code session. This is not the old gateway-LLM draft card coming back:
-  that card was removed (2026-07-23) because a *relay* was writing copy — the window calls the
-  same Claude that the `draft` skill uses, through the one decided per-draft spend lane
-  (`.claude/memory/decisions/2026-07-30-in-app-draft-spend.md`); the cron's no-spend default is
-  untouched.
+- **The Social Agent window** (2026-07-30) — `/social` now opens on the agent, full height: describe
+  the post and Claude drafts it, Arabic first with its English sibling; one press drops the copy into
+  the composer. It is the same ai block as the [sales agent](https://demo.databayt.org/en/sales) —
+  `atom/agent-heading`, `atom/prompt-input`, `atom/ai-response-display` — ported from hogwarts, so
+  the two windows read as one product.
+  **Asynchronous by design.** The window records a `SocialDraftRequest` and polls; a Claude Code
+  session on the Max pool answers it. The API lane of
+  `.claude/memory/decisions/2026-07-30-in-app-draft-spend.md` shipped but is blocked — no funded key
+  exists behind `ANTHROPIC_API_KEY` — so the queue is the live path and the reasoning panel says so
+  rather than performing invented thinking. The cron's no-spend default is untouched.
+  This is not the old gateway-LLM draft card coming back: that card was removed (2026-07-23) because
+  a *relay* was writing copy; here the writer is Claude itself.
 - **Still pending** — adapters beyond Slack (see [Hermes](/docs/hermes)), per-brand Telegram
   channels, a PostHog destination to consume the UTMs, and per-channel drafting in the cron —
   tracked in `docs/SOCIAL-AUTOMATION.md`.

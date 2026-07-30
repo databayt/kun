@@ -41,8 +41,10 @@ export async function SocialLedger({
     return null;
   }
 
+  // The id is load-bearing: the agent window's heading links down here ("see
+  // what's already published"), so the target has to be nameable.
   return (
-    <section className="mt-10">
+    <section id="social-ledger" className="mt-10">
       <h3 className="mb-3 text-sm font-medium">{t.ledgerTitle}</h3>
       {rows.length === 0 ? (
         <p className="text-sm text-muted-foreground">{t.ledgerEmpty}</p>

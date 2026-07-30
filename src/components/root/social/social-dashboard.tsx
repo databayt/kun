@@ -30,15 +30,25 @@ import type { EgressStatus } from "@/lib/social-status";
 
 interface SocialDashboardProps {
   lang: Locale;
+  /**
+   * The page's static header. It arrives as a prop rather than sitting above
+   * this component in page.tsx because the agent window is now a full-height
+   * hero and has to render first — the way /sales opens on its Lead Agent. Being
+   * a prop keeps the header a Server Component: its markup is serialized in,
+   * never bundled.
+   */
+  header: React.ReactNode;
 }
 
 /**
  * The interactive shell. Holds the two pieces of state every child reads — which
  * brand we publish as, and which channels are selected — and nothing else; the
- * composer, the picker, and the status panel own their own concerns. The page
- * header above it is static, so it stays a Server Component in page.tsx.
+ * composer, the picker, and the status panel own their own concerns.
  */
-export default function SocialDashboard({ lang }: SocialDashboardProps) {
+export default function SocialDashboard({
+  lang,
+  header,
+}: SocialDashboardProps) {
   const t = getSocialDict(lang);
   const isRightToLeft = isRTL(lang);
 
@@ -113,6 +123,18 @@ export default function SocialDashboard({ lang }: SocialDashboardProps) {
 
   return (
     <>
+      {/* The agent window opens the page, full height — the brain is Claude, now
+          reachable from the page itself. Everything that operates on its output
+          sits below the fold. */}
+      <DraftAgent
+        product={product}
+        onUse={(text) => setPrefill({ text, nonce: Date.now() })}
+        isRTL={isRightToLeft}
+        t={t}
+      />
+
+      {header}
+
       {/* Top bar — product, channels, and status side-by-side at start */}
       <div className="flex flex-wrap items-center justify-start gap-3 border-b-[0.5px] py-3">
         <label htmlFor="product-selector" className="sr-only">
@@ -161,15 +183,6 @@ export default function SocialDashboard({ lang }: SocialDashboardProps) {
       {/* One column now — status moved into the toolbar dialog, so the composer
           no longer shares the row with a permanent sidebar. */}
       <div className="space-y-8 py-8">
-        {/* The agent window replaced the "go draft in Claude Code" hint card —
-            the brain is still Claude, now reachable from the page itself. */}
-        <DraftAgent
-          product={product}
-          onUse={(text) => setPrefill({ text, nonce: Date.now() })}
-          isRTL={isRightToLeft}
-          t={t}
-        />
-
         <Composer
           product={product}
           selectedChannels={selectedChannels}
