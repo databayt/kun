@@ -53,3 +53,4 @@ public/fonts/thmanyah/*.woff2
 
 # Prisma generated client — regenerated on install, never committed
 src/generated/
+.claude/handoff/
