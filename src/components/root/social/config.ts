@@ -21,14 +21,17 @@
 
 /**
  * How bytes reach the platform.
- *   telegram — direct Bot API from the site (works on Vercel)
- *   facebook — direct Graph API from the site (works on Vercel)
- *   hermes   — the gateway delivers; it PULLS its work from /api/social/queue,
- *              because Vercel can never call into a localhost listener
- *   manual   — no posting API exists. /publish renders a copy-out block and a
- *              human forwards it. Never queued, never drained.
+ *   telegram  — direct Bot API from the site (works on Vercel)
+ *   facebook  — direct Graph API from the site (works on Vercel)
+ *   instagram — direct Graph API from the site, two-step container publish on
+ *               the linked Page's token (lib/instagram.ts). Image required.
+ *   hermes    — the gateway delivers; it PULLS its work from /api/social/queue,
+ *               because Vercel can never call into a localhost listener
+ *   manual    — no posting API exists. /publish renders a copy-out block and a
+ *               human forwards it. Never queued, never drained.
  */
-export type ChannelTransport = "telegram" | "facebook" | "hermes" | "manual";
+export type ChannelTransport =
+  "telegram" | "facebook" | "instagram" | "hermes" | "manual";
 
 /**
  * What the channel is for.
@@ -123,8 +126,12 @@ export const CHANNELS = [
     label: "Instagram",
     labelAr: "إنستغرام",
     kind: "distribution",
+    // The adapter is ready (lib/instagram.ts); the gate is the Standard-Access
+    // publish test via Mkan plus INSTAGRAM_USER_ID_<PRODUCT> and a Page token
+    // re-minted with instagram_content_publish. Flip to true when the test
+    // passes and the env lands — see kun#141 and /docs/social/channels/instagram.
     wired: false,
-    transport: "hermes",
+    transport: "instagram",
   },
   {
     id: "tiktok",
@@ -191,7 +198,11 @@ export const COMMUNICATION_CHANNEL_IDS: ChannelId[] = CHANNELS.filter(
  * visible as a growing `scheduled` backlog. For a system that writes to public
  * brand pages, fail-closed is the only defensible default.
  */
-const DRAIN_TRANSPORTS: readonly ChannelTransport[] = ["telegram", "facebook"];
+const DRAIN_TRANSPORTS: readonly ChannelTransport[] = [
+  "telegram",
+  "facebook",
+  "instagram",
+];
 
 export const DRAIN_CHANNEL_IDS: ChannelId[] = CHANNELS.filter((c) =>
   DRAIN_TRANSPORTS.includes(c.transport),

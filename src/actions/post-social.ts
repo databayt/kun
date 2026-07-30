@@ -36,7 +36,12 @@ export async function verifyConnections(
       connected: false,
       error: "Unauthorized: Please sign in.",
     };
-    return { hermes: denied, telegram: denied, facebook: denied };
+    return {
+      hermes: denied,
+      telegram: denied,
+      facebook: denied,
+      instagram: denied,
+    };
   }
   return getEgressStatus(product);
 }

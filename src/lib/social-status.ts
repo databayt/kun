@@ -9,6 +9,7 @@ import { db } from "@/lib/db";
 import { checkHermesHealth } from "@/lib/hermes";
 import { checkTelegramHealth } from "@/lib/telegram";
 import { checkFacebookHealth } from "@/lib/facebook";
+import { checkInstagramHealth, getInstagramConfig } from "@/lib/instagram";
 
 export interface TransportStatus {
   connected: boolean;
@@ -37,6 +38,7 @@ export interface EgressStatus {
   hermes: TransportStatus;
   telegram: TransportStatus;
   facebook: TransportStatus;
+  instagram: TransportStatus;
   /**
    * The draft queue's liveness: pending count + when a drafting session last
    * ran `social-drafts.mjs list` (heartbeat key "draft-drain"). Optional so
@@ -56,15 +58,25 @@ function settled<T>(
 }
 
 export async function getEgressStatus(product?: string): Promise<EgressStatus> {
-  const [hermes, telegram, facebook, heartbeat, drainBeat, drainPending] =
-    await Promise.allSettled([
-      checkHermesHealth(),
-      checkTelegramHealth(),
-      checkFacebookHealth(product),
-      db.systemHeartbeat.findUnique({ where: { key: "hermes" } }),
-      db.systemHeartbeat.findUnique({ where: { key: "draft-drain" } }),
-      db.socialDraftRequest.count({ where: { status: "pending" } }),
-    ]);
+  const [
+    hermes,
+    telegram,
+    facebook,
+    instagram,
+    igConfig,
+    heartbeat,
+    drainBeat,
+    drainPending,
+  ] = await Promise.allSettled([
+    checkHermesHealth(),
+    checkTelegramHealth(),
+    checkFacebookHealth(product),
+    checkInstagramHealth(product),
+    getInstagramConfig(product),
+    db.systemHeartbeat.findUnique({ where: { key: "hermes" } }),
+    db.systemHeartbeat.findUnique({ where: { key: "draft-drain" } }),
+    db.socialDraftRequest.count({ where: { status: "pending" } }),
+  ]);
 
   const lastSeen =
     heartbeat.status === "fulfilled" && heartbeat.value
@@ -84,6 +96,10 @@ export async function getEgressStatus(product?: string): Promise<EgressStatus> {
 
   const hermesParked = !(process.env.HERMES_API_URL ?? "").trim();
   const telegramParked = !(process.env.TELEGRAM_BOT_TOKEN ?? "").trim();
+  // Per-product, unlike the two above: mkan can be configured while hogwarts
+  // waits on its account — the row follows the brand selector.
+  const instagramParked =
+    igConfig.status === "fulfilled" ? !igConfig.value.igUserId : true;
 
   return {
     hermes: settled(hermes, (v) => ({
@@ -109,6 +125,13 @@ export async function getEgressStatus(product?: string): Promise<EgressStatus> {
       connected: v.ok,
       detail: v.name,
       error: v.error,
+    })),
+    // Same crossed-token guard as Facebook, via the @username.
+    instagram: settled(instagram, (v) => ({
+      connected: v.ok,
+      detail: v.username ? `@${v.username}` : undefined,
+      error: v.error,
+      parked: instagramParked,
     })),
     draftDrain,
   };

@@ -162,7 +162,12 @@ export default function SocialDashboard({
         connected: false,
         error: err instanceof Error ? err.message : String(err),
       };
-      setStatus({ hermes: failed, telegram: failed, facebook: failed });
+      setStatus({
+        hermes: failed,
+        telegram: failed,
+        facebook: failed,
+        instagram: failed,
+      });
     } finally {
       setChecking(false);
     }
@@ -183,7 +188,8 @@ export default function SocialDashboard({
     return (
       (!needs("hermes") || status.hermes.connected) &&
       (!needs("telegram") || status.telegram.connected) &&
-      (!needs("facebook") || status.facebook.connected)
+      (!needs("facebook") || status.facebook.connected) &&
+      (!needs("instagram") || status.instagram.connected)
     );
   }, [status, selectedChannels]);
 

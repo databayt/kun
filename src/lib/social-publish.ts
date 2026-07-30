@@ -14,6 +14,7 @@ import {
 import { productChannelWired } from "@/components/root/social/products";
 import { sendTelegramPost } from "@/lib/telegram";
 import { sendFacebookPost } from "@/lib/facebook";
+import { sendInstagramPost } from "@/lib/instagram";
 import { sendSocialPost } from "@/lib/hermes";
 import { applyUtm } from "@/lib/social-utm";
 
@@ -107,6 +108,25 @@ export async function deliverPost({
     };
   }
 
+  // Instagram is image-first by platform contract: the Graph flow publishes an
+  // image container and no text-only edge exists. Refused here, by name and
+  // before anything is delivered, so a mixed selection cannot half-land with
+  // the Instagram leg silently missing.
+  const instagramNoMedia = !mediaUrl
+    ? (byTransport.get("instagram") ?? [])
+    : [];
+  if (instagramNoMedia.length > 0) {
+    return {
+      ok: false,
+      error: `${instagramNoMedia.join(", ")}: an image is required — Instagram has no text-only posts.`,
+      results: instagramNoMedia.map((channel) => ({
+        channel,
+        ok: false,
+        error: "an image is required — no text-only posts",
+      })),
+    };
+  }
+
   // Belt-and-braces: the caller validated, but this is the last gate before a
   // public brand page, so re-refuse any channel this brand isn't wired for.
   const unwired = channels.filter(
@@ -129,36 +149,42 @@ export async function deliverPost({
     };
   }
 
-  // Telegram and Facebook go straight to their official APIs; the rest relay
-  // through the Hermes gateway in one webhook call.
+  // Telegram, Facebook and Instagram go straight to their official APIs; the
+  // rest relay through the Hermes gateway in one webhook call.
   const telegramChannels = byTransport.get("telegram") ?? [];
   const facebookChannels = byTransport.get("facebook") ?? [];
+  const instagramChannels = byTransport.get("instagram") ?? [];
   const hermesChannels = byTransport.get("hermes") ?? [];
 
-  // The three transports are independent destinations — running them in
+  // The transports are independent destinations — running them in
   // sequence made a multi-channel post pay every timeout back to back.
   // Tagged per channel, not once for the batch: utm_source is precisely what
-  // makes Telegram and Facebook traffic separable at the far end.
+  // makes each platform's traffic separable at the far end.
   const utm = (channel: string) => applyUtm(text, { channel, brand: product });
 
-  const [telegramOut, facebookOut, hermesOut] = await Promise.all([
-    telegramChannels.length > 0
-      ? sendTelegramPost(utm("telegram"), undefined, mediaUrl)
-      : null,
-    facebookChannels.length > 0
-      ? sendFacebookPost(utm("facebook"), product, mediaUrl)
-      : null,
-    hermesChannels.length > 0
-      ? sendSocialPost({
-          // One relay call covers N channels, so the first is the honest
-          // attribution; per-channel tagging for these arrives with the queue
-          // lane, which hands Hermes one variant at a time.
-          text: utm(hermesChannels[0]),
-          channels: hermesChannels,
-          mediaUrl,
-        })
-      : null,
-  ]);
+  const [telegramOut, facebookOut, instagramOut, hermesOut] = await Promise.all(
+    [
+      telegramChannels.length > 0
+        ? sendTelegramPost(utm("telegram"), undefined, mediaUrl)
+        : null,
+      facebookChannels.length > 0
+        ? sendFacebookPost(utm("facebook"), product, mediaUrl)
+        : null,
+      instagramChannels.length > 0
+        ? sendInstagramPost(utm("instagram"), product, mediaUrl)
+        : null,
+      hermesChannels.length > 0
+        ? sendSocialPost({
+            // One relay call covers N channels, so the first is the honest
+            // attribution; per-channel tagging for these arrives with the queue
+            // lane, which hands Hermes one variant at a time.
+            text: utm(hermesChannels[0]),
+            channels: hermesChannels,
+            mediaUrl,
+          })
+        : null,
+    ],
+  );
 
   // One Hermes call covers N channels, so its verdict applies to all of them.
   const results: ChannelOutcome[] = [
@@ -173,6 +199,12 @@ export async function deliverPost({
       ok: Boolean(facebookOut?.ok),
       error: facebookOut?.error,
       externalId: facebookOut?.externalId,
+    })),
+    ...instagramChannels.map((channel) => ({
+      channel,
+      ok: Boolean(instagramOut?.ok),
+      error: instagramOut?.error,
+      externalId: instagramOut?.externalId,
     })),
     ...hermesChannels.map((channel) => ({
       channel,

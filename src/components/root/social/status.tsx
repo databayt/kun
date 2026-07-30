@@ -79,6 +79,7 @@ const transportRows = (
   t: SocialDict,
 ): Array<{ key: string; label: string; state?: TransportStatus }> => [
   { key: "facebook", label: t.facebookRow, state: status?.facebook },
+  { key: "instagram", label: t.instagramRow, state: status?.instagram },
   { key: "hermes", label: t.hermesRow, state: status?.hermes },
   { key: "telegram", label: t.telegramRow, state: status?.telegram },
 ];
