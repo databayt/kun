@@ -32,26 +32,52 @@ async function telegramError(res: Response): Promise<string> {
 export async function checkTelegramHealth(): Promise<{
   ok: boolean;
   username?: string;
+  chatTitle?: string;
   error?: string;
 }> {
-  const { token } = await getTelegramConfig();
+  const { token, chatId } = await getTelegramConfig();
   if (!token) {
     return {
       ok: false,
       error: "TELEGRAM_BOT_TOKEN not set — see /docs/social",
     };
   }
+  // A bot with nowhere to post is not a working transport. Same treatment as
+  // Facebook's missing per-brand env: not-configured — the dashboard's green
+  // dot must vouch for the destination, not just the credential.
+  if (!chatId) {
+    return {
+      ok: false,
+      error: "TELEGRAM_CHANNEL_ID not set — see /docs/social",
+    };
+  }
   try {
-    const res = await fetch(`https://api.telegram.org/bot${token}/getMe`, {
-      signal: AbortSignal.timeout(3000),
-    });
-    if (!res.ok) {
-      return { ok: false, error: await telegramError(res) };
+    const [me, chat] = await Promise.all([
+      fetch(`https://api.telegram.org/bot${token}/getMe`, {
+        signal: AbortSignal.timeout(3000),
+      }),
+      fetch(
+        `https://api.telegram.org/bot${token}/getChat?chat_id=${encodeURIComponent(chatId)}`,
+        { signal: AbortSignal.timeout(3000) },
+      ),
+    ]);
+    if (!me.ok) {
+      return { ok: false, error: await telegramError(me) };
     }
-    const data = (await res.json().catch(() => null)) as {
+    if (!chat.ok) {
+      return { ok: false, error: `channel: ${await telegramError(chat)}` };
+    }
+    const meData = (await me.json().catch(() => null)) as {
       result?: { username?: string };
     } | null;
-    return { ok: true, username: data?.result?.username };
+    const chatData = (await chat.json().catch(() => null)) as {
+      result?: { title?: string };
+    } | null;
+    return {
+      ok: true,
+      username: meData?.result?.username,
+      chatTitle: chatData?.result?.title,
+    };
   } catch (err: unknown) {
     return {
       ok: false,

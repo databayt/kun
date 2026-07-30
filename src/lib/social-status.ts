@@ -62,9 +62,13 @@ export async function getEgressStatus(product?: string): Promise<EgressStatus> {
       error: v.error,
       lastSeen,
     })),
+    // Bot AND destination — a green dot that only vouched for the token lied
+    // about a channel that existed nowhere.
     telegram: settled(telegram, (v) => ({
       connected: v.ok,
-      detail: v.username ? `@${v.username}` : undefined,
+      detail: v.username
+        ? `@${v.username}${v.chatTitle ? ` → ${v.chatTitle}` : ""}`
+        : undefined,
       error: v.error,
     })),
     // The Page name is the proof the selected product resolved to the right
