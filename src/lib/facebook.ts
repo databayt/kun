@@ -15,7 +15,13 @@
 // uppercased — HOGWARTS, MKAN, DATABAYT). The legacy unsuffixed pair is the
 // hogwarts fallback, kept so an env that predates the split still posts.
 
-const GRAPH_VERSION = "v21.0";
+// v25.0 is app 874547138717755's floor — an app created after a version ships
+// cannot call anything older, and Meta serves a call aimed below the floor
+// from the app's configured version SILENTLY instead of erroring. The previous
+// v21.0 pin had therefore been publishing against v25.0 since the day it was
+// written (empirically verified 2026-07-27; fuller explanation in
+// facebook-metrics.ts, which corrected its pin first).
+const GRAPH_VERSION = "v25.0";
 
 export interface FacebookConfig {
   pageId: string;
@@ -150,9 +156,12 @@ export async function deleteFacebookPost(
   try {
     const res = await fetch(
       `https://graph.facebook.com/${GRAPH_VERSION}/${externalId}`,
-      { method: "DELETE", headers: { "Content-Type": "application/json" },
+      {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ access_token: token }),
-        signal: AbortSignal.timeout(10000) },
+        signal: AbortSignal.timeout(10000),
+      },
     );
     if (!res.ok) return { ok: false, error: await facebookError(res) };
     return { ok: true };
