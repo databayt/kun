@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { auth } from "@/auth";
 import { requireContributor } from "@/lib/auth-guard";
+import { draftBrief } from "@/lib/social-draft";
 import { detectSocialLocale } from "@/lib/social-locale";
 import { deliverPost, type ChannelOutcome } from "@/lib/social-publish";
 import { getEgressStatus, type EgressStatus } from "@/lib/social-status";
@@ -99,8 +100,48 @@ const publishSchema = z
     "A selected channel is not wired for this product yet.",
   );
 
-// Drafting is deliberately NOT an action here: Claude writes the copy (the
-// /social skill), never an egress-layer LLM — the relays below only deliver.
+const draftCopySchema = z.object({
+  product: z.enum(PRODUCT_IDS, { message: "Unknown product." }),
+  brief: z
+    .string()
+    .trim()
+    .min(3, "Say a little more about the post.")
+    .max(2000, "Brief is too long (max 2000 characters)."),
+});
+
+export interface DraftCopyResult {
+  ok: boolean;
+  ar?: string;
+  en?: string;
+  source?: string;
+  error?: string;
+}
+
+// The agent window's brain — the one drafting action in this file, and still
+// Claude writing the copy: it calls the Anthropic lane in lib/social-draft
+// directly (the decided per-draft spend lane), never a gateway LLM and never
+// the cron's draftSource() switch. The relays below remain delivery-only.
+export async function draftSocialCopy(
+  input: unknown,
+): Promise<DraftCopyResult> {
+  if (!(await requireContributor())) {
+    return { ok: false, error: "Forbidden: contributors only." };
+  }
+
+  const parsed = draftCopySchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      ok: false,
+      error: parsed.error.issues[0]?.message ?? "Invalid input.",
+    };
+  }
+
+  const result = await draftBrief(parsed.data);
+  return result.ok
+    ? { ok: true, ar: result.ar, en: result.en, source: result.source }
+    : { ok: false, error: result.error };
+}
+
 export async function publishPostDirect(input: unknown): Promise<PostResult> {
   if (!(await requireContributor())) {
     return { ok: false, error: "Forbidden: contributors only." };

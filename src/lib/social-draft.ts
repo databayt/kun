@@ -192,6 +192,90 @@ async function draftViaHermes(req: DraftRequest): Promise<DraftResult> {
   };
 }
 
+const BILINGUAL_TOOL: Anthropic.Tool = {
+  name: "draft_bilingual",
+  description:
+    "Return one social post as an Arabic original and its English sibling.",
+  input_schema: {
+    type: "object",
+    required: ["ar", "en"],
+    properties: {
+      ar: {
+        type: "string",
+        description:
+          "The Arabic post body, crafted natively. No preamble, no surrounding quotes.",
+      },
+      en: {
+        type: "string",
+        description:
+          "The English post body — a sibling of the Arabic, not a literal translation.",
+      },
+    },
+  },
+};
+
+export interface BriefRequest {
+  product: string;
+  /** The contributor's ask, verbatim — topic, news, angle. */
+  brief: string;
+}
+
+export type BriefResult =
+  | { ok: true; ar: string; en: string; source: string }
+  | { ok: false; error: string };
+
+// The agent window's lane (the /social page). Always Anthropic, deliberately —
+// this is the decided per-draft spend lane (2026-07-30), so it never consults
+// SOCIAL_DRAFT_SOURCE: the cron's no-spend default must not gain a side door,
+// and the window must not silently dead-end on Hermes from a cloud deployment.
+export async function draftBrief(req: BriefRequest): Promise<BriefResult> {
+  const apiKey = (process.env.ANTHROPIC_API_KEY ?? "").trim();
+  if (!apiKey) {
+    return { ok: false, error: "ANTHROPIC_API_KEY not set." };
+  }
+  const model = (process.env.SOCIAL_DRAFT_MODEL ?? "").trim() || DEFAULT_MODEL;
+
+  try {
+    const client = new Anthropic({ apiKey, timeout: TIMEOUT_MS });
+    const message = await client.messages.create({
+      model,
+      max_tokens: MAX_TOKENS,
+      system: SYSTEM_PROMPT,
+      tools: [BILINGUAL_TOOL],
+      tool_choice: { type: "tool", name: "draft_bilingual" },
+      messages: [
+        {
+          role: "user",
+          content: [
+            `Write one social post for the "${req.product}" brand — the channel-agnostic core piece; channels get their variants later.`,
+            `The contributor's brief:`,
+            req.brief,
+            ``,
+            `Craft the Arabic natively first, then write the English as a mirror of it — a sibling, not a translation. Return both through the draft_bilingual tool.`,
+          ].join("\n"),
+        },
+      ],
+    });
+
+    const block = message.content.find((b) => b.type === "tool_use");
+    const input =
+      block && block.type === "tool_use"
+        ? (block.input as { ar?: unknown; en?: unknown })
+        : undefined;
+    const ar = typeof input?.ar === "string" ? input.ar.trim() : "";
+    const en = typeof input?.en === "string" ? input.en.trim() : "";
+    if (!ar || !en) {
+      return { ok: false, error: "Model returned an incomplete draft." };
+    }
+    return { ok: true, ar, en, source: `anthropic:${model}` };
+  } catch (err: unknown) {
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : "Anthropic drafting failed.",
+    };
+  }
+}
+
 export function reviewChannel(): string {
   return (process.env.SOCIAL_REVIEW_CHANNEL ?? "").trim() || "slack";
 }
