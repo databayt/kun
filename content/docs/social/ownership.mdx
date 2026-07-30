@@ -64,7 +64,7 @@ Three entries, and only one is human:
 | `Mkan @mkan.sd` | Instagram-backed system user | Full access, everything |
 | `UnclaimedBusinessUser FromPool @mkan.sd` | Instagram-backed system user | Full access, everything |
 
-**No teammate has ever been invited.** Not Ali, not Aseel, not Osman Sedon. If the founder's
+**No teammate has ever been invited.** Not Ali (Aseel), not Moutaz, not Sedon. If the founder's
 account is locked, recovered, or lost, every brand Page and both Instagram accounts go with it.
 
 ### The assets
@@ -83,10 +83,10 @@ its portfolio is under full control, and Meta gives no per-Page override.
 
 ## Why this blocks Instagram, not just tidiness
 
-Instagram's `instagram_content_publish` permission needs **Advanced Access**, which needs **App
-Review**, which needs **Business Verification** — and Business Verification is verification of a
-*legal business*: registration documents, a matching legal name, an address, a verifiable phone
-or domain.
+Instagram's `instagram_content_publish` permission at **Advanced Access** needs **App Review**,
+which needs **Business Verification** — and Business Verification is verification of a *legal
+business*: registration documents, a matching legal name, an address, a verifiable phone or
+domain.
 
 A portfolio with no legal name, no address, and a name inherited from an Instagram handle has
 nothing to verify. So the ownership question is not housekeeping deferred until later; it sits
@@ -94,7 +94,17 @@ directly on the critical path to Instagram publishing, and it is worth doing **b
 brands are onboarded into the wrong container.
 
 Facebook posting works today without it, because the app posts to Pages its own admin controls.
-Instagram does not get the same grace.
+
+> **But test Standard Access before treating verification as the publishing gate.** The same
+> "own-admin grace" argument was proven for the Facebook *read* scopes on 2026-07-27:
+> `read_insights` and `pages_read_user_content` turned out to be Standard Access — no App
+> Review, no Business Verification, just the Use-Case grant and a token re-mint. Meta's
+> access-levels doctrine (Standard covers users with a role on the app) applies to
+> `instagram_content_publish` on paper too. Mkan is fully linked (gates 1–4 done) — a
+> ~10-minute console test settles whether gate 5 is real:
+> [the hypothesis](/docs/social/channels/instagram#standard-access-hypothesis). Everything else
+> on this page — naming, verification, a second admin, per-brand emails — is worth doing
+> whatever that test says; ownership is about durability, not only about the permission.
 
 ## Target state
 

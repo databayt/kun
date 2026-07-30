@@ -50,20 +50,20 @@ live on its page:
 ## The pipeline
 
 ```
-calendar ─► draft ─► media ─► approve ─► publish ─────────► measure
+calendar ─► draft ─► higgs ─► approve ─► publish ─────────► measure
     │         │        │         │          │                  │
-  which     Claude   /higgs    human    drain | hermes    SocialMetric
-brand,when  AR-first text-free  gate    | copy-out         + UTM tags
+  which     Claude  text-free  human    drain | hermes    SocialMetric
+brand,when  AR-first visuals    gate    | copy-out         + UTM tags
                               ▲ HARD STOP
 ```
 
 | Stage | Owner | Notes |
 |-------|-------|-------|
-| **Idea** | `calendar` skill · `weekly` cadence · `growth` agent pillars | What to say, to whom, when |
+| **Plan** | `calendar` skill · `weekly` cadence · `growth` agent pillars | What to say, to whom, when |
 | **Draft** | `draft` skill — **Claude, natively** | Arabic-first bilingual copy, one variant per channel, written against [Brand & Voice](/docs/brand) |
 | **Media** | `/higgs` | Text-free visuals, brand kit `b0a3f528…`; copy is overlaid in-post, never rendered |
 | **Approve** | `approve` skill → human (Abdout / Ali / Samia) | The gate — see [Autonomy ladder](#autonomy-ladder) |
-| **Schedule** | `SocialVariant.scheduledFor` + `/api/social/drain` | The composer takes a date and time; the drain publishes due variants every ~15 minutes from GitHub Actions |
+| **Schedule** | `SocialVariant.scheduledFor` + `/api/social/drain` | The composer takes a date and time; the drain publishes due variants every ~15 minutes from GitHub Actions. No keyword of its own — it is `publish`'s second verb ("schedule it for tomorrow") |
 | **Publish** | `publish` skill → **egress layer** — Telegram + Facebook direct APIs · Hermes-transport channels via the [gateway](/docs/hermes) · WhatsApp as a copy-out block | Egress only — dumb relays, never the LLM |
 | **Measure** | `measure` skill → `/api/social/metrics` → `SocialMetric` | Facebook reach + engagement, six-hourly. UTM tags are applied but not yet consumed — no PostHog in the app |
 
@@ -156,7 +156,9 @@ that layer is not a feature — it's an incident waiting to happen.
 
 ## The keywords
 
-Six stages, six words. Each runs on its own; `social` chains all of them.
+Six stage keywords — the pipeline table's seven rows fold onto six words because Schedule rides
+`publish`. Each runs on its own; `social` chains all of them, and `carousel` is the multi-slide
+sibling with [its own chapter](/docs/social/carousel).
 
 | Keyword | Stage | Say |
 |---------|-------|-----|
@@ -164,9 +166,10 @@ Six stages, six words. Each runs on its own; `social` chains all of them.
 | **`draft`** | Write | "draft a post for hogwarts about admission" |
 | **`higgs`** | Media | "make the image for it" |
 | **`approve`** | Gate | "send it for review" |
-| **`publish`** | Deliver | "publish it" · "schedule it for tomorrow" |
+| **`publish`** | Deliver + schedule | "publish it" · "schedule it for tomorrow" |
 | **`measure`** | Read back | "how did the post do" |
 | **`social`** | All six | "social post for mkan about the new listings" |
+| **`carousel`** | Multi-slide | "carousel for hogwarts intro" |
 
 They were split out (2026-07-27) because the pipeline above had named these stages and assigned
 them owners for months while four of them had no keyword — and Abdout types prose, not slash
@@ -174,8 +177,8 @@ commands, so a stage with no name is a stage that cannot be reached. Each skill'
 carries an explicit *negative* clause naming its siblings, which is what stops "publish it" from
 routing to `/ship`.
 
-The `growth` agent owns the strategy layer above them; `.claude/vocabulary.json` holds all six in
-the *Pensieve* school. No slash needed — say the word.
+The `growth` agent owns the strategy layer above them; `.claude/vocabulary.json` holds them all
+in the *Pensieve* school. No slash needed — say the word.
 
 ## Current status
 
@@ -197,7 +200,9 @@ The Social Hub at [`/social`](/social) is multi-product (Phase 3, 2026-07-23):
   communication channel, and `productChannelWired` refuses it for every product.
 - **Auto-post is draft-and-approve** — a daily Vercel cron (`/api/social/cron`, `CRON_SECRET`-guarded)
   drafts per opted-in product and sends the draft to a private review channel with a signed,
-  12-hour, one-click Publish link. Nothing publishes unattended. Opt in per product with
+  12-hour, single-use Publish link. The link opens a read-only confirm page and only its POSTed
+  button publishes — a chat client's link-preview crawler can never consume an approval. Nothing
+  publishes unattended. Opt in per product with
   `SOCIAL_AUTOPOST_PRODUCTS`; empty (the default) means the cron does nothing.
 - **Inbound relay** — because Vercel can never reach Hermes on `localhost`, `/api/social/relay`
   inverts the arrow: Hermes drafts, a human approves in Slack, Hermes POSTs the approved text to
@@ -223,6 +228,9 @@ The Social Hub at [`/social`](/social) is multi-product (Phase 3, 2026-07-23):
 - **Metrics** — `/api/social/metrics` reads Facebook reach and engagement back into
   `SocialMetric` six-hourly. A missing scope or a retired metric name is terminal on the first
   attempt with a named remedy, rather than retried forever.
+- **Ledger** — `/social` renders the last 20 variants server-side (brand, channel, copy, status,
+  time, latest reach/views), so pending approvals, scheduled posts, and publishes are visible
+  without SQL.
 - **Removed** — the in-app AI draft card: gateway-LLM drafting violated the layer boundary, so
   drafting now lives in the `draft` skill (Claude-native).
 - **Still pending** — adapters beyond Slack (see [Hermes](/docs/hermes)), per-brand Telegram
@@ -232,7 +240,9 @@ The Social Hub at [`/social`](/social) is multi-product (Phase 3, 2026-07-23):
 ## See also
 
 - [Status](/docs/social/status) — what is configured and live right now, versus what is merely wired.
+- [Ownership & Accounts](/docs/social/ownership) — who actually holds the Meta assets, and what Instagram needs.
 - [Channel Setup](/docs/social/channels) — per-platform setup guides, written to be usable on your own accounts.
+- [Carousel](/docs/social/carousel) — multi-slide bilingual decks rendered at exact platform sizes.
 - [Brand & Voice](/docs/brand) — the rules every post obeys.
 - [Connectors](/docs/connectors) — the MCP-backed service integrations.
-- `/higgs` skill — media generation · `calendar` · `draft` · `approve` · `publish` · `measure` · `growth` agent.
+- `/higgs` skill — media generation · `calendar` · `draft` · `approve` · `publish` · `measure` · `carousel` · `growth` agent.

@@ -42,10 +42,38 @@ of six. Do not plan the work as if the link is the finish line.
 | 2 | Account is **professional** (Business or Creator) | Mobile app, one screen |
 | 3 | Account is **linked to the brand's Facebook Page** | The flow below — the hard one |
 | 4 | Page and account owned by the same **business portfolio** | Business Settings |
-| 5 | App holds `instagram_basic` + `instagram_content_publish`, with Advanced Access | App Review + **Business Verification** |
+| 5 | App holds `instagram_basic` + `instagram_content_publish` | Use-Case grant + token re-mint — **possibly nothing more; see the hypothesis below** |
 | 6 | `INSTAGRAM_ACCOUNT_ID_<BRAND>` in Vercel, publish path wired | Env var + code |
 
 Gates 1–4 are per brand. Gates 5–6 are paid once for all brands.
+
+## Standard-Access hypothesis
+
+Gate 5 has been written up as Advanced Access → App Review → Business Verification. That may be
+wrong, and the evidence is ours: on 2026-07-27 the same claim about `read_insights` and
+`pages_read_user_content` fell — both turned out to be **Standard Access**, granted the moment
+they were added to the app's Use Case and a token was re-minted. No review, no verification.
+
+Meta's access-levels doctrine says Standard Access covers requesting permissions from users who
+**have a role on the app** — admins, developers, testers. kun posts to assets its own admin
+controls; that is the Standard case, and on paper it covers `instagram_content_publish` exactly
+as it covered the read scopes.
+
+The ~10-minute test, via Mkan (the one brand whose gates 1–4 are done):
+
+1. App Dashboard → **Use cases** → Customize → add `instagram_basic` +
+   `instagram_content_publish` (first `+ Add` click may pop "Something went wrong" — click OK,
+   click again).
+2. Re-mint the Page token (scopes are fixed at mint time — the runbook in
+   [Facebook](/docs/social/channels/facebook) applies; the password modal is Abdout's).
+3. `POST /{ig-account-id}/media` with a test image → `POST /{ig-account-id}/media_publish`
+   against `@mkan.sd` (`17841444144779316`).
+
+If it publishes, gate 5 was never a programme blocker and Instagram is per-brand work plus env
+vars. If Meta refuses with a permission error naming Advanced Access, the
+[ownership chapter](/docs/social/ownership)'s verification path stands as written — and either
+way that chapter's work (naming, verification, second admin, per-brand emails) remains worth
+doing for durability.
 
 ## What you get
 

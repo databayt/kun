@@ -10,7 +10,7 @@ talks to whom*, in which direction, and which of the three loops a given post ac
 If you are wiring a new channel, adding a cron, or wondering why a draft did not publish, start
 here.
 
-## The four actors
+## The five actors
 
 | Actor | Where it runs | Holds | Can call out to | Can be called by |
 |-------|---------------|-------|-----------------|------------------|
@@ -142,23 +142,26 @@ The chain the whole system is built around, and where each stage actually lives:
 |-------|-----------|------|------|-------------|
 | **Generate** | Claude (`/social` skill) · `/higgs` for media | `lib/social-draft.ts` (cron lane only) | A · B · C | Claude-native. The relays never write copy. |
 | **Approve** | Human — Abdout, Samia, or Ali | composer button · signed link · Slack | A · B · C | **Always required.** L2 on Facebook — the one live channel; L1 elsewhere. |
-| **Schedule** | Vercel Cron | `vercel.json` → `crons` | B only | **The weak link — see below.** |
+| **Schedule** | Contributor — the composer's date-time field | `schedulePost` → `scheduled` variants → `/api/social/drain` | A | Real: pick a moment, the drain publishes within ~15 min of it. |
 | **Publish** | Egress fan-out, per transport, in parallel | `lib/social-publish.ts` → `deliverPost` | A · B · C | One code path for all three loops. |
-| **Measure** | PostHog + UTM | — | — | Not wired back yet. |
+| **Measure** | Facebook Graph — insights + edge summaries | `/api/social/metrics` → `SocialMetric` rows | A · B · C | Wired on Facebook, six-hourly. UTM rides every link; PostHog not yet consuming. |
 
-### Scheduling is the honest gap
+### Scheduling, persistence, and the single-use link
 
-There is **no scheduling in the product sense** — you cannot pick a date and time for a post.
-What exists:
+Scheduling is real now. The composer takes a date and time, `schedulePost` writes one `scheduled`
+variant per channel, and the drain (GitHub Actions, every ~15 minutes) claims and publishes each
+one when its moment passes — three bounded attempts with backoff, and a reaper that recovers any
+row a killed function left stuck in `publishing`.
 
-- **One fixed slot**: `0 6 * * *` (06:00 UTC daily), hard-coded in `vercel.json`.
-- **One time window**: the approval token's 12-hour TTL. Miss it and the draft is gone.
+The persistence that unlocked it is Prisma on Neon: `SocialPiece` → `SocialVariant` (the status
+machine: `pending → publishing → published / failed / rejected`, plus `scheduled` for the drain
+lane) → `SocialMetric` (append-only time series). Persistence is also what made the approval link
+single-use — approving is a conditional row transition, so a second click refuses — and, since
+2026-07-30, a two-step confirm: GET renders a read-only page and only the POSTed button
+publishes, so a chat client's link-preview crawler can never consume an approval.
 
-Real scheduling needs persistence — a `SocialPost` / `ScheduledPost` model with `scheduled_for`,
-`status`, and a result column. **kun has no database at all** (no Prisma, no schema), so this is a
-genuine build, not a config change. It is the documented next phase, and it is what also removes
-the replayable-link limitation, because approval becomes a row transition instead of a URL.
-*(Landed 2026-07-26 — see the single-use note above.)*
+What remains fixed: `0 6 * * *` in `vercel.json` is when Loop B *drafts*, and its links still
+carry the 12-hour approval TTL.
 
 ## Cron jobs
 
@@ -166,20 +169,25 @@ the replayable-link limitation, because approval becomes a row transition instea
 
 | Path | Schedule | Auth | Does |
 |------|----------|------|------|
-| `/api/social/cron` | `0 6 * * *` (06:00 UTC) | `Bearer CRON_SECRET`, timing-safe compare | One draft per opted-in product → review message with signed link. **Never publishes.** |
+| `/api/social/cron` | `0 6 * * *` — Vercel Cron (`vercel.json`) | `Bearer CRON_SECRET`, timing-safe compare | One draft per opted-in product → review message with signed link. **Never publishes.** |
+| `/api/social/drain` | `*/15 * * * *` — GitHub Actions (`social-drain.yml`) | same bearer | Publishes `scheduled` variants whose time has passed; reaps rows stuck in `publishing`. |
+| `/api/social/metrics` | `0 */6 * * *` — GitHub Actions (`social-metrics.yml`) | same bearer | Reads reach/engagement back into `SocialMetric`; failure policy is terminal-per-kind, transport-only retries. |
+
+The fast cadences live in GitHub Actions because Vercel Hobby grants one cron slot and it is
+spent on drafting. That split means **`CRON_SECRET` must exist in two places** — Vercel env for
+the routes, and as a GitHub repo secret for the two workflows; missing the second, both lanes
+self-disable with a `::warning::` rather than failing red.
 
 ### Candidates, and what each needs first
 
-Listed so the follow-up is turnkey — none of these exist yet.
+Still unbuilt — listed so the follow-up is turnkey.
 
 | Candidate | What it would do | Blocked on |
 |-----------|------------------|------------|
-| **Scheduled publish** | Drain a queue of approved posts at their `scheduled_for` | `ScheduledPost` persistence |
-| **Metrics pull-back** | Fetch reach/clicks per post → PostHog → the payoff review | Persistence (needs a post id to attach to) |
 | **Token health canary** | Daily probe of every per-product Page token; alert before expiry | Nothing — buildable now on `getEgressStatus` |
 | **Weekly content nudge** | Friday: what shipped vs the calendar, into Slack | `calendar` structure |
 | **Kill-switch watchdog** | Halt auto-post on an error-rate or complaint spike | L4 guardrail layer |
-| **Per-brand cadence** | Different days/times per brand rather than one 06:00 sweep | Persistence + per-brand config |
+| **Per-brand cadence** | Different days/times per brand rather than one 06:00 sweep | Per-brand config (the persistence it needed now exists) |
 
 > A cron that publishes without a human is **L4** and is gated behind `/decide` plus the guardrail
 > layer (LLM-judge content + Arabic gate, rate limits, kill switch). Do not add one casually.

@@ -5,8 +5,8 @@ description: Where social automation actually stands — wired vs configured vs 
 
 # Status
 
-**Last verified: 2026-07-28** (against Vercel production env, live endpoint probes, and a full
-read of the Meta business portfolio).
+**Last verified: 2026-07-30** (against Vercel production env via `vercel env ls`, live endpoint
+probes, workflow run logs, and a full read of the Meta business portfolio).
 
 The code is in good shape. The configuration is not. This page exists because
 [the overview](/docs/social) describes what the pipeline *can* do, and it is easy to read that
@@ -40,7 +40,7 @@ in this table as a peer, which put a team chat in a marketing-reach denominator.
 | **Facebook** — hogwarts · mkan · databayt | ✅ | ✅ | **✅** | — |
 | **Telegram** | ✅ | ❌ | ❌ | Bot exists and is valid, but its token was never pushed to Vercel and no `TELEGRAM_CHANNEL_ID` exists anywhere |
 | **Facebook** — sijillee · moallimee | ✅ | ❌ | ❌ | No Facebook Page created yet |
-| **Instagram** | registry only | ❌ | ❌ | **Ownership.** 1 of 5 brands has an IG account linked to its Page; publishing needs Advanced Access → App Review → Business Verification, and the portfolio cannot pass verification yet — see [Ownership](/docs/social/ownership) |
+| **Instagram** | registry only | ❌ | ❌ | **Ownership.** 1 of 5 brands has an IG account linked to its Page. Publishing is documented as Advanced Access → App Review → Business Verification — but the 2026-07-27 insights result proved Standard Access covers own-asset use for the read scopes, so test the same for `instagram_content_publish` before treating verification as the gate: [the hypothesis](/docs/social/channels/instagram#standard-access-hypothesis). The portfolio still cannot pass verification — see [Ownership](/docs/social/ownership) |
 | **LinkedIn** | registry only | ❌ | ❌ | Community Management API approval |
 | **X** | registry only | ❌ | ❌ | Pay-per-use since Feb 2026 — needs `/decide` |
 | **TikTok** | registry only | ❌ | ❌ | Full app audit, 1–4 weeks |
@@ -48,6 +48,11 @@ in this table as a peer, which put a team chat in a marketing-reach denominator.
 | **WhatsApp** | ✅ *(manual)* | n/a | n/a | No organic posting API exists — and none is coming. Carried through draft, media, and approval like any channel; `/publish` hands out a copy-out block a human forwards |
 
 **Live: 1 of 8 distribution channels, for 3 of 5 brands.**
+
+> *WhatsApp's ✅ (manual) reads against this page's definition of wired — the copy-out code path
+> exists and is tested. The registry says `wired: false` for the same channel, deliberately: that
+> flag gates the composer's transports, and a manual channel has none. Two flags, two questions —
+> "is the path built" here, "can a machine deliver it" there.*
 
 Instagram in detail, because it is the nearest channel to going live and the one whose blocker is
 most often misread as "App Review":
@@ -107,9 +112,17 @@ returns `drafted: 0`.
 - **Per-product Facebook** — its own Page and permanent token per brand, with the resolved Page name shown before you publish, which is how a crossed token gets caught
 - **Registry** — 5 products × 8 distribution channels, AND-gated so a channel is publishable only when the transport *and* that brand's destination are both wired. A communication channel is refused whatever a per-brand map says
 - **Taxonomy** — `kind` separates what a channel is *for* from how its bytes move, and a test asserts every channel lands in exactly one delivery lane (drain · hermes · manual), so a transport added later cannot silently fall through all three
-- **Approval** — signed HMAC links, 12h TTL, contributor re-checked inside every mutating action
-- **Hub** — bilingual en/ar with RTL, Server-Component header, one-round-trip status probe
-- **Docs** — overview, architecture, strategy, five brand pages, and the channel guides
+- **Approval** — signed HMAC links, 12h TTL, single-use by row transition, and unfurl-proof since
+  2026-07-30: GET renders a read-only confirm page, only the POSTed button publishes, and the
+  same form carries a Reject that writes `rejected`. Contributor re-checked inside every mutating
+  action
+- **Recovery** — the drain reaps variants a killed function left stuck in `publishing`; every
+  batch route pins `maxDuration` and stops starting work on an elapsed budget, deferring the rest
+  to its next run
+- **Hub** — bilingual en/ar with RTL, Server-Component header, one-round-trip status probe, and a
+  read-only ledger of the last 20 variants (status, time, latest reach/views) under the composer
+- **Docs** — overview, status (this page), ownership, architecture, strategy, carousel, five
+  brand pages, the channel guides, and the groups/destinations design
 
 ## What's not
 
@@ -120,10 +133,10 @@ returns `drafted: 0`.
   - ✅ **UTM tagging works.** Every outbound link is tagged at delivery with `utm_source=<channel>`, `utm_medium=social`, `utm_campaign=<brand>`, so traffic is attributable *at our own site* — the only lane that does not depend on a platform choosing to share numbers. Already-tagged links are left alone.
   - ✅ **Platform-side numbers are fetchable.** `read_insights` and `pages_read_user_content` were **granted 2026-07-27** and verified returning real numbers against a live Hogwarts post (Page `1228948003637000`). Both turned out to be Standard Access — no App Review, no Business Verification. What was actually blocking them was neither: a permission has to be added to the app's **Use Case** (Dashboard → Use cases → Customize → Permissions and features) before it appears anywhere else in the console. Skip that and the Graph API Explorer answers "Found 0 results", which reads exactly like Meta having withdrawn the permission.
   - ⚠️ **The scopes were never the whole story.** Meta retired the entire `post_impressions*` family during 2025, so even a correctly-scoped token gets `(#100)` from the old names — a *metric* error, not a permissions one. The live names are `post_media_view` and `post_total_media_view_unique`. Granting a scope does not resurrect a retired name, and re-probing with the old names after a grant looks exactly like the grant having failed. `classifyGraphError` exists so that mistake is not repeatable.
-  - ⚠️ **Verified on one token.** hogwarts only. mkan and databayt have their own Pages and their own unverified scope state; sijillee and moallimee have no Page at all. `/api/social/metrics` degrades per product rather than globally, and gives up permanently on a permission failure rather than retrying it forever.
+  - ✅ **Verified on all three tokens.** Re-minted 2026-07-27 and Debugger-confirmed carrying `read_insights` + `pages_read_user_content` (hogwarts, mkan, databayt); hogwarts additionally proven end to end with real reads into `SocialMetric` (2026-07-28). sijillee and moallimee have no Page at all. `/api/social/metrics` degrades per product rather than globally, and gives up permanently on a permission failure rather than retrying it forever.
   - ❌ **No analytics destination.** There is no PostHog dependency or key in the app, so nothing consumes the UTMs yet. The tags are still worth having: they are recorded in the platform link and in any downstream analytics added later.
 - **Scheduling** — the queue exists (`SocialPiece` / `SocialVariant` / `SocialMetric` on Neon, added 2026-07-26), approval links are single-use, and `/api/social/drain` publishes due variants every ~15 minutes from GitHub Actions. The composer takes a date and time.
-- **Metrics** — `/api/social/metrics` writes `SocialMetric` on a six-hourly schedule. **Its workflow ships with the schedule commented out** pending one manual run per brand, since the scopes are confirmed on one token only.
+- **Metrics** — `/api/social/metrics` writes `SocialMetric` on a six-hourly schedule, **enabled 2026-07-30** after two manual dispatches returned real numbers and all three tokens' scopes were Debugger-verified.
 - **Variant-awareness** — still the honest gap. The cron drafts one text and fans it to every channel, which contradicts the *one core piece → N platform-native variants* multiplier the [strategy](/docs/social/strategy) depends on. The `draft` skill owns the correct shape; teaching the cron to use it is a separate change with its own drafting-cost implications.
 
 ## The honest constraints
@@ -145,13 +158,13 @@ granularity is a plan-tier limit and kun already uses a slot. GitHub Actions is 
 
 Ordered by value ÷ cost, not by size:
 
-1. **Three environment variables revive an entire loop.** A review destination, a draft source, and an opt-in list turn Loop B from dead to working. No code.
+1. **Three environment variables revive an entire loop.** A review destination, a draft source, and an opt-in list turn Loop B from dead to working. No code — but note the draft source is a billing decision ([env reference](/docs/social/channels/env)).
 2. **Turn Telegram on.** Free, instant, no gate, bot already exists — doubles the live distribution-channel count. Two environment variables.
-3. **Run `/api/social/metrics` once per brand by hand**, then uncomment the schedule. The scopes are verified on the hogwarts token only; one dispatch tells you what mkan and databayt actually return.
-4. **Name and verify the business portfolio, and invite a second admin.** Nothing on the Instagram half can start until Business Verification is in flight, and verification is waiting rather than working — so the cost of starting it late is paid in calendar days. See [Ownership & accounts](/docs/social/ownership).
+3. **Test Instagram publishing at Standard Access via Mkan** (~10 minutes of console work) before treating Business Verification as the publishing gate — [the hypothesis](/docs/social/channels/instagram#standard-access-hypothesis).
+4. **Name and verify the business portfolio, and invite a second admin.** Ownership is worth fixing whatever the test says — bus factor, recoverability, and the Databayt Page all hang on it, and if the hypothesis is wrong, verification is the long pole and is waiting rather than working. See [Ownership & accounts](/docs/social/ownership).
 5. **Teach the cron to draft per channel.** The last structural gap between the pipeline and the strategy it claims to serve.
 
-Done since this page was first written: persistence, real scheduling with a drain, single-use approval links, and the metrics lane.
+Done since this page was first written: persistence, real scheduling with a drain, single-use approval links, the metrics lane on schedule, the unfurl-proof confirm step, relay recording, the reaper, and the Hub ledger.
 
 ## See also
 
