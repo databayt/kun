@@ -120,6 +120,30 @@ function StatusBody({ status, checking, onRefresh, t }: StatusProps) {
         </p>
       )}
 
+      {/* The draft queue's liveness — same heartbeat idea as Hermes above:
+          "N pending, last checked X" is the difference between "a session
+          will get to it" and "nobody is draining". Amber past 15 minutes. */}
+      {!checking && status?.draftDrain && (
+        <p
+          className={`border-border/40 border-t pt-3 text-xs ${
+            status.draftDrain.lastSeen &&
+            Date.now() - new Date(status.draftDrain.lastSeen).getTime() <
+              15 * 60_000
+              ? "text-muted-foreground"
+              : "text-amber-500"
+          }`}
+        >
+          {t.drainRow}: {status.draftDrain.pending} · {t.drainLastCheck}{" "}
+          {status.draftDrain.lastSeen ? (
+            <span dir="ltr">
+              {new Date(status.draftDrain.lastSeen).toLocaleString()}
+            </span>
+          ) : (
+            t.drainNever
+          )}
+        </p>
+      )}
+
       {/* A parked row's "error" is just its unset env named back — noise. */}
       {!checking &&
         rows.map(

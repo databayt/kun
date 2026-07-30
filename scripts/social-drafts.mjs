@@ -61,8 +61,19 @@ if (command === "list") {
     WHERE "status" = 'pending'
     ORDER BY "createdAt" ASC
     LIMIT 20`;
+  // Liveness proof for the Hub: every look at the queue — the scheduled
+  // drainer or a human session — stamps the heartbeat the status panel and the
+  // agent window read. "at" is set here because @updatedAt only fires through
+  // Prisma, and this script is raw SQL.
+  await sql`
+    INSERT INTO "SystemHeartbeat" ("key", "at", "detail")
+    VALUES ('draft-drain', now(), ${`pending ${rows.length}`})
+    ON CONFLICT ("key") DO UPDATE
+      SET "at" = now(), "detail" = EXCLUDED."detail"`;
   if (rows.length === 0) {
-    console.log("No pending draft asks.");
+    // `--json` keeps the empty case machine-readable for drain-drafts.sh,
+    // which must decide "invoke claude or not" without parsing prose.
+    console.log(process.argv.includes("--json") ? "[]" : "No pending draft asks.");
   } else {
     // JSON so a session reads the briefs verbatim, Arabic intact.
     console.log(

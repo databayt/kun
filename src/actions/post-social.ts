@@ -121,6 +121,10 @@ export interface DraftReadResult {
   ar?: string;
   en?: string;
   note?: string;
+  /** Asks queued ahead of this one. Pending only. */
+  pendingAhead?: number;
+  /** When a drafting session last looked at the queue, ISO. Pending only. */
+  lastDrainAt?: string;
   error?: string;
 }
 
@@ -177,9 +181,28 @@ export async function readSocialDraft(id: unknown): Promise<DraftReadResult> {
   try {
     const row = await db.socialDraftRequest.findUnique({
       where: { id },
-      select: { status: true, ar: true, en: true, note: true },
+      select: { status: true, ar: true, en: true, note: true, createdAt: true },
     });
     if (!row) return { ok: false, error: "That draft ask no longer exists." };
+
+    // While the ask waits, the poll carries the honesty data too: queue
+    // position plus the drainer heartbeat, so the window can tell "a session
+    // will get to it" from "nobody is draining" — previously indistinguishable.
+    if (row.status === "pending") {
+      const [ahead, beat] = await Promise.all([
+        db.socialDraftRequest.count({
+          where: { status: "pending", createdAt: { lt: row.createdAt } },
+        }),
+        db.systemHeartbeat.findUnique({ where: { key: "draft-drain" } }),
+      ]);
+      return {
+        ok: true,
+        status: row.status,
+        pendingAhead: ahead,
+        lastDrainAt: beat?.at.toISOString(),
+      };
+    }
+
     return {
       ok: true,
       status: row.status,

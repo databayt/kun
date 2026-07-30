@@ -130,7 +130,10 @@ returns `drafted: 0`.
   shipped and is blocked (`ANTHROPIC_API_KEY` in Vercel returns 401, and subscription-only billing
   means there are no credits behind it), so the window records a `SocialDraftRequest` and a Claude
   Code session answers it on the Max pool via `draft`'s queue mode. The cron's no-spend default is
-  untouched. Nothing drains the queue on a schedule yet, and the window polls without a timeout
+  untouched. The queue drains on a 5-minute launchd tick (`scripts/drain-drafts.sh --install`,
+  2026-07-30) that beats a `draft-drain` heartbeat on every look; the window reads it back
+  (position + last check), backs off its poll, and stops at 10 minutes — and the drain sweep
+  expires hour-old unanswered asks
 - **Docs** — overview, status (this page), ownership, architecture, strategy, carousel, five
   brand pages, the channel guides, and the groups/destinations design
 
@@ -168,14 +171,14 @@ granularity is a plan-tier limit and kun already uses a slot. GitHub Actions is 
 
 Ordered by value ÷ cost, not by size:
 
-1. **Drain the draft queue on a schedule.** The Hub's Draft tab is the front door for a teammate without a Claude Code session, and today an ask waits for the next session someone happens to run. The window polls without a timeout, so an undrained queue and an outage are indistinguishable from the Hub. Either fold a drain into the daily maintain heartbeat, or add a "waiting longer than expected" state so a stall reads as a stall. No new spend either way — the answering is Max-pool.
-2. **Three environment variables revive an entire loop.** A review destination, a draft source, and an opt-in list turn Loop B from dead to working. No code — but note the draft source is a billing decision ([env reference](/docs/social/channels/env)).
-3. **Turn Telegram on.** Free, instant, no gate, bot already exists — doubles the live distribution-channel count. Two environment variables.
-4. **Test Instagram publishing at Standard Access via Mkan** (~10 minutes of console work) before treating Business Verification as the publishing gate — [the hypothesis](/docs/social/channels/instagram#standard-access-hypothesis).
-5. **Name and verify the business portfolio, and invite a second admin.** Ownership is worth fixing whatever the test says — bus factor, recoverability, and the Databayt Page all hang on it, and if the hypothesis is wrong, verification is the long pole and is waiting rather than working. See [Ownership & accounts](/docs/social/ownership).
-6. **Teach the cron to draft per channel.** The last structural gap between the pipeline and the strategy it claims to serve.
+1. **Test Instagram publishing at Standard Access via Mkan** (~10 minutes of console work) before treating Business Verification as the publishing gate — [the hypothesis](/docs/social/channels/instagram#standard-access-hypothesis). The channel focus is Facebook + Instagram (decision 2026-07-30), so this is the gate to the only new channel wanted.
+2. **Name and verify the business portfolio, and invite a second admin.** Ownership is worth fixing whatever the test says — bus factor, recoverability, and the Databayt Page all hang on it, and if the hypothesis is wrong, verification is the long pole and is waiting rather than working. See [Ownership & accounts](/docs/social/ownership).
+3. **A PostHog destination for the UTMs.** Every outbound link is tagged and nothing consumes the tags — attribution starts at the first site that carries the snippet.
+4. **Teach the cron to draft per channel.** The last structural gap between the pipeline and the strategy it claims to serve — and the precondition for reviving Loop B, whose draft source is also a billing decision ([env reference](/docs/social/channels/env)).
 
-Done since this page was first written: persistence, real scheduling with a drain, single-use approval links, the metrics lane on schedule, the unfurl-proof confirm step, relay recording, the reaper, and the Hub ledger.
+Deferred by decision, not by failure: **Telegram** (2026-07-30 — code ready, two env variables when the focus widens beyond Facebook + Instagram) and **Loop B's revival** (blocked behind per-channel drafting above).
+
+Done since this page was first written: persistence, real scheduling with a drain, single-use approval links, the metrics lane on schedule, the unfurl-proof confirm step, relay recording, the reaper, the Hub ledger — and the draft-queue drain on a 5-minute launchd tick with the Hub reading its heartbeat (2026-07-30).
 
 ## See also
 

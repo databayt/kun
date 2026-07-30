@@ -45,6 +45,9 @@ export const SOCIAL_DICTIONARY = {
     parked: "Parked — not configured",
     checking: "Checking...",
     lastSeen: "last polled",
+    drainRow: "Draft queue",
+    drainLastCheck: "last checked",
+    drainNever: "never checked",
     testConnection: "Test Connections",
     apiUrl: "Gateway URL",
     notConfigured: "not configured",
@@ -103,6 +106,15 @@ export const SOCIAL_DICTIONARY = {
     agentDrafting: "Queued — Claude is writing it.",
     agentQueuedHint:
       "Drafting runs on the team's Claude subscription, so it lands within minutes rather than seconds. Leave this page open — it updates itself.",
+    // The queue's own truth, once the first poll returns. {minutes} since a
+    // drafting session last listed the queue; {position} is 1-based.
+    agentDrainFresh:
+      "A drafting session checked the queue {minutes} min ago — you're position {position}.",
+    agentDrainStale:
+      "No drafting session is watching the queue right now — your ask stays saved.",
+    agentStillQueued:
+      "Still queued — no session picked this up. Your ask stays saved; unanswered asks expire after an hour.",
+    agentCheckAgain: "Check again",
     agentUseAr: "Use Arabic",
     agentUseEn: "Use English",
     agentUseBoth: "Use both",
@@ -177,6 +189,9 @@ export const SOCIAL_DICTIONARY = {
     parked: "متوقف — غير مُهيّأ",
     checking: "جاري الفحص...",
     lastSeen: "آخر اتصال",
+    drainRow: "طابور الصياغة",
+    drainLastCheck: "آخر فحص",
+    drainNever: "لم يُفحص بعد",
     testConnection: "فحص الاتصالات",
     apiUrl: "رابط البوابة",
     notConfigured: "غير مُهيّأ",
@@ -222,6 +237,12 @@ export const SOCIAL_DICTIONARY = {
     agentDrafting: "في الانتظار — Claude يكتبه الآن.",
     agentQueuedHint:
       "الصياغة تعمل على اشتراك الفريق في Claude، فتصل في دقائق لا ثوانٍ. اترك الصفحة مفتوحة — تُحدّث نفسها.",
+    agentDrainFresh:
+      "تفقّدت جلسة صياغة الطابور قبل {minutes} دقيقة — ترتيبك {position}.",
+    agentDrainStale: "لا توجد جلسة صياغة تراقب الطابور الآن — طلبك محفوظ.",
+    agentStillQueued:
+      "ما زال في الطابور — لم تلتقطه أي جلسة. طلبك محفوظ؛ الطلبات غير المُجابة تنتهي بعد ساعة.",
+    agentCheckAgain: "تحقّق مجدداً",
     agentUseAr: "استخدم العربية",
     agentUseEn: "استخدم الإنجليزية",
     agentUseBoth: "استخدم الاثنتين",

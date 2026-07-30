@@ -108,7 +108,16 @@ export function DraftAgent({
   const [reveal, setReveal] = useState<Reveal>(null);
   const [error, setError] = useState<string | null>(null);
   const [requestId, setRequestId] = useState<string | null>(null);
-  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // The queue telling its own truth: position + when a session last looked.
+  const [queueInfo, setQueueInfo] = useState<{
+    pendingAhead?: number;
+    lastDrainAt?: string;
+  } | null>(null);
+  // After the hard stop: the ask is saved server-side but this window stopped
+  // polling for it. "Check again" restarts a fresh polling window.
+  const [stalled, setStalled] = useState(false);
+  const [pollNonce, setPollNonce] = useState(0);
+  const pollRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const brandLabel =
     PRODUCTS.find((p) => p.id === product)?.[isRTL ? "labelAr" : "label"] ??
@@ -121,15 +130,32 @@ export function DraftAgent({
   }, []);
 
   // Poll the queued ask until a session answers it. Cleared on unmount, on a
-  // terminal status, and before any new ask — a stale interval would keep
+  // terminal status, and before any new ask — a stale timer would keep
   // writing into a window the contributor has moved on from.
+  //
+  // Cadence: 5s while an answer could be seconds away, 15s after the first
+  // minute, and a hard stop at 10 minutes — past that the ask is still saved
+  // (the drain sweep expires it server-side after an hour), but polling
+  // forever made "nobody is draining" indistinguishable from "app broken".
   useEffect(() => {
-    if (!requestId) return;
+    if (!requestId || stalled) return;
     let cancelled = false;
+    const startedAt = Date.now();
+
+    const schedule = () => {
+      const delay = Date.now() - startedAt > 60_000 ? 15_000 : 5_000;
+      pollRef.current = setTimeout(tick, delay);
+    };
 
     const tick = async () => {
       const res = await readSocialDraft(requestId).catch(() => null);
-      if (cancelled || !res) return;
+      if (cancelled) return;
+      if (!res) {
+        // A transient read failure is not a verdict — keep polling; the
+        // status line below keeps saying what the queue last looked like.
+        schedule();
+        return;
+      }
       if (!res.ok) {
         setError(res.error ?? "Could not read the draft.");
         setBusy(false);
@@ -145,16 +171,26 @@ export function DraftAgent({
         setError(res.note ?? "The draft could not be written.");
         setBusy(false);
         setRequestId(null);
+      } else {
+        setQueueInfo({
+          pendingAhead: res.pendingAhead,
+          lastDrainAt: res.lastDrainAt,
+        });
+        if (Date.now() - startedAt > 10 * 60_000) {
+          setStalled(true);
+          setBusy(false);
+          return;
+        }
+        schedule();
       }
     };
 
     void tick();
-    pollRef.current = setInterval(tick, 5000);
     return () => {
       cancelled = true;
-      if (pollRef.current) clearInterval(pollRef.current);
+      if (pollRef.current) clearTimeout(pollRef.current);
     };
-  }, [requestId]);
+  }, [requestId, stalled, pollNonce]);
 
   const handleSubmit = async ({ text, files }: PromptInputMessage) => {
     let brief = (text ?? "").trim();
@@ -179,13 +215,15 @@ export function DraftAgent({
     }
 
     if (!brief || busy) return;
-    if (pollRef.current) clearInterval(pollRef.current);
+    if (pollRef.current) clearTimeout(pollRef.current);
     setBusy(true);
     setHasInteracted(true);
     setError(null);
     setDraft(null);
     setReveal(null);
     setRequestId(null);
+    setQueueInfo(null);
+    setStalled(false);
     try {
       const res = await requestSocialDraft({ product, brief });
       if (res.ok && res.id) {
@@ -206,7 +244,7 @@ export function DraftAgent({
   const useDraft = onUse;
 
   const reset = () => {
-    if (pollRef.current) clearInterval(pollRef.current);
+    if (pollRef.current) clearTimeout(pollRef.current);
     setDraft(null);
     setReveal(null);
     setError(null);
@@ -214,6 +252,31 @@ export function DraftAgent({
     setPrompt("");
     setRequestId(null);
     setBusy(false);
+    setQueueInfo(null);
+    setStalled(false);
+  };
+
+  const checkAgain = () => {
+    setStalled(false);
+    setBusy(true);
+    setPollNonce((n) => n + 1);
+  };
+
+  // The honest pending line: a fresh heartbeat means a session is working the
+  // queue; a stale or absent one means nobody is, and saying so beats a
+  // spinner that promises minutes.
+  const drainStatus = () => {
+    const at = queueInfo?.lastDrainAt ? new Date(queueInfo.lastDrainAt) : null;
+    const minutes = at
+      ? Math.max(0, Math.round((Date.now() - at.getTime()) / 60_000))
+      : null;
+    if (minutes !== null && minutes < 15) {
+      return fill(t.agentDrainFresh, {
+        minutes,
+        position: (queueInfo?.pendingAhead ?? 0) + 1,
+      });
+    }
+    return t.agentDrainStale;
   };
 
   // The pill collapses to a single row once the window has been used, and
@@ -289,15 +352,35 @@ export function DraftAgent({
               )}
 
               {error && (
-                <p className="text-destructive text-start text-sm">
+                <p role="alert" className="text-destructive text-start text-sm">
                   {t.agentError} {error}
                 </p>
               )}
 
               {busy && (
-                <p className="text-muted-foreground/70 text-start text-xs">
-                  {t.agentQueuedHint}
+                <p
+                  role="status"
+                  className="text-muted-foreground/70 text-start text-xs"
+                >
+                  {queueInfo ? drainStatus() : t.agentQueuedHint}
                 </p>
+              )}
+
+              {stalled && (
+                <div
+                  role="status"
+                  className="border-border text-muted-foreground flex flex-wrap items-center gap-3 rounded-lg border border-dashed p-3 text-start text-xs"
+                >
+                  <span>{t.agentStillQueued}</span>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={checkAgain}
+                    className="h-7 rounded-full text-xs"
+                  >
+                    {t.agentCheckAgain}
+                  </Button>
+                </div>
               )}
 
               {draft && reveal === "done" && (

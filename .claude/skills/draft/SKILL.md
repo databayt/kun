@@ -116,7 +116,10 @@ register; every link is UTM-shaped; and nothing is asserted that is not true —
 invented metric, customer, price, or date.
 
 In queue mode: every pending ask ends `answered` or `failed` — never left
-`pending`, because the window polls forever and a silent skip looks like an outage
-to the person waiting.
+`pending`. The window stops polling after 10 minutes and the drain sweep expires
+hour-old asks, so a skipped ask becomes a visible failure — but only after the
+asker already gave up waiting. `scripts/drain-drafts.sh` runs this mode on a
+5-minute launchd tick; every `list` (yours included) beats the `draft-drain`
+heartbeat the Hub shows.
 
 Hand off to `/higgs` for media, then `/approve`. This stage never publishes.

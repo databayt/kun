@@ -37,6 +37,12 @@ export interface EgressStatus {
   hermes: TransportStatus;
   telegram: TransportStatus;
   facebook: TransportStatus;
+  /**
+   * The draft queue's liveness: pending count + when a drafting session last
+   * ran `social-drafts.mjs list` (heartbeat key "draft-drain"). Optional so
+   * the client-side error fallback doesn't have to fake it.
+   */
+  draftDrain?: { pending: number; lastSeen?: string };
 }
 
 // The health helpers already catch their own failures; allSettled is the guard
@@ -50,16 +56,30 @@ function settled<T>(
 }
 
 export async function getEgressStatus(product?: string): Promise<EgressStatus> {
-  const [hermes, telegram, facebook, heartbeat] = await Promise.allSettled([
-    checkHermesHealth(),
-    checkTelegramHealth(),
-    checkFacebookHealth(product),
-    db.systemHeartbeat.findUnique({ where: { key: "hermes" } }),
-  ]);
+  const [hermes, telegram, facebook, heartbeat, drainBeat, drainPending] =
+    await Promise.allSettled([
+      checkHermesHealth(),
+      checkTelegramHealth(),
+      checkFacebookHealth(product),
+      db.systemHeartbeat.findUnique({ where: { key: "hermes" } }),
+      db.systemHeartbeat.findUnique({ where: { key: "draft-drain" } }),
+      db.socialDraftRequest.count({ where: { status: "pending" } }),
+    ]);
 
   const lastSeen =
     heartbeat.status === "fulfilled" && heartbeat.value
       ? heartbeat.value.at.toISOString()
+      : undefined;
+
+  const draftDrain =
+    drainPending.status === "fulfilled"
+      ? {
+          pending: drainPending.value,
+          lastSeen:
+            drainBeat.status === "fulfilled" && drainBeat.value
+              ? drainBeat.value.at.toISOString()
+              : undefined,
+        }
       : undefined;
 
   const hermesParked = !(process.env.HERMES_API_URL ?? "").trim();
@@ -90,5 +110,6 @@ export async function getEgressStatus(product?: string): Promise<EgressStatus> {
       detail: v.name,
       error: v.error,
     })),
+    draftDrain,
   };
 }

@@ -42,6 +42,30 @@ function backoffMs(attempts: number): number {
   return 5 * 60_000 * Math.pow(5, Math.max(0, attempts - 1));
 }
 
+// An hour: long enough for a sleeping Mac to wake and drain, short enough not
+// to spend Max tokens answering an ask nobody is watching — the window stops
+// polling after 10 minutes, so a very late answer lands unseen anyway.
+const DRAFT_ASK_TTL_MS = 60 * 60_000;
+
+// Abandoned draft asks. The Mac-side drainer only runs while a laptop is
+// awake; this sweep rides the one social schedule that runs regardless, so
+// "nobody ever picked it up" becomes a visible `failed` in the agent window
+// instead of a pending row that outlives everyone's attention.
+async function expireStaleDraftAsks(): Promise<number> {
+  const expired = await db.socialDraftRequest.updateMany({
+    where: {
+      status: "pending",
+      createdAt: { lt: new Date(Date.now() - DRAFT_ASK_TTL_MS) },
+    },
+    data: {
+      status: "failed",
+      note: "expired — no drafting session picked this up within an hour; ask again when the queue shows a recent check",
+      answeredAt: new Date(),
+    },
+  });
+  return expired.count;
+}
+
 interface DrainOutcome {
   variant: string;
   brand: string;
@@ -118,7 +142,11 @@ export async function GET(request: Request): Promise<Response> {
   }
 
   const startedAt = Date.now();
-  const reaped = await reapStuck();
+  // Different tables, no ordering dependency — run the sweeps together.
+  const [reaped, expiredAsks] = await Promise.all([
+    reapStuck(),
+    expireStaleDraftAsks(),
+  ]);
 
   const due = await db.socialVariant.findMany({
     where: {
@@ -228,6 +256,7 @@ export async function GET(request: Request): Promise<Response> {
     due: due.length,
     published: results.filter((r) => r.status === "published").length,
     reaped: reaped.length,
+    expiredAsks,
     deferred: due.length - processed,
     results: [...reaped, ...results],
   });

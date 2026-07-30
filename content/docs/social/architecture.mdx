@@ -151,7 +151,7 @@ The chain the whole system is built around, and where each stage actually lives:
 
 | Stage | Who / what | Code | Loop | State today |
 |-------|-----------|------|------|-------------|
-| **Generate** | Claude (`/social` skill) · the Hub's **Draft** tab · `/higgs` for media | `lib/social-draft.ts` (cron lane) · `SocialDraftRequest` + `draft` queue mode (Hub lane) | A · B · C | Claude-native. The relays never write copy. The Hub lane needs a session draining the queue — nothing does it on a schedule yet. |
+| **Generate** | Claude (`/social` skill) · the Hub's **Draft** tab · `/higgs` for media | `lib/social-draft.ts` (cron lane) · `SocialDraftRequest` + `draft` queue mode (Hub lane) | A · B · C | Claude-native. The relays never write copy. The Hub lane drains on a 5-minute launchd tick (`scripts/drain-drafts.sh`) — heartbeat every look, Claude only when asks are pending. |
 | **Approve** | Human — Abdout, Samia, or Ali | composer button · signed link · Slack | A · B · C | **Always required.** L2 on Facebook — the one live channel; L1 elsewhere. |
 | **Schedule** | Contributor — the composer's date-time field | `schedulePost` → `scheduled` variants → `/api/social/drain` | A | Real: pick a moment, the drain publishes within ~15 min of it. |
 | **Publish** | Egress fan-out, per transport, in parallel | `lib/social-publish.ts` → `deliverPost` | A · B · C | One code path for all three loops. |
