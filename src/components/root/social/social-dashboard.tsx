@@ -30,25 +30,15 @@ import type { EgressStatus } from "@/lib/social-status";
 
 interface SocialDashboardProps {
   lang: Locale;
-  /**
-   * The page's static header. It arrives as a prop rather than sitting above
-   * this component in page.tsx because the agent window is now a full-height
-   * hero and has to render first — the way /sales opens on its Lead Agent. Being
-   * a prop keeps the header a Server Component: its markup is serialized in,
-   * never bundled.
-   */
-  header: React.ReactNode;
 }
 
 /**
  * The interactive shell. Holds the two pieces of state every child reads — which
  * brand we publish as, and which channels are selected — and nothing else; the
- * composer, the picker, and the status panel own their own concerns.
+ * composer, the picker, and the status panel own their own concerns. The page
+ * header above it is static, so it stays a Server Component in page.tsx.
  */
-export default function SocialDashboard({
-  lang,
-  header,
-}: SocialDashboardProps) {
+export default function SocialDashboard({ lang }: SocialDashboardProps) {
   const t = getSocialDict(lang);
   const isRightToLeft = isRTL(lang);
 
@@ -123,18 +113,6 @@ export default function SocialDashboard({
 
   return (
     <>
-      {/* The agent window opens the page, full height — the brain is Claude, now
-          reachable from the page itself. Everything that operates on its output
-          sits below the fold. */}
-      <DraftAgent
-        product={product}
-        onUse={(text) => setPrefill({ text, nonce: Date.now() })}
-        isRTL={isRightToLeft}
-        t={t}
-      />
-
-      {header}
-
       {/* Top bar — product, channels, and status side-by-side at start */}
       <div className="flex flex-wrap items-center justify-start gap-3 border-b-[0.5px] py-3">
         <label htmlFor="product-selector" className="sr-only">
@@ -179,6 +157,16 @@ export default function SocialDashboard({
           t={t}
         />
       </div>
+
+      {/* The agent window — the brain is Claude, reachable from the page itself.
+          It sits under the header and the toolbar rather than opening the page,
+          so /social still introduces itself before handing over the prompt. */}
+      <DraftAgent
+        product={product}
+        onUse={(text) => setPrefill({ text, nonce: Date.now() })}
+        isRTL={isRightToLeft}
+        t={t}
+      />
 
       {/* One column now — status moved into the toolbar dialog, so the composer
           no longer shares the row with a permanent sidebar. */}

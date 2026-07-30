@@ -223,10 +223,15 @@ export function DraftAgent({ product, onUse, isRTL, t }: DraftAgentProps) {
   };
 
   // full-bleed: the page wraps its children in px-responsive, and a gradient
-  // that stops at that padding reads as a panel rather than a hero. The utility
+  // that stops at that padding reads as a panel rather than a band. The utility
   // (styles/container.css) breaks out RTL-safely.
+  //
+  // Sized to its content, not `min-h-screen` like the sales agent it mirrors:
+  // that agent opens its page, so a full viewport is the whole point. This one
+  // sits under the header and the toolbar, where a screen-tall block would be
+  // mostly empty gradient with the prompt marooned in the middle of it.
   return (
-    <section className="full-bleed from-background to-muted/20 flex min-h-screen flex-col bg-gradient-to-b">
+    <section className="full-bleed from-background to-muted/20 flex flex-col bg-gradient-to-b py-16 md:py-24">
       <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col items-center justify-center px-4">
         <div className="flex w-full flex-1 flex-col items-center justify-center text-center">
           {!hasInteracted && (

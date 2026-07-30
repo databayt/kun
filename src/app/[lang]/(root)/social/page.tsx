@@ -32,38 +32,33 @@ export default async function SocialPage({ params }: SocialPageProps) {
     redirect(`/${lang}/login?next=/${lang}/social`);
   }
 
-  // The agent window opens the page at full height, the way /sales opens on its
-  // Lead Agent, so PageHeader is handed to the dashboard rather than rendered
-  // above it. It stays static either way: passed as a prop it renders on the
-  // server and never reaches the bundle; only the dashboard is interactive.
+  // Same shell as the homepage — PageHeader + a bar under it, one rhythm. The
+  // header is static, so it renders on the server and never reaches the bundle;
+  // only the dashboard below it is interactive.
   return (
     <div className="px-responsive lg:px-0" dir={isRTL(locale) ? "rtl" : "ltr"}>
-      <SocialDashboard
-        lang={locale}
-        header={
-          <PageHeader
-            announcement={
-              <Announcement
-                text={t.announcementText}
-                href={`/${lang}/docs`}
-                external={false}
-                badgeClassName="px-0"
-              />
-            }
-            heading={t.title}
-            description={t.description}
-            descriptionClassName="max-w-lg"
-            actions={
-              <TwoButtons
-                primaryLabel={t.primaryAction}
-                primaryHref={`/${lang}/docs/social`}
-                secondaryLabel={t.secondaryAction}
-                secondaryHref="https://github.com/databayt/kun/issues/new?labels=type%3Afeature&title=feat(social)%3A+"
-              />
-            }
+      <PageHeader
+        announcement={
+          <Announcement
+            text={t.announcementText}
+            href={`/${lang}/docs`}
+            external={false}
+            badgeClassName="px-0"
+          />
+        }
+        heading={t.title}
+        description={t.description}
+        descriptionClassName="max-w-lg"
+        actions={
+          <TwoButtons
+            primaryLabel={t.primaryAction}
+            primaryHref={`/${lang}/docs/social`}
+            secondaryLabel={t.secondaryAction}
+            secondaryHref="https://github.com/databayt/kun/issues/new?labels=type%3Afeature&title=feat(social)%3A+"
           />
         }
       />
+      <SocialDashboard lang={locale} />
       {/* The DB read streams in behind the interactive dashboard. */}
       <Suspense fallback={null}>
         <SocialLedger lang={locale} />
