@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { requireContributor } from "@/lib/auth-guard";
+import { detectSocialLocale } from "@/lib/social-locale";
 import { deliverPost, type ChannelOutcome } from "@/lib/social-publish";
 import { getEgressStatus, type EgressStatus } from "@/lib/social-status";
 import { sendReview } from "@/lib/social-review";
@@ -144,6 +145,7 @@ export async function publishPostDirect(input: unknown): Promise<PostResult> {
         data: {
           brand: product,
           source: "human",
+          locale: detectSocialLocale(text),
           aiGenerated: Boolean(mediaUrl),
           variants: {
             create: result.results.map((outcome) => ({
@@ -217,6 +219,7 @@ export async function schedulePost(input: unknown): Promise<ScheduleResult> {
       data: {
         brand: product,
         source: "human",
+        locale: detectSocialLocale(text),
         aiGenerated: Boolean(mediaUrl),
         variants: {
           create: channels.map((channel) => ({
@@ -274,6 +277,7 @@ export async function stageForReview(input: unknown): Promise<ReviewResult> {
       data: {
         brand: product,
         source: "human",
+        locale: detectSocialLocale(text),
         aiGenerated: Boolean(mediaUrl),
         variants: {
           create: channels.map((channel) => ({
