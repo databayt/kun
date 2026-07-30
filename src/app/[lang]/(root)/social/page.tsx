@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import { auth } from "@/auth";
 import { isRTL, type Locale } from "@/components/local/config";
 import { PageHeader } from "@/components/atom/page-header";
 import { Announcement } from "@/components/atom/announcement";
 import { TwoButtons } from "@/components/atom/two-buttons";
 import { getSocialDict } from "@/components/root/social/dictionary";
+import { SocialLedger } from "@/components/root/social/ledger";
 import SocialDashboard from "@/components/root/social/social-dashboard";
 
 export const metadata: Metadata = {
@@ -57,6 +59,10 @@ export default async function SocialPage({ params }: SocialPageProps) {
         }
       />
       <SocialDashboard lang={locale} />
+      {/* The DB read streams in behind the interactive dashboard. */}
+      <Suspense fallback={null}>
+        <SocialLedger lang={locale} />
+      </Suspense>
     </div>
   );
 }

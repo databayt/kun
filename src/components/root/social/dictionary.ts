@@ -69,6 +69,15 @@ export const SOCIAL_DICTIONARY = {
     blockedNoChannel: "Select at least one channel.",
     blockedTransport:
       "Waiting on a disconnected relay for the selected channels.",
+    ledgerTitle: "Recent activity",
+    ledgerEmpty:
+      "Nothing recorded yet — publishes, schedules and approvals will appear here.",
+    ledgerBrand: "Brand",
+    ledgerChannel: "Channel",
+    ledgerText: "Copy",
+    ledgerStatus: "Status",
+    ledgerWhen: "When",
+    ledgerReach: "Reach / views",
   },
   ar: {
     title: "كن للتواصل الاجتماعي",
@@ -127,6 +136,14 @@ export const SOCIAL_DICTIONARY = {
     blockedNoText: "اكتب أو الصق نص المنشور أولاً.",
     blockedNoChannel: "اختر قناة واحدة على الأقل.",
     blockedTransport: "في انتظار ناقل غير متصل للقنوات المختارة.",
+    ledgerTitle: "النشاط الأخير",
+    ledgerEmpty: "لا سجلات بعد — سيظهر هنا كل نشر وجدولة واعتماد.",
+    ledgerBrand: "العلامة",
+    ledgerChannel: "القناة",
+    ledgerText: "النص",
+    ledgerStatus: "الحالة",
+    ledgerWhen: "الوقت",
+    ledgerReach: "الوصول / المشاهدات",
   },
 } as const;
 
