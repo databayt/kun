@@ -29,7 +29,7 @@ export default async function SocialPage({ params }: SocialPageProps) {
   // (the actions re-check on top of this; see post-social.ts).
   const session = await auth();
   if (!session?.user) {
-    redirect(`/${lang}/login`);
+    redirect(`/${lang}/login?next=/${lang}/social`);
   }
 
   // Same shell as the homepage — PageHeader + a bar under it, one rhythm. The

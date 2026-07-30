@@ -1,81 +1,105 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { signIn } from "next-auth/react"
-import { useRouter } from "next/navigation"
+import { useState } from "react";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 
 interface LoginContentProps {
-  lang: string
+  lang: string;
+  /** Where to land after signing in — defaults to the context hub. */
+  next?: string;
 }
 
-export function LoginContent({ lang }: LoginContentProps) {
-  const isAr = lang === "ar"
-  const router = useRouter()
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [error, setError] = useState("")
-  const [loading, setLoading] = useState(false)
+// Rendered as a dialog over a bare backdrop (the /login route carries no site
+// chrome). Dismissing it goes home — the page behind it is deliberately empty.
+export function LoginContent({ lang, next }: LoginContentProps) {
+  const isAr = lang === "ar";
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const destination = next && next.startsWith("/") ? next : `/${lang}/context`;
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setError("")
-    setLoading(true)
+    e.preventDefault();
+    setError("");
+    setLoading(true);
 
     const result = await signIn("credentials", {
       email,
       password,
       redirect: false,
-    })
+    });
 
     if (result?.error) {
-      setError(isAr ? "بيانات خاطئة" : "invalid credentials")
-      setLoading(false)
-      return
+      setError(isAr ? "بيانات الدخول غير صحيحة" : "Invalid credentials");
+      setLoading(false);
+      return;
     }
 
-    router.push(`/${lang}/context`)
+    router.push(destination);
   }
 
   return (
-    <div className="container-wrapper">
-      <div className="mx-auto max-w-xs py-24 px-6">
-        <p className="text-sm text-muted-foreground/50">
-          {isAr ? "سياق" : "context"}
-        </p>
+    <Dialog
+      open
+      onOpenChange={(open) => {
+        if (!open) router.push(`/${lang}`);
+      }}
+    >
+      <DialogContent className="sm:max-w-sm">
+        <DialogHeader>
+          <DialogTitle>{isAr ? "تسجيل الدخول" : "Sign in"}</DialogTitle>
+          <DialogDescription>
+            {isAr
+              ? "مساحة المساهمين — بريدك في databayt وكلمة المرور."
+              : "Contributors only — your databayt email and password."}
+          </DialogDescription>
+        </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="mt-10 space-y-4">
-          <input
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <Input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder={isAr ? "البريد" : "email"}
-            className="w-full bg-transparent text-sm font-mono text-foreground placeholder:text-muted-foreground/30 border-b border-muted-foreground/20 pb-2 outline-none focus:border-foreground transition-colors"
+            placeholder={isAr ? "البريد الإلكتروني" : "Email"}
+            autoComplete="username"
+            autoFocus
             required
           />
-          <input
+          <Input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder={isAr ? "كلمة المرور" : "password"}
-            className="w-full bg-transparent text-sm font-mono text-foreground placeholder:text-muted-foreground/30 border-b border-muted-foreground/20 pb-2 outline-none focus:border-foreground transition-colors"
+            placeholder={isAr ? "كلمة المرور" : "Password"}
+            autoComplete="current-password"
             required
           />
 
-          {error && (
-            <p className="text-xs text-red-500">{error}</p>
-          )}
+          {error && <p className="text-destructive text-sm">{error}</p>}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="cursor-pointer text-sm font-mono text-muted-foreground/50 transition-colors hover:text-foreground disabled:text-muted-foreground/20"
-          >
+          <Button type="submit" className="w-full" disabled={loading}>
             {loading
-              ? isAr ? "جاري..." : "signing in..."
-              : isAr ? "دخول" : "sign in"}
-          </button>
+              ? isAr
+                ? "جاري الدخول…"
+                : "Signing in…"
+              : isAr
+                ? "دخول"
+                : "Sign in"}
+          </Button>
         </form>
-      </div>
-    </div>
-  )
+      </DialogContent>
+    </Dialog>
+  );
 }
