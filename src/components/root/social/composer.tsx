@@ -1,7 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { CalendarClock, CheckCircle2, Send, Share2, XCircle } from "lucide-react";
+import {
+  CalendarClock,
+  CheckCircle2,
+  Send,
+  Share2,
+  XCircle,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -14,10 +20,12 @@ import { fill, type SocialDict } from "@/components/root/social/dictionary";
 import type { ChannelOutcome } from "@/lib/social-publish";
 import type { ProductId } from "@/components/root/social/products";
 
-// Mirrors the Zod cap in actions/post-social.ts. The review-link cap is lower
-// because the approval token carries the copy inside the URL.
+// Mirrors the Zod cap in actions/post-social.ts. The review lane once capped
+// lower because the approval token carried the copy inside the URL; the token
+// now names a variant id (see lib/social-token.ts), so both lanes take the
+// same cap and the guard below is a relic kept only as defence in depth.
 const MAX_TEXT = 4000;
-const MAX_REVIEW_TEXT = 1200;
+const MAX_REVIEW_TEXT = 4000;
 
 interface ComposerProps {
   product: ProductId;
@@ -40,7 +48,9 @@ export function Composer({
   const [postText, setPostText] = useState("");
   const [mediaUrl, setMediaUrl] = useState("");
   const [scheduledFor, setScheduledFor] = useState("");
-  const [pending, setPending] = useState<"publish" | "review" | "schedule" | null>(null);
+  const [pending, setPending] = useState<
+    "publish" | "review" | "schedule" | null
+  >(null);
   const [outcomes, setOutcomes] = useState<ChannelOutcome[] | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
