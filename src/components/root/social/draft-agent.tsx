@@ -14,8 +14,7 @@
 // describes the real queue rather than performing invented thinking, and the
 // "Thought for 3 seconds" of the original is a genuine measured wait here.
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { readSocialDraft, requestSocialDraft } from "@/actions/post-social";
+import { useState } from "react";
 import AgentHeading from "@/components/atom/agent-heading";
 import { AIResponseDisplay } from "@/components/atom/ai-response-display";
 import {
@@ -42,30 +41,12 @@ import {
   PromptInputSubmit,
   PromptInputTextarea,
   usePromptInputAttachments,
-  type PromptInputMessage,
 } from "@/components/atom/prompt-input";
 import { Button } from "@/components/ui/button";
-import { fill, type SocialDict } from "@/components/root/social/dictionary";
-import { PRODUCTS, type ProductId } from "@/components/root/social/products";
+import { fill } from "@/components/root/social/dictionary";
+import { PRODUCTS } from "@/components/root/social/products";
+import { useSocial } from "@/components/root/social/provider";
 import { cn } from "@/lib/utils";
-
-interface DraftAgentProps {
-  product: ProductId;
-  /**
-   * Hands a chosen draft to the composer. The dashboard owns what that means —
-   * the composer is behind another tab, so this is a stage change, not a scroll.
-   */
-  onUse: (text: string) => void;
-  /** The heading's "see what's already published" — opens the Measure stage. */
-  onSeePublished: () => void;
-  isRTL: boolean;
-  t: SocialDict;
-}
-
-interface DraftPair {
-  ar: string;
-  en: string;
-}
 
 /**
  * The model chain from .claude/engine.json. Presentational for now: the queue
@@ -79,188 +60,36 @@ const MODELS = [
   { id: "claude-sonnet-5", label: "Sonnet 5" },
 ] as const;
 
-/**
- * Mirrors draftCopySchema's cap in actions/post-social.ts. An attachment is
- * folded into the brief rather than uploaded — the queue has a brief column, not
- * a file one — so the fold-in has to fit under the same ceiling the action
- * enforces. Overshooting it would answer "attach a transcript" with the server's
- * "Brief is too long", which explains nothing.
- */
-const MAX_BRIEF_CHARS = 2000;
-
 const RESPONSE_CONTAINER_ID = "ai-response-container";
 
-type Reveal = "ar" | "en" | "done" | null;
+export function DraftAgent() {
+  // The conversation — brief, queue poll, answer, reveal — is provider state,
+  // so it survives leaving this page the way the old hidden panel survived a
+  // tab switch. Only presentation state stays here.
+  const { isRTL, t, product, handToComposer, goToStage, draftQueue } =
+    useSocial();
+  const {
+    prompt,
+    setPrompt,
+    busy,
+    hasInteracted,
+    draft,
+    reveal,
+    error,
+    queueInfo,
+    stalled,
+    submit,
+    advance,
+    reset,
+    checkAgain,
+  } = draftQueue;
 
-export function DraftAgent({
-  product,
-  onUse,
-  onSeePublished,
-  isRTL,
-  t,
-}: DraftAgentProps) {
-  const [prompt, setPrompt] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [hasInteracted, setHasInteracted] = useState(false);
   const [isInputFocused, setIsInputFocused] = useState(false);
   const [model, setModel] = useState<string>(MODELS[0].id);
-  const [draft, setDraft] = useState<DraftPair | null>(null);
-  const [reveal, setReveal] = useState<Reveal>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [requestId, setRequestId] = useState<string | null>(null);
-  // The queue telling its own truth: position + when a session last looked.
-  const [queueInfo, setQueueInfo] = useState<{
-    pendingAhead?: number;
-    lastDrainAt?: string;
-  } | null>(null);
-  // After the hard stop: the ask is saved server-side but this window stopped
-  // polling for it. "Check again" restarts a fresh polling window.
-  const [stalled, setStalled] = useState(false);
-  const [pollNonce, setPollNonce] = useState(0);
-  const pollRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const brandLabel =
     PRODUCTS.find((p) => p.id === product)?.[isRTL ? "labelAr" : "label"] ??
     product;
-
-  // Only ever forward, so a late onStreamComplete from a block that already
-  // finished cannot rewind the reveal and replay it.
-  const advance = useCallback((from: Reveal, to: Reveal) => {
-    setReveal((current) => (current === from ? to : current));
-  }, []);
-
-  // Poll the queued ask until a session answers it. Cleared on unmount, on a
-  // terminal status, and before any new ask — a stale timer would keep
-  // writing into a window the contributor has moved on from.
-  //
-  // Cadence: 5s while an answer could be seconds away, 15s after the first
-  // minute, and a hard stop at 10 minutes — past that the ask is still saved
-  // (the drain sweep expires it server-side after an hour), but polling
-  // forever made "nobody is draining" indistinguishable from "app broken".
-  useEffect(() => {
-    if (!requestId || stalled) return;
-    let cancelled = false;
-    const startedAt = Date.now();
-
-    const schedule = () => {
-      const delay = Date.now() - startedAt > 60_000 ? 15_000 : 5_000;
-      pollRef.current = setTimeout(tick, delay);
-    };
-
-    const tick = async () => {
-      const res = await readSocialDraft(requestId).catch(() => null);
-      if (cancelled) return;
-      if (!res) {
-        // A transient read failure is not a verdict — keep polling; the
-        // status line below keeps saying what the queue last looked like.
-        schedule();
-        return;
-      }
-      if (!res.ok) {
-        setError(res.error ?? "Could not read the draft.");
-        setBusy(false);
-        setRequestId(null);
-        return;
-      }
-      if (res.status === "answered" && res.ar && res.en) {
-        setDraft({ ar: res.ar, en: res.en });
-        setReveal("ar");
-        setBusy(false);
-        setRequestId(null);
-      } else if (res.status === "failed") {
-        setError(res.note ?? "The draft could not be written.");
-        setBusy(false);
-        setRequestId(null);
-      } else {
-        setQueueInfo({
-          pendingAhead: res.pendingAhead,
-          lastDrainAt: res.lastDrainAt,
-        });
-        if (Date.now() - startedAt > 10 * 60_000) {
-          setStalled(true);
-          setBusy(false);
-          return;
-        }
-        schedule();
-      }
-    };
-
-    void tick();
-    return () => {
-      cancelled = true;
-      if (pollRef.current) clearTimeout(pollRef.current);
-    };
-  }, [requestId, stalled, pollNonce]);
-
-  const handleSubmit = async ({ text, files }: PromptInputMessage) => {
-    let brief = (text ?? "").trim();
-
-    // An attachment is context for the brief, so read it in rather than posting
-    // a file the queue has no column for. Only what fits under the cap goes in.
-    const separator = "\n\n---\n\n";
-    const room = MAX_BRIEF_CHARS - brief.length - separator.length;
-    if (files?.length && room > 0) {
-      const parts = await Promise.all(
-        files.map(async (file) => {
-          try {
-            const body = await fetch(file.url).then((res) => res.text());
-            return `${file.filename ?? "attachment"}:\n${body.trim()}`;
-          } catch {
-            return "";
-          }
-        }),
-      );
-      const attached = parts.filter(Boolean).join("\n\n").slice(0, room).trim();
-      if (attached) brief = `${brief}${separator}${attached}`;
-    }
-
-    if (!brief || busy) return;
-    if (pollRef.current) clearTimeout(pollRef.current);
-    setBusy(true);
-    setHasInteracted(true);
-    setError(null);
-    setDraft(null);
-    setReveal(null);
-    setRequestId(null);
-    setQueueInfo(null);
-    setStalled(false);
-    try {
-      const res = await requestSocialDraft({ product, brief });
-      if (res.ok && res.id) {
-        setRequestId(res.id);
-        setPrompt("");
-      } else {
-        setError(res.error ?? "Unknown error.");
-        setBusy(false);
-      }
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : String(err));
-      setBusy(false);
-    }
-  };
-
-  // No scroll here any more: the composer sits behind the Publish tab, so where
-  // the copy goes and how the page gets there is the dashboard's to decide.
-  const useDraft = onUse;
-
-  const reset = () => {
-    if (pollRef.current) clearTimeout(pollRef.current);
-    setDraft(null);
-    setReveal(null);
-    setError(null);
-    setHasInteracted(false);
-    setPrompt("");
-    setRequestId(null);
-    setBusy(false);
-    setQueueInfo(null);
-    setStalled(false);
-  };
-
-  const checkAgain = () => {
-    setStalled(false);
-    setBusy(true);
-    setPollNonce((n) => n + 1);
-  };
 
   // The honest pending line: a fresh heartbeat means a session is working the
   // queue; a stale or absent one means nobody is, and saying so beats a
@@ -311,7 +140,7 @@ export function DraftAgent({
                 title={t.agentTitle}
                 lead={t.agentLead}
                 scrollText={t.agentScrollText}
-                onNavigate={onSeePublished}
+                onNavigate={() => goToStage("measure")}
               />
             </div>
           )}
@@ -385,20 +214,22 @@ export function DraftAgent({
 
               {draft && reveal === "done" && (
                 <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
-                  <Button size="sm" onClick={() => useDraft(draft.ar)}>
+                  <Button size="sm" onClick={() => handToComposer(draft.ar)}>
                     {t.agentUseAr}
                   </Button>
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => useDraft(draft.en)}
+                    onClick={() => handToComposer(draft.en)}
                   >
                     {t.agentUseEn}
                   </Button>
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => useDraft(`${draft.ar}\n\n—\n\n${draft.en}`)}
+                    onClick={() =>
+                      handToComposer(`${draft.ar}\n\n—\n\n${draft.en}`)
+                    }
                   >
                     {t.agentUseBoth}
                   </Button>
@@ -412,7 +243,7 @@ export function DraftAgent({
 
           <div className="relative w-full max-w-3xl">
             <PromptInput
-              onSubmit={handleSubmit}
+              onSubmit={submit}
               className={cn(
                 "group border-muted-foreground/10 bg-muted focus-within:border-foreground/20 hover:border-foreground/10 focus-within:hover:border-foreground/20 flex w-full gap-2 rounded-[2rem] border text-base shadow-sm transition-all duration-300 ease-in-out",
                 collapsed ? "h-14 items-center p-2" : "flex-col p-3",

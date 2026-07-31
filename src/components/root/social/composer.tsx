@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   CalendarClock,
   CheckCircle2,
@@ -26,9 +26,9 @@ import {
   type ReviewLink,
 } from "@/actions/post-social";
 import { CHANNELS, type ChannelId } from "@/components/root/social/config";
-import { fill, type SocialDict } from "@/components/root/social/dictionary";
+import { fill } from "@/components/root/social/dictionary";
+import { useSocial } from "@/components/root/social/provider";
 import type { ChannelOutcome } from "@/lib/social-publish";
-import type { ProductId } from "@/components/root/social/products";
 
 // Mirrors the Zod cap in actions/post-social.ts. The review lane once capped
 // lower because the approval token carried the copy inside the URL; the token
@@ -37,29 +37,23 @@ import type { ProductId } from "@/components/root/social/products";
 const MAX_TEXT = 4000;
 const MAX_REVIEW_TEXT = 4000;
 
-interface ComposerProps {
-  product: ProductId;
-  selectedChannels: ChannelId[];
-  wiredForProduct: ChannelId[];
-  /** Null while the egress probe is still in flight. */
-  transportsReady: boolean;
-  isRTL: boolean;
-  t: SocialDict;
-  /** A draft handed over by the agent window; the nonce forces re-injection. */
-  prefill?: { text: string; nonce: number } | null;
-}
+export function Composer() {
+  // The copy and its media URL live in the provider: the composer unmounts on
+  // a stage navigation now, and losing typed copy to a tab switch is the bug
+  // the old hidden-panel design existed to prevent.
+  const {
+    product,
+    selectedChannels,
+    wiredForProduct,
+    transportsReady,
+    isRTL,
+    t,
+    composerText,
+    setComposerText,
+    composerMediaUrl,
+    setComposerMediaUrl,
+  } = useSocial();
 
-export function Composer({
-  product,
-  selectedChannels,
-  wiredForProduct,
-  transportsReady,
-  isRTL,
-  t,
-  prefill,
-}: ComposerProps) {
-  const [postText, setPostText] = useState("");
-  const [mediaUrl, setMediaUrl] = useState("");
   const [scheduledFor, setScheduledFor] = useState("");
   const [pending, setPending] = useState<
     "publish" | "review" | "schedule" | null
@@ -71,13 +65,7 @@ export function Composer({
   const [reviewLinks, setReviewLinks] = useState<ReviewLink[] | null>(null);
   const [copiedChannel, setCopiedChannel] = useState<string | null>(null);
 
-  // The agent window's hand-off. Deliberately overwrites whatever is in the
-  // box — pressing "Use …" is the explicit choice to take the draft.
-  useEffect(() => {
-    if (prefill) setPostText(prefill.text);
-  }, [prefill]);
-
-  const trimmed = postText.trim();
+  const trimmed = composerText.trim();
   const overReviewLimit = trimmed.length > MAX_REVIEW_TEXT;
 
   // Stating the blocker beats a dead button with no explanation.
@@ -99,9 +87,9 @@ export function Composer({
 
   const payload = () => ({
     product,
-    text: postText,
+    text: composerText,
     channels: selectedChannels,
-    mediaUrl: mediaUrl.trim() || undefined,
+    mediaUrl: composerMediaUrl.trim() || undefined,
     scheduledFor: scheduledFor || undefined,
   });
 
@@ -113,8 +101,8 @@ export function Composer({
       setOutcomes(res.results ?? null);
       if (res.ok) {
         setNotice(t.successMsg);
-        setPostText("");
-        setMediaUrl("");
+        setComposerText("");
+        setComposerMediaUrl("");
         setScheduledFor("");
       } else {
         // A per-channel breakdown renders below; the banner only needs to say
@@ -146,8 +134,8 @@ export function Composer({
             at: res.at ? new Date(res.at).toLocaleString() : "",
           }),
         );
-        setPostText("");
-        setMediaUrl("");
+        setComposerText("");
+        setComposerMediaUrl("");
         setScheduledFor("");
       } else {
         setError(`${t.errorMsg}${res.error}`);
@@ -176,8 +164,8 @@ export function Composer({
             : t.stagedLocalMsg,
         );
         setReviewLinks(res.links ?? null);
-        setPostText("");
-        setMediaUrl("");
+        setComposerText("");
+        setComposerMediaUrl("");
       } else {
         setError(`${t.errorMsg}${res.error}`);
       }
@@ -235,8 +223,8 @@ export function Composer({
           <div id="composer" className="relative mx-auto w-full max-w-3xl">
             <div className="group border-muted-foreground/10 bg-muted focus-within:border-foreground/20 hover:border-foreground/10 focus-within:hover:border-foreground/20 flex w-full flex-col gap-2 rounded-[2rem] border p-3 text-base shadow-sm transition-all duration-300 ease-in-out">
               <textarea
-                value={postText}
-                onChange={(e) => setPostText(e.target.value)}
+                value={composerText}
+                onChange={(e) => setComposerText(e.target.value)}
                 placeholder={t.textareaPlaceholder}
                 maxLength={MAX_TEXT}
                 className="placeholder:text-muted-foreground min-h-[220px] w-full flex-1 resize-none bg-transparent px-2 py-2 text-start text-[16px] leading-relaxed focus:bg-transparent focus:outline-none"
@@ -245,12 +233,15 @@ export function Composer({
               <div className="flex flex-wrap items-center gap-1">
                 <Popover>
                   <PopoverTrigger
-                    className={cn(pill, mediaUrl.trim() && "text-foreground")}
+                    className={cn(
+                      pill,
+                      composerMediaUrl.trim() && "text-foreground",
+                    )}
                     aria-label={t.mediaLabel}
                   >
                     <Paperclip className="size-4 shrink-0" />
                     <span className="hidden md:flex">{t.mediaLabel}</span>
-                    {mediaUrl.trim() && (
+                    {composerMediaUrl.trim() && (
                       <span className="bg-primary size-1.5 rounded-full" />
                     )}
                   </PopoverTrigger>
@@ -268,8 +259,8 @@ export function Composer({
                       id="social-media-url"
                       type="url"
                       dir="ltr"
-                      value={mediaUrl}
-                      onChange={(e) => setMediaUrl(e.target.value)}
+                      value={composerMediaUrl}
+                      onChange={(e) => setComposerMediaUrl(e.target.value)}
                       placeholder={t.mediaPlaceholder}
                       className="font-mono text-sm"
                     />

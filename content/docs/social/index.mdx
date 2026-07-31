@@ -70,22 +70,24 @@ brand,when  AR-first visuals    gate    | copy-out         + UTM tags
 Each stage is also its own keyword: say "draft a post for hogwarts" and only that stage runs.
 `social` is the orchestrator that chains all six.
 
-### The Hub is this table, as tabs
+### The Hub is this table, as routes
 
-`/social` mirrors the pipeline: seven stages across five tabs, in order, with brand · channels ·
-status above them as context that spans all of them.
+`/social` mirrors the pipeline: seven stages across five routes (`/social/<stage>`), in order,
+with brand · channels · status above them as context that spans all of them. Each stage is a
+page — linkable, shareable — and the bare `/social` opens on **Draft**.
 
-| Tab | Stages | What is there |
-|-----|--------|---------------|
-| **Calendar** | Plan | Nothing to operate — the calendar's output is a dated table the Hub has nowhere to keep. The tab names the keyword instead of faking a surface |
-| **Draft** | Draft | The Social Agent window. Real |
-| **Media** | Media | Nothing to operate — `/higgs` renders to the CDN. The tab says to bring the URL to Publish |
-| **Publish** | Approve · Schedule · Publish | The composer. All three are one form with three buttons, so they are one tab rather than three over the same fields |
-| **Measure** | Measure | The activity ledger — last 20 variants with status, time, and latest reach/views |
+| Route | Stages | What is there |
+|-------|--------|---------------|
+| **/social/calendar** | Plan | Nothing to operate — the calendar's output is a dated table the Hub has nowhere to keep. The page names the keyword instead of faking a surface |
+| **/social/draft** | Draft | The Social Agent window. Real |
+| **/social/media** | Media | Nothing to operate — `/higgs` renders to the CDN. The page says to bring the URL to Publish |
+| **/social/publish** | Approve · Schedule · Publish | The composer. All three are one form with three buttons, so they are one route rather than three over the same fields |
+| **/social/measure** | Measure | The activity ledger — last 20 variants with status, time, and latest reach/views |
 
-Panels are hidden, never unmounted: the agent polls its queue for minutes and the composer holds
-typed copy, and a tab switch must not throw either away. Taking a draft ("Use Arabic") moves the
-Hub to **Publish** — the composer is behind another tab, so handing it copy is a stage change.
+Cross-stage state lives in the layout's provider, which persists across stage navigations: the
+agent's queue poll runs on for minutes and the composer keeps its typed copy, and switching
+stages must not throw either away. Taking a draft ("Use Arabic") moves the Hub to **Publish** —
+the composer is another route, so handing it copy is a navigation.
 
 ### Drafting from the Hub — the two-sided loop
 
