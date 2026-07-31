@@ -1,7 +1,7 @@
 ---
 name: higgs
 description: Generate and edit photos and videos for databayt org marketing, ads, and prompts using Higgsfield AI
-when_to_use: "Use when generating or editing marketing media — image, photo, video, ad, banner, og image, social card, hero shot, product shot, promo reel, story, avatar ad — or when a reference video/image URL needs downloading and tweaking through Higgsfield. Triggers on: /higgs, generate video, generate image, generate photo, make an ad, promo video, og image, social card, hero image, product shot, brand kit, edit video from url, download and tweak video, higgs."
+when_to_use: "Use when generating or editing marketing media — image, photo, video, ad, banner, og image, social card, hero shot, product shot, promo reel, story, avatar ad — or when a reference video/image URL needs downloading and tweaking through Higgsfield. This is the TEXT-FREE lane: og images, infographics, testimonials, split comparisons and anything carrying copy render on /carousel's template lane instead (the Portrait Gallery spells route by taxonomy lane). Triggers on: /higgs, generate video, generate image, generate photo, make an ad, promo video, og image, social card, hero image, product shot, mockup, lifestyle scene, moodboard, showroom asset, brand kit, edit video from url, download and tweak video, higgs, صورة تسويقية, وسائط."
 argument-hint: "[recipe|prompt] [--url <ref>] [--count N] [--premium] [--ratio 16:9]"
 ---
 
@@ -120,6 +120,23 @@ higgsfield marketing-studio dtc-ads generate --prompt "<offer/hook>" \
 # product_shot, lifestyle_scene, closeup_product_with_person, moodboard_pin, hero_banner
 higgsfield product-photoshoot create --mode hero_banner --prompt "<intent>" --image <ref.png> --count 3 --enhance-only   # preview free, drop flag to spend
 ```
+
+## SMS ad pillars (school-management campaigns)
+
+The category's four proven layouts, mapped to lanes. Only Interface Hero spends higgs
+credits — the other three are free template renders (`/carousel`, 1-slide decks fine).
+The demo deck `hogwarts/sms-pillars` shows all three template pillars rendered.
+
+| Pillar                                    | Lane             | Recipe                                                                                                                                                                                           |
+| ----------------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Interface Hero** — 1:1 dashboard render | higgs `mockup`   | Screenshot the REAL hogwarts dashboard first (UI text must be a capture, never genAI type), then `product-photoshoot create --mode restyle --image <capture.png> --enhance-only` to preview free |
+| **Feature Ecosystem** — hub + modules     | template `grid`  | Deck slide: `{type: "grid", headline, hub, cells: [4-6 × {label, art}]}`                                                                                                                         |
+| **Efficiency Split** — before/after       | template `split` | Deck slide: `{type: "split", beforeLabel, afterLabel, beforeArt?, afterArt?}`                                                                                                                    |
+| **Trust Anchor** — testimonial lockup     | template `quote` | Deck slide: `{type: "quote", text, attribution?}` — REAL quotes only, never invented                                                                                                             |
+
+Register anything generated with `--type` (`hero`, `mockup`, `lifestyle`, …) so the
+showroom at `/social/media` files it; the taxonomy is
+`src/components/root/social/showroom/taxonomy.ts`.
 
 ## Result handling (verified JSON shape)
 

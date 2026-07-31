@@ -2,7 +2,7 @@
 name: social
 description: One spell — calendar, draft, media, approve, publish, measure for a brand post
 when_to_use: "Use when a databayt brand needs a social post taken the whole way — pick the slot, write the bilingual copy, render the media, get a human sign-off, deliver to the channels, and read the numbers back. This is the compound orchestrator; run a single stage directly when that is all you need (/calendar, /draft, /higgs, /approve, /publish, /measure). Triggers on: social post, post about <topic>, publish to social, social automation, broadcast the announcement, منشور تواصل, انشر عن."
-argument-hint: "<brand> <topic> [--channels ...] [--media] [--at <iso>] [--from <stage>]"
+argument-hint: "<brand> <topic> [--channels ...] [--media [type]] [--at <iso>] [--from <stage>]"
 ---
 
 # Social — one post, all the way through
@@ -68,9 +68,14 @@ Otherwise delegate to `.claude/skills/calendar/SKILL.md` to pick the slot.
 **Phase 3 — Stage 2: `/draft`.** Delegate to `.claude/skills/draft/SKILL.md`.
 Blocking — there is nothing to approve without copy.
 
-**Phase 4 — Stage 3: `/higgs`** (only on `--media`). Delegate to
-`.claude/skills/higgs/SKILL.md`. Non-blocking: a media failure downgrades to a text
-post rather than stopping the chain. A multi-slide deck is `/carousel` instead.
+**Phase 4 — Stage 3: media** (only on `--media [type]`). The optional type comes
+from the showroom taxonomy (`src/components/root/social/showroom/taxonomy.ts`,
+default `hero`) and picks the lane: text-free photography (`hero`, `product`,
+`lifestyle`, `mockup`, `reel`, `story`) delegates to `.claude/skills/higgs/SKILL.md`;
+text-bearing formats (`og`, `banner`, `infographic`, `split`, `testimonial`) render
+as a deck on `.claude/skills/carousel/SKILL.md` — a single card is a 1-slide deck.
+Non-blocking: a media failure downgrades to a text post rather than stopping the
+chain. A multi-slide deck is `/carousel` either way.
 
 **Phase 5 — Stage 4: `/approve` — HARD STOP.** Delegate to
 `.claude/skills/approve/SKILL.md`. Unlike `/release`'s advisory QA gate, this one

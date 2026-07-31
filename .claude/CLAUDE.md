@@ -59,6 +59,7 @@ Claude routes these to the right skill + agent + MCP without a dedicated command
 **The Auror Office** — one keyword, one quality dimension: `see`, `flow`, `debug`, `responsive`, `lang`, `fast`, `guard`, `architecture`, `structure`, `pattern`, `design`, `stack`, `trace`, `efficient`, `mirror`, `diff`
 **The Ministry of Magic** — operations and intelligence: `captain`, `weekly`, `monitor`, `incident`, `issue`, `credentials`, `health`, `sync`, `learn`, `conventions`, `patterns`, `drift`, `economy`
 **The Pensieve** — judgment and conversion: `canon`, `decide`, `premortem`, `convert`, `calendar`, `draft`, `higgs`, `approve`, `publish`, `measure`, `social`, `carousel`
+**The Portrait Gallery** — the media studio: `hero image`, `og image`, `banner`, `mockup`, `lifestyle`, `split-screen`, `reel`, `infographic`, `testimonial`, `showroom`
 <!-- END vocabulary (generated) -->
 
 **Quality dimensions** route through `.claude/agents/quality.md`; `/handover` orchestrates all of them on a URL or block.

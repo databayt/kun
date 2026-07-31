@@ -2613,6 +2613,145 @@ export const schools: School[] = [
       },
     ],
   },
+  {
+    id: "portraits",
+    number: "19",
+    name: "The Portrait Gallery",
+    subtitle: "The media studio",
+    description:
+      "Hogwarts' portraits are images that live on the walls and answer when spoken to. The gallery holds the format vocabulary of the media studio: say the asset you need and the right lane runs — text-free photography through higgs, text-bearing formats through the carousel template lane (Thmanyah type, brand frame, exact platform sizes) — and everything generated or kept as reference is filed in the showroom at /social/media. The taxonomy lives in src/components/root/social/showroom/taxonomy.ts.",
+    quote:
+      '"hero image for hogwarts" — the frame is empty until you speak; then the portrait paints itself.',
+    spells: [
+      {
+        name: "hero image",
+        effect:
+          "Text-free hero shot — nano_banana_pro at 16:9, minimal style block; the UI hero section is a different spell (conjuration's hero)",
+        order: [p("Higgs"), s("/higgs")],
+        steps: [
+          "Library lookup first (free): node scripts/higgs-library.mjs lookup",
+          "Estimate free, then generate text-free with the brand style block",
+          "Register with --type hero, push to the serving origin",
+          "Copy the URL into the showroom card or the composer's Media field",
+        ],
+        connects: ["higgs", "showroom", "social"],
+        depends: [],
+      },
+      {
+        name: "og image",
+        effect:
+          "Link-preview card — a 1-slide deck at 1200x630 on the template lane; type is HTML (Thmanyah), never AI raster",
+        order: [s("/carousel")],
+        steps: [
+          "Write a 1-slide cover deck (landscape lays out as text + art row)",
+          "pnpm carousel:render <brand>/<slug> --sizes 1200x630",
+          "Visual-verify the PNG, then hand to /approve with the post",
+        ],
+        connects: ["carousel", "showroom", "approve"],
+        depends: [],
+      },
+      {
+        name: "banner",
+        effect:
+          "Event or page-header banner — template lane at 1200x630, brand frame and logo included",
+        order: [s("/carousel")],
+        steps: [
+          "1-slide deck (cover or cta archetype) at 1200x630",
+          "Render, verify, stage — the album floor does not apply to single cards",
+        ],
+        connects: ["carousel", "og image"],
+        depends: [],
+      },
+      {
+        name: "mockup",
+        effect:
+          "Interface mockup — higgs restyles a REAL product screenshot; UI text must come from a capture, never genAI type",
+        order: [p("Higgs"), s("/higgs")],
+        steps: [
+          "Screenshot the real dashboard route first (the UI text source)",
+          "product-photoshoot --mode restyle with the capture as reference",
+          "Register with --type mockup; note the Interface Hero ad pillar uses this",
+        ],
+        connects: ["higgs", "showroom"],
+        depends: [],
+      },
+      {
+        name: "lifestyle",
+        effect:
+          "Lifestyle scene — product in a real-world moment, cinematic block, 4:5",
+        order: [p("Higgs"), s("/higgs")],
+        steps: [
+          "Library lookup, then product-photoshoot --mode lifestyle_scene",
+          "Batch variants in one command; register winners with --type lifestyle",
+        ],
+        connects: ["higgs", "showroom"],
+        depends: [],
+      },
+      {
+        name: "split-screen",
+        effect:
+          "Before/after comparative — the split archetype; labels live in HTML, imagery on art plates",
+        order: [s("/carousel")],
+        steps: [
+          "Deck with a split slide: beforeLabel/afterLabel bilingual, optional art per pane",
+          "Render at the target size; the Efficiency Split ad pillar is this spell",
+        ],
+        connects: ["carousel", "infographic"],
+        depends: [],
+      },
+      {
+        name: "reel",
+        effect:
+          "Vertical promo clip — kling3_0_turbo at 9:16; at 0.7 credits this lane PLANS and stops, it never spends",
+        order: [p("Higgs"), s("/higgs")],
+        steps: [
+          "State the cost honestly: video starts at 7.5 credits against a 0.7 balance",
+          "Plan the clip (image-first: iterate cheap stills, animate the winner LATER)",
+          "Stop and report — generation waits for a topped-up workspace",
+        ],
+        connects: ["higgs", "social"],
+        depends: [],
+      },
+      {
+        name: "infographic",
+        effect:
+          "Data-viz / feature-ecosystem card — stat, steps, or grid archetypes; numbers and labels are HTML, Arabic-safe",
+        order: [s("/carousel")],
+        steps: [
+          "Pick the archetype: stat (one number), steps (how-to), grid (hub + module cells)",
+          "The Feature Ecosystem ad pillar is a grid slide with 4-6 labelled cells",
+          "Render, verify RTL type, stage",
+        ],
+        connects: ["carousel", "split-screen"],
+        depends: [],
+      },
+      {
+        name: "testimonial",
+        effect:
+          "Typography lockup of social proof — the quote archetype, Serif Display; REAL quotes only, never invented",
+        order: [s("/carousel")],
+        steps: [
+          "Take the quote verbatim from a real client or the brand's own doctrine",
+          "quote slide, clay or dark canvas; the Trust Anchor ad pillar is this spell",
+        ],
+        connects: ["carousel", "approve"],
+        depends: [],
+      },
+      {
+        name: "showroom",
+        effect:
+          "Browse and curate the media gallery — generated work and kept references, one grid at /social/media",
+        order: [m("content/media/library.json"), s("/higgs")],
+        steps: [
+          "Generated side: library.json (higgs-library.mjs adds with --type)",
+          "Reference side: references.json — source link + what-to-steal note; optional thumb under public/social/media/refs/",
+          "Open kun.databayt.org/en/social/media — filter by collection, brand, type",
+        ],
+        connects: ["higgs", "carousel", "measure"],
+        depends: [],
+      },
+    ],
+  },
 ];
 
 // ─── Workflows ──────────────────────────────────────────────────────────────────
@@ -2720,6 +2859,43 @@ export const workflows: Workflow[] = [
       { keyword: "check", action: "Typecheck + build + visual" },
       { keyword: "ship", action: "Vercel --prod with auto-fix" },
       { keyword: "watch", action: "Production smoke test" },
+    ],
+  },
+  {
+    id: "media-studio",
+    name: "Media Studio",
+    description: "An asset from need to the showroom — the right lane by type",
+    steps: [
+      {
+        keyword: "calendar",
+        action: "Which brand, which slot, which ad pillar the asset serves",
+      },
+      {
+        keyword: "showroom",
+        action: "Library lookup first — do we already own the shot? (free)",
+      },
+      {
+        keyword: "higgs",
+        action:
+          "Text-free photography: model/ratio/style from the tables, batch, register --type",
+      },
+      {
+        keyword: "carousel",
+        action:
+          "Text-bearing formats: 1-slide card or full deck — Thmanyah type, brand frame",
+      },
+      {
+        keyword: "approve",
+        action: "Human gate — copy and media staged together",
+      },
+      {
+        keyword: "publish",
+        action: "Approved media rides the post to its channels",
+      },
+      {
+        keyword: "measure",
+        action: "Reach and attribution read back per post",
+      },
     ],
   },
 ];
