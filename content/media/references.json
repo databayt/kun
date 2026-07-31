@@ -1,0 +1,110 @@
+{
+  "version": 1,
+  "$comment": "Reference/inspiration cards for the media showroom (/social/media). Curated by hand or by a session: sourceUrl is the canonical value (never hotlink competitor images — links rot and leak referrers); note says what to steal; thumb is an optional small local file under public/social/media/refs/. assetType comes from src/components/root/social/showroom/taxonomy.ts.",
+  "references": [
+    {
+      "id": "thmanyah-facebook",
+      "title": "Thmanyah — ثمانية",
+      "source": "facebook",
+      "sourceUrl": "https://web.facebook.com/Thmanyah",
+      "assetType": "testimonial",
+      "note": "The style north star — the maker of the house typeface. Minimal Arabic typographic lockups: one thought per card, Serif Display headlines, generous space, no decoration the type doesn't earn."
+    },
+    {
+      "id": "aljazeera-technology-facebook",
+      "title": "Al Jazeera Technology",
+      "source": "facebook",
+      "sourceUrl": "https://web.facebook.com/AljazeeraTechnology",
+      "assetType": "infographic",
+      "note": "Arabic tech-media cards at volume: copy-centric graphics, strong typographic hierarchy, consistent brand frame — proof the template lane scales to a daily cadence."
+    },
+    {
+      "id": "powerschool",
+      "title": "PowerSchool",
+      "source": "vendor",
+      "sourceUrl": "https://www.powerschool.com",
+      "assetType": "lifestyle",
+      "note": "The enterprise K-12 standard: corporate blue/green gradients, sharp geometric grids, polished teacher-with-tablet lifestyle photography. What 'authoritative' looks like to district buyers."
+    },
+    {
+      "id": "classter",
+      "title": "Classter",
+      "source": "vendor",
+      "sourceUrl": "https://www.classter.com",
+      "assetType": "infographic",
+      "note": "Asymmetrical layouts with feature-spotlight vector badges (Admissions, Billing, LMS) floating around a central hero — the module-ecosystem story told in one frame."
+    },
+    {
+      "id": "gradelink",
+      "title": "Gradelink",
+      "source": "vendor",
+      "sourceUrl": "https://www.gradelink.com",
+      "assetType": "testimonial",
+      "note": "Small private/charter/faith schools: social-proof testimonial lockups plus plain UI screenshots — 'No Tech Skills Required'. Trust over polish."
+    },
+    {
+      "id": "alma-sis",
+      "title": "Alma SIS",
+      "source": "vendor",
+      "sourceUrl": "https://www.getalma.com",
+      "assetType": "mockup",
+      "note": "Modern minimal duotone — deep purple + bright orange, flat design, high contrast. Aimed at forward-thinking administrators; closest to our own restraint."
+    },
+    {
+      "id": "classe365",
+      "title": "Classe365",
+      "source": "vendor",
+      "sourceUrl": "https://www.classe365.com",
+      "assetType": "mockup",
+      "note": "Flat, high-contrast product mockups for tech-savvy private schools — UI screenshots framed as the hero, minimal supporting copy."
+    },
+    {
+      "id": "openeducat",
+      "title": "OpenEduCat / Fedena",
+      "source": "vendor",
+      "sourceUrl": "https://openeducat.org",
+      "assetType": "infographic",
+      "note": "The open-source pitch to IT directors: technical mockups, dashboard data-viz, cloud/security iconography. Speaks to the buyer who reads the architecture page first — our open-source story overlaps."
+    },
+    {
+      "id": "meta-ad-library-sms",
+      "title": "Meta Ad Library — school management",
+      "source": "meta-ad-library",
+      "sourceUrl": "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=ALL&q=school%20management%20system&media_type=all",
+      "assetType": "other",
+      "note": "The live competitive feed: every active SMS ad on Meta, searchable by advertiser. Check before designing a campaign — see what the category is running this month."
+    },
+    {
+      "id": "behance-social-suites",
+      "title": "Behance — social media design",
+      "source": "behance",
+      "sourceUrl": "https://www.behance.net/search/projects/social%20media%20design",
+      "assetType": "other",
+      "note": "Complete brand case studies and full social asset suites — for direction-setting, not single-card ideas."
+    },
+    {
+      "id": "dribbble-social-posts",
+      "title": "Dribbble — social post shots",
+      "source": "dribbble",
+      "sourceUrl": "https://dribbble.com/search/social-media-post",
+      "assetType": "other",
+      "note": "Bite-sized craft: color pairings, asymmetrical layouts, typography experiments. Best for stealing one move, not a system."
+    },
+    {
+      "id": "adespresso-gallery",
+      "title": "AdEspresso ads gallery",
+      "source": "adespresso",
+      "sourceUrl": "https://adespresso.com/ads-examples/",
+      "assetType": "other",
+      "note": "Curated real Facebook ads with conversion commentary — why a hierarchy or layout works, not just that it looks good."
+    },
+    {
+      "id": "pinterest-infographic-layouts",
+      "title": "Pinterest — infographic & grid layouts",
+      "source": "pinterest",
+      "sourceUrl": "https://www.pinterest.com/search/pins/?q=social%20media%20infographic%20layout",
+      "assetType": "other",
+      "note": "A search engine for modular layouts and infographic structures — feed it a slide archetype name and mine variations."
+    }
+  ]
+}

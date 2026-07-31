@@ -10,7 +10,10 @@
  *
  * Usage:
  *   node scripts/higgs-library.mjs lookup --prompt "..." [--model M] [--ratio 16:9] [--resolution 2k]
- *   node scripts/higgs-library.mjs add <file> --prompt "..." --model M [--brand b] [--ratio r] [--credits n]
+ *   node scripts/higgs-library.mjs add <file> --prompt "..." --model M [--brand b] [--ratio r] [--credits n] [--type t]
+ *     --type: canonical asset type (hero|og|banner|logo|product|lifestyle|mockup|
+ *     infographic|split|testimonial|carousel|reel|story — see
+ *     src/components/root/social/showroom/taxonomy.ts); the showroom filters by it.
  *   node scripts/higgs-library.mjs import [--dir ~/Downloads/higgs]
  *   node scripts/higgs-library.mjs push [--dry-run]
  *   node scripts/higgs-library.mjs list [--brand b]
@@ -190,6 +193,7 @@ function cmdAdd(args) {
     if (args.brand && !existing.brand) existing.brand = args.brand;
     if (args.ratio && !existing.ratio) existing.ratio = args.ratio;
     if (args.credits && existing.credits == null) existing.credits = Number(args.credits);
+    if (args.type && !existing.assetType) existing.assetType = args.type;
     existing.fingerprint = fingerprint(existing) || existing.fingerprint;
     saveManifest(manifest);
     return { ok: true, deduped: true, id: existing.id, file: existing.file };
@@ -205,6 +209,7 @@ function cmdAdd(args) {
     ratio: args.ratio || null,
     resolution: args.resolution || null,
     credits: args.credits != null ? Number(args.credits) : null,
+    assetType: args.type || null,
     bytes: fs.statSync(abs).size,
     createdAt: dateFromFilename(name, abs),
     cdnUrl: null,
