@@ -5,12 +5,16 @@ description: Photo and video generation for databayt marketing via Higgsfield AI
 
 # Media
 
-Marketing visuals — ads, og images, social cards, hero shots, promo reels — are generated
-through [Higgsfield AI](https://higgsfield.ai) instead of commissioned per asset. The `/higgs`
-skill wraps the CLI in a zero-question playbook: it picks the model, aspect ratio, and style
-from pre-made tables, prices the job before spending, and downloads the result. Finished media
-feeds the [Social Hub](/docs/social), which stages the post for human approval before any
-channel sees it.
+Marketing visuals ride two lanes. Text-free photography — hero shots, product shots,
+lifestyle scenes, reels — is generated through [Higgsfield AI](https://higgsfield.ai); the
+`/higgs` skill wraps the CLI in a zero-question playbook that picks the model, aspect ratio,
+and style from pre-made tables, prices the job before spending, and downloads the result.
+Anything that carries copy — og images, infographics, testimonials, comparisons — renders
+deterministically from HTML templates on the [carousel engine](/docs/social/carousel):
+Thmanyah type, the brand frame, exact platform sizes, and a 1-slide deck is a single-image
+asset. Finished media feeds the [Social Hub](/docs/social), which stages the post for human
+approval before any channel sees it; everything generated or kept as reference is browsable
+in the [showroom](https://kun.databayt.org/en/social/media).
 
 ## The doctrine
 
@@ -99,8 +103,118 @@ Credentials live in the Keychain, never in a repo — see [Credentials](/docs/cr
 - Video is entirely untested — no clip has ever been generated.
 - Arabic creative still needs manual typography in post.
 
+## The showroom
+
+The Media stage of the [Hub](https://kun.databayt.org/en/social/media) is a gallery of both
+registries — `content/media/library.json` (what we generated, S3-served) and
+`content/media/references.json` (what we keep as reference or inspiration) — filterable by
+collection, brand, and asset type. Rendered decks link to their live carousel routes.
+
+<MediaShowroom />
+
+## Asset vocabulary
+
+The canonical asset types (`src/components/root/social/showroom/taxonomy.ts`). The **lane**
+column is the doctrine as data: AI typography breaks (Arabic doubly so), so any type that
+carries copy renders on the template lane and only text-free photography spends Higgsfield
+credits. Industry names are the terms designers and the Meta Ad Library speak.
+
+| Type          | Industry term                     | Lane     | Defaults                        |
+| ------------- | --------------------------------- | -------- | ------------------------------- |
+| `hero`        | Hero image asset                  | higgs    | `nano_banana_pro` · 16:9 · minimal |
+| `og`          | Link-preview / OG image           | template | 1200×630, cover as text+art row |
+| `banner`      | Event banner · page header        | template | 1200×630                        |
+| `logo`        | Logo / wordmark render            | higgs    | `nano_banana_2_lite` · 1:1      |
+| `product`     | Product mockup / render           | higgs    | photoshoot `product_shot` · 4:5 |
+| `lifestyle`   | Lifestyle creative                | higgs    | `lifestyle_scene` · 4:5 · cinematic |
+| `mockup`      | Interface mockup                  | higgs    | restyle over a **real** screenshot — UI text must come from a capture, never genAI type |
+| `infographic` | Data visualization / infographic  | template | `stat` / `steps` / `grid` slides |
+| `split`       | Comparative / split-screen        | template | `split` archetype               |
+| `testimonial` | Typography lockup · social proof  | template | `quote` archetype               |
+| `carousel`    | Carousel asset suite              | template | 3–10 slides · 1080×1350         |
+| `reel`        | Promo reel / vertical video       | higgs    | `kling3_0_turbo` · 9:16 · **plan-only at today's balance** |
+| `story`       | Story                             | higgs    | 9:16 · cinematic                |
+
+Register the type at generation time — `node scripts/higgs-library.mjs add <file> --type hero
+…` — and the showroom files it; untyped legacy rows read as Unsorted.
+
+## Composition & style
+
+Compositional frameworks and treatments are **modifiers**, not asset types — they shape the
+prompt (higgs lane) or the slide layout (template lane). The two brand style blocks already
+encode the house defaults:
+
+| Modifier | Meaning | Where it lives |
+| --- | --- | --- |
+| Grid / modular | Strict geometric structure balancing several blocks | `grid` archetype; higgs `minimal` block |
+| Asymmetrical | Deliberate imbalance for tension and movement | prompt modifier; Classter's signature |
+| Symmetrical | Mirror balance — stability, corporate trust | prompt modifier; PowerSchool's signature |
+| Minimalist / flat | Clean lines, whitespace, no gradients or shadows | the `minimal` style block (og, hero, product, docs) |
+| Skeuomorphic / realist | Real-world texture, lighting, depth | the `cinematic` style block (ads, reels, promos) |
+| Duotone / monochromatic | Two contrasting colors or one hue's shades | prompt modifier; Alma SIS's purple+orange |
+| Negative space | The empty space forms a second read | prompt modifier — pairs with `minimal` |
+| Composite / photo manipulation | Several photographic elements fused seamlessly | higgs multi-reference (`nano_banana_flash`) |
+| Vector illustration | Scalable path-based artwork | the Anthropic art mirror (`public/carousel-art/`) — never genAI |
+
+## Typography in creatives
+
+Typographic hierarchy, text lockups, and font pairing are the template lane's whole craft —
+and the reason it exists. The house pairing is fixed: **Thmanyah Serif Display Black +
+`ss01`** for Arabic headlines (the signature calligraphic look), **Thmanyah Sans** for Arabic
+body, Geist for English — encoded once in `carousel/slides.tsx` and inherited by every
+template. Arabic never takes letter-spacing (it breaks the connected script). The hard rule
+stands: no text inside AI-generated visuals; a testimonial lockup or copy-centric graphic is
+HTML, rendered — the license-safe fetch script provisions the fonts, and the woff2 files
+never land in git or on the CDN.
+
+## Where to look
+
+| Source | Use it for |
+| --- | --- |
+| [Meta Ad Library](https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=ALL&q=school%20management%20system&media_type=all) | The live competitive feed — every active ad by advertiser, before designing any campaign |
+| [Behance](https://www.behance.net/search/projects/social%20media%20design) | Complete brand case studies and full social suites — direction, not single cards |
+| [Dribbble](https://dribbble.com/search/social-media-post) | Bite-sized craft: color pairings, layouts, type experiments — steal one move |
+| [AdEspresso gallery](https://adespresso.com/ads-examples/) | Real ads annotated for **why** they convert |
+| [Pinterest](https://www.pinterest.com/search/pins/?q=social%20media%20infographic%20layout) | Mining modular/infographic layout variations |
+| [facebook.com/Thmanyah](https://web.facebook.com/Thmanyah) | The style north star — minimal Arabic typographic lockups from the house font's maker |
+| [Al Jazeera Technology](https://web.facebook.com/AljazeeraTechnology) | Arabic copy-centric cards at daily-cadence volume |
+
+A find worth keeping becomes a card in `content/media/references.json` — source link + "what
+to steal"; an optional thumb goes under `public/social/media/refs/`.
+
+## Competitor teardown — school systems
+
+What the SMS category's creatives actually look like, per segment:
+
+| Vendor | Segment | Signature |
+| --- | --- | --- |
+| PowerSchool | Enterprise K-12 districts | Corporate blue/green gradients, sharp grids, polished teacher-with-tablet lifestyle photography |
+| Classter | Modular international | Asymmetrical layouts, feature-spotlight vector badges orbiting a hero |
+| Gradelink | Small private / charter / faith | Testimonial lockups + plain UI screenshots — trust over polish |
+| Alma SIS / Classe365 | Modern private | Duotone flat design, deep purple + bright orange, high contrast |
+| OpenEduCat / Fedena | Open-source, IT-director buyers | Technical mockups, dashboard data-viz, cloud/security iconography |
+
+The open-source pitch (OpenEduCat's lane) overlaps ours; the typographic-trust lane
+(Gradelink's) is where the Thmanyah template system outclasses the category.
+
+## The four ad pillars
+
+The category's proven layouts, mapped to our lanes — say the pillar's type in a session and
+the right lane runs:
+
+| Pillar | Layout | Lane | Recipe |
+| --- | --- | --- | --- |
+| Interface Hero | 1:1 dashboard render | higgs `mockup` | `product-photoshoot --mode restyle` over a **real** hogwarts screenshot |
+| Feature Ecosystem | Hub + module cells | template `grid` | headline + hub pill + 4–6 labelled art cells |
+| Efficiency Split | Before/after panes | template `split` | paper-stack pane → one-dashboard pane, labels in HTML |
+| Trust Anchor | Testimonial lockup | template `testimonial` | `quote` slide, Serif Display, real quotes only |
+
+The demo deck `hogwarts/sms-pillars` renders all four template-lane pillars; at 0.7 credits,
+the higgs pillar is plan-first (draft on `z_image` at 0.15 only when the library has no hit).
+
 ## Related
 
 - [Social Automation](/docs/social) — where generated media gets published
+- [Carousel](/docs/social/carousel) — the template lane's engine: decks, archetypes, sizes
 - [Brand & Voice](/docs/brand) — the rules every visual obeys
 - [Credentials](/docs/credentials) — where the Higgsfield session lives
