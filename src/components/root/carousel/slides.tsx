@@ -4,7 +4,7 @@ import { plateColor, THEMES, type ThemeColors } from "./palette";
 import type { Bilingual, DeckLang, Slide } from "./schema";
 
 /**
- * The six slide archetypes, drawn in the Anthropic editorial language:
+ * The eight slide archetypes, drawn in the Anthropic editorial language:
  * ink on ivory, one Clay accent, generous whitespace, and illustrations
  * sitting on soft tinted plates cycled from the accent family (the same
  * section-theming pattern anthropic.com uses).
@@ -112,14 +112,76 @@ interface SlideProps<S extends Slide> {
   slide: S;
   lang: DeckLang;
   index: number;
+  /** Deck length — a 1-slide deck is a single card, so "swipe" would lie. */
+  total?: number;
+  /** Wide artboard (og/banner) — fixed portrait sizes must scale down. */
+  landscape?: boolean;
 }
 
 function CoverSlide({
   slide,
   lang,
   index,
+  total,
+  landscape,
 }: SlideProps<Extract<Slide, { type: "cover" }>>): ReactElement {
   const c = THEMES[slide.theme];
+
+  // The og/banner layout: text column + art plate side by side. A 630px-tall
+  // artboard cannot stack the portrait cover's 92px headline over a 500px
+  // plate — landscape is a row, the classic link-card composition.
+  if (landscape) {
+    return (
+      <SlideShell>
+        <div className="flex min-h-0 flex-1 items-stretch" style={{ gap: 48 }}>
+          <div className="flex min-w-0 flex-1 flex-col justify-center">
+            {slide.eyebrow ? (
+              <p style={eyebrowStyle(c, lang)}>{t(slide.eyebrow, lang)}</p>
+            ) : null}
+            <h1
+              className="text-balance"
+              style={{ ...headlineStyle(64, lang), marginBlockStart: 20 }}
+            >
+              {t(slide.headline, lang)}
+            </h1>
+            {slide.sub ? (
+              <p
+                className="text-balance"
+                style={{
+                  ...bodyStyle(c, lang, 28),
+                  marginBlockStart: 20,
+                  maxWidth: 640,
+                }}
+              >
+                {t(slide.sub, lang)}
+              </p>
+            ) : null}
+          </div>
+          {slide.art ? (
+            <div className="flex min-h-0 items-stretch" style={{ width: 320 }}>
+              <div
+                className="flex w-full items-center justify-center"
+                style={{
+                  backgroundColor: plateColor(index, c.bg),
+                  borderRadius: 40,
+                }}
+              >
+                <Art
+                  name={slide.art}
+                  style={{
+                    maxHeight: "78%",
+                    maxWidth: "82%",
+                    objectFit: "contain",
+                  }}
+                />
+              </div>
+            </div>
+          ) : null}
+        </div>
+      </SlideShell>
+    );
+  }
+
   return (
     <SlideShell>
       {slide.eyebrow ? (
@@ -144,22 +206,24 @@ function CoverSlide({
         </p>
       ) : null}
       <div className="flex min-h-0 flex-1 items-end">
-        <span
-          className="flex items-center gap-3 rounded-full"
-          style={{
-            fontSize: 25,
-            color: c.muted,
-            border: `2px solid ${c.hairline}`,
-            paddingInline: 26,
-            paddingBlock: 12,
-            marginBlockEnd: 28,
-          }}
-        >
-          {lang === "ar" ? "اسحب" : "swipe"}
-          <span aria-hidden style={{ color: c.accent, fontSize: 28 }}>
-            {lang === "ar" ? "←" : "→"}
+        {total !== 1 ? (
+          <span
+            className="flex items-center gap-3 rounded-full"
+            style={{
+              fontSize: 25,
+              color: c.muted,
+              border: `2px solid ${c.hairline}`,
+              paddingInline: 26,
+              paddingBlock: 12,
+              marginBlockEnd: 28,
+            }}
+          >
+            {lang === "ar" ? "اسحب" : "swipe"}
+            <span aria-hidden style={{ color: c.accent, fontSize: 28 }}>
+              {lang === "ar" ? "←" : "→"}
+            </span>
           </span>
-        </span>
+        ) : null}
       </div>
       {slide.art ? (
         <ArtPlate
@@ -217,6 +281,7 @@ function PointSlide({
 function StatSlide({
   slide,
   lang,
+  landscape,
 }: SlideProps<Extract<Slide, { type: "stat" }>>): ReactElement {
   const c = THEMES[slide.theme];
   return (
@@ -229,13 +294,13 @@ function StatSlide({
             height: 10,
             borderRadius: 5,
             backgroundColor: c.accent,
-            marginBlockEnd: 52,
+            marginBlockEnd: landscape ? 28 : 52,
           }}
         />
         <p
           className="text-start"
           style={{
-            fontSize: 240,
+            fontSize: landscape ? 150 : 240,
             fontWeight: 650,
             lineHeight: 1,
             color: c.accent,
@@ -247,7 +312,10 @@ function StatSlide({
         </p>
         <p
           className="text-balance"
-          style={{ ...headlineStyle(50, lang), marginBlockStart: 34 }}
+          style={{
+            ...headlineStyle(landscape ? 42 : 50, lang),
+            marginBlockStart: landscape ? 22 : 34,
+          }}
         >
           {t(slide.label, lang)}
         </p>
@@ -265,6 +333,7 @@ function QuoteSlide({
   slide,
   lang,
   index,
+  landscape,
 }: SlideProps<Extract<Slide, { type: "quote" }>>): ReactElement {
   const c = THEMES[slide.theme];
   return (
@@ -273,7 +342,7 @@ function QuoteSlide({
         <span
           aria-hidden
           style={{
-            fontSize: 130,
+            fontSize: landscape ? 90 : 130,
             lineHeight: 1,
             color: c.accent,
             fontWeight: 650,
@@ -283,7 +352,10 @@ function QuoteSlide({
         </span>
         <blockquote
           className="text-balance"
-          style={{ ...headlineStyle(58, lang), marginBlockStart: 6 }}
+          style={{
+            ...headlineStyle(landscape ? 46 : 58, lang),
+            marginBlockStart: 6,
+          }}
         >
           {t(slide.text, lang)}
         </blockquote>
@@ -355,6 +427,7 @@ function StepsSlide({
 function CtaSlide({
   slide,
   lang,
+  landscape,
 }: SlideProps<Extract<Slide, { type: "cta" }>>): ReactElement {
   const c = THEMES[slide.theme];
   const host = new URL(slide.url).host;
@@ -363,14 +436,14 @@ function CtaSlide({
       <div className="flex min-h-0 flex-1 flex-col items-center justify-center text-center">
         <h2
           className="text-balance"
-          style={{ ...headlineStyle(76, lang), maxWidth: 840 }}
+          style={{ ...headlineStyle(landscape ? 56 : 76, lang), maxWidth: 840 }}
         >
           {t(slide.headline, lang)}
         </h2>
         <span
           className="rounded-full"
           style={{
-            marginBlockStart: 56,
+            marginBlockStart: landscape ? 32 : 56,
             paddingInline: 52,
             paddingBlock: 24,
             backgroundColor: c.accent,
@@ -392,27 +465,195 @@ function CtaSlide({
   );
 }
 
+function SplitSlide({
+  slide,
+  lang,
+  index,
+}: SlideProps<Extract<Slide, { type: "split" }>>): ReactElement {
+  const c = THEMES[slide.theme];
+  const pane = (
+    label: Bilingual,
+    art: string | undefined,
+    plateIndex: number,
+  ): ReactElement => (
+    <div
+      className="flex min-h-0 flex-1 flex-col items-center justify-center text-center"
+      style={{
+        backgroundColor: plateColor(plateIndex, c.bg),
+        borderRadius: 40,
+        paddingInline: 36,
+        paddingBlock: 44,
+        gap: 36,
+      }}
+    >
+      {art ? (
+        <Art
+          name={art}
+          style={{ height: 220, maxWidth: "82%", objectFit: "contain" }}
+        />
+      ) : null}
+      <p className="text-balance" style={headlineStyle(44, lang)}>
+        {t(label, lang)}
+      </p>
+    </div>
+  );
+
+  return (
+    <SlideShell>
+      {slide.headline ? (
+        <h2
+          className="text-balance"
+          style={{ ...headlineStyle(54, lang), marginBlockEnd: 44 }}
+        >
+          {t(slide.headline, lang)}
+        </h2>
+      ) : null}
+      <div className="flex min-h-0 flex-1 items-stretch" style={{ gap: 28 }}>
+        {pane(slide.beforeLabel, slide.beforeArt, index)}
+        <span
+          aria-hidden
+          className="flex items-center"
+          style={{ color: c.accent, fontSize: 64, fontWeight: 650 }}
+        >
+          {lang === "ar" ? "←" : "→"}
+        </span>
+        {pane(slide.afterLabel, slide.afterArt, index + 3)}
+      </div>
+    </SlideShell>
+  );
+}
+
+function GridSlide({
+  slide,
+  lang,
+  index,
+}: SlideProps<Extract<Slide, { type: "grid" }>>): ReactElement {
+  const c = THEMES[slide.theme];
+  const columns = slide.cells.length > 4 ? 3 : 2;
+  return (
+    <SlideShell>
+      <h2 className="text-balance" style={headlineStyle(54, lang)}>
+        {t(slide.headline, lang)}
+      </h2>
+      {slide.hub ? (
+        <span
+          className="self-start rounded-full"
+          style={{
+            marginBlockStart: 32,
+            paddingInline: 30,
+            paddingBlock: 12,
+            backgroundColor: c.accent,
+            color: slide.theme === "clay" ? THEMES.ivory.bg : c.bg,
+            fontSize: 27,
+            fontWeight: 600,
+          }}
+        >
+          {t(slide.hub, lang)}
+        </span>
+      ) : null}
+      <div
+        className="grid min-h-0 flex-1"
+        style={{
+          gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
+          gap: 24,
+          marginBlockStart: 44,
+          alignContent: "stretch",
+        }}
+      >
+        {slide.cells.map((cell, i) => (
+          <div
+            key={i}
+            className="flex min-h-0 flex-col items-center justify-center text-center"
+            style={{
+              backgroundColor: plateColor(index + i, c.bg),
+              borderRadius: 32,
+              paddingInline: 20,
+              paddingBlock: 28,
+              gap: 22,
+            }}
+          >
+            {cell.art ? (
+              <Art
+                name={cell.art}
+                style={{ height: 120, maxWidth: "78%", objectFit: "contain" }}
+              />
+            ) : null}
+            <p
+              className="text-balance"
+              style={{
+                fontSize: 29,
+                fontWeight: 600,
+                color: c.ink,
+                lineHeight: lang === "ar" ? 1.6 : 1.25,
+              }}
+            >
+              {t(cell.label, lang)}
+            </p>
+          </div>
+        ))}
+      </div>
+    </SlideShell>
+  );
+}
+
 export function SlideRenderer({
   slide,
   lang,
   index,
+  total,
+  landscape,
 }: {
   slide: Slide;
   lang: DeckLang;
   index: number;
+  total?: number;
+  landscape?: boolean;
 }): ReactElement {
   switch (slide.type) {
     case "cover":
-      return <CoverSlide slide={slide} lang={lang} index={index} />;
+      return (
+        <CoverSlide
+          slide={slide}
+          lang={lang}
+          index={index}
+          total={total}
+          landscape={landscape}
+        />
+      );
     case "point":
       return <PointSlide slide={slide} lang={lang} index={index} />;
     case "stat":
-      return <StatSlide slide={slide} lang={lang} index={index} />;
+      return (
+        <StatSlide
+          slide={slide}
+          lang={lang}
+          index={index}
+          landscape={landscape}
+        />
+      );
     case "quote":
-      return <QuoteSlide slide={slide} lang={lang} index={index} />;
+      return (
+        <QuoteSlide
+          slide={slide}
+          lang={lang}
+          index={index}
+          landscape={landscape}
+        />
+      );
     case "steps":
       return <StepsSlide slide={slide} lang={lang} index={index} />;
     case "cta":
-      return <CtaSlide slide={slide} lang={lang} index={index} />;
+      return (
+        <CtaSlide
+          slide={slide}
+          lang={lang}
+          index={index}
+          landscape={landscape}
+        />
+      );
+    case "split":
+      return <SplitSlide slide={slide} lang={lang} index={index} />;
+    case "grid":
+      return <GridSlide slide={slide} lang={lang} index={index} />;
   }
 }

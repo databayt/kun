@@ -18,6 +18,9 @@ const SIZES: Record<string, readonly [number, number]> = {
   "1080x1350": [1080, 1350],
   "1080x1080": [1080, 1080],
   "1080x1920": [1080, 1920],
+  // Landscape single-card sizes — og images and event/page banners. The
+  // artboard just widens; archetypes lay out with flex, so they adapt.
+  "1200x630": [1200, 630],
 };
 const DEFAULT_SIZE = "1080x1350";
 
@@ -41,6 +44,7 @@ export default async function CarouselPage({
 
   const [w, h] = SIZES[size ?? DEFAULT_SIZE] ?? SIZES[DEFAULT_SIZE];
   const total = deck.slides.length;
+  const landscape = w > h;
 
   // Exact-pixel frame — what Playwright screenshots.
   if (slide) {
@@ -56,7 +60,13 @@ export default async function CarouselPage({
           theme={current.theme}
           lang={lang}
         >
-          <SlideRenderer slide={current} lang={lang} index={index - 1} />
+          <SlideRenderer
+            slide={current}
+            lang={lang}
+            index={index - 1}
+            total={total}
+            landscape={landscape}
+          />
         </SlideFrame>
       </main>
     );
@@ -87,7 +97,13 @@ export default async function CarouselPage({
                 theme={s.theme}
                 lang={rowLang}
               >
-                <SlideRenderer slide={s} lang={rowLang} index={i} />
+                <SlideRenderer
+                  slide={s}
+                  lang={rowLang}
+                  index={i}
+                  total={total}
+                  landscape={landscape}
+                />
               </SlideFrame>
             ))}
           </div>
@@ -135,7 +151,13 @@ export default async function CarouselPage({
                   theme={s.theme}
                   lang={lang}
                 >
-                  <SlideRenderer slide={s} lang={lang} index={i} />
+                  <SlideRenderer
+                    slide={s}
+                    lang={lang}
+                    index={i}
+                    total={total}
+                    landscape={landscape}
+                  />
                 </SlideFrame>
               </div>
             </div>

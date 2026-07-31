@@ -55,15 +55,19 @@ TOPIC ─► COPY (AR-first) ─► DECK (zod JSON) ─► RENDER (route + Playw
 | Deck schema (zod v4) | `src/components/root/carousel/schema.ts`                                                                                                                                |
 | Decks                | the brand repo's `carousels/<slug>.json` (`BRANDS[brand].deckDir`, e.g. `~/hogwarts/carousels/`); kun `content/carousels/<brand>/` is the fallback for repo-less brands |
 | Render route         | `/[lang]/carousel/[brand]/[slug]?slide=N&size=1080x1350` (no `slide` → review sheet)                                                                                    |
-| Slide archetypes     | `cover · point · stat · quote · steps · cta` × themes `ivory · dark · clay · oat`                                                                                       |
+| Slide archetypes     | `cover · point · stat · quote · steps · cta · split · grid` × themes `ivory · dark · clay · oat` (`split` = before/after comparative; `grid` = feature-ecosystem cells) |
 | Palette              | Anthropic catalog (`root/anthropic/data.ts` COLORS) — Clay/Ivory/Ink/Oat                                                                                                |
 | Brand mark           | `BRANDS[brand].logo` (`public/brands/*.png`) at the bottom start — replaces the footer (no domain/counter strips); monochrome ink, auto-inverted on dark/clay           |
 | Art                  | `public/carousel-art/*.svg` (vendored) → fallback `cdn.databayt.org/anthropic/<file>`                                                                                   |
 | Renderer CLI         | `pnpm carousel:render <brand>/<slug>` → `~/Downloads/carousels/<brand>/<slug>/`                                                                                         |
 | DM / album           | `node scripts/post-to-telegram.mjs --media <dir> --caption-file <txt> [--chat <id>]`                                                                                    |
 
-Sizes: `1080x1350` (4:5 feed, default) · `1080x1080` (square) · `1080x1920` (story).
-Slides per deck: 3–10 (10 = Telegram album cap; IG allows 20 but 10 keeps decks portable).
+Sizes: `1080x1350` (4:5 feed, default) · `1080x1080` (square) · `1080x1920` (story) ·
+`1200x630` (landscape og/banner — cover lays out as a text+art row, fixed sizes scale down).
+Slides per deck: 1–10. A **1-slide deck is the template lane's single-image asset** (og card,
+testimonial, stat card — Thmanyah type, brand frame, no swipe pill). The 3-slide album floor
+is a publish-time rule for carousel posts (Telegram albums need 2+, decks target 3+), not a
+render constraint — `/publish` enforces it; 10 = Telegram album cap.
 
 ## Steps
 

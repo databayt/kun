@@ -1,0 +1,28 @@
+{
+  "brand": "databayt",
+  "slug": "og-kun",
+  "title": { "ar": "بطاقة كُن", "en": "The Kun card" },
+  "slides": [
+    {
+      "type": "cover",
+      "eyebrow": { "ar": "kun.databayt.org", "en": "kun.databayt.org" },
+      "headline": {
+        "ar": "كُن — محرّك الشركة",
+        "en": "Kun — the company engine"
+      },
+      "sub": {
+        "ar": "طبقة إعدادات تحوّل أدوات Anthropic إلى نظام تشغيل شركة كامل.",
+        "en": "A configuration layer that turns Anthropic's product suite into a company OS."
+      },
+      "theme": "ivory",
+      "art": "Hands-Build.svg"
+    }
+  ],
+  "captions": {
+    "base": { "ar": "كُن — محرّك الشركة.", "en": "Kun — the company engine." },
+    "hashtags": ["#databayt"],
+    "link": "https://kun.databayt.org"
+  },
+  "createdAt": "2026-07-31",
+  "status": "draft"
+}

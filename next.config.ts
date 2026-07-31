@@ -20,6 +20,11 @@ const nextConfig: NextConfig = {
     // The Second Brain graph derives its notes layer by reading the docs
     // corpus at runtime; trace it into the serverless bundle.
     "/[lang]/graph": ["./content/docs/**/*"],
+    // Deck JSONs are fs-read at request time (content.ts readDeck/listDecks);
+    // trace them so kun-owned decks render on Vercel — brand-repo deckDirs
+    // stay local-only by design.
+    "/[lang]/carousel/[brand]/[slug]": ["./content/carousels/**/*"],
+    "/[lang]/social/media": ["./content/carousels/**/*"],
   },
   // Locale-less docs URLs (e.g. shared links like /docs/onboarding) redirect
   // to the default locale. The docs render under /[lang]/docs/[[...slug]], so
