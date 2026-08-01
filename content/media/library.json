@@ -19,7 +19,8 @@
       "cdnUrl": "https://hogwarts-databayt.s3.amazonaws.com/media/mkan/b19bcfd17d63-2026-07-06-mkan-logo-c1.png",
       "fingerprint": null,
       "reuseCount": 0,
-      "key": "media/mkan/b19bcfd17d63-2026-07-06-mkan-logo-c1.png"
+      "key": "media/mkan/b19bcfd17d63-2026-07-06-mkan-logo-c1.png",
+      "assetType": "logo"
     },
     {
       "id": "cb08456e5557",
@@ -36,7 +37,8 @@
       "cdnUrl": "https://hogwarts-databayt.s3.amazonaws.com/media/mkan/cb08456e5557-2026-07-06-mkan-logo-c2.png",
       "fingerprint": null,
       "reuseCount": 0,
-      "key": "media/mkan/cb08456e5557-2026-07-06-mkan-logo-c2.png"
+      "key": "media/mkan/cb08456e5557-2026-07-06-mkan-logo-c2.png",
+      "assetType": "logo"
     },
     {
       "id": "7e977d36cc94",
@@ -53,7 +55,8 @@
       "cdnUrl": "https://hogwarts-databayt.s3.amazonaws.com/media/mkan/7e977d36cc94-2026-07-06-mkan-logo-c3.png",
       "fingerprint": null,
       "reuseCount": 0,
-      "key": "media/mkan/7e977d36cc94-2026-07-06-mkan-logo-c3.png"
+      "key": "media/mkan/7e977d36cc94-2026-07-06-mkan-logo-c3.png",
+      "assetType": "logo"
     },
     {
       "id": "6325500f0100",
@@ -70,7 +73,8 @@
       "cdnUrl": "https://hogwarts-databayt.s3.amazonaws.com/media/mkan/6325500f0100-2026-07-06-mkan-logo-c4.png",
       "fingerprint": null,
       "reuseCount": 0,
-      "key": "media/mkan/6325500f0100-2026-07-06-mkan-logo-c4.png"
+      "key": "media/mkan/6325500f0100-2026-07-06-mkan-logo-c4.png",
+      "assetType": "logo"
     },
     {
       "id": "8ebe93847d07",
@@ -87,7 +91,8 @@
       "cdnUrl": "https://hogwarts-databayt.s3.amazonaws.com/media/mkan/8ebe93847d07-2026-07-06-mkan-logo-final.png",
       "fingerprint": null,
       "reuseCount": 0,
-      "key": "media/mkan/8ebe93847d07-2026-07-06-mkan-logo-final.png"
+      "key": "media/mkan/8ebe93847d07-2026-07-06-mkan-logo-final.png",
+      "assetType": "logo"
     },
     {
       "id": "61ca718c40bc",
@@ -121,7 +126,8 @@
       "cdnUrl": "https://hogwarts-databayt.s3.amazonaws.com/media/mkan/2ab4a2163823-2026-07-07-mkan-belo-pro.png",
       "fingerprint": null,
       "reuseCount": 0,
-      "key": "media/mkan/2ab4a2163823-2026-07-07-mkan-belo-pro.png"
+      "key": "media/mkan/2ab4a2163823-2026-07-07-mkan-belo-pro.png",
+      "assetType": "logo"
     },
     {
       "id": "ae6ec9562da9",
@@ -138,7 +144,8 @@
       "cdnUrl": "https://hogwarts-databayt.s3.amazonaws.com/media/mkan/ae6ec9562da9-2026-07-07-mkan-belo-v1.png",
       "fingerprint": null,
       "reuseCount": 0,
-      "key": "media/mkan/ae6ec9562da9-2026-07-07-mkan-belo-v1.png"
+      "key": "media/mkan/ae6ec9562da9-2026-07-07-mkan-belo-v1.png",
+      "assetType": "logo"
     },
     {
       "id": "1658bb3fdc33",
@@ -155,7 +162,8 @@
       "cdnUrl": "https://hogwarts-databayt.s3.amazonaws.com/media/mkan/1658bb3fdc33-2026-07-07-mkan-belo-v2.png",
       "fingerprint": null,
       "reuseCount": 0,
-      "key": "media/mkan/1658bb3fdc33-2026-07-07-mkan-belo-v2.png"
+      "key": "media/mkan/1658bb3fdc33-2026-07-07-mkan-belo-v2.png",
+      "assetType": "logo"
     },
     {
       "id": "008c97839632",
@@ -172,7 +180,8 @@
       "cdnUrl": "https://hogwarts-databayt.s3.amazonaws.com/media/mkan/008c97839632-2026-07-07-mkan-belo-v3.png",
       "fingerprint": null,
       "reuseCount": 0,
-      "key": "media/mkan/008c97839632-2026-07-07-mkan-belo-v3.png"
+      "key": "media/mkan/008c97839632-2026-07-07-mkan-belo-v3.png",
+      "assetType": "logo"
     },
     {
       "id": "d2f9c3fbb6ad",
@@ -189,7 +198,8 @@
       "cdnUrl": "https://hogwarts-databayt.s3.amazonaws.com/media/mkan/d2f9c3fbb6ad-2026-07-07-mkan-belo-v4.png",
       "fingerprint": null,
       "reuseCount": 0,
-      "key": "media/mkan/d2f9c3fbb6ad-2026-07-07-mkan-belo-v4.png"
+      "key": "media/mkan/d2f9c3fbb6ad-2026-07-07-mkan-belo-v4.png",
+      "assetType": "logo"
     },
     {
       "id": "3daeb07dc775",
@@ -206,7 +216,8 @@
       "cdnUrl": "https://hogwarts-databayt.s3.amazonaws.com/media/mkan/3daeb07dc775-2026-07-07-mkan-majlis-interior.png",
       "fingerprint": null,
       "reuseCount": 0,
-      "key": "media/mkan/3daeb07dc775-2026-07-07-mkan-majlis-interior.png"
+      "key": "media/mkan/3daeb07dc775-2026-07-07-mkan-majlis-interior.png",
+      "assetType": "lifestyle"
     },
     {
       "id": "af943b883c50",
@@ -223,7 +234,8 @@
       "cdnUrl": "https://hogwarts-databayt.s3.amazonaws.com/media/mkan/af943b883c50-2026-07-07-mkan-meroe-desert-camp.png",
       "fingerprint": null,
       "reuseCount": 0,
-      "key": "media/mkan/af943b883c50-2026-07-07-mkan-meroe-desert-camp.png"
+      "key": "media/mkan/af943b883c50-2026-07-07-mkan-meroe-desert-camp.png",
+      "assetType": "lifestyle"
     },
     {
       "id": "34e3d4c7393e",
@@ -240,7 +252,8 @@
       "cdnUrl": "https://hogwarts-databayt.s3.amazonaws.com/media/mkan/34e3d4c7393e-2026-07-07-mkan-nile-rooftop.png",
       "fingerprint": null,
       "reuseCount": 0,
-      "key": "media/mkan/34e3d4c7393e-2026-07-07-mkan-nile-rooftop.png"
+      "key": "media/mkan/34e3d4c7393e-2026-07-07-mkan-nile-rooftop.png",
+      "assetType": "lifestyle"
     },
     {
       "id": "d74bd3415ae4",
@@ -257,7 +270,8 @@
       "cdnUrl": "https://hogwarts-databayt.s3.amazonaws.com/media/mkan/d74bd3415ae4-2026-07-07-mkan-nubian-guesthouse.png",
       "fingerprint": null,
       "reuseCount": 0,
-      "key": "media/mkan/d74bd3415ae4-2026-07-07-mkan-nubian-guesthouse.png"
+      "key": "media/mkan/d74bd3415ae4-2026-07-07-mkan-nubian-guesthouse.png",
+      "assetType": "lifestyle"
     },
     {
       "id": "860e5eae3122",
@@ -274,7 +288,8 @@
       "cdnUrl": "https://hogwarts-databayt.s3.amazonaws.com/media/mkan/860e5eae3122-2026-07-07-mkan-tent.png",
       "fingerprint": null,
       "reuseCount": 0,
-      "key": "media/mkan/860e5eae3122-2026-07-07-mkan-tent.png"
+      "key": "media/mkan/860e5eae3122-2026-07-07-mkan-tent.png",
+      "assetType": "lifestyle"
     },
     {
       "id": "50d277ebb5fb",
@@ -291,7 +306,8 @@
       "cdnUrl": "https://hogwarts-databayt.s3.amazonaws.com/media/databayt/50d277ebb5fb-2026-07-22-db-engine-hero.png",
       "fingerprint": null,
       "reuseCount": 0,
-      "key": "media/databayt/50d277ebb5fb-2026-07-22-db-engine-hero.png"
+      "key": "media/databayt/50d277ebb5fb-2026-07-22-db-engine-hero.png",
+      "assetType": "hero"
     },
     {
       "id": "977e33631378",
@@ -342,7 +358,8 @@
       "cdnUrl": "https://hogwarts-databayt.s3.amazonaws.com/media/databayt/c299174578f1-2026-07-22-db-workspace.png",
       "fingerprint": null,
       "reuseCount": 0,
-      "key": "media/databayt/c299174578f1-2026-07-22-db-workspace.png"
+      "key": "media/databayt/c299174578f1-2026-07-22-db-workspace.png",
+      "assetType": "lifestyle"
     },
     {
       "id": "74242077e6dd",
@@ -359,7 +376,8 @@
       "cdnUrl": "https://hogwarts-databayt.s3.amazonaws.com/media/hogwarts/74242077e6dd-2026-07-22-hw-admission-gateway.png",
       "fingerprint": null,
       "reuseCount": 0,
-      "key": "media/hogwarts/74242077e6dd-2026-07-22-hw-admission-gateway.png"
+      "key": "media/hogwarts/74242077e6dd-2026-07-22-hw-admission-gateway.png",
+      "assetType": "story"
     },
     {
       "id": "69292aec1ece",
@@ -376,7 +394,8 @@
       "cdnUrl": "https://hogwarts-databayt.s3.amazonaws.com/media/hogwarts/69292aec1ece-2026-07-22-hw-classroom.png",
       "fingerprint": null,
       "reuseCount": 0,
-      "key": "media/hogwarts/69292aec1ece-2026-07-22-hw-classroom.png"
+      "key": "media/hogwarts/69292aec1ece-2026-07-22-hw-classroom.png",
+      "assetType": "story"
     },
     {
       "id": "8eb88598df21",
@@ -393,7 +412,8 @@
       "cdnUrl": "https://hogwarts-databayt.s3.amazonaws.com/media/hogwarts/8eb88598df21-2026-07-22-hw-dashboard-device.png",
       "fingerprint": null,
       "reuseCount": 0,
-      "key": "media/hogwarts/8eb88598df21-2026-07-22-hw-dashboard-device.png"
+      "key": "media/hogwarts/8eb88598df21-2026-07-22-hw-dashboard-device.png",
+      "assetType": "hero"
     },
     {
       "id": "da241cccc0f7",
@@ -410,7 +430,26 @@
       "cdnUrl": "https://hogwarts-databayt.s3.amazonaws.com/media/hogwarts/da241cccc0f7-2026-07-22-hw-growth.png",
       "fingerprint": null,
       "reuseCount": 0,
-      "key": "media/hogwarts/da241cccc0f7-2026-07-22-hw-growth.png"
+      "key": "media/hogwarts/da241cccc0f7-2026-07-22-hw-growth.png",
+      "assetType": "hero"
+    },
+    {
+      "id": "cd51201cf2cc",
+      "file": "exams-one-entry-ar-1200x630-01.png",
+      "sha256": "cd51201cf2ccd4c88e6da39c3242997e4a0ce950fee399bfdf2c072514e3cf63",
+      "brand": "hogwarts",
+      "prompt": "exams-one-entry og card — رصد واحد، مخرجات كثيرة (template lane, cover/ivory, Hands-Document)",
+      "model": "template",
+      "ratio": "1200x630",
+      "resolution": null,
+      "credits": 0,
+      "assetType": "og",
+      "bytes": 120858,
+      "createdAt": "2026-08-01",
+      "cdnUrl": "https://hogwarts-databayt.s3.amazonaws.com/media/hogwarts/cd51201cf2cc-exams-one-entry-ar-1200x630-01.png",
+      "reuseCount": 0,
+      "fingerprint": "306b50c85f4569da",
+      "key": "media/hogwarts/cd51201cf2cc-exams-one-entry-ar-1200x630-01.png"
     }
   ]
 }

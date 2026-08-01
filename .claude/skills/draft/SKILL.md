@@ -69,6 +69,11 @@ instead of depending on who happens to be at the keyboard.
 node scripts/social-drafts.mjs list          # JSON: id, brand, brief, requestedBy, waitingMinutes
 ```
 
+Asks arrive from two writers: contributors on `/social`, and the **weekly seeder**
+(`scripts/seed-drafts.sh`, Mondays 07:00 — files briefs from `content/social/pillars.json`
+with `requestedBy: seed:weekly`). Both are answered identically; a seeded brief is just a
+brief whose asker is the calendar.
+
 For each ask, oldest first:
 
 1. **Run Steps 1–4 above** for its `brand` and `brief` — resolve the brand, read

@@ -59,6 +59,25 @@ reachable on LinkedIn. That's the core four.
 > WhatsApp has **no official organic-post API** — it's for community broadcast lists and
 > school↔parent messaging, not automated feed posts. Details in `docs/SOCIAL-AUTOMATION.md`.
 
+## Facebook playbook — the focus channel
+
+Facebook is the one live channel (2026-08-01), so it carries the whole cadence until Instagram
+unlocks. Four post archetypes rotate; each maps a [content pillar](#content-pillars) to an
+[asset type](/social/media) and a publish lane:
+
+| Archetype | Pillar | Asset type (lane) | Publish lane |
+|-----------|--------|-------------------|--------------|
+| **Feature highlight** | Features / time-savings | `og` card, 1200×630 (template — 1-slide deck) | approval link → drain |
+| **Scene + story** | Parent visibility, classroom life | `hero`/`story` photo (higgs, from the [library](/social/media)) | approval link → drain |
+| **Swipe story** | Product intro, module ecosystem | `carousel` deck 4:5 (template) | `post-to-facebook.mjs --photos` post-approval |
+| **Context / trust** | MENA education, open source | `og` or `split` card (template) | approval link → drain |
+
+**The weekly rhythm:** Monday 07:00 the seed lane files two briefs from
+`content/social/pillars.json` (ISO-week rotation over the pillars); the 5-minute drain answers
+them AR-first on the Max pool; the Hub shows the copy; a human stages, approves, and the drain
+delivers. Numbers come back via `/measure` (platform insights six-hourly + PostHog UTMs).
+Nothing publishes without the human tap — the gate is the design, not a bottleneck.
+
 ## Voice
 
 Trustworthy, calm, outcomes-focused — not hype. Arabic first. See [Brand & Voice](/docs/brand).

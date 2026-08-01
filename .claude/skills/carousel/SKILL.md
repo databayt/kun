@@ -87,9 +87,11 @@ render constraint — `/publish` enforces it; 10 = Telegram album cap.
 7. **Stage — STOP** — SendUserFile the cover PNGs + PDF + captions; set deck `status:
 "staged"`. Wait for explicit approval.
 8. **Publish / DM (post-approval only)** — Telegram album: `--media` (client DM via
-   `--chat`); Instagram/Facebook: upload the exported PNGs + matching caption file (no API
-   wired today); LinkedIn: the PDF as a document post; WhatsApp: manual send (no organic
-   API). Set `status: "published"`.
+   `--chat`); **Facebook: `node scripts/post-to-facebook.mjs --product <brand> --photos
+<renders-dir|a.png,b.png,...> --caption-file caption-<lang>-facebook.txt`** (2–10 ordered
+   images, unpublished uploads → `attached_media`; wired 2026-08-01); Instagram: upload the
+   exported PNGs + caption by hand (API gated on kun#141); LinkedIn: the PDF as a document
+   post; WhatsApp: manual send (no organic API). Set `status: "published"`.
 9. **Log** — content calendar (`/calendar`), UTM shows up in PostHog.
 
 ## Design round-trip (the doctrine that holds on the free tier)
@@ -135,5 +137,6 @@ block, adversarial copy QA, render, stage. Always ends staged; never publishes.
   auto-spawns either.
 - Turbopack occasionally misses edits to the carousel route in a running dev server —
   restart `pnpm dev` if a change doesn't show.
-- Instagram/Facebook/WhatsApp/LinkedIn have no wired publish API in the engine today — the
-  renderer's exports + captions are upload-ready by design. Telegram is the automated lane.
+- Automated publish lanes today: **Telegram** (albums) and **Facebook** (multi-photo via
+  `post-to-facebook.mjs --photos`, 2026-08-01). Instagram/WhatsApp/LinkedIn have no wired
+  publish API — the renderer's exports + captions stay upload-ready by design.

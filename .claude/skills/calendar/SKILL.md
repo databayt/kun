@@ -27,7 +27,9 @@ Default: `plan` for next week, all five brands.
 1. **Read the strategy** — `content/docs/social/strategy.mdx` for per-brand cadence
    and the kill criteria; `.claude/agents/growth.md` for the content pillars
    (Arabic-first tech · product marketing per vertical · dev relations · founder
-   story).
+   story). The standing week-by-week allocation lives in `content/social/pillars.json`
+   — the seed lane (`scripts/seed-drafts.sh`, Mondays) files it into the draft queue
+   automatically; editing that file IS editing the recurring calendar.
 2. **Read the brands** — `content/docs/social/<brand>.mdx` for each brand's channel
    mix and audience. The five are `databayt`, `hogwarts`, `mkan`, `sijillee`,
    `moalimee` (registry ids in `src/components/root/social/products.ts`; the

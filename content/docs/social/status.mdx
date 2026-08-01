@@ -5,8 +5,9 @@ description: Where social automation actually stands — wired vs configured vs 
 
 # Status
 
-**Last verified: 2026-07-30** (against Vercel production env via `vercel env ls`, live endpoint
-probes, workflow run logs, and a full read of the Meta business portfolio).
+**Last verified: 2026-08-01** (live Graph API dark-post + carousel transport tests against the
+Hogwarts Page, an unattended seed→drain draft cycle, workflow run logs, and a PostHog UTM
+read-back).
 
 The code is in good shape. The configuration is not. This page exists because
 [the overview](/docs/social) describes what the pipeline *can* do, and it is easy to read that
@@ -101,7 +102,7 @@ Their current state:
 | Loop | State | Why |
 |------|-------|-----|
 | **A — Hub** | **Works** (Facebook only) | The one working path, now whole: write in `/social`'s Publish editor and publish directly, or ask on the Draft tab — the queue drains on a 5-minute launchd tick, and staging returns the signed approval links right in the composer, so no chat relay is needed to run the human gate. |
-| **B — Cron** | **Parked** — deliberately | The three blockers stand (`SOCIAL_AUTOPOST_PRODUCTS` unset · draft source unreachable · billing), but the reason it stays parked is structural: it drafts ONE text and fans it to every channel, which contradicts the one-core-piece→N-variants multiplier the strategy depends on. Do not revive it as designed — per-channel drafting first. |
+| **B — Cron** | **Superseded by the seed lane** (2026-08-01) | The Vercel route stays parked as designed (`SOCIAL_AUTOPOST_PRODUCTS` unset — no compliant server-side draft source, and its one-text-everywhere shape contradicts the multiplier). Its *calendar half* now runs billing-compliantly on the Mac: `scripts/seed-drafts.sh` (launchd, Mondays 07:00) files the week's briefs from `content/social/pillars.json` into the draft queue, and the 5-minute drain answers them on the Max pool — verified unattended end to end (seed → answered in 3 minutes). Per-channel fan-out remains session-side at staging time. |
 | **C — Hermes relay** | **Parked** | Hermes is down, never observed end to end, and since 2026-07-30 nothing depends on it: reviews carry through the Hub's own links. Revisit only when a hermes-transport channel actually goes live. |
 
 Both `/api/social/cron` and `/api/social/relay` return **401** to an unauthenticated request —
@@ -149,10 +150,11 @@ returns `drafted: 0`.
   - ✅ **Platform-side numbers are fetchable.** `read_insights` and `pages_read_user_content` were **granted 2026-07-27** and verified returning real numbers against a live Hogwarts post (Page `1228948003637000`). Both turned out to be Standard Access — no App Review, no Business Verification. What was actually blocking them was neither: a permission has to be added to the app's **Use Case** (Dashboard → Use cases → Customize → Permissions and features) before it appears anywhere else in the console. Skip that and the Graph API Explorer answers "Found 0 results", which reads exactly like Meta having withdrawn the permission.
   - ⚠️ **The scopes were never the whole story.** Meta retired the entire `post_impressions*` family during 2025, so even a correctly-scoped token gets `(#100)` from the old names — a *metric* error, not a permissions one. The live names are `post_media_view` and `post_total_media_view_unique`. Granting a scope does not resurrect a retired name, and re-probing with the old names after a grant looks exactly like the grant having failed. `classifyGraphError` exists so that mistake is not repeatable.
   - ✅ **Verified on all three tokens.** Re-minted 2026-07-27 and Debugger-confirmed carrying `read_insights` + `pages_read_user_content` (hogwarts, mkan, databayt); hogwarts additionally proven end to end with real reads into `SocialMetric` (2026-07-28). sijillee and moallimee have no Page at all. `/api/social/metrics` degrades per product rather than globally, and gives up permanently on a permission failure rather than retrying it forever.
-  - ❌ **No analytics destination.** There is no PostHog dependency or key in the app, so nothing consumes the UTMs yet. The tags are still worth having: they are recorded in the platform link and in any downstream analytics added later.
+  - ✅ **Analytics destination live on hogwarts.** posthog-js on the hogwarts site (EU project 221194) consumes the UTMs; `utm_source=facebook` visitors verified readable over the PostHog MCP 2026-08-01. kun and mkan still don't carry the snippet — their zeros mean "nobody counted", not "nobody came".
 - **Scheduling** — the queue exists (`SocialPiece` / `SocialVariant` / `SocialMetric` on Neon, added 2026-07-26), approval links are single-use, and `/api/social/drain` publishes due variants every ~15 minutes from GitHub Actions. The composer takes a date and time.
 - **Metrics** — `/api/social/metrics` writes `SocialMetric` on a six-hourly schedule, **enabled 2026-07-30** after two manual dispatches returned real numbers and all three tokens' scopes were Debugger-verified.
-- **Variant-awareness** — still the honest gap. The cron drafts one text and fans it to every channel, which contradicts the *one core piece → N platform-native variants* multiplier the [strategy](/docs/social/strategy) depends on. The `draft` skill owns the correct shape; teaching the cron to use it is a separate change with its own drafting-cost implications.
+- **Variant-awareness** — narrowed but not closed. The seed lane (2026-08-01) retired the cron's one-text-everywhere drafting: briefs now become AR/EN core pieces via the `draft` skill's queue mode, on the Max pool. What remains session-side is the per-channel fan-out at staging — one core piece still becomes N platform-native variants by hand, not by schedule. That is the deliberate residual: fan-out quality is exactly what the human gate reviews.
+- **Carousel egress** — **Facebook multi-photo posts wired 2026-08-01** (`sendFacebookCarousel` in `lib/facebook.ts` + `post-to-facebook.mjs --photos <dir|list>`, 2–10 ordered images via unpublished uploads → `attached_media`; transport dark-tested live). The renderer's exports now have an automated FB lane; Instagram carousels stay gated on [kun#141](https://github.com/databayt/kun/issues/141).
 
 ## The honest constraints
 
@@ -176,9 +178,9 @@ Ordered by value ÷ cost, not by size:
 1. **Test Instagram publishing at Standard Access via Mkan** (~10 minutes of console work) before treating Business Verification as the publishing gate — [the hypothesis](/docs/social/channels/instagram#standard-access-hypothesis). The channel focus is Facebook + Instagram (decision 2026-07-30), so this is the gate to the only new channel wanted.
 2. **Name and verify the business portfolio, and invite a second admin.** Ownership is worth fixing whatever the test says — bus factor, recoverability, and the Databayt Page all hang on it, and if the hypothesis is wrong, verification is the long pole and is waiting rather than working. See [Ownership & accounts](/docs/social/ownership).
 3. **A PostHog destination for the UTMs.** Every outbound link is tagged and nothing consumes the tags — attribution starts at the first site that carries the snippet.
-4. **Teach the cron to draft per channel.** The last structural gap between the pipeline and the strategy it claims to serve — and the precondition for reviving Loop B, whose draft source is also a billing decision ([env reference](/docs/social/channels/env)).
+4. ~~**Teach the cron to draft per channel.**~~ **Done differently, 2026-08-01:** the seed lane runs Loop B's calendar half on the Mac (weekly launchd → draft queue → Max-pool drain), so drafting rides the `draft` skill's doctrine instead of a server-side template. The Vercel route stays parked; per-channel fan-out stays at the staging gate, on purpose.
 
-Deferred by decision, not by failure: **Telegram** (2026-07-30 — code ready, two env variables when the focus widens beyond Facebook + Instagram) and **Loop B's revival** (blocked behind per-channel drafting above).
+Deferred by decision, not by failure: **Telegram** (2026-07-30 — code ready, two env variables when the focus widens beyond Facebook + Instagram).
 
 Done since this page was first written: persistence, real scheduling with a drain, single-use approval links, the metrics lane on schedule, the unfurl-proof confirm step, relay recording, the reaper, the Hub ledger — and the draft-queue drain on a 5-minute launchd tick with the Hub reading its heartbeat (2026-07-30).
 

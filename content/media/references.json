@@ -105,6 +105,50 @@
       "sourceUrl": "https://www.pinterest.com/search/pins/?q=social%20media%20infographic%20layout",
       "assetType": "other",
       "note": "A search engine for modular layouts and infographic structures — feed it a slide archetype name and mine variations."
+    },
+    {
+      "id": "noon-academy",
+      "title": "Noon Academy — أكاديمية نون",
+      "source": "vendor",
+      "sourceUrl": "https://www.noonacademy.com",
+      "assetType": "carousel",
+      "brand": "hogwarts",
+      "note": "Saudi edtech speaking Arabic-first to students and parents at Facebook scale: bright single-idea cards, colloquial warmth over MSA stiffness, teachers as recurring faces. The counter-register to our calm voice — steal the accessibility, not the volume."
+    },
+    {
+      "id": "alef-education",
+      "title": "Alef Education",
+      "source": "vendor",
+      "sourceUrl": "https://www.alefeducation.com",
+      "assetType": "lifestyle",
+      "brand": "hogwarts",
+      "note": "UAE K-12 platform with ministry-grade trust signals: bilingual AR/EN mirrored posts, muted palette, real classrooms over stock. What institutional credibility looks like to a MENA education buyer — our B2B register."
+    },
+    {
+      "id": "madrasa-mbrgi",
+      "title": "Madrasa — مدرسة",
+      "source": "vendor",
+      "sourceUrl": "https://madrasa.org",
+      "assetType": "infographic",
+      "brand": "hogwarts",
+      "note": "MBRGI free Arabic e-learning: educational infographic cards at daily cadence, Arabic typographic hierarchy that stays legible at feed size. Proof Arabic copy-led cards scale — same thesis as our template lane."
+    },
+    {
+      "id": "classera",
+      "title": "Classera",
+      "source": "vendor",
+      "sourceUrl": "https://www.classera.com",
+      "assetType": "mockup",
+      "brand": "hogwarts",
+      "note": "The Saudi LMS incumbent: product-UI screenshots framed in brand gradients, award/partnership badges as trust currency. What schools comparing us have already seen — differentiate with restraint, not louder gradients."
+    },
+    {
+      "id": "anthropic-og",
+      "title": "Anthropic — og/social cards",
+      "source": "vendor",
+      "sourceUrl": "https://www.anthropic.com",
+      "assetType": "og",
+      "note": "The template lane's visual north star: type-led og cards, one accent illustration, Ivory/Clay/Ink discipline, no decoration the message doesn't earn. Steal the spacing and the one-accent rule; never the logomark (no implied endorsement)."
     }
   ]
 }
