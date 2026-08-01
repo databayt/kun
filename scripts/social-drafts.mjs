@@ -13,14 +13,25 @@
 //   node scripts/social-drafts.mjs list
 //   node scripts/social-drafts.mjs answer <id> --ar <file> --en <file>
 //   node scripts/social-drafts.mjs fail   <id> --note "why"
+//   node scripts/social-drafts.mjs seed --auto [--brand hogwarts] [--count 2]
+//   node scripts/social-drafts.mjs seed --brand hogwarts --brief "..."
 //
 // Copy goes in via FILES, not argv: brand copy is multi-line, contains quotes
 // and Arabic, and argv mangles all three.
+//
+// `seed` is the calendar half of Loop B done billing-compliantly: instead of
+// the Vercel cron drafting server-side (no compliant draft source — Hermes is
+// down and API spend is off by decision), a scheduled local tick files the
+// week's briefs as ordinary draft asks and the existing 5-minute drain answers
+// them on the Max pool. Same queue, same doctrine, same human gate after.
 
 // Raw SQL over the Neon driver rather than Prisma: the generated client is
-// TypeScript, which a plain .mjs cannot import, and three statements do not
-// justify a build step. Every value is parameterised.
+// TypeScript, which a plain .mjs cannot import, and a handful of statements do
+// not justify a build step. Every value is parameterised.
+import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { neon } from "@neondatabase/serverless";
 import dotenv from "dotenv";
 
@@ -118,6 +129,68 @@ if (command === "list") {
     process.exit(1);
   }
   console.log(`answered ${id} — ar ${ar.length} chars, en ${en.length} chars`);
+} else if (command === "seed") {
+  // File draft asks without a human at the window. Two modes:
+  //   --brand X --brief "..."   one explicit ask
+  //   --auto [--brand X] [--count N]   the week's briefs from pillars.json,
+  //     picked by ISO-week rotation — stateless, so cadence IS the order.
+  const by = flag("by") ?? "seed:weekly";
+
+  // Prisma's cuid() default is client-side; a raw INSERT must bring its own id.
+  const newId = () => `c${randomUUID().replace(/-/g, "").slice(0, 24)}`;
+
+  async function insertAsk(brand, brief) {
+    // One ask per (brand, brief) per 14 days, whatever its status — a re-run
+    // Monday, a manual seed, and next week's overlap all collapse to one.
+    const dupe = await sql`
+      SELECT "id" FROM "SocialDraftRequest"
+      WHERE "brand" = ${brand} AND "brief" = ${brief}
+        AND "createdAt" > now() - interval '14 days'
+      LIMIT 1`;
+    if (dupe.length > 0) {
+      console.log(`skip (asked within 14d): ${brief.slice(0, 60)}…`);
+      return false;
+    }
+    const [row] = await sql`
+      INSERT INTO "SocialDraftRequest" ("id", "brand", "brief", "requestedBy", "status", "createdAt")
+      VALUES (${newId()}, ${brand}, ${brief}, ${by}, 'pending', now())
+      RETURNING "id"`;
+    console.log(`seeded ${row.id}: [${brand}] ${brief.slice(0, 60)}…`);
+    return true;
+  }
+
+  if (process.argv.includes("--auto")) {
+    const brand = flag("brand") ?? "hogwarts";
+    const count = Math.max(1, Number(flag("count") ?? 2));
+    const here = dirname(fileURLToPath(import.meta.url));
+    const pillarsPath = join(here, "..", "content", "social", "pillars.json");
+    const pillars = JSON.parse(readFileSync(pillarsPath, "utf8"));
+    const briefs = pillars[brand];
+    if (!Array.isArray(briefs) || briefs.length === 0) {
+      console.error(`No briefs for "${brand}" in content/social/pillars.json.`);
+      process.exit(1);
+    }
+    // ISO week number — stateless rotation anchor shared by every machine.
+    const now = new Date();
+    const jan4 = new Date(Date.UTC(now.getUTCFullYear(), 0, 4));
+    const week = Math.ceil(
+      ((now - jan4) / 86400000 + ((jan4.getUTCDay() + 6) % 7) + 1) / 7,
+    );
+    let seeded = 0;
+    for (let i = 0; i < count; i++) {
+      const pick = briefs[(week * count + i) % briefs.length];
+      if (await insertAsk(brand, pick.brief)) seeded++;
+    }
+    console.log(`seed --auto: week ${week}, ${seeded}/${count} filed for ${brand}.`);
+  } else {
+    const brand = flag("brand");
+    const brief = flag("brief");
+    if (!brand || !brief) {
+      console.error('Usage: seed --auto [--brand X] [--count N] | seed --brand X --brief "..."');
+      process.exit(1);
+    }
+    await insertAsk(brand, brief);
+  }
 } else if (command === "fail") {
   if (!id) {
     console.error('Usage: fail <id> --note "why"');
@@ -137,6 +210,8 @@ if (command === "list") {
       "  node scripts/social-drafts.mjs list",
       "  node scripts/social-drafts.mjs answer <id> --ar <file> --en <file> [--note ...]",
       '  node scripts/social-drafts.mjs fail   <id> --note "why"',
+      "  node scripts/social-drafts.mjs seed --auto [--brand hogwarts] [--count 2]",
+      '  node scripts/social-drafts.mjs seed --brand <brand> --brief "..."',
     ].join("\n"),
   );
 }
