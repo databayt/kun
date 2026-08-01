@@ -146,6 +146,100 @@ export async function sendFacebookPost(
   }
 }
 
+// Multi-photo (carousel) post — the two-step attached_media flow: each image
+// is first uploaded UNPUBLISHED to /photos (it exists but appears nowhere),
+// then one /feed post attaches them all. Photos are attached in array order,
+// which is why the caller passes an ordered list — slide 01 first. Graph caps
+// a multi-photo feed post at 10 attachments, the same ceiling as a deck.
+//
+// Sequential uploads, deliberately: Graph downloads each URL server-side, and
+// firing ten concurrent downloads at it trips per-app throttling long before
+// it saves wall-clock that matters here (this lane runs from a session or the
+// CLI, not inside a request budget).
+export async function sendFacebookCarousel(
+  text: string,
+  mediaUrls: string[],
+  product?: string,
+): Promise<{ ok: boolean; error?: string; externalId?: string }> {
+  const { pageId, token } = await getFacebookConfig(product);
+  if (!token || !pageId) {
+    return { ok: false, error: notConfigured(product) };
+  }
+  if (mediaUrls.length < 2) {
+    return {
+      ok: false,
+      error:
+        "A carousel needs at least 2 images — use sendFacebookPost for one.",
+    };
+  }
+  if (mediaUrls.length > 10) {
+    return {
+      ok: false,
+      error: `Facebook caps a multi-photo post at 10 images (got ${mediaUrls.length}).`,
+    };
+  }
+  try {
+    const photoIds: string[] = [];
+    for (const url of mediaUrls) {
+      const res = await fetch(
+        `https://graph.facebook.com/${GRAPH_VERSION}/${pageId}/photos`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            url,
+            published: false,
+            access_token: token,
+          }),
+          signal: AbortSignal.timeout(25000),
+        },
+      );
+      if (!res.ok) {
+        return {
+          ok: false,
+          error: `photo ${photoIds.length + 1}/${mediaUrls.length}: ${await facebookError(res)}`,
+        };
+      }
+      const body = (await res.json().catch(() => null)) as {
+        id?: string;
+      } | null;
+      if (!body?.id) {
+        return {
+          ok: false,
+          error: `photo ${photoIds.length + 1}/${mediaUrls.length}: Graph returned no id`,
+        };
+      }
+      photoIds.push(body.id);
+    }
+
+    const res = await fetch(
+      `https://graph.facebook.com/${GRAPH_VERSION}/${pageId}/feed`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: text,
+          attached_media: photoIds.map((id) => ({ media_fbid: id })),
+          access_token: token,
+        }),
+        signal: AbortSignal.timeout(15000),
+      },
+    );
+    if (!res.ok) {
+      return { ok: false, error: await facebookError(res) };
+    }
+    const body = (await res.json().catch(() => null)) as {
+      id?: string;
+    } | null;
+    return { ok: true, externalId: body?.id };
+  } catch (err: unknown) {
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : "Failed to send the carousel",
+    };
+  }
+}
+
 /** Retract a published post. `externalId` is what sendFacebookPost returned. */
 export async function deleteFacebookPost(
   externalId: string,

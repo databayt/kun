@@ -24,6 +24,8 @@
  *   node scripts/post-to-facebook.mjs --product mkan --text "Approved copy here"
  *   node scripts/post-to-facebook.mjs --product hogwarts --text "..." --link "https://hogwarts.databayt.org"
  *   node scripts/post-to-facebook.mjs --product databayt --photo ./card.png --text "Caption"
+ *   node scripts/post-to-facebook.mjs --product hogwarts --photos <dir|a.png,b.png,...> \
+ *     --caption-file caption-ar-facebook.txt        # multi-photo carousel post
  */
 
 import fs from 'fs';
@@ -119,8 +121,85 @@ async function graphError(res) {
   return body?.error?.message ?? `Graph API error ${res.status}`;
 }
 
+// Resolve --photos into an ordered list of local PNG/JPG paths. Accepts a
+// directory (every image in it, name-sorted — the renderer's NN suffix makes
+// that slide order) or a comma-separated list. Order is what Facebook shows.
+function resolvePhotos() {
+  const raw = String(args.photos);
+  let files;
+  if (fs.existsSync(raw) && fs.statSync(raw).isDirectory()) {
+    files = fs
+      .readdirSync(raw)
+      .filter((f) => /\.(png|jpe?g|webp)$/i.test(f))
+      .sort()
+      .map((f) => path.join(raw, f));
+  } else {
+    files = raw.split(',').map((s) => s.trim()).filter(Boolean);
+  }
+  const missing = files.filter((f) => !fs.existsSync(f));
+  if (missing.length) {
+    console.error(`❌ Photo(s) not found: ${missing.join(', ')}`);
+    process.exit(1);
+  }
+  if (files.length < 2) {
+    console.error('❌ --photos needs at least 2 images (use --photo for one).');
+    process.exit(1);
+  }
+  if (files.length > 10) {
+    console.error(`❌ Facebook caps a multi-photo post at 10 images (got ${files.length}).`);
+    process.exit(1);
+  }
+  return files;
+}
+
+// The two-step attached_media flow with LOCAL files: each image goes up as an
+// UNPUBLISHED multipart /photos upload (it exists but appears nowhere), then
+// one /feed post attaches them all in order. Same shape as
+// src/lib/facebook.ts sendFacebookCarousel, which takes CDN URLs instead.
+async function postCarousel(files, text) {
+  const photoIds = [];
+  for (const [i, file] of files.entries()) {
+    const form = new FormData();
+    form.append('source', new Blob([fs.readFileSync(file)]), path.basename(file));
+    form.append('published', 'false');
+    form.append('access_token', TOKEN);
+    const res = await fetch(
+      `https://graph.facebook.com/${GRAPH_VERSION}/${PAGE_ID}/photos`,
+      { method: 'POST', body: form, signal: AbortSignal.timeout(30000) },
+    );
+    if (!res.ok) {
+      console.error(`❌ Upload ${i + 1}/${files.length} (${path.basename(file)}) failed: ${await graphError(res)}`);
+      process.exit(1);
+    }
+    const body = await res.json().catch(() => ({}));
+    if (!body.id) {
+      console.error(`❌ Upload ${i + 1}/${files.length}: Graph returned no photo id`);
+      process.exit(1);
+    }
+    photoIds.push(body.id);
+    console.log(`  ↑ ${i + 1}/${files.length} ${path.basename(file)}`);
+  }
+
+  const res = await fetch(`https://graph.facebook.com/${GRAPH_VERSION}/${PAGE_ID}/feed`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      message: text,
+      attached_media: photoIds.map((id) => ({ media_fbid: id })),
+      access_token: TOKEN,
+    }),
+    signal: AbortSignal.timeout(15000),
+  });
+  if (!res.ok) {
+    console.error(`❌ Carousel post failed: ${await graphError(res)}`);
+    process.exit(1);
+  }
+  const body = await res.json().catch(() => ({}));
+  console.log(`✅ Carousel (${files.length} photos) posted to ${PRODUCT}'s Facebook Page — id ${body.id ?? '?'}`);
+}
+
 async function main() {
-  if (args.help || (!args.text && !args.photo && !args['caption-file'])) {
+  if (args.help || (!args.text && !args.photo && !args.photos && !args['caption-file'])) {
     console.log(`
 Facebook Post Dispatcher (pre-approved copy only — Claude drafts via /draft)
 ------------------------------------------------------------------------------
@@ -130,6 +209,8 @@ Options:
   --text "Approved post content"   Text post, or the caption for a photo.
   --link "https://..."             Attach a link (text posts only).
   --photo <file.png>               Post a single photo with --text as caption.
+  --photos <dir|a.png,b.png,...>   Multi-photo carousel post (2–10 images, ordered).
+                                   A directory posts every image in it, name-sorted.
   --caption-file <caption.txt>     Read the message from a file (beats --text).
   --help                           Show this message.
 `);
@@ -171,6 +252,11 @@ Options:
   const text = applyUtm(resolveText(), 'facebook', PRODUCT);
 
   try {
+    if (args.photos) {
+      await postCarousel(resolvePhotos(), text);
+      return;
+    }
+
     if (args.photo) {
       const file = String(args.photo);
       if (!fs.existsSync(file)) {
