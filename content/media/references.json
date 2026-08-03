@@ -11,12 +11,84 @@
       "note": "The style north star — the maker of the house typeface. Minimal Arabic typographic lockups: one thought per card, Serif Display headlines, generous space, no decoration the type doesn't earn."
     },
     {
+      "id": "thmanyah-nashra-education",
+      "title": "Thmanyah — نشرة أها quote card",
+      "source": "facebook",
+      "sourceUrl": "https://web.facebook.com/photo.php?fbid=1063872076177757",
+      "assetType": "testimonial",
+      "note": "Real card, saved locally: Zaki Mubarak on true education — one quote fills a lavender field, display-size Thmanyah type, highlight swipe on the closing words, black attribution bar, the 8 mark alone at the foot. The exact lockup our testimonial format descends from.",
+      "thumb": "/social/media/refs/thmanyah-nashra-education.jpg"
+    },
+    {
+      "id": "thmanyah-nashra-happiness",
+      "title": "Thmanyah — the system, second color",
+      "source": "facebook",
+      "sourceUrl": "https://web.facebook.com/photo.php?fbid=1067407732490858",
+      "assetType": "testimonial",
+      "note": "Al-Aqqad on happiness, mint field — same grid, same type scale, new pastel. Two cards side by side prove it's a system, not a design: rotate the field color, never the layout.",
+      "thumb": "/social/media/refs/thmanyah-nashra-aha-happiness.jpg"
+    },
+    {
+      "id": "thmanyah-fnjan-quote",
+      "title": "Thmanyah — فنجان episode as pull-quote",
+      "source": "facebook",
+      "sourceUrl": "https://web.facebook.com/photo.php?fbid=1063268186238146",
+      "assetType": "testimonial",
+      "note": "Podcast promotion with no episode art, no guest photo, no play button — the strongest sentence from the episode IS the card, labeled بودكاست فنجان in the corner. Sell the idea, not the format.",
+      "thumb": "/social/media/refs/thmanyah-fnjan-podcast.jpg"
+    },
+    {
+      "id": "thmanyah-adam-longform",
+      "title": "Thmanyah — آدم longform card",
+      "source": "facebook",
+      "sourceUrl": "https://web.facebook.com/photo.php?fbid=1063207159577582",
+      "assetType": "carousel",
+      "note": "The longform archetype: bold question headline, then a full paragraph set small and ragged on warm paper texture, one emoji finger as the only CTA. A whole argument on one slide — what our 1-slide decks aim at.",
+      "thumb": "/social/media/refs/thmanyah-adam-podcast.jpg"
+    },
+    {
       "id": "aljazeera-technology-facebook",
       "title": "Al Jazeera Technology",
       "source": "facebook",
       "sourceUrl": "https://web.facebook.com/AljazeeraTechnology",
       "assetType": "infographic",
       "note": "Arabic tech-media cards at volume: copy-centric graphics, strong typographic hierarchy, consistent brand frame — proof the template lane scales to a daily cadence."
+    },
+    {
+      "id": "aljazeera-tech-qwen",
+      "title": "Al Jazeera Tech — news card frame",
+      "source": "facebook",
+      "sourceUrl": "https://web.facebook.com/photo.php?fbid=1063184196233900",
+      "assetType": "banner",
+      "note": "The daily 4:5 news card, saved locally: archive photo, purple headline band in bold Arabic, source credit (رويترز), صورة أرشيفية label, logo top corner, social-handles footer. A brand frame strong enough to survive any photo underneath.",
+      "thumb": "/social/media/refs/aljazeera-tech-qwen.jpg"
+    },
+    {
+      "id": "aljazeera-tech-deepseek",
+      "title": "Al Jazeera Tech — same frame, next day",
+      "source": "facebook",
+      "sourceUrl": "https://web.facebook.com/photo.php?fbid=1063067529578900",
+      "assetType": "banner",
+      "note": "DeepSeek study card in the identical frame as the Qwen one — band position, credit bar, label, footer all fixed. Proof the frame runs at daily volume with zero per-post design decisions.",
+      "thumb": "/social/media/refs/aljazeera-tech-deepseek.jpg"
+    },
+    {
+      "id": "aljazeera-tech-apple-siri",
+      "title": "Al Jazeera Tech — person-led variant",
+      "source": "facebook",
+      "sourceUrl": "https://web.facebook.com/photo.php?fbid=1062554112963575",
+      "assetType": "banner",
+      "note": "Keynote photo of Tim Cook, headline band dropped over the subject's body, face kept clear — how the fixed frame flexes when the story is a person, not a product.",
+      "thumb": "/social/media/refs/aljazeera-tech-apple-siri.jpg"
+    },
+    {
+      "id": "aljazeera-tech-gemini-explainer",
+      "title": "Al Jazeera Tech — text-led explainer",
+      "source": "facebook",
+      "sourceUrl": "https://web.facebook.com/photo.php?fbid=1062427829642870",
+      "assetType": "infographic",
+      "note": "The no-photo escape hatch: ivory card, bold lead with one keyword in color, body paragraph, framed video still below, vertical brand strips on the edge. Their explainer format for stories with no picture — our infographic register.",
+      "thumb": "/social/media/refs/aljazeera-tech-gemini-explainer.jpg"
     },
     {
       "id": "powerschool",
