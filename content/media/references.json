@@ -47,6 +47,60 @@
       "thumb": "/social/media/refs/thmanyah-adam-podcast.jpg"
     },
     {
+      "id": "thmanyah-nashra-muanasa",
+      "title": "Thmanyah — highlight opens the card",
+      "source": "facebook",
+      "sourceUrl": "https://web.facebook.com/photo.php?fbid=1068892169009081",
+      "assetType": "testimonial",
+      "note": "Al-Jahiz on companionship, lavender again — but the highlight swipe sits on the OPENING phrase, not the close. The accent is a movable spotlight: put it where the quote's weight is, never in a fixed slot.",
+      "thumb": "/social/media/refs/thmanyah-nashra-muanasa.jpg"
+    },
+    {
+      "id": "thmanyah-nashra-mubdioon",
+      "title": "Thmanyah — نشرة إلخ, third masthead",
+      "source": "facebook",
+      "sourceUrl": "https://web.facebook.com/photo.php?fbid=1066660369232261",
+      "assetType": "testimonial",
+      "note": "Same quote system, different product: نشرة إلخ on a salmon field, living author (إيمان العزوزي) not a classic. One layout carries every newsletter masthead — the corner label does all the brand differentiation.",
+      "thumb": "/social/media/refs/thmanyah-nashra-mubdioon.jpg"
+    },
+    {
+      "id": "thmanyah-nashra-nabeel",
+      "title": "Thmanyah — fourth pastel, same grid",
+      "source": "facebook",
+      "sourceUrl": "https://web.facebook.com/photo.php?fbid=1063601076204857",
+      "assetType": "testimonial",
+      "note": "Al-Jahiz on nobility, yellow field, white highlight. With lavender, mint, and salmon this completes the proof: the palette is a rotation of quiet pastels and the type never moves. Our field-color tokens should rotate the same way.",
+      "thumb": "/social/media/refs/thmanyah-nashra-nabeel.jpg"
+    },
+    {
+      "id": "thmanyah-adam-list",
+      "title": "Thmanyah — آدم list card",
+      "source": "facebook",
+      "sourceUrl": "https://web.facebook.com/photo.php?fbid=1063207156244249",
+      "assetType": "carousel",
+      "note": "The longform card's structured sibling: three bold colon-led labels (الكبير/الوسط/الصغير), each with a short definition and a hand-drawn underline, on the same paper texture. How a listicle stays typographic instead of becoming boxes-and-icons.",
+      "thumb": "/social/media/refs/thmanyah-adam-kabir.jpg"
+    },
+    {
+      "id": "thmanyah-films-banner",
+      "title": "Thmanyah — film-promo banner",
+      "source": "facebook",
+      "sourceUrl": "https://web.facebook.com/photo/?fbid=1019367583961540",
+      "assetType": "banner",
+      "note": "The documentary register: black field, two collage film cards flanking centered white type (تابع أفلامنا الجديدة), the 8 mark inside the artwork. Proof the pastel system has a monochrome sibling for the cinema side of the brand.",
+      "thumb": "/social/media/refs/thmanyah-cover.jpg"
+    },
+    {
+      "id": "thmanyah-reel-interview",
+      "title": "Thmanyah — reel cover, label only",
+      "source": "facebook",
+      "sourceUrl": "https://web.facebook.com/Thmanyah/videos/1902658494042519/",
+      "assetType": "reel",
+      "note": "Interview frame (توصيات معيشية) with nothing but a corner label and the 8 mark — no caption band, no title card. The cinematic frame IS the cover; branding stays in the corners. The restraint register for our reel thumbnails.",
+      "thumb": "/social/media/refs/thmanyah-reel-cover.jpg"
+    },
+    {
       "id": "aljazeera-technology-facebook",
       "title": "Al Jazeera Technology",
       "source": "facebook",
@@ -89,6 +143,60 @@
       "assetType": "infographic",
       "note": "The no-photo escape hatch: ivory card, bold lead with one keyword in color, body paragraph, framed video still below, vertical brand strips on the edge. Their explainer format for stories with no picture — our infographic register.",
       "thumb": "/social/media/refs/aljazeera-tech-gemini-explainer.jpg"
+    },
+    {
+      "id": "aljazeera-tech-mital",
+      "title": "Al Jazeera Tech — architecture variant",
+      "source": "facebook",
+      "sourceUrl": "https://web.facebook.com/photo.php?fbid=1063132939572359",
+      "assetType": "banner",
+      "note": "ArcelorMittal × Microsoft cloud deal: teal glass architecture fills the frame, purple band carries the whole story. Corporate news with no faces — the frame works when the only visual is a building.",
+      "thumb": "/social/media/refs/aljazeera-tech-mital.jpg"
+    },
+    {
+      "id": "aljazeera-tech-malaysia",
+      "title": "Al Jazeera Tech — event-stage variant",
+      "source": "facebook",
+      "sourceUrl": "https://web.facebook.com/photo.php?fbid=1063101532908833",
+      "assetType": "banner",
+      "note": "Conference-stage photo (TechCrunch Disrupt) under the same band; the wordmarks in the background do the scene-setting, source credit says وول ستريت جورنال. Third-party event photography inside a first-party frame.",
+      "thumb": "/social/media/refs/aljazeera-tech-malaysia.jpg"
+    },
+    {
+      "id": "aljazeera-tech-delhi",
+      "title": "Al Jazeera Tech — two-person variant",
+      "source": "facebook",
+      "sourceUrl": "https://web.facebook.com/photo.php?fbid=1062593096293010",
+      "assetType": "banner",
+      "note": "Modi–Zuckerberg handshake, band placed low so both faces stay clear. The two-subject composition rule for the fixed frame: people above the fold, copy below it.",
+      "thumb": "/social/media/refs/aljazeera-tech-delhi.jpg"
+    },
+    {
+      "id": "aljazeera-tech-benchmark-table",
+      "title": "Al Jazeera Tech — data-table card",
+      "source": "facebook",
+      "sourceUrl": "https://web.facebook.com/photo.php?fbid=1062427832976203",
+      "assetType": "infographic",
+      "note": "A raw DeepSeek benchmark table dropped into the ivory explainer frame, Arabic lead with Latin keywords (DEEPSEEK-V4-FLASH, CODEX) in bold. Proof a real data table survives at feed size when the frame around it stays calm — the reference for our metrics cards.",
+      "thumb": "/social/media/refs/aljazeera-tech-text-graphic.jpg"
+    },
+    {
+      "id": "aljazeera-tech-cover-hero",
+      "title": "Al Jazeera Tech — cinematic hero",
+      "source": "facebook",
+      "sourceUrl": "https://web.facebook.com/photo/?fbid=960552856497035",
+      "assetType": "hero",
+      "note": "The page cover: android and drone in a cable-lit scene, logo centered in the negative space. Their one cinematic asset — everything else is frames and bands. What a higgs-lane hero should feel like for a tech brand.",
+      "thumb": "/social/media/refs/aljazeera-tech-cover.jpg"
+    },
+    {
+      "id": "aljazeera-tech-reel-decimen",
+      "title": "Al Jazeera Tech — reel cover, demo style",
+      "source": "facebook",
+      "sourceUrl": "https://web.facebook.com/AljazeeraTechnology/videos/1055645343864863/",
+      "assetType": "reel",
+      "note": "Open-source story (DECIMEN QR file transfer) as a 9:16 cover: real phones on a desk, terminal UI visible, purple caption band over the demo. Screen-truth over motion graphics — exactly our register for product reels.",
+      "thumb": "/social/media/refs/aljazeera-tech-reel-cover.jpg"
     },
     {
       "id": "powerschool",
