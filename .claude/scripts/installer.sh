@@ -101,8 +101,18 @@ fi
 # =============================================================================
 # ACT 1 — Pre-flight (scan first, dialog only what detection can't answer)
 # =============================================================================
-# Role is universal — every machine gets the full config, so we never ask.
-ROLE="engineer"
+# Role is universal — every machine gets the full config, so we never ask. It is
+# a label, but the label rides through to onboarding-mac.sh and shows up in the
+# run header, so a teammate onboarded for one job can be handed a one-liner that
+# says so: `curl -fsSL https://kun.databayt.org/install | bash -s -- content`.
+# web/install.sh already forwards "$@" here; before this, that forwarding went
+# nowhere. An unknown value is corrected rather than fatal — a typo in a pasted
+# one-liner should not cost someone their whole install.
+ROLE="${1:-engineer}"
+case "$ROLE" in
+    engineer|business|content|ops) ;;
+    *) ROLE="engineer" ;;
+esac
 
 # Scan — the agent fleet library answers most pre-flight questions without dialogs.
 # shellcheck disable=SC1090

@@ -10,11 +10,13 @@
  *
  * Usage:
  *   node scripts/higgs-library.mjs lookup --prompt "..." [--model M] [--ratio 16:9] [--resolution 2k]
- *   node scripts/higgs-library.mjs add <file> --prompt "..." --model M [--brand b] [--ratio r] [--credits n] [--type t]
+ *   node scripts/higgs-library.mjs add <file> --prompt "..." --model M [--brand b] [--ratio r] [--credits n] [--type t] [--source s]
  *     --type: canonical asset type (hero|og|banner|logo|product|lifestyle|mockup|
  *     infographic|split|testimonial|carousel|reel|story — see
  *     src/components/root/social/showroom/taxonomy.ts); the showroom filters by it.
- *   node scripts/higgs-library.mjs import [--dir ~/Downloads/higgs]
+ *     --source: which renderer made it (higgsfield|chatgpt|template). Defaults to
+ *     higgsfield; the showroom badges it.
+ *   node scripts/higgs-library.mjs import [--dir ~/Downloads/higgs] [--source s]
  *   node scripts/higgs-library.mjs push [--dry-run]
  *   node scripts/higgs-library.mjs list [--brand b]
  *   node scripts/higgs-library.mjs stats
@@ -194,6 +196,7 @@ function cmdAdd(args) {
     if (args.ratio && !existing.ratio) existing.ratio = args.ratio;
     if (args.credits && existing.credits == null) existing.credits = Number(args.credits);
     if (args.type && !existing.assetType) existing.assetType = args.type;
+    if (args.source && !existing.source) existing.source = args.source;
     existing.fingerprint = fingerprint(existing) || existing.fingerprint;
     saveManifest(manifest);
     return { ok: true, deduped: true, id: existing.id, file: existing.file };
@@ -210,6 +213,11 @@ function cmdAdd(args) {
     resolution: args.resolution || null,
     credits: args.credits != null ? Number(args.credits) : null,
     assetType: args.type || null,
+    // Which renderer made it. Defaults to higgsfield because that is what every
+    // row predating this field came from — the showroom reads the same default,
+    // so untagged history keeps its correct badge while a ChatGPT-seat render
+    // (--source chatgpt) no longer inherits a Higgsfield credit it never spent.
+    source: args.source || 'higgsfield',
     bytes: fs.statSync(abs).size,
     createdAt: dateFromFilename(name, abs),
     cdnUrl: null,
@@ -255,6 +263,7 @@ function cmdImport(args) {
       ratio: null,
       resolution: null,
       credits: null,
+      source: args.source || 'higgsfield',
       bytes: fs.statSync(abs).size,
       createdAt: dateFromFilename(name, abs),
       cdnUrl: null,

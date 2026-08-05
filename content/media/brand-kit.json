@@ -1,0 +1,222 @@
+{
+  "version": 1,
+  "updated": "2026-08-05",
+  "readme": "The brand kit — everything a renderer needs to produce an on-brand asset without a human re-explaining the brand. Git-tracked JSON on purpose: the site imports it statically (a commit redeploys the showroom) and scripts/media-brief.mjs compiles it into prompts. Three renderers consume it: the `chatgpt` seat lane (a human pastes the compiled prompt into ChatGPT), the `higgs` CLI lane, and the deterministic `template` lane (the carousel engine). One kit, three lanes — so a brand change lands everywhere at once.",
+
+  "renderers": {
+    "chatgpt": {
+      "label": "ChatGPT seat (GPT-5.6 Sol → GPT Image 2)",
+      "kind": "human-in-the-loop",
+      "surface": "chatgpt.com",
+      "why": "Sol is a reasoning model with text output; it renders pictures by calling the image tool, which is GPT Image 2. A ChatGPT plan is not API access — there is no key, so no server can call this lane. The seat is a renderer, not an endpoint: kun compiles the prompt, a human pastes it, kun ingests the file back.",
+      "sizeRule": "GPT Image 2 accepts arbitrary WIDTHxHEIGHT with both sides divisible by 16 and the aspect ratio between 1:3 and 3:1. Every size in `types` below already satisfies this — do not round them by hand.",
+      "attachAlways": ["public/brands/hogwarts.png"],
+      "operator": "sedon"
+    },
+    "higgs": {
+      "label": "Higgsfield CLI",
+      "kind": "automated",
+      "why": "Paid credits, unattended, best for cinematic photography and the only lane that does video. Model/ratio tables live in /docs/media.",
+      "surface": "higgsfield CLI"
+    },
+    "template": {
+      "label": "Carousel engine (HTML → PNG)",
+      "kind": "deterministic",
+      "why": "Anything carrying copy. Real Thmanyah type, exact platform pixels, no typography risk. See /docs/social/carousel.",
+      "surface": "scripts/render-carousel.mjs"
+    }
+  },
+
+  "brands": {
+    "hogwarts": {
+      "id": "hogwarts",
+      "mediaName": "Hogwarts",
+      "domain": "ed.databayt.org",
+      "note": "The media brand is Hogwarts (Abdout, 2026-08-05). The shipped app introduces itself to schools as بالقلم / balqalam — that is the in-product name, deliberately not the media name. Do not let a generated asset say بالقلم unless someone changes this line.",
+      "inAppName": { "ar": "بالقلم", "en": "balqalam" },
+
+      "what": "A multi-tenant school management system — admissions, timetable, attendance, exams, grades, finance — sold to schools across MENA.",
+      "audience": "School owners and principals in Sudan, Saudi Arabia and the UAE. They are administrators, not technologists: the promise is relief from paperwork, not software features.",
+      "tone": "Calm, exact, unhurried. Never playful, never salesy, never 'edtech startup'. The visual argument is competence.",
+
+      "mark": {
+        "file": "public/brands/hogwarts.png",
+        "describe": "A single quill — one upright feather leaning to the right, solid black silhouette, with one carved white stroke running the length of the vane and a fine tapering tail at the base. Transparent background.",
+        "meaning": "The pen. It is what بالقلم means, and it is why the mark is a quill rather than a building or a graduation cap.",
+        "rules": [
+          "The mark is placed in post, never drawn by a generative model — an AI-drawn approximation of a logo is a different logo.",
+          "Monochrome ink only. It inverts to ivory on the dark and clay canvases; it is never recolored to an accent.",
+          "Attach it as a reference image on every ChatGPT render so the scene is composed with room for it, then place the real file on top."
+        ]
+      },
+
+      "typography": {
+        "source": "https://font.thmanyah.com",
+        "license": "Embedding and commercial use permitted; redistribution is not. Files are fetched by scripts/fetch-thmanyah.mjs on predev/prebuild and never committed or served from the CDN.",
+        "roles": {
+          "arabicHeadline": {
+            "family": "thmanyah serif display",
+            "weight": 900,
+            "features": "ss01",
+            "why": "The signature calligraphic look — this pairing is the brand's voice in Arabic."
+          },
+          "arabicBody": { "family": "thmanyah sans", "weight": 400 },
+          "latinHeadline": { "family": "Geist", "weight": 600 },
+          "latinBody": { "family": "Geist", "weight": 400 }
+        },
+        "rules": [
+          "Arabic never takes letter-spacing — it breaks the connected script.",
+          "Arabic is the first-class language; English mirrors it. RTL is the default direction.",
+          "Type is set by the template lane, never by a generative model."
+        ]
+      },
+
+      "palette": {
+        "why": "Drawn from the Anthropic catalog (src/components/root/anthropic/data.ts) so slides, site and generated media share one set of values. Quote the hex to a renderer — a color name alone drifts.",
+        "canvas": [
+          { "name": "Ivory Light", "hex": "#faf9f5", "use": "default canvas" },
+          { "name": "Oat", "hex": "#e3dacc", "use": "warm alternate canvas" },
+          {
+            "name": "Slate Dark",
+            "hex": "#141413",
+            "use": "dark canvas; ink on light"
+          },
+          {
+            "name": "Clay",
+            "hex": "#d97757",
+            "use": "the one accent — brand orange"
+          }
+        ],
+        "support": [
+          { "name": "Slate 550", "hex": "#73726c", "use": "muted text" },
+          {
+            "name": "Slate 250",
+            "hex": "#dedcd1",
+            "use": "hairline / surface"
+          },
+          { "name": "Coral", "hex": "#ebcece", "use": "tinted plate" },
+          { "name": "Cactus", "hex": "#bcd1ca", "use": "tinted plate" },
+          { "name": "Heather", "hex": "#cbcadb", "use": "tinted plate" }
+        ],
+        "rules": [
+          "One accent per image. Clay carries the emphasis; everything else is neutral.",
+          "No gradients, no glow, no neon. Saturation stays low — the warm neutrals do the work.",
+          "Never the stock-edtech palette: no royal blue, no purple-to-pink gradient, no lime green."
+        ]
+      },
+
+      "styleSpines": {
+        "minimal": {
+          "use": "hero, product, mockup, og and banner plates, anything documentary",
+          "prompt": "Editorial minimalism. Generous negative space, one clear subject, flat even light, no gradients or drop shadows, restrained warm-neutral palette, composed with a calm horizon and room at the bottom-start corner for a mark to be placed in post."
+        },
+        "cinematic": {
+          "use": "lifestyle, story, reel stills, anything with people",
+          "prompt": "Documentary photography. Natural window light, shallow depth of field, muted warm grade, candid unposed moment, real classroom or office texture, no studio lighting rig, no lens flare."
+        }
+      },
+
+      "subjectLibrary": {
+        "why": "The scenes that actually read as this product. Reach for these before inventing one.",
+        "items": [
+          "A school administrator at a desk with an open laptop, paper registers stacked and closed beside it",
+          "An empty classroom in early morning light, chairs squared to the desks",
+          "A parent's hands holding a phone, a school corridor soft behind",
+          "A teacher walking a corridor with a tablet, students blurred in motion",
+          "A school front office counter, clean and unhurried, no queue",
+          "Close detail of an attendance register, warm daylight raking across the page"
+        ]
+      },
+
+      "negative": {
+        "why": "The list that separates a usable render from a discard. Every item here has cost us a generation at least once.",
+        "items": [
+          "no text, no lettering, no numerals, no signage, no UI labels — Arabic script in particular renders as nonsense",
+          "no logos, no watermarks, no brand marks of any kind",
+          "no Harry Potter or wizarding references — the repo is named hogwarts, the product is not",
+          "no Western-school stock clichés: no yellow school bus, no red apple on a desk, no chalkboard with equations, no graduation caps thrown in the air",
+          "no AI-glossy skin, no plastic sheen, no over-sharpened HDR",
+          "no blue-to-purple tech gradient, no neon, no dark 'dashboard' UI glow",
+          "no cluttered collage; one subject, one idea"
+        ]
+      },
+
+      "region": {
+        "why": "The single most common failure is a render that looks like a suburban American school.",
+        "items": [
+          "MENA setting — Sudanese, Saudi or Emirati school interiors",
+          "Modest dress read as ordinary, not as a costume; hijab where natural, never as the subject of the image",
+          "Warm daylight, plastered or painted walls, ceiling fans, simple wooden or steel furniture",
+          "Mixed ages of building — these are working schools, not architectural showpieces"
+        ]
+      },
+
+      "types": {
+        "hero": {
+          "lane": "chatgpt",
+          "size": "1792x1024",
+          "spine": "minimal",
+          "use": "page and post hero images"
+        },
+        "lifestyle": {
+          "lane": "chatgpt",
+          "size": "1024x1280",
+          "spine": "cinematic",
+          "use": "people-in-context scenes for ads and posts"
+        },
+        "product": {
+          "lane": "chatgpt",
+          "size": "1024x1280",
+          "spine": "minimal",
+          "use": "the physical world around the product — desks, registers, devices"
+        },
+        "mockup": {
+          "lane": "chatgpt",
+          "size": "1024x1024",
+          "spine": "minimal",
+          "use": "a device in a scene; the screen is left blank and composited in post",
+          "extra": "The screen must be blank, off, or a flat neutral rectangle — never a rendered interface."
+        },
+        "story": {
+          "lane": "chatgpt",
+          "size": "1024x1792",
+          "spine": "cinematic",
+          "use": "vertical story and reel stills"
+        },
+        "plate": {
+          "lane": "chatgpt",
+          "size": "1200x624",
+          "spine": "minimal",
+          "use": "a text-free background plate the template lane sets copy over for og and banner",
+          "extra": "Compose as a background: keep the centre and the start edge quiet so a headline can sit there."
+        },
+        "og": {
+          "lane": "template",
+          "size": "1200x630",
+          "use": "carries copy — renders on the carousel engine"
+        },
+        "banner": {
+          "lane": "template",
+          "size": "1200x630",
+          "use": "carries copy"
+        },
+        "infographic": { "lane": "template", "use": "carries copy" },
+        "split": { "lane": "template", "use": "carries copy" },
+        "testimonial": { "lane": "template", "use": "carries copy" },
+        "carousel": {
+          "lane": "template",
+          "size": "1080x1350",
+          "use": "carries copy"
+        },
+        "logo": {
+          "lane": "none",
+          "use": "the mark exists; it is never regenerated"
+        },
+        "reel": {
+          "lane": "higgs",
+          "use": "motion — only Higgsfield does video"
+        }
+      }
+    }
+  }
+}

@@ -47,6 +47,8 @@ interface LibraryAsset {
   createdAt: string;
   cdnUrl: string | null;
   assetType?: string | null;
+  /** Which renderer made it. Absent on every row predating the field. */
+  source?: string | null;
 }
 
 interface ReferenceCard {
@@ -79,7 +81,10 @@ export function getShowroomData(): ShowroomData {
       href: a.cdnUrl as string,
       brand: a.brand || null,
       type: asShowroomType(a.assetType),
-      source: "higgsfield",
+      // Every asset used to come from Higgsfield, so the badge was a constant.
+      // Now the ChatGPT seat lane renders too — read what the manifest recorded
+      // and keep the old constant only as the fallback for untagged history.
+      source: a.source ?? "higgsfield",
       note: a.prompt,
       model: a.model,
       ratio: a.ratio,

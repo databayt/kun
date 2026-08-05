@@ -1,16 +1,21 @@
 ---
 title: Media
-description: Photo and video generation for databayt marketing via Higgsfield AI
+description: Photo and video generation for databayt marketing — three lanes, one brand kit
 ---
 
 # Media
 
-Marketing visuals ride two lanes. Text-free photography — hero shots, product shots,
-lifestyle scenes, reels — is generated through [Higgsfield AI](https://higgsfield.ai); the
-`/higgs` skill wraps the CLI in a zero-question playbook that picks the model, aspect ratio,
-and style from pre-made tables, prices the job before spending, and downloads the result.
-Anything that carries copy — og images, infographics, testimonials, comparisons — renders
-deterministically from HTML templates on the [carousel engine](/docs/social/carousel):
+Marketing visuals ride three lanes, and every one of them reads the same brand kit
+(`content/media/brand-kit.json`) — palette, type roles, the mark, the regional reality, the
+negative list — so a brand change lands everywhere at once instead of in whoever's memory.
+
+Text-free photography — hero shots, product shots, lifestyle scenes, reels — is generated
+either through [Higgsfield AI](https://higgsfield.ai) (the `/higgs` skill wraps the CLI in a
+zero-question playbook that picks the model, aspect ratio, and style from pre-made tables,
+prices the job before spending, and downloads the result) or, for stills, through a
+[ChatGPT seat](#the-chatgpt-seat-lane) — a human renderer driving GPT Image 2 from a prompt
+kun compiled. Anything that carries copy — og images, infographics, testimonials, comparisons
+— renders deterministically from HTML templates on the [carousel engine](/docs/social/carousel):
 Thmanyah type, the brand frame, exact platform sizes, and a 1-slide deck is a single-image
 asset. Finished media feeds the [Social Hub](/docs/social), which stages the post for human
 approval before any channel sees it; everything generated or kept as reference is browsable
@@ -63,6 +68,47 @@ Every job goes through `create`; there is no `generate image` or `generate video
 
 Results are JSON arrays carrying `result_url`; outputs land in `~/Downloads/higgs/` as
 `YYYY-MM-DD-<slug>.<ext>`.
+
+## The ChatGPT seat lane
+
+Owner: **Sedon**, on a $20 ChatGPT Plus seat. Roughly 50 images per rolling 3-hour window —
+call it 200 a day — at an effective cost under a cent each, which at a Higgsfield balance of
+0.7 credits is the only image capacity the company currently has.
+
+The constraint that shapes the whole lane: **a ChatGPT plan is not API access.** GPT-5.6 Sol
+is a reasoning model with text output; it renders pictures by calling the image tool, which
+is GPT Image 2. Both live behind the chat UI on a seat, and the API is separately billed with
+its own key. So no kun server can call this lane. kun compiles the prompt, a human renders,
+kun ingests the file — the seat is a renderer, not an endpoint.
+
+What makes the output consistent is a **ChatGPT Project**, not a good prompt. The project
+carries the standing brand instructions and the mark as an attached file; every chat inside
+it inherits both, so the tenth render matches the first.
+
+```bash
+node scripts/media-brief.mjs project                   # paste once into the Project's instructions
+node scripts/media-brief.mjs types                     # what each type is, and which lane owns it
+node scripts/media-brief.mjs brief --type hero \
+  --subject "An empty classroom in early morning light"  # paste per asset
+```
+
+`brief` refuses any type whose lane is not `chatgpt` — asking a raster model for an og image
+is exactly the mistake the no-text doctrine exists to prevent, so it fails loudly instead of
+compiling a prompt that would produce broken Arabic. Six types compile: `hero`, `lifestyle`,
+`product`, `mockup`, `story`, and `plate` (a text-free background the template lane sets copy
+over). Sizes are pre-checked against GPT Image 2's rule — both sides divisible by 16, ratio
+within 1:3 to 3:1 — so they are pasted, never rounded.
+
+Renders come back through the same library as everything else, tagged with their renderer:
+
+```bash
+node scripts/higgs-library.mjs add ~/Downloads/higgs/<file> \
+  --brand hogwarts --type hero --source chatgpt --model gpt-image-2
+node scripts/higgs-library.mjs push
+```
+
+`--source` is what keeps the showroom honest — without it a ChatGPT render inherits a
+Higgsfield badge and a credit cost it never spent.
 
 ## Asset library
 
