@@ -35,7 +35,7 @@ export const SOCIAL_DICTIONARY = {
     // Arabic doubly so); text-bearing formats render on the template lane.
     showroomTitle: "The showroom",
     showroomIntro:
-      "What we generated and what we keep as reference. Higgsfield renders text-free visuals to the CDN; text-bearing formats render from HTML templates in the house type. Copy a URL here and bring it to the Publish stage's Media field.",
+      "What we generated and what we keep as reference. Higgsfield renders text-free visuals to the CDN; text-bearing formats render from HTML templates in the house type. Attach an asset here and it rides the Publish stage's tray.",
     collectionAll: "All",
     collectionGenerated: "Generated",
     collectionReference: "References",
@@ -65,9 +65,6 @@ export const SOCIAL_DICTIONARY = {
     testConnection: "Test Connections",
     apiUrl: "Gateway URL",
     notConfigured: "not configured",
-    composerTitle: "Post Composer",
-    composerDesc:
-      "Paste approved copy, select channels, and publish to social media relays.",
     textareaPlaceholder: "Paste the approved post copy here…",
     all: "All",
     channel: "Channel",
@@ -77,11 +74,7 @@ export const SOCIAL_DICTIONARY = {
     // Why Slack is absent from an audience picker — stated so it reads as
     // deliberate rather than missing.
     reviewHint: "Approvals and notices go to #social",
-    postDirect: "Publish",
-    posting: "Publishing...",
     scheduleLabel: "Schedule for",
-    scheduleAction: "Schedule",
-    scheduling: "Scheduling...",
     scheduledMsg: "Scheduled {count} channel(s) for {at}",
     scheduleHint:
       "Leave empty to publish now. Scheduled posts go out within ~15 minutes of the chosen time.",
@@ -98,13 +91,51 @@ export const SOCIAL_DICTIONARY = {
     copyLink: "Copy",
     copiedLink: "Copied",
     openLink: "Open",
-    mediaLabel: "Media URL",
+    mediaLabel: "Media",
     mediaPlaceholder: "https://cdn.databayt.org/… (optional, from /higgs)",
     mediaHint:
-      "Must be a public image URL — the platforms fetch it themselves.",
+      "Must be a public media URL — the platforms fetch it themselves. Images and/or one video, up to 10.",
     charCount: "{count} / {max}",
-    overCaptionLimit:
-      "Over {max} characters — too long to stage for review; publish directly instead.",
+    // ——— The review queue (the Publish stage) ———
+    reviewTitle: "Review & publish",
+    reviewIntro:
+      "Answered drafts queue here for a human decision — fine-tune, then approve. Writing happens in the Draft stage; media in the showroom.",
+    reviewQueueCount: "{count} awaiting review",
+    reviewNextUp: "Next up",
+    reviewRefresh: "Refresh",
+    reviewAgo: "{age} ago",
+    reviewEmptyTitle: "Nothing awaiting review",
+    reviewEmptyBody:
+      "Answered drafts land here for approval. Ask the agent for one in the Draft stage — or let the Monday seed file the week's briefs.",
+    reviewEmptyCta: "Go to Draft",
+    reviewNextDraft: "Next draft",
+    approveAction: "Approve & publish",
+    approveScheduleAction: "Approve & schedule",
+    approving: "Approving...",
+    approvedNowMsg: "Approved and published.",
+    dismissAction: "Dismiss",
+    dismissing: "Dismissing...",
+    dismissedMsg: "Dismissed — it will not publish.",
+    // The settings popover: what Approve does.
+    approveModeLabel: "When a draft is approved",
+    approveModeNow: "Publish right away",
+    approveModeNowHint:
+      "Approve delivers to the selected channels immediately.",
+    approveModeSchedule: "Schedule for a time",
+    approveModeScheduleHint:
+      "Approve queues the post; the cron drain delivers it within ~15 minutes of the chosen time.",
+    // The attachment tray.
+    attachAddUrl: "Add media by URL",
+    attachAddAction: "Add",
+    attachRemove: "Remove",
+    attachBrowse: "Browse the showroom",
+    mediaKindVideo: "video",
+    mixedMediaWarning:
+      "Images and video cannot ride one post — keep one kind, split the other into its own post.",
+    // The showroom's attach affordance.
+    attachAsset: "Attach",
+    attachedAsset: "Attached",
+    attachOpenPublish: "Open the Publish stage",
     agentTitle: "Social Agent",
     // Under the prompt, before the first ask. The only place a contributor is
     // told what a good brief contains — and the copy is only as good as the brief.
@@ -149,7 +180,8 @@ export const SOCIAL_DICTIONARY = {
     agentPipDone: "Ready",
     agentPipFailed: "Failed",
     agentPipRejected: "Rejected",
-    successMsg: "Successfully posted!",
+    agentDraftMedia: "Suggested media",
+    agentTrayHint: "{count} media in the tray — they ride the next ask.",
     partialMsg: "Published with failures:",
     errorMsg: "Failed to process: ",
     noChannels: "No channel is wired for this product yet.",
@@ -188,7 +220,7 @@ export const SOCIAL_DICTIONARY = {
       "التقويم يحدّد أي علامة تنشر ماذا وفي أي يوم، وفق وتيرة كل علامة ومحاور محتواها. ناتجه جدول مؤرَّخ — العلامة، الموضوع، القنوات، المسؤول — ولا مكان في اللوحة لحفظه، فلم نصطنع له واجهة.",
     showroomTitle: "المعرض",
     showroomIntro:
-      "ما ولّدناه وما نحتفظ به كمرجع. Higgsfield يصنع صوراً بلا نصوص ويدفعها إلى الـCDN؛ والقوالب النصية تُصاغ من HTML بخط الدار. انسخ رابطاً من هنا وأحضره إلى حقل الوسائط في مرحلة النشر.",
+      "ما ولّدناه وما نحتفظ به كمرجع. Higgsfield يصنع صوراً بلا نصوص ويدفعها إلى الـCDN؛ والقوالب النصية تُصاغ من HTML بخط الدار. أرفق أصلاً من هنا يهبط في حافظة مرحلة النشر.",
     collectionAll: "الكل",
     collectionGenerated: "المولَّد",
     collectionReference: "المراجع",
@@ -220,18 +252,11 @@ export const SOCIAL_DICTIONARY = {
     testConnection: "فحص الاتصالات",
     apiUrl: "رابط البوابة",
     notConfigured: "غير مُهيّأ",
-    composerTitle: "منشئ المنشورات",
-    composerDesc:
-      "الصق النص المعتمد، اختر القنوات، ثم انشر. النواقل توصّل فقط — لا تكتب.",
     textareaPlaceholder: "الصق نص المنشور المعتمد هنا…",
     all: "الكل",
     comingSoon: "قريباً",
     reviewHint: "الاعتمادات والإشعارات تذهب إلى ‎#social",
-    postDirect: "نشر",
-    posting: "جاري النشر...",
     scheduleLabel: "جدولة في",
-    scheduleAction: "جدولة",
-    scheduling: "جاري الجدولة...",
     scheduledMsg: "تمت جدولة {count} قناة في {at}",
     scheduleHint:
       "اتركه فارغاً للنشر الآن. المنشورات المجدولة تُنشر خلال ~15 دقيقة من الوقت المحدد.",
@@ -245,12 +270,46 @@ export const SOCIAL_DICTIONARY = {
     copyLink: "نسخ",
     copiedLink: "تم النسخ",
     openLink: "فتح",
-    mediaLabel: "رابط الوسائط",
+    mediaLabel: "الوسائط",
     mediaPlaceholder: "https://cdn.databayt.org/… (اختياري، من ‎/higgs)",
-    mediaHint: "يجب أن يكون رابط صورة عاماً — المنصات تجلبه بنفسها.",
+    mediaHint:
+      "روابط وسائط عامة — المنصات تجلبها بنفسها. صور و/أو فيديو واحد، حتى 10.",
     charCount: "{count} / {max}",
-    overCaptionLimit:
-      "تجاوز {max} حرفاً — طويل جداً للمراجعة؛ انشر مباشرة بدلاً من ذلك.",
+    reviewTitle: "المراجعة والنشر",
+    reviewIntro:
+      "المسودات المُجابة تصطف هنا لقرار بشري — نقّح ثم اعتمد. الكتابة تجري في مرحلة الصياغة، والوسائط في المعرض.",
+    reviewQueueCount: "{count} بانتظار المراجعة",
+    reviewNextUp: "التالي",
+    reviewRefresh: "تحديث",
+    reviewAgo: "قبل {age}",
+    reviewEmptyTitle: "لا شيء بانتظار المراجعة",
+    reviewEmptyBody:
+      "المسودات المُجابة تهبط هنا للاعتماد. اطلب واحدة من الوكيل في مرحلة الصياغة — أو دع بذر الاثنين يقيّد موجزات الأسبوع.",
+    reviewEmptyCta: "إلى الصياغة",
+    reviewNextDraft: "المسودة التالية",
+    approveAction: "اعتمد وانشر",
+    approveScheduleAction: "اعتمد وجدول",
+    approving: "جاري الاعتماد...",
+    approvedNowMsg: "اعتُمد ونُشر.",
+    dismissAction: "استبعاد",
+    dismissing: "جاري الاستبعاد...",
+    dismissedMsg: "استُبعد — لن يُنشر.",
+    approveModeLabel: "عند اعتماد مسودة",
+    approveModeNow: "انشر فوراً",
+    approveModeNowHint: "الاعتماد يوصّل إلى القنوات المختارة في الحال.",
+    approveModeSchedule: "جدولة لوقت لاحق",
+    approveModeScheduleHint:
+      "الاعتماد يضع المنشور في الطابور؛ مهمة الجدولة توصّله خلال ~15 دقيقة من الوقت المحدد.",
+    attachAddUrl: "أضف وسائط برابط",
+    attachAddAction: "إضافة",
+    attachRemove: "إزالة",
+    attachBrowse: "تصفّح المعرض",
+    mediaKindVideo: "فيديو",
+    mixedMediaWarning:
+      "لا تجتمع الصور والفيديو في منشور واحد — أبقِ نوعاً واحداً واجعل الآخر منشوراً مستقلاً.",
+    attachAsset: "إرفاق",
+    attachedAsset: "أُرفق",
+    attachOpenPublish: "افتح مرحلة النشر",
     agentTitle: "وكيل التواصل",
     agentHint:
       "كلما كان الموجز أدقّ، كان النص أفضل: الخبر، ولمن هو، وما المطلوب من القارئ، وأي تاريخ أو اسم أو رابط يجب أن يظهر. يكتبه Claude على اشتراك الفريق، بالعربية أولًا ومعها الإنجليزية.",
@@ -286,7 +345,8 @@ export const SOCIAL_DICTIONARY = {
     agentPipDone: "جاهز",
     agentPipFailed: "فشل",
     agentPipRejected: "مرفوض",
-    successMsg: "تم النشر بنجاح!",
+    agentDraftMedia: "الوسائط المقترحة",
+    agentTrayHint: "{count} وسائط في الحافظة — سترافق الطلب التالي.",
     partialMsg: "تم النشر مع إخفاقات:",
     errorMsg: "فشلت العملية: ",
     noChannels: "لا توجد قناة موصولة لهذا المنتج بعد.",

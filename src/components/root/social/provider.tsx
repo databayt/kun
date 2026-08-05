@@ -18,9 +18,11 @@ import {
 import { useRouter } from "next/navigation";
 import { isRTL, type Locale } from "@/components/local/config";
 import {
+  listAnsweredDrafts,
   readSocialDraft,
   requestSocialDraft,
   verifyConnections,
+  type AnsweredDraft,
 } from "@/actions/post-social";
 import {
   CHANNELS,
@@ -29,6 +31,7 @@ import {
 } from "@/components/root/social/config";
 import {
   DEFAULT_PRODUCT,
+  PRODUCT_IDS,
   productChannelWired,
   type ProductId,
 } from "@/components/root/social/products";
@@ -53,7 +56,12 @@ export type Stage = (typeof STAGES)[number];
 export interface DraftPair {
   ar: string;
   en: string;
+  /** The draft's media half — ask-time attachments plus the answerer's picks. */
+  mediaUrls: string[];
 }
+
+/** The attachment tray's ceiling — mirrors the Zod cap and the platform max. */
+const MAX_MEDIA = 10;
 
 export type Reveal = "ar" | "en" | "done" | null;
 
@@ -76,6 +84,12 @@ export interface DraftQueue {
   busy: boolean;
   hasInteracted: boolean;
   draft: DraftPair | null;
+  /**
+   * The answered SocialDraftRequest's id, kept after the poll stops so the
+   * "Use …" hand-off can carry it — approving in the review queue then
+   * consumes the request instead of leaving it to be approved twice.
+   */
+  answeredId: string | null;
   reveal: Reveal;
   error: string | null;
   queueInfo: { pendingAhead?: number; lastDrainAt?: string } | null;
@@ -84,6 +98,23 @@ export interface DraftQueue {
   advance: (from: Reveal, to: Reveal) => void;
   reset: () => void;
   checkAgain: () => void;
+}
+
+/**
+ * The publish stage's queue of answered drafts. List and selection live here
+ * so a stage navigation (say, out to the showroom to attach media and back)
+ * never loses the draft under review.
+ */
+export interface ReviewQueue {
+  drafts: AnsweredDraft[];
+  loading: boolean;
+  error: string | null;
+  refresh: () => Promise<void>;
+  /** The draft loaded into the editor — null renders the queue empty-state. */
+  activeDraftId: string | null;
+  /** Copies the draft's copy + media into the editor/tray and selects it. */
+  loadDraft: (id: string) => void;
+  clearActive: () => void;
 }
 
 interface SocialContextValue {
@@ -102,16 +133,27 @@ interface SocialContextValue {
   /** Navigate to a stage — the tab row and cross-stage jumps share one path. */
   goToStage: (stage: Stage) => void;
   /**
-   * The agent window's hand-off. Overwrites whatever is in the composer —
+   * The agent window's hand-off. Overwrites whatever is in the editor —
    * pressing "Use …" is the explicit choice to take the draft — then opens
-   * the Publish stage.
+   * the Publish stage. Carrying the request id keeps the queue lifecycle
+   * honest: approving there consumes the request.
    */
-  handToComposer: (text: string) => void;
+  handToComposer: (
+    text: string,
+    mediaUrls?: string[],
+    draftId?: string,
+  ) => void;
   composerText: string;
   setComposerText: (value: string) => void;
-  composerMediaUrl: string;
-  setComposerMediaUrl: (value: string) => void;
+  /**
+   * The shared attachment tray — one ordered media set that rides a draft
+   * ask, the review editor, and the showroom's Attach in turn.
+   */
+  composerMediaUrls: string[];
+  attachMedia: (url: string) => void;
+  removeMedia: (url: string) => void;
   draftQueue: DraftQueue;
+  reviewQueue: ReviewQueue;
 }
 
 const SocialContext = createContext<SocialContextValue | null>(null);
@@ -143,7 +185,9 @@ export function SocialProvider({
   const [status, setStatus] = useState<EgressStatus | null>(null);
   const [checking, setChecking] = useState(true);
   const [composerText, setComposerText] = useState("");
-  const [composerMediaUrl, setComposerMediaUrl] = useState("");
+  const [composerMediaUrls, setComposerMediaUrls] = useState<string[]>([]);
+  // The review queue's selection — which answered draft the editor holds.
+  const [activeDraftId, setActiveDraftId] = useState<string | null>(null);
 
   const goToStage = useCallback(
     (stage: Stage) => {
@@ -152,9 +196,28 @@ export function SocialProvider({
     [router, lang],
   );
 
+  // Guards mirror the Zod gate: public http(s) URLs only, deduped, capped.
+  // Silent on refusal by design — the showroom's Attach always hands a CDN
+  // URL, and the editor's add-URL field validates before it calls this.
+  const attachMedia = useCallback((url: string) => {
+    const trimmed = url.trim();
+    if (!/^https?:\/\//i.test(trimmed)) return;
+    setComposerMediaUrls((prev) =>
+      prev.includes(trimmed) || prev.length >= MAX_MEDIA
+        ? prev
+        : [...prev, trimmed],
+    );
+  }, []);
+
+  const removeMedia = useCallback((url: string) => {
+    setComposerMediaUrls((prev) => prev.filter((u) => u !== url));
+  }, []);
+
   const handToComposer = useCallback(
-    (text: string) => {
+    (text: string, mediaUrls?: string[], draftId?: string) => {
       setComposerText(text);
+      if (mediaUrls) setComposerMediaUrls(mediaUrls.slice(0, MAX_MEDIA));
+      setActiveDraftId(draftId ?? null);
       goToStage("publish");
     },
     [goToStage],
@@ -227,6 +290,7 @@ export function SocialProvider({
   const [busy, setBusy] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
   const [draft, setDraft] = useState<DraftPair | null>(null);
+  const [answeredId, setAnsweredId] = useState<string | null>(null);
   const [reveal, setReveal] = useState<Reveal>(null);
   const [draftError, setDraftError] = useState<string | null>(null);
   const [requestId, setRequestId] = useState<string | null>(null);
@@ -284,7 +348,8 @@ export function SocialProvider({
         return;
       }
       if (res.status === "answered" && res.ar && res.en) {
-        setDraft({ ar: res.ar, en: res.en });
+        setDraft({ ar: res.ar, en: res.en, mediaUrls: res.mediaUrls ?? [] });
+        setAnsweredId(requestId);
         setReveal("ar");
         setBusy(false);
         setRequestId(null);
@@ -347,12 +412,19 @@ export function SocialProvider({
       setHasInteracted(true);
       setDraftError(null);
       setDraft(null);
+      setAnsweredId(null);
       setReveal(null);
       setRequestId(null);
       setQueueInfo(null);
       setStalled(false);
       try {
-        const res = await requestSocialDraft({ product, brief });
+        // The tray rides the ask — a showroom pick or pasted CDN URL becomes
+        // the draft's media half, for the answering session to keep or extend.
+        const res = await requestSocialDraft({
+          product,
+          brief,
+          mediaUrls: composerMediaUrls,
+        });
         if (res.ok && res.id) {
           setRequestId(res.id);
           setPrompt("");
@@ -365,12 +437,13 @@ export function SocialProvider({
         setBusy(false);
       }
     },
-    [busy, product],
+    [busy, product, composerMediaUrls],
   );
 
   const reset = useCallback(() => {
     if (pollRef.current) clearTimeout(pollRef.current);
     setDraft(null);
+    setAnsweredId(null);
     setReveal(null);
     setDraftError(null);
     setHasInteracted(false);
@@ -387,12 +460,72 @@ export function SocialProvider({
     setPollNonce((n) => n + 1);
   }, []);
 
+  // ——— The review queue ———
+
+  const [reviewDrafts, setReviewDrafts] = useState<AnsweredDraft[]>([]);
+  const [reviewLoading, setReviewLoading] = useState(false);
+  const [reviewError, setReviewError] = useState<string | null>(null);
+
+  const refreshReview = useCallback(async () => {
+    setReviewLoading(true);
+    setReviewError(null);
+    try {
+      const res = await listAnsweredDrafts();
+      if (res.ok) {
+        setReviewDrafts(res.drafts ?? []);
+      } else {
+        setReviewError(res.error ?? "Could not read the queue.");
+      }
+    } catch (err: unknown) {
+      setReviewError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setReviewLoading(false);
+    }
+  }, []);
+
+  const loadDraft = useCallback(
+    (id: string) => {
+      const found = reviewDrafts.find((d) => d.id === id);
+      if (found) {
+        // Arabic-first house rule: the AR copy loads by default; the editor's
+        // language pills refill from the same draft.
+        setComposerText(found.ar || found.en);
+        setComposerMediaUrls(found.mediaUrls.slice(0, MAX_MEDIA));
+        // The draft's brand is authoritative — channels, transport health and
+        // the approve payload all scope to it, not to whatever the select
+        // happened to show.
+        if ((PRODUCT_IDS as readonly string[]).includes(found.brand)) {
+          setProduct(found.brand as ProductId);
+        }
+      }
+      setActiveDraftId(id);
+    },
+    [reviewDrafts],
+  );
+
+  const clearActive = useCallback(() => {
+    setActiveDraftId(null);
+    setComposerText("");
+    setComposerMediaUrls([]);
+  }, []);
+
+  const reviewQueue: ReviewQueue = {
+    drafts: reviewDrafts,
+    loading: reviewLoading,
+    error: reviewError,
+    refresh: refreshReview,
+    activeDraftId,
+    loadDraft,
+    clearActive,
+  };
+
   const draftQueue: DraftQueue = {
     prompt,
     setPrompt,
     busy,
     hasInteracted,
     draft,
+    answeredId,
     reveal,
     error: draftError,
     queueInfo,
@@ -420,9 +553,11 @@ export function SocialProvider({
     handToComposer,
     composerText,
     setComposerText,
-    composerMediaUrl,
-    setComposerMediaUrl,
+    composerMediaUrls,
+    attachMedia,
+    removeMedia,
     draftQueue,
+    reviewQueue,
   };
 
   return (

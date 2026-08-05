@@ -606,6 +606,17 @@ export async function listAnsweredDrafts(): Promise<AnsweredDraftsResult> {
       where: { status: "answered" },
       orderBy: { createdAt: "asc" },
       take: 20,
+      select: {
+        id: true,
+        brand: true,
+        brief: true,
+        ar: true,
+        en: true,
+        mediaUrls: true,
+        requestedBy: true,
+        createdAt: true,
+        answeredAt: true,
+      },
     });
     return {
       ok: true,

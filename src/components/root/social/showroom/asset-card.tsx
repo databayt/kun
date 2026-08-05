@@ -7,7 +7,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Check, Copy, Download, ExternalLink } from "lucide-react";
+import { Check, Copy, Download, ExternalLink, Paperclip } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -27,9 +27,12 @@ export function ShowroomCard({
   asset: ShowroomAsset;
   index: number;
 }) {
-  const { isRTL, t } = useSocial();
+  const { isRTL, t, attachMedia, goToStage } = useSocial();
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  // Sticky, unlike the copy check: once something is in the tray, the way to
+  // the Publish stage should stay visible.
+  const [attached, setAttached] = useState(false);
 
   // References without a checked-in thumb render as a typed plate — the note
   // and source link are the value; a hotlinked competitor image would rot.
@@ -39,6 +42,14 @@ export function ShowroomCard({
     await navigator.clipboard.writeText(asset.imageUrl ?? asset.href);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
+  };
+
+  // Only generated assets carry a renderable media URL a platform could
+  // fetch; a reference's href is its source page, not media.
+  const attach = () => {
+    if (!asset.imageUrl) return;
+    attachMedia(asset.imageUrl);
+    setAttached(true);
   };
 
   const kindLabel =
@@ -120,9 +131,30 @@ export function ShowroomCard({
             </div>
 
             <div className="flex gap-2">
+              {asset.imageUrl && (
+                <button
+                  onClick={attach}
+                  className="hover:bg-muted flex flex-1 items-center justify-center gap-2 border px-3 py-2 text-sm transition-colors"
+                >
+                  {attached ? (
+                    <>
+                      <Check className="h-4 w-4 text-green-600" />{" "}
+                      {t.attachedAsset}
+                    </>
+                  ) : (
+                    <>
+                      <Paperclip className="h-4 w-4" /> {t.attachAsset}
+                    </>
+                  )}
+                </button>
+              )}
               <button
                 onClick={copyUrl}
-                className="hover:bg-muted flex flex-1 items-center justify-center gap-2 border px-3 py-2 text-sm transition-colors"
+                className={
+                  asset.imageUrl
+                    ? "hover:bg-muted flex items-center justify-center gap-2 border px-3 py-2 text-sm transition-colors"
+                    : "hover:bg-muted flex flex-1 items-center justify-center gap-2 border px-3 py-2 text-sm transition-colors"
+                }
               >
                 {copied ? (
                   <>
@@ -152,6 +184,20 @@ export function ShowroomCard({
                 </a>
               )}
             </div>
+
+            {/* The attach → review round-trip, closed: the tray now holds the
+                asset, and the Publish stage is where it gets used. */}
+            {attached && (
+              <button
+                onClick={() => {
+                  setOpen(false);
+                  goToStage("publish");
+                }}
+                className="text-foreground text-xs font-medium underline underline-offset-4"
+              >
+                {t.attachOpenPublish}
+              </button>
+            )}
           </div>
         </DialogContent>
       </Dialog>

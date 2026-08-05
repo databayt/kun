@@ -46,6 +46,7 @@ import { Button } from "@/components/ui/button";
 import { fill } from "@/components/root/social/dictionary";
 import { PRODUCTS } from "@/components/root/social/products";
 import { useSocial } from "@/components/root/social/provider";
+import { mediaKind } from "@/lib/media-kind";
 import { cn } from "@/lib/utils";
 
 /**
@@ -66,14 +67,22 @@ export function DraftAgent() {
   // The conversation — brief, queue poll, answer, reveal — is provider state,
   // so it survives leaving this page the way the old hidden panel survived a
   // tab switch. Only presentation state stays here.
-  const { isRTL, t, product, handToComposer, goToStage, draftQueue } =
-    useSocial();
+  const {
+    isRTL,
+    t,
+    product,
+    handToComposer,
+    goToStage,
+    draftQueue,
+    composerMediaUrls,
+  } = useSocial();
   const {
     prompt,
     setPrompt,
     busy,
     hasInteracted,
     draft,
+    answeredId,
     reveal,
     error,
     queueInfo,
@@ -212,15 +221,65 @@ export function DraftAgent() {
                 </div>
               )}
 
+              {/* The draft's media half — the answering session's picks (or
+                  the ask's own attachments), shown so what gets approved is
+                  the FULL draft, not just its copy. */}
+              {draft && reveal === "done" && draft.mediaUrls.length > 0 && (
+                <div className="space-y-1.5 pt-1 text-start">
+                  <p className="text-muted-foreground text-xs">
+                    {t.agentDraftMedia}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {draft.mediaUrls.map((url) =>
+                      mediaKind(url) === "image" ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          key={url}
+                          src={url}
+                          alt=""
+                          loading="lazy"
+                          className="border-border h-16 w-16 rounded-xl border object-cover"
+                        />
+                      ) : (
+                        <span
+                          key={url}
+                          className="border-border bg-muted flex h-16 w-16 items-center justify-center rounded-xl border font-mono text-[10px] tracking-wider uppercase"
+                        >
+                          {t.mediaKindVideo}
+                        </span>
+                      ),
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* "Use …" carries the whole draft — copy, media AND the request
+                  id — so approving on the Publish stage consumes the queue
+                  entry instead of leaving it approvable twice. */}
               {draft && reveal === "done" && (
                 <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
-                  <Button size="sm" onClick={() => handToComposer(draft.ar)}>
+                  <Button
+                    size="sm"
+                    onClick={() =>
+                      handToComposer(
+                        draft.ar,
+                        draft.mediaUrls,
+                        answeredId ?? undefined,
+                      )
+                    }
+                  >
                     {t.agentUseAr}
                   </Button>
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => handToComposer(draft.en)}
+                    onClick={() =>
+                      handToComposer(
+                        draft.en,
+                        draft.mediaUrls,
+                        answeredId ?? undefined,
+                      )
+                    }
                   >
                     {t.agentUseEn}
                   </Button>
@@ -228,7 +287,11 @@ export function DraftAgent() {
                     size="sm"
                     variant="outline"
                     onClick={() =>
-                      handToComposer(`${draft.ar}\n\n—\n\n${draft.en}`)
+                      handToComposer(
+                        `${draft.ar}\n\n—\n\n${draft.en}`,
+                        draft.mediaUrls,
+                        answeredId ?? undefined,
+                      )
                     }
                   >
                     {t.agentUseBoth}
@@ -381,6 +444,15 @@ export function DraftAgent() {
                 </div>
               )}
             </PromptInput>
+
+            {/* Tray media rides the next ask — said here because the tray was
+                filled elsewhere (the showroom's Attach) and an invisible
+                side-effect on submit would read as a bug. */}
+            {composerMediaUrls.length > 0 && !busy && (
+              <p className="text-muted-foreground/70 mx-auto mt-3 max-w-xl text-center text-xs leading-relaxed">
+                {fill(t.agentTrayHint, { count: composerMediaUrls.length })}
+              </p>
+            )}
 
             {/* What a good brief contains. Shown once, before the first ask: the
                 answering session gets the brand and this text and nothing else,
