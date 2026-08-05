@@ -50,21 +50,27 @@ live on its page:
 ## The pipeline
 
 ```
-calendar ─► draft ─► higgs ─► approve ─► publish ─────────► measure
-    │         │        │         │          │                  │
-  which     Claude  text-free  human    drain | hermes    SocialMetric
-brand,when  AR-first visuals    gate    | copy-out         + UTM tags
-                              ▲ HARD STOP
+calendar ══► draft ══════════════► review ─► publish ─────────► measure
+    │          │  ▲                   │         │                  │
+  pillars   Claude │  media        human      drain | hermes  SocialMetric
+  rotate    AR-first│ (pick|make)   gate      | copy-out       + UTM tags
+  into the         └── higgs · carousel      ▲ HARD STOP
+  queue                library.json          (/social/publish)
 ```
+
+A **full draft is copy AND/OR media** — text · text + image(s) · text + video ·
+image(s) only · video only. The stages are wired to each other: pillars seed the draft
+queue, media attaches to the draft (`SocialDraftRequest.mediaUrls`), and the answered
+full draft queues for a human on `/social/publish`.
 
 | Stage | Owner | Notes |
 |-------|-------|-------|
-| **Plan** | `calendar` skill · `weekly` cadence · `growth` agent pillars | What to say, to whom, when |
-| **Draft** | `draft` skill — **Claude, natively** — or the **Social Agent window** on `/social` | Arabic-first bilingual copy against [Brand & Voice](/docs/brand). The window queues the brief and a Claude Code session on the Max pool answers it — the API lane of D-20260730 has no funded key, so drafting stays on the subscription. Contributor-gated |
-| **Media** | `/higgs` | Text-free visuals, brand kit `b0a3f528…`; copy is overlaid in-post, never rendered |
-| **Approve** | `approve` skill → human (Abdout / Ali / Samia) | The gate — see [Autonomy ladder](#autonomy-ladder) |
-| **Schedule** | `SocialVariant.scheduledFor` + `/api/social/drain` | The composer takes a date and time; the drain publishes due variants every ~15 minutes from GitHub Actions. No keyword of its own — it is `publish`'s second verb ("schedule it for tomorrow") |
-| **Publish** | `publish` skill → **egress layer** — Telegram + Facebook direct APIs · Hermes-transport channels via the [gateway](/docs/hermes) · WhatsApp as a copy-out block | Egress only — dumb relays, never the LLM |
+| **Plan** | `calendar` skill · `weekly` cadence · `growth` agent pillars | What to say, to whom, when. `content/social/pillars.json` IS the recurring calendar — the Monday seeder rotates it into the draft queue, and `/social/calendar` renders it with a **Queue now** button |
+| **Draft** | `draft` skill — **Claude, natively** — or the **Social Agent window** on `/social` | Arabic-first bilingual copy against [Brand & Voice](/docs/brand), **plus the media half**. The window queues the brief and a Claude Code session on the Max pool answers it — the API lane of D-20260730 has no funded key, so drafting stays on the subscription. Contributor-gated |
+| **Media** | `media` keyword → `/higgs` (text-free) · `/carousel` (text-bearing) | **Pick before you generate**: `library.json` by brand + type, or the brief's `(library: id)` hint. New renders register in the library, then attach to the draft (`social-drafts.mjs attach`, or the showroom's **Attach**) |
+| **Approve** | `approve` skill → human (Abdout / Ali / Samia) | The gate — the **review queue** on `/social/publish` is the primary lane; a signed 12h link covers a remote approver. See [Autonomy ladder](#autonomy-ladder) |
+| **Schedule** | `SocialVariant.scheduledFor` + `/api/social/drain` | The review queue's approve-mode setting: publish right away, or schedule and delegate to the drain, which publishes due variants every ~15 minutes from GitHub Actions. No keyword of its own — it is `publish`'s second verb ("schedule it for tomorrow") |
+| **Publish** | `publish` skill → **egress layer** — Telegram + Facebook direct APIs · Hermes-transport channels via the [gateway](/docs/hermes) · WhatsApp as a copy-out block | Egress only — dumb relays, never the LLM. Media routes by shape: text · one photo · 2–10 album/carousel · one video; mixed kinds are refused by name |
 | **Measure** | `measure` skill → `/api/social/metrics` → `SocialMetric` | Facebook reach + engagement, six-hourly. UTM tags are applied but not yet consumed — no PostHog in the app |
 
 Each stage is also its own keyword: say "draft a post for hogwarts" and only that stage runs.
@@ -78,16 +84,17 @@ page — linkable, shareable — and the bare `/social` opens on **Draft**.
 
 | Route | Stages | What is there |
 |-------|--------|---------------|
-| **/social/calendar** | Plan | Nothing to operate — the calendar's output is a dated table the Hub has nowhere to keep. The page names the keyword instead of faking a surface |
-| **/social/draft** | Draft | The Social Agent window. Real |
-| **/social/media** | Media | The showroom — generated assets (`library.json`) and kept references (`references.json`), filterable by brand and type; decks link to their live renders. Copy URL feeds the Publish stage's Media field |
-| **/social/publish** | Approve · Schedule · Publish | The composer. All three are one form with three buttons, so they are one route rather than three over the same fields |
+| **/social/calendar** | Plan | The pillars, live: each brand's briefs with **this ISO week's rotation picks** highlighted (the same math the Monday seeder runs), a queue chip per brief — in the queue · answered · approved · dismissed — and **Queue now** to file one as a draft ask on the spot |
+| **/social/draft** | Draft | The Social Agent window. Shows the answered draft's media beside its copy; "Use …" hands copy **and** media to the review queue |
+| **/social/media** | Media | The showroom — generated assets (`library.json`) and kept references (`references.json`), filterable by brand and type; decks link to their live renders. **Attach** puts an asset in the publish tray — no copy-pasting URLs |
+| **/social/publish** | Approve · Schedule · Publish | The **review queue**: the next answered full draft awaiting approval, every upcoming one browsable, an editor that fine-tunes copy, attachments and channels — and never creates from blank. Approve (now, or scheduled per the settings), Dismiss, or send the signed review link. An empty queue points back at Draft |
 | **/social/measure** | Measure | The activity ledger — last 20 variants with status, time, and latest reach/views |
 
 Cross-stage state lives in the layout's provider, which persists across stage navigations: the
-agent's queue poll runs on for minutes and the composer keeps its typed copy, and switching
-stages must not throw either away. Taking a draft ("Use Arabic") moves the Hub to **Publish** —
-the composer is another route, so handing it copy is a navigation.
+agent's queue poll runs on for minutes, the editor keeps its copy, and the **attachment tray**
+survives a trip to the showroom and back — switching stages must not throw any of it away.
+Taking a draft ("Use Arabic") moves the Hub to **Publish** carrying copy, media, and the request
+id, so approving there consumes the queue entry instead of leaving it approvable twice.
 
 ### Drafting from the Hub — the two-sided loop
 
@@ -100,8 +107,10 @@ subscription. It has two halves and **both have to run**:
 | Any Claude Code session | the repo | Says **`draft`** with no topic → queue mode drains the pending asks through the same brand-voice doctrine, and writes the copy back |
 
 ```bash
-node scripts/social-drafts.mjs list                                    # what is waiting
-node scripts/social-drafts.mjs answer <id> --ar ar.txt --en en.txt     # the copy
+node scripts/social-drafts.mjs list                                    # what is waiting (incl. mediaUrls)
+node scripts/social-drafts.mjs answer <id> --ar ar.txt --en en.txt \
+  --media "https://cdn…/hero.png"                                     # the copy + its media half
+node scripts/social-drafts.mjs attach <id> --media "url1,url2"         # media alone, after a render
 node scripts/social-drafts.mjs fail   <id> --note "what is missing"    # shown to the asker
 ```
 
@@ -258,18 +267,23 @@ The Social Hub at [`/social`](/social) is multi-product (Phase 3, 2026-07-23):
 - **Drafting stays out of the relays** — `SOCIAL_DRAFT_SOURCE=hermes` (default) hands the ask to
   Hermes; `=anthropic` drafts server-side via the API and is opt-in because the engine's billing
   posture is subscription-only.
-- **Media** — an optional public image URL (typically a `/higgs` render on the CDN) rides the
-  whole chain: Facebook switches to the `/photos` edge with a caption, Telegram to `sendPhoto`
-  (spilling over-long copy into a follow-up message rather than truncating it), and the signed
-  approval token carries the media so approving a staged draft publishes the image, not just text.
+- **Media is a set, and it rides the whole chain** — a draft carries `mediaUrls` (≤10 public URLs,
+  typically `/higgs` or `/carousel` renders on the CDN) from the ask through approval to delivery,
+  which routes by shape: text · one photo (`/photos` edge, `sendPhoto`) · 2–10 as a Facebook
+  carousel or a Telegram album (`sendMediaGroup`) · one video (`/videos`, `sendVideo`). Over-long
+  copy spills into a follow-up message rather than being truncated. Mixed image+video, two videos,
+  or more than ten images are refused by name before anything is delivered, because no platform
+  edge carries them. The confirm page behind a signed link lists every URL.
 - **Multi-channel, with per-channel truth** — the picker selects any subset of a brand's wired
   channels, the three transports fan out in parallel, and the result names each channel
   individually. A half-landed post no longer reads as one flat failure.
-- **Stage for review from the Hub** — the composer can push your own copy down the cron's
-  approval path (signed 12h link into the private review channel) instead of publishing directly,
-  for when someone else signs off.
-- **Scheduling and the drain** — the composer takes a date and time; variants land as `scheduled`
-  and `/api/social/drain` publishes them from GitHub Actions every ~15 minutes, claiming each row
+- **Stage for review from the Hub** — the review editor can push the draft down the cron's
+  approval path (signed 12h link into the private review channel) instead of deciding in-app,
+  for when someone else signs off. Staging retires the queue entry, so a draft cannot be
+  approved through both lanes.
+- **Scheduling and the drain** — the review queue's approve-mode setting (publish right away, or
+  schedule) decides what Approve does; scheduled variants land as `scheduled` and
+  `/api/social/drain` publishes them from GitHub Actions every ~15 minutes, claiming each row
   before delivering so two overlapping runs cannot double-post. Its channel filter is an
   allow-list, so a transport added later waits visibly in the queue rather than being attempted
   and silently lost.
@@ -296,7 +310,23 @@ The Social Hub at [`/social`](/social) is multi-product (Phase 3, 2026-07-23):
 - **The composer is an editor** (2026-07-30) — the **Publish** tab wears the agent's shape: the same
   band, heading and rounded surface, sized for writing. Media URL and schedule collapsed from stacked
   labelled inputs into two popover pills, so the copy is the only thing on the page with weight.
-  Behaviour unchanged — same three actions, same validation, same per-channel outcome list.
+- **Publish became a review queue** (2026-08-05) — the blank-slate composer is gone. Answered full
+  drafts (copy AND/OR media) queue on **Publish** oldest-first: the next one up is highlighted,
+  every upcoming one is browsable, and loading one opens the editor prefilled with its copy and its
+  attachments. The only actions are decisions — **Approve** (now or scheduled, per a settings
+  popover), **Dismiss**, or send the signed review link — and an empty queue points back at Draft
+  rather than offering a textarea. Approval claims the request (`answered → consumed`) with the
+  same conditional update the drain uses, so two reviewers race safely; a total delivery failure
+  hands the draft back with the reason, while a partial one stays consumed because re-approving
+  would double-post the channels that landed.
+- **Media is wired to the draft** (2026-08-05) — the showroom's **Attach** fills a provider-owned
+  tray shared by the draft ask, the review editor, and the showroom itself; the drain's answering
+  session picks assets from `library.json` by the brief's `(library: id)` hint or brand + type and
+  passes them with `answer --media`; `/higgs` and `/carousel` end by attaching their render to the
+  ask it answers. Copy-and-paste-a-URL is no longer the hand-off.
+- **The calendar is real** (2026-08-05) — `/social/calendar` renders `pillars.json` with this ISO
+  week's rotation picks highlighted (a TS mirror of the seeder's math, parity-tested), a queue chip
+  per brief, and **Queue now** to file one immediately. Calendar → draft is a click.
 - **The queue drains itself** (2026-07-30) — `scripts/drain-drafts.sh --install` arms a launchd
   tick every 5 minutes: heartbeat on every look, Claude only when asks are pending. The window
   reads the heartbeat back (position, last check), stops polling after 10 minutes, and the drain

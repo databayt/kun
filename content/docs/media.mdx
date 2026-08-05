@@ -110,6 +110,16 @@ registries — `content/media/library.json` (what we generated, S3-served) and
 `content/media/references.json` (what we keep as reference or inspiration) — filterable by
 collection, brand, and asset type. Rendered decks link to their live carousel routes.
 
+**Attach is the hand-off.** A generated asset's card carries an **Attach** button that puts it
+in the Hub's attachment tray, which rides to the Publish stage and becomes the draft's media
+half — the tray survives the navigation, so browsing here and deciding there is one motion.
+Copy URL stays for the cases that need a URL in hand. A session does the same move from the
+CLI: `node scripts/social-drafts.mjs attach <askId> --media "<cdnUrl>"`.
+
+**Pick before you generate.** A `cdnUrl` already in the library is free and instant; the
+drafting queue's answering session matches by the brief's `(library: <id>)` hint or by brand +
+asset type, and only a genuine miss justifies spending credits.
+
 <MediaShowroom />
 
 ## Asset vocabulary

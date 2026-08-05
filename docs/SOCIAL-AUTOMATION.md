@@ -225,19 +225,32 @@ architecture (actors, the three loops, cron inventory, keywords) is now
   dependency or key in the app, so nothing consumes the UTMs. The tags are still recorded in the
   platform link for whatever is added later.
 
-### Draft queue — the Hub's Draft tab needs a drain
+### Draft queue and the review queue — ✅ done 2026-07-30 … 08-05
 
 The Social Agent window (2026-07-30) is the front door for a teammate with no Claude Code session:
 the ask lands in `SocialDraftRequest` as `pending` and a session answers it on the Max pool through
-`draft`'s queue mode (`scripts/social-drafts.mjs`). **Nothing drains it on a schedule**, so an ask
-waits for whenever someone next runs a session, and the window polls without a timeout — from the
-Hub, an undrained queue and an outage look identical.
+`draft`'s queue mode (`scripts/social-drafts.mjs`).
 
-- A scheduled drain — folded into the daily maintain heartbeat, or a scheduled cloud agent (which
-  would need `DATABASE_URL` reachable from that sandbox; unverified).
-- A "waiting longer than expected" state in the window, so a stall reads as a stall.
-- Reconnecting a window to an in-flight request: the request id lives in React state only, so
-  closing the tab orphans the answer — the row is answered but nothing surfaces it.
+- ✅ **Scheduled drain** — `scripts/drain-drafts.sh --install`, launchd every 5 minutes: heartbeat
+  on every look, Claude only when asks are pending. Zero tokens idle.
+- ✅ **A stall reads as a stall** — the window shows queue position + last drain check, backs off,
+  stops at 10 minutes into "still queued"; the drain sweep expires hour-old unanswered asks.
+- ✅ **Full drafts** (2026-08-05) — `SocialDraftRequest.mediaUrls` carries the media half, so a
+  draft is copy AND/OR media (text · text+image(s) · text+video · image(s) · video). The drain's
+  session picks from `library.json` (`answer --media`); a full session generating via `/higgs` or
+  `/carousel` attaches afterwards (`attach --media`). Delivery routes by shape and refuses what no
+  platform edge carries (mixed image+video, two videos, >10 images).
+- ✅ **The review queue** (2026-08-05) — `/social/publish` stopped being a blank composer: answered
+  drafts queue oldest-first, the editor fine-tunes but never creates, and Approve claims the row
+  (`answered → consumed`, conditional) then publishes now or schedules to the drain per a settings
+  toggle. `dismissed` records a human no. Staging the signed link retires the entry, so no draft
+  can be approved through both lanes.
+- ✅ **Calendar → draft is a click** (2026-08-05) — `/social/calendar` renders `pillars.json` with
+  this ISO week's seeder picks highlighted (parity-tested TS mirror of the seeder's math), a queue
+  chip per brief, and a **Queue now** button.
+- ⏭ **Reconnecting a window to an in-flight request** — still open, and now smaller: the request id
+  lives in React state, so closing the tab orphans that _window_, but the answer surfaces in the
+  review queue on Publish rather than being lost.
 
 No new spend in any of these: the answering is Max-pool, not API.
 

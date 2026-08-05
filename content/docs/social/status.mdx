@@ -101,7 +101,7 @@ Their current state:
 
 | Loop | State | Why |
 |------|-------|-----|
-| **A — Hub** | **Works** (Facebook only) | The one working path, now whole: write in `/social`'s Publish editor and publish directly, or ask on the Draft tab — the queue drains on a 5-minute launchd tick, and staging returns the signed approval links right in the composer, so no chat relay is needed to run the human gate. |
+| **A — Hub** | **Works** (Facebook only) | The one working path, and since 2026-08-05 a wired one: a brief on the Draft tab (or **Queue now** on the Calendar tab) becomes a queue ask, the 5-minute launchd drain answers it as a **full draft** — copy plus media picked from `library.json` — and it lands in the **review queue** on Publish, where a human fine-tunes and approves (now, or scheduled to the drain). Staging still returns the signed links in-app, so no chat relay is needed to run the gate. |
 | **B — Cron** | **Superseded by the seed lane** (2026-08-01) | The Vercel route stays parked as designed (`SOCIAL_AUTOPOST_PRODUCTS` unset — no compliant server-side draft source, and its one-text-everywhere shape contradicts the multiplier). Its *calendar half* now runs billing-compliantly on the Mac: `scripts/seed-drafts.sh` (launchd, Mondays 07:00) files the week's briefs from `content/social/pillars.json` into the draft queue, and the 5-minute drain answers them on the Max pool — verified unattended end to end (seed → answered in 3 minutes). Per-channel fan-out remains session-side at staging time. |
 | **C — Hermes relay** | **Parked** | Hermes is down, never observed end to end, and since 2026-07-30 nothing depends on it: reviews carry through the Hub's own links. Revisit only when a hermes-transport channel actually goes live. |
 
@@ -111,7 +111,7 @@ returns `drafted: 0`.
 
 ## What's done
 
-- **Egress** — per-channel results, three transports in parallel, media through the whole chain (Facebook `/photos`, Telegram `sendPhoto`, media signed into the approval token)
+- **Egress** — per-channel results, three transports in parallel, and a **media set** through the whole chain: one photo (Facebook `/photos`, Telegram `sendPhoto`), 2–10 as a Facebook carousel or Telegram album (`sendMediaGroup`), one video (`/videos`, `sendVideo`) — with mixed image+video, two videos, or >10 images refused by name before delivery, since no platform edge carries them. The approval token addresses the variant, so the confirm page lists every URL
 - **Per-product Facebook** — its own Page and permanent token per brand, with the resolved Page name shown before you publish, which is how a crossed token gets caught
 - **Registry** — 5 products × 8 distribution channels, AND-gated so a channel is publishable only when the transport *and* that brand's destination are both wired. A communication channel is refused whatever a per-brand map says
 - **Taxonomy** — `kind` separates what a channel is *for* from how its bytes move, and a test asserts every channel lands in exactly one delivery lane (drain · hermes · manual), so a transport added later cannot silently fall through all three
@@ -124,10 +124,18 @@ returns `drafted: 0`.
   to its next run
 - **Hub** — bilingual en/ar with RTL, Server-Component header, one-round-trip status probe, and the
   pipeline as five tabs (Calendar · Draft · Media · Publish · Measure) with brand, channels and
-  status as context above them. Panels are hidden rather than unmounted, so a queued draft keeps
-  polling and typed copy survives a tab switch. Draft and Publish share one shape — an agent window
-  and an editor built from the same block — and Publish's media and schedule fields collapse into
-  toolbar pills so the copy is what carries weight
+  status as context above them. State lives in the layout provider, so a queued draft keeps polling,
+  typed copy survives a stage switch, and the attachment tray survives a trip to the showroom.
+  Draft and Publish share one shape — an agent window and an editor built from the same block —
+  and Publish's media and schedule fields collapse into toolbar pills so the copy carries weight
+- **The stages are wired to each other** (2026-08-05) — Calendar renders `pillars.json` with this
+  ISO week's rotation picks highlighted and a **Queue now** button; Draft answers with a **full
+  draft** (copy AND/OR media — text, text+image(s), text+video, image(s) only, video only, carried
+  on `SocialDraftRequest.mediaUrls`); Media's showroom has an **Attach** button that fills a shared
+  tray instead of asking for copy-paste; Publish is a **review queue** — next-up draft, browse the
+  rest, fine-tune, then Approve (now or scheduled), Dismiss, or send the signed link. Approval
+  claims the request with the same conditional update the drain uses, so two reviewers race safely,
+  and an empty queue points back at Draft rather than offering a blank textarea
 - **The Social Agent window** — in-page drafting (2026-07-30): a brief in, AR+EN copy out, one
   press into the composer. Contributor-gated. **It does not call the API** — D-20260730's spend lane
   shipped and is blocked (`ANTHROPIC_API_KEY` in Vercel returns 401, and subscription-only billing

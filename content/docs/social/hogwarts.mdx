@@ -67,15 +67,17 @@ unlocks. Four post archetypes rotate; each maps a [content pillar](#content-pill
 
 | Archetype | Pillar | Asset type (lane) | Publish lane |
 |-----------|--------|-------------------|--------------|
-| **Feature highlight** | Features / time-savings | `og` card, 1200×630 (template — 1-slide deck) | approval link → drain |
-| **Scene + story** | Parent visibility, classroom life | `hero`/`story` photo (higgs, from the [library](/social/media)) | approval link → drain |
-| **Swipe story** | Product intro, module ecosystem | `carousel` deck 4:5 (template) | `post-to-facebook.mjs --photos` post-approval |
-| **Context / trust** | MENA education, open source | `og` or `split` card (template) | approval link → drain |
+| **Feature highlight** | Features / time-savings | `og` card, 1200×630 (template — 1-slide deck) | review queue → now or drain |
+| **Scene + story** | Parent visibility, classroom life | `hero`/`story` photo (higgs, from the [library](/social/media)) | review queue → now or drain |
+| **Swipe story** | Product intro, module ecosystem | `carousel` deck 4:5 (template) | attach the slides → review queue → drain (2–10 as one carousel post) |
+| **Context / trust** | MENA education, open source | `og` or `split` card (template) | review queue → now or drain |
 
 **The weekly rhythm:** Monday 07:00 the seed lane files two briefs from
-`content/social/pillars.json` (ISO-week rotation over the pillars); the 5-minute drain answers
-them AR-first on the Max pool; the Hub shows the copy; a human stages, approves, and the drain
-delivers. Numbers come back via `/measure` (platform insights six-hourly + PostHog UTMs).
+`content/social/pillars.json` (ISO-week rotation over the pillars — the Calendar tab shows which
+two, and **Queue now** files one off-cycle); the 5-minute drain answers them AR-first on the Max
+pool and attaches matching library media; the full draft lands in the **review queue** on the
+Publish tab; a human fine-tunes and approves, either publishing straight away or scheduling to
+the drain. Numbers come back via `/measure` (platform insights six-hourly + PostHog UTMs).
 Nothing publishes without the human tap — the gate is the design, not a bottleneck.
 
 ## Voice

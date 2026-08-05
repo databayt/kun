@@ -151,22 +151,27 @@ The chain the whole system is built around, and where each stage actually lives:
 
 | Stage | Who / what | Code | Loop | State today |
 |-------|-----------|------|------|-------------|
-| **Generate** | Claude (`/social` skill) · the Hub's **Draft** tab · `/higgs` for media | `lib/social-draft.ts` (cron lane) · `SocialDraftRequest` + `draft` queue mode (Hub lane) | A · B · C | Claude-native. The relays never write copy. The Hub lane drains on a 5-minute launchd tick (`scripts/drain-drafts.sh`) — heartbeat every look, Claude only when asks are pending. |
-| **Approve** | Human — Abdout, Samia, or Ali | composer button · signed link · Slack | A · B · C | **Always required.** L2 on Facebook — the one live channel; L1 elsewhere. |
-| **Schedule** | Contributor — the composer's date-time field | `schedulePost` → `scheduled` variants → `/api/social/drain` | A | Real: pick a moment, the drain publishes within ~15 min of it. |
-| **Publish** | Egress fan-out, per transport, in parallel | `lib/social-publish.ts` → `deliverPost` | A · B · C | One code path for all three loops. |
+| **Generate** | Claude (`/social` skill) · the Hub's **Draft** tab · `/higgs` · `/carousel` | `lib/social-draft.ts` (cron lane) · `SocialDraftRequest` + `draft` queue mode (Hub lane) | A · B · C | Claude-native, and a **full draft**: copy AND/OR media on `SocialDraftRequest.mediaUrls`. The relays never write copy. The Hub lane drains on a 5-minute launchd tick (`scripts/drain-drafts.sh`) — heartbeat every look, Claude only when asks are pending; that session picks media from `library.json` but never generates (no tools for it, by design). |
+| **Media** | `library.json` pick first · `/higgs` (text-free) or `/carousel` (text-bearing) on a miss | `scripts/social-drafts.mjs attach` · showroom **Attach** → the Hub's tray | A | Attaches to the draft rather than being pasted into a field. |
+| **Approve** | Human — Abdout, Samia, or Ali | the **review queue** on `/social/publish` (`approveDraft`) · signed link (`stageForReview`) · Slack | A · B · C | **Always required.** L2 on Facebook — the one live channel; L1 elsewhere. The queue claims `answered → consumed` conditionally, so two reviewers race safely. |
+| **Schedule** | Contributor — the review queue's approve-mode setting, or `--at` | `approveDraft` / `schedulePost` → `scheduled` variants → `/api/social/drain` | A | Real: approve for a moment, the drain publishes within ~15 min of it. |
+| **Publish** | Egress fan-out, per transport, in parallel | `lib/social-publish.ts` → `deliverPost` | A · B · C | One code path for all three loops; routes by media shape (text · photo · 2–10 album/carousel · video) and refuses mixed kinds by name. |
 | **Measure** | Facebook Graph — insights + edge summaries | `/api/social/metrics` → `SocialMetric` rows | A · B · C | Wired on Facebook, six-hourly. UTM rides every link; PostHog not yet consuming. |
 
 ### Scheduling, persistence, and the single-use link
 
-Scheduling is real now. The composer takes a date and time, `schedulePost` writes one `scheduled`
-variant per channel, and the drain (GitHub Actions, every ~15 minutes) claims and publishes each
-one when its moment passes — three bounded attempts with backoff, and a reaper that recovers any
-row a killed function left stuck in `publishing`.
+Scheduling is real now. The review queue's approve-mode setting (or the composer's date-time
+field) decides the moment, `approveDraft`/`schedulePost` writes one `scheduled` variant per
+channel, and the drain (GitHub Actions, every ~15 minutes) claims and publishes each one when
+its moment passes — three bounded attempts with backoff, and a reaper that recovers any row a
+killed function left stuck in `publishing`.
 
 The persistence that unlocked it is Prisma on Neon: `SocialPiece` → `SocialVariant` (the status
 machine: `pending → publishing → published / failed / rejected`, plus `scheduled` for the drain
-lane) → `SocialMetric` (append-only time series). Persistence is also what made the approval link
+lane; media as `mediaUrls`) → `SocialMetric` (append-only time series). Alongside it,
+`SocialDraftRequest` carries the draft's own lifecycle — `pending → answered → consumed`
+(approved into a piece) or `dismissed` (a human said no) — which is what makes the review queue
+a queue rather than a list. Persistence is also what made the approval link
 single-use — approving is a conditional row transition, so a second click refuses — and, since
 2026-07-30, a two-step confirm: GET renders a read-only page and only the POSTed button
 publishes, so a chat client's link-preview crawler can never consume an approval.
