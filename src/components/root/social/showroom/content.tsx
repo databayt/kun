@@ -10,6 +10,7 @@ import type { Locale } from "@/components/local/config";
 import { getSocialDict } from "@/components/root/social/dictionary";
 import { listDecks } from "@/components/root/carousel/content";
 import { getShowroomData } from "./data";
+import { BrandShelves } from "./brand-shelf";
 import { ShowroomGrid } from "./grid";
 import { ShowroomKeyword } from "./keyword-pill";
 
@@ -59,6 +60,8 @@ export async function ShowroomContent({ lang }: { lang: Locale }) {
           </div>
         </div>
       )}
+
+      <BrandShelves assets={assets} />
 
       <ShowroomGrid assets={assets} />
 
