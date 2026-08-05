@@ -16,7 +16,7 @@
       "android-app"
     ],
     "stack": "Next.js 16, React 19, Prisma 6, TypeScript 5, Tailwind CSS 4, shadcn/ui",
-    "headcount": 7
+    "headcount": 8
   },
   "team": [
     {
@@ -40,9 +40,7 @@
     {
       "id": "moutaz",
       "name": "Moutaz",
-      "aka": [
-        "mutaz"
-      ],
+      "aka": ["mutaz"],
       "category": "tech",
       "role": "Product Engineer (business + sales + AI + network)",
       "traits": "Experienced software engineer with strong business, sales, AI, and network skills; owns the Albayan pilot",
@@ -52,22 +50,25 @@
     {
       "id": "aseel",
       "name": "Ali Aseel",
-      "aka": [
-        "ali"
-      ],
+      "aka": ["ali"],
       "category": "business",
       "role": "Sales + QA",
       "traits": "Young, well educated at a tech hub (India — current tech scene), MBA + CS degree, strong in business",
       "installRole": "business",
       "email": "aseel@databayt.org",
-      "sales_email": "sales@databayt.org"
+      "sales_email": "sales@databayt.org",
+      "brand_emails": {
+        "balqalam.com": [
+          "hi@balqalam.com",
+          "sales@balqalam.com",
+          "support@balqalam.com"
+        ]
+      }
     },
     {
       "id": "moed",
       "name": "Moed",
-      "aka": [
-        "moad"
-      ],
+      "aka": ["moad"],
       "category": "business",
       "role": "Business Development + Copywriting + Network",
       "traits": "Well educated, loves reading; good at business, sales, copywriting, and networking",
@@ -95,6 +96,14 @@
       "traits": "Reality-driven — practical thinking grounded in reality, very smart, brings a different perspective; owns deploys/infra cadence + Saudi physical ops",
       "installRole": "ops",
       "email": "sedon@databayt.org"
+    },
+    {
+      "id": "abobaker",
+      "name": "Abobaker",
+      "category": "business",
+      "role": "CEO",
+      "installRole": "business",
+      "email": "abobaker@databayt.org"
     }
   ]
 }
