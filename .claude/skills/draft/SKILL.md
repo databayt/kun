@@ -1,14 +1,20 @@
 ---
 name: draft
-description: Write the core piece and its per-channel variants — Arabic crafted first, English mirrored
-when_to_use: "Use when a topic needs to become actual post copy for a databayt brand — the core piece plus one platform-native variant per channel, Arabic written natively and English mirrored, with UTM on every link. ALSO the answering half of the Hub's agent window: with no topic, or on any phrasing about the draft queue, it drains the briefs contributors submitted on /social. This is the writing stage only: it does not decide what to write about (/calendar), does not make images or video (/higgs), does not stage for sign-off (/approve), and never sends anything to a platform (/publish). Triggers on: draft a post, write the copy, write the caption, post about <topic>, drain the draft queue, answer the social asks, any drafts waiting, اكتب منشور, صياغة المنشور, طابور الصياغة."
-argument-hint: "[<brand> <topic>] [--channels facebook,telegram] [--locale ar|en|both] · no args = drain the queue"
+description: Write the full draft — copy (Arabic crafted first, English mirrored) and/or its media set
+when_to_use: "Use when a topic needs to become a FULL draft for a databayt brand — the core piece plus one platform-native variant per channel, Arabic written natively and English mirrored, with UTM on every link, AND the draft's media half: library picks attached by URL, or a generation hand-off. ALSO the answering half of the Hub's agent window: with no topic, or on any phrasing about the draft queue, it drains the briefs contributors submitted on /social — picking media from the library as it answers. This is the drafting stage only: it does not decide what to write about (/calendar), does not render new images or video itself (/higgs, /carousel — it attaches their output), does not approve (/approve), and never sends anything to a platform (/publish). Triggers on: draft a post, write the copy, write the caption, post about <topic>, attach media to the draft, drain the draft queue, answer the social asks, any drafts waiting, اكتب منشور, صياغة المنشور, طابور الصياغة, أرفق وسائط للمسودة."
+argument-hint: "[<brand> <topic>] [--channels facebook,telegram] [--locale ar|en|both] [--media urls|type] · no args = drain the queue"
 ---
 
-# Draft — the copy, Arabic first
+# Draft — the full draft, Arabic first
 
-One core piece, then one platform-native variant per channel. Claude writes it —
-never a gateway LLM, never a translation pass.
+One core piece, then one platform-native variant per channel — plus the draft's
+media half. Claude writes the copy (never a gateway LLM, never a translation
+pass) and picks or commissions the media.
+
+**A full draft is copy AND/OR media.** The valid shapes: text only · text +
+image(s) · text + video · image(s) only · video only. Media rides
+`SocialDraftRequest.mediaUrls` (≤ 10 public https URLs; one video max per post
+— the delivery layer refuses mixed image+video in a single post).
 
 Arguments: $ARGUMENTS — brand, the topic or news, optional `--channels`
 (default: every channel the brand is wired for), optional `--locale`.
@@ -54,7 +60,16 @@ the work is whatever the team submitted from `/social`.
 7. **WhatsApp gets a variant like any other channel.** Its transport is `manual`,
    not absent: `/publish` will render it as a copy-out block for a human to
    forward. Draft it properly — short, forwardable, no link-preview dependency.
-8. **Run the moral gate** before handing off.
+8. **Settle the media half.** Pick before you generate:
+   - **Pick** — search `content/media/library.json` by brand + assetType (the
+     brief's `(library: <id>)` hint wins) and take the `cdnUrl`. Free, instant.
+   - **Generate** — nothing matches and the piece needs a visual: text-free
+     photography → `/higgs`; text-bearing formats (og, banner, infographic,
+     split, testimonial) → `/carousel` as a 1-slide deck. Register the output
+     in the library, then attach its URL.
+   - **Neither** — a text-only draft is a valid full draft; say so rather than
+     forcing a stock-looking image.
+9. **Run the moral gate** before handing off.
 
 ## Queue mode — answering the Hub's agent window
 
@@ -66,7 +81,7 @@ Max pool, so the copy comes out of the same doctrine as a hand-run `/draft`
 instead of depending on who happens to be at the keyboard.
 
 ```bash
-node scripts/social-drafts.mjs list          # JSON: id, brand, brief, requestedBy, waitingMinutes
+node scripts/social-drafts.mjs list          # JSON: id, brand, brief, requestedBy, mediaUrls, waitingMinutes
 ```
 
 Asks arrive from two writers: contributors on `/social`, and the **weekly seeder**
@@ -89,14 +104,28 @@ For each ask, oldest first:
 4. **Run the moral gate.** This matters more here than in a hand-run draft: the
    asker may not know the doctrine, and a thin brief invites invention. Never add
    a metric, customer, price, or date the brief did not contain.
-5. **Write the answer back through files** — never argv, which mangles multi-line
-   Arabic and quotes:
+5. **Pick the media half from the library.** When the brief suggests a visual,
+   read `content/media/library.json` and match by the `(library: <id>)` hint
+   first, else by brand + assetType; pass the matched `cdnUrl`s with `--media`.
+   The rules of this lane:
+   - **Never invent or guess a URL** — only a `cdnUrl` read from the library.
+   - **The ask may already carry `mediaUrls`** (a contributor attached them from
+     the showroom) — keep them unless the brief says otherwise; `--media`
+     REPLACES the stored set, so include what you mean to keep.
+   - **No match → answer text-only.** Generation is a full-session job (`/higgs`
+     or `/carousel`, then `attach`) — the 5-minute drain tick has no generation
+     tools, by design.
+6. **Write the answer back through files** — never argv, which mangles multi-line
+   Arabic and quotes; media goes as comma-separated URLs:
 
 ```bash
-node scripts/social-drafts.mjs answer <id> --ar ar.txt --en en.txt --note "claude-code:<who>"
+node scripts/social-drafts.mjs answer <id> --ar ar.txt --en en.txt \
+  --media "https://cdn…/hero.png" --note "claude-code:<who>"
+# later, from a full session that generated something better:
+node scripts/social-drafts.mjs attach <id> --media "url1,url2"   # pending or answered; REPLACES the set
 ```
 
-6. **Refuse honestly when you should.** `note` is rendered to the asker verbatim
+7. **Refuse honestly when you should.** `note` is rendered to the asker verbatim
    in the window, so it is a message to a person, not a log line — say what to add
    and they can re-ask in one edit:
 
@@ -117,8 +146,9 @@ part of the brief. A brief that is only a topic gets copy that is only a topic.
 
 One core piece plus exactly one variant per requested channel, each inside its
 platform's budget; the Arabic reads as idiom rather than MSA press-release
-register; every link is UTM-shaped; and nothing is asserted that is not true — no
-invented metric, customer, price, or date.
+register; every link is UTM-shaped; nothing is asserted that is not true — no
+invented metric, customer, price, or date — and the media half is settled:
+library URLs attached, a generation handed off, or text-only said out loud.
 
 In queue mode: every pending ask ends `answered` or `failed` — never left
 `pending`. The window stops polling after 10 minutes and the drain sweep expires
@@ -127,4 +157,6 @@ asker already gave up waiting. `scripts/drain-drafts.sh` runs this mode on a
 5-minute launchd tick; every `list` (yours included) beats the `draft-drain`
 heartbeat the Hub shows.
 
-Hand off to `/higgs` for media, then `/approve`. This stage never publishes.
+An answered full draft lands in the review queue on `/social/publish`, where a
+human fine-tunes and approves (`/approve` is that gate's doctrine). This stage
+never publishes.

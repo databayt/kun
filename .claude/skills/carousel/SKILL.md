@@ -92,6 +92,11 @@ render constraint — `/publish` enforces it; 10 = Telegram album cap.
    images, unpublished uploads → `attached_media`; wired 2026-08-01); Instagram: upload the
    exported PNGs + caption by hand (API gated on kun#141); LinkedIn: the PDF as a document
    post; WhatsApp: manual send (no organic API). Set `status: "published"`.
+   **Draft-queue lane**: when the slides answer a draft ask, push them to the CDN
+   (`higgs-library.mjs add … && push`) and attach instead of posting directly —
+   `node scripts/social-drafts.mjs attach <askId> --media "url1,url2"` — so the human
+   yes happens in the Hub's review queue and the drain delivers the 2–10 images as one
+   carousel post.
 9. **Log** — content calendar (`/calendar`), UTM shows up in PostHog.
 
 ## Design round-trip (the doctrine that holds on the free tier)

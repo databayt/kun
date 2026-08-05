@@ -58,7 +58,7 @@ Claude routes these to the right skill + agent + MCP without a dedicated command
 **The Unforgivable Commands** — forbidden by the engine: `rm -rf *`, `prisma migrate reset`, `prisma db push --accept-data-loss`, `DROP TABLE`, `git push --force main`
 **The Auror Office** — one keyword, one quality dimension: `see`, `flow`, `debug`, `responsive`, `lang`, `fast`, `guard`, `architecture`, `structure`, `pattern`, `design`, `stack`, `trace`, `efficient`, `mirror`, `diff`
 **The Ministry of Magic** — operations and intelligence: `captain`, `weekly`, `monitor`, `incident`, `issue`, `credentials`, `health`, `sync`, `learn`, `conventions`, `patterns`, `drift`, `economy`
-**The Pensieve** — judgment and conversion: `canon`, `decide`, `premortem`, `convert`, `calendar`, `draft`, `higgs`, `approve`, `publish`, `measure`, `social`, `carousel`
+**The Pensieve** — judgment and conversion: `canon`, `decide`, `premortem`, `convert`, `calendar`, `draft`, `higgs`, `media`, `approve`, `publish`, `measure`, `social`, `carousel`
 **The Portrait Gallery** — the media studio: `hero image`, `og image`, `banner`, `mockup`, `lifestyle`, `split-screen`, `reel`, `infographic`, `testimonial`, `showroom`
 <!-- END vocabulary (generated) -->
 

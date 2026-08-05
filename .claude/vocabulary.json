@@ -4297,6 +4297,7 @@
           ],
           "steps": [
             "Read strategy cadence + growth pillars, then each brand's page under content/docs/social/",
+            "The recurring calendar IS content/social/pillars.json — the Monday seeder rotates it into the draft queue, and /social/calendar renders it live: this week's picks highlighted, a queue chip per brief, Queue-now files an ask on the spot",
             "Diff the previous period's plan against what actually shipped (SocialPiece + SocialVariant)",
             "Allocate one idea per slot — brand, topic, channel set (distribution only), owner",
             "Reschedule or explicitly drop every slipped slot; never silently",
@@ -4307,7 +4308,7 @@
         },
         {
           "name": "draft",
-          "effect": "Write the core piece and its per-channel variants — Arabic crafted first, English mirrored, UTM on every link",
+          "effect": "Write the FULL draft — copy (Arabic crafted first, English mirrored, UTM on every link) and/or its media set",
           "order": [
             {
               "type": "familiar",
@@ -4323,10 +4324,18 @@
             "Read content/docs/brand.mdx voice doctrine + the brand's social page",
             "Resolve channels from DISTRIBUTION_CHANNELS — Slack is never a draft target",
             "Write the core piece Arabic-first, then adapt per channel: hook, length, hashtags, CTA",
+            "Settle the media half: pick from library.json (the (library: id) hint wins), generate via /higgs or /carousel when nothing matches, or say text-only — queue mode passes cdnUrls with answer --media, never an invented URL",
             "UTM every link as utm_source=<channel>&utm_medium=social&utm_campaign=<brand>",
-            "Run the moral gate — no invented metric, customer, price, or date"
+            "Run the moral gate — no invented metric, customer, price, or date; the answered full draft lands in the review queue on /social/publish"
           ],
-          "connects": ["social", "calendar", "higgs", "approve", "carousel"],
+          "connects": [
+            "social",
+            "calendar",
+            "media",
+            "higgs",
+            "approve",
+            "carousel"
+          ],
           "depends": []
         },
         {
@@ -4346,14 +4355,38 @@
             "Preflight: account status; self-heal auth + workspace if needed",
             "Pick the recipe + model from the skill's verified defaults (never ask)",
             "Estimate free (generate cost / --cost-only / --enhance-only), then batch-generate with --json",
-            "Parse .[].result_url, download to ~/Downloads/higgs/, deliver via SendUserFile with spend + balance"
+            "Parse .[].result_url, download to ~/Downloads/higgs/, deliver via SendUserFile with spend + balance",
+            "Register in the library (higgs-library.mjs add … push), then attach the cdnUrl to the draft ask it answers: social-drafts.mjs attach <id> --media"
           ],
-          "connects": ["social", "draft", "approve", "carousel"],
+          "connects": ["social", "draft", "media", "approve", "carousel"],
+          "depends": []
+        },
+        {
+          "name": "media",
+          "effect": "The draft's media half — pick from the library or generate by lane, then attach to the draft; the showroom's Attach is the same move in the browser",
+          "order": [
+            {
+              "type": "memory",
+              "name": "content/media/library.json"
+            },
+            {
+              "type": "skill",
+              "name": "/higgs"
+            }
+          ],
+          "steps": [
+            "Pick before you generate: match library.json by the brief's (library: id) hint, else brand + assetType — a cdnUrl already paid for is free",
+            "Generate only when nothing matches: text-free photography via /higgs, text-bearing formats via /carousel as a 1-slide deck",
+            "Register the render (higgs-library.mjs add … push), then attach: node scripts/social-drafts.mjs attach <id> --media \"url1,url2\" — REPLACES the set",
+            "Shapes delivery accepts: images and/or ONE video, max 10 — mixed image+video is refused by name before anything is sent",
+            "In the Hub: the showroom's Attach fills the publish tray, and the review queue shows the full draft — copy beside its media — for the human yes"
+          ],
+          "connects": ["draft", "showroom", "publish", "higgs", "carousel"],
           "depends": []
         },
         {
           "name": "approve",
-          "effect": "The human gate — stage copy and media into #social with a signed one-click link, then stop",
+          "effect": "The human gate — the review queue on /social/publish approves in-app, or a signed one-click link reaches a remote approver; either way it ends by stopping",
           "order": [
             {
               "type": "familiar",
@@ -4371,16 +4404,17 @@
           "steps": [
             "Assemble copy + media per channel, exactly as it will appear",
             "Pre-flight: Arabic glyphs, no text baked into a render, AI media labelled, consent for faces",
-            "Stage via stageForReview — the only staging lane — one pending variant + one 12h signed link per channel (never /api/social/relay: it publishes immediately)",
+            "Primary lane — the review queue on /social/publish: load the next answered full draft, fine-tune, Approve (claims answered → consumed, then publishes now or schedules to the drain) or Dismiss",
+            "Remote lane — stageForReview: one pending variant + one 12h signed link per channel (never /api/social/relay: it publishes immediately); staging retires the queue entry so no draft is approved twice",
             "STOP. Deliver the links and wait; the gate never times out into a publish",
-            "Record the decision per channel — approved, held, or rejected"
+            "Record the decision per channel — approved, held, dismissed, or rejected"
           ],
-          "connects": ["draft", "higgs", "publish", "carousel"],
+          "connects": ["draft", "media", "higgs", "publish", "carousel"],
           "depends": []
         },
         {
           "name": "publish",
-          "effect": "Deliver approved copy to the channels — drained where an API exists, copy-out where none does",
+          "effect": "The review queue decides, the lanes deliver — approved full drafts drained where an API exists, copy-out where none does",
           "order": [
             {
               "type": "familiar",
@@ -4392,13 +4426,15 @@
             }
           ],
           "steps": [
-            "Verify the gate — refuse without a pending variant or a recorded human yes",
+            "/social/publish is a REVIEW QUEUE, not a composer: next-up draft, browse the rest, fine-tune, never create from blank",
+            "Verify the gate — refuse without a recorded approval (request consumed), a pending variant with a live link, or a human yes in-session",
             "Partition by lane: DRAIN (telegram, facebook), HERMES (gateway pulls), MANUAL (whatsapp)",
-            "Drain lane: click the signed link, or schedulePost with --at and let /api/social/drain deliver",
+            "Drain lane: Approve now, or approve-mode schedule / --at writes scheduled variants for /api/social/drain (~15 min, 3 retries)",
+            "Media routes by shape: text · one photo · 2–10 album/carousel · one video; mixed kinds refused by name",
             "Manual lane: render the copy-out block for a human to forward; never mark it published",
             "Record externalId per channel, then log the slot back to /calendar"
           ],
-          "connects": ["approve", "measure", "social", "calendar"],
+          "connects": ["approve", "media", "measure", "social", "calendar"],
           "depends": ["approve"]
         },
         {
@@ -4443,16 +4479,17 @@
           ],
           "steps": [
             "Pre-flight: resolve the brand and its wired DISTRIBUTION_CHANNELS; refuse Slack as a destination and say why",
-            "Stage 1 /calendar — pick the slot (skipped when the topic arrived as an argument)",
-            "Stage 2 /draft — Arabic-first core piece plus one platform-native variant per channel",
-            "Stage 3 /higgs — text-free media on --media; a failure downgrades to a text post, it does not stop the chain",
-            "Stage 4 /approve — HARD STOP. No human approval, no publish, ever",
-            "Stage 5 /publish — drain lane, hermes lane, or a copy-out block for whatsapp",
+            "Stage 1 /calendar — pick the slot from pillars.json (skipped when the topic arrived as an argument)",
+            "Stage 2 /draft — the FULL draft: Arabic-first core piece, platform-native variants, and its media set",
+            "Stage 3 media — pick from library.json first; generate only on a miss (/higgs text-free, /carousel text-bearing), then attach; a failure downgrades to a text post, it does not stop the chain",
+            "Stage 4 /approve — HARD STOP. The review queue on /social/publish is the primary gate; a signed link covers a remote approver. No human yes, no publish, ever",
+            "Stage 5 /publish — drain lane (now or scheduled), hermes lane, or a copy-out block for whatsapp",
             "Stage 6 /measure — deferred; numbers do not exist for an hour"
           ],
           "connects": [
             "calendar",
             "draft",
+            "media",
             "higgs",
             "approve",
             "publish",
@@ -4485,9 +4522,17 @@
             "Render: pnpm carousel:render <brand>/<slug> — PNGs per language and size, PDF variant, per-channel captions with UTM",
             "Art-direct (optional): push templates to Figma (writes are quota-free) or the claude-design canvas; hosted Figma pulls respect the 6-read budget",
             "Stage for human approval — deliver slides + captions and STOP; no approval, no publish",
+            "Answering a draft ask? Push the slides to the CDN and attach instead of posting: social-drafts.mjs attach <id> --media — the review queue takes the yes and the drain sends 2–10 images as one carousel",
             "After approval: Telegram album via scripts/post-to-telegram.mjs --media; IG/FB from the exported files; LinkedIn takes the PDF; log to the calendar"
           ],
-          "connects": ["social", "higgs", "approve", "publish", "calendar"],
+          "connects": [
+            "social",
+            "media",
+            "higgs",
+            "approve",
+            "publish",
+            "calendar"
+          ],
           "depends": []
         }
       ]
@@ -4682,9 +4727,10 @@
           "steps": [
             "Generated side: library.json (higgs-library.mjs adds with --type)",
             "Reference side: references.json — source link + what-to-steal note; optional thumb under public/social/media/refs/",
-            "Open kun.databayt.org/en/social/media — filter by collection, brand, type"
+            "Open kun.databayt.org/en/social/media — filter by collection, brand, type",
+            "Attach fills the publish tray: the asset rides to /social/publish and becomes the draft's media half — no copy-pasting URLs"
           ],
-          "connects": ["higgs", "carousel", "measure"],
+          "connects": ["higgs", "carousel", "media", "draft", "measure"],
           "depends": []
         }
       ]

@@ -1,14 +1,18 @@
 ---
 name: publish
-description: Deliver approved copy to the channels — automated where an API exists, copy-out where it does not
-when_to_use: "Use when APPROVED social copy must reach its channels, now or on a schedule — via the Hub composer, the signed approval link, or the copy-out block for WhatsApp. This publishes CONTENT, not code: /ship and /deploy put software in production and /release ships a feature block, and none of them touch a brand page. It refuses without an /approve artifact, never writes copy (/draft), and never reads numbers back (/measure). Triggers on: publish the post, send it out, post it now, schedule it for tomorrow, broadcast it, انشر المنشور, ابعت المنشور."
+description: Deliver approved full drafts to the channels — the review queue decides, the lanes deliver
+when_to_use: "Use when an APPROVED full draft (copy + media) must reach its channels, now or on a schedule — via the review queue on /social/publish (Approve = publish right away or delegate to the cron drain, per its settings), the signed approval link, or the copy-out block for WhatsApp. This publishes CONTENT, not code: /ship and /deploy put software in production and /release ships a feature block, and none of them touch a brand page. It refuses without a recorded /approve yes, never writes copy (/draft), never creates from blank (the queue only fine-tunes), and never reads numbers back (/measure). Triggers on: publish the post, send it out, post it now, schedule it for tomorrow, broadcast it, review and publish, انشر المنشور, ابعت المنشور, راجع وانشر."
 argument-hint: "<brand> [--channels ...] [--at <iso>] [--dry-run]"
 ---
 
 # Publish — the last mile
 
-Approved copy reaches the channels. Three lanes, because the eight distribution
-channels do not share one delivery mechanism.
+Approved full drafts reach the channels. The Hub side is a **review queue**, not
+a composer: `/social/publish` shows the next answered draft awaiting approval,
+every upcoming one browsable, an editor that fine-tunes (text, attachments,
+channels) but never creates from blank, and a settings choice for what Approve
+does — **publish right away**, or **schedule and delegate to the cron drain**
+(GitHub Actions, every ~15 minutes).
 
 Arguments: $ARGUMENTS — brand, channels, optional `--at` for a scheduled time.
 
@@ -19,20 +23,24 @@ Arguments: $ARGUMENTS — brand, channels, optional `--at` for a scheduled time.
 - **Egress only** — this layer delivers approved copy. It never writes copy.
 - **A channel is never silently absent.** Every requested channel ends in exactly
   one named state.
+- **Media routes by shape.** The fan-out reads the variant's `mediaUrls`: text ·
+  one photo · 2–10 album/carousel · one video. Mixed image+video, two videos, or
+  > 10 images are refused by name before anything is delivered.
 
 ## Steps
 
-1. **Verify the gate.** Refuse unless the variant is `pending` with a live signed
-   link, or a human said yes in-session. No artifact, no send.
+1. **Verify the gate.** Refuse unless the review queue recorded an approval
+   (request `consumed`), the variant is `pending` with a live signed link, or a
+   human said yes in-session. No recorded yes, no send.
 2. **Partition by lane**, from `src/components/root/social/config.ts`:
    - `DRAIN_CHANNEL_IDS` — telegram, facebook. kun delivers these itself.
    - `HERMES_CHANNEL_IDS` — the gateway pulls them from `/api/social/queue`.
    - `MANUAL_CHANNEL_IDS` — whatsapp. Copy-out.
-3. **Drain lane** — click the signed approval link to publish now, or use the
-   composer's **Schedule** (`schedulePost`) with `--at`, which writes variants as
-   `scheduled` and lets `/api/social/drain` deliver within ~15 minutes. The drain
-   retries three times with backoff and alerts the review channel only on the
-   terminal failure.
+3. **Drain lane** — the review queue's **Approve** delivers now, or (approve-mode
+   `schedule`, or `--at`) writes variants as `scheduled` and lets
+   `/api/social/drain` deliver within ~15 minutes; the signed approval link's
+   button is the remote equivalent. The drain retries three times with backoff
+   and alerts the review channel only on the terminal failure.
 4. **Hermes lane** — write the variant and stop. The gateway pulls its own work;
    Vercel can never call into it. Nothing to do in-session, and a Hermes outage
    means the item waits rather than being lost.

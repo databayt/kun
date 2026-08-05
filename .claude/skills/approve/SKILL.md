@@ -1,8 +1,8 @@
 ---
 name: approve
-description: The human gate — stage copy and media for sign-off, then stop
-when_to_use: "Use when drafted copy and media are ready for a human to say yes before anything reaches a public brand page — staging into #social with a signed single-use link (it opens a confirm page; only its button publishes), or recording an in-session approval. This is the gate, not the send: it never writes copy (/draft), never makes media (/higgs), and never delivers to a platform (/publish, which refuses to run without the artifact this stage produces). Triggers on: stage for review, send for approval, get sign-off, ready for review, اعتماد, أرسل للمراجعة."
-argument-hint: "<brand> [--channels ...] [--media <url>] [--reviewer <name>]"
+description: The human gate — the review queue on /social/publish, or a signed link for a remote approver
+when_to_use: "Use when a full draft (copy and/or media) is ready for a human to say yes before anything reaches a public brand page. Two lanes: the PRIMARY is the Hub's review queue at /social/publish — the next answered draft waits there, a contributor fine-tunes and approves (now, or scheduled to the cron drain); the SECONDARY stages a signed single-use link (it opens a confirm page; only its button publishes) for an approver outside the Hub. This is the gate, not the send: it never writes copy (/draft), never makes media (/higgs), and never delivers to a platform (/publish, which refuses to run without the yes this stage records). Triggers on: review the queue, approve the next draft, stage for review, send for approval, get sign-off, ready for review, اعتماد, راجع الطابور, اعتمد المسودة, أرسل للمراجعة."
+argument-hint: "<brand> [--channels ...] [--media <url,url>] [--reviewer <name>]"
 ---
 
 # Approve — the gate
@@ -10,7 +10,21 @@ argument-hint: "<brand> [--channels ...] [--media <url>] [--reviewer <name>]"
 Brand accounts are public and irreversible. This stage exists so a human says yes
 before that happens, and it ends by **stopping**.
 
-Arguments: $ARGUMENTS — brand, the channels being approved, the media URL if any.
+Arguments: $ARGUMENTS — brand, the channels being approved, the media URLs if any.
+
+## The two lanes
+
+1. **The review queue — primary.** An answered `SocialDraftRequest` (a full
+   draft: copy + `mediaUrls`) queues on `/social/publish`. A contributor loads
+   the next one, fine-tunes text and attachments, and presses **Approve** —
+   which claims the request (`answered → consumed`, conditional, so two
+   reviewers race safely) and either delivers now or writes `scheduled`
+   variants for the cron drain, per the panel's approve-mode setting.
+   **Dismiss** records the human no (`dismissed`, with the reason in `note`).
+2. **The signed link — remote.** For an approver who is not a Hub contributor:
+   stage `pending` variants + 12-hour single-use links (steps below). The Hub's
+   "Send for review" also retires the queue entry so the same draft cannot be
+   approved twice through two lanes.
 
 ## Doctrine (inherits /social)
 
@@ -58,10 +72,11 @@ Arguments: $ARGUMENTS — brand, the channels being approved, the media URL if a
 
 ## Exit gate
 
-Every requested channel has either a `SocialVariant` row in `pending` with a
-signed link delivered to the review channel, **or** an explicit recorded human
-yes. The session has made zero platform calls. Any held or rejected channel is
-named with its reason.
+Every requested channel has exactly one of: an in-app approval recorded (the
+request `consumed`, variants `published` or `scheduled`), a `SocialVariant` row
+in `pending` with a signed link delivered to the review channel, **or** an
+explicit recorded human yes. The session has made zero platform calls. Any held,
+dismissed, or rejected channel is named with its reason.
 
 ## When NOT to use
 

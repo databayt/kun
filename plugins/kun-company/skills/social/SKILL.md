@@ -7,14 +7,23 @@ argument-hint: "<brand> <topic> [--channels ...] [--media [type]] [--at <iso>] [
 
 # Social — one post, all the way through
 
-**Claude drafts, `/higgs` renders, a human approves, the egress layer relays.**
+**Claude drafts a FULL draft (copy + media), a human approves in the review
+queue, the egress layer relays.**
 
 ```
-calendar ─► draft ─► media ─► approve ─► publish ─► measure
-    │         │        │         │          │          │
-/calendar  /draft   /higgs   /approve   /publish   /measure
-                              ▲ HARD STOP
+calendar ─► draft ══► review ─► publish ─► measure
+    │         │▲         │          │          │
+/calendar  /draft ◄── /approve  /publish   /measure
+              │       ▲ HARD STOP (/social/publish)
+   media ─────┘
+ (/higgs · /carousel — picked from the library or generated, attached to the draft)
 ```
+
+The stages are wired: the calendar's briefs seed the draft queue (Mondays, plus
+the panel's queue-now), the draft carries its media set (`mediaUrls` — showroom
+Attach, library auto-pick, or a generation), and `/social/publish` is the
+review queue where the next full draft waits for the human yes — publish now or
+schedule for the cron drain.
 
 Arguments: $ARGUMENTS — brand (`databayt|hogwarts|mkan|sijillee|moalimee`), the
 idea or news, optional `--channels`, `--media`, `--at`, and `--from <stage>` to
@@ -68,21 +77,29 @@ Otherwise delegate to `.claude/skills/calendar/SKILL.md` to pick the slot.
 **Phase 3 — Stage 2: `/draft`.** Delegate to `.claude/skills/draft/SKILL.md`.
 Blocking — there is nothing to approve without copy.
 
-**Phase 4 — Stage 3: media** (only on `--media [type]`). The optional type comes
-from the showroom taxonomy (`src/components/root/social/showroom/taxonomy.ts`,
-default `hero`) and picks the lane: text-free photography (`hero`, `product`,
-`lifestyle`, `mockup`, `reel`, `story`) delegates to `.claude/skills/higgs/SKILL.md`;
-text-bearing formats (`og`, `banner`, `infographic`, `split`, `testimonial`) render
-as a deck on `.claude/skills/carousel/SKILL.md` — a single card is a 1-slide deck.
-Non-blocking: a media failure downgrades to a text post rather than stopping the
-chain. A multi-slide deck is `/carousel` either way.
+**Phase 4 — Stage 3: media.** Pick before you generate: search
+`content/media/library.json` by brand + type and attach the `cdnUrl`s to the
+draft (`node scripts/social-drafts.mjs attach <id> --media …`, or the Hub's
+showroom Attach). On `--media [type]`, or when nothing matches, generate: the
+type comes from the showroom taxonomy
+(`src/components/root/social/showroom/taxonomy.ts`, default `hero`) and picks
+the lane — text-free photography (`hero`, `product`, `lifestyle`, `mockup`,
+`reel`, `story`) delegates to `.claude/skills/higgs/SKILL.md`; text-bearing
+formats (`og`, `banner`, `infographic`, `split`, `testimonial`) render as a deck
+on `.claude/skills/carousel/SKILL.md` — a single card is a 1-slide deck.
+Register the output in the library, then attach. Non-blocking: a media failure
+downgrades to a text post rather than stopping the chain. A multi-slide deck is
+`/carousel` either way.
 
 **Phase 5 — Stage 4: `/approve` — HARD STOP.** Delegate to
-`.claude/skills/approve/SKILL.md`. Unlike `/release`'s advisory QA gate, this one
-blocks unconditionally.
+`.claude/skills/approve/SKILL.md`. The primary lane is the Hub's review queue at
+`/social/publish` (the answered full draft waits there; a contributor fine-tunes
+and decides); the signed-link lane covers a remote approver. Unlike `/release`'s
+advisory QA gate, this one blocks unconditionally.
 
 **Phase 6 — Stage 5: `/publish`.** Delegate to `.claude/skills/publish/SKILL.md`,
-only once Phase 5 returned an approval artifact.
+only once Phase 5 returned an approval — the review queue's Approve (now or
+scheduled to the drain) or a consumed signed link.
 
 **Phase 7 — Stage 6: `/measure`.** Deferred, not inline — numbers do not exist for
 an hour and refresh six-hourly. Print the command to run later.

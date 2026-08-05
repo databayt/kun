@@ -175,6 +175,16 @@ node scripts/higgs-library.mjs stats         # assets, credits spent, credits sa
 **Lookup before every paid job.** Prompts are normalized (case, whitespace, punctuation), so
 trivial rewording still hits. A different ratio or model is correctly a miss.
 
+**Attach to the draft it was made for.** When the render answers a draft-queue ask (a full
+draft is copy AND/OR media), hand the registered `cdnUrl` to the draft after `push`:
+
+```bash
+node scripts/social-drafts.mjs attach <askId> --media "<cdnUrl>"   # pending or answered; REPLACES the set
+```
+
+The Hub's review queue on `/social/publish` then shows the full draft — copy beside its
+media — for the human yes. The showroom's Attach button is the same move from the browser.
+
 Serving origin: `https://hogwarts-databayt.s3.amazonaws.com/media/<brand>/<id>-<file>`.
 `cdn.databayt.org` 403s on **every** key in this bucket (pre-existing CloudFront fault, not
 caused by the library) — once fixed, `push --base https://cdn.databayt.org` re-links all URLs
