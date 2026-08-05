@@ -9,7 +9,8 @@ export interface ConfirmationInput {
   brand: string;
   channel: string;
   text: string;
-  mediaUrl: string | null;
+  /** The variant's full media set — every URL is listed for the reviewer. */
+  mediaUrls: string[];
   /** Human-readable expiry, already formatted. */
   expiresAt: string;
   token: string;
@@ -60,9 +61,12 @@ export function page(title: string, body: string): string {
 }
 
 export function confirmationPage(input: ConfirmationInput): string {
-  const media = input.mediaUrl
-    ? `<p class="meta">Media: ${escapeHtml(input.mediaUrl)}</p>`
-    : "";
+  const media = input.mediaUrls
+    .map(
+      (url, i) =>
+        `<p class="meta">Media ${i + 1}/${input.mediaUrls.length}: ${escapeHtml(url)}</p>`,
+    )
+    .join("\n");
   return shell(
     "Approve & publish?",
     `<h1>Approve &amp; publish?</h1>

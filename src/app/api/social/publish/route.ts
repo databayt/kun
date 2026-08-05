@@ -22,6 +22,7 @@
 
 import type { ChannelId } from "@/components/root/social/config";
 import { db } from "@/lib/db";
+import { resolveMediaUrls } from "@/lib/media-kind";
 import { confirmationPage, page } from "@/lib/social-approval-page";
 import { deliverPost } from "@/lib/social-publish";
 import { sendReview } from "@/lib/social-review";
@@ -70,7 +71,7 @@ export async function GET(request: Request): Promise<Response> {
       brand: variant.piece.brand,
       channel: variant.channel,
       text: variant.text,
-      mediaUrl: variant.mediaUrl,
+      mediaUrls: resolveMediaUrls(variant.mediaUrls, variant.mediaUrl),
       expiresAt: `${new Date(verified.payload.e * 1000)
         .toISOString()
         .replace("T", " ")
@@ -163,7 +164,7 @@ export async function POST(request: Request): Promise<Response> {
     product: variant.piece.brand,
     text: variant.text,
     channels: [variant.channel as ChannelId],
-    mediaUrl: variant.mediaUrl ?? undefined,
+    mediaUrls: resolveMediaUrls(variant.mediaUrls, variant.mediaUrl),
   });
 
   await db.socialVariant.update({

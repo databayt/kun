@@ -241,7 +241,7 @@ export async function publishPostDirect(input: unknown): Promise<PostResult> {
     product,
     text,
     channels: [...channels],
-    mediaUrl,
+    mediaUrls: mediaUrl ? [mediaUrl] : [],
   });
 
   // Record what just happened. Without this a direct publish left no trace at

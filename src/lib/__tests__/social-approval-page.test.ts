@@ -10,7 +10,7 @@ function confirm(
     brand: "hogwarts",
     channel: "facebook",
     text: 'Say "hi" to <b>everyone</b>',
-    mediaUrl: null,
+    mediaUrls: [],
     expiresAt: "2026-07-30 18:00 UTC",
     token: TOKEN,
     postPath: "/api/social/publish",
@@ -65,10 +65,23 @@ describe("confirmationPage", () => {
     expect(html).toContain("&quot;hi&quot;");
   });
 
-  it("shows the media URL as text when present", () => {
+  it("shows every media URL as text when present", () => {
     const html = confirm({
-      mediaUrl: "https://cdn.databayt.org/x.png?a=1&b=2",
+      mediaUrls: [
+        "https://cdn.databayt.org/x.png?a=1&b=2",
+        "https://cdn.databayt.org/y.png",
+      ],
     });
     expect(html).toContain("https://cdn.databayt.org/x.png?a=1&amp;b=2");
+    expect(html).toContain("https://cdn.databayt.org/y.png");
+    // Numbered so a reviewer on a phone can tell a 2-image album from one.
+    expect(html).toContain("Media 1/2");
+    expect(html).toContain("Media 2/2");
+    // Listed as text only — a GET page must never hotlink or embed.
+    expect(html).not.toContain("<img");
+  });
+
+  it("renders no media line when the set is empty", () => {
+    expect(confirm()).not.toContain("Media 1/");
   });
 });

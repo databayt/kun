@@ -16,6 +16,7 @@ import {
   type ChannelId,
 } from "@/components/root/social/config";
 import { db } from "@/lib/db";
+import { resolveMediaUrls } from "@/lib/media-kind";
 import { deliverPost } from "@/lib/social-publish";
 import { REAP_AFTER_MS, reapDecision } from "@/lib/social-reap";
 import { sendReview } from "@/lib/social-review";
@@ -194,7 +195,7 @@ export async function GET(request: Request): Promise<Response> {
       product: variant.piece.brand,
       text: variant.text,
       channels: [variant.channel as ChannelId],
-      mediaUrl: variant.mediaUrl ?? undefined,
+      mediaUrls: resolveMediaUrls(variant.mediaUrls, variant.mediaUrl),
     });
 
     if (result.ok) {

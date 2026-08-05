@@ -240,6 +240,50 @@ export async function sendFacebookCarousel(
   }
 }
 
+// Single video post via the /videos edge with `file_url` — Graph downloads
+// the file server-side (same contract as photos, just heavier), encodes, and
+// publishes. One video per post is a platform rule, not ours; mixing video
+// with photos in one post has no Graph edge at all, which is why the fan-out
+// refuses mixed media before it ever gets here.
+export async function sendFacebookVideo(
+  text: string,
+  videoUrl: string,
+  product?: string,
+): Promise<{ ok: boolean; error?: string; externalId?: string }> {
+  const { pageId, token } = await getFacebookConfig(product);
+  if (!token || !pageId) {
+    return { ok: false, error: notConfigured(product) };
+  }
+  try {
+    const res = await fetch(
+      `https://graph.facebook.com/${GRAPH_VERSION}/${pageId}/videos`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          file_url: videoUrl,
+          description: text,
+          access_token: token,
+        }),
+        // Graph pulls the whole file before answering — the slowest edge here.
+        signal: AbortSignal.timeout(25000),
+      },
+    );
+    if (!res.ok) {
+      return { ok: false, error: await facebookError(res) };
+    }
+    const body = (await res.json().catch(() => null)) as {
+      id?: string;
+    } | null;
+    return { ok: true, externalId: body?.id };
+  } catch (err: unknown) {
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : "Failed to send the video",
+    };
+  }
+}
+
 /** Retract a published post. `externalId` is what sendFacebookPost returned. */
 export async function deleteFacebookPost(
   externalId: string,

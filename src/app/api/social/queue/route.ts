@@ -15,6 +15,7 @@
 import { isAuthorizedBearer } from "@/lib/cron-auth";
 import { HERMES_CHANNEL_IDS } from "@/components/root/social/config";
 import { db } from "@/lib/db";
+import { resolveMediaUrls } from "@/lib/media-kind";
 import { applyUtm } from "@/lib/social-utm";
 
 export const runtime = "nodejs";
@@ -77,7 +78,8 @@ export async function GET(request: Request): Promise<Response> {
       // Tagged here rather than by Hermes: attribution should not depend on
       // a client we do not control remembering to do it.
       text: applyUtm(v.text, { channel: v.channel, brand: v.piece.brand }),
-      mediaUrl: v.mediaUrl,
+      // Gateway contract is single-URL (lane parked) — first of the set.
+      mediaUrl: resolveMediaUrls(v.mediaUrls, v.mediaUrl)[0] ?? null,
       locale: v.piece.locale,
       attempts: v.attempts,
     })),

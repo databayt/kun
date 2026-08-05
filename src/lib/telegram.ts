@@ -189,3 +189,116 @@ export async function sendTelegramPost(
     };
   }
 }
+
+// Album (2–10 photos) via sendMediaGroup. The caption rides the FIRST item —
+// that is where Telegram renders an album's caption — with the same spill-over
+// rule as a single photo: over-long copy follows as a plain message so nothing
+// approved is ever truncated. Media are attached in array order.
+export async function sendTelegramAlbum(
+  text: string,
+  mediaUrls: string[],
+  chatIdOverride?: string,
+): Promise<{ ok: boolean; error?: string; externalId?: string }> {
+  const config = await getTelegramConfig();
+  const token = config.token;
+  const chatId = (chatIdOverride ?? config.chatId).trim();
+  if (!token) {
+    return {
+      ok: false,
+      error: "TELEGRAM_BOT_TOKEN not set — see /docs/social",
+    };
+  }
+  if (!chatId) {
+    return {
+      ok: false,
+      error: "TELEGRAM_CHANNEL_ID not set — see /docs/social",
+    };
+  }
+  if (mediaUrls.length < 2 || mediaUrls.length > 10) {
+    return {
+      ok: false,
+      error: `An album takes 2–10 photos (got ${mediaUrls.length}).`,
+    };
+  }
+  try {
+    const captionFits = text.length <= MAX_CAPTION;
+    const album = await callTelegram(
+      token,
+      "sendMediaGroup",
+      {
+        chat_id: chatId,
+        media: mediaUrls.map((url, i) => ({
+          type: "photo",
+          media: url,
+          ...(i === 0 && captionFits ? { caption: text } : {}),
+        })),
+      },
+      // Telegram fetches every URL server-side before answering.
+      25000,
+    );
+    if (!album.ok || captionFits) return album;
+    const spill = await callTelegram(
+      token,
+      "sendMessage",
+      { chat_id: chatId, text },
+      10000,
+    );
+    return spill.ok ? { ...spill, externalId: album.externalId } : spill;
+  } catch (err: unknown) {
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : "Failed to send the album",
+    };
+  }
+}
+
+// Single video via sendVideo — same caption/spill-over contract as a photo.
+// `videoUrl` must be publicly reachable; Telegram downloads it itself.
+export async function sendTelegramVideo(
+  text: string,
+  videoUrl: string,
+  chatIdOverride?: string,
+): Promise<{ ok: boolean; error?: string; externalId?: string }> {
+  const config = await getTelegramConfig();
+  const token = config.token;
+  const chatId = (chatIdOverride ?? config.chatId).trim();
+  if (!token) {
+    return {
+      ok: false,
+      error: "TELEGRAM_BOT_TOKEN not set — see /docs/social",
+    };
+  }
+  if (!chatId) {
+    return {
+      ok: false,
+      error: "TELEGRAM_CHANNEL_ID not set — see /docs/social",
+    };
+  }
+  try {
+    const captionFits = text.length <= MAX_CAPTION;
+    const video = await callTelegram(
+      token,
+      "sendVideo",
+      {
+        chat_id: chatId,
+        video: videoUrl,
+        ...(captionFits ? { caption: text } : {}),
+      },
+      // A video download is the slowest fetch Telegram does on our behalf.
+      25000,
+    );
+    if (!video.ok || captionFits) return video;
+    const spill = await callTelegram(
+      token,
+      "sendMessage",
+      { chat_id: chatId, text },
+      10000,
+    );
+    return spill.ok ? { ...spill, externalId: video.externalId } : spill;
+  } catch (err: unknown) {
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : "Failed to send the video",
+    };
+  }
+}
