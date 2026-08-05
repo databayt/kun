@@ -59,8 +59,13 @@ model SocialVariant {
   /// Channel id from components/root/social/config.ts.
   channel  String
   text     String
-  /// Publicly reachable image URL — platforms fetch it themselves.
+  /// LEGACY single-media column — code dual-writes it (first URL) and reads
+  /// mediaUrls first. Drop only after every deployed reader is array-aware.
   mediaUrl String?
+  /// Ordered media set, publicly reachable — platforms fetch the URLs
+  /// themselves. Images and/or one video; kind is inferred from extension
+  /// (lib/media-kind.ts).
+  mediaUrls String[] @default([])
 
   status VariantStatus @default(draft)
 
@@ -138,6 +143,10 @@ enum DraftRequestStatus {
   answered
   /// Whoever picked it up could not write it; `note` says why.
   failed
+  /// Approved from the review queue into a SocialPiece. Terminal.
+  consumed
+  /// A human decided not to use it; `note` says why. Terminal.
+  dismissed
 }
 
 /// A contributor's ask for copy, waiting on the Max pool.
@@ -170,6 +179,10 @@ model SocialDraftRequest {
   en String?
   /// Who answered, e.g. "claude-code:abdout". Or why it failed.
   note String?
+  /// The draft's media half — library picks or CDN renders, attached at ask
+  /// time by a contributor or at answer time by the drafting session. A full
+  /// draft is copy AND/OR media: any of the two may be empty, never both.
+  mediaUrls String[] @default([])
 
   createdAt  DateTime  @default(now())
   answeredAt DateTime?

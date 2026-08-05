@@ -122,7 +122,7 @@ export interface DraftRequestResult {
 
 export interface DraftReadResult {
   ok: boolean;
-  status?: "pending" | "answered" | "failed";
+  status?: "pending" | "answered" | "failed" | "consumed" | "dismissed";
   ar?: string;
   en?: string;
   note?: string;

@@ -54,3 +54,6 @@ public/fonts/thmanyah/*.woff2
 # Prisma generated client — regenerated on install, never committed
 src/generated/
 .claude/handoff/
+
+# Draft-queue answer scratch files (scripts/social-drafts.mjs answer --ar/--en)
+.tmp-draft-*.txt
