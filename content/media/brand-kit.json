@@ -9,7 +9,7 @@
       "kind": "human-in-the-loop",
       "surface": "chatgpt.com",
       "why": "Sol is a reasoning model with text output; it renders pictures by calling the image tool, which is GPT Image 2. A ChatGPT plan is not API access — there is no key, so no server can call this lane. The seat is a renderer, not an endpoint: kun compiles the prompt, a human pastes it, kun ingests the file back.",
-      "sizeRule": "GPT Image 2 accepts arbitrary WIDTHxHEIGHT with both sides divisible by 16 and the aspect ratio between 1:3 and 3:1. Every size in `types` below already satisfies this — do not round them by hand.",
+      "sizeRule": "GPT Image 2 takes arbitrary WIDTHxHEIGHT, not a fixed enum, subject to four constraints (verified against the official image-generation guide, 2026-08-05): both edges divisible by 16, longest edge <= 3840, long:short ratio <= 3:1, and total pixels between 655,360 and 8,294,400. The pixel FLOOR is the one that bites — 1200x624 clears it at 748,800, but a smaller plate would be rejected. Every size in `types` below satisfies all four; do not round them by hand, and check the floor before adding a type.",
       "attachAlways": ["public/brands/hogwarts.png"],
       "operator": "sedon"
     },
