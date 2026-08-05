@@ -205,12 +205,15 @@ export function ReviewPanel() {
                           {ageLabel(draft.createdAt)}
                         </span>
                       </span>
-                      <span className="text-muted-foreground mb-1 line-clamp-1 block text-xs">
+                      {/* line-clamp sets its own display (-webkit-box); pairing
+                          it with `block` lets display:block win the cascade and
+                          the excerpt renders full-height. */}
+                      <span className="text-muted-foreground mb-1 line-clamp-1 text-xs">
                         {draft.brief}
                       </span>
                       <span
                         dir="rtl"
-                        className="line-clamp-2 block text-start text-sm leading-relaxed"
+                        className="line-clamp-2 text-start text-sm leading-relaxed"
                       >
                         {draft.ar || draft.en}
                       </span>
