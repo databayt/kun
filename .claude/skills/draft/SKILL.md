@@ -41,26 +41,36 @@ the work is whatever the team submitted from `/social`.
    listing the five.
 2. **Read the voice** — `content/docs/brand.mdx` for the tone doctrine and the
    per-brand tagline, then `content/docs/social/<brand>.mdx` for audience, channel
-   mix, and content pillars.
+   mix, and content pillars, then **`content/docs/social/copy.mdx`** for the craft
+   bar and the register ladder — the seven checks this draft will be rejected
+   against, and which rung of Arabic this brand and channel take. Calibration
+   examples: `references/golden-set.md`.
 3. **Resolve the channel set** from `DISTRIBUTION_CHANNELS`
    (`src/components/root/social/config.ts`), intersected with what the brand is
    wired for via `productChannelWired`. Slack is never a draft target — it is the
    team channel, and its notices are sent by `sendReview`, not written here.
-4. **Write the core piece**, story-first, in Arabic. This is the thing being said;
-   the variants are how each platform says it.
-5. **Adapt per channel** — hook, length, hashtag budget, aspect hint, CTA. A single
+4. **Name three angles before writing one.** One line each: **the pain** (what the
+   reader's week costs them), **the moment** (a scene they recognize), **the proof**
+   (the one true fact from the brief). Pick the one whose first line survives check 1
+   — a pain or a promise, never a description — and say in one clause why the other
+   two lost. Runner-ups are not persisted; the discipline produces the hook, the
+   artifact has no reader (`copy.mdx` § "Why not a candidate set").
+5. **Write the winner**, story-first, in Arabic. This is the thing being said; the
+   variants are how each platform says it. Open on the scene, name the failure as a
+   rhythm, land one claim, close on a feeling — not on a feature.
+6. **Adapt per channel** — hook, length, hashtag budget, aspect hint, CTA. A single
    text fanned to every channel is the failure this stage exists to prevent (the
    06:00 cron still does exactly that; see `content/docs/social/status.mdx`).
    Rough budgets: X ≤ 280 · Telegram caption ≤ 1024 · Facebook and LinkedIn long-form
    fine · Instagram and TikTok caption-led, first line carries it.
-6. **UTM every link**, matching `src/lib/social-utm.ts` exactly:
+7. **UTM every link**, matching `src/lib/social-utm.ts` exactly:
    `utm_source=<channel>&utm_medium=social&utm_campaign=<brand>`. Note that
    `applyUtm` runs at delivery and is idempotent — hand-tagging a link means your
    tag wins, so only do it deliberately.
-7. **WhatsApp gets a variant like any other channel.** Its transport is `manual`,
+8. **WhatsApp gets a variant like any other channel.** Its transport is `manual`,
    not absent: `/publish` will render it as a copy-out block for a human to
    forward. Draft it properly — short, forwardable, no link-preview dependency.
-8. **Settle the media half.** Pick before you generate:
+9. **Settle the media half.** Pick before you generate:
    - **Pick** — search `content/media/library.json` by brand + assetType (the
      brief's `(library: <id>)` hint wins) and take the `cdnUrl`. Free, instant.
    - **Generate** — nothing matches and the piece needs a visual: text-free
@@ -69,7 +79,7 @@ the work is whatever the team submitted from `/social`.
      in the library, then attach its URL.
    - **Neither** — a text-only draft is a valid full draft; say so rather than
      forcing a stock-looking image.
-9. **Run the moral gate** before handing off.
+10. **Run the moral gate** before handing off.
 
 ## Queue mode — answering the Hub's agent window
 
@@ -91,14 +101,23 @@ brief whose asker is the calendar.
 
 For each ask, oldest first:
 
-1. **Run Steps 1–4 above** for its `brand` and `brief` — resolve the brand, read
-   `content/docs/brand.mdx` for voice and `content/docs/social/<brand>.mdx` for
-   audience, pillars, and channel mix. Skipping this is the whole failure mode
-   queue mode exists to prevent: a brief answered without the voice docs reads
-   like generic SaaS copy in Arabic.
-2. **Write the core piece only** — Arabic first, English as its sibling. The
-   window's contract is one `ar` and one `en`, not the per-channel fan-out; the
-   contributor picks channels in the composer afterwards. Do not fan out here.
+1. **Run Steps 1–5 above** for its `brand` and `brief` — resolve the brand, read
+   `content/docs/brand.mdx` for voice, `content/docs/social/<brand>.mdx` for
+   audience, pillars, and channel mix, and `content/docs/social/copy.mdx` for the
+   seven checks and the register ladder; then name the three angles and pick one.
+   Skipping this is the whole failure mode queue mode exists to prevent: a brief
+   answered without the voice docs reads like generic SaaS copy in Arabic, and a
+   brief answered without the craft bar reads like the product documentation it
+   was sourced from. Read `copy.mdx` and `references/golden-set.md` **once for the
+   whole run**, not per ask.
+2. **Write the core piece only — and make it portable rather than fanned out.**
+   The window's contract is one `ar` and one `en`; the contributor picks channels
+   in the composer afterwards. So the piece must clear **check 7**: a first line
+   that works cold with no image, a body that reads with no link preview, ≤ 3
+   hashtags at the end, and no platform-specific verb (no "swipe", no "link in
+   bio"). At this volume a portable core piece _is_ the per-channel adaptation
+   that matters — a thin fan-out into a schema that stores one `ar` and one `en`
+   would be generated and then discarded.
 3. **Fit the composer's ceiling** — `MAX_CAPTION` in the composer, and remember a
    post staged for review must be short enough to survive `/approve`.
 4. **Run the moral gate.** This matters more here than in a hand-run draft: the
@@ -145,10 +164,16 @@ part of the brief. A brief that is only a topic gets copy that is only a topic.
 ## Exit gate
 
 One core piece plus exactly one variant per requested channel, each inside its
-platform's budget; the Arabic reads as idiom rather than MSA press-release
-register; every link is UTM-shaped; nothing is asserted that is not true — no
-invented metric, customer, price, or date — and the media half is settled:
-library URLs attached, a generation handed off, or text-only said out loud.
+platform's budget; **the copy clears all seven checks in
+`content/docs/social/copy.mdx`** and sits on the register rung its brand and
+channel take — name any check it clears only marginally; every link is
+UTM-shaped; nothing is asserted that is not true — no invented metric, customer,
+price, or date — and the media half is settled: library URLs attached, a
+generation handed off, or text-only said out loud.
+
+**A draft that fails check 1 (hook) or check 2 (one idea) is not finished.**
+Rewrite it before answering; do not answer and let the reviewer catch it. The
+reviewer's dismiss is the feedback loop, not the quality gate.
 
 In queue mode: every pending ask ends `answered` or `failed` — never left
 `pending`. The window stops polling after 10 minutes and the drain sweep expires

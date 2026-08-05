@@ -1,11 +1,11 @@
 {
   "version": 1,
-  "$comment": "Rotating draft briefs per brand — the seed lane's content plan. `node scripts/social-drafts.mjs seed --auto` picks the week's briefs by ISO-week rotation and files them as SocialDraftRequest asks; the 5-minute drain answers them on the Max pool, and the copy lands in the Hub for a human to stage. Briefs follow the /draft contract: the fact, the audience, the CTA, the hard constraints. Never a metric, customer, price, or date that isn't true — the drafting session will refuse to invent one. Edit freely; rotation is stateless (ISO week % length), so order is cadence. Pillars per brand: content/docs/social/<brand>.mdx. | `visual` names the raster asset a post wants from the seat lane (null = the template lane owns its image).",
+  "$comment": "Rotating draft briefs per brand — the seed lane's content plan. `node scripts/social-drafts.mjs seed --auto` picks the week's briefs by ISO-week rotation and files them as SocialDraftRequest asks; the 5-minute drain answers them on the Max pool, and the copy lands in the Hub for a human to stage. Briefs follow the /draft contract: the fact, the audience, the CTA, the hard constraints — plus Angle (which of the three angles this brief is pre-committed to), The scene (a moment the audience owns, so the writer opens on something that is not a feature), and Register (the rung from content/docs/social/copy.mdx). All of it goes INSIDE the brief string: the calendar panel and the seeder both read only `brief`, so a new JSON field would be written and read by nobody — which is exactly what happened to `pillar`. Never a metric, customer, price, or date that isn't true — the drafting session will refuse to invent one. Edit freely; rotation is stateless (ISO week % length), so order is cadence. Pillars per brand: content/docs/social/<brand>.mdx. | `visual` names the raster asset a post wants from the seat lane (null = the template lane owns its image).",
   "hogwarts": [
     {
       "id": "admission-highlight",
       "pillar": "feature",
-      "brief": "Feature highlight: online admission — parents apply from their phone, the school tracks every application on one dashboard instead of paper folders. Audience: school owners and administrators in MENA. CTA: book a demo at https://ed.databayt.org. Suggested visual: admission dashboard card (template lane, og type). Constraint: no invented numbers — the promise is 'the paper chase ends', not a percentage.",
+      "brief": "Feature highlight: online admission — parents apply from their phone, the school tracks every application on one dashboard instead of paper folders. Audience: school owners and administrators in MENA. CTA: book a demo at https://ed.databayt.org. Suggested visual: admission dashboard card (template lane, og type). Constraint: no invented numbers — the promise is 'the paper chase ends', not a percentage. Angle: the admissions office gets its people back. The scene: first week of the season — a queue at the door, paper files on the desk, a phone that does not stop. Register: rung 2.",
       "visual": {
         "type": "plate",
         "subject": "A school front office counter, clean and unhurried, no queue, quiet wall behind it"
@@ -14,7 +14,7 @@
     {
       "id": "attendance-one-tap",
       "pillar": "feature",
-      "brief": "Feature highlight: attendance in one tap — the teacher marks the class in seconds and a parent sees it the same moment. Audience: teachers first, parents second. CTA: see it live at https://ed.databayt.org. Suggested visual: classroom lifestyle photo (library: hw-classroom). Constraint: truthful — instant visibility is the feature, don't promise SMS/WhatsApp delivery.",
+      "brief": "Feature highlight: attendance in one tap — the teacher marks the class in seconds and a parent sees it the same moment. Audience: teachers first, parents second. CTA: see it live at https://ed.databayt.org. Suggested visual: classroom lifestyle photo (library: hw-classroom). Constraint: truthful — instant visibility is the feature, don't promise SMS/WhatsApp delivery. Angle: the first two minutes of every period, given back. The scene: the register going down the row while the lesson waits, and a name called twice because the sheet was already passed. Register: rung 2.",
       "visual": {
         "type": "lifestyle",
         "subject": "A teacher at the front of a class holding a tablet, mid-motion marking the register, students blurred at their desks"
@@ -23,7 +23,7 @@
     {
       "id": "finance-without-spreadsheets",
       "pillar": "time-savings",
-      "brief": "Administrator time-savings: invoices and receipts come out of the system, not out of a spreadsheet — fees, installments, and who-paid-what in one view. Audience: school owners. CTA: https://ed.databayt.org. Suggested visual: og card with one strong Arabic line. Constraint: no claimed hours-saved figure; 'the end-of-term spreadsheet night' is the pain to name.",
+      "brief": "Administrator time-savings: invoices and receipts come out of the system, not out of a spreadsheet — fees, installments, and who-paid-what in one view. Audience: school owners. CTA: https://ed.databayt.org. Suggested visual: og card with one strong Arabic line. Constraint: no claimed hours-saved figure; 'the end-of-term spreadsheet night' is the pain to name. Angle: the night the books are reconciled by hand. The scene: a ledger open beside a laptop, the same number typed into both, and a total that refuses to agree with itself. Register: rung 2.",
       "visual": {
         "type": "product",
         "subject": "A school bursar’s desk — closed ledger books stacked to one side, an open laptop beside them, warm afternoon light"
@@ -32,25 +32,25 @@
     {
       "id": "arabic-first-rtl",
       "pillar": "mena-context",
-      "brief": "MENA education context: hogwarts is Arabic-first and RTL-native — built in Arabic, not translated into it. Menus, report cards, parent messages: all native. Audience: everyone; administrators decide, parents trust. CTA: https://ed.databayt.org. Suggested visual: split card (template lane) — Arabic UI beside English UI. Constraint: keep it proud but calm, no competitor-bashing.",
+      "brief": "MENA education context: hogwarts is Arabic-first and RTL-native — built in Arabic, not translated into it. Menus, report cards, parent messages: all native. Audience: everyone; administrators decide, parents trust. CTA: https://ed.databayt.org. Suggested visual: split card (template lane) — Arabic UI beside English UI. Constraint: keep it proud but calm, no competitor-bashing. Angle: built in Arabic, not translated into it — and a parent can feel the difference in one screen. The scene: the report card that reads right to left with no English label stranded in a corner, and no date written backwards. Register: rung 2.",
       "visual": null
     },
     {
       "id": "timetable-conflicts",
       "pillar": "feature",
-      "brief": "Feature highlight: the timetable builder catches conflicts before the term starts — a teacher can't be in two rooms, a room can't hold two classes. Audience: administrators who build the schedule every term. CTA: book a demo at https://ed.databayt.org. Suggested visual: og card. Constraint: the feature is conflict detection at build time — nothing about AI optimization.",
+      "brief": "Feature highlight: the timetable builder catches conflicts before the term starts — a teacher can't be in two rooms, a room can't hold two classes. Audience: administrators who build the schedule every term. CTA: book a demo at https://ed.databayt.org. Suggested visual: og card. Constraint: the feature is conflict detection at build time — nothing about AI optimization. Angle: the clash is found in the week before term, not in the first period of it. The scene: a printed timetable on the wall with three cells circled in red, and a teacher who is somehow in two rooms at nine o'clock. Register: rung 2.",
       "visual": null
     },
     {
       "id": "open-source-trust",
       "pillar": "trust",
-      "brief": "Open-source trust: hogwarts is open source — a school can read exactly how its students' data is handled, and its IT can self-host if policy requires. Audience: school owners and IT decision-makers. CTA: the code and a demo at https://ed.databayt.org. Suggested visual: og card with the repo motif. Constraint: true today — open source on GitHub; don't promise certifications we don't hold.",
+      "brief": "Open-source trust: hogwarts is open source — a school can read exactly how its students' data is handled, and its IT can self-host if policy requires. Audience: school owners and IT decision-makers. CTA: the code and a demo at https://ed.databayt.org. Suggested visual: og card with the repo motif. Constraint: true today — open source on GitHub; don't promise certifications we don't hold. Angle: you can read the code that holds your students' records. The scene: the question that stops a procurement meeting — where does this data actually live, and who else can see it? Register: rung 2. Say the guarantee in the reader's words, never the engineer's — 'your school's records stay your school's', not tenant scoping or reads and writes.",
       "visual": null
     },
     {
       "id": "parent-visibility",
       "pillar": "feature",
-      "brief": "Parent visibility: one place where a parent sees attendance, grades, and fees for every child they have in the school. Audience: parents (the B2C trust that closes the B2B sale). CTA: ask your school about hogwarts — https://ed.databayt.org. Suggested visual: lifestyle photo (library: hw-dashboard-device). Constraint: calm reassurance, not surveillance framing.",
+      "brief": "Parent visibility: one place where a parent sees attendance, grades, and fees for every child they have in the school. Audience: parents (the B2C trust that closes the B2B sale). CTA: ask your school about hogwarts — https://ed.databayt.org. Suggested visual: lifestyle photo (library: hw-dashboard-device). Constraint: calm reassurance, not surveillance framing. Angle: three children in the school should not mean three people to ask. The scene: a parent at the gate at pick-up, phone in hand, finding the answer before the teacher reaches the door. Register: rung 2, warmed — the reader is a parent, so second person is allowed.",
       "visual": {
         "type": "lifestyle",
         "subject": "A parent's hands holding a phone in a school corridor, other parents soft in the background"
@@ -59,7 +59,7 @@
     {
       "id": "exams-to-report-cards",
       "pillar": "time-savings",
-      "brief": "Feature highlight: exams and grades — marks entered once become report cards, transcripts, and the parent's view without re-typing. Audience: teachers and administrators at term end. CTA: https://ed.databayt.org. Suggested visual: og card. Constraint: the claim is single entry, many outputs — no 'auto-grading' language.",
+      "brief": "Feature highlight: exams and grades — marks entered once become report cards, transcripts, and the parent's view without re-typing. Audience: teachers and administrators at term end. CTA: https://ed.databayt.org. Suggested visual: og card. Constraint: the claim is single entry, many outputs — no 'auto-grading' language. Angle: one entry, many outputs. The scene: end of term — marks entered, then copied, then typed again, and every copy is another chance for an error. Register: rung 2. Note: this brief already has a shipped sibling in the carousel lane (hogwarts/carousels/exams-one-entry.json); write a different opening, do not reuse its first line.",
       "visual": {
         "type": "product",
         "subject": "A squared stack of paper report cards on a desk next to a closed laptop, raking daylight"

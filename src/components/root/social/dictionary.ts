@@ -149,6 +149,23 @@ export const SOCIAL_DICTIONARY = {
     dismissAction: "Dismiss",
     dismissing: "Dismissing...",
     dismissedMsg: "Dismissed — it will not publish.",
+    // The craft gate (content/docs/social/copy.mdx). A reviewer reads the whole
+    // post at once and mentally supplies context a scroller never has, so the
+    // first line is shown alone — that is check 1 made physically visible.
+    hookStripLabel: "What a scroller sees",
+    hookStripEmpty: "The first line lands here.",
+    craftCheck1: "Read only the line above. Would you keep reading?",
+    craftCheck2: "Say the post's one claim in five words. Can you?",
+    craftCheck4: "Point at the sentence where you recognise your own week.",
+    craftCheck6: "One thing to do at the end — one verb, one destination.",
+    // Dismiss reasons ride the note field that already exists. Naming the failed
+    // check is the only feedback the writing side ever gets.
+    dismissReasonTitle: "Why is it not shipping?",
+    dismissReasonHook: "No hook",
+    dismissReasonTwoPosts: "Two posts in one",
+    dismissReasonUntrue: "Not true",
+    dismissReasonRegister: "Wrong register",
+    dismissReasonOther: "Something else",
     // The settings popover: what Approve does.
     approveModeLabel: "When a draft is approved",
     approveModeNow: "Publish right away",
@@ -356,6 +373,18 @@ export const SOCIAL_DICTIONARY = {
     dismissAction: "استبعاد",
     dismissing: "جاري الاستبعاد...",
     dismissedMsg: "استُبعد — لن يُنشر.",
+    hookStripLabel: "ما يراه المتصفّح العابر",
+    hookStripEmpty: "السطر الأول يظهر هنا.",
+    craftCheck1: "اقرأ السطر أعلاه وحده. هل تكمل القراءة؟",
+    craftCheck2: "قل دعوى المنشور الواحدة في خمس كلمات. هل تستطيع؟",
+    craftCheck4: "أشِر إلى الجملة التي تعرف فيها أسبوعك أنت.",
+    craftCheck6: "شيء واحد يُفعل في النهاية — فعل واحد ووجهة واحدة.",
+    dismissReasonTitle: "لماذا لا يُنشر؟",
+    dismissReasonHook: "لا خُطّاف",
+    dismissReasonTwoPosts: "منشوران في واحد",
+    dismissReasonUntrue: "غير صحيح",
+    dismissReasonRegister: "مستوى لغوي خاطئ",
+    dismissReasonOther: "سبب آخر",
     approveModeLabel: "عند اعتماد مسودة",
     approveModeNow: "انشر فوراً",
     approveModeNowHint: "الاعتماد يوصّل إلى القنوات المختارة في الحال.",

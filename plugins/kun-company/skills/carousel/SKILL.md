@@ -27,15 +27,22 @@ TOPIC ─► COPY (AR-first) ─► DECK (zod JSON) ─► RENDER (route + Playw
   inside slides (no implied endorsement).
 - UTM on every link (`utm_source=<channel>&utm_medium=social&utm_campaign=<slug>`) → PostHog.
 
-## Copy framework (the high-end bar)
+## Copy framework
 
-- **Cover hook ≤ 12 words** — pain or promise, never a description. The brand line beats a
-  feature list.
-- **One idea per slide.** If a slide needs two sentences of body, it is two slides.
+**The craft bar, the Arabic register ladder, and the reject list are
+`content/docs/social/copy.mdx`** — the same bar `/draft` writes to. Read it before drafting
+the deck; calibration examples are `.claude/skills/draft/references/golden-set.md`. Deck
+specifics below.
+
+- **Cover hook = check 1 at slide granularity** — ≤ 12 words, pain or promise, never a
+  description. The brand line beats a feature list.
+- **One idea per slide** = check 2 at slide granularity. If a slide needs two sentences of
+  body, it is two slides.
 - **Open loops**: each slide's last beat pulls into the next (problem → "there is one
-  room…" → the answer).
-- **Concrete nouns** over abstractions: "admission, attendance, invoices" — not "workflows".
+  room…" → the answer). **Decks only** — a caption has no next slide.
 - **CTA last**, one verb («اطلب عرضًا تجريبيًا» / "Book a demo").
+- A deck caption may use a deck verb ("اسحب" / "swipe") — check 7 (portability) governs the
+  standalone core piece, and a carousel caption is bound to its carousel.
 - Budgets: eyebrow ≤ 24 chars · headline ≤ 48 (AR) / 56 (EN) · body ≤ 140 · step ≤ 60 ·
   caption ≤ 1024 (Telegram cap).
 - Arabic typography: **Thmanyah** (خط ثمانية) is the Arabic voice — Serif Display **Black

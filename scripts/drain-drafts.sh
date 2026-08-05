@@ -132,11 +132,21 @@ PENDING="$(node scripts/social-drafts.mjs list --json 2>>"$LOG_FILE")" || {
 COUNT="$(printf '%s' "$PENDING" | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>console.log(JSON.parse(d).length))' 2>/dev/null || echo "?")"
 log "drain start: $COUNT pending"
 
+# Answer files land outside the repo — a drain that writes into the working tree
+# leaves .tmp-draft-*.txt lying around for the next session to trip over.
+# TMPDIR is not in the launchd environment, so name the directory explicitly.
+DRAFT_TMP="$CLAUDE_DIR/.draft-tmp"
+mkdir -p "$DRAFT_TMP"
+
 # Tools are allow-listed to exactly what queue mode needs: the queue script,
-# brand-doc reads, and answer files. --max-turns caps a runaway session.
-claude -p "Run the /draft skill in queue mode: drain every pending ask via 'node scripts/social-drafts.mjs'. Write each answer's Arabic and English to temp files and pass them with 'answer <id> --ar <file> --en <file>'. A full draft is copy AND/OR media: when the brief suggests a visual, pick a matching asset from content/media/library.json — by the (library: <id>) hint if the brief names one, else by brand + assetType — and pass its cdnUrl via '--media <url>'. Never invent or guess a URL; if the ask already carries mediaUrls, keep them unless the brief says otherwise; if nothing in the library matches, answer text-only (generation is a full-session job, not this lane's). Every ask must end answered or failed — never left pending." \
+# doc reads, and answer files. --max-turns caps a runaway session.
+#
+# This prompt is the ONLY instruction the unattended writer gets, so it spends its
+# budget on craft — the media rules already live in the skill's queue mode, in full,
+# and duplicating them here once crowded the quality bar out entirely.
+claude -p "Run the /draft skill in queue mode: drain every pending ask via 'node scripts/social-drafts.mjs'. Before writing the first ask, read content/docs/social/copy.mdx and .claude/skills/draft/references/golden-set.md ONCE for the whole run — they are the craft bar, and every draft is judged against the seven checks and the Arabic register ladder. Then per ask read content/docs/brand.mdx and content/docs/social/<brand>.mdx for voice and audience. Copy that opens by describing the product, the feature, or the category is NOT FINISHED — rewrite the first line as a pain or a promise before answering. A bulleted feature list is two posts, not one. Do not summarize product documentation: docs contain no Thursdays, and a draft sourced from them will fail the scene check no matter how good the sentences are. Write each answer's Arabic and English to temp files under $DRAFT_TMP and pass them with 'answer <id> --ar <file> --en <file>'; never write answer files into the repo. Media rules are in the skill's queue mode — follow them there, and never invent a URL. Every ask must end answered or failed — never left pending. Finally, print for each ask the three angles you considered and which one won: this log is the only record of why the copy went the way it did." \
     --allowedTools "Bash(node scripts/social-drafts.mjs*)" "Read" "Write" "Glob" "Grep" \
-    --max-turns 40 >> "$LOG_FILE" 2>&1
+    --max-turns 50 >> "$LOG_FILE" 2>&1
 CLAUDE_EXIT=$?
 
 # Post-drain list refreshes the heartbeat detail to the fresh count.

@@ -1,0 +1,222 @@
+---
+title: Copy
+description: The craft bar every post clears, the Arabic register ladder, and the checks a draft is rejected against.
+---
+
+# Copy
+
+[Brand](/docs/brand) says what our voice *is*. [Strategy](/docs/social/strategy) says what wins.
+This page is the **craft bar** — the checks a draft must clear before a human ever sees it, and
+the ones a human rejects it against. `/draft` writes to it, `/carousel` writes to it, `/approve`
+reads it, and the 5-minute drain reads it before it answers the first ask of the run.
+
+It exists because the pipeline could already stop a *false* post and could not stop a *boring*
+one. On 2026-08-05 the unattended drain produced this, and it passed every gate the pipeline had:
+
+> `القبول في مدرستك… من أول سؤال ولي الأمر إلى أول يوم للطالب.`
+> — followed by five bullets, and a trust line that was tenant scoping translated into Arabic.
+
+One core piece, inside budget, no invented metric, no untagged link, correct Arabic. It was a
+summary of `admission.mdx`. Nothing in the pipeline was looking at whether anyone would read it.
+
+## The seven checks
+
+Named and binary, so a skill, a reviewer, and a dismiss reason can all say **"fails check 3."**
+
+### 1. Hook
+
+Cover everything but the first line. Read only that. Does it name a pain the reader has felt, or
+a promise they want? Naming the product, the feature, or the category is a **description**, and a
+description is not a hook. Maximum 12 words. Never opens with the brand name.
+
+- **Fails** — `القبول في مدرستك… من أول سؤال ولي الأمر إلى أول يوم للطالب.` (a table of contents)
+- **Passes** — `أسبوع المدير يذوب في الورق.` · `آخر الفصل مشهد يعرفه كل معلم.`
+
+### 2. One idea
+
+The piece makes one claim. Cut it at any sentence boundary — if both halves stand as posts, it is
+two posts. **A bulleted feature list is the failure signature.** Bullets are allowed only when
+each is a step in one process and there are three or fewer.
+
+### 3. Specificity
+
+Name the thing, not its category. `القبول، الحضور، الفواتير` beats `العمليات الإدارية`. Every
+abstraction is replaced with the object itself or deleted. The piece carries at least one image a
+person can actually see: a desk, a corridor, a stack of paper, a Thursday night.
+
+### 4. Scene
+
+Somewhere in the first third, the reader recognizes their own week. This is the check that
+separates copy that reads well from copy that reads like documentation — and the one the drain
+has never passed, structurally: **product docs contain no Thursdays.** If the piece was written
+from a feature list, it will fail here no matter how good the sentences are.
+
+### 5. Sibling
+
+Read Arabic and English side by side. If they are line-for-line parallel with the same clause
+order, one is a translation and the doctrine is broken. They may differ in length, in what they
+lead with, and in which detail they keep. **Divergence in at least two places is the floor.**
+
+### 6. CTA
+
+One verb, one destination, last. Never two asks. If there is a link it carries UTM (see
+`src/lib/social-utm.ts` — `applyUtm` runs at delivery and is idempotent). If there is no link,
+say what to do instead. Never both.
+
+### 7. Portability
+
+The core piece must survive any channel without editing:
+
+- the first line works **cold** — no image, no context
+- the body reads with **no link preview**
+- hashtags sit at the end, 3 maximum, so a channel that ignores them loses nothing
+- **no platform-specific verb** — no "swipe", no "link in bio", no "tap the highlight"
+
+A piece that passes this is forwardable on WhatsApp, which [Strategy](/docs/social/strategy) names
+as the viral unit for Sudan. At our volume, a portable core piece **is** the per-channel
+adaptation that matters — which is why the queue lane writes one piece rather than a thin fan-out.
+
+## The reject list
+
+Auto-fail. No discussion:
+
+- Opens with the brand name, `نحن`, or "We're excited to announce"
+- A bulleted feature list of four or more items
+- A number, name, price, or date not present in the brief
+- More than 3 hashtags — or any hashtags on Telegram, WhatsApp, or in a LinkedIn body
+- Emoji in the first line; more than one anywhere; ever as a bullet marker
+- An exclamation mark; more than one question mark
+- Engineering vocabulary carried into Arabic — `نطاق المستأجر`, `كل قراءة وكتابة`, `واجهة برمجية`
+
+**Length.** The core piece lands at **400–900 characters of Arabic**. Under 400 only for X. Over
+900 means check 2 already failed and you have not noticed yet.
+
+## The Arabic register ladder
+
+Four rungs. Rung 1 is the failure mode; rung 2 is the house default. "Correct Arabic" is not the
+bar — a press release is correct Arabic.
+
+### Rung 1 — فصحى الصحافة (MSA press-release). Never ships.
+
+Markers you can point at:
+
+- Agentless passives where an actor exists: `يتم إرسال`, `تم إطلاق`, `يُنشأ`
+- Nominalized verb chains, مصدر stacking: `عملية تحسين إدارة العمليات`
+- Institutional self-reference: `تفخر … بأن تعلن`, `في إطار حرصنا على`, `انطلاقًا من`
+- Abstraction nouns with no referent: `الحلول`, `المنظومة`, `التحول الرقمي`, `الكفاءة التشغيلية`
+- Adjective pairs used for rhythm: `الشامل والمتكامل`, `الفعّال والمرن`
+- Sentences past ~20 words carrying three إضافة chains
+
+**The passive rule** — the distinction that makes this operational, drawn from our own corpus:
+
+- `الدرجة تُرصد مرة واحدة` — **good.** The sentence is *about the mark*. The passive puts the
+  subject where the reader's attention already is.
+- `يُنشأ ملف الطالب وأولياء الأمر والرسوم والفواتير` — **bad.** The reader wants to know who does
+  this and whether it costs them anything. The passive hides exactly that.
+
+> Passive is right when the object is the topic.
+> Passive is wrong when it hides an actor the reader is asking about.
+
+### Rung 2 — فصحى معاصرة مبسّطة. The house default.
+
+- Active verbs with a named actor
+- One clause per sentence; a dash or a colon carries the turn
+- Nouns the reader touches: `الورق`, `الدفتر`, `الكشف`, `الفاتورة`, `المكتب`, `الطابور`
+- Everyday verbs — `يذوب`, `يضيع`, `يصل`, `ينتهي` — not `يتسنّى`, `يغدو`, `يُضحي`
+- Grammatically MSA, no dialect morphology, but the **rhythm of speech**
+
+This is what our shipped decks already are. It is also the only rung that reads correct to a
+Saudi, an Emirati, **and** a Sudanese reader at once — which is exactly what hogwarts needs, since
+its audience spans all three.
+
+### Rung 3 — عامية بيضاء (pan-Arab white colloquial).
+
+MSA skeleton, spoken vocabulary and connectives, no morphology that marks one country. Second
+person (`تعرف`, `جرّب`, `خليك`), conversational turns (`طيب`, `ببساطة`). Consumer and short-form
+only.
+
+### Rung 4 — لهجة محلية.
+
+A named local dialect. Sudanese for sijillee, per its own brand page: *"a helpful neighbour who
+happens to be good with books."* Only where a brand doc names it, only on that brand's channels.
+
+### The map
+
+| Brand | Channels | Rung | Why |
+|-------|----------|------|-----|
+| **hogwarts** | LinkedIn, Facebook, X | **2** | The buyer is a principal on a phone. Rung 3 reads unserious to an institution. |
+| **hogwarts** | Instagram, WhatsApp | **2, warmed** — second person allowed | Parents. Keep MSA morphology, drop institutional distance. |
+| **mkan** | IG, TikTok, Snapchat, FB | **3** | Consumer, Saudi-leaning. Imagery leads; copy is short and warm. |
+| **databayt** | X, LinkedIn, Telegram | **2** in Arabic; English may run technical | Developers. Precision over warmth. |
+| **sijillee** | FB, WhatsApp, Telegram | **4 — Sudanese** | Its brand page says so. Humility in tone; never crisis-adjacent. |
+| **moallimee** | — | **2, warmed** | Pre-launch. Locks with positioning. |
+
+### Script and typography
+
+- **Latin digits** (1, 2, 3) in copy — Gulf marketing norm. Applies to captions, not just decks.
+- **Diacritics** only to disambiguate, never decorative — and never in a Thmanyah display headline
+  (clearance is a known render issue; see [Carousel](/docs/social/carousel)).
+- **Never letter-space Arabic.** It is a connected script.
+- **The brand name in Arabic prose: transliterate.** `في هوجورتس`, not `في hogwarts`. Keep the
+  Latin form for handles, links, and hashtags. A Latin token mid-sentence forces an RTL reader to
+  context-switch, and the repo has been doing both — this line settles it.
+
+## The wordlist
+
+| Banned (AR) | Use instead |
+|-------------|-------------|
+| الحلول · حلول متكاملة | the actual thing — `نظام القبول`, `كشف الدرجات` |
+| المنظومة | `النظام`, or name the module |
+| التحول الرقمي | what changes — `من الورق إلى الشاشة` |
+| تفخر · يسرّنا أن نعلن · في إطار | delete the sentence |
+| يتم + مصدر (`يتم إرسال`) | the active verb — `يرسل النظام` |
+| الكفاءة · الفعالية | the time or the error actually saved |
+| ثورة · نقلة نوعية | nothing. We cannot make that claim. |
+| سهل الاستخدام | show it (`خمس خطوات`) instead of claiming it |
+| عزيزي ولي الأمر (as an opener) | speak to them, don't address them |
+
+**Preferred** — the register's own vocabulary, mined from the copy that works:
+`الورق` · `الدفتر` · `الكشف` · `الفاتورة` · `الطابور` · `يذوب` · `يضيع` · `يُنجز` ·
+`ينتهي بهدوء` · `أول يوم` · `آخر الفصل` · `أسبوع المدير` · `مرة واحدة` · `في مكان واحد` ·
+`بلمحة` · `بنقرة`.
+
+**Banned (EN):** revolutionize · seamless · cutting-edge · empower · streamline · solutions ·
+leverage · game-changer · "Excited to announce" · 🚀 · "workflows" (name them) · "AI-powered"
+unless the post is actually about the AI.
+
+## Three angles before one draft
+
+Before writing, name three angles in one line each:
+
+- **The pain** — what the reader's week costs them
+- **The moment** — a scene they recognize
+- **The proof** — the one true fact from the brief
+
+Pick the one whose first line survives check 1. Say in one clause why the other two lost. Then
+write only the winner. The runner-ups are not persisted anywhere — the discipline produces the
+hook; the artifact has no reader. A hand-run session says them out loud; the drain prints them to
+its log.
+
+## Why not a candidate set, an A/B, or a judge
+
+`SocialDraftRequest` holds exactly one `ar` and one `en`, and that is deliberate at this volume.
+
+- **Persisted candidates** would have to ride the `note` field, which is rendered *verbatim to the
+  asker* in the agent window — runner-ups would be invisible where they matter and corrupting
+  where they are visible.
+- **Attribution columns** (`angle`, `hook`, `pillar` on a variant) need six months to hold fifty
+  rows at ~2 posts/week — below any threshold that distinguishes a good hook from a lucky Tuesday.
+  The strategy's stop-loss fires at 3 months on *presence*, not attribution.
+- **An LLM judge** is the L4 gate, behind `/decide`. It costs a second model call per draft on a
+  subscription pool that already hits session limits. The human gate exists and takes twenty
+  seconds.
+
+The feedback loop we *do* run is free: dismiss reasons on the review queue, and the angles the
+drain prints to its daily log. If "no hook" stops appearing in dismiss reasons, this page worked.
+
+## See also
+
+- [Brand](/docs/brand) — visual identity, tone by audience, per-brand taglines
+- [Strategy](/docs/social/strategy) — the multiplier, viral mechanics, timing, the moral code
+- [Carousel](/docs/social/carousel) — the deck lane, which applies checks 1 and 2 per slide
+- `.claude/skills/draft/references/golden-set.md` — six annotated pairs from our own corpus

@@ -86,10 +86,32 @@ export function ReviewEditor({
   const [reviewLinks, setReviewLinks] = useState<ReviewLink[] | null>(null);
   const [copiedChannel, setCopiedChannel] = useState<string | null>(null);
   const [urlDraft, setUrlDraft] = useState("");
+  const [dismissOpen, setDismissOpen] = useState(false);
 
   const trimmed = composerText.trim();
+  // Check 1, made visible. A reviewer reads the whole post at once and mentally
+  // supplies context a scroller never has, so the first line is shown alone.
+  const hookLine = trimmed.split("\n")[0] ?? "";
   const { images, videos } = splitMedia(composerMediaUrls);
   const mixedMedia = images.length > 0 && videos.length > 0;
+
+  // The craft checks a reviewer rejects against (content/docs/social/copy.mdx).
+  const craftChecks = [
+    t.craftCheck1,
+    t.craftCheck2,
+    t.craftCheck4,
+    t.craftCheck6,
+  ];
+
+  // Dismiss reasons ride the `note` the action already accepts — naming the
+  // failed check is the only signal that ever reaches the writing side.
+  const dismissReasons = [
+    t.dismissReasonHook,
+    t.dismissReasonTwoPosts,
+    t.dismissReasonUntrue,
+    t.dismissReasonRegister,
+    t.dismissReasonOther,
+  ];
 
   // Stating the blocker beats a dead button with no explanation.
   const blockedReason = !trimmed
@@ -158,12 +180,16 @@ export function ReviewEditor({
     }
   };
 
-  const handleDismiss = async () => {
+  const handleDismiss = async (reason: string) => {
     if (!reviewQueue.activeDraftId) return;
+    setDismissOpen(false);
     setPending("dismiss");
     reset();
     try {
-      const res = await dismissDraft({ draftId: reviewQueue.activeDraftId });
+      const res = await dismissDraft({
+        draftId: reviewQueue.activeDraftId,
+        note: reason,
+      });
       if (res.ok) {
         setNotice(t.dismissedMsg);
         finishDecision();
@@ -255,6 +281,23 @@ export function ReviewEditor({
           {activeDraft.brief}
         </p>
       )}
+
+      {/* Check 1, made physically visible: the first line alone, in the shape a
+          scroller actually meets it. Reading the whole post at once hides a bad
+          hook, because the reader supplies context the feed never will. */}
+      <div className="border-border mx-auto mb-3 max-w-3xl rounded-lg border border-dashed p-3 text-start">
+        <p className="text-muted-foreground mb-1.5 text-[10px] font-medium tracking-wide uppercase">
+          {t.hookStripLabel}
+        </p>
+        <p
+          className={cn(
+            "text-base leading-snug",
+            hookLine ? "text-foreground" : "text-muted-foreground italic",
+          )}
+        >
+          {hookLine || t.hookStripEmpty}
+        </p>
+      </div>
 
       {/* The editor surface — the agent window's pill, sized for reviewing.
           Media renders inline (a full draft is copy AND media, so both must
@@ -460,15 +503,41 @@ export function ReviewEditor({
                 </Button>
               ) : (
                 <>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleDismiss}
-                    disabled={pending !== null}
-                    className="h-8 rounded-full"
-                  >
-                    {pending === "dismiss" ? t.dismissing : t.dismissAction}
-                  </Button>
+                  {/* Dismiss asks why. The reason rides the note the action
+                      already persists — a monthly read of these is the only
+                      feedback the writing side ever gets. */}
+                  <Popover open={dismissOpen} onOpenChange={setDismissOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        disabled={pending !== null}
+                        className="h-8 rounded-full"
+                      >
+                        {pending === "dismiss" ? t.dismissing : t.dismissAction}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      align={isRTL ? "start" : "end"}
+                      className="w-64 text-start"
+                    >
+                      <p className="text-muted-foreground mb-2 text-xs font-medium">
+                        {t.dismissReasonTitle}
+                      </p>
+                      <div className="flex flex-col gap-0.5">
+                        {dismissReasons.map((reason) => (
+                          <button
+                            key={reason}
+                            type="button"
+                            onClick={() => handleDismiss(reason)}
+                            className="hover:bg-accent rounded-md px-2 py-1.5 text-start text-sm transition-colors"
+                          >
+                            {reason}
+                          </button>
+                        ))}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
                   <Button
                     variant="outline"
                     size="sm"
@@ -512,6 +581,17 @@ export function ReviewEditor({
           </div>
         </div>
       </div>
+
+      {/* The craft gate, at the moment of decision. Sentences, not checkboxes —
+          checkboxes train a reviewer to click through. A fail here is a Dismiss
+          with the reason named, not a quiet rewrite in the textarea above. */}
+      {!decided && (
+        <ul className="text-muted-foreground mx-auto mt-4 max-w-3xl list-disc space-y-1 ps-5 text-start text-xs leading-relaxed">
+          {craftChecks.map((check) => (
+            <li key={check}>{check}</li>
+          ))}
+        </ul>
+      )}
 
       {/* Everything the editor has to say back, under it. */}
       <div className="mx-auto mt-4 w-full max-w-3xl space-y-3 text-start">

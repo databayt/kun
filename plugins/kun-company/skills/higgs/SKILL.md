@@ -51,12 +51,11 @@ Same models, two tills. Walk down; stop at the first line that can pay.
 | 2   | No key, Higgsfield has credits for the job | Higgsfield CLI (tables further down)                                  |
 | 3   | Neither                                    | Say so, propose the template lane (`/carousel`) or ask to fund a key  |
 
-Today rung 2 is dead (0.7 credits buys nothing publishable) and rung 1 needs one line in
-kun's central `.env`:
-
-```bash
-GEMINI_API_KEY=...   # https://aistudio.google.com/apikey — central .env only, never .env.local
-```
+Today **both rungs are unfunded**: Higgsfield holds 0.7 credits, and the Gemini key is on a
+free tier whose image quota is literally zero (see below). The key itself is already wired —
+`GEMINI_API_KEY` in kun's central `.env`, new-format (`AQ.Ab…`, 53 chars — _not_ the legacy
+`AIza…`), issued to the AI Studio key named `kun`. What's missing is billing on the Google
+project, not a credential.
 
 The script trims the value on read: a trailing newline pasted from a dashboard turns the
 auth header into an opaque 400 (it cost us kun report-issue / PR #97 once already).
@@ -175,11 +174,20 @@ node scripts/higgs-library.mjs add ~/Downloads/gemini/<file> --prompt "<full pro
   --model gemini-3.1-flash-lite-image --source gemini --type hero --brand databayt
 ```
 
-**Free tier — unsettled, worth one call to settle.** Google's pricing page lists _Free tier:
-Not available_ for every current image model, while third-party trackers report ~500
-images/day at 1K on an AI Studio key via `legacy` (`gemini-2.5-flash-image`). We have not
-tested it with our own key. First run on a new key: `--model legacy --size 1K` and watch
-whether it 429s or bills. Don't quote a free tier to Abdout until that's done.
+**There is no free tier for images. Settled 2026-08-05 by running it.** The key
+(`AQ.Ab…_bMQ`, named `kun`, project `gen-lang-client-0243019665`) authenticates, sees all 58
+models, and generates **text** fine on the free tier. Image generation returns:
+
+```
+429  Quota exceeded for metric: generate_content_free_tier_requests, limit: 0
+```
+
+`limit: 0` — not a used-up allowance, a quota that was never greater than zero. Google's own
+pricing page was right and the third-party "~500 images/day" trackers are wrong. Nothing on
+this lane renders until **billing is enabled** on that project; the AI Studio UI offers a
+monthly **spend cap** at the same time, which is the safe way to turn it on. Until then the
+raster lane has no funded renderer at all — say so and offer the template lane, do not
+burn turns retrying.
 
 **Arabic typography — a live question, not a settled doctrine.** Nano Banana Pro's headline
 claim is accurate multilingual text rendering, which is exactly what rule 2 forbids on the

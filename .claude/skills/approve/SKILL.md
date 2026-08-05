@@ -38,13 +38,30 @@ Arguments: $ARGUMENTS — brand, the channels being approved, the media URLs if 
 ## Steps
 
 1. **Assemble** — copy plus media path, per channel, exactly as it will appear.
-2. **Pre-flight checks**, all of which are cheaper here than after publishing:
+2. **Pre-flight checks**, all of which are cheaper here than after publishing.
+   **Craft first** — it is cheaper to reject a post than to check glyph integrity on
+   something that should not ship.
+
+   **Craft pre-flight** — twenty seconds; three of the five need no Arabic. The checks
+   are the seven in `content/docs/social/copy.mdx`:
+   - Read **only the first line**. Would you keep reading? _(check 1)_
+   - Say the post's one claim out loud in five words. Can you? _(check 2)_
+   - Point at the sentence where you recognise your own week. _(check 4)_
+   - Is there exactly one thing to do at the end? _(check 6)_
+   - Put AR and EN side by side — are they the same sentence in two alphabets? _(check 5)_
+
+   **A craft fail is a Dismiss with the check named, not a silent rewrite in the
+   textarea.** The review editor offers one-tap reasons for exactly this; patching it
+   quietly loses the only feedback the writing side ever gets.
+
+   **Safety pre-flight:**
    - Arabic glyph integrity — no broken or disconnected forms, no synthetic bold on
      a display face.
    - No text baked into a generated raster image.
    - AI-generated media is labelled.
    - Consent for any recognisable face. **Children: never without written consent.**
    - Claims are truthful and the links resolve.
+
 3. **Stage** — push each channel down the approval path so it gets its own
    `SocialVariant` in `pending` and its own signed, single-use, 12-hour link:
    - From the Hub: the composer's **Send for review** (`stageForReview` in
@@ -76,7 +93,9 @@ Every requested channel has exactly one of: an in-app approval recorded (the
 request `consumed`, variants `published` or `scheduled`), a `SocialVariant` row
 in `pending` with a signed link delivered to the review channel, **or** an
 explicit recorded human yes. The session has made zero platform calls. Any held,
-dismissed, or rejected channel is named with its reason.
+dismissed, or rejected channel is named with its reason — and a draft dismissed on
+craft names **which of the seven checks it failed**, not just that it was weak.
+That reason is the whole feedback loop back to the writing side.
 
 ## When NOT to use
 

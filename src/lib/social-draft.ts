@@ -54,6 +54,15 @@ export type DraftResult =
   //   (neither) — a genuine failure worth flagging.
   | { ok: false; error: string; transient?: boolean; handoff?: boolean };
 
+// This lane is dark (see `draftBrief`'s note, D-20260730): Hermes is parked and
+// the Anthropic path spends an API key we deliberately do not fund, so nothing
+// below writes a word of production copy today. **The live doctrine is
+// `content/docs/social/copy.mdx`** — the seven checks, the Arabic register
+// ladder, and the wordlist — which `/draft` reads on the Max pool instead.
+//
+// Do not treat this constant as a second source of truth; it is already behind
+// (no register ladder, no reject list, a stale 300-600 char target). If credits
+// are ever bought and this lane relit, inline that document here first.
 const SYSTEM_PROMPT = `You write social-media copy for databayt, a Sudanese open-source software house building SaaS products for the MENA region.
 
 Products you may be asked to write for:

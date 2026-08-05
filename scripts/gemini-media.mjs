@@ -70,8 +70,8 @@ const IMAGE_MODELS = {
     price: { '1K': 0.134, '2K': 0.134, '4K': 0.24 },
     refs: 'up to 6 object + 5 character references',
   },
-  // The only image model with a documented free lane (~500 images/day at 1K on
-  // an AI Studio key). Unverified against our own key — see `cost --kind image`.
+  // Kept for its cheap flat rate, NOT for a free tier — tested 2026-08-05 and the
+  // free-tier image quota is `limit: 0` on every model, this one included.
   legacy: {
     id: 'gemini-2.5-flash-image',
     label: 'Nano Banana (original)',
@@ -158,8 +158,9 @@ function apiKey() {
     fail(
       'GEMINI_API_KEY is not set.\n' +
         '  Create a key at https://aistudio.google.com/apikey, then add to kun/.env:\n' +
-        '    GEMINI_API_KEY=...\n' +
-        '  (central .env only — never .env.local)',
+        '    GEMINI_API_KEY=AQ.Ab...\n' +
+        '  (central .env only — never .env.local. Current keys are the new AQ. format,\n' +
+        '   53 chars; the legacy AIza... format is still accepted but no longer issued.)',
     );
   }
   return key;
@@ -178,7 +179,18 @@ async function postJSON(url, body, key) {
     body: JSON.stringify(body),
   });
   const text = await res.text();
-  if (!res.ok) fail(`${res.status} ${res.statusText} — ${text.slice(0, 600)}`);
+  if (!res.ok) {
+    // A free-tier key reads as rate-limited, but `limit: 0` means the quota was
+    // never above zero — it's a billing gap, not a burst. Say the useful thing.
+    if (res.status === 429 && /free_tier_requests[\s\S]*limit:\s*0/.test(text)) {
+      fail(
+        'No image/video quota on this key — the free tier for generation is limit: 0.\n' +
+          '  Enable billing on the Google project (AI Studio → Set up billing) and set a\n' +
+          '  monthly spend cap at the same time. Text models still work on the free tier.',
+      );
+    }
+    fail(`${res.status} ${res.statusText} — ${text.slice(0, 600)}`);
+  }
   try {
     return JSON.parse(text);
   } catch {

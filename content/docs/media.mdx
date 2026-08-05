@@ -74,11 +74,13 @@ estimate and exits. Setup is one line in kun's central `.env` —
 the value on read, because a trailing newline pasted out of a dashboard turns the auth header
 into an opaque 400.
 
-> **The free tier is unsettled.** Google's pricing page lists *Free tier: Not available* for
-> every current image model, while third-party trackers report ~500 images/day at 1K through
-> `gemini-2.5-flash-image` on an AI Studio key. We have not tested it with our own key. The
-> first run on a new key should be `--model legacy --size 1K`, watching for a 429 versus a
-> charge. Until then, assume the lane is paid.
+> **There is no free tier for images — settled by running it (2026-08-05).** The key
+> authenticates, sees all 58 models, and generates *text* fine on the free tier. Image
+> generation returns `429 … generate_content_free_tier_requests, limit: 0` — a quota that was
+> never above zero, not one we used up. Google's pricing page was right; the third-party
+> "~500 images/day" reports are wrong. The lane renders nothing until **billing is enabled**
+> on project `gen-lang-client-0243019665`, which AI Studio will pair with a monthly **spend
+> cap** — the safe way to switch it on.
 
 ## Higgsfield model defaults
 
@@ -199,8 +201,11 @@ model is correctly a miss. `/social --media` consults the library before spendin
 
 ## Setup
 
-**Google lane** — one line in the central `.env`: `GEMINI_API_KEY=` from
-[AI Studio](https://aistudio.google.com/apikey). Nothing to install; the script uses `fetch`.
+**Google lane** — `GEMINI_API_KEY` in the central `.env`, already wired from the
+[AI Studio](https://aistudio.google.com/apikey) key named `kun`. Nothing to install; the
+script uses `fetch`. Note current keys use Google's **new** format (`AQ.Ab…`, 53 chars), not
+the legacy `AIza…` — anything validating on the old prefix will reject a valid key. Rendering
+additionally needs billing enabled on the project; the key alone is not enough.
 
 **Higgsfield lane**
 
