@@ -27,9 +27,24 @@ export const SOCIAL_DICTIONARY = {
     tabPublish: "Publish",
     tabMeasure: "Measure",
     tabsLabel: "Pipeline stage",
-    calendarNoteTitle: "Planning happens in the session, not here",
-    calendarNoteBody:
-      "The calendar decides which brand publishes what, on which day, against each brand's cadence and content pillars. It produces a dated table — brand, topic, channels, owner — and the Hub has nowhere to keep one, so it is not faked here.",
+    // The calendar panel — pillars.json rendered as the recurring plan.
+    calendarTitle: "The calendar",
+    calendarIntro:
+      "The recurring plan: each brand's briefs rotate into the draft queue by ISO week. Editing content/social/pillars.json IS editing the calendar.",
+    calendarWeek: "Week {week}",
+    calendarSeedNote:
+      "Seeds Mondays 07:00 — {count} briefs a week, rotation is stateless.",
+    calendarThisWeek: "This week",
+    calendarQueueNow: "Queue now",
+    calendarQueueing: "Queueing...",
+    calendarAskedRecently: "asked within 14 days",
+    calendarStatePending: "In the draft queue",
+    calendarStateAnswered: "Answered — in review",
+    calendarStateConsumed: "Approved",
+    calendarStateDismissed: "Dismissed",
+    calendarStateFailed: "Failed",
+    calendarNoPillars:
+      "No briefs for this brand yet — add them to content/social/pillars.json and the rotation picks them up.",
     // The showroom — the Media stage's gallery of generated assets and kept
     // references. Copy is never rendered into AI images (typography breaks,
     // Arabic doubly so); text-bearing formats render on the template lane.
@@ -215,9 +230,23 @@ export const SOCIAL_DICTIONARY = {
     tabPublish: "النشر",
     tabMeasure: "القياس",
     tabsLabel: "مرحلة المسار",
-    calendarNoteTitle: "التخطيط يجري في الجلسة، لا هنا",
-    calendarNoteBody:
-      "التقويم يحدّد أي علامة تنشر ماذا وفي أي يوم، وفق وتيرة كل علامة ومحاور محتواها. ناتجه جدول مؤرَّخ — العلامة، الموضوع، القنوات، المسؤول — ولا مكان في اللوحة لحفظه، فلم نصطنع له واجهة.",
+    calendarTitle: "التقويم",
+    calendarIntro:
+      "الخطة الدورية: موجزات كل علامة تدور إلى طابور الصياغة بأسبوع السنة. تعديل content/social/pillars.json هو تعديل التقويم نفسه.",
+    calendarWeek: "الأسبوع {week}",
+    calendarSeedNote:
+      "يُبذر كل اثنين 07:00 — {count} موجزات أسبوعياً، والدوران بلا حالة.",
+    calendarThisWeek: "هذا الأسبوع",
+    calendarQueueNow: "قيّده الآن",
+    calendarQueueing: "جاري التقييد...",
+    calendarAskedRecently: "طُلب خلال 14 يوماً",
+    calendarStatePending: "في طابور الصياغة",
+    calendarStateAnswered: "أُجيب — في المراجعة",
+    calendarStateConsumed: "اعتُمد",
+    calendarStateDismissed: "استُبعد",
+    calendarStateFailed: "فشل",
+    calendarNoPillars:
+      "لا موجزات لهذه العلامة بعد — أضفها إلى content/social/pillars.json ليلتقطها الدوران.",
     showroomTitle: "المعرض",
     showroomIntro:
       "ما ولّدناه وما نحتفظ به كمرجع. Higgsfield يصنع صوراً بلا نصوص ويدفعها إلى الـCDN؛ والقوالب النصية تُصاغ من HTML بخط الدار. أرفق أصلاً من هنا يهبط في حافظة مرحلة النشر.",

@@ -171,6 +171,9 @@ if (command === "list") {
       process.exit(1);
     }
     // ISO week number — stateless rotation anchor shared by every machine.
+    // MIRROR of src/components/root/social/rotation.ts (the calendar panel's
+    // copy — TS the .mjs cannot import). Keep the two in lockstep, or the
+    // panel highlights briefs the seeder will not file.
     const now = new Date();
     const jan4 = new Date(Date.UTC(now.getUTCFullYear(), 0, 4));
     const week = Math.ceil(
