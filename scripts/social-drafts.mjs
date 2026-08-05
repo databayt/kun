@@ -11,13 +11,16 @@
 // egress layer: the relays deliver, they never write.
 //
 //   node scripts/social-drafts.mjs list
-//   node scripts/social-drafts.mjs answer <id> --ar <file> --en <file>
+//   node scripts/social-drafts.mjs answer <id> --ar <file> --en <file> [--media "url1,url2"]
+//   node scripts/social-drafts.mjs attach <id> --media "url1,url2"
 //   node scripts/social-drafts.mjs fail   <id> --note "why"
 //   node scripts/social-drafts.mjs seed --auto [--brand hogwarts] [--count 2]
 //   node scripts/social-drafts.mjs seed --brand hogwarts --brief "..."
 //
 // Copy goes in via FILES, not argv: brand copy is multi-line, contains quotes
-// and Arabic, and argv mangles all three.
+// and Arabic, and argv mangles all three. Media goes in via URLS, comma-
+// separated — a full draft is copy AND/OR media, and the URLs are library
+// cdnUrls a session picked, never invented.
 //
 // `seed` is the calendar half of Loop B done billing-compliantly: instead of
 // the Vercel cron drafting server-side (no compliant draft source — Hermes is
@@ -63,11 +66,37 @@ function read(path, label) {
   return text;
 }
 
+// --media "url1,url2" → validated array, or undefined when the flag is absent
+// (absent means "leave the stored set alone" — never clobber an ask-time
+// attachment with empty). Same gates as the server action: https, ≤ 10.
+function parseMedia(raw) {
+  if (raw === undefined) return undefined;
+  const urls = raw
+    .split(",")
+    .map((u) => u.trim())
+    .filter(Boolean);
+  if (urls.length === 0) {
+    console.error('--media given but empty — pass "url1,url2".');
+    process.exit(1);
+  }
+  if (urls.length > 10) {
+    console.error(`--media takes at most 10 URLs (got ${urls.length}).`);
+    process.exit(1);
+  }
+  for (const u of urls) {
+    if (!/^https?:\/\//i.test(u)) {
+      console.error(`--media URLs must start with http(s):// — got "${u}".`);
+      process.exit(1);
+    }
+  }
+  return urls;
+}
+
 const [, , command, id] = process.argv;
 
 if (command === "list") {
   const rows = await sql`
-    SELECT "id", "brand", "brief", "requestedBy", "createdAt"
+    SELECT "id", "brand", "brief", "requestedBy", "createdAt", "mediaUrls"
     FROM "SocialDraftRequest"
     WHERE "status" = 'pending'
     ORDER BY "createdAt" ASC
@@ -94,6 +123,7 @@ if (command === "list") {
           brand: r.brand,
           brief: r.brief,
           requestedBy: r.requestedBy,
+          mediaUrls: r.mediaUrls ?? [],
           waitingMinutes: Math.round(
             (Date.now() - new Date(r.createdAt).getTime()) / 60000,
           ),
@@ -105,19 +135,33 @@ if (command === "list") {
   }
 } else if (command === "answer") {
   if (!id) {
-    console.error("Usage: answer <id> --ar <file> --en <file>");
+    console.error(
+      'Usage: answer <id> --ar <file> --en <file> [--media "url1,url2"]',
+    );
     process.exit(1);
   }
   const ar = read(flag("ar"), "ar");
   const en = read(flag("en"), "en");
+  const media = parseMedia(flag("media"));
   // Conditional on `pending`: two sessions answering the same ask race here and
   // exactly one wins — the same guarantee the publish claim relies on.
-  const done = await sql`
-    UPDATE "SocialDraftRequest"
-       SET "status" = 'answered', "ar" = ${ar}, "en" = ${en},
-           "note" = ${flag("note") ?? "claude-code"}, "answeredAt" = now()
-     WHERE "id" = ${id} AND "status" = 'pending'
-    RETURNING "id"`;
+  // Branched, not dynamically built: --media absent must leave the stored set
+  // (an ask-time attachment) untouched, and the tagged template can't express
+  // an optional SET.
+  const done = media
+    ? await sql`
+        UPDATE "SocialDraftRequest"
+           SET "status" = 'answered', "ar" = ${ar}, "en" = ${en},
+               "mediaUrls" = ${media},
+               "note" = ${flag("note") ?? "claude-code"}, "answeredAt" = now()
+         WHERE "id" = ${id} AND "status" = 'pending'
+        RETURNING "id"`
+    : await sql`
+        UPDATE "SocialDraftRequest"
+           SET "status" = 'answered', "ar" = ${ar}, "en" = ${en},
+               "note" = ${flag("note") ?? "claude-code"}, "answeredAt" = now()
+         WHERE "id" = ${id} AND "status" = 'pending'
+        RETURNING "id"`;
   if (done.length === 0) {
     const [row] = await sql`
       SELECT "status" FROM "SocialDraftRequest" WHERE "id" = ${id}`;
@@ -128,7 +172,42 @@ if (command === "list") {
     );
     process.exit(1);
   }
-  console.log(`answered ${id} — ar ${ar.length} chars, en ${en.length} chars`);
+  console.log(
+    `answered ${id} — ar ${ar.length} chars, en ${en.length} chars${
+      media ? `, media ${media.length}` : ""
+    }`,
+  );
+} else if (command === "attach") {
+  // Replace the draft's media set — used by a full session after generating
+  // via /higgs or /carousel, or to hand-pick from the library. REPLACES, so
+  // pass the complete set you mean (read the current one with `list`).
+  if (!id) {
+    console.error('Usage: attach <id> --media "url1,url2"');
+    process.exit(1);
+  }
+  const media = parseMedia(flag("media"));
+  if (!media) {
+    console.error('Usage: attach <id> --media "url1,url2"');
+    process.exit(1);
+  }
+  // Pending or answered only — a consumed/dismissed draft is decided; media
+  // changes after the decision would never be seen by anyone.
+  const done = await sql`
+    UPDATE "SocialDraftRequest"
+       SET "mediaUrls" = ${media}
+     WHERE "id" = ${id} AND "status" IN ('pending', 'answered')
+    RETURNING "id", "status"`;
+  if (done.length === 0) {
+    const [row] = await sql`
+      SELECT "status" FROM "SocialDraftRequest" WHERE "id" = ${id}`;
+    console.error(
+      row
+        ? `Refused: that ask is "${row.status}" — media attaches to pending or answered only.`
+        : `Refused: no ask with id ${id}.`,
+    );
+    process.exit(1);
+  }
+  console.log(`attached ${media.length} media to ${id} (${done[0].status})`);
 } else if (command === "seed") {
   // File draft asks without a human at the window. Two modes:
   //   --brand X --brief "..."   one explicit ask
@@ -211,7 +290,8 @@ if (command === "list") {
     [
       "Usage:",
       "  node scripts/social-drafts.mjs list",
-      "  node scripts/social-drafts.mjs answer <id> --ar <file> --en <file> [--note ...]",
+      '  node scripts/social-drafts.mjs answer <id> --ar <file> --en <file> [--media "url1,url2"] [--note ...]',
+      '  node scripts/social-drafts.mjs attach <id> --media "url1,url2"',
       '  node scripts/social-drafts.mjs fail   <id> --note "why"',
       "  node scripts/social-drafts.mjs seed --auto [--brand hogwarts] [--count 2]",
       '  node scripts/social-drafts.mjs seed --brand <brand> --brief "..."',

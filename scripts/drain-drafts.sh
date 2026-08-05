@@ -134,7 +134,7 @@ log "drain start: $COUNT pending"
 
 # Tools are allow-listed to exactly what queue mode needs: the queue script,
 # brand-doc reads, and answer files. --max-turns caps a runaway session.
-claude -p "Run the /draft skill in queue mode: drain every pending ask via 'node scripts/social-drafts.mjs'. Write each answer's Arabic and English to temp files and pass them with 'answer <id> --ar <file> --en <file>'. Every ask must end answered or failed — never left pending." \
+claude -p "Run the /draft skill in queue mode: drain every pending ask via 'node scripts/social-drafts.mjs'. Write each answer's Arabic and English to temp files and pass them with 'answer <id> --ar <file> --en <file>'. A full draft is copy AND/OR media: when the brief suggests a visual, pick a matching asset from content/media/library.json — by the (library: <id>) hint if the brief names one, else by brand + assetType — and pass its cdnUrl via '--media <url>'. Never invent or guess a URL; if the ask already carries mediaUrls, keep them unless the brief says otherwise; if nothing in the library matches, answer text-only (generation is a full-session job, not this lane's). Every ask must end answered or failed — never left pending." \
     --allowedTools "Bash(node scripts/social-drafts.mjs*)" "Read" "Write" "Glob" "Grep" \
     --max-turns 40 >> "$LOG_FILE" 2>&1
 CLAUDE_EXIT=$?
