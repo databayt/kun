@@ -50,7 +50,7 @@ export const SOCIAL_DICTIONARY = {
     // Arabic doubly so); text-bearing formats render on the template lane.
     showroomTitle: "The showroom",
     showroomIntro:
-      "What we generated and what we keep as reference. Higgsfield renders text-free visuals to the CDN; text-bearing formats render from HTML templates in the house type. Attach an asset here and it rides the Publish stage's tray.",
+      "What we generated and what we keep as reference. Text-free visuals come from Higgsfield or a ChatGPT seat working the brief queue below; text-bearing formats render from HTML templates in the house type. Attach an asset here and it rides the Publish stage's tray.",
     collectionAll: "All",
     collectionGenerated: "Generated",
     collectionReference: "References",
@@ -267,7 +267,7 @@ export const SOCIAL_DICTIONARY = {
       "لا موجزات لهذه العلامة بعد — أضفها إلى content/social/pillars.json ليلتقطها الدوران.",
     showroomTitle: "المعرض",
     showroomIntro:
-      "ما ولّدناه وما نحتفظ به كمرجع. Higgsfield يصنع صوراً بلا نصوص ويدفعها إلى الـCDN؛ والقوالب النصية تُصاغ من HTML بخط الدار. أرفق أصلاً من هنا يهبط في حافظة مرحلة النشر.",
+      "ما ولّدناه وما نحتفظ به كمرجع. الصور بلا نصوص تأتي من Higgsfield أو من مقعد ChatGPT عبر طابور الموجزات بالأسفل؛ والقوالب النصية تُصاغ من HTML بخط الدار. أرفق أصلاً من هنا يهبط في حافظة مرحلة النشر.",
     collectionAll: "الكل",
     collectionGenerated: "المولَّد",
     collectionReference: "المراجع",
