@@ -35,6 +35,13 @@ export interface AssetTypeMeta {
   model?: string;
   ratio?: string;
   style?: "minimal" | "cinematic";
+  /**
+   * The same raster job addressed at Google directly instead of through
+   * Higgsfield's resale of it (`nano_banana_*` there IS Nano Banana here).
+   * `model` is an alias understood by `scripts/gemini-media.mjs`; `size` is the
+   * image tier (1K/2K/4K) or, for video, the clip length in seconds.
+   */
+  gemini?: { model: string; size?: string; seconds?: number };
 }
 
 export const ASSET_TYPE_META: Record<AssetType, AssetTypeMeta> = {
@@ -45,6 +52,7 @@ export const ASSET_TYPE_META: Record<AssetType, AssetTypeMeta> = {
     model: "nano_banana_pro",
     ratio: "16:9",
     style: "minimal",
+    gemini: { model: "pro", size: "2K" },
   },
   og: {
     en: "OG image",
@@ -65,6 +73,7 @@ export const ASSET_TYPE_META: Record<AssetType, AssetTypeMeta> = {
     model: "nano_banana_2_lite",
     ratio: "1:1",
     style: "minimal",
+    gemini: { model: "lite", size: "1K" },
   },
   product: {
     en: "Product shot",
@@ -73,6 +82,7 @@ export const ASSET_TYPE_META: Record<AssetType, AssetTypeMeta> = {
     model: "nano_banana_2_lite",
     ratio: "4:5",
     style: "minimal",
+    gemini: { model: "lite", size: "1K" },
   },
   lifestyle: {
     en: "Lifestyle scene",
@@ -81,14 +91,18 @@ export const ASSET_TYPE_META: Record<AssetType, AssetTypeMeta> = {
     model: "nano_banana_2_lite",
     ratio: "4:5",
     style: "cinematic",
+    gemini: { model: "lite", size: "1K" },
   },
   mockup: {
     en: "Interface mockup",
     ar: "نموذج واجهة",
     lane: "higgs",
+    // flash, not lite: a mockup restyles a real screenshot, and only flash and
+    // pro take reference images.
     model: "nano_banana_flash",
     ratio: "1:1",
     style: "minimal",
+    gemini: { model: "flash", size: "1K" },
   },
   infographic: {
     en: "Infographic",
@@ -118,6 +132,7 @@ export const ASSET_TYPE_META: Record<AssetType, AssetTypeMeta> = {
     model: "kling3_0_turbo",
     ratio: "9:16",
     style: "cinematic",
+    gemini: { model: "veo-lite", seconds: 8 },
   },
   story: {
     en: "Story",
@@ -126,6 +141,7 @@ export const ASSET_TYPE_META: Record<AssetType, AssetTypeMeta> = {
     model: "nano_banana_2_lite",
     ratio: "9:16",
     style: "cinematic",
+    gemini: { model: "lite", size: "1K" },
   },
 };
 

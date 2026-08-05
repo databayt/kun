@@ -1,30 +1,65 @@
 ---
 name: higgs
-description: Generate and edit photos and videos for databayt org marketing, ads, and prompts using Higgsfield AI
-when_to_use: "Use when generating or editing marketing media — image, photo, video, ad, banner, og image, social card, hero shot, product shot, promo reel, story, avatar ad — or when a reference video/image URL needs downloading and tweaking through Higgsfield. This is the TEXT-FREE lane: og images, infographics, testimonials, split comparisons and anything carrying copy render on /carousel's template lane instead (the Portrait Gallery spells route by taxonomy lane). Triggers on: /higgs, generate video, generate image, generate photo, make an ad, promo video, og image, social card, hero image, product shot, mockup, lifestyle scene, moodboard, showroom asset, brand kit, edit video from url, download and tweak video, higgs, صورة تسويقية, وسائط."
+description: Generate and edit photos and videos for databayt org marketing, ads, and prompts — Google (Nano Banana / Veo / Omni) direct, or Higgsfield
+when_to_use: "Use when generating or editing marketing media — image, photo, video, ad, banner, og image, social card, hero shot, product shot, promo reel, story, avatar ad — or when a reference video/image URL needs downloading and tweaking. Owns BOTH raster renderers: Google direct (Nano Banana, Nano Banana Pro, Veo, Omni Flash — pay per image, no credit ceiling) and Higgsfield (credits). This is the TEXT-FREE lane: og images, infographics, testimonials, split comparisons and anything carrying copy render on /carousel's template lane instead (the Portrait Gallery spells route by taxonomy lane). Triggers on: /higgs, generate video, generate image, generate photo, make an ad, promo video, og image, social card, hero image, product shot, mockup, lifestyle scene, moodboard, showroom asset, brand kit, edit video from url, download and tweak video, higgs, nano banana, veo, omni, gemini image, صورة تسويقية, وسائط."
 argument-hint: "[recipe|prompt] [--url <ref>] [--count N] [--premium] [--ratio 16:9]"
 ---
 
-# Higgs — Higgsfield media generation for databayt
+# Higgs — the raster media lane for databayt
 
 One-command marketing media. Every decision below is pre-made — do NOT ask Abdout about
-model, style, aspect ratio, or output location. Pick the recipe, run it, deliver the file.
-CLI: `higgsfield` (aliases `higgs`, `hf`), authed via `auth login` (OAuth token on disk).
+model, style, aspect ratio, renderer, or output location. Pick the recipe, run it, deliver
+the file.
+
+Two renderers reach the **same** frontier models — Higgsfield resells Google's Nano Banana
+(`nano_banana_pro` there IS `gemini-3-pro-image` here), so the choice is purely commercial:
+
+| Renderer                    | Surface                          | Pays with                   | Status                    |
+| --------------------------- | -------------------------------- | --------------------------- | ------------------------- |
+| **Google direct** (default) | `node scripts/gemini-media.mjs`  | `GEMINI_API_KEY`, per image | needs key — see below     |
+| Higgsfield (alternate)      | `higgsfield` CLI (`higgs`, `hf`) | credits, OAuth on disk      | **0.7 credits — drained** |
+
+Read the renderer ladder before spending anything.
 
 ## Zero-question doctrine
 
-1. **Never ask model/style/ratio** — the tables below decide. Only stop for: credits
+1. **Never ask model/style/ratio/renderer** — the tables below decide. Only stop for: budget
    insufficient for the asked job, or a truly ambiguous deliverable.
 2. **No text inside generated visuals** (AI typography breaks, Arabic doubly so). Generate
-   text-free; overlay copy in post. Exception: `dtc-ads` — its backend does typography.
-3. **Estimate free, then spend**: `generate cost <model> --prompt "..."`, `--cost-only`
-   (dtc-ads), `--enhance-only` (product-photoshoot). Report spend + balance after every run.
+   text-free; overlay copy in post. Exceptions: `dtc-ads` — its backend does typography; and
+   see the Arabic-typography test under the Gemini lane, which is **unsettled, not adopted**.
+3. **Estimate free, then spend**: `gemini-media.mjs cost …` and its dry-run gate (a generate
+   without `--yes` only prints the estimate) · `generate cost <model> --prompt "..."`,
+   `--cost-only` (dtc-ads), `--enhance-only` (product-photoshoot). Report spend after each run.
 4. **Batch in one command** — `--count 1-10` (photoshoot), `--batch-size 1-20` (dtc-ads) —
    never N separate invocations.
-5. **Always `--json`**, parse `.[].result_url`, download to `~/Downloads/higgs/`,
-   deliver via SendUserFile. Job page fallback: https://higgsfield.ai/create/image
-6. Video is expensive (7.5–22.5 cr) — iterate composition as a cheap image first
-   (`z_image`, 0.15 cr), then animate the winning frame via `--start-image`.
+5. **Always parse the JSON last line** — `.file` (gemini) or `.[].result_url` (higgsfield);
+   download to `~/Downloads/{gemini,higgs}/`, deliver via SendUserFile. Job page fallback:
+   https://higgsfield.ai/create/image
+6. Video costs 8–40× an image on either renderer — iterate composition as a cheap image
+   first, then animate the winning frame (`--start-image` on both).
+7. **Register every keeper** (below) so the showroom files it and the next job can reuse it.
+
+## Renderer ladder — pick before you spend
+
+Same models, two tills. Walk down; stop at the first line that can pay.
+
+| #   | Situation                                  | Do this                                                               |
+| --- | ------------------------------------------ | --------------------------------------------------------------------- |
+| 0   | **Do we already own this shot?**           | `node scripts/higgs-library.mjs lookup …` — a hit costs 0             |
+| 1   | `GEMINI_API_KEY` is set                    | **Google direct** — `scripts/gemini-media.mjs`, per-image, no ceiling |
+| 2   | No key, Higgsfield has credits for the job | Higgsfield CLI (tables further down)                                  |
+| 3   | Neither                                    | Say so, propose the template lane (`/carousel`) or ask to fund a key  |
+
+Today rung 2 is dead (0.7 credits buys nothing publishable) and rung 1 needs one line in
+kun's central `.env`:
+
+```bash
+GEMINI_API_KEY=...   # https://aistudio.google.com/apikey — central .env only, never .env.local
+```
+
+The script trims the value on read: a trailing newline pasted from a dashboard turns the
+auth header into an opaque 400 (it cost us kun report-issue / PR #97 once already).
 
 ## Account (re-verified 2026-07-27)
 
@@ -48,7 +83,7 @@ higgsfield account status || { higgsfield auth login; higgsfield workspace set 1
 hands-free). MCP `https://mcp.higgsfield.ai/mcp` is registered but unauthenticated — the CLI
 is the primary lane; don't detour through MCP.
 
-## Model defaults (costs re-verified 2026-07-27 via `generate cost`)
+## Higgsfield model defaults (costs re-verified 2026-07-27 via `generate cost`)
 
 **Naming trap**: `nano_banana_flash` = Nano Banana **2**; `nano_banana_pro` = Nano Banana
 **Pro**. There is **no `nano_banana_2` job type** — that ID was retired; using it errors.
@@ -82,7 +117,78 @@ film grain, monochrome with one restrained cyan accent, no text"`
 mode backdrop, electric cyan and warm sunset-orange rim light, shallow depth of field,
 slow tracking shot, cinematic studio lighting, photorealistic, no text"`
 
-## Recipes (copy-paste; swap prompt subject)
+## Gemini lane — Google direct (default renderer)
+
+Prices are USD per image / per second, standard tier, verified 2026-08-05 against
+ai.google.dev. `node scripts/gemini-media.mjs models` prints this table live — read it
+there rather than trusting these numbers after Google ships anything.
+
+| Use                        | `--model`  | Google ID                       | Price                       |
+| -------------------------- | ---------- | ------------------------------- | --------------------------- |
+| **Image final (default)**  | `lite`     | `gemini-3.1-flash-lite-image`   | $0.034 (1K only)            |
+| Image w/ refs, 2K/4K       | `flash`    | `gemini-3.1-flash-image`        | $0.045 / .067 / .101 / .151 |
+| Image hero, best type      | `pro`      | `gemini-3-pro-image`            | $0.134 (1K–2K) · $0.24 (4K) |
+| Image on the free lane     | `legacy`   | `gemini-2.5-flash-image`        | $0.039 — see free-tier note |
+| **Video default**          | `veo-lite` | `veo-3.1-lite-generate-preview` | $0.05/s 720p → **$0.40/8s** |
+| Video better motion        | `veo-fast` | `veo-3.1-fast-generate-preview` | $0.10/s 720p → $0.80/8s     |
+| Video hero                 | `veo`      | `veo-3.1-generate-preview`      | $0.40/s → $3.20/8s          |
+| Video, conversational edit | `omni`     | `gemini-omni-flash-preview`     | ≈$0.10/s of 720p            |
+
+Ratios: `1:1 3:2 2:3 3:4 4:3 4:5 5:4 9:16 16:9 21:9` (image, documented for the 3.1 pair —
+Pro may narrow it, the API errors clearly if so) · `16:9 9:16` only for video. Sizes take an
+**uppercase K** — `1k` is rejected; the script normalises but the raw API does not. Refs:
+`lite` 14 object / no character-or-style · `flash` 10 object + 4 character + 3 style ·
+`pro` 6 object + 5 character. Veo durations are 4/6/8s, and 1080p/4K are **8s-only**. Every
+output carries an invisible SynthID watermark. Veo keeps a render server-side for **2 days**
+— the script downloads immediately, so never re-poll an old operation instead of re-running.
+
+```bash
+# 0. ALWAYS FIRST — do we already own this shot? A hit costs $0.
+node scripts/higgs-library.mjs lookup --prompt "<full prompt>" --model gemini-3.1-flash-lite-image --ratio 16:9
+
+# Estimate without spending (free, no key needed) — or just omit --yes on any generate
+node scripts/gemini-media.mjs cost --kind image --model pro --size 4K --count 3
+node scripts/gemini-media.mjs image --prompt "<subject>, <minimal>"   # prints estimate, exits
+
+# Social square / story / product — the default publishable tier
+node scripts/gemini-media.mjs image --prompt "<subject>, <cinematic>" --ratio 1:1 --yes    # story: 9:16
+node scripts/gemini-media.mjs image --prompt "<subject>, <minimal>" --model lite --ratio 4:5 --yes
+
+# OG image / hero banner (final)
+node scripts/gemini-media.mjs image --prompt "<subject>, <minimal>" --model pro --ratio 16:9 --size 2K --yes
+
+# Interface mockup — restyle a REAL screenshot (UI text must be a capture, never genAI type)
+node scripts/gemini-media.mjs image --prompt "<restyle direction>, <minimal>" --model flash --ref ~/Desktop/capture.png --yes
+
+# Promo clip (8s with native audio) — cheapest publishable video anywhere in the engine
+node scripts/gemini-media.mjs video --prompt "<scene>, <cinematic>" --ratio 9:16 --seconds 8 --yes
+
+# Animate a winning image (image → video)
+node scripts/gemini-media.mjs video --prompt "<motion direction>" --start-image ~/Downloads/gemini/<img>.png --yes
+
+# Conversational video edit — feed the previous interactionId back to revise the same clip
+node scripts/gemini-media.mjs omni --prompt "<scene>" --ratio 16:9 --yes
+node scripts/gemini-media.mjs omni --prompt "warmer light, slower push-in" --continue <interactionId> --yes
+
+# Register the keeper so the showroom files it and the next lookup hits
+node scripts/higgs-library.mjs add ~/Downloads/gemini/<file> --prompt "<full prompt>" \
+  --model gemini-3.1-flash-lite-image --source gemini --type hero --brand databayt
+```
+
+**Free tier — unsettled, worth one call to settle.** Google's pricing page lists _Free tier:
+Not available_ for every current image model, while third-party trackers report ~500
+images/day at 1K on an AI Studio key via `legacy` (`gemini-2.5-flash-image`). We have not
+tested it with our own key. First run on a new key: `--model legacy --size 1K` and watch
+whether it 429s or bills. Don't quote a free tier to Abdout until that's done.
+
+**Arabic typography — a live question, not a settled doctrine.** Nano Banana Pro's headline
+claim is accurate multilingual text rendering, which is exactly what rule 2 forbids on the
+raster lane. Arabic is the hard case (letter joining, ligatures, RTL) and marketing claims
+are not evidence. Cheap test before anyone believes it: one `pro` render at $0.134 carrying
+a known Arabic string, eyeballed against the same string set in Thmanyah on the template
+lane. Until that test runs and passes, **rule 2 stands** — copy goes on the template lane.
+
+## Higgsfield recipes (copy-paste; swap prompt subject)
 
 ```bash
 # 0. ALWAYS FIRST — do we already own this shot? A hit costs 0 credits.

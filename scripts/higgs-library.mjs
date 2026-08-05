@@ -14,8 +14,9 @@
  *     --type: canonical asset type (hero|og|banner|logo|product|lifestyle|mockup|
  *     infographic|split|testimonial|carousel|reel|story — see
  *     src/components/root/social/showroom/taxonomy.ts); the showroom filters by it.
- *     --source: which renderer made it (higgsfield|chatgpt|template). Defaults to
- *     higgsfield; the showroom badges it.
+ *     --source: which renderer made it (gemini|higgsfield|chatgpt|template). Defaults
+ *     to higgsfield; the showroom badges it. `gemini` = Google direct via
+ *     scripts/gemini-media.mjs (see .claude/skills/higgs/SKILL.md § Gemini lane).
  *   node scripts/higgs-library.mjs import [--dir ~/Downloads/higgs] [--source s]
  *   node scripts/higgs-library.mjs push [--dry-run]
  *   node scripts/higgs-library.mjs list [--brand b]

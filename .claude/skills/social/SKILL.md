@@ -109,19 +109,20 @@ in which state, and what is waiting.
 
 ## Failure modes
 
-| Stage      | Failure                            | What `/social` does                                 |
-| ---------- | ---------------------------------- | --------------------------------------------------- |
-| Pre-flight | Unknown brand                      | Stop; print the five valid ids                      |
-| Pre-flight | No wired channel for the brand     | Stop; name the missing Page or token                |
-| Pre-flight | Slack requested as a destination   | Refuse it, explain the tier, continue with the rest |
-| Draft      | Arabic reads as translation        | Stop; rewrite natively — never ship it              |
-| Media      | `/higgs` fails or is out of credit | **Warn and continue** as a text post                |
-| Media      | Text baked into the render         | Stop; regenerate text-free                          |
-| Approve    | No response                        | Stop and wait. Never time out into a publish        |
-| Approve    | Held on one channel                | Publish the approved ones, report the held one      |
-| Publish    | Transport error                    | Leave it queued; the drain retries 3× with backoff  |
-| Publish    | `manual` channel                   | Render the copy-out block; never mark it published  |
-| Measure    | Scope missing or metric retired    | Report the classified cause; do not retry inline    |
+| Stage      | Failure                             | What `/social` does                                 |
+| ---------- | ----------------------------------- | --------------------------------------------------- |
+| Pre-flight | Unknown brand                       | Stop; print the five valid ids                      |
+| Pre-flight | No wired channel for the brand      | Stop; name the missing Page or token                |
+| Pre-flight | Slack requested as a destination    | Refuse it, explain the tier, continue with the rest |
+| Draft      | Arabic reads as translation         | Stop; rewrite natively — never ship it              |
+| Media      | One renderer is out of budget       | Fall to the next rung of `/higgs`'s renderer ladder |
+| Media      | Every renderer fails or is unfunded | **Warn and continue** as a text post                |
+| Media      | Text baked into the render          | Stop; regenerate text-free                          |
+| Approve    | No response                         | Stop and wait. Never time out into a publish        |
+| Approve    | Held on one channel                 | Publish the approved ones, report the held one      |
+| Publish    | Transport error                     | Leave it queued; the drain retries 3× with backoff  |
+| Publish    | `manual` channel                    | Render the copy-out block; never mark it published  |
+| Measure    | Scope missing or metric retired     | Report the classified cause; do not retry inline    |
 
 ## When NOT to use
 

@@ -1,20 +1,23 @@
 ---
 title: Media
-description: Photo and video generation for databayt marketing — three lanes, one brand kit
+description: Photo and video generation for databayt marketing — four lanes, one brand kit
 ---
 
 # Media
 
-Marketing visuals ride three lanes, and every one of them reads the same brand kit
+Marketing visuals ride four lanes, and every one of them reads the same brand kit
 (`content/media/brand-kit.json`) — palette, type roles, the mark, the regional reality, the
 negative list — so a brand change lands everywhere at once instead of in whoever's memory.
 
 Text-free photography — hero shots, product shots, lifestyle scenes, reels — is generated
-either through [Higgsfield AI](https://higgsfield.ai) (the `/higgs` skill wraps the CLI in a
-zero-question playbook that picks the model, aspect ratio, and style from pre-made tables,
-prices the job before spending, and downloads the result) or, for stills, through a
+through [Google direct](#the-google-lane) (Nano Banana and Veo called at the source), through
+[Higgsfield AI](https://higgsfield.ai), or, for stills, through a
 [ChatGPT seat](#the-chatgpt-seat-lane) — a human renderer driving GPT Image 2 from a prompt
-kun compiled. Anything that carries copy — og images, infographics, testimonials, comparisons
+kun compiled. The first two reach the *same* models: Higgsfield's `nano_banana_pro` job type
+is Google's `gemini-3-pro-image` with a reseller's margin on it, so the `/higgs` skill treats
+the choice as purely commercial and walks a renderer ladder before spending. Either way the
+skill is one zero-question playbook — it picks model, aspect ratio, and style from pre-made
+tables, prices the job before spending, and downloads the result. Anything that carries copy — og images, infographics, testimonials, comparisons
 — renders deterministically from HTML templates on the [carousel engine](/docs/social/carousel):
 Thmanyah type, the brand frame, exact platform sizes, and a 1-slide deck is a single-image
 asset. Finished media feeds the [Social Hub](/docs/social), which stages the post for human
@@ -26,13 +29,58 @@ in the [showroom](https://kun.databayt.org/en/social/media).
 | Rule | Why |
 |------|-----|
 | **Reuse before you buy** | The asset library answers "do we already own this shot?" for free. |
-| **Never ask model / style / ratio** | The tables decide. Only credits or a genuinely ambiguous deliverable stop a run. |
+| **Never ask model / style / ratio / renderer** | The tables and the renderer ladder decide. Only budget or a genuinely ambiguous deliverable stops a run. |
 | **No text inside generated visuals** | AI typography breaks, Arabic doubly so. Generate text-free, overlay copy in post. |
 | **Estimate free, then spend** | `generate cost` and the `--cost-only` / `--enhance-only` previews cost nothing. |
 | **Batch in one command** | `--count` / `--batch-size` beat N separate invocations. |
 | **Image first, then animate** | Video is 50-150× the price of a draft image. Iterate cheap, animate the winner. |
 
-## Model defaults
+## The Google lane
+
+The default renderer. `scripts/gemini-media.mjs` calls Google's own endpoints, so there is no
+credit ceiling to run into and no reseller margin to pay — a job costs what Google charges,
+per image or per second. Prices verified 2026-08-05 against `ai.google.dev`; the script's
+`models` subcommand prints the live table, which is what you should read after Google ships
+anything.
+
+| Use | `--model` | Google ID | Price |
+|-----|-----------|-----------|-------|
+| **Image final (default)** | `lite` | `gemini-3.1-flash-lite-image` | $0.034 (1K only) |
+| Image with references, 2K/4K | `flash` | `gemini-3.1-flash-image` | $0.045 / .067 / .101 / .151 |
+| Image hero, best type rendering | `pro` | `gemini-3-pro-image` | $0.134 (1K–2K) · $0.24 (4K) |
+| Image on the free lane | `legacy` | `gemini-2.5-flash-image` | $0.039 — see below |
+| **Video default** | `veo-lite` | `veo-3.1-lite-generate-preview` | $0.05/s → **$0.40 per 8s** |
+| Video better motion | `veo-fast` | `veo-3.1-fast-generate-preview` | $0.10/s → $0.80 per 8s |
+| Video hero | `veo` | `veo-3.1-generate-preview` | $0.40/s → $3.20 per 8s |
+| Video, conversational editing | `omni` | `gemini-omni-flash-preview` | ≈$0.10/s of 720p |
+
+Two API shapes sit behind that one CLI. Images and Omni video go to the **Interactions API**
+(`POST /v1beta/interactions`) and come back synchronously with base64 bytes in
+`steps[].content[]`. Veo goes to `:predictLongRunning`, returns an operation name, and gets
+polled until `done` — the script downloads the mp4 immediately because Google deletes the
+render after **two days**. Every output carries an invisible SynthID watermark.
+
+```bash
+node scripts/gemini-media.mjs cost --kind image --model pro --size 4K --count 3   # free
+node scripts/gemini-media.mjs image --prompt "..." --ratio 4:5                    # prints estimate, exits
+node scripts/gemini-media.mjs image --prompt "..." --ratio 4:5 --yes              # spends
+node scripts/gemini-media.mjs video --prompt "..." --ratio 9:16 --seconds 8 --yes # $0.40, native audio
+node scripts/higgs-library.mjs add ~/Downloads/gemini/<f> --source gemini --type hero --brand databayt
+```
+
+Spending is gated the way the Higgsfield lane gates it: a generate without `--yes` prints the
+estimate and exits. Setup is one line in kun's central `.env` —
+`GEMINI_API_KEY=` from [AI Studio](https://aistudio.google.com/apikey) — and the script trims
+the value on read, because a trailing newline pasted out of a dashboard turns the auth header
+into an opaque 400.
+
+> **The free tier is unsettled.** Google's pricing page lists *Free tier: Not available* for
+> every current image model, while third-party trackers report ~500 images/day at 1K through
+> `gemini-2.5-flash-image` on an AI Studio key. We have not tested it with our own key. The
+> first run on a new key should be `--model legacy --size 1K`, watching for a 429 versus a
+> charge. Until then, assume the lane is paid.
+
+## Higgsfield model defaults
 
 Costs are per job, re-verified 2026-07-27 with `higgsfield generate cost`.
 
@@ -52,7 +100,7 @@ Costs are per job, re-verified 2026-07-27 with `higgsfield generate cost`.
 > **Pro**. There is no `nano_banana_2` job type — that ID was retired and now errors. Only the
 > seedance family accepts `--video-references`.
 
-## Workflow
+## Higgsfield workflow
 
 ```bash
 higgsfield account status                            # preflight — re-auth only if this fails
@@ -151,6 +199,11 @@ model is correctly a miss. `/social --media` consults the library before spendin
 
 ## Setup
 
+**Google lane** — one line in the central `.env`: `GEMINI_API_KEY=` from
+[AI Studio](https://aistudio.google.com/apikey). Nothing to install; the script uses `fetch`.
+
+**Higgsfield lane**
+
 1. Install the `higgsfield` CLI (aliases `higgs`, `hf`).
 2. `higgsfield auth login` — browser OAuth, completes hands-free.
 3. `higgsfield workspace set <workspace-id>` — required after every re-auth.
@@ -160,16 +213,24 @@ Credentials live in the Keychain, never in a repo — see [Credentials](/docs/cr
 
 ## Known limits
 
-- **The balance is 0.7 credits** (2026-07-27). Only `z_image` drafts still run; every final
-  image, hero, and video is unaffordable until the workspace is topped up. Free-plan credits
-  look like a one-time grant, not a monthly refill.
+- **The Higgsfield balance is 0.7 credits** (2026-07-27). Only `z_image` drafts still run;
+  every final image, hero, and video is unaffordable there until the workspace is topped up.
+  Free-plan credits look like a one-time grant, not a monthly refill. This is what demoted
+  the lane from default to alternate.
+- **The Google lane is unfunded until a key exists** — the work is wired, the spend is not
+  authorised. It is also new external API spend, which the subscription-only billing posture
+  says is Abdout's call, not a session's.
 - The Plus trial requires a working card — currently blocked by the Mada rejection.
 - The Higgsfield MCP endpoint is registered but unauthenticated; the CLI is the primary lane.
 - `cdn.databayt.org` returns 403 for every key in the bucket — a CloudFront fault that
   predates the library. Assets are served from the S3 origin until it is fixed; the library
   re-links in place with `push --base` once it is.
-- Video is entirely untested — no clip has ever been generated.
-- Arabic creative still needs manual typography in post.
+- Video is entirely untested — no clip has ever been generated on any lane. Veo Lite at
+  $0.40 per 8-second clip is the cheapest way to change that.
+- Arabic creative still needs manual typography in post. Nano Banana Pro claims accurate
+  multilingual text rendering, which would overturn that rule if it holds for Arabic script
+  shaping — one $0.134 render against the same string set in Thmanyah settles it. Untested,
+  so the no-text-in-rasters rule stands.
 
 ## The showroom
 
