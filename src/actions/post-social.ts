@@ -8,6 +8,13 @@ import { deliverPost, type ChannelOutcome } from "@/lib/social-publish";
 import { getEgressStatus, type EgressStatus } from "@/lib/social-status";
 import { sendReview } from "@/lib/social-review";
 import { createApprovalToken } from "@/lib/social-token";
+import { isStorageConfigured, putMedia } from "@/lib/s3";
+import {
+  dismissBrief,
+  fileBrief,
+  markRendered,
+  type BriefRow,
+} from "@/lib/social-media-brief";
 import { db } from "@/lib/db";
 import {
   CHANNELS,
@@ -797,5 +804,146 @@ export async function dismissDraft(
       error: "Already handled — someone else decided this draft.",
     };
   }
+  return { ok: true };
+}
+
+// ── The media brief queue ───────────────────────────────────────────────────
+//
+// The Media stage's third lane. Higgsfield spends credits and the carousel
+// engine renders HTML; this one hands a compiled prompt to a person holding a
+// ChatGPT seat and takes the image back. The seat cannot be called — a consumer
+// plan carries no API key — so the queue exists to make that person's work a
+// list instead of an invention.
+
+const fileBriefSchema = z.object({
+  brand: z.string().trim().min(1),
+  assetType: z.string().trim().min(1),
+  subject: z
+    .string()
+    .trim()
+    .min(8, "Say what the scene is — one line.")
+    .max(400),
+});
+
+export async function fileMediaBrief(
+  input: unknown,
+): Promise<{ ok: boolean; error?: string; brief?: BriefRow }> {
+  if (!(await requireContributor())) {
+    return { ok: false, error: "Forbidden: contributors only." };
+  }
+
+  const parsed = fileBriefSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      ok: false,
+      error: parsed.error.issues[0]?.message ?? "Invalid input.",
+    };
+  }
+
+  try {
+    const brief = await fileBrief(
+      parsed.data.brand,
+      parsed.data.assetType,
+      parsed.data.subject,
+    );
+    return { ok: true, brief };
+  } catch (err) {
+    // compileBrief throws by design when the type belongs to another lane —
+    // that message names the lane, so it is the useful thing to surface.
+    return {
+      ok: false,
+      error:
+        err instanceof Error ? err.message : "Could not compile the brief.",
+    };
+  }
+}
+
+const MAX_RENDER_BYTES = 4 * 1024 * 1024;
+const RENDER_TYPES = ["image/webp", "image/png", "image/jpeg"];
+
+/**
+ * FormData rather than a JSON body: the payload is an image, and a base64 hop
+ * through a Server Action argument would inflate it by a third for nothing.
+ */
+export async function submitMediaRender(
+  form: FormData,
+): Promise<{ ok: boolean; error?: string; url?: string }> {
+  const session = await auth();
+  const email = session?.user?.email ?? "contributor";
+  if (!(await requireContributor())) {
+    return { ok: false, error: "Forbidden: contributors only." };
+  }
+
+  const briefId = String(form.get("briefId") ?? "").trim();
+  const file = form.get("file");
+  if (!briefId) return { ok: false, error: "Which brief is this for?" };
+  if (!(file instanceof File) || file.size === 0) {
+    return { ok: false, error: "No image attached." };
+  }
+  if (!RENDER_TYPES.includes(file.type)) {
+    return {
+      ok: false,
+      error: `Unsupported image type: ${file.type || "unknown"}.`,
+    };
+  }
+  if (file.size > MAX_RENDER_BYTES) {
+    return { ok: false, error: "Image is over 4MB even after re-encoding." };
+  }
+  if (!isStorageConfigured()) {
+    return {
+      ok: false,
+      error:
+        "Object storage is not configured — set AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY.",
+    };
+  }
+
+  // Read the brief first: it names the brand, which is the storage prefix, and
+  // its status is the guard against two people uploading against one ask.
+  const brief = await db.socialMediaBrief.findUnique({
+    where: { id: briefId },
+    select: { id: true, brand: true, assetType: true, status: true },
+  });
+  if (!brief) return { ok: false, error: "No such brief." };
+  if (brief.status !== "pending") {
+    return {
+      ok: false,
+      error: "Already handled — someone else rendered this.",
+    };
+  }
+
+  const ext = file.type.split("/")[1] ?? "webp";
+  const bytes = new Uint8Array(await file.arrayBuffer());
+
+  try {
+    const stored = await putMedia(
+      brief.brand,
+      brief.id.slice(0, 12),
+      `${brief.assetType}.${ext}`,
+      bytes,
+      file.type,
+    );
+    await markRendered(brief.id, stored.url, email);
+    return { ok: true, url: stored.url };
+  } catch (err) {
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : "Upload failed.",
+    };
+  }
+}
+
+export async function dismissMediaBrief(
+  input: unknown,
+): Promise<{ ok: boolean; error?: string }> {
+  const session = await auth();
+  const email = session?.user?.email ?? "contributor";
+  if (!(await requireContributor())) {
+    return { ok: false, error: "Forbidden: contributors only." };
+  }
+
+  const parsed = z.object({ id: z.string().trim().min(1) }).safeParse(input);
+  if (!parsed.success) return { ok: false, error: "Invalid input." };
+
+  await dismissBrief(parsed.data.id, `dismissed by ${email}`);
   return { ok: true };
 }

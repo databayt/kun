@@ -7,6 +7,11 @@ const nextConfig: NextConfig = {
   // direct imports at build time — ergonomic imports, without the cold-start tax.
   experimental: {
     optimizePackageImports: ["lucide-react"],
+    // A media brief comes back as an image through a Server Action, and the
+    // 1MB default rejects them. The client re-encodes to WebP before sending
+    // (a 1792x1024 PNG lands around 300KB), so this is headroom for an
+    // uncooperative file rather than the expected size.
+    serverActions: { bodySizeLimit: "4mb" },
   },
   reactStrictMode: true,
   // The carousel render route is screenshotted by Playwright — the dev

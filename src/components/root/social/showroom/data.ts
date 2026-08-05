@@ -69,7 +69,39 @@ export interface ShowroomData {
   referenceCount: number;
 }
 
-export function getShowroomData(): ShowroomData {
+/**
+ * A rendered brief is a generated asset — it just arrived through a phone
+ * rather than a script, so it lives in the database instead of library.json
+ * (a Vercel function cannot append to a git-tracked file). Mapping it into the
+ * same card shape is what keeps the grid one grid.
+ */
+export function briefAsAsset(brief: {
+  id: string;
+  brand: string;
+  assetType: string;
+  subject: string;
+  size: string;
+  renderedUrl: string | null;
+  createdAt: string;
+}): ShowroomAsset {
+  return {
+    id: brief.id,
+    kind: "generated",
+    title: brief.subject.slice(0, 72),
+    imageUrl: brief.renderedUrl,
+    href: brief.renderedUrl ?? "#",
+    brand: brief.brand,
+    type: asShowroomType(brief.assetType),
+    source: "chatgpt",
+    note: brief.subject,
+    model: "gpt-image-2",
+    ratio: brief.size,
+    credits: null,
+    createdAt: brief.createdAt,
+  };
+}
+
+export function getShowroomData(extra: ShowroomAsset[] = []): ShowroomData {
   const generated: ShowroomAsset[] = (library.assets as LibraryAsset[])
     .filter((a) => a.cdnUrl)
     .map((a) => ({
@@ -110,7 +142,9 @@ export function getShowroomData(): ShowroomData {
     }),
   );
 
-  const assets = [...generated, ...refs];
+  // Seat-lane renders lead: they are the newest work and the reason someone
+  // opens this page mid-week.
+  const assets = [...extra, ...generated, ...refs];
   const brands = [
     ...new Set(assets.map((a) => a.brand).filter(Boolean)),
   ].sort() as string[];
@@ -118,7 +152,7 @@ export function getShowroomData(): ShowroomData {
   return {
     assets,
     brands,
-    generatedCount: generated.length,
+    generatedCount: generated.length + extra.length,
     referenceCount: refs.length,
   };
 }

@@ -37,6 +37,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { neon } from "@neondatabase/serverless";
 import dotenv from "dotenv";
+import { compileBrief } from "./lib/brand-kit.mjs";
 
 dotenv.config({ quiet: true });
 
@@ -238,6 +239,48 @@ if (command === "list") {
     return true;
   }
 
+  // The seat lane's half of the same tick. A copy ask goes to the drain, which
+  // answers it on the Max pool; a media brief goes to /social/media, where a
+  // person with a ChatGPT seat renders it. Both come from one pillar, so the
+  // week's picture and the week's words are about the same thing — which is the
+  // whole reason to seed them together rather than let someone invent a scene.
+  //
+  // Only pillars carrying a `visual` file one. A null visual means the template
+  // lane owns that post's image, and filling a human's queue with work that
+  // renders better as HTML is worse than filing nothing.
+  async function insertMediaBrief(brand, visual) {
+    if (!visual || !visual.type || !visual.subject) return false;
+
+    const dupe = await sql`
+      SELECT "id" FROM "SocialMediaBrief"
+      WHERE "brand" = ${brand} AND "subject" = ${visual.subject}
+        AND "createdAt" > now() - interval '14 days'
+      LIMIT 1`;
+    if (dupe.length > 0) {
+      console.log(`skip media (filed within 14d): ${visual.subject.slice(0, 50)}…`);
+      return false;
+    }
+
+    let compiled;
+    try {
+      compiled = compileBrief(brand, visual.type, visual.subject);
+    } catch (err) {
+      // A pillar naming a template-lane type is a data mistake, not a reason to
+      // abandon the tick — the copy ask above already landed.
+      console.error(`skip media (${err.message})`);
+      return false;
+    }
+
+    const [row] = await sql`
+      INSERT INTO "SocialMediaBrief"
+        ("id", "brand", "assetType", "subject", "prompt", "size", "status", "createdAt")
+      VALUES (${newId()}, ${brand}, ${visual.type}, ${visual.subject},
+              ${compiled.prompt}, ${compiled.size}, 'pending', now())
+      RETURNING "id"`;
+    console.log(`seeded media ${row.id}: [${brand}/${visual.type}] ${visual.subject.slice(0, 50)}…`);
+    return true;
+  }
+
   if (process.argv.includes("--auto")) {
     const brand = flag("brand") ?? "hogwarts";
     const count = Math.max(1, Number(flag("count") ?? 2));
@@ -259,11 +302,15 @@ if (command === "list") {
       ((now - jan4) / 86400000 + ((jan4.getUTCDay() + 6) % 7) + 1) / 7,
     );
     let seeded = 0;
+    let media = 0;
     for (let i = 0; i < count; i++) {
       const pick = briefs[(week * count + i) % briefs.length];
       if (await insertAsk(brand, pick.brief)) seeded++;
+      if (await insertMediaBrief(brand, pick.visual)) media++;
     }
-    console.log(`seed --auto: week ${week}, ${seeded}/${count} filed for ${brand}.`);
+    console.log(
+      `seed --auto: week ${week}, ${seeded}/${count} copy asks and ${media} media briefs filed for ${brand}.`,
+    );
   } else {
     const brand = flag("brand");
     const brief = flag("brief");

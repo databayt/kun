@@ -92,6 +92,28 @@ node scripts/media-brief.mjs brief --type hero \
   --subject "An empty classroom in early morning light"  # paste per asset
 ```
 
+### The queue
+
+The scripts above are the desk version. The lane's real surface is
+[the Media stage](https://kun.databayt.org/en/social/media), because the renderer is a person
+holding a phone, and the ChatGPT app is on that phone. Briefs waiting appear at the top of the
+page: **Copy prompt** puts the compiled text on the clipboard, **Upload render** takes the
+image back. The image is re-encoded to WebP in the browser first — a 1792×1024 PNG off GPT
+Image 2 runs 2–4MB, more than a Server Action accepts and far more than a social image needs;
+the canvas hop lands it near 300KB. It uploads to the same bucket and `media/<brand>/` layout
+the library uses, then appears in the grid below, attachable to the Publish tray like any
+other asset.
+
+Where the work comes from is the point. The Monday tick (`social-drafts.mjs seed --auto`)
+already files the week's copy asks from `content/social/pillars.json`; it now files a media
+brief from the same pillar whenever that pillar carries a `visual`. The week's picture and the
+week's words come from one source, so nobody invents a scene — and a pillar whose image
+belongs to the template lane carries `visual: null` and files nothing, because filling a
+human's queue with work that renders better as HTML is worse than filing nothing.
+
+The prompt is **frozen into the row** at file time, never recompiled. The kit will change;
+what a given image was actually asked for must not change under it.
+
 `brief` refuses any type whose lane is not `chatgpt` — asking a raster model for an og image
 is exactly the mistake the no-text doctrine exists to prevent, so it fails loudly instead of
 compiling a prompt that would produce broken Arabic. Six types compile: `hero`, `lifestyle`,

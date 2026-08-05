@@ -9,17 +9,35 @@ import { ArrowRight } from "lucide-react";
 import type { Locale } from "@/components/local/config";
 import { getSocialDict } from "@/components/root/social/dictionary";
 import { listDecks } from "@/components/root/carousel/content";
-import { getShowroomData } from "./data";
+import {
+  chatgptTypes,
+  listPendingBriefs,
+  listRenderedBriefs,
+} from "@/lib/social-media-brief";
+import { briefAsAsset, getShowroomData } from "./data";
 import { BrandShelves } from "./brand-shelf";
+import { BriefQueue } from "./brief-queue";
 import { ShowroomGrid } from "./grid";
 import { ShowroomKeyword } from "./keyword-pill";
 
+// The brand the seat lane files against. One brand today by deliberate scope
+// (hogwarts is the pilot); the picker appears the day a second brand has a kit.
+const SEAT_BRAND = "hogwarts";
+
 export async function ShowroomContent({ lang }: { lang: Locale }) {
   const t = getSocialDict(lang);
-  const { assets, generatedCount, referenceCount } = getShowroomData();
-  // Local-path deckDirs make this an empty list on Vercel until decks land in
-  // kun's content/carousels/ — the section hides rather than faking cards.
-  const decks = await listDecks().catch(() => []);
+  // Three independent reads — the decks list touches the filesystem and the two
+  // brief reads touch the database, so they overlap rather than queue.
+  const [decks, pending, rendered] = await Promise.all([
+    // Local-path deckDirs make this an empty list on Vercel until decks land in
+    // kun's content/carousels/ — the section hides rather than faking cards.
+    listDecks().catch(() => []),
+    listPendingBriefs(),
+    listRenderedBriefs(),
+  ]);
+  const { assets, generatedCount, referenceCount } = getShowroomData(
+    rendered.map(briefAsAsset),
+  );
 
   return (
     <section className="space-y-10 py-10 md:py-14">
@@ -41,6 +59,12 @@ export async function ShowroomContent({ lang }: { lang: Locale }) {
           </Link>
         </p>
       </div>
+
+      <BriefQueue
+        briefs={pending}
+        types={chatgptTypes(SEAT_BRAND)}
+        brand={SEAT_BRAND}
+      />
 
       {decks.length > 0 && (
         <div className="space-y-3">

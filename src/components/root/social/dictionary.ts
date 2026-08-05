@@ -18,9 +18,9 @@ export const SOCIAL_DICTIONARY = {
     status: "Status",
     // The Hub's tabs are the documented pipeline (docs/social), all seven stages
     // across five tabs: Approve · Schedule · Publish are one composer with three
-    // buttons, so they are one tab. Plan and Media have no in-app state — the
-    // calendar produces a table and /higgs writes to the CDN — so their tabs say
-    // where the stage actually runs instead of faking a surface for it.
+    // buttons, so they are one tab. Plan still has no in-app state — the calendar
+    // produces a table — so its tab says where the stage runs. Media gained state
+    // with the seat lane: its renderer is a person, and a person needs a queue.
     tabCalendar: "Calendar",
     tabDraft: "Draft",
     tabMedia: "Media",
@@ -55,6 +55,24 @@ export const SOCIAL_DICTIONARY = {
     collectionGenerated: "Generated",
     collectionReference: "References",
     decksTitle: "Rendered decks",
+    // The brief queue — the seat lane's whole surface. A person holding a
+    // ChatGPT seat cannot be called by a server, so the work comes to them as
+    // a list and the render comes back as an upload.
+    briefQueueTitle: "Briefs waiting",
+    briefQueueIntro:
+      "Compiled prompts waiting for a render. Copy one, paste it into the Hogwarts Media project in ChatGPT, then bring the image back here — it lands in the showroom and the Publish tray.",
+    briefQueueEmpty: "Nothing waiting. File a brief below.",
+    briefCopyPrompt: "Copy prompt",
+    briefCopied: "Copied",
+    briefUpload: "Upload render",
+    briefUploading: "Uploading…",
+    briefDismiss: "Dismiss",
+    briefFileTitle: "File a brief",
+    briefFileSubject: "The scene, in one line",
+    briefFileSubmit: "File it",
+    briefFiling: "Filing…",
+    briefTypeLabel: "Type",
+    briefRendered: "Rendered",
     showroomEmpty: "Nothing matches these filters.",
     assetCredits: "credits",
     copyUrl: "Copy URL",
@@ -254,6 +272,21 @@ export const SOCIAL_DICTIONARY = {
     collectionGenerated: "المولَّد",
     collectionReference: "المراجع",
     decksTitle: "الكاروسيلات المُصيَّرة",
+    briefQueueTitle: "موجزات بانتظار التنفيذ",
+    briefQueueIntro:
+      "أوامر جاهزة تنتظر من يصيّرها. انسخ واحداً والصقه في مشروع Hogwarts Media داخل ChatGPT، ثم أعد الصورة إلى هنا — تهبط في المعرض وفي حافظة النشر.",
+    briefQueueEmpty: "لا شيء بالانتظار. سجّل موجزاً بالأسفل.",
+    briefCopyPrompt: "نسخ الأمر",
+    briefCopied: "نُسخ",
+    briefUpload: "رفع الصورة",
+    briefUploading: "جارٍ الرفع…",
+    briefDismiss: "تجاهل",
+    briefFileTitle: "تسجيل موجز",
+    briefFileSubject: "المشهد في سطر واحد",
+    briefFileSubmit: "سجّله",
+    briefFiling: "جارٍ التسجيل…",
+    briefTypeLabel: "النوع",
+    briefRendered: "مُصيَّر",
     showroomEmpty: "لا شيء يطابق هذه المرشّحات.",
     assetCredits: "رصيد",
     copyUrl: "نسخ الرابط",

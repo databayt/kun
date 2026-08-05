@@ -191,6 +191,56 @@ model SocialDraftRequest {
   @@index([status, createdAt])
 }
 
+enum MediaBriefStatus {
+  pending
+  rendered
+  dismissed
+}
+
+/// A render waiting for a human with a seat.
+///
+/// The Media stage had no state because both its lanes wrote to disk: Higgsfield
+/// downloads to ~/Downloads and the carousel engine renders to a file. Neither
+/// needed a queue. The ChatGPT seat lane does — its renderer is a person with a
+/// phone, and a person needs a work list, not a blank prompt box.
+///
+/// So the prompt is compiled and FROZEN here at file time rather than recompiled
+/// at render time. The brand kit will change; what a given asset was actually
+/// asked for must not change under it, or the library's record of why an image
+/// looks the way it does becomes fiction.
+model SocialMediaBrief {
+  id String @id @default(cuid())
+
+  /// Product registry id — hogwarts · mkan · databayt · sijillee · moalimee.
+  brand String
+  /// Canonical asset type from the showroom taxonomy. Only the types whose lane
+  /// is `chatgpt` can be filed; the compiler refuses the rest.
+  assetType String
+  /// The scene in one line — what makes this brief different from its siblings.
+  subject String
+  /// The compiled prompt, verbatim, as it will be pasted.
+  prompt String
+  /// Exact WIDTHxHEIGHT, pre-checked against the renderer's size constraints.
+  size String
+
+  status MediaBriefStatus @default(pending)
+
+  /// Where the render landed. Set together with status=rendered, never alone.
+  renderedUrl String?
+  /// Contributor email of whoever rendered it.
+  renderedBy String?
+  /// Why it was dismissed, or anything the renderer wants the next person to know.
+  note String?
+
+  createdAt  DateTime  @default(now())
+  renderedAt DateTime?
+
+  /// The queue read: oldest pending first.
+  @@index([status, createdAt])
+  /// The showroom read: a brand's rendered work, newest first.
+  @@index([brand, status])
+}
+
 /// Last-seen timestamps for components that call in rather than being called.
 ///
 /// Hermes runs on a personal machine with no public route, so kun can never

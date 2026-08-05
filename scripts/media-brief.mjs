@@ -30,28 +30,7 @@
  *   node scripts/higgs-library.mjs push
  */
 
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const rootDir = path.resolve(__dirname, '..');
-const kitPath = path.join(rootDir, 'content', 'media', 'brand-kit.json');
-
-function loadKit() {
-  if (!fs.existsSync(kitPath)) {
-    throw new Error(`Brand kit missing at ${kitPath}`);
-  }
-  return JSON.parse(fs.readFileSync(kitPath, 'utf8'));
-}
-
-function getBrand(kit, id) {
-  const brand = kit.brands[id];
-  if (!brand) {
-    throw new Error(`Unknown brand "${id}". Known: ${Object.keys(kit.brands).join(', ')}`);
-  }
-  return brand;
-}
+import { compileBrief, getBrand, loadKit } from './lib/brand-kit.mjs';
 
 function parseArgs(argv) {
   const args = { _: [] };
@@ -150,45 +129,16 @@ function cmdBrief(args) {
   const typeId = args.type;
   if (!typeId) throw new Error('brief needs --type (run `types` to list them)');
 
-  const type = b.types[typeId];
-  if (!type) {
-    throw new Error(`Unknown type "${typeId}". Known: ${Object.keys(b.types).join(', ')}`);
-  }
-  if (type.lane !== 'chatgpt') {
-    // Routing a copy-bearing asset to a raster model is the one mistake the
-    // whole doctrine exists to prevent, so it fails loudly rather than
-    // compiling a prompt that would produce broken type.
-    throw new Error(
-      `Type "${typeId}" renders on the ${type.lane} lane, not the ChatGPT one — ${type.use}. ` +
-        (type.lane === 'template'
-          ? 'It carries copy, so it renders from HTML: see /docs/social/carousel.'
-          : 'See /docs/media.'),
-    );
-  }
-
   const subject = args.subject || b.subjectLibrary.items[0];
-  const spine = b.styleSpines[type.spine];
-
-  const text = `${subject}
-
-${spine.prompt}
-
-Setting: ${b.region.items[0]}.
-Palette: ${b.palette.canvas.map((c) => `${c.hex}`).join(', ')} with ${
-    b.palette.canvas.find((c) => c.name === 'Clay').hex
-  } as the single accent.
-Size: exactly ${type.size} pixels.
-${type.extra ? `${type.extra}\n` : ''}
-No text, no lettering, no numerals, no logos, no watermarks anywhere in the image.
-Leave the bottom-start corner quiet for a mark placed in post.`;
+  const { prompt: text, size, spine } = compileBrief(id, typeId, subject);
 
   if (args.json) {
-    return { ok: true, brand: id, type: typeId, size: type.size, spine: type.spine, text };
+    return { ok: true, brand: id, type: typeId, size, spine, text };
   }
 
   console.log(text);
   console.log(`\n${'─'.repeat(72)}`);
-  console.log(`type ${typeId} · ${type.size} · ${type.spine} spine · brand ${id}`);
+  console.log(`type ${typeId} · ${size} · ${spine} spine · brand ${id}`);
   console.log(`Attach: ${kit.renderers.chatgpt.attachAlways.join(', ')}`);
   console.log(`\nAfter it renders, save into ~/Downloads/higgs and run:`);
   console.log(
