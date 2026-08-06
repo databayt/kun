@@ -226,6 +226,8 @@ Copy that opens by describing the product, the feature, or the category is NOT F
 
 Write each answer's Arabic and English to temp files under $DRAFT_TMP and pass them with 'answer <id> --ar <file> --en <file>'; never write answer files into the repo. Media rules are in the skill's queue mode — follow them there, and never invent a URL. Every one of your assigned asks must end answered or failed — never left pending.
 
+'answer' RUNS THE CRAFT GATE and will REFUSE a draft that trips copy.mdx's reject list, printing each failure by name. A refusal is not a failed ask: read the named failures, rewrite, and answer again. Two things it catches that a writer reliably misses — a number, date or price that is not in the brief, and a link without https:// (which would ship untagged). Do NOT pass --craft-override; it exists for a human who has read the findings and judged a rule wrong. If a draft still cannot pass after TWO rewrites, stop rewriting and 'fail <id> --note "craft gate: <the failures>"' — a rule that blocks correct copy is a bug worth a human's attention, and looping on it burns the run for every other ask.
+
 Finally, print for each ask the three angles you considered and which one won: this log is the only record of why the copy went the way it did.
 PROMPT_END
 

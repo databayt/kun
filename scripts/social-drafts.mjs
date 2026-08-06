@@ -12,6 +12,7 @@
 //
 //   node scripts/social-drafts.mjs list
 //   node scripts/social-drafts.mjs lessons [--brand hogwarts]
+//   node scripts/social-drafts.mjs check [<id>] --ar <file> [--en <file>] [--brief <file>]
 //   node scripts/social-drafts.mjs answer <id> --ar <file> --en <file> [--media "url1,url2"]
 //   node scripts/social-drafts.mjs attach <id> --media "url1,url2"
 //   node scripts/social-drafts.mjs fail   <id> --note "why"
@@ -22,6 +23,12 @@
 // contributor set, and for a refinement turn the previous draft plus what to
 // change about it. `lessons` is the other half of the same idea, backwards:
 // what reviewers rejected recently, so a run can stop repeating it.
+//
+// `answer` RUNS THE CRAFT GATE and refuses a draft that trips copy.mdx's reject
+// list (scripts/lib/craft.mjs). That page calls those items "auto-fail, no
+// discussion", and until 2026-08-06 nothing executed the sentence — the pipeline
+// could stop a false post and not a boring one. `check` is the same gate on
+// loose files, for a hand-run session or a reviewer's edit.
 //
 // Copy goes in via FILES, not argv: brand copy is multi-line, contains quotes
 // and Arabic, and argv mangles all three. Media goes in via URLS, comma-
@@ -44,6 +51,7 @@ import { fileURLToPath } from "node:url";
 import { neon } from "@neondatabase/serverless";
 import dotenv from "dotenv";
 import { compileBrief } from "./lib/brand-kit.mjs";
+import { checkCraft, craftFailures, formatCraft } from "./lib/craft.mjs";
 
 dotenv.config({ quiet: true });
 
@@ -180,6 +188,57 @@ if (command === "list") {
   const ar = read(flag("ar"), "ar");
   const en = read(flag("en"), "en");
   const media = parseMedia(flag("media"));
+  let craftNote = null;
+
+  // ── The craft gate ─────────────────────────────────────────────
+  // copy.mdx's reject list says "auto-fail, no discussion". This is that
+  // sentence, executed — and it runs HERE rather than at review because the
+  // writing session is still in context, so a rewrite is nearly free, while a
+  // reviewer rejection costs a human twenty seconds plus a full turnaround.
+  //
+  // The numbers a draft may carry come from the brief AND, on a refinement turn,
+  // the instruction and the parent draft — copy.mdx's "not present in the brief"
+  // was written before threads existed, and by turn three the brief alone would
+  // fail a figure the reviewer themselves asked for. (A number that slipped
+  // through on the parent stays allowed on its children: the alternative is
+  // re-litigating an accepted draft on every refinement.)
+  const [ask] = await sql`
+    SELECT r."brand", r."brief", r."instruction",
+           p."ar" AS "parentAr", p."en" AS "parentEn"
+      FROM "SocialDraftRequest" r
+      LEFT JOIN "SocialDraftRequest" p ON p."id" = r."parentId"
+     WHERE r."id" = ${id}`;
+  if (ask) {
+    const findings = checkCraft({
+      ar,
+      en,
+      brand: ask.brand,
+      allowedFrom: [ask.brief, ask.instruction, ask.parentAr, ask.parentEn]
+        .filter(Boolean)
+        .join("\n"),
+    });
+    const failures = craftFailures(findings);
+    const override = flag("craft-override");
+    if (failures.length && !override) {
+      console.error(formatCraft(findings));
+      console.error(
+        `\nRefused: ${failures.length} hard failure(s) against content/docs/social/copy.mdx.\n` +
+          `Rewrite and answer again. If a rule is wrong for THIS draft, pass\n` +
+          `--craft-override "<why>" — the reason is stored on the row so a\n` +
+          `reviewer sees it. If it cannot pass after two rewrites, fail the ask\n` +
+          `with the findings rather than looping.`,
+      );
+      process.exit(1);
+    }
+    if (findings.length) console.error(formatCraft(findings));
+    if (failures.length && override) {
+      console.error(`\ncraft overridden: ${override}`);
+      // The note is rendered verbatim to the asker in the agent window, so an
+      // override arrives where the decision is reviewed rather than only in a
+      // log nobody opens.
+      craftNote = `craft override (${failures.map((f) => f.rule).join(", ")}): ${override}`;
+    }
+  }
   // Conditional on `pending`: two sessions answering the same ask race here and
   // exactly one wins — the same guarantee the publish claim relies on.
   // Branched, not dynamically built: --media absent must leave the stored set
@@ -190,13 +249,13 @@ if (command === "list") {
         UPDATE "SocialDraftRequest"
            SET "status" = 'answered', "ar" = ${ar}, "en" = ${en},
                "mediaUrls" = ${media},
-               "note" = ${flag("note") ?? "claude-code"}, "answeredAt" = now()
+               "note" = ${craftNote ?? flag("note") ?? "claude-code"}, "answeredAt" = now()
          WHERE "id" = ${id} AND "status" = 'pending'
         RETURNING "id"`
     : await sql`
         UPDATE "SocialDraftRequest"
            SET "status" = 'answered', "ar" = ${ar}, "en" = ${en},
-               "note" = ${flag("note") ?? "claude-code"}, "answeredAt" = now()
+               "note" = ${craftNote ?? flag("note") ?? "claude-code"}, "answeredAt" = now()
          WHERE "id" = ${id} AND "status" = 'pending'
         RETURNING "id"`;
   if (done.length === 0) {
@@ -428,12 +487,59 @@ if (command === "list") {
      WHERE "id" = ${id} AND "status" = 'pending'
     RETURNING "id"`;
   console.log(done.length ? `failed ${id}` : `Refused: ${id} is not pending.`);
+} else if (command === "check") {
+  // The same gate `answer` runs, reachable on loose files — for a hand-run
+  // /draft that wants the verdict before it commits to an ask, and for a
+  // reviewer checking an edit. Exits 1 on any hard failure so a shell can
+  // branch on it.
+  //
+  // `id` is the second positional, so `check <id>` pulls the brief (and a
+  // refinement's parent) straight from the queue rather than making a caller
+  // paste it into a file.
+  const ar = read(flag("ar"), "ar");
+  const en = flag("en") ? read(flag("en"), "en") : undefined;
+  let brand = flag("brand");
+  let allowedFrom = flag("brief") ? read(flag("brief"), "brief") : undefined;
+  // `id` is positional, so a flag lands in it when the id is omitted. Every
+  // other command requires one and never hit this; check's is optional.
+  const askId = id && !id.startsWith("--") ? id : undefined;
+  if (askId) {
+    const [ask] = await sql`
+      SELECT r."brand", r."brief", r."instruction",
+             p."ar" AS "parentAr", p."en" AS "parentEn"
+        FROM "SocialDraftRequest" r
+        LEFT JOIN "SocialDraftRequest" p ON p."id" = r."parentId"
+       WHERE r."id" = ${askId}`;
+    if (!ask) {
+      console.error(`No ask with id ${askId}.`);
+      process.exit(1);
+    }
+    brand = brand ?? ask.brand;
+    allowedFrom =
+      allowedFrom ??
+      [ask.brief, ask.instruction, ask.parentAr, ask.parentEn]
+        .filter(Boolean)
+        .join("\n");
+  }
+  const findings = checkCraft({ ar, en, brand, allowedFrom, channel: flag("channel") });
+  console.log(formatCraft(findings));
+  const failures = craftFailures(findings);
+  if (allowedFrom === undefined) {
+    console.log(
+      "\nnote: no brief given, so the invented-number guard did not run — pass --brief <file> or a draft id.",
+    );
+  }
+  if (failures.length) {
+    console.log(`\n${failures.length} hard failure(s).`);
+    process.exit(1);
+  }
 } else {
   console.log(
     [
       "Usage:",
       "  node scripts/social-drafts.mjs list",
       "  node scripts/social-drafts.mjs lessons [--brand hogwarts]",
+      "  node scripts/social-drafts.mjs check [<id>] --ar <file> [--en <file>] [--brief <file>] [--brand X] [--channel Y]",
       '  node scripts/social-drafts.mjs answer <id> --ar <file> --en <file> [--media "url1,url2"] [--note ...]',
       '  node scripts/social-drafts.mjs attach <id> --media "url1,url2"',
       '  node scripts/social-drafts.mjs fail   <id> --note "why"',

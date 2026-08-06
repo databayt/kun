@@ -178,6 +178,32 @@ node scripts/social-drafts.mjs answer <id> --ar ar.txt --en en.txt \
 node scripts/social-drafts.mjs attach <id> --media "url1,url2"   # pending or answered; REPLACES the set
 ```
 
+**`answer` runs the craft gate and will refuse you.** `copy.mdx`'s reject list is
+executed by `scripts/lib/craft.mjs`, so a draft that trips it never reaches a
+human. A refusal is not a failed ask — read the named failures, rewrite, answer
+again. Check before committing to the round trip:
+
+```bash
+node scripts/social-drafts.mjs check <id> --ar ar.txt --en en.txt   # pulls the brief from the ask
+```
+
+Two it catches that a writer reliably misses: **a number, date or price not in
+the brief** (the guard is a set difference against the brief, plus a refinement's
+instruction and parent), and **a link without `https://`** — `applyUtm` only tags
+absolute URLs, so a bare `ed.databayt.org` ships untagged and attribution
+silently reads zero.
+
+What it does **not** do is judge whether the hook is a pain or a promise. The
+12-word ceiling is a floor under check 1, never the check — the 2026-08-05
+failure `copy.mdx` quotes is exactly 12 words and passes the rule while failing
+the doctrine. That judgment stays yours.
+
+`--craft-override "<why>"` exists for a human who has read the findings and
+judged a rule wrong for one draft; the reason is stored on the row so the
+reviewer sees it. Do not reach for it unattended. If a draft cannot pass after
+two rewrites, `fail` the ask with the findings — a rule that blocks correct copy
+is a bug worth a human's attention.
+
 7. **Refuse honestly when you should.** `note` is rendered to the asker verbatim
    in the window, so it is a message to a person, not a log line — say what to add
    and they can re-ask in one edit:
@@ -210,6 +236,15 @@ Rewrite it before answering; do not answer and let the reviewer catch it. The
 reviewer's dismiss is the feedback loop, not the quality gate — and now that
 `lessons` reads those dismissals back, answering a draft you know is weak costs
 the next run as well as this one.
+
+**Half of this gate is now mechanical, and it is the easy half.** Since
+2026-08-06 `answer` refuses anything on `copy.mdx`'s reject list — length,
+hashtags, emoji, punctuation, the wordlist, engineering Arabic, `يتم + مصدر`,
+Arabic-Indic digits, a second link, a link without a scheme, an invented number.
+Clearing it is the floor, not the bar: the checks it cannot see — is the hook a
+pain or a promise, is this one idea, does the reader recognize their own week,
+do the Arabic and English diverge in at least two places — are the ones the
+draft is actually judged on, and they are all yours.
 
 **A refinement is judged against its instruction, not just the checks.** Ask what
 the reviewer wanted changed, whether it changed, and whether anything they did

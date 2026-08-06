@@ -8,7 +8,7 @@
 // queue entry. Editing is fine-tuning an existing full draft; creation
 // belongs to the Draft stage.
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   CalendarClock,
   CheckCircle2,
@@ -38,11 +38,25 @@ import {
 import { CHANNELS, type ChannelId } from "@/components/root/social/config";
 import { fill } from "@/components/root/social/dictionary";
 import { useSocial } from "@/components/root/social/provider";
+import { checkCraft } from "@/lib/craft";
 import { mediaKind, splitMedia } from "@/lib/media-kind";
 import type { ChannelOutcome } from "@/lib/social-publish";
 
 // Mirrors the Zod cap in actions/post-social.ts.
 const MAX_TEXT = 4000;
+
+/** Any Arabic-block codepoint — decides whether the craft gate applies at all. */
+const ARABIC_SCRIPT = /[؀-ۿ]/;
+
+/**
+ * What "Both" puts between the two variants in the composer.
+ *
+ * One constant because it is written by the Both button and READ BACK by the
+ * craft check to recover the pair. Two literals would drift, and the failure
+ * would be silent: the checker would treat AR+EN as one Arabic text and report a
+ * length nobody can act on.
+ */
+const BOTH_SEPARATOR = "\n\n—\n\n";
 
 export function ReviewEditor({
   approveMode,
@@ -92,6 +106,36 @@ export function ReviewEditor({
   // Check 1, made visible. A reviewer reads the whole post at once and mentally
   // supplies context a scroller never has, so the first line is shown alone.
   const hookLine = trimmed.split("\n")[0] ?? "";
+
+  // The reject list, live (src/lib/craft.ts) — the same gate
+  // `social-drafts.mjs answer` runs, re-run here so a reviewer cannot
+  // reintroduce a violation while fine-tuning. The writer already cleared it;
+  // this is about the edit.
+  //
+  // The composer holds ONE variant. "Both" joins them with a separator this
+  // component itself writes, so split on that; a lone Arabic text is the AR
+  // side. An English-only load is skipped entirely — running the Arabic length
+  // band and register wordlist over English would fail every draft for reasons
+  // a reviewer cannot act on, and a linter that cries wolf stops being read.
+  const craftFindings = useMemo(() => {
+    if (!trimmed) return [];
+    const [first, second] = trimmed.split(BOTH_SEPARATOR);
+    if (!ARABIC_SCRIPT.test(first ?? "")) return [];
+    return checkCraft({
+      ar: first,
+      en: second,
+      brand: product,
+      // Only when unambiguous: the hashtag cap is per-channel, and picking one
+      // of several selected channels would apply a rule the reviewer did not ask
+      // for. With none passed, the default cap of 3 applies.
+      channel: selectedChannels.length === 1 ? selectedChannels[0] : undefined,
+      allowedFrom: activeDraft
+        ? [activeDraft.brief, activeDraft.instruction]
+            .filter(Boolean)
+            .join("\n")
+        : undefined,
+    });
+  }, [trimmed, product, selectedChannels, activeDraft]);
   const { images, videos } = splitMedia(composerMediaUrls);
   const mixedMedia = images.length > 0 && videos.length > 0;
 
@@ -112,6 +156,8 @@ export function ReviewEditor({
     { id: "two-posts" as const, label: t.dismissReasonTwoPosts },
     { id: "untrue" as const, label: t.dismissReasonUntrue },
     { id: "register" as const, label: t.dismissReasonRegister },
+    { id: "cta" as const, label: t.dismissReasonCta },
+    { id: "length" as const, label: t.dismissReasonLength },
     { id: "other" as const, label: t.dismissReasonOther },
   ];
 
@@ -328,7 +374,9 @@ export function ReviewEditor({
                 type="button"
                 className={pill}
                 onClick={() =>
-                  setComposerText(`${activeDraft.ar}\n\n—\n\n${activeDraft.en}`)
+                  setComposerText(
+                    `${activeDraft.ar}${BOTH_SEPARATOR}${activeDraft.en}`,
+                  )
                 }
               >
                 {t.agentUseBoth}
@@ -343,6 +391,48 @@ export function ReviewEditor({
             maxLength={MAX_TEXT}
             className="placeholder:text-muted-foreground min-h-[220px] w-full flex-1 resize-none bg-transparent px-2 py-2 text-start text-[16px] leading-relaxed focus:bg-transparent focus:outline-none"
           />
+
+          {/* Craft findings on the edit. Each message carries its own fix
+              ("الحلول" → the actual thing), so the message is the point and a
+              bare rule name would not be worth the row. Failures first, and
+              bounded — a wall of warnings reads as noise. */}
+          {craftFindings.length > 0 && (
+            <ul className="space-y-0.5 px-2 pb-1">
+              {[...craftFindings]
+                .sort((a, b) =>
+                  a.severity === b.severity
+                    ? 0
+                    : a.severity === "fail"
+                      ? -1
+                      : 1,
+                )
+                .slice(0, 4)
+                .map((f, i) => (
+                  <li
+                    key={`${f.rule}-${i}`}
+                    className={cn(
+                      "text-[11px] leading-snug",
+                      f.severity === "fail"
+                        ? "text-destructive"
+                        : "text-muted-foreground",
+                    )}
+                  >
+                    <span className="font-mono" dir="ltr">
+                      {f.check === null
+                        ? f.rule
+                        : `${f.rule} · ${t.craftCheckShort}${f.check}`}
+                    </span>
+                    {" — "}
+                    {f.message}
+                  </li>
+                ))}
+              {craftFindings.length > 4 && (
+                <li className="text-muted-foreground text-[11px]">
+                  {fill(t.craftMore, { count: craftFindings.length - 4 })}
+                </li>
+              )}
+            </ul>
+          )}
 
           {/* The attachment tray, inline — thumbnails for images, a typed
               plate for video. Remove is per-item; adding happens from the

@@ -78,7 +78,37 @@ adaptation that matters — which is why the queue lane writes one piece rather 
 
 ## The reject list
 
-Auto-fail. No discussion:
+Auto-fail. No discussion — and since **2026-08-06, executed rather than asserted.**
+`node scripts/social-drafts.mjs answer` refuses a draft that trips any of these,
+naming the rule, and `check` runs the same gate on loose files:
+
+```bash
+node scripts/social-drafts.mjs check <id> --ar ar.txt --en en.txt
+```
+
+The rules live as data in `content/social/craft-rules.json` — this page's tables,
+in the form a machine reads — and run from `src/lib/craft.ts` (the app, for the
+review editor) and `scripts/lib/craft.mjs` (the CLI and the drain), pinned
+byte-identical by `src/lib/__tests__/craft.test.ts`. Edit the JSON and both
+change; edit this page and the JSON does not, so change them together.
+
+**What the gate can and cannot see** is the thing to keep straight. It executes
+the list below, plus the length band, plus two failures a writer reliably misses:
+a number, date, or price **not present in the brief** (a set difference, which is
+what makes it the most valuable rule here), and a link without a scheme — bare
+`ed.databayt.org` parses as nothing, so `applyUtm` leaves it untagged and
+attribution silently reads zero.
+
+It does **not** judge checks 1, 2, or 4. The 12-word ceiling is a floor under
+check 1, never the check: the 2026-08-05 draft quoted above is *exactly* 12 words,
+so it clears the rule and fails the doctrine — which is the whole reason a
+description is not a hook. Checks 3 and 5 only warn, because their mechanical
+proxies are honest but coarse. **Clearing the gate is the floor, not the bar.**
+
+This is also why there is still no LLM judge (see
+[below](#why-not-a-candidate-set-an-ab-or-a-judge)): the free half of that idea
+was always the deterministic half, and it costs no tokens on a pool that already
+hits session limits.
 
 - Opens with the brand name, `نحن`, or "We're excited to announce"
 - A bulleted feature list of four or more items

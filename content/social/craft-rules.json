@@ -1,0 +1,128 @@
+{
+  "version": 1,
+  "$comment": "content/docs/social/copy.mdx's tables as data. That page is the doctrine and stays the doctrine — this file is only the part a machine can execute, and it must never say anything copy.mdx does not. Two implementations read it (src/lib/craft.ts for the app, scripts/lib/craft.mjs for the CLI and the drain) because a .mjs cannot import TS; craft.test.ts pins them byte-identically. Severity follows copy.mdx's own split: its `reject list` is 'auto-fail, no discussion' so those are `fail`, and its register ladder + checks 3/5 are judgment so those are `warn`. Checks 1's 'is this a pain or a promise', 2's 'cut it at any sentence boundary', and 4 'Scene' are NOT here — the first two need a reader and the third needs evidence, not a regex. `reason` maps every rule onto the five reviewer-facing DISMISS_REASONS in src/components/root/social/knobs.ts, so a machine refusal and a human dismissal speak one vocabulary.",
+  "limits": {
+    "arMinChars": 400,
+    "arMaxChars": 900,
+    "arMinCharsShortForm": 280,
+    "hookMaxWords": 12,
+    "maxBullets": 3,
+    "maxHashtags": 3,
+    "maxEmoji": 1,
+    "maxQuestionMarks": 1,
+    "maxLinks": 1,
+    "ctaLastFraction": 0.2
+  },
+  "$comment_shortForm": "copy.mdx: 'Under 400 only for X.' X is not in scope for the slice, so arMinCharsShortForm applies only when a caller passes channel=x.",
+  "channelHashtagCaps": {
+    "telegram": 0,
+    "whatsapp": 0,
+    "linkedin": 0
+  },
+  "openerBans": {
+    "$comment": "copy.mdx check 1, matched against the first line only. These are brand-independent.",
+    "ar": ["نحن", "عزيزي ولي الأمر"],
+    "en": ["We're excited", "We are excited", "Excited to announce"]
+  },
+  "$comment_brandOpenerNames": "copy.mdx check 1: 'Never opens with the brand name' — its OWN name. Keyed by the registry id in src/components/root/social/products.ts, and only the brand being written is checked. Checking all five would flag `مكان واحد` on a hogwarts post, and `في مكان واحد` is in this file's own preferredAr list. Both scripts per brand, because the transliteration rule means Arabic prose says هوجورتس and an opener is a violation either way. The note lives OUTSIDE the object so every value is a string[] and the map needs no cast.",
+  "brandOpenerNames": {
+    "hogwarts": ["هوجورتس", "Hogwarts"],
+    "databayt": ["داتابايت", "داتابيت", "Databayt"],
+    "mkan": ["مكان", "Mkan"],
+    "sijillee": ["سِجلي", "سجلي", "Sijillee"],
+    "moalimee": ["مُعلّمي", "معلمي", "Moallimee", "Moalimee"]
+  },
+  "wordlist": {
+    "$comment": "copy.mdx's wordlist table, verbatim in both columns. `use` is printed in the failure message so a refusal carries its own fix. Arabic is matched as a substring — JS \\b does not work on Arabic script — so terms are chosen long enough not to fire inside an innocent word.",
+    "ar": [
+      {
+        "term": "الحلول",
+        "use": "the actual thing — نظام القبول, كشف الدرجات"
+      },
+      { "term": "حلول متكاملة", "use": "the actual thing — name the module" },
+      { "term": "المنظومة", "use": "النظام, or name the module" },
+      { "term": "التحول الرقمي", "use": "what changes — من الورق إلى الشاشة" },
+      { "term": "تفخر", "use": "delete the sentence" },
+      { "term": "يسرّنا أن نعلن", "use": "delete the sentence" },
+      { "term": "يسرنا أن نعلن", "use": "delete the sentence" },
+      { "term": "في إطار", "use": "delete the sentence" },
+      { "term": "الكفاءة", "use": "the time or the error actually saved" },
+      { "term": "الفعالية", "use": "the time or the error actually saved" },
+      { "term": "ثورة", "use": "nothing. We cannot make that claim." },
+      { "term": "نقلة نوعية", "use": "nothing. We cannot make that claim." },
+      {
+        "term": "سهل الاستخدام",
+        "use": "show it (خمس خطوات) instead of claiming it"
+      }
+    ],
+    "en": [
+      { "term": "revolutionize", "use": "say what actually changes" },
+      { "term": "revolutionise", "use": "say what actually changes" },
+      { "term": "seamless", "use": "name the step that disappeared" },
+      { "term": "cutting-edge", "use": "delete it" },
+      { "term": "empower", "use": "say what they can now do" },
+      { "term": "streamline", "use": "name the time or the error saved" },
+      {
+        "term": "solutions",
+        "use": "the actual thing — the admission system, the mark sheet"
+      },
+      { "term": "leverage", "use": "use" },
+      { "term": "game-changer", "use": "nothing. We cannot make that claim." },
+      { "term": "Excited to announce", "use": "delete the sentence" }
+    ],
+    "enConditional": [
+      { "term": "workflows", "use": "name them" },
+      {
+        "term": "AI-powered",
+        "use": "drop it unless the post is actually about the AI"
+      }
+    ]
+  },
+  "engineeringAr": {
+    "$comment": "copy.mdx reject list: 'Engineering vocabulary carried into Arabic.' These are the exact three it names, plus the two the 2026-08-05 failure actually shipped.",
+    "terms": [
+      "نطاق المستأجر",
+      "كل قراءة وكتابة",
+      "واجهة برمجية",
+      "قاعدة البيانات",
+      "الخادم"
+    ]
+  },
+  "passiveAr": {
+    "$comment": "copy.mdx's wordlist bans `يتم + مصدر` outright, so يتم is a fail. The ladder's other rung-1 markers are judgment, so they warn — the page is explicit that passive is RIGHT when the object is the topic (الدرجة تُرصد مرة واحدة is called good), which no regex can tell.",
+    "fail": ["يتم "],
+    "warn": [
+      "تم إطلاق",
+      "يُنشأ",
+      "انطلاقًا من",
+      "الشامل والمتكامل",
+      "الفعّال والمرن",
+      "الكفاءة التشغيلية",
+      "عملية تحسين"
+    ]
+  },
+  "preferredAr": {
+    "$comment": "copy.mdx: 'the register's own vocabulary, mined from the copy that works.' Check 3 warns when a draft carries none of these — an abstraction with no object a reader can see.",
+    "terms": [
+      "الورق",
+      "الدفتر",
+      "الكشف",
+      "الفاتورة",
+      "الطابور",
+      "يذوب",
+      "يضيع",
+      "يُنجز",
+      "ينتهي بهدوء",
+      "أول يوم",
+      "آخر الفصل",
+      "أسبوع المدير",
+      "مرة واحدة",
+      "في مكان واحد",
+      "بلمحة",
+      "بنقرة",
+      "المكتب",
+      "الطابعة",
+      "الملف"
+    ]
+  }
+}

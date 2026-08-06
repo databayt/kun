@@ -158,6 +158,10 @@ export const SOCIAL_DICTIONARY = {
     craftCheck2: "Say the post's one claim in five words. Can you?",
     craftCheck4: "Point at the sentence where you recognise your own week.",
     craftCheck6: "One thing to do at the end — one verb, one destination.",
+    // The mechanical half (src/lib/craft.ts). `craftCheckShort` prefixes a check
+    // number inside an LTR run, so it stays a bare word rather than a sentence.
+    craftCheckShort: "check ",
+    craftMore: "+{count} more",
     // Dismiss reasons ride the note field that already exists. Naming the failed
     // check is the only feedback the writing side ever gets.
     dismissReasonTitle: "Why is it not shipping?",
@@ -165,6 +169,8 @@ export const SOCIAL_DICTIONARY = {
     dismissReasonTwoPosts: "Two posts in one",
     dismissReasonUntrue: "Not true",
     dismissReasonRegister: "Wrong register",
+    dismissReasonCta: "The ask is wrong",
+    dismissReasonLength: "Wrong length",
     dismissReasonOther: "Something else",
     // The settings popover: what Approve does.
     approveModeLabel: "When a draft is approved",
@@ -396,11 +402,15 @@ export const SOCIAL_DICTIONARY = {
     craftCheck2: "قل دعوى المنشور الواحدة في خمس كلمات. هل تستطيع؟",
     craftCheck4: "أشِر إلى الجملة التي تعرف فيها أسبوعك أنت.",
     craftCheck6: "شيء واحد يُفعل في النهاية — فعل واحد ووجهة واحدة.",
+    craftCheckShort: "فحص ",
+    craftMore: "و{count} أخرى",
     dismissReasonTitle: "لماذا لا يُنشر؟",
     dismissReasonHook: "لا خُطّاف",
     dismissReasonTwoPosts: "منشوران في واحد",
     dismissReasonUntrue: "غير صحيح",
     dismissReasonRegister: "مستوى لغوي خاطئ",
+    dismissReasonCta: "الدعوة غير صحيحة",
+    dismissReasonLength: "الطول غير مناسب",
     dismissReasonOther: "سبب آخر",
     approveModeLabel: "عند اعتماد مسودة",
     approveModeNow: "انشر فوراً",

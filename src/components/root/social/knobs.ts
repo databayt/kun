@@ -97,12 +97,20 @@ export type DraftRegisterId = (typeof DRAFT_REGISTERS)[number]["id"];
  * The ids are the aggregation key `social-drafts.mjs lessons` groups by, so they
  * are stable strings rather than the reviewer-facing label — which is free to be
  * reworded or translated without orphaning a month of history.
+ *
+ * `src/lib/craft.ts` maps every mechanical rule onto one of these, so a linter
+ * refusal and a human dismissal name the same thing. `cta` and `length` were
+ * added when the linter shipped (2026-08-06): both are checks copy.mdx already
+ * names, and a reviewer dismissing "the link is buried" or "this is three
+ * paragraphs too long" had nowhere to put it but `other`.
  */
 export const DISMISS_REASONS = [
   { id: "hook", check: 1 },
   { id: "two-posts", check: 2 },
   { id: "untrue", check: null },
   { id: "register", check: null },
+  { id: "cta", check: 6 },
+  { id: "length", check: null },
   { id: "other", check: null },
 ] as const;
 
