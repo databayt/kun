@@ -63,12 +63,28 @@ has side effects and a miss does not), `destructive_fp` (hard zero), `top3`, `mr
 | 6   | Headline excludes trivial cases                                                   | `top1_hard`                                     |
 | 7   | CLAUDE.md-routed skills frozen from tuning in round 1                             | `per_skill.claude_md_routed`                    |
 | 8   | Merge/retire is evidence for `/decide`, never auto-applied                        | `merge_candidates[]`                            |
+| 9   | **Graders are blind** — dispatch agents read only the `--redacted` view           | emit-time assertion + `audit-bench-run.mjs`     |
 
 Guard 1 is the load-bearing one. The cases come from `when_to_use`; the tuner edits
 `when_to_use`. Without it the optimal move is to paste every trigger phrase into the
 description — score 1.0, engine unchanged, frontmatter degraded into a keyword list that is
 _worse_ for the novel prompts that make up all real usage. A holdout alone does not stop
 this, because keyword stuffing lifts train and holdout identically.
+
+Guard 9 is the one that actually bit. The first run scored **0.9942** — and it was not a
+measurement. The dispatch agents had been told to read the case file for prompts, and that file
+carried `label` for every case, so they were reading the answer. `label` was not the only leak:
+`source` announces a none-case (`vocab_none`) and `tags` carries `destructive` and
+`hard:names-ship`. Redacting one field would have left the score just as contaminated and much
+harder to doubt.
+
+Two lessons are now wired in rather than remembered. First, **a near-perfect score on a 67-way
+classification is evidence about the harness, not the fleet** — 0.9942 with a holdout of 1.0 and
+a _negative_ train/holdout gap should be read as a symptom on sight. Second, an instruction not
+to look is not a control: `audit-bench-run.mjs` scans each run's agent transcripts for forbidden
+tool inputs afterwards, and fails the run on any hit. Void results stay in `weekly_history` with
+`invalid: true` and their reason instead of being deleted — a score file that only ever shows
+clean numbers is exactly the artifact this system exists to distrust.
 
 ## Improvement lane
 
