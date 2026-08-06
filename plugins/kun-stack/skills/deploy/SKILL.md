@@ -1,9 +1,10 @@
 ---
 name: Deploy
-description: Deploy to Vercel - use when user says "deploy", "push", or "ship"
+description: Vercel operator — preview/staging deploys, deployment logs and status, and the fix-until-deployed retry loop
+when_to_use: "Use when driving Vercel directly rather than running a pipeline stage — deploying to preview/staging, inspecting why a deployment failed, checking deployment status, or looping build-fix-redeploy until it goes green (max 5 attempts). Promoting a checked build to PRODUCTION is /ship (the pipeline's commit-to-live step after /check), the commit-lint-push cycle is /quick, and confirming a live deploy is healthy is /watch — this skill does not replace any of them. Triggers on: deploy to preview, deploy to staging, vercel logs, why did the deploy fail, deployment status, redeploy until it works."
 argument-hint: "[environment]"
 allowed-tools: Bash(git *), Bash(pnpm *), Bash(npx *), Bash(gh *)
-model: claude-opus-4-7
+model: opus
 ---
 
 # Vercel Deploy Command
@@ -11,6 +12,7 @@ model: claude-opus-4-7
 Deploy to Vercel with automatic error detection and fixing until deployment succeeds.
 
 ## Usage
+
 - `/deploy` - Deploy to production and watch until success
 - `/deploy preview` - Deploy to preview environment
 - `/deploy logs` - Fetch and analyze recent deployment logs
@@ -23,6 +25,7 @@ Deploy to Vercel with automatic error detection and fixing until deployment succ
 Execute deployment workflow based on the argument:
 
 ### If argument is "logs":
+
 1. List recent deployments: `npx vercel list --yes`
 2. Identify failed deployments (status: Error)
 3. Inspect the most recent failed deployment
@@ -30,14 +33,17 @@ Execute deployment workflow based on the argument:
 5. Report error summary with root cause analysis
 
 ### If argument is "status":
+
 1. List deployments: `npx vercel list --yes`
 2. Show status of last 5 deployments
 3. Report current production state
 
 ### If argument is "preview" or empty/production:
+
 Execute the full deployment loop:
 
 #### Phase 1: Pre-Deployment Validation
+
 1. **Git Status Check**
    - Check for uncommitted changes
    - Ensure branch is up to date with remote
@@ -48,6 +54,7 @@ Execute the full deployment loop:
    - Fix any errors before deploying
 
 #### Phase 2: Deploy
+
 1. **Trigger Deployment**
    - For production: `npx vercel --prod --yes`
    - For preview: `npx vercel --yes`
@@ -57,6 +64,7 @@ Execute the full deployment loop:
    - Capture deployment URL and ID
 
 #### Phase 3: Watch and Validate
+
 1. **Check Deployment Status**
    - Poll `npx vercel inspect <deployment-url>` every 30 seconds
    - Wait for status to be "Ready" or "Error"
@@ -74,6 +82,7 @@ Execute the full deployment loop:
    - List all aliases (production domains)
 
 ### Common Vercel Errors and Fixes:
+
 - **TypeScript errors**: Fix types, update tsconfig.json excludes
 - **Module not found**: Check imports, add missing dependencies
 - **Build timeout**: Optimize build, split large components

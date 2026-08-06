@@ -201,6 +201,15 @@ if [ -f "$ENGINE_JSON" ] && command -v jq &> /dev/null; then
     [ "$EC_RULES" = "$ER_RULES" ] && check pass "engine rules" "$ER_RULES" || check warn "engine rules" "engine.json=$EC_RULES actual=$ER_RULES"
     [ "$EC_DOMAIN_RULES" = "$ER_DOMAIN_RULES" ] && check pass "engine domain-rules" "$ER_DOMAIN_RULES" || check warn "engine domain-rules" "engine.json=$EC_DOMAIN_RULES actual=$ER_DOMAIN_RULES"
     [ "$EC_MCP" = "$ER_MCP" ] && check pass "engine mcp" "$ER_MCP" || check warn "engine mcp" "engine.json=$EC_MCP actual=$ER_MCP"
+    # User-level counts were declared but never checked, so both drifted silently
+    # (user_agents 46→50, user_skills 62→66, found 2026-08-06). The user fleet is
+    # what the dispatch benchmark actually measures — it is not optional truth.
+    EC_UAGENTS=$(jq -r '.counts.user_agents' "$ENGINE_JSON")
+    EC_USKILLS=$(jq -r '.counts.user_skills' "$ENGINE_JSON")
+    ER_UAGENTS=$(find "$HOME/.claude/agents" -maxdepth 1 -name '*.md' ! -name '_index*' 2>/dev/null | wc -l | tr -d ' ')
+    ER_USKILLS=$(find "$HOME/.claude/skills" -mindepth 2 -maxdepth 2 -name 'SKILL.md' 2>/dev/null | wc -l | tr -d ' ')
+    [ "$EC_UAGENTS" = "$ER_UAGENTS" ] && check pass "engine user-agents" "$ER_UAGENTS" || check warn "engine user-agents" "engine.json=$EC_UAGENTS actual=$ER_UAGENTS"
+    [ "$EC_USKILLS" = "$ER_USKILLS" ] && check pass "engine user-skills" "$ER_USKILLS" || check warn "engine user-skills" "engine.json=$EC_USKILLS actual=$ER_USKILLS"
     if grep -rq "Opus 4\.6\|Opus 4\.7\|claude-opus-4-6\|claude-opus-4-7" "$KUN_ROOT/docs" "$KUN_ROOT/.claude/CLAUDE.md" 2>/dev/null; then
         check warn "engine model refs" "stale Opus 4.6/4.7 in docs"
     else
@@ -223,6 +232,29 @@ if [ -f "$ENGINE_JSON" ] && command -v jq &> /dev/null; then
             check pass "vocabulary" "registry ↔ CLAUDE.md ↔ spellbook in sync"
         else
             check warn "vocabulary" "drift or dangling targets — run generate-vocab.mjs"
+        fi
+    fi
+    # Dispatch benchmark. engine.json holds DECLARED truth; skill-scores.json holds
+    # MEASURED state — so health.sh checks only that the measurement is current and
+    # that its guards still hold, never the score's value.
+    if [ -f "$KUN_ROOT/.claude/scripts/extract-dispatch-cases.mjs" ] && command -v node &> /dev/null; then
+        if node "$KUN_ROOT/.claude/scripts/extract-dispatch-cases.mjs" --check >/dev/null 2>&1; then
+            check pass "dispatch cases" "corpus_hash + listing budget in bounds"
+        else
+            check warn "dispatch cases" "guard violation — run extract-dispatch-cases.mjs --check"
+        fi
+        SCORES="$KUN_ROOT/.claude/memory/skill-scores.json"
+        if [ -f "$SCORES" ]; then
+            EC_SCORED=$(jq -r '.corpus.skills_listed' "$SCORES" 2>/dev/null)
+            # The scored fleet is what Claude Code resolves: project ∪ user, deduped
+            # by directory name. Today project is a strict subset of user, but don't
+            # assume it — count the union.
+            ER_FLEET=$( { find "$KUN_ROOT/.claude/skills" "$HOME/.claude/skills" -mindepth 2 -maxdepth 2 -name 'SKILL.md' 2>/dev/null \
+                | sed 's#/SKILL.md$##; s#.*/##'; } | sort -u | wc -l | tr -d ' ')
+            [ "$EC_SCORED" = "$ER_FLEET" ] && check pass "dispatch scores" "$EC_SCORED skills scored" \
+                || check warn "dispatch scores" "stale — scored=$EC_SCORED fleet=$ER_FLEET, re-run the bench"
+        else
+            check warn "dispatch scores" "no baseline yet — run the dispatch benchmark"
         fi
     fi
 fi

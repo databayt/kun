@@ -201,6 +201,16 @@ function skillExists(name) {
   );
 }
 
+// Only a real SKILL.md competes with a spell for its name. A Claude Code built-in
+// (`debug`, `loop`, …) shares the namespace but has no frontmatter to collide with,
+// so it must not trip the reverse check.
+function fileBackedSkill(name) {
+  return (
+    existsSync(join(ROOT, ".claude/skills", name, "SKILL.md")) ||
+    existsSync(join(HOME, ".claude/skills", name, "SKILL.md"))
+  );
+}
+
 function agentExists(name) {
   return (
     BUILTIN_AGENTS.has(name) ||
@@ -235,6 +245,25 @@ function validateTargets() {
   }
   for (const sc of vocab.schools) {
     for (const sp of sc.spells) {
+      // Reverse check: skill→spell. The loop below validates that a spell's skill
+      // target exists; nothing validated that a spell NAMED like a skill actually
+      // routes to it. Six do not (auth, profile, analyze, report, pattern, canon).
+      // Three are genuine semantic collisions — the `auth` spell means "build
+      // authentication", the `auth` skill means "log me into a site" — so this is a
+      // warning, not an error: the dispatch benchmark is what should measure the
+      // cost of the ambiguity, not a lint that papers over it.
+      if (!sp.mergedInto && fileBackedSkill(sp.name)) {
+        const routesToOwnSkill = sp.order.some(
+          (o) => o.type === "skill" && o.name.replace(/^\//, "") === sp.name
+        );
+        if (!routesToOwnSkill) {
+          warnings.push(
+            `${sc.id}/${sp.name}: a skill named "${sp.name}" exists but the spell routes to ${sp.order
+              .map((o) => `${o.type}:${o.name}`)
+              .join(", ")}`
+          );
+        }
+      }
       for (const o of sp.order) {
         const at = `${sc.id}/${sp.name}`;
         if (o.type === "skill" && !skillExists(o.name)) {
