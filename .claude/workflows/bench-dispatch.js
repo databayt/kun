@@ -210,6 +210,7 @@ function score(cases, answers) {
       hit1: rank === 1,
       hit3: rank >= 1 && rank <= 3,
       trivial: isTrivial(c),
+      lexical: (c.tags || []).includes("lexical"),
       destructive: isDestructive(c),
       split: c.split,
       adjudicatedAway: false,
@@ -222,6 +223,11 @@ function metrics(rows) {
   const pos = rows.filter((r) => r.label !== "none");
   const none = rows.filter((r) => r.label === "none");
   const hard = rows.filter((r) => !r.trivial);
+  // The honest difficulty floor: positives whose prompt does not contain the skill
+  // name at all. Everything above this stratum is partly measuring string overlap.
+  const lexFree = rows.filter(
+    (r) => !r.trivial && !r.lexical && r.label !== "none",
+  );
   const holdout = hard.filter((r) => r.split === "holdout");
   const train = hard.filter((r) => r.split === "train");
 
@@ -304,6 +310,8 @@ function metrics(rows) {
   return {
     top1: acc(rows),
     top1_hard: acc(hard),
+    top1_lexical_free: acc(lexFree),
+    n_lexical_free: lexFree.length,
     top3: pct(rows.filter((r) => r.hit3).length, rows.length),
     mrr,
     // The number that matters most: a false fire has side effects, a miss does not.

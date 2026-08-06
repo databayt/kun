@@ -363,6 +363,12 @@ for (const s of skills) {
   for (const p of phrases) {
     const tags = [];
     if (p.toLowerCase() === s.skill.toLowerCase()) tags.push("trivial");
+    // A prompt that merely CONTAINS its skill's name ("analyze <repo>", "create an
+    // atom") is not exact-match, but it is not a dispatch test either — the answer
+    // is in the question. 24% of non-trivial positives are like this, which is
+    // enough to flatter the headline. Tagged so `top1_lexical_free` can exclude them.
+    else if (new RegExp(`\\b${s.skill.replace(/-/g, "[- ]?")}\\b`, "i").test(p))
+      tags.push("lexical");
     // A phrase that literally names a DIFFERENT skill is a hard negative: a miss
     // there is a real finding, not a labeling error. `costs :: "budget check"`
     // firing /check would be an actual production bug.

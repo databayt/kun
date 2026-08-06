@@ -773,6 +773,7 @@
       "label": "analyze",
       "source": "trigger_phrase",
       "tags": [
+        "lexical",
         "hard:cluster"
       ],
       "split": "holdout"
@@ -813,6 +814,7 @@
       "label": "approve",
       "source": "trigger_phrase",
       "tags": [
+        "lexical",
         "hard:names-draft",
         "hard:cluster"
       ],
@@ -903,7 +905,9 @@
       "prompt": "atom <name>",
       "label": "atom",
       "source": "trigger_phrase",
-      "tags": [],
+      "tags": [
+        "lexical"
+      ],
       "split": "train"
     },
     {
@@ -911,7 +915,9 @@
       "prompt": "create an atom",
       "label": "atom",
       "source": "trigger_phrase",
-      "tags": [],
+      "tags": [
+        "lexical"
+      ],
       "split": "train"
     },
     {
@@ -919,7 +925,9 @@
       "prompt": "new atom",
       "label": "atom",
       "source": "trigger_phrase",
-      "tags": [],
+      "tags": [
+        "lexical"
+      ],
       "split": "train"
     },
     {
@@ -927,7 +935,9 @@
       "prompt": "register this as an atom",
       "label": "atom",
       "source": "trigger_phrase",
-      "tags": [],
+      "tags": [
+        "lexical"
+      ],
       "split": "holdout"
     },
     {
@@ -1008,6 +1018,7 @@
       "label": "calendar",
       "source": "trigger_phrase",
       "tags": [
+        "lexical",
         "hard:cluster"
       ],
       "split": "train"
@@ -1113,6 +1124,7 @@
       "label": "carousel",
       "source": "trigger_phrase",
       "tags": [
+        "lexical",
         "hard:names-block"
       ],
       "split": "train"
@@ -1189,7 +1201,9 @@
       "prompt": "clone <url>",
       "label": "clone",
       "source": "trigger_phrase",
-      "tags": [],
+      "tags": [
+        "lexical"
+      ],
       "split": "train"
     },
     {
@@ -1197,7 +1211,9 @@
       "prompt": "clone this section",
       "label": "clone",
       "source": "trigger_phrase",
-      "tags": [],
+      "tags": [
+        "lexical"
+      ],
       "split": "holdout"
     },
     {
@@ -1213,7 +1229,9 @@
       "prompt": "clone the figma design",
       "label": "clone",
       "source": "trigger_phrase",
-      "tags": [],
+      "tags": [
+        "lexical"
+      ],
       "split": "train"
     },
     {
@@ -1222,6 +1240,7 @@
       "label": "clone",
       "source": "trigger_phrase",
       "tags": [
+        "lexical",
         "hard:names-shadcn"
       ],
       "split": "train"
@@ -1272,7 +1291,9 @@
       "prompt": "convert <file|url>",
       "label": "convert",
       "source": "trigger_phrase",
-      "tags": [],
+      "tags": [
+        "lexical"
+      ],
       "split": "train"
     },
     {
@@ -1358,7 +1379,9 @@
       "prompt": "crawl anthropic",
       "label": "crawl-anthropic",
       "source": "trigger_phrase",
-      "tags": [],
+      "tags": [
+        "lexical"
+      ],
       "split": "train"
     },
     {
@@ -1427,6 +1450,7 @@
       "label": "deploy",
       "source": "trigger_phrase",
       "tags": [
+        "lexical",
         "hard:cluster"
       ],
       "split": "train"
@@ -1437,6 +1461,7 @@
       "label": "deploy",
       "source": "trigger_phrase",
       "tags": [
+        "lexical",
         "hard:cluster"
       ],
       "split": "train"
@@ -1457,6 +1482,7 @@
       "label": "deploy",
       "source": "trigger_phrase",
       "tags": [
+        "lexical",
         "hard:cluster"
       ],
       "split": "train"
@@ -1487,6 +1513,7 @@
       "label": "draft",
       "source": "trigger_phrase",
       "tags": [
+        "lexical",
         "hard:cluster"
       ],
       "split": "train"
@@ -1527,6 +1554,7 @@
       "label": "draft",
       "source": "trigger_phrase",
       "tags": [
+        "lexical",
         "hard:cluster"
       ],
       "split": "train"
@@ -1537,6 +1565,7 @@
       "label": "draft",
       "source": "trigger_phrase",
       "tags": [
+        "lexical",
         "hard:cluster"
       ],
       "split": "train"
@@ -1692,6 +1721,7 @@
       "label": "feature",
       "source": "trigger_phrase",
       "tags": [
+        "lexical",
         "hard:cluster"
       ],
       "split": "train"
@@ -1702,6 +1732,7 @@
       "label": "feature",
       "source": "trigger_phrase",
       "tags": [
+        "lexical",
         "hard:names-build",
         "hard:cluster"
       ],
@@ -1724,6 +1755,7 @@
       "label": "handover",
       "source": "trigger_phrase",
       "tags": [
+        "lexical",
         "hard:names-block",
         "hard:cluster"
       ],
@@ -1787,6 +1819,7 @@
       "label": "health",
       "source": "trigger_phrase",
       "tags": [
+        "lexical",
         "hard:cluster"
       ],
       "split": "train"
@@ -1827,7 +1860,9 @@
       "prompt": "/higgs",
       "label": "higgs",
       "source": "trigger_phrase",
-      "tags": [],
+      "tags": [
+        "lexical"
+      ],
       "split": "train"
     },
     {
@@ -2024,6 +2059,7 @@
       "label": "idea",
       "source": "trigger_phrase",
       "tags": [
+        "lexical",
         "hard:cluster"
       ],
       "split": "train"
@@ -2034,6 +2070,7 @@
       "label": "idea",
       "source": "trigger_phrase",
       "tags": [
+        "lexical",
         "hard:names-feature",
         "hard:cluster"
       ],
@@ -2128,6 +2165,7 @@
       "label": "issue",
       "source": "trigger_phrase",
       "tags": [
+        "lexical",
         "hard:cluster"
       ],
       "split": "train"
@@ -2138,6 +2176,7 @@
       "label": "issue",
       "source": "trigger_phrase",
       "tags": [
+        "lexical",
         "hard:cluster"
       ],
       "split": "train"
@@ -2286,7 +2325,9 @@
       "prompt": "package audit",
       "label": "package",
       "source": "trigger_phrase",
-      "tags": [],
+      "tags": [
+        "lexical"
+      ],
       "split": "train"
     },
     {
@@ -2320,7 +2361,9 @@
       "prompt": "pattern <keyword>",
       "label": "pattern",
       "source": "trigger_phrase",
-      "tags": [],
+      "tags": [
+        "lexical"
+      ],
       "split": "holdout"
     },
     {
@@ -2336,7 +2379,9 @@
       "prompt": "canonical pattern",
       "label": "pattern",
       "source": "trigger_phrase",
-      "tags": [],
+      "tags": [
+        "lexical"
+      ],
       "split": "train"
     },
     {
@@ -2353,6 +2398,7 @@
       "label": "plan",
       "source": "trigger_phrase",
       "tags": [
+        "lexical",
         "hard:cluster"
       ],
       "split": "train"
@@ -2363,6 +2409,7 @@
       "label": "plan",
       "source": "trigger_phrase",
       "tags": [
+        "lexical",
         "hard:names-spec",
         "hard:cluster"
       ],
@@ -2374,6 +2421,7 @@
       "label": "plan",
       "source": "trigger_phrase",
       "tags": [
+        "lexical",
         "hard:cluster"
       ],
       "split": "holdout"
@@ -2417,7 +2465,9 @@
       "prompt": "profile <role>",
       "label": "profile",
       "source": "trigger_phrase",
-      "tags": [],
+      "tags": [
+        "lexical"
+      ],
       "split": "train"
     },
     {
@@ -2425,7 +2475,9 @@
       "prompt": "load the business profile",
       "label": "profile",
       "source": "trigger_phrase",
-      "tags": [],
+      "tags": [
+        "lexical"
+      ],
       "split": "holdout"
     },
     {
@@ -2461,7 +2513,9 @@
       "prompt": "client proposal",
       "label": "proposal",
       "source": "trigger_phrase",
-      "tags": [],
+      "tags": [
+        "lexical"
+      ],
       "split": "train"
     },
     {
@@ -2478,6 +2532,7 @@
       "label": "publish",
       "source": "trigger_phrase",
       "tags": [
+        "lexical",
         "hard:cluster"
       ],
       "split": "train"
@@ -2528,6 +2583,7 @@
       "label": "publish",
       "source": "trigger_phrase",
       "tags": [
+        "lexical",
         "hard:cluster"
       ],
       "split": "train"
@@ -2568,6 +2624,7 @@
       "label": "release",
       "source": "trigger_phrase",
       "tags": [
+        "lexical",
         "hard:names-block"
       ],
       "split": "train"
@@ -2652,6 +2709,7 @@
       "label": "report",
       "source": "trigger_phrase",
       "tags": [
+        "lexical",
         "hard:cluster"
       ],
       "split": "train"
@@ -2727,6 +2785,7 @@
       "label": "social",
       "source": "trigger_phrase",
       "tags": [
+        "lexical",
         "hard:cluster"
       ],
       "split": "train"
@@ -2737,6 +2796,7 @@
       "label": "social",
       "source": "trigger_phrase",
       "tags": [
+        "lexical",
         "hard:names-publish",
         "hard:cluster"
       ],
@@ -2748,6 +2808,7 @@
       "label": "social",
       "source": "trigger_phrase",
       "tags": [
+        "lexical",
         "hard:cluster"
       ],
       "split": "train"
@@ -2788,6 +2849,7 @@
       "label": "spec",
       "source": "trigger_phrase",
       "tags": [
+        "lexical",
         "hard:names-feature",
         "hard:cluster"
       ],
@@ -2799,6 +2861,7 @@
       "label": "spec",
       "source": "trigger_phrase",
       "tags": [
+        "lexical",
         "hard:cluster"
       ],
       "split": "train"
@@ -2909,6 +2972,7 @@
       "label": "tasks",
       "source": "trigger_phrase",
       "tags": [
+        "lexical",
         "hard:cluster"
       ],
       "split": "train"
@@ -2918,7 +2982,9 @@
       "prompt": "template <name>",
       "label": "template",
       "source": "trigger_phrase",
-      "tags": [],
+      "tags": [
+        "lexical"
+      ],
       "split": "train"
     },
     {
@@ -2926,7 +2992,9 @@
       "prompt": "create a template",
       "label": "template",
       "source": "trigger_phrase",
-      "tags": [],
+      "tags": [
+        "lexical"
+      ],
       "split": "train"
     },
     {
@@ -2934,7 +3002,9 @@
       "prompt": "new hero/sidebar/login template",
       "label": "template",
       "source": "trigger_phrase",
-      "tags": [],
+      "tags": [
+        "lexical"
+      ],
       "split": "train"
     },
     {
@@ -2942,7 +3012,9 @@
       "prompt": "rebuild the template registry",
       "label": "template",
       "source": "trigger_phrase",
-      "tags": [],
+      "tags": [
+        "lexical"
+      ],
       "split": "train"
     },
     {
@@ -3044,6 +3116,7 @@
       "label": "wire",
       "source": "trigger_phrase",
       "tags": [
+        "lexical",
         "hard:cluster"
       ],
       "split": "train"

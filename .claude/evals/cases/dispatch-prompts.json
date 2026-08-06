@@ -1,0 +1,1951 @@
+{
+  "$comment": "REDACTED grader view. Contains no label, source, tag or split — reading any other file (a SKILL.md, the full case set, the extractor) leaks the answer and invalidates the run.",
+  "corpus_hash": "fnv1a:5072a199",
+  "listing": [
+    {
+      "skill": "analyze",
+      "description": "Analyze a repo's patterns and generate a tailored Claude Code config",
+      "when_to_use": "Use when a repo needs its patterns extracted into a tailored Claude Code config — CLAUDE.md, agents, rules, and skills generated and committed straight to main — the config-generator lane, distinct from /learn which mines org-wide conventions into memory. Triggers on: analyze <repo>, generate config for this repo, repo config generator."
+    },
+    {
+      "skill": "approve",
+      "description": "The human gate — the review queue on /social/publish, or a signed link for a remote approver",
+      "when_to_use": "Use when a full draft (copy and/or media) is ready for a human to say yes before anything reaches a public brand page. Two lanes: the PRIMARY is the Hub's review queue at /social/publish — the next answered draft waits there, a contributor fine-tunes and approves (now, or scheduled to the cron drain); the SECONDARY stages a signed single-use link (it opens a confirm page; only its button publishes) for an approver outside the Hub. This is the gate, not the send: it never writes copy (/draft), never makes media (/higgs), and never delivers to a platform (/publish, which refuses to run without the yes this stage records). Triggers on: review the queue, approve the next draft, stage for review, send for approval, get sign-off, ready for review, اعتماد, راجع الطابور, اعتمد المسودة, أرسل للمراجعة."
+    },
+    {
+      "skill": "atom",
+      "description": "Create atoms - compositions of 2+ shadcn/ui primitives",
+      "when_to_use": "When creating, listing, previewing, or documenting an atom in /Users/abdout/codebase — a reusable composition of 2+ shadcn/ui primitives registered at /atoms and installable via npx codebase add. Triggers on \"atom <name>\", \"create an atom\", \"new atom\", \"register this as an atom\"."
+    },
+    {
+      "skill": "auth",
+      "description": "Autonomously authenticate to any web service or CLI on Abdout's behalf using the macOS-Keychain-stored databayt identities, then reach protected pages and fetch original assets behind the login wall. Use whenever a page redirects to a login wall, a CLI reports \"not authenticated\", the user says \"log into X / sign me into X / auth\", or a clone/asset-fetch task needs content behind a paywall or dashboard. Minimizes interaction — only pauses for a one-time code when no non-interactive path exists.",
+      "when_to_use": ""
+    },
+    {
+      "skill": "bench",
+      "description": "Score the engine's own config on its labeled cases, and propose holdout-gated fixes",
+      "when_to_use": "Use when the question is whether the CONFIG works, not whether a product feature works — scoring which skill fires for a prompt, checking runs against the contracts their SKILL.md declares, or proposing a description rewrite that must beat an unseen holdout. Unlike /health (counts files, never reads one), /qa (a product block), /check (typecheck + build). Triggers on: bench, benchmark the skills, is the routing accurate, measure the engine, dispatch accuracy, which skills collide, are any skills dead."
+    },
+    {
+      "skill": "block",
+      "description": "Create blocks - UI components with integrated business logic",
+      "when_to_use": ""
+    },
+    {
+      "skill": "build",
+      "description": "Smart build with TypeScript check and auto-fix",
+      "when_to_use": "Use when the project needs to be built or build-validated — pnpm tsc + production build with an auto-fix loop (max 5 attempts) — including 'build', 'does it build', 'validate the build', or the build step inside a larger flow. Not the full pre-ship gate (/check adds visual verify + tests)."
+    },
+    {
+      "skill": "calendar",
+      "description": "The content calendar — which brand publishes what, on which day",
+      "when_to_use": "Use when deciding or reviewing WHAT to publish and WHEN — mapping topics to weeks, allocating slots per brand, checking what actually shipped against what was planned. This is the planning stage that feeds /draft: it never writes post copy (/draft), never renders media (/higgs), never stages for sign-off (/approve), never delivers (/publish), and never reads numbers back (/measure). Triggers on: content calendar, plan the content, what are we publishing, which brand is due, what slipped this week, التقويم, خطة المحتوى."
+    },
+    {
+      "skill": "canon",
+      "description": "Surface the right CEO book + operating move for a business or leadership decision — hiring, firing, pricing, positioning, what to build, customer development, fundraising, prioritization, runway, strategy. Pull in automatically when a decision is on the table; no slash command needed. /canon also lists all 10.",
+      "when_to_use": ""
+    },
+    {
+      "skill": "captain",
+      "description": "Databayt CEO brain - synthesize identity + state + journal, suggest next action",
+      "when_to_use": ""
+    },
+    {
+      "skill": "carousel",
+      "description": "Multi-slide bilingual brand carousels — Claude writes the deck, kun renders Anthropic-styled slides at exact platform sizes, a human approves, channels receive",
+      "when_to_use": "Use when a databayt brand needs a multi-slide social post — an Instagram/Facebook carousel, a LinkedIn PDF carousel, a story-sized slide set, or a slide album to DM a client on Telegram/WhatsApp. Triggers on: carousel, multi-slide post, swipe post, slides for instagram, carousel for <brand|block>, كاروسيل, سلايدات, منشور متعدد الشرائح."
+    },
+    {
+      "skill": "check",
+      "description": "Quality gate — typecheck + build + visual verify before shipping",
+      "when_to_use": "Use when work is about to ship and needs the pre-ship quality gate — run tsc, production build, optional browser visual verification, and existing tests, with auto-fix loops, then emit a READY TO SHIP / BLOCKED verdict and cache the pass in the session sentinel; unlike /handover or /qa (deep UI/block verification), this is the fast mechanical green-check. Triggers on: check, pre-ship quality gate, typecheck + build + visual verify, \"is it green\"."
+    },
+    {
+      "skill": "clone",
+      "description": "Clone a pattern/component from a source repo OR mirror a live URL section pixel-exact",
+      "when_to_use": "Use when reproducing something that already exists somewhere else — a live site section to mirror pixel-exact into the house stack (url-mode: deterministic Playwright capture → tiered Workflow), a Figma frame to implement, or code to adapt from github:/shadcn:/codebase:/pattern: sources. Triggers on: clone <url>, clone this section, make ours look like <site>, clone the figma design, clone shadcn:<component>, pattern:<keyword>. Distinct from /atom or /template (net-new components) — clone always starts from an existing source."
+    },
+    {
+      "skill": "code",
+      "description": "Logic layer — server actions with auth, validation, tenant isolation",
+      "when_to_use": "Use when the Logic stage of the pipeline is reached or Abdout asks in prose to build the business-logic layer for a feature — server actions, CRUD operations, permission rules, or optimized queries — as distinct from /schema (data layer) or /wire (UI layer). Triggers on: server actions, logic layer with auth+validation+tenant isolation, pipeline Logic stage."
+    },
+    {
+      "skill": "codebase",
+      "description": "Access reference codebase at /Users/abdout/codebase or databayt/codebase",
+      "when_to_use": ""
+    },
+    {
+      "skill": "convert",
+      "description": "Convert a file or URL to Markdown via MarkItDown (PDF, Office, images, audio, web)",
+      "when_to_use": "Use when a file or URL needs to become clean Markdown — PDFs, Office docs (DOCX/PPTX/XLSX), images, audio, web pages, YouTube transcripts — via the MarkItDown MCP, landing in docs/, a knowledge base, or printed to the session. Triggers on: convert <file|url>, markitdown, markdown this PDF, pull this page into docs, transcribe this video."
+    },
+    {
+      "skill": "costs",
+      "description": "API spend breakdown and cost-optimization analysis",
+      "when_to_use": "Use when Abdout asks where the money goes — API and infra spend breakdown with cost-optimization analysis across Vercel, Neon, AWS, and the Anthropic plan, honoring the subscription-only posture. Triggers on: costs, spend, how much are we paying, cost optimization, budget check."
+    },
+    {
+      "skill": "crawl-anthropic",
+      "description": "Crawl and snapshot Anthropic docs/assets",
+      "when_to_use": "Use when snapshotting Anthropic docs or assets into the local mirror — crawling code.claude.com and platform.claude.com pages for offline reference and rule harvesting. Triggers on: crawl anthropic, snapshot the docs, refresh the anthropic mirror."
+    },
+    {
+      "skill": "credentials",
+      "description": "Manage databayt credentials — API keys via Keychain, web logins via Safari",
+      "when_to_use": "Use when managing databayt credentials — storing or reading API keys via the macOS Keychain, driving Safari autofill for web logins, exporting keys for env wiring; never prints secrets into files. Triggers on: credentials, api key, log into <service>, store the key, which keys do we have."
+    },
+    {
+      "skill": "decide",
+      "description": "Write a decision journal entry — Type 1/2 classification, premortem, expected outcome, reviewed-by date",
+      "when_to_use": ""
+    },
+    {
+      "skill": "deploy",
+      "description": "Vercel operator — preview/staging deploys, deployment logs and status, and the fix-until-deployed retry loop",
+      "when_to_use": "Use when driving Vercel directly rather than running a pipeline stage — deploying to preview/staging, inspecting why a deployment failed, checking deployment status, or looping build-fix-redeploy until it goes green (max 5 attempts). Promoting a checked build to PRODUCTION is /ship (the pipeline's commit-to-live step after /check), the commit-lint-push cycle is /quick, and confirming a live deploy is healthy is /watch — this skill does not replace any of them. Triggers on: deploy to preview, deploy to staging, vercel logs, why did the deploy fail, deployment status, redeploy until it works."
+    },
+    {
+      "skill": "dev",
+      "description": "Start dev server on port 3000",
+      "when_to_use": ""
+    },
+    {
+      "skill": "docs",
+      "description": "Generate documentation - component MDX, API docs, Storybook stories",
+      "when_to_use": ""
+    },
+    {
+      "skill": "draft",
+      "description": "Write the full draft — copy (Arabic crafted first, English mirrored) and/or its media set",
+      "when_to_use": "Use when a topic needs to become a FULL draft for a databayt brand — the core piece plus one platform-native variant per channel, Arabic written natively and English mirrored, with UTM on every link, AND the draft's media half: library picks attached by URL, or a generation hand-off. ALSO the answering half of the Hub's agent window: with no topic, or on any phrasing about the draft queue, it drains the briefs contributors submitted on /social — picking media from the library as it answers. This is the drafting stage only: it does not decide what to write about (/calendar), does not render new images or video itself (/higgs, /carousel — it attaches their output), does not approve (/approve), and never sends anything to a platform (/publish). Triggers on: draft a post, write the copy, write the caption, post about <topic>, attach media to the draft, drain the draft queue, answer the social asks, any drafts waiting, اكتب منشور, صياغة المنشور, طابور الصياغة, أرفق وسائط للمسودة."
+    },
+    {
+      "skill": "economy",
+      "description": "Token economy — audit consumption and delegate across model × effort × product lane",
+      "when_to_use": "Use when token consumption, plan limits, or usage windows are the topic — auditing what's burning the Max pool, delegating work to a cheaper model/effort/product lane, or applying session hygiene. Triggers on: economy, token usage, optimize tokens, we're burning tokens, hit the limit, usage window, plan limit, tokens per outcome, توكن, استهلاك."
+    },
+    {
+      "skill": "feature",
+      "description": "Full pipeline — idea to production (chains every stage)",
+      "when_to_use": "Use when Abdout asks to build a feature end to end, take an idea all the way to production, or names a new feature to ship — this is the compound orchestrator that chains every pipeline stage (idea → spec → human approval → plan → tasks → schema → code → wire → check → ship → watch) with progress appended to a GitHub issue, unlike the single-stage neighbors (/idea, /spec, /schema, /code, /wire, /check, /ship, /watch) which each run one stage, and product scope resolves data-driven from .claude/memory/repositories.json (planned products get naming/spec only). Triggers on: feature <name> [product], build <feature> end to end, full pipeline idea→production."
+    },
+    {
+      "skill": "fix",
+      "description": "Auto-fix all detected issues - TypeScript, lint, build errors",
+      "when_to_use": ""
+    },
+    {
+      "skill": "handover",
+      "description": "UI verification — runs niche quality keywords on a URL or block",
+      "when_to_use": "Use when Abdout wants a UI verification pass before a demo, merge, or client handoff — polymorphic on argument, where URL mode (argument starts with /) runs all 12 per-URL niche quality keywords (browser 6 + code 6) on one route, and block mode (bare word) runs the per-route subset (debug, flow, responsive, lang) on every route in the block. Triggers on: handover <url|block>, pre-demo quality pass, run the niche quality keywords, \"is this URL clean\", \"is the whole block ready to show\"."
+    },
+    {
+      "skill": "health",
+      "description": "Check Claude Code config health across the team + engine drift",
+      "when_to_use": "Use when checking engine or config health — runs health.sh (counts vs engine.json, plugin parity, vocabulary sync, installed-agent matrix), reports drift, and reads teammates' statuses from the shared dashboard issue. Triggers on: health, config health, is the engine healthy, drift check, team config status."
+    },
+    {
+      "skill": "higgs",
+      "description": "Generate and edit photos and videos for databayt org marketing, ads, and prompts — Google (Nano Banana / Veo / Omni) direct, or Higgsfield",
+      "when_to_use": "Use when generating or editing marketing media — image, photo, video, ad, banner, og image, social card, hero shot, product shot, promo reel, story, avatar ad — or when a reference video/image URL needs downloading and tweaking. Owns BOTH raster renderers: Google direct (Nano Banana, Nano Banana Pro, Veo, Omni Flash — pay per image, no credit ceiling) and Higgsfield (credits). This is the TEXT-FREE lane: og images, infographics, testimonials, split comparisons and anything carrying copy render on /carousel's template lane instead (the Portrait Gallery spells route by taxonomy lane). Triggers on: /higgs, generate video, generate image, generate photo, make an ad, promo video, og image, social card, hero image, product shot, mockup, lifestyle scene, moodboard, showroom asset, brand kit, edit video from url, download and tweak video, higgs, nano banana, veo, omni, gemini image, صورة تسويقية, وسائط."
+    },
+    {
+      "skill": "idea",
+      "description": "Capture a feature idea as a structured GitHub issue",
+      "when_to_use": "Use when a new feature idea surfaces in conversation and needs to become a structured, deduplicated GitHub issue with user story, acceptance criteria, and scope — the Capture stage that opens the idea→production pipeline (distinct from /spec which details an existing issue, and /issue which files a generic issue without feature structure). Triggers on capture this idea, new feature idea, \"we should build …\", \"user can …\" stories, pipeline Capture stage, optionally scoped to a product (hogwarts, souq, mkan, shifa, kun)."
+    },
+    {
+      "skill": "incident",
+      "description": "Incident response workflow for production issues",
+      "when_to_use": "Use when production is broken and needs structured response — classify severity (P0-P3), diagnose via Sentry traces + Vercel logs, fix or roll back, verify recovery, write the postmortem on a GitHub issue. Triggers on: incident, production is down, outage, P0, users can't log in."
+    },
+    {
+      "skill": "issue",
+      "description": "Create a GitHub issue in the appropriate databayt repo",
+      "when_to_use": "Use when a task, bug, chore, or follow-up needs to become a tracked GitHub issue in the right databayt repo (kun, hogwarts, souq, mkan, shifa, codebase, shadcn, ios-app/android-app, marketing) with priority/type/scope/assignment labels, a Context/Action/Verification body, and a Slack #dev notification — including turning Slack messages into issues — as distinct from /idea which captures structured feature ideas with user stories. Triggers on: open/file an issue, create a GitHub issue in the right databayt repo."
+    },
+    {
+      "skill": "learn",
+      "description": "Extract organizational patterns and conventions from repos + history",
+      "when_to_use": "Use when extracting organizational intelligence — patterns, conventions, and team dynamics mined from git history and the databayt repos into memory; feeds the conventions/patterns/drift surfaces. Distinct from /analyze which generates a repo's Claude config. Triggers on: learn, what are our conventions, extract patterns from history."
+    },
+    {
+      "skill": "mcp-doctor",
+      "description": "Diagnose and recover the browser/Playwright MCP server when it disconnects, fails to launch, or returns \"tool not found\" for mcp__browser__*.",
+      "when_to_use": ""
+    },
+    {
+      "skill": "measure",
+      "description": "Read the numbers back — platform reach and engagement plus UTM attribution, per post and per brand",
+      "when_to_use": "Use when asking how published posts actually performed — reach, views, reactions, comments, shares, or UTM-attributed traffic, per post, per channel, or per brand, and whether the strategy's kill criteria can yet be judged. This reads numbers only: it never writes copy (/draft), never publishes (/publish), and is neither a bug report (/report) nor a deploy check (/watch). Triggers on: how did the post do, social metrics, reach and engagement, is social working, did anyone see it, أرقام المنشور, أداء المنشورات."
+    },
+    {
+      "skill": "monitor",
+      "description": "Check all deployments, costs, and uptime across databayt products",
+      "when_to_use": "Use when checking all deployments, costs, and uptime across the databayt products in one sweep — Vercel deploy status, production URL sampling, spend vs budget — escalating anything red to /incident. Triggers on: monitor, are the deploys green, uptime check, production status sweep."
+    },
+    {
+      "skill": "motion",
+      "description": "Add Framer Motion animations to components",
+      "when_to_use": ""
+    },
+    {
+      "skill": "package",
+      "description": "Cross-repo dependency audit and upgrade coordination",
+      "when_to_use": "Use when auditing or upgrading dependencies across the databayt repos — version consistency, coordinated upgrades, breaking-change sweeps by the package agent; cross-repo scope, unlike a single repo's deps/outdated check. Triggers on: package audit, upgrade deps across repos, version consistency, dependency sweep."
+    },
+    {
+      "skill": "pattern",
+      "description": "Look up a canonical cross-repo pattern (form, table, auth, ...)",
+      "when_to_use": "Use when looking up a canonical cross-repo pattern (form, table, modal, auth, validation, action, columns, wizard, sidebar, header, e2e) — reads the pattern card + registry adoption status and applies the canonical file structure. Triggers on: pattern <keyword>, how do we do forms, canonical pattern, follow the card."
+    },
+    {
+      "skill": "performance",
+      "description": "Performance audit - Core Web Vitals, bundle, database queries",
+      "when_to_use": ""
+    },
+    {
+      "skill": "plan",
+      "description": "Architecture plan — tech decisions from an approved spec, before code",
+      "when_to_use": "Use when turning a human-approved spec into an implementation plan — pattern choices, architecture decisions, mirror target, tradeoffs, and risks appended to the feature's GitHub issue — the pipeline Plan stage between /spec and /schema (NOT Claude Code plan mode). Triggers on: plan the architecture, architecture plan for the approved spec, pipeline Plan stage."
+    },
+    {
+      "skill": "premortem",
+      "description": "Klein-style premortem — imagine a decision/project failed, write the story, surface risks",
+      "when_to_use": ""
+    },
+    {
+      "skill": "pricing",
+      "description": "Calculate and compare pricing tiers for a databayt product",
+      "when_to_use": "Use when calculating or comparing pricing tiers for a databayt product — plan matrices, margins, competitor anchors, and what to quote a specific prospect. Triggers on: pricing, price the product, tier comparison, what should we charge."
+    },
+    {
+      "skill": "profile",
+      "description": "Load a selective config profile by role (engineer/business/content/ops)",
+      "when_to_use": "Use when loading a selective config profile by role — engineer, business, content, or ops — trimming the active agent/MCP surface to what that role needs. Triggers on: profile <role>, load the business profile, switch to content mode."
+    },
+    {
+      "skill": "proposal",
+      "description": "Generate a client proposal via the revenue agent",
+      "when_to_use": "Use when generating a client proposal via the revenue agent — scope, pricing, timeline, and branded structure ready to send to a school or client. Triggers on: proposal, draft the offer, client proposal, send them a quote."
+    },
+    {
+      "skill": "publish",
+      "description": "Deliver approved full drafts to the channels — the review queue decides, the lanes deliver",
+      "when_to_use": "Use when an APPROVED full draft (copy + media) must reach its channels, now or on a schedule — via the review queue on /social/publish (Approve = publish right away or delegate to the cron drain, per its settings), the signed approval link, or the copy-out block for WhatsApp. This publishes CONTENT, not code: /ship and /deploy put software in production and /release ships a feature block, and none of them touch a brand page. It refuses without a recorded /approve yes, never writes copy (/draft), never creates from blank (the queue only fine-tunes), and never reads numbers back (/measure). Triggers on: publish the post, send it out, post it now, schedule it for tomorrow, broadcast it, review and publish, انشر المنشور, ابعت المنشور, راجع وانشر."
+    },
+    {
+      "skill": "qa",
+      "description": "Autonomous block QA — detect, adversarially verify, fix safe tiers, hand the residual to a human",
+      "when_to_use": "Use when a feature block needs autonomous QA — detect across every route + the block source, adversarially verify every FAIL, auto-fix the safe (tier A) and build-gated (tier B) tiers, persist the verdict to blocks.json, and open one human-signoff issue carrying only the residual — triggering on qa <block> (e.g. \"qa admission\" in prose, no slash needed), \"QA this block\", pre-release verification, or a code-complete-but-unverified block; block-scope only — a single URL spot-check is handover's job, the typecheck/build gate alone is check's, and a user-reported bug is report's."
+    },
+    {
+      "skill": "quick",
+      "description": "Fastest commit cycle - lint, fix, commit, push",
+      "when_to_use": ""
+    },
+    {
+      "skill": "release",
+      "description": "One spell — handover, check, ship, watch, then comment + close the issue",
+      "when_to_use": "Use when a feature block is code-complete on main and Abdout wants it shipped to the client in one move — the full local-to-production-and-verified chain, not a single stage like /check (tight loop), /ship (deploy only), /handover (QA only), or /watch (verify only). Triggers on: release <block>, send to client, one-spell handoff (handover→check→ship→watch→close issue), give away to client, ship it and tell the client."
+    },
+    {
+      "skill": "report",
+      "description": "Auto-fix a user-reported issue end to end",
+      "when_to_use": "Use when GitHub issues labeled `report` need processing — reading a user-reported bug, locating the route/component, reproducing, fixing with a minimum diff, building, pushing, and closing the issue — across the databayt repos (hogwarts, kun, souq, mkan, shifa) or a single repo/issue, distinct from /qa (block-wide QA) and /check (pre-ship gate). Triggers on: report, fix reports, user-reported issue auto-fix, verified-report queue."
+    },
+    {
+      "skill": "repos",
+      "description": "Explore databayt organization repositories",
+      "when_to_use": ""
+    },
+    {
+      "skill": "saas",
+      "description": "Generate complete SaaS feature with all layers",
+      "when_to_use": ""
+    },
+    {
+      "skill": "schema",
+      "description": "Data layer — Prisma model, migration, and Zod validation",
+      "when_to_use": "Use when a feature needs its data foundation built from an approved spec — creating the Prisma model, applying the migration, generating the client, and writing Zod create/update/filter schemas with TypeScript types. Triggers on: add the model/migration, data layer, Prisma model + Zod validation, pipeline Data stage."
+    },
+    {
+      "skill": "screenshot",
+      "description": "View most recent screenshot from Desktop or Downloads",
+      "when_to_use": ""
+    },
+    {
+      "skill": "security",
+      "description": "Security audit - OWASP Top 10, dependency scanning",
+      "when_to_use": ""
+    },
+    {
+      "skill": "shadcn",
+      "description": "shadcn/ui knowledge pack — CLI, MCP, registry, skills, directory, and the docs-block pattern. Say \"shadcn\" to load it; \"shadcn docs\" = the docs-block style.",
+      "when_to_use": ""
+    },
+    {
+      "skill": "ship",
+      "description": "Promote a checked build to production (Vercel --prod)",
+      "when_to_use": "Use when a checked build must go live on Vercel production — the pipeline's final commit-to-live step after /check passes — including deploying main to prod, inspecting failed production deployment logs, or listing recent production deploys, as distinct from /deploy (staging/preview), /check (pre-ship gate), and /watch (post-deploy verification). Triggers on: ship, deploy to production, promote checked build (Vercel --prod)."
+    },
+    {
+      "skill": "social",
+      "description": "One spell — calendar, draft, media, approve, publish, measure for a brand post",
+      "when_to_use": "Use when a databayt brand needs a social post taken the whole way — pick the slot, write the bilingual copy, render the media, get a human sign-off, deliver to the channels, and read the numbers back. This is the compound orchestrator; run a single stage directly when that is all you need (/calendar, /draft, /higgs, /approve, /publish, /measure). Triggers on: social post, post about <topic>, publish to social, social automation, broadcast the announcement, منشور تواصل, انشر عن."
+    },
+    {
+      "skill": "spec",
+      "description": "Technical spec — data model, file plan, refined acceptance criteria",
+      "when_to_use": "Use when a captured feature idea (GitHub issue) needs to become a technical specification — Prisma data model sketch, file plan, refined acceptance criteria, and dependencies — published as an issue comment and paused for the single human approval gate of the pipeline; this is the Specify stage between /idea and /plan or /schema, not architecture planning (/plan) or task breakdown (/tasks). Triggers on: spec the <feature>, write the spec, technical specification, pipeline Specify stage (human approval gate)."
+    },
+    {
+      "skill": "sync",
+      "description": "Self-update — read the latest releases across the engine's whole surface (Anthropic, stack, services, practice), diff against the engine, adopt or propose",
+      "when_to_use": "Use when self-updating the engine against upstream releases — reads the Anthropic/stack/services/practice release feeds per engine.json sync tiers, diffs findings against the engine, adopts mechanical wins, proposes the rest, and stamps sync dates. Triggers on: sync, what's new in claude code, refresh the engine, release sweep."
+    },
+    {
+      "skill": "tasks",
+      "description": "Task breakdown — dependency-ordered work list from an approved plan",
+      "when_to_use": "Use when an approved implementation plan (from /plan) needs to become an ordered, dependency-aware checklist on the GitHub issue before /schema, /code, or /wire run — the pipeline Tasks stage, not spec writing (/spec) or architecture (/plan). Triggers on: break it down, ordered task list from an approved plan, task breakdown, decompose the plan, pipeline Tasks stage."
+    },
+    {
+      "skill": "template",
+      "description": "Create templates - full-page layouts and major UI sections",
+      "when_to_use": "When creating, listing, previewing, or rebuilding a template in /Users/abdout/codebase — a full-page layout (shadcn blocks equivalent) registered at /templates with per-template MDX docs. Triggers on \"template <name>\", \"create a template\", \"new hero/sidebar/login template\", \"rebuild the template registry\"."
+    },
+    {
+      "skill": "test",
+      "description": "Generate and run tests - unit, component, or E2E",
+      "when_to_use": ""
+    },
+    {
+      "skill": "watch",
+      "description": "Post-deploy verification — visual + console + smoke test",
+      "when_to_use": "Use when a deployment just landed and needs to be confirmed healthy in production — check Vercel deployment status, screenshot the live page, scan console errors and failed network requests, run a quick smoke interaction, then close or escalate the feature issue; unlike /check (pre-ship gate) or /qa (block QA), this observes production after /ship and never fixes code. Triggers on: watch, verify the deploy, is it live, post-deploy visual + console + smoke check, pipeline Monitor stage."
+    },
+    {
+      "skill": "weekly",
+      "description": "Run the captain's weekly Monday-plan / Wednesday-check / Friday-review cycle",
+      "when_to_use": "Use when running the captain's weekly cadence — Monday plan (allocate the 7 humans), Wednesday check (progress vs plan), Friday review (coach + canon principle) with archive to memory/weekly. Triggers on: weekly, monday plan, friday review, plan the week."
+    },
+    {
+      "skill": "wire",
+      "description": "UI layer — page (mirror pattern), content, form, table columns, i18n",
+      "when_to_use": "Use when a feature's UI layer needs to be built after schema and code stages — creating the route page (thin wrapper, mirror pattern), the server content component, the client form, table columns, dictionary keys for both en + ar, and optional navigation entries, all verified by pnpm build. Triggers on: wire the UI, build the page/form/table for the feature, i18n wiring, pipeline UI stage. Distinct from /code (server actions/logic) and /check (quality gate) — this is specifically the visible pages/components/i18n layer of the pipeline."
+    }
+  ],
+  "cases": [
+    {
+      "id": "trg:analyze:analyze-repo-ba00",
+      "prompt": "analyze <repo>"
+    },
+    {
+      "id": "trg:analyze:generate-config-for-this-repo-e65a",
+      "prompt": "generate config for this repo"
+    },
+    {
+      "id": "trg:analyze:repo-config-generator-b24b",
+      "prompt": "repo config generator"
+    },
+    {
+      "id": "trg:approve:review-the-queue-2472",
+      "prompt": "review the queue"
+    },
+    {
+      "id": "trg:approve:approve-the-next-draft-faf5",
+      "prompt": "approve the next draft"
+    },
+    {
+      "id": "trg:approve:stage-for-review-d40e",
+      "prompt": "stage for review"
+    },
+    {
+      "id": "trg:approve:send-for-approval-295b",
+      "prompt": "send for approval"
+    },
+    {
+      "id": "trg:approve:get-sign-off-b7fe",
+      "prompt": "get sign-off"
+    },
+    {
+      "id": "trg:approve:ready-for-review-36b6",
+      "prompt": "ready for review"
+    },
+    {
+      "id": "trg:approve:اعتماد-6982",
+      "prompt": "اعتماد"
+    },
+    {
+      "id": "trg:approve:راجع-الطابور-8d50",
+      "prompt": "راجع الطابور"
+    },
+    {
+      "id": "trg:approve:اعتمد-المسودة-a19f",
+      "prompt": "اعتمد المسودة"
+    },
+    {
+      "id": "trg:approve:أرسل-للمراجعة-4214",
+      "prompt": "أرسل للمراجعة"
+    },
+    {
+      "id": "trg:atom:atom-name-b43a",
+      "prompt": "atom <name>"
+    },
+    {
+      "id": "trg:atom:create-an-atom-3e77",
+      "prompt": "create an atom"
+    },
+    {
+      "id": "trg:atom:new-atom-c3fd",
+      "prompt": "new atom"
+    },
+    {
+      "id": "trg:atom:register-this-as-an-atom-1fa7",
+      "prompt": "register this as an atom"
+    },
+    {
+      "id": "trg:bench:bench-626e",
+      "prompt": "bench"
+    },
+    {
+      "id": "trg:bench:benchmark-the-skills-9945",
+      "prompt": "benchmark the skills"
+    },
+    {
+      "id": "trg:bench:is-the-routing-accurate-2347",
+      "prompt": "is the routing accurate"
+    },
+    {
+      "id": "trg:bench:measure-the-engine-30fc",
+      "prompt": "measure the engine"
+    },
+    {
+      "id": "trg:bench:dispatch-accuracy-21ea",
+      "prompt": "dispatch accuracy"
+    },
+    {
+      "id": "trg:bench:which-skills-collide-bdb9",
+      "prompt": "which skills collide"
+    },
+    {
+      "id": "trg:bench:are-any-skills-dead-7edb",
+      "prompt": "are any skills dead"
+    },
+    {
+      "id": "trg:calendar:content-calendar-1e8f",
+      "prompt": "content calendar"
+    },
+    {
+      "id": "trg:calendar:plan-the-content-ec2b",
+      "prompt": "plan the content"
+    },
+    {
+      "id": "trg:calendar:what-are-we-publishing-836f",
+      "prompt": "what are we publishing"
+    },
+    {
+      "id": "trg:calendar:which-brand-is-due-e7ac",
+      "prompt": "which brand is due"
+    },
+    {
+      "id": "trg:calendar:what-slipped-this-week-8525",
+      "prompt": "what slipped this week"
+    },
+    {
+      "id": "trg:calendar:التقويم-4c02",
+      "prompt": "التقويم"
+    },
+    {
+      "id": "trg:calendar:خطة-المحتوى-c890",
+      "prompt": "خطة المحتوى"
+    },
+    {
+      "id": "trg:carousel:carousel-4f34",
+      "prompt": "carousel"
+    },
+    {
+      "id": "trg:carousel:multi-slide-post-325f",
+      "prompt": "multi-slide post"
+    },
+    {
+      "id": "trg:carousel:swipe-post-b61d",
+      "prompt": "swipe post"
+    },
+    {
+      "id": "trg:carousel:slides-for-instagram-4266",
+      "prompt": "slides for instagram"
+    },
+    {
+      "id": "trg:carousel:carousel-for-brand-block-c48e",
+      "prompt": "carousel for <brand|block>"
+    },
+    {
+      "id": "trg:carousel:كاروسيل-e431",
+      "prompt": "كاروسيل"
+    },
+    {
+      "id": "trg:carousel:سلايدات-9ff1",
+      "prompt": "سلايدات"
+    },
+    {
+      "id": "trg:carousel:منشور-متعدد-الشرائح-03b0",
+      "prompt": "منشور متعدد الشرائح"
+    },
+    {
+      "id": "trg:check:check-b371",
+      "prompt": "check"
+    },
+    {
+      "id": "trg:check:pre-ship-quality-gate-1861",
+      "prompt": "pre-ship quality gate"
+    },
+    {
+      "id": "trg:check:typecheck-build-visual-verify-818a",
+      "prompt": "typecheck + build + visual verify"
+    },
+    {
+      "id": "trg:check:is-it-green-8e33",
+      "prompt": "is it green"
+    },
+    {
+      "id": "trg:clone:clone-url-3243",
+      "prompt": "clone <url>"
+    },
+    {
+      "id": "trg:clone:clone-this-section-e66f",
+      "prompt": "clone this section"
+    },
+    {
+      "id": "trg:clone:make-ours-look-like-site-e3c0",
+      "prompt": "make ours look like <site>"
+    },
+    {
+      "id": "trg:clone:clone-the-figma-design-dbbf",
+      "prompt": "clone the figma design"
+    },
+    {
+      "id": "trg:clone:clone-shadcn-component-52e5",
+      "prompt": "clone shadcn:<component>"
+    },
+    {
+      "id": "trg:clone:pattern-keyword-0367",
+      "prompt": "pattern:<keyword>"
+    },
+    {
+      "id": "trg:code:server-actions-9392",
+      "prompt": "server actions"
+    },
+    {
+      "id": "trg:code:logic-layer-with-auth-validation-tenant-isolatio-62db",
+      "prompt": "logic layer with auth+validation+tenant isolation"
+    },
+    {
+      "id": "trg:code:pipeline-logic-stage-23d0",
+      "prompt": "pipeline Logic stage"
+    },
+    {
+      "id": "trg:convert:convert-file-url-b36d",
+      "prompt": "convert <file|url>"
+    },
+    {
+      "id": "trg:convert:markitdown-718d",
+      "prompt": "markitdown"
+    },
+    {
+      "id": "trg:convert:markdown-this-pdf-3b71",
+      "prompt": "markdown this PDF"
+    },
+    {
+      "id": "trg:convert:pull-this-page-into-docs-8012",
+      "prompt": "pull this page into docs"
+    },
+    {
+      "id": "trg:convert:transcribe-this-video-cb5b",
+      "prompt": "transcribe this video"
+    },
+    {
+      "id": "trg:costs:costs-1424",
+      "prompt": "costs"
+    },
+    {
+      "id": "trg:costs:spend-7d75",
+      "prompt": "spend"
+    },
+    {
+      "id": "trg:costs:how-much-are-we-paying-690c",
+      "prompt": "how much are we paying"
+    },
+    {
+      "id": "trg:costs:cost-optimization-69cf",
+      "prompt": "cost optimization"
+    },
+    {
+      "id": "trg:costs:budget-check-6472",
+      "prompt": "budget check"
+    },
+    {
+      "id": "trg:crawl-anthropic:crawl-anthropic-f905",
+      "prompt": "crawl anthropic"
+    },
+    {
+      "id": "trg:crawl-anthropic:snapshot-the-docs-33d5",
+      "prompt": "snapshot the docs"
+    },
+    {
+      "id": "trg:crawl-anthropic:refresh-the-anthropic-mirror-ed6e",
+      "prompt": "refresh the anthropic mirror"
+    },
+    {
+      "id": "trg:credentials:credentials-e8fd",
+      "prompt": "credentials"
+    },
+    {
+      "id": "trg:credentials:api-key-295b",
+      "prompt": "api key"
+    },
+    {
+      "id": "trg:credentials:log-into-service-af50",
+      "prompt": "log into <service>"
+    },
+    {
+      "id": "trg:credentials:store-the-key-8d4a",
+      "prompt": "store the key"
+    },
+    {
+      "id": "trg:credentials:which-keys-do-we-have-d372",
+      "prompt": "which keys do we have"
+    },
+    {
+      "id": "trg:deploy:deploy-to-preview-5496",
+      "prompt": "deploy to preview"
+    },
+    {
+      "id": "trg:deploy:deploy-to-staging-c659",
+      "prompt": "deploy to staging"
+    },
+    {
+      "id": "trg:deploy:vercel-logs-d731",
+      "prompt": "vercel logs"
+    },
+    {
+      "id": "trg:deploy:why-did-the-deploy-fail-a9dc",
+      "prompt": "why did the deploy fail"
+    },
+    {
+      "id": "trg:deploy:deployment-status-bb76",
+      "prompt": "deployment status"
+    },
+    {
+      "id": "trg:deploy:redeploy-until-it-works-e90f",
+      "prompt": "redeploy until it works"
+    },
+    {
+      "id": "trg:draft:draft-a-post-6ade",
+      "prompt": "draft a post"
+    },
+    {
+      "id": "trg:draft:write-the-copy-e047",
+      "prompt": "write the copy"
+    },
+    {
+      "id": "trg:draft:write-the-caption-ea32",
+      "prompt": "write the caption"
+    },
+    {
+      "id": "trg:draft:post-about-topic-1e61",
+      "prompt": "post about <topic>"
+    },
+    {
+      "id": "trg:draft:attach-media-to-the-draft-7dfd",
+      "prompt": "attach media to the draft"
+    },
+    {
+      "id": "trg:draft:drain-the-draft-queue-a1f6",
+      "prompt": "drain the draft queue"
+    },
+    {
+      "id": "trg:draft:answer-the-social-asks-88ce",
+      "prompt": "answer the social asks"
+    },
+    {
+      "id": "trg:draft:any-drafts-waiting-4cce",
+      "prompt": "any drafts waiting"
+    },
+    {
+      "id": "trg:draft:اكتب-منشور-7377",
+      "prompt": "اكتب منشور"
+    },
+    {
+      "id": "trg:draft:صياغة-المنشور-783a",
+      "prompt": "صياغة المنشور"
+    },
+    {
+      "id": "trg:draft:طابور-الصياغة-4964",
+      "prompt": "طابور الصياغة"
+    },
+    {
+      "id": "trg:draft:أرفق-وسائط-للمسودة-7719",
+      "prompt": "أرفق وسائط للمسودة"
+    },
+    {
+      "id": "trg:economy:economy-b945",
+      "prompt": "economy"
+    },
+    {
+      "id": "trg:economy:token-usage-136a",
+      "prompt": "token usage"
+    },
+    {
+      "id": "trg:economy:optimize-tokens-f7d2",
+      "prompt": "optimize tokens"
+    },
+    {
+      "id": "trg:economy:we-re-burning-tokens-7370",
+      "prompt": "we're burning tokens"
+    },
+    {
+      "id": "trg:economy:hit-the-limit-99f2",
+      "prompt": "hit the limit"
+    },
+    {
+      "id": "trg:economy:usage-window-8cfa",
+      "prompt": "usage window"
+    },
+    {
+      "id": "trg:economy:plan-limit-0ab6",
+      "prompt": "plan limit"
+    },
+    {
+      "id": "trg:economy:tokens-per-outcome-4eb4",
+      "prompt": "tokens per outcome"
+    },
+    {
+      "id": "trg:economy:توكن-8cab",
+      "prompt": "توكن"
+    },
+    {
+      "id": "trg:economy:استهلاك-0811",
+      "prompt": "استهلاك"
+    },
+    {
+      "id": "trg:feature:feature-name-product-04a4",
+      "prompt": "feature <name> [product]"
+    },
+    {
+      "id": "trg:feature:build-feature-end-to-end-adec",
+      "prompt": "build <feature> end to end"
+    },
+    {
+      "id": "trg:feature:full-pipeline-idea-production-85fd",
+      "prompt": "full pipeline idea→production"
+    },
+    {
+      "id": "trg:handover:handover-url-block-77bf",
+      "prompt": "handover <url|block>"
+    },
+    {
+      "id": "trg:handover:pre-demo-quality-pass-0ade",
+      "prompt": "pre-demo quality pass"
+    },
+    {
+      "id": "trg:handover:run-the-niche-quality-keywords-05d5",
+      "prompt": "run the niche quality keywords"
+    },
+    {
+      "id": "trg:handover:is-this-url-clean-2032",
+      "prompt": "is this URL clean"
+    },
+    {
+      "id": "trg:handover:is-the-whole-block-ready-to-show-9842",
+      "prompt": "is the whole block ready to show"
+    },
+    {
+      "id": "trg:health:health-6b98",
+      "prompt": "health"
+    },
+    {
+      "id": "trg:health:config-health-5be4",
+      "prompt": "config health"
+    },
+    {
+      "id": "trg:health:is-the-engine-healthy-37d5",
+      "prompt": "is the engine healthy"
+    },
+    {
+      "id": "trg:health:drift-check-d2f0",
+      "prompt": "drift check"
+    },
+    {
+      "id": "trg:health:team-config-status-ea7d",
+      "prompt": "team config status"
+    },
+    {
+      "id": "trg:higgs:higgs-f33c",
+      "prompt": "/higgs"
+    },
+    {
+      "id": "trg:higgs:generate-video-92ca",
+      "prompt": "generate video"
+    },
+    {
+      "id": "trg:higgs:generate-image-be6d",
+      "prompt": "generate image"
+    },
+    {
+      "id": "trg:higgs:generate-photo-c9ea",
+      "prompt": "generate photo"
+    },
+    {
+      "id": "trg:higgs:make-an-ad-973d",
+      "prompt": "make an ad"
+    },
+    {
+      "id": "trg:higgs:promo-video-cf71",
+      "prompt": "promo video"
+    },
+    {
+      "id": "trg:higgs:og-image-8fb6",
+      "prompt": "og image"
+    },
+    {
+      "id": "trg:higgs:social-card-8d2e",
+      "prompt": "social card"
+    },
+    {
+      "id": "trg:higgs:hero-image-b471",
+      "prompt": "hero image"
+    },
+    {
+      "id": "trg:higgs:product-shot-56ba",
+      "prompt": "product shot"
+    },
+    {
+      "id": "trg:higgs:mockup-be55",
+      "prompt": "mockup"
+    },
+    {
+      "id": "trg:higgs:lifestyle-scene-3f66",
+      "prompt": "lifestyle scene"
+    },
+    {
+      "id": "trg:higgs:moodboard-a711",
+      "prompt": "moodboard"
+    },
+    {
+      "id": "trg:higgs:showroom-asset-1051",
+      "prompt": "showroom asset"
+    },
+    {
+      "id": "trg:higgs:brand-kit-0b07",
+      "prompt": "brand kit"
+    },
+    {
+      "id": "trg:higgs:edit-video-from-url-e196",
+      "prompt": "edit video from url"
+    },
+    {
+      "id": "trg:higgs:download-and-tweak-video-9161",
+      "prompt": "download and tweak video"
+    },
+    {
+      "id": "trg:higgs:higgs-d9e6",
+      "prompt": "higgs"
+    },
+    {
+      "id": "trg:higgs:nano-banana-9b94",
+      "prompt": "nano banana"
+    },
+    {
+      "id": "trg:higgs:veo-7730",
+      "prompt": "veo"
+    },
+    {
+      "id": "trg:higgs:omni-d56e",
+      "prompt": "omni"
+    },
+    {
+      "id": "trg:higgs:gemini-image-9cf8",
+      "prompt": "gemini image"
+    },
+    {
+      "id": "trg:higgs:صورة-تسويقية-fb7d",
+      "prompt": "صورة تسويقية"
+    },
+    {
+      "id": "trg:higgs:وسائط-12de",
+      "prompt": "وسائط"
+    },
+    {
+      "id": "trg:idea:capture-this-idea-29f5",
+      "prompt": "capture this idea"
+    },
+    {
+      "id": "trg:idea:new-feature-idea-6007",
+      "prompt": "new feature idea"
+    },
+    {
+      "id": "trg:idea:we-should-build-8932",
+      "prompt": "we should build …"
+    },
+    {
+      "id": "trg:idea:user-can-stories-7135",
+      "prompt": "user can …\" stories"
+    },
+    {
+      "id": "trg:idea:pipeline-capture-stage-f252",
+      "prompt": "pipeline Capture stage"
+    },
+    {
+      "id": "trg:idea:optionally-scoped-to-a-product-hogwarts-souq-mka-8e8b",
+      "prompt": "optionally scoped to a product (hogwarts, souq, mkan, shifa, kun)"
+    },
+    {
+      "id": "trg:incident:incident-6399",
+      "prompt": "incident"
+    },
+    {
+      "id": "trg:incident:production-is-down-cd36",
+      "prompt": "production is down"
+    },
+    {
+      "id": "trg:incident:outage-c244",
+      "prompt": "outage"
+    },
+    {
+      "id": "trg:incident:p0-20ff",
+      "prompt": "P0"
+    },
+    {
+      "id": "trg:incident:users-can-t-log-in-1871",
+      "prompt": "users can't log in"
+    },
+    {
+      "id": "trg:issue:open-file-an-issue-a4bd",
+      "prompt": "open/file an issue"
+    },
+    {
+      "id": "trg:issue:create-a-github-issue-in-the-right-databayt-repo-b531",
+      "prompt": "create a GitHub issue in the right databayt repo"
+    },
+    {
+      "id": "trg:learn:learn-7f69",
+      "prompt": "learn"
+    },
+    {
+      "id": "trg:learn:what-are-our-conventions-6793",
+      "prompt": "what are our conventions"
+    },
+    {
+      "id": "trg:learn:extract-patterns-from-history-9108",
+      "prompt": "extract patterns from history"
+    },
+    {
+      "id": "trg:measure:how-did-the-post-do-7b14",
+      "prompt": "how did the post do"
+    },
+    {
+      "id": "trg:measure:social-metrics-9883",
+      "prompt": "social metrics"
+    },
+    {
+      "id": "trg:measure:reach-and-engagement-f449",
+      "prompt": "reach and engagement"
+    },
+    {
+      "id": "trg:measure:is-social-working-6e46",
+      "prompt": "is social working"
+    },
+    {
+      "id": "trg:measure:did-anyone-see-it-b6d5",
+      "prompt": "did anyone see it"
+    },
+    {
+      "id": "trg:measure:أرقام-المنشور-c207",
+      "prompt": "أرقام المنشور"
+    },
+    {
+      "id": "trg:measure:أداء-المنشورات-46ff",
+      "prompt": "أداء المنشورات"
+    },
+    {
+      "id": "trg:monitor:monitor-763e",
+      "prompt": "monitor"
+    },
+    {
+      "id": "trg:monitor:are-the-deploys-green-30da",
+      "prompt": "are the deploys green"
+    },
+    {
+      "id": "trg:monitor:uptime-check-4160",
+      "prompt": "uptime check"
+    },
+    {
+      "id": "trg:monitor:production-status-sweep-a60f",
+      "prompt": "production status sweep"
+    },
+    {
+      "id": "trg:package:package-audit-3d1a",
+      "prompt": "package audit"
+    },
+    {
+      "id": "trg:package:upgrade-deps-across-repos-17d7",
+      "prompt": "upgrade deps across repos"
+    },
+    {
+      "id": "trg:package:version-consistency-f73d",
+      "prompt": "version consistency"
+    },
+    {
+      "id": "trg:package:dependency-sweep-4736",
+      "prompt": "dependency sweep"
+    },
+    {
+      "id": "trg:pattern:pattern-keyword-a453",
+      "prompt": "pattern <keyword>"
+    },
+    {
+      "id": "trg:pattern:how-do-we-do-forms-8bfd",
+      "prompt": "how do we do forms"
+    },
+    {
+      "id": "trg:pattern:canonical-pattern-d2c6",
+      "prompt": "canonical pattern"
+    },
+    {
+      "id": "trg:pattern:follow-the-card-6188",
+      "prompt": "follow the card"
+    },
+    {
+      "id": "trg:plan:plan-the-architecture-5326",
+      "prompt": "plan the architecture"
+    },
+    {
+      "id": "trg:plan:architecture-plan-for-the-approved-spec-afe9",
+      "prompt": "architecture plan for the approved spec"
+    },
+    {
+      "id": "trg:plan:pipeline-plan-stage-e066",
+      "prompt": "pipeline Plan stage"
+    },
+    {
+      "id": "trg:pricing:pricing-2e2f",
+      "prompt": "pricing"
+    },
+    {
+      "id": "trg:pricing:price-the-product-b513",
+      "prompt": "price the product"
+    },
+    {
+      "id": "trg:pricing:tier-comparison-aa70",
+      "prompt": "tier comparison"
+    },
+    {
+      "id": "trg:pricing:what-should-we-charge-174b",
+      "prompt": "what should we charge"
+    },
+    {
+      "id": "trg:profile:profile-role-c99f",
+      "prompt": "profile <role>"
+    },
+    {
+      "id": "trg:profile:load-the-business-profile-fd10",
+      "prompt": "load the business profile"
+    },
+    {
+      "id": "trg:profile:switch-to-content-mode-6f0f",
+      "prompt": "switch to content mode"
+    },
+    {
+      "id": "trg:proposal:proposal-190b",
+      "prompt": "proposal"
+    },
+    {
+      "id": "trg:proposal:draft-the-offer-12b0",
+      "prompt": "draft the offer"
+    },
+    {
+      "id": "trg:proposal:client-proposal-9b50",
+      "prompt": "client proposal"
+    },
+    {
+      "id": "trg:proposal:send-them-a-quote-c675",
+      "prompt": "send them a quote"
+    },
+    {
+      "id": "trg:publish:publish-the-post-95e5",
+      "prompt": "publish the post"
+    },
+    {
+      "id": "trg:publish:send-it-out-fc37",
+      "prompt": "send it out"
+    },
+    {
+      "id": "trg:publish:post-it-now-fa51",
+      "prompt": "post it now"
+    },
+    {
+      "id": "trg:publish:schedule-it-for-tomorrow-2e17",
+      "prompt": "schedule it for tomorrow"
+    },
+    {
+      "id": "trg:publish:broadcast-it-96af",
+      "prompt": "broadcast it"
+    },
+    {
+      "id": "trg:publish:review-and-publish-f302",
+      "prompt": "review and publish"
+    },
+    {
+      "id": "trg:publish:انشر-المنشور-83a0",
+      "prompt": "انشر المنشور"
+    },
+    {
+      "id": "trg:publish:ابعت-المنشور-0664",
+      "prompt": "ابعت المنشور"
+    },
+    {
+      "id": "trg:publish:راجع-وانشر-d6b9",
+      "prompt": "راجع وانشر"
+    },
+    {
+      "id": "trg:release:release-block-53e5",
+      "prompt": "release <block>"
+    },
+    {
+      "id": "trg:release:send-to-client-0231",
+      "prompt": "send to client"
+    },
+    {
+      "id": "trg:release:one-spell-handoff-handover-check-ship-watch-clos-10cf",
+      "prompt": "one-spell handoff (handover→check→ship→watch→close issue)"
+    },
+    {
+      "id": "trg:release:give-away-to-client-f178",
+      "prompt": "give away to client"
+    },
+    {
+      "id": "trg:release:ship-it-and-tell-the-client-669d",
+      "prompt": "ship it and tell the client"
+    },
+    {
+      "id": "trg:report:report-19bb",
+      "prompt": "report"
+    },
+    {
+      "id": "trg:report:fix-reports-9cca",
+      "prompt": "fix reports"
+    },
+    {
+      "id": "trg:report:user-reported-issue-auto-fix-635a",
+      "prompt": "user-reported issue auto-fix"
+    },
+    {
+      "id": "trg:report:verified-report-queue-1b07",
+      "prompt": "verified-report queue"
+    },
+    {
+      "id": "trg:schema:add-the-model-migration-c9fb",
+      "prompt": "add the model/migration"
+    },
+    {
+      "id": "trg:schema:data-layer-6bb9",
+      "prompt": "data layer"
+    },
+    {
+      "id": "trg:schema:prisma-model-zod-validation-dc12",
+      "prompt": "Prisma model + Zod validation"
+    },
+    {
+      "id": "trg:schema:pipeline-data-stage-41b8",
+      "prompt": "pipeline Data stage"
+    },
+    {
+      "id": "trg:ship:ship-ac56",
+      "prompt": "ship"
+    },
+    {
+      "id": "trg:ship:deploy-to-production-2b06",
+      "prompt": "deploy to production"
+    },
+    {
+      "id": "trg:ship:promote-checked-build-vercel-prod-7d39",
+      "prompt": "promote checked build (Vercel --prod)"
+    },
+    {
+      "id": "trg:social:social-post-225d",
+      "prompt": "social post"
+    },
+    {
+      "id": "trg:social:publish-to-social-a924",
+      "prompt": "publish to social"
+    },
+    {
+      "id": "trg:social:social-automation-677d",
+      "prompt": "social automation"
+    },
+    {
+      "id": "trg:social:broadcast-the-announcement-28fd",
+      "prompt": "broadcast the announcement"
+    },
+    {
+      "id": "trg:social:منشور-تواصل-db48",
+      "prompt": "منشور تواصل"
+    },
+    {
+      "id": "trg:social:انشر-عن-a95c",
+      "prompt": "انشر عن"
+    },
+    {
+      "id": "trg:spec:spec-the-feature-9924",
+      "prompt": "spec the <feature>"
+    },
+    {
+      "id": "trg:spec:write-the-spec-22a2",
+      "prompt": "write the spec"
+    },
+    {
+      "id": "trg:spec:technical-specification-529b",
+      "prompt": "technical specification"
+    },
+    {
+      "id": "trg:spec:pipeline-specify-stage-human-approval-gate-d671",
+      "prompt": "pipeline Specify stage (human approval gate)"
+    },
+    {
+      "id": "trg:sync:sync-097a",
+      "prompt": "sync"
+    },
+    {
+      "id": "trg:sync:what-s-new-in-claude-code-caed",
+      "prompt": "what's new in claude code"
+    },
+    {
+      "id": "trg:sync:refresh-the-engine-9062",
+      "prompt": "refresh the engine"
+    },
+    {
+      "id": "trg:sync:release-sweep-c610",
+      "prompt": "release sweep"
+    },
+    {
+      "id": "trg:tasks:break-it-down-a509",
+      "prompt": "break it down"
+    },
+    {
+      "id": "trg:tasks:ordered-task-list-from-an-approved-plan-9cec",
+      "prompt": "ordered task list from an approved plan"
+    },
+    {
+      "id": "trg:tasks:task-breakdown-4117",
+      "prompt": "task breakdown"
+    },
+    {
+      "id": "trg:tasks:decompose-the-plan-5183",
+      "prompt": "decompose the plan"
+    },
+    {
+      "id": "trg:tasks:pipeline-tasks-stage-2263",
+      "prompt": "pipeline Tasks stage"
+    },
+    {
+      "id": "trg:template:template-name-82a0",
+      "prompt": "template <name>"
+    },
+    {
+      "id": "trg:template:create-a-template-4fd6",
+      "prompt": "create a template"
+    },
+    {
+      "id": "trg:template:new-hero-sidebar-login-template-be22",
+      "prompt": "new hero/sidebar/login template"
+    },
+    {
+      "id": "trg:template:rebuild-the-template-registry-4355",
+      "prompt": "rebuild the template registry"
+    },
+    {
+      "id": "trg:watch:watch-5fb7",
+      "prompt": "watch"
+    },
+    {
+      "id": "trg:watch:verify-the-deploy-a65e",
+      "prompt": "verify the deploy"
+    },
+    {
+      "id": "trg:watch:is-it-live-fd42",
+      "prompt": "is it live"
+    },
+    {
+      "id": "trg:watch:post-deploy-visual-console-smoke-check-b346",
+      "prompt": "post-deploy visual + console + smoke check"
+    },
+    {
+      "id": "trg:watch:pipeline-monitor-stage-9016",
+      "prompt": "pipeline Monitor stage"
+    },
+    {
+      "id": "trg:weekly:weekly-fb69",
+      "prompt": "weekly"
+    },
+    {
+      "id": "trg:weekly:monday-plan-f0a0",
+      "prompt": "monday plan"
+    },
+    {
+      "id": "trg:weekly:friday-review-cfaf",
+      "prompt": "friday review"
+    },
+    {
+      "id": "trg:weekly:plan-the-week-b513",
+      "prompt": "plan the week"
+    },
+    {
+      "id": "trg:wire:wire-the-ui-1018",
+      "prompt": "wire the UI"
+    },
+    {
+      "id": "trg:wire:build-the-page-form-table-for-the-feature-eea0",
+      "prompt": "build the page/form/table for the feature"
+    },
+    {
+      "id": "trg:wire:i18n-wiring-124a",
+      "prompt": "i18n wiring"
+    },
+    {
+      "id": "trg:wire:pipeline-ui-stage-1619",
+      "prompt": "pipeline UI stage"
+    },
+    {
+      "id": "spell:pipeline:feature-e4ba",
+      "prompt": "feature"
+    },
+    {
+      "id": "spell:pipeline:idea-faf0",
+      "prompt": "idea"
+    },
+    {
+      "id": "spell:pipeline:spec-0bf6",
+      "prompt": "spec"
+    },
+    {
+      "id": "spell:pipeline:plan-b7cb",
+      "prompt": "plan"
+    },
+    {
+      "id": "spell:pipeline:tasks-ad2e",
+      "prompt": "tasks"
+    },
+    {
+      "id": "spell:pipeline:schema-527d",
+      "prompt": "schema"
+    },
+    {
+      "id": "none:pipeline:ready-660e",
+      "prompt": "ready"
+    },
+    {
+      "id": "spell:pipeline:code-f931",
+      "prompt": "code"
+    },
+    {
+      "id": "spell:pipeline:wire-f359",
+      "prompt": "wire"
+    },
+    {
+      "id": "spell:charm-work:dev-d559",
+      "prompt": "dev"
+    },
+    {
+      "id": "spell:charm-work:build-c39b",
+      "prompt": "build"
+    },
+    {
+      "id": "none:charm-work:push-876f",
+      "prompt": "push"
+    },
+    {
+      "id": "spell:charm-work:quick-f739",
+      "prompt": "quick"
+    },
+    {
+      "id": "spell:charm-work:deploy-5cd3",
+      "prompt": "deploy"
+    },
+    {
+      "id": "spell:charm-work:release-1036",
+      "prompt": "release"
+    },
+    {
+      "id": "none:transfiguration:component-5efd",
+      "prompt": "component"
+    },
+    {
+      "id": "none:transfiguration:page-815d",
+      "prompt": "page"
+    },
+    {
+      "id": "none:transfiguration:api-386a",
+      "prompt": "api"
+    },
+    {
+      "id": "spell:transfiguration:atom-0374",
+      "prompt": "atom"
+    },
+    {
+      "id": "spell:transfiguration:template-694a",
+      "prompt": "template"
+    },
+    {
+      "id": "spell:transfiguration:block-eb0c",
+      "prompt": "block"
+    },
+    {
+      "id": "none:transfiguration:migration-2b0b",
+      "prompt": "migration"
+    },
+    {
+      "id": "none:ancient-runes:nextjs-9c54",
+      "prompt": "nextjs"
+    },
+    {
+      "id": "none:ancient-runes:react-58fd",
+      "prompt": "react"
+    },
+    {
+      "id": "none:ancient-runes:typescript-1986",
+      "prompt": "typescript"
+    },
+    {
+      "id": "none:ancient-runes:prisma-c531",
+      "prompt": "prisma"
+    },
+    {
+      "id": "none:ancient-runes:tailwind-589a",
+      "prompt": "tailwind"
+    },
+    {
+      "id": "spell:ancient-runes:shadcn-414e",
+      "prompt": "shadcn"
+    },
+    {
+      "id": "none:conjuration:table-4a9c",
+      "prompt": "table"
+    },
+    {
+      "id": "none:conjuration:header-e488",
+      "prompt": "header"
+    },
+    {
+      "id": "none:conjuration:menu-99e4",
+      "prompt": "menu"
+    },
+    {
+      "id": "none:conjuration:form-4058",
+      "prompt": "form"
+    },
+    {
+      "id": "none:conjuration:modal-9080",
+      "prompt": "modal"
+    },
+    {
+      "id": "none:conjuration:card-8827",
+      "prompt": "card"
+    },
+    {
+      "id": "none:conjuration:sidebar-c87a",
+      "prompt": "sidebar"
+    },
+    {
+      "id": "none:conjuration:footer-1149",
+      "prompt": "footer"
+    },
+    {
+      "id": "none:conjuration:hero-1b3b",
+      "prompt": "hero"
+    },
+    {
+      "id": "none:conjuration:navbar-7aad",
+      "prompt": "navbar"
+    },
+    {
+      "id": "spell:dark-arts:saas-bb16",
+      "prompt": "saas"
+    },
+    {
+      "id": "none:dark-arts:dashboard-e4c1",
+      "prompt": "dashboard"
+    },
+    {
+      "id": "none:dark-arts:landing-3b55",
+      "prompt": "landing"
+    },
+    {
+      "id": "none:dark-arts:checkout-4db9",
+      "prompt": "checkout"
+    },
+    {
+      "id": "none:dark-arts:settings-6806",
+      "prompt": "settings"
+    },
+    {
+      "id": "none:dark-arts:admin-34c8",
+      "prompt": "admin"
+    },
+    {
+      "id": "none:dark-arts:onboarding-2263",
+      "prompt": "onboarding"
+    },
+    {
+      "id": "spell:animation:motion-bd73",
+      "prompt": "motion"
+    },
+    {
+      "id": "spell:animation:animation-e145",
+      "prompt": "animation"
+    },
+    {
+      "id": "spell:animation:transition-a627",
+      "prompt": "transition"
+    },
+    {
+      "id": "spell:animation:gesture-655c",
+      "prompt": "gesture"
+    },
+    {
+      "id": "spell:animation:scroll-dd4e",
+      "prompt": "scroll"
+    },
+    {
+      "id": "spell:defense:test-afd0",
+      "prompt": "test"
+    },
+    {
+      "id": "none:defense:e2e-7c36",
+      "prompt": "e2e"
+    },
+    {
+      "id": "spell:defense:handover-aedd",
+      "prompt": "handover"
+    },
+    {
+      "id": "spell:defense:qa-6c4c",
+      "prompt": "qa"
+    },
+    {
+      "id": "none:defense:coverage-f7f1",
+      "prompt": "coverage"
+    },
+    {
+      "id": "none:defense:review-2257",
+      "prompt": "review"
+    },
+    {
+      "id": "spell:defense:security-c92c",
+      "prompt": "security"
+    },
+    {
+      "id": "none:defense:audit-f561",
+      "prompt": "audit"
+    },
+    {
+      "id": "none:defense:constitution-2102",
+      "prompt": "constitution"
+    },
+    {
+      "id": "none:defense:accessibility-6c0a",
+      "prompt": "accessibility"
+    },
+    {
+      "id": "none:defense:optimize-f9e7",
+      "prompt": "optimize"
+    },
+    {
+      "id": "spell:defense:performance-aece",
+      "prompt": "performance"
+    },
+    {
+      "id": "spell:reparo:fix-b2e4",
+      "prompt": "fix"
+    },
+    {
+      "id": "none:reparo:error-2191",
+      "prompt": "error"
+    },
+    {
+      "id": "none:reparo:scan-ece8",
+      "prompt": "scan"
+    },
+    {
+      "id": "none:reparo:lint-06da",
+      "prompt": "lint"
+    },
+    {
+      "id": "none:reparo:format-b99d",
+      "prompt": "format"
+    },
+    {
+      "id": "none:reparo:type-check-540e",
+      "prompt": "type-check"
+    },
+    {
+      "id": "spell:quill:docs-28eb",
+      "prompt": "docs"
+    },
+    {
+      "id": "spell:quill:readme-4a07",
+      "prompt": "readme"
+    },
+    {
+      "id": "spell:quill:api-docs-7575",
+      "prompt": "api-docs"
+    },
+    {
+      "id": "spell:quill:storybook-034f",
+      "prompt": "storybook"
+    },
+    {
+      "id": "spell:quill:changelog-920f",
+      "prompt": "changelog"
+    },
+    {
+      "id": "spell:geminio:clone-2b88",
+      "prompt": "clone"
+    },
+    {
+      "id": "none:geminio:copy-e562",
+      "prompt": "copy"
+    },
+    {
+      "id": "none:geminio:fork-3e58",
+      "prompt": "fork"
+    },
+    {
+      "id": "none:geminio:extend-aa7d",
+      "prompt": "extend"
+    },
+    {
+      "id": "none:geminio:upstream-1335",
+      "prompt": "upstream"
+    },
+    {
+      "id": "none:summoning:github-22dc",
+      "prompt": "github"
+    },
+    {
+      "id": "none:summoning:figma-1e4f",
+      "prompt": "figma"
+    },
+    {
+      "id": "none:summoning:linear-d005",
+      "prompt": "linear"
+    },
+    {
+      "id": "none:summoning:slack-ea9b",
+      "prompt": "slack"
+    },
+    {
+      "id": "none:summoning:notion-8d57",
+      "prompt": "notion"
+    },
+    {
+      "id": "none:summoning:sentry-ca96",
+      "prompt": "sentry"
+    },
+    {
+      "id": "none:summoning:stripe-25a7",
+      "prompt": "stripe"
+    },
+    {
+      "id": "none:summoning:vercel-9400",
+      "prompt": "vercel"
+    },
+    {
+      "id": "none:summoning:analytics-5c10",
+      "prompt": "analytics"
+    },
+    {
+      "id": "none:summoning:neon-48db",
+      "prompt": "neon"
+    },
+    {
+      "id": "spell:divination:story-b3e7",
+      "prompt": "story"
+    },
+    {
+      "id": "none:divination:workflow-f16d",
+      "prompt": "workflow"
+    },
+    {
+      "id": "none:performance-magic:parallelize-5d10",
+      "prompt": "parallelize"
+    },
+    {
+      "id": "none:performance-magic:waterfall-516f",
+      "prompt": "waterfall"
+    },
+    {
+      "id": "none:performance-magic:bundle-1229",
+      "prompt": "bundle"
+    },
+    {
+      "id": "none:performance-magic:lazy-6acc",
+      "prompt": "lazy"
+    },
+    {
+      "id": "none:performance-magic:suspense-ac42",
+      "prompt": "suspense"
+    },
+    {
+      "id": "none:performance-magic:memo-9fe7",
+      "prompt": "memo"
+    },
+    {
+      "id": "none:performance-magic:server-component-96e7",
+      "prompt": "server-component"
+    },
+    {
+      "id": "none:performance-magic:streaming-7dcd",
+      "prompt": "streaming"
+    },
+    {
+      "id": "none:performance-magic:barrel-123c",
+      "prompt": "barrel"
+    },
+    {
+      "id": "none:performance-magic:dedup-e91c",
+      "prompt": "dedup"
+    },
+    {
+      "id": "spell:portkeys:from-codebase-1b48",
+      "prompt": "from codebase"
+    },
+    {
+      "id": "none:portkeys:from-shadcn-e1e1",
+      "prompt": "from shadcn"
+    },
+    {
+      "id": "none:portkeys:from-radix-4c7a",
+      "prompt": "from radix"
+    },
+    {
+      "id": "none:portkeys:like-hogwarts-2c36",
+      "prompt": "like hogwarts"
+    },
+    {
+      "id": "none:portkeys:like-souq-da28",
+      "prompt": "like souq"
+    },
+    {
+      "id": "none:portkeys:like-mkan-3eed",
+      "prompt": "like mkan"
+    },
+    {
+      "id": "none:portkeys:like-shifa-18cf",
+      "prompt": "like shifa"
+    },
+    {
+      "id": "none:portkeys:like-sijillee-3362",
+      "prompt": "like sijillee"
+    },
+    {
+      "id": "none:portkeys:like-moallimee-6b79",
+      "prompt": "like moallimee"
+    },
+    {
+      "id": "none:unforgivable:rm-rf-661c",
+      "prompt": "rm -rf *"
+    },
+    {
+      "id": "none:unforgivable:prisma-migrate-reset-be8e",
+      "prompt": "prisma migrate reset"
+    },
+    {
+      "id": "none:unforgivable:prisma-db-push-accept-data-loss-23fc",
+      "prompt": "prisma db push --accept-data-loss"
+    },
+    {
+      "id": "none:unforgivable:drop-table-4e6b",
+      "prompt": "DROP TABLE"
+    },
+    {
+      "id": "none:unforgivable:git-push-force-main-aeb1",
+      "prompt": "git push --force main"
+    },
+    {
+      "id": "none:auror-office:see-b526",
+      "prompt": "see"
+    },
+    {
+      "id": "none:auror-office:flow-bdc8",
+      "prompt": "flow"
+    },
+    {
+      "id": "none:auror-office:debug-5864",
+      "prompt": "debug"
+    },
+    {
+      "id": "none:auror-office:responsive-9bc4",
+      "prompt": "responsive"
+    },
+    {
+      "id": "none:auror-office:lang-70ea",
+      "prompt": "lang"
+    },
+    {
+      "id": "none:auror-office:fast-0294",
+      "prompt": "fast"
+    },
+    {
+      "id": "none:auror-office:guard-2bd1",
+      "prompt": "guard"
+    },
+    {
+      "id": "none:auror-office:architecture-67c3",
+      "prompt": "architecture"
+    },
+    {
+      "id": "none:auror-office:structure-6f55",
+      "prompt": "structure"
+    },
+    {
+      "id": "none:auror-office:design-fb31",
+      "prompt": "design"
+    },
+    {
+      "id": "none:auror-office:stack-6251",
+      "prompt": "stack"
+    },
+    {
+      "id": "none:auror-office:trace-813d",
+      "prompt": "trace"
+    },
+    {
+      "id": "none:auror-office:efficient-4f3a",
+      "prompt": "efficient"
+    },
+    {
+      "id": "none:auror-office:mirror-2fc9",
+      "prompt": "mirror"
+    },
+    {
+      "id": "none:auror-office:diff-682c",
+      "prompt": "diff"
+    },
+    {
+      "id": "spell:ministry:captain-55d7",
+      "prompt": "captain"
+    },
+    {
+      "id": "spell:ministry:issue-ba4d",
+      "prompt": "issue"
+    },
+    {
+      "id": "none:ministry:conventions-79c2",
+      "prompt": "conventions"
+    },
+    {
+      "id": "none:ministry:patterns-3f09",
+      "prompt": "patterns"
+    },
+    {
+      "id": "none:ministry:drift-2e87",
+      "prompt": "drift"
+    },
+    {
+      "id": "spell:pensieve:decide-ee17",
+      "prompt": "decide"
+    },
+    {
+      "id": "spell:pensieve:premortem-eff9",
+      "prompt": "premortem"
+    },
+    {
+      "id": "spell:pensieve:convert-6239",
+      "prompt": "convert"
+    },
+    {
+      "id": "spell:pensieve:calendar-a481",
+      "prompt": "calendar"
+    },
+    {
+      "id": "spell:pensieve:draft-b576",
+      "prompt": "draft"
+    },
+    {
+      "id": "spell:pensieve:media-fc9a",
+      "prompt": "media"
+    },
+    {
+      "id": "spell:pensieve:approve-cf90",
+      "prompt": "approve"
+    },
+    {
+      "id": "spell:pensieve:publish-0fc0",
+      "prompt": "publish"
+    },
+    {
+      "id": "spell:pensieve:measure-10bf",
+      "prompt": "measure"
+    },
+    {
+      "id": "spell:pensieve:social-b2ec",
+      "prompt": "social"
+    },
+    {
+      "id": "spell:portraits:banner-416b",
+      "prompt": "banner"
+    },
+    {
+      "id": "spell:portraits:lifestyle-33df",
+      "prompt": "lifestyle"
+    },
+    {
+      "id": "spell:portraits:split-screen-e34a",
+      "prompt": "split-screen"
+    },
+    {
+      "id": "spell:portraits:reel-d6e8",
+      "prompt": "reel"
+    },
+    {
+      "id": "spell:portraits:infographic-bf21",
+      "prompt": "infographic"
+    },
+    {
+      "id": "spell:portraits:testimonial-e6a3",
+      "prompt": "testimonial"
+    },
+    {
+      "id": "spell:portraits:showroom-4fb0",
+      "prompt": "showroom"
+    },
+    {
+      "id": "kw:auth:not-authenticated-b54a",
+      "prompt": "not authenticated"
+    },
+    {
+      "id": "kw:auth:log-into-x-sign-me-into-x-auth-69d6",
+      "prompt": "log into X / sign me into X / auth"
+    },
+    {
+      "id": "kw:mcp-doctor:tool-not-found-ffd9",
+      "prompt": "tool not found"
+    },
+    {
+      "id": "kw:qa:qa-admission-c365",
+      "prompt": "qa admission"
+    },
+    {
+      "id": "kw:qa:qa-this-block-8f4f",
+      "prompt": "QA this block"
+    },
+    {
+      "id": "kw:shadcn:shadcn-docs-f2d0",
+      "prompt": "shadcn docs"
+    }
+  ]
+}

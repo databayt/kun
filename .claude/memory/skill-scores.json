@@ -4,7 +4,7 @@
   "definition": "Given the exact frontmatter listing (skill + description + when_to_use) for every file-backed skill and one natural-language prompt, the fraction of cases where the rank-1 answer equals the extracted label — excluding cases whose prompt is literally the skill's own name, and after adversarial adjudication of every miss.",
   "source": ".claude/workflows/bench-dispatch.js + .claude/scripts/extract-dispatch-cases.mjs (deterministic extraction; grading is pure string comparison, zero LLM)",
   "last_updated": "2026-08-06",
-  "last_updated_by": "invalidated — first run was contaminated, see weekly_history",
+  "last_updated_by": "bench-dispatch.js",
   "corpus": {
     "skills_listed": 67,
     "project_skills": 49,
@@ -435,22 +435,25 @@
       "kw:shadcn:shadcn-docs-f2d0": "holdout"
     }
   },
-  "current_value": null,
+  "current_value": 0.9971,
   "current": {
-    "top1_hard": null,
-    "top1": null,
-    "top3": null,
-    "mrr": null,
-    "fp_rate": null,
-    "destructive_fp": null,
-    "abstain_error": null,
-    "macro_f1": null,
-    "weighted_f1": null,
-    "holdout_top1_hard": null,
-    "train_holdout_gap": null,
+    "top1_hard": 0.9971,
+    "top1": 0.9975,
+    "top3": 1,
+    "mrr": 0.9988,
+    "fp_rate": 0,
+    "destructive_fp": 0,
+    "abstain_error": 0,
+    "macro_f1": 0.999,
+    "weighted_f1": 0.9967,
+    "holdout_top1_hard": 1,
+    "train_holdout_gap": -0.0037,
     "listing_chars": 26243,
     "degraded": false,
-    "unadjudicated": 0
+    "unadjudicated": 0,
+    "top1_lexical_free": 0.9948,
+    "n_lexical_free": 192,
+    "audit_verdict": "CLEAN — audit-bench-run.mjs found no forbidden read by any blind agent"
   },
   "known_biases": [
     "Answer-key leakage: graders must read ONLY the --redacted view. The full case set, any SKILL.md (trigger phrases sit verbatim beside the skill name), and vocabulary.json all reveal labels. Enforced by redaction + an emit-time assertion, and verified after every run by audit-bench-run.mjs, which fails the run on any forbidden read.",
@@ -483,7 +486,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "approve": {
       "support": 11,
@@ -491,7 +499,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "atom": {
       "support": 5,
@@ -499,7 +512,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": true,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "auth": {
       "support": 2,
@@ -507,7 +525,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false
+      "has_when_to_use": false,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "bench": {
       "support": 7,
@@ -515,7 +538,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "block": {
       "support": 1,
@@ -523,7 +551,12 @@
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": true,
-      "has_when_to_use": false
+      "has_when_to_use": false,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "build": {
       "support": 1,
@@ -531,7 +564,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "calendar": {
       "support": 8,
@@ -539,7 +577,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "canon": {
       "support": 0,
@@ -555,7 +598,12 @@
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false
+      "has_when_to_use": false,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "carousel": {
       "support": 12,
@@ -563,7 +611,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 0.9167,
+      "f1": 0.9565,
+      "fp": 0,
+      "top3": 1
     },
     "check": {
       "support": 4,
@@ -571,7 +624,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "clone": {
       "support": 7,
@@ -579,7 +637,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "code": {
       "support": 4,
@@ -587,7 +650,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "codebase": {
       "support": 1,
@@ -595,7 +663,12 @@
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false
+      "has_when_to_use": false,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "convert": {
       "support": 6,
@@ -603,7 +676,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "costs": {
       "support": 5,
@@ -611,7 +689,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "crawl-anthropic": {
       "support": 3,
@@ -619,7 +702,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "credentials": {
       "support": 5,
@@ -627,7 +715,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "decide": {
       "support": 1,
@@ -635,7 +728,12 @@
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": true,
-      "has_when_to_use": false
+      "has_when_to_use": false,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "deploy": {
       "support": 7,
@@ -643,7 +741,12 @@
       "scope": "user",
       "fp_cost": 3,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "dev": {
       "support": 1,
@@ -651,7 +754,12 @@
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false
+      "has_when_to_use": false,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "docs": {
       "support": 5,
@@ -659,7 +767,12 @@
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": true,
-      "has_when_to_use": false
+      "has_when_to_use": false,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "draft": {
       "support": 13,
@@ -667,7 +780,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "economy": {
       "support": 10,
@@ -675,7 +793,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "feature": {
       "support": 4,
@@ -683,7 +806,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": true,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "fix": {
       "support": 1,
@@ -691,7 +819,12 @@
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false
+      "has_when_to_use": false,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "handover": {
       "support": 6,
@@ -699,7 +832,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": true,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "health": {
       "support": 5,
@@ -707,7 +845,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": true,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "higgs": {
       "support": 28,
@@ -715,7 +858,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 0.9655,
+      "recall": 1,
+      "f1": 0.9825,
+      "fp": 1,
+      "top3": 1
     },
     "idea": {
       "support": 8,
@@ -723,7 +871,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "incident": {
       "support": 5,
@@ -731,7 +884,12 @@
       "scope": "project",
       "fp_cost": 3,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "issue": {
       "support": 3,
@@ -739,7 +897,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "learn": {
       "support": 3,
@@ -747,7 +910,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "mcp-doctor": {
       "support": 1,
@@ -755,7 +923,12 @@
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false
+      "has_when_to_use": false,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "measure": {
       "support": 8,
@@ -763,7 +936,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "monitor": {
       "support": 4,
@@ -771,7 +949,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "motion": {
       "support": 5,
@@ -779,7 +962,12 @@
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false
+      "has_when_to_use": false,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "package": {
       "support": 4,
@@ -787,7 +975,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "pattern": {
       "support": 4,
@@ -795,7 +988,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "performance": {
       "support": 1,
@@ -803,7 +1001,12 @@
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false
+      "has_when_to_use": false,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "plan": {
       "support": 4,
@@ -811,7 +1014,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "premortem": {
       "support": 1,
@@ -819,7 +1027,12 @@
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false
+      "has_when_to_use": false,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "pricing": {
       "support": 4,
@@ -827,7 +1040,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "profile": {
       "support": 3,
@@ -835,7 +1053,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "proposal": {
       "support": 4,
@@ -843,7 +1066,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "publish": {
       "support": 10,
@@ -851,7 +1079,12 @@
       "scope": "project",
       "fp_cost": 3,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "qa": {
       "support": 3,
@@ -859,7 +1092,12 @@
       "scope": "project",
       "fp_cost": 3,
       "claude_md_routed": true,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "quick": {
       "support": 1,
@@ -867,7 +1105,12 @@
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false
+      "has_when_to_use": false,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "release": {
       "support": 6,
@@ -875,7 +1118,12 @@
       "scope": "project",
       "fp_cost": 3,
       "claude_md_routed": true,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "report": {
       "support": 4,
@@ -883,7 +1131,12 @@
       "scope": "project",
       "fp_cost": 3,
       "claude_md_routed": true,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "repos": {
       "support": 0,
@@ -899,7 +1152,12 @@
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false
+      "has_when_to_use": false,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "schema": {
       "support": 5,
@@ -907,7 +1165,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "screenshot": {
       "support": 0,
@@ -923,7 +1186,12 @@
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false
+      "has_when_to_use": false,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "shadcn": {
       "support": 2,
@@ -931,7 +1199,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false
+      "has_when_to_use": false,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "ship": {
       "support": 3,
@@ -939,7 +1212,12 @@
       "scope": "project",
       "fp_cost": 3,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "social": {
       "support": 7,
@@ -947,7 +1225,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "spec": {
       "support": 5,
@@ -955,7 +1238,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "sync": {
       "support": 4,
@@ -963,7 +1251,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "tasks": {
       "support": 6,
@@ -971,7 +1264,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "template": {
       "support": 5,
@@ -979,7 +1277,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": true,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "test": {
       "support": 1,
@@ -987,7 +1290,12 @@
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false
+      "has_when_to_use": false,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "watch": {
       "support": 5,
@@ -995,7 +1303,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "weekly": {
       "support": 4,
@@ -1003,7 +1316,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "wire": {
       "support": 5,
@@ -1011,7 +1329,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     }
   },
   "clusters": [
@@ -1212,7 +1535,13 @@
       0.357
     ]
   ],
-  "top_confusions": [],
+  "top_confusions": [
+    {
+      "predicted": "higgs",
+      "actual": "carousel",
+      "count": 1
+    }
+  ],
   "merge_candidates": [],
   "proxy_fidelity": {
     "n": null,
@@ -1234,6 +1563,67 @@
       "note": "VOID — see invalidated_reason. No conclusion may be drawn from this row.",
       "invalid": true,
       "invalidated_reason": "CONTAMINATED — not a measurement. The dispatch agents were told to read .claude/evals/cases/dispatch.json for prompts, and that file carries `label` (plus `source`, which announces a none-case, and `tags`). They read the answer key. Proven post-hoc by audit-bench-run.mjs: 46 forbidden reads across 11 blind agents. Fixed by a --redacted grader view (id + prompt + listing only, with an emit-time assertion that no label/source/tags/split survive) and an explicit prohibition on reading any other source. Retained rather than deleted so the failure stays visible."
+    },
+    {
+      "week_of": "2026-08-06",
+      "top1_hard": 0.9971,
+      "holdout_top1_hard": 1,
+      "fp_rate": 0,
+      "listing_chars": 26243,
+      "cases": 400,
+      "delta": null,
+      "note": "First VALID run (the earlier 0.9942 was contaminated — see the invalid row). Redaction held, audit clean. One real miss in 402 cases after adjudication: banner → higgs, should be carousel. The ceiling, not the score, is the result.",
+      "top1_lexical_free": 0.9948,
+      "audit": "CLEAN"
+    }
+  ],
+  "stratified": {
+    "$comment": "top1 by difficulty stratum, clean run 2026-08-06. The ceiling is the finding: after adjudication exactly ONE real miss remains in 402 cases, so this metric has almost no power to detect improvement. Its job is regression detection, not tuning.",
+    "all": {
+      "n": 402,
+      "top1": 0.9925
+    },
+    "none_of_the_above": {
+      "n": 95,
+      "top1": 0.9789
+    },
+    "positive_trivial": {
+      "n": 56,
+      "top1": 1,
+      "note": "prompt IS the skill name — measures string equality"
+    },
+    "positive_lexical": {
+      "n": 59,
+      "top1": 1,
+      "note": "prompt CONTAINS the skill name — the answer is in the question"
+    },
+    "positive_lexical_free": {
+      "n": 192,
+      "top1": 0.9948,
+      "note": "no lexical overlap — the honest difficulty floor"
+    },
+    "arabic": {
+      "n": 24,
+      "top1": 1,
+      "note": "zero lexical overlap by construction"
+    }
+  },
+  "findings": [
+    {
+      "id": "higgs-carousel-boundary",
+      "severity": "real",
+      "detail": "higgs's when_to_use declares itself 'the TEXT-FREE lane: og images, infographics, testimonials, split comparisons and anything carrying copy render on /carousel's template lane instead' — and its own Triggers on: list then claims 'og image', 'social card', 'hero image', 'mockup', 'moodboard'. It cedes the territory and claims it in the same field. Symptom: the single real miss in 402 cases is 'banner' → answered higgs, labelled carousel (adjudicator confirmed the label). The extractor independently flags 'og image' as a prompt-collision between the two.",
+      "proposal": ".claude/evals/proposals/higgs-2026-08-06.md"
+    },
+    {
+      "id": "vocab-label-artifacts",
+      "severity": "labelling",
+      "detail": "Two none-cases were adjudicated away as extraction artifacts, not model errors: 'from shadcn' (portkey spell with no skill-type order entry, though a shadcn skill exists) and 'drift' (spell routes to familiar:learn while its own effect reads 'Alias of the learn/health surface'). Same class as the six spell-skill collisions generate-vocab.mjs now warns on — vocabulary.json's order chains are stale where a skill has since been created."
+    },
+    {
+      "id": "ceiling-effect",
+      "severity": "method",
+      "detail": "402 cases, one real miss. The trigger phrases were authored as examples of what SHOULD route to a skill, so they are the easy cases by construction — they test recall of hand-written examples, not the hard boundary decisions. 56 are the skill's own name and 53 more contain it. To discriminate, L1 needs adversarial cases written in the confusion zones (plan/tasks 0.683, approve/publish 0.587, build/check 0.485) by something other than the hand that wrote the descriptions."
     }
   ]
 }
