@@ -1,0 +1,5233 @@
+{
+  "corpus": {
+    "skills_listed": 67,
+    "project_skills": 49,
+    "user_only_skills": 18,
+    "listing_chars": 26243,
+    "cases_total": 402,
+    "positive": 307,
+    "none": 95,
+    "trivial": 56,
+    "hard": 166,
+    "destructive": 5,
+    "sources": {
+      "trigger_phrase": 246,
+      "vocab_spell": 73,
+      "quoted_keyword": 6,
+      "vocab_none": 95
+    },
+    "skills_without_triggers": 22,
+    "builtin_targeted_spells": 3,
+    "corpus_hash": "fnv1a:5072a199"
+  },
+  "split": {
+    "version": "v1",
+    "salt": "kun-dispatch-v1",
+    "holdout_pct": 20,
+    "ledger": {
+      "trg:analyze:analyze-repo-ba00": "holdout",
+      "trg:analyze:generate-config-for-this-repo-e65a": "train",
+      "trg:analyze:repo-config-generator-b24b": "train",
+      "trg:approve:review-the-queue-2472": "train",
+      "trg:approve:approve-the-next-draft-faf5": "train",
+      "trg:approve:stage-for-review-d40e": "holdout",
+      "trg:approve:send-for-approval-295b": "train",
+      "trg:approve:get-sign-off-b7fe": "train",
+      "trg:approve:ready-for-review-36b6": "train",
+      "trg:approve:اعتماد-6982": "train",
+      "trg:approve:راجع-الطابور-8d50": "train",
+      "trg:approve:اعتمد-المسودة-a19f": "train",
+      "trg:approve:أرسل-للمراجعة-4214": "train",
+      "trg:atom:atom-name-b43a": "train",
+      "trg:atom:create-an-atom-3e77": "train",
+      "trg:atom:new-atom-c3fd": "train",
+      "trg:atom:register-this-as-an-atom-1fa7": "holdout",
+      "trg:bench:bench-626e": "holdout",
+      "trg:bench:benchmark-the-skills-9945": "train",
+      "trg:bench:is-the-routing-accurate-2347": "holdout",
+      "trg:bench:measure-the-engine-30fc": "train",
+      "trg:bench:dispatch-accuracy-21ea": "train",
+      "trg:bench:which-skills-collide-bdb9": "train",
+      "trg:bench:are-any-skills-dead-7edb": "train",
+      "trg:calendar:content-calendar-1e8f": "train",
+      "trg:calendar:plan-the-content-ec2b": "train",
+      "trg:calendar:what-are-we-publishing-836f": "train",
+      "trg:calendar:which-brand-is-due-e7ac": "train",
+      "trg:calendar:what-slipped-this-week-8525": "train",
+      "trg:calendar:التقويم-4c02": "train",
+      "trg:calendar:خطة-المحتوى-c890": "train",
+      "trg:carousel:carousel-4f34": "train",
+      "trg:carousel:multi-slide-post-325f": "holdout",
+      "trg:carousel:swipe-post-b61d": "holdout",
+      "trg:carousel:slides-for-instagram-4266": "train",
+      "trg:carousel:carousel-for-brand-block-c48e": "train",
+      "trg:carousel:كاروسيل-e431": "train",
+      "trg:carousel:سلايدات-9ff1": "holdout",
+      "trg:carousel:منشور-متعدد-الشرائح-03b0": "train",
+      "trg:check:check-b371": "train",
+      "trg:check:pre-ship-quality-gate-1861": "train",
+      "trg:check:typecheck-build-visual-verify-818a": "train",
+      "trg:check:is-it-green-8e33": "holdout",
+      "trg:clone:clone-url-3243": "train",
+      "trg:clone:clone-this-section-e66f": "holdout",
+      "trg:clone:make-ours-look-like-site-e3c0": "train",
+      "trg:clone:clone-the-figma-design-dbbf": "train",
+      "trg:clone:clone-shadcn-component-52e5": "train",
+      "trg:clone:pattern-keyword-0367": "holdout",
+      "trg:code:server-actions-9392": "train",
+      "trg:code:logic-layer-with-auth-validation-tenant-isolatio-62db": "holdout",
+      "trg:code:pipeline-logic-stage-23d0": "train",
+      "trg:convert:convert-file-url-b36d": "train",
+      "trg:convert:markitdown-718d": "train",
+      "trg:convert:markdown-this-pdf-3b71": "train",
+      "trg:convert:pull-this-page-into-docs-8012": "train",
+      "trg:convert:transcribe-this-video-cb5b": "train",
+      "trg:costs:costs-1424": "holdout",
+      "trg:costs:spend-7d75": "holdout",
+      "trg:costs:how-much-are-we-paying-690c": "train",
+      "trg:costs:cost-optimization-69cf": "train",
+      "trg:costs:budget-check-6472": "train",
+      "trg:crawl-anthropic:crawl-anthropic-f905": "train",
+      "trg:crawl-anthropic:snapshot-the-docs-33d5": "train",
+      "trg:crawl-anthropic:refresh-the-anthropic-mirror-ed6e": "holdout",
+      "trg:credentials:credentials-e8fd": "train",
+      "trg:credentials:api-key-295b": "holdout",
+      "trg:credentials:log-into-service-af50": "train",
+      "trg:credentials:store-the-key-8d4a": "train",
+      "trg:credentials:which-keys-do-we-have-d372": "train",
+      "trg:deploy:deploy-to-preview-5496": "train",
+      "trg:deploy:deploy-to-staging-c659": "train",
+      "trg:deploy:vercel-logs-d731": "train",
+      "trg:deploy:why-did-the-deploy-fail-a9dc": "train",
+      "trg:deploy:deployment-status-bb76": "train",
+      "trg:deploy:redeploy-until-it-works-e90f": "train",
+      "trg:draft:draft-a-post-6ade": "train",
+      "trg:draft:write-the-copy-e047": "train",
+      "trg:draft:write-the-caption-ea32": "train",
+      "trg:draft:post-about-topic-1e61": "holdout",
+      "trg:draft:attach-media-to-the-draft-7dfd": "train",
+      "trg:draft:drain-the-draft-queue-a1f6": "train",
+      "trg:draft:answer-the-social-asks-88ce": "holdout",
+      "trg:draft:any-drafts-waiting-4cce": "train",
+      "trg:draft:اكتب-منشور-7377": "train",
+      "trg:draft:صياغة-المنشور-783a": "train",
+      "trg:draft:طابور-الصياغة-4964": "train",
+      "trg:draft:أرفق-وسائط-للمسودة-7719": "train",
+      "trg:economy:economy-b945": "train",
+      "trg:economy:token-usage-136a": "train",
+      "trg:economy:optimize-tokens-f7d2": "holdout",
+      "trg:economy:we-re-burning-tokens-7370": "train",
+      "trg:economy:hit-the-limit-99f2": "holdout",
+      "trg:economy:usage-window-8cfa": "train",
+      "trg:economy:plan-limit-0ab6": "train",
+      "trg:economy:tokens-per-outcome-4eb4": "train",
+      "trg:economy:توكن-8cab": "train",
+      "trg:economy:استهلاك-0811": "train",
+      "trg:feature:feature-name-product-04a4": "train",
+      "trg:feature:build-feature-end-to-end-adec": "train",
+      "trg:feature:full-pipeline-idea-production-85fd": "train",
+      "trg:handover:handover-url-block-77bf": "train",
+      "trg:handover:pre-demo-quality-pass-0ade": "train",
+      "trg:handover:run-the-niche-quality-keywords-05d5": "train",
+      "trg:handover:is-this-url-clean-2032": "train",
+      "trg:handover:is-the-whole-block-ready-to-show-9842": "holdout",
+      "trg:health:health-6b98": "holdout",
+      "trg:health:config-health-5be4": "train",
+      "trg:health:is-the-engine-healthy-37d5": "train",
+      "trg:health:drift-check-d2f0": "train",
+      "trg:health:team-config-status-ea7d": "train",
+      "trg:higgs:higgs-f33c": "train",
+      "trg:higgs:generate-video-92ca": "train",
+      "trg:higgs:generate-image-be6d": "train",
+      "trg:higgs:generate-photo-c9ea": "holdout",
+      "trg:higgs:make-an-ad-973d": "train",
+      "trg:higgs:promo-video-cf71": "holdout",
+      "trg:higgs:og-image-8fb6": "train",
+      "trg:higgs:social-card-8d2e": "train",
+      "trg:higgs:hero-image-b471": "train",
+      "trg:higgs:product-shot-56ba": "train",
+      "trg:higgs:mockup-be55": "train",
+      "trg:higgs:lifestyle-scene-3f66": "train",
+      "trg:higgs:moodboard-a711": "train",
+      "trg:higgs:showroom-asset-1051": "train",
+      "trg:higgs:brand-kit-0b07": "train",
+      "trg:higgs:edit-video-from-url-e196": "train",
+      "trg:higgs:download-and-tweak-video-9161": "train",
+      "trg:higgs:higgs-d9e6": "train",
+      "trg:higgs:nano-banana-9b94": "train",
+      "trg:higgs:veo-7730": "train",
+      "trg:higgs:omni-d56e": "train",
+      "trg:higgs:gemini-image-9cf8": "train",
+      "trg:higgs:صورة-تسويقية-fb7d": "train",
+      "trg:higgs:وسائط-12de": "train",
+      "trg:idea:capture-this-idea-29f5": "train",
+      "trg:idea:new-feature-idea-6007": "train",
+      "trg:idea:we-should-build-8932": "train",
+      "trg:idea:user-can-stories-7135": "train",
+      "trg:idea:pipeline-capture-stage-f252": "train",
+      "trg:idea:optionally-scoped-to-a-product-hogwarts-souq-mka-8e8b": "holdout",
+      "trg:incident:incident-6399": "train",
+      "trg:incident:production-is-down-cd36": "holdout",
+      "trg:incident:outage-c244": "train",
+      "trg:incident:p0-20ff": "train",
+      "trg:incident:users-can-t-log-in-1871": "train",
+      "trg:issue:open-file-an-issue-a4bd": "train",
+      "trg:issue:create-a-github-issue-in-the-right-databayt-repo-b531": "train",
+      "trg:learn:learn-7f69": "train",
+      "trg:learn:what-are-our-conventions-6793": "train",
+      "trg:learn:extract-patterns-from-history-9108": "holdout",
+      "trg:measure:how-did-the-post-do-7b14": "train",
+      "trg:measure:social-metrics-9883": "train",
+      "trg:measure:reach-and-engagement-f449": "holdout",
+      "trg:measure:is-social-working-6e46": "holdout",
+      "trg:measure:did-anyone-see-it-b6d5": "train",
+      "trg:measure:أرقام-المنشور-c207": "train",
+      "trg:measure:أداء-المنشورات-46ff": "train",
+      "trg:monitor:monitor-763e": "train",
+      "trg:monitor:are-the-deploys-green-30da": "train",
+      "trg:monitor:uptime-check-4160": "holdout",
+      "trg:monitor:production-status-sweep-a60f": "holdout",
+      "trg:package:package-audit-3d1a": "train",
+      "trg:package:upgrade-deps-across-repos-17d7": "holdout",
+      "trg:package:version-consistency-f73d": "train",
+      "trg:package:dependency-sweep-4736": "train",
+      "trg:pattern:pattern-keyword-a453": "holdout",
+      "trg:pattern:how-do-we-do-forms-8bfd": "train",
+      "trg:pattern:canonical-pattern-d2c6": "train",
+      "trg:pattern:follow-the-card-6188": "train",
+      "trg:plan:plan-the-architecture-5326": "train",
+      "trg:plan:architecture-plan-for-the-approved-spec-afe9": "holdout",
+      "trg:plan:pipeline-plan-stage-e066": "holdout",
+      "trg:pricing:pricing-2e2f": "train",
+      "trg:pricing:price-the-product-b513": "holdout",
+      "trg:pricing:tier-comparison-aa70": "train",
+      "trg:pricing:what-should-we-charge-174b": "holdout",
+      "trg:profile:profile-role-c99f": "train",
+      "trg:profile:load-the-business-profile-fd10": "holdout",
+      "trg:profile:switch-to-content-mode-6f0f": "train",
+      "trg:proposal:proposal-190b": "holdout",
+      "trg:proposal:draft-the-offer-12b0": "train",
+      "trg:proposal:client-proposal-9b50": "train",
+      "trg:proposal:send-them-a-quote-c675": "train",
+      "trg:publish:publish-the-post-95e5": "train",
+      "trg:publish:send-it-out-fc37": "train",
+      "trg:publish:post-it-now-fa51": "holdout",
+      "trg:publish:schedule-it-for-tomorrow-2e17": "train",
+      "trg:publish:broadcast-it-96af": "train",
+      "trg:publish:review-and-publish-f302": "train",
+      "trg:publish:انشر-المنشور-83a0": "train",
+      "trg:publish:ابعت-المنشور-0664": "train",
+      "trg:publish:راجع-وانشر-d6b9": "holdout",
+      "trg:release:release-block-53e5": "train",
+      "trg:release:send-to-client-0231": "train",
+      "trg:release:one-spell-handoff-handover-check-ship-watch-clos-10cf": "train",
+      "trg:release:give-away-to-client-f178": "train",
+      "trg:release:ship-it-and-tell-the-client-669d": "holdout",
+      "trg:report:report-19bb": "train",
+      "trg:report:fix-reports-9cca": "holdout",
+      "trg:report:user-reported-issue-auto-fix-635a": "train",
+      "trg:report:verified-report-queue-1b07": "train",
+      "trg:schema:add-the-model-migration-c9fb": "holdout",
+      "trg:schema:data-layer-6bb9": "train",
+      "trg:schema:prisma-model-zod-validation-dc12": "train",
+      "trg:schema:pipeline-data-stage-41b8": "train",
+      "trg:ship:ship-ac56": "train",
+      "trg:ship:deploy-to-production-2b06": "train",
+      "trg:ship:promote-checked-build-vercel-prod-7d39": "holdout",
+      "trg:social:social-post-225d": "train",
+      "trg:social:publish-to-social-a924": "holdout",
+      "trg:social:social-automation-677d": "train",
+      "trg:social:broadcast-the-announcement-28fd": "train",
+      "trg:social:منشور-تواصل-db48": "holdout",
+      "trg:social:انشر-عن-a95c": "train",
+      "trg:spec:spec-the-feature-9924": "train",
+      "trg:spec:write-the-spec-22a2": "train",
+      "trg:spec:technical-specification-529b": "train",
+      "trg:spec:pipeline-specify-stage-human-approval-gate-d671": "train",
+      "trg:sync:sync-097a": "train",
+      "trg:sync:what-s-new-in-claude-code-caed": "holdout",
+      "trg:sync:refresh-the-engine-9062": "train",
+      "trg:sync:release-sweep-c610": "train",
+      "trg:tasks:break-it-down-a509": "holdout",
+      "trg:tasks:ordered-task-list-from-an-approved-plan-9cec": "train",
+      "trg:tasks:task-breakdown-4117": "train",
+      "trg:tasks:decompose-the-plan-5183": "train",
+      "trg:tasks:pipeline-tasks-stage-2263": "train",
+      "trg:template:template-name-82a0": "train",
+      "trg:template:create-a-template-4fd6": "train",
+      "trg:template:new-hero-sidebar-login-template-be22": "train",
+      "trg:template:rebuild-the-template-registry-4355": "train",
+      "trg:watch:watch-5fb7": "holdout",
+      "trg:watch:verify-the-deploy-a65e": "holdout",
+      "trg:watch:is-it-live-fd42": "train",
+      "trg:watch:post-deploy-visual-console-smoke-check-b346": "train",
+      "trg:watch:pipeline-monitor-stage-9016": "train",
+      "trg:weekly:weekly-fb69": "train",
+      "trg:weekly:monday-plan-f0a0": "train",
+      "trg:weekly:friday-review-cfaf": "train",
+      "trg:weekly:plan-the-week-b513": "holdout",
+      "trg:wire:wire-the-ui-1018": "train",
+      "trg:wire:build-the-page-form-table-for-the-feature-eea0": "train",
+      "trg:wire:i18n-wiring-124a": "train",
+      "trg:wire:pipeline-ui-stage-1619": "train",
+      "spell:pipeline:feature-e4ba": "holdout",
+      "spell:pipeline:idea-faf0": "train",
+      "spell:pipeline:spec-0bf6": "holdout",
+      "spell:pipeline:plan-b7cb": "train",
+      "spell:pipeline:tasks-ad2e": "train",
+      "spell:pipeline:schema-527d": "train",
+      "none:pipeline:ready-660e": "train",
+      "spell:pipeline:code-f931": "holdout",
+      "spell:pipeline:wire-f359": "holdout",
+      "spell:charm-work:dev-d559": "holdout",
+      "spell:charm-work:build-c39b": "holdout",
+      "none:charm-work:push-876f": "train",
+      "spell:charm-work:quick-f739": "holdout",
+      "spell:charm-work:deploy-5cd3": "holdout",
+      "spell:charm-work:release-1036": "holdout",
+      "none:transfiguration:component-5efd": "train",
+      "none:transfiguration:page-815d": "holdout",
+      "none:transfiguration:api-386a": "train",
+      "spell:transfiguration:atom-0374": "train",
+      "spell:transfiguration:template-694a": "holdout",
+      "spell:transfiguration:block-eb0c": "holdout",
+      "none:transfiguration:migration-2b0b": "holdout",
+      "none:ancient-runes:nextjs-9c54": "train",
+      "none:ancient-runes:react-58fd": "train",
+      "none:ancient-runes:typescript-1986": "train",
+      "none:ancient-runes:prisma-c531": "train",
+      "none:ancient-runes:tailwind-589a": "train",
+      "spell:ancient-runes:shadcn-414e": "train",
+      "none:conjuration:table-4a9c": "train",
+      "none:conjuration:header-e488": "train",
+      "none:conjuration:menu-99e4": "train",
+      "none:conjuration:form-4058": "train",
+      "none:conjuration:modal-9080": "holdout",
+      "none:conjuration:card-8827": "train",
+      "none:conjuration:sidebar-c87a": "train",
+      "none:conjuration:footer-1149": "holdout",
+      "none:conjuration:hero-1b3b": "train",
+      "none:conjuration:navbar-7aad": "train",
+      "spell:dark-arts:saas-bb16": "holdout",
+      "none:dark-arts:dashboard-e4c1": "train",
+      "none:dark-arts:landing-3b55": "holdout",
+      "none:dark-arts:checkout-4db9": "holdout",
+      "none:dark-arts:settings-6806": "train",
+      "none:dark-arts:admin-34c8": "train",
+      "none:dark-arts:onboarding-2263": "holdout",
+      "spell:animation:motion-bd73": "train",
+      "spell:animation:animation-e145": "holdout",
+      "spell:animation:transition-a627": "train",
+      "spell:animation:gesture-655c": "train",
+      "spell:animation:scroll-dd4e": "train",
+      "spell:defense:test-afd0": "holdout",
+      "none:defense:e2e-7c36": "train",
+      "spell:defense:handover-aedd": "train",
+      "spell:defense:qa-6c4c": "holdout",
+      "none:defense:coverage-f7f1": "train",
+      "none:defense:review-2257": "train",
+      "spell:defense:security-c92c": "holdout",
+      "none:defense:audit-f561": "train",
+      "none:defense:constitution-2102": "train",
+      "none:defense:accessibility-6c0a": "train",
+      "none:defense:optimize-f9e7": "holdout",
+      "spell:defense:performance-aece": "holdout",
+      "spell:reparo:fix-b2e4": "holdout",
+      "none:reparo:error-2191": "holdout",
+      "none:reparo:scan-ece8": "train",
+      "none:reparo:lint-06da": "train",
+      "none:reparo:format-b99d": "holdout",
+      "none:reparo:type-check-540e": "train",
+      "spell:quill:docs-28eb": "train",
+      "spell:quill:readme-4a07": "train",
+      "spell:quill:api-docs-7575": "train",
+      "spell:quill:storybook-034f": "holdout",
+      "spell:quill:changelog-920f": "train",
+      "spell:geminio:clone-2b88": "train",
+      "none:geminio:copy-e562": "train",
+      "none:geminio:fork-3e58": "train",
+      "none:geminio:extend-aa7d": "train",
+      "none:geminio:upstream-1335": "train",
+      "none:summoning:github-22dc": "train",
+      "none:summoning:figma-1e4f": "train",
+      "none:summoning:linear-d005": "train",
+      "none:summoning:slack-ea9b": "train",
+      "none:summoning:notion-8d57": "train",
+      "none:summoning:sentry-ca96": "train",
+      "none:summoning:stripe-25a7": "holdout",
+      "none:summoning:vercel-9400": "holdout",
+      "none:summoning:analytics-5c10": "train",
+      "none:summoning:neon-48db": "train",
+      "spell:divination:story-b3e7": "train",
+      "none:divination:workflow-f16d": "train",
+      "none:performance-magic:parallelize-5d10": "train",
+      "none:performance-magic:waterfall-516f": "holdout",
+      "none:performance-magic:bundle-1229": "train",
+      "none:performance-magic:lazy-6acc": "train",
+      "none:performance-magic:suspense-ac42": "train",
+      "none:performance-magic:memo-9fe7": "holdout",
+      "none:performance-magic:server-component-96e7": "train",
+      "none:performance-magic:streaming-7dcd": "train",
+      "none:performance-magic:barrel-123c": "train",
+      "none:performance-magic:dedup-e91c": "train",
+      "spell:portkeys:from-codebase-1b48": "holdout",
+      "none:portkeys:from-shadcn-e1e1": "train",
+      "none:portkeys:from-radix-4c7a": "train",
+      "none:portkeys:like-hogwarts-2c36": "train",
+      "none:portkeys:like-souq-da28": "train",
+      "none:portkeys:like-mkan-3eed": "train",
+      "none:portkeys:like-shifa-18cf": "train",
+      "none:portkeys:like-sijillee-3362": "train",
+      "none:portkeys:like-moallimee-6b79": "train",
+      "none:unforgivable:rm-rf-661c": "train",
+      "none:unforgivable:prisma-migrate-reset-be8e": "train",
+      "none:unforgivable:prisma-db-push-accept-data-loss-23fc": "train",
+      "none:unforgivable:drop-table-4e6b": "train",
+      "none:unforgivable:git-push-force-main-aeb1": "train",
+      "none:auror-office:see-b526": "train",
+      "none:auror-office:flow-bdc8": "train",
+      "none:auror-office:debug-5864": "train",
+      "none:auror-office:responsive-9bc4": "holdout",
+      "none:auror-office:lang-70ea": "train",
+      "none:auror-office:fast-0294": "train",
+      "none:auror-office:guard-2bd1": "train",
+      "none:auror-office:architecture-67c3": "train",
+      "none:auror-office:structure-6f55": "holdout",
+      "none:auror-office:design-fb31": "train",
+      "none:auror-office:stack-6251": "train",
+      "none:auror-office:trace-813d": "train",
+      "none:auror-office:efficient-4f3a": "holdout",
+      "none:auror-office:mirror-2fc9": "train",
+      "none:auror-office:diff-682c": "train",
+      "spell:ministry:captain-55d7": "holdout",
+      "spell:ministry:issue-ba4d": "holdout",
+      "none:ministry:conventions-79c2": "train",
+      "none:ministry:patterns-3f09": "holdout",
+      "none:ministry:drift-2e87": "holdout",
+      "spell:pensieve:decide-ee17": "holdout",
+      "spell:pensieve:premortem-eff9": "holdout",
+      "spell:pensieve:convert-6239": "holdout",
+      "spell:pensieve:calendar-a481": "holdout",
+      "spell:pensieve:draft-b576": "train",
+      "spell:pensieve:media-fc9a": "train",
+      "spell:pensieve:approve-cf90": "train",
+      "spell:pensieve:publish-0fc0": "train",
+      "spell:pensieve:measure-10bf": "train",
+      "spell:pensieve:social-b2ec": "train",
+      "spell:portraits:banner-416b": "train",
+      "spell:portraits:lifestyle-33df": "holdout",
+      "spell:portraits:split-screen-e34a": "train",
+      "spell:portraits:reel-d6e8": "holdout",
+      "spell:portraits:infographic-bf21": "train",
+      "spell:portraits:testimonial-e6a3": "holdout",
+      "spell:portraits:showroom-4fb0": "holdout",
+      "kw:auth:not-authenticated-b54a": "train",
+      "kw:auth:log-into-x-sign-me-into-x-auth-69d6": "holdout",
+      "kw:mcp-doctor:tool-not-found-ffd9": "holdout",
+      "kw:qa:qa-admission-c365": "train",
+      "kw:qa:qa-this-block-8f4f": "holdout",
+      "kw:shadcn:shadcn-docs-f2d0": "holdout"
+    }
+  },
+  "listing": [
+    {
+      "skill": "analyze",
+      "description": "Analyze a repo's patterns and generate a tailored Claude Code config",
+      "when_to_use": "Use when a repo needs its patterns extracted into a tailored Claude Code config — CLAUDE.md, agents, rules, and skills generated and committed straight to main — the config-generator lane, distinct from /learn which mines org-wide conventions into memory. Triggers on: analyze <repo>, generate config for this repo, repo config generator."
+    },
+    {
+      "skill": "approve",
+      "description": "The human gate — the review queue on /social/publish, or a signed link for a remote approver",
+      "when_to_use": "Use when a full draft (copy and/or media) is ready for a human to say yes before anything reaches a public brand page. Two lanes: the PRIMARY is the Hub's review queue at /social/publish — the next answered draft waits there, a contributor fine-tunes and approves (now, or scheduled to the cron drain); the SECONDARY stages a signed single-use link (it opens a confirm page; only its button publishes) for an approver outside the Hub. This is the gate, not the send: it never writes copy (/draft), never makes media (/higgs), and never delivers to a platform (/publish, which refuses to run without the yes this stage records). Triggers on: review the queue, approve the next draft, stage for review, send for approval, get sign-off, ready for review, اعتماد, راجع الطابور, اعتمد المسودة, أرسل للمراجعة."
+    },
+    {
+      "skill": "atom",
+      "description": "Create atoms - compositions of 2+ shadcn/ui primitives",
+      "when_to_use": "When creating, listing, previewing, or documenting an atom in /Users/abdout/codebase — a reusable composition of 2+ shadcn/ui primitives registered at /atoms and installable via npx codebase add. Triggers on \"atom <name>\", \"create an atom\", \"new atom\", \"register this as an atom\"."
+    },
+    {
+      "skill": "auth",
+      "description": "Autonomously authenticate to any web service or CLI on Abdout's behalf using the macOS-Keychain-stored databayt identities, then reach protected pages and fetch original assets behind the login wall. Use whenever a page redirects to a login wall, a CLI reports \"not authenticated\", the user says \"log into X / sign me into X / auth\", or a clone/asset-fetch task needs content behind a paywall or dashboard. Minimizes interaction — only pauses for a one-time code when no non-interactive path exists.",
+      "when_to_use": ""
+    },
+    {
+      "skill": "bench",
+      "description": "Score the engine's own config on its labeled cases, and propose holdout-gated fixes",
+      "when_to_use": "Use when the question is whether the CONFIG works, not whether a product feature works — scoring which skill fires for a prompt, checking runs against the contracts their SKILL.md declares, or proposing a description rewrite that must beat an unseen holdout. Unlike /health (counts files, never reads one), /qa (a product block), /check (typecheck + build). Triggers on: bench, benchmark the skills, is the routing accurate, measure the engine, dispatch accuracy, which skills collide, are any skills dead."
+    },
+    {
+      "skill": "block",
+      "description": "Create blocks - UI components with integrated business logic",
+      "when_to_use": ""
+    },
+    {
+      "skill": "build",
+      "description": "Smart build with TypeScript check and auto-fix",
+      "when_to_use": "Use when the project needs to be built or build-validated — pnpm tsc + production build with an auto-fix loop (max 5 attempts) — including 'build', 'does it build', 'validate the build', or the build step inside a larger flow. Not the full pre-ship gate (/check adds visual verify + tests)."
+    },
+    {
+      "skill": "calendar",
+      "description": "The content calendar — which brand publishes what, on which day",
+      "when_to_use": "Use when deciding or reviewing WHAT to publish and WHEN — mapping topics to weeks, allocating slots per brand, checking what actually shipped against what was planned. This is the planning stage that feeds /draft: it never writes post copy (/draft), never renders media (/higgs), never stages for sign-off (/approve), never delivers (/publish), and never reads numbers back (/measure). Triggers on: content calendar, plan the content, what are we publishing, which brand is due, what slipped this week, التقويم, خطة المحتوى."
+    },
+    {
+      "skill": "canon",
+      "description": "Surface the right CEO book + operating move for a business or leadership decision — hiring, firing, pricing, positioning, what to build, customer development, fundraising, prioritization, runway, strategy. Pull in automatically when a decision is on the table; no slash command needed. /canon also lists all 10.",
+      "when_to_use": ""
+    },
+    {
+      "skill": "captain",
+      "description": "Databayt CEO brain - synthesize identity + state + journal, suggest next action",
+      "when_to_use": ""
+    },
+    {
+      "skill": "carousel",
+      "description": "Multi-slide bilingual brand carousels — Claude writes the deck, kun renders Anthropic-styled slides at exact platform sizes, a human approves, channels receive",
+      "when_to_use": "Use when a databayt brand needs a multi-slide social post — an Instagram/Facebook carousel, a LinkedIn PDF carousel, a story-sized slide set, or a slide album to DM a client on Telegram/WhatsApp. Triggers on: carousel, multi-slide post, swipe post, slides for instagram, carousel for <brand|block>, كاروسيل, سلايدات, منشور متعدد الشرائح."
+    },
+    {
+      "skill": "check",
+      "description": "Quality gate — typecheck + build + visual verify before shipping",
+      "when_to_use": "Use when work is about to ship and needs the pre-ship quality gate — run tsc, production build, optional browser visual verification, and existing tests, with auto-fix loops, then emit a READY TO SHIP / BLOCKED verdict and cache the pass in the session sentinel; unlike /handover or /qa (deep UI/block verification), this is the fast mechanical green-check. Triggers on: check, pre-ship quality gate, typecheck + build + visual verify, \"is it green\"."
+    },
+    {
+      "skill": "clone",
+      "description": "Clone a pattern/component from a source repo OR mirror a live URL section pixel-exact",
+      "when_to_use": "Use when reproducing something that already exists somewhere else — a live site section to mirror pixel-exact into the house stack (url-mode: deterministic Playwright capture → tiered Workflow), a Figma frame to implement, or code to adapt from github:/shadcn:/codebase:/pattern: sources. Triggers on: clone <url>, clone this section, make ours look like <site>, clone the figma design, clone shadcn:<component>, pattern:<keyword>. Distinct from /atom or /template (net-new components) — clone always starts from an existing source."
+    },
+    {
+      "skill": "code",
+      "description": "Logic layer — server actions with auth, validation, tenant isolation",
+      "when_to_use": "Use when the Logic stage of the pipeline is reached or Abdout asks in prose to build the business-logic layer for a feature — server actions, CRUD operations, permission rules, or optimized queries — as distinct from /schema (data layer) or /wire (UI layer). Triggers on: server actions, logic layer with auth+validation+tenant isolation, pipeline Logic stage."
+    },
+    {
+      "skill": "codebase",
+      "description": "Access reference codebase at /Users/abdout/codebase or databayt/codebase",
+      "when_to_use": ""
+    },
+    {
+      "skill": "convert",
+      "description": "Convert a file or URL to Markdown via MarkItDown (PDF, Office, images, audio, web)",
+      "when_to_use": "Use when a file or URL needs to become clean Markdown — PDFs, Office docs (DOCX/PPTX/XLSX), images, audio, web pages, YouTube transcripts — via the MarkItDown MCP, landing in docs/, a knowledge base, or printed to the session. Triggers on: convert <file|url>, markitdown, markdown this PDF, pull this page into docs, transcribe this video."
+    },
+    {
+      "skill": "costs",
+      "description": "API spend breakdown and cost-optimization analysis",
+      "when_to_use": "Use when Abdout asks where the money goes — API and infra spend breakdown with cost-optimization analysis across Vercel, Neon, AWS, and the Anthropic plan, honoring the subscription-only posture. Triggers on: costs, spend, how much are we paying, cost optimization, budget check."
+    },
+    {
+      "skill": "crawl-anthropic",
+      "description": "Crawl and snapshot Anthropic docs/assets",
+      "when_to_use": "Use when snapshotting Anthropic docs or assets into the local mirror — crawling code.claude.com and platform.claude.com pages for offline reference and rule harvesting. Triggers on: crawl anthropic, snapshot the docs, refresh the anthropic mirror."
+    },
+    {
+      "skill": "credentials",
+      "description": "Manage databayt credentials — API keys via Keychain, web logins via Safari",
+      "when_to_use": "Use when managing databayt credentials — storing or reading API keys via the macOS Keychain, driving Safari autofill for web logins, exporting keys for env wiring; never prints secrets into files. Triggers on: credentials, api key, log into <service>, store the key, which keys do we have."
+    },
+    {
+      "skill": "decide",
+      "description": "Write a decision journal entry — Type 1/2 classification, premortem, expected outcome, reviewed-by date",
+      "when_to_use": ""
+    },
+    {
+      "skill": "deploy",
+      "description": "Vercel operator — preview/staging deploys, deployment logs and status, and the fix-until-deployed retry loop",
+      "when_to_use": "Use when driving Vercel directly rather than running a pipeline stage — deploying to preview/staging, inspecting why a deployment failed, checking deployment status, or looping build-fix-redeploy until it goes green (max 5 attempts). Promoting a checked build to PRODUCTION is /ship (the pipeline's commit-to-live step after /check), the commit-lint-push cycle is /quick, and confirming a live deploy is healthy is /watch — this skill does not replace any of them. Triggers on: deploy to preview, deploy to staging, vercel logs, why did the deploy fail, deployment status, redeploy until it works."
+    },
+    {
+      "skill": "dev",
+      "description": "Start dev server on port 3000",
+      "when_to_use": ""
+    },
+    {
+      "skill": "docs",
+      "description": "Generate documentation - component MDX, API docs, Storybook stories",
+      "when_to_use": ""
+    },
+    {
+      "skill": "draft",
+      "description": "Write the full draft — copy (Arabic crafted first, English mirrored) and/or its media set",
+      "when_to_use": "Use when a topic needs to become a FULL draft for a databayt brand — the core piece plus one platform-native variant per channel, Arabic written natively and English mirrored, with UTM on every link, AND the draft's media half: library picks attached by URL, or a generation hand-off. ALSO the answering half of the Hub's agent window: with no topic, or on any phrasing about the draft queue, it drains the briefs contributors submitted on /social — picking media from the library as it answers. This is the drafting stage only: it does not decide what to write about (/calendar), does not render new images or video itself (/higgs, /carousel — it attaches their output), does not approve (/approve), and never sends anything to a platform (/publish). Triggers on: draft a post, write the copy, write the caption, post about <topic>, attach media to the draft, drain the draft queue, answer the social asks, any drafts waiting, اكتب منشور, صياغة المنشور, طابور الصياغة, أرفق وسائط للمسودة."
+    },
+    {
+      "skill": "economy",
+      "description": "Token economy — audit consumption and delegate across model × effort × product lane",
+      "when_to_use": "Use when token consumption, plan limits, or usage windows are the topic — auditing what's burning the Max pool, delegating work to a cheaper model/effort/product lane, or applying session hygiene. Triggers on: economy, token usage, optimize tokens, we're burning tokens, hit the limit, usage window, plan limit, tokens per outcome, توكن, استهلاك."
+    },
+    {
+      "skill": "feature",
+      "description": "Full pipeline — idea to production (chains every stage)",
+      "when_to_use": "Use when Abdout asks to build a feature end to end, take an idea all the way to production, or names a new feature to ship — this is the compound orchestrator that chains every pipeline stage (idea → spec → human approval → plan → tasks → schema → code → wire → check → ship → watch) with progress appended to a GitHub issue, unlike the single-stage neighbors (/idea, /spec, /schema, /code, /wire, /check, /ship, /watch) which each run one stage, and product scope resolves data-driven from .claude/memory/repositories.json (planned products get naming/spec only). Triggers on: feature <name> [product], build <feature> end to end, full pipeline idea→production."
+    },
+    {
+      "skill": "fix",
+      "description": "Auto-fix all detected issues - TypeScript, lint, build errors",
+      "when_to_use": ""
+    },
+    {
+      "skill": "handover",
+      "description": "UI verification — runs niche quality keywords on a URL or block",
+      "when_to_use": "Use when Abdout wants a UI verification pass before a demo, merge, or client handoff — polymorphic on argument, where URL mode (argument starts with /) runs all 12 per-URL niche quality keywords (browser 6 + code 6) on one route, and block mode (bare word) runs the per-route subset (debug, flow, responsive, lang) on every route in the block. Triggers on: handover <url|block>, pre-demo quality pass, run the niche quality keywords, \"is this URL clean\", \"is the whole block ready to show\"."
+    },
+    {
+      "skill": "health",
+      "description": "Check Claude Code config health across the team + engine drift",
+      "when_to_use": "Use when checking engine or config health — runs health.sh (counts vs engine.json, plugin parity, vocabulary sync, installed-agent matrix), reports drift, and reads teammates' statuses from the shared dashboard issue. Triggers on: health, config health, is the engine healthy, drift check, team config status."
+    },
+    {
+      "skill": "higgs",
+      "description": "Generate and edit photos and videos for databayt org marketing, ads, and prompts — Google (Nano Banana / Veo / Omni) direct, or Higgsfield",
+      "when_to_use": "Use when generating or editing marketing media — image, photo, video, ad, banner, og image, social card, hero shot, product shot, promo reel, story, avatar ad — or when a reference video/image URL needs downloading and tweaking. Owns BOTH raster renderers: Google direct (Nano Banana, Nano Banana Pro, Veo, Omni Flash — pay per image, no credit ceiling) and Higgsfield (credits). This is the TEXT-FREE lane: og images, infographics, testimonials, split comparisons and anything carrying copy render on /carousel's template lane instead (the Portrait Gallery spells route by taxonomy lane). Triggers on: /higgs, generate video, generate image, generate photo, make an ad, promo video, og image, social card, hero image, product shot, mockup, lifestyle scene, moodboard, showroom asset, brand kit, edit video from url, download and tweak video, higgs, nano banana, veo, omni, gemini image, صورة تسويقية, وسائط."
+    },
+    {
+      "skill": "idea",
+      "description": "Capture a feature idea as a structured GitHub issue",
+      "when_to_use": "Use when a new feature idea surfaces in conversation and needs to become a structured, deduplicated GitHub issue with user story, acceptance criteria, and scope — the Capture stage that opens the idea→production pipeline (distinct from /spec which details an existing issue, and /issue which files a generic issue without feature structure). Triggers on capture this idea, new feature idea, \"we should build …\", \"user can …\" stories, pipeline Capture stage, optionally scoped to a product (hogwarts, souq, mkan, shifa, kun)."
+    },
+    {
+      "skill": "incident",
+      "description": "Incident response workflow for production issues",
+      "when_to_use": "Use when production is broken and needs structured response — classify severity (P0-P3), diagnose via Sentry traces + Vercel logs, fix or roll back, verify recovery, write the postmortem on a GitHub issue. Triggers on: incident, production is down, outage, P0, users can't log in."
+    },
+    {
+      "skill": "issue",
+      "description": "Create a GitHub issue in the appropriate databayt repo",
+      "when_to_use": "Use when a task, bug, chore, or follow-up needs to become a tracked GitHub issue in the right databayt repo (kun, hogwarts, souq, mkan, shifa, codebase, shadcn, ios-app/android-app, marketing) with priority/type/scope/assignment labels, a Context/Action/Verification body, and a Slack #dev notification — including turning Slack messages into issues — as distinct from /idea which captures structured feature ideas with user stories. Triggers on: open/file an issue, create a GitHub issue in the right databayt repo."
+    },
+    {
+      "skill": "learn",
+      "description": "Extract organizational patterns and conventions from repos + history",
+      "when_to_use": "Use when extracting organizational intelligence — patterns, conventions, and team dynamics mined from git history and the databayt repos into memory; feeds the conventions/patterns/drift surfaces. Distinct from /analyze which generates a repo's Claude config. Triggers on: learn, what are our conventions, extract patterns from history."
+    },
+    {
+      "skill": "mcp-doctor",
+      "description": "Diagnose and recover the browser/Playwright MCP server when it disconnects, fails to launch, or returns \"tool not found\" for mcp__browser__*.",
+      "when_to_use": ""
+    },
+    {
+      "skill": "measure",
+      "description": "Read the numbers back — platform reach and engagement plus UTM attribution, per post and per brand",
+      "when_to_use": "Use when asking how published posts actually performed — reach, views, reactions, comments, shares, or UTM-attributed traffic, per post, per channel, or per brand, and whether the strategy's kill criteria can yet be judged. This reads numbers only: it never writes copy (/draft), never publishes (/publish), and is neither a bug report (/report) nor a deploy check (/watch). Triggers on: how did the post do, social metrics, reach and engagement, is social working, did anyone see it, أرقام المنشور, أداء المنشورات."
+    },
+    {
+      "skill": "monitor",
+      "description": "Check all deployments, costs, and uptime across databayt products",
+      "when_to_use": "Use when checking all deployments, costs, and uptime across the databayt products in one sweep — Vercel deploy status, production URL sampling, spend vs budget — escalating anything red to /incident. Triggers on: monitor, are the deploys green, uptime check, production status sweep."
+    },
+    {
+      "skill": "motion",
+      "description": "Add Framer Motion animations to components",
+      "when_to_use": ""
+    },
+    {
+      "skill": "package",
+      "description": "Cross-repo dependency audit and upgrade coordination",
+      "when_to_use": "Use when auditing or upgrading dependencies across the databayt repos — version consistency, coordinated upgrades, breaking-change sweeps by the package agent; cross-repo scope, unlike a single repo's deps/outdated check. Triggers on: package audit, upgrade deps across repos, version consistency, dependency sweep."
+    },
+    {
+      "skill": "pattern",
+      "description": "Look up a canonical cross-repo pattern (form, table, auth, ...)",
+      "when_to_use": "Use when looking up a canonical cross-repo pattern (form, table, modal, auth, validation, action, columns, wizard, sidebar, header, e2e) — reads the pattern card + registry adoption status and applies the canonical file structure. Triggers on: pattern <keyword>, how do we do forms, canonical pattern, follow the card."
+    },
+    {
+      "skill": "performance",
+      "description": "Performance audit - Core Web Vitals, bundle, database queries",
+      "when_to_use": ""
+    },
+    {
+      "skill": "plan",
+      "description": "Architecture plan — tech decisions from an approved spec, before code",
+      "when_to_use": "Use when turning a human-approved spec into an implementation plan — pattern choices, architecture decisions, mirror target, tradeoffs, and risks appended to the feature's GitHub issue — the pipeline Plan stage between /spec and /schema (NOT Claude Code plan mode). Triggers on: plan the architecture, architecture plan for the approved spec, pipeline Plan stage."
+    },
+    {
+      "skill": "premortem",
+      "description": "Klein-style premortem — imagine a decision/project failed, write the story, surface risks",
+      "when_to_use": ""
+    },
+    {
+      "skill": "pricing",
+      "description": "Calculate and compare pricing tiers for a databayt product",
+      "when_to_use": "Use when calculating or comparing pricing tiers for a databayt product — plan matrices, margins, competitor anchors, and what to quote a specific prospect. Triggers on: pricing, price the product, tier comparison, what should we charge."
+    },
+    {
+      "skill": "profile",
+      "description": "Load a selective config profile by role (engineer/business/content/ops)",
+      "when_to_use": "Use when loading a selective config profile by role — engineer, business, content, or ops — trimming the active agent/MCP surface to what that role needs. Triggers on: profile <role>, load the business profile, switch to content mode."
+    },
+    {
+      "skill": "proposal",
+      "description": "Generate a client proposal via the revenue agent",
+      "when_to_use": "Use when generating a client proposal via the revenue agent — scope, pricing, timeline, and branded structure ready to send to a school or client. Triggers on: proposal, draft the offer, client proposal, send them a quote."
+    },
+    {
+      "skill": "publish",
+      "description": "Deliver approved full drafts to the channels — the review queue decides, the lanes deliver",
+      "when_to_use": "Use when an APPROVED full draft (copy + media) must reach its channels, now or on a schedule — via the review queue on /social/publish (Approve = publish right away or delegate to the cron drain, per its settings), the signed approval link, or the copy-out block for WhatsApp. This publishes CONTENT, not code: /ship and /deploy put software in production and /release ships a feature block, and none of them touch a brand page. It refuses without a recorded /approve yes, never writes copy (/draft), never creates from blank (the queue only fine-tunes), and never reads numbers back (/measure). Triggers on: publish the post, send it out, post it now, schedule it for tomorrow, broadcast it, review and publish, انشر المنشور, ابعت المنشور, راجع وانشر."
+    },
+    {
+      "skill": "qa",
+      "description": "Autonomous block QA — detect, adversarially verify, fix safe tiers, hand the residual to a human",
+      "when_to_use": "Use when a feature block needs autonomous QA — detect across every route + the block source, adversarially verify every FAIL, auto-fix the safe (tier A) and build-gated (tier B) tiers, persist the verdict to blocks.json, and open one human-signoff issue carrying only the residual — triggering on qa <block> (e.g. \"qa admission\" in prose, no slash needed), \"QA this block\", pre-release verification, or a code-complete-but-unverified block; block-scope only — a single URL spot-check is handover's job, the typecheck/build gate alone is check's, and a user-reported bug is report's."
+    },
+    {
+      "skill": "quick",
+      "description": "Fastest commit cycle - lint, fix, commit, push",
+      "when_to_use": ""
+    },
+    {
+      "skill": "release",
+      "description": "One spell — handover, check, ship, watch, then comment + close the issue",
+      "when_to_use": "Use when a feature block is code-complete on main and Abdout wants it shipped to the client in one move — the full local-to-production-and-verified chain, not a single stage like /check (tight loop), /ship (deploy only), /handover (QA only), or /watch (verify only). Triggers on: release <block>, send to client, one-spell handoff (handover→check→ship→watch→close issue), give away to client, ship it and tell the client."
+    },
+    {
+      "skill": "report",
+      "description": "Auto-fix a user-reported issue end to end",
+      "when_to_use": "Use when GitHub issues labeled `report` need processing — reading a user-reported bug, locating the route/component, reproducing, fixing with a minimum diff, building, pushing, and closing the issue — across the databayt repos (hogwarts, kun, souq, mkan, shifa) or a single repo/issue, distinct from /qa (block-wide QA) and /check (pre-ship gate). Triggers on: report, fix reports, user-reported issue auto-fix, verified-report queue."
+    },
+    {
+      "skill": "repos",
+      "description": "Explore databayt organization repositories",
+      "when_to_use": ""
+    },
+    {
+      "skill": "saas",
+      "description": "Generate complete SaaS feature with all layers",
+      "when_to_use": ""
+    },
+    {
+      "skill": "schema",
+      "description": "Data layer — Prisma model, migration, and Zod validation",
+      "when_to_use": "Use when a feature needs its data foundation built from an approved spec — creating the Prisma model, applying the migration, generating the client, and writing Zod create/update/filter schemas with TypeScript types. Triggers on: add the model/migration, data layer, Prisma model + Zod validation, pipeline Data stage."
+    },
+    {
+      "skill": "screenshot",
+      "description": "View most recent screenshot from Desktop or Downloads",
+      "when_to_use": ""
+    },
+    {
+      "skill": "security",
+      "description": "Security audit - OWASP Top 10, dependency scanning",
+      "when_to_use": ""
+    },
+    {
+      "skill": "shadcn",
+      "description": "shadcn/ui knowledge pack — CLI, MCP, registry, skills, directory, and the docs-block pattern. Say \"shadcn\" to load it; \"shadcn docs\" = the docs-block style.",
+      "when_to_use": ""
+    },
+    {
+      "skill": "ship",
+      "description": "Promote a checked build to production (Vercel --prod)",
+      "when_to_use": "Use when a checked build must go live on Vercel production — the pipeline's final commit-to-live step after /check passes — including deploying main to prod, inspecting failed production deployment logs, or listing recent production deploys, as distinct from /deploy (staging/preview), /check (pre-ship gate), and /watch (post-deploy verification). Triggers on: ship, deploy to production, promote checked build (Vercel --prod)."
+    },
+    {
+      "skill": "social",
+      "description": "One spell — calendar, draft, media, approve, publish, measure for a brand post",
+      "when_to_use": "Use when a databayt brand needs a social post taken the whole way — pick the slot, write the bilingual copy, render the media, get a human sign-off, deliver to the channels, and read the numbers back. This is the compound orchestrator; run a single stage directly when that is all you need (/calendar, /draft, /higgs, /approve, /publish, /measure). Triggers on: social post, post about <topic>, publish to social, social automation, broadcast the announcement, منشور تواصل, انشر عن."
+    },
+    {
+      "skill": "spec",
+      "description": "Technical spec — data model, file plan, refined acceptance criteria",
+      "when_to_use": "Use when a captured feature idea (GitHub issue) needs to become a technical specification — Prisma data model sketch, file plan, refined acceptance criteria, and dependencies — published as an issue comment and paused for the single human approval gate of the pipeline; this is the Specify stage between /idea and /plan or /schema, not architecture planning (/plan) or task breakdown (/tasks). Triggers on: spec the <feature>, write the spec, technical specification, pipeline Specify stage (human approval gate)."
+    },
+    {
+      "skill": "sync",
+      "description": "Self-update — read the latest releases across the engine's whole surface (Anthropic, stack, services, practice), diff against the engine, adopt or propose",
+      "when_to_use": "Use when self-updating the engine against upstream releases — reads the Anthropic/stack/services/practice release feeds per engine.json sync tiers, diffs findings against the engine, adopts mechanical wins, proposes the rest, and stamps sync dates. Triggers on: sync, what's new in claude code, refresh the engine, release sweep."
+    },
+    {
+      "skill": "tasks",
+      "description": "Task breakdown — dependency-ordered work list from an approved plan",
+      "when_to_use": "Use when an approved implementation plan (from /plan) needs to become an ordered, dependency-aware checklist on the GitHub issue before /schema, /code, or /wire run — the pipeline Tasks stage, not spec writing (/spec) or architecture (/plan). Triggers on: break it down, ordered task list from an approved plan, task breakdown, decompose the plan, pipeline Tasks stage."
+    },
+    {
+      "skill": "template",
+      "description": "Create templates - full-page layouts and major UI sections",
+      "when_to_use": "When creating, listing, previewing, or rebuilding a template in /Users/abdout/codebase — a full-page layout (shadcn blocks equivalent) registered at /templates with per-template MDX docs. Triggers on \"template <name>\", \"create a template\", \"new hero/sidebar/login template\", \"rebuild the template registry\"."
+    },
+    {
+      "skill": "test",
+      "description": "Generate and run tests - unit, component, or E2E",
+      "when_to_use": ""
+    },
+    {
+      "skill": "watch",
+      "description": "Post-deploy verification — visual + console + smoke test",
+      "when_to_use": "Use when a deployment just landed and needs to be confirmed healthy in production — check Vercel deployment status, screenshot the live page, scan console errors and failed network requests, run a quick smoke interaction, then close or escalate the feature issue; unlike /check (pre-ship gate) or /qa (block QA), this observes production after /ship and never fixes code. Triggers on: watch, verify the deploy, is it live, post-deploy visual + console + smoke check, pipeline Monitor stage."
+    },
+    {
+      "skill": "weekly",
+      "description": "Run the captain's weekly Monday-plan / Wednesday-check / Friday-review cycle",
+      "when_to_use": "Use when running the captain's weekly cadence — Monday plan (allocate the 7 humans), Wednesday check (progress vs plan), Friday review (coach + canon principle) with archive to memory/weekly. Triggers on: weekly, monday plan, friday review, plan the week."
+    },
+    {
+      "skill": "wire",
+      "description": "UI layer — page (mirror pattern), content, form, table columns, i18n",
+      "when_to_use": "Use when a feature's UI layer needs to be built after schema and code stages — creating the route page (thin wrapper, mirror pattern), the server content component, the client form, table columns, dictionary keys for both en + ar, and optional navigation entries, all verified by pnpm build. Triggers on: wire the UI, build the page/form/table for the feature, i18n wiring, pipeline UI stage. Distinct from /code (server actions/logic) and /check (quality gate) — this is specifically the visible pages/components/i18n layer of the pipeline."
+    }
+  ],
+  "cases": [
+    {
+      "id": "trg:analyze:analyze-repo-ba00",
+      "prompt": "analyze <repo>",
+      "label": "analyze",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:analyze:generate-config-for-this-repo-e65a",
+      "prompt": "generate config for this repo",
+      "label": "analyze",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:analyze:repo-config-generator-b24b",
+      "prompt": "repo config generator",
+      "label": "analyze",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:approve:review-the-queue-2472",
+      "prompt": "review the queue",
+      "label": "approve",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:approve:approve-the-next-draft-faf5",
+      "prompt": "approve the next draft",
+      "label": "approve",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-draft",
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:approve:stage-for-review-d40e",
+      "prompt": "stage for review",
+      "label": "approve",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:approve:send-for-approval-295b",
+      "prompt": "send for approval",
+      "label": "approve",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:approve:get-sign-off-b7fe",
+      "prompt": "get sign-off",
+      "label": "approve",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:approve:ready-for-review-36b6",
+      "prompt": "ready for review",
+      "label": "approve",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:approve:اعتماد-6982",
+      "prompt": "اعتماد",
+      "label": "approve",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:approve:راجع-الطابور-8d50",
+      "prompt": "راجع الطابور",
+      "label": "approve",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:approve:اعتمد-المسودة-a19f",
+      "prompt": "اعتمد المسودة",
+      "label": "approve",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:approve:أرسل-للمراجعة-4214",
+      "prompt": "أرسل للمراجعة",
+      "label": "approve",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:atom:atom-name-b43a",
+      "prompt": "atom <name>",
+      "label": "atom",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:atom:create-an-atom-3e77",
+      "prompt": "create an atom",
+      "label": "atom",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:atom:new-atom-c3fd",
+      "prompt": "new atom",
+      "label": "atom",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:atom:register-this-as-an-atom-1fa7",
+      "prompt": "register this as an atom",
+      "label": "atom",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:bench:bench-626e",
+      "prompt": "bench",
+      "label": "bench",
+      "source": "trigger_phrase",
+      "tags": [
+        "trivial",
+        "hard:cluster"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:bench:benchmark-the-skills-9945",
+      "prompt": "benchmark the skills",
+      "label": "bench",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:bench:is-the-routing-accurate-2347",
+      "prompt": "is the routing accurate",
+      "label": "bench",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:bench:measure-the-engine-30fc",
+      "prompt": "measure the engine",
+      "label": "bench",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-measure",
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:bench:dispatch-accuracy-21ea",
+      "prompt": "dispatch accuracy",
+      "label": "bench",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:bench:which-skills-collide-bdb9",
+      "prompt": "which skills collide",
+      "label": "bench",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:bench:are-any-skills-dead-7edb",
+      "prompt": "are any skills dead",
+      "label": "bench",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:calendar:content-calendar-1e8f",
+      "prompt": "content calendar",
+      "label": "calendar",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:calendar:plan-the-content-ec2b",
+      "prompt": "plan the content",
+      "label": "calendar",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-plan",
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:calendar:what-are-we-publishing-836f",
+      "prompt": "what are we publishing",
+      "label": "calendar",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:calendar:which-brand-is-due-e7ac",
+      "prompt": "which brand is due",
+      "label": "calendar",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:calendar:what-slipped-this-week-8525",
+      "prompt": "what slipped this week",
+      "label": "calendar",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:calendar:التقويم-4c02",
+      "prompt": "التقويم",
+      "label": "calendar",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:calendar:خطة-المحتوى-c890",
+      "prompt": "خطة المحتوى",
+      "label": "calendar",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:carousel:carousel-4f34",
+      "prompt": "carousel",
+      "label": "carousel",
+      "source": "trigger_phrase",
+      "tags": [
+        "trivial"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:carousel:multi-slide-post-325f",
+      "prompt": "multi-slide post",
+      "label": "carousel",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:carousel:swipe-post-b61d",
+      "prompt": "swipe post",
+      "label": "carousel",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:carousel:slides-for-instagram-4266",
+      "prompt": "slides for instagram",
+      "label": "carousel",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:carousel:carousel-for-brand-block-c48e",
+      "prompt": "carousel for <brand|block>",
+      "label": "carousel",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-block"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:carousel:كاروسيل-e431",
+      "prompt": "كاروسيل",
+      "label": "carousel",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:carousel:سلايدات-9ff1",
+      "prompt": "سلايدات",
+      "label": "carousel",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:carousel:منشور-متعدد-الشرائح-03b0",
+      "prompt": "منشور متعدد الشرائح",
+      "label": "carousel",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:check:check-b371",
+      "prompt": "check",
+      "label": "check",
+      "source": "trigger_phrase",
+      "tags": [
+        "trivial",
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:check:pre-ship-quality-gate-1861",
+      "prompt": "pre-ship quality gate",
+      "label": "check",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-ship",
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:check:typecheck-build-visual-verify-818a",
+      "prompt": "typecheck + build + visual verify",
+      "label": "check",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-build",
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:check:is-it-green-8e33",
+      "prompt": "is it green",
+      "label": "check",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:clone:clone-url-3243",
+      "prompt": "clone <url>",
+      "label": "clone",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:clone:clone-this-section-e66f",
+      "prompt": "clone this section",
+      "label": "clone",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:clone:make-ours-look-like-site-e3c0",
+      "prompt": "make ours look like <site>",
+      "label": "clone",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:clone:clone-the-figma-design-dbbf",
+      "prompt": "clone the figma design",
+      "label": "clone",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:clone:clone-shadcn-component-52e5",
+      "prompt": "clone shadcn:<component>",
+      "label": "clone",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-shadcn"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:clone:pattern-keyword-0367",
+      "prompt": "pattern:<keyword>",
+      "label": "clone",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-pattern"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:code:server-actions-9392",
+      "prompt": "server actions",
+      "label": "code",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:code:logic-layer-with-auth-validation-tenant-isolatio-62db",
+      "prompt": "logic layer with auth+validation+tenant isolation",
+      "label": "code",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-auth",
+        "hard:cluster"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:code:pipeline-logic-stage-23d0",
+      "prompt": "pipeline Logic stage",
+      "label": "code",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:convert:convert-file-url-b36d",
+      "prompt": "convert <file|url>",
+      "label": "convert",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:convert:markitdown-718d",
+      "prompt": "markitdown",
+      "label": "convert",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:convert:markdown-this-pdf-3b71",
+      "prompt": "markdown this PDF",
+      "label": "convert",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:convert:pull-this-page-into-docs-8012",
+      "prompt": "pull this page into docs",
+      "label": "convert",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-docs"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:convert:transcribe-this-video-cb5b",
+      "prompt": "transcribe this video",
+      "label": "convert",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:costs:costs-1424",
+      "prompt": "costs",
+      "label": "costs",
+      "source": "trigger_phrase",
+      "tags": [
+        "trivial"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:costs:spend-7d75",
+      "prompt": "spend",
+      "label": "costs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:costs:how-much-are-we-paying-690c",
+      "prompt": "how much are we paying",
+      "label": "costs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:costs:cost-optimization-69cf",
+      "prompt": "cost optimization",
+      "label": "costs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:costs:budget-check-6472",
+      "prompt": "budget check",
+      "label": "costs",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-check"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:crawl-anthropic:crawl-anthropic-f905",
+      "prompt": "crawl anthropic",
+      "label": "crawl-anthropic",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:crawl-anthropic:snapshot-the-docs-33d5",
+      "prompt": "snapshot the docs",
+      "label": "crawl-anthropic",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-docs"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:crawl-anthropic:refresh-the-anthropic-mirror-ed6e",
+      "prompt": "refresh the anthropic mirror",
+      "label": "crawl-anthropic",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:credentials:credentials-e8fd",
+      "prompt": "credentials",
+      "label": "credentials",
+      "source": "trigger_phrase",
+      "tags": [
+        "trivial"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:credentials:api-key-295b",
+      "prompt": "api key",
+      "label": "credentials",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:credentials:log-into-service-af50",
+      "prompt": "log into <service>",
+      "label": "credentials",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:credentials:store-the-key-8d4a",
+      "prompt": "store the key",
+      "label": "credentials",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:credentials:which-keys-do-we-have-d372",
+      "prompt": "which keys do we have",
+      "label": "credentials",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:deploy:deploy-to-preview-5496",
+      "prompt": "deploy to preview",
+      "label": "deploy",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:deploy:deploy-to-staging-c659",
+      "prompt": "deploy to staging",
+      "label": "deploy",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:deploy:vercel-logs-d731",
+      "prompt": "vercel logs",
+      "label": "deploy",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:deploy:why-did-the-deploy-fail-a9dc",
+      "prompt": "why did the deploy fail",
+      "label": "deploy",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:deploy:deployment-status-bb76",
+      "prompt": "deployment status",
+      "label": "deploy",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:deploy:redeploy-until-it-works-e90f",
+      "prompt": "redeploy until it works",
+      "label": "deploy",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:draft:draft-a-post-6ade",
+      "prompt": "draft a post",
+      "label": "draft",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:draft:write-the-copy-e047",
+      "prompt": "write the copy",
+      "label": "draft",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:draft:write-the-caption-ea32",
+      "prompt": "write the caption",
+      "label": "draft",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:draft:post-about-topic-1e61",
+      "prompt": "post about <topic>",
+      "label": "draft",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:draft:attach-media-to-the-draft-7dfd",
+      "prompt": "attach media to the draft",
+      "label": "draft",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:draft:drain-the-draft-queue-a1f6",
+      "prompt": "drain the draft queue",
+      "label": "draft",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:draft:answer-the-social-asks-88ce",
+      "prompt": "answer the social asks",
+      "label": "draft",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-social",
+        "hard:cluster"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:draft:any-drafts-waiting-4cce",
+      "prompt": "any drafts waiting",
+      "label": "draft",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:draft:اكتب-منشور-7377",
+      "prompt": "اكتب منشور",
+      "label": "draft",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:draft:صياغة-المنشور-783a",
+      "prompt": "صياغة المنشور",
+      "label": "draft",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:draft:طابور-الصياغة-4964",
+      "prompt": "طابور الصياغة",
+      "label": "draft",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:draft:أرفق-وسائط-للمسودة-7719",
+      "prompt": "أرفق وسائط للمسودة",
+      "label": "draft",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:economy:economy-b945",
+      "prompt": "economy",
+      "label": "economy",
+      "source": "trigger_phrase",
+      "tags": [
+        "trivial"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:economy:token-usage-136a",
+      "prompt": "token usage",
+      "label": "economy",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:economy:optimize-tokens-f7d2",
+      "prompt": "optimize tokens",
+      "label": "economy",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:economy:we-re-burning-tokens-7370",
+      "prompt": "we're burning tokens",
+      "label": "economy",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:economy:hit-the-limit-99f2",
+      "prompt": "hit the limit",
+      "label": "economy",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:economy:usage-window-8cfa",
+      "prompt": "usage window",
+      "label": "economy",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:economy:plan-limit-0ab6",
+      "prompt": "plan limit",
+      "label": "economy",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-plan"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:economy:tokens-per-outcome-4eb4",
+      "prompt": "tokens per outcome",
+      "label": "economy",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:economy:توكن-8cab",
+      "prompt": "توكن",
+      "label": "economy",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:economy:استهلاك-0811",
+      "prompt": "استهلاك",
+      "label": "economy",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:feature:feature-name-product-04a4",
+      "prompt": "feature <name> [product]",
+      "label": "feature",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:feature:build-feature-end-to-end-adec",
+      "prompt": "build <feature> end to end",
+      "label": "feature",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-build",
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:feature:full-pipeline-idea-production-85fd",
+      "prompt": "full pipeline idea→production",
+      "label": "feature",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-idea",
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:handover:handover-url-block-77bf",
+      "prompt": "handover <url|block>",
+      "label": "handover",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-block",
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:handover:pre-demo-quality-pass-0ade",
+      "prompt": "pre-demo quality pass",
+      "label": "handover",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:handover:run-the-niche-quality-keywords-05d5",
+      "prompt": "run the niche quality keywords",
+      "label": "handover",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:handover:is-this-url-clean-2032",
+      "prompt": "is this URL clean",
+      "label": "handover",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:handover:is-the-whole-block-ready-to-show-9842",
+      "prompt": "is the whole block ready to show",
+      "label": "handover",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-block",
+        "hard:cluster"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:health:health-6b98",
+      "prompt": "health",
+      "label": "health",
+      "source": "trigger_phrase",
+      "tags": [
+        "trivial",
+        "hard:cluster"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:health:config-health-5be4",
+      "prompt": "config health",
+      "label": "health",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:health:is-the-engine-healthy-37d5",
+      "prompt": "is the engine healthy",
+      "label": "health",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:health:drift-check-d2f0",
+      "prompt": "drift check",
+      "label": "health",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-check",
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:health:team-config-status-ea7d",
+      "prompt": "team config status",
+      "label": "health",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:higgs:higgs-f33c",
+      "prompt": "/higgs",
+      "label": "higgs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:higgs:generate-video-92ca",
+      "prompt": "generate video",
+      "label": "higgs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:higgs:generate-image-be6d",
+      "prompt": "generate image",
+      "label": "higgs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:higgs:generate-photo-c9ea",
+      "prompt": "generate photo",
+      "label": "higgs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:higgs:make-an-ad-973d",
+      "prompt": "make an ad",
+      "label": "higgs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:higgs:promo-video-cf71",
+      "prompt": "promo video",
+      "label": "higgs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:higgs:og-image-8fb6",
+      "prompt": "og image",
+      "label": "higgs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:higgs:social-card-8d2e",
+      "prompt": "social card",
+      "label": "higgs",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-social"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:higgs:hero-image-b471",
+      "prompt": "hero image",
+      "label": "higgs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:higgs:product-shot-56ba",
+      "prompt": "product shot",
+      "label": "higgs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:higgs:mockup-be55",
+      "prompt": "mockup",
+      "label": "higgs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:higgs:lifestyle-scene-3f66",
+      "prompt": "lifestyle scene",
+      "label": "higgs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:higgs:moodboard-a711",
+      "prompt": "moodboard",
+      "label": "higgs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:higgs:showroom-asset-1051",
+      "prompt": "showroom asset",
+      "label": "higgs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:higgs:brand-kit-0b07",
+      "prompt": "brand kit",
+      "label": "higgs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:higgs:edit-video-from-url-e196",
+      "prompt": "edit video from url",
+      "label": "higgs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:higgs:download-and-tweak-video-9161",
+      "prompt": "download and tweak video",
+      "label": "higgs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:higgs:higgs-d9e6",
+      "prompt": "higgs",
+      "label": "higgs",
+      "source": "trigger_phrase",
+      "tags": [
+        "trivial"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:higgs:nano-banana-9b94",
+      "prompt": "nano banana",
+      "label": "higgs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:higgs:veo-7730",
+      "prompt": "veo",
+      "label": "higgs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:higgs:omni-d56e",
+      "prompt": "omni",
+      "label": "higgs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:higgs:gemini-image-9cf8",
+      "prompt": "gemini image",
+      "label": "higgs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:higgs:صورة-تسويقية-fb7d",
+      "prompt": "صورة تسويقية",
+      "label": "higgs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:higgs:وسائط-12de",
+      "prompt": "وسائط",
+      "label": "higgs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:idea:capture-this-idea-29f5",
+      "prompt": "capture this idea",
+      "label": "idea",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:idea:new-feature-idea-6007",
+      "prompt": "new feature idea",
+      "label": "idea",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-feature",
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:idea:we-should-build-8932",
+      "prompt": "we should build …",
+      "label": "idea",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-build",
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:idea:user-can-stories-7135",
+      "prompt": "user can …\" stories",
+      "label": "idea",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:idea:pipeline-capture-stage-f252",
+      "prompt": "pipeline Capture stage",
+      "label": "idea",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:idea:optionally-scoped-to-a-product-hogwarts-souq-mka-8e8b",
+      "prompt": "optionally scoped to a product (hogwarts, souq, mkan, shifa, kun)",
+      "label": "idea",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:incident:incident-6399",
+      "prompt": "incident",
+      "label": "incident",
+      "source": "trigger_phrase",
+      "tags": [
+        "trivial"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:incident:production-is-down-cd36",
+      "prompt": "production is down",
+      "label": "incident",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:incident:outage-c244",
+      "prompt": "outage",
+      "label": "incident",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:incident:p0-20ff",
+      "prompt": "P0",
+      "label": "incident",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:incident:users-can-t-log-in-1871",
+      "prompt": "users can't log in",
+      "label": "incident",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:issue:open-file-an-issue-a4bd",
+      "prompt": "open/file an issue",
+      "label": "issue",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:issue:create-a-github-issue-in-the-right-databayt-repo-b531",
+      "prompt": "create a GitHub issue in the right databayt repo",
+      "label": "issue",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:learn:learn-7f69",
+      "prompt": "learn",
+      "label": "learn",
+      "source": "trigger_phrase",
+      "tags": [
+        "trivial",
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:learn:what-are-our-conventions-6793",
+      "prompt": "what are our conventions",
+      "label": "learn",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:learn:extract-patterns-from-history-9108",
+      "prompt": "extract patterns from history",
+      "label": "learn",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:measure:how-did-the-post-do-7b14",
+      "prompt": "how did the post do",
+      "label": "measure",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:measure:social-metrics-9883",
+      "prompt": "social metrics",
+      "label": "measure",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-social",
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:measure:reach-and-engagement-f449",
+      "prompt": "reach and engagement",
+      "label": "measure",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:measure:is-social-working-6e46",
+      "prompt": "is social working",
+      "label": "measure",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-social",
+        "hard:cluster"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:measure:did-anyone-see-it-b6d5",
+      "prompt": "did anyone see it",
+      "label": "measure",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:measure:أرقام-المنشور-c207",
+      "prompt": "أرقام المنشور",
+      "label": "measure",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:measure:أداء-المنشورات-46ff",
+      "prompt": "أداء المنشورات",
+      "label": "measure",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:monitor:monitor-763e",
+      "prompt": "monitor",
+      "label": "monitor",
+      "source": "trigger_phrase",
+      "tags": [
+        "trivial"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:monitor:are-the-deploys-green-30da",
+      "prompt": "are the deploys green",
+      "label": "monitor",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:monitor:uptime-check-4160",
+      "prompt": "uptime check",
+      "label": "monitor",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-check"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:monitor:production-status-sweep-a60f",
+      "prompt": "production status sweep",
+      "label": "monitor",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:package:package-audit-3d1a",
+      "prompt": "package audit",
+      "label": "package",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:package:upgrade-deps-across-repos-17d7",
+      "prompt": "upgrade deps across repos",
+      "label": "package",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-repos"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:package:version-consistency-f73d",
+      "prompt": "version consistency",
+      "label": "package",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:package:dependency-sweep-4736",
+      "prompt": "dependency sweep",
+      "label": "package",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:pattern:pattern-keyword-a453",
+      "prompt": "pattern <keyword>",
+      "label": "pattern",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:pattern:how-do-we-do-forms-8bfd",
+      "prompt": "how do we do forms",
+      "label": "pattern",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:pattern:canonical-pattern-d2c6",
+      "prompt": "canonical pattern",
+      "label": "pattern",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:pattern:follow-the-card-6188",
+      "prompt": "follow the card",
+      "label": "pattern",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:plan:plan-the-architecture-5326",
+      "prompt": "plan the architecture",
+      "label": "plan",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:plan:architecture-plan-for-the-approved-spec-afe9",
+      "prompt": "architecture plan for the approved spec",
+      "label": "plan",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-spec",
+        "hard:cluster"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:plan:pipeline-plan-stage-e066",
+      "prompt": "pipeline Plan stage",
+      "label": "plan",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:pricing:pricing-2e2f",
+      "prompt": "pricing",
+      "label": "pricing",
+      "source": "trigger_phrase",
+      "tags": [
+        "trivial"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:pricing:price-the-product-b513",
+      "prompt": "price the product",
+      "label": "pricing",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:pricing:tier-comparison-aa70",
+      "prompt": "tier comparison",
+      "label": "pricing",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:pricing:what-should-we-charge-174b",
+      "prompt": "what should we charge",
+      "label": "pricing",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:profile:profile-role-c99f",
+      "prompt": "profile <role>",
+      "label": "profile",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:profile:load-the-business-profile-fd10",
+      "prompt": "load the business profile",
+      "label": "profile",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:profile:switch-to-content-mode-6f0f",
+      "prompt": "switch to content mode",
+      "label": "profile",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:proposal:proposal-190b",
+      "prompt": "proposal",
+      "label": "proposal",
+      "source": "trigger_phrase",
+      "tags": [
+        "trivial"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:proposal:draft-the-offer-12b0",
+      "prompt": "draft the offer",
+      "label": "proposal",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-draft"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:proposal:client-proposal-9b50",
+      "prompt": "client proposal",
+      "label": "proposal",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:proposal:send-them-a-quote-c675",
+      "prompt": "send them a quote",
+      "label": "proposal",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:publish:publish-the-post-95e5",
+      "prompt": "publish the post",
+      "label": "publish",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:publish:send-it-out-fc37",
+      "prompt": "send it out",
+      "label": "publish",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:publish:post-it-now-fa51",
+      "prompt": "post it now",
+      "label": "publish",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:publish:schedule-it-for-tomorrow-2e17",
+      "prompt": "schedule it for tomorrow",
+      "label": "publish",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:publish:broadcast-it-96af",
+      "prompt": "broadcast it",
+      "label": "publish",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:publish:review-and-publish-f302",
+      "prompt": "review and publish",
+      "label": "publish",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:publish:انشر-المنشور-83a0",
+      "prompt": "انشر المنشور",
+      "label": "publish",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:publish:ابعت-المنشور-0664",
+      "prompt": "ابعت المنشور",
+      "label": "publish",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:publish:راجع-وانشر-d6b9",
+      "prompt": "راجع وانشر",
+      "label": "publish",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:release:release-block-53e5",
+      "prompt": "release <block>",
+      "label": "release",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-block"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:release:send-to-client-0231",
+      "prompt": "send to client",
+      "label": "release",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:release:one-spell-handoff-handover-check-ship-watch-clos-10cf",
+      "prompt": "one-spell handoff (handover→check→ship→watch→close issue)",
+      "label": "release",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-check",
+        "hard:names-handover",
+        "hard:names-issue",
+        "hard:names-ship",
+        "hard:names-watch"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:release:give-away-to-client-f178",
+      "prompt": "give away to client",
+      "label": "release",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:release:ship-it-and-tell-the-client-669d",
+      "prompt": "ship it and tell the client",
+      "label": "release",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-ship"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:report:report-19bb",
+      "prompt": "report",
+      "label": "report",
+      "source": "trigger_phrase",
+      "tags": [
+        "trivial",
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:report:fix-reports-9cca",
+      "prompt": "fix reports",
+      "label": "report",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-fix",
+        "hard:cluster"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:report:user-reported-issue-auto-fix-635a",
+      "prompt": "user-reported issue auto-fix",
+      "label": "report",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-fix",
+        "hard:names-issue",
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:report:verified-report-queue-1b07",
+      "prompt": "verified-report queue",
+      "label": "report",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:schema:add-the-model-migration-c9fb",
+      "prompt": "add the model/migration",
+      "label": "schema",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:schema:data-layer-6bb9",
+      "prompt": "data layer",
+      "label": "schema",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:schema:prisma-model-zod-validation-dc12",
+      "prompt": "Prisma model + Zod validation",
+      "label": "schema",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:schema:pipeline-data-stage-41b8",
+      "prompt": "pipeline Data stage",
+      "label": "schema",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:ship:ship-ac56",
+      "prompt": "ship",
+      "label": "ship",
+      "source": "trigger_phrase",
+      "tags": [
+        "trivial",
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:ship:deploy-to-production-2b06",
+      "prompt": "deploy to production",
+      "label": "ship",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-deploy",
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:ship:promote-checked-build-vercel-prod-7d39",
+      "prompt": "promote checked build (Vercel --prod)",
+      "label": "ship",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-build",
+        "hard:cluster"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:social:social-post-225d",
+      "prompt": "social post",
+      "label": "social",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:social:publish-to-social-a924",
+      "prompt": "publish to social",
+      "label": "social",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-publish",
+        "hard:cluster"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:social:social-automation-677d",
+      "prompt": "social automation",
+      "label": "social",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:social:broadcast-the-announcement-28fd",
+      "prompt": "broadcast the announcement",
+      "label": "social",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:social:منشور-تواصل-db48",
+      "prompt": "منشور تواصل",
+      "label": "social",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:social:انشر-عن-a95c",
+      "prompt": "انشر عن",
+      "label": "social",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:spec:spec-the-feature-9924",
+      "prompt": "spec the <feature>",
+      "label": "spec",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-feature",
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:spec:write-the-spec-22a2",
+      "prompt": "write the spec",
+      "label": "spec",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:spec:technical-specification-529b",
+      "prompt": "technical specification",
+      "label": "spec",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:spec:pipeline-specify-stage-human-approval-gate-d671",
+      "prompt": "pipeline Specify stage (human approval gate)",
+      "label": "spec",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:sync:sync-097a",
+      "prompt": "sync",
+      "label": "sync",
+      "source": "trigger_phrase",
+      "tags": [
+        "trivial"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:sync:what-s-new-in-claude-code-caed",
+      "prompt": "what's new in claude code",
+      "label": "sync",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-code"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:sync:refresh-the-engine-9062",
+      "prompt": "refresh the engine",
+      "label": "sync",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:sync:release-sweep-c610",
+      "prompt": "release sweep",
+      "label": "sync",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-release"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:tasks:break-it-down-a509",
+      "prompt": "break it down",
+      "label": "tasks",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:tasks:ordered-task-list-from-an-approved-plan-9cec",
+      "prompt": "ordered task list from an approved plan",
+      "label": "tasks",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-plan",
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:tasks:task-breakdown-4117",
+      "prompt": "task breakdown",
+      "label": "tasks",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:tasks:decompose-the-plan-5183",
+      "prompt": "decompose the plan",
+      "label": "tasks",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-plan",
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:tasks:pipeline-tasks-stage-2263",
+      "prompt": "pipeline Tasks stage",
+      "label": "tasks",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:template:template-name-82a0",
+      "prompt": "template <name>",
+      "label": "template",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:template:create-a-template-4fd6",
+      "prompt": "create a template",
+      "label": "template",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:template:new-hero-sidebar-login-template-be22",
+      "prompt": "new hero/sidebar/login template",
+      "label": "template",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:template:rebuild-the-template-registry-4355",
+      "prompt": "rebuild the template registry",
+      "label": "template",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:watch:watch-5fb7",
+      "prompt": "watch",
+      "label": "watch",
+      "source": "trigger_phrase",
+      "tags": [
+        "trivial",
+        "hard:cluster"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:watch:verify-the-deploy-a65e",
+      "prompt": "verify the deploy",
+      "label": "watch",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-deploy",
+        "hard:cluster"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:watch:is-it-live-fd42",
+      "prompt": "is it live",
+      "label": "watch",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:watch:post-deploy-visual-console-smoke-check-b346",
+      "prompt": "post-deploy visual + console + smoke check",
+      "label": "watch",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-check",
+        "hard:names-deploy",
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:watch:pipeline-monitor-stage-9016",
+      "prompt": "pipeline Monitor stage",
+      "label": "watch",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-monitor",
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:weekly:weekly-fb69",
+      "prompt": "weekly",
+      "label": "weekly",
+      "source": "trigger_phrase",
+      "tags": [
+        "trivial"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:weekly:monday-plan-f0a0",
+      "prompt": "monday plan",
+      "label": "weekly",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-plan"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:weekly:friday-review-cfaf",
+      "prompt": "friday review",
+      "label": "weekly",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:weekly:plan-the-week-b513",
+      "prompt": "plan the week",
+      "label": "weekly",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-plan"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:wire:wire-the-ui-1018",
+      "prompt": "wire the UI",
+      "label": "wire",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:wire:build-the-page-form-table-for-the-feature-eea0",
+      "prompt": "build the page/form/table for the feature",
+      "label": "wire",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-build",
+        "hard:names-feature",
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:wire:i18n-wiring-124a",
+      "prompt": "i18n wiring",
+      "label": "wire",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:wire:pipeline-ui-stage-1619",
+      "prompt": "pipeline UI stage",
+      "label": "wire",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "spell:pipeline:feature-e4ba",
+      "prompt": "feature",
+      "label": "feature",
+      "source": "vocab_spell",
+      "tags": [
+        "trivial",
+        "hard:cluster"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "spell:pipeline:idea-faf0",
+      "prompt": "idea",
+      "label": "idea",
+      "source": "vocab_spell",
+      "tags": [
+        "trivial",
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "spell:pipeline:spec-0bf6",
+      "prompt": "spec",
+      "label": "spec",
+      "source": "vocab_spell",
+      "tags": [
+        "trivial",
+        "hard:cluster"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "spell:pipeline:plan-b7cb",
+      "prompt": "plan",
+      "label": "plan",
+      "source": "vocab_spell",
+      "tags": [
+        "trivial",
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "spell:pipeline:tasks-ad2e",
+      "prompt": "tasks",
+      "label": "tasks",
+      "source": "vocab_spell",
+      "tags": [
+        "trivial",
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "spell:pipeline:schema-527d",
+      "prompt": "schema",
+      "label": "schema",
+      "source": "vocab_spell",
+      "tags": [
+        "trivial"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "none:pipeline:ready-660e",
+      "prompt": "ready",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "spell:pipeline:code-f931",
+      "prompt": "code",
+      "label": "code",
+      "source": "vocab_spell",
+      "tags": [
+        "trivial",
+        "hard:cluster"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "spell:pipeline:wire-f359",
+      "prompt": "wire",
+      "label": "wire",
+      "source": "vocab_spell",
+      "tags": [
+        "trivial",
+        "hard:cluster"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "spell:charm-work:dev-d559",
+      "prompt": "dev",
+      "label": "dev",
+      "source": "vocab_spell",
+      "tags": [
+        "trivial"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "spell:charm-work:build-c39b",
+      "prompt": "build",
+      "label": "build",
+      "source": "vocab_spell",
+      "tags": [
+        "trivial",
+        "hard:cluster"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "none:charm-work:push-876f",
+      "prompt": "push",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "spell:charm-work:quick-f739",
+      "prompt": "quick",
+      "label": "quick",
+      "source": "vocab_spell",
+      "tags": [
+        "trivial"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "spell:charm-work:deploy-5cd3",
+      "prompt": "deploy",
+      "label": "deploy",
+      "source": "vocab_spell",
+      "tags": [
+        "trivial",
+        "hard:cluster"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "spell:charm-work:release-1036",
+      "prompt": "release",
+      "label": "release",
+      "source": "vocab_spell",
+      "tags": [
+        "trivial"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "none:transfiguration:component-5efd",
+      "prompt": "component",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:transfiguration:page-815d",
+      "prompt": "page",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "none:transfiguration:api-386a",
+      "prompt": "api",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "spell:transfiguration:atom-0374",
+      "prompt": "atom",
+      "label": "atom",
+      "source": "vocab_spell",
+      "tags": [
+        "trivial"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "spell:transfiguration:template-694a",
+      "prompt": "template",
+      "label": "template",
+      "source": "vocab_spell",
+      "tags": [
+        "trivial"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "spell:transfiguration:block-eb0c",
+      "prompt": "block",
+      "label": "block",
+      "source": "vocab_spell",
+      "tags": [
+        "trivial"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "none:transfiguration:migration-2b0b",
+      "prompt": "migration",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "none:ancient-runes:nextjs-9c54",
+      "prompt": "nextjs",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:ancient-runes:react-58fd",
+      "prompt": "react",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:ancient-runes:typescript-1986",
+      "prompt": "typescript",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:ancient-runes:prisma-c531",
+      "prompt": "prisma",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:ancient-runes:tailwind-589a",
+      "prompt": "tailwind",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "spell:ancient-runes:shadcn-414e",
+      "prompt": "shadcn",
+      "label": "shadcn",
+      "source": "vocab_spell",
+      "tags": [
+        "trivial"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "none:conjuration:table-4a9c",
+      "prompt": "table",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:conjuration:header-e488",
+      "prompt": "header",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:conjuration:menu-99e4",
+      "prompt": "menu",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:conjuration:form-4058",
+      "prompt": "form",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:conjuration:modal-9080",
+      "prompt": "modal",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "none:conjuration:card-8827",
+      "prompt": "card",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:conjuration:sidebar-c87a",
+      "prompt": "sidebar",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:conjuration:footer-1149",
+      "prompt": "footer",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "none:conjuration:hero-1b3b",
+      "prompt": "hero",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:conjuration:navbar-7aad",
+      "prompt": "navbar",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "spell:dark-arts:saas-bb16",
+      "prompt": "saas",
+      "label": "saas",
+      "source": "vocab_spell",
+      "tags": [
+        "trivial"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "none:dark-arts:dashboard-e4c1",
+      "prompt": "dashboard",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:dark-arts:landing-3b55",
+      "prompt": "landing",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "none:dark-arts:checkout-4db9",
+      "prompt": "checkout",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "none:dark-arts:settings-6806",
+      "prompt": "settings",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:dark-arts:admin-34c8",
+      "prompt": "admin",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:dark-arts:onboarding-2263",
+      "prompt": "onboarding",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "spell:animation:motion-bd73",
+      "prompt": "motion",
+      "label": "motion",
+      "source": "vocab_spell",
+      "tags": [
+        "trivial"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "spell:animation:animation-e145",
+      "prompt": "animation",
+      "label": "motion",
+      "source": "vocab_spell",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "spell:animation:transition-a627",
+      "prompt": "transition",
+      "label": "motion",
+      "source": "vocab_spell",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "spell:animation:gesture-655c",
+      "prompt": "gesture",
+      "label": "motion",
+      "source": "vocab_spell",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "spell:animation:scroll-dd4e",
+      "prompt": "scroll",
+      "label": "motion",
+      "source": "vocab_spell",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "spell:defense:test-afd0",
+      "prompt": "test",
+      "label": "test",
+      "source": "vocab_spell",
+      "tags": [
+        "trivial"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "none:defense:e2e-7c36",
+      "prompt": "e2e",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "spell:defense:handover-aedd",
+      "prompt": "handover",
+      "label": "handover",
+      "source": "vocab_spell",
+      "tags": [
+        "trivial",
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "spell:defense:qa-6c4c",
+      "prompt": "qa",
+      "label": "qa",
+      "source": "vocab_spell",
+      "tags": [
+        "trivial",
+        "hard:cluster"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "none:defense:coverage-f7f1",
+      "prompt": "coverage",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:defense:review-2257",
+      "prompt": "review",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "spell:defense:security-c92c",
+      "prompt": "security",
+      "label": "security",
+      "source": "vocab_spell",
+      "tags": [
+        "trivial"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "none:defense:audit-f561",
+      "prompt": "audit",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:defense:constitution-2102",
+      "prompt": "constitution",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:defense:accessibility-6c0a",
+      "prompt": "accessibility",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:defense:optimize-f9e7",
+      "prompt": "optimize",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "spell:defense:performance-aece",
+      "prompt": "performance",
+      "label": "performance",
+      "source": "vocab_spell",
+      "tags": [
+        "trivial"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "spell:reparo:fix-b2e4",
+      "prompt": "fix",
+      "label": "fix",
+      "source": "vocab_spell",
+      "tags": [
+        "trivial",
+        "hard:cluster"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "none:reparo:error-2191",
+      "prompt": "error",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "none:reparo:scan-ece8",
+      "prompt": "scan",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:reparo:lint-06da",
+      "prompt": "lint",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:reparo:format-b99d",
+      "prompt": "format",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "none:reparo:type-check-540e",
+      "prompt": "type-check",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "spell:quill:docs-28eb",
+      "prompt": "docs",
+      "label": "docs",
+      "source": "vocab_spell",
+      "tags": [
+        "trivial"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "spell:quill:readme-4a07",
+      "prompt": "readme",
+      "label": "docs",
+      "source": "vocab_spell",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "spell:quill:api-docs-7575",
+      "prompt": "api-docs",
+      "label": "docs",
+      "source": "vocab_spell",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "spell:quill:storybook-034f",
+      "prompt": "storybook",
+      "label": "docs",
+      "source": "vocab_spell",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "spell:quill:changelog-920f",
+      "prompt": "changelog",
+      "label": "docs",
+      "source": "vocab_spell",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "spell:geminio:clone-2b88",
+      "prompt": "clone",
+      "label": "clone",
+      "source": "vocab_spell",
+      "tags": [
+        "trivial"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "none:geminio:copy-e562",
+      "prompt": "copy",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:geminio:fork-3e58",
+      "prompt": "fork",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:geminio:extend-aa7d",
+      "prompt": "extend",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:geminio:upstream-1335",
+      "prompt": "upstream",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:summoning:github-22dc",
+      "prompt": "github",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:summoning:figma-1e4f",
+      "prompt": "figma",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:summoning:linear-d005",
+      "prompt": "linear",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:summoning:slack-ea9b",
+      "prompt": "slack",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:summoning:notion-8d57",
+      "prompt": "notion",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:summoning:sentry-ca96",
+      "prompt": "sentry",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:summoning:stripe-25a7",
+      "prompt": "stripe",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "none:summoning:vercel-9400",
+      "prompt": "vercel",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "none:summoning:analytics-5c10",
+      "prompt": "analytics",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:summoning:neon-48db",
+      "prompt": "neon",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "spell:divination:story-b3e7",
+      "prompt": "story",
+      "label": "idea",
+      "source": "vocab_spell",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "none:divination:workflow-f16d",
+      "prompt": "workflow",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:performance-magic:parallelize-5d10",
+      "prompt": "parallelize",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:performance-magic:waterfall-516f",
+      "prompt": "waterfall",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "none:performance-magic:bundle-1229",
+      "prompt": "bundle",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:performance-magic:lazy-6acc",
+      "prompt": "lazy",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:performance-magic:suspense-ac42",
+      "prompt": "suspense",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:performance-magic:memo-9fe7",
+      "prompt": "memo",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "none:performance-magic:server-component-96e7",
+      "prompt": "server-component",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:performance-magic:streaming-7dcd",
+      "prompt": "streaming",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:performance-magic:barrel-123c",
+      "prompt": "barrel",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:performance-magic:dedup-e91c",
+      "prompt": "dedup",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "spell:portkeys:from-codebase-1b48",
+      "prompt": "from codebase",
+      "label": "codebase",
+      "source": "vocab_spell",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "none:portkeys:from-shadcn-e1e1",
+      "prompt": "from shadcn",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:portkeys:from-radix-4c7a",
+      "prompt": "from radix",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:portkeys:like-hogwarts-2c36",
+      "prompt": "like hogwarts",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:portkeys:like-souq-da28",
+      "prompt": "like souq",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:portkeys:like-mkan-3eed",
+      "prompt": "like mkan",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:portkeys:like-shifa-18cf",
+      "prompt": "like shifa",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:portkeys:like-sijillee-3362",
+      "prompt": "like sijillee",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:portkeys:like-moallimee-6b79",
+      "prompt": "like moallimee",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:unforgivable:rm-rf-661c",
+      "prompt": "rm -rf *",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [
+        "destructive"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "none:unforgivable:prisma-migrate-reset-be8e",
+      "prompt": "prisma migrate reset",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [
+        "destructive"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "none:unforgivable:prisma-db-push-accept-data-loss-23fc",
+      "prompt": "prisma db push --accept-data-loss",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [
+        "destructive"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "none:unforgivable:drop-table-4e6b",
+      "prompt": "DROP TABLE",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [
+        "destructive"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "none:unforgivable:git-push-force-main-aeb1",
+      "prompt": "git push --force main",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [
+        "destructive"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "none:auror-office:see-b526",
+      "prompt": "see",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:auror-office:flow-bdc8",
+      "prompt": "flow",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:auror-office:debug-5864",
+      "prompt": "debug",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:auror-office:responsive-9bc4",
+      "prompt": "responsive",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "none:auror-office:lang-70ea",
+      "prompt": "lang",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:auror-office:fast-0294",
+      "prompt": "fast",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:auror-office:guard-2bd1",
+      "prompt": "guard",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:auror-office:architecture-67c3",
+      "prompt": "architecture",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:auror-office:structure-6f55",
+      "prompt": "structure",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "none:auror-office:design-fb31",
+      "prompt": "design",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:auror-office:stack-6251",
+      "prompt": "stack",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:auror-office:trace-813d",
+      "prompt": "trace",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:auror-office:efficient-4f3a",
+      "prompt": "efficient",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "none:auror-office:mirror-2fc9",
+      "prompt": "mirror",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:auror-office:diff-682c",
+      "prompt": "diff",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "spell:ministry:captain-55d7",
+      "prompt": "captain",
+      "label": "captain",
+      "source": "vocab_spell",
+      "tags": [
+        "trivial"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "spell:ministry:issue-ba4d",
+      "prompt": "issue",
+      "label": "issue",
+      "source": "vocab_spell",
+      "tags": [
+        "trivial",
+        "hard:cluster"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "none:ministry:conventions-79c2",
+      "prompt": "conventions",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:ministry:patterns-3f09",
+      "prompt": "patterns",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "none:ministry:drift-2e87",
+      "prompt": "drift",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "spell:pensieve:decide-ee17",
+      "prompt": "decide",
+      "label": "decide",
+      "source": "vocab_spell",
+      "tags": [
+        "trivial"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "spell:pensieve:premortem-eff9",
+      "prompt": "premortem",
+      "label": "premortem",
+      "source": "vocab_spell",
+      "tags": [
+        "trivial"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "spell:pensieve:convert-6239",
+      "prompt": "convert",
+      "label": "convert",
+      "source": "vocab_spell",
+      "tags": [
+        "trivial"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "spell:pensieve:calendar-a481",
+      "prompt": "calendar",
+      "label": "calendar",
+      "source": "vocab_spell",
+      "tags": [
+        "trivial",
+        "hard:cluster"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "spell:pensieve:draft-b576",
+      "prompt": "draft",
+      "label": "draft",
+      "source": "vocab_spell",
+      "tags": [
+        "trivial",
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "spell:pensieve:media-fc9a",
+      "prompt": "media",
+      "label": "higgs",
+      "source": "vocab_spell",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "spell:pensieve:approve-cf90",
+      "prompt": "approve",
+      "label": "approve",
+      "source": "vocab_spell",
+      "tags": [
+        "trivial",
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "spell:pensieve:publish-0fc0",
+      "prompt": "publish",
+      "label": "publish",
+      "source": "vocab_spell",
+      "tags": [
+        "trivial",
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "spell:pensieve:measure-10bf",
+      "prompt": "measure",
+      "label": "measure",
+      "source": "vocab_spell",
+      "tags": [
+        "trivial",
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "spell:pensieve:social-b2ec",
+      "prompt": "social",
+      "label": "social",
+      "source": "vocab_spell",
+      "tags": [
+        "trivial",
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "spell:portraits:banner-416b",
+      "prompt": "banner",
+      "label": "carousel",
+      "source": "vocab_spell",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "spell:portraits:lifestyle-33df",
+      "prompt": "lifestyle",
+      "label": "higgs",
+      "source": "vocab_spell",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "spell:portraits:split-screen-e34a",
+      "prompt": "split-screen",
+      "label": "carousel",
+      "source": "vocab_spell",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "spell:portraits:reel-d6e8",
+      "prompt": "reel",
+      "label": "higgs",
+      "source": "vocab_spell",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "spell:portraits:infographic-bf21",
+      "prompt": "infographic",
+      "label": "carousel",
+      "source": "vocab_spell",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "spell:portraits:testimonial-e6a3",
+      "prompt": "testimonial",
+      "label": "carousel",
+      "source": "vocab_spell",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "spell:portraits:showroom-4fb0",
+      "prompt": "showroom",
+      "label": "higgs",
+      "source": "vocab_spell",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "kw:auth:not-authenticated-b54a",
+      "prompt": "not authenticated",
+      "label": "auth",
+      "source": "quoted_keyword",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "kw:auth:log-into-x-sign-me-into-x-auth-69d6",
+      "prompt": "log into X / sign me into X / auth",
+      "label": "auth",
+      "source": "quoted_keyword",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "kw:mcp-doctor:tool-not-found-ffd9",
+      "prompt": "tool not found",
+      "label": "mcp-doctor",
+      "source": "quoted_keyword",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "kw:qa:qa-admission-c365",
+      "prompt": "qa admission",
+      "label": "qa",
+      "source": "quoted_keyword",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "kw:qa:qa-this-block-8f4f",
+      "prompt": "QA this block",
+      "label": "qa",
+      "source": "quoted_keyword",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "kw:shadcn:shadcn-docs-f2d0",
+      "prompt": "shadcn docs",
+      "label": "shadcn",
+      "source": "quoted_keyword",
+      "tags": [],
+      "split": "holdout"
+    }
+  ],
+  "clusters": [
+    {
+      "id": "feature",
+      "members": [
+        "feature",
+        "idea",
+        "issue",
+        "plan",
+        "report",
+        "spec",
+        "tasks"
+      ],
+      "max_cosine": 0.683
+    },
+    {
+      "id": "approve",
+      "members": [
+        "approve",
+        "calendar",
+        "draft",
+        "measure",
+        "publish",
+        "social"
+      ],
+      "max_cosine": 0.587
+    },
+    {
+      "id": "build",
+      "members": [
+        "build",
+        "check",
+        "deploy",
+        "fix",
+        "ship",
+        "watch"
+      ],
+      "max_cosine": 0.494
+    },
+    {
+      "id": "code",
+      "members": [
+        "code",
+        "wire"
+      ],
+      "max_cosine": 0.41
+    },
+    {
+      "id": "handover",
+      "members": [
+        "handover",
+        "qa"
+      ],
+      "max_cosine": 0.358
+    },
+    {
+      "id": "analyze",
+      "members": [
+        "analyze",
+        "learn"
+      ],
+      "max_cosine": 0.357
+    },
+    {
+      "id": "bench",
+      "members": [
+        "bench",
+        "health"
+      ],
+      "max_cosine": 0.331
+    }
+  ],
+  "top_pairs": [
+    [
+      "plan",
+      "tasks",
+      0.683
+    ],
+    [
+      "approve",
+      "publish",
+      0.587
+    ],
+    [
+      "plan",
+      "spec",
+      0.518
+    ],
+    [
+      "feature",
+      "idea",
+      0.511
+    ],
+    [
+      "deploy",
+      "ship",
+      0.494
+    ],
+    [
+      "spec",
+      "tasks",
+      0.486
+    ],
+    [
+      "build",
+      "check",
+      0.485
+    ],
+    [
+      "draft",
+      "social",
+      0.451
+    ],
+    [
+      "idea",
+      "issue",
+      0.434
+    ],
+    [
+      "publish",
+      "social",
+      0.42
+    ],
+    [
+      "calendar",
+      "publish",
+      0.416
+    ],
+    [
+      "approve",
+      "draft",
+      0.411
+    ],
+    [
+      "code",
+      "wire",
+      0.41
+    ],
+    [
+      "measure",
+      "social",
+      0.405
+    ],
+    [
+      "issue",
+      "report",
+      0.403
+    ],
+    [
+      "feature",
+      "spec",
+      0.391
+    ],
+    [
+      "build",
+      "fix",
+      0.39
+    ],
+    [
+      "ship",
+      "watch",
+      0.386
+    ],
+    [
+      "idea",
+      "spec",
+      0.385
+    ],
+    [
+      "calendar",
+      "social",
+      0.377
+    ],
+    [
+      "build",
+      "ship",
+      0.374
+    ],
+    [
+      "approve",
+      "calendar",
+      0.361
+    ],
+    [
+      "calendar",
+      "measure",
+      0.358
+    ],
+    [
+      "handover",
+      "qa",
+      0.358
+    ],
+    [
+      "analyze",
+      "learn",
+      0.357
+    ]
+  ],
+  "per_skill": {
+    "analyze": {
+      "support": 3,
+      "chars": 415,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
+    "approve": {
+      "support": 11,
+      "chars": 904,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
+    "atom": {
+      "support": 5,
+      "chars": 340,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": true,
+      "has_when_to_use": true
+    },
+    "auth": {
+      "support": 2,
+      "chars": 505,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": false
+    },
+    "bench": {
+      "support": 7,
+      "chars": 596,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
+    "block": {
+      "support": 1,
+      "chars": 67,
+      "scope": "user",
+      "fp_cost": 1,
+      "claude_md_routed": true,
+      "has_when_to_use": false
+    },
+    "build": {
+      "support": 1,
+      "chars": 343,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
+    "calendar": {
+      "support": 8,
+      "chars": 597,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
+    "canon": {
+      "support": 0,
+      "chars": 318,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": true,
+      "has_when_to_use": false
+    },
+    "captain": {
+      "support": 1,
+      "chars": 88,
+      "scope": "user",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": false
+    },
+    "carousel": {
+      "support": 12,
+      "chars": 506,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
+    "check": {
+      "support": 4,
+      "chars": 521,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
+    "clone": {
+      "support": 7,
+      "chars": 624,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
+    "code": {
+      "support": 4,
+      "chars": 434,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
+    "codebase": {
+      "support": 1,
+      "chars": 82,
+      "scope": "user",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": false
+    },
+    "convert": {
+      "support": 6,
+      "chars": 430,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
+    "costs": {
+      "support": 5,
+      "chars": 336,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
+    "crawl-anthropic": {
+      "support": 3,
+      "chars": 304,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
+    "credentials": {
+      "support": 5,
+      "chars": 376,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
+    "decide": {
+      "support": 1,
+      "chars": 111,
+      "scope": "user",
+      "fp_cost": 1,
+      "claude_md_routed": true,
+      "has_when_to_use": false
+    },
+    "deploy": {
+      "support": 7,
+      "chars": 713,
+      "scope": "user",
+      "fp_cost": 3,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
+    "dev": {
+      "support": 1,
+      "chars": 34,
+      "scope": "user",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": false
+    },
+    "docs": {
+      "support": 5,
+      "chars": 73,
+      "scope": "user",
+      "fp_cost": 1,
+      "claude_md_routed": true,
+      "has_when_to_use": false
+    },
+    "draft": {
+      "support": 13,
+      "chars": 1085,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
+    "economy": {
+      "support": 10,
+      "chars": 438,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
+    "feature": {
+      "support": 4,
+      "chars": 726,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": true,
+      "has_when_to_use": true
+    },
+    "fix": {
+      "support": 1,
+      "chars": 66,
+      "scope": "user",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": false
+    },
+    "handover": {
+      "support": 6,
+      "chars": 563,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": true,
+      "has_when_to_use": true
+    },
+    "health": {
+      "support": 5,
+      "chars": 379,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": true,
+      "has_when_to_use": true
+    },
+    "higgs": {
+      "support": 28,
+      "chars": 1053,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
+    "idea": {
+      "support": 8,
+      "chars": 581,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
+    "incident": {
+      "support": 5,
+      "chars": 338,
+      "scope": "project",
+      "fp_cost": 3,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
+    "issue": {
+      "support": 3,
+      "chars": 577,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
+    "learn": {
+      "support": 3,
+      "chars": 411,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
+    "mcp-doctor": {
+      "support": 1,
+      "chars": 153,
+      "scope": "user",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": false
+    },
+    "measure": {
+      "support": 8,
+      "chars": 622,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
+    "monitor": {
+      "support": 4,
+      "chars": 357,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
+    "motion": {
+      "support": 5,
+      "chars": 50,
+      "scope": "user",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": false
+    },
+    "package": {
+      "support": 4,
+      "chars": 376,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
+    "pattern": {
+      "support": 4,
+      "chars": 390,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
+    "performance": {
+      "support": 1,
+      "chars": 74,
+      "scope": "user",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": false
+    },
+    "plan": {
+      "support": 4,
+      "chars": 438,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
+    "premortem": {
+      "support": 1,
+      "chars": 100,
+      "scope": "user",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": false
+    },
+    "pricing": {
+      "support": 4,
+      "chars": 303,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
+    "profile": {
+      "support": 3,
+      "chars": 314,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
+    "proposal": {
+      "support": 4,
+      "chars": 280,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
+    "publish": {
+      "support": 10,
+      "chars": 851,
+      "scope": "project",
+      "fp_cost": 3,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
+    "qa": {
+      "support": 3,
+      "chars": 682,
+      "scope": "project",
+      "fp_cost": 3,
+      "claude_md_routed": true,
+      "has_when_to_use": true
+    },
+    "quick": {
+      "support": 1,
+      "chars": 53,
+      "scope": "user",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": false
+    },
+    "release": {
+      "support": 6,
+      "chars": 502,
+      "scope": "project",
+      "fp_cost": 3,
+      "claude_md_routed": true,
+      "has_when_to_use": true
+    },
+    "report": {
+      "support": 4,
+      "chars": 483,
+      "scope": "project",
+      "fp_cost": 3,
+      "claude_md_routed": true,
+      "has_when_to_use": true
+    },
+    "repos": {
+      "support": 0,
+      "chars": 49,
+      "scope": "user",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": false
+    },
+    "saas": {
+      "support": 1,
+      "chars": 52,
+      "scope": "user",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": false
+    },
+    "schema": {
+      "support": 5,
+      "chars": 382,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
+    "screenshot": {
+      "support": 0,
+      "chars": 65,
+      "scope": "user",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": false
+    },
+    "security": {
+      "support": 1,
+      "chars": 60,
+      "scope": "user",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": false
+    },
+    "shadcn": {
+      "support": 2,
+      "chars": 164,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": false
+    },
+    "ship": {
+      "support": 3,
+      "chars": 487,
+      "scope": "project",
+      "fp_cost": 3,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
+    "social": {
+      "support": 7,
+      "chars": 568,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
+    "spec": {
+      "support": 5,
+      "chars": 586,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
+    "sync": {
+      "support": 4,
+      "chars": 489,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
+    "tasks": {
+      "support": 6,
+      "chars": 443,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
+    "template": {
+      "support": 5,
+      "chars": 375,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": true,
+      "has_when_to_use": true
+    },
+    "test": {
+      "support": 1,
+      "chars": 54,
+      "scope": "user",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": false
+    },
+    "watch": {
+      "support": 5,
+      "chars": 553,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
+    "weekly": {
+      "support": 4,
+      "chars": 339,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
+    "wire": {
+      "support": 5,
+      "chars": 615,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    }
+  },
+  "findings": [
+    {
+      "kind": "prompt-collision",
+      "detail": "\"post about <topic>\" is claimed by both draft and social"
+    },
+    {
+      "kind": "spell-skill-collision",
+      "detail": "spell \"auth\" (dark-arts) routes to familiar:authjs, familiar:middleware, familiar:prisma, familiar:nextjs, ward:auth while a skill named \"auth\" exists"
+    },
+    {
+      "kind": "spell-skill-collision",
+      "detail": "spell \"profile\" (dark-arts) routes to familiar:nextjs, familiar:template, familiar:react, ward:auth while a skill named \"profile\" exists"
+    },
+    {
+      "kind": "spell-skill-collision",
+      "detail": "spell \"analyze\" (defense) routes to familiar:product, familiar:architecture, familiar:typescript, familiar:prisma while a skill named \"analyze\" exists"
+    },
+    {
+      "kind": "spell-skill-collision",
+      "detail": "spell \"report\" (reparo) routes to familiar:report, familiar:quality, familiar:sse, familiar:build, portal:GitHub, portal:Browser while a skill named \"report\" exists"
+    },
+    {
+      "kind": "spell-skill-collision",
+      "detail": "spell \"pattern\" (auror-office) routes to familiar:quality, ward:rules/next-16, ward:rules/react-19 while a skill named \"pattern\" exists"
+    },
+    {
+      "kind": "spell-skill-collision",
+      "detail": "spell \"canon\" (pensieve) routes to familiar:captain, memory:docs/CANON.md while a skill named \"canon\" exists"
+    },
+    {
+      "kind": "prompt-collision",
+      "detail": "\"og image\" is claimed by both higgs and carousel"
+    }
+  ],
+  "guards": {
+    "listing_cap": 26500,
+    "skill_cap": 1200,
+    "listing_over_cap": false,
+    "skills_over_cap": [],
+    "zero_coverage": [
+      "canon",
+      "repos",
+      "screenshot"
+    ],
+    "parse_failures": []
+  }
+}

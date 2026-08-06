@@ -37,14 +37,22 @@ const SCORES_PATH = join(ROOT, ".claude/memory/skill-scores.json");
 const JSON_OUT = process.argv.includes("--json");
 const CHECK = process.argv.includes("--check");
 
-// Budget caps. Current reality is 25,403 chars total / 1,091 max (draft), so both
-// bind immediately — that is deliberate. Accuracy bought with prefix bloat is not
-// a win: every added word is paid by all 66 skills on every prompt.
-const LISTING_CAP = 26000;
-const SKILL_CAP = 1200;
+// Budget caps are DECLARED POLICY, so they live in engine.json (with a recorded
+// history of every reset) rather than as constants here. They bind close to
+// current reality on purpose: the listing is loaded into every session before a
+// word is typed, so accuracy bought with prefix bloat is a regression.
+const ENGINE = (() => {
+  try {
+    return JSON.parse(readFileSync(join(ROOT, ".claude/engine.json"), "utf8")).eval || {};
+  } catch {
+    return {};
+  }
+})();
+const LISTING_CAP = ENGINE.listing_cap ?? 26000;
+const SKILL_CAP = ENGINE.skill_cap ?? 1200;
 
 const SPLIT_SALT = "kun-dispatch-v1";
-const HOLDOUT_PCT = 20;
+const HOLDOUT_PCT = ENGINE.holdout_pct ?? 20;
 
 // Skills the harness cannot see the text of (Claude Code built-ins have no file on
 // disk). They still compete for dispatch in the real loop — a documented blind spot,

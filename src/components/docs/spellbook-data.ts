@@ -1133,6 +1133,25 @@ export const schools: School[] = [
         depends: [],
       },
       {
+        name: "bench",
+        effect:
+          "Measure the engine on its own labeled cases — dispatch accuracy, then propose holdout-gated fixes",
+        order: [
+          f("quality"),
+          s("/bench"),
+          m(".claude/memory/skill-scores.json"),
+        ],
+        steps: [
+          "Extract labeled cases from the fleet's own trigger phrases + vocabulary (deterministic, never an LLM)",
+          "Dispatch batched cases against the verbatim frontmatter listing, on the session model",
+          "Adversarially adjudicate every miss before it may count against the engine",
+          "Score in pure JS — top1_hard, fp_rate, destructive_fp, holdout gap, confusion",
+          "Persist the longitudinal series; propose tuning only on holdout gain, human commits",
+        ],
+        connects: ["health", "qa", "economy"],
+        depends: [],
+      },
+      {
         name: "analyze",
         effect: "Cross-artifact consistency — spec vs schema vs code vs tests",
         order: [f("product"), f("architecture"), f("typescript"), f("prisma")],

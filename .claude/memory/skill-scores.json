@@ -6,25 +6,25 @@
   "last_updated": "2026-08-06",
   "last_updated_by": "extract-dispatch-cases.mjs (baseline scaffold — no scored run yet)",
   "corpus": {
-    "skills_listed": 66,
-    "project_skills": 48,
+    "skills_listed": 67,
+    "project_skills": 49,
     "user_only_skills": 18,
-    "listing_chars": 25647,
-    "cases_total": 395,
-    "positive": 300,
+    "listing_chars": 26243,
+    "cases_total": 402,
+    "positive": 307,
     "none": 95,
-    "trivial": 55,
-    "hard": 155,
+    "trivial": 56,
+    "hard": 166,
     "destructive": 5,
     "sources": {
-      "trigger_phrase": 239,
-      "vocab_spell": 72,
+      "trigger_phrase": 246,
+      "vocab_spell": 73,
       "quoted_keyword": 6,
       "vocab_none": 95
     },
     "skills_without_triggers": 22,
     "builtin_targeted_spells": 3,
-    "corpus_hash": "fnv1a:7439bb52"
+    "corpus_hash": "fnv1a:5072a199"
   },
   "split": {
     "version": "v1",
@@ -48,6 +48,13 @@
       "trg:atom:create-an-atom-3e77": "train",
       "trg:atom:new-atom-c3fd": "train",
       "trg:atom:register-this-as-an-atom-1fa7": "holdout",
+      "trg:bench:bench-626e": "holdout",
+      "trg:bench:benchmark-the-skills-9945": "train",
+      "trg:bench:is-the-routing-accurate-2347": "holdout",
+      "trg:bench:measure-the-engine-30fc": "train",
+      "trg:bench:dispatch-accuracy-21ea": "train",
+      "trg:bench:which-skills-collide-bdb9": "train",
+      "trg:bench:are-any-skills-dead-7edb": "train",
       "trg:calendar:content-calendar-1e8f": "train",
       "trg:calendar:plan-the-content-ec2b": "train",
       "trg:calendar:what-are-we-publishing-836f": "train",
@@ -441,7 +448,7 @@
     "weighted_f1": null,
     "holdout_top1_hard": null,
     "train_holdout_gap": null,
-    "listing_chars": 25647,
+    "listing_chars": 26243,
     "degraded": false,
     "unadjudicated": 0
   },
@@ -500,6 +507,14 @@
       "fp_cost": 1,
       "claude_md_routed": false,
       "has_when_to_use": false
+    },
+    "bench": {
+      "support": 7,
+      "chars": 596,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
     },
     "block": {
       "support": 1,
@@ -1059,6 +1074,14 @@
         "learn"
       ],
       "max_cosine": 0.357
+    },
+    {
+      "id": "bench",
+      "members": [
+        "bench",
+        "health"
+      ],
+      "max_cosine": 0.331
     }
   ],
   "top_pairs": [
