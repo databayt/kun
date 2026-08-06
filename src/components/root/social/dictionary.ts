@@ -221,6 +221,23 @@ export const SOCIAL_DICTIONARY = {
     agentAttachHint: "Attached: {files}",
     agentVoiceTitle: "Dictation isn't wired yet",
     agentModelLabel: "Model",
+    // The knobs — the direction a contributor gives without writing prose about
+    // it. Vocabulary is copy.mdx's, so a reviewer and a writer name the same
+    // things (see components/root/social/knobs.ts).
+    agentAngleLabel: "Angle",
+    agentAngleAuto: "Let the writer pick",
+    agentRegisterLabel: "Register",
+    agentRegisterAuto: "The brand's usual rung",
+    agentReferenceLabel: "Like this one",
+    agentReferenceNone: "No reference",
+    agentReferenceEmpty: "Nothing published for this brand yet.",
+    agentReferenceShipped: "shipped",
+    // Turn 2 and beyond: the same box, now a reply box.
+    agentRefinePlaceholder: "What should change? — sharper hook, half as long…",
+    agentTurnBadge: "v{turn}",
+    agentRefinedFor: "Asked for: {instruction}",
+    agentRefineHint:
+      "Type what to change and it rewrites this draft — the rest stays as it is. Start new begins a different post.",
     // The reasoning panel — the real queue, not invented thinking.
     agentThinking: "Waiting on the draft queue…",
     agentThought: "Waited {seconds} seconds",
@@ -428,6 +445,19 @@ export const SOCIAL_DICTIONARY = {
     agentAttachHint: "مُرفق: {files}",
     agentVoiceTitle: "الإدخال الصوتي غير موصول بعد",
     agentModelLabel: "النموذج",
+    agentAngleLabel: "الزاوية",
+    agentAngleAuto: "اترك الاختيار للكاتب",
+    agentRegisterLabel: "الدرجة اللغوية",
+    agentRegisterAuto: "درجة العلامة المعتادة",
+    agentReferenceLabel: "على غرار هذا",
+    agentReferenceNone: "بدون مرجع",
+    agentReferenceEmpty: "لا يوجد منشور سابق لهذه العلامة بعد.",
+    agentReferenceShipped: "نُشر",
+    agentRefinePlaceholder: "ما الذي تريد تغييره؟ — خُطّاف أقوى، نصف الطول…",
+    agentTurnBadge: "نسخة {turn}",
+    agentRefinedFor: "طُلب: {instruction}",
+    agentRefineHint:
+      "اكتب ما تريد تغييره فتُعاد صياغة هذه المسودة وحدها، ويبقى الباقي كما هو. «ابدأ من جديد» يفتح منشورًا آخر.",
     agentThinking: "في انتظار طابور الصياغة…",
     agentThought: "انتظرنا {seconds} ثانية",
     agentReasoning:

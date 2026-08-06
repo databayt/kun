@@ -24,6 +24,10 @@ import {
   PRODUCT_IDS,
   productChannelWired,
 } from "@/components/root/social/products";
+import {
+  DISMISS_REASON_IDS,
+  DRAFT_MODEL_IDS,
+} from "@/components/root/social/knobs";
 
 // Long enough for a human to see it in the morning, short enough that a
 // leaked link goes stale before it is useful. Matches the cron.
@@ -131,7 +135,28 @@ const publishSchema = z
           : [],
   }));
 
-const draftCopySchema = z.object({
+/**
+ * The direction a contributor gives without writing prose about it.
+ *
+ * These are not new vocabulary: `content/social/pillars.json` already writes
+ * Angle, The scene, and Register into every brief string because there was
+ * nowhere else to put them. Making them columns means the Hub can offer them
+ * as controls and the drain can read them without parsing prose.
+ */
+const draftKnobsSchema = z.object({
+  // The window's model select was decoration until the column existed. Only
+  // the engine's own chain is accepted — this value reaches `claude -p --model`
+  // on a contributor's machine, so it is an execution parameter, not a label.
+  model: z.enum(DRAFT_MODEL_IDS).optional(),
+  angle: z.enum(["pain", "moment", "proof"]).optional(),
+  // 2–4. Rung 1 is فصحى الصحافة, which copy.mdx says never ships — so it is
+  // storable (the column means "a rung on the ladder") but never askable.
+  register: z.number().int().min(2).max(4).optional(),
+  // "Write it like this one" — checked against the same brand below.
+  referenceId: z.string().min(1).optional(),
+});
+
+const draftCopySchema = draftKnobsSchema.extend({
   product: z.enum(PRODUCT_IDS, { message: "Unknown product." }),
   brief: z
     .string()
@@ -156,17 +181,46 @@ export interface DraftRequestResult {
 
 export interface DraftReadResult {
   ok: boolean;
-  status?: "pending" | "answered" | "failed" | "consumed" | "dismissed";
+  status?:
+    "pending" | "answered" | "failed" | "consumed" | "dismissed" | "superseded";
   ar?: string;
   en?: string;
   note?: string;
   /** The draft's media half — attached at ask time or by the answerer. */
   mediaUrls?: string[];
+  /** 1-based depth in the refinement thread. The window renders it as "v{turn}". */
+  turn?: number;
   /** Asks queued ahead of this one. Pending only. */
   pendingAhead?: number;
   /** When a drafting session last looked at the queue, ISO. Pending only. */
   lastDrainAt?: string;
   error?: string;
+}
+
+/**
+ * Resolve a knob set against the brand it will be filed under.
+ *
+ * The only knob that can lie is `referenceId`: model and angle are closed enums
+ * and register is a bounded int, but a reference is an id a caller supplies. An
+ * unchecked one would let a contributor point a hogwarts draft at mkan's copy —
+ * not a security hole (the whole surface is contributor-gated) but a quiet way
+ * to poison a brand's voice with another brand's register. Cross-brand
+ * references are dropped rather than rejected: the ask is still answerable, and
+ * refusing the whole draft over a stale inspiration link would be worse.
+ */
+async function resolveReference(
+  referenceId: string | undefined,
+  brand: string,
+): Promise<string | null> {
+  if (!referenceId) return null;
+  const row = await db.socialDraftRequest.findUnique({
+    where: { id: referenceId },
+    select: { brand: true, ar: true },
+  });
+  // Must exist, share the brand, and actually carry copy — an unanswered ask
+  // is not an inspiration.
+  if (!row || row.brand !== brand || !row.ar) return null;
+  return referenceId;
 }
 
 // The agent window's ask. It does NOT call the Anthropic API: the engine's
@@ -199,6 +253,13 @@ export async function requestSocialDraft(
         brief: parsed.data.brief,
         requestedBy: email,
         mediaUrls: parsed.data.mediaUrls ?? [],
+        model: parsed.data.model,
+        angle: parsed.data.angle,
+        register: parsed.data.register,
+        referenceId: await resolveReference(
+          parsed.data.referenceId,
+          parsed.data.product,
+        ),
       },
     });
     return { ok: true, id: row.id };
@@ -207,6 +268,136 @@ export async function requestSocialDraft(
       ok: false,
       error:
         err instanceof Error ? err.message : "Could not queue the draft ask.",
+    };
+  }
+}
+
+const refineSchema = z.object({
+  parentId: z.string().min(1, "Missing draft id."),
+  instruction: z
+    .string()
+    .trim()
+    .min(3, "Say what to change.")
+    .max(1000, "Keep the change to 1000 characters."),
+  // A refinement may re-aim the knobs — "same brief, rung 3" is a legitimate
+  // turn. Unset means inherit the parent's, which is what a plain "sharper
+  // hook" should do.
+  model: z.enum(DRAFT_MODEL_IDS).optional(),
+  angle: z.enum(["pain", "moment", "proof"]).optional(),
+  register: z.number().int().min(2).max(4).optional(),
+});
+
+/**
+ * The next turn of a conversation.
+ *
+ * Refining does NOT mutate the answer. It supersedes the parent and files a
+ * child carrying the same root brief, the inherited knobs, and the instruction
+ * that says what to change. Three things fall out of that shape, and all three
+ * are why it beats an `UPDATE`:
+ *
+ *   - every turn stays independently readable and approvable, so a v3 that came
+ *     out worse does not destroy the v2 someone liked;
+ *   - the queue lifecycle is untouched — a turn is an ordinary `pending` ask, so
+ *     the drain, the poll, the review queue and the approval claim all work on
+ *     it without knowing threads exist;
+ *   - the supersede is a conditional update on `answered`, so two reviewers
+ *     refining the same draft race exactly as they already do on approve, and
+ *     one of them is told it lost.
+ */
+export async function refineSocialDraft(
+  input: unknown,
+): Promise<DraftRequestResult> {
+  const session = await auth();
+  const email = session?.user?.email ?? undefined;
+  if (!(await requireContributor())) {
+    return { ok: false, error: "Forbidden: contributors only." };
+  }
+
+  const parsed = refineSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      ok: false,
+      error: parsed.error.issues[0]?.message ?? "Invalid input.",
+    };
+  }
+
+  const parent = await db.socialDraftRequest.findUnique({
+    where: { id: parsed.data.parentId },
+    select: {
+      brand: true,
+      brief: true,
+      turn: true,
+      status: true,
+      mediaUrls: true,
+      model: true,
+      angle: true,
+      register: true,
+      referenceId: true,
+    },
+  });
+  if (!parent) {
+    return { ok: false, error: "That draft no longer exists." };
+  }
+  if (parent.status !== "answered") {
+    // Naming the state beats "cannot refine": a consumed draft is already
+    // published and a dismissed one is already decided, and the reviewer
+    // should know which happened rather than assume a bug.
+    return {
+      ok: false,
+      error: `That draft is "${parent.status}" — only an answered draft can be refined.`,
+    };
+  }
+
+  // Claim the parent first. If this loses, nothing was created — the alternative
+  // ordering leaves an orphan child pointing at a draft someone else approved.
+  const claimed = await db.socialDraftRequest.updateMany({
+    where: { id: parsed.data.parentId, status: "answered" },
+    data: { status: "superseded" },
+  });
+  if (claimed.count === 0) {
+    return {
+      ok: false,
+      error: "Already handled — someone else decided this draft.",
+    };
+  }
+
+  try {
+    const row = await db.socialDraftRequest.create({
+      data: {
+        brand: parent.brand,
+        // The ROOT brief, unchanged. Every turn is still answering the original
+        // ask; the instruction says how to answer it differently. Folding the
+        // instruction into the brief instead would lose the difference between
+        // "what we are writing about" and "what was wrong with the last one" —
+        // and by turn three the brief would be a changelog.
+        brief: parent.brief,
+        instruction: parsed.data.instruction,
+        parentId: parsed.data.parentId,
+        turn: parent.turn + 1,
+        requestedBy: email,
+        // Media rides the thread: a refinement of the copy should not silently
+        // drop the image someone already picked for it.
+        mediaUrls: parent.mediaUrls,
+        model: parsed.data.model ?? parent.model ?? undefined,
+        angle: parsed.data.angle ?? parent.angle ?? undefined,
+        register: parsed.data.register ?? parent.register ?? undefined,
+        referenceId: parent.referenceId,
+      },
+    });
+    return { ok: true, id: row.id };
+  } catch (err: unknown) {
+    // Hand the parent back — a thread that lost its next turn must not also
+    // lose the answer it already had.
+    await db.socialDraftRequest
+      .updateMany({
+        where: { id: parsed.data.parentId, status: "superseded" },
+        data: { status: "answered" },
+      })
+      .catch(() => {});
+    return {
+      ok: false,
+      error:
+        err instanceof Error ? err.message : "Could not queue the refinement.",
     };
   }
 }
@@ -230,6 +421,7 @@ export async function readSocialDraft(id: unknown): Promise<DraftReadResult> {
         note: true,
         createdAt: true,
         mediaUrls: true,
+        turn: true,
       },
     });
     if (!row) return { ok: false, error: "That draft ask no longer exists." };
@@ -247,6 +439,7 @@ export async function readSocialDraft(id: unknown): Promise<DraftReadResult> {
       return {
         ok: true,
         status: row.status,
+        turn: row.turn,
         pendingAhead: ahead,
         lastDrainAt: beat?.at.toISOString(),
       };
@@ -255,6 +448,7 @@ export async function readSocialDraft(id: unknown): Promise<DraftReadResult> {
     return {
       ok: true,
       status: row.status,
+      turn: row.turn,
       ar: row.ar ?? undefined,
       en: row.en ?? undefined,
       note: row.note ?? undefined,
@@ -590,6 +784,10 @@ export interface AnsweredDraft {
   en: string;
   mediaUrls: string[];
   requestedBy: string | null;
+  /** 1-based depth in the refinement thread. Rendered as a "v{turn}" badge. */
+  turn: number;
+  /** What the last refinement asked for. Null on a first turn. */
+  instruction: string | null;
   /** ISO — when the ask was filed. The queue orders oldest-first by this. */
   createdAt: string;
   answeredAt: string | null;
@@ -604,6 +802,12 @@ export interface AnsweredDraftsResult {
 // All brands in one read: the queue is small (answered rows drain into
 // consumed/dismissed), and filtering client-side means switching brand in the
 // Hub never refetches.
+//
+// One turn per thread reaches this list without a filter for it: refining
+// flips the parent to `superseded`, so only a thread's newest answer is ever
+// `answered`. That is the whole reason refinement supersedes instead of
+// inserting a sibling — a reviewer should see the current draft, not three
+// versions of one post competing for the same slot.
 export async function listAnsweredDrafts(): Promise<AnsweredDraftsResult> {
   if (!(await requireContributor())) {
     return { ok: false, error: "Forbidden: contributors only." };
@@ -621,6 +825,8 @@ export async function listAnsweredDrafts(): Promise<AnsweredDraftsResult> {
         en: true,
         mediaUrls: true,
         requestedBy: true,
+        turn: true,
+        instruction: true,
         createdAt: true,
         answeredAt: true,
       },
@@ -635,6 +841,8 @@ export async function listAnsweredDrafts(): Promise<AnsweredDraftsResult> {
         en: row.en ?? "",
         mediaUrls: row.mediaUrls,
         requestedBy: row.requestedBy,
+        turn: row.turn,
+        instruction: row.instruction,
         createdAt: row.createdAt.toISOString(),
         answeredAt: row.answeredAt?.toISOString() ?? null,
       })),
@@ -643,6 +851,70 @@ export async function listAnsweredDrafts(): Promise<AnsweredDraftsResult> {
     return {
       ok: false,
       error: err instanceof Error ? err.message : "Could not read the queue.",
+    };
+  }
+}
+
+export interface DraftReference {
+  id: string;
+  /** First line of the Arabic copy — enough to recognize the post by. */
+  excerpt: string;
+  /** consumed = it shipped. answered = it is still in review. */
+  shipped: boolean;
+}
+
+/**
+ * Candidates for "write it like this one".
+ *
+ * Approved drafts first and by recency, because a post that cleared the human
+ * gate is the strongest evidence of what this brand's voice sounds like when it
+ * works — which is exactly what a reference is for. Dismissed and superseded
+ * copy is excluded on the same logic: a reviewer already said it was wrong, and
+ * offering it as inspiration would recycle the failure.
+ */
+export async function listDraftReferences(
+  brand: unknown,
+): Promise<{ ok: boolean; references?: DraftReference[]; error?: string }> {
+  if (!(await requireContributor())) {
+    return { ok: false, error: "Forbidden: contributors only." };
+  }
+  if (
+    typeof brand !== "string" ||
+    !(PRODUCT_IDS as readonly string[]).includes(brand)
+  ) {
+    return { ok: false, error: "Unknown product." };
+  }
+
+  try {
+    const rows = await db.socialDraftRequest.findMany({
+      where: {
+        brand,
+        status: { in: ["consumed", "answered"] },
+        ar: { not: null },
+      },
+      orderBy: { answeredAt: "desc" },
+      take: 12,
+      select: { id: true, ar: true, status: true },
+    });
+    return {
+      ok: true,
+      references: rows
+        .map((row) => ({
+          id: row.id,
+          excerpt: (row.ar ?? "").split("\n")[0]!.slice(0, 80),
+          shipped: row.status === "consumed",
+        }))
+        // Shipped first, recency preserved inside each group (sort is stable).
+        // Done here rather than as an `orderBy` on status: Prisma sorts enums by
+        // DECLARATION order, so the SQL version would silently re-rank the day
+        // someone reorders DraftRequestStatus for an unrelated reason.
+        .sort((a, b) => Number(b.shipped) - Number(a.shipped)),
+    };
+  } catch (err: unknown) {
+    return {
+      ok: false,
+      error:
+        err instanceof Error ? err.message : "Could not read the references.",
     };
   }
 }
@@ -772,6 +1044,12 @@ export async function approveDraft(input: unknown): Promise<ApproveResult> {
 const dismissSchema = z.object({
   draftId: z.string().min(1, "Missing draft id."),
   note: z.string().trim().max(500).optional(),
+  // The failed check, as a stable id. This is the ONE signal that travels back
+  // to the writing side: copy.mdx claims the pipeline's feedback loop is
+  // "dismiss reasons on the review queue", and until this column existed that
+  // claim was true only in intent — the reason was concatenated into `note`,
+  // where nothing could group it by brand or count it over a month.
+  reason: z.enum(DISMISS_REASON_IDS).optional(),
 });
 
 export async function dismissDraft(
@@ -795,7 +1073,11 @@ export async function dismissDraft(
     where: { id: parsed.data.draftId, status: "answered" },
     data: {
       status: "dismissed",
+      // `note` stays the human sentence; `dismissReason` is the machine key.
+      // Both, not either: the note is what the next person reads, the reason is
+      // what the next drain counts.
       note: `dismissed by ${email}${parsed.data.note ? `: ${parsed.data.note}` : ""}`,
+      dismissReason: parsed.data.reason,
     },
   });
   if (dismissed.count === 0) {

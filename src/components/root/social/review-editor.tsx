@@ -103,14 +103,16 @@ export function ReviewEditor({
     t.craftCheck6,
   ];
 
-  // Dismiss reasons ride the `note` the action already accepts — naming the
-  // failed check is the only signal that ever reaches the writing side.
+  // Naming the failed check is the only signal that ever reaches the writing
+  // side, so it travels twice: `label` is the sentence a human reads back in
+  // the note, `id` is the stable key the drain aggregates over (a reworded or
+  // re-translated label must not orphan a month of history).
   const dismissReasons = [
-    t.dismissReasonHook,
-    t.dismissReasonTwoPosts,
-    t.dismissReasonUntrue,
-    t.dismissReasonRegister,
-    t.dismissReasonOther,
+    { id: "hook" as const, label: t.dismissReasonHook },
+    { id: "two-posts" as const, label: t.dismissReasonTwoPosts },
+    { id: "untrue" as const, label: t.dismissReasonUntrue },
+    { id: "register" as const, label: t.dismissReasonRegister },
+    { id: "other" as const, label: t.dismissReasonOther },
   ];
 
   // Stating the blocker beats a dead button with no explanation.
@@ -180,7 +182,7 @@ export function ReviewEditor({
     }
   };
 
-  const handleDismiss = async (reason: string) => {
+  const handleDismiss = async (reason: { id: string; label: string }) => {
     if (!reviewQueue.activeDraftId) return;
     setDismissOpen(false);
     setPending("dismiss");
@@ -188,7 +190,8 @@ export function ReviewEditor({
     try {
       const res = await dismissDraft({
         draftId: reviewQueue.activeDraftId,
-        note: reason,
+        note: reason.label,
+        reason: reason.id,
       });
       if (res.ok) {
         setNotice(t.dismissedMsg);
@@ -527,12 +530,12 @@ export function ReviewEditor({
                       <div className="flex flex-col gap-0.5">
                         {dismissReasons.map((reason) => (
                           <button
-                            key={reason}
+                            key={reason.id}
                             type="button"
                             onClick={() => handleDismiss(reason)}
                             className="hover:bg-accent rounded-md px-2 py-1.5 text-start text-sm transition-colors"
                           >
-                            {reason}
+                            {reason.label}
                           </button>
                         ))}
                       </div>

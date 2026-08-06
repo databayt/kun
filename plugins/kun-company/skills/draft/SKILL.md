@@ -91,13 +91,27 @@ Max pool, so the copy comes out of the same doctrine as a hand-run `/draft`
 instead of depending on who happens to be at the keyboard.
 
 ```bash
-node scripts/social-drafts.mjs list          # JSON: id, brand, brief, requestedBy, mediaUrls, waitingMinutes
+node scripts/social-drafts.mjs list       # JSON: id, brand, brief, requestedBy, mediaUrls,
+                                          # waitingMinutes + any direction the asker set:
+                                          # model, angle, register, referenceAr, turn, refine
+node scripts/social-drafts.mjs lessons    # what reviewers rejected in the last 60 days
 ```
 
 Asks arrive from two writers: contributors on `/social`, and the **weekly seeder**
 (`scripts/seed-drafts.sh`, Mondays 07:00 — files briefs from `content/social/pillars.json`
 with `requestedBy: seed:weekly`). Both are answered identically; a seeded brief is just a
 brief whose asker is the calendar.
+
+**Before the first ask of a run, read the corrections:**
+
+```bash
+node scripts/social-drafts.mjs lessons          # or --brand <brand>
+```
+
+Recent dismissals, most common failure first. Every row is a draft a session
+already believed was finished and a human refused anyway — so the top reason is
+the check _this_ run is most likely to fail again. Read it once, with `copy.mdx`
+and the golden set, not per ask.
 
 For each ask, oldest first:
 
@@ -110,30 +124,50 @@ For each ask, oldest first:
    brief answered without the craft bar reads like the product documentation it
    was sourced from. Read `copy.mdx` and `references/golden-set.md` **once for the
    whole run**, not per ask.
-2. **Write the core piece only — and make it portable rather than fanned out.**
-   The window's contract is one `ar` and one `en`; the contributor picks channels
-   in the composer afterwards. So the piece must clear **check 7**: a first line
-   that works cold with no image, a body that reads with no link preview, ≤ 3
-   hashtags at the end, and no platform-specific verb (no "swipe", no "link in
-   bio"). At this volume a portable core piece _is_ the per-channel adaptation
-   that matters — a thin fan-out into a schema that stores one `ar` and one `en`
-   would be generated and then discarded.
-3. **Fit the composer's ceiling** — `MAX_CAPTION` in the composer, and remember a
-   post staged for review must be short enough to survive `/approve`.
-4. **Run the moral gate.** This matters more here than in a hand-run draft: the
-   asker may not know the doctrine, and a thin brief invites invention. Never add
-   a metric, customer, price, or date the brief did not contain.
-5. **Pick the media half from the library.** When the brief suggests a visual,
-   read `content/media/library.json` and match by the `(library: <id>)` hint
-   first, else by brand + assetType; pass the matched `cdnUrl`s with `--media`.
-   The rules of this lane:
-   - **Never invent or guess a URL** — only a `cdnUrl` read from the library.
-   - **The ask may already carry `mediaUrls`** (a contributor attached them from
-     the showroom) — keep them unless the brief says otherwise; `--media`
-     REPLACES the stored set, so include what you mean to keep.
-   - **No match → answer text-only.** Generation is a full-session job (`/higgs`
-     or `/carousel`, then `attach`) — the 5-minute drain tick has no generation
-     tools, by design.
+
+1b. **Obey the ask's direction.** `list` carries whatever the contributor set,
+and each field is a decision rather than a hint:
+
+| Field         | Means                                                                                                                         |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `angle`       | The angle is decided. Still name three in the log; write the one asked for.                                                   |
+| `register`    | A rung from copy.mdx's ladder — overrides the brand map's rung.                                                               |
+| `referenceAr` | Echo this post's **voice** — rhythm, sentence length, distance from the reader. Never its subject; never reuse its sentences. |
+| `refine`      | This ask is the next turn of a draft a human just read. See below.                                                            |
+
+Absent means unset, and unset means you choose — the fields are omitted from
+the JSON rather than sent null so the two cases never blur.
+
+1c. **A refinement rewrites, it does not re-roll.** `refine.previousAr` /
+`refine.previousEn` is the exact text the reviewer read; `refine.instruction`
+is what they want changed. Change **that and nothing else** — keep the hook if
+the note is about length, keep the length if the note is about the hook. A
+refinement that quietly rewrites the whole post takes away the part they had
+already accepted, and they have to find it again. If the instruction cannot be
+satisfied without breaking a craft check, do it their way and name the cost in
+`--note`. 2. **Write the core piece only — and make it portable rather than fanned out.**
+The window's contract is one `ar` and one `en`; the contributor picks channels
+in the composer afterwards. So the piece must clear **check 7**: a first line
+that works cold with no image, a body that reads with no link preview, ≤ 3
+hashtags at the end, and no platform-specific verb (no "swipe", no "link in
+bio"). At this volume a portable core piece _is_ the per-channel adaptation
+that matters — a thin fan-out into a schema that stores one `ar` and one `en`
+would be generated and then discarded. 3. **Fit the composer's ceiling** — `MAX_CAPTION` in the composer, and remember a
+post staged for review must be short enough to survive `/approve`. 4. **Run the moral gate.** This matters more here than in a hand-run draft: the
+asker may not know the doctrine, and a thin brief invites invention. Never add
+a metric, customer, price, or date the brief did not contain. 5. **Pick the media half from the library.** When the brief suggests a visual,
+read `content/media/library.json` and match by the `(library: <id>)` hint
+first, else by brand + assetType; pass the matched `cdnUrl`s with `--media`.
+The rules of this lane:
+
+- **Never invent or guess a URL** — only a `cdnUrl` read from the library.
+- **The ask may already carry `mediaUrls`** (a contributor attached them from
+  the showroom) — keep them unless the brief says otherwise; `--media`
+  REPLACES the stored set, so include what you mean to keep.
+- **No match → answer text-only.** Generation is a full-session job (`/higgs`
+  or `/carousel`, then `attach`) — the 5-minute drain tick has no generation
+  tools, by design.
+
 6. **Write the answer back through files** — never argv, which mangles multi-line
    Arabic and quotes; media goes as comma-separated URLs:
 
@@ -173,15 +207,29 @@ generation handed off, or text-only said out loud.
 
 **A draft that fails check 1 (hook) or check 2 (one idea) is not finished.**
 Rewrite it before answering; do not answer and let the reviewer catch it. The
-reviewer's dismiss is the feedback loop, not the quality gate.
+reviewer's dismiss is the feedback loop, not the quality gate — and now that
+`lessons` reads those dismissals back, answering a draft you know is weak costs
+the next run as well as this one.
+
+**A refinement is judged against its instruction, not just the checks.** Ask what
+the reviewer wanted changed, whether it changed, and whether anything they did
+not mention survived intact. All three, or the turn was wasted.
 
 In queue mode: every pending ask ends `answered` or `failed` — never left
 `pending`. The window stops polling after 10 minutes and the drain sweep expires
 hour-old asks, so a skipped ask becomes a visible failure — but only after the
 asker already gave up waiting. `scripts/drain-drafts.sh` runs this mode on a
-5-minute launchd tick; every `list` (yours included) beats the `draft-drain`
-heartbeat the Hub shows.
+**60-second** launchd tick, up to two passes per run so a reply typed while you
+were writing is caught in the same run; every `list` (yours included) beats the
+`draft-drain` heartbeat the Hub shows.
+
+**A run answers only the ids it was given.** The drain groups the pending queue
+by `model` and makes one `claude -p --model` call per group, because `--model` is
+a property of the session and one call cannot honour a queue that chose two. If
+your prompt names ids, another session is answering the rest — leave them alone.
 
 An answered full draft lands in the review queue on `/social/publish`, where a
 human fine-tunes and approves (`/approve` is that gate's doctrine). This stage
-never publishes.
+never publishes. A reviewer who wants a change can ask for one instead of
+dismissing: that files the next turn of the thread, and it comes back here as an
+ordinary pending ask carrying `refine`.

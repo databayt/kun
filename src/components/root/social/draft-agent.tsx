@@ -44,24 +44,32 @@ import {
 } from "@/components/atom/prompt-input";
 import { Button } from "@/components/ui/button";
 import { fill } from "@/components/root/social/dictionary";
+import {
+  DRAFT_ANGLES,
+  DRAFT_MODELS,
+  DRAFT_REGISTERS,
+  type DraftAngleId,
+  type DraftModelId,
+  type DraftRegisterId,
+} from "@/components/root/social/knobs";
 import { PRODUCTS } from "@/components/root/social/products";
 import { useSocial } from "@/components/root/social/provider";
 import { mediaKind } from "@/lib/media-kind";
 import { cn } from "@/lib/utils";
 
-/**
- * The model chain from .claude/engine.json. Presentational for now: the queue
- * carries a brand and a brief, not a model, so the answering session uses its
- * own session default. Wiring it needs a `model` column on SocialDraftRequest
- * plus a pass-through in requestSocialDraft — deliberately not done here.
- */
-const MODELS = [
-  { id: "claude-fable-5", label: "Fable 5" },
-  { id: "claude-opus-4-8", label: "Opus 4.8" },
-  { id: "claude-sonnet-5", label: "Sonnet 5" },
-] as const;
-
 const RESPONSE_CONTAINER_ID = "ai-response-container";
+
+/** The select's "unset" option — Radix rejects an empty string as a value. */
+const AUTO = "__auto__";
+
+/**
+ * One pill shape for every knob in the toolbar. Extracted because four selects
+ * repeating the same twelve utilities is where they start to drift apart, and a
+ * toolbar whose controls are almost-but-not-quite the same height is the kind
+ * of thing nobody reports and everybody sees.
+ */
+const KNOB_TRIGGER =
+  "border-input bg-muted text-muted-foreground hover:text-foreground hover:bg-accent inline-flex h-8 items-center justify-center gap-1.5 rounded-full border px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors duration-100 ease-in-out hover:border-transparent";
 
 export function DraftAgent() {
   // The conversation — brief, queue poll, answer, reveal — is provider state,
@@ -73,6 +81,7 @@ export function DraftAgent() {
     product,
     handToComposer,
     goToStage,
+    draftKnobs,
     draftQueue,
     composerMediaUrls,
   } = useSocial();
@@ -83,6 +92,8 @@ export function DraftAgent() {
     hasInteracted,
     draft,
     answeredId,
+    turn,
+    lastInstruction,
     reveal,
     error,
     queueInfo,
@@ -92,9 +103,24 @@ export function DraftAgent() {
     reset,
     checkAgain,
   } = draftQueue;
+  const {
+    model,
+    setModel,
+    angle,
+    setAngle,
+    register,
+    setRegister,
+    referenceId,
+    setReferenceId,
+    references,
+  } = draftKnobs;
 
   const [isInputFocused, setIsInputFocused] = useState(false);
-  const [model, setModel] = useState<string>(MODELS[0].id);
+
+  // An answer on screen turns this window into a conversation: the prompt is
+  // now "what should change?", and submitting refines instead of starting over.
+  // The provider owns that branch — this is the same fact, said in the UI.
+  const isRefining = Boolean(draft && answeredId);
 
   const brandLabel =
     PRODUCTS.find((p) => p.id === product)?.[isRTL ? "labelAr" : "label"] ??
@@ -162,10 +188,33 @@ export function DraftAgent() {
                 isInputFocused ? "max-h-[200px]" : "max-h-[500px]",
               )}
             >
+              {/* Which turn is on screen, and what was asked of it. Shown only
+                  from v2 — a badge reading "v1" on every first draft would be
+                  noise, and the thread is exactly what makes v2 worth naming. */}
+              {draft && turn > 1 && (
+                <div className="flex flex-wrap items-baseline gap-2 text-start">
+                  <span className="border-border text-muted-foreground rounded-full border px-2 py-0.5 font-mono text-[11px]">
+                    {fill(t.agentTurnBadge, { turn })}
+                  </span>
+                  {lastInstruction && (
+                    <span className="text-muted-foreground/70 text-xs">
+                      {fill(t.agentRefinedFor, {
+                        instruction: lastInstruction,
+                      })}
+                    </span>
+                  )}
+                </div>
+              )}
+
               <AIResponseDisplay
                 reasoning={fill(t.agentReasoning, { brand: brandLabel })}
                 response={draft?.ar ?? ""}
-                isStreaming={busy || reveal === "ar"}
+                // A refinement keeps the previous answer on screen while it
+                // waits, and re-animating text the reader has already read
+                // would look like the rewrite finished. So stream only when
+                // there is genuinely new text: a first ask (no draft yet), or
+                // an answer being revealed.
+                isStreaming={reveal === "ar" || (busy && !draft)}
                 dir="rtl"
                 className="mb-4 pe-3"
                 streamDelay={10}
@@ -301,6 +350,16 @@ export function DraftAgent() {
                   </Button>
                 </div>
               )}
+
+              {/* The one thing a reader cannot guess from the UI: that typing
+                  again refines THIS draft rather than starting another. Said
+                  once the answer is fully revealed, next to the buttons that
+                  are the alternative. */}
+              {draft && reveal === "done" && (
+                <p className="text-muted-foreground/70 text-center text-xs leading-relaxed">
+                  {t.agentRefineHint}
+                </p>
+              )}
             </div>
           )}
 
@@ -345,9 +404,11 @@ export function DraftAgent() {
                   onFocus={() => setIsInputFocused(true)}
                   onBlur={() => setIsInputFocused(false)}
                   placeholder={
-                    collapsed
-                      ? t.agentPlaceholderMore
-                      : fill(t.agentPlaceholder, { brand: brandLabel })
+                    isRefining
+                      ? t.agentRefinePlaceholder
+                      : collapsed
+                        ? t.agentPlaceholderMore
+                        : fill(t.agentPlaceholder, { brand: brandLabel })
                   }
                   disabled={busy}
                   className={cn(
@@ -398,11 +459,11 @@ export function DraftAgent() {
 
                   <PromptInputModelSelect
                     value={model}
-                    onValueChange={setModel}
+                    onValueChange={(value) => setModel(value as DraftModelId)}
                   >
                     <PromptInputModelSelectTrigger
                       aria-label={t.agentModelLabel}
-                      className="border-input bg-muted text-muted-foreground hover:text-foreground hover:bg-accent inline-flex h-8 items-center justify-center gap-1.5 rounded-full border px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors duration-100 ease-in-out hover:border-transparent"
+                      className={KNOB_TRIGGER}
                     >
                       <div className="flex items-center gap-1.5">
                         <PromptInputModelSelectValue />
@@ -411,7 +472,7 @@ export function DraftAgent() {
                     <PromptInputModelSelectContent
                       align={isRTL ? "end" : "start"}
                     >
-                      {MODELS.map((m) => (
+                      {DRAFT_MODELS.map((m) => (
                         <PromptInputModelSelectItem key={m.id} value={m.id}>
                           <div className="flex items-center gap-2">
                             <AIBrainIcon className="h-4 w-4" />
@@ -421,6 +482,134 @@ export function DraftAgent() {
                       ))}
                     </PromptInputModelSelectContent>
                   </PromptInputModelSelect>
+
+                  {/* Angle and register are copy.mdx's own vocabulary, so a
+                      contributor sets the same things a reviewer dismisses
+                      against. Unset is a real choice on both — it means the
+                      writer runs its own three-angle discipline and takes the
+                      rung the brand map prescribes. */}
+                  <PromptInputModelSelect
+                    value={angle ?? AUTO}
+                    onValueChange={(value) =>
+                      setAngle(value === AUTO ? null : (value as DraftAngleId))
+                    }
+                  >
+                    <PromptInputModelSelectTrigger
+                      aria-label={t.agentAngleLabel}
+                      className={KNOB_TRIGGER}
+                    >
+                      <span className="truncate">
+                        {angle
+                          ? (DRAFT_ANGLES.find((a) => a.id === angle)?.[
+                              isRTL ? "labelAr" : "label"
+                            ] ?? t.agentAngleLabel)
+                          : t.agentAngleLabel}
+                      </span>
+                    </PromptInputModelSelectTrigger>
+                    <PromptInputModelSelectContent
+                      align={isRTL ? "end" : "start"}
+                    >
+                      <PromptInputModelSelectItem value={AUTO}>
+                        {t.agentAngleAuto}
+                      </PromptInputModelSelectItem>
+                      {DRAFT_ANGLES.map((a) => (
+                        <PromptInputModelSelectItem key={a.id} value={a.id}>
+                          {isRTL ? a.labelAr : a.label}
+                        </PromptInputModelSelectItem>
+                      ))}
+                    </PromptInputModelSelectContent>
+                  </PromptInputModelSelect>
+
+                  <PromptInputModelSelect
+                    value={register === null ? AUTO : String(register)}
+                    onValueChange={(value) =>
+                      setRegister(
+                        value === AUTO
+                          ? null
+                          : (Number(value) as DraftRegisterId),
+                      )
+                    }
+                  >
+                    <PromptInputModelSelectTrigger
+                      aria-label={t.agentRegisterLabel}
+                      className={KNOB_TRIGGER}
+                    >
+                      <span className="truncate">
+                        {register === null
+                          ? t.agentRegisterLabel
+                          : `${t.agentRegisterLabel} ${register}`}
+                      </span>
+                    </PromptInputModelSelectTrigger>
+                    <PromptInputModelSelectContent
+                      align={isRTL ? "end" : "start"}
+                      className="max-w-xs"
+                    >
+                      <PromptInputModelSelectItem value={AUTO}>
+                        {t.agentRegisterAuto}
+                      </PromptInputModelSelectItem>
+                      {DRAFT_REGISTERS.map((r) => (
+                        <PromptInputModelSelectItem
+                          key={r.id}
+                          value={String(r.id)}
+                        >
+                          <span className="flex flex-col items-start gap-0.5 text-start">
+                            <span>{isRTL ? r.labelAr : r.label}</span>
+                            <span className="text-muted-foreground text-xs">
+                              {isRTL ? r.hintAr : r.hint}
+                            </span>
+                          </span>
+                        </PromptInputModelSelectItem>
+                      ))}
+                    </PromptInputModelSelectContent>
+                  </PromptInputModelSelect>
+
+                  {/* "Write it like this one." Only offered once the brand HAS
+                      prior copy — an empty picker teaches nothing, and the
+                      first post of a brand has nothing to echo. A refinement
+                      inherits the parent's reference, so it is hidden there
+                      rather than shown as a control that changes nothing. */}
+                  {!isRefining && references.length > 0 && (
+                    <PromptInputModelSelect
+                      value={referenceId ?? AUTO}
+                      onValueChange={(value) =>
+                        setReferenceId(value === AUTO ? null : value)
+                      }
+                    >
+                      <PromptInputModelSelectTrigger
+                        aria-label={t.agentReferenceLabel}
+                        className={KNOB_TRIGGER}
+                      >
+                        <span className="max-w-[10rem] truncate">
+                          {referenceId
+                            ? (references.find((r) => r.id === referenceId)
+                                ?.excerpt ?? t.agentReferenceLabel)
+                            : t.agentReferenceLabel}
+                        </span>
+                      </PromptInputModelSelectTrigger>
+                      <PromptInputModelSelectContent
+                        align={isRTL ? "end" : "start"}
+                        className="max-w-sm"
+                      >
+                        <PromptInputModelSelectItem value={AUTO}>
+                          {t.agentReferenceNone}
+                        </PromptInputModelSelectItem>
+                        {references.map((r) => (
+                          <PromptInputModelSelectItem key={r.id} value={r.id}>
+                            <span className="flex items-center gap-2">
+                              <span className="max-w-[16rem] truncate">
+                                {r.excerpt}
+                              </span>
+                              {r.shipped && (
+                                <span className="text-muted-foreground shrink-0 text-xs">
+                                  {t.agentReferenceShipped}
+                                </span>
+                              )}
+                            </span>
+                          </PromptInputModelSelectItem>
+                        ))}
+                      </PromptInputModelSelectContent>
+                    </PromptInputModelSelect>
+                  )}
 
                   <div className="ms-auto flex items-center gap-1 md:gap-2">
                     <PromptInputButton

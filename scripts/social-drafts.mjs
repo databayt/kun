@@ -11,11 +11,17 @@
 // egress layer: the relays deliver, they never write.
 //
 //   node scripts/social-drafts.mjs list
+//   node scripts/social-drafts.mjs lessons [--brand hogwarts]
 //   node scripts/social-drafts.mjs answer <id> --ar <file> --en <file> [--media "url1,url2"]
 //   node scripts/social-drafts.mjs attach <id> --media "url1,url2"
 //   node scripts/social-drafts.mjs fail   <id> --note "why"
 //   node scripts/social-drafts.mjs seed --auto [--brand hogwarts] [--count 2]
 //   node scripts/social-drafts.mjs seed --brand hogwarts --brief "..."
+//
+// `list` carries an ask's DIRECTION as well as its brief — the knobs a
+// contributor set, and for a refinement turn the previous draft plus what to
+// change about it. `lessons` is the other half of the same idea, backwards:
+// what reviewers rejected recently, so a run can stop repeating it.
 //
 // Copy goes in via FILES, not argv: brand copy is multi-line, contains quotes
 // and Arabic, and argv mangles all three. Media goes in via URLS, comma-
@@ -96,11 +102,23 @@ function parseMedia(raw) {
 const [, , command, id] = process.argv;
 
 if (command === "list") {
+  // LEFT JOIN twice, because a pending ask can be two things the writer must
+  // see whole:
+  //   parent    — the turn being refined. Without its copy the instruction
+  //               ("sharper hook") names nothing, and the writer would answer
+  //               the root brief again from scratch.
+  //   reference — "write it like this one". Its Arabic IS the direction.
   const rows = await sql`
-    SELECT "id", "brand", "brief", "requestedBy", "createdAt", "mediaUrls"
-    FROM "SocialDraftRequest"
-    WHERE "status" = 'pending'
-    ORDER BY "createdAt" ASC
+    SELECT r."id", r."brand", r."brief", r."requestedBy", r."createdAt",
+           r."mediaUrls", r."turn", r."instruction",
+           r."model", r."angle", r."register",
+           p."ar" AS "parentAr", p."en" AS "parentEn",
+           ref."ar" AS "referenceAr"
+    FROM "SocialDraftRequest" r
+    LEFT JOIN "SocialDraftRequest" p   ON p."id"   = r."parentId"
+    LEFT JOIN "SocialDraftRequest" ref ON ref."id" = r."referenceId"
+    WHERE r."status" = 'pending'
+    ORDER BY r."createdAt" ASC
     LIMIT 20`;
   // Liveness proof for the Hub: every look at the queue — the scheduled
   // drainer or a human session — stamps the heartbeat the status panel and the
@@ -116,7 +134,10 @@ if (command === "list") {
     // which must decide "invoke claude or not" without parsing prose.
     console.log(process.argv.includes("--json") ? "[]" : "No pending draft asks.");
   } else {
-    // JSON so a session reads the briefs verbatim, Arabic intact.
+    // JSON so a session reads the briefs verbatim, Arabic intact. Keys are
+    // omitted rather than sent null: an ask with no direction should LOOK like
+    // an ask with no direction, so the writer runs its own three-angle
+    // discipline instead of reading `"angle": null` as a field to satisfy.
     console.log(
       JSON.stringify(
         rows.map((r) => ({
@@ -128,6 +149,21 @@ if (command === "list") {
           waitingMinutes: Math.round(
             (Date.now() - new Date(r.createdAt).getTime()) / 60000,
           ),
+          ...(r.turn > 1 && {
+            turn: r.turn,
+            // The refinement contract, in one place: what to change, and the
+            // exact text to change. Both or neither — an instruction without
+            // the previous draft is not actionable.
+            refine: {
+              instruction: r.instruction,
+              previousAr: r.parentAr,
+              previousEn: r.parentEn,
+            },
+          }),
+          ...(r.model && { model: r.model }),
+          ...(r.angle && { angle: r.angle }),
+          ...(r.register && { register: r.register }),
+          ...(r.referenceAr && { referenceAr: r.referenceAr }),
         })),
         null,
         2,
@@ -320,6 +356,66 @@ if (command === "list") {
     }
     await insertAsk(brand, brief);
   }
+} else if (command === "lessons") {
+  // What the reviewers rejected lately, so the next run does not repeat it.
+  //
+  // copy.mdx says the pipeline's feedback loop is "dismiss reasons on the review
+  // queue, and the angles the drain prints to its daily log". Both were being
+  // WRITTEN and neither was ever READ: the reason went into a prose `note` no
+  // query could group, and the angles went to a log file on one laptop. This
+  // subcommand is the read half. It is the cheapest quality lever in the
+  // pipeline — no model call, no new state, just showing the writer what a
+  // human already said about its last twenty drafts.
+  //
+  // 60 days: long enough to survive a slow fortnight at ~2 posts/week, short
+  // enough that a bar we have since raised stops being cited as current.
+  const brand = flag("brand");
+  const rows = brand
+    ? await sql`
+        SELECT "brand", "dismissReason", "note", "ar", "answeredAt"
+        FROM "SocialDraftRequest"
+        WHERE "status" = 'dismissed' AND "dismissReason" IS NOT NULL
+          AND "brand" = ${brand}
+          AND "answeredAt" > now() - interval '60 days'
+        ORDER BY "answeredAt" DESC
+        LIMIT 20`
+    : await sql`
+        SELECT "brand", "dismissReason", "note", "ar", "answeredAt"
+        FROM "SocialDraftRequest"
+        WHERE "status" = 'dismissed' AND "dismissReason" IS NOT NULL
+          AND "answeredAt" > now() - interval '60 days'
+        ORDER BY "answeredAt" DESC
+        LIMIT 20`;
+
+  if (rows.length === 0) {
+    // Said plainly, because "no lessons" and "the query broke" must not read
+    // the same to a session that is about to write without them.
+    console.log(
+      "No dismissals recorded in the last 60 days — nothing to correct for.",
+    );
+  } else {
+    const byReason = new Map();
+    for (const r of rows) {
+      if (!byReason.has(r.dismissReason)) byReason.set(r.dismissReason, []);
+      byReason.get(r.dismissReason).push(r);
+    }
+    console.log(
+      `Dismissed in the last 60 days${brand ? ` for ${brand}` : ""} — ${rows.length} draft(s).`,
+    );
+    console.log(
+      "These are drafts a human refused AFTER a session judged them finished. Read the first lines: whatever they have in common is the habit to break.\n",
+    );
+    // Most-common failure first — that ordering IS the instruction.
+    const ranked = [...byReason.entries()].sort((a, b) => b[1].length - a[1].length);
+    for (const [reason, group] of ranked) {
+      console.log(`## ${reason} — ${group.length}×`);
+      for (const r of group) {
+        const firstLine = (r.ar ?? "").split("\n")[0].slice(0, 90);
+        console.log(`  [${r.brand}] ${firstLine}`);
+      }
+      console.log("");
+    }
+  }
 } else if (command === "fail") {
   if (!id) {
     console.error('Usage: fail <id> --note "why"');
@@ -337,6 +433,7 @@ if (command === "list") {
     [
       "Usage:",
       "  node scripts/social-drafts.mjs list",
+      "  node scripts/social-drafts.mjs lessons [--brand hogwarts]",
       '  node scripts/social-drafts.mjs answer <id> --ar <file> --en <file> [--media "url1,url2"] [--note ...]',
       '  node scripts/social-drafts.mjs attach <id> --media "url1,url2"',
       '  node scripts/social-drafts.mjs fail   <id> --note "why"',

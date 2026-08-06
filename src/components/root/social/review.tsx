@@ -189,6 +189,15 @@ export function ReviewPanel() {
                         <span className="bg-muted rounded-full px-2 py-0.5 text-[10px] font-medium tracking-wider uppercase">
                           {brandLabel(draft.brand)}
                         </span>
+                        {/* A refined draft is a different thing to review than
+                            a first one: someone already read it and asked for a
+                            change, so the question is whether the change
+                            landed. Only from v2 — every draft is a v1. */}
+                        {draft.turn > 1 && (
+                          <span className="border-border text-muted-foreground rounded-full border px-2 py-0.5 font-mono text-[10px]">
+                            {fill(t.agentTurnBadge, { turn: draft.turn })}
+                          </span>
+                        )}
                         {media.images.length > 0 && (
                           <span className="text-muted-foreground flex items-center gap-1 text-xs">
                             <Images className="size-3.5" />
@@ -208,8 +217,15 @@ export function ReviewPanel() {
                       {/* line-clamp sets its own display (-webkit-box); pairing
                           it with `block` lets display:block win the cascade and
                           the excerpt renders full-height. */}
+                      {/* The instruction outranks the brief on a refined draft:
+                          the brief is what the thread has always been about,
+                          the instruction is what this turn was supposed to fix. */}
                       <span className="text-muted-foreground mb-1 line-clamp-1 text-xs">
-                        {draft.brief}
+                        {draft.instruction
+                          ? fill(t.agentRefinedFor, {
+                              instruction: draft.instruction,
+                            })
+                          : draft.brief}
                       </span>
                       <span
                         dir="rtl"

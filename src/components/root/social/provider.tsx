@@ -19,11 +19,20 @@ import { useRouter } from "next/navigation";
 import { isRTL, type Locale } from "@/components/local/config";
 import {
   listAnsweredDrafts,
+  listDraftReferences,
   readSocialDraft,
+  refineSocialDraft,
   requestSocialDraft,
   verifyConnections,
   type AnsweredDraft,
+  type DraftReference,
 } from "@/actions/post-social";
+import {
+  DEFAULT_DRAFT_MODEL,
+  type DraftAngleId,
+  type DraftModelId,
+  type DraftRegisterId,
+} from "@/components/root/social/knobs";
 import {
   CHANNELS,
   DISTRIBUTION_CHANNELS,
@@ -74,9 +83,29 @@ export type Reveal = "ar" | "en" | "done" | null;
 const MAX_BRIEF_CHARS = 2000;
 
 /**
+ * The direction a contributor sets before asking, and re-aims between turns.
+ *
+ * Provider state rather than component state for the same reason the poll is:
+ * a contributor who steps out to the showroom for an image and comes back
+ * should not find the register they chose reset to the default.
+ */
+export interface DraftKnobs {
+  model: DraftModelId;
+  setModel: (id: DraftModelId) => void;
+  angle: DraftAngleId | null;
+  setAngle: (id: DraftAngleId | null) => void;
+  register: DraftRegisterId | null;
+  setRegister: (id: DraftRegisterId | null) => void;
+  referenceId: string | null;
+  setReferenceId: (id: string | null) => void;
+  /** Prior copy for this brand, offered as "write it like this one". */
+  references: DraftReference[];
+}
+
+/**
  * The agent window's whole conversation, provider-owned so the queue poll and
  * an unrevealed answer survive leaving /social/draft. Only presentation state
- * (focus collapse, the model select) stays in the component.
+ * (focus collapse) stays in the component.
  */
 export interface DraftQueue {
   prompt: string;
@@ -87,9 +116,19 @@ export interface DraftQueue {
   /**
    * The answered SocialDraftRequest's id, kept after the poll stops so the
    * "Use …" hand-off can carry it — approving in the review queue then
-   * consumes the request instead of leaving it to be approved twice.
+   * consumes the request instead of leaving it to be approved twice. It is
+   * also what the next turn refines.
    */
   answeredId: string | null;
+  /**
+   * 1-based depth of the answer on screen. > 1 means this window is in a
+   * conversation, which is what flips the prompt from "describe a post" to
+   * "say what to change" — the single piece of state that makes the same box
+   * an ask box and a reply box.
+   */
+  turn: number;
+  /** The instruction that produced the answer on screen. Null on turn 1. */
+  lastInstruction: string | null;
   reveal: Reveal;
   error: string | null;
   queueInfo: { pendingAhead?: number; lastDrainAt?: string } | null;
@@ -152,6 +191,7 @@ interface SocialContextValue {
   composerMediaUrls: string[];
   attachMedia: (url: string) => void;
   removeMedia: (url: string) => void;
+  draftKnobs: DraftKnobs;
   draftQueue: DraftQueue;
   reviewQueue: ReviewQueue;
 }
@@ -291,7 +331,35 @@ export function SocialProvider({
   const [hasInteracted, setHasInteracted] = useState(false);
   const [draft, setDraft] = useState<DraftPair | null>(null);
   const [answeredId, setAnsweredId] = useState<string | null>(null);
+  const [turn, setTurn] = useState(1);
+  const [lastInstruction, setLastInstruction] = useState<string | null>(null);
   const [reveal, setReveal] = useState<Reveal>(null);
+
+  // ——— The knobs ———
+
+  const [model, setModel] = useState<DraftModelId>(DEFAULT_DRAFT_MODEL);
+  const [angle, setAngle] = useState<DraftAngleId | null>(null);
+  const [register, setRegister] = useState<DraftRegisterId | null>(null);
+  const [referenceId, setReferenceId] = useState<string | null>(null);
+  const [references, setReferences] = useState<DraftReference[]>([]);
+
+  // References are per brand, and a reference from another brand is dropped
+  // server-side anyway — so switching brand clears the pick rather than leaving
+  // a selected chip that will silently do nothing.
+  useEffect(() => {
+    let cancelled = false;
+    setReferenceId(null);
+    listDraftReferences(product)
+      .then((res) => {
+        if (!cancelled) setReferences(res.ok ? (res.references ?? []) : []);
+      })
+      .catch(() => {
+        if (!cancelled) setReferences([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [product]);
   const [draftError, setDraftError] = useState<string | null>(null);
   const [requestId, setRequestId] = useState<string | null>(null);
   // The queue telling its own truth: position + when a session last looked.
@@ -350,6 +418,7 @@ export function SocialProvider({
       if (res.status === "answered" && res.ar && res.en) {
         setDraft({ ar: res.ar, en: res.en, mediaUrls: res.mediaUrls ?? [] });
         setAnsweredId(requestId);
+        setTurn(res.turn ?? 1);
         setReveal("ar");
         setBusy(false);
         setRequestId(null);
@@ -408,25 +477,53 @@ export function SocialProvider({
 
       if (!brief || busy) return;
       if (pollRef.current) clearTimeout(pollRef.current);
+
+      // An answer on screen makes this box a reply box: the same submit
+      // refines the draft the contributor just read instead of starting an
+      // unrelated one. "Start new" is how you get the other behaviour, and it
+      // is the only way — an implicit switch back would silently orphan the
+      // thread someone is mid-conversation with.
+      const isRefinement = Boolean(answeredId && draft);
+
       setBusy(true);
       setHasInteracted(true);
       setDraftError(null);
-      setDraft(null);
-      setAnsweredId(null);
-      setReveal(null);
+      // The previous answer stays on screen through a refinement, so the wait
+      // shows what is being changed rather than an empty panel. A fresh ask
+      // clears, because nothing on screen relates to it any more.
+      if (!isRefinement) {
+        setDraft(null);
+        setAnsweredId(null);
+        setTurn(1);
+        setLastInstruction(null);
+        setReveal(null);
+      }
       setRequestId(null);
       setQueueInfo(null);
       setStalled(false);
       try {
-        // The tray rides the ask — a showroom pick or pasted CDN URL becomes
-        // the draft's media half, for the answering session to keep or extend.
-        const res = await requestSocialDraft({
-          product,
-          brief,
-          mediaUrls: composerMediaUrls,
-        });
+        const res = isRefinement
+          ? await refineSocialDraft({
+              parentId: answeredId,
+              instruction: brief,
+              model,
+              angle: angle ?? undefined,
+              register: register ?? undefined,
+            })
+          : // The tray rides the ask — a showroom pick or pasted CDN URL becomes
+            // the draft's media half, for the answering session to keep or extend.
+            await requestSocialDraft({
+              product,
+              brief,
+              mediaUrls: composerMediaUrls,
+              model,
+              angle: angle ?? undefined,
+              register: register ?? undefined,
+              referenceId: referenceId ?? undefined,
+            });
         if (res.ok && res.id) {
           setRequestId(res.id);
+          if (isRefinement) setLastInstruction(brief);
           setPrompt("");
         } else {
           setDraftError(res.error ?? "Unknown error.");
@@ -437,13 +534,25 @@ export function SocialProvider({
         setBusy(false);
       }
     },
-    [busy, product, composerMediaUrls],
+    [
+      busy,
+      product,
+      composerMediaUrls,
+      answeredId,
+      draft,
+      model,
+      angle,
+      register,
+      referenceId,
+    ],
   );
 
   const reset = useCallback(() => {
     if (pollRef.current) clearTimeout(pollRef.current);
     setDraft(null);
     setAnsweredId(null);
+    setTurn(1);
+    setLastInstruction(null);
     setReveal(null);
     setDraftError(null);
     setHasInteracted(false);
@@ -452,6 +561,8 @@ export function SocialProvider({
     setBusy(false);
     setQueueInfo(null);
     setStalled(false);
+    // Knobs deliberately survive: "start new" ends a conversation, it does not
+    // undo the register or the model someone set for this brand's whole session.
   }, []);
 
   const checkAgain = useCallback(() => {
@@ -519,6 +630,18 @@ export function SocialProvider({
     clearActive,
   };
 
+  const draftKnobs: DraftKnobs = {
+    model,
+    setModel,
+    angle,
+    setAngle,
+    register,
+    setRegister,
+    referenceId,
+    setReferenceId,
+    references,
+  };
+
   const draftQueue: DraftQueue = {
     prompt,
     setPrompt,
@@ -526,6 +649,8 @@ export function SocialProvider({
     hasInteracted,
     draft,
     answeredId,
+    turn,
+    lastInstruction,
     reveal,
     error: draftError,
     queueInfo,
@@ -556,6 +681,7 @@ export function SocialProvider({
     composerMediaUrls,
     attachMedia,
     removeMedia,
+    draftKnobs,
     draftQueue,
     reviewQueue,
   };

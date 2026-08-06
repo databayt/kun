@@ -197,22 +197,71 @@ write only the winner. The runner-ups are not persisted anywhere — the discipl
 hook; the artifact has no reader. A hand-run session says them out loud; the drain prints them to
 its log.
 
+## Direction: the three knobs
+
+A brief says what the post is about. The knobs say how to write it — and they are this page's own
+vocabulary, so a contributor sets the same things a reviewer dismisses against.
+
+| Knob | Values | Unset means |
+|------|--------|-------------|
+| **Angle** | pain · moment · proof | The writer runs the three-angle discipline itself |
+| **Register** | rung 2 · 3 · 4 | Take the rung the brand + channel map above prescribes |
+| **Like this one** | a prior post for the same brand | No reference |
+
+Two rules make them worth having:
+
+- **A set knob is a decision, not a hint.** The writer still names three angles in its log, but it
+  writes the one asked for. Substituting a better idea silently is how direction stops being worth
+  giving.
+- **Rung 1 is storable but never askable.** The column means "a rung on the ladder"; the Hub offers
+  2–4, because offering the rung this page says never ships would return a draft already failed.
+
+A reference is matched for **voice** — rhythm, sentence length, distance from the reader — never
+for subject, and its sentences are never reused. `content/social/pillars.json` has been encoding
+Angle and Register inside its brief strings since the seed lane shipped; the knobs are that
+convention given a home the UI can reach.
+
+## Refinement: a draft is a conversation
+
+A draft that fails a check does not have to be dismissed and re-asked. Typing what to change in
+the Hub's agent window files the **next turn** of the same thread.
+
+- The parent is **superseded**, not overwritten — every turn keeps its own copy, its own media,
+  and its own approvability, so a v3 that came out worse never destroys the v2 someone liked.
+- The **root brief travels unchanged**; the instruction rides beside it. Folding the instruction
+  into the brief would lose the difference between what the post is about and what was wrong with
+  the last attempt — by turn three the brief would be a changelog.
+- A refinement **changes only what was asked**. Keep the hook if the note is about length; keep the
+  length if the note is about the hook. Quietly rewriting the whole post takes away the part the
+  reviewer had already accepted, and they have to find it again.
+- Only the newest turn is `answered`, so the review queue shows the current draft rather than three
+  versions of one post competing for a slot.
+
+The reviewer's dismiss is still the feedback loop, not the quality gate — a draft that fails
+check 1 or check 2 is rewritten before it is answered, not after.
+
 ## Why not a candidate set, an A/B, or a judge
 
-`SocialDraftRequest` holds exactly one `ar` and one `en`, and that is deliberate at this volume.
+`SocialDraftRequest` holds exactly one `ar` and one `en` **per turn**, and that is deliberate at
+this volume. A thread is a sequence a human steered, not a set to choose from.
 
 - **Persisted candidates** would have to ride the `note` field, which is rendered *verbatim to the
   asker* in the agent window — runner-ups would be invisible where they matter and corrupting
-  where they are visible.
-- **Attribution columns** (`angle`, `hook`, `pillar` on a variant) need six months to hold fifty
-  rows at ~2 posts/week — below any threshold that distinguishes a good hook from a lucky Tuesday.
-  The strategy's stop-loss fires at 3 months on *presence*, not attribution.
+  where they are visible. Refinement gets the same outcome by asking, and records who asked.
+- **Attribution columns** (`hook`, `pillar` on a variant) need six months to hold fifty rows at ~2
+  posts/week — below any threshold that distinguishes a good hook from a lucky Tuesday. The
+  strategy's stop-loss fires at 3 months on *presence*, not attribution. (`angle` became a column
+  anyway — as an **input**, which needs no sample size to be useful.)
 - **An LLM judge** is the L4 gate, behind `/decide`. It costs a second model call per draft on a
   subscription pool that already hits session limits. The human gate exists and takes twenty
   seconds.
 
-The feedback loop we *do* run is free: dismiss reasons on the review queue, and the angles the
-drain prints to its daily log. If "no hook" stops appearing in dismiss reasons, this page worked.
+The feedback loop we run is free, and since 2026-08-06 it is actually **read**: dismiss reasons are
+stored as a structured `dismissReason`, and `node scripts/social-drafts.mjs lessons` shows the
+drain what reviewers rejected in the last 60 days, most common failure first — before it writes the
+first draft of a run. Until that column existed the reason was concatenated into a prose `note`
+where nothing could group it, and this paragraph described an intention rather than a mechanism.
+If "no hook" stops appearing in dismiss reasons, this page worked.
 
 ## See also
 

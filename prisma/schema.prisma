@@ -147,6 +147,26 @@ enum DraftRequestStatus {
   consumed
   /// A human decided not to use it; `note` says why. Terminal.
   dismissed
+  /// A refinement turn replaced this answer. Terminal, but NOT a rejection —
+  /// the copy stays readable as the thread's history and as the next turn's
+  /// starting point. This is what keeps a conversation from filling the review
+  /// queue with three versions of one post.
+  superseded
+}
+
+/// Which of copy.mdx's three angles a draft is pre-committed to.
+///
+/// The skill already names three angles before writing one and picks the
+/// survivor; this lets the asker make that call instead, which is the
+/// difference between "write me something" and direction. Unset means the
+/// writer still chooses — the documented default, not a missing value.
+enum DraftAngle {
+  /// What the reader's week costs them.
+  pain
+  /// A scene they recognize.
+  moment
+  /// The one true fact from the brief.
+  proof
 }
 
 /// A contributor's ask for copy, waiting on the Max pool.
@@ -162,23 +182,78 @@ enum DraftRequestStatus {
 ///
 /// Deliberately not a SocialPiece: nothing has been written yet, and a piece
 /// with no copy would pollute the ledger the Hub and metrics both read.
+///
+/// A row is also one TURN in a conversation. Refining an answer does not mutate
+/// it — it supersedes it and files a child, so every turn keeps its own copy,
+/// its own media, and its own approvability. The thread is the `parent` chain;
+/// there is no separate turn table because a turn and an ask want exactly the
+/// same columns, and one lifecycle (pending → answered) is already race-safe.
 model SocialDraftRequest {
   id String @id @default(cuid())
 
   /// Product registry id — hogwarts · mkan · databayt · sijillee · moalimee.
   brand String
-  /// The contributor's ask, verbatim.
+  /// The contributor's ask, verbatim. Carried down a thread unchanged: every
+  /// turn is still answering the original brief, however it was redirected.
   brief String
   /// Who asked, for the answering session's context. Contributor email.
   requestedBy String?
 
   status DraftRequestStatus @default(pending)
 
+  // ── The thread ────────────────────────────────────────────────────────────
+
+  /// The turn this one refines. Null on the first ask of a thread.
+  parentId String?
+  parent   SocialDraftRequest?  @relation("DraftThread", fields: [parentId], references: [id], onDelete: SetNull)
+  children SocialDraftRequest[] @relation("DraftThread")
+
+  /// 1-based depth. Denormalized from the parent chain so the queue read and
+  /// the "v2" badge never walk it.
+  turn Int @default(1)
+
+  /// What to change, in the reviewer's words — "sharper hook", "half as long",
+  /// "lose the second claim". Null on turn 1, required on every turn after:
+  /// a refinement with no instruction is a re-roll, and a re-roll of a passing
+  /// draft is how a good hook gets replaced by a lucky one.
+  instruction String?
+
+  // ── The knobs ─────────────────────────────────────────────────────────────
+  //
+  // The direction a contributor can give without writing prose about it.
+  // pillars.json already encodes exactly these three in its brief strings
+  // (Angle / The scene / Register) because there was nowhere else to put them;
+  // these columns are that convention given a home the UI can reach.
+
+  /// Which model wrote it. Passed to `claude -p --model` by the drain — the
+  /// window's model select used to be decoration because this column did not
+  /// exist. Null means the answering session's own default.
+  model String?
+  /// Pre-committed angle, or null to let the writer pick.
+  angle DraftAngle?
+  /// Rung on copy.mdx's Arabic register ladder, 1–4. Null means take the rung
+  /// the brand + channel map already prescribes. 1 never ships, so the UI
+  /// offers 2–4 and 1 exists only to make the stored value mean the ladder.
+  register Int?
+  /// "Write it like this one" — a prior request in the same brand whose copy is
+  /// the inspiration. SetNull rather than Cascade: losing the reference must
+  /// never delete a draft that was written from it.
+  referenceId String?
+  reference   SocialDraftRequest?  @relation("DraftReference", fields: [referenceId], references: [id], onDelete: SetNull)
+  referencedBy SocialDraftRequest[] @relation("DraftReference")
+
+  // ── The answer ────────────────────────────────────────────────────────────
+
   /// The answer: Arabic crafted first, English as its sibling.
   ar String?
   en String?
   /// Who answered, e.g. "claude-code:abdout". Or why it failed.
   note String?
+  /// Which craft check failed, when a human dismissed it — the one column the
+  /// writing side reads back. It used to be concatenated into `note`, where
+  /// nothing could aggregate it, which made copy.mdx's claim to run a feedback
+  /// loop true only in intent. `social-drafts.mjs lessons` reads this.
+  dismissReason String?
   /// The draft's media half — library picks or CDN renders, attached at ask
   /// time by a contributor or at answer time by the drafting session. A full
   /// draft is copy AND/OR media: any of the two may be empty, never both.
@@ -189,6 +264,10 @@ model SocialDraftRequest {
 
   /// The queue read: oldest pending first.
   @@index([status, createdAt])
+  /// The thread read, and the review queue's latest-turn filter.
+  @@index([parentId])
+  /// The lessons read: recent dismissals for one brand.
+  @@index([brand, dismissReason])
 }
 
 enum MediaBriefStatus {

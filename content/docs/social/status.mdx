@@ -101,7 +101,7 @@ Their current state:
 
 | Loop | State | Why |
 |------|-------|-----|
-| **A — Hub** | **Works** (Facebook only) | The one working path, and since 2026-08-05 a wired one: a brief on the Draft tab (or **Queue now** on the Calendar tab) becomes a queue ask, the 5-minute launchd drain answers it as a **full draft** — copy plus media picked from `library.json` — and it lands in the **review queue** on Publish, where a human fine-tunes and approves (now, or scheduled to the drain). Staging still returns the signed links in-app, so no chat relay is needed to run the gate. |
+| **A — Hub** | **Works** (Facebook only) | The one working path, and since 2026-08-05 a wired one: a brief on the Draft tab (or **Queue now** on the Calendar tab) becomes a queue ask, the 60-second launchd drain answers it as a **full draft** — copy plus media picked from `library.json` — and it lands in the **review queue** on Publish, where a human fine-tunes and approves (now, or scheduled to the drain). Since 2026-08-06 the Draft tab is also a **conversation**: typing again refines the draft on screen rather than starting a new one, and angle/register/reference/model ride the ask as columns. Staging still returns the signed links in-app, so no chat relay is needed to run the gate. |
 | **B — Cron** | **Superseded by the seed lane** (2026-08-01) | The Vercel route stays parked as designed (`SOCIAL_AUTOPOST_PRODUCTS` unset — no compliant server-side draft source, and its one-text-everywhere shape contradicts the multiplier). Its *calendar half* now runs billing-compliantly on the Mac: `scripts/seed-drafts.sh` (launchd, Mondays 07:00) files the week's briefs from `content/social/pillars.json` into the draft queue, and the 5-minute drain answers them on the Max pool — verified unattended end to end (seed → answered in 3 minutes). Per-channel fan-out remains session-side at staging time. |
 | **C — Hermes relay** | **Parked** | Hermes is down, never observed end to end, and since 2026-07-30 nothing depends on it: reviews carry through the Hub's own links. Revisit only when a hermes-transport channel actually goes live. |
 
@@ -141,10 +141,29 @@ returns `drafted: 0`.
   shipped and is blocked (`ANTHROPIC_API_KEY` in Vercel returns 401, and subscription-only billing
   means there are no credits behind it), so the window records a `SocialDraftRequest` and a Claude
   Code session answers it on the Max pool via `draft`'s queue mode. The cron's no-spend default is
-  untouched. The queue drains on a 5-minute launchd tick (`scripts/drain-drafts.sh --install`,
-  2026-07-30) that beats a `draft-drain` heartbeat on every look; the window reads it back
+  untouched. The queue drains on a **60-second** launchd tick (`scripts/drain-drafts.sh --install`)
+  that beats a `draft-drain` heartbeat on every look; the window reads it back
   (position + last check), backs off its poll, and stops at 10 minutes — and the drain sweep
   expires hour-old unanswered asks
+- **Drafting is a conversation with direction** (2026-08-06) — the Draft stage stopped being one
+  shot in the dark:
+  - **Refinement turns.** Typing into the window after an answer refines *that* draft instead of
+    starting another. The parent is `superseded` and a child is filed carrying the root brief, the
+    inherited knobs, the media, and the instruction — so every turn keeps its own copy and its own
+    approvability, and only the newest is `answered` (the review queue shows the current draft, not
+    three versions of one post). The supersede is the same conditional claim `approve` uses, so two
+    reviewers refining at once race safely.
+  - **Knobs, not prose.** Angle (pain · moment · proof), register (rung 2–4), and "write it like
+    this one" are columns the Hub offers as controls and the drain reads directly. `pillars.json`
+    had been encoding all three inside its brief strings because there was nowhere else to put them.
+  - **The model select became real.** It was decoration — the queue had no `model` column, and the
+    code said so. The drain now groups the pending queue by model and makes one `claude -p --model`
+    call per group, because `--model` is a session property and one call cannot honour two choices.
+  - **The feedback loop is read, not just written.** Dismiss reasons are stored as a structured
+    `dismissReason`; `social-drafts.mjs lessons` shows the drain what reviewers rejected in the last
+    60 days, most common failure first, before it writes anything. [Copy](/docs/social/copy) had
+    claimed this loop since it was written — it was concatenating the reason into a prose `note` no
+    query could group
 - **Docs** — overview, status (this page), ownership, architecture, strategy, carousel, five
   brand pages, the channel guides, and the groups/destinations design
 
