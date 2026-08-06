@@ -1839,7 +1839,7 @@ export const schools: School[] = [
       {
         name: "from shadcn",
         effect: "shadcn/ui fork — refined for Databayt",
-        order: [f("shadcn"), p("shadcn"), w("org-refs")],
+        order: [f("shadcn"), p("shadcn"), w("org-refs"), s("/shadcn")],
         steps: [
           "Search shadcn registry via MCP",
           "View component details",
