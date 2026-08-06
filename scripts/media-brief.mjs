@@ -140,10 +140,18 @@ function cmdBrief(args) {
   console.log(`\n${'─'.repeat(72)}`);
   console.log(`type ${typeId} · ${size} · ${spine} spine · brand ${id}`);
   console.log(`Attach: ${kit.renderers.chatgpt.attachAlways.join(', ')}`);
-  console.log(`\nAfter it renders, save into ~/Downloads/higgs and run:`);
+  // The brief body is renderer-agnostic — only the seat differs. Print both
+  // funded seats rather than assuming ChatGPT, since the Gemini seat renders
+  // free on the AI Studio Pro subscription while its API quota is limit: 0.
+  console.log(`\nRender it on a seat:`);
   console.log(
-    `  node scripts/higgs-library.mjs add ~/Downloads/higgs/<file> \\\n` +
-      `    --brand ${id} --type ${typeId} --source chatgpt --model gpt-image-2\n` +
+    `  gemini  https://aistudio.google.com/prompts/new_chat?model=gemini-3.1-flash-image\n` +
+      `  chatgpt the brand Project (instructions from \`media-brief.mjs project\`)`,
+  );
+  console.log(`\nThen save it and run — set --source to the seat you used:`);
+  console.log(
+    `  node scripts/higgs-library.mjs add ~/Downloads/<file> \\\n` +
+      `    --brand ${id} --type ${typeId} --source gemini --model gemini-3.1-flash-image\n` +
       `  node scripts/higgs-library.mjs push`,
   );
   return null;
