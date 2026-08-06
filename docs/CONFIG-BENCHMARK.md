@@ -81,24 +81,24 @@ agent-browser, garrytan/gstack, bmad-method v6.10, github/spec-kit v0.12.9, micr
 v0.1.6, hermes-agent v0.18.2, Claude Design, and the harness-engineering + solo-leverage
 literature. Verified against CHANGELOG 2.1.199→2.1.206 and the July docs.
 
-| Finding (source)                                                                            | kun decision                                                                                                                                                  |
-| ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Claude 5 family GA; Fable 5 set as session default via `/model`                             | **ADOPTED** — engine model `claude-fable-5`, fallbacks `opus-4-8 → sonnet-5`; agent alias tiers unchanged                                                     |
-| spec-kit `clarify` (taxonomy scan + ≤5 questions before the gate)                           | **ADOPTED** — CLARIFY step in `/spec` (≤3 questions, answers encoded into the spec comment)                                                                   |
-| spec-kit `analyze` gate semantics (read-only, constitution conflict = CRITICAL)             | **ADOPTED** — READY stage wired into `/feature` (Stage 2.7): coverage + conflict + constitution, FAIL blocks the pipeline                                     |
-| Vercel react-best-practices rule pack (impact-tagged, per-rule files)                       | **ADOPTED** — new `react-perf/` domain, 8 rules vendored + `_template.md` + `impactDescription` frontmatter; feeds `stack`/`trace`/`efficient`                |
-| Claude Design: `design` plugin (knowledge-work-plugins) + canvas MCP, Max-covered           | **ADOPTED** — onboarding Phase 5 wires both; `claude-design` added to the declared MCP fleet; `/design-login` is a deferred manual click                      |
-| Anthropic harness engineering (initializer/worker, evaluator ≠ generator, JSON state)       | **ADOPTED** — `/sync` harness-audit step (retire dead scaffolds on model releases), `/qa` baseline smoke + `blocks.json` verdict contract, CEO-OS Direction 8 |
-| Second-brain / one-person-$1M operating moves                                               | **ADOPTED** — NORTH-STAR "enough" line, CEO-OS cash mechanics + custom-work rule, `/weekly` decision-review sweep, memory TL;DR/archive practice              |
-| Vocabulary drift: duplicate `feature`/`check`/`ship`, dead BMAD v4 spells, `sync` collision | **ADOPTED** — vocabulary v2: deduped, stale spells pruned, Anthropic-native automation school (`loop`/`goal`/`schedule`/`workflow`), 12 missing spells added  |
-| Hermes docs drift (`gateway run` vs `start`; Slack event subscriptions)                     | **ADOPTED** — hermes.mdx corrected against the v0.18.2 official docs                                                                                          |
-| TypeScript 7.0 native (Go) stable 2026-07-08; TS 6.0 current JS release                     | TRACK — hold products until **7.1** restores the JS API (typescript-eslint blocked); STACK.md updated                                                         |
-| Prisma 6.x maintenance tail ended (6.19.3, Apr 2026); Prisma 7 requires driver adapters     | **PROPOSE** — `/decide` + `/package`-driven migration plan; marketing (already 7.2.0) is the proof path                                                       |
-| shadcn/ui defaults to Base UI (Jul 2026); Radix demoted to `-b radix`                       | **PROPOSE** — `/decide` Base-UI-vs-Radix; affects the databayt/radix fork, codebase atoms, shadcn skill pack                                                  |
-| vercel-labs/agent-browser (Rust CDP daemon, CLI-first, MCP profiles)                        | TRACK — pilot on one niche keyword before any Playwright swap; no independent benchmark, deep `~/.playwright-auth` wiring stays                               |
-| gstack eval infra (LLM-judge skill evals, diff-based selection, gate/periodic tiers)        | TRACK — highest-leverage QA idea seen; costs plan usage, scope to 3–5 pipeline skills when piloted                                                            |
-| Cloud routines API/GitHub triggers (P0-labeled issue → auto `/report` session)              | **PROPOSE** — one routine + stored bearer token; removes polling from incident response                                                                       |
-| Stacked skills (2.1.199+), MCP `request_timeout_ms`, hook `prompt_id`                       | TRACK — adopt opportunistically on next touch of each surface                                                                                                 |
+| Finding (source)                                                                            | kun decision                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Claude 5 family GA; Fable 5 set as session default via `/model`                             | **ADOPTED** — engine model `claude-fable-5`, fallbacks `opus-4-8 → sonnet-5`; agent alias tiers unchanged                                                       |
+| spec-kit `clarify` (taxonomy scan + ≤5 questions before the gate)                           | **ADOPTED** — CLARIFY step in `/spec` (≤3 questions, answers encoded into the spec comment)                                                                     |
+| spec-kit `analyze` gate semantics (read-only, constitution conflict = CRITICAL)             | **ADOPTED** — READY stage wired into `/feature` (Stage 2.7): coverage + conflict + constitution, FAIL blocks the pipeline                                       |
+| Vercel react-best-practices rule pack (impact-tagged, per-rule files)                       | **ADOPTED** — new `react-perf/` domain, 8 rules vendored + `_template.md` + `impactDescription` frontmatter; feeds `stack`/`trace`/`efficient`                  |
+| Claude Design: `design` plugin (knowledge-work-plugins) + canvas MCP, Max-covered           | **ADOPTED** — onboarding Phase 5 wires both; `claude-design` added to the declared MCP fleet; `/design-login` is a deferred manual click                        |
+| Anthropic harness engineering (initializer/worker, evaluator ≠ generator, JSON state)       | **ADOPTED** — `/sync` harness-audit step (retire dead scaffolds on model releases), `/qa` baseline smoke + `blocks.json` verdict contract, CEO-OS Direction 8   |
+| Second-brain / one-person-$1M operating moves                                               | **ADOPTED** — NORTH-STAR "enough" line, CEO-OS cash mechanics + custom-work rule, `/weekly` decision-review sweep, memory TL;DR/archive practice                |
+| Vocabulary drift: duplicate `feature`/`check`/`ship`, dead BMAD v4 spells, `sync` collision | **ADOPTED** — vocabulary v2: deduped, stale spells pruned, Anthropic-native automation school (`loop`/`goal`/`schedule`/`workflow`), 12 missing spells added    |
+| Hermes docs drift (`gateway run` vs `start`; Slack event subscriptions)                     | **ADOPTED** — hermes.mdx corrected against the v0.18.2 official docs                                                                                            |
+| TypeScript 7.0 native (Go) stable 2026-07-08; TS 6.0 current JS release                     | TRACK — hold products until **7.1** restores the JS API (typescript-eslint blocked); STACK.md updated                                                           |
+| Prisma 6.x maintenance tail ended (6.19.3, Apr 2026); Prisma 7 requires driver adapters     | **PROPOSE** — `/decide` + `/package`-driven migration plan; marketing (already 7.2.0) is the proof path                                                         |
+| shadcn/ui defaults to Base UI (Jul 2026); Radix demoted to `-b radix`                       | **PROPOSE** — `/decide` Base-UI-vs-Radix; affects the databayt/radix fork, codebase atoms, shadcn skill pack                                                    |
+| vercel-labs/agent-browser (Rust CDP daemon, CLI-first, MCP profiles)                        | TRACK — pilot on one niche keyword before any Playwright swap; no independent benchmark, deep `~/.playwright-auth` wiring stays                                 |
+| gstack eval infra (LLM-judge skill evals, diff-based selection, gate/periodic tiers)        | **ADOPTED 2026-08-06** — shipped as `/bench` L1; see "Measuring the engine" below. Cheaper than scoped: L1 grading is exact string comparison, not an LLM judge |
+| Cloud routines API/GitHub triggers (P0-labeled issue → auto `/report` session)              | **PROPOSE** — one routine + stored bearer token; removes polling from incident response                                                                         |
+| Stacked skills (2.1.199+), MCP `request_timeout_ms`, hook `prompt_id`                       | TRACK — adopt opportunistically on next touch of each surface                                                                                                   |
 
 Ceremony rejected on the cash-flow filter: BMAD party-mode/PRFAQ/sprint-status.yaml, spec-kit
 `checklist`/`taskstoissues`/personas, BenAI's n8n/Airtable stack, gstack wholesale (worktree+PR
@@ -120,12 +120,59 @@ surfaces, recorded in `.claude/memory/weekly/<date>.md`.
 | 5   | **Autonomy** — human unblocks needed per shipped feature                            | session observation + `/insights`       | trending ↓                        |
 | 6   | **North-star linkage** — allocations that name their line to the metric             | `weekly/<date>.md`                      | 100%                              |
 
+| 7 | **Dispatch accuracy** — does the right skill fire, and do the wrong ones stay silent? | `/bench` → `skill-scores.json` → `top1_hard` | ≥ 0.85 by Q4-2026; `destructive_fp` = 0 |
+| 8 | **Listing budget** — chars of frontmatter loaded into every session before a word is typed | `extract-dispatch-cases.mjs --check` | ≤ `engine.json` → `eval.listing_cap` |
+
+KPIs 7 and 8 are deliberately co-primary. Dispatch accuracy alone is trivially gamed by pasting
+every trigger phrase into every description — the score reaches 1.0, the engine is unchanged, and
+the frontmatter degrades into a keyword list that is _worse_ for the novel prompts that make up
+all real usage. Reading them together makes _deleting_ words a winning move: the honest figure is
+`top1_hard` per KB of listing. A week where accuracy rose 3 points and the listing grew 8% is a
+regression, and the report must say so.
+
+`destructive_fp` (a skill firing on `rm -rf *`, `DROP TABLE`, …) is a hard-zero gate, never traded
+against accuracy — a false fire has side effects a human must undo, a miss costs one clarifying
+sentence. For the same reason precision and recall carry different weights per skill (`fp_cost` 3
+for `publish`/`ship`/`deploy`/`release`/`incident`/`qa`/`report`), reported as a separate gate
+rather than folded into one number.
+
+## Measuring the engine — what `/bench` answers that `/health` cannot
+
+`/health` counts files and compares them to `engine.json`. It has never read a `SKILL.md` body.
+That gap let three defects sit undetected: `deploy` shipped with no `when_to_use` while claiming
+`"ship"` as a trigger (and it is the most-invoked skill in the transcript history), `user_skills`
+declared 62 against a real 66 because user-level counts were never checked at all, and six
+vocabulary spells are named like a skill but route elsewhere.
+
+The system rests on one fact: **kun already wrote its own test set and never ran it.** 246
+`Triggers on:` phrases, 73 spells naming a skill, and 95 spells routing to an agent/MCP that must
+therefore fire _nothing_ — 402 labeled cases, zero synthesis. The load-bearing rule is that those
+phrases are the test set and are **read-only to the tuner**, enforced by a `corpus_hash` that
+refuses to compare scores across an edit. A holdout alone does not stop keyword stuffing, because
+stuffing lifts train and holdout identically.
+
+Deliberately **not** copied from the tools this was benchmarked against: skilltune locks its eval
+cases and reuses them for every version with no holdout, which optimizes the test set by
+construction; Hermes' runtime loop patches skills every ~10 turns with no reward signal at all.
+kun takes Hermes' _measured_ shape instead — holdout-gated, human-committed — minus DSPy/GEPA,
+which needs per-token API spend the billing posture forbids.
+
 KPI 6 is the conscience clause: the engine exists to make databayt profitable and sustainable
 (`NORTH-STAR.md`). An engine improvement that cannot articulate its line to active-paying-schools
 is bench polish, not benchmark push.
 
 ## Adoption log
 
+- **2026-08-06** — `/bench` L1: the engine starts measuring itself. New `bench` skill + spell
+  (Defense), `bench-dispatch.js` workflow (Extract → Dispatch → Adjudicate → Score → Persist,
+  mirroring `qa.js`'s death-safe verify and persist-only-writes contracts),
+  `extract-dispatch-cases.mjs` (deterministic, `--check` wired into `health.sh`),
+  `harvest-transcripts.mjs` (real prompt→skill pairs for the proxy fidelity check),
+  `test-bench-dispatch.mjs` (28 assertions over the scoring math, zero tokens),
+  `skill-scores.json` (measured state + `weekly_history`). Budget caps moved into `engine.json`
+  → `eval` as declared policy with a `listing_cap_history`. Fixed: `deploy` frontmatter,
+  `user_skills` 62→66, user-level count checks in `health.sh`, skill→spell reverse check in
+  `generate-vocab.mjs`. KPIs 7–8 added. Engine v4.1.
 - **2026-07-10** — engine v4.0 benchmark pass: model → Fable 5 (fallbacks opus-4-8 → sonnet-5);
   vocabulary v2 (deduped keywords, BMAD-era spells pruned, `loop`/`goal`/`schedule`/`workflow`
   wired, +12 spells for existing skills); `/spec` CLARIFY + `/feature` READY gate (spec-kit
