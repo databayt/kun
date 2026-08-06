@@ -210,7 +210,13 @@ if [ -f "$ENGINE_JSON" ] && command -v jq &> /dev/null; then
     ER_USKILLS=$(find "$HOME/.claude/skills" -mindepth 2 -maxdepth 2 -name 'SKILL.md' 2>/dev/null | wc -l | tr -d ' ')
     [ "$EC_UAGENTS" = "$ER_UAGENTS" ] && check pass "engine user-agents" "$ER_UAGENTS" || check warn "engine user-agents" "engine.json=$EC_UAGENTS actual=$ER_UAGENTS"
     [ "$EC_USKILLS" = "$ER_USKILLS" ] && check pass "engine user-skills" "$ER_USKILLS" || check warn "engine user-skills" "engine.json=$EC_USKILLS actual=$ER_USKILLS"
-    if grep -rq "Opus 4\.6\|Opus 4\.7\|claude-opus-4-6\|claude-opus-4-7" "$KUN_ROOT/docs" "$KUN_ROOT/.claude/CLAUDE.md" 2>/dev/null; then
+    # CONFIG-BENCHMARK.md is excluded on purpose: it is a historical ledger of
+    # re-benchmarks and adoptions, so it will always name retired versions —
+    # recording that 11 skills were un-pinned FROM claude-opus-4-7 is the opposite
+    # of staleness. Structural pinning is caught properly by lint-contracts.mjs,
+    # which reads frontmatter and compares against engine.json rather than grepping
+    # prose. This grep only guards against a retired model being presented as current.
+    if grep -rq --exclude=CONFIG-BENCHMARK.md "Opus 4\.6\|Opus 4\.7\|claude-opus-4-6\|claude-opus-4-7" "$KUN_ROOT/docs" "$KUN_ROOT/.claude/CLAUDE.md" 2>/dev/null; then
         check warn "engine model refs" "stale Opus 4.6/4.7 in docs"
     else
         check pass "engine model refs" "$(jq -r '.model_label' "$ENGINE_JSON") canonical"
