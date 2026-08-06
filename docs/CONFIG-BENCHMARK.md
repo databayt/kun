@@ -173,6 +173,14 @@ is bench polish, not benchmark push.
   → `eval` as declared policy with a `listing_cap_history`. Fixed: `deploy` frontmatter,
   `user_skills` 62→66, user-level count checks in `health.sh`, skill→spell reverse check in
   `generate-vocab.mjs`. KPIs 7–8 added. Engine v4.1.
+- **2026-08-06** — `/bench` L2 contracts: `lint-contracts.mjs`, deterministic and wired into
+  `health.sh`. Found 11 skills pinning `model: claude-opus-4-7` — neither the engine model nor
+  a declared fallback. `health.sh` already grepped for retired Opus versions, but only across
+  `docs/` and `CLAUDE.md`, never the frontmatter where they were; a rule whose check points at
+  the wrong place reads exactly like a rule being followed. All 11 moved to the `opus` alias.
+  The `trigger-authority` check found 0 today but was validated by replay: against `higgs`'s
+  pre-fix text it catches `og image` → `/carousel` in milliseconds — the same defect the L1
+  benchmark needed 16 agents and ~1.3M tokens to surface. **Do the deterministic layer first.**
 - **2026-07-10** — engine v4.0 benchmark pass: model → Fable 5 (fallbacks opus-4-8 → sonnet-5);
   vocabulary v2 (deduped keywords, BMAD-era spells pruned, `loop`/`goal`/`schedule`/`workflow`
   wired, +12 spells for existing skills); `/spec` CLARIFY + `/feature` READY gate (spec-kit
