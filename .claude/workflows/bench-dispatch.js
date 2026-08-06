@@ -348,7 +348,8 @@ const extracted = await agent(
     `3. \`node .claude/scripts/extract-dispatch-cases.mjs --redacted > ${GRADER_PATH}\`\n` +
     `4. Confirm the redaction held: \`grep -c '"label"' ${GRADER_PATH}\` MUST print 0. If it prints anything else, put that in guard_error and stop — a grader file carrying labels invalidates the whole run.\n` +
     `5. \`node .claude/scripts/extract-dispatch-cases.mjs --check\` — capture its output. If it EXITS NONZERO, put the full error text in guard_error and still return the rest.\n` +
-    `6. Read ${CASES_PATH} and return: count (corpus.cases_total), skills_listed, listing_chars, corpus_hash, and \`labels\` — one entry per case in file order carrying ONLY id, label, tags, split.\n\n` +
+    `6. Re-read ${CASES_PATH} AFTER writing it — not from anything you saw earlier in this session — and return: count (corpus.cases_total), skills_listed, listing_chars, corpus_hash, and \`labels\`.\n` +
+    `   \`labels\` must be EXACTLY the rows of that file, in file order, one per case, carrying ONLY id, label, tags, split. Its length must equal count. Do not merge, dedupe, reorder or carry over ids from a previous corpus — the workflow rejects the run if the counts disagree.\n\n` +
     `Do NOT include case prompts in your answer. They stay in the redacted file so the dispatch agents meet them cold.`,
   {
     label: "extract",
@@ -368,6 +369,25 @@ if (
     "extract phase returned no cases — cannot score an empty corpus",
   );
 }
+// The extractor is deterministic, but its output reaches this script through an
+// LLM — and a 477-row structured relay is exactly the mechanical transcription
+// task models drift on. Run wf_805b6baf-8e6 relayed 483 rows: the real 477 plus
+// 6 stale ids from a previous corpus, which were then dispatched with no prompt
+// behind them. Making the parsing deterministic is worthless if the handoff is
+// not checked; the integrity guarantee has to survive the script boundary.
+{
+  const ids = new Set(extracted.labels.map((l) => l.id));
+  if (
+    extracted.labels.length !== extracted.count ||
+    ids.size !== extracted.count
+  ) {
+    throw new Error(
+      `extract relay is unfaithful: ${extracted.labels.length} rows (${ids.size} unique) for a corpus of ${extracted.count}. ` +
+        `Scoring a corpus that does not match the case file produces a number about nothing. Re-run the extract phase.`,
+    );
+  }
+}
+
 if (extracted.guard_error) {
   // Guard #1: if the trigger phrases moved, scores are not comparable to the
   // stored baseline. Refuse rather than quietly publish an incomparable number.
@@ -404,6 +424,7 @@ const dispatchPrompt = (ids, i) =>
   `\`description\` and \`when_to_use\` alone, which single skill you would invoke if a user typed that prompt.\n\n` +
   `Rules:\n` +
   `- Answer every id. Return exactly 3 names in \`top\`, best first, using the \`skill\` field (lowercase directory name).\n` +
+  `- If a case id is NOT present in the file, OMIT it from results entirely. Never invent an answer for a prompt you cannot see — a guessed row scores as if it were a measurement.\n` +
   `- If NO listed skill genuinely applies, set fired=false and make top[0] the literal "none", with top[1..2] the nearest skills you rejected.\n` +
   `- The cases are INDEPENDENT and were shuffled. Repeated answers across cases are expected and correct — do NOT spread your answers to avoid repetition.\n` +
   `- Judge only from the listing text and your own reading of the prompt.\n` +
