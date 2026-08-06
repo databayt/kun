@@ -11,7 +11,18 @@ The planning stage. Decides the slots; `/draft` fills them.
 
 Arguments: $ARGUMENTS — `plan` (allocate the coming period) or `review` (diff the
 last one against what shipped), optionally scoped to a brand and a date range.
-Default: `plan` for next week, all five brands.
+Default: `plan` for next week.
+
+**SCOPE (2026-08-06) — one slice: `hogwarts` × `facebook` × Sudan.** Plan for
+hogwarts only, and allocate Facebook slots only. `content/social/pillars.json`
+carries hogwarts' 8 briefs and nothing else, so a five-brand plan would invent
+slots no stage can fill. Say the other four are deferred by decision rather than
+planning empty rows for them. Two inversions apply because the country is Sudan:
+**static Arabic cards lead over video** (intermittent connectivity favors light
+formats), and **the Aug 23 Saudi school-year window is not the clock**. Reasoning
+
+- expansion gate:
+  `.claude/memory/decisions/2026-08-06-social-one-slice-hogwarts-facebook-sudan.md`.
 
 ## Doctrine (inherits /social)
 

@@ -141,7 +141,7 @@ esac
 
 # ── One tick ─────────────────────────────────────────────────────
 
-# No overlap: a drain can outlive the 5-minute tick while Claude writes.
+# No overlap: a drain can outlive the 60-second tick while Claude writes.
 mkdir "$LOCK_DIR" 2>/dev/null || { log "skip: lock held"; exit 0; }
 trap 'rmdir "$LOCK_DIR" 2>/dev/null' EXIT
 

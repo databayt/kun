@@ -29,6 +29,16 @@ Arguments: $ARGUMENTS — brand (`databayt|hogwarts|mkan|sijillee|moalimee`), th
 idea or news, optional `--channels`, `--media`, `--at`, and `--from <stage>` to
 resume mid-chain.
 
+**SCOPE (2026-08-06) — one slice: `hogwarts` × `facebook` × Sudan.** Default to
+that brand and that channel; the other four brands have no filled brand kit
+(`compileBrief` throws) and no pillars, and Facebook is the only live transport.
+If asked for another brand or channel, say it is deferred by decision and name
+the expansion gate — do not widen on your own. The multiplier is dormant: with
+one channel live, the core piece **is** the post. Register stays rung 2 and the
+moral code's Sudan clause binds every post (humility in tone; never exploit
+crisis for engagement). Reasoning + gate:
+`.claude/memory/decisions/2026-08-06-social-one-slice-hogwarts-facebook-sudan.md`.
+
 Autonomy is **L1/L2** — a human signs off before any brand post. L4 is gated
 behind `/decide` plus an automated guardrail layer (LLM-judge content and
 Arabic-correctness checks, per-channel rate limits, a kill switch). Strategy and

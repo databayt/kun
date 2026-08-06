@@ -33,7 +33,9 @@ Arguments: $ARGUMENTS — brand, channels, optional `--at` for a scheduled time.
    (request `consumed`), the variant is `pending` with a live signed link, or a
    human said yes in-session. No recorded yes, no send.
 2. **Partition by lane**, from `src/components/root/social/config.ts`:
-   - `DRAIN_CHANNEL_IDS` — telegram, facebook. kun delivers these itself.
+   - `DRAIN_CHANNEL_IDS` — telegram, facebook, instagram. kun delivers these
+     itself. Instagram is in the allow-list so it goes live the moment its
+     `wired` flag flips; today only **facebook** is both wired and in scope.
    - `HERMES_CHANNEL_IDS` — the gateway pulls them from `/api/social/queue`.
    - `MANUAL_CHANNEL_IDS` — whatsapp. Copy-out.
 3. **Drain lane** — the review queue's **Approve** delivers now, or (approve-mode

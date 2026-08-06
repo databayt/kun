@@ -16,6 +16,25 @@ as what it *is* doing. It isn't — yet.
 > **One-line summary:** 1 of 8 distribution channels is live, 1 of 3 loops works, and the daily
 > cron has been a no-op since it shipped.
 
+## Scope — one slice, on purpose (2026-08-06)
+
+Read the tables below as **status**, not as a backlog. Since 2026-08-06 the pipeline deliberately
+runs **one brand, one channel, one country — hogwarts × Facebook × Sudan** — until the full loop is
+proven end to end. `1 of 8` is the plan right now, not the gap.
+
+Everything red or empty further down this page is **deferred by decision, not by blocker** — the
+Instagram adapter stays complete behind its flag, Telegram stays two env variables from live, and
+the four other brands stay registered with their kits unfilled. Expansion is gated on five written
+conditions and then runs one step at a time: Instagram → Telegram → mkan → Saudi.
+
+Two priorities invert because the country is Sudan rather than Saudi, and both are recorded so they
+are not quietly reintroduced: **video drops down the list** (this page's own Sudan line — intermittent
+connectivity favors text + image over video), and **the Aug 23 Saudi school-year window stops being
+the clock**.
+
+The full reasoning, the deferral list, and the expansion gate:
+`.claude/memory/decisions/2026-08-06-social-one-slice-hogwarts-facebook-sudan.md`.
+
 ## Three words that mean different things
 
 | Term | Means |
@@ -200,11 +219,36 @@ granularity is a plan-tier limit and kun already uses a slot. GitHub Actions is 
 
 ## Highest-leverage next moves
 
-Ordered by value ÷ cost, not by size:
+Ordered by value ÷ cost, not by size — and **re-ordered 2026-08-06 by the one-slice decision**. The
+list used to lead with Instagram; under the slice, widening ranks below proving.
 
-1. **Test Instagram publishing at Standard Access via Mkan** (~10 minutes of console work) before treating Business Verification as the publishing gate — [the hypothesis](/docs/social/channels/instagram#standard-access-hypothesis). The channel focus is Facebook + Instagram (decision 2026-07-30), so this is the gate to the only new channel wanted.
-2. **Name and verify the business portfolio, and invite a second admin.** Ownership is worth fixing whatever the test says — bus factor, recoverability, and the Databayt Page all hang on it, and if the hypothesis is wrong, verification is the long pole and is waiting rather than working. See [Ownership & accounts](/docs/social/ownership).
-3. **A PostHog destination for the UTMs.** Every outbound link is tagged and nothing consumes the tags — attribution starts at the first site that carries the snippet.
+1. **One observed end-to-end pass, twice.** Seed → drain → review → Facebook → `SocialMetric`, on a
+   real published post, in one unbroken run — once as text+image, once as a multi-photo carousel
+   (`sendFacebookCarousel` has been transport-dark-tested since 2026-08-01 and never used for a real
+   post). Every hop below is individually verified; **the whole chain never has been.** This is the
+   deliverable, and anything that breaks gets written into the decision file.
+2. **Make the craft bar mechanical.** [Copy](/docs/social/copy)'s reject list is prose that nothing
+   enforces — about 11 of its ~14 items are deterministic, including the invented-number guard
+   (a set difference between the draft's digit-tokens and the brief's). Zero tokens, which is why it
+   beats the LLM judge that page already priced and deferred.
+3. **Collect real scenes.** Check 4 is the one the drain "has never passed, structurally" — product
+   docs contain no Thursdays, and every scene in `pillars.json` today was invented by the brief
+   author. There is exactly one real customer, in the target country, four months into the pilot,
+   already reachable on WhatsApp. Five questions as a voice note, transcribed free through the
+   `markitdown` MCP.
+4. **Name and verify the business portfolio, and invite a second admin.** Ownership is worth fixing
+   whatever the scope is — bus factor, recoverability, and the Databayt Page all hang on it, and it
+   is the long pole for Instagram whenever the slice widens. See
+   [Ownership & accounts](/docs/social/ownership).
+
+Deferred to the expansion gate, in order: **Instagram** (~10 minutes of console work — [the Standard
+Access hypothesis](/docs/social/channels/instagram#standard-access-hypothesis), kun#141) →
+**Telegram** (2 env variables) → **mkan** → **Saudi**.
+
+PostHog now has its destination — the hogwarts site carries the snippet and `/measure` reads the UTMs
+back over HogQL. For a Sudan audience treat click attribution as a floor rather than a measure:
+intermittent connectivity plus WhatsApp forwarding means **reach, shares, and comments** are the
+slice's real scoreboard.
 4. ~~**Teach the cron to draft per channel.**~~ **Done differently, 2026-08-01:** the seed lane runs Loop B's calendar half on the Mac (weekly launchd → draft queue → Max-pool drain), so drafting rides the `draft` skill's doctrine instead of a server-side template. The Vercel route stays parked; per-channel fan-out stays at the staging gate, on purpose.
 
 Deferred by decision, not by failure: **Telegram** (2026-07-30 — code ready, two env variables when the focus widens beyond Facebook + Instagram).
