@@ -7,7 +7,7 @@ argument-hint: "[dispatch|adherence|outcome] [--audit] [--tune <skill>] [--retir
 
 # Bench — measuring the engine instead of trusting it
 
-kun ships 66 skills into every session. `health.sh` counts them; it has never read one.
+kun ships 67 skills into every session. `health.sh` counts them; it has never read one.
 `bench` is the layer that produces a defensible number, a trend line, and improvement
 proposals a human commits.
 
@@ -25,11 +25,12 @@ write both the cases and the answers is measuring its own reflection.
 
 ## Layers
 
-| Layer            | Question                                                          | Grading                                    | Status  |
-| ---------------- | ----------------------------------------------------------------- | ------------------------------------------ | ------- |
-| **L1 dispatch**  | Does the right skill fire, and do the wrong ones stay silent?     | exact string match, zero LLM               | shipped |
-| **L2 adherence** | When a skill fires, does the run honor its own declared contract? | static lint + transcript mining            | planned |
-| **L3 outcome**   | Is the artifact any good?                                         | LLM judge, calibrated against human labels | planned |
+| Layer            | Question                                                      | Grading                                    | Status  |
+| ---------------- | ------------------------------------------------------------- | ------------------------------------------ | ------- |
+| **L1 dispatch**  | Does the right skill fire, and do the wrong ones stay silent? | exact string match, zero LLM               | shipped |
+| **L2 contracts** | Is what a skill declares about itself still true?             | `lint-contracts.mjs` — deterministic       | shipped |
+| L2 behavioral    | Did a real run honor the contract it declared?                | transcript-mined                           | planned |
+| **L3 outcome**   | Is the artifact any good?                                     | LLM judge, calibrated against human labels | planned |
 
 ## L1 — dispatch
 
@@ -39,9 +40,9 @@ node .claude/scripts/extract-dispatch-cases.mjs --check # guards (health.sh runs
 ```
 
 Then run the workflow `bench-dispatch` (Extract → Dispatch → Adjudicate → Score → Persist).
-~17 agents, ~195k tokens, entirely on the Max subscription — no API-key spend.
+~16 agents, ~1.3M subagent tokens, entirely on the Max subscription — no API-key spend.
 
-**Ground truth is free.** 239 `Triggers on:` phrases, 72 vocabulary spells naming a skill,
+**Ground truth is free.** 244 `Triggers on:` phrases, 73 vocabulary spells naming a skill,
 and 95 spells that route to an agent/MCP and must therefore fire _nothing_. Nothing is
 synthesized; the extractor is a parser, not a generator.
 
@@ -56,7 +57,7 @@ has side effects and a miss does not), `destructive_fp` (hard zero), `top3`, `mr
 | #   | Guard                                                                             | Enforced by                                     |
 | --- | --------------------------------------------------------------------------------- | ----------------------------------------------- |
 | 1   | Trigger phrases are the test set — **read-only to the tuner**                     | `corpus_hash`; `--check` exits 1 when they move |
-| 2   | Listing ≤ 26,000 chars total, ≤ 1,200 per skill                                   | `--check`                                       |
+| 2   | Listing budget per `engine.json` → `eval` (caps + reset history)                  | `--check`                                       |
 | 3   | `listing_chars` is co-primary — accuracy bought with prefix bloat is a regression | report phase                                    |
 | 4   | 20% holdout in a write-once ledger, never shown to the tuner                      | `split.ledger`                                  |
 | 5   | `destructive_fp` hard 0 blocks adoption regardless of accuracy                    | verdict gate                                    |
@@ -122,6 +123,9 @@ survivorship-biased — it never sees the dispatch that _should_ have happened a
 | `.claude/scripts/extract-dispatch-cases.mjs` | deterministic case extraction + guards                                |
 | `.claude/scripts/test-bench-dispatch.mjs`    | regression test for the scoring math (28 assertions, free)            |
 | `.claude/workflows/bench-dispatch.js`        | the L1 harness                                                        |
+| `.claude/scripts/lint-contracts.mjs`         | L2 contracts — deterministic, wired into `health.sh`                  |
+| `.claude/scripts/audit-bench-run.mjs`        | post-run contamination check (guard 9)                                |
+| `.claude/scripts/harvest-transcripts.mjs`    | real prompt→skill pairs for proxy fidelity                            |
 | `.claude/evals/cases/dispatch.json`          | generated case set — git-tracked so a corpus change shows in the diff |
 | `.claude/memory/skill-scores.json`           | measured state + longitudinal `weekly_history`                        |
 

@@ -3,7 +3,7 @@ name: Fix
 description: Auto-fix all detected issues - TypeScript, lint, build errors
 argument-hint: "[scope]"
 allowed-tools: Bash(pnpm *), Bash(npx *)
-model: claude-opus-4-7
+model: opus
 ---
 
 # Auto-Fix

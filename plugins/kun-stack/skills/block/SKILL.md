@@ -2,7 +2,7 @@
 name: Block
 description: Create blocks - UI components with integrated business logic
 argument-hint: "<source|refactor|audit|list> [name]"
-model: claude-opus-4-7
+model: opus
 allowed-tools: ["Bash(pnpm *)", "Read", "Write", "Edit", "Glob", "Grep", "mcp__shadcn__*"]
 ---
 

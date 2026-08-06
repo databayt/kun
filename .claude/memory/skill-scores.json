@@ -4,27 +4,27 @@
   "definition": "Given the exact frontmatter listing (skill + description + when_to_use) for every file-backed skill and one natural-language prompt, the fraction of cases where the rank-1 answer equals the extracted label — excluding cases whose prompt is literally the skill's own name, and after adversarial adjudication of every miss.",
   "source": ".claude/workflows/bench-dispatch.js + .claude/scripts/extract-dispatch-cases.mjs (deterministic extraction; grading is pure string comparison, zero LLM)",
   "last_updated": "2026-08-06",
-  "last_updated_by": "bench-dispatch.js",
+  "last_updated_by": "baseline reset — higgs trigger list edited, awaiting re-run",
   "corpus": {
     "skills_listed": 67,
     "project_skills": 49,
     "user_only_skills": 18,
-    "listing_chars": 26243,
-    "cases_total": 402,
-    "positive": 307,
+    "listing_chars": 26212,
+    "cases_total": 401,
+    "positive": 306,
     "none": 95,
     "trivial": 56,
-    "hard": 166,
+    "hard": 165,
     "destructive": 5,
     "sources": {
-      "trigger_phrase": 246,
+      "trigger_phrase": 244,
       "vocab_spell": 73,
       "quoted_keyword": 6,
       "vocab_none": 95
     },
     "skills_without_triggers": 22,
     "builtin_targeted_spells": 3,
-    "corpus_hash": "fnv1a:5072a199"
+    "corpus_hash": "fnv1a:be5dc57d"
   },
   "split": {
     "version": "v1",
@@ -432,28 +432,29 @@
       "kw:mcp-doctor:tool-not-found-ffd9": "holdout",
       "kw:qa:qa-admission-c365": "train",
       "kw:qa:qa-this-block-8f4f": "holdout",
-      "kw:shadcn:shadcn-docs-f2d0": "holdout"
+      "kw:shadcn:shadcn-docs-f2d0": "holdout",
+      "spell:portraits:og-image-8fb6": "holdout"
     }
   },
-  "current_value": 0.9971,
+  "current_value": null,
   "current": {
-    "top1_hard": 0.9971,
-    "top1": 0.9975,
-    "top3": 1,
-    "mrr": 0.9988,
-    "fp_rate": 0,
-    "destructive_fp": 0,
-    "abstain_error": 0,
-    "macro_f1": 0.999,
-    "weighted_f1": 0.9967,
-    "holdout_top1_hard": 1,
-    "train_holdout_gap": -0.0037,
-    "listing_chars": 26243,
+    "top1_hard": null,
+    "top1": null,
+    "top3": null,
+    "mrr": null,
+    "fp_rate": null,
+    "destructive_fp": null,
+    "abstain_error": null,
+    "macro_f1": null,
+    "weighted_f1": null,
+    "holdout_top1_hard": null,
+    "train_holdout_gap": null,
+    "listing_chars": 26212,
     "degraded": false,
     "unadjudicated": 0,
-    "top1_lexical_free": 0.9948,
-    "n_lexical_free": 192,
-    "audit_verdict": "CLEAN — audit-bench-run.mjs found no forbidden read by any blind agent"
+    "top1_lexical_free": null,
+    "n_lexical_free": null,
+    "audit_verdict": null
   },
   "known_biases": [
     "Answer-key leakage: graders must read ONLY the --redacted view. The full case set, any SKILL.md (trigger phrases sit verbatim beside the skill name), and vocabulary.json all reveal labels. Enforced by redaction + an emit-time assertion, and verified after every run by audit-bench-run.mjs, which fails the run on any forbidden read.",
@@ -486,12 +487,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "approve": {
       "support": 11,
@@ -499,12 +495,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "atom": {
       "support": 5,
@@ -512,12 +503,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": true,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "auth": {
       "support": 2,
@@ -525,12 +511,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": false
     },
     "bench": {
       "support": 7,
@@ -538,12 +519,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "block": {
       "support": 1,
@@ -551,12 +527,7 @@
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": true,
-      "has_when_to_use": false,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": false
     },
     "build": {
       "support": 1,
@@ -564,12 +535,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "calendar": {
       "support": 8,
@@ -577,12 +543,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "canon": {
       "support": 0,
@@ -598,25 +559,15 @@
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": false
     },
     "carousel": {
-      "support": 12,
+      "support": 13,
       "chars": 506,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 0.9167,
-      "f1": 0.9565,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "check": {
       "support": 4,
@@ -624,12 +575,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "clone": {
       "support": 7,
@@ -637,12 +583,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "code": {
       "support": 4,
@@ -650,12 +591,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "codebase": {
       "support": 1,
@@ -663,12 +599,7 @@
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": false
     },
     "convert": {
       "support": 6,
@@ -676,12 +607,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "costs": {
       "support": 5,
@@ -689,12 +615,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "crawl-anthropic": {
       "support": 3,
@@ -702,12 +623,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "credentials": {
       "support": 5,
@@ -715,12 +631,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "decide": {
       "support": 1,
@@ -728,12 +639,7 @@
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": true,
-      "has_when_to_use": false,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": false
     },
     "deploy": {
       "support": 7,
@@ -741,12 +647,7 @@
       "scope": "user",
       "fp_cost": 3,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "dev": {
       "support": 1,
@@ -754,12 +655,7 @@
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": false
     },
     "docs": {
       "support": 5,
@@ -767,12 +663,7 @@
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": true,
-      "has_when_to_use": false,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": false
     },
     "draft": {
       "support": 13,
@@ -780,12 +671,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "economy": {
       "support": 10,
@@ -793,12 +679,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "feature": {
       "support": 4,
@@ -806,12 +687,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": true,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "fix": {
       "support": 1,
@@ -819,12 +695,7 @@
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": false
     },
     "handover": {
       "support": 6,
@@ -832,12 +703,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": true,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "health": {
       "support": 5,
@@ -845,25 +711,15 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": true,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "higgs": {
-      "support": 28,
-      "chars": 1053,
+      "support": 26,
+      "chars": 1022,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 0.9655,
-      "recall": 1,
-      "f1": 0.9825,
-      "fp": 1,
-      "top3": 1
+      "has_when_to_use": true
     },
     "idea": {
       "support": 8,
@@ -871,12 +727,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "incident": {
       "support": 5,
@@ -884,12 +735,7 @@
       "scope": "project",
       "fp_cost": 3,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "issue": {
       "support": 3,
@@ -897,12 +743,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "learn": {
       "support": 3,
@@ -910,12 +751,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "mcp-doctor": {
       "support": 1,
@@ -923,12 +759,7 @@
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": false
     },
     "measure": {
       "support": 8,
@@ -936,12 +767,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "monitor": {
       "support": 4,
@@ -949,12 +775,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "motion": {
       "support": 5,
@@ -962,12 +783,7 @@
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": false
     },
     "package": {
       "support": 4,
@@ -975,12 +791,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "pattern": {
       "support": 4,
@@ -988,12 +799,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "performance": {
       "support": 1,
@@ -1001,12 +807,7 @@
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": false
     },
     "plan": {
       "support": 4,
@@ -1014,12 +815,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "premortem": {
       "support": 1,
@@ -1027,12 +823,7 @@
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": false
     },
     "pricing": {
       "support": 4,
@@ -1040,12 +831,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "profile": {
       "support": 3,
@@ -1053,12 +839,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "proposal": {
       "support": 4,
@@ -1066,12 +847,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "publish": {
       "support": 10,
@@ -1079,12 +855,7 @@
       "scope": "project",
       "fp_cost": 3,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "qa": {
       "support": 3,
@@ -1092,12 +863,7 @@
       "scope": "project",
       "fp_cost": 3,
       "claude_md_routed": true,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "quick": {
       "support": 1,
@@ -1105,12 +871,7 @@
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": false
     },
     "release": {
       "support": 6,
@@ -1118,12 +879,7 @@
       "scope": "project",
       "fp_cost": 3,
       "claude_md_routed": true,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "report": {
       "support": 4,
@@ -1131,12 +887,7 @@
       "scope": "project",
       "fp_cost": 3,
       "claude_md_routed": true,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "repos": {
       "support": 0,
@@ -1152,12 +903,7 @@
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": false
     },
     "schema": {
       "support": 5,
@@ -1165,12 +911,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "screenshot": {
       "support": 0,
@@ -1186,12 +927,7 @@
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": false
     },
     "shadcn": {
       "support": 2,
@@ -1199,12 +935,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": false
     },
     "ship": {
       "support": 3,
@@ -1212,12 +943,7 @@
       "scope": "project",
       "fp_cost": 3,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "social": {
       "support": 7,
@@ -1225,12 +951,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "spec": {
       "support": 5,
@@ -1238,12 +959,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "sync": {
       "support": 4,
@@ -1251,12 +967,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "tasks": {
       "support": 6,
@@ -1264,12 +975,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "template": {
       "support": 5,
@@ -1277,12 +983,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": true,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "test": {
       "support": 1,
@@ -1290,12 +991,7 @@
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": false
     },
     "watch": {
       "support": 5,
@@ -1303,12 +999,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "weekly": {
       "support": 4,
@@ -1316,12 +1007,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "wire": {
       "support": 5,
@@ -1329,12 +1015,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     }
   },
   "clusters": [
@@ -1535,13 +1216,7 @@
       0.357
     ]
   ],
-  "top_confusions": [
-    {
-      "predicted": "higgs",
-      "actual": "carousel",
-      "count": 1
-    }
-  ],
+  "top_confusions": [],
   "merge_candidates": [],
   "proxy_fidelity": {
     "n": null,
@@ -1575,6 +1250,16 @@
       "note": "First VALID run (the earlier 0.9942 was contaminated — see the invalid row). Redaction held, audit clean. One real miss in 402 cases after adjudication: banner → higgs, should be carousel. The ceiling, not the score, is the result.",
       "top1_lexical_free": 0.9948,
       "audit": "CLEAN"
+    },
+    {
+      "week_of": "2026-08-06",
+      "baseline_reset": true,
+      "corpus_hash_from": "fnv1a:5072a199",
+      "corpus_hash_to": "fnv1a:be5dc57d",
+      "cases_from": 402,
+      "cases_to": 401,
+      "top1_hard": null,
+      "note": "BASELINE RESET, not a scored run. higgs's trigger list dropped 'og image' and 'social card' (vocabulary.json routes both Portrait Gallery spells to /carousel), and its opening prose dropped 'banner, og image, social card' for the same reason. 'hero image' and 'mockup' were KEPT — the proposal originally named them too, but the Portrait Gallery authority routes both to /higgs, so removing them would have been wrong. Scores before and after this line are not comparable. Next run re-establishes the number."
     }
   ],
   "stratified": {
@@ -1613,7 +1298,10 @@
       "id": "higgs-carousel-boundary",
       "severity": "real",
       "detail": "higgs's when_to_use declares itself 'the TEXT-FREE lane: og images, infographics, testimonials, split comparisons and anything carrying copy render on /carousel's template lane instead' — and its own Triggers on: list then claims 'og image', 'social card', 'hero image', 'mockup', 'moodboard'. It cedes the territory and claims it in the same field. Symptom: the single real miss in 402 cases is 'banner' → answered higgs, labelled carousel (adjudicator confirmed the label). The extractor independently flags 'og image' as a prompt-collision between the two.",
-      "proposal": ".claude/evals/proposals/higgs-2026-08-06.md"
+      "proposal": ".claude/evals/proposals/higgs-2026-08-06.md",
+      "status": "FIXED (unverified)",
+      "applied": "2026-08-06 — removed 'og image' + 'social card' from the trigger list and 'banner, og image, social card' from the opening prose. Kept 'hero image' and 'mockup': vocabulary.json routes those spells to /higgs, so the original proposal over-reached on two of its four phrases.",
+      "verification": "pending — the next bench-dispatch run should show the 'banner' miss resolved and higgs precision back to 1.0"
     },
     {
       "id": "vocab-label-artifacts",

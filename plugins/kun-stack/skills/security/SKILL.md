@@ -2,7 +2,7 @@
 name: Security
 description: Security audit - OWASP Top 10, dependency scanning
 argument-hint: "[deps|auth|file]"
-model: claude-opus-4-7
+model: opus
 allowed-tools: ["Bash(pnpm *)", "Read", "Glob", "Grep"]
 ---
 

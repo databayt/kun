@@ -2,7 +2,7 @@
 name: Docs
 description: Generate documentation - component MDX, API docs, Storybook stories
 argument-hint: "<component|api|readme> [name]"
-model: claude-opus-4-7
+model: opus
 allowed-tools: ["Read", "Write", "Edit", "Glob", "Grep"]
 ---
 

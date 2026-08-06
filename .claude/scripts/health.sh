@@ -243,6 +243,13 @@ if [ -f "$ENGINE_JSON" ] && command -v jq &> /dev/null; then
         else
             check warn "dispatch cases" "guard violation — run extract-dispatch-cases.mjs --check"
         fi
+        if [ -f "$KUN_ROOT/.claude/scripts/lint-contracts.mjs" ]; then
+            if node "$KUN_ROOT/.claude/scripts/lint-contracts.mjs" --check >/dev/null 2>&1; then
+                check pass "skill contracts" "declared references resolve"
+            else
+                check warn "skill contracts" "run lint-contracts.mjs — a skill declares something that no longer resolves"
+            fi
+        fi
         SCORES="$KUN_ROOT/.claude/memory/skill-scores.json"
         if [ -f "$SCORES" ]; then
             EC_SCORED=$(jq -r '.corpus.skills_listed' "$SCORES" 2>/dev/null)

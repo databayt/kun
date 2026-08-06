@@ -2,7 +2,7 @@
 name: Performance
 description: Performance audit - Core Web Vitals, bundle, database queries
 argument-hint: "[bundle|queries|file]"
-model: claude-opus-4-7
+model: opus
 allowed-tools: ["Bash(pnpm *)", "Read", "Glob", "Grep"]
 ---
 

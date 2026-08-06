@@ -3,22 +3,22 @@
     "skills_listed": 67,
     "project_skills": 49,
     "user_only_skills": 18,
-    "listing_chars": 26243,
-    "cases_total": 402,
-    "positive": 307,
+    "listing_chars": 26212,
+    "cases_total": 401,
+    "positive": 306,
     "none": 95,
     "trivial": 56,
-    "hard": 166,
+    "hard": 165,
     "destructive": 5,
     "sources": {
-      "trigger_phrase": 246,
+      "trigger_phrase": 244,
       "vocab_spell": 73,
       "quoted_keyword": 6,
       "vocab_none": 95
     },
     "skills_without_triggers": 22,
     "builtin_targeted_spells": 3,
-    "corpus_hash": "fnv1a:5072a199"
+    "corpus_hash": "fnv1a:be5dc57d"
   },
   "split": {
     "version": "v1",
@@ -426,7 +426,8 @@
       "kw:mcp-doctor:tool-not-found-ffd9": "holdout",
       "kw:qa:qa-admission-c365": "train",
       "kw:qa:qa-this-block-8f4f": "holdout",
-      "kw:shadcn:shadcn-docs-f2d0": "holdout"
+      "kw:shadcn:shadcn-docs-f2d0": "holdout",
+      "spell:portraits:og-image-8fb6": "holdout"
     }
   },
   "listing": [
@@ -578,7 +579,7 @@
     {
       "skill": "higgs",
       "description": "Generate and edit photos and videos for databayt org marketing, ads, and prompts — Google (Nano Banana / Veo / Omni) direct, or Higgsfield",
-      "when_to_use": "Use when generating or editing marketing media — image, photo, video, ad, banner, og image, social card, hero shot, product shot, promo reel, story, avatar ad — or when a reference video/image URL needs downloading and tweaking. Owns BOTH raster renderers: Google direct (Nano Banana, Nano Banana Pro, Veo, Omni Flash — pay per image, no credit ceiling) and Higgsfield (credits). This is the TEXT-FREE lane: og images, infographics, testimonials, split comparisons and anything carrying copy render on /carousel's template lane instead (the Portrait Gallery spells route by taxonomy lane). Triggers on: /higgs, generate video, generate image, generate photo, make an ad, promo video, og image, social card, hero image, product shot, mockup, lifestyle scene, moodboard, showroom asset, brand kit, edit video from url, download and tweak video, higgs, nano banana, veo, omni, gemini image, صورة تسويقية, وسائط."
+      "when_to_use": "Use when generating or editing marketing media — image, photo, video, ad, hero shot, product shot, promo reel, story, avatar ad — or when a reference video/image URL needs downloading and tweaking. Owns BOTH raster renderers: Google direct (Nano Banana, Nano Banana Pro, Veo, Omni Flash — pay per image, no credit ceiling) and Higgsfield (credits). This is the TEXT-FREE lane: og images, banners, social cards, infographics, testimonials, split comparisons and anything carrying copy render on /carousel's template lane instead (the Portrait Gallery spells route by taxonomy lane). Triggers on: /higgs, generate video, generate image, generate photo, make an ad, promo video, hero image, product shot, mockup, lifestyle scene, moodboard, showroom asset, brand kit, edit video from url, download and tweak video, higgs, nano banana, veo, omni, gemini image, صورة تسويقية, وسائط."
     },
     {
       "skill": "idea",
@@ -1904,24 +1905,6 @@
       "source": "trigger_phrase",
       "tags": [],
       "split": "holdout"
-    },
-    {
-      "id": "trg:higgs:og-image-8fb6",
-      "prompt": "og image",
-      "label": "higgs",
-      "source": "trigger_phrase",
-      "tags": [],
-      "split": "train"
-    },
-    {
-      "id": "trg:higgs:social-card-8d2e",
-      "prompt": "social card",
-      "label": "higgs",
-      "source": "trigger_phrase",
-      "tags": [
-        "hard:names-social"
-      ],
-      "split": "train"
     },
     {
       "id": "trg:higgs:hero-image-b471",
@@ -4413,6 +4396,14 @@
       "split": "train"
     },
     {
+      "id": "spell:portraits:og-image-8fb6",
+      "prompt": "og image",
+      "label": "carousel",
+      "source": "vocab_spell",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
       "id": "spell:portraits:banner-416b",
       "prompt": "banner",
       "label": "carousel",
@@ -4801,7 +4792,7 @@
       "has_when_to_use": false
     },
     "carousel": {
-      "support": 12,
+      "support": 13,
       "chars": 506,
       "scope": "project",
       "fp_cost": 1,
@@ -4953,8 +4944,8 @@
       "has_when_to_use": true
     },
     "higgs": {
-      "support": 28,
-      "chars": 1053,
+      "support": 26,
+      "chars": 1022,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
@@ -5285,10 +5276,6 @@
     {
       "kind": "spell-skill-collision",
       "detail": "spell \"canon\" (pensieve) routes to familiar:captain, memory:docs/CANON.md while a skill named \"canon\" exists"
-    },
-    {
-      "kind": "prompt-collision",
-      "detail": "\"og image\" is claimed by both higgs and carousel"
     }
   ],
   "guards": {

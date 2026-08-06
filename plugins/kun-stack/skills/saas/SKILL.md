@@ -2,7 +2,7 @@
 name: SaaS
 description: Generate complete SaaS feature with all layers
 argument-hint: "<feature-name>"
-model: claude-opus-4-7
+model: opus
 allowed-tools: ["Bash(pnpm *)", "Read", "Write", "Edit", "Glob", "Grep"]
 ---
 

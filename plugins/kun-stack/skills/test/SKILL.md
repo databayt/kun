@@ -3,7 +3,7 @@ name: Test
 description: Generate and run tests - unit, component, or E2E
 argument-hint: "<file|e2e|coverage>"
 allowed-tools: Bash(pnpm *), Bash(npx *)
-model: claude-opus-4-7
+model: opus
 ---
 
 # Test Generator

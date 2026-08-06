@@ -1,6 +1,6 @@
 {
   "$comment": "REDACTED grader view. Contains no label, source, tag or split — reading any other file (a SKILL.md, the full case set, the extractor) leaks the answer and invalidates the run.",
-  "corpus_hash": "fnv1a:5072a199",
+  "corpus_hash": "fnv1a:be5dc57d",
   "listing": [
     {
       "skill": "analyze",
@@ -150,7 +150,7 @@
     {
       "skill": "higgs",
       "description": "Generate and edit photos and videos for databayt org marketing, ads, and prompts — Google (Nano Banana / Veo / Omni) direct, or Higgsfield",
-      "when_to_use": "Use when generating or editing marketing media — image, photo, video, ad, banner, og image, social card, hero shot, product shot, promo reel, story, avatar ad — or when a reference video/image URL needs downloading and tweaking. Owns BOTH raster renderers: Google direct (Nano Banana, Nano Banana Pro, Veo, Omni Flash — pay per image, no credit ceiling) and Higgsfield (credits). This is the TEXT-FREE lane: og images, infographics, testimonials, split comparisons and anything carrying copy render on /carousel's template lane instead (the Portrait Gallery spells route by taxonomy lane). Triggers on: /higgs, generate video, generate image, generate photo, make an ad, promo video, og image, social card, hero image, product shot, mockup, lifestyle scene, moodboard, showroom asset, brand kit, edit video from url, download and tweak video, higgs, nano banana, veo, omni, gemini image, صورة تسويقية, وسائط."
+      "when_to_use": "Use when generating or editing marketing media — image, photo, video, ad, hero shot, product shot, promo reel, story, avatar ad — or when a reference video/image URL needs downloading and tweaking. Owns BOTH raster renderers: Google direct (Nano Banana, Nano Banana Pro, Veo, Omni Flash — pay per image, no credit ceiling) and Higgsfield (credits). This is the TEXT-FREE lane: og images, banners, social cards, infographics, testimonials, split comparisons and anything carrying copy render on /carousel's template lane instead (the Portrait Gallery spells route by taxonomy lane). Triggers on: /higgs, generate video, generate image, generate photo, make an ad, promo video, hero image, product shot, mockup, lifestyle scene, moodboard, showroom asset, brand kit, edit video from url, download and tweak video, higgs, nano banana, veo, omni, gemini image, صورة تسويقية, وسائط."
     },
     {
       "skill": "idea",
@@ -806,14 +806,6 @@
     {
       "id": "trg:higgs:promo-video-cf71",
       "prompt": "promo video"
-    },
-    {
-      "id": "trg:higgs:og-image-8fb6",
-      "prompt": "og image"
-    },
-    {
-      "id": "trg:higgs:social-card-8d2e",
-      "prompt": "social card"
     },
     {
       "id": "trg:higgs:hero-image-b471",
@@ -1894,6 +1886,10 @@
     {
       "id": "spell:pensieve:social-b2ec",
       "prompt": "social"
+    },
+    {
+      "id": "spell:portraits:og-image-8fb6",
+      "prompt": "og image"
     },
     {
       "id": "spell:portraits:banner-416b",
