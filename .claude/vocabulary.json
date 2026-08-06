@@ -3733,6 +3733,10 @@
             {
               "type": "ward",
               "name": "org-refs"
+            },
+            {
+              "type": "skill",
+              "name": "/shadcn"
             }
           ],
           "steps": [

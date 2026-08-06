@@ -1,6 +1,7 @@
 ---
 name: SaaS
 description: Generate complete SaaS feature with all layers
+when_to_use: "Use when a whole feature should be scaffolded across every layer at once — schema, server actions and UI — instead of walking the staged /feature pipeline. Triggers on: scaffold the whole feature, generate all layers, full CRUD for."
 argument-hint: "<feature-name>"
 model: opus
 allowed-tools: ["Bash(pnpm *)", "Read", "Write", "Edit", "Glob", "Grep"]

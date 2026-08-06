@@ -1,6 +1,7 @@
 ---
 name: Block
 description: Create blocks - UI components with integrated business logic
+when_to_use: "Use when building a feature-level UI component that carries business logic — a data table wired to server actions, an auth flow, a dashboard, checkout. The level above /atom (2+ primitives) and /template (page layout). Triggers on: block, create a block, data table with logic, dashboard component."
 argument-hint: "<source|refactor|audit|list> [name]"
 model: opus
 allowed-tools: ["Bash(pnpm *)", "Read", "Write", "Edit", "Glob", "Grep", "mcp__shadcn__*"]

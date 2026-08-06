@@ -4,27 +4,27 @@
   "definition": "Given the exact frontmatter listing (skill + description + when_to_use) for every file-backed skill and one natural-language prompt, the fraction of cases where the rank-1 answer equals the extracted label — excluding cases whose prompt is literally the skill's own name, and after adversarial adjudication of every miss.",
   "source": ".claude/workflows/bench-dispatch.js + .claude/scripts/extract-dispatch-cases.mjs (deterministic extraction; grading is pure string comparison, zero LLM)",
   "last_updated": "2026-08-06",
-  "last_updated_by": "bench-dispatch.js",
+  "last_updated_by": "baseline reset — 20 skills gained when_to_use, awaiting re-run",
   "corpus": {
     "skills_listed": 67,
     "project_skills": 49,
     "user_only_skills": 18,
-    "listing_chars": 26212,
-    "cases_total": 401,
-    "positive": 306,
-    "none": 95,
+    "listing_chars": 31428,
+    "cases_total": 477,
+    "positive": 383,
+    "none": 94,
     "trivial": 56,
-    "hard": 165,
+    "hard": 173,
     "destructive": 5,
     "sources": {
-      "trigger_phrase": 244,
-      "vocab_spell": 73,
-      "quoted_keyword": 6,
-      "vocab_none": 95
+      "trigger_phrase": 327,
+      "vocab_spell": 74,
+      "quoted_keyword": 2,
+      "vocab_none": 94
     },
-    "skills_without_triggers": 22,
+    "skills_without_triggers": 2,
     "builtin_targeted_spells": 3,
-    "corpus_hash": "fnv1a:be5dc57d"
+    "corpus_hash": "fnv1a:9fd4080f"
   },
   "split": {
     "version": "v1",
@@ -433,28 +433,112 @@
       "kw:qa:qa-admission-c365": "train",
       "kw:qa:qa-this-block-8f4f": "holdout",
       "kw:shadcn:shadcn-docs-f2d0": "holdout",
-      "spell:portraits:og-image-8fb6": "holdout"
+      "spell:portraits:og-image-8fb6": "holdout",
+      "trg:auth:log-into-x-8d16": "train",
+      "trg:auth:sign-me-in-a237": "train",
+      "trg:auth:not-authenticated-b54a": "train",
+      "trg:auth:behind-a-login-wall-60fe": "holdout",
+      "trg:auth:session-expired-3098": "train",
+      "trg:block:block-eb0c": "train",
+      "trg:block:create-a-block-cd0e": "train",
+      "trg:block:data-table-with-logic-a297": "train",
+      "trg:block:dashboard-component-2a78": "holdout",
+      "trg:canon:should-we-build-ced9": "train",
+      "trg:canon:what-do-i-do-about-27a1": "train",
+      "trg:canon:how-should-i-price-5cd1": "train",
+      "trg:canon:is-it-time-to-hire-3595": "train",
+      "trg:canon:are-we-running-out-of-runway-0948": "holdout",
+      "trg:captain:what-should-i-do-next-d9a7": "holdout",
+      "trg:captain:company-status-d082": "train",
+      "trg:captain:brief-me-ba95": "train",
+      "trg:captain:where-do-i-spend-this-week-1ea2": "train",
+      "trg:codebase:from-codebase-1b48": "train",
+      "trg:codebase:how-does-codebase-do-it-f91d": "train",
+      "trg:codebase:check-the-reference-repo-f8d7": "holdout",
+      "trg:codebase:is-there-an-existing-pattern-for-this-cb96": "train",
+      "trg:decide:log-this-decision-e139": "train",
+      "trg:decide:we-decided-to-fc83": "holdout",
+      "trg:decide:record-the-call-74e9": "train",
+      "trg:dev:dev-d559": "holdout",
+      "trg:dev:start-the-server-a530": "train",
+      "trg:dev:run-it-locally-d475": "train",
+      "trg:dev:spin-up-localhost-a544": "train",
+      "trg:dev:port-3000-is-taken-f5bc": "train",
+      "trg:docs:document-this-component-ca04": "train",
+      "trg:docs:write-the-api-docs-a140": "train",
+      "trg:docs:generate-the-mdx-ec12": "train",
+      "trg:docs:add-a-storybook-story-56f9": "train",
+      "trg:fix:fix-the-errors-c797": "train",
+      "trg:fix:clear-the-type-errors-4267": "train",
+      "trg:fix:make-it-compile-38d2": "train",
+      "trg:fix:lint-is-failing-d058": "holdout",
+      "trg:mcp-doctor:browser-mcp-is-not-working-073a": "train",
+      "trg:mcp-doctor:tool-not-found-ffd9": "holdout",
+      "trg:mcp-doctor:playwright-mcp-is-disconnected-2902": "train",
+      "trg:mcp-doctor:browser-tools-missing-acb4": "train",
+      "trg:motion:animate-this-7947": "train",
+      "trg:motion:add-a-transition-6873": "train",
+      "trg:motion:make-it-fade-in-b52e": "train",
+      "trg:motion:scroll-animation-11c4": "train",
+      "trg:motion:stagger-the-list-ec73": "train",
+      "trg:performance:it-feels-slow-b593": "train",
+      "trg:performance:audit-the-bundle-239d": "train",
+      "trg:performance:why-is-this-page-slow-4403": "train",
+      "trg:performance:optimize-the-queries-77ec": "train",
+      "trg:premortem:what-could-go-wrong-c344": "train",
+      "trg:premortem:imagine-this-failed-5d23": "train",
+      "trg:premortem:what-are-the-risks-cdf2": "train",
+      "trg:premortem:stress-test-this-plan-06fb": "train",
+      "trg:quick:commit-and-push-8e7c": "train",
+      "trg:quick:just-push-it-4034": "train",
+      "trg:quick:save-this-work-4745": "train",
+      "trg:quick:land-it-edf4": "train",
+      "trg:repos:list-our-repos-6e04": "holdout",
+      "trg:repos:which-repo-has-16d8": "train",
+      "trg:repos:org-status-7903": "train",
+      "trg:repos:sync-the-repos-233b": "train",
+      "trg:saas:scaffold-the-whole-feature-a860": "train",
+      "trg:saas:generate-all-layers-6033": "holdout",
+      "trg:saas:full-crud-for-da1d": "train",
+      "trg:screenshot:look-at-my-screenshot-99df": "train",
+      "trg:screenshot:i-just-took-a-screenshot-8d5e": "train",
+      "trg:screenshot:check-the-image-i-saved-7fb2": "holdout",
+      "trg:screenshot:see-the-screen-grab-fb22": "train",
+      "trg:security:security-audit-9eb8": "train",
+      "trg:security:are-we-vulnerable-5d64": "train",
+      "trg:security:scan-the-dependencies-3857": "train",
+      "trg:security:owasp-check-ef8e": "train",
+      "trg:shadcn:shadcn-docs-f2d0": "train",
+      "trg:shadcn:add-a-shadcn-component-2eac": "train",
+      "trg:shadcn:registry-item-e5ad": "holdout",
+      "trg:shadcn:how-does-shadcn-do-it-b36a": "train",
+      "trg:shadcn:base-ui-vs-radix-9936": "holdout",
+      "trg:test:write-tests-for-e3d3": "train",
+      "trg:test:add-e2e-coverage-5a51": "train",
+      "trg:test:run-the-tests-e3e0": "train",
+      "trg:test:test-this-component-1f4b": "holdout",
+      "spell:portkeys:from-shadcn-e1e1": "train"
     }
   },
-  "current_value": 1,
+  "current_value": null,
   "current": {
-    "top1_hard": 1,
-    "top1": 1,
-    "top3": 1,
-    "mrr": 1,
-    "fp_rate": 0,
-    "destructive_fp": 0,
-    "abstain_error": 0,
-    "macro_f1": 1,
-    "weighted_f1": 1,
-    "holdout_top1_hard": 1,
-    "train_holdout_gap": 0,
-    "listing_chars": 26212,
+    "top1_hard": null,
+    "top1": null,
+    "top3": null,
+    "mrr": null,
+    "fp_rate": null,
+    "destructive_fp": null,
+    "abstain_error": null,
+    "macro_f1": null,
+    "weighted_f1": null,
+    "holdout_top1_hard": null,
+    "train_holdout_gap": null,
+    "listing_chars": 31428,
     "degraded": false,
     "unadjudicated": 0,
-    "top1_lexical_free": 1,
-    "n_lexical_free": 197,
-    "audit_verdict": "CLEAN — audit-bench-run.mjs, 11 blind agents, no forbidden read"
+    "top1_lexical_free": null,
+    "n_lexical_free": null,
+    "audit_verdict": null
   },
   "known_biases": [
     "Answer-key leakage: graders must read ONLY the --redacted view. The full case set, any SKILL.md (trigger phrases sit verbatim beside the skill name), and vocabulary.json all reveal labels. Enforced by redaction + an emit-time assertion, and verified after every run by audit-bench-run.mjs, which fails the run on any forbidden read.",
@@ -487,12 +571,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "approve": {
       "support": 11,
@@ -500,12 +579,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "atom": {
       "support": 5,
@@ -513,25 +587,15 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": true,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "auth": {
-      "support": 2,
-      "chars": 505,
+      "support": 5,
+      "chars": 816,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "bench": {
       "support": 7,
@@ -539,25 +603,15 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "block": {
-      "support": 1,
-      "chars": 67,
+      "support": 4,
+      "chars": 365,
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": true,
-      "has_when_to_use": false,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "build": {
       "support": 1,
@@ -565,12 +619,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "calendar": {
       "support": 8,
@@ -578,33 +627,23 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "canon": {
-      "support": 0,
-      "chars": 318,
+      "support": 5,
+      "chars": 623,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": true,
-      "has_when_to_use": false
+      "has_when_to_use": true
     },
     "captain": {
-      "support": 1,
-      "chars": 88,
+      "support": 5,
+      "chars": 393,
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "carousel": {
       "support": 13,
@@ -612,12 +651,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "check": {
       "support": 4,
@@ -625,12 +659,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "clone": {
       "support": 7,
@@ -638,12 +667,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "code": {
       "support": 4,
@@ -651,25 +675,15 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "codebase": {
-      "support": 1,
-      "chars": 82,
+      "support": 4,
+      "chars": 310,
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "convert": {
       "support": 6,
@@ -677,12 +691,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "costs": {
       "support": 5,
@@ -690,12 +699,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "crawl-anthropic": {
       "support": 3,
@@ -703,12 +707,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "credentials": {
       "support": 5,
@@ -716,25 +715,15 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "decide": {
-      "support": 1,
-      "chars": 111,
+      "support": 4,
+      "chars": 407,
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": true,
-      "has_when_to_use": false,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "deploy": {
       "support": 7,
@@ -742,38 +731,23 @@
       "scope": "user",
       "fp_cost": 3,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "dev": {
-      "support": 1,
-      "chars": 34,
+      "support": 5,
+      "chars": 282,
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "docs": {
-      "support": 5,
-      "chars": 73,
+      "support": 9,
+      "chars": 323,
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": true,
-      "has_when_to_use": false,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "draft": {
       "support": 13,
@@ -781,12 +755,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "economy": {
       "support": 10,
@@ -794,12 +763,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "feature": {
       "support": 4,
@@ -807,25 +771,15 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": true,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "fix": {
-      "support": 1,
-      "chars": 66,
+      "support": 5,
+      "chars": 357,
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "handover": {
       "support": 6,
@@ -833,12 +787,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": true,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "health": {
       "support": 5,
@@ -846,12 +795,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": true,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "higgs": {
       "support": 26,
@@ -859,12 +803,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "idea": {
       "support": 8,
@@ -872,12 +811,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "incident": {
       "support": 5,
@@ -885,12 +819,7 @@
       "scope": "project",
       "fp_cost": 3,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "issue": {
       "support": 3,
@@ -898,12 +827,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "learn": {
       "support": 3,
@@ -911,25 +835,15 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "mcp-doctor": {
-      "support": 1,
-      "chars": 153,
+      "support": 4,
+      "chars": 369,
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "measure": {
       "support": 8,
@@ -937,12 +851,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "monitor": {
       "support": 4,
@@ -950,25 +859,15 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "motion": {
-      "support": 5,
-      "chars": 50,
+      "support": 10,
+      "chars": 296,
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "package": {
       "support": 4,
@@ -976,12 +875,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "pattern": {
       "support": 4,
@@ -989,25 +883,15 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "performance": {
-      "support": 1,
-      "chars": 74,
+      "support": 5,
+      "chars": 335,
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "plan": {
       "support": 4,
@@ -1015,25 +899,15 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "premortem": {
-      "support": 1,
-      "chars": 100,
+      "support": 5,
+      "chars": 394,
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "pricing": {
       "support": 4,
@@ -1041,12 +915,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "profile": {
       "support": 3,
@@ -1054,12 +923,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "proposal": {
       "support": 4,
@@ -1067,12 +931,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "publish": {
       "support": 10,
@@ -1080,12 +939,7 @@
       "scope": "project",
       "fp_cost": 3,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "qa": {
       "support": 3,
@@ -1093,25 +947,15 @@
       "scope": "project",
       "fp_cost": 3,
       "claude_md_routed": true,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "quick": {
-      "support": 1,
-      "chars": 53,
+      "support": 5,
+      "chars": 301,
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "release": {
       "support": 6,
@@ -1119,12 +963,7 @@
       "scope": "project",
       "fp_cost": 3,
       "claude_md_routed": true,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "report": {
       "support": 4,
@@ -1132,33 +971,23 @@
       "scope": "project",
       "fp_cost": 3,
       "claude_md_routed": true,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "repos": {
-      "support": 0,
-      "chars": 49,
+      "support": 4,
+      "chars": 273,
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false
+      "has_when_to_use": true
     },
     "saas": {
-      "support": 1,
-      "chars": 52,
+      "support": 4,
+      "chars": 284,
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "schema": {
       "support": 5,
@@ -1166,46 +995,31 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "screenshot": {
-      "support": 0,
-      "chars": 65,
+      "support": 4,
+      "chars": 314,
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false
+      "has_when_to_use": true
     },
     "security": {
-      "support": 1,
-      "chars": 60,
+      "support": 5,
+      "chars": 310,
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "shadcn": {
-      "support": 2,
-      "chars": 164,
+      "support": 7,
+      "chars": 395,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "ship": {
       "support": 3,
@@ -1213,12 +1027,7 @@
       "scope": "project",
       "fp_cost": 3,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "social": {
       "support": 7,
@@ -1226,12 +1035,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "spec": {
       "support": 5,
@@ -1239,12 +1043,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "sync": {
       "support": 4,
@@ -1252,12 +1051,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "tasks": {
       "support": 6,
@@ -1265,12 +1059,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "template": {
       "support": 5,
@@ -1278,25 +1067,15 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": true,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "test": {
-      "support": 1,
-      "chars": 54,
+      "support": 5,
+      "chars": 287,
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "watch": {
       "support": 5,
@@ -1304,12 +1083,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "weekly": {
       "support": 4,
@@ -1317,12 +1091,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     },
     "wire": {
       "support": 5,
@@ -1330,12 +1099,7 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true,
-      "precision": 1,
-      "recall": 1,
-      "f1": 1,
-      "fp": 0,
-      "top3": 1
+      "has_when_to_use": true
     }
   },
   "clusters": [
@@ -1370,7 +1134,6 @@
         "build",
         "check",
         "deploy",
-        "fix",
         "ship",
         "watch"
       ],
@@ -1491,11 +1254,6 @@
       0.391
     ],
     [
-      "build",
-      "fix",
-      0.39
-    ],
-    [
       "ship",
       "watch",
       0.386
@@ -1534,6 +1292,11 @@
       "analyze",
       "learn",
       0.357
+    ],
+    [
+      "approve",
+      "social",
+      0.344
     ]
   ],
   "top_confusions": [],
@@ -1590,6 +1353,18 @@
       "cases": 400,
       "delta": null,
       "note": "Not degraded — clean run, 400 cases scored, 1 adjudicated away, 0 unadjudicated."
+    },
+    {
+      "week_of": "2026-08-06",
+      "baseline_reset": true,
+      "corpus_hash_from": "fnv1a:be5dc57d",
+      "corpus_hash_to": "fnv1a:9fd4080f",
+      "cases_from": 401,
+      "cases_to": 477,
+      "listing_chars_from": 26212,
+      "listing_chars_to": 31428,
+      "top1_hard": null,
+      "note": "BASELINE RESET. 20 skills that had no when_to_use at all gained one, so they are now reachable by prose rather than only by exact name. Corpus 401 -> 477 cases; listing 26212 -> 31428 chars (cap raised 26500 -> 32000, reasoning in engine.json eval.listing_cap_history). Also: from-shadcn now routes to /shadcn. The next run tests whether +5.2k chars of listing degraded dispatch — the question the cap was only ever a proxy for."
     }
   ],
   "stratified": {

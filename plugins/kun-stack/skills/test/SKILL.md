@@ -1,6 +1,7 @@
 ---
 name: Test
 description: Generate and run tests - unit, component, or E2E
+when_to_use: "Use when code needs tests written or run — unit, component or Playwright E2E, with coverage. Unlike /qa, which verifies a shipped block in a browser. Triggers on: write tests for, add e2e coverage, run the tests, test this component."
 argument-hint: "<file|e2e|coverage>"
 allowed-tools: Bash(pnpm *), Bash(npx *)
 model: opus

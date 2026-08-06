@@ -1,6 +1,7 @@
 ---
 name: auth
 description: Autonomously authenticate to any web service or CLI on Abdout's behalf using the macOS-Keychain-stored databayt identities, then reach protected pages and fetch original assets behind the login wall. Use whenever a page redirects to a login wall, a CLI reports "not authenticated", the user says "log into X / sign me into X / auth", or a clone/asset-fetch task needs content behind a paywall or dashboard. Minimizes interaction — only pauses for a one-time code when no non-interactive path exists.
+when_to_use: "Use when a login wall blocks progress — a page redirects to sign-in, a CLI reports not authenticated, or an asset sits behind a paywall or dashboard. Uses Keychain-stored identities; never asks for a password in chat. Triggers on: log into X, sign me in, not authenticated, behind a login wall, session expired."
 ---
 
 # auth — self-service login for the kun engine

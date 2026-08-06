@@ -1,6 +1,7 @@
 ---
 name: Motion
 description: Add Framer Motion animations to components
+when_to_use: "Use when an existing component needs animation — Framer Motion entrances, transitions, scroll effects or gestures added to JSX that already renders. Triggers on: animate this, add a transition, make it fade in, scroll animation, stagger the list."
 argument-hint: "<hero|list|page|component>"
 model: opus
 allowed-tools: ["Read", "Write", "Edit", "Glob", "Grep"]

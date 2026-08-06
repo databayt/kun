@@ -1,6 +1,7 @@
 ---
 name: shadcn
 description: shadcn/ui knowledge pack — CLI, MCP, registry, skills, directory, and the docs-block pattern. Say "shadcn" to load it; "shadcn docs" = the docs-block style.
+when_to_use: "Use when working with shadcn/ui — components, the registry, the CLI, MCP, the directory model, or the docs-block MDX pattern. Triggers on: shadcn docs, add a shadcn component, registry item, how does shadcn do it, base ui vs radix."
 argument-hint: "<docs|add|registry|cli|mcp|directory> [name]"
 last-verified: 2026-08-01
 allowed-tools:

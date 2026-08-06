@@ -1,6 +1,6 @@
 {
   "$comment": "REDACTED grader view. Contains no label, source, tag or split — reading any other file (a SKILL.md, the full case set, the extractor) leaks the answer and invalidates the run.",
-  "corpus_hash": "fnv1a:be5dc57d",
+  "corpus_hash": "fnv1a:9fd4080f",
   "listing": [
     {
       "skill": "analyze",
@@ -20,7 +20,7 @@
     {
       "skill": "auth",
       "description": "Autonomously authenticate to any web service or CLI on Abdout's behalf using the macOS-Keychain-stored databayt identities, then reach protected pages and fetch original assets behind the login wall. Use whenever a page redirects to a login wall, a CLI reports \"not authenticated\", the user says \"log into X / sign me into X / auth\", or a clone/asset-fetch task needs content behind a paywall or dashboard. Minimizes interaction — only pauses for a one-time code when no non-interactive path exists.",
-      "when_to_use": ""
+      "when_to_use": "Use when a login wall blocks progress — a page redirects to sign-in, a CLI reports not authenticated, or an asset sits behind a paywall or dashboard. Uses Keychain-stored identities; never asks for a password in chat. Triggers on: log into X, sign me in, not authenticated, behind a login wall, session expired."
     },
     {
       "skill": "bench",
@@ -30,7 +30,7 @@
     {
       "skill": "block",
       "description": "Create blocks - UI components with integrated business logic",
-      "when_to_use": ""
+      "when_to_use": "Use when building a feature-level UI component that carries business logic — a data table wired to server actions, an auth flow, a dashboard, checkout. The level above /atom (2+ primitives) and /template (page layout). Triggers on: block, create a block, data table with logic, dashboard component."
     },
     {
       "skill": "build",
@@ -45,12 +45,12 @@
     {
       "skill": "canon",
       "description": "Surface the right CEO book + operating move for a business or leadership decision — hiring, firing, pricing, positioning, what to build, customer development, fundraising, prioritization, runway, strategy. Pull in automatically when a decision is on the table; no slash command needed. /canon also lists all 10.",
-      "when_to_use": ""
+      "when_to_use": "Use when a business or leadership decision is on the table and needs a grounded operating move rather than an opinion — hiring, pricing, positioning, what to build, fundraising, runway. Triggers on: should we build, what do I do about, how should I price, is it time to hire, are we running out of runway."
     },
     {
       "skill": "captain",
       "description": "Databayt CEO brain - synthesize identity + state + journal, suggest next action",
-      "when_to_use": ""
+      "when_to_use": "Use when the question is what to work on next at company level — identity, state and the decision journal synthesised into one allocation. Unlike /canon (a principle for one decision) or /weekly (the Friday ritual). Triggers on: what should I do next, company status, brief me, where do I spend this week."
     },
     {
       "skill": "carousel",
@@ -75,7 +75,7 @@
     {
       "skill": "codebase",
       "description": "Access reference codebase at /Users/abdout/codebase or databayt/codebase",
-      "when_to_use": ""
+      "when_to_use": "Use when a pattern, component or convention should be pulled from the reference codebase rather than invented. Triggers on: from codebase, how does codebase do it, check the reference repo, is there an existing pattern for this."
     },
     {
       "skill": "convert",
@@ -100,7 +100,7 @@
     {
       "skill": "decide",
       "description": "Write a decision journal entry — Type 1/2 classification, premortem, expected outcome, reviewed-by date",
-      "when_to_use": ""
+      "when_to_use": "Use when a choice worth remembering needs recording — Type 1/2 classification, premortem, expected outcome and a reviewed-by date in the decision journal. Unlike /canon (surfaces a principle) and /premortem (only the failure story). Triggers on: log this decision, we decided to, record the call."
     },
     {
       "skill": "deploy",
@@ -110,12 +110,12 @@
     {
       "skill": "dev",
       "description": "Start dev server on port 3000",
-      "when_to_use": ""
+      "when_to_use": "Use when the local dev server should come up on port 3000, killing whatever holds the port first. Not a production build (/build) and not a deploy (/deploy). Triggers on: dev, start the server, run it locally, spin up localhost, port 3000 is taken."
     },
     {
       "skill": "docs",
       "description": "Generate documentation - component MDX, API docs, Storybook stories",
-      "when_to_use": ""
+      "when_to_use": "Use when code needs written documentation generated from source — component MDX, API reference, or Storybook stories. Not the docs-site content itself. Triggers on: document this component, write the API docs, generate the MDX, add a storybook story."
     },
     {
       "skill": "draft",
@@ -135,7 +135,7 @@
     {
       "skill": "fix",
       "description": "Auto-fix all detected issues - TypeScript, lint, build errors",
-      "when_to_use": ""
+      "when_to_use": "Use when the codebase has mechanical errors to clear — TypeScript, lint and build failures fixed in a loop until green. Unlike /report (a user-filed bug) and /check (the pre-ship gate, which only reports). Triggers on: fix the errors, clear the type errors, make it compile, lint is failing."
     },
     {
       "skill": "handover",
@@ -175,7 +175,7 @@
     {
       "skill": "mcp-doctor",
       "description": "Diagnose and recover the browser/Playwright MCP server when it disconnects, fails to launch, or returns \"tool not found\" for mcp__browser__*.",
-      "when_to_use": ""
+      "when_to_use": "Use when the browser/Playwright MCP is broken — tools missing, server disconnected, or a launch failure. Triggers on: browser mcp is not working, tool not found, playwright mcp is disconnected, browser tools missing."
     },
     {
       "skill": "measure",
@@ -190,7 +190,7 @@
     {
       "skill": "motion",
       "description": "Add Framer Motion animations to components",
-      "when_to_use": ""
+      "when_to_use": "Use when an existing component needs animation — Framer Motion entrances, transitions, scroll effects or gestures added to JSX that already renders. Triggers on: animate this, add a transition, make it fade in, scroll animation, stagger the list."
     },
     {
       "skill": "package",
@@ -205,7 +205,7 @@
     {
       "skill": "performance",
       "description": "Performance audit - Core Web Vitals, bundle, database queries",
-      "when_to_use": ""
+      "when_to_use": "Use when something is measurably slow and needs profiling with concrete fixes — Core Web Vitals, bundle size, database queries. Unlike /fast, the per-URL quality keyword. Triggers on: it feels slow, audit the bundle, why is this page slow, optimize the queries."
     },
     {
       "skill": "plan",
@@ -215,7 +215,7 @@
     {
       "skill": "premortem",
       "description": "Klein-style premortem — imagine a decision/project failed, write the story, surface risks",
-      "when_to_use": ""
+      "when_to_use": "Use before committing to a decision or project, to surface risks by assuming it already failed and writing the story backwards. Unlike /decide (records the call) and /canon (supplies a principle). Triggers on: what could go wrong, imagine this failed, what are the risks, stress-test this plan."
     },
     {
       "skill": "pricing",
@@ -245,7 +245,7 @@
     {
       "skill": "quick",
       "description": "Fastest commit cycle - lint, fix, commit, push",
-      "when_to_use": ""
+      "when_to_use": "Use when finished work just needs to land — lint, auto-fix, conventional commit and push to main in one pass. Not a production promotion (/ship) and not a Vercel deploy (/deploy). Triggers on: commit and push, just push it, save this work, land it."
     },
     {
       "skill": "release",
@@ -260,12 +260,12 @@
     {
       "skill": "repos",
       "description": "Explore databayt organization repositories",
-      "when_to_use": ""
+      "when_to_use": "Use when the question spans the databayt GitHub org rather than this repo — listing, syncing, cross-repo status, or finding which repo holds something. Triggers on: list our repos, which repo has, org status, sync the repos."
     },
     {
       "skill": "saas",
       "description": "Generate complete SaaS feature with all layers",
-      "when_to_use": ""
+      "when_to_use": "Use when a whole feature should be scaffolded across every layer at once — schema, server actions and UI — instead of walking the staged /feature pipeline. Triggers on: scaffold the whole feature, generate all layers, full CRUD for."
     },
     {
       "skill": "schema",
@@ -275,17 +275,17 @@
     {
       "skill": "screenshot",
       "description": "View most recent screenshot from Desktop or Downloads",
-      "when_to_use": ""
+      "when_to_use": "Use when the most recent screenshot from Desktop or Downloads should be opened and read — usually a UI bug or design reference just captured. Triggers on: look at my screenshot, I just took a screenshot, check the image I saved, see the screen grab."
     },
     {
       "skill": "security",
       "description": "Security audit - OWASP Top 10, dependency scanning",
-      "when_to_use": ""
+      "when_to_use": "Use when code needs a security pass — OWASP Top 10, dependency vulnerabilities, auth and exposure checks. Unlike /guard, the per-URL tenant and authz quality keyword. Triggers on: security audit, are we vulnerable, scan the dependencies, owasp check."
     },
     {
       "skill": "shadcn",
       "description": "shadcn/ui knowledge pack — CLI, MCP, registry, skills, directory, and the docs-block pattern. Say \"shadcn\" to load it; \"shadcn docs\" = the docs-block style.",
-      "when_to_use": ""
+      "when_to_use": "Use when working with shadcn/ui — components, the registry, the CLI, MCP, the directory model, or the docs-block MDX pattern. Triggers on: shadcn docs, add a shadcn component, registry item, how does shadcn do it, base ui vs radix."
     },
     {
       "skill": "ship",
@@ -320,7 +320,7 @@
     {
       "skill": "test",
       "description": "Generate and run tests - unit, component, or E2E",
-      "when_to_use": ""
+      "when_to_use": "Use when code needs tests written or run — unit, component or Playwright E2E, with coverage. Unlike /qa, which verifies a shipped block in a browser. Triggers on: write tests for, add e2e coverage, run the tests, test this component."
     },
     {
       "skill": "watch",
@@ -408,6 +408,26 @@
       "prompt": "register this as an atom"
     },
     {
+      "id": "trg:auth:log-into-x-8d16",
+      "prompt": "log into X"
+    },
+    {
+      "id": "trg:auth:sign-me-in-a237",
+      "prompt": "sign me in"
+    },
+    {
+      "id": "trg:auth:not-authenticated-b54a",
+      "prompt": "not authenticated"
+    },
+    {
+      "id": "trg:auth:behind-a-login-wall-60fe",
+      "prompt": "behind a login wall"
+    },
+    {
+      "id": "trg:auth:session-expired-3098",
+      "prompt": "session expired"
+    },
+    {
       "id": "trg:bench:bench-626e",
       "prompt": "bench"
     },
@@ -436,6 +456,22 @@
       "prompt": "are any skills dead"
     },
     {
+      "id": "trg:block:block-eb0c",
+      "prompt": "block"
+    },
+    {
+      "id": "trg:block:create-a-block-cd0e",
+      "prompt": "create a block"
+    },
+    {
+      "id": "trg:block:data-table-with-logic-a297",
+      "prompt": "data table with logic"
+    },
+    {
+      "id": "trg:block:dashboard-component-2a78",
+      "prompt": "dashboard component"
+    },
+    {
       "id": "trg:calendar:content-calendar-1e8f",
       "prompt": "content calendar"
     },
@@ -462,6 +498,42 @@
     {
       "id": "trg:calendar:خطة-المحتوى-c890",
       "prompt": "خطة المحتوى"
+    },
+    {
+      "id": "trg:canon:should-we-build-ced9",
+      "prompt": "should we build"
+    },
+    {
+      "id": "trg:canon:what-do-i-do-about-27a1",
+      "prompt": "what do I do about"
+    },
+    {
+      "id": "trg:canon:how-should-i-price-5cd1",
+      "prompt": "how should I price"
+    },
+    {
+      "id": "trg:canon:is-it-time-to-hire-3595",
+      "prompt": "is it time to hire"
+    },
+    {
+      "id": "trg:canon:are-we-running-out-of-runway-0948",
+      "prompt": "are we running out of runway"
+    },
+    {
+      "id": "trg:captain:what-should-i-do-next-d9a7",
+      "prompt": "what should I do next"
+    },
+    {
+      "id": "trg:captain:company-status-d082",
+      "prompt": "company status"
+    },
+    {
+      "id": "trg:captain:brief-me-ba95",
+      "prompt": "brief me"
+    },
+    {
+      "id": "trg:captain:where-do-i-spend-this-week-1ea2",
+      "prompt": "where do I spend this week"
     },
     {
       "id": "trg:carousel:carousel-4f34",
@@ -548,6 +620,22 @@
       "prompt": "pipeline Logic stage"
     },
     {
+      "id": "trg:codebase:from-codebase-1b48",
+      "prompt": "from codebase"
+    },
+    {
+      "id": "trg:codebase:how-does-codebase-do-it-f91d",
+      "prompt": "how does codebase do it"
+    },
+    {
+      "id": "trg:codebase:check-the-reference-repo-f8d7",
+      "prompt": "check the reference repo"
+    },
+    {
+      "id": "trg:codebase:is-there-an-existing-pattern-for-this-cb96",
+      "prompt": "is there an existing pattern for this"
+    },
+    {
       "id": "trg:convert:convert-file-url-b36d",
       "prompt": "convert <file|url>"
     },
@@ -620,6 +708,18 @@
       "prompt": "which keys do we have"
     },
     {
+      "id": "trg:decide:log-this-decision-e139",
+      "prompt": "log this decision"
+    },
+    {
+      "id": "trg:decide:we-decided-to-fc83",
+      "prompt": "we decided to"
+    },
+    {
+      "id": "trg:decide:record-the-call-74e9",
+      "prompt": "record the call"
+    },
+    {
       "id": "trg:deploy:deploy-to-preview-5496",
       "prompt": "deploy to preview"
     },
@@ -642,6 +742,42 @@
     {
       "id": "trg:deploy:redeploy-until-it-works-e90f",
       "prompt": "redeploy until it works"
+    },
+    {
+      "id": "trg:dev:dev-d559",
+      "prompt": "dev"
+    },
+    {
+      "id": "trg:dev:start-the-server-a530",
+      "prompt": "start the server"
+    },
+    {
+      "id": "trg:dev:run-it-locally-d475",
+      "prompt": "run it locally"
+    },
+    {
+      "id": "trg:dev:spin-up-localhost-a544",
+      "prompt": "spin up localhost"
+    },
+    {
+      "id": "trg:dev:port-3000-is-taken-f5bc",
+      "prompt": "port 3000 is taken"
+    },
+    {
+      "id": "trg:docs:document-this-component-ca04",
+      "prompt": "document this component"
+    },
+    {
+      "id": "trg:docs:write-the-api-docs-a140",
+      "prompt": "write the API docs"
+    },
+    {
+      "id": "trg:docs:generate-the-mdx-ec12",
+      "prompt": "generate the MDX"
+    },
+    {
+      "id": "trg:docs:add-a-storybook-story-56f9",
+      "prompt": "add a storybook story"
     },
     {
       "id": "trg:draft:draft-a-post-6ade",
@@ -742,6 +878,22 @@
     {
       "id": "trg:feature:full-pipeline-idea-production-85fd",
       "prompt": "full pipeline idea→production"
+    },
+    {
+      "id": "trg:fix:fix-the-errors-c797",
+      "prompt": "fix the errors"
+    },
+    {
+      "id": "trg:fix:clear-the-type-errors-4267",
+      "prompt": "clear the type errors"
+    },
+    {
+      "id": "trg:fix:make-it-compile-38d2",
+      "prompt": "make it compile"
+    },
+    {
+      "id": "trg:fix:lint-is-failing-d058",
+      "prompt": "lint is failing"
     },
     {
       "id": "trg:handover:handover-url-block-77bf",
@@ -936,6 +1088,22 @@
       "prompt": "extract patterns from history"
     },
     {
+      "id": "trg:mcp-doctor:browser-mcp-is-not-working-073a",
+      "prompt": "browser mcp is not working"
+    },
+    {
+      "id": "trg:mcp-doctor:tool-not-found-ffd9",
+      "prompt": "tool not found"
+    },
+    {
+      "id": "trg:mcp-doctor:playwright-mcp-is-disconnected-2902",
+      "prompt": "playwright mcp is disconnected"
+    },
+    {
+      "id": "trg:mcp-doctor:browser-tools-missing-acb4",
+      "prompt": "browser tools missing"
+    },
+    {
       "id": "trg:measure:how-did-the-post-do-7b14",
       "prompt": "how did the post do"
     },
@@ -980,6 +1148,26 @@
       "prompt": "production status sweep"
     },
     {
+      "id": "trg:motion:animate-this-7947",
+      "prompt": "animate this"
+    },
+    {
+      "id": "trg:motion:add-a-transition-6873",
+      "prompt": "add a transition"
+    },
+    {
+      "id": "trg:motion:make-it-fade-in-b52e",
+      "prompt": "make it fade in"
+    },
+    {
+      "id": "trg:motion:scroll-animation-11c4",
+      "prompt": "scroll animation"
+    },
+    {
+      "id": "trg:motion:stagger-the-list-ec73",
+      "prompt": "stagger the list"
+    },
+    {
       "id": "trg:package:package-audit-3d1a",
       "prompt": "package audit"
     },
@@ -1012,6 +1200,22 @@
       "prompt": "follow the card"
     },
     {
+      "id": "trg:performance:it-feels-slow-b593",
+      "prompt": "it feels slow"
+    },
+    {
+      "id": "trg:performance:audit-the-bundle-239d",
+      "prompt": "audit the bundle"
+    },
+    {
+      "id": "trg:performance:why-is-this-page-slow-4403",
+      "prompt": "why is this page slow"
+    },
+    {
+      "id": "trg:performance:optimize-the-queries-77ec",
+      "prompt": "optimize the queries"
+    },
+    {
       "id": "trg:plan:plan-the-architecture-5326",
       "prompt": "plan the architecture"
     },
@@ -1022,6 +1226,22 @@
     {
       "id": "trg:plan:pipeline-plan-stage-e066",
       "prompt": "pipeline Plan stage"
+    },
+    {
+      "id": "trg:premortem:what-could-go-wrong-c344",
+      "prompt": "what could go wrong"
+    },
+    {
+      "id": "trg:premortem:imagine-this-failed-5d23",
+      "prompt": "imagine this failed"
+    },
+    {
+      "id": "trg:premortem:what-are-the-risks-cdf2",
+      "prompt": "what are the risks"
+    },
+    {
+      "id": "trg:premortem:stress-test-this-plan-06fb",
+      "prompt": "stress-test this plan"
     },
     {
       "id": "trg:pricing:pricing-2e2f",
@@ -1104,6 +1324,22 @@
       "prompt": "راجع وانشر"
     },
     {
+      "id": "trg:quick:commit-and-push-8e7c",
+      "prompt": "commit and push"
+    },
+    {
+      "id": "trg:quick:just-push-it-4034",
+      "prompt": "just push it"
+    },
+    {
+      "id": "trg:quick:save-this-work-4745",
+      "prompt": "save this work"
+    },
+    {
+      "id": "trg:quick:land-it-edf4",
+      "prompt": "land it"
+    },
+    {
       "id": "trg:release:release-block-53e5",
       "prompt": "release <block>"
     },
@@ -1140,6 +1376,34 @@
       "prompt": "verified-report queue"
     },
     {
+      "id": "trg:repos:list-our-repos-6e04",
+      "prompt": "list our repos"
+    },
+    {
+      "id": "trg:repos:which-repo-has-16d8",
+      "prompt": "which repo has"
+    },
+    {
+      "id": "trg:repos:org-status-7903",
+      "prompt": "org status"
+    },
+    {
+      "id": "trg:repos:sync-the-repos-233b",
+      "prompt": "sync the repos"
+    },
+    {
+      "id": "trg:saas:scaffold-the-whole-feature-a860",
+      "prompt": "scaffold the whole feature"
+    },
+    {
+      "id": "trg:saas:generate-all-layers-6033",
+      "prompt": "generate all layers"
+    },
+    {
+      "id": "trg:saas:full-crud-for-da1d",
+      "prompt": "full CRUD for"
+    },
+    {
       "id": "trg:schema:add-the-model-migration-c9fb",
       "prompt": "add the model/migration"
     },
@@ -1154,6 +1418,58 @@
     {
       "id": "trg:schema:pipeline-data-stage-41b8",
       "prompt": "pipeline Data stage"
+    },
+    {
+      "id": "trg:screenshot:look-at-my-screenshot-99df",
+      "prompt": "look at my screenshot"
+    },
+    {
+      "id": "trg:screenshot:i-just-took-a-screenshot-8d5e",
+      "prompt": "I just took a screenshot"
+    },
+    {
+      "id": "trg:screenshot:check-the-image-i-saved-7fb2",
+      "prompt": "check the image I saved"
+    },
+    {
+      "id": "trg:screenshot:see-the-screen-grab-fb22",
+      "prompt": "see the screen grab"
+    },
+    {
+      "id": "trg:security:security-audit-9eb8",
+      "prompt": "security audit"
+    },
+    {
+      "id": "trg:security:are-we-vulnerable-5d64",
+      "prompt": "are we vulnerable"
+    },
+    {
+      "id": "trg:security:scan-the-dependencies-3857",
+      "prompt": "scan the dependencies"
+    },
+    {
+      "id": "trg:security:owasp-check-ef8e",
+      "prompt": "owasp check"
+    },
+    {
+      "id": "trg:shadcn:shadcn-docs-f2d0",
+      "prompt": "shadcn docs"
+    },
+    {
+      "id": "trg:shadcn:add-a-shadcn-component-2eac",
+      "prompt": "add a shadcn component"
+    },
+    {
+      "id": "trg:shadcn:registry-item-e5ad",
+      "prompt": "registry item"
+    },
+    {
+      "id": "trg:shadcn:how-does-shadcn-do-it-b36a",
+      "prompt": "how does shadcn do it"
+    },
+    {
+      "id": "trg:shadcn:base-ui-vs-radix-9936",
+      "prompt": "base ui vs radix"
     },
     {
       "id": "trg:ship:ship-ac56",
@@ -1260,6 +1576,22 @@
       "prompt": "rebuild the template registry"
     },
     {
+      "id": "trg:test:write-tests-for-e3d3",
+      "prompt": "write tests for"
+    },
+    {
+      "id": "trg:test:add-e2e-coverage-5a51",
+      "prompt": "add e2e coverage"
+    },
+    {
+      "id": "trg:test:run-the-tests-e3e0",
+      "prompt": "run the tests"
+    },
+    {
+      "id": "trg:test:test-this-component-1f4b",
+      "prompt": "test this component"
+    },
+    {
       "id": "trg:watch:watch-5fb7",
       "prompt": "watch"
     },
@@ -1348,10 +1680,6 @@
       "prompt": "wire"
     },
     {
-      "id": "spell:charm-work:dev-d559",
-      "prompt": "dev"
-    },
-    {
       "id": "spell:charm-work:build-c39b",
       "prompt": "build"
     },
@@ -1390,10 +1718,6 @@
     {
       "id": "spell:transfiguration:template-694a",
       "prompt": "template"
-    },
-    {
-      "id": "spell:transfiguration:block-eb0c",
-      "prompt": "block"
     },
     {
       "id": "none:transfiguration:migration-2b0b",
@@ -1712,11 +2036,7 @@
       "prompt": "dedup"
     },
     {
-      "id": "spell:portkeys:from-codebase-1b48",
-      "prompt": "from codebase"
-    },
-    {
-      "id": "none:portkeys:from-shadcn-e1e1",
+      "id": "spell:portkeys:from-shadcn-e1e1",
       "prompt": "from shadcn"
     },
     {
@@ -1920,28 +2240,12 @@
       "prompt": "showroom"
     },
     {
-      "id": "kw:auth:not-authenticated-b54a",
-      "prompt": "not authenticated"
-    },
-    {
-      "id": "kw:auth:log-into-x-sign-me-into-x-auth-69d6",
-      "prompt": "log into X / sign me into X / auth"
-    },
-    {
-      "id": "kw:mcp-doctor:tool-not-found-ffd9",
-      "prompt": "tool not found"
-    },
-    {
       "id": "kw:qa:qa-admission-c365",
       "prompt": "qa admission"
     },
     {
       "id": "kw:qa:qa-this-block-8f4f",
       "prompt": "QA this block"
-    },
-    {
-      "id": "kw:shadcn:shadcn-docs-f2d0",
-      "prompt": "shadcn docs"
     }
   ]
 }

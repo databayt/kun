@@ -3,22 +3,22 @@
     "skills_listed": 67,
     "project_skills": 49,
     "user_only_skills": 18,
-    "listing_chars": 26212,
-    "cases_total": 401,
-    "positive": 306,
-    "none": 95,
+    "listing_chars": 31428,
+    "cases_total": 477,
+    "positive": 383,
+    "none": 94,
     "trivial": 56,
-    "hard": 165,
+    "hard": 173,
     "destructive": 5,
     "sources": {
-      "trigger_phrase": 244,
-      "vocab_spell": 73,
-      "quoted_keyword": 6,
-      "vocab_none": 95
+      "trigger_phrase": 327,
+      "vocab_spell": 74,
+      "quoted_keyword": 2,
+      "vocab_none": 94
     },
-    "skills_without_triggers": 22,
+    "skills_without_triggers": 2,
     "builtin_targeted_spells": 3,
-    "corpus_hash": "fnv1a:be5dc57d"
+    "corpus_hash": "fnv1a:9fd4080f"
   },
   "split": {
     "version": "v1",
@@ -427,7 +427,91 @@
       "kw:qa:qa-admission-c365": "train",
       "kw:qa:qa-this-block-8f4f": "holdout",
       "kw:shadcn:shadcn-docs-f2d0": "holdout",
-      "spell:portraits:og-image-8fb6": "holdout"
+      "spell:portraits:og-image-8fb6": "holdout",
+      "trg:auth:log-into-x-8d16": "train",
+      "trg:auth:sign-me-in-a237": "train",
+      "trg:auth:not-authenticated-b54a": "train",
+      "trg:auth:behind-a-login-wall-60fe": "holdout",
+      "trg:auth:session-expired-3098": "train",
+      "trg:block:block-eb0c": "train",
+      "trg:block:create-a-block-cd0e": "train",
+      "trg:block:data-table-with-logic-a297": "train",
+      "trg:block:dashboard-component-2a78": "holdout",
+      "trg:canon:should-we-build-ced9": "train",
+      "trg:canon:what-do-i-do-about-27a1": "train",
+      "trg:canon:how-should-i-price-5cd1": "train",
+      "trg:canon:is-it-time-to-hire-3595": "train",
+      "trg:canon:are-we-running-out-of-runway-0948": "holdout",
+      "trg:captain:what-should-i-do-next-d9a7": "holdout",
+      "trg:captain:company-status-d082": "train",
+      "trg:captain:brief-me-ba95": "train",
+      "trg:captain:where-do-i-spend-this-week-1ea2": "train",
+      "trg:codebase:from-codebase-1b48": "train",
+      "trg:codebase:how-does-codebase-do-it-f91d": "train",
+      "trg:codebase:check-the-reference-repo-f8d7": "holdout",
+      "trg:codebase:is-there-an-existing-pattern-for-this-cb96": "train",
+      "trg:decide:log-this-decision-e139": "train",
+      "trg:decide:we-decided-to-fc83": "holdout",
+      "trg:decide:record-the-call-74e9": "train",
+      "trg:dev:dev-d559": "holdout",
+      "trg:dev:start-the-server-a530": "train",
+      "trg:dev:run-it-locally-d475": "train",
+      "trg:dev:spin-up-localhost-a544": "train",
+      "trg:dev:port-3000-is-taken-f5bc": "train",
+      "trg:docs:document-this-component-ca04": "train",
+      "trg:docs:write-the-api-docs-a140": "train",
+      "trg:docs:generate-the-mdx-ec12": "train",
+      "trg:docs:add-a-storybook-story-56f9": "train",
+      "trg:fix:fix-the-errors-c797": "train",
+      "trg:fix:clear-the-type-errors-4267": "train",
+      "trg:fix:make-it-compile-38d2": "train",
+      "trg:fix:lint-is-failing-d058": "holdout",
+      "trg:mcp-doctor:browser-mcp-is-not-working-073a": "train",
+      "trg:mcp-doctor:tool-not-found-ffd9": "holdout",
+      "trg:mcp-doctor:playwright-mcp-is-disconnected-2902": "train",
+      "trg:mcp-doctor:browser-tools-missing-acb4": "train",
+      "trg:motion:animate-this-7947": "train",
+      "trg:motion:add-a-transition-6873": "train",
+      "trg:motion:make-it-fade-in-b52e": "train",
+      "trg:motion:scroll-animation-11c4": "train",
+      "trg:motion:stagger-the-list-ec73": "train",
+      "trg:performance:it-feels-slow-b593": "train",
+      "trg:performance:audit-the-bundle-239d": "train",
+      "trg:performance:why-is-this-page-slow-4403": "train",
+      "trg:performance:optimize-the-queries-77ec": "train",
+      "trg:premortem:what-could-go-wrong-c344": "train",
+      "trg:premortem:imagine-this-failed-5d23": "train",
+      "trg:premortem:what-are-the-risks-cdf2": "train",
+      "trg:premortem:stress-test-this-plan-06fb": "train",
+      "trg:quick:commit-and-push-8e7c": "train",
+      "trg:quick:just-push-it-4034": "train",
+      "trg:quick:save-this-work-4745": "train",
+      "trg:quick:land-it-edf4": "train",
+      "trg:repos:list-our-repos-6e04": "holdout",
+      "trg:repos:which-repo-has-16d8": "train",
+      "trg:repos:org-status-7903": "train",
+      "trg:repos:sync-the-repos-233b": "train",
+      "trg:saas:scaffold-the-whole-feature-a860": "train",
+      "trg:saas:generate-all-layers-6033": "holdout",
+      "trg:saas:full-crud-for-da1d": "train",
+      "trg:screenshot:look-at-my-screenshot-99df": "train",
+      "trg:screenshot:i-just-took-a-screenshot-8d5e": "train",
+      "trg:screenshot:check-the-image-i-saved-7fb2": "holdout",
+      "trg:screenshot:see-the-screen-grab-fb22": "train",
+      "trg:security:security-audit-9eb8": "train",
+      "trg:security:are-we-vulnerable-5d64": "train",
+      "trg:security:scan-the-dependencies-3857": "train",
+      "trg:security:owasp-check-ef8e": "train",
+      "trg:shadcn:shadcn-docs-f2d0": "train",
+      "trg:shadcn:add-a-shadcn-component-2eac": "train",
+      "trg:shadcn:registry-item-e5ad": "holdout",
+      "trg:shadcn:how-does-shadcn-do-it-b36a": "train",
+      "trg:shadcn:base-ui-vs-radix-9936": "holdout",
+      "trg:test:write-tests-for-e3d3": "train",
+      "trg:test:add-e2e-coverage-5a51": "train",
+      "trg:test:run-the-tests-e3e0": "train",
+      "trg:test:test-this-component-1f4b": "holdout",
+      "spell:portkeys:from-shadcn-e1e1": "train"
     }
   },
   "listing": [
@@ -449,7 +533,7 @@
     {
       "skill": "auth",
       "description": "Autonomously authenticate to any web service or CLI on Abdout's behalf using the macOS-Keychain-stored databayt identities, then reach protected pages and fetch original assets behind the login wall. Use whenever a page redirects to a login wall, a CLI reports \"not authenticated\", the user says \"log into X / sign me into X / auth\", or a clone/asset-fetch task needs content behind a paywall or dashboard. Minimizes interaction — only pauses for a one-time code when no non-interactive path exists.",
-      "when_to_use": ""
+      "when_to_use": "Use when a login wall blocks progress — a page redirects to sign-in, a CLI reports not authenticated, or an asset sits behind a paywall or dashboard. Uses Keychain-stored identities; never asks for a password in chat. Triggers on: log into X, sign me in, not authenticated, behind a login wall, session expired."
     },
     {
       "skill": "bench",
@@ -459,7 +543,7 @@
     {
       "skill": "block",
       "description": "Create blocks - UI components with integrated business logic",
-      "when_to_use": ""
+      "when_to_use": "Use when building a feature-level UI component that carries business logic — a data table wired to server actions, an auth flow, a dashboard, checkout. The level above /atom (2+ primitives) and /template (page layout). Triggers on: block, create a block, data table with logic, dashboard component."
     },
     {
       "skill": "build",
@@ -474,12 +558,12 @@
     {
       "skill": "canon",
       "description": "Surface the right CEO book + operating move for a business or leadership decision — hiring, firing, pricing, positioning, what to build, customer development, fundraising, prioritization, runway, strategy. Pull in automatically when a decision is on the table; no slash command needed. /canon also lists all 10.",
-      "when_to_use": ""
+      "when_to_use": "Use when a business or leadership decision is on the table and needs a grounded operating move rather than an opinion — hiring, pricing, positioning, what to build, fundraising, runway. Triggers on: should we build, what do I do about, how should I price, is it time to hire, are we running out of runway."
     },
     {
       "skill": "captain",
       "description": "Databayt CEO brain - synthesize identity + state + journal, suggest next action",
-      "when_to_use": ""
+      "when_to_use": "Use when the question is what to work on next at company level — identity, state and the decision journal synthesised into one allocation. Unlike /canon (a principle for one decision) or /weekly (the Friday ritual). Triggers on: what should I do next, company status, brief me, where do I spend this week."
     },
     {
       "skill": "carousel",
@@ -504,7 +588,7 @@
     {
       "skill": "codebase",
       "description": "Access reference codebase at /Users/abdout/codebase or databayt/codebase",
-      "when_to_use": ""
+      "when_to_use": "Use when a pattern, component or convention should be pulled from the reference codebase rather than invented. Triggers on: from codebase, how does codebase do it, check the reference repo, is there an existing pattern for this."
     },
     {
       "skill": "convert",
@@ -529,7 +613,7 @@
     {
       "skill": "decide",
       "description": "Write a decision journal entry — Type 1/2 classification, premortem, expected outcome, reviewed-by date",
-      "when_to_use": ""
+      "when_to_use": "Use when a choice worth remembering needs recording — Type 1/2 classification, premortem, expected outcome and a reviewed-by date in the decision journal. Unlike /canon (surfaces a principle) and /premortem (only the failure story). Triggers on: log this decision, we decided to, record the call."
     },
     {
       "skill": "deploy",
@@ -539,12 +623,12 @@
     {
       "skill": "dev",
       "description": "Start dev server on port 3000",
-      "when_to_use": ""
+      "when_to_use": "Use when the local dev server should come up on port 3000, killing whatever holds the port first. Not a production build (/build) and not a deploy (/deploy). Triggers on: dev, start the server, run it locally, spin up localhost, port 3000 is taken."
     },
     {
       "skill": "docs",
       "description": "Generate documentation - component MDX, API docs, Storybook stories",
-      "when_to_use": ""
+      "when_to_use": "Use when code needs written documentation generated from source — component MDX, API reference, or Storybook stories. Not the docs-site content itself. Triggers on: document this component, write the API docs, generate the MDX, add a storybook story."
     },
     {
       "skill": "draft",
@@ -564,7 +648,7 @@
     {
       "skill": "fix",
       "description": "Auto-fix all detected issues - TypeScript, lint, build errors",
-      "when_to_use": ""
+      "when_to_use": "Use when the codebase has mechanical errors to clear — TypeScript, lint and build failures fixed in a loop until green. Unlike /report (a user-filed bug) and /check (the pre-ship gate, which only reports). Triggers on: fix the errors, clear the type errors, make it compile, lint is failing."
     },
     {
       "skill": "handover",
@@ -604,7 +688,7 @@
     {
       "skill": "mcp-doctor",
       "description": "Diagnose and recover the browser/Playwright MCP server when it disconnects, fails to launch, or returns \"tool not found\" for mcp__browser__*.",
-      "when_to_use": ""
+      "when_to_use": "Use when the browser/Playwright MCP is broken — tools missing, server disconnected, or a launch failure. Triggers on: browser mcp is not working, tool not found, playwright mcp is disconnected, browser tools missing."
     },
     {
       "skill": "measure",
@@ -619,7 +703,7 @@
     {
       "skill": "motion",
       "description": "Add Framer Motion animations to components",
-      "when_to_use": ""
+      "when_to_use": "Use when an existing component needs animation — Framer Motion entrances, transitions, scroll effects or gestures added to JSX that already renders. Triggers on: animate this, add a transition, make it fade in, scroll animation, stagger the list."
     },
     {
       "skill": "package",
@@ -634,7 +718,7 @@
     {
       "skill": "performance",
       "description": "Performance audit - Core Web Vitals, bundle, database queries",
-      "when_to_use": ""
+      "when_to_use": "Use when something is measurably slow and needs profiling with concrete fixes — Core Web Vitals, bundle size, database queries. Unlike /fast, the per-URL quality keyword. Triggers on: it feels slow, audit the bundle, why is this page slow, optimize the queries."
     },
     {
       "skill": "plan",
@@ -644,7 +728,7 @@
     {
       "skill": "premortem",
       "description": "Klein-style premortem — imagine a decision/project failed, write the story, surface risks",
-      "when_to_use": ""
+      "when_to_use": "Use before committing to a decision or project, to surface risks by assuming it already failed and writing the story backwards. Unlike /decide (records the call) and /canon (supplies a principle). Triggers on: what could go wrong, imagine this failed, what are the risks, stress-test this plan."
     },
     {
       "skill": "pricing",
@@ -674,7 +758,7 @@
     {
       "skill": "quick",
       "description": "Fastest commit cycle - lint, fix, commit, push",
-      "when_to_use": ""
+      "when_to_use": "Use when finished work just needs to land — lint, auto-fix, conventional commit and push to main in one pass. Not a production promotion (/ship) and not a Vercel deploy (/deploy). Triggers on: commit and push, just push it, save this work, land it."
     },
     {
       "skill": "release",
@@ -689,12 +773,12 @@
     {
       "skill": "repos",
       "description": "Explore databayt organization repositories",
-      "when_to_use": ""
+      "when_to_use": "Use when the question spans the databayt GitHub org rather than this repo — listing, syncing, cross-repo status, or finding which repo holds something. Triggers on: list our repos, which repo has, org status, sync the repos."
     },
     {
       "skill": "saas",
       "description": "Generate complete SaaS feature with all layers",
-      "when_to_use": ""
+      "when_to_use": "Use when a whole feature should be scaffolded across every layer at once — schema, server actions and UI — instead of walking the staged /feature pipeline. Triggers on: scaffold the whole feature, generate all layers, full CRUD for."
     },
     {
       "skill": "schema",
@@ -704,17 +788,17 @@
     {
       "skill": "screenshot",
       "description": "View most recent screenshot from Desktop or Downloads",
-      "when_to_use": ""
+      "when_to_use": "Use when the most recent screenshot from Desktop or Downloads should be opened and read — usually a UI bug or design reference just captured. Triggers on: look at my screenshot, I just took a screenshot, check the image I saved, see the screen grab."
     },
     {
       "skill": "security",
       "description": "Security audit - OWASP Top 10, dependency scanning",
-      "when_to_use": ""
+      "when_to_use": "Use when code needs a security pass — OWASP Top 10, dependency vulnerabilities, auth and exposure checks. Unlike /guard, the per-URL tenant and authz quality keyword. Triggers on: security audit, are we vulnerable, scan the dependencies, owasp check."
     },
     {
       "skill": "shadcn",
       "description": "shadcn/ui knowledge pack — CLI, MCP, registry, skills, directory, and the docs-block pattern. Say \"shadcn\" to load it; \"shadcn docs\" = the docs-block style.",
-      "when_to_use": ""
+      "when_to_use": "Use when working with shadcn/ui — components, the registry, the CLI, MCP, the directory model, or the docs-block MDX pattern. Triggers on: shadcn docs, add a shadcn component, registry item, how does shadcn do it, base ui vs radix."
     },
     {
       "skill": "ship",
@@ -749,7 +833,7 @@
     {
       "skill": "test",
       "description": "Generate and run tests - unit, component, or E2E",
-      "when_to_use": ""
+      "when_to_use": "Use when code needs tests written or run — unit, component or Playwright E2E, with coverage. Unlike /qa, which verifies a shipped block in a browser. Triggers on: write tests for, add e2e coverage, run the tests, test this component."
     },
     {
       "skill": "watch",
@@ -942,6 +1026,46 @@
       "split": "holdout"
     },
     {
+      "id": "trg:auth:log-into-x-8d16",
+      "prompt": "log into X",
+      "label": "auth",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:auth:sign-me-in-a237",
+      "prompt": "sign me in",
+      "label": "auth",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:auth:not-authenticated-b54a",
+      "prompt": "not authenticated",
+      "label": "auth",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:auth:behind-a-login-wall-60fe",
+      "prompt": "behind a login wall",
+      "label": "auth",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:auth:session-expired-3098",
+      "prompt": "session expired",
+      "label": "auth",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
       "id": "trg:bench:bench-626e",
       "prompt": "bench",
       "label": "bench",
@@ -1014,6 +1138,42 @@
       "split": "train"
     },
     {
+      "id": "trg:block:block-eb0c",
+      "prompt": "block",
+      "label": "block",
+      "source": "trigger_phrase",
+      "tags": [
+        "trivial"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:block:create-a-block-cd0e",
+      "prompt": "create a block",
+      "label": "block",
+      "source": "trigger_phrase",
+      "tags": [
+        "lexical"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:block:data-table-with-logic-a297",
+      "prompt": "data table with logic",
+      "label": "block",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:block:dashboard-component-2a78",
+      "prompt": "dashboard component",
+      "label": "block",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
       "id": "trg:calendar:content-calendar-1e8f",
       "prompt": "content calendar",
       "label": "calendar",
@@ -1083,6 +1243,80 @@
       "tags": [
         "hard:cluster"
       ],
+      "split": "train"
+    },
+    {
+      "id": "trg:canon:should-we-build-ced9",
+      "prompt": "should we build",
+      "label": "canon",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-build"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:canon:what-do-i-do-about-27a1",
+      "prompt": "what do I do about",
+      "label": "canon",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:canon:how-should-i-price-5cd1",
+      "prompt": "how should I price",
+      "label": "canon",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:canon:is-it-time-to-hire-3595",
+      "prompt": "is it time to hire",
+      "label": "canon",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:canon:are-we-running-out-of-runway-0948",
+      "prompt": "are we running out of runway",
+      "label": "canon",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:captain:what-should-i-do-next-d9a7",
+      "prompt": "what should I do next",
+      "label": "captain",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:captain:company-status-d082",
+      "prompt": "company status",
+      "label": "captain",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:captain:brief-me-ba95",
+      "prompt": "brief me",
+      "label": "captain",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:captain:where-do-i-spend-this-week-1ea2",
+      "prompt": "where do I spend this week",
+      "label": "captain",
+      "source": "trigger_phrase",
+      "tags": [],
       "split": "train"
     },
     {
@@ -1288,6 +1522,46 @@
       "split": "train"
     },
     {
+      "id": "trg:codebase:from-codebase-1b48",
+      "prompt": "from codebase",
+      "label": "codebase",
+      "source": "trigger_phrase",
+      "tags": [
+        "lexical"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:codebase:how-does-codebase-do-it-f91d",
+      "prompt": "how does codebase do it",
+      "label": "codebase",
+      "source": "trigger_phrase",
+      "tags": [
+        "lexical"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:codebase:check-the-reference-repo-f8d7",
+      "prompt": "check the reference repo",
+      "label": "codebase",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-check"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:codebase:is-there-an-existing-pattern-for-this-cb96",
+      "prompt": "is there an existing pattern for this",
+      "label": "codebase",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-pattern"
+      ],
+      "split": "train"
+    },
+    {
       "id": "trg:convert:convert-file-url-b36d",
       "prompt": "convert <file|url>",
       "label": "convert",
@@ -1446,6 +1720,30 @@
       "split": "train"
     },
     {
+      "id": "trg:decide:log-this-decision-e139",
+      "prompt": "log this decision",
+      "label": "decide",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:decide:we-decided-to-fc83",
+      "prompt": "we decided to",
+      "label": "decide",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:decide:record-the-call-74e9",
+      "prompt": "record the call",
+      "label": "decide",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
       "id": "trg:deploy:deploy-to-preview-5496",
       "prompt": "deploy to preview",
       "label": "deploy",
@@ -1506,6 +1804,82 @@
       "tags": [
         "hard:cluster"
       ],
+      "split": "train"
+    },
+    {
+      "id": "trg:dev:dev-d559",
+      "prompt": "dev",
+      "label": "dev",
+      "source": "trigger_phrase",
+      "tags": [
+        "trivial"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:dev:start-the-server-a530",
+      "prompt": "start the server",
+      "label": "dev",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:dev:run-it-locally-d475",
+      "prompt": "run it locally",
+      "label": "dev",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:dev:spin-up-localhost-a544",
+      "prompt": "spin up localhost",
+      "label": "dev",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:dev:port-3000-is-taken-f5bc",
+      "prompt": "port 3000 is taken",
+      "label": "dev",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:docs:document-this-component-ca04",
+      "prompt": "document this component",
+      "label": "docs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:docs:write-the-api-docs-a140",
+      "prompt": "write the API docs",
+      "label": "docs",
+      "source": "trigger_phrase",
+      "tags": [
+        "lexical"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:docs:generate-the-mdx-ec12",
+      "prompt": "generate the MDX",
+      "label": "docs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:docs:add-a-storybook-story-56f9",
+      "prompt": "add a storybook story",
+      "label": "docs",
+      "source": "trigger_phrase",
+      "tags": [],
       "split": "train"
     },
     {
@@ -1749,6 +2123,40 @@
         "hard:cluster"
       ],
       "split": "train"
+    },
+    {
+      "id": "trg:fix:fix-the-errors-c797",
+      "prompt": "fix the errors",
+      "label": "fix",
+      "source": "trigger_phrase",
+      "tags": [
+        "lexical"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:fix:clear-the-type-errors-4267",
+      "prompt": "clear the type errors",
+      "label": "fix",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:fix:make-it-compile-38d2",
+      "prompt": "make it compile",
+      "label": "fix",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:fix:lint-is-failing-d058",
+      "prompt": "lint is failing",
+      "label": "fix",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
     },
     {
       "id": "trg:handover:handover-url-block-77bf",
@@ -2196,6 +2604,38 @@
       "split": "holdout"
     },
     {
+      "id": "trg:mcp-doctor:browser-mcp-is-not-working-073a",
+      "prompt": "browser mcp is not working",
+      "label": "mcp-doctor",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:mcp-doctor:tool-not-found-ffd9",
+      "prompt": "tool not found",
+      "label": "mcp-doctor",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:mcp-doctor:playwright-mcp-is-disconnected-2902",
+      "prompt": "playwright mcp is disconnected",
+      "label": "mcp-doctor",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:mcp-doctor:browser-tools-missing-acb4",
+      "prompt": "browser tools missing",
+      "label": "mcp-doctor",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
       "id": "trg:measure:how-did-the-post-do-7b14",
       "prompt": "how did the post do",
       "label": "measure",
@@ -2304,6 +2744,46 @@
       "split": "holdout"
     },
     {
+      "id": "trg:motion:animate-this-7947",
+      "prompt": "animate this",
+      "label": "motion",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:motion:add-a-transition-6873",
+      "prompt": "add a transition",
+      "label": "motion",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:motion:make-it-fade-in-b52e",
+      "prompt": "make it fade in",
+      "label": "motion",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:motion:scroll-animation-11c4",
+      "prompt": "scroll animation",
+      "label": "motion",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:motion:stagger-the-list-ec73",
+      "prompt": "stagger the list",
+      "label": "motion",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
       "id": "trg:package:package-audit-3d1a",
       "prompt": "package audit",
       "label": "package",
@@ -2376,6 +2856,38 @@
       "split": "train"
     },
     {
+      "id": "trg:performance:it-feels-slow-b593",
+      "prompt": "it feels slow",
+      "label": "performance",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:performance:audit-the-bundle-239d",
+      "prompt": "audit the bundle",
+      "label": "performance",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:performance:why-is-this-page-slow-4403",
+      "prompt": "why is this page slow",
+      "label": "performance",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:performance:optimize-the-queries-77ec",
+      "prompt": "optimize the queries",
+      "label": "performance",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
       "id": "trg:plan:plan-the-architecture-5326",
       "prompt": "plan the architecture",
       "label": "plan",
@@ -2408,6 +2920,41 @@
         "hard:cluster"
       ],
       "split": "holdout"
+    },
+    {
+      "id": "trg:premortem:what-could-go-wrong-c344",
+      "prompt": "what could go wrong",
+      "label": "premortem",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:premortem:imagine-this-failed-5d23",
+      "prompt": "imagine this failed",
+      "label": "premortem",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:premortem:what-are-the-risks-cdf2",
+      "prompt": "what are the risks",
+      "label": "premortem",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:premortem:stress-test-this-plan-06fb",
+      "prompt": "stress-test this plan",
+      "label": "premortem",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-plan",
+        "hard:names-test"
+      ],
+      "split": "train"
     },
     {
       "id": "trg:pricing:pricing-2e2f",
@@ -2602,6 +3149,38 @@
       "split": "holdout"
     },
     {
+      "id": "trg:quick:commit-and-push-8e7c",
+      "prompt": "commit and push",
+      "label": "quick",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:quick:just-push-it-4034",
+      "prompt": "just push it",
+      "label": "quick",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:quick:save-this-work-4745",
+      "prompt": "save this work",
+      "label": "quick",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:quick:land-it-edf4",
+      "prompt": "land it",
+      "label": "quick",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
       "id": "trg:release:release-block-53e5",
       "prompt": "release <block>",
       "label": "release",
@@ -2698,6 +3277,69 @@
       "split": "train"
     },
     {
+      "id": "trg:repos:list-our-repos-6e04",
+      "prompt": "list our repos",
+      "label": "repos",
+      "source": "trigger_phrase",
+      "tags": [
+        "lexical"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:repos:which-repo-has-16d8",
+      "prompt": "which repo has",
+      "label": "repos",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:repos:org-status-7903",
+      "prompt": "org status",
+      "label": "repos",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:repos:sync-the-repos-233b",
+      "prompt": "sync the repos",
+      "label": "repos",
+      "source": "trigger_phrase",
+      "tags": [
+        "lexical",
+        "hard:names-sync"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:saas:scaffold-the-whole-feature-a860",
+      "prompt": "scaffold the whole feature",
+      "label": "saas",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-feature"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:saas:generate-all-layers-6033",
+      "prompt": "generate all layers",
+      "label": "saas",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:saas:full-crud-for-da1d",
+      "prompt": "full CRUD for",
+      "label": "saas",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
       "id": "trg:schema:add-the-model-migration-c9fb",
       "prompt": "add the model/migration",
       "label": "schema",
@@ -2728,6 +3370,127 @@
       "source": "trigger_phrase",
       "tags": [],
       "split": "train"
+    },
+    {
+      "id": "trg:screenshot:look-at-my-screenshot-99df",
+      "prompt": "look at my screenshot",
+      "label": "screenshot",
+      "source": "trigger_phrase",
+      "tags": [
+        "lexical"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:screenshot:i-just-took-a-screenshot-8d5e",
+      "prompt": "I just took a screenshot",
+      "label": "screenshot",
+      "source": "trigger_phrase",
+      "tags": [
+        "lexical"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:screenshot:check-the-image-i-saved-7fb2",
+      "prompt": "check the image I saved",
+      "label": "screenshot",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-check"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:screenshot:see-the-screen-grab-fb22",
+      "prompt": "see the screen grab",
+      "label": "screenshot",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:security:security-audit-9eb8",
+      "prompt": "security audit",
+      "label": "security",
+      "source": "trigger_phrase",
+      "tags": [
+        "lexical"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:security:are-we-vulnerable-5d64",
+      "prompt": "are we vulnerable",
+      "label": "security",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:security:scan-the-dependencies-3857",
+      "prompt": "scan the dependencies",
+      "label": "security",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:security:owasp-check-ef8e",
+      "prompt": "owasp check",
+      "label": "security",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-check"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:shadcn:shadcn-docs-f2d0",
+      "prompt": "shadcn docs",
+      "label": "shadcn",
+      "source": "trigger_phrase",
+      "tags": [
+        "lexical",
+        "hard:names-docs"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:shadcn:add-a-shadcn-component-2eac",
+      "prompt": "add a shadcn component",
+      "label": "shadcn",
+      "source": "trigger_phrase",
+      "tags": [
+        "lexical"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:shadcn:registry-item-e5ad",
+      "prompt": "registry item",
+      "label": "shadcn",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:shadcn:how-does-shadcn-do-it-b36a",
+      "prompt": "how does shadcn do it",
+      "label": "shadcn",
+      "source": "trigger_phrase",
+      "tags": [
+        "lexical"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:shadcn:base-ui-vs-radix-9936",
+      "prompt": "base ui vs radix",
+      "label": "shadcn",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
     },
     {
       "id": "trg:ship:ship-ac56",
@@ -3001,6 +3764,40 @@
       "split": "train"
     },
     {
+      "id": "trg:test:write-tests-for-e3d3",
+      "prompt": "write tests for",
+      "label": "test",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:test:add-e2e-coverage-5a51",
+      "prompt": "add e2e coverage",
+      "label": "test",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:test:run-the-tests-e3e0",
+      "prompt": "run the tests",
+      "label": "test",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:test:test-this-component-1f4b",
+      "prompt": "test this component",
+      "label": "test",
+      "source": "trigger_phrase",
+      "tags": [
+        "lexical"
+      ],
+      "split": "holdout"
+    },
+    {
       "id": "trg:watch:watch-5fb7",
       "prompt": "watch",
       "label": "watch",
@@ -3232,16 +4029,6 @@
       "split": "holdout"
     },
     {
-      "id": "spell:charm-work:dev-d559",
-      "prompt": "dev",
-      "label": "dev",
-      "source": "vocab_spell",
-      "tags": [
-        "trivial"
-      ],
-      "split": "holdout"
-    },
-    {
       "id": "spell:charm-work:build-c39b",
       "prompt": "build",
       "label": "build",
@@ -3329,16 +4116,6 @@
       "id": "spell:transfiguration:template-694a",
       "prompt": "template",
       "label": "template",
-      "source": "vocab_spell",
-      "tags": [
-        "trivial"
-      ],
-      "split": "holdout"
-    },
-    {
-      "id": "spell:transfiguration:block-eb0c",
-      "prompt": "block",
-      "label": "block",
       "source": "vocab_spell",
       "tags": [
         "trivial"
@@ -3697,8 +4474,7 @@
       "label": "fix",
       "source": "vocab_spell",
       "tags": [
-        "trivial",
-        "hard:cluster"
+        "trivial"
       ],
       "split": "holdout"
     },
@@ -4005,18 +4781,10 @@
       "split": "train"
     },
     {
-      "id": "spell:portkeys:from-codebase-1b48",
-      "prompt": "from codebase",
-      "label": "codebase",
-      "source": "vocab_spell",
-      "tags": [],
-      "split": "holdout"
-    },
-    {
-      "id": "none:portkeys:from-shadcn-e1e1",
+      "id": "spell:portkeys:from-shadcn-e1e1",
       "prompt": "from shadcn",
-      "label": "none",
-      "source": "vocab_none",
+      "label": "shadcn",
+      "source": "vocab_spell",
       "tags": [],
       "split": "train"
     },
@@ -4460,30 +5228,6 @@
       "split": "holdout"
     },
     {
-      "id": "kw:auth:not-authenticated-b54a",
-      "prompt": "not authenticated",
-      "label": "auth",
-      "source": "quoted_keyword",
-      "tags": [],
-      "split": "train"
-    },
-    {
-      "id": "kw:auth:log-into-x-sign-me-into-x-auth-69d6",
-      "prompt": "log into X / sign me into X / auth",
-      "label": "auth",
-      "source": "quoted_keyword",
-      "tags": [],
-      "split": "holdout"
-    },
-    {
-      "id": "kw:mcp-doctor:tool-not-found-ffd9",
-      "prompt": "tool not found",
-      "label": "mcp-doctor",
-      "source": "quoted_keyword",
-      "tags": [],
-      "split": "holdout"
-    },
-    {
       "id": "kw:qa:qa-admission-c365",
       "prompt": "qa admission",
       "label": "qa",
@@ -4501,14 +5245,6 @@
       "tags": [
         "hard:cluster"
       ],
-      "split": "holdout"
-    },
-    {
-      "id": "kw:shadcn:shadcn-docs-f2d0",
-      "prompt": "shadcn docs",
-      "label": "shadcn",
-      "source": "quoted_keyword",
-      "tags": [],
       "split": "holdout"
     }
   ],
@@ -4544,7 +5280,6 @@
         "build",
         "check",
         "deploy",
-        "fix",
         "ship",
         "watch"
       ],
@@ -4665,11 +5400,6 @@
       0.391
     ],
     [
-      "build",
-      "fix",
-      0.39
-    ],
-    [
       "ship",
       "watch",
       0.386
@@ -4708,6 +5438,11 @@
       "analyze",
       "learn",
       0.357
+    ],
+    [
+      "approve",
+      "social",
+      0.344
     ]
   ],
   "per_skill": {
@@ -4736,12 +5471,12 @@
       "has_when_to_use": true
     },
     "auth": {
-      "support": 2,
-      "chars": 505,
+      "support": 5,
+      "chars": 816,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false
+      "has_when_to_use": true
     },
     "bench": {
       "support": 7,
@@ -4752,12 +5487,12 @@
       "has_when_to_use": true
     },
     "block": {
-      "support": 1,
-      "chars": 67,
+      "support": 4,
+      "chars": 365,
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": true,
-      "has_when_to_use": false
+      "has_when_to_use": true
     },
     "build": {
       "support": 1,
@@ -4776,20 +5511,20 @@
       "has_when_to_use": true
     },
     "canon": {
-      "support": 0,
-      "chars": 318,
+      "support": 5,
+      "chars": 623,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": true,
-      "has_when_to_use": false
+      "has_when_to_use": true
     },
     "captain": {
-      "support": 1,
-      "chars": 88,
+      "support": 5,
+      "chars": 393,
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false
+      "has_when_to_use": true
     },
     "carousel": {
       "support": 13,
@@ -4824,12 +5559,12 @@
       "has_when_to_use": true
     },
     "codebase": {
-      "support": 1,
-      "chars": 82,
+      "support": 4,
+      "chars": 310,
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false
+      "has_when_to_use": true
     },
     "convert": {
       "support": 6,
@@ -4864,12 +5599,12 @@
       "has_when_to_use": true
     },
     "decide": {
-      "support": 1,
-      "chars": 111,
+      "support": 4,
+      "chars": 407,
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": true,
-      "has_when_to_use": false
+      "has_when_to_use": true
     },
     "deploy": {
       "support": 7,
@@ -4880,20 +5615,20 @@
       "has_when_to_use": true
     },
     "dev": {
-      "support": 1,
-      "chars": 34,
+      "support": 5,
+      "chars": 282,
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false
+      "has_when_to_use": true
     },
     "docs": {
-      "support": 5,
-      "chars": 73,
+      "support": 9,
+      "chars": 323,
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": true,
-      "has_when_to_use": false
+      "has_when_to_use": true
     },
     "draft": {
       "support": 13,
@@ -4920,12 +5655,12 @@
       "has_when_to_use": true
     },
     "fix": {
-      "support": 1,
-      "chars": 66,
+      "support": 5,
+      "chars": 357,
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false
+      "has_when_to_use": true
     },
     "handover": {
       "support": 6,
@@ -4984,12 +5719,12 @@
       "has_when_to_use": true
     },
     "mcp-doctor": {
-      "support": 1,
-      "chars": 153,
+      "support": 4,
+      "chars": 369,
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false
+      "has_when_to_use": true
     },
     "measure": {
       "support": 8,
@@ -5008,12 +5743,12 @@
       "has_when_to_use": true
     },
     "motion": {
-      "support": 5,
-      "chars": 50,
+      "support": 10,
+      "chars": 296,
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false
+      "has_when_to_use": true
     },
     "package": {
       "support": 4,
@@ -5032,12 +5767,12 @@
       "has_when_to_use": true
     },
     "performance": {
-      "support": 1,
-      "chars": 74,
+      "support": 5,
+      "chars": 335,
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false
+      "has_when_to_use": true
     },
     "plan": {
       "support": 4,
@@ -5048,12 +5783,12 @@
       "has_when_to_use": true
     },
     "premortem": {
-      "support": 1,
-      "chars": 100,
+      "support": 5,
+      "chars": 394,
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false
+      "has_when_to_use": true
     },
     "pricing": {
       "support": 4,
@@ -5096,12 +5831,12 @@
       "has_when_to_use": true
     },
     "quick": {
-      "support": 1,
-      "chars": 53,
+      "support": 5,
+      "chars": 301,
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false
+      "has_when_to_use": true
     },
     "release": {
       "support": 6,
@@ -5120,20 +5855,20 @@
       "has_when_to_use": true
     },
     "repos": {
-      "support": 0,
-      "chars": 49,
+      "support": 4,
+      "chars": 273,
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false
+      "has_when_to_use": true
     },
     "saas": {
-      "support": 1,
-      "chars": 52,
+      "support": 4,
+      "chars": 284,
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false
+      "has_when_to_use": true
     },
     "schema": {
       "support": 5,
@@ -5144,28 +5879,28 @@
       "has_when_to_use": true
     },
     "screenshot": {
-      "support": 0,
-      "chars": 65,
+      "support": 4,
+      "chars": 314,
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false
+      "has_when_to_use": true
     },
     "security": {
-      "support": 1,
-      "chars": 60,
+      "support": 5,
+      "chars": 310,
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false
+      "has_when_to_use": true
     },
     "shadcn": {
-      "support": 2,
-      "chars": 164,
+      "support": 7,
+      "chars": 395,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false
+      "has_when_to_use": true
     },
     "ship": {
       "support": 3,
@@ -5216,12 +5951,12 @@
       "has_when_to_use": true
     },
     "test": {
-      "support": 1,
-      "chars": 54,
+      "support": 5,
+      "chars": 287,
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": false
+      "has_when_to_use": true
     },
     "watch": {
       "support": 5,
@@ -5279,15 +6014,11 @@
     }
   ],
   "guards": {
-    "listing_cap": 26500,
+    "listing_cap": 32000,
     "skill_cap": 1200,
     "listing_over_cap": false,
     "skills_over_cap": [],
-    "zero_coverage": [
-      "canon",
-      "repos",
-      "screenshot"
-    ],
+    "zero_coverage": [],
     "parse_failures": []
   }
 }

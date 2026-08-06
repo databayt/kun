@@ -1,6 +1,7 @@
 ---
 name: Security
 description: Security audit - OWASP Top 10, dependency scanning
+when_to_use: "Use when code needs a security pass — OWASP Top 10, dependency vulnerabilities, auth and exposure checks. Unlike /guard, the per-URL tenant and authz quality keyword. Triggers on: security audit, are we vulnerable, scan the dependencies, owasp check."
 argument-hint: "[deps|auth|file]"
 model: opus
 allowed-tools: ["Bash(pnpm *)", "Read", "Glob", "Grep"]

@@ -1,6 +1,7 @@
 ---
 name: canon
 description: Surface the right CEO book + operating move for a business or leadership decision — hiring, firing, pricing, positioning, what to build, customer development, fundraising, prioritization, runway, strategy. Pull in automatically when a decision is on the table; no slash command needed. /canon also lists all 10.
+when_to_use: "Use when a business or leadership decision is on the table and needs a grounded operating move rather than an opinion — hiring, pricing, positioning, what to build, fundraising, runway. Triggers on: should we build, what do I do about, how should I price, is it time to hire, are we running out of runway."
 argument-hint: "[decision-type | keyword]"
 ---
 

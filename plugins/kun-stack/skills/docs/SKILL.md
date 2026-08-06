@@ -1,6 +1,7 @@
 ---
 name: Docs
 description: Generate documentation - component MDX, API docs, Storybook stories
+when_to_use: "Use when code needs written documentation generated from source — component MDX, API reference, or Storybook stories. Not the docs-site content itself. Triggers on: document this component, write the API docs, generate the MDX, add a storybook story."
 argument-hint: "<component|api|readme> [name]"
 model: opus
 allowed-tools: ["Read", "Write", "Edit", "Glob", "Grep"]
