@@ -4,7 +4,7 @@
   "definition": "Given the exact frontmatter listing (skill + description + when_to_use) for every file-backed skill and one natural-language prompt, the fraction of cases where the rank-1 answer equals the extracted label — excluding cases whose prompt is literally the skill's own name, and after adversarial adjudication of every miss.",
   "source": ".claude/workflows/bench-dispatch.js + .claude/scripts/extract-dispatch-cases.mjs (deterministic extraction; grading is pure string comparison, zero LLM)",
   "last_updated": "2026-08-06",
-  "last_updated_by": "extract-dispatch-cases.mjs (baseline scaffold — no scored run yet)",
+  "last_updated_by": "invalidated — first run was contaminated, see weekly_history",
   "corpus": {
     "skills_listed": 67,
     "project_skills": 49,
@@ -453,6 +453,7 @@
     "unadjudicated": 0
   },
   "known_biases": [
+    "Answer-key leakage: graders must read ONLY the --redacted view. The full case set, any SKILL.md (trigger phrases sit verbatim beside the skill name), and vocabulary.json all reveal labels. Enforced by redaction + an emit-time assertion, and verified after every run by audit-bench-run.mjs, which fails the run on any forbidden read.",
     "Proxy: the harness shows the skill listing only. It does NOT carry .claude/CLAUDE.md, path-scoped rules, ~25 MCP servers' tool listings, or conversation history. Under-estimates the claude_md_routed skills (CLAUDE.md's Behavior section routes them directly, so their frontmatter was never the binding constraint); over-estimates higgs/issue/deploy whose real competitor is an MCP tool the harness cannot show; under-estimates ship/watch/check which are context-dependent and here always cold-start.",
     "Batching: a model shown 40 prompts at once knows it is a benchmark and spreads answers to avoid repeating itself — an anti-correlation the live loop lacks. Mitigated by deterministic interleaving, not solved.",
     "Blind spot: 3 vocabulary spells route to a Claude Code built-in that has no file on disk, so the harness cannot show the model its text and those dispatch decisions cannot be scored."
@@ -1221,5 +1222,18 @@
   "judge_calibration": {
     "note": "L3 only — not applicable to L1, whose grading is exact string comparison"
   },
-  "weekly_history": []
+  "weekly_history": [
+    {
+      "week_of": "2026-08-06",
+      "top1_hard": null,
+      "holdout_top1_hard": null,
+      "fp_rate": null,
+      "listing_chars": 26243,
+      "cases": 400,
+      "delta": null,
+      "note": "VOID — see invalidated_reason. No conclusion may be drawn from this row.",
+      "invalid": true,
+      "invalidated_reason": "CONTAMINATED — not a measurement. The dispatch agents were told to read .claude/evals/cases/dispatch.json for prompts, and that file carries `label` (plus `source`, which announces a none-case, and `tags`). They read the answer key. Proven post-hoc by audit-bench-run.mjs: 46 forbidden reads across 11 blind agents. Fixed by a --redacted grader view (id + prompt + listing only, with an emit-time assertion that no label/source/tags/split survive) and an explicit prohibition on reading any other source. Retained rather than deleted so the failure stays visible."
+    }
+  ]
 }

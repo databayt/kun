@@ -36,6 +36,12 @@ const SCORES_PATH = join(ROOT, ".claude/memory/skill-scores.json");
 
 const JSON_OUT = process.argv.includes("--json");
 const CHECK = process.argv.includes("--check");
+// --redacted emits ONLY what a grader may see: the fleet listing and {id, prompt}.
+// The full payload carries `label`, but also `source` ("vocab_none" announces a
+// none-case) and `tags` ("destructive", "hard:names-ship") — every one of those
+// is an answer key. The first run of this benchmark scored 0.9942 because the
+// graders read the labelled file; redaction is not a nicety, it is the measurement.
+const REDACTED = process.argv.includes("--redacted");
 
 // Budget caps are DECLARED POLICY, so they live in engine.json (with a recorded
 // history of every reset) rather than as constants here. They bind close to
@@ -587,6 +593,25 @@ const payload = {
 };
 
 // ── Output ──────────────────────────────────────────────────────────────────
+if (REDACTED) {
+  // Self-sufficient by design: the listing is included so a grader has no reason
+  // to open a SKILL.md — where the trigger phrase sits verbatim next to its skill.
+  const out = {
+    $comment:
+      "REDACTED grader view. Contains no label, source, tag or split — reading any other file (a SKILL.md, the full case set, the extractor) leaks the answer and invalidates the run.",
+    corpus_hash: payload.corpus.corpus_hash,
+    listing: payload.listing,
+    cases: cases.map((c) => ({ id: c.id, prompt: c.prompt })),
+  };
+  const leak = JSON.stringify(out).match(/"(label|split|source|tags)"/);
+  if (leak) {
+    console.error(`error: redacted payload still carries ${leak[1]} — refusing to emit`);
+    process.exit(1);
+  }
+  console.log(JSON.stringify(out, null, 2));
+  process.exit(0);
+}
+
 if (JSON_OUT) {
   console.log(JSON.stringify(payload, null, 2));
   process.exit(0);

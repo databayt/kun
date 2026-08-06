@@ -43,7 +43,8 @@ const _a =
       : {};
 const AUDIT = !!_a.audit; // extract + dispatch + adjudicate + score, but never write
 const BATCH = _a.batch ?? 40; // >50 and the model starts truncating the results array
-const CASES_PATH = ".claude/evals/cases/dispatch.json";
+const CASES_PATH = ".claude/evals/cases/dispatch.json"; // full, labelled — NEVER shown to a grader
+const GRADER_PATH = ".claude/evals/cases/dispatch-prompts.json"; // redacted grader view
 const SCORES_PATH = ".claude/memory/skill-scores.json";
 
 // ── Schemas ─────────────────────────────────────────────────────────────────
@@ -336,9 +337,11 @@ const extracted = await agent(
   `Run the deterministic dispatch-case extractor for the kun engine and report what it produced. Do NOT parse or judge anything yourself — the script is the only source of truth, and an LLM doing this parsing would make the case set irreproducible.\n\n` +
     `1. \`mkdir -p .claude/evals/cases\`\n` +
     `2. \`node .claude/scripts/extract-dispatch-cases.mjs --json > ${CASES_PATH}\`\n` +
-    `3. \`node .claude/scripts/extract-dispatch-cases.mjs --check\` — capture its output. If it EXITS NONZERO, put the full error text in guard_error and still return the rest.\n` +
-    `4. Read ${CASES_PATH} and return: count (corpus.cases_total), skills_listed, listing_chars, corpus_hash, and \`labels\` — one entry per case in file order carrying ONLY id, label, tags, split.\n\n` +
-    `Do NOT include case prompts in your answer. They must stay in the file so the dispatch agents meet them cold.`,
+    `3. \`node .claude/scripts/extract-dispatch-cases.mjs --redacted > ${GRADER_PATH}\`\n` +
+    `4. Confirm the redaction held: \`grep -c '"label"' ${GRADER_PATH}\` MUST print 0. If it prints anything else, put that in guard_error and stop — a grader file carrying labels invalidates the whole run.\n` +
+    `5. \`node .claude/scripts/extract-dispatch-cases.mjs --check\` — capture its output. If it EXITS NONZERO, put the full error text in guard_error and still return the rest.\n` +
+    `6. Read ${CASES_PATH} and return: count (corpus.cases_total), skills_listed, listing_chars, corpus_hash, and \`labels\` — one entry per case in file order carrying ONLY id, label, tags, split.\n\n` +
+    `Do NOT include case prompts in your answer. They stay in the redacted file so the dispatch agents meet them cold.`,
   {
     label: "extract",
     phase: "Extract",
@@ -381,15 +384,21 @@ const adjudications = new Map();
 let unadjudicated = 0;
 
 const dispatchPrompt = (ids, i) =>
-  `You are measuring skill DISPATCH for the kun engine. Read ${CASES_PATH}.\n\n` +
+  `You are measuring skill DISPATCH for the kun engine. Read ${GRADER_PATH} — and ONLY that file.\n\n` +
+  `**This is a blind measurement.** ${GRADER_PATH} is redacted: it holds the fleet listing and the case prompts, ` +
+  `and nothing else, because it is self-sufficient. Every other source in this repo carries the answer key — ` +
+  `${CASES_PATH} has a \`label\` per case, and each \`.claude/skills/<name>/SKILL.md\` contains its own trigger ` +
+  `phrases verbatim beside its own name. Reading any of them, or re-running the extractor, does not help you: it ` +
+  `destroys the measurement and the run has to be thrown away. Do NOT read SKILL.md files, the full case set, ` +
+  `vocabulary.json, or CLAUDE.md. Do not grep the repo for a prompt's text. Everything you need is in the one file.\n\n` +
   `Its \`listing\` array is the complete set of skills available — treat it as the ONLY skills that exist. ` +
   `For each case id below, find that case's \`prompt\` in the file's \`cases\` array and decide, from the listing's ` +
   `\`description\` and \`when_to_use\` alone, which single skill you would invoke if a user typed that prompt.\n\n` +
   `Rules:\n` +
   `- Answer every id. Return exactly 3 names in \`top\`, best first, using the \`skill\` field (lowercase directory name).\n` +
   `- If NO listed skill genuinely applies, set fired=false and make top[0] the literal "none", with top[1..2] the nearest skills you rejected.\n` +
-  `- The cases are INDEPENDENT and were shuffled. Repeated labels across cases are expected and correct — do NOT spread your answers to avoid repetition.\n` +
-  `- Judge only from the listing text. Do not consult CLAUDE.md, rules, or your memory of this repo.\n` +
+  `- The cases are INDEPENDENT and were shuffled. Repeated answers across cases are expected and correct — do NOT spread your answers to avoid repetition.\n` +
+  `- Judge only from the listing text and your own reading of the prompt.\n` +
   `- \`why\` must quote the specific frontmatter phrase that decided it.\n\n` +
   `Case ids (batch ${i + 1}/${groups.length}):\n${ids.map((l) => l.id).join("\n")}`;
 
