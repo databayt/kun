@@ -125,8 +125,19 @@ engagement.**
 
 ## Expansion gate
 
-Expand only when **all five** hold:
+> **Corrected the same day it was written (2026-08-06).** The Graph API says the Hogwarts Page has
+> **`followers_count: 0`** — the reach of 1–2 the metrics lane has faithfully recorded across three
+> published posts is us looking at our own posts. Conditions 4 and 5 below (a trending read-back, a
+> named outcome) are therefore **unmeetable as written**: no amount of craft produces a signal from
+> an audience of zero, so the gate could never open. A seed condition has to come first, and it is
+> hand-work — `strategy.mdx` § Grow already prescribed it (_"0 → 100 (seed): manual and personal…
+> no automation needed; credibility is hand-made"_) and nobody had done it. Tracked as **kun#146**,
+> now the top item in the slice.
 
+Expand only when **all six** hold — condition 0 is new, and it gates 4 and 5:
+
+0. **The Page has an audience at all.** ≥100 followers on the Hogwarts Page, seeded by hand
+   (kun#146). Below that, 4 and 5 cannot be evaluated and everything above them is unfalsifiable.
 1. **8 consecutive weeks** of seed → drain → review → Facebook running without manual repair.
 2. **Zero linter escapes** — nothing published that trips a hard rule from `copy.mdx`'s reject list.
 3. **≥12 evidence rows** in `content/social/evidence.json`, and `"no hook"` no longer the top entry
@@ -153,5 +164,29 @@ own container branches) → **Telegram** (2 env vars, owned and algorithm-proof)
 
 ## Review
 
-_(empty — first entry goes here after the first two real published posts, naming anything that
-broke in the chain.)_
+**2026-08-06, same day — what the first pass actually found.**
+
+Prepared the loop to the point where only the human yes is left: brief seeded, answered AR-first at
+434 characters through the new craft gate (`craft: clean`), og card rendered on the template lane and
+attached. Draft `cb537a063677f481db9033eb4` is `answered` and waiting at `/social/publish`.
+
+Four things the pass surfaced that the plan had wrong or did not know:
+
+1. **The Page has 0 followers** (`followers_count: 0`, `fan_count: 0`). Three posts published since
+   2026-07-21 reached 1–2 each — that is us. This is the real bottleneck, it is not an engineering
+   one, and it broke two conditions of this file's own gate (see the correction above). **kun#146.**
+2. **The two library photos the briefs point at are unusable for product claims.** `hw-classroom`
+   and `hw-dashboard-device` both show *fabricated* product UI with garbled pseudo-text. Attaching
+   either to a claim about the product passes AI imagery off as reality — forbidden by
+   `strategy.mdx` § Moral law 2. Neither carries a warning in `library.json`. One is already
+   attached to a `pending` variant from 2026-08-01 (#145).
+3. **Three variants are stuck `pending` forever.** Their signed links carried a 24h TTL and were
+   minted 2026-08-01, and `pending` is the only state a link publishes from. Queue debt, not a
+   decision waiting on anyone. One of them duplicates the attendance topic.
+4. **`cdn.databayt.org` is bypassed, not blocking** — `cdnBase` already points at the S3 origin,
+   which answers 200. The skill doc read like a blocker and was costing planning attention. **kun#148.**
+
+What held up: the seed lane, the drain, the review queue, the permanent token, and the metrics lane
+(six-hourly, zero errors, zero give-ups — it was reporting the truth about reach all along, and
+nobody had read it).
+
