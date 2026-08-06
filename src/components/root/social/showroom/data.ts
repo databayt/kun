@@ -24,6 +24,16 @@ export interface ShowroomAsset {
   type: ShowroomType;
   source: string;
   note: string | null;
+  /**
+   * Which question a reference card answers — `arabic-type`,
+   * `arabic-newsroom`, `competitor-sms`, `mena-edtech`, `ad-formats`,
+   * `house-aesthetic`. Null on every generated asset: a thing we made is
+   * grouped by brand and type, not by what it teaches.
+   *
+   * Distinct from `kind` (generated vs reference), which the grid used to call
+   * "collection" before this field existed.
+   */
+  collection: string | null;
   model: string | null;
   ratio: string | null;
   credits: number | null;
@@ -60,6 +70,8 @@ interface ReferenceCard {
   brand?: string;
   note: string;
   thumb?: string;
+  /** Which question this card answers — see references.json's $comment. */
+  collection?: string;
 }
 
 export interface ShowroomData {
@@ -92,6 +104,7 @@ export function briefAsAsset(brief: {
     href: brief.renderedUrl ?? "#",
     brand: brief.brand,
     type: asShowroomType(brief.assetType),
+    collection: null,
     source: "chatgpt",
     note: brief.subject,
     model: "gpt-image-2",
@@ -113,6 +126,7 @@ export function getShowroomData(extra: ShowroomAsset[] = []): ShowroomData {
       href: a.cdnUrl as string,
       brand: a.brand || null,
       type: asShowroomType(a.assetType),
+      collection: null,
       // Every asset used to come from Higgsfield, so the badge was a constant.
       // Now the ChatGPT seat lane renders too — read what the manifest recorded
       // and keep the old constant only as the fallback for untagged history.
@@ -135,6 +149,7 @@ export function getShowroomData(extra: ShowroomAsset[] = []): ShowroomData {
       type: asShowroomType(r.assetType),
       source: r.source,
       note: r.note,
+      collection: r.collection ?? null,
       model: null,
       ratio: null,
       credits: null,

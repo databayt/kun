@@ -450,6 +450,26 @@
       "reuseCount": 0,
       "fingerprint": "306b50c85f4569da",
       "key": "media/hogwarts/cd51201cf2cc-exams-one-entry-ar-1200x630-01.png"
+    },
+    {
+      "id": "6de10e332402",
+      "file": "attendance-one-tap-ar-1200x630-01.png",
+      "sha256": "6de10e3324021a83a58a1c29d5cd86bcf5277d56ab8500563cb3c8f35ebb4f85",
+      "brand": "hogwarts",
+      "prompt": "attendance-one-tap · cover · ivory · People-Motion-01.svg · ar · 1200x630 (template lane, deterministic render — not a generative prompt)",
+      "model": "template:carousel",
+      "ratio": "1200x630",
+      "resolution": null,
+      "credits": 0,
+      "assetType": "og",
+      "source": "template",
+      "bytes": 108298,
+      "createdAt": "2026-08-06",
+      "cdnUrl": "https://hogwarts-databayt.s3.amazonaws.com/media/hogwarts/6de10e332402-attendance-one-tap-ar-1200x630-01.png",
+      "reuseCount": 0,
+      "fingerprint": "4bbd3caf879f8eea",
+      "sourceDir": "/Users/abdout/Downloads/carousels/hogwarts/attendance-one-tap",
+      "key": "media/hogwarts/6de10e332402-attendance-one-tap-ar-1200x630-01.png"
     }
   ]
 }

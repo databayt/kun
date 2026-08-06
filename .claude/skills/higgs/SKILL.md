@@ -304,6 +304,18 @@ Serving origin: `https://hogwarts-databayt.s3.amazonaws.com/media/<brand>/<id>-<
 caused by the library) — once fixed, `push --base https://cdn.databayt.org` re-links all URLs
 in place with no re-upload.
 
+**Re-verified 2026-08-06:** the S3 origin answers **200** and `cdnBase` in `library.json` already
+points at it, so the CDN fault is **bypassed, not blocking** — nothing on the publish path waits on
+it. Treat it as a caching/branding improvement, not a gate. (`x-cache: Error from cloudfront` with
+`server: AmazonS3` on the 403 means the distribution cannot read the bucket — an OAC/bucket-policy
+fix in the AWS console, not a code change.)
+
+**Template-lane renders can also live here.** `add` records a `sourceDir`, so an asset registered
+from anywhere — `~/Downloads/carousels/<brand>/<slug>/` for a `carousel:render` output — is pushable.
+Before 2026-08-06 `push` only looked in `~/Downloads/higgs` and reported such a row `missing`
+forever while it sat on disk. Tag it honestly: `--source template --type og --credits 0`, because
+the default `--source` is `higgsfield` and would badge a free render as spent credits.
+
 ## Budget ladder — **balance is 0.7 cr as of 2026-07-27**
 
 At 0.7 credits only `z_image` drafts (0.15) still run — 4 of them. Every final image (≥1),

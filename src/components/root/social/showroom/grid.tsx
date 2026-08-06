@@ -1,8 +1,13 @@
 "use client";
 
 // The filterable showroom grid — the /anthropic content pattern (pill filters
-// over a dense square grid) on three axes: collection, brand, type. State is
-// local; the card list arrives serialized from the server component.
+// over a dense square grid) on four axes: kind, collection, brand, type. State
+// is local; the card list arrives serialized from the server component.
+//
+// `kind` (generated vs reference) was called "collection" until references
+// gained a real `collection` field. Two meanings of one word in one file is how
+// a filter starts filtering the wrong thing, so the older one took the name it
+// actually reads off the data.
 
 import { useMemo, useState } from "react";
 import { useSocial } from "@/components/root/social/provider";
@@ -10,11 +15,12 @@ import { ASSET_TYPES, OTHER_TYPE, typeLabel } from "./taxonomy";
 import { ShowroomCard } from "./asset-card";
 import type { ShowroomAsset } from "./data";
 
-type Collection = "all" | "generated" | "reference";
+type Kind = "all" | "generated" | "reference";
 
 export function ShowroomGrid({ assets }: { assets: ShowroomAsset[] }) {
   const { isRTL, t } = useSocial();
-  const [collection, setCollection] = useState<Collection>("all");
+  const [kind, setKind] = useState<Kind>("all");
+  const [collection, setCollection] = useState<string>("all");
   const [brand, setBrand] = useState<string>("all");
   const [type, setType] = useState<string>("all");
 
@@ -26,6 +32,16 @@ export function ShowroomGrid({ assets }: { assets: ShowroomAsset[] }) {
     [assets],
   );
 
+  // Reference shelves, only those actually present — and only while references
+  // are in view, since every generated asset has a null collection and the row
+  // would be a set of pills that filter everything away.
+  const collections = useMemo(() => {
+    if (kind === "generated") return [];
+    return [
+      ...new Set(assets.map((a) => a.collection).filter(Boolean)),
+    ].sort() as string[];
+  }, [assets, kind]);
+
   // Only offer type pills that exist in the data — 13 canonical + other would
   // be a wall of dead filters at today's library size.
   const presentTypes = useMemo(() => {
@@ -36,12 +52,13 @@ export function ShowroomGrid({ assets }: { assets: ShowroomAsset[] }) {
   const filtered = useMemo(
     () =>
       assets.filter((a) => {
-        if (collection !== "all" && a.kind !== collection) return false;
+        if (kind !== "all" && a.kind !== kind) return false;
+        if (collection !== "all" && a.collection !== collection) return false;
         if (brand !== "all" && a.brand !== brand) return false;
         if (type !== "all" && a.type !== type) return false;
         return true;
       }),
-    [assets, collection, brand, type],
+    [assets, kind, collection, brand, type],
   );
 
   const pill = (active: boolean) =>
@@ -63,10 +80,28 @@ export function ShowroomGrid({ assets }: { assets: ShowroomAsset[] }) {
         ).map(([id, label]) => (
           <button
             key={id}
-            onClick={() => setCollection(id)}
-            className={pill(collection === id)}
+            onClick={() => {
+              setKind(id);
+              // Generated assets all have a null collection, so leaving a shelf
+              // selected here would hide its pills AND filter the grid to
+              // nothing — a dead screen with no visible cause.
+              if (id === "generated") setCollection("all");
+            }}
+            className={pill(kind === id)}
           >
             {label}
+          </button>
+        ))}
+
+        {collections.length > 0 && <span className="bg-border mx-1 h-4 w-px" />}
+
+        {collections.map((c) => (
+          <button
+            key={c}
+            onClick={() => setCollection(collection === c ? "all" : c)}
+            className={pill(collection === c)}
+          >
+            {c}
           </button>
         ))}
 

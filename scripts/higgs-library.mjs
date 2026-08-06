@@ -37,6 +37,17 @@ const rootDir = path.resolve(__dirname, '..');
 const manifestPath = path.join(rootDir, 'content', 'media', 'library.json');
 const defaultInbox = path.join(os.homedir(), 'Downloads', 'higgs');
 
+// Where an asset's bytes live. `sourceDir` is recorded by `add` (a template-lane
+// render lands outside the inbox); the inbox is the fallback for every row that
+// predates the field. Returns null when neither exists, so callers can report
+// `missing` instead of pushing a path that is not there.
+function localFile(asset) {
+  const candidates = [];
+  if (asset.sourceDir) candidates.push(path.join(asset.sourceDir, asset.file));
+  candidates.push(path.join(defaultInbox, asset.file));
+  return candidates.find((p) => fs.existsSync(p)) || null;
+}
+
 const BUCKET = 'hogwarts-databayt';
 const PREFIX = 'media';
 
@@ -163,12 +174,11 @@ function cmdLookup(args) {
   asset.lastReusedAt = new Date().toISOString().slice(0, 10);
   saveManifest(manifest);
 
-  const localPath = path.join(defaultInbox, asset.file);
   return {
     hit: true,
     fingerprint: fp,
     file: asset.file,
-    localPath: fs.existsSync(localPath) ? localPath : null,
+    localPath: localFile(asset),
     cdnUrl: asset.cdnUrl || null,
     model: asset.model,
     credits: asset.credits ?? null,
@@ -223,6 +233,13 @@ function cmdAdd(args) {
     createdAt: dateFromFilename(name, abs),
     cdnUrl: null,
     reuseCount: 0,
+    // Where the bytes actually are, because `push` and `lookup` otherwise only
+    // look in ~/Downloads/higgs. Template-lane renders land in
+    // ~/Downloads/carousels/<brand>/<slug>/, so without this an og card could be
+    // `add`ed and then never pushed — it reported `missing` forever while sitting
+    // on disk. Absolute and machine-local by nature: it is a hint, not a
+    // contract, and every reader falls back to the inbox when it is stale.
+    sourceDir: path.dirname(abs),
   };
   asset.fingerprint = fingerprint(asset);
 
@@ -300,8 +317,8 @@ function cmdPush(args) {
       continue;
     }
 
-    const abs = path.join(defaultInbox, asset.file);
-    if (!fs.existsSync(abs)) {
+    const abs = localFile(asset);
+    if (!abs) {
       missing.push(asset.file);
       continue;
     }
@@ -362,6 +379,15 @@ function cmdStats() {
 
   console.log(`Assets            ${assets.length}`);
   console.log(`  reuse-matchable ${matchable}  (need prompt + model)`);
+  if (assets.length > matchable) {
+    // Say it out loud, because the obvious "fix" is to invent the prompts —
+    // which would make `lookup` hit on a shot nobody actually asked for. These
+    // rows were registered before the field existed and are permanently
+    // unmatchable; the cache works going forward, and that is the whole ask.
+    console.log(
+      `  unmatchable     ${assets.length - matchable}  (registered with no prompt — do NOT backfill a guess)`,
+    );
+  }
   console.log(`  on CDN          ${onCdn}`);
   console.log(`Total size        ${(bytes / 1024 / 1024).toFixed(1)} MB`);
   console.log(`Credits recorded  ${spent.toFixed(2)}`);

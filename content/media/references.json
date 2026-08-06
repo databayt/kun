@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "$comment": "Reference/inspiration cards for the media showroom (/social/media). Curated by hand or by a session: sourceUrl is the canonical value (never hotlink competitor images — links rot and leak referrers); note says what to steal; thumb is an optional small local file under public/social/media/refs/. assetType comes from src/components/root/social/showroom/taxonomy.ts.",
+  "$comment": "Reference/inspiration cards for the media showroom (/social/media). Curated by hand or by a session: sourceUrl is the canonical value (never hotlink competitor images — links rot and leak referrers); note says what to steal; thumb is an optional small local file under public/social/media/refs/. assetType comes from src/components/root/social/showroom/taxonomy.ts. `collection` (backfilled 2026-08-06) says which QUESTION a card answers, where assetType says which FORMAT it is — so a reel stays on its brand's shelf and is reachable as collection+type together. Six shelves: arabic-type (11 — Thmanyah: how Arabic display type should look) · arabic-newsroom (11 — Al Jazeera Tech: news-card frames and Arabic infographics) · competitor-sms (7 — what the school-SIS vendors' marketing looks like) · mena-edtech (3 — regional consumer edtech) · ad-formats (5 — layout and ad galleries) · house-aesthetic (1 — the Anthropic card style we draw from). Honest ceiling: only arabic-type (10/11) and arabic-newsroom (10/11) carry thumbs, so those two are the only shelves a session can actually SEE; the other 16 cards are link-plus-note only. Backfilling thumbs for a competitor screenshot is not worth the hour — the note carries what to steal.",
   "references": [
     {
       "id": "thmanyah-facebook",
@@ -8,7 +8,8 @@
       "source": "facebook",
       "sourceUrl": "https://web.facebook.com/Thmanyah",
       "assetType": "testimonial",
-      "note": "The style north star — the maker of the house typeface. Minimal Arabic typographic lockups: one thought per card, Serif Display headlines, generous space, no decoration the type doesn't earn."
+      "note": "The style north star — the maker of the house typeface. Minimal Arabic typographic lockups: one thought per card, Serif Display headlines, generous space, no decoration the type doesn't earn.",
+      "collection": "arabic-type"
     },
     {
       "id": "thmanyah-nashra-education",
@@ -17,7 +18,8 @@
       "sourceUrl": "https://web.facebook.com/photo.php?fbid=1063872076177757",
       "assetType": "testimonial",
       "note": "Real card, saved locally: Zaki Mubarak on true education — one quote fills a lavender field, display-size Thmanyah type, highlight swipe on the closing words, black attribution bar, the 8 mark alone at the foot. The exact lockup our testimonial format descends from.",
-      "thumb": "/social/media/refs/thmanyah-nashra-education.jpg"
+      "thumb": "/social/media/refs/thmanyah-nashra-education.jpg",
+      "collection": "arabic-type"
     },
     {
       "id": "thmanyah-nashra-happiness",
@@ -26,7 +28,8 @@
       "sourceUrl": "https://web.facebook.com/photo.php?fbid=1067407732490858",
       "assetType": "testimonial",
       "note": "Al-Aqqad on happiness, mint field — same grid, same type scale, new pastel. Two cards side by side prove it's a system, not a design: rotate the field color, never the layout.",
-      "thumb": "/social/media/refs/thmanyah-nashra-aha-happiness.jpg"
+      "thumb": "/social/media/refs/thmanyah-nashra-aha-happiness.jpg",
+      "collection": "arabic-type"
     },
     {
       "id": "thmanyah-fnjan-quote",
@@ -35,7 +38,8 @@
       "sourceUrl": "https://web.facebook.com/photo.php?fbid=1063268186238146",
       "assetType": "testimonial",
       "note": "Podcast promotion with no episode art, no guest photo, no play button — the strongest sentence from the episode IS the card, labeled بودكاست فنجان in the corner. Sell the idea, not the format.",
-      "thumb": "/social/media/refs/thmanyah-fnjan-podcast.jpg"
+      "thumb": "/social/media/refs/thmanyah-fnjan-podcast.jpg",
+      "collection": "arabic-type"
     },
     {
       "id": "thmanyah-adam-longform",
@@ -44,7 +48,8 @@
       "sourceUrl": "https://web.facebook.com/photo.php?fbid=1063207159577582",
       "assetType": "carousel",
       "note": "The longform archetype: bold question headline, then a full paragraph set small and ragged on warm paper texture, one emoji finger as the only CTA. A whole argument on one slide — what our 1-slide decks aim at.",
-      "thumb": "/social/media/refs/thmanyah-adam-podcast.jpg"
+      "thumb": "/social/media/refs/thmanyah-adam-podcast.jpg",
+      "collection": "arabic-type"
     },
     {
       "id": "thmanyah-nashra-muanasa",
@@ -53,7 +58,8 @@
       "sourceUrl": "https://web.facebook.com/photo.php?fbid=1068892169009081",
       "assetType": "testimonial",
       "note": "Al-Jahiz on companionship, lavender again — but the highlight swipe sits on the OPENING phrase, not the close. The accent is a movable spotlight: put it where the quote's weight is, never in a fixed slot.",
-      "thumb": "/social/media/refs/thmanyah-nashra-muanasa.jpg"
+      "thumb": "/social/media/refs/thmanyah-nashra-muanasa.jpg",
+      "collection": "arabic-type"
     },
     {
       "id": "thmanyah-nashra-mubdioon",
@@ -62,7 +68,8 @@
       "sourceUrl": "https://web.facebook.com/photo.php?fbid=1066660369232261",
       "assetType": "testimonial",
       "note": "Same quote system, different product: نشرة إلخ on a salmon field, living author (إيمان العزوزي) not a classic. One layout carries every newsletter masthead — the corner label does all the brand differentiation.",
-      "thumb": "/social/media/refs/thmanyah-nashra-mubdioon.jpg"
+      "thumb": "/social/media/refs/thmanyah-nashra-mubdioon.jpg",
+      "collection": "arabic-type"
     },
     {
       "id": "thmanyah-nashra-nabeel",
@@ -71,7 +78,8 @@
       "sourceUrl": "https://web.facebook.com/photo.php?fbid=1063601076204857",
       "assetType": "testimonial",
       "note": "Al-Jahiz on nobility, yellow field, white highlight. With lavender, mint, and salmon this completes the proof: the palette is a rotation of quiet pastels and the type never moves. Our field-color tokens should rotate the same way.",
-      "thumb": "/social/media/refs/thmanyah-nashra-nabeel.jpg"
+      "thumb": "/social/media/refs/thmanyah-nashra-nabeel.jpg",
+      "collection": "arabic-type"
     },
     {
       "id": "thmanyah-adam-list",
@@ -80,7 +88,8 @@
       "sourceUrl": "https://web.facebook.com/photo.php?fbid=1063207156244249",
       "assetType": "carousel",
       "note": "The longform card's structured sibling: three bold colon-led labels (الكبير/الوسط/الصغير), each with a short definition and a hand-drawn underline, on the same paper texture. How a listicle stays typographic instead of becoming boxes-and-icons.",
-      "thumb": "/social/media/refs/thmanyah-adam-kabir.jpg"
+      "thumb": "/social/media/refs/thmanyah-adam-kabir.jpg",
+      "collection": "arabic-type"
     },
     {
       "id": "thmanyah-films-banner",
@@ -89,7 +98,8 @@
       "sourceUrl": "https://web.facebook.com/photo/?fbid=1019367583961540",
       "assetType": "banner",
       "note": "The documentary register: black field, two collage film cards flanking centered white type (تابع أفلامنا الجديدة), the 8 mark inside the artwork. Proof the pastel system has a monochrome sibling for the cinema side of the brand.",
-      "thumb": "/social/media/refs/thmanyah-cover.jpg"
+      "thumb": "/social/media/refs/thmanyah-cover.jpg",
+      "collection": "arabic-type"
     },
     {
       "id": "thmanyah-reel-interview",
@@ -98,7 +108,8 @@
       "sourceUrl": "https://web.facebook.com/Thmanyah/videos/1902658494042519/",
       "assetType": "reel",
       "note": "Interview frame (توصيات معيشية) with nothing but a corner label and the 8 mark — no caption band, no title card. The cinematic frame IS the cover; branding stays in the corners. The restraint register for our reel thumbnails.",
-      "thumb": "/social/media/refs/thmanyah-reel-cover.jpg"
+      "thumb": "/social/media/refs/thmanyah-reel-cover.jpg",
+      "collection": "arabic-type"
     },
     {
       "id": "aljazeera-technology-facebook",
@@ -106,7 +117,8 @@
       "source": "facebook",
       "sourceUrl": "https://web.facebook.com/AljazeeraTechnology",
       "assetType": "infographic",
-      "note": "Arabic tech-media cards at volume: copy-centric graphics, strong typographic hierarchy, consistent brand frame — proof the template lane scales to a daily cadence."
+      "note": "Arabic tech-media cards at volume: copy-centric graphics, strong typographic hierarchy, consistent brand frame — proof the template lane scales to a daily cadence.",
+      "collection": "arabic-newsroom"
     },
     {
       "id": "aljazeera-tech-qwen",
@@ -115,7 +127,8 @@
       "sourceUrl": "https://web.facebook.com/photo.php?fbid=1063184196233900",
       "assetType": "banner",
       "note": "The daily 4:5 news card, saved locally: archive photo, purple headline band in bold Arabic, source credit (رويترز), صورة أرشيفية label, logo top corner, social-handles footer. A brand frame strong enough to survive any photo underneath.",
-      "thumb": "/social/media/refs/aljazeera-tech-qwen.jpg"
+      "thumb": "/social/media/refs/aljazeera-tech-qwen.jpg",
+      "collection": "arabic-newsroom"
     },
     {
       "id": "aljazeera-tech-deepseek",
@@ -124,7 +137,8 @@
       "sourceUrl": "https://web.facebook.com/photo.php?fbid=1063067529578900",
       "assetType": "banner",
       "note": "DeepSeek study card in the identical frame as the Qwen one — band position, credit bar, label, footer all fixed. Proof the frame runs at daily volume with zero per-post design decisions.",
-      "thumb": "/social/media/refs/aljazeera-tech-deepseek.jpg"
+      "thumb": "/social/media/refs/aljazeera-tech-deepseek.jpg",
+      "collection": "arabic-newsroom"
     },
     {
       "id": "aljazeera-tech-apple-siri",
@@ -133,7 +147,8 @@
       "sourceUrl": "https://web.facebook.com/photo.php?fbid=1062554112963575",
       "assetType": "banner",
       "note": "Keynote photo of Tim Cook, headline band dropped over the subject's body, face kept clear — how the fixed frame flexes when the story is a person, not a product.",
-      "thumb": "/social/media/refs/aljazeera-tech-apple-siri.jpg"
+      "thumb": "/social/media/refs/aljazeera-tech-apple-siri.jpg",
+      "collection": "arabic-newsroom"
     },
     {
       "id": "aljazeera-tech-gemini-explainer",
@@ -142,7 +157,8 @@
       "sourceUrl": "https://web.facebook.com/photo.php?fbid=1062427829642870",
       "assetType": "infographic",
       "note": "The no-photo escape hatch: ivory card, bold lead with one keyword in color, body paragraph, framed video still below, vertical brand strips on the edge. Their explainer format for stories with no picture — our infographic register.",
-      "thumb": "/social/media/refs/aljazeera-tech-gemini-explainer.jpg"
+      "thumb": "/social/media/refs/aljazeera-tech-gemini-explainer.jpg",
+      "collection": "arabic-newsroom"
     },
     {
       "id": "aljazeera-tech-mital",
@@ -151,7 +167,8 @@
       "sourceUrl": "https://web.facebook.com/photo.php?fbid=1063132939572359",
       "assetType": "banner",
       "note": "ArcelorMittal × Microsoft cloud deal: teal glass architecture fills the frame, purple band carries the whole story. Corporate news with no faces — the frame works when the only visual is a building.",
-      "thumb": "/social/media/refs/aljazeera-tech-mital.jpg"
+      "thumb": "/social/media/refs/aljazeera-tech-mital.jpg",
+      "collection": "arabic-newsroom"
     },
     {
       "id": "aljazeera-tech-malaysia",
@@ -160,7 +177,8 @@
       "sourceUrl": "https://web.facebook.com/photo.php?fbid=1063101532908833",
       "assetType": "banner",
       "note": "Conference-stage photo (TechCrunch Disrupt) under the same band; the wordmarks in the background do the scene-setting, source credit says وول ستريت جورنال. Third-party event photography inside a first-party frame.",
-      "thumb": "/social/media/refs/aljazeera-tech-malaysia.jpg"
+      "thumb": "/social/media/refs/aljazeera-tech-malaysia.jpg",
+      "collection": "arabic-newsroom"
     },
     {
       "id": "aljazeera-tech-delhi",
@@ -169,7 +187,8 @@
       "sourceUrl": "https://web.facebook.com/photo.php?fbid=1062593096293010",
       "assetType": "banner",
       "note": "Modi–Zuckerberg handshake, band placed low so both faces stay clear. The two-subject composition rule for the fixed frame: people above the fold, copy below it.",
-      "thumb": "/social/media/refs/aljazeera-tech-delhi.jpg"
+      "thumb": "/social/media/refs/aljazeera-tech-delhi.jpg",
+      "collection": "arabic-newsroom"
     },
     {
       "id": "aljazeera-tech-benchmark-table",
@@ -178,7 +197,8 @@
       "sourceUrl": "https://web.facebook.com/photo.php?fbid=1062427832976203",
       "assetType": "infographic",
       "note": "A raw DeepSeek benchmark table dropped into the ivory explainer frame, Arabic lead with Latin keywords (DEEPSEEK-V4-FLASH, CODEX) in bold. Proof a real data table survives at feed size when the frame around it stays calm — the reference for our metrics cards.",
-      "thumb": "/social/media/refs/aljazeera-tech-text-graphic.jpg"
+      "thumb": "/social/media/refs/aljazeera-tech-text-graphic.jpg",
+      "collection": "arabic-newsroom"
     },
     {
       "id": "aljazeera-tech-cover-hero",
@@ -187,7 +207,8 @@
       "sourceUrl": "https://web.facebook.com/photo/?fbid=960552856497035",
       "assetType": "hero",
       "note": "The page cover: android and drone in a cable-lit scene, logo centered in the negative space. Their one cinematic asset — everything else is frames and bands. What a higgs-lane hero should feel like for a tech brand.",
-      "thumb": "/social/media/refs/aljazeera-tech-cover.jpg"
+      "thumb": "/social/media/refs/aljazeera-tech-cover.jpg",
+      "collection": "arabic-newsroom"
     },
     {
       "id": "aljazeera-tech-reel-decimen",
@@ -196,7 +217,8 @@
       "sourceUrl": "https://web.facebook.com/AljazeeraTechnology/videos/1055645343864863/",
       "assetType": "reel",
       "note": "Open-source story (DECIMEN QR file transfer) as a 9:16 cover: real phones on a desk, terminal UI visible, purple caption band over the demo. Screen-truth over motion graphics — exactly our register for product reels.",
-      "thumb": "/social/media/refs/aljazeera-tech-reel-cover.jpg"
+      "thumb": "/social/media/refs/aljazeera-tech-reel-cover.jpg",
+      "collection": "arabic-newsroom"
     },
     {
       "id": "powerschool",
@@ -204,7 +226,8 @@
       "source": "vendor",
       "sourceUrl": "https://www.powerschool.com",
       "assetType": "lifestyle",
-      "note": "The enterprise K-12 standard: corporate blue/green gradients, sharp geometric grids, polished teacher-with-tablet lifestyle photography. What 'authoritative' looks like to district buyers."
+      "note": "The enterprise K-12 standard: corporate blue/green gradients, sharp geometric grids, polished teacher-with-tablet lifestyle photography. What 'authoritative' looks like to district buyers.",
+      "collection": "competitor-sms"
     },
     {
       "id": "classter",
@@ -212,7 +235,8 @@
       "source": "vendor",
       "sourceUrl": "https://www.classter.com",
       "assetType": "infographic",
-      "note": "Asymmetrical layouts with feature-spotlight vector badges (Admissions, Billing, LMS) floating around a central hero — the module-ecosystem story told in one frame."
+      "note": "Asymmetrical layouts with feature-spotlight vector badges (Admissions, Billing, LMS) floating around a central hero — the module-ecosystem story told in one frame.",
+      "collection": "competitor-sms"
     },
     {
       "id": "gradelink",
@@ -220,7 +244,8 @@
       "source": "vendor",
       "sourceUrl": "https://www.gradelink.com",
       "assetType": "testimonial",
-      "note": "Small private/charter/faith schools: social-proof testimonial lockups plus plain UI screenshots — 'No Tech Skills Required'. Trust over polish."
+      "note": "Small private/charter/faith schools: social-proof testimonial lockups plus plain UI screenshots — 'No Tech Skills Required'. Trust over polish.",
+      "collection": "competitor-sms"
     },
     {
       "id": "alma-sis",
@@ -228,7 +253,8 @@
       "source": "vendor",
       "sourceUrl": "https://www.getalma.com",
       "assetType": "mockup",
-      "note": "Modern minimal duotone — deep purple + bright orange, flat design, high contrast. Aimed at forward-thinking administrators; closest to our own restraint."
+      "note": "Modern minimal duotone — deep purple + bright orange, flat design, high contrast. Aimed at forward-thinking administrators; closest to our own restraint.",
+      "collection": "competitor-sms"
     },
     {
       "id": "classe365",
@@ -236,7 +262,8 @@
       "source": "vendor",
       "sourceUrl": "https://www.classe365.com",
       "assetType": "mockup",
-      "note": "Flat, high-contrast product mockups for tech-savvy private schools — UI screenshots framed as the hero, minimal supporting copy."
+      "note": "Flat, high-contrast product mockups for tech-savvy private schools — UI screenshots framed as the hero, minimal supporting copy.",
+      "collection": "competitor-sms"
     },
     {
       "id": "openeducat",
@@ -244,7 +271,8 @@
       "source": "vendor",
       "sourceUrl": "https://openeducat.org",
       "assetType": "infographic",
-      "note": "The open-source pitch to IT directors: technical mockups, dashboard data-viz, cloud/security iconography. Speaks to the buyer who reads the architecture page first — our open-source story overlaps."
+      "note": "The open-source pitch to IT directors: technical mockups, dashboard data-viz, cloud/security iconography. Speaks to the buyer who reads the architecture page first — our open-source story overlaps.",
+      "collection": "competitor-sms"
     },
     {
       "id": "meta-ad-library-sms",
@@ -252,7 +280,8 @@
       "source": "meta-ad-library",
       "sourceUrl": "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=ALL&q=school%20management%20system&media_type=all",
       "assetType": "other",
-      "note": "The live competitive feed: every active SMS ad on Meta, searchable by advertiser. Check before designing a campaign — see what the category is running this month."
+      "note": "The live competitive feed: every active SMS ad on Meta, searchable by advertiser. Check before designing a campaign — see what the category is running this month.",
+      "collection": "ad-formats"
     },
     {
       "id": "behance-social-suites",
@@ -260,7 +289,8 @@
       "source": "behance",
       "sourceUrl": "https://www.behance.net/search/projects/social%20media%20design",
       "assetType": "other",
-      "note": "Complete brand case studies and full social asset suites — for direction-setting, not single-card ideas."
+      "note": "Complete brand case studies and full social asset suites — for direction-setting, not single-card ideas.",
+      "collection": "ad-formats"
     },
     {
       "id": "dribbble-social-posts",
@@ -268,7 +298,8 @@
       "source": "dribbble",
       "sourceUrl": "https://dribbble.com/search/social-media-post",
       "assetType": "other",
-      "note": "Bite-sized craft: color pairings, asymmetrical layouts, typography experiments. Best for stealing one move, not a system."
+      "note": "Bite-sized craft: color pairings, asymmetrical layouts, typography experiments. Best for stealing one move, not a system.",
+      "collection": "ad-formats"
     },
     {
       "id": "adespresso-gallery",
@@ -276,7 +307,8 @@
       "source": "adespresso",
       "sourceUrl": "https://adespresso.com/ads-examples/",
       "assetType": "other",
-      "note": "Curated real Facebook ads with conversion commentary — why a hierarchy or layout works, not just that it looks good."
+      "note": "Curated real Facebook ads with conversion commentary — why a hierarchy or layout works, not just that it looks good.",
+      "collection": "ad-formats"
     },
     {
       "id": "pinterest-infographic-layouts",
@@ -284,7 +316,8 @@
       "source": "pinterest",
       "sourceUrl": "https://www.pinterest.com/search/pins/?q=social%20media%20infographic%20layout",
       "assetType": "other",
-      "note": "A search engine for modular layouts and infographic structures — feed it a slide archetype name and mine variations."
+      "note": "A search engine for modular layouts and infographic structures — feed it a slide archetype name and mine variations.",
+      "collection": "ad-formats"
     },
     {
       "id": "noon-academy",
@@ -293,7 +326,8 @@
       "sourceUrl": "https://www.noonacademy.com",
       "assetType": "carousel",
       "brand": "hogwarts",
-      "note": "Saudi edtech speaking Arabic-first to students and parents at Facebook scale: bright single-idea cards, colloquial warmth over MSA stiffness, teachers as recurring faces. The counter-register to our calm voice — steal the accessibility, not the volume."
+      "note": "Saudi edtech speaking Arabic-first to students and parents at Facebook scale: bright single-idea cards, colloquial warmth over MSA stiffness, teachers as recurring faces. The counter-register to our calm voice — steal the accessibility, not the volume.",
+      "collection": "mena-edtech"
     },
     {
       "id": "alef-education",
@@ -302,7 +336,8 @@
       "sourceUrl": "https://www.alefeducation.com",
       "assetType": "lifestyle",
       "brand": "hogwarts",
-      "note": "UAE K-12 platform with ministry-grade trust signals: bilingual AR/EN mirrored posts, muted palette, real classrooms over stock. What institutional credibility looks like to a MENA education buyer — our B2B register."
+      "note": "UAE K-12 platform with ministry-grade trust signals: bilingual AR/EN mirrored posts, muted palette, real classrooms over stock. What institutional credibility looks like to a MENA education buyer — our B2B register.",
+      "collection": "mena-edtech"
     },
     {
       "id": "madrasa-mbrgi",
@@ -311,7 +346,8 @@
       "sourceUrl": "https://madrasa.org",
       "assetType": "infographic",
       "brand": "hogwarts",
-      "note": "MBRGI free Arabic e-learning: educational infographic cards at daily cadence, Arabic typographic hierarchy that stays legible at feed size. Proof Arabic copy-led cards scale — same thesis as our template lane."
+      "note": "MBRGI free Arabic e-learning: educational infographic cards at daily cadence, Arabic typographic hierarchy that stays legible at feed size. Proof Arabic copy-led cards scale — same thesis as our template lane.",
+      "collection": "mena-edtech"
     },
     {
       "id": "classera",
@@ -320,7 +356,8 @@
       "sourceUrl": "https://www.classera.com",
       "assetType": "mockup",
       "brand": "hogwarts",
-      "note": "The Saudi LMS incumbent: product-UI screenshots framed in brand gradients, award/partnership badges as trust currency. What schools comparing us have already seen — differentiate with restraint, not louder gradients."
+      "note": "The Saudi LMS incumbent: product-UI screenshots framed in brand gradients, award/partnership badges as trust currency. What schools comparing us have already seen — differentiate with restraint, not louder gradients.",
+      "collection": "competitor-sms"
     },
     {
       "id": "anthropic-og",
@@ -328,7 +365,8 @@
       "source": "vendor",
       "sourceUrl": "https://www.anthropic.com",
       "assetType": "og",
-      "note": "The template lane's visual north star: type-led og cards, one accent illustration, Ivory/Clay/Ink discipline, no decoration the message doesn't earn. Steal the spacing and the one-accent rule; never the logomark (no implied endorsement)."
+      "note": "The template lane's visual north star: type-led og cards, one accent illustration, Ivory/Clay/Ink discipline, no decoration the message doesn't earn. Steal the spacing and the one-accent rule; never the logomark (no implied endorsement).",
+      "collection": "house-aesthetic"
     }
   ]
 }
