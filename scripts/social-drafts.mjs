@@ -63,6 +63,11 @@ if (!url) {
 
 const sql = neon(url);
 
+// MIRROR of GEMINI_DRAFT_MODEL in src/lib/google-draft.ts (TS the .mjs cannot
+// import) — the model D-20260807 measured and chose. Pinned together by
+// src/lib/__tests__/google-draft.test.ts; change both or the pin fails.
+const GEMINI_MODEL = "gemini-3.6-flash";
+
 function flag(name) {
   const i = process.argv.indexOf(`--${name}`);
   return i > -1 ? process.argv[i + 1] : undefined;
@@ -569,7 +574,7 @@ House Rules:
 
     try {
       const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -596,7 +601,7 @@ House Rules:
                "answeredAt" = NOW()
          WHERE "id" = ${ask.id}`;
 
-      console.log(`✅ Answered ${ask.id} via Gemini 2.5 Flash.`);
+      console.log(`✅ Answered ${ask.id} via ${GEMINI_MODEL}.`);
     } catch (err) {
       console.error(`Failed to drain ${ask.id}:`, err.message);
     }

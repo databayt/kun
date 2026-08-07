@@ -1,3 +1,16 @@
+/**
+ * The one Gemini model the inline lane calls — chosen by measurement, not vibes.
+ *
+ * D-20260807 (.claude/memory/decisions/2026-08-07-gemini-inline-draft.md) timed
+ * four models against the craft gate: gemini-3.6-flash hits p50 10.9s with 4/6
+ * first-pass clean on a measured 20 requests/day free tier. gemini-2.5-flash —
+ * what this file called before the reconcile — runs ~24s and loses the ~10s
+ * target the lane exists for. `scripts/social-drafts.mjs` mirrors this value
+ * (a .mjs cannot import TS); `src/lib/__tests__/google-draft.test.ts` pins the
+ * two together.
+ */
+export const GEMINI_DRAFT_MODEL = "gemini-3.6-flash";
+
 export interface GoogleDraftParams {
   product: string;
   brief: string;
@@ -49,7 +62,7 @@ House Rules:
 
   try {
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_DRAFT_MODEL}:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -94,7 +107,8 @@ House Rules:
   } catch (err) {
     return {
       ok: false,
-      error: err instanceof Error ? err.message : "Failed to draft with Gemini.",
+      error:
+        err instanceof Error ? err.message : "Failed to draft with Gemini.",
     };
   }
 }
