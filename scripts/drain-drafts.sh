@@ -212,7 +212,8 @@ Run the /draft skill in queue mode. Answer ONLY these ask ids: __IDS__. Read the
 
 Before writing the first ask, ONCE for the whole run:
   1. Read content/docs/social/copy.mdx and .claude/skills/draft/references/golden-set.md — the craft bar. Every draft is judged against the seven checks and the Arabic register ladder.
-  2. Run 'node scripts/social-drafts.mjs lessons' — what reviewers actually rejected in the last 60 days, most common failure first. These are drafts a session already believed were finished. Whatever they have in common is the habit to break in THIS run; treat the top reason as the check you are most likely to fail again.
+  2. Read content/social/scenes.json (doctrine: .claude/skills/draft/references/scene-bank.md) — concrete reader-week moments per brand and season, check 4's raw material. Ground a post in at most ONE scene it can honestly claim; never summarize docs (docs contain no Thursdays).
+  3. Run 'node scripts/social-drafts.mjs lessons' — what reviewers actually rejected in the last 60 days, most common failure first. These are drafts a session already believed were finished. Whatever they have in common is the habit to break in THIS run; treat the top reason as the check you are most likely to fail again.
 
 Then per ask read content/docs/brand.mdx and content/docs/social/<brand>.mdx for voice and audience.
 

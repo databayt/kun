@@ -1,0 +1,60 @@
+{
+  "$comment": "The scene bank — concrete reader-week moments for check 4 (Scene). copy.mdx names the structural gap this fills: 'product docs contain no Thursdays'; these are the Thursdays. Consumed by scenesFor() in the draft-prompt mirror pair (src/lib/draft-prompt.ts ⇄ scripts/lib/draft-prompt.mjs) for the Gemini lanes, and by the claude drain via .claude/skills/draft/references/scene-bank.md. Rules for entries: Arabic-first, nouns the reader touches (الورق، الكشف، الطابور), ONE moment per line, and NO digits or spelled-out figures — a number here would seed copy the craft gate's invented-number rule then refuses. Season windows are month-based for the Sudan slice (school year ≈ June→April; certificate exams mid-April — Apr 13-23 in 2026; Ramadan ≈ Feb-Mar through 2027). Refresh ritual: quarterly or at a season boundary, via a research session — verify the exam and Ramadan windows still hold, retire scenes reviewers stopped recognizing, add what the last term surfaced.",
+  "hogwarts": {
+    "evergreen": [
+      "طابور الصباح، والمشرف يقلّب كشف الغياب الورقي بحثاً عن اسم واحد",
+      "هاتف الإدارة يرن بعد العشاء: ولي أمر يسأل عن غياب ابنه",
+      "أسبوع المدير يذوب بين التوقيعات والأوراق التي تنتظر على المكتب"
+    ],
+    "seasons": [
+      {
+        "id": "year-start",
+        "months": [6, 7],
+        "label": "بداية العام وموسم التسجيل",
+        "scenes": [
+          "موسم التسجيل: طابور أولياء الأمور عند الباب، وملف الطالب يتنقل بين المكاتب قبل أن يستقر",
+          "أول أسبوع: مكتب القبول بين استمارة تُملأ وهاتف لا يتوقف",
+          "جدول الحصص يُعاد رسمه مرة بعد مرة قبل أن يستقر التوزيع"
+        ]
+      },
+      {
+        "id": "mid-term",
+        "months": [8, 9, 10],
+        "label": "منتصف الفصل",
+        "scenes": [
+          "نهاية الشهر: المحاسب يطارد إيصالات الأقساط دفتراً بعد دفتر",
+          "اجتماع الصباح تأخّر لأن كشف الحضور لم يكتمل بعد",
+          "معلمة تنقل درجات الاختبار من الدفتر إلى الكشف ثم تعيد التأكد منها"
+        ]
+      },
+      {
+        "id": "term-close",
+        "months": [11, 12, 1],
+        "label": "نهاية الفصل وإعادة التسجيل",
+        "scenes": [
+          "آخر الفصل مشهد يعرفه كل معلم: درجات تُرصد، ثم تُنقل، ثم تُكتب من جديد",
+          "أكوام كشوف الدرجات على مكتب المدير في انتظار المراجعة والتوقيع",
+          "موسم إعادة التسجيل: من يعود ومن ينتقل؟ الإجابة موزّعة على دفاتر لا يراها أحد كاملة"
+        ]
+      },
+      {
+        "id": "ramadan-revision",
+        "months": [2, 3],
+        "label": "رمضان والمراجعة",
+        "scenes": [
+          "حصص رمضان أقصر، والجدول يُعاد ترتيبه كل أسبوع",
+          "بعد الإفطار تبدأ مجموعات المراجعة، وهاتف المعلم يرن بالأسئلة حتى السحور"
+        ]
+      },
+      {
+        "id": "certificate-exams",
+        "months": [4, 5],
+        "label": "امتحانات الشهادة والنتائج",
+        "scenes": [
+          "قاعة الامتحان: المراقبون يوزعون الأوراق، والغياب يُرصد يدوياً ورقة بورقة",
+          "يوم النتيجة: الهاتف في مكتب الإدارة لا يتوقف عن الرنين"
+        ]
+      }
+    ]
+  }
+}

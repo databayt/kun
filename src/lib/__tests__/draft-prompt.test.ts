@@ -77,6 +77,38 @@ describe("the draft prompt mirror pair", () => {
     expect(ts.BRAND_CONTEXTS).toEqual(mjs.BRAND_CONTEXTS);
   });
 
+  it("renders the scene bank identically on both sides", () => {
+    // Fixed dates, one per season window plus the unknown-brand miss — the
+    // month decides the season, so the pin must not depend on when the suite
+    // runs.
+    const dates = [
+      new Date("2026-06-15T12:00:00Z"), // year-start window
+      new Date("2026-09-15T12:00:00Z"), // mid-term window
+      new Date("2026-12-15T12:00:00Z"), // term-close window
+      new Date("2027-02-20T12:00:00Z"), // ramadan-revision window
+      new Date("2026-04-20T12:00:00Z"), // certificate-exams window
+    ];
+    for (const date of dates) {
+      expect(ts.scenesFor("hogwarts", date)).toEqual(
+        mjs.scenesFor("hogwarts", date),
+      );
+      expect(ts.scenesFor("hogwarts", date)).toBeTruthy();
+    }
+    expect(ts.scenesFor("mkan")).toBeUndefined();
+    expect(mjs.scenesFor("mkan")).toBeUndefined();
+  });
+
+  it("puts the season's scenes ahead of the evergreen ones", () => {
+    // The season is the sharper anchor; evergreen pads after it. The cap
+    // keeps the section a nudge rather than a second brief.
+    const june = ts.scenesFor("hogwarts", new Date("2026-06-15T12:00:00Z"));
+    expect(june).toContain("موسم التسجيل");
+    expect(june?.indexOf("موسم التسجيل")).toBeLessThan(
+      june?.indexOf("طابور الصباح") ?? -1,
+    );
+    expect((june ?? "").split("\n").length).toBeLessThanOrEqual(8);
+  });
+
   it("keeps statics ahead of dynamics for the cache prefix", () => {
     // Implicit caching keys on an identical prefix (D-20260807 0.f). The
     // brief is the first per-ask dynamic; everything before it must not vary

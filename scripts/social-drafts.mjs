@@ -56,6 +56,7 @@ import {
   buildDraftPrompt,
   CRAFT_REFUSED_PREFIX,
   GEMINI_DRAFT_MODEL,
+  scenesFor,
 } from "./lib/draft-prompt.mjs";
 
 dotenv.config({ quiet: true });
@@ -625,6 +626,7 @@ if (command === "list") {
       instruction: ask.instruction ?? undefined,
       angle: ask.angle ?? undefined,
       register: ask.register ?? undefined,
+      scenes: scenesFor(ask.brand),
       lessons: await lessonsFor(ask.brand),
     };
 

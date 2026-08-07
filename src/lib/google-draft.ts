@@ -1,7 +1,11 @@
 import { createGoogle } from "@ai-sdk/google";
 import { generateObject } from "ai";
 import { z } from "zod";
-import { buildDraftPrompt, GEMINI_DRAFT_MODEL } from "@/lib/draft-prompt";
+import {
+  buildDraftPrompt,
+  GEMINI_DRAFT_MODEL,
+  scenesFor,
+} from "@/lib/draft-prompt";
 
 // The model id, the refusal marker, and the prompt live in the mirror pair
 // src/lib/draft-prompt.ts ⇄ scripts/lib/draft-prompt.mjs (parity-pinned by
@@ -69,6 +73,9 @@ export async function draftWithGeminiFree(
     instruction: params.instruction,
     angle: params.angle,
     register: params.register,
+    // Scenes are a property of brand + season, not of the ask — computed
+    // here so every caller gets check 4's raw material for free.
+    scenes: scenesFor(params.product),
     lessons: params.lessons,
     violations: params.violations,
   });

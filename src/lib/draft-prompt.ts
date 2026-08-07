@@ -18,6 +18,8 @@
 // per-ask dynamics — brief, instruction, direction, lessons, violations —
 // come last. Reordering a section is a cache invalidation, not a style edit.
 
+import scenesData from "../../content/social/scenes.json";
+
 /**
  * The one Gemini model the inline lane calls — chosen by measurement, not
  * vibes. D-20260807 timed four models against the craft gate:
@@ -47,6 +49,42 @@ export const BRAND_CONTEXTS: Record<string, string> = {
   sijillee: "sijillee (سِجلي) — records/documents product.",
   moalimee: "moalimee (مُعلّمي) — teacher/tutor marketplace.",
 };
+
+interface SceneSeason {
+  id: string;
+  /** Calendar months (1-12) this window covers — Sudan-slice school year. */
+  months: number[];
+  label: string;
+  scenes: string[];
+}
+
+interface BrandScenes {
+  evergreen: string[];
+  seasons: SceneSeason[];
+}
+
+/**
+ * The scene bank for one brand, rendered for the prompt: the current season's
+ * moments first, evergreen after, capped so the section stays a nudge rather
+ * than a second brief. Returns undefined for a brand with no bank (only the
+ * slice brand carries one today) — the prompt section is then omitted
+ * entirely, copy.mdx's "an ask with no direction looks like one" rule.
+ */
+export function scenesFor(
+  brand: string,
+  now: Date = new Date(),
+): string | undefined {
+  const bank = (scenesData as unknown as Record<string, BrandScenes>)[brand];
+  if (!bank) return undefined;
+  const month = now.getMonth() + 1;
+  const season = bank.seasons.find((s) => s.months.includes(month));
+  const lines = [...(season ? season.scenes : []), ...bank.evergreen].slice(
+    0,
+    8,
+  );
+  if (lines.length === 0) return undefined;
+  return lines.map((s) => `- ${s}`).join("\n");
+}
 
 export interface DraftPromptInput {
   brand: string;

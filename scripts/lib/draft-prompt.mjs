@@ -18,8 +18,45 @@
 // per-ask dynamics — brief, instruction, direction, lessons, violations —
 // come last. Reordering a section is a cache invalidation, not a style edit.
 
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
 /** The model D-20260807 measured and chose. See src/lib/draft-prompt.ts. */
 export const GEMINI_DRAFT_MODEL = "gemini-3.6-flash";
+
+const scenesData = JSON.parse(
+  readFileSync(
+    join(
+      dirname(fileURLToPath(import.meta.url)),
+      "..",
+      "..",
+      "content",
+      "social",
+      "scenes.json",
+    ),
+    "utf8",
+  ),
+);
+
+/**
+ * The scene bank for one brand, rendered for the prompt: the current season's
+ * moments first, evergreen after, capped so the section stays a nudge rather
+ * than a second brief. Returns undefined for a brand with no bank — the
+ * prompt section is then omitted entirely.
+ */
+export function scenesFor(brand, now = new Date()) {
+  const bank = scenesData[brand];
+  if (!bank || !Array.isArray(bank.seasons)) return undefined;
+  const month = now.getMonth() + 1;
+  const season = bank.seasons.find((s) => s.months.includes(month));
+  const lines = [
+    ...(season ? season.scenes : []),
+    ...(bank.evergreen ?? []),
+  ].slice(0, 8);
+  if (lines.length === 0) return undefined;
+  return lines.map((s) => `- ${s}`).join("\n");
+}
 
 /** Marker on a pending row's note after the Gemini lane's craft refusal. */
 export const CRAFT_REFUSED_PREFIX = "craft-refused:";
