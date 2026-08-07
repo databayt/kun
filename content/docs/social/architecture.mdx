@@ -188,6 +188,7 @@ carry the 12-hour approval TTL.
 | `/api/social/cron` | `0 6 * * *` — Vercel Cron (`vercel.json`) | `Bearer CRON_SECRET`, timing-safe compare | One draft per opted-in product → review message with signed link. **Never publishes.** |
 | `/api/social/drain` | `*/15 * * * *` — GitHub Actions (`social-drain.yml`) | same bearer | Publishes `scheduled` variants whose time has passed; reaps rows stuck in `publishing`. |
 | `/api/social/metrics` | `0 */6 * * *` — GitHub Actions (`social-metrics.yml`) | same bearer | Reads reach/engagement back into `SocialMetric`; failure policy is terminal-per-kind, transport-only retries. |
+| `scripts/weekly-digest.sh` | Fri 09:00 local — launchd (`com.databayt.social-digest`) | none — runs on the Mac, outbound only | The Friday digest: planned vs shipped, Facebook numbers, dismissal lessons, lane health → Hermes → Slack `#social` (Telegram review chat fallback). Deterministic, zero tokens. |
 
 The fast cadences live in GitHub Actions because Vercel Hobby grants one cron slot and it is
 spent on drafting. That split means **`CRON_SECRET` must exist in two places** — Vercel env for
@@ -201,9 +202,12 @@ Still unbuilt — listed so the follow-up is turnkey.
 | Candidate | What it would do | Blocked on |
 |-----------|------------------|------------|
 | **Token health canary** | Daily probe of every per-product Page token; alert before expiry | Nothing — buildable now on `getEgressStatus` |
-| **Weekly content nudge** | Friday: what shipped vs the calendar, into Slack | `calendar` structure |
 | **Kill-switch watchdog** | Halt auto-post on an error-rate or complaint spike | L4 guardrail layer |
 | **Per-brand cadence** | Different days/times per brand rather than one 06:00 sweep | Per-brand config (the persistence it needed now exists) |
+
+The **Weekly content nudge** left this table 2026-08-07 — it runs as the Friday
+digest above (`scripts/social-digest.mjs`; pillars + the seed lane turned out to
+be the "calendar structure" it was waiting for).
 
 > A cron that publishes without a human is **L4** and is gated behind `/decide` plus the guardrail
 > layer (LLM-judge content + Arabic gate, rate limits, kill switch). Do not add one casually.
