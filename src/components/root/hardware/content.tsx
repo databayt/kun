@@ -153,8 +153,10 @@ export default function HardwareContent({ lang }: HardwareContentProps) {
           {isAr
             ? "التفاصيل الكاملة — الحماية والتبريد والاتصال والمياه والسكن وقائمة المواد والمخاطر ومسح الموقع — في "
             : "The full reasoning — protection, cooling, connectivity, water, housing, bill of materials, risks and the site survey — is in "}
+          {/* Hardcoded /en: the docs corpus is English-only, so /ar/docs/*
+              404s. Point Arabic readers at the page that exists. */}
           <Link
-            href={`/${lang}/docs/hardware`}
+            href="/en/docs/hardware"
             className="text-foreground underline underline-offset-4"
           >
             {isAr ? "وثيقة العتاد" : "the hardware doc"}
