@@ -28,6 +28,7 @@ import {
   DISMISS_REASON_IDS,
   DRAFT_MODEL_IDS,
 } from "@/components/root/social/knobs";
+import { draftWithGeminiFree } from "@/lib/google-draft";
 
 // Long enough for a human to see it in the morning, short enough that a
 // leaked link goes stale before it is useful. Matches the cron.
@@ -247,6 +248,22 @@ export async function requestSocialDraft(
   }
 
   try {
+    let instantResult: { ar: string; en: string } | null = null;
+    if (
+      (!parsed.data.model || parsed.data.model === "google-free") &&
+      process.env.GEMINI_API_KEY
+    ) {
+      const geminiRes = await draftWithGeminiFree({
+        product: parsed.data.product,
+        brief: parsed.data.brief,
+        angle: parsed.data.angle,
+        register: parsed.data.register,
+      });
+      if (geminiRes.ok && geminiRes.ar && geminiRes.en) {
+        instantResult = { ar: geminiRes.ar, en: geminiRes.en };
+      }
+    }
+
     const row = await db.socialDraftRequest.create({
       data: {
         brand: parsed.data.product,
@@ -260,6 +277,10 @@ export async function requestSocialDraft(
           parsed.data.referenceId,
           parsed.data.product,
         ),
+        status: instantResult ? "answered" : "pending",
+        ar: instantResult?.ar ?? null,
+        en: instantResult?.en ?? null,
+        answeredAt: instantResult ? new Date() : null,
       },
     });
     return { ok: true, id: row.id };
@@ -362,26 +383,43 @@ export async function refineSocialDraft(
   }
 
   try {
+    const chosenModel = parsed.data.model ?? parent.model ?? undefined;
+    const chosenAngle = parsed.data.angle ?? parent.angle ?? undefined;
+    const chosenRegister = parsed.data.register ?? parent.register ?? undefined;
+
+    let instantResult: { ar: string; en: string } | null = null;
+    if (
+      (!chosenModel || chosenModel === "google-free") &&
+      process.env.GEMINI_API_KEY
+    ) {
+      const geminiRes = await draftWithGeminiFree({
+        product: parent.brand,
+        brief: `${parent.brief}\nRefinement Instruction: ${parsed.data.instruction}`,
+        angle: chosenAngle,
+        register: chosenRegister,
+      });
+      if (geminiRes.ok && geminiRes.ar && geminiRes.en) {
+        instantResult = { ar: geminiRes.ar, en: geminiRes.en };
+      }
+    }
+
     const row = await db.socialDraftRequest.create({
       data: {
         brand: parent.brand,
-        // The ROOT brief, unchanged. Every turn is still answering the original
-        // ask; the instruction says how to answer it differently. Folding the
-        // instruction into the brief instead would lose the difference between
-        // "what we are writing about" and "what was wrong with the last one" —
-        // and by turn three the brief would be a changelog.
         brief: parent.brief,
         instruction: parsed.data.instruction,
         parentId: parsed.data.parentId,
         turn: parent.turn + 1,
         requestedBy: email,
-        // Media rides the thread: a refinement of the copy should not silently
-        // drop the image someone already picked for it.
         mediaUrls: parent.mediaUrls,
-        model: parsed.data.model ?? parent.model ?? undefined,
-        angle: parsed.data.angle ?? parent.angle ?? undefined,
-        register: parsed.data.register ?? parent.register ?? undefined,
+        model: chosenModel,
+        angle: chosenAngle,
+        register: chosenRegister,
         referenceId: parent.referenceId,
+        status: instantResult ? "answered" : "pending",
+        ar: instantResult?.ar ?? null,
+        en: instantResult?.en ?? null,
+        answeredAt: instantResult ? new Date() : null,
       },
     });
     return { ok: true, id: row.id };
