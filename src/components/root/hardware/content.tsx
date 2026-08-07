@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { SizingModel } from "./sizing-model";
-import { SITE_FACTS, TIERS, MODEL_LADDER } from "./config";
+import { SITE_FACTS, TIERS, MODEL_LADDER, ALTERNATIVES } from "./config";
 import type { Locale } from "@/components/local/config";
 
 interface HardwareContentProps {
@@ -96,6 +96,93 @@ export default function HardwareContent({ lang }: HardwareContentProps) {
               </span>
             </div>
           ))}
+        </div>
+
+        {/* The OS is not a separate decision */}
+        <div className="border-border mt-6 rounded-lg border p-4">
+          <h3 className="text-sm font-semibold">
+            {isAr
+              ? "نظام التشغيل ليس قرارًا منفصلًا"
+              : "The OS is not a separate decision"}
+          </h3>
+          <p className="text-muted-foreground mt-1 text-xs leading-relaxed">
+            {isAr
+              ? "جهاز Spark يأتي بنظام DGX OS المبني على أوبنتو مع CUDA مثبتًا — اختيار الجهاز يختار النظام. وهو الصواب أصلًا: PagedAttention في vLLM حصري على لينكس وCUDA، بينما ذاكرة السياق في mlx_lm.server لكل طلب على حدة — وهو بالضبط ما لا يناسب المهام المتزامنة المُرسَلة عن بُعد."
+              : "The Spark ships DGX OS, built on Ubuntu, with CUDA preloaded — choosing the box chooses the OS. It is right anyway: vLLM's PagedAttention is Linux + CUDA only, while mlx_lm.server keeps a per-request KV cache — exactly the wrong shape for concurrent dispatched jobs."}
+          </p>
+        </div>
+      </section>
+
+      {/* ── The roads not taken ─────────────────────────────────────── */}
+      <section className="mt-20">
+        <h2 className="text-xl font-semibold tracking-tight">
+          {isAr ? "الطرق التي لم نسلكها" : "The roads not taken"}
+        </h2>
+        <p className="text-muted-foreground mt-2 max-w-2xl text-sm">
+          {isAr
+            ? "ثلاثة بدائل معقولة، كلٌّ مرفوض لسبب محدد لا لتفضيل. الأرقام محققة في أغسطس ٢٠٢٦."
+            : "Three reasonable alternatives, each rejected for a specific reason rather than a preference. Figures checked August 2026."}
+        </p>
+
+        <div className="mt-6 grid gap-3 md:grid-cols-3">
+          {ALTERNATIVES.map((alt) => (
+            <div
+              key={alt.id}
+              className="border-border flex flex-col rounded-lg border p-4"
+            >
+              <div className="flex items-baseline justify-between gap-2">
+                <h3 className="text-sm font-semibold">
+                  {isAr ? alt.nameAr : alt.name}
+                </h3>
+                <span className="text-muted-foreground border-border shrink-0 rounded border px-1 text-[10px]">
+                  {alt.status === "watch"
+                    ? isAr
+                      ? "يُراجع"
+                      : "watch"
+                    : isAr
+                      ? "مرفوض"
+                      : "rejected"}
+                </span>
+              </div>
+
+              <div
+                dir="ltr"
+                className="mt-3 font-mono text-2xl tabular-nums rtl:text-end"
+              >
+                {alt.headline}
+              </div>
+              <div className="text-muted-foreground text-xs">
+                {isAr ? alt.headlineLabelAr : alt.headlineLabel}
+              </div>
+
+              {/* dir=ltr keeps the number-unit runs in order; short Arabic
+                  phrases inside still render as correct RTL runs. */}
+              <div
+                dir="ltr"
+                className="text-muted-foreground border-border mt-3 space-y-0.5 border-t pt-3 font-mono text-[11px] tabular-nums rtl:text-end"
+              >
+                {(isAr ? alt.specsAr : alt.specs).map((s) => (
+                  <div key={s}>{s}</div>
+                ))}
+              </div>
+
+              <p className="text-muted-foreground mt-3 text-xs leading-relaxed">
+                {isAr ? alt.verdictAr : alt.verdict}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        {/* Buy the class, never the SKU */}
+        <div className="border-foreground mt-6 rounded-lg border p-4">
+          <h3 className="text-sm font-semibold">
+            {isAr ? "اشترِ الفئة لا الطراز" : "Buy the class, never the SKU"}
+          </h3>
+          <p className="text-muted-foreground mt-1 text-xs leading-relaxed">
+            {isAr
+              ? "خارطة NVIDIA تُصلح ضعف الجهاز الحالي في موعد معروف: Rubin Spark بذاكرة LPDDR6 بين ٢٠٢٧ و٢٠٢٨، وعرض النطاق هو بالضبط ما يقيّد التوليد اليوم. ومحفّز المرحلة ٣ يقع غالبًا في ٢٠٢٧ — لذا تُكتب المواصفة «من فئة Spark، الجيل المتاح وقت التنفيذ»، لا رقم طراز. بهذا لا يكون تأجيل الشراء انضباطًا ماليًا فحسب، بل ترقية تلقائية للخطة."
+              : "NVIDIA's roadmap fixes the current box's one weakness on a known schedule: Rubin Spark with LPDDR6 lands 2027–28, and LPDDR5X bandwidth is precisely what caps decode today. Our Tier 3 trigger plausibly fires in 2027 — so the spec reads “Spark-class, current generation at trigger time,” never a part number. Written that way, buying the box last is not only cash discipline; the plan upgrades itself while it waits."}
+          </p>
         </div>
       </section>
 

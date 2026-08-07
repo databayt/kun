@@ -494,3 +494,97 @@ export const MODEL_LADDER: ModelRow[] = [
     good: false,
   },
 ];
+
+// ── The roads not taken ─────────────────────────────────────────────────
+//
+// Three reasonable alternatives, each rejected for a specific reason rather
+// than a preference. Facts checked August 2026 — the Apple row in particular
+// is date-sensitive and flips if an M5 Ultra ships with large memory.
+
+export type Alternative = {
+  id: string;
+  name: string;
+  nameAr: string;
+  /** The single number that decides it. */
+  headline: string;
+  headlineLabel: string;
+  headlineLabelAr: string;
+  specs: string[];
+  specsAr: string[];
+  verdict: string;
+  verdictAr: string;
+  /** "rejected" is settled; "watch" means revisit when a condition changes. */
+  status: "rejected" | "watch";
+};
+
+export const ALTERNATIVES: Alternative[] = [
+  {
+    id: "apple",
+    name: "Apple — Mac Studio",
+    nameAr: "أبل — ماك ستوديو",
+    headline: "96 GB",
+    headlineLabel: "max unified memory, Aug 2026",
+    headlineLabelAr: "أقصى ذاكرة موحدة، أغسطس ٢٠٢٦",
+    specs: [
+      "M3 Ultra · 819 GB/s · ~200 W",
+      "128 / 256 / 512 GB options withdrawn",
+      "M5 Ultra ~768 GB reported for late 2026",
+    ],
+    specsAr: [
+      "M3 Ultra · 819 GB/s · ~200 W",
+      "سُحبت خيارات 128 / 256 / 512 GB",
+      "M5 Ultra ~768 GB مُتوقَّع أواخر ٢٠٢٦",
+    ],
+    verdict:
+      "Less memory than a $4K Spark, and no CUDA — so no media lane and no vLLM. Even an M5 Ultra would not re-qualify. Stays Abdout's dev machine.",
+    verdictAr:
+      "ذاكرة أقل من جهاز بأربعة آلاف دولار وبلا CUDA — لا وسائط ولا vLLM. حتى M5 Ultra لن يغيّر ذلك. يبقى جهاز تطوير.",
+    status: "rejected",
+  },
+  {
+    id: "starlink",
+    name: "Starlink Mini",
+    nameAr: "ستارلينك ميني",
+    headline: "~720 Wh/day",
+    headlineLabel: "against 4,320 for licensed VSAT",
+    headlineLabelAr: "مقابل ٤٣٢٠ لمحطة الأقمار المرخّصة",
+    specs: [
+      "~17 W steady · 60 W startup peak",
+      "~40 ms vs ~600 ms GEO",
+      "Licensed in 27–28 African countries",
+    ],
+    specsAr: [
+      "~17 W مستقر · 60 W ذروة الإقلاع",
+      "~40 ms مقابل ~600 ms للأقمار الثابتة",
+      "مرخّص في ٢٧–٢٨ دولة أفريقية",
+    ],
+    verdict:
+      "Best technical fit by far — licensing it would delete the VSAT line item entirely. Not licensed in Sudan, no committed date. Revisit when that changes.",
+    verdictAr:
+      "الأنسب تقنيًا بفارق كبير — لو رُخّص لألغى بند الأقمار كليًا. غير مرخّص في السودان ولا موعد معلن. يُراجع عند التغيّر.",
+    status: "watch",
+  },
+  {
+    id: "powerwall",
+    name: "Tesla Powerwall 3",
+    nameAr: "تسلا باوروول ٣",
+    headline: "One box",
+    headlineLabel: "battery and inverter, inseparable",
+    headlineLabelAr: "بطارية وعاكس لا ينفصلان",
+    specs: [
+      "13.5 kWh · NMC · ~5,000 cycles",
+      "~11.5 kW inverter — 4× our peak",
+      "~$998/kWh US installed vs ~$170–280 landed",
+    ],
+    specsAr: [
+      "13.5 kWh · NMC · ~5,000 دورة",
+      "عاكس ~11.5 kW — أربعة أضعاف ذروتنا",
+      "~$998/kWh مركّبًا في أمريكا مقابل ~$170–280 واصلًا",
+    ],
+    verdict:
+      "Integrating the inverter destroys the 2 × 3 kW N+1 that exists because help is 4 h away. No Tesla service in Sudan, and a 13.5 kWh monolith cannot ride to Port Sudan in a car — a 5 kWh module can.",
+    verdictAr:
+      "دمج العاكس يلغي التكرار الاحتياطي الموجود لأن المساعدة على بعد أربع ساعات. لا خدمة تسلا في السودان، ووحدة ١٣٫٥ ك.و.س لا تُنقل بسيارة بينما وحدة ٥ ك.و.س تُنقل.",
+    status: "rejected",
+  },
+];
