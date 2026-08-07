@@ -201,96 +201,12 @@ async function draftViaHermes(req: DraftRequest): Promise<DraftResult> {
   };
 }
 
-const BILINGUAL_TOOL: Anthropic.Tool = {
-  name: "draft_bilingual",
-  description:
-    "Return one social post as an Arabic original and its English sibling.",
-  input_schema: {
-    type: "object",
-    required: ["ar", "en"],
-    properties: {
-      ar: {
-        type: "string",
-        description:
-          "The Arabic post body, crafted natively. No preamble, no surrounding quotes.",
-      },
-      en: {
-        type: "string",
-        description:
-          "The English post body — a sibling of the Arabic, not a literal translation.",
-      },
-    },
-  },
-};
-
-export interface BriefRequest {
-  product: string;
-  /** The contributor's ask, verbatim — topic, news, angle. */
-  brief: string;
-}
-
-export type BriefResult =
-  | { ok: true; ar: string; en: string; source: string }
-  | { ok: false; error: string };
-
-// The FUNDED lane for a contributor's brief — currently unused.
-//
-// The Hub's agent window does not call this: a live production test on
-// 2026-07-30 found no API key with credits behind it (subscription-only
-// billing, so there is nothing for one to spend — see
-// .claude/memory/decisions/2026-07-30-in-app-draft-spend.md). Briefs are queued
-// as SocialDraftRequest rows and answered by a Claude Code session on the Max
-// pool instead. This function is kept, tested, and one funded key away: if
-// credits are ever bought, wire requestSocialDraft to call it and the window
-// drafts inline again. Always Anthropic by design — never SOCIAL_DRAFT_SOURCE,
-// so the cron's no-spend default gains no side door.
-export async function draftBrief(req: BriefRequest): Promise<BriefResult> {
-  const apiKey = (process.env.ANTHROPIC_API_KEY ?? "").trim();
-  if (!apiKey) {
-    return { ok: false, error: "ANTHROPIC_API_KEY not set." };
-  }
-  const model = (process.env.SOCIAL_DRAFT_MODEL ?? "").trim() || DEFAULT_MODEL;
-
-  try {
-    const client = new Anthropic({ apiKey, timeout: TIMEOUT_MS });
-    const message = await client.messages.create({
-      model,
-      max_tokens: MAX_TOKENS,
-      system: SYSTEM_PROMPT,
-      tools: [BILINGUAL_TOOL],
-      tool_choice: { type: "tool", name: "draft_bilingual" },
-      messages: [
-        {
-          role: "user",
-          content: [
-            `Write one social post for the "${req.product}" brand — the channel-agnostic core piece; channels get their variants later.`,
-            `The contributor's brief:`,
-            req.brief,
-            ``,
-            `Craft the Arabic natively first, then write the English as a mirror of it — a sibling, not a translation. Return both through the draft_bilingual tool.`,
-          ].join("\n"),
-        },
-      ],
-    });
-
-    const block = message.content.find((b) => b.type === "tool_use");
-    const input =
-      block && block.type === "tool_use"
-        ? (block.input as { ar?: unknown; en?: unknown })
-        : undefined;
-    const ar = typeof input?.ar === "string" ? input.ar.trim() : "";
-    const en = typeof input?.en === "string" ? input.en.trim() : "";
-    if (!ar || !en) {
-      return { ok: false, error: "Model returned an incomplete draft." };
-    }
-    return { ok: true, ar, en, source: `anthropic:${model}` };
-  } catch (err: unknown) {
-    return {
-      ok: false,
-      error: err instanceof Error ? err.message : "Anthropic drafting failed.",
-    };
-  }
-}
+// The bilingual brief lane (`draftBrief`, the `draft_bilingual` forced tool)
+// lived here dark from D-20260730 until 2026-08-07, waiting on a funded key
+// that never came. Its living successor is `draftWithGeminiFree` in
+// lib/google-draft.ts — AI SDK `generateObject`, provider-abstracted, so the
+// funded-Anthropic future is a one-line `createAnthropic` swap there rather
+// than a parallel client kept warm here.
 
 export function reviewChannel(): string {
   return (process.env.SOCIAL_REVIEW_CHANNEL ?? "").trim() || "slack";

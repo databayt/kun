@@ -1,3 +1,7 @@
+import { createGoogle } from "@ai-sdk/google";
+import { generateObject } from "ai";
+import { z } from "zod";
+
 /**
  * The one Gemini model the inline lane calls — chosen by measurement, not vibes.
  *
@@ -10,6 +14,16 @@
  * two together.
  */
 export const GEMINI_DRAFT_MODEL = "gemini-3.6-flash";
+
+/**
+ * The bilingual pair every draft lane returns. generateObject validates the
+ * model's output against this at the SDK layer — a malformed or truncated
+ * response throws instead of leaking `{ar: undefined}` downstream.
+ */
+const draftObjectSchema = z.object({
+  ar: z.string().min(1),
+  en: z.string().min(1),
+});
 
 /**
  * Marks a pending row the inline lane REFUSED after a craft-tripping attempt
@@ -102,48 +116,31 @@ ${params.violations}`
   }`;
 
   try {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_DRAFT_MODEL}:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            responseMimeType: "application/json",
-            temperature: 0.7,
-          },
-        }),
-      },
-    );
-
-    if (!res.ok) {
-      const errText = await res.text();
-      return { ok: false, error: `Gemini API HTTP ${res.status}: ${errText}` };
-    }
-
-    const data = (await res.json()) as {
-      candidates?: Array<{
-        content?: {
-          parts?: Array<{ text?: string }>;
-        };
-      }>;
-    };
-
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!text) {
-      return { ok: false, error: "Empty response from Gemini API." };
-    }
-
-    const parsed = JSON.parse(text) as { ar?: string; en?: string };
-    if (!parsed.ar || !parsed.en) {
-      return { ok: false, error: "Invalid JSON structure from Gemini API." };
-    }
+    // AI SDK generateObject replaces the hand-rolled fetch + JSON.parse: the
+    // provider drives Gemini's native responseSchema (honoured on free tier —
+    // D-20260807 0.c) and validates the result against the zod schema, so the
+    // tolerant-parser problem never comes back. Provider swap is one line:
+    // when the anthropic lane is ever funded, this becomes
+    // `createAnthropic({...})` + a model id and nothing else moves.
+    const google = createGoogle({ apiKey });
+    const { object } = await generateObject({
+      model: google(GEMINI_DRAFT_MODEL),
+      schema: draftObjectSchema,
+      prompt,
+      temperature: 0.7,
+      // Thinking tokens count against the output budget; at 2000 the JSON
+      // truncated and parsed as garbage. 8000 is the measured working floor
+      // (D-20260807 0.c).
+      maxOutputTokens: 8000,
+      // Fresh per call — the craft-gate retry gets its own 20s, not the
+      // remainder of the first attempt's.
+      abortSignal: AbortSignal.timeout(20_000),
+    });
 
     return {
       ok: true,
-      ar: parsed.ar.trim(),
-      en: parsed.en.trim(),
+      ar: object.ar.trim(),
+      en: object.en.trim(),
     };
   } catch (err) {
     return {
