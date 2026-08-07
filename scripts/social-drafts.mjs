@@ -52,6 +52,11 @@ import { neon } from "@neondatabase/serverless";
 import dotenv from "dotenv";
 import { compileBrief } from "./lib/brand-kit.mjs";
 import { checkCraft, craftFailures, formatCraft } from "./lib/craft.mjs";
+import {
+  buildDraftPrompt,
+  CRAFT_REFUSED_PREFIX,
+  GEMINI_DRAFT_MODEL,
+} from "./lib/draft-prompt.mjs";
 
 dotenv.config({ quiet: true });
 
@@ -62,18 +67,6 @@ if (!url) {
 }
 
 const sql = neon(url);
-
-// MIRROR of GEMINI_DRAFT_MODEL in src/lib/google-draft.ts (TS the .mjs cannot
-// import) — the model D-20260807 measured and chose. Pinned together by
-// src/lib/__tests__/google-draft.test.ts; change both or the pin fails.
-const GEMINI_MODEL = "gemini-3.6-flash";
-
-// MIRROR of CRAFT_REFUSED_PREFIX in src/lib/google-draft.ts, pinned by the same
-// test. A pending row whose note starts with this already failed the Gemini
-// lane's craft gate twice: drain-google must SKIP it (or a poisoned brief burns
-// the 20-requests/day quota at two calls per tick), and `list` surfaces it as
-// `craftRefused` so the claude lane writes fresh copy avoiding the named rules.
-const CRAFT_REFUSED = "craft-refused:";
 
 function flag(name) {
   const i = process.argv.indexOf(`--${name}`);
@@ -187,7 +180,7 @@ if (command === "list") {
           // The Gemini lane already tried this ask and the craft gate refused
           // both attempts — the named rules ride along so the writer avoids
           // them instead of rediscovering them.
-          ...(r.note?.startsWith(CRAFT_REFUSED) && { craftRefused: r.note }),
+          ...(r.note?.startsWith(CRAFT_REFUSED_PREFIX) && { craftRefused: r.note }),
         })),
         null,
         2,
@@ -561,7 +554,7 @@ if (command === "list") {
       LEFT JOIN "SocialDraftRequest" p ON p."id" = r."parentId"
      WHERE r."status" = 'pending'
        AND (r."model" IS NULL OR r."model" = 'google-free')
-       AND (r."note" IS NULL OR r."note" NOT LIKE ${`${CRAFT_REFUSED}%`})
+       AND (r."note" IS NULL OR r."note" NOT LIKE ${`${CRAFT_REFUSED_PREFIX}%`})
      ORDER BY r."createdAt" ASC`;
 
   if (!pending.length) {
@@ -577,7 +570,7 @@ if (command === "list") {
 
   const callGemini = async (promptText) => {
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_DRAFT_MODEL}:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -598,20 +591,42 @@ if (command === "list") {
     return { ar: parsed.ar.trim(), en: parsed.en.trim() };
   };
 
+  // The lessons line, once per brand per run — the same 60-day dismiss
+  // aggregate the claude lane reads via `lessons`, compacted for a prompt.
+  const lessonsByBrand = new Map();
+  const lessonsFor = async (brand) => {
+    if (lessonsByBrand.has(brand)) return lessonsByBrand.get(brand);
+    let line;
+    try {
+      const rows = await sql`
+        SELECT "dismissReason", COUNT(*)::int AS "n"
+          FROM "SocialDraftRequest"
+         WHERE "status" = 'dismissed' AND "dismissReason" IS NOT NULL
+           AND "brand" = ${brand}
+           AND "answeredAt" > now() - interval '60 days'
+         GROUP BY "dismissReason"
+         ORDER BY "n" DESC
+         LIMIT 5`;
+      line = rows.length
+        ? rows.map((r) => `${r.dismissReason} ${r.n}×`).join(", ")
+        : undefined;
+    } catch {
+      line = undefined; // losing the lesson line must never cost the draft
+    }
+    lessonsByBrand.set(brand, line);
+    return line;
+  };
+
   for (const ask of pending) {
     console.log(`Draining google-free ask ${ask.id} (${ask.brand}: ${ask.brief})...`);
-    const basePrompt = `You are Databayt's lead social media writer for MENA.
-Write a social media post for product: ${ask.brand}.
-User Brief: ${ask.brief}
-${ask.instruction ? `Refinement Instruction: ${ask.instruction}` : ""}
-Angle: ${ask.angle ?? "pain"}
-Arabic Register: Rung ${ask.register ?? 2}
-
-House Rules:
-- Return ONLY valid JSON with keys "ar" and "en".
-- Arabic ("ar"): 300-600 characters, native Arabic. Use Latin digits (1, 2, 3).
-- English ("en"): 300-600 characters, plain and concrete.
-- JSON: {"ar": "...", "en": "..."}`;
+    const promptInput = {
+      brand: ask.brand,
+      brief: ask.brief,
+      instruction: ask.instruction ?? undefined,
+      angle: ask.angle ?? undefined,
+      register: ask.register ?? undefined,
+      lessons: await lessonsFor(ask.brand),
+    };
 
     // Same allowance `answer` builds: a figure from the brief, the reviewer's
     // instruction, or the parent draft stays legal on this turn.
@@ -629,18 +644,18 @@ House Rules:
       // The same gate-retry-refuse ladder as the server action's
       // draftInlineGated — the inline lane's other half. One corrective retry,
       // then the row is marked and left pending for the claude group.
-      let draft = await callGemini(basePrompt);
+      let draft = await callGemini(buildDraftPrompt(promptInput));
       let failures = gate(draft);
       if (failures.length) {
         console.log(`craft gate tripped (${failures.map((f) => f.rule).join(", ")}) — one corrective retry...`);
         draft = await callGemini(
-          `${basePrompt}\n\nYour previous attempt failed these craft rules — fix every one of them without breaking the others:\n${named(failures)}`,
+          buildDraftPrompt({ ...promptInput, violations: named(failures) }),
         );
         failures = gate(draft);
       }
 
       if (failures.length) {
-        const note = `${CRAFT_REFUSED} ${named(failures)}`.slice(0, 500);
+        const note = `${CRAFT_REFUSED_PREFIX} ${named(failures)}`.slice(0, 500);
         await sql`
           UPDATE "SocialDraftRequest"
              SET "note" = ${note}
@@ -662,7 +677,7 @@ House Rules:
 
       console.log(
         done.length
-          ? `✅ Answered ${ask.id} via ${GEMINI_MODEL}.`
+          ? `✅ Answered ${ask.id} via ${GEMINI_DRAFT_MODEL}.`
           : `skip: ${ask.id} was answered by another session mid-flight.`,
       );
     } catch (err) {

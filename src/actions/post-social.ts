@@ -242,6 +242,41 @@ interface InlineDraftOutcome {
   refusalNote: string | null;
 }
 
+/**
+ * The other half of the feedback loop, extended to the inline lane.
+ *
+ * `social-drafts.mjs lessons` has fed 60 days of human dismiss reasons into
+ * the Mac drain's prompt since 2026-08-06; the inline Gemini lane never saw
+ * them. One Prisma aggregate (hits the [brand, dismissReason] index) turns
+ * the same rows into one compact prompt line — zero model tokens, and the
+ * doctrine's cheapest quality lever now reaches the default lane too.
+ * Non-fatal by design: losing the lesson line must never cost the draft.
+ */
+async function recentDismissLessons(
+  brand: string,
+): Promise<string | undefined> {
+  try {
+    const groups = await db.socialDraftRequest.groupBy({
+      by: ["dismissReason"],
+      where: {
+        brand,
+        status: "dismissed",
+        dismissReason: { not: null },
+        answeredAt: { gt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000) },
+      },
+      _count: { _all: true },
+    });
+    const ranked = groups
+      .filter((g) => g.dismissReason)
+      .sort((a, b) => b._count._all - a._count._all)
+      .slice(0, 5);
+    if (ranked.length === 0) return undefined;
+    return ranked.map((g) => `${g.dismissReason} ${g._count._all}×`).join(", ");
+  } catch {
+    return undefined;
+  }
+}
+
 function refusalNoteFrom(failures: CraftFinding[]): string {
   // note is a human-and-machine surface: the prefix is the machine key, the
   // named rules are what the drain prompt feeds back to the writer. ~500 chars
@@ -265,6 +300,7 @@ function refusalNoteFrom(failures: CraftFinding[]): string {
 async function draftInlineGated(params: {
   product: string;
   brief: string;
+  instruction?: string;
   angle?: string;
   register?: number;
   /** Every text a number may legitimately come from — see CraftInput. */
@@ -280,7 +316,8 @@ async function draftInlineGated(params: {
       }),
     );
 
-  const first = await draftWithGeminiFree(params);
+  const lessons = await recentDismissLessons(params.product);
+  const first = await draftWithGeminiFree({ ...params, lessons });
   if (!first.ok || !first.ar || !first.en) {
     // Transport or quota miss — no craft verdict, so no marker. The row falls
     // to the queue plain, and drain-google may retry it when the quota resets.
@@ -293,6 +330,7 @@ async function draftInlineGated(params: {
 
   const retry = await draftWithGeminiFree({
     ...params,
+    lessons,
     violations: firstFailures.map((f) => `${f.rule}: ${f.message}`).join("; "),
   });
   if (!retry.ok || !retry.ar || !retry.en) {
@@ -492,7 +530,11 @@ export async function refineSocialDraft(
     ) {
       gated = await draftInlineGated({
         product: parent.brand,
-        brief: `${parent.brief}\nRefinement Instruction: ${parsed.data.instruction}`,
+        // The root brief travels unchanged; the instruction rides beside it
+        // (copy.mdx's refinement contract) — the prompt builder renders each
+        // in its own labelled slot.
+        brief: parent.brief,
+        instruction: parsed.data.instruction,
         angle: chosenAngle,
         register: chosenRegister,
         allowedFrom: [

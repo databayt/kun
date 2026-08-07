@@ -1,19 +1,14 @@
 import { createGoogle } from "@ai-sdk/google";
 import { generateObject } from "ai";
 import { z } from "zod";
+import { buildDraftPrompt, GEMINI_DRAFT_MODEL } from "@/lib/draft-prompt";
 
-/**
- * The one Gemini model the inline lane calls — chosen by measurement, not vibes.
- *
- * D-20260807 (.claude/memory/decisions/2026-08-07-gemini-inline-draft.md) timed
- * four models against the craft gate: gemini-3.6-flash hits p50 10.9s with 4/6
- * first-pass clean on a measured 20 requests/day free tier. gemini-2.5-flash —
- * what this file called before the reconcile — runs ~24s and loses the ~10s
- * target the lane exists for. `scripts/social-drafts.mjs` mirrors this value
- * (a .mjs cannot import TS); `src/lib/__tests__/google-draft.test.ts` pins the
- * two together.
- */
-export const GEMINI_DRAFT_MODEL = "gemini-3.6-flash";
+// The model id, the refusal marker, and the prompt live in the mirror pair
+// src/lib/draft-prompt.ts ⇄ scripts/lib/draft-prompt.mjs (parity-pinned by
+// draft-prompt.test.ts). Re-exported here because this module is the lane's
+// public face — callers reason about "the google draft lane", not about
+// where its prompt happens to live.
+export { CRAFT_REFUSED_PREFIX, GEMINI_DRAFT_MODEL } from "@/lib/draft-prompt";
 
 /**
  * The bilingual pair every draft lane returns. generateObject validates the
@@ -24,23 +19,6 @@ const draftObjectSchema = z.object({
   ar: z.string().min(1),
   en: z.string().min(1),
 });
-
-/**
- * Marks a pending row the inline lane REFUSED after a craft-tripping attempt
- * plus one corrective retry. Written into `SocialDraftRequest.note` (verified
- * unused on pending rows; `answer`/`fail` overwrite it, so the marker
- * self-cleans). Three readers key on it:
- *
- *   - `drain-google` skips marked rows, or a poisoned brief would burn the
- *     20-requests/day free tier at two calls per 60s tick;
- *   - `list` surfaces it as `craftRefused`, so the Mac claude lane writes
- *     fresh copy avoiding the named rules;
- *   - nothing else — the row stays an ordinary `pending` ask.
- *
- * Mirrored as CRAFT_REFUSED in scripts/social-drafts.mjs; pinned together by
- * src/lib/__tests__/google-draft.test.ts.
- */
-export const CRAFT_REFUSED_PREFIX = "craft-refused:";
 
 /**
  * The one-variable revert D-20260807 names: `SOCIAL_DRAFT_INLINE=off` returns
@@ -56,8 +34,12 @@ export function inlineDraftEnabled(): boolean {
 export interface GoogleDraftParams {
   product: string;
   brief: string;
+  /** A refinement turn's "what to change" — travels beside the root brief. */
+  instruction?: string;
   angle?: string;
   register?: number;
+  /** Aggregated dismiss reasons for this brand, e.g. "hook 3×, two-posts 1×". */
+  lessons?: string;
   /**
    * Named craft-rule failures from a previous attempt, e.g.
    * "invented-number: 40% is not in the brief". Present only on the one
@@ -73,16 +55,6 @@ export interface GoogleDraftResult {
   error?: string;
 }
 
-const BRAND_CONTEXTS: Record<string, string> = {
-  hogwarts:
-    "hogwarts — school management SaaS (multi-tenant SIS/LMS: admission, attendance, timetable, exams, grades, finance). Audience: school owners, principals, and operators in MENA.",
-  mkan: "mkan (مكان) — rental marketplace for property listings and bookings.",
-  databayt:
-    "databayt — the company itself: open source, the sharing-economy doctrine, engineering craft.",
-  sijillee: "sijillee (سِجلي) — records/documents product.",
-  moalimee: "moalimee (مُعلّمي) — teacher/tutor marketplace.",
-};
-
 export async function draftWithGeminiFree(
   params: GoogleDraftParams,
 ): Promise<GoogleDraftResult> {
@@ -91,29 +63,15 @@ export async function draftWithGeminiFree(
     return { ok: false, error: "GEMINI_API_KEY is not configured." };
   }
 
-  const brandContext =
-    BRAND_CONTEXTS[params.product] ??
-    `${params.product} — SaaS product by Databayt.`;
-
-  const prompt = `You are Databayt's lead social media writer for MENA.
-Write a social media post for product: ${params.product}.
-Product description: ${brandContext}
-User Brief: ${params.brief}
-Angle directive: ${params.angle ?? "Choose the best angle (pain, moment, or proof)"}
-Arabic Register directive: Rung ${params.register ?? 2} (2=simplified MSA, 3=pan-Arab, 4=Sudanese dialect)
-
-House Rules:
-- Return ONLY valid JSON with keys "ar" and "en".
-- Arabic copy ("ar"): Write native, engaging Arabic (300-600 characters). Use Latin digits (1, 2, 3) rather than Arabic-Indic digits (١, ٢, ٣). No "🚀" or clickbait.
-- English copy ("en"): Parallel English post (300-600 characters). Plain, concrete, confident.
-- Format: {"ar": "...", "en": "..."}${
-    params.violations
-      ? `
-
-Your previous attempt failed these craft rules — fix every one of them without breaking the others:
-${params.violations}`
-      : ""
-  }`;
+  const prompt = buildDraftPrompt({
+    brand: params.product,
+    brief: params.brief,
+    instruction: params.instruction,
+    angle: params.angle,
+    register: params.register,
+    lessons: params.lessons,
+    violations: params.violations,
+  });
 
   try {
     // AI SDK generateObject replaces the hand-rolled fetch + JSON.parse: the
