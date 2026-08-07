@@ -533,11 +533,80 @@ if (command === "list") {
     console.log(`\n${failures.length} hard failure(s).`);
     process.exit(1);
   }
+} else if (command === "drain-google") {
+  const pending = await sql`
+    SELECT "id", "brand", "brief", "instruction", "angle", "register", "model"
+      FROM "SocialDraftRequest"
+     WHERE "status" = 'pending'
+       AND ("model" IS NULL OR "model" = 'google-free')
+     ORDER BY "createdAt" ASC`;
+
+  if (!pending.length) {
+    console.log("No google-free pending asks.");
+    process.exit(0);
+  }
+
+  const apiKey = (process.env.GEMINI_API_KEY ?? "").trim();
+  if (!apiKey) {
+    console.error("GEMINI_API_KEY is not set.");
+    process.exit(1);
+  }
+
+  for (const ask of pending) {
+    console.log(`Draining google-free ask ${ask.id} (${ask.brand}: ${ask.brief})...`);
+    const promptText = `You are Databayt's lead social media writer for MENA.
+Write a social media post for product: ${ask.brand}.
+User Brief: ${ask.brief}
+${ask.instruction ? `Refinement Instruction: ${ask.instruction}` : ""}
+Angle: ${ask.angle ?? "pain"}
+Arabic Register: Rung ${ask.register ?? 2}
+
+House Rules:
+- Return ONLY valid JSON with keys "ar" and "en".
+- Arabic ("ar"): 300-600 characters, native Arabic. Use Latin digits (1, 2, 3).
+- English ("en"): 300-600 characters, plain and concrete.
+- JSON: {"ar": "...", "en": "..."}`;
+
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: promptText }] }],
+            generationConfig: {
+              responseMimeType: "application/json",
+              temperature: 0.7,
+            },
+          }),
+        },
+      );
+      const data = await res.json();
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!text) throw new Error("Empty Gemini response");
+      const parsed = JSON.parse(text);
+      if (!parsed.ar || !parsed.en) throw new Error("Invalid ar/en structure");
+
+      await sql`
+        UPDATE "SocialDraftRequest"
+           SET "status" = 'answered',
+               "ar" = ${parsed.ar.trim()},
+               "en" = ${parsed.en.trim()},
+               "answeredAt" = NOW()
+         WHERE "id" = ${ask.id}`;
+
+      console.log(`✅ Answered ${ask.id} via Gemini 2.5 Flash.`);
+    } catch (err) {
+      console.error(`Failed to drain ${ask.id}:`, err.message);
+    }
+  }
 } else {
   console.log(
     [
       "Usage:",
       "  node scripts/social-drafts.mjs list",
+      "  node scripts/social-drafts.mjs drain-google",
       "  node scripts/social-drafts.mjs lessons [--brand hogwarts]",
       "  node scripts/social-drafts.mjs check [<id>] --ar <file> [--en <file>] [--brief <file>] [--brand X] [--channel Y]",
       '  node scripts/social-drafts.mjs answer <id> --ar <file> --en <file> [--media "url1,url2"] [--note ...]',

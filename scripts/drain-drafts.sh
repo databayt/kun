@@ -232,6 +232,9 @@ Finally, print for each ask the three angles you considered and which one won: t
 PROMPT_END
 
 for pass in $(seq 1 $PASSES); do
+    # Drain any google-free asks first via direct Gemini API
+    node scripts/social-drafts.mjs drain-google >> "$LOG_FILE" 2>&1 || true
+
     # The list beats the heartbeat even when empty — that write is the whole
     # "somebody is watching the queue" signal.
     PENDING="$(node scripts/social-drafts.mjs list --json 2>>"$LOG_FILE")" || {
