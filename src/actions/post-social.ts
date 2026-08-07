@@ -28,7 +28,8 @@ import {
   DISMISS_REASON_IDS,
   DRAFT_MODEL_IDS,
 } from "@/components/root/social/knobs";
-import { draftWithGeminiFree } from "@/lib/google-draft";
+import { CRAFT_REFUSED_PREFIX, draftWithGeminiFree } from "@/lib/google-draft";
+import { checkCraft, craftFailures, type CraftFinding } from "@/lib/craft";
 
 // Long enough for a human to see it in the morning, short enough that a
 // leaked link goes stale before it is useful. Matches the cron.
@@ -224,6 +225,85 @@ async function resolveReference(
   return referenceId;
 }
 
+interface InlineDraftOutcome {
+  /** Craft-clean copy, ready to land the row `answered` inline. */
+  result: { ar: string; en: string } | null;
+  /**
+   * Set when the lane REFUSED: the attempt tripped the craft gate and the one
+   * corrective retry either tripped it again or could not run. Written to
+   * `note` on the pending row — drain-google skips it, `list` shows the Mac
+   * lane what failed.
+   */
+  refusalNote: string | null;
+}
+
+function refusalNoteFrom(failures: CraftFinding[]): string {
+  // note is a human-and-machine surface: the prefix is the machine key, the
+  // named rules are what the drain prompt feeds back to the writer. ~500 chars
+  // keeps a many-failure draft from turning the column into a transcript.
+  return `${CRAFT_REFUSED_PREFIX} ${failures
+    .map((f) => `${f.rule}: ${f.message}`)
+    .join("; ")}`.slice(0, 500);
+}
+
+// The inline half of the gate `social-drafts.mjs answer` has run since
+// 2026-08-06. Until this helper existed the Gemini lanes bypassed the craft
+// gate entirely — copy.mdx's "auto-fail, no discussion" was executed on the
+// Mac fallback lane and skipped by the DEFAULT one, so ungated copy reached
+// the review queue at exactly the speed that made it the common path.
+//
+// Same doctrine as `answer`: a failing draft is rewritten before it is
+// answered, never answered with a warning attached. One corrective retry —
+// each call spends the measured 20-requests/day free tier (D-20260807) — then
+// refuse to the queue, which is this lane's pre-existing fallback for every
+// other kind of inline miss.
+async function draftInlineGated(params: {
+  product: string;
+  brief: string;
+  angle?: string;
+  register?: number;
+  /** Every text a number may legitimately come from — see CraftInput. */
+  allowedFrom: string;
+}): Promise<InlineDraftOutcome> {
+  const gate = (ar: string, en: string): CraftFinding[] =>
+    craftFailures(
+      checkCraft({
+        ar,
+        en,
+        brand: params.product,
+        allowedFrom: params.allowedFrom,
+      }),
+    );
+
+  const first = await draftWithGeminiFree(params);
+  if (!first.ok || !first.ar || !first.en) {
+    // Transport or quota miss — no craft verdict, so no marker. The row falls
+    // to the queue plain, and drain-google may retry it when the quota resets.
+    return { result: null, refusalNote: null };
+  }
+  const firstFailures = gate(first.ar, first.en);
+  if (firstFailures.length === 0) {
+    return { result: { ar: first.ar, en: first.en }, refusalNote: null };
+  }
+
+  const retry = await draftWithGeminiFree({
+    ...params,
+    violations: firstFailures.map((f) => `${f.rule}: ${f.message}`).join("; "),
+  });
+  if (!retry.ok || !retry.ar || !retry.en) {
+    // The brief already tripped the gate once and the retry could not run.
+    // Mark it anyway: letting drain-google spend two more requests
+    // rediscovering the same failures is how a poisoned brief burns the day's
+    // quota, and the Mac lane writes better copy regardless.
+    return { result: null, refusalNote: refusalNoteFrom(firstFailures) };
+  }
+  const retryFailures = gate(retry.ar, retry.en);
+  if (retryFailures.length === 0) {
+    return { result: { ar: retry.ar, en: retry.en }, refusalNote: null };
+  }
+  return { result: null, refusalNote: refusalNoteFrom(retryFailures) };
+}
+
 // The agent window's ask. It does NOT call the Anthropic API: the engine's
 // billing posture is subscription-only, so no API key has credits to spend
 // (verified against production 2026-07-30 — see the decision record). The ask
@@ -248,21 +328,21 @@ export async function requestSocialDraft(
   }
 
   try {
-    let instantResult: { ar: string; en: string } | null = null;
+    let gated: InlineDraftOutcome = { result: null, refusalNote: null };
     if (
       (!parsed.data.model || parsed.data.model === "google-free") &&
       process.env.GEMINI_API_KEY
     ) {
-      const geminiRes = await draftWithGeminiFree({
+      gated = await draftInlineGated({
         product: parsed.data.product,
         brief: parsed.data.brief,
         angle: parsed.data.angle,
         register: parsed.data.register,
+        // A root ask has no thread yet — the brief is the whole allowance.
+        allowedFrom: parsed.data.brief,
       });
-      if (geminiRes.ok && geminiRes.ar && geminiRes.en) {
-        instantResult = { ar: geminiRes.ar, en: geminiRes.en };
-      }
     }
+    const instantResult = gated.result;
 
     const row = await db.socialDraftRequest.create({
       data: {
@@ -280,6 +360,7 @@ export async function requestSocialDraft(
         status: instantResult ? "answered" : "pending",
         ar: instantResult?.ar ?? null,
         en: instantResult?.en ?? null,
+        note: gated.refusalNote,
         answeredAt: instantResult ? new Date() : null,
       },
     });
@@ -354,6 +435,11 @@ export async function refineSocialDraft(
       angle: true,
       register: true,
       referenceId: true,
+      // The craft gate's allowance: a number the parent draft already carries
+      // (or the reviewer's own instruction asks for) stays legal on the child —
+      // same construction as `answer`'s in social-drafts.mjs.
+      ar: true,
+      en: true,
     },
   });
   if (!parent) {
@@ -387,21 +473,27 @@ export async function refineSocialDraft(
     const chosenAngle = parsed.data.angle ?? parent.angle ?? undefined;
     const chosenRegister = parsed.data.register ?? parent.register ?? undefined;
 
-    let instantResult: { ar: string; en: string } | null = null;
+    let gated: InlineDraftOutcome = { result: null, refusalNote: null };
     if (
       (!chosenModel || chosenModel === "google-free") &&
       process.env.GEMINI_API_KEY
     ) {
-      const geminiRes = await draftWithGeminiFree({
+      gated = await draftInlineGated({
         product: parent.brand,
         brief: `${parent.brief}\nRefinement Instruction: ${parsed.data.instruction}`,
         angle: chosenAngle,
         register: chosenRegister,
+        allowedFrom: [
+          parent.brief,
+          parsed.data.instruction,
+          parent.ar,
+          parent.en,
+        ]
+          .filter(Boolean)
+          .join("\n"),
       });
-      if (geminiRes.ok && geminiRes.ar && geminiRes.en) {
-        instantResult = { ar: geminiRes.ar, en: geminiRes.en };
-      }
     }
+    const instantResult = gated.result;
 
     const row = await db.socialDraftRequest.create({
       data: {
@@ -419,6 +511,7 @@ export async function refineSocialDraft(
         status: instantResult ? "answered" : "pending",
         ar: instantResult?.ar ?? null,
         en: instantResult?.en ?? null,
+        note: gated.refusalNote,
         answeredAt: instantResult ? new Date() : null,
       },
     });

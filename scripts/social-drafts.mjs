@@ -68,6 +68,13 @@ const sql = neon(url);
 // src/lib/__tests__/google-draft.test.ts; change both or the pin fails.
 const GEMINI_MODEL = "gemini-3.6-flash";
 
+// MIRROR of CRAFT_REFUSED_PREFIX in src/lib/google-draft.ts, pinned by the same
+// test. A pending row whose note starts with this already failed the Gemini
+// lane's craft gate twice: drain-google must SKIP it (or a poisoned brief burns
+// the 20-requests/day quota at two calls per tick), and `list` surfaces it as
+// `craftRefused` so the claude lane writes fresh copy avoiding the named rules.
+const CRAFT_REFUSED = "craft-refused:";
+
 function flag(name) {
   const i = process.argv.indexOf(`--${name}`);
   return i > -1 ? process.argv[i + 1] : undefined;
@@ -124,7 +131,7 @@ if (command === "list") {
   const rows = await sql`
     SELECT r."id", r."brand", r."brief", r."requestedBy", r."createdAt",
            r."mediaUrls", r."turn", r."instruction",
-           r."model", r."angle", r."register",
+           r."model", r."angle", r."register", r."note",
            p."ar" AS "parentAr", p."en" AS "parentEn",
            ref."ar" AS "referenceAr"
     FROM "SocialDraftRequest" r
@@ -177,6 +184,10 @@ if (command === "list") {
           ...(r.angle && { angle: r.angle }),
           ...(r.register && { register: r.register }),
           ...(r.referenceAr && { referenceAr: r.referenceAr }),
+          // The Gemini lane already tried this ask and the craft gate refused
+          // both attempts — the named rules ride along so the writer avoids
+          // them instead of rediscovering them.
+          ...(r.note?.startsWith(CRAFT_REFUSED) && { craftRefused: r.note }),
         })),
         null,
         2,
@@ -539,12 +550,19 @@ if (command === "list") {
     process.exit(1);
   }
 } else if (command === "drain-google") {
+  // Skip craft-refused rows by note prefix: those already cost two Gemini
+  // calls and failed the gate on both — they belong to the claude group in
+  // the same tick, not to another 2-requests-per-minute retry loop.
   const pending = await sql`
-    SELECT "id", "brand", "brief", "instruction", "angle", "register", "model"
-      FROM "SocialDraftRequest"
-     WHERE "status" = 'pending'
-       AND ("model" IS NULL OR "model" = 'google-free')
-     ORDER BY "createdAt" ASC`;
+    SELECT r."id", r."brand", r."brief", r."instruction", r."angle",
+           r."register", r."model",
+           p."ar" AS "parentAr", p."en" AS "parentEn"
+      FROM "SocialDraftRequest" r
+      LEFT JOIN "SocialDraftRequest" p ON p."id" = r."parentId"
+     WHERE r."status" = 'pending'
+       AND (r."model" IS NULL OR r."model" = 'google-free')
+       AND (r."note" IS NULL OR r."note" NOT LIKE ${`${CRAFT_REFUSED}%`})
+     ORDER BY r."createdAt" ASC`;
 
   if (!pending.length) {
     console.log("No google-free pending asks.");
@@ -557,9 +575,32 @@ if (command === "list") {
     process.exit(1);
   }
 
+  const callGemini = async (promptText) => {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: promptText }] }],
+          generationConfig: {
+            responseMimeType: "application/json",
+            temperature: 0.7,
+          },
+        }),
+      },
+    );
+    const data = await res.json();
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!text) throw new Error("Empty Gemini response");
+    const parsed = JSON.parse(text);
+    if (!parsed.ar || !parsed.en) throw new Error("Invalid ar/en structure");
+    return { ar: parsed.ar.trim(), en: parsed.en.trim() };
+  };
+
   for (const ask of pending) {
     console.log(`Draining google-free ask ${ask.id} (${ask.brand}: ${ask.brief})...`);
-    const promptText = `You are Databayt's lead social media writer for MENA.
+    const basePrompt = `You are Databayt's lead social media writer for MENA.
 Write a social media post for product: ${ask.brand}.
 User Brief: ${ask.brief}
 ${ask.instruction ? `Refinement Instruction: ${ask.instruction}` : ""}
@@ -572,36 +613,58 @@ House Rules:
 - English ("en"): 300-600 characters, plain and concrete.
 - JSON: {"ar": "...", "en": "..."}`;
 
-    try {
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: promptText }] }],
-            generationConfig: {
-              responseMimeType: "application/json",
-              temperature: 0.7,
-            },
-          }),
-        },
+    // Same allowance `answer` builds: a figure from the brief, the reviewer's
+    // instruction, or the parent draft stays legal on this turn.
+    const allowedFrom = [ask.brief, ask.instruction, ask.parentAr, ask.parentEn]
+      .filter(Boolean)
+      .join("\n");
+    const gate = (draft) =>
+      craftFailures(
+        checkCraft({ ar: draft.ar, en: draft.en, brand: ask.brand, allowedFrom }),
       );
-      const data = await res.json();
-      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (!text) throw new Error("Empty Gemini response");
-      const parsed = JSON.parse(text);
-      if (!parsed.ar || !parsed.en) throw new Error("Invalid ar/en structure");
+    const named = (failures) =>
+      failures.map((f) => `${f.rule}: ${f.message}`).join("; ");
 
-      await sql`
+    try {
+      // The same gate-retry-refuse ladder as the server action's
+      // draftInlineGated — the inline lane's other half. One corrective retry,
+      // then the row is marked and left pending for the claude group.
+      let draft = await callGemini(basePrompt);
+      let failures = gate(draft);
+      if (failures.length) {
+        console.log(`craft gate tripped (${failures.map((f) => f.rule).join(", ")}) — one corrective retry...`);
+        draft = await callGemini(
+          `${basePrompt}\n\nYour previous attempt failed these craft rules — fix every one of them without breaking the others:\n${named(failures)}`,
+        );
+        failures = gate(draft);
+      }
+
+      if (failures.length) {
+        const note = `${CRAFT_REFUSED} ${named(failures)}`.slice(0, 500);
+        await sql`
+          UPDATE "SocialDraftRequest"
+             SET "note" = ${note}
+           WHERE "id" = ${ask.id} AND "status" = 'pending'`;
+        console.log(`⛔ Refused ${ask.id} — ${failures.length} craft failure(s); left pending for the claude lane.`);
+        continue;
+      }
+
+      // Conditional on `pending`, like `answer`: a claude session racing this
+      // tick must not have its finished draft overwritten by a slower Gemini.
+      const done = await sql`
         UPDATE "SocialDraftRequest"
            SET "status" = 'answered',
-               "ar" = ${parsed.ar.trim()},
-               "en" = ${parsed.en.trim()},
+               "ar" = ${draft.ar},
+               "en" = ${draft.en},
                "answeredAt" = NOW()
-         WHERE "id" = ${ask.id}`;
+         WHERE "id" = ${ask.id} AND "status" = 'pending'
+        RETURNING "id"`;
 
-      console.log(`✅ Answered ${ask.id} via ${GEMINI_MODEL}.`);
+      console.log(
+        done.length
+          ? `✅ Answered ${ask.id} via ${GEMINI_MODEL}.`
+          : `skip: ${ask.id} was answered by another session mid-flight.`,
+      );
     } catch (err) {
       console.error(`Failed to drain ${ask.id}:`, err.message);
     }

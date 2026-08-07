@@ -11,11 +11,34 @@
  */
 export const GEMINI_DRAFT_MODEL = "gemini-3.6-flash";
 
+/**
+ * Marks a pending row the inline lane REFUSED after a craft-tripping attempt
+ * plus one corrective retry. Written into `SocialDraftRequest.note` (verified
+ * unused on pending rows; `answer`/`fail` overwrite it, so the marker
+ * self-cleans). Three readers key on it:
+ *
+ *   - `drain-google` skips marked rows, or a poisoned brief would burn the
+ *     20-requests/day free tier at two calls per 60s tick;
+ *   - `list` surfaces it as `craftRefused`, so the Mac claude lane writes
+ *     fresh copy avoiding the named rules;
+ *   - nothing else — the row stays an ordinary `pending` ask.
+ *
+ * Mirrored as CRAFT_REFUSED in scripts/social-drafts.mjs; pinned together by
+ * src/lib/__tests__/google-draft.test.ts.
+ */
+export const CRAFT_REFUSED_PREFIX = "craft-refused:";
+
 export interface GoogleDraftParams {
   product: string;
   brief: string;
   angle?: string;
   register?: number;
+  /**
+   * Named craft-rule failures from a previous attempt, e.g.
+   * "invented-number: 40% is not in the brief". Present only on the one
+   * corrective retry the lane allows.
+   */
+  violations?: string;
 }
 
 export interface GoogleDraftResult {
@@ -58,7 +81,14 @@ House Rules:
 - Return ONLY valid JSON with keys "ar" and "en".
 - Arabic copy ("ar"): Write native, engaging Arabic (300-600 characters). Use Latin digits (1, 2, 3) rather than Arabic-Indic digits (١, ٢, ٣). No "🚀" or clickbait.
 - English copy ("en"): Parallel English post (300-600 characters). Plain, concrete, confident.
-- Format: {"ar": "...", "en": "..."}`;
+- Format: {"ar": "...", "en": "..."}${
+    params.violations
+      ? `
+
+Your previous attempt failed these craft rules — fix every one of them without breaking the others:
+${params.violations}`
+      : ""
+  }`;
 
   try {
     const res = await fetch(
