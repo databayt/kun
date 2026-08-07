@@ -250,7 +250,7 @@ for pass in $(seq 1 $PASSES); do
         # Tools are allow-listed to exactly what queue mode needs: the queue
         # script, doc reads, and answer files. --max-turns caps a runaway session.
         ID_COUNT="$(printf '%s' "$IDS" | wc -w | tr -d ' ')"
-        if [ "$group" = "default" ]; then
+        if [ "$group" = "default" ] || [ "$group" = "google-free" ]; then
             claude -p "${PROMPT//__IDS__/$IDS}" \
                 --allowedTools "Bash(node scripts/social-drafts.mjs*)" "Read" "Write" "Glob" "Grep" \
                 --max-turns 50 >> "$LOG_FILE" 2>&1
