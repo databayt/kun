@@ -211,6 +211,7 @@ function score(cases, answers) {
       hit3: rank >= 1 && rank <= 3,
       trivial: isTrivial(c),
       lexical: (c.tags || []).includes("lexical"),
+      real: (c.tags || []).includes("real"),
       destructive: isDestructive(c),
       split: c.split,
       adjudicatedAway: false,
@@ -219,7 +220,13 @@ function score(cases, answers) {
   return rows;
 }
 
-function metrics(rows) {
+function metrics(allRows) {
+  // Fidelity rows are real transcript dispatches replayed through the proxy.
+  // Their agreement rate IS proxy_fidelity; they enter no headline stratum and
+  // no per-skill P/R — mixing usage-derived rows into the authored corpus would
+  // let survivorship bias inflate the score.
+  const fid = allRows.filter((r) => r.real);
+  const rows = allRows.filter((r) => !r.real);
   const pos = rows.filter((r) => r.label !== "none");
   const none = rows.filter((r) => r.label === "none");
   const hard = rows.filter((r) => !r.trivial);
@@ -329,8 +336,14 @@ function metrics(rows) {
     per_skill: perSkill,
     top_confusions: topConfusions,
     merge_candidates: mergeCandidates,
+    // Agreement between the proxy and what the live loop actually dispatched.
+    // Bounds gross proxy error; certifies nothing (n is small, survivorship-
+    // biased, and grows for free every session).
+    proxy_fidelity: pct(fid.filter((r) => r.hit1).length, fid.length),
+    n_fidelity: fid.length,
     counts: {
       scored: rows.length,
+      fidelity: fid.length,
       positive: pos.length,
       none: none.length,
       hard: hard.length,
@@ -469,6 +482,10 @@ await pipeline(
       .map((r) => {
         const l = labelById.get(r.case_id);
         if (!l) return null;
+        // Fidelity rows are never adjudicated: their label is what the live
+        // loop actually did, which is a fact, not a judgment call. A proxy
+        // disagreement here is exactly the number we are measuring.
+        if ((l.tags || []).includes("real")) return null;
         const top = (r.top || []).map(norm);
         const label = norm(l.label);
         const fired = r.fired !== false;
@@ -563,7 +580,8 @@ await agent(
     `it is a write-once record of which cases are holdout, and losing it would silently reassign holdout membership.\n\n` +
     `Steps:\n` +
     `1. Read ${SCORES_PATH}.\n` +
-    `2. Set \`current\` to the metrics below (top1_hard, top1, top3, mrr, fp_rate, destructive_fp, abstain_error, macro_f1, weighted_f1, holdout_top1_hard, train_holdout_gap, listing_chars, degraded, unadjudicated).\n` +
+    `2. Set \`current\` to the metrics below (top1_hard, top1, top1_lexical_free, top3, mrr, fp_rate, destructive_fp, abstain_error, macro_f1, weighted_f1, holdout_top1_hard, train_holdout_gap, listing_chars, degraded, unadjudicated).\n` +
+    `   Also set the top-level \`proxy_fidelity\` object: { n: <n_fidelity>, agreement: <proxy_fidelity>, note: keep the existing note }.\n` +
     `3. Set \`current_value\` to top1_hard, \`top_confusions\` and \`merge_candidates\` to the arrays below, and merge the per-skill precision/recall/f1/fp/top3 into the matching \`per_skill\` entries — keep each entry's existing chars/scope/fp_cost/claude_md_routed/has_when_to_use fields.\n` +
     `4. Append ONE entry to \`weekly_history\`: { week_of: <today, from \`date +%F\`>, top1_hard, holdout_top1_hard, fp_rate, listing_chars, cases: <cases_scored>, delta: <top1_hard minus the previous entry's, or null if first>, note }. ` +
     `In \`note\`, state plainly if the run was DEGRADED and why.\n` +

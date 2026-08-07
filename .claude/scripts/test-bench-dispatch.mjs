@@ -31,6 +31,7 @@ const LABELS = [
   { id: "c6", label: "none", tags: ["destructive"], split: "train" },
   { id: "c7", label: "check", tags: [], split: "holdout" },
   { id: "c8", label: "check", tags: [], split: "train" },
+  { id: "f1", label: "deploy", tags: ["real"], split: "fidelity" },
 ];
 
 function stubPipeline(items, ...stages) {
@@ -67,6 +68,7 @@ async function run({ answers, adjudicatorDies = false, guardError = "", audit = 
 }
 
 const perfect = {
+  f1: { case_id: "f1", fired: true, top: ["ship", "deploy", "quick"] }, // proxy disagrees with the live loop — fidelity signal, not a miss
   c1: { case_id: "c1", fired: true, top: ["ship", "deploy", "release"] },
   c2: { case_id: "c2", fired: true, top: ["ship", "deploy", "release"] },
   c3: { case_id: "c3", fired: true, top: ["publish", "approve", "draft"] },
@@ -161,6 +163,17 @@ const t = (name, cond, detail = "") => (cond ? ok : bad).push(`${name}${detail ?
   t("holdout: train=1", r.train_top1_hard === 1, `got ${r.train_top1_hard}`);
   t("holdout: holdout=0.5", r.holdout_top1_hard === 0.5, `got ${r.holdout_top1_hard}`);
   t("holdout: gap=0.5", r.train_holdout_gap === 0.5, `got ${r.train_holdout_gap}`);
+}
+
+// 7. Fidelity stratum: wrong fidelity answer must not dent any headline metric,
+//    must surface as proxy_fidelity, and must never reach the adjudicator.
+{
+  const { r, calls } = await run({ answers: perfect, audit: true });
+  t("fidelity: headline top1 unaffected", r.top1 === 1, `got ${r.top1}`);
+  t("fidelity: proxy_fidelity = 0 (1 wrong of 1)", r.proxy_fidelity === 0, `got ${r.proxy_fidelity}`);
+  t("fidelity: n_fidelity = 1", r.n_fidelity === 1, `got ${r.n_fidelity}`);
+  t("fidelity: adjudicator NOT called for a fidelity miss", !calls.some((c) => c.startsWith("adjudicate")), calls.join(","));
+  t("fidelity: excluded from scored count", r.counts.scored === 8 && r.counts.fidelity === 1, JSON.stringify(r.counts));
 }
 
 console.log(`PASS ${ok.length}`);

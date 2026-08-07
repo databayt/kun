@@ -20,17 +20,30 @@ write both the cases and the answers is measuring its own reflection.
 - `bench` — full sweep (all implemented layers), appends one `weekly_history` entry
 - `bench dispatch` — L1 only
 - `bench dispatch --audit` — score and report, write nothing
-- `bench --tune <skill>` — propose a description rewrite, gated on holdout gain
-- `bench --retire` — merge candidates + absorption + usage evidence, for a `/decide`
+- `bench --retire` — `node .claude/scripts/bench-retire.mjs` — retirement _evidence_ (usage ×
+  redundancy × cost), ranked for a `/decide`. Deterministic, zero tokens, never applies anything.
+- `bench --tune <skill>` — propose a **trim**: shorter description, accuracy held. L1 saturated
+  at 1.0, so accuracy has no headroom — the open target is the other co-primary, `listing_chars`
+  (31.4k paid on every prompt). A trim proposal is accepted only if the tripwire re-run holds 1.0
+  and `destructive_fp` stays 0; guard 1 still applies (never touch the `Triggers on:` tail).
 
 ## Layers
 
-| Layer            | Question                                                      | Grading                                    | Status  |
-| ---------------- | ------------------------------------------------------------- | ------------------------------------------ | ------- |
-| **L1 dispatch**  | Does the right skill fire, and do the wrong ones stay silent? | exact string match, zero LLM               | shipped |
-| **L2 contracts** | Is what a skill declares about itself still true?             | `lint-contracts.mjs` — deterministic       | shipped |
-| L2 behavioral    | Did a real run honor the contract it declared?                | transcript-mined                           | planned |
-| **L3 outcome**   | Is the artifact any good?                                     | LLM judge, calibrated against human labels | planned |
+| Layer            | Question                                                      | Grading                                                                      | Status  |
+| ---------------- | ------------------------------------------------------------- | ---------------------------------------------------------------------------- | ------- |
+| **L1 dispatch**  | Does the right skill fire, and do the wrong ones stay silent? | exact string match, zero LLM                                                 | shipped |
+| **L1 fidelity**  | Does the proxy agree with what the live loop actually did?    | real transcript pairs as a `fidelity` stratum — `proxy_fidelity`, auto-grows | shipped |
+| **L2 contracts** | Is what a skill declares about itself still true?             | `lint-contracts.mjs` — deterministic                                         | shipped |
+| L2 behavioral    | Did a real run honor the contract it declared?                | transcript-mined                                                             | planned |
+| **L3 outcome**   | Is the artifact any good?                                     | LLM judge, calibrated against human labels                                   | planned |
+
+**The corpus grows from usage, not authorship.** `harvest-transcripts.mjs --out
+.claude/evals/cases/real-pairs.json` feeds real dispatches into the extractor as
+`source: real_pair` — labelled by what the live loop actually did. They carry
+`split: "fidelity"`: never in the train/holdout ledger, never in any headline stratum, never
+adjudicated (their label is a fact, not a judgment call). Their agreement rate **is**
+`proxy_fidelity`, and `n` climbs for free every session. This is the honest answer to "cases must
+be written by another hand" — reality is the other hand.
 
 ## L1 — dispatch
 
@@ -126,6 +139,7 @@ survivorship-biased — it never sees the dispatch that _should_ have happened a
 | `.claude/scripts/lint-contracts.mjs`         | L2 contracts — deterministic, wired into `health.sh`                  |
 | `.claude/scripts/audit-bench-run.mjs`        | post-run contamination check (guard 9)                                |
 | `.claude/scripts/harvest-transcripts.mjs`    | real prompt→skill pairs for proxy fidelity                            |
+| `.claude/scripts/bench-retire.mjs`           | retirement evidence — usage × redundancy × cost, for a `/decide`      |
 | `.claude/evals/cases/dispatch.json`          | generated case set — git-tracked so a corpus change shows in the diff |
 | `.claude/memory/skill-scores.json`           | measured state + longitudinal `weekly_history`                        |
 

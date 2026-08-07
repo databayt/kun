@@ -2246,6 +2246,46 @@
     {
       "id": "kw:qa:qa-this-block-8f4f",
       "prompt": "QA this block"
+    },
+    {
+      "id": "real:clone:clone-https-gemini-google-overview-image-generat-0d28",
+      "prompt": "clone https://gemini.google/overview/image-generation/ section Dial in every detail\nwith Nano Banana. as a template"
+    },
+    {
+      "id": "real:qa:qa-admission-block-82b0",
+      "prompt": "qa admission block"
+    },
+    {
+      "id": "real:qa:audit-admission-block-for-shipping-it-we-be-in-u-2682",
+      "prompt": "audit admission block for shipping , it we be in use from towmorrw .. ensure full translaition and internationlaztion and full production readness , health routes and functioning ui and seed"
+    },
+    {
+      "id": "real:qa:test-admission-block-4de3",
+      "prompt": "test admission block"
+    },
+    {
+      "id": "real:draft:run-the-draft-skill-in-queue-mode-drain-every-pe-57c0",
+      "prompt": "Run the /draft skill in queue mode: drain every pending ask via 'node scripts/social-drafts.mjs'. Write each answer's Arabic and English to temp files and pass them with 'answer <id> --ar <file> --en <file>'. Every ask must end answered or failed — never left pending."
+    },
+    {
+      "id": "real:higgs:higgs-edit-this-vido-https-www-youtube-com-short-50d1",
+      "prompt": "higgs edit this vido https://www.youtube.com/shorts/yqA_C-c0ibc to preserve everything while tune it for arabic , sudan , and replace airbnb with mkan"
+    },
+    {
+      "id": "real:sync:what-is-next-55ec",
+      "prompt": "what is next"
+    },
+    {
+      "id": "real:social:now-foucs-on-hogwarts-and-facebook-we-want-to-te-713f",
+      "prompt": "now foucs on hogwarts and facebook we want to test the soical workflow end to end"
+    },
+    {
+      "id": "real:auth:test-in-production-in-fornt-of-me-bc53",
+      "prompt": "test in production in fornt of me"
+    },
+    {
+      "id": "real:performance:optimize-mkan-e9dd",
+      "prompt": "optimize mkan"
     }
   ]
 }

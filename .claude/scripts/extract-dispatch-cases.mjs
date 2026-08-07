@@ -461,6 +461,35 @@ for (const name of noTrigger) {
   }
 }
 
+// 4. Real dispatches harvested from session transcripts — the corpus growing
+//    from USAGE rather than from the hand that wrote the descriptions. These are
+//    a FIDELITY set, never a tuning set: the label is "what the live loop
+//    actually did", which is survivorship-biased and not proof the dispatch was
+//    right. So they carry split:"fidelity", never enter the train/holdout
+//    ledger, and are excluded from every headline stratum — their accuracy IS
+//    proxy_fidelity, published as its own number.
+//    Regenerate with: node .claude/scripts/harvest-transcripts.mjs --out .claude/evals/cases/real-pairs.json
+let realPairs = 0;
+const REAL_PAIRS_PATH = join(ROOT, ".claude/evals/cases/real-pairs.json");
+if (existsSync(REAL_PAIRS_PATH)) {
+  try {
+    const harvested = JSON.parse(readFileSync(REAL_PAIRS_PATH, "utf8"));
+    for (const p of harvested.pairs || []) {
+      if (!skillNames.has(p.skill)) continue; // built-ins can't be shown to the grader
+      realPairs++;
+      addCase({
+        id: caseId("real", p.skill, p.prompt),
+        prompt: p.prompt,
+        label: p.skill,
+        source: "real_pair",
+        tags: ["real"],
+      });
+    }
+  } catch {
+    findings.push({ kind: "real-pairs-unreadable", detail: `${REAL_PAIRS_PATH} exists but did not parse` });
+  }
+}
+
 // ── Adjacency ───────────────────────────────────────────────────────────────
 const bags = new Map(
   skills.map((s) => [s.skill, bag(`${s.skill} ${s.description} ${s.when_to_use}`)])
@@ -548,8 +577,12 @@ if (existsSync(SCORES_PATH)) {
     /* unreadable scores file — treat as a first run */
   }
 }
-const split = assignSplit(cases, ledger);
-for (const c of cases) c.split = split[c.id];
+// Fidelity cases never enter the ledger: they are measurement subjects, not
+// tuning data, and writing them into the write-once split would freeze
+// usage-derived rows into a file whose whole point is stability.
+const splittable = cases.filter((c) => !c.tags.includes("real"));
+const split = assignSplit(splittable, ledger);
+for (const c of cases) c.split = c.tags.includes("real") ? "fidelity" : split[c.id];
 
 const trivial = cases.filter((c) => c.tags.includes("trivial")).length;
 const destructive = cases.filter((c) => c.tags.includes("destructive")).length;
@@ -572,6 +605,7 @@ const payload = {
       vocab_spell: spellPositives,
       quoted_keyword: quotedKeywords,
       vocab_none: noneCases,
+      real_pair: realPairs,
     },
     skills_without_triggers: noTrigger.length,
     builtin_targeted_spells: builtinTargeted.length,
@@ -670,7 +704,7 @@ if (CHECK) {
 const pct = (n) => `${((n / cases.length) * 100).toFixed(1)}%`;
 console.log(`fleet         ${skills.length} skills (${payload.corpus.project_skills} project + ${payload.corpus.user_only_skills} user-only), ${listingChars} chars / ${LISTING_CAP} cap`);
 console.log(`cases         ${cases.length} total — ${payload.corpus.positive} positive, ${payload.corpus.none} none-of-the-above`);
-console.log(`  sources     trigger_phrase ${triggerPhraseCount}, vocab_spell ${spellPositives}, quoted_keyword ${quotedKeywords}, vocab_none ${noneCases}`);
+console.log(`  sources     trigger_phrase ${triggerPhraseCount}, vocab_spell ${spellPositives}, quoted_keyword ${quotedKeywords}, vocab_none ${noneCases}, real_pair ${realPairs}`);
 console.log(`  tags        trivial ${trivial} (${pct(trivial)}), hard ${hard}, destructive ${destructive}`);
 console.log(`  split       ${cases.filter((c) => c.split === "holdout").length} holdout / ${cases.filter((c) => c.split === "train").length} train`);
 console.log(`corpus_hash   ${payload.corpus.corpus_hash}`);

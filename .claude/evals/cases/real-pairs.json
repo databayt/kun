@@ -1,0 +1,357 @@
+{
+  "$comment": "Real (prompt → skill) dispatches observed in the live main loop. Under-sampled (explicit Skill tool only), survivorship-biased (never shows the dispatch that should have happened), and self-selected. Bounds gross proxy error; certifies nothing.",
+  "transcripts_scanned": 546,
+  "skill_invocations": 52,
+  "pairs_usable": 13,
+  "pairs_rejected": {
+    "continuation": 3,
+    "too_distant": 10,
+    "max_distance": 40
+  },
+  "distinct_skills": 18,
+  "by_skill": {
+    "deploy": 14,
+    "draft": 6,
+    "mcp-doctor": 5,
+    "qa": 4,
+    "auth": 4,
+    "dev": 3,
+    "artifact-design": 2,
+    "dataviz": 2,
+    "claude-api": 2,
+    "higgs": 2,
+    "clone": 1,
+    "report": 1,
+    "check": 1,
+    "idea": 1,
+    "sync": 1,
+    "social": 1,
+    "screenshot": 1,
+    "performance": 1
+  },
+  "ambiguous_prompts": [
+    {
+      "prompt": "resume",
+      "skills": [
+        "claude-api",
+        "higgs"
+      ]
+    }
+  ],
+  "pairs": [
+    {
+      "prompt": "deploy",
+      "skill": "deploy",
+      "args": null,
+      "distance": 10,
+      "rejected": null,
+      "file": "~/.claude/projects/-Users-abdout-codebase/60051e7f-f264-4819-b42f-f31dda1c57e5.jsonl"
+    },
+    {
+      "prompt": "clone https://gemini.google/overview/image-generation/ section Dial in every detail\nwith Nano Banana. as a template",
+      "skill": "clone",
+      "args": "https://gemini.google/overview/image-generation/ section \"Dial in every detail with Nano Banana\" as a template",
+      "distance": 11,
+      "rejected": null,
+      "file": "~/.claude/projects/-Users-abdout-codebase/98bbbf1f-b718-4303-8aef-c336073ef8c7.jsonl"
+    },
+    {
+      "prompt": "report",
+      "skill": "report",
+      "args": null,
+      "distance": 9,
+      "rejected": null,
+      "file": "~/.claude/projects/-Users-abdout-hogwarts/082c7fbd-c63c-43a6-9b89-0ae1ef07f5ef.jsonl"
+    },
+    {
+      "prompt": "qa admission block",
+      "skill": "qa",
+      "args": "admission",
+      "distance": 9,
+      "rejected": null,
+      "file": "~/.claude/projects/-Users-abdout-hogwarts/2731447d-bc34-48a5-b734-0e0a09eaf446.jsonl"
+    },
+    {
+      "prompt": "audit admission block for shipping , it we be in use from towmorrw .. ensure full translaition and internationlaztion and full production readness , health routes and functioning ui and seed",
+      "skill": "qa",
+      "args": "admission",
+      "distance": 12,
+      "rejected": null,
+      "file": "~/.claude/projects/-Users-abdout-hogwarts/3a6ee721-812f-4e45-82cd-faa21c5f3489.jsonl"
+    },
+    {
+      "prompt": "dev",
+      "skill": "dev",
+      "args": null,
+      "distance": 10,
+      "rejected": null,
+      "file": "~/.claude/projects/-Users-abdout-hogwarts/4bf869a6-d155-412a-b9e9-c9e64169828c.jsonl"
+    },
+    {
+      "prompt": "test admission block",
+      "skill": "qa",
+      "args": "admission",
+      "distance": 12,
+      "rejected": null,
+      "file": "~/.claude/projects/-Users-abdout-hogwarts/991d1562-f6be-468a-82f0-997186cba9a5.jsonl"
+    },
+    {
+      "prompt": "Run the /draft skill in queue mode: drain every pending ask via 'node scripts/social-drafts.mjs'. Write each answer's Arabic and English to temp files and pass them with 'answer <id> --ar <file> --en <file>'. Every ask must end answered or failed — never left pending.",
+      "skill": "draft",
+      "args": "queue mode — drain every pending ask via scripts/social-drafts.mjs; answer each with --ar/--en temp files; every ask must end answered or failed",
+      "distance": 7,
+      "rejected": null,
+      "file": "~/.claude/projects/-Users-abdout-kun/38e59a01-c46a-4625-969a-a0d025dafe23.jsonl"
+    },
+    {
+      "prompt": "higgs edit this vido https://www.youtube.com/shorts/yqA_C-c0ibc to preserve everything while tune it for arabic , sudan , and replace airbnb with mkan",
+      "skill": "higgs",
+      "args": "edit https://www.youtube.com/shorts/yqA_C-c0ibc — preserve everything, tune for Arabic + Sudan, replace Airbnb branding with mkan",
+      "distance": 12,
+      "rejected": null,
+      "file": "~/.claude/projects/-Users-abdout-kun/6f67bdb9-68a8-4d16-8ac2-a12f8ca4d32e.jsonl"
+    },
+    {
+      "prompt": "what is next",
+      "skill": "sync",
+      "args": "anthropic stack services",
+      "distance": 19,
+      "rejected": null,
+      "file": "~/.claude/projects/-Users-abdout-kun/756a0cf0-1f10-444d-a0b2-0e4052a8e399.jsonl"
+    },
+    {
+      "prompt": "now foucs on hogwarts and facebook we want to test the soical workflow end to end",
+      "skill": "social",
+      "args": "hogwarts facebook — end-to-end pipeline test with a real post",
+      "distance": 4,
+      "rejected": null,
+      "file": "~/.claude/projects/-Users-abdout-kun/9ad8546c-356f-4984-bc5a-24957bfd5f39.jsonl"
+    },
+    {
+      "prompt": "test in production in fornt of me",
+      "skill": "auth",
+      "args": "kun.databayt.org /en/social login as abdout@databayt.org — need an authenticated session to drive the page with Playwright headed",
+      "distance": 3,
+      "rejected": null,
+      "file": "~/.claude/projects/-Users-abdout-kun/9ad8546c-356f-4984-bc5a-24957bfd5f39.jsonl"
+    },
+    {
+      "prompt": "optimize mkan",
+      "skill": "performance",
+      "args": "mkan — full pass: Core Web Vitals, bundle, database queries",
+      "distance": 12,
+      "rejected": null,
+      "file": "~/.claude/projects/-Users-abdout-mkan/791778d8-1ae5-49a2-ba1a-287a5629fa7e.jsonl"
+    }
+  ],
+  "pairs_all": [
+    {
+      "prompt": "deploy",
+      "skill": "deploy",
+      "args": null,
+      "distance": 10,
+      "rejected": null,
+      "file": "~/.claude/projects/-Users-abdout-codebase/60051e7f-f264-4819-b42f-f31dda1c57e5.jsonl"
+    },
+    {
+      "prompt": "clone https://gemini.google/overview/image-generation/ section Dial in every detail\nwith Nano Banana. as a template",
+      "skill": "clone",
+      "args": "https://gemini.google/overview/image-generation/ section \"Dial in every detail with Nano Banana\" as a template",
+      "distance": 11,
+      "rejected": null,
+      "file": "~/.claude/projects/-Users-abdout-codebase/98bbbf1f-b718-4303-8aef-c336073ef8c7.jsonl"
+    },
+    {
+      "prompt": "refactor http://demo.localhost:3000/en/about to reuse the exact same about page from @~/zenda/",
+      "skill": "mcp-doctor",
+      "args": null,
+      "distance": 237,
+      "rejected": "too-distant",
+      "file": "~/.claude/projects/-Users-abdout-hogwarts/0580d1dd-e91b-4d09-95ac-4df5869acef7.jsonl"
+    },
+    {
+      "prompt": "report",
+      "skill": "report",
+      "args": null,
+      "distance": 9,
+      "rejected": null,
+      "file": "~/.claude/projects/-Users-abdout-hogwarts/082c7fbd-c63c-43a6-9b89-0ae1ef07f5ef.jsonl"
+    },
+    {
+      "prompt": "test it in the browser first",
+      "skill": "mcp-doctor",
+      "args": null,
+      "distance": 63,
+      "rejected": "too-distant",
+      "file": "~/.claude/projects/-Users-abdout-hogwarts/26bb413b-a2cb-4322-81de-4580044bcc54.jsonl"
+    },
+    {
+      "prompt": "qa admission block",
+      "skill": "qa",
+      "args": "admission",
+      "distance": 9,
+      "rejected": null,
+      "file": "~/.claude/projects/-Users-abdout-hogwarts/2731447d-bc34-48a5-b734-0e0a09eaf446.jsonl"
+    },
+    {
+      "prompt": "audit admission block for shipping , it we be in use from towmorrw .. ensure full translaition and internationlaztion and full production readness , health routes and functioning ui and seed",
+      "skill": "qa",
+      "args": "admission",
+      "distance": 12,
+      "rejected": null,
+      "file": "~/.claude/projects/-Users-abdout-hogwarts/3a6ee721-812f-4e45-82cd-faa21c5f3489.jsonl"
+    },
+    {
+      "prompt": "dev",
+      "skill": "dev",
+      "args": null,
+      "distance": 10,
+      "rejected": null,
+      "file": "~/.claude/projects/-Users-abdout-hogwarts/4bf869a6-d155-412a-b9e9-c9e64169828c.jsonl"
+    },
+    {
+      "prompt": "[Image: original 1440x9785, displayed at 294x2000. Multiply coordinates by 4.90 to map to original image.]",
+      "skill": "mcp-doctor",
+      "args": null,
+      "distance": 267,
+      "rejected": "too-distant",
+      "file": "~/.claude/projects/-Users-abdout-hogwarts/7bd56cb3-9caa-4da0-80cd-ecc591d8b69c.jsonl"
+    },
+    {
+      "prompt": "test announcement , and invoke quality and release config to ensure announcement is fully production ready espically /ar (arabic lang)",
+      "skill": "qa",
+      "args": "announcement",
+      "distance": 73,
+      "rejected": "too-distant",
+      "file": "~/.claude/projects/-Users-abdout-hogwarts/8cf39681-2f20-4f84-8cf1-d9da20446d11.jsonl"
+    },
+    {
+      "prompt": "test admission block",
+      "skill": "qa",
+      "args": "admission",
+      "distance": 12,
+      "rejected": null,
+      "file": "~/.claude/projects/-Users-abdout-hogwarts/991d1562-f6be-468a-82f0-997186cba9a5.jsonl"
+    },
+    {
+      "prompt": "go",
+      "skill": "mcp-doctor",
+      "args": null,
+      "distance": 7,
+      "rejected": "continuation",
+      "file": "~/.claude/projects/-Users-abdout-hogwarts/a20acec7-4054-41fe-abad-f81ca4826bba.jsonl"
+    },
+    {
+      "prompt": "[Image: source: /Users/abdout/.claude/image-cache/02b9bf31-149b-4019-ab5a-66ce0a4e2c96/1.png]",
+      "skill": "artifact-design",
+      "args": null,
+      "distance": 41,
+      "rejected": "too-distant",
+      "file": "~/.claude/projects/-Users-abdout-kun/02b9bf31-149b-4019-ab5a-66ce0a4e2c96.jsonl"
+    },
+    {
+      "prompt": "Run the /draft skill in queue mode: drain every pending ask via 'node scripts/social-drafts.mjs'. Write each answer's Arabic and English to temp files and pass them with 'answer <id> --ar <file> --en <file>'. Every ask must end answered or failed — never left pending.",
+      "skill": "draft",
+      "args": "queue mode — drain every pending ask via scripts/social-drafts.mjs; answer each with --ar/--en temp files; every ask must end answered or failed",
+      "distance": 7,
+      "rejected": null,
+      "file": "~/.claude/projects/-Users-abdout-kun/38e59a01-c46a-4625-969a-a0d025dafe23.jsonl"
+    },
+    {
+      "prompt": "search web about second brain and graph and optimize /graph",
+      "skill": "dataviz",
+      "args": null,
+      "distance": 258,
+      "rejected": "too-distant",
+      "file": "~/.claude/projects/-Users-abdout-kun/52d329a0-76d4-4dc2-8e04-2d24cc4b1b1f.jsonl"
+    },
+    {
+      "prompt": "higgs edit this vido https://www.youtube.com/shorts/yqA_C-c0ibc to preserve everything while tune it for arabic , sudan , and replace airbnb with mkan",
+      "skill": "higgs",
+      "args": "edit https://www.youtube.com/shorts/yqA_C-c0ibc — preserve everything, tune for Arabic + Sudan, replace Airbnb branding with mkan",
+      "distance": 12,
+      "rejected": null,
+      "file": "~/.claude/projects/-Users-abdout-kun/6f67bdb9-68a8-4d16-8ac2-a12f8ca4d32e.jsonl"
+    },
+    {
+      "prompt": "what is next",
+      "skill": "sync",
+      "args": "anthropic stack services",
+      "distance": 19,
+      "rejected": null,
+      "file": "~/.claude/projects/-Users-abdout-kun/756a0cf0-1f10-444d-a0b2-0e4052a8e399.jsonl"
+    },
+    {
+      "prompt": "now foucs on hogwarts and facebook we want to test the soical workflow end to end",
+      "skill": "social",
+      "args": "hogwarts facebook — end-to-end pipeline test with a real post",
+      "distance": 4,
+      "rejected": null,
+      "file": "~/.claude/projects/-Users-abdout-kun/9ad8546c-356f-4984-bc5a-24957bfd5f39.jsonl"
+    },
+    {
+      "prompt": "resume",
+      "skill": "claude-api",
+      "args": null,
+      "distance": 15,
+      "rejected": "continuation",
+      "file": "~/.claude/projects/-Users-abdout-kun/9ad8546c-356f-4984-bc5a-24957bfd5f39.jsonl"
+    },
+    {
+      "prompt": "test in production in fornt of me",
+      "skill": "auth",
+      "args": "kun.databayt.org /en/social login as abdout@databayt.org — need an authenticated session to drive the page with Playwright headed",
+      "distance": 3,
+      "rejected": null,
+      "file": "~/.claude/projects/-Users-abdout-kun/9ad8546c-356f-4984-bc5a-24957bfd5f39.jsonl"
+    },
+    {
+      "prompt": "read https://kun.databayt.org/en/social/media fetch real arts from Al Jazeera Technology and Thmanyah — ثمانية and renedr them",
+      "skill": "auth",
+      "args": "Log into kun.databayt.org (currently at https://kun.databayt.org/en/login in the headed browser) so I can reach the protected showroom page /en/social/media for visual verification",
+      "distance": 323,
+      "rejected": "too-distant",
+      "file": "~/.claude/projects/-Users-abdout-kun/9cae9dc0-1ddf-400f-983c-3914491a8cb0.jsonl"
+    },
+    {
+      "prompt": "what is the interconnection between kun engine , hermes agent , crm and the machine where hermes and crm is self hosted and the machines of the other teams and the interconnections between claude code and chat and cowork and machines and phones",
+      "skill": "artifact-design",
+      "args": null,
+      "distance": 43,
+      "rejected": "too-distant",
+      "file": "~/.claude/projects/-Users-abdout-kun/b10e26c9-5c53-42d0-ba2f-a81cba1011a6.jsonl"
+    },
+    {
+      "prompt": "resume",
+      "skill": "higgs",
+      "args": null,
+      "distance": 6,
+      "rejected": "continuation",
+      "file": "~/.claude/projects/-Users-abdout-kun/cffc3c7e-1b2a-417e-bfd3-93d76c1e9676.jsonl"
+    },
+    {
+      "prompt": "optimize the social hub",
+      "skill": "auth",
+      "args": "log into localhost:3000 kun (Auth.js) so I can view /en/social",
+      "distance": 434,
+      "rejected": "too-distant",
+      "file": "~/.claude/projects/-Users-abdout-kun/f3943339-9905-469f-bdf9-54bc42ac7651.jsonl"
+    },
+    {
+      "prompt": "restore blue section above footer , restore fill icon for chatbot, reduce get started button width in footer",
+      "skill": "screenshot",
+      "args": null,
+      "distance": 160,
+      "rejected": "too-distant",
+      "file": "~/.claude/projects/-Users-abdout-marketing/5faa4d01-abe5-4f0f-9953-4478f84a267d.jsonl"
+    },
+    {
+      "prompt": "optimize mkan",
+      "skill": "performance",
+      "args": "mkan — full pass: Core Web Vitals, bundle, database queries",
+      "distance": 12,
+      "rejected": null,
+      "file": "~/.claude/projects/-Users-abdout-mkan/791778d8-1ae5-49a2-ba1a-287a5629fa7e.jsonl"
+    }
+  ]
+}
