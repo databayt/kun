@@ -1,12 +1,14 @@
-// Data behind /hardware — the Erkowit off-grid compound.
+// Data behind /hardware — the unmanned, solar-powered compute node at Erkowit.
 //
 // Numbers here are the authority for the page and must stay in step with
 // content/docs/hardware.mdx, which carries the reasoning. Wh/day is stored
 // explicitly rather than always derived, because a few rows have mixed duty
-// cycles (Node A idles most of the day and bursts for six hours) that a single
-// watts x hours product cannot express honestly.
+// cycles that a single watts x hours product cannot express honestly.
+//
+// This replaced a 7-seat live-in hub model. The node is unmanned and dispatched
+// remotely, so there is no domestic load beyond the caretaker's quarters.
 
-export type LoadGroup = "compute" | "domestic";
+export type LoadGroup = "node" | "site";
 
 export type LoadRow = {
   id: string;
@@ -28,72 +30,16 @@ export type LoadRow = {
 };
 
 export const LOAD_ROWS: LoadRow[] = [
-  // ── Compute and IT ────────────────────────────────────────────────────
+  // ── The node ──────────────────────────────────────────────────────────
   {
-    id: "laptops",
-    group: "compute",
-    label: "Dev laptops",
-    labelAr: "حواسيب المطورين",
-    qty: 7,
-    watts: 55,
-    hours: 10,
-    wh: 3850,
-    firm: false,
-    shiftable: false,
-    defaultOn: true,
-  },
-  {
-    id: "monitors",
-    group: "compute",
-    label: "External monitors",
-    labelAr: "شاشات خارجية",
-    qty: 5,
-    watts: 28,
-    hours: 9,
-    wh: 1260,
-    firm: false,
-    shiftable: false,
-    defaultOn: true,
-  },
-  {
-    id: "node-a",
-    group: "compute",
-    label: "Node A — always-on inference",
-    labelAr: "العقدة أ — الاستدلال الدائم",
+    id: "service-plane",
+    group: "node",
+    label: "Service plane",
+    labelAr: "طبقة الخدمات",
     qty: 1,
-    watts: 200,
-    hours: 6,
-    wh: 1470,
-    firm: true,
-    shiftable: false,
-    defaultOn: true,
-    detail: "Mac Studio · 15 W idle × 18 h + 200 W × 6 h",
-    detailAr: "ماك ستوديو · ١٥ واط خمول × ١٨ س + ٢٠٠ واط × ٦ س",
-  },
-  {
-    id: "node-b",
-    group: "compute",
-    label: "Node B — media + burst GPU",
-    labelAr: "العقدة ب — الوسائط والمعالج الرسومي",
-    qty: 1,
-    watts: 850,
-    hours: 5,
-    wh: 4250,
-    firm: false,
-    shiftable: true,
-    defaultOn: true,
-    detail: "Image + video generation, large-context code jobs",
-    detailAr: "توليد الصور والفيديو ومهام الشيفرة الكبيرة",
-  },
-  {
-    id: "node-c",
-    group: "compute",
-    label: "Node C — server plane",
-    labelAr: "العقدة ج — طبقة الخادم",
-    qty: 1,
-    watts: 85,
+    watts: 25,
     hours: 24,
-    wh: 2040,
+    wh: 600,
     firm: true,
     shiftable: false,
     defaultOn: true,
@@ -103,8 +49,8 @@ export const LOAD_ROWS: LoadRow[] = [
   },
   {
     id: "storage",
-    group: "compute",
-    label: "Storage / NAS",
+    group: "node",
+    label: "Storage",
     labelAr: "التخزين",
     qty: 1,
     watts: 30,
@@ -113,14 +59,14 @@ export const LOAD_ROWS: LoadRow[] = [
     firm: true,
     shiftable: false,
     defaultOn: true,
-    detail: "Package cache, model weights, backup target",
-    detailAr: "ذاكرة الحزم وأوزان النماذج والنسخ الاحتياطي",
+    detail: "Model weights, package cache, backup target",
+    detailAr: "أوزان النماذج وذاكرة الحزم والنسخ الاحتياطي",
   },
   {
     id: "network",
-    group: "compute",
-    label: "Network — router, switch, AP, LTE CPE",
-    labelAr: "الشبكة — الموجه والمبدل ونقطة الوصول",
+    group: "node",
+    label: "Network — router, switch, LTE CPE",
+    labelAr: "الشبكة — الموجه والمبدل ووحدة الاتصال",
     qty: 1,
     watts: 45,
     hours: 24,
@@ -130,146 +76,84 @@ export const LOAD_ROWS: LoadRow[] = [
     defaultOn: true,
   },
   {
-    id: "misc",
-    group: "compute",
-    label: "Bench, printer, chargers",
-    labelAr: "الطاولة والطابعة والشواحن",
+    id: "oob",
+    group: "node",
+    label: "Out-of-band — switched PDU, management modem, watchdog",
+    labelAr: "التحكم المستقل — مقبس مُبدَّل ومودم إدارة ومراقب",
     qty: 1,
-    watts: 20,
-    hours: 12,
-    wh: 240,
-    firm: false,
+    watts: 12,
+    hours: 24,
+    wh: 288,
+    firm: true,
+    shiftable: false,
+    defaultOn: true,
+    detail: "The remote power button. Nobody is there to press one",
+    detailAr: "زر التشغيل عن بُعد — لا أحد هناك ليضغطه",
+  },
+  {
+    id: "security",
+    group: "node",
+    label: "Security — cameras, sensors, perimeter light",
+    labelAr: "الحماية — كاميرات وحساسات وإنارة محيطية",
+    qty: 1,
+    watts: 25,
+    hours: 24,
+    wh: 600,
+    firm: true,
     shiftable: false,
     defaultOn: true,
   },
   {
-    id: "room-cooling",
-    group: "compute",
+    id: "cooling",
+    group: "node",
     label: "Equipment-room free-air cooling",
     labelAr: "تبريد غرفة المعدات بالهواء الحر",
-    qty: 1,
-    watts: 200,
-    hours: 8,
-    wh: 1600,
+    qty: 2,
+    watts: 60,
+    hours: 10,
+    wh: 1200,
     firm: false,
     shiftable: false,
     defaultOn: true,
-    detail: "EC fans — replaces a ~1.2 kW mini-split at 22 °C ambient",
-    detailAr: "مراوح بدل مكيف ١٫٢ كيلوواط عند ٢٢ درجة",
-  },
-  {
-    id: "vsat",
-    group: "compute",
-    label: "VSAT terminal as primary link",
-    labelAr: "محطة الأقمار كوصلة أساسية",
-    qty: 1,
-    watts: 180,
-    hours: 24,
-    wh: 4320,
-    firm: true,
-    shiftable: false,
-    defaultOn: false,
-    detail: "Backup lane. Costs more power than the whole team's laptops",
-    detailAr: "وصلة احتياطية — تستهلك أكثر من كل حواسيب الفريق",
+    detail:
+      "EC fans. At 22 °C ambient this replaces a compressor drawing 6× more",
+    detailAr: "مراوح — عند ٢٢ درجة تُغني عن مكيف يستهلك ٦ أضعاف",
   },
 
-  // ── Domestic ──────────────────────────────────────────────────────────
+  // ── Site ──────────────────────────────────────────────────────────────
   {
-    id: "lighting",
-    group: "domestic",
-    label: "LED lighting",
-    labelAr: "الإضاءة",
-    qty: 18,
-    watts: 9,
-    hours: 5,
-    wh: 810,
-    firm: true,
-    shiftable: false,
-    defaultOn: true,
-  },
-  {
-    id: "fridges",
-    group: "domestic",
-    label: "Fridge-freezers (inverter type)",
-    labelAr: "الثلاجات",
-    qty: 2,
-    watts: 42,
+    id: "caretaker",
+    group: "site",
+    label: "Caretaker quarters",
+    labelAr: "سكن الحارس",
+    qty: 1,
+    watts: 63,
     hours: 24,
-    wh: 2000,
-    firm: true,
-    shiftable: false,
-    defaultOn: true,
-  },
-  {
-    id: "fans",
-    group: "domestic",
-    label: "Ceiling fans (warm months)",
-    labelAr: "مراوح السقف (الأشهر الحارة)",
-    qty: 8,
-    watts: 50,
-    hours: 8,
-    wh: 3200,
+    wh: 1500,
     firm: false,
     shiftable: false,
     defaultOn: true,
+    detail:
+      "Light, fan, charging, small fridge. Not optional — theft and panel cleaning",
+    detailAr:
+      "إنارة ومروحة وشحن وثلاجة صغيرة — ضرورة لمنع السرقة وتنظيف الألواح",
   },
   {
     id: "pump",
-    group: "domestic",
+    group: "site",
     label: "Water transfer pump",
     labelAr: "مضخة المياه",
     qty: 1,
     watts: 750,
-    hours: 1.5,
-    wh: 1125,
+    hours: 0.7,
+    wh: 525,
     firm: false,
     shiftable: true,
-    defaultOn: true,
-  },
-  {
-    id: "washing",
-    group: "domestic",
-    label: "Washing machine (cold cycles)",
-    labelAr: "الغسالة (دورات باردة)",
-    qty: 1,
-    watts: 400,
-    hours: 1.5,
-    wh: 600,
-    firm: false,
-    shiftable: true,
-    defaultOn: true,
-  },
-  {
-    id: "kitchen",
-    group: "domestic",
-    label: "Kitchen smalls — cooking on LPG",
-    labelAr: "أدوات المطبخ — الطبخ بالغاز",
-    qty: 1,
-    watts: 700,
-    hours: 1,
-    wh: 700,
-    firm: false,
-    shiftable: false,
-    defaultOn: true,
-    detail: "Electric cooking would add 3–5 kWh/day and ~$3–4K of PV + battery",
-    detailAr: "الطبخ الكهربائي يضيف ٣–٥ ك.و.س يوميًا و٣–٤ آلاف دولار",
-  },
-  {
-    id: "charging",
-    group: "domestic",
-    label: "Phone / tablet charging",
-    labelAr: "شحن الهواتف واللوحيات",
-    qty: 1,
-    watts: 50,
-    hours: 8,
-    wh: 400,
-    firm: false,
-    shiftable: false,
     defaultOn: true,
   },
   {
     id: "dehumidifier",
-    group: "domestic",
+    group: "site",
     label: "Dehumidifier — fog season",
     labelAr: "مزيل الرطوبة — موسم الضباب",
     qty: 1,
@@ -280,10 +164,80 @@ export const LOAD_ROWS: LoadRow[] = [
     shiftable: false,
     defaultOn: false,
     detail:
-      "Equipment room only. Condensation is the failure mode here, not heat",
-    detailAr: "غرفة المعدات فقط — التكثف هو الخطر لا الحرارة",
+      "Condensation on cold silicon at dawn is the failure mode here, not heat",
+    detailAr: "التكثف على الرقائق الباردة فجرًا هو الخطر لا الحرارة",
+  },
+  {
+    id: "vsat",
+    group: "site",
+    label: "VSAT as primary link",
+    labelAr: "الأقمار كوصلة أساسية",
+    qty: 1,
+    watts: 180,
+    hours: 24,
+    wh: 4320,
+    firm: true,
+    shiftable: false,
+    defaultOn: false,
+    detail: "Backup lane — power it down unless the primary is out",
+    detailAr: "وصلة احتياطية — تُطفأ ما لم تنقطع الأساسية",
   },
 ];
+
+// ── The one box ─────────────────────────────────────────────────────────
+
+export type Machine = {
+  id: string;
+  name: string;
+  nameAr: string;
+  memory: string;
+  bandwidth: string;
+  compute: string;
+  loadW: number;
+  idleW: number;
+  loadHours: number;
+  price: string;
+  verdict: string;
+  verdictAr: string;
+};
+
+export const MACHINES: Machine[] = [
+  {
+    id: "spark",
+    name: "DGX Spark class",
+    nameAr: "من فئة DGX Spark",
+    memory: "128 GB unified",
+    bandwidth: "273 GB/s",
+    compute: "~1 PFLOP FP4",
+    loadW: 240,
+    idleW: 30,
+    loadHours: 10,
+    price: "$3,999–4,699",
+    verdict:
+      "Buy this one. Fits the array with room to spare; excellent on low-active MoE at batch",
+    verdictAr:
+      "الخيار الآن — يناسب الألواح بسهولة وممتاز مع نماذج MoE على دفعات",
+  },
+  {
+    id: "station",
+    name: "DGX Station GB300",
+    nameAr: "DGX Station GB300",
+    memory: "~784 GB coherent",
+    bandwidth: "HBM3e",
+    compute: "~20 PFLOPS FP4",
+    loadW: 1600,
+    idleW: 400,
+    loadHours: 8,
+    price: "~$85,000",
+    verdict:
+      "The endpoint, priced and gated. Needs roughly triple the solar plant on top of the box",
+    verdictAr: "الهدف البعيد — يحتاج ثلاثة أضعاف المحطة الشمسية فوق ثمن الجهاز",
+  },
+];
+
+export function machineWh(m: Machine): number {
+  return m.loadW * m.loadHours + m.idleW * (24 - m.loadHours);
+}
 
 /** Sizing constants. Every one of these is a design choice, not a law. */
 export const SIZING = {
@@ -297,7 +251,7 @@ export const SIZING = {
   pshWorstMonth: 4.5,
   /** Soiling, temperature, wiring, MPPT, mismatch. */
   derate: 0.75,
-  /** Deliberate array oversize — see the doc on why PV beats battery per kWh. */
+  /** Deliberate array oversize — PV beats battery per delivered kWh. */
   pvHeadroom: 1.9,
   /** Contingency on the measured load table to reach the design figure. */
   designMargin: 1.1,
@@ -307,7 +261,7 @@ export type Sizing = {
   dailyKWh: number;
   designKWh: number;
   firmKWh: number;
-  shiftableKWh: number;
+  machineKWh: number;
   batteryKWh: number;
   pvMinKWp: number;
   pvRecKWp: number;
@@ -318,16 +272,17 @@ export type Sizing = {
  * The whole electrical model in one function. Kept pure and exported so the
  * numbers on the page and the numbers in the doc come from one place.
  */
-export function computeSizing(selectedIds: ReadonlySet<string>): Sizing {
-  let dailyWh = 0;
+export function computeSizing(
+  selectedIds: ReadonlySet<string>,
+  machine: Machine,
+): Sizing {
+  let dailyWh = machineWh(machine);
   let firmWh = 0;
-  let shiftableWh = 0;
 
   for (const row of LOAD_ROWS) {
     if (!selectedIds.has(row.id)) continue;
     dailyWh += row.wh;
     if (row.firm) firmWh += row.wh;
-    if (row.shiftable) shiftableWh += row.wh;
   }
 
   const dailyKWh = dailyWh / 1000;
@@ -342,7 +297,7 @@ export function computeSizing(selectedIds: ReadonlySet<string>): Sizing {
     dailyKWh,
     designKWh,
     firmKWh: firmWh / 1000,
-    shiftableKWh: shiftableWh / 1000,
+    machineKWh: machineWh(machine) / 1000,
     batteryKWh,
     pvMinKWp,
     pvRecKWp,
@@ -370,8 +325,8 @@ export const SITE_FACTS: SiteFact[] = [
   {
     label: "Ambient",
     labelAr: "الحرارة",
-    value: "~22 °C — no general AC",
-    valueAr: "٢٢° — بلا تكييف عام",
+    value: "~22 °C — free-air cooling",
+    valueAr: "٢٢° — تبريد بالهواء الحر",
   },
   {
     label: "To Port Sudan",
@@ -392,10 +347,10 @@ export const SITE_FACTS: SiteFact[] = [
     valueAr: "٤٫٥ ساعة ذروة (ضباب)",
   },
   {
-    label: "Seats",
-    labelAr: "المقاعد",
-    value: "7, live-in",
-    valueAr: "٧ مع السكن",
+    label: "Staffing",
+    labelAr: "التشغيل",
+    value: "Unmanned — dispatched remotely",
+    valueAr: "بلا طاقم — يُشغَّل عن بُعد",
   },
 ];
 
@@ -439,39 +394,39 @@ export const TIERS: Tier[] = [
   },
   {
     n: "2",
-    name: "Anchor node + server plane",
-    nameAr: "العقدة الأساسية وطبقة الخادم",
-    what: "5 kWp PV, 15 kWh battery, one 5 kW hybrid, mast + LTE, Node C. CRM, Hermes, git mirror, cache and staging all move local. 2 seats.",
+    name: "The node, without the supercomputer",
+    nameAr: "الموقع بلا الحاسوب الخارق",
+    what: "6 kWp, 15 kWh, 2 × 3 kW hybrid, mast + LTE, service plane, switched PDU + management modem, security. CRM, Hermes, git, cache and staging move local.",
     whatAr:
-      "٥ ك.و.ذ ألواح، بطارية ١٥ ك.و.س، عاكس ٥ ك.و، برج واتصال، العقدة ج. نقل العملاء وهيرمس وgit والتجريب محليًا. مقعدان.",
-    capex: "$10,000–15,000",
+      "٦ ك.و.ذ ألواح، بطارية ١٥ ك.و.س، عاكسان ٣ ك.و، برج واتصال، طبقة الخدمات، مقبس مُبدَّل ومودم إدارة، حماية. نقل العملاء وهيرمس وgit والتجريب محليًا.",
+    capex: "$15,000–22,000",
     trigger: "First paying school, or non-dilutive funding",
     triggerAr: "أول مدرسة مدفوعة أو تمويل غير مخفِّض",
     now: false,
   },
   {
     n: "3",
-    name: "Local inference",
-    nameAr: "الاستدلال المحلي",
-    what: "Node A, PV to 12 kWp, battery to 30 kWh, second inverter.",
-    whatAr: "العقدة أ، الألواح إلى ١٢ ك.و.ذ، البطارية إلى ٣٠ ك.و.س، عاكس ثانٍ.",
-    capex: "$10,000–15,000",
+    name: "The supercomputer",
+    nameAr: "الحاسوب الخارق",
+    what: "Spark-class box on the plant Tier 2 already built. Local inference and media generation go live.",
+    whatAr:
+      "جهاز من فئة Spark على المحطة التي بنتها المرحلة ٢. تشغيل الاستدلال وتوليد الوسائط محليًا.",
+    capex: "$4,000–5,000",
     trigger: "3 paying schools / ~$3K MRR sustained 3 months",
     triggerAr: "٣ مدارس مدفوعة أو ٣ آلاف دولار شهريًا لثلاثة أشهر",
     now: false,
   },
   {
     n: "4",
-    name: "Full hub + media lane",
-    nameAr: "المقر الكامل ومسار الوسائط",
-    what: "Node B, 7 seats, housing, PV to 16 kWp, battery to 40 kWh, third inverter.",
+    name: "Scale the box",
+    nameAr: "توسيع الجهاز",
+    what: "Second Spark linked over ConnectX-7 for 256 GB, or a DGX Station GB300 with the plant tripled to 16 kWp / 40 kWh.",
     whatAr:
-      "العقدة ب، ٧ مقاعد، السكن، الألواح إلى ١٦ ك.و.ذ، البطارية إلى ٤٠ ك.و.س، عاكس ثالث.",
-    capex: "$15,000–30,000",
+      "جهاز Spark ثانٍ موصول عبر ConnectX-7 ليصبح ٢٥٦ ج.ب، أو DGX Station GB300 مع مضاعفة المحطة ثلاث مرات.",
+    capex: "$5,000 or ~$105,000",
     trigger:
-      "Media volume measurably justifies it — at ~$50–100/mo of current spend, this does not pay back",
-    triggerAr:
-      "أن يبرره حجم الوسائط فعليًا — عند إنفاق ٥٠–١٠٠ دولار شهريًا لا يسترد",
+      "Measured saturation — the queue is waiting on the machine, not on the link",
+    triggerAr: "إشباع مُقاس — الطابور ينتظر الجهاز لا الاتصال",
     now: false,
   },
   {
@@ -482,64 +437,60 @@ export const TIERS: Tier[] = [
     whatAr: "مستأجرون مختارون على عتادنا.",
     capex: "Incremental",
     trigger:
-      "12 months of measured site uptime, and a customer who wants on-prem and pays for it",
+      "12 months of measured node uptime, and a customer who wants on-prem and pays for it",
     triggerAr: "١٢ شهرًا من التشغيل المُقاس وعميل يطلب الاستضافة المحلية ويدفع",
     now: false,
   },
 ];
 
-// ── The model ladder ────────────────────────────────────────────────────
+// ── What the box should run ─────────────────────────────────────────────
 
 export type ModelRow = {
   klass: string;
   klassAr: string;
-  weights: string;
-  fits: string;
-  fitsAr: string;
+  active: string;
+  speed: string;
   verdict: string;
   verdictAr: string;
-  target: boolean;
+  good: boolean;
 };
 
 export const MODEL_LADDER: ModelRow[] = [
   {
-    klass: "20–30B coder",
-    klassAr: "٢٠–٣٠ مليار",
-    weights: "12–18 GB",
-    fits: "Any 24 GB GPU, 64 GB Mac",
-    fitsAr: "أي معالج ٢٤ ج.ب أو ماك ٦٤ ج.ب",
-    verdict: "Fast, fine for the volume lane",
-    verdictAr: "سريع ويكفي المسار الكثيف",
-    target: false,
+    klass: "Llama 3.1 8B FP4",
+    klassAr: "Llama 3.1 8B FP4",
+    active: "8B dense",
+    speed: "~924 tok/s @ batch 128",
+    verdict: "Trivial for the box. Good for classification and enrichment",
+    verdictAr: "سهل على الجهاز — مناسب للتصنيف والإثراء",
+    good: true,
   },
   {
-    klass: "80B-class coder",
-    klassAr: "٨٠ مليار",
-    weights: "~45 GB",
-    fits: "256 GB Mac / 96 GB GPU",
-    fitsAr: "ماك ٢٥٦ ج.ب أو معالج ٩٦ ج.ب",
-    verdict: "The target — best quality that still prefills fast",
-    verdictAr: "الهدف — أفضل جودة مع معالجة سياق سريعة",
-    target: true,
+    klass: "Qwen3-Coder-30B-A3B FP8",
+    klassAr: "Qwen3-Coder-30B-A3B FP8",
+    active: "3B active (MoE)",
+    speed: "~483 tok/s @ batch 64",
+    verdict:
+      "The target. Low active params is exactly what this hardware wants",
+    verdictAr: "الهدف — قلة المعاملات النشطة هي ما يناسب هذا العتاد",
+    good: true,
   },
   {
-    klass: "235B MoE",
-    klassAr: "٢٣٥ مليار",
-    weights: "~120–140 GB",
-    fits: "256 GB Mac / 2× 96 GB GPU",
-    fitsAr: "ماك ٢٥٦ ج.ب أو معالجان ٩٦ ج.ب",
-    verdict: "Possible; prefill starts to hurt",
-    verdictAr: "ممكن لكن معالجة السياق تثقل",
-    target: false,
+    klass: "80B-class MoE coder",
+    klassAr: "مبرمج MoE بحجم ٨٠ مليار",
+    active: "~45 GB weights",
+    speed: "fits 128 GB with KV headroom",
+    verdict: "Best quality that still fits and still prefills fast",
+    verdictAr: "أفضل جودة تتسع وتُعالج السياق بسرعة",
+    good: true,
   },
   {
-    klass: "671B MoE",
-    klassAr: "٦٧١ مليار",
-    weights: "~404 GB",
-    fits: "512 GB Mac only",
-    fitsAr: "ماك ٥١٢ ج.ب فقط",
-    verdict: "Trophy. ~14 min to ingest an 8k prompt — unusable for agents",
-    verdictAr: "للعرض فقط — ١٤ دقيقة لاستيعاب ٨ آلاف رمز",
-    target: false,
+    klass: "Dense Llama 3.1 70B",
+    klassAr: "Llama 3.1 70B الكثيف",
+    active: "70B dense",
+    speed: "~2.7 tok/s decode",
+    verdict: "Never. Bandwidth-bound — the box looks broken running this",
+    verdictAr: "أبدًا — محدود بعرض النطاق ويبدو الجهاز معطلًا",
+    good: false,
   },
 ];

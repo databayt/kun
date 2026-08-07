@@ -1,7 +1,14 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { LOAD_ROWS, SIZING, computeSizing, type LoadRow } from "./config";
+import {
+  LOAD_ROWS,
+  MACHINES,
+  SIZING,
+  computeSizing,
+  machineWh,
+  type LoadRow,
+} from "./config";
 
 interface SizingModelProps {
   isAr: boolean;
@@ -15,16 +22,23 @@ function fmt(n: number, digits = 1): string {
 }
 
 /**
- * The live electrical model. Toggling a load re-derives battery, array and
- * inverter from the same formulas the doc prints — the point of this page over
- * the doc is that you can see what each load actually costs in silicon.
+ * The live electrical model. Picking the box or toggling a load re-derives
+ * battery, array and area from the same formulas the doc prints — the point of
+ * this page over the doc is that the cost of a choice is visible rather than
+ * asserted. Choosing the $85K Station over the $4K Spark roughly triples the
+ * solar plant, and that is the argument the page exists to make.
  */
 export function SizingModel({ isAr }: SizingModelProps) {
+  const [machineId, setMachineId] = useState<string>(MACHINES[0].id);
   const [selected, setSelected] = useState<Set<string>>(
     () => new Set(LOAD_ROWS.filter((r) => r.defaultOn).map((r) => r.id)),
   );
 
-  const sizing = useMemo(() => computeSizing(selected), [selected]);
+  const machine = MACHINES.find((m) => m.id === machineId) ?? MACHINES[0];
+  const sizing = useMemo(
+    () => computeSizing(selected, machine),
+    [selected, machine],
+  );
 
   function toggle(id: string): void {
     setSelected((prev) => {
@@ -36,14 +50,76 @@ export function SizingModel({ isAr }: SizingModelProps) {
   }
 
   const groups: { key: LoadRow["group"]; title: string; titleAr: string }[] = [
-    { key: "compute", title: "Compute and IT", titleAr: "الحوسبة والتقنية" },
-    { key: "domestic", title: "Domestic", titleAr: "المنزلي" },
+    { key: "node", title: "The node", titleAr: "الموقع" },
+    { key: "site", title: "Site", titleAr: "الخدمات" },
   ];
 
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_20rem]">
-      {/* ── Load table ──────────────────────────────────────────────── */}
       <div className="space-y-8">
+        {/* ── The one box ───────────────────────────────────────────── */}
+        <section>
+          <div className="mb-3 flex items-baseline justify-between">
+            <h2 className="text-muted-foreground text-xs font-medium tracking-widest uppercase">
+              {isAr ? "الحاسوب الخارق" : "The one box"}
+            </h2>
+            <span
+              dir="ltr"
+              className="text-muted-foreground font-mono text-xs tabular-nums"
+            >
+              {fmt(sizing.machineKWh)} kWh
+            </span>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            {MACHINES.map((m) => {
+              const on = m.id === machineId;
+              return (
+                <button
+                  key={m.id}
+                  type="button"
+                  onClick={() => setMachineId(m.id)}
+                  aria-pressed={on}
+                  className={`rounded-lg border p-4 text-start transition-colors ${
+                    on
+                      ? "border-foreground"
+                      : "border-border hover:bg-muted/50 opacity-60"
+                  }`}
+                >
+                  <div className="flex items-baseline justify-between gap-2">
+                    <span className="text-sm font-semibold">
+                      {isAr ? m.nameAr : m.name}
+                    </span>
+                    <span
+                      dir="ltr"
+                      className="font-mono text-xs tabular-nums whitespace-nowrap"
+                    >
+                      {m.price}
+                    </span>
+                  </div>
+                  <div
+                    dir="ltr"
+                    className="text-muted-foreground mt-2 space-y-0.5 font-mono text-[11px] tabular-nums rtl:text-end"
+                  >
+                    <div>{m.memory}</div>
+                    <div>
+                      {m.bandwidth} · {m.compute}
+                    </div>
+                    <div>
+                      {m.loadW} W load · {m.idleW} W idle ·{" "}
+                      {(machineWh(m) / 1000).toFixed(1)} kWh/day
+                    </div>
+                  </div>
+                  <p className="text-muted-foreground mt-2 text-xs">
+                    {isAr ? m.verdictAr : m.verdict}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* ── Load table ────────────────────────────────────────────── */}
         {groups.map((group) => {
           const rows = LOAD_ROWS.filter((r) => r.group === group.key);
           const subtotal =
@@ -171,10 +247,10 @@ export function SizingModel({ isAr }: SizingModelProps) {
             </div>
             <div>
               <div className="text-muted-foreground text-xs">
-                {isAr ? "قابل للجدولة" : "Shiftable"}
+                {isAr ? "الجهاز" : "The box"}
               </div>
               <div dir="ltr" className="font-mono tabular-nums rtl:text-end">
-                {fmt(sizing.shiftableKWh)} kWh
+                {fmt(sizing.machineKWh)} kWh
               </div>
             </div>
           </div>
@@ -200,8 +276,8 @@ export function SizingModel({ isAr }: SizingModelProps) {
 
           <p className="text-muted-foreground border-border border-t pt-4 text-xs leading-relaxed">
             {isAr
-              ? "الكيلوواط الشمسي النهاري يكلف نحو ثلث نظيره الليلي — لذا نوسّع الألواح ونضبط البطارية وننقل الأحمال المرنة إلى نافذة الشمس."
-              : "A daytime kWh costs about a third of a night-time one — so oversize the array, right-size the battery, and move flexible loads into the sun."}
+              ? "الجهاز هو أكبر حمل وأكثره مرونة — لذا يعمل في نافذة الشمس. الكيلوواط النهاري يكلف نحو ثلث نظيره الليلي."
+              : "The box is the largest and most flexible load, so it runs in the solar window. A daytime kWh costs about a third of a night-time one."}
           </p>
         </div>
       </aside>
