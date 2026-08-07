@@ -86,6 +86,17 @@ describe("checkCraft parity", () => {
       name: "short-form floor on x",
       input: { ar: GOOD_AR.slice(0, 300), channel: "x", brand: "hogwarts" },
     },
+    {
+      // The digit fold lives in both files; this is the case that catches it
+      // being applied to one of them only.
+      name: "arabic-indic digits in the brief, latin in the copy",
+      input: {
+        ar: "الملف كان يمر على 3 مكاتب، والعملية تستغرق 14 يوماً.",
+        en: "The file crossed 3 desks over 14 days.",
+        allowedFrom: "الملف بيتنقل بين ٣ مكاتب، والعملية بتاخد ۱٤ يوم.",
+        brand: "hogwarts",
+      },
+    },
   ];
 
   it.each(cases)("TS and .mjs agree on $name", ({ input }) => {
@@ -237,6 +248,50 @@ describe("the invented-number guard", () => {
     // "every number is invented".
     const findings = checkCraft({ ar: "الكشف في 3 خطوات، والورق ينتهي." });
     expect(findings.map((f) => f.rule)).not.toContain("invented-number");
+  });
+
+  // Briefs are written Arabic-first, so a figure in one arrives as ٣, while
+  // copy.mdx mandates Latin digits in the copy itself. Before the digit fold
+  // that pairing was unsatisfiable — "3" read as invented because the brief's
+  // own ٣ never tokenized, and "٣" tripped arabic-indic-digits instead. Every
+  // Arabic brief carrying a number was unanswerable without --craft-override.
+  it("accepts a Latin digit citing an Arabic-Indic figure from the brief", () => {
+    const findings = checkCraft({
+      ar: "الملف كان يمر على 3 مكاتب، والآن خطوة واحدة.",
+      allowedFrom: "الملف بيتنقل بين ٣ مكاتب قبل الموافقة.",
+    });
+    expect(findings.map((f) => f.rule)).not.toContain("invented-number");
+  });
+
+  it("accepts Persian digits in the brief too", () => {
+    const findings = checkCraft({
+      ar: "العملية كانت تستغرق 14 يوماً.",
+      allowedFrom: "العملية بتاخد ۱۴ يوم.",
+    });
+    expect(findings.map((f) => f.rule)).not.toContain("invented-number");
+  });
+
+  it("still catches an invented figure when the brief is Arabic-Indic", () => {
+    // The fold must not turn the guard off — it only aligns the alphabets.
+    const findings = checkCraft({
+      ar: "الملف كان يمر على 9 مكاتب.",
+      allowedFrom: "الملف بيتنقل بين ٣ مكاتب قبل الموافقة.",
+    });
+    const invented = findings.filter((f) => f.rule === "invented-number");
+    expect(invented).toHaveLength(1);
+    expect(invented[0].message).toContain("9");
+  });
+
+  it("leaves arabic-indic-digits free to fail copy that ships ٣", () => {
+    // The fold is scoped to the invented-number guard. Latin digits in the copy
+    // are still house style, and that rule must keep seeing the raw text.
+    const findings = checkCraft({
+      ar: "الملف كان يمر على ٣ مكاتب.",
+      allowedFrom: "الملف بيتنقل بين ٣ مكاتب قبل الموافقة.",
+    });
+    const rules = findings.map((f) => f.rule);
+    expect(rules).toContain("arabic-indic-digits");
+    expect(rules).not.toContain("invented-number");
   });
 });
 

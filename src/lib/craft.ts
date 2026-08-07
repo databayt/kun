@@ -105,6 +105,28 @@ function stripLinks(text: string): string {
   return stripAbsolute(text).replace(SCHEMELESS_URL, " ");
 }
 
+/**
+ * Arabic-Indic (٠-٩) and Persian (۰-۹) digits folded to Latin — for the
+ * invented-number guard, and nowhere else.
+ *
+ * That guard is a set difference over NUMBER_TOKEN, which is `\d`: Latin only.
+ * Briefs are written Arabic-first and naturally carry ٣, while copy.mdx mandates
+ * Latin digits in the copy — a pairing that was unsatisfiable until this fold.
+ * Cite the brief's ٣ as "3" and invented-number fired, because the brief's own
+ * digits were never tokenized and the allowed-set came back empty; cite it as
+ * "٣" and arabic-indic-digits fired instead. Every Arabic brief carrying a
+ * figure was therefore unanswerable without --craft-override.
+ *
+ * Deliberately NOT applied to the arabic-indic-digits check, which must keep
+ * seeing raw text — catching ٣ in shipped copy is that rule's whole job.
+ */
+function latinizeDigits(text: string): string {
+  return text.replace(/[٠-٩۰-۹]/g, (d) => {
+    const code = d.charCodeAt(0);
+    return String(code >= 0x06f0 ? code - 0x06f0 : code - 0x0660);
+  });
+}
+
 function sentences(text: string): string[] {
   return text
     .split(/[.!?؟]+\s+|\n+/)
@@ -423,11 +445,12 @@ export function checkCraft(input: CraftInput): CraftFinding[] {
   // school owner absolutely can.
   if (input.allowedFrom !== undefined) {
     const allowed = new Set(
-      stripLinks(input.allowedFrom).match(NUMBER_TOKEN) ?? [],
+      latinizeDigits(stripLinks(input.allowedFrom)).match(NUMBER_TOKEN) ?? [],
     );
     const seen = new Set<string>();
     for (const text of [ar, en]) {
-      for (const n of stripLinks(text).match(NUMBER_TOKEN) ?? []) {
+      for (const n of latinizeDigits(stripLinks(text)).match(NUMBER_TOKEN) ??
+        []) {
         if (!allowed.has(n) && !seen.has(n)) {
           seen.add(n);
           add(
