@@ -9,18 +9,18 @@
   ],
   "engine_version": "databayt v4.0",
   "updated": "2026-07-10",
-  "min_claude_code_version": "2.1.190",
+  "min_claude_code_version": "2.1.216",
   "billing": {
     "plan": "claude-max-100",
     "$comment": "Max 5x ($100/mo) for the time being — corrected from Max 20x on 2026-06-12. Subscription-ONLY posture: no usage-based credits, no API-key per-token spend — changing this requires a /decide entry + Abdout approval (captain ESCALATE gate: budget > $50/mo). Check /usage per-category weekly to stay inside plan caps."
   },
   "sync": {
     "$comment": "Self-update stamps per tier — /sync refreshes them; the captain flags overdue tiers at session start. null = never synced (due immediately). Sources of the form gh:owner/repo are read via `gh api .../releases`. Material adoptions land in docs/CONFIG-BENCHMARK.md → Adoption log.",
-    "anthropic": "2026-07-10",
-    "stack": "2026-07-10",
-    "services": "2026-07-10",
+    "anthropic": "2026-08-07",
+    "stack": "2026-08-07",
+    "services": "2026-08-07",
     "practice": "2026-07-10",
-    "claude_code_version": "2.1.206",
+    "claude_code_version": "2.1.223",
     "cadence_days": {
       "anthropic": 7,
       "stack": 14,

@@ -161,6 +161,47 @@ KPI 6 is the conscience clause: the engine exists to make databayt profitable an
 (`NORTH-STAR.md`). An engine improvement that cannot articulate its line to active-paying-schools
 is bench polish, not benchmark push.
 
+## Re-benchmark 2026-08-07 — the August surface (CHANGELOG 2.1.207 → 2.1.223)
+
+Three tiers synced after 28 days (anthropic was 21d overdue against a 7d cadence — KPI 1 was RED
+throughout the session that built `/bench`, which is its own small indictment).
+
+| Finding                                                                                            | kun decision                                                                                                                                                             |
+| -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Next.js July security release — 4 HIGH + 5 MEDIUM CVEs; patched in 16.2.11 / 15.5.21 / 16.3.0**  | **ESCALATED — 5 of 6 repos exposed.** kun 16.2.2, codebase 16.2.4, mkan 16.2.4, shifa 16.1.0, souq 15.3.8. Only hogwarts (16.3.0) is clear. See the security block below |
+| Claude **Opus 5** GA (2.1.219), now the default Opus model — 1M context                            | **PROPOSE** — `/decide` on the fallback chain (`claude-opus-4-8` → `claude-opus-5`). The `opus` alias already resolves forward, so the agent fleet needs no edit         |
+| Skills with `context: fork` now run in the **background** by default (2.1.216)                     | **ADOPTED** — `watch` pinned `background: false`; it returns a verdict the session acts on, so foreground is correct                                                     |
+| Subagents may nest to **depth 3** by default, was 1 (2.1.219); caps at 20 concurrent / 200 session | TRACK — `bench-dispatch` and `qa` are single-depth fan-outs; nesting buys nothing yet                                                                                    |
+| `workflowSizeGuideline` settings key (2.1.219)                                                     | TRACK — the default medium guideline bound `bench-dispatch` to ~16 agents and that was the right size; set it only when a workflow genuinely needs more                  |
+| `prompt-audit` subcommand on the `claude-api` skill (2.1.221)                                      | TRACK — audits prompts for _older-model patterns_, which is orthogonal to `/bench` (dispatch accuracy) and to `lint-contracts` (declared-reference integrity)            |
+| `DirectoryAdded` hook (2.1.219); nested `.claude/rules/*.md` load fix (2.1.211)                    | **ADOPTED (no-op)** — the rules fix silently repairs the 37-rule domain corpus; no config change needed                                                                  |
+| `/review` → alias of `/code-review`; runs as a background subagent (2.1.218/221)                   | **ADOPTED** as practice — no config change                                                                                                                               |
+| Claude no longer runs `/verify`, `/code-review`, `/deep-research` autonomously (2.1.215/216)       | **ADOPTED** as practice — invoke explicitly                                                                                                                              |
+| Next.js **16.3** (Aug 3): ~90% less dev memory, first-party Skills, AGENTS.md-bundled docs         | **PROPOSE** — `/package`-driven; hogwarts is already on it and is the proof path                                                                                         |
+| shadcn: React Aria as a first-class base; registry **server-side search**; `@shadcn/helpers`       | TRACK — Base-UI-vs-Radix `/decide` still open from July; React Aria widens it rather than settling it                                                                    |
+| Vercel **Agent Plugins 1.0.0** — standard format for packaging Skills + MCP into portable plugins  | TRACK — kun's two-plugin marketplace already does this Anthropic-natively; revisit only if the format becomes the ecosystem default                                      |
+| Neon: project-level permissions, `neon` CLI rebrand (Node 20.19+), backend services beta           | TRACK — no action for a single-operator setup on one shared DB                                                                                                           |
+| React: no releases since 2026-02                                                                   | —                                                                                                                                                                        |
+
+### Security — the headline, and it is not about agents
+
+The July security release patches **4 HIGH** severity CVEs. Verified against each repo's pinned
+version rather than assumed:
+
+| Repo         | next    | Status      |
+| ------------ | ------- | ----------- |
+| **hogwarts** | 16.3.0  | OK          |
+| kun          | 16.2.2  | **EXPOSED** |
+| codebase     | 16.2.4  | **EXPOSED** |
+| mkan         | 16.2.4  | **EXPOSED** |
+| shifa        | ^16.1.0 | **EXPOSED** |
+| souq         | 15.3.8  | **EXPOSED** |
+
+kun's exposure is concrete, not theoretical: **6 files use Server Actions** (CVE-2026-64641,
+App-Router DoS via CPU exhaustion) and `next.config.ts` configures **rewrites/redirects**
+(CVE-2026-64645, SSRF via attacker-controlled destination hostname). Patch line is 16.2.11 for
+the 16.2 branch, 15.5.21 for 15.5 — both patch-level bumps inside the same minor.
+
 ## Adoption log
 
 - **2026-08-06** — `/bench` L1: the engine starts measuring itself. New `bench` skill + spell
@@ -173,6 +214,13 @@ is bench polish, not benchmark push.
   → `eval` as declared policy with a `listing_cap_history`. Fixed: `deploy` frontmatter,
   `user_skills` 62→66, user-level count checks in `health.sh`, skill→spell reverse check in
   `generate-vocab.mjs`. KPIs 7–8 added. Engine v4.1.
+- **2026-08-07** — `/sync` anthropic + stack + services after 28 days. Stamps refreshed,
+  `claude_code_version` 2.1.206 → 2.1.223, `min_claude_code_version` → 2.1.216 (the release that
+  changed `context: fork` to background-by-default). `watch` pinned `background: false`. Headline
+  is **not** an agent finding: the July Next.js security release patches 4 HIGH CVEs and **5 of 6
+  repos are on vulnerable versions** — escalated, not auto-applied. Opus 5 GA proposed for the
+  fallback chain; the `opus` alias already resolves forward, which is the payoff of the
+  alias-over-version rule `lint-contracts.mjs` started enforcing yesterday.
 - **2026-08-06** — `/bench` L2 contracts: `lint-contracts.mjs`, deterministic and wired into
   `health.sh`. Found 11 skills pinning `model: claude-opus-4-7` — neither the engine model nor
   a declared fallback. `health.sh` already grepped for retired Opus versions, but only across
