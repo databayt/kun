@@ -117,11 +117,111 @@ Two notes that save money and watts:
 - **Two Sparks can be linked** over ConnectX-7 at 200 Gb/s for 256 GB, which is the
   cheap path to bigger models if one proves insufficient. Then the NIC earns its watts.
 
-**Why not a Mac Studio.** The M3 Ultra is the best decode-per-watt machine available —
-up to 512 GB at 819 GB/s (3× the Spark's bandwidth) for about 200 W — and on a
-text-only node it would be a serious contender. It is disqualified here by the media
-lane: image and video generation (FLUX, Wan, LTX, Hunyuan) is CUDA tooling in
-practice. One box that must also render means one box that must be NVIDIA.
+### Buy the class, never the SKU
+
+NVIDIA's roadmap says the current Spark's one real weakness gets fixed on a known
+schedule: **Rubin Spark with LPDDR6 lands 2027–2028**, and LPDDR5X bandwidth is
+precisely what caps decode today. (Rubin R100 samples Q4 2026, volume Q1 2027; Rosa
+Feynman Spark follows around 2029.)
+
+Our Tier 3 trigger plausibly fires in 2027. So the specification is
+**"Spark-class, current generation at trigger time"** — never a part number. Written
+that way, buying the box last is not only cash discipline; the plan upgrades itself
+while it waits.
+
+## The roads not taken
+
+Three reasonable alternatives, each rejected for a specific reason rather than a
+preference.
+
+### Apple — Mac Studio
+
+**Disqualified on availability, as of August 2026.** The M3 Ultra's 819 GB/s is still
+3× the Spark's bandwidth and it does it at ~200 W, which on solar is superb. But Apple
+pulled the large memory configurations during 2026's memory-supply squeeze: the Mac
+Studio now ships **M3 Ultra at 96 GB** and M4 Max at 36–64 GB. The 128 GB, 256 GB and
+512 GB options are gone.
+
+**Today's Mac Studio therefore has less memory than a $4K DGX Spark** — 96 GB against
+128 GB — and the "512 GB Mac runs a 671B model" story describes a machine you cannot
+currently buy.
+
+An M5 Ultra with up to 768 GB is *reported* for later in 2026 (around October, delayed
+by the same supply problem) — that is press rumour, not published spec. **Even if it
+ships, it does not re-qualify**: no CUDA means no media lane and no vLLM. The Mac's
+role here is Abdout's development machine, not the node.
+
+### macOS vs Linux — a decision the box already made
+
+**The DGX Spark ships DGX OS, built on Ubuntu Desktop**, with CUDA, cuDNN, TensorRT and
+the NVIDIA Container Runtime pre-configured. Choosing the box chooses the OS; there is
+no second decision.
+
+It is the right one anyway, for two reasons that matter to *this* node:
+
+- **Serving.** vLLM has no official GPU support on macOS — PagedAttention is a
+  Linux+CUDA feature. The Apple-silicon bridge translates a subset of CUDA through
+  Metal and is slower than llama.cpp's native Metal backend. The native macOS path,
+  `mlx_lm.server`, does now expose an OpenAI-compatible API with continuous batching,
+  but **its KV cache is per-request — no paged or block-based KV management.** For a
+  node whose entire workload is concurrent dispatched jobs, that is the exact gap.
+- **Unattended operation.** Headless, remote, containerised, power-cycled without a
+  human is what a server OS is for. macOS is not built to be run this way.
+
+### Starlink — the best link we cannot lawfully use
+
+On the technical merits it wins outright, and its power figures are remarkable for an
+off-grid site: **Starlink Mini draws ~15–20 W steady (≈17 W typical) after the January
+2026 firmware, with a 60 W startup peak — budget ~30 W, about 720 Wh/day.** Licensed
+VSAT costs **4,320 Wh/day**, six times more, at fifteen times the latency.
+
+If Sudan licensed it, the honest planning consequence is not "somewhat better link" —
+it would **delete the VSAT line item entirely** ($1,500–3,500 capex plus $200–800/mo)
+and hand back 3.6 kWh/day of generation.
+
+It is **not licensed in Sudan.** Starlink now operates in 27–28 African countries
+(Uganda and Côte d'Ivoire licensed during 2026), but Sudan carries no committed date
+and the service is treated as not legally operational; terminals in-country arrive
+informally. For a company signing school contracts and pursuing regulated enterprise
+buyers, running core infrastructure on an unlicensed service is a business exposure as
+much as a legal one.
+
+**So: plan on licensed LTE and licensed VSAT, and revisit the day the licence exists.**
+The design already has a slot for it.
+
+### Tesla Powerwall — a good product in the wrong place
+
+| | Powerwall 3 | 48 V LiFePO4 rack (specified) |
+| --- | --- | --- |
+| Capacity | 13.5 kWh | 15 kWh (3 × 5 kWh modules) |
+| Chemistry | NMC, ~5,000 cycles | **LiFePO4, 6,000+ cycles**, better in heat |
+| Inverter | **~11.5 kW built in** | Separate — 2 × 3 kW, N+1 |
+| Cost | ~$11,500–16,500 **US installed** (~$998/kWh) | ~$2,550–4,200 **landed hardware** |
+| Service | Tesla-certified installers, app/cloud commissioning | Any competent electrician |
+
+Not a like-for-like price comparison — Powerwall's figure is a US installed price and
+ours is landed hardware — but the gap is wide enough that the direction is not in
+doubt. Three reasons it is wrong for Erkowit specifically:
+
+1. **It integrates the inverter, which destroys the N+1 design.** The whole reason the
+   plan specifies two 3 kW hybrids instead of one bigger unit is that the site is four
+   hours from a technician. A single integrated battery-plus-inverter is precisely the
+   single point of failure that section exists to avoid.
+2. **There is no Tesla service network in Sudan.** Powerwall is sold and supported
+   through certified installers — it reached South Africa in 2025 — and commissioning
+   and monitoring run through Tesla's app. A site whose entire premise is autonomy
+   should not depend on a vendor cloud it cannot reach.
+3. **A 13.5 kWh monolith cannot go to Port Sudan in a car.** A 5 kWh rack module can.
+
+Its 11.5 kW inverter is also roughly four times our 2.6 kW peak — capacity we would
+pay for and never use.
+
+### Solar panels — no change
+
+Already the design: **6 kWp**, about 11 × 550 W modules at $0.25–0.45/W. Worth
+specifying **bifacial or N-type TOPCon** if the price delta is small — a hilltop with
+light-coloured ground returns a few percent on the rear face, and better temperature
+coefficients suit the site. Not worth paying a premium for.
 
 ## Three planes, split by blast radius
 
@@ -350,7 +450,7 @@ Power is arithmetic. The link is the hard part, and for a remotely-operated node
 | **Management-plane modem** | Licensed | ~$30/mo | — | **Separate carrier, reaches only the PDU and OOB gear.** Highest-value line item in the BOM |
 | **Licensed VSAT** (TPRA-licensed — NTvsat, Hotnet, GlobalTT, Vizocom) | Licensed | $1,500–3,500 + $200–800/mo | ~600 ms | Backup. Costs ~4.3 kWh/day if run continuously — power it down unless needed |
 | **Point-to-point microwave to Sinkat / Port Sudan** | Needs a licensed partner | Site-dependent | 5–20 ms | Best case if a licensed partner exists. Investigate on the survey |
-| **Starlink** | **Not licensed in Sudan.** Widely used informally since the 2024 network collapse | — | ~40 ms | Do not build on it. Real legal and continuity exposure for a company signing school contracts |
+| **Starlink Mini** | **Not licensed in Sudan** (27–28 African countries are; Sudan has no committed date) | — | ~40 ms | Best technical fit by far — **~17 W, ~720 Wh/day** against VSAT's 4,320. Licensing it would delete the VSAT line entirely. Not lawful there today; see [the roads not taken](#starlink--the-best-link-we-cannot-lawfully-use) |
 
 ### Ingress and bandwidth
 
@@ -505,6 +605,18 @@ Nothing above is buyable until someone stands on the hill. The first visit retur
 [Spark idle power cut by ConnectX hot-plug detection](https://www.tomshardware.com/tech-industry/artificial-intelligence/nvidia-dgx-spark-update-cuts-idle-power-by-32-percent-or-more-hot-plug-detection-on-connectx-nic-makes-for-a-more-efficient-ai-workstation) ·
 [Spark vs Mac Studio bandwidth](https://tech-insider.org/dgx-spark-vs-mac-studio-2026/) ·
 [Prefill is compute-bound, decode is memory-bound](https://towardsdatascience.com/prefill-is-compute-bound-decode-is-memory-bound-why-your-gpu-shouldnt-do-both/)
+**NVIDIA roadmap:** [RTX Spark roadmap — Rubin 2027, Rosa Feynman 2029](https://www.tomshardware.com/pc-components/cpus/nvidia-unveils-dgx-sparrk-roadmap-for-laptops-and-desktop-pcs-at-computex-2026-three-generations-outlined-rubin-followed-by-rosa-feynman) ·
+[Inside the Vera Rubin platform](https://developer.nvidia.com/blog/inside-the-nvidia-rubin-platform-six-new-chips-one-ai-supercomputer/)
+**Apple:** [Mac Studio technical specifications](https://www.apple.com/mac-studio/specs/) (96 GB max, checked August 2026) ·
+[M5 Ultra Mac Studio reported for 2026 with up to 768 GB](https://www.macrumors.com/2026/06/25/m5-ultra-mac-studio-2026/) ·
+[…still due in 2026](https://appleinsider.com/articles/26/06/28/m5-ultra-mac-studio-still-due-in-2026-m7-ultra-in-2028)
+**macOS vs Linux serving:** [vLLM on Apple Silicon — does MLX integration work](https://contracollective.com/blog/vllm-mlx-apple-silicon-integration-2026) ·
+[vLLM GPU installation (Linux + CUDA)](https://docs.vllm.ai/en/stable/getting_started/installation/gpu/)
+**Starlink:** [Starlink now in 27 African nations](https://www.advanced-television.com/2026/03/27/starlink-now-working-in-27-african-nations/) ·
+[Starlink Mini power consumption — real wattage data](https://gridwright.com/blog/starlink-mini-power-consumption)
+**Powerwall:** [Powerwall 3 review and pricing 2026](https://www.energysage.com/energy-storage/best-home-batteries/tesla-powerwall-battery-complete-review/) ·
+[Powerwall 3 launches in South Africa](https://cleantechnica.com/2025/03/05/tesla-powerwall-3-now-available-in-south-africa/) ·
+[48 V server-rack battery vs Powerwall](https://www.lithpower.com/48v-server-rack-battery-vs-powerwall-guide/)
 **Open-weight models:** [Best open-weight coding models to self-host, 2026](https://www.digitalapplied.com/blog/best-open-weight-coding-models-self-host-hardware-match-2026)
 **Media generation:** [Video-gen GPU requirements 2026](https://willitrunai.com/blog/video-generation-gpu-guide-2026)
 **Connectivity:** [Telecommunications in Sudan](https://en.wikipedia.org/wiki/Telecommunications_in_Sudan) ·
