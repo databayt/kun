@@ -166,7 +166,7 @@ PASSES=2
 # The models a run may be asked for. An ask carrying anything else is answered
 # on the session default rather than refused — an unknown id here means the
 # engine's chain moved on, and a draft is not the place to litigate that.
-KNOWN_MODELS="claude-fable-5 claude-opus-4-8 claude-sonnet-5"
+KNOWN_MODELS="google-free claude-fable-5 claude-opus-4-8 claude-sonnet-5"
 
 # `list` emits an ask's model only when one was chosen, so absent = "session
 # default" and the two cases stay distinguishable. `default` is the sentinel for

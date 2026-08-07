@@ -23,6 +23,7 @@
  * so, and this is the list that made it real.
  */
 export const DRAFT_MODELS = [
+  { id: "google-free", label: "Google Free (Gemini 2.5 Pro)" },
   { id: "claude-fable-5", label: "Fable 5" },
   { id: "claude-opus-4-8", label: "Opus 4.8" },
   { id: "claude-sonnet-5", label: "Sonnet 5" },
@@ -35,8 +36,8 @@ export const DRAFT_MODEL_IDS = DRAFT_MODELS.map((m) => m.id) as [
   ...DraftModelId[],
 ];
 
-/** The house default — kun's session model, so the Hub matches a hand-run /draft. */
-export const DEFAULT_DRAFT_MODEL: DraftModelId = "claude-fable-5";
+/** The house default — Google Free (Gemini 2.5 Pro) with high reasoning effort. */
+export const DEFAULT_DRAFT_MODEL: DraftModelId = "google-free";
 
 /**
  * copy.mdx's three angles. The skill already names three and picks the survivor;
