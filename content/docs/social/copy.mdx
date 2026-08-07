@@ -80,7 +80,13 @@ adaptation that matters — which is why the queue lane writes one piece rather 
 
 Auto-fail. No discussion — and since **2026-08-06, executed rather than asserted.**
 `node scripts/social-drafts.mjs answer` refuses a draft that trips any of these,
-naming the rule, and `check` runs the same gate on loose files:
+naming the rule, and `check` runs the same gate on loose files. Since
+**2026-08-07 the inline Gemini lanes run it too** — `requestSocialDraft`,
+`refineSocialDraft`, and `drain-google` gate every draft with one corrective
+retry, then **refuse to the queue** (the row stays `pending`, marked
+`craft-refused:` with the named rules, and the Mac claude lane writes fresh
+copy avoiding them). For a while the default lane was the one lane this page
+could not stop; that hole is closed.
 
 ```bash
 node scripts/social-drafts.mjs check <id> --ar ar.txt --en en.txt

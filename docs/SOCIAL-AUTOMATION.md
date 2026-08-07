@@ -254,6 +254,46 @@ the ask lands in `SocialDraftRequest` as `pending` and a session answers it on t
 
 No new spend in any of these: the answering is Max-pool, not API.
 
+### AI SDK 7 + eve evaluation → inline lane hardening — ✅ done 2026-08-07
+
+Abdout asked what [ai-sdk.dev](https://ai-sdk.dev) and
+[vercel-labs/eve-content-agent-template](https://github.com/vercel-labs/eve-content-agent-template)
+could add. The evaluation's verdict: **the pipeline already implements eve's content-agent
+patterns** — per-surface style (the register ladder + brand×channel map), deterministic lint (the
+craft gate), Slack surface (Loop C), approvals, durable sessions — and several things eve lacks
+(the `lessons` dismiss-reason loop, refinement threads). What the comparison exposed instead was
+that the **inline Gemini lane** (D-20260807, shipped the same morning) was missing its own spec:
+no craft gate, no kill switch, no rate limiter, a 2×-slower model than the memo measured, and a
+prompt drifting across two copies. All landed same-day:
+
+- ✅ **AI SDK v7 adopted where it genuinely fits** — `ai` + `@ai-sdk/google`, `generateObject`
+  with a zod schema replacing two hand-rolled JSON-mode clients (the dark `draftBrief` Anthropic
+  client is deleted; a funded future is a one-line `createAnthropic` swap). Same free
+  `GEMINI_API_KEY`, zero billing change.
+- ✅ **The craft gate runs on the inline lanes** — one corrective retry, then refuse-to-queue with
+  a `craft-refused:` marker the claude lane reads. The gate's one bypass is closed.
+- ✅ **D-20260807's spec shipped** — `SOCIAL_DRAFT_INLINE=off` revert, non-throwing 8/4-per-min
+  limiter, `gemini-3.6-flash` reconciled across three drifted surfaces.
+- ✅ **Prompt single-sourced** — parity-pinned mirror pair, statics-first for implicit caching,
+  carrying the lessons line (the feedback loop now reaches the default lane).
+- ✅ **Scene bank** (`content/social/scenes.json`) — eve's _researcher_ pattern adapted to a
+  curated, seasonally-refreshed file; check 4's structural gap ("docs contain no Thursdays")
+  finally has source material.
+- ✅ **Friday digest** (`scripts/social-digest.mjs`, launchd Fri 09:00) — the Typefully template's
+  weekly-analytics cron, done deterministically: planned vs shipped, Facebook numbers, lessons,
+  lane health → Hermes → Slack (Telegram fallback). Zero tokens.
+
+**Deliberately NOT adopted** (each a doctrine call, recorded here so it is not re-litigated):
+
+| Rejected                                         | Why                                                                                                                                                                                      |
+| ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **eve as runtime**                               | Bills via AI Gateway/API keys (subscription-only doctrine); its server-orchestrates-agent shape inverts the pipeline's load-bearing inverted arrow (Vercel can never reach the writers). |
+| **HarnessAgent** (Claude Code in Vercel Sandbox) | Experimental ("expect breaking changes"), API/Gateway-billed, no subscription OAuth documented. **Watch item**: revisit if subscription auth lands or it stabilizes.                     |
+| **Reviewer/LLM-judge subagent**                  | copy.mdx's documented rejection stands — L4, `/decide`-gated, a second model call per draft on a pool hitting session limits. The `lessons` loop is the feedback mechanism.              |
+| **Typefully queue**                              | Covers X/LinkedIn/Threads/Bluesky/Mastodon; our channels are FB/IG/Telegram/WhatsApp, and the queue + drain already exist.                                                               |
+
+Decision record: `.claude/memory/decisions/2026-08-07-ai-sdk-inline-lane.md`.
+
 ### AI-disclosure mapping (the moral gate's compliance half)
 
 The publish payload carries `aiGenerated: boolean` (set whenever media came from `/higgs`). The

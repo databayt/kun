@@ -156,7 +156,7 @@ returns `drafted: 0`.
   claims the request with the same conditional update the drain uses, so two reviewers race safely,
   and an empty queue points back at Draft rather than offering a blank textarea
 - **The Social Agent window** — in-page drafting (2026-07-30): a brief in, AR+EN copy out, one
-  press into the composer. Contributor-gated. **It does not call the API** — D-20260730's spend lane
+  press into the composer. Contributor-gated. **It does not call the Anthropic API** — D-20260730's spend lane
   shipped and is blocked (`ANTHROPIC_API_KEY` in Vercel returns 401, and subscription-only billing
   means there are no credits behind it), so the window records a `SocialDraftRequest` and a Claude
   Code session answers it on the Max pool via `draft`'s queue mode. The cron's no-spend default is
@@ -183,6 +183,19 @@ returns `drafted: 0`.
     60 days, most common failure first, before it writes anything. [Copy](/docs/social/copy) had
     claimed this loop since it was written — it was concatenating the reason into a prose `note` no
     query could group
+- **The window drafts inline on Gemini — and the gate went with it** (2026-08-07) — D-20260807
+  routed around the funded-key blocker: `requestSocialDraft`/`refineSocialDraft` answer in ~11s
+  via AI SDK `generateObject` on `gemini-3.6-flash` (free tier, measured **20 requests/day**),
+  with the Mac drain as the floor for every miss. The memo's unshipped spec landed the same day:
+  the **craft gate now runs on both Gemini lanes** (one corrective retry with the named failures,
+  then refuse — the row stays `pending` with a `craft-refused:` note that `drain-google` skips
+  and the claude lane reads as `craftRefused`), `SOCIAL_DRAFT_INLINE=off` is the one-variable
+  revert, a non-throwing limiter (8/min global, 4/min per contributor) queues the ninth draft
+  instead of erroring, and the prompt is single-sourced in a parity-pinned mirror pair
+  (`src/lib/draft-prompt.ts` ⇄ `scripts/lib/draft-prompt.mjs`, statics first for Gemini's
+  implicit caching) carrying the **scene bank** (`content/social/scenes.json` — check 4's raw
+  material) and the **lessons line**, so the dismiss-reason loop finally reaches the default
+  lane. The Hub's model label names the model that actually answers
 - **Docs** — overview, status (this page), ownership, architecture, strategy, carousel, five
   brand pages, the channel guides, and the groups/destinations design
 
