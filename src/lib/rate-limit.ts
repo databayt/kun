@@ -45,6 +45,26 @@ export const rateLimiters = {
         prefix: "@upstash/ratelimit/report-tenant",
       })
     : null,
+  /** Inline Gemini drafting, all contributors together — a spend cap on the
+   *  20-requests/day free tier (D-20260807), not an abuse gate. */
+  "draft-inline": redis
+    ? new Ratelimit({
+        redis,
+        limiter: Ratelimit.slidingWindow(8, "1 m"),
+        analytics: true,
+        prefix: "@upstash/ratelimit/draft-inline",
+      })
+    : null,
+  /** The same cap per contributor, so one busy reviewer cannot spend the
+   *  team's morning quota on refinements alone. */
+  "draft-inline-user": redis
+    ? new Ratelimit({
+        redis,
+        limiter: Ratelimit.slidingWindow(4, "1 m"),
+        analytics: true,
+        prefix: "@upstash/ratelimit/draft-inline-user",
+      })
+    : null,
 };
 
 export class RateLimitError extends Error {
@@ -82,6 +102,38 @@ export async function assertRateLimit(
     throw new RateLimitError(
       Math.max(1, Math.ceil((res.reset - Date.now()) / 1000)),
     );
+  }
+}
+
+/**
+ * The inline draft lane's limiter — non-throwing and fail-OPEN by design,
+ * diverging from assertRateLimit's fail-closed doctrine on purpose.
+ *
+ * assertRateLimit protects an abuse surface: there, accepting a request that
+ * should have been refused is the failure, so a missing Redis must refuse.
+ * This helper caps SPEND on a measured 20-requests/day free tier
+ * (D-20260807), and the whole surface is already contributor-gated. A false
+ * never refuses the ask — it skips the inline Gemini call and the row queues
+ * for the Mac lane, the same fallback every other inline miss takes, so the
+ * 9th draft of a busy minute gets last week's latency instead of an error.
+ * Failing closed would silently kill the fast lane the day Redis is missing,
+ * while Gemini's own 429 still backstops the daily total either way.
+ */
+export async function allowInlineDraft(identifier: string): Promise<boolean> {
+  if (process.env.NODE_ENV === "development") return true;
+  const global = rateLimiters["draft-inline"];
+  const user = rateLimiters["draft-inline-user"];
+  if (!global || !user) return true;
+  try {
+    const [g, u] = await Promise.all([
+      // One shared key: the global bucket meters the lane, not a caller.
+      global.limit("all"),
+      user.limit(identifier),
+    ]);
+    return g.success && u.success;
+  } catch {
+    // An Upstash outage must not take the fast lane down with it.
+    return true;
   }
 }
 

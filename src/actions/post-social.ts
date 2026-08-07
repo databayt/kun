@@ -28,8 +28,13 @@ import {
   DISMISS_REASON_IDS,
   DRAFT_MODEL_IDS,
 } from "@/components/root/social/knobs";
-import { CRAFT_REFUSED_PREFIX, draftWithGeminiFree } from "@/lib/google-draft";
+import {
+  CRAFT_REFUSED_PREFIX,
+  draftWithGeminiFree,
+  inlineDraftEnabled,
+} from "@/lib/google-draft";
 import { checkCraft, craftFailures, type CraftFinding } from "@/lib/craft";
+import { allowInlineDraft, getClientIp } from "@/lib/rate-limit";
 
 // Long enough for a human to see it in the morning, short enough that a
 // leaked link goes stale before it is useful. Matches the cron.
@@ -330,8 +335,13 @@ export async function requestSocialDraft(
   try {
     let gated: InlineDraftOutcome = { result: null, refusalNote: null };
     if (
+      inlineDraftEnabled() &&
       (!parsed.data.model || parsed.data.model === "google-free") &&
-      process.env.GEMINI_API_KEY
+      process.env.GEMINI_API_KEY &&
+      // Last on purpose: a limiter token is only worth spending once the lane
+      // is actually going to call Gemini. A false queues the ask instead —
+      // the contributor sees last week's latency, never an error.
+      (await allowInlineDraft(email ?? (await getClientIp())))
     ) {
       gated = await draftInlineGated({
         product: parsed.data.product,
@@ -475,8 +485,10 @@ export async function refineSocialDraft(
 
     let gated: InlineDraftOutcome = { result: null, refusalNote: null };
     if (
+      inlineDraftEnabled() &&
       (!chosenModel || chosenModel === "google-free") &&
-      process.env.GEMINI_API_KEY
+      process.env.GEMINI_API_KEY &&
+      (await allowInlineDraft(email ?? (await getClientIp())))
     ) {
       gated = await draftInlineGated({
         product: parent.brand,

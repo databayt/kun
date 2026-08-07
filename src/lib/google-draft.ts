@@ -28,6 +28,17 @@ export const GEMINI_DRAFT_MODEL = "gemini-3.6-flash";
  */
 export const CRAFT_REFUSED_PREFIX = "craft-refused:";
 
+/**
+ * The one-variable revert D-20260807 names: `SOCIAL_DRAFT_INLINE=off` returns
+ * the lane to queue-only behaviour — every ask lands `pending` and the Mac
+ * drain answers it, exactly the pre-inline world. Anything else (including
+ * unset) means ON: the lane exists because a contributor asked for ~10
+ * seconds, so the default is the fast path and the env var is the brake.
+ */
+export function inlineDraftEnabled(): boolean {
+  return (process.env.SOCIAL_DRAFT_INLINE ?? "").trim().toLowerCase() !== "off";
+}
+
 export interface GoogleDraftParams {
   product: string;
   brief: string;
