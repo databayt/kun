@@ -4,7 +4,7 @@
 # Driven by the /record skill (kun/.claude/skills/record/SKILL.md); technique origin:
 # hogwarts memory project_demo_video_recording_otp_2026_08_08.
 #
-# Library:  ~/databayt/media/<repo>/<block>/<url-slug>--<kind>--<locale>--v<N>.<ext>
+# Library:  ~/media/<repo>/<block>/<url-slug>--<kind>--<locale>--v<N>.<ext>
 # Drive:    My Drive/databayt/media (mirror; local library is the truth)
 #
 # Subcommands:
@@ -25,7 +25,7 @@
 
 set -u
 
-LIB="${RECORD_LIBRARY:-$HOME/databayt/media}"
+LIB="${RECORD_LIBRARY:-$HOME/media}"
 MANIFEST="$LIB/manifest.json"
 WORK="$LIB/_work"
 PIDFILE="$WORK/.rec.pid"
@@ -42,7 +42,7 @@ ensure_lib() {
 {
   "$schema": "record-manifest-v1",
   "$comment": "Registry of product flow recordings and screenshots. Managed by record.sh; read by the session-media-stale hook and the /record skill. The local library is the truth; Google Drive is a mirror.",
-  "library": "~/databayt/media",
+  "library": "~/media",
   "drive": "My Drive/databayt/media",
   "assets": []
 }
@@ -255,7 +255,7 @@ record: sync blocked by macOS permissions. Two one-time fixes (either works):
      terminal app, then rerun: record.sh sync            (enables fast rsync)
   2. Rerun and click "Allow" on the "control Finder" automation prompt
      (enables the Finder copy lane)
-The library is safe locally at ~/databayt/media — nothing is lost.
+The library is safe locally at ~/media — nothing is lost.
 EOT
   return 1
 }

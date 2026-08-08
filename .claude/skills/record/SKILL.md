@@ -22,7 +22,7 @@ CLI: `bash ~/.claude/scripts/record.sh <cmd>` (canonical copy in kun).
 
 | Command           | Does                                                                    |
 | ----------------- | ----------------------------------------------------------------------- |
-| `init` / `status` | Create/inspect the library (`~/databayt/media/`)                        |
+| `init` / `status` | Create/inspect the library (`~/media/`)                        |
 | `frame`           | Size Chrome to 1512x982, dismiss the automation infobar                 |
 | `start [name]`    | Begin a recording SEGMENT (`screencapture -v`, backgrounds itself)      |
 | `stop`            | End the segment with SIGINT + `ffprobe` verify                          |
@@ -104,7 +104,7 @@ while recording, by design.
 
 **Screenshots (blocks/routes)** — for each route: navigate, wait for settle, capture
 via the browser MCP (`browser_take_screenshot` / `take_screenshot`) with an ABSOLUTE
-path into `~/databayt/media/_work/`, both locales when relevant. `record.sh shot` is
+path into `~/media/_work/`, both locales when relevant. `record.sh shot` is
 only for desktop-context stills.
 
 ### 3. File — the naming convention
@@ -114,7 +114,7 @@ only for desktop-context stills.
 Every asset lands as:
 
 ```
-~/databayt/media/<repo>/<block>/<url-slug>--<kind>--<locale>--v<N>.<ext>
+~/media/<repo>/<block>/<url-slug>--<kind>--<locale>--v<N>.<ext>
    hogwarts/onboarding/onboarding-title--shot--ar--v1.png
    hogwarts/onboarding/onboarding-flow--flow--ar--v2.mov
 ```
@@ -166,7 +166,7 @@ sync loses nothing.
 
 - `screencapture -v` stops with **`kill -INT` only**; segments concat losslessly
   (`-c copy`) because they share the codec.
-- record.sh writes OUTSIDE the project (`~/databayt/media`) and drives screen capture —
+- record.sh writes OUTSIDE the project (`~/media`) and drives screen capture —
   run its capture/library commands through the **non-sandboxed** shell or they fail
   on "Operation not permitted".
 - **cliclick, not `System Events click at`** (-609 Connection invalid); Retina ÷2.

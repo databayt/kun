@@ -2670,7 +2670,7 @@ export const schools: School[] = [
       {
         name: "record",
         effect:
-          "Screen-record demo videos and screenshot sets of the REAL running product — login walls and email OTPs handled autonomously (Outlook desktop, Gmail), assets filed by repo/block/route into ~/databayt/media and mirrored to Google Drive, re-records flagged when block source drifts",
+          "Screen-record demo videos and screenshot sets of the REAL running product — login walls and email OTPs handled autonomously (Outlook desktop, Gmail), assets filed by repo/block/route into ~/media and mirrored to Google Drive, re-records flagged when block source drifts",
         order: [
           f("record"),
           s("/record"),

@@ -1,14 +1,14 @@
 #!/bin/bash
 # SessionStart — stale-recording nudge (the iterate half of the /record loop).
 # If the current repo has filed assets in the media library manifest
-# (~/databayt/media/manifest.json) whose block source gained commits since
+# (~/media/manifest.json) whose block source gained commits since
 # capture, print a one-line nudge so the session knows a re-record is due.
 # Silent and instant in every other case.
 # Installed at ~/.claude/hooks/session-media-stale.sh; canonical copy in kun
 # (.claude/hooks/ — setup.sh ships everything in that dir user-global).
 
 input=$(cat)
-MANIFEST="${RECORD_LIBRARY:-$HOME/databayt/media}/manifest.json"
+MANIFEST="${RECORD_LIBRARY:-$HOME/media}/manifest.json"
 [ -f "$MANIFEST" ] || exit 0
 
 proj="${CLAUDE_PROJECT_DIR:-$(printf '%s' "$input" | jq -r '.cwd // empty' 2>/dev/null)}"
