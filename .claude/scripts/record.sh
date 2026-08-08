@@ -135,8 +135,13 @@ cmd_assemble() {
     ffmpeg -y -v error -f concat -safe 0 -i "$listfile" -c copy "$out" || die "ffmpeg concat failed"
   fi
   local dur; dur=$(ffprobe -v quiet -show_entries format=duration -of csv=p=0 "$out" 2>/dev/null)
+  # Consume the segments — the next take must start clean, never splice old footage.
+  local done="$WORK/.assembled-$(date +%s)"
+  mkdir -p "$done"
+  while IFS= read -r s; do [ -f "$s" ] && mv "$s" "$done/"; done < "$SEGLIST"
+  : > "$SEGLIST"
   echo "assembled $count segment(s) → $out (${dur:-?}s)"
-  echo "segments kept in $WORK until you run: record.sh file $out --repo … --block … --url …"
+  echo "consumed segments parked in $done — file the output: record.sh file $out --repo … --block … --url …"
 }
 
 cmd_file() {

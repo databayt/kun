@@ -166,6 +166,9 @@ sync loses nothing.
 
 - `screencapture -v` stops with **`kill -INT` only**; segments concat losslessly
   (`-c copy`) because they share the codec.
+- record.sh writes OUTSIDE the project (`~/databayt/media`) and drives screen capture —
+  run its capture/library commands through the **non-sandboxed** shell or they fail
+  on "Operation not permitted".
 - **cliclick, not `System Events click at`** (-609 Connection invalid); Retina ÷2.
 - Chrome's "controlled by automated test software" infobar HAS a close button —
   `record.sh frame` best-efforts it; verify it's gone before rolling.
