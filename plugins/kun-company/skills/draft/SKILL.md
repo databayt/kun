@@ -44,7 +44,10 @@ the work is whatever the team submitted from `/social`.
    mix, and content pillars, then **`content/docs/social/copy.mdx`** for the craft
    bar and the register ladder — the seven checks this draft will be rejected
    against, and which rung of Arabic this brand and channel take. Calibration
-   examples: `references/golden-set.md`.
+   examples: `references/golden-set.md`. For check 4's raw material read
+   `references/scene-bank.md` → `content/social/scenes.json` — concrete
+   reader-week moments per brand and season; ground the post in one it can
+   honestly claim rather than summarizing docs (docs contain no Thursdays).
 3. **Resolve the channel set** from `DISTRIBUTION_CHANNELS`
    (`src/components/root/social/config.ts`), intersected with what the brand is
    wired for via `productChannelWired`. Slack is never a draft target — it is the

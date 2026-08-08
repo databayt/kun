@@ -88,3 +88,13 @@ A per-brand table of reach / views / engagement, each number carrying its
 `fetchedAt`; every channel without a metric lane named as such rather than shown
 as zero; and every `metricsGaveUp` variant listed with its classified cause and
 the specific remedy.
+
+## The scheduled sibling
+
+`scripts/social-digest.mjs` (launchd, Fridays 09:00 via
+`scripts/weekly-digest.sh`) is this skill's zero-token weekly floor: planned vs
+shipped for the ISO week, latest Facebook numbers, 60-day dismissal lessons,
+and lane health, delivered to Slack `#social` via Hermes (Telegram review chat
+fallback). A hand-run `/measure` goes deeper — the digest never replaces the
+kill-criteria judgement; it feeds the captain's Friday review. `--dry-run`
+prints without delivering.

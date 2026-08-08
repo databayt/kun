@@ -22,6 +22,10 @@
           {
             "type": "command",
             "command": "[ -f \"$HOME/.claude/hooks/session-maintain-status.sh\" ] && bash \"$HOME/.claude/hooks/session-maintain-status.sh\"; exit 0"
+          },
+          {
+            "type": "command",
+            "command": "[ -f \"$HOME/.claude/hooks/session-media-stale.sh\" ] && bash \"$HOME/.claude/hooks/session-media-stale.sh\"; exit 0"
           }
         ]
       }

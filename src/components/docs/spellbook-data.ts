@@ -2667,6 +2667,28 @@ export const schools: School[] = [
         ],
         depends: [],
       },
+      {
+        name: "record",
+        effect:
+          "Screen-record demo videos and screenshot sets of the REAL running product — login walls and email OTPs handled autonomously (Outlook desktop, Gmail), assets filed by repo/block/route into ~/databayt/media and mirrored to Google Drive, re-records flagged when block source drifts",
+        order: [
+          f("record"),
+          s("/record"),
+          p("Browser"),
+          h("session-media-stale"),
+        ],
+        steps: [
+          "Resolve scope — a named flow, a block (routes from the repo's .claude/blocks.json), or one URL; default locale ar, capture en when bilingual",
+          "Prep the frame: record.sh frame (Chrome 1512x982, infobar dismissed), fresh + alias identity per take, Do Not Disturb by hand",
+          "Capture in segments: record.sh start → drive the browser → stop; fetch the OTP OFF camera (record.sh otp screenshots the Outlook desktop inbox — codes are 4 digits); assemble with ffmpeg concat",
+          "Screenshots per route via the browser MCP with absolute paths into _work — both locales when relevant",
+          "File every asset: record.sh file <src> --repo --block --url — lands as <url-slug>--<kind>--<locale>--v<N> with the repo sha in the manifest",
+          "record.sh sync mirrors the library to My Drive/databayt/media (rsync → Finder lanes); the local library stays the truth",
+          "Iterate: the session-media-stale hook and record.sh stale flag drifted blocks — re-record as vN+1, trim with ffmpeg for fine-tunes",
+        ],
+        connects: ["higgs", "media", "handover", "credentials", "docs"],
+        depends: [],
+      },
     ],
   },
   {

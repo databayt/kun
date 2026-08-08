@@ -1,0 +1,86 @@
+---
+title: Record
+description: Screen-record demo videos and screenshot sets of the real product, filed by repo/block/route and mirrored to Google Drive
+---
+
+# Record
+
+The engine films and photographs databayt products **as they actually run** — signup
+flows, onboarding wizards, block features — and files every asset into one organized
+library that mirrors to Google Drive. Say it in prose: _"record video for school
+onboarding"_, _"record admission"_, _"re-record the stale blocks"_.
+
+This is the **product-truth archive**. Generated marketing media never lands here — that
+is [higgs](/docs/higgs) + the showroom on the [media](/docs/media) page.
+
+## The library
+
+```
+~/databayt/media/<repo>/<block>/<url-slug>--<kind>--<locale>--v<N>.<ext>
+
+hogwarts/onboarding/onboarding-title--shot--ar--v1.png
+hogwarts/onboarding/onboarding-flow--flow--ar--v2.mov
+```
+
+- **url-slug** derives from the route — scheme/host, locale prefix, and
+  `/s/<subdomain>` stripped; root = `home`
+- **kind**: `shot` (still) · `clip` (kept segment) · `flow` (assembled walkthrough)
+- **vN** auto-increments on every re-record; `manifest.json` carries the url, repo
+  sha at capture, date, and note for every asset
+- Mirror: **My Drive → databayt → media** (`record.sh sync`; the local library is
+  the truth, Drive is the mirror)
+
+## The machinery
+
+| Piece                              | Where                                        |
+| ---------------------------------- | -------------------------------------------- |
+| Skill (the playbook)               | `.claude/skills/record/SKILL.md`             |
+| Agent (the videographer)           | `.claude/agents/record.md`                   |
+| CLI (capture/file/sync/stale)      | `.claude/scripts/record.sh`                  |
+| Staleness nudge (SessionStart)     | `.claude/hooks/session-media-stale.sh`       |
+| Spell                              | `record` — The Pensieve, [keywords](/docs/keywords) |
+
+```bash
+record.sh start intro    # begin a screen-recording segment
+record.sh stop           # SIGINT + ffprobe verify — never plain kill
+record.sh otp            # screenshot the Outlook desktop inbox (off camera)
+record.sh assemble x     # concat segments into one .mov
+record.sh file <src> --repo hogwarts --block onboarding --url <real-url>
+record.sh sync           # mirror to Google Drive
+record.sh stale          # what needs a re-record
+```
+
+## Flows behind logins and OTPs
+
+Recording real flows means completing them — the engine handles the walls on its own:
+
+- **Fresh identity per take**: `osmanabdout+<take>@hotmail.com` (`+` aliases deliver
+  to the same inbox; reusing one collides with prod leftovers from prior takes)
+- **Hotmail/Outlook codes**: the signed-in Outlook **desktop app**, read off a
+  screenshot — codes are 4 digits. AppleScript cannot read New Outlook's mailbox and
+  the automation Chrome profile is logged out of web Outlook; the screenshot lane is
+  the one that works
+- **Gmail codes**: the Gmail MCP reads them without any screen work
+- **Anything else**: the `auth` and `credentials` skills (Keychain identities)
+
+Recording happens in **segments** — stop, fetch the code off camera, resume — so the
+inbox never appears in the footage.
+
+## Iterate
+
+The library stays honest by construction: every asset records the repo sha it was
+captured at. When a block's source gains commits, the `session-media-stale` hook says
+so at session start, and `record.sh stale` lists exactly what drifted. Re-recording
+files the same name as the next version; fine-tune a video with an ffmpeg trim,
+a screenshot by recapturing the route.
+
+## One-time macOS permissions
+
+| Grant                                   | Enables                          |
+| --------------------------------------- | -------------------------------- |
+| Screen recording (already granted)      | `screencapture -v`               |
+| Full Disk Access for the terminal app   | fast rsync into the Drive folder |
+| "Control Finder" automation (or the above) | the Finder copy sync lane     |
+
+Sweeps are serial by design — one screen, one recorder — so there is deliberately no
+multi-agent fan-out here; the skill plans the shot list, then works it in order.
