@@ -37,8 +37,10 @@ CLI: `bash ~/.claude/scripts/record.sh <cmd>` (canonical copy in kun).
 
 - **Fresh identity per take**: signup Zod accepts `+` aliases — use
   `osmanabdout+<take-slug>@hotmail.com`; Outlook delivers to the same inbox. Never reuse
-  an alias: prior takes leave users/schools on prod that collide (known leftover:
-  `osmanabdout+comboni@hotmail.com`, school `cmsjsr75p0002l404ugypes06`).
+  an alias: prior takes leave users/schools on prod that collide. Clean up after a take
+  and COUNT-verify the delete — **`vercel env pull` fails outside the repo root, so a
+  `cd … && pull && psql` chain no-ops while printing success.** (No known leftovers as of
+  2026-08-09: the `comboni` alias and subdomain were cleaned and are free.)
 - **Hotmail/Outlook OTP** — the desktop-app screenshot lane (`record.sh otp`):
   `osmanabdout@hotmail.com` is signed into the Outlook **desktop app**; activate it and
   read the code off a screenshot. Dead ends, all verified — don't retry them:
@@ -60,8 +62,16 @@ CLI: `bash ~/.claude/scripts/record.sh <cmd>` (canonical copy in kun).
   `tell application "Google Chrome" to set bounds of window 1 to {0,0,1512,982}`
   (`System Events set size` throws -1719 here). Screenshots with relative filenames
   land in the REPO ROOT — always pass absolute paths into `_work/`.
-- **browser / browser-headed MCP** (Playwright, `~/.playwright-auth` profile) — carries
-  SAVED logins; use for flows that need an existing session (dashboards, admin).
+- **browser-headed MCP** (Playwright, `~/.playwright-auth` profile) — carries SAVED
+  logins; use for flows that need an existing session (dashboards, admin).
+- **`browser` MCP is HEADLESS — it CANNOT be recorded.** Nothing renders on screen. It is
+  excellent for VERIFYING a flow end to end (e.g. confirming a deployed fix), never for a take.
+- **If a browser MCP dies mid-session, the take is over.** MCP servers cannot be restarted
+  from inside a session — restart Claude Code, then resume. To kill a stuck browser, match
+  the browser BINARY (`pkill -f "Chrome for Testing"`, `pkill -f chrome-devtools-mcp`) and
+  clear `SingletonLock`/`SingletonCookie`/`SingletonSocket` in its profile dir.
+  **Never `pkill -f <profile-path>`** — that also matches the MCP _server_ process and takes
+  the whole lane down with it (this killed a take on 2026-08-08).
 - **Never mix lanes mid-take** — cookies and window geometry differ; a lane switch
   reads as a cut and breaks the session on camera.
 - **Typing feel**: CDP `fill` populates fields INSTANTLY — footage reads as automated.
