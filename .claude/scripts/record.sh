@@ -4,7 +4,7 @@
 # Driven by the /record skill (kun/.claude/skills/record/SKILL.md); technique origin:
 # hogwarts memory project_demo_video_recording_otp_2026_08_08.
 #
-# Library:  ~/media/<repo>/<block>/<url-slug>--<kind>--<locale>--v<N>.<ext>
+# Library:  ~/media/<repo>/<block>/<repo>--<block>--<url-slug>--<kind>--<locale>--v<N>.<ext>
 # Drive:    My Drive/databayt/media (mirror; local library is the truth)
 #
 # Subcommands:
@@ -16,6 +16,9 @@
 #   otp                       screenshot the Outlook desktop inbox for the code
 #                             (refuses while recording — keeps the inbox off camera)
 #   assemble <name>           concat all pending segments into one .mov
+#   adcut <in> <out> [--target 30] [--tail 3]
+#                             ad render — speed the body to the target length,
+#                             keep the last seconds real-time (ads run 15-45s)
 #   file <src> --repo R --block B --url U [--kind shot|clip|flow] [--locale ar|en] [--note ...]
 #                             normalize the name, move into the library, update manifest
 #   sync                      mirror the library to Google Drive (rsync → Finder → advice)
@@ -188,7 +191,9 @@ locale = opts["locale"]
 
 dest_dir = os.path.join(lib, opts["repo"], opts["block"])
 os.makedirs(dest_dir, exist_ok=True)
-stem = f"{slug}--{kind}--{locale}"
+# Self-describing name: repo + block ride IN the filename so the file keeps its
+# designation when shared out of context (Drive links, chat attachments).
+stem = f"{opts['repo']}--{opts['block']}--{slug}--{kind}--{locale}"
 existing = [f for f in os.listdir(dest_dir) if re.match(re.escape(stem) + r"--v(\d+)\.", f)]
 versions = [int(re.search(r"--v(\d+)\.", f).group(1)) for f in existing]
 v = max(versions, default=0) + 1
@@ -217,6 +222,35 @@ json.dump(m, open(tmp, "w"), indent=1, ensure_ascii=False)
 os.replace(tmp, manifest_path)
 print(dest)
 PY
+}
+
+cmd_adcut() {
+  # Ad render: speed the body so the whole clip hits the target length, keep the
+  # last TAIL seconds at 1x so the payoff is readable. Ads run 15-45s.
+  local in="${1:?usage: record.sh adcut <in> <out> [--target 30] [--tail 3]}"
+  local out="${2:?usage: record.sh adcut <in> <out> [--target 30] [--tail 3]}"
+  shift 2
+  local target=30 tail=3
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --target) target="$2"; shift 2 ;;
+      --tail)   tail="$2"; shift 2 ;;
+      *) shift ;;
+    esac
+  done
+  local dur; dur=$(ffprobe -v quiet -show_entries format=duration -of csv=p=0 "$in")
+  [ -n "$dur" ] || die "cannot probe $in"
+  local speed cut
+  speed=$(python3 -c "
+d, t, tl = float('$dur'), float('$target'), float('$tail')
+body = max(d - tl, 0.1)
+print(round(max(body / max(t - tl, 1.0), 1.0), 3))")
+  cut=$(python3 -c "print(round(float('$dur') - float('$tail'), 3))")
+  ffmpeg -y -v error -i "$in" -filter_complex \
+    "[0:v]trim=0:${cut},setpts=PTS/${speed}[a];[0:v]trim=${cut},setpts=PTS-STARTPTS[b];[a][b]concat=n=2:v=1:a=0,fps=30[v]" \
+    -map "[v]" -c:v libx264 -preset fast -crf 18 -pix_fmt yuv420p "$out" || die "adcut render failed"
+  local final; final=$(ffprobe -v quiet -show_entries format=duration -of csv=p=0 "$out")
+  echo "ad cut: ${dur}s → ${final}s (body ${speed}x, last ${tail}s real-time) → $out"
 }
 
 cmd_sync() {
@@ -349,6 +383,7 @@ case "${1:-}" in
   shot)     shift; cmd_shot "$@" ;;
   otp)      shift; cmd_otp "$@" ;;
   assemble) shift; cmd_assemble "$@" ;;
+  adcut)    shift; cmd_adcut "$@" ;;
   file)     shift; cmd_file "$@" ;;
   sync)     shift; cmd_sync "$@" ;;
   stale)    shift; cmd_stale "$@" ;;

@@ -79,9 +79,16 @@ CLI: `bash ~/.claude/scripts/record.sh <cmd>` (canonical copy in kun).
    missing), or one URL. Default locale **ar**; capture en too when the flow is bilingual.
 2. Target prod for client-facing demos (balqalam.com, ed.databayt.org); dev for
    pre-release captures. Note which — it goes in the manifest URL.
-3. `record.sh init` (idempotent) · `record.sh frame` · ask Abdout to enable Do Not
-   Disturb (no automation shortcut exists on this Mac) and to keep the screen free.
-4. Plan the take as a **shot list** (steps, where OTP lands, expected screens) BEFORE
+3. `record.sh init` (idempotent) · `record.sh frame` · **zoom the browser to 125%**
+   (cmd+= twice from 100%; verify `devicePixelRatio` reads 2.5 on this Retina display)
+   — ad footage must read large. Ask Abdout to enable Do Not Disturb (no automation
+   shortcut exists on this Mac) and to keep the screen free.
+4. **Set dressing — benchmark every page that will be on camera BEFORE rolling.**
+   These are ADS: the first screen sells. Walk the shot's pages and fix blemishes:
+   junk rows (nameless drafts, test entries → archive them), empty states, broken
+   images, debug text, sparse tables. If the data looks poor, improve it first —
+   never film an ugly benchmark. What can't be fixed gets reframed out of the shot.
+5. Plan the take as a **shot list** (steps, where OTP lands, expected screens) BEFORE
    rolling — a fumbled step costs one segment, an unplanned take costs the session.
 
 ### 2. Capture
@@ -114,10 +121,13 @@ only for desktop-context stills.
 Every asset lands as:
 
 ```
-~/media/<repo>/<block>/<url-slug>--<kind>--<locale>--v<N>.<ext>
-   hogwarts/onboarding/onboarding-title--shot--ar--v1.png
-   hogwarts/onboarding/onboarding-flow--flow--ar--v2.mov
+~/media/<repo>/<block>/<repo>--<block>--<url-slug>--<kind>--<locale>--v<N>.<ext>
+   hogwarts/onboarding/hogwarts--onboarding--onboarding-title--shot--ar--v1.png
+   hogwarts/students/hogwarts--students--students--flow--ar--v2.mov
 ```
+
+The repo + block ride IN the filename on purpose — the designation survives when the
+file leaves its folder (Drive links, chat attachments, client handoffs).
 
 - **url-slug** derives from the URL path — scheme/host, locale prefix, and
   `/s/<subdomain>` are stripped (`https://balqalam.com/ar/onboarding/x/title` →
@@ -128,6 +138,15 @@ Every asset lands as:
   no archive dirs).
 - The manifest records repo, block, url, sha (repo HEAD at capture), capturedAt, note
   — that sha is what staleness is measured against.
+
+### 3½. Ad cut — flows ship blazing fast
+
+Raw captures are minutes; **the deliverable is an ad: 15-45 seconds**. Render with
+`record.sh adcut <raw> <out> [--target 30] [--tail 3]` — it speeds the body to hit
+the target and keeps the last seconds real-time so the payoff (the new row, the
+success state) is readable. File the AD as the flow asset; keep the raw only if a
+slower walkthrough was explicitly requested. Instant field-fills are FINE for ads —
+at ad speed they read as snappy, so prefer the fast fill lane over human typing.
 
 ### 4. Sync to Google Drive
 
