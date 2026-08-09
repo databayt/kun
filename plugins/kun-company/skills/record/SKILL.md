@@ -22,7 +22,7 @@ CLI: `bash ~/.claude/scripts/record.sh <cmd>` (canonical copy in kun).
 
 | Command           | Does                                                                    |
 | ----------------- | ----------------------------------------------------------------------- |
-| `init` / `status` | Create/inspect the library (`~/media/`)                        |
+| `init` / `status` | Create/inspect the library (`~/media/`)                                 |
 | `frame`           | Size Chrome to 1512x982, dismiss the automation infobar                 |
 | `start [name]`    | Begin a recording SEGMENT (`screencapture -v`, backgrounds itself)      |
 | `stop`            | End the segment with SIGINT + `ffprobe` verify                          |
@@ -172,6 +172,23 @@ sync loses nothing.
 - **cliclick, not `System Events click at`** (-609 Connection invalid); Retina ÷2.
 - Chrome's "controlled by automated test software" infobar HAS a close button —
   `record.sh frame` best-efforts it; verify it's gone before rolling.
+- **If the browser MCP dies mid-session** (tools deregister; they cannot come back until
+  restart): relaunch the SAME profile manually — `open -na "Google Chrome" --args
+--user-data-dir=~/.cache/chrome-devtools-mcp/chrome-profile --use-mock-keychain
+--password-store=basic --disable-sync …` (omitting mock-keychain loses the cookies) —
+  and drive pages with Chrome AppleScript `execute javascript` (one-time enable:
+  `browser.allow_javascript_apple_events=true` in the profile's Default/Preferences,
+  edited with Chrome DOWN; the View-menu toggle via System Events does not stick).
+  React inputs need the native value setter + an `input` event; browser-chrome popups
+  (Save password → Never) are cliclick-only; autofill dropdowns EAT the Tab key
+  (press Escape first); cliclick keystrokes silently vanish if the window lost focus —
+  activate + wake-click before typing.
+- `screencapture -v` is VARIABLE frame rate — still stretches are one long frame, so
+  `-c copy` trims cannot cut inside them. Final cut = ffmpeg concat FILTER + `fps=30`
+  re-encode; never stream-copy the edit.
+- Park the cursor AFTER your last cliclick, not before. Verify success by what the UI
+  RENDERS (the students table shows "first last", not the full three-part name — an
+  innerText check for the typed full name false-negatives).
 - Web Outlook in the MCP Chrome profile is logged OUT — the desktop app is the lane.
 - Screen-recording permission is already granted to the terminal host; Drive-folder
   writes are TCC-blocked until one of the two sync fixes above is applied.
