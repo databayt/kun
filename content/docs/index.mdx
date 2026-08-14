@@ -1,142 +1,97 @@
 ---
 title: Introduction
-description: Kun (كن) — The Databayt Engine
+description: Kun (كن) — The Databayt Company Engine
 ---
 
 # Kun (كن)
 
-> The configuration layer that unifies Claude Code, Antigravity, OpenCode, Hermes, and Cowork into one company operating system — running both the technical and business operations of **Databayt**.
+> **Configure over build.** The markdown & JSON configuration layer that transforms Claude Code, Antigravity, OpenCode, Hermes, and Cowork into a single unified company OS — running engineering, business operations, and multi-brand social distribution for **Databayt**.
 
-Kun is not a server and not a platform. It is the brain that coordinates 14 repositories, 7 people, and every tool in the stack — from git commit to Stripe checkout to Monday planning.
+Say the word. The engine coordinates **14 repositories, 7 people, 5 products**, and every tool in the stack.
 
-**Say the word. It happens.**
+> 🚀 **Quickstart**: [`bash <(curl -sL https://kun.databayt.org/install)`](/docs/onboarding) sets up any fresh Mac, Linux, or Windows machine into a fully provisioned node in one command.
 
-> **New here? Start with [Onboarding](/docs/onboarding).** One paste takes a fresh Mac, Windows, or Linux machine to a fully provisioned databayt workstation.
+---
 
-## The core insight
+## The 6 Engine Layers
 
-Don't build what Anthropic ships — **configure it**. Every capability below is a markdown file or a JSON entry, not a service to operate.
+Every capability is pure configuration — zero custom server infrastructure.
 
-| Layer | Count | What it is |
-|-------|-------|-----------|
-| [**Agents**](/docs/agents) | 47 | 20 company + 27 stack specialists in two plugins |
-| [**Skills**](/docs/skills) | 68 | 50 project + 18 portable skills (61 unique across plugins) |
-| [**Keywords**](/docs/keywords) | 178 | The vocabulary that routes prose to config across 20 schools |
-| [**MCP**](/docs/mcp) | 25 | 25 catalog servers (20 live at user scope) + connectors |
-| [**Rules**](/docs/rules) | 37 | 37 domain rules across 9 domains + 5 cross-cutting rules |
-| [**Hooks**](/docs/hooks) | 10 | Lifecycle automations across 6 events |
+| Layer | Count | Purpose & Artifacts |
+|:------|:-----:|:-------------------|
+| [**Agents**](/docs/agents) | **47** | 20 company (strategy, quality, videography) + 27 stack specialists |
+| [**Skills**](/docs/skills) | **68** | Packaged workflows: 50 project + 18 portable (61 in plugins) |
+| [**Keywords**](/docs/keywords) | **178** | Prose vocabulary across 20 schools — zero slash commands |
+| [**MCP**](/docs/mcp) | **25** | 25 catalog servers (20 live at user scope: Neon, Stripe, Sentry, DevTools, Figma) |
+| [**Rules**](/docs/rules) | **37** | Path-scoped domain guardrails (Next 16, React 19, Prisma 6, Tailwind 4) + 5 global |
+| [**Hooks**](/docs/hooks) | **10** | Harness lifecycle guards (port cleanup, destructive bash block, media staleness) |
 
-Canonical values live in `.claude/engine.json`; `/health` flags drift between it and reality.
+*Single source of truth: `.claude/engine.json` · `/health` verifies zero config drift.*
 
-## How it works
+---
 
-You don't type slash commands. You write prose, and the engine picks the keywords out of it.
+## 4 Operating Lanes
 
-| You say | What happens |
-|---------|-------------|
-| `dev` | Kill port 3000 → start the server → open Chrome |
-| `ship` | Check → deploy to Vercel production → verify |
-| `qa admission` | Detect → verify → fix safe tiers → one signoff issue |
-| `release auth` | Handover → check → ship → watch → close the issue |
-| `social hogwarts` | Calendar → draft (AR-first) → media → review queue → publish → measure |
-| `record admission` | Autonomous OTP signup → segment capture → ~/media archive → Drive sync |
+Universal capability: every machine receives the full fleet, routed by task weight:
 
-### Four agent lanes
+| Lane | Command | Agent / Engine | Workload |
+|:-----|:-------:|:---------------|:---------|
+| **Primary** | `c` | [**Claude Code**](/docs/claude-code) | Full build, schema migrations, deep QA, architecture, releases |
+| **Secondary** | `a` | [**Antigravity**](/docs/antigravity) | Cheap off-pool lane (Gemini Flash) — quick edits, renames, lookups |
+| **Tertiary** | `o` | **OpenCode** | Fallback CLI runner |
+| **Gateway** | `h` | [**Hermes**](/docs/hermes) | Asynchronous messaging bus & Slack/WhatsApp relay |
 
-The machine, not the person, is the unit of capability. Four launchers route to the right model tier:
+---
 
-| Lane | Launcher | Agent | Role |
-|------|----------|-------|------|
-| **Primary** | `c` | [Claude Code](/docs/claude-code) | Main daily driver — full build, QA, architecture, releases |
-| **Secondary** | `a` | [Antigravity](/docs/antigravity) | Off-pool cheap lane (Gemini Flash) — quick edits, lookups, renames |
-| **Tertiary** | `o` | OpenCode | Tertiary fallback lane |
-| **Gateway** | `h` | [Hermes](/docs/hermes) | Messaging gateway and channel relay |
+## Dual Execution Pipelines
 
-## The pipelines
-
-### 1. Feature pipeline (Idea to Production)
+### 1. Feature Pipeline · *Code to Production*
 
 ```
-IDEA → SPEC → [PLAN → TASKS] → SCHEMA → CODE → WIRE → CHECK → SHIP → WATCH
-              └─ human gate ─┘
+IDEA ──► SPEC ──► [PLAN ──► TASKS] ──► SCHEMA ──► CODE ──► WIRE ──► CHECK ──► SHIP ──► WATCH
+                  └── human gate ──┘
 ```
+*Trigger: `feature <name>` chains all 9 stages; each stage is also an independent skill with its own exit gate.*
 
-`/feature <name>` chains every stage. Each is also a standalone skill with its own exit gate.
-
-### 2. Social & media pipeline (Idea to Audience)
-
-Turn product wins into multi-channel brand momentum across 5 brands and 8 channels.
+### 2. Social & Media Pipeline · *Product to Audience*
 
 ```
-CALENDAR ══► DRAFT ══════════════► APPROVE ─► PUBLISH ─────────► MEASURE
-    │          │  ▲                   │         │                  │
-  pillars   Claude │  media        human      drain | hermes  SocialMetric
-  rotate    AR-first│ (pick|make)   gate      | copy-out       + UTM tags
-  into the         └── higgs · carousel      ▲ HARD STOP
-  queue                record · media         (/social/publish)
+CALENDAR ──► DRAFT (AR-first) ──► ASSETS (Media/Record/Higgs) ──► APPROVE (/social/publish) ──► PUBLISH ──► MEASURE
 ```
 
-- **[Social](/docs/social)** — multi-channel broadcasting with Arabic-first drafting and an approval gate at `/social/publish`.
-- **[Media](/docs/media)** — marketing assets created via Higgsfield (`/higgs`) and bilingual carousels (`/carousel`).
-- **[Record](/docs/record)** — real product-truth video walkthroughs and screenshots filed to `~/media/` and mirrored to Google Drive.
+- **[Social Automation](/docs/social)**: Multi-channel broadcasting across 5 brands & 8 platforms.
+- **[Product Videography (`record`)](/docs/record)**: Autonomous OTP handling, ad-grade video cuts, and screenshot archives in `~/media/` synced to Google Drive.
+- **[Media Studio (`higgs` · `carousel`)](/docs/media)**: Generative image/video marketing & bilingual slide decks.
 
-## The drive
+---
 
-**Cash flow first. Break-even or bust.** This governs every decision and settles every argument — when two options tie on the canon, the one closer to revenue wins.
+## Products, Pilots & Status
 
-- **Burn**: ~$500/month — Claude Max 5x ($100) + services (~$300). No salaries yet.
-- **Capital**: $5K, ~10 months runway.
-- **Posture**: subscription-only. No usage credits, no API-key spend.
-- **Metric**: active paying schools — `docs/NORTH-STAR.md`.
+| Product | Domain | Status & Pilots |
+|:--------|:-------|:----------------|
+| [**Hogwarts**](https://ed.databayt.org) | School Management SaaS (**Flagship**) | 2 Sudan pilots (King Fahad, Albayan); [Aldar](/docs/aldar) 29-school prospect |
+| [**Codebase**](https://base-coral.vercel.app) | Shared Pattern Library | 54 UI + 62 atoms + 31 templates |
+| [**Mkan**](https://mkan.vercel.app) | Rental Marketplace | Phase 1 complete |
+| [**Souq**](https://souq-smoky.vercel.app) | E-commerce Marketplace | MVP paused |
+| [**Shifa**](https://shifa-lovat.vercel.app) | Healthcare Operations | MVP paused |
 
-## The team
+---
 
-Seven people. IDs are CRM and Slack logins (`<id>@databayt.org`).
+## Financial Discipline & Operating Drive
 
-| Name | Role |
-|------|------|
-| **Abdout** | Founder & Tech Lead — the visionary |
-| **Ibrahim** | Senior Fullstack & Mobile Engineer — owns the iOS/Android lane |
-| **Moutaz** | Product Engineer — bridges engineering and business; owns the Albayan pilot |
-| **Aseel** | Sales & QA — owns CRM pipeline hygiene |
-| **Moed** | Business Development — outreach, copy, network |
-| **Samia** | R&D — languages, voice, copywriting, steelmanning |
-| **Sedon** | Ops — DevOps, reality-driven execution |
+- **North Star**: Cash flow first. Break-even or bust.
+- **Burn / Capital**: ~$500/mo burn against $5K capital (~10 months runway).
+- **Billing Policy**: Strict subscription-only (Claude Max 5x $100/mo). Zero per-token API spend.
+- **Team**: 7 builders (`<id>@databayt.org` on Slack/CRM) — Abdout, Ibrahim, Moutaz, Aseel, Moed, Samia, Sedon.
 
-## The products
+---
 
-| Product | Type | Status |
-|---------|------|--------|
-| [**Hogwarts**](https://ed.databayt.org) | Education SaaS — **flagship** | Active, two pilots |
-| [**Mkan**](https://mkan.vercel.app) | Rental marketplace | Phase 1 done |
-| [**Souq**](https://souq-smoky.vercel.app) | E-commerce | MVP, paused |
-| [**Shifa**](https://shifa-lovat.vercel.app) | Medical platform | Early, paused |
-| [**Codebase**](https://base-coral.vercel.app) | Pattern library | Active |
+## Core Principles
 
-## Pilots
+1. **Configure over build** — Don't rebuild what Anthropic ships.
+2. **Architecture over vibe coding** — Humans design, AI generates within strict rules.
+3. **Guardrails as training data** — Every clean component enforces the next.
+4. **Full spectrum** — The engine runs the business, not just the code.
+5. **Open source, shared economy** — SSPL public repos, sustain through real-world value.
 
-| Pilot | Where | Status |
-|-------|-------|--------|
-| **King Fahad** | Sudan, 3 branches | Go-live target September 2026 — the proof-of-concept case study |
-| **Albayan** | Khartoum, Sudan | Onboarded June 2026, free MENA-10 |
-| **[Aldar](/docs/aldar)** | Abu Dhabi, 29 schools | Prospect — AED 180K pilot proposed |
-
-Sprint goal: two free MENA-10 pilots with documented PMF signal. That gates the Q4 cash decision.
-
-## The company
-
-**Databayt** (داتابايت) builds products that automate real-world operations — schools, rentals, commerce, healthcare — on a shared component library and one configuration engine.
-
-- **Website**: [databayt.org](https://databayt.org)
-- **GitHub**: [github.com/databayt](https://github.com/databayt) — 14 repos, all public
-- **License**: SSPL — open source; commercial use requires a license
-
-## Principles
-
-- **Configure over build** — don't rebuild what Anthropic ships
-- **Architecture over vibe coding** — humans design, AI generates within constraints
-- **Guardrails as training data** — every good component teaches the next one
-- **Full spectrum** — the engine runs the business, not just the build
-- **Open source, shared economy** — build in the open, sustain through value
-
-Deeper: [Architecture](/docs/architecture) · [Configuration](/docs/configuration) · [Captain](/docs/captain) · [Social](/docs/social) · [Record](/docs/record)
+*Explore: [Architecture](/docs/architecture) · [Configuration](/docs/configuration) · [Captain](/docs/captain) · [Social](/docs/social) · [Record](/docs/record)*
