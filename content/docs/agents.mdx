@@ -1,20 +1,20 @@
 ---
 title: Agents
-description: 46 agents in two fleets — 19 company, 27 stack
+description: 47 agents in two fleets — 20 company, 27 stack
 ---
 
 # Agents
 
-The engine ships **46 agents** in two fleets. The **company fleet** (19) runs the business: strategy, revenue, quality, product references. The **stack fleet** (27) writes the code: one agent per framework, layer, or tool.
+The engine ships **47 agents** in two fleets. The **company fleet** (20) runs the business: strategy, revenue, quality, product references, and product flow videography. The **stack fleet** (27) writes the code: one agent per framework, layer, or tool.
 
 Each fleet is a plugin, which is how it reaches other machines — see [Onboarding](/docs/onboarding).
 
 | Fleet | Plugin | Agents | Lives in |
 |-------|--------|--------|----------|
-| Company | `kun-company` | 19 | `.claude/agents/` |
+| Company | `kun-company` | 20 | `.claude/agents/` |
 | Stack | `kun-stack` | 27 | installed to `~/.claude/agents/` |
 
-## Company fleet (19)
+## Company fleet (20)
 
 The captain sits above everything and never writes code — it allocates, decides, and delegates.
 
@@ -40,11 +40,12 @@ The captain sits above everything and never writes code — it allocates, decide
 | **ops** | CI/CD, API spend, monitoring, infrastructure, uptime |
 | **guardian** | OWASP Top 10, performance budgets, dependency health, SSPL compliance |
 
-### Engine maintenance (6)
+### Engine maintenance & media (7)
 
 | Agent | Scope |
 |-------|-------|
 | **quality** | Routes the 17 niche quality keywords; owns `/handover` and `/release` |
+| **record** | Screen-records demo videos and screenshot sets of real product flows, files into media archive |
 | **report** | Auto-fixes user-reported issues — read, verify, fix, close |
 | **analyze** | Generates a tailored Claude Code config for any repo |
 | **learn** | Extracts patterns, conventions, and team dynamics into memory |

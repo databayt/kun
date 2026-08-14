@@ -1,13 +1,13 @@
 ---
 title: Hooks
-description: Nine lifecycle automations the engine can't forget to run
+description: Ten lifecycle automations the engine can't forget to run
 ---
 
 # Hooks
 
 Hooks are the part of the engine that survives forgetting. A rule can be ignored and a skill can go uninvoked, but a hook is executed by the harness — not by Claude — so it fires whether or not anyone remembers it.
 
-**9 hooks across 6 events**, configured in `.claude/settings.json`.
+**10 hooks across 6 events**, configured in `.claude/settings.json`.
 
 ## Active hooks
 
@@ -15,6 +15,7 @@ Hooks are the part of the engine that survives forgetting. A rule can be ignored
 |-------|---------|-------------|
 | `SessionStart` | `*` | Inject engine context — sync drift, bridge handoffs, open report items |
 | `SessionStart` | `*` | Nag if the machine's maintain heartbeat is stale or RED |
+| `SessionStart` | `*` | Warn if product flow recordings or media library are stale |
 | `ConfigChange` | `*` | Warn when `vocabulary.json` drifts from the generated docs |
 | `PreToolUse` | `Bash(pnpm dev)` | Kill anything holding port 3000 |
 | `PreToolUse` | `Bash` | Block destructive commands (the Unforgivable list) |
@@ -29,6 +30,7 @@ Hook scripts live in `.claude/hooks/` and are installed to `~/.claude/hooks/`:
 |--------|---------|
 | `session-engine-context.sh` | Session-start engine context |
 | `session-maintain-status.sh` · `.ps1` | Maintain heartbeat (macOS/Linux · Windows) |
+| `session-media-stale.sh` | Staleness check on recorded product media |
 | `block-destructive-bash.sh` | The guard on `rm -rf`, `migrate reset`, `DROP TABLE`, force-push |
 
 ## Configuration

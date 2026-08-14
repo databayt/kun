@@ -53,20 +53,20 @@ Priority (High → Low):
 4. Pattern library /Users/abdout/codebase/     — Core patterns
 ```
 
-### Agent Fleet (46 agents, two plugins)
+### Agent Fleet (47 agents, two plugins)
 
 ```
 captain (company brain — allocates, decides, never writes code)
 ├── Business:   revenue, growth, support, analyst
 ├── Delivery:   product, tech-lead, ops, guardian
-├── Engine:     quality, report, analyze, learn, package, clone
+├── Engine:     quality, record, report, analyze, learn, package, clone
 └── Reference:  hogwarts, souq, mkan, shifa
         └── kun-stack → 27 specialist agents
 ```
 
 | Fleet | Plugin | Agents |
 |-------|--------|--------|
-| **Company** (19) | `kun-company` | captain, revenue, growth, support, analyst, product, tech-lead, ops, guardian, quality, report, analyze, learn, package, clone, hogwarts, souq, mkan, shifa |
+| **Company** (20) | `kun-company` | captain, revenue, growth, support, analyst, product, tech-lead, ops, guardian, quality, record, report, analyze, learn, package, clone, hogwarts, souq, mkan, shifa |
 | **Stack** (27) | `kun-stack` | nextjs, react, typescript, tailwind, prisma, shadcn, authjs, architecture, orchestration, pattern, structure, atom, template, block, icon, semantic, build, deploy, test, git, github, middleware, internationalization, sse, optimize, performance, comment |
 
 Full breakdown: [Agents](/docs/agents).
@@ -89,12 +89,13 @@ Plus the claude.ai connectors (Gmail, Calendar, Drive, PlanetScale, Vercel). Reg
 
 Domain rules auto-load via a `paths` glob: `react-perf` (8), `next-16` (5), `react-19` (5), `prisma-6` (4), `tailwind-v4` (4), `typescript-strict` (4), `authjs` (3), `neon` (2), `s3` (2). Five more load unconditionally: `github-workflow`, `block-protocol`, `patterns`, `cowork-bridge`, `engine-parity`.
 
-### Hook Automation (9 hooks)
+### Hook Automation (10 hooks)
 
 | Event | Action |
 |-------|--------|
 | SessionStart | Inject engine context — sync drift, bridge handoffs, open reports |
 | SessionStart | Nag on a stale or RED maintain heartbeat |
+| SessionStart | Warn if product flow recordings or media library are stale |
 | ConfigChange | Warn when `vocabulary.json` drifts from generated docs |
 | PreToolUse (pnpm dev) | Kill port 3000 |
 | PreToolUse (Bash) | Block destructive commands |
