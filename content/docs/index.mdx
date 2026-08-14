@@ -5,7 +5,7 @@ description: Kun (كن) — The Databayt Engine
 
 # Kun (كن)
 
-> The configuration layer that makes Claude Code, Claude Desktop, Cowork, and the Agent SDK work as one engine — running both the technical and the business side of **Databayt**.
+> The configuration layer that unifies Claude Code, Antigravity, OpenCode, Hermes, and Cowork into one company operating system — running both the technical and business operations of **Databayt**.
 
 Kun is not a server and not a platform. It is the brain that coordinates 14 repositories, 7 people, and every tool in the stack — from git commit to Stripe checkout to Monday planning.
 
@@ -19,8 +19,8 @@ Don't build what Anthropic ships — **configure it**. Every capability below is
 
 | Layer | Count | What it is |
 |-------|-------|-----------|
-| [**Agents**](/docs/agents) | 47 | 20 company + 27 stack specialists, in two plugins |
-| [**Skills**](/docs/skills) | 68 | 50 project + 18 portable skills (61 in plugins) |
+| [**Agents**](/docs/agents) | 47 | 20 company + 27 stack specialists in two plugins |
+| [**Skills**](/docs/skills) | 68 | 50 project + 18 portable skills (61 unique across plugins) |
 | [**Keywords**](/docs/keywords) | 178 | The vocabulary that routes prose to config across 20 schools |
 | [**MCP**](/docs/mcp) | 25 | 25 catalog servers (20 live at user scope) + connectors |
 | [**Rules**](/docs/rules) | 37 | 37 domain rules across 9 domains + 5 cross-cutting rules |
@@ -38,10 +38,23 @@ You don't type slash commands. You write prose, and the engine picks the keyword
 | `ship` | Check → deploy to Vercel production → verify |
 | `qa admission` | Detect → verify → fix safe tiers → one signoff issue |
 | `release auth` | Handover → check → ship → watch → close the issue |
+| `social hogwarts` | Calendar → draft (AR-first) → media → review queue → publish → measure |
+| `record admission` | Autonomous OTP signup → segment capture → ~/media archive → Drive sync |
 
-## The pipeline
+### Four agent lanes
 
-Idea to production, one stage per skill, one human gate.
+The machine, not the person, is the unit of capability. Four launchers route to the right model tier:
+
+| Lane | Launcher | Agent | Role |
+|------|----------|-------|------|
+| **Primary** | `c` | [Claude Code](/docs/claude-code) | Main daily driver — full build, QA, architecture, releases |
+| **Secondary** | `a` | [Antigravity](/docs/antigravity) | Off-pool cheap lane (Gemini Flash) — quick edits, lookups, renames |
+| **Tertiary** | `o` | OpenCode | Tertiary fallback lane |
+| **Gateway** | `h` | [Hermes](/docs/hermes) | Messaging gateway and channel relay |
+
+## The pipelines
+
+### 1. Feature pipeline (Idea to Production)
 
 ```
 IDEA → SPEC → [PLAN → TASKS] → SCHEMA → CODE → WIRE → CHECK → SHIP → WATCH
@@ -49,6 +62,23 @@ IDEA → SPEC → [PLAN → TASKS] → SCHEMA → CODE → WIRE → CHECK → SH
 ```
 
 `/feature <name>` chains every stage. Each is also a standalone skill with its own exit gate.
+
+### 2. Social & media pipeline (Idea to Audience)
+
+Turn product wins into multi-channel brand momentum across 5 brands and 8 channels.
+
+```
+CALENDAR ══► DRAFT ══════════════► APPROVE ─► PUBLISH ─────────► MEASURE
+    │          │  ▲                   │         │                  │
+  pillars   Claude │  media        human      drain | hermes  SocialMetric
+  rotate    AR-first│ (pick|make)   gate      | copy-out       + UTM tags
+  into the         └── higgs · carousel      ▲ HARD STOP
+  queue                record · media         (/social/publish)
+```
+
+- **[Social](/docs/social)** — multi-channel broadcasting with Arabic-first drafting and an approval gate at `/social/publish`.
+- **[Media](/docs/media)** — marketing assets created via Higgsfield (`/higgs`) and bilingual carousels (`/carousel`).
+- **[Record](/docs/record)** — real product-truth video walkthroughs and screenshots filed to `~/media/` and mirrored to Google Drive.
 
 ## The drive
 
@@ -109,6 +139,4 @@ Sprint goal: two free MENA-10 pilots with documented PMF signal. That gates the 
 - **Full spectrum** — the engine runs the business, not just the build
 - **Open source, shared economy** — build in the open, sustain through value
 
-Deeper: [Architecture](/docs/architecture) · [Configuration](/docs/configuration) · [Captain](/docs/captain)
-
-The decision framework itself is not yet published — it lives in the repo as `docs/PRINCIPLES.md`, `docs/CONSTITUTION.md`, `docs/CANON.md`, and `docs/NORTH-STAR.md`.
+Deeper: [Architecture](/docs/architecture) · [Configuration](/docs/configuration) · [Captain](/docs/captain) · [Social](/docs/social) · [Record](/docs/record)
