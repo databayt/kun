@@ -1,54 +1,73 @@
-import Link from "next/link"
-import { notFound } from "next/navigation"
-import { ArrowLeft, ArrowRight } from "lucide-react"
-import { findNeighbour } from "fumadocs-core/page-tree"
-import type { Metadata } from "next"
-import { docsSource } from "@/lib/source"
-import { DocsTableOfContents } from "@/components/docs/toc"
-import { Button } from "@/components/ui/button"
-import { mdxComponents } from "@/mdx-components"
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { ArrowLeft, ArrowRight } from "lucide-react";
+import { findNeighbour } from "fumadocs-core/page-tree";
+import type { Metadata } from "next";
+import { docsSource } from "@/lib/source";
+import { DocsTableOfContents } from "@/components/docs/toc";
+import { Button } from "@/components/ui/button";
+import { mdxComponents } from "@/mdx-components";
 
-export const runtime = "nodejs"
-export const revalidate = false
-export const dynamic = "force-static"
-export const dynamicParams = false
+export const runtime = "nodejs";
+export const revalidate = false;
+export const dynamic = "force-static";
+export const dynamicParams = false;
 
 export function generateStaticParams() {
-  const params = docsSource.generateParams().map((p) => ({ ...p, lang: "en" }))
-  return params
+  const params = docsSource.generateParams().map((p) => ({ ...p, lang: "en" }));
+  return params;
 }
 
 export async function generateMetadata(props: {
-  params: Promise<{ slug?: string[]; lang: string }>
+  params: Promise<{ slug?: string[]; lang: string }>;
 }): Promise<Metadata> {
-  const params = await props.params
-  const page = docsSource.getPage(params.slug)
+  const params = await props.params;
+  const page = docsSource.getPage(params.slug);
 
   if (!page) {
-    notFound()
+    notFound();
   }
 
-  const doc = page.data
+  const doc = page.data;
+  const siteName = "Kun, the Code Machine";
+  const shareTitle = `${doc.title} | ${siteName}`;
+  const url = `/${params.lang}${page.url}`;
+  const ogImage = `/api/og?title=${encodeURIComponent(doc.title)}&description=${encodeURIComponent(doc.description ?? "")}`;
 
   return {
     title: doc.title,
     description: doc.description,
-  }
+    alternates: { canonical: url },
+    openGraph: {
+      type: "article",
+      siteName,
+      title: shareTitle,
+      description: doc.description,
+      url,
+      images: [{ url: ogImage, width: 1200, height: 630, alt: shareTitle }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: shareTitle,
+      description: doc.description,
+      images: [ogImage],
+    },
+  };
 }
 
 export default async function DocsPage(props: {
-  params: Promise<{ slug?: string[]; lang: string }>
+  params: Promise<{ slug?: string[]; lang: string }>;
 }) {
-  const params = await props.params
-  const page = docsSource.getPage(params.slug)
+  const params = await props.params;
+  const page = docsSource.getPage(params.slug);
 
   if (!page) {
-    notFound()
+    notFound();
   }
 
-  const doc = page.data
-  const MDX = doc.body
-  const neighbours = findNeighbour(docsSource.pageTree, page.url)
+  const doc = page.data;
+  const MDX = doc.body;
+  const neighbours = findNeighbour(docsSource.pageTree, page.url);
 
   return (
     <div className="flex items-stretch text-[1.05rem] sm:text-[15px] xl:w-full">
@@ -138,5 +157,5 @@ export default async function DocsPage(props: {
         ) : null}
       </div>
     </div>
-  )
+  );
 }
