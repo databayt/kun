@@ -50,7 +50,7 @@ import {
 import {
   InstallCommand,
   FeaturePipeline,
-  FindHere,
+  SocialPipeline,
 } from "@/components/docs/intro";
 
 // This file is required to use MDX in `app` directory.
@@ -355,7 +355,7 @@ const mdxComponents = {
   // Intro / landing
   InstallCommand,
   FeaturePipeline,
-  FindHere,
+  SocialPipeline,
 };
 
 export function useMDXComponents(
