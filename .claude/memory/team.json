@@ -83,7 +83,7 @@
     },
     {
       "id": "samia",
-      "name": "Samia Hamd",
+      "name": "Samia",
       "category": "rnd",
       "role": "Research & Development",
       "traits": "Most talented and gifted — well-read; languages, voice-over, copywriting, brainstorming, argument (steelmanning debates)",
@@ -105,16 +105,12 @@
     },
     {
       "id": "abobaker",
-      "name": "Abobaker Altaif",
+      "name": "Abobaker",
       "category": "business",
       "role": "CEO",
       "installRole": "business",
       "email": "abobaker@databayt.org",
-      "aka": [
-        "bakri",
-        "altaif"
-      ],
-      "traits": "Technical Director of Baldna (Sudan national data exchange, 40+ institutions / 78+ services); founder of Esh3ark (95K+ users, 1.6M+ notifications); ex-CTO Digital Plus; value-driven monetization, knows the Sudan + Saudi market; profile: https://bakrialtaif.github.io"
+      "traits": "Two decades of institutional systems: technical director of Sudan's national data-exchange platform (40+ institutions, 78+ services), architect of the passport booking system (40+ global offices, 674K+ bookings), lead on the foreigners management system (85+ offices); ex-CTO of a telecom/digital services company; founder of a bank notification platform (95K+ users, 1.6M+ notifications, self-funded). Value-driven monetization; knows the Sudan + Saudi market, public sector and commercial"
     }
   ]
 }
