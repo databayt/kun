@@ -40,7 +40,9 @@
     {
       "id": "moutaz",
       "name": "Moutaz",
-      "aka": ["mutaz"],
+      "aka": [
+        "mutaz"
+      ],
       "category": "tech",
       "role": "Product Engineer (business + sales + AI + network)",
       "traits": "Experienced software engineer with strong business, sales, AI, and network skills; owns the Albayan pilot",
@@ -50,7 +52,9 @@
     {
       "id": "aseel",
       "name": "Ali Aseel",
-      "aka": ["ali"],
+      "aka": [
+        "ali"
+      ],
       "category": "business",
       "role": "Sales + QA",
       "traits": "Young, well educated at a tech hub (India — current tech scene), MBA + CS degree, strong in business",
@@ -68,7 +72,9 @@
     {
       "id": "moed",
       "name": "Moed",
-      "aka": ["moad"],
+      "aka": [
+        "moad"
+      ],
       "category": "business",
       "role": "Business Development + Copywriting + Network",
       "traits": "Well educated, loves reading; good at business, sales, copywriting, and networking",
@@ -99,11 +105,16 @@
     },
     {
       "id": "abobaker",
-      "name": "Abobaker",
+      "name": "Abobaker Altaif",
       "category": "business",
       "role": "CEO",
       "installRole": "business",
-      "email": "abobaker@databayt.org"
+      "email": "abobaker@databayt.org",
+      "aka": [
+        "bakri",
+        "altaif"
+      ],
+      "traits": "Technical Director of Baldna (Sudan national data exchange, 40+ institutions / 78+ services); founder of Esh3ark (95K+ users, 1.6M+ notifications); ex-CTO Digital Plus; value-driven monetization, knows the Sudan + Saudi market; profile: https://bakrialtaif.github.io"
     }
   ]
 }
