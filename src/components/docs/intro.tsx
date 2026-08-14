@@ -47,15 +47,13 @@ type Stage = { name: string; description: string };
 
 function StageGrid({ stages }: { stages: Stage[] }) {
   return (
-    <div className="not-prose mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+    <div className="not-prose mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
       {stages.map((stage, i) => (
-        <div key={stage.name} className="rounded-lg border p-6">
-          <h3 className="mb-2 text-base font-medium">
-            <span className="text-muted-foreground me-2 font-mono text-xs">
-              {String(i + 1).padStart(2, "0")}
-            </span>
-            {stage.name}
-          </h3>
+        <div key={stage.name} className="rounded-lg border p-4">
+          <div className="text-muted-foreground mb-1 font-mono text-xs">
+            {String(i + 1).padStart(2, "0")}
+          </div>
+          <h3 className="mb-1 text-base font-medium">{stage.name}</h3>
           <p className="text-muted-foreground text-sm">{stage.description}</p>
         </div>
       ))}
@@ -64,56 +62,16 @@ function StageGrid({ stages }: { stages: Stage[] }) {
 }
 
 const featureStages: Stage[] = [
-  {
-    name: "Idea",
-    description:
-      "Capture the feature as a structured, deduplicated issue with a user story and acceptance criteria.",
-  },
-  {
-    name: "Spec",
-    description:
-      "Detail the requirement and settle scope. This is the human gate — nothing is generated until it is approved.",
-  },
-  {
-    name: "Plan",
-    description:
-      "Turn the approved spec into an implementation strategy and the architectural calls it depends on.",
-  },
-  {
-    name: "Tasks",
-    description:
-      "Break the plan into atomic, ordered units of work, each small enough to verify on its own.",
-  },
-  {
-    name: "Schema",
-    description:
-      "The data layer: Prisma models, migrations, and tenant scoping for every new table.",
-  },
-  {
-    name: "Code",
-    description:
-      "The logic layer: server actions carrying auth, validation, and tenant isolation.",
-  },
-  {
-    name: "Wire",
-    description:
-      "The UI layer: components composed from the registry and wired to the server actions.",
-  },
-  {
-    name: "Check",
-    description:
-      "The quality gate: typecheck, production build, and visual verification, with auto-fix loops.",
-  },
-  {
-    name: "Ship",
-    description:
-      "Conventional commit, push straight to main, and deploy to production.",
-  },
-  {
-    name: "Watch",
-    description:
-      "Post-deploy verification: screenshot the live page, scan the console, run a smoke interaction.",
-  },
+  { name: "Idea", description: "Capture the ask" },
+  { name: "Spec", description: "Human gate" },
+  { name: "Plan", description: "Strategy" },
+  { name: "Tasks", description: "Break it down" },
+  { name: "Schema", description: "Data layer" },
+  { name: "Code", description: "Logic layer" },
+  { name: "Wire", description: "UI layer" },
+  { name: "Check", description: "Typecheck + build" },
+  { name: "Ship", description: "Push to main" },
+  { name: "Watch", description: "Verify live" },
 ];
 
 export function FeaturePipeline() {
@@ -124,44 +82,19 @@ export function FeaturePipeline() {
         <code className="bg-muted rounded px-1.5 py-0.5 text-[13px] font-bold">
           feature &lt;name&gt;
         </code>{" "}
-        chains all ten stages; each is also an independent skill with its own
-        exit gate.
+        chains all ten stages; each is also a skill on its own.
       </p>
     </>
   );
 }
 
 const socialStages: Stage[] = [
-  {
-    name: "Calendar",
-    description:
-      "Decide which brand publishes what, and on which day, before a word is written.",
-  },
-  {
-    name: "Draft",
-    description:
-      "Write the copy — Arabic crafted first, English mirrored — with UTM on every link.",
-  },
-  {
-    name: "Assets",
-    description:
-      "Render the media: generated imagery, recorded product flows, and bilingual slide decks.",
-  },
-  {
-    name: "Approve",
-    description:
-      "The human gate. A contributor signs off in the review queue at /social/publish.",
-  },
-  {
-    name: "Publish",
-    description:
-      "Deliver the approved draft to every channel, now or on the scheduled drain.",
-  },
-  {
-    name: "Measure",
-    description:
-      "Read the numbers back: reach, engagement, and UTM-attributed traffic per brand.",
-  },
+  { name: "Calendar", description: "Pick the slot" },
+  { name: "Draft", description: "Arabic first" },
+  { name: "Assets", description: "Render media" },
+  { name: "Approve", description: "Human gate" },
+  { name: "Publish", description: "Deliver" },
+  { name: "Measure", description: "Read the numbers" },
 ];
 
 export function SocialPipeline() {
@@ -172,10 +105,7 @@ export function SocialPipeline() {
         <code className="bg-muted rounded px-1.5 py-0.5 text-[13px] font-bold">
           social &lt;topic&gt;
         </code>{" "}
-        chains every stage; assets come from{" "}
-        <code className="font-bold">record</code>,{" "}
-        <code className="font-bold">higgs</code>, and{" "}
-        <code className="font-bold">carousel</code>.
+        chains every stage; each is also a skill on its own.
       </p>
     </>
   );
