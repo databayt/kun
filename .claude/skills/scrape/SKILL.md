@@ -8,9 +8,19 @@ argument-hint: "[facebook|whatsapp|website] [for <product>] [--apply]"
 # Scrape — the lead acquisition runbook
 
 **The measured truth this runbook exists to enforce: discovery is the low-yield lane.**
-Automated enrichment caps at **+40** rows. The Sudan scraper adds **+15**. Meanwhile **130 tier-A/B
+Automated enrichment caps at **+45** rows. The Sudan scraper adds **+15**. Meanwhile **131 tier-A/B
 schools are contactable and unworked right now.** So: measure the gap, work the contactable, and
 treat raw discovery as a deliberate choice someone made on purpose — never the default.
+
+**Two lanes are now settled, so nobody re-litigates them:**
+
+- **OSM re-fetch is DONE and exhausted** (2026-08-17). `hogwarts/scripts/crm/osm-refetch.ts` re-read
+  all 3,145 elements; contactable moved **175 → 176**, because the CRM already held OSM's contact
+  tags. It did bank +2,528 coordinates and +1,106 English names. A re-run plans **0 writes** — if
+  you are about to propose "re-fetch the OSM tags", it already happened.
+- **Government open data is the highest free yield, measured.** ADEK's ArcGIS layer gives 225 Abu
+  Dhabi private schools at 100% phone/email/website; exact-name matching alone reaches **48**
+  unreachable AE rows. That is 48× the entire OSM lane. Build §8 before anything paid or scraped.
 
 Full numbers and the hard rules: `.claude/agents/lead.md`. Code lives in the product repos —
 `hogwarts/scripts/crm/` and `mkan/scripts/crm/` (canonical). **kun holds no scraper code.**
@@ -96,6 +106,27 @@ from school notifications, warm-up ramp 10→20→30/day, randomized 40–180s g
 
 27 rows. Fetch the domain, extract contact from the usual pages (`/contact`, `/about`, footer),
 same regexes as §2. Cheap, no account risk, no ban risk.
+
+## §8 — Official directories (build this next)
+
+The only lane that reaches the 2,935 MAP_ONLY rows, and the only free one with a measured yield
+worth the name. Regulators publish licensed-school registers, often with contact details:
+
+| Source                  | Endpoint                                                                                | Measured                                                                  |
+| ----------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| **ADEK** (Abu Dhabi)    | `arcgis.sdi.abudhabi.ae/agspublish/rest/services/OpenData/ADSDI_OpenData/MapServer/212` | 225 schools, **100%** phone/email/website; 48 unreachable AE rows matched |
+| **KHDA** (Dubai)        | `dubaipulse.gov.ae/data/khda-schools/…` (+ web API)                                     | contact details published; not yet measured                               |
+| Saudi MoE / SDAIA       | `open.data.gov.sa`                                                                      | not yet investigated — SA is the biggest slice (1,001)                    |
+| Egypt MoE · Qatar MoEHE | —                                                                                       | not yet investigated                                                      |
+
+ADEK's emails are mostly regulator-routed (`9338@adek.gov.ae`), which is deliverable but not a
+direct line — say so rather than counting them as warm. Phones are local-format and must go through
+`normalize-contacts.ts`. **Check each register's licence before redistributing it**; enriching our
+own CRM is ordinary use, republishing the register is not.
+
+Matching is the real work, not fetching: normalize Arabic (strip diacritics, ألف/همزة, ة/ه, ى/ي,
+and the boilerplate `مدرسة|مدارس|الخاصة|الدولية`), match EN and AR names both ways, and use the
+coordinates §1's OSM re-fetch just banked to break ties. Dedup key: `adek:<SCH_ESIS_ID>`.
 
 ## §5 — Discovery (deliberate only)
 

@@ -19,25 +19,38 @@ The constraint on this business is **contactability, not discovery** — measure
 Owns: contact-gap analysis · enrichment · tiering · outreach drafting.
 Does **not** own: sending (hogwarts' Evolution API + Resend), the CRM's hosting, social publishing.
 
-## The numbers — measured 2026-08-17, do not re-derive
+## The numbers — measured 2026-08-17 (post-OSM-refetch), do not re-derive
 
 `hogwarts/scripts/crm/contact-gap.ts` over the live hogwarts workspace:
 
 | Lane            |     Count |     % | What can work on it                             |
 | --------------- | --------: | ----: | ----------------------------------------------- |
-| **CONTACTABLE** |   **175** |  5.5% | reachable today — the asset                     |
+| **CONTACTABLE** |   **176** |  5.6% | reachable today — the asset                     |
 | FB_PAGE         |        13 |  0.4% | scrape the About/Intro tab                      |
-| WEBSITE         |        27 |  0.9% | fetch + extract                                 |
-| **MAP_ONLY**    | **2,941** | 93.2% | **an OSM name + a map pin. No automated lane.** |
+| WEBSITE         |        32 |  1.0% | fetch + extract                                 |
+| **MAP_ONLY**    | **2,935** | 93.0% | **an OSM name + a map pin. No automated lane.** |
 
 Consequences that govern every recommendation this agent makes:
 
-- **Automated enrichment caps at +40 rows.** FB_PAGE (13) + WEBSITE (27). That is the whole ceiling.
+- **The free OSM lane is now EXHAUSTED — do not propose it again.** `osm-refetch.ts` re-read all
+  3,145 elements on 2026-08-17. It moved contactable by **+1** (175→176), because the CRM already
+  held OSM's contact tags: 101 phones, 50 emails and 36 websites came back byte-identical. The
+  original import did take contact where OSM had it. A second run now plans **0 writes**.
+- **What that lane DID buy is real, just not contact:** +2,528 coordinates (every row now has one),
+  +1,106 English names, +58 private/public classifications, plus grades/ISCED/gender/operator.
+  The coordinates are the asset — they make a location-biased directory or Places match possible.
+- **Automated enrichment caps at +45 rows.** FB_PAGE (13) + WEBSITE (32). That is the whole ceiling.
 - **The existing Sudan scraper adds +15.** 505 of its 817 names were already in the CRM; of the 312
   genuinely new, 15 are contactable. Discovery is the low-yield lane — say so out loud when asked
   to scrape.
-- **130 tier-A/B schools are contactable and unworked right now.** This is the highest-yield move
+- **131 tier-A/B schools are contactable and unworked right now.** This is the highest-yield move
   available, and it needs no scraping and no enrichment to start.
+- **Government open data beats every scraper, measured.** Abu Dhabi's ADEK layer (ArcGIS SDI
+  `OpenData/ADSDI_OpenData/MapServer/212`) publishes **225 private schools at 100% phone, email,
+  website and student count**, free and machine-readable. Naive exact-name matching alone puts
+  **48 currently-unreachable AE schools** in reach — 48× what the whole free OSM lane produced,
+  from one emirate. Dubai's equivalent is KHDA on `dubaipulse.gov.ae`. **This is the lane to
+  build next**; see `content/docs/scrape.mdx`.
 - **Of 175 contacts only 45 are mobile**; the rest are switchboards. A landline in a WhatsApp
   campaign is a silent non-delivery that reads as disinterest — label reach, never guess it.
 - **119 rows carry an email.** For this MENA-wide list **email is the larger channel**, not
@@ -46,7 +59,8 @@ Consequences that govern every recommendation this agent makes:
 - Stages: 3,069 COLD · 21 PROSPECT · 65 LOST · 1 PILOT.
 
 Closing the 93% needs a **real directory** (Saudi MoE, ADEK, Egypt MoE) or the network. Not a
-better scraper. If someone asks for a better scraper, that is the answer.
+better scraper. If someone asks for a better scraper, that is the answer — and as of 2026-08-17 it
+is no longer a hypothesis: ADEK's open data measured 48 reachable schools against the OSM lane's 1.
 
 mkan reached the identical conclusion independently for its own market
 (`mkan/scripts/crm/README.md`): _"Coverage is not the constraint on this business; inventory is."_
@@ -84,14 +98,14 @@ The CRM is down whenever the laptop is — every scheduled CRM job is a Mac job.
 
 ## Where the code lives — kun holds none of it
 
-| Repo                                    | What                                                                                                                                                                                                                                              |
-| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mkan/scripts/crm/`                     | **Canonical.** 52 files, 37 `pnpm crm:*` commands. scrape → upsert → score-trust → contact-hunt → outreach → rehost → import → gate → wave-publish, two-way Twenty sync.                                                                          |
-| `hogwarts/scripts/crm/`                 | `twenty-rest.ts` (vendored from mkan), `contact-gap.ts`, `normalize-contacts.ts` — built 2026-08-17, `f82f64309`.                                                                                                                                 |
-| `hogwarts/src/lib/whatsapp/`            | The Evolution API sender — retry, rate limiter, templates, dispatch. **Never build a second sender.**                                                                                                                                             |
-| `hogwarts/src/lib/email.ts`             | Resend — the larger channel for this list.                                                                                                                                                                                                        |
-| `twenty/scripts/sudan-schools-scraper/` | The CDP Facebook scraper, in an upstream-tracked fork behind a `divergence-guard` hook. Relocating to `hogwarts/scripts/crm/`. Its `import-to-twenty.js` writes raw SQL into **every** workspace with no dedup key — **must not be resurrected.** |
-| `kun`                                   | Routing only — this card, `/scrape`, the hooks, the workflow, the docs. **No scraper code, ever.**                                                                                                                                                |
+| Repo                                    | What                                                                                                                                                                                                                                                   |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `mkan/scripts/crm/`                     | **Canonical.** 52 files, 37 `pnpm crm:*` commands. scrape → upsert → score-trust → contact-hunt → outreach → rehost → import → gate → wave-publish, two-way Twenty sync.                                                                               |
+| `hogwarts/scripts/crm/`                 | `twenty-rest.ts` (vendored from mkan), `contact-gap.ts`, `normalize-contacts.ts` — built 2026-08-17, `f82f64309`. Plus `osm-refetch.ts` (fetch→plan→apply, converges to 0 writes) and `places-sample.ts` (the Lane-2 gate, not the run) — `0677440c5`. |
+| `hogwarts/src/lib/whatsapp/`            | The Evolution API sender — retry, rate limiter, templates, dispatch. **Never build a second sender.**                                                                                                                                                  |
+| `hogwarts/src/lib/email.ts`             | Resend — the larger channel for this list.                                                                                                                                                                                                             |
+| `twenty/scripts/sudan-schools-scraper/` | The CDP Facebook scraper, in an upstream-tracked fork behind a `divergence-guard` hook. Relocating to `hogwarts/scripts/crm/`. Its `import-to-twenty.js` writes raw SQL into **every** workspace with no dedup key — **must not be resurrected.**      |
+| `kun`                                   | Routing only — this card, `/scrape`, the hooks, the workflow, the docs. **No scraper code, ever.**                                                                                                                                                     |
 
 `twenty-rest.ts` is vendored, not shared. Fix bugs in **both** copies until it is extracted to a
 package (Phase 4); prefer mkan's if they ever disagree.
