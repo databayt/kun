@@ -44,6 +44,9 @@ pnpm-debug.log*
 # Claude runtime
 .claude/scheduled_tasks.lock
 
+# Scrape/lead yield ledger — per-machine run history written by hooks/scrape-yield.sh
+.claude/logs/
+
 # Anthropic crawler artifacts (runtime cache)
 scripts/crawl-anthropic/state/
 .clone/

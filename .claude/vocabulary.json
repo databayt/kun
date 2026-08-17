@@ -2,7 +2,7 @@
   "$schema": "kun-vocabulary-v1",
   "$comment": "Single source of truth for the kun keyword vocabulary. Edit THIS file, then run: node .claude/scripts/generate-vocab.mjs — it regenerates the Vocabulary block in .claude/CLAUDE.md and src/components/docs/spellbook-data.ts. health.sh runs generate-vocab.mjs --check to flag drift. v2 (2026-07-10): deduped cross-school keywords, retired stale BMAD spells, wired Anthropic-native automation (loop/goal/schedule/workflow). Spell fields: name (the keyword), effect (one-line), order (routing chain: familiar=agent, portal=MCP, skill=/skill-or-command, hook, ward=rule, memory), steps, connects, depends, and optional mergedInto (keyword retired into another).",
   "version": 2,
-  "updated": "2026-08-06",
+  "updated": "2026-08-17",
   "orderTypeLabels": {
     "familiar": "Agent",
     "portal": "MCP",
@@ -5493,6 +5493,429 @@
           "depends": []
         }
       ]
+    },
+    {
+      "id": "owlery",
+      "number": "20",
+      "name": "The Owlery",
+      "subtitle": "Lead acquisition and outreach",
+      "description": "Hogwarts' owls carry post out and bring the reply back — which is the whole job here, and the reason this school is named for delivery rather than for discovery. Measured 2026-08-17, the CRM's 3,156 school leads break down as 175 contactable, 13 with a Facebook page, 27 with a website, and 2,941 that are an OpenStreetMap name and a map pin with no online handle at all. So automated enrichment caps at +40 rows and a full scrape run adds +15, while 130 tier-A/B schools are contactable and unworked today. Every spell here makes contact-gap analysis, enrichment and outreach the easy path and raw discovery a deliberate choice someone made out loud. Arabic forms are first-class — half this work is Arabic. Code lives in hogwarts/scripts/crm/ and mkan/scripts/crm/ (canonical); kun holds the routing and none of the scrapers.",
+      "quote": "\"scrap facebook for hogwarts\" — and the owl comes back with thirteen pages, not three thousand. Knowing that before you send it is the spell.",
+      "spells": [
+        {
+          "name": "scrap",
+          "effect": "The umbrella — routes by argument, and with none it measures the contact gap first, because discovery is the low-yield lane here",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "lead"
+            },
+            {
+              "type": "skill",
+              "name": "/scrape"
+            },
+            {
+              "type": "hook",
+              "name": "scrape-guard"
+            }
+          ],
+          "steps": [
+            "No argument: run contact-gap.ts (read-only) and report the four lanes",
+            "Name the yield of each option before choosing one — enrichment caps at +40, discovery adds +15",
+            "Recommend the highest-yield move, which is almost always outreach on the 130 already contactable",
+            "Dry-run first, --apply second; never write to Twenty by SQL"
+          ],
+          "connects": [
+            "contact gap",
+            "leads",
+            "enrich",
+            "outreach"
+          ],
+          "depends": []
+        },
+        {
+          "name": "scrape",
+          "effect": "The other spelling — same lane as `scrap`, which is how Abdout types it; both route here",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "lead"
+            },
+            {
+              "type": "skill",
+              "name": "/scrape"
+            }
+          ],
+          "steps": [
+            "Identical to `scrap` — see its steps"
+          ],
+          "connects": [
+            "scrap"
+          ],
+          "depends": []
+        },
+        {
+          "name": "contact gap",
+          "effect": "The measurement that governs everything: 175 contactable · 13 FB pages · 27 websites · 2,941 name-and-map-pin-only",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "lead"
+            },
+            {
+              "type": "skill",
+              "name": "/scrape"
+            },
+            {
+              "type": "portal",
+              "name": "Keychain"
+            },
+            {
+              "type": "memory",
+              "name": "project_lead_engine"
+            }
+          ],
+          "steps": [
+            "TWENTY_API_URL=http://localhost:3100 — never 3000, that is hogwarts' dev server",
+            "Token from Keychain: security find-generic-password -s databayt-twenty -a <product> -w",
+            "npx tsx scripts/crm/contact-gap.ts — read-only by design, it never writes",
+            "Flag drift from the 2026-08-17 snapshot rather than quietly reusing it"
+          ],
+          "connects": [
+            "leads",
+            "enrich",
+            "pipeline health"
+          ],
+          "depends": []
+        },
+        {
+          "name": "leads",
+          "effect": "The asset, not the backlog — 130 tier-A/B schools that are contactable and unworked right now",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "lead"
+            },
+            {
+              "type": "skill",
+              "name": "/scrape"
+            },
+            {
+              "type": "memory",
+              "name": "reference_crm"
+            }
+          ],
+          "steps": [
+            "Filter contactable AND (COLD|PROSPECT) AND tier A|B — that is the workable set",
+            "Working it needs no scraping and no enrichment to start",
+            "Hand to outreach drafting; personalization comes from Twenty, never from a scraped file"
+          ],
+          "connects": [
+            "prospect",
+            "outreach",
+            "contact gap"
+          ],
+          "depends": []
+        },
+        {
+          "name": "prospect",
+          "effect": "Work one named school — read its tier, stage and next action from the CRM, then draft the move",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "lead"
+            },
+            {
+              "type": "skill",
+              "name": "/scrape"
+            },
+            {
+              "type": "memory",
+              "name": "reference_crm"
+            }
+          ],
+          "steps": [
+            "Look the company up over REST; never psql into a workspace schema",
+            "Check nextActionAt — the digest surfaces overdue actions the pipeline forgot",
+            "Log the touch as a Twenty Note so the next session sees it"
+          ],
+          "connects": [
+            "leads",
+            "outreach"
+          ],
+          "depends": []
+        },
+        {
+          "name": "enrich",
+          "effect": "Turn a signal into a contact — FB About tab plus website extract. The ceiling is +40 rows, measured, not hoped",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "lead"
+            },
+            {
+              "type": "skill",
+              "name": "/scrape"
+            },
+            {
+              "type": "portal",
+              "name": "Chrome DevTools"
+            },
+            {
+              "type": "hook",
+              "name": "scrape-yield"
+            }
+          ],
+          "steps": [
+            "Only the FB_PAGE (13) and WEBSITE (27) lanes have anything to work on",
+            "MAP_ONLY rows carry no online handle — spend nothing on them; they need a directory or a human",
+            "Normalize to E.164 and LABEL mobile vs landline — only 45 of 175 are mobile",
+            "Checkpoint so a stop is resumable, and log what the stop dropped"
+          ],
+          "connects": [
+            "contact gap",
+            "scrap facebook",
+            "outreach"
+          ],
+          "depends": []
+        },
+        {
+          "name": "outreach",
+          "effect": "Draft the first touch — email leads for the Gulf/Egypt majority (119 emails), WhatsApp for the Sudan slice (45 mobiles)",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "lead"
+            },
+            {
+              "type": "skill",
+              "name": "/scrape"
+            }
+          ],
+          "steps": [
+            "Arabic written first, English mirrored; personalization read from Twenty",
+            "Email through Resend on an outreach subdomain; WhatsApp through hogwarts' Evolution API",
+            "Never build a second sender — hogwarts already ships retry, rate limiter, templates, dispatch",
+            "A human approves before anything reaches a school; stop the cadence on any reply"
+          ],
+          "connects": [
+            "leads",
+            "scrap whatsapp",
+            "prospect"
+          ],
+          "depends": []
+        },
+        {
+          "name": "pipeline health",
+          "effect": "The CRM funnel's shape — stages, tiers, overdue next-actions. Not /health (engine config) and not /measure (published-social numbers)",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "lead"
+            },
+            {
+              "type": "skill",
+              "name": "/scrape"
+            },
+            {
+              "type": "memory",
+              "name": "reference_crm"
+            }
+          ],
+          "steps": [
+            "Read stage + tier + nextActionAt tallies over REST",
+            "Surface anything overdue — the King Fahad conversion sat overdue since 2026-06-15 unnoticed",
+            "Refresh .claude/memory/pipeline.json from this rather than hand-copying it"
+          ],
+          "connects": [
+            "contact gap",
+            "leads",
+            "captain"
+          ],
+          "depends": []
+        },
+        {
+          "name": "scrap facebook",
+          "effect": "The Page About/Intro lane — 13 rows, the whole surface. Dedicated account, throttled, never Abdout's",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "lead"
+            },
+            {
+              "type": "skill",
+              "name": "/scrape"
+            },
+            {
+              "type": "portal",
+              "name": "Chrome DevTools"
+            },
+            {
+              "type": "hook",
+              "name": "scrape-guard"
+            }
+          ],
+          "steps": [
+            "Read the About/Intro tab, NOT the feed — the feed is why the earlier yield was near zero",
+            "Split Pages from Groups; a /groups/ URL is not a school lead",
+            "FB_SCRAPE_PROFILE + FB_SCRAPE_PORT + FB_SCRAPE_DELAY_MS, or scrape-guard blocks the run",
+            "Losing the account also loses the Page tokens the whole social pipeline depends on"
+          ],
+          "connects": [
+            "enrich",
+            "scrap",
+            "scrap whatsapp"
+          ],
+          "depends": []
+        },
+        {
+          "name": "scrap whatsapp",
+          "effect": "Not a thing — WhatsApp has no scrapeable surface. Routes to what is real: harvest numbers from the public web and FB About tabs, then SEND through the Evolution API",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "lead"
+            },
+            {
+              "type": "skill",
+              "name": "/scrape"
+            }
+          ],
+          "steps": [
+            "Say the honest part first: there is no WhatsApp directory to crawl",
+            "Harvest: the FB About and website lanes, then normalize-contacts.ts to E.164",
+            "Label mobile vs landline — a landline in a WhatsApp campaign is a silent non-delivery",
+            "Send: hogwarts/src/lib/whatsapp/ — dedicated number, separate instance, warm-up ramp, stop-on-reply"
+          ],
+          "connects": [
+            "outreach",
+            "scrap facebook",
+            "enrich"
+          ],
+          "depends": []
+        },
+        {
+          "name": "scrap for hogwarts",
+          "effect": "Product-scoped — the school lane, the 3,156-lead workspace. Also `scrap facebook for hogwarts`",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "lead"
+            },
+            {
+              "type": "skill",
+              "name": "/scrape"
+            },
+            {
+              "type": "portal",
+              "name": "Keychain"
+            }
+          ],
+          "steps": [
+            "Resolve scope from .claude/memory/repositories.json",
+            "Keychain account = hogwarts; code in hogwarts/scripts/crm/",
+            "The lead object is the school (Company with stage/tier/leadStatus custom fields)"
+          ],
+          "connects": [
+            "scrap",
+            "leads"
+          ],
+          "depends": []
+        },
+        {
+          "name": "scrap for mkan",
+          "effect": "Product-scoped — the rental lane, where the lead is a property host, not a school",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "lead"
+            },
+            {
+              "type": "skill",
+              "name": "/scrape"
+            },
+            {
+              "type": "portal",
+              "name": "Keychain"
+            }
+          ],
+          "steps": [
+            "Keychain account = mkan; code in mkan/scripts/crm/ — 52 files, the canonical implementation",
+            "Growth must come from hosts NOT on Airbnb: Sudan has ~120 listings across 67 hosts nationally",
+            "Same conclusion as hogwarts: coverage is not the constraint, inventory is"
+          ],
+          "connects": [
+            "scrap",
+            "leads"
+          ],
+          "depends": []
+        },
+        {
+          "name": "اسحب",
+          "effect": "Arabic for `scrap` — the same umbrella, measured first",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "lead"
+            },
+            {
+              "type": "skill",
+              "name": "/scrape"
+            }
+          ],
+          "steps": [
+            "Identical to `scrap` — see its steps"
+          ],
+          "connects": [
+            "scrap"
+          ],
+          "depends": []
+        },
+        {
+          "name": "جمع بيانات",
+          "effect": "Arabic for data collection — routes to enrichment, since the gap is contacts and not names",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "lead"
+            },
+            {
+              "type": "skill",
+              "name": "/scrape"
+            }
+          ],
+          "steps": [
+            "Identical to `enrich` — see its steps"
+          ],
+          "connects": [
+            "enrich",
+            "scrap"
+          ],
+          "depends": []
+        },
+        {
+          "name": "عملاء محتملين",
+          "effect": "Arabic for leads — the 130 contactable tier-A/B schools waiting to be worked",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "lead"
+            },
+            {
+              "type": "skill",
+              "name": "/scrape"
+            }
+          ],
+          "steps": [
+            "Identical to `leads` — see its steps"
+          ],
+          "connects": [
+            "leads",
+            "outreach"
+          ],
+          "depends": []
+        }
+      ]
     }
   ],
   "workflows": [
@@ -5740,6 +6163,33 @@
         {
           "keyword": "measure",
           "action": "Reach and attribution read back per post"
+        }
+      ]
+    },
+    {
+      "id": "lead-acquisition",
+      "name": "Lead Acquisition",
+      "description": "Measure the gap, then work the highest-yield lane — discovery last, never first",
+      "steps": [
+        {
+          "keyword": "contact gap",
+          "action": "Measure — 175 contactable, 2,941 map-pin-only"
+        },
+        {
+          "keyword": "leads",
+          "action": "The 130 contactable tier-A/B schools, unworked"
+        },
+        {
+          "keyword": "enrich",
+          "action": "FB About + website — ceiling +40 rows"
+        },
+        {
+          "keyword": "outreach",
+          "action": "Email first, WhatsApp for the Sudan slice"
+        },
+        {
+          "keyword": "pipeline health",
+          "action": "Stages, tiers, overdue next-actions"
         }
       ]
     }

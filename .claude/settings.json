@@ -60,6 +60,15 @@
             "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/block-destructive-bash.sh\""
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/scrape-guard.sh\""
+          }
+        ]
       }
     ],
     "PostToolUse": [
@@ -78,6 +87,16 @@
           {
             "type": "command",
             "command": "json=$(cat); p=$(printf '%s' \"$json\" | jq -r '.tool_input.file_path // empty' 2>/dev/null); [ -z \"$p\" ] && p=\"${FILE_PATH:-}\"; if [ -n \"$p\" ] && [[ \"$p\" =~ \\.(ts|tsx|js|jsx|json|css|md)$ ]]; then npx prettier --write \"$p\" 2>/dev/null; fi; exit 0"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/scrape-yield.sh\"",
+            "async": true
           }
         ]
       }

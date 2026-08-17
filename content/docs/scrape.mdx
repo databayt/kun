@@ -1,0 +1,194 @@
+---
+title: Scrape
+description: The lead acquisition lane — contact gap first, enrichment second, discovery last, measured every time
+---
+
+# Scrape
+
+The engine's lead lane. Say it in prose — _"scrap facebook for hogwarts"_, _"who should we
+contact"_, _"contact gap"_, _"اسحب"_ — and the [`lead`](/docs/agents) agent plus the `/scrape`
+runbook activate with the product scope already resolved.
+
+**kun holds none of the scraping code.** It holds the routing: the keywords, the skill, the agent,
+two hooks, one workflow, and this page. The scrapers live in the product repos, where they belong.
+
+## The number that decides everything
+
+Measured 2026-08-17 by `hogwarts/scripts/crm/contact-gap.ts` over the live hogwarts workspace —
+3,156 school leads:
+
+| Lane            |     Count |     % | What can work on it                             |
+| --------------- | --------: | ----: | ----------------------------------------------- |
+| **CONTACTABLE** |   **175** |  5.5% | reachable today                                 |
+| FB_PAGE         |        13 |  0.4% | scrape the About/Intro tab                      |
+| WEBSITE         |        27 |  0.9% | fetch + extract                                 |
+| **MAP_ONLY**    | **2,941** | 93.2% | **an OSM name and a map pin. No automated lane.** |
+
+So: **automated enrichment caps at +40 rows**, and a full scrape run adds **+15** (505 of the
+scraper's 817 names were already in the CRM). Meanwhile **130 tier-A/B schools are contactable and
+completely unworked**.
+
+That is why this lane is configured the way it is. Every spell makes contact-gap analysis,
+enrichment and outreach the easy path, and makes raw discovery something you choose out loud with
+the number in front of you. Closing the 93% needs a real school directory — Saudi MoE, ADEK, Egypt
+MoE — or the network. Not a better scraper.
+
+mkan reached the identical conclusion independently for its own market:
+_"Coverage is not the constraint on this business; inventory is."_
+
+Two more findings that reorder the channel plan:
+
+- **Only 45 of the 175 contacts are mobile.** The rest are switchboards. A landline in a WhatsApp
+  campaign is a silent non-delivery that reads as disinterest, so reach is labelled, never guessed.
+- **119 rows carry an email.** For this MENA-wide list (SA 1001 · EG 764 · SD 609 · AE 603 · QA 173)
+  **email is the larger channel**, not WhatsApp. WhatsApp stays right for the Sudan slice.
+
+## Keywords
+
+The Owlery — school 20 in the [spellbook](/docs/keywords).
+
+| Say                                       | You get                                                              |
+| ----------------------------------------- | -------------------------------------------------------------------- |
+| `scrap` · `scrape` · `اسحب`               | The umbrella. No argument → measure the gap, then recommend           |
+| `contact gap`                             | The read-only measurement that governs the lane                      |
+| `leads` · `عملاء محتملين`                 | The 130 contactable tier-A/B schools, unworked                        |
+| `prospect`                                | Work one named school — tier, stage, next action                     |
+| `enrich` · `جمع بيانات`                   | Signal → contact. FB About + website. Ceiling +40                     |
+| `outreach`                                | Draft the first touch — email-first for this list                     |
+| `pipeline health`                         | The CRM funnel's shape — stages, tiers, overdue actions               |
+| `scrap facebook`                          | The Page About/Intro lane — 13 rows, the whole surface                |
+| `scrap whatsapp`                          | Honest redirect — see below                                           |
+| `scrap for hogwarts` · `scrap for mkan`   | Product-scoped, resolved from `repositories.json`                     |
+
+Abdout types **`scrap`**. Both spellings trigger, in the spellbook and in the skill's
+`when_to_use`.
+
+### "scrap whatsapp" is not a thing, and the spell says so
+
+WhatsApp has no scrapeable surface — no directory, no public profile index, nothing to crawl. The
+spell exists because the phrase gets said, and it routes to the two real capabilities behind it:
+
+1. **Harvest numbers** from the public web and Facebook Page About tabs (that is the FB and website
+   lanes), then `normalize-contacts.ts` to E.164, labelling mobile vs landline.
+2. **Send** through `hogwarts/src/lib/whatsapp/` — the Evolution API sender that already exists with
+   retry, rate limiter, templates and dispatch. Never build a second sender.
+
+Configuring a capability we do not have would be worse than not configuring it at all.
+
+## Where the code lives
+
+| Repo                                    | What                                                                                                              |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `mkan/scripts/crm/`                     | **Canonical.** 52 files, 37 `pnpm crm:*` commands — scrape → upsert → score-trust → contact-hunt → outreach → import |
+| `hogwarts/scripts/crm/`                 | `twenty-rest.ts` (vendored from mkan), `contact-gap.ts`, `normalize-contacts.ts`                                   |
+| `hogwarts/src/lib/whatsapp/`            | The Evolution API sender                                                                                          |
+| `hogwarts/src/lib/email.ts`             | Resend — the larger channel for this list                                                                         |
+| `twenty/scripts/sudan-schools-scraper/` | The CDP Facebook scraper, relocating to `hogwarts/scripts/crm/`                                                    |
+| `kun`                                   | Routing only — no scraper code, ever                                                                              |
+
+`twenty-rest.ts` is **vendored, not shared**: fix bugs in both copies until it is extracted to a
+package, and prefer mkan's if they ever disagree.
+
+`import-to-twenty.js` is **forbidden**. It mints a fresh `crypto.randomUUID()` per row with
+`ON CONFLICT (id) DO NOTHING` — no dedup key — and writes raw SQL into *every* workspace, so Sudan
+schools land in mkan, sijillee and moallimee. Use `twenty-upsert` with a stable external id
+(`fb:<pageId>` / `osm:<nodeId>`).
+
+## Reaching Twenty
+
+```bash
+export TWENTY_API_URL=http://localhost:3100   # NEVER 3000 — that is hogwarts' Next dev server
+export TWENTY_API_KEY=$(security find-generic-password -s databayt-twenty -a hogwarts -w)
+npx tsx scripts/crm/contact-gap.ts
+```
+
+Keychain service `databayt-twenty`, account = `hogwarts` | `mkan` | `sijillee` | `moallimee`. Off
+this Mac, the backend answers at the Tailscale Funnel `https://twenty-api-2.tail42a5c4.ts.net`. The
+backend is Docker on Abdout's laptop, so the CRM is down whenever the laptop is — every scheduled
+CRM job is a Mac job. See [CRM](/docs/crm).
+
+Defaulting to port 3000 is not hypothetical: it is why Hermes' CRM crons silently returned nothing
+for weeks while reporting `last_status: ok`.
+
+## MCP — REST only, deliberately
+
+**There is no Twenty MCP configured, and we are not adding one.** Twenty does ship an MCP server
+in-tree (`twenty-server/src/engine/api/mcp/`), so this was a real choice:
+
+- **The REST + metadata API is the surface that survives.** The `packages/twenty-api` rewrite
+  (Slices 0–11, ~10–15% to parity) preserves REST. A raw-SQL or MCP-specific integration is
+  migration debt against a backend that is actively being replaced.
+- **Adding it means changing the pinned backend.** The Docker image is pinned at `v2.31.1` after a
+  restore-verified backup; enabling a new endpoint on it is config risk for no capability we lack.
+- **Scrapers cost zero tokens, and should stay that way.** REST scripts keep 3,156 CRM rows out of
+  model context entirely. An MCP would pull them in per query.
+
+Same reasoning rules out the `postgres` MCP for Twenty: **never psql into a workspace schema.** Raw
+SQL skips search vectors, timeline and activity, and it is exactly what the rewrite does not
+preserve.
+
+What the lane *does* use: `chrome-devtools` / `browser` (user-level) for the CDP Facebook lane, and
+`keychain` for the workspace token.
+
+## The two hooks
+
+**`scrape-guard`** (PreToolUse, Bash) — blocks a Facebook scrape that would drive the wrong Chrome.
+
+On this machine, `~/.claude/bin/chrome-debug.sh` runs one persistent **session vault** Chrome at
+`~/.claude/chrome-debug-profile` on port **9222** — the browser Abdout logs into by hand *and* the
+browser agents attach to. Pointing the scraper at it means scraping Facebook as him, and losing that
+account also loses the Page tokens the whole social pipeline depends on.
+
+A shell hook cannot ask Chrome which Facebook user is signed in — CDP exposes the browser build,
+never the profile. So the guard checks the thing that *is* checkable and is the actual failure mode:
+it reads `--user-data-dir` straight off the live Chrome process serving the port the run will attach
+to. Session vault → blocked. It also warns, without blocking, when a run declares no throttle.
+
+```bash
+export FB_SCRAPE_PORT=9333
+export FB_SCRAPE_PROFILE="$HOME/.claude/chrome-fbscrape-profile"
+export FB_SCRAPE_DELAY_MS=4000
+```
+
+Read-only commands (`contact-gap.ts`, `normalize-contacts.ts`) are never blocked.
+
+**`scrape-yield`** (PostToolUse, Bash, async) — appends the contact-gap delta to
+`.claude/logs/scrape-runs.log` after every lead-lane run, so yield is measured rather than
+remembered. It never calls Twenty; it diffs the artifact `contact-gap.ts` already writes. If that
+file was not refreshed, it logs `UNMEASURED` rather than reporting a zero delta as though zero were
+a measurement.
+
+Every earlier read of this funnel was optimistic and each was corrected only because someone
+measured. That is what the ledger is for.
+
+## The workflow
+
+`Workflow({ name: "scrape", args: { product: "hogwarts" } })` — **gap → enrich → tier → report**,
+dry-run by default.
+
+**Discovery is off unless you ask for it** (`stages: ["gap","discover","enrich","tier","report"]`),
+and when it runs, the stage states the +15 measured yield before doing anything.
+
+Every stage must return a `dropped[]` array — a top-N cap, a sampling limit, a rate-limit stop, a
+checkpoint bail, an auth wall. Silent truncation reads as "we covered everything" when it didn't, so
+the schema requires the field and the workflow logs each entry before the summary. The return value
+carries a `recommendation`, because a lead pass that reports counts without naming the next move is
+how "scrape more" wins by default.
+
+## Guardrails
+
+- **Dry-run first, `--apply` second.** Run `--apply` twice; the company count must be identical
+  after the second run. That is the dedup test.
+- **Fill-empty-never-replace-populated.** A conflict becomes a dated note, not an overwrite.
+- **Zero tokens per lead.** Claude writes the extractor; the extractor runs on all 3,156 rows free.
+  Bulk classification → Gemini free tier (~20 req/day/model). Judgment → the local `claude -p` drain
+  on the Max pool. No `ANTHROPIC_API_KEY` — it is dead in prod (401).
+- **Facebook**: dedicated account, throttled, never Abdout's.
+- **WhatsApp**: dedicated number, a separate Evolution instance from school notifications, warm-up
+  ramp 10 → 20 → 30/day, randomized 40–180s gaps, stop-on-reply, `OUTREACH_SEND=off` kill switch.
+
+## Related
+
+- [Keywords](/docs/keywords) — The Owlery, school 20
+- [CRM](/docs/crm) — the Twenty workspaces
+- [Agents](/docs/agents) · [Hooks](/docs/hooks) · [Workflows](/docs/workflows)
