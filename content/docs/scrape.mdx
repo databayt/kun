@@ -19,14 +19,47 @@ Measured 2026-08-17 by `hogwarts/scripts/crm/contact-gap.ts` over the live hogwa
 
 | Lane            |     Count |     % | What can work on it                             |
 | --------------- | --------: | ----: | ----------------------------------------------- |
-| **CONTACTABLE** |   **175** |  5.5% | reachable today                                 |
+| **CONTACTABLE** |   **176** |  5.6% | reachable today                                 |
 | FB_PAGE         |        13 |  0.4% | scrape the About/Intro tab                      |
-| WEBSITE         |        27 |  0.9% | fetch + extract                                 |
-| **MAP_ONLY**    | **2,941** | 93.2% | **an OSM name and a map pin. No automated lane.** |
+| WEBSITE         |        32 |  1.0% | fetch + extract                                 |
+| **MAP_ONLY**    | **2,935** | 93.0% | **an OSM name and a map pin. No automated lane.** |
 
-So: **automated enrichment caps at +40 rows**, and a full scrape run adds **+15** (505 of the
-scraper's 817 names were already in the CRM). Meanwhile **130 tier-A/B schools are contactable and
+So: **automated enrichment caps at +45 rows**, and a full scrape run adds **+15** (505 of the
+scraper's 817 names were already in the CRM). Meanwhile **131 tier-A/B schools are contactable and
 completely unworked**.
+
+### The free OSM lane has been run, and it is finished
+
+On 2026-08-17 `hogwarts/scripts/crm/osm-refetch.ts` re-read all 3,145 OSM elements the original
+import had reduced to a name and a coordinate. The projection going in was ~210 new contacts. **The
+measured result was one.**
+
+The reason is the useful part, and it is the kind of thing only running it can tell you: **the CRM
+already held OSM's contact tags.** 101 phones, 50 emails and 36 websites came back byte-identical to
+what was already stored. The import did take contact where OpenStreetMap had it — what it dropped
+were the *attribute* tags. A second run now plans **zero writes**.
+
+What the lane did buy is real, just not reachability: **+2,528 coordinates** (3,136 of 3,156 rows
+carry one now), +1,106 English names, +58 private/public classifications, and grades, ISCED level,
+gender, operator, street, city and postcode. Coordinates are infrastructure — they are what lets a
+directory or a paid lookup match the right school instead of a same-named one two countries away.
+
+### Government open data is the answer to the other 93%
+
+Not a better scraper. As of 2026-08-17 that is measured rather than argued:
+
+| Source                | Endpoint                                                                                | Measured                                                                |
+| --------------------- | --------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| **ADEK** (Abu Dhabi)  | `arcgis.sdi.abudhabi.ae/agspublish/rest/services/OpenData/ADSDI_OpenData/MapServer/212` | 225 schools, **100%** phone/email/website/student-count; **48** unreachable AE rows matched |
+| **KHDA** (Dubai)      | `dubaipulse.gov.ae/data/khda-schools/…`                                                 | contact details published; not yet measured                             |
+| Saudi MoE / SDAIA     | `open.data.gov.sa`                                                                       | not yet investigated — SA is the biggest slice (1,001)                   |
+| Egypt MoE · Qatar MoEHE | —                                                                                      | not yet investigated                                                    |
+
+**48 schools from one emirate, against the entire free OSM lane's 1.** Caveats worth carrying:
+ADEK's emails are mostly regulator-routed (`9338@adek.gov.ae`) — deliverable, but not a direct line;
+phones are local-format and must go through `normalize-contacts.ts`; and a public register is not
+automatically redistributable, so check the licence before republishing it (enriching our own CRM is
+ordinary use). Dedup on `adek:<SCH_ESIS_ID>`.
 
 That is why this lane is configured the way it is. Every spell makes contact-gap analysis,
 enrichment and outreach the easy path, and makes raw discovery something you choose out loud with
@@ -38,7 +71,7 @@ _"Coverage is not the constraint on this business; inventory is."_
 
 Two more findings that reorder the channel plan:
 
-- **Only 45 of the 175 contacts are mobile.** The rest are switchboards. A landline in a WhatsApp
+- **Only 45 of the 176 contacts are mobile.** The rest are switchboards. A landline in a WhatsApp
   campaign is a silent non-delivery that reads as disinterest, so reach is labelled, never guessed.
 - **119 rows carry an email.** For this MENA-wide list (SA 1001 · EG 764 · SD 609 · AE 603 · QA 173)
   **email is the larger channel**, not WhatsApp. WhatsApp stays right for the Sudan slice.
@@ -51,9 +84,9 @@ The Owlery — school 20 in the [spellbook](/docs/keywords).
 | ----------------------------------------- | -------------------------------------------------------------------- |
 | `scrap` · `scrape` · `اسحب`               | The umbrella. No argument → measure the gap, then recommend           |
 | `contact gap`                             | The read-only measurement that governs the lane                      |
-| `leads` · `عملاء محتملين`                 | The 130 contactable tier-A/B schools, unworked                        |
+| `leads` · `عملاء محتملين`                 | The 131 contactable tier-A/B schools, unworked                        |
 | `prospect`                                | Work one named school — tier, stage, next action                     |
-| `enrich` · `جمع بيانات`                   | Signal → contact. FB About + website. Ceiling +40                     |
+| `enrich` · `جمع بيانات`                   | Signal → contact. FB About + website. Ceiling +45                     |
 | `outreach`                                | Draft the first touch — email-first for this list                     |
 | `pipeline health`                         | The CRM funnel's shape — stages, tiers, overdue actions               |
 | `scrap facebook`                          | The Page About/Intro lane — 13 rows, the whole surface                |

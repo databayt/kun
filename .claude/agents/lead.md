@@ -36,7 +36,7 @@ Consequences that govern every recommendation this agent makes:
   3,145 elements on 2026-08-17. It moved contactable by **+1** (175→176), because the CRM already
   held OSM's contact tags: 101 phones, 50 emails and 36 websites came back byte-identical. The
   original import did take contact where OSM had it. A second run now plans **0 writes**.
-- **What that lane DID buy is real, just not contact:** +2,528 coordinates (every row now has one),
+- **What that lane DID buy is real, just not contact:** +2,528 coordinates (3,136 of 3,156 rows now carry one),
   +1,106 English names, +58 private/public classifications, plus grades/ISCED/gender/operator.
   The coordinates are the asset — they make a location-biased directory or Places match possible.
 - **Automated enrichment caps at +45 rows.** FB_PAGE (13) + WEBSITE (32). That is the whole ceiling.
