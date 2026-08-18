@@ -1,0 +1,193 @@
+---
+title: Funnel
+description: The conversion lane — designed backwards from the sale, so every question asked is one the invoice requires
+---
+
+# Funnel
+
+The engine's conversion lane. Say it in prose — _"which gate is that school stuck at"_, _"follow
+up"_, _"segment this lead"_, _"قمع"_ — and the `funnel` agent, the `/funnel` skill and the two
+guard hooks come with it.
+
+**The measured truth this lane exists to change: nothing here has ever converted.** 0 funnel
+sessions, 0 gates instrumented, 0 active paying schools, against a Q3 2026 target of 1. Every rate
+below starts at zero, and saying so is the point — the sibling [scrape](/docs/scrape) lane learned
+the hard way that a number remembered rather than measured drifts optimistic.
+
+## Designed backwards
+
+The ladder was drawn from the invoice down, not from the visitor up. Start at the end:
+
+```
+PAID          subscription active + real usage in the last 30 days
+   ↑            needs: a pilot that proved itself
+PILOT         the committed free 3-month engagement
+   ↑            needs: they have actually used it
+TRIAL         a self-serve sandbox carrying the school's own name
+   ↑            needs: a reason to try it
+DEMO          a proposal or consult, priced from size × rail × term
+   ↑            needs: we gave something and asked for nothing
+DISCOVERY     authority, size, rail and timing all known
+   ↑            needs: answers
+WARM          they replied — one email or phone captured
+   ↑            needs: a reason to answer
+PROSPECT      tiered and worth working, but silent
+   ↑
+COLD          /scrape's territory, not ours
+```
+
+**Follow-up is not a final step.** It is the edge on every arrow: each gate carries a stall timer, a
+next-best asset and a channel ladder, so a lead either advances, receives something new, or is
+retired to `DORMANT` on purpose.
+
+### What the client must actually give us
+
+Everything upstream exists only to obtain seven facts, because you cannot issue a hogwarts invoice
+without all of them:
+
+| Fact | Why the sale needs it |
+| --- | --- |
+| **Authority** | Only a signer can sign |
+| **Student count** | Sets the price — `$1.50 × N`, floor $30/mo |
+| **Country** | Sets currency and rail: SD → Bankak/Cashi, Gulf/EG → card or wire |
+| **Curriculum + regulator** | Sudanese certificate, IGCSE, ADEK eSIS — decides fit |
+| **Current system** | Paper, Excel or a competitor — the switching cost |
+| **Term start** | Schools buy before a term, never during one |
+| **A reachable channel** | 119 emails against 45 mobiles of 176 contactables |
+
+**Every question the bot asks is on this list, and every fact on this list gets asked.** That is
+what "nothing random" means in practice.
+
+## No fourth vocabulary
+
+The gate is the union of the enums that already exist. Twenty's stage options are **appended, never
+replaced** — `COLD`, `PROSPECT`, `PILOT` and `LOST` already sit on 3,156 live rows, and Twenty
+stores an option's value on the record, so a swap would orphan them.
+
+| Gate | `Prospect.status` | `Lead.status` | Twenty `stage` | live rows |
+| --- | --- | --- | --- | --- |
+| COLD | `new` `enriched` `queued` `contacted` | — | `COLD` | 3,119 |
+| PROSPECT | `queued` | — | `PROSPECT` | 21 |
+| **WARM** | `replied` | `NEW` | `WARM` | 0 |
+| **DISCOVERY** | `promoted` | `QUALIFIED` | `DISCOVERY` | 0 |
+| **DEMO** | `promoted` | `PROPOSAL` | `DEMO` | 0 |
+| **TRIAL** | `promoted` | `NEGOTIATION` | `TRIAL` | 0 |
+| **PILOT** | `promoted` | `NEGOTIATION` | `PILOT` | 1 |
+| **PAID** | `promoted` | `CLOSED_WON` | `PAID` | 0 |
+| DORMANT | `dead` + `dormant:<gate>` | `ARCHIVED` | `DORMANT` (new) | — |
+| LOST | `dead` | `CLOSED_LOST` | `LOST` | 65 |
+
+**Measured against the live workspace on 2026-08-18, and it improved the design.** `company.stage`
+already carried nine options with five of them holding zero rows — a ladder someone built and never
+populated. So the funnel adopts it and adds exactly one genuinely missing state, `DORMANT`, instead
+of appending a parallel REPLIED/QUALIFIED/CUSTOMER set that would have duplicated it. WARM *is*
+replied, DISCOVERY *is* qualified, PAID *is* customer.
+
+The existing split of **TRIAL** (a self-serve sandbox) from **PILOT** (the committed free 3-month
+engagement) turned out to be better than the merged stage that had been designed on paper — the
+go-to-market needs both. **COLD and PROSPECT belong to [scrape](/docs/scrape); this lane starts at
+WARM**, which is to say at a reply.
+
+## Segmentation — the customer department
+
+A deterministic key, recomputed on every read, that routes four things at once: **owner, cadence
+speed, value asset and price path.** hogwarts uses `<authority>-<band>-<rail>-<term>`; mkan uses
+`<units>-<airbnb>-<wave>-<photos>`.
+
+Bands are not taste — **100** is the free-tier ceiling in the pricing config, **20** is the
+`minimumMonthly 30 ÷ $1.50` floor, **1000** is where enterprise is offered. Rail sets the channel:
+Sudan is WhatsApp-first, the Gulf and Egypt are **email-first**, because a landline in a WhatsApp
+campaign is a silent non-delivery that reads as disinterest.
+
+Segmentation is deliberately **not a gate**. It is a pure function of facts already collected, so it
+can never stall, never annoy, and never disagree with itself between the web and WhatsApp lanes.
+
+## Value before payment
+
+**Every touch carries a new asset. If a segment has no unsent asset left, the touch does not fire —
+it opens a human task instead.** That single rule is what stops a cadence from decaying into "just
+checking in", which is how most of them die.
+
+Assets are produced by [`/carousel`](/docs/keywords), `/draft` and `/higgs`, pushed to the CDN, and
+referenced **by URL** — never generated at runtime. That is what holds the per-lead cost at zero.
+The two strongest gives are already built and cost nothing marginal:
+
+- **hogwarts** — a sandbox tenant carrying the school's own name, seeded with real data.
+- **mkan** — a listing we already built from their own photos, plus a single-use claim token. The
+  host is not asked to imagine the value; they are handed a finished page only they can claim.
+
+## The follow-up engine
+
+The most important part, and the one most likely to be built badly.
+
+```
+tick        → rows past their stall timer                [0 tokens]
+touch 1–2   → existing templates, send unattended
+touch 3+    → queued as a draft request
+drain       → claude -p on the Max pool, ONE session per tick,
+              answers written through FILES not argv
+human gate  → approve now | schedule | dismiss           ← required for drafted copy
+dispatch    → Evolution WhatsApp | Resend email | human task
+```
+
+**The clock is launchd and Vercel cron, never a Twenty `CRON` workflow.** Twenty is down whenever
+the Mac is asleep, has no automatic retries, and fails rather than queues past 5,000 runs/hour — a
+cadence that silently loses every overnight window looks exactly like disinterest.
+
+**Stop on reply, instantly.** A reply freezes the cadence, advances the gate if it parses as the
+current question's answer, and hands to a human. A reply is a gate transition, not just a stop.
+Four touches, then `DORMANT` — never infinite. At +90 days a dormant lead re-enters at the gate it
+stalled at, with one asset it has never seen.
+
+## Where the automation lives
+
+| Layer | Owner | Why |
+| --- | --- | --- |
+| Gate state | **hogwarts Postgres** | One writer, one truth |
+| The board | **Twenty**, mirrored | A human dragging a card is advisory — the webhook records it and opens a review task, never a silent write-back |
+| The clock | **launchd + Vercel cron** | Twenty sleeps with the Mac |
+| The conversation | hogwarts / mkan | Deterministic rail; Groq answers free-form |
+| Follow-up copy | **Claude Max pool** | Batched per cohort, never per lead |
+| Alerts | **Hermes → Slack** | Hot-lead ping, daily digest, `pause funnel` |
+
+Hermes alerts; it does not chat. Its contract stands — the gateway pulls its own work, and Vercel
+can never call into it.
+
+## Zero tokens per lead
+
+Routing, segmentation and scheduling are ordinary code. Groq answers free-form chat messages
+(already live, a separate budget line). Personalized follow-up copy is drafted in **one** `claude -p`
+session per tick on the Max subscription pool. **No Anthropic API key is ever called per lead** — the
+same hard rule the [scrape](/docs/scrape) lane carries.
+
+A useful test: run a full qualifying conversation with the chat model disabled. The rail must still
+complete. If it does not, the routing was never deterministic.
+
+## Known defects the lane must not paper over
+
+Recorded so no session rediscovers them, and so none of them is quietly assumed fixed:
+
+- `promoteToLead()` is referenced in hogwarts' Prisma schema and **does not exist**.
+- `Lead.schoolId` and `LeadActivity.createdById` are **required foreign keys**; an inbound chat lead
+  has neither, so nothing can promote until a sentinel tenant exists.
+- `School.trialEndsAt` is **read by `isTenantOnTrial()` and absent from the schema**.
+- `planType` is written `"starter"`, documented lowercase, queried UPPERCASE — plan-distribution
+  counts render 0 today.
+- mkan's `outreach-cadence.ts` is a fixture mock whose day divisor is 1000× too large, so touches 2
+  and 3 can never fire while it reports healthy.
+- mkan's Twenty webhook destructures `event`/`object`/`action`, which Twenty does not send — every
+  branch is dead and it still returns 200.
+
+## Guards
+
+- **`funnel-guard`** (PreToolUse) — blocks an `--apply` that sends with no `--segment`, and a drain
+  that names no approval source. An unsegmented blast erases the whole reason this lane exists.
+- **`funnel-yield`** (PostToolUse, async) — appends the gate delta to `.claude/logs/funnel-runs.log`,
+  and logs `UNMEASURED` rather than passing a stale zero off as a measurement.
+
+## Related
+
+- [Keywords](/docs/keywords) — The Floo Network, school 21
+- [Scrape](/docs/scrape) — the lane before this one; everything up to the first reply
+- [CRM](/docs/crm) — the Twenty workspaces
+- [Agents](/docs/agents) · [Hooks](/docs/hooks) · [Workflows](/docs/workflows)

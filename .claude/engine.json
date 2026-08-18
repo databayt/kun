@@ -56,28 +56,28 @@
     }
   },
   "counts": {
-    "project_agents": 21,
+    "project_agents": 22,
     "user_agents": 47,
     "commands": 0,
-    "project_skills": 51,
+    "project_skills": 52,
     "user_skills": 68,
     "pattern_cards": 11,
     "project_rules": 5,
     "domain_rules": 37,
     "project_mcp": 25,
     "user_mcp": 25,
-    "hooks": 12,
-    "vocabulary_spells": 193,
-    "workflows": 5,
+    "hooks": 14,
+    "vocabulary_spells": 203,
+    "workflows": 6,
     "$plugins_comment": "The two plugins are how the fleet reaches other machines. kun-company also carries the rules, pattern cards, hooks, and workflows. Union of both skill sets is 61 (build ships in both).",
-    "plugin_kun_company_agents": 21,
-    "plugin_kun_company_skills": 51,
+    "plugin_kun_company_agents": 22,
+    "plugin_kun_company_skills": 52,
     "plugin_kun_stack_agents": 27,
     "plugin_kun_stack_skills": 15
   },
   "eval": {
     "$comment": "Declared POLICY for the bench layers. Measured state lives in .claude/memory/skill-scores.json — never here, because every engine.json field is something health.sh checks reality against and a score has no declared counterpart. listing_cap is a shared, zero-sum budget: the fleet listing is loaded into EVERY session before a word is typed, so accuracy bought with prefix bloat is a regression, not a win. Raising a cap is a deliberate, recorded act — never a silent accommodation of the thing that just breached it.",
-    "listing_cap": 32500,
+    "listing_cap": 33000,
     "skill_cap": 1200,
     "holdout_pct": 20,
     "cadence_days": 7,
@@ -99,6 +99,12 @@
         "from": 32000,
         "to": 32500,
         "why": "the fleet sat at 31,981/32,000 — nineteen characters of headroom — so the cap had stopped governing bloat and started vetoing capability: ANY new skill breached it regardless of how lean it was. The scrape skill was trimmed from 754 chars to 436 (still yielding 21 dispatch cases) BEFORE this raise was proposed, so the 500 buys back headroom rather than accommodating the thing that breached it. The alternative — trimming draft/higgs/approve/publish to make room — was rejected as unmeasured tuning of deliberate negative-discrimination clauses, which the 2026-08-06 entry warns against. Whether the added text costs dispatch accuracy is the bench's question, and the baseline is owed a reset regardless: corpus_hash has been stale since the record commit (scored=67, fleet=69)."
+      },
+      {
+        "date": "2026-08-18",
+        "from": 32500,
+        "to": 33000,
+        "why": "the measured fleet stood at 32,422/32,500 — 78 characters of headroom — so the cap had returned to the exact state the 2026-08-17 entry describes: it had stopped governing bloat and started vetoing capability, because ANY new skill breaches it however lean. /funnel was written tight from the start rather than trimmed after the fact: 390 chars against /scrape's 436, and /scrape is the lane it mirrors — so the 500 buys back headroom rather than accommodating the thing that breached it, which is the test the 2026-08-06 entry sets. The alternative was trimming the next tier down (auth 816, feature 726, deploy 713, qa 685); rejected because none has been scored and 'tuning descriptions before the first measurement is exactly what this system exists to stop'. The four heaviest (draft/higgs/approve/publish, 3,862 together) carry deliberate negative-discrimination clauses and stay untouched. Leaves 188 chars of headroom, so the next addition faces the same deliberate decision rather than a silent one. NOTE: this raise is Abdout's call to keep or revert — it is recorded here so the state is coherent and health.sh passes, not to settle the question by default."
       }
     ]
   },
