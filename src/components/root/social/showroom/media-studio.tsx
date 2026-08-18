@@ -10,6 +10,7 @@ import {
   Copy,
   Image as ImageIcon,
   Loader2,
+  Paperclip,
   Plus,
   Send,
   Sparkles,
@@ -24,6 +25,7 @@ import {
   PromptInputActionMenuTrigger,
   PromptInputAttachment,
   PromptInputAttachments,
+  PromptInputButton,
   PromptInputModelSelect,
   PromptInputModelSelectContent,
   PromptInputModelSelectItem,
@@ -31,6 +33,7 @@ import {
   PromptInputModelSelectValue,
   PromptInputSubmit,
   PromptInputTextarea,
+  usePromptInputAttachments,
 } from "@/components/atom/prompt-input";
 import { Button } from "@/components/ui/button";
 import { fileMediaBrief } from "@/actions/post-social";
@@ -370,6 +373,9 @@ export function MediaStudio() {
                 </PromptInputActionMenuContent>
               </PromptInputActionMenu>
 
+              {/* Attach Outline Button matching /social/draft */}
+              <AttachButton label={t.agentAttach} />
+
               {/* Image / Video Icon Segmented Toggle */}
               <div className="border-input bg-muted inline-flex h-8 items-center rounded-full p-0.5 border">
                 <button
@@ -622,3 +628,19 @@ export function MediaStudio() {
     </div>
   );
 }
+
+function AttachButton({ label }: { label: string }) {
+  const attachments = usePromptInputAttachments();
+
+  return (
+    <PromptInputButton
+      size="default"
+      className="border-input bg-muted text-muted-foreground hover:text-foreground hover:bg-accent inline-flex h-8 items-center justify-center gap-1.5 rounded-full border px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors duration-100 ease-in-out hover:border-transparent cursor-pointer"
+      onClick={attachments.openFileDialog}
+    >
+      <Paperclip className="h-4 w-4 shrink-0" />
+      <span className="hidden md:flex">{label}</span>
+    </PromptInputButton>
+  );
+}
+
