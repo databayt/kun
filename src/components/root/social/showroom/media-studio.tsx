@@ -47,9 +47,98 @@ import {
   type MediaStudioOutput,
   type MediaStudioRatio,
 } from "@/lib/brand-kit";
+import { cn } from "@/lib/utils";
 
 const KNOB_TRIGGER =
   "border-input bg-muted text-muted-foreground hover:text-foreground hover:bg-accent inline-flex h-8 items-center justify-center gap-1.5 rounded-full border px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors duration-100 ease-in-out hover:border-transparent";
+
+function RatioWireframe({
+  ratio,
+  className,
+}: {
+  ratio: string;
+  className?: string;
+}) {
+  switch (ratio) {
+    case "9:16":
+      return (
+        <span
+          className={cn(
+            "inline-flex h-3.5 w-2 items-center justify-center rounded-[2px] border-[1.5px] border-current shrink-0",
+            className,
+          )}
+        />
+      );
+    case "1:1":
+      return (
+        <span
+          className={cn(
+            "inline-flex h-3 w-3 items-center justify-center rounded-[2px] border-[1.5px] border-current shrink-0",
+            className,
+          )}
+        />
+      );
+    case "16:9":
+      return (
+        <span
+          className={cn(
+            "inline-flex h-2 w-3.5 items-center justify-center rounded-[2px] border-[1.5px] border-current shrink-0",
+            className,
+          )}
+        />
+      );
+    case "4:5":
+      return (
+        <span
+          className={cn(
+            "inline-flex h-3.5 w-2.5 items-center justify-center rounded-[2px] border-[1.5px] border-current shrink-0",
+            className,
+          )}
+        />
+      );
+    default:
+      return (
+        <span
+          className={cn(
+            "inline-flex h-3 w-3 items-center justify-center rounded-[2px] border-[1.5px] border-current shrink-0",
+            className,
+          )}
+        />
+      );
+  }
+}
+
+const RATIO_OPTIONS: {
+  id: MediaStudioRatio;
+  label: string;
+  sub: string;
+  platforms: string;
+}[] = [
+  {
+    id: "9:16",
+    label: "9:16 Vertical",
+    sub: "1080×1920",
+    platforms: "Reels · TikTok · Stories",
+  },
+  {
+    id: "1:1",
+    label: "1:1 Square",
+    sub: "1080×1080",
+    platforms: "Feed · Carousels · Grid",
+  },
+  {
+    id: "16:9",
+    label: "16:9 Landscape",
+    sub: "1920×1080",
+    platforms: "YouTube · Web · Widescreen",
+  },
+  {
+    id: "4:5",
+    label: "4:5 Portrait",
+    sub: "1080×1350",
+    platforms: "Instagram Portrait Feed",
+  },
+];
 
 export function MediaStudio() {
   const { isRTL, t, product: globalProduct } = useSocial();
@@ -230,16 +319,48 @@ export function MediaStudio() {
                 </PromptInputModelSelectContent>
               </PromptInputModelSelect>
 
-              {/* Ratio Knob */}
-              <PromptInputModelSelect value={ratio} onValueChange={(val) => { setRatio(val as MediaStudioRatio); if (compiled) handleCompile(); }}>
+              {/* Ratio Knob — Higgsfield Marketing Studio inspired */}
+              <PromptInputModelSelect
+                value={ratio}
+                onValueChange={(val) => {
+                  setRatio(val as MediaStudioRatio);
+                  if (compiled) handleCompile();
+                }}
+              >
                 <PromptInputModelSelectTrigger className={KNOB_TRIGGER}>
-                  <PromptInputModelSelectValue placeholder={t.mediaRatioLabel} />
+                  <div className="flex items-center gap-1.5">
+                    <RatioWireframe ratio={ratio} className="text-primary" />
+                    <span className="font-mono text-xs">{ratio}</span>
+                  </div>
                 </PromptInputModelSelectTrigger>
-                <PromptInputModelSelectContent>
-                  <PromptInputModelSelectItem value="9:16">9:16 (Reels/Stories)</PromptInputModelSelectItem>
-                  <PromptInputModelSelectItem value="1:1">1:1 (Square)</PromptInputModelSelectItem>
-                  <PromptInputModelSelectItem value="16:9">16:9 (Landscape)</PromptInputModelSelectItem>
-                  <PromptInputModelSelectItem value="4:5">4:5 (Portrait)</PromptInputModelSelectItem>
+                <PromptInputModelSelectContent
+                  align={isRTL ? "end" : "start"}
+                  className="w-56 p-1.5 space-y-1"
+                >
+                  {RATIO_OPTIONS.map((opt) => (
+                    <PromptInputModelSelectItem
+                      key={opt.id}
+                      value={opt.id}
+                      className="flex items-start gap-2.5 py-1.5 cursor-pointer"
+                    >
+                      <div className="flex h-5 w-5 items-center justify-center pt-0.5">
+                        <RatioWireframe ratio={opt.id} className="text-foreground/80" />
+                      </div>
+                      <div className="flex flex-col">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-xs text-foreground">
+                            {opt.label}
+                          </span>
+                          <span className="font-mono text-[10px] text-muted-foreground">
+                            {opt.sub}
+                          </span>
+                        </div>
+                        <span className="text-[10px] text-muted-foreground/80 leading-tight">
+                          {opt.platforms}
+                        </span>
+                      </div>
+                    </PromptInputModelSelectItem>
+                  ))}
                 </PromptInputModelSelectContent>
               </PromptInputModelSelect>
 
