@@ -17,6 +17,7 @@ import {
 import { briefAsAsset, getShowroomData } from "./data";
 import { BrandShelves } from "./brand-shelf";
 import { BriefQueue } from "./brief-queue";
+import { MediaStudio } from "./media-studio";
 import { ShowroomGrid } from "./grid";
 import { ShowroomKeyword } from "./keyword-pill";
 
@@ -40,31 +41,36 @@ export async function ShowroomContent({ lang }: { lang: Locale }) {
   );
 
   return (
-    <section className="space-y-10 py-10 md:py-14">
-      <div className="mx-auto max-w-2xl space-y-4 text-center">
-        <h3 className="text-primary text-base font-medium">
-          {t.showroomTitle}
-        </h3>
-        <p className="text-muted-foreground text-sm leading-relaxed font-light">
-          {t.showroomIntro}
-        </p>
-        <ShowroomKeyword />
-        <p>
-          <Link
-            href={`/${lang}/docs/media`}
-            className="text-primary text-sm hover:underline"
-          >
-            {t.stageNoteDocs}
-            <ArrowRight className="ms-1 inline size-4 align-middle rtl:rotate-180" />
-          </Link>
-        </p>
-      </div>
+    <section className="space-y-12 py-8 md:py-12">
+      {/* Media Studio — the Prompt Area for generating images, video reels, and cards */}
+      <MediaStudio />
 
-      <BriefQueue
-        briefs={pending}
-        types={chatgptTypes(SEAT_BRAND)}
-        brand={SEAT_BRAND}
-      />
+      <div id="showroom-gallery" className="space-y-10 border-t pt-10">
+        <div className="mx-auto max-w-2xl space-y-4 text-center">
+          <h3 className="text-primary text-base font-medium">
+            {t.showroomTitle}
+          </h3>
+          <p className="text-muted-foreground text-sm leading-relaxed font-light">
+            {t.showroomIntro}
+          </p>
+          <ShowroomKeyword />
+          <p>
+            <Link
+              href={`/${lang}/docs/media`}
+              className="text-primary text-sm hover:underline"
+            >
+              {t.stageNoteDocs}
+              <ArrowRight className="ms-1 inline size-4 align-middle rtl:rotate-180" />
+            </Link>
+          </p>
+        </div>
+
+        <BriefQueue
+          briefs={pending}
+          types={chatgptTypes(SEAT_BRAND)}
+          brand={SEAT_BRAND}
+        />
+      </div>
 
       {decks.length > 0 && (
         <div className="space-y-3">

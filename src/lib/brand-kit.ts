@@ -82,3 +82,143 @@ Leave the bottom-start corner quiet for a mark placed in post.`;
 
   return { prompt, size: type.size as string, spine: type.spine as string };
 }
+
+export type MediaStudioKind = "video" | "image" | "template";
+export type MediaStudioRatio = "9:16" | "1:1" | "16:9" | "4:5";
+
+export interface MediaStudioInput {
+  brand: string;
+  kind: MediaStudioKind;
+  subject: string;
+  ratio?: MediaStudioRatio;
+  spine?: string;
+}
+
+export interface MediaStudioOutput {
+  prompt: string;
+  title: string;
+  lane: MediaStudioKind;
+  dimensions: string;
+  ratio: MediaStudioRatio;
+  spine: string;
+  paletteHexes: string[];
+  accentHex: string;
+  domain: string;
+  markFile: string;
+  beats: {
+    scene: string;
+    cameraMotion: string;
+    lightingAtmosphere: string;
+    soundFoley: string;
+    postProcessing: string;
+  };
+}
+
+export function getBrandSpines(brand: string): { id: string; use: string; prompt: string }[] {
+  const b = kit.brands[brand as keyof typeof kit.brands];
+  if (!b) return [];
+  const out: { id: string; use: string; prompt: string }[] = [];
+  if (b.styleSpines) {
+    for (const [id, s] of Object.entries(b.styleSpines as Record<string, { use?: string; prompt: string }>)) {
+      out.push({ id, use: s.use || id, prompt: s.prompt });
+    }
+  }
+  if ((b as any).videoSpines) {
+    for (const [id, s] of Object.entries((b as any).videoSpines as Record<string, { use?: string; prompt: string }>)) {
+      out.push({ id, use: s.use || id, prompt: s.prompt });
+    }
+  }
+  return out;
+}
+
+const RATIO_DIMS: Record<MediaStudioRatio, { image: string; video: string }> = {
+  "9:16": { image: "1080x1920", video: "1080x1920 (9:16 vertical 24fps)" },
+  "1:1": { image: "1080x1080", video: "1080x1080 (1:1 square 24fps)" },
+  "16:9": { image: "1792x1024", video: "1920x1080 (16:9 landscape 24fps)" },
+  "4:5": { image: "1080x1350", video: "1080x1350 (4:5 portrait 24fps)" },
+};
+
+export function compileMediaStudioPrompt(input: MediaStudioInput): MediaStudioOutput {
+  const brand = input.brand || "mkan";
+  const b = kit.brands[brand as keyof typeof kit.brands] || kit.brands.mkan;
+  const kind = input.kind || "image";
+  const ratio = input.ratio || (kind === "video" ? "9:16" : "1:1");
+  const dims = RATIO_DIMS[ratio] || RATIO_DIMS["1:1"];
+  const dimensions = kind === "video" ? dims.video : dims.image;
+
+  const spines = getBrandSpines(brand);
+  const selectedSpine = spines.find((s) => s.id === input.spine) || spines[0] || {
+    id: "cinematic",
+    use: "default cinematic",
+    prompt: "Cinematic natural photography with authentic lighting and rich atmosphere.",
+  };
+
+  const clay = b.palette.canvas.find((c) => c.name === "Clay")?.hex || "#e05638";
+  const paletteHexes = b.palette.canvas.map((c) => c.hex);
+  const setting = b.region?.items?.[0] || "Port Sudan, Red Sea, Sudan";
+
+  let cameraMotion = "Stationary 50mm prime framing with shallow depth of field";
+  let soundFoley = "Natural ambient room tone";
+
+  if (kind === "video") {
+    if (brand === "mkan") {
+      cameraMotion = "Gentle 35mm handheld drift gliding from interior living space towards breezy sunlit Red Sea balcony at 24fps";
+      soundFoley = "Gentle coastal Red Sea breeze, faint clinking of tea glasses, quiet warm laughter, authentic room tone";
+    } else {
+      cameraMotion = "Smooth slow cinematic dolly push-in at 24fps with natural optic distortion";
+      soundFoley = "Subtle acoustic ambience, soft paper turning, calm room tone";
+    }
+  }
+
+  const postProcessing = `No generated text, no lettering, no AI watermark. Leave quiet bottom-start corner for ${b.domain || "mkan.sd"} brand lockup.`;
+
+  let prompt = "";
+  if (kind === "video") {
+    prompt = `[SCENE]: ${input.subject}
+[CAMERA & MOTION]: ${cameraMotion}
+[STYLE & ATMOSPHERE]: ${selectedSpine.prompt}
+[SETTING]: ${setting}
+[LIGHTING & COLOR]: Natural daylight, palette: ${paletteHexes.join(", ")} with ${clay} as accent.
+[AUDIO DIRECTIVES]: ${soundFoley}
+[FORMAT]: ${dimensions}
+[CONSTRAINTS]: ${postProcessing}`;
+  } else if (kind === "image") {
+    prompt = `${input.subject}
+
+${selectedSpine.prompt}
+
+Setting: ${setting}.
+Palette: ${paletteHexes.join(", ")} with ${clay} as the single accent.
+Size: ${dimensions} pixels.
+No text, no lettering, no numerals, no logos, no watermarks anywhere in the image.
+Leave the bottom-start corner quiet for a mark placed in post.`;
+  } else {
+    prompt = `[TEMPLATE CARD DIRECTIVE]
+Headline: Set in Thmanyah Serif Display (Arabic) / Geist (English).
+Subject Plate: ${input.subject} (${selectedSpine.prompt})
+Dimensions: ${dimensions}
+Badge Overlay: Pill shape with transparent glass background, displaying local price / district pill.
+Brand Mark: ${b.mark.file} in monochrome ink placed at bottom-start.`;
+  }
+
+  return {
+    prompt,
+    title: `${b.mediaName} · ${kind.toUpperCase()} (${ratio})`,
+    lane: kind,
+    dimensions,
+    ratio,
+    spine: selectedSpine.id,
+    paletteHexes,
+    accentHex: clay,
+    domain: b.domain || "mkan.sd",
+    markFile: b.mark.file,
+    beats: {
+      scene: input.subject,
+      cameraMotion,
+      lightingAtmosphere: `Natural sunlight in ${setting}. Colors: ${paletteHexes.join(", ")} (accent ${clay}).`,
+      soundFoley,
+      postProcessing,
+    },
+  };
+}
+
