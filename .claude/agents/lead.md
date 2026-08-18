@@ -25,10 +25,14 @@ Does **not** own: sending (hogwarts' Evolution API + Resend), the CRM's hosting,
 
 | Lane            |     Count |     % | What can work on it                             |
 | --------------- | --------: | ----: | ----------------------------------------------- |
-| **CONTACTABLE** |   **176** |  5.6% | reachable today — the asset                     |
-| FB_PAGE         |        13 |  0.4% | scrape the About/Intro tab                      |
+| **CONTACTABLE** |   **235** |  7.1% | reachable today — the asset                     |
+| FB_PAGE         |   **113** |  3.4% | scrape the About/Intro tab                      |
 | WEBSITE         |        32 |  1.0% | fetch + extract                                 |
-| **MAP_ONLY**    | **2,935** | 93.0% | **an OSM name + a map pin. No automated lane.** |
+| **MAP_ONLY**    | **2,936** | 88.5% | **an OSM name + a map pin. No automated lane.** |
+
+Total 3,316 schools (was 3,156). The **Sudanese book of business** — every school
+of Sudanese origin wherever it operates — is `originCountry=SD`: **160 rows**
+(110 in Sudan · 35 Egypt · 15 Saudi).
 
 Consequences that govern every recommendation this agent makes:
 
@@ -39,11 +43,18 @@ Consequences that govern every recommendation this agent makes:
 - **What that lane DID buy is real, just not contact:** +2,528 coordinates (3,136 of 3,156 rows now carry one),
   +1,106 English names, +58 private/public classifications, plus grades/ISCED/gender/operator.
   The coordinates are the asset — they make a location-biased directory or Places match possible.
-- **Automated enrichment caps at +45 rows.** FB_PAGE (13) + WEBSITE (32). That is the whole ceiling.
+- **Automated enrichment caps at +145 rows.** FB_PAGE (113) + WEBSITE (32). The FB lane grew from
+  13 to 113 because the old Sudan scraper's dork run had found 159 pages and never delivered them.
+- **The Sudan diaspora is the highest-yield lane found so far, measured.** Sudanese schools that
+  relocated to Cairo and Riyadh after April 2023 are published in community directories with names,
+  addresses and phones: **50 schools, 49 with a phone, 86 numbers and every one a MOBILE.** They
+  were entirely absent from the CRM. `sd-diaspora-harvest.ts` + `sd-upsert.ts`. Contactable went
+  176 → 235 on that plus the scraper backlog. **Sudan itself has no register to fall back on —
+  moe.gov.sd is offline — so for this market the community directories ARE the register.**
 - **The existing Sudan scraper adds +15.** 505 of its 817 names were already in the CRM; of the 312
   genuinely new, 15 are contactable. Discovery is the low-yield lane — say so out loud when asked
   to scrape.
-- **131 tier-A/B schools are contactable and unworked right now.** This is the highest-yield move
+- **186 tier-A/B schools are contactable and unworked right now.** This is the highest-yield move
   available, and it needs no scraping and no enrichment to start.
 - **Government open data beats every scraper, measured.** Abu Dhabi's ADEK layer (ArcGIS SDI
   `OpenData/ADSDI_OpenData/MapServer/212`) publishes **225 private schools at 100% phone, email,

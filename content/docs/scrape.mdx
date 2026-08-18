@@ -15,17 +15,17 @@ two hooks, one workflow, and this page. The scrapers live in the product repos, 
 ## The number that decides everything
 
 Measured 2026-08-17 by `hogwarts/scripts/crm/contact-gap.ts` over the live hogwarts workspace —
-3,156 school leads:
+3,316 school leads:
 
 | Lane            |     Count |     % | What can work on it                             |
 | --------------- | --------: | ----: | ----------------------------------------------- |
-| **CONTACTABLE** |   **176** |  5.6% | reachable today                                 |
-| FB_PAGE         |        13 |  0.4% | scrape the About/Intro tab                      |
+| **CONTACTABLE** |   **235** |  7.1% | reachable today                                 |
+| FB_PAGE         |   **113** |  3.4% | scrape the About/Intro tab                      |
 | WEBSITE         |        32 |  1.0% | fetch + extract                                 |
-| **MAP_ONLY**    | **2,935** | 93.0% | **an OSM name and a map pin. No automated lane.** |
+| **MAP_ONLY**    | **2,936** | 88.5% | **an OSM name and a map pin. No automated lane.** |
 
-So: **automated enrichment caps at +45 rows**, and a full scrape run adds **+15** (505 of the
-scraper's 817 names were already in the CRM). Meanwhile **131 tier-A/B schools are contactable and
+So: **automated enrichment caps at +145 rows**, and a full scrape run adds **+15** (505 of the
+scraper's 817 names were already in the CRM). Meanwhile **186 tier-A/B schools are contactable and
 completely unworked**.
 
 ### The free OSM lane has been run, and it is finished
