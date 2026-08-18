@@ -8,10 +8,12 @@ import { useMemo, useState, useTransition } from "react";
 import {
   Check,
   Copy,
+  Image as ImageIcon,
   Loader2,
   Plus,
   Send,
   Sparkles,
+  Video as VideoIcon,
 } from "lucide-react";
 import AgentHeading from "@/components/atom/agent-heading";
 import {
@@ -368,31 +370,35 @@ export function MediaStudio() {
                 </PromptInputActionMenuContent>
               </PromptInputActionMenu>
 
-              {/* Image / Video Segmented Toggle */}
+              {/* Image / Video Icon Segmented Toggle */}
               <div className="border-input bg-muted inline-flex h-8 items-center rounded-full p-0.5 border">
                 <button
                   type="button"
                   onClick={() => handleModeToggle("image")}
+                  aria-label={isRTL ? "صورة" : "Image"}
+                  title={isRTL ? "صورة" : "Image"}
                   className={cn(
-                    "h-7 rounded-full px-2.5 text-xs font-medium transition-colors cursor-pointer",
+                    "h-7 w-7 flex items-center justify-center rounded-full transition-colors cursor-pointer",
                     mode === "image"
                       ? "bg-background text-foreground shadow-xs"
                       : "text-muted-foreground hover:text-foreground",
                   )}
                 >
-                  {isRTL ? "صورة" : "Image"}
+                  <ImageIcon className="size-3.5" />
                 </button>
                 <button
                   type="button"
                   onClick={() => handleModeToggle("video")}
+                  aria-label={isRTL ? "فيديو" : "Video"}
+                  title={isRTL ? "فيديو" : "Video"}
                   className={cn(
-                    "h-7 rounded-full px-2.5 text-xs font-medium transition-colors cursor-pointer",
+                    "h-7 w-7 flex items-center justify-center rounded-full transition-colors cursor-pointer",
                     mode === "video"
                       ? "bg-background text-foreground shadow-xs"
                       : "text-muted-foreground hover:text-foreground",
                   )}
                 >
-                  {isRTL ? "فيديو" : "Video"}
+                  <VideoIcon className="size-3.5" />
                 </button>
               </div>
 
