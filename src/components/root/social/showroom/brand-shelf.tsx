@@ -45,6 +45,13 @@ const SHELVES: ShelfConfig[] = [
     titleAr: "الجزيرة تكنولوجيا",
     sourceUrl: "https://web.facebook.com/AljazeeraTechnology",
   },
+  {
+    key: "airbnb",
+    prefix: "airbnb-",
+    title: "Airbnb Campaign References — Mkan Inspiration",
+    titleAr: "إعلانات إيربي إن بي المرجعية — إلهام مكان",
+    sourceUrl: "https://www.airbnb.com",
+  },
 ];
 
 export function BrandShelves({ assets }: { assets: ShowroomAsset[] }) {
@@ -53,12 +60,10 @@ export function BrandShelves({ assets }: { assets: ShowroomAsset[] }) {
   return (
     <div className="space-y-10">
       {SHELVES.map((shelf) => {
-        // Only cards with real artwork belong on a shelf — the typed plates
-        // (brand overview cards without a thumb) stay grid-only.
+        // Shelf assets by prefix
         const shelfAssets = assets.filter(
           (a) =>
             a.kind === "reference" &&
-            a.imageUrl &&
             a.id.startsWith(shelf.prefix),
         );
         if (shelfAssets.length === 0) return null;

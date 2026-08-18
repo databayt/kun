@@ -57,13 +57,25 @@ async function toWebp(file: File): Promise<File> {
 export function BriefQueue({
   briefs,
   types,
-  brand,
+  typesByBrand,
+  brand: initialBrand,
 }: {
   briefs: BriefRow[];
-  types: { id: string; use: string }[];
-  brand: string;
+  types?: { id: string; use: string }[];
+  typesByBrand?: Record<string, { id: string; use: string }[]>;
+  brand?: string;
 }) {
-  const { t } = useSocial();
+  const { t, product } = useSocial();
+  const activeBrand = product || initialBrand || "mkan";
+  const activeTypes =
+    types ||
+    (typesByBrand
+      ? typesByBrand[activeBrand] ||
+        typesByBrand.mkan ||
+        typesByBrand.hogwarts ||
+        []
+      : []);
+
   // Optimistic local list: the server component above only re-reads on a route
   // change, and a renderer working through four briefs should see each one
   // leave as they finish it.
@@ -105,8 +117,8 @@ export function BriefQueue({
       )}
 
       <FileBriefForm
-        brand={brand}
-        types={types}
+        brand={activeBrand}
+        types={activeTypes}
         onFiled={(b) => setRows((r) => [...r, b])}
         onError={setError}
       />
@@ -242,10 +254,14 @@ function FileBriefForm({
   const [subject, setSubject] = useState("");
   const [pending, start] = useTransition();
 
+  const effectiveType = types.some((ty) => ty.id === assetType)
+    ? assetType
+    : types[0]?.id ?? "hero";
+
   const submit = () => {
     onError(null);
     start(async () => {
-      const res = await fileMediaBrief({ brand, assetType, subject });
+      const res = await fileMediaBrief({ brand, assetType: effectiveType, subject });
       if (!res.ok || !res.brief) {
         onError(res.error ?? "Could not file the brief.");
         return;
@@ -262,7 +278,7 @@ function FileBriefForm({
       </h5>
       <div className="flex flex-col gap-2 sm:flex-row">
         <select
-          value={assetType}
+          value={effectiveType}
           onChange={(e) => setAssetType(e.target.value)}
           aria-label={t.briefTypeLabel}
           className="bg-background border px-3 py-2 text-sm"

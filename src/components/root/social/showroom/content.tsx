@@ -67,8 +67,10 @@ export async function ShowroomContent({ lang }: { lang: Locale }) {
 
         <BriefQueue
           briefs={pending}
-          types={chatgptTypes(SEAT_BRAND)}
-          brand={SEAT_BRAND}
+          typesByBrand={{
+            mkan: chatgptTypes("mkan"),
+            hogwarts: chatgptTypes("hogwarts"),
+          }}
         />
       </div>
 
