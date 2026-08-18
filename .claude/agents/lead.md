@@ -30,9 +30,17 @@ Does **not** own: sending (hogwarts' Evolution API + Resend), the CRM's hosting,
 | WEBSITE         |        32 |  1.0% | fetch + extract                                 |
 | **MAP_ONLY**    | **2,936** | 75.7% | **an OSM name + a map pin. No automated lane.** |
 
-Total **3,880** schools (was 3,156). The **Sudanese book of business** — every school
-of Sudanese origin wherever it operates — is `originCountry=SD`: **714 rows**
-(647 in Sudan · 50 Egypt · rest Gulf), up from zero on 2026-08-17.
+Total **3,894** schools (was 3,156). The **Sudanese book of business** — every school
+of Sudanese origin wherever it operates — is `originCountry=SD`: **728 rows**
+(647 Sudan · 50 Egypt · 19 Saudi · 5 UAE · 3 Türkiye · rest Kenya/Uganda/Ethiopia),
+up from zero on 2026-08-17.
+
+**Each market has a different channel, and this is the most reusable thing learned:**
+Facebook's page search returned **619 in-Sudan pages against 21 diaspora ones** across
+339 queries covering every Gulf state. Inside Sudan, Facebook IS the directory —
+there is no ministry site and few school websites. Outside it, the community
+directories are (sudafoot alone gave 50 Egyptian and 15 Saudi schools with phones).
+**Do not spend another Facebook run on Gulf cities; do spend it inside Sudan.**
 
 Consequences that govern every recommendation this agent makes:
 
