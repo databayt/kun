@@ -18,9 +18,7 @@ Databayt runs a self-hosted **[Twenty](https://twenty.com)** fork ([databayt/twe
 
 The old `*.crm.databayt.org` hosts still resolve but 307-redirect to the same path on `<product>.databayt.org`. The default landing host is `app.databayt.org`.
 
-<Callout type="warn">
-**`mkan.databayt.org` is the CRM, not the mkan app.** The app is `mk.databayt.org`, migrating to `mkan.sd`. A script that mints an outreach or claim link must never default to the CRM host. These names also collide with hogwarts' tenant wildcard, which provisions schools at `<domain>.databayt.org` — guarded by `hogwarts/src/lib/reserved-subdomains.ts`.
-</Callout>
+> **`mkan.databayt.org` is the CRM, not the mkan app.** The app is `mk.databayt.org`, migrating to `mkan.sd`. A script that mints an outreach or claim link must never default to the CRM host. These names also collide with hogwarts' tenant wildcard, which provisions schools at `<domain>.databayt.org` — guarded by `hogwarts/src/lib/reserved-subdomains.ts`.
 
 ## Topology
 
@@ -31,9 +29,7 @@ The old `*.crm.databayt.org` hosts still resolve but 307-redirect to the same pa
 | **Public API** | Tailscale Funnel — `https://twenty-api-2.tail42a5c4.ts.net` |
 | **Version** | pinned `v2.31.1` (upstream is ~v2.30 on its own numbering; the fork's checkout is v2.17) |
 
-<Callout type="warn">
-**The CRM is down whenever the laptop is.** Every scheduled CRM job is a Mac job — which is why the funnel's cadence clock runs on launchd and Vercel cron rather than a Twenty `CRON` workflow. The worker must be up too: webhooks, crons and the workflow engine all run through BullMQ.
-</Callout>
+> **The CRM is down whenever the laptop is.** Every scheduled CRM job is a Mac job — which is why the funnel's cadence clock runs on launchd and Vercel cron rather than a Twenty `CRON` workflow. The worker must be up too: webhooks, crons and the workflow engine all run through BullMQ.
 
 ## API access
 
