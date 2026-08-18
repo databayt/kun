@@ -455,8 +455,6 @@ export function DraftAgent() {
                     </PromptInputActionMenuContent>
                   </PromptInputActionMenu>
 
-                  <AttachButton label={t.agentAttach} />
-
                   <PromptInputModelSelect
                     value={model}
                     onValueChange={(value) => setModel(value as DraftModelId)}
@@ -659,22 +657,3 @@ export function DraftAgent() {
   );
 }
 
-/**
- * The toolbar's second attach affordance. The sales agent points its copy at a
- * hand-rolled hidden `<input id="file-upload">` that nothing reads, so files
- * picked through it vanish; this one opens the real dialog behind PromptInput.
- */
-function AttachButton({ label }: { label: string }) {
-  const attachments = usePromptInputAttachments();
-
-  return (
-    <PromptInputButton
-      size="default"
-      className="border-input bg-muted text-muted-foreground hover:text-foreground hover:bg-accent inline-flex h-8 items-center justify-center gap-1.5 rounded-full border px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors duration-100 ease-in-out hover:border-transparent"
-      onClick={attachments.openFileDialog}
-    >
-      <AttachIcon className="h-4 w-4 shrink-0" />
-      <span className="hidden md:flex">{label}</span>
-    </PromptInputButton>
-  );
-}
