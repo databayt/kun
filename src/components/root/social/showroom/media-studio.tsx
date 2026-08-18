@@ -98,14 +98,14 @@ export function MediaStudio() {
 
   // Active brand is driven by the global product in the page nav tabs
   const brand = globalProduct || "mkan";
-  const [mode, setMode] = useState<"image" | "video">("video");
-  const [formatId, setFormatId] = useState<string>("walkthrough");
+  const [mode, setMode] = useState<"image" | "video">("image");
+  const [formatId, setFormatId] = useState<string>("post");
   const currentFormat =
-    ASSET_FORMATS.find((f) => f.id === formatId) || ASSET_FORMATS[0];
+    ASSET_FORMATS.find((f) => f.id === "post") || ASSET_FORMATS[0];
 
-  const [kind, setKind] = useState<MediaStudioKind>(currentFormat.kind);
-  const [model, setModel] = useState<string>("seedance");
-  const [ratio, setRatio] = useState<MediaStudioRatio>(currentFormat.defaultRatio);
+  const [kind, setKind] = useState<MediaStudioKind>("image");
+  const [model, setModel] = useState<string>("gemini");
+  const [ratio, setRatio] = useState<MediaStudioRatio>("4:5");
   const [spine, setSpine] = useState<string>("");
   const [subject, setSubject] = useState<string>("");
   const [compiled, setCompiled] = useState<MediaStudioOutput | null>(null);
