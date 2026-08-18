@@ -140,12 +140,31 @@ const RATIO_OPTIONS: {
   },
 ];
 
+const MODELS_BY_KIND: Record<
+  MediaStudioKind,
+  { id: string; label: string; sub: string }[]
+> = {
+  video: [
+    { id: "seedance", label: "Seedance 2.5", sub: "Fast · Motion & Audio" },
+    { id: "veo", label: "Veo 3.1", sub: "Google Cinematic Realism" },
+    { id: "kling", label: "Kling 3.0", sub: "Optics & Camera Movement" },
+  ],
+  image: [
+    { id: "gemini", label: "Gemini 3.1 Flash", sub: "High-Res 4K Master Plate" },
+    { id: "gpt_image", label: "GPT Image 2", sub: "Photorealistic Textures" },
+  ],
+  template: [
+    { id: "canvas", label: "HTML Canvas", sub: "Deterministic Thmanyah Type" },
+  ],
+};
+
 export function MediaStudio() {
   const { isRTL, t, product: globalProduct } = useSocial();
 
   // Active brand is driven by the global product in the page nav tabs
   const brand = globalProduct || "mkan";
   const [kind, setKind] = useState<MediaStudioKind>("video");
+  const [model, setModel] = useState<string>("seedance");
   const [ratio, setRatio] = useState<MediaStudioRatio>("9:16");
   const [spine, setSpine] = useState<string>("");
   const [subject, setSubject] = useState<string>("");
@@ -154,6 +173,11 @@ export function MediaStudio() {
   const [filedId, setFiledId] = useState<string | null>(null);
   const [filingError, setFilingError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  const activeModelOptions = useMemo(
+    () => MODELS_BY_KIND[kind] || MODELS_BY_KIND.video,
+    [kind],
+  );
 
   // Spines available for this brand
   const spines = useMemo(() => getBrandSpines(brand), [brand]);
@@ -191,6 +215,7 @@ export function MediaStudio() {
       subject: textToCompile,
       ratio,
       spine: activeSpine,
+      model,
     });
     setCompiled(res);
   };
@@ -289,37 +314,82 @@ export function MediaStudio() {
                 </PromptInputActionMenuContent>
               </PromptInputActionMenu>
 
-              {/* Media Lane Knob */}
-              <PromptInputModelSelect value={kind} onValueChange={(val) => { setKind(val as MediaStudioKind); if (compiled) handleCompile(); }}>
+              {/* 1. Image / Video / Card Mode Select */}
+              <PromptInputModelSelect
+                value={kind}
+                onValueChange={(val) => {
+                  const newKind = val as MediaStudioKind;
+                  setKind(newKind);
+                  setModel(MODELS_BY_KIND[newKind]?.[0]?.id || "default");
+                  if (compiled) handleCompile();
+                }}
+              >
                 <PromptInputModelSelectTrigger className={KNOB_TRIGGER}>
                   {kind === "video" && <Clapperboard className="size-3.5 text-primary" />}
                   {kind === "image" && <FileImage className="size-3.5 text-primary" />}
                   {kind === "template" && <LayoutTemplate className="size-3.5 text-primary" />}
-                  <PromptInputModelSelectValue placeholder={t.mediaLaneLabel} />
+                  <span className="capitalize font-medium text-xs">
+                    {kind === "video" ? (isRTL ? "فيديو" : "Video") : kind === "image" ? (isRTL ? "صورة" : "Image") : (isRTL ? "قالب" : "Card")}
+                  </span>
                 </PromptInputModelSelectTrigger>
-                <PromptInputModelSelectContent>
-                  <PromptInputModelSelectItem value="video">
-                    <span className="flex items-center gap-2">
-                      <Clapperboard className="size-4 text-primary" />
-                      {t.mediaLaneVideo}
-                    </span>
+                <PromptInputModelSelectContent align={isRTL ? "end" : "start"} className="w-52 p-1.5 space-y-1">
+                  <PromptInputModelSelectItem value="video" className="cursor-pointer py-1.5">
+                    <div className="flex items-center gap-2.5">
+                      <Clapperboard className="size-4 text-primary shrink-0" />
+                      <div className="flex flex-col">
+                        <span className="font-medium text-xs">{isRTL ? "فيديو (ريل / موشن)" : "Video Reel"}</span>
+                        <span className="text-[10px] text-muted-foreground">Motion & ambient audio</span>
+                      </div>
+                    </div>
                   </PromptInputModelSelectItem>
-                  <PromptInputModelSelectItem value="image">
-                    <span className="flex items-center gap-2">
-                      <FileImage className="size-4 text-primary" />
-                      {t.mediaLaneImage}
-                    </span>
+                  <PromptInputModelSelectItem value="image" className="cursor-pointer py-1.5">
+                    <div className="flex items-center gap-2.5">
+                      <FileImage className="size-4 text-primary shrink-0" />
+                      <div className="flex flex-col">
+                        <span className="font-medium text-xs">{isRTL ? "صورة (لوحة 4K)" : "4K Master Photo"}</span>
+                        <span className="text-[10px] text-muted-foreground">Clean photographic plate</span>
+                      </div>
+                    </div>
                   </PromptInputModelSelectItem>
-                  <PromptInputModelSelectItem value="template">
-                    <span className="flex items-center gap-2">
-                      <LayoutTemplate className="size-4 text-primary" />
-                      {t.mediaLaneTemplate}
-                    </span>
+                  <PromptInputModelSelectItem value="template" className="cursor-pointer py-1.5">
+                    <div className="flex items-center gap-2.5">
+                      <LayoutTemplate className="size-4 text-primary shrink-0" />
+                      <div className="flex flex-col">
+                        <span className="font-medium text-xs">{isRTL ? "قالب بطاقة" : "Card Template"}</span>
+                        <span className="text-[10px] text-muted-foreground">Thmanyah typography</span>
+                      </div>
+                    </div>
                   </PromptInputModelSelectItem>
                 </PromptInputModelSelectContent>
               </PromptInputModelSelect>
 
-              {/* Ratio Knob — Higgsfield Marketing Studio inspired */}
+              {/* 2. Simplified Model Select */}
+              <PromptInputModelSelect
+                value={model}
+                onValueChange={(val) => {
+                  setModel(val);
+                  if (compiled) handleCompile();
+                }}
+              >
+                <PromptInputModelSelectTrigger className={KNOB_TRIGGER}>
+                  <Sparkles className="size-3.5 text-primary" />
+                  <span className="font-medium text-xs">
+                    {activeModelOptions.find((m) => m.id === model)?.label || activeModelOptions[0]?.label}
+                  </span>
+                </PromptInputModelSelectTrigger>
+                <PromptInputModelSelectContent align={isRTL ? "end" : "start"} className="w-56 p-1.5 space-y-1">
+                  {activeModelOptions.map((m) => (
+                    <PromptInputModelSelectItem key={m.id} value={m.id} className="cursor-pointer py-1.5">
+                      <div className="flex flex-col">
+                        <span className="font-medium text-xs text-foreground">{m.label}</span>
+                        <span className="text-[10px] text-muted-foreground">{m.sub}</span>
+                      </div>
+                    </PromptInputModelSelectItem>
+                  ))}
+                </PromptInputModelSelectContent>
+              </PromptInputModelSelect>
+
+              {/* 3. Ratio Knob — Higgsfield Marketing Studio inspired */}
               <PromptInputModelSelect
                 value={ratio}
                 onValueChange={(val) => {
@@ -399,10 +469,16 @@ export function MediaStudio() {
         <div className="bg-card text-card-foreground border-border/80 relative space-y-4 rounded-2xl border p-5 shadow-sm">
           {/* Header pill */}
           <div className="flex flex-wrap items-center justify-between gap-3 border-b pb-3">
-            <div className="flex items-center gap-2">
-              <span className="bg-primary/10 text-primary rounded-full px-2.5 py-0.5 font-mono text-xs font-semibold uppercase">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="bg-primary/10 text-primary flex items-center gap-1.5 rounded-full px-2.5 py-0.5 font-mono text-xs font-semibold uppercase">
+                <RatioWireframe ratio={compiled.ratio} className="text-primary" />
                 {compiled.lane} · {compiled.ratio}
               </span>
+              {compiled.model && (
+                <span className="bg-muted text-muted-foreground rounded-full px-2.5 py-0.5 text-xs font-medium">
+                  {MODELS_BY_KIND[compiled.lane]?.find((m) => m.id === compiled.model)?.label || compiled.model}
+                </span>
+              )}
               <h4 className="text-sm font-medium">{compiled.title}</h4>
             </div>
             <div className="flex items-center gap-1.5">

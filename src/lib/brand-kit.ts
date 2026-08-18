@@ -92,12 +92,14 @@ export interface MediaStudioInput {
   subject: string;
   ratio?: MediaStudioRatio;
   spine?: string;
+  model?: string;
 }
 
 export interface MediaStudioOutput {
   prompt: string;
   title: string;
   lane: MediaStudioKind;
+  model?: string;
   dimensions: string;
   ratio: MediaStudioRatio;
   spine: string;
@@ -205,6 +207,7 @@ Brand Mark: ${b.mark.file} in monochrome ink placed at bottom-start.`;
     prompt,
     title: `${b.mediaName} · ${kind.toUpperCase()} (${ratio})`,
     lane: kind,
+    model: input.model,
     dimensions,
     ratio,
     spine: selectedSpine.id,
