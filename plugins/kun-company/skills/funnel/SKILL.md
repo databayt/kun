@@ -62,8 +62,11 @@ never `migrate deploy`, so schema reaches the database *before* the code that ex
 
 ## §0 — Scope and access
 
-Product from `.claude/memory/repositories.json`. Default **hogwarts**; `mkan`'s lead is the property
-**host** and its conversion is a claimed listing, not a subscription.
+Product from `.claude/memory/repositories.json`. Default **hogwarts**. **`mkan` is a different
+funnel**: free to hosts, so no sale. Its lead is the property **host**, its ladder ends at a LIVE
+listing, and after that it is a permanent loop — finish the listing, send guides as gaps appear,
+answer support, ask for feedback, and keep availability true. Unconfirmed availability flips a
+listing to busy, because a guest who books an occupied unit does not come back.
 
 ```bash
 export TWENTY_API_URL=http://localhost:3100          # NEVER 3000 — that is hogwarts' dev server
@@ -117,9 +120,11 @@ every read, so it cannot stall and cannot disagree with itself between the web a
 
 ## §3 — `segment`: the customer department
 
-hogwarts key `<authority>-<band>-<rail>-<term>`; mkan `<units>-<airbnb>-<wave>-<photos>`. Written to
-`tags[]` as `seg:<key>` so Prisma and Twenty both filter on it. It routes four things at once:
-**owner · cadence speed · value asset · price path.**
+hogwarts key `<authority>-<band>-<rail>-<term>`; mkan `<units>-<readiness>-<wave>-<responsiveness>`.
+Written to `tags[]` as `seg:<key>` so Prisma and Twenty both filter on it. hogwarts routes **owner ·
+cadence speed · value asset · price path**. **mkan is free — there is no price path**; its key
+routes which guide to send, how fast to run, whether a human calls, and whether a silent listing
+flips to busy.
 
 Bands are not arbitrary: **100** is the free-tier ceiling in `pricing/config.ts`, **20** is the
 `minimumMonthly 30 ÷ $1.50` floor, **1000** is where enterprise is offered. Rail sets the channel —

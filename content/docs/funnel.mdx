@@ -14,9 +14,11 @@ sessions, 0 gates instrumented, 0 active paying schools, against a Q3 2026 targe
 below starts at zero, and saying so is the point — the sibling [scrape](/docs/scrape) lane learned
 the hard way that a number remembered rather than measured drifts optimistic.
 
-## Designed backwards
+## hogwarts — designed backwards from the invoice
 
-The ladder was drawn from the invoice down, not from the visitor up. Start at the end:
+The ladder was drawn from the invoice down, not from the visitor up. (mkan's is a different
+shape and gets [its own section](#mkan--the-same-spine-a-different-job) — it is free, so there
+is no invoice to work back from.) Start at the end:
 
 ```
 PAID          subscription active + real usage in the last 30 days
@@ -60,7 +62,7 @@ what "nothing random" means in practice.
 
 ## No fourth vocabulary
 
-The gate is the union of the enums that already exist. Twenty's stage options are **appended, never
+hogwarts' gate is the union of the enums that already exist. Twenty's stage options are **appended, never
 replaced** — `COLD`, `PROSPECT`, `PILOT` and `LOST` already sit on 3,156 live rows, and Twenty
 stores an option's value on the record, so a swap would orphan them.
 
@@ -88,11 +90,59 @@ engagement) turned out to be better than the merged stage that had been designed
 go-to-market needs both. **COLD and PROSPECT belong to [scrape](/docs/scrape); this lane starts at
 WARM**, which is to say at a reply.
 
+## mkan — the same spine, a different job
+
+**mkan is free to hosts.** Its funnel is therefore not a sale: nobody is being moved toward a
+payment, and there is no price path. The job is **host success**, and it splits in two — a
+ladder that ends, and a loop that does not.
+
+### The activation ladder — one-time, ends at LIVE
+
+| Gate | What happens | What we give |
+| --- | --- | --- |
+| **SOURCED** | We scraped the unit and pre-built a draft listing. The host does not know yet. | — |
+| **INVITED** | First touch on WhatsApp — Sudan is WhatsApp-first — carrying the listing preview and a single-use claim link. | The listing we already built, plus an earnings estimate from real comparables in their own city |
+| **CLAIMED** | Token spent, `listing.claimedAt` stamped, the account is theirs. | A short screen-recorded walkthrough of the host console |
+| **COMPLETING** | The listing is missing photos, a price, a description or amenities. The bot walks them through **one gap at a time**, not all at once. | Photo guide, free photo re-hosting, description help |
+| **LIVE** | Passes `listing-qualification-gate.ts`; `wave-publish` flips Busy → Available in the open city. | "You are live", plus first-booking tips |
+
+### The retention loop — recurring, and the real ongoing work
+
+A free marketplace's funnel lives here, and it never terminates:
+
+- **Confirm availability.** On a cadence: *still available, or busy?* One tap either way.
+- **Support.** Answer what they ask — and reach out unprompted when telemetry says they are
+  stuck: claimed but no photos, live but no views, views but no enquiries.
+- **Guides**, sent when the gap actually appears rather than dumped at signup.
+- **Feedback**, at defined moments: a week after going live, after the first booking, and on
+  any churn signal.
+- **Stale → busy.** Availability unconfirmed past the threshold flips the listing to busy
+  automatically, and then asks.
+
+That last rule carries more weight than the four above it, and the reason is worth stating
+plainly: **a guest who books a unit that is actually occupied does not come back.** In a
+marketplace with no subscription to cancel, stale availability *is* the churn mechanism. So the
+highest-value recurring touch in all of mkan is also the cheapest — a two-word question.
+
+### What the guides are made of
+
+Host content is produced by the engine's existing media spells and referenced by URL, never
+generated per host:
+
+| Kind | Spell | Used for |
+| --- | --- | --- |
+| Text | `/draft` | The touch copy itself, Arabic-first |
+| Image / slides | `/carousel` | Photo guide, pricing explainer, "what a good listing looks like" |
+| Video | `/record` | Screen recordings of the real host console — the walkthrough, adding photos, flipping availability |
+| Video / imagery | `/higgs` | Generated marketing pieces where a real screen recording is not the point |
+
 ## Segmentation — the customer department
 
 A deterministic key, recomputed on every read, that routes four things at once: **owner, cadence
-speed, value asset and price path.** hogwarts uses `<authority>-<band>-<rail>-<term>`; mkan uses
-`<units>-<airbnb>-<wave>-<photos>`.
+speed, value asset and price path.** hogwarts uses `<authority>-<band>-<rail>-<term>`.
+mkan has no price path — it is free — so its key routes *help* instead:
+`<units>-<readiness>-<wave>-<responsiveness>`, deciding which guide to send, how fast the
+cadence runs, whether a human should call, and whether a silent listing gets flipped to busy.
 
 Bands are not taste — **100** is the free-tier ceiling in the pricing config, **20** is the
 `minimumMonthly 30 ÷ $1.50` floor, **1000** is where enterprise is offered. Rail sets the channel:
@@ -102,11 +152,15 @@ campaign is a silent non-delivery that reads as disinterest.
 Segmentation is deliberately **not a gate**. It is a pure function of facts already collected, so it
 can never stall, never annoy, and never disagree with itself between the web and WhatsApp lanes.
 
-## Value before payment
+## Give before you ask
 
 **Every touch carries a new asset. If a segment has no unsent asset left, the touch does not fire —
 it opens a human task instead.** That single rule is what stops a cadence from decaying into "just
 checking in", which is how most of them die.
+
+What is being asked for differs by product, and only one of them involves money: hogwarts is
+working toward a signature, while mkan is only ever asking a host to finish a listing, confirm
+availability, or answer a question. The rule is the same in both — arrive with something.
 
 Assets are produced by [`/carousel`](/docs/keywords), `/draft` and `/higgs`, pushed to the CDN, and
 referenced **by URL** — never generated at runtime. That is what holds the per-lead cost at zero.
@@ -115,6 +169,8 @@ The two strongest gives are already built and cost nothing marginal:
 - **hogwarts** — a sandbox tenant carrying the school's own name, seeded with real data.
 - **mkan** — a listing we already built from their own photos, plus a single-use claim token. The
   host is not asked to imagine the value; they are handed a finished page only they can claim.
+  After that the giving does not stop, because there is nothing to sell them: the guides, the free
+  photo re-hosting and the support answers *are* the product relationship.
 
 ## The follow-up engine
 

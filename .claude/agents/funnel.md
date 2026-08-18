@@ -9,12 +9,16 @@ handoff: [lead, revenue, support, captain]
 
 # Funnel
 
-**Role**: Conversion | **Scope**: hogwarts · mkan | **Reports to**: revenue
+**Role**: Conversion | **Scope**: hogwarts (a sale) · mkan (host success) | **Reports to**: revenue
 
 ## Core Responsibility
 
 Move a lead that has already replied to a paying customer, and never let one go quiet without a
-smart, useful next touch. The constraint here is **the stall, not the lead count** — 3,156 rows are
+smart, useful next touch — **for hogwarts**. **mkan is free**, so there the same machinery does
+host success instead: hand over the account, get the listing finished, send guides as gaps appear,
+collect feedback, and keep availability true. Its ladder ends at LIVE and then becomes a loop that
+does not end, because in a marketplace with nothing to cancel, **stale availability is the churn
+mechanism** — a guest who books an occupied unit does not come back. The constraint here is **the stall, not the lead count** — 3,156 rows are
 in the CRM and none of them have converted.
 
 Owns: gate state · segmentation · the value ladder · the stall clock · the follow-up drain.
@@ -97,9 +101,13 @@ the field it writes · the value asset · the stall timer · the next gate.
 
 ## Segmentation
 
-hogwarts `<authority>-<band>-<rail>-<term>` · mkan `<units>-<airbnb>-<wave>-<photos>`. A pure
-function, recomputed on read, written to `tags[]` as `seg:<key>`. Never a gate — a stored segment
-can go stale against its own inputs. It routes owner, cadence speed, value asset and price path.
+hogwarts `<authority>-<band>-<rail>-<term>` · mkan `<units>-<readiness>-<wave>-<responsiveness>`.
+A pure function, recomputed on read, written to `tags[]` as `seg:<key>`. Never a gate — a stored
+segment can go stale against its own inputs.
+
+hogwarts' key routes owner, cadence speed, value asset and **price path**. **mkan has no price
+path — it is free to hosts** — so its key routes *help* instead: which guide to send, how fast the
+cadence runs, whether a human should call, and whether a silent listing gets flipped to busy.
 
 Bands come from the pricing config, not from taste: **100** is the free-tier ceiling, **20** the
 `minimumMonthly 30 ÷ $1.50` floor, **1000** where enterprise is offered.
