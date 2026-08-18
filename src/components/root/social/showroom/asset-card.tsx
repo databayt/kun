@@ -7,7 +7,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Check, Copy, Download, ExternalLink, Paperclip } from "lucide-react";
+import { Check, Copy, Download, ExternalLink, Paperclip, Sparkles } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -42,6 +42,25 @@ export function ShowroomCard({
     await navigator.clipboard.writeText(asset.imageUrl ?? asset.href);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
+  };
+
+  // Bridge reference or asset into Media Studio
+  const useInStudio = () => {
+    setOpen(false);
+    window.dispatchEvent(
+      new CustomEvent("media-studio:load-reference", {
+        detail: {
+          title: asset.title,
+          note: asset.note,
+          type: asset.type,
+          brand: asset.brand,
+        },
+      }),
+    );
+    const el = document.getElementById("media-studio-root");
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
   // Only generated assets carry a renderable media URL a platform could
@@ -129,6 +148,15 @@ export function ShowroomCard({
               )}
               {asset.createdAt && <Badge>{asset.createdAt}</Badge>}
             </div>
+
+            {/* Primary Action: Use as reference in Media Studio */}
+            <button
+              onClick={useInStudio}
+              className="bg-primary text-primary-foreground hover:bg-primary/90 flex w-full items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors cursor-pointer shadow-xs"
+            >
+              <Sparkles className="size-4" />
+              {t.mediaUseInStudio}
+            </button>
 
             <div className="flex gap-2">
               {asset.imageUrl && (
