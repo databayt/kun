@@ -57,10 +57,10 @@
   },
   "counts": {
     "project_agents": 22,
-    "user_agents": 47,
+    "user_agents": 49,
     "commands": 0,
-    "project_skills": 52,
-    "user_skills": 68,
+    "project_skills": 53,
+    "user_skills": 71,
     "pattern_cards": 11,
     "project_rules": 5,
     "domain_rules": 37,
@@ -71,7 +71,7 @@
     "workflows": 6,
     "$plugins_comment": "The two plugins are how the fleet reaches other machines. kun-company also carries the rules, pattern cards, hooks, and workflows. Union of both skill sets is 61 (build ships in both).",
     "plugin_kun_company_agents": 22,
-    "plugin_kun_company_skills": 52,
+    "plugin_kun_company_skills": 53,
     "plugin_kun_stack_agents": 27,
     "plugin_kun_stack_skills": 15
   },
