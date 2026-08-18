@@ -24,8 +24,22 @@
 # carries a segment, and that an explicit drain names its approval source. The
 # database-side check is the sender's job; this is the cheap outer fence.
 #
+# WHY IT IS NARROWER THAN IT LOOKS
+#
+# The first version matched the whole command text for an entrypoint and the
+# apply flag anywhere in it. That blocked its own author three times inside one
+# hour — a heredoc writing a refusal message, a patch script quoting the flag, a
+# test fixture listing commands. All three were AUTHORING, not sending. A guard
+# that cries wolf while you work on the thing it guards is one people learn to
+# route around, which is strictly worse than no guard at all. So it now demands
+# three things together on ONE line: an entrypoint, the flag, and a runner —
+# and it stands down entirely for commands that write files.
+#
 # Exit 2 BLOCKS and returns stderr to Claude. Exit 0 allows (warnings print).
-# Deliberately narrow: read-only funnel commands run untouched.
+#
+# Smoke-tested, not just syntax-checked: see the case table in the session
+# scratchpad. It runs on every Bash call in every kun session, so "bash -n
+# passes" was never a sufficient bar.
 #
 # Canonical source: .claude/hooks/. Wired via ${CLAUDE_PROJECT_DIR} in project
 # settings.json and bundled into the kun-company plugin.
@@ -36,12 +50,27 @@ json="$(cat)"
 cmd="$(printf '%s' "$json" | jq -r '.tool_input.command // empty' 2>/dev/null)"
 [ -z "$cmd" ] && exit 0
 
+# ── Authoring is not sending ──────────────────────────────────────────────────
+# A command that writes a file is never a send, however much send-shaped text it
+# carries. Editing this lane's own scripts must not look like running them.
+AUTHORING='^[[:space:]]*(python3?|cat|sed|awk|tee|perl|printf|echo|node[[:space:]]+-e)([[:space:]]|$)'
+printf '%s' "$cmd" | grep -Eq "$AUTHORING" && exit 0
+
 # Only the funnel lane's write/send entrypoints. A plain read never matches.
 FUNNEL_SEND='(funnel-(tick|drain)|drain-funnel|sendFunnelTouch|outreach-cadence|crm:(nudge|drain|funnel)|scripts/(crm|funnel)/(tick|drain|nudge))'
-printf '%s' "$cmd" | grep -Eiq "$FUNNEL_SEND" || exit 0
 
-# A dry run is always safe — this lane's default, and the guard stays out of its way.
-printf '%s' "$cmd" | grep -Eq '(^|[[:space:]])--apply([[:space:]]|$)' || exit 0
+# A send is an INVOCATION: an entrypoint, the apply flag, and a runner, all on
+# the SAME line. Matching across a whole multi-line script is what produced the
+# false positives — text on line 40 is data, not an argument to line 3.
+RUNNER='(^|[;&|(]|[[:space:]])(npx|pnpm|yarn|bun|node|tsx|bash|sh|\./)'
+send_lines="$(printf '%s\n' "$cmd" \
+  | grep -Ei "$FUNNEL_SEND" \
+  | grep -E '(^|[[:space:]])--apply([[:space:]]|$)' \
+  | grep -E "$RUNNER")"
+[ -z "$send_lines" ] && exit 0
+
+# From here on judge only the offending invocation(s), never the whole script.
+cmd="$send_lines"
 
 # ── 1. An apply that sends must name a segment ────────────────────────────────
 if ! printf '%s' "$cmd" | grep -Eq '(^|[[:space:]])--segment[=[:space:]]'; then

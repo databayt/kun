@@ -50,6 +50,21 @@ cmd="$(printf '%s' "$json" | jq -r '.tool_input.command // empty' 2>/dev/null)"
 SCRAPE_ENTRYPOINTS='(sudan-schools-scraper|tier[0-9]+-[a-z]+|cdp-client|fb-matrix|dorker|enricher|scripts/crm/(scrape|discover|enrich|contact-hunt)|crm:(scrape|discover|enrich|matrix|dork|fb))'
 printf '%s' "$cmd" | grep -Eiq "$SCRAPE_ENTRYPOINTS" || exit 0
 
+# ...and is it RUNNING one, rather than merely naming one?
+#
+# The entrypoint pattern matches command TEXT, so it also fired on `ls`, on
+# `grep`, on `git add scripts/crm/enrich-fb-about.ts`, and even on a `git commit`
+# whose message described the work. Blocking version control on a file is not
+# what this guard is for, and a guard that cries wolf on `git add` is a guard
+# people start routing around — which costs exactly the protection it exists to
+# provide.
+#
+# A real scrape run always *executes* something. Requiring an execution verb
+# keeps every genuine run matched (they are all `npx tsx …` / `node …` /
+# `pnpm crm:…`) while letting inspection and version control through untouched.
+EXEC_VERBS='(^|[;&|]|[[:space:]])(npx|node|tsx|pnpm|npm|yarn|bun|deno|bash|sh|zsh|python3?)([[:space:]]|$)'
+printf '%s' "$cmd" | grep -Eq "$EXEC_VERBS" || exit 0
+
 # ── 2. Which profile backs the port this run will attach to? ─────
 port="${FB_SCRAPE_PORT:-9222}"
 # An inline env assignment in the command itself wins over the ambient one.
