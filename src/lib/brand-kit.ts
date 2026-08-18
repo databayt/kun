@@ -90,6 +90,7 @@ export interface MediaStudioInput {
   brand: string;
   kind: MediaStudioKind;
   subject: string;
+  format?: string;
   ratio?: MediaStudioRatio;
   spine?: string;
   model?: string;
@@ -99,6 +100,7 @@ export interface MediaStudioOutput {
   prompt: string;
   title: string;
   lane: MediaStudioKind;
+  format?: string;
   model?: string;
   dimensions: string;
   ratio: MediaStudioRatio;
@@ -144,6 +146,7 @@ export function compileMediaStudioPrompt(input: MediaStudioInput): MediaStudioOu
   const brand = input.brand || "mkan";
   const b = kit.brands[brand as keyof typeof kit.brands] || kit.brands.mkan;
   const kind = input.kind || "image";
+  const format = input.format || (kind === "video" ? "reel" : "product");
   const ratio = input.ratio || (kind === "video" ? "9:16" : "1:1");
   const dims = RATIO_DIMS[ratio] || RATIO_DIMS["1:1"];
   const dimensions = kind === "video" ? dims.video : dims.image;
@@ -170,13 +173,20 @@ export function compileMediaStudioPrompt(input: MediaStudioInput): MediaStudioOu
       cameraMotion = "Smooth slow cinematic dolly push-in at 24fps with natural optic distortion";
       soundFoley = "Subtle acoustic ambience, soft paper turning, calm room tone";
     }
+  } else if (format === "lifestyle") {
+    cameraMotion = "Candid 35mm documentary eye-level framing capturing authentic moment and human warmth";
+  } else if (format === "product" || format === "hero") {
+    cameraMotion = "Clean 50mm architectural framing with crisp geometry and balanced perspective";
+  } else if (format === "mockup") {
+    cameraMotion = "Top-down 45-degree angle table shot with natural soft studio lighting and clean desk texture";
   }
 
   const postProcessing = `No generated text, no lettering, no AI watermark. Leave quiet bottom-start corner for ${b.domain || "mkan.sd"} brand lockup.`;
 
   let prompt = "";
   if (kind === "video") {
-    prompt = `[SCENE]: ${input.subject}
+    prompt = `[FORMAT & USE CASE]: ${format.toUpperCase()} (${b.mediaName})
+[SCENE]: ${input.subject}
 [CAMERA & MOTION]: ${cameraMotion}
 [STYLE & ATMOSPHERE]: ${selectedSpine.prompt}
 [SETTING]: ${setting}
@@ -185,28 +195,31 @@ export function compileMediaStudioPrompt(input: MediaStudioInput): MediaStudioOu
 [FORMAT]: ${dimensions}
 [CONSTRAINTS]: ${postProcessing}`;
   } else if (kind === "image") {
-    prompt = `${input.subject}
+    prompt = `[USE CASE: ${format.toUpperCase()}]
+${input.subject}
 
 ${selectedSpine.prompt}
 
+Framing: ${cameraMotion}.
 Setting: ${setting}.
 Palette: ${paletteHexes.join(", ")} with ${clay} as the single accent.
 Size: ${dimensions} pixels.
 No text, no lettering, no numerals, no logos, no watermarks anywhere in the image.
 Leave the bottom-start corner quiet for a mark placed in post.`;
   } else {
-    prompt = `[TEMPLATE CARD DIRECTIVE]
+    prompt = `[TEMPLATE DIRECTIVE: ${format.toUpperCase()}]
 Headline: Set in Thmanyah Serif Display (Arabic) / Geist (English).
 Subject Plate: ${input.subject} (${selectedSpine.prompt})
 Dimensions: ${dimensions}
-Badge Overlay: Pill shape with transparent glass background, displaying local price / district pill.
+Badge Overlay: Pill shape with transparent glass background, displaying local price / district pill / metrics.
 Brand Mark: ${b.mark.file} in monochrome ink placed at bottom-start.`;
   }
 
   return {
     prompt,
-    title: `${b.mediaName} · ${kind.toUpperCase()} (${ratio})`,
+    title: `${b.mediaName} · ${format.toUpperCase()} (${ratio})`,
     lane: kind,
+    format,
     model: input.model,
     dimensions,
     ratio,
