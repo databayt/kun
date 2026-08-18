@@ -356,9 +356,78 @@ the right lane runs:
 The demo deck `hogwarts/sms-pillars` renders all four template-lane pillars; at 0.7 credits,
 the higgs pillar is plan-first (draft on `z_image` at 0.15 only when the library has no hit).
 
+## Production Scenarios & Playbooks
+
+The Media Studio and Pipeline serve concrete production scenarios for every databayt product. Rather than prompting from scratch, choose a playbook below:
+
+### Scenario 1: Mkan Port Sudan Property Tour & Listing Pack {#scenario-mkan-walkthrough}
+
+- **Objective:** Complete marketing pack for a coastal rental in Port Sudan (Hayy Al-Shati or Salbona).
+- **Brand:** Mkan (`mkan.sd`) — see [Mkan Social Strategy](/docs/social/mkan) & [Twenty CRM Schema](/docs/crm).
+- **Workflow:**
+  1. Open [Media Studio](https://kun.databayt.org/en/social/media) with **Mkan** selected.
+  2. Select **Walkthrough** (`9:16` · Video · `Seedance 2.5` / `Veo 3.1`) — generates 35mm handheld coastal drift from interior to Red Sea balcony @ 24fps with coastal wind & tea foley.
+  3. Select **Post** (`4:5` · Image · `Gemini 3.1` / `GPT Image 2`) — generates 50mm architectural framing with morning sunlight and clay accent (`#e05638`).
+  4. Select **Infographic** (`1:1` · Template) — renders live preview of property amenities (24/7 Standby Power, Split AC, Red Sea shore distance).
+  5. Click **Draft Copy with this Media** — hands off to [Draft Agent](/docs/social#the-hub-is-this-table-as-routes) (`/social/draft`) for bilingual Arabic/English copy.
+
+### Scenario 2: Hogwarts Academic Admission Campaign Pack {#scenario-hogwarts-admission}
+
+- **Objective:** Multi-format promotional creative for school enrollment drives and SIS migration.
+- **Brand:** Hogwarts (`ed.databayt.org`) — see [Hogwarts Social Playbook](/docs/social/hogwarts) & [Carousel Engine](/docs/social/carousel).
+- **Workflow:**
+  1. Open [Media Studio](https://kun.databayt.org/en/social/media) with **Hogwarts** selected.
+  2. Select **Ad** (`16:9` · Image) — compiles hero promotional banner with generous negative space for zero-paperwork headlines.
+  3. Select **Carousel** (`4:5` · Template) — generates 5-slide deck directives ("5 reasons schools switch from spreadsheets to Hogwarts").
+  4. Select **Testimonial** (`1:1` · Template) — renders deterministic Thmanyah Serif Display quote card with Principal Dr. Tariq's quote.
+  5. Click **Draft Copy with this Media** to compose the accompanying announcement.
+
+### Scenario 3: Airbnb Swipe File & Repurposing for Mkan {#scenario-airbnb-repurposing}
+
+- **Objective:** Adapt proven multi-billion-dollar Airbnb advertising formulas into Mkan Port Sudan campaigns with zero prompt fatigue.
+- **Brand:** Mkan (`mkan.sd`) — see [Mkan Social](/docs/social/mkan).
+- **Workflow:**
+  1. In [Showroom Gallery](https://kun.databayt.org/en/social/media#showroom-gallery), browse the **Airbnb Inspiration Shelf**.
+  2. Click **Use in Studio** on any reference card (*Belong Anywhere / Strangers*, *Categories & Standout Stays*, *Host Recruitment*).
+  3. The prompt box, asset format, and aspect ratio auto-populate and compile tailored Mkan Port Sudan directives.
+
+### Scenario 4: Fast Deterministic Text-Bearing Cards {#scenario-deterministic-canvas}
+
+- **Objective:** Generate quote cards, infographic statistics, and multi-slide decks with authentic Arabic typography and zero AI text hallucinations.
+- **Brands:** All brands (`mkan`, `hogwarts`, `databayt`, `sijillee`, `moallimee`) — see [Carousel Documentation](/docs/social/carousel).
+- **Workflow:**
+  1. Select **Infographic**, **Carousel**, or **Testimonial** in Media Studio.
+  2. The browser renders a live visual card preview using Thmanyah Serif Display and brand palette.
+  3. Decks render deterministically via `node scripts/render-carousel.mjs <deck-slug>`.
+
+### Scenario 5: High-Impact Video Generation {#scenario-video-production}
+
+- **Objective:** 24fps motion tours, cinematic dolly glides, and feature demos with native audio.
+- **Engines:** [Google Veo Lane](#the-google-lane) (`scripts/gemini-media.mjs`) · [Higgsfield CLI](#higgsfield-model-defaults).
+- **Workflow:**
+  1. Toggle **Video** icon (`🎥`) on [Media Studio](https://kun.databayt.org/en/social/media).
+  2. Select **Walkthrough** and compile the 5-beat camera motion and foley prompt.
+  3. Run Google Veo Lite ($0.40 / 8s clip):
+     ```bash
+     node scripts/gemini-media.mjs video --prompt "..." --ratio 9:16 --seconds 8 --yes
+     ```
+  4. Upload finished render to [Brief Queue](https://kun.databayt.org/en/social/media#brief-queue).
+
+### Scenario 6: Social Pipeline Hand-off & Cross-Platform Broadcast {#scenario-social-bridge}
+
+- **Objective:** Bridge visual assets into multi-channel social posts across X, Facebook, LinkedIn, Instagram, and TikTok.
+- **Workflow:**
+  1. In Media Studio or Showroom, click **Attach** or **Draft Copy with this Media**.
+  2. The attachment tray retains media URLs across stages.
+  3. In [Social Draft](/docs/social#draft), generate bilingual copy matching the visual tone.
+  4. In [Social Publish](/docs/social#publish), review preview across channels and approve immediately or schedule to the automated drain.
+
 ## Related
 
 - [Social Automation](/docs/social) — where generated media gets published
+- [Mkan Social Playbook](/docs/social/mkan) — rentals marketing & Airbnb alignment
+- [Hogwarts Social Playbook](/docs/social/hogwarts) — school SIS marketing
 - [Carousel](/docs/social/carousel) — the template lane's engine: decks, archetypes, sizes
+- [CRM & Listings Schema](/docs/crm) — Twenty CRM listings integration
 - [Brand & Voice](/docs/brand) — the rules every visual obeys
 - [Credentials](/docs/credentials) — where the Higgsfield session lives

@@ -335,12 +335,27 @@ The Social Hub at [`/social`](/social) is multi-product (Phase 3, 2026-07-23):
   channels, a PostHog destination to consume the UTMs, and per-channel drafting in the cron.
   Tracked in `docs/SOCIAL-AUTOMATION.md`.
 
+## Production Scenarios & Playbooks
+
+The pipeline executes through six canonical, end-to-end production scenarios:
+
+| Scenario | Objective | Tools & Pipeline | Documentation Link |
+|---|---|---|---|
+| **Mkan Port Sudan Tour** | Coastal rental walkthroughs & listing packs | Media Studio (`9:16` Video · `4:5` Stills) → Twenty CRM → Draft Agent → Multi-channel publish | [Mkan Walkthrough Playbook](/docs/media#scenario-mkan-walkthrough) · [Mkan Brand Page](/docs/social/mkan) |
+| **Hogwarts Admission Campaign** | School SIS marketing & zero-paperwork push | Media Studio (`16:9` Ad) → 5-Slide Carousel → Thmanyah Quote Card → LinkedIn / Meta publish | [Hogwarts Admission Playbook](/docs/media#scenario-hogwarts-admission) · [Hogwarts Brand Page](/docs/social/hogwarts) |
+| **Airbnb Ad Repurposing** | Adapt proven Airbnb campaigns to Mkan | Showroom Airbnb Shelf → "Use in Studio" → 121 Port Sudan listings | [Airbnb Swipe Playbook](/docs/media#scenario-airbnb-repurposing) · [Twenty CRM Schema](/docs/crm) |
+| **Deterministic Quote Cards** | High-trust typography without AI lettering hallucinations | Template Lane → HTML Canvas Engine → Live Visual Card Preview | [Deterministic Cards Playbook](/docs/media#scenario-deterministic-canvas) · [Carousel Docs](/docs/social/carousel) |
+| **High-Impact Video Production** | 24fps walkthroughs with Red Sea audio foley | Prompt Compiler → Google Veo / Seedance / Kling → Showroom Brief Queue | [Video Production Playbook](/docs/media#scenario-video-production) · [Google Lane](/docs/media#the-google-lane) |
+| **Full Lifecycle Broadcast** | Weekly calendar rotation to measured reach | Pillars rotation → Draft Agent → Review Queue → Scheduled Cron Drain → UTM Metrics | [Social Architecture](/docs/social/architecture) · [Channels Mix](/docs/social/channels) |
+
 ## See also
 
+- [Media Studio & Generation](/docs/media) — photo and video generation, prompt compiler, showroom shelves.
 - [Status](/docs/social/status) — what is configured and live right now, versus what is merely wired.
 - [Ownership & Accounts](/docs/social/ownership) — who actually holds the Meta assets, and what Instagram needs.
 - [Channel Setup](/docs/social/channels) — per-platform setup guides, written to be usable on your own accounts.
 - [Carousel](/docs/social/carousel) — multi-slide bilingual decks rendered at exact platform sizes.
+- [CRM & Listings Schema](/docs/crm) — Twenty CRM listings integration.
 - [Brand & Voice](/docs/brand) — the rules every post obeys.
 - [Connectors](/docs/connectors) — the MCP-backed service integrations.
 - `/higgs` skill — media generation · `calendar` · `draft` · `approve` · `publish` · `measure` · `carousel` · `growth` agent.
