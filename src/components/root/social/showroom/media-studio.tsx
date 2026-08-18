@@ -54,8 +54,8 @@ const KNOB_TRIGGER =
 export function MediaStudio() {
   const { isRTL, t, product: globalProduct } = useSocial();
 
-  // Active brand defaults to current global product or mkan
-  const [brand, setBrand] = useState<string>(globalProduct || "mkan");
+  // Active brand is driven by the global product in the page nav tabs
+  const brand = globalProduct || "mkan";
   const [kind, setKind] = useState<MediaStudioKind>("video");
   const [ratio, setRatio] = useState<MediaStudioRatio>("9:16");
   const [spine, setSpine] = useState<string>("");
@@ -199,20 +199,6 @@ export function MediaStudio() {
                   <PromptInputActionAddAttachments label={t.agentAttachItem} />
                 </PromptInputActionMenuContent>
               </PromptInputActionMenu>
-
-              {/* Brand Selector */}
-              <PromptInputModelSelect value={brand} onValueChange={(val) => { setBrand(val); setCompiled(null); }}>
-                <PromptInputModelSelectTrigger className={KNOB_TRIGGER}>
-                  <PromptInputModelSelectValue placeholder="Brand" />
-                </PromptInputModelSelectTrigger>
-                <PromptInputModelSelectContent>
-                  {PRODUCTS.map((p) => (
-                    <PromptInputModelSelectItem key={p.id} value={p.id}>
-                      {isRTL ? p.labelAr : p.label}
-                    </PromptInputModelSelectItem>
-                  ))}
-                </PromptInputModelSelectContent>
-              </PromptInputModelSelect>
 
               {/* Media Lane Knob */}
               <PromptInputModelSelect value={kind} onValueChange={(val) => { setKind(val as MediaStudioKind); if (compiled) handleCompile(); }}>
