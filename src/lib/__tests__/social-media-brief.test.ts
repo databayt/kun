@@ -75,22 +75,33 @@ describe("chatgptTypes", () => {
 });
 
 describe("brand kit sizes", () => {
-  it("satisfies every GPT Image 2 constraint", () => {
+  it("satisfies every GPT Image 2 constraint for hogwarts and mkan", () => {
     // Divisible by 16, longest edge <= 3840, ratio <= 3:1, and total pixels
     // between 655,360 and 8,294,400. The pixel FLOOR is the one that bites —
     // 1200x624 clears it by under 100k.
-    for (const { id } of chatgptTypes("hogwarts")) {
-      const { size } = compileBrief("hogwarts", id, "subject line here");
-      const [w, h] = size.split("x").map(Number);
-      expect(w % 16, `${id} width`).toBe(0);
-      expect(h % 16, `${id} height`).toBe(0);
-      expect(Math.max(w, h), `${id} max edge`).toBeLessThanOrEqual(3840);
-      expect(
-        Math.max(w, h) / Math.min(w, h),
-        `${id} ratio`,
-      ).toBeLessThanOrEqual(3);
-      expect(w * h, `${id} pixels`).toBeGreaterThanOrEqual(655_360);
-      expect(w * h, `${id} pixels`).toBeLessThanOrEqual(8_294_400);
+    for (const brand of ["hogwarts", "mkan"] as const) {
+      for (const { id } of chatgptTypes(brand)) {
+        const { size } = compileBrief(brand, id, "subject line here");
+        const [w, h] = size.split("x").map(Number);
+        expect(w % 16, `${brand}/${id} width`).toBe(0);
+        expect(h % 16, `${brand}/${id} height`).toBe(0);
+        expect(Math.max(w, h), `${brand}/${id} max edge`).toBeLessThanOrEqual(3840);
+        expect(
+          Math.max(w, h) / Math.min(w, h),
+          `${brand}/${id} ratio`,
+        ).toBeLessThanOrEqual(3);
+        expect(w * h, `${brand}/${id} pixels`).toBeGreaterThanOrEqual(655_360);
+        expect(w * h, `${brand}/${id} pixels`).toBeLessThanOrEqual(8_294_400);
+      }
     }
+  });
+
+  it("compiles mkan briefs with parity between TS and .mjs", () => {
+    const ts = compileBrief("mkan", "hero", "A coastal Port Sudan home overlooking the Red Sea");
+    const mjs = compileMjs("mkan", "hero", "A coastal Port Sudan home overlooking the Red Sea");
+    expect(ts.prompt).toBe(mjs.prompt);
+    expect(ts.size).toBe(mjs.size);
+    expect(ts.spine).toBe(mjs.spine);
+    expect(ts.prompt).toContain("Port Sudan, Sudan setting");
   });
 });

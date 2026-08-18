@@ -151,6 +151,13 @@
         ]
       },
 
+      "videoSpines": {
+        "documentary_calm": {
+          "use": "reels and video showcases (Seedance 2.5 and Veo)",
+          "prompt": "Documentary 24fps cinematography. A quiet morning administrative office or classroom in a Khartoum or Riyadh school. Smooth slow tracking push-in with 35mm shallow depth of field. Soft raking morning sunlight through sheer blinds. Audio: Gentle morning breeze, quiet footsteps in hallway, soft paper rustle."
+        }
+      },
+
       "types": {
         "hero": {
           "lane": "chatgpt",
@@ -214,7 +221,210 @@
         },
         "reel": {
           "lane": "higgs",
-          "use": "motion — only Higgsfield does video"
+          "use": "motion — Seedance 2.5 and Veo video"
+        }
+      }
+    },
+    "mkan": {
+      "id": "mkan",
+      "mediaName": "Mkan",
+      "domain": "mkan.sd",
+      "note": "Mkan (مكان) — Port Sudan short-term home rental marketplace (and intercity transport). Honest, high-fidelity Airbnb adaptation for Port Sudan, Red Sea State, Sudan.",
+      "inAppName": { "ar": "مكان", "en": "mkan" },
+      "airbnb_mirror": true,
+
+      "what": "A Port Sudan short-term home rental marketplace — coastal apartments, furnished family houses, Red Sea view verandas — with contact-first host connection (and intercity bus ticketing) across Sudan.",
+      "audience": "Travelers, families, and professionals seeking clean, reliable short stays in Port Sudan (B2C); local home hosts listing properties with direct phone contact and instant availability confirmation (B2B).",
+      "tone": "Warm, honest, hospitable, coastal calm. Direct 1:1 Airbnb mirror aesthetic localized to Port Sudan.",
+
+      "mark": {
+        "file": "public/brands/mkan.png",
+        "describe": "A stylized architectural archway and destination pin silhouette in monochrome ink.",
+        "meaning": "Place, destination, Sudanese hospitality and home.",
+        "rules": [
+          "The mark is placed in post, never drawn by a generative model.",
+          "Monochrome ink only. Inverts to ivory on dark and terracotta canvases.",
+          "Leave room at the bottom-start corner for the mark and mkan.sd lockup."
+        ]
+      },
+
+      "typography": {
+        "source": "https://font.thmanyah.com",
+        "roles": {
+          "arabicHeadline": {
+            "family": "thmanyah serif display",
+            "weight": 900,
+            "features": "ss01",
+            "why": "Signature Arabic calligraphic voice"
+          },
+          "arabicBody": { "family": "thmanyah sans", "weight": 400 },
+          "latinHeadline": { "family": "Geist", "weight": 600 },
+          "latinBody": { "family": "Geist", "weight": 400 }
+        },
+        "rules": [
+          "Arabic never takes letter-spacing.",
+          "Arabic is first-class; English mirrors it."
+        ]
+      },
+
+      "palette": {
+        "why": "Red Sea coastal blues, warm desert dune neutrals, terracotta accent, and slate dark matching Airbnb warmth in a Port Sudan context.",
+        "canvas": [
+          { "name": "Ivory Light", "hex": "#faf8f5", "use": "default canvas" },
+          { "name": "Dune Sand", "hex": "#e5d9c5", "use": "warm alternate canvas" },
+          {
+            "name": "Slate Dark",
+            "hex": "#1a2530",
+            "use": "dark coastal evening canvas; ink on light"
+          },
+          {
+            "name": "Clay",
+            "hex": "#e05638",
+            "use": "the one accent — brand coral terracotta"
+          }
+        ],
+        "support": [
+          { "name": "Red Sea Blue", "hex": "#0f4c81", "use": "maritime and harbor accent" },
+          { "name": "Slate 550", "hex": "#73726c", "use": "muted text" },
+          { "name": "Slate 250", "hex": "#dedcd1", "use": "hairline / surface" },
+          { "name": "Amber Glow", "hex": "#e09f3e", "use": "warm interior lighting glow" }
+        ],
+        "rules": [
+          "One accent per image. Coral Terracotta carries the emphasis; coastal neutrals do the work.",
+          "No neon, no oversaturated AI gradients. Natural coastal daylight and Red Sea sunset light only."
+        ]
+      },
+
+      "styleSpines": {
+        "minimal": {
+          "use": "hero, product, mockup, listing detail plates",
+          "prompt": "Architectural minimalism. Clean lines, ceramic tile floors, whitewashed plaster, generous negative space, bright natural seaside daylight, room at bottom-start for mkan.sd brand mark."
+        },
+        "cinematic": {
+          "use": "lifestyle, story, reel stills, candid guest scenes",
+          "prompt": "Cinematic documentary photography. Natural coastal window light, shallow depth of field, warm color grade, candid unposed moments of Sudanese hospitality in Port Sudan."
+        },
+        "coastal_red_sea": {
+          "use": "Port Sudan seaside apartments, veranda views",
+          "prompt": "Coastal architectural photography. A modern furnished Port Sudan apartment overlooking the Red Sea, light airy linen curtains moving in sea breeze, warm sunset glow."
+        },
+        "airbnb_made_possible": {
+          "use": "Airbnb-mirrored candid guest/host stories",
+          "prompt": "Documentary home photography. Warm candid moments of friends or family enjoying tea on a balcony in Port Sudan, natural unposed laughter, authentic home comfort."
+        }
+      },
+
+      "videoSpines": {
+        "made_possible_by_host": {
+          "use": "Airbnb 'Made possible by Hosts' mirror reels (Seedance 2.5 / Veo)",
+          "prompt": "Documentary 24fps cinematography. A warm candid morning in a sunlit coastal apartment in Port Sudan. A Sudanese family enjoying fresh mint tea on a breezy tiled balcony overlooking the calm Red Sea coastline at golden hour. Gentle handheld drift, 35mm natural optics. Audio: Gentle coastal breeze, faint clink of tea glasses, quiet warm laughter."
+        },
+        "coastal_walkthrough": {
+          "use": "Property showcase reels, Seedance 2.5 and Veo video",
+          "prompt": "Cinematic 24fps architectural video. Slow smooth gimbal glide through a bright living room in Port Sudan (Hayy Al-Shati) out onto an open terrace overlooking the harbor at sunset. Audio: Soft Red Sea waves, gentle breeze, calm room ambience."
+        }
+      },
+
+      "subjectLibrary": {
+        "why": "The scenes that actually represent Mkan in Port Sudan.",
+        "items": [
+          "A bright, clean living room in a furnished apartment in Port Sudan (Hayy Al-Shati) with sea breeze through sheer curtains",
+          "A family sharing fresh mint tea on a breezy tiled balcony overlooking the Red Sea coast at sunset",
+          "A modern, well-equipped kitchen in a Salbona rental apartment with clean ceramic countertops and morning light",
+          "A tranquil bedroom in an Al-Riyadh Port Sudan home with crisp white bedding, wooden nightstand, and soft lamp glow",
+          "Detail of a guest receiving host keys and verified contact card on a dining table with fresh tea glasses",
+          "An open veranda terrace in an Airport District home overlooking Port Sudan palms and twilight sky",
+          "A spacious living hall with comfortable traditional modern seating, ceiling fan gently spinning, and natural daylight",
+          "A traveler working on a laptop at a neat wooden desk in a quiet Port Sudan rental flat"
+        ]
+      },
+
+      "negative": {
+        "why": "Negative prompt bank to eliminate common AI video and image rendering defects.",
+        "items": [
+          "no text, no lettering, no numerals, no signage, no UI labels",
+          "no logos, no watermarks, no brand marks of any kind",
+          "no Western suburban houses, no American McMansions, no snow or pine trees",
+          "no distorted perspective, no impossible architectural geometry, no warped furniture",
+          "no AI-glossy skin, no plastic sheen, no over-saturated HDR",
+          "no cluttered chaotic rooms, no messy luggage; one pristine, welcoming home"
+        ]
+      },
+
+      "region": {
+        "why": "Regional authenticity for Port Sudan and Red Sea coastal settings.",
+        "items": [
+          "Port Sudan, Sudan setting — Red Sea coastal districts (Hayy Al-Shati, Salbona, Al-Riyadh, Airport District)",
+          "Authentic Sudanese hospitality decor — airy curtains, clean tile floors, comfortable seating, ceiling fans, tea glasses",
+          "Modest, natural Sudanese attire; authentic and unforced",
+          "Warm golden hour seaside light and bright natural coastal daylight"
+        ]
+      },
+
+      "types": {
+        "hero": {
+          "lane": "chatgpt",
+          "size": "1792x1024",
+          "spine": "minimal",
+          "use": "page and post hero images"
+        },
+        "lifestyle": {
+          "lane": "chatgpt",
+          "size": "1024x1280",
+          "spine": "airbnb_made_possible",
+          "use": "candid guest moments and Airbnb-mirrored lifestyle scenes"
+        },
+        "product": {
+          "lane": "chatgpt",
+          "size": "1024x1280",
+          "spine": "coastal_red_sea",
+          "use": "Port Sudan listing interiors and architectural views"
+        },
+        "mockup": {
+          "lane": "chatgpt",
+          "size": "1024x1024",
+          "spine": "minimal",
+          "use": "device in scene with blank screen",
+          "extra": "The screen must be blank, off, or a flat neutral rectangle — never a rendered interface."
+        },
+        "story": {
+          "lane": "chatgpt",
+          "size": "1024x1792",
+          "spine": "cinematic",
+          "use": "vertical story stills"
+        },
+        "plate": {
+          "lane": "chatgpt",
+          "size": "1200x624",
+          "spine": "minimal",
+          "use": "text-free background plate for copy overlay",
+          "extra": "Compose as a background: keep the centre and the start edge quiet so a headline can sit there."
+        },
+        "og": {
+          "lane": "template",
+          "size": "1200x630",
+          "use": "carries copy"
+        },
+        "banner": {
+          "lane": "template",
+          "size": "1200x630",
+          "use": "carries copy"
+        },
+        "infographic": { "lane": "template", "use": "carries copy" },
+        "split": { "lane": "template", "use": "carries copy" },
+        "testimonial": { "lane": "template", "use": "carries copy" },
+        "carousel": {
+          "lane": "template",
+          "size": "1080x1350",
+          "use": "carries copy"
+        },
+        "logo": {
+          "lane": "none",
+          "use": "the mark exists; it is never regenerated"
+        },
+        "reel": {
+          "lane": "higgs",
+          "use": "motion — Seedance 2.5 and Veo video"
         }
       }
     }

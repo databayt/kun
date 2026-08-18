@@ -65,5 +65,37 @@
         "subject": "A squared stack of paper report cards on a desk next to a closed laptop, raking daylight"
       }
     }
+  ],
+  "mkan": [
+    {
+      "id": "portsudan-made-possible",
+      "pillar": "airbnb-mirror",
+      "brief": "Airbnb-mirrored story: 'Made possible by Hosts on Mkan' — a family weekend in Port Sudan enjoying morning tea on a breezy seaside balcony in Hayy Al-Shati. Audience: Sudanese families and travelers visiting Port Sudan. CTA: find a home at https://mkan.sd. Suggested visual: candid balcony tea scene (lifestyle). Constraint: genuine Port Sudan coastal setting, honest SDG rates, no fake claims. Angle: memorable family moments made possible by local hosts. The scene: morning sunlight over the Red Sea coast, fresh mint tea, breeze through linen curtains. Register: rung 2, warm and authentic.",
+      "visual": {
+        "type": "lifestyle",
+        "subject": "A Sudanese family sharing fresh mint tea on a breezy tiled balcony overlooking the Red Sea coast at sunset"
+      }
+    },
+    {
+      "id": "portsudan-coastal-stays",
+      "pillar": "showcase",
+      "brief": "Property showcase: clean, furnished coastal apartment in Port Sudan with Red Sea view — verified host, clear pricing in SDG, and direct contact. Audience: travelers, business visitors, and relocating families. CTA: explore Port Sudan homes at https://mkan.sd. Suggested visual: coastal apartment living room (product). Constraint: real Port Sudan amenities, no fabricated luxury claims. Angle: find your preferred stay and call the host directly. The scene: stepping into a spacious, bright living room in Salbona with a gentle ceiling fan and seaside daylight. Register: rung 2.",
+      "visual": {
+        "type": "product",
+        "subject": "A bright, clean living room in a furnished apartment in Port Sudan (Hayy Al-Shati) with sea breeze through sheer curtains"
+      }
+    },
+    {
+      "id": "portsudan-home-vs-hotel",
+      "pillar": "belong-anywhere",
+      "brief": "Value comparison: your own private home in Port Sudan vs a cramped hotel room — full kitchen, laundry, space for the whole family. Audience: travelers and visitors in Port Sudan. CTA: https://mkan.sd. Suggested visual: og card. Constraint: respectful tone, focus on home comforts. Angle: when you visit Port Sudan, you have a home waiting for you. The scene: cooking a family meal in a private kitchen after a long travel day instead of sitting in a cramped room. Register: rung 2.",
+      "visual": null
+    },
+    {
+      "id": "portsudan-host-onboarding",
+      "pillar": "host-supply",
+      "brief": "Host recruitment: have a home or apartment in Port Sudan? List it on Mkan in minutes — stay logged in for ~1 year, confirm availability with one tap, and receive calls directly from verified guests. Audience: homeowners in Port Sudan (Salbona, Hayy Al-Shati, Al-Riyadh, Airport District). CTA: list your home at https://mkan.sd. Suggested visual: og card. Constraint: truthful contact-only model in phase 1, no online payment claims. Angle: put your vacant Port Sudan home to work with direct control. The scene: a homeowner confirming 'Available' on their phone with a single tap. Register: rung 2.",
+      "visual": null
+    }
   ]
 }

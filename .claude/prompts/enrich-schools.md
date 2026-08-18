@@ -12,8 +12,8 @@ take that as high as the available sources actually allow, cheapest source first
 the yield of each lane rather than assume it**.
 
 ## What these records are
-
-They are **schools**, not companies. They live on Twenty's standard `Company` object because that
+``
+`z§±§They are **schools**, not companies. They live on Twenty's standard `Company` object because that
 is what the workspace was built on — the API name stays `company`, but the workspace label should
 read "School". First task, two minutes: rename `labelSingular`/`labelPlural` on the object metadata
 so the UI stops calling a school a company. Do not rename the API field.

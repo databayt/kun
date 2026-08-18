@@ -129,7 +129,7 @@ export const ASSET_TYPE_META: Record<AssetType, AssetTypeMeta> = {
     en: "Reel / promo clip",
     ar: "ريل / مقطع ترويجي",
     lane: "higgs",
-    model: "kling3_0_turbo",
+    model: "seedance_2_5",
     ratio: "9:16",
     style: "cinematic",
     gemini: { model: "veo-lite", seconds: 8 },

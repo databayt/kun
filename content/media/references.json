@@ -367,6 +367,46 @@
       "assetType": "og",
       "note": "The template lane's visual north star: type-led og cards, one accent illustration, Ivory/Clay/Ink discipline, no decoration the message doesn't earn. Steal the spacing and the one-accent rule; never the logomark (no implied endorsement).",
       "collection": "house-aesthetic"
+    },
+    {
+      "id": "airbnb-made-possible-by-hosts",
+      "title": "Airbnb — Made possible by Hosts",
+      "source": "vendor",
+      "sourceUrl": "https://www.airbnb.com",
+      "assetType": "reel",
+      "brand": "mkan",
+      "note": "The signature Airbnb emotional narrative: candid, nostalgic home photos/video montage set to music, closing on a simple title card 'Vacation in [Location], made possible by Host [Name] on Airbnb'. For Mkan: 1:1 mirror swapping to Port Sudan families/travelers, 'عطلة في بورتسودان · أصبحت ممكنة بفضل المضيف على مكان', ending on mkan.sd.",
+      "collection": "airbnb-ads"
+    },
+    {
+      "id": "airbnb-categories-stays",
+      "title": "Airbnb — Categories & Standout Stays",
+      "source": "vendor",
+      "sourceUrl": "https://www.airbnb.com",
+      "assetType": "product",
+      "brand": "mkan",
+      "note": "Full-bleed architectural and interior photography/video showcasing the space with minimal UI: category badge pill (e.g. Red Sea Coastal), price in local currency, and clean typography. For Mkan: Port Sudan apartments (Salbona, Hayy Al-Shati), SDG pricing, mkan.sd.",
+      "collection": "airbnb-ads"
+    },
+    {
+      "id": "airbnb-strangers-belong-anywhere",
+      "title": "Airbnb — Belong Anywhere / Strangers",
+      "source": "vendor",
+      "sourceUrl": "https://www.airbnb.com",
+      "assetType": "lifestyle",
+      "brand": "mkan",
+      "note": "The 'Hotel vs Home' contrast: selling the space, full kitchen, private laundry, and peace of a whole home over cramped, sterile hotel rooms. For Mkan: 'بيتك في بورتسودان' targeting families and work travelers coming to Port Sudan.",
+      "collection": "airbnb-ads"
+    },
+    {
+      "id": "airbnb-setup-host",
+      "title": "Airbnb — Airbnb Setup (Host Recruitment)",
+      "source": "vendor",
+      "sourceUrl": "https://www.airbnb.com/host/homes",
+      "assetType": "og",
+      "brand": "mkan",
+      "note": "Direct, empowering host recruitment: 'Earn with your space. You're in control.' For Mkan: 'أجّر بيتك أو شقتك في بورتسودان' on mkan.sd with direct verified guest calls and one-tap availability checks.",
+      "collection": "airbnb-ads"
     }
   ]
 }
