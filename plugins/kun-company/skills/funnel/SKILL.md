@@ -8,17 +8,21 @@ argument-hint: "[qualify|segment|nurture|follow-up|stalled|chatbot] [for <produc
 # Funnel — the conversion runbook
 
 **The measured truth this runbook exists to enforce: nothing here has ever converted.**
-0 funnel sessions, 0 gates instrumented, 0 active paying schools against a Q3 2026 target of 1.
-Every number below starts at zero, and the runbook exists so the first one is not an accident.
+0 funnel sessions, 0 leads moved through a gate, 0 active paying schools against a Q3 2026 target
+of 1. The plumbing landed 2026-08-18 — the gate ladder and 16 fields are live in Twenty, the
+inbound receiver is registered and proven, `promoteToLead()` exists — but **capture does not**, so
+those zeros are *structurally* empty rather than genuinely empty. Say it that way; the difference
+is the whole state of the lane.
 
 Three facts govern the design, and none of them are opinions:
 
 - **hogwarts already has the chatbot** (`src/components/chatbot/`, Groq, bilingual, mounted on both
   the SaaS site and every tenant site). It answers well and **captures nothing** — `sendMessage`
   writes to no table. The work is capture, not construction.
-- **The inbound plumbing is built and unused.** `saas-marketing/actions.ts` holds `requestDemo`,
-  `startFreeTrial`, `captureLead`, all writing `Prospect` via `upsertInboundProspect`, with **zero
-  importers**. `promoteToLead()` is referenced in a doc comment and does not exist.
+- **The inbound plumbing is built and still unused.** `saas-marketing/actions.ts` holds
+  `requestDemo`, `startFreeTrial`, `captureLead`, all writing `Prospect` via
+  `upsertInboundProspect`, with **zero importers**. `promoteToLead()` now exists and is
+  idempotent — it is waiting on a caller, not on itself.
 - **The funnel logic is deterministic; the LLM is asynchronous.** Which question comes next, which
   segment you land in, which asset you get, when a touch fires — scripted, **zero tokens**. Groq
   answers free-form messages (already live, a different budget line). Personalized follow-up copy is
@@ -26,6 +30,21 @@ Three facts govern the design, and none of them are opinions:
 
 Numbers and hard rules: `.claude/agents/funnel.md`. Acquisition — everything before the first
 reply — belongs to `.claude/agents/lead.md` and `/scrape`. **kun holds no funnel code.**
+
+## State — built vs not, so nothing is claimed twice
+
+**Live and production-proven:** the inbound receiver (`POST /api/webhooks/twenty` → verify →
+parse → one `TwentyInboundEvent` row, applying nothing) on `company.updated` +
+`opportunity.updated` · `promoteToLead()` · `School.trialEndsAt` · the gate ladder and 16 funnel
+fields seeded into the live workspace · mkan's two-way sync.
+
+**Missing:** capture · the applier that reads the inbox · the cadence clock, drain and approve
+queue · every URL in the value registry.
+
+**Two traps, measured:** never `prisma db push` against hogwarts production (no
+`_prisma_migrations`; a `migrate diff` aimed at `prisma/schema.prisma` rather than the `prisma/`
+folder falsely reports 719 dropped FKs and 328 dropped tables) — and Vercel runs `prisma generate`,
+never `migrate deploy`, so schema reaches the database *before* the code that expects it.
 
 ## Argument: $ARGUMENTS
 

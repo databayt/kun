@@ -29,10 +29,11 @@ acquisition numbers to look instrumented.
 | Metric                     | Value        | Note                                            |
 | -------------------------- | ------------ | ----------------------------------------------- |
 | Funnel sessions            | **0**        | `sendMessage` has never persisted a transcript  |
-| Gates instrumented         | **0**        | the ladder exists on paper only                 |
+| Gates instrumented         | **0**        | the ladder + 16 fields ARE live in Twenty; nothing moves a lead through them |
 | Conversions                | **0**        | north star: active paying schools               |
 | North-star target          | Q3 2026 = 1  | Q4 = 2 · 12mo = 3 · "enough" = 4–5 vs $500/mo   |
 | Reachable inbound traffic  | **~0**       | the widget is mounted; nothing captures from it |
+| Inbound CRM events stored  | **1**        | one verification event; the applier does not exist yet |
 
 Inherited from `lead.md` — **read, never restated as this agent's own**: 176 contactable of 3,156 ·
 131 tier-A/B unworked · 119 emails vs 45 mobiles · SA 1001 · EG 764 · SD 609 · AE 603 · QA 173.
@@ -103,23 +104,35 @@ can go stale against its own inputs. It routes owner, cadence speed, value asset
 Bands come from the pricing config, not from taste: **100** is the free-tier ceiling, **20** the
 `minimumMonthly 30 ÷ $1.50` floor, **1000** where enterprise is offered.
 
-## Known defects this agent must not paper over
+## State — what exists, so this agent stops citing fixed defects
 
-- `promoteToLead()` is referenced in `prisma/models/sales.prisma` and **does not exist**.
-- `Lead.schoolId` and `LeadActivity.createdById` are **required FKs**; an inbound chat lead has
-  neither. Sentinel `School{id:"platform"}` + `User{id:"system-funnel"}` before anything promotes.
-- **Trial state is not modelled anywhere.** Neither `School` nor `Subscription` carries a
-  trial end date (`Subscription` is Stripe-shaped: `currentPeriodEnd`, `status`).
-  `isTenantOnTrial()` takes it as a *parameter*, and the dashboard reads
-  `tenantBilling?.trialEndsAt`, which is always undefined and handled by optional
-  chaining. So this is a missing capability the code already documents as a TODO in two
-  places — **not** a live crash. The funnel's PILOT gate needs it and it does not exist.
-- `planType` is written `"starter"`, documented lowercase, and queried UPPERCASE — plan-distribution
-  counts render 0 today.
-- `mkan/scripts/crm/outreach-cadence.ts` is a fixture mock whose day divisor is 1000× too large, so
-  touches 2 and 3 can never fire while it reports healthy.
-- mkan's `api/webhooks/twenty/route.ts` destructures `event`/`object`/`action`, which Twenty does not
-  send — every branch is dead and it returns 200.
+Plumbing landed 2026-08-18. **Built and production-proven:** the inbound receiver
+(`POST /api/webhooks/twenty` → verify → parse → one `TwentyInboundEvent` row, applying
+nothing) registered on `company.updated` + `opportunity.updated` and verified end to end ·
+`promoteToLead()` (idempotent, sentinel tenant created on demand) · `School.trialEndsAt` ·
+16 funnel fields + the `DORMANT` stage seeded live · mkan's two-way sync, which had never
+processed an event.
+
+**Not built:** capture (the chatbot still persists nothing) · the applier (inbox rows sit
+`pending`, nothing reads them) · the cadence (no clock, no drain, no approve queue) · the
+value assets (the registry holds no URLs).
+
+So when this agent reports zeros, the honest phrasing is **structurally empty, not
+genuinely empty** — there is no capture, so there is nothing to count.
+
+## Traps, measured — do not re-derive these either
+
+1. **Never `prisma db push` against hogwarts production.** No `_prisma_migrations` table; a
+   `migrate diff` aimed at `prisma/schema.prisma` rather than the `prisma/` folder claims 719
+   dropped foreign keys and 328 dropped tables. Artifact of the argument — `prisma.config.ts`
+   loads models from the folder. Pass the folder.
+2. **Vercel runs `prisma generate`, never `migrate deploy`.** Schema reaches the database
+   *before* the code that expects it, or every query on that model fails.
+3. **`.env` holds `DIRECT_DATABASE_URL` too**, and a grep for `DATABASE_URL=` matches both.
+   Local dev is Postgres on localhost; production is Neon, reachable only via the Vercel env.
+   Read the wrong line and you will report dev data as production — that has happened.
+4. **`outreach-cadence.ts` still reads fixtures** and refuses to write. Its arithmetic is
+   fixed; its data source is not.
 
 ## Boundaries
 

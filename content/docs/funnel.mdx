@@ -144,6 +144,7 @@ stalled at, with one asset it has never seen.
 | Layer | Owner | Why |
 | --- | --- | --- |
 | Gate state | **hogwarts Postgres** | One writer, one truth |
+| Board moves | **`TwentyInboundEvent`** | A durable inbox, so "received" and "applied" are separately observable — the distinction a silent 200 destroys |
 | The board | **Twenty**, mirrored | A human dragging a card is advisory — the webhook records it and opens a review task, never a silent write-back |
 | The clock | **launchd + Vercel cron** | Twenty sleeps with the Mac |
 | The conversation | hogwarts / mkan | Deterministic rail; Groq answers free-form |
@@ -163,23 +164,49 @@ same hard rule the [scrape](/docs/scrape) lane carries.
 A useful test: run a full qualifying conversation with the chat model disabled. The rail must still
 complete. If it does not, the routing was never deterministic.
 
-## Known defects the lane must not paper over
+## What is built, and what is not
 
-Recorded so no session rediscovers them, and so none of them is quietly assumed fixed:
+The lane's plumbing landed on 2026-08-18. Stated precisely, because "the funnel exists" and
+"the funnel converts" are different claims and only the first one is true.
 
-- `promoteToLead()` is referenced in hogwarts' Prisma schema and **does not exist**.
-- `Lead.schoolId` and `LeadActivity.createdById` are **required foreign keys**; an inbound chat lead
-  has neither, so nothing can promote until a sentinel tenant exists.
-- **Trial state is modelled nowhere.** Neither `School` nor `Subscription` holds a trial end
-  date, `isTenantOnTrial()` takes one as a parameter, and the dashboard reads
-  `tenantBilling?.trialEndsAt` — always undefined, absorbed by optional chaining. A
-  documented TODO rather than a live fault, but the PILOT gate cannot run without it.
-- `planType` is written `"starter"`, documented lowercase, queried UPPERCASE — plan-distribution
-  counts render 0 today.
-- mkan's `outreach-cadence.ts` is a fixture mock whose day divisor is 1000× too large, so touches 2
-  and 3 can never fire while it reports healthy.
-- mkan's Twenty webhook destructures `event`/`object`/`action`, which Twenty does not send — every
-  branch is dead and it still returns 200.
+**Built, and proven against production — not just unit-tested:**
+
+- **The inbound receiver.** `POST /api/webhooks/twenty` verifies Twenty's HMAC, parses the
+  delivery, writes one `TwentyInboundEvent` row and returns. It applies nothing, for the two
+  reasons above. Registered on `company.updated` and `opportunity.updated`; a real board edit
+  has gone the whole way — Twenty signed it, production verified it, the row landed with
+  `updatedFields` matching the field that changed.
+- **`promoteToLead()`.** Prospect → Lead, idempotent on the existing
+  `Prospect.promotedLeadId @unique`. The sentinel tenant that satisfies `Lead.schoolId` is
+  created on demand rather than seeded, so no environment needs a setup step first.
+- **`School.trialEndsAt`.** The PILOT gate's 90-day clock. Live on production.
+- **The gate ladder and funnel fields.** 16 custom fields plus the one new `DORMANT` stage,
+  seeded into the live workspace; the seeder plans zero writes on a re-run.
+- **mkan's two-way sync.** The receiver that had never processed a single event now does.
+
+**Not built, and worth being blunt about:**
+
+- **Capture.** The chatbot still writes to no table. So every gate past WARM is
+  *structurally* empty rather than genuinely empty, and every conversion rate reads
+  `UNMEASURED` by construction rather than by neglect.
+- **The applier.** Rows arrive in the inbox at `status: pending` and nothing reads them yet.
+- **The cadence.** No clock, no drafting drain, no approve queue.
+- **The value ladder.** The registry has no URLs in it — every asset in the table above is
+  still a plan.
+
+## Operational notes worth not rediscovering
+
+- **Never run `prisma db push` against hogwarts production.** There is no `_prisma_migrations`
+  table — it is db-push managed — and a `migrate diff` pointed at `prisma/schema.prisma`
+  instead of the `prisma/` folder reports **719 dropped foreign keys and 328 dropped tables**.
+  That is an artifact of the argument, not real drift: `prisma.config.ts` loads models from the
+  folder, so a single file yields an empty datamodel. Pass the folder. Real drift is a couple
+  of dozen lines.
+- **Vercel runs `prisma generate`, never `migrate deploy`.** A schema change must reach the
+  database *before* the code that expects it ships, or every query on that model fails.
+- **mkan's `outreach-cadence.ts` still reads fixture hosts**, and its write path now refuses
+  outright rather than mint placeholder claim links that no `HostClaimToken` backs. The ladder
+  arithmetic is fixed and tested; what it needs next is a real host query.
 
 ## Guards
 

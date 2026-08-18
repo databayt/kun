@@ -44,6 +44,32 @@ Tokens live in the macOS Keychain under service `databayt-twenty`, account = wor
 
 Defaulting to port 3000 is not hypothetical — it answers `307` on `/graphql`, which is why the Hermes CRM crons silently returned nothing for weeks while reporting `last_status: ok`.
 
+## Webhooks
+
+Both products receive real-time events from their workspace. Registered 2026-08-18 and
+verified end to end against production, not just configured:
+
+| Workspace | Target | Operations |
+| --- | --- | --- |
+| **hogwarts** | `ed.databayt.org/api/webhooks/twenty` | `company.updated`, `opportunity.updated` |
+| **mkan** | `mk.databayt.org/api/webhooks/twenty` | `home.updated`, `host.updated`, `opportunity.updated` |
+
+Twenty signs each delivery with `X-Twenty-Webhook-Signature` — an HMAC-SHA256 over
+`` `${timestamp}:${body}` `` — **not** an `Authorization` bearer, and the secret is stripped
+from the payload before signing, so verification must run against the raw request text.
+Secrets are per-product and live only in Vercel; a receiver with none configured refuses
+every delivery rather than accepting it.
+
+Three properties worth designing around: **5-second timeout, no retries, and private IPs are
+SSRF-blocked.** So a receiver must ack fast and do its slow work elsewhere, a dropped event
+is gone for good, and local development needs a tunnel rather than `localhost`.
+
+> **A 200 is not proof of anything.** mkan's receiver answered 200 for every delivery for
+> months while processing none of them — it read fields Twenty does not send, so every branch
+> fell through. Both ends reported success the entire time. hogwarts' receiver therefore
+> stores a durable row and keeps `received` and `applied` as separate, separately observable
+> facts.
+
 ## Login
 
 | Property | Value |
