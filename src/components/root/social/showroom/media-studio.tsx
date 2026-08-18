@@ -1,24 +1,15 @@
 "use client";
 
 // The Media Studio — prompt area on /social/media matching the exact geometry
-// and feel of DraftAgent on /social/draft. Tailored for concrete marketing asset
-// generation across brands like Mkan and Hogwarts (walkthrough reels, listing shots,
-// lifestyle scenes, product ads, infographics, carousels, testimonials, mockups).
+// and feel of DraftAgent on /social/draft. Simplified single-concept dropdowns
+// without icons or descriptions for quick, effortless selection.
 
 import { useMemo, useState, useTransition } from "react";
 import {
-  BarChart3,
   Check,
-  Clapperboard,
   Copy,
-  FileImage,
-  Laptop,
-  Layers,
-  LayoutTemplate,
   Loader2,
-  Megaphone,
   Plus,
-  Quote,
   Send,
   Sparkles,
 } from "lucide-react";
@@ -56,203 +47,47 @@ import { cn } from "@/lib/utils";
 const KNOB_TRIGGER =
   "border-input bg-muted text-muted-foreground hover:text-foreground hover:bg-accent inline-flex h-8 items-center justify-center gap-1.5 rounded-full border px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors duration-100 ease-in-out hover:border-transparent";
 
-function RatioWireframe({
-  ratio,
-  className,
-}: {
-  ratio: string;
-  className?: string;
-}) {
-  switch (ratio) {
-    case "9:16":
-      return (
-        <span
-          className={cn(
-            "inline-flex h-3.5 w-2 items-center justify-center rounded-[2px] border-[1.5px] border-current shrink-0",
-            className,
-          )}
-        />
-      );
-    case "1:1":
-      return (
-        <span
-          className={cn(
-            "inline-flex h-3 w-3 items-center justify-center rounded-[2px] border-[1.5px] border-current shrink-0",
-            className,
-          )}
-        />
-      );
-    case "16:9":
-      return (
-        <span
-          className={cn(
-            "inline-flex h-2 w-3.5 items-center justify-center rounded-[2px] border-[1.5px] border-current shrink-0",
-            className,
-          )}
-        />
-      );
-    case "4:5":
-      return (
-        <span
-          className={cn(
-            "inline-flex h-3.5 w-2.5 items-center justify-center rounded-[2px] border-[1.5px] border-current shrink-0",
-            className,
-          )}
-        />
-      );
-    default:
-      return (
-        <span
-          className={cn(
-            "inline-flex h-3 w-3 items-center justify-center rounded-[2px] border-[1.5px] border-current shrink-0",
-            className,
-          )}
-        />
-      );
-  }
-}
-
-const RATIO_OPTIONS: {
-  id: MediaStudioRatio;
-  label: string;
-  sub: string;
-  platforms: string;
-}[] = [
-  {
-    id: "9:16",
-    label: "9:16 Vertical",
-    sub: "1080×1920",
-    platforms: "Reels · TikTok · Stories",
-  },
-  {
-    id: "1:1",
-    label: "1:1 Square",
-    sub: "1080×1080",
-    platforms: "Feed · Carousels · Grid",
-  },
-  {
-    id: "16:9",
-    label: "16:9 Landscape",
-    sub: "1920×1080",
-    platforms: "YouTube · Web · Widescreen",
-  },
-  {
-    id: "4:5",
-    label: "4:5 Portrait",
-    sub: "1080×1350",
-    platforms: "Instagram Portrait Feed",
-  },
-];
-
 export interface AssetFormatOption {
   id: string;
   label: string;
   labelAr: string;
-  sub: string;
-  subAr: string;
   kind: MediaStudioKind;
   defaultRatio: MediaStudioRatio;
-  icon: typeof Clapperboard;
 }
 
 const ASSET_FORMATS: AssetFormatOption[] = [
-  {
-    id: "reel",
-    label: "Walkthrough & Reel",
-    labelAr: "جولة فيديو وريل",
-    sub: "Property tour / Feature demo (24fps)",
-    subAr: "جولة في العقار أو استعراض الميزات",
-    kind: "video",
-    defaultRatio: "9:16",
-    icon: Clapperboard,
-  },
-  {
-    id: "product",
-    label: "Listing & Product Shot",
-    labelAr: "لقطة عقار ومنتج",
-    sub: "4K architectural / master room plate",
-    subAr: "لوحة معمارية أو لقطة غرفة بدقة 4K",
-    kind: "image",
-    defaultRatio: "4:5",
-    icon: FileImage,
-  },
-  {
-    id: "lifestyle",
-    label: "Lifestyle & Guest Scene",
-    labelAr: "مشهد حياتي وتجربة",
-    sub: "Warm family / student / host moment",
-    subAr: "لحظة دافئة لعائلة أو طالب أو مضيف",
-    kind: "image",
-    defaultRatio: "4:5",
-    icon: Sparkles,
-  },
-  {
-    id: "ad",
-    label: "Product Ad & Campaign",
-    labelAr: "إعلان وحملة ترويجية",
-    sub: "High-impact booking / admission promo",
-    subAr: "ترويج عالي التأثير للحجز أو التسجيل",
-    kind: "image",
-    defaultRatio: "16:9",
-    icon: Megaphone,
-  },
-  {
-    id: "infographic",
-    label: "Infographic & Amenities",
-    labelAr: "إنفوجرافيك ومميزات",
-    sub: "Amenities list / stats / fee breakdown",
-    subAr: "قائمة الخدمات والأسعار والإحصاءات",
-    kind: "template",
-    defaultRatio: "1:1",
-    icon: BarChart3,
-  },
-  {
-    id: "carousel",
-    label: "Carousel Deck Slide",
-    labelAr: "شريحة كاروسيل",
-    sub: "Multi-slide city guide / product steps",
-    subAr: "دليل الأحياء وخطوات الاستخدام",
-    kind: "template",
-    defaultRatio: "4:5",
-    icon: Layers,
-  },
-  {
-    id: "testimonial",
-    label: "Host / Client Testimonial",
-    labelAr: "شهادة مضيف / عميل",
-    sub: "Thmanyah Serif Display quote card",
-    subAr: "بطاقة اقتباس بخط ثمانية العريض",
-    kind: "template",
-    defaultRatio: "1:1",
-    icon: Quote,
-  },
-  {
-    id: "mockup",
-    label: "UI & Device Mockup",
-    labelAr: "نموذج الواجهة والتطبيق",
-    sub: "App interface on phone / tablet / desk",
-    subAr: "واجهة التطبيق على هاتف أو جهاز لوحي",
-    kind: "image",
-    defaultRatio: "1:1",
-    icon: Laptop,
-  },
+  { id: "walkthrough", label: "Walkthrough", labelAr: "جولة", kind: "video", defaultRatio: "9:16" },
+  { id: "post", label: "Post", labelAr: "منشور", kind: "image", defaultRatio: "4:5" },
+  { id: "lifestyle", label: "Lifestyle", labelAr: "حياة", kind: "image", defaultRatio: "4:5" },
+  { id: "ad", label: "Ad", labelAr: "إعلان", kind: "image", defaultRatio: "16:9" },
+  { id: "infographic", label: "Infographic", labelAr: "إنفوجرافيك", kind: "template", defaultRatio: "1:1" },
+  { id: "carousel", label: "Carousel", labelAr: "كاروسيل", kind: "template", defaultRatio: "4:5" },
+  { id: "testimonial", label: "Testimonial", labelAr: "شهادة", kind: "template", defaultRatio: "1:1" },
+  { id: "mockup", label: "Mockup", labelAr: "نموذج", kind: "image", defaultRatio: "1:1" },
+];
+
+const RATIO_OPTIONS: { id: MediaStudioRatio; label: string }[] = [
+  { id: "9:16", label: "9:16" },
+  { id: "1:1", label: "1:1" },
+  { id: "16:9", label: "16:9" },
+  { id: "4:5", label: "4:5" },
 ];
 
 const MODELS_BY_KIND: Record<
   MediaStudioKind,
-  { id: string; label: string; sub: string }[]
+  { id: string; label: string }[]
 > = {
   video: [
-    { id: "seedance", label: "Seedance 2.5", sub: "Fast · Motion & Audio" },
-    { id: "veo", label: "Veo 3.1", sub: "Google Cinematic Realism" },
-    { id: "kling", label: "Kling 3.0", sub: "Optics & Camera Movement" },
+    { id: "seedance", label: "Seedance 2.5" },
+    { id: "veo", label: "Veo 3.1" },
+    { id: "kling", label: "Kling 3.0" },
   ],
   image: [
-    { id: "gemini", label: "Gemini 3.1 Flash", sub: "High-Res 4K Master Plate" },
-    { id: "gpt_image", label: "GPT Image 2", sub: "Photorealistic Textures" },
+    { id: "gemini", label: "Gemini 3.1" },
+    { id: "gpt_image", label: "GPT Image 2" },
   ],
   template: [
-    { id: "canvas", label: "HTML Canvas", sub: "Deterministic Thmanyah Type" },
+    { id: "canvas", label: "HTML Canvas" },
   ],
 };
 
@@ -261,7 +96,7 @@ export function MediaStudio() {
 
   // Active brand is driven by the global product in the page nav tabs
   const brand = globalProduct || "mkan";
-  const [formatId, setFormatId] = useState<string>("reel");
+  const [formatId, setFormatId] = useState<string>("walkthrough");
   const currentFormat =
     ASSET_FORMATS.find((f) => f.id === formatId) || ASSET_FORMATS[0];
 
@@ -301,30 +136,30 @@ export function MediaStudio() {
   const presets = useMemo(() => {
     if (brand === "mkan") {
       switch (formatId) {
-        case "reel":
+        case "walkthrough":
           return [
-            { label: "Walkthrough · Red Sea Balcony", text: "A smooth 35mm handheld tour gliding from a sunlit coastal living room to a breezy balcony overlooking the Red Sea in Port Sudan." },
-            { label: "Kitchen to Sunset Terrace", text: "Walkthrough gliding through an open kitchen into a private sunset veranda in Hayy Al-Shati." },
+            { label: "Balcony Tour", text: "A smooth 35mm handheld tour gliding from a sunlit coastal living room to a breezy balcony overlooking the Red Sea in Port Sudan." },
+            { label: "Sunset Veranda", text: "Walkthrough gliding through an open kitchen into a private sunset veranda in Hayy Al-Shati." },
           ];
-        case "product":
+        case "post":
           return [
-            { label: "Master Bedroom · Ocean View", text: "A bright, airy master bedroom with clean white linens, wooden side tables, and gentle morning sunlight in Hayy Al-Shati, Port Sudan." },
-            { label: "Spacious Coastal Living Room", text: "Living room with large windows, split AC, and clean tiled floors overlooking the Red Sea coastline." },
+            { label: "Master Bedroom", text: "A bright, airy master bedroom with clean white linens, wooden side tables, and gentle morning sunlight in Hayy Al-Shati, Port Sudan." },
+            { label: "Coastal Living Room", text: "Living room with large windows, split AC, and clean tiled floors overlooking the Red Sea coastline." },
           ];
         case "lifestyle":
           return [
-            { label: "Family Afternoon Tea", text: "A Sudanese family enjoying mint tea on a breezy seaside veranda in Port Sudan during golden hour." },
-            { label: "Host Welcoming Guests", text: "A warm local host greeting arriving travelers with authentic Red Sea hospitality." },
+            { label: "Afternoon Tea", text: "A Sudanese family enjoying mint tea on a breezy seaside veranda in Port Sudan during golden hour." },
+            { label: "Welcoming Host", text: "A warm local host greeting arriving travelers with authentic Red Sea hospitality." },
           ];
         case "ad":
           return [
-            { label: "Weekend Rental Campaign", text: "High-impact promotional plate for luxury Port Sudan seaside apartments with 24/7 standby power and split AC." },
-            { label: "Host Onboarding Promo", text: "Earn from your coastal property in Port Sudan by listing on Mkan." },
+            { label: "Weekend Rental", text: "High-impact promotional plate for luxury Port Sudan seaside apartments with 24/7 standby power and split AC." },
+            { label: "Host Onboarding", text: "Earn from your coastal property in Port Sudan by listing on Mkan." },
           ];
         case "infographic":
           return [
-            { label: "Amenities Checklist", text: "24/7 solar & generator backup power, high-speed Wi-Fi, split AC in every room, 5 mins from Red Sea beach." },
-            { label: "Transparent Pricing Breakdown", text: "Clear nightly rental pricing with zero hidden fees in Hayy Al-Shati." },
+            { label: "Amenities List", text: "24/7 solar & generator backup power, high-speed Wi-Fi, split AC in every room, 5 mins from Red Sea beach." },
+            { label: "Pricing Breakdown", text: "Clear nightly rental pricing with zero hidden fees in Hayy Al-Shati." },
           ];
         case "carousel":
           return [
@@ -337,7 +172,7 @@ export function MediaStudio() {
           ];
         case "mockup":
           return [
-            { label: "Mobile App Search", text: "Traveler holding a smartphone searching Port Sudan rental homes on Mkan with the Red Sea in the soft background." },
+            { label: "App Search", text: "Traveler holding a smartphone searching Port Sudan rental homes on Mkan with the Red Sea in the soft background." },
           ];
         default:
           return [
@@ -348,29 +183,29 @@ export function MediaStudio() {
 
     if (brand === "hogwarts") {
       switch (formatId) {
-        case "reel":
+        case "walkthrough":
           return [
-            { label: "Campus Library Walkthrough", text: "Cinematic camera glide across a sunlit modern school library courtyard as students collaborate on laptops." },
-            { label: "Classroom Attendance Demo", text: "Teacher taking digital attendance in seconds on a tablet in an active classroom." },
+            { label: "Library Walkthrough", text: "Cinematic camera glide across a sunlit modern school library courtyard as students collaborate on laptops." },
+            { label: "Attendance Demo", text: "Teacher taking digital attendance in seconds on a tablet in an active classroom." },
           ];
-        case "product":
+        case "post":
           return [
-            { label: "Teacher's Desk Setup", text: "A clean minimalist teacher's desk with a tablet displaying the Hogwarts live student gradebook." },
-            { label: "Bursar Administrative Suite", text: "An elegant administrative office with laptops running fee reconciliation dashboards." },
+            { label: "Teacher Desk", text: "A clean minimalist teacher's desk with a tablet displaying the Hogwarts live student gradebook." },
+            { label: "Bursar Office", text: "An elegant administrative office with laptops running fee reconciliation dashboards." },
           ];
         case "lifestyle":
           return [
-            { label: "Focused Student Study", text: "A dedicated high school student researching in a tranquil modern library setting with natural morning light." },
-            { label: "Interactive Classroom Group", text: "Students enthusiastically raising hands in a bright, modern classroom." },
+            { label: "Student Study", text: "A dedicated high school student researching in a tranquil modern library setting with natural morning light." },
+            { label: "Classroom Group", text: "Students enthusiastically raising hands in a bright, modern classroom." },
           ];
         case "ad":
           return [
-            { label: "Admission Season Campaign", text: "Modernize your entire school management in minutes with zero paperwork this admission term." },
-            { label: "Bursar Automated Billing Promo", text: "Automate fee tracking and parent WhatsApp invoices with Hogwarts SIS." },
+            { label: "Admission Campaign", text: "Modernize your entire school management in minutes with zero paperwork this admission term." },
+            { label: "Billing Promo", text: "Automate fee tracking and parent WhatsApp invoices with Hogwarts SIS." },
           ];
         case "infographic":
           return [
-            { label: "School Metrics Overview", text: "98% on-time fee collection, 100% automated student progress cards, and instant SMS parent notices." },
+            { label: "School Metrics", text: "98% on-time fee collection, 100% automated student progress cards, and instant SMS parent notices." },
           ];
         case "carousel":
           return [
@@ -382,7 +217,7 @@ export function MediaStudio() {
           ];
         case "mockup":
           return [
-            { label: "Tablet Dashboard Mockup", text: "Clean bursar's office desk with a tablet displaying the real-time school financial collection dashboard." },
+            { label: "Tablet Dashboard", text: "Clean bursar's office desk with a tablet displaying the real-time school financial collection dashboard." },
           ];
         default:
           return [
@@ -427,7 +262,7 @@ export function MediaStudio() {
     startTransition(async () => {
       const res = await fileMediaBrief({
         brand,
-        assetType: kind === "video" ? "reel" : formatId === "ad" ? "hero" : "hero",
+        assetType: kind === "video" ? "reel" : "hero",
         subject: compiled.beats.scene,
       });
       if (res.ok && res.brief) {
@@ -442,8 +277,6 @@ export function MediaStudio() {
     (isRTL
       ? PRODUCTS.find((p) => p.id === brand)?.labelAr
       : PRODUCTS.find((p) => p.id === brand)?.label) || brand;
-
-  const FormatIcon = currentFormat.icon;
 
   return (
     <div className="mx-auto w-full max-w-4xl space-y-6">
@@ -510,54 +343,30 @@ export function MediaStudio() {
                 </PromptInputActionMenuContent>
               </PromptInputActionMenu>
 
-              {/* 1. Asset Format & Use-Case Selector */}
+              {/* 1. Format Selector — Clean single title, no icons */}
               <PromptInputModelSelect
                 value={formatId}
                 onValueChange={(val) => handleFormatChange(val)}
               >
                 <PromptInputModelSelectTrigger className={KNOB_TRIGGER}>
-                  <FormatIcon className="size-3.5 text-primary" />
                   <span className="font-medium text-xs">
                     {isRTL ? currentFormat.labelAr : currentFormat.label}
                   </span>
                 </PromptInputModelSelectTrigger>
-                <PromptInputModelSelectContent
-                  align={isRTL ? "end" : "start"}
-                  className="w-72 p-1.5 space-y-1"
-                >
-                  {ASSET_FORMATS.map((fmt) => {
-                    const Icon = fmt.icon;
-                    return (
-                      <PromptInputModelSelectItem
-                        key={fmt.id}
-                        value={fmt.id}
-                        className="cursor-pointer py-1.5"
-                      >
-                        <div className="flex items-start gap-2.5">
-                          <div className="mt-0.5 flex h-4 w-4 items-center justify-center text-primary">
-                            <Icon className="size-4" />
-                          </div>
-                          <div className="flex flex-col">
-                            <div className="flex items-center gap-2">
-                              <span className="font-medium text-xs text-foreground">
-                                {isRTL ? fmt.labelAr : fmt.label}
-                              </span>
-                              <span className="font-mono text-[9px] uppercase text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
-                                {fmt.kind}
-                              </span>
-                            </div>
-                            <span className="text-[10px] text-muted-foreground/80 leading-tight">
-                              {isRTL ? fmt.subAr : fmt.sub}
-                            </span>
-                          </div>
-                        </div>
-                      </PromptInputModelSelectItem>
-                    );
-                  })}
+                <PromptInputModelSelectContent align={isRTL ? "end" : "start"}>
+                  {ASSET_FORMATS.map((fmt) => (
+                    <PromptInputModelSelectItem
+                      key={fmt.id}
+                      value={fmt.id}
+                      className="cursor-pointer"
+                    >
+                      {isRTL ? fmt.labelAr : fmt.label}
+                    </PromptInputModelSelectItem>
+                  ))}
                 </PromptInputModelSelectContent>
               </PromptInputModelSelect>
 
-              {/* 2. Simple Model Selector */}
+              {/* 2. Model Selector — Clean title */}
               <PromptInputModelSelect
                 value={model}
                 onValueChange={(val) => {
@@ -566,36 +375,25 @@ export function MediaStudio() {
                 }}
               >
                 <PromptInputModelSelectTrigger className={KNOB_TRIGGER}>
-                  <Sparkles className="size-3.5 text-primary" />
                   <span className="font-medium text-xs">
                     {activeModelOptions.find((m) => m.id === model)?.label ||
                       activeModelOptions[0]?.label}
                   </span>
                 </PromptInputModelSelectTrigger>
-                <PromptInputModelSelectContent
-                  align={isRTL ? "end" : "start"}
-                  className="w-56 p-1.5 space-y-1"
-                >
+                <PromptInputModelSelectContent align={isRTL ? "end" : "start"}>
                   {activeModelOptions.map((m) => (
                     <PromptInputModelSelectItem
                       key={m.id}
                       value={m.id}
-                      className="cursor-pointer py-1.5"
+                      className="cursor-pointer"
                     >
-                      <div className="flex flex-col">
-                        <span className="font-medium text-xs text-foreground">
-                          {m.label}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground">
-                          {m.sub}
-                        </span>
-                      </div>
+                      {m.label}
                     </PromptInputModelSelectItem>
                   ))}
                 </PromptInputModelSelectContent>
               </PromptInputModelSelect>
 
-              {/* 3. Higgsfield-inspired Aspect Ratio Selector */}
+              {/* 3. Aspect Ratio Selector — Clean title */}
               <PromptInputModelSelect
                 value={ratio}
                 onValueChange={(val) => {
@@ -604,37 +402,16 @@ export function MediaStudio() {
                 }}
               >
                 <PromptInputModelSelectTrigger className={KNOB_TRIGGER}>
-                  <div className="flex items-center gap-1.5">
-                    <RatioWireframe ratio={ratio} className="text-primary" />
-                    <span className="font-mono text-xs">{ratio}</span>
-                  </div>
+                  <span className="font-mono text-xs">{ratio}</span>
                 </PromptInputModelSelectTrigger>
-                <PromptInputModelSelectContent
-                  align={isRTL ? "end" : "start"}
-                  className="w-56 p-1.5 space-y-1"
-                >
+                <PromptInputModelSelectContent align={isRTL ? "end" : "start"}>
                   {RATIO_OPTIONS.map((opt) => (
                     <PromptInputModelSelectItem
                       key={opt.id}
                       value={opt.id}
-                      className="flex items-start gap-2.5 py-1.5 cursor-pointer"
+                      className="cursor-pointer font-mono text-xs"
                     >
-                      <div className="flex h-5 w-5 items-center justify-center pt-0.5">
-                        <RatioWireframe ratio={opt.id} className="text-foreground/80" />
-                      </div>
-                      <div className="flex flex-col">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium text-xs text-foreground">
-                            {opt.label}
-                          </span>
-                          <span className="font-mono text-[10px] text-muted-foreground">
-                            {opt.sub}
-                          </span>
-                        </div>
-                        <span className="text-[10px] text-muted-foreground/80 leading-tight">
-                          {opt.platforms}
-                        </span>
-                      </div>
+                      {opt.label}
                     </PromptInputModelSelectItem>
                   ))}
                 </PromptInputModelSelectContent>
@@ -682,8 +459,7 @@ export function MediaStudio() {
           {/* Header pill */}
           <div className="flex flex-wrap items-center justify-between gap-3 border-b pb-3">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="bg-primary/10 text-primary flex items-center gap-1.5 rounded-full px-2.5 py-0.5 font-mono text-xs font-semibold uppercase">
-                <RatioWireframe ratio={compiled.ratio} className="text-primary" />
+              <span className="bg-primary/10 text-primary rounded-full px-2.5 py-0.5 font-mono text-xs font-semibold uppercase">
                 {compiled.format || compiled.lane} · {compiled.ratio}
               </span>
               {compiled.model && (
@@ -715,9 +491,7 @@ export function MediaStudio() {
             </div>
 
             <div className="bg-muted/50 rounded-xl p-3 space-y-1">
-              <p className="font-semibold text-foreground/80 flex items-center gap-1.5">
-                <Clapperboard className="size-3.5 text-primary" /> Camera & Framing
-              </p>
+              <p className="font-semibold text-foreground/80">Camera & Framing</p>
               <p className="text-muted-foreground">{compiled.beats.cameraMotion}</p>
             </div>
 
