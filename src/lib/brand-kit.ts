@@ -146,9 +146,9 @@ export function compileMediaStudioPrompt(input: MediaStudioInput): MediaStudioOu
   const brand = input.brand || "mkan";
   const b = kit.brands[brand as keyof typeof kit.brands] || kit.brands.mkan;
   const kind = input.kind || "image";
-  const format = input.format || (kind === "video" ? "reel" : "product");
-  const ratio = input.ratio || (kind === "video" ? "9:16" : "1:1");
-  const dims = RATIO_DIMS[ratio] || RATIO_DIMS["1:1"];
+  const format = input.format || (kind === "video" ? "walkthrough" : "post");
+  const ratio = input.ratio || (kind === "video" ? "9:16" : "4:5");
+  const dims = RATIO_DIMS[ratio] || (kind === "video" ? RATIO_DIMS["9:16"] : RATIO_DIMS["4:5"]);
   const dimensions = kind === "video" ? dims.video : dims.image;
 
   const spines = getBrandSpines(brand);
@@ -158,9 +158,9 @@ export function compileMediaStudioPrompt(input: MediaStudioInput): MediaStudioOu
     prompt: "Cinematic natural photography with authentic lighting and rich atmosphere.",
   };
 
-  const clay = b.palette.canvas.find((c) => c.name === "Clay")?.hex || "#e05638";
-  const paletteHexes = b.palette.canvas.map((c) => c.hex);
-  const setting = b.region?.items?.[0] || "Port Sudan, Red Sea, Sudan";
+  const clay = b.palette?.canvas?.find((c) => c.name === "Clay")?.hex || "#e05638";
+  const paletteHexes = b.palette?.canvas?.map((c) => c.hex) || ["#0f4c81", "#e5d9c5", "#e05638"];
+  const setting = b.region?.items?.[0] || (brand === "mkan" ? "Port Sudan, Red Sea, Sudan" : "Modern school campus, Khartoum, Sudan");
 
   let cameraMotion = "Stationary 50mm prime framing with shallow depth of field";
   let soundFoley = "Natural ambient room tone";
@@ -169,19 +169,45 @@ export function compileMediaStudioPrompt(input: MediaStudioInput): MediaStudioOu
     if (brand === "mkan") {
       cameraMotion = "Gentle 35mm handheld drift gliding from interior living space towards breezy sunlit Red Sea balcony at 24fps";
       soundFoley = "Gentle coastal Red Sea breeze, faint clinking of tea glasses, quiet warm laughter, authentic room tone";
+    } else if (brand === "hogwarts") {
+      cameraMotion = "Smooth slow cinematic dolly push-in across school library and modern classroom at 24fps";
+      soundFoley = "Subtle acoustic school ambience, soft paper turning, calm room tone";
     } else {
       cameraMotion = "Smooth slow cinematic dolly push-in at 24fps with natural optic distortion";
-      soundFoley = "Subtle acoustic ambience, soft paper turning, calm room tone";
+      soundFoley = "Subtle acoustic ambience, soft room tone";
     }
-  } else if (format === "lifestyle") {
-    cameraMotion = "Candid 35mm documentary eye-level framing capturing authentic moment and human warmth";
-  } else if (format === "product" || format === "hero") {
-    cameraMotion = "Clean 50mm architectural framing with crisp geometry and balanced perspective";
-  } else if (format === "mockup") {
-    cameraMotion = "Top-down 45-degree angle table shot with natural soft studio lighting and clean desk texture";
+  } else {
+    switch (format) {
+      case "lifestyle":
+        cameraMotion = "Candid 35mm documentary eye-level framing capturing authentic human warmth and natural interactions";
+        break;
+      case "post":
+      case "product":
+      case "hero":
+        cameraMotion = "Clean 50mm architectural framing with crisp geometry and balanced perspective";
+        break;
+      case "ad":
+        cameraMotion = "High-impact promotional composition with prominent focal subject and generous negative space for typography overlay";
+        break;
+      case "infographic":
+        cameraMotion = "Structured clean editorial layout with clear subject staging and balanced quadrants for statistics and feature checklists";
+        break;
+      case "carousel":
+        cameraMotion = "Editorial sequential framing maintaining consistent eye-level horizon and narrative progression across slides";
+        break;
+      case "testimonial":
+        cameraMotion = "Warm intimate portrait framing with soft shallow depth-of-field background, leaving prominent negative space for quotation display";
+        break;
+      case "mockup":
+        cameraMotion = "Top-down 45-degree angle table shot with natural soft studio lighting and clean desk texture";
+        break;
+      default:
+        cameraMotion = "Clean 50mm prime framing with natural depth and balanced composition";
+        break;
+    }
   }
 
-  const postProcessing = `No generated text, no lettering, no AI watermark. Leave quiet bottom-start corner for ${b.domain || "mkan.sd"} brand lockup.`;
+  const postProcessing = `No generated text, no lettering, no AI watermark. Leave quiet bottom-start corner for ${b.domain || (brand === "mkan" ? "mkan.sd" : "hogwarts.sd")} brand lockup.`;
 
   let prompt = "";
   if (kind === "video") {
@@ -212,7 +238,7 @@ Headline: Set in Thmanyah Serif Display (Arabic) / Geist (English).
 Subject Plate: ${input.subject} (${selectedSpine.prompt})
 Dimensions: ${dimensions}
 Badge Overlay: Pill shape with transparent glass background, displaying local price / district pill / metrics.
-Brand Mark: ${b.mark.file} in monochrome ink placed at bottom-start.`;
+Brand Mark: ${b.mark?.file || "mark.svg"} in monochrome ink placed at bottom-start.`;
   }
 
   return {
@@ -226,8 +252,8 @@ Brand Mark: ${b.mark.file} in monochrome ink placed at bottom-start.`;
     spine: selectedSpine.id,
     paletteHexes,
     accentHex: clay,
-    domain: b.domain || "mkan.sd",
-    markFile: b.mark.file,
+    domain: b.domain || (brand === "mkan" ? "mkan.sd" : "hogwarts.sd"),
+    markFile: b.mark?.file || "mark.svg",
     beats: {
       scene: input.subject,
       cameraMotion,
