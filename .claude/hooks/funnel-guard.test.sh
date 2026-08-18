@@ -54,6 +54,11 @@ check 0 "drain + templated-only"           "npx tsx scripts/funnel/drain.ts $A $
 check 0 "drain + approved-by"              "npx tsx scripts/funnel/drain.ts $A $S --approved-by=abdout"
 check 0 "safe drain after a cd"            "cd /x && npx tsx scripts/funnel/drain.ts $A $S $T"
 
+echo "── an authoring prefix must not disable the guard ──"
+check 2 "echo prefix then a real unsafe send"  "echo go && npx tsx scripts/funnel/drain.ts $A $S"
+check 2 "printf prefix then unsafe send"       "printf hi && npx tsx scripts/funnel/tick.ts $A"
+check 0 "echo prefix then a SAFE send"         "echo go && npx tsx scripts/funnel/drain.ts $A $S $T"
+
 echo "── authoring is not sending (the regression that started this) ──"
 check 0 "echo writing a send command"      "echo 'npx tsx scripts/funnel/tick.ts $A' > notes.txt"
 check 0 "sed writing a send command"       "sed -i '' 's|x|scripts/funnel/drain.ts $A|' f.ts"

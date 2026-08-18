@@ -66,22 +66,27 @@ cmd="$(printf '%s\n' "$cmd" | awk '
   { print }
 ')"
 
-# Authoring is not sending. Checked per pipeline segment so that
-# `cd somewhere && python3 - <<PY` is still recognised as authoring.
-AUTHORING='(^|&&|\|\||;|\|)[[:space:]]*(python3?|cat|sed|awk|tee|perl|printf|echo|node[[:space:]]+-e)([[:space:]]|$)'
-printf '%s' "$cmd" | grep -Eq "$AUTHORING" && exit 0
-
 # Only the funnel lane's write/send entrypoints. A plain read never matches.
 FUNNEL_SEND='(funnel-(tick|drain)|drain-funnel|sendFunnelTouch|outreach-cadence|crm:(nudge|drain|funnel)|scripts/(crm|funnel)/(tick|drain|nudge))'
 
-# A send is an INVOCATION: an entrypoint, the apply flag, and a runner, all on
-# the SAME line. Matching across a whole multi-line script is what produced the
-# false positives — text on line 40 is data, not an argument to line 3.
-RUNNER='(^|[;&|(]|[[:space:]])(npx|pnpm|yarn|bun|node|tsx|bash|sh|\./)'
+# A send is an INVOCATION: an entrypoint, the apply flag, and a runner, together
+# in ONE pipeline segment. Judging a whole multi-line command is what produced
+# the false positives — text on line 40 is data, not an argument to line 3.
+RUNNER='(^|[[:space:]])(npx|pnpm|yarn|bun|node|tsx|bash|sh|\./)'
+
+# Authoring is not sending — but this must NEVER short-circuit the whole command.
+# An earlier version bailed globally the moment any segment looked like authoring,
+# which meant `echo go && <real unsafe send>` sailed straight through: a one-word
+# prefix disabled the guard. So the filter drops only the offending SEGMENT, and
+# every other segment stays eligible to block.
+AUTHORING_SEG='^[[:space:]]*(python3?|cat|sed|awk|tee|perl|printf|echo)([[:space:]]|$)'
+
 send_lines="$(printf '%s\n' "$cmd" \
+  | sed -E 's/(&&|\|\||;|\|)/\n/g' \
   | grep -Ei "$FUNNEL_SEND" \
   | grep -E '(^|[[:space:]])--apply([[:space:]]|$)' \
-  | grep -E "$RUNNER")"
+  | grep -E "$RUNNER" \
+  | grep -Ev "$AUTHORING_SEG")"
 [ -z "$send_lines" ] && exit 0
 
 # From here on judge only the offending invocation(s), never the whole script.
