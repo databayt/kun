@@ -25,14 +25,14 @@ Does **not** own: sending (hogwarts' Evolution API + Resend), the CRM's hosting,
 
 | Lane            |     Count |     % | What can work on it                             |
 | --------------- | --------: | ----: | ----------------------------------------------- |
-| **CONTACTABLE** |   **287** |  8.7% | reachable today — the asset                     |
-| FB_PAGE         |        61 |  1.8% | scrape the About/Intro tab                      |
+| **CONTACTABLE** |   **287** |  7.4% | reachable today — the asset                     |
+| FB_PAGE         |   **625** | 16.1% | scrape the About/Intro tab — the live queue     |
 | WEBSITE         |        32 |  1.0% | fetch + extract                                 |
-| **MAP_ONLY**    | **2,936** | 88.5% | **an OSM name + a map pin. No automated lane.** |
+| **MAP_ONLY**    | **2,936** | 75.7% | **an OSM name + a map pin. No automated lane.** |
 
-Total 3,316 schools (was 3,156). The **Sudanese book of business** — every school
-of Sudanese origin wherever it operates — is `originCountry=SD`: **158 rows**
-(98 in Sudan · 43 Egypt · 16 Saudi), 111 of them evidenced as OPERATING.
+Total **3,880** schools (was 3,156). The **Sudanese book of business** — every school
+of Sudanese origin wherever it operates — is `originCountry=SD`: **714 rows**
+(647 in Sudan · 50 Egypt · rest Gulf), up from zero on 2026-08-17.
 
 Consequences that govern every recommendation this agent makes:
 
@@ -43,7 +43,14 @@ Consequences that govern every recommendation this agent makes:
 - **What that lane DID buy is real, just not contact:** +2,528 coordinates (3,136 of 3,156 rows now carry one),
   +1,106 English names, +58 private/public classifications, plus grades/ISCED/gender/operator.
   The coordinates are the asset — they make a location-biased directory or Places match possible.
-- **Automated enrichment caps at +93 rows.** FB_PAGE (61) + WEBSITE (32). The FB lane grew from
+- **Automated enrichment now reaches +657 rows.** FB_PAGE (625) + WEBSITE (32). That ceiling is no
+  longer the constraint it was: Facebook's own in-app page search — which had NEVER run, because it
+  needs a signed-in session — found 564 more Sudanese schools across every state, Khartoum's real
+  neighbourhoods, and the diaspora. `discover-fb-pages.ts` + `sd-discover-load.ts`.
+- **Facebook search is an OR, so a discovery filter must prove Sudan in the page's own name.** The
+  first query, "مدرسة سودانية مصر", returned 42 pages and not one was Sudanese — Egyptian schools, a
+  bank academy, a meme page, and a koshary restaurant called "مدرسة الكشري". Diaspora results must
+  say Sudanese; in-country results must contain the place searched. The FB lane grew from
   13 to 113 because the old Sudan scraper's dork run had found 159 pages and never delivered them.
 - **The Sudan diaspora is the highest-yield lane found so far, measured.** Sudanese schools that
   relocated to Cairo and Riyadh after April 2023 are published in community directories with names,
