@@ -32,7 +32,10 @@ cmd="$(printf '%s' "$json" | jq -r '.tool_input.command // empty' 2>/dev/null)"
 
 # Only funnel-lane runs. The gate read itself IS included: re-running the
 # measurement is exactly when a fresh snapshot lands.
-FUNNEL_RUN='(funnel-(tick|drain|gates)|drain-funnel|funnel-drafts|sendFunnelTouch|outreach-cadence|promoteToLead|crm:(funnel|nudge|gates|drain)|scripts/(crm|funnel)/)'
+# Narrow on purpose: matching all of scripts/crm/ would make every ordinary scrape
+# command append an UNMEASURED line to this lane's ledger, which is noise that trains
+# people to stop reading it.
+FUNNEL_RUN='(funnel-(tick|drain|gates)|drain-funnel|funnel-drafts|sendFunnelTouch|outreach-cadence|promoteToLead|seed-funnel-fields|crm:(funnel|nudge|gates|drain)|scripts/funnel/)'
 printf '%s' "$cmd" | grep -Eiq "$FUNNEL_RUN" || exit 0
 
 ROOT="${CLAUDE_PROJECT_DIR:-$HOME/kun}"
@@ -54,24 +57,26 @@ if [ ! -f "$GATES" ]; then
 fi
 
 read_gates() {
-  jq -r '[.gates.REPLIED, .gates.PROSPECT, .gates.QUALIFIED, .gates.PROPOSAL, .gates.PILOT, .gates.CUSTOMER, .gates.DORMANT, .generatedAt] | @tsv' \
+  # Gate names match the ladder LIVE in the workspace (measured 2026-08-18), not the
+  # one drafted on paper: WARM is replied, DISCOVERY is qualified, PAID is customer.
+  jq -r '[.gates.PROSPECT, .gates.WARM, .gates.DISCOVERY, .gates.DEMO, .gates.TRIAL, .gates.PILOT, .gates.PAID, .gates.DORMANT, .generatedAt] | @tsv' \
     "$1" 2>/dev/null
 }
 
 cur="$(read_gates "$GATES")"
 [ -z "$cur" ] && exit 0
-IFS=$'\t' read -r r_now p_now q_now pr_now pi_now c_now d_now gen_now <<< "$cur"
+IFS=$'\t' read -r p_now w_now di_now de_now tr_now pi_now pa_now d_now gen_now <<< "$cur"
 
 if [ -f "$SNAP" ]; then
   prev="$(read_gates "$SNAP")"
-  IFS=$'\t' read -r r_was p_was q_was pr_was pi_was c_was d_was gen_was <<< "${prev:-}"
+  IFS=$'\t' read -r p_was w_was di_was de_was tr_was pi_was pa_was d_was gen_was <<< "${prev:-}"
 else
   gen_was=""
 fi
 
 if [ -z "${gen_was:-}" ]; then
-  printf '[%s] %s  %s\n         baseline: replied %s · prospect %s · qualified %s · proposal %s · pilot %s · customer %s · dormant %s (gates file %s)\n' \
-    "$now" "$repo" "$short" "$r_now" "$p_now" "$q_now" "$pr_now" "$pi_now" "$c_now" "$d_now" "$gen_now" >> "$LOG"
+  printf '[%s] %s  %s\n         baseline: prospect %s · warm %s · discovery %s · demo %s · trial %s · pilot %s · paid %s · dormant %s (gates file %s)\n' \
+    "$now" "$repo" "$short" "$p_now" "$w_now" "$di_now" "$de_now" "$tr_now" "$pi_now" "$pa_now" "$d_now" "$gen_now" >> "$LOG"
 elif [ "$gen_was" = "$gen_now" ]; then
   # The command ran, the measurement did not. A stale file reporting a zero
   # delta is exactly the false "it's working" this hook exists to stop.
@@ -80,11 +85,11 @@ elif [ "$gen_was" = "$gen_now" ]; then
   exit 0
 else
   d() { printf '%+d' "$(( ${1:-0} - ${2:-0} ))"; }
-  printf '[%s] %s  %s\n         delta: replied %s · prospect %s · qualified %s · proposal %s · pilot %s · CUSTOMER %s (%s→%s) · dormant %s\n' \
+  printf '[%s] %s  %s\n         delta: prospect %s · warm %s · discovery %s · demo %s · trial %s · pilot %s · PAID %s (%s→%s) · dormant %s\n' \
     "$now" "$repo" "$short" \
-    "$(d "$r_now" "$r_was")" "$(d "$p_now" "$p_was")" "$(d "$q_now" "$q_was")" \
-    "$(d "$pr_now" "$pr_was")" "$(d "$pi_now" "$pi_was")" \
-    "$(d "$c_now" "$c_was")" "$c_was" "$c_now" "$(d "$d_now" "$d_was")" >> "$LOG"
+    "$(d "$p_now" "$p_was")" "$(d "$w_now" "$w_was")" "$(d "$di_now" "$di_was")" \
+    "$(d "$de_now" "$de_was")" "$(d "$tr_now" "$tr_was")" "$(d "$pi_now" "$pi_was")" \
+    "$(d "$pa_now" "$pa_was")" "$pa_was" "$pa_now" "$(d "$d_now" "$d_was")" >> "$LOG"
 fi
 
 cp "$GATES" "$SNAP" 2>/dev/null
