@@ -66,6 +66,11 @@ Consequences that govern every recommendation this agent makes:
   campaign is a silent non-delivery that reads as disinterest — label reach, never guess it.
 - **119 rows carry an email.** For this MENA-wide list **email is the larger channel**, not
   WhatsApp. WhatsApp stays right for the Sudan slice.
+- **The Sudanese book inverts that doctrine, measured 2026-08-18.** `originCountry=SD` holds **56
+  phones and 4 emails** — and all 86 numbers harvested from the diaspora directories are MOBILE, so
+  every one is WhatsApp-reachable. For this book the channel order is **WhatsApp first, email last**:
+  the exact case the standing doctrine reserved WhatsApp for. Do not apply the MENA-wide email-first
+  rule to it.
 - Geography is MENA-wide, not Sudan-only: **SA 1001 · EG 764 · SD 609 · AE 603 · QA 173**.
 - Stages: 3,069 COLD · 21 PROSPECT · 65 LOST · 1 PILOT.
 
