@@ -50,10 +50,25 @@ json="$(cat)"
 cmd="$(printf '%s' "$json" | jq -r '.tool_input.command // empty' 2>/dev/null)"
 [ -z "$cmd" ] && exit 0
 
-# ── Authoring is not sending ──────────────────────────────────────────────────
-# A command that writes a file is never a send, however much send-shaped text it
-# carries. Editing this lane's own scripts must not look like running them.
-AUTHORING='^[[:space:]]*(python3?|cat|sed|awk|tee|perl|printf|echo|node[[:space:]]+-e)([[:space:]]|$)'
+# ── A heredoc body is data, not a command ─────────────────────────────────────
+# Strip every heredoc body before matching. This is the precise fix for the
+# false positives: a script being WRITTEN — a refusal message quoting the flag,
+# a patch, a fixture listing commands — lives inside a heredoc, and matching it
+# blocked this guard's own author repeatedly. The opener line survives (it is a
+# real command), only the body is dropped, so nothing real is weakened.
+cmd="$(printf '%s\n' "$cmd" | awk '
+  !inhd && match($0, /<<-?[[:space:]]*"?'"'"'?[A-Za-z_][A-Za-z0-9_]*/) {
+    tag = substr($0, RSTART, RLENGTH)
+    sub(/^<<-?[[:space:]]*"?'"'"'?/, "", tag)
+    inhd = 1; hdtag = tag; print; next
+  }
+  inhd { if ($0 ~ "^[[:space:]]*" hdtag "[[:space:]]*$") inhd = 0; next }
+  { print }
+')"
+
+# Authoring is not sending. Checked per pipeline segment so that
+# `cd somewhere && python3 - <<PY` is still recognised as authoring.
+AUTHORING='(^|&&|\|\||;|\|)[[:space:]]*(python3?|cat|sed|awk|tee|perl|printf|echo|node[[:space:]]+-e)([[:space:]]|$)'
 printf '%s' "$cmd" | grep -Eq "$AUTHORING" && exit 0
 
 # Only the funnel lane's write/send entrypoints. A plain read never matches.
