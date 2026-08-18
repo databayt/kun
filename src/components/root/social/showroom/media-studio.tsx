@@ -96,6 +96,7 @@ export function MediaStudio() {
 
   // Active brand is driven by the global product in the page nav tabs
   const brand = globalProduct || "mkan";
+  const [mode, setMode] = useState<"image" | "video">("video");
   const [formatId, setFormatId] = useState<string>("walkthrough");
   const currentFormat =
     ASSET_FORMATS.find((f) => f.id === formatId) || ASSET_FORMATS[0];
@@ -111,6 +112,12 @@ export function MediaStudio() {
   const [filingError, setFilingError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
+  const availableFormats = useMemo(() => {
+    return ASSET_FORMATS.filter((f) =>
+      mode === "video" ? f.kind === "video" : f.kind !== "video",
+    );
+  }, [mode]);
+
   const activeModelOptions = useMemo(
     () => MODELS_BY_KIND[kind] || MODELS_BY_KIND.video,
     [kind],
@@ -119,6 +126,24 @@ export function MediaStudio() {
   // Spines available for this brand
   const spines = useMemo(() => getBrandSpines(brand), [brand]);
   const activeSpine = spine || spines[0]?.id || "cinematic";
+
+  // Handle toggling between Image and Video mode
+  const handleModeToggle = (nextMode: "image" | "video") => {
+    if (nextMode === mode) return;
+    setMode(nextMode);
+    if (nextMode === "video") {
+      setFormatId("walkthrough");
+      setKind("video");
+      setRatio("9:16");
+      setModel("seedance");
+    } else {
+      setFormatId("post");
+      setKind("image");
+      setRatio("4:5");
+      setModel("gemini");
+    }
+    if (compiled) setCompiled(null);
+  };
 
   // When format changes, update kind, default ratio, and default model
   const handleFormatChange = (newFormatId: string) => {
@@ -343,6 +368,34 @@ export function MediaStudio() {
                 </PromptInputActionMenuContent>
               </PromptInputActionMenu>
 
+              {/* Image / Video Segmented Toggle */}
+              <div className="border-input bg-muted inline-flex h-8 items-center rounded-full p-0.5 border">
+                <button
+                  type="button"
+                  onClick={() => handleModeToggle("image")}
+                  className={cn(
+                    "h-7 rounded-full px-2.5 text-xs font-medium transition-colors cursor-pointer",
+                    mode === "image"
+                      ? "bg-background text-foreground shadow-xs"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {isRTL ? "صورة" : "Image"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleModeToggle("video")}
+                  className={cn(
+                    "h-7 rounded-full px-2.5 text-xs font-medium transition-colors cursor-pointer",
+                    mode === "video"
+                      ? "bg-background text-foreground shadow-xs"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {isRTL ? "فيديو" : "Video"}
+                </button>
+              </div>
+
               {/* 1. Format Selector — Clean single title, no icons */}
               <PromptInputModelSelect
                 value={formatId}
@@ -354,7 +407,7 @@ export function MediaStudio() {
                   </span>
                 </PromptInputModelSelectTrigger>
                 <PromptInputModelSelectContent align={isRTL ? "end" : "start"}>
-                  {ASSET_FORMATS.map((fmt) => (
+                  {availableFormats.map((fmt) => (
                     <PromptInputModelSelectItem
                       key={fmt.id}
                       value={fmt.id}
