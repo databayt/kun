@@ -108,7 +108,12 @@ Bands come from the pricing config, not from taste: **100** is the free-tier cei
 - `promoteToLead()` is referenced in `prisma/models/sales.prisma` and **does not exist**.
 - `Lead.schoolId` and `LeadActivity.createdById` are **required FKs**; an inbound chat lead has
   neither. Sentinel `School{id:"platform"}` + `User{id:"system-funnel"}` before anything promotes.
-- `School.trialEndsAt` is **read by `isTenantOnTrial()` and does not exist in the schema**.
+- **Trial state is not modelled anywhere.** Neither `School` nor `Subscription` carries a
+  trial end date (`Subscription` is Stripe-shaped: `currentPeriodEnd`, `status`).
+  `isTenantOnTrial()` takes it as a *parameter*, and the dashboard reads
+  `tenantBilling?.trialEndsAt`, which is always undefined and handled by optional
+  chaining. So this is a missing capability the code already documents as a TODO in two
+  places — **not** a live crash. The funnel's PILOT gate needs it and it does not exist.
 - `planType` is written `"starter"`, documented lowercase, and queried UPPERCASE — plan-distribution
   counts render 0 today.
 - `mkan/scripts/crm/outreach-cadence.ts` is a fixture mock whose day divisor is 1000× too large, so

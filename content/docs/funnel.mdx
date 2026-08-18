@@ -170,7 +170,10 @@ Recorded so no session rediscovers them, and so none of them is quietly assumed 
 - `promoteToLead()` is referenced in hogwarts' Prisma schema and **does not exist**.
 - `Lead.schoolId` and `LeadActivity.createdById` are **required foreign keys**; an inbound chat lead
   has neither, so nothing can promote until a sentinel tenant exists.
-- `School.trialEndsAt` is **read by `isTenantOnTrial()` and absent from the schema**.
+- **Trial state is modelled nowhere.** Neither `School` nor `Subscription` holds a trial end
+  date, `isTenantOnTrial()` takes one as a parameter, and the dashboard reads
+  `tenantBilling?.trialEndsAt` — always undefined, absorbed by optional chaining. A
+  documented TODO rather than a live fault, but the PILOT gate cannot run without it.
 - `planType` is written `"starter"`, documented lowercase, queried UPPERCASE — plan-distribution
   counts render 0 today.
 - mkan's `outreach-cadence.ts` is a fixture mock whose day divisor is 1000× too large, so touches 2
