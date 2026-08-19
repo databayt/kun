@@ -203,6 +203,45 @@ Instagram account's email later is possible but changing the *scheme* means recr
 `ig.<brand>@` is the safer default: one address per brand per platform, so the next platform that
 demands a unique email does not collide with Instagram's.
 
+## Status — 2026-08-19
+
+Three things changed, and one correction to what this page said before.
+
+**The Meta app is now `Gabriel`** (`874547138717755`), renamed from "Hogwarts Social". It carries
+four Pages across four brands, so naming it after one of them misled every consent dialog a
+collaborator sees. Verified through `debug_token` (`"application": "Gabriel"`), not the dashboard.
+
+**A dedicated posting account is being introduced.** `datapayt@gmail.com` was invited to the
+portfolio with **Partial access: Basic**, and the Hogwarts Page assigned with **Content and
+Insights** only — not Messages, not Ads, not Everything. Least privilege on purpose: this account
+publishes and reads numbers, and can do nothing else. Status **Invited**; the invitation expires
+in 30 days.
+
+> This was Abdout's explicit call. The engine's written position is that a second personal account
+> does not reduce publishing risk — Graph API posting to a Page you administer is the sanctioned
+> path, and Meta permits one personal account per human, so a second one operated from the same
+> machine is more likely to be actioned than to shield anything. The risk this *does* address is
+> real but different: bus factor. Recorded here so the reasoning survives the decision.
+
+**Correction to "The people" above.** `Mkan @mkan.sd` and `UnclaimedBusinessUser FromPool @mkan.sd`
+are listed under **People**, not System users — Business settings → System users shows *none*. Both
+still hold **Full access / Everything**. Two non-human accounts with total control of the portfolio
+is worth a deliberate look; neither was created intentionally.
+
+### What remains before publishing actually runs on the new account
+
+1. `datapayt@gmail.com` accepts the invitation — needs that account's own login, cannot be done
+   from Abdout's session.
+2. Assign the remaining three Pages. The invite wizard carries **one asset at a time** (selecting a
+   second replaces the first, silently), so Mkan مكان, Bilqalam and Databayt still need adding via
+   *Details → Assign assets*. Bilqalam and Databayt are **not in the portfolio at all** — they are
+   personally owned and must be brought in first, or granted at Page level.
+3. Mint Page tokens from the new account's grant on Gabriel and swap
+   `FACEBOOK_PAGE_ACCESS_TOKEN_*`. See [/facebook](/docs/social/channels/facebook) — and note the
+   Edit-settings trap, which applies to every future grant.
+
+Until step 3 lands, publishing still runs on Abdout's personal grant and is unchanged.
+
 ## Open decisions
 
 These need a human call, not a default:
