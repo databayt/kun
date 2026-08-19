@@ -29,8 +29,17 @@ export type AssetType = (typeof ASSET_TYPES)[number];
 export interface AssetTypeMeta {
   en: string;
   ar: string;
-  /** Which generator owns the type by default. */
-  lane: "higgs" | "template";
+  /**
+   * Does this type carry copy? That is the whole question this field answers:
+   * `template` goes to the deterministic carousel engine, `higgs` to a raster
+   * renderer, `none` is never generated at all.
+   *
+   * Note this is NOT the same question `lane` answers in
+   * `content/media/brand-kit.json`, which names the specific renderer or seat
+   * (`chatgpt` vs `higgs`). The two agree on the set that matters — every
+   * copy-carrying type — and `taxonomy-parity.test.ts` pins that agreement.
+   */
+  lane: "higgs" | "template" | "none";
   /** Higgs-lane defaults, lifted from the skill's verified tables. */
   model?: string;
   ratio?: string;
@@ -69,11 +78,13 @@ export const ASSET_TYPE_META: Record<AssetType, AssetTypeMeta> = {
   logo: {
     en: "Logo / wordmark",
     ar: "شعار",
-    lane: "higgs",
-    model: "nano_banana_2_lite",
-    ratio: "1:1",
-    style: "minimal",
-    gemini: { model: "lite", size: "1K" },
+    // No model, and `lane: "none"` on purpose. Every brand's mark rules say the
+    // same thing — "the mark is placed in post, never drawn by a generative
+    // model; an AI-drawn approximation of a logo is a different logo". This
+    // entry used to carry nano_banana_2_lite, which invited exactly that.
+    // The type stays so the library can still FILE a logo; it just never
+    // generates one.
+    lane: "none",
   },
   product: {
     en: "Product shot",
