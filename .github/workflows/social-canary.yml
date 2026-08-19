@@ -1,0 +1,70 @@
+name: Token canary
+
+# Turns a silent publishing outage into a message.
+#
+# Page access tokens are derived from an identity (today a Business Portfolio
+# System User). If that identity is banned, loses its role on a Page, or has a
+# scope revoked, posting starts failing and NOTHING says so — the drain retries,
+# variants sit at `scheduled`, and the brand Pages simply go quiet. Kun found
+# out about this class of failure the slow way; this is the fix.
+#
+# Twice daily, not hourly. The failure it catches is a step change, not a drift:
+# a token is either revoked or it is not, and catching it within twelve hours is
+# the difference between "we knew before the client did" and "we didn't". More
+# often would add Graph reads and alert fatigue without shortening that in any
+# way that matters.
+#
+# Read-only by construction — the route probes and reports, it never publishes.
+# A green run is silent on purpose: an alert channel that chirps on success gets
+# muted, and a muted channel is worse than no channel.
+
+on:
+  schedule:
+    - cron: "0 5,17 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: social-canary
+  cancel-in-progress: false
+
+jobs:
+  canary:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Probe every publishable brand
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: ${{ vars.SITE_URL || 'https://kun.databayt.org' }}
+        run: |
+          if [ -z "$CRON_SECRET" ]; then
+            echo "CRON_SECRET secret is not set — refusing to call the canary route."
+            exit 1
+          fi
+
+          response=$(mktemp)
+          code=$(curl -sS -o "$response" -w '%{http_code}' --max-time 90 \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            "$SITE_URL/api/social/canary")
+
+          echo "HTTP $code"
+          cat "$response"
+          echo
+
+          # No CRON_SECRET on the deployment is a config gap, not a dead token.
+          if [ "$code" = "503" ]; then
+            echo "::warning::Canary disabled on the deployment (no CRON_SECRET)."
+            exit 0
+          fi
+
+          if [ "$code" != "200" ]; then
+            echo "::error::Canary returned HTTP $code"
+            exit 1
+          fi
+
+          # ok:false means a brand's token is dead or expiring. The review
+          # channel already has the detail and the remedy; fail the run so it is
+          # also visible to anyone looking at Actions rather than at chat.
+          if grep -q '"ok":false' "$response"; then
+            echo "::error::A brand token is dead or expiring — see the review channel."
+            exit 1
+          fi
