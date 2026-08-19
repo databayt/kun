@@ -7,8 +7,9 @@ description: بالقلم — the Arabic-facing school SaaS brand. Same product 
 
 *بالقلم — المدرسة كلها في مكان واحد.* Balqalam is the **in-product name** of the same school
 management system that ships to English-facing audiences as [Hogwarts](/docs/social/hogwarts).
-It is not a second product; it is the face Sudanese and MENA schools actually see when they open
-the app at [balqalam.com](https://balqalam.com).
+It is not a second product; it is the face Arabic-speaking schools actually see when they open
+the app at [balqalam.com](https://balqalam.com). The Page carries a **Saudi** address (Al Khobar)
+and a Saudi contact number — this is the Gulf-facing front door, not the Sudan lane.
 
 It appears here as its own brand because the pipeline models **one destination per (brand,
 channel)** — Balqalam has its own Facebook Page, its own permanent Page access token, and its own
@@ -33,12 +34,12 @@ the wrong audience.
 
 ## Channel mix
 
-Sudan and the wider Arabic MENA market run on Facebook and WhatsApp. That is the mix — not a
+Saudi and the wider Arabic MENA market run on Facebook and WhatsApp. That is the mix — not a
 preference, an observation about where the schools already are.
 
 | Priority | Channel | Why |
 |----------|---------|-----|
-| **Primary** | **Facebook** | Where Sudanese school communities and admin groups live |
+| **Primary** | **Facebook** | Where Arabic school communities and admin groups live |
 | **Primary** | **WhatsApp** | The follow-up surface — manual by transport, no organic posting API |
 | **Secondary** | **Instagram** | Visual proof (dashboards, classrooms); wired the day kun#141 clears |
 | **Low** | Telegram, X, LinkedIn | Not where this buyer is |
@@ -47,7 +48,7 @@ preference, an observation about where the schools already are.
 
 Arabic is **written**, never translated. The Hogwarts English copy is the mirror of the Arabic,
 not its source. Avoid the Hogwarts wordmark in any asset produced for this brand — an asset
-addressed to a Sudanese principal should say **بالقلم**, and the brand-kit note in
+addressed to an Arabic-speaking principal should say **بالقلم**, and the brand-kit note in
 `content/media/brand-kit.json` records exactly which name belongs where.
 
 ## Wiring
@@ -55,12 +56,19 @@ addressed to a Sudanese principal should say **بالقلم**, and the brand-kit
 | Piece | Value |
 |-------|-------|
 | Product id | `balqalam` (env suffix `BALQALAM`) |
-| Facebook Page | [web.facebook.com/profile.php?id=61592684345321](https://web.facebook.com/profile.php?id=61592684345321) |
+| Facebook Page | **Bilqalam بالقلم** — [profile.php?id=61592684345321](https://web.facebook.com/profile.php?id=61592684345321) |
+| Graph Page id | `1218016808068580` — **not** the `61592684345321` in the profile URL, which is the profile number and returns `error_subcode: 33` from Graph |
 | Env | `FACEBOOK_PAGE_ID_BALQALAM`, `FACEBOOK_PAGE_ACCESS_TOKEN_BALQALAM` |
 | Meta app | `Hogwarts Social` (874547138717755) — the same Business app that carries the other Pages |
 | Domain / UTM | `balqalam.com` |
 
 The Page token is minted the same way as the others: a **user** grant on the Business app with the
 Balqalam Page ticked in Meta's granular-consent dialog, exchanged for a long-lived user token, then
-`/me/accounts` for the Page token — which must come back with `expires_at: 0`. A permission grant
-made before this Page existed does **not** cover it; the granular scopes name page ids explicitly.
+`/me/accounts` for the Page token — which must come back with `expires_at: 0`. A permission grant made before this Page existed does **not** cover it: the granular scopes name
+page ids explicitly, and clicking **Generate Access Token** in the Graph API Explorer silently
+re-issues the *old* grant rather than offering the new Page. The step that actually adds it is
+**Edit settings → Select all → Continue → Save** in the login dialog. Do not revoke the app to
+force a fresh dialog — that would invalidate the three working permanent Page tokens.
+
+Wired and verified 2026-08-19: `checkFacebookHealth("balqalam")` returns *Bilqalam بالقلم*, and
+the hogwarts / mkan / databayt tokens survived the re-consent unchanged.
