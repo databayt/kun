@@ -2,7 +2,9 @@ import { NextResponse, type NextRequest } from "next/server";
 
 // The outer wall. Every route below ALSO does its own `auth()` check in the
 // page — this is defence in depth, not a replacement for the gate on the door.
-// If this file is deleted, the pages still refuse.
+// If this file is deleted, the pages still refuse. Both layers skip the check
+// outside production so local automation can reach the Hub; keep the two in
+// step, and never disable one without the other (see social/layout.tsx).
 //
 // Next 16 renamed the `middleware` file convention to `proxy`; the default
 // export is the entry point. Proxy always runs on the Node

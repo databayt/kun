@@ -1428,6 +1428,13 @@ import {
 export async function generateStudioImage(
   input: GenerateStudioImageInput,
 ): Promise<GenerateStudioImageResult> {
+  // Server Actions are public POST endpoints and do not traverse proxy.ts's
+  // matcher, so the Hub's page guard never sees this call. Without the check
+  // here there is none: this was the only exported action in the file missing
+  // it, and the only one that can reach a paid renderer.
+  if (!(await requireContributor())) {
+    return { ok: false, error: "Forbidden: contributors only." };
+  }
 
   if (process.env.OPENAI_API_KEY && input.model === "gpt_image") {
     try {

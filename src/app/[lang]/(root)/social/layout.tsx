@@ -35,10 +35,16 @@ export default async function SocialLayout({
   const t = getSocialDict(locale);
 
   // Guard at the server boundary — publishing surfaces are contributors-only
-  // const session = await auth();
-  // if (!session?.user) {
-  //   redirect(`/${lang}/login?next=/${lang}/social`);
-  // }
+  // (the actions re-check on top of this; see post-social.ts). Production-gated
+  // rather than unconditional so local browser automation can reach the Hub
+  // without a login; the same shape rate-limit.ts and turnstile.ts use. Vercel
+  // builds preview as NODE_ENV=production, so preview is gated too.
+  if (process.env.NODE_ENV === "production") {
+    const session = await auth();
+    if (!session?.user) {
+      redirect(`/${lang}/login?next=/${lang}/social`);
+    }
+  }
 
   // Same shell as the homepage — PageHeader + a bar under it, one rhythm. The
   // header is static, so it renders on the server and never reaches the bundle;
