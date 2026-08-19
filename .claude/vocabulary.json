@@ -4652,10 +4652,6 @@
           "effect": "Databayt credentials — API keys via Keychain, web logins via Safari",
           "order": [
             {
-              "type": "portal",
-              "name": "Keychain"
-            },
-            {
               "type": "skill",
               "name": "/credentials"
             }
@@ -5567,10 +5563,6 @@
               "name": "/scrape"
             },
             {
-              "type": "portal",
-              "name": "Keychain"
-            },
-            {
               "type": "memory",
               "name": "project_lead_engine"
             }
@@ -5805,10 +5797,6 @@
             {
               "type": "skill",
               "name": "/scrape"
-            },
-            {
-              "type": "portal",
-              "name": "Keychain"
             }
           ],
           "steps": [
@@ -5833,10 +5821,6 @@
             {
               "type": "skill",
               "name": "/scrape"
-            },
-            {
-              "type": "portal",
-              "name": "Keychain"
             }
           ],
           "steps": [

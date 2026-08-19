@@ -26,8 +26,8 @@ Kun is a **configuration engine** — not a server, not a platform. It sits as t
 │                                                                  │
 │  Layer 3: KUN CONFIGURATION ENGINE (core value)                 │
 │  ┌────────────────────────────────────────────────────────────┐ │
-│  │ CLAUDE.md   │ 18 Agents  │ 29 Commands │ 26 MCP Servers   │ │
-│  │ 3 Rules     │ 5 Hooks    │ 10 Cards   │ 100+ Keywords    │ │
+│  │ CLAUDE.md   │ 22 Agents  │  0 Commands │ 17 MCP Servers   │ │
+│  │ 5 Rules     │ 14 Hooks   │ 11 Cards   │ 193 Keywords     │ │
 │  └────────────────────────────────────────────────────────────┘ │
 │                                                                  │
 │  Layer 2: Developer Surfaces (Anthropic-provided)               │

@@ -1,0 +1,10 @@
+{
+  "$comment": "Project-scoped MCP servers, per Claude Code's native project scope. This is the file the runtime reads (.claude/mcp.json is kun's own catalog and is NOT read). Only genuinely project-scoped servers belong here — everything else in the catalog is registered at user scope, and duplicating it here would shadow working servers. Declared but DISABLED by default via disabledMcpjsonServers in .claude/settings.json; see that key's comment for how to enable per-machine. ${VAR:-default} is native expansion, so this git-shared file stays portable off this Mac: set SCRAPLING_MCP_BIN if the binary lives elsewhere.",
+  "mcpServers": {
+    "scrapling": {
+      "command": "${SCRAPLING_MCP_BIN:-/Users/abdout/.local/bin/scrapling-mcp}",
+      "args": [],
+      "env": {}
+    }
+  }
+}

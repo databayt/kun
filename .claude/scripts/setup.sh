@@ -255,12 +255,45 @@ PYEOF
 chmod 600 "$CLAUDE_DIR/settings.json" 2>/dev/null || true
 info "settings (engine keys refreshed, personal keys preserved)"
 
-# Full MCP fleet
+# Full MCP fleet — copy AND register. Both are needed, for different reasons.
+#
+# The copy below is NOT what makes MCP work: Claude Code reads ~/.claude.json
+# (user/local scope) and a project-root .mcp.json — never ~/.claude/mcp.json.
+# For a long time that made this whole block a no-op, and the "26-server fleet"
+# never loaded. The copy stays anyway because health.sh hard-FAILS when
+# ~/.claude/mcp.json is absent and derives ROLE from it.
+#
+# The loop after it is what actually registers the catalog with Claude Code.
 if [ -f "$KUN_DIR/.claude/mcp.json" ]; then
     cp "$KUN_DIR/.claude/mcp.json" "$CLAUDE_DIR/mcp.json"
     chmod 600 "$CLAUDE_DIR/mcp.json" 2>/dev/null || true
     MCP_COUNT=$(grep -c '"description"' "$CLAUDE_DIR/mcp.json" 2>/dev/null || echo 0)
-    info "MCP servers ($MCP_COUNT)"
+    info "MCP catalog copied ($MCP_COUNT) — health input, not the live config"
+
+    # Idempotent: `claude mcp get` short-circuits anything already registered, so
+    # re-running setup costs one cheap lookup per server and changes nothing.
+    # `del(.description)` strips kun's own annotation — it is not part of the MCP
+    # server schema, and leaving it in is the kind of thing that fails silently.
+    if command -v claude &>/dev/null && command -v jq &>/dev/null; then
+        MCP_NEW=0
+        # `$skipRegistration` marks a server that is real and documented but must
+        # NOT be registered — today that is `vercel`, whose tools already arrive
+        # via the claude.ai connector, so registering it too would put two Vercel
+        # servers in every session.
+        for name in $(jq -r '.mcpServers | to_entries[] | select(.value["$skipRegistration"] != true) | .key' "$KUN_DIR/.claude/mcp.json"); do
+            claude mcp get "$name" >/dev/null 2>&1 && continue
+            if jq -c ".mcpServers.\"$name\" | del(.description, .\"\$skipRegistration\", .\"\$skipRegistration_why\")" "$KUN_DIR/.claude/mcp.json" \
+                | claude mcp add-json -s user "$name" - >/dev/null 2>&1; then
+                MCP_NEW=$((MCP_NEW + 1))
+            else
+                info "MCP registration skipped: $name"
+            fi
+        done
+        [ "$MCP_NEW" -gt 0 ] && info "MCP servers registered ($MCP_NEW new)" \
+            || info "MCP servers already registered"
+    else
+        info "MCP registration skipped — needs both claude and jq on PATH"
+    fi
 fi
 
 # Antigravity bridge — the secondary agent (`agy`) reuses the same MCP fleet,

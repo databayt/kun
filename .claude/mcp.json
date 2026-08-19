@@ -4,21 +4,53 @@
     "@eldoraui": "https://eldoraui.site/r/{name}.json"
   },
   "mcpServers": {
-    "shadcn": {
-      "command": "npx",
-      "args": [
-        "shadcn@latest",
-        "mcp"
-      ],
-      "description": "shadcn/ui component registry - browse, search, install components"
-    },
-    "design-system-analyzer": {
+    "airtable": {
       "command": "npx",
       "args": [
         "-y",
-        "@yajihum/design-system-mcp"
+        "airtable-mcp-server"
       ],
-      "description": "Analyze React components and design tokens"
+      "env": {
+        "AIRTABLE_API_KEY": "${AIRTABLE_API_KEY}"
+      },
+      "description": "Airtable data management"
+    },
+    "chrome-devtools": {
+      "command": "/Users/abdout/.claude/bin/chrome-devtools-mcp.sh",
+      "args": [],
+      "description": "Chrome DevTools Protocol — real-Chrome capture, network/asset waterfall, CSS cascade, performance. Attaches to Chrome on :9222 (chrome-debug.sh) to reuse manual logins, else default persistent profile. (clone --devtools; pinned 1.3.0)"
+    },
+    "claude-design": {
+      "type": "http",
+      "url": "https://api.anthropic.com/v1/design/mcp",
+      "description": "Claude Design (Anthropic Labs) — canvas design-system sync + handoff; auth via /design-login, subscription-covered"
+    },
+    "context7": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@upstash/context7-mcp@latest"
+      ],
+      "description": "Up-to-date documentation for libraries"
+    },
+    "figma": {
+      "type": "http",
+      "url": "https://mcp.figma.com/mcp",
+      "description": "Figma hosted MCP (OAuth) — works app-open or closed. Free Starter: reads (get_design_context/screenshot/metadata) capped 6/month; writes (generate_figma_design, add_code_connect_map, whoami) exempt. Reserve reads for critical pulls; use window screenshots for everyday design reading."
+    },
+    "figma-desktop": {
+      "type": "http",
+      "url": "http://127.0.0.1:3845/mcp",
+      "description": "Figma desktop app local MCP (port 3845) — requires app running + 'Enable desktop MCP server' quick-action toggled. Selection-based design context when available."
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/Users/abdout"
+      ],
+      "description": "Direct file system access"
     },
     "github": {
       "command": "npx",
@@ -31,6 +63,35 @@
       },
       "description": "GitHub repositories, issues, PRs, and Projects"
     },
+    "linear": {
+      "type": "sse",
+      "url": "https://mcp.linear.app/sse",
+      "description": "Issue tracking and project management"
+    },
+    "markitdown": {
+      "command": "uvx",
+      "args": [
+        "markitdown-mcp"
+      ],
+      "description": "MarkItDown — convert PDF, Office, images, audio, HTML, URLs to Markdown"
+    },
+    "notion": {
+      "type": "http",
+      "url": "https://mcp.notion.so",
+      "env": {
+        "NOTION_API_KEY": "${NOTION_API_KEY}"
+      },
+      "description": "Documentation sync, knowledge base"
+    },
+    "posthog": {
+      "type": "http",
+      "url": "https://mcp.posthog.com",
+      "env": {
+        "POSTHOG_API_KEY": "${POSTHOG_API_KEY}",
+        "POSTHOG_PROJECT_ID": "${POSTHOG_PROJECT_ID}"
+      },
+      "description": "Product analytics, feature flags"
+    },
     "ref": {
       "command": "npx",
       "args": [
@@ -42,74 +103,18 @@
       },
       "description": "Search documentation, curated technical docs"
     },
-    "vercel": {
-      "type": "http",
-      "url": "https://mcp.vercel.com/",
-      "description": "Deployments, logs, performance monitoring"
-    },
     "sentry": {
       "type": "http",
       "url": "https://mcp.sentry.dev/mcp",
       "description": "Error monitoring, debug production issues"
     },
-    "linear": {
-      "type": "sse",
-      "url": "https://mcp.linear.app/sse",
-      "description": "Issue tracking and project management"
-    },
-    "stripe": {
-      "type": "http",
-      "url": "https://mcp.stripe.com",
-      "description": "Payment processing, subscriptions"
-    },
-    "figma": {
-      "type": "http",
-      "url": "https://mcp.figma.com/mcp",
-      "description": "Figma hosted MCP (OAuth) — works app-open or closed. Free Starter: reads (get_design_context/screenshot/metadata) capped 6/month; writes (generate_figma_design, add_code_connect_map, whoami) exempt. Reserve reads for critical pulls; use window screenshots for everyday design reading."
-    },
-    "figma-desktop": {
-      "type": "http",
-      "url": "http://127.0.0.1:3845/mcp",
-      "description": "Figma desktop app local MCP (port 3845) — requires app running + 'Enable desktop MCP server' quick-action toggled. Selection-based design context when available."
-    },
-    "postgres": {
+    "shadcn": {
       "command": "npx",
       "args": [
-        "-y",
-        "@bytebase/dbhub"
+        "shadcn@latest",
+        "mcp"
       ],
-      "env": {
-        "DATABASE_URL": "${DATABASE_URL}"
-      },
-      "description": "Database queries and management"
-    },
-    "neon": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@neondatabase/mcp-server-neon"
-      ],
-      "env": {
-        "NEON_API_KEY": "${NEON_API_KEY}"
-      },
-      "description": "Neon PostgreSQL - branching, migrations, queries"
-    },
-    "posthog": {
-      "type": "http",
-      "url": "https://mcp.posthog.com",
-      "env": {
-        "POSTHOG_API_KEY": "${POSTHOG_API_KEY}",
-        "POSTHOG_PROJECT_ID": "${POSTHOG_PROJECT_ID}"
-      },
-      "description": "Product analytics, feature flags"
-    },
-    "notion": {
-      "type": "http",
-      "url": "https://mcp.notion.so",
-      "env": {
-        "NOTION_API_KEY": "${NOTION_API_KEY}"
-      },
-      "description": "Documentation sync, knowledge base"
+      "description": "shadcn/ui component registry - browse, search, install components"
     },
     "slack": {
       "type": "http",
@@ -120,76 +125,18 @@
       },
       "description": "Team notifications, collaboration"
     },
-    "memory-bank": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@memory-bank/mcp-server@latest"
-      ],
-      "description": "Persistent context across sessions"
-    },
-    "context7": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@upstash/context7-mcp@latest"
-      ],
-      "description": "Up-to-date documentation for libraries"
-    },
-    "filesystem": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-filesystem",
-        "/Users/abdout"
-      ],
-      "description": "Direct file system access"
-    },
-    "airtable": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@airtable/mcp-server"
-      ],
-      "env": {
-        "AIRTABLE_API_KEY": "${AIRTABLE_API_KEY}"
-      },
-      "description": "Airtable data management"
-    },
-    "algolia": {
-      "command": "/Users/abdout/.claude/bin/algolia-mcp",
-      "env": {
-        "ALGOLIA_APP_ID": "${ALGOLIA_APP_ID}",
-        "ALGOLIA_API_KEY": "${ALGOLIA_API_KEY}",
-        "ALGOLIA_INDEX_NAME": "${ALGOLIA_INDEX_NAME}",
-        "ALGOLIA_WRITE_API_KEY": "${ALGOLIA_WRITE_API_KEY}"
-      },
-      "description": "Algolia search - indexing, querying"
-    },
-    "gcloud": {
-      "command": "/Users/abdout/.claude/bin/gcloud-mcp.sh",
-      "description": "Google Cloud CLI - OAuth, projects, auth"
-    },
-    "keychain": {
-      "command": "/Users/abdout/.claude/bin/keychain-mcp.sh",
-      "description": "macOS Keychain - stored credentials"
-    },
-    "markitdown": {
-      "command": "uvx",
-      "args": [
-        "markitdown-mcp"
-      ],
-      "description": "MarkItDown — convert PDF, Office, images, audio, HTML, URLs to Markdown"
-    },
-    "chrome-devtools": {
-      "command": "/Users/abdout/.claude/bin/chrome-devtools-mcp.sh",
-      "args": [],
-      "description": "Chrome DevTools Protocol — real-Chrome capture, network/asset waterfall, CSS cascade, performance. Attaches to Chrome on :9222 (chrome-debug.sh) to reuse manual logins, else default persistent profile. (clone --devtools; pinned 1.3.0)"
-    },
-    "claude-design": {
+    "stripe": {
       "type": "http",
-      "url": "https://api.anthropic.com/v1/design/mcp",
-      "description": "Claude Design (Anthropic Labs) — canvas design-system sync + handoff; auth via /design-login, subscription-covered"
+      "url": "https://mcp.stripe.com",
+      "description": "Payment processing, subscriptions"
+    },
+    "vercel": {
+      "type": "http",
+      "url": "https://mcp.vercel.com/",
+      "description": "Vercel deployments, logs, projects",
+      "$skipRegistration": true,
+      "$skipRegistration_why": "Real and working, and 9 vocabulary spells reference a Vercel portal — so it stays in the catalog as declared capability. But it is NOT registered at user scope: the claude.ai Vercel connector already provides these tools as mcp__claude_ai_Vercel__*, and registering this endpoint too would put two Vercel servers in every session. setup.sh honours this flag."
     }
-  }
+  },
+  "$comment": "kun's MCP catalog — the DECLARED fleet, and the input health.sh counts. Claude Code does NOT read this file; setup.sh copies it to ~/.claude/mcp.json (also not read, but health.sh requires it and derives ROLE from it) and separately registers each entry for real via `claude mcp add-json -s user`. Pruned 2026-08-19 from 25 to 17: eight entries were unregistered not by oversight but because they are broken — design-system-analyzer (npm 404 (@yajihum/design-system-mcp)); memory-bank (npm 404 (@memory-bank/mcp-server)); algolia (local binary ~/.claude/bin/algolia-mcp is missing); gcloud (shell wrapper, speaks no JSON-RPC — not an MCP server); keychain (shell wrapper, speaks no JSON-RPC — not an MCP server); vercel (deliberate dedup — the claude.ai Vercel connector already covers it); neon (case-collides with the live user-scope `Neon`; wrong transport besides); postgres (@bytebase/dbhub — wrong driver, redundant with Neon). Every remaining entry documents a server that is live at user scope today. Asymmetry left deliberately unfixed: Neon, browser, browser-headed and higgs are live at user scope but absent here; adding them changes project_mcp again for no gain. The per-server `description` field is kun's own annotation and is stripped (del(.description)) before registration — it is not part of the MCP config schema."
 }

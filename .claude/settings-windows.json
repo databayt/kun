@@ -6,6 +6,24 @@
     "CODEBASE_NAME": "codebase",
     "DEV_PORT": "3000"
   },
+  "permissions": {
+    "$comment": "Name-level gates the PreToolUse hooks structurally CANNOT reach. scrape-guard.sh only ever sees Bash, so an MCP tool call bypasses it entirely — and open_session is the one tool that accepts a remote-browser URL, i.e. the only MCP path to the session vault. The docs also warn that argument-constraining Bash patterns are fragile, which is why the state-dependent checks (which Chrome profile backs a port RIGHT NOW) stay in the hook and only the by-name gates live here. Evaluated deny -> ask -> allow, first match wins. NOTE: setup.sh merges this file into ~/.claude/settings.json, so these become fleet-wide user-scope rules on every machine at next setup — deliberate for a safety deny, but stated rather than discovered. Both server-key spellings are shipped because rules match the key literally and the upstream docs tell users to register it under the CamelCase name.",
+    "deny": [
+      "mcp__scrapling__open_session",
+      "mcp__ScraplingServer__open_session",
+      "Bash(agent-reach skill)",
+      "Bash(agent-reach skill:*)"
+    ],
+    "ask": [
+      "mcp__scrapling__stealthy_fetch",
+      "mcp__scrapling__bulk_stealthy_fetch",
+      "mcp__ScraplingServer__stealthy_fetch",
+      "mcp__ScraplingServer__bulk_stealthy_fetch",
+      "Bash(agent-reach install:*)",
+      "Bash(agent-reach setup:*)"
+    ],
+    "allow": []
+  },
   "hooks": {
     "SessionStart": [
       {

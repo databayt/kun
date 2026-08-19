@@ -21,6 +21,37 @@ Kept because it is the reason the lane is shaped the way it is, and re-testing i
 readily as for a school site, so it is an IP/region block on this machine rather than anything about
 the target. Re-test before planning around it; do not assume it came back.
 
+## The MCP: declared, disabled, and how to turn it on
+
+`.mcp.json` at the kun root declares `scrapling-mcp` under Claude Code's native **project scope** —
+so it is discoverable in `/mcp` and reviewable in git — and `.claude/settings.json` declares it
+**disabled** via `disabledMcpjsonServers`. That is the whole opt-in design: zero context cost per
+session, and no first-session approval prompt (an undeclared `.mcp.json` entry would raise one).
+
+To enable it on one machine, put **both** keys in `.claude/settings.local.json` (gitignored,
+per-machine, never reaches the plugin):
+
+```json
+{ "enabledMcpjsonServers": ["scrapling"], "disabledMcpjsonServers": [] }
+```
+
+Both are required. Local scope out-precedes project scope **per key**, so clearing the disable list
+is what actually lifts the project-level disable — adding to the enable list alone does nothing.
+
+Two of its ten tools are gated natively in `.claude/settings.json` → `permissions`, because
+`scrape-guard.sh` sees only Bash and can never see an MCP call:
+
+- **`open_session` is denied.** It is the only tool that accepts a remote-browser URL, i.e. the only
+  MCP path back to the session vault. Denying it kills that vector while leaving `get`, `fetch`,
+  `stealthy_fetch` and `screenshot` usable sessionless — which is exactly the sanctioned use.
+- **`stealthy_fetch` / `bulk_stealthy_fetch` ask.** Fine on an anonymous school site, catastrophic
+  aimed at a platform we hold an account on. A permission rule cannot read the `url` argument (the
+  docs are explicit that argument patterns are the wrong tool for this), and a hook parsing MCP JSON
+  would be a new hand-rolled script — so it escalates to the human, who can see the URL.
+
+**Library for batches, MCP for a one-off look.** 600+ pages through an MCP is 600+ pages of model
+context for work a local extractor does for free.
+
 ## Choosing a reader
 
 Every reading lane has a **backend**, and a lane that returns nothing is ambiguous until you know

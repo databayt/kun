@@ -2329,7 +2329,7 @@ export const schools: School[] = [
         name: "credentials",
         effect:
           "Databayt credentials — API keys via Keychain, web logins via Safari",
-        order: [p("Keychain"), s("/credentials")],
+        order: [s("/credentials")],
         steps: [
           "status: show which keys and passwords are configured",
           "setup: store a new API key in the Keychain",
@@ -2869,12 +2869,7 @@ export const schools: School[] = [
         name: "contact gap",
         effect:
           "The measurement that governs everything: 176 contactable · 13 FB pages · 32 websites · 2,935 name-and-map-pin-only",
-        order: [
-          f("lead"),
-          s("/scrape"),
-          p("Keychain"),
-          m("project_lead_engine"),
-        ],
+        order: [f("lead"), s("/scrape"), m("project_lead_engine")],
         steps: [
           "TWENTY_API_URL=http://localhost:3100 — never 3000, that is hogwarts' dev server",
           "Token from Keychain: security find-generic-password -s databayt-twenty -a <product> -w",
@@ -2993,7 +2988,7 @@ export const schools: School[] = [
         name: "scrap for hogwarts",
         effect:
           "Product-scoped — the school lane, the 3,156-lead workspace. Also `scrap facebook for hogwarts`",
-        order: [f("lead"), s("/scrape"), p("Keychain")],
+        order: [f("lead"), s("/scrape")],
         steps: [
           "Resolve scope from .claude/memory/repositories.json",
           "Keychain account = hogwarts; code in hogwarts/scripts/crm/",
@@ -3006,7 +3001,7 @@ export const schools: School[] = [
         name: "scrap for mkan",
         effect:
           "Product-scoped — the rental lane, where the lead is a property host, not a school",
-        order: [f("lead"), s("/scrape"), p("Keychain")],
+        order: [f("lead"), s("/scrape")],
         steps: [
           "Keychain account = mkan; code in mkan/scripts/crm/ — 52 files, the canonical implementation",
           "Growth must come from hosts NOT on Airbnb: Sudan has ~120 listings across 67 hosts nationally",
