@@ -1419,16 +1419,15 @@ export async function dismissMediaBrief(
   return { ok: true };
 }
 
-import type {
-  GenerateStudioImageInput,
-  GenerateStudioImageResult,
+import {
+  generateStudioImageCore,
+  type GenerateStudioImageInput,
+  type GenerateStudioImageResult,
 } from "@/lib/studio-image";
-export type { GenerateStudioImageInput, GenerateStudioImageResult };
 
 export async function generateStudioImage(
   input: GenerateStudioImageInput,
 ): Promise<GenerateStudioImageResult> {
-  const { generateStudioImageCore } = await import("@/lib/studio-image");
 
   if (process.env.OPENAI_API_KEY && input.model === "gpt_image") {
     try {
