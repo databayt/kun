@@ -99,6 +99,16 @@ export async function GET(request: Request): Promise<Response> {
     (p) => p.ok && p.expiresAt !== undefined && p.expiresAt !== 0,
   );
 
+  // A canary that cannot sing is a canary you only think you have. `sendReview`
+  // needs Hermes or a private Telegram chat; if neither is configured the
+  // detection still works but the message goes nowhere, so this is reported
+  // even on a healthy run — the scheduled caller turns it into a warning.
+  const canAlert = Boolean(
+    (process.env.HERMES_API_URL ?? "").trim() ||
+      ((process.env.TELEGRAM_BOT_TOKEN ?? "").trim() &&
+        (process.env.TELEGRAM_REVIEW_CHAT_ID ?? "").trim()),
+  );
+
   let alerted = false;
   if (dead.length || expiring.length) {
     const lines = [
@@ -121,6 +131,7 @@ export async function GET(request: Request): Promise<Response> {
   return Response.json({
     ok: dead.length === 0 && expiring.length === 0,
     checked: probes.length,
+    canAlert,
     alerted,
     probes,
   });

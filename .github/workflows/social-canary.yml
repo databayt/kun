@@ -61,6 +61,14 @@ jobs:
             exit 1
           fi
 
+          # A canary with nowhere to send its alarm is the failure mode this
+          # whole route exists to remove, so it is surfaced even on a green run.
+          # (Today prod has CRON_SECRET but no review destination — detection
+          # works, delivery does not, and this line is how anyone finds out.)
+          if grep -q '"canAlert":false' "$response"; then
+            echo "::warning::Canary has no review destination (set HERMES_API_URL, or TELEGRAM_BOT_TOKEN + TELEGRAM_REVIEW_CHAT_ID). Detection works; the chat alert does not. This run's exit code is the only signal."
+          fi
+
           # ok:false means a brand's token is dead or expiring. The review
           # channel already has the detail and the remedy; fail the run so it is
           # also visible to anyone looking at Actions rather than at chat.
