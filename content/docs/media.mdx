@@ -241,6 +241,12 @@ Credentials live in the Keychain, never in a repo — see [Credentials](/docs/cr
   Both raster lanes are CLI- or seat-driven and unreachable from a Server Action.
   A studio badge that names a model would be the `--source` fault above, applied
   to the generator instead of the library.
+- **S3 is configured in production as of 2026-08-19.** `AWS_ACCESS_KEY_ID`,
+  `AWS_SECRET_ACCESS_KEY` and `AWS_REGION` were absent from the Vercel project, so
+  `isStorageConfigured()` returned false there and `putMedia()` silently no-opped — every
+  render uploaded through the Brief Queue was accepted and then dropped, in production only.
+  Added and redeployed; verified with a write/read/delete round-trip against
+  `media/unsorted/` (IAM user `hogwarts`, origin readback 200).
 - **`cdn.databayt.org` 403s on every key in the bucket** — a CloudFront fault
   (distribution `E3PHDXTDSBCQSJ`) that predates the library. Assets serve from
   the S3 origin meanwhile; `higgs-library.mjs push --base https://cdn.databayt.org`
