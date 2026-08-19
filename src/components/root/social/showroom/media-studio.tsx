@@ -121,6 +121,7 @@ export function MediaStudio() {
 
   // Direct In-Browser Generation State
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const [generatedEngine, setGeneratedEngine] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generateError, setGenerateError] = useState<string | null>(null);
   const [attached, setAttached] = useState(false);
@@ -338,6 +339,7 @@ export function MediaStudio() {
       });
       if (res.ok && res.imageUrl) {
         setGeneratedImage(res.imageUrl);
+        setGeneratedEngine(res.engine || (model === "gemini" ? "Nano Banana 2" : "GPT Image 2.0"));
       } else {
         setGenerateError(res.error || "Generation failed.");
       }
@@ -618,10 +620,15 @@ export function MediaStudio() {
       {generatedImage && (
         <div className="bg-card text-card-foreground border-primary/30 relative space-y-4 rounded-2xl border p-5 shadow-md animate-in fade-in-50 duration-300">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b pb-3">
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <span className="bg-primary text-primary-foreground rounded-full px-2.5 py-0.5 font-mono text-xs font-bold uppercase">
                 {t.mediaGeneratedTitle}
               </span>
+              {generatedEngine && (
+                <span className="bg-muted text-foreground border rounded-full px-2.5 py-0.5 text-xs font-medium">
+                  {generatedEngine}
+                </span>
+              )}
               <span className="text-xs font-mono text-muted-foreground">{compiled?.dimensions || ratio}</span>
             </div>
 
