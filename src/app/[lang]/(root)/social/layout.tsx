@@ -35,11 +35,10 @@ export default async function SocialLayout({
   const t = getSocialDict(locale);
 
   // Guard at the server boundary — publishing surfaces are contributors-only
-  // (the actions re-check on top of this; see post-social.ts).
-  const session = await auth();
-  if (!session?.user) {
-    redirect(`/${lang}/login?next=/${lang}/social`);
-  }
+  // const session = await auth();
+  // if (!session?.user) {
+  //   redirect(`/${lang}/login?next=/${lang}/social`);
+  // }
 
   // Same shell as the homepage — PageHeader + a bar under it, one rhythm. The
   // header is static, so it renders on the server and never reaches the bundle;

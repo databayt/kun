@@ -98,7 +98,7 @@ export const slideSchema = z.discriminatedUnion("type", [
 ]);
 
 export const deckSchema = z.object({
-  brand: z.enum(["hogwarts", "databayt", "mkan", "moallimee", "sijillee"]),
+  brand: z.enum(["hogwarts", "balqalam", "databayt", "mkan", "moallimee", "sijillee"]),
   slug: z.string().regex(/^[a-z0-9-]+$/),
   title: bilingualSchema,
   /** Feature-block scope for the later per-block carousels (hogwarts blocks.json). */

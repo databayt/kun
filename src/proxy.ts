@@ -11,6 +11,10 @@ import { NextResponse, type NextRequest } from "next/server";
 // It also means a `runtime` segment export is rejected outright; don't add one.
 
 export default async function proxy(request: NextRequest) {
+  if (process.env.NODE_ENV !== "production") {
+    return NextResponse.next();
+  }
+
   // Imported lazily so the auth graph is only pulled in for matched routes.
   const { auth } = await import("@/auth");
   const session = await auth();

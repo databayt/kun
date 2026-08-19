@@ -35,6 +35,7 @@ export const BRANDS: Record<Deck["brand"], BrandInfo> = {
     figma: { fileKey: "HqgFh4Lxp8QtTnW04czQQN", carouselsNodeId: "251-2" },
     deckDir: "/Users/abdout/hogwarts/carousels",
   },
+  balqalam: { wordmark: "balqalam", domain: "balqalam.com" },
   databayt: { wordmark: "databayt", domain: "databayt.org" },
   mkan: { wordmark: "mkan", domain: "mkan.databayt.org" },
   moallimee: { wordmark: "moallimee", domain: "moallimee.databayt.org" },

@@ -40,6 +40,16 @@ export const PRODUCTS = [
     channels: { facebook: true },
   },
   {
+    // The in-product Arabic face of the same school SaaS that ships as Hogwarts
+    // (content/media/brand-kit.json). Separate brand here because it has its own
+    // Facebook Page and its own permanent Page token — one destination per
+    // (brand, channel) is exactly what this map models.
+    id: "balqalam",
+    label: "Balqalam",
+    labelAr: "بالقلم",
+    channels: { facebook: true },
+  },
+  {
     id: "mkan",
     label: "Mkan",
     labelAr: "مكان",

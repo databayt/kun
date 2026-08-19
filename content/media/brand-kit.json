@@ -32,7 +32,7 @@
       "id": "hogwarts",
       "mediaName": "Hogwarts",
       "domain": "ed.databayt.org",
-      "note": "The media brand is Hogwarts (Abdout, 2026-08-05). The shipped app introduces itself to schools as بالقلم / balqalam — that is the in-product name, deliberately not the media name. Do not let a generated asset say بالقلم unless someone changes this line.",
+      "note": "The media brand is Hogwarts (Abdout, 2026-08-05). The shipped app introduces itself to schools as بالقلم / balqalam — that is the in-product name. AMENDED 2026-08-19: balqalam now has its own Facebook Page and its own `balqalam` brand in the social pipeline, so an asset addressed to that brand SHOULD say بالقلم. The rule that still stands: an asset generated for the `hogwarts` brand must not say بالقلم, and one generated for `balqalam` must not carry the Hogwarts wordmark. Pick the name from the brand the piece is for.",
       "inAppName": { "ar": "بالقلم", "en": "balqalam" },
 
       "what": "A multi-tenant school management system — admissions, timetable, attendance, exams, grades, finance — sold to schools across MENA.",
