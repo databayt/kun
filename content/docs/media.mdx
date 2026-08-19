@@ -222,18 +222,13 @@ Credentials live in the Keychain, never in a repo — see [Credentials](/docs/cr
   every final image, hero, and video is unaffordable there until the workspace is topped up.
   Free-plan credits look like a one-time grant, not a monthly refill. This is what demoted
   the lane from default to alternate.
-- **The Google lane is blocked on billing, not on a key** (probed 2026-08-19). The key exists,
-  is in the central `.env` and in Vercel production, authenticates fine, and lists all six image
-  models — `GET /v1beta/models` returns 200. Generation is still refused:
-
-  ```
-  ✗ No image/video quota on this key — the free tier for generation is limit: 0.
-  ```
-
-  Text models work on the free tier; image and video are hard-zero. The fix is one switch —
-  **AI Studio → Set up billing** on the project, with a monthly spend cap set at the same time.
-  The probe costs nothing: the gate refuses before generating. It remains new external API spend,
-  which the subscription-only posture says is Abdout's call, not a session's.
+- **The Google lane is blocked on billing, not on a missing key** — see
+  [the callout above](#the-google-lane), settled 2026-08-05 and re-confirmed 2026-08-19. The
+  key exists, is in the central `.env` *and* in Vercel production, and lists all six image
+  models. Enabling billing on project `gen-lang-client-0243019665` is the single remaining
+  step, and it is new external API spend, which the subscription-only posture says is Abdout's
+  call, not a session's. Re-confirming costs nothing — the spend gate refuses before it
+  generates, so `image --model lite --yes` is a free liveness probe.
 - The Plus trial requires a working card — currently blocked by the Mada rejection.
 - The Higgsfield MCP endpoint is registered but unauthenticated; the CLI is the primary lane.
 - `cdn.databayt.org` returns 403 for every key in the bucket — a CloudFront fault that
