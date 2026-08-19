@@ -5785,7 +5785,7 @@
             "Read the About/Intro tab, NOT the feed — the feed is why the earlier yield was near zero",
             "Split Pages from Groups; a /groups/ URL is not a school lead",
             "FB_SCRAPE_PROFILE + FB_SCRAPE_PORT + FB_SCRAPE_DELAY_MS, or scrape-guard blocks the run",
-            "Losing the account also loses the Page tokens the whole social pipeline depends on"
+            "Publishing moved to a System User (2026-08-19) so a scrape ban no longer touches it — keep the scrape account at ZERO roles so losing it stays cheap"
           ],
           "connects": [
             "enrich",

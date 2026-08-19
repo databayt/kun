@@ -100,7 +100,9 @@ If the sample is weak, say so and stop. A lane that returns 5% is not worth $50 
 `twenty/scripts/sudan-schools-scraper/` drives a logged-in Chrome via CDP. Two rules, both
 non-negotiable:
 
-- **A dedicated Facebook account, never Abdout's.** Losing it also loses the Page tokens the social
+- **A dedicated Facebook account, never Abdout's.** It must hold ZERO roles on any Page or
+  portfolio, so losing it costs nothing. (Page tokens moved to a System User 2026-08-19 and are no
+  longer at risk from this lane.) Abdout's account administers the
   pipeline runs on.
 - Extract the **About / Intro tab**, not the feed. The current extractor reads the feed, which is
   why its yield is near zero. Split Pages from Groups — a `/groups/` URL is a community, not a school.

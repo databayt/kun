@@ -161,7 +161,9 @@ only; a Page can only message someone who messaged it first).**
 ## Safety — the two accounts that must not be lost
 
 - **Facebook.** The scraper drives a logged-in Chrome via CDP. Use a **dedicated** account, throttled.
-  Losing Abdout's account also loses the Page tokens the whole social pipeline depends on. The
+  Abdout's account administers the portfolio, so it stays out of this lane. Page tokens are no
+  longer at stake — publishing moved to a System User (2026-08-19) — and the dedicated account is
+  kept cheap to lose by holding ZERO roles on any Page, portfolio or app. The
   `scrape-guard` hook enforces this at the Bash boundary.
 - **WhatsApp.** Evolution API is Baileys — the same mechanism class as UltraMsg. Ban risk lands on
   the number: dedicated number, a **separate instance** from school notifications, warm-up ramp

@@ -89,12 +89,47 @@ automated lane** — treat a stale number here as a planning error, not a detail
 - Reuse the existing phone regex and `extractWhatsApp` in `tier4-enricher.js`; do not write a third.
 - **Checkpoint** (`dorker_checkpoint.json` pattern) so a stop is resumable, and log what the stop dropped.
 
-**Account + throttle rule — read this every time.** Use a **dedicated account**, never Abdout's:
-losing it also loses the Page tokens the whole social pipeline depends on. Throttle every run. The
+**Account + throttle rule — read this every time.** Use a **dedicated account**, never Abdout's.
+Throttle every run. The
 `scrape-guard` PreToolUse hook **blocks** (exit 2) when no dedicated identity is declared, and
 **escalates to you** (`permissionDecision: "ask"`) when a run declares no throttle — so an
 unthrottled run now stops and waits for a human instead of proceeding with a warning. If either
 fires, fix the run; don't route around it.
+
+### Why the rule changed shape (2026-08-19)
+
+This rule used to say *"losing it also loses the Page tokens the whole social pipeline depends
+on."* **That is no longer true, and the improvement is the point.** Publishing now runs on a
+Business Portfolio **System User** (`Gabriel`, `61593467071204`) — a non-human identity whose
+tokens do not derive from anyone's login. Banning a scrape account can no longer take publishing
+down with it.
+
+The rule survives with a different justification: **Abdout's** account still administers the
+portfolio, so it is still the thing that must not be risked. And the dedicated account is now
+genuinely cheap to lose — which is exactly what makes it safe to point at a risky lane.
+
+### Keeping it cheap to lose
+
+The account's value is that losing it costs nothing. Four rules preserve that:
+
+1. **Zero roles, permanently.** The scrape account holds **no** role on any Page, portfolio, or
+   app. A pending grant on the Hogwarts Page was revoked on 2026-08-19 for exactly this reason.
+   If a scrape run ever fails for want of a permission, the answer is a different data source —
+   never a Page role. The moment it holds one, it stops being cheap to lose.
+2. **One place, one rhythm.** Meta reads geography as an automation signal. This account's own
+   security mail already shows logins near **Atbara** on 18 Aug and **Kannur** on 19 Aug — two
+   countries in two days, which is a stronger flag than anything the scraping itself does. Run it
+   from one egress, or accept a checkpoint.
+3. **Warm up; never burst.** A new account scraping at volume is the classic pattern. Ramp like the
+   WhatsApp lane does — ~20 profile reads/day for the first week, then 50, then 100 — and keep
+   `FB_SCRAPE_DELAY_MS` at 4000 or higher. The guard escalates an unthrottled run to a human.
+4. **No evasion, ever.** Scrapling's `StealthyFetcher` stays off Meta. Fingerprint spoofing on a
+   platform you hold an account on raises the stakes of detection instead of lowering the odds —
+   and evasion is what turns a rate-limit into a ban.
+
+A checkpointed or banned scrape account should be a shrug: make another, resume from the
+checkpoint file. If it ever feels like more than that, something has been given to it that
+shouldn't have been.
 
 Two vectors, only one of them inspectable: the bespoke scraper is CDP-on-9222 and the hook can read
 which Chrome profile backs that port, but agent-reach/OpenCLI drives your **real desktop Chrome**

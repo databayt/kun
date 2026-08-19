@@ -256,7 +256,8 @@ What the lane *does* use: `chrome-devtools` / `browser` (user-level) for the CDP
 On this machine, `~/.claude/bin/chrome-debug.sh` runs one persistent **session vault** Chrome at
 `~/.claude/chrome-debug-profile` on port **9222** — the browser Abdout logs into by hand *and* the
 browser agents attach to. Pointing the scraper at it means scraping Facebook as him, and losing that
-account also loses the Page tokens the whole social pipeline depends on.
+account administers the business portfolio. Page tokens are no longer at stake — publishing moved
+to a System User on 2026-08-19 — and the scrape account is kept cheap to lose by holding zero roles.
 
 A shell hook cannot ask Chrome which Facebook user is signed in — CDP exposes the browser build,
 never the profile. So the guard checks the thing that *is* checkable and is the actual failure mode:

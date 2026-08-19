@@ -1,7 +1,7 @@
 ---
 name: facebook
 description: Connect a brand's Facebook Page to the publishing pipeline — grant, permanent token, registration, verified first post
-when_to_use: "Use when a Facebook Page must be wired into kun's social pipeline so drafts can be delivered to it — a brand-new brand Page, a Page that exists but posts nothing, a token that expired or was invalidated, or a delivery failure that reports a permissions error naming nothing. Covers the whole path: the Meta grant, the permanent Page token, the four-file code registration, env on Vercel, and a verified-then-retracted first post. This is CONNECTION work, not content: it never writes copy (/draft), never renders media (/higgs, /carousel), never approves (/approve), and never runs the everyday send (/publish, which assumes the Page is already wired). Triggers on: connect a facebook page, add my brand page, wire up facebook, new brand page, facebook token expired, page token not working, invalid scopes, add <brand> to social, اربط صفحة فيسبوك, أضف صفحة العلامة."
+when_to_use: "Use when a Facebook Page must be wired into the social pipeline so drafts can reach it — a new brand Page, a Page that posts nothing, an expired or invalidated token, or a delivery failure reporting a permissions error that names nothing. Covers the grant, the permanent Page token, code registration, env, and a verified-then-retracted first post. Connection work, not content: never writes copy (/draft), renders media (/higgs), approves (/approve), or runs the everyday send (/publish). Triggers on: connect a facebook page, add my brand page, wire up facebook, new brand page, facebook token expired, invalid scopes, اربط صفحة فيسبوك."
 argument-hint: "<brand-id> [--page-url <profile-or-page-url>]"
 ---
 

@@ -103,7 +103,8 @@ it does not re-derive them, and the rule that Twenty is reached only through RES
 
 - A **pre-run guard** that refuses a scrape when the Facebook session belongs to Abdout's personal
   account, and warns when a run has no throttle. The scraper drives a logged-in Chrome via CDP;
-  losing that account also loses the Page tokens the social pipeline depends on.
+  that account administers the business portfolio. Page tokens are safe either way since publishing
+  moved to a System User (2026-08-19); the dedicated account holds zero roles so losing it costs nothing.
 - A **post-run** hook that appends the contact-gap delta to the run log so yield is always measured,
   not assumed.
 
