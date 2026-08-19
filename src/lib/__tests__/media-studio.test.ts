@@ -5,6 +5,7 @@ import {
   type MediaStudioKind,
   type MediaStudioRatio,
 } from "@/lib/brand-kit";
+import { generateStudioImageCore } from "@/lib/studio-image";
 
 describe("Media Studio — Mkan & Hogwarts Handy Media Creation", () => {
   describe("Mkan media generation", () => {
@@ -256,6 +257,77 @@ describe("Media Studio — Mkan & Hogwarts Handy Media Creation", () => {
       expect(out.title).toBeDefined();
       expect(out.prompt).toContain("Fallback test");
       expect(out.paletteHexes.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe("In-Browser Image Generation (generateStudioImage)", () => {
+    it("generates teacher desk raster image for Hogwarts prompt mentioning student dashboard", async () => {
+      const result = generateStudioImageCore({
+        brand: "hogwarts",
+        format: "post",
+        ratio: "1:1",
+        model: "gemini",
+        subject:
+          "Minimalist teacher desk in a modern school classroom with soft morning sunlight. On the wooden desk sits a sleek tablet displaying a clean modern student dashboard interface, a small notebook and pen, warm terracotta accents.",
+      });
+
+      expect(result.ok).toBe(true);
+      expect(result.imageUrl).toBe("/media/hogwarts-teacher-desk.jpg");
+      expect(result.engine).toContain("Nano Banana 2");
+      expect(result.dimensions).toBe("1080x1080");
+    });
+
+    it("generates library study raster image for Hogwarts prompt mentioning library", async () => {
+      const result = generateStudioImageCore({
+        brand: "hogwarts",
+        format: "post",
+        ratio: "4:5",
+        model: "gemini",
+        subject: "Student studying in tranquil modern library courtyard with natural light.",
+      });
+
+      expect(result.ok).toBe(true);
+      expect(result.imageUrl).toBe("/media/hogwarts-library-study.jpg");
+    });
+
+    it("generates coastal living room raster image for Mkan stay prompt", async () => {
+      const result = generateStudioImageCore({
+        brand: "mkan",
+        format: "post",
+        ratio: "4:5",
+        model: "gemini",
+        subject: "A bright coastal living room overlooking the Red Sea in Hayy Al-Shati with split AC.",
+      });
+
+      expect(result.ok).toBe(true);
+      expect(result.imageUrl).toBe("/media/mkan-coastal-living-room.jpg");
+    });
+
+    it("generates sunset balcony raster image for Mkan walkthrough / sunset balcony prompt", async () => {
+      const result = generateStudioImageCore({
+        brand: "mkan",
+        format: "walkthrough",
+        ratio: "9:16",
+        model: "seedance",
+        subject: "Sunset veranda with sea breeze in Port Sudan.",
+      });
+
+      expect(result.ok).toBe(true);
+      expect(result.imageUrl).toBe("/media/mkan-balcony-sunset.jpg");
+    });
+
+    it("generates deterministic SVG plate for infographic template format", async () => {
+      const result = generateStudioImageCore({
+        brand: "mkan",
+        format: "infographic",
+        ratio: "1:1",
+        model: "canvas",
+        subject: "Amenities breakdown in Port Sudan.",
+      });
+
+      expect(result.ok).toBe(true);
+      expect(result.imageUrl).toMatch(/^data:image\/svg\+xml;base64,/);
+      expect(result.engine).toBe("Deterministic HTML Canvas Engine");
     });
   });
 });
