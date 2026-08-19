@@ -47,7 +47,22 @@ cmd="$(printf '%s' "$json" | jq -r '.tool_input.command // empty' 2>/dev/null)"
 # Matched against BOTH the current fork path and the hogwarts path the plan
 # relocates it to, so the guard survives the move. contact-gap / normalize-contacts
 # are read-only and are NOT scrape entrypoints — they must never be blocked.
-SCRAPE_ENTRYPOINTS='(sudan-schools-scraper|tier[0-9]+-[a-z]+|cdp-client|fb-matrix|dorker|enricher|scripts/crm/(scrape|discover|enrich|contact-hunt)|crm:(scrape|discover|enrich|matrix|dork|fb))'
+#
+# Agent Reach (github.com/Panniantong/Agent-Reach) is covered here too, and it was
+# added BEFORE the tool was installed rather than after. Its OpenCLI backend states
+# plainly that it never logs in for you — it drives "the user's existing, explicitly
+# controlled Chrome session." On this machine that session IS the vault on :9222.
+# So `opencli facebook …` carries exactly the risk this guard was written for, while
+# matching none of the bespoke entrypoints above. Adopting a new backend without
+# extending the guard would silently reopen the hole it exists to close.
+#
+# MAINTENANCE: Agent Reach's whole design is that backends get swapped underneath
+# you ("接入方式会换代"). When `agent-reach doctor --json` reports a NEW
+# active_backend for facebook or instagram, add that binary here — the guard cannot
+# discover it on its own. Scoped to the session-driving channels on purpose:
+# `agent-reach doctor` / `install` / `check-update` are read-only or administrative
+# and must stay unblocked, because a guard that cries wolf gets routed around.
+SCRAPE_ENTRYPOINTS='(sudan-schools-scraper|tier[0-9]+-[a-z]+|cdp-client|fb-matrix|dorker|enricher|scripts/crm/(scrape|discover|enrich|contact-hunt)|crm:(scrape|discover|enrich|matrix|dork|fb)|opencli[[:space:]]+(facebook|instagram)|agent-reach[[:space:]]+[a-z-]*[[:space:]]*(facebook|instagram))'
 printf '%s' "$cmd" | grep -Eiq "$SCRAPE_ENTRYPOINTS" || exit 0
 
 # ...and is it RUNNING one, rather than merely naming one?
@@ -62,7 +77,13 @@ printf '%s' "$cmd" | grep -Eiq "$SCRAPE_ENTRYPOINTS" || exit 0
 # A real scrape run always *executes* something. Requiring an execution verb
 # keeps every genuine run matched (they are all `npx tsx …` / `node …` /
 # `pnpm crm:…`) while letting inspection and version control through untouched.
-EXEC_VERBS='(^|[;&|]|[[:space:]])(npx|node|tsx|pnpm|npm|yarn|bun|deno|bash|sh|zsh|python3?)([[:space:]]|$)'
+#
+# `opencli` and `agent-reach` are in this list because they are invoked as bare
+# binaries — `opencli facebook profile …`, not `npx opencli …`. Without them the
+# entrypoint patterns added above would match the text and then be discarded here,
+# so the new coverage would silently never fire. A guard that looks present and
+# does nothing is worse than no guard, so this pairing is tested, not assumed.
+EXEC_VERBS='(^|[;&|]|[[:space:]])(npx|node|tsx|pnpm|npm|yarn|bun|deno|bash|sh|zsh|python3?|opencli|agent-reach)([[:space:]]|$)'
 printf '%s' "$cmd" | grep -Eq "$EXEC_VERBS" || exit 0
 
 # ── 2. Which profile backs the port this run will attach to? ─────
@@ -99,9 +120,10 @@ block() {
     echo "     export FB_SCRAPE_DELAY_MS=4000"
     echo "   Launch it once and log in as that account, then re-run."
     echo
-    echo "   Before scraping at all: automated enrichment caps at +40 rows and the"
-    echo "   scraper adds +15, while 130 contactable tier-A/B schools sit unworked."
-    echo "   See .claude/agents/lead.md — discovery is the low-yield lane."
+    echo "   Before scraping at all: raw discovery is the measured low-yield lane"
+    echo "   (the last full scrape run added 15 contactable rows). Read the live"
+    echo "   split from contact-gap.json and .claude/agents/lead.md first — counts"
+    echo "   are deliberately not hardcoded here, because they move weekly."
   } >&2
   exit 2
 }

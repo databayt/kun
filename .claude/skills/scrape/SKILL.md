@@ -8,9 +8,15 @@ argument-hint: "[facebook|whatsapp|website] [for <product>] [--apply]"
 # Scrape — the lead acquisition runbook
 
 **The measured truth this runbook exists to enforce: discovery is the low-yield lane.**
-Automated enrichment caps at **+45** rows. The Sudan scraper adds **+15**. Meanwhile **131 tier-A/B
-schools are contactable and unworked right now.** So: measure the gap, work the contactable, and
-treat raw discovery as a deliberate choice someone made on purpose — never the default.
+A full scrape run adds **+15** contactable rows — 505 of the scraper's 817 names were already in the
+CRM. So: measure the gap, work the contactable, and treat raw discovery as a deliberate choice
+someone made on purpose — never the default.
+
+**Counts are NOT hardcoded in this file, on purpose.** Read them from
+`<repo>/scripts/crm/.data/contact-gap.json` (or re-run §1). This paragraph used to carry them and
+they went 50× stale inside two days — it claimed 13 Facebook rows while the CRM held 639. An
+instruction file that says "do not re-derive" must not itself be the stale source. The `lead` agent
+card is the one place a live snapshot lives; everything else reads the artifact.
 
 **Two lanes are now settled, so nobody re-litigates them:**
 
@@ -20,7 +26,7 @@ treat raw discovery as a deliberate choice someone made on purpose — never the
   you are about to propose "re-fetch the OSM tags", it already happened.
 - **Government open data is the highest free yield, measured.** ADEK's ArcGIS layer gives 225 Abu
   Dhabi private schools at 100% phone/email/website; exact-name matching alone reaches **48**
-  unreachable AE rows. That is 48× the entire OSM lane. Build §8 before anything paid or scraped.
+  unreachable AE rows. That is 48× the entire OSM lane. Build §5 before anything paid or scraped.
 
 Full numbers and the hard rules: `.claude/agents/lead.md`. Code lives in the product repos —
 `hogwarts/scripts/crm/` and `mkan/scripts/crm/` (canonical). **kun holds no scraper code.**
@@ -32,9 +38,9 @@ Polymorphic on argument, like `/handover`:
 | Argument                              | Mode                                           |
 | ------------------------------------- | ---------------------------------------------- |
 | _(none)_                              | **Gap report** — measure, then recommend. §1   |
-| `facebook`                            | The FB Page About/Intro lane (13 rows). §2     |
+| `facebook`                            | The FB Page About/Intro lane. §2               |
 | `whatsapp`                            | Harvest numbers + hand to the sender. §3       |
-| `website`                             | Fetch + extract from a domain (27 rows). §4    |
+| `website`                             | Fetch + extract from a domain. §4              |
 | `for <product>` / `<x> for <product>` | Resolve scope, then run the above. §0          |
 | `--apply`                             | Write. Absent = dry run. Always dry-run first. |
 
@@ -57,19 +63,25 @@ Off this Mac: `https://twenty-api-2.tail42a5c4.ts.net`. The CRM is down whenever
 cd <product-local> && npx tsx scripts/crm/contact-gap.ts   # read-only by design
 ```
 
-Report the split as measured — CONTACTABLE / FB_PAGE / WEBSITE / MAP_ONLY — and then **recommend
-the highest-yield next move**, which is almost never "scrape more":
+Report the split **as the command prints it** — CONTACTABLE / FB_PAGE / WEBSITE / MAP_ONLY, plus
+"Workable NOW" — and then **recommend the highest-yield next move**, which is almost never "scrape
+more". Rank by what the run actually returned:
 
-1. **Work the contactable unworked** (130 tier-A/B today) → `/outreach` drafting. Yield: immediate.
-2. **Enrich the 40 with a signal** (§2 + §4). Yield: ≤40 rows, ceiling, measured.
-3. **Discovery** (§5). Yield: +15 measured. Only on an explicit decision, and say the number first.
+1. **Work the contactable unworked** (the "Workable NOW" line) → `/outreach`. Yield: immediate, and
+   it needs no enrichment run to start.
+2. **Enrich the rows that still carry a signal** — FB_PAGE + WEBSITE (§2, §4). That sum IS the
+   enrichment ceiling; state it as a number you just read, never one you remembered.
+3. **Directories** (§5). The only lane that reaches MAP_ONLY, and the highest measured free yield.
+4. **Discovery** (§6). +15 measured. Only on an explicit decision, and say the number first.
 
-If the split has moved materially since 2026-08-17, say so — the agent card's numbers are a
-snapshot, and a drifted snapshot is worth flagging rather than quietly using.
+Never quote a count this file or the agent card taught you without checking it against the run.
+Every previous read of this funnel was optimistic and each was corrected only by measuring.
 
 ## §2 — `facebook`: the About/Intro lane
 
-Only **13 rows** have a Facebook page. That is the whole surface. Say it before running.
+Read `fbQueue` from `contact-gap.json` for the size of the surface, and say it before running. It
+grew from 13 rows to the high hundreds once the About-tab pass landed, so this is now the **largest
+automated lane** — treat a stale number here as a planning error, not a detail.
 
 - Extract from the **About / Intro tab**, not the feed — the feed is why the earlier yield was near
   zero; schools publish phone and WhatsApp on About.
@@ -90,13 +102,15 @@ profile index, and nothing to crawl. Two real capabilities sit behind the phrase
 routes to them:
 
 1. **Harvest numbers** from the public web and Facebook Page About tabs (that is §2 and §4), then
-   `normalize-contacts.ts` to E.164 — and **label mobile vs landline**. Only **45 of 175** contacts
-   are mobile; a landline in a WhatsApp campaign is a silent non-delivery that reads as disinterest.
+   `normalize-contacts.ts` to E.164 — and **label mobile vs landline**. Barely a quarter of the
+   contacts are mobile; the rest are switchboards, and a landline in a WhatsApp campaign is a
+   silent non-delivery that reads as disinterest. Count them, do not assume the ratio held.
 2. **Send** through `hogwarts/src/lib/whatsapp/` — the Evolution API sender that already exists with
    retry, rate limiter, templates and dispatch. **Never build a second sender.**
 
-And say the channel truth: **119 rows carry an email; email is the larger channel for this
-MENA-wide list.** WhatsApp is right for the Sudan slice.
+And say the channel truth: **for the MENA-wide list, email reaches more rows than WhatsApp.**
+WhatsApp leads for the Sudan slice, where the diaspora directories delivered mobile numbers — the
+channel is a per-market decision, not a global one.
 
 Send guardrails live in the sender, not bolted on: dedicated number, separate Evolution instance
 from school notifications, warm-up ramp 10→20→30/day, randomized 40–180s gaps, stop-on-reply,
@@ -104,10 +118,24 @@ from school notifications, warm-up ramp 10→20→30/day, randomized 40–180s g
 
 ## §4 — `website`: fetch + extract
 
-27 rows. Fetch the domain, extract contact from the usual pages (`/contact`, `/about`, footer),
-same regexes as §2. Cheap, no account risk, no ban risk.
+Read `webQueue` from `contact-gap.json` for the count. Fetch the domain, extract contact from the
+usual pages (`/contact`, `/about`, footer), same regexes as §2. Cheap, no account risk, no ban risk.
 
-## §8 — Official directories (build this next)
+**Measured 2026-08-19 on three real `webQueue` rows, so nobody re-tests it next week:**
+
+| Attempt                       | Result                                                                      |
+| ----------------------------- | --------------------------------------------------------------------------- |
+| plain `curl -sL` + browser UA | **1 of 3** yielded (`qla.edu.qa` → email + `+974` phone)                    |
+| the other 2                   | one JS-rendered shell (5.6 KB, no contact in HTML), one dead host (0 bytes) |
+| Jina Reader `r.jina.ai/<url>` | **HTTP 451 on every URL from this machine** — systemic, not per-site        |
+
+So the residual is **JS-rendered sites and dead hosts**, not parsing. A headless render would reach
+the first group; nothing reaches the second. Jina Reader is the obvious fix for group one and it is
+**unavailable here** — 451 "Unavailable For Legal Reasons" from the Cloudflare edge for
+`example.com` as readily as for a school site, so it is an IP/region block on this machine rather
+than anything about the target. Re-test before planning around it; do not assume it came back.
+
+## §5 — Official directories (build this next)
 
 The only lane that reaches the 2,935 MAP_ONLY rows, and the only free one with a measured yield
 worth the name. Regulators publish licensed-school registers, often with contact details:
@@ -128,7 +156,7 @@ Matching is the real work, not fetching: normalize Arabic (strip diacritics, أ�
 and the boilerplate `مدرسة|مدارس|الخاصة|الدولية`), match EN and AR names both ways, and use the
 coordinates §1's OSM re-fetch just banked to break ties. Dedup key: `adek:<SCH_ESIS_ID>`.
 
-## §5 — Discovery (deliberate only)
+## §6 — Discovery (deliberate only)
 
 Never the default. Before running, state the measured yield (**+15**) and get an explicit yes.
 Then: `tier2-osm.js` / `tier1-dorker.js` / `tier3-fb-matrix.js` from the relocated scraper.
@@ -137,7 +165,7 @@ Then: `tier2-osm.js` / `tier1-dorker.js` / `tier3-fb-matrix.js` from the relocat
 `ON CONFLICT (id) DO NOTHING` = no dedup key, and it writes raw SQL into **every** workspace. Use
 `twenty-upsert` (dedup on a stable external id — `fb:<pageId>` / `osm:<nodeId>`).
 
-## §6 — Load into Twenty
+## §7 — Load into Twenty
 
 **REST only, never SQL.** Dry-run, then `--apply`. `stage=COLD`, `leadStatus=UNREVIEWED`, `source`
 set, **fill-empty-never-replace-populated** — a conflict becomes a dated note, not an overwrite.
@@ -145,11 +173,53 @@ set, **fill-empty-never-replace-populated** — a conflict becomes a dated note,
 Run `--apply` **twice**; the company count must be identical after the second run. That is the
 dedup test, and it is not optional.
 
-## §7 — Measure the yield
+## §8 — Measure the yield
 
 The `scrape-yield` PostToolUse hook appends the contact-gap delta to
 `.claude/logs/scrape-runs.log` after every run, so yield is measured rather than assumed. Read it
 back and report the delta — including when it is zero. A run that added nothing is a finding.
+
+## §9 — Backends: check the reader before blaming the lane
+
+Every reading lane above has a **backend**, and a lane that returns nothing is ambiguous until you
+know which one failed: the target had no contact, or the reader was broken. Separate those before
+concluding anything — a broken reader reported as "low yield" is how a good lane gets abandoned.
+
+**Pre-flight, before any batch run:** try the reader on **one** row you have already confirmed by
+hand. If that row fails, the reader is down; stop and fix it rather than burning the queue and
+recording a false zero.
+
+**[Agent Reach](https://github.com/Panniantong/Agent-Reach)** (MIT, ~73k★, actively maintained) is a
+capability layer over exactly these readers — one CLI routing Facebook, Instagram, web, RSS and Exa
+semantic search across multiple backends, with `agent-reach doctor --json` reporting which backend
+serves each platform right now. Its premise is that access methods break and get swapped, which is
+precisely this lane's failure mode. **Status here: not installed** — it needs Python ≥3.10 and this
+Mac has 3.9.6. Adopt the idea now, the tool on approval:
+
+| Its idea                              | Applied here                                                                              |
+| ------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `doctor` before work                  | the one-known-good-row pre-flight above                                                   |
+| declare which backend you are using   | say it in the run report, so a yield number is attributable                               |
+| ordered backend fallbacks per channel | §4's chain: plain fetch → headless render → give up, and name which one produced each row |
+| backends change, config should not    | never hardcode a reader into the yield claim — record reader **and** result               |
+
+**Measured before adopting anything** (2026-08-19): its headline zero-config web reader,
+`r.jina.ai`, returns **HTTP 451 from this machine for every URL** — see §4. So the piece that looked
+like the free win is the piece that does not work here. Test the others the same way before planning
+around them, and do not treat the README's "works immediately" as measurement.
+
+**If it is installed, the account rule does not relax — it widens.** Agent Reach does not log in for
+you; its OpenCLI backend drives _the browser session you already have_, which on this machine is the
+session vault holding Abdout's personal Facebook. `scrape-guard` already matches
+`opencli facebook|instagram` and Agent Reach's Facebook/Instagram subcommands, and it was extended
+**before** the install rather than after. `agent-reach doctor`, `install` and `check-update` are
+deliberately left unblocked. When `doctor` reports a **new** active_backend for those channels, add
+that binary to the guard — it cannot discover the swap on its own.
+
+**Do not install its skill as a kun skill.** It ships a Claude Code `SKILL.md` whose description is
+"MUST USE when the user wants to research/search anything, or mentions any platform or URL" — a
+fleet-wide dispatch collision, and the listing budget has roughly 80 characters of headroom. Call
+its CLI from this runbook instead.
 
 ## Deterministic fan-out
 

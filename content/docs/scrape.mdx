@@ -143,6 +143,46 @@ CRM job is a Mac job. See [CRM](/docs/crm).
 Defaulting to port 3000 is not hypothetical: it is why Hermes' CRM crons silently returned nothing
 for weeks while reporting `last_status: ok`.
 
+## Readers and backends — Agent Reach
+
+Every reading lane has a **backend**, and a lane that returns nothing is ambiguous until you know
+which one failed: the target had no contact, or the reader was broken. A broken reader reported as
+"low yield" is how a good lane gets abandoned, so the runbook now demands a one-known-good-row
+pre-flight before any batch, and asks every yield number to name the reader that produced it.
+
+[Agent Reach](https://github.com/Panniantong/Agent-Reach) (MIT, ~73k★, last release 2026-08-12) is a
+capability layer over exactly these readers — one CLI routing Facebook, Instagram, web, RSS and Exa
+semantic search across multiple backends, with `agent-reach doctor --json` reporting which backend
+serves each platform right now. Its premise is that access methods break and get swapped underneath
+you, which is precisely this lane's failure mode. **Status: not installed** — it needs Python ≥3.10
+and this Mac has 3.9.6.
+
+**What was measured before adopting anything, 2026-08-19:**
+
+| Piece                                          | Measured here                                                                    |
+| ---------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `r.jina.ai` web reader (the zero-config win)   | **HTTP 451 for every URL from this machine** — systemic IP/region block, not per-site |
+| plain `curl` on the website lane               | **1 of 3** real rows yielded; residual is JS-rendered shells and dead hosts        |
+| `opencli facebook profile/search/groups`       | the FB queue is now the largest automated lane — highest-value piece, needs install |
+| `mcporter call exa.web_search_exa`             | the only credible automated angle on the map-pin-only rows; unverified free tier   |
+
+The headline free win is the piece that does not work here. That is the whole argument for measuring
+a dependency before designing around its README.
+
+**The account rule widens rather than relaxes.** Agent Reach does not log in for you — its OpenCLI
+backend drives *the browser session you already have*, which on this machine is the session vault
+holding Abdout's personal Facebook. So `scrape-guard` was extended to match `opencli facebook`,
+`opencli instagram` and Agent Reach's Facebook/Instagram subcommands **before** any install rather
+than after; `agent-reach doctor`, `install` and `check-update` stay unblocked because a guard that
+cries wolf gets routed around. Because Agent Reach's design is that backends get swapped, the guard
+carries a maintenance note: when `doctor` reports a new active_backend for those channels, add that
+binary — it cannot discover the swap on its own.
+
+**Its skill is deliberately not installed.** Agent Reach ships a Claude Code `SKILL.md` whose
+description is "MUST USE when the user wants to research/search anything, or mentions any platform
+or URL" — a fleet-wide dispatch collision, and the listing budget has roughly 80 characters of
+headroom. The runbook calls its CLI instead.
+
 ## MCP — REST only, deliberately
 
 **There is no Twenty MCP configured, and we are not adding one.** Twenty does ship an MCP server
@@ -184,6 +224,13 @@ export FB_SCRAPE_DELAY_MS=4000
 ```
 
 Read-only commands (`contact-gap.ts`, `normalize-contacts.ts`) are never blocked.
+
+It also covers **Agent Reach** (`opencli facebook|instagram`, and Agent Reach's own Facebook and
+Instagram subcommands) — added before the tool was installed, because its OpenCLI backend drives the
+existing browser session by design. `agent-reach doctor`, `install` and `check-update` are left
+unblocked. Both `opencli` and `agent-reach` also had to join the execution-verb list: they are
+invoked as bare binaries, so without that the new patterns would have matched the text and then been
+discarded — coverage that looks present and does nothing. Thirteen smoke cases cover it.
 
 **`scrape-yield`** (PostToolUse, Bash, async) — appends the contact-gap delta to
 `.claude/logs/scrape-runs.log` after every lead-lane run, so yield is measured rather than
