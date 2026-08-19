@@ -260,8 +260,11 @@ describe("Media Studio — Mkan & Hogwarts Handy Media Creation", () => {
     });
   });
 
-  describe("In-Browser Image Generation (generateStudioImage)", () => {
-    it("generates teacher desk raster image for Hogwarts prompt mentioning student dashboard", async () => {
+  describe("Studio results (generateStudioImageCore)", () => {
+    // These assertions used to pin `engine: "Nano Banana 2 (…)"` onto a static
+    // JPG, which made the suite green precisely because it agreed with the bug.
+    // The rule now: the badge must never name a model that did not run.
+    it("offers the desk still for a Hogwarts dashboard prompt, labelled as a library asset", () => {
       const result = generateStudioImageCore({
         brand: "hogwarts",
         format: "post",
@@ -273,11 +276,13 @@ describe("Media Studio — Mkan & Hogwarts Handy Media Creation", () => {
 
       expect(result.ok).toBe(true);
       expect(result.imageUrl).toBe("/media/hogwarts-teacher-desk.jpg");
-      expect(result.engine).toContain("Nano Banana 2");
-      expect(result.dimensions).toBe("1080x1080");
+      expect(result.engine).toBe("Library asset · hogwarts-teacher-desk.jpg");
+      // Fixed file on disk — never resized, so no dimensions are claimed.
+      expect(result.dimensions).toBeUndefined();
+      expect(result.attachable).toBe(false);
     });
 
-    it("generates library study raster image for Hogwarts prompt mentioning library", async () => {
+    it("offers the library still for a Hogwarts library prompt", () => {
       const result = generateStudioImageCore({
         brand: "hogwarts",
         format: "post",
@@ -288,9 +293,10 @@ describe("Media Studio — Mkan & Hogwarts Handy Media Creation", () => {
 
       expect(result.ok).toBe(true);
       expect(result.imageUrl).toBe("/media/hogwarts-library-study.jpg");
+      expect(result.engine).toBe("Library asset · hogwarts-library-study.jpg");
     });
 
-    it("generates coastal living room raster image for Mkan stay prompt", async () => {
+    it("offers the coastal still for a Mkan stay prompt", () => {
       const result = generateStudioImageCore({
         brand: "mkan",
         format: "post",
@@ -303,7 +309,22 @@ describe("Media Studio — Mkan & Hogwarts Handy Media Creation", () => {
       expect(result.imageUrl).toBe("/media/mkan-coastal-living-room.jpg");
     });
 
-    it("generates sunset balcony raster image for Mkan walkthrough / sunset balcony prompt", async () => {
+    it("never claims a model name it did not call", () => {
+      for (const model of ["gemini", "gpt_image", "seedance", "veo"]) {
+        const result = generateStudioImageCore({
+          brand: "mkan",
+          format: "post",
+          ratio: "4:5",
+          model,
+          subject: "A bright coastal living room overlooking the Red Sea.",
+        });
+        expect(result.engine).not.toMatch(/Nano Banana|Gemini|GPT Image|DALL|Seedance|Veo|Kling/i);
+      }
+    });
+
+    it("returns a prompt, not a still, when a video format is requested", () => {
+      // `walkthrough` used to fall through to the stills table, so picking a
+      // video model handed back a JPG.
       const result = generateStudioImageCore({
         brand: "mkan",
         format: "walkthrough",
@@ -313,10 +334,30 @@ describe("Media Studio — Mkan & Hogwarts Handy Media Creation", () => {
       });
 
       expect(result.ok).toBe(true);
-      expect(result.imageUrl).toBe("/media/mkan-balcony-sunset.jpg");
+      expect(result.imageUrl).toBeUndefined();
+      expect(result.prompt).toBeTruthy();
+      expect(result.attachable).toBe(false);
+      expect(result.engine).toMatch(/no video renderer/i);
     });
 
-    it("generates deterministic SVG plate for infographic template format", async () => {
+    it("does not borrow another brand's stills for a brand that has none", () => {
+      // Every non-Mkan brand silently used Hogwarts' shelf; balqalam is a real
+      // brand in the pipeline as of e606768.
+      const result = generateStudioImageCore({
+        brand: "balqalam",
+        format: "post",
+        ratio: "4:5",
+        model: "gemini",
+        subject: "A reading nook with warm afternoon light.",
+      });
+
+      expect(result.ok).toBe(true);
+      expect(result.imageUrl).toBeUndefined();
+      expect(result.engine).toContain("balqalam");
+      expect(result.prompt).toBeTruthy();
+    });
+
+    it("still renders the deterministic SVG plate for template formats", () => {
       const result = generateStudioImageCore({
         brand: "mkan",
         format: "infographic",

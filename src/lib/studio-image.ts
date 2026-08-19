@@ -18,6 +18,10 @@ export interface GenerateStudioImageResult {
   title?: string;
   engine?: string;
   briefId?: string;
+  /** False when `imageUrl` is not a publishable absolute URL (or absent). */
+  attachable?: boolean;
+  /** Why it is not attachable, and what to do instead. */
+  attachNote?: string;
 }
 
 export function generateStudioImageCore(
@@ -49,59 +53,99 @@ export function generateStudioImageCore(
   const brandTitle = isMkan ? "MKAN · PORT SUDAN" : "HOGWARTS · SCHOOL SIS";
   const domain = compiled.domain;
 
-  const isRasterModel = model !== "canvas";
-  const isPhotographicFormat = ["post", "lifestyle", "ad", "mockup", "walkthrough"].includes(format);
+  // The studio does not render anything. It compiles a prompt, and for the two
+  // brands with curated stills on disk it offers the closest one as a starting
+  // point. A badge naming a model that never ran is the exact dishonesty the
+  // `--source` rule in content/docs/media.mdx exists to prevent, so the label
+  // below always says where the pixels actually came from.
+  const LIBRARY: Record<
+    string,
+    { match: (subject: string) => boolean; file: string }[]
+  > = {
+    mkan: [
+      {
+        match: (t) =>
+          ["balcony", "sunset", "veranda", "tea", "tour"].some((k) =>
+            t.includes(k),
+          ),
+        file: "mkan-balcony-sunset.jpg",
+      },
+      { match: () => true, file: "mkan-coastal-living-room.jpg" },
+    ],
+    hogwarts: [
+      {
+        match: (t) =>
+          [
+            "desk",
+            "tablet",
+            "dashboard",
+            "classroom",
+            "gradebook",
+            "teacher",
+            "bursar",
+            "office",
+          ].some((k) => t.includes(k)),
+        file: "hogwarts-teacher-desk.jpg",
+      },
+      {
+        match: (t) =>
+          ["library", "courtyard", "books", "studying", "research"].some((k) =>
+            t.includes(k),
+          ),
+        file: "hogwarts-library-study.jpg",
+      },
+      { match: () => true, file: "hogwarts-teacher-desk.jpg" },
+    ],
+  };
 
-  // If raster AI model (Nano Banana / GPT Image) or photographic format
-  if (isRasterModel && isPhotographicFormat) {
-    const sLower = subject.toLowerCase();
-    let rasterUrl = "";
-    if (isMkan) {
-      if (
-        sLower.includes("balcony") ||
-        sLower.includes("sunset") ||
-        sLower.includes("veranda") ||
-        sLower.includes("tea") ||
-        sLower.includes("tour") ||
-        format === "walkthrough"
-      ) {
-        rasterUrl = "/media/mkan-balcony-sunset.jpg";
-      } else {
-        rasterUrl = "/media/mkan-coastal-living-room.jpg";
-      }
-    } else {
-      // For Hogwarts: check desk, classroom, tablet, dashboard first
-      if (
-        sLower.includes("desk") ||
-        sLower.includes("tablet") ||
-        sLower.includes("dashboard") ||
-        sLower.includes("classroom") ||
-        sLower.includes("gradebook") ||
-        sLower.includes("teacher") ||
-        sLower.includes("bursar") ||
-        sLower.includes("office")
-      ) {
-        rasterUrl = "/media/hogwarts-teacher-desk.jpg";
-      } else if (
-        sLower.includes("library") ||
-        sLower.includes("courtyard") ||
-        sLower.includes("books") ||
-        sLower.includes("studying") ||
-        sLower.includes("research")
-      ) {
-        rasterUrl = "/media/hogwarts-library-study.jpg";
-      } else {
-        rasterUrl = "/media/hogwarts-teacher-desk.jpg";
-      }
-    }
+  const kind = format === "walkthrough" ? "video" : "image";
+  const wantsPhotographic = ["post", "lifestyle", "ad", "mockup"].includes(
+    format,
+  );
 
+  // Video used to fall through to the stills table, so picking Seedance or Veo
+  // returned a JPG. No video renderer is reachable from a Server Action; the
+  // compiled prompt is the whole deliverable here.
+  if (kind === "video") {
     return {
       ok: true,
-      imageUrl: rasterUrl,
-      dimensions: compiled.dimensions,
       prompt: compiled.prompt,
       title: compiled.title,
-      engine: model === "gemini" ? "Nano Banana 2 (Gemini 3.1 Flash Image)" : "GPT Image 2.0 (OpenAI DALL·E 3)",
+      engine: "Prompt only — no video renderer is wired to this surface",
+      attachable: false,
+      attachNote:
+        "Run the compiled prompt through scripts/video-media.mjs or scripts/gemini-media.mjs, then add the result to the library.",
+    };
+  }
+
+  if (wantsPhotographic) {
+    const shelf = LIBRARY[brand];
+    // Brands added after the stills were curated (balqalam, databayt) have no
+    // shelf. Previously every non-Mkan brand silently borrowed Hogwarts'.
+    if (!shelf) {
+      return {
+        ok: true,
+        prompt: compiled.prompt,
+        title: compiled.title,
+        engine: `Prompt only — no library stills exist for ${brand}`,
+        attachable: false,
+        attachNote:
+          "Pick an asset from the showroom, or render the compiled prompt and add it to the library.",
+      };
+    }
+    const needle = subject.toLowerCase();
+    const file = shelf.find((entry) => entry.match(needle))!.file;
+    return {
+      ok: true,
+      imageUrl: `/media/${file}`,
+      // Deliberately no `dimensions`: these are fixed files on disk and are not
+      // resized to the requested ratio, so reporting the request would be wrong.
+      prompt: compiled.prompt,
+      title: compiled.title,
+      engine: `Library asset · ${file}`,
+      attachable: false,
+      attachNote:
+        "Repo-relative placeholder, not a publishable URL. Attach from the showroom instead.",
     };
   }
 

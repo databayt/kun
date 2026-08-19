@@ -73,6 +73,16 @@ const ASSET_FORMATS: AssetFormatOption[] = [
   { id: "mockup", label: "Mockup", labelAr: "نموذج", kind: "image", defaultRatio: "1:1" },
 ];
 
+/**
+ * The download filename used to be hardcoded `.svg`, so saving a library JPG
+ * produced a file no viewer would open. Derive it from what we actually got.
+ */
+function downloadExt(url: string): string {
+  if (url.startsWith("data:image/svg+xml")) return "svg";
+  const match = /\.([a-z0-9]{3,4})(?:[?#]|$)/i.exec(url);
+  return match ? match[1].toLowerCase() : "png";
+}
+
 const RATIO_OPTIONS: { id: MediaStudioRatio; label: string }[] = [
   { id: "9:16", label: "9:16" },
   { id: "1:1", label: "1:1" },
@@ -80,21 +90,32 @@ const RATIO_OPTIONS: { id: MediaStudioRatio; label: string }[] = [
   { id: "4:5", label: "4:5" },
 ];
 
+/**
+ * Which renderer the compiled prompt is written FOR — not something this
+ * surface runs. Nothing here is reachable from a Server Action: the Google and
+ * Higgsfield lanes are CLI-only (scripts/gemini-media.mjs, video-media.mjs) and
+ * GPT Image is a seat a human drives. Picking one shapes the prompt's phrasing
+ * and constraints, then you take it to that lane. See content/docs/media.mdx.
+ *
+ * Labels are the canonical names from the renderer ladder; "Gemini 3.1" and
+ * "Nano Banana 2" were not among them.
+ */
 const MODELS_BY_KIND: Record<
   MediaStudioKind,
   { id: string; label: string }[]
 > = {
   video: [
-    { id: "seedance", label: "Seedance 2.5" },
-    { id: "veo", label: "Veo 3.1" },
-    { id: "kling", label: "Kling 3.0" },
+    { id: "veo", label: "Veo Lite · Google CLI" },
+    { id: "seedance", label: "Seedance 2.5 · Higgsfield" },
+    { id: "kling", label: "Kling 3.0 · Higgsfield" },
   ],
   image: [
-    { id: "gemini", label: "Gemini 3.1" },
-    { id: "gpt_image", label: "GPT Image 2" },
+    { id: "gemini", label: "Nano Banana · Google CLI" },
+    { id: "nano_banana_pro", label: "Nano Banana Pro · Google CLI" },
+    { id: "gpt_image", label: "GPT Image 2 · ChatGPT seat" },
   ],
   template: [
-    { id: "canvas", label: "HTML Canvas" },
+    { id: "canvas", label: "HTML Canvas · deterministic" },
   ],
 };
 
@@ -122,6 +143,8 @@ export function MediaStudio() {
   // Direct In-Browser Generation State
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [generatedEngine, setGeneratedEngine] = useState<string | null>(null);
+  const [attachNote, setAttachNote] = useState<string | null>(null);
+  const [attachable, setAttachable] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generateError, setGenerateError] = useState<string | null>(null);
   const [attached, setAttached] = useState(false);
@@ -337,9 +360,14 @@ export function MediaStudio() {
         model,
         spine: activeSpine,
       });
-      if (res.ok && res.imageUrl) {
-        setGeneratedImage(res.imageUrl);
-        setGeneratedEngine(res.engine || (model === "gemini" ? "Nano Banana 2" : "GPT Image 2.0"));
+      if (res.ok) {
+        // No fabricated fallback: the badge says what the server actually did,
+        // or nothing at all. A prompt-only result carries no image.
+        setGeneratedImage(res.imageUrl ?? null);
+        setGeneratedEngine(res.engine ?? null);
+        setAttachable(Boolean(res.attachable));
+        setAttachNote(res.attachNote ?? null);
+        setAttached(false);
       } else {
         setGenerateError(res.error || "Generation failed.");
       }
@@ -375,7 +403,10 @@ export function MediaStudio() {
   };
 
   const handleAttachToDraft = () => {
-    if (!generatedImage) return;
+    // attachMedia() drops anything that is not an absolute http(s) URL, so this
+    // button used to show a check mark and navigate while the media silently
+    // never arrived. Only offer it when the URL will actually survive.
+    if (!generatedImage || !attachable) return;
     attachMedia(generatedImage);
     setAttached(true);
     goToStage("draft");
@@ -617,7 +648,7 @@ export function MediaStudio() {
       </div>
 
       {/* Generated Image Result Card */}
-      {generatedImage && (
+      {(generatedImage || generatedEngine) && (
         <div className="bg-card text-card-foreground border-primary/30 relative space-y-4 rounded-2xl border p-5 shadow-md animate-in fade-in-50 duration-300">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b pb-3">
             <div className="flex flex-wrap items-center gap-2">
@@ -629,24 +660,30 @@ export function MediaStudio() {
                   {generatedEngine}
                 </span>
               )}
-              <span className="text-xs font-mono text-muted-foreground">{compiled?.dimensions || ratio}</span>
+              {generatedImage && (
+                <span className="text-xs font-mono text-muted-foreground">{ratio}</span>
+              )}
             </div>
 
             <div className="flex items-center gap-2">
-              <a
-                href={generatedImage}
-                download={`${brand}-${formatId}-${ratio}.svg`}
-                className="bg-muted hover:bg-muted/80 text-foreground inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-xs font-medium transition-colors"
-              >
-                <Download className="size-3.5" />
-                {t.mediaDownloadImage}
-              </a>
+              {generatedImage && (
+                <a
+                  href={generatedImage}
+                  download={`${brand}-${formatId}-${ratio}.${downloadExt(generatedImage)}`}
+                  className="bg-muted hover:bg-muted/80 text-foreground inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-xs font-medium transition-colors"
+                >
+                  <Download className="size-3.5" />
+                  {t.mediaDownloadImage}
+                </a>
+              )}
 
               <Button
                 size="sm"
                 variant="default"
                 onClick={handleAttachToDraft}
-                className="h-8 rounded-full text-xs font-medium cursor-pointer"
+                disabled={!attachable || !generatedImage}
+                title={attachNote ?? undefined}
+                className="h-8 rounded-full text-xs font-medium cursor-pointer disabled:cursor-not-allowed"
               >
                 {attached ? <Check className="size-3.5 me-1.5" /> : <Paperclip className="size-3.5 me-1.5" />}
                 {t.mediaAttachDraft}
@@ -654,15 +691,21 @@ export function MediaStudio() {
             </div>
           </div>
 
+          {attachNote && (
+            <p className="text-muted-foreground text-xs">{attachNote}</p>
+          )}
+
           {/* Rendered Image Display */}
-          <div className="flex items-center justify-center overflow-hidden rounded-xl border bg-black/5 p-2">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={generatedImage}
-              alt={compiled?.title || "Generated Media"}
-              className="max-h-[460px] w-auto max-w-full rounded-lg object-contain shadow-sm"
-            />
-          </div>
+          {generatedImage && (
+            <div className="flex items-center justify-center overflow-hidden rounded-xl border bg-black/5 p-2">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={generatedImage}
+                alt={compiled?.title || "Generated Media"}
+                className="max-h-[460px] w-auto max-w-full rounded-lg object-contain shadow-sm"
+              />
+            </div>
+          )}
         </div>
       )}
 
