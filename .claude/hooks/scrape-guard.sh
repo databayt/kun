@@ -3,11 +3,23 @@
 #
 # WHY THIS EXISTS
 #
-# The Facebook scraper drives a logged-in Chrome over CDP on port 9222. On this
-# machine that port is the **session vault** — `~/.claude/bin/chrome-debug.sh`
-# launches ONE persistent Chrome at `~/.claude/chrome-debug-profile` which is
-# both the browser Abdout logs into by hand and the browser agents attach to.
-# Pointing the scraper at it means scraping Facebook as **Abdout personally**.
+# TWO vectors reach a logged-in social session, and they look nothing alike:
+#
+#   1. The bespoke scraper drives Chrome over CDP on port 9222. On this machine
+#      that port is the **session vault** — `~/.claude/bin/chrome-debug.sh`
+#      launches ONE persistent Chrome at `~/.claude/chrome-debug-profile` which
+#      is both the browser Abdout logs into by hand and the browser agents
+#      attach to. Pointing a scraper at it means scraping as **Abdout
+#      personally**. This vector IS inspectable — see WHAT IT CAN SEE below.
+#   2. agent-reach's facebook/instagram channels are thin OpenCLI subclasses,
+#      and OpenCLI drives the **real desktop Chrome** through a browser
+#      extension talking to a local daemon on **127.0.0.1:19825**. No CDP port,
+#      no --user-data-dir, nothing to read. This vector is NOT inspectable, and
+#      what catches it is the FB_SCRAPE_PROFILE declaration rule.
+#
+# Do not "fix" the port checks to cover vector 2 — they structurally cannot.
+# The declaration rule is the coverage, and it is the better rule anyway: a
+# dedicated identity is the real requirement; the port was only ever a proxy.
 #
 # The cost of losing that account is not "re-log in later": it also loses the
 # Page access tokens the entire social pipeline (draft → approve → publish)
@@ -115,14 +127,30 @@ live_profile="$(ps -axo command= 2>/dev/null \
 
 block() {
   {
-    echo "⛔ kun scrape-guard blocked a Facebook scrape run."
+    echo "⛔ kun scrape-guard blocked a social scrape run."
     echo "   Reason : $1"
     echo
-    echo "   The CDP session on port ${port} is backed by:"
-    echo "     ${live_profile:-<no Chrome listening on that port>}"
+    # Only assert what was actually observed. There are TWO vectors and only one
+    # of them has a CDP port to inspect, so claiming a port reading when none
+    # exists is how a guard teaches people the wrong mental model.
+    if [ -n "$live_profile" ]; then
+      echo "   The CDP session on port ${port} is backed by:"
+      echo "     ${live_profile}"
+    else
+      echo "   No Chrome is listening on port ${port}, so there was no profile to read."
+    fi
     echo "   The session vault (${VAULT_PROFILE}) is ABDOUT'S OWN logged-in Chrome."
-    echo "   Scraping Facebook as him risks the account — and with it the Page tokens"
-    echo "   the whole social pipeline (draft → approve → publish) depends on."
+    echo "   Scraping as him risks the account — and with it the Page tokens the"
+    echo "   whole social pipeline (draft → approve → publish) depends on."
+    echo
+    echo "   NOTE — the OpenCLI vector has no port at all. agent-reach's facebook/"
+    echo "   instagram channels are thin OpenCLI subclasses, and OpenCLI drives your"
+    echo "   REAL desktop Chrome through a browser extension talking to a local daemon"
+    echo "   on 127.0.0.1:19825. There is no --user-data-dir to read and no CDP port"
+    echo "   to inspect, so the profile check above cannot see it. What catches that"
+    echo "   path is the FB_SCRAPE_PROFILE declaration rule — which is the right"
+    echo "   ground to refuse on, because a dedicated identity is the actual"
+    echo "   requirement and the port was only ever a proxy for it."
     echo
     echo "   Fix: run the scrape on a dedicated Facebook account, on its own port+profile."
     echo "     export FB_SCRAPE_PORT=9333"
@@ -139,7 +167,7 @@ block() {
 }
 
 if [ -z "${FB_SCRAPE_PROFILE:-}" ] && ! printf '%s' "$cmd" | grep -q 'FB_SCRAPE_PROFILE='; then
-  block "no dedicated scrape profile declared (FB_SCRAPE_PROFILE unset), so this run defaults to the shared session vault"
+  block "no dedicated scrape identity declared (FB_SCRAPE_PROFILE unset). For a CDP scraper this defaults to the shared session vault; for the agent-reach/OpenCLI path there is no port to inspect at all — it drives the real desktop Chrome via its extension daemon on 127.0.0.1:19825 — so this declaration is the only checkable signal that a dedicated account is in play"
 fi
 
 if [ -n "$live_profile" ] && [ "$live_profile" = "$VAULT_PROFILE" ]; then
@@ -150,18 +178,27 @@ if [ "$port" = "9222" ]; then
   block "port 9222 is the session-vault port; a dedicated scrape account needs its own port"
 fi
 
-# ── 3. Throttle: warn, do not block ──────────────────────────────
-# An unthrottled run is a ban risk, not a data-loss risk, so it is a warning —
-# but a loud one, because the account it burns is the dedicated one we just
-# spent effort standing up.
+# ── 3. Throttle: escalate to the human, do not block ─────────────
+# An unthrottled run is a ban risk, not a data-loss risk, so it is not exit 2.
+# But it used to be a stderr warning on exit 0, and that is invisible to the
+# permission system: the call proceeds and the warning may reach nobody. The
+# documented PreToolUse protocol has an escalation channel for exactly this
+# shape of concern — `permissionDecision: "ask"` hands the decision to the human,
+# who is the only one who can say "yes, I know, it is three rows".
+#
+# ACCEPTED COST: "ask" halts an unattended run instead of warning past it. That
+# is deliberate — an unattended unthrottled scrape is precisely the case the old
+# warning was too weak to stop.
+#
+# STDOUT PROTOCOL — load-bearing: the JSON below is the ONLY thing this script
+# may ever write to stdout. Every other message in this file goes to stderr
+# (>&2) and must stay there. One stray echo corrupts the decision object and the
+# hook fails open silently, with no visible symptom. scrape-guard.test.sh exists
+# to catch exactly that.
 if [ -z "${FB_SCRAPE_DELAY_MS:-}" ] \
   && ! printf '%s' "$cmd" | grep -Eq 'FB_SCRAPE_DELAY_MS=|--(delay|throttle|sleep)[= ]'; then
-  {
-    echo "⚠️  kun scrape-guard: this scrape run declares NO throttle."
-    echo "   Facebook rate-limits and then bans on burst patterns; the ban lands on the"
-    echo "   account, not the IP. Set FB_SCRAPE_DELAY_MS (4000+) or pass --delay."
-    echo "   Allowing the run — this is a warning, not a block."
-  } >&2
+  printf '%s\n' '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"kun scrape-guard: this run declares NO throttle. The platform rate-limits and then bans on burst patterns, and the ban lands on the ACCOUNT, not the IP — including the dedicated account this lane just spent effort standing up. Fix: export FB_SCRAPE_DELAY_MS=4000 (or pass --delay) and re-run. Approve only if you have deliberately chosen an unthrottled run."}}'
+  exit 0
 fi
 
 exit 0
