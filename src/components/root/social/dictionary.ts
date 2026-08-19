@@ -257,7 +257,7 @@ export const SOCIAL_DICTIONARY = {
     agentTrayHint: "{count} media in tray — will ride the next ask.",
     // Media Studio — prompt area on /social/media
     mediaStudioTitle: "Media Studio",
-    mediaStudioLead: "Direct generative models or pick a template, or",
+    mediaStudioLead: "Compile a prompt for the renderer lanes, or",
     mediaStudioScroll: "browse the showroom gallery",
     mediaStudioPlaceholder:
       "Describe the visual scene, video action, or listing showcase for {brand}…",
@@ -281,11 +281,11 @@ export const SOCIAL_DICTIONARY = {
     mediaFilingQueue: "Filing…",
     mediaFiledQueue: "Filed to queue",
     mediaAttachDraft: "Attach to social draft",
-    mediaDraftCopy: "Draft Copy with this Media",
+    mediaDraftCopy: "Draft copy",
     mediaVisualPreview: "Live Visual Card Preview",
     mediaGenerateImage: "Generate Image",
     mediaGeneratingImage: "Generating…",
-    mediaGeneratedTitle: "Generated Image Asset",
+    mediaGeneratedTitle: "Studio result",
     mediaDownloadImage: "Download",
     mediaSaveShowroom: "Save to Showroom",
     mediaSavedShowroom: "Saved to Showroom",
@@ -519,7 +519,7 @@ export const SOCIAL_DICTIONARY = {
 
     // Media Studio — prompt area on /social/media
     mediaStudioTitle: "استوديو الوسائط",
-    mediaStudioLead: "وجّه نماذج التوليد لإنتاج صور وفيديوهات وقوالب، أو",
+    mediaStudioLead: "اكتب موجّهًا جاهزًا لمسارات التوليد، أو",
     mediaStudioScroll: "استعرض المعرض والمكتبة",
     mediaStudioPlaceholder:
       "صف المشهد البصري أو حركة الفيديو أو إبراز العقار لـ {brand}…",
@@ -543,11 +543,11 @@ export const SOCIAL_DICTIONARY = {
     mediaFilingQueue: "جارٍ الإرسال…",
     mediaFiledQueue: "تمت الإضافة للطابور",
     mediaAttachDraft: "إرفاق بالمسودة الاجتماعية",
-    mediaDraftCopy: "صياغة منشور لهذا الوسيط",
+    mediaDraftCopy: "صياغة منشور",
     mediaVisualPreview: "معاينة بصرية حية للبطاقة",
     mediaGenerateImage: "توليد الصورة",
     mediaGeneratingImage: "جارٍ التوليد…",
-    mediaGeneratedTitle: "الصورة المُولّدة",
+    mediaGeneratedTitle: "نتيجة الاستوديو",
     mediaDownloadImage: "تنزيل",
     mediaSaveShowroom: "حفظ في المعرض",
     mediaSavedShowroom: "تم الحفظ في المعرض",

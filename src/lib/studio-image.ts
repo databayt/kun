@@ -98,6 +98,23 @@ export function generateStudioImageCore(
     ],
   };
 
+  // An unrecognised format used to fall through to the template plate, so a
+  // video request that arrived with format "" came back as a deterministic
+  // card. Refuse instead of guessing — a wrong asset is worse than no asset.
+  const KNOWN_FORMATS = [
+    "walkthrough",
+    "post",
+    "lifestyle",
+    "ad",
+    "mockup",
+    "infographic",
+    "carousel",
+    "testimonial",
+  ];
+  if (!KNOWN_FORMATS.includes(format)) {
+    return { ok: false, error: `Unknown format: ${format || "(empty)"}` };
+  }
+
   const kind = format === "walkthrough" ? "video" : "image";
   const wantsPhotographic = ["post", "lifestyle", "ad", "mockup"].includes(
     format,

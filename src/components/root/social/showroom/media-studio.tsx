@@ -126,8 +126,16 @@ export function MediaStudio() {
   const brand = globalProduct || "mkan";
   const [mode, setMode] = useState<"image" | "video">("image");
   const [formatId, setFormatId] = useState<string>("post");
+  // Switching Image/Video remounts the select's items, and the select can be
+  // left holding "" for a tick. The trigger renders this derived label, so the
+  // UI read "Walkthrough" while the action was handed format: "" — which fell
+  // through to the image branch and returned a template plate for a video
+  // request. Resolve once, and use this everywhere rather than raw `formatId`.
   const currentFormat =
-    ASSET_FORMATS.find((f) => f.id === formatId) || ASSET_FORMATS[0];
+    ASSET_FORMATS.find((f) => f.id === formatId) ||
+    ASSET_FORMATS.find((f) =>
+      mode === "video" ? f.kind === "video" : f.kind !== "video",
+    )!;
 
   const [kind, setKind] = useState<MediaStudioKind>("image");
   const [model, setModel] = useState<string>("gemini");
@@ -160,6 +168,12 @@ export function MediaStudio() {
     [kind],
   );
 
+  // Same defence for the model select, which went out as "" for the same reason.
+  const effectiveModel =
+    activeModelOptions.find((m) => m.id === model)?.id ||
+    activeModelOptions[0]?.id ||
+    "canvas";
+
   // Spines available for this brand
   const spines = useMemo(() => getBrandSpines(brand), [brand]);
   const activeSpine = spine || spines[0]?.id || "cinematic";
@@ -181,6 +195,9 @@ export function MediaStudio() {
     }
     if (compiled) setCompiled(null);
     setGeneratedImage(null);
+    setGeneratedEngine(null);
+    setAttachNote(null);
+    setAttachable(false);
   };
 
   // When format changes, update kind, default ratio, and default model
@@ -336,11 +353,11 @@ export function MediaStudio() {
     const res = compileMediaStudioPrompt({
       brand,
       kind,
-      format: formatId,
+      format: currentFormat.id,
       subject: textToCompile,
       ratio,
       spine: activeSpine,
-      model,
+      model: effectiveModel,
     });
     setCompiled(res);
   };
@@ -354,10 +371,10 @@ export function MediaStudio() {
     try {
       const res = await generateStudioImage({
         brand,
-        format: formatId,
+        format: currentFormat.id,
         ratio,
         subject: textToUse,
-        model,
+        model: effectiveModel,
         spine: activeSpine,
       });
       if (res.ok) {

@@ -357,6 +357,23 @@ describe("Media Studio — Mkan & Hogwarts Handy Media Creation", () => {
       expect(result.prompt).toBeTruthy();
     });
 
+    it("refuses an unknown format instead of emitting a template plate", () => {
+      // A mode switch could hand the action format:"" while the UI read
+      // "Walkthrough"; the empty value fell through to the canvas branch and a
+      // video request came back as a deterministic card.
+      for (const format of ["", "nonsense"]) {
+        const result = generateStudioImageCore({
+          brand: "mkan",
+          format,
+          ratio: "9:16",
+          model: "veo",
+          subject: "Sunset veranda with sea breeze in Port Sudan.",
+        });
+        expect(result.ok).toBe(false);
+        expect(result.imageUrl).toBeUndefined();
+      }
+    });
+
     it("still renders the deterministic SVG plate for template formats", () => {
       const result = generateStudioImageCore({
         brand: "mkan",
