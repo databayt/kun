@@ -232,6 +232,19 @@ Credentials live in the Keychain, never in a repo — see [Credentials](/docs/cr
   re-links in place with `push --base` once it is.
 - Video is entirely untested — no clip has ever been generated on any lane. Veo Lite at
   $0.40 per 8-second clip is the cheapest way to change that.
+- **The Media Studio does not render.** It compiles a prompt and offers a curated
+  still from `public/media` when one fits; the badge names the file, not a model.
+  Both raster lanes are CLI- or seat-driven and unreachable from a Server Action.
+  A studio badge that names a model would be the `--source` fault above, applied
+  to the generator instead of the library.
+- **`cdn.databayt.org` 403s on every key in the bucket** — a CloudFront fault
+  (distribution `E3PHDXTDSBCQSJ`) that predates the library. Assets serve from
+  the S3 origin meanwhile; `higgs-library.mjs push --base https://cdn.databayt.org`
+  re-links in place once it is fixed, no re-upload.
+- **S3 is unconfigured in production.** `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`
+  and `AWS_REGION` are absent from the Vercel project, so `isStorageConfigured()`
+  is false there and `putMedia()` no-ops. Setting them is an ops action and a
+  prerequisite for any in-app persistence.
 - Arabic creative still needs manual typography in post. Nano Banana Pro claims accurate
   multilingual text rendering, which would overturn that rule if it holds for Arabic script
   shaping — one $0.134 render against the same string set in Thmanyah settles it. Untested,
@@ -366,8 +379,8 @@ The Media Studio and Pipeline serve concrete production scenarios for every data
 - **Brand:** Mkan (`mkan.sd`) — see [Mkan Social Strategy](/docs/social/mkan) & [Twenty CRM Schema](/docs/crm).
 - **Workflow:**
   1. Open [Media Studio](https://kun.databayt.org/en/social/media) with **Mkan** selected.
-  2. Select **Walkthrough** (`9:16` · Video · `Seedance 2.5` / `Veo 3.1`) — generates 35mm handheld coastal drift from interior to Red Sea balcony @ 24fps with coastal wind & tea foley.
-  3. Select **Post** (`4:5` · Image · `Gemini 3.1` / `GPT Image 2`) — generates 50mm architectural framing with morning sunlight and clay accent (`#e05638`).
+  2. Select **Walkthrough** (`9:16` · Video) — **compiles** the 35mm handheld coastal-drift prompt (interior to Red Sea balcony, 24fps, coastal wind & tea foley). It does not render; take the prompt to `scripts/video-media.mjs` or the Veo lane below.
+  3. Select **Post** (`4:5` · Image) — compiles 50mm architectural framing with morning sunlight and clay accent (`#e05638`), and offers the closest curated still from the library as a starting point. The badge says which; no model runs on this surface.
   4. Select **Infographic** (`1:1` · Template) — renders live preview of property amenities (24/7 Standby Power, Split AC, Red Sea shore distance).
   5. Click **Draft Copy with this Media** — hands off to [Draft Agent](/docs/social#the-hub-is-this-table-as-routes) (`/social/draft`) for bilingual Arabic/English copy.
 
@@ -411,7 +424,7 @@ The Media Studio and Pipeline serve concrete production scenarios for every data
      ```bash
      node scripts/gemini-media.mjs video --prompt "..." --ratio 9:16 --seconds 8 --yes
      ```
-  4. Upload finished render to [Brief Queue](https://kun.databayt.org/en/social/media#brief-queue).
+  4. Upload finished render to [Brief Queue](https://kun.databayt.org/en/social/media#brief-queue). **Blocked today:** the queue accepts `image/webp|png|jpeg` only, capped at 4MB (`RENDER_TYPES` in `src/actions/post-social.ts`), so every mp4 is rejected at the MIME check. Keep the clip in `~/Downloads` and register it with `higgs-library.mjs add` until the queue learns video.
 
 ### Scenario 6: Social Pipeline Hand-off & Cross-Platform Broadcast
 
