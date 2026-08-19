@@ -20,10 +20,7 @@ import {
   CHANNELS,
   DISTRIBUTION_CHANNEL_IDS,
 } from "@/components/root/social/config";
-import {
-  compileMediaStudioPrompt,
-  type MediaStudioRatio,
-} from "@/lib/brand-kit";
+import { type MediaStudioRatio } from "@/lib/brand-kit";
 import {
   PRODUCT_IDS,
   productChannelWired,
@@ -1434,50 +1431,6 @@ export async function generateStudioImage(
   // it, and the only one that can reach a paid renderer.
   if (!(await requireContributor())) {
     return { ok: false, error: "Forbidden: contributors only." };
-  }
-
-  if (process.env.OPENAI_API_KEY && input.model === "gpt_image") {
-    try {
-      const compiled = compileMediaStudioPrompt({
-        brand: input.brand,
-        kind: input.format === "walkthrough" ? "video" : "image",
-        format: input.format,
-        subject: input.subject.trim(),
-        ratio: input.ratio,
-        spine: input.spine,
-        model: input.model,
-      });
-      const openAiRes = await fetch("https://api.openai.com/v1/images/generations", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${process.env.OPENAI_API_KEY.trim()}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "dall-e-3",
-          prompt: compiled.prompt,
-          n: 1,
-          size: input.ratio === "1:1" ? "1024x1024" : input.ratio === "16:9" ? "1792x1024" : "1024x1792",
-          quality: "standard",
-        }),
-      });
-      if (openAiRes.ok) {
-        const json = await openAiRes.json();
-        const liveUrl = json.data?.[0]?.url;
-        if (liveUrl) {
-          return {
-            ok: true,
-            imageUrl: liveUrl,
-            dimensions: compiled.dimensions,
-            prompt: compiled.prompt,
-            title: compiled.title,
-            engine: "GPT Image 2.0 (Live OpenAI DALL·E 3 API)",
-          };
-        }
-      }
-    } catch {
-      // Fallback to core
-    }
   }
 
   return generateStudioImageCore(input);
