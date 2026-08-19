@@ -32,15 +32,26 @@ export function generateStudioImageCore(
     return { ok: false, error: "Subject cannot be empty." };
   }
 
-  const compiled = compileMediaStudioPrompt({
-    brand,
-    kind: format === "walkthrough" ? "video" : "image",
-    format,
-    subject: subject.trim(),
-    ratio,
-    spine,
-    model,
-  });
+  // The compiler refuses an unknown brand rather than substituting Mkan. Turn
+  // that into the same {ok:false} shape the rest of this function speaks, so a
+  // brand without a kit entry reads as a clear refusal instead of a 500.
+  let compiled;
+  try {
+    compiled = compileMediaStudioPrompt({
+      brand,
+      kind: format === "walkthrough" ? "video" : "image",
+      format,
+      subject: subject.trim(),
+      ratio,
+      spine,
+      model,
+    });
+  } catch (err) {
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : "Could not compile the prompt.",
+    };
+  }
 
   const [widthStr, heightStr] = compiled.dimensions.split(/[x×]/);
   const width = parseInt(widthStr, 10) || 1080;

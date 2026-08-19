@@ -1,8 +1,7 @@
 {
   "version": 1,
-  "updated": "2026-08-05",
+  "updated": "2026-08-19",
   "readme": "The brand kit — everything a renderer needs to produce an on-brand asset without a human re-explaining the brand. Git-tracked JSON on purpose: the site imports it statically (a commit redeploys the showroom) and scripts/media-brief.mjs compiles it into prompts. Three renderers consume it: the `chatgpt` seat lane (a human pastes the compiled prompt into ChatGPT), the `higgs` CLI lane, and the deterministic `template` lane (the carousel engine). One kit, three lanes — so a brand change lands everywhere at once.",
-
   "renderers": {
     "chatgpt": {
       "label": "ChatGPT seat (GPT-5.6 Sol → GPT Image 2)",
@@ -10,7 +9,9 @@
       "surface": "chatgpt.com",
       "why": "Sol is a reasoning model with text output; it renders pictures by calling the image tool, which is GPT Image 2. A ChatGPT plan is not API access — there is no key, so no server can call this lane. The seat is a renderer, not an endpoint: kun compiles the prompt, a human pastes it, kun ingests the file back.",
       "sizeRule": "GPT Image 2 takes arbitrary WIDTHxHEIGHT, not a fixed enum, subject to four constraints (verified against the official image-generation guide, 2026-08-05): both edges divisible by 16, longest edge <= 3840, long:short ratio <= 3:1, and total pixels between 655,360 and 8,294,400. The pixel FLOOR is the one that bites — 1200x624 clears it at 748,800, but a smaller plate would be rejected. Every size in `types` below satisfies all four; do not round them by hand, and check the floor before adding a type.",
-      "attachAlways": ["public/brands/hogwarts.png"],
+      "attachAlways": [
+        "public/brands/hogwarts.png"
+      ],
       "operator": "sedon"
     },
     "higgs": {
@@ -26,19 +27,19 @@
       "surface": "scripts/render-carousel.mjs"
     }
   },
-
   "brands": {
     "hogwarts": {
       "id": "hogwarts",
       "mediaName": "Hogwarts",
       "domain": "ed.databayt.org",
       "note": "The media brand is Hogwarts (Abdout, 2026-08-05). The shipped app introduces itself to schools as بالقلم / balqalam — that is the in-product name. AMENDED 2026-08-19: balqalam now has its own Facebook Page and its own `balqalam` brand in the social pipeline, so an asset addressed to that brand SHOULD say بالقلم. The rule that still stands: an asset generated for the `hogwarts` brand must not say بالقلم, and one generated for `balqalam` must not carry the Hogwarts wordmark. Pick the name from the brand the piece is for.",
-      "inAppName": { "ar": "بالقلم", "en": "balqalam" },
-
+      "inAppName": {
+        "ar": "بالقلم",
+        "en": "balqalam"
+      },
       "what": "A multi-tenant school management system — admissions, timetable, attendance, exams, grades, finance — sold to schools across MENA.",
       "audience": "School owners and principals in Sudan, Saudi Arabia and the UAE. They are administrators, not technologists: the promise is relief from paperwork, not software features.",
       "tone": "Calm, exact, unhurried. Never playful, never salesy, never 'edtech startup'. The visual argument is competence.",
-
       "mark": {
         "file": "public/brands/hogwarts.png",
         "describe": "A single quill — one upright feather leaning to the right, solid black silhouette, with one carved white stroke running the length of the vane and a fine tapering tail at the base. Transparent background.",
@@ -49,7 +50,6 @@
           "Attach it as a reference image on every ChatGPT render so the scene is composed with room for it, then place the real file on top."
         ]
       },
-
       "typography": {
         "source": "https://font.thmanyah.com",
         "license": "Embedding and commercial use permitted; redistribution is not. Files are fetched by scripts/fetch-thmanyah.mjs on predev/prebuild and never committed or served from the CDN.",
@@ -60,9 +60,18 @@
             "features": "ss01",
             "why": "The signature calligraphic look — this pairing is the brand's voice in Arabic."
           },
-          "arabicBody": { "family": "thmanyah sans", "weight": 400 },
-          "latinHeadline": { "family": "Geist", "weight": 600 },
-          "latinBody": { "family": "Geist", "weight": 400 }
+          "arabicBody": {
+            "family": "thmanyah sans",
+            "weight": 400
+          },
+          "latinHeadline": {
+            "family": "Geist",
+            "weight": 600
+          },
+          "latinBody": {
+            "family": "Geist",
+            "weight": 400
+          }
         },
         "rules": [
           "Arabic never takes letter-spacing — it breaks the connected script.",
@@ -70,12 +79,19 @@
           "Type is set by the template lane, never by a generative model."
         ]
       },
-
       "palette": {
         "why": "Drawn from the Anthropic catalog (src/components/root/anthropic/data.ts) so slides, site and generated media share one set of values. Quote the hex to a renderer — a color name alone drifts.",
         "canvas": [
-          { "name": "Ivory Light", "hex": "#faf9f5", "use": "default canvas" },
-          { "name": "Oat", "hex": "#e3dacc", "use": "warm alternate canvas" },
+          {
+            "name": "Ivory Light",
+            "hex": "#faf9f5",
+            "use": "default canvas"
+          },
+          {
+            "name": "Oat",
+            "hex": "#e3dacc",
+            "use": "warm alternate canvas"
+          },
           {
             "name": "Slate Dark",
             "hex": "#141413",
@@ -88,15 +104,31 @@
           }
         ],
         "support": [
-          { "name": "Slate 550", "hex": "#73726c", "use": "muted text" },
+          {
+            "name": "Slate 550",
+            "hex": "#73726c",
+            "use": "muted text"
+          },
           {
             "name": "Slate 250",
             "hex": "#dedcd1",
             "use": "hairline / surface"
           },
-          { "name": "Coral", "hex": "#ebcece", "use": "tinted plate" },
-          { "name": "Cactus", "hex": "#bcd1ca", "use": "tinted plate" },
-          { "name": "Heather", "hex": "#cbcadb", "use": "tinted plate" }
+          {
+            "name": "Coral",
+            "hex": "#ebcece",
+            "use": "tinted plate"
+          },
+          {
+            "name": "Cactus",
+            "hex": "#bcd1ca",
+            "use": "tinted plate"
+          },
+          {
+            "name": "Heather",
+            "hex": "#cbcadb",
+            "use": "tinted plate"
+          }
         ],
         "rules": [
           "One accent per image. Clay carries the emphasis; everything else is neutral.",
@@ -104,7 +136,6 @@
           "Never the stock-edtech palette: no royal blue, no purple-to-pink gradient, no lime green."
         ]
       },
-
       "styleSpines": {
         "minimal": {
           "use": "hero, product, mockup, og and banner plates, anything documentary",
@@ -115,7 +146,6 @@
           "prompt": "Documentary photography. Natural window light, shallow depth of field, muted warm grade, candid unposed moment, real classroom or office texture, no studio lighting rig, no lens flare."
         }
       },
-
       "subjectLibrary": {
         "why": "The scenes that actually read as this product. Reach for these before inventing one.",
         "items": [
@@ -127,7 +157,6 @@
           "Close detail of an attendance register, warm daylight raking across the page"
         ]
       },
-
       "negative": {
         "why": "The list that separates a usable render from a discard. Every item here has cost us a generation at least once.",
         "items": [
@@ -140,7 +169,6 @@
           "no cluttered collage; one subject, one idea"
         ]
       },
-
       "region": {
         "why": "The single most common failure is a render that looks like a suburban American school.",
         "items": [
@@ -150,14 +178,12 @@
           "Mixed ages of building — these are working schools, not architectural showpieces"
         ]
       },
-
       "videoSpines": {
         "documentary_calm": {
           "use": "reels and video showcases (Seedance 2.5 and Veo)",
           "prompt": "Documentary 24fps cinematography. A quiet morning administrative office or classroom in a Khartoum or Riyadh school. Smooth slow tracking push-in with 35mm shallow depth of field. Soft raking morning sunlight through sheer blinds. Audio: Gentle morning breeze, quiet footsteps in hallway, soft paper rustle."
         }
       },
-
       "types": {
         "hero": {
           "lane": "chatgpt",
@@ -207,9 +233,18 @@
           "size": "1200x630",
           "use": "carries copy"
         },
-        "infographic": { "lane": "template", "use": "carries copy" },
-        "split": { "lane": "template", "use": "carries copy" },
-        "testimonial": { "lane": "template", "use": "carries copy" },
+        "infographic": {
+          "lane": "template",
+          "use": "carries copy"
+        },
+        "split": {
+          "lane": "template",
+          "use": "carries copy"
+        },
+        "testimonial": {
+          "lane": "template",
+          "use": "carries copy"
+        },
         "carousel": {
           "lane": "template",
           "size": "1080x1350",
@@ -230,13 +265,14 @@
       "mediaName": "Mkan",
       "domain": "mkan.sd",
       "note": "Mkan (مكان) — Port Sudan short-term home rental marketplace (and intercity transport). Honest, high-fidelity Airbnb adaptation for Port Sudan, Red Sea State, Sudan.",
-      "inAppName": { "ar": "مكان", "en": "mkan" },
+      "inAppName": {
+        "ar": "مكان",
+        "en": "mkan"
+      },
       "airbnb_mirror": true,
-
       "what": "A Port Sudan short-term home rental marketplace — coastal apartments, furnished family houses, Red Sea view verandas — with contact-first host connection (and intercity bus ticketing) across Sudan.",
       "audience": "Travelers, families, and professionals seeking clean, reliable short stays in Port Sudan (B2C); local home hosts listing properties with direct phone contact and instant availability confirmation (B2B).",
       "tone": "Warm, honest, hospitable, coastal calm. Direct 1:1 Airbnb mirror aesthetic localized to Port Sudan.",
-
       "mark": {
         "file": "public/brands/mkan.png",
         "describe": "A stylized architectural archway and destination pin silhouette in monochrome ink.",
@@ -247,7 +283,6 @@
           "Leave room at the bottom-start corner for the mark and mkan.sd lockup."
         ]
       },
-
       "typography": {
         "source": "https://font.thmanyah.com",
         "roles": {
@@ -257,21 +292,37 @@
             "features": "ss01",
             "why": "Signature Arabic calligraphic voice"
           },
-          "arabicBody": { "family": "thmanyah sans", "weight": 400 },
-          "latinHeadline": { "family": "Geist", "weight": 600 },
-          "latinBody": { "family": "Geist", "weight": 400 }
+          "arabicBody": {
+            "family": "thmanyah sans",
+            "weight": 400
+          },
+          "latinHeadline": {
+            "family": "Geist",
+            "weight": 600
+          },
+          "latinBody": {
+            "family": "Geist",
+            "weight": 400
+          }
         },
         "rules": [
           "Arabic never takes letter-spacing.",
           "Arabic is first-class; English mirrors it."
         ]
       },
-
       "palette": {
         "why": "Red Sea coastal blues, warm desert dune neutrals, terracotta accent, and slate dark matching Airbnb warmth in a Port Sudan context.",
         "canvas": [
-          { "name": "Ivory Light", "hex": "#faf8f5", "use": "default canvas" },
-          { "name": "Dune Sand", "hex": "#e5d9c5", "use": "warm alternate canvas" },
+          {
+            "name": "Ivory Light",
+            "hex": "#faf8f5",
+            "use": "default canvas"
+          },
+          {
+            "name": "Dune Sand",
+            "hex": "#e5d9c5",
+            "use": "warm alternate canvas"
+          },
           {
             "name": "Slate Dark",
             "hex": "#1a2530",
@@ -284,17 +335,32 @@
           }
         ],
         "support": [
-          { "name": "Red Sea Blue", "hex": "#0f4c81", "use": "maritime and harbor accent" },
-          { "name": "Slate 550", "hex": "#73726c", "use": "muted text" },
-          { "name": "Slate 250", "hex": "#dedcd1", "use": "hairline / surface" },
-          { "name": "Amber Glow", "hex": "#e09f3e", "use": "warm interior lighting glow" }
+          {
+            "name": "Red Sea Blue",
+            "hex": "#0f4c81",
+            "use": "maritime and harbor accent"
+          },
+          {
+            "name": "Slate 550",
+            "hex": "#73726c",
+            "use": "muted text"
+          },
+          {
+            "name": "Slate 250",
+            "hex": "#dedcd1",
+            "use": "hairline / surface"
+          },
+          {
+            "name": "Amber Glow",
+            "hex": "#e09f3e",
+            "use": "warm interior lighting glow"
+          }
         ],
         "rules": [
           "One accent per image. Coral Terracotta carries the emphasis; coastal neutrals do the work.",
           "No neon, no oversaturated AI gradients. Natural coastal daylight and Red Sea sunset light only."
         ]
       },
-
       "styleSpines": {
         "minimal": {
           "use": "hero, product, mockup, listing detail plates",
@@ -313,7 +379,6 @@
           "prompt": "Documentary home photography. Warm candid moments of friends or family enjoying tea on a balcony in Port Sudan, natural unposed laughter, authentic home comfort."
         }
       },
-
       "videoSpines": {
         "made_possible_by_host": {
           "use": "Airbnb 'Made possible by Hosts' mirror reels (Seedance 2.5 / Veo)",
@@ -324,7 +389,6 @@
           "prompt": "Cinematic 24fps architectural video. Slow smooth gimbal glide through a bright living room in Port Sudan (Hayy Al-Shati) out onto an open terrace overlooking the harbor at sunset. Audio: Soft Red Sea waves, gentle breeze, calm room ambience."
         }
       },
-
       "subjectLibrary": {
         "why": "The scenes that actually represent Mkan in Port Sudan.",
         "items": [
@@ -338,7 +402,6 @@
           "A traveler working on a laptop at a neat wooden desk in a quiet Port Sudan rental flat"
         ]
       },
-
       "negative": {
         "why": "Negative prompt bank to eliminate common AI video and image rendering defects.",
         "items": [
@@ -350,7 +413,6 @@
           "no cluttered chaotic rooms, no messy luggage; one pristine, welcoming home"
         ]
       },
-
       "region": {
         "why": "Regional authenticity for Port Sudan and Red Sea coastal settings.",
         "items": [
@@ -360,7 +422,6 @@
           "Warm golden hour seaside light and bright natural coastal daylight"
         ]
       },
-
       "types": {
         "hero": {
           "lane": "chatgpt",
@@ -410,9 +471,482 @@
           "size": "1200x630",
           "use": "carries copy"
         },
-        "infographic": { "lane": "template", "use": "carries copy" },
-        "split": { "lane": "template", "use": "carries copy" },
-        "testimonial": { "lane": "template", "use": "carries copy" },
+        "infographic": {
+          "lane": "template",
+          "use": "carries copy"
+        },
+        "split": {
+          "lane": "template",
+          "use": "carries copy"
+        },
+        "testimonial": {
+          "lane": "template",
+          "use": "carries copy"
+        },
+        "carousel": {
+          "lane": "template",
+          "size": "1080x1350",
+          "use": "carries copy"
+        },
+        "logo": {
+          "lane": "none",
+          "use": "the mark exists; it is never regenerated"
+        },
+        "reel": {
+          "lane": "higgs",
+          "use": "motion — Seedance 2.5 and Veo video"
+        }
+      }
+    },
+    "balqalam": {
+      "id": "balqalam",
+      "mediaName": "Balqalam",
+      "domain": "balqalam.com",
+      "note": "بالقلم is the in-product name of the same school system that ships to English-facing audiences as Hogwarts — not a second product, but the face Arabic-speaking schools see when they open the app. It is its own brand here because the pipeline models one destination per (brand, channel): its own Facebook Page, its own token, its own Arabic-first voice. The Page carries a Saudi address (Al Khobar) — this is the Gulf-facing front door, not the Sudan lane. The rule that matters: an asset for this brand must never carry the Hogwarts wordmark.",
+      "inAppName": {
+        "ar": "بالقلم",
+        "en": "balqalam"
+      },
+      "what": "A multi-tenant school management system — admission, attendance, grades, timetable, exams, fees — addressed to Arabic-speaking schools. The whole school in one place.",
+      "audience": "School owners, principals and administrators in Saudi Arabia and the wider Arabic MENA market. They are administrators, not technologists: the promise is one system instead of five notebooks and a WhatsApp group.",
+      "tone": "Calm, exact, unhurried, and Arabic-first — the Arabic is written, never translated. Never playful, never salesy. The visual argument is competence.",
+      "mark": {
+        "file": "public/brands/hogwarts.png",
+        "describe": "A single quill — one upright feather leaning to the right, solid black silhouette, with one carved white stroke running the length of the vane and a fine tapering tail at the base. Transparent background.",
+        "meaning": "The pen — it is literally what بالقلم means, which is why the mark is a quill rather than a building or a graduation cap. The file lives under the hogwarts name for repo-historical reasons; the artwork is a quill silhouette, not a wordmark, so it is correct for this brand.",
+        "rules": [
+          "The mark is placed in post, never drawn by a generative model — an AI-drawn approximation of a logo is a different logo.",
+          "Monochrome ink only. It inverts to ivory on the dark and clay canvases; it is never recolored to an accent.",
+          "Attach it as a reference image on every ChatGPT render so the scene is composed with room for it, then place the real file on top.",
+          "Never place the Hogwarts wordmark on a balqalam asset — the quill is shared, the name is not."
+        ]
+      },
+      "typography": {
+        "source": "https://font.thmanyah.com",
+        "license": "Embedding and commercial use permitted; redistribution is not. Files are fetched by scripts/fetch-thmanyah.mjs on predev/prebuild and never committed or served from the CDN.",
+        "roles": {
+          "arabicHeadline": {
+            "family": "thmanyah serif display",
+            "weight": 900,
+            "features": "ss01",
+            "why": "The signature calligraphic look — this pairing is the brand's voice in Arabic."
+          },
+          "arabicBody": {
+            "family": "thmanyah sans",
+            "weight": 400
+          },
+          "latinHeadline": {
+            "family": "Geist",
+            "weight": 600
+          },
+          "latinBody": {
+            "family": "Geist",
+            "weight": 400
+          }
+        },
+        "rules": [
+          "Arabic never takes letter-spacing — it breaks the connected script.",
+          "Arabic is the first-class language; English mirrors it. RTL is the default direction.",
+          "Type is set by the template lane, never by a generative model."
+        ]
+      },
+      "palette": {
+        "why": "Drawn from the Anthropic catalog (src/components/root/anthropic/data.ts) so slides, site and generated media share one set of values. Quote the hex to a renderer — a color name alone drifts.",
+        "canvas": [
+          {
+            "name": "Ivory Light",
+            "hex": "#faf9f5",
+            "use": "default canvas"
+          },
+          {
+            "name": "Oat",
+            "hex": "#e3dacc",
+            "use": "warm alternate canvas"
+          },
+          {
+            "name": "Slate Dark",
+            "hex": "#141413",
+            "use": "dark canvas; ink on light"
+          },
+          {
+            "name": "Clay",
+            "hex": "#d97757",
+            "use": "the one accent — brand orange"
+          }
+        ],
+        "support": [
+          {
+            "name": "Slate 550",
+            "hex": "#73726c",
+            "use": "muted text"
+          },
+          {
+            "name": "Slate 250",
+            "hex": "#dedcd1",
+            "use": "hairline / surface"
+          },
+          {
+            "name": "Coral",
+            "hex": "#ebcece",
+            "use": "tinted plate"
+          },
+          {
+            "name": "Cactus",
+            "hex": "#bcd1ca",
+            "use": "tinted plate"
+          },
+          {
+            "name": "Heather",
+            "hex": "#cbcadb",
+            "use": "tinted plate"
+          }
+        ],
+        "rules": [
+          "One accent per image. Clay carries the emphasis; everything else is neutral.",
+          "No gradients, no glow, no neon. Saturation stays low — the warm neutrals do the work.",
+          "Never the stock-edtech palette: no royal blue, no purple-to-pink gradient, no lime green."
+        ]
+      },
+      "styleSpines": {
+        "minimal": {
+          "use": "hero, product, mockup, og and banner plates, anything documentary",
+          "prompt": "Editorial minimalism. Generous negative space, one clear subject, flat even light, no gradients or drop shadows, restrained warm-neutral palette, composed with a calm horizon and room at the bottom-start corner for a mark to be placed in post."
+        },
+        "cinematic": {
+          "use": "lifestyle, story, reel stills, anything with people",
+          "prompt": "Documentary photography. Natural window light, shallow depth of field, muted warm grade, candid unposed moment, real classroom or office texture, no studio lighting rig, no lens flare."
+        }
+      },
+      "subjectLibrary": {
+        "why": "The scenes that actually read as this product. Reach for these before inventing one.",
+        "items": [
+          "A school administrator at a desk with an open laptop, paper registers stacked and closed beside it",
+          "An empty classroom in early morning light, chairs squared to the desks",
+          "A parent's hands holding a phone, a school corridor soft behind",
+          "A teacher walking a corridor with a tablet, students blurred in motion",
+          "A school front office counter, clean and unhurried, no queue",
+          "Close detail of an attendance register, warm daylight raking across the page"
+        ]
+      },
+      "negative": {
+        "why": "The list that separates a usable render from a discard. Every item here has cost us a generation at least once.",
+        "items": [
+          "no text, no lettering, no numerals, no signage, no UI labels — Arabic script in particular renders as nonsense",
+          "no logos, no watermarks, no brand marks of any kind",
+          "no Western-school stock clichés: no yellow school bus, no red apple on a desk, no chalkboard with equations, no graduation caps thrown in the air",
+          "no AI-glossy skin, no plastic sheen, no over-sharpened HDR",
+          "no blue-to-purple tech gradient, no neon, no dark 'dashboard' UI glow",
+          "no cluttered collage; one subject, one idea",
+          "no Hogwarts wordmark and no Latin brand lettering — this brand is addressed in Arabic"
+        ]
+      },
+      "region": {
+        "why": "The Gulf front door, not the Sudan lane — a Khartoum-looking render is off-brand here.",
+        "items": [
+          "Gulf setting — Saudi and Emirati school interiors, Al Khobar and Riyadh rather than Khartoum",
+          "Modest dress read as ordinary, not as a costume; hijab where natural, never as the subject of the image",
+          "Bright even daylight, plastered or painted walls, air conditioning, simple wooden or steel furniture",
+          "Working schools, not architectural showpieces — but newer and better-resourced than the Sudan lane"
+        ]
+      },
+      "videoSpines": {
+        "documentary_calm": {
+          "use": "reels and video showcases (Seedance 2.5 and Veo)",
+          "prompt": "Documentary 24fps cinematography. A quiet morning administrative office or classroom in a Khartoum or Riyadh school. Smooth slow tracking push-in with 35mm shallow depth of field. Soft raking morning sunlight through sheer blinds. Audio: Gentle morning breeze, quiet footsteps in hallway, soft paper rustle."
+        }
+      },
+      "types": {
+        "hero": {
+          "lane": "chatgpt",
+          "size": "1792x1024",
+          "spine": "minimal",
+          "use": "page and post hero images"
+        },
+        "lifestyle": {
+          "lane": "chatgpt",
+          "size": "1024x1280",
+          "spine": "cinematic",
+          "use": "people-in-context scenes for ads and posts"
+        },
+        "product": {
+          "lane": "chatgpt",
+          "size": "1024x1280",
+          "spine": "minimal",
+          "use": "the physical world around the product — desks, registers, devices"
+        },
+        "mockup": {
+          "lane": "chatgpt",
+          "size": "1024x1024",
+          "spine": "minimal",
+          "use": "a device in a scene; the screen is left blank and composited in post",
+          "extra": "The screen must be blank, off, or a flat neutral rectangle — never a rendered interface."
+        },
+        "story": {
+          "lane": "chatgpt",
+          "size": "1024x1792",
+          "spine": "cinematic",
+          "use": "vertical story and reel stills"
+        },
+        "plate": {
+          "lane": "chatgpt",
+          "size": "1200x624",
+          "spine": "minimal",
+          "use": "a text-free background plate the template lane sets copy over for og and banner",
+          "extra": "Compose as a background: keep the centre and the start edge quiet so a headline can sit there."
+        },
+        "og": {
+          "lane": "template",
+          "size": "1200x630",
+          "use": "carries copy — renders on the carousel engine"
+        },
+        "banner": {
+          "lane": "template",
+          "size": "1200x630",
+          "use": "carries copy"
+        },
+        "infographic": {
+          "lane": "template",
+          "use": "carries copy"
+        },
+        "split": {
+          "lane": "template",
+          "use": "carries copy"
+        },
+        "testimonial": {
+          "lane": "template",
+          "use": "carries copy"
+        },
+        "carousel": {
+          "lane": "template",
+          "size": "1080x1350",
+          "use": "carries copy"
+        },
+        "logo": {
+          "lane": "none",
+          "use": "the mark exists; it is never regenerated"
+        },
+        "reel": {
+          "lane": "higgs",
+          "use": "motion — Seedance 2.5 and Veo video"
+        }
+      }
+    },
+    "databayt": {
+      "id": "databayt",
+      "mediaName": "Databayt",
+      "domain": "databayt.org",
+      "note": "The umbrella brand. Its presence tells the company story, not a product's — open source, the sharing-economy doctrine, and how a small team runs a software company with Claude Code. The SaaS products have their own brands; anything product-specific belongs there, not here. There is no mark file under public/brands yet, so the template lane falls back to the databayt wordmark and a raster render must simply leave the corner quiet.",
+      "inAppName": {
+        "ar": "داتابايت",
+        "en": "databayt"
+      },
+      "what": "The company itself: open-source software built in public, a contributor revenue-share model, and custom automation work. Three business models — Per Project, Partners, and Codebase.",
+      "audience": "Developers and contributors, businesses looking to automate the boring, partners and talent, and the Arabic-speaking MENA tech community. Technical readers who want detail, not slogans.",
+      "tone": "Precise, technical, generous with detail. Arabic-first for community content; English is fine where the audience is global and the subject is deep-technical. Never corporate, never hype.",
+      "mark": {
+        "file": null,
+        "describe": "No mark file exists for this brand yet.",
+        "meaning": "The wordmark carries the brand until artwork exists.",
+        "rules": [
+          "There is no logo file to attach — do not substitute another brand's mark.",
+          "Compose with the bottom-start corner quiet anyway, so a mark can be placed once it exists."
+        ]
+      },
+      "typography": {
+        "source": "https://font.thmanyah.com",
+        "license": "Embedding and commercial use permitted; redistribution is not. Files are fetched by scripts/fetch-thmanyah.mjs on predev/prebuild and never committed or served from the CDN.",
+        "roles": {
+          "arabicHeadline": {
+            "family": "thmanyah serif display",
+            "weight": 900,
+            "features": "ss01",
+            "why": "The signature calligraphic look — this pairing is the brand's voice in Arabic."
+          },
+          "arabicBody": {
+            "family": "thmanyah sans",
+            "weight": 400
+          },
+          "latinHeadline": {
+            "family": "Geist",
+            "weight": 600
+          },
+          "latinBody": {
+            "family": "Geist",
+            "weight": 400
+          }
+        },
+        "rules": [
+          "Arabic never takes letter-spacing — it breaks the connected script.",
+          "Arabic is the first-class language; English mirrors it. RTL is the default direction.",
+          "Type is set by the template lane, never by a generative model."
+        ]
+      },
+      "palette": {
+        "why": "Drawn from the Anthropic catalog (src/components/root/anthropic/data.ts) so slides, site and generated media share one set of values. Quote the hex to a renderer — a color name alone drifts.",
+        "canvas": [
+          {
+            "name": "Ivory Light",
+            "hex": "#faf9f5",
+            "use": "default canvas"
+          },
+          {
+            "name": "Oat",
+            "hex": "#e3dacc",
+            "use": "warm alternate canvas"
+          },
+          {
+            "name": "Slate Dark",
+            "hex": "#141413",
+            "use": "dark canvas; ink on light"
+          },
+          {
+            "name": "Clay",
+            "hex": "#d97757",
+            "use": "the one accent — brand orange"
+          }
+        ],
+        "support": [
+          {
+            "name": "Slate 550",
+            "hex": "#73726c",
+            "use": "muted text"
+          },
+          {
+            "name": "Slate 250",
+            "hex": "#dedcd1",
+            "use": "hairline / surface"
+          },
+          {
+            "name": "Coral",
+            "hex": "#ebcece",
+            "use": "tinted plate"
+          },
+          {
+            "name": "Cactus",
+            "hex": "#bcd1ca",
+            "use": "tinted plate"
+          },
+          {
+            "name": "Heather",
+            "hex": "#cbcadb",
+            "use": "tinted plate"
+          }
+        ],
+        "rules": [
+          "One accent per image. Clay carries the emphasis; everything else is neutral.",
+          "No gradients, no glow, no neon. Saturation stays low — the warm neutrals do the work.",
+          "Never the stock-edtech palette: no royal blue, no purple-to-pink gradient, no lime green."
+        ]
+      },
+      "styleSpines": {
+        "minimal": {
+          "use": "hero, product, mockup, og and banner plates, anything documentary",
+          "prompt": "Editorial minimalism. Generous negative space, one clear subject, flat even light, no gradients or drop shadows, restrained warm-neutral palette, composed with a calm horizon and room at the bottom-start corner for a mark to be placed in post."
+        },
+        "cinematic": {
+          "use": "lifestyle, story, reel stills, anything with people",
+          "prompt": "Documentary photography. Natural window light, shallow depth of field, muted warm grade, candid unposed moment, real classroom or office texture, no studio lighting rig, no lens flare."
+        }
+      },
+      "subjectLibrary": {
+        "why": "The company's own subjects — work and craft, never a classroom.",
+        "items": [
+          "A laptop open on a plain desk in even daylight, terminal text unreadable at this distance",
+          "Hands at a mechanical keyboard, the rest of the desk almost empty",
+          "A small team around one screen in a plain room, nobody posing",
+          "A quiet home-office corner at dawn, one cup of tea, no clutter",
+          "An open notebook of hand-drawn boxes and arrows beside a closed laptop",
+          "Cables, a monitor edge, and a plant — the texture of real work, shot close"
+        ]
+      },
+      "negative": {
+        "why": "Generic tech stock is the failure mode — it says nothing and looks like everyone.",
+        "items": [
+          "no text, no lettering, no numerals, no signage, no UI labels — Arabic script in particular renders as nonsense",
+          "no logos, no watermarks, no brand marks of any kind",
+          "no readable code on screens — generated code is always nonsense; keep screens out of focus or off-frame",
+          "no server rooms, no glowing blue data streams, no matrix rain, no hooded-hacker imagery",
+          "no blue-to-purple tech gradient, no neon, no dark 'dashboard' UI glow",
+          "no AI-glossy skin, no plastic sheen, no over-sharpened HDR",
+          "no cluttered collage; one subject, one idea"
+        ]
+      },
+      "region": {
+        "why": "The team is MENA-based and remote; the work looks the same anywhere, so keep it plain.",
+        "items": [
+          "Ordinary rooms — a home desk, a small office, a plain wall",
+          "Warm natural daylight rather than studio or screen glow",
+          "MENA where people appear, read as ordinary rather than as a subject",
+          "Modest, real equipment — no rows of monitors, no startup-office cliché"
+        ]
+      },
+      "videoSpines": {
+        "documentary_calm": {
+          "use": "reels and video showcases (Seedance 2.5 and Veo)",
+          "prompt": "Documentary 24fps cinematography. A quiet desk at work — hands, keyboard, notebook. Smooth slow tracking push-in with 35mm shallow depth of field. Soft daylight from one window. Audio: quiet room tone, keys, a page turning. No music bed."
+        }
+      },
+      "types": {
+        "hero": {
+          "lane": "chatgpt",
+          "size": "1792x1024",
+          "spine": "minimal",
+          "use": "page and post hero images"
+        },
+        "lifestyle": {
+          "lane": "chatgpt",
+          "size": "1024x1280",
+          "spine": "cinematic",
+          "use": "people-in-context scenes for ads and posts"
+        },
+        "product": {
+          "lane": "chatgpt",
+          "size": "1024x1280",
+          "spine": "minimal",
+          "use": "the physical world around the product — desks, registers, devices"
+        },
+        "mockup": {
+          "lane": "chatgpt",
+          "size": "1024x1024",
+          "spine": "minimal",
+          "use": "a device in a scene; the screen is left blank and composited in post",
+          "extra": "The screen must be blank, off, or a flat neutral rectangle — never a rendered interface."
+        },
+        "story": {
+          "lane": "chatgpt",
+          "size": "1024x1792",
+          "spine": "cinematic",
+          "use": "vertical story and reel stills"
+        },
+        "plate": {
+          "lane": "chatgpt",
+          "size": "1200x624",
+          "spine": "minimal",
+          "use": "a text-free background plate the template lane sets copy over for og and banner",
+          "extra": "Compose as a background: keep the centre and the start edge quiet so a headline can sit there."
+        },
+        "og": {
+          "lane": "template",
+          "size": "1200x630",
+          "use": "carries copy — renders on the carousel engine"
+        },
+        "banner": {
+          "lane": "template",
+          "size": "1200x630",
+          "use": "carries copy"
+        },
+        "infographic": {
+          "lane": "template",
+          "use": "carries copy"
+        },
+        "split": {
+          "lane": "template",
+          "use": "carries copy"
+        },
+        "testimonial": {
+          "lane": "template",
+          "use": "carries copy"
+        },
         "carousel": {
           "lane": "template",
           "size": "1080x1350",

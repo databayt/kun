@@ -143,8 +143,19 @@ const RATIO_DIMS: Record<MediaStudioRatio, { image: string; video: string }> = {
 };
 
 export function compileMediaStudioPrompt(input: MediaStudioInput): MediaStudioOutput {
-  const brand = input.brand || "mkan";
-  const b = kit.brands[brand as keyof typeof kit.brands] || kit.brands.mkan;
+  const brand = input.brand;
+  const b = kit.brands[brand as keyof typeof kit.brands];
+  // Refuse rather than substitute. This used to fall back to `kit.brands.mkan`,
+  // so picking balqalam compiled a Port Sudan coastal prompt with an mkan.sd
+  // lockup and said nothing — which made the balqalam naming rule the kit
+  // itself records ("must never carry the Hogwarts wordmark") unenforceable.
+  // compileBrief has always thrown here; this is the same contract.
+  if (!b) {
+    throw new Error(
+      `Unknown brand "${brand}" — no entry in content/media/brand-kit.json. ` +
+        `Known: ${Object.keys(kit.brands).join(", ")}.`,
+    );
+  }
   const kind = input.kind || "image";
   const format = input.format || (kind === "video" ? "walkthrough" : "post");
   const ratio = input.ratio || (kind === "video" ? "9:16" : "4:5");
@@ -207,7 +218,7 @@ export function compileMediaStudioPrompt(input: MediaStudioInput): MediaStudioOu
     }
   }
 
-  const postProcessing = `No generated text, no lettering, no AI watermark. Leave quiet bottom-start corner for ${b.domain || (brand === "mkan" ? "mkan.sd" : "hogwarts.sd")} brand lockup.`;
+  const postProcessing = `No generated text, no lettering, no AI watermark. Leave quiet bottom-start corner for ${b.domain} brand lockup.`;
 
   let prompt = "";
   if (kind === "video") {
@@ -252,7 +263,7 @@ Brand Mark: ${b.mark?.file || "mark.svg"} in monochrome ink placed at bottom-sta
     spine: selectedSpine.id,
     paletteHexes,
     accentHex: clay,
-    domain: b.domain || (brand === "mkan" ? "mkan.sd" : "hogwarts.sd"),
+    domain: b.domain,
     markFile: b.mark?.file || "mark.svg",
     beats: {
       scene: input.subject,

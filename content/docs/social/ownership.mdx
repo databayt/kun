@@ -250,23 +250,30 @@ going silent.
 Three of four now publish without a human in the token path, each verified by a real post that was
 then retracted.
 
-**Databayt is the holdout, and the reason is still not fully pinned down.** Its Page lives in some
-other business portfolio, so "Add an existing Page" could not auto-approve — it became a **request**
-(id `1092185790156133`, sent 2026-08-19, expires in 30 days) and it is pending. Until it clears,
-databayt publishes on the personal grant.
+**Databayt is the holdout, and the cause is now pinned down exactly.**
 
-What is verified, so nobody re-derives it: Abdout is the **only** person with a role on that Page
-and holds `MANAGE` (`GET /814371365085465/roles` returns exactly one entry). His business selector
-lists only **Databayt** (this portfolio) and **Abdout** — so the portfolio holding the Page is one
-he is not a member of, which is why "Needs review" is empty on our side and no approval notification
-arrives. Being the Page's sole full admin is *not* the same as being an admin of the portfolio that
-claimed it, and that distinction is the whole blocker.
+Its Page is claimed by a **third business portfolio named "Databayt", id `1364261941941312`** —
+*not* this one (`2243724639760887`, which was renamed to Databayt on 2026-08-19) and not "Abdout"
+(`645257771961210`, which owns zero Pages). Two portfolios with the same name is why this took so
+long to see.
 
-Do not read the request's own detail text as authoritative — it describes the move as being *from*
-this portfolio, while the Pages list plainly shows Databayt as `Request sent` and the System User
-still reaches only three Pages. The Pages list and `/me/accounts` are the reliable signals.
+Abdout **cannot reach `1364261941941312`** — `business_info?business_id=1364261941941312` returns
+*"this content isn't available… may only be visible to an audience that you aren't in"*, verified
+while logged in as his personal account (`c_user=668417438`). His business selector lists only the
+other two. So both pending requests — the add (`1092185790156133`) and the removal — sit with that
+portfolio's admins, and neither can be approved from here.
 
-> **Do not revoke the personal grant.** It is the only thing keeping databayt publishing.
+Where to find that screen, because it is not discoverable: switch **into** the Page (profile →
+Switch Now), then **Settings → Page setup → Page access**. The bottom section is *Business
+portfolio access* and it names the owning portfolio. Business Suite never shows it, and Graph's
+`owner_business` needs `business_management` which our tokens do not carry.
+
+**Access finding worth acting on separately.** That same screen shows **علي أصيل** with *Facebook
+access* to the Databayt Page carrying **Page deletion, Permissions, Content, Messages and calls,
+Community activity, Ads, Insights** — i.e. full control, including the ability to delete the Page.
+Graph's `GET /{page-id}/roles` returns **only Abdout**, so the API under-reports access and must not
+be used as an access audit. Given the timing, `1364261941941312` is plausibly his portfolio; that
+is a lead, not a conclusion.
 
 Adding a Page to a portfolio is a **checkpointed action**: Meta demanded two-step verification
 mid-flow for balqalam. Expect that, and expect the flow to abandon if the code is not entered.
