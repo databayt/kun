@@ -205,42 +205,48 @@ demands a unique email does not collide with Instagram's.
 
 ## Status — 2026-08-19
 
-Three things changed, and one correction to what this page said before.
+Publishing no longer depends on a human login.
 
 **The Meta app is now `Gabriel`** (`874547138717755`), renamed from "Hogwarts Social". It carries
 four Pages across four brands, so naming it after one of them misled every consent dialog a
-collaborator sees. Verified through `debug_token` (`"application": "Gabriel"`), not the dashboard.
+collaborator sees. Verified through `debug_token`, not the dashboard.
 
-**A dedicated posting account is being introduced.** `datapayt@gmail.com` was invited to the
-portfolio with **Partial access: Basic**, and the Hogwarts Page assigned with **Content and
-Insights** only — not Messages, not Ads, not Everything. Least privilege on purpose: this account
-publishes and reads numbers, and can do nothing else. Status **Invited**; the invitation expires
-in 30 days.
+**A System User now holds the Page tokens.** `Gabriel` (`61593467071204`), Admin, created in the
+portfolio: `type: SYSTEM_USER`, `expires_at: 0`, five scopes and no more, with **Content and
+Insights** on each Page — so the identity that posts cannot read messages, spend on ads, or delete
+a Page. `hogwarts` and `mkan` were migrated to its tokens and verified by publishing a real post
+and deleting it.
 
-> This was Abdout's explicit call. The engine's written position is that a second personal account
-> does not reduce publishing risk — Graph API posting to a Page you administer is the sanctioned
-> path, and Meta permits one personal account per human, so a second one operated from the same
-> machine is more likely to be actioned than to shield anything. The risk this *does* address is
-> real but different: bus factor. Recorded here so the reasoning survives the decision.
+This resolved an open question rather than assuming it: **an Unverified portfolio does issue
+working System User tokens.** Two undocumented gates stand in the way — the portfolio must *own*
+the app before a System User can be assigned it, and the System User needs an explicit **app role**
+or the permissions picker renders "No permissions available" and dead-ends with no explanation.
+
+**A second personal account was considered and rejected.** `datapayt@gmail.com` was invited as a
+posting account and the invite was **revoked the same day**: the account turned out to be
+**"Scrape Funnel"**, created 2026-08-18 as the dedicated scraping identity. Using one account for
+both lanes would have re-coupled exactly what the scrape doctrine separates — a ban earned while
+scraping would have taken publishing down with it. It now holds **zero** roles on any Page,
+portfolio or app, which is what keeps it cheap to lose. See [/docs/scrape](/docs/scrape).
 
 **Correction to "The people" above.** `Mkan @mkan.sd` and `UnclaimedBusinessUser FromPool @mkan.sd`
-are listed under **People**, not System users — Business settings → System users shows *none*. Both
-still hold **Full access / Everything**. Two non-human accounts with total control of the portfolio
-is worth a deliberate look; neither was created intentionally.
+are listed under **People**, not System users. Both still hold **Full access / Everything** — two
+non-human accounts with total control of the portfolio, neither created deliberately.
 
-### What remains before publishing actually runs on the new account
+**A canary now watches the tokens.** `/api/social/canary` probes every publishable brand twice
+daily and alerts the review channel on a dead *or merely expiring* token. Page tokens do not
+announce their own death; before this, a revoked identity surfaced only as brand Pages quietly
+going silent.
 
-1. `datapayt@gmail.com` accepts the invitation — needs that account's own login, cannot be done
-   from Abdout's session.
-2. Assign the remaining three Pages. The invite wizard carries **one asset at a time** (selecting a
-   second replaces the first, silently), so Mkan مكان, Bilqalam and Databayt still need adding via
-   *Details → Assign assets*. Bilqalam and Databayt are **not in the portfolio at all** — they are
-   personally owned and must be brought in first, or granted at Page level.
-3. Mint Page tokens from the new account's grant on Gabriel and swap
-   `FACEBOOK_PAGE_ACCESS_TOKEN_*`. See [/facebook](/docs/social/channels/facebook) — and note the
-   Edit-settings trap, which applies to every future grant.
+### What is still open
 
-Until step 3 lands, publishing still runs on Abdout's personal grant and is unchanged.
+1. **`balqalam` and `databayt` still publish on the personal grant.** Their Pages are personally
+   owned and sit outside the portfolio, so the System User cannot hold their tokens yet.
+   **Do not revoke the personal grant** until those two Pages have joined the portfolio and been
+   re-minted — revoking now takes half the fleet down.
+2. The portfolio is still named **Mkan** and is **Unverified**, with no legal name or address.
+3. **No second human has Full access.** The System User fixed the *token* dependency, not the bus
+   factor: a portfolio is still administered by humans, and today that is one human.
 
 ## Open decisions
 
