@@ -25,14 +25,15 @@ Does **not** own: sending (hogwarts' Evolution API + Resend), the CRM's hosting,
 
 | Lane            |     Count |     % | What can work on it                             |
 | --------------- | --------: | ----: | ----------------------------------------------- |
-| **CONTACTABLE** |   **287** |  7.4% | reachable today — the asset                     |
-| FB_PAGE         |   **625** | 16.1% | scrape the About/Intro tab — the live queue     |
+| **CONTACTABLE** |   **455** | 11.7% | reachable today — the asset                     |
+| FB_PAGE         |       471 | 12.1% | scrape the About/Intro tab — the live queue     |
 | WEBSITE         |        32 |  1.0% | fetch + extract                                 |
-| **MAP_ONLY**    | **2,936** | 75.7% | **an OSM name + a map pin. No automated lane.** |
+| **MAP_ONLY**    | **2,936** | 75.4% | **an OSM name + a map pin. No automated lane.** |
 
 Total **3,894** schools (was 3,156). The **Sudanese book of business** — every school
-of Sudanese origin wherever it operates — is `originCountry=SD`: **728 rows**
-(647 Sudan · 50 Egypt · 19 Saudi · 5 UAE · 3 Türkiye · rest Kenya/Uganda/Ethiopia),
+of Sudanese origin wherever it operates — is `originCountry=SD`: **724 rows**
+(610 Sudan · 81 Egypt · 21 Saudi · rest Gulf/East Africa/Türkiye), **262 of them
+contactable (36%)** against 8 when this started, and 280 evidenced as OPERATING.
 up from zero on 2026-08-17.
 
 **Each market has a different channel, and this is the most reusable thing learned:**
@@ -51,7 +52,7 @@ Consequences that govern every recommendation this agent makes:
 - **What that lane DID buy is real, just not contact:** +2,528 coordinates (3,136 of 3,156 rows now carry one),
   +1,106 English names, +58 private/public classifications, plus grades/ISCED/gender/operator.
   The coordinates are the asset — they make a location-biased directory or Places match possible.
-- **Automated enrichment now reaches +657 rows.** FB_PAGE (625) + WEBSITE (32). That ceiling is no
+- **Automated enrichment now reaches +503 rows.** FB_PAGE (471) + WEBSITE (32). That ceiling is no
   longer the constraint it was: Facebook's own in-app page search — which had NEVER run, because it
   needs a signed-in session — found 564 more Sudanese schools across every state, Khartoum's real
   neighbourhoods, and the diaspora. `discover-fb-pages.ts` + `sd-discover-load.ts`.
