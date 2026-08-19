@@ -3,14 +3,17 @@
 // The Media Studio — prompt area on /social/media matching the exact geometry
 // and feel of DraftAgent on /social/draft. Simplified single-concept dropdowns
 // without icons or descriptions, direct reference loading, real-time live
-// card previews, and cross-stage bridge to /social/draft.
+// card previews, interactive image generation, and cross-stage bridge to /social/draft.
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import {
   Check,
   Copy,
+  Download,
+  Eye,
   Image as ImageIcon,
   Loader2,
+  Paperclip,
   Plus,
   Quote,
   Send,
@@ -35,7 +38,7 @@ import {
   PromptInputTextarea,
 } from "@/components/atom/prompt-input";
 import { Button } from "@/components/ui/button";
-import { fileMediaBrief } from "@/actions/post-social";
+import { fileMediaBrief, generateStudioImage } from "@/actions/post-social";
 import { fill } from "@/components/root/social/dictionary";
 import { PRODUCTS } from "@/components/root/social/products";
 import { useSocial } from "@/components/root/social/provider";
@@ -96,7 +99,7 @@ const MODELS_BY_KIND: Record<
 };
 
 export function MediaStudio() {
-  const { isRTL, t, product: globalProduct, goToStage } = useSocial();
+  const { isRTL, t, product: globalProduct, goToStage, attachMedia } = useSocial();
 
   // Active brand is driven by the global product in the page nav tabs
   const brand = globalProduct || "mkan";
@@ -115,6 +118,12 @@ export function MediaStudio() {
   const [filedId, setFiledId] = useState<string | null>(null);
   const [filingError, setFilingError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  // Direct In-Browser Generation State
+  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generateError, setGenerateError] = useState<string | null>(null);
+  const [attached, setAttached] = useState(false);
 
   const availableFormats = useMemo(() => {
     return ASSET_FORMATS.filter((f) =>
@@ -147,6 +156,7 @@ export function MediaStudio() {
       setModel("gemini");
     }
     if (compiled) setCompiled(null);
+    setGeneratedImage(null);
   };
 
   // When format changes, update kind, default ratio, and default model
@@ -159,6 +169,7 @@ export function MediaStudio() {
       setModel(MODELS_BY_KIND[targetFormat.kind]?.[0]?.id || "default");
     }
     if (compiled) setCompiled(null);
+    setGeneratedImage(null);
   };
 
   // Listen for reference card clicks from the showroom gallery
@@ -310,6 +321,33 @@ export function MediaStudio() {
     setCompiled(res);
   };
 
+  const handleGenerateImage = async () => {
+    const textToUse = compiled ? compiled.beats.scene : subject.trim();
+    if (!textToUse) return;
+    if (!compiled) handleCompile(textToUse);
+    setIsGenerating(true);
+    setGenerateError(null);
+    try {
+      const res = await generateStudioImage({
+        brand,
+        format: formatId,
+        ratio,
+        subject: textToUse,
+        model,
+        spine: activeSpine,
+      });
+      if (res.ok && res.imageUrl) {
+        setGeneratedImage(res.imageUrl);
+      } else {
+        setGenerateError(res.error || "Generation failed.");
+      }
+    } catch (err: unknown) {
+      setGenerateError(err instanceof Error ? err.message : "Generation failed.");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   const handleCopy = () => {
     if (!compiled) return;
     navigator.clipboard.writeText(compiled.prompt);
@@ -332,6 +370,13 @@ export function MediaStudio() {
         setFilingError(res.error || "Could not file to queue.");
       }
     });
+  };
+
+  const handleAttachToDraft = () => {
+    if (!generatedImage) return;
+    attachMedia(generatedImage);
+    setAttached(true);
+    goToStage("draft");
   };
 
   const brandLabel =
@@ -533,18 +578,90 @@ export function MediaStudio() {
               )}
             </div>
 
-            {/* Submit Button */}
-            <PromptInputSubmit
-              disabled={!subject.trim()}
-              status="ready"
-              className="h-8 w-8 rounded-full"
-              aria-label={isRTL ? "تجميع الأمر" : "Compile prompt"}
-            >
-              <Send className="size-4" />
-            </PromptInputSubmit>
+            {/* Compile & Generate Actions */}
+            <div className="flex items-center gap-1.5">
+              <Button
+                type="button"
+                size="sm"
+                variant="default"
+                disabled={isGenerating || !subject.trim()}
+                onClick={handleGenerateImage}
+                className="h-8 rounded-full px-3.5 text-xs font-semibold shadow-xs cursor-pointer"
+              >
+                {isGenerating ? (
+                  <>
+                    <Loader2 className="size-3.5 me-1.5 animate-spin" />
+                    {t.mediaGeneratingImage}
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="size-3.5 me-1.5" />
+                    {t.mediaGenerateImage}
+                  </>
+                )}
+              </Button>
+
+              <PromptInputSubmit
+                disabled={!subject.trim()}
+                status="ready"
+                className="h-8 w-8 rounded-full"
+                aria-label={isRTL ? "تجميع الأمر" : "Compile prompt"}
+              >
+                <Send className="size-4" />
+              </PromptInputSubmit>
+            </div>
           </div>
         </PromptInput>
       </div>
+
+      {/* Generated Image Result Card */}
+      {generatedImage && (
+        <div className="bg-card text-card-foreground border-primary/30 relative space-y-4 rounded-2xl border p-5 shadow-md animate-in fade-in-50 duration-300">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b pb-3">
+            <div className="flex items-center gap-2">
+              <span className="bg-primary text-primary-foreground rounded-full px-2.5 py-0.5 font-mono text-xs font-bold uppercase">
+                {t.mediaGeneratedTitle}
+              </span>
+              <span className="text-xs font-mono text-muted-foreground">{compiled?.dimensions || ratio}</span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <a
+                href={generatedImage}
+                download={`${brand}-${formatId}-${ratio}.svg`}
+                className="bg-muted hover:bg-muted/80 text-foreground inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-xs font-medium transition-colors"
+              >
+                <Download className="size-3.5" />
+                {t.mediaDownloadImage}
+              </a>
+
+              <Button
+                size="sm"
+                variant="default"
+                onClick={handleAttachToDraft}
+                className="h-8 rounded-full text-xs font-medium cursor-pointer"
+              >
+                {attached ? <Check className="size-3.5 me-1.5" /> : <Paperclip className="size-3.5 me-1.5" />}
+                {t.mediaAttachDraft}
+              </Button>
+            </div>
+          </div>
+
+          {/* Rendered Image Display */}
+          <div className="flex items-center justify-center overflow-hidden rounded-xl border bg-black/5 p-2">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={generatedImage}
+              alt={compiled?.title || "Generated Media"}
+              className="max-h-[460px] w-auto max-w-full rounded-lg object-contain shadow-sm"
+            />
+          </div>
+        </div>
+      )}
+
+      {generateError && (
+        <p className="text-destructive text-xs" role="alert">{generateError}</p>
+      )}
 
       {/* Compiled Studio Response Card */}
       {compiled && (
@@ -575,7 +692,9 @@ export function MediaStudio() {
           </div>
 
           {/* Live Visual Card Preview for deterministic and card templates */}
-          <VisualCardPreview compiled={compiled} isRTL={isRTL} brand={brand} />
+          {!generatedImage && (
+            <VisualCardPreview compiled={compiled} isRTL={isRTL} brand={brand} />
+          )}
 
           {/* 5-Beat Breakdown */}
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 text-xs">
@@ -622,6 +741,26 @@ export function MediaStudio() {
             <div className="flex flex-wrap items-center gap-2">
               <Button
                 size="sm"
+                variant="default"
+                disabled={isGenerating}
+                onClick={handleGenerateImage}
+                className="h-8 rounded-full text-xs font-semibold cursor-pointer shadow-xs"
+              >
+                {isGenerating ? (
+                  <>
+                    <Loader2 className="size-3.5 me-1.5 animate-spin" />
+                    {t.mediaGeneratingImage}
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="size-3.5 me-1.5" />
+                    {t.mediaGenerateImage}
+                  </>
+                )}
+              </Button>
+
+              <Button
+                size="sm"
                 variant={copied ? "default" : "outline"}
                 onClick={handleCopy}
                 className="h-8 rounded-full text-xs cursor-pointer"
@@ -659,6 +798,7 @@ export function MediaStudio() {
               onClick={() => {
                 setCompiled(null);
                 setSubject("");
+                setGeneratedImage(null);
               }}
               className="h-8 text-xs cursor-pointer"
             >
@@ -686,7 +826,6 @@ function VisualCardPreview({
 }) {
   const isTestimonial = compiled.format === "testimonial";
   const isInfographic = compiled.format === "infographic";
-  const isAdOrHero = compiled.format === "ad" || compiled.format === "post";
 
   return (
     <div className="space-y-1.5">
