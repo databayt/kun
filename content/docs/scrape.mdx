@@ -163,10 +163,31 @@ search across multiple backends, with `agent-reach doctor --json` reporting whic
 each platform right now. Its premise is that access methods break and get swapped underneath you,
 which is precisely this lane's failure mode.
 
-**Status: neither installed, and Python is not the blocker.** An earlier version of this page said
-3.9.6 blocked them — that was wrong, and worth correcting rather than quietly deleting: `python3` is
-3.9.6, but `python3.11` (3.11.15) and `uv` are both present, so each installs isolated without
-touching the system interpreter (`uv tool install 'scrapling[fetchers]'`).
+**Status: both installed 2026-08-19** — Scrapling 0.4.14, Agent Reach v1.5.0, each in its own `uv`
+tool environment. An earlier version of this page said Python 3.9.6 blocked them; that was wrong and
+is corrected rather than quietly deleted — `python3` is 3.9.6, but `python3.11` and `uv` are both
+present.
+
+```bash
+uv tool install --with markdownify 'scrapling[fetchers]' && scrapling install
+uv tool install 'https://github.com/Panniantong/agent-reach/archive/main.zip'
+```
+
+**Two install traps, both hit for real.** `uv tool install agent-reach` fetches the **wrong
+package** — PyPI's `agent-reach` is 0.1.0 by a different author pointing at
+`github.com/jgalea/agent-reach`, a name collision rather than the ~73k★ project; the version
+mismatch is the tell, and `agent-reach --version` must print `v1.5.0`. And `scrapling[fetchers]`
+omits `markdownify`, so `scrapling extract` renders the page and then dies at the markdown step.
+
+**The payoff, measured the same day on a real queue row.** `tpsdxb.com/contact-us` — 5,652 bytes of
+JS shell with zero contact under plain curl — yielded `info@tpsdxb.com`, `registrar@tpsdxb.com` and
+`+971-428-444-65` through `scrapling extract fetch`. One unreachable row became contactable.
+
+**`agent-reach doctor` is a config check, not a liveness check.** It reports 4/15 channels up and
+marks "any web page via Jina Reader" ✅ **available**, while `r.jina.ai` returns 451 for every URL
+from this machine. Doctor verifies that a backend is configured, not that it answers — which is
+precisely why this lane's pre-flight is one known-good row, not a health command. Facebook,
+Instagram and Exa remain unlocked pending OpenCLI + the dedicated account, and `mcporter`.
 
 **What was measured before adopting anything, 2026-08-19:**
 

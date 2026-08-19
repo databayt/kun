@@ -220,15 +220,39 @@ Exa semantic search across multiple backends, with `agent-reach doctor --json` r
 backend serves each platform right now. Its premise is that access methods break and get swapped,
 which is precisely this lane's failure mode.
 
-**Install status: neither is installed, and Python is not the blocker.** An earlier note here said
-3.9.6 blocked them; that was wrong. `python3` is 3.9.6 but **`python3.11` (3.11.15) and `uv` are
-both present**, so each installs isolated without touching the system interpreter:
+**Install status: BOTH INSTALLED 2026-08-19** — Scrapling 0.4.14, Agent Reach v1.5.0. Python was
+never the blocker (an earlier note here said 3.9.6 stopped them; `python3` is 3.9.6 but
+`python3.11` and `uv` are both present, so each lives in its own isolated tool env).
 
 ```bash
-uv tool install 'scrapling[fetchers]' && scrapling install   # fetchers + browsers
+uv tool install --with markdownify 'scrapling[fetchers]' && scrapling install
+uv tool install 'https://github.com/Panniantong/agent-reach/archive/main.zip'
 ```
 
-Adopt the ideas now, the tools on approval:
+Two install traps, both hit for real, so nobody hits them twice:
+
+1. **`uv tool install agent-reach` installs the WRONG PACKAGE.** PyPI's `agent-reach` is version
+   0.1.0 by a different author pointing at `github.com/jgalea/agent-reach` — a name collision, not
+   the ~73k★ project. The version mismatch (repo says 1.5.0, PyPI serves 0.1.0) is the tell. Install
+   from the **GitHub archive URL** above — that is what Agent Reach's own install guide
+   ([docs/install.md upstream](https://github.com/Panniantong/Agent-Reach/blob/main/docs/install.md))
+   prescribes. Verify with `agent-reach --version`; it must print `Agent Reach v1.5.0`.
+2. **`scrapling[fetchers]` omits `markdownify`**, so `scrapling extract` fetches and renders the page
+   and then dies at the markdown step. `--with markdownify` fixes it.
+
+**Measured payoff, same day, on a real `webQueue` row.** `tpsdxb.com/contact-us` — 5,652 bytes of JS
+shell and zero contact under plain curl — yielded `info@tpsdxb.com`, `registrar@tpsdxb.com` and
+`+971-428-444-65` through `scrapling extract fetch`. One unreachable row became contactable, which is
+the entire thesis of adopting it.
+
+**`agent-reach doctor` is a CONFIG check, not a liveness check — do not trust it as one.** It reports
+4/15 channels up and marks "any web page via Jina Reader" **✅ available**, while `r.jina.ai` returns
+451 for every URL from this machine. That is not a bug so much as a boundary: doctor verifies that a
+backend is configured, not that it answers. It is exactly why §9 opens with a one-known-good-row
+pre-flight instead of a health command. Still unlocked: Facebook and Instagram (need OpenCLI plus the
+dedicated account) and Exa semantic search (needs `npm install -g mcporter` + `mcporter config add`).
+
+Adopt the ideas as well as the tools:
 
 | Its idea                              | Applied here                                                                              |
 | ------------------------------------- | ----------------------------------------------------------------------------------------- |
