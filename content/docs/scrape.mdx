@@ -150,24 +150,49 @@ which one failed: the target had no contact, or the reader was broken. A broken 
 "low yield" is how a good lane gets abandoned, so the runbook now demands a one-known-good-row
 pre-flight before any batch, and asks every yield number to name the reader that produced it.
 
-[Agent Reach](https://github.com/Panniantong/Agent-Reach) (MIT, ~73k★, last release 2026-08-12) is a
-capability layer over exactly these readers — one CLI routing Facebook, Instagram, web, RSS and Exa
-semantic search across multiple backends, with `agent-reach doctor --json` reporting which backend
-serves each platform right now. Its premise is that access methods break and get swapped underneath
-you, which is precisely this lane's failure mode. **Status: not installed** — it needs Python ≥3.10
-and this Mac has 3.9.6.
+Two tools cover this, and **the line between them is the account-risk line**:
+
+| Tool                                                                       | Lane                                                                                      | Account risk                         |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ------------------------------------ |
+| [Scrapling](https://github.com/D4Vinci/Scrapling) (BSD-3, ~75k★)           | Anonymous — school websites, government registers. Rendering, adaptive selectors, checkpointed crawl | **None** — no login, nothing to lose |
+| [Agent Reach](https://github.com/Panniantong/Agent-Reach) (MIT, ~73k★)     | Logged-in social — Facebook, Instagram. Multi-backend routing + `doctor`                    | **High** — drives a real session     |
+
+Scrapling covers everything that needs no login, which is most of the remaining yield. Agent Reach
+is a capability layer over readers — one CLI routing Facebook, Instagram, web, RSS and Exa semantic
+search across multiple backends, with `agent-reach doctor --json` reporting which backend serves
+each platform right now. Its premise is that access methods break and get swapped underneath you,
+which is precisely this lane's failure mode.
+
+**Status: neither installed, and Python is not the blocker.** An earlier version of this page said
+3.9.6 blocked them — that was wrong, and worth correcting rather than quietly deleting: `python3` is
+3.9.6, but `python3.11` (3.11.15) and `uv` are both present, so each installs isolated without
+touching the system interpreter (`uv tool install 'scrapling[fetchers]'`).
 
 **What was measured before adopting anything, 2026-08-19:**
 
-| Piece                                          | Measured here                                                                    |
-| ---------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `r.jina.ai` web reader (the zero-config win)   | **HTTP 451 for every URL from this machine** — systemic IP/region block, not per-site |
-| plain `curl` on the website lane               | **1 of 3** real rows yielded; residual is JS-rendered shells and dead hosts        |
-| `opencli facebook profile/search/groups`       | the FB queue is now the largest automated lane — highest-value piece, needs install |
-| `mcporter call exa.web_search_exa`             | the only credible automated angle on the map-pin-only rows; unverified free tier   |
+| Piece                                        | Measured here                                                                         |
+| -------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `r.jina.ai` web reader (the zero-config win) | **HTTP 451 for every URL from this machine** — systemic IP/region block, not per-site   |
+| plain `curl` on the website lane             | **1 of 3** real rows yielded; residual is JS-rendered shells and dead hosts             |
+| the failing site, diagnosed                  | `tpsdxb.com` serves ~5.6 KB of `<noscript>` + a nonce'd script at `/`, `/contact`, `/contact-us` |
+| Scrapling `DynamicFetcher`                   | real Playwright Chromium — the named fix for that residual, and it runs **locally**     |
+| Agent Reach's social channels                | the FB queue is now the largest automated lane — highest-value piece, needs install     |
+| `mcporter call exa.web_search_exa`           | the only credible automated angle on the map-pin-only rows; unverified free tier        |
 
-The headline free win is the piece that does not work here. That is the whole argument for measuring
-a dependency before designing around its README.
+Agent Reach's headline free win is the piece that does not work here, and the fix for the gap it
+left came from the second tool rather than the first. That is the whole argument for measuring a
+dependency before designing around its README.
+
+**Where Scrapling must not go.** Its `StealthyFetcher` bypasses Cloudflare and spoofs fingerprints —
+ordinary against an anonymous school website, and the worst possible pairing against a platform we
+hold an irreplaceable logged-in account on, because evasion raises the stakes of detection on the
+one account we cannot re-buy. The guard blocks that shape and the `--cdp-url` shape (which would
+attach to the vault) while leaving every anonymous run free, which is the whole reason to adopt it.
+We honour `robots.txt` on the website lane; Scrapling makes that optional and we do not.
+
+**Its MCP server is a separate decision from the library.** Useful for inspecting one page
+interactively; wrong for the queue, because this lane's rule is zero tokens per lead — 600+ pages
+through an MCP is 600+ pages of model context for work a local extractor does free.
 
 **The account rule widens rather than relaxes.** Agent Reach does not log in for you — its OpenCLI
 backend drives *the browser session you already have*, which on this machine is the session vault
@@ -225,12 +250,17 @@ export FB_SCRAPE_DELAY_MS=4000
 
 Read-only commands (`contact-gap.ts`, `normalize-contacts.ts`) are never blocked.
 
-It also covers **Agent Reach** (`opencli facebook|instagram`, and Agent Reach's own Facebook and
-Instagram subcommands) — added before the tool was installed, because its OpenCLI backend drives the
-existing browser session by design. `agent-reach doctor`, `install` and `check-update` are left
-unblocked. Both `opencli` and `agent-reach` also had to join the execution-verb list: they are
-invoked as bare binaries, so without that the new patterns would have matched the text and then been
-discarded — coverage that looks present and does nothing. Thirteen smoke cases cover it.
+It also covers **Agent Reach and Scrapling** — added before either tool was installed. Agent Reach's
+social subcommands are blocked outright because its OpenCLI backend drives the existing browser
+session by design. Scrapling is deliberately *not* blocked wholesale: its anonymous lane is the one
+we want, so only two shapes are caught — aimed at a logged-in social platform, or attaching to an
+existing CDP endpoint. `agent-reach doctor`, `install` and `check-update` stay unblocked, as does
+every ordinary `scrapling extract` against a school website or a government register.
+
+`opencli`, `agent-reach` and `scrapling` also had to join the execution-verb list: they are invoked
+as bare binaries, so without that the new patterns would have matched the command text and then been
+discarded by the verb gate — coverage that looks present and does nothing. Nineteen smoke cases
+cover the matrix, including the four that must stay allowed.
 
 **`scrape-yield`** (PostToolUse, Bash, async) — appends the contact-gap delta to
 `.claude/logs/scrape-runs.log` after every lead-lane run, so yield is measured rather than

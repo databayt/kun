@@ -62,7 +62,17 @@ cmd="$(printf '%s' "$json" | jq -r '.tool_input.command // empty' 2>/dev/null)"
 # discover it on its own. Scoped to the session-driving channels on purpose:
 # `agent-reach doctor` / `install` / `check-update` are read-only or administrative
 # and must stay unblocked, because a guard that cries wolf gets routed around.
-SCRAPE_ENTRYPOINTS='(sudan-schools-scraper|tier[0-9]+-[a-z]+|cdp-client|fb-matrix|dorker|enricher|scripts/crm/(scrape|discover|enrich|contact-hunt)|crm:(scrape|discover|enrich|matrix|dork|fb)|opencli[[:space:]]+(facebook|instagram)|agent-reach[[:space:]]+[a-z-]*[[:space:]]*(facebook|instagram))'
+# Scrapling (github.com/D4Vinci/Scrapling) is deliberately NOT matched wholesale.
+# Its normal use is the opposite of risky: anonymous fetching of school websites
+# and government registers with its own Playwright Chromium, no login, no account
+# to lose. Blocking that would block the lane we actually want. Two shapes ARE
+# matched, because they re-introduce the account risk:
+#   • pointed at facebook/instagram — stealth fetching a platform we hold an
+#     irreplaceable logged-in account on is the worst pairing available: evasion
+#     raises the stakes of detection on exactly the account we cannot re-buy.
+#   • attaching to an existing CDP endpoint (`cdp`/`9222`) — DynamicFetcher can
+#     connect to a remote browser, and the remote browser here is the vault.
+SCRAPE_ENTRYPOINTS='(sudan-schools-scraper|tier[0-9]+-[a-z]+|cdp-client|fb-matrix|dorker|enricher|scripts/crm/(scrape|discover|enrich|contact-hunt)|crm:(scrape|discover|enrich|matrix|dork|fb)|opencli[[:space:]]+(facebook|instagram)|agent-reach[[:space:]]+[a-z-]*[[:space:]]*(facebook|instagram)|scrapling[^;&|]*(facebook|instagram|cdp|9222))'
 printf '%s' "$cmd" | grep -Eiq "$SCRAPE_ENTRYPOINTS" || exit 0
 
 # ...and is it RUNNING one, rather than merely naming one?
@@ -83,7 +93,7 @@ printf '%s' "$cmd" | grep -Eiq "$SCRAPE_ENTRYPOINTS" || exit 0
 # entrypoint patterns added above would match the text and then be discarded here,
 # so the new coverage would silently never fire. A guard that looks present and
 # does nothing is worse than no guard, so this pairing is tested, not assumed.
-EXEC_VERBS='(^|[;&|]|[[:space:]])(npx|node|tsx|pnpm|npm|yarn|bun|deno|bash|sh|zsh|python3?|opencli|agent-reach)([[:space:]]|$)'
+EXEC_VERBS='(^|[;&|]|[[:space:]])(npx|node|tsx|pnpm|npm|yarn|bun|deno|bash|sh|zsh|python3?(\.[0-9]+)?|uv|uvx|opencli|agent-reach|scrapling)([[:space:]]|$)'
 printf '%s' "$cmd" | grep -Eq "$EXEC_VERBS" || exit 0
 
 # ── 2. Which profile backs the port this run will attach to? ─────

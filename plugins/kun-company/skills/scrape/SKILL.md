@@ -129,11 +129,26 @@ usual pages (`/contact`, `/about`, footer), same regexes as §2. Cheap, no accou
 | the other 2                   | one JS-rendered shell (5.6 KB, no contact in HTML), one dead host (0 bytes) |
 | Jina Reader `r.jina.ai/<url>` | **HTTP 451 on every URL from this machine** — systemic, not per-site        |
 
-So the residual is **JS-rendered sites and dead hosts**, not parsing. A headless render would reach
-the first group; nothing reaches the second. Jina Reader is the obvious fix for group one and it is
-**unavailable here** — 451 "Unavailable For Legal Reasons" from the Cloudflare edge for
-`example.com` as readily as for a school site, so it is an IP/region block on this machine rather
-than anything about the target. Re-test before planning around it; do not assume it came back.
+So the residual is **JS-rendered sites and dead hosts**, not parsing. `tpsdxb.com` was confirmed:
+`/`, `/contact` and `/contact-us` all return ~5.6 KB of `<noscript>` plus a nonce'd script tag and
+zero contact. Nothing reaches a dead host; a headless render reaches the rest.
+
+**The fix is [Scrapling](https://github.com/D4Vinci/Scrapling)'s `DynamicFetcher`** (BSD-3, ~75k★,
+released weekly) — real Playwright Chromium, so the page is rendered before extraction. It also
+ships the CLI that Jina Reader would have been, except it runs **locally**, which makes the 451
+block irrelevant:
+
+```bash
+scrapling extract get   'https://qla.edu.qa'    contact.md    # static, fast path
+scrapling extract fetch 'https://www.tpsdxb.com' contact.md --solve-cloudflare   # rendered
+```
+
+Order the chain cheapest-first and **record which fetcher produced each row**: plain fetch →
+`DynamicFetcher` → dead. A row found by rendering is a row that plain curl will keep missing, so the
+attribution is what tells you whether the lane is worth re-running.
+
+Jina Reader stays **unavailable here** — 451 for `example.com` as readily as for a school site, so
+it is an IP/region block on this machine, not the target. Re-test before planning around it.
 
 ## §5 — Official directories (build this next)
 
@@ -189,12 +204,31 @@ concluding anything — a broken reader reported as "low yield" is how a good la
 hand. If that row fails, the reader is down; stop and fix it rather than burning the queue and
 recording a false zero.
 
-**[Agent Reach](https://github.com/Panniantong/Agent-Reach)** (MIT, ~73k★, actively maintained) is a
-capability layer over exactly these readers — one CLI routing Facebook, Instagram, web, RSS and Exa
-semantic search across multiple backends, with `agent-reach doctor --json` reporting which backend
-serves each platform right now. Its premise is that access methods break and get swapped, which is
-precisely this lane's failure mode. **Status here: not installed** — it needs Python ≥3.10 and this
-Mac has 3.9.6. Adopt the idea now, the tool on approval:
+Two tools cover this, and **the line between them is the account-risk line**:
+
+| Tool                                                                       | Lane                                                                                                | Account risk                         |
+| -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------ |
+| **[Scrapling](https://github.com/D4Vinci/Scrapling)** (BSD-3, ~75k★)       | Anonymous: school websites, government registers. Rendering, adaptive selectors, crawl + checkpoint | **None** — no login, nothing to lose |
+| **[Agent Reach](https://github.com/Panniantong/Agent-Reach)** (MIT, ~73k★) | Logged-in social: Facebook, Instagram. Multi-backend + `doctor`                                     | **High** — drives a real session     |
+
+Use Scrapling for everything that does not need a login, which is most of the remaining yield: §4's
+rendered sites and §5's registers. Use Agent Reach only where a login is unavoidable, under §2's
+dedicated-account rule.
+
+Agent Reach is a capability layer over readers — one CLI routing Facebook, Instagram, web, RSS and
+Exa semantic search across multiple backends, with `agent-reach doctor --json` reporting which
+backend serves each platform right now. Its premise is that access methods break and get swapped,
+which is precisely this lane's failure mode.
+
+**Install status: neither is installed, and Python is not the blocker.** An earlier note here said
+3.9.6 blocked them; that was wrong. `python3` is 3.9.6 but **`python3.11` (3.11.15) and `uv` are
+both present**, so each installs isolated without touching the system interpreter:
+
+```bash
+uv tool install 'scrapling[fetchers]' && scrapling install   # fetchers + browsers
+```
+
+Adopt the ideas now, the tools on approval:
 
 | Its idea                              | Applied here                                                                              |
 | ------------------------------------- | ----------------------------------------------------------------------------------------- |
@@ -208,15 +242,42 @@ Mac has 3.9.6. Adopt the idea now, the tool on approval:
 like the free win is the piece that does not work here. Test the others the same way before planning
 around them, and do not treat the README's "works immediately" as measurement.
 
-**If it is installed, the account rule does not relax — it widens.** Agent Reach does not log in for
-you; its OpenCLI backend drives _the browser session you already have_, which on this machine is the
-session vault holding Abdout's personal Facebook. `scrape-guard` already matches
-`opencli facebook|instagram` and Agent Reach's Facebook/Instagram subcommands, and it was extended
-**before** the install rather than after. `agent-reach doctor`, `install` and `check-update` are
-deliberately left unblocked. When `doctor` reports a **new** active_backend for those channels, add
-that binary to the guard — it cannot discover the swap on its own.
+**Where Scrapling must NOT go.** Its `StealthyFetcher` bypasses Cloudflare and spoofs browser
+fingerprints. On an anonymous school website that is ordinary, sensible scraping. Aimed at a
+platform we hold an irreplaceable logged-in account on, it is the **worst pairing available**:
+evasion raises the stakes of detection on the one account we cannot re-buy. Same for a `--cdp-url`
+attaching to an existing browser — the existing browser here is the vault. `scrape-guard` blocks
+both shapes and leaves every anonymous run untouched, which is the whole reason to adopt it. Honour
+`robots.txt` on the website lane; Scrapling makes it optional and we do not.
 
-**Do not install its skill as a kun skill.** It ships a Claude Code `SKILL.md` whose description is
+**If Agent Reach is installed, the account rule does not relax — it widens.** It does not log in for
+you; its OpenCLI backend drives _the browser session you already have_, which on this machine is the
+session vault holding Abdout's personal account. `scrape-guard` already matches its social
+subcommands, and it was extended **before** the install rather than after. `agent-reach doctor`,
+`install` and `check-update` are deliberately left unblocked. When `doctor` reports a **new**
+active_backend for those channels, add that binary to the guard — it cannot discover the swap alone.
+
+**What Scrapling buys the other sections**, beyond §4's rendering:
+
+- **§5 directories.** ADEK's ArcGIS is plain JSON that curl already handles, but the portals still
+  unmeasured (KHDA, `open.data.gov.sa`) are likely JS-heavy. Rendering is what makes them reachable.
+- **§2 parsing durability.** `auto_save=True` / `adaptive=True` relocate elements by similarity when
+  a layout changes. The About tab is exactly the kind of markup that silently reshapes, and a 600+
+  row queue is exactly where a silent selector break costs the most.
+- **Checkpointing and throttling, already required here.** Its spider `crawldir` gives resumable
+  runs and AutoThrottle adapts delay to the server — §2 demands both today and hand-rolls them.
+
+**Its MCP server is a separate decision from the library, and the answer differs.** Scrapling ships
+an MCP for Claude. Useful for inspecting _one_ page interactively; wrong for the queue, because this
+lane's rule is zero tokens per lead — 600+ pages through an MCP is 600+ pages of model context for
+work a local extractor does free. Library for batches, MCP only for a one-off look.
+
+**Ergonomic note.** The guard matches command _text_, so prose naming a tool and a platform in one
+clause can trip it — writing this section did, twice. That is the conservative bias working as
+intended on an account-loss risk. Edit these files with the Edit tool rather than a Bash heredoc,
+and do not loosen the pattern to make documentation easier.
+
+**Do not install Agent Reach's skill as a kun skill.** It ships a Claude Code `SKILL.md` whose description is
 "MUST USE when the user wants to research/search anything, or mentions any platform or URL" — a
 fleet-wide dispatch collision, and the listing budget has roughly 80 characters of headroom. Call
 its CLI from this runbook instead.
