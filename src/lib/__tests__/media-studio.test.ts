@@ -246,17 +246,19 @@ describe("Media Studio — Mkan & Hogwarts Handy Media Creation", () => {
       }
     });
 
-    it("safely handles fallback for unknown brand gracefully", () => {
-      const out = compileMediaStudioPrompt({
-        brand: "unknown-brand",
-        kind: "image",
-        format: "post",
-        subject: "Fallback test",
-      });
-
-      expect(out.title).toBeDefined();
-      expect(out.prompt).toContain("Fallback test");
-      expect(out.paletteHexes.length).toBeGreaterThan(0);
+    it("refuses an unknown brand instead of quietly becoming another one", () => {
+      // This test used to assert the opposite — that an unknown brand still
+      // produced a prompt. It did: the Mkan one. So balqalam compiled a Port
+      // Sudan scene with an mkan.sd lockup, and the suite called that
+      // "graceful". Silently wearing another brand's identity is the failure.
+      expect(() =>
+        compileMediaStudioPrompt({
+          brand: "unknown-brand",
+          kind: "image",
+          format: "post",
+          subject: "Fallback test",
+        }),
+      ).toThrow(/Unknown brand/);
     });
   });
 
