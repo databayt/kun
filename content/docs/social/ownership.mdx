@@ -242,18 +242,29 @@ going silent.
 
 | Brand | Page owned by | Token issued to |
 |---|---|---|
-| hogwarts | Mkan portfolio | System User `Gabriel` |
-| mkan | Mkan portfolio | System User `Gabriel` |
-| **balqalam** | **Mkan portfolio** (added 2026-08-19) | **System User `Gabriel`** |
+| hogwarts | Databayt portfolio | System User `Gabriel` |
+| mkan | Databayt portfolio | System User `Gabriel` |
+| **balqalam** | **Databayt portfolio** (added 2026-08-19) | **System User `Gabriel`** |
 | databayt | a **separate** Databayt portfolio | still the personal grant |
 
 Three of four now publish without a human in the token path, each verified by a real post that was
 then retracted.
 
-**Databayt is the holdout, and it is a different problem from the others.** Its Page lives in
-another business portfolio, so "Add an existing Page" could not auto-approve — it became a
-**request** sent to whoever holds full control there, and it is pending. Until that is approved,
+**Databayt is the holdout, and the reason is still not fully pinned down.** Its Page lives in some
+other business portfolio, so "Add an existing Page" could not auto-approve — it became a **request**
+(id `1092185790156133`, sent 2026-08-19, expires in 30 days) and it is pending. Until it clears,
 databayt publishes on the personal grant.
+
+What is verified, so nobody re-derives it: Abdout is the **only** person with a role on that Page
+and holds `MANAGE` (`GET /814371365085465/roles` returns exactly one entry). His business selector
+lists only **Databayt** (this portfolio) and **Abdout** — so the portfolio holding the Page is one
+he is not a member of, which is why "Needs review" is empty on our side and no approval notification
+arrives. Being the Page's sole full admin is *not* the same as being an admin of the portfolio that
+claimed it, and that distinction is the whole blocker.
+
+Do not read the request's own detail text as authoritative — it describes the move as being *from*
+this portfolio, while the Pages list plainly shows Databayt as `Request sent` and the System User
+still reaches only three Pages. The Pages list and `/me/accounts` are the reliable signals.
 
 > **Do not revoke the personal grant.** It is the only thing keeping databayt publishing.
 
@@ -269,7 +280,8 @@ improved rather than fixed: **no second person has Full access.**
 
 1. **Approve the databayt Page request** from the other portfolio, then assign it to `Gabriel` and
    re-mint. Only then is the personal grant safe to revoke.
-2. The portfolio is still named **Mkan** and is **Unverified**, with no legal name or address.
+2. The portfolio is **Unverified**, with no legal name, address, phone or website. (The name is
+   fixed — it is **Databayt** as of 2026-08-19.)
 3. **No second human with Full access.**
 4. **The canary has no review destination** — `nmbdsd_bot` is alive but `TELEGRAM_REVIEW_CHAT_ID`
    is unset, and Telegram only caches chat ids for ~24h. One message to the bot from the account
