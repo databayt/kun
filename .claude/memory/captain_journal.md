@@ -29,6 +29,20 @@ The captain reads the **last 5 entries** at session start, plus any entries tagg
 
 ---
 
+## 2026-08-19 — Comment→DM capture proposed; the gate moves to the campaign
+
+**What happened**: Reviewed [diwenne/openreply](https://github.com/diwenne/openreply) (open-source ManyChat alternative: Instagram comment → auto-DM) against the social pipeline. The pipeline is outbound-complete (`calendar → … → measure`) and **capture-missing** — `/funnel`'s zeros are structural, because `upsertInboundProspect`/`promoteToLead()` have zero importers. OpenReply is a reference implementation of exactly that missing lane. Recommendation: take the **pattern** (campaign = keyword + DM template + tracked link), not the codebase — its Redis/BullMQ worker duplicates kun's existing drain/cron.
+
+**The blocker is doctrine, not engineering**: an auto-DM is an outbound brand message with no per-message approval — L4 under the current ladder, where `/social` doctrine #5 sits at L1/L2. Proposed resolution: the **DM template becomes the approvable artifact**, approved once per campaign in the existing `/social/publish` queue, with approval expiring on Meta's own 7-day private-reply window.
+
+**Measured, not assumed**: `debug_token` on the hogwarts Page token shows `pages_messaging` is **not** granted (only `pages_manage_posts`, `pages_read_engagement`, `pages_read_user_content`, `pages_show_list`, `read_insights`). Reading comments already works; sending does not. Re-auth **plus Meta App Review** is the long pole — the code is worthless until it clears.
+
+**Decision**: [D-20260819-campaign-level-dm-approval](decisions/2026-08-19-campaign-level-dm-approval.md) — Type 1, status `proposed`, awaiting Abdout by 2026-08-26. Scope stays hogwarts × facebook × Sudan per D-20260806; IG inherits when #141 unblocks.
+
+**Tags**: #decision #social #funnel #capture #open
+
+---
+
 ## How to use this journal
 
 **When the captain writes**: At the end of every weekly/monthly/quarterly review. On every Type-1 decision (use `/decide`). On every observation worth keeping for later sessions.
