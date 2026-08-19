@@ -11,7 +11,7 @@
 // Setup (one-time, per brand — see /docs/social/channels/instagram):
 //   1. Link the brand's IG professional account to its Facebook Page.
 //   2. Re-mint the Page token WITH instagram_basic + instagram_content_publish
-//      (Graph Explorer, app "Hogwarts Social"). Whether Standard Access
+//      (Graph Explorer, app "Gabriel"). Whether Standard Access
 //      suffices is the open hypothesis this lane is gated on — the read scopes
 //      needed no App Review (proven 2026-07-27), publish may behave the same.
 //   3. GET /{page-id}?fields=instagram_business_account → the IG user id, into

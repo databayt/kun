@@ -3313,6 +3313,40 @@
             "migration"
           ],
           "depends": []
+        },
+        {
+          "name": "facebook",
+          "effect": "Connect a brand's Facebook Page to the pipeline — grant, permanent token, registration, a verified-then-retracted first post",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "growth"
+            },
+            {
+              "type": "skill",
+              "name": "/facebook"
+            }
+          ],
+          "steps": [
+            "The Page id is NOT the number in profile.php?id= — that is the profile number and Graph rejects it (error_subcode 33); take the real id from the Page picker or /me/accounts",
+            "App must be Business type — a Consumer app can never request Pages scopes ('Invalid Scopes') and the type cannot be changed after creation",
+            "If the app already holds other Pages, Generate Access Token SILENTLY re-issues the old grant — click Edit settings → Select all → Continue → Save, then Generate",
+            "Never revoke the app to force a fresh dialog: it invalidates every other brand's permanent Page token",
+            "Long-lived exchange needs no app secret — the Access Token Debugger's 'Extend Access Token' does it, then /me/accounts derives the Page token",
+            "Require type: PAGE and expires_at: 0 before storing anything; a token that expires is a scheduled outage",
+            "/me/accounts returns only personally-owned Pages — a Business-Portfolio Page is granted and postable but absent there",
+            "Register in four files (products.ts, carousel schema.ts, brands.ts, docs meta.json + <brand>.mdx); transport code never changes, env resolves by suffix",
+            "Env FACEBOOK_PAGE_ID_<BRAND> / FACEBOOK_PAGE_ACCESS_TOKEN_<BRAND> in .env, .env.example, and Vercel production+preview+development",
+            "Prove with a real post (health check alone is insufficient), read it back for a live permalink, then retract it — and re-check every sibling brand, since a grant change is when their tokens break"
+          ],
+          "connects": [
+            "social",
+            "publish",
+            "draft",
+            "approve",
+            "measure"
+          ],
+          "depends": []
         }
       ]
     },

@@ -51,7 +51,7 @@ billing posture that is the strongest structural argument for the lane.
 **The Meta constraint is measured, not assumed** (debug_token on
 `FACEBOOK_PAGE_ACCESS_TOKEN_HOGWARTS`, 2026-08-19):
 
-- Token is `PAGE` type, `expires_at: 0` (permanent), Business app "Hogwarts Social".
+- Token is `PAGE` type, `expires_at: 0` (permanent), Business app "Gabriel" (renamed from "Hogwarts Social" 2026-08-19).
 - Granted scopes: `pages_manage_posts`, `pages_read_engagement`,
   `pages_read_user_content`, `pages_show_list`, `public_profile`, `read_insights`.
 - **`pages_messaging` is NOT granted.** Neither is `pages_manage_engagement`
