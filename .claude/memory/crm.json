@@ -21,6 +21,12 @@
       "product": "moallimee",
       "url": "https://moallimee.crm.databayt.org",
       "status": "pre-launch"
+    },
+    {
+      "product": "databayt",
+      "url": "https://sales.databayt.org",
+      "pipeline": "tech jobs, software house partnerships, client custom software & automation",
+      "status": "active"
     }
   ],
   "ownership": {
