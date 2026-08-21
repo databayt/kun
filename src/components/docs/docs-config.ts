@@ -26,6 +26,7 @@ export const docsNav: (DocEntry | DocSection)[] = [
     items: [
       { href: "/docs/captain", label: "Captain" },
       { href: "/docs/team", label: "Team" },
+      { href: "/docs/jobs", label: "Jobs Intelligence" },
       { href: "/docs/crm", label: "CRM" },
       { href: "/docs/scrape", label: "Scrape & Leads" },
       { href: "/docs/sprint", label: "Sprint Plan" },

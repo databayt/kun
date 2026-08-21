@@ -109,7 +109,9 @@ graph LR
 
 Every ingested job posting is evaluated across five distinct dimensions:
 
-$$\text{Overall Score} = 0.40 \times \text{Tech} + 0.30 \times \text{Capability} + 0.15 \times \text{Domain} + 0.15 \times \text{Seniority} - \text{Penalty}_{\text{Blocker}}$$
+```text
+Overall Score = 0.40 * Tech + 0.30 * Capability + 0.15 * Domain + 0.15 * Seniority - BlockerPenalty
+```
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -141,10 +143,10 @@ $$\text{Overall Score} = 0.40 \times \text{Tech} + 0.30 \times \text{Capability}
 
 | Tier | Score Range | Meaning | Action |
 | :--- | :--- | :--- | :--- |
-| **High Priority** | $\ge 85\%$ (0 blockers) | Perfect alignment with demonstrated builder capabilities | Push to CRM immediately & tailor application |
-| **Strong Fit** | $70\% - 84\%$ | Strong foundation; minor secondary gaps easily bridged | Prepare portfolio links and apply |
-| **Prepare & Apply** | $55\% - 69\%$ | Valid match but requires targeted interview prep on gaps | Review risk points before proceeding |
-| **Low Probability** | $< 55\%$ or $\ge 2$ blockers | Fundamental mismatch in core stack or domain | Skip or archive |
+| **High Priority** | >= 85% (0 blockers) | Perfect alignment with demonstrated builder capabilities | Push to CRM immediately & tailor application |
+| **Strong Fit** | 70% - 84% | Strong foundation; minor secondary gaps easily bridged | Prepare portfolio links and apply |
+| **Prepare & Apply** | 55% - 69% | Valid match but requires targeted interview prep on gaps | Review risk points before proceeding |
+| **Low Probability** | < 55% or >= 2 blockers | Fundamental mismatch in core stack or domain | Skip or archive |
 
 ---
 
@@ -186,7 +188,7 @@ Qualified opportunities are pushed directly into Databayt's self-hosted **Twenty
 | **Target Pipeline** | *Tech jobs, software house partnerships, client custom software* |
 | **Local Endpoint** | `http://localhost:3100/rest/opportunities` |
 | **Auth Key** | macOS Keychain: `security find-generic-password -s databayt-twenty -a databayt` |
-| **Throttling** | $\ge 700\text{ms}$ spacing, exponential backoff on 429 |
+| **Throttling** | >= 700ms spacing, exponential backoff on 429 |
 
 ### Ingestion Lifecycle
 
