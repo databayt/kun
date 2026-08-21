@@ -7,12 +7,14 @@ import {
   CapabilityInference,
   EngineeringKnowledgeProfile,
   EvidenceFact,
+  EvidenceFreshness,
+  EvidenceWeight,
   MarketPositioningRole,
   RepositoryIdentity,
   TechnologySkillFact,
 } from "./types";
 
-const ANALYZER_VERSION = "v2.1-github-deep-reader";
+const ANALYZER_VERSION = "v2.2-production-hardened";
 
 let cachedProfile: EngineeringKnowledgeProfile | null = null;
 let lastScanFingerprint = "";
@@ -47,6 +49,7 @@ export function extractRepositoryFacts(repos: RepositoryIdentity[]): EvidenceFac
     const localPath = localSource?.location;
     const lang = repo.primaryLanguage.toLowerCase();
     const repoId = repo.id.toLowerCase();
+    const revision = repo.sources.find((s) => s.type === "github")?.fingerprint || "main";
 
     // ── Level 1: Canonical Metadata from github.com/databayt ────────────────
     facts.push({
@@ -56,6 +59,9 @@ export function extractRepositoryFacts(repos: RepositoryIdentity[]): EvidenceFac
       artifactType: "documentation",
       artifactPath: "README.md",
       claim: `${repo.name} (${repo.domain}): ${repo.description}`,
+      evidenceWeight: "metadata_proof",
+      freshness: "fresh",
+      revisionFingerprint: revision,
       extractionMethod: "deterministic",
       confidence: "high",
       extractedAt: now,
@@ -78,6 +84,9 @@ export function extractRepositoryFacts(repos: RepositoryIdentity[]): EvidenceFac
             artifactPath: "package.json",
             claim: `Production dependencies in ${repo.name}: ${deps.slice(0, 10).join(", ")}`,
             rawProof: JSON.stringify({ name: pkg.name, version: pkg.version, keyDeps: deps.slice(0, 8) }),
+            evidenceWeight: "surface_manifest_proof",
+            freshness: "fresh",
+            revisionFingerprint: revision,
             extractionMethod: "deterministic",
             confidence: "high",
             extractedAt: now,
@@ -87,7 +96,7 @@ export function extractRepositoryFacts(repos: RepositoryIdentity[]): EvidenceFac
         }
       }
 
-      // B. Database Schema (Prisma)
+      // B. Relational Database Schema (Prisma) - Deep Production Proof
       if (repoId.includes("hogwarts") || repoId.includes("kun") || repoId.includes("mkan") || repoId.includes("crm") || repoId.includes("twenty")) {
         const prismaContent = getFileContent(repo, "prisma/schema.prisma", localPath);
         if (prismaContent) {
@@ -108,13 +117,16 @@ export function extractRepositoryFacts(repos: RepositoryIdentity[]): EvidenceFac
               isMultiTenant ? " and tenant/organization isolation" : ""
             }`,
             rawProof: `models: ${modelCount}, tenant-scoped: ${isMultiTenant}`,
+            evidenceWeight: "deep_production_proof",
+            freshness: "fresh",
+            revisionFingerprint: revision,
             extractionMethod: "static_analysis",
             confidence: "high",
             extractedAt: now,
           });
         }
 
-        // C. Auth
+        // C. Auth & Session Scoping - Deep Production Proof
         const authContent =
           getFileContent(repo, "src/auth.ts", localPath) ||
           getFileContent(repo, "src/auth.config.ts", localPath);
@@ -127,6 +139,9 @@ export function extractRepositoryFacts(repos: RepositoryIdentity[]): EvidenceFac
             artifactType: "api_route",
             artifactPath: "src/auth.ts",
             claim: `Authentication implementation in ${repo.name} with session callbacks and RBAC permissions`,
+            evidenceWeight: "deep_production_proof",
+            freshness: "fresh",
+            revisionFingerprint: revision,
             extractionMethod: "static_analysis",
             confidence: "high",
             extractedAt: now,
@@ -135,7 +150,7 @@ export function extractRepositoryFacts(repos: RepositoryIdentity[]): EvidenceFac
       }
     }
 
-    // D. Rust Systems & P2P Protocols
+    // D. Rust Systems & P2P Protocols - Deep Production Proof
     if (lang.includes("rust") || repoId.includes("distributed-computer")) {
       const cargoContent = getFileContent(repo, "Cargo.toml", localPath);
       if (cargoContent) {
@@ -147,6 +162,9 @@ export function extractRepositoryFacts(repos: RepositoryIdentity[]): EvidenceFac
           artifactType: "source_file",
           artifactPath: "Cargo.toml",
           claim: `Rust systems architecture in ${repo.name}${isP2P ? " with libp2p async networking and Kademlia DHT" : ""}`,
+          evidenceWeight: "deep_production_proof",
+          freshness: "fresh",
+          revisionFingerprint: revision,
           extractionMethod: "deterministic",
           confidence: "high",
           extractedAt: now,
@@ -154,7 +172,7 @@ export function extractRepositoryFacts(repos: RepositoryIdentity[]): EvidenceFac
       }
     }
 
-    // E. Native Mobile (Swift & Kotlin)
+    // E. Native Mobile (Swift & Kotlin) - Deep Production Proof
     if (lang.includes("swift") || repoId.includes("ios")) {
       const swiftContent = getFileContent(repo, "Package.swift", localPath);
       if (swiftContent) {
@@ -165,6 +183,9 @@ export function extractRepositoryFacts(repos: RepositoryIdentity[]): EvidenceFac
           artifactType: "source_file",
           artifactPath: "Package.swift",
           claim: `Native Swift 6 / SwiftUI iOS application in ${repo.name} with offline synchronization`,
+          evidenceWeight: "deep_production_proof",
+          freshness: "fresh",
+          revisionFingerprint: revision,
           extractionMethod: "deterministic",
           confidence: "high",
           extractedAt: now,
@@ -182,6 +203,9 @@ export function extractRepositoryFacts(repos: RepositoryIdentity[]): EvidenceFac
           artifactType: "source_file",
           artifactPath: "build.gradle.kts",
           claim: `Native Kotlin / Jetpack Compose Android application in ${repo.name}`,
+          evidenceWeight: "deep_production_proof",
+          freshness: "fresh",
+          revisionFingerprint: revision,
           extractionMethod: "deterministic",
           confidence: "high",
           extractedAt: now,
@@ -202,6 +226,9 @@ export function extractRepositoryFacts(repos: RepositoryIdentity[]): EvidenceFac
             artifactType: "source_file",
             artifactPath: "src/actions/",
             claim: `Server Actions with Zod validation in ${repo.name} (${actionFiles.slice(0, 4).join(", ")})`,
+            evidenceWeight: "deep_production_proof",
+            freshness: "fresh",
+            revisionFingerprint: revision,
             extractionMethod: "static_analysis",
             confidence: "high",
             extractedAt: now,
@@ -219,6 +246,9 @@ export function extractRepositoryFacts(repos: RepositoryIdentity[]): EvidenceFac
           artifactType: "component",
           artifactPath: "src/components/ui",
           claim: `Shadcn UI component registry in ${repo.name} containing ${uiCount} primitives`,
+          evidenceWeight: "deep_production_proof",
+          freshness: "fresh",
+          revisionFingerprint: revision,
           extractionMethod: "deterministic",
           confidence: "high",
           extractedAt: now,
@@ -365,50 +395,59 @@ export function synthesizeMarketPositioning(capabilities: CapabilityInference[])
 }
 
 export function extractTechnologySkills(facts: EvidenceFact[]): TechnologySkillFact[] {
-  const map: Record<string, { category: TechnologySkillFact["category"]; level: TechnologySkillFact["level"]; facts: EvidenceFact[] }> = {
+  const map: Record<string, { category: TechnologySkillFact["category"]; level: TechnologySkillFact["level"]; depth: EvidenceWeight; facts: EvidenceFact[] }> = {
     "TypeScript / JavaScript": {
       category: "Frontend",
       level: "Deep Production",
+      depth: "deep_production_proof",
       facts: facts.filter((f) => f.artifactPath.endsWith(".ts") || f.artifactPath.endsWith(".tsx") || f.claim.includes("TypeScript")),
     },
     "Next.js 16 / React 19": {
       category: "Frontend",
       level: "Deep Production",
+      depth: "deep_production_proof",
       facts: facts.filter((f) => f.claim.includes("Next") || f.claim.includes("React") || f.artifactPath.includes("actions")),
     },
     "Tailwind CSS v4 & Shadcn/UI": {
       category: "Design",
       level: "Deep Production",
+      depth: "deep_production_proof",
       facts: facts.filter((f) => f.claim.includes("Shadcn") || f.claim.includes("component")),
     },
     "PostgreSQL & Prisma 7 / Neon": {
       category: "Database",
       level: "Deep Production",
+      depth: "deep_production_proof",
       facts: facts.filter((f) => f.artifactType === "database_schema" || f.claim.includes("Prisma")),
     },
     "LLM & AI SDKs (Gemini, Claude, Vercel AI SDK)": {
       category: "AI / ML",
       level: "Deep Production",
+      depth: "deep_production_proof",
       facts: facts.filter((f) => f.claim.includes("Gemini") || f.claim.includes("AI")),
     },
     "Authentication (NextAuth v5 / Auth.js)": {
       category: "Backend",
       level: "Deep Production",
+      depth: "deep_production_proof",
       facts: facts.filter((f) => f.claim.includes("NextAuth") || f.artifactPath.includes("auth")),
     },
     "Rust & P2P Networking (libp2p, DHT)": {
       category: "Systems",
       level: "Working Knowledge",
+      depth: "deep_production_proof",
       facts: facts.filter((f) => f.claim.includes("Rust")),
     },
     "Swift 6 / SwiftUI & Kotlin / Compose": {
       category: "Mobile",
       level: "Proficient",
+      depth: "deep_production_proof",
       facts: facts.filter((f) => f.claim.includes("Swift") || f.claim.includes("Kotlin")),
     },
     "Docker, Twenty CRM & Automation Pipelines": {
       category: "Automation",
       level: "Proficient",
+      depth: "deep_production_proof",
       facts: facts.filter((f) => f.claim.includes("CRM") || f.claim.includes("WhatsApp") || f.claim.includes("automation")),
     },
   };
@@ -417,6 +456,7 @@ export function extractTechnologySkills(facts: EvidenceFact[]): TechnologySkillF
     name,
     category: data.category,
     level: data.level,
+    depth: data.depth,
     facts: data.facts,
   }));
 }
@@ -445,6 +485,7 @@ export function buildEvidenceKnowledgeProfile(): EngineeringKnowledgeProfile {
     positioningRoles,
     technologies,
     repositories: repos,
+    overallFreshness: "fresh",
     updatedAt: new Date().toISOString(),
   };
 

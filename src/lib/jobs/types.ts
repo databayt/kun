@@ -1,4 +1,4 @@
-// ── Job Engine: Domain Types & Evidence Model (Phase 1 & Phase 2) ────────────
+// ── Job Engine: Domain Types, Provenance & Production Observability ─────────
 
 export type EvidenceLevel = "level_1_metadata" | "level_2_source" | "level_3_deep_local";
 
@@ -23,6 +23,10 @@ export type ExtractionMethod =
   | "manual";
 
 export type SourceType = "local" | "github" | "git" | "snapshot" | "manual";
+
+export type EvidenceWeight = "deep_production_proof" | "surface_manifest_proof" | "metadata_proof";
+
+export type EvidenceFreshness = "fresh" | "aging" | "stale";
 
 // ── 1. Repository Identity vs Repository Source ──────────────────────────────
 
@@ -57,6 +61,9 @@ export interface EvidenceFact {
   artifactPath: string;
   claim: string;
   rawProof?: string;
+  evidenceWeight: EvidenceWeight;
+  freshness: EvidenceFreshness;
+  revisionFingerprint?: string;
   extractionMethod: ExtractionMethod;
   confidence: "high" | "medium" | "low";
   extractedAt: string;
@@ -95,6 +102,7 @@ export interface TechnologySkillFact {
     | "Design"
     | "Automation";
   level: "Deep Production" | "Proficient" | "Working Knowledge";
+  depth: EvidenceWeight;
   facts: EvidenceFact[];
 }
 
@@ -109,10 +117,11 @@ export interface EngineeringKnowledgeProfile {
   positioningRoles: MarketPositioningRole[];
   technologies: TechnologySkillFact[];
   repositories: RepositoryIdentity[];
+  overallFreshness: EvidenceFreshness;
   updatedAt: string;
 }
 
-// ── 4. Job Ingestion & Normalization Model ───────────────────────────────────
+// ── 4. Job Ingestion, Normalization & Deduplication ──────────────────────────
 
 export type RemoteType = "remote" | "hybrid" | "onsite";
 export type EmploymentType = "full_time" | "part_time" | "contract" | "freelance";
@@ -149,6 +158,7 @@ export interface NormalizedJobInput {
   sourceUrl?: string;
   source?: string;
   rawTextSnapshot?: string;
+  fingerprint?: string; // Deterministic hash of (company + title + remoteType)
 }
 
 // ── 5. Explainable 5D Match & Blocker Breakdown ──────────────────────────────
@@ -227,13 +237,13 @@ export interface DatabaytSolutionProof {
 export interface ProblemMatchAnalysis {
   companyUnderlyingProblems: string[];
   roleCoreNeed: string;
-  builderFitScore: number; // 0 - 100
+  builderFitScore: number;
   builderFitReasoning: string;
   builderDimensions: {
-    autonomyAndOwnership: number; // 0 - 100
-    zeroToOneCreation: number;    // 0 - 100
-    fullstackVersatility: number; // 0 - 100
-    productAgency: number;        // 0 - 100
+    autonomyAndOwnership: number;
+    zeroToOneCreation: number;
+    fullstackVersatility: number;
+    productAgency: number;
   };
   relevantDatabaytSolutions: DatabaytSolutionProof[];
   candidateStrategicAdvantage: string;
@@ -242,7 +252,7 @@ export interface ProblemMatchAnalysis {
 // ── 7. Phase 2: Application Strategy & Tailored Evidence Assets ──────────────
 
 export interface InterviewStoryStar {
-  questionType: string; // e.g. "Architecture & Systems Design", "AI Error Boundaries"
+  questionType: string;
   context: string;
   problem: string;
   decision: string;
@@ -262,17 +272,17 @@ export interface StudyTaskItem {
 export interface ApplicationStrategy {
   targetJobTitle: string;
   companyName: string;
-  jobFitScore: number;            // 0 - 100 (Technical/Capability match)
-  builderFitScore: number;        // 0 - 100 (Product agency & 0-to-1 build scope)
-  applicationReadinessScore: number; // 0 - 100 (Preparedness to submit right now)
+  jobFitScore: number;
+  builderFitScore: number;
+  applicationReadinessScore: number;
   readinessAssessment?: string;
   readinessGapReasoning?: string;
   
-  strategicPriorityRank: number; // 1 = highest priority
+  strategicPriorityRank: number;
   strategicCareerValue: "Transformative" | "High Value" | "Solid Opportunity" | "Stepping Stone";
   
   positioningAngle: string;
-  truthfulNarrative: string; // Grounded career story (EE systems foundations -> high-velocity SaaS/AI builder)
+  truthfulNarrative: string;
   
   keyProjectProofs: Array<{
     name: string;
@@ -305,6 +315,23 @@ export interface JobCampaign {
   minBuilderFit: number;
   focusKeywords: string[];
   isActive: boolean;
+}
+
+// ── 9. Production Observability & Health Telemetry ───────────────────────────
+
+export interface EngineObservabilityStats {
+  repositoriesDiscovered: number;
+  repositoriesAnalyzed: number;
+  totalFactsExtracted: number;
+  factsByWeight: {
+    deepProduction: number;
+    surfaceManifest: number;
+    metadata: number;
+  };
+  evidenceFreshness: EvidenceFreshness;
+  lastScannedAt: string;
+  analyzerVersion: string;
+  activeCampaignsCount: number;
 }
 
 export interface FullJobWithAssessment {

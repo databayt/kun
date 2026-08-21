@@ -42,7 +42,7 @@ describe("Kun Job Engine (Hardened & Modular Architecture)", () => {
   it("synthesizes the 3-Layer Knowledge Profile (Facts -> Capabilities -> Market Positioning)", () => {
     const profile = buildEvidenceKnowledgeProfile();
     expect(profile.candidateName).toContain("Osman Abdout");
-    expect(profile.analyzerVersion).toContain("github-deep-reader");
+    expect(profile.analyzerVersion).toContain("v2");
 
     // Layer A: Verified Facts
     expect(profile.facts.length).toBeGreaterThan(0);

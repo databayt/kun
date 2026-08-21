@@ -14,31 +14,39 @@ The **Job Engine** is Kun's career operations and opportunity matching platform.
 │                    JOB ENGINE ARCHITECTURE                      │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
-│  Layer 4: Operations & Applications                             │
+│  Layer 5: Operations & Decision Layer                           │
 │  ┌────────────────────────────────────────────────────────────┐ │
 │  │ Kun Jobs Hub (/jobs) │ Profile Dossier │ Twenty CRM Sync   │ │
+│  │ Human Review Queue   │ Application Assets (Cover, DM, STAR)│ │
 │  └────────────────────────────────────────────────────────────┘ │
 │                               ▲                                 │
 │                               │                                 │
-│  Layer 3: 5D Matching & Normalization Engine                    │
+│  Layer 4: Opportunity & Strategy Intelligence                   │
+│  ┌────────────────────────────────────────────────────────────┐ │
+│  │ Problem-Based Matcher │ Builder Fit (0-to-1 Ownership)     │ │
+│  │ Application Readiness │ Truthful Career Narrative          │ │
+│  └────────────────────────────────────────────────────────────┘ │
+│                               ▲                                 │
+│                               │                                 │
+│  Layer 3: 5D Explainable Matching & Normalization Engine        │
 │  ┌────────────────────────────────────────────────────────────┐ │
 │  │ AI Normalizer (Gemini 2.5) │ 5D Explainable Matcher        │ │
-│  │ Critical Blocker Detector  │ Evidence-Grounded Talk Points │ │
+│  │ 3-Tier Blocker Classifier  │ Golden Dataset Validations    │ │
 │  └────────────────────────────────────────────────────────────┘ │
 │                               ▲                                 │
 │                               │                                 │
-│  Layer 2: Engineering Knowledge Profile                         │
+│  Layer 2: 3-Layer Engineering Knowledge Profile                 │
 │  ┌────────────────────────────────────────────────────────────┐ │
-│  │ Capabilities (SaaS, AI, Mobile, Design Systems, Systems)   │ │
-│  │ Verified Stack Mastery     │ Code Provenance Artifacts     │ │
+│  │ Layer C: Market Positioning (Full-Stack AI, Founding, SaaS)│ │
+│  │ Layer B: Capability Inferences (with explicit reasoning)   │ │
+│  │ Layer A: Observable Facts (Deep Production vs Manifests)   │ │
 │  └────────────────────────────────────────────────────────────┘ │
 │                               ▲                                 │
 │                               │                                 │
-│  Layer 1: Repository Evidence Base (Databayt Codebases on Mac)  │
+│  Layer 1: Canonical Evidence Base (github.com/databayt)         │
 │  ┌────────────────────────────────────────────────────────────┐ │
-│  │ Hogwarts (Multi-tenant)   │ Codebase (54 Primitives+62 At) │ │
-│  │ Mkan (Marketplace/Booking)│ Distributed Computer (Rust/P2P)│ │
-│  │ Apple & Nike (Pixel UI)   │ iOS & Android (SwiftUI/Compose)│ │
+│  │ GitHub Deep Reader (Schemas, Manifests, Remote AST Trees)  │ │
+│  │ Local Disk Fast-Path (AST / Server Actions Acceleration)   │ │
 │  └────────────────────────────────────────────────────────────┘ │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
@@ -57,25 +65,26 @@ The Kun Job Engine solves this by anchoring every evaluation in **verifiable rep
 | Principle | Traditional Approach | Kun Job Engine |
 | :--- | :--- | :--- |
 | **Grounding** | Self-reported resume keywords | Scanned AST, Prisma schemas, Server Actions, and Git commits |
-| **Matching** | Keyword string overlap % | 5-Dimensional Match (Tech, Capability, Domain, Seniority, Risk) |
-| **Output** | Opaque numerical rank | Explainable report with specific repo paths & talking points |
-| **Positioning** | Title buzzword inflation | Truthful positioning backed by shipped product proof |
+| **Matching** | Keyword string overlap % | 5D Match + Problem-Based Solution Matching |
+| **Builder Fit** | Assumes narrow specialization | Evaluates 0-to-1 build scope, product agency, and full-stack ownership |
+| **Output** | Opaque numerical rank | Explainable report with positive/negative contributions & talking points |
+| **Positioning** | Title buzzword inflation | Truthful narrative (EE foundations -> product builder) |
 | **Action** | Disconnected job bookmarking | Integrated 1-click push to Twenty CRM (`sales.databayt.org`) |
 
 ---
 
-## 2. The Databayt Repository Evidence Base
+## 2. Canonical Evidence Base (github.com/databayt)
 
-The engine performs deep static inspection of the 14 repositories owned and maintained by Databayt on the local filesystem (`/Users/abdout/`):
+The engine inspects the repositories owned and maintained by Databayt directly from **`github.com/databayt`** with local AST acceleration:
 
 ```mermaid
 graph LR
-    HOGWARTS["/Users/abdout/hogwarts"] -->|Proves| SAAS["Multi-tenant SaaS Architecture\nRBAC & Subdomains\nWhatsApp Cadence"]
-    CODEBASE["/Users/abdout/codebase"] -->|Proves| UI["Atomic Design Systems\n54 Primitives + 62 Atoms\nShadcn Registry Standard"]
-    MKAN["/Users/abdout/mkan"] -->|Proves| MKT["Marketplace Engineering\nBooking & Calendar Engine\nGeographic Search"]
-    DISTRIBUTED["/Users/abdout/distributed-computer"] -->|Proves| SYS["Systems Programming\nRust & P2P Protocols\nlibp2p & Kademlia DHT"]
-    APPLE["/Users/abdout/apple & nike"] -->|Proves| CRAFT["Pixel-Exact Design Craft\nReact 19 & Tailwind 4\nFluid Motion & Polish"]
-    MOBILE["/Users/abdout/ios-app & android-app"] -->|Proves| MOB["Native Mobile Engineering\nSwift 6 & SwiftUI\nKotlin & Jetpack Compose"]
+    HOGWARTS["github.com/databayt/hogwarts"] -->|Proves| SAAS["Multi-tenant SaaS Architecture\nRBAC & Subdomains\nWhatsApp Cadence"]
+    CODEBASE["github.com/databayt/codebase"] -->|Proves| UI["Atomic Design Systems\n54 Primitives + 62 Atoms\nShadcn Registry Standard"]
+    MKAN["github.com/databayt/mkan"] -->|Proves| MKT["Marketplace Engineering\nBooking & Calendar Engine\nGeographic Search"]
+    DISTRIBUTED["github.com/databayt/distributed-computer"] -->|Proves| SYS["Systems Programming\nRust & P2P Protocols\nlibp2p & Kademlia DHT"]
+    APPLE["github.com/databayt/apple & nike"] -->|Proves| CRAFT["Pixel-Exact Design Craft\nReact 19 & Tailwind 4\nFluid Motion & Polish"]
+    MOBILE["github.com/databayt/ios-app & android-app"] -->|Proves| MOB["Native Mobile Engineering\nSwift 6 & SwiftUI\nKotlin & Jetpack Compose"]
 ```
 
 ### Verified Code Evidence Matrix
