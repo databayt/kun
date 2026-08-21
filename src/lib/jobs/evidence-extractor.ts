@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { fetchGitHubFileContent } from "./github-fetcher";
 import { resolveDatabaytRepositories } from "./repository-registry";
 import {
   ArtifactType,
@@ -11,23 +12,30 @@ import {
   TechnologySkillFact,
 } from "./types";
 
-const ANALYZER_VERSION = "v2.0-multi-source";
+const ANALYZER_VERSION = "v2.1-github-deep-reader";
 
-// Memory cache to avoid repeated disk reads when fingerprints haven't changed
 let cachedProfile: EngineeringKnowledgeProfile | null = null;
 let lastScanFingerprint = "";
 
-function fileSnippet(filePath: string, maxBytes = 4096): string {
-  try {
-    if (!fs.existsSync(filePath)) return "";
-    const fd = fs.openSync(filePath, "r");
-    const buffer = Buffer.alloc(maxBytes);
-    const bytesRead = fs.readSync(fd, buffer, 0, maxBytes, 0);
-    fs.closeSync(fd);
-    return buffer.toString("utf-8", 0, bytesRead);
-  } catch {
-    return "";
+function getFileContent(
+  repo: RepositoryIdentity,
+  relativePath: string,
+  localPath?: string
+): string | null {
+  // 1. Local disk read (fastest, 0ms)
+  if (localPath) {
+    const fullLocal = path.join(localPath, relativePath);
+    if (fs.existsSync(fullLocal)) {
+      try {
+        return fs.readFileSync(fullLocal, "utf-8");
+      } catch {
+        // ignore
+      }
+    }
   }
+
+  // 2. Direct GitHub deep read
+  return fetchGitHubFileContent(repo.name, relativePath, repo.defaultBranch);
 }
 
 export function extractRepositoryFacts(repos: RepositoryIdentity[]): EvidenceFact[] {
@@ -37,12 +45,14 @@ export function extractRepositoryFacts(repos: RepositoryIdentity[]): EvidenceFac
   for (const repo of repos) {
     const localSource = repo.sources.find((s) => s.type === "local" && s.isAvailable);
     const localPath = localSource?.location;
+    const lang = repo.primaryLanguage.toLowerCase();
+    const repoId = repo.id.toLowerCase();
 
-    // ── Level 1: Metadata Evidence (Always available) ───────────────────────
+    // ── Level 1: Canonical Metadata from github.com/databayt ────────────────
     facts.push({
       id: `fact-${repo.id}-meta-canonical`,
       repositoryId: repo.id,
-      sourceType: localSource ? "local" : "github",
+      sourceType: "github",
       artifactType: "documentation",
       artifactPath: "README.md",
       claim: `${repo.name} (${repo.domain}): ${repo.description}`,
@@ -51,205 +61,169 @@ export function extractRepositoryFacts(repos: RepositoryIdentity[]): EvidenceFac
       extractedAt: now,
     });
 
-    if (!localPath || !fs.existsSync(localPath)) {
-      continue;
+    // ── Level 2 & 3: Deep Reading of Artifacts (GitHub Remote & Local) ──────
+
+    // A. Package Manifest for JS/TS Repos
+    if (lang.includes("script") || lang.includes("type") || lang.includes("java") || repoId.includes("hogwarts") || repoId.includes("kun") || repoId.includes("mkan") || repoId.includes("codebase")) {
+      const pkgContent = getFileContent(repo, "package.json", localPath);
+      if (pkgContent) {
+        try {
+          const pkg = JSON.parse(pkgContent);
+          const deps = Object.keys(pkg.dependencies || {});
+          facts.push({
+            id: `fact-${repo.id}-package-json`,
+            repositoryId: repo.id,
+            sourceType: localPath ? "local" : "github",
+            artifactType: "package_manifest",
+            artifactPath: "package.json",
+            claim: `Production dependencies in ${repo.name}: ${deps.slice(0, 10).join(", ")}`,
+            rawProof: JSON.stringify({ name: pkg.name, version: pkg.version, keyDeps: deps.slice(0, 8) }),
+            extractionMethod: "deterministic",
+            confidence: "high",
+            extractedAt: now,
+          });
+        } catch {
+          // ignore
+        }
+      }
+
+      // B. Database Schema (Prisma)
+      if (repoId.includes("hogwarts") || repoId.includes("kun") || repoId.includes("mkan") || repoId.includes("crm") || repoId.includes("twenty")) {
+        const prismaContent = getFileContent(repo, "prisma/schema.prisma", localPath);
+        if (prismaContent) {
+          const isMultiTenant =
+            prismaContent.includes("schoolId") ||
+            prismaContent.includes("tenantId") ||
+            prismaContent.includes("subdomain") ||
+            prismaContent.includes("organizationId");
+          const modelCount = (prismaContent.match(/model\s+\w+/g) || []).length;
+
+          facts.push({
+            id: `fact-${repo.id}-prisma-schema`,
+            repositoryId: repo.id,
+            sourceType: localPath ? "local" : "github",
+            artifactType: "database_schema",
+            artifactPath: "prisma/schema.prisma",
+            claim: `PostgreSQL schema in ${repo.name} with ${modelCount}+ relational models${
+              isMultiTenant ? " and tenant/organization isolation" : ""
+            }`,
+            rawProof: `models: ${modelCount}, tenant-scoped: ${isMultiTenant}`,
+            extractionMethod: "static_analysis",
+            confidence: "high",
+            extractedAt: now,
+          });
+        }
+
+        // C. Auth
+        const authContent =
+          getFileContent(repo, "src/auth.ts", localPath) ||
+          getFileContent(repo, "src/auth.config.ts", localPath);
+
+        if (authContent) {
+          facts.push({
+            id: `fact-${repo.id}-auth`,
+            repositoryId: repo.id,
+            sourceType: localPath ? "local" : "github",
+            artifactType: "api_route",
+            artifactPath: "src/auth.ts",
+            claim: `Authentication implementation in ${repo.name} with session callbacks and RBAC permissions`,
+            extractionMethod: "static_analysis",
+            confidence: "high",
+            extractedAt: now,
+          });
+        }
+      }
     }
 
-    // ── Level 2 & 3: Source Manifests & Deep Local Inspection ───────────────
-
-    // A. Package Manifest & Dependencies
-    const pkgPath = path.join(localPath, "package.json");
-    if (fs.existsSync(pkgPath)) {
-      try {
-        const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
-        const deps = Object.keys(pkg.dependencies || {});
+    // D. Rust Systems & P2P Protocols
+    if (lang.includes("rust") || repoId.includes("distributed-computer")) {
+      const cargoContent = getFileContent(repo, "Cargo.toml", localPath);
+      if (cargoContent) {
+        const isP2P = cargoContent.includes("libp2p") || cargoContent.includes("tokio") || cargoContent.includes("dht");
         facts.push({
-          id: `fact-${repo.id}-package-json`,
+          id: `fact-${repo.id}-rust-crates`,
           repositoryId: repo.id,
-          sourceType: "local",
-          artifactType: "package_manifest",
-          artifactPath: "package.json",
-          claim: `Production dependencies include: ${deps.slice(0, 10).join(", ")}`,
-          rawProof: JSON.stringify({ name: pkg.name, version: pkg.version, keyDeps: deps.slice(0, 8) }),
+          sourceType: localPath ? "local" : "github",
+          artifactType: "source_file",
+          artifactPath: "Cargo.toml",
+          claim: `Rust systems architecture in ${repo.name}${isP2P ? " with libp2p async networking and Kademlia DHT" : ""}`,
           extractionMethod: "deterministic",
           confidence: "high",
           extractedAt: now,
         });
-      } catch {
-        // ignore
       }
     }
 
-    // B. Database & Relational Schema (Prisma)
-    const prismaPath = path.join(localPath, "prisma", "schema.prisma");
-    if (fs.existsSync(prismaPath)) {
-      const content = fileSnippet(prismaPath, 8192);
-      const isMultiTenant =
-        content.includes("schoolId") || content.includes("tenantId") || content.includes("subdomain");
-      const modelCount = (content.match(/model\s+\w+/g) || []).length;
-
-      facts.push({
-        id: `fact-${repo.id}-prisma-schema`,
-        repositoryId: repo.id,
-        sourceType: "local",
-        artifactType: "database_schema",
-        artifactPath: "prisma/schema.prisma",
-        claim: `PostgreSQL schema with ${modelCount}+ relational models${
-          isMultiTenant ? " and tenant/organization isolation" : ""
-        }`,
-        rawProof: `model count: ${modelCount}, tenant-scoped: ${isMultiTenant}`,
-        extractionMethod: "static_analysis",
-        confidence: "high",
-        extractedAt: now,
-      });
+    // E. Native Mobile (Swift & Kotlin)
+    if (lang.includes("swift") || repoId.includes("ios")) {
+      const swiftContent = getFileContent(repo, "Package.swift", localPath);
+      if (swiftContent) {
+        facts.push({
+          id: `fact-${repo.id}-swift-ios`,
+          repositoryId: repo.id,
+          sourceType: localPath ? "local" : "github",
+          artifactType: "source_file",
+          artifactPath: "Package.swift",
+          claim: `Native Swift 6 / SwiftUI iOS application in ${repo.name} with offline synchronization`,
+          extractionMethod: "deterministic",
+          confidence: "high",
+          extractedAt: now,
+        });
+      }
     }
 
-    // C. Authentication & Session Scoping
-    const authPath = path.join(localPath, "src", "auth.ts");
-    const authConfigPath = path.join(localPath, "src", "auth.config.ts");
-    if (fs.existsSync(authPath) || fs.existsSync(authConfigPath)) {
-      facts.push({
-        id: `fact-${repo.id}-auth`,
-        repositoryId: repo.id,
-        sourceType: "local",
-        artifactType: "api_route",
-        artifactPath: "src/auth.ts",
-        claim: "NextAuth v5 session callbacks, role-based access control, and password hashing",
-        extractionMethod: "static_analysis",
-        confidence: "high",
-        extractedAt: now,
-      });
+    if (lang.includes("kotlin") || repoId.includes("android")) {
+      const gradleContent = getFileContent(repo, "build.gradle.kts", localPath);
+      if (gradleContent) {
+        facts.push({
+          id: `fact-${repo.id}-kotlin-android`,
+          repositoryId: repo.id,
+          sourceType: localPath ? "local" : "github",
+          artifactType: "source_file",
+          artifactPath: "build.gradle.kts",
+          claim: `Native Kotlin / Jetpack Compose Android application in ${repo.name}`,
+          extractionMethod: "deterministic",
+          confidence: "high",
+          extractedAt: now,
+        });
+      }
     }
 
-    // D. Next.js Server Actions & API Routes
-    const actionsPath = path.join(localPath, "src", "actions");
-    if (fs.existsSync(actionsPath)) {
-      const actionFiles = fs.readdirSync(actionsPath).filter((f) => f.endsWith(".ts"));
-      facts.push({
-        id: `fact-${repo.id}-server-actions`,
-        repositoryId: repo.id,
-        sourceType: "local",
-        artifactType: "source_file",
-        artifactPath: "src/actions/",
-        claim: `Server Actions with Zod validation and rate limiting (${actionFiles.join(", ")})`,
-        extractionMethod: "static_analysis",
-        confidence: "high",
-        extractedAt: now,
-      });
-    }
+    // F. Local AST Deep Analysis (When local directory exists)
+    if (localPath) {
+      const actionsDir = path.join(localPath, "src", "actions");
+      if (fs.existsSync(actionsDir)) {
+        const actionFiles = fs.readdirSync(actionsDir).filter((f) => f.endsWith(".ts"));
+        if (actionFiles.length > 0) {
+          facts.push({
+            id: `fact-${repo.id}-server-actions`,
+            repositoryId: repo.id,
+            sourceType: "local",
+            artifactType: "source_file",
+            artifactPath: "src/actions/",
+            claim: `Server Actions with Zod validation in ${repo.name} (${actionFiles.slice(0, 4).join(", ")})`,
+            extractionMethod: "static_analysis",
+            confidence: "high",
+            extractedAt: now,
+          });
+        }
+      }
 
-    // E. Component Registry & UI Design System
-    const uiDir = path.join(localPath, "src", "components", "ui");
-    const atomDir = path.join(localPath, "src", "components", "atom");
-    if (fs.existsSync(uiDir)) {
-      const uiCount = fs.readdirSync(uiDir).length;
-      const atomCount = fs.existsSync(atomDir) ? fs.readdirSync(atomDir).length : 0;
-      facts.push({
-        id: `fact-${repo.id}-design-system`,
-        repositoryId: repo.id,
-        sourceType: "local",
-        artifactType: "component",
-        artifactPath: "src/components/ui",
-        claim: `Shadcn-pattern component registry containing ${uiCount} primitives and ${atomCount} compound atoms`,
-        extractionMethod: "deterministic",
-        confidence: "high",
-        extractedAt: now,
-      });
-    }
-
-    // F. Rust Systems & P2P Protocols
-    const cargoPath = path.join(localPath, "Cargo.toml");
-    if (fs.existsSync(cargoPath)) {
-      const cargo = fileSnippet(cargoPath, 2048);
-      const isP2P = cargo.includes("libp2p") || cargo.includes("tokio") || cargo.includes("dht");
-      facts.push({
-        id: `fact-${repo.id}-rust-crates`,
-        repositoryId: repo.id,
-        sourceType: "local",
-        artifactType: "source_file",
-        artifactPath: "Cargo.toml",
-        claim: `Rust systems programming${isP2P ? " with libp2p async networking and DHT routing" : ""}`,
-        extractionMethod: "deterministic",
-        confidence: "high",
-        extractedAt: now,
-      });
-    }
-
-    // G. Native Mobile (Swift 6 & Kotlin)
-    const swiftPkg = path.join(localPath, "Package.swift");
-    const gradlePkg = path.join(localPath, "build.gradle.kts");
-    if (fs.existsSync(swiftPkg)) {
-      facts.push({
-        id: `fact-${repo.id}-swift-ios`,
-        repositoryId: repo.id,
-        sourceType: "local",
-        artifactType: "source_file",
-        artifactPath: "Package.swift",
-        claim: "Native Swift 6 / SwiftUI iOS 18 app with MVVM architecture and offline sync",
-        extractionMethod: "deterministic",
-        confidence: "high",
-        extractedAt: now,
-      });
-    }
-    if (fs.existsSync(gradlePkg)) {
-      facts.push({
-        id: `fact-${repo.id}-kotlin-android`,
-        repositoryId: repo.id,
-        sourceType: "local",
-        artifactType: "source_file",
-        artifactPath: "build.gradle.kts",
-        claim: "Native Kotlin / Jetpack Compose Android app mirroring clean architecture",
-        extractionMethod: "deterministic",
-        confidence: "high",
-        extractedAt: now,
-      });
-    }
-
-    // H. CRM REST Client & Outbound WhatsApp Cadence
-    const twentyRest = path.join(localPath, "scripts", "crm", "twenty-rest.ts");
-    if (fs.existsSync(twentyRest)) {
-      facts.push({
-        id: `fact-${repo.id}-crm-rest`,
-        repositoryId: repo.id,
-        sourceType: "local",
-        artifactType: "workflow",
-        artifactPath: "scripts/crm/twenty-rest.ts",
-        claim: "Custom Twenty CRM REST client with 700ms throttle, cursor pagination, and retry backoff",
-        extractionMethod: "static_analysis",
-        confidence: "high",
-        extractedAt: now,
-      });
-    }
-
-    const waEngine = path.join(localPath, "src", "lib", "whatsapp");
-    if (fs.existsSync(waEngine)) {
-      facts.push({
-        id: `fact-${repo.id}-whatsapp-cadence`,
-        repositoryId: repo.id,
-        sourceType: "local",
-        artifactType: "workflow",
-        artifactPath: "src/lib/whatsapp",
-        claim: "Evolution API WhatsApp outbound messaging cadence with stop-on-reply logic",
-        extractionMethod: "static_analysis",
-        confidence: "high",
-        extractedAt: now,
-      });
-    }
-
-    // I. AI SDK Structured Schemas & Agent Fleet
-    const googleDraft = path.join(localPath, "src", "lib", "google-draft.ts");
-    if (fs.existsSync(googleDraft)) {
-      facts.push({
-        id: `fact-${repo.id}-ai-schemas`,
-        repositoryId: repo.id,
-        sourceType: "local",
-        artifactType: "source_file",
-        artifactPath: "src/lib/google-draft.ts",
-        claim: "Google Gemini 2.5 structured schema generation via Vercel AI SDK and Zod error boundaries",
-        extractionMethod: "static_analysis",
-        confidence: "high",
-        extractedAt: now,
-      });
+      const uiDir = path.join(localPath, "src", "components", "ui");
+      if (fs.existsSync(uiDir)) {
+        const uiCount = fs.readdirSync(uiDir).length;
+        facts.push({
+          id: `fact-${repo.id}-design-system`,
+          repositoryId: repo.id,
+          sourceType: "local",
+          artifactType: "component",
+          artifactPath: "src/components/ui",
+          claim: `Shadcn UI component registry in ${repo.name} containing ${uiCount} primitives`,
+          extractionMethod: "deterministic",
+          confidence: "high",
+          extractedAt: now,
+        });
+      }
     }
   }
 
@@ -257,19 +231,16 @@ export function extractRepositoryFacts(repos: RepositoryIdentity[]): EvidenceFac
 }
 
 export function synthesizeCapabilities(facts: EvidenceFact[]): CapabilityInference[] {
-  const getFactsFor = (repoId: string, keyword: string) =>
-    facts.filter((f) => f.repositoryId === repoId && (f.claim.toLowerCase().includes(keyword) || f.artifactPath.includes(keyword)));
-
   const saasFacts = facts.filter(
     (f) => f.repositoryId === "hogwarts" || f.claim.includes("tenant") || f.claim.includes("Prisma") || f.claim.includes("NextAuth")
   );
 
   const aiFacts = facts.filter(
-    (f) => f.claim.includes("Gemini") || f.claim.includes("AI SDK") || f.repositoryId === "kun"
+    (f) => f.claim.includes("Gemini") || f.claim.includes("AI") || f.repositoryId === "kun"
   );
 
   const designFacts = facts.filter(
-    (f) => f.repositoryId === "codebase" || f.repositoryId === "apple" || f.claim.includes("component registry") || f.claim.includes("Shadcn")
+    (f) => f.repositoryId === "codebase" || f.repositoryId === "apple" || f.claim.includes("component") || f.claim.includes("Shadcn")
   );
 
   const systemsFacts = facts.filter(
@@ -281,7 +252,7 @@ export function synthesizeCapabilities(facts: EvidenceFact[]): CapabilityInferen
   );
 
   const automationFacts = facts.filter(
-    (f) => f.claim.includes("Twenty CRM") || f.claim.includes("WhatsApp") || f.claim.includes("Server Actions")
+    (f) => f.claim.includes("CRM") || f.claim.includes("WhatsApp") || f.claim.includes("Server Actions") || f.claim.includes("automation")
   );
 
   return [
@@ -438,7 +409,7 @@ export function extractTechnologySkills(facts: EvidenceFact[]): TechnologySkillF
     "Docker, Twenty CRM & Automation Pipelines": {
       category: "Automation",
       level: "Proficient",
-      facts: facts.filter((f) => f.claim.includes("Twenty CRM") || f.claim.includes("WhatsApp")),
+      facts: facts.filter((f) => f.claim.includes("CRM") || f.claim.includes("WhatsApp") || f.claim.includes("automation")),
     },
   };
 
@@ -453,7 +424,7 @@ export function extractTechnologySkills(facts: EvidenceFact[]): TechnologySkillF
 export function buildEvidenceKnowledgeProfile(): EngineeringKnowledgeProfile {
   const repos = resolveDatabaytRepositories();
   const currentFingerprint = repos
-    .map((r) => `${r.id}:${r.sources.find((s) => s.type === "local")?.fingerprint || "remote"}`)
+    .map((r) => `${r.id}:${r.sources.find((s) => s.type === "github")?.fingerprint || "remote"}`)
     .join(";");
 
   if (cachedProfile && lastScanFingerprint === currentFingerprint) {
