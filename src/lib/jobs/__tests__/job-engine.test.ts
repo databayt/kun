@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
-import { buildEvidenceKnowledgeProfile } from "./src/lib/jobs/evidence-extractor";
-import { calculateDeterministicMatch } from "./src/lib/jobs/matcher";
-import { NormalizedJobInput } from "./src/lib/jobs/types";
+import { buildEvidenceKnowledgeProfile } from "../evidence-extractor";
+import { calculateDeterministicMatch } from "../matcher";
+import { NormalizedJobInput, EngineeringCapability } from "../types";
 
 describe("Kun Job Intelligence Engine", () => {
   it("extracts evidence knowledge profile from local repositories", () => {
@@ -11,7 +11,7 @@ describe("Kun Job Intelligence Engine", () => {
     expect(profile.technologies.length).toBeGreaterThan(5);
     expect(profile.repositories.length).toBeGreaterThan(0);
 
-    const saasCap = profile.capabilities.find((c) => c.id === "multi-tenant-saas");
+    const saasCap = profile.capabilities.find((c: EngineeringCapability) => c.id === "multi-tenant-saas");
     expect(saasCap).toBeDefined();
     expect(saasCap?.evidence.length).toBeGreaterThan(0);
   });

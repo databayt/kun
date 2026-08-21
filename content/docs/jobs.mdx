@@ -1,65 +1,258 @@
 ---
 title: Job Intelligence Engine
-description: Evidence-based job matching comparing market opportunities against real architectural proof extracted from Databayt repositories
+description: Evidence-based career intelligence comparing market opportunities against real architectural proof extracted from Databayt repositories
 ---
 
-# Job Intelligence Engine (Phase 1)
+# Job Intelligence Engine
 
-The **Job Intelligence Engine** is Kun's evidence-grounded career intelligence subsystem. Rather than performing superficial keyword matching, it inspects Databayt's actual codebase on disk, builds a verified **Engineering Knowledge Profile**, normalizes incoming market opportunities, and scores candidate fit with full explainability.
+> **"Evidence over keywords. Capabilities over job titles. Explainability over mysterious scores."**
 
-## Core Tenets
+The **Job Intelligence Engine** is Kun's career operations and opportunity matching platform. Rather than building a naive keyword counter that matches "React" to "React" without understanding depth, the engine inspects Databayt's actual codebase on disk, builds a verified **Engineering Knowledge Profile**, normalizes incoming market opportunities, and scores candidate fit with full explainability.
 
-1. **Evidence over keywords** — Finding `next` in `package.json` is weak; complex App Router architectures, multi-tenant isolation, NextAuth RBAC, and server actions are proof.
-2. **Capabilities over job titles** — Highlighting generalist ability to architect and ship end-to-end products from scratch (Hogwarts, Mkan, Codebase).
-3. **Transparent explainability** — Every match produces a detailed five-dimensional breakdown with concrete code references, critical blockers, and interview talking points.
-4. **Zero exaggeration** — Strictly grounded positioning derived from verified repository assets.
-
----
-
-## Architecture
-
-```mermaid
-flowchart TD
-    subgraph Repositories["Databayt Repositories on Disk"]
-        H[Hogwarts: Multi-tenant SaaS]
-        C[Codebase: 50+ Shadcn UI Primitives]
-        M[Mkan: Rental Marketplace]
-        D[Distributed: Rust & P2P]
-        A[Apple & Nike: Pixel-Exact Design]
-    end
-
-    subgraph Intelligence["Kun Intelligence Pipeline"]
-        Scanner[Evidence Extractor]
-        Profile[Engineering Knowledge Profile]
-        Norm[Job Normalizer: AI SDK + Zod]
-        Matcher[5D Matcher: Tech, Capability, Domain, Seniority]
-    end
-
-    subgraph Destinations["Pipeline Outputs"]
-        Hub[Kun Jobs Hub: /jobs]
-        Twenty[Twenty CRM: sales.databayt.org]
-    end
-
-    Repos --> Scanner --> Profile
-    Norm --> Matcher
-    Profile --> Matcher
-    Matcher --> Hub
-    Hub -->|Push to CRM| Twenty
+```
+┌─────────────────────────────────────────────────────────────────┐
+│              KUN JOB INTELLIGENCE ENGINE ARCHITECTURE           │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  Layer 4: Operations & Applications                             │
+│  ┌────────────────────────────────────────────────────────────┐ │
+│  │ Kun Jobs Hub (/jobs) │ Profile Dossier │ Twenty CRM Sync   │ │
+│  └────────────────────────────────────────────────────────────┘ │
+│                               ▲                                 │
+│                               │                                 │
+│  Layer 3: 5D Matching & Normalization Engine                    │
+│  ┌────────────────────────────────────────────────────────────┐ │
+│  │ AI Normalizer (Gemini 2.5) │ 5D Explainable Matcher        │ │
+│  │ Critical Blocker Detector  │ Evidence-Grounded Talk Points │ │
+│  └────────────────────────────────────────────────────────────┘ │
+│                               ▲                                 │
+│                               │                                 │
+│  Layer 2: Engineering Knowledge Profile                         │
+│  ┌────────────────────────────────────────────────────────────┐ │
+│  │ Capabilities (SaaS, AI, Mobile, Design Systems, Systems)   │ │
+│  │ Verified Stack Mastery     │ Code Provenance Artifacts     │ │
+│  └────────────────────────────────────────────────────────────┘ │
+│                               ▲                                 │
+│                               │                                 │
+│  Layer 1: Repository Evidence Base (Databayt Codebases on Mac)  │
+│  ┌────────────────────────────────────────────────────────────┐ │
+│  │ Hogwarts (Multi-tenant)   │ Codebase (54 Primitives+62 At) │ │
+│  │ Mkan (Marketplace/Booking)│ Distributed Computer (Rust/P2P)│ │
+│  │ Apple & Nike (Pixel UI)   │ iOS & Android (SwiftUI/Compose)│ │
+│  └────────────────────────────────────────────────────────────┘ │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 5-Dimensional Match Scoring
+## 1. The Core Philosophy
 
-| Dimension | Weight | Meaning |
+Traditional job boards and candidate matching systems fail in two symmetric ways:
+1. **Keyword Overlap Hallucination**: A developer who wrote a 10-line tutorial in `Go` is scored identically to someone who built distributed P2P protocols in `Rust`.
+2. **Title Inelasticity**: Someone who built and shipped complete multi-tenant SaaS products (Hogwarts) is considered unqualified for "Full-Stack AI Engineer", "Founding Engineer", or "Product Engineer" simply because their previous title did not contain the exact buzzwords.
+
+The Kun Job Intelligence Engine solves this by anchoring every evaluation in **verifiable repository evidence**:
+
+| Principle | Traditional Approach | Kun Job Intelligence Engine |
 | :--- | :--- | :--- |
-| **Technical Match** | 40% | Direct alignment with verified production stack (TypeScript, Next.js, React, Prisma, PostgreSQL, AI SDKs). |
-| **Capability Match** | 30% | Architecture and scope alignment (Multi-tenant SaaS, Auth, Design Systems, Mobile, Scraping). |
-| **Domain Match** | 15% | Product domain familiarity (SaaS, EdTech, Marketplaces, DevTools, FinTech). |
-| **Seniority Realism** | 15% | Realistic attainability for a product builder and system engineer. |
+| **Grounding** | Self-reported resume keywords | Scanned AST, Prisma schemas, Server Actions, and Git commits |
+| **Matching** | Keyword string overlap % | 5-Dimensional Match (Tech, Capability, Domain, Seniority, Risk) |
+| **Output** | Opaque numerical rank | Explainable report with specific repo paths & talking points |
+| **Positioning** | Title buzzword inflation | Truthful positioning backed by shipped product proof |
+| **Action** | Disconnected job bookmarking | Integrated 1-click push to Twenty CRM (`sales.databayt.org`) |
 
 ---
 
-## Twenty CRM Integration
+## 2. The Databayt Repository Evidence Base
 
-Qualified opportunities (overall score $\ge 80\%$) can be synced directly to Databayt's Twenty CRM workspace at **[`sales.databayt.org`](https://sales.databayt.org)** via the throttled REST client on port 3100 or through Keychain credentials (`databayt-twenty`).
+The engine performs deep static inspection of the 14 repositories owned and maintained by Databayt on the local filesystem (`/Users/abdout/`):
+
+```mermaid
+graph LR
+    HOGWARTS["/Users/abdout/hogwarts"] -->|Proves| SAAS["Multi-tenant SaaS Architecture\nRBAC & Subdomains\nWhatsApp Cadence"]
+    CODEBASE["/Users/abdout/codebase"] -->|Proves| UI["Atomic Design Systems\n54 Primitives + 62 Atoms\nShadcn Registry Standard"]
+    MKAN["/Users/abdout/mkan"] -->|Proves| MKT["Marketplace Engineering\nBooking & Calendar Engine\nGeographic Search"]
+    DISTRIBUTED["/Users/abdout/distributed-computer"] -->|Proves| SYS["Systems Programming\nRust & P2P Protocols\nlibp2p & Kademlia DHT"]
+    APPLE["/Users/abdout/apple & nike"] -->|Proves| CRAFT["Pixel-Exact Design Craft\nReact 19 & Tailwind 4\nFluid Motion & Polish"]
+    MOBILE["/Users/abdout/ios-app & android-app"] -->|Proves| MOB["Native Mobile Engineering\nSwift 6 & SwiftUI\nKotlin & Jetpack Compose"]
+```
+
+### Verified Code Evidence Matrix
+
+```text
+1. Multi-Tenant SaaS Architecture:
+   - hogwarts/prisma/schema.prisma → 30+ relational models with schoolId isolation
+   - hogwarts/src/auth.ts → NextAuth v5 session callbacks, role-based guards, scrypt hashing
+   - hogwarts/src/lib/whatsapp/ → Outbound messaging cadence via Evolution API
+   - hogwarts/scripts/crm/twenty-rest.ts → Throttled Twenty CRM REST client
+
+2. Design Systems & Frontend Craft:
+   - codebase/src/components/ → 54 UI primitives, 62 compound atoms, 31 templates
+   - apple/src/app/ → Pixel-exact high-fidelity Apple design implementation in Next.js 16
+   - mkan/src/components/search/ → Interactive calendar & property filters
+
+3. AI Integration & Workflow Automation:
+   - kun/src/lib/google-draft.ts → Gemini 2.5 structured schema generation with Zod
+   - kun/.claude/agents/ → 28 autonomous stack agents with persistent memory
+   - kun/scripts/crawl-anthropic/ → Automated web crawler & structural snapshotting
+
+4. Systems & Native Mobile:
+   - distributed-computer/crates/ → Rust multi-crate workspace, libp2p, Kademlia DHT
+   - ios-app/Sources/ → Swift 6, SwiftUI, iOS 18+, MVVM, offline sync
+   - android-app/app/ → Kotlin, Jetpack Compose, bilingual LTR/RTL
+```
+
+---
+
+## 3. The 5-Dimensional Matching Algorithm
+
+Every ingested job posting is evaluated across five distinct dimensions:
+
+$$\text{Overall Score} = 0.40 \times \text{Tech} + 0.30 \times \text{Capability} + 0.15 \times \text{Domain} + 0.15 \times \text{Seniority} - \text{Penalty}_{\text{Blocker}}$$
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                     5D MATCHING BREAKDOWN                       │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  1. Technical Match (40% Weight)                                │
+│     Direct alignment with verified production stack             │
+│     (Next.js, TypeScript, React, Prisma, PostgreSQL, AI SDKs).  │
+│                                                                 │
+│  2. Capability & Scope Match (30% Weight)                       │
+│     Architectural breadth proven in complete products           │
+│     (Multi-tenancy, Auth, Design Systems, Mobile, Pipelines).   │
+│                                                                 │
+│  3. Product Domain Match (15% Weight)                           │
+│     Domain familiarity (SaaS, EdTech, Marketplaces, DevTools). │
+│                                                                 │
+│  4. Seniority & Realism Match (15% Weight)                      │
+│     Realistic fit for a product builder and systems engineer.   │
+│                                                                 │
+│  5. Critical Blocker Penalty                                    │
+│     Detects hard blockers (e.g. bare-metal C++ graphics) vs     │
+│     easily learnable nice-to-haves (e.g. unfamiliar cloud SDK). │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Recommendation Tiers
+
+| Tier | Score Range | Meaning | Action |
+| :--- | :--- | :--- | :--- |
+| **High Priority** | $\ge 85\%$ (0 blockers) | Perfect alignment with demonstrated builder capabilities | Push to CRM immediately & tailor application |
+| **Strong Fit** | $70\% - 84\%$ | Strong foundation; minor secondary gaps easily bridged | Prepare portfolio links and apply |
+| **Prepare & Apply** | $55\% - 69\%$ | Valid match but requires targeted interview prep on gaps | Review risk points before proceeding |
+| **Low Probability** | $< 55\%$ or $\ge 2$ blockers | Fundamental mismatch in core stack or domain | Skip or archive |
+
+---
+
+## 4. Normalization Engine
+
+Jobs arrive from diverse sources (pasted text, job boards, scrapers). The normalizer cleans raw input into a strict Zod-validated model using **Google Gemini 2.5 Flash** (`@ai-sdk/google` + `generateObject`):
+
+```typescript
+export interface NormalizedJobInput {
+  title: string;
+  company: string;
+  companyUrl?: string;
+  location?: string;
+  remoteType: "remote" | "hybrid" | "onsite";
+  employmentType: "full_time" | "part_time" | "contract" | "freelance";
+  salary?: string;
+  description: string;
+  responsibilities: string[];
+  requiredSkills: string[];     // Must-have requirements
+  preferredSkills: string[];    // Nice-to-have bonuses
+  seniority?: string;
+  domain?: string;
+  sourceUrl?: string;
+  source?: string;
+}
+```
+
+If the AI API key is not configured, the normalizer falls back to a deterministic heuristic parser, guaranteeing 100% offline availability.
+
+---
+
+## 5. Twenty CRM Integration
+
+Qualified opportunities are pushed directly into Databayt's self-hosted **Twenty CRM** instance:
+
+| Property | Value |
+| :--- | :--- |
+| **Target Workspace** | **Databayt** (`sales.databayt.org`) |
+| **Target Pipeline** | *Tech jobs, software house partnerships, client custom software* |
+| **Local Endpoint** | `http://localhost:3100/rest/opportunities` |
+| **Auth Key** | macOS Keychain: `security find-generic-password -s databayt-twenty -a databayt` |
+| **Throttling** | $\ge 700\text{ms}$ spacing, exponential backoff on 429 |
+
+### Ingestion Lifecycle
+
+```mermaid
+stateDiagram-v2
+    [*] --> Discovered: Job Ingested (/jobs)
+    Discovered --> Analyzed: 5D Match Calculated
+    Analyzed --> Qualified: Score >= 70%
+    Analyzed --> HighPriority: Score >= 85% & 0 Blockers
+    HighPriority --> TwentyCRM: 1-Click Push (sales.databayt.org)
+    TwentyCRM --> Applied: Application Sent
+    Applied --> Interview: Interview Scheduled
+    Interview --> Offer: Offer Received
+```
+
+---
+
+## 6. Interview Preparation Loop
+
+When a high-priority opportunity is reviewed, the engine automatically compiles **Evidence-Grounded Talking Points**:
+
+```text
+Example Assessment Output:
+--------------------------------------------------------------------------------
+Role: Senior Full-Stack AI Engineer @ ScaleAI Labs
+Overall Match: 92% (High Priority)
+
+Strongest Evidence:
+• Hogwarts: Shipped end-to-end multi-tenant education SaaS with PostgreSQL,
+  NextAuth v5, and Evolution API WhatsApp automation.
+• Codebase: Built canonical atomic design registry with 54 UI primitives and
+  62 compound atoms adhering to strict Shadcn/UI standards.
+• Kun: Engineered AI workflow engine with Vercel AI SDK, Google Gemini 2.5
+  structured schema generation, and Prisma 7 driver adapters.
+
+Talking Points for Interview:
+1. "In Hogwarts, I architected a multi-tenant PostgreSQL schema supporting student/teacher
+   isolation and automated outbound WhatsApp workflows via Evolution API."
+2. "I treat frontend with extreme craft, having built a 150+ component Shadcn registry in
+   Codebase and pixel-exact React 19 clones in Apple R&D."
+3. "My AI engineering experience centers on structured, reliable LLM output pipelines using
+   Zod schemas and error boundaries rather than fragile free-text prompts."
+```
+
+---
+
+## 7. Developer Runbook & Verification
+
+### Running the Engine Locally
+
+```bash
+# 1. Typecheck the entire engine
+pnpm typecheck
+
+# 2. Run unit & integration tests
+pnpm test src/lib/jobs/__tests__/job-engine.test.ts
+
+# 3. Push Prisma schema changes to database
+npx prisma db push
+
+# 4. Start local development server
+pnpm dev
+```
+
+### Route Map
+
+- **`/jobs`**: Interactive Hub with live intake form, sample job preset loader, filter tabs, stats overview, and expandable opportunity cards.
+- **`/jobs/profile`**: Dedicated dossier view of the candidate's verified Engineering Knowledge Profile with active repositories and proven capabilities.
+- **`/docs/jobs`**: This architecture manual.
