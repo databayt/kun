@@ -339,8 +339,11 @@ model SystemHeartbeat {
 enum JobOpportunityStatus {
   discovered
   analyzed
+  needs_review
   qualified
   high_priority
+  preparing
+  ready_to_apply
   applied
   interview
   offer

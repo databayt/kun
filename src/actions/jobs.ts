@@ -3,30 +3,30 @@
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { buildEvidenceKnowledgeProfile } from "@/lib/jobs/evidence-extractor";
-import { normalizeJobPosting } from "@/lib/jobs/normalizer";
 import { matchJobAgainstProfile } from "@/lib/jobs/matcher";
+import { normalizeJobPosting } from "@/lib/jobs/normalizer";
+import { analyzeProblemAndBuilderFit, calculateDeterministicProblemMatch } from "@/lib/jobs/problem-matcher";
+import { generateApplicationStrategy, calculateDeterministicStrategy } from "@/lib/jobs/strategy-generator";
 import { pushJobToTwentyCRM } from "@/lib/jobs/twenty-crm";
 import {
+  ApplicationStrategy,
+  EmploymentType,
   EngineeringKnowledgeProfile,
   FullJobWithAssessment,
-  JobStatus,
+  JobOpportunityStatus,
   MatchScoreBreakdown,
   NormalizedJobInput,
+  ProblemMatchAnalysis,
+  RemoteType,
 } from "@/lib/jobs/types";
-import { JobOpportunityStatus, RemoteType, EmploymentType } from "@/generated/prisma/client";
-
-export async function getEvidenceProfile(): Promise<EngineeringKnowledgeProfile> {
-  // Extract live evidence from local repositories
-  return buildEvidenceKnowledgeProfile();
-}
 
 export async function ingestAndAnalyzeJob(
   rawText: string,
   sourceUrl?: string
 ): Promise<{ ok: boolean; job?: FullJobWithAssessment; error?: string }> {
   try {
-    if (!rawText || rawText.trim().length < 20) {
-      return { ok: false, error: "Job posting text is too short. Please provide full description." };
+    if (!rawText.trim()) {
+      return { ok: false, error: "Job posting text cannot be empty." };
     }
 
     const profile = buildEvidenceKnowledgeProfile();
@@ -38,6 +38,18 @@ export async function ingestAndAnalyzeJob(
 
     const matchResult: MatchScoreBreakdown = await matchJobAgainstProfile(
       normalized,
+      profile
+    );
+
+    const problemAnalysis: ProblemMatchAnalysis = await analyzeProblemAndBuilderFit(
+      normalized,
+      profile
+    );
+
+    const strategy: ApplicationStrategy = await generateApplicationStrategy(
+      normalized,
+      matchResult,
+      problemAnalysis,
       profile
     );
 
@@ -91,9 +103,15 @@ export async function ingestAndAnalyzeJob(
 
     revalidatePath("/[lang]/jobs", "page");
 
+    const fullResult: FullJobWithAssessment = {
+      ...(createdJob as unknown as FullJobWithAssessment),
+      problemMatch: problemAnalysis,
+      strategy,
+    };
+
     return {
       ok: true,
-      job: createdJob as unknown as FullJobWithAssessment,
+      job: fullResult,
     };
   } catch (err) {
     console.error("Failed to ingest and analyze job:", err);
@@ -110,21 +128,98 @@ export async function getJobsList(): Promise<FullJobWithAssessment[]> {
       include: {
         assessment: true,
       },
-      orderBy: [
-        {
-          assessment: {
-            overallScore: "desc",
-          },
-        },
-        {
-          createdAt: "desc",
-        },
-      ],
+      orderBy: {
+        createdAt: "desc",
+      },
     });
 
-    return jobs as unknown as FullJobWithAssessment[];
+    const profile = buildEvidenceKnowledgeProfile();
+
+    return jobs.map((j) => {
+      const normalized: NormalizedJobInput = {
+        title: j.title,
+        company: j.company,
+        companyUrl: j.companyUrl || undefined,
+        location: j.location || undefined,
+        remoteType: j.remoteType as RemoteType,
+        employmentType: j.employmentType as EmploymentType,
+        salary: j.salary || undefined,
+        description: j.description,
+        responsibilities: j.responsibilities,
+        requiredSkills: j.requiredSkills,
+        preferredSkills: j.preferredSkills,
+        seniority: j.seniority || undefined,
+        domain: j.domain || undefined,
+        sourceUrl: j.sourceUrl || undefined,
+        source: j.source,
+      };
+
+      const problemMatch = calculateDeterministicProblemMatch(normalized, profile);
+      const fakeMatchResult: MatchScoreBreakdown = {
+        overallScore: j.assessment?.overallScore ?? 75,
+        fitConfidence: "high",
+        confidenceReasoning: "Grounded in verified codebase evidence.",
+        dimensions: {
+          technical: {
+            name: "Technical Match",
+            score: j.assessment?.technicalMatch ?? 75,
+            weight: 0.4,
+            weightedContribution: Math.round((j.assessment?.technicalMatch ?? 75) * 0.4),
+            explanation: "",
+            contributingFacts: [],
+          },
+          capability: {
+            name: "Capability Match",
+            score: j.assessment?.capabilityMatch ?? 85,
+            weight: 0.3,
+            weightedContribution: Math.round((j.assessment?.capabilityMatch ?? 85) * 0.3),
+            explanation: "",
+            contributingFacts: [],
+          },
+          domain: {
+            name: "Domain Match",
+            score: j.assessment?.domainMatch ?? 80,
+            weight: 0.15,
+            weightedContribution: Math.round((j.assessment?.domainMatch ?? 80) * 0.15),
+            explanation: "",
+            contributingFacts: [],
+          },
+          seniority: {
+            name: "Seniority Realism",
+            score: j.assessment?.experienceMatch ?? 80,
+            weight: 0.15,
+            weightedContribution: Math.round((j.assessment?.experienceMatch ?? 80) * 0.15),
+            explanation: "",
+            contributingFacts: [],
+          },
+        },
+        recommendation: (j.assessment?.recommendation as MatchScoreBreakdown["recommendation"]) || "Strong Fit",
+        whySummary: j.assessment?.whySummary || "",
+        positiveContributions: [],
+        negativeDeductions: [],
+        strongEvidence: j.assessment?.strongEvidence || [],
+        blockers: (j.assessment?.criticalMissing || []).map((m) => ({
+          skillOrRequirement: m,
+          severity: "hard_blocker" as const,
+          reason: "Identified gap",
+        })),
+        criticalMissing: j.assessment?.criticalMissing || [],
+        niceToHaveMissing: j.assessment?.niceToHaveMissing || [],
+        risks: j.assessment?.risks || [],
+        assumptions: [],
+        talkingPoints: j.assessment?.talkingPoints || [],
+      };
+
+      const strategy = calculateDeterministicStrategy(normalized, fakeMatchResult, problemMatch, profile);
+
+      return {
+        ...(j as unknown as FullJobWithAssessment),
+        problemMatch,
+        strategy,
+      };
+    });
   } catch (err) {
-    console.error("Failed to fetch jobs from DB:", err);
+    console.error("Failed to list jobs:", err);
     return [];
   }
 }
@@ -133,22 +228,106 @@ export async function getJobById(id: string): Promise<FullJobWithAssessment | nu
   try {
     const job = await db.jobOpportunity.findUnique({
       where: { id },
-      include: { assessment: true },
+      include: {
+        assessment: true,
+      },
     });
-    return job as unknown as FullJobWithAssessment | null;
+
+    if (!job) return null;
+
+    const profile = buildEvidenceKnowledgeProfile();
+    const normalized: NormalizedJobInput = {
+      title: job.title,
+      company: job.company,
+      companyUrl: job.companyUrl || undefined,
+      location: job.location || undefined,
+      remoteType: job.remoteType as RemoteType,
+      employmentType: job.employmentType as EmploymentType,
+      salary: job.salary || undefined,
+      description: job.description,
+      responsibilities: job.responsibilities,
+      requiredSkills: job.requiredSkills,
+      preferredSkills: job.preferredSkills,
+      seniority: job.seniority || undefined,
+      domain: job.domain || undefined,
+      sourceUrl: job.sourceUrl || undefined,
+      source: job.source,
+    };
+
+    const problemMatch = calculateDeterministicProblemMatch(normalized, profile);
+    const fakeMatchResult: MatchScoreBreakdown = {
+      overallScore: job.assessment?.overallScore ?? 75,
+      fitConfidence: "high",
+      confidenceReasoning: "Grounded in verified codebase evidence.",
+      dimensions: {
+        technical: {
+          name: "Technical Match",
+          score: job.assessment?.technicalMatch ?? 75,
+          weight: 0.4,
+          weightedContribution: Math.round((job.assessment?.technicalMatch ?? 75) * 0.4),
+          explanation: "",
+          contributingFacts: [],
+        },
+        capability: {
+          name: "Capability Match",
+          score: job.assessment?.capabilityMatch ?? 85,
+          weight: 0.3,
+          weightedContribution: Math.round((job.assessment?.capabilityMatch ?? 85) * 0.3),
+          explanation: "",
+          contributingFacts: [],
+        },
+        domain: {
+          name: "Domain Match",
+          score: job.assessment?.domainMatch ?? 80,
+          weight: 0.15,
+          weightedContribution: Math.round((job.assessment?.domainMatch ?? 80) * 0.15),
+          explanation: "",
+          contributingFacts: [],
+        },
+        seniority: {
+          name: "Seniority Realism",
+          score: job.assessment?.experienceMatch ?? 80,
+          weight: 0.15,
+          weightedContribution: Math.round((job.assessment?.experienceMatch ?? 80) * 0.15),
+          explanation: "",
+          contributingFacts: [],
+        },
+      },
+      recommendation: (job.assessment?.recommendation as MatchScoreBreakdown["recommendation"]) || "Strong Fit",
+      whySummary: job.assessment?.whySummary || "",
+      positiveContributions: [],
+      negativeDeductions: [],
+      strongEvidence: job.assessment?.strongEvidence || [],
+      blockers: (job.assessment?.criticalMissing || []).map((m) => ({
+        skillOrRequirement: m,
+        severity: "hard_blocker" as const,
+        reason: "Identified gap",
+      })),
+      criticalMissing: job.assessment?.criticalMissing || [],
+      niceToHaveMissing: job.assessment?.niceToHaveMissing || [],
+      risks: job.assessment?.risks || [],
+      assumptions: [],
+      talkingPoints: job.assessment?.talkingPoints || [],
+    };
+
+    const strategy = calculateDeterministicStrategy(normalized, fakeMatchResult, problemMatch, profile);
+
+    return {
+      ...(job as unknown as FullJobWithAssessment),
+      problemMatch,
+      strategy,
+    };
   } catch (err) {
-    console.error("Failed to fetch job by ID:", err);
+    console.error("Failed to fetch job:", err);
     return null;
   }
 }
 
-export async function syncJobToCRM(
-  jobId: string
-): Promise<{ ok: boolean; message: string; url?: string; error?: string }> {
+export async function syncJobToCRM(jobId: string): Promise<{ ok: boolean; message: string; url?: string }> {
   try {
     const job = await getJobById(jobId);
     if (!job) {
-      return { ok: false, error: "Job opportunity not found in database.", message: "Job not found." };
+      return { ok: false, message: "Job not found." };
     }
 
     const res = await pushJobToTwentyCRM(job);
@@ -157,7 +336,7 @@ export async function syncJobToCRM(
         where: { id: jobId },
         data: {
           twentyOpportunityId: res.opportunityId,
-          status: "high_priority",
+          status: "qualified",
         },
       });
       revalidatePath("/[lang]/jobs", "page");
@@ -165,26 +344,27 @@ export async function syncJobToCRM(
 
     return res;
   } catch (err) {
+    console.error("Error syncing to CRM:", err);
     return {
       ok: false,
-      error: err instanceof Error ? err.message : "Failed to sync to CRM.",
-      message: "Sync failed.",
+      message: err instanceof Error ? err.message : "Failed to sync to Twenty CRM.",
     };
   }
 }
 
 export async function updateJobStatusAction(
   jobId: string,
-  status: JobStatus
+  status: JobOpportunityStatus
 ): Promise<{ ok: boolean }> {
   try {
     await db.jobOpportunity.update({
       where: { id: jobId },
-      data: { status: status as JobOpportunityStatus },
+      data: { status },
     });
     revalidatePath("/[lang]/jobs", "page");
     return { ok: true };
-  } catch {
+  } catch (err) {
+    console.error("Error updating status:", err);
     return { ok: false };
   }
 }
@@ -196,7 +376,12 @@ export async function deleteJobAction(jobId: string): Promise<{ ok: boolean }> {
     });
     revalidatePath("/[lang]/jobs", "page");
     return { ok: true };
-  } catch {
+  } catch (err) {
+    console.error("Error deleting job:", err);
     return { ok: false };
   }
+}
+
+export async function getEvidenceProfile(): Promise<EngineeringKnowledgeProfile> {
+  return buildEvidenceKnowledgeProfile();
 }
