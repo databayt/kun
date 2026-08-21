@@ -8,7 +8,7 @@ import { JobsHub } from "@/components/root/jobs/jobs-hub";
 import { getJobsList, getEvidenceProfile } from "@/actions/jobs";
 
 export const metadata: Metadata = {
-  title: "Job Intelligence Engine | Databayt",
+  title: "Job Engine | Databayt",
   description:
     "Evidence-based career matching engine powered by real repository engineering proof from Databayt.",
 };

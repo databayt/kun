@@ -1,32 +1,88 @@
-export type EvidenceCategory =
-  | "schema"
-  | "routing"
-  | "auth"
-  | "ui_component"
-  | "api_action"
-  | "engine"
-  | "p2p"
-  | "mobile"
-  | "automation"
-  | "config";
+// ── Job Engine: Domain Types & Evidence Model ───────────────────────────────
 
-export interface EvidenceItem {
-  repo: string;
-  path: string;
-  type: EvidenceCategory;
-  summary: string;
-  confidence: "high" | "medium";
+export type EvidenceLevel = "level_1_metadata" | "level_2_source" | "level_3_deep_local";
+
+export type ArtifactType =
+  | "source_file"
+  | "package_manifest"
+  | "database_schema"
+  | "api_route"
+  | "component"
+  | "workflow"
+  | "test"
+  | "git_commit"
+  | "documentation"
+  | "configuration"
+  | "deployment";
+
+export type ExtractionMethod =
+  | "deterministic"
+  | "static_analysis"
+  | "ast_analysis"
+  | "ai_inference"
+  | "manual";
+
+export type SourceType = "local" | "github" | "git" | "snapshot" | "manual";
+
+// ── 1. Repository Identity vs Repository Source ──────────────────────────────
+
+export interface RepositorySource {
+  type: SourceType;
+  location: string; // e.g. "/Users/abdout/hogwarts" or "https://github.com/databayt/hogwarts"
+  isAvailable: boolean;
+  lastCheckedAt?: string;
+  fingerprint?: string; // Commit SHA, tree hash, or mtime fingerprint
 }
 
-export interface EngineeringCapability {
-  id: string;
+export interface RepositoryIdentity {
+  id: string; // e.g. "hogwarts", "codebase", "mkan"
+  organization: string; // e.g. "databayt"
   name: string;
-  level: "Expert" | "Proficient" | "Advanced";
+  canonicalUrl: string;
+  defaultBranch: string;
+  visibility: "public" | "private" | "internal";
   description: string;
-  evidence: EvidenceItem[];
+  primaryLanguage: string;
+  domain: string;
+  sources: RepositorySource[];
 }
 
-export interface TechnologySkill {
+// ── 2. Explicit Evidence & Provenance Model ──────────────────────────────────
+
+export interface EvidenceFact {
+  id: string;
+  repositoryId: string;
+  sourceType: SourceType;
+  artifactType: ArtifactType;
+  artifactPath: string;
+  claim: string; // Directly observable fact (e.g. "Contains Prisma schema with schoolId tenant isolation")
+  rawProof?: string; // Code snippet, file signature, or manifest line
+  extractionMethod: ExtractionMethod;
+  confidence: "high" | "medium" | "low";
+  extractedAt: string;
+}
+
+export interface CapabilityInference {
+  id: string;
+  name: string; // e.g. "Multi-Tenant SaaS Architecture"
+  category: "Architecture" | "Frontend" | "Backend" | "AI" | "Systems" | "Mobile" | "Automation";
+  level: "Expert" | "Proficient" | "Advanced" | "Foundational";
+  description: string;
+  reasoning: string; // Why the facts lead to this conclusion
+  confidence: "high" | "medium" | "low";
+  supportingFactIds: string[];
+  facts: EvidenceFact[];
+}
+
+export interface MarketPositioningRole {
+  title: string; // e.g. "Full-Stack AI Engineer", "Founding Engineer"
+  justification: string;
+  readinessScore: number; // 0 - 100
+  supportingCapabilityIds: string[];
+  strongestProjectProofs: string[];
+}
+
+export interface TechnologySkillFact {
   name: string;
   category:
     | "Frontend"
@@ -39,27 +95,35 @@ export interface TechnologySkill {
     | "Design"
     | "Automation";
   level: "Deep Production" | "Proficient" | "Working Knowledge";
-  evidence: EvidenceItem[];
+  facts: EvidenceFact[];
 }
 
-export interface RepositorySummary {
-  id: string;
-  name: string;
-  localPath: string;
-  stack: string[];
-  highlights: string[];
-  evidenceCount: number;
-}
+// ── 3. Candidate Engineering Knowledge Profile (3-Layer Model) ───────────────
 
 export interface EngineeringKnowledgeProfile {
   candidateName: string;
   headline: string;
-  targetRoles: string[];
-  capabilities: EngineeringCapability[];
-  technologies: TechnologySkill[];
-  repositories: RepositorySummary[];
+  analyzerVersion: string;
+  
+  // Layer A: Verified Observable Facts
+  facts: EvidenceFact[];
+  
+  // Layer B: Inferred Capabilities with Provenance
+  capabilities: CapabilityInference[];
+  
+  // Layer C: Market Positioning Driven by Evidence
+  positioningRoles: MarketPositioningRole[];
+  
+  // Verified Technology Stack
+  technologies: TechnologySkillFact[];
+  
+  // Repositories Registry
+  repositories: RepositoryIdentity[];
+  
   updatedAt: string;
 }
+
+// ── 4. Job Ingestion & Normalization Model ───────────────────────────────────
 
 export type RemoteType = "remote" | "hybrid" | "onsite";
 export type EmploymentType = "full_time" | "part_time" | "contract" | "freelance";
@@ -90,25 +154,60 @@ export interface NormalizedJobInput {
   domain?: string;
   sourceUrl?: string;
   source?: string;
+  rawTextSnapshot?: string; // Preserves raw original posting for re-normalization
+}
+
+// ── 5. Explainable 5D Match & Blocker Breakdown ──────────────────────────────
+
+export type BlockerSeverity = "hard_blocker" | "significant_gap" | "learnable_gap";
+
+export interface BlockerItem {
+  skillOrRequirement: string;
+  severity: BlockerSeverity;
+  reason: string;
+  mitigationStrategy?: string;
+}
+
+export interface DimensionScore {
+  name: string;
+  score: number; // 0 - 100
+  weight: number; // e.g. 0.40
+  weightedContribution: number;
+  explanation: string;
+  contributingFacts: string[];
 }
 
 export interface MatchScoreBreakdown {
   overallScore: number; // 0 - 100
-  technicalMatch: number; // 0 - 100
-  capabilityMatch: number; // 0 - 100
-  domainMatch: number; // 0 - 100
-  experienceMatch: number; // 0 - 100
+  fitConfidence: "high" | "medium" | "low"; // Confidence in the assessment
+  confidenceReasoning: string;
+  
+  dimensions: {
+    technical: DimensionScore;
+    capability: DimensionScore;
+    domain: DimensionScore;
+    seniority: DimensionScore;
+  };
+  
   recommendation:
     | "High Priority"
     | "Strong Fit"
     | "Prepare & Apply"
     | "Low Probability"
     | "Not a Fit";
+    
   whySummary: string;
+  
+  // Explainability deltas
+  positiveContributions: string[];
+  negativeDeductions: string[];
+  
   strongEvidence: string[];
-  criticalMissing: string[];
-  niceToHaveMissing: string[];
+  blockers: BlockerItem[];
+  criticalMissing: string[]; // For backward compatibility
+  niceToHaveMissing: string[]; // For backward compatibility
   risks: string[];
+  assumptions: string[];
   talkingPoints: string[];
 }
 

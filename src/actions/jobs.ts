@@ -70,10 +70,10 @@ export async function ingestAndAnalyzeJob(
         assessment: {
           create: {
             overallScore: matchResult.overallScore,
-            technicalMatch: matchResult.technicalMatch,
-            capabilityMatch: matchResult.capabilityMatch,
-            domainMatch: matchResult.domainMatch,
-            experienceMatch: matchResult.experienceMatch,
+            technicalMatch: matchResult.dimensions.technical.score,
+            capabilityMatch: matchResult.dimensions.capability.score,
+            domainMatch: matchResult.dimensions.domain.score,
+            experienceMatch: matchResult.dimensions.seniority.score,
             recommendation: matchResult.recommendation,
             whySummary: matchResult.whySummary,
             strongEvidence: matchResult.strongEvidence,

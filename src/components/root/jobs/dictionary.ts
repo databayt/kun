@@ -37,10 +37,10 @@ export interface JobsDict {
 
 export const jobsDictionaries: Record<Locale, JobsDict> = {
   ar: {
-    title: "محرك استخبارات الوظائف | Databayt Job Intelligence",
+    title: "محرك الوظائف | Databayt Job Engine",
     description:
       "مطابقة الفرص الوظيفية العالمية بناءً على الأدلة الهندسية الحقيقية المستخرجة من مستودعات ومشاريع Databayt بدلاً من الكلمات المفتاحية.",
-    announcementText: "نظام التقييم القائم على الأدلة — المرحلة الأولى",
+    announcementText: "نظام التقييم القائم على الأدلة — محرك الوظائف",
     primaryAction: "استعراض ملف المعرفة الهندسية",
     secondaryAction: "توثيق المحرك",
     analyzeNewJob: "تحليل ومطابقة فرصة وظيفية جديدة",
@@ -74,10 +74,10 @@ export const jobsDictionaries: Record<Locale, JobsDict> = {
     technologiesCount: "تقنيات تم بناؤها فعلياً",
   },
   en: {
-    title: "Job Intelligence Engine | Databayt",
+    title: "Job Engine | Databayt",
     description:
       "Evidence-based job matching comparing market opportunities against real architectural proof extracted from Databayt repositories.",
-    announcementText: "Evidence-Based Matching Engine — Phase 1",
+    announcementText: "Evidence-Based Matching System — Job Engine",
     primaryAction: "View Engineering Knowledge Profile",
     secondaryAction: "Documentation",
     analyzeNewJob: "Analyze & Match New Job Opportunity",

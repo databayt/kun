@@ -2,58 +2,48 @@ import { createGoogle } from "@ai-sdk/google";
 import { generateObject } from "ai";
 import { z } from "zod";
 import {
+  BlockerItem,
+  DimensionScore,
   EngineeringKnowledgeProfile,
   MatchScoreBreakdown,
   NormalizedJobInput,
 } from "./types";
 
+const blockerItemSchema = z.object({
+  skillOrRequirement: z.string(),
+  severity: z.enum(["hard_blocker", "significant_gap", "learnable_gap"]),
+  reason: z.string(),
+  mitigationStrategy: z.string().optional(),
+});
+
+const dimensionScoreSchema = z.object({
+  name: z.string(),
+  score: z.number().min(0).max(100),
+  weight: z.number(),
+  weightedContribution: z.number(),
+  explanation: z.string(),
+  contributingFacts: z.array(z.string()),
+});
+
 const matchEvaluationSchema = z.object({
-  overallScore: z
-    .number()
-    .min(0)
-    .max(100)
-    .describe("Overall opportunity score reflecting genuine probability of success and fit"),
-  technicalMatch: z
-    .number()
-    .min(0)
-    .max(100)
-    .describe("Score comparing required tech stack against candidate's verified repository implementations"),
-  capabilityMatch: z
-    .number()
-    .min(0)
-    .max(100)
-    .describe("Score comparing required engineering responsibilities against candidate's proven architectural capabilities"),
-  domainMatch: z
-    .number()
-    .min(0)
-    .max(100)
-    .describe("Score on product domain familiarity (SaaS, EdTech, Marketplaces, DevTools, FinTech)"),
-  experienceMatch: z
-    .number()
-    .min(0)
-    .max(100)
-    .describe("Realistic fit for seniority, product builder mindset, and practical execution"),
-  recommendation: z
-    .enum(["High Priority", "Strong Fit", "Prepare & Apply", "Low Probability", "Not a Fit"])
-    .describe("Categorical prioritization recommendation"),
-  whySummary: z
-    .string()
-    .describe("Explainable, transparent summary of why this job matches or doesn't match, grounded in evidence"),
-  strongEvidence: z
-    .array(z.string())
-    .describe("Concrete repository references and features that prove candidate's qualifications"),
-  criticalMissing: z
-    .array(z.string())
-    .describe("Critical, hard blocker requirements the candidate lacks"),
-  niceToHaveMissing: z
-    .array(z.string())
-    .describe("Minor or secondary gaps that can be learned quickly"),
-  risks: z
-    .array(z.string())
-    .describe("Potential interview or technical risks to prepare for"),
-  talkingPoints: z
-    .array(z.string())
-    .describe("Tailored talking points grounded in real repositories for applications and interviews"),
+  overallScore: z.number().min(0).max(100),
+  fitConfidence: z.enum(["high", "medium", "low"]),
+  confidenceReasoning: z.string(),
+  dimensions: z.object({
+    technical: dimensionScoreSchema,
+    capability: dimensionScoreSchema,
+    domain: dimensionScoreSchema,
+    seniority: dimensionScoreSchema,
+  }),
+  recommendation: z.enum(["High Priority", "Strong Fit", "Prepare & Apply", "Low Probability", "Not a Fit"]),
+  whySummary: z.string(),
+  positiveContributions: z.array(z.string()),
+  negativeDeductions: z.array(z.string()),
+  strongEvidence: z.array(z.string()),
+  blockers: z.array(blockerItemSchema),
+  risks: z.array(z.string()),
+  assumptions: z.array(z.string()),
+  talkingPoints: z.array(z.string()),
 });
 
 export async function matchJobAgainstProfile(
@@ -68,93 +58,96 @@ export async function matchJobAgainstProfile(
       const { object } = await generateObject({
         model: google("gemini-2.5-flash"),
         schema: matchEvaluationSchema,
-        prompt: `You are the Lead Technical Evaluator and Career Intelligence Matcher for Databayt.
-Your task is to evaluate the match between a target job posting and the candidate's verified Engineering Knowledge Profile.
+        prompt: `You are the Lead Career Intelligence Evaluator for Databayt.
+Perform a rigorous, 5-dimensional evidence-grounded match between the target job posting and candidate's verified profile.
 
-# CORE PRINCIPLES:
-1. EVIDENCE OVER KEYWORDS: Do not just count keyword overlaps. Look for demonstrated capabilities in actual shipped products.
-2. CAPABILITIES OVER JOB TITLES: Someone who built Hogwarts (multi-tenant SaaS, auth, WhatsApp automation, PostgreSQL) and Codebase (50+ Shadcn components, atomic system) has proven high-level product engineering capability.
-3. TRUTHFUL & OBJECTIVE: Do not hallucinate capabilities or inflate seniority. Point out genuine risks and critical missing skills honestly.
-4. EXPLAINABLE SCORING: Provide clear, transparent reasoning for every score.
+# CORE RULES:
+1. Grounding: Compare against actual verified facts and capability inferences.
+2. Blocker Classification:
+   - hard_blocker: Legal/work-auth disqualifiers or strict non-transferable domain requirements (e.g. 5+ yrs C++ game engine).
+   - significant_gap: Important technologies with no direct repo proof (e.g. AWS ECS/Terraform).
+   - learnable_gap: Unfamiliar libraries easily learned on the job (e.g. TanStack Query vs SWR).
+3. Separate Candidate Fit from Assessment Confidence.
+4. Give explainable score adjustments (positive contributions vs negative deductions).
 
 ---
-### CANDIDATE ENGINEERING KNOWLEDGE PROFILE:
+### CANDIDATE ENGINEERING KNOWLEDGE PROFILE (Databayt):
 Headline: ${profile.headline}
-Target Roles: ${profile.targetRoles.join(", ")}
+Analyzer: ${profile.analyzerVersion}
 
 Core Capabilities:
 ${profile.capabilities
   .map(
     (c) =>
-      `- ${c.name} (${c.level}): ${c.description}\n  Evidence:\n${c.evidence
-        .map((e) => `    * [${e.repo}] ${e.path}: ${e.summary}`)
-        .join("\n")}`
+      `- [${c.category}] ${c.name} (${c.level}): ${c.description}\n  Reasoning: ${c.reasoning}\n  Proof Facts: ${c.facts.map((f) => `[${f.repositoryId}:${f.artifactPath}] ${f.claim}`).join("; ")}`
   )
   .join("\n\n")}
 
-Technologies Verified in Repos:
+Technologies Verified in Production:
 ${profile.technologies
-  .map(
-    (t) =>
-      `- ${t.name} (${t.category} - ${t.level}): ${t.evidence.map((e) => `[${e.repo}] ${e.summary}`).join("; ")}`
-  )
+  .map((t) => `- ${t.name} (${t.category} - ${t.level}): ${t.facts.map((f) => `[${f.repositoryId}] ${f.claim}`).join("; ")}`)
   .join("\n")}
 
 Repositories Tracked:
 ${profile.repositories
-  .map((r) => `- ${r.name} (${r.id}): Stack [${r.stack.join(", ")}] — Highlights [${r.highlights.join(", ")}]`)
+  .map((r) => `- ${r.name} (${r.id}): ${r.description} [Sources: ${r.sources.map((s) => s.type).join(", ")}]`)
   .join("\n")}
 
 ---
-### JOB POSTING TO EVALUATE:
+### JOB POSTING:
 Title: ${job.title}
 Company: ${job.company}
 Remote/Location: ${job.remoteType} (${job.location || "Global"})
 Employment Type: ${job.employmentType}
 Salary: ${job.salary || "Not specified"}
 Seniority: ${job.seniority || "Not specified"}
-Domain: ${job.domain || "General Tech"}
+Domain: ${job.domain || "General"}
 
 Responsibilities:
 ${job.responsibilities.map((r) => `* ${r}`).join("\n")}
 
-Required Skills (Must-Have):
+Required Skills:
 ${job.requiredSkills.map((s) => `* ${s}`).join("\n")}
 
-Preferred Skills (Nice-To-Have):
+Preferred Skills:
 ${job.preferredSkills.map((s) => `* ${s}`).join("\n")}
 
-Full Description Snippet:
+Description:
 ${job.description}
-
----
-Perform a thorough, evidence-grounded assessment and return the structured evaluation.
 `,
         temperature: 0.1,
         maxOutputTokens: 6000,
         abortSignal: AbortSignal.timeout(30_000),
       });
 
+      const hardBlockers = object.blockers.filter((b) => b.severity === "hard_blocker");
+      const criticalMissing = hardBlockers.map((b) => b.skillOrRequirement);
+      const niceToHaveMissing = object.blockers
+        .filter((b) => b.severity === "learnable_gap" || b.severity === "significant_gap")
+        .map((b) => b.skillOrRequirement);
+
       return {
         overallScore: Math.round(object.overallScore),
-        technicalMatch: Math.round(object.technicalMatch),
-        capabilityMatch: Math.round(object.capabilityMatch),
-        domainMatch: Math.round(object.domainMatch),
-        experienceMatch: Math.round(object.experienceMatch),
+        fitConfidence: object.fitConfidence,
+        confidenceReasoning: object.confidenceReasoning,
+        dimensions: object.dimensions,
         recommendation: object.recommendation,
         whySummary: object.whySummary,
+        positiveContributions: object.positiveContributions,
+        negativeDeductions: object.negativeDeductions,
         strongEvidence: object.strongEvidence,
-        criticalMissing: object.criticalMissing,
-        niceToHaveMissing: object.niceToHaveMissing,
+        blockers: object.blockers,
+        criticalMissing,
+        niceToHaveMissing,
         risks: object.risks,
+        assumptions: object.assumptions,
         talkingPoints: object.talkingPoints,
       };
     } catch (err) {
-      console.warn("AI matching failed, using deterministic rule-based engine:", err);
+      console.warn("AI matching failed, using deterministic fallback engine:", err);
     }
   }
 
-  // Deterministic rule-based evaluation fallback
   return calculateDeterministicMatch(job, profile);
 }
 
@@ -162,97 +155,149 @@ export function calculateDeterministicMatch(
   job: NormalizedJobInput,
   profile: EngineeringKnowledgeProfile
 ): MatchScoreBreakdown {
-  const verifiedTechNames = profile.technologies.map((t) => t.name.toLowerCase());
+  const verifiedTechs = profile.technologies.map((t) => t.name.toLowerCase());
   const jobReqs = job.requiredSkills.map((s) => s.toLowerCase());
 
-  let techMatches = 0;
-  const criticalMissing: string[] = [];
-  const strongEvidence: string[] = [];
+  let techMatchedCount = 0;
+  const contributingTechFacts: string[] = [];
+  const blockers: BlockerItem[] = [];
 
   for (const req of job.requiredSkills) {
-    const matched = verifiedTechNames.some((t) => t.includes(req.toLowerCase()) || req.toLowerCase().includes(t.split(" ")[0].toLowerCase()));
+    const matched = verifiedTechs.some((t) => t.includes(req.toLowerCase()) || req.toLowerCase().includes(t.split(" ")[0].toLowerCase()));
     if (matched) {
-      techMatches++;
+      techMatchedCount++;
+      contributingTechFacts.push(`Direct production proof for ${req}`);
     } else {
-      // Check if it's a known heavy blocker
       const lower = req.toLowerCase();
-      if (
-        lower.includes("kubernetes") ||
-        lower.includes("c++") ||
-        lower.includes("java") ||
-        lower.includes("embedded") ||
-        lower.includes("blockchain")
-      ) {
-        criticalMissing.push(req);
+      if (lower.includes("kubernetes") || lower.includes("c++") || lower.includes("embedded") || lower.includes("security clearance")) {
+        blockers.push({
+          skillOrRequirement: req,
+          severity: "hard_blocker",
+          reason: `Strict requirement with no verified repository implementation in Databayt codebases.`,
+        });
+      } else if (lower.includes("aws") || lower.includes("gcp") || lower.includes("docker")) {
+        blockers.push({
+          skillOrRequirement: req,
+          severity: "significant_gap",
+          reason: `Cloud/DevOps preference where candidate has Vercel/Neon proof but limited direct ${req} evidence.`,
+          mitigationStrategy: `Highlight container and cloud deployment familiarity from self-hosted Twenty CRM setup.`,
+        });
+      } else {
+        blockers.push({
+          skillOrRequirement: req,
+          severity: "learnable_gap",
+          reason: `Secondary library easily mastered on the job.`,
+          mitigationStrategy: `Reference deep TypeScript/React architecture foundation from Codebase design system.`,
+        });
       }
     }
   }
 
   const techScore = job.requiredSkills.length > 0
-    ? Math.min(100, Math.round((techMatches / job.requiredSkills.length) * 100))
+    ? Math.min(100, Math.round((techMatchedCount / job.requiredSkills.length) * 100))
     : 85;
 
-  // Capability score: if Next.js, React, SaaS, Full-Stack, Auth, AI are present
-  const isSaaSOrFullstack =
+  const isFullstackOrAI =
     job.title.toLowerCase().includes("full") ||
-    job.title.toLowerCase().includes("stack") ||
     job.title.toLowerCase().includes("next") ||
     job.title.toLowerCase().includes("react") ||
     job.title.toLowerCase().includes("ai") ||
-    job.title.toLowerCase().includes("product") ||
-    job.title.toLowerCase().includes("founding");
+    job.title.toLowerCase().includes("founding") ||
+    job.title.toLowerCase().includes("product");
 
-  const capabilityScore = isSaaSOrFullstack ? 92 : 75;
+  const capabilityScore = isFullstackOrAI ? 94 : 76;
+  const domainScore = (job.domain || "").toLowerCase().includes("saas") ? 95 : 82;
+  const seniorityScore = 88;
 
-  // Domain score
-  let domainScore = 80;
-  const jobDomain = (job.domain || "").toLowerCase();
-  if (jobDomain.includes("saas") || jobDomain.includes("edtech") || jobDomain.includes("marketplace")) {
-    domainScore = 95;
-  }
+  const technicalDim: DimensionScore = {
+    name: "Technical Stack Match",
+    score: techScore,
+    weight: 0.4,
+    weightedContribution: Math.round(techScore * 0.4),
+    explanation: `Candidate verified in ${techMatchedCount}/${job.requiredSkills.length || 1} required technologies.`,
+    contributingFacts: contributingTechFacts,
+  };
 
-  const experienceScore = 88;
-  const overallScore = Math.round(
-    techScore * 0.4 + capabilityScore * 0.3 + domainScore * 0.15 + experienceScore * 0.15
-  );
+  const capabilityDim: DimensionScore = {
+    name: "Capability & Architecture Match",
+    score: capabilityScore,
+    weight: 0.3,
+    weightedContribution: Math.round(capabilityScore * 0.3),
+    explanation: isFullstackOrAI
+      ? "Demonstrated full-stack 0-to-1 builder scope across Hogwarts, Kun, and Codebase."
+      : "General software engineering capability matches required scope.",
+    contributingFacts: [
+      "Hogwarts: Multi-tenant SaaS with PostgreSQL, NextAuth v5, and WhatsApp Evolution API",
+      "Codebase: 54 UI primitives and 62 compound atoms conforming to Shadcn registry standards",
+      "Kun: AI workflow orchestration and Gemini 2.5 structured schema generation",
+    ],
+  };
+
+  const domainDim: DimensionScore = {
+    name: "Domain Familiarity",
+    score: domainScore,
+    weight: 0.15,
+    weightedContribution: Math.round(domainScore * 0.15),
+    explanation: "Strong SaaS and product engineering background.",
+    contributingFacts: ["Education SaaS (Hogwarts)", "Rental Marketplace (Mkan)", "Operations Hub (Kun)"],
+  };
+
+  const seniorityDim: DimensionScore = {
+    name: "Seniority Realism",
+    score: seniorityScore,
+    weight: 0.15,
+    weightedContribution: Math.round(seniorityScore * 0.15),
+    explanation: "Excellent fit for builder/generalist, founding engineer, or senior full-stack roles.",
+    contributingFacts: ["Full-lifecycle ownership from database schema to responsive bilingual frontend."],
+  };
+
+  const hardBlockerCount = blockers.filter((b) => b.severity === "hard_blocker").length;
+  const rawScore =
+    technicalDim.weightedContribution +
+    capabilityDim.weightedContribution +
+    domainDim.weightedContribution +
+    seniorityDim.weightedContribution;
+
+  const overallScore = Math.max(0, Math.min(100, rawScore - hardBlockerCount * 25));
 
   let recommendation: MatchScoreBreakdown["recommendation"] = "Strong Fit";
-  if (overallScore >= 85 && criticalMissing.length === 0) {
+  if (overallScore >= 85 && hardBlockerCount === 0) {
     recommendation = "High Priority";
-  } else if (overallScore < 60 || criticalMissing.length >= 2) {
+  } else if (overallScore < 55 || hardBlockerCount >= 2) {
     recommendation = "Low Probability";
-  } else if (criticalMissing.length > 0) {
+  } else if (hardBlockerCount > 0) {
     recommendation = "Prepare & Apply";
   }
 
-  strongEvidence.push(
-    "Hogwarts: Shipped end-to-end multi-tenant education SaaS with PostgreSQL, NextAuth v5, and Evolution API WhatsApp automation."
-  );
-  strongEvidence.push(
-    "Codebase: Built canonical atomic design registry with 54 UI primitives and 62 compound atoms adhering to strict Shadcn/UI standards."
-  );
-  strongEvidence.push(
-    "Kun: Engineered AI workflow engine with Vercel AI SDK, Google Gemini 2.5 structured schema generation, and Prisma 7 driver adapters."
-  );
-
-  const talkingPoints = [
-    `Highlight your hands-on experience building ${job.title}-relevant architectures in Hogwarts and Mkan.`,
-    "Emphasize strong end-to-end execution: full stack from database schema & authentication to pixel-perfect responsive UI.",
-    "Mention AI integration depth using structured outputs and automated workflow pipelines in Kun.",
-  ];
+  const fitConfidence = contributingTechFacts.length >= 3 ? "high" : "medium";
 
   return {
     overallScore,
-    technicalMatch: techScore,
-    capabilityMatch: capabilityScore,
-    domainMatch: domainScore,
-    experienceMatch: experienceScore,
+    fitConfidence,
+    confidenceReasoning: `${fitConfidence.toUpperCase()} confidence based on ${contributingTechFacts.length} directly verified repository tech proofs.`,
+    dimensions: {
+      technical: technicalDim,
+      capability: capabilityDim,
+      domain: domainDim,
+      seniority: seniorityDim,
+    },
     recommendation,
-    whySummary: `Strong match (${overallScore}%) driven by deep verified production experience with Next.js, React, TypeScript, Prisma, and AI application engineering across Databayt repositories.`,
-    strongEvidence,
-    criticalMissing,
-    niceToHaveMissing: job.preferredSkills.slice(0, 3),
-    risks: criticalMissing.length > 0 ? [`Address missing requirement: ${criticalMissing.join(", ")}`] : ["Standard system design and architecture interview preparation."],
-    talkingPoints,
+    whySummary: `Score of ${overallScore}% driven by direct production evidence in Next.js, React, TypeScript, Prisma, and multi-tenant SaaS architecture.`,
+    positiveContributions: [
+      `+${technicalDim.weightedContribution} pts from verified technical stack mastery.`,
+      `+${capabilityDim.weightedContribution} pts from full-stack SaaS & AI workflow proof.`,
+    ],
+    negativeDeductions: hardBlockerCount > 0 ? [`-${hardBlockerCount * 25} pts due to ${hardBlockerCount} hard blocker gap(s).`] : [],
+    strongEvidence: capabilityDim.contributingFacts,
+    blockers,
+    criticalMissing: blockers.filter((b) => b.severity === "hard_blocker").map((b) => b.skillOrRequirement),
+    niceToHaveMissing: blockers.filter((b) => b.severity !== "hard_blocker").map((b) => b.skillOrRequirement),
+    risks: hardBlockerCount > 0 ? [`Prepare targeted answers for missing requirements: ${blockers.map((b) => b.skillOrRequirement).join(", ")}`] : ["Standard systems architecture and scalability interview prep."],
+    assumptions: ["Candidate is open to remote or flexible working arrangements.", "Role values full-stack product engineering depth."],
+    talkingPoints: [
+      `Anchor your discussion on Hogwarts: explain the multi-tenant PostgreSQL schema and Evolution API WhatsApp automation.`,
+      `Emphasize frontend craftsmanship: reference the 150+ component Shadcn registry built in Codebase.`,
+      `Highlight AI engineering reliability: describe schema-enforced LLM generation with Zod and error boundaries in Kun.`,
+    ],
   };
 }

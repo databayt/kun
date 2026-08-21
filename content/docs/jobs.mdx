@@ -1,17 +1,17 @@
 ---
-title: Job Intelligence Engine
+title: Job Engine
 description: Evidence-based career intelligence comparing market opportunities against real architectural proof extracted from Databayt repositories
 ---
 
-# Job Intelligence Engine
+# Job Engine
 
 > **"Evidence over keywords. Capabilities over job titles. Explainability over mysterious scores."**
 
-The **Job Intelligence Engine** is Kun's career operations and opportunity matching platform. Rather than building a naive keyword counter that matches "React" to "React" without understanding depth, the engine inspects Databayt's actual codebase on disk, builds a verified **Engineering Knowledge Profile**, normalizes incoming market opportunities, and scores candidate fit with full explainability.
+The **Job Engine** is Kun's career operations and opportunity matching platform. Rather than building a naive keyword counter that matches "React" to "React" without understanding depth, the engine inspects Databayt's actual codebase on disk, builds a verified **Engineering Knowledge Profile**, normalizes incoming market opportunities, and scores candidate fit with full explainability.
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│              KUN JOB INTELLIGENCE ENGINE ARCHITECTURE           │
+│                    JOB ENGINE ARCHITECTURE                      │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │  Layer 4: Operations & Applications                             │
@@ -52,9 +52,9 @@ Traditional job boards and candidate matching systems fail in two symmetric ways
 1. **Keyword Overlap Hallucination**: A developer who wrote a 10-line tutorial in `Go` is scored identically to someone who built distributed P2P protocols in `Rust`.
 2. **Title Inelasticity**: Someone who built and shipped complete multi-tenant SaaS products (Hogwarts) is considered unqualified for "Full-Stack AI Engineer", "Founding Engineer", or "Product Engineer" simply because their previous title did not contain the exact buzzwords.
 
-The Kun Job Intelligence Engine solves this by anchoring every evaluation in **verifiable repository evidence**:
+The Kun Job Engine solves this by anchoring every evaluation in **verifiable repository evidence**:
 
-| Principle | Traditional Approach | Kun Job Intelligence Engine |
+| Principle | Traditional Approach | Kun Job Engine |
 | :--- | :--- | :--- |
 | **Grounding** | Self-reported resume keywords | Scanned AST, Prisma schemas, Server Actions, and Git commits |
 | **Matching** | Keyword string overlap % | 5-Dimensional Match (Tech, Capability, Domain, Seniority, Risk) |

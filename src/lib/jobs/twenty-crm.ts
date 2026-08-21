@@ -63,7 +63,7 @@ export async function pushJobToTwentyCRM(
       name: job.company,
       domainName: job.companyUrl || undefined,
     },
-    note: `[Kun Job Intelligence Engine]\nJob URL: ${job.sourceUrl || "N/A"}\nRemote: ${job.remoteType}\nType: ${job.employmentType}\nSalary: ${job.salary || "N/A"}\n\n${assessmentSummary}`,
+    note: `[Job Engine]\nJob URL: ${job.sourceUrl || "N/A"}\nRemote: ${job.remoteType}\nType: ${job.employmentType}\nSalary: ${job.salary || "N/A"}\n\n${assessmentSummary}`,
   };
 
   if (!apiKey) {

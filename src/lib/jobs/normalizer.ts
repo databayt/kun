@@ -49,7 +49,7 @@ export async function normalizeJobPosting(
       const { object } = await generateObject({
         model: google("gemini-2.5-flash"),
         schema: jobNormalizationSchema,
-        prompt: `You are an expert technical recruiting analyst and job intelligence normalizer for Databayt.
+        prompt: `You are an expert technical recruiting analyst and job normalizer for Databayt.
 Normalize the following raw job posting into a strictly structured, clean JSON specification.
 
 RAW JOB POSTING:
@@ -85,6 +85,7 @@ Instructions:
         domain: object.domain,
         sourceUrl: sourceUrl || object.sourceUrl,
         source,
+        rawTextSnapshot: rawText,
       };
     } catch (err) {
       console.warn("AI normalization failed, falling back to heuristic parser:", err);
@@ -151,5 +152,6 @@ Instructions:
     domain: lower.includes("saas") ? "SaaS" : lower.includes("ai") ? "AI / Tech" : "Web Development",
     sourceUrl,
     source,
+    rawTextSnapshot: rawText,
   };
 }

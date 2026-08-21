@@ -334,7 +334,7 @@ model SystemHeartbeat {
   detail String?
 }
 
-// ── Job Intelligence Engine (Phase 1) ───────────────────────────────────────
+// ── Job Engine ─────────────────────────────────────────────────────────────
 
 enum JobOpportunityStatus {
   discovered
