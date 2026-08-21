@@ -4,6 +4,7 @@
 export type SiteNavItem = { href: string; label: string };
 
 export const siteNav: SiteNavItem[] = [
+  { href: "/jobs", label: "Jobs" },
   { href: "/docs", label: "Docs" },
   { href: "/incantations", label: "Incantations" },
   { href: "/team", label: "Team" },

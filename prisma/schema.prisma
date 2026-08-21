@@ -333,3 +333,100 @@ model SystemHeartbeat {
   at     DateTime @updatedAt
   detail String?
 }
+
+// ── Job Intelligence Engine (Phase 1) ───────────────────────────────────────
+
+enum JobOpportunityStatus {
+  discovered
+  analyzed
+  qualified
+  high_priority
+  applied
+  interview
+  offer
+  rejected
+  archived
+}
+
+enum RemoteType {
+  remote
+  hybrid
+  onsite
+}
+
+enum EmploymentType {
+  full_time
+  part_time
+  contract
+  freelance
+}
+
+/// A structured job opportunity discovered or submitted for analysis.
+model JobOpportunity {
+  id                  String               @id @default(cuid())
+  title               String
+  company             String
+  companyUrl          String?
+  location            String?
+  remoteType          RemoteType           @default(remote)
+  employmentType      EmploymentType       @default(full_time)
+  salary              String?
+  description         String
+  responsibilities    String[]             @default([])
+  requiredSkills      String[]             @default([])
+  preferredSkills     String[]             @default([])
+  seniority           String?
+  domain              String?
+  sourceUrl           String?
+  source              String               @default("manual")
+  status              JobOpportunityStatus @default(discovered)
+  
+  /// Link to Twenty CRM Opportunity ID in Databayt workspace
+  twentyOpportunityId String?
+
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+
+  assessment          JobAssessment?
+
+  @@index([status, createdAt])
+  @@index([company])
+}
+
+/// Explainable matching assessment based on real repository evidence.
+model JobAssessment {
+  id                String         @id @default(cuid())
+  jobId             String         @unique
+  job               JobOpportunity @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  overallScore      Float          // 0 - 100
+  technicalMatch    Float          // 0 - 100
+  capabilityMatch   Float          // 0 - 100
+  domainMatch       Float          // 0 - 100
+  experienceMatch   Float          // 0 - 100
+
+  recommendation    String         // e.g. "High Priority", "Strong Fit", "Prepare & Apply", "Low Probability"
+  whySummary        String         // Narrative explanation of why it matches
+  
+  strongEvidence    String[]       @default([]) // Concrete repository features & paths
+  criticalMissing   String[]       @default([]) // Real blocking gaps
+  niceToHaveMissing String[]       @default([]) // Learnable/secondary gaps
+  risks             String[]       @default([]) // Potential interview / tech risks
+  talkingPoints     String[]       @default([]) // Evidence-grounded points for application & interview
+
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  @@index([overallScore])
+}
+
+/// Cached snapshot of candidate engineering knowledge extracted from repos.
+model EvidenceProfileSnapshot {
+  id          String   @id @default(cuid())
+  version     Int      @default(1)
+  data        Json
+  scannedAt   DateTime @default(now())
+
+  @@index([scannedAt])
+}
+
