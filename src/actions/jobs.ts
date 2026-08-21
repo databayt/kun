@@ -2,6 +2,14 @@
 
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
+import {
+  calculateCampaignPerformance,
+  calculateConversionFunnel,
+  calculatePositioningPerformance,
+  calculateSourceQuality,
+  generateWeeklyJobSearchReview,
+} from "@/lib/jobs/conversion-funnel";
+import { attachJobFingerprint } from "@/lib/jobs/deduplication";
 import { buildEvidenceKnowledgeProfile } from "@/lib/jobs/evidence-extractor";
 import { matchJobAgainstProfile } from "@/lib/jobs/matcher";
 import { normalizeJobPosting } from "@/lib/jobs/normalizer";
@@ -10,14 +18,22 @@ import { generateApplicationStrategy, calculateDeterministicStrategy } from "@/l
 import { pushJobToTwentyCRM } from "@/lib/jobs/twenty-crm";
 import {
   ApplicationStrategy,
+  CampaignConversionPerformance,
+  CareerConversionFunnel,
   EmploymentType,
   EngineeringKnowledgeProfile,
   FullJobWithAssessment,
   JobOpportunityStatus,
+  JobStatus,
   MatchScoreBreakdown,
   NormalizedJobInput,
+  OutcomeCategory,
+  OutcomeReasonCategory,
+  PositioningConversionPerformance,
   ProblemMatchAnalysis,
   RemoteType,
+  SourceQualityPerformance,
+  WeeklyJobSearchReview,
 } from "@/lib/jobs/types";
 
 export async function ingestAndAnalyzeJob(
@@ -30,11 +46,12 @@ export async function ingestAndAnalyzeJob(
     }
 
     const profile = buildEvidenceKnowledgeProfile();
-    const normalized: NormalizedJobInput = await normalizeJobPosting(
+    let normalized: NormalizedJobInput = await normalizeJobPosting(
       rawText,
       sourceUrl ? "url" : "manual",
       sourceUrl
     );
+    normalized = attachJobFingerprint(normalized);
 
     const matchResult: MatchScoreBreakdown = await matchJobAgainstProfile(
       normalized,
@@ -354,12 +371,12 @@ export async function syncJobToCRM(jobId: string): Promise<{ ok: boolean; messag
 
 export async function updateJobStatusAction(
   jobId: string,
-  status: JobOpportunityStatus
+  status: JobStatus
 ): Promise<{ ok: boolean }> {
   try {
     await db.jobOpportunity.update({
       where: { id: jobId },
-      data: { status },
+      data: { status: status as JobOpportunityStatus },
     });
     revalidatePath("/[lang]/jobs", "page");
     return { ok: true };
@@ -367,6 +384,54 @@ export async function updateJobStatusAction(
     console.error("Error updating status:", err);
     return { ok: false };
   }
+}
+
+export async function recordJobOutcomeAction(
+  jobId: string,
+  status: JobStatus,
+  outcome?: OutcomeCategory,
+  reasonCategory?: OutcomeReasonCategory,
+  feedback?: string,
+  hypothesis?: string
+): Promise<{ ok: boolean }> {
+  try {
+    await db.jobOpportunity.update({
+      where: { id: jobId },
+      data: {
+        status: status as JobOpportunityStatus,
+      },
+    });
+    revalidatePath("/[lang]/jobs", "page");
+    return { ok: true };
+  } catch (err) {
+    console.error("Error recording outcome:", err);
+    return { ok: false };
+  }
+}
+
+export async function getConversionFunnelStatsAction(): Promise<{
+  funnel: CareerConversionFunnel;
+  campaigns: CampaignConversionPerformance[];
+  positioning: PositioningConversionPerformance[];
+  sources: SourceQualityPerformance[];
+}> {
+  const jobs = await getJobsList();
+  const funnel = calculateConversionFunnel(jobs);
+  const campaigns = calculateCampaignPerformance(jobs);
+  const positioning = calculatePositioningPerformance(jobs);
+  const sources = calculateSourceQuality(jobs);
+
+  return {
+    funnel,
+    campaigns,
+    positioning,
+    sources,
+  };
+}
+
+export async function getWeeklySearchReviewAction(): Promise<WeeklyJobSearchReview> {
+  const jobs = await getJobsList();
+  return generateWeeklyJobSearchReview(jobs);
 }
 
 export async function deleteJobAction(jobId: string): Promise<{ ok: boolean }> {

@@ -345,9 +345,15 @@ enum JobOpportunityStatus {
   preparing
   ready_to_apply
   applied
+  response
+  screen
   interview
+  technical_round
+  final_round
   offer
   rejected
+  withdrawn
+  ghosted
   archived
 }
 

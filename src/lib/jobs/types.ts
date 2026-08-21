@@ -134,9 +134,15 @@ export type JobStatus =
   | "preparing"
   | "ready_to_apply"
   | "applied"
+  | "response"
+  | "screen"
   | "interview"
+  | "technical_round"
+  | "final_round"
   | "offer"
   | "rejected"
+  | "withdrawn"
+  | "ghosted"
   | "archived";
 
 export type JobOpportunityStatus = JobStatus;
@@ -317,7 +323,113 @@ export interface JobCampaign {
   isActive: boolean;
 }
 
-// ── 9. Production Observability & Health Telemetry ───────────────────────────
+// ── 9. Phase 3A: Outcome Intelligence & Conversion Funnel ────────────────────
+
+export type OutcomeCategory =
+  | "offer"
+  | "rejected_pre_interview"
+  | "rejected_recruiter_screen"
+  | "rejected_technical"
+  | "rejected_final"
+  | "withdrew"
+  | "ghosted_no_response"
+  | "role_closed";
+
+export type OutcomeReasonCategory =
+  | "skills_gap"
+  | "seniority_mismatch"
+  | "location_visa"
+  | "compensation_mismatch"
+  | "culture_fit"
+  | "competition_volume"
+  | "timing_role_filled"
+  | "unknown";
+
+export interface JobOutcomeRecord {
+  id: string;
+  jobId: string;
+  appliedAt?: string;
+  positioningAngle?: string;
+  campaignId?: string;
+  stage: JobStatus;
+  outcome?: OutcomeCategory;
+  reasonCategory?: OutcomeReasonCategory;
+  observedFeedback?: string;
+  candidateHypothesis?: string;
+  recordedAt: string;
+}
+
+export interface CareerConversionFunnel {
+  totalDiscovered: number;
+  totalQualified: number;
+  totalPrepared: number;
+  totalApplied: number;
+  totalResponses: number;
+  totalScreens: number;
+  totalTechnicalRounds: number;
+  totalFinalRounds: number;
+  totalOffers: number;
+  totalRejections: number;
+  
+  // Rates
+  qualificationRate: number;     // qualified / discovered
+  applicationRate: number;       // applied / qualified
+  responseRate: number;          // responses / applied
+  interviewConversionRate: number;// screens / applied
+  technicalPassRate: number;     // final / technical
+  offerRate: number;             // offers / applied
+}
+
+export interface CampaignConversionPerformance {
+  campaignId: string;
+  campaignName: string;
+  jobsFound: number;
+  qualified: number;
+  applied: number;
+  responses: number;
+  interviews: number;
+  offers: number;
+  responseRate: number;
+  interviewRate: number;
+  efficiencyScore: number; // Combined conversion score
+}
+
+export interface PositioningConversionPerformance {
+  positioningAngle: string;
+  applicationsCount: number;
+  responsesCount: number;
+  interviewsCount: number;
+  offersCount: number;
+  responseRate: number;
+  interviewRate: number;
+}
+
+export interface SourceQualityPerformance {
+  sourceName: string;
+  jobsCount: number;
+  qualifiedCount: number;
+  responsesCount: number;
+  qualificationRate: number;
+  responseRate: number;
+}
+
+export interface WeeklyJobSearchReview {
+  weekStarting: string;
+  weekEnding: string;
+  discoveredCount: number;
+  highPriorityCount: number;
+  applicationsSentCount: number;
+  responsesCount: number;
+  interviewsCount: number;
+  topPerformingCampaign: string;
+  topPerformingPositioning: string;
+  keySkillGapBottleneck: string;
+  repeatedInterviewInsight: string;
+  recommendedNextWeekFocus: string[];
+  generatedAt: string;
+}
+
+// ── 10. Production Observability & Health Telemetry ──────────────────────────
 
 export interface EngineObservabilityStats {
   repositoriesDiscovered: number;
@@ -374,4 +486,5 @@ export interface FullJobWithAssessment {
   } | null;
   problemMatch?: ProblemMatchAnalysis | null;
   strategy?: ApplicationStrategy | null;
+  outcome?: JobOutcomeRecord | null;
 }

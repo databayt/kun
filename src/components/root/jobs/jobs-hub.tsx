@@ -5,6 +5,7 @@ import { EngineeringKnowledgeProfile, FullJobWithAssessment } from "@/lib/jobs/t
 import { ingestAndAnalyzeJob } from "@/actions/jobs";
 import { JobCard } from "./job-card";
 import { ProfileDossier } from "./profile-dossier";
+import { ConversionDashboard } from "./conversion-dashboard";
 import { getJobsDict } from "./dictionary";
 import { type Locale } from "@/components/local/config";
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,7 @@ import {
   Filter,
   CheckCircle2,
   Cpu,
+  Target,
 } from "lucide-react";
 
 interface JobsHubProps {
@@ -113,6 +115,7 @@ export function JobsHub({ initialJobs, profile, lang }: JobsHubProps) {
     if (filter === "crm") {
       return Boolean(job.twentyOpportunityId);
     }
+
     return true;
   });
 
@@ -120,13 +123,31 @@ export function JobsHub({ initialJobs, profile, lang }: JobsHubProps) {
   const crmCount = jobs.filter((j) => Boolean(j.twentyOpportunityId)).length;
 
   return (
-    <div className="container-wrapper py-8 space-y-8 max-w-7xl mx-auto">
-      {/* Top Stats Overview */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div className="container max-w-6xl mx-auto px-4 py-8 space-y-8">
+      {/* Header Title & Subtitle */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <Badge variant="outline" className="text-xs font-mono">
+            {isAr ? "محرك الوظائف v3.0" : "Job Engine v3.0"}
+          </Badge>
+          <Badge variant="secondary" className="text-xs">
+            {profile.repositories.length} {isAr ? "مستودع في github.com/databayt" : "Repos on github.com/databayt"}
+          </Badge>
+        </div>
+        <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
+          {t.title}
+        </h1>
+        <p className="text-sm sm:text-base text-muted-foreground max-w-3xl leading-relaxed">
+          {t.description}
+        </p>
+      </div>
+
+      {/* Metric Counters Banner */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div className="rounded-xl border bg-card/60 p-4 space-y-1">
           <div className="text-xs text-muted-foreground font-medium flex items-center gap-1.5">
             <Briefcase className="h-3.5 w-3.5 text-primary" />
-            {isAr ? "إجمالي الفرص المقيمة" : "Total Opportunities"}
+            {isAr ? "الفرص المحللة" : "Analyzed Jobs"}
           </div>
           <div className="text-2xl font-bold">{jobs.length}</div>
         </div>
@@ -162,10 +183,14 @@ export function JobsHub({ initialJobs, profile, lang }: JobsHubProps) {
 
       <Tabs defaultValue="opportunities" className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b pb-4">
-          <TabsList className="grid w-full sm:w-auto grid-cols-2">
+          <TabsList className="grid w-full sm:w-auto grid-cols-3">
             <TabsTrigger value="opportunities" className="flex items-center gap-2">
               <Briefcase className="h-4 w-4" />
               {t.opportunitiesTab} ({jobs.length})
+            </TabsTrigger>
+            <TabsTrigger value="conversion" className="flex items-center gap-2">
+              <Target className="h-4 w-4" />
+              {isAr ? "قمع التحويل والتعلم" : "Conversion & Learning"}
             </TabsTrigger>
             <TabsTrigger value="profile" className="flex items-center gap-2">
               <Layers className="h-4 w-4" />
@@ -202,35 +227,49 @@ export function JobsHub({ initialJobs, profile, lang }: JobsHubProps) {
               </div>
             </div>
 
-            <form onSubmit={handleAnalyze} className="space-y-3">
-              <Textarea
-                placeholder={t.inputPlaceholder}
-                value={rawText}
-                onChange={(e) => setRawText(e.target.value)}
-                rows={4}
-                className="font-sans text-sm resize-y"
-              />
+            <form onSubmit={handleAnalyze} className="space-y-4">
+              <div className="space-y-2">
+                <Textarea
+                  placeholder={t.inputPlaceholder}
+                  value={rawText}
+                  onChange={(e) => setRawText(e.target.value)}
+                  rows={6}
+                  className="font-mono text-xs leading-relaxed resize-y"
+                  disabled={isAnalyzing}
+                />
+              </div>
 
-              <div className="flex flex-col sm:flex-row gap-2">
+              <div className="flex flex-col sm:flex-row items-center gap-3">
                 <Input
+                  type="url"
                   placeholder={t.urlPlaceholder}
                   value={sourceUrl}
                   onChange={(e) => setSourceUrl(e.target.value)}
-                  className="text-sm sm:flex-1"
+                  className="text-xs flex-1"
+                  disabled={isAnalyzing}
                 />
 
                 <Button
                   type="submit"
                   disabled={isAnalyzing || !rawText.trim()}
-                  className="sm:w-auto font-medium"
+                  className="w-full sm:w-auto shrink-0 gap-2 text-xs"
                 >
-                  <Sparkles className="h-4 w-4 me-2 text-amber-300" />
-                  {isAnalyzing ? t.analyzingText : t.analyzeButton}
+                  {isAnalyzing ? (
+                    <>
+                      <Sparkles className="h-4 w-4 animate-spin" />
+                      {t.analyzingText}
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4" />
+                      {t.analyzeButton}
+                    </>
+                  )}
                 </Button>
               </div>
 
               {errorMsg && (
-                <p className="text-xs text-rose-500 font-medium bg-rose-500/10 p-2 rounded border border-rose-500/20">
+                <p className="text-xs text-destructive font-medium bg-destructive/10 p-2.5 rounded-lg border border-destructive/20">
                   {errorMsg}
                 </p>
               )}
@@ -238,77 +277,82 @@ export function JobsHub({ initialJobs, profile, lang }: JobsHubProps) {
           </div>
 
           {/* Search & Filter Bar */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-2">
-            <div className="relative flex-1 max-w-sm">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="relative w-full sm:w-72">
               <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder={isAr ? "بحث في الوظائف أو الشركات أو المهارات..." : "Search jobs, companies, skills..."}
+                placeholder={isAr ? "بحث في المسمى، الشركة، المهارات..." : "Search title, company, skills..."}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="ps-9 text-sm"
+                className="ps-9 text-xs"
               />
             </div>
 
-            <div className="flex flex-wrap items-center gap-1.5">
+            <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
               <Button
-                size="sm"
                 variant={filter === "all" ? "default" : "outline"}
+                size="sm"
                 onClick={() => setFilter("all")}
-                className="h-8 text-xs font-normal"
+                className="text-xs"
               >
-                {t.filterAll}
+                {isAr ? "الكل" : "All"} ({jobs.length})
               </Button>
               <Button
-                size="sm"
                 variant={filter === "high" ? "default" : "outline"}
+                size="sm"
                 onClick={() => setFilter("high")}
-                className="h-8 text-xs font-normal"
+                className="text-xs"
               >
-                {t.filterHighPriority}
+                {isAr ? "أولوية قصوى" : "High Priority"} ({highPriorityCount})
               </Button>
               <Button
-                size="sm"
                 variant={filter === "remote" ? "default" : "outline"}
+                size="sm"
                 onClick={() => setFilter("remote")}
-                className="h-8 text-xs font-normal"
+                className="text-xs"
               >
-                {t.filterRemote}
+                {isAr ? "عن بعد" : "Remote Only"}
               </Button>
               <Button
-                size="sm"
                 variant={filter === "crm" ? "default" : "outline"}
+                size="sm"
                 onClick={() => setFilter("crm")}
-                className="h-8 text-xs font-normal"
+                className="text-xs"
               >
                 Twenty CRM ({crmCount})
               </Button>
             </div>
           </div>
 
-          {/* Jobs List */}
-          <div className="space-y-4">
-            {filteredJobs.length > 0 ? (
-              filteredJobs.map((job) => (
-                <JobCard key={job.id} job={job} lang={lang} />
-              ))
-            ) : (
-              <div className="rounded-xl border border-dashed p-12 text-center space-y-3">
-                <Briefcase className="h-10 w-10 text-muted-foreground mx-auto" />
-                <h4 className="font-semibold text-base">
-                  {isAr ? "لم يتم العثور على فرص تطابق الفلتر" : "No job opportunities match this filter"}
-                </h4>
-                <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-                  {isAr
-                    ? "الصق إعلان وظيفة جديد في الصندوق أعلاه لتحليله فوراً ومطابقته بالأدلة."
-                    : "Paste a job description in the box above to immediately analyze and match against your evidence profile."}
-                </p>
+          {/* Job Opportunities List */}
+          {filteredJobs.length === 0 ? (
+            <div className="rounded-2xl border border-dashed p-12 text-center space-y-3">
+              <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mx-auto text-muted-foreground">
+                <Briefcase className="h-6 w-6" />
               </div>
-            )}
-          </div>
+              <h3 className="font-bold text-base">{isAr ? "لا توجد فرص مطابقة للفلتر" : "No matching jobs found"}</h3>
+              <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+                {isAr
+                  ? "قم بلصق إعلان وظيفي جديد أعلاه للمقارنة الفورية مع مستودعاتك الهندسية."
+                  : "Paste a job posting above to instantly compare against verified code evidence."}
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {filteredJobs.map((job) => (
+                <JobCard key={job.id} job={job} lang={lang} />
+              ))}
+            </div>
+          )}
         </TabsContent>
 
-        {/* Tab 2: Candidate Knowledge Profile Dossier */}
-        <TabsContent value="profile" className="mt-0">
+        {/* Tab 2: Career Conversion Funnel & Learning */}
+        <TabsContent value="conversion" className="space-y-8 mt-0">
+          <ConversionDashboard lang={lang} />
+        </TabsContent>
+
+        {/* Tab 3: Knowledge Profile Dossier */}
+        <TabsContent value="profile" className="space-y-8 mt-0">
           <ProfileDossier profile={profile} lang={lang} />
         </TabsContent>
       </Tabs>
