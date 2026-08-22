@@ -190,3 +190,37 @@ What held up: the seed lane, the drain, the review queue, the permanent token, a
 (six-hourly, zero errors, zero give-ups — it was reporting the truth about reach all along, and
 nobody had read it).
 
+
+## Amendment — 2026-08-22: pillars widened to four brands
+
+**Decided by**: founder, in session · **Amends**: the deferral row
+"mkan · databayt · sijillee · moallimee — `brand-kit.json` and `pillars.json` stay hogwarts-only".
+
+That row is now partly reversed. `pillars.json` carries **hogwarts, mkan, balqalam and databayt**
+(4 briefs each for the three added; hogwarts keeps its 8). `brand-kit.json` had already drifted past
+this decision — all four brands were filled before today — so the two files are now consistent with
+each other rather than one lagging.
+
+**What did NOT change, and is the reason this is a small amendment rather than a reversal:**
+
+- The **human gate is untouched.** Pillars seed draft asks; asks become answers in the review queue;
+  nothing reaches a Page without an Approve. Authoring a pillar publishes nothing.
+- **hogwarts × Facebook × Sudan is still the proving slice.** The other three brands now *can* be
+  drafted for; they are not scheduled, and the loop is still unproven end to end.
+- **The expansion order is unchanged** (Instagram → Telegram → mkan → Saudi) and the five written
+  conditions still gate it. This amendment does not tick any of them.
+
+Reasoning: the three brands each had a Facebook Page, a permanent token and a filled brand kit, and
+were blocked only by having nothing written for them — a content gap masquerading as a scope
+decision. The cheap half of expansion (a content spine) is now done; the expensive half (proving the
+loop, then publishing) still waits on the gate.
+
+Two of the four unresolved items above are also now closed or moved:
+
+- **databayt's token identity** (the last brand on a personal grant) was root-caused this session:
+  the Page is owned by business portfolio `1364261941941312` — a **second portfolio also named
+  "Databayt"**, distinct from `2243724639760887` which holds the other three Pages and the System
+  User. Abdout is not a member of it and cannot see it; the Aug-19 "add Page" request went to its
+  admins and is unanswered. Name collision is why this read as one portfolio for three days.
+- The personal grant's 90-day data-access clock was **refreshed to 2026-11-20** by re-consenting, so
+  the deadline moved but did not disappear.
