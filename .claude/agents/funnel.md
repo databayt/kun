@@ -80,11 +80,11 @@ and Vercel cron rather than in a Twenty `CRON` workflow.
 
 ## Where the code lives — kun holds none of it
 
-| Repo         | What                                                                                                                                                                        |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Repo         | What                                                                                                                                                                                                                                                                                                                               |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **hogwarts** | `scripts/funnel/{lib,gates,tick,apply-inbox}.ts` (the lane's own scripts — the path kun's hooks fence) · `src/components/chatbot/` (captures + rate-limited since 2026-08-22) · `src/lib/whatsapp/` (Evolution client — instance 404 today) · `src/lib/sales/promote.ts` · `scripts/crm/{wave-one,workflow-spec,funnel-schema}.ts` |
-| **mkan**     | `scripts/mastering/` (the photo-mastering loop) · `scripts/crm/{gift-handover,claim-tokens,outreach-cadence,wave-publish}.ts`                                               |
-| **kun**      | routing, this card, `/funnel`, `workflows/funnel.js`, the two hooks, and the drain scripts — **no funnel logic**                                                            |
+| **mkan**     | `scripts/mastering/` (the photo-mastering loop) · `scripts/crm/{gift-handover,claim-tokens,outreach-cadence,wave-publish}.ts`                                                                                                                                                                                                      |
+| **kun**      | routing, this card, `/funnel`, `workflows/funnel.js`, the two hooks, and the drain scripts — **no funnel logic**                                                                                                                                                                                                                   |
 
 ## The gate ladder
 
@@ -129,12 +129,16 @@ artifact — the yield ledger finally measures) · `tick.ts` (ramped roll; whats
 until the Twenty workflow is ACTIVE, email lane sends via Resend — databayt.org is verified —
 and requires `--reply-to`) · `apply-inbox.ts` (WARM drag → Prospect capture + promoteToLead;
 everything else recorded advisory) · chatbot capture v1 + rate limit (identifiers typed into
-the widget persist as Prospects; saasMarketing mode only).
+the widget persist as Prospects; saasMarketing mode only) · **the outreach workflow, ACTIVE
+same day** — deployed + throwaway-tested entirely over the API (no UI session exists or is
+needed; sequence + the `nextStepIds` trap in `hogwarts/scripts/crm/workflow-spec.ts`), its
+cards landing in private **#hogwarts-funnel** (`C0BRXUREB8W`, Abdout + the @kun bot) via
+Hermes `deliver_extra.chat_id`. Queue lag ~30–45s per flip — never assert at +10s.
 
-**Still not built:** the Twenty workflow activation (HUMAN, in the UI — `workflow-spec.ts` is
-the spec + verifier) · the cadence (touches 2+: no clock, no drain, no approve queue) · the
+**Still not built:** the cadence (touches 2+: no clock, no drain, no approve queue) · the
 value assets (the registry holds no URLs) · transcript persistence (capture keeps identifiers,
-not sessions).
+not sessions) · `UPSTASH_*` in Vercel env (chatbot throttle is per-invocation in prod until
+then).
 
 So when this agent reports zeros, the honest phrasing is **structurally empty, not
 genuinely empty** — there is no capture, so there is nothing to count.

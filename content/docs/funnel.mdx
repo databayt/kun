@@ -9,10 +9,15 @@ The engine's conversion lane. Say it in prose — _"which gate is that school st
 up"_, _"segment this lead"_, _"قمع"_ — and the `funnel` agent, the `/funnel` skill and the two
 guard hooks come with it.
 
-**The measured truth this lane exists to change: nothing here has ever converted.** 0 funnel
-sessions, 0 gates instrumented, 0 active paying schools, against a Q3 2026 target of 1. Every rate
-below starts at zero, and saying so is the point — the sibling [scrape](/docs/scrape) lane learned
-the hard way that a number remembered rather than measured drifts optimistic.
+**The measured truth this lane exists to change: nothing here has ever converted.** 0 active
+paying schools against a Q3 2026 target of 1. But since 2026-08-22 the lane is instrumented
+rather than remembered: the gates census (`pnpm crm:funnel-gates` in hogwarts) measured **377
+reachable, unmessaged schools — 222 verified-mobile + 155 email** (5× the remembered 45 mobiles;
+E.164 + Arabic-Indic normalization found what raw strings hid), the chatbot captures, and the
+outreach workflow is **ACTIVE** with its cards landing in the private **#hogwarts-funnel** Slack
+channel. Every conversion rate still starts at zero, and saying so is the point — the sibling
+[scrape](/docs/scrape) lane learned the hard way that a number remembered rather than measured
+drifts optimistic.
 
 ## hogwarts — designed backwards from the invoice
 
@@ -33,6 +38,10 @@ DISCOVERY     authority, size, rail and timing all known
    ↑            needs: answers
 WARM          they replied — one email or phone captured
    ↑            needs: a reason to answer
+CONTACTED     the opening message went out (QUEUED until a human marks SENT)
+   ↑            needs: the message actually sent
+SHORTLISTED   picked for today's ramped batch — the workflow fires here
+   ↑            needs: a verified contact and a slot in the ramp
 PROSPECT      tiered and worth working, but silent
    ↑
 COLD          /scrape's territory, not ours
@@ -66,24 +75,29 @@ hogwarts' gate is the union of the enums that already exist. Twenty's stage opti
 replaced** — `COLD`, `PROSPECT`, `PILOT` and `LOST` already sit on 3,156 live rows, and Twenty
 stores an option's value on the record, so a swap would orphan them.
 
-| Gate | `Prospect.status` | `Lead.status` | Twenty `stage` | live rows |
+| Gate | `Prospect.status` | `Lead.status` | Twenty `stage` | live rows (08-22) |
 | --- | --- | --- | --- | --- |
-| COLD | `new` `enriched` `queued` `contacted` | — | `COLD` | 3,119 |
+| COLD | `new` `enriched` `queued` `contacted` | — | `COLD` | 3,795 |
 | PROSPECT | `queued` | — | `PROSPECT` | 21 |
+| SHORTLISTED | `queued` | — | `SHORTLISTED` (08-19) | 0 |
+| CONTACTED | `contacted` | — | `CONTACTED` (08-19) | 0 |
 | **WARM** | `replied` | `NEW` | `WARM` | 0 |
 | **DISCOVERY** | `promoted` | `QUALIFIED` | `DISCOVERY` | 0 |
 | **DEMO** | `promoted` | `PROPOSAL` | `DEMO` | 0 |
 | **TRIAL** | `promoted` | `NEGOTIATION` | `TRIAL` | 0 |
 | **PILOT** | `promoted` | `NEGOTIATION` | `PILOT` | 1 |
 | **PAID** | `promoted` | `CLOSED_WON` | `PAID` | 0 |
-| DORMANT | `dead` + `dormant:<gate>` | `ARCHIVED` | `DORMANT` (new) | — |
-| LOST | `dead` | `CLOSED_LOST` | `LOST` | 65 |
+| DORMANT | `dead` + `dormant:<gate>` | `ARCHIVED` | `DORMANT` (08-18) | — |
+| LOST | `dead` | `CLOSED_LOST` | `LOST` | 77 |
 
 **Measured against the live workspace on 2026-08-18, and it improved the design.** `company.stage`
 already carried nine options with five of them holding zero rows — a ladder someone built and never
-populated. So the funnel adopts it and adds exactly one genuinely missing state, `DORMANT`, instead
-of appending a parallel REPLIED/QUALIFIED/CUSTOMER set that would have duplicated it. WARM *is*
-replied, DISCOVERY *is* qualified, PAID *is* customer.
+populated. So the funnel adopts it and adds only what was genuinely missing: `DORMANT` (08-18),
+then `SHORTLISTED` + `CONTACTED` (08-19) for the outreach roll — **12 options live**. No parallel
+REPLIED/QUALIFIED/CUSTOMER set: WARM *is* replied, DISCOVERY *is* qualified, PAID *is* customer.
+Ownership of the two new pre-reply stages is split on purpose: the `funnel-gates.json` artifact
+carries all 12, the funnel lane reports WARM and beyond, and SHORTLISTED/CONTACTED are the
+outreach report's numbers — contacted-but-silent is the stall that matters first.
 
 The existing split of **TRIAL** (a self-serve sandbox) from **PILOT** (the committed free 3-month
 engagement) turned out to be better than the merged stage that had been designed on paper — the
@@ -204,6 +218,7 @@ stalled at, with one asset it has never seen.
 | The board | **Twenty**, mirrored | A human dragging a card is advisory — the webhook records it and opens a review task, never a silent write-back |
 | The clock | **launchd + Vercel cron** | Twenty sleeps with the Mac |
 | The conversation | hogwarts / mkan | Deterministic rail; Groq answers free-form |
+| The cards | **#hogwarts-funnel** (private) | Every workflow card — opening message + wa.me link — in its own room, not the team channel |
 | Follow-up copy | **Claude Max pool** | Batched per cohort, never per lead |
 | Alerts | **Hermes → Slack** | Hot-lead ping, daily digest, `pause funnel` |
 
@@ -222,33 +237,52 @@ complete. If it does not, the routing was never deterministic.
 
 ## What is built, and what is not
 
-The lane's plumbing landed on 2026-08-18. Stated precisely, because "the funnel exists" and
-"the funnel converts" are different claims and only the first one is true.
+Stated precisely, because "the funnel exists" and "the funnel converts" are different claims
+and only the first one is true. Three layers landed on three days: the plumbing (08-18), the
+outbound slice (08-19), and the roll (08-22).
 
-**Built, and proven against production — not just unit-tested:**
+**Built, and proven against live systems — not just unit-tested:**
 
-- **The inbound receiver.** `POST /api/webhooks/twenty` verifies Twenty's HMAC, parses the
-  delivery, writes one `TwentyInboundEvent` row and returns. It applies nothing, for the two
-  reasons above. Registered on `company.updated` and `opportunity.updated`; a real board edit
-  has gone the whole way — Twenty signed it, production verified it, the row landed with
-  `updatedFields` matching the field that changed.
-- **`promoteToLead()`.** Prospect → Lead, idempotent on the existing
-  `Prospect.promotedLeadId @unique`. The sentinel tenant that satisfies `Lead.schoolId` is
-  created on demand rather than seeded, so no environment needs a setup step first.
-- **`School.trialEndsAt`.** The PILOT gate's 90-day clock. Live on production.
-- **The gate ladder and funnel fields.** 16 custom fields plus the one new `DORMANT` stage,
-  seeded into the live workspace; the seeder plans zero writes on a re-run.
-- **mkan's two-way sync.** The receiver that had never processed a single event now does.
+- **The inbound receiver** (08-18). `POST /api/webhooks/twenty` verifies Twenty's HMAC, writes
+  one `TwentyInboundEvent` row and returns. Registered on `company.updated` +
+  `opportunity.updated`; proven end to end against production.
+- **`promoteToLead()`** (08-18). Prospect → Lead, idempotent; the sentinel tenant is created
+  on demand. **`School.trialEndsAt`** — the PILOT gate's 90-day clock, live.
+- **The 12-stage ladder + 16 funnel fields** (08-18/19), seeded into the live workspace;
+  re-runs plan zero writes.
+- **The outreach workflow, ACTIVE** (08-22). "School shortlisted → outreach" — trigger,
+  filters, both steps — deployed and activated **entirely over the API** (the "built by a
+  human in the UI" doctrine was disproved; the five-call sequence and the `nextStepIds` trap
+  live in `hogwarts/scripts/crm/workflow-spec.ts`, whose `--verify` reads ✅). Proven on a
+  throwaway school: trigger fired → Hermes delivered to Slack (`delivery_id` recorded inside
+  the run) → record stamped `CONTACTED`/`QUEUED` → a re-flip with `outreachStatus=QUEUED`
+  produced **no second run**. Queue lag is real: a flip fires in ~30–45s, not instantly.
+- **The measurement backbone** (08-22). `scripts/funnel/gates.ts` — census + the
+  `funnel-gates.json` artifact this page's yield ledger diffs. First census: 3,894 schools,
+  377 reachable + unmessaged. The ledger recorded its first real baseline the same run.
+- **The roll** (08-22). `scripts/funnel/tick.ts` — ramped, segment-required, kill-switch
+  honoring. WhatsApp lane flips `SHORTLISTED` and refuses unless the workflow is ACTIVE;
+  email lane sends touch-1 itself via Resend (`databayt.org` verified) and requires
+  `--reply-to`, because stop-on-reply is meaningless if replies land nowhere.
+- **The applier, v1** (08-22). `scripts/funnel/apply-inbox.ts` — a WARM drag is the designed
+  reply signal: capture into `Prospect` + `promoteToLead()`; every other board move recorded
+  as advisory, never silently applied.
+- **Chatbot capture, v1 + rate limit** (08-22). `sendMessage` throttles (12/min + 120/h per
+  IP+UA) and persists typed emails/phones as Prospects — Arabic-Indic digits normalized,
+  `saasMarketing` mode only (a tenant school's parents are not our pipeline).
+- **The channel** (08-22). Workflow cards land in private **#hogwarts-funnel**
+  (`C0BRXUREB8W`, Abdout + the @kun bot) via Hermes `deliver_extra.chat_id` — not in the
+  team's #hogwarts, which 10–30 cards/day would drown.
 
 **Not built, and worth being blunt about:**
 
-- **Capture.** The chatbot still writes to no table. So every gate past WARM is
-  *structurally* empty rather than genuinely empty, and every conversion rate reads
-  `UNMEASURED` by construction rather than by neglect.
-- **The applier.** Rows arrive in the inbox at `status: pending` and nothing reads them yet.
-- **The cadence.** No clock, no drafting drain, no approve queue.
-- **The value ladder.** The registry has no URLs in it — every asset in the table above is
-  still a plan.
+- **Conversions.** Still zero. The machinery above exists to change that, not to be admired.
+- **The cadence.** Touches 2+ have no clock, no drafting drain, no approve queue.
+- **The value ladder.** The registry has no URLs — every asset in the table above is a plan.
+- **Transcript persistence.** Capture keeps identifiers, not sessions; `FunnelSession` is
+  still design, not schema.
+- **Distributed rate limiting.** No `UPSTASH_*` in the Vercel env, so the chatbot throttle
+  is per-invocation in prod — burst protection only until that env lands.
 
 ## Operational notes worth not rediscovering
 
@@ -263,6 +297,15 @@ The lane's plumbing landed on 2026-08-18. Stated precisely, because "the funnel 
 - **mkan's `outreach-cadence.ts` still reads fixture hosts**, and its write path now refuses
   outright rather than mint placeholder claim links that no `HostClaimToken` backs. The ladder
   arithmetic is fixed and tested; what it needs next is a real host query.
+- **Twenty workflows deploy over the API — never assume the UI.** The web UI is effectively
+  unreachable (unauthenticated visits bounce to `app.databayt.org`, whose Vercel deployment
+  is paused), and it is not needed: login with the Keychain `databayt-twenty-login`
+  credentials via `getLoginTokenFromCredentials` on `/metadata` (the `origin` picks the
+  workspace), then the introspection-masked mutations on `/graphql` do the rest. The full
+  sequence, the `nextStepIds` trap (a trigger without it produces runs that COMPLETE with
+  every step NOT_STARTED), and the filter shape live in `hogwarts/scripts/crm/workflow-spec.ts`.
+- **A stage flip is not instant.** The trigger queue fires in ~30–45 seconds; an assertion
+  read 10 seconds after a flip races the run and reads stale state (measured, the hard way).
 
 ## Guards
 

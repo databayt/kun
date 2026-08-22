@@ -25,24 +25,24 @@ Owns: gate state · segmentation · the value ladder · the stall clock · the f
 Does **not** own: finding leads (`lead` + `/scrape`), the brand voice (`/draft`), closing and
 pricing (`revenue`), the product itself.
 
-## The numbers — measured 2026-08-18, do not re-derive
+## The numbers — measured 2026-08-22 by `crm:funnel-gates`, do not re-derive
 
-**Everything is zero, and saying so is the point.** This agent must not borrow `lead.md`'s
-acquisition numbers to look instrumented.
+**Re-measure with `pnpm crm:funnel-gates` (hogwarts) rather than trusting this table** — it
+writes the `funnel-gates.json` artifact the kun `funnel-yield` ledger diffs, so every re-run
+is also a movement measurement. First census 2026-08-22:
 
-| Metric                     | Value        | Note                                            |
-| -------------------------- | ------------ | ----------------------------------------------- |
-| Funnel sessions            | **0**        | `sendMessage` has never persisted a transcript  |
-| Gates instrumented         | **0**        | the ladder + 16 fields ARE live in Twenty; nothing moves a lead through them |
-| Conversions                | **0**        | north star: active paying schools               |
-| North-star target          | Q3 2026 = 1  | Q4 = 2 · 12mo = 3 · "enough" = 4–5 vs $500/mo   |
-| Reachable inbound traffic  | **~0**       | the widget is mounted; nothing captures from it |
-| Inbound CRM events stored  | **1**        | one verification event; the applier does not exist yet |
+| Metric                    | Value                                 | Note                                                                                                                                                               |
+| ------------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Schools in Twenty         | **3,894**                             | COLD 3,795 · PROSPECT 21 · PILOT 1 · LOST 77 · every other gate 0                                                                                                  |
+| **Reachable, unmessaged** | **377**                               | **222 verified-mobile (whatsapp lane) + 155 email lane** — 5× the remembered 45 mobiles, unlocked by E.164 + Arabic-Indic normalization in `scripts/funnel/lib.ts` |
+| By rail                   | sd 141 · gulf 118 · eg 118 · other 10 | rail sets the channel; `other` needs an EN email variant before touching                                                                                           |
+| Landline-only             | 64                                    | never WhatsApped, never counted reachable                                                                                                                          |
+| Conversions               | **0**                                 | north star: active paying schools; Q3 2026 = 1                                                                                                                     |
+| Chatbot capture           | live (v1)                             | `sendMessage` now rate-limited + captures typed identifiers → Prospect (saasMarketing mode only)                                                                   |
 
-Inherited from `lead.md` — **read, never restated as this agent's own**: 176 contactable of 3,156 ·
-131 tier-A/B unworked · 119 emails vs 45 mobiles · SA 1001 · EG 764 · SD 609 · AE 603 · QA 173.
-Every conversion rate starts at zero the day capture ships. Report `UNMEASURED` rather than a
-borrowed or stale figure.
+The old 2026-08-18 snapshot (176 contactable · 119 emails · 45 mobiles) undercounted because
+it read raw strings; the census normalizes first. Report `UNMEASURED` rather than a borrowed
+or stale figure — and prefer the artifact over this table.
 
 ## Hard rules
 
@@ -80,15 +80,18 @@ and Vercel cron rather than in a Twenty `CRON` workflow.
 
 ## Where the code lives — kun holds none of it
 
-| Repo         | What                                                                        |
-| ------------ | --------------------------------------------------------------------------- |
-| **hogwarts** | `src/components/chatbot/` (exists, captures nothing) · `src/components/funnel/` · `src/lib/outreach.ts` · `src/lib/whatsapp/` · `src/lib/sales/promote.ts` · `scripts/crm/` |
-| **mkan**     | `src/components/{chatbot,funnel}/` · `scripts/crm/outreach-cadence.ts` · `claim-tokens.ts` · `wave-publish.ts` |
-| **kun**      | routing, this card, `/funnel`, `workflows/funnel.js`, the two hooks, and the drain scripts — **no funnel logic** |
+| Repo         | What                                                                                                                                                                                                                                                                                                                               |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **hogwarts** | `scripts/funnel/{lib,gates,tick,apply-inbox}.ts` (the lane's own scripts — the path kun's hooks fence) · `src/components/chatbot/` (captures + rate-limited since 2026-08-22) · `src/lib/whatsapp/` (Evolution client — instance 404 today) · `src/lib/sales/promote.ts` · `scripts/crm/{wave-one,workflow-spec,funnel-schema}.ts` |
+| **mkan**     | `scripts/mastering/` (the photo-mastering loop) · `scripts/crm/{gift-handover,claim-tokens,outreach-cadence,wave-publish}.ts`                                                                                                                                                                                                      |
+| **kun**      | routing, this card, `/funnel`, `workflows/funnel.js`, the two hooks, and the drain scripts — **no funnel logic**                                                                                                                                                                                                                   |
 
 ## The gate ladder
 
-`COLD → PROSPECT → WARM → DISCOVERY → DEMO → TRIAL → PILOT → PAID`, plus `DORMANT` and `LOST`.
+`COLD → PROSPECT → SHORTLISTED → CONTACTED → WARM → DISCOVERY → DEMO → TRIAL → PILOT → PAID`,
+plus `DORMANT` and `LOST` — 12 options live (SHORTLISTED + CONTACTED appended 2026-08-19 for the
+outreach roll; the gates artifact carries all 12, this lane reports WARM+, SHORTLISTED/CONTACTED
+are the outreach report's numbers).
 
 **Measured 2026-08-18: this ladder already existed in the workspace** — nine options, five holding
 zero rows (COLD 3,119 · PROSPECT 21 · WARM/DISCOVERY/DEMO/TRIAL/PAID 0 · PILOT 1 · LOST 65). The
@@ -106,7 +109,7 @@ A pure function, recomputed on read, written to `tags[]` as `seg:<key>`. Never a
 segment can go stale against its own inputs.
 
 hogwarts' key routes owner, cadence speed, value asset and **price path**. **mkan has no price
-path — it is free to hosts** — so its key routes *help* instead: which guide to send, how fast the
+path — it is free to hosts** — so its key routes _help_ instead: which guide to send, how fast the
 cadence runs, whether a human should call, and whether a silent listing gets flipped to busy.
 
 Bands come from the pricing config, not from taste: **100** is the free-tier ceiling, **20** the
@@ -121,9 +124,21 @@ nothing) registered on `company.updated` + `opportunity.updated` and verified en
 16 funnel fields + the `DORMANT` stage seeded live · mkan's two-way sync, which had never
 processed an event.
 
-**Not built:** capture (the chatbot still persists nothing) · the applier (inbox rows sit
-`pending`, nothing reads them) · the cadence (no clock, no drain, no approve queue) · the
-value assets (the registry holds no URLs).
+**Built 2026-08-22 (the roll):** `scripts/funnel/gates.ts` (census + the `funnel-gates.json`
+artifact — the yield ledger finally measures) · `tick.ts` (ramped roll; whatsapp lane refuses
+until the Twenty workflow is ACTIVE, email lane sends via Resend — databayt.org is verified —
+and requires `--reply-to`) · `apply-inbox.ts` (WARM drag → Prospect capture + promoteToLead;
+everything else recorded advisory) · chatbot capture v1 + rate limit (identifiers typed into
+the widget persist as Prospects; saasMarketing mode only) · **the outreach workflow, ACTIVE
+same day** — deployed + throwaway-tested entirely over the API (no UI session exists or is
+needed; sequence + the `nextStepIds` trap in `hogwarts/scripts/crm/workflow-spec.ts`), its
+cards landing in private **#hogwarts-funnel** (`C0BRXUREB8W`, Abdout + the @kun bot) via
+Hermes `deliver_extra.chat_id`. Queue lag ~30–45s per flip — never assert at +10s.
+
+**Still not built:** the cadence (touches 2+: no clock, no drain, no approve queue) · the
+value assets (the registry holds no URLs) · transcript persistence (capture keeps identifiers,
+not sessions) · `UPSTASH_*` in Vercel env (chatbot throttle is per-invocation in prod until
+then).
 
 So when this agent reports zeros, the honest phrasing is **structurally empty, not
 genuinely empty** — there is no capture, so there is nothing to count.
@@ -135,7 +150,7 @@ genuinely empty** — there is no capture, so there is nothing to count.
    dropped foreign keys and 328 dropped tables. Artifact of the argument — `prisma.config.ts`
    loads models from the folder. Pass the folder.
 2. **Vercel runs `prisma generate`, never `migrate deploy`.** Schema reaches the database
-   *before* the code that expects it, or every query on that model fails.
+   _before_ the code that expects it, or every query on that model fails.
 3. **`.env` holds `DIRECT_DATABASE_URL` too**, and a grep for `DATABASE_URL=` matches both.
    Local dev is Postgres on localhost; production is Neon, reachable only via the Vercel env.
    Read the wrong line and you will report dev data as production — that has happened.
@@ -154,11 +169,11 @@ genuinely empty** — there is no capture, so there is nothing to count.
 
 ## Team
 
-| Person | Role          | Interaction                                             |
-| ------ | ------------- | ------------------------------------------------------- |
-| Abdout | Founder       | Owns `owner-*` and `principal-*` segments; approves sends |
-| Ali    | Sales / QA    | Works `admin-*` and nurture segments; runs the queue     |
-| Aseel  | CRM hygiene   | The Twenty board; a drag is advisory, not a write        |
+| Person | Role        | Interaction                                               |
+| ------ | ----------- | --------------------------------------------------------- |
+| Abdout | Founder     | Owns `owner-*` and `principal-*` segments; approves sends |
+| Ali    | Sales / QA  | Works `admin-*` and nurture segments; runs the queue      |
+| Aseel  | CRM hygiene | The Twenty board; a drag is advisory, not a write         |
 
 Related: `.claude/skills/funnel/SKILL.md` · `.claude/workflows/funnel.js` ·
 `content/docs/funnel.mdx` · `.claude/agents/lead.md` · `docs/NORTH-STAR.md`
