@@ -97,5 +97,72 @@
       "brief": "Host recruitment: have a home or apartment in Port Sudan? List it on Mkan in minutes — stay logged in for ~1 year, confirm availability with one tap, and receive calls directly from verified guests. Audience: homeowners in Port Sudan (Salbona, Hayy Al-Shati, Al-Riyadh, Airport District). CTA: list your home at https://mkan.sd. Suggested visual: og card. Constraint: truthful contact-only model in phase 1, no online payment claims. Angle: put your vacant Port Sudan home to work with direct control. The scene: a homeowner confirming 'Available' on their phone with a single tap. Register: rung 2.",
       "visual": null
     }
+  ],
+  "balqalam": [
+    {
+      "id": "balqalam-one-system",
+      "pillar": "feature",
+      "brief": "Feature highlight: one system instead of five notebooks and a WhatsApp group — admission, attendance, grades, timetable, exams and fees in a single place, addressed to Arabic-speaking schools. Audience: school owners and principals in Saudi Arabia and the wider Arabic MENA market; administrators, not technologists. CTA: احجز عرضاً at https://balqalam.com. Suggested visual: an unhurried principal's desk (plate). Constraint: no invented numbers and no percentages — the promise is that the school stops living in separate notebooks, not a measured saving. Never carry the Hogwarts wordmark on a balqalam asset. Angle: the argument is competence, not enthusiasm. The scene: the end of a working day, one laptop open, the paper stacks gone. Register: rung 2.",
+      "visual": {
+        "type": "plate",
+        "subject": "A school principal's desk at the end of the day, one laptop open, no paper stacks, blinds half-drawn"
+      }
+    },
+    {
+      "id": "balqalam-attendance-parent",
+      "pillar": "trust",
+      "brief": "Trust: the teacher marks the register and the parent sees it the same moment — no evening phone call, no note that arrives a week late. Audience: parents second, principals first; Gulf schools weighing whether the system is worth the switch. CTA: شوفها مباشرة at https://balqalam.com. Suggested visual: a calm morning glance at a phone (lifestyle). Constraint: truthful — same-moment visibility inside the app is the feature; do NOT promise SMS or WhatsApp delivery. Never carry the Hogwarts wordmark. Angle: trust is built by small accuracies, not announcements. The scene: a Gulf living room, early light, a parent reading one line and putting the phone down. Register: rung 2.",
+      "visual": {
+        "type": "lifestyle",
+        "subject": "A parent glancing at a phone in a bright Gulf living room in early morning light, calm and undramatic"
+      }
+    },
+    {
+      "id": "balqalam-grades-one-entry",
+      "pillar": "time-savings",
+      "brief": "Time saved: the grade is entered once. From that single entry the report card, the transcript and the parent's view all follow — every re-copy is a chance to be wrong, and the re-copying is what the system removes. Audience: teachers and heads of department in Arabic-speaking schools. CTA: جرّبها at https://balqalam.com. Suggested visual: a single clean grade column on a tablet (product). Constraint: no invented hours-saved figure — 'entered once' is the claim and it is literally true. Never carry the Hogwarts wordmark. Angle: the end of term stops being a copying exercise. The scene: a tablet on a staffroom table, one column filled, no duplicate paperwork beside it. Register: rung 2.",
+      "visual": {
+        "type": "product",
+        "subject": "A tablet on a staffroom table showing a single clean grade-entry column, no paperwork beside it"
+      }
+    },
+    {
+      "id": "balqalam-school-year-ready",
+      "pillar": "mena-context",
+      "brief": "Context: the Gulf school year starts in late August, and the schools that begin it calmly are the ones that set up before the first bell rather than during the first week. Audience: Saudi and Gulf school owners deciding now, in the weeks before term. CTA: ابدأ قبل الجرس at https://balqalam.com. Suggested visual: template lane — an Arabic type card, no photograph. Constraint: no urgency manufactured beyond the real calendar, no countdown pressure, no invented enrolment numbers. Never carry the Hogwarts wordmark. Angle: readiness is quieter than rescue. The scene: none — this one is typographic. Register: rung 2.",
+      "visual": null
+    }
+  ],
+  "databayt": [
+    {
+      "id": "databayt-open-source",
+      "pillar": "open-source",
+      "brief": "The company story: databayt builds its software in the open — the repositories are public, the issues are public, and the work is readable while it happens rather than after it ships. Audience: developers, contributors and the Arabic-speaking MENA tech community; technical readers who want detail, not slogans. CTA: read the code at https://github.com/databayt. Suggested visual: template lane — a typographic card, no photograph. Constraint: describe only what is genuinely public; do not overstate the size of the team or the community, and do not claim adoption we cannot show. The Sudan clause binds: humility in tone, never trade on crisis. Constraint: databayt has no mark file — the wordmark carries the asset and the corner stays quiet. Angle: building in public is a working method, not a marketing posture. Register: rung 2.",
+      "visual": null
+    },
+    {
+      "id": "databayt-share-economy",
+      "pillar": "doctrine",
+      "brief": "The doctrine: a contributor revenue-share model — people who build the software share in what it earns, across three business models (Per Project, Partners, Codebase). Audience: contributors, partners and talent weighing whether to work with a small open-source company. CTA: see how it works at https://databayt.org. Suggested visual: template lane — Arabic type card. Constraint: describe the model as it is actually written; quote no earnings figures and promise no income. The Sudan clause binds: humility, never crisis-as-hook. databayt has no mark file — wordmark only, corner quiet. Angle: the sharing economy is the company's structure, not a slogan bolted onto it. Register: rung 2.",
+      "visual": null
+    },
+    {
+      "id": "databayt-built-with-claude",
+      "pillar": "build-in-public",
+      "brief": "How the work is done: a small team runs a software company with Claude Code — configuration over construction, guardrails written down, and the same engine driving the technical and the business side. Audience: developers and technical founders curious about the practice, not the product. CTA: read the engine at https://kun.databayt.org. Suggested visual: one laptop, terminal open (mockup). Constraint: no productivity multiplier claims and no invented output figures — describe the method, not a speedup. Label the media as AI-generated. databayt has no mark file — leave the corner quiet. Angle: the interesting part is the configuration, not the autocomplete. The scene: a plain desk, a single laptop with a terminal session, no faces and no branding on the machine. Register: rung 3 — this one may be written in English where the subject is deep-technical.",
+      "visual": {
+        "type": "mockup",
+        "subject": "A single laptop on a plain desk with a terminal session open, no faces, no branding visible on the machine"
+      }
+    },
+    {
+      "id": "databayt-automate-the-boring",
+      "pillar": "services",
+      "brief": "The offer: automate the boring — custom automation work for businesses drowning in repeated manual steps, delivered Per Project or as an ongoing Partnership. Audience: businesses in Sudan and the wider MENA market with a process that runs on copy-paste. CTA: تحدّث إلينا at https://databayt.org. Suggested visual: a finished job list at dawn (plate). Constraint: no invented client names, no case-study numbers we cannot source, no implied endorsements. The Sudan clause binds: humility in tone, never exploit hardship for engagement. databayt has no mark file — wordmark only, corner quiet. Angle: the boring work is the expensive work. The scene: an empty desk at first light, one monitor showing a completed run, a quiet wall behind it. Register: rung 2.",
+      "visual": {
+        "type": "plate",
+        "subject": "An empty office desk at dawn with one monitor showing a finished job list, quiet wall behind it"
+      }
+    }
   ]
 }
