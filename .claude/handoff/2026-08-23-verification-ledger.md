@@ -91,7 +91,7 @@ copies are inert.
 
 ---
 
-## Step 1 — settle the working tree · **OPEN**
+## Step 1 — settle the working tree · **DONE 2026-08-23**
 
 Every uncommitted and untracked path gets an explicit verdict — commit, ignore, or delete.
 **Never `git add -A` here:** nothing below is gitignored, so a blanket add would sweep in
@@ -107,14 +107,48 @@ personal data and a stale hook mirror.
 | `.codex/` | Codex CLI config, 22 agent .toml, hooks in sync | commit |
 | `.agents/` | cross-runtime bridge, but `.agents/.claude/hooks/` is a **stale mirror** with 44-byte `exit 0` stubs | resync or drop that subdir first |
 | `databayt-portfolio-pages.png`, `heirs-1180.jpeg` | loose at repo root, no references | move to the media library or delete |
-| **`jobs/`** | **appeared after the inventory — Job Engine working data plus `jobs/cv/` holding two real CVs (PDF + HTML)** | **personal data, untracked, NOT gitignored. Decide before any staging: ignore or move out of a public repo.** |
+| **`jobs/`** | **appeared after the inventory — Job Engine working data plus `jobs/cv/` holding two real CVs (PDF + HTML)** | **gitignored** (Abdout's call) — stays local, can never be swept into a commit |
 
-## Step 2 — get CI green · **OPEN**
+**Outcome: working tree clean**, in four commits — `afa2f89` hooks, `aec2549` parked compiler
++ rotation fix, `dffe69e`/config bridge. Two extras the plan did not anticipate:
 
-CI last passed `631c27a` (2026-08-19T12:28). Every push since — all 11 Job Engine commits, all
-funnel and social work — landed on a red `main`. Cause: 3 assertions in
-`src/lib/jobs/__tests__/job-engine.test.ts` read sibling repos cloned locally; the runner has
-none, so counts return 0. 28/31 test files and 245/257 tests pass.
+- A **real latent bug fixed, not filed**: `weeklyPickIndexes` used `(week*count+i) % length`, and
+  JS `%` keeps the dividend's sign, so any week ≤ 0 indexed backwards off the array and returned
+  `undefined`. Unreachable via today's callers, reachable the moment `plannedPillars` is called
+  with `weekOffset = -1` in early January. Positive modulo; identical for positive weeks; 23 tests
+  green. One line, zero risk, so fixing beat filing.
+- The unbuilt panel is tracked as **#151**.
+- The two loose root images were **moved** to `~/media/inbox/2026-08-23/`, not deleted.
+
+## Step 2 — get CI green · **DONE 2026-08-23** — the line
+
+CI last passed `631c27a` (2026-08-19T12:28). Every push since — all eleven Job Engine commits,
+all funnel and social work — landed on a red `main` and nobody noticed. **Now green at `dd545a6`.**
+
+**The diagnosis in the plan was half wrong, and the wrong half mattered.** It read as a local-clone
+dependency. The clones were the *second* path. The first was `fetchDatabaytOrgRepos()`, which
+shells out to `gh repo list databayt` — unauthenticated on the runner — and then falls back to a
+memory file whose path was written as a literal `/Users/abdout/kun/...`. That directory exists on
+exactly one machine, so everywhere else the fallback found nothing and returned `[]`. Zero repos,
+three assertions failing with *"expected 0 to be >= 10"*.
+
+The memory file itself is **tracked in this repo**. Only the path was wrong. Resolving it against
+`process.cwd()` makes the fallback work anywhere, offline and unauthenticated. Local clone
+discovery had the same shape and is now rooted at `os.homedir()` with a `DATABAYT_REPOS_DIR`
+override — clones are optional Level 3 enrichment, since every repo already carries its canonical
+GitHub source.
+
+Both paths lived inside `c08fd6b`, whose subject is *"decouple filesystem paths"*. It missed these
+two. A good reminder for the rows below: the commit subject is the claim, not the evidence.
+
+**Verified the way the failure demanded** — stubbed `gh` that always exits 1, `DATABAYT_REPOS_DIR`
+pointing at a directory that does not exist, no `GITHUB_TOKEN`: **31 files, 257 tests, 0 failures**
+(CI previously: 3 failed, 245 passed, 9 skipped). Assertions were not weakened —
+`toBeGreaterThanOrEqual(10)` still stands. `tsc` clean, production build clean, and the CI run on
+the pushed commit confirmed **success** rather than assumed.
+
+Also worth a ledger line: `.claude/engine.json` says `"model": "google-free"` while
+`.claude/CLAUDE.md` says `claude-fable-5`. Row 11.
 
 ---
 
@@ -124,7 +158,7 @@ none, so counts return 0. 28/31 test files and 245/257 tests pass.
 |---|---|---|---|---|
 | 3 | Social publishing | OPEN | — | reconcile vs #145 #146 #147 #149 #150 |
 | 4 | Media Studio | OPEN | — | — |
-| 5 | Job Engine | OPEN | — | owns the Step 2 CI break |
+| 5 | Job Engine | PARTIAL | CI break fixed + 257 tests green offline; **the engine itself is still untested behaviorally** | build/verify `/jobs` renders real extraction |
 | 6 | Funnel (Floo Network) | OPEN | — | needs Twenty CRM up (:3100) |
 | 7 | Scrape / Owlery | OPEN | — | — |
 | 8 | mkan Port Sudan launch | OPEN | — | orphaned commit `46f93b2` — did it ship? |
