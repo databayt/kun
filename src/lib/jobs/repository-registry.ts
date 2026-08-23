@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import os from "node:os";
 import { execSync } from "node:child_process";
 import { fetchDatabaytOrgRepos } from "./github-fetcher";
 import { RepositoryIdentity, RepositorySource } from "./types";
@@ -33,10 +34,15 @@ export function resolveDatabaytRepositories(): RepositoryIdentity[] {
     const repoId = ghRepo.name.toLowerCase();
     const defaultBranch = ghRepo.defaultBranchRef?.name || "main";
 
-    // Candidate local clone directories on developer machine
+    // Candidate local clone directories. Local clones are an OPTIONAL Level 3
+    // enrichment — every repo already has its canonical GitHub source above, so
+    // a machine with no clones (CI, a teammate's laptop) still resolves a full
+    // identity. Rooted at the current user's home rather than a hardcoded one;
+    // DATABAYT_REPOS_DIR overrides it.
+    const cloneRoot = process.env.DATABAYT_REPOS_DIR?.trim() || os.homedir();
     const candidateLocalPaths = [
-      `/Users/abdout/${repoId}`,
-      `/Users/abdout/oss/${repoId}`,
+      path.join(cloneRoot, repoId),
+      path.join(cloneRoot, "oss", repoId),
     ];
 
     const existingLocalPath = candidateLocalPaths.find((p) => fs.existsSync(p));

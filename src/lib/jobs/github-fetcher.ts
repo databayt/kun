@@ -1,5 +1,6 @@
 import { execSync } from "node:child_process";
 import fs from "node:fs";
+import path from "node:path";
 
 export interface GitHubRepoItem {
   name: string;
@@ -60,8 +61,18 @@ export function fetchDatabaytOrgRepos(): GitHubRepoItem[] {
     // Fall back to memory file or curl
   }
 
-  // 2. Fallback to memory file if offline or rate limited
-  const memoryFile = "/Users/abdout/kun/.claude/memory/repositories.json";
+  // 2. Fallback to the committed memory file if offline, unauthenticated, or
+  //     rate limited. This path used to be hardcoded to one developer's home
+  //     directory, so it resolved to nothing on any other machine — CI fell
+  //     through to `return []` and the suite failed with "expected 0 to be >= 10"
+  //     on every push from 2026-08-19 onward. The file is tracked in this repo,
+  //     so resolving it against the repo root makes the fallback work anywhere.
+  const memoryFile = path.join(
+    process.cwd(),
+    ".claude",
+    "memory",
+    "repositories.json",
+  );
   if (fs.existsSync(memoryFile)) {
     try {
       const parsed = JSON.parse(fs.readFileSync(memoryFile, "utf-8"));
