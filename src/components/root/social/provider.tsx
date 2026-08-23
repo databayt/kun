@@ -295,7 +295,7 @@ export function SocialProvider({
       };
       setStatus({
         hermes: failed,
-        telegram: failed,
+        slack: failed,
         facebook: failed,
         instagram: failed,
       });
@@ -318,7 +318,7 @@ export function SocialProvider({
       );
     return (
       (!needs("hermes") || status.hermes.connected) &&
-      (!needs("telegram") || status.telegram.connected) &&
+      (!needs("slack") || status.slack.connected) &&
       (!needs("facebook") || status.facebook.connected) &&
       (!needs("instagram") || status.instagram.connected)
     );

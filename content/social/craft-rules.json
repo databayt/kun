@@ -15,22 +15,47 @@
   },
   "$comment_shortForm": "copy.mdx: 'Under 400 only for X.' X is not in scope for the slice, so arMinCharsShortForm applies only when a caller passes channel=x.",
   "channelHashtagCaps": {
-    "telegram": 0,
     "whatsapp": 0,
     "linkedin": 0
   },
   "openerBans": {
     "$comment": "copy.mdx check 1, matched against the first line only. These are brand-independent.",
-    "ar": ["نحن", "عزيزي ولي الأمر"],
-    "en": ["We're excited", "We are excited", "Excited to announce"]
+    "ar": [
+      "نحن",
+      "عزيزي ولي الأمر"
+    ],
+    "en": [
+      "We're excited",
+      "We are excited",
+      "Excited to announce"
+    ]
   },
   "$comment_brandOpenerNames": "copy.mdx check 1: 'Never opens with the brand name' — its OWN name. Keyed by the registry id in src/components/root/social/products.ts, and only the brand being written is checked. Checking all five would flag `مكان واحد` on a hogwarts post, and `في مكان واحد` is in this file's own preferredAr list. Both scripts per brand, because the transliteration rule means Arabic prose says هوجورتس and an opener is a violation either way. The note lives OUTSIDE the object so every value is a string[] and the map needs no cast.",
   "brandOpenerNames": {
-    "hogwarts": ["هوجورتس", "Hogwarts"],
-    "databayt": ["داتابايت", "داتابيت", "Databayt"],
-    "mkan": ["مكان", "Mkan"],
-    "sijillee": ["سِجلي", "سجلي", "Sijillee"],
-    "moalimee": ["مُعلّمي", "معلمي", "Moallimee", "Moalimee"]
+    "hogwarts": [
+      "هوجورتس",
+      "Hogwarts"
+    ],
+    "databayt": [
+      "داتابايت",
+      "داتابيت",
+      "Databayt"
+    ],
+    "mkan": [
+      "مكان",
+      "Mkan"
+    ],
+    "sijillee": [
+      "سِجلي",
+      "سجلي",
+      "Sijillee"
+    ],
+    "moalimee": [
+      "مُعلّمي",
+      "معلمي",
+      "Moallimee",
+      "Moalimee"
+    ]
   },
   "wordlist": {
     "$comment": "copy.mdx's wordlist table, verbatim in both columns. `use` is printed in the failure message so a refusal carries its own fix. Arabic is matched as a substring — JS \\b does not work on Arabic script — so terms are chosen long enough not to fire inside an innocent word.",
@@ -39,39 +64,102 @@
         "term": "الحلول",
         "use": "the actual thing — نظام القبول, كشف الدرجات"
       },
-      { "term": "حلول متكاملة", "use": "the actual thing — name the module" },
-      { "term": "المنظومة", "use": "النظام, or name the module" },
-      { "term": "التحول الرقمي", "use": "what changes — من الورق إلى الشاشة" },
-      { "term": "تفخر", "use": "delete the sentence" },
-      { "term": "يسرّنا أن نعلن", "use": "delete the sentence" },
-      { "term": "يسرنا أن نعلن", "use": "delete the sentence" },
-      { "term": "في إطار", "use": "delete the sentence" },
-      { "term": "الكفاءة", "use": "the time or the error actually saved" },
-      { "term": "الفعالية", "use": "the time or the error actually saved" },
-      { "term": "ثورة", "use": "nothing. We cannot make that claim." },
-      { "term": "نقلة نوعية", "use": "nothing. We cannot make that claim." },
+      {
+        "term": "حلول متكاملة",
+        "use": "the actual thing — name the module"
+      },
+      {
+        "term": "المنظومة",
+        "use": "النظام, or name the module"
+      },
+      {
+        "term": "التحول الرقمي",
+        "use": "what changes — من الورق إلى الشاشة"
+      },
+      {
+        "term": "تفخر",
+        "use": "delete the sentence"
+      },
+      {
+        "term": "يسرّنا أن نعلن",
+        "use": "delete the sentence"
+      },
+      {
+        "term": "يسرنا أن نعلن",
+        "use": "delete the sentence"
+      },
+      {
+        "term": "في إطار",
+        "use": "delete the sentence"
+      },
+      {
+        "term": "الكفاءة",
+        "use": "the time or the error actually saved"
+      },
+      {
+        "term": "الفعالية",
+        "use": "the time or the error actually saved"
+      },
+      {
+        "term": "ثورة",
+        "use": "nothing. We cannot make that claim."
+      },
+      {
+        "term": "نقلة نوعية",
+        "use": "nothing. We cannot make that claim."
+      },
       {
         "term": "سهل الاستخدام",
         "use": "show it (خمس خطوات) instead of claiming it"
       }
     ],
     "en": [
-      { "term": "revolutionize", "use": "say what actually changes" },
-      { "term": "revolutionise", "use": "say what actually changes" },
-      { "term": "seamless", "use": "name the step that disappeared" },
-      { "term": "cutting-edge", "use": "delete it" },
-      { "term": "empower", "use": "say what they can now do" },
-      { "term": "streamline", "use": "name the time or the error saved" },
+      {
+        "term": "revolutionize",
+        "use": "say what actually changes"
+      },
+      {
+        "term": "revolutionise",
+        "use": "say what actually changes"
+      },
+      {
+        "term": "seamless",
+        "use": "name the step that disappeared"
+      },
+      {
+        "term": "cutting-edge",
+        "use": "delete it"
+      },
+      {
+        "term": "empower",
+        "use": "say what they can now do"
+      },
+      {
+        "term": "streamline",
+        "use": "name the time or the error saved"
+      },
       {
         "term": "solutions",
         "use": "the actual thing — the admission system, the mark sheet"
       },
-      { "term": "leverage", "use": "use" },
-      { "term": "game-changer", "use": "nothing. We cannot make that claim." },
-      { "term": "Excited to announce", "use": "delete the sentence" }
+      {
+        "term": "leverage",
+        "use": "use"
+      },
+      {
+        "term": "game-changer",
+        "use": "nothing. We cannot make that claim."
+      },
+      {
+        "term": "Excited to announce",
+        "use": "delete the sentence"
+      }
     ],
     "enConditional": [
-      { "term": "workflows", "use": "name them" },
+      {
+        "term": "workflows",
+        "use": "name them"
+      },
       {
         "term": "AI-powered",
         "use": "drop it unless the post is actually about the AI"
@@ -90,7 +178,9 @@
   },
   "passiveAr": {
     "$comment": "copy.mdx's wordlist bans `يتم + مصدر` outright, so يتم is a fail. The ladder's other rung-1 markers are judgment, so they warn — the page is explicit that passive is RIGHT when the object is the topic (الدرجة تُرصد مرة واحدة is called good), which no regex can tell.",
-    "fail": ["يتم "],
+    "fail": [
+      "يتم "
+    ],
     "warn": [
       "تم إطلاق",
       "يُنشأ",

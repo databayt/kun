@@ -30,7 +30,7 @@ describeDb("social queue", () => {
         variants: {
           create: [
             {
-              channel: "telegram",
+              channel: "x",
               text: "t",
               status: "scheduled",
               scheduledFor,

@@ -104,7 +104,7 @@ export const deckSchema = z.object({
   /** Feature-block scope for the later per-block carousels (hogwarts blocks.json). */
   block: z.string().optional(),
   /**
-   * Max 10 — the Telegram album cap, the lowest limit across target channels.
+   * Max 10 — the Instagram carousel cap, the lowest limit across target channels.
    * Min 1: a single-slide deck IS the template lane's single-image asset (og
    * card, testimonial, stat card). The 3-slide album floor is a publish-time
    * rule for carousel posts, not a render constraint — /publish enforces it.

@@ -103,7 +103,6 @@ const total = deck.slides.length;
 const CHANNELS = [
   'facebook',
   'instagram',
-  'telegram',
   'whatsapp',
   'x',
   'linkedin',
@@ -129,11 +128,6 @@ function captionFor(channel, lang) {
   switch (channel) {
     case 'linkedin':
       text = `${bodyText}\n\n${link}\n\n${deck.captions.hashtags.slice(0, 3).join(' ')}`;
-      break;
-    case 'telegram':
-      // No hashtags; Telegram album captions cap at 1024 chars.
-      text = `${bodyText}\n\n${link}`;
-      if (text.length > 1024) text = `${text.slice(0, 1021)}…`;
       break;
     case 'whatsapp':
       text = `${bodyText}\n\n${link}`;

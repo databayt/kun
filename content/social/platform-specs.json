@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "$comment": "Per-platform MEDIA facts — the sizes and shapes an asset must be to land well on a given channel. Keyed by DISTRIBUTION_CHANNEL_IDS in src/components/root/social/config.ts; platform-specs.test.ts pins the keys so a new channel cannot appear without its specs. Deliberately NARROW: caption length and hashtag policy are NOT here, because they already have owners — content/social/craft-rules.json holds the house copy rules, and src/lib/telegram.ts and src/lib/instagram.ts hold the transport's own hard caps. Duplicating them here would make a third source of truth for a number that changes on the platform's schedule, which is exactly how the four asset-type vocabularies happened. What this file owns is pixels. Sizes are drawn from content/docs/social/carousel.mdx and the carousel render route's SIZES table, so a compiled brief and a rendered deck ask for the same artboard.",
+  "$comment": "Per-platform MEDIA facts — the sizes and shapes an asset must be to land well on a given channel. Keyed by DISTRIBUTION_CHANNEL_IDS in src/components/root/social/config.ts; platform-specs.test.ts pins the keys so a new channel cannot appear without its specs. Deliberately NARROW: caption length and hashtag policy are NOT here, because they already have owners — content/social/craft-rules.json holds the house copy rules, and src/lib/instagram.ts holds the transport's own hard caps. Duplicating them here would make a third source of truth for a number that changes on the platform's schedule, which is exactly how the four asset-type vocabularies happened. What this file owns is pixels. Sizes are drawn from content/docs/social/carousel.mdx and the carousel render route's SIZES table, so a compiled brief and a rendered deck ask for the same artboard.",
   "placements": {
     "feed": "the main in-feed post",
     "square": "the square feed variant, safest when a channel crops unpredictably",
@@ -17,39 +17,52 @@
     "facebook": {
       "label": "Facebook",
       "wired": true,
-      "placements": ["feed", "square", "landscape", "story"],
+      "placements": [
+        "feed",
+        "square",
+        "landscape",
+        "story"
+      ],
       "default": "feed",
-      "album": { "min": 2, "max": 10 },
+      "album": {
+        "min": 2,
+        "max": 10
+      },
       "note": "Carousel posts go up as an album of ordered photos. Link previews use the landscape plate."
     },
     "instagram": {
       "label": "Instagram",
       "wired": false,
-      "placements": ["feed", "square", "story"],
+      "placements": [
+        "feed",
+        "square",
+        "story"
+      ],
       "default": "feed",
-      "album": { "min": 2, "max": 10 },
+      "album": {
+        "min": 2,
+        "max": 10
+      },
       "requiresMedia": true,
       "note": "A post without an image is not possible here — Instagram is the one channel where the media IS the post. No landscape placement; a 1200x630 plate will be cropped."
-    },
-    "telegram": {
-      "label": "Telegram",
-      "wired": true,
-      "placements": ["feed", "square", "landscape"],
-      "default": "feed",
-      "album": { "min": 2, "max": 10 },
-      "note": "Albums carry the caption on the first item only. The transport's own caption cap lives in src/lib/telegram.ts."
     },
     "whatsapp": {
       "label": "WhatsApp",
       "wired": false,
-      "placements": ["feed", "square"],
+      "placements": [
+        "feed",
+        "square"
+      ],
       "default": "square",
       "note": "No organic posting API — assets are sent by hand, so favour a shape that survives forwarding and a small screen."
     },
     "linkedin": {
       "label": "LinkedIn",
       "wired": false,
-      "placements": ["landscape", "square"],
+      "placements": [
+        "landscape",
+        "square"
+      ],
       "default": "landscape",
       "documentPost": true,
       "note": "A LinkedIn carousel is a PDF document post, not an image album — the deck renders to PDF rather than to a set of PNGs."
@@ -57,21 +70,28 @@
     "x": {
       "label": "X",
       "wired": false,
-      "placements": ["landscape", "square"],
+      "placements": [
+        "landscape",
+        "square"
+      ],
       "default": "landscape",
       "note": "Short-form by nature; the house register floor for this channel is arMinCharsShortForm in craft-rules.json."
     },
     "tiktok": {
       "label": "TikTok",
       "wired": false,
-      "placements": ["story"],
+      "placements": [
+        "story"
+      ],
       "default": "story",
       "note": "Vertical only. A still is a stopgap here — this channel wants motion, which no funded lane currently renders."
     },
     "snapchat": {
       "label": "Snapchat",
       "wired": false,
-      "placements": ["story"],
+      "placements": [
+        "story"
+      ],
       "default": "story",
       "note": "Vertical only, same caveat as TikTok."
     }

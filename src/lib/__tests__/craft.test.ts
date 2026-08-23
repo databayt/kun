@@ -68,7 +68,7 @@ describe("checkCraft parity", () => {
       name: "letter-spaced arabic and a channel cap",
       input: {
         ar: "م ر ح ب ا بكم #وسم #ثان #ثالث #رابع",
-        channel: "telegram",
+        channel: "whatsapp",
         brand: "hogwarts",
       },
     },
@@ -311,10 +311,10 @@ describe("emoji rules are not stateful", () => {
 });
 
 describe("channel caps", () => {
-  it("takes no hashtags at all on telegram", () => {
+  it("takes no hashtags at all on whatsapp", () => {
     const findings = checkCraft({
       ar: "الورق يذوب. #وسم",
-      channel: "telegram",
+      channel: "whatsapp",
     });
     const tags = findings.find((f) => f.rule === "hashtags")!;
     expect(tags.message).toContain("takes none");

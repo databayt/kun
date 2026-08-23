@@ -1,6 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { sendFacebookPost } from "@/lib/facebook";
-import { sendTelegramPost } from "@/lib/telegram";
 
 // Stubbed transport on purpose. The alternative is publishing to a real brand
 // page to read back an id, which is exactly the mistake that made this column
@@ -24,8 +23,6 @@ function stub(json: unknown, ok = true) {
 beforeEach(() => {
   process.env.FACEBOOK_PAGE_ID_HOGWARTS = "123";
   process.env.FACEBOOK_PAGE_ACCESS_TOKEN_HOGWARTS = "tok";
-  process.env.TELEGRAM_BOT_TOKEN = "bot";
-  process.env.TELEGRAM_CHANNEL_ID = "@brand";
 });
 
 afterEach(() => {
@@ -33,8 +30,6 @@ afterEach(() => {
   vi.restoreAllMocks();
   delete process.env.FACEBOOK_PAGE_ID_HOGWARTS;
   delete process.env.FACEBOOK_PAGE_ACCESS_TOKEN_HOGWARTS;
-  delete process.env.TELEGRAM_BOT_TOKEN;
-  delete process.env.TELEGRAM_CHANNEL_ID;
 });
 
 describe("Facebook externalId", () => {
@@ -61,23 +56,6 @@ describe("Facebook externalId", () => {
     stub({ error: { message: "nope" } }, false);
     const res = await sendFacebookPost("hello", "hogwarts");
     expect(res.ok).toBe(false);
-    expect(res.externalId).toBeUndefined();
-  });
-});
-
-describe("Telegram externalId", () => {
-  it("stores chat and message together", async () => {
-    // Deleting needs both; a bare message_id addresses nothing.
-    stub({ ok: true, result: { message_id: 42, chat: { id: -1001234 } } });
-    const res = await sendTelegramPost("hello");
-    expect(res.ok).toBe(true);
-    expect(res.externalId).toBe("-1001234:42");
-  });
-
-  it("has no id when the response omits the ids", async () => {
-    stub({ ok: true, result: {} });
-    const res = await sendTelegramPost("hello");
-    expect(res.ok).toBe(true);
     expect(res.externalId).toBeUndefined();
   });
 });

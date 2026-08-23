@@ -57,7 +57,7 @@ export async function verifyConnections(
     };
     return {
       hermes: denied,
-      telegram: denied,
+      slack: denied,
       facebook: denied,
       instagram: denied,
     };
@@ -865,7 +865,7 @@ export async function stageForReview(input: unknown): Promise<ReviewResult> {
   const { product, text, channels, mediaUrls } = parsed.data;
 
   // One piece, one variant per selected channel. Each gets its own approval
-  // link so a reviewer can take Telegram and hold Facebook — previously a
+  // link so a reviewer can take one channel and hold another — previously a
   // single token covered the whole fan-out, so it was all or nothing.
   let piece;
   try {
@@ -921,7 +921,7 @@ export async function stageForReview(input: unknown): Promise<ReviewResult> {
   }
 
   // Media listed capped at 4 URLs so ten attachments cannot push the links —
-  // the part the reviewer actually needs — past Telegram's 4096-char message
+  // the part the reviewer actually needs — past a chat platform's message
   // limit. The confirm page itself lists every URL.
   const mediaLines = mediaUrls
     .slice(0, 4)
@@ -945,7 +945,7 @@ export async function stageForReview(input: unknown): Promise<ReviewResult> {
   );
   if (sent.ok) return { ok: true, via: sent.via, delivered: true, links };
 
-  // No relay carried it — Hermes is parked and Telegram is deferred, which is
+  // No relay carried it — Hermes is parked, which is
   // the production norm. The stage still stands: the caller renders these links
   // and a human hands them to the approver. Deleting the rows here would make
   // approval impossible exactly when there is no chat destination. Handing the

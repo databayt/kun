@@ -1,6 +1,6 @@
 // Facebook Graph API client — direct egress for the `facebook` channel.
 // Posting to a Page you administer is a plain HTTPS call with a long-lived Page
-// access token, so the site relays to it directly (like Telegram) instead of
+// access token, so the site relays to it directly instead of
 // hopping through the Hermes gateway. Doctrine unchanged: this layer only relays
 // approved copy — Claude writes it (the /social skill), a human approves.
 //

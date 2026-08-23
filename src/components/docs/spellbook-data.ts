@@ -2612,7 +2612,7 @@ export const schools: School[] = [
         steps: [
           "/social/publish is a REVIEW QUEUE, not a composer: next-up draft, browse the rest, fine-tune, never create from blank",
           "Verify the gate — refuse without a recorded approval (request consumed), a pending variant with a live link, or a human yes in-session",
-          "Partition by lane: DRAIN (telegram, facebook), HERMES (gateway pulls), MANUAL (whatsapp)",
+          "Partition by lane: DRAIN (facebook, instagram), HERMES (gateway pulls), MANUAL (whatsapp)",
           "Drain lane: Approve now, or approve-mode schedule / --at writes scheduled variants for /api/social/drain (~15 min, 3 retries)",
           "Media routes by shape: text · one photo · 2–10 album/carousel · one video; mixed kinds refused by name",
           "Manual lane: render the copy-out block for a human to forward; never mark it published",
@@ -2675,7 +2675,7 @@ export const schools: School[] = [
           "Art-direct (optional): push templates to Figma (writes are quota-free) or the claude-design canvas; hosted Figma pulls respect the 6-read budget",
           "Stage for human approval — deliver slides + captions and STOP; no approval, no publish",
           "Answering a draft ask? Push the slides to the CDN and attach instead of posting: social-drafts.mjs attach <id> --media — the review queue takes the yes and the drain sends 2–10 images as one carousel",
-          "After approval: Telegram album via scripts/post-to-telegram.mjs --media; IG/FB from the exported files; LinkedIn takes the PDF; log to the calendar",
+          "After approval: IG/FB from the exported files; LinkedIn takes the PDF; log to the calendar",
         ],
         connects: [
           "social",

@@ -261,7 +261,7 @@ export function ReviewEditor({
     try {
       const res = await stageForReview(payload());
       if (res.ok) {
-        // Undelivered is the production norm (Hermes parked, Telegram
+        // Undelivered is the production norm (Hermes parked,
         // deferred): the stage stands and the links render below for a human
         // to carry to the approver.
         setNotice(

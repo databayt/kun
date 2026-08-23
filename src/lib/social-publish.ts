@@ -13,11 +13,6 @@ import {
 } from "@/components/root/social/config";
 import { productChannelWired } from "@/components/root/social/products";
 import {
-  sendTelegramAlbum,
-  sendTelegramPost,
-  sendTelegramVideo,
-} from "@/lib/telegram";
-import {
   sendFacebookCarousel,
   sendFacebookPost,
   sendFacebookVideo,
@@ -49,7 +44,7 @@ export interface ChannelOutcome {
    *
    * Without it a published post cannot be found again — so it cannot be
    * retracted, and metrics have nothing to attach to. Facebook gives a feed
-   * post id; Telegram needs chat+message, so it is stored as "chat:message".
+   * post id.
    * Hermes relays asynchronously and returns nothing addressable.
    */
   externalId?: string;
@@ -143,7 +138,7 @@ export async function deliverPost({
   // Payload-shape gates — about the media set, not any one channel, so a
   // refusal covers every requested channel and nothing is delivered anywhere.
   // The platforms themselves draw these lines: no edge mixes photos and video
-  // in one post, none takes two videos, and both Graph and Telegram cap a
+  // in one post, none takes two videos, and Graph caps a
   // multi-photo post at 10.
   const { images, videos } = splitMedia(mediaUrls);
   const refuseAll = (error: string): DeliverResult => ({
@@ -187,9 +182,9 @@ export async function deliverPost({
     };
   }
 
-  // Telegram, Facebook and Instagram go straight to their official APIs; the
-  // rest relay through the Hermes gateway in one webhook call.
-  const telegramChannels = byTransport.get("telegram") ?? [];
+  // Facebook and Instagram go straight to their official APIs; the rest relay
+  // through the Hermes gateway in one webhook call. Slack is never here — it is
+  // the communication channel, reached by the review lane, never an audience.
   const facebookChannels = byTransport.get("facebook") ?? [];
   const instagramChannels = byTransport.get("instagram") ?? [];
   const hermesChannels = byTransport.get("hermes") ?? [];
@@ -203,11 +198,6 @@ export async function deliverPost({
   // Route by media shape — the gates above guarantee all-images XOR one
   // video, so each transport picks exactly one edge: text, single photo,
   // album/carousel (2–10), or video.
-  const sendTelegram = (caption: string) => {
-    if (videos.length === 1) return sendTelegramVideo(caption, videos[0]);
-    if (images.length >= 2) return sendTelegramAlbum(caption, images);
-    return sendTelegramPost(caption, undefined, images[0]);
-  };
   const sendFacebook = (caption: string) => {
     if (videos.length === 1)
       return sendFacebookVideo(caption, videos[0], product);
@@ -216,9 +206,8 @@ export async function deliverPost({
     return sendFacebookPost(caption, product, images[0]);
   };
 
-  const [telegramOut, facebookOut, instagramOut, hermesOut] = await Promise.all(
+  const [facebookOut, instagramOut, hermesOut] = await Promise.all(
     [
-      telegramChannels.length > 0 ? sendTelegram(utm("telegram")) : null,
       facebookChannels.length > 0 ? sendFacebook(utm("facebook")) : null,
       instagramChannels.length > 0
         ? // Single image only — the channel is gated (kun#141); when it
@@ -241,12 +230,6 @@ export async function deliverPost({
 
   // One Hermes call covers N channels, so its verdict applies to all of them.
   const results: ChannelOutcome[] = [
-    ...telegramChannels.map((channel) => ({
-      channel,
-      ok: Boolean(telegramOut?.ok),
-      error: telegramOut?.error,
-      externalId: telegramOut?.externalId,
-    })),
     ...facebookChannels.map((channel) => ({
       channel,
       ok: Boolean(facebookOut?.ok),

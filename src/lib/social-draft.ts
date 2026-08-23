@@ -3,7 +3,7 @@
 // Doctrine (unchanged from /docs/social): the relays deliver, they never write.
 // Drafting is Claude-side or Hermes-side, and a human approves before anything
 // reaches a public brand page. This module is the *drafting* half; lib/hermes,
-// lib/telegram, and lib/facebook remain delivery-only.
+// lib/slack, and lib/facebook remain delivery-only.
 //
 // Two sources, selected by SOCIAL_DRAFT_SOURCE:
 //

@@ -7,9 +7,9 @@
 
 import { db } from "@/lib/db";
 import { checkHermesHealth } from "@/lib/hermes";
-import { checkTelegramHealth } from "@/lib/telegram";
 import { checkFacebookHealth } from "@/lib/facebook";
 import { checkInstagramHealth, getInstagramConfig } from "@/lib/instagram";
+import { isSlackConfigured } from "@/lib/slack";
 
 export interface TransportStatus {
   connected: boolean;
@@ -26,7 +26,7 @@ export interface TransportStatus {
    */
   lastSeen?: string;
   /**
-   * Deliberately unconfigured — Hermes without a gateway URL, Telegram without
+   * Deliberately unconfigured — Hermes without a gateway URL, a transport without
    * a bot token (deferred 2026-07-30: the focus is Facebook + Instagram).
    * Parked is a choice, not a failure: it must not render red or drag the
    * toolbar dot down. The moment the env lands, the row goes live again.
@@ -36,9 +36,16 @@ export interface TransportStatus {
 
 export interface EgressStatus {
   hermes: TransportStatus;
-  telegram: TransportStatus;
   facebook: TransportStatus;
   instagram: TransportStatus;
+  /**
+   * The review lane's destination. Surfaced deliberately: on 2026-08-23 it was
+   * configured nowhere, so approval notices and token alarms went nowhere, and
+   * three finished posts sat unapproved for 23 days with every other row green.
+   * A missing review destination is not a quiet condition — it is the one that
+   * hides all the others.
+   */
+  slack: TransportStatus;
   /**
    * The draft queue's liveness: pending count + when a drafting session last
    * ran `social-drafts.mjs list` (heartbeat key "draft-drain"). Optional so
@@ -60,7 +67,6 @@ function settled<T>(
 export async function getEgressStatus(product?: string): Promise<EgressStatus> {
   const [
     hermes,
-    telegram,
     facebook,
     instagram,
     igConfig,
@@ -69,7 +75,6 @@ export async function getEgressStatus(product?: string): Promise<EgressStatus> {
     drainPending,
   ] = await Promise.allSettled([
     checkHermesHealth(),
-    checkTelegramHealth(),
     checkFacebookHealth(product),
     checkInstagramHealth(product),
     getInstagramConfig(product),
@@ -95,13 +100,24 @@ export async function getEgressStatus(product?: string): Promise<EgressStatus> {
       : undefined;
 
   const hermesParked = !(process.env.HERMES_API_URL ?? "").trim();
-  const telegramParked = !(process.env.TELEGRAM_BOT_TOKEN ?? "").trim();
   // Per-product, unlike the two above: mkan can be configured while hogwarts
   // waits on its account — the row follows the brand selector.
   const instagramParked =
     igConfig.status === "fulfilled" ? !igConfig.value.igUserId : true;
 
+  // No probe: an incoming webhook has no read endpoint, and POSTing to find out
+  // would put a test message in the review channel every time the panel opens.
+  // Configured-or-not is the honest signal available.
+  const slackReady = isSlackConfigured();
+
   return {
+    slack: {
+      connected: slackReady,
+      detail: slackReady ? "webhook set" : undefined,
+      error: slackReady
+        ? undefined
+        : "No review destination — approvals and token alarms reach nobody. Set SLACK_WEBHOOK_URL.",
+    },
     hermes: settled(hermes, (v) => ({
       connected: v.ok,
       detail: v.version ? `v${v.version}` : undefined,
@@ -111,14 +127,6 @@ export async function getEgressStatus(product?: string): Promise<EgressStatus> {
     })),
     // Bot AND destination — a green dot that only vouched for the token lied
     // about a channel that existed nowhere.
-    telegram: settled(telegram, (v) => ({
-      connected: v.ok,
-      detail: v.username
-        ? `@${v.username}${v.chatTitle ? ` → ${v.chatTitle}` : ""}`
-        : undefined,
-      error: v.error,
-      parked: telegramParked,
-    })),
     // The Page name is the proof the selected product resolved to the right
     // Page — the only pre-publish signal that the token isn't crossed.
     facebook: settled(facebook, (v) => ({

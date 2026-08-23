@@ -1,6 +1,6 @@
 // Signed approval tokens for the draft → approve → publish loop.
 //
-// The cron cannot ask a human to log in, and a Slack or Telegram message cannot
+// The cron cannot ask a human to log in, and a Slack message cannot
 // carry a session. So the approval link carries its own authority: an HMAC-SHA256
 // signature over the payload, keyed by CRON_SECRET.
 //

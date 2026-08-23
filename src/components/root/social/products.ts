@@ -6,14 +6,13 @@
 // own permanent Page access token, read from FACEBOOK_PAGE_ID_<PRODUCT> /
 // FACEBOOK_PAGE_ACCESS_TOKEN_<PRODUCT> (see lib/facebook.ts).
 //
-// Telegram is NOT per-brand today — there is exactly one Telegram channel
-// (TELEGRAM_CHANNEL_ID), an org-level databayt destination. It stays wired for
+// Some channels are NOT per-brand — an org-level destination stays wired for
 // `databayt` only; claiming it for a product brand would send a "post as
 // Hogwarts" into the org channel. Flip a product's flag to true the day that
 // brand gets its own channel and its own per-product transport config.
 //
 // That boolean assumes one destination per (brand, channel), which holds for a
-// Page but not for Telegram/WhatsApp — their real audience sits in many groups
+// Page but not for WhatsApp — its real audience sits in many groups
 // run by other people, selected per post. Replacing the flag with a destination
 // registry is designed and deliberately unbuilt; do not widen this map to model
 // groups. See /docs/social/channels/groups.
@@ -59,7 +58,7 @@ export const PRODUCTS = [
     id: "databayt",
     label: "Databayt",
     labelAr: "داتابايت",
-    channels: { facebook: true, telegram: true },
+    channels: { facebook: true },
   },
   {
     id: "sijillee",

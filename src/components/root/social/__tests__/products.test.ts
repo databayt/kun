@@ -60,12 +60,11 @@ describe("productChannelWired — the full product × channel matrix", () => {
 // team chat ended up in a marketing-reach denominator. `kind` separates what a
 // channel is FOR from how its bytes move, and these tests keep the two apart.
 describe("channel taxonomy", () => {
-  it("exposes exactly the eight distribution channels", () => {
+  it("exposes exactly the seven distribution channels", () => {
     expect(new Set(DISTRIBUTION_CHANNEL_IDS)).toEqual(
       new Set([
         "facebook",
         "instagram",
-        "telegram",
         "whatsapp",
         "x",
         "linkedin",
@@ -73,7 +72,7 @@ describe("channel taxonomy", () => {
         "snapchat",
       ]),
     );
-    expect(DISTRIBUTION_CHANNEL_IDS).toHaveLength(8);
+    expect(DISTRIBUTION_CHANNEL_IDS).toHaveLength(7);
   });
 
   it("keeps Slack as the only communication channel", () => {
@@ -107,10 +106,21 @@ describe("channel taxonomy", () => {
       ...HERMES_CHANNEL_IDS,
       ...MANUAL_CHANNEL_IDS,
     ];
-    expect(new Set(lanes), "every channel has a lane").toEqual(
-      new Set(CHANNEL_IDS),
+    // The partition covers the DISTRIBUTION channels — the ones that carry
+    // copy to an audience and therefore need a publish lane. A communication
+    // channel deliberately has none: Slack is reached by the review lane, and
+    // giving it a publish lane is precisely the conflation this file defends
+    // against. It previously satisfied this assertion only because it was
+    // parked on the `hermes` transport, i.e. it WAS publishable.
+    expect(new Set(lanes), "every distribution channel has a lane").toEqual(
+      new Set(DISTRIBUTION_CHANNEL_IDS),
     );
-    expect(lanes, "no channel has two lanes").toHaveLength(CHANNEL_IDS.length);
+    expect(lanes, "no channel has two lanes").toHaveLength(
+      DISTRIBUTION_CHANNEL_IDS.length,
+    );
+    for (const id of COMMUNICATION_CHANNEL_IDS) {
+      expect(lanes, `${id} must not have a publish lane`).not.toContain(id);
+    }
   });
 
   it("marks only metric-capable channels as such", () => {
@@ -121,25 +131,5 @@ describe("channel taxonomy", () => {
         `${channel.id} reports metrics, so it must be a distribution channel`,
       ).toBe("distribution");
     }
-  });
-});
-
-// Telegram is a single org-level destination: there is exactly one channel
-// (TELEGRAM_CHANNEL_ID). Claiming it for a product brand would publish "as
-// Hogwarts" into databayt's own channel. Previously guarded only by a comment.
-describe("org-level channels stay databayt-only", () => {
-  it("telegram is not wired for any brand other than databayt", () => {
-    for (const product of PRODUCTS) {
-      if (product.id === "databayt") continue;
-      expect(
-        productChannelWired(product.id, "telegram", globalWired("telegram")),
-        `${product.id} must not publish to the org telegram channel`,
-      ).toBe(false);
-    }
-  });
-
-  it("databayt itself may use telegram while its transport is wired", () => {
-    expect(globalWired("telegram")).toBe(true);
-    expect(productChannelWired("databayt", "telegram", true)).toBe(true);
   });
 });

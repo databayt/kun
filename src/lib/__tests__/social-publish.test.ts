@@ -150,47 +150,6 @@ describe("deliverPost — media routing", () => {
     expect(String(spy.mock.calls[0]?.[0])).toMatch(/\/videos$/);
     expect(res.results[0]?.externalId).toBe("fb_video");
   });
-
-  it("routes 2+ images to a Telegram album (sendMediaGroup)", async () => {
-    process.env.TELEGRAM_BOT_TOKEN = "tg-token";
-    process.env.TELEGRAM_CHANNEL_ID = "-100777";
-    const spy = stub({
-      ok: true,
-      result: { message_id: 9, chat: { id: -100777 } },
-    });
-
-    const res = await deliverPost({
-      product: "databayt",
-      text: "hello",
-      channels: ["telegram"],
-      mediaUrls: ["https://c/1.png", "https://c/2.png"],
-    });
-
-    expect(res.ok).toBe(true);
-    expect(spy).toHaveBeenCalledTimes(1);
-    expect(String(spy.mock.calls[0]?.[0])).toMatch(/sendMediaGroup$/);
-    expect(res.results[0]?.externalId).toBe("-100777:9");
-  });
-
-  it("routes one video to Telegram sendVideo", async () => {
-    process.env.TELEGRAM_BOT_TOKEN = "tg-token";
-    process.env.TELEGRAM_CHANNEL_ID = "-100777";
-    const spy = stub({
-      ok: true,
-      result: { message_id: 4, chat: { id: -100777 } },
-    });
-
-    const res = await deliverPost({
-      product: "databayt",
-      text: "hello",
-      channels: ["telegram"],
-      mediaUrls: ["https://c/reel.mp4"],
-    });
-
-    expect(res.ok).toBe(true);
-    expect(spy).toHaveBeenCalledTimes(1);
-    expect(String(spy.mock.calls[0]?.[0])).toMatch(/sendVideo$/);
-  });
 });
 
 describe("deliverPost — outcome accounting", () => {

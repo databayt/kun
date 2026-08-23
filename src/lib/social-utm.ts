@@ -24,7 +24,7 @@
 // it becomes channel-specific.
 
 export interface UtmContext {
-  /** Channel id — becomes utm_source, so Telegram and Facebook are separable. */
+  /** Channel id — becomes utm_source, so each platform's traffic is separable. */
   channel: string;
   /** Product id — becomes part of utm_campaign. */
   brand: string;

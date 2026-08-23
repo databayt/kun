@@ -41,7 +41,7 @@ describe("platform media specs cover every publishable channel", () => {
   });
 
   it("keeps caption and hashtag policy out of this file", () => {
-    // craft-rules.json owns the house copy rules; telegram.ts and instagram.ts
+    // craft-rules.json owns the house copy rules; instagram.ts
     // own the transports' hard caps. A number duplicated here would drift on
     // the platform's schedule, not ours.
     const raw = JSON.stringify(specs);

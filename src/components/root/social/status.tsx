@@ -81,7 +81,7 @@ const transportRows = (
   { key: "facebook", label: t.facebookRow, state: status?.facebook },
   { key: "instagram", label: t.instagramRow, state: status?.instagram },
   { key: "hermes", label: t.hermesRow, state: status?.hermes },
-  { key: "telegram", label: t.telegramRow, state: status?.telegram },
+  { key: "slack", label: t.slackRow, state: status?.slack },
 ];
 
 function StatusBody({ status, checking, onRefresh, t }: StatusProps) {
@@ -182,7 +182,7 @@ function StatusBody({ status, checking, onRefresh, t }: StatusProps) {
 export function StatusDialog({ status, checking, onRefresh, t }: StatusProps) {
   const rows = transportRows(status, t);
   // Parked transports don't vote: the dot answers "is anything that SHOULD be
-  // up, down?" — with Hermes parked and Telegram deferred, counting them kept
+  // up, down?" — with Hermes parked, counting it kept
   // the dot red forever and it stopped meaning anything.
   const allConnected =
     !checking &&

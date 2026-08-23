@@ -4,7 +4,7 @@
 // Two orthogonal axes, and conflating them is the mistake this file exists to
 // prevent:
 //
-//   kind      — what the channel is FOR. Eight distribution channels carry
+//   kind      — what the channel is FOR. The distribution channels carry
 //               marketing to an audience; Slack is the one communication
 //               channel, the internal team surface where approvals and notices
 //               land. Slack is never reach and never a publish target.
@@ -21,7 +21,8 @@
 
 /**
  * How bytes reach the platform.
- *   telegram  — direct Bot API from the site (works on Vercel)
+ *   slack     — direct incoming webhook from the site (works on Vercel). The
+ *               internal review lane only; never an audience channel.
  *   facebook  — direct Graph API from the site (works on Vercel)
  *   instagram — direct Graph API from the site, two-step container publish on
  *               the linked Page's token (lib/instagram.ts). Image required.
@@ -31,7 +32,7 @@
  *               human forwards it. Never queued, never drained.
  */
 export type ChannelTransport =
-  "telegram" | "facebook" | "instagram" | "hermes" | "manual";
+  "slack" | "facebook" | "instagram" | "hermes" | "manual";
 
 /**
  * What the channel is for.
@@ -50,26 +51,12 @@ export interface SocialChannel {
   transport: ChannelTransport;
   /**
    * The platform reports numbers back, so /api/social/metrics can read them.
-   * Facebook only today. Telegram exposes a per-post view count on channel
-   * messages, but not through anything the Bot API grants a non-admin bot; a
-   * `manual` channel has no platform surface at all.
+   * Facebook only today; a `manual` channel has no platform surface at all.
    */
   metrics?: boolean;
 }
 
 export const CHANNELS = [
-  {
-    id: "telegram",
-    label: "Telegram",
-    labelAr: "تيليجرام",
-    kind: "distribution",
-    wired: true,
-    // Resolves to the one org channel (TELEGRAM_CHANNEL_ID). The transport can
-    // already address any chat id, so reaching the groups where prospects
-    // actually are needs a destination registry and guardrails, not new
-    // transport work — planned, unbuilt: /docs/social/channels/groups.
-    transport: "telegram",
-  },
   {
     id: "slack",
     label: "Slack",
@@ -79,7 +66,10 @@ export const CHANNELS = [
     // name it in a refusal — but `kind` keeps it out of every audience path.
     kind: "communication",
     wired: true,
-    transport: "hermes",
+    // Direct incoming webhook, not the gateway. The approval notice and the
+    // token alarm must arrive when nobody is watching; routing them through a
+    // laptop at home is how three posts sat unapproved for 23 days.
+    transport: "slack",
   },
   {
     id: "whatsapp",
@@ -198,11 +188,7 @@ export const COMMUNICATION_CHANNEL_IDS: ChannelId[] = CHANNELS.filter(
  * visible as a growing `scheduled` backlog. For a system that writes to public
  * brand pages, fail-closed is the only defensible default.
  */
-const DRAIN_TRANSPORTS: readonly ChannelTransport[] = [
-  "telegram",
-  "facebook",
-  "instagram",
-];
+const DRAIN_TRANSPORTS: readonly ChannelTransport[] = ["facebook", "instagram"];
 
 export const DRAIN_CHANNEL_IDS: ChannelId[] = CHANNELS.filter((c) =>
   DRAIN_TRANSPORTS.includes(c.transport),

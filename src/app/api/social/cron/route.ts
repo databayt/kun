@@ -186,7 +186,7 @@ export async function GET(request: Request): Promise<Response> {
       continue;
     }
 
-    // A link per variant, so a reviewer can approve Telegram and hold Facebook.
+    // A link per variant, so a reviewer can approve one channel and hold another.
     // Each one publishes exactly once — the publish route claims the row.
     const links = piece.variants.map(
       (variant) =>
