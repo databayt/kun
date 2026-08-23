@@ -1,0 +1,67 @@
+{
+  "scrape-guard": {
+    "PreToolUse": [
+      {
+        "matcher": "run_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /Users/abdout/.claude/hooks/scrape-guard.sh"
+          }
+        ]
+      }
+    ]
+  },
+  "scrape-yield": {
+    "PostToolUse": [
+      {
+        "matcher": "run_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /Users/abdout/.claude/hooks/scrape-yield.sh"
+          }
+        ]
+      }
+    ]
+  },
+  "funnel-guard": {
+    "PreToolUse": [
+      {
+        "matcher": "run_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /Users/abdout/.claude/hooks/funnel-guard.sh"
+          }
+        ]
+      }
+    ]
+  },
+  "funnel-yield": {
+    "PostToolUse": [
+      {
+        "matcher": "run_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /Users/abdout/.claude/hooks/funnel-yield.sh"
+          }
+        ]
+      }
+    ]
+  },
+  "block-destructive-bash": {
+    "PreToolUse": [
+      {
+        "matcher": "run_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /Users/abdout/.claude/hooks/block-destructive-bash.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

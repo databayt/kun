@@ -1,0 +1,86 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash(pnpm dev)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "lsof -ti:3000 | xargs kill -9 2>/dev/null; exit 0"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash '/Users/abdout/kun/.codex/hooks/block-destructive-bash.sh'"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash '/Users/abdout/kun/.codex/hooks/scrape-guard.sh'"
+          },
+          {
+            "type": "command",
+            "command": "bash '/Users/abdout/kun/.codex/hooks/funnel-guard.sh'"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash(pnpm dev)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sleep 2 && open -a 'Google Chrome' http://localhost:3000 &"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "json=$(cat); p=$(printf '%s' \"$json\" | jq -r '.tool_input.file_path // empty' 2>/dev/null); [ -z \"$p\" ] && p=\"${FILE_PATH:-}\"; if [ -n \"$p\" ] && [[ \"$p\" =~ \\.(ts|tsx|js|jsx|json|css|md)$ ]]; then npx prettier --write \"$p\" 2>/dev/null; fi; exit 0"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash '/Users/abdout/kun/.codex/hooks/session-engine-context.sh'"
+          },
+          {
+            "type": "command",
+            "command": "[ -f '/Users/abdout/kun/.codex/hooks/session-maintain-status.sh' ] && bash '/Users/abdout/kun/.codex/hooks/session-maintain-status.sh'; exit 0"
+          },
+          {
+            "type": "command",
+            "command": "[ -f '/Users/abdout/kun/.codex/hooks/session-media-stale.sh' ] && bash '/Users/abdout/kun/.codex/hooks/session-media-stale.sh'; exit 0"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"[$(date '+%Y-%m-%d %H:%M:%S')] Session ended\" >> ~/.claude/session-log.txt"
+          }
+        ]
+      }
+    ]
+  }
+}

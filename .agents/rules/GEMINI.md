@@ -1,0 +1,1 @@
+/Users/abdout/kun/GEMINI.md

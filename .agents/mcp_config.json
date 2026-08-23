@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "scrapling": {
+      "command": "/Users/abdout/.local/bin/scrapling-mcp",
+      "args": []
+    }
+  }
+}

@@ -1,0 +1,11 @@
+[shell_environment_policy]
+inherit = "core"
+
+[shell_environment_policy.set]
+CODEBASE_PATH = "/Users/abdout/codebase"
+CODEBASE_REPO = "databayt/codebase"
+CODEBASE_OWNER = "databayt"
+CODEBASE_NAME = "codebase"
+DEV_PORT = "3000"
+OSS_PATH = "/Users/abdout/oss"
+GITHUB_USER = "abdout"
