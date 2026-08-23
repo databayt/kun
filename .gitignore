@@ -74,3 +74,12 @@ pt.json
 /dbpage*.yml
 /dbpage*.png
 /meta-login*.png
+
+# The browser/Playwright MCP writes evaluate-results and screenshots to RELATIVE
+# paths, which land in whatever directory it was invoked from — i.e. here. One of
+# those (sut.txt) held a live System User token on 2026-08-23. Never trust the
+# output location; refuse the whole class at the repo root.
+/sut.txt
+/page-*.yml
+/console-*.log
+/*-snapshot.yml
