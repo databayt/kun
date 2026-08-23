@@ -156,7 +156,7 @@ Also worth a ledger line: `.claude/engine.json` says `"model": "google-free"` wh
 
 | # | Area | Verdict | Evidence | Follow-up |
 |---|---|---|---|---|
-| 3 | Social publishing | OPEN | — | reconcile vs #145 #146 #147 #149 #150 |
+| 3 | Social publishing | **PARTIAL — stalled at the human gate, not broken** | see below | #145 restated; #149 stale; new: no review destination |
 | 4 | Media Studio | OPEN | — | — |
 | 5 | Job Engine | PARTIAL | CI break fixed + 257 tests green offline; **the engine itself is still untested behaviorally** | build/verify `/jobs` renders real extraction |
 | 6 | Funnel (Floo Network) | OPEN | — | needs Twenty CRM up (:3100) |
@@ -166,6 +166,40 @@ Also worth a ledger line: `.claude/engine.json` says `"model": "google-free"` wh
 | 10 | Media mastering + carousel | OPEN | — | implementation in mkan |
 | 11 | Engine config | OPEN | — | engine.json `google-free` vs CLAUDE.md `claude-fable-5` |
 | 12 | Docs site | OPEN | — | — |
+
+### Step 3 — social publishing · verdict **PARTIAL**, 2026-08-23
+
+**The lane is not broken. It is unattended, and nothing tells anyone.**
+
+| Question | Measured answer |
+|---|---|
+| Does delivery work? | **Yes** — real post → read back → delete on the Hogwarts Page (Step 0), prod canary 4/4 |
+| Has anything published since 2026-07-31? | **No.** DB holds exactly 3 published variants (07-21, 07-23, 07-31), matching the Page history exactly |
+| Why not? | **3 variants sit `pending`**, created 07-30 and 08-01 — 23 days at the human approval gate. `scheduled` = 0, `failed` = 0, `draft` = 0 |
+| Then why does the hourly drain report `success`? | Because it truthfully drains an **empty** queue. Nothing ever reached `scheduled`. Green means "nothing to do", not "the lane works" |
+| Why did nobody notice? | **Production has no review destination at all** — no `HERMES_API_URL`, no `TELEGRAM_BOT_TOKEN` + `TELEGRAM_REVIEW_CHAT_ID`. `sendReview()` therefore always returns "No review destination configured" |
+| Is the drafting half dead (#149)? | **No — that claim is stale.** 16 answered draft requests, the most recent 2026-08-22 |
+| Is the prod auth gate live? | **Yes** — `/social/publish` redirects to `/login`. It was once commented out; it is not now |
+
+**The causal chain, end to end:** a draft lands `pending` → `sendReview` has nowhere to send →
+nobody is told → it sits → nothing reaches `scheduled` → the drain succeeds on an empty queue →
+every dashboard is green while the lane produces nothing. Twenty-three days of that.
+
+The canary's `canAlert: false` is the *same* missing config, which is why it reads as a separate
+bug and is not one: one fix closes both.
+
+**Highest-leverage fix: configure one review destination.** That converts silence into a message
+and unblocks the gate. Everything downstream of it already works.
+
+`/api/social/queue` returning `count: 0` is **correct, not a symptom** — it is the Hermes *pull*
+queue (`scheduled`/`approved` on Hermes channels), not the review queue.
+
+**Unresolved sub-check, stated honestly:** could not log into the contributor UI locally to eyeball
+`/social/publish` rendering the three pending variants. The generated hash verified `true` against
+`verifyPassword` standalone, and `abdout` resolves in the contributor list, but Auth.js kept
+returning `CredentialsSignin` against a freshly restarted dev server. `.env` was swapped and
+**restored, verified byte-identical**. This is a gap in the verification harness, not a known
+product defect — the queue's *state* is confirmed from the database either way.
 
 ### Incidental findings (not yet steps)
 
