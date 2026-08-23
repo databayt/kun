@@ -60,3 +60,17 @@ src/generated/
 
 # Draft-queue answer scratch files (scripts/social-drafts.mjs answer --ar/--en)
 .tmp-draft-*.txt
+
+# Browser-capture and auth debris — NEVER commit these.
+# 2026-08-19: pt.json carried two live, non-expiring Facebook Page tokens into
+# this public repo and sat there for four days. Rotated 2026-08-23.
+# Snapshots from the Playwright/browser MCP land in ~/.claude/playwright-output;
+# these patterns stop a stray copy from ever being staged here.
+*token*.txt
+*token*.json
+pt.json
+/consent*.yml
+/assign*.yml
+/dbpage*.yml
+/dbpage*.png
+/meta-login*.png
