@@ -47,7 +47,7 @@
 set -uo pipefail
 
 json="$(cat)"
-cmd="$(printf '%s' "$json" | jq -r '.tool_input.command // empty' 2>/dev/null)"
+cmd="$(printf '%s' "$json" | jq -r '.tool_input.command // .toolCall.args.CommandLine // empty' 2>/dev/null)"
 [ -z "$cmd" ] && exit 0
 
 # ── A heredoc body is data, not a command ─────────────────────────────────────

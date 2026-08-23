@@ -18,7 +18,7 @@
 set -uo pipefail
 
 json="$(cat)"
-cmd="$(printf '%s' "$json" | jq -r '.tool_input.command // empty' 2>/dev/null)"
+cmd="$(printf '%s' "$json" | jq -r '.tool_input.command // .toolCall.args.CommandLine // empty' 2>/dev/null)"
 [ -z "$cmd" ] && cmd="$json" # fallback when jq is unavailable: scan raw payload
 
 # reason@@extended-regex  (single-quoted so every regex metachar is literal).

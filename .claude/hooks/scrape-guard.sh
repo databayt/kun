@@ -52,7 +52,7 @@
 set -uo pipefail
 
 json="$(cat)"
-cmd="$(printf '%s' "$json" | jq -r '.tool_input.command // empty' 2>/dev/null)"
+cmd="$(printf '%s' "$json" | jq -r '.tool_input.command // .toolCall.args.CommandLine // empty' 2>/dev/null)"
 [ -z "$cmd" ] && cmd="$json" # jq unavailable → scan the raw payload
 
 # ── 1. Is this a scrape run at all? ──────────────────────────────
@@ -197,7 +197,11 @@ fi
 # to catch exactly that.
 if [ -z "${FB_SCRAPE_DELAY_MS:-}" ] \
   && ! printf '%s' "$cmd" | grep -Eq 'FB_SCRAPE_DELAY_MS=|--(delay|throttle|sleep)[= ]'; then
-  printf '%s\n' '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"kun scrape-guard: this run declares NO throttle. The platform rate-limits and then bans on burst patterns, and the ban lands on the ACCOUNT, not the IP — including the dedicated account this lane just spent effort standing up. Fix: export FB_SCRAPE_DELAY_MS=4000 (or pass --delay) and re-run. Approve only if you have deliberately chosen an unthrottled run."}}'
+  if [ -n "$(printf '%s' "$json" | jq -r '.toolCall // empty' 2>/dev/null)" ]; then
+    printf '%s\n' '{"decision":"ask","reason":"kun scrape-guard: this run declares NO throttle. The platform rate-limits and then bans on burst patterns, and the ban lands on the ACCOUNT, not the IP — including the dedicated account this lane just spent effort standing up. Fix: export FB_SCRAPE_DELAY_MS=4000 (or pass --delay) and re-run. Approve only if you have deliberately chosen an unthrottled run."}'
+  else
+    printf '%s\n' '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"kun scrape-guard: this run declares NO throttle. The platform rate-limits and then bans on burst patterns, and the ban lands on the ACCOUNT, not the IP — including the dedicated account this lane just spent effort standing up. Fix: export FB_SCRAPE_DELAY_MS=4000 (or pass --delay) and re-run. Approve only if you have deliberately chosen an unthrottled run."}}'
+  fi
   exit 0
 fi
 
