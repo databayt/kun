@@ -272,7 +272,20 @@ outbound slice (08-19), and the roll (08-22).
   `saasMarketing` mode only (a tenant school's parents are not our pipeline).
 - **The channel** (08-22). Workflow cards land in private **#hogwarts-funnel**
   (`C0BRXUREB8W`, Abdout + the @kun bot) via Hermes `deliver_extra.chat_id` — not in the
-  team's #hogwarts, which 10–30 cards/day would drown.
+  team's #hogwarts, which 10–30 cards/day would drown. The card's instruction says what is
+  actually left to do — *mark `outreachStatus = SENT` after sending* — because the workflow
+  already stamped CONTACTED/QUEUED, and QUEUED is not SENT.
+- **The capture alert, create-only** (08-23). A NEW identifier in the chatbot emails
+  `SALES_NOTIFY_EMAIL` (fallback `hi@databayt.org` — only real if someone reads that box)
+  with the conversation tail. `findUnique`-before-upsert gates it: without the gate, every
+  later turn in the same chat re-fires the alert and the founder stops reading them.
+- **The hourly inbox drain** (08-23). `/api/cron/funnel-apply` on Vercel (Bearer
+  `CRON_SECRET`, `?dry=1` probe) runs the ONE applier implementation
+  (`src/lib/funnel/apply-inbox.ts`); the script wraps the same core for dry runs and
+  launchd. Webhook rows stop sitting `pending` forever.
+- **One identifier module** (08-23). `src/lib/funnel/identifiers.ts` — capture, the applier
+  and the funnel scripts share the same `normalizeDigits`/`toE164`/`emailOf`; the rules
+  drifted twice living in two files and do not get a third chance.
 
 **Not built, and worth being blunt about:**
 
