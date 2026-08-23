@@ -92,6 +92,23 @@ copies are inert.
 ---
 
 ## Step 1 — settle the working tree · **OPEN**
+
+Every uncommitted and untracked path gets an explicit verdict — commit, ignore, or delete.
+**Never `git add -A` here:** nothing below is gitignored, so a blanket add would sweep in
+personal data and a stale hook mirror.
+
+| Path | What it is | Verdict |
+|---|---|---|
+| 10 hook files (`.claude/hooks/`, `plugins/kun-company/hooks/`) | second command-extraction path for another agent runtime | finished — commit as one |
+| `src/lib/media-prompt.ts`, `social/dictionary.ts` | `plannedPillars()` + 16 EN/AR keys, **zero consumers** — the panel was never written | park as groundwork, open an issue |
+| `social/rotation.ts`, `calendar-panel.tsx` | `SEED_COUNT` hoisted to a shared export | commit (drop the stray double blank line) |
+| `next-env.d.ts` | Next.js regenerated it | commit, never hand-edit |
+| `AGENTS.md`, `GEMINI.md` | symlinks to existing tracked config | commit |
+| `.codex/` | Codex CLI config, 22 agent .toml, hooks in sync | commit |
+| `.agents/` | cross-runtime bridge, but `.agents/.claude/hooks/` is a **stale mirror** with 44-byte `exit 0` stubs | resync or drop that subdir first |
+| `databayt-portfolio-pages.png`, `heirs-1180.jpeg` | loose at repo root, no references | move to the media library or delete |
+| **`jobs/`** | **appeared after the inventory — Job Engine working data plus `jobs/cv/` holding two real CVs (PDF + HTML)** | **personal data, untracked, NOT gitignored. Decide before any staging: ignore or move out of a public repo.** |
+
 ## Step 2 — get CI green · **OPEN**
 
 CI last passed `631c27a` (2026-08-19T12:28). Every push since — all 11 Job Engine commits, all
