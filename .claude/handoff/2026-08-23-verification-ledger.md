@@ -201,6 +201,35 @@ returning `CredentialsSignin` against a freshly restarted dev server. `.env` was
 **restored, verified byte-identical**. This is a gap in the verification harness, not a known
 product defect — the queue's *state* is confirmed from the database either way.
 
+### Interlude — the Step 3 root cause, fixed (2026-08-23)
+
+Abdout's call mid-pass: **Slack instead of Telegram, and Telegram gone for good.**
+Recorded as `D-20260823-drop-telegram-slack-review-lane`.
+
+| | |
+|---|---|
+| `d30efca` | `lib/slack.ts` — direct incoming webhook. `sendReview` prefers it; `canAlert` now asks `canSendReview()` instead of re-deriving from env, because the two had already drifted. 8 new tests, degrades safely with no credentials |
+| `c186fb8` | Telegram removed — transport, registry entry, drain lane, craft rule, platform specs, carousel slot, env, two routing tests. Distribution channels 8 → 7 |
+| `aa15e27` | The decision entry |
+
+**Why removing Telegram was free:** no variant has *ever* gone through it — every
+row in `SocialVariant`, published or pending, is `facebook` — and production
+carried no `TELEGRAM_*` env at all. A transport maintained, tested and documented
+for a channel that never carried a post.
+
+**What it costs, said out loud:** the carousel lane's client-DM delivery *was*
+Telegram albums, and the `hogwarts-intro` deck is staged. That deck now has no
+transport. Follow-up work, not part of the decision.
+
+**What it exposed:** Slack was declared a *communication* channel while parked on
+the `hermes` transport — which is how it passed the "every channel has exactly one
+publish lane" test. It was technically publishable. The partition now covers
+distribution channels only, and a test asserts communication channels have none.
+
+**Still open:** `SLACK_WEBHOOK_URL` is not set, so the review lane still reaches
+nobody. The code is landed and inert until it is. Creating the webhook needs a
+Slack workspace sign-in the browser does not hold.
+
 ### Incidental findings (not yet steps)
 
 - Nothing has published to either Page since **2026-07-31**, although the hourly "Social drain"
