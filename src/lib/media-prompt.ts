@@ -22,6 +22,11 @@
 import kit from "../../content/media/brand-kit.json";
 import pillars from "../../content/social/pillars.json";
 import platformSpecs from "../../content/social/platform-specs.json";
+import {
+  isoWeek,
+  SEED_COUNT,
+  weeklyPickIndexes,
+} from "@/components/root/social/rotation";
 
 type KitBrand = {
   id: string;
@@ -105,6 +110,30 @@ export type CompiledMedia =
       /** Things the operator should know that do not stop the compile. */
       warnings: string[];
     };
+
+/**
+ * The plan's picks for a week, as the Monday seeder would make them. Offset 0
+ * is this week, -1 last, +1 next — which is the whole of "previous and
+ * upcoming" this surface claims. Publication history is a different question
+ * and needs the database; this needs nothing, because the rotation is stateless
+ * arithmetic over a git-tracked file.
+ *
+ * NOT WIRED YET. Nothing calls this, and nothing renders the dictionary keys
+ * that were added alongside it (mediaPlan*, mediaBriefTitle, mediaAttach*, …).
+ * The data layer and the bilingual strings landed; the panel did not. Parked
+ * deliberately rather than deleted — see the tracking issue.
+ */
+export function plannedPillars(
+  brand: string,
+  weekOffset = 0,
+  now = new Date(),
+  count = SEED_COUNT,
+): Pillar[] {
+  const list = (pillars as unknown as Record<string, Pillar[]>)[brand];
+  if (!Array.isArray(list) || list.length === 0) return [];
+  const week = isoWeek(now) + weekOffset;
+  return weeklyPickIndexes(list.length, week, count).map((i) => list[i]);
+}
 
 function pillarFor(brand: string, id?: string): Pillar | undefined {
   if (!id) return undefined;

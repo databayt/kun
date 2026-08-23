@@ -19,10 +19,7 @@ import { requestSocialDraft } from "@/actions/post-social";
 import pillarsJson from "../../../../content/social/pillars.json";
 import { fill } from "@/components/root/social/dictionary";
 import { useSocial } from "@/components/root/social/provider";
-import { isoWeek, weeklyPickIndexes } from "@/components/root/social/rotation";
-
-/** Mirrors the seeder's default (scripts/seed-drafts.sh SEED_COUNT). */
-const SEED_COUNT = 2;
+import { SEED_COUNT, isoWeek, weeklyPickIndexes } from "@/components/root/social/rotation";
 
 interface PillarBrief {
   id: string;
