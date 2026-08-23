@@ -22,7 +22,7 @@ import { isAuthorizedBearer } from "@/lib/cron-auth";
 import { checkFacebookHealth, getFacebookConfig } from "@/lib/facebook";
 import { PRODUCTS, productChannelWired } from "@/components/root/social/products";
 import { CHANNELS } from "@/components/root/social/config";
-import { sendReview } from "@/lib/social-review";
+import { canSendReview, sendReview } from "@/lib/social-review";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -99,15 +99,11 @@ export async function GET(request: Request): Promise<Response> {
     (p) => p.ok && p.expiresAt !== undefined && p.expiresAt !== 0,
   );
 
-  // A canary that cannot sing is a canary you only think you have. `sendReview`
-  // needs Hermes or a private Telegram chat; if neither is configured the
-  // detection still works but the message goes nowhere, so this is reported
-  // even on a healthy run — the scheduled caller turns it into a warning.
-  const canAlert = Boolean(
-    (process.env.HERMES_API_URL ?? "").trim() ||
-      ((process.env.TELEGRAM_BOT_TOKEN ?? "").trim() &&
-        (process.env.TELEGRAM_REVIEW_CHAT_ID ?? "").trim()),
-  );
+  // A canary that cannot sing is a canary you only think you have. This asks
+  // sendReview itself rather than re-deriving the answer from env vars — the
+  // two drifted apart before, and a canary reporting the wrong alertability is
+  // worse than one that cannot alert at all.
+  const canAlert = canSendReview();
 
   let alerted = false;
   if (dead.length || expiring.length) {
