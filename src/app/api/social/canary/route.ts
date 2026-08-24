@@ -36,6 +36,13 @@ interface BrandProbe {
   error?: string;
   /** 0 means permanent. Anything else is a scheduled outage worth warning on. */
   expiresAt?: number;
+  /**
+   * When the GRANT behind the token dies, which is a different clock from the
+   * token's own. A permanent Page token derived from a personal login reports
+   * `expires_at: 0` and still stops working when the 90-day data-access window
+   * closes. Also 0 for a System User token, which has no such window.
+   */
+  dataAccessExpiresAt?: number;
 }
 
 /**
@@ -43,20 +50,46 @@ interface BrandProbe {
  * reports it alongside outright failure. `expires_at: 0` is the only healthy
  * value; the System User tokens and the older permanent Page tokens both
  * report it.
+ *
+ * Reading `expires_at` ALONE is how the canary spent months calling databayt
+ * permanently healthy while it was the only brand with a deadline. A Page token
+ * derived from a personal login reports `expires_at: 0` — the token really is
+ * permanent — but dies anyway when the grant's 90-day `data_access_expires_at`
+ * window closes. Two clocks, either one fatal, so probe both.
  */
-async function probeExpiry(token: string): Promise<number | undefined> {
+async function probeToken(token: string): Promise<{
+  expiresAt?: number;
+  dataAccessExpiresAt?: number;
+}> {
   try {
     const url = new URL("https://graph.facebook.com/v25.0/debug_token");
     url.searchParams.set("input_token", token);
     url.searchParams.set("access_token", token);
     const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
-    if (!res.ok) return undefined;
-    const body = (await res.json()) as { data?: { expires_at?: number } };
-    return body.data?.expires_at;
+    if (!res.ok) return {};
+    const body = (await res.json()) as {
+      data?: { expires_at?: number; data_access_expires_at?: number };
+    };
+    return {
+      expiresAt: body.data?.expires_at,
+      dataAccessExpiresAt: body.data?.data_access_expires_at,
+    };
   } catch {
-    return undefined;
+    return {};
   }
 }
+
+/** Days from now until `epochSeconds`, floored. Negative once it has passed. */
+function daysUntil(epochSeconds: number): number {
+  return Math.floor((epochSeconds * 1000 - Date.now()) / 86_400_000);
+}
+
+/**
+ * How close a grant has to get before it is worth waking someone. Re-consenting
+ * rolls the window a full 90 days, so there is no value in chirping the whole
+ * time — but the fix needs a human at a browser, so it needs real notice.
+ */
+const GRANT_WARNING_DAYS = 21;
 
 export async function GET(request: Request): Promise<Response> {
   if (!isAuthorizedBearer(request)) {
@@ -83,11 +116,13 @@ export async function GET(request: Request): Promise<Response> {
         return { product: p.id, ok: false, error: health.error };
       }
       const { token } = await getFacebookConfig(p.id);
+      const probed = await probeToken(token);
       return {
         product: p.id,
         ok: true,
         name: health.name,
-        expiresAt: await probeExpiry(token),
+        expiresAt: probed.expiresAt,
+        dataAccessExpiresAt: probed.dataAccessExpiresAt,
       };
     }),
   );
@@ -98,6 +133,14 @@ export async function GET(request: Request): Promise<Response> {
   const expiring = probes.filter(
     (p) => p.ok && p.expiresAt !== undefined && p.expiresAt !== 0,
   );
+  // The grant clock, warned on only once it is close — see GRANT_WARNING_DAYS.
+  const grantExpiring = probes.filter(
+    (p) =>
+      p.ok &&
+      p.dataAccessExpiresAt !== undefined &&
+      p.dataAccessExpiresAt !== 0 &&
+      daysUntil(p.dataAccessExpiresAt) <= GRANT_WARNING_DAYS,
+  );
 
   // A canary that cannot sing is a canary you only think you have. This asks
   // sendReview itself rather than re-deriving the answer from env vars — the
@@ -106,7 +149,7 @@ export async function GET(request: Request): Promise<Response> {
   const canAlert = canSendReview();
 
   let alerted = false;
-  if (dead.length || expiring.length) {
+  if (dead.length || expiring.length || grantExpiring.length) {
     const lines = [
       "🐤 Facebook token canary — publishing is degraded.",
       "",
@@ -114,6 +157,14 @@ export async function GET(request: Request): Promise<Response> {
       ...expiring.map(
         (p) =>
           `⏳ ${p.product}: token expires at ${p.expiresAt} (should be 0 — it will stop working)`,
+      ),
+      ...grantExpiring.map(
+        (p) =>
+          `⏳ ${p.product}: the GRANT behind this token dies in ` +
+          `${daysUntil(p.dataAccessExpiresAt ?? 0)} days ` +
+          `(data_access_expires_at ${p.dataAccessExpiresAt}). The token itself ` +
+          `still reads permanent — re-consent, or migrate the brand to the ` +
+          `System User so it has no such window.`,
       ),
       "",
       "Publishing to these brands is failing or will fail. Re-mint from the",
@@ -125,7 +176,7 @@ export async function GET(request: Request): Promise<Response> {
   }
 
   return Response.json({
-    ok: dead.length === 0 && expiring.length === 0,
+    ok: dead.length === 0 && expiring.length === 0 && grantExpiring.length === 0,
     checked: probes.length,
     canAlert,
     alerted,
