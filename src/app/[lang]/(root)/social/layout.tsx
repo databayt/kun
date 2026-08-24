@@ -42,7 +42,9 @@ export default async function SocialLayout({
   if (process.env.NODE_ENV === "production") {
     const session = await auth();
     if (!session?.user) {
-      redirect(`/${lang}/login?next=/${lang}/social`);
+      redirect(
+        `/${lang}/login?callbackUrl=${encodeURIComponent(`/${lang}/social`)}`,
+      );
     }
   }
 

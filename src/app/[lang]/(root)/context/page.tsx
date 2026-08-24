@@ -20,7 +20,9 @@ export default async function ContextPage({ params }: ContextPageProps) {
   // Same pattern as social/page.tsx; middleware is the outer wall on top.
   const session = await auth();
   if (!session?.user) {
-    redirect(`/${lang}/login`);
+    redirect(
+      `/${lang}/login?callbackUrl=${encodeURIComponent(`/${lang}/context`)}`,
+    );
   }
 
   return <ContextContent lang={locale} />;

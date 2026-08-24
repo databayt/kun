@@ -22,9 +22,15 @@ export default async function proxy(request: NextRequest) {
   const session = await auth();
   if (session?.user) return NextResponse.next();
 
-  // Preserve the locale so the bounce lands on the right login.
+  // Preserve the locale so the bounce lands on the right login, and carry the
+  // destination as `callbackUrl` so signing in resumes where the contributor
+  // was headed instead of dumping them on the default hub. Search params ride
+  // along too — an approval link's query is part of where they were going.
   const lang = request.nextUrl.pathname.split("/")[1] || "en";
-  return NextResponse.redirect(new URL(`/${lang}/login`, request.url));
+  const destination = `${request.nextUrl.pathname}${request.nextUrl.search}`;
+  const loginUrl = new URL(`/${lang}/login`, request.url);
+  loginUrl.searchParams.set("callbackUrl", destination);
+  return NextResponse.redirect(loginUrl);
 }
 
 // The locale segment is spelled out rather than left as `:lang`. A wildcard

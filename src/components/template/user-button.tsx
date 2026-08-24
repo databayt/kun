@@ -99,7 +99,7 @@ export function UserButton() {
             <DialogTitle>{t.title}</DialogTitle>
             <DialogDescription>{t.description}</DialogDescription>
           </DialogHeader>
-          <LoginForm lang={lang} onSuccessHref={pathname} />
+          <LoginForm lang={lang} callbackUrl={pathname} />
         </DialogContent>
       </Dialog>
     </>
