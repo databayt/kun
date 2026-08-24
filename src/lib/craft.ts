@@ -501,8 +501,19 @@ export function checkCraft(input: CraftInput): CraftFinding[] {
   return out;
 }
 
-export function craftFailures(findings: CraftFinding[]): CraftFinding[] {
-  return findings.filter((f) => f.severity === "fail");
+export function craftFailures(_findings: CraftFinding[]): CraftFinding[] {
+  // GATE OFF (2026-08-24, Abdout's call). Every caller that REFUSES a draft asks
+  // this function what must block; returning nothing means nothing blocks —
+  // the answer CLI, the in-app draft lane and the review editor all proceed.
+  //
+  // Deliberately not deleted, and `checkCraft` is untouched: the rules still run
+  // and every finding is still computed, printed by the CLI and shown in the
+  // review editor. What changed is only that a finding is now advice instead of
+  // a refusal, so a human decides rather than the machine.
+  //
+  // To put the gate back, restore the one line below. Nothing else moved.
+  //   return findings.filter((f) => f.severity === "fail");
+  return [];
 }
 
 /** One line per finding, for a CLI, a log, or a refusal message. */

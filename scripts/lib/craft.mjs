@@ -420,8 +420,16 @@ export function checkCraft(input) {
   return out;
 }
 
-export function craftFailures(findings) {
-  return findings.filter((f) => f.severity === "fail");
+export function craftFailures(_findings) {
+  // GATE OFF (2026-08-24, Abdout's call) — the .mjs half of the same override.
+  // Kept byte-parallel with src/lib/craft.ts because craft.test.ts pins the two
+  // implementations together; if one blocks and the other does not, a draft
+  // passes on the CLI and fails in the app.
+  //
+  // checkCraft still runs and every finding is still printed. Only the refusal
+  // is gone. Restore by putting back:
+  //   return findings.filter((f) => f.severity === "fail");
+  return [];
 }
 
 export function formatCraft(findings) {
