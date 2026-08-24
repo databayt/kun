@@ -158,7 +158,7 @@ Also worth a ledger line: `.claude/engine.json` says `"model": "google-free"` wh
 |---|---|---|---|---|
 | 3 | Social publishing | **PARTIAL — stalled at the human gate, not broken** | see below | #145 restated; #149 stale; new: no review destination |
 | 4 | Media Studio | **PARTIAL** | see below | inert model selector; 2 dead media URLs; seat lane never delivered |
-| 5 | Job Engine | PARTIAL | CI break fixed + 257 tests green offline; **the engine itself is still untested behaviorally** | build/verify `/jobs` renders real extraction |
+| 5 | Job Engine | **PARTIAL** | see below | Layers B+C hardcoded; 0 rows persisted; **schema drift — no migration** |
 | 6 | Funnel (Floo Network) | OPEN | — | needs Twenty CRM up (:3100) |
 | 7 | Scrape / Owlery | OPEN | — | — |
 | 8 | mkan Port Sudan launch | OPEN | — | orphaned commit `46f93b2` — did it ship? |
@@ -269,6 +269,46 @@ still misleads.
 
 4. **`cdn.databayt.org` still 403s** (issue #148). Direct S3 URLs work, so this is not blocking
    delivery today, and the issue's P3-low is fair — but the CDN is not usable.
+
+### Step 5 — Job Engine · verdict **PARTIAL**, 2026-08-24
+
+Eleven commits in a single day, three "phases". The bottom layer is real work; the labels above it
+promise more than the code does.
+
+**What holds:**
+
+| Claim | Result |
+|---|---|
+| Evidence extraction is real | **True, and good.** 30 repositories resolved, 21 with local clones, **84 facts** across 6 artifact types — drawn from actual `package.json` dependencies, Prisma schemas, API routes and components. Not fixtures |
+| The pages render in production | **True** — `/en/jobs` and `/en/jobs/profile` both 200, with real extracted content on the page |
+| CI is green | **True** — fixed in Step 2 |
+
+**What does not hold:**
+
+1. **"Synthesizes the 3-Layer Knowledge Profile (Facts → Capabilities → Market Positioning)"
+   overstates it by two layers.** Layer A is genuinely derived. **Layers B and C are hardcoded
+   literals** in `evidence-extractor.ts`: 8 authored capabilities with hand-written `reasoning`
+   and `level`, and 8 positioning roles with hand-assigned `readinessScore` values (94, …). Only
+   the *evidence attached* to them is computed. This is a hand-written CV with automated evidence
+   stapling — genuinely useful, and not synthesis. Consequently
+   `expect(capabilities.length).toBeGreaterThanOrEqual(4)` and the roles assertion pass trivially
+   against literal arrays; the meaningful assertion in that test is `supportingFactIds.length > 0`.
+
+2. **"Observability telemetry" is a stats getter** — no persistence, no emission, no time series.
+   Two of its metrics are structurally incapable of varying:
+   - `evidenceFreshness` can only ever return `"fresh"`. `profile.updatedAt` is stamped when the
+     profile is built, **1 ms** before the comparison, so the `aging` (>24h) and `stale` (>7d)
+     branches are unreachable.
+   - `repositoriesAnalyzed` always equals `repositoriesDiscovered`, because every repo's GitHub
+     source is hardcoded `isAvailable: true`.
+
+3. **Nothing has been persisted.** `JobOpportunity` and `JobAssessment`: **0 rows each.**
+
+4. **Schema drift — a real deployment landmine.** `dfd7b84` added 97 lines of Job models to
+   `prisma/schema.prisma` with **no migration file**, and **zero migrations have been added since
+   2026-08-06**. The tables exist in the shared Neon database only because someone ran
+   `prisma db push`. `pnpm db:deploy` (`prisma migrate deploy`) against a fresh environment would
+   **not** create them, and the app would fail at first query. Filed separately.
 
 ### Incidental findings (not yet steps)
 
