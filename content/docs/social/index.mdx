@@ -11,6 +11,43 @@ writing the copy, `/higgs` making the media, and a thin gateway doing the broadc
 The brand rules every post obeys are in [Brand & Voice](/docs/brand); the build roadmap and
 credential plan are internal (`docs/SOCIAL-AUTOMATION.md`).
 
+## How a post travels
+
+Nine steps from an idea to a live page. The first six are about words and permission;
+only the last three touch a platform at all.
+
+```mermaid
+flowchart TD
+  A["Pick what to post<br/>and which day"] --> B["Write the words<br/>Arabic first, English after"]
+  B --> C{"Craft gate checks<br/>the writing"}
+  C -- "too short · banned word<br/>· bare link" --> B
+  C -- "clean" --> D["Attach media<br/>(optional)"]
+  D --> E{"A human<br/>says yes"}
+  E -- "no" --> X["Dismissed, with<br/>a reason recorded"]
+  E -- "yes" --> F["Send to the platform"]
+  F --> G["Save the receipt<br/>the post id"]
+  G --> H["Read the numbers<br/>back, six-hourly"]
+
+  classDef stop fill:#3b2220,stroke:#a35a4e,color:#f2d9d4;
+  classDef send fill:#12312e,stroke:#2f7d72,color:#c6e8e2;
+  class X stop;
+  class F,G send;
+```
+
+Four doors open onto **Send to the platform**, and they differ only in who says yes:
+the **review queue** on `/social/publish` (a person clicks Approve), a **signed link**
+in the private Slack review channel (a person clicks once — a second click gets
+`409 Already handled`), the **drain** (a post booked for later, checked every ~15
+minutes), and the **relay** (no person; a machine with the cron secret). All four
+funnel into one shared egress path — see
+[Facebook](/docs/social/channels/facebook#what-happens-when-a-post-is-sent) for that
+path step by step.
+
+**The craft gate is not advisory.** It rejects on its own, before a human ever sees the
+draft — the first Balqalam draft written against it was refused for `balqalam.com`
+without a scheme, because `applyUtm` only tags absolute URLs and the post would have
+shipped untracked.
+
 ## Business models → who we're talking to
 
 databayt runs on [four business models](https://databayt.org/about). Social marketing serves
@@ -49,14 +86,8 @@ live on its page:
 
 ## The pipeline
 
-```
-calendar ══► draft ══════════════► review ─► publish ─────────► measure
-    │          │  ▲                   │         │                  │
-  pillars   Claude │  media        human      drain | hermes  SocialMetric
-  rotate    AR-first│ (pick|make)   gate      | copy-out       + UTM tags
-  into the         └── higgs · carousel      ▲ HARD STOP
-  queue                library.json          (/social/publish)
-```
+The stage-by-stage view of the same journey diagrammed in
+[How a post travels](#how-a-post-travels) — who owns each step, and what it actually does.
 
 A **full draft is copy AND/OR media** — text · text + image(s) · text + video ·
 image(s) only · video only. The stages are wired to each other: pillars seed the draft
