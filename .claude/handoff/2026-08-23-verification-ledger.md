@@ -161,7 +161,7 @@ Also worth a ledger line: `.claude/engine.json` says `"model": "google-free"` wh
 | 5 | Job Engine | **PARTIAL** | see below | Layers B+C hardcoded; 0 rows persisted; **schema drift — no migration** |
 | 6 | Funnel (Floo Network) | **PARTIAL** | see below | structurally real, operationally empty; "capturing" not demonstrated |
 | 7 | Scrape / Owlery | **PASS** | see below | first area to hold; one readability caveat |
-| 8 | mkan Port Sudan launch | OPEN | — | orphaned commit `46f93b2` — did it ship? |
+| 8 | mkan Port Sudan launch | **PARTIAL** | see below | the site shipped; the campaign never ran |
 | 9 | CRM workspaces | OPEN | — | — |
 | 10 | Media mastering + carousel | OPEN | — | implementation in mkan |
 | 11 | Engine config | OPEN | — | engine.json `google-free` vs CLAUDE.md `claude-fable-5` |
@@ -373,6 +373,39 @@ commits most often said *"correct the measured numbers"* — the census churned 
 724 → 287 → 262 across six commits, each correcting the last. That looked like thrash in the git
 log. It was the opposite: the discipline of re-measuring instead of restating is exactly why its
 claims survive checking.
+
+### Step 8 — mkan Port Sudan launch · verdict **PARTIAL**, 2026-08-24
+
+The orphaned commit. The question was simply *did any of this ship?* — and the answer splits
+cleanly in two.
+
+**The product shipped.** `www.mkan.sd` is live, serving Arabic, and the page contains
+**بورتسودان** along with apartment and property listings. The Port Sudan launch happened.
+
+**The preparation shipped, and it is thorough.** `46f93b2` delivered exactly what its subject
+claimed: the mkan brand kit entry, **4 content pillars**, media references, the `airbnb-copy`
+skill (registered and loadable), `scripts/video-media.mjs`, and a **4,109-line** corpus of real
+Sudanese Airbnb listings to write against. mkan's Facebook Page is connected and the canary
+reports it healthy.
+
+**The campaign never ran.** Measured in the database:
+
+| | |
+|---|---|
+| `SocialPiece` by brand | **hogwarts 5. That is the entire table.** |
+| Media briefs by brand | hogwarts 2 · balqalam 1 · databayt 1 — **mkan 0** |
+| mkan variants, drafts, posts | **zero, of every kind** |
+
+So mkan has a live site with Port Sudan listings, a connected and healthy Facebook Page, a
+complete brand kit, four content pillars, a bespoke copywriting skill and a 4,109-line reference
+corpus — and **has never posted once**.
+
+The commit is not a lie: it says *align … for Port Sudan launch*, and the alignment is real and
+complete. It reads as orphaned because the thing it was preparing for never used it.
+
+**Noted in passing:** `content/social/pillars.json`'s own `$comment` records the same pattern
+happening one level down — a `pillar` field that was "written and read by nobody". The repo has
+already caught itself doing this once.
 
 ### Incidental findings (not yet steps)
 
