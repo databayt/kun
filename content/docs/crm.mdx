@@ -15,11 +15,65 @@ Databayt runs a self-hosted **[Twenty](https://twenty.com)** fork ([databayt/twe
 | **Mkan** | [mkan.databayt.org](https://mkan.databayt.org) | Property hosts and listings |
 | **Sijillee** | [sijillee.databayt.org](https://sijillee.databayt.org) | Pre-launch prospects |
 | **Moallimee** | [moallimee.databayt.org](https://moallimee.databayt.org) | Pre-launch prospects |
-| **Databayt** | [sales.databayt.org](https://sales.databayt.org) | Tech jobs (Next.js/React/TS), software house partnerships, per-project client services |
+| **Databayt** | [sales.databayt.org](https://sales.databayt.org) | Tech jobs (Next.js/React/TS), software house partnerships, per-project client services — plus the **Kigali** custom object (below) |
 
 The old `*.crm.databayt.org` hosts still resolve but 307-redirect to the same path on `<product>.databayt.org`. The default landing host is `app.databayt.org`.
 
 > **`mkan.databayt.org` is the CRM, not the mkan app.** The app is `mk.databayt.org`, migrating to `mkan.sd`. A script that mints an outreach or claim link must never default to the CRM host. These names also collide with hogwarts' tenant wildcard, which provisions schools at `<domain>.databayt.org` — guarded by `hogwarts/src/lib/reserved-subdomains.ts`.
+
+## Custom objects
+
+The workspaces run Twenty's standard objects with one exception. The **Databayt**
+workspace carries a custom object, **Kigali** (`kigaliOpportunity`), added
+2026-08-24 as the pipeline for the Kigali job search and the worldwide remote
+developer lane.
+
+It exists because `Opportunity` could not hold the work. An opportunity has
+`name`, `amount`, `closeDate` and a five-value sales `stage`
+(`NEW|SCREENING|MEETING|PROPOSAL|CUSTOMER`) — nowhere to put a campaign, a
+recommendation tier, an engine score, a job URL or an application deadline, and
+a sales stage means nothing for a job hunt. Sales deals keep Opportunities; jobs
+live next door.
+
+| Field | Type | Carries |
+| --- | --- | --- |
+| `company` | `RELATION` → company | The employer, reverse-labelled "Kigali" |
+| `campaign` | `SELECT` | Protection · Electrical · Marine ETO · Web Developer · Remote Worldwide |
+| `tier` | `SELECT` | The [Job Engine](/docs/jobs)'s 5D recommendation |
+| `engineScore` | `NUMBER` | 5D overall, 0-100 |
+| `applicationStatus` | `SELECT` | To apply → Applied → Response → Interview → Offer |
+| `remoteType` · `employmentType` · `location` | `SELECT` · `SELECT` · `TEXT` | Shape of the role; `location` carries the timezone constraint on remote rows |
+| `jobUrl` | `LINKS` | The posting or direct-approach target |
+| `deadline` | `DATE_TIME` | Where the posting states one |
+| `source` · `fingerprint` | `TEXT` | Provenance, and the engine's dedup hash |
+| `assessment` | `RICH_TEXT` | Description, skills, and the engine's reasoning |
+
+Written by `jobs/push-kigali-to-twenty.mjs` and by the 1-click button on every
+`/jobs` card. **Both dedupe on `fingerprint`** — `sha256(company:title:remoteType)`
+truncated to 16 chars, the same hash the engine uses, so a record is the same
+record in both systems. The Opportunities object still carries duplicate `[Job]`
+rows from an earlier push that had no such check.
+
+### Writing custom objects
+
+The metadata API is open on this build — `GET/POST/PATCH/DELETE` on
+`/rest/metadata/objects` and `/rest/metadata/fields`. Three shapes are easy to
+get wrong and all three cost a 400:
+
+- `RICH_TEXT` is a **composite**, `{ blocknote, markdown }`, not a string. An
+  import fills `markdown` and leaves `blocknote` null; Twenty renders the rest.
+- `LINKS` is `{ primaryLinkUrl, primaryLinkLabel, secondaryLinks }`, not a URL
+  string. `company.domainName` is a `LINKS` field, which surprises people.
+- A `RELATION` field needs `relationCreationPayload:
+  { targetObjectMetadataId, targetFieldLabel, targetFieldIcon, type }` where
+  `type` is `MANY_TO_ONE` or `ONE_TO_MANY`.
+
+Set `isLabelSyncedWithName: false` whenever the label differs from the name —
+which is always, for a plural like "Kigali" over `kigaliOpportunities`.
+
+`scripts/crm-kigali-object.mjs` creates the object and its fields idempotently;
+`scripts/lib/twenty-rest.mjs` holds the shared client (Keychain auth, 800 ms
+spacing, 429 backoff).
 
 ## Topology
 

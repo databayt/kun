@@ -152,9 +152,27 @@ describe("Kun Job Engine (Hardened & Modular Architecture)", () => {
       },
     };
 
-    const res = await pushJobToTwentyCRM(mockJob);
-    expect(res).toBeDefined();
-    expect(typeof res.ok).toBe("boolean");
-    expect(res.message).toBeTruthy();
+    // The test name says "offline backend" but nothing here made it offline —
+    // so with the Twenty Docker stack up and the Keychain key present, this
+    // wrote a real record into the production CRM on every run. It went
+    // unnoticed while pushJobToTwentyCRM was broken and always got a 400;
+    // fixing that function turned a silent no-op into three duplicate
+    // "Full-Stack Engineer @ Databayt Tech Partner" rows in one afternoon.
+    //
+    // Port 1 is reserved and never listening, so this forces the connection
+    // failure the assertions are actually about.
+    const realApiUrl = process.env.TWENTY_API_URL;
+    process.env.TWENTY_API_URL = "http://127.0.0.1:1";
+
+    try {
+      const res = await pushJobToTwentyCRM(mockJob);
+      expect(res).toBeDefined();
+      expect(typeof res.ok).toBe("boolean");
+      expect(res.message).toBeTruthy();
+      expect(res.ok).toBe(false);
+    } finally {
+      if (realApiUrl === undefined) delete process.env.TWENTY_API_URL;
+      else process.env.TWENTY_API_URL = realApiUrl;
+    }
   });
 });
