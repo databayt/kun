@@ -10,6 +10,14 @@ Plan: `~/.claude/plans/through-the-past-days-quiet-muffin.md`
 
 ## Status: **DONE** — 2026-08-24. All twelve rows carry a verdict.
 
+### Follow-through after the pass closed
+
+| | |
+|---|---|
+| `7178857` | **Schema-drift guard** — a test that fails the build when a model has no migration. It would have caught #152 on the same push, and it surfaced a **third** undocumented model the issue had not named: `EvidenceProfileSnapshot`. The three sit on a `KNOWN_MISSING` list rather than in a red build, with a second test that fails if the list outlives the debt |
+| `8a636ef` | **Media Studio honesty** — the inert model picker now reads "Run in: …" with a line saying the studio compiles a prompt rather than rendering. Closes the last surface in that area still implying generation |
+| #149, #148 | **Retitled to match reality** — "no review destination is configured, so the approval gate is unattended", and the CDN issue reframed as a wiring decision rather than a broken distribution |
+
 **3 PASS · 6 PARTIAL · 1 FAIL** (+ Steps 0–2, all closed)
 
 | Exit criterion | |
