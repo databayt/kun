@@ -11,6 +11,8 @@
 
 import { useEffect, useState } from "react";
 import { Film, Images, RefreshCw, Settings2 } from "lucide-react";
+
+import { ReviewSpotlight } from "@/components/root/social/spotlight";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -80,6 +82,12 @@ export function ReviewPanel() {
             <p className="text-muted-foreground mx-auto mt-4 max-w-xl text-lg font-light">
               {t.reviewIntro}
             </p>
+          </div>
+
+          {/* The search bar sits above the queue it filters, and doubles as
+              the way to send a line you just wrote — see spotlight.tsx. */}
+          <div className="mb-6">
+            <ReviewSpotlight />
           </div>
 
           {/* The queue header — count on one side, refresh + settings on the

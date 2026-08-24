@@ -130,6 +130,13 @@ export const SOCIAL_DICTIONARY = {
       "Must be a public media URL — the platforms fetch it themselves. Images and/or one video, up to 10.",
     charCount: "{count} / {max}",
     // ——— The review queue (the Publish stage) ———
+    // The queue's search bar. One box, two row kinds: find a draft, or send
+    // what you just typed.
+    spotlightPlaceholder: "Search the queue, or type a post and press Enter",
+    spotlightSend: "Send to {brand}",
+    spotlightSendTooShort: "Type a little more to send it",
+    spotlightSentTo: "Sent to {brand}.",
+    spotlightNoDrafts: "No drafts match — Enter still sends what you typed.",
     reviewTitle: "Review & publish",
     reviewIntro:
       "Answered drafts queue here for a human decision — fine-tune, then approve. Writing happens in the Draft stage; media in the showroom.",
@@ -438,6 +445,11 @@ export const SOCIAL_DICTIONARY = {
     mediaHint:
       "روابط وسائط عامة — المنصات تجلبها بنفسها. صور و/أو فيديو واحد، حتى 10.",
     charCount: "{count} / {max}",
+    spotlightPlaceholder: "ابحث في الطابور، أو اكتب منشوراً واضغط Enter",
+    spotlightSend: "أرسل إلى {brand}",
+    spotlightSendTooShort: "اكتب أكثر قليلاً لإرساله",
+    spotlightSentTo: "أُرسل إلى {brand}.",
+    spotlightNoDrafts: "لا مسودة تطابق — وEnter يرسل ما كتبته.",
     reviewTitle: "المراجعة والنشر",
     reviewIntro:
       "المسودات المُجابة تصطف هنا لقرار بشري — نقّح ثم اعتمد. الكتابة تجري في مرحلة الصياغة، والوسائط في المعرض.",
