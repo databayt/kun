@@ -162,10 +162,10 @@ Also worth a ledger line: `.claude/engine.json` says `"model": "google-free"` wh
 | 6 | Funnel (Floo Network) | **PARTIAL** | see below | structurally real, operationally empty; "capturing" not demonstrated |
 | 7 | Scrape / Owlery | **PASS** | see below | first area to hold; one readability caveat |
 | 8 | mkan Port Sudan launch | **PARTIAL** | see below | the site shipped; the campaign never ran |
-| 9 | CRM workspaces | OPEN | — | — |
-| 10 | Media mastering + carousel | OPEN | — | implementation in mkan |
-| 11 | Engine config | OPEN | — | engine.json `google-free` vs CLAUDE.md `claude-fable-5` |
-| 12 | Docs site | OPEN | — | — |
+| 9 | CRM workspaces | **FAIL** | see below | every published URL is dead; reachable only from the Mac |
+| 10 | Media mastering + carousel | **PASS** | see below | docs match the runbook; artifacts exist and are served |
+| 11 | Engine config | **PARTIAL** | see below | agent counts drifted; model declared wrong twice over |
+| 12 | Docs site | **PASS** | `/api/og` 200 image/png 28KB · `/en/docs` 200 | — |
 
 ### Step 3 — social publishing · verdict **PARTIAL**, 2026-08-23
 
@@ -406,6 +406,71 @@ complete. It reads as orphaned because the thing it was preparing for never used
 **Noted in passing:** `content/social/pillars.json`'s own `$comment` records the same pattern
 happening one level down — a `pillar` field that was "written and read by nobody". The repo has
 already caught itself doing this once.
+
+### Step 9 — CRM workspaces · verdict **FAIL**, 2026-08-24
+
+**Every published CRM URL is dead. The CRM is reachable only from Abdout's laptop.**
+
+| Host | Result |
+|---|---|
+| 4 × `*.crm.databayt.org` | **402** — still attached to the soft-blocked Vercel account |
+| `sales.databayt.org` (the 5th workspace, added 08-20) | **404** |
+| `app.databayt.org` + 4 × `<product>.databayt.org` (the hosts the docs call canonical) | **404** |
+| `localhost:3100` | **200** |
+
+**Root cause:** DNS is fine — every hostname resolves to Vercel's IPs, the same ones that serve
+`kun.databayt.org`. The failure is `x-vercel-error: DEPLOYMENT_NOT_FOUND`. The zone move to the
+free `databayt` account on 2026-08-23 brought the **records** and left the **project** behind, so
+the domains point at Vercel and no project claims them.
+
+The public docs page lists all of these as working links and says "one login that works on all
+workspaces — sign in once on any link". There is currently no link that works. The team cannot
+reach the CRM, and the funnel of Step 6 runs against `localhost` only.
+
+### Step 10 — Media mastering + carousel · verdict **PASS**, 2026-08-24
+
+kun's `master.mdx` and mkan's `docs/image-mastering.md` **agree exactly** — "loop PROVEN
+end-to-end (2026-08-22)", photo 2 of listing #1051, 147 listings / 112 to queue / **779** low
+photos, ~$30 on `legacy`, next up #1127 and #1161, blocked on the same two human actions (Slack
+scopes, the deferred billing `/decide`). A doc that names another repo as its source of truth and
+then matches it.
+
+And the artifacts are real, not just described: **two mastered WebPs** in `databayt-cdn` at
+`mkan/uploads/mastered/` — 109 KB dated 2026-08-22 and 181 KB dated 2026-08-23, exactly when
+claimed. Both are **publicly served (200)** through `cdn.databayt.org`, and one of them appears on
+the live `www.mkan.sd` homepage.
+
+### Step 11 — Engine config · verdict **PARTIAL**, 2026-08-24
+
+- `project_agents` declared **22**, actual **26**. `user_agents` declared **49**, actual **53**.
+  (Skill counts are correct: 54 and 72.)
+- `.claude/engine.json` declares `"model": "google-free"` / "Google Free (Gemini 2.5 Pro)" while
+  `.claude/CLAUDE.md` declares `claude-fable-5` — and the session that ran this audit was Opus 5.
+  The file called "single source of truth for engine metadata" is wrong twice over.
+
+### Step 12 — Docs site · verdict **PASS**, 2026-08-24
+
+`/api/og?title=…` returns **200, `image/png`, 28 KB** — the generated share image works.
+`/en/docs` returns **200**. Dormant since 08-14 and fine.
+
+### Correction — the CDN diagnosis in Step 4 (and in issue #148) was wrong
+
+Step 4 recorded "cdn.databayt.org still 403s", and I said as much on #148. **That was a bad test:**
+the key I probed did not exist in any bucket, so the 403 was S3 masking a 404.
+
+A discriminating probe — one object written to **only** `hogwarts-databayt`, another to **only**
+`databayt-cdn`, both requested through the CDN:
+
+| Object lives in | `cdn.databayt.org` returns |
+|---|---|
+| `hogwarts-databayt` only | **403** |
+| `databayt-cdn` only | **200** |
+
+**The CDN works.** Its origin is `databayt-cdn`, and it serves that bucket correctly — which is why
+the mastered mkan photos above are publicly reachable. What 403s is the *social pipeline's* bucket,
+`hogwarts-databayt`, because it is **not the CDN's origin at all**. Issue #148's premise —
+"CloudFront cannot read the bucket" — is wrong, and so is the `reference_aws_cdn` memory that names
+`hogwarts-databayt` as the alias's bucket.
 
 ### Incidental findings (not yet steps)
 
