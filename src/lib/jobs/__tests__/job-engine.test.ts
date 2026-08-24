@@ -162,7 +162,15 @@ describe("Kun Job Engine (Hardened & Modular Architecture)", () => {
     // Port 1 is reserved and never listening, so this forces the connection
     // failure the assertions are actually about.
     const realApiUrl = process.env.TWENTY_API_URL;
+    const realKey = process.env.TWENTY_API_KEY_DATABAYT;
     process.env.TWENTY_API_URL = "http://127.0.0.1:1";
+    // A key must be present or pushJobToTwentyCRM short-circuits to its
+    // "simulated sync" branch and returns ok:true — which is what happens on
+    // CI, where getDatabytTwentyKey()'s last resort is the macOS Keychain and
+    // there isn't one. The test then passed on a Mac and failed on the runner:
+    // the same works-on-my-machine shape that kept CI red from 08-19 to 08-24.
+    // A dummy key forces the network path the assertions are actually about.
+    process.env.TWENTY_API_KEY_DATABAYT = "test-key-not-a-real-credential";
 
     try {
       const res = await pushJobToTwentyCRM(mockJob);
@@ -173,6 +181,8 @@ describe("Kun Job Engine (Hardened & Modular Architecture)", () => {
     } finally {
       if (realApiUrl === undefined) delete process.env.TWENTY_API_URL;
       else process.env.TWENTY_API_URL = realApiUrl;
+      if (realKey === undefined) delete process.env.TWENTY_API_KEY_DATABAYT;
+      else process.env.TWENTY_API_KEY_DATABAYT = realKey;
     }
   });
 });
