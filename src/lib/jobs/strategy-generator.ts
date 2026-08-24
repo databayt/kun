@@ -178,7 +178,11 @@ export function calculateDeterministicStrategy(
     },
   ];
 
-  const truthfulNarrative = `I am a product builder and systems engineer who transitioned from electrical engineering into software development. My engineering training instilled a deep first-principles mindset that I apply to full-stack architecture: from relational database schemas and session security to accessible design systems and structured AI workflows. Over the past several years at Databayt, I have personally architected and shipped 10+ production codebases including Hogwarts (multi-tenant SaaS), Kun (AI operations), and Codebase (150+ component design system).`;
+  // Dual-track on purpose. The old wording said "transitioned from electrical
+  // engineering into software development" — past tense, one track abandoned —
+  // which is both untrue and useless for a protection or ETO application. Both
+  // careers are live and each makes the other unusual.
+  const truthfulNarrative = `I run two engineering tracks at once, and each one makes the other unusual. On the hardware side I am a practising electrical engineering professional: seven years at sea as an Electro-Technical Officer across four shipping lines, then four years testing and commissioning 33/13.8 kV protection schemes for Saudi Electricity Company, SWCC and EEIC on a full OMICRON and Megger bench. On the software side I have architected and shipped 10+ production codebases at Databayt, including Hogwarts (multi-tenant SaaS), Kun (AI operations), and Codebase (a 150+ component design system). The first-principles habits are the same in both: measure before you replace, know which reading condemns the cable, and design the schema before the screen.`;
 
   const coverLetter = `Dear Hiring Team at ${job.company},
 

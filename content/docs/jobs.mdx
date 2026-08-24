@@ -37,16 +37,17 @@ The **Job Engine** is Kun's career operations and opportunity matching platform.
 │                               │                                 │
 │  Layer 2: 3-Layer Engineering Knowledge Profile                 │
 │  ┌────────────────────────────────────────────────────────────┐ │
-│  │ Layer C: Market Positioning (Full-Stack AI, Founding, SaaS)│ │
+│  │ Layer C: Market Positioning (Software · Protection · ETO)  │ │
 │  │ Layer B: Capability Inferences (with explicit reasoning)   │ │
 │  │ Layer A: Observable Facts (Deep Production vs Manifests)   │ │
 │  └────────────────────────────────────────────────────────────┘ │
 │                               ▲                                 │
 │                               │                                 │
-│  Layer 1: Canonical Evidence Base (github.com/databayt)         │
+│  Layer 1: Canonical Evidence Base (two channels)                │
 │  ┌────────────────────────────────────────────────────────────┐ │
 │  │ GitHub Deep Reader (Schemas, Manifests, Remote AST Trees)  │ │
 │  │ Local Disk Fast-Path (AST / Server Actions Acceleration)   │ │
+│  │ CV Channel (protection & marine record — sourceType manual)│ │
 │  └────────────────────────────────────────────────────────────┘ │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
@@ -86,6 +87,21 @@ graph LR
     APPLE["github.com/databayt/apple & nike"] -->|Proves| CRAFT["Pixel-Exact Design Craft\nReact 19 & Tailwind 4\nFluid Motion & Polish"]
     MOBILE["github.com/databayt/ios-app & android-app"] -->|Proves| MOB["Native Mobile Engineering\nSwift 6 & SwiftUI\nKotlin & Jetpack Compose"]
 ```
+
+### The CV Channel
+
+Repository scanning can only ever prove software: a commissioning report is not
+a `package.json`. Twelve years of electrical and marine engineering therefore
+entered the profile nowhere. `src/lib/jobs/cv-evidence.ts` is the second
+channel — `EvidenceFact`, `CapabilityInference`, `MarketPositioningRole` and
+`TechnologySkillFact` entries carrying `sourceType: "manual"`, merged in
+`buildEvidenceKnowledgeProfile()` and sourced from `jobs/cv/`.
+
+Technology **names in that file are load-bearing**. The matcher tests
+`t.includes(req) || req.includes(t.split(" ")[0])`, so each name's first word is
+a live wildcard: a name containing "maintenance" would swallow the bare required
+skill `"AI"`, and one starting "Systems" or "Embedded" would neutralise the hard
+blockers the bare-metal golden scenarios depend on.
 
 ### Verified Code Evidence Matrix
 
@@ -148,6 +164,34 @@ Overall Score = 0.40 * Tech + 0.30 * Capability + 0.15 * Domain + 0.15 * Seniori
 └─────────────────────────────────────────────────────────────────┘
 ```
 
+### Engineering Lanes
+
+The four dimensions above are not scored the same way for every job, because the
+candidate is not one professional. A 33 kV substation posting and a Next.js
+posting need different verified stacks, different blocker ladders and different
+domain vocabularies — scored on one software-shaped ruler, the substation job
+came out at **48%, "Low Probability"**, which was the engine's single worst
+answer.
+
+`src/lib/jobs/lanes.ts` resolves each job into one of four lanes and supplies
+the four literals the matcher used to hardcode:
+
+| Lane | Verified stack | Evidence behind it |
+| :--- | :--- | :--- |
+| `software` | 9 repository technologies | github.com/databayt — Hogwarts, Kun, Codebase, Mkan |
+| `protection` | Power Systems · Industrial & Plant | SEC / SWCC / EEIC 33/13.8 kV, OMICRON + Megger bench |
+| `electrical` | Power Systems · Industrial & Plant | S-CHEM MCC and busbar, KAP C2 cable diagnostics |
+| `marine` | Marine · Power Systems · Industrial & Plant | ETO across four shipping lines, 2014–2021, STCW |
+
+Resolution scores lane keywords across title (×3), domain (×2) and required
+skills (×1), and **defaults to `software`**. Two rules keep the software lane
+exactly where it was: lane keywords must be specific — never bare `systems`,
+which `Embedded Systems` and `Defense Systems` would trip — and the technology
+categories partition, so a software job never sees a protection relay in its
+verified stack. Both were load-bearing in practice: an early keyword list
+included bare `ship`, and "Partner**ship**s" routed a developer-network record
+into the marine lane.
+
 ### Recommendation Tiers
 
 | Tier | Score Range | Meaning | Action |
@@ -194,8 +238,8 @@ Qualified opportunities are pushed directly into Databayt's self-hosted **Twenty
 | Property | Value |
 | :--- | :--- |
 | **Target Workspace** | **Databayt** (`sales.databayt.org`) |
-| **Target Pipeline** | *Tech jobs, software house partnerships, client custom software* |
-| **Local Endpoint** | `http://localhost:3100/rest/opportunities` |
+| **Target Object** | **Kigali** (custom object — `kigaliOpportunity`) |
+| **Local Endpoint** | `http://localhost:3100/rest/kigaliOpportunities` |
 | **Auth Key** | macOS Keychain: `security find-generic-password -s databayt-twenty -a databayt` |
 | **Throttling** | >= 700ms spacing, exponential backoff on 429 |
 
@@ -203,12 +247,13 @@ Qualified opportunities are pushed directly into Databayt's self-hosted **Twenty
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Discovered: Job Ingested (/jobs)
-    Discovered --> Analyzed: 5D Match Calculated
+    [*] --> Discovered: Job Ingested (/jobs or seed)
+    Discovered --> Analyzed: Lane Resolved, 5D Match Calculated
     Analyzed --> Qualified: Score >= 70%
     Analyzed --> HighPriority: Score >= 85% & 0 Blockers
-    HighPriority --> TwentyCRM: 1-Click Push (sales.databayt.org)
-    TwentyCRM --> Applied: Application Sent
+    HighPriority --> Kigali: Push to the Kigali object (sales.databayt.org)
+    Qualified --> Kigali: Push to the Kigali object
+    Kigali --> Applied: Application Sent
     Applied --> Interview: Interview Scheduled
     Interview --> Offer: Offer Received
 ```
@@ -255,10 +300,19 @@ pnpm typecheck
 # 2. Run unit & integration tests
 pnpm test src/lib/jobs/__tests__/job-engine.test.ts
 
-# 3. Push Prisma schema changes to database
-npx prisma db push
+# 3. Seed the staged campaign records (idempotent by fingerprint)
+pnpm db:seed:jobs --dry-run   # review first — Neon is shared prod + local
+pnpm db:seed:jobs
 
-# 4. Start local development server
+# 4. Score any record set against the current profile (regression instrument)
+pnpm dlx tsx scripts/score-report.ts --golden
+pnpm dlx tsx scripts/score-report.ts jobs/kigali-jobs.normalized.json
+
+# 5. CRM: create the Kigali object, then push (both idempotent, both --dry-run)
+node scripts/crm-kigali-object.mjs --dry-run
+node jobs/push-kigali-to-twenty.mjs --probe
+
+# 6. Start local development server
 pnpm dev
 ```
 

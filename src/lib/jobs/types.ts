@@ -72,7 +72,17 @@ export interface EvidenceFact {
 export interface CapabilityInference {
   id: string;
   name: string;
-  category: "Architecture" | "Frontend" | "Backend" | "AI" | "Systems" | "Mobile" | "Automation";
+  category:
+    | "Architecture"
+    | "Frontend"
+    | "Backend"
+    | "AI"
+    | "Systems"
+    | "Mobile"
+    | "Automation"
+    // Non-software engineering lanes, evidenced from the CV rather than a repo.
+    | "Power Systems"
+    | "Marine";
   level: "Expert" | "Proficient" | "Advanced" | "Foundational";
   description: string;
   reasoning: string;
@@ -100,7 +110,13 @@ export interface TechnologySkillFact {
     | "Mobile"
     | "Systems"
     | "Design"
-    | "Automation";
+    | "Automation"
+    // Non-software engineering lanes. These carry CV-sourced evidence rather
+    // than repository evidence, and the matcher partitions on them so a
+    // software job never sees a protection relay in its verified stack.
+    | "Power Systems"
+    | "Industrial & Plant"
+    | "Marine";
   level: "Deep Production" | "Proficient" | "Working Knowledge";
   depth: EvidenceWeight;
   facts: EvidenceFact[];

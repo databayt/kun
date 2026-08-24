@@ -1,5 +1,11 @@
 import fs from "node:fs";
 import path from "node:path";
+import {
+  CV_CAPABILITIES,
+  CV_EVIDENCE_FACTS,
+  CV_POSITIONING_ROLES,
+  CV_TECHNOLOGY_SKILLS,
+} from "./cv-evidence";
 import { fetchGitHubFileContent } from "./github-fetcher";
 import { resolveDatabaytRepositories } from "./repository-registry";
 import {
@@ -391,6 +397,10 @@ export function synthesizeMarketPositioning(capabilities: CapabilityInference[])
       supportingCapabilityIds: ["cap-design-systems"],
       strongestProjectProofs: ["Codebase", "Apple Clone", "Nike Clone"],
     },
+    // The engineering track. Repository scanning can never surface these — a
+    // 33 kV commissioning report is not a package.json — so they arrive from
+    // the CV channel instead. See cv-evidence.ts.
+    ...CV_POSITIONING_ROLES,
   ];
 }
 
@@ -471,14 +481,19 @@ export function buildEvidenceKnowledgeProfile(): EngineeringKnowledgeProfile {
     return cachedProfile;
   }
 
-  const facts = extractRepositoryFacts(repos);
-  const capabilities = synthesizeCapabilities(facts);
+  // CV evidence is merged here rather than inside extractRepositoryFacts:
+  // that function means "what the repositories prove", and a test asserts it
+  // on those terms. The profile is the union of both channels.
+  const repoFacts = extractRepositoryFacts(repos);
+  const facts = [...repoFacts, ...CV_EVIDENCE_FACTS];
+  const capabilities = [...synthesizeCapabilities(repoFacts), ...CV_CAPABILITIES];
   const positioningRoles = synthesizeMarketPositioning(capabilities);
-  const technologies = extractTechnologySkills(facts);
+  const technologies = [...extractTechnologySkills(repoFacts), ...CV_TECHNOLOGY_SKILLS];
 
   const profile: EngineeringKnowledgeProfile = {
     candidateName: "Osman Abdout (Databayt Lead Builder)",
-    headline: "Full-Stack AI Engineer & SaaS Systems Architect",
+    headline:
+      "Full-Stack AI Engineer & SaaS Systems Architect · Protection & Testing Engineer · Marine Electro-Technical Officer",
     analyzerVersion: ANALYZER_VERSION,
     facts,
     capabilities,

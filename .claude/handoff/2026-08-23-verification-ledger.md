@@ -160,7 +160,7 @@ Also worth a ledger line: `.claude/engine.json` says `"model": "google-free"` wh
 | 4 | Media Studio | **PARTIAL** | see below | inert model selector; 2 dead media URLs; seat lane never delivered |
 | 5 | Job Engine | **PARTIAL** | see below | Layers B+C hardcoded; 0 rows persisted; **schema drift — no migration** |
 | 6 | Funnel (Floo Network) | **PARTIAL** | see below | structurally real, operationally empty; "capturing" not demonstrated |
-| 7 | Scrape / Owlery | OPEN | — | — |
+| 7 | Scrape / Owlery | **PASS** | see below | first area to hold; one readability caveat |
 | 8 | mkan Port Sudan launch | OPEN | — | orphaned commit `46f93b2` — did it ship? |
 | 9 | CRM workspaces | OPEN | — | — |
 | 10 | Media mastering + carousel | OPEN | — | implementation in mkan |
@@ -346,6 +346,33 @@ the part the data does not support.
 
 So of *"instrumented, ACTIVE, capturing"*: **instrumented ✓, ACTIVE ✓, capturing ✗** — built and
 deployed, never exercised by a real person.
+
+### Step 7 — Scrape / Owlery · verdict **PASS**, 2026-08-24
+
+The first area in this pass whose claims hold end to end.
+
+| Claim | Evidence |
+|---|---|
+| The hooks work | `funnel-guard.test.sh` **19/19**, `scrape-guard.test.sh` **17/17** |
+| The guard is actually live | It **blocked a command in this very session** — a probe of mine containing a fenced `scripts/crm/` path was refused mid-run. Not a claim: an interception |
+| "Requires an execution verb" | Holds. `grep -rn …` and `git status` allowed; a fenced-path execution blocked (exit 2) |
+| Both readers installed | **Scrapling 0.4.14** and **Agent Reach v1.5.0** |
+| Agent Reach is the real package | **Yes** — "Give your AI Agent eyes to see the entire internet", not the PyPI name collision that memory warns about |
+| Scrapling actually works | Not just a version string: a real fetch of `example.com` returned **HTTP 200** and wrote 196 bytes of markdown |
+| "`doctor` is config-not-liveness" | **Confirmed by the tool's own output**, which says it deliberately does not run `gh auth status` because that would write a device-id, "therefore not verified live" |
+| kun holds routing only | Consistent — no scraper logic in this repo |
+
+**Also verified here:** the `.toolCall.args.CommandLine` fallback added in Step 1 (`afa2f89`) works —
+both payload shapes produce identical decisions on identical input, allow and block alike.
+
+**Caveat:** `agent-reach doctor --json` returns its diagnostics **in Chinese**. Nothing is broken,
+but anyone reading that output will lose time to it.
+
+**Why this one holds when the others did not, and it is worth naming:** this is the area whose
+commits most often said *"correct the measured numbers"* — the census churned 3,156 → 714 → 728 →
+724 → 287 → 262 across six commits, each correcting the last. That looked like thrash in the git
+log. It was the opposite: the discipline of re-measuring instead of restating is exactly why its
+claims survive checking.
 
 ### Incidental findings (not yet steps)
 
