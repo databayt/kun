@@ -24,40 +24,95 @@ Seven parts. Each one does a single thing:
 ## The loop
 
 A photo goes in at the top. A better photo comes out on the website at the
-bottom. Of the seven steps, you only do three.
+bottom. Six steps, and you only touch two of them.
 
 ```mermaid
 graph TD
     S1["1 · A photo enters Twenty CRM"]
     S2["2 · Twenty fires a workflow"]
     S3["3 · The photo lands in mkan/inbox"]
-    S4["4 · You make the better photo"]
-    S5["5 · You save it back to mkan/inbox"]
-    S6{"6 · You check it"}
-    S7["7 · It goes live, and back to Twenty"]
+    S4["4 · You paste it into ChatGPT"]
+    S5["5 · You save the result to mkan/inbox"]
+    S6["6 · It goes live, and back to Twenty"]
     S1 --> S2 --> S3 --> S4 --> S5 --> S6
-    S6 -->|"good"| S7
-    S6 -->|"not right — say why"| S4
 ```
 
 ### What each box means
 
 | Box | In plain words |
 | --- | --- |
-| **1 · A photo enters Twenty CRM** | Someone puts a photo on a home in the CRM. This is the only thing that starts the loop — there is nothing else to press or run. |
+| **1 · A photo enters Twenty CRM** | Someone puts a photo on a home in the CRM. This is the only thing that starts the loop — nothing else to press or run. |
 | **2 · Twenty fires a workflow** | Twenty notices the new photo by itself and sends a signal out. Nobody has to tell it. |
-| **3 · The photo lands in `mkan/inbox`** | The signal pulls the photo down to one folder on the Mac. Its name says which home it belongs to, so it can never get mixed up with another. |
-| **4 · You make the better photo** | Drag it from that folder into ChatGPT. The instructions are already saved there, so you just press Enter and wait. |
-| **5 · You save it back to `mkan/inbox`** | Same folder it came from. Saving *is* the whole job — the computer is watching that folder and takes over the second the file appears. |
-| **6 · You check it** | Look at the old photo and the new one together. Same room? Still true to the real place? Only a person can answer that. If it is wrong, say why — that is what makes the next one better. |
-| **7 · It goes live** | The new photo replaces the old one on the website, and Twenty is updated to match. Done. |
+| **3 · The photo lands in `mkan/inbox`** | The signal pulls the photo down to one folder on the Mac, and puts it on your clipboard ready to paste. |
+| **4 · You paste it into ChatGPT** | ⌘V, Enter. You do not type a prompt — the project already carries it (see below). |
+| **5 · You save the result to `mkan/inbox`** | Same folder. Saving *is* the whole job — the computer watches that folder and takes over the second the file appears. |
+| **6 · It goes live** | The new photo replaces the old one on the website, and Twenty is updated to match. Done. |
 
-Your part is three boxes: **4, 5 and 6** — make it, save it, say yes.
+There is no separate "check it" step, because you already saw the photo in
+ChatGPT before you saved it. Saving **is** the yes. If one comes out wrong,
+do not save it — press Enter again.
 
 > **Not switched on yet.** Box 2 is the plan. Today nothing watches Twenty:
 > the photo is fetched by a command that has to be run, and the every-5-minutes
-> timer that would run it is written but not installed. Boxes 5 → 7 are live
+> timer that would run it is written but not installed. Boxes 5 → 6 are live
 > and working right now.
+
+## Set ChatGPT up once
+
+The single biggest thing that makes this easy is a **ChatGPT Project** holding
+the standing instructions. Do it once and it pays on every photo forever.
+
+```bash
+pnpm master:prep --setup-chatgpt   # prints the text to paste
+```
+
+ChatGPT → **Projects** → New project → name it **Makan Mastering** →
+**Instructions** → paste what that command printed.
+
+Why it matters so much:
+
+- **The prompt stops travelling.** It is saved in the project, applied to every
+  image you send, so there is nothing to copy, paste or retype per photo.
+- **That frees the clipboard for the photo.** ChatGPT's Mac app cannot be
+  handed an image file from the command line — it declares no image file types,
+  so `open -a ChatGPT photo.jpg` does nothing. Pasting is the only way in. With
+  the prompt standing, `master:prep --standing` puts the *photo* on your
+  clipboard instead, and the job becomes **⌘V, Enter, save**.
+- **Every photo gets the identical prompt.** No drift between photo 1 and photo
+  40, which is what makes the output consistent enough to trust without a
+  separate review step.
+- **It ends the questions.** The instructions finish with *"Return only the
+  transformed photograph. Never ask follow-up questions"* — so ChatGPT answers
+  with an image, not a conversation.
+- **It is the same trick anywhere.** Gemini calls it a Gem, Claude calls it a
+  Project. The standing instructions are identical; only the menu differs.
+
+The one thing the project cannot know is **which room** it is looking at — that
+varies per photo, and it comes from the file name.
+
+## Naming the photos
+
+Name each photo after its room, in plain lowercase English:
+
+```
+bedroom.jpg   bathroom.jpg   hall.jpg   kitchen.jpg   living-room.jpg
+```
+
+That name is read as a **room hint** and added to the prompt, so the generator
+knows it is lighting a kitchen and not a bedroom. Three rules, all of them
+tested:
+
+| Do | Don't | Why |
+| --- | --- | --- |
+| `bedroom.jpg` | `0001-01-bedroom.jpg` | A name starting with digits is thrown away as a hint — it looks like a machine id, not a room. |
+| `bedroom-2.jpg` for the second one | `bedroom2.jpg` | With a dash the number is trimmed and the hint is still `bedroom`. Glued on, the whole name is rejected. |
+| `living-room.jpg` | `IMG_4821.jpg` | Dashes become spaces, so the hint reads `living room`. Camera names carry no room at all. |
+
+**You never need to put the listing in the file name.** The photo is dropped on
+a home record in Twenty, so the CRM already knows which home and which listing
+it belongs to. Your `0001-01` scheme identifies the *listing*; the file name
+only has to say the *room*. If you keep them in folders, keep the id on the
+folder — `0001-01/bedroom.jpg` works, because only the last part is read.
 
 State truth lives in **mkan Prisma** (`MasteringRun` — absence is the ORIGINAL state; retries append, history never overwritten). Twenty's `home` is the ops mirror (`photoStage` grew `MASTERED`, plus `photosMastered` / `lastMasteredAt`). The CDN is canonical and originals are immortal. Operator runbook: `mkan/docs/image-mastering.md`.
 
