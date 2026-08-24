@@ -159,7 +159,7 @@ Also worth a ledger line: `.claude/engine.json` says `"model": "google-free"` wh
 | 3 | Social publishing | **PARTIAL — stalled at the human gate, not broken** | see below | #145 restated; #149 stale; new: no review destination |
 | 4 | Media Studio | **PARTIAL** | see below | inert model selector; 2 dead media URLs; seat lane never delivered |
 | 5 | Job Engine | **PARTIAL** | see below | Layers B+C hardcoded; 0 rows persisted; **schema drift — no migration** |
-| 6 | Funnel (Floo Network) | OPEN | — | needs Twenty CRM up (:3100) |
+| 6 | Funnel (Floo Network) | **PARTIAL** | see below | structurally real, operationally empty; "capturing" not demonstrated |
 | 7 | Scrape / Owlery | OPEN | — | — |
 | 8 | mkan Port Sudan launch | OPEN | — | orphaned commit `46f93b2` — did it ship? |
 | 9 | CRM workspaces | OPEN | — | — |
@@ -309,6 +309,43 @@ promise more than the code does.
    2026-08-06**. The tables exist in the shared Neon database only because someone ran
    `prisma db push`. `pnpm db:deploy` (`prisma migrate deploy`) against a fresh environment would
    **not** create them, and the app would fail at first query. Filed separately.
+
+### Step 6 — Funnel (Floo Network) · verdict **PARTIAL**, 2026-08-24
+
+Verified against the **live Twenty CRM** (containers healthy on `:3100`, authenticated over the
+GraphQL API). The structure is real and the card is unusually honest; what it calls *capturing* is
+the part the data does not support.
+
+**Verified TRUE — these claims hold exactly:**
+
+| Claim | Evidence |
+|---|---|
+| 12 stage options live | `CompanyStageEnum` = COLD, PROSPECT, SHORTLISTED, CONTACTED, WARM, DISCOVERY, DEMO, TRIAL, PILOT, PAID, DORMANT, LOST — **exact names, exact order** |
+| The outreach workflow is ACTIVE | "School shortlisted → outreach" — one ACTIVE version, one ARCHIVED |
+| The lead book is loaded | **3,894 companies** |
+| "Conversions: 0" | Accurate — PAID = 0 |
+
+**Verified NOT FLOWING:**
+
+1. **Ten of the twelve stages are empty.** COLD 3,795 · PROSPECT 21 · PILOT 1 · LOST 77 — and
+   nothing anywhere else.
+
+2. **SHORTLISTED = 0 and CONTACTED = 0.** Those two stages were appended on 2026-08-19
+   *specifically for the outreach roll*, and the card says they are "the outreach report's
+   numbers". The roll has produced **no record in either**.
+
+3. **The ACTIVE workflow has fired three times, ever** — all on 2026-08-22 (two COMPLETED, one
+   FAILED with no `startedAt`). Two of those are the throwaway tests the card itself describes. It
+   triggers on *shortlisted*, and nothing has been shortlisted since, so it has had **zero real
+   firings**.
+
+4. **The chatbot has captured nothing.** All 21 PROSPECT records were created **2026-07-23** — a
+   bulk import of named MENA schools (George Washington Academy, Doha College, King's Academy, …),
+   a **month before** chatbot capture went live on 2026-08-22. Not one prospect has entered
+   through the widget.
+
+So of *"instrumented, ACTIVE, capturing"*: **instrumented ✓, ACTIVE ✓, capturing ✗** — built and
+deployed, never exercised by a real person.
 
 ### Incidental findings (not yet steps)
 
