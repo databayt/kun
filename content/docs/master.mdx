@@ -43,8 +43,8 @@ graph TD
 | --- | --- |
 | **1 · A photo enters Twenty CRM** | Someone puts a photo on a home in the CRM. This is the only thing that starts the loop — nothing else to press or run. |
 | **2 · Twenty fires a workflow** | Twenty notices the new photo by itself and sends a signal out. Nobody has to tell it. |
-| **3 · The photo lands in `mkan/inbox`** | The signal pulls the photo down to one folder on the Mac, and puts it on your clipboard ready to paste. |
-| **4 · You paste it into ChatGPT** | ⌘V, Enter. You do not type a prompt — the project already carries it (see below). |
+| **3 · The photo lands in `mkan/inbox`** | The signal pulls the photo down to one folder on the Mac. A whole batch can land at once — they wait there for you. |
+| **4 · You paste it into ChatGPT** | `pnpm master:prep --standing` takes the next waiting photo, puts it on your clipboard and opens ChatGPT. Then it is ⌘V, Enter. You never type a prompt — the project already carries it (see below). |
 | **5 · You save the result to `mkan/inbox`** | Same folder. Saving *is* the whole job — the computer watches that folder and takes over the second the file appears. |
 | **6 · It goes live** | The new photo replaces the old one on the website, and Twenty is updated to match. Done. |
 
