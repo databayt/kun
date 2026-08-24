@@ -554,7 +554,12 @@ export function MediaStudio() {
                 </PromptInputModelSelectContent>
               </PromptInputModelSelect>
 
-              {/* 2. Model Selector — Clean title */}
+              {/* 2. Renderer selector — "Run in", not "Model", because nothing
+                  here renders. The studio compiles a prompt; this names the
+                  downstream lane an operator runs it through. Verified
+                  2026-08-24: every option returns byte-identical output, so a
+                  bare model name above a submit button reads as a choice that
+                  changes the pixels. The label and the note are the fix. */}
               <PromptInputModelSelect
                 value={model}
                 onValueChange={(val) => {
@@ -564,11 +569,17 @@ export function MediaStudio() {
               >
                 <PromptInputModelSelectTrigger className={KNOB_TRIGGER}>
                   <span className="font-medium text-xs">
+                    <span className="text-muted-foreground me-1">
+                      {t.mediaRunIn}:
+                    </span>
                     {activeModelOptions.find((m) => m.id === model)?.label ||
                       activeModelOptions[0]?.label}
                   </span>
                 </PromptInputModelSelectTrigger>
                 <PromptInputModelSelectContent align={isRTL ? "end" : "start"}>
+                  <p className="text-muted-foreground max-w-[16rem] px-2 py-1.5 text-xs leading-snug">
+                    {t.mediaRenderNote}
+                  </p>
                   {activeModelOptions.map((m) => (
                     <PromptInputModelSelectItem
                       key={m.id}

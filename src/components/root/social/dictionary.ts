@@ -285,6 +285,9 @@ export const SOCIAL_DICTIONARY = {
     mediaVisualPreview: "Live Visual Card Preview",
     mediaGenerateImage: "Generate Image",
     mediaGeneratingImage: "Generating…",
+    mediaRunIn: "Run in",
+    mediaRenderNote:
+      "The studio compiles a prompt — it does not render. Pick where you will run it; the preview below is a library still or a template plate, never this model's output.",
     mediaGeneratedTitle: "Studio result",
     mediaDownloadImage: "Download",
     mediaSaveShowroom: "Save to Showroom",
@@ -567,6 +570,9 @@ export const SOCIAL_DICTIONARY = {
     mediaVisualPreview: "معاينة بصرية حية للبطاقة",
     mediaGenerateImage: "توليد الصورة",
     mediaGeneratingImage: "جارٍ التوليد…",
+    mediaRunIn: "شغّل في",
+    mediaRenderNote:
+      "الاستوديو يجمّع الوصف ولا يولّد الصورة. اختر أين ستشغّله؛ ما يظهر أدناه صورة من المكتبة أو لوح قالب، وليس ناتج هذا النموذج.",
     mediaGeneratedTitle: "نتيجة الاستوديو",
     mediaDownloadImage: "تنزيل",
     mediaSaveShowroom: "حفظ في المعرض",
