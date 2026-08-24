@@ -19,12 +19,14 @@ import { useRouter } from "next/navigation";
 import { isRTL, type Locale } from "@/components/local/config";
 import {
   listAnsweredDrafts,
+  listBrandMedia,
   listDraftReferences,
   readSocialDraft,
   refineSocialDraft,
   requestSocialDraft,
   verifyConnections,
   type AnsweredDraft,
+  type BrandMedia,
   type DraftReference,
 } from "@/actions/post-social";
 import {
@@ -189,6 +191,8 @@ interface SocialContextValue {
    * ask, the review editor, and the showroom's Attach in turn.
    */
   composerMediaUrls: string[];
+  /** Library assets for the current brand — the composer's recommended strip. */
+  brandMedia: BrandMedia[];
   attachMedia: (url: string) => void;
   removeMedia: (url: string) => void;
   draftKnobs: DraftKnobs;
@@ -360,6 +364,25 @@ export function SocialProvider({
       cancelled = true;
     };
   }, [product]);
+
+  // The composer's recommended strip. Same per-brand shape as references, and
+  // deliberately non-blocking: a library read that fails leaves an empty strip,
+  // never a broken composer — attaching media is optional, writing is not.
+  const [brandMedia, setBrandMedia] = useState<BrandMedia[]>([]);
+  useEffect(() => {
+    let cancelled = false;
+    listBrandMedia(product)
+      .then((res) => {
+        if (!cancelled) setBrandMedia(res.ok ? (res.media ?? []) : []);
+      })
+      .catch(() => {
+        if (!cancelled) setBrandMedia([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [product]);
+
   const [draftError, setDraftError] = useState<string | null>(null);
   const [requestId, setRequestId] = useState<string | null>(null);
   // The queue telling its own truth: position + when a session last looked.
@@ -679,6 +702,7 @@ export function SocialProvider({
     composerText,
     setComposerText,
     composerMediaUrls,
+    brandMedia,
     attachMedia,
     removeMedia,
     draftKnobs,

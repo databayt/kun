@@ -31,6 +31,8 @@ import {
 import { cn } from "@/lib/utils";
 import {
   approveDraft,
+  publishPostDirect,
+  type PostResult,
   dismissDraft,
   stageForReview,
   type ReviewLink,
@@ -77,6 +79,7 @@ export function ReviewEditor({
     composerText,
     setComposerText,
     composerMediaUrls,
+    brandMedia,
     attachMedia,
     removeMedia,
     goToStage,
@@ -136,6 +139,12 @@ export function ReviewEditor({
         : undefined,
     });
   }, [trimmed, product, selectedChannels, activeDraft]);
+  /** Library picks not already in the tray — attached ones would be inert. */
+  const suggestions = useMemo(
+    () => brandMedia.filter((m) => !composerMediaUrls.includes(m.url)),
+    [brandMedia, composerMediaUrls],
+  );
+
   const { images, videos } = splitMedia(composerMediaUrls);
   const mixedMedia = images.length > 0 && videos.length > 0;
 
@@ -191,26 +200,54 @@ export function ReviewEditor({
     onDecided();
   };
 
+  /**
+   * One Send, two paths — chosen by where the copy came from, not by a control
+   * the writer has to think about.
+   *
+   * A draft loaded from the queue must go through `approveDraft`, because
+   * approving is also a claim: it moves the request `answered → consumed` in the
+   * same transaction, which is what stops two reviewers publishing the same post.
+   * Copy written here answers to no queue entry, so there is nothing to claim and
+   * `publishPostDirect` is the whole job.
+   *
+   * Routing on `activeDraftId` rather than on a mode flag means the wrong path
+   * cannot be selected by mistake — the state that decides is the same state that
+   * put the text on screen.
+   */
   const handleApprove = async () => {
-    if (!reviewQueue.activeDraftId) return;
     setPending("approve");
     reset();
     try {
-      const res = await approveDraft({
-        draftId: reviewQueue.activeDraftId,
-        mode: approveMode,
-        ...payload(),
-      });
+      const draftId = reviewQueue.activeDraftId;
+      // Scheduling only exists on the queue path — a direct post has no variant
+      // to park. Captured inside the branch that knows it, so the union never
+      // has to be narrowed back open afterwards.
+      let scheduled: { count: number; at: string } | null = null;
+      let res: PostResult;
+      if (draftId) {
+        const approved = await approveDraft({
+          draftId,
+          mode: approveMode,
+          ...payload(),
+        });
+        res = approved;
+        if (approveMode === "schedule") {
+          scheduled = {
+            count: approved.count ?? 0,
+            at: approved.at ? new Date(approved.at).toLocaleString() : "",
+          };
+        }
+      } else {
+        res = await publishPostDirect(payload());
+      }
       if (res.ok) {
         setOutcomes(res.results ?? null);
         setNotice(
-          approveMode === "schedule"
-            ? fill(t.scheduledMsg, {
-                count: res.count ?? 0,
-                at: res.at ? new Date(res.at).toLocaleString() : "",
-              })
-            : t.approvedNowMsg,
+          scheduled ? fill(t.scheduledMsg, scheduled) : t.approvedNowMsg,
         );
+        // Nothing was claimed on the direct path, so there is no queue entry to
+        // move on to — clear the box for the next post instead.
+        if (!draftId) setComposerText("");
         finishDecision();
       } else {
         setOutcomes(res.results ?? null);
@@ -467,6 +504,39 @@ export function ReviewEditor({
             </div>
           )}
 
+          {/* Recommended media — this brand's library, inline. The showroom is
+              still there for browsing, but the common case is "attach one of the
+              assets already made for this brand", and that should not cost a
+              round trip to another route and a copied URL. Already-attached
+              assets drop out rather than sitting there inert. */}
+          {suggestions.length > 0 && (
+            <div className="px-2 pb-2">
+              <p className="text-muted-foreground/60 pb-1.5 text-[11px]">
+                {t.recommendedMedia}
+              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                {suggestions.map((asset) => (
+                  <button
+                    key={asset.id}
+                    type="button"
+                    onClick={() => attachMedia(asset.url)}
+                    title={asset.title}
+                    aria-label={fill(t.attachNamed, { name: asset.title })}
+                    className="border-border hover:border-foreground/40 focus-visible:border-foreground/40 h-14 w-14 shrink-0 overflow-hidden rounded-lg border transition-colors"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={asset.url}
+                      alt=""
+                      loading="lazy"
+                      className="h-full w-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="flex flex-wrap items-center gap-1">
             <Popover>
               <PopoverTrigger
@@ -598,7 +668,10 @@ export function ReviewEditor({
                 <>
                   {/* Dismiss asks why. The reason rides the note the action
                       already persists — a monthly read of these is the only
-                      feedback the writing side ever gets. */}
+                      feedback the writing side ever gets.
+                      Only for a loaded draft: freshly written copy answers to no
+                      queue entry, so there is nothing to decline. */}
+                  {activeDraft && (
                   <Popover open={dismissOpen} onOpenChange={setDismissOpen}>
                     <PopoverTrigger asChild>
                       <Button
@@ -631,6 +704,7 @@ export function ReviewEditor({
                       </div>
                     </PopoverContent>
                   </Popover>
+                  )}
                   <Button
                     variant="outline"
                     size="sm"
@@ -665,7 +739,9 @@ export function ReviewEditor({
                         ? t.approving
                         : approveMode === "schedule"
                           ? t.approveScheduleAction
-                          : t.approveAction}
+                          : activeDraft
+                            ? t.approveAction
+                            : t.publishDirectAction}
                     </span>
                   </Button>
                 </>

@@ -171,112 +171,22 @@ export function ReviewPanel() {
             </p>
           )}
 
-          {/* The queue itself. First card is next up; loading one opens the
-              editor below and scopes the Hub to the draft's brand. */}
-          {drafts.length > 0 ? (
-            <ul className="mx-auto mb-8 w-full max-w-3xl space-y-2">
-              {drafts.map((draft, index) => {
-                const media = splitMedia(draft.mediaUrls);
-                return (
-                  <li key={draft.id}>
-                    <button
-                      type="button"
-                      onClick={() => loadDraft(draft.id)}
-                      className={cn(
-                        "border-border hover:border-foreground/25 w-full rounded-2xl border p-4 text-start transition-colors",
-                        activeDraftId === draft.id &&
-                          "border-foreground/40 bg-muted/60",
-                      )}
-                    >
-                      <span className="mb-2 flex flex-wrap items-center gap-2">
-                        {index === 0 && (
-                          <span className="bg-primary text-primary-foreground rounded-full px-2 py-0.5 text-[10px] font-medium tracking-wider uppercase">
-                            {t.reviewNextUp}
-                          </span>
-                        )}
-                        <span className="bg-muted rounded-full px-2 py-0.5 text-[10px] font-medium tracking-wider uppercase">
-                          {brandLabel(draft.brand)}
-                        </span>
-                        {/* A refined draft is a different thing to review than
-                            a first one: someone already read it and asked for a
-                            change, so the question is whether the change
-                            landed. Only from v2 — every draft is a v1. */}
-                        {draft.turn > 1 && (
-                          <span className="border-border text-muted-foreground rounded-full border px-2 py-0.5 font-mono text-[10px]">
-                            {fill(t.agentTurnBadge, { turn: draft.turn })}
-                          </span>
-                        )}
-                        {media.images.length > 0 && (
-                          <span className="text-muted-foreground flex items-center gap-1 text-xs">
-                            <Images className="size-3.5" />
-                            <span dir="ltr">{media.images.length}</span>
-                          </span>
-                        )}
-                        {media.videos.length > 0 && (
-                          <span className="text-muted-foreground flex items-center gap-1 text-xs">
-                            <Film className="size-3.5" />
-                            <span dir="ltr">{media.videos.length}</span>
-                          </span>
-                        )}
-                        <span className="text-muted-foreground ms-auto text-xs">
-                          {ageLabel(draft.createdAt)}
-                        </span>
-                      </span>
-                      {/* line-clamp sets its own display (-webkit-box); pairing
-                          it with `block` lets display:block win the cascade and
-                          the excerpt renders full-height. */}
-                      {/* The instruction outranks the brief on a refined draft:
-                          the brief is what the thread has always been about,
-                          the instruction is what this turn was supposed to fix. */}
-                      <span className="text-muted-foreground mb-1 line-clamp-1 text-xs">
-                        {draft.instruction
-                          ? fill(t.agentRefinedFor, {
-                              instruction: draft.instruction,
-                            })
-                          : draft.brief}
-                      </span>
-                      <span
-                        dir="rtl"
-                        className="line-clamp-2 text-start text-sm leading-relaxed"
-                      >
-                        {draft.ar || draft.en}
-                      </span>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          ) : (
-            !loading && (
-              <div className="border-border mx-auto mb-8 w-full max-w-3xl rounded-2xl border border-dashed p-8 text-center">
-                <h3 className="text-base font-medium">{t.reviewEmptyTitle}</h3>
-                <p className="text-muted-foreground mx-auto mt-2 max-w-md text-sm leading-relaxed">
-                  {t.reviewEmptyBody}
-                </p>
-                <Button
-                  size="sm"
-                  className="mt-4 rounded-full"
-                  onClick={() => goToStage("draft")}
-                >
-                  {t.reviewEmptyCta}
-                </Button>
-              </div>
-            )
-          )}
-
+          {/* No card list. The queue lives in the search box above — focus it
+              and this brand's drafts are there; the list was the same data
+              rendered twice, and the one that could not be searched. */}
           {loading && drafts.length === 0 && (
-            <p className="text-muted-foreground mb-8 text-center text-sm">
+            <p className="text-muted-foreground mb-6 text-center text-sm">
               {t.checking}
             </p>
           )}
 
-          {/* The editor mounts only for a loaded draft — no blank-slate lane. */}
-          {activeDraftId && (
-            <ReviewEditor
-              approveMode={approveMode}
-              onDecided={() => void refresh()}
-            />
-          )}
+          {/* Always mounted. An empty composer IS the direct-write path — this
+              stage used to render nothing until a queue draft was picked, which
+              is why publishPostDirect sat with no caller anywhere in the repo. */}
+          <ReviewEditor
+            approveMode={approveMode}
+            onDecided={() => void refresh()}
+          />
         </div>
       </div>
     </section>

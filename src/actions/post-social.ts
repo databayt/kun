@@ -16,6 +16,7 @@ import {
   type BriefRow,
 } from "@/lib/social-media-brief";
 import { db } from "@/lib/db";
+import { getShowroomData } from "@/components/root/social/showroom/data";
 import {
   CHANNELS,
   DISTRIBUTION_CHANNEL_IDS,
@@ -1037,6 +1038,55 @@ export async function listAnsweredDrafts(): Promise<AnsweredDraftsResult> {
     return {
       ok: false,
       error: err instanceof Error ? err.message : "Could not read the queue.",
+    };
+  }
+}
+
+export interface BrandMedia {
+  id: string;
+  /** Human label for the tile's alt text and tooltip. */
+  title: string;
+  /** Public CDN URL — Graph fetches the bytes itself, so it must be reachable. */
+  url: string;
+}
+
+/**
+ * Media worth attaching to this brand's next post.
+ *
+ * The showroom already knows every generated asset and its brand; this is the
+ * same data, narrowed to what a composer can actually use — a renderable URL —
+ * so the publish stage can offer a few tiles inline instead of sending someone
+ * to another route to copy a link back. Newest first: the asset made for the
+ * campaign currently being written is almost always the one wanted.
+ */
+export async function listBrandMedia(
+  brand: unknown,
+): Promise<{ ok: boolean; media?: BrandMedia[]; error?: string }> {
+  if (!(await requireContributor())) {
+    return { ok: false, error: "Forbidden: contributors only." };
+  }
+  if (
+    typeof brand !== "string" ||
+    !(PRODUCT_IDS as readonly string[]).includes(brand)
+  ) {
+    return { ok: false, error: "Unknown product." };
+  }
+
+  try {
+    const { assets } = getShowroomData();
+    return {
+      ok: true,
+      media: assets
+        .filter(
+          (a) => a.kind === "generated" && a.brand === brand && a.imageUrl,
+        )
+        .slice(0, 8)
+        .map((a) => ({ id: a.id, title: a.title, url: a.imageUrl as string })),
+    };
+  } catch (err: unknown) {
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : "Could not read the library.",
     };
   }
 }

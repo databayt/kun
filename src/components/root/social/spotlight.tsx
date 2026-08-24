@@ -1,7 +1,6 @@
 "use client";
 
-// The review queue's search bar — one box that both finds a draft and sends
-// what you typed.
+// The review queue's search bar — how a draft gets into the composer.
 //
 // Shaped after hogwarts' spotlight (components/atom/generic-command-menu), and
 // deliberately NOT a port of it: that one is a Cmd+K modal over a surface-aware
@@ -15,10 +14,11 @@
 // launcher over a desktop; this box sits at the top of the thing it filters, so
 // covering the queue would be hiding the answer.
 //
-// The two row kinds are the whole idea:
-//
-//   FIND — an answered draft, selected into the editor below.
-//   SEND — the query itself, published as written to the brand in the picker.
+// It finds; it does not send. It briefly had its own send row, and that was a
+// mistake: the composer below is already a place to write and already has a
+// Send, so the page grew two writing surfaces and three ways to publish. The
+// composer is the single sender now — empty means write from scratch, and this
+// box is how you fill it from the queue instead.
 //
 // The queue shows on focus, before a single keystroke — the common case is
 // "show me what is waiting", not "search". Typing narrows it.
@@ -33,14 +33,11 @@
 // second group, and only once a query is typed — the label says opening one
 // switches the brand, so the side effect is announced rather than sprung.
 //
-// Send goes through `publishPostDirect`, which until now had no caller anywhere
-// in the repo: an exported action that reaches a public brand page and that
-// nothing exercised. This is its first one.
 
 import * as React from "react";
 import { Command as CommandPrimitive } from "cmdk";
 import { AnimatePresence, motion } from "framer-motion";
-import { Loader2, Search, SendHorizontal } from "lucide-react";
+import { Search } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { matchesQuery } from "@/lib/normalize-search";
@@ -72,11 +69,6 @@ export function ReviewSpotlight() {
 
   const [query, setQuery] = React.useState("");
   const [focused, setFocused] = React.useState(false);
-  const [sending, setSending] = React.useState(false);
-  const [outcome, setOutcome] = React.useState<{
-    ok: boolean;
-    message: string;
-  } | null>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
   const trimmed = query.trim();
@@ -125,17 +117,6 @@ export function ReviewSpotlight() {
 
   const open = focused && (trimmed.length > 0 || reviewQueue.drafts.length > 0);
 
-  // Why send can refuse, in the order a reader would check it. Kept as a
-  // reason rather than a boolean so the row can say which gate it is on —
-  // a disabled control that will not explain itself is the thing this
-  // codebase keeps writing comments about.
-  const sendBlockedReason = React.useMemo(() => {
-    if (trimmed.length < MIN_SEND_CHARS) return t.spotlightSendTooShort;
-    if (selectedChannels.length === 0) return t.blockedNoChannel;
-    if (!transportsReady) return t.blockedTransport;
-    return null;
-  }, [trimmed, selectedChannels, transportsReady, t]);
-
   const handleSelectDraft = React.useCallback(
     (id: string) => {
       // MUST go through loadDraft: it hydrates the composer, fills the media
@@ -143,60 +124,12 @@ export function ReviewSpotlight() {
       // id alone would leave the approve payload scoped to the wrong brand.
       reviewQueue.loadDraft(id);
       setQuery("");
-      setOutcome(null);
       document
         .getElementById("composer")
         ?.scrollIntoView({ behavior: "smooth", block: "center" });
     },
     [reviewQueue],
   );
-
-  const handleSend = React.useCallback(async () => {
-    if (sendBlockedReason || sending) return;
-    setSending(true);
-    setOutcome(null);
-    try {
-      const res = await publishPostDirect({
-        product,
-        text: trimmed,
-        channels: selectedChannels,
-        mediaUrls: composerMediaUrls,
-      });
-      if (res.ok) {
-        setQuery("");
-        setOutcome({
-          ok: true,
-          message: fill(t.spotlightSentTo, { brand: brandLabel(product) }),
-        });
-      } else {
-        // A partial fan-out already reached a public page — say so rather than
-        // reporting a flat failure the reader would retry.
-        const landed = (res.results ?? []).filter((r: ChannelOutcome) => r.ok);
-        setOutcome({
-          ok: false,
-          message: landed.length
-            ? `${t.partialMsg} ${res.error ?? ""}`.trim()
-            : `${t.errorMsg}${res.error ?? ""}`,
-        });
-      }
-    } catch (err: unknown) {
-      setOutcome({
-        ok: false,
-        message: `${t.errorMsg}${err instanceof Error ? err.message : String(err)}`,
-      });
-    } finally {
-      setSending(false);
-    }
-  }, [
-    sendBlockedReason,
-    sending,
-    product,
-    trimmed,
-    selectedChannels,
-    composerMediaUrls,
-    t,
-    brandLabel,
-  ]);
 
   // Cmd/Ctrl+K focuses rather than opens — the box is already on the page, so
   // there is nothing to summon. Ignored while the caret is in another field so
@@ -231,7 +164,6 @@ export function ReviewSpotlight() {
         onKeyDown={(e) => {
           if (e.key === "Escape") {
             setQuery("");
-            setOutcome(null);
           }
         }}
       >
@@ -242,7 +174,6 @@ export function ReviewSpotlight() {
             value={query}
             onValueChange={(v) => {
               setQuery(v);
-              setOutcome(null);
             }}
             onFocus={() => setFocused(true)}
             // Deferred: a click on a row blurs the input before the row's own
@@ -256,9 +187,6 @@ export function ReviewSpotlight() {
               "placeholder:text-muted-foreground/70",
             )}
           />
-          {sending && (
-            <Loader2 className="text-muted-foreground size-4 shrink-0 animate-spin" />
-          )}
         </div>
 
         <AnimatePresence>
@@ -272,44 +200,6 @@ export function ReviewSpotlight() {
               className="w-full overflow-hidden"
             >
               <CommandPrimitive.List className="max-h-[min(360px,45vh)] scroll-py-1 overflow-x-hidden overflow-y-auto p-2">
-                {/* SEND — the query itself, first whenever there is one: it is
-                    the row whose content the reader already knows they want. */}
-                {trimmed.length > 0 && (
-                <CommandPrimitive.Group>
-                  <CommandPrimitive.Item
-                    value="__send__"
-                    disabled={sendBlockedReason !== null || sending}
-                    onSelect={() => void handleSend()}
-                    className={cn(
-                      "relative flex cursor-default items-center gap-3 rounded-xl px-3 py-3 text-sm outline-hidden select-none",
-                      "transition-colors duration-100",
-                      "data-[selected=true]:bg-accent/50",
-                      "data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50",
-                    )}
-                  >
-                    <div className="bg-muted/50 flex size-9 shrink-0 items-center justify-center rounded-xl">
-                      <SendHorizontal className="text-muted-foreground size-5 rtl:rotate-180" />
-                    </div>
-                    <div className="flex min-w-0 flex-1 flex-col">
-                      <span className="truncate">
-                        {fill(t.spotlightSend, {
-                          brand: brandLabel(product),
-                        })}
-                      </span>
-                      <span
-                        dir="auto"
-                        className="text-muted-foreground truncate text-xs"
-                      >
-                        {sendBlockedReason ?? trimmed}
-                      </span>
-                    </div>
-                    <kbd className="bg-muted text-muted-foreground pointer-events-none hidden h-5 items-center rounded border px-1.5 font-mono text-[10px] sm:flex">
-                      ↵
-                    </kbd>
-                  </CommandPrimitive.Item>
-                </CommandPrimitive.Group>
-                )}
-
                 {/* FIND — this brand's queue first, because the picker above
                     already says which brand the reader is working in. */}
                 {mine.length > 0 && (
@@ -383,18 +273,6 @@ export function ReviewSpotlight() {
           )}
         </AnimatePresence>
       </CommandPrimitive>
-
-      {outcome && (
-        <p
-          role={outcome.ok ? "status" : "alert"}
-          className={cn(
-            "mt-2 px-2 text-xs",
-            outcome.ok ? "text-emerald-600" : "text-rose-600",
-          )}
-        >
-          {outcome.message}
-        </p>
-      )}
     </div>
   );
 }
