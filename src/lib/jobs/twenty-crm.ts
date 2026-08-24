@@ -161,6 +161,31 @@ export async function pushJobToTwentyCRM(
     : `${job.description}\n\nNo assessment generated yet.\n\nFingerprint: ${fingerprint}`;
 
   try {
+    // Idempotency. The button is a button — it gets pressed twice, and without
+    // this the second press creates a second row. That is not hypothetical:
+    // three identical "Full-Stack Engineer @ Databayt Tech Partner" rows were
+    // created this way within five minutes of the object going live, and the
+    // Opportunities object still carries older duplicates from the same habit.
+    const existing = await call(
+      apiUrl,
+      `${KIGALI_PATH}?limit=200`,
+      apiKey,
+      { method: "GET" },
+    );
+    const rows = ((existing.body.data as unknown as {
+      kigaliOpportunities?: { id: string; fingerprint?: string }[];
+    })?.kigaliOpportunities ?? []) as { id: string; fingerprint?: string }[];
+    const already = rows.find((r) => r.fingerprint === fingerprint);
+    if (already) {
+      return {
+        ok: true,
+        opportunityId: already.id,
+        url: `https://sales.databayt.org/object/kigaliOpportunity/${already.id}`,
+        message: "Already in the Kigali pipeline — opening the existing record.",
+      };
+    }
+    await sleep(THROTTLE_MS);
+
     const companyId = await resolveCompanyId(apiUrl, apiKey, job);
     await sleep(THROTTLE_MS);
 
