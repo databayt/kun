@@ -388,13 +388,20 @@ export function checkCraft(input) {
   }
 
   // ── Check 3: specificity ───────────────────────────────────────
-  if (ar && !rules.preferredAr.terms.some((t) => ar.includes(t))) {
+  // Per brand — see the .ts twin for why. Kept byte-parallel.
+  const preferred = [
+    ...rules.preferredAr.shared,
+    ...(input.brand ? (rules.preferredAr.byBrand[input.brand] ?? []) : []),
+  ];
+  if (ar && preferred.length > 0 && !preferred.some((t) => ar.includes(t))) {
     add(
       "specificity",
       "other",
       3,
       "warn",
-      "No object a reader can see — copy.mdx's register vocabulary (الورق, الدفتر, الكشف, الفاتورة, الطابور) is absent.",
+      `No object a reader can see — none of this brand's register vocabulary (${preferred
+        .slice(-5)
+        .join(", ")}) is present.`,
     );
   }
 

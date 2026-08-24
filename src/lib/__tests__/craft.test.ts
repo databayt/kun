@@ -56,6 +56,22 @@ describe("checkCraft parity", () => {
     },
     { name: "empty", input: { ar: "" } },
     {
+      // Per-brand specificity: both twins must read the same byBrand list, or a
+      // rentals draft passes on the CLI and warns in the app.
+      name: "concrete rentals copy on a non-school brand",
+      input: {
+        ar: "شقة كاملة في بورتسودان: غرفة وصالة ومطبخ مجهز، تحجزها من هاتفك.",
+        brand: "mkan",
+      },
+    },
+    {
+      name: "abstract rentals copy on a non-school brand",
+      input: {
+        ar: "نقدم لعملائنا تجربة إقامة متميزة تلبي كل التطلعات وأعلى مستويات الجودة.",
+        brand: "mkan",
+      },
+    },
+    {
       name: "every hard rule at once",
       input: {
         ar: "هوجورتس تفخر بأن تعلن عن الحلول المتكاملة! يتم إرسال ٥ رسائل ومعها التحول الرقمي 🚀 و 🎉 عبر ed.databayt.org وأيضًا https://a.example.com/x وكذلك https://b.example.com/y؟ ولماذا؟",
@@ -326,6 +342,61 @@ describe("channel caps", () => {
       channel: "facebook",
     });
     expect(findings.map((f) => f.rule)).not.toContain("hashtags");
+  });
+});
+
+describe("check 3 — specificity is per brand", () => {
+  // The regression this exists for: the list was school vocabulary for every
+  // brand, so a rentals post naming a kitchen and a bed was told it had no
+  // object a reader can see.
+  const MKAN_CONCRETE =
+    "في بورتسودان، شقة كاملة بدل غرفة فندق. غرفة وصالة ومطبخ مجهز — " +
+    "مساحة تطبخ فيها وجبة العائلة، وتجتمعون فيها آخر اليوم بدل الجلوس " +
+    "على أطراف سريرين في غرفة واحدة. تحجزها من هاتفك.";
+
+  const MKAN_ABSTRACT =
+    "نقدم لعملائنا الكرام تجربة إقامة متميزة تلبي كل التطلعات. نحرص " +
+    "دائماً على تقديم أعلى مستويات الجودة والراحة لضمان رضا الجميع.";
+
+  it("does not fire on concrete rentals copy", () => {
+    const findings = checkCraft({ ar: MKAN_CONCRETE, brand: "mkan" });
+    expect(findings.map((f) => f.rule)).not.toContain("specificity");
+  });
+
+  it("still fires on abstract rentals copy", () => {
+    const findings = checkCraft({ ar: MKAN_ABSTRACT, brand: "mkan" });
+    expect(findings.map((f) => f.rule)).toContain("specificity");
+  });
+
+  it("names the brand's own vocabulary in the message, not the school's", () => {
+    const findings = checkCraft({ ar: MKAN_ABSTRACT, brand: "mkan" });
+    const message = findings.find((f) => f.rule === "specificity")!.message;
+    expect(message).not.toContain("الدفتر");
+    expect(message).toContain("الشقة");
+  });
+
+  it("school vocabulary no longer satisfies a rentals post", () => {
+    // "الورق يذوب" would have passed under the shared-list version.
+    const findings = checkCraft({ ar: `الورق ${MKAN_ABSTRACT}`, brand: "mkan" });
+    expect(findings.map((f) => f.rule)).toContain("specificity");
+  });
+
+  it("keeps working for the school brands", () => {
+    const findings = checkCraft({
+      ar: "الكشف يمشي بين الصفوف والدرجة تُرصد مرة واحدة في آخر الفصل.",
+      brand: "hogwarts",
+    });
+    expect(findings.map((f) => f.rule)).not.toContain("specificity");
+  });
+
+  it("falls back to the shared markers when the brand is unknown", () => {
+    const findings = checkCraft({ ar: MKAN_ABSTRACT });
+    expect(findings.map((f) => f.rule)).toContain("specificity");
+    expect(
+      checkCraft({ ar: `${MKAN_ABSTRACT} كل هذا في مكان واحد.` }).map(
+        (f) => f.rule,
+      ),
+    ).not.toContain("specificity");
   });
 });
 

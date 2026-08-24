@@ -466,13 +466,26 @@ export function checkCraft(input: CraftInput): CraftFinding[] {
   }
 
   // ── Check 3: specificity ───────────────────────────────────────
-  if (ar && !rules.preferredAr.terms.some((t) => ar.includes(t))) {
+  // Per brand. The list was school vocabulary for every brand, which meant a
+  // rentals post naming مطبخ, صالة and سرير was told it had no object a reader
+  // can see — and a check that fires on good copy stops being read.
+  const preferred = [
+    ...rules.preferredAr.shared,
+    ...(input.brand
+      ? (rules.preferredAr.byBrand[
+          input.brand as keyof typeof rules.preferredAr.byBrand
+        ] ?? [])
+      : []),
+  ];
+  if (ar && preferred.length > 0 && !preferred.some((t) => ar.includes(t))) {
     add(
       "specificity",
       "other",
       3,
       "warn",
-      "No object a reader can see — copy.mdx's register vocabulary (الورق, الدفتر, الكشف, الفاتورة, الطابور) is absent.",
+      `No object a reader can see — none of this brand's register vocabulary (${preferred
+        .slice(-5)
+        .join(", ")}) is present.`,
     );
   }
 

@@ -192,27 +192,104 @@
     ]
   },
   "preferredAr": {
-    "$comment": "copy.mdx: 'the register's own vocabulary, mined from the copy that works.' Check 3 warns when a draft carries none of these — an abstraction with no object a reader can see.",
-    "terms": [
-      "الورق",
-      "الدفتر",
-      "الكشف",
-      "الفاتورة",
-      "الطابور",
+    "$comment": "copy.mdx: 'the register's own vocabulary, mined from the copy that works.' Check 3 warns when a draft carries none of these — an abstraction with no object a reader can see. PER BRAND since 2026-08-24: the list used to be school vocabulary only (الورق/الدفتر/الكشف), so every mkan post warned no matter how concrete it was — a rentals post naming مطبخ, صالة and سرير was told it had no object a reader can see. A check that fires on good copy stops being read. `shared` is the register's domain-free markers; `byBrand` is each brand's own furniture, and a brand with no entry is judged on `shared` alone. Terms are SUBSTRINGS: prefer the bare stem (مطبخ) over the definite form (المطبخ), which would never match ومطبخ مجهز — and keep each long enough not to fire inside an innocent word.",
+    "shared": [
       "يذوب",
       "يضيع",
       "يُنجز",
       "ينتهي بهدوء",
       "أول يوم",
-      "آخر الفصل",
-      "أسبوع المدير",
       "مرة واحدة",
       "في مكان واحد",
       "بلمحة",
-      "بنقرة",
-      "المكتب",
-      "الطابعة",
-      "الملف"
-    ]
+      "بنقرة"
+    ],
+    "byBrand": {
+      "hogwarts": [
+        "الورق",
+        "ورقة",
+        "الدفتر",
+        "الكشف",
+        "كشوف",
+        "الفاتورة",
+        "الطابور",
+        "المكتب",
+        "الطابعة",
+        "الملف",
+        "آخر الفصل",
+        "أسبوع المدير",
+        "الحصة",
+        "الدرجة"
+      ],
+      "balqalam": [
+        "الورق",
+        "ورقة",
+        "الدفتر",
+        "الكشف",
+        "كشوف",
+        "الفاتورة",
+        "الطابور",
+        "المكتب",
+        "الطابعة",
+        "الملف",
+        "آخر الفصل",
+        "أسبوع المدير",
+        "الحصة",
+        "الدرجة"
+      ],
+      "mkan": [
+        "مطبخ",
+        "صالة",
+        "غرفة",
+        "غرفتين",
+        "سرير",
+        "مفتاح",
+        "ليلة",
+        "حجز",
+        "ضيف",
+        "ضيوف",
+        "مضيف",
+        "حقيبة",
+        "أمتعت",
+        "شقق",
+        "الشقة",
+        "البيت",
+        "الطريق",
+        "الجيران",
+        "صور المكان"
+      ],
+      "databayt": [
+        "الشاشة",
+        "السطر",
+        "الملف",
+        "المستودع",
+        "الأمر",
+        "اللوحة",
+        "الخطأ",
+        "السجل",
+        "الطرفية",
+        "الكود"
+      ],
+      "sijillee": [
+        "الفاتورة",
+        "الدفتر",
+        "الحساب",
+        "القيد",
+        "الرصيد",
+        "الإيصال",
+        "الخزنة",
+        "الكشف"
+      ],
+      "moalimee": [
+        "الحصة",
+        "الدرس",
+        "الجدول",
+        "الموعد",
+        "السبورة",
+        "الواجب",
+        "الطالب",
+        "الدرجة"
+      ]
+    }
   }
 }
