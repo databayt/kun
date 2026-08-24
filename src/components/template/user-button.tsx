@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { usePathname } from "next/navigation"
-import { LogIn, LogOut, User } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { useState } from "react";
+import { usePathname } from "next/navigation";
+import { LogIn, LogOut, User } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,40 +11,51 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Dialog, DialogContent } from "@/components/ui/dialog"
-import { useSession } from "next-auth/react"
-import { LoginForm } from "@/components/auth/login/form"
-import { logout } from "@/components/auth/logout-action"
-import { getAuthText } from "@/components/auth/dictionary"
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { useSession } from "next-auth/react";
+import { LoginForm } from "@/components/auth/login/form";
+import { logout } from "@/components/auth/logout-action";
+import { getAuthText } from "@/components/auth/dictionary";
 
 // Header avatar. Signed out → a dialog wrapping the shared LoginForm; signed in
 // → a dropdown with profile + sign-out. All auth copy, the form, and the guards
 // now come from the auth block, so this button no longer hand-rolls a second
 // credentials form.
 export function UserButton() {
-  const { data: session, status } = useSession()
-  const user = session?.user
-  const pathname = usePathname()
-  const lang = pathname.startsWith("/ar") ? "ar" : "en"
-  const t = getAuthText(lang)
+  const { data: session, status } = useSession();
+  const user = session?.user;
+  const pathname = usePathname();
+  const lang = pathname.startsWith("/ar") ? "ar" : "en";
+  const t = getAuthText(lang);
 
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false);
 
-  if (status === "loading") return null
+  if (status === "loading") return null;
 
   async function handleLogout() {
-    await logout()
-    window.location.href = `/${lang}`
+    await logout();
+    window.location.href = `/${lang}`;
   }
 
   if (user) {
-    const initial = user.name?.[0] || "?"
+    const initial = user.name?.[0] || "?";
 
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="size-8" title={user.name || ""}>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-8"
+            title={user.name || ""}
+          >
             <span className="text-xs font-mono">{initial}</span>
           </Button>
         </DropdownMenuTrigger>
@@ -67,7 +78,7 @@ export function UserButton() {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-    )
+    );
   }
 
   return (
@@ -84,10 +95,13 @@ export function UserButton() {
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-sm">
-          <p className="text-sm text-muted-foreground">{t.description}</p>
+          <DialogHeader>
+            <DialogTitle>{t.title}</DialogTitle>
+            <DialogDescription>{t.description}</DialogDescription>
+          </DialogHeader>
           <LoginForm lang={lang} onSuccessHref={pathname} />
         </DialogContent>
       </Dialog>
     </>
-  )
+  );
 }
