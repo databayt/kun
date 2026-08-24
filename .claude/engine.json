@@ -56,8 +56,8 @@
     }
   },
   "counts": {
-    "project_agents": 22,
-    "user_agents": 49,
+    "project_agents": 26,
+    "user_agents": 53,
     "commands": 0,
     "project_skills": 54,
     "user_skills": 72,

@@ -8,6 +8,26 @@ recorded here.
 
 Plan: `~/.claude/plans/through-the-past-days-quiet-muffin.md`
 
+## Status: **DONE** — 2026-08-24. All twelve rows carry a verdict.
+
+**3 PASS · 6 PARTIAL · 1 FAIL** (+ Steps 0–2, all closed)
+
+| Exit criterion | |
+|---|---|
+| Leaked tokens rotated, verified by replay + round trip + 4/4 canary | ✅ |
+| Working tree clean | ✅ |
+| `main` green — checked with `gh run list`, not assumed | ✅ |
+| Every row has PASS / PARTIAL / FAIL with evidence | ✅ |
+| Every FAIL and material finding has an issue | ✅ #145 #148 #149 #151 #152 #153 |
+
+**The pattern, in one line:** every lane works, and four of them are waiting on a human nobody
+told. This is an engine with no doorbell — one Slack webhook away from being an engine that rings.
+
+**The lesson worth keeping:** the area whose commits kept *correcting their own measured numbers*
+(scrape/Owlery — the census churned 3,156 → 714 → 728 → 724 → 287 → 262) is the only one that
+passed clean. The areas that read tidiest in the log — three "phases" in a day, a confident
+"ACTIVE, capturing" — are the ones that did not hold. Re-measuring beats restating.
+
 Verdicts: **PASS** (claim held under a behavioral test) · **PARTIAL** (some of it held) ·
 **FAIL** (claim did not hold) · **OPEN** (not yet tested).
 
