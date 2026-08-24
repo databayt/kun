@@ -157,7 +157,7 @@ Also worth a ledger line: `.claude/engine.json` says `"model": "google-free"` wh
 | # | Area | Verdict | Evidence | Follow-up |
 |---|---|---|---|---|
 | 3 | Social publishing | **PARTIAL — stalled at the human gate, not broken** | see below | #145 restated; #149 stale; new: no review destination |
-| 4 | Media Studio | OPEN | — | — |
+| 4 | Media Studio | **PARTIAL** | see below | inert model selector; 2 dead media URLs; seat lane never delivered |
 | 5 | Job Engine | PARTIAL | CI break fixed + 257 tests green offline; **the engine itself is still untested behaviorally** | build/verify `/jobs` renders real extraction |
 | 6 | Funnel (Floo Network) | OPEN | — | needs Twenty CRM up (:3100) |
 | 7 | Scrape / Owlery | OPEN | — | — |
@@ -229,6 +229,46 @@ distribution channels only, and a test asserts communication channels have none.
 **Still open:** `SLACK_WEBHOOK_URL` is not set, so the review lane still reaches
 nobody. The code is landed and inert until it is. Creating the webhook needs a
 Slack workspace sign-in the browser does not hold.
+
+### Step 4 — Media Studio · verdict **PARTIAL**, 2026-08-24
+
+The area with the worst history in this repo — a handover once claimed live Nano Banana / GPT
+Image renders that were a keyword→static-JPG lookup. **Those 2026-08-19 corrections held.** What
+is left is a different problem: every individual statement is honest, and the surface as a whole
+still misleads.
+
+**What holds, verified:**
+
+| Claim | Result |
+|---|---|
+| Studio does not secretly generate | **True, and it says so** — no API call anywhere in `studio-image.ts`; the badge names real provenance (`Library asset · <file>`, `Deterministic HTML Canvas Engine`, `Prompt only — no video renderer is wired`) |
+| No paid renderer reachable from the server | **True** — no OpenAI egress remains, pinned by `studio-action-guard.test.ts` |
+| The action is gated | **True** — `requireContributor()` runs before any work, pinned statically, and the same test catches *any* new unguarded export in `post-social.ts` |
+| Attach is blocked for placeholders | **True** — `attachable:false` + a note saying what to do instead |
+| S3 configured in production | **True** — wrote a probe object, read it back publicly over HTTPS (200), deleted it. Facebook could fetch it |
+
+**What does not hold:**
+
+1. **The model selector is inert.** Six models across image/video. Calling the core with `gemini`,
+   `nano_banana_pro` and `gpt_image` returns **byte-identical** output — same image, same prompt.
+   Its only real effect is labelling the compiled prompt with its intended downstream renderer,
+   which is defensible; sitting above a submit button in a generate flow, unlabelled as such, is
+   not. This is the exact shape of the false claim that was corrected on 08-19, surviving in the UI.
+
+2. **The two posts awaiting approval carry dead media URLs.** Both point at
+   `hogwarts-databayt.s3.amazonaws.com/media/hogwarts/…`, and both objects **do not exist** —
+   authenticated `HeadObject` returns **404**; the public 403 is S3 masking a missing key. They
+   date from 2026-08-01, before the 08-19 storage fix, and are artifacts of the era when
+   `putMedia()` failed silently while the URL was still written to the row. **Approving them today
+   would hand Facebook a URL it cannot fetch.** Decide before approving: clear `mediaUrls` and post
+   text-only, or re-render the media.
+
+3. **The seat lane has never delivered an asset.** `SocialMediaBrief`: 4 rows, all `pending`, all
+   with no asset, oldest 2026-08-05. The same unattended-queue pattern as the approval gate — work
+   parked for a human that nobody is told about.
+
+4. **`cdn.databayt.org` still 403s** (issue #148). Direct S3 URLs work, so this is not blocking
+   delivery today, and the issue's P3-low is fair — but the CDN is not usable.
 
 ### Incidental findings (not yet steps)
 
