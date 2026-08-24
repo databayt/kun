@@ -17,8 +17,21 @@
 //
 // The two row kinds are the whole idea:
 //
-//   FIND — every answered draft that matches, selected into the editor below.
+//   FIND — an answered draft, selected into the editor below.
 //   SEND — the query itself, published as written to the brand in the picker.
+//
+// The queue shows on focus, before a single keystroke — the common case is
+// "show me what is waiting", not "search". Typing narrows it.
+//
+// Scoped to the brand in the picker, because that picker already scopes the
+// channels, the transport check and the approve payload; a queue that ignored
+// it would be the one control on the page that disagreed with the others.
+//
+// But scoped is not the same as hidden. `loadDraft` SWITCHES the Hub's brand to
+// the draft's, so a strict filter would make every other brand's work
+// unreachable from the box that exists to reach things. Other brands stay, in a
+// second group, and only once a query is typed — the label says opening one
+// switches the brand, so the side effect is announced rather than sprung.
 //
 // Send goes through `publishPostDirect`, which until now had no caller anywhere
 // in the repo: an exported action that reaches a public brand page and that
@@ -58,6 +71,7 @@ export function ReviewSpotlight() {
   } = useSocial();
 
   const [query, setQuery] = React.useState("");
+  const [focused, setFocused] = React.useState(false);
   const [sending, setSending] = React.useState(false);
   const [outcome, setOutcome] = React.useState<{
     ok: boolean;
@@ -66,7 +80,6 @@ export function ReviewSpotlight() {
   const inputRef = React.useRef<HTMLInputElement>(null);
 
   const trimmed = query.trim();
-  const open = trimmed.length > 0;
 
   const brandLabel = React.useCallback(
     (id: string) => {
@@ -78,17 +91,39 @@ export function ReviewSpotlight() {
 
   // The corpus is already here — filter it, do not fetch it. Matching folds
   // Arabic orthography on both sides so "مكان" finds "مكـان".
-  const matches = React.useMemo(() => {
-    if (!trimmed) return [];
-    return reviewQueue.drafts.filter((d) =>
-      matchesQuery(
-        [d.ar, d.en, d.brief, d.instruction ?? "", brandLabel(d.brand), d.brand]
-          .filter(Boolean)
-          .join(" "),
-        trimmed,
+  const haystack = React.useCallback(
+    (d: (typeof reviewQueue.drafts)[number]) =>
+      [d.ar, d.en, d.brief, d.instruction ?? "", brandLabel(d.brand), d.brand]
+        .filter(Boolean)
+        .join(" "),
+    [brandLabel],
+  );
+
+  /** This brand's queue, narrowed by the query. Shown even with no query. */
+  const mine = React.useMemo(
+    () =>
+      reviewQueue.drafts.filter(
+        (d) => d.brand === product && (!trimmed || matchesQuery(haystack(d), trimmed)),
       ),
-    );
-  }, [reviewQueue.drafts, trimmed, brandLabel]);
+    [reviewQueue.drafts, product, trimmed, haystack],
+  );
+
+  /**
+   * Everything else that matches — only once something is typed. With an empty
+   * query this would just be "the rest of the queue", which is the brand picker's
+   * job to change, not this box's job to dump.
+   */
+  const others = React.useMemo(
+    () =>
+      !trimmed
+        ? []
+        : reviewQueue.drafts.filter(
+            (d) => d.brand !== product && matchesQuery(haystack(d), trimmed),
+          ),
+    [reviewQueue.drafts, product, trimmed, haystack],
+  );
+
+  const open = focused && (trimmed.length > 0 || reviewQueue.drafts.length > 0);
 
   // Why send can refuse, in the order a reader would check it. Kept as a
   // reason rather than a boolean so the row can say which gate it is on —
@@ -209,6 +244,11 @@ export function ReviewSpotlight() {
               setQuery(v);
               setOutcome(null);
             }}
+            onFocus={() => setFocused(true)}
+            // Deferred: a click on a row blurs the input before the row's own
+            // handler runs, and closing first would unmount the thing being
+            // clicked. cmdk's Enter path is unaffected either way.
+            onBlur={() => window.setTimeout(() => setFocused(false), 150)}
             placeholder={t.spotlightPlaceholder}
             // 16px keeps iOS Safari from zooming the page on focus.
             className={cn(
@@ -232,8 +272,9 @@ export function ReviewSpotlight() {
               className="w-full overflow-hidden"
             >
               <CommandPrimitive.List className="max-h-[min(360px,45vh)] scroll-py-1 overflow-x-hidden overflow-y-auto p-2">
-                {/* SEND — the query itself, always first: it is the one row
-                    whose content the reader already knows they want. */}
+                {/* SEND — the query itself, first whenever there is one: it is
+                    the row whose content the reader already knows they want. */}
+                {trimmed.length > 0 && (
                 <CommandPrimitive.Group>
                   <CommandPrimitive.Item
                     value="__send__"
@@ -267,11 +308,13 @@ export function ReviewSpotlight() {
                     </kbd>
                   </CommandPrimitive.Item>
                 </CommandPrimitive.Group>
+                )}
 
-                {/* FIND — matching drafts, into the editor below. */}
-                {matches.length > 0 && (
+                {/* FIND — this brand's queue first, because the picker above
+                    already says which brand the reader is working in. */}
+                {mine.length > 0 && (
                   <CommandPrimitive.Group>
-                    {matches.map((draft) => (
+                    {mine.map((draft) => (
                       <CommandPrimitive.Item
                         key={draft.id}
                         value={draft.id}
@@ -296,9 +339,43 @@ export function ReviewSpotlight() {
                   </CommandPrimitive.Group>
                 )}
 
-                {matches.length === 0 && (
+                {/* Other brands — only when searching, and labelled, because
+                    opening one silently retargets the whole page. */}
+                {others.length > 0 && (
+                  <>
+                    <p className="text-muted-foreground/50 px-3 pt-2 pb-1 text-[11px]">
+                      {t.spotlightOtherBrands}
+                    </p>
+                    <CommandPrimitive.Group>
+                      {others.map((draft) => (
+                        <CommandPrimitive.Item
+                          key={draft.id}
+                          value={draft.id}
+                          onSelect={() => handleSelectDraft(draft.id)}
+                          className={cn(
+                            "relative flex cursor-default items-start gap-3 rounded-xl px-3 py-3 text-sm outline-hidden select-none",
+                            "transition-colors duration-100",
+                            "data-[selected=true]:bg-accent/50",
+                          )}
+                        >
+                          <span className="border-input text-muted-foreground mt-0.5 shrink-0 rounded-full border px-2 py-0.5 text-[10px]">
+                            {brandLabel(draft.brand)}
+                          </span>
+                          <span
+                            dir="auto"
+                            className="line-clamp-2 min-w-0 flex-1 text-start leading-relaxed"
+                          >
+                            {draft.ar || draft.en || draft.brief}
+                          </span>
+                        </CommandPrimitive.Item>
+                      ))}
+                    </CommandPrimitive.Group>
+                  </>
+                )}
+
+                {mine.length === 0 && others.length === 0 && (
                   <p className="text-muted-foreground/60 px-3 py-4 text-center text-xs">
-                    {t.spotlightNoDrafts}
+                    {trimmed ? t.spotlightNoDrafts : t.spotlightQueueEmpty}
                   </p>
                 )}
               </CommandPrimitive.List>

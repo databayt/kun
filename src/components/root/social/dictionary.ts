@@ -137,6 +137,9 @@ export const SOCIAL_DICTIONARY = {
     spotlightSendTooShort: "Type a little more to send it",
     spotlightSentTo: "Sent to {brand}.",
     spotlightNoDrafts: "No drafts match — Enter still sends what you typed.",
+    spotlightQueueEmpty: "Nothing in the queue for this brand.",
+    spotlightOtherBrands: "Other brands — opening one switches the brand",
+    spotlightBrandCount: "{count} for {brand}",
     reviewTitle: "Review & publish",
     reviewIntro:
       "Answered drafts queue here for a human decision — fine-tune, then approve. Writing happens in the Draft stage; media in the showroom.",
@@ -450,6 +453,9 @@ export const SOCIAL_DICTIONARY = {
     spotlightSendTooShort: "اكتب أكثر قليلاً لإرساله",
     spotlightSentTo: "أُرسل إلى {brand}.",
     spotlightNoDrafts: "لا مسودة تطابق — وEnter يرسل ما كتبته.",
+    spotlightQueueEmpty: "لا شيء في طابور هذه العلامة.",
+    spotlightOtherBrands: "علامات أخرى — فتح إحداها يبدّل العلامة",
+    spotlightBrandCount: "{count} لـ {brand}",
     reviewTitle: "المراجعة والنشر",
     reviewIntro:
       "المسودات المُجابة تصطف هنا لقرار بشري — نقّح ثم اعتمد. الكتابة تجري في مرحلة الصياغة، والوسائط في المعرض.",
