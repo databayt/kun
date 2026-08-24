@@ -59,6 +59,11 @@ which is why **adding a Page is configuration and never transport code**.
 
 ```mermaid
 flowchart TD
+  D1["Review queue<br/>a contributor clicks Approve<br/>on /social/publish"] --> A
+  D2["Signed link<br/>one click in private Slack —<br/>the second gets 409"] --> A
+  D3["The drain<br/>a post booked for later,<br/>swept every ~15 min"] --> A
+  D4["The relay<br/>no human — a machine<br/>holding the cron secret"] --> A
+
   A["Approved post<br/>brand + words + any media"] --> B{"Which brand,<br/>and is Facebook<br/>switched on for it?"}
 
   B -- "not wired" --> S1["Refuse, naming the brand.<br/>Nothing is sent."]
@@ -89,10 +94,39 @@ flowchart TD
   classDef stop fill:#3b2220,stroke:#a35a4e,color:#f2d9d4;
   classDef live fill:#12312e,stroke:#2f7d72,color:#c6e8e2;
   classDef keep fill:#232a25,stroke:#4a6350,color:#d3e3d7;
+  classDef door fill:#1d2436,stroke:#4d5a7a,color:#d7deee;
   class S1,S2,S3 stop;
   class LIVE live;
   class SAVE,DEL keep;
+  class D1,D2,D3,D4 door;
 ```
+
+### Where an approved post comes from
+
+Those four boxes are the **only** four things in the codebase that call `deliverPost`.
+They differ in exactly one way — who is trusted to say yes:
+
+| Door | Entry point | Who may open it |
+|------|-------------|-----------------|
+| **Review queue** | `approveDraft` (`src/actions/post-social.ts`) | A signed-in contributor. `requireContributor()` re-checks the session email against the allowlist on every call |
+| **Signed link** | `POST /api/social/publish` | Anyone holding the link — its only protection is being unguessable, which is why the review channel is private. Approving is a one-way status change, so a second click gets `409` |
+| **Drain** | `GET /api/social/drain` | The `CRON_SECRET` bearer. Publishes variants whose `scheduledFor` has passed — those were approved earlier, in schedule mode |
+| **Relay** | `POST /api/social/relay` | The `CRON_SECRET` bearer. No human at all — the headless lane |
+
+**The words** arrive one of two ways: a contributor files a brief on `/social`, a Claude
+Code session drains the queue and writes the copy back through the craft gate
+(`scripts/social-drafts.mjs answer`), or a reviewer edits copy directly in the queue's
+editor. The editor never creates from blank — it only refines something already drafted.
+
+**The media** is attached, never invented at send time: library assets picked by URL
+(`content/media/library.json`, or the showroom's **Attach**), landing on
+`SocialDraftRequest.mediaUrls` and then `SocialVariant.mediaUrls`. `deliverPost` receives
+URLs and nothing else — Graph fetches the bytes itself, which is why they must already be
+public on the CDN.
+
+> Two exported server actions, `publishPostDirect` and `schedulePost`, also reach
+> `deliverPost` but have **no callers anywhere** — no route, no component. They are a
+> publish path with nothing driving it. Treat them as dormant, not as a fifth door.
 
 **The saved id is the only way back.** Graph returns it once, in its reply; it cannot be
 recovered from the variant afterwards, and it is the sole argument `deleteFacebookPost`
