@@ -48,6 +48,63 @@ draft — the first Balqalam draft written against it was refused for `balqalam.
 without a scheme, because `applyUtm` only tags absolute URLs and the post would have
 shipped untracked.
 
+## Sending it out to a Facebook Page
+
+The step above marked *Send to the platform*, opened up. Every door — review queue,
+signed link, drain, relay — arrives here, at `deliverPost` (`src/lib/social-publish.ts`)
+and then `sendFacebookPost` (`src/lib/facebook.ts`).
+
+Nothing in this path knows a brand by name. It builds the setting name from the brand id,
+which is why **adding a Page is configuration and never transport code**.
+
+```mermaid
+flowchart TD
+  A["Approved post<br/>brand + words + any media"] --> B{"Which brand,<br/>and is Facebook<br/>switched on for it?"}
+
+  B -- "not wired" --> S1["Refuse, naming the brand.<br/>Nothing is sent."]
+  B -- "balqalam" --> P1["Page: Bilqalam بالقلم<br/>1218016808068580"]
+  B -- "mkan" --> P2["Page: Mkan مكان<br/>1133424016531929"]
+
+  P1 --> K["Read that brand's own pair —<br/>FACEBOOK_PAGE_ID_ + brand id<br/>FACEBOOK_PAGE_ACCESS_TOKEN_ + brand id"]
+  P2 --> K
+  K --> Q{"Both present?"}
+  Q -- no --> S2["Refuse, naming the<br/>missing variable"]
+  Q -- yes --> U["Tag every absolute link<br/>so visits can be traced"]
+
+  U --> M{"What is attached?"}
+  M -- "words only" --> F1["Post to the Page feed"]
+  M -- "one image" --> F2["Post image + caption"]
+  M -- "2–10 images" --> F3["Upload each quietly, then<br/>one post holding them all"]
+  M -- "one video" --> F4["Post video + description"]
+  M -- "mixed kinds<br/>or 2+ videos" --> S3["Refuse before any<br/>network call"]
+
+  F1 --> R["Facebook returns<br/>the post id"]
+  F2 --> R
+  F3 --> R
+  F4 --> R
+  R --> SAVE["Save it as externalId<br/>on the SocialVariant"]
+  SAVE --> LIVE(["Live on the Page"])
+  LIVE -.-> DEL["Retract later with<br/>that same id"]
+
+  classDef stop fill:#3b2220,stroke:#a35a4e,color:#f2d9d4;
+  classDef live fill:#12312e,stroke:#2f7d72,color:#c6e8e2;
+  classDef keep fill:#232a25,stroke:#4a6350,color:#d3e3d7;
+  class S1,S2,S3 stop;
+  class LIVE live;
+  class SAVE,DEL keep;
+```
+
+**The saved id is the only way back.** Graph returns it once, in its reply; it cannot be
+recovered from the variant afterwards, and it is the sole argument `deleteFacebookPost`
+accepts. A test post that was never recorded is a test post the system cannot retract.
+`sendFacebookPost` deliberately prefers `post_id` over `id`, because on a photo post the
+bare `id` addresses the *photo* rather than the post.
+
+Both Arabic-facing Pages were run through this whole path on 2026-08-24 — posted, read
+back, retracted, confirmed gone. Neither had ever carried a post before that. The
+per-brand ids, tokens and traps live on
+[Facebook](/docs/social/channels/facebook#the-two-arabic-facing-pages-end-to-end).
+
 ## Business models → who we're talking to
 
 databayt runs on [four business models](https://databayt.org/about). Social marketing serves

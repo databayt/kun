@@ -172,48 +172,24 @@ path is `/latest/settings/business_users`.
 
 Every door into publishing — the review queue, a signed Slack link, the drain, the relay —
 converges on `deliverPost` (`src/lib/social-publish.ts`) and then on `sendFacebookPost`
-(`src/lib/facebook.ts`). Nothing in that path knows a brand by name: it builds the env var
-from the product id, so **adding a Page is configuration, never transport code**.
+(`src/lib/facebook.ts`). That path is drawn step by step in
+[Sending it out to a Facebook Page](/docs/social#sending-it-out-to-a-facebook-page) — one
+diagram, kept in one place.
 
-```mermaid
-flowchart TD
-  IN["brand + text<br/>+ any mediaUrls"] --> Q1{"Known channel?"}
-  Q1 -- no --> S1["Refuse every requested<br/>channel. Nothing sent."]
-  Q1 -- yes --> Q2{"Is this brand wired<br/>for facebook?"}
-  Q2 -- no --> S2["Refuse, naming the brand"]
-  Q2 -- yes --> K["Read FACEBOOK_PAGE_ID_&lt;BRAND&gt;<br/>and FACEBOOK_PAGE_ACCESS_TOKEN_&lt;BRAND&gt;"]
-  K --> Q3{"Both present?"}
-  Q3 -- no --> S3["Refuse, naming the<br/>missing variable"]
-  Q3 -- yes --> U["applyUtm — tag every<br/>absolute URL in the copy"]
-  U --> M{"Media shape?"}
+What matters here is the part specific to this channel:
 
-  M -- "none" --> P1["POST /&lt;page&gt;/feed<br/>message"]
-  M -- "1 image" --> P2["POST /&lt;page&gt;/photos<br/>url + caption"]
-  M -- "2–10 images" --> P3["Upload each unpublished,<br/>then one /feed with<br/>attached_media"]
-  M -- "1 video" --> P4["POST /&lt;page&gt;/videos<br/>file_url + description"]
-  M -- "mixed kinds<br/>or &gt;1 video" --> S4["Refuse before any<br/>network call"]
-
-  P1 --> R["Graph replies with<br/>post_id"]
-  P2 --> R
-  P3 --> R
-  P4 --> R
-  R --> SAVE["Persist externalId on<br/>the SocialVariant"]
-  SAVE --> LIVE(["Live on the Page"])
-  LIVE -.-> DEL["deleteFacebookPost(externalId)<br/>— the only way back"]
-
-  classDef stop fill:#3b2220,stroke:#a35a4e,color:#f2d9d4;
-  classDef live fill:#12312e,stroke:#2f7d72,color:#c6e8e2;
-  classDef keep fill:#232a25,stroke:#4a6350,color:#d3e3d7;
-  class S1,S2,S3,S4 stop;
-  class LIVE live;
-  class SAVE,DEL keep;
-```
-
-**Why `externalId` is load-bearing.** Graph returns the post id exactly once, in its reply.
-It is not recoverable later from the variant alone, and it is the only handle
-`deleteFacebookPost` accepts — so a test post that is not recorded is a test post that
-cannot be retracted by the system. `sendFacebookPost` prefers `post_id` over `id` for
-exactly this reason: on a photo post the bare `id` addresses the *photo*, not the post.
+- **The env pair is built from the product id**, so transport code never changes when a
+  brand is added — only `FACEBOOK_PAGE_ID_<BRAND>` and `FACEBOOK_PAGE_ACCESS_TOKEN_<BRAND>`.
+- **Media routes by shape**, and the shapes are different Graph edges, not options on one
+  call: `/feed` takes `message`, `/photos` takes `url` + `caption`, a 2–10 image album is
+  N unpublished `/photos` uploads followed by one `/feed` with `attached_media`, and
+  `/videos` takes `file_url` + `description`. Mixed kinds, or more than one video, are
+  refused before any network call.
+- **`externalId` is load-bearing.** Graph returns the post id exactly once, in its reply.
+  It is not recoverable from the variant later, and it is the only handle
+  `deleteFacebookPost` accepts — so a post that is not recorded cannot be retracted by the
+  system. `sendFacebookPost` prefers `post_id` over `id` for exactly this reason: on a photo
+  post the bare `id` addresses the *photo*, not the post.
 
 ### The two Arabic-facing Pages, end to end
 
