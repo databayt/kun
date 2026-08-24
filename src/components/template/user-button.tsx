@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { useSession, signIn, signOut } from "next-auth/react"
 import { usePathname } from "next/navigation"
 import { LogIn, LogOut, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -13,124 +12,80 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import {
-  Dialog,
-  DialogContent,
-} from "@/components/ui/dialog"
+import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { useSession } from "next-auth/react"
+import { LoginForm } from "@/components/auth/login/form"
+import { logout } from "@/components/auth/logout-action"
+import { getAuthText } from "@/components/auth/dictionary"
 
+// Header avatar. Signed out → a dialog wrapping the shared LoginForm; signed in
+// → a dropdown with profile + sign-out. All auth copy, the form, and the guards
+// now come from the auth block, so this button no longer hand-rolls a second
+// credentials form.
 export function UserButton() {
   const { data: session, status } = useSession()
+  const user = session?.user
   const pathname = usePathname()
   const lang = pathname.startsWith("/ar") ? "ar" : "en"
-  const isAr = lang === "ar"
+  const t = getAuthText(lang)
 
   const [open, setOpen] = useState(false)
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [error, setError] = useState("")
-  const [loading, setLoading] = useState(false)
 
   if (status === "loading") return null
 
-  async function handleLogin(e: React.FormEvent) {
-    e.preventDefault()
-    setError("")
-    setLoading(true)
-
-    const result = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    })
-
-    if (result?.error) {
-      setError(isAr ? "بيانات خاطئة" : "invalid credentials")
-      setLoading(false)
-      return
-    }
-
-    setOpen(false)
-    window.location.reload()
+  async function handleLogout() {
+    await logout()
+    window.location.href = `/${lang}`
   }
 
-  // Signed in
-  if (session?.user) {
-    const initial = session.user.name?.[0] || "?"
+  if (user) {
+    const initial = user.name?.[0] || "?"
 
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="size-8" title={session.user.name || ""}>
+          <Button variant="ghost" size="icon" className="size-8" title={user.name || ""}>
             <span className="text-xs font-mono">{initial}</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48">
           <DropdownMenuLabel className="font-normal">
-            <p className="text-sm font-medium">{session.user.name}</p>
-            <p className="text-xs text-muted-foreground">{session.user.email}</p>
+            <p className="text-sm font-medium">{user.name}</p>
+            <p className="text-xs text-muted-foreground">{user.email}</p>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem asChild>
             <a href={`/${lang}/profile`}>
               <User className="size-4" />
-              {isAr ? "الملف الشخصي" : "Profile"}
+              {t.profile}
             </a>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => signOut({ callbackUrl: `/${lang}` })}>
+          <DropdownMenuItem onClick={handleLogout}>
             <LogOut className="size-4" />
-            {isAr ? "خروج" : "Sign out"}
+            {t.signOut}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     )
   }
 
-  // Not signed in
   return (
     <>
       <Button
         variant="ghost"
         size="icon"
         className="size-8"
-        title="Sign in"
+        title={t.signIn}
         onClick={() => setOpen(true)}
       >
         <LogIn className="size-4.5" />
       </Button>
 
-      <Dialog open={open} onOpenChange={(v) => { setOpen(v); setError(""); }}>
-        <DialogContent className="max-w-xs p-6 gap-0 [&>button]:hidden">
-          <p className="text-sm text-muted-foreground/50">
-            {isAr ? "تسجيل الدخول" : "sign in"}
-          </p>
-
-          <form onSubmit={handleLogin} className="mt-6 space-y-4">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder={isAr ? "البريد" : "email"}
-              className="w-full bg-transparent text-sm font-mono text-foreground placeholder:text-muted-foreground/30 border-b border-muted-foreground/20 pb-2 outline-none focus:border-foreground transition-colors"
-              required
-            />
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder={isAr ? "كلمة المرور" : "password"}
-              className="w-full bg-transparent text-sm font-mono text-foreground placeholder:text-muted-foreground/30 border-b border-muted-foreground/20 pb-2 outline-none focus:border-foreground transition-colors"
-              required
-            />
-
-            {error && <p className="text-xs text-red-500">{error}</p>}
-
-            <Button type="submit" disabled={loading} className="w-full">
-              {loading
-                ? isAr ? "جاري..." : "signing in..."
-                : isAr ? "دخول" : "sign in"}
-            </Button>
-          </form>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <p className="text-sm text-muted-foreground">{t.description}</p>
+          <LoginForm lang={lang} onSuccessHref={pathname} />
         </DialogContent>
       </Dialog>
     </>

@@ -1,19 +1,9 @@
-// The authorization gate shared by every mutating Server Action.
+// Re-export shim. The contributor authorization guard now lives with the rest
+// of the server-side auth helpers in the auth block. Kept here so the many
+// Server Actions that already import `@/lib/auth-guard` don't have to churn.
 //
-// Session presence is not enough: JWT sessions outlive removal from the
-// contributors allowlist, so every call re-resolves the email against the
-// config at call time rather than trusting a claim minted earlier.
-//
-// Lives here rather than in one action file so the check cannot drift between
-// callers — a guard that exists in one action and not its neighbour is the
-// shape most authorization bugs take.
+// See @/components/auth/auth for the guard itself and its rationale (JWT
+// sessions outlive removal from the allowlist, so the check re-resolves the
+// email at call time).
 
-import { auth } from "@/auth";
-import { getContributorByEmail } from "@/components/root/context/contributors.server";
-
-export async function requireContributor(): Promise<boolean> {
-  const session = await auth();
-  const email = session?.user?.email;
-  if (!email) return false;
-  return Boolean(getContributorByEmail(email));
-}
+export { requireContributor } from "@/components/auth/auth";

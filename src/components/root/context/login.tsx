@@ -1,9 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -11,7 +8,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+import { LoginForm } from "@/components/auth/login/form";
+import { getAuthText } from "@/components/auth/dictionary";
 
 interface LoginContentProps {
   lang: string;
@@ -21,35 +19,14 @@ interface LoginContentProps {
 
 // Rendered as a dialog over a bare backdrop (the /login route carries no site
 // chrome). Dismissing it goes home — the page behind it is deliberately empty.
+// The form itself is the shared auth block LoginForm, so this route and the
+// header UserButton stay in lockstep.
 export function LoginContent({ lang, next }: LoginContentProps) {
-  const isAr = lang === "ar";
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const t = getAuthText(lang);
 
-  const destination = next && next.startsWith("/") ? next : `/${lang}/context`;
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-
-    const result = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    });
-
-    if (result?.error) {
-      setError(isAr ? "بيانات الدخول غير صحيحة" : "Invalid credentials");
-      setLoading(false);
-      return;
-    }
-
-    router.push(destination);
-  }
+  const destination =
+    next && next.startsWith("/") ? next : `/${lang}/context`;
 
   return (
     <Dialog
@@ -60,45 +37,11 @@ export function LoginContent({ lang, next }: LoginContentProps) {
     >
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle>{isAr ? "تسجيل الدخول" : "Sign in"}</DialogTitle>
-          <DialogDescription>
-            {isAr
-              ? "مساحة المساهمين — بريدك في databayt وكلمة المرور."
-              : "Contributors only — your databayt email and password."}
-          </DialogDescription>
+          <DialogTitle>{t.title}</DialogTitle>
+          <DialogDescription>{t.description}</DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder={isAr ? "البريد الإلكتروني" : "Email"}
-            autoComplete="username"
-            autoFocus
-            required
-          />
-          <Input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder={isAr ? "كلمة المرور" : "Password"}
-            autoComplete="current-password"
-            required
-          />
-
-          {error && <p className="text-destructive text-sm">{error}</p>}
-
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading
-              ? isAr
-                ? "جاري الدخول…"
-                : "Signing in…"
-              : isAr
-                ? "دخول"
-                : "Sign in"}
-          </Button>
-        </form>
+        <LoginForm lang={lang} onSuccessHref={destination} />
       </DialogContent>
     </Dialog>
   );

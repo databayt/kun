@@ -9,6 +9,7 @@
 | mkan | standard (login/join/reset/password/verify) | development | 25 | no |
 | shifa | standard (near-identical to mkan) | development | 23 | no |
 | souq | clerk (incompatible) | production | 0 | no |
+| kun | credentials-allowlist, no DB (minimal-by-design) | production | 10 | no |
 
 ## Canonical: hogwarts
 
