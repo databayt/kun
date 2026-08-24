@@ -9,17 +9,33 @@ The one rule that outranks quality: **same property, same reality**. The model i
 
 ## The loop
 
+```mermaid
+graph TD
+    A1["Twenty Home<br/>photoStage POOR_QUALITY"] --> Q
+    A2["CLI --listing"] --> Q
+    Q["master:queue<br/>MasteringRun QUEUED<br/>prompt v1 frozen on row"] --> D
+    D["master:dispatch<br/>Slack #mkan task<br/>ASSIGNED"] --> P
+    P["master:prep<br/>prompt to clipboard · original to Finder · Gemini opens"] --> H
+    H{{"HUMAN — Nano Banana in Gemini app<br/>GATE: billing /decide<br/>Phase 3 swaps only this node"}}
+    H --> R{"return lane"}
+    R -->|"reply in thread — GATE: Slack scopes"| S1["master:done --from-slack"]
+    R -->|"drop in ~/mkan/inbox"| S2["master:relay"]
+    R -->|"newest ~/Downloads"| S3["master:done runId"]
+    S1 --> V
+    S2 --> V
+    S3 --> V
+    V{"validate<br/>not byte-identical?<br/>size/ratio ok?"} -->|"tech fail"| F["FAILED + Slack alert"]
+    V -->|"pass"| ID{"identity<br/>does render depict THIS room?"}
+    ID -->|"no"| RJ["master:reject<br/>REJECTED, attempt+1"]
+    ID -->|"yes"| M["MASTERED<br/>WebP to CDN"]
+    M --> U["swap photoUrls by URL match<br/>UPDATED · Twenty rollup · Slack ✅"]
+    RJ --> Q
+    F -.->|"requeue-failed"| Q
+    U -.->|"host edits photos"| DR["DRIFTED (reconcile/status)"]
+    RC["master:reconcile<br/>launchd 10:00 · stall clock"] -.->|"re-dispatch stalls"| D
 ```
-Twenty Home (photoStage Kanban) ─┐        CLI --listing ─┐
-                                 ▼                       ▼
-master:queue     → MasteringRun rows (mkan Prisma, prompt FROZEN v1 per row)
-master:dispatch  → Slack #mkan task: original unfurled + copyable prompt + return command
-master:prep      → prompt→clipboard · original→Finder · Gemini opens   (~20s human floor)
-HUMAN            → Nano Banana in the Gemini app (covered by Google AI Pro, $0 API)
-master:done      → validate → sharp ≤2048px 4:3 WebP → CDN → swap by URL match → UPDATED
-                 → Twenty rollup (photosMastered, cover, photoStage) → Slack thread ✅
-master:reject / revert / status / reconcile / census — the ops set
-```
+
+The ops set outside the happy path: `master:reject` / `master:revert` / `master:status` / `master:reconcile` / `master:census`.
 
 State truth lives in **mkan Prisma** (`MasteringRun` — absence is the ORIGINAL state; retries append, history never overwritten). Twenty's `home` is the ops mirror (`photoStage` grew `MASTERED`, plus `photosMastered` / `lastMasteredAt`). The CDN is canonical and originals are immortal. Operator runbook: `mkan/docs/image-mastering.md`.
 

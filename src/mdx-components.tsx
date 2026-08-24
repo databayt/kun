@@ -18,6 +18,7 @@ import { PrismaStructure } from "@/components/docs/prisma-structure";
 import { CdnStructure } from "@/components/docs/cdn-structure";
 import { CdnAssets } from "@/components/docs/cdn-assets";
 import { MediaShowroom } from "@/components/docs/media-library";
+import { Mermaid } from "@/components/docs/mermaid";
 import {
   FlowChart,
   Phase1Flow,
@@ -331,6 +332,7 @@ const mdxComponents = {
   CdnStructure,
   CdnAssets,
   MediaShowroom,
+  Mermaid,
   // Flow charts
   FlowChart,
   Phase1Flow,
