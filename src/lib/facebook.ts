@@ -285,6 +285,17 @@ export async function sendFacebookVideo(
 }
 
 /** Retract a published post. `externalId` is what sendFacebookPost returned. */
+// 30s, not the 10s a delete looks like it deserves. Measured 2026-08-24 during
+// the first retraction this function ever performed: the call timed out at 10s
+// and reported `Delete failed`, while the post was ALREADY GONE — reading it
+// back returned "(#10) Object does not exist".
+//
+// A false "delete failed" is the expensive direction of this error. It invites
+// a retry against an id that no longer exists (which answers with the same #10
+// and reads as a second failure), and on a public brand page it leaves whoever
+// is watching believing a test post is still live when it is not.
+const DELETE_TIMEOUT_MS = 30_000;
+
 export async function deleteFacebookPost(
   externalId: string,
   product?: string,
@@ -298,7 +309,7 @@ export async function deleteFacebookPost(
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ access_token: token }),
-        signal: AbortSignal.timeout(10000),
+        signal: AbortSignal.timeout(DELETE_TIMEOUT_MS),
       },
     );
     if (!res.ok) return { ok: false, error: await facebookError(res) };
