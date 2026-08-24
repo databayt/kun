@@ -7,40 +7,40 @@ description: "Makan's listing-photo mastering pipeline — ORIGINAL → professi
 
 The one rule that outranks quality: **same property, same reality**. The model improves the *photograph*, never the *property* — nothing invented, nothing hidden, no rooms made larger or newer than they are. The gate is human (and the eyeball owns *identity* too: the render must depict *this* run's original — hash checks can't know the room).
 
-## Building blocks
+## The parts
 
-Seven pieces, each with one job:
+Seven parts. Each one does a single thing:
 
-| Piece | Its one job |
+| Part | What it does |
 | --- | --- |
-| **Twenty CRM** | where the work starts — drop a photo on a Home record |
-| **`master:*` scripts** (mkan) | the automation: pull, prep, relay, done |
-| **`MasteringRun`** (mkan Prisma) | the memory — one row per photo, per attempt |
-| **The generator** (Gemini / ChatGPT) | makes the picture — the human step |
-| **`~/mkan/inbox`** | the return lane — save the render here, that's the whole job |
-| **The CDN** | the image bytes, originals kept forever |
-| **Slack #mkan** | the cockpit — tasks in, results out |
+| **Twenty CRM** | where you put the photo in |
+| **The scripts** (mkan) | do all the boring work for you |
+| **The database** | remembers every photo and every try |
+| **Gemini / ChatGPT** | makes the better photo |
+| **Your inbox folder** | where you save the new photo |
+| **The CDN** | keeps all the photos, old ones too |
+| **Slack #mkan** | tells you what is going on |
 
 ## The loop
 
-It starts when a photo lands on a Home record in Twenty, and ends when the
-site serves the mastered version. Everything except step 3 is automatic.
+It starts when Twenty CRM gets a new photo. It ends when that photo is on
+the website. You only do three of the six steps — the rest happens on its own.
 
 ```mermaid
 graph TD
-    T["1 · DROP — you<br/>drag the photo onto the Home record in Twenty"]
-    P["2 · PULL — automatic, every 5 min<br/>re-host to CDN · create the run · stage in inbox · post to Slack"]
-    G["3 · GENERATE — you<br/>drag into the generator, save into ~/mkan/inbox"]
-    R["4 · RELAY — automatic<br/>the file lands, finds its run, converts to WebP"]
-    C{"5 · CHECK — you<br/>right room? honest photo?"}
-    L["6 · LIVE — automatic<br/>swap into the listing · mirror to Twenty · ✅ in Slack"]
-    T --> P --> G --> R --> C
-    C -->|"yes"| L
-    C -->|"no — say why"| G
+    A["1 · Twenty CRM gets a new photo<br/>you drag it onto the home"]
+    B["2 · The system picks it up — on its own<br/>saves a copy · opens a job · posts in Slack"]
+    C["3 · You make the better photo<br/>drop it in Gemini, save it to your inbox folder"]
+    D["4 · The system takes it back — on its own<br/>finds the job it belongs to · resizes it"]
+    E{"5 · You look at it<br/>same room? still true?"}
+    F["6 · It goes live on the website<br/>and Twenty is updated"]
+    A --> B --> C --> D --> E
+    E -->|"good"| F
+    E -->|"bad — say why"| C
 ```
 
-Your part is three gestures: **drop it, render it, say yes.** The reject note
-on a "no" is what improves the prompt for every photo after it.
+You do three things: **put the photo in, make it, say yes.** When you say no,
+say why — that is how the next photo comes out better.
 
 State truth lives in **mkan Prisma** (`MasteringRun` — absence is the ORIGINAL state; retries append, history never overwritten). Twenty's `home` is the ops mirror (`photoStage` grew `MASTERED`, plus `photosMastered` / `lastMasteredAt`). The CDN is canonical and originals are immortal. Operator runbook: `mkan/docs/image-mastering.md`.
 
