@@ -42,7 +42,7 @@ graph TD
 | Box | In plain words |
 | --- | --- |
 | **1 · A photo enters Twenty CRM** | Someone puts a photo on a home in the CRM. This is the only thing that starts the loop — nothing else to press or run. |
-| **2 · Twenty fires a workflow** | Twenty notices the new photo by itself and sends a signal out. Nobody has to tell it. |
+| **2 · Twenty fires a workflow** | Twenty notices the new photo by itself and sends a signed message to this Mac. Nobody has to tell it. Drop six photos at once and it still runs the next step only once. |
 | **3 · The photo lands in `mkan/inbox`** | The signal pulls the photo down to one folder on the Mac. A whole batch can land at once — they wait there for you. |
 | **4 · You paste it into ChatGPT** | `pnpm master:prep --standing` takes the next waiting photo, puts it on your clipboard and opens ChatGPT. Then it is ⌘V, Enter. You never type a prompt — the project already carries it (see below). |
 | **5 · You save the result to `mkan/inbox`** | Same folder. Saving *is* the whole job — the computer watches that folder and takes over the second the file appears. |
@@ -52,10 +52,11 @@ There is no separate "check it" step, because you already saw the photo in
 ChatGPT before you saved it. Saving **is** the yes. If one comes out wrong,
 do not save it — press Enter again.
 
-> **Not switched on yet.** Box 2 is the plan. Today nothing watches Twenty:
-> the photo is fetched by a command that has to be run, and the every-5-minutes
-> timer that would run it is written but not installed. Boxes 5 → 6 are live
-> and working right now.
+> **All six boxes are live** (2026-08-24). Box 2 was the last gap and is now
+> built: Twenty fires an `attachment.created` webhook at a listener on the Mac,
+> which runs the pull. Proven end to end — three photos dropped through the API
+> arrived in `mkan/inbox` named by their run, each with its room read off the
+> file name.
 
 ## Set ChatGPT up once
 
