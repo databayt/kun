@@ -23,24 +23,41 @@ Seven parts. Each one does a single thing:
 
 ## The loop
 
-It starts when Twenty CRM gets a new photo. It ends when that photo is on
-the website. You only do three of the six steps — the rest happens on its own.
+A photo goes in at the top. A better photo comes out on the website at the
+bottom. Of the seven steps, you only do three.
 
 ```mermaid
 graph TD
-    A["1 · New image entered Twenty CRM"]
-    B["2 · The system picks it up — on its own<br/>saves a copy · opens a job · posts in Slack"]
-    C["3 · You make the better photo<br/>drop it in Gemini, save it to your inbox folder"]
-    D["4 · The system takes it back — on its own<br/>finds the job it belongs to · resizes it"]
-    E{"5 · You look at it<br/>same room? still true?"}
-    F["6 · It goes live on the website<br/>and Twenty is updated"]
-    A --> B --> C --> D --> E
-    E -->|"good"| F
-    E -->|"bad — say why"| C
+    S1["1 · A photo enters Twenty CRM"]
+    S2["2 · Twenty fires a workflow"]
+    S3["3 · The photo lands in mkan/inbox"]
+    S4["4 · You make the better photo"]
+    S5["5 · You save it back to mkan/inbox"]
+    S6{"6 · You check it"}
+    S7["7 · It goes live, and back to Twenty"]
+    S1 --> S2 --> S3 --> S4 --> S5 --> S6
+    S6 -->|"good"| S7
+    S6 -->|"not right — say why"| S4
 ```
 
-You do three things: **put the photo in, make it, say yes.** When you say no,
-say why — that is how the next photo comes out better.
+### What each box means
+
+| Box | In plain words |
+| --- | --- |
+| **1 · A photo enters Twenty CRM** | Someone puts a photo on a home in the CRM. This is the only thing that starts the loop — there is nothing else to press or run. |
+| **2 · Twenty fires a workflow** | Twenty notices the new photo by itself and sends a signal out. Nobody has to tell it. |
+| **3 · The photo lands in `mkan/inbox`** | The signal pulls the photo down to one folder on the Mac. Its name says which home it belongs to, so it can never get mixed up with another. |
+| **4 · You make the better photo** | Drag it from that folder into ChatGPT. The instructions are already saved there, so you just press Enter and wait. |
+| **5 · You save it back to `mkan/inbox`** | Same folder it came from. Saving *is* the whole job — the computer is watching that folder and takes over the second the file appears. |
+| **6 · You check it** | Look at the old photo and the new one together. Same room? Still true to the real place? Only a person can answer that. If it is wrong, say why — that is what makes the next one better. |
+| **7 · It goes live** | The new photo replaces the old one on the website, and Twenty is updated to match. Done. |
+
+Your part is three boxes: **4, 5 and 6** — make it, save it, say yes.
+
+> **Not switched on yet.** Box 2 is the plan. Today nothing watches Twenty:
+> the photo is fetched by a command that has to be run, and the every-5-minutes
+> timer that would run it is written but not installed. Boxes 5 → 7 are live
+> and working right now.
 
 State truth lives in **mkan Prisma** (`MasteringRun` — absence is the ORIGINAL state; retries append, history never overwritten). Twenty's `home` is the ops mirror (`photoStage` grew `MASTERED`, plus `photosMastered` / `lastMasteredAt`). The CDN is canonical and originals are immortal. Operator runbook: `mkan/docs/image-mastering.md`.
 
