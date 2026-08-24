@@ -7,35 +7,40 @@ description: "Makan's listing-photo mastering pipeline — ORIGINAL → professi
 
 The one rule that outranks quality: **same property, same reality**. The model improves the *photograph*, never the *property* — nothing invented, nothing hidden, no rooms made larger or newer than they are. The gate is human (and the eyeball owns *identity* too: the render must depict *this* run's original — hash checks can't know the room).
 
+## Building blocks
+
+Seven pieces, each with one job:
+
+| Piece | Its one job |
+| --- | --- |
+| **Twenty CRM** | where the work starts — drop a photo on a Home record |
+| **`master:*` scripts** (mkan) | the automation: pull, prep, relay, done |
+| **`MasteringRun`** (mkan Prisma) | the memory — one row per photo, per attempt |
+| **The generator** (Gemini / ChatGPT) | makes the picture — the human step |
+| **`~/mkan/inbox`** | the return lane — save the render here, that's the whole job |
+| **The CDN** | the image bytes, originals kept forever |
+| **Slack #mkan** | the cockpit — tasks in, results out |
+
 ## The loop
+
+It starts when a photo lands on a Home record in Twenty, and ends when the
+site serves the mastered version. Everything except step 3 is automatic.
 
 ```mermaid
 graph TD
-    A1["Twenty Home<br/>photoStage POOR_QUALITY"] --> Q
-    A2["CLI --listing"] --> Q
-    Q["master:queue<br/>MasteringRun QUEUED<br/>prompt v1 frozen on row"] --> D
-    D["master:dispatch<br/>Slack #mkan task<br/>ASSIGNED"] --> P
-    P["master:prep<br/>prompt to clipboard · original to Finder · Gemini opens"] --> H
-    H{{"HUMAN — Nano Banana in Gemini app<br/>GATE: billing /decide<br/>Phase 3 swaps only this node"}}
-    H --> R{"return lane"}
-    R -->|"reply in thread — GATE: Slack scopes"| S1["master:done --from-slack"]
-    R -->|"drop in ~/mkan/inbox"| S2["master:relay"]
-    R -->|"newest ~/Downloads"| S3["master:done runId"]
-    S1 --> V
-    S2 --> V
-    S3 --> V
-    V{"validate<br/>not byte-identical?<br/>size/ratio ok?"} -->|"tech fail"| F["FAILED + Slack alert"]
-    V -->|"pass"| ID{"identity<br/>does render depict THIS room?"}
-    ID -->|"no"| RJ["master:reject<br/>REJECTED, attempt+1"]
-    ID -->|"yes"| M["MASTERED<br/>WebP to CDN"]
-    M --> U["swap photoUrls by URL match<br/>UPDATED · Twenty rollup · Slack ✅"]
-    RJ --> Q
-    F -.->|"requeue-failed"| Q
-    U -.->|"host edits photos"| DR["DRIFTED (reconcile/status)"]
-    RC["master:reconcile<br/>launchd 10:00 · stall clock"] -.->|"re-dispatch stalls"| D
+    T["1 · DROP — you<br/>drag the photo onto the Home record in Twenty"]
+    P["2 · PULL — automatic, every 5 min<br/>re-host to CDN · create the run · stage in inbox · post to Slack"]
+    G["3 · GENERATE — you<br/>drag into the generator, save into ~/mkan/inbox"]
+    R["4 · RELAY — automatic<br/>the file lands, finds its run, converts to WebP"]
+    C{"5 · CHECK — you<br/>right room? honest photo?"}
+    L["6 · LIVE — automatic<br/>swap into the listing · mirror to Twenty · ✅ in Slack"]
+    T --> P --> G --> R --> C
+    C -->|"yes"| L
+    C -->|"no — say why"| G
 ```
 
-The ops set outside the happy path: `master:reject` / `master:revert` / `master:status` / `master:reconcile` / `master:census`.
+Your part is three gestures: **drop it, render it, say yes.** The reject note
+on a "no" is what improves the prompt for every photo after it.
 
 State truth lives in **mkan Prisma** (`MasteringRun` — absence is the ORIGINAL state; retries append, history never overwritten). Twenty's `home` is the ops mirror (`photoStage` grew `MASTERED`, plus `photosMastered` / `lastMasteredAt`). The CDN is canonical and originals are immortal. Operator runbook: `mkan/docs/image-mastering.md`.
 
