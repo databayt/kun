@@ -59,9 +59,12 @@ import {
   CheckCircle2,
   Images,
   Layers,
+  Loader2,
   PenLine,
   RefreshCw,
   Search,
+  Send,
+  Settings2,
   SlidersHorizontal,
   type LucideIcon,
 } from "lucide-react";
@@ -78,6 +81,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  approveDraft,
+  publishPostDirect,
+  type PostResult,
+} from "@/actions/post-social";
 import { CHANNELS } from "@/components/root/social/config";
 import { PRODUCTS } from "@/components/root/social/products";
 import { fill, type SocialDict } from "@/components/root/social/dictionary";
@@ -88,6 +101,16 @@ import { useSocial } from "@/components/root/social/provider";
  * blurred panel over a scrolling list reads as smeared rather than glassy.
  */
 const GLASS = "bg-muted border border-muted-foreground/20 shadow-2xl";
+
+/**
+ * What Approve does — publish on the spot, or write `scheduled` variants for
+ * the ~15-minute cron drain. Persisted per browser; it used to live on the
+ * review panel beside a composer that is no longer there, so it travels with
+ * the Send it configures.
+ */
+type ApproveMode = "now" | "schedule";
+
+const APPROVE_MODE_KEY = "social:approve-mode";
 
 type Mode = "all" | "draft" | "scheduled" | "published";
 type Scope = "brand" | "every";
@@ -151,10 +174,27 @@ const KIND_HEADING_KEY: Record<QueueItem["kind"], keyof SocialDict> = {
 };
 
 export function ReviewSpotlight() {
-  const { t, lang, isRTL, product, reviewQueue } = useSocial();
+  const {
+    t,
+    lang,
+    isRTL,
+    product,
+    reviewQueue,
+    selectedChannels,
+    transportsReady,
+    composerText,
+    setComposerText,
+    composerMediaUrls,
+  } = useSocial();
   const router = useRouter();
 
-  const [query, setQuery] = React.useState("");
+  // ONE field, two jobs: what is typed here is the post copy AND the query the
+  // queue below is filtered by. It reads from the provider rather than local
+  // state so a draft loaded out of the queue lands in the same box the writer
+  // is already looking at, and so leaving the stage does not lose the copy.
+  const query = composerText;
+  const setQuery = setComposerText;
+
   const [mode, setMode] = React.useState<Mode>("all");
   const [scope, setScope] = React.useState<Scope>("brand");
   const [order, setOrder] = React.useState<Order>("oldest");
@@ -163,8 +203,23 @@ export function ReviewSpotlight() {
   // Radix portals the filter menu outside this subtree, so a plain blur would
   // close the dropdown the moment the menu opens.
   const [menuOpen, setMenuOpen] = React.useState(false);
+  const [sending, setSending] = React.useState(false);
+  const [notice, setNotice] = React.useState<string | null>(null);
+  const [error, setError] = React.useState<string | null>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const rootRef = React.useRef<HTMLDivElement>(null);
+
+  // Read after mount so the server render never touches localStorage.
+  const [approveMode, setApproveModeState] =
+    React.useState<ApproveMode>("now");
+  React.useEffect(() => {
+    const stored = window.localStorage.getItem(APPROVE_MODE_KEY);
+    if (stored === "now" || stored === "schedule") setApproveModeState(stored);
+  }, []);
+  const setApproveMode = (next: ApproveMode) => {
+    setApproveModeState(next);
+    window.localStorage.setItem(APPROVE_MODE_KEY, next);
+  };
 
   const trimmed = query.trim();
 
@@ -308,14 +363,123 @@ export function ReviewSpotlight() {
       // MUST go through loadDraft: it hydrates the composer, fills the media
       // tray, AND switches the Hub's brand to the draft's. Setting the active
       // id alone would leave the approve payload scoped to the wrong brand.
+      // loadDraft writes the draft's copy into composerText, which IS this
+      // field — so the row the reader picked is now the text in the box.
+      // Collapse the panel so they can see that rather than a list filtered
+      // by the paragraph they just loaded.
       reviewQueue.loadDraft(item.id);
-      setQuery("");
-      document
-        .getElementById("composer")
-        ?.scrollIntoView({ behavior: "smooth", block: "center" });
+      setNotice(null);
+      setError(null);
+      setFocused(false);
+      inputRef.current?.blur();
     },
     [reviewQueue, router, lang],
   );
+
+  /**
+   * The button says which of the two sends it is about to perform: approving a
+   * queue draft (which also claims it) reads differently from publishing a
+   * line typed from scratch, and scheduling reads differently again.
+   */
+  const sendLabel = !reviewQueue.activeDraftId
+    ? t.publishDirectAction
+    : approveMode === "schedule"
+      ? t.approveScheduleAction
+      : t.approveAction;
+
+  /**
+   * Stating the blocker beats a dead button with no explanation.
+   */
+  const blockedReason = !trimmed
+    ? t.blockedNoText
+    : selectedChannels.length === 0
+      ? t.blockedNoChannel
+      : !transportsReady
+        ? t.blockedTransport
+        : null;
+
+  /**
+   * One Send, two paths — chosen by where the copy came from, not by a control
+   * the writer has to think about.
+   *
+   * A draft loaded from the queue must go through `approveDraft`, because
+   * approving is also a claim: it moves the request `answered → consumed` in
+   * the same transaction, which is what stops two reviewers publishing the
+   * same post. Copy typed here answers to no queue entry, so there is nothing
+   * to claim and `publishPostDirect` is the whole job.
+   *
+   * Routing on `activeDraftId` rather than on a mode flag means the wrong path
+   * cannot be selected by mistake — the state that decides is the same state
+   * that put the text on screen. Lifted verbatim from review-editor.tsx, which
+   * is where this reasoning was paid for.
+   */
+  const handleSend = React.useCallback(async () => {
+    if (blockedReason || sending) return;
+    setSending(true);
+    setNotice(null);
+    setError(null);
+    const payload = {
+      product,
+      text: query,
+      channels: selectedChannels,
+      mediaUrls: composerMediaUrls,
+    };
+    try {
+      const draftId = reviewQueue.activeDraftId;
+      let scheduled: { count: number; at: string } | null = null;
+      let res: PostResult;
+      if (draftId) {
+        const approved = await approveDraft({
+          draftId,
+          mode: approveMode,
+          ...payload,
+        });
+        res = approved;
+        if (approveMode === "schedule") {
+          scheduled = {
+            count: approved.count ?? 0,
+            at: approved.at ? new Date(approved.at).toLocaleString() : "",
+          };
+        }
+      } else {
+        res = await publishPostDirect(payload);
+      }
+
+      if (res.ok) {
+        setNotice(
+          scheduled ? fill(t.scheduledMsg, scheduled) : t.approvedNowMsg,
+        );
+        reviewQueue.clearActive();
+        void reviewQueue.refresh();
+      } else {
+        // A partial landing consumed the draft server-side, so the queue has
+        // moved even though the send did not fully succeed — refresh either
+        // way rather than leaving a consumed row on screen as pending work.
+        const partial = Boolean(res.results?.some((r) => r.ok));
+        setError(partial ? t.partialMsg : `${t.errorMsg}${res.error}`);
+        if (partial) {
+          reviewQueue.clearActive();
+          void reviewQueue.refresh();
+        }
+      }
+    } catch (err: unknown) {
+      setError(
+        `${t.errorMsg}${err instanceof Error ? err.message : String(err)}`,
+      );
+    } finally {
+      setSending(false);
+    }
+  }, [
+    blockedReason,
+    sending,
+    product,
+    query,
+    selectedChannels,
+    composerMediaUrls,
+    reviewQueue,
+    approveMode,
+    t,
+  ]);
 
   /**
    * Focusing the box brings the stage to the top of the screen, so the panel
@@ -412,15 +576,11 @@ export function ReviewSpotlight() {
             setFocused(false);
           }, 150);
         }}
-        // Escape clears the query, and on an already-empty one collapses the
-        // box back to its search line — the panel now hides what it reveals,
-        // so leaving it needs a key, not a click somewhere else on the page.
+        // Escape collapses the box; it does NOT clear. The field holds the
+        // post now, so the old "Escape empties it" would throw away writing
+        // on the key people press to dismiss a panel.
         onKeyDown={(e) => {
           if (e.key !== "Escape") return;
-          if (trimmed) {
-            setQuery("");
-            return;
-          }
           setFocused(false);
           inputRef.current?.blur();
         }}
@@ -603,6 +763,90 @@ export function ReviewSpotlight() {
                       </DropdownMenuCheckboxItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
+
+                  {/* What Send does — publish on the spot, or park `scheduled`
+                      variants for the cron drain. It sat beside the composer that
+                      is no longer on this page; it belongs next to the button it
+                      configures. */}
+                  <Popover>
+                    <PopoverTrigger
+                      aria-label={t.approveModeLabel}
+                      title={
+                        approveMode === "schedule"
+                          ? t.approveModeSchedule
+                          : t.approveModeNow
+                      }
+                      onMouseDown={(e) => e.preventDefault()}
+                      className={cn(
+                        "flex size-8 cursor-pointer items-center justify-center rounded-full transition-colors duration-150",
+                        approveMode === "schedule"
+                          ? "bg-accent text-accent-foreground"
+                          : "text-muted-foreground/70 hover:bg-accent/50 hover:text-accent-foreground",
+                      )}
+                    >
+                      <Settings2 className="size-4" />
+                    </PopoverTrigger>
+                    <PopoverContent
+                      align={isRTL ? "start" : "end"}
+                      className="w-72 text-start"
+                    >
+                      <p className="text-muted-foreground mb-2 text-xs font-medium">
+                        {t.approveModeLabel}
+                      </p>
+                      <div className="space-y-1.5">
+                        {(["now", "schedule"] as const).map((option) => (
+                          <label
+                            key={option}
+                            className="hover:bg-muted flex cursor-pointer items-start gap-2 rounded-lg p-2 text-sm"
+                          >
+                            <input
+                              type="radio"
+                              name="approve-mode"
+                              checked={approveMode === option}
+                              onChange={() => setApproveMode(option)}
+                              className="mt-1"
+                            />
+                            <span>
+                              <span className="block font-medium">
+                                {option === "now"
+                                  ? t.approveModeNow
+                                  : t.approveModeSchedule}
+                              </span>
+                              <span className="text-muted-foreground block text-xs">
+                                {option === "now"
+                                  ? t.approveModeNowHint
+                                  : t.approveModeScheduleHint}
+                              </span>
+                            </span>
+                          </label>
+                        ))}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+
+                  {/* Send. Disabled states carry their reason in the tooltip —
+                      a dead button that will not say why is the thing this
+                      replaces. */}
+                  <button
+                    type="button"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => void handleSend()}
+                    disabled={Boolean(blockedReason) || sending}
+                    title={blockedReason ?? sendLabel}
+                    className={cn(
+                      "ms-1 flex h-8 cursor-pointer items-center gap-1.5 rounded-full px-3",
+                      "text-xs font-medium transition-colors duration-150",
+                      "bg-primary text-primary-foreground hover:opacity-90",
+                      "disabled:cursor-not-allowed disabled:opacity-40",
+                    )}
+                  >
+                    {sending ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                      <Send className="size-4 rtl:-scale-x-100" />
+                    )}
+                    <span className="hidden sm:inline">{sendLabel}</span>
+                  </button>
                 </div>
               </div>
 
@@ -650,6 +894,22 @@ export function ReviewSpotlight() {
           )}
         </AnimatePresence>
       </CommandPrimitive>
+
+      {/* What the send did. Under the box, because the box collapses and a
+          notice inside it would vanish with the panel that carried it. */}
+      {(notice || error) && (
+        <p
+          role={error ? "alert" : "status"}
+          className={cn(
+            "mt-3 rounded-lg px-3 py-2 text-sm",
+            error
+              ? "border border-rose-500/30 bg-rose-500/10 text-rose-500"
+              : "text-muted-foreground",
+          )}
+        >
+          {error ?? notice}
+        </p>
+      )}
     </div>
   );
 }
@@ -839,7 +1099,7 @@ function Footer({ t }: { t: SocialDict }) {
       </span>
       <span className="ms-auto flex items-center gap-1.5">
         <Key>esc</Key>
-        <span>{t.spotlightHintClear}</span>
+        <span>{t.spotlightHintClose}</span>
       </span>
     </div>
   );

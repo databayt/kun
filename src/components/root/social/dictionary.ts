@@ -160,7 +160,7 @@ export const SOCIAL_DICTIONARY = {
     // Footer key hints.
     spotlightHintNavigate: "navigate",
     spotlightHintOpen: "open",
-    spotlightHintClear: "clear",
+    spotlightHintClose: "close",
     recommendedMedia: "Recommended for this brand",
     publishDirectAction: "Publish",
     attachNamed: "Attach {name}",
@@ -496,7 +496,7 @@ export const SOCIAL_DICTIONARY = {
     spotlightReadOnly: "للاطلاع فقط — يفتح السجل",
     spotlightHintNavigate: "تنقل",
     spotlightHintOpen: "فتح",
-    spotlightHintClear: "مسح",
+    spotlightHintClose: "إغلاق",
     recommendedMedia: "مقترح لهذه العلامة",
     publishDirectAction: "انشر",
     attachNamed: "أرفق {name}",
