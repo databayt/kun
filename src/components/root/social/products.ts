@@ -46,6 +46,20 @@ export interface SocialProduct {
    */
   logo?: string;
   /**
+   * The brand's actual Facebook Page profile picture.
+   *
+   * A DIFFERENT asset from `logo`, and the difference matters. The logo is the
+   * monochrome mark the brand kit governs — placed on renders, never drawn,
+   * inverted on dark grounds. The avatar is what a reader sees beside the post
+   * on the platform: full colour, its own ground, cropped to a circle by
+   * Facebook itself.
+   *
+   * Fetched from the live Page rather than assumed, so a preview claiming to
+   * be this brand's post wears the face the brand actually has. Falls back to
+   * the logo where no Page has been read yet.
+   */
+  avatar?: string;
+  /**
    * Does the mark invert on a dark ground?
    *
    * True for the marks the brand kit calls "monochrome ink only" — they are
@@ -97,6 +111,11 @@ export const PRODUCTS = [
     // "by the pen". The mark is shared; the name is not.
     logo: "/brands/hogwarts.png",
     logoInvertsOnDark: true,
+    // The live Page: an ivory quill on clay. Read from
+    // facebook.com/profile.php?id=61592684345321, where the Page is titled
+    // "Bilqalam بالقلم" — an i where this registry has an a. The id is what
+    // publishing uses, so the spelling drift is cosmetic, but it is there.
+    avatar: "/brands/balqalam-avatar.jpg",
     channels: { facebook: true },
   },
   {
@@ -107,6 +126,9 @@ export const PRODUCTS = [
     // rasterised to the path the brand kit already declared.
     logo: "/brands/mkan.png",
     logoInvertsOnDark: true,
+    // The live Page: the same arch, white on crimson. Read from
+    // facebook.com/profile.php?id=61591860681425.
+    avatar: "/brands/mkan-avatar.jpg",
     channels: { facebook: true },
   },
   {

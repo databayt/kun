@@ -1517,8 +1517,12 @@ function PostShape({
               src={avatar}
               alt=""
               className={cn(
-                "bg-muted size-6 shrink-0 rounded-full object-contain p-0.5",
-                invertAvatar && "dark:invert",
+                "size-6 shrink-0 rounded-full",
+                // A Page picture fills its circle the way Facebook crops it;
+                // a bare mark is padded so it does not touch the edge.
+                invertAvatar
+                  ? "bg-muted object-contain p-0.5 dark:invert"
+                  : "object-cover",
               )}
             />
           ) : (
@@ -1850,8 +1854,13 @@ function ConfigChoices({
               >
                 <PostShape
                   meta={meta}
-                  avatar={brandMark?.logo}
-                  invertAvatar={brandMark?.logoInvertsOnDark}
+                  // The Page's own picture where one has been read, the mark
+                  // otherwise — and a real avatar is never inverted, because
+                  // it is colour artwork on its own ground.
+                  avatar={brandMark?.avatar ?? brandMark?.logo}
+                  invertAvatar={
+                    !brandMark?.avatar && brandMark?.logoInvertsOnDark
+                  }
                 />
                 <span className="w-full truncate text-center text-[10px] leading-tight">
                   {t[POST_TYPE_LABEL[type]]}
