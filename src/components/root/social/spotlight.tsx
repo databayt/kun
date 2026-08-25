@@ -74,6 +74,7 @@ import {
 
 import { cn } from "@/lib/utils";
 import { matchesQuery } from "@/lib/normalize-search";
+import { checkCraft, type CraftFinding } from "@/lib/craft";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -115,6 +116,9 @@ import { useSocial } from "@/components/root/social/provider";
  * blurred panel over a scrolling list reads as smeared rather than glassy.
  */
 const GLASS = "bg-muted border border-muted-foreground/20 shadow-2xl";
+
+/** Any Arabic-block codepoint — decides whether the craft rules apply at all. */
+const ARABIC_SCRIPT = /[\u0600-\u06FF]/;
 
 /**
  * What Approve does — publish on the spot, or write `scheduled` variants for
@@ -243,6 +247,8 @@ export function ReviewSpotlight({
     attachMedia,
     removeMedia,
     goToStage,
+    checking,
+    checkConnections,
     setProduct,
     setSelectedChannels,
     wiredForProduct,
@@ -413,6 +419,39 @@ export function ReviewSpotlight({
         .sort((a, b) => b.when.localeCompare(a.when))[0] ?? null,
     [items, product],
   );
+
+  /**
+   * The craft findings for whatever is in the field, run on the same rules the
+   * answering CLI and the old review editor used (lib/craft.ts, which is
+   * content/docs/social/copy.mdx as code). English-only copy is skipped
+   * entirely: the Arabic length bands and register wordlist would fail every
+   * English draft for reasons a writer cannot act on, and a linter that cries
+   * wolf stops being read.
+   *
+   * Advice, not a gate — `craftFailures` has returned nothing since the gate
+   * was turned off in August, deliberately, so a human decides.
+   */
+  const craftFindings = React.useMemo(() => {
+    if (!trimmed || !ARABIC_SCRIPT.test(trimmed)) return [];
+    return checkCraft({
+      ar: trimmed,
+      brand: product,
+      // Only when unambiguous: the hashtag cap is per-channel, and picking one
+      // of several selected channels would apply a rule nobody asked for.
+      channel: selectedChannels.length === 1 ? selectedChannels[0] : undefined,
+    });
+  }, [trimmed, product, selectedChannels]);
+
+  /** Posts that actually went out for this brand in the last seven days. */
+  const publishedThisWeek = React.useMemo(() => {
+    const since = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    return items.filter(
+      (i) =>
+        i.kind === "published" &&
+        i.brand === product &&
+        new Date(i.when).getTime() >= since,
+    ).length;
+  }, [items, product]);
 
   const sort = React.useCallback(
     (list: QueueItem[]) =>
@@ -864,6 +903,14 @@ export function ReviewSpotlight({
                     setNotice(t.spotlightStartReused);
                     setError(null);
                   }}
+                  channelsReady={transportsReady}
+                  channelsChecking={checking}
+                  onCheckChannels={() => void checkConnections()}
+                  craftFindings={craftFindings}
+                  hasCopy={Boolean(trimmed)}
+                  isArabic={ARABIC_SCRIPT.test(trimmed)}
+                  publishedThisWeek={publishedThisWeek}
+                  onSeeNumbers={() => goToStage("measure")}
                   onBlank={() => {
                     reviewQueue.clearActive();
                     setPanel("queue");
@@ -1193,6 +1240,14 @@ function ConfigPanel({
   onUseDraft,
   onReuse,
   onBlank,
+  channelsReady,
+  channelsChecking,
+  onCheckChannels,
+  craftFindings,
+  hasCopy,
+  isArabic,
+  publishedThisWeek,
+  onSeeNumbers,
 }: {
   t: SocialDict;
   isRTL: boolean;
@@ -1215,8 +1270,17 @@ function ConfigPanel({
   onUseDraft: (id: string) => void;
   onReuse: (text: string) => void;
   onBlank: () => void;
+  channelsReady: boolean;
+  channelsChecking: boolean;
+  onCheckChannels: () => void;
+  craftFindings: CraftFinding[];
+  hasCopy: boolean;
+  isArabic: boolean;
+  publishedThisWeek: number;
+  onSeeNumbers: () => void;
 }) {
   const [section, setSection] = React.useState<ConfigSection | null>(null);
+  const [craftOpen, setCraftOpen] = React.useState(false);
 
   const brandName = (() => {
     const p = PRODUCTS.find((entry) => entry.id === product);
@@ -1316,6 +1380,86 @@ function ConfigPanel({
     </div>
   );
 
+  /**
+   * ——— And under that: what to look at before it goes ———
+   *
+   * Three questions a publisher asks in the second before pressing send, and
+   * every one of them used to live somewhere else: whether the relay is
+   * answering (the shell's status dialog), whether the copy holds up (the
+   * craft findings, which left with the review editor), and whether this brand
+   * has already posted this week (the ledger, on another route).
+   *
+   * Craft is advice, not a gate — `craftFailures` has returned nothing since
+   * the gate was turned off, deliberately, so a human decides. Pressing the
+   * card opens the findings under the row rather than sending anyone away.
+   */
+  const craftHint = !hasCopy
+    ? t.spotlightCheckCraftEmpty
+    : !isArabic
+      ? t.spotlightCheckCraftSkipped
+      : craftFindings.length === 0
+        ? t.spotlightCheckCraftClean
+        : fill(t.spotlightCheckCraftFlags, { count: craftFindings.length });
+
+  const beforeItGoes = (
+    <div className="mt-3 border-t border-black/5 pt-3 dark:border-white/10">
+      <p className="text-muted-foreground/60 pb-2 text-[11px]">
+        {t.spotlightCheckTitle}
+      </p>
+      <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+        <StartCard
+          label={t.spotlightCheckChannels}
+          hint={
+            channelsChecking
+              ? t.spotlightCheckChannelsChecking
+              : selected.length === 0
+                ? t.spotlightCheckChannelsNone
+                : channelsReady
+                  ? fill(t.spotlightCheckChannelsReady, {
+                      count: selected.length,
+                    })
+                  : t.spotlightCheckChannelsDown
+          }
+          tone={
+            selected.length === 0 || !channelsReady ? "warn" : "default"
+          }
+          onClick={onCheckChannels}
+        />
+        <StartCard
+          label={t.spotlightCheckCraft}
+          hint={craftHint}
+          tone={craftFindings.length > 0 ? "warn" : "default"}
+          disabled={craftFindings.length === 0}
+          onClick={() => setCraftOpen((v) => !v)}
+        />
+        <StartCard
+          label={t.spotlightCheckWeek}
+          hint={fill(t.spotlightCheckWeekCount, { count: publishedThisWeek })}
+          onClick={onSeeNumbers}
+        />
+      </div>
+
+      {craftOpen && craftFindings.length > 0 && (
+        <ul className="mt-2 space-y-1">
+          {craftFindings.slice(0, 5).map((f, i) => (
+            <li
+              key={`${f.rule}-${i}`}
+              className="text-muted-foreground flex gap-2 text-[11px]"
+            >
+              <span
+                className={cn(
+                  "mt-1 size-1.5 shrink-0 rounded-full",
+                  f.severity === "fail" ? "bg-clay" : "bg-muted-foreground/40",
+                )}
+              />
+              <span dir="auto">{f.message}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+
   /* ——— Level one: the boxes ——— */
   if (!section) {
     const tiles: { id: ConfigSection; label: string; value: string }[] = [
@@ -1374,6 +1518,7 @@ function ConfigPanel({
         </div>
 
         {startFrom}
+        {beforeItGoes}
       </div>
     );
   }
@@ -1525,11 +1670,14 @@ function StartCard({
   label,
   hint,
   disabled,
+  tone = "default",
   onClick,
 }: {
   label: string;
   hint: string;
   disabled?: boolean;
+  /** `warn` marks a card whose answer is "not yet" — clay, never red. */
+  tone?: "default" | "warn";
   onClick: () => void;
 }) {
   return (
@@ -1547,7 +1695,12 @@ function StartCard({
       )}
     >
       <span className="w-full truncate text-xs font-medium">{label}</span>
-      <span className="text-muted-foreground/70 w-full truncate text-[10px]">
+      <span
+        className={cn(
+          "w-full truncate text-[10px]",
+          tone === "warn" ? "text-clay" : "text-muted-foreground/70",
+        )}
+      >
         {hint}
       </span>
     </button>
