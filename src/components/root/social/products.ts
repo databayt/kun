@@ -62,10 +62,13 @@ export interface SocialProduct {
   /**
    * The Page's title, exactly as Facebook shows it.
    *
-   * Not the same string as `label`, which is what this Hub calls the brand.
-   * The Page carries its own bilingual name — "Bilqalam بالقلم", "Mkan مكان" —
-   * and a preview claiming to be that Page should say what the Page says, not
-   * what our registry does. Falls back to `label` where no Page has been read.
+   * The Latin half of it, which is the half that differs. The Pages are
+   * titled "Bilqalam بالقلم" and "Mkan مكان"; the Arabic repeats what the
+   * avatar and the copy already carry, and at 9px in a 160px card it is
+   * unreadable anyway. What is worth keeping is the spelling: the Page says
+   * Bilqalam with an i where this registry says Balqalam with an a.
+   *
+   * Falls back to `label` where no Page has been read.
    */
   pageName?: string;
   /**
@@ -125,7 +128,7 @@ export const PRODUCTS = [
     // "Bilqalam بالقلم" — an i where this registry has an a. The id is what
     // publishing uses, so the spelling drift is cosmetic, but it is there.
     avatar: "/brands/balqalam-avatar.jpg",
-    pageName: "Bilqalam بالقلم",
+    pageName: "Bilqalam",
     channels: { facebook: true },
   },
   {
@@ -139,7 +142,7 @@ export const PRODUCTS = [
     // The live Page: the same arch, white on crimson. Read from
     // facebook.com/profile.php?id=61591860681425.
     avatar: "/brands/mkan-avatar.jpg",
-    pageName: "Mkan مكان",
+    pageName: "Mkan",
     channels: { facebook: true },
   },
   {
