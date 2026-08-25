@@ -19,7 +19,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useSocial } from "@/components/root/social/provider";
-import { ReviewEditor } from "@/components/root/social/review-editor";
 
 type ApproveMode = "now" | "schedule";
 
@@ -160,13 +159,17 @@ export function ReviewPanel() {
             </p>
           )}
 
-          {/* Always mounted. An empty composer IS the direct-write path — this
-              stage used to render nothing until a queue draft was picked, which
-              is why publishPostDirect sat with no caller anywhere in the repo. */}
-          <ReviewEditor
-            approveMode={approveMode}
-            onDecided={() => void refresh()}
-          />
+          {/* The composer is not rendered here any more — it is being folded
+              INTO the search bar above, where one field will both find a draft
+              and be the copy that goes out. `review-editor.tsx` stays on disk
+              because that fold needs its publish, schedule, stage-for-review
+              and dismiss paths; it is the destination that changes, not the
+              logic.
+
+              Until then this stage BROWSES and does not send. That is a
+              deliberate gap, not an oversight: the alternative was leaving two
+              writing surfaces on the page during the change, which is the
+              exact mistake spotlight.tsx's header records. */}
         </div>
       </div>
     </section>
