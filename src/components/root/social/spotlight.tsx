@@ -1606,14 +1606,6 @@ function PostShape({
       {/* Copy under the media is where a reel or a caption-last post puts it. */}
       {meta.text && tall && <span className={cn(line, "w-3/4")} />}
 
-      {/* The action bar — like, comment, share. Feed only. */}
-      {!tall && (
-        <div className="mt-auto flex items-center gap-2 border-t border-black/5 pt-1.5 dark:border-white/10">
-          {[0, 1, 2].map((i) => (
-            <span key={i} className={cn(line, "h-1 w-5")} />
-          ))}
-        </div>
-      )}
     </div>
   );
 }
