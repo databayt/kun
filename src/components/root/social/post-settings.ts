@@ -31,45 +31,90 @@ export const DESTINATIONS = ["direct", "schedule", "review"] as const;
 export type Destination = (typeof DESTINATIONS)[number];
 
 /**
- * What the post is, in platform terms.
+ * The shapes a post can take.
  *
- * NOT stored on the post — a `SocialVariant` carries text, media and a channel
- * and nothing else — so this steers what the composer OFFERS rather than
- * pretending to be a column. Saying so plainly here because a setting that
- * looks persisted and is not would be the worse kind of lie.
+ * Two things decide a shape, and the schema names both. A draft is "copy
+ * AND/OR media: any of the two may be empty, never both"
+ * (`SocialDraftRequest.mediaUrls`), and a variant's media is "images and/or
+ * one video" (`SocialVariant.mediaUrls`). So the axes are what it carries —
+ * nothing, one still, several stills, footage — and where it lands: in the
+ * feed, as a swipe, as a story, as a reel.
+ *
+ * NOT stored on the post. Nothing records a shape, and the delivered thing is
+ * just text plus URLs, so this steers what the composer OFFERS rather than
+ * pretending to be a column. Saying so here beats a setting that looks
+ * persisted and is not.
  */
-export const POST_TYPES = ["post", "carousel", "reel", "story"] as const;
+export const POST_TYPES = [
+  "text",
+  "image",
+  "gallery",
+  "video",
+  "imageOnly",
+  "videoOnly",
+  "carousel",
+  "story",
+  "reel",
+] as const;
 export type PostType = (typeof POST_TYPES)[number];
+
+export interface PostTypeMeta {
+  /** Which showroom asset types this shape can draw from. */
+  assets: readonly string[];
+  /** What kind of media it takes. `none` means the ＋ has nothing to offer. */
+  kind: "image" | "video" | "none";
+  /** Does the shape carry copy? Drives nothing yet; it is what the card draws. */
+  text: boolean;
+  /** How many pieces of media the shape implies. */
+  count: "none" | "one" | "many";
+}
+
+/** Stills a feed post can use — every text-bearing still type the library has. */
+const STILLS = [
+  "hero",
+  "og",
+  "banner",
+  "product",
+  "lifestyle",
+  "mockup",
+  "infographic",
+  "split",
+  "testimonial",
+  "logo",
+  "other",
+] as const;
+
+export const POST_TYPE_META: Record<PostType, PostTypeMeta> = {
+  text: { assets: [], kind: "none", text: true, count: "none" },
+  image: { assets: STILLS, kind: "image", text: true, count: "one" },
+  gallery: { assets: STILLS, kind: "image", text: true, count: "many" },
+  video: { assets: ["reel", "story"], kind: "video", text: true, count: "one" },
+  imageOnly: { assets: STILLS, kind: "image", text: false, count: "one" },
+  videoOnly: {
+    assets: ["reel", "story"],
+    kind: "video",
+    text: false,
+    count: "one",
+  },
+  carousel: {
+    assets: ["carousel", "split", "infographic", "og"],
+    kind: "image",
+    text: true,
+    count: "many",
+  },
+  story: { assets: ["story", "reel"], kind: "image", text: false, count: "one" },
+  reel: { assets: ["reel"], kind: "video", text: true, count: "one" },
+};
 
 /** Image, video, or don't care. Filters both the library and the queue. */
 export const MEDIA_FILTERS = ["any", "image", "video"] as const;
 export type MediaFilter = (typeof MEDIA_FILTERS)[number];
 
-/**
- * Which of the showroom's asset types belong to each post format.
- *
- * Keys are `ASSET_TYPES` from the showroom taxonomy — one vocabulary, not two.
- * A format with no matching assets in a brand's library shows an empty grid,
- * which is honest: that brand has nothing of that shape to attach yet.
- */
-export const POST_TYPE_ASSETS: Record<PostType, readonly string[]> = {
-  post: [
-    "hero",
-    "og",
-    "banner",
-    "product",
-    "lifestyle",
-    "mockup",
-    "infographic",
-    "split",
-    "testimonial",
-    "logo",
-    "other",
-  ],
-  carousel: ["carousel", "split", "infographic", "og"],
-  reel: ["reel"],
-  story: ["story", "reel"],
-};
+/** Kept for readers that only want the asset lists. */
+export const POST_TYPE_ASSETS: Record<PostType, readonly string[]> =
+  Object.fromEntries(
+    POST_TYPES.map((t) => [t, POST_TYPE_META[t].assets]),
+  ) as Record<PostType, readonly string[]>;
 
 /**
  * Does this library asset belong in the ＋ face under these settings?
@@ -84,7 +129,14 @@ export function libraryFits(
   postType: PostType,
   mediaFilter: MediaFilter,
 ): boolean {
-  if (!POST_TYPE_ASSETS[postType].includes(asset.type)) return false;
+  const meta = POST_TYPE_META[postType];
+  // A text-only post has nothing to attach, so the library offers nothing —
+  // an empty grid is the honest answer, not a bug.
+  if (meta.kind === "none") return false;
+  if (!meta.assets.includes(asset.type)) return false;
+  // The shape decides the kind before the filter narrows it further: asking
+  // for a reel and being offered stills is the shape not working.
+  if (mediaKind(asset.url) !== meta.kind) return false;
   if (mediaFilter === "any") return true;
   return mediaKind(asset.url) === mediaFilter;
 }

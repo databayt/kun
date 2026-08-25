@@ -4,6 +4,7 @@ import { ASSET_TYPES } from "@/components/root/social/showroom/taxonomy";
 import {
   POST_TYPES,
   POST_TYPE_ASSETS,
+  POST_TYPE_META,
   featureFits,
   featureLabel,
   featuresFor,
@@ -14,8 +15,8 @@ import {
 const IMAGE = "https://cdn.databayt.org/a.png";
 const VIDEO = "https://cdn.databayt.org/a.mp4";
 
-describe("POST_TYPE_ASSETS", () => {
-  it("names only types the showroom taxonomy actually has", () => {
+describe("post shapes", () => {
+  it("names only asset types the showroom taxonomy actually has", () => {
     // Two vocabularies that drift is how a filter starts matching nothing —
     // the failure the settings face would show as an empty library.
     const known = new Set<string>([...ASSET_TYPES, "other"]);
@@ -26,37 +27,60 @@ describe("POST_TYPE_ASSETS", () => {
     }
   });
 
-  it("gives every post type somewhere to draw from", () => {
+  it("gives every media-bearing shape somewhere to draw from", () => {
     for (const postType of POST_TYPES) {
-      expect(POST_TYPE_ASSETS[postType].length).toBeGreaterThan(0);
+      const meta = POST_TYPE_META[postType];
+      if (meta.kind === "none") {
+        // Text-only has nothing to attach, and that is the point.
+        expect(meta.assets.length, postType).toBe(0);
+        continue;
+      }
+      expect(meta.assets.length, postType).toBeGreaterThan(0);
     }
+  });
+
+  it("covers both halves of what a post may carry", () => {
+    // The schema's own rule: copy AND/OR media, never neither. So the set has
+    // to offer copy alone, media alone, and the pairings.
+    const metas = POST_TYPES.map((t) => POST_TYPE_META[t]);
+    expect(metas.some((m) => m.text && m.kind === "none")).toBe(true);
+    expect(metas.some((m) => !m.text && m.kind !== "none")).toBe(true);
+    expect(metas.some((m) => m.text && m.kind === "image")).toBe(true);
+    expect(metas.some((m) => m.text && m.kind === "video")).toBe(true);
+    expect(metas.some((m) => m.count === "many")).toBe(true);
+    // And nothing may be neither, which the schema forbids outright.
+    expect(metas.every((m) => m.text || m.kind !== "none")).toBe(true);
   });
 });
 
 describe("libraryFits", () => {
-  it("offers stills to a post and withholds them from a reel", () => {
+  it("offers stills to a feed post and withholds them from a reel", () => {
     const hero = { url: IMAGE, type: "hero" };
-    expect(libraryFits(hero, "post", "any")).toBe(true);
+    expect(libraryFits(hero, "image", "any")).toBe(true);
     expect(libraryFits(hero, "reel", "any")).toBe(false);
   });
 
-  it("offers a story asset to a story and not to a post", () => {
-    const story = { url: IMAGE, type: "story" };
-    expect(libraryFits(story, "story", "any")).toBe(true);
-    expect(libraryFits(story, "post", "any")).toBe(false);
+  it("offers nothing at all to a text-only post", () => {
+    for (const type of ["hero", "og", "reel", "story", "carousel"]) {
+      expect(libraryFits({ url: IMAGE, type }, "text", "any"), type).toBe(false);
+      expect(libraryFits({ url: VIDEO, type }, "text", "any"), type).toBe(false);
+    }
   });
 
-  it("applies the media filter on top of the format", () => {
-    const stillHero = { url: IMAGE, type: "hero" };
-    const movingHero = { url: VIDEO, type: "hero" };
-    expect(libraryFits(stillHero, "post", "image")).toBe(true);
-    expect(libraryFits(stillHero, "post", "video")).toBe(false);
-    expect(libraryFits(movingHero, "post", "video")).toBe(true);
+  it("matches the kind the shape implies before any filter", () => {
+    // A reel is footage: a still tagged `reel` is not one.
+    expect(libraryFits({ url: VIDEO, type: "reel" }, "reel", "any")).toBe(true);
+    expect(libraryFits({ url: IMAGE, type: "reel" }, "reel", "any")).toBe(false);
+    // And a gallery is stills, whatever the asset was tagged.
+    expect(libraryFits({ url: VIDEO, type: "hero" }, "gallery", "any")).toBe(
+      false,
+    );
   });
 
-  it("lets an unrecognised extension through under Any", () => {
-    const odd = { url: "https://cdn.databayt.org/a.heic", type: "hero" };
-    expect(libraryFits(odd, "post", "any")).toBe(true);
+  it("lets the media filter narrow further, never widen", () => {
+    const still = { url: IMAGE, type: "hero" };
+    expect(libraryFits(still, "image", "image")).toBe(true);
+    expect(libraryFits(still, "image", "video")).toBe(false);
   });
 });
 

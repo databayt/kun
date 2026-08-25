@@ -111,6 +111,7 @@ import {
   DESTINATIONS,
   MEDIA_FILTERS,
   POST_TYPES,
+  POST_TYPE_META,
   featureFits,
   featureLabel,
   featuresFor,
@@ -120,6 +121,7 @@ import {
   type BrandFeature,
   type MediaFilter,
   type PostType,
+  type PostTypeMeta,
 } from "@/components/root/social/post-settings";
 import {
   PICKABLE_PRODUCTS,
@@ -214,6 +216,19 @@ const MODES: readonly {
  * Keyed by the ids in config.ts. A channel with no entry falls back to its
  * name, the same way a brand without artwork does.
  */
+/** One name per shape, so the summary and the cards cannot disagree. */
+const POST_TYPE_LABEL: Record<PostType, keyof SocialDict> = {
+  text: "postTypeText",
+  image: "postTypeImage",
+  gallery: "postTypeGallery",
+  video: "postTypeVideo",
+  imageOnly: "postTypeImageOnly",
+  videoOnly: "postTypeVideoOnly",
+  carousel: "postTypeCarousel",
+  story: "postTypeStory",
+  reel: "postTypeReel",
+};
+
 const CHANNEL_ICON: Record<string, React.ComponentType<IconProps>> = {
   facebook: IconBrandFacebook,
   instagram: IconBrandInstagram,
@@ -341,7 +356,8 @@ export function ReviewSpotlight({
   );
   const [postType, setPostType] = usePersisted<PostType>(
     POST_TYPE_KEY,
-    "post",
+    // Text and one still is the ordinary post; the rest are departures from it.
+    "image",
     (v): v is PostType => (POST_TYPES as readonly string[]).includes(v),
   );
   const [feature, setFeature] = usePersisted<string>(
@@ -1341,13 +1357,6 @@ function ConfigPanel({
     return c ? (isRTL ? c.labelAr : c.label) : id;
   };
 
-  const postTypeName: Record<PostType, string> = {
-    post: t.postTypePost,
-    carousel: t.postTypeCarousel,
-    reel: t.postTypeReel,
-    story: t.postTypeStory,
-  };
-
   const mediaName: Record<MediaFilter, string> = {
     any: t.mediaAny,
     image: t.mediaImage,
@@ -1456,6 +1465,57 @@ function ConfigPanel({
         </div>
       )}
 
+    </div>
+  );
+}
+
+/**
+ * A post's shape, drawn.
+ *
+ * Bars are copy, blocks are media, a triangle is footage. Nine names in a row
+ * are nine things to read; nine little diagrams are one glance — and the
+ * distinction a word makes worst ("Text + images" against "Carousel") is the
+ * one a picture makes best.
+ */
+function PostShape({ meta }: { meta: PostTypeMeta }) {
+  const bar = "bg-muted-foreground/40 h-1 rounded-full";
+  const block = "bg-muted-foreground/25 rounded";
+
+  const media = () => {
+    if (meta.kind === "none") return null;
+    if (meta.count === "many") {
+      return (
+        <div className="grid w-full flex-1 grid-cols-2 gap-0.5">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className={cn(block, "h-full w-full")} />
+          ))}
+        </div>
+      );
+    }
+    return (
+      <div
+        className={cn(block, "flex w-full flex-1 items-center justify-center")}
+      >
+        {meta.kind === "video" && (
+          <span className="border-s-muted-foreground/60 h-0 w-0 border-y-[5px] border-s-[8px] border-y-transparent rtl:rotate-180" />
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div
+      aria-hidden
+      className="flex h-12 w-full flex-col items-center justify-center gap-1 px-1"
+    >
+      {media()}
+      {meta.text && (
+        <div className="flex w-full flex-col gap-0.5">
+          <div className={cn(bar, "w-full")} />
+          <div className={cn(bar, "w-2/3")} />
+          {meta.kind === "none" && <div className={cn(bar, "w-5/6")} />}
+        </div>
+      )}
     </div>
   );
 }
@@ -1689,22 +1749,37 @@ function ConfigChoices({
   }
 
   if (section === "postType") {
-    const name: Record<PostType, string> = {
-      post: t.postTypePost,
-      carousel: t.postTypeCarousel,
-      reel: t.postTypeReel,
-      story: t.postTypeStory,
-    };
+    // Cards, not pills: a shape is easier to recognise drawn than named, and
+    // "Text + images" versus "Carousel" is a distinction a word makes badly.
     return (
       <>
-        <Pills
-          items={POST_TYPES.map((type) => ({
-            id: type,
-            label: name[type],
-            on: postType === type,
-            pick: () => onPostType(type),
-          }))}
-        />
+        <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+          {POST_TYPES.map((type) => {
+            const meta = POST_TYPE_META[type];
+            const on = postType === type;
+            return (
+              <button
+                key={type}
+                type="button"
+                aria-pressed={on}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => onPostType(type)}
+                className={cn(
+                  "flex cursor-pointer flex-col items-center gap-2 rounded-xl border p-2",
+                  "transition-colors duration-150",
+                  on
+                    ? "border-foreground/40 bg-accent"
+                    : "border-input hover:border-foreground/30 hover:bg-accent/40",
+                )}
+              >
+                <PostShape meta={meta} />
+                <span className="w-full truncate text-center text-[10px] leading-tight">
+                  {t[POST_TYPE_LABEL[type]]}
+                </span>
+              </button>
+            );
+          })}
+        </div>
         <p className="text-muted-foreground/60 pt-2 text-[11px]">
           {t.postTypeHint}
         </p>
