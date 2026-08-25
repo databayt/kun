@@ -107,12 +107,15 @@ import { mediaKind } from "@/lib/media-kind";
 import {
   approveDraft,
   publishPostDirect,
+  readSocialDraft,
+  requestSocialDraft,
   schedulePost,
   stageForReview,
   type BrandMedia,
   type PostResult,
   type ReviewLink,
 } from "@/actions/post-social";
+import { composeBrief } from "@/components/root/social/brief";
 import { CHANNELS, type ChannelId } from "@/components/root/social/config";
 import {
   ANY_STYLE,
@@ -332,6 +335,7 @@ export function ReviewSpotlight({
     setProduct,
     setSelectedChannels,
     wiredForProduct,
+    draftKnobs,
   } = useSocial();
   const router = useRouter();
 
@@ -671,6 +675,40 @@ export function ReviewSpotlight({
   /**
    * Stating the blocker beats a dead button with no explanation.
    */
+  // ——— Asking for the copy instead of writing it ———
+  //
+  // The box could publish and it could search. It could not ask, which meant
+  // the eight settings above it aimed nothing: brand and channels rode the
+  // post, and Feature, Post, Media and the Draft knobs narrowed a list or
+  // pointed at a lane this box had no way to reach. `requestSocialDraft`
+  // answers inline in about eleven seconds on the free tier and falls back to
+  // the Mac drain, so the ask is cheap and the settings finally have an
+  // errand.
+  //
+  // Called directly rather than through the provider's `draftQueue.submit`,
+  // deliberately. That one treats an ask as a REFINEMENT whenever the agent
+  // window is holding an answered draft — so a composer ask would silently
+  // file a turn against a thread the writer is not looking at. The box always
+  // wants a root ask.
+  const [askId, setAskId] = React.useState<string | null>(null);
+  const [asking, setAsking] = React.useState(false);
+  const [askQueue, setAskQueue] = React.useState<{
+    pendingAhead?: number;
+    lastDrainAt?: string;
+  } | null>(null);
+  const [askStalled, setAskStalled] = React.useState(false);
+  /**
+   * An answer that arrived after the writer had already changed the field.
+   *
+   * The poll can run for minutes, and the field is the one thing on screen
+   * someone might be editing the whole time. Overwriting it with a draft they
+   * asked for ten minutes ago loses work they can never get back, so a late
+   * answer waits here behind a press instead.
+   */
+  const [askReady, setAskReady] = React.useState<string | null>(null);
+  /** The field as it stood when the ask was filed — what "unchanged" means. */
+  const askedFrom = React.useRef("");
+
   const blockedReason = !trimmed
     ? t.blockedNoText
     : selectedChannels.length === 0
@@ -700,6 +738,193 @@ export function ReviewSpotlight({
    * that put the text on screen. Lifted verbatim from review-editor.tsx, which
    * is where this reasoning was paid for.
    */
+  /**
+   * File the ask: everything on screen, as a brief.
+   *
+   * The knobs ride as columns — the request has one each for angle, register,
+   * reference and model — and the two settings with no column, Feature and
+   * Post, ride as prose. That split is not tidiness: prose is the documented
+   * input ("the brief is the whole input"), and pillars.json has carried this
+   * exact kind of direction in its brief strings since the seed lane shipped.
+   */
+  const handleAsk = React.useCallback(async () => {
+    if (asking || askId) return;
+    const brief = composeBrief({
+      text: query,
+      feature:
+        feature === ANY_FEATURE ? null : featureLabel(product, feature, isRTL),
+      postType,
+      channels: selectedChannels.map((id) => {
+        const channel = CHANNELS.find((c) => c.id === id);
+        return channel ? (isRTL ? channel.labelAr : channel.label) : id;
+      }),
+      mediaCount: composerMediaUrls.length,
+      style:
+        imageStyle === ANY_STYLE ? null : styleLabel(imageStyle, isRTL),
+    });
+    if (!brief) {
+      setError(t.askNoSubject);
+      return;
+    }
+
+    setAsking(true);
+    setError(null);
+    setNotice(null);
+    setAskReady(null);
+    setAskStalled(false);
+    setAskQueue(null);
+    askedFrom.current = query;
+
+    try {
+      const res = await requestSocialDraft({
+        product,
+        brief,
+        mediaUrls: composerMediaUrls,
+        model: draftKnobs.model,
+        ...(draftKnobs.angle ? { angle: draftKnobs.angle } : {}),
+        ...(draftKnobs.register ? { register: draftKnobs.register } : {}),
+        ...(draftKnobs.referenceId
+          ? { referenceId: draftKnobs.referenceId }
+          : {}),
+      });
+      if (!res.ok || !res.id) {
+        setError(`${t.errorMsg}${res.error ?? ""}`);
+        return;
+      }
+      // The poll takes it from here. Inline answers come back on the first
+      // tick, which is why there is no separate "did it answer instantly"
+      // path — one arrival, one place that handles it.
+      setAskId(res.id);
+    } catch (err: unknown) {
+      setError(
+        `${t.errorMsg}${err instanceof Error ? err.message : String(err)}`,
+      );
+    } finally {
+      setAsking(false);
+    }
+  }, [
+    asking,
+    askId,
+    query,
+    feature,
+    product,
+    isRTL,
+    postType,
+    selectedChannels,
+    composerMediaUrls,
+    imageStyle,
+    draftKnobs.model,
+    draftKnobs.angle,
+    draftKnobs.register,
+    draftKnobs.referenceId,
+    t,
+  ]);
+
+  /**
+   * Wait for it. Same cadence as the agent window, for the same reasons: five
+   * seconds while an answer could be seconds away, fifteen after the first
+   * minute, and a hard stop at ten — the ask survives the stop (the drain
+   * sweep expires it server-side after an hour), but polling forever made
+   * "nobody is draining" look identical to "the app is broken".
+   */
+  React.useEffect(() => {
+    if (!askId || askStalled) return;
+    let cancelled = false;
+    const startedAt = Date.now();
+    let timer: ReturnType<typeof setTimeout> | null = null;
+
+    const schedule = () => {
+      timer = setTimeout(
+        tick,
+        Date.now() - startedAt > 60_000 ? 15_000 : 5_000,
+      );
+    };
+
+    const tick = async () => {
+      const res = await readSocialDraft(askId).catch(() => null);
+      if (cancelled) return;
+      // A read that failed is not a verdict — the queue line keeps saying
+      // whatever it last said, and the next tick asks again.
+      if (!res?.ok) {
+        schedule();
+        return;
+      }
+
+      if (res.status === "pending") {
+        setAskQueue({
+          pendingAhead: res.pendingAhead,
+          lastDrainAt: res.lastDrainAt,
+        });
+        if (Date.now() - startedAt > 10 * 60_000) {
+          setAskStalled(true);
+          return;
+        }
+        schedule();
+        return;
+      }
+
+      setAskId(null);
+      setAskQueue(null);
+
+      if (res.status !== "answered") {
+        // failed · dismissed · superseded — all of them mean no copy is
+        // coming, and the note is the answerer's own words about why.
+        setError(`${t.askFailed}${res.note ?? res.status}`);
+        return;
+      }
+
+      const copy = res.ar || res.en || "";
+      // activeDraftId FIRST, and before the refresh: it is what routes Send
+      // through approveDraft, which claims the request answered → consumed.
+      // Without it the copy would publish through publishPostDirect and leave
+      // this same draft sitting in the queue for someone else to publish a
+      // second time.
+      reviewQueue.loadDraft(askId);
+      if (query.trim() === askedFrom.current.trim()) {
+        setQuery(copy);
+        setNotice(t.askArrived);
+      } else {
+        setAskReady(copy);
+      }
+      // The drafting session may have picked the media half too. Only when the
+      // writer has attached none — their pick outranks the queue's.
+      if (composerMediaUrls.length === 0) {
+        for (const url of res.mediaUrls ?? []) attachMedia(url);
+      }
+      void reviewQueue.refresh();
+    };
+
+    schedule();
+    return () => {
+      cancelled = true;
+      if (timer) clearTimeout(timer);
+    };
+    // `query` is read inside the tick to decide whether the field moved, and
+    // re-running this effect on every keystroke would restart the poll clock.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [askId, askStalled]);
+
+  const askLane: AskLane = {
+    run: () => void handleAsk(),
+    busy: asking || Boolean(askId),
+    waiting: Boolean(askId) && !asking,
+    queue: askQueue,
+    stalled: askStalled,
+    // Restarting the window, not re-asking: the row is still there and still
+    // pending, so a fresh ask would file a second one for the same brief.
+    again: () => setAskStalled(false),
+    ready: askReady,
+    use: () => {
+      if (!askReady) return;
+      setQuery(askReady);
+      setAskReady(null);
+      setNotice(t.askArrived);
+    },
+    can: Boolean(
+      trimmed || (feature !== ANY_FEATURE && brandFeatures.length > 0),
+    ),
+  };
+
   const handleSend = React.useCallback(async () => {
     if (blockedReason || sending) return;
     setSending(true);
@@ -1050,6 +1275,7 @@ export function ReviewSpotlight({
                   onDestination={setDestination}
                   scheduleAt={scheduleAt}
                   onScheduleAt={setScheduleAt}
+                  ask={askLane}
                   postType={postType}
                   onPostType={setPostType}
                   mediaFilter={mediaFilter}
@@ -1404,6 +1630,7 @@ function ConfigPanel({
   onDestination,
   scheduleAt,
   onScheduleAt,
+  ask,
   postType,
   onPostType,
   mediaFilter,
@@ -1433,6 +1660,7 @@ function ConfigPanel({
   onDestination: (next: Destination) => void;
   scheduleAt: string;
   onScheduleAt: (next: string) => void;
+  ask: AskLane;
   postType: PostType;
   onPostType: (next: PostType) => void;
   mediaFilter: MediaFilter;
@@ -1574,6 +1802,7 @@ function ConfigPanel({
             onDestination={onDestination}
             scheduleAt={scheduleAt}
             onScheduleAt={onScheduleAt}
+            ask={ask}
             drafts={drafts}
             onUseDraft={onUseDraft}
             ago={ago}
@@ -2136,6 +2365,28 @@ function StyleCard({
 }
 
 /**
+ * The ask, bundled — nine props for one errand would bury the eight settings
+ * they sit under.
+ */
+interface AskLane {
+  /** File it. */
+  run: () => void;
+  /** Filing, or waiting on an answer. */
+  busy: boolean;
+  /** Waiting specifically — the queue line has something to say. */
+  waiting: boolean;
+  queue: { pendingAhead?: number; lastDrainAt?: string } | null;
+  /** Ten minutes gone. The ask is still saved; this window stopped looking. */
+  stalled: boolean;
+  again: () => void;
+  /** An answer that arrived after the field had moved on. */
+  ready: string | null;
+  use: () => void;
+  /** Is there a subject to write about at all. */
+  can: boolean;
+}
+
+/**
  * A Date as `<input type="datetime-local">` wants it: local wall-clock, no
  * zone. `toISOString()` would be the instant in UTC, which the picker reads as
  * a wall-clock time and shows shifted by the reader's offset.
@@ -2331,6 +2582,7 @@ function ConfigChoices({
   onDestination,
   scheduleAt,
   onScheduleAt,
+  ask,
   drafts,
   onUseDraft,
   ago,
@@ -2359,6 +2611,7 @@ function ConfigChoices({
   /** When Later means, as local wall-clock. Empty until Later is chosen. */
   scheduleAt: string;
   onScheduleAt: (next: string) => void;
+  ask: AskLane;
   drafts: { id: string; text: string; when: string }[];
   onUseDraft: (id: string) => void;
   ago: (iso: string) => string;
@@ -2659,8 +2912,87 @@ function ConfigChoices({
     const modelEngine = (label: string) =>
       label.match(/\(([^)]+)\)/)?.[1] ?? null;
 
+    // The queue's own words while it waits. Position when a session will get
+    // to it, the heartbeat's silence when none has looked — the two are
+    // otherwise indistinguishable, which is the failure the agent window
+    // already learned to name.
+    const waitLine = ask.stalled
+      ? t.askStalled
+      : ask.queue
+        ? ask.queue.lastDrainAt === undefined
+          ? t.askNoDrain
+          : ask.queue.pendingAhead
+            ? fill(t.askQueuedAhead, { ahead: ask.queue.pendingAhead })
+            : t.askQueuedNext
+        : null;
+
     return (
       <div className="space-y-1">
+        {/* The verb this tab never had. Angle, register and model were
+            direction for an ask that could only be made somewhere else — a
+            control panel wired to a lane its own box could not reach. */}
+        <div className="flex flex-wrap items-center gap-2 pb-0.5">
+          <button
+            type="button"
+            disabled={!ask.can || ask.busy}
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={ask.run}
+            title={ask.can ? t.askAction : t.askNoSubject}
+            className={cn(
+              "inline-flex cursor-pointer items-center gap-1.5 rounded-full",
+              "px-3 py-1.5 text-xs font-medium transition-opacity duration-150",
+              "bg-foreground text-background",
+              (!ask.can || ask.busy) && "cursor-not-allowed opacity-40",
+            )}
+          >
+            {ask.busy ? (
+              <Loader2 className="size-3.5 animate-spin" />
+            ) : (
+              <PenLine className="size-3.5" />
+            )}
+            {ask.busy ? t.askWorking : t.askAction}
+          </button>
+
+          {waitLine && (
+            <span className="text-muted-foreground/70 text-[11px]">
+              {waitLine}
+            </span>
+          )}
+          {ask.stalled && (
+            <button
+              type="button"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={ask.again}
+              className={pill(false)}
+            >
+              {t.askCheckAgain}
+            </button>
+          )}
+
+          {/* An answer that landed after the field had moved on. It waits
+              behind a press rather than overwriting words someone spent the
+              wait writing. */}
+          {ask.ready && (
+            <>
+              <span className="text-muted-foreground/70 text-[11px]">
+                {t.askHeld}
+              </span>
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={ask.use}
+                className={pill(true)}
+              >
+                {t.askUse}
+              </button>
+            </>
+          )}
+        </div>
+
+        <p className="text-muted-foreground/60 pb-1.5 text-[11px]">
+          {t.askHint}
+        </p>
+
         <CardStrip
           heading={t.spotlightConfigDraftAngle}
           rowRef={angleRow}

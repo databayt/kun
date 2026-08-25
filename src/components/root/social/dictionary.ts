@@ -169,6 +169,22 @@ export const SOCIAL_DICTIONARY = {
     spotlightConfigDraftModel: "Model",
     spotlightConfigDraftHint:
       "Direction for a draft the queue writes. Typing your own copy above ignores all three.",
+    // The ask — everything above, as a brief.
+    askAction: "Write it",
+    askHint:
+      "Turns the field and every setting above into a brief, and asks for the copy. Your own words carry it; the settings only sharpen them.",
+    askNoSubject: "Say what the post is about, or pick a feature first.",
+    askWorking: "Writing…",
+    askQueuedAhead: "Queued — {ahead} ahead of it.",
+    askQueuedNext: "Queued — next up.",
+    askNoDrain: "Queued, but no session has looked in a while.",
+    askStalled: "Still queued. The ask is saved — look again whenever.",
+    askCheckAgain: "Check again",
+    askArrived: "A draft came back. Read it before you send it.",
+    askHeld:
+      "A draft came back while you were writing. Your words are still in the field.",
+    askUse: "Use the draft",
+    askFailed: "No copy came back: ",
     spotlightConfigDraftFree: "Writer's choice",
     // What the unset card says, in the doc's own terms: not "no answer" but
     // "the writer decides", which is a different and legitimate instruction.
@@ -578,6 +594,20 @@ export const SOCIAL_DICTIONARY = {
     spotlightConfigDraftModel: "النموذج",
     spotlightConfigDraftHint:
       "توجيه لمسودة يكتبها الطابور. كتابة نصّك أعلاه تتجاوز الثلاثة.",
+    askAction: "اكتبها",
+    askHint:
+      "يحوّل الحقل وكل الإعدادات أعلاه إلى موجز، ويطلب النص. كلماتك هي الأساس، والإعدادات تشحذها.",
+    askNoSubject: "قل عمّ يتحدث المنشور، أو اختر محوراً أولاً.",
+    askWorking: "يكتب…",
+    askQueuedAhead: "في الطابور — {ahead} قبله.",
+    askQueuedNext: "في الطابور — التالي.",
+    askNoDrain: "في الطابور، لكن لم تمرّ جلسة منذ حين.",
+    askStalled: "ما زال في الطابور. الطلب محفوظ — عد إليه متى شئت.",
+    askCheckAgain: "تحقق مجدداً",
+    askArrived: "وصلت مسودة. اقرأها قبل الإرسال.",
+    askHeld: "وصلت مسودة أثناء كتابتك. كلماتك ما زالت في الحقل.",
+    askUse: "استخدم المسودة",
+    askFailed: "لم يعد أي نص: ",
     spotlightConfigDraftFree: "اختيار الكاتب",
     spotlightConfigDraftFreeAngle: "الكاتب يسمّي ثلاث زوايا ويبقي الناجية.",
     spotlightConfigDraftFreeRegister:

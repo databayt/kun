@@ -113,10 +113,17 @@ They differ in exactly one way — who is trusted to say yes:
 | **Drain** | `GET /api/social/drain` | The `CRON_SECRET` bearer. Publishes variants whose `scheduledFor` has passed — those were approved earlier, in schedule mode |
 | **Relay** | `POST /api/social/relay` | The `CRON_SECRET` bearer. No human at all — the headless lane |
 
-**The words** arrive one of two ways: a contributor files a brief on `/social`, a Claude
-Code session drains the queue and writes the copy back through the craft gate
-(`scripts/social-drafts.mjs answer`), or a reviewer edits copy directly in the queue's
-editor. The editor never creates from blank — it only refines something already drafted.
+**The words** arrive one of three ways: a contributor files a brief on `/social` and a
+Claude Code session drains the queue and writes the copy back through the craft gate
+(`scripts/social-drafts.mjs answer`); a reviewer edits copy directly in the queue's
+editor, which never creates from blank; or — since 2026-08-25 — the **composer asks for
+itself**. Its **Write it** button turns the field plus every setting above it (brand,
+feature, post shape, channels, attached media, and the angle/register/model knobs) into
+a brief, files it with `requestSocialDraft`, and drops the answer back into the same
+field. The inline Gemini lane answers in about eleven seconds; a miss falls through to
+the same queue and the same drain, and the box says so rather than spinning. The
+answered request becomes the composer's active draft, so approving there consumes it
+instead of leaving it approvable twice.
 
 **The media** is attached, never invented at send time: library assets picked by URL
 (`content/media/library.json`, or the showroom's **Attach**), landing on
@@ -124,9 +131,14 @@ editor. The editor never creates from blank — it only refines something alread
 URLs and nothing else — Graph fetches the bytes itself, which is why they must already be
 public on the CDN.
 
-> Two exported server actions, `publishPostDirect` and `schedulePost`, also reach
-> `deliverPost` but have **no callers anywhere** — no route, no component. They are a
-> publish path with nothing driving it. Treat them as dormant, not as a fifth door.
+> **A fifth door opened 2026-08-25: the composer itself.** `publishPostDirect` and
+> `schedulePost` used to be a publish path with nothing driving it — no route, no
+> component. The review queue's composer now calls both: copy typed into the box
+> that answers to no queue entry publishes through `publishPostDirect` (Now) or
+> `schedulePost` (Later, for the time the Plan tab picks). Copy that came from a
+> draft still goes through `approveDraft`, because approving is also a claim.
+> The door count is five; who may open this one is the same signed-in
+> contributor `requireContributor()` checks on every other call.
 
 **The saved id is the only way back.** Graph returns it once, in its reply; it cannot be
 recovered from the variant afterwards, and it is the sole argument `deleteFacebookPost`
