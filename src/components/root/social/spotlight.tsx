@@ -391,6 +391,29 @@ export function ReviewSpotlight({
     } satisfies Record<Mode, number>;
   }, [matching, scope, product]);
 
+  /**
+   * What the quick-start row offers, for the brand the settings currently
+   * name. Derived from the corpus already in the client — no extra read, and
+   * no reaching into another face to find out whether there is anything
+   * waiting.
+   */
+  const brandDrafts = React.useMemo(
+    () => items.filter((i) => i.kind === "draft" && i.brand === product),
+    [items, product],
+  );
+  const nextDraft = React.useMemo(
+    () =>
+      [...brandDrafts].sort((a, b) => a.when.localeCompare(b.when))[0] ?? null,
+    [brandDrafts],
+  );
+  const lastPublished = React.useMemo(
+    () =>
+      [...items]
+        .filter((i) => i.kind === "published" && i.brand === product)
+        .sort((a, b) => b.when.localeCompare(a.when))[0] ?? null,
+    [items, product],
+  );
+
   const sort = React.useCallback(
     (list: QueueItem[]) =>
       [...list].sort((a, b) => {
@@ -820,6 +843,34 @@ export function ReviewSpotlight({
                   onPostType={setPostType}
                   mediaFilter={mediaFilter}
                   onMediaFilter={setMediaFilter}
+                  nextDraft={nextDraft}
+                  queueCount={brandDrafts.length}
+                  lastPublished={lastPublished}
+                  onUseDraft={(id) => {
+                    reviewQueue.loadDraft(id);
+                    setPanel("queue");
+                    setNotice(null);
+                    setError(null);
+                    setFocused(false);
+                    inputRef.current?.blur();
+                  }}
+                  onReuse={(text) => {
+                    // Text only. Carrying the draft id would make Send
+                    // re-approve a consumed request; carrying the media would
+                    // quietly republish the same image.
+                    reviewQueue.clearActive();
+                    setQuery(text);
+                    setPanel("queue");
+                    setNotice(t.spotlightStartReused);
+                    setError(null);
+                  }}
+                  onBlank={() => {
+                    reviewQueue.clearActive();
+                    setPanel("queue");
+                    setNotice(null);
+                    setError(null);
+                    inputRef.current?.focus();
+                  }}
                 />
               ) : panel === "media" ? (
                 <MediaPanel
@@ -1136,6 +1187,12 @@ function ConfigPanel({
   onPostType,
   mediaFilter,
   onMediaFilter,
+  nextDraft,
+  queueCount,
+  lastPublished,
+  onUseDraft,
+  onReuse,
+  onBlank,
 }: {
   t: SocialDict;
   isRTL: boolean;
@@ -1150,6 +1207,14 @@ function ConfigPanel({
   onPostType: (next: PostType) => void;
   mediaFilter: MediaFilter;
   onMediaFilter: (next: MediaFilter) => void;
+  /** Oldest draft awaiting review for this brand, if any. */
+  nextDraft: { id: string } | null;
+  queueCount: number;
+  /** Most recent post that actually went out for this brand. */
+  lastPublished: { text: string } | null;
+  onUseDraft: (id: string) => void;
+  onReuse: (text: string) => void;
+  onBlank: () => void;
 }) {
   const [section, setSection] = React.useState<ConfigSection | null>(null);
 
@@ -1206,6 +1271,51 @@ function ConfigPanel({
         : "text-muted-foreground/70 hover:bg-accent/50 hover:text-accent-foreground",
     );
 
+  /**
+   * ——— Under the boxes: the three ways a post actually starts ———
+   *
+   * Settings say what a post IS; this says where its words come from, which is
+   * the part that was slow. The queue was reachable only by opening another
+   * face and reading a list; the last post that went out was reachable only by
+   * leaving for the ledger. Both are already in the client, so both are one
+   * press from here.
+   *
+   * Reuse copies TEXT and nothing else — no draft id, no media. That matters:
+   * carrying the id would make Send re-approve a request that is already
+   * consumed, and carrying the media would quietly republish the same image.
+   * What comes back is a starting point, and the notice says so.
+   */
+  const startFrom = (
+    <div className="mt-3 border-t border-black/5 pt-3 dark:border-white/10">
+      <p className="text-muted-foreground/60 pb-2 text-[11px]">
+        {t.spotlightStartTitle}
+      </p>
+      <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+        <StartCard
+          label={t.spotlightStartQueue}
+          hint={
+            nextDraft
+              ? fill(t.spotlightStartQueueHint, { count: queueCount })
+              : t.spotlightStartQueueEmpty
+          }
+          disabled={!nextDraft}
+          onClick={() => nextDraft && onUseDraft(nextDraft.id)}
+        />
+        <StartCard
+          label={t.spotlightStartReuse}
+          hint={lastPublished ? t.spotlightStartReuseHint : t.spotlightStartReuseEmpty}
+          disabled={!lastPublished}
+          onClick={() => lastPublished && onReuse(lastPublished.text)}
+        />
+        <StartCard
+          label={t.spotlightStartBlank}
+          hint={t.spotlightStartBlankHint}
+          onClick={onBlank}
+        />
+      </div>
+    </div>
+  );
+
   /* ——— Level one: the boxes ——— */
   if (!section) {
     const tiles: { id: ConfigSection; label: string; value: string }[] = [
@@ -1236,7 +1346,11 @@ function ConfigPanel({
 
     return (
       <div className={shell}>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+        {/* One row, always. Five settings read as a single line of state —
+            "hogwarts, facebook, a post, any media, publish now" — and a grid
+            that reflows into two rows on a narrow screen turns that sentence
+            into a paragraph. It scrolls sideways instead. */}
+        <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
           {tiles.map((tile) => (
             <button
               key={tile.id}
@@ -1244,19 +1358,22 @@ function ConfigPanel({
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => setSection(tile.id)}
               className={cn(
-                "border-input hover:border-foreground/30 hover:bg-accent/40 flex cursor-pointer",
-                "flex-col items-start gap-1 rounded-xl border p-3 text-start transition-colors duration-150",
+                "border-input hover:border-foreground/30 hover:bg-accent/40 flex min-w-0 flex-1",
+                "shrink-0 basis-0 cursor-pointer flex-col items-start gap-0.5 rounded-xl border",
+                "px-2.5 py-2 text-start transition-colors duration-150",
               )}
             >
-              <span className="text-muted-foreground/70 text-[11px]">
+              <span className="text-muted-foreground/70 truncate text-[10px]">
                 {tile.label}
               </span>
-              <span className="line-clamp-1 text-sm font-medium">
+              <span className="w-full truncate text-xs font-medium">
                 {tile.value}
               </span>
             </button>
           ))}
         </div>
+
+        {startFrom}
       </div>
     );
   }
@@ -1400,6 +1517,40 @@ function ConfigPanel({
         )}
       </div>
     </div>
+  );
+}
+
+/** One way in, on the quick-start row. Disabled when there is nothing there. */
+function StartCard({
+  label,
+  hint,
+  disabled,
+  onClick,
+}: {
+  label: string;
+  hint: string;
+  disabled?: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onMouseDown={(e) => e.preventDefault()}
+      onClick={onClick}
+      className={cn(
+        "border-input flex min-w-0 flex-1 shrink-0 basis-0 flex-col items-start gap-0.5",
+        "rounded-xl border px-2.5 py-2 text-start transition-colors duration-150",
+        disabled
+          ? "cursor-not-allowed opacity-50"
+          : "hover:border-foreground/30 hover:bg-accent/40 cursor-pointer",
+      )}
+    >
+      <span className="w-full truncate text-xs font-medium">{label}</span>
+      <span className="text-muted-foreground/70 w-full truncate text-[10px]">
+        {hint}
+      </span>
+    </button>
   );
 }
 
