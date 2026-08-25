@@ -57,8 +57,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowUp,
   CalendarClock,
+  Check,
   CheckCircle2,
-  ChevronLeft,
   Images,
   Layers,
   Loader2,
@@ -276,6 +276,11 @@ export function ReviewSpotlight({
   const [panel, setPanel] = React.useState<"queue" | "media" | "config">(
     "queue",
   );
+  // The settings dialog. Like the filters menu it portals out of this subtree,
+  // so the panel has to be told to stay open behind it.
+  const [configFocus, setConfigFocus] = React.useState<ConfigSection | null>(
+    null,
+  );
   const [sending, setSending] = React.useState(false);
   const [notice, setNotice] = React.useState<string | null>(null);
   const [error, setError] = React.useState<string | null>(null);
@@ -487,7 +492,7 @@ export function ReviewSpotlight({
     );
   }, [matching, product, inMode, sort, scope, trimmed]);
 
-  const open = focused || menuOpen;
+  const open = focused || menuOpen || configFocus !== null;
 
   const handleSelect = React.useCallback(
     (item: QueueItem) => {
@@ -746,6 +751,12 @@ export function ReviewSpotlight({
         // on the key people press to dismiss a panel.
         onKeyDown={(e) => {
           if (e.key !== "Escape") return;
+          // A portalled child still bubbles through the React tree, so the
+          // Escape that dismisses the settings dialog or the filters menu
+          // arrives here too. Measured: closing the dialog also collapsed the
+          // box, and the settings you had just changed went off screen with
+          // it. Whoever is on top owns that key.
+          if (configFocus !== null || menuOpen) return;
           setFocused(false);
           inputRef.current?.blur();
         }}
@@ -911,6 +922,12 @@ export function ReviewSpotlight({
                   isArabic={ARABIC_SCRIPT.test(trimmed)}
                   publishedThisWeek={publishedThisWeek}
                   onSeeNumbers={() => goToStage("measure")}
+                  onOpenDialog={setConfigFocus}
+                  openSection={configFocus}
+                  onCloseSection={() => {
+                    setConfigFocus(null);
+                    inputRef.current?.focus();
+                  }}
                   onBlank={() => {
                     reviewQueue.clearActive();
                     setPanel("queue");
@@ -1248,6 +1265,9 @@ function ConfigPanel({
   isArabic,
   publishedThisWeek,
   onSeeNumbers,
+  onOpenDialog,
+  openSection,
+  onCloseSection,
 }: {
   t: SocialDict;
   isRTL: boolean;
@@ -1278,8 +1298,12 @@ function ConfigPanel({
   isArabic: boolean;
   publishedThisWeek: number;
   onSeeNumbers: () => void;
+  onOpenDialog: (section: ConfigSection) => void;
+  /** Which box is open, and how to shut it. Held by the parent so Escape
+   *  can be given to this card before it reaches the box underneath. */
+  openSection: ConfigSection | null;
+  onCloseSection: () => void;
 }) {
-  const [section, setSection] = React.useState<ConfigSection | null>(null);
   const [craftOpen, setCraftOpen] = React.useState(false);
 
   const brandName = (() => {
@@ -1325,7 +1349,7 @@ function ConfigPanel({
     );
 
   const shell =
-    "max-h-[min(360px,45vh)] overflow-y-auto border-t border-black/5 p-4 text-start dark:border-white/10";
+    "relative max-h-[min(360px,45vh)] overflow-y-auto border-t border-black/5 p-4 text-start dark:border-white/10";
 
   const pill = (on: boolean) =>
     cn(
@@ -1460,71 +1484,144 @@ function ConfigPanel({
     </div>
   );
 
-  /* ——— Level one: the boxes ——— */
-  if (!section) {
-    const tiles: { id: ConfigSection; label: string; value: string }[] = [
-      { id: "brand", label: t.spotlightConfigBrand, value: brandName },
-      {
-        id: "channels",
-        label: t.spotlightConfigChannels,
-        value: selected.length
-          ? selected.map(channelName).join(" · ")
-          : t.spotlightConfigNone,
-      },
-      {
-        id: "postType",
-        label: t.spotlightConfigPostType,
-        value: postTypeName[postType],
-      },
-      {
-        id: "media",
-        label: t.spotlightConfigMedia,
-        value: mediaName[mediaFilter],
-      },
-      {
-        id: "destination",
-        label: t.spotlightConfigTiming,
-        value: destinationName[destination],
-      },
-    ];
+  const tiles: { id: ConfigSection; label: string; value: string }[] = [
+    { id: "brand", label: t.spotlightConfigBrand, value: brandName },
+    {
+      id: "channels",
+      label: t.spotlightConfigChannels,
+      value: selected.length
+        ? selected.map(channelName).join(" · ")
+        : t.spotlightConfigNone,
+    },
+    {
+      id: "postType",
+      label: t.spotlightConfigPostType,
+      value: postTypeName[postType],
+    },
+    {
+      id: "media",
+      label: t.spotlightConfigMedia,
+      value: mediaName[mediaFilter],
+    },
+    {
+      id: "destination",
+      label: t.spotlightConfigTiming,
+      value: destinationName[destination],
+    },
+  ];
 
-    return (
-      <div className={shell}>
-        {/* One row, always. Five settings read as a single line of state —
-            "hogwarts, facebook, a post, any media, publish now" — and a grid
-            that reflows into two rows on a narrow screen turns that sentence
-            into a paragraph. It scrolls sideways instead. */}
-        <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
-          {tiles.map((tile) => (
-            <button
-              key={tile.id}
-              type="button"
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={() => setSection(tile.id)}
-              className={cn(
-                "border-input hover:border-foreground/30 hover:bg-accent/40 flex min-w-0 flex-1",
-                "shrink-0 basis-0 cursor-pointer flex-col items-start gap-0.5 rounded-xl border",
-                "px-2.5 py-2 text-start transition-colors duration-150",
-              )}
-            >
-              <span className="text-muted-foreground/70 truncate text-[10px]">
-                {tile.label}
-              </span>
-              <span className="w-full truncate text-xs font-medium">
-                {tile.value}
-              </span>
-            </button>
-          ))}
-        </div>
+  return (
+    <div className={shell}>
+      {/* One row, always. Five settings read as a single line of state —
+          "hogwarts, facebook, a post, any media, publish now" — and a grid
+          that reflows into two rows on a narrow screen turns that sentence
+          into a paragraph. It scrolls sideways instead.
 
-        {startFrom}
-        {beforeItGoes}
+          Pressing any of them opens ONE dialog holding all five. The boxes
+          used to drill down inside this panel, which cost a press back out
+          between every change — three presses to set two things. Now the
+          dialog is opened once, everything is changed in it, and it is closed
+          once, with the pressed box deciding only what is highlighted. */}
+      <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+        {tiles.map((tile) => (
+          <button
+            key={tile.id}
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => onOpenDialog(tile.id)}
+            className={cn(
+              "border-input hover:border-foreground/30 hover:bg-accent/40 flex min-w-0 flex-1",
+              "shrink-0 basis-0 cursor-pointer flex-col items-start gap-0.5 rounded-xl border",
+              "px-2.5 py-2 text-start transition-colors duration-150",
+            )}
+          >
+            <span className="text-muted-foreground/70 truncate text-[10px]">
+              {tile.label}
+            </span>
+            <span className="w-full truncate text-xs font-medium">
+              {tile.value}
+            </span>
+          </button>
+        ))}
       </div>
-    );
+
+      {startFrom}
+      {beforeItGoes}
+
+      <ConfigSelect
+        section={openSection}
+        onClose={onCloseSection}
+        t={t}
+        isRTL={isRTL}
+        product={product}
+        onProduct={onProduct}
+        wired={wired}
+        selected={selected}
+        onChannels={onChannels}
+        postType={postType}
+        onPostType={onPostType}
+        mediaFilter={mediaFilter}
+        onMediaFilter={onMediaFilter}
+        destination={destination}
+        onDestination={onDestination}
+      />
+    </div>
+  );
+}
+
+/**
+ * One small dialog, five settings, one shape.
+ *
+ * Press a box, choose, done. Every setting answers the same question — which
+ * of these — so they all get the same dialog rather than five layouts to
+ * learn: a title, a short list, nothing else. Options are one or two words
+ * because the box under them already carries the sentence.
+ *
+ * Single-choice settings close on the press, which is the whole point: brand
+ * is two presses from anywhere, not four. Channels is the exception and stays
+ * open, because picking one channel is rarely picking all of them.
+ */
+function ConfigSelect({
+  section,
+  onClose,
+  t,
+  isRTL,
+  product,
+  onProduct,
+  wired,
+  selected,
+  onChannels,
+  postType,
+  onPostType,
+  mediaFilter,
+  onMediaFilter,
+  destination,
+  onDestination,
+}: {
+  section: ConfigSection | null;
+  onClose: () => void;
+  t: SocialDict;
+  isRTL: boolean;
+  product: string;
+  onProduct: (id: ProductId) => void;
+  wired: ChannelId[];
+  selected: ChannelId[];
+  onChannels: (next: ChannelId[]) => void;
+  postType: PostType;
+  onPostType: (next: PostType) => void;
+  mediaFilter: MediaFilter;
+  onMediaFilter: (next: MediaFilter) => void;
+  destination: Destination;
+  onDestination: (next: Destination) => void;
+}) {
+  interface Choice {
+    id: string;
+    label: string;
+    on: boolean;
+    pick: () => void;
   }
 
-  /* ——— Level two: one box, opened ——— */
-  const heading: Record<ConfigSection, string> = {
+  const title: Record<ConfigSection, string> = {
     brand: t.spotlightConfigBrand,
     channels: t.spotlightConfigChannels,
     postType: t.spotlightConfigPostType,
@@ -1532,133 +1629,134 @@ function ConfigPanel({
     destination: t.spotlightConfigTiming,
   };
 
-  const hint: Partial<Record<ConfigSection, string>> = {
-    postType: t.postTypeHint,
-    media: t.mediaFilterHint,
-  };
+  /** Channels toggle; everything else replaces and closes. */
+  const multi = section === "channels";
+
+  const choices: Choice[] = (() => {
+    if (section === "brand") {
+      return PRODUCTS.map((p) => ({
+        id: p.id,
+        label: isRTL ? p.labelAr : p.label,
+        on: product === p.id,
+        pick: () => onProduct(p.id),
+      }));
+    }
+    if (section === "channels") {
+      return wired.map((id) => {
+        const c = CHANNELS.find((entry) => entry.id === id);
+        return {
+          id,
+          label: c ? (isRTL ? c.labelAr : c.label) : id,
+          on: selected.includes(id),
+          pick: () =>
+            onChannels(
+              selected.includes(id)
+                ? selected.filter((x) => x !== id)
+                : [...selected, id],
+            ),
+        };
+      });
+    }
+    if (section === "postType") {
+      const name: Record<PostType, string> = {
+        post: t.postTypePost,
+        carousel: t.postTypeCarousel,
+        reel: t.postTypeReel,
+        story: t.postTypeStory,
+      };
+      return POST_TYPES.map((type) => ({
+        id: type,
+        label: name[type],
+        on: postType === type,
+        pick: () => onPostType(type),
+      }));
+    }
+    if (section === "media") {
+      const name: Record<MediaFilter, string> = {
+        any: t.mediaAny,
+        image: t.mediaImage,
+        video: t.mediaVideo,
+      };
+      return MEDIA_FILTERS.map((value) => ({
+        id: value,
+        label: name[value],
+        on: mediaFilter === value,
+        pick: () => onMediaFilter(value),
+      }));
+    }
+    if (section === "destination") {
+      const name: Record<Destination, string> = {
+        direct: t.destinationDirect,
+        schedule: t.destinationSchedule,
+        review: t.destinationReview,
+      };
+      return DESTINATIONS.map((option) => ({
+        id: option,
+        label: name[option],
+        on: destination === option,
+        pick: () => onDestination(option),
+      }));
+    }
+    return [];
+  })();
+
+  if (!section) return null;
 
   return (
-    <div className={shell}>
-      <div className="mb-3 flex items-center gap-2">
-        <button
-          type="button"
-          onMouseDown={(e) => e.preventDefault()}
-          onClick={() => setSection(null)}
-          aria-label={t.spotlightConfigBack}
-          title={t.spotlightConfigBack}
-          className="text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors duration-150"
-        >
-          <ChevronLeft className="size-4 rtl:-scale-x-100" />
-        </button>
-        <p className="text-sm font-medium">{heading[section]}</p>
-      </div>
-
-      {/* Centred, because this is the middle of a panel rather than a form on
-          a page — the choices are the only thing here and they should sit
-          where the eye already is. */}
-      <div className="flex min-h-[7rem] flex-col items-center justify-center gap-2">
-        {section === "brand" && (
-          <div className="flex flex-wrap justify-center gap-1.5">
-            {PRODUCTS.map((entry) => (
-              <button
-                key={entry.id}
-                type="button"
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => onProduct(entry.id)}
-                aria-pressed={product === entry.id}
-                className={pill(product === entry.id)}
-              >
-                {isRTL ? entry.labelAr : entry.label}
-              </button>
-            ))}
-          </div>
+    // Centred on the PANEL, not the window — absolute inside the settings
+    // face rather than a portal to <body>. The thing being configured is
+    // right here, and a card that flies to the middle of the screen leaves
+    // its own context behind. It also means focus never leaves the field, so
+    // the box underneath cannot fold while you choose.
+    <div className="absolute inset-0 z-10 flex items-center justify-center">
+      <button
+        type="button"
+        aria-label={t.spotlightHintClose}
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={onClose}
+        className="bg-muted/80 absolute inset-0 cursor-default"
+      />
+      <div
+        role="dialog"
+        aria-label={title[section]}
+        className={cn(
+          "bg-popover text-popover-foreground relative w-56 rounded-2xl border p-3 shadow-lg",
+          "text-start",
         )}
+      >
+        <p className="text-muted-foreground/70 px-1 pb-2 text-[11px]">
+          {title[section]}
+        </p>
 
-        {section === "channels" &&
-          (wired.length === 0 ? (
-            <p className="text-muted-foreground/60 text-xs">
-              {t.spotlightConfigNoChannels}
-            </p>
-          ) : (
-            <div className="flex flex-wrap justify-center gap-1.5">
-              {wired.map((id) => (
-                <button
-                  key={id}
-                  type="button"
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => toggle(id)}
-                  aria-pressed={selected.includes(id)}
-                  className={pill(selected.includes(id))}
-                >
-                  {channelName(id)}
-                </button>
-              ))}
-            </div>
-          ))}
-
-        {section === "postType" && (
-          <div className="flex flex-wrap justify-center gap-1.5">
-            {POST_TYPES.map((type) => (
+        {choices.length === 0 ? (
+          <p className="text-muted-foreground/60 py-2 text-xs">
+            {t.spotlightConfigNoChannels}
+          </p>
+        ) : (
+          <div className="flex flex-col gap-1">
+            {choices.map((choice) => (
               <button
-                key={type}
+                key={choice.id}
                 type="button"
+                aria-pressed={choice.on}
                 onMouseDown={(e) => e.preventDefault()}
-                onClick={() => onPostType(type)}
-                aria-pressed={postType === type}
-                className={pill(postType === type)}
-              >
-                {postTypeName[type]}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {section === "media" && (
-          <div className="flex flex-wrap justify-center gap-1.5">
-            {MEDIA_FILTERS.map((value) => (
-              <button
-                key={value}
-                type="button"
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => onMediaFilter(value)}
-                aria-pressed={mediaFilter === value}
-                className={pill(mediaFilter === value)}
-              >
-                {mediaName[value]}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {section === "destination" && (
-          <div className="w-full max-w-sm space-y-1">
-            {DESTINATIONS.map((option) => (
-              <button
-                key={option}
-                type="button"
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => onDestination(option)}
-                aria-pressed={destination === option}
+                onClick={() => {
+                  choice.pick();
+                  if (!multi) onClose();
+                }}
                 className={cn(
-                  "flex w-full cursor-pointer flex-col rounded-lg p-2 text-start transition-colors duration-150",
-                  destination === option ? "bg-accent" : "hover:bg-muted",
+                  "flex cursor-pointer items-center justify-between rounded-lg px-3 py-2",
+                  "text-sm transition-colors duration-150",
+                  choice.on
+                    ? "bg-accent text-accent-foreground font-medium"
+                    : "hover:bg-muted",
                 )}
               >
-                <span className="text-sm font-medium">
-                  {destinationName[option]}
-                </span>
-                <span className="text-muted-foreground text-xs">
-                  {destinationHint[option]}
-                </span>
+                <span className="truncate">{choice.label}</span>
+                {choice.on && <Check className="size-4 shrink-0" />}
               </button>
             ))}
           </div>
-        )}
-
-        {hint[section] && (
-          <p className="text-muted-foreground/60 pt-1 text-center text-[11px]">
-            {hint[section]}
-          </p>
         )}
       </div>
     </div>
