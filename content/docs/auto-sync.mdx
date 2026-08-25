@@ -1,0 +1,167 @@
+---
+title: Auto-sync
+description: Real-time bidirectional git sync for every databayt repo at ~/<name>
+---
+
+# Auto-sync
+
+> Every commit you make pushes within ~2 seconds. Every commit a teammate pushes pulls within ~60 seconds. Per-repo isolation — one failure never stops the others.
+
+A background service that watches all 11 databayt repos at `~/<name>` (see [repositories — local layout](/docs/repositories#local-layout)) and keeps them in sync with GitHub.
+
+---
+
+## Install
+
+```powershell
+# Windows
+& "$env:USERPROFILE\.claude\scripts\auto-sync-install.ps1" -Install
+```
+
+```bash
+# macOS / Linux
+~/.claude/scripts/auto-sync-install.sh --install
+```
+
+No admin/sudo required — runs user-scoped. Starts on every logon and restarts on failure.
+
+To start immediately without logging out:
+
+```powershell
+& "$env:USERPROFILE\.claude\scripts\auto-sync-install.ps1" -Run
+```
+
+```bash
+~/.claude/scripts/auto-sync-install.sh --run
+```
+
+---
+
+## How it works
+
+For each repo at `~/<name>` with a `.git/` directory:
+
+1. **Push side (real-time)** — a `FileSystemWatcher` (Windows) / `fswatch` (macOS) / `inotifywait` (Linux) watches `.git/refs/heads`. When you make a local commit, the watcher fires; after a 2-second debounce, auto-sync runs `git push`.
+2. **Pull side (every 60s)** — a polling loop runs `git fetch` + `git pull --rebase` per repo. If the working tree is dirty, the pull is skipped (your in-flight work isn't touched).
+3. **Conflict on pull** — `git rebase --abort` is called, the failure is logged, and the next poll tries again. Your working tree stays as you left it.
+4. **Push failure** — logged as a warning (auth issue, force-push conflict, no network). The next commit on that repo retries.
+
+Per-repo isolation: a single repo failing (no upstream, auth broken, force-push needed) doesn't stop the others.
+
+---
+
+## Configuration
+
+| Flag | PowerShell | bash | Default | What it does |
+|------|-----------|------|---------|--------------|
+| Poll interval | `-PollInterval 60` | `--poll-interval 60` | 60s | How often to fetch+pull each repo |
+| Debounce | `-Debounce 2` | `--debounce 2` | 2s | How long after a local commit before pushing |
+| Dry run | `-DryRun` | `--dry-run` | off | Log what would happen, don't push/pull |
+| Once | `-Once` | `--once` | off | Exit after one poll cycle (for testing) |
+| Verbose | `-Verbose` | `--verbose` | off | Echo every log line to console |
+
+Test before installing:
+
+```powershell
+& "$env:USERPROFILE\.claude\scripts\auto-sync.ps1" -DryRun -Once -Verbose
+```
+
+```bash
+~/.claude/scripts/auto-sync.sh --dry-run --once --verbose
+```
+
+---
+
+## Status, logs, uninstall
+
+```powershell
+# Status
+auto-sync-install.ps1 -Status
+
+# Tail today's log
+Get-Content "$env:USERPROFILE\.claude\logs\auto-sync-$(Get-Date -Format yyyy-MM-dd).log" -Wait
+
+# Stop and remove
+auto-sync-install.ps1 -Uninstall
+```
+
+```bash
+# Status
+~/.claude/scripts/auto-sync-install.sh --status
+
+# Tail today's log
+tail -f ~/.claude/logs/auto-sync-$(date +%Y-%m-%d).log
+
+# Stop and remove
+~/.claude/scripts/auto-sync-install.sh --uninstall
+```
+
+---
+
+## Log format
+
+Each line: `[HH:MM:SS] [LEVEL] [repo-name           ] message`
+
+| Level | Meaning |
+|-------|---------|
+| `INFO` | Startup, repo discovery |
+| `PUSH` | Successful push (with commit count) |
+| `PULL` | Successful pull (with commit count) |
+| `WARN` | Skipped (dirty tree, no upstream, push failed) |
+| `ERROR` | Pull failed → rebase aborted; or unexpected exception |
+
+Sample:
+
+```
+[09:14:02] [INFO ] [_main_              ] auto-sync starting · poll=60s · debounce=2s · dry-run=False · watcher=FileSystemWatcher
+[09:14:02] [INFO ] [_main_              ] watching 11 repos
+[09:14:33] [PUSH ] [kun                 ] 1 commit(s) pushed
+[09:15:02] [PULL ] [hogwarts            ] 3 commit(s) rebased
+[09:15:02] [WARN ] [souq                ] 2 behind but working tree dirty — skipping pull
+```
+
+---
+
+## What auto-sync does NOT do
+
+- **Doesn't commit for you** — only pushes commits you've already made
+- **Doesn't resolve merge conflicts** — aborts the rebase and logs
+- **Doesn't force-push** — if upstream history was rewritten, you'll see a `WARN` and need to handle manually
+- **Doesn't sync uncommitted work** — your working tree is sacred
+- **Doesn't touch branches other than the current one** — feature branches you haven't pushed yet stay local
+
+Treat auto-sync as a co-pilot for the common case (linear commits to main / feature branches with upstream). Anything weirder, handle yourself.
+
+---
+
+## Relationship to `maintain`
+
+| | `maintain` | `auto-sync` |
+|---|---|---|
+| Frequency | Once daily at 09:00 | Real-time + every 60s |
+| What it does | Doctor + sync-repos burst + notify on red | Push on local commit, pull on poll |
+| Resource use | One-shot, ~30s | Always running, ~5-30MB RAM |
+| Purpose | Health check + drift catcher | Active sync |
+
+Run both. `maintain` catches what auto-sync misses; auto-sync keeps you fresh between maintain runs.
+
+---
+
+## Troubleshooting
+
+| Symptom | Fix |
+|---------|-----|
+| Logs say `no cloned repos found` | Run `sync-repos.ps1` (or `.sh`) first to clone repos to `~/<name>` |
+| Logs say `no upstream` for a repo | `cd ~/<repo>; git push -u origin <branch>` once to set upstream |
+| Push fails with auth error | Re-run `gh auth login` — auto-sync uses the same credentials |
+| Linux: `auto-sync-install.sh --install` says `systemctl not found` | Your distro doesn't have systemd; run `auto-sync.sh` from cron manually |
+| macOS: launchd loaded but no logs | Check `~/.claude/logs/auto-sync-launchd.err` for startup errors |
+| Want to pause sync without uninstalling | Windows: `Disable-ScheduledTask -TaskName kun-auto-sync`. Linux: `systemctl --user stop kun-auto-sync`. Mac: `launchctl unload ~/Library/LaunchAgents/com.databayt.kun-auto-sync.plist`. |
+
+---
+
+## Reference
+
+- [Repositories — local layout](/docs/repositories#local-layout) — where the repos live
+- [`auto-sync.ps1` source](https://github.com/databayt/kun/blob/main/.claude/scripts/auto-sync.ps1)
+- [`auto-sync.sh` source](https://github.com/databayt/kun/blob/main/.claude/scripts/auto-sync.sh)
