@@ -1778,14 +1778,25 @@ function useDragScroll(): {
  * invented ratio would be a claim about how they render that nothing backs.
  */
 function MediaFormatCard({
+  t,
   label,
   ratio,
+  lane,
+  style,
+  seconds,
   on,
   inert,
   onPick,
 }: {
+  t: SocialDict;
   label: string;
   ratio: string | null;
+  /** How it is made: a photographic render, a designed plate, or a placed file. */
+  lane?: "higgs" | "template" | "none";
+  /** Its look, where the taxonomy records one. */
+  style?: "minimal" | "cinematic";
+  /** Clip length, for the moving formats. */
+  seconds?: number;
   on: boolean;
   inert: boolean;
   onPick: () => void;
@@ -1796,13 +1807,30 @@ function MediaFormatCard({
   const h = parsed ? Number(parsed[2]) : 1;
   const box = 96;
   const scale = Math.min(box / w, box / h);
+  const moving = typeof seconds === "number";
+
+  const laneName =
+    lane === "template"
+      ? t.laneTemplate
+      : lane === "none"
+        ? t.laneNone
+        : lane === "higgs"
+          ? t.laneHiggs
+          : null;
+  const styleName =
+    style === "cinematic"
+      ? t.styleCinematic
+      : style === "minimal"
+        ? t.styleMinimal
+        : null;
+  const meta = [ratio, styleName ?? laneName].filter(Boolean).join(" · ");
 
   return (
     <button
       type="button"
       aria-pressed={on}
       aria-label={label}
-      title={label}
+      title={[label, laneName, styleName].filter(Boolean).join(" · ")}
       onMouseDown={(e) => e.preventDefault()}
       onClick={onPick}
       className={cn(
@@ -1811,12 +1839,7 @@ function MediaFormatCard({
         on ? "opacity-100" : "opacity-90 hover:opacity-100",
       )}
     >
-      <div
-        className={cn(
-          "bg-card relative flex h-44 w-full flex-col items-center justify-center gap-2",
-          "rounded-lg p-2.5 shadow-sm",
-        )}
-      >
+      <div className="bg-card relative flex h-44 w-full flex-col items-center justify-center gap-2 rounded-lg p-2.5 shadow-sm">
         {on && (
           <span className="bg-foreground text-background absolute end-1.5 bottom-1.5 z-10 flex size-4 items-center justify-center rounded-full">
             <Check className="size-3" strokeWidth={3} />
@@ -1824,18 +1847,48 @@ function MediaFormatCard({
         )}
 
         <span className="flex h-24 items-center justify-center">
+          {/* The block is the format: its ratio, and how it is made. A
+              photographic lane gets a graded field, a designed one gets the
+              copy it carries, a placed mark gets a plain plate. Grey squares
+              for all thirteen said only "some media goes here". */}
           <span
-            className="bg-muted-foreground/20 rounded"
             style={{ width: w * scale, height: h * scale }}
-          />
+            className={cn(
+              "relative flex items-center justify-center overflow-hidden rounded",
+              lane === "higgs" && style === "cinematic"
+                ? "from-muted-foreground/45 to-muted-foreground/15 bg-gradient-to-br"
+                : lane === "higgs"
+                  ? "bg-muted-foreground/20"
+                  : "bg-muted-foreground/15",
+            )}
+          >
+            {lane === "template" && (
+              // A designed plate carries copy; that is what makes it one.
+              <span className="flex w-full flex-col gap-1 px-2">
+                <span className="bg-muted-foreground/40 h-1 w-4/5 rounded-full" />
+                <span className="bg-muted-foreground/30 h-1 w-3/5 rounded-full" />
+                <span className="bg-muted-foreground/25 h-1 w-2/3 rounded-full" />
+              </span>
+            )}
+            {lane === "none" && (
+              <span className="bg-muted-foreground/40 size-4 rounded-full" />
+            )}
+            {moving && (
+              <span className="border-s-card h-0 w-0 border-y-[7px] border-s-[12px] border-y-transparent rtl:rotate-180" />
+            )}
+          </span>
         </span>
 
         <span className="flex w-full flex-col items-center gap-0.5">
           <span className="w-full truncate text-center text-[11px] leading-tight">
             {label}
           </span>
-          <span className="text-muted-foreground/60 text-[9px] leading-none">
-            {ratio ?? "\u00a0"}
+          <span className="text-muted-foreground/60 truncate text-[9px] leading-none">
+            {moving
+              ? [meta, fill(t.mediaSeconds, { count: seconds })]
+                  .filter(Boolean)
+                  .join(" · ")
+              : meta || "\u00a0"}
           </span>
         </span>
       </div>
@@ -2205,6 +2258,7 @@ function ConfigChoices({
             )}
           >
             <MediaFormatCard
+              t={t}
               label={t.mediaAny}
               ratio={null}
               on={mediaType === ANY_MEDIA_TYPE}
@@ -2214,8 +2268,14 @@ function ConfigChoices({
             {types.map((type) => (
               <MediaFormatCard
                 key={type}
+                t={t}
                 label={typeLabel(type as AssetType, isRTL)}
                 ratio={ASSET_TYPE_META[type as AssetType]?.ratio ?? null}
+                lane={ASSET_TYPE_META[type as AssetType]?.lane}
+                style={ASSET_TYPE_META[type as AssetType]?.style}
+                seconds={
+                  ASSET_TYPE_META[type as AssetType]?.gemini?.seconds
+                }
                 on={mediaType === type}
                 inert={mediaDragging}
                 onPick={() => onMediaType(type)}
