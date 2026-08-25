@@ -1817,11 +1817,17 @@ function ConfigSelect({
 
   if (!section) return null;
 
-  // Kept inside the panel's width. A card hanging off the last box would
-  // otherwise run past the box it belongs to. Brand is wider because two
-  // columns plus a tick cannot hold a name like "Hogwarts" in half of 224.
-  const grid = section === "brand";
-  const CARD = grid ? 264 : 224;
+  /**
+   * How wide the card is, and how many across. A list of three reads best as
+   * a column; a dozen one-word features read as a grid, and a column of
+   * thirteen would be taller than the panel it hangs in.
+   *
+   * Width follows the columns rather than the other way round: four columns
+   * of "Parent portal" need the room, and the first attempt at two columns
+   * proved the point by truncating "Hogwarts".
+   */
+  const cols = section === "feature" ? 4 : section === "brand" ? 2 : 1;
+  const CARD = cols === 4 ? 384 : cols === 2 ? 264 : 224;
   const left = anchor
     ? Math.max(8, Math.min(anchor.x, Math.max(8, panelWidth - CARD - 8)))
     : 8;
@@ -1844,11 +1850,10 @@ function ConfigSelect({
       <div
         role="dialog"
         aria-label={title[section]}
-        style={{ insetInlineStart: left, top: anchor?.y ?? 8 }}
+        style={{ insetInlineStart: left, top: anchor?.y ?? 8, width: CARD }}
         className={cn(
           "bg-popover text-popover-foreground absolute rounded-2xl border p-2 shadow-lg",
           "text-start",
-          grid ? "w-66" : "w-56",
         )}
       >
         {choices.length === 0 ? (
@@ -1859,9 +1864,11 @@ function ConfigSelect({
           <div
             className={cn(
               "gap-1",
-              // Brand is six one-word names; a single column makes a tall,
-              // mostly-empty card out of a list that fits in three rows.
-              grid ? "grid grid-cols-2" : "flex flex-col",
+              cols === 4
+                ? "grid grid-cols-4"
+                : cols === 2
+                  ? "grid grid-cols-2"
+                  : "flex flex-col",
             )}
           >
             {choices.map((choice) => (
@@ -1875,16 +1882,21 @@ function ConfigSelect({
                   if (!multi) onClose();
                 }}
                 className={cn(
-                  "flex cursor-pointer items-center justify-between rounded-lg py-2",
-                  grid ? "px-2.5" : "px-3",
-                  "text-sm transition-colors duration-150",
+                  "flex cursor-pointer items-center rounded-lg transition-colors duration-150",
+                  cols === 1
+                    ? "justify-between px-3 py-2 text-sm"
+                    : // In a grid the tick would cost more room than it earns,
+                      // so the accent alone says which one holds.
+                      "justify-start px-2 py-1.5 text-xs leading-tight",
                   choice.on
                     ? "bg-accent text-accent-foreground font-medium"
                     : "hover:bg-muted",
                 )}
               >
-                <span className="truncate">{choice.label}</span>
-                {choice.on && <Check className="size-4 shrink-0" />}
+                <span className={cols === 1 ? "truncate" : "text-balance"}>
+                  {choice.label}
+                </span>
+                {choice.on && cols === 1 && <Check className="size-4 shrink-0" />}
               </button>
             ))}
           </div>
