@@ -145,6 +145,11 @@ export const SOCIAL_DICTIONARY = {
     spotlightModePublished: "Published",
     // The filter menu behind the sliders icon.
     spotlightFilters: "Filters",
+    // The config face — what the post is, before what it says.
+    spotlightConfig: "Post settings",
+    spotlightConfigBrand: "Brand",
+    spotlightConfigChannels: "Channels",
+    spotlightConfigNoChannels: "No channel is wired for this brand yet.",
     spotlightScope: "Brands",
     spotlightScopeThis: "Only {brand}",
     spotlightScopeAll: "Every brand",
@@ -482,6 +487,10 @@ export const SOCIAL_DICTIONARY = {
     spotlightModeScheduled: "المجدول",
     spotlightModePublished: "المنشور",
     spotlightFilters: "المرشحات",
+    spotlightConfig: "إعدادات المنشور",
+    spotlightConfigBrand: "العلامة",
+    spotlightConfigChannels: "القنوات",
+    spotlightConfigNoChannels: "لا قناة موصولة لهذه العلامة بعد.",
     spotlightScope: "العلامات",
     spotlightScopeThis: "{brand} فقط",
     spotlightScopeAll: "كل العلامات",

@@ -188,6 +188,14 @@
    */
   html.snap-stage {
     scroll-snap-type: y proximity;
+    /*
+     * Scroll anchoring off while this stage owns the screen. The panel under
+     * its search bar animates its height open, and Chrome answers a growing
+     * box by moving the scroll offset to keep its anchor still — measured
+     * drifting 125px away from the snap point mid-reveal, which reads as the
+     * page sliding out from under the thing you just touched.
+     */
+    overflow-anchor: none;
   }
 
   /* No snapping where it fights a virtual keyboard or a momentum scroll. */

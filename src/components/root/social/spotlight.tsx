@@ -64,6 +64,7 @@ import {
   PenLine,
   Plus,
   RefreshCw,
+  Settings,
   Settings2,
   X,
   SlidersHorizontal,
@@ -82,11 +83,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { mediaKind } from "@/lib/media-kind";
@@ -96,8 +92,8 @@ import {
   type BrandMedia,
   type PostResult,
 } from "@/actions/post-social";
-import { CHANNELS } from "@/components/root/social/config";
-import { PRODUCTS } from "@/components/root/social/products";
+import { CHANNELS, type ChannelId } from "@/components/root/social/config";
+import { PRODUCTS, type ProductId } from "@/components/root/social/products";
 import { fill, type SocialDict } from "@/components/root/social/dictionary";
 import { useSocial } from "@/components/root/social/provider";
 
@@ -178,7 +174,17 @@ const KIND_HEADING_KEY: Record<QueueItem["kind"], keyof SocialDict> = {
   published: "spotlightModePublished",
 };
 
-export function ReviewSpotlight() {
+export function ReviewSpotlight({
+  onEngagedChange,
+}: {
+  /**
+   * Fires when the box opens or closes. The stage above uses it to lock the
+   * screen around this column — see review.tsx. A callback rather than shared
+   * state because only one surface reacts, and the box should not have to know
+   * what reacting means.
+   */
+  onEngagedChange?: (engaged: boolean) => void;
+} = {}) {
   const {
     t,
     lang,
@@ -194,6 +200,9 @@ export function ReviewSpotlight() {
     attachMedia,
     removeMedia,
     goToStage,
+    setProduct,
+    setSelectedChannels,
+    wiredForProduct,
   } = useSocial();
   const router = useRouter();
 
@@ -215,7 +224,9 @@ export function ReviewSpotlight() {
   // Which face the one panel is wearing. The dropdown under the bar is the
   // only revealed surface this box has; the media picker borrows it rather
   // than floating a second layer over the page.
-  const [panel, setPanel] = React.useState<"queue" | "media">("queue");
+  const [panel, setPanel] = React.useState<"queue" | "media" | "config">(
+    "queue",
+  );
   const [sending, setSending] = React.useState(false);
   const [notice, setNotice] = React.useState<string | null>(null);
   const [error, setError] = React.useState<string | null>(null);
@@ -559,6 +570,15 @@ export function ReviewSpotlight() {
     return () => document.removeEventListener("keydown", onKey);
   }, []);
 
+  // Report engagement upward on the transition only, so a parent re-render
+  // cannot be mistaken for a state change.
+  const engagedRef = React.useRef(false);
+  React.useEffect(() => {
+    if (engagedRef.current === open) return;
+    engagedRef.current = open;
+    onEngagedChange?.(open);
+  }, [open, onEngagedChange]);
+
   const emptyText = trimmed
     ? t.spotlightNoDrafts
     : scope === "every"
@@ -657,29 +677,50 @@ export function ReviewSpotlight() {
             )}
           />
 
+          {/* One seat, two jobs, decided by whether there is anything to
+              send. Empty, it opens the post's settings — brand, channels, and
+              what Approve does. The moment a character lands it becomes Send.
+
+              One button, not two swapped ones: the circle never moves or
+              redraws, only the glyph inside it changes. A button that springs
+              and rotates on every first keystroke is a firework where a state
+              change would do. */}
           <button
             type="button"
             onMouseDown={(e) => e.preventDefault()}
-            onClick={() => void handleSend()}
-            disabled={Boolean(blockedReason) || sending}
-            title={blockedReason ?? sendLabel}
-            aria-label={sendLabel}
+            onClick={() => {
+              if (trimmed) {
+                void handleSend();
+                return;
+              }
+              setPanel((current) =>
+                open && current === "config" ? "queue" : "config",
+              );
+              setFocused(true);
+              inputRef.current?.focus();
+            }}
+            disabled={trimmed ? Boolean(blockedReason) || sending : false}
+            title={trimmed ? (blockedReason ?? sendLabel) : t.spotlightConfig}
+            aria-label={trimmed ? sendLabel : t.spotlightConfig}
+            aria-expanded={!trimmed && open && panel === "config"}
             className={cn(
               "flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full",
-              "transition-colors duration-150",
-              // Clay, not primary: send is the one irreversible button in the
-              // box, and it should not look like every other filled control.
-              "bg-clay text-clay-foreground hover:opacity-90",
-              "disabled:cursor-not-allowed disabled:opacity-30",
+              "bg-clay text-clay-foreground transition-opacity duration-150",
+              "hover:opacity-90",
+              // Blocked keeps the clay and loses only the pointer — no fade,
+              // no grey, so the seat is the same object throughout.
+              "disabled:cursor-not-allowed disabled:hover:opacity-100",
             )}
           >
-            {/* An arrow up, not a paper plane: it needs no mirroring in
-                Arabic, and "up" is the gesture people already know from a
-                composer. */}
             {sending ? (
               <Loader2 className="size-4 animate-spin" />
-            ) : (
+            ) : trimmed ? (
               <ArrowUp className="size-5" />
+            ) : (
+              /* A gear, not sliders: this opens what the post IS — brand,
+                 channels, when it goes — and sliders already mean the queue's
+                 filters, one row below. */
+              <Settings className="size-5" />
             )}
           </button>
         </div>
@@ -694,7 +735,19 @@ export function ReviewSpotlight() {
               transition={{ type: "spring", duration: 0.45, bounce: 0.05 }}
               className="w-full overflow-hidden"
             >
-              {panel === "media" ? (
+              {panel === "config" ? (
+                <ConfigPanel
+                  t={t}
+                  isRTL={isRTL}
+                  product={product}
+                  onProduct={setProduct}
+                  wired={wiredForProduct}
+                  selected={selectedChannels}
+                  onChannels={setSelectedChannels}
+                  approveMode={approveMode}
+                  onApproveMode={setApproveMode}
+                />
+              ) : panel === "media" ? (
                 <MediaPanel
                   t={t}
                   urls={composerMediaUrls}
@@ -855,65 +908,33 @@ export function ReviewSpotlight() {
                       </DropdownMenuContent>
                     </DropdownMenu>
 
-                    {/* What Send does — publish on the spot, or park `scheduled`
-                        variants for the cron drain. It sat beside the composer that
-                        is no longer on this page; it belongs next to the button it
-                        configures. */}
-                    <Popover>
-                      <PopoverTrigger
-                        aria-label={t.approveModeLabel}
-                        title={
-                          approveMode === "schedule"
-                            ? t.approveModeSchedule
-                            : t.approveModeNow
-                        }
-                        onMouseDown={(e) => e.preventDefault()}
-                        className={cn(
-                          "flex size-8 cursor-pointer items-center justify-center rounded-full transition-colors duration-150",
-                          approveMode === "schedule"
-                            ? "bg-accent text-accent-foreground"
-                            : "text-muted-foreground/70 hover:bg-accent/50 hover:text-accent-foreground",
-                        )}
-                      >
-                        <Settings2 className="size-4" />
-                      </PopoverTrigger>
-                      <PopoverContent
-                        align={isRTL ? "start" : "end"}
-                        className="w-72 text-start"
-                      >
-                        <p className="text-muted-foreground mb-2 text-xs font-medium">
-                          {t.approveModeLabel}
-                        </p>
-                        <div className="space-y-1.5">
-                          {(["now", "schedule"] as const).map((option) => (
-                            <label
-                              key={option}
-                              className="hover:bg-muted flex cursor-pointer items-start gap-2 rounded-lg p-2 text-sm"
-                            >
-                              <input
-                                type="radio"
-                                name="approve-mode"
-                                checked={approveMode === option}
-                                onChange={() => setApproveMode(option)}
-                                className="mt-1"
-                              />
-                              <span>
-                                <span className="block font-medium">
-                                  {option === "now"
-                                    ? t.approveModeNow
-                                    : t.approveModeSchedule}
-                                </span>
-                                <span className="text-muted-foreground block text-xs">
-                                  {option === "now"
-                                    ? t.approveModeNowHint
-                                    : t.approveModeScheduleHint}
-                                </span>
-                              </span>
-                            </label>
-                          ))}
-                        </div>
-                      </PopoverContent>
-                    </Popover>
+                    {/* The config face's other door. The trailing button in
+                        the line above is the same door while the field is
+                        empty; once there is copy to send, that button has a
+                        more urgent job and this one is how you still get
+                        back here. */}
+                    <button
+                      type="button"
+                      aria-label={t.spotlightConfig}
+                      title={t.spotlightConfig}
+                      // This row only renders on the queue face, so pressing
+                      // it is always a move TO config, never a toggle back.
+                      aria-expanded={false}
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => {
+                        setPanel("config");
+                        setFocused(true);
+                        inputRef.current?.focus();
+                      }}
+                      className={cn(
+                        "flex size-8 cursor-pointer items-center justify-center rounded-full transition-colors duration-150",
+                        approveMode === "schedule"
+                          ? "bg-accent text-accent-foreground"
+                          : "text-muted-foreground/70 hover:bg-accent/50 hover:text-accent-foreground",
+                      )}
+                    >
+                      <Settings2 className="size-4" />
+                    </button>
                   
                   </div>
                 </div>
@@ -980,6 +1001,139 @@ export function ReviewSpotlight() {
           {error ?? notice}
         </p>
       )}
+    </div>
+  );
+}
+
+/**
+ * The panel's third face — what the post IS, before what it says.
+ *
+ * Brand, channels and what Approve does. These three decide where the copy
+ * lands and when, and they were scattered across the page header, a popover
+ * and a shell select; a writer changing brand had to leave the box they were
+ * writing in. Approve-mode lives here rather than behind its own popover
+ * because a portal over a locked, raised column is a stacking fight nobody
+ * wins — measured: the popover opened underneath the queue rows.
+ */
+function ConfigPanel({
+  t,
+  isRTL,
+  product,
+  onProduct,
+  wired,
+  selected,
+  onChannels,
+  approveMode,
+  onApproveMode,
+}: {
+  t: SocialDict;
+  isRTL: boolean;
+  product: string;
+  onProduct: (id: ProductId) => void;
+  wired: ChannelId[];
+  selected: ChannelId[];
+  onChannels: (next: ChannelId[]) => void;
+  approveMode: ApproveMode;
+  onApproveMode: (next: ApproveMode) => void;
+}) {
+  const toggle = (id: ChannelId) =>
+    onChannels(
+      selected.includes(id)
+        ? selected.filter((c) => c !== id)
+        : [...selected, id],
+    );
+
+  return (
+    <div className="max-h-[min(360px,45vh)] space-y-4 overflow-y-auto border-t border-black/5 p-4 text-start dark:border-white/10">
+      <section>
+        <p className="text-muted-foreground/60 pb-2 text-[11px]">
+          {t.spotlightConfigBrand}
+        </p>
+        <div className="flex flex-wrap gap-1.5">
+          {PRODUCTS.map((entry) => (
+            <button
+              key={entry.id}
+              type="button"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => onProduct(entry.id)}
+              aria-pressed={product === entry.id}
+              className={cn(
+                "cursor-pointer rounded-full px-3 py-1 text-xs font-medium transition-colors duration-150",
+                product === entry.id
+                  ? "bg-accent text-accent-foreground"
+                  : "text-muted-foreground/70 hover:bg-accent/50 hover:text-accent-foreground",
+              )}
+            >
+              {isRTL ? entry.labelAr : entry.label}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section>
+        <p className="text-muted-foreground/60 pb-2 text-[11px]">
+          {t.spotlightConfigChannels}
+        </p>
+        {wired.length === 0 ? (
+          <p className="text-muted-foreground/60 text-xs">
+            {t.spotlightConfigNoChannels}
+          </p>
+        ) : (
+          <div className="flex flex-wrap gap-1.5">
+            {wired.map((id) => {
+              const channel = CHANNELS.find((c) => c.id === id);
+              const on = selected.includes(id);
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => toggle(id)}
+                  aria-pressed={on}
+                  className={cn(
+                    "cursor-pointer rounded-full px-3 py-1 text-xs font-medium transition-colors duration-150",
+                    on
+                      ? "bg-accent text-accent-foreground"
+                      : "text-muted-foreground/70 hover:bg-accent/50 hover:text-accent-foreground",
+                  )}
+                >
+                  {channel ? (isRTL ? channel.labelAr : channel.label) : id}
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
+      <section>
+        <p className="text-muted-foreground/60 pb-2 text-[11px]">
+          {t.approveModeLabel}
+        </p>
+        <div className="space-y-1">
+          {(["now", "schedule"] as const).map((option) => (
+            <button
+              key={option}
+              type="button"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => onApproveMode(option)}
+              aria-pressed={approveMode === option}
+              className={cn(
+                "flex w-full cursor-pointer flex-col rounded-lg p-2 text-start transition-colors duration-150",
+                approveMode === option ? "bg-accent" : "hover:bg-muted",
+              )}
+            >
+              <span className="text-sm font-medium">
+                {option === "now" ? t.approveModeNow : t.approveModeSchedule}
+              </span>
+              <span className="text-muted-foreground text-xs">
+                {option === "now"
+                  ? t.approveModeNowHint
+                  : t.approveModeScheduleHint}
+              </span>
+            </button>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }
