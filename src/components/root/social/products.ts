@@ -45,6 +45,25 @@ export interface SocialProduct {
    * one, and a shared key would fail by silently finding nothing.
    */
   logo?: string;
+  /**
+   * Does the mark invert on a dark ground?
+   *
+   * True for the marks the brand kit calls "monochrome ink only" — they are
+   * black artwork and would disappear on a dark surface, and the kit's own
+   * rule is that they invert to ivory there. False for colour marks, which
+   * inverting would simply corrupt.
+   */
+  logoInvertsOnDark?: boolean;
+  /**
+   * Kept in the registry, kept out of the pickers.
+   *
+   * A brand cannot simply be deleted once it has published: its Page token is
+   * wired, its posts are in the ledger, and its drafts are in the queue. All
+   * of those resolve a brand id back to a name, so removing the entry would
+   * turn live history into an unlabelled string. Hiding drops it from the
+   * lists a person picks from and leaves every lookup working.
+   */
+  hidden?: boolean;
   // channelId -> wired for this product. Distribution channels only —
   // a communication channel is structurally excluded from audience reach.
   channels: Partial<Record<DistributionChannelId, boolean>>;
@@ -55,7 +74,13 @@ export const PRODUCTS = [
     id: "hogwarts",
     label: "Hogwarts",
     labelAr: "هوجورتس",
+    // Hidden from the pickers: balqalam is the face this school SaaS publishes
+    // as. The entry stays because hogwarts has published — its Page token is
+    // wired, its posts are in the ledger and its drafts are in the queue, and
+    // all of those name the brand by this id.
+    hidden: true,
     logo: "/brands/hogwarts.png",
+    logoInvertsOnDark: true,
     channels: { facebook: true },
   },
   {
@@ -71,6 +96,7 @@ export const PRODUCTS = [
     // artwork is a quill silhouette rather than a wordmark, and بالقلم means
     // "by the pen". The mark is shared; the name is not.
     logo: "/brands/hogwarts.png",
+    logoInvertsOnDark: true,
     channels: { facebook: true },
   },
   {
@@ -80,6 +106,7 @@ export const PRODUCTS = [
     // The product's own mark, taken from databayt/mkan's public/logo.svg and
     // rasterised to the path the brand kit already declared.
     logo: "/brands/mkan.png",
+    logoInvertsOnDark: true,
     channels: { facebook: true },
   },
   {
@@ -94,6 +121,7 @@ export const PRODUCTS = [
     // GENERATED. Answering that changes render behaviour, so it is left as it
     // stands and the picker simply shows the real mark.
     logo: "/brands/databayt.png",
+    logoInvertsOnDark: true,
     channels: { facebook: true },
   },
   {
@@ -129,7 +157,15 @@ export const PRODUCT_IDS = PRODUCTS.map((p) => p.id) as [
   ...ProductId[],
 ];
 
-export const DEFAULT_PRODUCT: ProductId = "hogwarts";
+/** The brand a fresh session starts on — necessarily one that is offered. */
+export const DEFAULT_PRODUCT: ProductId = "balqalam";
+
+/**
+ * The brands a person can choose. Every picker reads this; `PRODUCTS` stays
+ * the complete registry that lookups, labels and env suffixes resolve against.
+ */
+export const PICKABLE_PRODUCTS: readonly SocialProduct[] =
+  SOCIAL_PRODUCTS.filter((p) => !p.hidden);
 
 export function getProduct(id: string): SocialProduct | undefined {
   return PRODUCTS.find((p) => p.id === id);

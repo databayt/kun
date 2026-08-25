@@ -15,7 +15,10 @@ import {
 } from "@/components/ui/select";
 import { ChannelPicker } from "@/components/root/social/channel-picker";
 import { StatusDialog } from "@/components/root/social/status";
-import { PRODUCTS, type ProductId } from "@/components/root/social/products";
+import {
+  PICKABLE_PRODUCTS,
+  type ProductId,
+} from "@/components/root/social/products";
 import {
   STAGES,
   useSocial,
@@ -92,7 +95,7 @@ export function SocialShell() {
           {/* Aligned to the trigger's far edge — it sits at the end of the
               row, so the menu opens against the same edge. */}
           <SelectContent align={isRTL ? "start" : "end"}>
-            {PRODUCTS.map((p) => (
+            {PICKABLE_PRODUCTS.map((p) => (
               <SelectItem
                 key={p.id}
                 value={p.id}

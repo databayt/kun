@@ -110,8 +110,8 @@ import {
   type PostType,
 } from "@/components/root/social/post-settings";
 import {
+  PICKABLE_PRODUCTS,
   PRODUCTS,
-  SOCIAL_PRODUCTS,
   type ProductId,
 } from "@/components/root/social/products";
 import { fill, type SocialDict } from "@/components/root/social/dictionary";
@@ -1516,7 +1516,7 @@ function ConfigChoices({
     // worse lie than a name.
     return (
       <div className="flex flex-wrap gap-1.5">
-        {SOCIAL_PRODUCTS.map((p) => {
+        {PICKABLE_PRODUCTS.map((p) => {
           const on = product === p.id;
           const name = isRTL ? p.labelAr : p.label;
           return (
@@ -1529,11 +1529,19 @@ function ConfigChoices({
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => onProduct(p.id as ProductId)}
               className={cn(
-                pill(on),
-                // A mark needs room a word does not: squarer padding, and a
-                // minimum width so a narrow glyph still gets a target worth
-                // pressing.
-                p.logo && "flex min-w-14 items-center justify-center px-3 py-2",
+                p.logo
+                  ? cn(
+                      // A mark needs room a word does not, and an outline of
+                      // its own: a bare glyph on a bare background has no
+                      // edge to say it is pressable, and no way to show it is
+                      // the chosen one without dimming the others.
+                      "flex size-20 shrink-0 cursor-pointer items-center justify-center",
+                      "rounded-2xl border p-3.5 transition-colors duration-150",
+                      on
+                        ? "border-foreground/40 bg-accent"
+                        : "border-input hover:border-foreground/30 hover:bg-accent/40",
+                    )
+                  : pill(on),
               )}
             >
               {p.logo ? (
@@ -1542,12 +1550,14 @@ function ConfigChoices({
                   src={p.logo}
                   alt={name}
                   className={cn(
-                    "h-7 w-auto object-contain",
-                    // The marks are monochrome ink, so they read on the
-                    // muted pill but vanish on the accent one — invert with
-                    // the text they replace.
-                    on && "dark:invert",
-                    !on && "opacity-70",
+                    // Full strength either way. Fading the ones you did not
+                    // pick makes five brands look broken to say one is
+                    // chosen; the outline says that.
+                    "size-full object-contain",
+                    // Monochrome-ink marks would vanish on a dark ground —
+                    // the brand kit's own rule is that they invert to ivory
+                    // there. Colour marks must never be inverted.
+                    p.logoInvertsOnDark && "dark:invert",
                   )}
                 />
               ) : (
