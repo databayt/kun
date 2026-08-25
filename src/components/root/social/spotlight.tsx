@@ -1621,6 +1621,72 @@ function PostShape({
  * Send is the exception, and earns it: its three answers change what pressing
  * the arrow DOES, so each carries the sentence that says so.
  */
+/**
+ * Drag a horizontal strip with the pointer.
+ *
+ * A finger and a trackpad can already flick an overflow row; a mouse cannot —
+ * it gets a scrollbar, and the scrollbar is the thing being hidden. So the
+ * strip itself becomes the handle.
+ *
+ * A CALLBACK ref, not an effect on a ref object. The row only exists while its
+ * word is open, so an effect with an empty dependency list runs once against a
+ * node that is not there yet and never attaches — measured: the strip sat at
+ * scrollLeft 4 through a ten-step drag. A callback ref fires on every mount
+ * and unmount, which is exactly when the listener should come and go.
+ *
+ * `dragging` is reported back so the caller can switch the cursor, suspend
+ * scroll-snap (mandatory snapping corrects every scrollLeft this sets, which
+ * pins the strip in place), and make the cards inert mid-drag — without that
+ * last one, releasing after a swipe lands as a click and silently changes the
+ * setting.
+ */
+function useDragScroll(): {
+  ref: (node: HTMLElement | null) => void;
+  dragging: boolean;
+} {
+  const [dragging, setDragging] = React.useState(false);
+  const cleanup = React.useRef<(() => void) | null>(null);
+
+  const ref = React.useCallback((node: HTMLElement | null) => {
+    cleanup.current?.();
+    cleanup.current = null;
+    if (!node) return;
+
+    const from = { x: 0, left: 0, moved: false };
+    const down = (e: PointerEvent) => {
+      // Primary button only, and never a touch — a finger already scrolls,
+      // and hijacking it would fight the platform's own momentum.
+      if (e.pointerType === "touch" || e.button !== 0) return;
+      from.x = e.clientX;
+      from.left = node.scrollLeft;
+      from.moved = false;
+
+      const move = (m: PointerEvent) => {
+        const dx = m.clientX - from.x;
+        // A few pixels of slop, so a press that wobbles is still a press.
+        if (!from.moved && Math.abs(dx) < 4) return;
+        from.moved = true;
+        setDragging(true);
+        node.scrollLeft = from.left - dx;
+      };
+      const up = () => {
+        window.removeEventListener("pointermove", move);
+        window.removeEventListener("pointerup", up);
+        // Released on the next frame: a click fires after pointerup, and the
+        // cards must still be inert when it does.
+        requestAnimationFrame(() => setDragging(false));
+      };
+      window.addEventListener("pointermove", move);
+      window.addEventListener("pointerup", up);
+    };
+
+    node.addEventListener("pointerdown", down);
+    cleanup.current = () => node.removeEventListener("pointerdown", down);
+  }, []);
+
+  return { ref, dragging };
+}
+
 function ConfigChoices({
   section,
   t,
@@ -1664,6 +1730,8 @@ function ConfigChoices({
   onUseDraft: (id: string) => void;
   ago: (iso: string) => string;
 }) {
+  const { ref: shapeRow, dragging } = useDragScroll();
+
   const pill = (on: boolean) =>
     cn(
       "cursor-pointer rounded-full px-3 py-1 text-xs font-medium transition-colors duration-150",
@@ -1849,8 +1917,26 @@ function ConfigChoices({
       <>
         {/* One row that scrolls, rather than a grid that reflows. Nine
             shapes read as a strip of posts to flick through; wrapped into
-            rows they read as a form. */}
-        <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+            rows they read as a form.
+
+            Swipeable in both senses: a trackpad or a finger flicks it and the
+            cards land on their own edges, and a mouse can drag the strip
+            directly — see useDragScroll, which exists because a desktop
+            pointer has nothing to flick with. No bar underneath, since the
+            cards running off the edge already say there is more. */}
+        <div
+          ref={shapeRow}
+          className={cn(
+            "no-scrollbar -mx-1 flex gap-2 px-1 py-3",
+            "overflow-x-auto overscroll-x-contain",
+            // Snap is suspended mid-drag. Mandatory snapping corrects every
+            // scrollLeft the pointer handler sets, back to the nearest card,
+            // so the strip refused to move at all — measured, 4px before and
+            // after an eight-step drag. Off while dragging, back on at
+            // release, which is also when it lands the strip on a card.
+            dragging ? "cursor-grabbing snap-none" : "cursor-grab snap-x snap-mandatory",
+          )}
+        >
           {POST_TYPES.map((type) => {
             const meta = POST_TYPE_META[type];
             const on = postType === type;
@@ -1868,10 +1954,14 @@ function ConfigChoices({
                 // post IS the choice, so it is the button. Selection rides on
                 // the post's own edge.
                 className={cn(
-                  "w-40 shrink-0 cursor-pointer rounded-lg transition-all duration-150",
+                  "w-40 shrink-0 snap-start rounded-lg transition-all duration-150",
+                  dragging ? "pointer-events-none" : "cursor-pointer",
+                  // Lift, not an outline. A grey ring around a card that is
+                  // already a card read as a second border; a shadow says
+                  // "this one" without drawing another edge.
                   on
-                    ? "ring-foreground/40 ring-2"
-                    : "opacity-80 hover:opacity-100",
+                    ? "shadow-lg"
+                    : "opacity-80 hover:opacity-100 hover:shadow-md",
                 )}
               >
                 <PostShape
