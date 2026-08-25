@@ -667,7 +667,9 @@ export function ReviewSpotlight() {
             className={cn(
               "flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full",
               "transition-colors duration-150",
-              "bg-primary text-primary-foreground hover:opacity-90",
+              // Clay, not primary: send is the one irreversible button in the
+              // box, and it should not look like every other filled control.
+              "bg-clay text-clay-foreground hover:opacity-90",
               "disabled:cursor-not-allowed disabled:opacity-30",
             )}
           >

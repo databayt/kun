@@ -47,6 +47,8 @@
   --color-code-foreground: var(--code-foreground);
   --color-code-highlight: var(--code-highlight);
   --color-code-number: var(--code-number);
+  --color-clay: var(--clay);
+  --color-clay-foreground: var(--clay-foreground);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -63,6 +65,14 @@
   --popover-foreground: oklch(0.145 0 0);
   --primary: oklch(0.205 0 0);
   --primary-foreground: oklch(0.985 0 0);
+  /*
+   * Clay — the house accent, and the one colour in a greyscale palette. Named
+   * for the brand kit's own accent (lib/brand-kit.ts calls it Clay and hands
+   * it to every render as "the single accent"), so the interface and the
+   * images it publishes are not two different oranges.
+   */
+  --clay: oklch(0.688 0.127 38.5);
+  --clay-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
@@ -116,6 +126,8 @@
   --popover-foreground: oklch(0.985 0 0);
   --primary: oklch(0.922 0 0);
   --primary-foreground: oklch(0.205 0 0);
+  --clay: oklch(0.72 0.13 38.5);
+  --clay-foreground: oklch(0.205 0 0);
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
