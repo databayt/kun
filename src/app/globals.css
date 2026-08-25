@@ -164,6 +164,27 @@
     -webkit-overflow-scrolling: touch;
   }
 
+  /*
+   * A stage that wants the whole screen asks for this class while it is
+   * mounted (see components/root/social/review.tsx) — scroll-snap-type has to
+   * sit on the SCROLL CONTAINER, and here that is the document itself, so a
+   * class on a wrapper div would do nothing.
+   *
+   * `proximity`, never `mandatory`: with one snap point on the page, mandatory
+   * would refuse to let anyone rest above it, and the header would become
+   * unreadable. Proximity only finishes a scroll that already arrived near.
+   */
+  html.snap-stage {
+    scroll-snap-type: y proximity;
+  }
+
+  /* No snapping where it fights a virtual keyboard or a momentum scroll. */
+  @media (max-width: 767px), (prefers-reduced-motion: reduce) {
+    html.snap-stage {
+      scroll-snap-type: none;
+    }
+  }
+
   body {
     @apply bg-background text-foreground;
     overflow-x: hidden;

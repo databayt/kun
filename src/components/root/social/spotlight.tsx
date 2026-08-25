@@ -317,6 +317,42 @@ export function ReviewSpotlight() {
     [reviewQueue, router, lang],
   );
 
+  /**
+   * Focusing the box brings the stage to the top of the screen, so the panel
+   * that just unfolded has room to be read instead of opening into whatever
+   * sliver was left below the fold. The scroll-snap in globals.css does this
+   * for a scroll; this does it for a keystroke.
+   *
+   * The target is found by climbing, not by a shared id: the thing worth
+   * lifting is whatever section this bar was placed in, so the bar stays
+   * portable and review.tsx does not have to import back from the file that
+   * imports it.
+   *
+   * Skipped when the stage is already there — a smooth scroll of a few pixels
+   * is a twitch, not an animation — and skipped for anyone who asked for less
+   * motion, who gets the jump the browser would have made anyway.
+   */
+  const liftStage = React.useCallback(() => {
+    // From the input, not the cmdk root: `CommandPrimitive`'s ref is the
+    // library's to define, while `CommandPrimitive.Input` forwards to the real
+    // <input> — the same node ⌘K already focuses.
+    const stage = inputRef.current?.closest("section");
+    if (!stage) return;
+    if (Math.abs(stage.getBoundingClientRect().top) < 24) return;
+    const behavior = window.matchMedia("(prefers-reduced-motion: reduce)")
+      .matches
+      ? "auto"
+      : "smooth";
+    // Two frames, not zero. Focus opens the panel in the same tick, and a
+    // smooth scroll started before that layout lands is cancelled outright —
+    // measured: the call ran, found the section, and moved nothing. Waiting
+    // until the panel has mounted costs 32ms and is the difference between
+    // this working and silently doing nothing.
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => stage.scrollIntoView({ behavior, block: "start" })),
+    );
+  }, []);
+
   // Cmd/Ctrl+K focuses rather than opens — the box is already on the page, so
   // there is nothing to summon. Cmd/Ctrl+1..4 switch modes, the same shortcuts
   // hogwarts prints on its category buttons. Both are ignored while the caret
@@ -395,7 +431,10 @@ export function ReviewSpotlight() {
             ref={inputRef}
             value={query}
             onValueChange={setQuery}
-            onFocus={() => setFocused(true)}
+            onFocus={() => {
+              setFocused(true);
+              liftStage();
+            }}
             placeholder={t.spotlightPlaceholder}
             // 16px keeps iOS Safari from zooming the page on focus.
             className={cn(

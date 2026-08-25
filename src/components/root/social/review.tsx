@@ -25,6 +25,9 @@ type ApproveMode = "now" | "schedule";
 
 const APPROVE_MODE_KEY = "social:approve-mode";
 
+/** Defined in globals.css, on <html> — the document is the scroll container. */
+const SNAP_CLASS = "snap-stage";
+
 export function ReviewPanel() {
   const { t, isRTL, reviewQueue } = useSocial();
   const { drafts, loading, error, refresh } = reviewQueue;
@@ -45,18 +48,30 @@ export function ReviewPanel() {
     void refresh();
   }, [refresh]);
 
+  // The stage asks the document to settle on it. Only while this stage is
+  // mounted: snapping is scoped to the route that wants it, so navigating to
+  // Calendar or Measure leaves the page scrolling normally. The class has to
+  // land on <html> because that is the scroll container — see globals.css.
+  useEffect(() => {
+    document.documentElement.classList.add(SNAP_CLASS);
+    return () => document.documentElement.classList.remove(SNAP_CLASS);
+  }, []);
+
   return (
     // A full screen, and centred in it: the stage is one column — a search
-    // bar and the composer under it — so anything less left it stranded at the
-    // top of a mostly empty page.
-    <section className="full-bleed from-background to-muted/20 flex min-h-screen flex-col justify-center bg-gradient-to-b py-16 md:py-24">
+    // line and the composer under it — so anything less left it stranded at
+    // the top of a mostly empty page.
+    //
+    // `snap-start` is the other half: scrolling down from the header settles
+    // here rather than halfway, so the stage arrives whole. Focusing the
+    // search does the same deliberately — see spotlight.tsx, which climbs to
+    // this section and lifts it.
+    <section className="full-bleed from-background to-muted/20 flex min-h-screen snap-start flex-col justify-center bg-gradient-to-b py-16 md:py-24">
       <div className="mx-auto flex w-full max-w-4xl flex-col items-center px-4">
         <div className="w-full">
-          {/* One word — the strip a plane takes off from. Drafts queue on it,
-              wait their turn, and leave; the tab already says "Publish", so
-              this says what the stage IS. The paragraph that stood here
-              explained where writing and media happen, which the tab row
-              above already answers by being a tab row. */}
+          {/* One word. The paragraph that stood here explained where writing
+              and media happen, which the tab row above already answers by
+              being a tab row. */}
           <div className="mb-8 text-center">
             <h2 className="text-2xl font-semibold tracking-tight">
               {t.reviewTitle}
