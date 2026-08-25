@@ -1734,8 +1734,31 @@ function useDragScroll(): {
       window.addEventListener("pointerup", up);
     };
 
+    /**
+     * A vertical wheel moves the strip sideways.
+     *
+     * A trackpad can send deltaX; a mouse cannot, so without this a mouse has
+     * no way to reach the ninth card except by dragging. Only taken when the
+     * strip actually has room in that direction — at either end the event goes
+     * back to the page, so the strip never traps a scroll.
+     */
+    const wheel = (e: WheelEvent) => {
+      if (e.deltaX !== 0) return; // the platform is already doing it
+      const room =
+        e.deltaY < 0
+          ? node.scrollLeft > 0
+          : node.scrollLeft + node.clientWidth < node.scrollWidth - 1;
+      if (!room) return;
+      e.preventDefault();
+      node.scrollLeft += e.deltaY;
+    };
+
     node.addEventListener("pointerdown", down);
-    cleanup.current = () => node.removeEventListener("pointerdown", down);
+    node.addEventListener("wheel", wheel, { passive: false });
+    cleanup.current = () => {
+      node.removeEventListener("pointerdown", down);
+      node.removeEventListener("wheel", wheel);
+    };
   }, []);
 
   return { ref, dragging };

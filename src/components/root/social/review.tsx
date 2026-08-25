@@ -134,6 +134,53 @@ export function ReviewPanel() {
   useEffect(() => {
     if (!locked) return;
 
+    /**
+     * Can something inside the stage take this wheel instead of the page?
+     *
+     * The first version of this lock swallowed every wheel event, which also
+     * ate the ones aimed at a scroller INSIDE the stage — the settings panel's
+     * own overflow, and the horizontal card strips within it. Measured: a
+     * 300px horizontal wheel over the post strip moved it 0px, while dragging
+     * the same strip moved it 336. The page is what is being held still, not
+     * everything on it.
+     */
+    const innerCanTake = (e: WheelEvent) => {
+      let node = e.target instanceof Element ? e.target : null;
+      while (node && node !== document.body) {
+        const cs = getComputedStyle(node);
+        const scrollableY =
+          (cs.overflowY === "auto" || cs.overflowY === "scroll") &&
+          node.scrollHeight > node.clientHeight;
+        if (scrollableY) {
+          const room =
+            e.deltaY < 0
+              ? node.scrollTop > 0
+              : node.scrollTop + node.clientHeight < node.scrollHeight - 1;
+          if (room) return true;
+        }
+        const scrollableX =
+          (cs.overflowX === "auto" || cs.overflowX === "scroll") &&
+          node.scrollWidth > node.clientWidth;
+        if (scrollableX) {
+          // A plain mouse has no deltaX, so a vertical wheel over a horizontal
+          // strip counts as intent to move it — the strip is the only thing
+          // under the pointer that can move at all.
+          const delta = e.deltaX || e.deltaY;
+          const room =
+            delta < 0
+              ? node.scrollLeft > 0
+              : node.scrollLeft + node.clientWidth < node.scrollWidth - 1;
+          if (room) return true;
+        }
+        node = node.parentElement;
+      }
+      return false;
+    };
+
+    const swallowWheel = (e: WheelEvent) => {
+      if (innerCanTake(e)) return;
+      e.preventDefault();
+    };
     const swallow = (e: Event) => e.preventDefault();
     const onKeyDown = (e: KeyboardEvent) => {
       if (!SCROLLING_KEYS.has(e.key)) return;
@@ -149,11 +196,11 @@ export function ReviewPanel() {
       e.preventDefault();
     };
 
-    window.addEventListener("wheel", swallow, { passive: false });
+    window.addEventListener("wheel", swallowWheel, { passive: false });
     window.addEventListener("touchmove", swallow, { passive: false });
     window.addEventListener("keydown", onKeyDown);
     return () => {
-      window.removeEventListener("wheel", swallow);
+      window.removeEventListener("wheel", swallowWheel);
       window.removeEventListener("touchmove", swallow);
       window.removeEventListener("keydown", onKeyDown);
     };
