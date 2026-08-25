@@ -58,6 +58,7 @@ import {
   ArrowUp,
   CalendarClock,
   CheckCircle2,
+  Image as ImageIcon,
   Images,
   Layers,
   Loader2,
@@ -68,6 +69,7 @@ import {
   Settings2,
   X,
   SlidersHorizontal,
+  Video,
   type LucideIcon,
 } from "lucide-react";
 
@@ -108,14 +110,21 @@ import {
 } from "@/actions/post-social";
 import { CHANNELS, type ChannelId } from "@/components/root/social/config";
 import {
+  ASSET_TYPE_META,
+  typeLabel,
+  type AssetType,
+} from "@/components/root/social/showroom/taxonomy";
+import {
   DESTINATIONS,
   MEDIA_FILTERS,
   POST_TYPES,
+  ANY_MEDIA_TYPE,
   POST_TYPE_META,
   featureFits,
   featureLabel,
   featuresFor,
   libraryFits,
+  mediaTypesFor,
   queueFits,
   type Destination,
   type BrandFeature,
@@ -151,6 +160,7 @@ const APPROVE_MODE_KEY = "social:approve-mode";
 const DESTINATION_KEY = "social:destination";
 const POST_TYPE_KEY = "social:post-type";
 const MEDIA_FILTER_KEY = "social:media-filter";
+const MEDIA_TYPE_KEY = "social:media-type";
 const FEATURE_KEY = "social:feature";
 
 /** The select's "no pillar chosen" row, stored as a value rather than absence. */
@@ -371,6 +381,24 @@ export function ReviewSpotlight({
     "any",
     (v): v is MediaFilter => (MEDIA_FILTERS as readonly string[]).includes(v),
   );
+  const [mediaType, setMediaType] = usePersisted<string>(
+    MEDIA_TYPE_KEY,
+    ANY_MEDIA_TYPE,
+    (v): v is string => typeof v === "string",
+  );
+
+  /**
+   * A format belongs to a kind and a shape. Change either and a format that
+   * no longer appears would keep filtering the library from off screen, which
+   * is the same silent-empty-grid failure the settings face exists to avoid.
+   */
+  React.useEffect(() => {
+    if (mediaType === ANY_MEDIA_TYPE) return;
+    const kind = mediaFilter === "video" ? "video" : "image";
+    if (!mediaTypesFor(kind, postType).includes(mediaType)) {
+      setMediaType(ANY_MEDIA_TYPE);
+    }
+  }, [mediaType, mediaFilter, postType, setMediaType]);
 
   /**
    * Features are per-brand vocabulary — mkan does not have Attendance — so a
@@ -967,6 +995,8 @@ export function ReviewSpotlight({
                   onPostType={setPostType}
                   mediaFilter={mediaFilter}
                   onMediaFilter={setMediaFilter}
+                  mediaType={mediaType}
+                  onMediaType={setMediaType}
                   drafts={brandDrafts.map((d) => ({
                     id: d.id,
                     text: d.text,
@@ -995,6 +1025,7 @@ export function ReviewSpotlight({
                   brandMedia={brandMedia}
                   postType={postType}
                   mediaFilter={mediaFilter}
+                  mediaType={mediaType}
                   onAttach={attachMedia}
                   onRemove={removeMedia}
                   onBrowse={() => goToStage("media")}
@@ -1313,6 +1344,8 @@ function ConfigPanel({
   onPostType,
   mediaFilter,
   onMediaFilter,
+  mediaType,
+  onMediaType,
   drafts,
   onUseDraft,
   ago,
@@ -1336,6 +1369,8 @@ function ConfigPanel({
   onPostType: (next: PostType) => void;
   mediaFilter: MediaFilter;
   onMediaFilter: (next: MediaFilter) => void;
+  mediaType: string;
+  onMediaType: (next: string) => void;
   /** This brand's drafts awaiting review, oldest first. */
   drafts: { id: string; text: string; when: string }[];
   onUseDraft: (id: string) => void;
@@ -1457,6 +1492,8 @@ function ConfigPanel({
             onPostType={onPostType}
             mediaFilter={mediaFilter}
             onMediaFilter={onMediaFilter}
+            mediaType={mediaType}
+            onMediaType={onMediaType}
             destination={destination}
             onDestination={onDestination}
             drafts={drafts}
@@ -1687,6 +1724,77 @@ function useDragScroll(): {
   return { ref, dragging };
 }
 
+/**
+ * One media format, drawn at its own ratio.
+ *
+ * The taxonomy records what each type renders at — 16:9 for a hero, 9:16 for
+ * a story, 1200x630 for an OG image — so the card can BE that shape rather
+ * than describe it. Types with no recorded ratio (mockup, infographic, split)
+ * get a neutral square: an invented ratio would be a claim about how they
+ * render that nothing backs.
+ */
+function MediaFormatCard({
+  id,
+  label,
+  ratio,
+  on,
+  inert,
+  onPick,
+}: {
+  id: string;
+  label: string;
+  ratio: string | null;
+  on: boolean;
+  inert: boolean;
+  onPick: () => void;
+}) {
+  // "16:9" and "1200x630" both mean the same thing to a box.
+  const parsed = ratio?.match(/^(\d+)[:x](\d+)$/);
+  const w = parsed ? Number(parsed[1]) : 1;
+  const h = parsed ? Number(parsed[2]) : 1;
+  const box = 68;
+  const scale = Math.min(box / w, box / h);
+
+  return (
+    <button
+      key={id}
+      type="button"
+      aria-pressed={on}
+      onMouseDown={(e) => e.preventDefault()}
+      onClick={onPick}
+      className={cn(
+        "flex w-24 shrink-0 snap-start flex-col items-center gap-1.5 rounded-lg p-2",
+        "transition-opacity duration-150",
+        inert ? "pointer-events-none" : "cursor-pointer",
+        on ? "opacity-100" : "opacity-90 hover:opacity-100",
+      )}
+    >
+      <span className="flex h-[68px] w-full items-center justify-center">
+        <span
+          className="bg-muted-foreground/20 rounded"
+          style={{ width: w * scale, height: h * scale }}
+        />
+      </span>
+      <span className="w-full truncate text-center text-[10px] leading-tight">
+        {label}
+      </span>
+      <span className="text-muted-foreground/60 text-[9px] leading-none">
+        {ratio ?? "\u00a0"}
+      </span>
+      {/* The same radio the post shapes use — one choice, one shape for it. */}
+      <span
+        aria-hidden
+        className={cn(
+          "mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full border transition-colors duration-150",
+          on ? "border-foreground" : "border-muted-foreground/40",
+        )}
+      >
+        {on && <span className="bg-foreground size-2 rounded-full" />}
+      </span>
+    </button>
+  );
+}
+
 function ConfigChoices({
   section,
   t,
@@ -1703,6 +1811,8 @@ function ConfigChoices({
   onPostType,
   mediaFilter,
   onMediaFilter,
+  mediaType,
+  onMediaType,
   destination,
   onDestination,
   drafts,
@@ -1724,6 +1834,8 @@ function ConfigChoices({
   onPostType: (next: PostType) => void;
   mediaFilter: MediaFilter;
   onMediaFilter: (next: MediaFilter) => void;
+  mediaType: string;
+  onMediaType: (next: string) => void;
   destination: Destination;
   onDestination: (next: Destination) => void;
   drafts: { id: string; text: string; when: string }[];
@@ -1731,6 +1843,7 @@ function ConfigChoices({
   ago: (iso: string) => string;
 }) {
   const { ref: shapeRow, dragging } = useDragScroll();
+  const { ref: mediaRow, dragging: mediaDragging } = useDragScroll();
 
   const pill = (on: boolean) =>
     cn(
@@ -1954,14 +2067,10 @@ function ConfigChoices({
                 // post IS the choice, so it is the button. Selection rides on
                 // the post's own edge.
                 className={cn(
-                  "w-40 shrink-0 snap-start rounded-lg transition-all duration-150",
+                  "flex w-40 shrink-0 snap-start flex-col items-center gap-2",
+                  "rounded-lg transition-opacity duration-150",
                   dragging ? "pointer-events-none" : "cursor-pointer",
-                  // Lift, not an outline. A grey ring around a card that is
-                  // already a card read as a second border; a shadow says
-                  // "this one" without drawing another edge.
-                  on
-                    ? "shadow-lg"
-                    : "opacity-80 hover:opacity-100 hover:shadow-md",
+                  on ? "opacity-100" : "opacity-90 hover:opacity-100",
                 )}
               >
                 <PostShape
@@ -1982,6 +2091,21 @@ function ConfigChoices({
                         : t.previewWhenNow
                   }
                 />
+                {/* A radio, under the card. Nine posts are one choice, and a
+                    radio is what a reader already knows that shape to mean —
+                    where a shadow only says "this one is different" and makes
+                    the other eight look switched off. */}
+                <span
+                  aria-hidden
+                  className={cn(
+                    "flex size-4 shrink-0 items-center justify-center rounded-full border transition-colors duration-150",
+                    on ? "border-foreground" : "border-muted-foreground/40",
+                  )}
+                >
+                  {on && (
+                    <span className="bg-foreground size-2 rounded-full" />
+                  )}
+                </span>
               </button>
             );
           })}
@@ -1994,60 +2118,89 @@ function ConfigChoices({
   }
 
   if (section === "media") {
-    const name: Record<MediaFilter, string> = {
-      any: t.mediaAny,
-      image: t.mediaImage,
-      video: t.mediaVideo,
-    };
+    const kind = mediaFilter === "video" ? "video" : "image";
+    const types = mediaTypesFor(kind, postType);
+
     return (
       <>
-        <Pills
-          items={MEDIA_FILTERS.map((value) => ({
-            id: value,
-            label: name[value],
-            on: mediaFilter === value,
-            pick: () => onMediaFilter(value),
-          }))}
-        />
+        {/* Two icons, not three pills. A still or a moving picture is the
+            first question and it has two answers; pressing the lit one again
+            clears it back to either, which is what most posts want. */}
+        <div className="flex items-center gap-2">
+          {(
+            [
+              ["image", ImageIcon, t.mediaImage],
+              ["video", Video, t.mediaVideo],
+            ] as const
+          ).map(([value, Icon, label]) => {
+            const on = mediaFilter === value;
+            return (
+              <button
+                key={value}
+                type="button"
+                aria-pressed={on}
+                aria-label={label}
+                title={label}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => onMediaFilter(on ? "any" : value)}
+                className={cn(
+                  "flex size-11 cursor-pointer items-center justify-center rounded-xl border",
+                  "transition-colors duration-150",
+                  on
+                    ? "border-foreground/40 bg-accent text-foreground"
+                    : "border-input text-muted-foreground hover:border-foreground/30 hover:bg-accent/40 hover:text-foreground",
+                )}
+              >
+                <Icon className="size-5" />
+              </button>
+            );
+          })}
+        </div>
+
+        {/* And under it, the shapes that kind comes in — the same strip of
+            cards the Post word uses, drawn at each format's own ratio, since
+            a format IS a ratio plus a name. */}
+        {types.length > 0 ? (
+          <div
+            ref={mediaRow}
+            className={cn(
+              "no-scrollbar -mx-1 mt-3 flex gap-2 px-1 py-2",
+              "overflow-x-auto overscroll-x-contain",
+              mediaDragging
+                ? "cursor-grabbing snap-none"
+                : "cursor-grab snap-x snap-mandatory",
+            )}
+          >
+            <MediaFormatCard
+              id={ANY_MEDIA_TYPE}
+              label={t.mediaAny}
+              ratio={null}
+              on={mediaType === ANY_MEDIA_TYPE}
+              inert={mediaDragging}
+              onPick={() => onMediaType(ANY_MEDIA_TYPE)}
+            />
+            {types.map((type) => (
+              <MediaFormatCard
+                key={type}
+                id={type}
+                label={typeLabel(type as AssetType, isRTL)}
+                ratio={ASSET_TYPE_META[type as AssetType]?.ratio ?? null}
+                on={mediaType === type}
+                inert={mediaDragging}
+                onPick={() => onMediaType(type)}
+              />
+            ))}
+          </div>
+        ) : (
+          <p className="text-muted-foreground/60 pt-3 text-xs">
+            {t.mediaNoFormats}
+          </p>
+        )}
+
         <p className="text-muted-foreground/60 pt-2 text-[11px]">
           {t.mediaFilterHint}
         </p>
       </>
-    );
-  }
-
-  if (section === "queue") {
-    if (drafts.length === 0) {
-      return (
-        <p className="text-muted-foreground/60 text-xs">
-          {t.spotlightConfigQueueEmpty}
-        </p>
-      );
-    }
-    // Oldest first, and pressing one puts it in the field above. The queue was
-    // reachable only by leaving this face for another; it is a word now.
-    return (
-      <div className="space-y-1">
-        {drafts.map((draft) => (
-          <button
-            key={draft.id}
-            type="button"
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={() => onUseDraft(draft.id)}
-            className="hover:bg-muted flex w-full cursor-pointer items-start gap-3 rounded-lg p-2 text-start transition-colors duration-150"
-          >
-            <span
-              dir="auto"
-              className="line-clamp-2 min-w-0 flex-1 text-xs leading-relaxed"
-            >
-              {draft.text}
-            </span>
-            <span className="text-muted-foreground/60 shrink-0 text-[10px]">
-              {ago(draft.when)}
-            </span>
-          </button>
-        ))}
-      </div>
     );
   }
 
@@ -2103,6 +2256,7 @@ function MediaPanel({
   brandMedia,
   postType,
   mediaFilter,
+  mediaType,
   onAttach,
   onRemove,
   onBrowse,
@@ -2112,6 +2266,7 @@ function MediaPanel({
   brandMedia: BrandMedia[];
   postType: PostType;
   mediaFilter: MediaFilter;
+  mediaType: string;
   onAttach: (url: string) => void;
   onRemove: (url: string) => void;
   onBrowse: () => void;
@@ -2126,7 +2281,9 @@ function MediaPanel({
    * settings face is not decoration: this is where two of its boxes land.
    */
   const suggestions = brandMedia.filter(
-    (m) => !urls.includes(m.url) && libraryFits(m, postType, mediaFilter),
+    (m) =>
+      !urls.includes(m.url) &&
+      libraryFits(m, postType, mediaFilter, mediaType),
   );
 
   const addUrl = () => {

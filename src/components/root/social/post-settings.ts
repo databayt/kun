@@ -12,6 +12,7 @@
 import featuresJson from "../../../../content/social/features.json";
 
 import { mediaKind } from "@/lib/media-kind";
+import { ASSET_TYPES } from "@/components/root/social/showroom/taxonomy";
 import { matchesQuery } from "@/lib/normalize-search";
 
 /**
@@ -172,7 +173,9 @@ export function libraryFits(
   asset: { url: string; type: string },
   postType: PostType,
   mediaFilter: MediaFilter,
+  mediaType: string = ANY_MEDIA_TYPE,
 ): boolean {
+  if (!mediaTypeFits(asset.type, mediaType)) return false;
   const meta = POST_TYPE_META[postType];
   // A text-only post has nothing to attach, so the library offers nothing —
   // an empty grid is the honest answer, not a bug.
@@ -253,4 +256,45 @@ export function featureFits(
   const found = featuresFor(brand).find((f) => f.id === featureId);
   if (!found) return true;
   return matchesQuery(haystack, found.en) || matchesQuery(haystack, found.ar);
+}
+
+/**
+ * ——— Media format: which shape of asset ———
+ *
+ * The showroom taxonomy already names every asset type and, for most, the
+ * ratio it renders at. This narrows the ＋ to one of them — pick "Story" and
+ * only 9:16 assets are offered — on top of what the post shape already allows.
+ *
+ * `any` is a real answer, not an absence: most posts do not care which of a
+ * brand's stills they use.
+ */
+export const ANY_MEDIA_TYPE = "any";
+
+/** The asset types this kind can contain, in taxonomy order. */
+export function mediaTypesFor(
+  kind: "image" | "video",
+  postType: PostType,
+): string[] {
+  const allowed = POST_TYPE_META[postType].assets;
+  return (ASSET_TYPES as readonly string[]).filter((type) => {
+    if (!allowed.includes(type)) return false;
+    // Reel and story are the moving formats; everything else is a still.
+    const moving = type === "reel";
+    return kind === "video" ? moving : !moving;
+  });
+}
+
+/**
+ * Does this asset match the chosen format?
+ *
+ * `any` passes, and so does a format the current post shape does not offer —
+ * the shape has already had its say, and stacking a second silent no would
+ * make an empty grid impossible to explain.
+ */
+export function mediaTypeFits(
+  assetType: string,
+  mediaType: string,
+): boolean {
+  if (mediaType === ANY_MEDIA_TYPE) return true;
+  return assetType === mediaType;
 }
