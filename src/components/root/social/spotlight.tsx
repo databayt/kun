@@ -57,6 +57,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowUp,
   CalendarClock,
+  Check,
   CheckCircle2,
   Image as ImageIcon,
   Images,
@@ -1523,6 +1524,7 @@ function PostShape({
   invertAvatar,
   pageName,
   when,
+  selected,
 }: {
   meta: PostTypeMeta;
   /** The current brand's mark — a Page's profile picture is its logo. */
@@ -1532,6 +1534,7 @@ function PostShape({
   pageName?: string;
   /** The byline's second line — when this will appear, per the Send setting. */
   when?: string;
+  selected?: boolean;
 }) {
   // Facebook's own furniture: a white card on a grey ground, with the
   // placeholder grey it uses for anything not yet loaded. Tokens rather than
@@ -1547,9 +1550,18 @@ function PostShape({
       aria-hidden
       className={cn(
         surface,
-        "flex h-44 w-full flex-col gap-2 rounded-lg p-2.5 shadow-sm",
+        "relative flex h-44 w-full flex-col gap-2 rounded-lg p-2.5 shadow-sm",
       )}
     >
+      {/* Chosen is marked INSIDE the post, the way a picked photo is. A ring
+          or a shadow frames the card from outside and makes the other eight
+          look switched off; a radio underneath sits in space the strip does
+          not have. This costs nothing but a corner. */}
+      {selected && (
+        <span className="bg-clay text-clay-foreground absolute end-1.5 top-1.5 z-10 flex size-4 items-center justify-center rounded-full">
+          <Check className="size-3" strokeWidth={3} />
+        </span>
+      )}
       {/* The byline. Every feed post has one; a full-bleed vertical surface
           does not, so the tall frames spend that room on the media. */}
       {!tall && (
@@ -2067,8 +2079,7 @@ function ConfigChoices({
                 // post IS the choice, so it is the button. Selection rides on
                 // the post's own edge.
                 className={cn(
-                  "flex w-40 shrink-0 snap-start flex-col items-center gap-2",
-                  "rounded-lg transition-opacity duration-150",
+                  "w-40 shrink-0 snap-start rounded-lg transition-opacity duration-150",
                   dragging ? "pointer-events-none" : "cursor-pointer",
                   on ? "opacity-100" : "opacity-90 hover:opacity-100",
                 )}
@@ -2090,22 +2101,8 @@ function ConfigChoices({
                         ? t.previewWhenLater
                         : t.previewWhenNow
                   }
+                  selected={on}
                 />
-                {/* A radio, under the card. Nine posts are one choice, and a
-                    radio is what a reader already knows that shape to mean —
-                    where a shadow only says "this one is different" and makes
-                    the other eight look switched off. */}
-                <span
-                  aria-hidden
-                  className={cn(
-                    "flex size-4 shrink-0 items-center justify-center rounded-full border transition-colors duration-150",
-                    on ? "border-foreground" : "border-muted-foreground/40",
-                  )}
-                >
-                  {on && (
-                    <span className="bg-foreground size-2 rounded-full" />
-                  )}
-                </span>
               </button>
             );
           })}
