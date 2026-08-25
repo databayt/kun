@@ -90,10 +90,22 @@ import { mediaKind } from "@/lib/media-kind";
 import {
   approveDraft,
   publishPostDirect,
+  stageForReview,
   type BrandMedia,
   type PostResult,
+  type ReviewLink,
 } from "@/actions/post-social";
 import { CHANNELS, type ChannelId } from "@/components/root/social/config";
+import {
+  DESTINATIONS,
+  MEDIA_FILTERS,
+  POST_TYPES,
+  libraryFits,
+  queueFits,
+  type Destination,
+  type MediaFilter,
+  type PostType,
+} from "@/components/root/social/post-settings";
 import { PRODUCTS, type ProductId } from "@/components/root/social/products";
 import { fill, type SocialDict } from "@/components/root/social/dictionary";
 import { useSocial } from "@/components/root/social/provider";
@@ -113,6 +125,10 @@ const GLASS = "bg-muted border border-muted-foreground/20 shadow-2xl";
 type ApproveMode = "now" | "schedule";
 
 const APPROVE_MODE_KEY = "social:approve-mode";
+
+const DESTINATION_KEY = "social:destination";
+const POST_TYPE_KEY = "social:post-type";
+const MEDIA_FILTER_KEY = "social:media-filter";
 
 type Mode = "all" | "draft" | "scheduled" | "published";
 type Scope = "brand" | "every";
@@ -175,6 +191,32 @@ const KIND_HEADING_KEY: Record<QueueItem["kind"], keyof SocialDict> = {
   published: "spotlightModePublished",
 };
 
+/**
+ * A choice that survives a reload, read after mount so the server render never
+ * touches localStorage. Three settings wanted the same six lines.
+ */
+function usePersisted<T extends string>(
+  key: string,
+  fallback: T,
+  isValid: (value: string) => value is T,
+): [T, (next: T) => void] {
+  const [value, setValue] = React.useState<T>(fallback);
+  React.useEffect(() => {
+    const stored = window.localStorage.getItem(key);
+    if (stored && isValid(stored)) setValue(stored);
+    // `isValid` is a fresh closure each render and the key never changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
+  const commit = React.useCallback(
+    (next: T) => {
+      setValue(next);
+      window.localStorage.setItem(key, next);
+    },
+    [key],
+  );
+  return [value, commit];
+}
+
 export function ReviewSpotlight({
   onEngagedChange,
 }: {
@@ -231,20 +273,26 @@ export function ReviewSpotlight({
   const [sending, setSending] = React.useState(false);
   const [notice, setNotice] = React.useState<string | null>(null);
   const [error, setError] = React.useState<string | null>(null);
+  /** Signed approval links, when Send staged instead of published. */
+  const [links, setLinks] = React.useState<ReviewLink[] | null>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const rootRef = React.useRef<HTMLDivElement>(null);
 
-  // Read after mount so the server render never touches localStorage.
-  const [approveMode, setApproveModeState] =
-    React.useState<ApproveMode>("now");
-  React.useEffect(() => {
-    const stored = window.localStorage.getItem(APPROVE_MODE_KEY);
-    if (stored === "now" || stored === "schedule") setApproveModeState(stored);
-  }, []);
-  const setApproveMode = (next: ApproveMode) => {
-    setApproveModeState(next);
-    window.localStorage.setItem(APPROVE_MODE_KEY, next);
-  };
+  const [destination, setDestination] = usePersisted<Destination>(
+    DESTINATION_KEY,
+    "direct",
+    (v): v is Destination => (DESTINATIONS as readonly string[]).includes(v),
+  );
+  const [postType, setPostType] = usePersisted<PostType>(
+    POST_TYPE_KEY,
+    "post",
+    (v): v is PostType => (POST_TYPES as readonly string[]).includes(v),
+  );
+  const [mediaFilter, setMediaFilter] = usePersisted<MediaFilter>(
+    MEDIA_FILTER_KEY,
+    "any",
+    (v): v is MediaFilter => (MEDIA_FILTERS as readonly string[]).includes(v),
+  );
 
   const trimmed = query.trim();
 
@@ -318,12 +366,14 @@ export function ReviewSpotlight({
    */
   const matching = React.useMemo(
     () =>
-      items.filter(
-        (item) =>
-          (!mediaOnly || item.mediaUrls.length > 0) &&
-          (!trimmed || matchesQuery(item.haystack, trimmed)),
-      ),
-    [items, mediaOnly, trimmed],
+      items.filter((item) => {
+        if (mediaOnly && item.mediaUrls.length === 0) return false;
+        // The settings face reaches the queue too: asking for Video narrows
+        // this to drafts and posts that actually carry one.
+        if (!queueFits(item.mediaUrls, mediaFilter)) return false;
+        return !trimmed || matchesQuery(item.haystack, trimmed);
+      }),
+    [items, mediaOnly, mediaFilter, trimmed],
   );
 
   const counts = React.useMemo(() => {
@@ -402,15 +452,20 @@ export function ReviewSpotlight({
   );
 
   /**
-   * The button says which of the two sends it is about to perform: approving a
-   * queue draft (which also claims it) reads differently from publishing a
-   * line typed from scratch, and scheduling reads differently again.
+   * The button says what it is about to do, which is two questions at once:
+   * where the post is going (the destination setting) and whether sending
+   * also claims a queue draft.
    */
-  const sendLabel = !reviewQueue.activeDraftId
-    ? t.publishDirectAction
-    : approveMode === "schedule"
-      ? t.approveScheduleAction
-      : t.approveAction;
+  const sendLabel =
+    destination === "review"
+      ? t.stageForReview
+      : destination === "schedule"
+        ? reviewQueue.activeDraftId
+          ? t.approveScheduleAction
+          : t.scheduleAction
+        : reviewQueue.activeDraftId
+          ? t.approveAction
+          : t.publishDirectAction;
 
   /**
    * Stating the blocker beats a dead button with no explanation.
@@ -443,6 +498,7 @@ export function ReviewSpotlight({
     setSending(true);
     setNotice(null);
     setError(null);
+    setLinks(null);
     const payload = {
       product,
       text: query,
@@ -453,14 +509,25 @@ export function ReviewSpotlight({
       const draftId = reviewQueue.activeDraftId;
       let scheduled: { count: number; at: string } | null = null;
       let res: PostResult;
-      if (draftId) {
+
+      if (destination === "review") {
+        // The draft half of draft-or-direct. Nothing reaches a platform: this
+        // mints a piece with `pending` variants and one single-use signed link
+        // per channel, and an approver's press is what publishes.
+        const staged = await stageForReview(payload);
+        res = staged;
+        if (staged.ok) {
+          setNotice(staged.delivered ? t.stagedMsg : t.stagedLocalMsg);
+          setLinks(staged.links ?? null);
+        }
+      } else if (draftId) {
         const approved = await approveDraft({
           draftId,
-          mode: approveMode,
+          mode: destination === "schedule" ? "schedule" : "now",
           ...payload,
         });
         res = approved;
-        if (approveMode === "schedule") {
+        if (destination === "schedule") {
           scheduled = {
             count: approved.count ?? 0,
             at: approved.at ? new Date(approved.at).toLocaleString() : "",
@@ -471,9 +538,11 @@ export function ReviewSpotlight({
       }
 
       if (res.ok) {
-        setNotice(
-          scheduled ? fill(t.scheduledMsg, scheduled) : t.approvedNowMsg,
-        );
+        if (destination !== "review") {
+          setNotice(
+            scheduled ? fill(t.scheduledMsg, scheduled) : t.approvedNowMsg,
+          );
+        }
         reviewQueue.clearActive();
         void reviewQueue.refresh();
       } else {
@@ -502,7 +571,7 @@ export function ReviewSpotlight({
     selectedChannels,
     composerMediaUrls,
     reviewQueue,
-    approveMode,
+    destination,
     t,
   ]);
 
@@ -745,14 +814,20 @@ export function ReviewSpotlight({
                   wired={wiredForProduct}
                   selected={selectedChannels}
                   onChannels={setSelectedChannels}
-                  approveMode={approveMode}
-                  onApproveMode={setApproveMode}
+                  destination={destination}
+                  onDestination={setDestination}
+                  postType={postType}
+                  onPostType={setPostType}
+                  mediaFilter={mediaFilter}
+                  onMediaFilter={setMediaFilter}
                 />
               ) : panel === "media" ? (
                 <MediaPanel
                   t={t}
                   urls={composerMediaUrls}
                   brandMedia={brandMedia}
+                  postType={postType}
+                  mediaFilter={mediaFilter}
                   onAttach={attachMedia}
                   onRemove={removeMedia}
                   onBrowse={() => goToStage("media")}
@@ -929,7 +1004,7 @@ export function ReviewSpotlight({
                       }}
                       className={cn(
                         "flex size-8 cursor-pointer items-center justify-center rounded-full transition-colors duration-150",
-                        approveMode === "schedule"
+                        destination !== "direct"
                           ? "bg-accent text-accent-foreground"
                           : "text-muted-foreground/70 hover:bg-accent/50 hover:text-accent-foreground",
                       )}
@@ -989,6 +1064,30 @@ export function ReviewSpotlight({
 
       {/* What the send did. Under the box, because the box collapses and a
           notice inside it would vanish with the panel that carried it. */}
+      {links && links.length > 0 && (
+        <ul className="border-input mt-3 space-y-1 rounded-lg border p-3 text-sm">
+          <li className="text-muted-foreground pb-1 text-xs font-medium">
+            {t.reviewLinksTitle}
+          </li>
+          {links.map((link) => (
+            <li key={link.channel} className="flex items-center gap-2">
+              <span className="text-muted-foreground w-24 shrink-0 text-xs">
+                {link.channel}
+              </span>
+              <a
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                dir="ltr"
+                className="truncate font-mono text-xs underline underline-offset-4"
+              >
+                {link.url}
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+
       {(notice || error) && (
         <p
           role={error ? "alert" : "status"}
@@ -1021,7 +1120,7 @@ export function ReviewSpotlight({
  * a stacking fight nobody wins: measured, the popover opened underneath the
  * queue rows.
  */
-type ConfigSection = "brand" | "channels" | "timing";
+type ConfigSection = "brand" | "channels" | "postType" | "media" | "destination";
 
 function ConfigPanel({
   t,
@@ -1031,8 +1130,12 @@ function ConfigPanel({
   wired,
   selected,
   onChannels,
-  approveMode,
-  onApproveMode,
+  destination,
+  onDestination,
+  postType,
+  onPostType,
+  mediaFilter,
+  onMediaFilter,
 }: {
   t: SocialDict;
   isRTL: boolean;
@@ -1041,8 +1144,12 @@ function ConfigPanel({
   wired: ChannelId[];
   selected: ChannelId[];
   onChannels: (next: ChannelId[]) => void;
-  approveMode: ApproveMode;
-  onApproveMode: (next: ApproveMode) => void;
+  destination: Destination;
+  onDestination: (next: Destination) => void;
+  postType: PostType;
+  onPostType: (next: PostType) => void;
+  mediaFilter: MediaFilter;
+  onMediaFilter: (next: MediaFilter) => void;
 }) {
   const [section, setSection] = React.useState<ConfigSection | null>(null);
 
@@ -1056,6 +1163,31 @@ function ConfigPanel({
     return c ? (isRTL ? c.labelAr : c.label) : id;
   };
 
+  const postTypeName: Record<PostType, string> = {
+    post: t.postTypePost,
+    carousel: t.postTypeCarousel,
+    reel: t.postTypeReel,
+    story: t.postTypeStory,
+  };
+
+  const mediaName: Record<MediaFilter, string> = {
+    any: t.mediaAny,
+    image: t.mediaImage,
+    video: t.mediaVideo,
+  };
+
+  const destinationName: Record<Destination, string> = {
+    direct: t.destinationDirect,
+    schedule: t.destinationSchedule,
+    review: t.destinationReview,
+  };
+
+  const destinationHint: Record<Destination, string> = {
+    direct: t.destinationDirectHint,
+    schedule: t.destinationScheduleHint,
+    review: t.destinationReviewHint,
+  };
+
   const toggle = (id: ChannelId) =>
     onChannels(
       selected.includes(id)
@@ -1065,6 +1197,14 @@ function ConfigPanel({
 
   const shell =
     "max-h-[min(360px,45vh)] overflow-y-auto border-t border-black/5 p-4 text-start dark:border-white/10";
+
+  const pill = (on: boolean) =>
+    cn(
+      "cursor-pointer rounded-full px-3 py-1 text-xs font-medium transition-colors duration-150",
+      on
+        ? "bg-accent text-accent-foreground"
+        : "text-muted-foreground/70 hover:bg-accent/50 hover:text-accent-foreground",
+    );
 
   /* ——— Level one: the boxes ——— */
   if (!section) {
@@ -1078,18 +1218,25 @@ function ConfigPanel({
           : t.spotlightConfigNone,
       },
       {
-        id: "timing",
+        id: "postType",
+        label: t.spotlightConfigPostType,
+        value: postTypeName[postType],
+      },
+      {
+        id: "media",
+        label: t.spotlightConfigMedia,
+        value: mediaName[mediaFilter],
+      },
+      {
+        id: "destination",
         label: t.spotlightConfigTiming,
-        value:
-          approveMode === "schedule"
-            ? t.approveModeSchedule
-            : t.approveModeNow,
+        value: destinationName[destination],
       },
     ];
 
     return (
       <div className={shell}>
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {tiles.map((tile) => (
             <button
               key={tile.id}
@@ -1115,20 +1262,18 @@ function ConfigPanel({
   }
 
   /* ——— Level two: one box, opened ——— */
-  const heading =
-    section === "brand"
-      ? t.spotlightConfigBrand
-      : section === "channels"
-        ? t.spotlightConfigChannels
-        : t.spotlightConfigTiming;
+  const heading: Record<ConfigSection, string> = {
+    brand: t.spotlightConfigBrand,
+    channels: t.spotlightConfigChannels,
+    postType: t.spotlightConfigPostType,
+    media: t.spotlightConfigMedia,
+    destination: t.spotlightConfigTiming,
+  };
 
-  const pill = (on: boolean) =>
-    cn(
-      "cursor-pointer rounded-full px-3 py-1 text-xs font-medium transition-colors duration-150",
-      on
-        ? "bg-accent text-accent-foreground"
-        : "text-muted-foreground/70 hover:bg-accent/50 hover:text-accent-foreground",
-    );
+  const hint: Partial<Record<ConfigSection, string>> = {
+    postType: t.postTypeHint,
+    media: t.mediaFilterHint,
+  };
 
   return (
     <div className={shell}>
@@ -1143,7 +1288,7 @@ function ConfigPanel({
         >
           <ChevronLeft className="size-4 rtl:-scale-x-100" />
         </button>
-        <p className="text-sm font-medium">{heading}</p>
+        <p className="text-sm font-medium">{heading[section]}</p>
       </div>
 
       {/* Centred, because this is the middle of a panel rather than a form on
@@ -1189,31 +1334,69 @@ function ConfigPanel({
             </div>
           ))}
 
-        {section === "timing" && (
+        {section === "postType" && (
+          <div className="flex flex-wrap justify-center gap-1.5">
+            {POST_TYPES.map((type) => (
+              <button
+                key={type}
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => onPostType(type)}
+                aria-pressed={postType === type}
+                className={pill(postType === type)}
+              >
+                {postTypeName[type]}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {section === "media" && (
+          <div className="flex flex-wrap justify-center gap-1.5">
+            {MEDIA_FILTERS.map((value) => (
+              <button
+                key={value}
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => onMediaFilter(value)}
+                aria-pressed={mediaFilter === value}
+                className={pill(mediaFilter === value)}
+              >
+                {mediaName[value]}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {section === "destination" && (
           <div className="w-full max-w-sm space-y-1">
-            {(["now", "schedule"] as const).map((option) => (
+            {DESTINATIONS.map((option) => (
               <button
                 key={option}
                 type="button"
                 onMouseDown={(e) => e.preventDefault()}
-                onClick={() => onApproveMode(option)}
-                aria-pressed={approveMode === option}
+                onClick={() => onDestination(option)}
+                aria-pressed={destination === option}
                 className={cn(
                   "flex w-full cursor-pointer flex-col rounded-lg p-2 text-start transition-colors duration-150",
-                  approveMode === option ? "bg-accent" : "hover:bg-muted",
+                  destination === option ? "bg-accent" : "hover:bg-muted",
                 )}
               >
                 <span className="text-sm font-medium">
-                  {option === "now" ? t.approveModeNow : t.approveModeSchedule}
+                  {destinationName[option]}
                 </span>
                 <span className="text-muted-foreground text-xs">
-                  {option === "now"
-                    ? t.approveModeNowHint
-                    : t.approveModeScheduleHint}
+                  {destinationHint[option]}
                 </span>
               </button>
             ))}
           </div>
+        )}
+
+        {hint[section] && (
+          <p className="text-muted-foreground/60 pt-1 text-center text-[11px]">
+            {hint[section]}
+          </p>
         )}
       </div>
     </div>
@@ -1238,6 +1421,8 @@ function MediaPanel({
   t,
   urls,
   brandMedia,
+  postType,
+  mediaFilter,
   onAttach,
   onRemove,
   onBrowse,
@@ -1245,6 +1430,8 @@ function MediaPanel({
   t: SocialDict;
   urls: string[];
   brandMedia: BrandMedia[];
+  postType: PostType;
+  mediaFilter: MediaFilter;
   onAttach: (url: string) => void;
   onRemove: (url: string) => void;
   onBrowse: () => void;
@@ -1252,8 +1439,15 @@ function MediaPanel({
   const [draft, setDraft] = React.useState("");
   const valid = /^https?:\/\//i.test(draft.trim());
 
-  /** Library picks not already in the tray — attached ones would be inert. */
-  const suggestions = brandMedia.filter((m) => !urls.includes(m.url));
+  /**
+   * Library picks not already in the tray — attached ones would be inert —
+   * narrowed by what the post says it is. Choosing Reel in the settings stops
+   * this offering hero stills; choosing Video stops it offering images. The
+   * settings face is not decoration: this is where two of its boxes land.
+   */
+  const suggestions = brandMedia.filter(
+    (m) => !urls.includes(m.url) && libraryFits(m, postType, mediaFilter),
+  );
 
   const addUrl = () => {
     if (!valid) return;

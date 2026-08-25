@@ -1133,6 +1133,14 @@ export interface BrandMedia {
   title: string;
   /** Public CDN URL — Graph fetches the bytes itself, so it must be reachable. */
   url: string;
+  /**
+   * The showroom's asset type (`reel`, `carousel`, `og`, `lifestyle`, …). The
+   * composer's settings filter the library by it, so picking "Reel" as the
+   * post's format stops offering hero stills. Carried from `library.json`
+   * through the showroom's own reader, so there is one vocabulary rather than
+   * two that drift.
+   */
+  type: string;
 }
 
 /**
@@ -1165,8 +1173,13 @@ export async function listBrandMedia(
         .filter(
           (a) => a.kind === "generated" && a.brand === brand && a.imageUrl,
         )
-        .slice(0, 8)
-        .map((a) => ({ id: a.id, title: a.title, url: a.imageUrl as string })),
+        .slice(0, 24)
+        .map((a) => ({
+          id: a.id,
+          title: a.title,
+          url: a.imageUrl as string,
+          type: a.type,
+        })),
     };
   } catch (err: unknown) {
     return {
