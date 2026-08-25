@@ -1805,8 +1805,15 @@ function MediaFormatCard({
   const parsed = ratio?.match(/^(\d+)[:x](\d+)$/);
   const w = parsed ? Number(parsed[1]) : 1;
   const h = parsed ? Number(parsed[2]) : 1;
-  const box = 96;
-  const scale = Math.min(box / w, box / h);
+  // Fitted inside a box, not forced into a square. The card BECOMES the
+  // format — a 16:9 card is wide and short, a 9:16 one is tall and narrow —
+  // so the strip is a ribbon of real shapes rather than thirteen identical
+  // tiles each holding a small drawing of one.
+  const MAX_W = 190;
+  const MAX_H = 150;
+  const scale = Math.min(MAX_W / w, MAX_H / h);
+  const width = Math.round(w * scale);
+  const height = Math.round(h * scale);
   const moving = typeof seconds === "number";
 
   const laneName =
@@ -1833,65 +1840,63 @@ function MediaFormatCard({
       title={[label, laneName, styleName].filter(Boolean).join(" · ")}
       onMouseDown={(e) => e.preventDefault()}
       onClick={onPick}
+      style={{ width }}
       className={cn(
-        "w-40 shrink-0 snap-start rounded-lg transition-opacity duration-150",
+        "flex shrink-0 snap-start flex-col items-center gap-1.5",
+        "transition-opacity duration-150",
         inert ? "pointer-events-none" : "cursor-pointer",
         on ? "opacity-100" : "opacity-90 hover:opacity-100",
       )}
     >
-      <div className="bg-card relative flex h-44 w-full flex-col items-center justify-center gap-2 rounded-lg p-2.5 shadow-sm">
+      {/* The whole card is the format. Nothing sits inside a frame that is
+          not the thing itself. */}
+      <span
+        style={{ width, height }}
+        className={cn(
+          "relative flex items-center justify-center overflow-hidden rounded-lg shadow-sm",
+          lane === "higgs" && style === "cinematic"
+            ? "from-muted-foreground/45 to-muted-foreground/15 bg-gradient-to-br"
+            : lane === "higgs"
+              ? "bg-muted-foreground/25"
+              : lane === "none"
+                ? "bg-muted-foreground/10"
+                : "bg-card",
+        )}
+      >
         {on && (
           <span className="bg-foreground text-background absolute end-1.5 bottom-1.5 z-10 flex size-4 items-center justify-center rounded-full">
             <Check className="size-3" strokeWidth={3} />
           </span>
         )}
 
-        <span className="flex h-24 items-center justify-center">
-          {/* The block is the format: its ratio, and how it is made. A
-              photographic lane gets a graded field, a designed one gets the
-              copy it carries, a placed mark gets a plain plate. Grey squares
-              for all thirteen said only "some media goes here". */}
-          <span
-            style={{ width: w * scale, height: h * scale }}
-            className={cn(
-              "relative flex items-center justify-center overflow-hidden rounded",
-              lane === "higgs" && style === "cinematic"
-                ? "from-muted-foreground/45 to-muted-foreground/15 bg-gradient-to-br"
-                : lane === "higgs"
-                  ? "bg-muted-foreground/20"
-                  : "bg-muted-foreground/15",
-            )}
-          >
-            {lane === "template" && (
-              // A designed plate carries copy; that is what makes it one.
-              <span className="flex w-full flex-col gap-1 px-2">
-                <span className="bg-muted-foreground/40 h-1 w-4/5 rounded-full" />
-                <span className="bg-muted-foreground/30 h-1 w-3/5 rounded-full" />
-                <span className="bg-muted-foreground/25 h-1 w-2/3 rounded-full" />
-              </span>
-            )}
-            {lane === "none" && (
-              <span className="bg-muted-foreground/40 size-4 rounded-full" />
-            )}
-            {moving && (
-              <span className="border-s-card h-0 w-0 border-y-[7px] border-s-[12px] border-y-transparent rtl:rotate-180" />
-            )}
+        {lane === "template" && (
+          // A designed plate carries copy; that is what makes it one.
+          <span className="flex w-full flex-col gap-1.5 px-4">
+            <span className="bg-muted-foreground/35 h-2 w-4/5 rounded-full" />
+            <span className="bg-muted-foreground/25 h-1.5 w-3/5 rounded-full" />
+            <span className="bg-muted-foreground/20 h-1.5 w-2/3 rounded-full" />
           </span>
-        </span>
+        )}
+        {lane === "none" && (
+          <span className="bg-muted-foreground/40 size-6 rounded-full" />
+        )}
+        {moving && (
+          <span className="border-s-card h-0 w-0 border-y-[9px] border-s-[15px] border-y-transparent rtl:rotate-180" />
+        )}
+      </span>
 
-        <span className="flex w-full flex-col items-center gap-0.5">
-          <span className="w-full truncate text-center text-[11px] leading-tight">
-            {label}
-          </span>
-          <span className="text-muted-foreground/60 truncate text-[9px] leading-none">
-            {moving
-              ? [meta, fill(t.mediaSeconds, { count: seconds })]
-                  .filter(Boolean)
-                  .join(" · ")
-              : meta || "\u00a0"}
-          </span>
+      <span className="flex w-full flex-col items-center gap-0.5">
+        <span className="w-full truncate text-center text-[11px] leading-tight">
+          {label}
         </span>
-      </div>
+        <span className="text-muted-foreground/60 truncate text-[9px] leading-none">
+          {moving
+            ? [meta, fill(t.mediaSeconds, { count: seconds })]
+                .filter(Boolean)
+                .join(" · ")
+            : meta || "\u00a0"}
+        </span>
+      </span>
     </button>
   );
 }
@@ -2250,7 +2255,7 @@ function ConfigChoices({
           <div
             ref={mediaRow}
             className={cn(
-              "no-scrollbar -mx-1 mt-3 flex gap-2 px-1 py-2",
+              "no-scrollbar -mx-1 mt-3 flex items-end gap-3 px-1 py-2",
               "overflow-x-auto overscroll-x-contain",
               mediaDragging
                 ? "cursor-grabbing snap-none"
