@@ -30,6 +30,7 @@ export const docsNav: (DocEntry | DocSection)[] = [
       { href: "/docs/crm", label: "CRM" },
       { href: "/docs/scrape", label: "Scrape & Leads" },
       { href: "/docs/master", label: "Mastering" },
+      { href: "/docs/home", label: "Home" },
       { href: "/docs/sprint", label: "Sprint Plan" },
       { href: "/docs/share-economy", label: "Share Economy" },
       { href: "/docs/onboarding", label: "Onboarding" },
