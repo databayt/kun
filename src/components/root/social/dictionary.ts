@@ -175,6 +175,12 @@ export const SOCIAL_DICTIONARY = {
     postTypeStory: "Story",
     postTypeReel: "Reel",
     postTypeHint: "Steers which library assets the ＋ offers.",
+    // The byline's second line — where Facebook puts the time and the
+    // audience. What it says follows the Send setting, because that is what
+    // decides when this appears.
+    previewWhenNow: "Just now · Public",
+    previewWhenLater: "Scheduled · Public",
+    previewWhenReview: "Awaiting approval",
     mediaAny: "Any",
     mediaImage: "Images",
     mediaVideo: "Video",
@@ -546,6 +552,9 @@ export const SOCIAL_DICTIONARY = {
     postTypeStory: "ستوري",
     postTypeReel: "ريل",
     postTypeHint: "يوجّه أي أصول المكتبة يعرضها ＋.",
+    previewWhenNow: "الآن · عام",
+    previewWhenLater: "مجدول · عام",
+    previewWhenReview: "بانتظار الاعتماد",
     mediaAny: "الكل",
     mediaImage: "صور",
     mediaVideo: "فيديو",

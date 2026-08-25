@@ -1485,6 +1485,7 @@ function PostShape({
   avatar,
   invertAvatar,
   pageName,
+  when,
 }: {
   meta: PostTypeMeta;
   /** The current brand's mark — a Page's profile picture is its logo. */
@@ -1492,6 +1493,8 @@ function PostShape({
   invertAvatar?: boolean;
   /** What the Page calls itself, shown where Facebook shows it. */
   pageName?: string;
+  /** The byline's second line — when this will appear, per the Send setting. */
+  when?: string;
 }) {
   // Facebook's own furniture: a white card on a grey ground, with the
   // placeholder grey it uses for anything not yet loaded. Tokens rather than
@@ -1537,13 +1540,22 @@ function PostShape({
                 something that is already here. The timestamp stays a bar:
                 when this posts is the Send setting's answer, not ours. */}
             {pageName ? (
-              <span className="text-foreground/70 truncate text-[9px] leading-none font-semibold">
+              <span className="text-foreground/70 truncate text-start text-[9px] leading-none font-semibold">
                 {pageName}
               </span>
             ) : (
               <span className={cn(line, "w-2/3")} />
             )}
-            <span className={cn(line, "h-1 w-1/3")} />
+            {/* Where Facebook prints the time and the audience. It is known
+                too — the Send setting decides when this appears — so a grey
+                bar here was a placeholder for an answer already given. */}
+            {when ? (
+              <span className="text-muted-foreground/70 truncate text-start text-[8px] leading-none">
+                {when}
+              </span>
+            ) : (
+              <span className={cn(line, "h-1 w-1/3")} />
+            )}
           </span>
         </div>
       )}
@@ -1875,6 +1887,13 @@ function ConfigChoices({
                     !brandMark?.avatar && brandMark?.logoInvertsOnDark
                   }
                   pageName={brandMark?.pageName ?? brandMark?.label}
+                  when={
+                    destination === "review"
+                      ? t.previewWhenReview
+                      : destination === "schedule"
+                        ? t.previewWhenLater
+                        : t.previewWhenNow
+                  }
                 />
                 <span className="w-full truncate text-center text-[10px] leading-tight">
                   {t[POST_TYPE_LABEL[type]]}
