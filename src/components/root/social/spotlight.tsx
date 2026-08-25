@@ -1305,6 +1305,16 @@ function ConfigPanel({
   onCloseSection: () => void;
 }) {
   const [craftOpen, setCraftOpen] = React.useState(false);
+  /**
+   * Where to hang the select. Measured against the panel on the press, not
+   * derived from the box's DOM position at render: the row scrolls sideways,
+   * and it clips its own children, so a card rendered inside it would be cut
+   * off. This keeps the card a child of the panel and points it at the box.
+   */
+  const panelRef = React.useRef<HTMLDivElement>(null);
+  const [anchor, setAnchor] = React.useState<{ x: number; y: number } | null>(
+    null,
+  );
 
   const brandName = (() => {
     const p = PRODUCTS.find((entry) => entry.id === product);
@@ -1511,7 +1521,7 @@ function ConfigPanel({
   ];
 
   return (
-    <div className={shell}>
+    <div ref={panelRef} className={shell}>
       {/* One row, always. Five settings read as a single line of state —
           "hogwarts, facebook, a post, any media, publish now" — and a grid
           that reflows into two rows on a narrow screen turns that sentence
@@ -1528,7 +1538,17 @@ function ConfigPanel({
             key={tile.id}
             type="button"
             onMouseDown={(e) => e.preventDefault()}
-            onClick={() => onOpenDialog(tile.id)}
+            onClick={(e) => {
+              const box = e.currentTarget.getBoundingClientRect();
+              const panel = panelRef.current?.getBoundingClientRect();
+              if (panel) {
+                setAnchor({
+                  x: box.left - panel.left,
+                  y: box.bottom - panel.top + 6,
+                });
+              }
+              onOpenDialog(tile.id);
+            }}
             className={cn(
               "border-input hover:border-foreground/30 hover:bg-accent/40 flex min-w-0 flex-1",
               "shrink-0 basis-0 cursor-pointer flex-col items-start gap-0.5 rounded-xl border",
@@ -1550,6 +1570,8 @@ function ConfigPanel({
 
       <ConfigSelect
         section={openSection}
+        anchor={anchor}
+        panelWidth={panelRef.current?.clientWidth ?? 0}
         onClose={onCloseSection}
         t={t}
         isRTL={isRTL}
@@ -1583,6 +1605,8 @@ function ConfigPanel({
  */
 function ConfigSelect({
   section,
+  anchor,
+  panelWidth,
   onClose,
   t,
   isRTL,
@@ -1599,6 +1623,9 @@ function ConfigSelect({
   onDestination,
 }: {
   section: ConfigSection | null;
+  /** Top-left of the card, relative to the panel. Null centres it. */
+  anchor: { x: number; y: number } | null;
+  panelWidth: number;
   onClose: () => void;
   t: SocialDict;
   isRTL: boolean;
@@ -1702,25 +1729,34 @@ function ConfigSelect({
 
   if (!section) return null;
 
+  // Kept inside the panel's width. A card hanging off the last box would
+  // otherwise run past the box it belongs to.
+  const CARD = 224;
+  const left = anchor
+    ? Math.max(8, Math.min(anchor.x, Math.max(8, panelWidth - CARD - 8)))
+    : 8;
+
   return (
-    // Centred on the PANEL, not the window — absolute inside the settings
-    // face rather than a portal to <body>. The thing being configured is
-    // right here, and a card that flies to the middle of the screen leaves
-    // its own context behind. It also means focus never leaves the field, so
-    // the box underneath cannot fold while you choose.
-    <div className="absolute inset-0 z-10 flex items-center justify-center">
+    // Hung under the box that was pressed, and rendered inside the settings
+    // face rather than portalled to <body>. Two reasons it belongs here: the
+    // thing being configured is right there, so the card should point at it
+    // rather than fly to the middle of anything; and staying in the tree
+    // means focus never leaves the field, so the box underneath cannot fold
+    // while you choose. A portalled version did fold it.
+    <div className="absolute inset-0 z-10">
       <button
         type="button"
         aria-label={t.spotlightHintClose}
         onMouseDown={(e) => e.preventDefault()}
         onClick={onClose}
-        className="bg-muted/80 absolute inset-0 cursor-default"
+        className="absolute inset-0 cursor-default"
       />
       <div
         role="dialog"
         aria-label={title[section]}
+        style={{ insetInlineStart: left, top: anchor?.y ?? 8 }}
         className={cn(
-          "bg-popover text-popover-foreground relative w-56 rounded-2xl border p-3 shadow-lg",
+          "bg-popover text-popover-foreground absolute w-56 rounded-2xl border p-2 shadow-lg",
           "text-start",
         )}
       >
