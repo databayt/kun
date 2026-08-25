@@ -153,9 +153,21 @@ export const SOCIAL_DICTIONARY = {
     spotlightConfigQueueEmpty: "Nothing waiting for this brand.",
     spotlightConfigChannels: "Channel",
     spotlightConfigNoChannels: "No channel is wired for this brand yet.",
-    spotlightConfigTiming: "Send",
+    // "Plan", not "Send": the button beside the field sends. This word says
+    // what sending WILL DO, which is a plan for the post rather than the act.
+    spotlightConfigTiming: "Plan",
     spotlightConfigPostType: "Post",
     spotlightConfigMedia: "Media",
+    // The direction a queued brief carries — angle, register, model. Same
+    // knobs the agent window at /social/draft sets, and the same provider
+    // state, so setting one here aims the ask made there.
+    spotlightConfigDraft: "Draft",
+    spotlightConfigDraftAngle: "Angle",
+    spotlightConfigDraftRegister: "Register",
+    spotlightConfigDraftModel: "Model",
+    spotlightConfigDraftHint:
+      "Direction for a draft the queue writes. Typing your own copy above ignores all three.",
+    spotlightConfigDraftFree: "Writer's choice",
     scheduleAction: "Schedule",
     destinationDirect: "Now",
     destinationDirectHint: "Send reaches the selected channels immediately.",
@@ -542,9 +554,16 @@ export const SOCIAL_DICTIONARY = {
     spotlightConfigQueueEmpty: "لا شيء بانتظار هذه العلامة.",
     spotlightConfigChannels: "القناة",
     spotlightConfigNoChannels: "لا قناة موصولة لهذه العلامة بعد.",
-    spotlightConfigTiming: "الإرسال",
+    spotlightConfigTiming: "الخطة",
     spotlightConfigPostType: "المنشور",
     spotlightConfigMedia: "الوسائط",
+    spotlightConfigDraft: "المسودة",
+    spotlightConfigDraftAngle: "الزاوية",
+    spotlightConfigDraftRegister: "الدرجة",
+    spotlightConfigDraftModel: "النموذج",
+    spotlightConfigDraftHint:
+      "توجيه لمسودة يكتبها الطابور. كتابة نصّك أعلاه تتجاوز الثلاثة.",
+    spotlightConfigDraftFree: "اختيار الكاتب",
     scheduleAction: "جدولة",
     destinationDirect: "الآن",
     destinationDirectHint: "الإرسال يصل القنوات المختارة فوراً.",

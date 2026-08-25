@@ -137,6 +137,11 @@ import {
   type PostTypeMeta,
 } from "@/components/root/social/post-settings";
 import {
+  DRAFT_ANGLES,
+  DRAFT_MODELS,
+  DRAFT_REGISTERS,
+} from "@/components/root/social/knobs";
+import {
   PICKABLE_PRODUCTS,
   PRODUCTS,
   SOCIAL_PRODUCTS,
@@ -1322,6 +1327,7 @@ type ConfigSection =
   | "feature"
   | "channels"
   | "postType"
+  | "draft"
   | "media"
   | "destination"
   | "queue";
@@ -1432,14 +1438,18 @@ function ConfigPanel({
         : "text-muted-foreground/70 hover:bg-accent/50 hover:text-accent-foreground",
     );
 
+  // The order a post gets made in: whose it is, what it is about, where it
+  // goes, what shape it takes, how it gets written, what pictures ride with
+  // it — then what is already waiting, and last, what pressing the arrow does.
   const WORDS: { id: ConfigSection; label: string }[] = [
     { id: "brand", label: t.spotlightConfigBrand },
     { id: "feature", label: t.spotlightConfigFeature },
     { id: "channels", label: t.spotlightConfigChannels },
     { id: "postType", label: t.spotlightConfigPostType },
+    { id: "draft", label: t.spotlightConfigDraft },
     { id: "media", label: t.spotlightConfigMedia },
-    { id: "destination", label: t.spotlightConfigTiming },
     { id: "queue", label: t.spotlightConfigQueue },
+    { id: "destination", label: t.spotlightConfigTiming },
   ];
 
   return (
@@ -2115,6 +2125,10 @@ function ConfigChoices({
 }) {
   const { ref: shapeRow, dragging } = useDragScroll();
   const { ref: mediaRow, dragging: mediaDragging } = useDragScroll();
+  // Read straight off the provider rather than threaded down as six more
+  // props: this component is only ever rendered inside SocialProvider, and the
+  // knobs belong to the drafting lane, not to the panel that displays them.
+  const { draftKnobs: knobs } = useSocial();
 
   const pill = (on: boolean) =>
     cn(
@@ -2371,6 +2385,93 @@ function ConfigChoices({
           {t.postTypeHint}
         </p>
       </>
+    );
+  }
+
+  if (section === "draft") {
+    // The knobs the drafting lane already has, reachable from the box the
+    // writing actually happens in. They are NOT local state: `draftKnobs`
+    // lives on the provider, the agent window at /social/draft reads the same
+    // values, and the queued brief carries them — so a choice made here aims a
+    // real ask rather than being remembered and ignored.
+    //
+    // Which is also why the hint says what it says. Typing your own copy into
+    // the field above and pressing the arrow publishes that copy; no angle or
+    // register touches it. Three settings that apply to one of the two ways
+    // out of this box need to name which one.
+    const { model, setModel, angle, setAngle, register, setRegister } = knobs;
+    const group = "text-muted-foreground/60 pb-1.5 text-[11px] font-medium";
+    // "Rung 2 — simplified MSA" is a sentence, not a pill. The rung is the
+    // choice; the sentence after the dash is what the hint line is for.
+    const rung = (label: string) => label.split(" — ")[0];
+
+    return (
+      <div className="space-y-3">
+        <div>
+          <p className={group}>{t.spotlightConfigDraftAngle}</p>
+          <Pills
+            items={[
+              {
+                id: "free-angle",
+                label: t.spotlightConfigDraftFree,
+                on: angle === null,
+                pick: () => setAngle(null),
+              },
+              ...DRAFT_ANGLES.map((a) => ({
+                id: a.id,
+                label: isRTL ? a.labelAr : a.label,
+                on: angle === a.id,
+                pick: () => setAngle(a.id),
+              })),
+            ]}
+          />
+        </div>
+
+        <div>
+          <p className={group}>{t.spotlightConfigDraftRegister}</p>
+          <Pills
+            items={[
+              {
+                id: "free-register",
+                label: t.spotlightConfigDraftFree,
+                on: register === null,
+                pick: () => setRegister(null),
+              },
+              ...DRAFT_REGISTERS.map((r) => ({
+                id: String(r.id),
+                label: rung(isRTL ? r.labelAr : r.label),
+                on: register === r.id,
+                pick: () => setRegister(r.id),
+              })),
+            ]}
+          />
+          {register !== null && (
+            <p className="text-muted-foreground/70 pt-1.5 text-[11px]">
+              {(() => {
+                const chosen = DRAFT_REGISTERS.find((r) => r.id === register);
+                if (!chosen) return null;
+                return isRTL ? chosen.hintAr : chosen.hint;
+              })()}
+            </p>
+          )}
+        </div>
+
+        <div>
+          <p className={group}>{t.spotlightConfigDraftModel}</p>
+          <Pills
+            items={DRAFT_MODELS.map((m) => ({
+              id: m.id,
+              label: m.label,
+              on: model === m.id,
+              pick: () => setModel(m.id),
+            }))}
+          />
+        </div>
+
+        <p className="text-muted-foreground/60 text-[11px]">
+          {t.spotlightConfigDraftHint}
+        </p>
+      </div>
     );
   }
 
