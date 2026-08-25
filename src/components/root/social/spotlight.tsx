@@ -158,7 +158,12 @@ import { useSocial } from "@/components/root/social/provider";
  * Opaque rather than a real backdrop blur — the same call hogwarts made. A
  * blurred panel over a scrolling list reads as smeared rather than glassy.
  */
-const GLASS = "bg-muted border border-muted-foreground/20 shadow-2xl";
+/**
+ * The bar every stage box wears. Exported rather than copied: three boxes
+ * whose glass drifted apart would read as three different components on what
+ * is meant to be one surface repeated.
+ */
+export const GLASS = "bg-muted border border-muted-foreground/20 shadow-2xl";
 
 /**
  * What Approve does — publish on the spot, or write `scheduled` variants for
@@ -2444,7 +2449,7 @@ const QUICK_TIMES = [
  * a sentence identifies nothing. Ink pill for the chosen one, the same as the
  * register strip in Media.
  */
-function DraftCard({
+export function DraftCard({
   label,
   body,
   on,
@@ -2526,7 +2531,7 @@ function DraftCard({
  * every pick — and a remounted scroll container loses its scrollLeft. The
  * strip would snap back to its first card each time you chose one.
  */
-function CardStrip({
+export function CardStrip({
   heading,
   rowRef,
   dragging,
@@ -3320,7 +3325,7 @@ function ConfigChoices({
  * sits on top with a remove on each — the tray has nowhere else to live now
  * that the composer's inline strip is gone.
  */
-function MediaPanel({
+export function MediaPanel({
   t,
   urls,
   brandMedia,

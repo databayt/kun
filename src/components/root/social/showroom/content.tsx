@@ -14,6 +14,7 @@ import {
   listPendingBriefs,
   listRenderedBriefs,
 } from "@/lib/social-media-brief";
+import { MediaStage, type MediaPick } from "@/components/root/social/media-spotlight";
 import { briefAsAsset, getShowroomData } from "./data";
 import { BrandShelves } from "./brand-shelf";
 import { BriefQueue } from "./brief-queue";
@@ -40,9 +41,29 @@ export async function ShowroomContent({ lang }: { lang: Locale }) {
     rendered.map(briefAsAsset),
   );
 
+  // The box's rows, narrowed at the boundary. `ShowroomAsset` carries model,
+  // credits, ratio, note and source; none of that reaches a 40px result line,
+  // and every field crossing into a client component is serialized into the
+  // page for every visitor. Assets with no image are dropped rather than
+  // shown as a placeholder — you cannot attach a tile that has no URL.
+  const picks: MediaPick[] = assets
+    .filter((a) => a.imageUrl)
+    .map((a) => ({
+      id: a.id,
+      title: a.title,
+      url: a.imageUrl as string,
+      brand: a.brand,
+      type: a.type,
+    }));
+
   return (
+    <MediaStage assets={picks} below={
     <section className="space-y-12 py-8 md:py-12">
-      {/* Media Studio — the Prompt Area for generating images, video reels, and cards */}
+      {/* Media Studio — the Prompt Area for generating images, video reels, and cards.
+          A second writable area on this page, and the next fold candidate: the
+          box above finds what exists, this one asks for what does not. Below
+          the fold for now, where it reads as a different job rather than a
+          competing field. */}
       <MediaStudio />
 
       <div id="showroom-gallery" className="space-y-10 border-t pt-10">
@@ -102,5 +123,6 @@ export async function ShowroomContent({ lang }: { lang: Locale }) {
         content/media/
       </p>
     </section>
+    } />
   );
 }
