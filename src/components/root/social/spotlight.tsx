@@ -1867,14 +1867,19 @@ function ConfigChoices({
                 key={type}
                 type="button"
                 aria-pressed={on}
+                aria-label={t[POST_TYPE_LABEL[type]]}
+                title={t[POST_TYPE_LABEL[type]]}
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => onPostType(type)}
+                // No tile around the post. A card inside a card, with a
+                // caption under it, was three frames to say one thing — the
+                // post IS the choice, so it is the button. Selection rides on
+                // the post's own edge.
                 className={cn(
-                  "flex w-40 shrink-0 cursor-pointer flex-col items-center gap-2",
-                  "rounded-xl border p-2 transition-colors duration-150",
+                  "w-40 shrink-0 cursor-pointer rounded-lg transition-all duration-150",
                   on
-                    ? "border-foreground/40 bg-accent"
-                    : "border-input hover:border-foreground/30 hover:bg-accent/40",
+                    ? "ring-foreground/40 ring-2"
+                    : "opacity-80 hover:opacity-100",
                 )}
               >
                 <PostShape
@@ -1895,9 +1900,6 @@ function ConfigChoices({
                         : t.previewWhenNow
                   }
                 />
-                <span className="w-full truncate text-center text-[10px] leading-tight">
-                  {t[POST_TYPE_LABEL[type]]}
-                </span>
               </button>
             );
           })}
