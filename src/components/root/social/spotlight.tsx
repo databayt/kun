@@ -143,12 +143,6 @@ const KIND_ICON: Record<QueueItem["kind"], LucideIcon> = {
   published: CheckCircle2,
 };
 
-const KIND_CHIP_KEY: Record<QueueItem["kind"], keyof SocialDict> = {
-  draft: "spotlightChipDraft",
-  scheduled: "spotlightChipScheduled",
-  published: "spotlightChipPublished",
-};
-
 /** The group heading in "all" mode — the mode row's own words, plural. */
 const KIND_HEADING_KEY: Record<QueueItem["kind"], keyof SocialDict> = {
   draft: "spotlightModeDrafts",

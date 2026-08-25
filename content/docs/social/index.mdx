@@ -209,7 +209,7 @@ page — linkable, shareable — and the bare `/social` opens on **Draft**.
 | **/social/calendar** | Plan | The pillars, live: each brand's briefs with **this ISO week's rotation picks** highlighted (the same math the Monday seeder runs), a queue chip per brief — in the queue · answered · approved · dismissed — and **Queue now** to file one as a draft ask on the spot |
 | **/social/draft** | Draft | The Social Agent window. Shows the answered draft's media beside its copy; "Use …" hands copy **and** media to the review queue |
 | **/social/media** | Media | The showroom — generated assets (`library.json`) and kept references (`references.json`), filterable by brand and type; decks link to their live renders. **Attach** puts an asset in the publish tray — no copy-pasting URLs |
-| **/social/publish** | Approve · Schedule · Publish | The **review queue**: the next answered full draft awaiting approval, every upcoming one browsable, an editor that fine-tunes copy, attachments and channels — and never creates from blank. Approve (now, or scheduled per the settings), Dismiss, or send the signed review link. An empty queue points back at Draft |
+| **/social/publish** | Approve · Schedule · Publish | The **review queue**, behind one search bar with a **mode row** — All · Drafts · Scheduled · Published — that spans the whole lane: drafts awaiting a decision, plus the variants where the decision is already made. Only a draft loads into the editor, which fine-tunes copy, attachments and channels and never creates from blank; scheduled and published rows are read-only and open the ledger. Approve (now, or scheduled per the settings), Dismiss, or send the signed review link |
 | **/social/measure** | Measure | The activity ledger — last 20 variants with status, time, and latest reach/views |
 
 Cross-stage state lives in the layout's provider, which persists across stage navigations: the
@@ -441,6 +441,17 @@ The Social Hub at [`/social`](/social) is multi-product (Phase 3, 2026-07-23):
   same conditional update the drain uses, so two reviewers race safely; a total delivery failure
   hands the draft back with the reason, while a partial one stays consumed because re-approving
   would double-post the channels that landed.
+- **The publish queue got a mode row** (2026-08-25) — the search bar over the queue used to see
+  only a third of the lane: `listAnsweredDrafts` reads work awaiting a decision, and work already
+  decided lives in `SocialVariant`, so "did that one go out?" meant leaving the stage for the
+  ledger on **Measure**. `listQueuedVariants` reads the other two thirds, and the bar wears
+  hogwarts' category buttons as four split icons — **All · Drafts · Scheduled · Published** — each
+  carrying the count of what a search actually landed on rather than the size of its table. A
+  filter menu holds the knobs that are a preference rather than a slice (brand scope, order,
+  media-only), and every row carries its kind's icon, its channel and its time. **Only a draft
+  loads into the composer**: a variant is downstream of a `SocialPiece`, so approving one again
+  would mint a duplicate — those rows open the ledger and say so on the row. The queue header's
+  count and Refresh moved into the bar rather than standing beside it twice
 - **Media is wired to the draft** (2026-08-05) — the showroom's **Attach** fills a provider-owned
   tray shared by the draft ask, the review editor, and the showroom itself; the drain's answering
   session picks assets from `library.json` by the brief's `(library: id)` hint or brand + type and
