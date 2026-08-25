@@ -1556,9 +1556,10 @@ function PostShape({
       {/* Chosen is marked INSIDE the post, the way a picked photo is. A ring
           or a shadow frames the card from outside and makes the other eight
           look switched off; a radio underneath sits in space the strip does
-          not have. This costs nothing but a corner. */}
+          not have. This costs nothing but a corner — the bottom one, where
+          the byline and the media are not. */}
       {selected && (
-        <span className="bg-clay text-clay-foreground absolute end-1.5 top-1.5 z-10 flex size-4 items-center justify-center rounded-full">
+        <span className="bg-clay text-clay-foreground absolute end-1.5 bottom-1.5 z-10 flex size-4 items-center justify-center rounded-full">
           <Check className="size-3" strokeWidth={3} />
         </span>
       )}
