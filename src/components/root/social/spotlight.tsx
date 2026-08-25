@@ -61,10 +61,11 @@ import {
   Layers,
   Loader2,
   PenLine,
+  Plus,
   RefreshCw,
-  Search,
   Send,
   Settings2,
+  X,
   SlidersHorizontal,
   type LucideIcon,
 } from "lucide-react";
@@ -86,9 +87,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { mediaKind } from "@/lib/media-kind";
 import {
   approveDraft,
   publishPostDirect,
+  type BrandMedia,
   type PostResult,
 } from "@/actions/post-social";
 import { CHANNELS } from "@/components/root/social/config";
@@ -185,6 +190,10 @@ export function ReviewSpotlight() {
     composerText,
     setComposerText,
     composerMediaUrls,
+    brandMedia,
+    attachMedia,
+    removeMedia,
+    goToStage,
   } = useSocial();
   const router = useRouter();
 
@@ -585,8 +594,21 @@ export function ReviewSpotlight() {
           inputRef.current?.blur();
         }}
       >
-        <div className="relative flex h-12 items-center gap-3 px-5">
-          <Search className="text-muted-foreground size-5 shrink-0" />
+        {/* The line you see at rest: attach on one side, send on the other,
+            and the writing between them. The magnifying glass that used to sit
+            here described the smaller half of what this field does — it is the
+            post now, and a post is written and sent, not looked up. Finding is
+            still here, in the panel underneath. */}
+        <div className="relative flex h-12 items-center gap-2 ps-3 pe-2">
+          <MediaButton
+            t={t}
+            isRTL={isRTL}
+            urls={composerMediaUrls}
+            brandMedia={brandMedia}
+            onAttach={attachMedia}
+            onRemove={removeMedia}
+            onBrowse={() => goToStage("media")}
+          />
           <CommandPrimitive.Input
             ref={inputRef}
             value={query}
@@ -602,6 +624,27 @@ export function ReviewSpotlight() {
               "placeholder:text-muted-foreground/70",
             )}
           />
+
+          <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => void handleSend()}
+            disabled={Boolean(blockedReason) || sending}
+            title={blockedReason ?? sendLabel}
+            aria-label={sendLabel}
+            className={cn(
+              "flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full",
+              "transition-colors duration-150",
+              "bg-primary text-primary-foreground hover:opacity-90",
+              "disabled:cursor-not-allowed disabled:opacity-30",
+            )}
+          >
+            {sending ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Send className="size-4 rtl:-scale-x-100" />
+            )}
+          </button>
         </div>
 
         <AnimatePresence>
@@ -823,30 +866,7 @@ export function ReviewSpotlight() {
                       </div>
                     </PopoverContent>
                   </Popover>
-
-                  {/* Send. Disabled states carry their reason in the tooltip —
-                      a dead button that will not say why is the thing this
-                      replaces. */}
-                  <button
-                    type="button"
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => void handleSend()}
-                    disabled={Boolean(blockedReason) || sending}
-                    title={blockedReason ?? sendLabel}
-                    className={cn(
-                      "ms-1 flex h-8 cursor-pointer items-center gap-1.5 rounded-full px-3",
-                      "text-xs font-medium transition-colors duration-150",
-                      "bg-primary text-primary-foreground hover:opacity-90",
-                      "disabled:cursor-not-allowed disabled:opacity-40",
-                    )}
-                  >
-                    {sending ? (
-                      <Loader2 className="size-4 animate-spin" />
-                    ) : (
-                      <Send className="size-4 rtl:-scale-x-100" />
-                    )}
-                    <span className="hidden sm:inline">{sendLabel}</span>
-                  </button>
+                  
                 </div>
               </div>
 
@@ -911,6 +931,177 @@ export function ReviewSpotlight() {
         </p>
       )}
     </div>
+  );
+}
+
+/**
+ * The ⊕ — where image and video get onto the post.
+ *
+ * Three ways in, cheapest first: the brand's own library (the common case, and
+ * it should not cost a trip to the showroom and a copied URL), a pasted CDN
+ * link, and the showroom itself for actual browsing. What is already attached
+ * sits on top with a remove on each, because the tray has nowhere else to live
+ * now that the composer's inline strip is gone.
+ *
+ * The count rides the button, so a collapsed bar still says the post is
+ * carrying media.
+ */
+function MediaButton({
+  t,
+  isRTL,
+  urls,
+  brandMedia,
+  onAttach,
+  onRemove,
+  onBrowse,
+}: {
+  t: SocialDict;
+  isRTL: boolean;
+  urls: string[];
+  brandMedia: BrandMedia[];
+  onAttach: (url: string) => void;
+  onRemove: (url: string) => void;
+  onBrowse: () => void;
+}) {
+  const [draft, setDraft] = React.useState("");
+  const valid = /^https?:\/\//i.test(draft.trim());
+
+  /** Library picks not already in the tray — attached ones would be inert. */
+  const suggestions = brandMedia.filter((m) => !urls.includes(m.url));
+
+  const addUrl = () => {
+    if (!valid) return;
+    onAttach(draft.trim());
+    setDraft("");
+  };
+
+  return (
+    <Popover>
+      <PopoverTrigger
+        aria-label={t.mediaLabel}
+        title={t.mediaLabel}
+        onMouseDown={(e) => e.preventDefault()}
+        className={cn(
+          "flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full",
+          "transition-colors duration-150",
+          urls.length > 0
+            ? "bg-accent text-accent-foreground"
+            : "text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground",
+        )}
+      >
+        {urls.length > 0 ? (
+          <span className="text-xs font-medium tabular-nums" dir="ltr">
+            {urls.length}
+          </span>
+        ) : (
+          <Plus className="size-5" />
+        )}
+      </PopoverTrigger>
+      <PopoverContent
+        align={isRTL ? "end" : "start"}
+        className="w-80 text-start"
+      >
+        {urls.length > 0 && (
+          <div className="mb-3 flex flex-wrap items-center gap-2">
+            {urls.map((url) => (
+              <div key={url} className="group/chip relative">
+                {mediaKind(url) === "image" ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={url}
+                    alt=""
+                    loading="lazy"
+                    className="border-border size-14 rounded-xl border object-cover"
+                  />
+                ) : (
+                  <span className="border-border bg-muted-foreground/10 flex size-14 items-center justify-center rounded-xl border font-mono text-[10px] tracking-wider uppercase">
+                    {t.mediaKindVideo}
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={() => onRemove(url)}
+                  aria-label={t.attachRemove}
+                  className="bg-background border-border absolute -top-1.5 -end-1.5 rounded-full border p-0.5 opacity-0 transition-opacity group-hover/chip:opacity-100 focus-visible:opacity-100"
+                >
+                  <X className="size-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {suggestions.length > 0 && (
+          <>
+            <p className="text-muted-foreground/60 pb-1.5 text-[11px]">
+              {t.recommendedMedia}
+            </p>
+            <div className="mb-3 flex flex-wrap items-center gap-2">
+              {suggestions.map((asset) => (
+                <button
+                  key={asset.id}
+                  type="button"
+                  onClick={() => onAttach(asset.url)}
+                  title={asset.title}
+                  aria-label={fill(t.attachNamed, { name: asset.title })}
+                  className="border-border hover:border-foreground/40 focus-visible:border-foreground/40 size-14 shrink-0 overflow-hidden rounded-lg border transition-colors"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={asset.url}
+                    alt=""
+                    loading="lazy"
+                    className="size-full object-cover"
+                  />
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+
+        <label
+          htmlFor="social-media-url"
+          className="text-muted-foreground mb-1 block text-xs font-medium"
+        >
+          {t.attachAddUrl}
+        </label>
+        <div className="flex gap-1.5">
+          <Input
+            id="social-media-url"
+            type="url"
+            dir="ltr"
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                addUrl();
+              }
+            }}
+            placeholder={t.mediaPlaceholder}
+            className="font-mono text-sm"
+          />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={addUrl}
+            disabled={!valid}
+            className="h-9 shrink-0 rounded-full"
+            aria-label={t.attachAddAction}
+          >
+            <Plus className="size-4" />
+          </Button>
+        </div>
+        <p className="text-muted-foreground mt-2 text-xs">{t.mediaHint}</p>
+        <button
+          type="button"
+          onClick={onBrowse}
+          className="text-foreground mt-2 text-xs font-medium underline underline-offset-4"
+        >
+          {t.attachBrowse}
+        </button>
+      </PopoverContent>
+    </Popover>
   );
 }
 

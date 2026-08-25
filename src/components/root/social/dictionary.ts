@@ -132,7 +132,7 @@ export const SOCIAL_DICTIONARY = {
     // ——— The review queue (the Publish stage) ———
     // The queue's search bar: one box over the whole publish lane, with a mode
     // row that says which slice of it you are looking at.
-    spotlightPlaceholder: "Search drafts, scheduled and published",
+    spotlightPlaceholder: "Write a post, or search the queue",
     spotlightNoDrafts: "Nothing matches that search.",
     spotlightQueueEmpty: "Nothing in the queue for this brand.",
     spotlightNoScheduled: "Nothing scheduled for this brand.",
@@ -471,7 +471,7 @@ export const SOCIAL_DICTIONARY = {
     mediaHint:
       "روابط وسائط عامة — المنصات تجلبها بنفسها. صور و/أو فيديو واحد، حتى 10.",
     charCount: "{count} / {max}",
-    spotlightPlaceholder: "ابحث في المسودات والمجدول والمنشور",
+    spotlightPlaceholder: "اكتب منشوراً، أو ابحث في الطابور",
     spotlightNoDrafts: "لا شيء يطابق هذا البحث.",
     spotlightQueueEmpty: "لا شيء في طابور هذه العلامة.",
     spotlightNoScheduled: "لا شيء مجدول لهذه العلامة.",
