@@ -1570,7 +1570,7 @@ function PostShape({
         // knows what they chose; the label says which of the nine it was, and
         // it is the only place the names appear now that the captions are
         // gone. Same corner, same ink.
-        <span className="bg-foreground text-background absolute end-1.5 bottom-1.5 z-10 max-w-[calc(100%-0.75rem)] truncate rounded-full px-2 py-0.5 text-[9px] leading-tight font-medium">
+        <span className="bg-foreground text-background absolute end-2 bottom-2 z-10 max-w-[calc(100%-1rem)] truncate rounded-full px-2.5 py-1 text-[11px] leading-tight font-medium">
           {label}
         </span>
       )}
