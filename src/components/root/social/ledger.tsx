@@ -45,6 +45,15 @@ export async function SocialLedger({
   // what's already published"), so the target has to be nameable.
   return (
     <section id="social-ledger" className="mt-10">
+      {/* The one stage that had no name on it. Every other stage says what it
+          is in a word; this one opened straight into a table. Not the full
+          screen frame — that belongs to the stages with a box to lock around,
+          and a ledger has nothing to engage. */}
+      <div className="mb-8 text-center">
+        <h2 className="text-2xl font-semibold tracking-tight">
+          {t.measureStageTitle}
+        </h2>
+      </div>
       <h3 className="mb-3 text-sm font-medium">{t.ledgerTitle}</h3>
       {rows.length === 0 ? (
         <p className="text-sm text-muted-foreground">{t.ledgerEmpty}</p>

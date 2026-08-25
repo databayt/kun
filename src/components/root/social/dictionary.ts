@@ -185,6 +185,15 @@ export const SOCIAL_DICTIONARY = {
       "A draft came back while you were writing. Your words are still in the field.",
     askUse: "Use the draft",
     askFailed: "No copy came back: ",
+    // Refining — the next turn of the draft that is in the field.
+    refinePlaceholder: "What should change?",
+    refineAction: "Refine",
+    refineHint:
+      "Files the next turn against the draft in the field. It changes what the queue holds, not your hand-edits — those two are different lanes.",
+    // The plan, as one-press starts. Same briefs the calendar rotates.
+    pillarHeading: "Start from the plan",
+    pillarHint:
+      "This brand's recurring briefs, already carrying their audience, call to action and constraint. Pressing one asks with it — no typing.",
     spotlightConfigDraftFree: "Writer's choice",
     // What the unset card says, in the doc's own terms: not "no answer" but
     // "the writer decides", which is a different and legitimate instruction.
@@ -267,6 +276,7 @@ export const SOCIAL_DICTIONARY = {
     // tab would be two names for one place.
     draftStageTitle: "Draft",
     mediaStageTitle: "Media",
+    measureStageTitle: "Measure",
     draftSpotlightPlaceholder: "Say what the post is about",
     mediaSpotlightPlaceholder: "Search the library",
     mediaSpotlightEmpty: "Nothing in the library matches.",
@@ -618,6 +628,13 @@ export const SOCIAL_DICTIONARY = {
     askHeld: "وصلت مسودة أثناء كتابتك. كلماتك ما زالت في الحقل.",
     askUse: "استخدم المسودة",
     askFailed: "لم يعد أي نص: ",
+    refinePlaceholder: "ما الذي يجب تغييره؟",
+    refineAction: "تحسين",
+    refineHint:
+      "يرسل الدور التالي على المسودة التي في الحقل. يغيّر ما يحفظه الطابور لا تعديلاتك اليدوية — مساران مختلفان.",
+    pillarHeading: "ابدأ من الخطة",
+    pillarHint:
+      "الموجزات المتكررة لهذه العلامة، تحمل جمهورها ودعوتها وقيدها. الضغط على واحد يطلب بها — دون كتابة.",
     spotlightConfigDraftFree: "اختيار الكاتب",
     spotlightConfigDraftFreeAngle: "الكاتب يسمّي ثلاث زوايا ويبقي الناجية.",
     spotlightConfigDraftFreeRegister:
@@ -684,6 +701,7 @@ export const SOCIAL_DICTIONARY = {
     reviewTitle: "النشر",
     draftStageTitle: "المسودة",
     mediaStageTitle: "الوسائط",
+    measureStageTitle: "القياس",
     draftSpotlightPlaceholder: "قل عمّ يتحدث المنشور",
     mediaSpotlightPlaceholder: "ابحث في المكتبة",
     mediaSpotlightEmpty: "لا شيء في المكتبة يطابق.",

@@ -108,6 +108,7 @@ import {
   approveDraft,
   publishPostDirect,
   readSocialDraft,
+  refineSocialDraft,
   requestSocialDraft,
   schedulePost,
   stageForReview,
@@ -116,6 +117,10 @@ import {
   type ReviewLink,
 } from "@/actions/post-social";
 import { composeBrief } from "@/components/root/social/brief";
+import {
+  pillarSubject,
+  pillarsFor,
+} from "@/components/root/social/pillars";
 import { CHANNELS, type ChannelId } from "@/components/root/social/config";
 import {
   ANY_STYLE,
@@ -752,9 +757,14 @@ export function ReviewSpotlight({
    * input ("the brief is the whole input"), and pillars.json has carried this
    * exact kind of direction in its brief strings since the seed lane shipped.
    */
-  const handleAsk = React.useCallback(async () => {
+  const handleAsk = React.useCallback(
+    async (given?: string) => {
     if (asking || askId) return;
-    const brief = composeBrief({
+    // A brief chosen from the plan goes as it is written. It already carries
+    // its audience, CTA and constraint — appending "Shape: a caption beside
+    // one image" to a sentence that has been rotated into the queue for
+    // months would be the box second-guessing the plan.
+    const brief = given ?? composeBrief({
       text: query,
       feature:
         feature === ANY_FEATURE ? null : featureLabel(product, feature, isRTL),
@@ -807,7 +817,8 @@ export function ReviewSpotlight({
     } finally {
       setAsking(false);
     }
-  }, [
+  },
+  [
     asking,
     askId,
     query,
@@ -824,6 +835,79 @@ export function ReviewSpotlight({
     draftKnobs.referenceId,
     t,
   ]);
+
+  /**
+   * The next turn of the same draft.
+   *
+   * `Write it` files a root ask every time, which meant a draft that came back
+   * eighty percent right had two ways forward: retype it by hand, or walk to
+   * the Draft stage and start over. Eighty percent right is the common case.
+   *
+   * Parented on `activeDraftId`, not on the ask this box happened to make —
+   * and that is the whole reach of it. The same field is set by loading a
+   * draft out of the Queue tab, and `refineSocialDraft` only asks that the
+   * parent be `answered`, so a draft the drain wrote three days ago refines
+   * here too.
+   *
+   * What does NOT ride a refine is a hand-edit: the writer is given the
+   * PARENT's stored copy plus the instruction, so "make it shorter" shortens
+   * what the queue holds, not what is currently in the field. Editing by hand
+   * and asking for a change are two lanes, and mixing them would quietly throw
+   * one of them away.
+   */
+  const handleRefine = React.useCallback(
+    async (instruction: string) => {
+      const parentId = reviewQueue.activeDraftId;
+      if (!parentId || asking || askId) return;
+      const said = instruction.trim();
+      if (said.length < 3) return;
+
+      setAsking(true);
+      setError(null);
+      setNotice(null);
+      setAskReady(null);
+      setAskStalled(false);
+      setAskQueue(null);
+      // The answer will land in a field that currently holds v1. Without this
+      // the arrival guard compares against the ORIGINAL ask's text, decides
+      // the writer has been editing, and holds every refinement behind a
+      // press it does not need.
+      askedFrom.current = query;
+
+      try {
+        const res = await refineSocialDraft({
+          parentId,
+          instruction: said,
+          model: draftKnobs.model,
+          ...(draftKnobs.angle ? { angle: draftKnobs.angle } : {}),
+          ...(draftKnobs.register ? { register: draftKnobs.register } : {}),
+        });
+        if (!res.ok || !res.id) {
+          setError(`${t.errorMsg}${res.error ?? ""}`);
+          return;
+        }
+        // The child is an ordinary pending ask, so the poll below takes it
+        // without knowing threads exist.
+        setAskId(res.id);
+      } catch (err: unknown) {
+        setError(
+          `${t.errorMsg}${err instanceof Error ? err.message : String(err)}`,
+        );
+      } finally {
+        setAsking(false);
+      }
+    },
+    [
+      reviewQueue.activeDraftId,
+      asking,
+      askId,
+      query,
+      draftKnobs.model,
+      draftKnobs.angle,
+      draftKnobs.register,
+      t,
+    ],
+  );
 
   /**
    * Wait for it. Same cadence as the agent window, for the same reasons: five
@@ -928,6 +1012,9 @@ export function ReviewSpotlight({
     can: Boolean(
       trimmed || (feature !== ANY_FEATURE && brandFeatures.length > 0),
     ),
+    runWith: (brief) => void handleAsk(brief),
+    refine: (instruction) => void handleRefine(instruction),
+    canRefine: Boolean(reviewQueue.activeDraftId),
   };
 
   const handleSend = React.useCallback(async () => {
@@ -2389,6 +2476,12 @@ interface AskLane {
   use: () => void;
   /** Is there a subject to write about at all. */
   can: boolean;
+  /** Ask with a brief the writer picked rather than typed. */
+  runWith: (brief: string) => void;
+  /** File the next turn of the draft that is currently in the field. */
+  refine: (instruction: string) => void;
+  /** Is there a draft to refine — an ask that answered, or one loaded from the queue. */
+  canRefine: boolean;
 }
 
 /**
@@ -2434,6 +2527,66 @@ const QUICK_TIMES = [
     },
   },
 ] as const;
+
+/**
+ * "What should change?" — one line, and the press that files it.
+ *
+ * Local state on purpose. The instruction is spent the moment it is sent: it
+ * rides the turn as a column and the next turn wants a new one, so keeping it
+ * in the provider would mean carrying a sentence nobody will use again across
+ * every stage in the Hub.
+ */
+function RefineRow({
+  t,
+  onRefine,
+  busy,
+}: {
+  t: SocialDict;
+  onRefine: (instruction: string) => void;
+  busy: boolean;
+}) {
+  const [said, setSaid] = React.useState("");
+  const ready = said.trim().length >= 3 && !busy;
+
+  const file = () => {
+    if (!ready) return;
+    onRefine(said);
+    setSaid("");
+  };
+
+  return (
+    <div className="flex items-center gap-2">
+      <input
+        value={said}
+        onChange={(e) => setSaid(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key !== "Enter") return;
+          e.preventDefault();
+          file();
+        }}
+        placeholder={t.refinePlaceholder}
+        className={cn(
+          "border-input bg-background text-foreground min-w-0 flex-1 rounded-full border",
+          "px-3 py-1.5 text-xs",
+          "placeholder:text-muted-foreground/60 focus-visible:border-foreground/40 focus-visible:outline-none",
+        )}
+      />
+      <button
+        type="button"
+        disabled={!ready}
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={file}
+        className={cn(
+          "shrink-0 cursor-pointer rounded-full px-3 py-1.5 text-xs font-medium",
+          "bg-foreground text-background transition-opacity duration-150",
+          !ready && "cursor-not-allowed opacity-40",
+        )}
+      >
+        {t.refineAction}
+      </button>
+    </div>
+  );
+}
 
 /**
  * One draft-direction answer, drawn the way a post shape and a visual register
@@ -2629,6 +2782,7 @@ function ConfigChoices({
   const { ref: registerRow, dragging: registerDragging } = useDragScroll();
   const { ref: modelRow, dragging: modelDragging } = useDragScroll();
   const { ref: queueRow, dragging: queueDragging } = useDragScroll();
+  const { ref: pillarRow, dragging: pillarDragging } = useDragScroll();
   // Read straight off the provider rather than threaded down as six more
   // props: this component is only ever rendered inside SocialProvider, and the
   // knobs belong to the drafting lane, not to the panel that displays them.
@@ -2916,6 +3070,12 @@ function ConfigChoices({
     const modelName = (label: string) => label.split(" (")[0];
     const modelEngine = (label: string) =>
       label.match(/\(([^)]+)\)/)?.[1] ?? null;
+    // Brand-scoped, and empty for a brand with no plan — sijillee and
+    // moalimee are pre-launch, and an invented catalogue is worse than an
+    // absence. The knobs still apply on top: copy.mdx settles the conflict
+    // between a brief's written "Register: rung 2" and a knob set here — a
+    // set knob is a decision, so the column wins.
+    const pillars = pillarsFor(product);
 
     // The queue's own words while it waits. Position when a session will get
     // to it, the heartbeat's silence when none has looked — the two are
@@ -2997,6 +3157,47 @@ function ConfigChoices({
         <p className="text-muted-foreground/60 pb-1.5 text-[11px]">
           {t.askHint}
         </p>
+
+        {/* Refining, once there is something to refine. It is a second field
+            because the one above holds the POST — typing into that edits what
+            will publish, which is the opposite of saying what to change about
+            it. The Draft window can overload one field for both because its
+            field never holds a post. */}
+        {ask.canRefine && (
+          <div className="pb-2">
+            <RefineRow t={t} onRefine={ask.refine} busy={ask.busy} />
+            <p className="text-muted-foreground/60 pt-1 text-[11px]">
+              {t.refineHint}
+            </p>
+          </div>
+        )}
+
+        {/* The plan, as one-press starts. Zero typing to a post: press one,
+            wait, read, send. */}
+        {pillars.length > 0 && (
+          <>
+            <CardStrip
+              heading={t.pillarHeading}
+              rowRef={pillarRow}
+              dragging={pillarDragging}
+            >
+              {pillars.map((p) => (
+                <DraftCard
+                  key={p.id}
+                  copy
+                  label={p.pillar}
+                  body={pillarSubject(p.brief)}
+                  on={false}
+                  inert={pillarDragging || ask.busy}
+                  onPick={() => ask.runWith(p.brief)}
+                />
+              ))}
+            </CardStrip>
+            <p className="text-muted-foreground/60 pb-1.5 text-[11px]">
+              {t.pillarHint}
+            </p>
+          </>
+        )}
 
         <CardStrip
           heading={t.spotlightConfigDraftAngle}
