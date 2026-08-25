@@ -58,6 +58,7 @@ import {
   ArrowUp,
   CalendarClock,
   CheckCircle2,
+  ChevronLeft,
   Images,
   Layers,
   Loader2,
@@ -1008,13 +1009,20 @@ export function ReviewSpotlight({
 /**
  * The panel's third face — what the post IS, before what it says.
  *
- * Brand, channels and what Approve does. These three decide where the copy
- * lands and when, and they were scattered across the page header, a popover
- * and a shell select; a writer changing brand had to leave the box they were
- * writing in. Approve-mode lives here rather than behind its own popover
- * because a portal over a locked, raised column is a stacking fight nobody
- * wins — measured: the popover opened underneath the queue rows.
+ * Two levels, not one long form. The first is boxes: Brand · Channels ·
+ * Timing, each carrying the answer it currently holds, so the face reads as a
+ * summary of the post's settings before it is a way to change them. Opening
+ * one puts its choices in the middle of the same panel, with a way back.
+ *
+ * These three decide where the copy lands and when, and they were scattered
+ * across the page header, a popover and a shell select — a writer changing
+ * brand had to leave the box they were writing in. Approve-mode lives here
+ * rather than behind its own popover because a portal over a raised column is
+ * a stacking fight nobody wins: measured, the popover opened underneath the
+ * queue rows.
  */
+type ConfigSection = "brand" | "channels" | "timing";
+
 function ConfigPanel({
   t,
   isRTL,
@@ -1036,6 +1044,18 @@ function ConfigPanel({
   approveMode: ApproveMode;
   onApproveMode: (next: ApproveMode) => void;
 }) {
+  const [section, setSection] = React.useState<ConfigSection | null>(null);
+
+  const brandName = (() => {
+    const p = PRODUCTS.find((entry) => entry.id === product);
+    return p ? (isRTL ? p.labelAr : p.label) : product;
+  })();
+
+  const channelName = (id: ChannelId) => {
+    const c = CHANNELS.find((entry) => entry.id === id);
+    return c ? (isRTL ? c.labelAr : c.label) : id;
+  };
+
   const toggle = (id: ChannelId) =>
     onChannels(
       selected.includes(id)
@@ -1043,97 +1063,159 @@ function ConfigPanel({
         : [...selected, id],
     );
 
-  return (
-    <div className="max-h-[min(360px,45vh)] space-y-4 overflow-y-auto border-t border-black/5 p-4 text-start dark:border-white/10">
-      <section>
-        <p className="text-muted-foreground/60 pb-2 text-[11px]">
-          {t.spotlightConfigBrand}
-        </p>
-        <div className="flex flex-wrap gap-1.5">
-          {PRODUCTS.map((entry) => (
+  const shell =
+    "max-h-[min(360px,45vh)] overflow-y-auto border-t border-black/5 p-4 text-start dark:border-white/10";
+
+  /* ——— Level one: the boxes ——— */
+  if (!section) {
+    const tiles: { id: ConfigSection; label: string; value: string }[] = [
+      { id: "brand", label: t.spotlightConfigBrand, value: brandName },
+      {
+        id: "channels",
+        label: t.spotlightConfigChannels,
+        value: selected.length
+          ? selected.map(channelName).join(" · ")
+          : t.spotlightConfigNone,
+      },
+      {
+        id: "timing",
+        label: t.spotlightConfigTiming,
+        value:
+          approveMode === "schedule"
+            ? t.approveModeSchedule
+            : t.approveModeNow,
+      },
+    ];
+
+    return (
+      <div className={shell}>
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+          {tiles.map((tile) => (
             <button
-              key={entry.id}
+              key={tile.id}
               type="button"
               onMouseDown={(e) => e.preventDefault()}
-              onClick={() => onProduct(entry.id)}
-              aria-pressed={product === entry.id}
+              onClick={() => setSection(tile.id)}
               className={cn(
-                "cursor-pointer rounded-full px-3 py-1 text-xs font-medium transition-colors duration-150",
-                product === entry.id
-                  ? "bg-accent text-accent-foreground"
-                  : "text-muted-foreground/70 hover:bg-accent/50 hover:text-accent-foreground",
+                "border-input hover:border-foreground/30 hover:bg-accent/40 flex cursor-pointer",
+                "flex-col items-start gap-1 rounded-xl border p-3 text-start transition-colors duration-150",
               )}
             >
-              {isRTL ? entry.labelAr : entry.label}
+              <span className="text-muted-foreground/70 text-[11px]">
+                {tile.label}
+              </span>
+              <span className="line-clamp-1 text-sm font-medium">
+                {tile.value}
+              </span>
             </button>
           ))}
         </div>
-      </section>
+      </div>
+    );
+  }
 
-      <section>
-        <p className="text-muted-foreground/60 pb-2 text-[11px]">
-          {t.spotlightConfigChannels}
-        </p>
-        {wired.length === 0 ? (
-          <p className="text-muted-foreground/60 text-xs">
-            {t.spotlightConfigNoChannels}
-          </p>
-        ) : (
-          <div className="flex flex-wrap gap-1.5">
-            {wired.map((id) => {
-              const channel = CHANNELS.find((c) => c.id === id);
-              const on = selected.includes(id);
-              return (
+  /* ——— Level two: one box, opened ——— */
+  const heading =
+    section === "brand"
+      ? t.spotlightConfigBrand
+      : section === "channels"
+        ? t.spotlightConfigChannels
+        : t.spotlightConfigTiming;
+
+  const pill = (on: boolean) =>
+    cn(
+      "cursor-pointer rounded-full px-3 py-1 text-xs font-medium transition-colors duration-150",
+      on
+        ? "bg-accent text-accent-foreground"
+        : "text-muted-foreground/70 hover:bg-accent/50 hover:text-accent-foreground",
+    );
+
+  return (
+    <div className={shell}>
+      <div className="mb-3 flex items-center gap-2">
+        <button
+          type="button"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={() => setSection(null)}
+          aria-label={t.spotlightConfigBack}
+          title={t.spotlightConfigBack}
+          className="text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors duration-150"
+        >
+          <ChevronLeft className="size-4 rtl:-scale-x-100" />
+        </button>
+        <p className="text-sm font-medium">{heading}</p>
+      </div>
+
+      {/* Centred, because this is the middle of a panel rather than a form on
+          a page — the choices are the only thing here and they should sit
+          where the eye already is. */}
+      <div className="flex min-h-[7rem] flex-col items-center justify-center gap-2">
+        {section === "brand" && (
+          <div className="flex flex-wrap justify-center gap-1.5">
+            {PRODUCTS.map((entry) => (
+              <button
+                key={entry.id}
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => onProduct(entry.id)}
+                aria-pressed={product === entry.id}
+                className={pill(product === entry.id)}
+              >
+                {isRTL ? entry.labelAr : entry.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {section === "channels" &&
+          (wired.length === 0 ? (
+            <p className="text-muted-foreground/60 text-xs">
+              {t.spotlightConfigNoChannels}
+            </p>
+          ) : (
+            <div className="flex flex-wrap justify-center gap-1.5">
+              {wired.map((id) => (
                 <button
                   key={id}
                   type="button"
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => toggle(id)}
-                  aria-pressed={on}
-                  className={cn(
-                    "cursor-pointer rounded-full px-3 py-1 text-xs font-medium transition-colors duration-150",
-                    on
-                      ? "bg-accent text-accent-foreground"
-                      : "text-muted-foreground/70 hover:bg-accent/50 hover:text-accent-foreground",
-                  )}
+                  aria-pressed={selected.includes(id)}
+                  className={pill(selected.includes(id))}
                 >
-                  {channel ? (isRTL ? channel.labelAr : channel.label) : id}
+                  {channelName(id)}
                 </button>
-              );
-            })}
+              ))}
+            </div>
+          ))}
+
+        {section === "timing" && (
+          <div className="w-full max-w-sm space-y-1">
+            {(["now", "schedule"] as const).map((option) => (
+              <button
+                key={option}
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => onApproveMode(option)}
+                aria-pressed={approveMode === option}
+                className={cn(
+                  "flex w-full cursor-pointer flex-col rounded-lg p-2 text-start transition-colors duration-150",
+                  approveMode === option ? "bg-accent" : "hover:bg-muted",
+                )}
+              >
+                <span className="text-sm font-medium">
+                  {option === "now" ? t.approveModeNow : t.approveModeSchedule}
+                </span>
+                <span className="text-muted-foreground text-xs">
+                  {option === "now"
+                    ? t.approveModeNowHint
+                    : t.approveModeScheduleHint}
+                </span>
+              </button>
+            ))}
           </div>
         )}
-      </section>
-
-      <section>
-        <p className="text-muted-foreground/60 pb-2 text-[11px]">
-          {t.approveModeLabel}
-        </p>
-        <div className="space-y-1">
-          {(["now", "schedule"] as const).map((option) => (
-            <button
-              key={option}
-              type="button"
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={() => onApproveMode(option)}
-              aria-pressed={approveMode === option}
-              className={cn(
-                "flex w-full cursor-pointer flex-col rounded-lg p-2 text-start transition-colors duration-150",
-                approveMode === option ? "bg-accent" : "hover:bg-muted",
-              )}
-            >
-              <span className="text-sm font-medium">
-                {option === "now" ? t.approveModeNow : t.approveModeSchedule}
-              </span>
-              <span className="text-muted-foreground text-xs">
-                {option === "now"
-                  ? t.approveModeNowHint
-                  : t.approveModeScheduleHint}
-              </span>
-            </button>
-          ))}
-        </div>
-      </section>
+      </div>
     </div>
   );
 }
