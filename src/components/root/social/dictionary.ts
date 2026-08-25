@@ -168,6 +168,12 @@ export const SOCIAL_DICTIONARY = {
     spotlightConfigDraftHint:
       "Direction for a draft the queue writes. Typing your own copy above ignores all three.",
     spotlightConfigDraftFree: "Writer's choice",
+    // What the unset card says, in the doc's own terms: not "no answer" but
+    // "the writer decides", which is a different and legitimate instruction.
+    spotlightConfigDraftFreeAngle:
+      "The writer names three angles and keeps the survivor.",
+    spotlightConfigDraftFreeRegister:
+      "Take the rung the brand and channel already prescribe.",
     scheduleAction: "Schedule",
     destinationDirect: "Now",
     destinationDirectHint: "Send reaches the selected channels immediately.",
@@ -564,6 +570,9 @@ export const SOCIAL_DICTIONARY = {
     spotlightConfigDraftHint:
       "توجيه لمسودة يكتبها الطابور. كتابة نصّك أعلاه تتجاوز الثلاثة.",
     spotlightConfigDraftFree: "اختيار الكاتب",
+    spotlightConfigDraftFreeAngle: "الكاتب يسمّي ثلاث زوايا ويبقي الناجية.",
+    spotlightConfigDraftFreeRegister:
+      "خذ الدرجة التي تفرضها العلامة والقناة أصلاً.",
     scheduleAction: "جدولة",
     destinationDirect: "الآن",
     destinationDirectHint: "الإرسال يصل القنوات المختارة فوراً.",

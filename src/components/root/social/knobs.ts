@@ -16,6 +16,10 @@
 /**
  * The engine's model chain (`.claude/engine.json`), in preference order.
  *
+ * `role` is that order said out loud, so a picker does not have to imply it by
+ * position: `model` in engine.json is the default, `fallback_models` is the
+ * rest, in the order written there.
+ *
  * These ids reach `claude -p --model` on a contributor's machine via the drain,
  * so they are execution parameters rather than labels — which is why the action
  * validates against this list instead of accepting any string. Before the
@@ -23,10 +27,30 @@
  * so, and this is the list that made it real.
  */
 export const DRAFT_MODELS = [
-  { id: "google-free", label: "Google Free (Gemini 3.6 Flash)" },
-  { id: "claude-fable-5", label: "Fable 5" },
-  { id: "claude-opus-4-8", label: "Opus 4.8" },
-  { id: "claude-sonnet-5", label: "Sonnet 5" },
+  {
+    id: "google-free",
+    label: "Google Free (Gemini 3.6 Flash)",
+    role: "House default",
+    roleAr: "الافتراضي",
+  },
+  {
+    id: "claude-fable-5",
+    label: "Fable 5",
+    role: "First fallback",
+    roleAr: "البديل الأول",
+  },
+  {
+    id: "claude-opus-4-8",
+    label: "Opus 4.8",
+    role: "Second fallback",
+    roleAr: "البديل الثاني",
+  },
+  {
+    id: "claude-sonnet-5",
+    label: "Sonnet 5",
+    role: "Third fallback",
+    roleAr: "البديل الثالث",
+  },
 ] as const;
 
 export type DraftModelId = (typeof DRAFT_MODELS)[number]["id"];
@@ -46,11 +70,33 @@ export const DEFAULT_DRAFT_MODEL: DraftModelId = "google-free";
  *
  * Unset is a first-class answer, not a missing value: it means the writer still
  * runs the three-angle discipline itself.
+ *
+ * The hints are copy.mdx's own one-line definitions, verbatim. An angle picked
+ * from its name alone is a guess — "the proof" and "the pain" are only
+ * distinguishable once you know one is a cost and the other is a fact.
  */
 export const DRAFT_ANGLES = [
-  { id: "pain", label: "The pain", labelAr: "الوجع" },
-  { id: "moment", label: "The moment", labelAr: "اللحظة" },
-  { id: "proof", label: "The proof", labelAr: "البرهان" },
+  {
+    id: "pain",
+    label: "The pain",
+    labelAr: "الوجع",
+    hint: "What the reader's week costs them.",
+    hintAr: "ما يكلّفه أسبوع القارئ.",
+  },
+  {
+    id: "moment",
+    label: "The moment",
+    labelAr: "اللحظة",
+    hint: "A scene they recognize.",
+    hintAr: "مشهد يعرفه القارئ.",
+  },
+  {
+    id: "proof",
+    label: "The proof",
+    labelAr: "البرهان",
+    hint: "The one true fact from the brief.",
+    hintAr: "الحقيقة الواحدة في الموجز.",
+  },
 ] as const;
 
 export type DraftAngleId = (typeof DRAFT_ANGLES)[number]["id"];
@@ -62,6 +108,13 @@ export type DraftAngleId = (typeof DRAFT_ANGLES)[number]["id"];
  * mode and says it never ships, so offering it as a choice would make the UI
  * contradict the doctrine. The column still stores 1..4 so the stored value
  * means "a rung on the ladder" rather than "a rung the Hub happens to offer".
+ *
+ * `markers` is what the rung SOUNDS like — the words copy.mdx points at when it
+ * defines each one, verbatim and in Arabic in both locales, because the ladder
+ * is a fact about Arabic and an English gloss of `خليك` would describe the rung
+ * without letting anyone hear it. Rung 4's is a dialect name rather than a word
+ * list on purpose: the ladder names no pan-dialect markers, it names a dialect
+ * per brand.
  */
 export const DRAFT_REGISTERS = [
   {
@@ -71,6 +124,7 @@ export const DRAFT_REGISTERS = [
     hint: "The house default. Active verbs, one clause a sentence, nouns the reader touches.",
     hintAr:
       "الوضع الافتراضي. أفعال مبنية للمعلوم، جملة واحدة، ومفردات يلمسها القارئ.",
+    markers: "الورق · الدفتر · الكشف · الفاتورة",
   },
   {
     id: 3,
@@ -79,6 +133,7 @@ export const DRAFT_REGISTERS = [
     hint: "MSA skeleton, spoken vocabulary, no country markers. Consumer and short-form only.",
     hintAr:
       "هيكل فصيح بمفردات محكية دون سمات قُطرية. للمحتوى الاستهلاكي والقصير فقط.",
+    markers: "تعرف · جرّب · خليك · طيب · ببساطة",
   },
   {
     id: 4,
@@ -86,6 +141,7 @@ export const DRAFT_REGISTERS = [
     labelAr: "الدرجة ٤ — لهجة محلية",
     hint: "Only where a brand doc names one — Sudanese for sijillee, and only on its channels.",
     hintAr: "فقط حيث تنصّ صفحة العلامة — السودانية لسجلي، وعلى قنواتها وحدها.",
+    markers: "سوداني",
   },
 ] as const;
 

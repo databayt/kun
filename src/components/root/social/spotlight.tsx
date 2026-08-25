@@ -2072,6 +2072,120 @@ function StyleCard({
   );
 }
 
+/**
+ * One draft-direction answer, drawn the way a post shape and a visual register
+ * are: a card in a strip, with its name on a pill in the corner.
+ *
+ * The body is the only thing that separates two of these, so it carries the
+ * sentence that actually decides the choice — copy.mdx's definition of an
+ * angle, the words a register sounds like, what a model is FOR. A card whose
+ * body were the name again would be a pill with extra steps.
+ *
+ * Every card wears its name, not only the chosen one. A post shape identifies
+ * itself once drawn, so the post strip can hold its labels back until you pick;
+ * a sentence identifies nothing. Ink pill for the chosen one, the same as the
+ * register strip in Media.
+ */
+function DraftCard({
+  label,
+  body,
+  on,
+  inert,
+  onPick,
+}: {
+  label: string;
+  body: string;
+  on: boolean;
+  inert: boolean;
+  onPick: () => void;
+}) {
+  // Landscape, where a post shape is portrait and a visual register is square.
+  // Each tab's card is the size of what it has to show, and this one shows a
+  // sentence: 150 wide holds three lines of it, and 120 tall lets a second
+  // strip sit inside the panel's 360px window with the first. Three questions
+  // in one tab is the whole difference from Post, which asks one.
+  const W = 150;
+  const H = 120;
+
+  return (
+    <button
+      type="button"
+      aria-pressed={on}
+      aria-label={label}
+      title={label}
+      onMouseDown={(e) => e.preventDefault()}
+      onClick={onPick}
+      style={{ width: W, height: H }}
+      className={cn(
+        // A ground that is NOT bg-card, so an unchosen card's bg-card/85 pill
+        // has something to sit on. The style cards get theirs from the drawing.
+        "bg-muted relative shrink-0 snap-start overflow-hidden rounded-lg shadow-sm",
+        "transition-opacity duration-150",
+        inert ? "pointer-events-none" : "cursor-pointer",
+        on ? "opacity-100" : "opacity-90 hover:opacity-100",
+      )}
+    >
+      <span
+        className={cn(
+          "absolute inset-x-3 top-3 bottom-10 flex items-center justify-center",
+          "text-foreground/75 text-center text-[13px] leading-snug text-balance",
+        )}
+      >
+        {body}
+      </span>
+      <span
+        className={cn(
+          "absolute end-2 bottom-2 z-10 max-w-[calc(100%-1rem)] truncate rounded-full",
+          "px-2.5 py-1 text-[11px] leading-tight font-medium",
+          on ? "bg-foreground text-background" : "bg-card/85 text-foreground",
+        )}
+      >
+        {label}
+      </span>
+    </button>
+  );
+}
+
+/**
+ * A named row of cards that scrolls.
+ *
+ * Module level rather than a closure inside the panel: a component defined
+ * during render is a new type every render, so React would remount the row on
+ * every pick — and a remounted scroll container loses its scrollLeft. The
+ * strip would snap back to its first card each time you chose one.
+ */
+function CardStrip({
+  heading,
+  rowRef,
+  dragging,
+  children,
+}: {
+  heading: string;
+  rowRef: (node: HTMLElement | null) => void;
+  dragging: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <p className="text-muted-foreground/60 text-[11px] font-medium">
+        {heading}
+      </p>
+      <div
+        ref={rowRef}
+        className={cn(
+          "no-scrollbar -mx-1 flex gap-2 px-1 py-2",
+          "overflow-x-auto overscroll-x-contain",
+          dragging
+            ? "cursor-grabbing snap-none"
+            : "cursor-grab snap-x snap-mandatory",
+        )}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
+
 function ConfigChoices({
   section,
   t,
@@ -2125,6 +2239,11 @@ function ConfigChoices({
 }) {
   const { ref: shapeRow, dragging } = useDragScroll();
   const { ref: mediaRow, dragging: mediaDragging } = useDragScroll();
+  // One per strip, and never inside the branch that renders them — a hook in a
+  // conditional is a rule React enforces at runtime and tsc does not see.
+  const { ref: angleRow, dragging: angleDragging } = useDragScroll();
+  const { ref: registerRow, dragging: registerDragging } = useDragScroll();
+  const { ref: modelRow, dragging: modelDragging } = useDragScroll();
   // Read straight off the provider rather than threaded down as six more
   // props: this component is only ever rendered inside SocialProvider, and the
   // knobs belong to the drafting lane, not to the panel that displays them.
@@ -2395,80 +2514,109 @@ function ConfigChoices({
     // values, and the queued brief carries them — so a choice made here aims a
     // real ask rather than being remembered and ignored.
     //
-    // Which is also why the hint says what it says. Typing your own copy into
-    // the field above and pressing the arrow publishes that copy; no angle or
-    // register touches it. Three settings that apply to one of the two ways
-    // out of this box need to name which one.
+    // Which is also why the hint at the bottom says what it says. Typing your
+    // own copy into the field above and pressing the arrow publishes that
+    // copy; no angle or register touches it. Three settings that apply to one
+    // of the two ways out of this box need to name which one.
     const { model, setModel, angle, setAngle, register, setRegister } = knobs;
-    const group = "text-muted-foreground/60 pb-1.5 text-[11px] font-medium";
-    // "Rung 2 — simplified MSA" is a sentence, not a pill. The rung is the
-    // choice; the sentence after the dash is what the hint line is for.
+    const chosenRung = DRAFT_REGISTERS.find((r) => r.id === register);
+    // "Rung 2 — simplified MSA" is a sentence, and a pill is not. The rung is
+    // the name; the half after the dash is what the card's body already says.
     const rung = (label: string) => label.split(" — ")[0];
+    // "Google Free (Gemini 3.6 Flash)" — the name goes on the pill, the model
+    // it actually runs goes in the body next to what it is for.
+    const modelName = (label: string) => label.split(" (")[0];
+    const modelEngine = (label: string) =>
+      label.match(/\(([^)]+)\)/)?.[1] ?? null;
 
     return (
-      <div className="space-y-3">
-        <div>
-          <p className={group}>{t.spotlightConfigDraftAngle}</p>
-          <Pills
-            items={[
-              {
-                id: "free-angle",
-                label: t.spotlightConfigDraftFree,
-                on: angle === null,
-                pick: () => setAngle(null),
-              },
-              ...DRAFT_ANGLES.map((a) => ({
-                id: a.id,
-                label: isRTL ? a.labelAr : a.label,
-                on: angle === a.id,
-                pick: () => setAngle(a.id),
-              })),
-            ]}
+      <div className="space-y-1">
+        <CardStrip
+          heading={t.spotlightConfigDraftAngle}
+          rowRef={angleRow}
+          dragging={angleDragging}
+        >
+          <DraftCard
+            label={t.spotlightConfigDraftFree}
+            body={t.spotlightConfigDraftFreeAngle}
+            on={angle === null}
+            inert={angleDragging}
+            onPick={() => setAngle(null)}
           />
-        </div>
+          {DRAFT_ANGLES.map((a) => (
+            <DraftCard
+              key={a.id}
+              label={isRTL ? a.labelAr : a.label}
+              body={isRTL ? a.hintAr : a.hint}
+              on={angle === a.id}
+              inert={angleDragging}
+              onPick={() => setAngle(a.id)}
+            />
+          ))}
+        </CardStrip>
 
-        <div>
-          <p className={group}>{t.spotlightConfigDraftRegister}</p>
-          <Pills
-            items={[
-              {
-                id: "free-register",
-                label: t.spotlightConfigDraftFree,
-                on: register === null,
-                pick: () => setRegister(null),
-              },
-              ...DRAFT_REGISTERS.map((r) => ({
-                id: String(r.id),
-                label: rung(isRTL ? r.labelAr : r.label),
-                on: register === r.id,
-                pick: () => setRegister(r.id),
-              })),
-            ]}
+        <CardStrip
+          heading={t.spotlightConfigDraftRegister}
+          rowRef={registerRow}
+          dragging={registerDragging}
+        >
+          <DraftCard
+            label={t.spotlightConfigDraftFree}
+            body={t.spotlightConfigDraftFreeRegister}
+            on={register === null}
+            inert={registerDragging}
+            onPick={() => setRegister(null)}
           />
-          {register !== null && (
-            <p className="text-muted-foreground/70 pt-1.5 text-[11px]">
-              {(() => {
-                const chosen = DRAFT_REGISTERS.find((r) => r.id === register);
-                if (!chosen) return null;
-                return isRTL ? chosen.hintAr : chosen.hint;
-              })()}
-            </p>
-          )}
-        </div>
+          {DRAFT_REGISTERS.map((r) => (
+            <DraftCard
+              key={r.id}
+              label={rung(isRTL ? r.labelAr : r.label)}
+              // What the rung SOUNDS like, in Arabic in both locales. The
+              // ladder is a fact about Arabic; an English gloss of `خليك`
+              // would describe the rung without letting anyone hear it.
+              body={r.markers}
+              on={register === r.id}
+              inert={registerDragging}
+              onPick={() => setRegister(r.id)}
+            />
+          ))}
+        </CardStrip>
 
-        <div>
-          <p className={group}>{t.spotlightConfigDraftModel}</p>
-          <Pills
-            items={DRAFT_MODELS.map((m) => ({
-              id: m.id,
-              label: m.label,
-              on: model === m.id,
-              pick: () => setModel(m.id),
-            }))}
-          />
-        </div>
+        {/* The rung's full sentence, for the chosen one only. It is fifteen
+            words — it would set the card height by itself, and every other
+            card in the row would be padding around a shorter one. */}
+        {chosenRung && (
+          <p className="text-muted-foreground/70 pb-1 text-[11px]">
+            {isRTL ? chosenRung.hintAr : chosenRung.hint}
+          </p>
+        )}
 
-        <p className="text-muted-foreground/60 text-[11px]">
+        <CardStrip
+          heading={t.spotlightConfigDraftModel}
+          rowRef={modelRow}
+          dragging={modelDragging}
+        >
+          {DRAFT_MODELS.map((m) => {
+            const engine = modelEngine(m.label);
+            const role = isRTL ? m.roleAr : m.role;
+            return (
+              <DraftCard
+                key={m.id}
+                label={modelName(m.label)}
+                // Its place in the engine's chain, which is the only thing
+                // that distinguishes four names to someone choosing between
+                // them. No "Writer's choice" card here: the chain has a
+                // default and it is already the first card.
+                body={engine ? `${role} · ${engine}` : role}
+                on={model === m.id}
+                inert={modelDragging}
+                onPick={() => setModel(m.id)}
+              />
+            );
+          })}
+        </CardStrip>
+
+        <p className="text-muted-foreground/60 pt-1 text-[11px]">
           {t.spotlightConfigDraftHint}
         </p>
       </div>

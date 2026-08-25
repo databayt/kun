@@ -28,6 +28,15 @@ describe("the register ladder", () => {
     expect(DRAFT_REGISTERS.map((r) => r.id)).toEqual([2, 3, 4]);
   });
 
+  it("says what every rung sounds like, in Arabic", () => {
+    // `markers` is the card's body, and the ladder is a fact about Arabic — a
+    // rung whose markers came back transliterated or translated would describe
+    // the register instead of letting anyone hear it.
+    for (const rung of DRAFT_REGISTERS) {
+      expect(rung.markers, `${rung.id} markers`).toMatch(/[؀-ۿ]/);
+    }
+  });
+
   it("carries both languages for every rung", () => {
     // The Hub is Arabic-default. A rung whose hint exists only in English is
     // invisible guidance to the reader most likely to be choosing a register.
@@ -39,6 +48,17 @@ describe("the register ladder", () => {
 });
 
 describe("the three angles", () => {
+  it("carries both languages, name and definition", () => {
+    // The Hub draws each angle as a card whose BODY is the definition — an
+    // angle card missing its Arabic would be an empty card to the reader most
+    // likely to be choosing one.
+    for (const angle of DRAFT_ANGLES) {
+      expect(angle.labelAr.length, `${angle.id} labelAr`).toBeGreaterThan(0);
+      expect(angle.hint.length, `${angle.id} hint`).toBeGreaterThan(0);
+      expect(angle.hintAr.length, `${angle.id} hintAr`).toBeGreaterThan(0);
+    }
+  });
+
   it("is exactly copy.mdx's set", () => {
     // "Name three angles before writing one" — the pain, the moment, the proof.
     // A fourth here would be an angle the craft bar has no opinion about.
@@ -65,6 +85,18 @@ describe("the model chain", () => {
     // A Hub draft and a hand-run /draft should come out of the same model, or
     // the Hub quietly becomes a second house style.
     expect(DEFAULT_DRAFT_MODEL).toBe(engine.model);
+  });
+
+  it("names each model's place in the chain, in both languages", () => {
+    // The Hub's model cards are four names; `role` is the only thing that
+    // separates them for someone choosing. It mirrors engine.json — `model` is
+    // the default, `fallback_models` is the rest in the order written there.
+    const fallbacks = engine.fallback_models as string[];
+    for (const m of DRAFT_MODELS) {
+      expect(m.role.length, `${m.id} role`).toBeGreaterThan(0);
+      expect(m.roleAr.length, `${m.id} roleAr`).toBeGreaterThan(0);
+    }
+    expect(DRAFT_MODELS.slice(1).map((m) => m.id)).toEqual(fallbacks);
   });
 
   it("lists the default first, so the select opens on it", () => {
