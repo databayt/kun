@@ -1,15 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import pillarsPlan from "../../../../../content/social/pillars.json";
-
 import { ASSET_TYPES } from "@/components/root/social/showroom/taxonomy";
 import {
   POST_TYPES,
   POST_TYPE_ASSETS,
   featureFits,
+  featureLabel,
+  featuresFor,
   libraryFits,
-  pillarLabel,
-  pillarsFor,
   queueFits,
 } from "@/components/root/social/post-settings";
 
@@ -80,63 +78,63 @@ describe("queueFits", () => {
   });
 });
 
-describe("pillars", () => {
-  it("reads each brand's own plan and skips the file's envelope", () => {
+describe("features", () => {
+  it("reads each brand's own list and skips the file's envelope", () => {
     // `version` and `$comment` sit beside the brand arrays; neither is a brand.
-    expect(pillarsFor("hogwarts").length).toBeGreaterThan(0);
-    expect(pillarsFor("version")).toEqual([]);
-    expect(pillarsFor("$comment")).toEqual([]);
-    expect(pillarsFor("nobody")).toEqual([]);
+    expect(featuresFor("hogwarts").length).toBeGreaterThan(0);
+    expect(featuresFor("version")).toEqual([]);
+    expect(featuresFor("$comment")).toEqual([]);
+    // Pre-launch brands have no catalogue, and inventing one would put claims
+    // about unbuilt products into a composer that publishes to real Pages.
+    expect(featuresFor("sijillee")).toEqual([]);
   });
 
-  it("gives brands their own vocabulary rather than a shared one", () => {
-    const hogwarts = pillarsFor("hogwarts");
-    const mkan = pillarsFor("mkan");
-    expect(hogwarts).not.toEqual(mkan);
+  it("gives every feature both names, because the queue holds both", () => {
+    for (const brand of ["hogwarts", "balqalam", "mkan", "databayt"]) {
+      for (const f of featuresFor(brand)) {
+        expect(f.id, `${brand} id`).toBeTruthy();
+        expect(f.en, `${brand}/${f.id} en`).toBeTruthy();
+        expect(f.ar, `${brand}/${f.id} ar`).toBeTruthy();
+        // An Arabic label that is really English would silently match nothing.
+        expect(f.ar, `${brand}/${f.id} ar script`).toMatch(/[\u0600-\u06FF]/);
+      }
+    }
   });
 
-  it("names a pillar from its id", () => {
-    expect(pillarLabel("time-savings")).toBe("Time savings");
-    expect(pillarLabel("trust")).toBe("Trust");
+  it("names a feature in the reader's language", () => {
+    expect(featureLabel("hogwarts", "attendance", false)).toBe("Attendance");
+    expect(featureLabel("hogwarts", "attendance", true)).toBe("الحضور");
+    // Unknown ids fall back to themselves rather than throwing.
+    expect(featureLabel("hogwarts", "nope", false)).toBe("nope");
   });
 });
 
 describe("featureFits", () => {
-  it("passes everything when no pillar is chosen", () => {
+  it("passes everything when no feature is chosen", () => {
     expect(featureFits("hogwarts", "anything at all", null)).toBe(true);
-    expect(featureFits("hogwarts", "", null)).toBe(true);
   });
 
-  it("keeps a draft asked with that pillar's own brief", () => {
-    const pillar = pillarsFor("hogwarts")[0];
-    // The seeder files the plan's brief verbatim, which is the whole reason
-    // a draft can be traced back to a pillar at all.
-    const brief = briefFor("hogwarts", pillar);
-    expect(featureFits("hogwarts", brief, pillar)).toBe(true);
+  it("finds the feature by either of its names", () => {
+    expect(featureFits("hogwarts", "Attendance in one place", "attendance")).toBe(
+      true,
+    );
+    expect(
+      featureFits("hogwarts", "الحضور يُرصد مرة واحدة", "attendance"),
+    ).toBe(true);
   });
 
-  it("drops a draft that belongs to a different pillar", () => {
-    const [first, second] = pillarsFor("hogwarts");
-    expect(featureFits("hogwarts", briefFor("hogwarts", second), first)).toBe(
+  it("folds Arabic orthography, so a written form is not a miss", () => {
+    // The same matcher the search bar uses — harakat and alef forms fold.
+    expect(featureFits("hogwarts", "الحُضور اليومي", "attendance")).toBe(true);
+  });
+
+  it("drops copy about something else", () => {
+    expect(featureFits("hogwarts", "Exams are entered once", "attendance")).toBe(
       false,
     );
   });
 
-  it("drops copy written from scratch, which belongs to no pillar", () => {
-    const pillar = pillarsFor("hogwarts")[0];
-    expect(featureFits("hogwarts", "something typed by hand", pillar)).toBe(
-      false,
-    );
+  it("passes when the brand has no such feature, rather than emptying the list", () => {
+    expect(featureFits("mkan", "anything", "attendance")).toBe(true);
   });
 });
-
-/** The first brief the plan files under this pillar, for the tests above. */
-function briefFor(brand: string, pillar: string): string {
-  const raw = (
-    pillarsPlan as unknown as Record<
-      string,
-      { pillar: string; brief: string }[]
-    >
-  )[brand];
-  return raw.find((b) => b.pillar === pillar)!.brief;
-}

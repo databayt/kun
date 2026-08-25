@@ -102,11 +102,12 @@ import {
   MEDIA_FILTERS,
   POST_TYPES,
   featureFits,
+  featureLabel,
+  featuresFor,
   libraryFits,
-  pillarLabel,
-  pillarsFor,
   queueFits,
   type Destination,
+  type BrandFeature,
   type MediaFilter,
   type PostType,
 } from "@/components/root/social/post-settings";
@@ -320,16 +321,19 @@ export function ReviewSpotlight({
   );
 
   /**
-   * Pillars are per-brand vocabulary, so a feature chosen for one brand is
-   * meaningless under the next — and would silently empty the queue rather
-   * than say why. Switching brand drops it.
+   * Features are per-brand vocabulary — mkan does not have Attendance — so a
+   * feature chosen under one brand is meaningless under the next, and would
+   * silently narrow the queue rather than say why. Switching brand drops it.
    */
-  const brandPillars = React.useMemo(() => pillarsFor(product), [product]);
+  const brandFeatures = React.useMemo(() => featuresFor(product), [product]);
   React.useEffect(() => {
-    if (feature !== ANY_FEATURE && !brandPillars.includes(feature)) {
+    if (
+      feature !== ANY_FEATURE &&
+      !brandFeatures.some((f) => f.id === feature)
+    ) {
       setFeature(ANY_FEATURE);
     }
-  }, [brandPillars, feature, setFeature]);
+  }, [brandFeatures, feature, setFeature]);
 
   const trimmed = query.trim();
 
@@ -409,14 +413,12 @@ export function ReviewSpotlight({
         // The settings face reaches the queue too: asking for Video narrows
         // this to drafts and posts that actually carry one.
         if (!queueFits(item.mediaUrls, mediaFilter)) return false;
-        // A pillar names a plan a DRAFT was asked from; a published variant
-        // carries no brief, so the filter would erase the other two modes if
-        // it applied to them.
+        // Every mode, not only drafts: a feature is matched on the words a
+        // post uses, and a published post uses them too.
         if (
-          item.kind === "draft" &&
           !featureFits(
             item.brand,
-            item.brief ?? "",
+            item.haystack,
             feature === ANY_FEATURE ? null : feature,
           )
         ) {
@@ -929,7 +931,7 @@ export function ReviewSpotlight({
                   onChannels={setSelectedChannels}
                   feature={feature}
                   onFeature={setFeature}
-                  pillars={brandPillars}
+                  features={brandFeatures}
                   destination={destination}
                   onDestination={setDestination}
                   postType={postType}
@@ -1296,7 +1298,7 @@ function ConfigPanel({
   onChannels,
   feature,
   onFeature,
-  pillars,
+  features,
   destination,
   onDestination,
   postType,
@@ -1330,7 +1332,7 @@ function ConfigPanel({
   onChannels: (next: ChannelId[]) => void;
   feature: string;
   onFeature: (next: string) => void;
-  pillars: string[];
+  features: BrandFeature[];
   destination: Destination;
   onDestination: (next: Destination) => void;
   postType: PostType;
@@ -1554,7 +1556,10 @@ function ConfigPanel({
     {
       id: "feature",
       label: t.spotlightConfigFeature,
-      value: feature === ANY_FEATURE ? t.mediaAny : pillarLabel(feature),
+      value:
+        feature === ANY_FEATURE
+          ? t.mediaAny
+          : featureLabel(product, feature, isRTL),
     },
     {
       id: "channels",
@@ -1642,7 +1647,7 @@ function ConfigPanel({
         onChannels={onChannels}
         feature={feature}
         onFeature={onFeature}
-        pillars={pillars}
+        features={features}
         postType={postType}
         onPostType={onPostType}
         mediaFilter={mediaFilter}
@@ -1680,7 +1685,7 @@ function ConfigSelect({
   onChannels,
   feature,
   onFeature,
-  pillars,
+  features,
   postType,
   onPostType,
   mediaFilter,
@@ -1702,7 +1707,7 @@ function ConfigSelect({
   onChannels: (next: ChannelId[]) => void;
   feature: string;
   onFeature: (next: string) => void;
-  pillars: string[];
+  features: BrandFeature[];
   postType: PostType;
   onPostType: (next: PostType) => void;
   mediaFilter: MediaFilter;
@@ -1739,13 +1744,16 @@ function ConfigSelect({
       }));
     }
     if (section === "feature") {
-      // "Any" first, and always present: a brand with no plan of its own must
-      // still have a way to say "no pillar", not an empty card.
-      return [ANY_FEATURE, ...pillars].map((id) => ({
-        id,
-        label: id === ANY_FEATURE ? t.mediaAny : pillarLabel(id),
-        on: feature === id,
-        pick: () => onFeature(id),
+      // "Any" first, and always present: a pre-launch brand with no catalogue
+      // still needs a way to say "no feature", not an empty card.
+      return [
+        { id: ANY_FEATURE, label: t.mediaAny },
+        ...features.map((f) => ({ id: f.id, label: isRTL ? f.ar : f.en })),
+      ].map((entry) => ({
+        id: entry.id,
+        label: entry.label,
+        on: feature === entry.id,
+        pick: () => onFeature(entry.id),
       }));
     }
     if (section === "channels") {

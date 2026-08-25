@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "$comment": "What each brand actually SELLS, as the composer's Feature list. Sourced from each product's own block registry — hogwarts' entries are the blocks under src/components/school-dashboard/ in databayt/hogwarts/.claude/blocks.json, mkan's are its component domains — narrowed to the ones a post can be about. Infrastructure blocks (atom, ui, shared, context, providers) are deliberately absent: nobody writes a post about a sidebar. Vendored here rather than read from the sibling repos because a production build of kun has no sibling repos, and because the marketing-facing subset is an editorial choice, not a directory listing. Labels are the words a post would use, so they are also what the queue filter matches on. Balqalam is the Arabic face of the same school SaaS as Hogwarts and shares its list. Brands with no entry (sijillee, moallimee) are pre-launch: the Feature box offers Any and nothing else, which is the truth rather than an invented catalogue.",
+  "hogwarts": [
+    { "id": "admission", "en": "Admission", "ar": "القبول" },
+    { "id": "attendance", "en": "Attendance", "ar": "الحضور" },
+    { "id": "exams", "en": "Exams", "ar": "الاختبارات" },
+    { "id": "grades", "en": "Grades", "ar": "الدرجات" },
+    { "id": "timetable", "en": "Timetable", "ar": "الجدول" },
+    { "id": "finance", "en": "Finance", "ar": "المالية" },
+    { "id": "fees", "en": "Fees", "ar": "الرسوم" },
+    { "id": "parent-portal", "en": "Parent portal", "ar": "بوابة ولي الأمر" },
+    { "id": "transportation", "en": "Transport", "ar": "النقل" },
+    { "id": "messaging", "en": "Messaging", "ar": "المراسلة" },
+    { "id": "reports", "en": "Reports", "ar": "التقارير" },
+    { "id": "documents", "en": "Documents", "ar": "المستندات" }
+  ],
+  "balqalam": [
+    { "id": "admission", "en": "Admission", "ar": "القبول" },
+    { "id": "attendance", "en": "Attendance", "ar": "الحضور" },
+    { "id": "exams", "en": "Exams", "ar": "الاختبارات" },
+    { "id": "grades", "en": "Grades", "ar": "الدرجات" },
+    { "id": "timetable", "en": "Timetable", "ar": "الجدول" },
+    { "id": "finance", "en": "Finance", "ar": "المالية" },
+    { "id": "fees", "en": "Fees", "ar": "الرسوم" },
+    { "id": "parent-portal", "en": "Parent portal", "ar": "بوابة ولي الأمر" },
+    { "id": "transportation", "en": "Transport", "ar": "النقل" },
+    { "id": "messaging", "en": "Messaging", "ar": "المراسلة" },
+    { "id": "reports", "en": "Reports", "ar": "التقارير" },
+    { "id": "documents", "en": "Documents", "ar": "المستندات" }
+  ],
+  "mkan": [
+    { "id": "listings", "en": "Listings", "ar": "العروض" },
+    { "id": "booking", "en": "Booking", "ar": "الحجز" },
+    { "id": "search", "en": "Search", "ar": "البحث" },
+    { "id": "hosting", "en": "Hosting", "ar": "الاستضافة" },
+    { "id": "reviews", "en": "Reviews", "ar": "التقييمات" },
+    { "id": "favorites", "en": "Favourites", "ar": "المفضلة" }
+  ],
+  "databayt": [
+    { "id": "hogwarts", "en": "Hogwarts", "ar": "هوجورتس" },
+    { "id": "mkan", "en": "Mkan", "ar": "مكان" },
+    { "id": "open-source", "en": "Open source", "ar": "المصدر المفتوح" },
+    { "id": "services", "en": "Services", "ar": "الخدمات" }
+  ]
+}

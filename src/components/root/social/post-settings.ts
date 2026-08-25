@@ -9,9 +9,10 @@
 // the part worth testing: a filter that silently matches nothing looks exactly
 // like a library that is empty.
 
-import pillarsJson from "../../../../content/social/pillars.json";
+import featuresJson from "../../../../content/social/features.json";
 
 import { mediaKind } from "@/lib/media-kind";
+import { matchesQuery } from "@/lib/normalize-search";
 
 /**
  * Where Send puts the post. Three real destinations, each already backed by an
@@ -104,62 +105,56 @@ export function queueFits(
 }
 
 /**
- * ——— Feature: which content pillar a post belongs to ———
+ * ——— Feature: which part of the product a post is about ———
  *
- * `content/social/pillars.json` is the recurring plan — per-brand briefs, each
- * tagged with a pillar ("feature", "trust", "time-savings", …). The seeder
- * files those briefs verbatim as `SocialDraftRequest.brief`, which is what
- * makes this filterable at all: a draft can be traced back to its pillar by
- * matching the brief it was asked with.
+ * `content/social/features.json` is what each brand actually sells, taken from
+ * that product's own block registry and narrowed to the blocks a post can be
+ * about. Infrastructure is deliberately absent: nobody writes a post about a
+ * sidebar.
  *
- * That is also the limit, and worth saying. A post typed from scratch belongs
- * to no pillar, because nothing on a post records one — the JSON's own comment
- * notes that `pillar` was long written and read by nobody. So this narrows the
- * queue; it does not label what you write.
+ * Matching is on the WORDS, not on a column, because no column exists — a
+ * `SocialDraftRequest` carries a brief and its copy, a `SocialVariant` carries
+ * text, and neither records which feature it is selling. A post about
+ * attendance says "attendance" or "الحضور", so that is what this looks for,
+ * through the same Arabic-folding matcher the search bar uses. It narrows a
+ * list; it does not label what you write.
  */
-interface PillarBrief {
+export interface BrandFeature {
   id: string;
-  pillar: string;
-  brief: string;
+  en: string;
+  ar: string;
 }
 
 /** The file's envelope carries `version` and `$comment` beside the arrays. */
-function briefsFor(brand: string): PillarBrief[] {
-  const raw = (pillarsJson as Record<string, unknown>)[brand];
-  return Array.isArray(raw) ? (raw as PillarBrief[]) : [];
+export function featuresFor(brand: string): BrandFeature[] {
+  const raw = (featuresJson as Record<string, unknown>)[brand];
+  return Array.isArray(raw) ? (raw as BrandFeature[]) : [];
 }
 
-/** The distinct pillars this brand actually plans against, in file order. */
-export function pillarsFor(brand: string): string[] {
-  const seen = new Set<string>();
-  for (const b of briefsFor(brand)) {
-    if (b.pillar) seen.add(b.pillar);
-  }
-  return [...seen];
-}
-
-/** "time-savings" → "Time savings". The ids are the only names these have. */
-export function pillarLabel(pillar: string): string {
-  const words = pillar.replace(/-/g, " ");
-  return words.charAt(0).toUpperCase() + words.slice(1);
+export function featureLabel(
+  brand: string,
+  id: string,
+  isRTL: boolean,
+): string {
+  const found = featuresFor(brand).find((f) => f.id === id);
+  if (!found) return id;
+  return isRTL ? found.ar : found.en;
 }
 
 /**
- * Does this queue row belong to the chosen pillar?
+ * Is this row about the chosen feature?
  *
- * Matched on the brief, trimmed, because that is the one field carried from
- * the plan to the request unchanged. `null` means no pillar chosen and
- * everything passes — including drafts written from scratch, which belong to
- * no pillar and would otherwise be unreachable the moment a filter was set.
+ * Both names are tried — a brand publishes in Arabic and English from the same
+ * queue, so an English draft about Admission and an Arabic one about القبول are
+ * the same answer to the same question. `null` passes everything.
  */
 export function featureFits(
   brand: string,
-  brief: string,
-  pillar: string | null,
+  haystack: string,
+  featureId: string | null,
 ): boolean {
-  if (!pillar) return true;
-  const wanted = briefsFor(brand)
-    .filter((b) => b.pillar === pillar)
-    .map((b) => b.brief.trim());
-  return wanted.includes(brief.trim());
+  if (!featureId) return true;
+  const found = featuresFor(brand).find((f) => f.id === featureId);
+  if (!found) return true;
+  return matchesQuery(haystack, found.en) || matchesQuery(haystack, found.ar);
 }
