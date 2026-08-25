@@ -212,6 +212,10 @@ export function ReviewSpotlight() {
   // Radix portals the filter menu outside this subtree, so a plain blur would
   // close the dropdown the moment the menu opens.
   const [menuOpen, setMenuOpen] = React.useState(false);
+  // Which face the one panel is wearing. The dropdown under the bar is the
+  // only revealed surface this box has; the media picker borrows it rather
+  // than floating a second layer over the page.
+  const [panel, setPanel] = React.useState<"queue" | "media">("queue");
   const [sending, setSending] = React.useState(false);
   const [notice, setNotice] = React.useState<string | null>(null);
   const [error, setError] = React.useState<string | null>(null);
@@ -600,19 +604,47 @@ export function ReviewSpotlight() {
             post now, and a post is written and sent, not looked up. Finding is
             still here, in the panel underneath. */}
         <div className="relative flex h-12 items-center gap-2 ps-3 pe-2">
-          <MediaButton
-            t={t}
-            isRTL={isRTL}
-            urls={composerMediaUrls}
-            brandMedia={brandMedia}
-            onAttach={attachMedia}
-            onRemove={removeMedia}
-            onBrowse={() => goToStage("media")}
-          />
+          {/* Opens the panel already under the bar, on its media face. A
+              second floating layer over a panel that was open anyway is one
+              surface too many. Pressing it again returns to the queue. */}
+          <button
+            type="button"
+            aria-label={t.mediaLabel}
+            title={t.mediaLabel}
+            aria-expanded={open && panel === "media"}
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => {
+              setPanel((current) =>
+                open && current === "media" ? "queue" : "media",
+              );
+              setFocused(true);
+              inputRef.current?.focus();
+            }}
+            className={cn(
+              "flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full",
+              "transition-colors duration-150",
+              composerMediaUrls.length > 0 || (open && panel === "media")
+                ? "bg-accent text-accent-foreground"
+                : "text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground",
+            )}
+          >
+            {composerMediaUrls.length > 0 ? (
+              <span className="text-xs font-medium tabular-nums" dir="ltr">
+                {composerMediaUrls.length}
+              </span>
+            ) : (
+              <Plus className="size-5" />
+            )}
+          </button>
           <CommandPrimitive.Input
             ref={inputRef}
             value={query}
-            onValueChange={setQuery}
+            onValueChange={(value) => {
+              // Writing or searching — either way the queue is the face that
+              // answers, so a keystroke takes the panel back from the picker.
+              setPanel("queue");
+              setQuery(value);
+            }}
             onFocus={() => {
               setFocused(true);
               liftStage();
@@ -660,259 +692,272 @@ export function ReviewSpotlight() {
               transition={{ type: "spring", duration: 0.45, bounce: 0.05 }}
               className="w-full overflow-hidden"
             >
-              {/* The split icons — a second row that arrives WITH the dropdown
-                rather than standing under the input all day. At rest this box
-                is one search line: the list it filters is not on screen yet,
-                so neither is the filtering. Inside the reveal, not beside it,
-                so one spring carries the whole panel. */}
-              <div className="flex items-center gap-1 border-t border-black/5 px-2 py-2 dark:border-white/10">
-                {MODES.map((entry, i) => {
-                  const Icon = entry.icon;
-                  const active = mode === entry.id;
-                  const count = counts[entry.id];
-                  return (
-                    <motion.button
-                      key={entry.id}
-                      type="button"
-                      data-active={active}
-                      title={`${t[entry.labelKey]} (${entry.shortcut})`}
-                      aria-pressed={active}
-                      initial={{ opacity: 0, x: isRTL ? 20 : -20, scale: 0.6 }}
-                      animate={{ opacity: 1, x: 0, scale: 1 }}
-                      transition={{
-                        type: "spring",
-                        duration: 0.4,
-                        bounce: 0.2,
-                        delay: i * 0.04,
-                      }}
-                      // Keep the caret in the input — switching mode is a filter, not
-                      // a departure from what you were typing.
-                      onMouseDown={(e) => e.preventDefault()}
-                      onClick={() => {
-                        setMode(entry.id);
-                        setFocused(true);
-                        inputRef.current?.focus();
-                      }}
-                      className={cn(
-                        "flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full px-3 py-1.5",
-                        "text-xs font-medium transition-colors duration-150",
-                        active
-                          ? "bg-accent text-accent-foreground"
-                          : "text-muted-foreground/70 hover:bg-accent/50 hover:text-accent-foreground",
-                      )}
-                    >
-                      <Icon className="size-4 shrink-0" />
-                      <span className="hidden sm:inline">
-                        {t[entry.labelKey]}
-                      </span>
-                      {count > 0 && (
-                        <span
-                          dir="ltr"
-                          className={cn(
-                            "rounded-full px-1.5 py-px text-[10px] tabular-nums",
-                            active
-                              ? "bg-background/60"
-                              : "bg-muted-foreground/10 text-muted-foreground",
-                          )}
-                        >
-                          {count}
-                        </span>
-                      )}
-                    </motion.button>
-                  );
-                })}
-
-                <div className="ms-auto flex items-center gap-1">
-                  <button
-                    type="button"
-                    title={t.spotlightRefresh}
-                    aria-label={t.spotlightRefresh}
-                    disabled={reviewQueue.loading}
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => void reviewQueue.refresh()}
-                    className="text-muted-foreground/70 hover:bg-accent/50 hover:text-accent-foreground flex size-8 cursor-pointer items-center justify-center rounded-full transition-colors duration-150 disabled:opacity-50"
-                  >
-                    <RefreshCw
-                      className={cn(
-                        "size-4",
-                        reviewQueue.loading && "animate-spin",
-                      )}
-                    />
-                  </button>
-
-                  {/* The filter menu — the knobs that are a preference rather than a
-                  slice: which brands, which order, and whether a row has to
-                  carry media at all. */}
-                  <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
-                    <DropdownMenuTrigger
-                      title={t.spotlightFilters}
-                      aria-label={t.spotlightFilters}
-                      onMouseDown={(e) => e.preventDefault()}
-                      className={cn(
-                        "flex size-8 cursor-pointer items-center justify-center rounded-full transition-colors duration-150",
-                        menuOpen || scope === "every" || mediaOnly
-                          ? "bg-accent text-accent-foreground"
-                          : "text-muted-foreground/70 hover:bg-accent/50 hover:text-accent-foreground",
-                      )}
-                    >
-                      <SlidersHorizontal className="size-4" />
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      align={isRTL ? "start" : "end"}
-                      className="w-56"
-                      // Returning focus would fight the deferred blur above; the
-                      // input is refocused explicitly instead.
-                      onCloseAutoFocus={(e) => {
-                        e.preventDefault();
-                        inputRef.current?.focus();
-                      }}
-                    >
-                      <DropdownMenuLabel>{t.spotlightScope}</DropdownMenuLabel>
-                      <DropdownMenuRadioGroup
-                        value={scope}
-                        onValueChange={(value) => setScope(value as Scope)}
-                      >
-                        <DropdownMenuRadioItem value="brand">
-                          {fill(t.spotlightScopeThis, {
-                            brand: brandLabel(product),
-                          })}
-                        </DropdownMenuRadioItem>
-                        <DropdownMenuRadioItem value="every">
-                          {t.spotlightScopeAll}
-                        </DropdownMenuRadioItem>
-                      </DropdownMenuRadioGroup>
-
-                      <DropdownMenuSeparator />
-
-                      <DropdownMenuLabel>{t.spotlightOrder}</DropdownMenuLabel>
-                      <DropdownMenuRadioGroup
-                        value={order}
-                        onValueChange={(value) => setOrder(value as Order)}
-                      >
-                        <DropdownMenuRadioItem value="oldest">
-                          {t.spotlightOrderOldest}
-                        </DropdownMenuRadioItem>
-                        <DropdownMenuRadioItem value="newest">
-                          {t.spotlightOrderNewest}
-                        </DropdownMenuRadioItem>
-                      </DropdownMenuRadioGroup>
-
-                      <DropdownMenuSeparator />
-
-                      <DropdownMenuCheckboxItem
-                        checked={mediaOnly}
-                        onCheckedChange={(checked) =>
-                          setMediaOnly(Boolean(checked))
-                        }
-                      >
-                        {t.spotlightMediaOnly}
-                      </DropdownMenuCheckboxItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-
-                  {/* What Send does — publish on the spot, or park `scheduled`
-                      variants for the cron drain. It sat beside the composer that
-                      is no longer on this page; it belongs next to the button it
-                      configures. */}
-                  <Popover>
-                    <PopoverTrigger
-                      aria-label={t.approveModeLabel}
-                      title={
-                        approveMode === "schedule"
-                          ? t.approveModeSchedule
-                          : t.approveModeNow
-                      }
-                      onMouseDown={(e) => e.preventDefault()}
-                      className={cn(
-                        "flex size-8 cursor-pointer items-center justify-center rounded-full transition-colors duration-150",
-                        approveMode === "schedule"
-                          ? "bg-accent text-accent-foreground"
-                          : "text-muted-foreground/70 hover:bg-accent/50 hover:text-accent-foreground",
-                      )}
-                    >
-                      <Settings2 className="size-4" />
-                    </PopoverTrigger>
-                    <PopoverContent
-                      align={isRTL ? "start" : "end"}
-                      className="w-72 text-start"
-                    >
-                      <p className="text-muted-foreground mb-2 text-xs font-medium">
-                        {t.approveModeLabel}
-                      </p>
-                      <div className="space-y-1.5">
-                        {(["now", "schedule"] as const).map((option) => (
-                          <label
-                            key={option}
-                            className="hover:bg-muted flex cursor-pointer items-start gap-2 rounded-lg p-2 text-sm"
-                          >
-                            <input
-                              type="radio"
-                              name="approve-mode"
-                              checked={approveMode === option}
-                              onChange={() => setApproveMode(option)}
-                              className="mt-1"
-                            />
-                            <span>
-                              <span className="block font-medium">
-                                {option === "now"
-                                  ? t.approveModeNow
-                                  : t.approveModeSchedule}
-                              </span>
-                              <span className="text-muted-foreground block text-xs">
-                                {option === "now"
-                                  ? t.approveModeNowHint
-                                  : t.approveModeScheduleHint}
-                              </span>
-                            </span>
-                          </label>
-                        ))}
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                  
-                </div>
-              </div>
-
-              <CommandPrimitive.List className="max-h-[min(360px,45vh)] scroll-py-1 overflow-x-hidden overflow-y-auto border-t border-black/5 p-2 dark:border-white/10">
-                {/* FIND — this brand's slice first, because the picker above
-                    already says which brand the reader is working in. */}
-                <ItemGroup
-                  items={mine}
-                  grouped={mode === "all"}
+              {panel === "media" ? (
+                <MediaPanel
                   t={t}
-                  lang={lang}
-                  brandLabel={brandLabel}
-                  channelLabel={channelLabel}
-                  onSelect={handleSelect}
+                  urls={composerMediaUrls}
+                  brandMedia={brandMedia}
+                  onAttach={attachMedia}
+                  onRemove={removeMedia}
+                  onBrowse={() => goToStage("media")}
                 />
+              ) : (
+                <>
+                {/* The split icons — a second row that arrives WITH the dropdown
+                  rather than standing under the input all day. At rest this box
+                  is one search line: the list it filters is not on screen yet,
+                  so neither is the filtering. Inside the reveal, not beside it,
+                  so one spring carries the whole panel. */}
+                <div className="flex items-center gap-1 border-t border-black/5 px-2 py-2 dark:border-white/10">
+                  {MODES.map((entry, i) => {
+                    const Icon = entry.icon;
+                    const active = mode === entry.id;
+                    const count = counts[entry.id];
+                    return (
+                      <motion.button
+                        key={entry.id}
+                        type="button"
+                        data-active={active}
+                        title={`${t[entry.labelKey]} (${entry.shortcut})`}
+                        aria-pressed={active}
+                        initial={{ opacity: 0, x: isRTL ? 20 : -20, scale: 0.6 }}
+                        animate={{ opacity: 1, x: 0, scale: 1 }}
+                        transition={{
+                          type: "spring",
+                          duration: 0.4,
+                          bounce: 0.2,
+                          delay: i * 0.04,
+                        }}
+                        // Keep the caret in the input — switching mode is a filter, not
+                        // a departure from what you were typing.
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => {
+                          setMode(entry.id);
+                          setFocused(true);
+                          inputRef.current?.focus();
+                        }}
+                        className={cn(
+                          "flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full px-3 py-1.5",
+                          "text-xs font-medium transition-colors duration-150",
+                          active
+                            ? "bg-accent text-accent-foreground"
+                            : "text-muted-foreground/70 hover:bg-accent/50 hover:text-accent-foreground",
+                        )}
+                      >
+                        <Icon className="size-4 shrink-0" />
+                        <span className="hidden sm:inline">
+                          {t[entry.labelKey]}
+                        </span>
+                        {count > 0 && (
+                          <span
+                            dir="ltr"
+                            className={cn(
+                              "rounded-full px-1.5 py-px text-[10px] tabular-nums",
+                              active
+                                ? "bg-background/60"
+                                : "bg-muted-foreground/10 text-muted-foreground",
+                            )}
+                          >
+                            {count}
+                          </span>
+                        )}
+                      </motion.button>
+                    );
+                  })}
 
-                {/* Other brands — labelled, because opening one silently
-                    retargets the whole page. */}
-                {others.length > 0 && (
-                  <>
-                    <p className="text-muted-foreground/50 px-3 pt-2 pb-1 text-[11px]">
-                      {t.spotlightOtherBrands}
+                  <div className="ms-auto flex items-center gap-1">
+                    <button
+                      type="button"
+                      title={t.spotlightRefresh}
+                      aria-label={t.spotlightRefresh}
+                      disabled={reviewQueue.loading}
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => void reviewQueue.refresh()}
+                      className="text-muted-foreground/70 hover:bg-accent/50 hover:text-accent-foreground flex size-8 cursor-pointer items-center justify-center rounded-full transition-colors duration-150 disabled:opacity-50"
+                    >
+                      <RefreshCw
+                        className={cn(
+                          "size-4",
+                          reviewQueue.loading && "animate-spin",
+                        )}
+                      />
+                    </button>
+
+                    {/* The filter menu — the knobs that are a preference rather than a
+                    slice: which brands, which order, and whether a row has to
+                    carry media at all. */}
+                    <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
+                      <DropdownMenuTrigger
+                        title={t.spotlightFilters}
+                        aria-label={t.spotlightFilters}
+                        onMouseDown={(e) => e.preventDefault()}
+                        className={cn(
+                          "flex size-8 cursor-pointer items-center justify-center rounded-full transition-colors duration-150",
+                          menuOpen || scope === "every" || mediaOnly
+                            ? "bg-accent text-accent-foreground"
+                            : "text-muted-foreground/70 hover:bg-accent/50 hover:text-accent-foreground",
+                        )}
+                      >
+                        <SlidersHorizontal className="size-4" />
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        align={isRTL ? "start" : "end"}
+                        className="w-56"
+                        // Returning focus would fight the deferred blur above; the
+                        // input is refocused explicitly instead.
+                        onCloseAutoFocus={(e) => {
+                          e.preventDefault();
+                          inputRef.current?.focus();
+                        }}
+                      >
+                        <DropdownMenuLabel>{t.spotlightScope}</DropdownMenuLabel>
+                        <DropdownMenuRadioGroup
+                          value={scope}
+                          onValueChange={(value) => setScope(value as Scope)}
+                        >
+                          <DropdownMenuRadioItem value="brand">
+                            {fill(t.spotlightScopeThis, {
+                              brand: brandLabel(product),
+                            })}
+                          </DropdownMenuRadioItem>
+                          <DropdownMenuRadioItem value="every">
+                            {t.spotlightScopeAll}
+                          </DropdownMenuRadioItem>
+                        </DropdownMenuRadioGroup>
+
+                        <DropdownMenuSeparator />
+
+                        <DropdownMenuLabel>{t.spotlightOrder}</DropdownMenuLabel>
+                        <DropdownMenuRadioGroup
+                          value={order}
+                          onValueChange={(value) => setOrder(value as Order)}
+                        >
+                          <DropdownMenuRadioItem value="oldest">
+                            {t.spotlightOrderOldest}
+                          </DropdownMenuRadioItem>
+                          <DropdownMenuRadioItem value="newest">
+                            {t.spotlightOrderNewest}
+                          </DropdownMenuRadioItem>
+                        </DropdownMenuRadioGroup>
+
+                        <DropdownMenuSeparator />
+
+                        <DropdownMenuCheckboxItem
+                          checked={mediaOnly}
+                          onCheckedChange={(checked) =>
+                            setMediaOnly(Boolean(checked))
+                          }
+                        >
+                          {t.spotlightMediaOnly}
+                        </DropdownMenuCheckboxItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+
+                    {/* What Send does — publish on the spot, or park `scheduled`
+                        variants for the cron drain. It sat beside the composer that
+                        is no longer on this page; it belongs next to the button it
+                        configures. */}
+                    <Popover>
+                      <PopoverTrigger
+                        aria-label={t.approveModeLabel}
+                        title={
+                          approveMode === "schedule"
+                            ? t.approveModeSchedule
+                            : t.approveModeNow
+                        }
+                        onMouseDown={(e) => e.preventDefault()}
+                        className={cn(
+                          "flex size-8 cursor-pointer items-center justify-center rounded-full transition-colors duration-150",
+                          approveMode === "schedule"
+                            ? "bg-accent text-accent-foreground"
+                            : "text-muted-foreground/70 hover:bg-accent/50 hover:text-accent-foreground",
+                        )}
+                      >
+                        <Settings2 className="size-4" />
+                      </PopoverTrigger>
+                      <PopoverContent
+                        align={isRTL ? "start" : "end"}
+                        className="w-72 text-start"
+                      >
+                        <p className="text-muted-foreground mb-2 text-xs font-medium">
+                          {t.approveModeLabel}
+                        </p>
+                        <div className="space-y-1.5">
+                          {(["now", "schedule"] as const).map((option) => (
+                            <label
+                              key={option}
+                              className="hover:bg-muted flex cursor-pointer items-start gap-2 rounded-lg p-2 text-sm"
+                            >
+                              <input
+                                type="radio"
+                                name="approve-mode"
+                                checked={approveMode === option}
+                                onChange={() => setApproveMode(option)}
+                                className="mt-1"
+                              />
+                              <span>
+                                <span className="block font-medium">
+                                  {option === "now"
+                                    ? t.approveModeNow
+                                    : t.approveModeSchedule}
+                                </span>
+                                <span className="text-muted-foreground block text-xs">
+                                  {option === "now"
+                                    ? t.approveModeNowHint
+                                    : t.approveModeScheduleHint}
+                                </span>
+                              </span>
+                            </label>
+                          ))}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  
+                  </div>
+                </div>
+
+                <CommandPrimitive.List className="max-h-[min(360px,45vh)] scroll-py-1 overflow-x-hidden overflow-y-auto border-t border-black/5 p-2 dark:border-white/10">
+                  {/* FIND — this brand's slice first, because the picker above
+                      already says which brand the reader is working in. */}
+                  <ItemGroup
+                    items={mine}
+                    grouped={mode === "all"}
+                    t={t}
+                    lang={lang}
+                    brandLabel={brandLabel}
+                    channelLabel={channelLabel}
+                    onSelect={handleSelect}
+                  />
+
+                  {/* Other brands — labelled, because opening one silently
+                      retargets the whole page. */}
+                  {others.length > 0 && (
+                    <>
+                      <p className="text-muted-foreground/50 px-3 pt-2 pb-1 text-[11px]">
+                        {t.spotlightOtherBrands}
+                      </p>
+                      <ItemGroup
+                        items={others}
+                        grouped={mode === "all"}
+                        t={t}
+                        lang={lang}
+                        brandLabel={brandLabel}
+                        channelLabel={channelLabel}
+                        onSelect={handleSelect}
+                      />
+                    </>
+                  )}
+
+                  {mine.length === 0 && others.length === 0 && (
+                    <p className="text-muted-foreground/60 px-3 py-4 text-center text-xs">
+                      {emptyText}
                     </p>
-                    <ItemGroup
-                      items={others}
-                      grouped={mode === "all"}
-                      t={t}
-                      lang={lang}
-                      brandLabel={brandLabel}
-                      channelLabel={channelLabel}
-                      onSelect={handleSelect}
-                    />
-                  </>
-                )}
+                  )}
+                </CommandPrimitive.List>
 
-                {mine.length === 0 && others.length === 0 && (
-                  <p className="text-muted-foreground/60 px-3 py-4 text-center text-xs">
-                    {emptyText}
-                  </p>
-                )}
-              </CommandPrimitive.List>
-
-              <Footer t={t} />
+                <Footer t={t} />
+                </>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
@@ -938,20 +983,21 @@ export function ReviewSpotlight() {
 }
 
 /**
- * The ⊕ — where image and video get onto the post.
+ * The panel's other face — where image and video get onto the post.
+ *
+ * It renders INSIDE the dropdown rather than in a popover of its own. The
+ * panel is already open when the ⊕ is pressed, and a floating layer over an
+ * open panel is one surface too many: two stacking contexts, two ways to
+ * dismiss, and a picker that covers the thing it is attaching to.
  *
  * Three ways in, cheapest first: the brand's own library (the common case, and
  * it should not cost a trip to the showroom and a copied URL), a pasted CDN
  * link, and the showroom itself for actual browsing. What is already attached
- * sits on top with a remove on each, because the tray has nowhere else to live
- * now that the composer's inline strip is gone.
- *
- * The count rides the button, so a collapsed bar still says the post is
- * carrying media.
+ * sits on top with a remove on each — the tray has nowhere else to live now
+ * that the composer's inline strip is gone.
  */
-function MediaButton({
+function MediaPanel({
   t,
-  isRTL,
   urls,
   brandMedia,
   onAttach,
@@ -959,7 +1005,6 @@ function MediaButton({
   onBrowse,
 }: {
   t: SocialDict;
-  isRTL: boolean;
   urls: string[];
   brandMedia: BrandMedia[];
   onAttach: (url: string) => void;
@@ -979,132 +1024,114 @@ function MediaButton({
   };
 
   return (
-    <Popover>
-      <PopoverTrigger
-        aria-label={t.mediaLabel}
-        title={t.mediaLabel}
-        onMouseDown={(e) => e.preventDefault()}
-        className={cn(
-          "flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full",
-          "transition-colors duration-150",
-          urls.length > 0
-            ? "bg-accent text-accent-foreground"
-            : "text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground",
-        )}
-      >
-        {urls.length > 0 ? (
-          <span className="text-xs font-medium tabular-nums" dir="ltr">
-            {urls.length}
-          </span>
-        ) : (
-          <Plus className="size-5" />
-        )}
-      </PopoverTrigger>
-      <PopoverContent
-        align={isRTL ? "end" : "start"}
-        className="w-80 text-start"
-      >
-        {urls.length > 0 && (
-          <div className="mb-3 flex flex-wrap items-center gap-2">
-            {urls.map((url) => (
-              <div key={url} className="group/chip relative">
-                {mediaKind(url) === "image" ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={url}
-                    alt=""
-                    loading="lazy"
-                    className="border-border size-14 rounded-xl border object-cover"
-                  />
-                ) : (
-                  <span className="border-border bg-muted-foreground/10 flex size-14 items-center justify-center rounded-xl border font-mono text-[10px] tracking-wider uppercase">
-                    {t.mediaKindVideo}
-                  </span>
-                )}
-                <button
-                  type="button"
-                  onClick={() => onRemove(url)}
-                  aria-label={t.attachRemove}
-                  className="bg-background border-border absolute -top-1.5 -end-1.5 rounded-full border p-0.5 opacity-0 transition-opacity group-hover/chip:opacity-100 focus-visible:opacity-100"
-                >
-                  <X className="size-3" />
-                </button>
-              </div>
+    <div className="max-h-[min(360px,45vh)] overflow-y-auto border-t border-black/5 p-4 text-start dark:border-white/10">
+      {urls.length > 0 && (
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          {urls.map((url) => (
+            <div key={url} className="group/chip relative">
+              {mediaKind(url) === "image" ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={url}
+                  alt=""
+                  loading="lazy"
+                  className="border-border size-16 rounded-xl border object-cover"
+                />
+              ) : (
+                <span className="border-border bg-muted-foreground/10 flex size-16 items-center justify-center rounded-xl border font-mono text-[10px] tracking-wider uppercase">
+                  {t.mediaKindVideo}
+                </span>
+              )}
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => onRemove(url)}
+                aria-label={t.attachRemove}
+                className="bg-background border-border absolute -top-1.5 -end-1.5 rounded-full border p-0.5 opacity-0 transition-opacity group-hover/chip:opacity-100 focus-visible:opacity-100"
+              >
+                <X className="size-3" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {suggestions.length > 0 && (
+        <>
+          <p className="text-muted-foreground/60 pb-2 text-[11px]">
+            {t.recommendedMedia}
+          </p>
+          <div className="mb-4 flex flex-wrap items-center gap-2">
+            {suggestions.map((asset) => (
+              <button
+                key={asset.id}
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => onAttach(asset.url)}
+                title={asset.title}
+                aria-label={fill(t.attachNamed, { name: asset.title })}
+                className="border-border hover:border-foreground/40 focus-visible:border-foreground/40 size-16 shrink-0 overflow-hidden rounded-xl border transition-colors"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={asset.url}
+                  alt=""
+                  loading="lazy"
+                  className="size-full object-cover"
+                />
+              </button>
             ))}
           </div>
-        )}
+        </>
+      )}
 
-        {suggestions.length > 0 && (
-          <>
-            <p className="text-muted-foreground/60 pb-1.5 text-[11px]">
-              {t.recommendedMedia}
-            </p>
-            <div className="mb-3 flex flex-wrap items-center gap-2">
-              {suggestions.map((asset) => (
-                <button
-                  key={asset.id}
-                  type="button"
-                  onClick={() => onAttach(asset.url)}
-                  title={asset.title}
-                  aria-label={fill(t.attachNamed, { name: asset.title })}
-                  className="border-border hover:border-foreground/40 focus-visible:border-foreground/40 size-14 shrink-0 overflow-hidden rounded-lg border transition-colors"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={asset.url}
-                    alt=""
-                    loading="lazy"
-                    className="size-full object-cover"
-                  />
-                </button>
-              ))}
-            </div>
-          </>
-        )}
-
-        <label
-          htmlFor="social-media-url"
-          className="text-muted-foreground mb-1 block text-xs font-medium"
+      <label
+        htmlFor="social-media-url"
+        className="text-muted-foreground mb-1 block text-xs font-medium"
+      >
+        {t.attachAddUrl}
+      </label>
+      <div className="flex gap-1.5">
+        <Input
+          id="social-media-url"
+          type="url"
+          dir="ltr"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          // The panel lives inside a cmdk root, which reads arrow keys and
+          // Enter as list navigation. This field is not a list.
+          onKeyDown={(e) => {
+            e.stopPropagation();
+            if (e.key === "Enter") {
+              e.preventDefault();
+              addUrl();
+            }
+          }}
+          placeholder={t.mediaPlaceholder}
+          className="font-mono text-sm"
+        />
+        <Button
+          variant="outline"
+          size="sm"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={addUrl}
+          disabled={!valid}
+          className="h-9 shrink-0 rounded-full"
+          aria-label={t.attachAddAction}
         >
-          {t.attachAddUrl}
-        </label>
-        <div className="flex gap-1.5">
-          <Input
-            id="social-media-url"
-            type="url"
-            dir="ltr"
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                addUrl();
-              }
-            }}
-            placeholder={t.mediaPlaceholder}
-            className="font-mono text-sm"
-          />
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={addUrl}
-            disabled={!valid}
-            className="h-9 shrink-0 rounded-full"
-            aria-label={t.attachAddAction}
-          >
-            <Plus className="size-4" />
-          </Button>
-        </div>
-        <p className="text-muted-foreground mt-2 text-xs">{t.mediaHint}</p>
-        <button
-          type="button"
-          onClick={onBrowse}
-          className="text-foreground mt-2 text-xs font-medium underline underline-offset-4"
-        >
-          {t.attachBrowse}
-        </button>
-      </PopoverContent>
-    </Popover>
+          <Plus className="size-4" />
+        </Button>
+      </div>
+      <p className="text-muted-foreground mt-2 text-xs">{t.mediaHint}</p>
+      <button
+        type="button"
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={onBrowse}
+        className="text-foreground mt-2 text-xs font-medium underline underline-offset-4"
+      >
+        {t.attachBrowse}
+      </button>
+    </div>
   );
 }
 
