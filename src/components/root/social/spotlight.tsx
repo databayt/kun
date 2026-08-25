@@ -1557,9 +1557,13 @@ function PostShape({
           or a shadow frames the card from outside and makes the other eight
           look switched off; a radio underneath sits in space the strip does
           not have. This costs nothing but a corner — the bottom one, where
-          the byline and the media are not. */}
+          the byline and the media are not.
+
+          Foreground rather than clay: the avatar in every card is already
+          clay, so a clay mark read as more of the brand instead of a state,
+          and it followed the theme's ink either way. */}
       {selected && (
-        <span className="bg-clay text-clay-foreground absolute end-1.5 bottom-1.5 z-10 flex size-4 items-center justify-center rounded-full">
+        <span className="bg-foreground text-background absolute end-1.5 bottom-1.5 z-10 flex size-4 items-center justify-center rounded-full">
           <Check className="size-3" strokeWidth={3} />
         </span>
       )}
