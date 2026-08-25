@@ -27,15 +27,22 @@ export interface SocialProduct {
   label: string;
   labelAr: string;
   /**
-   * Brand mark under `public/brands/`, shown instead of the name wherever the
-   * Hub offers a brand to pick. Optional because most brands do not have one
-   * yet: drop `<id>.png` in that folder and it appears, no code change.
+   * Brand mark, shown instead of the name wherever the Hub offers a brand to
+   * pick. A public URL, so `public/brands/x.png` is written `/brands/x.png`.
    *
-   * Deliberately NOT read from components/root/carousel/brands.ts, which also
-   * records marks. That registry keys by the carousel deck's brand union, and
-   * the two vocabularies have already drifted — it spells moallimee with two
-   * l's where this file uses one. A silent lookup miss is exactly the failure
-   * a shared key would produce.
+   * `content/media/brand-kit.json` is where a mark is DECLARED — its file, its
+   * description, and the rules for using it. This field mirrors that
+   * declaration for the brands whose file actually exists, and a test pins the
+   * two together so they cannot drift. Mirrored rather than imported because
+   * the brand kit is 44KB of prompt text and this is a client bundle.
+   *
+   * Set only where the artwork is real. The brand kit's own rule for a brand
+   * without one is explicit — "do not substitute another brand's mark" — and a
+   * missing file would render as a broken image, which is worse than a name.
+   *
+   * Also deliberately NOT read from components/root/carousel/brands.ts, which
+   * records marks too: it spells moallimee with two l's where this file uses
+   * one, and a shared key would fail by silently finding nothing.
    */
   logo?: string;
   // channelId -> wired for this product. Distribution channels only —
@@ -59,6 +66,11 @@ export const PRODUCTS = [
     id: "balqalam",
     label: "Balqalam",
     labelAr: "بالقلم",
+    // The same quill, on purpose. The brand kit says so in as many words: the
+    // file lives under the hogwarts name for repo-historical reasons, the
+    // artwork is a quill silhouette rather than a wordmark, and بالقلم means
+    // "by the pen". The mark is shared; the name is not.
+    logo: "/brands/hogwarts.png",
     channels: { facebook: true },
   },
   {
