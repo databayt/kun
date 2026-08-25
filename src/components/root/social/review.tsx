@@ -10,30 +10,24 @@
 // away, or write `scheduled` variants the ~15-minute cron drain delivers.
 
 import { useEffect, useState } from "react";
-import { Film, Images, RefreshCw, Settings2 } from "lucide-react";
+import { Settings2 } from "lucide-react";
 
 import { ReviewSpotlight } from "@/components/root/social/spotlight";
-import { Button } from "@/components/ui/button";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-import { fill } from "@/components/root/social/dictionary";
-import { PRODUCTS } from "@/components/root/social/products";
 import { useSocial } from "@/components/root/social/provider";
 import { ReviewEditor } from "@/components/root/social/review-editor";
-import { splitMedia } from "@/lib/media-kind";
 
 type ApproveMode = "now" | "schedule";
 
 const APPROVE_MODE_KEY = "social:approve-mode";
 
 export function ReviewPanel() {
-  const { t, isRTL, reviewQueue, goToStage } = useSocial();
-  const { drafts, loading, error, refresh, activeDraftId, loadDraft } =
-    reviewQueue;
+  const { t, isRTL, reviewQueue } = useSocial();
+  const { drafts, loading, error, refresh } = reviewQueue;
 
   // The approve-mode setting, persisted per browser. Read after mount so the
   // server render never touches localStorage.
@@ -51,26 +45,6 @@ export function ReviewPanel() {
     void refresh();
   }, [refresh]);
 
-  const brandLabel = (id: string) => {
-    const p = PRODUCTS.find((product) => product.id === id);
-    return p ? (isRTL ? p.labelAr : p.label) : id;
-  };
-
-  // Relative age, coarse on purpose — the queue cares about "hours vs days".
-  const ageLabel = (iso: string) => {
-    const minutes = Math.max(
-      0,
-      Math.round((Date.now() - new Date(iso).getTime()) / 60_000),
-    );
-    const age =
-      minutes >= 60 * 24
-        ? `${Math.round(minutes / (60 * 24))}d`
-        : minutes >= 60
-          ? `${Math.round(minutes / 60)}h`
-          : `${minutes}m`;
-    return fill(t.reviewAgo, { age });
-  };
-
   return (
     <section className="full-bleed from-background to-muted/20 flex flex-col bg-gradient-to-b py-16 md:py-24">
       <div className="mx-auto flex w-full max-w-4xl flex-col items-center px-4">
@@ -84,32 +58,18 @@ export function ReviewPanel() {
             </p>
           </div>
 
-          {/* The search bar sits above the queue it filters, and doubles as
-              the way to send a line you just wrote — see spotlight.tsx. */}
-          <div className="mb-6">
+          {/* The search bar sits above the queue it filters — see
+              spotlight.tsx. Its mode row owns the queue's own controls now:
+              the per-mode counts, the refresh and the filter menu. */}
+          <div className="mb-4">
             <ReviewSpotlight />
           </div>
 
-          {/* The queue header — count on one side, refresh + settings on the
-              other. Settings is the whole "publish now vs delegate to cron"
-              choice, so it lives here rather than per draft. */}
+          {/* What is left of the queue header: the one choice that is about
+              approving rather than browsing. Settings is the whole "publish
+              now vs delegate to cron" call, so it lives here, not per draft. */}
           <div className="mx-auto mb-4 flex w-full max-w-3xl items-center gap-2">
-            <p className="text-muted-foreground text-sm">
-              {fill(t.reviewQueueCount, { count: drafts.length })}
-            </p>
             <div className="ms-auto flex items-center gap-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => void refresh()}
-                disabled={loading}
-                className="h-8 gap-1.5 rounded-full"
-              >
-                <RefreshCw
-                  className={cn("size-4", loading && "animate-spin")}
-                />
-                <span className="hidden md:flex">{t.reviewRefresh}</span>
-              </Button>
               <Popover>
                 <PopoverTrigger
                   aria-label={t.approveModeLabel}

@@ -21,6 +21,7 @@ import {
   listAnsweredDrafts,
   listBrandMedia,
   listDraftReferences,
+  listQueuedVariants,
   readSocialDraft,
   refineSocialDraft,
   requestSocialDraft,
@@ -28,6 +29,7 @@ import {
   type AnsweredDraft,
   type BrandMedia,
   type DraftReference,
+  type QueuedVariant,
 } from "@/actions/post-social";
 import {
   DEFAULT_DRAFT_MODEL,
@@ -148,6 +150,12 @@ export interface DraftQueue {
  */
 export interface ReviewQueue {
   drafts: AnsweredDraft[];
+  /**
+   * The decided half — approved variants waiting on the cron drain, and ones
+   * already delivered. Read-only: the search bar's Scheduled/Published modes
+   * browse them, nothing loads them back into the composer.
+   */
+  variants: QueuedVariant[];
   loading: boolean;
   error: string | null;
   refresh: () => Promise<void>;
@@ -597,6 +605,7 @@ export function SocialProvider({
   // ——— The review queue ———
 
   const [reviewDrafts, setReviewDrafts] = useState<AnsweredDraft[]>([]);
+  const [reviewVariants, setReviewVariants] = useState<QueuedVariant[]>([]);
   const [reviewLoading, setReviewLoading] = useState(false);
   const [reviewError, setReviewError] = useState<string | null>(null);
 
@@ -604,12 +613,20 @@ export function SocialProvider({
     setReviewLoading(true);
     setReviewError(null);
     try {
-      const res = await listAnsweredDrafts();
-      if (res.ok) {
-        setReviewDrafts(res.drafts ?? []);
+      // One refresh, both halves — a mode row that switched between a fresh
+      // list and a stale one would be the same bug as two refresh buttons.
+      const [drafts, variants] = await Promise.all([
+        listAnsweredDrafts(),
+        listQueuedVariants(),
+      ]);
+      if (drafts.ok) {
+        setReviewDrafts(drafts.drafts ?? []);
       } else {
-        setReviewError(res.error ?? "Could not read the queue.");
+        setReviewError(drafts.error ?? "Could not read the queue.");
       }
+      // The decided half is context, not the work: a failure there leaves the
+      // review queue usable rather than blanking the stage.
+      if (variants.ok) setReviewVariants(variants.variants ?? []);
     } catch (err: unknown) {
       setReviewError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -645,6 +662,7 @@ export function SocialProvider({
 
   const reviewQueue: ReviewQueue = {
     drafts: reviewDrafts,
+    variants: reviewVariants,
     loading: reviewLoading,
     error: reviewError,
     refresh: refreshReview,

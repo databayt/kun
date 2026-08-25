@@ -1042,6 +1042,91 @@ export async function listAnsweredDrafts(): Promise<AnsweredDraftsResult> {
   }
 }
 
+/**
+ * The other two thirds of the publish queue.
+ *
+ * `listAnsweredDrafts` reads work that has not been decided yet; this reads
+ * work that has — variants a human already approved, either waiting on the
+ * cron drain (`scheduled`) or already on a platform (`published`). The search
+ * bar's mode row spans all three, so a reviewer can answer "did that go out?"
+ * without leaving the stage for the ledger on /social/measure.
+ *
+ * Read-only on purpose. These rows never load into the composer: a variant is
+ * downstream of a SocialPiece, so re-approving one would mint a duplicate.
+ */
+export interface QueuedVariant {
+  id: string;
+  kind: "scheduled" | "published";
+  brand: string;
+  /** Channel id from components/root/social/config.ts. */
+  channel: string;
+  text: string;
+  mediaUrls: string[];
+  /** ISO — when it publishes (scheduled) or when it did (published). */
+  when: string;
+}
+
+export interface QueuedVariantsResult {
+  ok: boolean;
+  variants?: QueuedVariant[];
+  error?: string;
+}
+
+export async function listQueuedVariants(): Promise<QueuedVariantsResult> {
+  if (!(await requireContributor())) {
+    return { ok: false, error: "Forbidden: contributors only." };
+  }
+  try {
+    const rows = await db.socialVariant.findMany({
+      where: { status: { in: ["scheduled", "published"] } },
+      orderBy: { createdAt: "desc" },
+      take: 40,
+      select: {
+        id: true,
+        channel: true,
+        status: true,
+        text: true,
+        mediaUrls: true,
+        scheduledFor: true,
+        publishedAt: true,
+        createdAt: true,
+        piece: { select: { brand: true } },
+      },
+    });
+
+    const variants: QueuedVariant[] = rows.map((row) => {
+      const scheduled = row.status === "scheduled";
+      return {
+        id: row.id,
+        kind: scheduled ? ("scheduled" as const) : ("published" as const),
+        brand: row.piece.brand,
+        channel: row.channel,
+        text: row.text,
+        mediaUrls: row.mediaUrls,
+        when: (scheduled
+          ? (row.scheduledFor ?? row.createdAt)
+          : (row.publishedAt ?? row.createdAt)
+        ).toISOString(),
+      };
+    });
+
+    // Soonest-first for what has not happened, newest-first for what has —
+    // both orderings answer "what is nearest to now", from opposite sides.
+    variants.sort((a, b) => {
+      if (a.kind !== b.kind) return a.kind === "scheduled" ? -1 : 1;
+      const delta = a.when.localeCompare(b.when);
+      return a.kind === "scheduled" ? delta : -delta;
+    });
+
+    return { ok: true, variants };
+  } catch (err: unknown) {
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : "Could not read the queue.",
+    };
+  }
+}
+
 export interface BrandMedia {
   id: string;
   /** Human label for the tile's alt text and tooltip. */
