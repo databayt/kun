@@ -376,10 +376,17 @@ export function ReviewSpotlight() {
             setFocused(false);
           }, 150);
         }}
+        // Escape clears the query, and on an already-empty one collapses the
+        // box back to its search line — the panel now hides what it reveals,
+        // so leaving it needs a key, not a click somewhere else on the page.
         onKeyDown={(e) => {
-          if (e.key === "Escape") {
+          if (e.key !== "Escape") return;
+          if (trimmed) {
             setQuery("");
+            return;
           }
+          setFocused(false);
+          inputRef.current?.blur();
         }}
       >
         <div className="relative flex h-12 items-center gap-3 px-5">
@@ -398,149 +405,6 @@ export function ReviewSpotlight() {
           />
         </div>
 
-        {/* The split icons. A second row inside the bar rather than a floating
-            cluster: this box is inline, so a row that detaches from it would
-            read as belonging to the page, not to the search. */}
-        <div className="flex items-center gap-1 border-t border-black/5 px-2 py-2 dark:border-white/10">
-          {MODES.map((entry, i) => {
-            const Icon = entry.icon;
-            const active = mode === entry.id;
-            const count = counts[entry.id];
-            return (
-              <motion.button
-                key={entry.id}
-                type="button"
-                data-active={active}
-                title={`${t[entry.labelKey]} (${entry.shortcut})`}
-                aria-pressed={active}
-                initial={{ opacity: 0, x: isRTL ? 20 : -20, scale: 0.6 }}
-                animate={{ opacity: 1, x: 0, scale: 1 }}
-                transition={{
-                  type: "spring",
-                  duration: 0.4,
-                  bounce: 0.2,
-                  delay: i * 0.04,
-                }}
-                // Keep the caret in the input — switching mode is a filter, not
-                // a departure from what you were typing.
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => {
-                  setMode(entry.id);
-                  setFocused(true);
-                  inputRef.current?.focus();
-                }}
-                className={cn(
-                  "flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full px-3 py-1.5",
-                  "text-xs font-medium transition-colors duration-150",
-                  active
-                    ? "bg-accent text-accent-foreground"
-                    : "text-muted-foreground/70 hover:bg-accent/50 hover:text-accent-foreground",
-                )}
-              >
-                <Icon className="size-4 shrink-0" />
-                <span className="hidden sm:inline">{t[entry.labelKey]}</span>
-                {count > 0 && (
-                  <span
-                    dir="ltr"
-                    className={cn(
-                      "rounded-full px-1.5 py-px text-[10px] tabular-nums",
-                      active
-                        ? "bg-background/60"
-                        : "bg-muted-foreground/10 text-muted-foreground",
-                    )}
-                  >
-                    {count}
-                  </span>
-                )}
-              </motion.button>
-            );
-          })}
-
-          <div className="ms-auto flex items-center gap-1">
-            <button
-              type="button"
-              title={t.spotlightRefresh}
-              aria-label={t.spotlightRefresh}
-              disabled={reviewQueue.loading}
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={() => void reviewQueue.refresh()}
-              className="text-muted-foreground/70 hover:bg-accent/50 hover:text-accent-foreground flex size-8 cursor-pointer items-center justify-center rounded-full transition-colors duration-150 disabled:opacity-50"
-            >
-              <RefreshCw
-                className={cn("size-4", reviewQueue.loading && "animate-spin")}
-              />
-            </button>
-
-            {/* The filter menu — the knobs that are a preference rather than a
-                slice: which brands, which order, and whether a row has to
-                carry media at all. */}
-            <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
-              <DropdownMenuTrigger
-                title={t.spotlightFilters}
-                aria-label={t.spotlightFilters}
-                onMouseDown={(e) => e.preventDefault()}
-                className={cn(
-                  "flex size-8 cursor-pointer items-center justify-center rounded-full transition-colors duration-150",
-                  menuOpen || scope === "every" || mediaOnly
-                    ? "bg-accent text-accent-foreground"
-                    : "text-muted-foreground/70 hover:bg-accent/50 hover:text-accent-foreground",
-                )}
-              >
-                <SlidersHorizontal className="size-4" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align={isRTL ? "start" : "end"}
-                className="w-56"
-                // Returning focus would fight the deferred blur above; the
-                // input is refocused explicitly instead.
-                onCloseAutoFocus={(e) => {
-                  e.preventDefault();
-                  inputRef.current?.focus();
-                }}
-              >
-                <DropdownMenuLabel>{t.spotlightScope}</DropdownMenuLabel>
-                <DropdownMenuRadioGroup
-                  value={scope}
-                  onValueChange={(value) => setScope(value as Scope)}
-                >
-                  <DropdownMenuRadioItem value="brand">
-                    {fill(t.spotlightScopeThis, {
-                      brand: brandLabel(product),
-                    })}
-                  </DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="every">
-                    {t.spotlightScopeAll}
-                  </DropdownMenuRadioItem>
-                </DropdownMenuRadioGroup>
-
-                <DropdownMenuSeparator />
-
-                <DropdownMenuLabel>{t.spotlightOrder}</DropdownMenuLabel>
-                <DropdownMenuRadioGroup
-                  value={order}
-                  onValueChange={(value) => setOrder(value as Order)}
-                >
-                  <DropdownMenuRadioItem value="oldest">
-                    {t.spotlightOrderOldest}
-                  </DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="newest">
-                    {t.spotlightOrderNewest}
-                  </DropdownMenuRadioItem>
-                </DropdownMenuRadioGroup>
-
-                <DropdownMenuSeparator />
-
-                <DropdownMenuCheckboxItem
-                  checked={mediaOnly}
-                  onCheckedChange={(checked) => setMediaOnly(Boolean(checked))}
-                >
-                  {t.spotlightMediaOnly}
-                </DropdownMenuCheckboxItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-
         <AnimatePresence>
           {open && (
             <motion.div
@@ -549,9 +413,161 @@ export function ReviewSpotlight() {
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0, transition: { duration: 0.2 } }}
               transition={{ type: "spring", duration: 0.45, bounce: 0.05 }}
-              className="w-full overflow-hidden border-t border-black/5 dark:border-white/10"
+              className="w-full overflow-hidden"
             >
-              <CommandPrimitive.List className="max-h-[min(360px,45vh)] scroll-py-1 overflow-x-hidden overflow-y-auto p-2">
+              {/* The split icons — a second row that arrives WITH the dropdown
+                rather than standing under the input all day. At rest this box
+                is one search line: the list it filters is not on screen yet,
+                so neither is the filtering. Inside the reveal, not beside it,
+                so one spring carries the whole panel. */}
+              <div className="flex items-center gap-1 border-t border-black/5 px-2 py-2 dark:border-white/10">
+                {MODES.map((entry, i) => {
+                  const Icon = entry.icon;
+                  const active = mode === entry.id;
+                  const count = counts[entry.id];
+                  return (
+                    <motion.button
+                      key={entry.id}
+                      type="button"
+                      data-active={active}
+                      title={`${t[entry.labelKey]} (${entry.shortcut})`}
+                      aria-pressed={active}
+                      initial={{ opacity: 0, x: isRTL ? 20 : -20, scale: 0.6 }}
+                      animate={{ opacity: 1, x: 0, scale: 1 }}
+                      transition={{
+                        type: "spring",
+                        duration: 0.4,
+                        bounce: 0.2,
+                        delay: i * 0.04,
+                      }}
+                      // Keep the caret in the input — switching mode is a filter, not
+                      // a departure from what you were typing.
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => {
+                        setMode(entry.id);
+                        setFocused(true);
+                        inputRef.current?.focus();
+                      }}
+                      className={cn(
+                        "flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full px-3 py-1.5",
+                        "text-xs font-medium transition-colors duration-150",
+                        active
+                          ? "bg-accent text-accent-foreground"
+                          : "text-muted-foreground/70 hover:bg-accent/50 hover:text-accent-foreground",
+                      )}
+                    >
+                      <Icon className="size-4 shrink-0" />
+                      <span className="hidden sm:inline">
+                        {t[entry.labelKey]}
+                      </span>
+                      {count > 0 && (
+                        <span
+                          dir="ltr"
+                          className={cn(
+                            "rounded-full px-1.5 py-px text-[10px] tabular-nums",
+                            active
+                              ? "bg-background/60"
+                              : "bg-muted-foreground/10 text-muted-foreground",
+                          )}
+                        >
+                          {count}
+                        </span>
+                      )}
+                    </motion.button>
+                  );
+                })}
+
+                <div className="ms-auto flex items-center gap-1">
+                  <button
+                    type="button"
+                    title={t.spotlightRefresh}
+                    aria-label={t.spotlightRefresh}
+                    disabled={reviewQueue.loading}
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => void reviewQueue.refresh()}
+                    className="text-muted-foreground/70 hover:bg-accent/50 hover:text-accent-foreground flex size-8 cursor-pointer items-center justify-center rounded-full transition-colors duration-150 disabled:opacity-50"
+                  >
+                    <RefreshCw
+                      className={cn(
+                        "size-4",
+                        reviewQueue.loading && "animate-spin",
+                      )}
+                    />
+                  </button>
+
+                  {/* The filter menu — the knobs that are a preference rather than a
+                  slice: which brands, which order, and whether a row has to
+                  carry media at all. */}
+                  <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
+                    <DropdownMenuTrigger
+                      title={t.spotlightFilters}
+                      aria-label={t.spotlightFilters}
+                      onMouseDown={(e) => e.preventDefault()}
+                      className={cn(
+                        "flex size-8 cursor-pointer items-center justify-center rounded-full transition-colors duration-150",
+                        menuOpen || scope === "every" || mediaOnly
+                          ? "bg-accent text-accent-foreground"
+                          : "text-muted-foreground/70 hover:bg-accent/50 hover:text-accent-foreground",
+                      )}
+                    >
+                      <SlidersHorizontal className="size-4" />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align={isRTL ? "start" : "end"}
+                      className="w-56"
+                      // Returning focus would fight the deferred blur above; the
+                      // input is refocused explicitly instead.
+                      onCloseAutoFocus={(e) => {
+                        e.preventDefault();
+                        inputRef.current?.focus();
+                      }}
+                    >
+                      <DropdownMenuLabel>{t.spotlightScope}</DropdownMenuLabel>
+                      <DropdownMenuRadioGroup
+                        value={scope}
+                        onValueChange={(value) => setScope(value as Scope)}
+                      >
+                        <DropdownMenuRadioItem value="brand">
+                          {fill(t.spotlightScopeThis, {
+                            brand: brandLabel(product),
+                          })}
+                        </DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem value="every">
+                          {t.spotlightScopeAll}
+                        </DropdownMenuRadioItem>
+                      </DropdownMenuRadioGroup>
+
+                      <DropdownMenuSeparator />
+
+                      <DropdownMenuLabel>{t.spotlightOrder}</DropdownMenuLabel>
+                      <DropdownMenuRadioGroup
+                        value={order}
+                        onValueChange={(value) => setOrder(value as Order)}
+                      >
+                        <DropdownMenuRadioItem value="oldest">
+                          {t.spotlightOrderOldest}
+                        </DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem value="newest">
+                          {t.spotlightOrderNewest}
+                        </DropdownMenuRadioItem>
+                      </DropdownMenuRadioGroup>
+
+                      <DropdownMenuSeparator />
+
+                      <DropdownMenuCheckboxItem
+                        checked={mediaOnly}
+                        onCheckedChange={(checked) =>
+                          setMediaOnly(Boolean(checked))
+                        }
+                      >
+                        {t.spotlightMediaOnly}
+                      </DropdownMenuCheckboxItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </div>
+
+              <CommandPrimitive.List className="max-h-[min(360px,45vh)] scroll-py-1 overflow-x-hidden overflow-y-auto border-t border-black/5 p-2 dark:border-white/10">
                 {/* FIND — this brand's slice first, because the picker above
                     already says which brand the reader is working in. */}
                 <ItemGroup
