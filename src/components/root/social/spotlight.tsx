@@ -57,7 +57,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowUp,
   CalendarClock,
-  Check,
   CheckCircle2,
   Images,
   Layers,
@@ -1362,16 +1361,6 @@ function ConfigPanel({
   onCloseSection: () => void;
 }) {
   const [craftOpen, setCraftOpen] = React.useState(false);
-  /**
-   * Where to hang the select. Measured against the panel on the press, not
-   * derived from the box's DOM position at render: the row scrolls sideways,
-   * and it clips its own children, so a card rendered inside it would be cut
-   * off. This keeps the card a child of the panel and points it at the box.
-   */
-  const panelRef = React.useRef<HTMLDivElement>(null);
-  const [anchor, setAnchor] = React.useState<{ x: number; y: number } | null>(
-    null,
-  );
 
   const brandName = (() => {
     const p = PRODUCTS.find((entry) => entry.id === product);
@@ -1551,131 +1540,93 @@ function ConfigPanel({
     </div>
   );
 
-  const tiles: { id: ConfigSection; label: string; value: string }[] = [
-    { id: "brand", label: t.spotlightConfigBrand, value: brandName },
-    {
-      id: "feature",
-      label: t.spotlightConfigFeature,
-      value:
-        feature === ANY_FEATURE
-          ? t.mediaAny
-          : featureLabel(product, feature, isRTL),
-    },
-    {
-      id: "channels",
-      label: t.spotlightConfigChannels,
-      value: selected.length
-        ? selected.map(channelName).join(" · ")
-        : t.spotlightConfigNone,
-    },
-    {
-      id: "postType",
-      label: t.spotlightConfigPostType,
-      value: postTypeName[postType],
-    },
-    {
-      id: "media",
-      label: t.spotlightConfigMedia,
-      value: mediaName[mediaFilter],
-    },
-    {
-      id: "destination",
-      label: t.spotlightConfigTiming,
-      value: destinationName[destination],
-    },
+  const WORDS: { id: ConfigSection; label: string }[] = [
+    { id: "brand", label: t.spotlightConfigBrand },
+    { id: "feature", label: t.spotlightConfigFeature },
+    { id: "channels", label: t.spotlightConfigChannels },
+    { id: "postType", label: t.spotlightConfigPostType },
+    { id: "media", label: t.spotlightConfigMedia },
+    { id: "destination", label: t.spotlightConfigTiming },
   ];
 
   return (
-    <div ref={panelRef} className={shell}>
-      {/* One row, always. Five settings read as a single line of state —
-          "hogwarts, facebook, a post, any media, publish now" — and a grid
-          that reflows into two rows on a narrow screen turns that sentence
-          into a paragraph. It scrolls sideways instead.
-
-          Pressing any of them opens ONE dialog holding all five. The boxes
-          used to drill down inside this panel, which cost a press back out
-          between every change — three presses to set two things. Now the
-          dialog is opened once, everything is changed in it, and it is closed
-          once, with the pressed box deciding only what is highlighted. */}
-      <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
-        {tiles.map((tile) => (
-          <button
-            key={tile.id}
-            type="button"
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={(e) => {
-              const box = e.currentTarget.getBoundingClientRect();
-              const panel = panelRef.current?.getBoundingClientRect();
-              if (panel) {
-                setAnchor({
-                  x: box.left - panel.left,
-                  y: box.bottom - panel.top + 6,
-                });
+    <div className={shell}>
+      {/* Six words, and the one you press opens under it.
+          
+          They were boxes carrying their own values, and pressing one opened a
+          card floating over the panel. Two things wrong with that: the card
+          covered the rows it was launched from, and the value on every box
+          made a settings summary out of a row that is really a nav. A word,
+          then its choices, in the space below — nothing is hidden while you
+          choose, and pressing the same word again shuts it. */}
+      <div className="-mx-1 flex flex-wrap items-center gap-x-4 gap-y-1 px-1">
+        {WORDS.map((word) => {
+          const active = openSection === word.id;
+          return (
+            <button
+              key={word.id}
+              type="button"
+              aria-pressed={active}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() =>
+                active ? onCloseSection() : onOpenDialog(word.id)
               }
-              onOpenDialog(tile.id);
-            }}
-            className={cn(
-              "border-input hover:border-foreground/30 hover:bg-accent/40 flex min-w-0 flex-1",
-              "shrink-0 basis-0 cursor-pointer flex-col items-start gap-0.5 rounded-xl border",
-              "px-2.5 py-2 text-start transition-colors duration-150",
-            )}
-          >
-            <span className="text-muted-foreground/70 truncate text-[10px]">
-              {tile.label}
-            </span>
-            <span className="w-full truncate text-xs font-medium">
-              {tile.value}
-            </span>
-          </button>
-        ))}
+              className={cn(
+                "cursor-pointer py-1 text-sm transition-colors duration-150",
+                active
+                  ? "text-foreground font-medium"
+                  : "text-muted-foreground/70 hover:text-foreground",
+              )}
+            >
+              {word.label}
+            </button>
+          );
+        })}
       </div>
+
+      {openSection && (
+        <div className="border-t border-black/5 pt-3 pb-1 dark:border-white/10">
+          <ConfigChoices
+            section={openSection}
+            t={t}
+            isRTL={isRTL}
+            product={product}
+            onProduct={onProduct}
+            wired={wired}
+            selected={selected}
+            onChannels={onChannels}
+            feature={feature}
+            onFeature={onFeature}
+            features={features}
+            postType={postType}
+            onPostType={onPostType}
+            mediaFilter={mediaFilter}
+            onMediaFilter={onMediaFilter}
+            destination={destination}
+            onDestination={onDestination}
+          />
+        </div>
+      )}
 
       {startFrom}
       {beforeItGoes}
-
-      <ConfigSelect
-        section={openSection}
-        anchor={anchor}
-        panelWidth={panelRef.current?.clientWidth ?? 0}
-        onClose={onCloseSection}
-        t={t}
-        isRTL={isRTL}
-        product={product}
-        onProduct={onProduct}
-        wired={wired}
-        selected={selected}
-        onChannels={onChannels}
-        feature={feature}
-        onFeature={onFeature}
-        features={features}
-        postType={postType}
-        onPostType={onPostType}
-        mediaFilter={mediaFilter}
-        onMediaFilter={onMediaFilter}
-        destination={destination}
-        onDestination={onDestination}
-      />
     </div>
   );
 }
 
 /**
- * One small dialog, five settings, one shape.
+ * The choices for whichever word is open, rendered under it.
  *
- * Press a box, choose, done. Every setting answers the same question — which
- * of these — so they all get the same dialog rather than five layouts to
- * learn: a title, a short list, nothing else. Options are one or two words
- * because the box under them already carries the sentence.
+ * One shape for all six, because they all answer the same question — which of
+ * these — and five layouts would be five things to learn. Pills wrap, so a
+ * dozen features need no grid maths and no card to be measured and clamped;
+ * the row simply grows and the panel scrolls if it must.
  *
- * Single-choice settings close on the press, which is the whole point: brand
- * is two presses from anywhere, not four. Channels is the exception and stays
- * open, because picking one channel is rarely picking all of them.
+ * Send is the exception, and earns it: its three answers change what pressing
+ * the arrow DOES, so each carries the sentence that says so.
  */
-function ConfigSelect({
+function ConfigChoices({
   section,
-  anchor,
-  panelWidth,
-  onClose,
   t,
   isRTL,
   product,
@@ -1693,11 +1644,7 @@ function ConfigSelect({
   destination,
   onDestination,
 }: {
-  section: ConfigSection | null;
-  /** Top-left of the card, relative to the panel. Null centres it. */
-  anchor: { x: number; y: number } | null;
-  panelWidth: number;
-  onClose: () => void;
+  section: ConfigSection;
   t: SocialDict;
   isRTL: boolean;
   product: string;
@@ -1715,193 +1662,174 @@ function ConfigSelect({
   destination: Destination;
   onDestination: (next: Destination) => void;
 }) {
-  interface Choice {
-    id: string;
-    label: string;
-    on: boolean;
-    pick: () => void;
+  const pill = (on: boolean) =>
+    cn(
+      "cursor-pointer rounded-full px-3 py-1 text-xs font-medium transition-colors duration-150",
+      on
+        ? "bg-accent text-accent-foreground"
+        : "text-muted-foreground/70 hover:bg-accent/50 hover:text-accent-foreground",
+    );
+
+  const Pills = ({
+    items,
+  }: {
+    items: { id: string; label: string; on: boolean; pick: () => void }[];
+  }) => (
+    <div className="flex flex-wrap gap-1.5">
+      {items.map((item) => (
+        <button
+          key={item.id}
+          type="button"
+          aria-pressed={item.on}
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={item.pick}
+          className={pill(item.on)}
+        >
+          {item.label}
+        </button>
+      ))}
+    </div>
+  );
+
+  if (section === "brand") {
+    return (
+      <Pills
+        items={PRODUCTS.map((p) => ({
+          id: p.id,
+          label: isRTL ? p.labelAr : p.label,
+          on: product === p.id,
+          pick: () => onProduct(p.id),
+        }))}
+      />
+    );
   }
 
-  const title: Record<ConfigSection, string> = {
-    brand: t.spotlightConfigBrand,
-    feature: t.spotlightConfigFeature,
-    channels: t.spotlightConfigChannels,
-    postType: t.spotlightConfigPostType,
-    media: t.spotlightConfigMedia,
-    destination: t.spotlightConfigTiming,
-  };
-
-  /** Channels toggle; everything else replaces and closes. */
-  const multi = section === "channels";
-
-  const choices: Choice[] = (() => {
-    if (section === "brand") {
-      return PRODUCTS.map((p) => ({
-        id: p.id,
-        label: isRTL ? p.labelAr : p.label,
-        on: product === p.id,
-        pick: () => onProduct(p.id),
-      }));
-    }
-    if (section === "feature") {
-      // "Any" first, and always present: a pre-launch brand with no catalogue
-      // still needs a way to say "no feature", not an empty card.
-      return [
-        { id: ANY_FEATURE, label: t.mediaAny },
-        ...features.map((f) => ({ id: f.id, label: isRTL ? f.ar : f.en })),
-      ].map((entry) => ({
-        id: entry.id,
-        label: entry.label,
-        on: feature === entry.id,
-        pick: () => onFeature(entry.id),
-      }));
-    }
-    if (section === "channels") {
-      return wired.map((id) => {
-        const c = CHANNELS.find((entry) => entry.id === id);
-        return {
-          id,
-          label: c ? (isRTL ? c.labelAr : c.label) : id,
-          on: selected.includes(id),
-          pick: () =>
-            onChannels(
-              selected.includes(id)
-                ? selected.filter((x) => x !== id)
-                : [...selected, id],
-            ),
-        };
-      });
-    }
-    if (section === "postType") {
-      const name: Record<PostType, string> = {
-        post: t.postTypePost,
-        carousel: t.postTypeCarousel,
-        reel: t.postTypeReel,
-        story: t.postTypeStory,
-      };
-      return POST_TYPES.map((type) => ({
-        id: type,
-        label: name[type],
-        on: postType === type,
-        pick: () => onPostType(type),
-      }));
-    }
-    if (section === "media") {
-      const name: Record<MediaFilter, string> = {
-        any: t.mediaAny,
-        image: t.mediaImage,
-        video: t.mediaVideo,
-      };
-      return MEDIA_FILTERS.map((value) => ({
-        id: value,
-        label: name[value],
-        on: mediaFilter === value,
-        pick: () => onMediaFilter(value),
-      }));
-    }
-    if (section === "destination") {
-      const name: Record<Destination, string> = {
-        direct: t.destinationDirect,
-        schedule: t.destinationSchedule,
-        review: t.destinationReview,
-      };
-      return DESTINATIONS.map((option) => ({
-        id: option,
-        label: name[option],
-        on: destination === option,
-        pick: () => onDestination(option),
-      }));
-    }
-    return [];
-  })();
-
-  if (!section) return null;
-
-  /**
-   * How wide the card is, and how many across. A list of three reads best as
-   * a column; a dozen one-word features read as a grid, and a column of
-   * thirteen would be taller than the panel it hangs in.
-   *
-   * Width follows the columns rather than the other way round: four columns
-   * of "Parent portal" need the room, and the first attempt at two columns
-   * proved the point by truncating "Hogwarts".
-   */
-  const cols = section === "feature" ? 4 : section === "brand" ? 2 : 1;
-  const CARD = cols === 4 ? 384 : cols === 2 ? 264 : 224;
-  const left = anchor
-    ? Math.max(8, Math.min(anchor.x, Math.max(8, panelWidth - CARD - 8)))
-    : 8;
-
-  return (
-    // Hung under the box that was pressed, and rendered inside the settings
-    // face rather than portalled to <body>. Two reasons it belongs here: the
-    // thing being configured is right there, so the card should point at it
-    // rather than fly to the middle of anything; and staying in the tree
-    // means focus never leaves the field, so the box underneath cannot fold
-    // while you choose. A portalled version did fold it.
-    <div className="absolute inset-0 z-10">
-      <button
-        type="button"
-        aria-label={t.spotlightHintClose}
-        onMouseDown={(e) => e.preventDefault()}
-        onClick={onClose}
-        className="absolute inset-0 cursor-default"
+  if (section === "feature") {
+    // "Any" first, and always present: a pre-launch brand with no catalogue
+    // still needs a way to say "no feature", not an empty row.
+    return (
+      <Pills
+        items={[
+          {
+            id: ANY_FEATURE,
+            label: t.mediaAny,
+            on: feature === ANY_FEATURE,
+            pick: () => onFeature(ANY_FEATURE),
+          },
+          ...features.map((f) => ({
+            id: f.id,
+            label: isRTL ? f.ar : f.en,
+            on: feature === f.id,
+            pick: () => onFeature(f.id),
+          })),
+        ]}
       />
-      <div
-        role="dialog"
-        aria-label={title[section]}
-        style={{ insetInlineStart: left, top: anchor?.y ?? 8, width: CARD }}
-        className={cn(
-          "bg-popover text-popover-foreground absolute rounded-2xl border p-2 shadow-lg",
-          "text-start",
-        )}
-      >
-        {choices.length === 0 ? (
-          <p className="text-muted-foreground/60 py-2 text-xs">
-            {t.spotlightConfigNoChannels}
-          </p>
-        ) : (
-          <div
-            className={cn(
-              "gap-1",
-              cols === 4
-                ? "grid grid-cols-4"
-                : cols === 2
-                  ? "grid grid-cols-2"
-                  : "flex flex-col",
-            )}
-          >
-            {choices.map((choice) => (
-              <button
-                key={choice.id}
-                type="button"
-                aria-pressed={choice.on}
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => {
-                  choice.pick();
-                  if (!multi) onClose();
-                }}
-                className={cn(
-                  "flex cursor-pointer items-center rounded-lg transition-colors duration-150",
-                  cols === 1
-                    ? "justify-between px-3 py-2 text-sm"
-                    : // In a grid the tick would cost more room than it earns,
-                      // so the accent alone says which one holds.
-                      "justify-start px-2 py-1.5 text-xs leading-tight",
-                  choice.on
-                    ? "bg-accent text-accent-foreground font-medium"
-                    : "hover:bg-muted",
-                )}
-              >
-                <span className={cols === 1 ? "truncate" : "text-balance"}>
-                  {choice.label}
-                </span>
-                {choice.on && cols === 1 && <Check className="size-4 shrink-0" />}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
+    );
+  }
+
+  if (section === "channels") {
+    if (wired.length === 0) {
+      return (
+        <p className="text-muted-foreground/60 text-xs">
+          {t.spotlightConfigNoChannels}
+        </p>
+      );
+    }
+    return (
+      <Pills
+        items={wired.map((id) => {
+          const c = CHANNELS.find((entry) => entry.id === id);
+          return {
+            id,
+            label: c ? (isRTL ? c.labelAr : c.label) : id,
+            on: selected.includes(id),
+            pick: () =>
+              onChannels(
+                selected.includes(id)
+                  ? selected.filter((x) => x !== id)
+                  : [...selected, id],
+              ),
+          };
+        })}
+      />
+    );
+  }
+
+  if (section === "postType") {
+    const name: Record<PostType, string> = {
+      post: t.postTypePost,
+      carousel: t.postTypeCarousel,
+      reel: t.postTypeReel,
+      story: t.postTypeStory,
+    };
+    return (
+      <>
+        <Pills
+          items={POST_TYPES.map((type) => ({
+            id: type,
+            label: name[type],
+            on: postType === type,
+            pick: () => onPostType(type),
+          }))}
+        />
+        <p className="text-muted-foreground/60 pt-2 text-[11px]">
+          {t.postTypeHint}
+        </p>
+      </>
+    );
+  }
+
+  if (section === "media") {
+    const name: Record<MediaFilter, string> = {
+      any: t.mediaAny,
+      image: t.mediaImage,
+      video: t.mediaVideo,
+    };
+    return (
+      <>
+        <Pills
+          items={MEDIA_FILTERS.map((value) => ({
+            id: value,
+            label: name[value],
+            on: mediaFilter === value,
+            pick: () => onMediaFilter(value),
+          }))}
+        />
+        <p className="text-muted-foreground/60 pt-2 text-[11px]">
+          {t.mediaFilterHint}
+        </p>
+      </>
+    );
+  }
+
+  const name: Record<Destination, string> = {
+    direct: t.destinationDirect,
+    schedule: t.destinationSchedule,
+    review: t.destinationReview,
+  };
+  const hint: Record<Destination, string> = {
+    direct: t.destinationDirectHint,
+    schedule: t.destinationScheduleHint,
+    review: t.destinationReviewHint,
+  };
+  return (
+    <div className="space-y-1">
+      {DESTINATIONS.map((option) => (
+        <button
+          key={option}
+          type="button"
+          aria-pressed={destination === option}
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={() => onDestination(option)}
+          className={cn(
+            "flex w-full cursor-pointer flex-col rounded-lg p-2 text-start transition-colors duration-150",
+            destination === option ? "bg-accent" : "hover:bg-muted",
+          )}
+        >
+          <span className="text-sm font-medium">{name[option]}</span>
+          <span className="text-muted-foreground text-xs">{hint[option]}</span>
+        </button>
+      ))}
     </div>
   );
 }
