@@ -1801,19 +1801,11 @@ function MediaFormatCard({
   inert: boolean;
   onPick: () => void;
 }) {
-  // "16:9" and "1200x630" both mean the same thing to a box.
-  const parsed = ratio?.match(/^(\d+)[:x](\d+)$/);
-  const w = parsed ? Number(parsed[1]) : 1;
-  const h = parsed ? Number(parsed[2]) : 1;
-  // Fitted inside a box, not forced into a square. The card BECOMES the
-  // format — a 16:9 card is wide and short, a 9:16 one is tall and narrow —
-  // so the strip is a ribbon of real shapes rather than thirteen identical
-  // tiles each holding a small drawing of one.
-  const MAX_W = 190;
-  const MAX_H = 150;
-  const scale = Math.min(MAX_W / w, MAX_H / h);
-  const width = Math.round(w * scale);
-  const height = Math.round(h * scale);
+  // One size for every card, the way the first one is. Drawing each at its
+  // own ratio made a ribbon of real shapes, and made a row nothing could line
+  // up in — nine widths, two heights and a label hanging off each. The shape
+  // is still said, in the line underneath, where it does not cost the grid.
+  const SIZE = 150;
   const moving = typeof seconds === "number";
 
   const laneName =
@@ -1840,7 +1832,7 @@ function MediaFormatCard({
       title={[label, laneName, styleName].filter(Boolean).join(" · ")}
       onMouseDown={(e) => e.preventDefault()}
       onClick={onPick}
-      style={{ width }}
+      style={{ width: SIZE }}
       className={cn(
         "flex shrink-0 snap-start flex-col items-center gap-1.5",
         "transition-opacity duration-150",
@@ -1851,7 +1843,7 @@ function MediaFormatCard({
       {/* The whole card is the format. Nothing sits inside a frame that is
           not the thing itself. */}
       <span
-        style={{ width, height }}
+        style={{ width: SIZE, height: SIZE }}
         className={cn(
           "relative flex items-center justify-center overflow-hidden rounded-lg shadow-sm",
           lane === "higgs" && style === "cinematic"
@@ -2255,7 +2247,7 @@ function ConfigChoices({
           <div
             ref={mediaRow}
             className={cn(
-              "no-scrollbar -mx-1 mt-3 flex items-end gap-3 px-1 py-2",
+              "no-scrollbar -mx-1 mt-3 flex gap-3 px-1 py-2",
               "overflow-x-auto overscroll-x-contain",
               mediaDragging
                 ? "cursor-grabbing snap-none"
