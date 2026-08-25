@@ -111,10 +111,11 @@ import {
 } from "@/actions/post-social";
 import { CHANNELS, type ChannelId } from "@/components/root/social/config";
 import {
-  ASSET_TYPE_META,
-  typeLabel,
-  type AssetType,
-} from "@/components/root/social/showroom/taxonomy";
+  ANY_STYLE,
+  IMAGE_STYLES,
+  isImageStyle,
+  styleLabel,
+} from "@/components/root/social/image-styles";
 import {
   DESTINATIONS,
   MEDIA_FILTERS,
@@ -125,7 +126,6 @@ import {
   featureLabel,
   featuresFor,
   libraryFits,
-  mediaTypesFor,
   queueFits,
   type Destination,
   type BrandFeature,
@@ -162,6 +162,7 @@ const DESTINATION_KEY = "social:destination";
 const POST_TYPE_KEY = "social:post-type";
 const MEDIA_FILTER_KEY = "social:media-filter";
 const MEDIA_TYPE_KEY = "social:media-type";
+const IMAGE_STYLE_KEY = "social:image-style";
 const FEATURE_KEY = "social:feature";
 
 /** The select's "no pillar chosen" row, stored as a value rather than absence. */
@@ -387,19 +388,11 @@ export function ReviewSpotlight({
     ANY_MEDIA_TYPE,
     (v): v is string => typeof v === "string",
   );
-
-  /**
-   * A format belongs to a kind and a shape. Change either and a format that
-   * no longer appears would keep filtering the library from off screen, which
-   * is the same silent-empty-grid failure the settings face exists to avoid.
-   */
-  React.useEffect(() => {
-    if (mediaType === ANY_MEDIA_TYPE) return;
-    const kind = mediaFilter === "video" ? "video" : "image";
-    if (!mediaTypesFor(kind, postType).includes(mediaType)) {
-      setMediaType(ANY_MEDIA_TYPE);
-    }
-  }, [mediaType, mediaFilter, postType, setMediaType]);
+  const [imageStyle, setImageStyle] = usePersisted<string>(
+    IMAGE_STYLE_KEY,
+    ANY_STYLE,
+    (v): v is string => isImageStyle(v),
+  );
 
   /**
    * Features are per-brand vocabulary — mkan does not have Attendance — so a
@@ -998,6 +991,8 @@ export function ReviewSpotlight({
                   onMediaFilter={setMediaFilter}
                   mediaType={mediaType}
                   onMediaType={setMediaType}
+                  imageStyle={imageStyle}
+                  onImageStyle={setImageStyle}
                   drafts={brandDrafts.map((d) => ({
                     id: d.id,
                     text: d.text,
@@ -1347,6 +1342,8 @@ function ConfigPanel({
   onMediaFilter,
   mediaType,
   onMediaType,
+  imageStyle,
+  onImageStyle,
   drafts,
   onUseDraft,
   ago,
@@ -1372,6 +1369,8 @@ function ConfigPanel({
   onMediaFilter: (next: MediaFilter) => void;
   mediaType: string;
   onMediaType: (next: string) => void;
+  imageStyle: string;
+  onImageStyle: (next: string) => void;
   /** This brand's drafts awaiting review, oldest first. */
   drafts: { id: string; text: string; when: string }[];
   onUseDraft: (id: string) => void;
@@ -1495,6 +1494,8 @@ function ConfigPanel({
             onMediaFilter={onMediaFilter}
             mediaType={mediaType}
             onMediaType={onMediaType}
+            imageStyle={imageStyle}
+            onImageStyle={onImageStyle}
             destination={destination}
             onDestination={onDestination}
             drafts={drafts}
@@ -1785,238 +1786,274 @@ function useDragScroll(): {
  * invented ratio would be a claim about how they render that nothing backs.
  */
 /**
- * What a format LOOKS like, sketched.
+ * What a visual register looks like, sketched edge to edge.
  *
- * Every card is the same white plate — the difference between them is the
- * design, not the colour of a swatch. A hero is a picture with a line over it;
- * an OG image is a title plate; an infographic is a chart; a testimonial is a
- * quote with a face. Grey rectangles told you a format existed and nothing
- * about what choosing it would get you.
+ * Every card is the same square and every sketch bleeds to its corners — a
+ * style is a treatment of the whole frame, so a drawing floating in the middle
+ * of a white plate would be describing the opposite of the thing.
  *
- * Drawn from the taxonomy's own ids, so a type added there gets a neutral
- * frame here rather than a wrong one.
+ * Monochrome plus the house clay. These are registers, not palettes: showing
+ * "Bold" in red and "Luxury" in gold would be inventing brand colours the kit
+ * does not have, and the brands each bring their own.
  */
-function FormatSketch({ type }: { type: string }) {
-  const wash = "bg-muted-foreground/20";
-  const ink = "bg-muted-foreground/35";
-  const faint = "bg-muted-foreground/12";
+function StyleSketch({ id }: { id: string }) {
+  const wash = "bg-muted-foreground/15";
+  const mid = "bg-muted-foreground/30";
+  const ink = "bg-muted-foreground/55";
 
-  switch (type) {
-    case "hero":
-      // A picture that fills the frame, with the headline sitting on it.
+  switch (id) {
+    case "corporate":
+      // Order: a rule, a column, room. Nothing raises its voice.
       return (
-        <span className={cn(wash, "absolute inset-0 flex items-end p-3")}>
-          <span className="flex w-full flex-col gap-1">
-            <span className={cn(ink, "h-2 w-3/4 rounded-full")} />
-            <span className={cn(ink, "h-1.5 w-1/2 rounded-full opacity-70")} />
-          </span>
+        <span className="bg-card absolute inset-0 p-4">
+          <span className={cn(ink, "absolute inset-x-4 top-5 h-1 rounded-full")} />
+          <span className={cn(mid, "absolute start-4 top-9 h-1 w-1/2 rounded-full")} />
+          <span className={cn(wash, "absolute inset-x-4 bottom-4 h-14 rounded")} />
         </span>
       );
 
-    case "og":
-    case "banner":
-      // A title plate: the thing a link preview shows.
+    case "modern":
+      // One clean geometric gesture over a soft field.
       return (
-        <span className="flex w-full flex-col items-center gap-1.5 px-4">
-          <span className={cn(ink, "h-2.5 w-4/5 rounded-full")} />
-          <span className={cn(wash, "h-1.5 w-3/5 rounded-full")} />
-          <span className={cn(faint, "mt-1 h-1 w-2/5 rounded-full")} />
+        <span className="from-muted-foreground/25 to-muted-foreground/5 absolute inset-0 bg-gradient-to-br">
+          <span className="border-muted-foreground/50 absolute end-5 bottom-5 size-16 rounded-full border-2" />
         </span>
       );
 
-    case "logo":
-      return <span className={cn(ink, "size-10 rounded-full")} />;
-
-    case "product":
-      // One object, centred, on a plain ground with its shadow.
+    case "minimalist":
+      // Almost nothing, placed exactly.
       return (
-        <span className="flex flex-col items-center gap-2">
-          <span className={cn(wash, "size-14 rounded-xl")} />
-          <span className={cn(faint, "h-1 w-10 rounded-full")} />
+        <span className="bg-card absolute inset-0">
+          <span className={cn(ink, "absolute start-6 top-6 size-3 rounded-sm")} />
+          <span className={cn(wash, "absolute end-6 bottom-6 h-1 w-10 rounded-full")} />
         </span>
       );
 
-    case "lifestyle":
-      // A scene: ground, horizon, a figure in it.
+    case "bold":
+      // Type as the picture: one word filling the frame.
       return (
-        <span className="absolute inset-0">
-          <span
-            className={cn(wash, "absolute inset-x-0 bottom-0 h-2/5")}
-          />
-          <span className={cn(faint, "absolute inset-x-0 top-0 h-3/5")} />
-          <span className={cn(ink, "absolute bottom-[38%] start-6 size-5 rounded-full")} />
-          <span className={cn(ink, "absolute bottom-[30%] end-7 h-8 w-5 rounded-t-full opacity-70")} />
+        <span className="bg-foreground absolute inset-0 flex flex-col justify-center gap-2 p-4">
+          <span className="bg-background h-5 w-4/5 rounded-sm" />
+          <span className="bg-background/70 h-5 w-3/5 rounded-sm" />
         </span>
       );
 
-    case "mockup":
-      // A device, because that is what an interface shot is.
+    case "luxury":
+      // Dark, quiet, one hairline and a lot of space.
       return (
-        <span className={cn("border-muted-foreground/30 flex h-24 w-16 flex-col gap-1 rounded-lg border-2 p-1.5")}>
-          <span className={cn(faint, "h-1 w-1/2 self-center rounded-full")} />
-          <span className={cn(wash, "flex-1 rounded")} />
+        <span className="bg-foreground absolute inset-0 flex flex-col items-center justify-center gap-3">
+          <span className="bg-background/80 h-px w-16" />
+          <span className="bg-background/90 size-6 rounded-full" />
+          <span className="bg-background/80 h-px w-16" />
         </span>
       );
 
-    case "infographic":
-      // A chart is the whole point of one.
+    case "creative":
+      // Shapes that overlap and lean.
       return (
-        <span className="flex h-20 items-end gap-2">
-          {[0.45, 0.8, 0.6, 1].map((n, i) => (
+        <span className="bg-card absolute inset-0">
+          <span className={cn(mid, "absolute start-5 top-7 size-16 rotate-12 rounded-lg")} />
+          <span className={cn(ink, "absolute end-6 bottom-8 size-12 -rotate-6 rounded-full opacity-80")} />
+          <span className={cn(wash, "absolute end-10 top-6 size-8 rotate-45")} />
+        </span>
+      );
+
+    case "playful":
+      // Scattered, round, unserious.
+      return (
+        <span className="bg-card absolute inset-0">
+          {[
+            "start-5 top-6 size-7",
+            "end-6 top-10 size-4",
+            "start-12 bottom-7 size-9",
+            "end-8 bottom-6 size-6",
+            "start-6 top-20 size-3",
+          ].map((pos, i) => (
             <span
               key={i}
-              className={cn(i === 3 ? ink : wash, "w-4 rounded-t")}
-              style={{ height: `${n * 100}%` }}
+              className={cn(
+                i % 2 ? mid : ink,
+                "absolute rounded-full",
+                pos,
+              )}
             />
           ))}
         </span>
       );
 
-    case "split":
-      // Two halves and the line between them.
+    case "editorial":
+      // A magazine page: headline, deck, columns.
       return (
-        <span className="relative flex h-24 w-28 overflow-hidden rounded">
-          <span className={cn(faint, "flex-1")} />
-          <span className="bg-card w-0.5" />
-          <span className={cn(wash, "flex-1")} />
-        </span>
-      );
-
-    case "testimonial":
-      // A quote, and the face it belongs to.
-      return (
-        <span className="flex w-full flex-col items-center gap-2 px-4">
-          <span className={cn(ink, "h-4 w-2 rounded-sm")} />
-          <span className={cn(wash, "h-1.5 w-full rounded-full")} />
-          <span className={cn(wash, "h-1.5 w-4/5 rounded-full")} />
-          <span className="mt-1 flex items-center gap-1.5">
-            <span className={cn(ink, "size-4 rounded-full")} />
-            <span className={cn(faint, "h-1 w-8 rounded-full")} />
+        <span className="bg-card absolute inset-0 p-4">
+          <span className={cn(ink, "absolute inset-x-4 top-4 h-3 rounded-sm")} />
+          <span className={cn(mid, "absolute start-4 top-9 h-1.5 w-2/3 rounded-full")} />
+          <span className="absolute inset-x-4 bottom-4 flex h-16 gap-2">
+            <span className="flex flex-1 flex-col gap-1">
+              {[0, 1, 2, 3].map((i) => (
+                <span key={i} className={cn(wash, "h-1 rounded-full")} />
+              ))}
+            </span>
+            <span className={cn(mid, "w-1/2 rounded")} />
           </span>
         </span>
       );
 
-    case "carousel":
-      // Cards behind cards — the swipe made visible.
+    case "cinematic":
+      // Letterboxed, graded, a figure lit from one side.
       return (
-        <span className="relative h-24 w-20">
-          <span className={cn(faint, "absolute inset-y-2 -end-3 w-16 rounded-lg")} />
-          <span className={cn(wash, "absolute inset-y-1 -end-1.5 w-16 rounded-lg")} />
-          <span className={cn("bg-muted-foreground/30 absolute inset-0 rounded-lg")} />
+        <span className="from-muted-foreground/50 to-muted-foreground/10 absolute inset-0 bg-gradient-to-tr">
+          <span className="bg-foreground absolute inset-x-0 top-0 h-5" />
+          <span className="bg-foreground absolute inset-x-0 bottom-0 h-5" />
+          <span className={cn(ink, "absolute bottom-8 start-8 h-14 w-6 rounded-t-full")} />
         </span>
       );
 
-    case "reel":
-    case "story":
-      // A vertical frame; story carries the segment bar that names it.
+    case "retro":
+      // Sun bands.
       return (
-        <span className={cn(wash, "relative flex h-28 w-16 items-center justify-center rounded-lg")}>
-          {type === "story" && (
-            <span className="absolute inset-x-1.5 top-1.5 flex gap-1">
-              {[0, 1, 2].map((i) => (
-                <span
-                  key={i}
-                  className={cn(i === 0 ? ink : "bg-card/70", "h-0.5 flex-1 rounded-full")}
-                />
-              ))}
-            </span>
-          )}
-          <span className="border-s-card h-0 w-0 border-y-[8px] border-s-[13px] border-y-transparent rtl:rotate-180" />
+        <span className="bg-card absolute inset-0 flex flex-col justify-end gap-1.5 p-4">
+          <span className="bg-clay/70 absolute end-6 top-6 size-12 rounded-full" />
+          {[0.9, 0.7, 0.5, 0.3].map((o, i) => (
+            <span
+              key={i}
+              className="bg-clay h-2.5 w-full rounded-full"
+              style={{ opacity: o }}
+            />
+          ))}
+        </span>
+      );
+
+    case "futuristic":
+      // A grid, and something glowing on it.
+      return (
+        <span className="bg-foreground absolute inset-0 overflow-hidden">
+          {[0, 1, 2, 3].map((i) => (
+            <span
+              key={`h${i}`}
+              className="bg-background/20 absolute inset-x-0 h-px"
+              style={{ top: `${20 + i * 20}%` }}
+            />
+          ))}
+          {[0, 1, 2, 3].map((i) => (
+            <span
+              key={`v${i}`}
+              className="bg-background/20 absolute inset-y-0 w-px"
+              style={{ left: `${20 + i * 20}%` }}
+            />
+          ))}
+          <span className="bg-clay absolute start-1/2 top-1/2 size-8 -translate-x-1/2 -translate-y-1/2 rounded-full" />
+        </span>
+      );
+
+    case "threeD":
+      // An isometric solid, drawn as its three faces.
+      return (
+        <span className="bg-card absolute inset-0 flex items-center justify-center">
+          <span className="relative h-20 w-20">
+            <span className={cn(ink, "absolute inset-x-0 top-0 h-10 [clip-path:polygon(50%_0,100%_25%,50%_50%,0_25%)]")} />
+            <span className={cn(mid, "absolute start-0 top-[25%] h-14 w-1/2 [clip-path:polygon(0_0,100%_50%,100%_100%,0_50%)]")} />
+            <span className={cn(wash, "absolute end-0 top-[25%] h-14 w-1/2 [clip-path:polygon(100%_0,100%_50%,0_100%,0_50%)]")} />
+          </span>
+        </span>
+      );
+
+    case "illustration":
+      // Drawn, not photographed: outlines and flat fills.
+      return (
+        <span className="bg-card absolute inset-0">
+          <span className="border-muted-foreground/50 absolute start-6 bottom-8 size-12 rounded-full border-2" />
+          <span className={cn(mid, "absolute end-7 bottom-8 h-16 w-10 rounded-t-full")} />
+          <span className="bg-muted-foreground/50 absolute inset-x-5 bottom-6 h-0.5 rounded-full" />
+          <span className="border-muted-foreground/40 absolute end-8 top-6 size-6 rotate-45 border-2" />
+        </span>
+      );
+
+    case "abstract":
+      // Overlapping organic fields, no subject at all.
+      return (
+        <span className="bg-card absolute inset-0 overflow-hidden">
+          <span className={cn(mid, "absolute -start-4 top-4 size-24 rounded-full")} />
+          <span className={cn(ink, "absolute end-2 bottom-2 size-20 rounded-[45%] opacity-70")} />
+          <span className={cn(wash, "absolute start-10 bottom-6 size-16 rounded-[60%_40%]")} />
+        </span>
+      );
+
+    case "ugc":
+      // A snapshot: off-square, hand-held, a caption bar.
+      return (
+        <span className={cn(wash, "absolute inset-0 flex items-center justify-center")}>
+          <span className="bg-card w-24 rotate-[-4deg] p-1.5 shadow-sm">
+            <span className={cn(mid, "block h-16 w-full rounded-sm")} />
+            <span className={cn(wash, "mt-1.5 block h-1 w-2/3 rounded-full")} />
+          </span>
+        </span>
+      );
+
+    case "product":
+      // One object, lit, on a plinth with its own shadow.
+      return (
+        <span className="from-muted-foreground/20 to-card absolute inset-0 bg-gradient-to-b">
+          <span className={cn(ink, "absolute start-1/2 top-10 size-16 -translate-x-1/2 rounded-2xl")} />
+          <span className={cn(mid, "absolute start-1/2 bottom-9 h-1.5 w-20 -translate-x-1/2 rounded-full opacity-60")} />
+          <span className="bg-muted-foreground/20 absolute inset-x-0 bottom-0 h-8" />
         </span>
       );
 
     default:
-      // "Any", and any type the taxonomy gains before this switch does.
-      return null;
+      // "Any", and any register added before this switch is.
+      return <span className="bg-card absolute inset-0" />;
   }
 }
 
-function MediaFormatCard({
-  t,
-  type,
+/**
+ * One visual register, as a card that is entirely its own sketch.
+ *
+ * Edge to edge: a style is a treatment of the whole frame, so the drawing goes
+ * to the corners and the name sits on it rather than under it — the same ink
+ * pill the chosen post shape wears, for the same reason.
+ */
+function StyleCard({
+  id,
   label,
-  ratio,
-  lane,
-  style,
-  seconds,
   on,
   inert,
   onPick,
 }: {
-  t: SocialDict;
-  /** Taxonomy id, which is what the sketch is drawn from. */
-  type: string;
+  id: string;
   label: string;
-  ratio: string | null;
-  /** How it is made: a photographic render, a designed plate, or a placed file. */
-  lane?: "higgs" | "template" | "none";
-  /** Its look, where the taxonomy records one. */
-  style?: "minimal" | "cinematic";
-  /** Clip length, for the moving formats. */
-  seconds?: number;
   on: boolean;
   inert: boolean;
   onPick: () => void;
 }) {
   const SIZE = 150;
-  const moving = typeof seconds === "number";
-
-  const laneName =
-    lane === "template"
-      ? t.laneTemplate
-      : lane === "none"
-        ? t.laneNone
-        : lane === "higgs"
-          ? t.laneHiggs
-          : null;
-  const styleName =
-    style === "cinematic"
-      ? t.styleCinematic
-      : style === "minimal"
-        ? t.styleMinimal
-        : null;
-  const meta = [ratio, styleName ?? laneName].filter(Boolean).join(" · ");
 
   return (
     <button
       type="button"
       aria-pressed={on}
       aria-label={label}
-      title={[label, laneName, styleName].filter(Boolean).join(" · ")}
+      title={label}
       onMouseDown={(e) => e.preventDefault()}
       onClick={onPick}
-      style={{ width: SIZE }}
+      style={{ width: SIZE, height: SIZE }}
       className={cn(
-        "flex shrink-0 snap-start flex-col items-center gap-1.5",
+        "relative shrink-0 snap-start overflow-hidden rounded-lg shadow-sm",
         "transition-opacity duration-150",
         inert ? "pointer-events-none" : "cursor-pointer",
         on ? "opacity-100" : "opacity-90 hover:opacity-100",
       )}
     >
-      {/* Every card is the same plate. What differs is the design on it. */}
+      <StyleSketch id={id} />
       <span
-        style={{ width: SIZE, height: SIZE }}
-        className="bg-card relative flex items-center justify-center overflow-hidden rounded-lg shadow-sm"
-      >
-        <FormatSketch type={type} />
-        {on && (
-          <span className="bg-foreground text-background absolute end-1.5 bottom-1.5 z-10 flex size-4 items-center justify-center rounded-full">
-            <Check className="size-3" strokeWidth={3} />
-          </span>
+        className={cn(
+          "absolute end-2 bottom-2 z-10 max-w-[calc(100%-1rem)] truncate rounded-full",
+          "px-2.5 py-1 text-[11px] leading-tight font-medium",
+          on
+            ? "bg-foreground text-background"
+            : "bg-card/85 text-foreground",
         )}
-      </span>
-
-      <span className="flex w-full flex-col items-center gap-0.5">
-        <span className="w-full truncate text-center text-[11px] leading-tight">
-          {label}
-        </span>
-        <span className="text-muted-foreground/60 truncate text-[9px] leading-none">
-          {moving
-            ? [meta, fill(t.mediaSeconds, { count: seconds })]
-                .filter(Boolean)
-                .join(" · ")
-            : meta || "\u00a0"}
-        </span>
+      >
+        {label}
       </span>
     </button>
   );
@@ -2040,6 +2077,8 @@ function ConfigChoices({
   onMediaFilter,
   mediaType,
   onMediaType,
+  imageStyle,
+  onImageStyle,
   destination,
   onDestination,
   drafts,
@@ -2063,6 +2102,8 @@ function ConfigChoices({
   onMediaFilter: (next: MediaFilter) => void;
   mediaType: string;
   onMediaType: (next: string) => void;
+  imageStyle: string;
+  onImageStyle: (next: string) => void;
   destination: Destination;
   onDestination: (next: Destination) => void;
   drafts: { id: string; text: string; when: string }[];
@@ -2331,9 +2372,6 @@ function ConfigChoices({
   }
 
   if (section === "media") {
-    const kind = mediaFilter === "video" ? "video" : "image";
-    const types = mediaTypesFor(kind, postType);
-
     return (
       <>
         {/* Two icons, not three pills. A still or a moving picture is the
@@ -2370,55 +2408,41 @@ function ConfigChoices({
           })}
         </div>
 
-        {/* And under it, the shapes that kind comes in — the same strip of
-            cards the Post word uses, drawn at each format's own ratio, since
-            a format IS a ratio plus a name. */}
-        {types.length > 0 ? (
-          <div
-            ref={mediaRow}
-            className={cn(
-              "no-scrollbar -mx-1 mt-3 flex gap-3 px-1 py-2",
-              "overflow-x-auto overscroll-x-contain",
-              mediaDragging
-                ? "cursor-grabbing snap-none"
-                : "cursor-grab snap-x snap-mandatory",
-            )}
-          >
-            <MediaFormatCard
-              t={t}
-              type={ANY_MEDIA_TYPE}
-              label={t.mediaAny}
-              ratio={null}
-              on={mediaType === ANY_MEDIA_TYPE}
+        {/* And under it, how it should look. Sixteen registers, each card
+            entirely its own sketch — a style is a treatment of the whole
+            frame, so a drawing floating inside a plate would be describing
+            the opposite of the thing. */}
+        <div
+          ref={mediaRow}
+          className={cn(
+            "no-scrollbar -mx-1 mt-3 flex gap-3 px-1 py-2",
+            "overflow-x-auto overscroll-x-contain",
+            mediaDragging
+              ? "cursor-grabbing snap-none"
+              : "cursor-grab snap-x snap-mandatory",
+          )}
+        >
+          <StyleCard
+            id={ANY_STYLE}
+            label={t.mediaAny}
+            on={imageStyle === ANY_STYLE}
+            inert={mediaDragging}
+            onPick={() => onImageStyle(ANY_STYLE)}
+          />
+          {IMAGE_STYLES.map((style) => (
+            <StyleCard
+              key={style.id}
+              id={style.id}
+              label={styleLabel(style.id, isRTL)}
+              on={imageStyle === style.id}
               inert={mediaDragging}
-              onPick={() => onMediaType(ANY_MEDIA_TYPE)}
+              onPick={() => onImageStyle(style.id)}
             />
-            {types.map((type) => (
-              <MediaFormatCard
-                key={type}
-                t={t}
-                type={type}
-                label={typeLabel(type as AssetType, isRTL)}
-                ratio={ASSET_TYPE_META[type as AssetType]?.ratio ?? null}
-                lane={ASSET_TYPE_META[type as AssetType]?.lane}
-                style={ASSET_TYPE_META[type as AssetType]?.style}
-                seconds={
-                  ASSET_TYPE_META[type as AssetType]?.gemini?.seconds
-                }
-                on={mediaType === type}
-                inert={mediaDragging}
-                onPick={() => onMediaType(type)}
-              />
-            ))}
-          </div>
-        ) : (
-          <p className="text-muted-foreground/60 pt-3 text-xs">
-            {t.mediaNoFormats}
-          </p>
-        )}
+          ))}
+        </div>
 
         <p className="text-muted-foreground/60 pt-2 text-[11px]">
-          {t.mediaFilterHint}
+          {t.styleHint}
         </p>
       </>
     );

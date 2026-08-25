@@ -186,6 +186,8 @@ export const SOCIAL_DICTIONARY = {
     mediaImage: "Images",
     mediaVideo: "Video",
     mediaFilterHint: "Filters the ＋ library and the queue below.",
+    styleHint:
+      "The look a generated image is asked for. It rides the brief — it does not filter the library.",
     mediaNoFormats: "This post shape has no formats of that kind.",
     // How a format is made, from the showroom taxonomy's own `lane`.
     laneHiggs: "Photo",
@@ -569,6 +571,7 @@ export const SOCIAL_DICTIONARY = {
     mediaImage: "صور",
     mediaVideo: "فيديو",
     mediaFilterHint: "يرشّح مكتبة ＋ والطابور أدناه.",
+    styleHint: "الطابع المطلوب للصورة المولّدة. يرافق الموجز ولا يرشّح المكتبة.",
     mediaNoFormats: "لا صيغ من هذا النوع لشكل المنشور هذا.",
     laneHiggs: "تصوير",
     laneTemplate: "تصميم",
