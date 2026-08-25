@@ -67,6 +67,12 @@ export interface PostTypeMeta {
   text: boolean;
   /** How many pieces of media the shape implies. */
   count: "none" | "one" | "many";
+  /**
+   * How the media sits in the frame — what the preview has to draw. `feed` is
+   * a wide block in a scrolling post, `tall` is the 9:16 surfaces (story,
+   * reel), `swipe` is the multi-card one where the next card peeks in.
+   */
+  frame: "feed" | "tall" | "swipe";
 }
 
 /** Stills a feed post can use — every text-bearing still type the library has. */
@@ -85,25 +91,63 @@ const STILLS = [
 ] as const;
 
 export const POST_TYPE_META: Record<PostType, PostTypeMeta> = {
-  text: { assets: [], kind: "none", text: true, count: "none" },
-  image: { assets: STILLS, kind: "image", text: true, count: "one" },
-  gallery: { assets: STILLS, kind: "image", text: true, count: "many" },
-  video: { assets: ["reel", "story"], kind: "video", text: true, count: "one" },
-  imageOnly: { assets: STILLS, kind: "image", text: false, count: "one" },
+  text: { assets: [], kind: "none", text: true, count: "none", frame: "feed" },
+  image: {
+    assets: STILLS,
+    kind: "image",
+    text: true,
+    count: "one",
+    frame: "feed",
+  },
+  gallery: {
+    assets: STILLS,
+    kind: "image",
+    text: true,
+    count: "many",
+    frame: "feed",
+  },
+  video: {
+    assets: ["reel", "story"],
+    kind: "video",
+    text: true,
+    count: "one",
+    frame: "feed",
+  },
+  imageOnly: {
+    assets: STILLS,
+    kind: "image",
+    text: false,
+    count: "one",
+    frame: "feed",
+  },
   videoOnly: {
     assets: ["reel", "story"],
     kind: "video",
     text: false,
     count: "one",
+    frame: "feed",
   },
   carousel: {
     assets: ["carousel", "split", "infographic", "og"],
     kind: "image",
     text: true,
     count: "many",
+    frame: "swipe",
   },
-  story: { assets: ["story", "reel"], kind: "image", text: false, count: "one" },
-  reel: { assets: ["reel"], kind: "video", text: true, count: "one" },
+  story: {
+    assets: ["story", "reel"],
+    kind: "image",
+    text: false,
+    count: "one",
+    frame: "tall",
+  },
+  reel: {
+    assets: ["reel"],
+    kind: "video",
+    text: true,
+    count: "one",
+    frame: "tall",
+  },
 };
 
 /** Image, video, or don't care. Filters both the library and the queue. */

@@ -1470,50 +1470,89 @@ function ConfigPanel({
 }
 
 /**
- * A post's shape, drawn.
+ * A post's shape, drawn as the post itself.
  *
- * Bars are copy, blocks are media, a triangle is footage. Nine names in a row
- * are nine things to read; nine little diagrams are one glance — and the
- * distinction a word makes worst ("Text + images" against "Carousel") is the
- * one a picture makes best.
+ * Not an abstract diagram: a feed card with an avatar, a name, the copy, the
+ * media and an action bar, because that is the thing being chosen and a
+ * reader recognises it before reading a word. The 9:16 surfaces drop the feed
+ * chrome — a story has no byline row above it — and the swipe frame lets the
+ * next card peek in at the edge, which is the only thing that tells a carousel
+ * apart from a single image at this size.
  */
 function PostShape({ meta }: { meta: PostTypeMeta }) {
-  const bar = "bg-muted-foreground/40 h-1 rounded-full";
-  const block = "bg-muted-foreground/25 rounded";
-
-  const media = () => {
-    if (meta.kind === "none") return null;
-    if (meta.count === "many") {
-      return (
-        <div className="grid w-full flex-1 grid-cols-2 gap-0.5">
-          {[0, 1, 2, 3].map((i) => (
-            <div key={i} className={cn(block, "h-full w-full")} />
-          ))}
-        </div>
-      );
-    }
-    return (
-      <div
-        className={cn(block, "flex w-full flex-1 items-center justify-center")}
-      >
-        {meta.kind === "video" && (
-          <span className="border-s-muted-foreground/60 h-0 w-0 border-y-[5px] border-s-[8px] border-y-transparent rtl:rotate-180" />
-        )}
-      </div>
-    );
-  };
+  const skin = "bg-muted-foreground/20";
+  const line = "bg-muted-foreground/25 h-1.5 rounded-full";
+  const tall = meta.frame === "tall";
 
   return (
     <div
       aria-hidden
-      className="flex h-12 w-full flex-col items-center justify-center gap-1 px-1"
+      className="bg-background/60 flex h-[8.5rem] w-full flex-col gap-1.5 rounded-lg p-2"
     >
-      {media()}
-      {meta.text && (
-        <div className="flex w-full flex-col gap-0.5">
-          <div className={cn(bar, "w-full")} />
-          <div className={cn(bar, "w-2/3")} />
-          {meta.kind === "none" && <div className={cn(bar, "w-5/6")} />}
+      {/* The byline. Every feed post has one; a full-bleed vertical surface
+          does not, so the tall frames spend that room on the media. */}
+      {!tall && (
+        <div className="flex items-center gap-1.5">
+          <span className={cn(skin, "size-4 shrink-0 rounded-full")} />
+          <span className="flex flex-1 flex-col gap-1">
+            <span className={cn(line, "w-2/3")} />
+            <span className={cn(line, "h-1 w-1/3")} />
+          </span>
+        </div>
+      )}
+
+      {meta.text && !tall && (
+        <div className="flex flex-col gap-1">
+          <span className={cn(line, "w-full")} />
+          <span className={cn(line, "w-4/5")} />
+          {meta.kind === "none" && (
+            <>
+              <span className={cn(line, "w-full")} />
+              <span className={cn(line, "w-3/5")} />
+            </>
+          )}
+        </div>
+      )}
+
+      {meta.kind !== "none" && (
+        <div className="relative flex min-h-0 flex-1 gap-1">
+          {meta.count === "many" && meta.frame !== "swipe" ? (
+            <div className="grid h-full w-full grid-cols-2 gap-1">
+              {[0, 1, 2, 3].map((i) => (
+                <span key={i} className={cn(skin, "h-full w-full rounded-sm")} />
+              ))}
+            </div>
+          ) : (
+            <>
+              <span
+                className={cn(
+                  skin,
+                  "flex h-full items-center justify-center rounded-md",
+                  // The swipe frame leaves a sliver for the next card.
+                  meta.frame === "swipe" ? "w-4/5" : "w-full",
+                )}
+              >
+                {meta.kind === "video" && (
+                  <span className="border-s-background/80 h-0 w-0 border-y-[6px] border-s-[10px] border-y-transparent rtl:rotate-180" />
+                )}
+              </span>
+              {meta.frame === "swipe" && (
+                <span className={cn(skin, "h-full flex-1 rounded-s-md")} />
+              )}
+            </>
+          )}
+        </div>
+      )}
+
+      {/* Copy under the media is where a reel or a caption-last post puts it. */}
+      {meta.text && tall && <span className={cn(line, "w-3/4")} />}
+
+      {/* The action bar — like, comment, share. Feed only. */}
+      {!tall && (
+        <div className="mt-auto flex items-center gap-2 pt-0.5">
+          {[0, 1, 2].map((i) => (
+            <span key={i} className={cn(line, "h-1 w-4")} />
+          ))}
         </div>
       )}
     </div>
@@ -1753,7 +1792,10 @@ function ConfigChoices({
     // "Text + images" versus "Carousel" is a distinction a word makes badly.
     return (
       <>
-        <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+        {/* One row that scrolls, rather than a grid that reflows. Nine
+            shapes read as a strip of posts to flick through; wrapped into
+            rows they read as a form. */}
+        <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
           {POST_TYPES.map((type) => {
             const meta = POST_TYPE_META[type];
             const on = postType === type;
@@ -1765,8 +1807,8 @@ function ConfigChoices({
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => onPostType(type)}
                 className={cn(
-                  "flex cursor-pointer flex-col items-center gap-2 rounded-xl border p-2",
-                  "transition-colors duration-150",
+                  "flex w-28 shrink-0 cursor-pointer flex-col items-center gap-1.5",
+                  "rounded-xl border p-1.5 transition-colors duration-150",
                   on
                     ? "border-foreground/40 bg-accent"
                     : "border-input hover:border-foreground/30 hover:bg-accent/40",
