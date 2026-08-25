@@ -107,18 +107,18 @@ AC, generator, 80k/night https://maps.app.goo.gl/…
 
 | You write | It becomes | Needed for live? |
 | --- | --- | --- |
-| a phone number, in any digits | `hostPhone` as `+249…` — and the host record it belongs to | **yes** — someone to call |
+| a phone number, in any digits | `hostPhone` as `+249…`, plus the host record | **yes** — someone to call |
 | a person's name | `hostName` | expected, not required |
-| `غرفتين` · "2 bedrooms" | `bedrooms` | **yes** |
-| `حمام` · `حمامين` · "3 bathrooms" | `bathrooms` | **yes** |
-| `شقة` · `فيلا` · `استوديو` · "villa" | `propertyType` (`APARTMENT`, `VILLA`, `ROOMS`…) | **yes** |
-| `٣٠ الف الليلة` · "30k/night" | `priceNightSdg` | **yes** |
-| a neighbourhood · a map link | `zone` (one of the 45 Port Sudan zones) · `googleMapsUrl` | **yes** — one of the two |
-| a title, a description | `titleAr`, `descriptionAr` (English mirrored later) | **yes** — drafted for you from the facts if you did not write them; you see the draft before `live` |
-| `صالة` · `مطبخ` · `مكيف` · "wifi" | `highlights` · `amenities` | nice |
-| "sleeps 4" · `٤ اشخاص` · `سريرين` | `guestCapacity` · `beds` | nice |
-| `1.` `2.` `3.` — numbered lines | one home per number, same host, codes in order | identity |
-| "price confirmed" · `السعر مؤكد` — you agreed it with the host in person | `priceConfirmedByHost` | part of the bell |
+| 2 bedrooms · `غرفتين` | `bedrooms` | **yes** |
+| 3 bathrooms · `حمامين` | `bathrooms` | **yes** |
+| villa · `فيلا` · `شقة` · `استوديو` | `propertyType` | **yes** |
+| 30k/night · `٣٠ الف الليلة` | `priceNightSdg` | **yes** |
+| a neighbourhood · a map link | `zone` (45 Port Sudan zones) · `googleMapsUrl` | **yes** — one of the two |
+| a title, a description | `titleAr`, `descriptionAr` (English mirrored later) | **yes** — drafted from the facts if you did not write them; you see the draft before `live` |
+| wifi · `صالة` · `مطبخ` · `مكيف` | `highlights` · `amenities` | nice |
+| sleeps 4 · `٤ اشخاص` · `سريرين` | `guestCapacity` · `beds` | nice |
+| numbered lines `1.` `2.` `3.` | one home per number, same host, codes in order | identity |
+| price confirmed · `السعر مؤكد` — agreed with the host in person | `priceConfirmedByHost` | part of the bell |
 | anything else — generator, water tank, which floor, furnished | kept in the note on the record, never dropped | — |
 
 Words the CRM has no field for are not thrown away and not guessed at: they stay in your
