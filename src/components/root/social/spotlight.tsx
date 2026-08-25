@@ -1765,23 +1765,25 @@ function useDragScroll(): {
 }
 
 /**
- * One media format, drawn at its own ratio.
+ * One media format, drawn at its own ratio — the post cards' pattern, applied
+ * to a smaller question.
+ *
+ * Same card surface, same size, same ink check in the same corner. The post
+ * strip taught the shape; a second strip that answered differently would make
+ * a reader learn it twice.
  *
  * The taxonomy records what each type renders at — 16:9 for a hero, 9:16 for
- * a story, 1200x630 for an OG image — so the card can BE that shape rather
- * than describe it. Types with no recorded ratio (mockup, infographic, split)
- * get a neutral square: an invented ratio would be a claim about how they
- * render that nothing backs.
+ * a story, 1200x630 for an OG image — so the block inside IS that shape rather
+ * than describing it. Types with no recorded ratio get a neutral square: an
+ * invented ratio would be a claim about how they render that nothing backs.
  */
 function MediaFormatCard({
-  id,
   label,
   ratio,
   on,
   inert,
   onPick,
 }: {
-  id: string;
   label: string;
   ratio: string | null;
   on: boolean;
@@ -1792,45 +1794,51 @@ function MediaFormatCard({
   const parsed = ratio?.match(/^(\d+)[:x](\d+)$/);
   const w = parsed ? Number(parsed[1]) : 1;
   const h = parsed ? Number(parsed[2]) : 1;
-  const box = 68;
+  const box = 96;
   const scale = Math.min(box / w, box / h);
 
   return (
     <button
-      key={id}
       type="button"
       aria-pressed={on}
+      aria-label={label}
+      title={label}
       onMouseDown={(e) => e.preventDefault()}
       onClick={onPick}
       className={cn(
-        "flex w-24 shrink-0 snap-start flex-col items-center gap-1.5 rounded-lg p-2",
-        "transition-opacity duration-150",
+        "w-40 shrink-0 snap-start rounded-lg transition-opacity duration-150",
         inert ? "pointer-events-none" : "cursor-pointer",
         on ? "opacity-100" : "opacity-90 hover:opacity-100",
       )}
     >
-      <span className="flex h-[68px] w-full items-center justify-center">
-        <span
-          className="bg-muted-foreground/20 rounded"
-          style={{ width: w * scale, height: h * scale }}
-        />
-      </span>
-      <span className="w-full truncate text-center text-[10px] leading-tight">
-        {label}
-      </span>
-      <span className="text-muted-foreground/60 text-[9px] leading-none">
-        {ratio ?? "\u00a0"}
-      </span>
-      {/* The same radio the post shapes use — one choice, one shape for it. */}
-      <span
-        aria-hidden
+      <div
         className={cn(
-          "mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full border transition-colors duration-150",
-          on ? "border-foreground" : "border-muted-foreground/40",
+          "bg-card relative flex h-44 w-full flex-col items-center justify-center gap-2",
+          "rounded-lg p-2.5 shadow-sm",
         )}
       >
-        {on && <span className="bg-foreground size-2 rounded-full" />}
-      </span>
+        {on && (
+          <span className="bg-foreground text-background absolute end-1.5 bottom-1.5 z-10 flex size-4 items-center justify-center rounded-full">
+            <Check className="size-3" strokeWidth={3} />
+          </span>
+        )}
+
+        <span className="flex h-24 items-center justify-center">
+          <span
+            className="bg-muted-foreground/20 rounded"
+            style={{ width: w * scale, height: h * scale }}
+          />
+        </span>
+
+        <span className="flex w-full flex-col items-center gap-0.5">
+          <span className="w-full truncate text-center text-[11px] leading-tight">
+            {label}
+          </span>
+          <span className="text-muted-foreground/60 text-[9px] leading-none">
+            {ratio ?? "\u00a0"}
+          </span>
+        </span>
+      </div>
     </button>
   );
 }
@@ -2197,7 +2205,6 @@ function ConfigChoices({
             )}
           >
             <MediaFormatCard
-              id={ANY_MEDIA_TYPE}
               label={t.mediaAny}
               ratio={null}
               on={mediaType === ANY_MEDIA_TYPE}
@@ -2207,7 +2214,6 @@ function ConfigChoices({
             {types.map((type) => (
               <MediaFormatCard
                 key={type}
-                id={type}
                 label={typeLabel(type as AssetType, isRTL)}
                 ratio={ASSET_TYPE_META[type as AssetType]?.ratio ?? null}
                 on={mediaType === type}
