@@ -1530,7 +1530,10 @@ function ConfigChoices({
               onClick={() => onProduct(p.id as ProductId)}
               className={cn(
                 pill(on),
-                p.logo && "flex items-center justify-center",
+                // A mark needs room a word does not: squarer padding, and a
+                // minimum width so a narrow glyph still gets a target worth
+                // pressing.
+                p.logo && "flex min-w-14 items-center justify-center px-3 py-2",
               )}
             >
               {p.logo ? (
@@ -1539,7 +1542,7 @@ function ConfigChoices({
                   src={p.logo}
                   alt={name}
                   className={cn(
-                    "h-4 w-auto object-contain",
+                    "h-7 w-auto object-contain",
                     // The marks are monochrome ink, so they read on the
                     // muted pill but vanish on the accent one — invert with
                     // the text they replace.

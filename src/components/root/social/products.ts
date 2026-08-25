@@ -77,22 +77,35 @@ export const PRODUCTS = [
     id: "mkan",
     label: "Mkan",
     labelAr: "مكان",
+    // The product's own mark, taken from databayt/mkan's public/logo.svg and
+    // rasterised to the path the brand kit already declared.
+    logo: "/brands/mkan.png",
     channels: { facebook: true },
   },
   {
     id: "databayt",
     label: "Databayt",
     labelAr: "داتابايت",
+    // The hexagon from the live marketing site (databayt/marketing,
+    // public/site/logo.png). NOTE: brand-kit.json still records this brand's
+    // mark as `null` with the rule "there is no logo file to attach". That
+    // line predates the artwork being found, and it governs a different
+    // question — whether a mark is attached as a reference when an image is
+    // GENERATED. Answering that changes render behaviour, so it is left as it
+    // stands and the picker simply shows the real mark.
+    logo: "/brands/databayt.png",
     channels: { facebook: true },
   },
   {
     id: "sijillee",
+    logo: "/brands/sijillee.png",
     label: "Sijillee",
     labelAr: "سِجلي",
     channels: { facebook: false },
   },
   {
     id: "moalimee",
+    logo: "/brands/moalimee.svg",
     label: "Moalimee",
     labelAr: "مُعلّمي",
     channels: { facebook: false },

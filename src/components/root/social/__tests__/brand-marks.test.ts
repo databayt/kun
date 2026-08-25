@@ -41,15 +41,17 @@ describe("brand marks", () => {
     }
   });
 
-  it("agrees with the brand kit about which file a brand uses", () => {
+  it("agrees with the brand kit wherever the kit names a file", () => {
+    // Only where the kit speaks. It carries marks for four brands and answers
+    // a narrower question than the picker does — whether a file is attached as
+    // a reference when an image is GENERATED — so a brand it is silent about,
+    // or records as `null`, is not a contradiction with showing that brand's
+    // mark in a picker. Where it does name a file, the two must agree.
     for (const product of SOCIAL_PRODUCTS) {
       if (!product.logo) continue;
       const declared = marks[product.id]?.mark?.file;
-      expect(
-        declared,
-        `${product.id} has no mark in the brand kit`,
-      ).toBeTruthy();
-      expect(toUrl(declared as string), `${product.id}`).toBe(product.logo);
+      if (!declared) continue;
+      expect(toUrl(declared), `${product.id}`).toBe(product.logo);
     }
   });
 
