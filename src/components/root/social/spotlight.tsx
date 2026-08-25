@@ -73,7 +73,6 @@ import {
 
 import { cn } from "@/lib/utils";
 import { matchesQuery } from "@/lib/normalize-search";
-import { checkCraft, type CraftFinding } from "@/lib/craft";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -119,9 +118,6 @@ import { useSocial } from "@/components/root/social/provider";
  * blurred panel over a scrolling list reads as smeared rather than glassy.
  */
 const GLASS = "bg-muted border border-muted-foreground/20 shadow-2xl";
-
-/** Any Arabic-block codepoint — decides whether the craft rules apply at all. */
-const ARABIC_SCRIPT = /[\u0600-\u06FF]/;
 
 /**
  * What Approve does — publish on the spot, or write `scheduled` variants for
@@ -287,8 +283,10 @@ export function ReviewSpotlight({
   );
   // The settings dialog. Like the filters menu it portals out of this subtree,
   // so the panel has to be told to stay open behind it.
+  // Brand is open by default: the face should show something the moment it
+  // appears, and brand is the setting every other one is scoped by.
   const [configFocus, setConfigFocus] = React.useState<ConfigSection | null>(
-    null,
+    "brand",
   );
   const [sending, setSending] = React.useState(false);
   const [notice, setNotice] = React.useState<string | null>(null);
@@ -444,60 +442,39 @@ export function ReviewSpotlight({
   }, [matching, scope, product]);
 
   /**
-   * What the quick-start row offers, for the brand the settings currently
-   * name. Derived from the corpus already in the client — no extra read, and
-   * no reaching into another face to find out whether there is anything
-   * waiting.
+   * Relative age, the same coarse one the queue rows use — the Queue word's
+   * list asks the same question ("how long has this waited"), so it should not
+   * grow a second clock that rounds differently.
    */
-  const brandDrafts = React.useMemo(
-    () => items.filter((i) => i.kind === "draft" && i.brand === product),
-    [items, product],
-  );
-  const nextDraft = React.useMemo(
-    () =>
-      [...brandDrafts].sort((a, b) => a.when.localeCompare(b.when))[0] ?? null,
-    [brandDrafts],
-  );
-  const lastPublished = React.useMemo(
-    () =>
-      [...items]
-        .filter((i) => i.kind === "published" && i.brand === product)
-        .sort((a, b) => b.when.localeCompare(a.when))[0] ?? null,
-    [items, product],
+  const ageLabel = React.useCallback(
+    (iso: string) => {
+      const minutes = Math.max(
+        0,
+        Math.round((Date.now() - new Date(iso).getTime()) / 60_000),
+      );
+      const age =
+        minutes >= 60 * 24
+          ? `${Math.round(minutes / (60 * 24))}d`
+          : minutes >= 60
+            ? `${Math.round(minutes / 60)}h`
+            : `${minutes}m`;
+      return fill(t.reviewAgo, { age });
+    },
+    [t],
   );
 
   /**
-   * The craft findings for whatever is in the field, run on the same rules the
-   * answering CLI and the old review editor used (lib/craft.ts, which is
-   * content/docs/social/copy.mdx as code). English-only copy is skipped
-   * entirely: the Arabic length bands and register wordlist would fail every
-   * English draft for reasons a writer cannot act on, and a linter that cries
-   * wolf stops being read.
-   *
-   * Advice, not a gate — `craftFailures` has returned nothing since the gate
-   * was turned off in August, deliberately, so a human decides.
+   * This brand's drafts awaiting review, oldest first — what the Queue word
+   * lists. Derived from the corpus already in the client, so reaching the
+   * queue costs no read.
    */
-  const craftFindings = React.useMemo(() => {
-    if (!trimmed || !ARABIC_SCRIPT.test(trimmed)) return [];
-    return checkCraft({
-      ar: trimmed,
-      brand: product,
-      // Only when unambiguous: the hashtag cap is per-channel, and picking one
-      // of several selected channels would apply a rule nobody asked for.
-      channel: selectedChannels.length === 1 ? selectedChannels[0] : undefined,
-    });
-  }, [trimmed, product, selectedChannels]);
-
-  /** Posts that actually went out for this brand in the last seven days. */
-  const publishedThisWeek = React.useMemo(() => {
-    const since = Date.now() - 7 * 24 * 60 * 60 * 1000;
-    return items.filter(
-      (i) =>
-        i.kind === "published" &&
-        i.brand === product &&
-        new Date(i.when).getTime() >= since,
-    ).length;
-  }, [items, product]);
+  const brandDrafts = React.useMemo(
+    () =>
+      items
+        .filter((i) => i.kind === "draft" && i.brand === product)
+        .sort((a, b) => a.when.localeCompare(b.when)),
+    [items, product],
+  );
 
   const sort = React.useCallback(
     (list: QueueItem[]) =>
@@ -533,7 +510,7 @@ export function ReviewSpotlight({
     );
   }, [matching, product, inMode, sort, scope, trimmed]);
 
-  const open = focused || menuOpen || configFocus !== null;
+  const open = focused || menuOpen;
 
   const handleSelect = React.useCallback(
     (item: QueueItem) => {
@@ -792,12 +769,10 @@ export function ReviewSpotlight({
         // on the key people press to dismiss a panel.
         onKeyDown={(e) => {
           if (e.key !== "Escape") return;
-          // A portalled child still bubbles through the React tree, so the
-          // Escape that dismisses the settings dialog or the filters menu
-          // arrives here too. Measured: closing the dialog also collapsed the
-          // box, and the settings you had just changed went off screen with
-          // it. Whoever is on top owns that key.
-          if (configFocus !== null || menuOpen) return;
+          // The filters menu portals out of this subtree but still bubbles
+          // through the React tree, so its Escape arrives here too. Whoever is
+          // on top owns that key.
+          if (menuOpen) return;
           setFocused(false);
           inputRef.current?.blur();
         }}
@@ -937,9 +912,12 @@ export function ReviewSpotlight({
                   onPostType={setPostType}
                   mediaFilter={mediaFilter}
                   onMediaFilter={setMediaFilter}
-                  nextDraft={nextDraft}
-                  queueCount={brandDrafts.length}
-                  lastPublished={lastPublished}
+                  drafts={brandDrafts.map((d) => ({
+                    id: d.id,
+                    text: d.text,
+                    when: d.when,
+                  }))}
+                  ago={ageLabel}
                   onUseDraft={(id) => {
                     reviewQueue.loadDraft(id);
                     setPanel("queue");
@@ -948,35 +926,10 @@ export function ReviewSpotlight({
                     setFocused(false);
                     inputRef.current?.blur();
                   }}
-                  onReuse={(text) => {
-                    // Text only. Carrying the draft id would make Send
-                    // re-approve a consumed request; carrying the media would
-                    // quietly republish the same image.
-                    reviewQueue.clearActive();
-                    setQuery(text);
-                    setPanel("queue");
-                    setNotice(t.spotlightStartReused);
-                    setError(null);
-                  }}
-                  channelsReady={transportsReady}
-                  channelsChecking={checking}
-                  onCheckChannels={() => void checkConnections()}
-                  craftFindings={craftFindings}
-                  hasCopy={Boolean(trimmed)}
-                  isArabic={ARABIC_SCRIPT.test(trimmed)}
-                  publishedThisWeek={publishedThisWeek}
-                  onSeeNumbers={() => goToStage("measure")}
                   onOpenDialog={setConfigFocus}
                   openSection={configFocus}
                   onCloseSection={() => {
                     setConfigFocus(null);
-                    inputRef.current?.focus();
-                  }}
-                  onBlank={() => {
-                    reviewQueue.clearActive();
-                    setPanel("queue");
-                    setNotice(null);
-                    setError(null);
                     inputRef.current?.focus();
                   }}
                 />
@@ -1285,7 +1238,8 @@ type ConfigSection =
   | "channels"
   | "postType"
   | "media"
-  | "destination";
+  | "destination"
+  | "queue";
 
 function ConfigPanel({
   t,
@@ -1304,20 +1258,9 @@ function ConfigPanel({
   onPostType,
   mediaFilter,
   onMediaFilter,
-  nextDraft,
-  queueCount,
-  lastPublished,
+  drafts,
   onUseDraft,
-  onReuse,
-  onBlank,
-  channelsReady,
-  channelsChecking,
-  onCheckChannels,
-  craftFindings,
-  hasCopy,
-  isArabic,
-  publishedThisWeek,
-  onSeeNumbers,
+  ago,
   onOpenDialog,
   openSection,
   onCloseSection,
@@ -1338,29 +1281,17 @@ function ConfigPanel({
   onPostType: (next: PostType) => void;
   mediaFilter: MediaFilter;
   onMediaFilter: (next: MediaFilter) => void;
-  /** Oldest draft awaiting review for this brand, if any. */
-  nextDraft: { id: string } | null;
-  queueCount: number;
-  /** Most recent post that actually went out for this brand. */
-  lastPublished: { text: string } | null;
+  /** This brand's drafts awaiting review, oldest first. */
+  drafts: { id: string; text: string; when: string }[];
   onUseDraft: (id: string) => void;
-  onReuse: (text: string) => void;
-  onBlank: () => void;
-  channelsReady: boolean;
-  channelsChecking: boolean;
-  onCheckChannels: () => void;
-  craftFindings: CraftFinding[];
-  hasCopy: boolean;
-  isArabic: boolean;
-  publishedThisWeek: number;
-  onSeeNumbers: () => void;
+  /** Relative age, formatted by the parent so one clock serves both faces. */
+  ago: (iso: string) => string;
   onOpenDialog: (section: ConfigSection) => void;
   /** Which box is open, and how to shut it. Held by the parent so Escape
    *  can be given to this card before it reaches the box underneath. */
   openSection: ConfigSection | null;
   onCloseSection: () => void;
 }) {
-  const [craftOpen, setCraftOpen] = React.useState(false);
 
   const brandName = (() => {
     const p = PRODUCTS.find((entry) => entry.id === product);
@@ -1415,131 +1346,6 @@ function ConfigPanel({
         : "text-muted-foreground/70 hover:bg-accent/50 hover:text-accent-foreground",
     );
 
-  /**
-   * ——— Under the boxes: the three ways a post actually starts ———
-   *
-   * Settings say what a post IS; this says where its words come from, which is
-   * the part that was slow. The queue was reachable only by opening another
-   * face and reading a list; the last post that went out was reachable only by
-   * leaving for the ledger. Both are already in the client, so both are one
-   * press from here.
-   *
-   * Reuse copies TEXT and nothing else — no draft id, no media. That matters:
-   * carrying the id would make Send re-approve a request that is already
-   * consumed, and carrying the media would quietly republish the same image.
-   * What comes back is a starting point, and the notice says so.
-   */
-  const startFrom = (
-    <div className="mt-3 border-t border-black/5 pt-3 dark:border-white/10">
-      <p className="text-muted-foreground/60 pb-2 text-[11px]">
-        {t.spotlightStartTitle}
-      </p>
-      <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
-        <StartCard
-          label={t.spotlightStartQueue}
-          hint={
-            nextDraft
-              ? fill(t.spotlightStartQueueHint, { count: queueCount })
-              : t.spotlightStartQueueEmpty
-          }
-          disabled={!nextDraft}
-          onClick={() => nextDraft && onUseDraft(nextDraft.id)}
-        />
-        <StartCard
-          label={t.spotlightStartReuse}
-          hint={lastPublished ? t.spotlightStartReuseHint : t.spotlightStartReuseEmpty}
-          disabled={!lastPublished}
-          onClick={() => lastPublished && onReuse(lastPublished.text)}
-        />
-        <StartCard
-          label={t.spotlightStartBlank}
-          hint={t.spotlightStartBlankHint}
-          onClick={onBlank}
-        />
-      </div>
-    </div>
-  );
-
-  /**
-   * ——— And under that: what to look at before it goes ———
-   *
-   * Three questions a publisher asks in the second before pressing send, and
-   * every one of them used to live somewhere else: whether the relay is
-   * answering (the shell's status dialog), whether the copy holds up (the
-   * craft findings, which left with the review editor), and whether this brand
-   * has already posted this week (the ledger, on another route).
-   *
-   * Craft is advice, not a gate — `craftFailures` has returned nothing since
-   * the gate was turned off, deliberately, so a human decides. Pressing the
-   * card opens the findings under the row rather than sending anyone away.
-   */
-  const craftHint = !hasCopy
-    ? t.spotlightCheckCraftEmpty
-    : !isArabic
-      ? t.spotlightCheckCraftSkipped
-      : craftFindings.length === 0
-        ? t.spotlightCheckCraftClean
-        : fill(t.spotlightCheckCraftFlags, { count: craftFindings.length });
-
-  const beforeItGoes = (
-    <div className="mt-3 border-t border-black/5 pt-3 dark:border-white/10">
-      <p className="text-muted-foreground/60 pb-2 text-[11px]">
-        {t.spotlightCheckTitle}
-      </p>
-      <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
-        <StartCard
-          label={t.spotlightCheckChannels}
-          hint={
-            channelsChecking
-              ? t.spotlightCheckChannelsChecking
-              : selected.length === 0
-                ? t.spotlightCheckChannelsNone
-                : channelsReady
-                  ? fill(t.spotlightCheckChannelsReady, {
-                      count: selected.length,
-                    })
-                  : t.spotlightCheckChannelsDown
-          }
-          tone={
-            selected.length === 0 || !channelsReady ? "warn" : "default"
-          }
-          onClick={onCheckChannels}
-        />
-        <StartCard
-          label={t.spotlightCheckCraft}
-          hint={craftHint}
-          tone={craftFindings.length > 0 ? "warn" : "default"}
-          disabled={craftFindings.length === 0}
-          onClick={() => setCraftOpen((v) => !v)}
-        />
-        <StartCard
-          label={t.spotlightCheckWeek}
-          hint={fill(t.spotlightCheckWeekCount, { count: publishedThisWeek })}
-          onClick={onSeeNumbers}
-        />
-      </div>
-
-      {craftOpen && craftFindings.length > 0 && (
-        <ul className="mt-2 space-y-1">
-          {craftFindings.slice(0, 5).map((f, i) => (
-            <li
-              key={`${f.rule}-${i}`}
-              className="text-muted-foreground flex gap-2 text-[11px]"
-            >
-              <span
-                className={cn(
-                  "mt-1 size-1.5 shrink-0 rounded-full",
-                  f.severity === "fail" ? "bg-clay" : "bg-muted-foreground/40",
-                )}
-              />
-              <span dir="auto">{f.message}</span>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-
   const WORDS: { id: ConfigSection; label: string }[] = [
     { id: "brand", label: t.spotlightConfigBrand },
     { id: "feature", label: t.spotlightConfigFeature },
@@ -1547,6 +1353,7 @@ function ConfigPanel({
     { id: "postType", label: t.spotlightConfigPostType },
     { id: "media", label: t.spotlightConfigMedia },
     { id: "destination", label: t.spotlightConfigTiming },
+    { id: "queue", label: t.spotlightConfigQueue },
   ];
 
   return (
@@ -1604,12 +1411,13 @@ function ConfigPanel({
             onMediaFilter={onMediaFilter}
             destination={destination}
             onDestination={onDestination}
+            drafts={drafts}
+            onUseDraft={onUseDraft}
+            ago={ago}
           />
         </div>
       )}
 
-      {startFrom}
-      {beforeItGoes}
     </div>
   );
 }
@@ -1643,6 +1451,9 @@ function ConfigChoices({
   onMediaFilter,
   destination,
   onDestination,
+  drafts,
+  onUseDraft,
+  ago,
 }: {
   section: ConfigSection;
   t: SocialDict;
@@ -1661,6 +1472,9 @@ function ConfigChoices({
   onMediaFilter: (next: MediaFilter) => void;
   destination: Destination;
   onDestination: (next: Destination) => void;
+  drafts: { id: string; text: string; when: string }[];
+  onUseDraft: (id: string) => void;
+  ago: (iso: string) => string;
 }) {
   const pill = (on: boolean) =>
     cn(
@@ -1802,6 +1616,41 @@ function ConfigChoices({
     );
   }
 
+  if (section === "queue") {
+    if (drafts.length === 0) {
+      return (
+        <p className="text-muted-foreground/60 text-xs">
+          {t.spotlightConfigQueueEmpty}
+        </p>
+      );
+    }
+    // Oldest first, and pressing one puts it in the field above. The queue was
+    // reachable only by leaving this face for another; it is a word now.
+    return (
+      <div className="space-y-1">
+        {drafts.map((draft) => (
+          <button
+            key={draft.id}
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => onUseDraft(draft.id)}
+            className="hover:bg-muted flex w-full cursor-pointer items-start gap-3 rounded-lg p-2 text-start transition-colors duration-150"
+          >
+            <span
+              dir="auto"
+              className="line-clamp-2 min-w-0 flex-1 text-xs leading-relaxed"
+            >
+              {draft.text}
+            </span>
+            <span className="text-muted-foreground/60 shrink-0 text-[10px]">
+              {ago(draft.when)}
+            </span>
+          </button>
+        ))}
+      </div>
+    );
+  }
+
   const name: Record<Destination, string> = {
     direct: t.destinationDirect,
     schedule: t.destinationSchedule,
@@ -1831,48 +1680,6 @@ function ConfigChoices({
         </button>
       ))}
     </div>
-  );
-}
-
-/** One way in, on the quick-start row. Disabled when there is nothing there. */
-function StartCard({
-  label,
-  hint,
-  disabled,
-  tone = "default",
-  onClick,
-}: {
-  label: string;
-  hint: string;
-  disabled?: boolean;
-  /** `warn` marks a card whose answer is "not yet" — clay, never red. */
-  tone?: "default" | "warn";
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      disabled={disabled}
-      onMouseDown={(e) => e.preventDefault()}
-      onClick={onClick}
-      className={cn(
-        "border-input flex min-w-0 flex-1 shrink-0 basis-0 flex-col items-start gap-0.5",
-        "rounded-xl border px-2.5 py-2 text-start transition-colors duration-150",
-        disabled
-          ? "cursor-not-allowed opacity-50"
-          : "hover:border-foreground/30 hover:bg-accent/40 cursor-pointer",
-      )}
-    >
-      <span className="w-full truncate text-xs font-medium">{label}</span>
-      <span
-        className={cn(
-          "w-full truncate text-[10px]",
-          tone === "warn" ? "text-clay" : "text-muted-foreground/70",
-        )}
-      >
-        {hint}
-      </span>
-    </button>
   );
 }
 
