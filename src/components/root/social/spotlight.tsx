@@ -1777,8 +1777,156 @@ function useDragScroll(): {
  * than describing it. Types with no recorded ratio get a neutral square: an
  * invented ratio would be a claim about how they render that nothing backs.
  */
+/**
+ * What a format LOOKS like, sketched.
+ *
+ * Every card is the same white plate — the difference between them is the
+ * design, not the colour of a swatch. A hero is a picture with a line over it;
+ * an OG image is a title plate; an infographic is a chart; a testimonial is a
+ * quote with a face. Grey rectangles told you a format existed and nothing
+ * about what choosing it would get you.
+ *
+ * Drawn from the taxonomy's own ids, so a type added there gets a neutral
+ * frame here rather than a wrong one.
+ */
+function FormatSketch({ type }: { type: string }) {
+  const wash = "bg-muted-foreground/20";
+  const ink = "bg-muted-foreground/35";
+  const faint = "bg-muted-foreground/12";
+
+  switch (type) {
+    case "hero":
+      // A picture that fills the frame, with the headline sitting on it.
+      return (
+        <span className={cn(wash, "absolute inset-0 flex items-end p-3")}>
+          <span className="flex w-full flex-col gap-1">
+            <span className={cn(ink, "h-2 w-3/4 rounded-full")} />
+            <span className={cn(ink, "h-1.5 w-1/2 rounded-full opacity-70")} />
+          </span>
+        </span>
+      );
+
+    case "og":
+    case "banner":
+      // A title plate: the thing a link preview shows.
+      return (
+        <span className="flex w-full flex-col items-center gap-1.5 px-4">
+          <span className={cn(ink, "h-2.5 w-4/5 rounded-full")} />
+          <span className={cn(wash, "h-1.5 w-3/5 rounded-full")} />
+          <span className={cn(faint, "mt-1 h-1 w-2/5 rounded-full")} />
+        </span>
+      );
+
+    case "logo":
+      return <span className={cn(ink, "size-10 rounded-full")} />;
+
+    case "product":
+      // One object, centred, on a plain ground with its shadow.
+      return (
+        <span className="flex flex-col items-center gap-2">
+          <span className={cn(wash, "size-14 rounded-xl")} />
+          <span className={cn(faint, "h-1 w-10 rounded-full")} />
+        </span>
+      );
+
+    case "lifestyle":
+      // A scene: ground, horizon, a figure in it.
+      return (
+        <span className="absolute inset-0">
+          <span
+            className={cn(wash, "absolute inset-x-0 bottom-0 h-2/5")}
+          />
+          <span className={cn(faint, "absolute inset-x-0 top-0 h-3/5")} />
+          <span className={cn(ink, "absolute bottom-[38%] start-6 size-5 rounded-full")} />
+          <span className={cn(ink, "absolute bottom-[30%] end-7 h-8 w-5 rounded-t-full opacity-70")} />
+        </span>
+      );
+
+    case "mockup":
+      // A device, because that is what an interface shot is.
+      return (
+        <span className={cn("border-muted-foreground/30 flex h-24 w-16 flex-col gap-1 rounded-lg border-2 p-1.5")}>
+          <span className={cn(faint, "h-1 w-1/2 self-center rounded-full")} />
+          <span className={cn(wash, "flex-1 rounded")} />
+        </span>
+      );
+
+    case "infographic":
+      // A chart is the whole point of one.
+      return (
+        <span className="flex h-20 items-end gap-2">
+          {[0.45, 0.8, 0.6, 1].map((n, i) => (
+            <span
+              key={i}
+              className={cn(i === 3 ? ink : wash, "w-4 rounded-t")}
+              style={{ height: `${n * 100}%` }}
+            />
+          ))}
+        </span>
+      );
+
+    case "split":
+      // Two halves and the line between them.
+      return (
+        <span className="relative flex h-24 w-28 overflow-hidden rounded">
+          <span className={cn(faint, "flex-1")} />
+          <span className="bg-card w-0.5" />
+          <span className={cn(wash, "flex-1")} />
+        </span>
+      );
+
+    case "testimonial":
+      // A quote, and the face it belongs to.
+      return (
+        <span className="flex w-full flex-col items-center gap-2 px-4">
+          <span className={cn(ink, "h-4 w-2 rounded-sm")} />
+          <span className={cn(wash, "h-1.5 w-full rounded-full")} />
+          <span className={cn(wash, "h-1.5 w-4/5 rounded-full")} />
+          <span className="mt-1 flex items-center gap-1.5">
+            <span className={cn(ink, "size-4 rounded-full")} />
+            <span className={cn(faint, "h-1 w-8 rounded-full")} />
+          </span>
+        </span>
+      );
+
+    case "carousel":
+      // Cards behind cards — the swipe made visible.
+      return (
+        <span className="relative h-24 w-20">
+          <span className={cn(faint, "absolute inset-y-2 -end-3 w-16 rounded-lg")} />
+          <span className={cn(wash, "absolute inset-y-1 -end-1.5 w-16 rounded-lg")} />
+          <span className={cn("bg-muted-foreground/30 absolute inset-0 rounded-lg")} />
+        </span>
+      );
+
+    case "reel":
+    case "story":
+      // A vertical frame; story carries the segment bar that names it.
+      return (
+        <span className={cn(wash, "relative flex h-28 w-16 items-center justify-center rounded-lg")}>
+          {type === "story" && (
+            <span className="absolute inset-x-1.5 top-1.5 flex gap-1">
+              {[0, 1, 2].map((i) => (
+                <span
+                  key={i}
+                  className={cn(i === 0 ? ink : "bg-card/70", "h-0.5 flex-1 rounded-full")}
+                />
+              ))}
+            </span>
+          )}
+          <span className="border-s-card h-0 w-0 border-y-[8px] border-s-[13px] border-y-transparent rtl:rotate-180" />
+        </span>
+      );
+
+    default:
+      // "Any", and any type the taxonomy gains before this switch does.
+      return null;
+  }
+}
+
 function MediaFormatCard({
   t,
+  type,
   label,
   ratio,
   lane,
@@ -1789,6 +1937,8 @@ function MediaFormatCard({
   onPick,
 }: {
   t: SocialDict;
+  /** Taxonomy id, which is what the sketch is drawn from. */
+  type: string;
   label: string;
   ratio: string | null;
   /** How it is made: a photographic render, a designed plate, or a placed file. */
@@ -1801,10 +1951,6 @@ function MediaFormatCard({
   inert: boolean;
   onPick: () => void;
 }) {
-  // One size for every card, the way the first one is. Drawing each at its
-  // own ratio made a ribbon of real shapes, and made a row nothing could line
-  // up in — nine widths, two heights and a label hanging off each. The shape
-  // is still said, in the line underneath, where it does not cost the grid.
   const SIZE = 150;
   const moving = typeof seconds === "number";
 
@@ -1840,40 +1986,16 @@ function MediaFormatCard({
         on ? "opacity-100" : "opacity-90 hover:opacity-100",
       )}
     >
-      {/* The whole card is the format. Nothing sits inside a frame that is
-          not the thing itself. */}
+      {/* Every card is the same plate. What differs is the design on it. */}
       <span
         style={{ width: SIZE, height: SIZE }}
-        className={cn(
-          "relative flex items-center justify-center overflow-hidden rounded-lg shadow-sm",
-          lane === "higgs" && style === "cinematic"
-            ? "from-muted-foreground/45 to-muted-foreground/15 bg-gradient-to-br"
-            : lane === "higgs"
-              ? "bg-muted-foreground/25"
-              : lane === "none"
-                ? "bg-muted-foreground/10"
-                : "bg-card",
-        )}
+        className="bg-card relative flex items-center justify-center overflow-hidden rounded-lg shadow-sm"
       >
+        <FormatSketch type={type} />
         {on && (
           <span className="bg-foreground text-background absolute end-1.5 bottom-1.5 z-10 flex size-4 items-center justify-center rounded-full">
             <Check className="size-3" strokeWidth={3} />
           </span>
-        )}
-
-        {lane === "template" && (
-          // A designed plate carries copy; that is what makes it one.
-          <span className="flex w-full flex-col gap-1.5 px-4">
-            <span className="bg-muted-foreground/35 h-2 w-4/5 rounded-full" />
-            <span className="bg-muted-foreground/25 h-1.5 w-3/5 rounded-full" />
-            <span className="bg-muted-foreground/20 h-1.5 w-2/3 rounded-full" />
-          </span>
-        )}
-        {lane === "none" && (
-          <span className="bg-muted-foreground/40 size-6 rounded-full" />
-        )}
-        {moving && (
-          <span className="border-s-card h-0 w-0 border-y-[9px] border-s-[15px] border-y-transparent rtl:rotate-180" />
         )}
       </span>
 
@@ -2256,6 +2378,7 @@ function ConfigChoices({
           >
             <MediaFormatCard
               t={t}
+              type={ANY_MEDIA_TYPE}
               label={t.mediaAny}
               ratio={null}
               on={mediaType === ANY_MEDIA_TYPE}
@@ -2266,6 +2389,7 @@ function ConfigChoices({
               <MediaFormatCard
                 key={type}
                 t={t}
+                type={type}
                 label={typeLabel(type as AssetType, isRTL)}
                 ratio={ASSET_TYPE_META[type as AssetType]?.ratio ?? null}
                 lane={ASSET_TYPE_META[type as AssetType]?.lane}
