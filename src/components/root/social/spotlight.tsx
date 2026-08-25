@@ -55,6 +55,7 @@ import { useRouter } from "next/navigation";
 import { Command as CommandPrimitive } from "cmdk";
 import { AnimatePresence, motion } from "framer-motion";
 import {
+  ArrowUp,
   CalendarClock,
   CheckCircle2,
   Images,
@@ -63,7 +64,6 @@ import {
   PenLine,
   Plus,
   RefreshCw,
-  Send,
   Settings2,
   X,
   SlidersHorizontal,
@@ -639,10 +639,13 @@ export function ReviewSpotlight() {
               "disabled:cursor-not-allowed disabled:opacity-30",
             )}
           >
+            {/* An arrow up, not a paper plane: it needs no mirroring in
+                Arabic, and "up" is the gesture people already know from a
+                composer. */}
             {sending ? (
               <Loader2 className="size-4 animate-spin" />
             ) : (
-              <Send className="size-4 rtl:-scale-x-100" />
+              <ArrowUp className="size-5" />
             )}
           </button>
         </div>
