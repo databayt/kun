@@ -2092,12 +2092,22 @@ function DraftCard({
   on,
   inert,
   onPick,
+  copy,
 }: {
   label: string;
   body: string;
   on: boolean;
   inert: boolean;
   onPick: () => void;
+  /**
+   * The body is a real post rather than a written-for-the-card sentence.
+   *
+   * A definition is short, one thought, and reads best centred. A draft is as
+   * long as it is, starts with a hook that must be the first thing seen, and
+   * may be Arabic — so it hangs from the top edge, aligns to the start, and
+   * clamps where the card ends instead of being balanced into the middle.
+   */
+  copy?: boolean;
 }) {
   // Landscape, where a post shape is portrait and a visual register is square.
   // Each tab's card is the size of what it has to show, and this one shows a
@@ -2126,9 +2136,13 @@ function DraftCard({
       )}
     >
       <span
+        {...(copy ? { dir: "auto" as const } : {})}
         className={cn(
-          "absolute inset-x-3 top-3 bottom-10 flex items-center justify-center",
-          "text-foreground/75 text-center text-[13px] leading-snug text-balance",
+          "absolute inset-x-3 top-3 bottom-10 flex overflow-hidden",
+          "text-foreground/75 text-[13px] leading-snug",
+          copy
+            ? "line-clamp-4 items-start text-start"
+            : "items-center justify-center text-center text-balance",
         )}
       >
         {body}
@@ -2244,10 +2258,14 @@ function ConfigChoices({
   const { ref: angleRow, dragging: angleDragging } = useDragScroll();
   const { ref: registerRow, dragging: registerDragging } = useDragScroll();
   const { ref: modelRow, dragging: modelDragging } = useDragScroll();
+  const { ref: queueRow, dragging: queueDragging } = useDragScroll();
   // Read straight off the provider rather than threaded down as six more
   // props: this component is only ever rendered inside SocialProvider, and the
   // knobs belong to the drafting lane, not to the panel that displays them.
-  const { draftKnobs: knobs } = useSocial();
+  const { draftKnobs: knobs, reviewQueue } = useSocial();
+  // Which waiting draft is already in the field, so the queue can mark it the
+  // way every other strip marks its choice.
+  const activeDraftId = reviewQueue.activeDraftId;
 
   const pill = (on: boolean) =>
     cn(
@@ -2695,6 +2713,51 @@ function ConfigChoices({
 
         <p className="text-muted-foreground/60 pt-2 text-[11px]">
           {t.styleHint}
+        </p>
+      </>
+    );
+  }
+
+  if (section === "queue") {
+    if (drafts.length === 0) {
+      return (
+        <p className="text-muted-foreground/60 text-xs">
+          {t.spotlightConfigQueueEmpty}
+        </p>
+      );
+    }
+    // Restored. This branch was deleted in 671d61b — a commit about media
+    // radios — and the word kept working the way a word does: it opened the
+    // panel and rendered whatever fell through, which was Plan's tiles. Two
+    // words, one row, the same three tiles under both, and nothing to say
+    // which one you were looking at.
+    //
+    // Cards now, like everything else in the row, and the body is the draft's
+    // own copy — a queue is chosen from by reading the hook, which is exactly
+    // what a card can show and a two-line row could not. The pill is the age,
+    // because "how long has this been waiting" is the queue's whole question.
+    return (
+      <>
+        <CardStrip
+          heading={t.spotlightConfigQueue}
+          rowRef={queueRow}
+          dragging={queueDragging}
+        >
+          {drafts.map((draft) => (
+            <DraftCard
+              key={draft.id}
+              copy
+              label={ago(draft.when)}
+              body={draft.text}
+              on={draft.id === activeDraftId}
+              inert={queueDragging}
+              onPick={() => onUseDraft(draft.id)}
+            />
+          ))}
+        </CardStrip>
+
+        <p className="text-muted-foreground/60 pt-1 text-[11px]">
+          {t.spotlightConfigQueueHint}
         </p>
       </>
     );

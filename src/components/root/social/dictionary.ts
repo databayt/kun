@@ -151,6 +151,8 @@ export const SOCIAL_DICTIONARY = {
     spotlightConfigFeature: "Feature",
     spotlightConfigQueue: "Queue",
     spotlightConfigQueueEmpty: "Nothing waiting for this brand.",
+    spotlightConfigQueueHint:
+      "Oldest first. Opening one puts its copy in the field above.",
     spotlightConfigChannels: "Channel",
     spotlightConfigNoChannels: "No channel is wired for this brand yet.",
     // "Plan", not "Send": the button beside the field sends. This word says
@@ -558,6 +560,7 @@ export const SOCIAL_DICTIONARY = {
     spotlightConfigFeature: "المحور",
     spotlightConfigQueue: "الطابور",
     spotlightConfigQueueEmpty: "لا شيء بانتظار هذه العلامة.",
+    spotlightConfigQueueHint: "الأقدم أولاً. فتح واحدة يضع نصّها في الحقل أعلاه.",
     spotlightConfigChannels: "القناة",
     spotlightConfigNoChannels: "لا قناة موصولة لهذه العلامة بعد.",
     spotlightConfigTiming: "الخطة",
