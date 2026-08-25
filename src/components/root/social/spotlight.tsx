@@ -1525,6 +1525,7 @@ function PostShape({
   pageName,
   when,
   selected,
+  label,
 }: {
   meta: PostTypeMeta;
   /** The current brand's mark — a Page's profile picture is its logo. */
@@ -1535,6 +1536,8 @@ function PostShape({
   /** The byline's second line — when this will appear, per the Send setting. */
   when?: string;
   selected?: boolean;
+  /** The shape's name, shown on the chosen card. */
+  label?: string;
 }) {
   // Facebook's own furniture: a white card on a grey ground, with the
   // placeholder grey it uses for anything not yet loaded. Tokens rather than
@@ -1563,8 +1566,12 @@ function PostShape({
           clay, so a clay mark read as more of the brand instead of a state,
           and it followed the theme's ink either way. */}
       {selected && (
-        <span className="bg-foreground text-background absolute end-1.5 bottom-1.5 z-10 flex size-4 items-center justify-center rounded-full">
-          <Check className="size-3" strokeWidth={3} />
+        // The name, not a tick. A check says "chosen" to someone who already
+        // knows what they chose; the label says which of the nine it was, and
+        // it is the only place the names appear now that the captions are
+        // gone. Same corner, same ink.
+        <span className="bg-foreground text-background absolute end-1.5 bottom-1.5 z-10 max-w-[calc(100%-0.75rem)] truncate rounded-full px-2 py-0.5 text-[9px] leading-tight font-medium">
+          {label}
         </span>
       )}
       {/* The byline. Every feed post has one; a full-bleed vertical surface
@@ -2310,6 +2317,7 @@ function ConfigChoices({
                         : t.previewWhenNow
                   }
                   selected={on}
+                  label={t[POST_TYPE_LABEL[type]]}
                 />
               </button>
             );
