@@ -53,9 +53,9 @@ graph TD
 | **7 · You say live** | `live 0005-01` in the thread. Only a person says this — never the machine. |
 | **8 · The home is on mkan.sd** | The site gets the listing with its code, Twenty is updated to match, and the thread carries the link: `mkan.sd/ar/listings/0005-01`. |
 
-> **Box 2 is the only box that is not ready.** Everything it needs exists and is running,
-> except one Slack permission that only a workspace admin can click — see
-> [Blocked on exactly one human action](#blocked-on-exactly-one-human-action).
+> **All eight boxes exist and are switched on** (2026-08-25). The one Slack permission Box 2
+> needed was clicked the same day. What is still missing is the first real home — see
+> [Progress](#progress--the-real-trace-snapshot-2026-08-25).
 
 ## The parts
 
@@ -209,33 +209,33 @@ Measured against the live CRM, gateway and Slack, not the docs:
 | Twenty browser UI | **back** — `mkan.databayt.org` answers 200 again |
 | Hermes gateway | **running** on this Mac, Slack and webhook platforms connected since 2026-08-23 |
 | `#mkan` | **exists** (private, `C0BS2NZE2AY`), the bot `kun` is a member and posts there daily |
-| The bot reading `#mkan` | **blocked** — `groups:history` is missing from the bot's scopes; the probe answers `missing_scope` |
-| This lane's code | **not built** — this page is the first commit |
+| The bot reading `#mkan` | **unblocked 2026-08-25** — `groups:history` + `files:read` added and the app reinstalled; the probe answers `ok: true` |
+| The script (Phase 1) | **built** — `home:sweep` / `extract` / `intake` / `update` / `publish` / `status` in `mkan/scripts/crm/`, 17 pure tests green |
+| The ears | **live** — Hermes bound to `#mkan` (every message wakes it, `home` skill, `[SILENT]`), launchd `com.databayt.mkan-home-sweep` every 2 min, one run lock |
+| The first real home | **awaiting the first message** — the reader was proven on the example (8.7 s, every field right); the channel run is proven on non-home chatter only |
 
-**Blocked on exactly one human action:**
-
-1. **Slack read scopes (30 seconds, unblocks this lane and the mastering phone lane at once):**
-   api.slack.com/apps → the `kun` app → *OAuth & Permissions* → Bot Token Scopes → add
-   `groups:history` and `files:read` → *Event Subscriptions* → Subscribe to bot events → add
-   `message.groups` → **Reinstall to Workspace**. `hermes slack manifest --write` prints the
-   full manifest if you would rather paste it whole. Until then Box 2 hears nothing, and
-   `master:done --from-slack` keeps failing on the same scope.
+**Blocked on nothing.** The one human action this page opened with — the Slack read scopes
+on the `kun` app — was clicked the same day: `groups:history` + `files:read` added, the app
+reinstalled, and the probe that used to answer `missing_scope` now reads the channel. That
+click also unblocked the mastering phone lane (`master:done --from-slack`). What remains is
+proof: the first real home typed into `#mkan`.
 
 ### Build ledger
 
 | Commit | What landed |
 | --- | --- |
-| this page | The lane drawn before any code — eight boxes, the level, the code, the learning loop, and the one blocker |
+| kun `d1e9a34` · `bf431af` | This page — the lane drawn before any code; the mixed-script table made readable |
+| mkan `7056c97` | The intake lane: `home:sweep` reads `#mkan` straight from Slack (cursor + thread ledger, idempotent by `ts`), `claude -p` under the frozen v1 prompt, vocabulary enforcement, host by phone, account + code minting, `home` + `host` + note, the trust rubric's own completeness, thread replies as the same bot, corrections file; the Hermes `home` skill + installer |
+| mkan `5f795c3` | `live 0005-01` → `home:publish`: site first (account, location — pin or zone centre said as such —, listing with its code), then Twenty mirrors LIVE; run lock between the two ears; `FORCE_SEED` carried by both installers |
 
 ### Next
 
-Phase 1 — the script (`home:sweep`, `home:extract`, `home:publish`, `home:status`), its pure
-core and test set, the one-line Hermes skill and its installer, the two-minute timer, and the
-one-line hardening of the webhook (mint the code on `LIVE`). Phase 2 — the bell from Twenty for
-edits made in the CRM's own UI (a workflow on `pipelineStage → CLAIMED` posting to Hermes'
-webhook route, the same shape the hogwarts funnel already runs). Phase 3 — photos posted in the
-thread, re-hosted on the CDN and attached to the record so mastering picks them up by itself.
-Phase 4 — `home:learn`.
+The first real message, and the first `live`. Then the one-line hardening of the site's
+webhook (mint the code on `LIVE`). Phase 2 — the bell from Twenty for edits made in the CRM's
+own UI (a workflow on `pipelineStage → CLAIMED` posting to Hermes' webhook route, the same
+shape the hogwarts funnel already runs). Phase 3 — photos posted in the thread, re-hosted on
+the CDN and attached to the record so mastering picks them up by itself. Phase 4 —
+`home:learn`, the gated prompt-version loop (the corrections file is already being written).
 
 ## Decisions on record
 
