@@ -126,6 +126,7 @@ import {
 import {
   PICKABLE_PRODUCTS,
   PRODUCTS,
+  SOCIAL_PRODUCTS,
   type ProductId,
 } from "@/components/root/social/products";
 import { fill, type SocialDict } from "@/components/root/social/dictionary";
@@ -1479,21 +1480,50 @@ function ConfigPanel({
  * next card peek in at the edge, which is the only thing that tells a carousel
  * apart from a single image at this size.
  */
-function PostShape({ meta }: { meta: PostTypeMeta }) {
+function PostShape({
+  meta,
+  avatar,
+  invertAvatar,
+}: {
+  meta: PostTypeMeta;
+  /** The current brand's mark — a Page's profile picture is its logo. */
+  avatar?: string;
+  invertAvatar?: boolean;
+}) {
+  // Facebook's own furniture: a white card on a grey ground, with the
+  // placeholder grey it uses for anything not yet loaded. Tokens rather than
+  // the literal hexes, so the card follows the theme instead of staying white
+  // in the dark.
+  const surface = "bg-card";
   const skin = "bg-muted-foreground/20";
-  const line = "bg-muted-foreground/25 h-1.5 rounded-full";
+  const line = "bg-muted-foreground/20 h-1.5 rounded-full";
   const tall = meta.frame === "tall";
 
   return (
     <div
       aria-hidden
-      className="bg-background/60 flex h-[8.5rem] w-full flex-col gap-1.5 rounded-lg p-2"
+      className={cn(
+        surface,
+        "flex h-44 w-full flex-col gap-2 rounded-lg p-2.5 shadow-sm",
+      )}
     >
       {/* The byline. Every feed post has one; a full-bleed vertical surface
           does not, so the tall frames spend that room on the media. */}
       {!tall && (
         <div className="flex items-center gap-1.5">
-          <span className={cn(skin, "size-4 shrink-0 rounded-full")} />
+          {avatar ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={avatar}
+              alt=""
+              className={cn(
+                "bg-muted size-6 shrink-0 rounded-full object-contain p-0.5",
+                invertAvatar && "dark:invert",
+              )}
+            />
+          ) : (
+            <span className={cn(skin, "size-6 shrink-0 rounded-full")} />
+          )}
           <span className="flex flex-1 flex-col gap-1">
             <span className={cn(line, "w-2/3")} />
             <span className={cn(line, "h-1 w-1/3")} />
@@ -1533,7 +1563,7 @@ function PostShape({ meta }: { meta: PostTypeMeta }) {
                 )}
               >
                 {meta.kind === "video" && (
-                  <span className="border-s-background/80 h-0 w-0 border-y-[6px] border-s-[10px] border-y-transparent rtl:rotate-180" />
+                  <span className="border-s-card h-0 w-0 border-y-[7px] border-s-[12px] border-y-transparent rtl:rotate-180" />
                 )}
               </span>
               {meta.frame === "swipe" && (
@@ -1549,9 +1579,9 @@ function PostShape({ meta }: { meta: PostTypeMeta }) {
 
       {/* The action bar — like, comment, share. Feed only. */}
       {!tall && (
-        <div className="mt-auto flex items-center gap-2 pt-0.5">
+        <div className="mt-auto flex items-center gap-2 border-t border-black/5 pt-1.5 dark:border-white/10">
           {[0, 1, 2].map((i) => (
-            <span key={i} className={cn(line, "h-1 w-4")} />
+            <span key={i} className={cn(line, "h-1 w-5")} />
           ))}
         </div>
       )}
@@ -1788,6 +1818,10 @@ function ConfigChoices({
   }
 
   if (section === "postType") {
+    // A Page's profile picture is its logo, so the preview wears the brand
+    // that is actually selected — the card is this brand's post, not a
+    // stock one.
+    const brandMark = SOCIAL_PRODUCTS.find((p) => p.id === product);
     // Cards, not pills: a shape is easier to recognise drawn than named, and
     // "Text + images" versus "Carousel" is a distinction a word makes badly.
     return (
@@ -1807,14 +1841,18 @@ function ConfigChoices({
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => onPostType(type)}
                 className={cn(
-                  "flex w-28 shrink-0 cursor-pointer flex-col items-center gap-1.5",
-                  "rounded-xl border p-1.5 transition-colors duration-150",
+                  "flex w-40 shrink-0 cursor-pointer flex-col items-center gap-2",
+                  "rounded-xl border p-2 transition-colors duration-150",
                   on
                     ? "border-foreground/40 bg-accent"
                     : "border-input hover:border-foreground/30 hover:bg-accent/40",
                 )}
               >
-                <PostShape meta={meta} />
+                <PostShape
+                  meta={meta}
+                  avatar={brandMark?.logo}
+                  invertAvatar={brandMark?.logoInvertsOnDark}
+                />
                 <span className="w-full truncate text-center text-[10px] leading-tight">
                   {t[POST_TYPE_LABEL[type]]}
                 </span>
