@@ -1,10 +1,15 @@
 import { describe, expect, it } from "vitest";
 
+import pillarsPlan from "../../../../../content/social/pillars.json";
+
 import { ASSET_TYPES } from "@/components/root/social/showroom/taxonomy";
 import {
   POST_TYPES,
   POST_TYPE_ASSETS,
+  featureFits,
   libraryFits,
+  pillarLabel,
+  pillarsFor,
   queueFits,
 } from "@/components/root/social/post-settings";
 
@@ -74,3 +79,64 @@ describe("queueFits", () => {
     expect(queueFits([IMAGE, VIDEO], "video")).toBe(true);
   });
 });
+
+describe("pillars", () => {
+  it("reads each brand's own plan and skips the file's envelope", () => {
+    // `version` and `$comment` sit beside the brand arrays; neither is a brand.
+    expect(pillarsFor("hogwarts").length).toBeGreaterThan(0);
+    expect(pillarsFor("version")).toEqual([]);
+    expect(pillarsFor("$comment")).toEqual([]);
+    expect(pillarsFor("nobody")).toEqual([]);
+  });
+
+  it("gives brands their own vocabulary rather than a shared one", () => {
+    const hogwarts = pillarsFor("hogwarts");
+    const mkan = pillarsFor("mkan");
+    expect(hogwarts).not.toEqual(mkan);
+  });
+
+  it("names a pillar from its id", () => {
+    expect(pillarLabel("time-savings")).toBe("Time savings");
+    expect(pillarLabel("trust")).toBe("Trust");
+  });
+});
+
+describe("featureFits", () => {
+  it("passes everything when no pillar is chosen", () => {
+    expect(featureFits("hogwarts", "anything at all", null)).toBe(true);
+    expect(featureFits("hogwarts", "", null)).toBe(true);
+  });
+
+  it("keeps a draft asked with that pillar's own brief", () => {
+    const pillar = pillarsFor("hogwarts")[0];
+    // The seeder files the plan's brief verbatim, which is the whole reason
+    // a draft can be traced back to a pillar at all.
+    const brief = briefFor("hogwarts", pillar);
+    expect(featureFits("hogwarts", brief, pillar)).toBe(true);
+  });
+
+  it("drops a draft that belongs to a different pillar", () => {
+    const [first, second] = pillarsFor("hogwarts");
+    expect(featureFits("hogwarts", briefFor("hogwarts", second), first)).toBe(
+      false,
+    );
+  });
+
+  it("drops copy written from scratch, which belongs to no pillar", () => {
+    const pillar = pillarsFor("hogwarts")[0];
+    expect(featureFits("hogwarts", "something typed by hand", pillar)).toBe(
+      false,
+    );
+  });
+});
+
+/** The first brief the plan files under this pillar, for the tests above. */
+function briefFor(brand: string, pillar: string): string {
+  const raw = (
+    pillarsPlan as unknown as Record<
+      string,
+      { pillar: string; brief: string }[]
+    >
+  )[brand];
+  return raw.find((b) => b.pillar === pillar)!.brief;
+}

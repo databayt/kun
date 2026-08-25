@@ -101,7 +101,10 @@ import {
   DESTINATIONS,
   MEDIA_FILTERS,
   POST_TYPES,
+  featureFits,
   libraryFits,
+  pillarLabel,
+  pillarsFor,
   queueFits,
   type Destination,
   type MediaFilter,
@@ -133,6 +136,10 @@ const APPROVE_MODE_KEY = "social:approve-mode";
 const DESTINATION_KEY = "social:destination";
 const POST_TYPE_KEY = "social:post-type";
 const MEDIA_FILTER_KEY = "social:media-filter";
+const FEATURE_KEY = "social:feature";
+
+/** The select's "no pillar chosen" row, stored as a value rather than absence. */
+const ANY_FEATURE = "any";
 
 type Mode = "all" | "draft" | "scheduled" | "published";
 type Scope = "brand" | "every";
@@ -151,6 +158,8 @@ interface QueueItem {
   turn?: number;
   /** Variants only. */
   channel?: string;
+  /** Drafts only: the ask it was written from, which carries its pillar. */
+  brief?: string;
   /** Everything the matcher may look at, joined once. */
   haystack: string;
 }
@@ -299,11 +308,28 @@ export function ReviewSpotlight({
     "post",
     (v): v is PostType => (POST_TYPES as readonly string[]).includes(v),
   );
+  const [feature, setFeature] = usePersisted<string>(
+    FEATURE_KEY,
+    ANY_FEATURE,
+    (v): v is string => typeof v === "string",
+  );
   const [mediaFilter, setMediaFilter] = usePersisted<MediaFilter>(
     MEDIA_FILTER_KEY,
     "any",
     (v): v is MediaFilter => (MEDIA_FILTERS as readonly string[]).includes(v),
   );
+
+  /**
+   * Pillars are per-brand vocabulary, so a feature chosen for one brand is
+   * meaningless under the next — and would silently empty the queue rather
+   * than say why. Switching brand drops it.
+   */
+  const brandPillars = React.useMemo(() => pillarsFor(product), [product]);
+  React.useEffect(() => {
+    if (feature !== ANY_FEATURE && !brandPillars.includes(feature)) {
+      setFeature(ANY_FEATURE);
+    }
+  }, [brandPillars, feature, setFeature]);
 
   const trimmed = query.trim();
 
@@ -336,6 +362,7 @@ export function ReviewSpotlight({
       when: d.answeredAt ?? d.createdAt,
       mediaUrls: d.mediaUrls,
       turn: d.turn,
+      brief: d.brief,
       haystack: [
         d.ar,
         d.en,
@@ -382,9 +409,22 @@ export function ReviewSpotlight({
         // The settings face reaches the queue too: asking for Video narrows
         // this to drafts and posts that actually carry one.
         if (!queueFits(item.mediaUrls, mediaFilter)) return false;
+        // A pillar names a plan a DRAFT was asked from; a published variant
+        // carries no brief, so the filter would erase the other two modes if
+        // it applied to them.
+        if (
+          item.kind === "draft" &&
+          !featureFits(
+            item.brand,
+            item.brief ?? "",
+            feature === ANY_FEATURE ? null : feature,
+          )
+        ) {
+          return false;
+        }
         return !trimmed || matchesQuery(item.haystack, trimmed);
       }),
-    [items, mediaOnly, mediaFilter, trimmed],
+    [items, mediaOnly, mediaFilter, feature, trimmed],
   );
 
   const counts = React.useMemo(() => {
@@ -887,6 +927,9 @@ export function ReviewSpotlight({
                   wired={wiredForProduct}
                   selected={selectedChannels}
                   onChannels={setSelectedChannels}
+                  feature={feature}
+                  onFeature={setFeature}
+                  pillars={brandPillars}
                   destination={destination}
                   onDestination={setDestination}
                   postType={postType}
@@ -1235,7 +1278,13 @@ export function ReviewSpotlight({
  * a stacking fight nobody wins: measured, the popover opened underneath the
  * queue rows.
  */
-type ConfigSection = "brand" | "channels" | "postType" | "media" | "destination";
+type ConfigSection =
+  | "brand"
+  | "feature"
+  | "channels"
+  | "postType"
+  | "media"
+  | "destination";
 
 function ConfigPanel({
   t,
@@ -1245,6 +1294,9 @@ function ConfigPanel({
   wired,
   selected,
   onChannels,
+  feature,
+  onFeature,
+  pillars,
   destination,
   onDestination,
   postType,
@@ -1276,6 +1328,9 @@ function ConfigPanel({
   wired: ChannelId[];
   selected: ChannelId[];
   onChannels: (next: ChannelId[]) => void;
+  feature: string;
+  onFeature: (next: string) => void;
+  pillars: string[];
   destination: Destination;
   onDestination: (next: Destination) => void;
   postType: PostType;
@@ -1497,6 +1552,11 @@ function ConfigPanel({
   const tiles: { id: ConfigSection; label: string; value: string }[] = [
     { id: "brand", label: t.spotlightConfigBrand, value: brandName },
     {
+      id: "feature",
+      label: t.spotlightConfigFeature,
+      value: feature === ANY_FEATURE ? t.mediaAny : pillarLabel(feature),
+    },
+    {
       id: "channels",
       label: t.spotlightConfigChannels,
       value: selected.length
@@ -1580,6 +1640,9 @@ function ConfigPanel({
         wired={wired}
         selected={selected}
         onChannels={onChannels}
+        feature={feature}
+        onFeature={onFeature}
+        pillars={pillars}
         postType={postType}
         onPostType={onPostType}
         mediaFilter={mediaFilter}
@@ -1615,6 +1678,9 @@ function ConfigSelect({
   wired,
   selected,
   onChannels,
+  feature,
+  onFeature,
+  pillars,
   postType,
   onPostType,
   mediaFilter,
@@ -1634,6 +1700,9 @@ function ConfigSelect({
   wired: ChannelId[];
   selected: ChannelId[];
   onChannels: (next: ChannelId[]) => void;
+  feature: string;
+  onFeature: (next: string) => void;
+  pillars: string[];
   postType: PostType;
   onPostType: (next: PostType) => void;
   mediaFilter: MediaFilter;
@@ -1650,6 +1719,7 @@ function ConfigSelect({
 
   const title: Record<ConfigSection, string> = {
     brand: t.spotlightConfigBrand,
+    feature: t.spotlightConfigFeature,
     channels: t.spotlightConfigChannels,
     postType: t.spotlightConfigPostType,
     media: t.spotlightConfigMedia,
@@ -1666,6 +1736,16 @@ function ConfigSelect({
         label: isRTL ? p.labelAr : p.label,
         on: product === p.id,
         pick: () => onProduct(p.id),
+      }));
+    }
+    if (section === "feature") {
+      // "Any" first, and always present: a brand with no plan of its own must
+      // still have a way to say "no pillar", not an empty card.
+      return [ANY_FEATURE, ...pillars].map((id) => ({
+        id,
+        label: id === ANY_FEATURE ? t.mediaAny : pillarLabel(id),
+        on: feature === id,
+        pick: () => onFeature(id),
       }));
     }
     if (section === "channels") {

@@ -148,6 +148,7 @@ export const SOCIAL_DICTIONARY = {
     // The config face — what the post is, before what it says.
     spotlightConfig: "Post settings",
     spotlightConfigBrand: "Brand",
+    spotlightConfigFeature: "Feature",
     spotlightConfigChannels: "Channels",
     spotlightConfigNoChannels: "No channel is wired for this brand yet.",
     spotlightConfigTiming: "Send",
@@ -536,6 +537,7 @@ export const SOCIAL_DICTIONARY = {
     spotlightFilters: "المرشحات",
     spotlightConfig: "إعدادات المنشور",
     spotlightConfigBrand: "العلامة",
+    spotlightConfigFeature: "المحور",
     spotlightConfigChannels: "القنوات",
     spotlightConfigNoChannels: "لا قناة موصولة لهذه العلامة بعد.",
     spotlightConfigTiming: "الإرسال",

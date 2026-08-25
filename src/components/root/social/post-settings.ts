@@ -9,6 +9,8 @@
 // the part worth testing: a filter that silently matches nothing looks exactly
 // like a library that is empty.
 
+import pillarsJson from "../../../../content/social/pillars.json";
+
 import { mediaKind } from "@/lib/media-kind";
 
 /**
@@ -99,4 +101,65 @@ export function queueFits(
 ): boolean {
   if (mediaFilter === "any") return true;
   return mediaUrls.some((url) => mediaKind(url) === mediaFilter);
+}
+
+/**
+ * ——— Feature: which content pillar a post belongs to ———
+ *
+ * `content/social/pillars.json` is the recurring plan — per-brand briefs, each
+ * tagged with a pillar ("feature", "trust", "time-savings", …). The seeder
+ * files those briefs verbatim as `SocialDraftRequest.brief`, which is what
+ * makes this filterable at all: a draft can be traced back to its pillar by
+ * matching the brief it was asked with.
+ *
+ * That is also the limit, and worth saying. A post typed from scratch belongs
+ * to no pillar, because nothing on a post records one — the JSON's own comment
+ * notes that `pillar` was long written and read by nobody. So this narrows the
+ * queue; it does not label what you write.
+ */
+interface PillarBrief {
+  id: string;
+  pillar: string;
+  brief: string;
+}
+
+/** The file's envelope carries `version` and `$comment` beside the arrays. */
+function briefsFor(brand: string): PillarBrief[] {
+  const raw = (pillarsJson as Record<string, unknown>)[brand];
+  return Array.isArray(raw) ? (raw as PillarBrief[]) : [];
+}
+
+/** The distinct pillars this brand actually plans against, in file order. */
+export function pillarsFor(brand: string): string[] {
+  const seen = new Set<string>();
+  for (const b of briefsFor(brand)) {
+    if (b.pillar) seen.add(b.pillar);
+  }
+  return [...seen];
+}
+
+/** "time-savings" → "Time savings". The ids are the only names these have. */
+export function pillarLabel(pillar: string): string {
+  const words = pillar.replace(/-/g, " ");
+  return words.charAt(0).toUpperCase() + words.slice(1);
+}
+
+/**
+ * Does this queue row belong to the chosen pillar?
+ *
+ * Matched on the brief, trimmed, because that is the one field carried from
+ * the plan to the request unchanged. `null` means no pillar chosen and
+ * everything passes — including drafts written from scratch, which belong to
+ * no pillar and would otherwise be unreachable the moment a filter was set.
+ */
+export function featureFits(
+  brand: string,
+  brief: string,
+  pillar: string | null,
+): boolean {
+  if (!pillar) return true;
+  const wanted = briefsFor(brand)
+    .filter((b) => b.pillar === pillar)
+    .map((b) => b.brief.trim());
+  return wanted.includes(brief.trim());
 }
