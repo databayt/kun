@@ -5,9 +5,10 @@ description: Where social automation actually stands — wired vs configured vs 
 
 # Status
 
-**Last verified: 2026-08-01** (live Graph API dark-post + carousel transport tests against the
-Hogwarts Page, an unattended seed→drain draft cycle, workflow run logs, and a PostHog UTM
-read-back).
+**Last verified: 2026-08-01** for the transport claims (live Graph API dark-post + carousel tests
+against the Hogwarts Page, an unattended seed→drain draft cycle, workflow run logs, and a PostHog
+UTM read-back). **The Hub rows were re-verified 2026-08-26** in the browser against the live
+Balqalam data — ask, refine, schedule, queue claim — with no post sent to a Page.
 
 The code is in good shape. The configuration is not. This page exists because
 [the overview](/docs/social) describes what the pipeline *can* do, and it is easy to read that
@@ -120,7 +121,7 @@ Their current state:
 
 | Loop | State | Why |
 |------|-------|-----|
-| **A — Hub** | **Works** (Facebook only) | The one working path, and since 2026-08-05 a wired one: a brief on the Draft tab (or **Queue now** on the Calendar tab) becomes a queue ask, the 60-second launchd drain answers it as a **full draft** — copy plus media picked from `library.json` — and it lands in the **review queue** on Publish, where a human fine-tunes and approves (now, or scheduled to the drain). Since 2026-08-06 the Draft tab is also a **conversation**: typing again refines the draft on screen rather than starting a new one, and angle/register/reference/model ride the ask as columns. Staging still returns the signed links in-app, so no chat relay is needed to run the gate. Since 2026-08-25 the composer can also **ask for its own copy** — one press turns its settings into a brief and the answer lands in the field, which is what finally connects Feature, Post shape and the draft knobs to something that gets published. |
+| **A — Hub** | **Works** (Facebook only) | The one working path, and since 2026-08-05 a wired one: a brief on the Draft tab (or **Queue now** on the Calendar tab) becomes a queue ask, the 60-second launchd drain answers it as a **full draft** — copy plus media picked from `library.json` — and it lands in the **review queue** on Publish, where a human fine-tunes and approves (now, or scheduled to the drain). Since 2026-08-06 the Draft tab is also a **conversation**: typing again refines the draft on screen rather than starting a new one, and angle/register/reference/model ride the ask as columns. Staging still returns the signed links in-app, so no chat relay is needed to run the gate. Since 2026-08-25 the composer can also **ask for its own copy, argue with it, and start from the plan** — a press on one of `pillars.json`'s briefs asks with no typing at all, one press turns the settings into a brief, and "what should change?" files the next turn of the same thread. That is what finally connects Feature, Post shape and the draft knobs to something that gets published, and it is why the bare `/social` now opens here rather than on Draft. |
 | **B — Cron** | **Superseded by the seed lane** (2026-08-01) | The Vercel route stays parked as designed (`SOCIAL_AUTOPOST_PRODUCTS` unset — no compliant server-side draft source, and its one-text-everywhere shape contradicts the multiplier). Its *calendar half* now runs billing-compliantly on the Mac: `scripts/seed-drafts.sh` (launchd, Mondays 07:00) files the week's briefs from `content/social/pillars.json` into the draft queue, and the 5-minute drain answers them on the Max pool — verified unattended end to end (seed → answered in 3 minutes). Per-channel fan-out remains session-side at staging time. |
 | **C — Hermes relay** | **Parked** | Hermes is down, never observed end to end, and since 2026-07-30 nothing depends on it: reviews carry through the Hub's own links. Revisit only when a hermes-transport channel actually goes live. |
 
@@ -129,6 +130,41 @@ which confirms they are deployed and `CRON_SECRET` is set. The cron fires daily 
 returns `drafted: 0`.
 
 ## What's done
+
+- **The composer became the pipeline (2026-08-25/26).** `/social/publish` stopped being a review
+  queue with a Send and became the only stage that finishes a post on its own — which is why the
+  bare `/social` opens there now. One box: the field is both the post and the queue search; ⊕ is
+  the shared media tray; the seat sends. Behind it, eight words — Brand · Feature · Channel · Post
+  · Draft · Media · Queue · Plan — each rendering its choices as the same card in the same strip.
+  Three joins made it a pipeline rather than a form:
+  - **It asks.** *Write it* turns the field plus every setting into a brief (knobs as columns,
+    Feature and post shape as prose, since prose is the documented input) and files it with
+    `requestSocialDraft`. ~11s inline on Gemini; a miss falls through to the same queue and the
+    same drain, and the box says which happened rather than spinning. The answered request becomes
+    the composer's active draft, so Send routes through `approveDraft` and claims it — skip that
+    and the copy publishes while the same draft stays answered for someone else to publish twice.
+  - **It starts from the plan.** `pillars.json`'s briefs are a strip of cards; pressing one asks
+    with it verbatim. Zero typing to a post. Not a replacement for the Calendar stage — two
+    questions off one file.
+  - **It refines.** "What should change?" files the next turn against whatever draft is in the
+    field, including one the drain wrote days ago. Measured: a draft promising a parent alert that
+    [balqalam](/docs/social/balqalam) forbids was fixed in 24 seconds, the parent superseded and
+    the child holding the claim.
+- **Later means later (2026-08-25).** It did not. `approveDraft({mode:"schedule"})` rejects a
+  payload with no `scheduledFor` and the box never sent one, so scheduling a queued draft failed
+  every time; typed copy was worse — the no-draft arm called `publishPostDirect` regardless of
+  destination, so choosing Later and pressing the arrow published immediately. Plan carries a time
+  now, seeded 15 minutes out, resolved to an instant in the browser because the server reads a
+  naive string in its own zone (UTC on Vercel — 19:00 Khartoum would have queued for 16:00).
+- **Every brand has a writing context (2026-08-25).** `BRAND_CONTEXTS` had no `balqalam` row —
+  the Hub's default brand — so the fallback `"<id> — SaaS product by Databayt"` fired and every
+  draft ever asked for it was written by someone who did not know it was school software. Asked
+  for "attendance" it produced clean, on-register Arabic about tracking employees. A test now pins
+  the map to the product registry, and each row carries the brand page's audience.
+- **One stage frame (2026-08-25).** Publish's screen — the snap, the settle-then-lock, the gesture
+  swallowing that still lets an inner scroller take its own wheel — is `stage.tsx`, and Draft and
+  Media wear it. Calendar and Measure deliberately do not: the lock is armed by a box calling
+  `onEngagedChange`, and a stage with no box would get a full screen centred on a heading.
 
 - **Egress** — per-channel results, three transports in parallel, and a **media set** through the whole chain: one photo (Facebook `/photos`, Telegram `sendPhoto`), 2–10 as a Facebook carousel or Telegram album (`sendMediaGroup`), one video (`/videos`, `sendVideo`) — with mixed image+video, two videos, or >10 images refused by name before delivery, since no platform edge carries them. The approval token addresses the variant, so the confirm page lists every URL
 - **Per-product Facebook** — its own Page and permanent token per brand, with the resolved Page name shown before you publish, which is how a crossed token gets caught
@@ -202,6 +238,21 @@ returns `drafted: 0`.
 
 ## What's not
 
+- **The craft gate never sees what actually publishes.** `checkCraft` is called in exactly two
+  places: the Gemini drafting lanes, and `review-editor.tsx`, which is no longer rendered anywhere.
+  So AI copy is gated until a human edits it, and anything typed straight into the composer reaches
+  the Page with the linter never looking. It is the linter that catches a bare link, a banned word
+  and the length floor — the mechanical half a reader at 11pm misses.
+- **Dismiss has no button.** The composer can load a queue draft but not reject one, and
+  `dismissReason` is what `social-drafts.mjs lessons` feeds the writer *before* it drafts. So the
+  feedback loop [Copy](/docs/social/copy) describes is starved by the UI rather than by the data
+  model. Disposal currently means SQL.
+- **The composer always takes Arabic.** Every draft answers `ar` **and** `en`; the box does
+  `ar || en` on both its own ask and a queue load. The English half is reachable only from the
+  Draft stage's "Use English", so a session run entirely in the fast lane can never get it.
+- **A visual register is remembered and changes nothing.** The Media tab's sixteen styles are a
+  directive with no wire: nothing in `library.json` records a style, and `lib/media-prompt.ts` —
+  where the adjective belongs — does not read it yet.
 - **Configuration** — the largest gap and the cheapest to close. Being handled by Cowork, which can drive the platform consoles directly.
 - **Ownership** — newly named, and the only gap on this page that is *not* cheap to close. Every brand's social identity hangs off one personal Facebook account inside an unnamed, unverified business portfolio with a bus factor of one, and no teammate has ever been invited. It blocks Instagram outright rather than merely being untidy. See [Ownership & accounts](/docs/social/ownership).
 - **Hermes** — parked (down, no production config), and since 2026-07-30 nothing user-facing depends on it: the approve stage returns its links in the composer, and the status panel shows the lane as parked-neutral instead of permanently red. Tracked in [kun#143](https://github.com/databayt/kun/issues/143).

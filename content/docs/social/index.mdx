@@ -13,26 +13,75 @@ credential plan are internal (`docs/SOCIAL-AUTOMATION.md`).
 
 ## How a post travels
 
-Nine steps from an idea to a live page. The first six are about words and permission;
-only the last three touch a platform at all.
+From nothing to a live page, in one box. Everything above the dashed line happens on
+`/social/publish` without leaving it — which is why the bare `/social` opens there.
 
 ```mermaid
 flowchart TD
-  A["Pick what to post<br/>and which day"] --> B["Write the words<br/>Arabic first, English after"]
-  B --> C{"Craft gate checks<br/>the writing"}
-  C -- "too short · banned word<br/>· bare link" --> B
-  C -- "clean" --> D["Attach media<br/>(optional)"]
-  D --> E{"A human<br/>says yes"}
-  E -- "no" --> X["Dismissed, with<br/>a reason recorded"]
-  E -- "yes" --> F["Send to the platform"]
-  F --> G["Save the receipt<br/>the post id"]
-  G --> H["Read the numbers<br/>back, six-hourly"]
+  P["Press a brief from the plan<br/>audience · CTA · constraint written"] --> ASK
+  W["…or say what it is about"] --> ASK
 
-  classDef stop fill:#3b2220,stroke:#a35a4e,color:#f2d9d4;
+  ASK["Ask — brand, feature, shape, channels<br/>and the knobs ride with it"]
+  ASK --> C{"Craft gate<br/>reads the writing"}
+  C -- "banned word · bare link · too short" --> ASK
+
+  C -- "clean" --> D{"The copy lands in the field.<br/>Right yet?"}
+  D -- "no — say what to change" --> RF["Refine — the next turn<br/>of the same draft"]
+  RF --> D
+  D -- "yes" --> M["Attach media (optional)"]
+
+  M --> S{"Send"}
+  S -- "Now" --> F
+  S -- "Later" --> Q["Queued for the time you picked"] --> F
+  S -- "Review" --> L["One signed link per channel"] --> F
+
+  F["Every wired channel, one press"] --> G["Save the receipt — the post id"]
+  G --> H["Read the numbers back, six-hourly"]
+
+  classDef start fill:#1d2436,stroke:#4d5a7a,color:#d7deee;
   classDef send fill:#12312e,stroke:#2f7d72,color:#c6e8e2;
-  class X stop;
-  class F,G send;
+  classDef keep fill:#232a25,stroke:#4a6350,color:#d3e3d7;
+  class P,W start;
+  class F send;
+  class G,H keep;
 ```
+
+Two ways in, and the first one costs no typing at all: `content/social/pillars.json` holds each
+brand's recurring briefs — audience, call to action, constraint, angle and scene already written —
+and pressing one asks with it verbatim. The [Calendar](#the-hub-is-this-table-as-routes) stage
+renders the same file as the week's plan; the composer offers it as a starting line.
+
+**The loop in the middle is the point.** A draft that comes back eighty percent right used to mean
+retyping it by hand — eighty percent right being the common case. Saying what to change files the
+next turn of the same thread: the parent is superseded, the child carries the root brief and the
+inherited knobs, and only the newest is `answered`, so the queue shows the current draft rather
+than three versions competing for a slot.
+
+### Why this beats posting by hand
+
+Not the login. [Strategy](/docs/social/strategy#the-multiplier--create-once-repurpose-everywhere)
+names the real constraint: **content capacity** — two or three core pieces a week, because writing
+Arabic that clears the seven checks is genuinely hard. The pipeline attacks that number and four
+things a person posting by hand structurally cannot do:
+
+| | Posting by hand | This pipeline |
+|---|---|---|
+| **Brand knowledge** | Lives in whoever is typing | [Copy](/docs/social/copy)'s seven checks, the register ladder, and the brand's own audience and constraint reach the writer before it writes |
+| **Refusal** | Nothing stops a boring or untracked post | The craft gate rejects on its own — the first Balqalam draft was refused for `balqalam.com` without a scheme, because `applyUtm` only tags absolute URLs |
+| **Memory** | A post leaves nothing behind | Platform id saved (so it can be retracted), links UTM-tagged at delivery, `SocialMetric` read six-hourly, dismiss reasons fed back to the next draft |
+| **Delegation** | Means sharing the account | Approval is a conditional claim, so two reviewers cannot double-post; a signed single-use link approves from a phone with no token in anyone's hands |
+
+Measured 2026-08-25, on the Balqalam Page's own brand: brand + feature picked, **nothing typed**,
+publishable Arabic in ~25 seconds. Then one sentence — *shorter, drop any out-of-app notification* —
+and 24 seconds later the draft no longer promised a parent alert that
+[balqalam.mdx](/docs/social/balqalam) forbids in as many words.
+
+**Where it does not beat manual yet, stated plainly.** One press already fans to every *selected*
+channel, but only Facebook is live, for three of five brands — so today's win is quality and memory
+per post, not reach per press. The multiplier is real in the schema (`SocialVariant.text` is
+per-channel) and deliberately unbuilt under the
+[one-slice decision](/docs/social/status#scope--one-slice-on-purpose-2026-08-06). Copy typed by
+hand is not craft-gated, and dismiss has no button — see [Status](/docs/social/status#whats-not).
 
 Four doors open onto **Send to the platform**, and they differ only in who says yes:
 the **review queue** on `/social/publish` (a person clicks Approve), a **signed link**
@@ -200,7 +249,7 @@ full draft queues for a human on `/social/publish`.
 | Stage | Owner | Notes |
 |-------|-------|-------|
 | **Plan** | `calendar` skill · `weekly` cadence · `growth` agent pillars | What to say, to whom, when. `content/social/pillars.json` IS the recurring calendar — the Monday seeder rotates it into the draft queue, and `/social/calendar` renders it with a **Queue now** button |
-| **Draft** | `draft` skill — **Claude, natively** — or the **Social Agent window** on `/social` | Arabic-first bilingual copy against [Brand & Voice](/docs/brand), **plus the media half**. The window queues the brief and a Claude Code session on the Max pool answers it — the API lane of D-20260730 has no funded key, so drafting stays on the subscription. Contributor-gated |
+| **Draft** | `draft` skill — **Claude, natively** — the agent window on `/social/draft`, or **the composer itself** on `/social/publish` | Arabic-first bilingual copy against [Brand & Voice](/docs/brand), **plus the media half**. Three askers, one queue: all of them file a `SocialDraftRequest`, the inline Gemini lane answers in ~11s where it can, and a Claude Code session on the Max pool answers the rest — the API lane of D-20260730 has no funded key, so drafting stays on the subscription. Contributor-gated |
 | **Media** | `media` keyword → `/higgs` (text-free) · `/carousel` (text-bearing) | **Pick before you generate**: `library.json` by brand + type, or the brief's `(library: id)` hint. New renders register in the library, then attach to the draft (`social-drafts.mjs attach`, or the showroom's **Attach**) |
 | **Approve** | `approve` skill → human (Abdout / Ali / Samia) | The gate — the **review queue** on `/social/publish` is the primary lane; a signed 12h link covers a remote approver. See [Autonomy ladder](#autonomy-ladder) |
 | **Schedule** | `SocialVariant.scheduledFor` + `/api/social/drain` | The review queue's approve-mode setting: publish right away, or schedule and delegate to the drain, which publishes due variants every ~15 minutes from GitHub Actions. No keyword of its own — it is `publish`'s second verb ("schedule it for tomorrow") |
@@ -221,9 +270,9 @@ attach the media, and send.
 | Route | Stages | What is there |
 |-------|--------|---------------|
 | **/social/calendar** | Plan | The pillars, live: each brand's briefs with **this ISO week's rotation picks** highlighted (the same math the Monday seeder runs), a queue chip per brief — in the queue · answered · approved · dismissed — and **Queue now** to file one as a draft ask on the spot |
-| **/social/draft** | Draft | The Social Agent window. Shows the answered draft's media beside its copy; "Use …" hands copy **and** media to the review queue |
-| **/social/media** | Media | The showroom — generated assets (`library.json`) and kept references (`references.json`), filterable by brand and type; decks link to their live renders. **Attach** puts an asset in the publish tray — no copy-pasting URLs |
-| **/social/publish** | Approve · Schedule · Publish | The **review queue**, behind one search bar with a **mode row** — All · Drafts · Scheduled · Published — that spans the whole lane: drafts awaiting a decision, plus the variants where the decision is already made. Only a draft loads into the editor, which fine-tunes copy, attachments and channels and never creates from blank; scheduled and published rows are read-only and open the ledger. Approve (now, or scheduled per the settings), Dismiss, or send the signed review link |
+| **/social/draft** | Draft | The agent window, and since 2026-08-25 the same box the other stages wear: one glass bar whose field is a BRIEF, its ⊕ the shared media tray, its empty seat the three knobs. Typing again refines the draft on screen rather than starting another. The answer, its media and the "Use …" buttons sit under it — "Use English" is the only place the English half is reachable |
+| **/social/media** | Media | The same box, finding rather than asking: type two words and the library narrows, and each row attaches into the shared tray. The showroom below it still browses — shelves by brand, cards with model, credits and source. Media Studio (generation) sits under the gallery: the box finds what exists, the studio asks for what does not |
+| **/social/publish** | Draft · Media · Approve · Schedule · Publish | **Where the bare `/social` opens**, because it is the only stage that finishes a post on its own. One box: the field is both the post and the queue search, ⊕ attaches, and the seat sends. Behind it, eight words — Brand · Feature · Channel · Post · Draft · Media · Queue · Plan. **Draft** carries the plan's briefs as one-press starts, the angle/register/model knobs, **Write it**, and **Refine**. **Plan** is what Send does: Now, Later (with a time), or Review (one signed link per channel). A draft loaded from **Queue** is approved rather than re-published, which claims it `answered → consumed` |
 | **/social/measure** | Measure | The activity ledger — last 20 variants with status, time, and latest reach/views |
 
 Cross-stage state lives in the layout's provider, which persists across stage navigations: the
