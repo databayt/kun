@@ -71,6 +71,18 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
+import {
+  IconBrandFacebook,
+  IconBrandInstagram,
+  IconBrandLinkedin,
+  IconBrandSlack,
+  IconBrandSnapchat,
+  IconBrandTiktok,
+  IconBrandWhatsapp,
+  IconBrandX,
+  type IconProps,
+} from "@tabler/icons-react";
+
 import { cn } from "@/lib/utils";
 import { matchesQuery } from "@/lib/normalize-search";
 import {
@@ -190,6 +202,28 @@ const MODES: readonly {
     shortcut: "⌘4",
   },
 ] as const;
+
+/**
+ * A channel's own glyph, for the picker that offers it.
+ *
+ * Tabler rather than an asset folder: these are platform marks, they ship with
+ * a dependency the app already has, and they are drawn as icons — an outline
+ * that sits beside our own brand marks without pretending to be one. lucide
+ * dropped its brand set, which is why the house icon library cannot serve here.
+ *
+ * Keyed by the ids in config.ts. A channel with no entry falls back to its
+ * name, the same way a brand without artwork does.
+ */
+const CHANNEL_ICON: Record<string, React.ComponentType<IconProps>> = {
+  facebook: IconBrandFacebook,
+  instagram: IconBrandInstagram,
+  whatsapp: IconBrandWhatsapp,
+  x: IconBrandX,
+  linkedin: IconBrandLinkedin,
+  tiktok: IconBrandTiktok,
+  snapchat: IconBrandSnapchat,
+  slack: IconBrandSlack,
+};
 
 const KIND_ICON: Record<QueueItem["kind"], LucideIcon> = {
   draft: PenLine,
@@ -1601,23 +1635,56 @@ function ConfigChoices({
         </p>
       );
     }
+    // The same outlined tiles the brands get: a channel is picked by its mark
+    // too, and two rows of the same question should not answer it in two
+    // different shapes. Multi-select, so several can hold at once.
     return (
-      <Pills
-        items={wired.map((id) => {
-          const c = CHANNELS.find((entry) => entry.id === id);
-          return {
-            id,
-            label: c ? (isRTL ? c.labelAr : c.label) : id,
-            on: selected.includes(id),
-            pick: () =>
-              onChannels(
-                selected.includes(id)
-                  ? selected.filter((x) => x !== id)
-                  : [...selected, id],
-              ),
-          };
+      <div className="flex flex-wrap gap-2">
+        {wired.map((id) => {
+          const channel = CHANNELS.find((entry) => entry.id === id);
+          const label = channel ? (isRTL ? channel.labelAr : channel.label) : id;
+          const Icon = CHANNEL_ICON[id];
+          const on = selected.includes(id);
+          const toggle = () =>
+            onChannels(
+              on ? selected.filter((x) => x !== id) : [...selected, id],
+            );
+          if (!Icon) {
+            return (
+              <button
+                key={id}
+                type="button"
+                aria-pressed={on}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={toggle}
+                className={pill(on)}
+              >
+                {label}
+              </button>
+            );
+          }
+          return (
+            <button
+              key={id}
+              type="button"
+              aria-pressed={on}
+              aria-label={label}
+              title={label}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={toggle}
+              className={cn(
+                "flex size-20 shrink-0 cursor-pointer items-center justify-center",
+                "rounded-2xl border transition-colors duration-150",
+                on
+                  ? "border-foreground/40 bg-accent text-foreground"
+                  : "border-input text-muted-foreground hover:border-foreground/30 hover:bg-accent/40 hover:text-foreground",
+              )}
+            >
+              <Icon size={32} stroke={1.5} />
+            </button>
+          );
         })}
-      />
+      </div>
     );
   }
 
