@@ -1730,8 +1730,10 @@ function ConfigSelect({
   if (!section) return null;
 
   // Kept inside the panel's width. A card hanging off the last box would
-  // otherwise run past the box it belongs to.
-  const CARD = 224;
+  // otherwise run past the box it belongs to. Brand is wider because two
+  // columns plus a tick cannot hold a name like "Hogwarts" in half of 224.
+  const grid = section === "brand";
+  const CARD = grid ? 264 : 224;
   const left = anchor
     ? Math.max(8, Math.min(anchor.x, Math.max(8, panelWidth - CARD - 8)))
     : 8;
@@ -1756,20 +1758,24 @@ function ConfigSelect({
         aria-label={title[section]}
         style={{ insetInlineStart: left, top: anchor?.y ?? 8 }}
         className={cn(
-          "bg-popover text-popover-foreground absolute w-56 rounded-2xl border p-2 shadow-lg",
+          "bg-popover text-popover-foreground absolute rounded-2xl border p-2 shadow-lg",
           "text-start",
+          grid ? "w-66" : "w-56",
         )}
       >
-        <p className="text-muted-foreground/70 px-1 pb-2 text-[11px]">
-          {title[section]}
-        </p>
-
         {choices.length === 0 ? (
           <p className="text-muted-foreground/60 py-2 text-xs">
             {t.spotlightConfigNoChannels}
           </p>
         ) : (
-          <div className="flex flex-col gap-1">
+          <div
+            className={cn(
+              "gap-1",
+              // Brand is six one-word names; a single column makes a tall,
+              // mostly-empty card out of a list that fits in three rows.
+              grid ? "grid grid-cols-2" : "flex flex-col",
+            )}
+          >
             {choices.map((choice) => (
               <button
                 key={choice.id}
@@ -1781,7 +1787,8 @@ function ConfigSelect({
                   if (!multi) onClose();
                 }}
                 className={cn(
-                  "flex cursor-pointer items-center justify-between rounded-lg px-3 py-2",
+                  "flex cursor-pointer items-center justify-between rounded-lg py-2",
+                  grid ? "px-2.5" : "px-3",
                   "text-sm transition-colors duration-150",
                   choice.on
                     ? "bg-accent text-accent-foreground font-medium"
