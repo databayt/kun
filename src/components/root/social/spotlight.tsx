@@ -107,6 +107,7 @@ import { mediaKind } from "@/lib/media-kind";
 import {
   approveDraft,
   publishPostDirect,
+  schedulePost,
   stageForReview,
   type BrandMedia,
   type PostResult,
@@ -375,6 +376,36 @@ export function ReviewSpotlight({
     "direct",
     (v): v is Destination => (DESTINATIONS as readonly string[]).includes(v),
   );
+
+  // The time "Later" means, as a datetime-local string ("2026-08-25T18:00").
+  //
+  // It exists because "Later" did not work. `approveDraft({mode:"schedule"})`
+  // rejects a payload with no `scheduledFor` — "Pick a date and time first." —
+  // and the box never sent one, so a queued draft could not be scheduled at
+  // all. Typed copy was worse: the send routed on whether a draft was loaded,
+  // so with none, Later fell through to `publishPostDirect` and the post went
+  // out immediately. A control that says Later and publishes now is the one
+  // kind of bug this box must not have.
+  //
+  // Deliberately NOT persisted. A brand or a channel is a preference that
+  // should survive the tab; a specific Tuesday evening is not, and restoring
+  // one a week later would schedule into the past.
+  const [scheduleAt, setScheduleAt] = React.useState("");
+
+  // A time whenever Later is on and none is set — the seed for both ways in.
+  //
+  // Pressing Later is one. The other is remembering it: the destination is
+  // persisted and the time deliberately is not, so someone who left the box on
+  // Later returns with no time and would find Send off, its reason pointing at
+  // a control they have not opened. Fifteen minutes out is what Later used to
+  // claim it meant, back when it meant nothing.
+  React.useEffect(() => {
+    if (destination !== "schedule" || scheduleAt) return;
+    const soon = new Date(Date.now() + 15 * 60_000);
+    soon.setSeconds(0, 0);
+    setScheduleAt(toLocalInput(soon));
+  }, [destination, scheduleAt]);
+
   const [postType, setPostType] = usePersisted<PostType>(
     POST_TYPE_KEY,
     // Text and one still is the ordinary post; the rest are departures from it.
@@ -646,7 +677,13 @@ export function ReviewSpotlight({
       ? t.blockedNoChannel
       : !transportsReady
         ? t.blockedTransport
-        : null;
+        : // Caught here rather than at the server, which checks the same thing:
+          // a past time is a typo, and finding out after the button by way of
+          // an error is worse than a button that says why it is off.
+          destination === "schedule" &&
+            (!scheduleAt || new Date(scheduleAt).getTime() < Date.now() - 60_000)
+          ? t.blockedSchedule
+          : null;
 
   /**
    * One Send, two paths — chosen by where the copy came from, not by a control
@@ -675,6 +712,12 @@ export function ReviewSpotlight({
       channels: selectedChannels,
       mediaUrls: composerMediaUrls,
     };
+    // The picker gives local wall-clock with no zone ("2026-08-25T18:00"). The
+    // server does `new Date(...)` on whatever arrives, and Node reads a naive
+    // string in the PROCESS's zone — UTC on Vercel — so sending it raw would
+    // schedule 18:00 Khartoum as 18:00 UTC, three hours early. Resolved here,
+    // where the browser's own zone is the right one to resolve it in.
+    const at = scheduleAt ? new Date(scheduleAt).toISOString() : undefined;
     try {
       const draftId = reviewQueue.activeDraftId;
       let scheduled: { count: number; at: string } | null = null;
@@ -695,6 +738,7 @@ export function ReviewSpotlight({
           draftId,
           mode: destination === "schedule" ? "schedule" : "now",
           ...payload,
+          ...(destination === "schedule" ? { scheduledFor: at } : {}),
         });
         res = approved;
         if (destination === "schedule") {
@@ -703,6 +747,16 @@ export function ReviewSpotlight({
             at: approved.at ? new Date(approved.at).toLocaleString() : "",
           };
         }
+      } else if (destination === "schedule") {
+        // Typed copy answers to no queue entry, so there is nothing to claim —
+        // but it still has a time, and this is the action that takes one. It
+        // used to fall into publishPostDirect below and go out immediately.
+        const queued = await schedulePost({ ...payload, scheduledFor: at });
+        res = queued;
+        scheduled = {
+          count: queued.count ?? 0,
+          at: queued.at ? new Date(queued.at).toLocaleString() : "",
+        };
       } else {
         res = await publishPostDirect(payload);
       }
@@ -736,6 +790,7 @@ export function ReviewSpotlight({
   }, [
     blockedReason,
     sending,
+    scheduleAt,
     product,
     query,
     selectedChannels,
@@ -993,6 +1048,8 @@ export function ReviewSpotlight({
                   features={brandFeatures}
                   destination={destination}
                   onDestination={setDestination}
+                  scheduleAt={scheduleAt}
+                  onScheduleAt={setScheduleAt}
                   postType={postType}
                   onPostType={setPostType}
                   mediaFilter={mediaFilter}
@@ -1345,6 +1402,8 @@ function ConfigPanel({
   features,
   destination,
   onDestination,
+  scheduleAt,
+  onScheduleAt,
   postType,
   onPostType,
   mediaFilter,
@@ -1372,6 +1431,8 @@ function ConfigPanel({
   features: BrandFeature[];
   destination: Destination;
   onDestination: (next: Destination) => void;
+  scheduleAt: string;
+  onScheduleAt: (next: string) => void;
   postType: PostType;
   onPostType: (next: PostType) => void;
   mediaFilter: MediaFilter;
@@ -1511,6 +1572,8 @@ function ConfigPanel({
             onImageStyle={onImageStyle}
             destination={destination}
             onDestination={onDestination}
+            scheduleAt={scheduleAt}
+            onScheduleAt={onScheduleAt}
             drafts={drafts}
             onUseDraft={onUseDraft}
             ago={ago}
@@ -2073,6 +2136,50 @@ function StyleCard({
 }
 
 /**
+ * A Date as `<input type="datetime-local">` wants it: local wall-clock, no
+ * zone. `toISOString()` would be the instant in UTC, which the picker reads as
+ * a wall-clock time and shows shifted by the reader's offset.
+ */
+function toLocalInput(date: Date): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+/**
+ * The times anyone actually picks, so the common answers cost one press
+ * instead of a date picker. The exact one stays available beside them — these
+ * are shortcuts into the same field, not a second way of answering.
+ */
+const QUICK_TIMES = [
+  {
+    id: "hour",
+    key: "scheduleInHour" as const,
+    at: () => toLocalInput(new Date(Date.now() + 60 * 60_000)),
+  },
+  {
+    id: "evening",
+    key: "scheduleThisEvening" as const,
+    at: () => {
+      const d = new Date();
+      d.setHours(20, 0, 0, 0);
+      // Past eight already — the reader means tomorrow evening.
+      if (d.getTime() < Date.now()) d.setDate(d.getDate() + 1);
+      return toLocalInput(d);
+    },
+  },
+  {
+    id: "morning",
+    key: "scheduleTomorrow" as const,
+    at: () => {
+      const d = new Date();
+      d.setDate(d.getDate() + 1);
+      d.setHours(9, 0, 0, 0);
+      return toLocalInput(d);
+    },
+  },
+] as const;
+
+/**
  * One draft-direction answer, drawn the way a post shape and a visual register
  * are: a card in a strip, with its name on a pill in the corner.
  *
@@ -2222,6 +2329,8 @@ function ConfigChoices({
   onImageStyle,
   destination,
   onDestination,
+  scheduleAt,
+  onScheduleAt,
   drafts,
   onUseDraft,
   ago,
@@ -2247,6 +2356,9 @@ function ConfigChoices({
   onImageStyle: (next: string) => void;
   destination: Destination;
   onDestination: (next: Destination) => void;
+  /** When Later means, as local wall-clock. Empty until Later is chosen. */
+  scheduleAt: string;
+  onScheduleAt: (next: string) => void;
   drafts: { id: string; text: string; when: string }[];
   onUseDraft: (id: string) => void;
   ago: (iso: string) => string;
@@ -2773,6 +2885,9 @@ function ConfigChoices({
     schedule: t.destinationScheduleHint,
     review: t.destinationReviewHint,
   };
+  // The picker's own floor. A past time is refused by the server and by the
+  // send button; saying so in the widget is cheaper than either.
+  const minSchedule = toLocalInput(new Date());
   const icon: Record<Destination, React.ComponentType<IconProps>> = {
     // The paper plane the seat beside the field already wears.
     direct: IconSend,
@@ -2816,6 +2931,38 @@ function ConfigChoices({
           );
         })}
       </div>
+
+      {/* Later is the only one of the three that needs a second answer, and it
+          appears under the tile that asked for it rather than living in the
+          row permanently — Now and Review have no time, and an input greyed
+          out beside them would be a control that is never for you. */}
+      {destination === "schedule" && (
+        <div className="flex flex-wrap items-center gap-1.5 pt-3">
+          <input
+            type="datetime-local"
+            value={scheduleAt}
+            min={minSchedule}
+            onMouseDown={(e) => e.stopPropagation()}
+            onChange={(e) => onScheduleAt(e.target.value)}
+            className={cn(
+              "border-input bg-background text-foreground rounded-md border",
+              "px-2.5 py-1.5 text-xs tabular-nums",
+              "focus-visible:border-foreground/40 focus-visible:outline-none",
+            )}
+          />
+          {QUICK_TIMES.map((quick) => (
+            <button
+              key={quick.id}
+              type="button"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => onScheduleAt(quick.at())}
+              className={pill(false)}
+            >
+              {t[quick.key]}
+            </button>
+          ))}
+        </div>
+      )}
 
       <p className="text-muted-foreground/70 pt-2.5 text-[11px]">
         <span className="text-foreground/80 font-medium">

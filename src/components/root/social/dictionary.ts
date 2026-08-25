@@ -180,8 +180,13 @@ export const SOCIAL_DICTIONARY = {
     destinationDirect: "Now",
     destinationDirectHint: "Send reaches the selected channels immediately.",
     destinationSchedule: "Later",
+    // What it does now that it does anything. The old line promised the next
+    // drain run, and the send never reached a scheduling action at all.
     destinationScheduleHint:
-      "Send queues it; the cron drain delivers within ~15 minutes.",
+      "Send queues it for the time you pick; the drain delivers it on its first run after that.",
+    scheduleInHour: "In an hour",
+    scheduleThisEvening: "This evening",
+    scheduleTomorrow: "Tomorrow 9",
     destinationReview: "Review",
     destinationReviewHint:
       "Send stages it and hands back one signed link per channel. Nothing publishes until an approver presses one.",
@@ -428,6 +433,7 @@ export const SOCIAL_DICTIONARY = {
     // Why the Publish button is disabled — shown so the block is never silent.
     blockedNoText: "Write or paste the post copy first.",
     blockedNoChannel: "Select at least one channel.",
+    blockedSchedule: "Pick a time in the future first.",
     blockedTransport:
       "Waiting on a disconnected relay for the selected channels.",
     ledgerTitle: "Recent activity",
@@ -581,7 +587,10 @@ export const SOCIAL_DICTIONARY = {
     destinationDirectHint: "الإرسال يصل القنوات المختارة فوراً.",
     destinationSchedule: "لاحقاً",
     destinationScheduleHint:
-      "الإرسال يضعه في الطابور، والتصريف ينشره خلال ~15 دقيقة.",
+      "الإرسال يضعه في الطابور للوقت الذي تختاره، والتصريف ينشره في أول دورة بعده.",
+    scheduleInHour: "بعد ساعة",
+    scheduleThisEvening: "هذا المساء",
+    scheduleTomorrow: "غداً ٩",
     destinationReview: "مراجعة",
     destinationReviewHint:
       "الإرسال يجهّزه ويعيد رابطاً موقّعاً لكل قناة. لا شيء يُنشر حتى يضغط المعتمد أحدها.",
@@ -794,6 +803,7 @@ export const SOCIAL_DICTIONARY = {
     noChannels: "لا توجد قناة موصولة لهذا المنتج بعد.",
     blockedNoText: "اكتب أو الصق نص المنشور أولاً.",
     blockedNoChannel: "اختر قناة واحدة على الأقل.",
+    blockedSchedule: "اختر وقتاً في المستقبل أولاً.",
     blockedTransport: "في انتظار ناقل غير متصل للقنوات المختارة.",
     ledgerTitle: "النشاط الأخير",
     ledgerEmpty: "لا سجلات بعد — سيظهر هنا كل نشر وجدولة واعتماد.",
