@@ -83,6 +83,9 @@ import {
   IconBrandTiktok,
   IconBrandWhatsapp,
   IconBrandX,
+  IconCalendarClock,
+  IconEye,
+  IconSend,
   type IconProps,
 } from "@tabler/icons-react";
 
@@ -2458,25 +2461,57 @@ function ConfigChoices({
     schedule: t.destinationScheduleHint,
     review: t.destinationReviewHint,
   };
+  const icon: Record<Destination, React.ComponentType<IconProps>> = {
+    // The paper plane the seat beside the field already wears.
+    direct: IconSend,
+    schedule: IconCalendarClock,
+    // Someone else looks before it goes out — the signed link's whole point.
+    review: IconEye,
+  };
+  // The brand and channel rows' tiles. Three answers that differ in kind, and
+  // the row above them already asks its question this way; a third shape for
+  // the same kind of choice would only say they are unrelated.
+  //
+  // The sentence stays, for the chosen one only. A brand tile can drop its
+  // label because a mark IS the name — nobody needs telling that the quill is
+  // Balqalam. These three change what pressing the arrow DOES, and "hands
+  // back one signed link per channel" is not something an eye can say.
   return (
-    <div className="space-y-1">
-      {DESTINATIONS.map((option) => (
-        <button
-          key={option}
-          type="button"
-          aria-pressed={destination === option}
-          onMouseDown={(e) => e.preventDefault()}
-          onClick={() => onDestination(option)}
-          className={cn(
-            "flex w-full cursor-pointer flex-col rounded-lg p-2 text-start transition-colors duration-150",
-            destination === option ? "bg-accent" : "hover:bg-muted",
-          )}
-        >
-          <span className="text-sm font-medium">{name[option]}</span>
-          <span className="text-muted-foreground text-xs">{hint[option]}</span>
-        </button>
-      ))}
-    </div>
+    <>
+      <div className="flex flex-wrap gap-2">
+        {DESTINATIONS.map((option) => {
+          const Icon = icon[option];
+          const on = destination === option;
+          return (
+            <button
+              key={option}
+              type="button"
+              aria-pressed={on}
+              aria-label={name[option]}
+              title={name[option]}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => onDestination(option)}
+              className={cn(
+                "flex size-20 shrink-0 cursor-pointer items-center justify-center",
+                "rounded-2xl border transition-colors duration-150",
+                on
+                  ? "border-foreground/40 bg-accent text-foreground"
+                  : "border-input text-muted-foreground hover:border-foreground/30 hover:bg-accent/40 hover:text-foreground",
+              )}
+            >
+              <Icon size={32} stroke={1.5} />
+            </button>
+          );
+        })}
+      </div>
+
+      <p className="text-muted-foreground/70 pt-2.5 text-[11px]">
+        <span className="text-foreground/80 font-medium">
+          {name[destination]}
+        </span>{" "}
+        — {hint[destination]}
+      </p>
+    </>
   );
 }
 
