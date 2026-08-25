@@ -109,7 +109,11 @@ import {
   type MediaFilter,
   type PostType,
 } from "@/components/root/social/post-settings";
-import { PRODUCTS, type ProductId } from "@/components/root/social/products";
+import {
+  PRODUCTS,
+  SOCIAL_PRODUCTS,
+  type ProductId,
+} from "@/components/root/social/products";
 import { fill, type SocialDict } from "@/components/root/social/dictionary";
 import { useSocial } from "@/components/root/social/provider";
 
@@ -1506,15 +1510,50 @@ function ConfigChoices({
   );
 
   if (section === "brand") {
+    // A brand with a mark shows it; the rest show their name. Mixed on
+    // purpose — five wordmarks and one logo is the honest state of
+    // public/brands/, and a placeholder for the missing five would be a
+    // worse lie than a name.
     return (
-      <Pills
-        items={PRODUCTS.map((p) => ({
-          id: p.id,
-          label: isRTL ? p.labelAr : p.label,
-          on: product === p.id,
-          pick: () => onProduct(p.id),
-        }))}
-      />
+      <div className="flex flex-wrap gap-1.5">
+        {SOCIAL_PRODUCTS.map((p) => {
+          const on = product === p.id;
+          const name = isRTL ? p.labelAr : p.label;
+          return (
+            <button
+              key={p.id}
+              type="button"
+              aria-pressed={on}
+              aria-label={name}
+              title={name}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => onProduct(p.id as ProductId)}
+              className={cn(
+                pill(on),
+                p.logo && "flex items-center justify-center",
+              )}
+            >
+              {p.logo ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={p.logo}
+                  alt={name}
+                  className={cn(
+                    "h-4 w-auto object-contain",
+                    // The marks are monochrome ink, so they read on the
+                    // muted pill but vanish on the accent one — invert with
+                    // the text they replace.
+                    on && "dark:invert",
+                    !on && "opacity-70",
+                  )}
+                />
+              ) : (
+                name
+              )}
+            </button>
+          );
+        })}
+      </div>
     );
   }
 

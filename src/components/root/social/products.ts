@@ -26,6 +26,18 @@ export interface SocialProduct {
   id: string; // stable key; matches the env var suffix (uppercased)
   label: string;
   labelAr: string;
+  /**
+   * Brand mark under `public/brands/`, shown instead of the name wherever the
+   * Hub offers a brand to pick. Optional because most brands do not have one
+   * yet: drop `<id>.png` in that folder and it appears, no code change.
+   *
+   * Deliberately NOT read from components/root/carousel/brands.ts, which also
+   * records marks. That registry keys by the carousel deck's brand union, and
+   * the two vocabularies have already drifted — it spells moallimee with two
+   * l's where this file uses one. A silent lookup miss is exactly the failure
+   * a shared key would produce.
+   */
+  logo?: string;
   // channelId -> wired for this product. Distribution channels only —
   // a communication channel is structurally excluded from audience reach.
   channels: Partial<Record<DistributionChannelId, boolean>>;
@@ -36,6 +48,7 @@ export const PRODUCTS = [
     id: "hogwarts",
     label: "Hogwarts",
     labelAr: "هوجورتس",
+    logo: "/brands/hogwarts.png",
     channels: { facebook: true },
   },
   {
@@ -73,6 +86,16 @@ export const PRODUCTS = [
     channels: { facebook: false },
   },
 ] as const satisfies readonly SocialProduct[];
+
+/**
+ * The same list, widened to the interface.
+ *
+ * `as const` keeps each entry's literal type, which means an optional field
+ * only exists on the members that set it — reading `.logo` off the union is a
+ * type error even though `satisfies` has already proved the shape. This view
+ * is for callers that read optional fields across every brand.
+ */
+export const SOCIAL_PRODUCTS: readonly SocialProduct[] = PRODUCTS;
 
 export type ProductId = (typeof PRODUCTS)[number]["id"];
 
