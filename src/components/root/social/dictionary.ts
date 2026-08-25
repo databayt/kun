@@ -167,9 +167,7 @@ export const SOCIAL_DICTIONARY = {
     composeHint: "Write a post, or search the queue above to pull one in.",
     spotlightOtherBrands: "Other brands — opening one switches the brand",
     spotlightBrandCount: "{count} for {brand}",
-    reviewTitle: "Review & publish",
-    reviewIntro:
-      "Answered drafts queue here for a human decision — fine-tune, then approve. Writing happens in the Draft stage; media in the showroom.",
+    reviewTitle: "Runway",
     reviewNextUp: "Next up",
     reviewAgo: "{age} ago",
     reviewEmptyTitle: "Nothing awaiting review",
@@ -505,9 +503,7 @@ export const SOCIAL_DICTIONARY = {
     composeHint: "اكتب منشوراً، أو ابحث في الطابور أعلاه لسحب مسودة.",
     spotlightOtherBrands: "علامات أخرى — فتح إحداها يبدّل العلامة",
     spotlightBrandCount: "{count} لـ {brand}",
-    reviewTitle: "المراجعة والنشر",
-    reviewIntro:
-      "المسودات المُجابة تصطف هنا لقرار بشري — نقّح ثم اعتمد. الكتابة تجري في مرحلة الصياغة، والوسائط في المعرض.",
+    reviewTitle: "المدرج",
     reviewNextUp: "التالي",
     reviewAgo: "قبل {age}",
     reviewEmptyTitle: "لا شيء بانتظار المراجعة",

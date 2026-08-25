@@ -46,16 +46,21 @@ export function ReviewPanel() {
   }, [refresh]);
 
   return (
-    <section className="full-bleed from-background to-muted/20 flex flex-col bg-gradient-to-b py-16 md:py-24">
+    // A full screen, and centred in it: the stage is one column — a search
+    // bar and the composer under it — so anything less left it stranded at the
+    // top of a mostly empty page.
+    <section className="full-bleed from-background to-muted/20 flex min-h-screen flex-col justify-center bg-gradient-to-b py-16 md:py-24">
       <div className="mx-auto flex w-full max-w-4xl flex-col items-center px-4">
         <div className="w-full">
+          {/* One word — the strip a plane takes off from. Drafts queue on it,
+              wait their turn, and leave; the tab already says "Publish", so
+              this says what the stage IS. The paragraph that stood here
+              explained where writing and media happen, which the tab row
+              above already answers by being a tab row. */}
           <div className="mb-8 text-center">
             <h2 className="text-2xl font-semibold tracking-tight">
               {t.reviewTitle}
             </h2>
-            <p className="text-muted-foreground mx-auto mt-4 max-w-xl text-lg font-light">
-              {t.reviewIntro}
-            </p>
           </div>
 
           {/* The search bar sits above the queue it filters — see
