@@ -175,10 +175,22 @@ whole marketplace joins on (`Listing.code` on the site, `listingId` in Twenty; s
 [Mastering](/docs/master#naming-the-photos)). Accounts `0001–0004` are the four hand-verified
 hosts, `1001+` the scraped ones; a new host from Slack takes the next free manual number.
 
-For a home born in Slack the **CRM mints** the code the moment the host is known, and the
-site keeps it — `ensureListingCode` sees a code and returns. The mint scans both Twenty's
-`listingId`s and the site's `code`s for the account prefix, and the site's unique index on
-`code` is the final arbiter if two paths ever race.
+**How the account is assigned, in order.** The phone in your words is the anchor: it is
+normalised (`٠٩١٢…`, `00 249 …`, `+249 …` all become one number) and looked up on the `host`
+records. A known host keeps the account written on their own record (`mkanUsername`, `0004` for
+السند), falling back to what their homes carry; a host nobody knows gets a new `host` record and
+the next free manual number (`0005` today; `1001+` stays for scraped hosts). No phone means
+nothing is minted — the thread asks for the number first. The site's `NNNN@mkan.org` account is
+created only when the first home goes `live`.
+
+**How the code is assigned.** For a home born in Slack the **CRM mints** it the moment the
+host is known — the next unit under the account, in the order the units were written (the
+"first flat" in your message is not necessarily unit 01) — and the site keeps it at `live`
+(`ensureListingCode` sees a code and returns). A unit that looks like a home the host already
+has is not minted until you answer `new`. Known gap: the mint reads Twenty's codes but not yet
+the site's, so a host who publishes a flat through the wizard in between could take the same
+number; the site's unique index on `code` catches that at `live`, and the next step is to read
+both sides before minting.
 
 ## It learns your way of writing
 
@@ -212,13 +224,14 @@ Measured against the live CRM, gateway and Slack, not the docs:
 | The bot reading `#mkan` | **unblocked 2026-08-25** — `groups:history` + `files:read` added and the app reinstalled; the probe answers `ok: true` |
 | The script (Phase 1) | **built** — `home:sweep` / `extract` / `intake` / `update` / `publish` / `status` in `mkan/scripts/crm/`, 17 pure tests green |
 | The ears | **live** — Hermes bound to `#mkan` (every message wakes it, `home` skill, `[SILENT]`), launchd `com.databayt.mkan-home-sweep` every 2 min, one run lock |
-| The first real home | **awaiting the first message** — the reader was proven on the example (8.7 s, every field right); the channel run is proven on non-home chatter only |
+| The first real home | **proven 2026-08-25** — السند's two flats in one message: read right (2 bd · 1 ba · 7 beds · railway district · AC, washer, kitchen, TV, balcony; floor, iron, cooler, generator-by-agreement kept as notes), phone matched to the existing account-0004 host, matched one-to-one to `0004-02` / `0004-03` (live since 08-18), merged on `same`, **beds corrected 4→7 from the scout's words**, message attached as a note, both at 90% |
 
-**Blocked on nothing.** The one human action this page opened with — the Slack read scopes
-on the `kun` app — was clicked the same day: `groups:history` + `files:read` added, the app
-reinstalled, and the probe that used to answer `missing_scope` now reads the channel. That
-click also unblocked the mastering phone lane (`master:done --from-slack`). What remains is
-proof: the first real home typed into `#mkan`.
+**Blocked on one small click, and only for the Hermes ear.** The read scopes were added the
+same day and the timer ear carried the first real home end to end. Hermes itself never woke —
+your ID is allowed and the gateway was connected, so the `message.groups` **event
+subscription** is the missing piece: api.slack.com/apps → the `kun` app → *Event
+Subscriptions* → Subscribe to bot events → `message.groups` → Save → Reinstall. Until then the
+two-minute timer is the listener, which it has proven it can be.
 
 ### Build ledger
 
@@ -227,15 +240,40 @@ proof: the first real home typed into `#mkan`.
 | kun `d1e9a34` · `bf431af` | This page — the lane drawn before any code; the mixed-script table made readable |
 | mkan `7056c97` | The intake lane: `home:sweep` reads `#mkan` straight from Slack (cursor + thread ledger, idempotent by `ts`), `claude -p` under the frozen v1 prompt, vocabulary enforcement, host by phone, account + code minting, `home` + `host` + note, the trust rubric's own completeness, thread replies as the same bot, corrections file; the Hermes `home` skill + installer |
 | mkan `5f795c3` | `live 0005-01` → `home:publish`: site first (account, location — pin or zone centre said as such —, listing with its code), then Twenty mirrors LIVE; run lock between the two ears; `FORCE_SEED` carried by both installers |
+| mkan `334a7a0` | The site's Twenty webhook mints the code when a home is flipped LIVE from the CRM |
+| mkan `283d7e4` · `10e7fd9` · `6374406` | Learned from the first real message: duplicates matched one-to-one and **asked** (`same 0004-02 0004-03` merges, `new` creates); the host record's own account is the truth; no phone → nothing minted; the scout's numbers win on a merge and land in the corrections file; place names (a building, a market) are address words, not leftovers; a home already on the site is told so instead of asked to go live; `home:answer` for decisions taken elsewhere |
 
 ### Next
 
-The first real message, and the first `live`. Then the one-line hardening of the site's
-webhook (mint the code on `LIVE`). Phase 2 — the bell from Twenty for edits made in the CRM's
+The first `live` of a home born here (the first message described two flats that were
+already on the site). Then: read the site's codes before minting; a `host 0004` hint in the
+words to force a host match when the phone is new. Phase 2 — the bell from Twenty for edits made in the CRM's
 own UI (a workflow on `pipelineStage → CLAIMED` posting to Hermes' webhook route, the same
 shape the hogwarts funnel already runs). Phase 3 — photos posted in the thread, re-hosted on
 the CDN and attached to the record so mastering picks them up by itself. Phase 4 —
 `home:learn`, the gated prompt-version loop (the corrections file is already being written).
+
+## Traps, measured
+
+Each of these cost one real round trip on 2026-08-25; none is theoretical.
+
+- **A host's second flat is not a duplicate of the first.** The first dedup rule (same phone,
+  same rooms, same type) flagged both of السند's flats against the same record and created
+  nothing — with no way to answer. Duplicates are now matched one-to-one by likeness and the
+  thread asks: `same …` or `new`. The scout decides; the machine never merges on its own.
+- **Stale numbers in the CRM.** `0004-02` and `0004-03` carried `beds = 4`; the scout wrote
+  "سبعة سرير". On `same`, the scout's numbers win — they were at the door — and every changed
+  number is written to `corrections.jsonl`, which is how the CRM got corrected instead of the
+  message being bent to fit it.
+- **"مشغل دبي" is an address, not a leftover.** The reader filed the building's name under
+  leftover; the prompt now says building, operator, market and landmark names are place words.
+- **Already live is not "say live".** The merged flats had been on mkan.sd for a week and the
+  reply still offered `live`. Replies and `home:publish` now read the publish state first.
+- **An ear that is connected can still be deaf.** Scopes let the bot read; only the
+  `message.groups` event makes Socket Mode deliver private-channel messages. The timer ear was
+  designed for exactly this gap and carried the whole first run.
+- **`depth=0` hides relations.** Twenty's REST answers `noteTargets: []` at the default depth;
+  the notes were attached all along. Check with `depth=1` before calling something missing.
 
 ## Decisions on record
 
