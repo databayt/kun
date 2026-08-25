@@ -60,6 +60,15 @@ export interface SocialProduct {
    */
   avatar?: string;
   /**
+   * The Page's title, exactly as Facebook shows it.
+   *
+   * Not the same string as `label`, which is what this Hub calls the brand.
+   * The Page carries its own bilingual name — "Bilqalam بالقلم", "Mkan مكان" —
+   * and a preview claiming to be that Page should say what the Page says, not
+   * what our registry does. Falls back to `label` where no Page has been read.
+   */
+  pageName?: string;
+  /**
    * Does the mark invert on a dark ground?
    *
    * True for the marks the brand kit calls "monochrome ink only" — they are
@@ -116,6 +125,7 @@ export const PRODUCTS = [
     // "Bilqalam بالقلم" — an i where this registry has an a. The id is what
     // publishing uses, so the spelling drift is cosmetic, but it is there.
     avatar: "/brands/balqalam-avatar.jpg",
+    pageName: "Bilqalam بالقلم",
     channels: { facebook: true },
   },
   {
@@ -129,6 +139,7 @@ export const PRODUCTS = [
     // The live Page: the same arch, white on crimson. Read from
     // facebook.com/profile.php?id=61591860681425.
     avatar: "/brands/mkan-avatar.jpg",
+    pageName: "Mkan مكان",
     channels: { facebook: true },
   },
   {

@@ -1484,11 +1484,14 @@ function PostShape({
   meta,
   avatar,
   invertAvatar,
+  pageName,
 }: {
   meta: PostTypeMeta;
   /** The current brand's mark — a Page's profile picture is its logo. */
   avatar?: string;
   invertAvatar?: boolean;
+  /** What the Page calls itself, shown where Facebook shows it. */
+  pageName?: string;
 }) {
   // Facebook's own furniture: a white card on a grey ground, with the
   // placeholder grey it uses for anything not yet loaded. Tokens rather than
@@ -1528,8 +1531,18 @@ function PostShape({
           ) : (
             <span className={cn(skin, "size-6 shrink-0 rounded-full")} />
           )}
-          <span className="flex flex-1 flex-col gap-1">
-            <span className={cn(line, "w-2/3")} />
+          <span className="flex min-w-0 flex-1 flex-col gap-1">
+            {/* The Page's name, not a placeholder for one — it is known, and
+                a bar where a name belongs is a skeleton pretending to load
+                something that is already here. The timestamp stays a bar:
+                when this posts is the Send setting's answer, not ours. */}
+            {pageName ? (
+              <span className="text-foreground/70 truncate text-[9px] leading-none font-semibold">
+                {pageName}
+              </span>
+            ) : (
+              <span className={cn(line, "w-2/3")} />
+            )}
             <span className={cn(line, "h-1 w-1/3")} />
           </span>
         </div>
@@ -1861,6 +1874,7 @@ function ConfigChoices({
                   invertAvatar={
                     !brandMark?.avatar && brandMark?.logoInvertsOnDark
                   }
+                  pageName={brandMark?.pageName ?? brandMark?.label}
                 />
                 <span className="w-full truncate text-center text-[10px] leading-tight">
                   {t[POST_TYPE_LABEL[type]]}
