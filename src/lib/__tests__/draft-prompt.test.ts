@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { PRODUCTS } from "@/components/root/social/products";
 // eslint-disable-next-line -- the .mjs mirror is imported as itself on purpose
 import * as mjs from "../../../scripts/lib/draft-prompt.mjs";
 import * as ts from "@/lib/draft-prompt";
@@ -59,6 +60,32 @@ const CASES: Array<[string, MirrorInput]> = [
     },
   ],
 ];
+
+describe("brand context", () => {
+  it("covers every brand the Hub can publish for", () => {
+    // The fallback is `<id> — SaaS product by Databayt`, which throws nothing
+    // and is wrong everywhere. balqalam had no row until 2026-08-25 — the Hub's
+    // DEFAULT brand — so every draft ever asked for it was written by someone
+    // who did not know it was school software. Asked for "attendance" it
+    // produced a clean, on-register post about tracking employees.
+    for (const product of PRODUCTS) {
+      expect(
+        ts.BRAND_CONTEXTS[product.id],
+        `${product.id} falls through to the generic context`,
+      ).toBeTruthy();
+    }
+  });
+
+  it("says who the reader is, not only what the product is", () => {
+    // A product line without an audience is how a school system gets pitched
+    // to a business owner. Pre-launch brands included: the reader is known
+    // even where the Page is not.
+    for (const [id, context] of Object.entries(ts.BRAND_CONTEXTS)) {
+      if (id === "databayt") continue; // the company itself — its own reader
+      expect(context, `${id}`).toMatch(/Audience:/);
+    }
+  });
+});
 
 describe("the draft prompt mirror pair", () => {
   it.each(CASES)("renders identically on both sides: %s", (_name, input) => {

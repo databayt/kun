@@ -61,14 +61,33 @@ export function scenesFor(brand, now = new Date()) {
 /** Marker on a pending row's note after the Gemini lane's craft refusal. */
 export const CRAFT_REFUSED_PREFIX = "craft-refused:";
 
+/**
+ * What the writer is told the product IS.
+ *
+ * Every registered brand needs a row. The fallback below reads
+ * "<id> — SaaS product by Databayt", which is not an error anywhere and is
+ * wrong everywhere: balqalam had no row until 2026-08-25, so every draft ever
+ * asked for the Hub's DEFAULT brand was written by someone who did not know it
+ * was school software. Asked for "attendance", the writer produced a clean,
+ * on-register post about tracking employees for a business owner. A test pins
+ * this map to the product registry so the next brand cannot arrive silently.
+ *
+ * The audiences are each brand page's own Audience table, compressed —
+ * /docs/social/<brand>. sijillee's row used to say "records/documents
+ * product", which its page has never said.
+ */
 export const BRAND_CONTEXTS = {
   hogwarts:
     "hogwarts — school management SaaS (multi-tenant SIS/LMS: admission, attendance, timetable, exams, grades, finance). Audience: school owners, principals, and operators in MENA.",
-  mkan: "mkan (مكان) — rental marketplace for property listings and bookings.",
+  balqalam:
+    "balqalam (بالقلم) — the Arabic-facing face of the same school management SaaS: admission, attendance, timetable, exams, grades and fees in one system instead of five notebooks and a WhatsApp group. Audience: school owners and principals in Saudi Arabia and the wider Arabic MENA market — administrators, not technologists — with teachers and parents as the daily users. Never carries the Hogwarts wordmark.",
+  mkan: "mkan (مكان) — rental marketplace for property listings and bookings, and a photo-and-video product. Audience: renters and travellers on the demand side; hosts and property managers on the supply side.",
   databayt:
     "databayt — the company itself: open source, the sharing-economy doctrine, engineering craft.",
-  sijillee: "sijillee (سِجلي) — records/documents product.",
-  moalimee: "moalimee (مُعلّمي) — teacher/tutor marketplace.",
+  sijillee:
+    "sijillee (سِجلي) — daily bookkeeping for Sudanese small businesses: who owes what, simple records, clean reports. Audience: shopkeepers and traders first, then accountants and growing SMEs.",
+  moalimee:
+    "moalimee (مُعلّمي) — teacher and tutor marketplace. Audience: students and the parents finding them a tutor, and the tutors who want students and a professional profile. Pre-launch.",
 };
 
 /**
