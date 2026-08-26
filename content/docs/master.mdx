@@ -10,9 +10,9 @@ You touch one step.
 
 ```mermaid
 graph TD
-    S1["A host adds a home on mkan.sd"]
-    S2["You write a home into Slack"]
-    S3["We add it ourselves —<br/>scraped from Airbnb, or typed in by hand"]
+    S1["A host adds their home on mkan.sd<br/>picked up every hour"]
+    S2["Someone finds a property and sends it<br/>to Slack #mkan — read every 2 minutes"]
+    S3["We scrape it from Airbnb"]
     CRM["The CRM — every home in one place"]
     ADD["A photo the website doesn't have:<br/>drop it on the home"]
     REP["A photo already there that looks bad:<br/>mark the home 'poor quality'"]
@@ -22,6 +22,7 @@ graph TD
     NO["Say what was wrong.<br/>It tries again."]
     YES["It goes live.<br/>The old photo is kept, always."]
 
+    S1 ~~~ S2 ~~~ S3
     S1 --> CRM
     S2 --> CRM
     S3 --> CRM
@@ -46,7 +47,8 @@ really is.
 
 | Step | In plain words |
 | --- | --- |
-| **A home arrives** | Three ways in, and today they are very unequal. **Scraped** — 121 of the 148 homes on the board were pulled from Airbnb; that is how most inventory got here. **By hand** — 26, the real owners we know personally. **From the website** — a host signs up on mkan.sd and adds their own home: it appears on the board within the hour, host and photos too, with nobody copying anything. That last lane is new and has caught nobody yet, because it only just started running. Typing a home into Slack `#mkan` is newer still and being built. |
+| **A home arrives** | Three ways in, all of them ending in the CRM, and today they are very unequal. **Scraped** — 121 of the 148 homes on the board came from Airbnb; that is how most of the inventory got here. **Found in person** — someone stands in front of a property and types what they see into Slack `#mkan`, in whatever words come naturally. A reader picks the message up within two minutes, turns it into a home and a host, and replies in the thread with what it understood so it can be corrected. **From the website** — a host signs up on mkan.sd and adds their own home; it appears on the board within the hour, host and photos too. (A further 26 homes were typed in by hand long ago — the real owners we know personally. That was a one-off, not a lane.) |
+| **The count so far** | Scraped 121 · found in person 1 · from the website 0. The Slack lane produced its first home this morning — `0005-01 · الطيب`, with the host's phone number. The website lane started running today and is waiting for its first host. |
 | **The CRM** | Every home in one place, and the only place mastering starts. You never open a terminal to begin. |
 | **A new photo** | The host sends you a photo the website doesn't have. Drag it onto their home. The listing goes from 9 photos to 10, and the new one is mastered on the way in. |
 | **A bad photo** | It's already live and it looks bad. Set the home's stage to **poor quality**: its photos are queued and one is handed to you in Slack. |
