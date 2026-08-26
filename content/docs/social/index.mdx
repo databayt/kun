@@ -75,36 +75,33 @@ and Queue would earn its place there the moment it is.
 
 ## How a post travels
 
-The seventeen steps below all happen on **`/social/publish`** — this is that one page,
-opened up. Eleven of them are yours — 1 to 7, then 11 to 14 — and every one of those is a
-tap or a few words.
+The fourteen steps below all happen on **`/social/publish`** — this is that one page,
+opened up. Eight of them are yours — 1 to 4, then 8 to 11 — and every one of those is a tap
+or a few words.
 
 ```mermaid
 graph TD
     S1["1 · Open the box"]
-    S2["2 · Pick the brand"]
-    S3["3 · Pick the feature"]
-    S4["4 · Pick the channels"]
-    S5["5 · Pick the post shape"]
-    S6["6 · Say the topic<br/>(or press one from /social/calendar)"]
-    S7["7 · Press Write it"]
-    S8["8 · Every pick becomes<br/>a line of the prompt"]
-    S9["9 · Claude writes it<br/>in Arabic and English"]
-    S10["10 · A craft check<br/>reads it first"]
-    S11["11 · You read it"]
-    S12["12 · Say what to change"]
-    S13["13 · Attach a photo or a video<br/>(the tray, or /social/media)"]
-    S14["14 · Say when"]
-    S15["15 · It posts to<br/>your channels"]
-    S16["16 · It saves the receipt"]
-    S17["17 · It reads the numbers back<br/>(shown on /social/measure)"]
+    S2["2 · Set the post<br/>brand · feature · channel · shape"]
+    S3["3 · Say the topic<br/>(or press one from /social/calendar)"]
+    S4["4 · Press Write it"]
+    S5["5 · Every pick becomes<br/>a line of the prompt"]
+    S6["6 · Claude writes it<br/>in Arabic and English"]
+    S7["7 · A craft check<br/>reads it first"]
+    S8["8 · You read it"]
+    S9["9 · Say what to change"]
+    S10["10 · Attach a photo or a video<br/>(the tray, or /social/media)"]
+    S11["11 · Say when"]
+    S12["12 · It posts to<br/>your channels"]
+    S13["13 · It saves the receipt"]
+    S14["14 · It reads the numbers back<br/>(shown on /social/measure)"]
 
-    S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7 --> S8 --> S9 --> S10
-    S10 -. "weak" .-> S9
-    S10 -- "clean" --> S11
-    S11 -- "not yet" --> S12
-    S12 -. "next turn" .-> S8
-    S11 -- "good" --> S13 --> S14 --> S15 --> S16 --> S17
+    S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7
+    S7 -. "weak" .-> S6
+    S7 -- "clean" --> S8
+    S8 -- "not yet" --> S9
+    S9 -. "next turn" .-> S5
+    S8 -- "good" --> S10 --> S11 --> S12 --> S13 --> S14
 ```
 
 ### What each step means
@@ -112,71 +109,73 @@ graph TD
 **1 · Open the box.** `/social` opens on Publish, because it is the only stage that can
 finish a post on its own. One glass bar: the field, a ⊕ on one side, a seat on the other.
 
-**2 · Pick the brand.** Balqalam, Mkan, databayt, Sijillee, Moallimee. (Hogwarts writes
-through Balqalam, its Arabic face, so it is not in the picker.) This is the biggest single
-pick — see [why](#why-this-beats-writing-it-yourself) below.
+**2 · Set the post.** One row behind the seat, four answers, and none of them a form field
+— each is a paragraph of context handed to the writer.
 
-**3 · Pick the feature.** Which part of the product the post is about: Admission,
-Attendance, Exams, Grades… The list is that brand's own block registry, narrowed to the
-blocks a post can be about — twelve for Balqalam, six for Mkan, four for databayt, and none
-yet for Sijillee or Moallimee. Optional, but it is the difference between a post about a
-school system and a post about attendance in one.
+- **Brand** · Balqalam, Mkan, databayt, Sijillee, Moallimee. (Hogwarts writes through
+  Balqalam, its Arabic face, so it is not in the picker.) The biggest single pick — see
+  [why](#why-this-beats-writing-it-yourself) below.
+- **Feature** · which part of the product the post is about: Admission, Attendance, Exams,
+  Grades… That brand's own block registry, narrowed to the blocks a post can be about —
+  twelve for Balqalam, six for Mkan, four for databayt, none yet for Sijillee or Moallimee.
+  Optional, and it is the difference between a post about a school system and a post about
+  attendance in one.
+- **Channel** · where it is going. A channel is offered only when both the transport and
+  that brand's own destination are wired, so an unpublishable channel is never on the list.
+- **Post** · the shape. Words alone · a caption beside one image · one caption over several
+  · a video · an image or video with no words · a swipe deck · a story · a reel. Nine of
+  them, and each changes what the writer is told to write.
 
-**4 · Pick the channels.** Where it is going. A channel is only offered when both the
-transport and that brand's own destination are wired, so an unpublishable channel is never
-on the list.
+They stay set between visits and follow you across the stages, so this is a step you do
+once and then rarely touch — which is why it is one box and not four.
 
-**5 · Pick the post shape.** Words alone · a caption beside one image · one caption over
-several · a video · an image or video with no words · a swipe deck · a story · a reel. Nine
-shapes, and each one changes what the writer is told to write.
-
-**6 · Say the topic.** A few words is enough — *"attendance"*. Or press one of the week's
+**3 · Say the topic.** A few words is enough — *"attendance"*. Or press one of the week's
 ready briefs and type nothing at all: `content/social/pillars.json` holds each brand's
 recurring topics with the audience, the call to action and the constraint already written.
 The [Calendar](#the-hub-is-this-table-as-routes) stage is that same file, shown as a week.
 
-**7 · Press Write it.** The seat on the right of the bar. That is the last thing you do
+**4 · Press Write it.** The seat on the right of the bar. That is the last thing you do
 until there is a draft to read.
 
-**8 · Every pick becomes a line of the prompt.** This step is the whole point of the
+**5 · Every pick becomes a line of the prompt.** This step is the whole point of the
 pipeline, and it is spelled out [below](#why-this-beats-writing-it-yourself).
 
-**9 · Claude writes it.** Arabic written first and English mirrored from it — a sibling,
+**6 · Claude writes it.** Arabic written first and English mirrored from it — a sibling,
 not a translation. About eleven seconds when the inline lane answers. When it cannot, the
 same ask falls to a queue that a Claude Code session drains, and the box tells you which of
 the two happened instead of spinning.
 
-**10 · A craft check reads it first.** It refuses on its own — it is not advice. A banned
+**7 · A craft check reads it first.** It refuses on its own — it is not advice. A banned
 word, a link that would publish untracked, a post too short to say anything: the draft goes
 back to be written again rather than forward to you, and the second attempt is told which
 rules it broke by name. The very first Balqalam draft was refused for writing
 `balqalam.com` without `https://`, which would have shipped with no way to count it.
 
-**11 · You read it.** The copy lands in the same field you typed the topic into.
+**8 · You read it.** The copy lands in the same field you typed the topic into.
 
-**12 · Say what to change.** Eighty percent right is the normal case, and it used to mean
+**9 · Say what to change.** Eighty percent right is the normal case, and it used to mean
 retyping the whole thing. Say *"shorter, drop the parent alert"* instead: the same draft is
 rewritten rather than replaced, so the queue shows one current draft and not three versions
 competing for the slot. Measured: 24 seconds.
 
-**13 · Attach a photo or a video.** Optional. ⊕ opens the library — pick something that
+**10 · Attach a photo or a video.** Optional. ⊕ opens the library — pick something that
 already exists, or ask [`/higgs`](/docs/media) for a photo or a video and
 [`/carousel`](/docs/social/carousel) for slides with words on them. One photo, up to ten as
 an album, or one video.
 
-**14 · Say when.** **Now** sends it. **Later** books a time, and a sweep every ~15 minutes
+**11 · Say when.** **Now** sends it. **Later** books a time, and a sweep every ~15 minutes
 publishes it when the time comes. **For review** makes one signed link per channel that
 anyone can approve from a phone — one click publishes, and a second click gets *already
 handled* rather than posting twice.
 
-**15 · It posts to your channels.** One press fans out to all of them. Today that means
+**12 · It posts to your channels.** One press fans out to all of them. Today that means
 Facebook, for three of the five brands — the rest are wired in the data and deliberately not
 built yet ([Status](/docs/social/status)).
 
-**16 · It saves the receipt.** The platform's own post id, so the post can be taken down
+**13 · It saves the receipt.** The platform's own post id, so the post can be taken down
 again. Every link is tagged so its clicks can be counted.
 
-**17 · It reads the numbers back.** Reach and engagement, every six hours.
+**14 · It reads the numbers back.** Reach and engagement, every six hours.
 
 The rules every post obeys are in [Brand & Voice](/docs/brand); the build roadmap and
 credential plan stay internal (`docs/SOCIAL-AUTOMATION.md`).
