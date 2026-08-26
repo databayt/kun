@@ -76,28 +76,6 @@ export function DraftSpotlight({
     return found ? (isRTL ? found.labelAr : found.label) : product;
   })();
 
-  /**
-   * Bring the stage to the top of the screen, the way the composer does.
-   *
-   * Verbatim reasoning from spotlight.tsx, including the two frames: focus
-   * opens the panel in the same tick, and a smooth scroll started before that
-   * layout lands is cancelled outright.
-   */
-  const liftStage = React.useCallback(() => {
-    const stage = inputRef.current?.closest("section");
-    if (!stage) return;
-    if (Math.abs(stage.getBoundingClientRect().top) < 24) return;
-    const behavior = window.matchMedia("(prefers-reduced-motion: reduce)")
-      .matches
-      ? "auto"
-      : "smooth";
-    requestAnimationFrame(() =>
-      requestAnimationFrame(() =>
-        stage.scrollIntoView({ behavior, block: "start" }),
-      ),
-    );
-  }, []);
-
   const ask = () => {
     if (!trimmed || busy) return;
     void submit({ text: prompt });
@@ -157,10 +135,9 @@ export function DraftSpotlight({
             ref={inputRef}
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            onFocus={() => {
-              setFocused(true);
-              liftStage();
-            }}
+            // The frame lifts its own column off the engagement this
+            // reports — see stage.tsx.
+            onFocus={() => setFocused(true)}
             onKeyDown={(e) => {
               if (e.key !== "Enter" || e.shiftKey) return;
               e.preventDefault();

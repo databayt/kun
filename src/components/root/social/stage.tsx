@@ -31,6 +31,15 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 /** Defined in globals.css, on <html> — the document is the scroll container. */
 const STAGE_CLASS = "stage-open";
 
+/**
+ * Where the section's own top edge sits once the column has reached the middle.
+ *
+ * The sticky container pins at a quarter-screen down (`top-[25svh]`), so this
+ * is the same number twice — which is what makes the distance still to travel
+ * readable off one rect, with nothing measured and nothing stored.
+ */
+const RESTING_FRACTION = 0.25;
+
 /** Keys that scroll a page when nothing has swallowed them first. */
 const SCROLLING_KEYS = new Set([
   "ArrowUp",
@@ -45,11 +54,12 @@ const SCROLLING_KEYS = new Set([
 /**
  * Run once the page has stopped moving.
  *
- * Engaging the box starts a smooth scroll (spotlight.tsx lifts the stage to
- * the top of the viewport). Freezing the page mid-glide would strand it, so
- * the lock waits for three quiet frames rather than guessing at a duration —
- * the duration is the browser's, not ours. Bounded, because a page that never
- * settles must not leave the lock permanently unarmed.
+ * Engaging the box starts a smooth scroll (`liftColumn`, below). Freezing the
+ * page mid-glide would strand it, so the lock waits for three quiet frames
+ * rather than guessing at a duration — the duration is the browser's, not
+ * ours. Bounded, because a page that never settles must not leave the lock
+ * permanently unarmed. A lift with nothing to do is quiet from the start and
+ * simply falls through the grace, which costs about 150ms and no motion.
  */
 function whenScrollSettles(run: () => void): () => void {
   let frame = 0;
@@ -59,8 +69,8 @@ function whenScrollSettles(run: () => void): () => void {
   const deadline = performance.now() + 1500;
   let cancelled = false;
 
-  // The lift itself waits two frames before it starts (spotlight.tsx), so the
-  // first frames here are quiet for the wrong reason. Measured without this
+  // The lift itself waits two frames before it starts, so the first frames
+  // here are quiet for the wrong reason. Measured without this
   // grace: the lock landed at 250ms and froze the glide a third of the way,
   // stranding the page — and the column with it — short of the middle.
   const GRACE_FRAMES = 6;
@@ -87,7 +97,59 @@ function whenScrollSettles(run: () => void): () => void {
   };
 }
 
-
+/**
+ * Bring the column to the middle of the screen.
+ *
+ * This used to live in each box — three copies of it, since Draft, Media and
+ * Publish each focused their own input and each climbed back out to
+ * `closest("section")` to find the screen they were sitting in. The screen is
+ * the frame's, so the lift is too, and it now runs off the engagement the
+ * boxes already report rather than a fourth thing they each have to remember
+ * to call.
+ *
+ * The target is the stick point, not the top of the page. Scrolling the whole
+ * section to the viewport's top was 450px on a 900px screen of which only the
+ * first 225 moved the box at all: it reaches the middle where the sticky
+ * container pins, and holds there while the background keeps sliding for as
+ * long again. Half a glide with nothing to show for it, and it read as the
+ * page taking a moment to agree.
+ *
+ * So the box and the scroll now finish together — and when the column is
+ * already centred, because someone scrolled it there before touching it or is
+ * focusing a second time, nothing moves at all and the lock arms on the spot.
+ *
+ * Two frames, not zero: focus opens the panel in the same tick, and a smooth
+ * scroll started before that layout lands is cancelled outright — measured,
+ * the call ran, found the section, and moved nothing. Measuring inside the
+ * second frame rather than before them is the same story from the other end:
+ * a distance read before the panel has mounted is a distance to the wrong
+ * place.
+ *
+ * `"instant"`, not `"auto"`, for anyone who asked for less motion. All three
+ * copies of this said `"auto"` and none of them worked: `auto` means *defer to
+ * the CSS*, and `html` here carries `scroll-behavior: smooth` (globals.css) —
+ * so the branch written to skip the animation asked for it by name. Measured
+ * under `prefers-reduced-motion: reduce`: 188px into a 225px glide at 120ms,
+ * which is a glide.
+ */
+function liftColumn(section: HTMLElement): void {
+  const behavior: ScrollBehavior = window.matchMedia(
+    "(prefers-reduced-motion: reduce)",
+  ).matches
+    ? "instant"
+    : "smooth";
+  requestAnimationFrame(() =>
+    requestAnimationFrame(() => {
+      const rest = window.innerHeight * RESTING_FRACTION;
+      const distance = section.getBoundingClientRect().top - rest;
+      // At or past the stick point the column is centred already — either the
+      // sticky container is pinned, or it is about to be. Nothing to do, and a
+      // smooth scroll of a few pixels is a twitch rather than an animation.
+      if (distance <= 1) return;
+      window.scrollBy({ top: distance, behavior });
+    }),
+  );
+}
 
 /**
  * @param title  The stage's one word.
@@ -113,6 +175,9 @@ export function StageFrame({
   const [engaged, setEngaged] = useState(false);
   const [locked, setLocked] = useState(false);
   const columnRef = useRef<HTMLDivElement>(null);
+  // The lift's target. A ref, where the boxes used to climb out to
+  // `closest("section")` — the frame renders this element, so it can hold it.
+  const sectionRef = useRef<HTMLElement>(null);
 
   // The stage asks the document to stop anchoring its scroll to a growing
   // box. Only while this stage is mounted, so navigating to Calendar or
@@ -128,6 +193,7 @@ export function StageFrame({
       setLocked(false);
       return;
     }
+    if (sectionRef.current) liftColumn(sectionRef.current);
     return whenScrollSettles(() => setLocked(true));
   }, [engaged]);
 
@@ -264,14 +330,15 @@ export function StageFrame({
     // is a runway to scroll after the column has stopped moving — the whole
     // point of sticking is that the page keeps going and the box does not.
     //
-    // Focusing the box lifts the section to the top of the screen —
-    // spotlight.tsx climbs to `closest("section")` and scrolls it into view,
-    // which is why the section element is the frame's own and not something a
-    // stage supplies. That lift now runs past the stick point, so the column
-    // rises to the middle and then holds while the rest of the page slides
-    // out from behind it.
+    // Touching the box lifts the section to its stick point (`liftColumn`),
+    // which is the same move a scroll makes by hand — so however the column
+    // arrives at the middle, it arrives the same way and stops in the same
+    // place.
     <>
-      <section className="full-bleed from-background to-muted/20 min-h-svh bg-gradient-to-b">
+      <section
+        ref={sectionRef}
+        className="full-bleed from-background to-muted/20 min-h-svh bg-gradient-to-b"
+      >
         {/* Half a viewport, at the top of the stage, with the column centred
             inside it — so at rest the column sits at 75svh: the middle of the
             screen's second half.

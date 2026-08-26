@@ -67,21 +67,6 @@ export function MediaSpotlight({
     );
   }, [assets, query]);
 
-  const liftStage = React.useCallback(() => {
-    const stage = inputRef.current?.closest("section");
-    if (!stage) return;
-    if (Math.abs(stage.getBoundingClientRect().top) < 24) return;
-    const behavior = window.matchMedia("(prefers-reduced-motion: reduce)")
-      .matches
-      ? "auto"
-      : "smooth";
-    requestAnimationFrame(() =>
-      requestAnimationFrame(() =>
-        stage.scrollIntoView({ behavior, block: "start" }),
-      ),
-    );
-  }, []);
-
   return (
     <div className="mx-auto w-full max-w-3xl">
       <div
@@ -110,10 +95,9 @@ export function MediaSpotlight({
             ref={inputRef}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            onFocus={() => {
-              setFocused(true);
-              liftStage();
-            }}
+            // The frame lifts its own column off the engagement this
+            // reports — see stage.tsx.
+            onFocus={() => setFocused(true)}
             placeholder={t.mediaSpotlightPlaceholder}
             // 16px keeps iOS Safari from zooming the page on focus.
             className={cn(

@@ -181,6 +181,19 @@ returns `drafted: 0`.
   clip. No listener and no measured height — a centred flex column overflows both edges, which is
   exactly what an open panel should do. Document scroll-snapping went with it: it existed to
   settle a stage that began off-screen, and only pulled against the rise.
+- **The lift stops where the box does (2026-08-26).** Touching the box scrolled the whole section
+  to the top of the viewport — 450px on a 900px screen, of which only the first 225 moved the box
+  at all: it centres at the stick point and then holds while the background slides for as long
+  again. Worse, the case where someone had *already* scrolled the box to the middle answered a
+  click with a 225px jump. The lift targets the stick point now, so the box and the scroll finish
+  together, and a column already centred does not move at all — measured from rest, from the stick
+  point and from past it, on all three box stages and in both languages: `0 → 225` then locked, or
+  no motion then locked. It also moved **out of the three boxes and into the frame** (`liftColumn`
+  in `stage.tsx`, off the engagement they already report), which is where a fourth copy would
+  otherwise have gone. All three said `behavior: "auto"` for `prefers-reduced-motion` and none of
+  them worked: `auto` defers to the CSS, and `html` carries `scroll-behavior: smooth`, so the
+  branch written to skip the animation asked for it by name — measured at 188px into a 225px glide
+  at 120ms. It is `"instant"` now, in the one place it lives.
 
 - **Egress** — per-channel results, three transports in parallel, and a **media set** through the whole chain: one photo (Facebook `/photos`, Telegram `sendPhoto`), 2–10 as a Facebook carousel or Telegram album (`sendMediaGroup`), one video (`/videos`, `sendVideo`) — with mixed image+video, two videos, or >10 images refused by name before delivery, since no platform edge carries them. The approval token addresses the variant, so the confirm page lists every URL
 - **Per-product Facebook** — its own Page and permanent token per brand, with the resolved Page name shown before you publish, which is how a crossed token gets caught
