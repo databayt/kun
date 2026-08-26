@@ -1,61 +1,90 @@
 ---
 title: Social Automation
-description: How databayt drafts, approves, and broadcasts social posts across eight platforms — the Claude-native + Hermes pipeline, one brand at a time.
+description: "How one sentence becomes a published post for five databayt brands — written, checked, approved and sent from a single box. Drawn first in plain words: eight steps, four of them yours."
 ---
 
-# Social Automation
+**Social** is the lane that turns one sentence into a live post. You say what to post
+about, Claude writes it in Arabic and English, a quality check refuses it if it is weak,
+you say what to change until it is right, and you say when to send. All of it happens in
+one box on `/social/publish` — which is why the bare `/social` opens there. Five brands
+(databayt, Hogwarts, Mkan, Moallimee, Sijillee) share this one pipeline.
 
-How databayt turns an idea into a published social post across eight platforms — with Claude
-writing the copy, `/higgs` making the media, and a thin gateway doing the broadcast. Each brand
-(databayt, Hogwarts, Mkan, Moallimee, Sijillee) runs its own presence off this shared pipeline.
-The brand rules every post obeys are in [Brand & Voice](/docs/brand); the build roadmap and
-credential plan are internal (`docs/SOCIAL-AUTOMATION.md`).
+The rule that outranks speed: **nothing reaches a public page without a person saying yes.**
 
 ## How a post travels
 
-From nothing to a live page, in one box. Everything above the dashed line happens on
-`/social/publish` without leaving it — which is why the bare `/social` opens there.
+Eight steps. You touch four of them (1, 4, 5, 6); the rest happen on their own.
 
 ```mermaid
-flowchart TD
-  P["Press a brief from the plan<br/>audience · CTA · constraint written"] --> ASK
-  W["…or say what it is about"] --> ASK
+graph TD
+    S1["1 · You say the topic<br/>or press a ready brief"]
+    S2["2 · Claude writes it<br/>in Arabic and English"]
+    S3{"3 · A quality check<br/>reads it before you do"}
+    S4{"4 · You read it. Right yet?"}
+    S5["5 · Add a photo or video<br/>optional"]
+    S6{"6 · You say when"}
+    S7["7 · It posts to every<br/>channel you switched on"]
+    S8["8 · It keeps the receipt<br/>and the numbers"]
 
-  ASK["Ask — brand, feature, shape, channels<br/>and the knobs ride with it"]
-  ASK --> C{"Craft gate<br/>reads the writing"}
-  C -- "banned word · bare link · too short" --> ASK
+    S1 --> S2 --> S3
+    S3 -- "too weak" --> S2
+    S3 -- "clean" --> S4
+    S4 -- "not yet" --> S2
+    S4 -- "yes" --> S5 --> S6
+    S6 -- "now" --> S7
+    S6 -- "later" --> S7
+    S6 -- "for review" --> S7
+    S7 --> S8
 
-  C -- "clean" --> D{"The copy lands in the field.<br/>Right yet?"}
-  D -- "no — say what to change" --> RF["Refine — the next turn<br/>of the same draft"]
-  RF --> D
-  D -- "yes" --> M["Attach media (optional)"]
-
-  M --> S{"Send"}
-  S -- "Now" --> F
-  S -- "Later" --> Q["Queued for the time you picked"] --> F
-  S -- "Review" --> L["One signed link per channel"] --> F
-
-  F["Every wired channel, one press"] --> G["Save the receipt — the post id"]
-  G --> H["Read the numbers back, six-hourly"]
-
-  classDef start fill:#1d2436,stroke:#4d5a7a,color:#d7deee;
-  classDef send fill:#12312e,stroke:#2f7d72,color:#c6e8e2;
-  classDef keep fill:#232a25,stroke:#4a6350,color:#d3e3d7;
-  class P,W start;
-  class F send;
-  class G,H keep;
+    classDef you fill:#3b2f1e,stroke:#b58a3c,color:#f5e6c8;
+    classDef live fill:#12312e,stroke:#2f7d72,color:#c6e8e2;
+    class S1,S4,S5,S6 you;
+    class S7 live;
 ```
 
-Two ways in, and the first one costs no typing at all: `content/social/pillars.json` holds each
-brand's recurring briefs — audience, call to action, constraint, angle and scene already written —
-and pressing one asks with it verbatim. The [Calendar](#the-hub-is-this-table-as-routes) stage
-renders the same file as the week's plan; the composer offers it as a starting line.
+### What each box means
 
-**The loop in the middle is the point.** A draft that comes back eighty percent right used to mean
-retyping it by hand — eighty percent right being the common case. Saying what to change files the
-next turn of the same thread: the parent is superseded, the child carries the root brief and the
-inherited knobs, and only the newest is `answered`, so the queue shows the current draft rather
-than three versions competing for a slot.
+**1 · You say the topic.** A sentence in the box is enough — *"attendance, for Balqalam"*.
+Or press one of the week's ready briefs and type nothing at all: `content/social/pillars.json`
+holds each brand's recurring topics with the audience, the call to action and the constraint
+already written, and pressing one asks with it word for word. The
+[Calendar](#the-hub-is-this-table-as-routes) stage is that same file, shown as a week.
+
+**2 · Claude writes it.** Arabic written first and English mirrored from it, against that
+brand's own voice, audience and rules — not a generic writer's idea of a school. About eleven
+seconds when the inline lane answers. When it cannot, the same ask falls to a queue that a
+Claude Code session drains, and the box tells you which of the two happened instead of spinning.
+
+**3 · A quality check reads it before you do.** It refuses on its own — it is not advice.
+A banned word, a link that would publish untracked, a post too short to say anything: the draft
+goes back to step 2 rather than forward to you. The very first Balqalam draft was refused for
+writing `balqalam.com` without `https://`, which would have shipped with no way to count it.
+
+**4 · You read it. Right yet?** Eighty percent right is the normal case, and it used to mean
+retyping the whole thing. Say what to change instead — *"shorter, drop the parent alert"* — and
+the same draft is rewritten rather than replaced, so the queue shows one current draft and not
+three versions competing for the slot. Measured: 24 seconds.
+
+**5 · Add a photo or a video.** Optional. ⊕ opens the library: pick something that already
+exists, or ask [`/higgs`](/docs/media) for a photo or a video, and
+[`/carousel`](/docs/social/carousel) for slides with words on them. One photo, up to ten as an
+album, or one video.
+
+**6 · You say when.** **Now** sends it. **Later** books a time, and a sweep every ~15 minutes
+publishes it when the time comes. **For review** makes one signed link per channel that anyone
+can approve from a phone — one click publishes, and a second click gets *already handled*
+rather than posting twice.
+
+**7 · It posts to every channel you switched on.** One press fans out to all of them. Today
+that means Facebook, for three of the five brands — the other channels are wired in the data
+and deliberately not built yet ([Status](/docs/social/status)).
+
+**8 · It keeps the receipt, and the numbers.** The platform's own post id is saved, so the post
+can be taken down again. Every link is tagged so its clicks can be counted. Reach and engagement
+are read back every six hours.
+
+The rules every post obeys are in [Brand & Voice](/docs/brand); the build roadmap and credential
+plan stay internal (`docs/SOCIAL-AUTOMATION.md`).
 
 ### Why this beats posting by hand
 
@@ -91,11 +120,6 @@ minutes), and the **relay** (no person; a machine with the cron secret). All fou
 funnel into one shared egress path — see
 [Facebook](/docs/social/channels/facebook#what-happens-when-a-post-is-sent) for that
 path step by step.
-
-**The craft gate is not advisory.** It rejects on its own, before a human ever sees the
-draft — the first Balqalam draft written against it was refused for `balqalam.com`
-without a scheme, because `applyUtm` only tags absolute URLs and the post would have
-shipped untracked.
 
 ## Sending it out to a Facebook Page
 
