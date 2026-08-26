@@ -9,28 +9,26 @@ graph TD
     S2["Someone finds a property and sends it<br/>to Slack #mkan — read every 2 minutes"]
     S3["We scrape it from Airbnb"]
     CRM["The CRM — every home in one place"]
-    ADD["A photo the website doesn't have:<br/>drop it on the home"]
-    REP["A photo already there that looks bad:<br/>mark the home 'poor quality'"]
-    JOB["The photo gets its own job,<br/>and shows up in Slack"]
+    Q1["Every photo that was never mastered<br/>joins the queue"]
+    W["It waits its turn"]
     YOU["You paste it into ChatGPT,<br/>look at the result, and save it"]
     Q{"Same place, and the right room?"}
-    NO["Say what was wrong.<br/>It tries again."]
-    YES["It goes live.<br/>The old photo is kept, always."]
+    NO["Say what was wrong.<br/>It goes back in the queue."]
+    YES["Enhanced, properly named,<br/>on the CDN, live on the website."]
 
     S1 ~~~ S2 ~~~ S3
     S1 --> CRM
     S2 --> CRM
     S3 --> CRM
-    CRM --> ADD --> JOB
-    CRM --> REP --> JOB
-    JOB --> YOU --> Q
-    Q -->|no| NO --> JOB
+    CRM --> Q1 --> W --> YOU --> Q
+    Q -->|no| NO --> W
     Q -->|yes| YES
 ```
 
-Every home ends up in the CRM, however it arrived, and that is where a photo is
-sent for mastering. Saving the new photo **is** the yes — if it came back wrong,
-don't save it, press enter again.
+There is no step where anyone decides a photo is bad enough to be worth
+fixing. If it reached the CRM and has never been mastered, it goes in the
+queue — 1,093 photos are in it today. They come out one at a time, because the
+only slow part is a human looking at each one.
 
 **Master** takes a photo a host shot on a cheap phone and gives back the photo a
 professional would have taken in the same room. One rule beats all the others:
@@ -44,21 +42,20 @@ really is.
 | --- | --- |
 | **A home arrives** | Three ways in, all of them ending in the CRM, and today they are very unequal. **Scraped** — 121 of the 148 homes on the board came from Airbnb; that is how most of the inventory got here. **Found in person** — someone stands in front of a property and types what they see into Slack `#mkan`, in whatever words come naturally. A reader picks the message up within two minutes, turns it into a home and a host, and replies in the thread with what it understood so it can be corrected. **From the website** — a host signs up on mkan.sd and adds their own home; it appears on the board within the hour, host and photos too. (A further 26 homes were typed in by hand long ago — the real owners we know personally. That was a one-off, not a lane.) |
 | **The count so far** | Scraped 121 · found in person 1 · from the website 0. The Slack lane produced its first home this morning — `0005-01 · الطيب`, with the host's phone number. The website lane started running today and is waiting for its first host. |
-| **The CRM** | Every home in one place, and the only place mastering starts. You never open a terminal to begin. |
-| **A new photo** | The host sends you a photo the website doesn't have. Drag it onto their home. The listing goes from 9 photos to 10, and the new one is mastered on the way in. |
-| **A bad photo** | It's already live and it looks bad. Set the home's stage to **poor quality**: its photos are queued and one is handed to you in Slack. |
-| **Don't mix them up** | Dropping a photo the website *already shows* onto the home **adds** it — you'd end up with the bad original and its replacement side by side. New photo: drop it. Bad photo: flag it. |
-| **Its own job** | One photo, one try, one row. The exact words sent to ChatGPT are saved on that row and can never change afterwards, so you can always see what a photo was asked for. Only one photo per home is handed out at a time. |
+| **Every photo joins the queue** | Once an hour, every photo on every home that has never been mastered is added. No opinion required, and asking for one was the mistake: almost every photo we hold is an anonymous file nobody has looked at. Adding to the queue is silent — nothing is sent to anyone, nothing is decided. |
+| **Adding a photo later** | If the host sends a photo the website doesn't have, drag it onto their home in Twenty and it joins the queue within seconds. Only ever drop in a photo that is genuinely *new* — dropping in one the website already shows **adds** it, and you end up with the old and the new side by side. |
+| **It waits its turn** | One photo at a time leaves the queue and is handed to you in Slack. That number is the whole throttle, and it is one because a person can only look at one photo at a time. |
+| **Its own job** | One photo, one try, one row. The exact words sent to ChatGPT are saved on that row and can never change afterwards, so you can always see what a photo was asked for. If a better prompt ships while a photo is still waiting, the old job is retired and a fresh one takes its place — nothing is quietly rewritten. |
 | **You** | The photo is put on your clipboard and ChatGPT opens. Paste, enter, look, save. You never type the words — they're already in the ChatGPT project. About twenty seconds. |
 | **Same place, right room?** | Two questions. Nothing invented or hidden — *and* is this really the room it says it is. The very first photo that came back showed a different room, and only a human eye caught it. |
-| **It goes live** | The new photo takes the old one's place and gets a proper name: `mkan/0001-01/bedroom-1.webp`. The original is never deleted — it keeps its old address forever. |
+| **Live** | The new photo takes the old one's place, gets a proper name — `mkan/0001-01/bedroom-1.webp` — and is served from the CDN. The original is never deleted; it keeps its old address forever. |
 | **It tries again** | Saying no needs a reason. That reason is the only thing that makes the next round better. |
-| **Nothing goes quiet** | Every morning at 10:00 a check tells Slack about anything stuck: a job nobody picked up, a job nobody was ever asked to do, a photo that quietly fell off a listing, a saved photo nobody read. |
+| **Nothing goes quiet** | Every morning at 10:00 a check tells Slack about anything wrong: a photo sitting with a human too long, a photo that quietly fell off a listing, a saved photo nobody read, or the queue not moving at all. A *long* queue is normal and is never reported — only a stopped one. |
 
-> **Every step is live.** The two newest: a home added on mkan.sd now reaches
-> the board on its own, and marking a home poor quality now starts the loop for
-> the photos it already shows. What is *not* proven yet is how many photos
-> survive the check — see the measured trace below.
+> **Every step is live**, except the last mile: writing a mastered photo to its
+> proper name needs one AWS permission line widened, or it lands nowhere. What
+> is *not* proven yet is how many photos survive the check — see the measured
+> trace below.
 
 ## The parts
 
