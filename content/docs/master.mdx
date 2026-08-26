@@ -117,6 +117,23 @@ folder — `0001-01/bedroom.jpg` works, because only the last part is read.
 
 State truth lives in **mkan Prisma** (`MasteringRun` — absence is the ORIGINAL state; retries append, history never overwritten). Twenty's `home` is the ops mirror (`photoStage` grew `MASTERED`, plus `photosMastered` / `lastMasteredAt`). The CDN is canonical and originals are immortal. Operator runbook: `mkan/docs/image-mastering.md`.
 
+## What a photo is called
+
+```
+original   cdn.databayt.org/mkan/temp/0001-01/hall.jpg
+mastered   cdn.databayt.org/mkan/0001-01/hall.webp
+```
+
+The folder is the listing's own public code — the same `NNNN-NN` the CRM, the WhatsApp outreach and mkan.sd already share. The name is the room. An original never gets that name: it waits in `temp/` under whatever the human called it, because **the clean path is what mastering earns** — the URL alone tells you whether a photo has been through the pipeline.
+
+Three rules hold it together:
+
+- **The name is allocated, never assumed.** A second bedroom and a second *attempt* at the first one both become `bedroom-2`, and a freed name is never reused. That is not tidiness: overwriting `bedroom.webp` would let the CDN keep serving the **reverted** photo for a day — the exact image the revert existed to remove. Because keys can never be rewritten, new mastered objects are cached immutable.
+- **The room comes from evidence**, in order: what the operator said, then the original's own filename, then `photo-N` — which is honest about knowing nothing rather than guessing "bedroom". 1086 of 1095 photos are uuid-named today, so most of the corpus starts on that last rung.
+- **Forward-only.** Nothing already stored moves; the ugly URLs die as photos pass through.
+
+One human action gates it: writing outside `mkan/uploads/*` needs the mkan IAM user's S3 policy widened to `mkan/*`. The bucket and CloudFront already serve such keys — verified by probe — so it is a single line, and until it is clicked `master:done` refuses with the fix and leaves the run untouched rather than burning a render someone already made.
+
 ## What it is worth — the pipeline against doing it by hand
 
 Doing this by hand means: open ChatGPT, paste the photo, paste the prompt, save
@@ -204,6 +221,7 @@ All on mkan `main`, 2026-08-22 → 26:
 | `9433b7f` | The Slack return lane (`--from-slack`): thread attachment → run-id text → sole-waiting fallback — built because renders happen on the phone |
 | `457ca10` | Production hardening: pure core + 10 pinned invariant tests (incl. a real UUID→"room" prompt-leak bug), race-guarded state claim, 🫥 DRIFTED detection, launchd stall clock (daily 10:00), retries keep room hints, cache identity check, `dispatch --repost` |
 | `2c52245` | Prompt v2 — four loopholes v1 left open, closed (preservation beats the 4:3 ratio, no fabricated light, no geometry that enlarges a room, no fake HDR) |
+| `0b48968` `50c7e83` | **A mastered photo gets the URL a human would have chosen** — `mkan/0001-01/bedroom.webp`, folder = the listing's public code, name = the room; originals wait in `temp/` under their human name; names allocated and never reused so a reverted photo cannot be served from a recycled key; mastered objects written immutable |
 | `553c986` | **The loop stops losing work it already paid for** (2026-08-26): a render made while the machine was still re-queueing is no longer refused — a dropped file is judged against its PHOTO's history, not the attempt in flight (`~/Downloads` keeps the strict bar); `revert` demands a reason; the frozen prompt is enforced by a Postgres trigger instead of a comment; reconcile sees undispatched runs, impossible states, and renders stuck in the inbox — eleven on its first run |
 
 ## Decisions on record
