@@ -9,7 +9,7 @@ graph TD
     S2["Someone finds a property and sends it<br/>to Slack #mkan — read every 2 minutes"]
     S3["We scrape it from Airbnb"]
     CRM["The CRM — every home in one place"]
-    Q1["Every photo that was never mastered<br/>joins the queue"]
+    Q1["Every photo in the Port Sudan book<br/>that was never mastered joins the queue"]
     W["It waits its turn"]
     YOU["You paste it into ChatGPT,<br/>look at the result, and save it"]
     Q{"Same place, and the right room?"}
@@ -27,7 +27,7 @@ graph TD
 
 There is no step where anyone decides a photo is bad enough to be worth
 fixing. If it reached the CRM and has never been mastered, it goes in the
-queue — 1,093 photos are in it today. They come out one at a time, because the
+queue — 106 photos are in it today. They come out one at a time, because the
 only slow part is a human looking at each one.
 
 **Master** takes a photo a host shot on a cheap phone and gives back the photo a
@@ -42,7 +42,8 @@ really is.
 | --- | --- |
 | **A home arrives** | Three ways in, all of them ending in the CRM, and today they are very unequal. **Scraped** — 121 of the 148 homes on the board came from Airbnb; that is how most of the inventory got here. **Found in person** — someone stands in front of a property and types what they see into Slack `#mkan`, in whatever words come naturally. A reader picks the message up within two minutes, turns it into a home and a host, and replies in the thread with what it understood so it can be corrected. **From the website** — a host signs up on mkan.sd and adds their own home; it appears on the board within the hour, host and photos too. (A further 26 homes were typed in by hand long ago — the real owners we know personally. That was a one-off, not a lane.) |
 | **The count so far** | Scraped 121 · found in person 1 · from the website 0. The Slack lane produced its first home this morning — `0005-01 · الطيب`, with the host's phone number. The website lane started running today and is waiting for its first host. |
-| **Every photo joins the queue** | Once an hour, every photo on every home that has never been mastered is added. No opinion required, and asking for one was the mistake: almost every photo we hold is an anonymous file nobody has looked at. Adding to the queue is silent — nothing is sent to anyone, nothing is decided. |
+| **Every photo joins the queue** | Once an hour, every photo on every home **in the Port Sudan book** that has never been mastered is added. No opinion required, and asking for one was the mistake: almost every photo we hold is an anonymous file nobody has looked at. Adding to the queue is silent — nothing is sent to anyone, nothing is decided. |
+| **The book is the scope** | The `portSudan` object in the CRM — 34 homes with a listing code, the inventory actually being worked. It is a question of membership, never of quality: being in the book is the whole qualification. A home added to it is swept within the hour; one removed takes its untouched queued photos with it. |
 | **Adding a photo later** | If the host sends a photo the website doesn't have, drag it onto their home in Twenty and it joins the queue within seconds. Only ever drop in a photo that is genuinely *new* — dropping in one the website already shows **adds** it, and you end up with the old and the new side by side. |
 | **It waits its turn** | One photo at a time leaves the queue and is handed to you in Slack. That number is the whole throttle, and it is one because a person can only look at one photo at a time. |
 | **Its own job** | One photo, one try, one row. The exact words sent to ChatGPT are saved on that row and can never change afterwards, so you can always see what a photo was asked for. If a better prompt ships while a photo is still waiting, the old job is retired and a fresh one takes its place — nothing is quietly rewritten. |
@@ -52,10 +53,11 @@ really is.
 | **It tries again** | Saying no needs a reason. That reason is the only thing that makes the next round better. |
 | **Nothing goes quiet** | Every morning at 10:00 a check tells Slack about anything wrong: a photo sitting with a human too long, a photo that quietly fell off a listing, a saved photo nobody read, or the queue not moving at all. A *long* queue is normal and is never reported — only a stopped one. |
 
-> **Every step is live**, except the last mile: writing a mastered photo to its
-> proper name needs one AWS permission line widened, or it lands nowhere. What
-> is *not* proven yet is how many photos survive the check — see the measured
-> trace below.
+> **Every step is live**, end to end — the last mile included: the scripts write
+> to the CDN with this machine's own AWS key rather than the app's, which is
+> scoped to host uploads and could reach neither the temp path nor the proper
+> name. What is *not* proven yet is how many photos survive the check — see the
+> measured trace below.
 
 ## The parts
 
@@ -145,7 +147,9 @@ Three rules hold it together:
 - **The room comes from evidence**, in order: what the operator said, then the original's own filename, then `photo-N` — which is honest about knowing nothing rather than guessing "bedroom". 1086 of 1095 photos are uuid-named today, so most of the corpus starts on that last rung.
 - **Forward-only.** Nothing already stored moves; the ugly URLs die as photos pass through.
 
-One human action gates it: writing outside `mkan/uploads/*` needs the mkan IAM user's S3 policy widened to `mkan/*`. The bucket and CloudFront already serve such keys — verified by probe — so it is a single line, and until it is clicked `master:done` refuses with the fix and leaves the run untouched rather than burning a render someone already made.
+Nothing gates it. Both of these paths sit outside `mkan/uploads/*`, where the app's own S3 key is scoped and correctly stays — the deployed app writes host uploads and nothing else. The mastering scripts run on one Mac, under a person, so they use that machine's AWS profile, the same way they already take Twenty's key from the Keychain and Slack's from Hermes' env. Widening the app's key would have granted the deployed app a permission it never uses.
+
+Nothing new became deletable in the trade: the delete guard in `s3.ts` keys on the `uploads/` prefix, not on who is asking. And if `master:done` ever does hit a permission wall it refuses with the fix and leaves the run untouched, rather than burning a render someone already made.
 
 ## What it is worth — the pipeline against doing it by hand
 
