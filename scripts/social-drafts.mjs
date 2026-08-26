@@ -16,7 +16,7 @@
 //   node scripts/social-drafts.mjs answer <id> --ar <file> --en <file> [--media "url1,url2"]
 //   node scripts/social-drafts.mjs attach <id> --media "url1,url2"
 //   node scripts/social-drafts.mjs fail   <id> --note "why"
-//   node scripts/social-drafts.mjs seed --auto [--brand hogwarts] [--count 2]
+//   node scripts/social-drafts.mjs seed --auto [--all-brands|--brand hogwarts] [--count 2]
 //   node scripts/social-drafts.mjs seed --brand hogwarts --brief "..."
 //
 // `list` carries an ask's DIRECTION as well as its brief — the knobs a
@@ -317,7 +317,7 @@ if (command === "list") {
 } else if (command === "seed") {
   // File draft asks without a human at the window. Two modes:
   //   --brand X --brief "..."   one explicit ask
-  //   --auto [--brand X] [--count N]   the week's briefs from pillars.json,
+  //   --auto [--all-brands|--brand X] [--count N]   the week's briefs from pillars.json,
   //     picked by ISO-week rotation — stateless, so cadence IS the order.
   const by = flag("by") ?? "seed:weekly";
 
@@ -387,16 +387,32 @@ if (command === "list") {
   }
 
   if (process.argv.includes("--auto")) {
-    const brand = flag("brand") ?? "hogwarts";
     const count = Math.max(1, Number(flag("count") ?? 2));
     const here = dirname(fileURLToPath(import.meta.url));
     const pillarsPath = join(here, "..", "content", "social", "pillars.json");
     const pillars = JSON.parse(readFileSync(pillarsPath, "utf8"));
-    const briefs = pillars[brand];
-    if (!Array.isArray(briefs) || briefs.length === 0) {
-      console.error(`No briefs for "${brand}" in content/social/pillars.json.`);
+
+    // Which brands to file for. `--all-brands` is what the Monday timer uses:
+    // the seeder used to take a single --brand, so the weekly job filed for
+    // hogwarts and nothing else, and every other brand's briefs arrived only
+    // when someone ran it by hand. Measured 2026-08-26: hogwarts 7 seeded
+    // asks, balqalam 3, mkan 3, databayt 1.
+    //
+    // The list is DERIVED from pillars.json rather than hardcoded, because a
+    // brand with no briefs cannot be seeded anyway — that file is already the
+    // answer to "which brands have something to say this week". Keys that are
+    // not brief arrays (version, $comment) fall out on their own.
+    const allBrands = Object.keys(pillars).filter(
+      (k) => Array.isArray(pillars[k]) && pillars[k].length > 0,
+    );
+    const brands = process.argv.includes("--all-brands")
+      ? allBrands
+      : [flag("brand") ?? "hogwarts"];
+    if (brands.length === 0) {
+      console.error("No brands with briefs in content/social/pillars.json.");
       process.exit(1);
     }
+
     // ISO week number — stateless rotation anchor shared by every machine.
     // MIRROR of src/components/root/social/rotation.ts (the calendar panel's
     // copy — TS the .mjs cannot import). Keep the two in lockstep, or the
@@ -406,21 +422,43 @@ if (command === "list") {
     const week = Math.ceil(
       ((now - jan4) / 86400000 + ((jan4.getUTCDay() + 6) % 7) + 1) / 7,
     );
-    let seeded = 0;
-    let media = 0;
-    for (let i = 0; i < count; i++) {
-      const pick = briefs[(week * count + i) % briefs.length];
-      if (await insertAsk(brand, pick.brief)) seeded++;
-      if (await insertMediaBrief(brand, pick.visual)) media++;
+
+    let totalSeeded = 0;
+    let totalMedia = 0;
+    let failed = 0;
+    for (const brand of brands) {
+      const briefs = pillars[brand];
+      if (!Array.isArray(briefs) || briefs.length === 0) {
+        console.error(`No briefs for "${brand}" in content/social/pillars.json.`);
+        failed++;
+        continue;
+      }
+      let seeded = 0;
+      let media = 0;
+      for (let i = 0; i < count; i++) {
+        const pick = briefs[(week * count + i) % briefs.length];
+        if (await insertAsk(brand, pick.brief)) seeded++;
+        if (await insertMediaBrief(brand, pick.visual)) media++;
+      }
+      totalSeeded += seeded;
+      totalMedia += media;
+      console.log(
+        `seed --auto: week ${week}, ${seeded}/${count} copy asks and ${media} media briefs filed for ${brand}.`,
+      );
     }
-    console.log(
-      `seed --auto: week ${week}, ${seeded}/${count} copy asks and ${media} media briefs filed for ${brand}.`,
-    );
+    if (brands.length > 1) {
+      console.log(
+        `seed --auto: ${totalSeeded} copy asks and ${totalMedia} media briefs across ${brands.length} brand(s).`,
+      );
+    }
+    // One brand failing must not cost the others their week; the exit code
+    // still reports it so the launchd log is not quietly green.
+    if (failed > 0) process.exitCode = 1;
   } else {
     const brand = flag("brand");
     const brief = flag("brief");
     if (!brand || !brief) {
-      console.error('Usage: seed --auto [--brand X] [--count N] | seed --brand X --brief "..."');
+      console.error('Usage: seed --auto [--all-brands|--brand X] [--count N] | seed --brand X --brief "..."');
       process.exit(1);
     }
     await insertAsk(brand, brief);
@@ -697,7 +735,7 @@ if (command === "list") {
       '  node scripts/social-drafts.mjs answer <id> --ar <file> --en <file> [--media "url1,url2"] [--note ...]',
       '  node scripts/social-drafts.mjs attach <id> --media "url1,url2"',
       '  node scripts/social-drafts.mjs fail   <id> --note "why"',
-      "  node scripts/social-drafts.mjs seed --auto [--brand hogwarts] [--count 2]",
+      "  node scripts/social-drafts.mjs seed --auto [--all-brands|--brand hogwarts] [--count 2]",
       '  node scripts/social-drafts.mjs seed --brand <brand> --brief "..."',
     ].join("\n"),
   );

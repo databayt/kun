@@ -3,8 +3,8 @@
 #
 # Monday 07:00 local, this files the week's briefs (content/social/pillars.json,
 # ISO-week rotation) into SocialDraftRequest via `social-drafts.mjs seed --auto`,
-# then nudges the drain so the copy exists minutes later instead of at the next
-# 5-minute tick. The existing drain answers on the Max pool; the Hub shows the
+# for EVERY brand with briefs, then nudges the drain so the copy exists minutes
+# later instead of at the next tick. The existing drain answers on the Max pool; the Hub shows the
 # drafts; a human stages and approves. Nothing here publishes.
 #
 # Why not the Vercel cron (/api/social/cron)? It has no billing-compliant draft
@@ -32,7 +32,14 @@ LOG_DIR="$CLAUDE_DIR/logs"
 PLIST_LABEL="com.databayt.social-seed"
 PLIST_PATH="$HOME/Library/LaunchAgents/$PLIST_LABEL.plist"
 
-SEED_BRAND="${SEED_BRAND:-hogwarts}"
+# Empty means every brand with briefs in content/social/pillars.json — which is
+# what the weekly timer wants. This used to default to "hogwarts", so the Monday
+# job filed for one brand and every other brand's briefs arrived only when
+# somebody ran the seeder by hand. Measured 2026-08-26, seeded asks per brand:
+# hogwarts 7, balqalam 3, mkan 3, databayt 1.
+#
+# Set SEED_BRAND=<name> to file for exactly one brand instead.
+SEED_BRAND="${SEED_BRAND:-}"
 SEED_COUNT="${SEED_COUNT:-2}"
 
 MODE="--run"
@@ -104,7 +111,7 @@ do_uninstall() {
 
 do_status() {
     if launchctl print "gui/$(id -u)/$PLIST_LABEL" >/dev/null 2>&1; then
-        echo "armed ($PLIST_LABEL, Mondays 07:00, brand $SEED_BRAND × $SEED_COUNT)"
+        echo "armed ($PLIST_LABEL, Mondays 07:00, ${SEED_BRAND:-all brands} × $SEED_COUNT)"
     else
         echo "NOT armed — run: bash scripts/seed-drafts.sh --install"
     fi
@@ -121,8 +128,13 @@ esac
 
 cd "$REPO" || exit 0
 
-log "seed start: $SEED_BRAND × $SEED_COUNT"
-node scripts/social-drafts.mjs seed --auto --brand "$SEED_BRAND" --count "$SEED_COUNT" >> "$LOG_FILE" 2>&1 || {
+log "seed start: ${SEED_BRAND:-all brands} × $SEED_COUNT"
+if [ -n "$SEED_BRAND" ]; then
+    SEED_SCOPE=(--brand "$SEED_BRAND")
+else
+    SEED_SCOPE=(--all-brands)
+fi
+node scripts/social-drafts.mjs seed --auto "${SEED_SCOPE[@]}" --count "$SEED_COUNT" >> "$LOG_FILE" 2>&1 || {
     log "seed failed — check DATABASE_URL / network"; exit 0;
 }
 
