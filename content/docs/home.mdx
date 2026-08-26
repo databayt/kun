@@ -155,7 +155,7 @@ rings the same bell.
 
 1. The script checks the home is at `CLAIMED` with every must-have present — otherwise it
    refuses and names the gap.
-2. The **site** gets the listing first: the host account `0005@mkan.org` (created if new), the
+2. The **site** gets the listing first: the host account `0005` (created if new), the
    location row, and the listing with `code 0005-01`, published and out of draft. Nothing is
    fabricated — in particular the host's claim of the account stays empty until the host
    actually claims it, the way the funnel records it.
@@ -191,11 +191,14 @@ to, unless it turns out to belong to a host who already has an account — then 
 so and moves nothing, because welding two identities together on a guess is the mistake the
 `same` / `new` question exists to prevent.
 
-The site account is provisioned when the first home goes `live`: `username` is the host's own
-name (it is what a guest reads under *"Hosted by"*), the password is the shared one, and the
-number is what they log in with — `getUserByIdentifier` resolves a bare `0006`, so no host is
-ever handed an email address. `mkanUsername`, `mkan account` and `Account provisioned` are
-filled on the host record at that moment.
+The site account is provisioned when the first home goes `live`, and it is **only the number**:
+`0006` and the shared password are the whole of what a host is told. `User.email` is a required
+unique column, so it holds the number itself — the `@mkan.org` domain that used to sit behind it
+was removed on 2026-08-26 (69 accounts; `pnpm accounts:simplify`, reversible from its ledger).
+`getUserByIdentifier` answers to the number, to a host's own name, and still to the old address
+for anyone who types it from memory. `username` stays the host's name because that is what a
+guest reads under *"Hosted by"*; `mkanUsername` and `Account provisioned` are filled on the host
+record at that moment, and the CRM's `mkan account` field is legacy.
 
 **How the code is assigned.** For a home born in Slack the **CRM mints** it the moment the
 host is known — the next unit under the account, in the order the units were written (the
