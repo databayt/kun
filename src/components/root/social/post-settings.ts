@@ -270,6 +270,25 @@ export function featureFits(
  */
 export const ANY_MEDIA_TYPE = "any";
 
+/** "no particular feature" — the default, and what a brand change falls back to. */
+export const ANY_FEATURE = "any";
+
+/**
+ * Where a setting is remembered between visits.
+ *
+ * These keys were private to the Publish box until the settings moved to the
+ * provider so every stage could wear them. They are named here, unchanged, so
+ * that move cost nobody their saved picks — a renamed key is a silent reset.
+ */
+export const SETTING_KEYS = {
+  destination: "social:destination",
+  postType: "social:post-type",
+  mediaFilter: "social:media-filter",
+  mediaType: "social:media-type",
+  imageStyle: "social:image-style",
+  feature: "social:feature",
+} as const;
+
 /** The asset types this kind can contain, in taxonomy order. */
 export function mediaTypesFor(
   kind: "image" | "video",

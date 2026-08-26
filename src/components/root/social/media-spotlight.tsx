@@ -13,14 +13,21 @@
 // know roughly what you want, you type two words, you attach it, and you are
 // back to writing. The grid answers "what do we have"; the box answers "give
 // me the one with the desk in it".
+//
+// The seat opens the same settings row the other stages wear, narrowed to the
+// three words that mean something while finding a picture: Brand · Feature ·
+// Media. They are not decoration — brand and the media filters narrow the
+// results, and the count on the bar says by how much. Post shape, Timing and
+// Queue stay behind: nothing here is being written or sent.
 
 import * as React from "react";
-import { Check, Plus, Search } from "lucide-react";
+import { Check, Plus, Search, Settings } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { matchesQuery } from "@/lib/normalize-search";
 import { fill } from "@/components/root/social/dictionary";
-import { GLASS } from "@/components/root/social/spotlight";
+import { ConfigPanel, GLASS } from "@/components/root/social/spotlight";
+import { mediaKind } from "@/lib/media-kind";
 import { useSocial } from "@/components/root/social/provider";
 import { StageFrame } from "@/components/root/social/stage";
 
@@ -47,9 +54,32 @@ export function MediaSpotlight({
   assets: MediaPick[];
   onEngagedChange?: (engaged: boolean) => void;
 }) {
-  const { t, composerMediaUrls, attachMedia, removeMedia } = useSocial();
+  const {
+    t,
+    isRTL,
+    composerMediaUrls,
+    attachMedia,
+    removeMedia,
+    product,
+    setProduct,
+    wiredForProduct,
+    selectedChannels,
+    setSelectedChannels,
+    feature,
+    setFeature,
+    brandFeatures,
+    postType,
+    setPostType,
+    mediaFilter,
+    setMediaFilter,
+    mediaType,
+    setMediaType,
+    imageStyle,
+    setImageStyle,
+  } = useSocial();
 
   const [query, setQuery] = React.useState("");
+  const [openSection, setOpenSection] = React.useState<string | null>(null);
   const [focused, setFocused] = React.useState(false);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const rootRef = React.useRef<HTMLDivElement>(null);
@@ -59,13 +89,20 @@ export function MediaSpotlight({
 
   // The Arabic-aware matcher, the same one the queue is filtered by — a
   // library whose titles are half Arabic cannot be searched by a Latin scorer.
+  // The settings narrow before the query does, so the count on the bar reads
+  // as "of what I am allowed to see" rather than "of everything we own". An
+  // asset with no brand recorded belongs to nobody and stays visible — it is
+  // shared, not somebody else's.
   const shown = React.useMemo(() => {
     const q = query.trim();
-    if (!q) return assets;
-    return assets.filter((a) =>
-      matchesQuery([a.title, a.brand ?? "", a.type, a.id].join(" "), q),
-    );
-  }, [assets, query]);
+    return assets.filter((a) => {
+      if (a.brand && a.brand !== product) return false;
+      if (mediaFilter !== "any" && mediaKind(a.url) !== mediaFilter) return false;
+      if (mediaType !== "any" && a.type !== mediaType) return false;
+      if (!q) return true;
+      return matchesQuery([a.title, a.brand ?? "", a.type, a.id].join(" "), q);
+    });
+  }, [assets, query, product, mediaFilter, mediaType]);
 
   return (
     <div className="mx-auto w-full max-w-3xl">
@@ -118,9 +155,64 @@ export function MediaSpotlight({
               total: assets.length,
             })}
           </span>
+
+          {/* The seat. Publish sends from here and Draft asks; this stage has
+              nothing to send, so the seat is only ever the settings. */}
+          <button
+            type="button"
+            aria-label={t.spotlightConfig}
+            title={t.spotlightConfig}
+            aria-expanded={open && openSection !== null}
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => {
+              setOpenSection((current) => (current ? null : "brand"));
+              setFocused(true);
+              inputRef.current?.focus();
+            }}
+            className={cn(
+              "flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full",
+              "transition-colors duration-150",
+              open && openSection !== null
+                ? "bg-accent text-accent-foreground"
+                : "text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground",
+            )}
+          >
+            <Settings className="size-5" />
+          </button>
         </div>
 
-        {open && (
+        {open && openSection !== null && (
+          <div className="relative max-h-[min(360px,45vh)] overflow-y-auto border-t border-black/5 dark:border-white/10">
+            <div className="p-3">
+              <ConfigPanel
+                words={["brand", "feature", "media"]}
+                t={t}
+                isRTL={isRTL}
+                product={product}
+                onProduct={setProduct}
+                wired={wiredForProduct}
+                selected={selectedChannels}
+                onChannels={setSelectedChannels}
+                feature={feature}
+                onFeature={setFeature}
+                features={brandFeatures}
+                postType={postType}
+                onPostType={setPostType}
+                mediaFilter={mediaFilter}
+                onMediaFilter={setMediaFilter}
+                mediaType={mediaType}
+                onMediaType={setMediaType}
+                imageStyle={imageStyle}
+                onImageStyle={setImageStyle}
+                onOpenDialog={(section) => setOpenSection(section)}
+                openSection={openSection as never}
+                onCloseSection={() => setOpenSection(null)}
+              />
+            </div>
+          </div>
+        )}
+
+        {open && openSection === null && (
           <div className="relative max-h-[min(360px,45vh)] overflow-y-auto border-t border-black/5 dark:border-white/10">
             {shown.length === 0 ? (
               <p className="text-muted-foreground/60 p-4 text-center text-xs">

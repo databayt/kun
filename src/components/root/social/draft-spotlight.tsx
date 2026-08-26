@@ -17,6 +17,14 @@
 //
 // There is only one field on this stage. The prompt pill it replaces is gone
 // — two writable boxes on one screen is two places for the same sentence.
+//
+// The seat opens the same settings row Publish wears — Brand · Feature ·
+// Channels · Post · Direction · Media — because every one of those changes
+// what gets WRITTEN, and asking on this stage while the brand lived on
+// another was the odd part. Timing and Queue stay behind: this stage cannot
+// send, so it has nothing to schedule and no queue to approve from. The
+// writing knobs are this stage's own word, passed to the shared panel rather
+// than taught to it.
 
 import * as React from "react";
 import { ArrowUp, Loader2, Plus, Settings } from "lucide-react";
@@ -25,6 +33,7 @@ import { cn } from "@/lib/utils";
 import { fill } from "@/components/root/social/dictionary";
 import {
   CardStrip,
+  ConfigPanel,
   DraftCard,
   GLASS,
   MediaPanel,
@@ -37,8 +46,16 @@ import {
 import { useSocial } from "@/components/root/social/provider";
 import { getProduct } from "@/components/root/social/products";
 
-/** Which face the panel under the bar is wearing. */
-type Face = "knobs" | "media";
+/** This stage's own word — the shared panel knows nothing about it. */
+const KNOBS_WORD = "knobs";
+
+/**
+ * Which panel the bar is wearing. The same split Publish uses: the ⊕ opens the
+ * attachment tray, the seat opens the settings. They are different questions —
+ * "which pictures ride with this" and "what is this post" — and the settings
+ * row's own Media word narrows the library rather than attaching from it.
+ */
+type Panel = "config" | "media";
 
 export function DraftSpotlight({
   onEngagedChange,
@@ -49,6 +66,21 @@ export function DraftSpotlight({
     t,
     isRTL,
     product,
+    setProduct,
+    wiredForProduct,
+    selectedChannels,
+    setSelectedChannels,
+    feature,
+    setFeature,
+    brandFeatures,
+    postType,
+    setPostType,
+    mediaFilter,
+    setMediaFilter,
+    mediaType,
+    setMediaType,
+    imageStyle,
+    setImageStyle,
     draftQueue,
     draftKnobs,
     composerMediaUrls,
@@ -63,7 +95,8 @@ export function DraftSpotlight({
   const { prompt, setPrompt, busy, submit } = draftQueue;
 
   const [focused, setFocused] = React.useState(false);
-  const [face, setFace] = React.useState<Face>("knobs");
+  const [panel, setPanel] = React.useState<Panel>("config");
+  const [openSection, setOpenSection] = React.useState<string | null>(KNOBS_WORD);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const rootRef = React.useRef<HTMLDivElement>(null);
 
@@ -105,11 +138,11 @@ export function DraftSpotlight({
             type="button"
             aria-label={t.mediaLabel}
             title={t.mediaLabel}
-            aria-expanded={open && face === "media"}
+            aria-expanded={open && panel === "media"}
             onMouseDown={(e) => e.preventDefault()}
             onClick={() => {
-              setFace((current) =>
-                open && current === "media" ? "knobs" : "media",
+              setPanel((current) =>
+                open && current === "media" ? "config" : "media",
               );
               setFocused(true);
               inputRef.current?.focus();
@@ -117,7 +150,7 @@ export function DraftSpotlight({
             className={cn(
               "flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full",
               "transition-colors duration-150",
-              composerMediaUrls.length > 0 || (open && face === "media")
+              composerMediaUrls.length > 0 || (open && panel === "media")
                 ? "bg-accent text-accent-foreground"
                 : "text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground",
             )}
@@ -163,8 +196,11 @@ export function DraftSpotlight({
                 ask();
                 return;
               }
-              setFace((current) =>
-                open && current === "knobs" ? "media" : "knobs",
+              setPanel("config");
+              setOpenSection((current) =>
+                open && panel === "config" && current === KNOBS_WORD
+                  ? null
+                  : KNOBS_WORD,
               );
               setFocused(true);
               inputRef.current?.focus();
@@ -192,7 +228,7 @@ export function DraftSpotlight({
         {open && (
           <div className="relative max-h-[min(360px,45vh)] overflow-y-auto border-t border-black/5 dark:border-white/10">
             <div className="p-3">
-              {face === "media" ? (
+              {panel === "media" ? (
                 <MediaPanel
                   t={t}
                   urls={composerMediaUrls}
@@ -209,7 +245,37 @@ export function DraftSpotlight({
                   onBrowse={() => goToStage("media")}
                 />
               ) : (
-                <KnobFaces t={t} isRTL={isRTL} knobs={draftKnobs} />
+              <ConfigPanel
+                words={["brand", "feature", "channels", "postType", "media"]}
+                extra={[
+                  {
+                    id: KNOBS_WORD,
+                    label: t.spotlightConfigDraft,
+                    node: <KnobFaces t={t} isRTL={isRTL} knobs={draftKnobs} />,
+                  },
+                ]}
+                t={t}
+                isRTL={isRTL}
+                product={product}
+                onProduct={setProduct}
+                wired={wiredForProduct}
+                selected={selectedChannels}
+                onChannels={setSelectedChannels}
+                feature={feature}
+                onFeature={setFeature}
+                features={brandFeatures}
+                postType={postType}
+                onPostType={setPostType}
+                mediaFilter={mediaFilter}
+                onMediaFilter={setMediaFilter}
+                mediaType={mediaType}
+                onMediaType={setMediaType}
+                imageStyle={imageStyle}
+                onImageStyle={setImageStyle}
+                onOpenDialog={(section) => setOpenSection(section)}
+                openSection={openSection as never}
+                onCloseSection={() => setOpenSection(null)}
+              />
               )}
             </div>
           </div>

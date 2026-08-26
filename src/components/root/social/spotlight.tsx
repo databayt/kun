@@ -130,9 +130,11 @@ import {
 } from "@/components/root/social/image-styles";
 import {
   DESTINATIONS,
+  ANY_FEATURE,
   MEDIA_FILTERS,
   POST_TYPES,
   ANY_MEDIA_TYPE,
+  SETTING_KEYS,
   POST_TYPE_META,
   featureFits,
   featureLabel,
@@ -157,7 +159,7 @@ import {
   type ProductId,
 } from "@/components/root/social/products";
 import { fill, type SocialDict } from "@/components/root/social/dictionary";
-import { useSocial } from "@/components/root/social/provider";
+import { useSocial, usePersisted } from "@/components/root/social/provider";
 
 /**
  * Opaque rather than a real backdrop blur — the same call hogwarts made. A
@@ -180,15 +182,9 @@ type ApproveMode = "now" | "schedule";
 
 const APPROVE_MODE_KEY = "social:approve-mode";
 
-const DESTINATION_KEY = "social:destination";
-const POST_TYPE_KEY = "social:post-type";
-const MEDIA_FILTER_KEY = "social:media-filter";
-const MEDIA_TYPE_KEY = "social:media-type";
-const IMAGE_STYLE_KEY = "social:image-style";
-const FEATURE_KEY = "social:feature";
+const DESTINATION_KEY = SETTING_KEYS.destination;
 
 /** The select's "no pillar chosen" row, stored as a value rather than absence. */
-const ANY_FEATURE = "any";
 
 type Mode = "all" | "draft" | "scheduled" | "published";
 type Scope = "brand" | "every";
@@ -292,28 +288,6 @@ const KIND_HEADING_KEY: Record<QueueItem["kind"], keyof SocialDict> = {
  * A choice that survives a reload, read after mount so the server render never
  * touches localStorage. Three settings wanted the same six lines.
  */
-function usePersisted<T extends string>(
-  key: string,
-  fallback: T,
-  isValid: (value: string) => value is T,
-): [T, (next: T) => void] {
-  const [value, setValue] = React.useState<T>(fallback);
-  React.useEffect(() => {
-    const stored = window.localStorage.getItem(key);
-    if (stored && isValid(stored)) setValue(stored);
-    // `isValid` is a fresh closure each render and the key never changes.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key]);
-  const commit = React.useCallback(
-    (next: T) => {
-      setValue(next);
-      window.localStorage.setItem(key, next);
-    },
-    [key],
-  );
-  return [value, commit];
-}
-
 export function ReviewSpotlight({
   onEngagedChange,
 }: {
@@ -346,6 +320,17 @@ export function ReviewSpotlight({
     setSelectedChannels,
     wiredForProduct,
     draftKnobs,
+    feature,
+    setFeature,
+    brandFeatures,
+    postType,
+    setPostType,
+    mediaFilter,
+    setMediaFilter,
+    mediaType,
+    setMediaType,
+    imageStyle,
+    setImageStyle,
   } = useSocial();
   const router = useRouter();
 
@@ -420,47 +405,6 @@ export function ReviewSpotlight({
     setScheduleAt(toLocalInput(soon));
   }, [destination, scheduleAt]);
 
-  const [postType, setPostType] = usePersisted<PostType>(
-    POST_TYPE_KEY,
-    // Text and one still is the ordinary post; the rest are departures from it.
-    "image",
-    (v): v is PostType => (POST_TYPES as readonly string[]).includes(v),
-  );
-  const [feature, setFeature] = usePersisted<string>(
-    FEATURE_KEY,
-    ANY_FEATURE,
-    (v): v is string => typeof v === "string",
-  );
-  const [mediaFilter, setMediaFilter] = usePersisted<MediaFilter>(
-    MEDIA_FILTER_KEY,
-    "any",
-    (v): v is MediaFilter => (MEDIA_FILTERS as readonly string[]).includes(v),
-  );
-  const [mediaType, setMediaType] = usePersisted<string>(
-    MEDIA_TYPE_KEY,
-    ANY_MEDIA_TYPE,
-    (v): v is string => typeof v === "string",
-  );
-  const [imageStyle, setImageStyle] = usePersisted<string>(
-    IMAGE_STYLE_KEY,
-    ANY_STYLE,
-    (v): v is string => isImageStyle(v),
-  );
-
-  /**
-   * Features are per-brand vocabulary — mkan does not have Attendance — so a
-   * feature chosen under one brand is meaningless under the next, and would
-   * silently narrow the queue rather than say why. Switching brand drops it.
-   */
-  const brandFeatures = React.useMemo(() => featuresFor(product), [product]);
-  React.useEffect(() => {
-    if (
-      feature !== ANY_FEATURE &&
-      !brandFeatures.some((f) => f.id === feature)
-    ) {
-      setFeature(ANY_FEATURE);
-    }
-  }, [brandFeatures, feature, setFeature]);
 
   const trimmed = query.trim();
 
@@ -1671,7 +1615,9 @@ type ConfigSection =
   | "destination"
   | "queue";
 
-function ConfigPanel({
+export function ConfigPanel({
+  words: wordSubset,
+  extra,
   t,
   isRTL,
   product,
@@ -1712,11 +1658,11 @@ function ConfigPanel({
   feature: string;
   onFeature: (next: string) => void;
   features: BrandFeature[];
-  destination: Destination;
-  onDestination: (next: Destination) => void;
-  scheduleAt: string;
-  onScheduleAt: (next: string) => void;
-  ask: AskLane;
+  destination?: Destination;
+  onDestination?: (next: Destination) => void;
+  scheduleAt?: string;
+  onScheduleAt?: (next: string) => void;
+  ask?: AskLane;
   postType: PostType;
   onPostType: (next: PostType) => void;
   mediaFilter: MediaFilter;
@@ -1726,15 +1672,28 @@ function ConfigPanel({
   imageStyle: string;
   onImageStyle: (next: string) => void;
   /** This brand's drafts awaiting review, oldest first. */
-  drafts: { id: string; text: string; when: string }[];
-  onUseDraft: (id: string) => void;
+  drafts?: { id: string; text: string; when: string }[];
+  onUseDraft?: (id: string) => void;
   /** Relative age, formatted by the parent so one clock serves both faces. */
-  ago: (iso: string) => string;
+  ago?: (iso: string) => string;
   onOpenDialog: (section: ConfigSection) => void;
   /** Which box is open, and how to shut it. Held by the parent so Escape
    *  can be given to this card before it reaches the box underneath. */
   openSection: ConfigSection | null;
   onCloseSection: () => void;
+  /**
+   * Which words this stage shows, in this order. Publish shows all of them;
+   * Draft and Media show the ones that mean something where they are — a
+   * stage that cannot send has no business offering Timing, and a stage that
+   * only finds pictures has no post shape to pick.
+   */
+  words?: ConfigSection[];
+  /**
+   * A face this stage owns and the others do not, keyed by a word of its own.
+   * Draft's writing knobs are the only one today: they belong to that stage
+   * alone, and passing them in beats teaching this panel about them.
+   */
+  extra?: { id: string; label: string; node: React.ReactNode }[];
 }) {
 
   const brandName = (() => {
@@ -1786,7 +1745,7 @@ function ConfigPanel({
   // The order a post gets made in: whose it is, what it is about, where it
   // goes, what shape it takes, how it gets written, what pictures ride with
   // it — then what is already waiting, and last, what pressing the arrow does.
-  const WORDS: { id: ConfigSection; label: string }[] = [
+  const ALL_WORDS: { id: ConfigSection; label: string }[] = [
     { id: "brand", label: t.spotlightConfigBrand },
     { id: "feature", label: t.spotlightConfigFeature },
     { id: "channels", label: t.spotlightConfigChannels },
@@ -1796,6 +1755,16 @@ function ConfigPanel({
     { id: "queue", label: t.spotlightConfigQueue },
     { id: "destination", label: t.spotlightConfigTiming },
   ];
+  // A stage's own subset, in its own order, plus any face it owns alone.
+  const WORDS: { id: string; label: string }[] = [
+    ...(wordSubset
+      ? wordSubset
+          .map((id) => ALL_WORDS.find((w) => w.id === id))
+          .filter((w): w is { id: ConfigSection; label: string } => Boolean(w))
+      : ALL_WORDS),
+    ...(extra ?? []).map((e) => ({ id: e.id, label: e.label })),
+  ];
+  const extraFace = extra?.find((e) => e.id === openSection);
 
   return (
     <div className={shell}>
@@ -1817,7 +1786,7 @@ function ConfigPanel({
               aria-pressed={active}
               onMouseDown={(e) => e.preventDefault()}
               onClick={() =>
-                active ? onCloseSection() : onOpenDialog(word.id)
+                active ? onCloseSection() : onOpenDialog(word.id as ConfigSection)
               }
               className={cn(
                 "cursor-pointer py-1 text-sm transition-colors duration-150",
@@ -1834,7 +1803,7 @@ function ConfigPanel({
 
       {openSection && (
         <div className="border-t border-black/5 pt-3 pb-1 dark:border-white/10">
-          <ConfigChoices
+          {extraFace ? extraFace.node : <ConfigChoices
             section={openSection}
             t={t}
             isRTL={isRTL}
@@ -1862,7 +1831,7 @@ function ConfigPanel({
             drafts={drafts}
             onUseDraft={onUseDraft}
             ago={ago}
-          />
+          />}
         </div>
       )}
 
@@ -2728,15 +2697,15 @@ function ConfigChoices({
   onMediaType: (next: string) => void;
   imageStyle: string;
   onImageStyle: (next: string) => void;
-  destination: Destination;
-  onDestination: (next: Destination) => void;
+  destination?: Destination;
+  onDestination?: (next: Destination) => void;
   /** When Later means, as local wall-clock. Empty until Later is chosen. */
-  scheduleAt: string;
-  onScheduleAt: (next: string) => void;
-  ask: AskLane;
-  drafts: { id: string; text: string; when: string }[];
-  onUseDraft: (id: string) => void;
-  ago: (iso: string) => string;
+  scheduleAt?: string;
+  onScheduleAt?: (next: string) => void;
+  ask?: AskLane;
+  drafts?: { id: string; text: string; when: string }[];
+  onUseDraft?: (id: string) => void;
+  ago?: (iso: string) => string;
 }) {
   const { ref: shapeRow, dragging } = useDragScroll();
   const { ref: mediaRow, dragging: mediaDragging } = useDragScroll();
@@ -3014,6 +2983,9 @@ function ConfigChoices({
   }
 
   if (section === "draft") {
+    // Publish's face: the drafts already waiting, and the lane that answers.
+    // Draft's own stage shows its writing knobs here instead, passed in.
+    if (!ask || !drafts || !onUseDraft || !ago) return null;
     // The knobs the drafting lane already has, reachable from the box the
     // writing actually happens in. They are NOT local state: `draftKnobs`
     // lives on the provider, the agent window at /social/draft reads the same
@@ -3333,6 +3305,9 @@ function ConfigChoices({
   }
 
   if (section === "queue") {
+    // Publish's faces only. A stage that never shows the word cannot reach
+    // here, and one that does without the data has nothing to draw.
+    if (!drafts || !onUseDraft || !ago) return null;
     if (drafts.length === 0) {
       return (
         <p className="text-muted-foreground/60 text-xs">
@@ -3376,6 +3351,11 @@ function ConfigChoices({
       </>
     );
   }
+
+  // The fall-through face is Timing, and it is Publish's alone: a stage that
+  // cannot send has nothing to schedule. It never shows the word, so it never
+  // arrives here — but say so rather than trust that.
+  if (!destination || !onDestination || scheduleAt === undefined || !onScheduleAt) return null;
 
   const name: Record<Destination, string> = {
     direct: t.destinationDirect,

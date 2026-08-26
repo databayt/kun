@@ -49,6 +49,18 @@ import {
   type ProductId,
 } from "@/components/root/social/products";
 import {
+  ANY_FEATURE,
+  ANY_MEDIA_TYPE,
+  MEDIA_FILTERS,
+  POST_TYPES,
+  SETTING_KEYS,
+  featuresFor,
+  type BrandFeature,
+  type MediaFilter,
+  type PostType,
+} from "@/components/root/social/post-settings";
+import { ANY_STYLE, isImageStyle } from "@/components/root/social/image-styles";
+import {
   getSocialDict,
   type SocialDict,
 } from "@/components/root/social/dictionary";
@@ -166,6 +178,33 @@ export interface ReviewQueue {
   clearActive: () => void;
 }
 
+/**
+ * A setting that outlives the visit. Reads on mount rather than during render
+ * so the server and the first client paint agree; a stored value that no
+ * longer validates is ignored rather than crashing the stage.
+ */
+export function usePersisted<T extends string>(
+  key: string,
+  fallback: T,
+  isValid: (value: string) => value is T,
+): [T, (next: T) => void] {
+  const [value, setValue] = useState<T>(fallback);
+  useEffect(() => {
+    const stored = window.localStorage.getItem(key);
+    if (stored && isValid(stored)) setValue(stored);
+    // `isValid` is a fresh closure each render and the key never changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
+  const commit = useCallback(
+    (next: T) => {
+      setValue(next);
+      window.localStorage.setItem(key, next);
+    },
+    [key],
+  );
+  return [value, commit];
+}
+
 interface SocialContextValue {
   lang: Locale;
   isRTL: boolean;
@@ -175,6 +214,22 @@ interface SocialContextValue {
   selectedChannels: ChannelId[];
   setSelectedChannels: (next: ChannelId[]) => void;
   wiredForProduct: ChannelId[];
+  /**
+   * The post's settings, shared by every stage that wears the box. Publish
+   * owns timing on top of these; Draft and Media wear the subset that means
+   * anything to them.
+   */
+  feature: string;
+  setFeature: (next: string) => void;
+  brandFeatures: BrandFeature[];
+  postType: PostType;
+  setPostType: (next: PostType) => void;
+  mediaFilter: MediaFilter;
+  setMediaFilter: (next: MediaFilter) => void;
+  mediaType: string;
+  setMediaType: (next: string) => void;
+  imageStyle: string;
+  setImageStyle: (next: string) => void;
   status: EgressStatus | null;
   checking: boolean;
   checkConnections: () => Promise<void>;
@@ -234,6 +289,54 @@ export function SocialProvider({
   // different permanent token per product.
   const [product, setProduct] = useState<ProductId>(DEFAULT_PRODUCT);
   const [selectedChannels, setSelectedChannels] = useState<ChannelId[]>([]);
+
+  // ── The post's settings ───────────────────────────────────────────────────
+  //
+  // These lived inside the Publish box, which was fine while Publish was the
+  // only stage that had them. Draft and Media wear the same settings now, and
+  // a pick made on one stage that vanished on the next would be the exact
+  // thing this provider exists to prevent — the tray and the editor already
+  // survive the trip, and "which brand, which feature" is a stranger thing to
+  // lose than an attachment.
+  //
+  // The localStorage keys are unchanged, so nobody's saved picks reset.
+  const [feature, setFeature] = usePersisted<string>(
+    SETTING_KEYS.feature,
+    ANY_FEATURE,
+    (v): v is string => typeof v === "string",
+  );
+  const [postType, setPostType] = usePersisted<PostType>(
+    SETTING_KEYS.postType,
+    "image",
+    (v): v is PostType => (POST_TYPES as readonly string[]).includes(v),
+  );
+  const [mediaFilter, setMediaFilter] = usePersisted<MediaFilter>(
+    SETTING_KEYS.mediaFilter,
+    "any",
+    (v): v is MediaFilter => (MEDIA_FILTERS as readonly string[]).includes(v),
+  );
+  const [mediaType, setMediaType] = usePersisted<string>(
+    SETTING_KEYS.mediaType,
+    ANY_MEDIA_TYPE,
+    (v): v is string => typeof v === "string",
+  );
+  const [imageStyle, setImageStyle] = usePersisted<string>(
+    SETTING_KEYS.imageStyle,
+    ANY_STYLE,
+    (v): v is string => isImageStyle(v),
+  );
+
+  /**
+   * Features are that brand's own vocabulary — mkan has no Attendance — so a
+   * feature that does not survive a brand change is dropped rather than kept
+   * as a stale label.
+   */
+  const brandFeatures = useMemo(() => featuresFor(product), [product]);
+  useEffect(() => {
+    if (feature !== ANY_FEATURE && !brandFeatures.some((f) => f.id === feature)) {
+      setFeature(ANY_FEATURE);
+    }
+  }, [brandFeatures, feature, setFeature]);
   const [status, setStatus] = useState<EgressStatus | null>(null);
   const [checking, setChecking] = useState(true);
   const [composerText, setComposerText] = useState("");
@@ -709,6 +812,17 @@ export function SocialProvider({
     product,
     setProduct,
     selectedChannels,
+    feature,
+    setFeature,
+    brandFeatures,
+    postType,
+    setPostType,
+    mediaFilter,
+    setMediaFilter,
+    mediaType,
+    setMediaType,
+    imageStyle,
+    setImageStyle,
     setSelectedChannels,
     wiredForProduct,
     status,
