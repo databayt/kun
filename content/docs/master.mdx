@@ -10,12 +10,39 @@ One rule beats all the others: **same place, same reality.** The picture gets
 better; the property never changes. Nothing added, nothing hidden, no room made
 bigger or newer than it really is.
 
-## The loop
+## Where homes come from
+
+Everything meets in one place. A home can start on the website, in a Slack
+message, or on a scouting trip — but it becomes real work only once it is in
+the CRM, and that is where mastering starts too.
 
 ```mermaid
 graph TD
-    A1["ADD a photo the website does not have yet<br/>— the host just sent it to you"]
-    A2["REPLACE a photo already on the website<br/>— it is live, and it looks bad"]
+    S1["A host signs up on mkan.sd<br/>and adds their home"]
+    S2["You write a home into Slack #mkan"]
+    S3["We find one while scouting"]
+    CRM["Twenty CRM<br/>every home, in one place"]
+
+    S1 -->|checked every hour| CRM
+    S2 -->|being built| CRM
+    S3 --> CRM
+```
+
+Nobody has to copy anything by hand. A host who signs up and adds a home is
+picked up on the hour — the home, the host and their photos all appear on the
+board on their own. Homes typed into Slack are the newest lane and still being
+built. Scouted homes come in the way they always have.
+
+## The loop
+
+A photo goes in at the top. A better photo comes out on the website at the
+bottom. You touch one step.
+
+```mermaid
+graph TD
+    CRM["The home, in the CRM"]
+    A1["ADD a photo the website does not have yet<br/>— drop it on the home"]
+    A2["REPLACE a photo already on the website<br/>— mark the home 'poor quality'"]
     B["It gets its own job — one photo, one job"]
     C["The job appears in Slack"]
     D["The photo lands on your clipboard,<br/>ChatGPT opens"]
@@ -24,6 +51,8 @@ graph TD
     G["No — say what was wrong.<br/>It goes back for another try."]
     H["Yes — it goes live.<br/>The old photo is kept, always."]
 
+    CRM --> A1
+    CRM --> A2
     A1 --> B
     A2 --> B
     B --> C --> D --> E --> F
@@ -38,11 +67,13 @@ If it came back wrong, don't save it — press enter again.
 
 | Step | In plain words |
 | --- | --- |
-| **Add** | The host sends you a photo the website doesn't have. Drag it onto their home in Twenty — nothing else to press. The listing goes from 9 photos to 10, and the new one is mastered on the way in. |
-| **Replace** | A photo is already live and looks bad. Fix it where it stands: `pnpm master:queue --listing=1180 --photos=2 --apply`. The better version takes over that same slot, and the listing still has 9 photos. |
-| **Never mix them up** | Dropping a photo the website *already shows* into Twenty **adds** it. You would end up with the bad original and its replacement side by side on the page. Add through the CRM, replace with `master:queue`. |
+| **The CRM is where it starts** | Both ways in are a gesture on the home record — one for a photo that is new, one for a photo that is already live. Nothing else needs opening. |
+| **Add** | The host sends you a photo the website doesn't have. Drag it onto their home in Twenty. The listing goes from 9 photos to 10, and the new one is mastered on the way in. |
+| **Replace** | A photo is already live and looks bad. Set the home's stage to **poor quality** and its photos are queued, with one handed to you in Slack. (By hand, the same thing is `pnpm master:queue --listing=1180 --photos=2 --apply`.) |
+| **Never mix them up** | Dropping a photo the website *already shows* into Twenty **adds** it — you would end up with the bad original and its replacement side by side. New photo: drop it. Bad photo: flag it. |
+| **One flag, one photo** | Flagging a home queues all its photos but hands out only one. The thing that limits this pipeline is how many photos survive the check below, not how many can be queued. |
 | **Its own job** | One photo, one try, one row in the database. The exact words sent to ChatGPT are saved on that row and can never be changed afterwards, so you can always see what a photo was actually asked for. |
-| **The job appears in Slack** | `master:dispatch` posts it in `#mkan` with the photo and the words. Until that happens, nobody has been asked — and a daily check now says so. |
+| **The job appears in Slack** | Posted in `#mkan` with the photo and the words. Until that happens, nobody has been asked — and a daily check now says so. |
 | **On your clipboard** | `master:prep --standing` opens ChatGPT with the photo ready to paste. You never type the words; the ChatGPT project already holds them. About twenty seconds per photo. |
 | **You look, and save** | Save it to `~/mkan/inbox`. The moment the file lands, the computer takes over. |
 | **Same place, right room?** | Two questions, not one. Nothing invented or hidden — *and* is this really the room it claims to be. The very first photo that came back showed a different room than it said, and only a human eye caught it. |
@@ -50,10 +81,11 @@ If it came back wrong, don't save it — press enter again.
 | **Another try** | Saying no needs a reason. That reason is the only thing that makes the next round better. |
 | **The daily check** | `master:reconcile` runs every morning at 10:00 and tells Slack about anything stuck: a job nobody picked up, a job nobody was ever asked to do, a photo that quietly fell off a listing, a saved photo nobody read. |
 
-> **Every step is live.** The CRM step was the last to close (2026-08-24):
-> Twenty tells this Mac the moment a photo is added, and the download starts on
-> its own. What is *not* proven yet is how many photos survive the gate — see
-> the measured trace below.
+> **Every step is live.** The two newest: a home born on mkan.sd now reaches the
+> board on its own (hourly), and flagging a home poor quality now starts the
+> loop for the photos it already shows. Writing a home into Slack is the lane
+> still being built. What is *not* proven yet is how many photos survive the
+> check — see the measured trace below.
 
 ## The parts
 
