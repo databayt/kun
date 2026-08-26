@@ -2,11 +2,15 @@
 # The Friday digest on a timer — architecture.mdx's "Weekly content nudge"
 # candidate, built.
 #
-# Friday 09:00 local, this runs scripts/social-digest.mjs: planned vs shipped
-# for the ISO week, the Facebook numbers, the 60-day dismissal lessons, and
-# lane health — delivered via Hermes to Slack #social (Telegram review chat as
-# fallback). Deterministic, zero tokens; it feeds the captain's Friday review
-# rather than replacing it.
+# Friday 09:00 local, this runs scripts/social-digest.mjs: the backlog waiting
+# on a human, planned vs shipped for the ISO week, the Facebook numbers, the
+# 60-day dismissal lessons, and lane health — delivered to Slack via the
+# incoming webhook (Hermes relay as fallback). Deterministic, zero tokens; it
+# feeds the captain's Friday review rather than replacing it.
+#
+# The backlog section leads the digest because it is the only part that asks
+# for an action. The daily half of that same read lives in
+# scripts/social-nudge.sh, which speaks only when something is already stale.
 #
 # Friday because the weekend is Fri-Sat in both Saudi Arabia and Sudan: the
 # digest closes the working week and sits at the top of the channel when
@@ -21,8 +25,8 @@
 #
 # Failure modes, visible rather than papered over:
 #   Mac asleep Friday 09:00 → launchd fires the job on next wake.
-#   Hermes down → Telegram review chat; both down → the log carries the digest
-#   and a DELIVERED NOWHERE warning.
+#   Slack webhook unset or rejecting → the Hermes relay; both down → the log
+#   carries the digest and a DELIVERED NOWHERE warning.
 
 set -u
 
