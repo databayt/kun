@@ -14,8 +14,8 @@ bigger or newer than it really is.
 
 ```mermaid
 graph TD
-    A1["A new photo you drop in the CRM"]
-    A2["A photo the listing already shows"]
+    A1["ADD a photo the website does not have yet<br/>— the host just sent it to you"]
+    A2["REPLACE a photo already on the website<br/>— it is live, and it looks bad"]
     B["It gets its own job — one photo, one job"]
     C["The job appears in Slack"]
     D["The photo lands on your clipboard,<br/>ChatGPT opens"]
@@ -38,7 +38,9 @@ If it came back wrong, don't save it — press enter again.
 
 | Step | In plain words |
 | --- | --- |
-| **Two ways in** | A photo the listing doesn't have yet goes in through the CRM — drop it on the home and nothing else needs pressing. A photo the listing *already shows* is queued in place with `master:queue`. Never send that one through the CRM: it adds photos, so you would end up with the bad one still sitting next to its replacement. |
+| **Add** | The host sends you a photo the website doesn't have. Drag it onto their home in Twenty — nothing else to press. The listing goes from 9 photos to 10, and the new one is mastered on the way in. |
+| **Replace** | A photo is already live and looks bad. Fix it where it stands: `pnpm master:queue --listing=1180 --photos=2 --apply`. The better version takes over that same slot, and the listing still has 9 photos. |
+| **Never mix them up** | Dropping a photo the website *already shows* into Twenty **adds** it. You would end up with the bad original and its replacement side by side on the page. Add through the CRM, replace with `master:queue`. |
 | **Its own job** | One photo, one try, one row in the database. The exact words sent to ChatGPT are saved on that row and can never be changed afterwards, so you can always see what a photo was actually asked for. |
 | **The job appears in Slack** | `master:dispatch` posts it in `#mkan` with the photo and the words. Until that happens, nobody has been asked — and a daily check now says so. |
 | **On your clipboard** | `master:prep --standing` opens ChatGPT with the photo ready to paste. You never type the words; the ChatGPT project already holds them. About twenty seconds per photo. |
