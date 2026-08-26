@@ -10,7 +10,8 @@ check reads it before you do, and nothing goes out until you say so.
 
 ## How a post travels
 
-Seventeen small steps. The amber ones are yours — and most of them are one tap.
+Seventeen small steps. Eleven of them are yours — 1 to 7, then 11 to 14 — and every one
+of those is a tap or a few words.
 
 ```mermaid
 graph TD
@@ -38,11 +39,6 @@ graph TD
     S11 -- "not yet" --> S12
     S12 -. "next turn" .-> S8
     S11 -- "good" --> S13 --> S14 --> S15 --> S16 --> S17
-
-    classDef you fill:#3b2f1e,stroke:#b58a3c,color:#f5e6c8;
-    classDef live fill:#12312e,stroke:#2f7d72,color:#c6e8e2;
-    class S1,S2,S3,S4,S5,S6,S7,S11,S12,S13,S14 you;
-    class S15 live;
 ```
 
 ### What each step means
@@ -362,14 +358,6 @@ flowchart TD
   SAVE --> LIVE(["Live on the Page"])
   LIVE -.-> DEL["Retract later with<br/>that same id"]
 
-  classDef stop fill:#3b2220,stroke:#a35a4e,color:#f2d9d4;
-  classDef live fill:#12312e,stroke:#2f7d72,color:#c6e8e2;
-  classDef keep fill:#232a25,stroke:#4a6350,color:#d3e3d7;
-  classDef door fill:#1d2436,stroke:#4d5a7a,color:#d7deee;
-  class S1,S2,S3 stop;
-  class LIVE live;
-  class SAVE,DEL keep;
-  class D1,D2,D3,D4 door;
 ```
 
 ### Where an approved post comes from
