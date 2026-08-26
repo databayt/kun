@@ -244,11 +244,14 @@ Measured against the live CRM, gateway and Slack, not the docs:
 | The first real home | **proven 2026-08-25** — السند's two flats in one message: read right (2 bd · 1 ba · 7 beds · railway district · AC, washer, kitchen, TV, balcony; floor, iron, cooler, generator-by-agreement kept as notes), phone matched to the existing account-0004 host, matched one-to-one to `0004-02` / `0004-03` (live since 08-18), merged on `same`, **beds corrected 4→7 from the scout's words**, message attached as a note, both at 90% |
 
 **Blocked on one small click, and only for the Hermes ear.** The read scopes were added the
-same day and the timer ear carried the first real home end to end. Hermes itself never woke —
-your ID is allowed and the gateway was connected, so the `message.groups` **event
-subscription** is the missing piece: api.slack.com/apps → the `kun` app → *Event
-Subscriptions* → Subscribe to bot events → `message.groups` → Save → Reinstall. Until then the
-two-minute timer is the listener, which it has proven it can be.
+same day and the timer ear has carried every home end to end since. Hermes itself has never
+woken: `grep -c C0BS2NZE2AY ~/.hermes/logs/agent.log` is still `0`, because the app is not
+subscribed to the event that fires for a private channel. api.slack.com/apps → the `kun` app
+→ *Event Subscriptions* → Subscribe to bot events → `message.groups` (and `message.mpim`,
+which the gateway warns about on every start) → Save → Reinstall. The steps, and why not to
+paste a whole manifest over the app, are in `mkan/scripts/crm/hermes/SLACK-EVENTS.md`. Until
+then the two-minute timer is the listener, which it has proven it can be — the cost is
+latency, not correctness.
 
 ### Build ledger
 
