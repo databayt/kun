@@ -1,9 +1,9 @@
 ---
 title: "Mastering"
-description: "Makan's listing-photo mastering pipeline — ORIGINAL → professional per photo, state in Prisma, cockpit in Slack, mirrored to Twenty. The live trace: built, proven, blocked, next."
+description: "Makan's listing-photo mastering pipeline — ORIGINAL → professional per photo, state in Prisma, cockpit in Slack, mirrored to Twenty. The live trace: built, proven, measured, next."
 ---
 
-**Mastering** turns a host's bad photo into what a professional real-estate photographer would have shot in the same room. Hosts photograph on cheap phones in bad light; the marketplace should not. Every eligible photo moves through its own tracked run — `QUEUED → ASSIGNED → MASTERED → UPDATED` — with the render made by **Nano Banana** (Gemini), a human honesty gate before anything goes live, and no way for an image to disappear silently.
+**Mastering** turns a host's bad photo into what a professional real-estate photographer would have shot in the same room. Hosts photograph on cheap phones in bad light; the marketplace should not. Every eligible photo moves through its own tracked run — `QUEUED → ASSIGNED → MASTERED → UPDATED` — with the render made by whichever image model the run names (`chatgpt-image-2` today, Nano Banana before it — the registry takes any of them), a human honesty gate before anything goes live, and no way for an image to disappear silently.
 
 The one rule that outranks quality: **same property, same reality**. The model improves the *photograph*, never the *property* — nothing invented, nothing hidden, no rooms made larger or newer than they are. The gate is human (and the eyeball owns *identity* too: the render must depict *this* run's original — hash checks can't know the room).
 
@@ -117,27 +117,81 @@ folder — `0001-01/bedroom.jpg` works, because only the last part is read.
 
 State truth lives in **mkan Prisma** (`MasteringRun` — absence is the ORIGINAL state; retries append, history never overwritten). Twenty's `home` is the ops mirror (`photoStage` grew `MASTERED`, plus `photosMastered` / `lastMasteredAt`). The CDN is canonical and originals are immortal. Operator runbook: `mkan/docs/image-mastering.md`.
 
-## Progress — the real trace (snapshot 2026-08-23)
+## What it is worth — the pipeline against doing it by hand
 
-Live truth is `pnpm master:status`; this table is the dated snapshot.
+Doing this by hand means: open ChatGPT, paste the photo, paste the prompt, save
+the render, open the host photos page, upload it, delete the old one. It works.
+It is also how 779 photos quietly become nobody's job.
+
+| | By hand | This pipeline |
+| --- | --- | --- |
+| **Human time per photo** | ~2 min — mostly finding the photo and re-pasting the prompt | ~20 s — `master:prep --standing` puts the photo on the clipboard; ⌘V, Enter, save |
+| **Generating** | the human | the human (identical — this is the whole ceiling) |
+| **Which photo is this?** | memory | the run id, the room hint, and the original revealed beside the render |
+| **A bad photo** | you remember, or you don't | `revert` puts the original back and records why |
+| **What prompt made this?** | unknowable a week later | frozen on the row, enforced by the database |
+| **A render nobody ingested** | lost | reported daily until someone acts |
+| **Undo, six weeks later** | the original is gone | originals are immortal; `master:revert` is one command |
+
+Read the table honestly: on **speed** the pipeline wins a little, and only
+because the prompt stopped travelling. The generate step is human in both lanes,
+so **the ceiling is the same** — which is why the API flip, not more plumbing,
+is what changes the arithmetic. What the pipeline actually buys is **memory and
+reversibility**: every photo has a name, a reason, an original, and a way back.
+That is what makes it safe to point at 779 photos instead of five.
+
+## Progress — the real trace (measured 2026-08-26)
+
+Live truth is `pnpm master:status`; this is what five days of it say.
 
 | Listing | Photos | State |
 | --- | --- | --- |
-| **#1051** Kobar Residence 4 (acceptance batch) | 5 | **1/5 mastered** — photo 2 UPDATED end-to-end; photos 1, 3, 4 ASSIGNED (tasks waiting in #mkan); photo 5 rejected to trim the batch |
-| **#1180** جناح تنفيذي — السكة حديد (heirs set, room-named photos) | 9 | photo 1 (living room) ASSIGNED — **render returned from the phone and verified faithful**, ingest blocked on the Slack scopes click below; 8 still ORIGINAL |
+| **#1051** Kobar Residence 4 (acceptance batch) | 5 | **1/5 mastered** — photo 2 UPDATED end-to-end and still live; photos 1, 3, 4 QUEUED; photo 5 rejected to trim the batch |
+| **#1180** جناح تنفيذي — السكة حديد (heirs set, room-named photos) | 9 | **0/9 live** — photos 1 and 2 were applied on 08-25 and **both reverted the same day**; photo 1 is on attempt 2, the rest QUEUED |
 
-**Proven end-to-end (2026-08-22):** photo 2 of #1051 went ORIGINAL → UPDATED through the full loop — mastered WebP live on `cdn.databayt.org/mkan/uploads/mastered/`, `photoUrls` slot swapped in a transaction, Twenty shows 1/5 + new cover, Slack thread carries the before/after. The proof also caught the pipeline's defining lesson: the first return was labeled "photo 1" but depicted photo 2 — the visual identity match caught it, and that duty is now doctrine and a playbook row.
+**16 runs · 3 photos ever applied · 2 reverted · 1 net live photo · 779 in the
+backlog.** The wiring is done and the loop has run end to end; what has not been
+demonstrated is **yield**. Two of the three photos that reached the live site
+came back down within days, and neither revert recorded a reason — so whether
+prompt v2 fixed what v1 got wrong is, in the data, unanswerable.
 
-**The backlog, measured** (`master:census`, 147 listings): **112 listings / 779 low-quality photos** ready to queue, 9 OK, 26 with no photos at all (24 of those *published* — a product gap outside this pipeline), 0 needing re-hosting.
+**What is actually blocking, in order:**
 
-**Blocked on exactly two human actions:**
+1. **Yield, not plumbing.** 2 of 3 applied photos were reverted. Until a batch
+   of four or five survives a day, queueing the other 112 listings would just
+   manufacture work to undo. The fix shipped with this pass is small and
+   procedural: `master:revert` now demands a reason, the way `master:reject`
+   always has.
+2. **Throughput is a human, and the arithmetic is unkind.** One net live photo
+   in five days against 779. Even at the tool's best pace — ~20 s of attention
+   per photo, which the standing-prompt trick really does deliver — the backlog
+   is a full day of someone doing nothing else, spread over however many days
+   that day gets split into. **The whole backlog on the API lane prices at ~$30**
+   (`legacy` Nano Banana; $79 flash-2K, $134 pro-2K). That decision is on record
+   as deferred, and it is the only lever that moves the ceiling.
+3. **~~Slack read scopes~~ — resolved.** Verified live 2026-08-26: the kun bot
+   holds `groups:history` + `files:read`, and both `conversations.history` and
+   `files.list` answer on `C0BS2NZE2AY`. Every doc claimed this was still
+   blocking; it has not been for days. The phone lane works.
+4. **The queue→dispatch gap.** `queue` and `pull` create runs; `dispatch` hands
+   them out; nothing connects the two. Six runs sat QUEUED with no Slack task —
+   five of them for 45 hours — while the stall clock, which only looked at a
+   seven-day QUEUED threshold, said "all clear". Reconcile now flags an
+   undispatched run after a day.
+5. **The record was rewritten from outside.** Three dispatched runs had their
+   frozen prompt rewritten v1 → v2 on 2026-08-25 while their Slack tasks still
+   quoted v1, and five runs show a status the scripts cannot produce
+   (QUEUED, but carrying a Slack task — dispatched, then reset). Nothing
+   noticed. A Postgres trigger now refuses to let a run's prompt change, and
+   reconcile reports impossible states.
 
-1. **Slack read scopes (30 seconds, unblocks the phone lane forever):** api.slack.com/apps → kun app → OAuth & Permissions → Bot Token Scopes → add `groups:history` + `files:read` → Reinstall. The bot posts but cannot read; until then `master:done --from-slack` fails `missing_scope`, and the verified #1180 render waits in its thread.
-2. **Google API billing (deferred by decision, 2026-08-22):** the whole 779-photo backlog prices at **~$30** on `legacy` Nano Banana ($79 flash-2K, $134 pro-2K) via the already-wired `gemini-media.mjs --ref` lane. Until the `/decide`, the human generates in the Gemini app.
+**The backlog, measured** (`master:census`, 147 listings): **112 listings / 779
+low-quality photos** ready to queue, 9 OK, 26 with no photos at all (24 of those
+*published* — a product gap outside this pipeline), 0 needing re-hosting.
 
 ## Build ledger
 
-All on mkan `main`, all 2026-08-22 → 23:
+All on mkan `main`, 2026-08-22 → 26:
 
 | Commit | What landed |
 | --- | --- |
@@ -149,11 +203,13 @@ All on mkan `main`, all 2026-08-22 → 23:
 | `b0b6e0d` `2c2246b` | Heirs photo sets named by room; filename room hints ground the prompt |
 | `9433b7f` | The Slack return lane (`--from-slack`): thread attachment → run-id text → sole-waiting fallback — built because renders happen on the phone |
 | `457ca10` | Production hardening: pure core + 10 pinned invariant tests (incl. a real UUID→"room" prompt-leak bug), race-guarded state claim, 🫥 DRIFTED detection, launchd stall clock (daily 10:00), retries keep room hints, cache identity check, `dispatch --repost` |
+| `2c52245` | Prompt v2 — four loopholes v1 left open, closed (preservation beats the 4:3 ratio, no fabricated light, no geometry that enlarges a room, no fake HDR) |
+| `553c986` | **The loop stops losing work it already paid for** (2026-08-26): a render made while the machine was still re-queueing is no longer refused — a dropped file is judged against its PHOTO's history, not the attempt in flight (`~/Downloads` keeps the strict bar); `revert` demands a reason; the frozen prompt is enforced by a Postgres trigger instead of a comment; reconcile sees undispatched runs, impossible states, and renders stuck in the inbox — eleven on its first run |
 
 ## Decisions on record
 
 - **State home:** mkan Prisma, not Twenty — Twenty mirrors, the app's array is what the site serves (settled by evidence, 2026-08-22).
-- **Generate lane:** human via the Gemini app while API billing is deferred; the flip (`master:auto`) changes only the generate step, never the state machine or the human gate.
+- **Generate lane:** human via a chat app while API billing is deferred — the model is per-run and the default is now `chatgpt-image-2`; the flip (`master:auto`) changes only the generate step, never the state machine or the human gate.
 - **No browser/desktop automation of Nano Banana:** no desktop app exists; driving the web app is possible but declined — spec-forbidden, main-Google-account ToS risk, fragile. Supervised prototype only on explicit override.
 - **Stall clock is deterministic shell** (launchd, daily 10:00), not an LLM cron.
 - **Cockpit:** private **#mkan** (`C0BS2NZE2AY`); the posting identity is the workspace `kun` bot (Hermes' token).
