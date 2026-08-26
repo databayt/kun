@@ -1,11 +1,57 @@
 ---
-title: "Mastering"
-description: "Makan's listing-photo mastering pipeline — ORIGINAL → professional per photo, state in Prisma, cockpit in Slack, mirrored to Twenty. The live trace: built, proven, measured, next."
+title: "Master"
+description: "Bad listing photos in, professional ones out — one photo at a time."
 ---
 
-**Mastering** turns a host's bad photo into what a professional real-estate photographer would have shot in the same room. Hosts photograph on cheap phones in bad light; the marketplace should not. Every eligible photo moves through its own tracked run — `QUEUED → ASSIGNED → MASTERED → UPDATED` — with the render made by whichever image model the run names (`chatgpt-image-2` today, Nano Banana before it — the registry takes any of them), a human honesty gate before anything goes live, and no way for an image to disappear silently.
+**Master** takes a photo a host shot on a cheap phone and gives back the photo a
+professional would have taken in the same room.
 
-The one rule that outranks quality: **same property, same reality**. The model improves the *photograph*, never the *property* — nothing invented, nothing hidden, no rooms made larger or newer than they are. The gate is human (and the eyeball owns *identity* too: the render must depict *this* run's original — hash checks can't know the room).
+One rule beats all the others: **same place, same reality.** The picture gets
+better; the property never changes. Nothing added, nothing hidden, no room made
+bigger or newer than it really is.
+
+## The loop
+
+```mermaid
+graph TD
+    A1["A new photo you drop in the CRM"]
+    A2["A photo the listing already shows"]
+    B["It gets its own job — one photo, one job"]
+    C["The job appears in Slack"]
+    D["The photo lands on your clipboard,<br/>ChatGPT opens"]
+    E["You look at the new photo, and save it"]
+    F{"Same place, and the right room?"}
+    G["No — say what was wrong.<br/>It goes back for another try."]
+    H["Yes — it goes live.<br/>The old photo is kept, always."]
+
+    A1 --> B
+    A2 --> B
+    B --> C --> D --> E --> F
+    F -->|no| G --> B
+    F -->|yes| H
+```
+
+You only touch one step: look at the photo, and save it. Saving **is** the yes.
+If it came back wrong, don't save it — press enter again.
+
+### What each step means
+
+| Step | In plain words |
+| --- | --- |
+| **Two ways in** | A photo the listing doesn't have yet goes in through the CRM — drop it on the home and nothing else needs pressing. A photo the listing *already shows* is queued in place with `master:queue`. Never send that one through the CRM: it adds photos, so you would end up with the bad one still sitting next to its replacement. |
+| **Its own job** | One photo, one try, one row in the database. The exact words sent to ChatGPT are saved on that row and can never be changed afterwards, so you can always see what a photo was actually asked for. |
+| **The job appears in Slack** | `master:dispatch` posts it in `#mkan` with the photo and the words. Until that happens, nobody has been asked — and a daily check now says so. |
+| **On your clipboard** | `master:prep --standing` opens ChatGPT with the photo ready to paste. You never type the words; the ChatGPT project already holds them. About twenty seconds per photo. |
+| **You look, and save** | Save it to `~/mkan/inbox`. The moment the file lands, the computer takes over. |
+| **Same place, right room?** | Two questions, not one. Nothing invented or hidden — *and* is this really the room it claims to be. The very first photo that came back showed a different room than it said, and only a human eye caught it. |
+| **Goes live** | The new photo replaces the old one on the website and takes a proper name — `mkan/0001-01/bedroom-1.webp`. The original is never deleted; it keeps its old address forever. |
+| **Another try** | Saying no needs a reason. That reason is the only thing that makes the next round better. |
+| **The daily check** | `master:reconcile` runs every morning at 10:00 and tells Slack about anything stuck: a job nobody picked up, a job nobody was ever asked to do, a photo that quietly fell off a listing, a saved photo nobody read. |
+
+> **Every step is live.** The CRM step was the last to close (2026-08-24):
+> Twenty tells this Mac the moment a photo is added, and the download starts on
+> its own. What is *not* proven yet is how many photos survive the gate — see
+> the measured trace below.
 
 ## The parts
 
@@ -16,56 +62,10 @@ Seven parts. Each one does a single thing:
 | **Twenty CRM** | where you put the photo in |
 | **The scripts** (mkan) | do all the boring work for you |
 | **The database** | remembers every photo and every try |
-| **Gemini / ChatGPT** | makes the better photo |
+| **ChatGPT / Gemini** | makes the better photo |
 | **Your inbox folder** | where you save the new photo |
 | **The CDN** | keeps all the photos, old ones too |
 | **Slack #mkan** | tells you what is going on |
-
-## The loop
-
-A photo goes in at the top. A better photo comes out on the website at the
-bottom. You touch one box.
-
-```mermaid
-graph TD
-    A1["A photo is dropped on a home in Twenty CRM<br/>(one the listing does not have yet)"]
-    A2["pnpm master:queue --listing=N<br/>(a photo the listing already shows)"]
-    W["Twenty fires a webhook · master:pull downloads it<br/>original lands at mkan/temp/0001-01/hall.jpg"]
-    R["A RUN is born — QUEUED<br/>its prompt frozen on the row, forever"]
-    D["master:dispatch — a task in Slack #mkan — ASSIGNED"]
-    P["master:prep --standing<br/>the photo goes to your clipboard, ChatGPT opens"]
-    H(["YOU: paste · enter · look at it · save to ~/mkan/inbox"])
-    G["master:relay takes it the moment the file lands"]
-    V{"Same property, same reality —<br/>and is it THIS room?"}
-    X["master:reject --note / master:revert --note<br/>REJECTED, and a fresh attempt is queued"]
-    U["master:done — WebP, 2048px wide, and a name it earned<br/>cdn.databayt.org/mkan/0001-01/bedroom-1.webp<br/>swapped into the listing — UPDATED"]
-    T["Twenty mirrored · the Slack thread gets before and after"]
-    C["master:reconcile, every day at 10:00<br/>parked · drifted · never dispatched · stuck in the inbox"]
-
-    A1 --> W --> R
-    A2 --> R
-    R --> D --> P --> H --> G --> V
-    V -->|no| X --> R
-    V -->|yes| U --> T
-    C -.->|watches every open run| R
-```
-
-### What each box means
-
-| Box | In plain words |
-| --- | --- |
-| **Two ways in** | A photo the listing doesn't have yet goes in through the CRM — drop it on the home record and nothing else needs pressing. A photo the listing *already shows* is queued in place with `master:queue`; it must never come in through the CRM, which appends and would leave the bad photo sitting beside its replacement. |
-| **The run** | One photo, one attempt, one row. The prompt is compiled and frozen onto it — the database refuses to let that change afterwards, so what an image was actually asked for stays true. |
-| **The Slack task** | The run is handed to a human by posting it in #mkan, with the original and the exact prompt. Until that happens nobody has been asked, and `reconcile` now says so after a day. |
-| **`prep`** | Takes the next waiting photo, puts *the photo itself* on your clipboard, and opens ChatGPT. You never paste a prompt — the project carries it. |
-| **You** | ⌘V, Enter, look at what came back, save it to `~/mkan/inbox`. Saving **is** the yes. If it came back wrong, don't save it — press Enter again. |
-| **The gate** | Two questions, not one. *Same property, same reality* — nothing invented, hidden, or made bigger. And *is this the right room* — the pipeline's first real return depicted a different room than the one it claimed, and only an eye caught it. |
-| **Live** | The mastered photo replaces the original in the listing by URL match, never by position, and takes the name it earned: `mkan/0001-01/bedroom-1.webp`. The original keeps its `temp/` URL forever — nothing here deletes an image. |
-| **The clock** | Nothing is allowed to go quiet. A run parked too long, a photo that drifted out of the listing after going live, a run nobody was ever asked for, a render sitting unread in the inbox — all of it reaches Slack. |
-
-> **Every box is live.** The CRM lane was the last to close (2026-08-24):
-> Twenty fires an `attachment.created` webhook at a listener on this Mac, which
-> runs the pull. What is *not* proven is yield — see the measured trace below.
 
 ## Set ChatGPT up once
 
