@@ -8,10 +8,44 @@ shape — and say the topic in a few words. Those picks are not a form: **each o
 paragraph of context handed to the writer.** Claude writes it in Arabic and English, a craft
 check reads it before you do, and nothing goes out until you say so.
 
+## The four pages
+
+`/social` is one job split across pages, and **`/social/publish` can do the whole job by
+itself** — which is why the bare `/social` opens there. The other three exist for when you
+want to start somewhere earlier.
+
+```mermaid
+graph TD
+    CAL["/social/calendar<br/>this week's topics, ready to press"]
+    DRA["/social/draft<br/>ask for words in your own words"]
+    MED["/social/media<br/>find a picture, or make one"]
+    PUB["/social/publish<br/>read it · attach it · send it"]
+    MEA["/social/measure<br/>how it did"]
+    LIVE(["Live on your channels"])
+
+    CAL ~~~ DRA ~~~ MED
+    CAL -->|"Queue now"| DRA
+    DRA -->|"Use Arabic"| PUB
+    MED -->|"Attach"| PUB
+    PUB --> LIVE --> MEA
+```
+
+Nothing is lost moving between them: the copy you are working on and the pictures you have
+attached follow you from page to page.
+
+| Page | What you go there for |
+| --- | --- |
+| **calendar** | The topics we already decided to write about this week, per brand, with the ones due now highlighted. Press **Queue now** and it becomes a request for words. |
+| **draft** | The place to ask for copy in a sentence and get Arabic and English back. Type again to refine what is on screen rather than starting over. **Use Arabic** carries it to publish. |
+| **media** | Type two words and the library narrows; **Attach** puts a picture in the tray. Generating something new lives below it — this page finds what exists, the studio asks for what does not. |
+| **publish** | The whole job in one place: write it, refine it, attach, and send — now, later, or out for someone else's approval. It is also the review queue, where a draft someone else asked for waits for a yes. |
+| **measure** | The last twenty posts, with what each one reached. |
+
 ## How a post travels
 
-Seventeen small steps. Eleven of them are yours — 1 to 7, then 11 to 14 — and every one
-of those is a tap or a few words.
+The seventeen steps below all happen on **`/social/publish`** — this is that one page,
+opened up. Eleven of them are yours — 1 to 7, then 11 to 14 — and every one of those is a
+tap or a few words.
 
 ```mermaid
 graph TD
@@ -20,18 +54,18 @@ graph TD
     S3["3 · Pick the feature"]
     S4["4 · Pick the channels"]
     S5["5 · Pick the post shape"]
-    S6["6 · Say the topic"]
+    S6["6 · Say the topic<br/>(or press one from /social/calendar)"]
     S7["7 · Press Write it"]
     S8["8 · Every pick becomes<br/>a line of the prompt"]
     S9["9 · Claude writes it<br/>in Arabic and English"]
     S10["10 · A craft check<br/>reads it first"]
     S11["11 · You read it"]
     S12["12 · Say what to change"]
-    S13["13 · Attach a photo<br/>or a video"]
+    S13["13 · Attach a photo or a video<br/>(the tray, or /social/media)"]
     S14["14 · Say when"]
     S15["15 · It posts to<br/>your channels"]
     S16["16 · It saves the receipt"]
-    S17["17 · It reads the<br/>numbers back"]
+    S17["17 · It reads the numbers back<br/>(shown on /social/measure)"]
 
     S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7 --> S8 --> S9 --> S10
     S10 -. "weak" .-> S9
