@@ -37,18 +37,15 @@ graph TD
 
 ### What each box means
 
-| Box | In plain words | When | Who |
-| --- | --- | --- | --- |
-| **1 · Pick** | Reads this week's briefs from the content pillars and files one ask per brand. Four brands, two topics each. | Mon 07:00 | Machine |
-| **2 · Write** | An agent answers each ask on the Max plan — Arabic written natively, English mirrored from it. Costs nothing per draft. | every 60s | Machine |
-| **3 · Check** | Runs the craft rules: register, length, hollow phrases, and any number that was not in the brief. Today it **advises** rather than refuses. | with the draft | Machine |
-| **4 · Approve** | You open the queue, read what was written, and say yes — publish now or schedule it. **This is the only human step.** | once a week | **You** |
-| **5 · Send** | Delivers to the brand's Facebook page. Retries up to three times, and never double-posts. | every 15 min | Machine |
-| **6 · Measure** | Reads reach, views, reactions, comments and shares back from Facebook. | every 6h | Machine |
-| **7 · Report** | A digest in Slack: what was planned, what shipped, the numbers, and **what is still waiting on you**. | Fri 09:00 | Machine |
-
-Steps 1, 2 and 7 run on your Mac. Steps 5 and 6 run on GitHub Actions, so they keep going
-whether or not the laptop is open.
+| Box | In plain words |
+| --- | --- |
+| **1 · Pick** | *Monday 07:00.* Reads this week's briefs from the content pillars and files one ask per brand — four brands, two topics each. Runs on this Mac. |
+| **2 · Write** | *Every 60 seconds.* An agent answers each ask on the Max plan: Arabic written natively, English mirrored from it. Costs nothing per draft. Runs on this Mac. |
+| **3 · Check** | *With the draft.* Runs the craft rules — register, length, hollow phrases, and any number that was not in the brief. Today it **advises** rather than refuses. |
+| **4 · Approve** | *Once a week, whenever you sit down.* You open the queue, read what was written, and say yes — publish now, or pick a time. **This is the only human step, and the only one with no timer on it.** |
+| **5 · Send** | *Every 15 minutes.* Delivers to the brand's Facebook page. Retries up to three times and never double-posts. Runs on GitHub Actions, so it keeps going with the laptop shut. |
+| **6 · Measure** | *Every 6 hours.* Reads reach, views, reactions, comments and shares back from Facebook. Also GitHub Actions. |
+| **7 · Report** | *Friday 09:00.* A digest in Slack: what was planned, what shipped, the numbers, and **what is still waiting on you**. Runs on this Mac. |
 
 ## When nobody says yes
 
@@ -97,7 +94,7 @@ prevent.
 When you approve, **open each draft from the queue** — do not retype its text into an
 empty box.
 
-| | What happens |
+| If you… | What happens |
 | --- | --- |
 | **Open it from the queue** | The system still knows which request the words came from. It marks that request finished, and the loop closes. |
 | **Retype it into an empty box** | The post still goes out — but the original request is never closed, so the loop looks like it never ran. |
