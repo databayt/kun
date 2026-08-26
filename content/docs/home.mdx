@@ -175,13 +175,27 @@ whole marketplace joins on (`Listing.code` on the site, `listingId` in Twenty; s
 [Mastering](/docs/master#naming-the-photos)). Accounts `0001–0004` are the four hand-verified
 hosts, `1001+` the scraped ones; a new host from Slack takes the next free manual number.
 
-**How the account is assigned, in order.** The phone in your words is the anchor: it is
-normalised (`٠٩١٢…`, `00 249 …`, `+249 …` all become one number) and looked up on the `host`
-records. A known host keeps the account written on their own record (`mkanUsername`, `0004` for
-السند), falling back to what their homes carry; a host nobody knows gets a new `host` record and
-the next free manual number (`0005` today; `1001+` stays for scraped hosts). No phone means
-nothing is minted — the thread asks for the number first. The site's `NNNN@mkan.org` account is
-created only when the first home goes `live`.
+**How the account is assigned, in order.** The account number is a **login slot, not a fact
+about the host** — `0006` and the one shared password are what they type on mkan.sd, and the
+number has nothing to do with their phone. It is simply the next free one, read across both
+sides of the join at once: the `account` on every home *and* the `mkanUsername` on every host
+(a host can hold a number a day before their first home carries it, and reading one side only
+hands the same number out twice). `1001+` stays reserved for scraped hosts.
+
+A known host keeps the account already written on their record; a host nobody knows gets a new
+`host` record, the next free number written onto it, and codes for their homes — **whether or
+not a phone was written down**. The phone stays an anchor for *recognising* a host and a
+must-have before `live`, so nothing reaches the site with nobody to call; it is no longer a
+gate on the numbering. A number that arrives later is written onto the host record it belongs
+to, unless it turns out to belong to a host who already has an account — then the thread says
+so and moves nothing, because welding two identities together on a guess is the mistake the
+`same` / `new` question exists to prevent.
+
+The site account is provisioned when the first home goes `live`: `username` is the host's own
+name (it is what a guest reads under *"Hosted by"*), the password is the shared one, and the
+number is what they log in with — `getUserByIdentifier` resolves a bare `0006`, so no host is
+ever handed an email address. `mkanUsername`, `mkan account` and `Account provisioned` are
+filled on the host record at that moment.
 
 **How the code is assigned.** For a home born in Slack the **CRM mints** it the moment the
 host is known — the next unit under the account, in the order the units were written (the
@@ -293,6 +307,11 @@ Each of these cost one real round trip on 2026-08-25; none is theoretical.
 - **A person says `live`.** Never the machine.
 - **State truth is mkan Prisma; Twenty mirrors.** The CRM mints the code when the host is known;
   the site keeps it.
+- **The account number is a sequence, not a fact.** `0006` is a login slot with one shared
+  password, minted in order from the whole CRM at once and written onto both the host and every
+  home. It is unrelated to the phone: a host filed without a number still gets an account and
+  codes, and still cannot go `live` until someone can be called. *(Reversed 2026-08-26, by
+  Abdout, from the 08-25 "no phone → nothing minted".)*
 - **Dedup before create.** A thread reply is always an update; a new message that matches an
   existing host phone and unit is flagged `SUSPECTED` and asked about, not duplicated.
 - **Improvement is a gated loop.** Corrections become tests; a prompt version ships only green.
