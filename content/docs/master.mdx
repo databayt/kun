@@ -24,39 +24,48 @@ Seven parts. Each one does a single thing:
 ## The loop
 
 A photo goes in at the top. A better photo comes out on the website at the
-bottom. Six steps, and you only touch two of them.
+bottom. You touch one box.
 
 ```mermaid
 graph TD
-    S1["1 · A photo enters Twenty CRM"]
-    S2["2 · Twenty fires a workflow"]
-    S3["3 · The photo lands in mkan/inbox"]
-    S4["4 · You paste it into ChatGPT"]
-    S5["5 · You save the result to mkan/inbox"]
-    S6["6 · It goes live, and back to Twenty"]
-    S1 --> S2 --> S3 --> S4 --> S5 --> S6
+    A1["A photo is dropped on a home in Twenty CRM<br/>(one the listing does not have yet)"]
+    A2["pnpm master:queue --listing=N<br/>(a photo the listing already shows)"]
+    W["Twenty fires a webhook · master:pull downloads it<br/>original lands at mkan/temp/0001-01/hall.jpg"]
+    R["A RUN is born — QUEUED<br/>its prompt frozen on the row, forever"]
+    D["master:dispatch — a task in Slack #mkan — ASSIGNED"]
+    P["master:prep --standing<br/>the photo goes to your clipboard, ChatGPT opens"]
+    H(["YOU: paste · enter · look at it · save to ~/mkan/inbox"])
+    G["master:relay takes it the moment the file lands"]
+    V{"Same property, same reality —<br/>and is it THIS room?"}
+    X["master:reject --note / master:revert --note<br/>REJECTED, and a fresh attempt is queued"]
+    U["master:done — WebP, 2048px wide, and a name it earned<br/>cdn.databayt.org/mkan/0001-01/bedroom-1.webp<br/>swapped into the listing — UPDATED"]
+    T["Twenty mirrored · the Slack thread gets before and after"]
+    C["master:reconcile, every day at 10:00<br/>parked · drifted · never dispatched · stuck in the inbox"]
+
+    A1 --> W --> R
+    A2 --> R
+    R --> D --> P --> H --> G --> V
+    V -->|no| X --> R
+    V -->|yes| U --> T
+    C -.->|watches every open run| R
 ```
 
 ### What each box means
 
 | Box | In plain words |
 | --- | --- |
-| **1 · A photo enters Twenty CRM** | Someone puts a photo on a home in the CRM. This is the only thing that starts the loop — nothing else to press or run. |
-| **2 · Twenty fires a workflow** | Twenty notices the new photo by itself and sends a signed message to this Mac. Nobody has to tell it. Drop six photos at once and it still runs the next step only once. |
-| **3 · The photo lands in `mkan/inbox`** | The signal pulls the photo down to one folder on the Mac. A whole batch can land at once — they wait there for you. |
-| **4 · You paste it into ChatGPT** | `pnpm master:prep --standing` takes the next waiting photo, puts it on your clipboard and opens ChatGPT. Then it is ⌘V, Enter. You never type a prompt — the project already carries it (see below). |
-| **5 · You save the result to `mkan/inbox`** | Same folder. Saving *is* the whole job — the computer watches that folder and takes over the second the file appears. |
-| **6 · It goes live** | The new photo replaces the old one on the website, and Twenty is updated to match. Done. |
+| **Two ways in** | A photo the listing doesn't have yet goes in through the CRM — drop it on the home record and nothing else needs pressing. A photo the listing *already shows* is queued in place with `master:queue`; it must never come in through the CRM, which appends and would leave the bad photo sitting beside its replacement. |
+| **The run** | One photo, one attempt, one row. The prompt is compiled and frozen onto it — the database refuses to let that change afterwards, so what an image was actually asked for stays true. |
+| **The Slack task** | The run is handed to a human by posting it in #mkan, with the original and the exact prompt. Until that happens nobody has been asked, and `reconcile` now says so after a day. |
+| **`prep`** | Takes the next waiting photo, puts *the photo itself* on your clipboard, and opens ChatGPT. You never paste a prompt — the project carries it. |
+| **You** | ⌘V, Enter, look at what came back, save it to `~/mkan/inbox`. Saving **is** the yes. If it came back wrong, don't save it — press Enter again. |
+| **The gate** | Two questions, not one. *Same property, same reality* — nothing invented, hidden, or made bigger. And *is this the right room* — the pipeline's first real return depicted a different room than the one it claimed, and only an eye caught it. |
+| **Live** | The mastered photo replaces the original in the listing by URL match, never by position, and takes the name it earned: `mkan/0001-01/bedroom-1.webp`. The original keeps its `temp/` URL forever — nothing here deletes an image. |
+| **The clock** | Nothing is allowed to go quiet. A run parked too long, a photo that drifted out of the listing after going live, a run nobody was ever asked for, a render sitting unread in the inbox — all of it reaches Slack. |
 
-There is no separate "check it" step, because you already saw the photo in
-ChatGPT before you saved it. Saving **is** the yes. If one comes out wrong,
-do not save it — press Enter again.
-
-> **All six boxes are live** (2026-08-24). Box 2 was the last gap and is now
-> built: Twenty fires an `attachment.created` webhook at a listener on the Mac,
-> which runs the pull. Proven end to end — three photos dropped through the API
-> arrived in `mkan/inbox` named by their run, each with its room read off the
-> file name.
+> **Every box is live.** The CRM lane was the last to close (2026-08-24):
+> Twenty fires an `attachment.created` webhook at a listener on this Mac, which
+> runs the pull. What is *not* proven is yield — see the measured trace below.
 
 ## Set ChatGPT up once
 
