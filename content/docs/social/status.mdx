@@ -161,10 +161,26 @@ returns `drafted: 0`.
   draft ever asked for it was written by someone who did not know it was school software. Asked
   for "attendance" it produced clean, on-register Arabic about tracking employees. A test now pins
   the map to the product registry, and each row carries the brand page's audience.
-- **One stage frame (2026-08-25).** Publish's screen — the snap, the settle-then-lock, the gesture
+- **One stage frame (2026-08-25).** Publish's screen — the settle-then-lock, the gesture
   swallowing that still lets an inner scroller take its own wheel — is `stage.tsx`, and Draft and
   Media wear it. Calendar and Measure deliberately do not: the lock is armed by a box calling
   `onEngagedChange`, and a stage with no box would get a full screen centred on a heading.
+- **The box stopped waiting below the fold (2026-08-26).** The stage was a `min-h-screen` section
+  *under* a header that was as tall as it needed to be, so the thing you came to use rendered at
+  **94% of the viewport** — measured, not guessed — and the first screen was all title. The two
+  halves are one decision now, made in the Hub layout and consumed by the frame: the header claims
+  `calc(50svh - var(--header-height))`, the stage starts at the fold, and its column is centred in
+  a half-viewport box pinned at `top-[25svh]`. Which means the same arithmetic reads twice — at
+  rest the column sits at 75svh, the middle of the second half; scroll and it rises to 50svh and
+  **sticks**, so the page keeps moving behind a box that has stopped. The stuck half is exact
+  everywhere measured — 1440×900, 1280×720, 390×844, en and ar all read **49%** from 225px of
+  scroll on, and flat for every scroll after. The resting half is exact only where the header
+  fits the half it was given: `min-h`, not `h`, so a header taller than half a screen wins and
+  the box simply starts lower (74% at 1440×900, 76% at 390×844, 80% at 1280×720 — where the
+  header's own 403px exceeds half of 720). The halves are a promise about roomy screens, not a
+  clip. No listener and no measured height — a centred flex column overflows both edges, which is
+  exactly what an open panel should do. Document scroll-snapping went with it: it existed to
+  settle a stage that began off-screen, and only pulled against the rise.
 
 - **Egress** — per-channel results, three transports in parallel, and a **media set** through the whole chain: one photo (Facebook `/photos`, Telegram `sendPhoto`), 2–10 as a Facebook carousel or Telegram album (`sendMediaGroup`), one video (`/videos`, `sendVideo`) — with mixed image+video, two videos, or >10 images refused by name before delivery, since no platform edge carries them. The approval token addresses the variant, so the confirm page lists every URL
 - **Per-product Facebook** — its own Page and permanent token per brand, with the resolved Page name shown before you publish, which is how a crossed token gets caught

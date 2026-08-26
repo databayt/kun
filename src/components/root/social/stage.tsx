@@ -1,17 +1,25 @@
 "use client";
 
-// The stage frame — one screen, one word, one box.
+// The stage frame — half a screen, one word, one box.
 //
-// Lifted out of review.tsx on 2026-08-25, unchanged. Publish had grown the
-// shape the other stages want: a full screen that the page settles onto, a
-// single-word heading, and a box that locks the display around itself when
-// you touch it. Draft and Media asked for the same head, and the alternative
-// was three copies of two hundred lines of scroll machinery — which would
-// have meant three places to fix the next thing measured wrong about it.
+// Lifted out of review.tsx on 2026-08-25. Publish had grown the shape the
+// other stages want: a single-word heading, and a box that locks the display
+// around itself when you touch it. Draft and Media asked for the same head,
+// and the alternative was three copies of two hundred lines of scroll
+// machinery — which would have meant three places to fix the next thing
+// measured wrong about it.
 //
-// What this owns is the SCREEN. Touch the box and the stage locks: the page
-// stops scrolling, and the heading, the box and whatever its panel is wearing
-// hold the middle of the display until you press outside.
+// What this owns is the LOWER HALF of the first screen, and then the middle
+// of every screen after it. The layout above takes the other half (title,
+// description, tab row), so the stage opens whole on arrival instead of
+// waiting below the fold for someone to find it — measured, the box used to
+// render at 94% of the viewport, which is another way of saying off it. From
+// there the column rises with the page until it reaches the middle, and
+// sticks: scrolling on moves the page behind a box that has stopped.
+//
+// Touch the box and the stage locks: the page stops scrolling, and the
+// heading, the box and whatever its panel is wearing hold that middle until
+// you press outside.
 //
 // There is no scrim, no dim and no blur: the background keeps its gradient,
 // the site header and the tab row keep their colours, and the only thing the
@@ -21,7 +29,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
 /** Defined in globals.css, on <html> — the document is the scroll container. */
-const SNAP_CLASS = "snap-stage";
+const STAGE_CLASS = "stage-open";
 
 /** Keys that scroll a page when nothing has swallowed them first. */
 const SCROLLING_KEYS = new Set([
@@ -53,8 +61,8 @@ function whenScrollSettles(run: () => void): () => void {
 
   // The lift itself waits two frames before it starts (spotlight.tsx), so the
   // first frames here are quiet for the wrong reason. Measured without this
-  // grace: the lock landed at 250ms, froze the glide a third of the way, and
-  // the release then jumped because the page was held off its snap point.
+  // grace: the lock landed at 250ms and froze the glide a third of the way,
+  // stranding the page — and the column with it — short of the middle.
   const GRACE_FRAMES = 6;
   const QUIET_FRAMES = 3;
 
@@ -106,13 +114,13 @@ export function StageFrame({
   const [locked, setLocked] = useState(false);
   const columnRef = useRef<HTMLDivElement>(null);
 
-  // The stage asks the document to settle on it. Only while this stage is
-  // mounted: snapping is scoped to the route that wants it, so navigating to
-  // Calendar or Measure leaves the page scrolling normally. The class has to
-  // land on <html> because that is the scroll container — see globals.css.
+  // The stage asks the document to stop anchoring its scroll to a growing
+  // box. Only while this stage is mounted, so navigating to Calendar or
+  // Measure leaves the page behaving normally. The class has to land on
+  // <html> because that is the scroll container — see globals.css.
   useEffect(() => {
-    document.documentElement.classList.add(SNAP_CLASS);
-    return () => document.documentElement.classList.remove(SNAP_CLASS);
+    document.documentElement.classList.add(STAGE_CLASS);
+    return () => document.documentElement.classList.remove(STAGE_CLASS);
   }, []);
 
   useEffect(() => {
@@ -251,26 +259,45 @@ export function StageFrame({
 
 
   return (
-    // A full screen, and centred in it: the stage is one column — a heading
-    // and the box under it — so anything less left it stranded at the top of
-    // a mostly empty page.
+    // The stage begins exactly at the fold, because the layout gives the
+    // header the half above it (social/layout.tsx). A screen tall, so there
+    // is a runway to scroll after the column has stopped moving — the whole
+    // point of sticking is that the page keeps going and the box does not.
     //
-    // `snap-start` is the other half: scrolling down from the header settles
-    // here rather than halfway, so the stage arrives whole. Focusing the box
-    // does the same deliberately — spotlight.tsx climbs to `closest("section")`
-    // and lifts it, which is why the section element is the frame's own and
-    // not something a stage supplies.
+    // Focusing the box lifts the section to the top of the screen —
+    // spotlight.tsx climbs to `closest("section")` and scrolls it into view,
+    // which is why the section element is the frame's own and not something a
+    // stage supplies. That lift now runs past the stick point, so the column
+    // rises to the middle and then holds while the rest of the page slides
+    // out from behind it.
     <>
-      <section className="full-bleed from-background to-muted/20 flex min-h-screen snap-start flex-col justify-center bg-gradient-to-b py-16 md:py-24">
-        <div className="mx-auto flex w-full max-w-4xl flex-col items-center px-4">
-          <div ref={columnRef} className="w-full">
-            {/* One word. Any paragraph that stood here would explain what the
-                tab row above already answers by being a tab row. */}
-            <div className="mb-8 text-center">
-              <h2 className="text-2xl font-semibold tracking-tight">{title}</h2>
-            </div>
+      <section className="full-bleed from-background to-muted/20 min-h-svh bg-gradient-to-b">
+        {/* Half a viewport, at the top of the stage, with the column centred
+            inside it — so at rest the column sits at 75svh: the middle of the
+            screen's second half.
 
-            <div className="mb-4">{children({ onEngagedChange: setEngaged })}</div>
+            `top-[25svh]` is that same centring written for the stuck state.
+            Pin a half-screen box a quarter-screen down and its middle is the
+            screen's middle, whatever the column inside it happens to be
+            wearing. Between the two the column just rises with the page: no
+            measurement, no listener, no height to keep in sync — a box taller
+            than its container overflows both edges of a centred flex column,
+            which is exactly what an open panel should do.
+
+            No `overflow-hidden` here, for that reason. */}
+        <div className="sticky top-[25svh] flex h-[50svh] flex-col justify-center">
+          <div className="mx-auto flex w-full max-w-4xl flex-col items-center px-4">
+            <div ref={columnRef} className="w-full">
+              {/* One word. Any paragraph that stood here would explain what
+                  the tab row above already answers by being a tab row. */}
+              <div className="mb-8 text-center">
+                <h2 className="text-2xl font-semibold tracking-tight">{title}</h2>
+              </div>
+
+              <div className="mb-4">
+                {children({ onEngagedChange: setEngaged })}
+              </div>
+            </div>
           </div>
         </div>
       </section>

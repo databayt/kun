@@ -177,32 +177,26 @@
   }
 
   /*
-   * A stage that wants the whole screen asks for this class while it is
-   * mounted (see components/root/social/review.tsx) — scroll-snap-type has to
-   * sit on the SCROLL CONTAINER, and here that is the document itself, so a
-   * class on a wrapper div would do nothing.
+   * A stage asks for this class while it is mounted (see
+   * components/root/social/stage.tsx). It has to sit on the SCROLL CONTAINER,
+   * and here that is the document itself, so a class on a wrapper div would
+   * do nothing.
    *
-   * `proximity`, never `mandatory`: with one snap point on the page, mandatory
-   * would refuse to let anyone rest above it, and the header would become
-   * unreadable. Proximity only finishes a scroll that already arrived near.
+   * Scroll anchoring off while a stage owns the screen. The panel under its
+   * search bar animates its height open, and Chrome answers a growing box by
+   * moving the scroll offset to keep its anchor still — measured drifting
+   * 125px away mid-reveal, which reads as the page sliding out from under the
+   * thing you just touched.
+   *
+   * This used to snap the document to the stage as well (`scroll-snap-type: y
+   * proximity` here, `snap-start` on the section). That was for a stage which
+   * began below the fold and had to be scrolled to before it could be read
+   * whole. The stage opens on the first screen now and its column sticks to
+   * the middle, so the snap had nothing left to correct and only pulled
+   * against the rise.
    */
-  html.snap-stage {
-    scroll-snap-type: y proximity;
-    /*
-     * Scroll anchoring off while this stage owns the screen. The panel under
-     * its search bar animates its height open, and Chrome answers a growing
-     * box by moving the scroll offset to keep its anchor still — measured
-     * drifting 125px away from the snap point mid-reveal, which reads as the
-     * page sliding out from under the thing you just touched.
-     */
+  html.stage-open {
     overflow-anchor: none;
-  }
-
-  /* No snapping where it fights a virtual keyboard or a momentum scroll. */
-  @media (max-width: 767px), (prefers-reduced-motion: reduce) {
-    html.snap-stage {
-      scroll-snap-type: none;
-    }
   }
 
   body {
