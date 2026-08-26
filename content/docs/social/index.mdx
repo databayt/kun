@@ -1,116 +1,314 @@
 ---
-title: Social Automation
-description: "How one sentence becomes a published post for five databayt brands — written, checked, approved and sent from a single box. Drawn first in plain words: eight steps, four of them yours."
+title: Social
+description: "You pick the brand, the feature, the channels and the shape. Those picks become the prompt that writes the post. The whole journey, one small step at a time."
 ---
 
-**Social** is the lane that turns one sentence into a live post. You say what to post
-about, Claude writes it in Arabic and English, a quality check refuses it if it is weak,
-you say what to change until it is right, and you say when to send. All of it happens in
-one box on `/social/publish` — which is why the bare `/social` opens there. Five brands
-(databayt, Hogwarts, Mkan, Moallimee, Sijillee) share this one pipeline.
-
-The rule that outranks speed: **nothing reaches a public page without a person saying yes.**
+**Social** makes a post. You pick a few things — the brand, the feature, the channels, the
+shape — and say the topic in a few words. Those picks are not a form: **each one is a
+paragraph of context handed to the writer.** Claude writes it in Arabic and English, a craft
+check reads it before you do, and nothing goes out until you say so.
 
 ## How a post travels
 
-Eight steps. You touch four of them (1, 4, 5, 6); the rest happen on their own.
+Seventeen small steps. The amber ones are yours — and most of them are one tap.
 
 ```mermaid
 graph TD
-    S1["1 · You say the topic<br/>or press a ready brief"]
-    S2["2 · Claude writes it<br/>in Arabic and English"]
-    S3{"3 · A quality check<br/>reads it before you do"}
-    S4{"4 · You read it. Right yet?"}
-    S5["5 · Add a photo or video<br/>optional"]
-    S6{"6 · You say when"}
-    S7["7 · It posts to every<br/>channel you switched on"]
-    S8["8 · It keeps the receipt<br/>and the numbers"]
+    S1["1 · Open the box"]
+    S2["2 · Pick the brand"]
+    S3["3 · Pick the feature"]
+    S4["4 · Pick the channels"]
+    S5["5 · Pick the post shape"]
+    S6["6 · Say the topic"]
+    S7["7 · Press Write it"]
+    S8["8 · Every pick becomes<br/>a line of the prompt"]
+    S9["9 · Claude writes it<br/>in Arabic and English"]
+    S10["10 · A craft check<br/>reads it first"]
+    S11["11 · You read it"]
+    S12["12 · Say what to change"]
+    S13["13 · Attach a photo<br/>or a video"]
+    S14["14 · Say when"]
+    S15["15 · It posts to<br/>your channels"]
+    S16["16 · It saves the receipt"]
+    S17["17 · It reads the<br/>numbers back"]
 
-    S1 --> S2 --> S3
-    S3 -- "too weak" --> S2
-    S3 -- "clean" --> S4
-    S4 -- "not yet" --> S2
-    S4 -- "yes" --> S5 --> S6
-    S6 -- "now" --> S7
-    S6 -- "later" --> S7
-    S6 -- "for review" --> S7
-    S7 --> S8
+    S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7 --> S8 --> S9 --> S10
+    S10 -. "weak" .-> S9
+    S10 -- "clean" --> S11
+    S11 -- "not yet" --> S12
+    S12 -. "next turn" .-> S8
+    S11 -- "good" --> S13 --> S14 --> S15 --> S16 --> S17
 
     classDef you fill:#3b2f1e,stroke:#b58a3c,color:#f5e6c8;
     classDef live fill:#12312e,stroke:#2f7d72,color:#c6e8e2;
-    class S1,S4,S5,S6 you;
-    class S7 live;
+    class S1,S2,S3,S4,S5,S6,S7,S11,S12,S13,S14 you;
+    class S15 live;
 ```
 
-### What each box means
+### What each step means
 
-**1 · You say the topic.** A sentence in the box is enough — *"attendance, for Balqalam"*.
-Or press one of the week's ready briefs and type nothing at all: `content/social/pillars.json`
-holds each brand's recurring topics with the audience, the call to action and the constraint
-already written, and pressing one asks with it word for word. The
-[Calendar](#the-hub-is-this-table-as-routes) stage is that same file, shown as a week.
+**1 · Open the box.** `/social` opens on Publish, because it is the only stage that can
+finish a post on its own. One glass bar: the field, a ⊕ on one side, a seat on the other.
 
-**2 · Claude writes it.** Arabic written first and English mirrored from it, against that
-brand's own voice, audience and rules — not a generic writer's idea of a school. About eleven
-seconds when the inline lane answers. When it cannot, the same ask falls to a queue that a
-Claude Code session drains, and the box tells you which of the two happened instead of spinning.
+**2 · Pick the brand.** Balqalam, Mkan, databayt, Sijillee, Moallimee. (Hogwarts writes
+through Balqalam, its Arabic face, so it is not in the picker.) This is the biggest single
+pick — see [why](#why-this-beats-writing-it-yourself) below.
 
-**3 · A quality check reads it before you do.** It refuses on its own — it is not advice.
-A banned word, a link that would publish untracked, a post too short to say anything: the draft
-goes back to step 2 rather than forward to you. The very first Balqalam draft was refused for
-writing `balqalam.com` without `https://`, which would have shipped with no way to count it.
+**3 · Pick the feature.** Which part of the product the post is about: Admission,
+Attendance, Exams, Grades… The list is that brand's own block registry, narrowed to the
+blocks a post can be about — twelve for Balqalam, six for Mkan, four for databayt, and none
+yet for Sijillee or Moallimee. Optional, but it is the difference between a post about a
+school system and a post about attendance in one.
 
-**4 · You read it. Right yet?** Eighty percent right is the normal case, and it used to mean
-retyping the whole thing. Say what to change instead — *"shorter, drop the parent alert"* — and
-the same draft is rewritten rather than replaced, so the queue shows one current draft and not
-three versions competing for the slot. Measured: 24 seconds.
+**4 · Pick the channels.** Where it is going. A channel is only offered when both the
+transport and that brand's own destination are wired, so an unpublishable channel is never
+on the list.
 
-**5 · Add a photo or a video.** Optional. ⊕ opens the library: pick something that already
-exists, or ask [`/higgs`](/docs/media) for a photo or a video, and
-[`/carousel`](/docs/social/carousel) for slides with words on them. One photo, up to ten as an
-album, or one video.
+**5 · Pick the post shape.** Words alone · a caption beside one image · one caption over
+several · a video · an image or video with no words · a swipe deck · a story · a reel. Nine
+shapes, and each one changes what the writer is told to write.
 
-**6 · You say when.** **Now** sends it. **Later** books a time, and a sweep every ~15 minutes
-publishes it when the time comes. **For review** makes one signed link per channel that anyone
-can approve from a phone — one click publishes, and a second click gets *already handled*
-rather than posting twice.
+**6 · Say the topic.** A few words is enough — *"attendance"*. Or press one of the week's
+ready briefs and type nothing at all: `content/social/pillars.json` holds each brand's
+recurring topics with the audience, the call to action and the constraint already written.
+The [Calendar](#the-hub-is-this-table-as-routes) stage is that same file, shown as a week.
 
-**7 · It posts to every channel you switched on.** One press fans out to all of them. Today
-that means Facebook, for three of the five brands — the other channels are wired in the data
-and deliberately not built yet ([Status](/docs/social/status)).
+**7 · Press Write it.** The seat on the right of the bar. That is the last thing you do
+until there is a draft to read.
 
-**8 · It keeps the receipt, and the numbers.** The platform's own post id is saved, so the post
-can be taken down again. Every link is tagged so its clicks can be counted. Reach and engagement
-are read back every six hours.
+**8 · Every pick becomes a line of the prompt.** This step is the whole point of the
+pipeline, and it is spelled out [below](#why-this-beats-writing-it-yourself).
 
-The rules every post obeys are in [Brand & Voice](/docs/brand); the build roadmap and credential
-plan stay internal (`docs/SOCIAL-AUTOMATION.md`).
+**9 · Claude writes it.** Arabic written first and English mirrored from it — a sibling,
+not a translation. About eleven seconds when the inline lane answers. When it cannot, the
+same ask falls to a queue that a Claude Code session drains, and the box tells you which of
+the two happened instead of spinning.
 
-### Why this beats posting by hand
+**10 · A craft check reads it first.** It refuses on its own — it is not advice. A banned
+word, a link that would publish untracked, a post too short to say anything: the draft goes
+back to be written again rather than forward to you, and the second attempt is told which
+rules it broke by name. The very first Balqalam draft was refused for writing
+`balqalam.com` without `https://`, which would have shipped with no way to count it.
 
-Not the login. [Strategy](/docs/social/strategy#the-multiplier--create-once-repurpose-everywhere)
-names the real constraint: **content capacity** — two or three core pieces a week, because writing
-Arabic that clears the seven checks is genuinely hard. The pipeline attacks that number and four
-things a person posting by hand structurally cannot do:
+**11 · You read it.** The copy lands in the same field you typed the topic into.
 
-| | Posting by hand | This pipeline |
-|---|---|---|
-| **Brand knowledge** | Lives in whoever is typing | [Copy](/docs/social/copy)'s seven checks, the register ladder, and the brand's own audience and constraint reach the writer before it writes |
-| **Refusal** | Nothing stops a boring or untracked post | The craft gate rejects on its own — the first Balqalam draft was refused for `balqalam.com` without a scheme, because `applyUtm` only tags absolute URLs |
-| **Memory** | A post leaves nothing behind | Platform id saved (so it can be retracted), links UTM-tagged at delivery, `SocialMetric` read six-hourly, dismiss reasons fed back to the next draft |
-| **Delegation** | Means sharing the account | Approval is a conditional claim, so two reviewers cannot double-post; a signed single-use link approves from a phone with no token in anyone's hands |
+**12 · Say what to change.** Eighty percent right is the normal case, and it used to mean
+retyping the whole thing. Say *"shorter, drop the parent alert"* instead: the same draft is
+rewritten rather than replaced, so the queue shows one current draft and not three versions
+competing for the slot. Measured: 24 seconds.
 
-Measured 2026-08-25, on the Balqalam Page's own brand: brand + feature picked, **nothing typed**,
-publishable Arabic in ~25 seconds. Then one sentence — *shorter, drop any out-of-app notification* —
-and 24 seconds later the draft no longer promised a parent alert that
-[balqalam.mdx](/docs/social/balqalam) forbids in as many words.
+**13 · Attach a photo or a video.** Optional. ⊕ opens the library — pick something that
+already exists, or ask [`/higgs`](/docs/media) for a photo or a video and
+[`/carousel`](/docs/social/carousel) for slides with words on them. One photo, up to ten as
+an album, or one video.
 
-**Where it does not beat manual yet, stated plainly.** One press already fans to every *selected*
-channel, but only Facebook is live, for three of five brands — so today's win is quality and memory
-per post, not reach per press. The multiplier is real in the schema (`SocialVariant.text` is
-per-channel) and deliberately unbuilt under the
-[one-slice decision](/docs/social/status#scope--one-slice-on-purpose-2026-08-06). Copy typed by
-hand is not craft-gated, and dismiss has no button — see [Status](/docs/social/status#whats-not).
+**14 · Say when.** **Now** sends it. **Later** books a time, and a sweep every ~15 minutes
+publishes it when the time comes. **For review** makes one signed link per channel that
+anyone can approve from a phone — one click publishes, and a second click gets *already
+handled* rather than posting twice.
+
+**15 · It posts to your channels.** One press fans out to all of them. Today that means
+Facebook, for three of the five brands — the rest are wired in the data and deliberately not
+built yet ([Status](/docs/social/status)).
+
+**16 · It saves the receipt.** The platform's own post id, so the post can be taken down
+again. Every link is tagged so its clicks can be counted.
+
+**17 · It reads the numbers back.** Reach and engagement, every six hours.
+
+The rules every post obeys are in [Brand & Voice](/docs/brand); the build roadmap and
+credential plan stay internal (`docs/SOCIAL-AUTOMATION.md`).
+
+## Why this beats writing it yourself
+
+Not speed, and not the login.
+
+Ask a good copywriter for *"a post about Mkan"* and they will not start writing. They will
+start **asking**:
+
+- What is Mkan? Who reads this — renters, or hosts?
+- What is the tone? What must it never say?
+- Which part of the product is this about?
+- Where is it going? A Facebook caption is not a story.
+- What shape is it — a caption, a swipe deck, a reel?
+- What did we post before this, and what comes after?
+- What time of year is it for the reader?
+- What have we tried that did not work?
+- How will we know whether it worked?
+
+A brief that answers none of those gets a post that says only a topic. That interview is
+the real work, and doing it properly every single time is exactly what nobody has the
+patience for — which is why posts written by hand get shorter interviews as the week goes
+on, and worse as a direct result.
+
+**The pipeline's job is to have the answers ready before the question is asked.** Most come
+from registries the engine already keeps; the rest come from four taps. Where an answer does
+not exist, the question is left out of the prompt rather than answered vaguely.
+
+| The question a copywriter would ask | Who answers it here |
+|---|---|
+| What is it, and who reads it? | the **brand** pick |
+| What must it never say? | the brand row, plus the craft gate |
+| Which part of the product? | the **feature** pick |
+| Where is it going? | the **channel** pick — *named today, not yet written for* |
+| What shape? | the **post shape** pick |
+| What time of year? | the calendar, on its own |
+| What have we tried that failed? | the last twenty dismissals |
+| How will we know? | the receipt and the six-hourly numbers |
+| What came before and after? | **nobody yet** — see [below](#where-it-does-not-beat-manual-yet) |
+
+Read the other way round, the picks are a **prompt template being filled in**. Every setting
+has a clause waiting for it, and picking swaps a generic clause for a specific one. Sections
+you leave unpicked are **left out entirely rather than rendered empty** — so an ask with no
+direction looks like an ask with no direction, instead of quietly reading as a direction to
+be generic.
+
+Here is the same topic, asked both ways.
+
+Nothing picked:
+
+```
+You are Databayt's lead social media writer for MENA.
+Product: balqalam — SaaS product by Databayt.
+
+House Rules: …
+
+User Brief: attendance
+Angle directive: Choose the best angle (pain, moment, or proof)
+Arabic Register directive: Rung 2
+```
+
+Brand · feature · shape · channels · media · angle · register picked — the same three
+seconds of tapping:
+
+```
+You are Databayt's lead social media writer for MENA.
+Product: balqalam (بالقلم) — the Arabic-facing face of the same school management
+SaaS: admission, attendance, timetable, exams, grades and fees in one system instead
+of five notebooks and a WhatsApp group. Audience: school owners and principals in
+Saudi Arabia and the wider Arabic MENA market — administrators, not technologists —
+with teachers and parents as the daily users. Never carries the Hogwarts wordmark.
+
+Scenes from the reader's own week — ground the post in one it can honestly claim:
+- <this month's moments, from the school year's current window>
+
+House Rules: …
+
+User Brief: attendance
+Feature: Attendance — the part of the product this post is about.
+Shape: a swipe deck. The first panel is the hook and has to stand alone; the caption
+underneath is short.
+Going to: Facebook, Instagram.
+One asset is already attached — write copy that sits beside it without narrating it.
+Angle directive: pain
+Arabic Register directive: Rung 3 (pan-Arab colloquial)
+Reviewers recently dismissed drafts for: hook 3×, two-posts 1× — these are habits to
+break, not suggestions.
+```
+
+### What each pick is worth
+
+**The brand** is the largest one. It carries what the product *is*, who reads it, and what
+it must never say — Balqalam's row ends *"Never carries the Hogwarts wordmark."* One row per
+brand, and a test pins the map to the product registry so the next brand cannot arrive
+silently. It matters because it already failed once: Balqalam had no row until
+2026-08-25, so every draft ever written for the Hub's **default** brand came from a writer
+who did not know it was school software. Asked for *"attendance"*, it produced clean,
+on-register Arabic about tracking employees.
+
+**The feature** becomes *"Feature: Attendance — the part of the product this post is
+about."* The list is not invented for social: it is each product's own block registry,
+narrowed to what a post can be about. Infrastructure is deliberately absent — nobody writes
+a post about a sidebar.
+
+**The post shape** becomes a writing instruction rather than a label. A card reading "text +
+image" tells a writer nothing; a caption under one still is a different length from a swipe
+deck's opening panel, so the shape is read out as the difference:
+
+- swipe deck → *"the first panel is the hook and has to stand alone; the caption underneath is short."*
+- reel → *"the hook is spoken in the first seconds, so the caption adds rather than repeats."*
+- story → *"a tall frame — one thought, a handful of words, read in passing."*
+- gallery → *"one caption over several images. It carries the whole set, not the first picture."*
+- words alone → *"nothing rides with them, so the copy carries the image itself."*
+- image-only → *"write nothing longer than a line, and only if it adds something the image cannot say."*
+
+**The channels** become *"Going to: Facebook, Instagram."*
+
+**Media already attached** becomes *"write copy that sits beside it without narrating it"* —
+because the reader is already looking at it. With nothing attached the clause flips to
+*"Suggested visual: …"* instead: with assets in hand the register is already decided, and
+asking for one would describe a picture nobody is going to make.
+
+**The angle** is pain, moment, or proof. **The register** is a rung: 2 simplified MSA, 3
+pan-Arab colloquial, 4 local dialect.
+
+**The month you are in** is a pick you never make. `content/social/scenes.json` carries each
+brand's year as windows — year-start, mid-term, term-close, Ramadan revision, certificate
+exams — and the current one's moments are handed over as scenes the post can honestly
+claim. Documents contain no Thursdays; these do.
+
+**What reviewers dismissed recently** rides too — *"hook 3×, two-posts 1× — these are habits
+to break, not suggestions"* — so the writer is corrected by the last twenty drafts, not just
+by the rules.
+
+And the house rules never leave: 400–900 Arabic characters, matched to the craft gate's own
+floor so the prompt cannot steer a draft into the refusal band; Latin digits, never
+Arabic-Indic; at most one emoji and never in the first line; no exclamation marks; the
+English a sibling of the Arabic rather than a translation; never open with the brand name or
+*"We're excited to announce"*; one idea per post, because a bulleted feature list is two
+posts; and never invent a number, name, price or date that is not in the brief.
+
+Even the **order** is engineered: static sections first (role, brand, scenes, house rules),
+per-ask ones last (brief, instruction, direction, lessons, violations), because the model's
+implicit caching keys on an identical prefix — measured at ~65% token reuse. Reordering a
+section is a cache invalidation, not a style edit.
+
+### What a person cannot do
+
+A person writing by hand has every one of these available and none of them in front of them.
+That is the whole gap:
+
+**Brand knowledge** lives in whoever is typing, and leaves when they do. Here it reaches the
+writer before it writes.
+**Refusal** does not exist by hand — nothing stops a boring or untracked post. The craft gate
+rejects on its own.
+**Memory** does not exist either: a post typed by hand leaves nothing behind. Here the
+platform id is saved so it can be retracted, links are tagged at delivery, metrics are read
+six-hourly, and dismissals feed the next draft.
+**Delegation** by hand means sharing the account. Here approval is a conditional claim, so
+two reviewers cannot double-post, and a signed single-use link approves from a phone with no
+token in anyone's hands.
+
+Measured 2026-08-25, on the Balqalam Page's own brand: brand + feature picked, **nothing
+typed**, publishable Arabic in ~25 seconds. Then one sentence — *shorter, drop any
+out-of-app notification* — and 24 seconds later the draft no longer promised a parent alert
+that [balqalam.mdx](/docs/social/balqalam) forbids in as many words.
+
+### Where it does not beat manual yet
+
+Stated plainly, because the argument above is only worth what is true.
+
+**The channel is named to the writer, not written for.** *"Going to: Facebook, Instagram"* is
+the whole of it today — one post in one voice goes to every selected channel. Per-channel
+rewriting is real in the schema (`SocialVariant.text` is per-channel) and deliberately
+unbuilt under the
+[one-slice decision](/docs/social/status#scope--one-slice-on-purpose-2026-08-06). That is the
+next multiplier, not a shipped one.
+
+**Reach is one channel wide.** One press already fans to every *selected* channel, but only
+Facebook is live, for three of five brands — so today's win is quality and memory per post,
+not reach per press.
+
+**The writer has no memory of the plan.** It knows what reviewers rejected lately, but not
+what actually went out last week or what is booked for next — so it cannot avoid repeating
+itself, or deliberately follow on from the last post. The plan exists and you can see it
+(`pillars.json`, rendered as the week on the Calendar stage), and the ledger exists on the
+Measure stage; neither reaches the prompt. Of the copywriter's questions above, this is the
+one still unanswered, and it is the cheapest one left.
+
+**The feature is matched on words, not stored.** Nothing records which feature a post sold;
+`featureFits` narrows a list by looking for the word. And copy typed by hand into the field
+is not craft-gated, and dismiss has no button — see [Status](/docs/social/status#whats-not).
 
 Four doors open onto **Send to the platform**, and they differ only in who says yes:
 the **review queue** on `/social/publish` (a person clicks Approve), a **signed link**
