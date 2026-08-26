@@ -161,10 +161,23 @@ returns `drafted: 0`.
   draft ever asked for it was written by someone who did not know it was school software. Asked
   for "attendance" it produced clean, on-register Arabic about tracking employees. A test now pins
   the map to the product registry, and each row carries the brand page's audience.
-- **One stage frame (2026-08-25).** Publish's screen — the settle-then-lock, the gesture
-  swallowing that still lets an inner scroller take its own wheel — is `stage.tsx`, and Draft and
-  Media wear it. Calendar and Measure deliberately do not: the lock is armed by a box calling
-  `onEngagedChange`, and a stage with no box would get a full screen centred on a heading.
+- **One stage frame (2026-08-25, Calendar joined 2026-08-26).** Publish's screen — the
+  settle-then-lock, the gesture swallowing that still lets an inner scroller take its own wheel —
+  is `stage.tsx`, and Draft, Media and Calendar wear it. **Measure** deliberately does not: the
+  lock is armed by a box calling `onEngagedChange`, and a stage with no box would get a full
+  screen centred on a heading.
+- **The plan grew a box (2026-08-26).** Calendar was the last stage you had to scroll to use — a
+  list of every brief in the plan, in the file's own order, with **Queue now** on each. It now
+  wears the same glass bar the other three do: a calendar glyph where Media has a magnifying
+  glass, the plan as its panel, `{shown} of {total}` on the bar, and the settings seat opening two
+  words rather than eight — Brand and Feature, since a plan has no post shape and no channels.
+  This week's rotation picks sort to the top, and Feature narrows the plan by the same
+  `featureFits` word-match that narrows the queue on Publish. The list stays underneath, as
+  Media's showroom does: two questions off one file, which `pillars.ts` had already named — the
+  list answers *what is the plan this week*, the box answers *give me something to post about
+  admission*. `queueing` and the optimistic queue state moved up to the shared parent, since both
+  surfaces file and both draw the result; queue from the box and the card below greys out in the
+  same breath. Fourth copy of the glass-bar shell — noted, not extracted.
 - **The box stopped waiting below the fold (2026-08-26).** The stage was a `min-h-screen` section
   *under* a header that was as tall as it needed to be, so the thing you came to use rendered at
   **94% of the viewport** — measured, not guessed — and the first screen was all title. The two

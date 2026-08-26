@@ -27,8 +27,14 @@ export const SOCIAL_DICTIONARY = {
     tabPublish: "Publish",
     tabMeasure: "Measure",
     tabsLabel: "Pipeline stage",
-    // The calendar panel — pillars.json rendered as the recurring plan.
-    calendarTitle: "The calendar",
+    // The calendar stage — one word for the frame, the box's own strings,
+    // then the plan rendered in full below it.
+    calendarStageTitle: "Calendar",
+    calendarSpotlightPlaceholder: "Search the plan, or press one to queue it",
+    calendarSpotlightEmpty: "Nothing in the plan matches.",
+    calendarSpotlightCount: "{shown} of {total}",
+    // The panel below the box — pillars.json rendered as the recurring plan.
+    calendarTitle: "The whole plan",
     calendarIntro:
       "The recurring plan: each brand's briefs rotate into the draft queue by ISO week. Editing content/social/pillars.json IS editing the calendar.",
     calendarWeek: "Week {week}",
@@ -497,7 +503,11 @@ export const SOCIAL_DICTIONARY = {
     tabPublish: "النشر",
     tabMeasure: "القياس",
     tabsLabel: "مرحلة المسار",
-    calendarTitle: "التقويم",
+    calendarStageTitle: "التقويم",
+    calendarSpotlightPlaceholder: "ابحث في الخطة، أو اضغط موجزاً لتقييده",
+    calendarSpotlightEmpty: "لا شيء في الخطة يطابق.",
+    calendarSpotlightCount: "{shown} من {total}",
+    calendarTitle: "الخطة كاملة",
     calendarIntro:
       "الخطة الدورية: موجزات كل علامة تدور إلى طابور الصياغة بأسبوع السنة. تعديل content/social/pillars.json هو تعديل التقويم نفسه.",
     calendarWeek: "الأسبوع {week}",

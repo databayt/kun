@@ -1,6 +1,7 @@
 "use client";
 
-// The calendar, real.
+// The calendar, real — and since 2026-08-26 the same box the other stages
+// wear on top of it.
 //
 // content/social/pillars.json IS the recurring calendar: per-brand briefs the
 // Monday seeder rotates into the draft queue by ISO week. This panel renders
@@ -9,30 +10,38 @@
 // each brief currently sits in the queue (from a 14-day server read — the
 // seeder's own dedup window), and lets a contributor queue any brief now via
 // the same requestSocialDraft the agent window uses.
+//
+// The box and the list are two questions off one file, which is why both are
+// here rather than one replacing the other. The list answers "what is the plan
+// this week" — every brief in the plan's own order, the rotation's picks
+// marked, a queue chip on each. The box answers "give me something to post
+// about admission", which is the question a person actually arrives with.
+// Media's stage made the same split first: the grid browses, the box finds.
+//
+// WHY THE STATE LIVES HERE. Both surfaces can file a brief and both draw the
+// result, so `queueing` and the optimistic `justQueued` belong to neither.
+// Queue from the box and the card below has to grey out in the same breath —
+// one owner, two readers.
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, CalendarClock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { requestSocialDraft } from "@/actions/post-social";
-import pillarsJson from "../../../../content/social/pillars.json";
 import { fill } from "@/components/root/social/dictionary";
+import { pillarsFor } from "@/components/root/social/pillars";
 import { useSocial } from "@/components/root/social/provider";
-import { SEED_COUNT, isoWeek, weeklyPickIndexes } from "@/components/root/social/rotation";
-
-interface PillarBrief {
-  id: string;
-  pillar: string;
-  brief: string;
-}
-
-// The file's envelope carries `version` and `$comment` beside the brand
-// arrays — only actual arrays of briefs count.
-function briefsFor(brand: string): PillarBrief[] {
-  const raw = (pillarsJson as Record<string, unknown>)[brand];
-  return Array.isArray(raw) ? (raw as PillarBrief[]) : [];
-}
+import { StageFrame } from "@/components/root/social/stage";
+import {
+  CalendarSpotlight,
+  type CalendarRow,
+} from "@/components/root/social/calendar-spotlight";
+import {
+  SEED_COUNT,
+  isoWeek,
+  weeklyPickIndexes,
+} from "@/components/root/social/rotation";
 
 export interface RecentAsk {
   brand: string;
@@ -51,27 +60,51 @@ const STATE_KEYS = {
 
 export function CalendarPanel({ recent }: { recent: RecentAsk[] }) {
   const { lang, t, product } = useSocial();
-  const briefs = briefsFor(product);
   const week = isoWeek(new Date());
-  const picks = new Set(weeklyPickIndexes(briefs.length, week, SEED_COUNT));
 
   const [queueing, setQueueing] = useState<string | null>(null);
-  // Optimistic queue state for briefs asked from this panel — the server
+  // Optimistic queue state for briefs asked from either surface — the server
   // read behind `recent` is a page load old.
   const [justQueued, setJustQueued] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
 
-  // The seeder's dedup key, exactly: (brand, brief) within 14 days.
-  const matchFor = (brief: PillarBrief) =>
-    recent.find((r) => r.brand === product && r.brief === brief.brief);
+  /**
+   * The plan, with the two facts the file itself does not carry.
+   *
+   * `pillarsFor` rather than a local reader: it validates the shape and skips
+   * a malformed row, and this file used to keep an unvalidated copy of the
+   * same three lines. One plan, one reader.
+   */
+  const rows: CalendarRow[] = useMemo(() => {
+    const briefs = pillarsFor(product);
+    const picks = new Set(weeklyPickIndexes(briefs.length, week, SEED_COUNT));
+    return briefs.map((brief, index) => ({
+      id: brief.id,
+      pillar: brief.pillar,
+      brief: brief.brief,
+      isPick: picks.has(index),
+      // The seeder's dedup key, exactly: (brand, brief) within 14 days.
+      state:
+        justQueued[brief.id] ??
+        recent.find((r) => r.brand === product && r.brief === brief.brief)
+          ?.status ??
+        null,
+    }));
+  }, [product, week, recent, justQueued]);
 
-  const queueNow = async (brief: PillarBrief) => {
-    setQueueing(brief.id);
+  const stateLabel = (status: string) => {
+    const key = STATE_KEYS[status as keyof typeof STATE_KEYS];
+    return key ? t[key] : status;
+  };
+
+  const queueNow = async (row: CalendarRow) => {
+    if (row.state !== null || queueing !== null) return;
+    setQueueing(row.id);
     setError(null);
     try {
-      const res = await requestSocialDraft({ product, brief: brief.brief });
+      const res = await requestSocialDraft({ product, brief: row.brief });
       if (res.ok) {
-        setJustQueued((prev) => ({ ...prev, [brief.id]: "pending" }));
+        setJustQueued((prev) => ({ ...prev, [row.id]: "pending" }));
       } else {
         setError(`${t.errorMsg}${res.error}`);
       }
@@ -84,19 +117,17 @@ export function CalendarPanel({ recent }: { recent: RecentAsk[] }) {
     }
   };
 
-  const stateLabel = (status: string) => {
-    const key = STATE_KEYS[status as keyof typeof STATE_KEYS];
-    return key ? t[key] : status;
-  };
-
-  return (
-    <section className="full-bleed from-background to-muted/20 flex flex-col bg-gradient-to-b py-16 md:py-24">
+  // Everything under the fold: the week's own facts, then the plan in full.
+  // It is browsing, so it sits where Media's showroom sits — outside the
+  // screen the box holds, and a press down here releases the stage's lock.
+  const below = (
+    <section className="full-bleed from-background to-muted/20 flex flex-col bg-gradient-to-b pb-16 md:pb-24">
       <div className="mx-auto flex w-full max-w-4xl flex-col px-4">
         <div className="mb-8 text-center">
-          <h2 className="text-2xl font-semibold tracking-tight">
+          <h3 className="text-primary text-base font-medium">
             {t.calendarTitle}
-          </h2>
-          <p className="text-muted-foreground mx-auto mt-4 max-w-xl text-lg font-light">
+          </h3>
+          <p className="text-muted-foreground mx-auto mt-3 max-w-xl text-sm leading-relaxed font-light">
             {t.calendarIntro}
           </p>
         </div>
@@ -111,82 +142,69 @@ export function CalendarPanel({ recent }: { recent: RecentAsk[] }) {
           </span>
         </div>
 
-        {error && (
-          <p
-            role="alert"
-            className="mx-auto mb-4 w-full max-w-3xl rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-500"
-          >
-            {error}
-          </p>
-        )}
-
-        {briefs.length > 0 ? (
+        {rows.length > 0 ? (
           <ul className="mx-auto w-full max-w-3xl space-y-2">
-            {briefs.map((brief, index) => {
-              const match = matchFor(brief);
-              const state = justQueued[brief.id] ?? match?.status ?? null;
-              const isPick = picks.has(index);
-              return (
-                <li
-                  key={brief.id}
-                  className={cn(
-                    "border-border rounded-2xl border p-4 text-start",
-                    isPick && "border-foreground/30 bg-muted/40",
+            {rows.map((row) => (
+              <li
+                key={row.id}
+                className={cn(
+                  "border-border rounded-2xl border p-4 text-start",
+                  row.isPick && "border-foreground/30 bg-muted/40",
+                )}
+              >
+                <div className="mb-2 flex flex-wrap items-center gap-2">
+                  {row.isPick && (
+                    <span className="bg-primary text-primary-foreground rounded-full px-2 py-0.5 text-[10px] font-medium tracking-wider uppercase">
+                      {t.calendarThisWeek}
+                    </span>
                   )}
-                >
-                  <div className="mb-2 flex flex-wrap items-center gap-2">
-                    {isPick && (
-                      <span className="bg-primary text-primary-foreground rounded-full px-2 py-0.5 text-[10px] font-medium tracking-wider uppercase">
-                        {t.calendarThisWeek}
-                      </span>
-                    )}
-                    <span className="bg-muted rounded-full px-2 py-0.5 text-[10px] font-medium tracking-wider uppercase">
-                      {brief.pillar}
+                  <span className="bg-muted rounded-full px-2 py-0.5 text-[10px] font-medium tracking-wider uppercase">
+                    {row.pillar}
+                  </span>
+                  <span className="text-muted-foreground ms-auto font-mono text-[10px]">
+                    {row.id}
+                  </span>
+                </div>
+                <p className="text-muted-foreground line-clamp-3 text-sm leading-relaxed">
+                  {row.brief}
+                </p>
+                <div className="mt-3 flex items-center gap-2">
+                  {row.state ? (
+                    <span
+                      className={cn(
+                        "rounded-full px-2 py-0.5 text-[10px] font-medium tracking-wider uppercase",
+                        row.state === "consumed" &&
+                          "bg-emerald-500/10 text-emerald-500",
+                        row.state === "answered" &&
+                          "bg-primary/10 text-primary",
+                        row.state === "pending" && "bg-muted text-foreground",
+                        (row.state === "dismissed" || row.state === "failed") &&
+                          "bg-muted text-muted-foreground",
+                      )}
+                    >
+                      {stateLabel(row.state)}
                     </span>
-                    <span className="text-muted-foreground ms-auto font-mono text-[10px]">
-                      {brief.id}
+                  ) : (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => queueNow(row)}
+                      disabled={queueing !== null}
+                      className="h-7 rounded-full text-xs"
+                    >
+                      {queueing === row.id
+                        ? t.calendarQueueing
+                        : t.calendarQueueNow}
+                    </Button>
+                  )}
+                  {row.state && !justQueued[row.id] && (
+                    <span className="text-muted-foreground text-xs">
+                      {t.calendarAskedRecently}
                     </span>
-                  </div>
-                  <p className="text-muted-foreground line-clamp-3 text-sm leading-relaxed">
-                    {brief.brief}
-                  </p>
-                  <div className="mt-3 flex items-center gap-2">
-                    {state ? (
-                      <span
-                        className={cn(
-                          "rounded-full px-2 py-0.5 text-[10px] font-medium tracking-wider uppercase",
-                          state === "consumed" &&
-                            "bg-emerald-500/10 text-emerald-500",
-                          state === "answered" && "bg-primary/10 text-primary",
-                          state === "pending" && "bg-muted text-foreground",
-                          (state === "dismissed" || state === "failed") &&
-                            "bg-muted text-muted-foreground",
-                        )}
-                      >
-                        {stateLabel(state)}
-                      </span>
-                    ) : (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => queueNow(brief)}
-                        disabled={queueing !== null}
-                        className="h-7 rounded-full text-xs"
-                      >
-                        {queueing === brief.id
-                          ? t.calendarQueueing
-                          : t.calendarQueueNow}
-                      </Button>
-                    )}
-                    {match && !justQueued[brief.id] && (
-                      <span className="text-muted-foreground text-xs">
-                        {t.calendarAskedRecently}
-                      </span>
-                    )}
-                  </div>
-                </li>
-              );
-            })}
+                  )}
+                </div>
+              </li>
+            ))}
           </ul>
         ) : (
           <div className="border-border mx-auto w-full max-w-3xl rounded-2xl border border-dashed p-8 text-center">
@@ -207,5 +225,30 @@ export function CalendarPanel({ recent }: { recent: RecentAsk[] }) {
         </p>
       </div>
     </section>
+  );
+
+  return (
+    <StageFrame title={t.calendarStageTitle} below={below}>
+      {({ onEngagedChange }) => (
+        <>
+          <CalendarSpotlight
+            rows={rows}
+            queueing={queueing}
+            onQueue={queueNow}
+            stateLabel={stateLabel}
+            onEngagedChange={onEngagedChange}
+          />
+
+          {error && (
+            <p
+              role="alert"
+              className="mx-auto mt-4 max-w-3xl rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-500"
+            >
+              {error}
+            </p>
+          )}
+        </>
+      )}
+    </StageFrame>
   );
 }
