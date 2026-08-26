@@ -26,7 +26,13 @@ import { Check, Plus, Search, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { matchesQuery } from "@/lib/normalize-search";
 import { fill } from "@/components/root/social/dictionary";
-import { ConfigPanel, GLASS } from "@/components/root/social/spotlight";
+import { ConfigPanel } from "@/components/root/social/spotlight";
+import {
+  GLASS,
+  SPOTLIGHT_BAR,
+  SPOTLIGHT_PANEL,
+  useSpotlightBox,
+} from "@/components/root/social/spotlight-shell";
 import { mediaKind } from "@/lib/media-kind";
 import { useSocial } from "@/components/root/social/provider";
 import { StageFrame } from "@/components/root/social/stage";
@@ -80,12 +86,9 @@ export function MediaSpotlight({
 
   const [query, setQuery] = React.useState("");
   const [openSection, setOpenSection] = React.useState<string | null>(null);
-  const [focused, setFocused] = React.useState(false);
-  const inputRef = React.useRef<HTMLInputElement>(null);
-  const rootRef = React.useRef<HTMLDivElement>(null);
-
-  const open = focused;
-  React.useEffect(() => onEngagedChange?.(open), [open, onEngagedChange]);
+  const { setFocused, open, inputRef, shellProps } = useSpotlightBox({
+    onEngagedChange,
+  });
 
   // The Arabic-aware matcher, the same one the queue is filtered by — a
   // library whose titles are half Arabic cannot be searched by a Latin scorer.
@@ -107,20 +110,10 @@ export function MediaSpotlight({
   return (
     <div className="mx-auto w-full max-w-3xl">
       <div
-        ref={rootRef}
+        {...shellProps}
         className={cn(GLASS, "overflow-hidden rounded-[28px]")}
-        onBlurCapture={(e: React.FocusEvent<HTMLDivElement>) => {
-          const next = e.relatedTarget;
-          if (next instanceof Node && rootRef.current?.contains(next)) return;
-          window.setTimeout(() => setFocused(false), 150);
-        }}
-        onKeyDown={(e) => {
-          if (e.key !== "Escape") return;
-          setFocused(false);
-          inputRef.current?.blur();
-        }}
       >
-        <div className="relative flex h-12 items-center gap-2 ps-3 pe-2">
+        <div className={SPOTLIGHT_BAR}>
           {/* A magnifying glass, where Publish has a ⊕. It earns it here: this
               field really is a query and nothing else, and the seat that
               attaches is on each result rather than on the bar. */}
@@ -182,7 +175,7 @@ export function MediaSpotlight({
         </div>
 
         {open && openSection !== null && (
-          <div className="relative max-h-[min(360px,45vh)] overflow-y-auto border-t border-black/5 dark:border-white/10">
+          <div className={SPOTLIGHT_PANEL}>
             <div className="p-3">
               <ConfigPanel
                 words={["brand", "feature", "media"]}
@@ -213,7 +206,7 @@ export function MediaSpotlight({
         )}
 
         {open && openSection === null && (
-          <div className="relative max-h-[min(360px,45vh)] overflow-y-auto border-t border-black/5 dark:border-white/10">
+          <div className={SPOTLIGHT_PANEL}>
             {shown.length === 0 ? (
               <p className="text-muted-foreground/60 p-4 text-center text-xs">
                 {t.mediaSpotlightEmpty}

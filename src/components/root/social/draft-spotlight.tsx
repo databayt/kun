@@ -31,13 +31,13 @@ import { ArrowUp, Loader2, Plus, Settings } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { fill } from "@/components/root/social/dictionary";
+import { CardStrip, ConfigPanel, DraftCard, MediaPanel } from "@/components/root/social/spotlight";
 import {
-  CardStrip,
-  ConfigPanel,
-  DraftCard,
   GLASS,
-  MediaPanel,
-} from "@/components/root/social/spotlight";
+  SPOTLIGHT_BAR,
+  SPOTLIGHT_PANEL,
+  useSpotlightBox,
+} from "@/components/root/social/spotlight-shell";
 import {
   DRAFT_ANGLES,
   DRAFT_MODELS,
@@ -94,14 +94,11 @@ export function DraftSpotlight({
   // wait is how they end up disagreeing.
   const { prompt, setPrompt, busy, submit } = draftQueue;
 
-  const [focused, setFocused] = React.useState(false);
   const [panel, setPanel] = React.useState<Panel>("config");
   const [openSection, setOpenSection] = React.useState<string | null>(KNOBS_WORD);
-  const inputRef = React.useRef<HTMLInputElement>(null);
-  const rootRef = React.useRef<HTMLDivElement>(null);
-
-  const open = focused;
-  React.useEffect(() => onEngagedChange?.(open), [open, onEngagedChange]);
+  const { setFocused, open, inputRef, shellProps } = useSpotlightBox({
+    onEngagedChange,
+  });
 
   const trimmed = prompt.trim();
   const brandName = (() => {
@@ -117,20 +114,10 @@ export function DraftSpotlight({
   return (
     <div className="mx-auto w-full max-w-3xl">
       <div
-        ref={rootRef}
+        {...shellProps}
         className={cn(GLASS, "overflow-hidden rounded-[28px]")}
-        onBlurCapture={(e: React.FocusEvent<HTMLDivElement>) => {
-          const next = e.relatedTarget;
-          if (next instanceof Node && rootRef.current?.contains(next)) return;
-          window.setTimeout(() => setFocused(false), 150);
-        }}
-        onKeyDown={(e) => {
-          if (e.key !== "Escape") return;
-          setFocused(false);
-          inputRef.current?.blur();
-        }}
       >
-        <div className="relative flex h-12 items-center gap-2 ps-3 pe-2">
+        <div className={SPOTLIGHT_BAR}>
           {/* The media half of a full draft. It rides the ask — `submit`
               already sends the shared tray as `mediaUrls` — so what is
               attached here is what the answering session is handed. */}
@@ -226,7 +213,7 @@ export function DraftSpotlight({
         </div>
 
         {open && (
-          <div className="relative max-h-[min(360px,45vh)] overflow-y-auto border-t border-black/5 dark:border-white/10">
+          <div className={SPOTLIGHT_PANEL}>
             <div className="p-3">
               {panel === "media" ? (
                 <MediaPanel

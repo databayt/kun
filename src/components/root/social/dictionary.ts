@@ -478,6 +478,9 @@ export const SOCIAL_DICTIONARY = {
     blockedSchedule: "Pick a time in the future first.",
     blockedTransport:
       "Waiting on a disconnected relay for the selected channels.",
+    measureSpotlightPlaceholder: "Search the ledger",
+    measureSpotlightEmpty: "Nothing in the ledger matches.",
+    measureSpotlightCount: "{shown} of {total}",
     ledgerTitle: "Recent activity",
     ledgerEmpty:
       "Nothing recorded yet — publishes, schedules and approvals will appear here.",
@@ -880,6 +883,9 @@ export const SOCIAL_DICTIONARY = {
     blockedNoChannel: "اختر قناة واحدة على الأقل.",
     blockedSchedule: "اختر وقتاً في المستقبل أولاً.",
     blockedTransport: "في انتظار ناقل غير متصل للقنوات المختارة.",
+    measureSpotlightPlaceholder: "ابحث في السجل",
+    measureSpotlightEmpty: "لا شيء في السجل يطابق.",
+    measureSpotlightCount: "{shown} من {total}",
     ledgerTitle: "النشاط الأخير",
     ledgerEmpty: "لا سجلات بعد — سيظهر هنا كل نشر وجدولة واعتماد.",
     ledgerBrand: "العلامة",

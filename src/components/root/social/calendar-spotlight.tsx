@@ -27,7 +27,13 @@ import { CalendarClock, Check, Plus, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { matchesQuery } from "@/lib/normalize-search";
 import { fill } from "@/components/root/social/dictionary";
-import { ConfigPanel, GLASS } from "@/components/root/social/spotlight";
+import { ConfigPanel } from "@/components/root/social/spotlight";
+import {
+  GLASS,
+  SPOTLIGHT_BAR,
+  SPOTLIGHT_PANEL,
+  useSpotlightBox,
+} from "@/components/root/social/spotlight-shell";
 import { featureFits } from "@/components/root/social/post-settings";
 import { pillarSubject } from "@/components/root/social/pillars";
 import { useSocial } from "@/components/root/social/provider";
@@ -88,12 +94,9 @@ export function CalendarSpotlight({
 
   const [query, setQuery] = React.useState("");
   const [openSection, setOpenSection] = React.useState<string | null>(null);
-  const [focused, setFocused] = React.useState(false);
-  const inputRef = React.useRef<HTMLInputElement>(null);
-  const rootRef = React.useRef<HTMLDivElement>(null);
-
-  const open = focused;
-  React.useEffect(() => onEngagedChange?.(open), [open, onEngagedChange]);
+  const { setFocused, open, inputRef, shellProps } = useSpotlightBox({
+    onEngagedChange,
+  });
 
   /**
    * The plan, narrowed and then reordered.
@@ -125,20 +128,10 @@ export function CalendarSpotlight({
   return (
     <div className="mx-auto w-full max-w-3xl">
       <div
-        ref={rootRef}
+        {...shellProps}
         className={cn(GLASS, "overflow-hidden rounded-[28px]")}
-        onBlurCapture={(e: React.FocusEvent<HTMLDivElement>) => {
-          const next = e.relatedTarget;
-          if (next instanceof Node && rootRef.current?.contains(next)) return;
-          window.setTimeout(() => setFocused(false), 150);
-        }}
-        onKeyDown={(e) => {
-          if (e.key !== "Escape") return;
-          setFocused(false);
-          inputRef.current?.blur();
-        }}
       >
-        <div className="relative flex h-12 items-center gap-2 ps-3 pe-2">
+        <div className={SPOTLIGHT_BAR}>
           {/* A calendar, where Media has a magnifying glass and Publish a ⊕.
               The glyph is the stage: this field searches, but what it searches
               is a week's worth of plan rather than a drawer of pictures. */}
@@ -200,7 +193,7 @@ export function CalendarSpotlight({
         </div>
 
         {open && openSection !== null && (
-          <div className="relative max-h-[min(360px,45vh)] overflow-y-auto border-t border-black/5 dark:border-white/10">
+          <div className={SPOTLIGHT_PANEL}>
             <div className="p-3">
               <ConfigPanel
                 words={["brand", "feature"]}
@@ -231,7 +224,7 @@ export function CalendarSpotlight({
         )}
 
         {open && openSection === null && (
-          <div className="relative max-h-[min(360px,45vh)] overflow-y-auto border-t border-black/5 dark:border-white/10">
+          <div className={SPOTLIGHT_PANEL}>
             {rows.length === 0 ? (
               <p className="text-muted-foreground/60 p-4 text-center text-xs">
                 {t.calendarNoPillars}

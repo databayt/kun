@@ -160,17 +160,23 @@ import {
 } from "@/components/root/social/products";
 import { fill, type SocialDict } from "@/components/root/social/dictionary";
 import { useSocial, usePersisted } from "@/components/root/social/provider";
+import {
+  GLASS,
+  SPOTLIGHT_BAR,
+  SPOTLIGHT_PANEL,
+  useSpotlightBox,
+} from "@/components/root/social/spotlight-shell";
 
 /**
  * Opaque rather than a real backdrop blur — the same call hogwarts made. A
  * blurred panel over a scrolling list reads as smeared rather than glassy.
  */
 /**
- * The bar every stage box wears. Exported rather than copied: three boxes
- * whose glass drifted apart would read as three different components on what
- * is meant to be one surface repeated.
+ * The bar every stage box wears now lives in spotlight-shell.tsx, beside the
+ * two handlers that decide when its panel is open. Re-exported here because
+ * this file is the barrel three other boxes already import from.
  */
-export const GLASS = "bg-muted border border-muted-foreground/20 shadow-2xl";
+export { GLASS };
 
 /**
  * What Approve does — publish on the spot, or write `scheduled` variants for
@@ -345,7 +351,6 @@ export function ReviewSpotlight({
   const [scope, setScope] = React.useState<Scope>("brand");
   const [order, setOrder] = React.useState<Order>("oldest");
   const [mediaOnly, setMediaOnly] = React.useState(false);
-  const [focused, setFocused] = React.useState(false);
   // Radix portals the filter menu outside this subtree, so a plain blur would
   // close the dropdown the moment the menu opens.
   const [menuOpen, setMenuOpen] = React.useState(false);
@@ -367,8 +372,13 @@ export function ReviewSpotlight({
   const [error, setError] = React.useState<string | null>(null);
   /** Signed approval links, when Send staged instead of published. */
   const [links, setLinks] = React.useState<ReviewLink[] | null>(null);
-  const inputRef = React.useRef<HTMLInputElement>(null);
-  const rootRef = React.useRef<HTMLDivElement>(null);
+  // `menuOpen` is the hold: the filters menu portals out of this subtree, so a
+  // focus landing in it reads as a focus leaving the box, and its Escape
+  // bubbles through the React tree to the box's own handler.
+  const { setFocused, open, inputRef, shellProps } = useSpotlightBox({
+    onEngagedChange,
+    hold: menuOpen,
+  });
 
   const [destination, setDestination] = usePersisted<Destination>(
     DESTINATION_KEY,
@@ -583,8 +593,6 @@ export function ReviewSpotlight({
       matching.filter((item) => item.brand !== product && inMode(item)),
     );
   }, [matching, product, inMode, sort, scope, trimmed]);
-
-  const open = focused || menuOpen;
 
   const handleSelect = React.useCallback(
     (item: QueueItem) => {
@@ -1090,15 +1098,6 @@ export function ReviewSpotlight({
     return () => document.removeEventListener("keydown", onKey);
   }, []);
 
-  // Report engagement upward on the transition only, so a parent re-render
-  // cannot be mistaken for a state change.
-  const engagedRef = React.useRef(false);
-  React.useEffect(() => {
-    if (engagedRef.current === open) return;
-    engagedRef.current = open;
-    onEngagedChange?.(open);
-  }, [open, onEngagedChange]);
-
   const emptyText = trimmed
     ? t.spotlightNoDrafts
     : scope === "every"
@@ -1112,42 +1111,20 @@ export function ReviewSpotlight({
   return (
     <div className="mx-auto w-full max-w-3xl">
       <CommandPrimitive
-        ref={rootRef}
+        {...shellProps}
         loop
         // cmdk filters by each item's `value`; ours is already filtered by the
         // Arabic-aware matcher, and cmdk's Latin-only scorer would then throw
         // half of it away again.
         shouldFilter={false}
         className={cn(GLASS, "overflow-hidden rounded-[28px]")}
-        // Focus moving between the input, the mode pills and the filter button
-        // must not read as leaving the box — only a landing outside it does.
-        onBlurCapture={(e: React.FocusEvent<HTMLDivElement>) => {
-          const next = e.relatedTarget;
-          if (next instanceof Node && rootRef.current?.contains(next)) return;
-          window.setTimeout(() => {
-            if (menuOpen) return;
-            setFocused(false);
-          }, 150);
-        }}
-        // Escape collapses the box; it does NOT clear. The field holds the
-        // post now, so the old "Escape empties it" would throw away writing
-        // on the key people press to dismiss a panel.
-        onKeyDown={(e) => {
-          if (e.key !== "Escape") return;
-          // The filters menu portals out of this subtree but still bubbles
-          // through the React tree, so its Escape arrives here too. Whoever is
-          // on top owns that key.
-          if (menuOpen) return;
-          setFocused(false);
-          inputRef.current?.blur();
-        }}
       >
         {/* The line you see at rest: attach on one side, send on the other,
             and the writing between them. The magnifying glass that used to sit
             here described the smaller half of what this field does — it is the
             post now, and a post is written and sent, not looked up. Finding is
             still here, in the panel underneath. */}
-        <div className="relative flex h-12 items-center gap-2 ps-3 pe-2">
+        <div className={SPOTLIGHT_BAR}>
           {/* Opens the panel already under the bar, on its media face. A
               second floating layer over a panel that was open anyway is one
               surface too many. Pressing it again returns to the queue. */}
@@ -1500,7 +1477,12 @@ export function ReviewSpotlight({
                   </div>
                 </div>
 
-                <CommandPrimitive.List className="max-h-[min(360px,45vh)] scroll-py-1 overflow-x-hidden overflow-y-auto border-t border-black/5 p-2 dark:border-white/10">
+                <CommandPrimitive.List
+                  className={cn(
+                    SPOTLIGHT_PANEL,
+                    "scroll-py-1 overflow-x-hidden p-2",
+                  )}
+                >
                   {/* FIND — this brand's slice first, because the picker above
                       already says which brand the reader is working in. */}
                   <ItemGroup
@@ -1732,7 +1714,7 @@ export function ConfigPanel({
     );
 
   const shell =
-    "relative max-h-[min(360px,45vh)] overflow-y-auto border-t border-black/5 p-4 text-start dark:border-white/10";
+    cn(SPOTLIGHT_PANEL, "p-4 text-start");
 
   const pill = (on: boolean) =>
     cn(
@@ -3513,7 +3495,7 @@ export function MediaPanel({
   };
 
   return (
-    <div className="max-h-[min(360px,45vh)] overflow-y-auto border-t border-black/5 p-4 text-start dark:border-white/10">
+    <div className={cn(SPOTLIGHT_PANEL, "p-4 text-start")}>
       {urls.length > 0 && (
         <div className="mb-4 flex flex-wrap items-center gap-2">
           {urls.map((url) => (

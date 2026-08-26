@@ -161,11 +161,10 @@ returns `drafted: 0`.
   draft ever asked for it was written by someone who did not know it was school software. Asked
   for "attendance" it produced clean, on-register Arabic about tracking employees. A test now pins
   the map to the product registry, and each row carries the brand page's audience.
-- **One stage frame (2026-08-25, Calendar joined 2026-08-26).** Publish's screen — the
+- **One stage frame, all five (2026-08-25 → 2026-08-26).** Publish's screen — the
   settle-then-lock, the gesture swallowing that still lets an inner scroller take its own wheel —
-  is `stage.tsx`, and Draft, Media and Calendar wear it. **Measure** deliberately does not: the
-  lock is armed by a box calling `onEngagedChange`, and a stage with no box would get a full
-  screen centred on a heading.
+  is `stage.tsx`, and every stage wears it. Measure was the exception on the grounds that a stage
+  with no box has nothing to lock around; it has a box now, so the exception went with it.
 - **The plan grew a box (2026-08-26).** Calendar was the last stage you had to scroll to use — a
   list of every brief in the plan, in the file's own order, with **Queue now** on each. It now
   wears the same glass bar the other three do: a calendar glyph where Media has a magnifying
@@ -177,7 +176,28 @@ returns `drafted: 0`.
   list answers *what is the plan this week*, the box answers *give me something to post about
   admission*. `queueing` and the optimistic queue state moved up to the shared parent, since both
   surfaces file and both draw the result; queue from the box and the card below greys out in the
-  same breath. Fourth copy of the glass-bar shell — noted, not extracted.
+  same breath. Fourth copy of the glass-bar shell — noted, then extracted the same day (below).
+- **The bar became one file (2026-08-26).** By the fourth box the glass, the 48px line, the panel
+  under it and the two handlers that decide when the panel is open were four copies of eighteen
+  lines. `spotlight-shell.tsx` holds them now — `GLASS`, `SPOTLIGHT_BAR`, `SPOTLIGHT_PANEL`, and
+  `useSpotlightBox`, which hands back `shellProps` for whatever root a box actually has. That last
+  part is why it is a hook and not a component: Publish's root is cmdk's `CommandPrimitive` and the
+  other four are a plain div, and a shell that had to be polymorphic over its own root would charge
+  a generic to hide one element name.
+  Publish's portalled filters menu was the one behaviour that differed — a focus landing in it
+  reads as a focus leaving the box, and its Escape bubbles to the box's handler — so the hook takes
+  a `hold` flag rather than the other four pretending they need one. Verified after the move:
+  filters opens with the box still open, Escape closes the menu, a second Escape closes the box,
+  ⌘K reopens it. All five stages still rest at ~75svh, stick at ~50svh, and lock on focus.
+- **Measure got the fifth box (2026-08-26).** The one stage where the box does nothing: its rows
+  are not buttons, because a variant is the record of a decision already taken and a row that
+  highlights under the cursor promises otherwise. Finding IS the job here — *did Tuesday's Balqalam
+  post go out, and did anyone see it* — so the row carries channel, status, time and reach on it.
+  The seat opens one word, Brand; the status is in the haystack instead of in a dropdown, so
+  typing "scheduled" filters to scheduled and there is one filtering surface rather than two. The
+  twenty-row table stays underneath, as the plan and the showroom do. On a database that cannot be
+  read (preview deployments) the stage now renders empty rather than returning `null` — a blank
+  route reads as broken, an empty ledger reads as an empty ledger.
 - **The box stopped waiting below the fold (2026-08-26).** The stage was a `min-h-screen` section
   *under* a header that was as tall as it needed to be, so the thing you came to use rendered at
   **94% of the viewport** — measured, not guessed — and the first screen was all title. The two
