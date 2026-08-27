@@ -180,6 +180,64 @@ again. Every link is tagged so its clicks can be counted.
 The rules every post obeys are in [Brand & Voice](/docs/brand); the build roadmap and
 credential plan stay internal (`docs/SOCIAL-AUTOMATION.md`).
 
+## The other way a post travels
+
+Everything above is **you driving it** — you open the box, you say the topic, you press
+Write it. There is a second path where nobody opens anything: **the week runs on timers,
+and you only say yes.**
+
+Seven steps instead of fourteen, and you touch exactly one of them.
+
+```mermaid
+graph TD
+    W1["1 · Monday 07:00<br/>the week's topics are picked<br/>for all four brands"]
+    W2["2 · Every 60 seconds<br/>the agent writes it —<br/>Arabic first, English mirrored"]
+    W3["3 · A craft check reads it<br/>before you do"]
+    W4["4 · You read it and say yes<br/>post now, or pick a time"]
+    W5["5 · Every 15 minutes<br/>it goes out to<br/>the Facebook page"]
+    W6["6 · Every 6 hours<br/>it reads the numbers back"]
+    W7["7 · Friday 09:00<br/>a digest lands in Slack:<br/>what shipped, what is waiting"]
+
+    W1 --> W2 --> W3 --> W4 --> W5 --> W6 --> W7
+    W7 -. "next week" .-> W1
+
+    classDef you fill:#3b2f1e,stroke:#b58a3c,color:#f5e6c8;
+    classDef live fill:#12312e,stroke:#2f7d72,color:#c6e8e2;
+    class W4 you;
+    class W5 live;
+```
+
+Both paths end in the same place, and they share the same queue — a post seeded on Monday
+and a post you typed yourself both wait on `/social/publish` for the same yes.
+
+### What happens when nobody says yes
+
+Step 4 is the only box with no timer on it, which makes it the only place the week can
+stop. It already did, for **27 days**.
+
+```mermaid
+graph TD
+    Q1["A draft is ready<br/>written and checked"]
+    Q2["It waits for you<br/>you were told once, on the day"]
+    Q3["Nothing is ever scheduled"]
+    Q4["The sender looks for work<br/>and finds an empty queue"]
+    Q5["It reports success<br/>every light stays green"]
+
+    Q1 --> Q2 --> Q3 --> Q4 --> Q5
+
+    classDef you fill:#3b2f1e,stroke:#b58a3c,color:#f5e6c8;
+    classDef bad fill:#2e1a16,stroke:#a6432f,color:#f0d2c9;
+    class Q2 you;
+    class Q3,Q4,Q5 bad;
+```
+
+Nothing broke. Every job ran and honestly reported success, because each one truthfully
+emptied a queue that nothing had reached. **Green meant "nothing to do", not "it worked."**
+A daily nudge now says what is waiting, and stays quiet when nothing is.
+
+**[The loop →](/docs/social/loop)** — what each box does, and the one thing to get right
+when you approve.
+
 ## Why this beats writing it yourself
 
 Not speed, and not the login.
