@@ -199,6 +199,33 @@
     overflow-anchor: none;
   }
 
+  /*
+   * Center mode: hide page heading, page nav, and footer while stage is engaged.
+   * Keeps only the top site header and the centered composer in view.
+   */
+  html.stage-engaged .social-stage-header-area {
+    opacity: 0;
+    max-height: 0;
+    min-height: 0 !important;
+    overflow: hidden;
+    pointer-events: none;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: translateY(-12px);
+    transition: opacity 0.2s ease, transform 0.2s ease, max-height 0.3s ease, min-height 0.3s ease, margin 0.3s ease, padding 0.3s ease;
+  }
+
+  html.stage-engaged footer {
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    pointer-events: none;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-color: transparent !important;
+    transition: opacity 0.2s ease, max-height 0.3s ease, margin 0.3s ease, padding 0.3s ease;
+  }
+
   body {
     @apply bg-background text-foreground;
     overflow-x: hidden;

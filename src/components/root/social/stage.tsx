@@ -104,6 +104,10 @@ function liftColumn(section: HTMLElement): void {
     : "smooth";
   requestAnimationFrame(() =>
     requestAnimationFrame(() => {
+      if (document.documentElement.classList.contains("stage-engaged")) {
+        window.scrollTo({ top: 0, behavior });
+        return;
+      }
       const rest = window.innerHeight * RESTING_FRACTION;
       const rect = section.getBoundingClientRect();
       const targetScrollY = window.scrollY + (rect.top - rest);
@@ -154,10 +158,14 @@ export function StageFrame({
   // <html> because that is the scroll container — see globals.css.
   useEffect(() => {
     document.documentElement.classList.add(STAGE_CLASS);
-    return () => document.documentElement.classList.remove(STAGE_CLASS);
+    return () => {
+      document.documentElement.classList.remove(STAGE_CLASS);
+      document.documentElement.classList.remove("stage-engaged");
+    };
   }, []);
 
   useEffect(() => {
+    document.documentElement.classList.toggle("stage-engaged", engaged);
     if (!engaged) {
       setLocked(false);
       return;

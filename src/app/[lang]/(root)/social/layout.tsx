@@ -68,7 +68,7 @@ export default async function SocialLayout({
           header's own content is taller than half a viewport and has to
           win — the halves are a promise about roomy screens, not a clip.
         */}
-        <div className="flex min-h-[calc(50svh_-_var(--header-height))] flex-col justify-center">
+        <div className="social-stage-header-area flex min-h-[calc(50svh_-_var(--header-height))] flex-col justify-center transition-all duration-300">
           <PageHeader
             announcement={
               <Announcement
