@@ -120,6 +120,21 @@ ladder that ends, and a loop that does not.
 | **COMPLETING** | The listing is missing photos, a price, a description or amenities. The bot walks them through **one gap at a time**, not all at once. | Photo guide, free photo re-hosting, description help |
 | **LIVE** | Passes `listing-qualification-gate.ts`; `wave-publish` flips Busy → Available in the open city. | "You are live", plus first-booking tips |
 
+**Two credential models, one message each — measured 2026-08-29.** Hosts the growth import
+provisioned (`1001+`, 65 accounts) hold an account whose bootstrap password was never stored,
+so the only key is a single-use claim link: `pnpm crm:gift-handover` compiles that WhatsApp
+(listing page, the photo gift when mastering has landed, the claim link, a `wa.me` link) and
+`pnpm crm:claim-token --account=1004 --rotate --ttl-days=14 --apply` mints or renews the link.
+The sheet flags a live link that dies within 48 hours, because a link that expires before the
+human sends it is a dead link too — the two links minted on 08-23 were found 34 hours from
+expiry, unsent. Hosts the site provisions itself (`0001–0004`, and every Slack-born `0005+`)
+use the shared password, and `pnpm crm:handover --account=0005` compiles *their* message —
+number, password, login, listing links — which the `live` thread now posts by itself (see
+[Home → Saying live](/docs/home#saying-live)). Both are sheets a human sends from;
+`--mark-sent --apply` is the human's word, stamped on `credentialsSentAt`. The claim page was
+probed on production with a fresh link: it renders the host's own listing and asks *"هذه
+إعلاناتك؟"* — only the form submit spends the token.
+
 ### The retention loop — recurring, and the real ongoing work
 
 A free marketplace's funnel lives here, and it never terminates:
@@ -286,6 +301,16 @@ outbound slice (08-19), and the roll (08-22).
 - **One identifier module** (08-23). `src/lib/funnel/identifiers.ts` — capture, the applier
   and the funnel scripts share the same `normalizeDigits`/`toE164`/`emailOf`; the rules
   drifted twice living in two files and do not get a third chance.
+- **The opening-message chain, re-proven after the gateway restart** (08-29). A throwaway
+  school flipped to `SHORTLISTED` by direct PATCH → run `COMPLETED` → Hermes `200` +
+  `direct-deliver` → the card in #hogwarts-funnel (name, `wa.me` link, the message, the
+  deck-after-reply line) → record stamped `CONTACTED`/`QUEUED` — **ten seconds end to end**;
+  the workflow's shared secret matches the gateway's; `wa.me/+249…` resolves. Throwaway
+  deleted, `CONTACTED` back to 0. `tick.ts` now writes the verified E.164 back onto
+  `schoolPhone` on the same flip, because the workflow body and the card read that field
+  raw (one live row still carried `055941771`). The roll itself has **still never been
+  applied** — 222 verified mobiles + 155 emails queued, zero real flips; it is one typed
+  command away and stays a human's act by design.
 
 **Not built, and worth being blunt about:**
 
@@ -310,6 +335,12 @@ outbound slice (08-19), and the roll (08-22).
 - **mkan's `outreach-cadence.ts` still reads fixture hosts**, and its write path now refuses
   outright rather than mint placeholder claim links that no `HostClaimToken` backs. The ladder
   arithmetic is fixed and tested; what it needs next is a real host query.
+- **`claim-tokens.ts` printed `http://localhost:3000/ar/claim/…` until 2026-08-29** — the only
+  place a minted link is ever printed. mkan's `.env` carries the dev origin, and of the three
+  scripts that built public links only `gift-handover.ts` guarded against it.
+  `scripts/crm/public-links.ts` now builds every link that leaves the building (`publicAppUrl`,
+  `claimUrl`, `listingUrl`, `loginUrl`, `waLink`); an explicit `--base-url` is honoured, the env
+  fallback is not allowed to be local.
 - **Twenty workflows deploy over the API — never assume the UI.** The web UI is effectively
   unreachable (unauthenticated visits bounce to `app.databayt.org`, whose Vercel deployment
   is paused), and it is not needed: login with the Keychain `databayt-twenty-login`

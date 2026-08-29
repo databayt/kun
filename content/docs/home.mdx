@@ -186,6 +186,16 @@ rings the same bell.
 4. Twenty's own webhook fires `home.updated` at the site, finds the row it just got, and
    re-confirms it — harmless, and it proves the mirror.
 5. The thread carries `https://mkan.sd/ar/listings/0005-01`.
+6. The same thread then carries the **account handover** — the WhatsApp the scout sends the
+   host, ready to tap: the account number, the shared password, the login link and the
+   listing link(s), behind a `wa.me` link that opens the host's chat with the message already
+   typed. The machine sends nothing; the scout taps, sends, and says so with
+   `pnpm crm:handover --account=0005 --mark-sent --apply` (`credentialsSentAt` on the host,
+   plus a Note carrying the message). `pnpm crm:handover --account=0005` re-prints it any
+   time, `--all` is the sheet for every site-provisioned host, and a number that does not
+   read as a Sudanese mobile is reported rather than dialled. Until 2026-08-29 this step did
+   not exist: the docs said the host is told the number and the password, and nothing ever
+   told them.
 
 Only a person says `live`. Setting `publishState = LIVE` in Twenty by hand only touches a
 listing that already exists on the site, so for a home born in Slack the word is the door.
@@ -214,7 +224,8 @@ so and moves nothing, because welding two identities together on a guess is the 
 `same` / `new` question exists to prevent.
 
 The site account is provisioned when the first home goes `live`, and it is **only the number**:
-`0006` and the shared password are the whole of what a host is told. `User.email` is a required
+`0006` and the shared password are the whole of what a host is told — and since 2026-08-29 they
+are actually told it, in the `live` thread (step 6 of [Saying live](#saying-live)). `User.email` is a required
 unique column, so it holds the number itself — the `@mkan.org` domain that used to sit behind it
 was removed on 2026-08-26 (69 accounts; `pnpm accounts:simplify`, reversible from its ledger).
 `getUserByIdentifier` answers to the number, to a host's own name, and still to the old address
@@ -264,6 +275,7 @@ Measured against the live CRM, gateway and Slack, not the docs:
 | The script (Phase 1) | **built** — `home:sweep` / `extract` / `intake` / `update` / `publish` / `status` in `mkan/scripts/crm/`, 17 pure tests green |
 | The ears | **live** — Hermes bound to `#mkan` (every message wakes it, `home` skill, `[SILENT]`), launchd `com.databayt.mkan-home-sweep` every 2 min, one run lock |
 | The first real home | **proven 2026-08-25** — السند's two flats in one message: read right (2 bd · 1 ba · 7 beds · railway district · AC, washer, kitchen, TV, balcony; floor, iron, cooler, generator-by-agreement kept as notes), phone matched to the existing account-0004 host, matched one-to-one to `0004-02` / `0004-03` (live since 08-18), merged on `same`, **beds corrected 4→7 from the scout's words**, message attached as a note, both at 90% |
+| The handover | **built 2026-08-29** — `scripts/crm/host-handover.ts`: the shared-password message (number · password · login · listing links) compiled per account from the site (truth) and Twenty (contact), posted in the `live` thread by `home:publish`, re-printed by `pnpm crm:handover`; `--mark-sent --apply` stamps `credentialsSentAt` + a Note. Dry-run sheet on the four hand-verified hosts: 3 ready, 1 (`0003`) whose recorded number is not a mobile. No host has been handed an account yet |
 
 **Blocked on one small click, and only for the Hermes ear.** The read scopes were added the
 same day and the timer ear has carried every home end to end since. Hermes itself has never
@@ -284,6 +296,7 @@ latency, not correctness.
 | mkan `5f795c3` | `live 0005-01` → `home:publish`: site first (account, location — pin or zone centre said as such —, listing with its code), then Twenty mirrors LIVE; run lock between the two ears; `FORCE_SEED` carried by both installers |
 | mkan `334a7a0` | The site's Twenty webhook mints the code when a home is flipped LIVE from the CRM |
 | mkan `283d7e4` · `10e7fd9` · `6374406` | Learned from the first real message: duplicates matched one-to-one and **asked** (`same 0004-02 0004-03` merges, `new` creates); the host record's own account is the truth; no phone → nothing minted; the scout's numbers win on a merge and land in the corrections file; place names (a building, a market) are address words, not leftovers; a home already on the site is told so instead of asked to go live; `home:answer` for decisions taken elsewhere |
+| mkan `36ddf23` · hogwarts `5de61e94d` | **The account handover** — `scripts/crm/host-handover.ts` + `public-links.ts`: the shared-password message per site account, posted in the `live` thread by `home:publish`, `--mark-sent --apply` stamps `credentialsSentAt`; `claim-tokens.ts` stopped printing localhost links, `--account=` selects by the number on the sheet, the gift sheet flags a link dying within 48h. Same day the hogwarts opening-message chain was re-proven end to end (see [Funnel](/docs/funnel)) |
 
 ### Next
 
