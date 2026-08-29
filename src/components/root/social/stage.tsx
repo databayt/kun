@@ -149,6 +149,7 @@ export function StageFrame({
   const sectionRef = useRef<HTMLElement>(null);
 
   const triggerCenter = () => {
+    setEngaged(true);
     if (sectionRef.current) liftColumn(sectionRef.current);
   };
 
@@ -267,17 +268,6 @@ export function StageFrame({
 
   /**
    * A press anywhere outside the column is the way out.
-   *
-   * There is no scrim to click — the page keeps its own background and its own
-   * navigation, unchanged, because a lock is about where the scroll rests, not
-   * about dimming everything a reader might still want to see. So the release
-   * listens on the document instead: press outside, and whatever the box had
-   * focused is blurred, which is what actually closes it. The lock is
-   * downstream of that, so there is one way to be open and one to be shut
-   * rather than two states to keep in agreement.
-   *
-   * Bound only while locked, and on pointerdown rather than click so it fires
-   * before a focus lands somewhere new.
    */
   useEffect(() => {
     if (!engaged) return;
@@ -295,9 +285,19 @@ export function StageFrame({
       if (active instanceof HTMLElement) active.blur();
       setEngaged(false);
     };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        const active = document.activeElement;
+        if (active instanceof HTMLElement) active.blur();
+        setEngaged(false);
+      }
+    };
     document.addEventListener("pointerdown", onPointerDown, true);
-    return () =>
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
       document.removeEventListener("pointerdown", onPointerDown, true);
+      window.removeEventListener("keydown", onKeyDown);
+    };
   }, [engaged]);
 
 

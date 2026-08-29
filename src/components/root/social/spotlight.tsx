@@ -632,9 +632,10 @@ export function ReviewSpotlight({
       setError(null);
       setFocused(false);
       setPanel("queue");
+      triggerCenter?.();
       inputRef.current?.blur();
     },
-    [reviewQueue, router, lang, inputRef],
+    [reviewQueue, router, lang, inputRef, triggerCenter],
   );
 
   /**
