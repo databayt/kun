@@ -63,6 +63,7 @@ export function CalendarSpotlight({
   onQueue,
   stateLabel,
   onEngagedChange,
+  triggerCenter,
 }: {
   rows: CalendarRow[];
   /** The brief id currently being filed, if any — one at a time. */
@@ -70,6 +71,7 @@ export function CalendarSpotlight({
   onQueue: (row: CalendarRow) => void;
   stateLabel: (state: string) => string;
   onEngagedChange?: (engaged: boolean) => void;
+  triggerCenter?: () => void;
 }) {
   const {
     t,
@@ -96,6 +98,7 @@ export function CalendarSpotlight({
   const [openSection, setOpenSection] = React.useState<string | null>(null);
   const { setFocused, open, inputRef, shellProps } = useSpotlightBox({
     onEngagedChange,
+    triggerCenter,
   });
 
   /**
@@ -126,12 +129,18 @@ export function CalendarSpotlight({
   }, [rows, query, product, feature]);
 
   return (
-    <div className="mx-auto w-full max-w-3xl">
+    <div
+      className="mx-auto w-full max-w-3xl"
+      onMouseEnter={() => triggerCenter?.()}
+    >
       <div
         {...shellProps}
         className={cn(GLASS, "overflow-hidden rounded-[28px]")}
       >
-        <div className={SPOTLIGHT_BAR}>
+        <div
+          className={SPOTLIGHT_BAR}
+          onMouseEnter={() => triggerCenter?.()}
+        >
           {/* A calendar, where Media has a magnifying glass and Publish a ⊕.
               The glyph is the stage: this field searches, but what it searches
               is a week's worth of plan rather than a drawer of pictures. */}

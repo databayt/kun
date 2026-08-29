@@ -59,8 +59,10 @@ type Panel = "config" | "media";
 
 export function DraftSpotlight({
   onEngagedChange,
+  triggerCenter,
 }: {
   onEngagedChange?: (engaged: boolean) => void;
+  triggerCenter?: () => void;
 }) {
   const {
     t,
@@ -98,6 +100,7 @@ export function DraftSpotlight({
   const [openSection, setOpenSection] = React.useState<string | null>(KNOBS_WORD);
   const { setFocused, open, inputRef, shellProps } = useSpotlightBox({
     onEngagedChange,
+    triggerCenter,
   });
 
   const trimmed = prompt.trim();
@@ -112,12 +115,18 @@ export function DraftSpotlight({
   };
 
   return (
-    <div className="mx-auto w-full max-w-3xl">
+    <div
+      className="mx-auto w-full max-w-3xl"
+      onMouseEnter={() => triggerCenter?.()}
+    >
       <div
         {...shellProps}
         className={cn(GLASS, "overflow-hidden rounded-[28px]")}
       >
-        <div className={SPOTLIGHT_BAR}>
+        <div
+          className={SPOTLIGHT_BAR}
+          onMouseEnter={() => triggerCenter?.()}
+        >
           {/* The media half of a full draft. It rides the ask — `submit`
               already sends the shared tray as `mediaUrls` — so what is
               attached here is what the answering session is handed. */}

@@ -66,21 +66,17 @@ function whenScrollSettles(run: () => void): () => void {
   let seen = 0;
   let quiet = 0;
   let last = window.scrollY;
-  const deadline = performance.now() + 1500;
+  const deadline = performance.now() + 1200;
   let cancelled = false;
 
-  // The lift itself waits two frames before it starts, so the first frames
-  // here are quiet for the wrong reason. Measured without this
-  // grace: the lock landed at 250ms and froze the glide a third of the way,
-  // stranding the page — and the column with it — short of the middle.
-  const GRACE_FRAMES = 6;
-  const QUIET_FRAMES = 3;
+  const GRACE_FRAMES = 4;
+  const QUIET_FRAMES = 2;
 
   const tick = () => {
     if (cancelled) return;
     seen += 1;
     const now = window.scrollY;
-    quiet = now === last ? quiet + 1 : 0;
+    quiet = Math.abs(now - last) <= 0.5 ? quiet + 1 : 0;
     last = now;
     const settled = seen > GRACE_FRAMES && quiet >= QUIET_FRAMES;
     if (settled || performance.now() > deadline) {
@@ -98,39 +94,7 @@ function whenScrollSettles(run: () => void): () => void {
 }
 
 /**
- * Bring the column to the middle of the screen.
- *
- * This used to live in each box — three copies of it, since Draft, Media and
- * Publish each focused their own input and each climbed back out to
- * `closest("section")` to find the screen they were sitting in. The screen is
- * the frame's, so the lift is too, and it now runs off the engagement the
- * boxes already report rather than a fourth thing they each have to remember
- * to call.
- *
- * The target is the stick point, not the top of the page. Scrolling the whole
- * section to the viewport's top was 450px on a 900px screen of which only the
- * first 225 moved the box at all: it reaches the middle where the sticky
- * container pins, and holds there while the background keeps sliding for as
- * long again. Half a glide with nothing to show for it, and it read as the
- * page taking a moment to agree.
- *
- * So the box and the scroll now finish together — and when the column is
- * already centred, because someone scrolled it there before touching it or is
- * focusing a second time, nothing moves at all and the lock arms on the spot.
- *
- * Two frames, not zero: focus opens the panel in the same tick, and a smooth
- * scroll started before that layout lands is cancelled outright — measured,
- * the call ran, found the section, and moved nothing. Measuring inside the
- * second frame rather than before them is the same story from the other end:
- * a distance read before the panel has mounted is a distance to the wrong
- * place.
- *
- * `"instant"`, not `"auto"`, for anyone who asked for less motion. All three
- * copies of this said `"auto"` and none of them worked: `auto` means *defer to
- * the CSS*, and `html` here carries `scroll-behavior: smooth` (globals.css) —
- * so the branch written to skip the animation asked for it by name. Measured
- * under `prefers-reduced-motion: reduce`: 188px into a 225px glide at 120ms,
- * which is a glide.
+ * Bring the column to the middle of the screen smoothly.
  */
 function liftColumn(section: HTMLElement): void {
   const behavior: ScrollBehavior = window.matchMedia(
@@ -141,12 +105,10 @@ function liftColumn(section: HTMLElement): void {
   requestAnimationFrame(() =>
     requestAnimationFrame(() => {
       const rest = window.innerHeight * RESTING_FRACTION;
-      const distance = section.getBoundingClientRect().top - rest;
-      // At or past the stick point the column is centred already — either the
-      // sticky container is pinned, or it is about to be. Nothing to do, and a
-      // smooth scroll of a few pixels is a twitch rather than an animation.
-      if (distance <= 1) return;
-      window.scrollBy({ top: distance, behavior });
+      const rect = section.getBoundingClientRect();
+      const targetScrollY = window.scrollY + (rect.top - rest);
+      if (Math.abs(window.scrollY - targetScrollY) <= 1) return;
+      window.scrollTo({ top: Math.max(0, targetScrollY), behavior });
     }),
   );
 }
@@ -166,7 +128,10 @@ export function StageFrame({
   below,
 }: {
   title: string;
-  children: (props: { onEngagedChange: (engaged: boolean) => void }) => ReactNode;
+  children: (props: {
+    onEngagedChange: (engaged: boolean) => void;
+    triggerCenter: () => void;
+  }) => ReactNode;
   below?: ReactNode;
 }) {
   // Engaged: the box is open. Locked: the page has been frozen around it.
@@ -178,6 +143,10 @@ export function StageFrame({
   // The lift's target. A ref, where the boxes used to climb out to
   // `closest("section")` — the frame renders this element, so it can hold it.
   const sectionRef = useRef<HTMLElement>(null);
+
+  const triggerCenter = () => {
+    if (sectionRef.current) liftColumn(sectionRef.current);
+  };
 
   // The stage asks the document to stop anchoring its scroll to a growing
   // box. Only while this stage is mounted, so navigating to Calendar or
@@ -303,7 +272,7 @@ export function StageFrame({
    * before a focus lands somewhere new.
    */
   useEffect(() => {
-    if (!locked) return;
+    if (!engaged) return;
     const onPointerDown = (e: PointerEvent) => {
       const target = e.target;
       if (target instanceof Node && columnRef.current?.contains(target)) return;
@@ -321,7 +290,7 @@ export function StageFrame({
     document.addEventListener("pointerdown", onPointerDown, true);
     return () =>
       document.removeEventListener("pointerdown", onPointerDown, true);
-  }, [locked]);
+  }, [engaged]);
 
 
   return (
@@ -362,7 +331,7 @@ export function StageFrame({
               </div>
 
               <div className="mb-4">
-                {children({ onEngagedChange: setEngaged })}
+                {children({ onEngagedChange: setEngaged, triggerCenter })}
               </div>
             </div>
           </div>

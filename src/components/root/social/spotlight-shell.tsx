@@ -59,9 +59,11 @@ export const SPOTLIGHT_PANEL =
  */
 export function useSpotlightBox({
   onEngagedChange,
+  triggerCenter,
   hold = false,
 }: {
   onEngagedChange?: (engaged: boolean) => void;
+  triggerCenter?: () => void;
   hold?: boolean;
 } = {}) {
   const [focused, setFocused] = React.useState(false);
@@ -95,6 +97,12 @@ export function useSpotlightBox({
    */
   const shellProps = {
     ref: rootRef,
+    onMouseEnter: () => {
+      triggerCenter?.();
+    },
+    onFocusCapture: () => {
+      triggerCenter?.();
+    },
     onBlurCapture: (e: React.FocusEvent<HTMLElement>) => {
       const next = e.relatedTarget;
       if (next instanceof Node && rootRef.current?.contains(next)) return;

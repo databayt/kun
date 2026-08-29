@@ -56,9 +56,11 @@ export interface MediaPick {
 export function MediaSpotlight({
   assets,
   onEngagedChange,
+  triggerCenter,
 }: {
   assets: MediaPick[];
   onEngagedChange?: (engaged: boolean) => void;
+  triggerCenter?: () => void;
 }) {
   const {
     t,
@@ -88,6 +90,7 @@ export function MediaSpotlight({
   const [openSection, setOpenSection] = React.useState<string | null>(null);
   const { setFocused, open, inputRef, shellProps } = useSpotlightBox({
     onEngagedChange,
+    triggerCenter,
   });
 
   // The Arabic-aware matcher, the same one the queue is filtered by — a
@@ -108,12 +111,18 @@ export function MediaSpotlight({
   }, [assets, query, product, mediaFilter, mediaType]);
 
   return (
-    <div className="mx-auto w-full max-w-3xl">
+    <div
+      className="mx-auto w-full max-w-3xl"
+      onMouseEnter={() => triggerCenter?.()}
+    >
       <div
         {...shellProps}
         className={cn(GLASS, "overflow-hidden rounded-[28px]")}
       >
-        <div className={SPOTLIGHT_BAR}>
+        <div
+          className={SPOTLIGHT_BAR}
+          onMouseEnter={() => triggerCenter?.()}
+        >
           {/* A magnifying glass, where Publish has a ⊕. It earns it here: this
               field really is a query and nothing else, and the seat that
               attaches is on each result rather than on the bar. */}
@@ -311,8 +320,12 @@ export function MediaStage({
   const { t } = useSocial();
   return (
     <StageFrame title={t.mediaStageTitle} below={below}>
-      {({ onEngagedChange }) => (
-        <MediaSpotlight assets={assets} onEngagedChange={onEngagedChange} />
+      {({ onEngagedChange, triggerCenter }) => (
+        <MediaSpotlight
+          assets={assets}
+          onEngagedChange={onEngagedChange}
+          triggerCenter={triggerCenter}
+        />
       )}
     </StageFrame>
   );

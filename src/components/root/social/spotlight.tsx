@@ -296,6 +296,7 @@ const KIND_HEADING_KEY: Record<QueueItem["kind"], keyof SocialDict> = {
  */
 export function ReviewSpotlight({
   onEngagedChange,
+  triggerCenter,
 }: {
   /**
    * Fires when the box opens or closes. The stage above uses it to lock the
@@ -304,6 +305,7 @@ export function ReviewSpotlight({
    * what reacting means.
    */
   onEngagedChange?: (engaged: boolean) => void;
+  triggerCenter?: () => void;
 } = {}) {
   const {
     t,
@@ -377,6 +379,7 @@ export function ReviewSpotlight({
   // bubbles through the React tree to the box's own handler.
   const { setFocused, open, inputRef, shellProps } = useSpotlightBox({
     onEngagedChange,
+    triggerCenter,
     hold: menuOpen,
   });
 
@@ -1109,7 +1112,10 @@ export function ReviewSpotlight({
           : t.spotlightQueueEmpty;
 
   return (
-    <div className="mx-auto w-full max-w-3xl">
+    <div
+      className="mx-auto w-full max-w-3xl"
+      onMouseEnter={() => triggerCenter?.()}
+    >
       <CommandPrimitive
         {...shellProps}
         loop
@@ -1124,7 +1130,10 @@ export function ReviewSpotlight({
             here described the smaller half of what this field does — it is the
             post now, and a post is written and sent, not looked up. Finding is
             still here, in the panel underneath. */}
-        <div className={SPOTLIGHT_BAR}>
+        <div
+          className={SPOTLIGHT_BAR}
+          onMouseEnter={() => triggerCenter?.()}
+        >
           {/* Opens the panel already under the bar, on its media face. A
               second floating layer over a panel that was open anyway is one
               surface too many. Pressing it again returns to the queue. */}
@@ -1139,6 +1148,7 @@ export function ReviewSpotlight({
                 open && current === "media" ? "queue" : "media",
               );
               setFocused(true);
+              triggerCenter?.();
               inputRef.current?.focus();
             }}
             className={cn(
@@ -1166,10 +1176,10 @@ export function ReviewSpotlight({
               setPanel("queue");
               setQuery(value);
             }}
-            // Nothing to lift from here: opening the box reports engagement
-            // to the stage frame, and the frame brings its own column to the
-            // middle (stage.tsx).
-            onFocus={() => setFocused(true)}
+            onFocus={() => {
+              setFocused(true);
+              triggerCenter?.();
+            }}
             placeholder={t.spotlightPlaceholder}
             // 16px keeps iOS Safari from zooming the page on focus.
             className={cn(

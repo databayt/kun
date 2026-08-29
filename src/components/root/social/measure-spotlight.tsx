@@ -59,12 +59,14 @@ export interface LedgerPick {
   reach: string;
 }
 
-function MeasureSpotlight({
+export function MeasureSpotlight({
   picks,
   onEngagedChange,
+  triggerCenter,
 }: {
   picks: LedgerPick[];
   onEngagedChange?: (engaged: boolean) => void;
+  triggerCenter?: () => void;
 }) {
   const {
     t,
@@ -91,6 +93,7 @@ function MeasureSpotlight({
   const [openSection, setOpenSection] = React.useState<string | null>(null);
   const { setFocused, open, inputRef, shellProps } = useSpotlightBox({
     onEngagedChange,
+    triggerCenter,
   });
 
   /**
@@ -115,12 +118,18 @@ function MeasureSpotlight({
   }, [picks, query, product]);
 
   return (
-    <div className="mx-auto w-full max-w-3xl">
+    <div
+      className="mx-auto w-full max-w-3xl"
+      onMouseEnter={() => triggerCenter?.()}
+    >
       <div
         {...shellProps}
         className={cn(GLASS, "overflow-hidden rounded-[28px]")}
       >
-        <div className={SPOTLIGHT_BAR}>
+        <div
+          className={SPOTLIGHT_BAR}
+          onMouseEnter={() => triggerCenter?.()}
+        >
           {/* A bar chart, where Calendar has a calendar and Media a magnifying
               glass. The glyph is the stage. */}
           <span className="text-muted-foreground/70 flex size-9 shrink-0 items-center justify-center">
@@ -274,8 +283,12 @@ export function MeasureStage({
   const { t } = useSocial();
   return (
     <StageFrame title={t.measureStageTitle} below={below}>
-      {({ onEngagedChange }) => (
-        <MeasureSpotlight picks={picks} onEngagedChange={onEngagedChange} />
+      {({ onEngagedChange, triggerCenter }) => (
+        <MeasureSpotlight
+          picks={picks}
+          onEngagedChange={onEngagedChange}
+          triggerCenter={triggerCenter}
+        />
       )}
     </StageFrame>
   );

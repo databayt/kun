@@ -27,12 +27,15 @@ export function ReviewPanel() {
 
   return (
     <StageFrame title={t.reviewTitle}>
-      {({ onEngagedChange }) => (
+      {({ onEngagedChange, triggerCenter }) => (
         <>
           {/* One box: find a draft, write the copy, and send it. Its command
               row carries the per-mode counts, refresh, the filters, what
               Approve does, and Send — see spotlight.tsx. */}
-          <ReviewSpotlight onEngagedChange={onEngagedChange} />
+          <ReviewSpotlight
+            onEngagedChange={onEngagedChange}
+            triggerCenter={triggerCenter}
+          />
 
           {error && (
             <p

@@ -229,7 +229,7 @@ export function CalendarPanel({ recent }: { recent: RecentAsk[] }) {
 
   return (
     <StageFrame title={t.calendarStageTitle} below={below}>
-      {({ onEngagedChange }) => (
+      {({ onEngagedChange, triggerCenter }) => (
         <>
           <CalendarSpotlight
             rows={rows}
@@ -237,6 +237,7 @@ export function CalendarPanel({ recent }: { recent: RecentAsk[] }) {
             onQueue={queueNow}
             stateLabel={stateLabel}
             onEngagedChange={onEngagedChange}
+            triggerCenter={triggerCenter}
           />
 
           {error && (

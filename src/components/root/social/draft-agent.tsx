@@ -120,7 +120,7 @@ export function DraftAgent() {
   // mostly empty gradient with the prompt marooned in the middle of it.
   return (
     <StageFrame title={t.draftStageTitle}>
-      {({ onEngagedChange }) => (
+      {({ onEngagedChange, triggerCenter }) => (
         <>
           {/* The box. It is the whole input now — the rounded-[2rem] prompt
               pill this file was built around is gone, and with it the second
@@ -133,6 +133,7 @@ export function DraftAgent() {
               onEngagedChange(engaged);
               setIsInputFocused(engaged);
             }}
+            triggerCenter={triggerCenter}
           />
 
       {hasInteracted && (
