@@ -43,6 +43,15 @@ export const homeItems: HomeItem[] = [
     group: "configuration",
   },
   {
+    id: "social-hub",
+    title: "Social",
+    description: "Manage social posts and auto-publish via Hermes.",
+    icon: "TwitterIcon",
+    image: "like.png",
+    href: "/social",
+    group: "integrations",
+  },
+  {
     id: "agents",
     title: "Agents",
     description: "40 agents across 4 tiers — captain to specialists.",
@@ -157,15 +166,6 @@ export const homeItems: HomeItem[] = [
     icon: "CredentialsIcon",
     image: "lock.png",
     href: "/engine/credentials",
-    group: "integrations",
-  },
-  {
-    id: "social-hub",
-    title: "Social",
-    description: "Manage social posts and auto-publish via Hermes.",
-    icon: "TwitterIcon",
-    image: "like.png",
-    href: "/social",
     group: "integrations",
   },
   {
