@@ -32,7 +32,7 @@ export const GLASS = "bg-muted border border-muted-foreground/20 shadow-2xl";
 /**
  * The line you see at rest — 48px, a seat at each end, the writing between.
  */
-export const SPOTLIGHT_BAR = "relative flex h-12 items-center gap-2 ps-3 pe-2";
+export const SPOTLIGHT_BAR = "relative flex min-h-12 items-center gap-2 ps-3 pe-2";
 
 /**
  * The panel that unfolds under the bar.
@@ -57,7 +57,7 @@ export const SPOTLIGHT_PANEL =
  *   a focus leaving the box; without this the panel closes under the menu the
  *   moment you touch it. Called during render, so keep it a plain read.
  */
-export function useSpotlightBox({
+export function useSpotlightBox<T extends HTMLElement = HTMLInputElement>({
   onEngagedChange,
   triggerCenter,
   hold = false,
@@ -68,7 +68,7 @@ export function useSpotlightBox({
 } = {}) {
   const [focused, setFocused] = React.useState(false);
   const rootRef = React.useRef<HTMLDivElement>(null);
-  const inputRef = React.useRef<HTMLInputElement>(null);
+  const inputRef = React.useRef<T>(null);
 
   const open = focused || hold;
 

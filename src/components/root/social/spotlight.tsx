@@ -377,11 +377,12 @@ export function ReviewSpotlight({
   // `menuOpen` is the hold: the filters menu portals out of this subtree, so a
   // focus landing in it reads as a focus leaving the box, and its Escape
   // bubbles through the React tree to the box's own handler.
-  const { setFocused, open, inputRef, shellProps } = useSpotlightBox({
-    onEngagedChange,
-    triggerCenter,
-    hold: menuOpen,
-  });
+  const { setFocused, open, inputRef, shellProps } =
+    useSpotlightBox<HTMLTextAreaElement>({
+      onEngagedChange,
+      triggerCenter,
+      hold: menuOpen,
+    });
 
   const [destination, setDestination] = usePersisted<Destination>(
     DESTINATION_KEY,
@@ -597,6 +598,20 @@ export function ReviewSpotlight({
     );
   }, [matching, product, inMode, sort, scope, trimmed]);
 
+  const adjustTextareaHeight = React.useCallback(() => {
+    const el = inputRef.current as HTMLTextAreaElement | null;
+    if (!el) return;
+    el.style.height = "auto";
+    const nextHeight = Math.min(Math.max(48, el.scrollHeight), 280);
+    el.style.height = `${nextHeight}px`;
+  }, [inputRef]);
+
+  React.useEffect(() => {
+    adjustTextareaHeight();
+    const frame = requestAnimationFrame(adjustTextareaHeight);
+    return () => cancelAnimationFrame(frame);
+  }, [query, adjustTextareaHeight]);
+
   const handleSelect = React.useCallback(
     (item: QueueItem) => {
       if (item.kind !== "draft") {
@@ -616,9 +631,10 @@ export function ReviewSpotlight({
       setNotice(null);
       setError(null);
       setFocused(false);
+      setPanel("queue");
       inputRef.current?.blur();
     },
-    [reviewQueue, router, lang],
+    [reviewQueue, router, lang, inputRef],
   );
 
   /**
@@ -1131,7 +1147,7 @@ export function ReviewSpotlight({
             post now, and a post is written and sent, not looked up. Finding is
             still here, in the panel underneath. */}
         <div
-          className={SPOTLIGHT_BAR}
+          className={cn(SPOTLIGHT_BAR, "items-end py-1.5")}
           onMouseEnter={() => triggerCenter?.()}
         >
           {/* Opens the panel already under the bar, on its media face. A
@@ -1147,12 +1163,12 @@ export function ReviewSpotlight({
               setPanel((current) =>
                 open && current === "media" ? "queue" : "media",
               );
-              setFocused(true);
+              setFocused(open && panel === "media" ? false : true);
               triggerCenter?.();
               inputRef.current?.focus();
             }}
             className={cn(
-              "flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full",
+              "flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full mb-0.5",
               "transition-colors duration-150",
               composerMediaUrls.length > 0 || (open && panel === "media")
                 ? "bg-accent text-accent-foreground"
@@ -1167,73 +1183,114 @@ export function ReviewSpotlight({
               <Plus className="size-5" />
             )}
           </button>
-          <CommandPrimitive.Input
-            ref={inputRef}
+
+          <textarea
+            ref={inputRef as React.RefObject<HTMLTextAreaElement>}
             value={query}
-            onValueChange={(value) => {
-              // Writing or searching — either way the queue is the face that
-              // answers, so a keystroke takes the panel back from the picker.
-              setPanel("queue");
-              setQuery(value);
+            onChange={(e) => {
+              setQuery(e.target.value);
+              adjustTextareaHeight();
+            }}
+            onKeyDown={(e) => {
+              if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                e.preventDefault();
+                if (trimmed && !blockedReason && !sending) {
+                  void handleSend();
+                }
+              }
             }}
             onFocus={() => {
-              setFocused(true);
               triggerCenter?.();
+              // Don't auto-open dropdown if draft is loaded or user is editing text
+              if (!reviewQueue.activeDraftId && !trimmed) {
+                setFocused(true);
+              }
             }}
             placeholder={t.spotlightPlaceholder}
-            // 16px keeps iOS Safari from zooming the page on focus.
+            rows={1}
             className={cn(
-              "flex h-12 w-full bg-transparent text-base outline-hidden",
+              "flex w-full resize-none bg-transparent text-base outline-hidden leading-relaxed py-2.5",
               "placeholder:text-muted-foreground/70",
+              "min-h-9 max-h-[280px] overflow-y-auto whitespace-pre-wrap break-words",
             )}
           />
 
-          {/* One seat, two jobs, decided by whether there is anything to
-              send. Empty, it opens the post's settings — brand, channels, and
-              what Approve does. The moment a character lands it becomes Send.
+          {/* Action buttons on the end */}
+          <div className="flex items-center gap-1.5 mb-0.5">
+            {trimmed ? (
+              <>
+                <button
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => {
+                    if (open && panel === "config") {
+                      setFocused(false);
+                    } else {
+                      setPanel("config");
+                      setFocused(true);
+                      triggerCenter?.();
+                    }
+                  }}
+                  title={t.spotlightConfig}
+                  aria-label={t.spotlightConfig}
+                  aria-expanded={open && panel === "config"}
+                  className={cn(
+                    "flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full",
+                    "text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground transition-colors duration-150",
+                    open && panel === "config" && "bg-accent text-accent-foreground",
+                  )}
+                >
+                  <Settings className="size-5" />
+                </button>
 
-              One button, not two swapped ones: the circle never moves or
-              redraws, only the glyph inside it changes. A button that springs
-              and rotates on every first keystroke is a firework where a state
-              change would do. */}
-          <button
-            type="button"
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={() => {
-              if (trimmed) {
-                void handleSend();
-                return;
-              }
-              setPanel((current) =>
-                open && current === "config" ? "queue" : "config",
-              );
-              setFocused(true);
-              inputRef.current?.focus();
-            }}
-            disabled={trimmed ? Boolean(blockedReason) || sending : false}
-            title={trimmed ? (blockedReason ?? sendLabel) : t.spotlightConfig}
-            aria-label={trimmed ? sendLabel : t.spotlightConfig}
-            aria-expanded={!trimmed && open && panel === "config"}
-            className={cn(
-              "flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full",
-              "bg-clay text-clay-foreground transition-opacity duration-150",
-              "hover:opacity-90",
-              // Blocked keeps the clay and loses only the pointer — no fade,
-              // no grey, so the seat is the same object throughout.
-              "disabled:cursor-not-allowed disabled:hover:opacity-100",
-            )}
-          >
-            {sending ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : trimmed ? (
-              <ArrowUp className="size-5" />
+                <button
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => {
+                    void handleSend();
+                  }}
+                  disabled={Boolean(blockedReason) || sending}
+                  title={blockedReason ?? sendLabel}
+                  aria-label={sendLabel}
+                  className={cn(
+                    "flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full",
+                    "bg-clay text-clay-foreground transition-opacity duration-150",
+                    "hover:opacity-90",
+                    "disabled:cursor-not-allowed disabled:hover:opacity-100",
+                  )}
+                >
+                  {sending ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <ArrowUp className="size-5" />
+                  )}
+                </button>
+              </>
             ) : (
-              /* A gear, not sliders: this opens what the post IS — brand,
-                 channels, when it goes — and sliders already mean the queue's
-                 filters, one row below. */
-              <Settings className="size-5" />
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => {
+                  setPanel((current) =>
+                    open && current === "config" ? "queue" : "config",
+                  );
+                  setFocused(true);
+                  triggerCenter?.();
+                  inputRef.current?.focus();
+                }}
+                title={t.spotlightConfig}
+                aria-label={t.spotlightConfig}
+                aria-expanded={open && panel === "config"}
+                className={cn(
+                  "flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full",
+                  "bg-clay text-clay-foreground transition-opacity duration-150",
+                  "hover:opacity-90",
+                )}
+              >
+                <Settings className="size-5" />
+              </button>
             )}
-          </button>
+          </div>
         </div>
 
         <AnimatePresence>
