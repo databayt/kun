@@ -301,6 +301,37 @@ outbound slice (08-19), and the roll (08-22).
 - **One identifier module** (08-23). `src/lib/funnel/identifiers.ts` — capture, the applier
   and the funnel scripts share the same `normalizeDigits`/`toE164`/`emailOf`; the rules
   drifted twice living in two files and do not get a third chance.
+- **The inbound side was dead in production until 08-29 — two deployment gaps, both measured.**
+  The receiver and the hourly `funnel-apply` cron had been shipped against a production
+  database that never received the `twenty_inbound_events` table (hogwarts prod is
+  db-push managed, Vercel runs `prisma generate` and never a migration, and the local dev
+  `.env` is where the table had been pushed): `GET /api/cron/funnel-apply?dry=1` answered
+  **500 "table does not exist"** for eleven days, and every Twenty delivery to
+  `ed.databayt.org/api/webhooks/twenty` — the worker log shows them going out, 2.6 s each —
+  died the same way. Then, once the table existed, deliveries still landed nothing, because
+  production carried **no `TWENTY_WEBHOOK_SECRET` at all** (no `TWENTY_*` variable in the
+  Vercel env) and the receiver refuses an unsigned delivery by design. The table was created
+  from the `prisma migrate diff` script (only that table — the same diff shows four *other*
+  tables the deployed code expects and prod lacks: `school_instructor_policies`,
+  `school_instructor_blocks`, `school_payment_settings`, `SchoolPayrollPolicy`, plus 31
+  column/constraint changes; those belong to other lanes and were left alone), and the
+  secret was copied from Twenty's webhook into Vercel production + preview and the local
+  `.env`. The cron now answers 200, and after a
+  scoped redeploy the inbound path was proven on production the same way the outbound one
+  was: a throwaway school patched in Twenty → `company.updated` delivered → one
+  `twenty_inbound_events` row in **five seconds** → the applier reads it and classifies a
+  `tier` change as advisory ("no gate meaning"). Throwaway deleted.
+- **The email lane's transport is dead, in production and locally** (08-29).
+  `RESEND_API_KEY` is the same value in hogwarts `.env`, the Vercel production env (set
+  two days earlier), codebase and souq — and Resend answers *"API key is invalid"* to every
+  endpoint. Nothing in hogwarts that sends mail (auth OTP, invoices, the chatbot capture
+  alert, the funnel's touch 1 to 155 email-only schools) can work until a new key is
+  minted. No Resend key sits in the Keychain, Resend is not a Vercel integration here, and
+  its login form defeats scripted input, so `resend.com` was greenlisted in the session
+  vault: one human login there, and the engine mints and wires the key. Also measured in the
+  prod env: no `SALES_NOTIFY_EMAIL` (capture alerts fall back to `hi@databayt.org`) and no
+  `UPSTASH_*` (the chatbot throttle stays per-invocation). Prod `prospects` holds 0 rows —
+  the chatbot has captured nothing, measured directly this time.
 - **The opening-message chain, re-proven after the gateway restart** (08-29). A throwaway
   school flipped to `SHORTLISTED` by direct PATCH → run `COMPLETED` → Hermes `200` +
   `direct-deliver` → the card in #hogwarts-funnel (name, `wa.me` link, the message, the
