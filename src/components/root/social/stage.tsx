@@ -104,10 +104,6 @@ function liftColumn(section: HTMLElement): void {
     : "smooth";
   requestAnimationFrame(() =>
     requestAnimationFrame(() => {
-      if (document.documentElement.classList.contains("stage-engaged")) {
-        window.scrollTo({ top: 0, behavior });
-        return;
-      }
       const rest = window.innerHeight * RESTING_FRACTION;
       const rect = section.getBoundingClientRect();
       const targetScrollY = window.scrollY + (rect.top - rest);

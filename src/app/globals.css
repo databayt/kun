@@ -367,9 +367,13 @@
  * Keeps only the top site header and the centered composer in view.
  */
 html.stage-engaged .social-stage-header-area {
-  display: none !important;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
 }
 
 html.stage-engaged footer {
-  display: none !important;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
 }

@@ -601,15 +601,17 @@ export function ReviewSpotlight({
   const adjustTextareaHeight = React.useCallback(() => {
     const el = inputRef.current as HTMLTextAreaElement | null;
     if (!el) return;
+    if (!query.trim()) {
+      el.style.height = "";
+      return;
+    }
     el.style.height = "auto";
-    const nextHeight = Math.min(Math.max(48, el.scrollHeight), 280);
+    const nextHeight = Math.min(Math.max(44, el.scrollHeight), 280);
     el.style.height = `${nextHeight}px`;
-  }, [inputRef]);
+  }, [inputRef, query]);
 
   React.useEffect(() => {
     adjustTextareaHeight();
-    const frame = requestAnimationFrame(adjustTextareaHeight);
-    return () => cancelAnimationFrame(frame);
   }, [query, adjustTextareaHeight]);
 
   const handleSelect = React.useCallback(
@@ -1190,7 +1192,6 @@ export function ReviewSpotlight({
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
-              adjustTextareaHeight();
             }}
             onKeyDown={(e) => {
               if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
@@ -1210,9 +1211,9 @@ export function ReviewSpotlight({
             placeholder={t.spotlightPlaceholder}
             rows={1}
             className={cn(
-              "flex w-full resize-none bg-transparent text-base outline-hidden leading-relaxed py-2.5",
+              "flex w-full resize-none bg-transparent text-base outline-hidden leading-6 py-2.5",
               "placeholder:text-muted-foreground/70",
-              "min-h-9 max-h-[280px] overflow-y-auto whitespace-pre-wrap break-words",
+              "h-11 max-h-[280px] overflow-y-auto whitespace-pre-wrap break-words",
             )}
           />
 
