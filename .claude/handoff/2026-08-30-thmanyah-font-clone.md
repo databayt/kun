@@ -7,64 +7,48 @@
 
 ---
 
-## 1. What Was Built & Iterated
+## 1. Exact Section-by-Section Mirror Implementation
 
-Following the strict databayt architecture rules and component hierarchy:
+The structure and exact CSS styles provided from the reference HTML have been implemented:
 
-### Level 1: UI Primitives (`src/components/ui/`)
-- `button.tsx`: Rounded-full pill buttons with `green` (#00bc6d), `default` (black), `outline`, and ghost variants.
-- `dialog.tsx`: Radix Dialog with animated backdrop blur, scale transitions, and accessible close actions.
-- `slider.tsx`: Radix Slider for typography size adjustments.
-- `switch.tsx`: Radix Switch with RTL-aware toggle indicators.
-- `accordion.tsx`: Radix Accordion for the FAQ section with smooth height transition.
-- `badge.tsx`: Pill badge components with mint, green, and neutral variations.
+### 1. Hero Section (`data-framer-name="Hero"`, `id="خط-ثمانيـة"`)
+- Background: `#00bc6d`, `min-height: 100vh`, `padding: 132px 60px 60px`.
+- Subtitle: `خط ثمانيــة` using `thmanyah sans Regular` with OpenType features `'blwf' on, 'cv09' on, 'cv03' on, 'cv04' on, 'cv11' on`.
+- Typography Header (`.framer-ht94lv`):
+  - `لماذا` (`thmanyah serif display Black`, 80px, 900, `ss01`)
+  - `قـرّرنا` (`thmanyah serif display Black`, 80px, 900, `ss01`)
+  - `في` (`thmanyah serif display Black`, 80px, 900, `ss01`)
+  - `ثمانيــة` (`thmanyah serif display Black`, 80px, 900, `ss01`)
+  - `أن نُصمم` (`thmanyah serif display Black`, 80px, 900)
+  - `خطًّـا عربيًّــــا؟` with absolute background highlight pill (`#9fe5b1`).
+- CTA Button (`.framer-3lvoni`):
+  - Black rounded pill (`#000`, border-radius 20px, height 40px, padding 0 16px).
+  - Text `احصل على الخط` with SVG arrow down bounce animation.
 
-### Level 2: Atoms (`src/components/atom/`)
-- `FontSelector.tsx`: 3-family selector (`thmanyah Serif Display`, `thmanyah Serif Text`, `thmanyah Sans`).
-- `WeightSelector.tsx`: 5-weight selector (`رفيــــع` 300, `عادي` 400, `متوســط` 500, `سميــك` 700, `ثقيـــل` 900).
-- `AlignmentButtons.tsx`: Text alignment toggles (Right, Center, Left).
-- `StylisticAlternatesSwitch.tsx`: OpenType `ss01`/`cv01`/`blwf` stylistic alternates feature toggle (`الحروف مرسلة`).
-- `FontSizeSlider.tsx`: Interactive font size slider (18px - 120px) with live px badge.
-- `CounterNumber.tsx`: Intersection-observer animated number counters (45+, 1,200+, 80+).
-- `CalligraphySlider.tsx`: Interactive side-by-side comparison between Thmanyah Display font and master calligrapher Zaki Al-Hashemi's manuscript artwork.
-- `LottiePlayer.tsx`: Smooth vector animation player for character and feature animations.
+### 2. The Answer Section (`data-framer-name="The Answer"`, `id="2"`)
+- Row 1: Paragraph 1 (`منذ بدأنا قصّة إثراء المحتوى العربي في 2017...`) alongside giant high-res sculpted letter "ح" artwork (`/images/ha-compare-1.png`).
+- Centerpiece (`id="8"`): Sculpted letter "8" container with `#afe4b6` mint background and animated vector strokes.
+- Row 2: Paragraph 2 (`الخط هو العامل القادر على تحويل أي تصميم...`) with `thmanyah sans Medium` highlighted ending alongside the second sculpted letter "ح" angle (`/images/ha-compare-2.png`).
 
-### Level 4: Blocks (`src/components/block/`)
-- `NavbarBlock.tsx`: Sticky glassmorphism header with logo, section anchors, and download action.
-- `HeroBlock.tsx`: Full-bleed vibrant green hero (#00bc6d) with bold Arabic typography, mint badge highlight, floating Lottie calligraphy mark, and CTA.
-- `StoryNarrativeBlock.tsx`: Story and design manifest explaining the 2017 origin and typography vision.
-- `StatsMetricsBlock.tsx`: Research journey metrics with animated counters and the letter "ح" evolutionary comparison.
-- `CalligraphyComparisonBlock.tsx`: "خط أصيل — كما لو أن خطاطًا كتبــه" with interactive calligraphy comparison.
-- `FontFamiliesBlock.tsx`: 3 font families x 5 weights (15 styles) specimen stack in Arabic and English.
-- `InteractiveTesterBlock.tsx`: Live playground with custom text editing, presets, weight switching, OpenType toggles, size slider, and instant CSS copy.
-- `FeaturesBlock.tsx`: "الصفـات" grid highlighting smoothness, screen optimization, stylistic alternates, and the Saudi Riyal symbol («ر.س»).
-- `ModernShowcaseBlock.tsx`: Practical applications grid with integrated video player (`video-1.mp4`) and UI showcase cards (01 to 04).
-- `FaqBlock.tsx`: 7 FAQ accordion items addressing installation (Mac/Windows), licensing, OpenType usage, support, and web fonts.
-- `DownloadCtaBlock.tsx`: Immersive black footer CTA banner.
-- `DownloadModalBlock.tsx`: Email collection modal with terms agreement, zip compilation, and confetti celebration.
-- `FooterBlock.tsx`: Copyright, Arabic & English license links, and company links.
+### 3. Trials Section (`data-framer-name="Trials"`)
+- Pitch-black background (`#000000`).
+- Header: `رحلة بناء` + `خــط عـربي غير مسبوق` (44px, 900, `ss01`) + `أصبح رسم حرف الحاء أكثر انسيابية، بزوايا حادة تعكس قوة الحرف وحضوره.` (26px, 300).
+- Center: `JAMLIA` animated vector character morph.
+- 3 Stats Cells (`data-framer-name="No."`):
+  - `Cell 1`: `دراسة أكثر من` -> **`45`** (`Thmanyah sans 1.2 Bold`, 32px, `ss01`) -> `خطًّا عربيًّا في سعينا لتصميم خط عربي أنيق ومميز.`
+  - `Cell 2`: `أكثر من` -> **`1,200`** (`Thmanyah sans 1.2 Bold`, 32px, `ss01`) -> `ساعة من البحث والتجارب للوصول إلى خط أصيل مرن فريد عصري.`
+  - `Cell 3`: `أكثر من` -> **`80`** (`Thmanyah sans 1.2 Bold`, 32px, `ss01`) -> `نسخة من الخط مع تحسين مستمر للوصول إلى نسخة تنسجم مع هوية ثمانية.`
 
-### Level 3: Templates (`src/components/template/`)
-- `HomeTemplate.tsx`: Complete single-page landing experience.
-- `LicensesTemplate.tsx`: Full Arabic End User License Agreement page.
-- `LicensesEnTemplate.tsx`: Full English End User License Agreement page.
-- `NotFoundTemplate.tsx`: Custom 404 page.
-
-### Level 5: Micro (`src/components/micro/`)
-- `FontDownloadService.ts`: Client-side ZIP package generator packaging all 15 font weights (WOFF2) with README.txt and LICENSE.txt.
+### 4. Authenticity Section (`data-framer-name="الصفـات"`, `id="jamal"`)
+- Title: `خط أصيل` + `كما لو أن خطاطًا كتبــه.` (44px, 900) + `يجمع بين أصالة اليد ودقّة التقنية، كأنّها امتداد ليد خطاطٍ ماهر.`
+- Comparison: Side-by-side cards:
+  - `بخط ثمانيــة للعناويــن` with dark manuscript card.
+  - `بخط زكي الهاشمي` with light manuscript card.
 
 ---
 
-## 2. What Was Verified
+## 2. Verification
 
-1. **Production Build Compilation:**
-   - Ran `pnpm build`.
-   - Verified 0 errors and 0 warnings.
-   - All static pages (`/`, `/licenses`, `/licenses-en`, `/_not-found`) compiled cleanly with Turbopack in 1.3s.
-
-2. **Development Server Execution:**
-   - Verified server runs on `http://localhost:3000` (port 3000 compliance).
-   - Tested HTTP GET on `/`, `/licenses`, and `/licenses-en` via curl — all returned `HTTP/1.1 200 OK`.
-
-3. **Git Cleanliness:**
-   - Small atomic conventional commits on `main`.
+- **Production Build:** `pnpm build` completed with **0 errors**.
+- **Dev Server:** Running on `http://localhost:3000` returning `HTTP 200 OK`.
+- **Git:** Atomic conventional commits on `main`.
