@@ -52,3 +52,33 @@ The structure and exact CSS styles provided from the reference HTML have been im
 - **Production Build:** `pnpm build` completed with **0 errors**.
 - **Dev Server:** Running on `http://localhost:3000` returning `HTTP 200 OK`.
 - **Git:** Atomic conventional commits on `main`.
+
+---
+
+## Iteration 4 — second-half sections mirrored (2026-08-30)
+
+Session continued in Claude Code after the Antigravity quota cutoff. All prior commits had landed; nothing was lost.
+
+**Rewritten against the reference DOM (copy verbatim):**
+
+| Block | Reference | Notes |
+|---|---|---|
+| `FeaturesBlock` | `مرن` + "New design - wireframe" | MARN Lottie (`lottie-hero-ha-v2`, 2970×1060) then 6 full-width panels: feature-1/2/3, `video-1.mp4`, feature-4/5 at reference aspect ratios |
+| `FontFamiliesBlock` | `#8-fonts` accordion | 3 family rows, one open (Serif Display default), 5 weight columns (300→900) with AR+EN specimen at 20px |
+| `InteractiveTesterBlock` | "B Display" tester | `#fafafa` wrapper, black rounded panel, controls column (الخط/الوزن/المحاذاة/الحروف مرسلة), 68px serif textarea (`field-sizing: content`), floating pill with black/green/white swatches |
+| `ModernShowcaseBlock` | "Modern" | title block + auto-scrolling draggable marquee; item 01 = `video-3.webm`, 02–10 = new `poster-*.png` (downloaded) |
+| `FaqBlock` | `#faq` | open 3-column grid, all 7 Q&As |
+| `DownloadCtaBlock` + `FooterBlock` | `#footer` | 52px Light/Black headline, black pill → email field, thmanyah wordmark SVG, الترخيص, ⓒ line |
+
+**Fixes found along the way**
+- `StatsMetricsBlock` was playing the MARN Lottie; JAMLIA is `lottie-hero-ha.json` (3840×2160 green path). Corrected.
+- `CalligraphyComparisonBlock` referenced `calligraphy-manuscript-1/2.png` which never existed (400s in console). Downloaded the two 1547×756 reference images under those names.
+- `HomeTemplate` reordered to reference flow: اصيل → مرن → Try → Modern → FAQ → Footer. Nav anchors updated (`#2`, `#الصفـات`, `#8-fonts`).
+
+**Asset map (framer → local)**
+- `Yf10bNu0…mp4` = `video-1.mp4` (byte-exact), `ZCod2tu1…webm` = `video-3.webm`
+- Not yet mirrored: `DownloadModalBlock` still exists (reference uses `#footer` anchor + inline email form); CTA form currently opens the modal on submit.
+
+**Verification**: `pnpm build` clean (4 routes), `tsc --noEmit` clean, dev server on :3000, all six section ids mount, marquee advances at 40px/s, 6 Lottie SVGs render, no console errors after the image fix.
+
+**Gotcha**: running `next build` while `next dev` is up on :3000 hangs the dev server (shared `.next`). Restart dev after builds.
