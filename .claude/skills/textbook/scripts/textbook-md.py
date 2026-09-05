@@ -192,7 +192,7 @@ def process(sdir: str, opt) -> dict:
                 engine = f"tesseract {tesseract_version()} (lang={tl}, {opt.dpi} dpi, psm {opt.psm}) on PyMuPDF renders"
                 extraction = "ocr"
                 notes = [f"MarkItDown's text-layer result graded {text_layer_grade}; OCR used instead",
-                         "OCR text is machine-read: expect occasional wrong letters, especially in tables and diagrams"]
+                         "OCR text is machine-read: prose is reliable, but chemical formulas, equations, tables and diagram labels come out as noise"]
             else:
                 notes.append(f"OCR tried (tesseract, {tl}) but did not beat the text layer — kept MarkItDown output")
     if g["quality"] == "EMPTY":
