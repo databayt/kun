@@ -299,7 +299,7 @@ def refresh_front_matter(sdir: str) -> dict:
         if key in stamp and key not in seen:
             idx = next((i for i, l in enumerate(lines) if l.startswith("subject:")), len(lines) - 1)
             lines.insert(idx + 1, f"{key}: {stamp[key]}")
-    body = re.sub(r"^# .*\n", f"# {title}\n", body, count=1) if body.startswith("# ") else body
+    body = re.sub(r"^(\s*)# .*\n", lambda m: f"{m.group(1)}# {title}\n", body, count=1)  # H1 follows a blank line
     tmp = out + ".tmp"
     with open(tmp, "w", encoding="utf-8") as fh:
         fh.write("---\n" + "\n".join(lines) + "\n---\n" + body)
