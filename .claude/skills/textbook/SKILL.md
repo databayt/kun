@@ -19,6 +19,10 @@ and how good it is; the file never contains invented text.
 - `$1` curriculum code (`sd`, `uk`, `in`, …) — the tree under `curriculum/<code>/`.
 - `$2` a grade (`g12`) or one subject dir (`g12/physics`).
 - `--ocr auto|off|force` — `auto` (default) runs OCR only when MarkItDown grades EMPTY or C.
+- `--lang ar|en|fr` (or `ara|eng|fra`) — the BOOK language: it picks the script the grade counts
+  AND the tesseract model. Default: `structure.json` `lang`; when that is missing the script
+  sniffs it (text-layer script ratio, else a 3-page `ara+eng` OCR sample + French/English
+  stop-word vote) and records `langSource: sniffed` in the front matter.
 - `--upload` — after generating, push the `.md` (and any new PDF/cover) to BOTH buckets.
 
 ## Process
@@ -53,6 +57,11 @@ max-age=1y`: after overwriting a key, invalidate `/catalog/textbooks/<slug>/*` o
   with the subscription-only billing posture). Arabic at 300 dpi, `--psm 3`, `-l ara`; English
   `eng`, French `fra`. MarkItDown's own OCR needs an Azure Document Intelligence endpoint
   (paid) — adopting it is a `/decide`.
+- **A wrong language grades garbage as A** (learned on Sudan grade 11, 2026-09-05): the SPINE 5
+  English scan and the French text-layer book sat in dirs whose legacy `structure.json` had no
+  `lang`; the old default (`ar`) OCR'd them with the Arabic model and the grade counted the
+  Arabic-looking noise as clean text → "A". Since then the language is resolved
+  override → structure → sniff, and `langSource` says which. Read it before trusting a grade.
 - **Never run MarkItDown through the MCP for a book** — a 400-page PDF returned into the
   session is a context bomb; the script uses the CLI (`uvx --from 'markitdown[pdf]'
 markitdown in.pdf -o out.md`).
@@ -63,7 +72,7 @@ markitdown in.pdf -o out.md`).
 ## Front matter written by the script
 
 ```yaml
-title, titleEn, curriculum, grade, subject, dbSlug, lang, edition, source, sourceMd5,
+title, titleEn, curriculum, grade, subject, dbSlug, lang, langSource, edition, source, sourceMd5,
 sourcePages, generator, generatedOn, extraction (text-layer|ocr|glyph-ids-without-unicode-map|none-scanned),
 quality (A|B|C|EMPTY), coverage (0–100), stats {…}, notes [...]
 ```

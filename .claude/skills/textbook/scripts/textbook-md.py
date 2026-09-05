@@ -17,7 +17,8 @@ Pipeline per subject directory (a dir holding textbook.pdf, optionally structure
   3. Quality grade from measured facts (chars per page, unmapped letters, glyph tokens):
      A clean · B readable with defects · C fragments · EMPTY (scan or unmapped font).
   4. OCR fallback (--ocr auto, the default): when the text layer grades EMPTY or C, pages are
-     rendered with PyMuPDF and read by tesseract (ara/eng/fra from structure.json lang); the
+     rendered with PyMuPDF and read by tesseract (ara/eng/fra from --lang, structure.json lang,
+     or a script sniff of the text layer / a 3-page OCR sample when neither says); the
      better of the two results is kept and the front matter says which engine produced it.
      tesseract is free and offline (brew install tesseract tesseract-lang) — the only OCR lane
      compatible with the subscription-only billing posture; MarkItDown's own OCR needs an
@@ -47,6 +48,41 @@ COMMON = ["في", "من", "على", "التي", "الذي", "هذا", "هذه", 
 BRACKETS = str.maketrans("()[]{}<>«»", ")(][}{><»«")
 LTR_RUN = re.compile(r"[A-Za-z0-9٠-٩][A-Za-z0-9٠-٩.,:%/+\-]*")
 TESS_LANG = {"ar": "ara", "en": "eng", "fr": "fra"}
+ISO_LANG = {"ara": "ar", "eng": "en", "fra": "fr", "ar": "ar", "en": "en", "fr": "fr"}
+FR_WORDS = {"le", "la", "les", "des", "une", "un", "et", "est", "dans", "pour", "que", "qui", "vous", "nous",
+            "avec", "sur", "pas", "ce", "cette", "sont", "votre", "tu", "il", "elle", "au", "du"}
+EN_WORDS = {"the", "and", "of", "to", "in", "is", "that", "for", "you", "with", "are", "this", "on", "as",
+            "be", "was", "it", "his", "her", "they", "their", "have", "from", "by", "an", "or"}
+
+
+def normalize_lang(code: str) -> str:
+    """Accept ISO (ar/en/fr) or tesseract (ara/eng/fra) codes; returns the ISO code."""
+    if code not in ISO_LANG:
+        sys.exit(f"--lang must be one of {sorted(ISO_LANG)} (got {code!r})")
+    return ISO_LANG[code]
+
+
+def vote_latin(text: str) -> str:
+    words = re.findall(r"[a-zà-ÿ']+", text.lower())
+    fr = sum(w in FR_WORDS for w in words); en = sum(w in EN_WORDS for w in words)
+    return "fr" if fr > en else "en"
+
+
+def sniff_lang(pdf: str, text: str, dpi: int = 150) -> str:
+    """Decide the book's language when structure.json does not say: from the text layer when it
+    has enough letters, otherwise from a 3-page `ara+eng` OCR sample (scans)."""
+    ar = len(AR.findall(text)); lat = len(re.findall(r"[A-Za-z]", text))
+    if ar + lat >= 300:
+        return "ar" if ar >= lat else vote_latin(text)
+    if shutil.which("tesseract") is None:
+        return "ar"
+    n = fitz.open(pdf).page_count
+    sample = sorted({min(n - 1, max(0, int(n * f))) for f in (0.08, 0.35, 0.65)})
+    txt = "".join(ocr_page((pdf, i, dpi, "ara+eng", 3))[1] for i in sample)
+    ar = len(AR.findall(txt)); lat = len(re.findall(r"[A-Za-z]", txt))
+    if ar + lat < 60:
+        return "ar"
+    return "ar" if ar >= lat else vote_latin(txt)
 MARKITDOWN = ["uvx", "--from", "markitdown[pdf]", "markitdown"]
 
 
@@ -162,15 +198,21 @@ def process(sdir: str, opt) -> dict:
     sp = os.path.join(sdir, "structure.json")
     if os.path.isfile(sp):
         st = json.load(open(sp, encoding="utf-8"))
-    lang = st.get("lang", "ar")
     pages = fitz.open(pdf).page_count
     subject = os.path.basename(sdir); grade_dir = os.path.basename(os.path.dirname(sdir))
 
-    # 1–3: MarkItDown + RTL + grade
+    # 1–3: MarkItDown + RTL + grade (the language decides which script the grade counts AND the OCR model)
     raw = run_markitdown(pdf)
     text, ps = rtl_post(raw)
-    g = grade(text, pages, lang, ps["cid"])
     engine, notes = "markitdown 0.1.7 (pdfminer.six) + rtl post-processing", []
+    if opt.lang:
+        lang, lang_src = normalize_lang(opt.lang), "--lang override"
+    elif st.get("lang") in TESS_LANG:
+        lang, lang_src = st["lang"], "structure.json"
+    else:
+        lang, lang_src = sniff_lang(pdf, text), "sniffed (structure.json has no lang)"
+        notes.append(f"language sniffed as {lang!r}: structure.json has no lang field — set it and re-run if wrong")
+    g = grade(text, pages, lang, ps["cid"])
     if ps["pres"]: notes.append(f"{ps['pres']} presentation-form glyphs normalised to standard letters")
     if ps["reordered"]: notes.append(f"{ps['reordered']} lines re-ordered from visual to logical Arabic order")
     if ps["cid"]: notes.append(f"{ps['cid']} unmapped glyph tokens removed (font has no Unicode map)")
@@ -183,7 +225,7 @@ def process(sdir: str, opt) -> dict:
         if shutil.which("tesseract") is None:
             notes.append("OCR wanted but tesseract is not installed (brew install tesseract tesseract-lang)")
         else:
-            tl = opt.lang or TESS_LANG.get(lang, "ara")
+            tl = TESS_LANG[lang]
             ocr_text = run_ocr(pdf, tl, opt.dpi, opt.psm, opt.jobs)
             g2 = grade(ocr_text, pages, lang, 0)
             if RANK[g2["quality"]] > RANK[g["quality"]] or (g2["quality"] == g["quality"] and g2["coverage"] > g["coverage"]):
@@ -203,7 +245,7 @@ def process(sdir: str, opt) -> dict:
     md5 = hashlib.md5(open(pdf, "rb").read()).hexdigest()
     fm = ["---", f'title: "{title}"', f'titleEn: "{title_en}"', f"curriculum: {st.get('curriculum', '')}",
           f"grade: {st.get('grade', grade_dir)}", f"subject: {subject}", f"dbSlug: {st.get('dbSlug', '')}",
-          f"lang: {lang}", f'edition: "{st.get("edition", "")}"', "source: textbook.pdf", f"sourceMd5: {md5}",
+          f"lang: {lang}", f'langSource: "{lang_src}"', f'edition: "{st.get("edition", "")}"', "source: textbook.pdf", f"sourceMd5: {md5}",
           f"sourcePages: {pages}", f'generator: "{engine}"', f"generatedOn: {datetime.date.today().isoformat()}",
           f"extraction: {extraction}", f"quality: {g['quality']}",
           f"coverage: {g['coverage']}  # extracted text per page vs ~1200 chars of prose",
@@ -220,6 +262,51 @@ def process(sdir: str, opt) -> dict:
                 extraction=extraction, bytes=os.path.getsize(out))
 
 
+IDENTITY_KEYS = ("title", "titleEn", "curriculum", "grade", "subject", "dbSlug", "lang", "langSource", "edition")
+
+
+def refresh_front_matter(sdir: str) -> dict:
+    """Re-stamp the identity fields of an existing textbook.md from structure.json (after a
+    structure rebuild) without touching the extracted body or the measured stats. Atomic write."""
+    sdir = sdir.rstrip("/")
+    out = os.path.join(sdir, "textbook.md")
+    sp = os.path.join(sdir, "structure.json")
+    if not os.path.isfile(out) or not os.path.isfile(sp):
+        return dict(subject=os.path.basename(sdir), error="needs textbook.md and structure.json")
+    st = json.load(open(sp, encoding="utf-8"))
+    text = open(out, encoding="utf-8").read()
+    m = re.match(r"---\n(.*?)\n---\n", text, re.S)
+    if not m:
+        return dict(subject=os.path.basename(sdir), error="no front matter")
+    head, body = m.group(1), text[m.end():]
+    subject = os.path.basename(sdir); grade_dir = os.path.basename(os.path.dirname(sdir))
+    title = st.get("subjectAr") or st.get("subject") or subject
+    lang = st.get("lang") if st.get("lang") in TESS_LANG else None
+    stamp = {"title": f'"{title}"', "titleEn": f'"{st.get("subjectEn", "")}"', "curriculum": st.get("curriculum", ""),
+             "grade": st.get("grade", grade_dir), "subject": subject, "dbSlug": st.get("dbSlug", ""),
+             "edition": f'"{st.get("edition", "")}"'}
+    if lang:
+        stamp["lang"] = lang; stamp["langSource"] = '"structure.json (refreshed)"'
+    lines, seen = [], set()
+    for line in head.split("\n"):
+        key = line.split(":", 1)[0].strip()
+        if key in stamp:
+            lines.append(f"{key}: {stamp[key]}"); seen.add(key)
+        else:
+            lines.append(line)
+    # keep key order stable: insert any missing identity keys after `subject`
+    for key in IDENTITY_KEYS:
+        if key in stamp and key not in seen:
+            idx = next((i for i, l in enumerate(lines) if l.startswith("subject:")), len(lines) - 1)
+            lines.insert(idx + 1, f"{key}: {stamp[key]}")
+    body = re.sub(r"^# .*\n", f"# {title}\n", body, count=1) if body.startswith("# ") else body
+    tmp = out + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as fh:
+        fh.write("---\n" + "\n".join(lines) + "\n---\n" + body)
+    os.replace(tmp, out)
+    return dict(subject=subject, refreshed=sorted(stamp), dbSlug=st.get("dbSlug", ""))
+
+
 def tesseract_version() -> str:
     try:
         return subprocess.run(["tesseract", "--version"], capture_output=True, text=True).stdout.split()[1]
@@ -234,14 +321,17 @@ def main():
     ap.add_argument("--dpi", type=int, default=200)
     ap.add_argument("--psm", type=int, default=3)
     ap.add_argument("--jobs", type=int, default=6)
-    ap.add_argument("--lang", help="tesseract language override (default from structure.json lang: ara/eng/fra)")
+    ap.add_argument("--lang", help="book language override, ISO or tesseract code (ar|en|fr / ara|eng|fra); "
+                    "default: structure.json lang, else sniffed from the text layer / a 3-page OCR sample")
     ap.add_argument("--keep-raw", action="store_true", help="also keep MarkItDown's raw output next to the twin")
     ap.add_argument("--quiet", action="store_true")
+    ap.add_argument("--front-matter-only", action="store_true",
+                    help="re-stamp title/dbSlug/lang/edition from structure.json into an existing textbook.md (no extraction)")
     opt = ap.parse_args()
     for d in opt.dirs:
         if not os.path.isdir(d):
             continue
-        r = process(d, opt)
+        r = refresh_front_matter(d) if opt.front_matter_only else process(d, opt)
         print(json.dumps(r, ensure_ascii=False), flush=True)
 
 
