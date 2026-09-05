@@ -157,6 +157,15 @@ Transfigures a document or web page into clean Markdown — PDF, Office, images,
 > 3. Write `<basename>.md` next to the source (or to `$2`; `-` prints to the session)
 > 4. Spot-check headings/tables survived — image-only PDFs need OCR, audio needs `ffmpeg`
 
+### `textbook`
+
+Gives every curriculum textbook its Markdown twin — `textbook.md` beside `textbook.pdf`, locally and on the CDN — and tells the truth about it. MarkItDown reads the text layer; the spell repairs what pdfminer does to Arabic (letter-reversed words, presentation-form glyphs, glyph-id noise from fonts without a Unicode map), grades the result from measured facts, and hands scans and unmapped fonts to tesseract OCR instead.
+
+> **The Order:**
+> **Familiar:** none (direct tool) | **Portal:** MarkItDown MCP (`markitdown`, via `uvx`) + tesseract (`brew install tesseract tesseract-lang`) | **Skill:** `/textbook`
+>
+> `textbook sd g12` — 25 subjects, one JSON line each: quality A/B/C/EMPTY, coverage, engine. Ship nothing graded EMPTY as if it were text.
+
 ### `higgs`
 
 Generates and edits photos and videos for databayt org ads, promotions, and marketing using Higgsfield AI's models — high output, zero questions: models, costs, ratios, brand style, and the databayt brand kit are pre-decided in the skill.

@@ -244,6 +244,8 @@ brew_smart gh
 # Node.js — pin to LTS major (Node 24 Krypton as of 2026). brew_smart handles
 # install + upgrade; the link step is idempotent so safe to run every time.
 brew_smart node@24
+brew_smart tesseract        # OCR for the `textbook` skill (scanned / unmapped-font PDFs)
+brew_smart tesseract-lang   # Arabic, French … language data for tesseract
 brew link --overwrite --force node@24 &>/dev/null || true
 
 # pnpm + Vercel CLI — @latest is idempotent (noop if already latest)

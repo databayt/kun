@@ -2,7 +2,7 @@
   "$schema": "kun-vocabulary-v1",
   "$comment": "Single source of truth for the kun keyword vocabulary. Edit THIS file, then run: node .claude/scripts/generate-vocab.mjs — it regenerates the Vocabulary block in .claude/CLAUDE.md and src/components/docs/spellbook-data.ts. health.sh runs generate-vocab.mjs --check to flag drift. v2 (2026-07-10): deduped cross-school keywords, retired stale BMAD spells, wired Anthropic-native automation (loop/goal/schedule/workflow). Spell fields: name (the keyword), effect (one-line), order (routing chain: familiar=agent, portal=MCP, skill=/skill-or-command, hook, ward=rule, memory), steps, connects, depends, and optional mergedInto (keyword retired into another).",
   "version": 2,
-  "updated": "2026-08-18",
+  "updated": "2026-09-05",
   "orderTypeLabels": {
     "familiar": "Agent",
     "portal": "MCP",
@@ -4957,6 +4957,32 @@
             "docs"
           ],
           "depends": []
+        },
+        {
+          "name": "textbook",
+          "effect": "Every curriculum textbook.pdf gets a graded Markdown twin — MarkItDown, RTL repair, OCR fallback, CDN",
+          "order": [
+            {
+              "type": "portal",
+              "name": "MarkItDown"
+            },
+            {
+              "type": "skill",
+              "name": "/textbook"
+            }
+          ],
+          "steps": [
+            "Run textbook-md.py over the grade or subject dirs (MarkItDown CLI, never the MCP for a book)",
+            "Read the per-book grade: A/B usable, C fragments, EMPTY → tesseract OCR fallback",
+            "Upload textbook.md beside textbook.pdf to both buckets and record the grades in the ledger"
+          ],
+          "connects": [
+            "convert",
+            "docs"
+          ],
+          "depends": [
+            "convert"
+          ]
         },
         {
           "name": "calendar",
