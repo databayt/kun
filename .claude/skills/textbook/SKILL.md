@@ -78,3 +78,21 @@ quality (A|B|C|EMPTY), coverage (0–100), stats {…}, notes [...]
 ```
 
 Convert textbooks: $ARGUMENTS
+
+## Page images for the in-app reader (`textbook-pages.py`)
+
+hogwarts renders each textbook's Markdown twin as native text at
+`/<lang>/subjects/<slug>/textbook` (school dashboard, "reader mode": Thmanyah
+serif, adjustable size, Arabic-folded search, contents from the catalog
+chapters). Equations, tables and figures are OCR noise in the twin, so the
+reader can show the ORIGINAL page beside the text — one WebP per PDF page:
+
+```bash
+python3 ~/.claude/skills/textbook/scripts/textbook-pages.py curriculum/sd/g12/*/ --jobs 6   # <dir>/pages/<N>.webp, N = 1-based PDF page = the twin's <!-- page N --> number
+aws s3 sync curriculum/sd/g12/biology/pages s3://databayt-cdn/catalog/textbooks/sd-g12-biology/pages/ --content-type image/webp --cache-control "public, max-age=31536000, immutable" --only-show-errors   # and the app bucket
+```
+
+~1000 px wide, quality 70 → ~55 KB a page, ~15 MB a book. The reader loads
+them only when "show page images" is on. Books whose twin has no page markers
+(MarkItDown text-layer path) get the strip unaligned — add markers to that path
+before relying on it.
