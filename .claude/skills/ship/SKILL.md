@@ -7,6 +7,17 @@ argument-hint: "[product]"
 
 # Ship — Production Deploy
 
+
+## Platform check — do this first
+
+```bash
+ls wrangler.jsonc 2>/dev/null && echo "CLOUDFLARE" || echo "VERCEL"
+```
+
+If the repo has a **`wrangler.jsonc`**, it deploys to **Cloudflare**, not Vercel — invoke the
+`cloudflare` skill and follow that runbook instead of anything below. hogwarts and mkan are both
+Cloudflare now; every Vercel hostname on the databayt accounts answers HTTP 402.
+
 Promote a `/check`-passed build to **production** on Vercel. The pipeline's final commit-to-live step.
 
 `/ship` is for production. For staging/preview, use `/deploy preview`.

@@ -25,7 +25,7 @@ Attach, library auto-pick, or a generation), and `/social/publish` is the
 review queue where the next full draft waits for the human yes — publish now or
 schedule for the cron drain.
 
-Arguments: $ARGUMENTS — brand (`databayt|hogwarts|mkan|sijillee|moalimee`), the
+Arguments: $ARGUMENTS — brand (`databayt|hogwarts|balqalam|mkan|sijillee|moalimee`), the
 idea or news, optional `--channels`, `--media`, `--at`, and `--from <stage>` to
 resume mid-chain.
 
@@ -121,7 +121,7 @@ in which state, and what is waiting.
 
 | Stage      | Failure                             | What `/social` does                                 |
 | ---------- | ----------------------------------- | --------------------------------------------------- |
-| Pre-flight | Unknown brand                       | Stop; print the five valid ids                      |
+| Pre-flight | Unknown brand                       | Stop; print the six valid ids                       |
 | Pre-flight | No wired channel for the brand      | Stop; name the missing Page or token                |
 | Pre-flight | Slack requested as a destination    | Refuse it, explain the tier, continue with the rest |
 | Draft      | Arabic reads as translation         | Stop; rewrite natively — never ship it              |

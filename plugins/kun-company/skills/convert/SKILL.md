@@ -57,6 +57,12 @@ a knowledge base, or the content pipeline as Markdown the model can read.
 - Plain-language requests like "convert this PDF to markdown: <path>" route to
   the same `markitdown` tool without typing `/convert`.
 - Audio transcription needs `ffmpeg`; image EXIF needs `exiftool` (`brew install`).
+- **Arabic / RTL PDFs come out unusable raw** — pdfminer emits Arabic in visual
+  order (every word letter-reversed), presentation-form glyphs, and `(cid:NN)` tokens
+  for fonts without a Unicode map. For textbooks use the `textbook` skill, whose
+  script wraps MarkItDown with the RTL repair, a measured quality grade and a
+  tesseract OCR fallback (`~/.claude/skills/textbook/scripts/textbook-md.py`).
+  Never push a whole book through the MCP — the result lands in the session.
 - Image-only/scanned PDFs: upstream ships a `markitdown-ocr` plugin
   (`--use-plugins --llm-client … --llm-model …`) — it needs an OpenAI-compatible
   API key, which the subscription-only billing posture forbids; adopting it

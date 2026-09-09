@@ -38,7 +38,7 @@ the work is whatever the team submitted from `/social`.
    **`moalimee`** and map to the registry id `moalimee` — the double-L spelling is
    canonical in prose and everywhere in the docs, the single-L is the env-var
    suffix and the stored `SocialPiece.brand` value. Refuse an unknown brand by
-   listing the five.
+   listing the six.
 2. **Read the voice** — `content/docs/brand.mdx` for the tone doctrine and the
    per-brand tagline, then `content/docs/social/<brand>.mdx` for audience, channel
    mix, and content pillars, then **`content/docs/social/copy.mdx`** for the craft

@@ -41,7 +41,7 @@ IDEA → SPEC (human gate) → [PLAN → TASKS] → SCHEMA → CODE → WIRE →
 Claude routes these to the right skill + agent + MCP without a dedicated command. Registry: `.claude/vocabulary.json` (edit it, then `node .claude/scripts/generate-vocab.mjs`); browsable at kun.databayt.org/en/docs/keywords.
 
 **The Pipeline** — idea to production in one word: `feature`, `idea`, `spec`, `plan`, `tasks`, `schema`, `ready`, `code`, `wire`, `check`, `ship`, `watch`
-**Charm Work** — everyday practical magic: `dev`, `build`, `push`, `quick`, `deploy`, `release`
+**Charm Work** — everyday practical magic: `dev`, `build`, `push`, `quick`, `deploy`, `release`, `cloudflare`
 **Transfiguration** — creating something from nothing: `component`, `page`, `api`, `atom`, `template`, `block`, `migration`
 **Ancient Runes** — the foundational frameworks: `nextjs`, `react`, `typescript`, `prisma`, `tailwind`, `shadcn`
 **Conjuration** — summoning ui elements: `table`, `header`, `menu`, `form`, `modal`, `card`, `sidebar`, `footer`, `hero`, `navbar`

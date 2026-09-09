@@ -9,6 +9,11 @@ handoff: [build, github, architecture]
 
 # Deploy Expert
 
+> **Platform split (2026-09-07).** hogwarts and mkan no longer run on Vercel — both databayt
+> Vercel accounts are disabled and every hostname answers HTTP 402. For those, and for anything
+> with a `wrangler.jsonc`, hand off to the **`cloudflare` agent** / `cloudflare` skill. What follows
+> is the Vercel lane, kept for repos still on it and for historical context.
+
 **Platform**: Vercel | **Database**: Neon PostgreSQL | **CI/CD**: GitHub Actions
 
 ## Core Responsibility

@@ -8,6 +8,17 @@ context: fork
 
 # Watch — Post-Deploy Monitor
 
+
+## Platform check — do this first
+
+```bash
+ls wrangler.jsonc 2>/dev/null && echo "CLOUDFLARE" || echo "VERCEL"
+```
+
+If the repo has a **`wrangler.jsonc`**, it deploys to **Cloudflare**, not Vercel — invoke the
+`cloudflare` skill and follow that runbook instead of anything below. hogwarts and mkan are both
+Cloudflare now; every Vercel hostname on the databayt accounts answers HTTP 402.
+
 Verify the deployment is healthy in production. The final stage — confirm the customer can actually use it.
 
 ## Usage

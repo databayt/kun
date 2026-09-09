@@ -46,9 +46,11 @@ formats), and **the Aug 23 Saudi school-year window is not the clock**. Reasonin
    math), a queue chip per brief, and a **Queue now** button that files a brief as a
    draft ask on the spot — calendar → draft is a click, not a wish.
 2. **Read the brands** — `content/docs/social/<brand>.mdx` for each brand's channel
-   mix and audience. The five are `databayt`, `hogwarts`, `mkan`, `sijillee`,
-   `moalimee` (registry ids in `src/components/root/social/products.ts`; the
-   canonical public spelling of the last is _Moallimee_).
+   mix and audience. The six are `databayt`, `hogwarts`, `balqalam`, `mkan`,
+   `sijillee`, `moalimee` (registry ids in
+   `src/components/root/social/products.ts`; the canonical public spelling of the
+   last is _Moallimee_). Only the first four have a Facebook Page — `sijillee`
+   and `moalimee` carry `facebook: false` and cannot be scheduled against it.
 3. **Diff against reality** — read `SocialPiece` joined to `SocialVariant` for the
    period and compare `published` rows against the previous plan. A plan never
    checked against what shipped is a wish list.
