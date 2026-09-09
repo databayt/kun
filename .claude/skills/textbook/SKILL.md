@@ -1,98 +1,125 @@
 ---
 name: textbook
-description: Give every curriculum textbook.pdf a graded Markdown twin (MarkItDown → RTL fix → OCR fallback → CDN)
-when_to_use: "Use when curriculum textbooks (PDF scans or text-layer PDFs, mostly Arabic) must become Markdown next to the PDF and on the CDN — per subject, per grade, or a whole curriculum. Triggers on: textbook markdown, textbook.md, convert the textbooks, pdf to md for grade N, OCR the textbooks, markitdown the curriculum."
-argument-hint: "<curriculum> <grade|subject-dir> [--ocr auto|off|force] [--upload]"
+description: Give every curriculum textbook.pdf a Markdown twin by vision transcription, graded by agreement
+when_to_use: "Use when curriculum textbooks (PDF scans, mostly Arabic) must become Markdown next to the PDF and on the CDN — per subject, per grade, or a whole curriculum. Triggers on: textbook markdown, textbook.md, convert the textbooks, pdf to md for grade N, re-transcribe the textbooks, fix the textbook twin."
+argument-hint: "<curriculum> <grade|subject-dir> [--audit N] [--upload]"
 ---
 
 # Textbook → Markdown twin
 
-Every `textbook.pdf` under a curriculum tree gets a `textbook.md` beside it, then both
-travel to the CDN under the same key prefix. The Markdown is produced by Microsoft
-**MarkItDown** (the `convert` keyword's engine), repaired for Arabic, graded from measured
-facts, and — when the text layer is a scan or a font without a Unicode map — read by
-**tesseract** OCR instead. The front matter always says which engine produced the file
-and how good it is; the file never contains invented text.
+Every `textbook.pdf` under a curriculum tree gets a `textbook.md` beside it. The
+twin is produced by **reading the page images with a vision model** — not OCR —
+and it is graded by **agreement between two independent reads**, never by a
+character count.
 
-## Arguments
+## Why not OCR (settled on sd/g12/biology, 2026-09-09)
 
-- `$1` curriculum code (`sd`, `uk`, `in`, …) — the tree under `curriculum/<code>/`.
-- `$2` a grade (`g12`) or one subject dir (`g12/physics`).
-- `--ocr auto|off|force` — `auto` (default) runs OCR only when MarkItDown grades EMPTY or C.
-- `--lang ar|en|fr` (or `ara|eng|fra`) — the BOOK language: it picks the script the grade counts
-  AND the tesseract model. Default: `structure.json` `lang`; when that is missing the script
-  sniffs it (text-layer script ratio, else a 3-page `ara+eng` OCR sample + French/English
-  stop-word vote) and records `langSource: sniffed` in the front matter.
-- `--upload` — after generating, push the `.md` (and any new PDF/cover) to BOTH buckets.
+Tesseract is the wrong engine for these scans and it is not a tuning problem.
+Measured on the same book, same pages:
 
-## Process
+| | tesseract | vision |
+|---|---:|---:|
+| Arabic characters | 143,153 | 180,323 |
+| Latin (scientific terms) | 0 | 7,324 |
+| table rows | 6 | 276 |
+| figures with captions | 0 | 144 |
+| pages yielding no text | 3 | 0 |
 
-1. **Generate** — `python3 ~/.claude/skills/textbook/scripts/textbook-md.py curriculum/<code>/<grade>/*/`
-   (installed copy; canonical: `kun/.claude/skills/textbook/scripts/textbook-md.py`).
-   One JSON line per subject: `quality`, `coverage`, `engine`, `extraction`.
-2. **Read the grades** before anything else. A = clean, B = readable with unmapped
-   letters, C = fragments, EMPTY = nothing usable. Decide per book whether OCR is worth
-   it (`--ocr force` on a dir) — never ship an EMPTY twin as if it were text.
-3. **Upload** (hogwarts) — `pnpm tsx scripts/upload-textbooks-all.ts --force --assets=textbook.md
---only=<slugs> --bucket=databayt-cdn`, then the same without `--bucket` (app bucket).
-   New subjects also need `--assets=textbook.pdf,cover.jpg`. Objects are `immutable,
-max-age=1y`: after overwriting a key, invalidate `/catalog/textbooks/<slug>/*` on
-   CloudFront `E3PHDXTDSBCQSJ`. Verify over HTTPS (`content-type: text/markdown`), not the S3 API.
-4. **Record** — grade table in the curriculum ledger (`curriculum/<code>/TEXTBOOK_AUDIT.md`
-   for Sudan), the block ISSUE, and memory.
+Page 112 is the whole argument: a full-page spermatogenesis flowchart where
+tesseract produced **zero characters** and vision read all nine labels plus the
+caption. 29 of 253 pages held under 200 Arabic characters, and they were the
+diagram pages — which in a science textbook carry much of the teaching.
 
-## What the engines can and cannot do (learned on Sudan grade 12, 2026-09-05)
+**The old grader certified garbage.** It counted whether output looked like
+Arabic letters, so biology scored `quality: A` at `coverage: 47`, and g12 maths
+scored A at 28. Never reintroduce a coverage-derived grade.
 
-- **MarkItDown = pdfminer text extraction, no OCR.** On Arabic textbooks the raw output is
-  unusable without the RTL pass: pdfminer emits Arabic in _visual_ order (every word
-  letter-reversed), many fonts store presentation-form glyphs (U+FExx), and fonts without a
-  ToUnicode map yield `(cid:NN)` tokens carrying no text at all. The script's post-processing
-  handles the first two; nothing can recover the third — that is an OCR job.
-- **Yield on old NCCER scans**: 10 of 25 grade-12 books had a usable text layer (A: 3, B: 4,
-  C: 3); 15 were EMPTY (5 pure scans, 10 unmapped fonts). Expect the same on other grades.
-- **Ligature trap**: a glyph that expands to several letters (lam-meem, lam-alef) expands in
-  logical order; on a line about to be reversed it must be pre-flipped or "المناهج" becomes
-  "املناهج". Fonts that hide ligatures behind a Unicode map can still leave a few swaps.
-- **OCR lane**: `brew install tesseract tesseract-lang` (free, offline — the only OCR compatible
-  with the subscription-only billing posture). Arabic at 300 dpi, `--psm 3`, `-l ara`; English
-  `eng`, French `fra`. MarkItDown's own OCR needs an Azure Document Intelligence endpoint
-  (paid) — adopting it is a `/decide`.
-- **A wrong language grades garbage as A** (learned on Sudan grade 11, 2026-09-05): the SPINE 5
-  English scan and the French text-layer book sat in dirs whose legacy `structure.json` had no
-  `lang`; the old default (`ar`) OCR'd them with the Arabic model and the grade counted the
-  Arabic-looking noise as clean text → "A". Since then the language is resolved
-  override → structure → sniff, and `langSource` says which. Read it before trusting a grade.
-- **Never run MarkItDown through the MCP for a book** — a 400-page PDF returned into the
-  session is a context bomb; the script uses the CLI (`uvx --from 'markitdown[pdf]'
-markitdown in.pdf -o out.md`).
-- **CDN convention**: `catalog/textbooks/<slug>/textbook.md` beside `textbook.pdf`; no
-  `Subject` field points at the Markdown (deterministic key). Adding one is a schema decision.
-- **Coverage < 100 %** on good books is tables, figures and scan pages the text layer omits.
+## Pipeline
 
-## Front matter written by the script
+1. **Renders already exist.** `pages/<N>.webp` (1000 px, ~60 KB) from
+   `textbook-pages.py`. 1000 px was verified legible against a 1654 px
+   re-render on a dense table page — identical reading. Do not re-render; each
+   page costs ~1,900 image tokens under the 1568 px cap.
+2. **Write the contract first** to `pages-md/_CONTRACT.md` — the per-book rules
+   (reading order, headings from `structure.json`, tables, figures, notation,
+   the no-guessing and no-repairing clauses). Every agent reads this one file.
+   Editing the contract is how you fix systematic output problems.
+3. **Fan out, 12 pages per agent.** (The `transcribe` agent exists for this and
+   is **untested** — the biology run used `general-purpose` with the contract.) Each agent reads one image, writes
+   `pages-md/<N>.md`, moves on, and returns **one status line**. Agents must
+   never return prose: 253 pages of Arabic through the parent is a context bomb,
+   and per-page files give resume for free when a session dies.
+   **Concurrency cap is 20 subagents** — a 250-page book is one full wave, a
+   400-page book is two.
+4. **Assemble** — `textbook-assemble.py <book> --model … --agreement … --note …`
+   stitches `pages-md/` in numeric order, preserves `<!-- page N -->` markers so
+   the reader's page-image strip stays aligned, and writes provenance front
+   matter. It reports missing pages rather than silently skipping them.
+5. **Grade by agreement** — `md-agreement.py <book> --sample N` picks pages,
+   a fresh agent re-transcribes them into `pages-md-audit/`, then `--score`
+   diffs normalised Arabic. Feed the mean back into the assembler.
+   The audit pass MUST use the current contract, so the score partly measures
+   contract drift — that is intended.
+6. **Keep the old file** as `textbook.ocr.md`. Front matter records
+   `extraction: vision`, the model, the agreement and the sample size.
 
-```yaml
-title, titleEn, curriculum, grade, subject, dbSlug, lang, langSource, edition, source, sourceMd5,
-sourcePages, generator, generatedOn, extraction (text-layer|ocr|glyph-ids-without-unicode-map|none-scanned),
-quality (A|B|C|EMPTY), coverage (0–100), stats {…}, notes [...]
-```
+## Cost, measured
+
+**~11,000 tokens per page**, not the ~3,000 an image-token estimate suggests —
+the gap is the agent's own reasoning and file writes. A 12-page agent ran
+130–190k tokens; the 253-page biology book cost roughly **3M tokens** across 21
+agents. Budget a grade from that, not from image size.
+
+## The failure mode: correction drift
+
+Agents rationalise silent repairs. On biology one transcriber "corrected" a
+printed `(الصورة 51)` to 15 and `(الصورة 42)` to 24 by cross-referencing later
+pages, and normalised the book's `ڤ` to `ف`. It reported these as improvements.
+They were reverted and the contract gained an explicit **"Do not repair the
+book"** clause naming those exact cases. After that, audit agents began
+*reporting* book typos instead of fixing them — reversed Mendel dates, a
+mismatched cross-table label, `OBA` for `ABO`. Keep that clause verbatim.
+
+**Tool-use count is NOT a drift signal.** The agent that altered text used a
+normal 29 calls; the 87–131-call agents were working diagram-dense pages and
+their output was, if anything, more complete than the audit's. Do not build a
+detector on it. Drift is caught by the contract and by reading status lines.
+
+## Reading the agreement number
+
+Biology scored **94.8 % over 21 pages (8 %)**. Inspect the weakest pages before
+trusting or distrusting the number: there, every sub-90 % page was **diagram-label
+ordering** (identical word counts, labels listed in a different sequence) or a
+completeness difference on a dense figure. No fabricated prose appeared in any
+sampled page. A low score from label ordering is not the same defect as a low
+score from invented text — look, do not just read the percentage.
+
+Thresholds (A ≥ 0.95, B ≥ 0.90, C ≥ 0.80) are **provisional**, set on one book
+at n=21. Model was **opus**; sonnet is untested on this task.
+
+## Known issue — table column direction
+
+The contract asks for the rightmost printed column first. On the two pages
+checked against the scan (42, 169) the transcriber emitted the **leftmost**
+printed column first, which under the reader's `dir="rtl"` renders those tables
+mirrored against the book.
+
+**The extent is unmeasured and the fix is undecided.** Only 5 audited pages carry
+tables in both runs, and 2 of those disagree structurally — so "systematic
+inversion" is not established, and neither is whether rewording the contract
+would fix it or a post-process column swap is needed. Measure before acting:
+compare column 1 against the scan on a proper table sample.
+
+## Upload (only when asked)
+
+`pnpm tsx scripts/upload-textbooks-all.ts --force --assets=textbook.md
+--only=<slugs> --bucket=databayt-cdn`, then again without `--bucket`. Objects are
+`immutable, max-age=1y`: after overwriting a key, invalidate
+`/catalog/textbooks/<slug>/*` on CloudFront `E3PHDXTDSBCQSJ`. Verify over HTTPS,
+not the S3 API. **The reader serves the twin from the CDN, so a re-transcription
+is not live until this runs.**
+
+Then record: the grade table in `curriculum/<code>/TEXTBOOK_AUDIT.md`, the block
+ISSUE, and memory.
 
 Convert textbooks: $ARGUMENTS
-
-## Page images for the in-app reader (`textbook-pages.py`)
-
-hogwarts renders each textbook's Markdown twin as native text at
-`/<lang>/subjects/<slug>/textbook` (school dashboard, "reader mode": Thmanyah
-serif, adjustable size, Arabic-folded search, contents from the catalog
-chapters). Equations, tables and figures are OCR noise in the twin, so the
-reader can show the ORIGINAL page beside the text — one WebP per PDF page:
-
-```bash
-python3 ~/.claude/skills/textbook/scripts/textbook-pages.py curriculum/sd/g12/*/ --jobs 6   # <dir>/pages/<N>.webp, N = 1-based PDF page = the twin's <!-- page N --> number
-aws s3 sync curriculum/sd/g12/biology/pages s3://databayt-cdn/catalog/textbooks/sd-g12-biology/pages/ --content-type image/webp --cache-control "public, max-age=31536000, immutable" --only-show-errors   # and the app bucket
-```
-
-~1000 px wide, quality 70 → ~55 KB a page, ~15 MB a book. The reader loads
-them only when "show page images" is on. Books whose twin has no page markers
-(MarkItDown text-layer path) get the strip unaligned — add markers to that path
-before relying on it.

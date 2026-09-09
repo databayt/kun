@@ -5003,29 +5003,57 @@
           "depends": []
         },
         {
-          "name": "textbook",
-          "effect": "Every curriculum textbook.pdf gets a graded Markdown twin — MarkItDown, RTL repair, OCR fallback, CDN",
+          "name": "md",
+          "effect": "The house standard for machine-produced Markdown — the schema, the RTL rules, and grading by agreement instead of volume",
           "order": [
             {
-              "type": "portal",
-              "name": "MarkItDown"
-            },
-            {
               "type": "skill",
-              "name": "/textbook"
+              "name": "/md"
             }
           ],
           "steps": [
-            "Run textbook-md.py over the grade or subject dirs (MarkItDown CLI, never the MCP for a book)",
-            "Read the per-book grade: A/B usable, C fragments, EMPTY → tesseract OCR fallback",
-            "Upload textbook.md beside textbook.pdf to both buckets and record the grades in the ledger"
+            "Judge a conversion by re-reading a sample with a fresh agent and diffing, never by character count",
+            "Look at the weakest pages — ordering noise is not the same defect as invented prose",
+            "Write or repair the transcription contract: transcribe don't correct, never guess, figures are content",
+            "Record provenance and known issues in the front matter"
           ],
           "connects": [
+            "textbook",
+            "convert",
+            "docs"
+          ],
+          "depends": []
+        },
+        {
+          "name": "textbook",
+          "effect": "Every curriculum textbook.pdf gets a Markdown twin by VISION transcription of the page images, graded by agreement between two independent reads",
+          "order": [
+            {
+              "type": "skill",
+              "name": "/textbook"
+            },
+            {
+              "type": "agent",
+              "name": "transcribe"
+            },
+            {
+              "type": "skill",
+              "name": "/md"
+            }
+          ],
+          "steps": [
+            "Write the per-book _CONTRACT.md — reading order, headings, tables, figures, no-guessing, no-repairing",
+            "Fan out 12 pages per transcribe agent (cap 20 concurrent); each writes pages-md/<N>.md and returns one line",
+            "Assemble with textbook-assemble.py, then grade with md-agreement.py --sample/--score and record the number",
+            "Upload beside textbook.pdf to both buckets and update the ledger — only when asked"
+          ],
+          "connects": [
+            "md",
             "convert",
             "docs"
           ],
           "depends": [
-            "convert"
+            "md"
           ]
         },
         {
