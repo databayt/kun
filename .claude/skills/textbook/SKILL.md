@@ -97,18 +97,42 @@ score from invented text — look, do not just read the percentage.
 Thresholds (A ≥ 0.95, B ≥ 0.90, C ≥ 0.80) are **provisional**, set on one book
 at n=21. Model was **opus**; sonnet is untested on this task.
 
-## Known issue — table column direction
+## Table column direction — solved, and how
 
-The contract asks for the rightmost printed column first. On the two pages
-checked against the scan (42, 169) the transcriber emitted the **leftmost**
-printed column first, which under the reader's `dir="rtl"` renders those tables
-mirrored against the book.
+Under `dir="rtl"` Markdown column 1 renders at the RIGHT edge, so column 1 must
+carry the **rightmost printed** column or the table renders mirrored against the
+book. On biology, 8 of 31 checkable tables were mirrored. Not systematic — 23
+were already right, so a blanket swap would have corrupted the majority.
 
-**The extent is unmeasured and the fix is undecided.** Only 5 audited pages carry
-tables in both runs, and 2 of those disagree structurally — so "systematic
-inversion" is not established, and neither is whether rewording the contract
-would fix it or a post-process column swap is needed. Measure before acting:
-compare column 1 against the scan on a proper table sample.
+**Do not ask an agent which column is on the right.** Asked to judge direction on
+a full page, transcribers get it backwards — it is the same confusion that
+creates the bug. A first audit pass reported page 42's rightmost column as
+`تينيا ساجيناتا` when the scan plainly shows `تينيا سوليوم`.
+
+**Crop instead.** Render the right ~45 % of the page and ask only "what is in
+this image". Position becomes physical, and there is no direction judgment left
+to get wrong. That pass matched every page hand-checked against the scan.
+
+```bash
+# 1. crop the right 45% of each page carrying a table (PyMuPDF clip)
+# 2. an agent writes tables-audit/<N>.right.json: rightmostFirstCell, nextToItsLeft
+# 3. compare + fix
+md-table-direction.py <book>          # report
+md-table-direction.py <book> --fix    # reverse only the MIRRORED tables
+```
+
+Reversing a whole row is safe even for a Punnett square: header and body reverse
+together, so row × column still lands on the same genotype, and the corner label
+moves to whichever end the print has it.
+
+Two things the checker must handle, both found the hard way: a **blank header
+row** carries no signal, so fall through to the first row with content (page 169
+scored 0.00 both ways until then); and **near-identical labels** (`القائمة (أ)`
+vs `القائمة (ب)`) score ~0.89 against each other, so an exact match on one end
+must decide it regardless of margin.
+
+Leave alone what is not a printed grid: on 2 pages the Markdown "table" renders a
+cross DIAGRAM, where column direction is meaningless.
 
 ## Upload (only when asked)
 

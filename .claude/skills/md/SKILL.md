@@ -55,10 +55,12 @@ Clauses that earned their place:
 
 - Keep the source language's own digits and spelling as printed.
 - **Table column direction is a live trap.** Markdown column 1 renders on the
-  *right* under `dir="rtl"`. So the rightmost printed column must be written
-  first, or the rendered table is mirrored against its source. Transcribers have
-  been observed doing the opposite even when told; state it explicitly, then
-  **verify against the scan** rather than assuming either the error or the fix.
+  *right* under `dir="rtl"`, so the rightmost printed column must be written
+  first or the table is mirrored against its source. Transcribers get this wrong
+  even when told, and **they get it wrong again when asked to audit it** — the
+  judgement is the bug. Verify by CROPPING the page's right edge and asking only
+  what is in the crop; position then becomes physical. Expect a mix: on one book
+  8 of 31 tables were mirrored and 23 were fine, so never blanket-swap.
 - Never put a code sample inside translatable RTL prose — braces and `#`/`/` are
   bidi-neutral and will reorder.
 

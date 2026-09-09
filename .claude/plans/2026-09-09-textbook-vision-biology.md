@@ -142,3 +142,41 @@ The first write-up said tesseract extracted 1,060 Latin characters and vision
 Excluding comments the real figures are **0 and 7,324**: tesseract with `-l ara`
 recovered no Latin letters at all, so every scientific term in the book was lost.
 The corrected row is a stronger result than the one it replaces.
+
+---
+
+# Table direction resolved + SHIPPED — 2026-09-09, later
+
+**Live.** `textbook.md` is on both buckets and CloudFront `E3PHDXTDSBCQSJ` was
+invalidated (`I8T0K9PM8OCVQJVP67WRFKIORX`). `cdn.databayt.org` now serves the
+vision twin (441,667 bytes, `extraction: vision`), verified over HTTPS: page 112
+carries its figure and caption where the OCR twin was empty, and page 42's table
+leads with `تينيا سوليوم`.
+
+**The mirrored-tables question is answered: it was NOT systematic.** Of 31
+checkable tables, 23 were already correct and 8 were mirrored (pages 5, 42, 153,
+169, 171, 172, 174, 178). A blanket swap — which the earlier write-up implied
+would be the fix — would have corrupted 23 correct tables. Measuring first was
+the right call.
+
+**The method matters more than the result.** Asking agents to report which column
+sits on the right FAILED: the first audit pass said page 42's rightmost column
+was `تينيا ساجيناتا` when the scan plainly shows `تينيا سوليوم`. Judging direction
+on a full page is the very confusion that causes the bug. Cropping the right 45 %
+of the page and asking only "what is in this image" removed the judgement and
+matched every hand-checked page.
+
+Two checker bugs found the hard way: a blank header row carries no signal (page
+169 scored 0.00 both ways until the checker fell through to the first row with
+content), and near-identical labels score ~0.89 against each other, so an exact
+match on one end must decide it regardless of margin.
+
+Reversal is safe even for Punnett squares — header and body reverse together, so
+row × column still lands on the same genotype. Verified on page 171: after
+reversal, row Y × column y still yields yY.
+
+Left alone deliberately: pages 138 and 141 (hand-checked, correct) and pages 146
+and 150, where the Markdown table renders a printed cross DIAGRAM rather than a
+ruled grid.
+
+New tool: `md-table-direction.py` (report / `--fix`).
