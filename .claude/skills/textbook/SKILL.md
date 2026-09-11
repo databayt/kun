@@ -2,7 +2,7 @@
 name: textbook
 description: Give every curriculum textbook.pdf a verified Markdown twin — vision transcription, blind re-reads, adjudication, a benchmark
 when_to_use: "Use when curriculum textbooks (PDF scans, mostly Arabic) must become Markdown twins, or a twin must be verified, repaired or benchmarked. Triggers on: textbook markdown, textbook.md, convert the textbooks, pdf to md for grade N, re-transcribe the textbooks, fix the textbook twin, textbook bench."
-argument-hint: "<book-dir> [--mode full|verify|repair] [--sample N] [--rounds N] [--audit] | bench [book-id] [--label L] [--model M] | gold <book-id> <pages>"
+argument-hint: "<book-dir> [--mode full|verify|repair] [--sample N] [--rounds N] [--audit] | bench [book-id] [--label L] [--model M]"
 ---
 
 # Textbook → verified Markdown twin
@@ -75,7 +75,9 @@ for diagrams, figure count, `illegibleMin/Max` for the never-guess discipline. G
 beside them as a secondary signal. `textbook-bench.py score` is deterministic; it reports per
 kind, per class, and whether the run is `comparable` (gold hash + contract hash + model recorded).
 `propose` seeds a corpus from two reads on disk (what both contain is safe, the rest is
-`disputed`); `gold` mode adjudicates the disputes; `freeze` hashes the gold. **Blind runs write
+`disputed`); promoting a case from `candidate` to `adjudicated` is **manual until wired**: run the
+`adjudicate` agent on the disputed page with its output directed to `gold/<N>.md`, edit the
+assertions with the page image open, then `freeze` hashes the gold. **Blind runs write
 to `bench-runs/<label>/` and never open `pages-md/`, `gold/` or the manifest** — the transcript
 audit fails the run on any such read, and the entry is persisted `invalid`.
 

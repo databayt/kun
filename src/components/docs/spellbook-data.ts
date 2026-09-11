@@ -2557,12 +2557,7 @@ export const schools: School[] = [
         name: "textbook",
         effect:
           "Every curriculum textbook.pdf gets a Markdown twin by VISION transcription, verified by a blind second read on text and structure, adjudicated against the scan, and benchmarked on the hardest pages",
-        order: [
-          s("/textbook"),
-          undefined("transcribe"),
-          undefined("adjudicate"),
-          s("/md"),
-        ],
+        order: [s("/textbook"), f("transcribe"), f("adjudicate"), s("/md")],
         steps: [
           "Render pages/<N>.webp and template pages-md/_CONTRACT.md from structure.json",
           "Fan out 12 pages per transcribe agent; each writes pages-md/<N>.md and returns one line",
@@ -2599,7 +2594,7 @@ export const schools: School[] = [
         name: "transcribe",
         effect:
           "Read one page image, write one Markdown file, exactly as printed — never correcting, never guessing, blind when told",
-        order: [undefined("transcribe"), s("/textbook")],
+        order: [f("transcribe"), s("/textbook")],
         steps: [
           "Read the contract, then the image, then write pages-md/<N>.md — one page at a time",
           "Tables are ruled or shaded grids only; diagram labels are printed words only; no caption is composed",
@@ -2626,7 +2621,7 @@ export const schools: School[] = [
         name: "adjudicate",
         effect:
           "Settle every disagreement against the scan and its native-density crops, repair the page, record the verdict, teach the contract the case",
-        order: [undefined("adjudicate"), s("/textbook")],
+        order: [f("adjudicate"), s("/textbook")],
         steps: [
           "textbook-crop.py zoom renders each figure at native density; right crops decide table direction",
           "The adjudicate agent reads image, crops, both reads and the hunks; chooses A, B or the illegible marker — never a third reading",
@@ -2642,7 +2637,7 @@ export const schools: School[] = [
           "Score the pipeline — contract × agent × model — on the benchmark corpus of the hardest pages against objective assertions, and persist the trend",
         order: [
           s("/textbook"),
-          undefined("transcribe"),
+          f("transcribe"),
           m(".claude/memory/textbook-scores.json"),
         ],
         steps: [

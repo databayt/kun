@@ -5034,11 +5034,11 @@
               "name": "/textbook"
             },
             {
-              "type": "agent",
+              "type": "familiar",
               "name": "transcribe"
             },
             {
-              "type": "agent",
+              "type": "familiar",
               "name": "adjudicate"
             },
             {
@@ -5096,7 +5096,7 @@
           "effect": "Read one page image, write one Markdown file, exactly as printed — never correcting, never guessing, blind when told",
           "order": [
             {
-              "type": "agent",
+              "type": "familiar",
               "name": "transcribe"
             },
             {
@@ -5153,7 +5153,7 @@
           "effect": "Settle every disagreement against the scan and its native-density crops, repair the page, record the verdict, teach the contract the case",
           "order": [
             {
-              "type": "agent",
+              "type": "familiar",
               "name": "adjudicate"
             },
             {
@@ -5186,7 +5186,7 @@
               "name": "/textbook"
             },
             {
-              "type": "agent",
+              "type": "familiar",
               "name": "transcribe"
             },
             {
