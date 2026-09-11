@@ -45,6 +45,7 @@ import {
   SpellSchool,
   SpellbookLegend,
   SpellWorkflows,
+  SpellWorkflow,
   SpellMastery,
   SpellStats,
 } from "@/components/docs/spellbook";
@@ -52,6 +53,7 @@ import {
   InstallCommand,
   FeaturePipeline,
   SocialPipeline,
+  TextbookPipeline,
 } from "@/components/docs/intro";
 
 // This file is required to use MDX in `app` directory.
@@ -352,12 +354,14 @@ const mdxComponents = {
   SpellSchool,
   SpellbookLegend,
   SpellWorkflows,
+  SpellWorkflow,
   SpellMastery,
   SpellStats,
   // Intro / landing
   InstallCommand,
   FeaturePipeline,
   SocialPipeline,
+  TextbookPipeline,
 };
 
 export function useMDXComponents(

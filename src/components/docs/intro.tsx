@@ -110,3 +110,30 @@ export function SocialPipeline() {
     </>
   );
 }
+
+const textbookStages: Stage[] = [
+  { name: "Textbook", description: "Render the pages" },
+  { name: "Contract", description: "The book's rules" },
+  { name: "Transcribe", description: "Vision, one file per page" },
+  { name: "Agreement", description: "Blind second read" },
+  { name: "Adjudicate", description: "Settle against the scan" },
+  { name: "Textbook bench", description: "Score the pipeline" },
+];
+
+export function TextbookPipeline() {
+  return (
+    <>
+      <StageGrid stages={textbookStages} />
+      <p className="text-muted-foreground mt-4 text-sm">
+        <code className="bg-muted rounded px-1.5 py-0.5 text-[13px] font-bold">
+          textbook &lt;book-dir&gt;
+        </code>{" "}
+        chains the first five stages;{" "}
+        <code className="bg-muted rounded px-1.5 py-0.5 text-[13px] font-bold">
+          textbook bench
+        </code>{" "}
+        scores the pipeline on its hardest pages.
+      </p>
+    </>
+  );
+}

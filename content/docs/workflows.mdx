@@ -117,6 +117,31 @@ Session start: Claude checks for open report issues
 
 ---
 
+## Content Workflows
+
+### Textbook to Markdown twin (`textbook <book-dir>`)
+
+Every curriculum `textbook.pdf` gets a `textbook.md` beside it, read by a vision model — not OCR — and trusted only as far as a **blind second read agrees with it**. Disagreements are adjudicated against the scan, never averaged away.
+
+| Phase | What happens |
+|-------|--------------|
+| 1. Prepare | Render `pages/<N>.webp` at 1000 px; template `pages-md/_CONTRACT.md` from `structure.json` |
+| 2. Transcribe | 12 pages per `transcribe` agent, one file per page, one status line back |
+| 3. Assemble | Stitch with provenance; lint every page on the reader's grammar (tables without a grid, composed captions, headings not in the structure) |
+| 4. Verify | Random + risk sample re-read **blind**; six axes per page; a failure class per page; right-edge crops settle table direction |
+| 5. Adjudicate | Every queued page settled against the scan by the `adjudicate` agent — page repaired, verdict recorded, contract taught |
+| 6. Persist | Grade and queue written to `.claude/memory/textbook-scores.json` — the only writer |
+
+Modes: `full` · `verify` (a twin already on disk) · `repair` (the saved queue only). The headline is the random sample's agreement; A ≥ 0.95 is provisional.
+
+### Textbook benchmark (`textbook bench [book-id]`)
+
+A blind transcription of the corpus's hardest pages into `bench-runs/<label>/`, scored against objective per-page assertions (repair traps that must survive, interpretive words that must not appear, label sets, table shapes, the crop-verified rightmost column), then the transcript audit that voids a run that peeked. Every entry records the gold hash, the contract hash and the model, so a contract or model change is a comparable number.
+
+**Full page**: [Textbook](/docs/textbook) — run commands, arguments, configuration, the record.
+
+---
+
 ## Component Creation
 
 ### Atom (`atom [name]`)
@@ -357,6 +382,8 @@ Every piece of work = a GitHub issue. 22 labels, 3 milestones (Phase 1/2/3).
 | Create component | `atom` / `template` / `block` | Abdout |
 | Generate feature | `saas [feature]` | Abdout |
 | Run tests | `test [target]` | Abdout |
+| Convert a textbook | `textbook <book-dir>` | Abdout |
+| Score the textbook pipeline | `textbook bench` | Abdout |
 | QA testing | GitHub Issue checklists | Ali |
 | Report bugs | Comment on GitHub Issue | Ali |
 | Fix user reports | `report` / `report hogwarts` | Automatic |

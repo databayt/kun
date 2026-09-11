@@ -1074,6 +1074,8 @@ The true power of this system lies in combination. Single words are charms. Pair
 | `handover auth`      | `guardian` familiar → Browser MCP (headed) → all wards               | 5-pass QA across 2 environments            |
 | `parallelize`        | `react` + `performance` familiars                                    | Sequential code bends time                 |
 | `deploy`             | `/deploy` skill → `deploy` familiar → Vercel MCP → `deployment` ward | Code travels to the edge of the world      |
+| `textbook <book-dir>` | `/textbook` skill → `transcribe` familiar → blind re-read → `adjudicate` familiar → `textbook-scores.json` | A Markdown twin a second read agrees with |
+| `textbook bench`     | `/textbook` skill → `transcribe` familiar (blind) → `textbook-bench.py score` → transcript audit | The pipeline itself, as a number           |
 
 ---
 

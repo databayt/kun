@@ -1,7 +1,7 @@
 # Workflows: Kun (كن)
 
 > **Version**: 2.0
-> **Date**: 2026-03-30
+> **Date**: 2026-09-11
 > **Purpose**: How Kun runs Databayt's technical and business operations
 
 ---
@@ -106,6 +106,30 @@ When NOT to use:
   - Hotfix from a non-main branch → use /ship directly
   - QA only, not shipping → use /handover alone
   - Investigating a prod issue → use /watch + /incident
+```
+
+### 1.10 Textbook → Markdown twin
+
+```
+"textbook <book-dir>"  →  .claude/workflows/textbook.js
+
+Prepare     → pages/<N>.webp (1000 px) + pages-md/_CONTRACT.md from structure.json
+Transcribe  → 12 pages per `transcribe` agent, one pages-md/<N>.md each
+Assemble    → textbook.md with provenance; lint on the reader's grammar
+Verify      → random + risk sample re-read BLIND; seq/bow/num/lat/labels/struct; a class per page
+Adjudicate  → every queued page settled against the scan by `adjudicate`; page repaired, contract taught
+Persist     → .claude/memory/textbook-scores.json (the only writer)
+
+Modes: full | verify (twin already on disk) | repair (saved queue only)
+Headline: the random sample's agreement — A ≥ 0.95 provisional (engine.json → textbook)
+Agents: transcribe (reads, never corrects) · adjudicate (settles, never invents)
+
+"textbook bench [book-id] --label <what changed>"  →  .claude/workflows/textbook-bench.js
+
+  blind run into bench-runs/<label>/ → textbook-bench.py score → audit-textbook-run.mjs
+  30 tough pages of sd-g12-biology; objective assertions; gold + contract hash recorded
+
+Docs: content/docs/textbook.mdx · Runbook: .claude/skills/textbook/SKILL.md
 ```
 
 ---
@@ -360,6 +384,8 @@ Cowork (Samia or Ali):
 | Create component | "atom/template/block [name]" | Abdout |
 | Generate feature | "saas [feature]" | Abdout |
 | Run tests | "test [target]" | Abdout |
+| Convert a textbook | "textbook <book-dir>" | Abdout |
+| Score the textbook pipeline | "textbook bench" | Abdout |
 | QA testing | GitHub Issue checklists | Ali |
 | Report bugs | Comment on GitHub Issue | Ali |
 | Fix errors | "fix" | Abdout |

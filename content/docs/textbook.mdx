@@ -1,6 +1,6 @@
 ---
 title: Textbook
-description: The textbook pipeline — a scanned PDF to a Markdown twin that a blind second read agrees with, adjudicated against the scan, measured on a benchmark of its hardest pages
+description: A scanned textbook to a verified Markdown twin — vision transcription, a blind second read, adjudication against the scan, and a benchmark of the hardest pages
 ---
 
 # Textbook
@@ -11,7 +11,10 @@ activates with the `transcribe` and `adjudicate` agents and two saved workflows.
 
 **kun holds the harness, not the books.** The books live in the product repo's `curriculum/`
 tree (gitignored) and on the CDN; kun holds the contract template, the agents, the scorers, the
-workflows, the benchmark corpus and the measured record.
+workflows, the benchmark corpus and the measured record. Nothing in the harness knows a subject:
+headings come from the book's `structure.json`, the language decides direction and the illegible
+marker, and the benchmark is per book. The Grade 12 Sudanese biology book is the first benchmark,
+not a special case.
 
 ## The problem is verification, not transcription
 
@@ -32,19 +35,80 @@ hides the defect, by six axes and a failure class per page.
 
 ## The pipeline
 
-<SpellWorkflows />
+<SpellWorkflow id="textbook-pipeline" />
 
-| Stage         | Keyword          | What happens                                                                                                    |
-| ------------- | ---------------- | --------------------------------------------------------------------------------------------------------------- |
-| Render        | `textbook`       | `pages/<N>.webp` at 1000 px beside `textbook.pdf` — the reader's page strip and the transcribers' input          |
-| Contract      | `contract`       | `pages-md/_CONTRACT.md` templated from `structure.json`: headings, language, direction, the named do-not-repair cases |
-| Transcribe    | `transcribe`     | 12 pages per agent, one file per page, one status line back                                                     |
-| Verify        | `agreement`      | random + risk sample re-read **blind**; `seq` / `bow` / `num` / `lat` / `labels` / `struct` per page; classes; right-edge crops settle table direction |
-| Repair        | `adjudicate`     | every queued page settled against the scan and native-density crops; page repaired, verdict recorded, contract taught |
-| Measure       | `textbook bench` | the corpus of hardest pages scored against objective assertions; the trend persisted                            |
+| Stage      | Keyword          | What happens                                                                                                                                           |
+| ---------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Render     | `textbook`       | `pages/<N>.webp` at 1000 px beside `textbook.pdf` — the reader's page strip and the transcribers' input                                                 |
+| Contract   | `contract`       | `pages-md/_CONTRACT.md` templated from `structure.json`: headings, language, direction, the named do-not-repair cases                                   |
+| Transcribe | `transcribe`     | 12 pages per agent, one file per page, one status line back                                                                                            |
+| Verify     | `agreement`      | random + risk sample re-read **blind**; `seq` / `bow` / `num` / `lat` / `labels` / `struct` per page; a class per page; right-edge crops settle table direction |
+| Repair     | `adjudicate`     | every queued page settled against the scan and native-density crops; page repaired, verdict recorded, contract taught                                  |
+| Measure    | `textbook bench` | the corpus of hardest pages scored against objective assertions; the trend persisted                                                                   |
 
 The harness is `.claude/workflows/textbook.js` (Prepare → Transcribe → Assemble → Verify →
-Adjudicate → Persist); the benchmark runner is `.claude/workflows/textbook-bench.js`.
+Adjudicate → Persist); the benchmark runner is `.claude/workflows/textbook-bench.js`. Both are
+Workflow-tool scripts: deterministic control flow, agents only where a page has to be read.
+
+## Run it
+
+Three calls cover every use. The book path is absolute; every other argument has a default that
+comes from `engine.json`.
+
+```js
+// a new book — render, transcribe, verify, adjudicate, persist
+Workflow({ name: "textbook", args: { book: "/abs/curriculum/sd/g12/biology", mode: "full", date: "2026-09-11" } })
+
+// a twin already on disk — verify and repair only
+Workflow({ name: "textbook", args: { book: "/abs/curriculum/sd/g12/biology", mode: "verify", seed: 11, date: "2026-09-11" } })
+
+// the benchmark, then the transcript audit — always both
+Workflow({ name: "textbook-bench", args: { book: "sd-g12-biology", label: "contract-v2", date: "2026-09-11" } })
+// node ~/kun/.claude/scripts/audit-textbook-run.mjs --latest --out-dir <run dir>
+```
+
+| Argument  | Default   | Meaning                                                                                                                  |
+| --------- | --------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `book`    | required  | absolute path to the directory holding `textbook.pdf` and `structure.json` (the bench takes the book id from the manifest) |
+| `mode`    | `full`    | `full` transcribes everything · `verify` skips transcription and checks what is on disk · `repair` adjudicates the saved queue only |
+| `pages`   | all       | restrict a run to a page list                                                                                            |
+| `sample`  | 12        | random pages re-read blind — the headline                                                                                |
+| `riskCap` | 12        | suspects, illegible and table pages added to the sample — the tail, reported beside the headline                          |
+| `seed`    | 7         | vary it per run; the workflow sandbox has no randomness                                                                  |
+| `batch`   | 12        | pages per transcriber                                                                                                    |
+| `rounds`  | 2         | adjudication passes                                                                                                      |
+| `model`   | opus      | the readers and the adjudicator; the scorers are Python and take no model                                                |
+| `audit`   | false     | measure and queue, repair nothing, persist nothing                                                                       |
+| `label`   | bench     | names the run under `bench-runs/<label>/` — say what changed                                                             |
+| `date`    | pass it   | stamped into the record; a workflow script cannot read the clock                                                         |
+
+One measured gotcha: the typed agents can fail to resolve in the session that created them. Both
+workflows then fall back to a general-purpose agent that reads the agent file first and is
+forbidden to consult anything — a general-purpose adjudicator once reached the right verdict on a
+page and then stalled for twenty minutes inside its own advisor call, while the typed `adjudicate`
+agent (Read, Write, Glob only) settled the same twelve hunks in six minutes.
+
+## What the numbers mean
+
+| Axis     | Measures                                                                 |
+| -------- | ------------------------------------------------------------------------ |
+| `seq`    | sequence similarity of the normalised text — **the headline**            |
+| `bow`    | bag-of-words overlap, order-insensitive                                  |
+| `num`    | numerals present in both reads                                           |
+| `lat`    | Latin tokens present in both reads                                       |
+| `labels` | figure label sets at token level, order-insensitive                      |
+| `struct` | tables, dimensions, figures and captions on the reader's grammar         |
+
+Every sampled page also gets a **class**, and the class decides the repair, not the mean:
+`structure` (tables, dims, figures, captions or label sets differ) · `omission` (a run of six or
+more words in one read only) · `numeric` · `latin` · `illegible` (one read marked, the other wrote
+text — a guess suspect) · `ordering` (same words, different order — noise unless the contract
+defines an order) · `wording` · `clean`. Only the first six enter the queue.
+
+The **headline is the random sample's `seq` agreement**, nothing else. The risk sample is the
+tail and is reported beside it; post-adjudication text is not re-scored as independent, because
+the adjudicator saw both reads. Thresholds A ≥ 0.95 · B ≥ 0.90 · C ≥ 0.80 are provisional — one
+book, n = 21, opus — and are re-derived once the benchmark carries three books.
 
 ## What "structure fidelity" means
 
@@ -80,17 +144,108 @@ sets, an order-insensitive label set, table dimensions and the crop-verified rig
 A run is a blind transcription into `bench-runs/<label>/`; `textbook-bench.py score` is
 deterministic; `audit-textbook-run.mjs` scans the transcripts and voids a run that opened an
 earlier read. Every entry records the gold hash, the contract hash and the model, so "the
-contract change helped" is a comparable number.
+contract change helped" is a comparable number — and only under the **same gold hash and the
+same contract hash**. Anything else starts a new baseline, and the entry says so.
+
+### Adding a book to the corpus
+
+1. `textbook-bench.py propose` seeds cases from two reads on disk: what both reads contain
+   becomes assertions, the rest is listed as `disputed`.
+2. Promote a case from `candidate` to `adjudicated` — **manual until wired**: run the
+   `adjudicate` agent on the disputed page with its output directed to `gold/<N>.md`, edit the
+   assertions with the page image open.
+3. `freeze` hashes the gold; add the book id to `textbook.benchmark.books` in `engine.json`.
+
+Only adjudicated cases count toward the headline (`gold_status_for_headline`). A candidate case
+still runs; it just cannot certify.
+
+## A new book
+
+What a book directory needs before `textbook <dir>`:
+
+| File             | Role                                                                                              |
+| ---------------- | ------------------------------------------------------------------------------------------------- |
+| `textbook.pdf`   | the scan                                                                                          |
+| `structure.json` | chapters and headings, language, page offset — the source of every heading the contract allows    |
+
+The harness creates the rest: `pages/`, `pages-md/` with `_CONTRACT.md`, `pages-md-audit/` (the
+blind reads), `pages-md-verify/` (verdicts, queue, score, run), `tables-audit/` (right-edge crops),
+`crops/` (native-density figures) and `textbook.md` with provenance front matter. The contract's
+"Observed in this book" section starts empty and is appended by the adjudicator; a second book in
+the same curriculum starts from the template, not from the first book's cases — repair drift is
+book-specific, and a clause that names a case the book does not have is noise.
+
+The language is the only thing the harness reads about the text: it decides direction, the
+illegible marker and the normalisation the scorers apply. Right-to-left languages are listed in
+`textbook-contract.py`.
+
+## Configuration
+
+Declared policy lives in `engine.json` under `textbook`; measured state lives in
+`.claude/memory/textbook-scores.json` and never in the engine file — the same split the dispatch
+bench uses.
+
+| Knob                                          | Value                    | Meaning                                                                 |
+| --------------------------------------------- | ------------------------ | ----------------------------------------------------------------------- |
+| `thresholds`                                  | A 0.95 · B 0.90 · C 0.80 | provisional — set on one book, n = 21, opus                              |
+| `sample_pages` / `risk_cap`                   | 12 / 12                  | the headline sample and the risk tail                                   |
+| `seed`                                        | 7                        | default sampling seed — vary it per run                                 |
+| `batch_pages`                                 | 12                       | pages per transcriber                                                   |
+| `adjudicate_rounds`                           | 2                        | repair passes before a page is left `unresolved`                        |
+| `render_width`                                | 1000                     | px — the page strip the reader and the transcribers share               |
+| `crop_right_frac`                             | 0.45                     | the right-edge crop that settles table direction                        |
+| `zoom_max`                                    | 6                        | cap on the native-density re-render                                     |
+| `tokens_per_page` / `tokens_per_adjudication` | 11,000 / 15,000          | measured on opus — for budgeting a run, not a limit                     |
+| `max_concurrent_agents`                       | 16                       | the Workflow tool's ceiling                                             |
+| `models`                                      | opus · opus · none       | transcribe · adjudicate · score (deterministic Python)                  |
+| `classes`                                     | 8                        | the failure classes above                                               |
+| `benchmark`                                   | manifest, scores, books, audit script, blind marker | where the corpus and its record live                  |
+
+## The record
+
+| Measure                    | Value                          | Provenance                                                        |
+| -------------------------- | ------------------------------ | ----------------------------------------------------------------- |
+| Sampled agreement          | 94.8 %, grade B                | 21 pages of `sd-g12-biology` re-read blind, 2026-09-09            |
+| Repair queue               | 15 pages                       | structure 11 · omission 3 · numeric 1                              |
+| Benchmark                  | 97.4 % — 489 of 502 assertions | the shipped twin under gold `e2e540503419`, 2026-09-11             |
+| Gold                       | 4 adjudicated · 26 candidate   | 30 cases                                                          |
+
+An earlier 96.2 % entry sits under a superseded gold and is marked not comparable. Neither
+workflow has yet run end to end: the scorers were validated page by page on the biology data, and
+the `adjudicate` agent ran once, by hand, on page 196 — it restored a dropped word, stripped
+interpretive labels, marked two tiny labels illegible and caught a printed doubled colon the hand
+gold had missed. The first full verify run is the next step, and its number enters the record
+with its seed.
 
 ## Honesty
 
 - The headline is the **random** sample only. The risk-weighted tail and the post-adjudication
   scores are reported beside it and never folded in — the adjudicator saw both reads.
-- Thresholds (A ≥ 0.95, B ≥ 0.90, C ≥ 0.80) are provisional: one book, n = 21, opus.
 - A dead agent leaves a page as it was and flags it `unverified`; a run with missing pages is
-  `DEGRADED` and is persisted as such.
+  `DEGRADED` and is persisted as such — never as a clean grade.
+- Blind means blind: a bench read that opens `pages-md/`, `gold/` or the manifest is voided by
+  the transcript audit and persisted `invalid`.
 - Measured cost: ~11k tokens per transcribed page on opus; ~3M for a 253-page book; ~350k per
   benchmark run.
 
-Runbook and files: `.claude/skills/textbook/SKILL.md`; the standard both converters are held to:
-`.claude/skills/md/SKILL.md`.
+## Files
+
+| Path                                             | Role                                                              |
+| ------------------------------------------------ | ----------------------------------------------------------------- |
+| `.claude/workflows/textbook.js`                  | the harness — one book, six phases                                |
+| `.claude/workflows/textbook-bench.js`            | the benchmark runner                                              |
+| `.claude/agents/transcribe.md`                   | page and crop reader, narrow toolset, blind when told             |
+| `.claude/agents/adjudicate.md`                   | settles hunks against the scan; the only agent that edits a page  |
+| `skills/textbook/scripts/textbook-contract.py`   | contract from `structure.json` + the observed-cases section       |
+| `skills/textbook/scripts/md-structure.py`        | reader-grammar signature, lint, grid detector                     |
+| `skills/textbook/scripts/md-agreement.py`        | stratified sampling; six-axis scoring; classes; repair queue      |
+| `skills/textbook/scripts/textbook-crop.py`       | right-edge crops, native-density figure crops, native-size report |
+| `skills/textbook/scripts/md-table-direction.py`  | report or `--fix` mirrored tables from crop truth                 |
+| `skills/textbook/scripts/textbook-assemble.py`   | stitch + provenance front matter                                  |
+| `skills/textbook/scripts/textbook-bench.py`      | propose · score · freeze · persist · report                       |
+| `.claude/scripts/audit-textbook-run.mjs`         | post-run contamination check on blind reads                       |
+| `.claude/evals/textbook/`                        | manifest + per-book gold                                          |
+| `.claude/memory/textbook-scores.json`            | measured state — books and benchmark history                      |
+
+Runbook: `.claude/skills/textbook/SKILL.md`. The standard both converters are held to:
+`.claude/skills/md/SKILL.md`. The words: [Keywords](/docs/keywords) · [Workflows](/docs/workflows).

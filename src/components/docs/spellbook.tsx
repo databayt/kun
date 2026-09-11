@@ -277,6 +277,16 @@ export function SpellWorkflows() {
   )
 }
 
+export function SpellWorkflow({ id }: { id: string }) {
+  const workflow = workflows.find((wf) => wf.id === id)
+  if (!workflow) return null
+  return (
+    <div className="max-w-sm">
+      <WorkflowCard workflow={workflow} />
+    </div>
+  )
+}
+
 // ─── Mastery Levels ─────────────────────────────────────────────────────────────
 
 const levels = [

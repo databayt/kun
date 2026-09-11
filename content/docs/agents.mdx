@@ -1,20 +1,20 @@
 ---
 title: Agents
-description: 47 agents in two fleets — 20 company, 27 stack
+description: 49 agents in two fleets — 22 company, 27 stack
 ---
 
 # Agents
 
-The engine ships **47 agents** in two fleets. The **company fleet** (20) runs the business: strategy, revenue, quality, product references, and product flow videography. The **stack fleet** (27) writes the code: one agent per framework, layer, or tool.
+The engine ships **49 agents** in two fleets. The **company fleet** (22) runs the business: strategy, revenue, quality, product references, product flow videography, and curriculum content. The **stack fleet** (27) writes the code: one agent per framework, layer, or tool.
 
 Each fleet is a plugin, which is how it reaches other machines — see [Onboarding](/docs/onboarding).
 
 | Fleet | Plugin | Agents | Lives in |
 |-------|--------|--------|----------|
-| Company | `kun-company` | 20 | `.claude/agents/` |
+| Company | `kun-company` | 22 | `.claude/agents/` |
 | Stack | `kun-stack` | 27 | installed to `~/.claude/agents/` |
 
-## Company fleet (20)
+## Company fleet (22)
 
 The captain sits above everything and never writes code — it allocates, decides, and delegates.
 
@@ -51,6 +51,15 @@ The captain sits above everything and never writes code — it allocates, decide
 | **learn** | Extracts patterns, conventions, and team dynamics into memory |
 | **package** | Cross-repo dependency audit and upgrade coordination |
 | **clone** | Translates a captured live-URL section into house-stack JSX |
+
+### Content (2)
+
+The textbook lane — see [Textbook](/docs/textbook). Narrow toolsets by design: Read, Write, Glob — a reader that cannot run a shell cannot peek.
+
+| Agent | Scope |
+|-------|-------|
+| **transcribe** | Reads scanned page images and writes one Markdown file per page, exactly as printed — never corrects, never guesses |
+| **adjudicate** | Settles every disagreement between two reads against the page and its crops, repairs the page, records the verdict — the only agent that edits a transcribed page |
 
 ### Product references (4)
 
