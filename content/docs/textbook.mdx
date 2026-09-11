@@ -1,0 +1,96 @@
+---
+title: Textbook
+description: The textbook pipeline — a scanned PDF to a Markdown twin that a blind second read agrees with, adjudicated against the scan, measured on a benchmark of its hardest pages
+---
+
+# Textbook
+
+The engine's content lane for curriculum books. Say it in prose — _"convert the grade 12
+textbooks"_, _"verify the biology twin"_, _"textbook bench"_ — and the `/textbook` runbook
+activates with the `transcribe` and `adjudicate` agents and two saved workflows.
+
+**kun holds the harness, not the books.** The books live in the product repo's `curriculum/`
+tree (gitignored) and on the CDN; kun holds the contract template, the agents, the scorers, the
+workflows, the benchmark corpus and the measured record.
+
+## The problem is verification, not transcription
+
+A vision model reads a scanned Arabic page well — on `sd/g12/biology` it recovered 180,323 Arabic
+characters, 7,324 Latin ones, 276 table rows and 144 captioned figures where tesseract produced
+143,153 / **0** / 6 / 0. The hard part is knowing which of those characters are wrong. Two
+failures shaped the design:
+
+- **A coverage grade certified garbage.** The old grader counted whether output looked like
+  Arabic letters, so a 47 %-complete OCR twin scored "A".
+- **Transcribers repair the source.** One "corrected" two printed figure numbers by
+  cross-reference and normalised `ڤ` to `ف`, reporting the fixes as improvements. Another added
+  interpretive words to raw diagram labels; another composed a caption for an uncaptioned figure;
+  another rendered a Punnett cross as a Markdown table.
+
+So the twin is graded by **agreement between two independent reads** — and, because one number
+hides the defect, by six axes and a failure class per page.
+
+## The pipeline
+
+<SpellWorkflows />
+
+| Stage         | Keyword          | What happens                                                                                                    |
+| ------------- | ---------------- | --------------------------------------------------------------------------------------------------------------- |
+| Render        | `textbook`       | `pages/<N>.webp` at 1000 px beside `textbook.pdf` — the reader's page strip and the transcribers' input          |
+| Contract      | `contract`       | `pages-md/_CONTRACT.md` templated from `structure.json`: headings, language, direction, the named do-not-repair cases |
+| Transcribe    | `transcribe`     | 12 pages per agent, one file per page, one status line back                                                     |
+| Verify        | `agreement`      | random + risk sample re-read **blind**; `seq` / `bow` / `num` / `lat` / `labels` / `struct` per page; classes; right-edge crops settle table direction |
+| Repair        | `adjudicate`     | every queued page settled against the scan and native-density crops; page repaired, verdict recorded, contract taught |
+| Measure       | `textbook bench` | the corpus of hardest pages scored against objective assertions; the trend persisted                            |
+
+The harness is `.claude/workflows/textbook.js` (Prepare → Transcribe → Assemble → Verify →
+Adjudicate → Persist); the benchmark runner is `.claude/workflows/textbook-bench.js`.
+
+## What "structure fidelity" means
+
+Structure is scored on the **reader's own grammar** — the block regexes of hogwarts
+`textbook/parse.ts` are ported into `md-structure.py`, so a "table" is exactly what a student
+sees rendered as a grid. Three structural defects are detected without a model:
+
+- **diagram-as-table** — a Markdown table on a page with no ruled or shaded grid. A PIL long-run
+  detector finds rules and shaded bands; a boxed diagram has two rules per axis, a table has more.
+- **composed caption** — alt text that carries no printed figure number.
+- **mirrored table** — column 1 must be the rightmost printed column under `dir="rtl"`. Decided
+  by cropping the right 45 % of the page and asking only what is in the crop; on the first book
+  8 of 31 tables were mirrored and 23 were right, so nothing is ever blanket-swapped.
+
+## Unreadable labels
+
+Figures are embedded at native resolution but painted small: biology page 60 holds a 1237 px
+flower diagram drawn at ~420 px in the render, which is why six labels read as `[غير مقروء]`.
+`textbook-crop.py native` reports the gain; `zoom` re-renders each figure at native density (2.95×
+there) and the adjudicator reads the crop. When the native image is no larger than the render,
+the tool says so and the harness keeps the mark — marking uncertainty is never penalised.
+
+## The benchmark
+
+`.claude/evals/textbook/manifest.json` — 30 pages of `sd-g12-biology` chosen for the failure
+classes: dense labels, unreadable labels, diagram-as-table, RTL and notation tables, multi-figure
+pages, ordering and interpretation, repair traps, edge and control pages. Each case carries
+**objective assertions** a person can check against the scan: raw `mustContain` /
+`mustNotContain` (`(الصورة 51)` must survive; `العمود الأيمن` must not appear), numeral and Latin
+sets, an order-insensitive label set, table dimensions and the crop-verified rightmost column,
+`noTable`, figure count, `illegibleMin/Max`. Gold text sits beside them as a secondary signal.
+
+A run is a blind transcription into `bench-runs/<label>/`; `textbook-bench.py score` is
+deterministic; `audit-textbook-run.mjs` scans the transcripts and voids a run that opened an
+earlier read. Every entry records the gold hash, the contract hash and the model, so "the
+contract change helped" is a comparable number.
+
+## Honesty
+
+- The headline is the **random** sample only. The risk-weighted tail and the post-adjudication
+  scores are reported beside it and never folded in — the adjudicator saw both reads.
+- Thresholds (A ≥ 0.95, B ≥ 0.90, C ≥ 0.80) are provisional: one book, n = 21, opus.
+- A dead agent leaves a page as it was and flags it `unverified`; a run with missing pages is
+  `DEGRADED` and is persisted as such.
+- Measured cost: ~11k tokens per transcribed page on opus; ~3M for a 253-page book; ~350k per
+  benchmark run.
+
+Runbook and files: `.claude/skills/textbook/SKILL.md`; the standard both converters are held to:
+`.claude/skills/md/SKILL.md`.

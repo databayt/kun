@@ -1,0 +1,1482 @@
+{
+ "$schema": "kun-textbook-bench-v1",
+ "updated": "2026-09-11",
+ "classes": {
+  "dense-labels": "a figure with 8+ internal labels — completeness and no interpretation",
+  "unreadable-labels": "labels illegible at the page render; a native-density crop must be tried before marking",
+  "diagram-as-table": "a cross, flow chart or boxed diagram that must NOT become a Markdown table",
+  "rtl-table": "a printed grid; column 1 must be the rightmost printed column",
+  "mirrored": "a table the first run emitted mirrored — direction regression guard",
+  "punnett": "a Punnett square; reversal must keep row × column genotypes",
+  "notation": "superscripts, subscripts, crosses and ratios kept as printed (LaTeX)",
+  "latin": "binomials and English glosses inline, as printed",
+  "numerals": "the book's own digits, as printed",
+  "ordering": "same printed words, different sequence — noise unless a printed order exists",
+  "interpretation": "a read that adds words no label carries",
+  "omission": "a printed word or span dropped by one read",
+  "composed-caption": "an uncaptioned figure given an invented description",
+  "multi-figure": "several figures on one page — all captions, all labels",
+  "repair-trap": "a printed typo that must be reproduced, never corrected",
+  "structure": "headings/lists/tables where two reads disagreed structurally",
+  "edge": "cover, near-blank and furniture-only pages",
+  "cover": "the cover page",
+  "near-blank": "a page with almost no text",
+  "control": "a page that scored 100% agreement — regression guard",
+  "pictorial-grid": "a ruled grid whose cells are drawings with labels — a table, but only the printed words"
+ },
+ "books": [
+  {
+   "id": "sd-g12-biology",
+   "source": "/Users/abdout/hogwarts/curriculum/sd/g12/biology",
+   "pagesUrl": "https://cdn.databayt.org/catalog/textbooks/sd-g12-biology/pages/{n}.webp",
+   "lang": "ar",
+   "pdfMd5": "534d69d019cd32409a034ebeed7834ee",
+   "renderWidth": 1000,
+   "contract": "pages-md/_CONTRACT.md",
+   "gold": "sd-g12-biology/gold",
+   "goldHash": "sha1:5d1064d23eac",
+   "cases": [
+    {
+     "page": 1,
+     "classes": [
+      "edge",
+      "cover"
+     ],
+     "why": "cover page carrying only an aggregator watermark and the title — must not be padded",
+     "goldStatus": "candidate",
+     "assert": {
+      "mustContain": [],
+      "mustNotContain": [],
+      "numerals": [],
+      "latin": [
+       "com",
+       "rowadaltamayoz",
+       "www"
+      ],
+      "labels": [],
+      "labelsMin": 0.8,
+      "tables": [],
+      "figures": 0,
+      "illegibleMin": 0,
+      "illegibleMax": 0
+     }
+    },
+    {
+     "page": 6,
+     "classes": [
+      "edge",
+      "near-blank"
+     ],
+     "why": "21 Arabic characters: a near-blank page must yield exactly its few words",
+     "goldStatus": "candidate",
+     "assert": {
+      "mustContain": [],
+      "mustNotContain": [],
+      "numerals": [],
+      "latin": [
+       "reproduction"
+      ],
+      "labels": [],
+      "labelsMin": 0.8,
+      "tables": [],
+      "figures": 0,
+      "illegibleMin": 0,
+      "illegibleMax": 0
+     }
+    },
+    {
+     "page": 7,
+     "classes": [
+      "rtl-table",
+      "numerals"
+     ],
+     "why": "contents table, 20 rows of titles and printed page numbers",
+     "goldStatus": "candidate",
+     "assert": {
+      "mustContain": [],
+      "mustNotContain": [],
+      "numerals": [
+       "1",
+       "1.1",
+       "1.2",
+       "10.2",
+       "11.2",
+       "2",
+       "2.1",
+       "2.2",
+       "25",
+       "26",
+       "27",
+       "3",
+       "3.1",
+       "3.2",
+       "31",
+       "33",
+       "4.1",
+       "4.2",
+       "40",
+       "44",
+       "5.2",
+       "51",
+       "6.2",
+       "7.2",
+       "8.2",
+       "9",
+       "9.2",
+       "95"
+      ],
+      "latin": [],
+      "labels": [],
+      "labelsMin": 0.8,
+      "tables": [
+       {
+        "rows": 19,
+        "cols": 2,
+        "rightmost": "الموضوع"
+       }
+      ],
+      "figures": 0,
+      "illegibleMin": 0,
+      "illegibleMax": 0
+     }
+    },
+    {
+     "page": 39,
+     "classes": [
+      "numerals"
+     ],
+     "why": "the two reads agreed on words and disagreed on numbers (numeral F1 0.57)",
+     "goldStatus": "candidate",
+     "assert": {
+      "mustContain": [],
+      "mustNotContain": [],
+      "numerals": [
+       "1",
+       "2",
+       "3",
+       "4"
+      ],
+      "latin": [
+       "budding",
+       "cycle",
+       "hydra",
+       "life"
+      ],
+      "labels": [],
+      "labelsMin": 0.8,
+      "tables": [
+       {
+        "rows": 6,
+        "cols": 3,
+        "rightmost": "وجه المقارنة"
+       }
+      ],
+      "figures": 0,
+      "illegibleMin": 0,
+      "illegibleMax": 0
+     },
+     "disputed": {
+      "numerals": [
+       "2.5",
+       "2.6",
+       "5",
+       "٢.٥",
+       "٢.٦",
+       "٥"
+      ],
+      "latin": [],
+      "labelsOnlyInA": [],
+      "labelsOnlyInB": [],
+      "tables": [
+       1,
+       1
+      ],
+      "figures": [
+       0,
+       0
+      ]
+     }
+    },
+    {
+     "page": 42,
+     "classes": [
+      "rtl-table",
+      "numerals",
+      "latin",
+      "dense-labels",
+      "mirrored"
+     ],
+     "why": "comparison table with Arabic-Indic counts, mirrored in the first run; figure with Latin binomials",
+     "goldStatus": "candidate",
+     "assert": {
+      "mustContain": [
+       "الجدول (1)",
+       "الجدول(1)",
+       "الشكل (20)"
+      ],
+      "mustNotContain": [],
+      "numerals": [
+       "1",
+       "20",
+       "١",
+       "١٠",
+       "١٠٠٠",
+       "١٢",
+       "١٥",
+       "٢",
+       "٢٠",
+       "٢٠٠٠",
+       "٣",
+       "٣٥",
+       "٤",
+       "٤٠٠٠٠",
+       "٥",
+       "٦",
+       "٧",
+       "٨٠٠٠٠"
+      ],
+      "latin": [
+       "hooks",
+       "proglottids",
+       "scolex",
+       "solium",
+       "suckers",
+       "taenia"
+      ],
+      "labels": [
+       "قطع لسانية غير ناضجة",
+       "قطع ناضجة",
+       "قطع خصبة",
+       "الرأس",
+       "ممصات",
+       "خطافات hooks",
+       "ممصات suckers",
+       "رأس الدودة Scolex of _Taenia solium_"
+      ],
+      "labelsMin": 0.8,
+      "tables": [
+       {
+        "rows": 7,
+        "cols": 2,
+        "rightmost": "تينيا سوليوم"
+       }
+      ],
+      "figures": 1,
+      "illegibleMin": 0,
+      "illegibleMax": 0
+     }
+    },
+    {
+     "page": 52,
+     "classes": [
+      "numerals",
+      "structure",
+      "dense-labels"
+     ],
+     "why": "structure and numeral disagreement on a figure page",
+     "goldStatus": "candidate",
+     "assert": {
+      "mustContain": [
+       "الشكل (27)",
+       "الشكل 27)"
+      ],
+      "mustNotContain": [],
+      "numerals": [
+       "27"
+      ],
+      "latin": [
+       "breeding",
+       "frog",
+       "season",
+       "seminalis",
+       "vesicula"
+      ],
+      "labels": [
+       "أجسام دهنية",
+       "الخصية",
+       "الكلية",
+       "المستقيم",
+       "المثانة البولية",
+       "فتحة المجمع",
+       "المجمع"
+      ],
+      "labelsMin": 0.8,
+      "tables": [],
+      "figures": 1,
+      "illegibleMin": 0,
+      "illegibleMax": 0
+     },
+     "disputed": {
+      "numerals": [
+       "2",
+       "2.9",
+       "9"
+      ],
+      "latin": [],
+      "labelsOnlyInA": [
+       "الغدة المجاورة الكلوية",
+       "الحالب",
+       "الحويصلة المنوية"
+      ],
+      "labelsOnlyInB": [
+       "الغدة الجاركلوبية",
+       "المالب",
+       "المرسلة البولية"
+      ],
+      "tables": [
+       0,
+       0
+      ],
+      "figures": [
+       1,
+       1
+      ]
+     }
+    },
+    {
+     "page": 56,
+     "classes": [
+      "ordering",
+      "dense-labels"
+     ],
+     "why": "eight numbered stages with scattered labels; same words, different order (seq 80%, bow 99%)",
+     "goldStatus": "adjudicated",
+     "assert": {
+      "mustContain": [
+       "الشكل (29)",
+       "يدلل عليه",
+       "ثقب الأنف",
+       "الفتحة الخيشومية",
+       "خمسة أصابع",
+       "أربعة أصابع"
+      ],
+      "mustNotContain": [
+       "يدل عليه باختفاء"
+      ],
+      "numerals": [
+       "1",
+       "29",
+       "5",
+       "6",
+       "7",
+       "8"
+      ],
+      "latin": [],
+      "labels": [
+       "عين",
+       "ثقب الأنف",
+       "فم",
+       "الطرف الخلفي",
+       "الطرف الخلفي يحمل خمسة أصابع",
+       "الطرف الأمامي يحمل أربعة أصابع"
+      ],
+      "labelsMin": 0.85,
+      "tables": [],
+      "figures": 1,
+      "illegibleMin": 0,
+      "illegibleMax": 0
+     },
+     "goldNote": "2026-09-11: settled against pages/56.webp — read A is the print; the print says يدلل. Label order follows the stages top to bottom."
+    },
+    {
+     "page": 60,
+     "classes": [
+      "unreadable-labels"
+     ],
+     "why": "flower diagram painted at ~420px from a 1237px native image; 6 labels marked illegible — a native-density crop recovers most",
+     "goldStatus": "candidate",
+     "assert": {
+      "mustContain": [
+       "Pedicle",
+       "Peduncle",
+       "Receptacle",
+       "Sepals",
+       "الشكل (30)"
+      ],
+      "mustNotContain": [],
+      "numerals": [
+       "1",
+       "2",
+       "3",
+       "30",
+       "4"
+      ],
+      "latin": [
+       "pedicle",
+       "peduncle",
+       "receptacle",
+       "sepals"
+      ],
+      "labels": [],
+      "labelsMin": 0.8,
+      "tables": [],
+      "figures": 1,
+      "illegibleMin": 0,
+      "illegibleMax": 3
+     },
+     "disputed": {
+      "numerals": [],
+      "latin": [],
+      "labelsOnlyInA": [
+       "الأسدية",
+       "محيط"
+      ],
+      "labelsOnlyInB": [
+       "اتحاد",
+       "الحيط",
+       "أنثى"
+      ],
+      "tables": [
+       0,
+       0
+      ],
+      "figures": [
+       1,
+       1
+      ]
+     },
+     "goldNote": "crops/60.img0.webp (native density, gain 2.95×) makes most labels legible; the page render does not. illegibleMax=3 measures the zoom step."
+    },
+    {
+     "page": 77,
+     "classes": [
+      "unreadable-labels",
+      "dense-labels"
+     ],
+     "why": "15 labels, 2 illegible marks",
+     "goldStatus": "candidate",
+     "assert": {
+      "mustContain": [
+       "الشكل (41 ب)",
+       "الشكل 42)",
+       "الشكل 43)"
+      ],
+      "mustNotContain": [],
+      "numerals": [
+       "2",
+       "4",
+       "41",
+       "42",
+       "43"
+      ],
+      "latin": [
+       "cotyledons",
+       "dicotyledons",
+       "monocotyledons",
+       "plumule",
+       "radicle"
+      ],
+      "labels": [
+       "حبة لقاح",
+       "الميسم",
+       "أنبوب اللقاح",
+       "القلم",
+       "النيوسلة",
+       "الكيس الجنيني",
+       "غلاف داخلي",
+       "غلاف خارجي",
+       "أنبوب اللقاح",
+       "فتحة النقير",
+       "[غير مقروء]",
+       "[غير مقروء]",
+       "مبيض",
+       "بويضة",
+       "جدار البويضة"
+      ],
+      "labelsMin": 0.8,
+      "tables": [],
+      "figures": 1,
+      "illegibleMin": 0,
+      "illegibleMax": 2
+     }
+    },
+    {
+     "page": 95,
+     "classes": [
+      "multi-figure",
+      "dense-labels"
+     ],
+     "why": "four figures and 11 labels on one page",
+     "goldStatus": "candidate",
+     "assert": {
+      "mustContain": [],
+      "mustNotContain": [],
+      "numerals": [],
+      "latin": [],
+      "labels": [
+       "قصرة مُمزقة",
+       "جذير",
+       "قصرة مُمزقة",
+       "جذير",
+       "سطح التُربة",
+       "برعم طرفي",
+       "سويقة فوق فلقية",
+       "قصرة مُمزقة",
+       "جذير",
+       "سويقة فوق فلقه",
+       "سطح تربة"
+      ],
+      "labelsMin": 0.8,
+      "tables": [],
+      "figures": 4,
+      "illegibleMin": 0,
+      "illegibleMax": 0
+     }
+    },
+    {
+     "page": 102,
+     "classes": [
+      "control"
+     ],
+     "why": "prose page that scored 100% agreement — regression guard",
+     "goldStatus": "candidate",
+     "assert": {
+      "mustContain": [],
+      "mustNotContain": [],
+      "numerals": [
+       "1",
+       "10",
+       "11",
+       "12",
+       "2",
+       "3",
+       "4",
+       "5",
+       "6",
+       "7",
+       "8",
+       "9"
+      ],
+      "latin": [],
+      "labels": [],
+      "labelsMin": 0.8,
+      "tables": [],
+      "figures": 0,
+      "illegibleMin": 0,
+      "illegibleMax": 0
+     }
+    },
+    {
+     "page": 115,
+     "classes": [
+      "unreadable-labels",
+      "composed-caption"
+     ],
+     "why": "4 illegible marks; the alt text was composed rather than printed",
+     "goldStatus": "candidate",
+     "assert": {
+      "mustContain": [],
+      "mustNotContain": [],
+      "numerals": [
+       "1",
+       "15",
+       "2",
+       "3",
+       "4",
+       "6",
+       "7",
+       "8"
+      ],
+      "latin": [],
+      "labels": [
+       "مستعيناً بالشكل أجب عن الآتي:",
+       "1",
+       "[غير مقروء]",
+       "[غير مقروء]",
+       "8",
+       "[غير مقروء]",
+       "[غير مقروء]",
+       "6",
+       "7"
+      ],
+      "labelsMin": 0.8,
+      "tables": [],
+      "figures": 1,
+      "illegibleMin": 0,
+      "illegibleMax": 4
+     }
+    },
+    {
+     "page": 119,
+     "classes": [
+      "dense-labels"
+     ],
+     "why": "16 diagram labels",
+     "goldStatus": "candidate",
+     "assert": {
+      "mustContain": [
+       "الشكل (59)",
+       "الشكل 59)"
+      ],
+      "mustNotContain": [],
+      "numerals": [
+       "2",
+       "3",
+       "5",
+       "59"
+      ],
+      "latin": [
+       "blastula",
+       "ectoderm",
+       "endoderm",
+       "gastrula",
+       "mesoderm"
+      ],
+      "labels": [
+       "الزايجوت",
+       "نواة البيضة",
+       "نواة الحيوان المنوي",
+       "حيوانات منوية",
+       "إخصاب",
+       "خلية بيضية ثانوية",
+       "التلقيح",
+       "خليتان",
+       "أربع خلايا",
+       "ثمان خلايا",
+       "الموريولا - التوتة",
+       "المبيض",
+       "حويصلة ناضجة",
+       "التبويض",
+       "البلاستيولا",
+       "كتلة خلوية داخلية"
+      ],
+      "labelsMin": 0.8,
+      "tables": [],
+      "figures": 1,
+      "illegibleMin": 0,
+      "illegibleMax": 0
+     }
+    },
+    {
+     "page": 136,
+     "classes": [
+      "composed-caption",
+      "ordering",
+      "structure"
+     ],
+     "why": "unit opener with an uncaptioned diagram; one read invented a caption and nested the labels",
+     "goldStatus": "adjudicated",
+     "assert": {
+      "mustContain": [
+       "الوحدة الثانية",
+       "الوراثة",
+       "Genetics",
+       "44+XX",
+       "44+XY",
+       "22+X",
+       "22+Y"
+      ],
+      "mustNotContain": [
+       "رسم توضيحي",
+       "diagram:",
+       "inheritance of"
+      ],
+      "numerals": [
+       "22",
+       "44"
+      ],
+      "latin": [
+       "genetics"
+      ],
+      "labels": [
+       "الآباء",
+       "44+XX",
+       "الأم",
+       "44+XY",
+       "الأب",
+       "الأمشاج",
+       "22+X",
+       "بويضة",
+       "حيوان منوي",
+       "22+X",
+       "22+Y",
+       "الأبناء",
+       "44+XX",
+       "أنثى",
+       "44+XY",
+       "ذكر"
+      ],
+      "labelsMin": 0.8,
+      "tables": [],
+      "figures": 1,
+      "illegibleMin": 0,
+      "illegibleMax": 0
+     },
+     "goldNote": "2026-09-11: settled against pages/136.webp — the diagram carries no printed caption; both reads composed one. Labels verified from the image."
+    },
+    {
+     "page": 137,
+     "classes": [
+      "rtl-table",
+      "numerals"
+     ],
+     "why": "24-row contents table",
+     "goldStatus": "candidate",
+     "assert": {
+      "mustContain": [],
+      "mustNotContain": [],
+      "numerals": [
+       "1",
+       "1.1",
+       "1.2",
+       "1.3",
+       "1.6",
+       "1.7",
+       "131",
+       "132",
+       "136",
+       "144",
+       "149",
+       "150",
+       "153",
+       "154",
+       "155",
+       "157",
+       "164",
+       "169",
+       "170",
+       "171",
+       "172",
+       "174",
+       "178",
+       "179",
+       "183",
+       "184",
+       "2",
+       "2.1",
+       "2.2",
+       "2.3",
+       "2.6",
+       "2.7",
+       "3",
+       "3.1",
+       "4",
+       "4.1",
+       "5",
+       "6",
+       "7",
+       "8",
+       "9",
+       "91"
+      ],
+      "latin": [],
+      "labels": [],
+      "labelsMin": 0.8,
+      "tables": [
+       {
+        "rows": 23,
+        "cols": 2,
+        "rightmost": "الم"
+       }
+      ],
+      "figures": 0,
+      "illegibleMin": 0,
+      "illegibleMax": 0
+     }
+    },
+    {
+     "page": 144,
+     "classes": [
+      "rtl-table",
+      "pictorial-grid",
+      "interpretation"
+     ],
+     "why": "Mendel's seven traits as a ruled pictorial grid (3 columns × 7 rows of drawings with labels); the first read invented a header row (العمود الأيمن) — a printed grid is a table, but its cells are only the printed labels",
+     "goldStatus": "candidate",
+     "assert": {
+      "mustContain": [
+       "الشكل (3)"
+      ],
+      "mustNotContain": [
+       "العمود الأيمن",
+       "العمود الأيسر"
+      ],
+      "numerals": [
+       "1",
+       "1.1",
+       "3"
+      ],
+      "latin": [
+       "character",
+       "dominant",
+       "law",
+       "recessive",
+       "segregation"
+      ],
+      "labels": [],
+      "labelsMin": 0.8,
+      "tables": [
+       {
+        "rows": 7,
+        "cols": 3,
+        "rightmost": "أحمر"
+       }
+      ],
+      "figures": 1,
+      "illegibleMin": 0,
+      "illegibleMax": 0
+     },
+     "goldNote": "2026-09-11: pages/144.webp shows ruled lines — a real grid; rightmost printed column starts with the red flower أحمر (crop-verified)."
+    },
+    {
+     "page": 146,
+     "classes": [
+      "diagram-as-table"
+     ],
+     "why": "a cross diagram in a box — a Markdown table here is a grid the book never printed",
+     "goldStatus": "candidate",
+     "assert": {
+      "mustContain": [
+       "الشكل (4)",
+       "الشكل 4)",
+       "الشكل 5)"
+      ],
+      "mustNotContain": [],
+      "numerals": [
+       "1",
+       "2",
+       "3",
+       "4",
+       "5",
+       "6",
+       "7"
+      ],
+      "latin": [
+       "punnett",
+       "square"
+      ],
+      "labels": [
+       "الآباء",
+       "أزهار بيضاء نقية — rr",
+       "×",
+       "أزهار حمراء نقية — RR",
+       "تلقيح خلطي — R ، r",
+       "الأمشاج (الجاميطات)",
+       "الجيل الأول — $F_1$",
+       "أزهار حمراء هجينة (سيادة تامة) — Rr",
+       "أنثى ♀ / ذكر ♂ — تلقيح ذاتي لأفراد الجيل الأول",
+       "الجيل الثاني — $F_2$"
+      ],
+      "labelsMin": 0.8,
+      "figures": 1,
+      "illegibleMin": 0,
+      "illegibleMax": 0,
+      "noTable": true
+     }
+    },
+    {
+     "page": 147,
+     "classes": [
+      "dense-labels",
+      "notation"
+     ],
+     "why": "16 labels with genetic notation",
+     "goldStatus": "candidate",
+     "assert": {
+      "mustContain": [
+       "الشكل (5)"
+      ],
+      "mustNotContain": [],
+      "numerals": [
+       "1",
+       "2",
+       "3",
+       "5"
+      ],
+      "latin": [],
+      "labels": [
+       "الآباء (P): نباتات حمراء الأزهار X نباتات بيضاء الأزهار",
+       "↓ تلقيح خلطي (تهجين)",
+       "الجيل الأول ($F_1$): نباتات كلها حمراء الأزهار",
+       "↓ تلقيح ذاتي",
+       "الجيل الثاني ($F_2$): نباتات حمراء الأزهار | نباتات بيضاء الأزهار (بنسبة 3:1 على التوالي)",
+       "نباتات حمراء الأزهار",
+       "↓ تلقيح ذاتي",
+       "⅓ النباتات حمراء الأزهار",
+       "↓ تلقيح ذاتي",
+       "الجيل الثالث ($F_3$): نباتات كلها حمراء الأزهار",
+       "⅔ النباتات حمراء الأزهار",
+       "↓ تلقيح ذاتي",
+       "الجيل الثالث ($F_3$): نباتات حمراء الأزهار ونباتات بيضاء الأزهار (بنسبة 1:3 على التوالي)",
+       "نباتات بيضاء الأزهار",
+       "↓ تلقيح ذاتي",
+       "الجيل الثالث ($F_3$): نباتات كلها بيضاء الأزهار"
+      ],
+      "labelsMin": 0.8,
+      "tables": [],
+      "figures": 1,
+      "illegibleMin": 0,
+      "illegibleMax": 0
+     }
+    },
+    {
+     "page": 150,
+     "classes": [
+      "diagram-as-table",
+      "dense-labels",
+      "ordering"
+     ],
+     "why": "Punnett flow diagram: one read made its last generation a table, the other flattened every label (seq 85.8%)",
+     "goldStatus": "adjudicated",
+     "assert": {
+      "mustContain": [
+       "الشكل (6)",
+       "الشكل 7",
+       "Punnett square",
+       "تلقيح ذاتي",
+       "انقسام اختزالي",
+       "الجيل الثاني",
+       "1:2:1"
+      ],
+      "mustNotContain": [
+       "| النسبة |",
+       "الطراز الوراثي | الطراز المظهري"
+      ],
+      "numerals": [
+       "1",
+       "2",
+       "3",
+       "6",
+       "7"
+      ],
+      "latin": [
+       "punnett",
+       "square"
+      ],
+      "labels": [
+       "الأباء (P): أحمر الأزهار نقي RR X أبيض الأزهار نقي rr",
+       "انقسام اختزالي",
+       "الأمشاج: R ، r",
+       "الجيل الأول (F1): أحمر الأزهار خليط Rr",
+       "انقسام اختزالي",
+       "الأمشاج (بنسبة 1:1): 1 R : 1 r",
+       "تلقيح ذاتي",
+       "الجيل الثاني (بنسبة 1:2:1): 1 RR : 2 Rr : 1 rr",
+       "أحمر نقي",
+       "أحمر الأزهار خليط",
+       "أبيض الأزهار نقي",
+       "الأزهار"
+      ],
+      "labelsMin": 0.75,
+      "figures": 1,
+      "illegibleMin": 0,
+      "illegibleMax": 0,
+      "noTable": true
+     },
+     "goldNote": "2026-09-11: settled against pages/150.webp — a boxed flow diagram, no ruled grid; the 1:2:1 generation is three labelled outcomes, not a table."
+    },
+    {
+     "page": 168,
+     "classes": [
+      "rtl-table",
+      "notation",
+      "latin"
+     ],
+     "why": "shaded-header blood-group table with superscript alleles — 3 columns, rightmost printed column first",
+     "goldStatus": "candidate",
+     "assert": {
+      "mustContain": [],
+      "mustNotContain": [],
+      "numerals": [
+       "1",
+       "3"
+      ],
+      "latin": [],
+      "labels": [],
+      "labelsMin": 0.8,
+      "tables": [
+       {
+        "rows": 14,
+        "cols": 3,
+        "rightmost": "فصائل دم الأبوين"
+       }
+      ],
+      "figures": 0,
+      "illegibleMin": 0,
+      "illegibleMax": 0
+     }
+    },
+    {
+     "page": 169,
+     "classes": [
+      "rtl-table",
+      "notation",
+      "mirrored"
+     ],
+     "why": "blood-group crosses; mirrored in the first run; little prose",
+     "goldStatus": "candidate",
+     "assert": {
+      "mustContain": [],
+      "mustNotContain": [],
+      "numerals": [
+       "1",
+       "2",
+       "3"
+      ],
+      "latin": [
+       "times"
+      ],
+      "labels": [],
+      "labelsMin": 0.8,
+      "tables": [
+       {
+        "rows": 6,
+        "cols": 3,
+        "rightmost": "AB x A"
+       }
+      ],
+      "figures": 0,
+      "illegibleMin": 0,
+      "illegibleMax": 0
+     }
+    },
+    {
+     "page": 171,
+     "classes": [
+      "rtl-table",
+      "punnett",
+      "mirrored"
+     ],
+     "why": "Punnett square as a ruled grid; reversal must keep row × column genotypes",
+     "goldStatus": "candidate",
+     "assert": {
+      "mustContain": [
+       "الشكل (21)"
+      ],
+      "mustNotContain": [],
+      "numerals": [
+       "1",
+       "2",
+       "21"
+      ],
+      "latin": [
+       "dominant",
+       "gene",
+       "lethal"
+      ],
+      "labels": [
+       "مثال (1): الجين المميت السائد Dominant Lethal Gene",
+       "التفسير:",
+       "P الآباء: اصفر Yy × اصفر Yy",
+       "الأمشاج: Y ، y (من الأم) و Y ، y (من الأب)",
+       "الجيل الاول F1: أصفر ميت ¼YY — اصفر ½Yy — رمادي ¼yy"
+      ],
+      "labelsMin": 0.8,
+      "tables": [
+       {
+        "rows": 3,
+        "cols": 3,
+        "rightmost": "y"
+       }
+      ],
+      "figures": 1,
+      "illegibleMin": 0,
+      "illegibleMax": 0
+     }
+    },
+    {
+     "page": 182,
+     "classes": [
+      "dense-labels"
+     ],
+     "why": "28 diagram labels",
+     "goldStatus": "candidate",
+     "assert": {
+      "mustContain": [
+       "الشكل (14)",
+       "الشكل(14)"
+      ],
+      "mustNotContain": [],
+      "numerals": [
+       "1",
+       "10",
+       "11",
+       "12",
+       "13",
+       "14",
+       "15",
+       "16",
+       "17",
+       "18",
+       "19",
+       "2",
+       "2.6",
+       "20",
+       "21",
+       "22",
+       "23",
+       "24",
+       "3",
+       "4",
+       "46",
+       "5",
+       "6",
+       "7",
+       "8",
+       "9"
+      ],
+      "latin": [
+       "autosomes",
+       "grasshopper"
+      ],
+      "labels": [
+       "التركيب الصبغي للذكر أو الأنثى في الإنسان الطبيعي",
+       "1",
+       "2",
+       "3",
+       "4",
+       "5",
+       "6",
+       "7",
+       "8",
+       "9",
+       "10",
+       "11",
+       "12",
+       "13",
+       "14",
+       "15",
+       "16",
+       "17",
+       "18",
+       "19",
+       "20",
+       "21",
+       "22",
+       "XX أنثى",
+       "أو",
+       "XY ذكر",
+       "الصبغيات الجنسية",
+       "الصبغيات الجسدية أو الذاتية"
+      ],
+      "labelsMin": 0.8,
+      "tables": [],
+      "figures": 1,
+      "illegibleMin": 0,
+      "illegibleMax": 0
+     }
+    },
+    {
+     "page": 184,
+     "classes": [
+      "diagram-as-table",
+      "dense-labels"
+     ],
+     "why": "two boxed sex-determination crosses, 30 labels — figures, never tables",
+     "goldStatus": "candidate",
+     "assert": {
+      "mustContain": [
+       "الشكل (15ب)",
+       "الشكل (16)"
+      ],
+      "mustNotContain": [],
+      "numerals": [
+       "1",
+       "15",
+       "16",
+       "2"
+      ],
+      "latin": [],
+      "labels": [
+       "الآباء:",
+       "أنثى XX",
+       "×",
+       "ذكر XY",
+       "الأمشاج:",
+       "X",
+       ":",
+       "Y",
+       "X",
+       "الأبناء:",
+       "1XX",
+       "أنثى",
+       ":",
+       "1XY",
+       "ذكر",
+       "الآباء:",
+       "أنثى XX",
+       "×",
+       "ذكر XO",
+       "الأمشاج:",
+       "O",
+       ":",
+       "X",
+       "X",
+       "الأبناء:",
+       "1XX",
+       "أنثى",
+       ":",
+       "1XO",
+       "ذكر"
+      ],
+      "labelsMin": 0.8,
+      "figures": 2,
+      "illegibleMin": 0,
+      "illegibleMax": 0,
+      "noTable": true
+     }
+    },
+    {
+     "page": 196,
+     "classes": [
+      "interpretation",
+      "omission",
+      "dense-labels"
+     ],
+     "why": "one read added interpretive words to raw G/W labels and dropped a printed word (أنثى) the other read kept",
+     "goldStatus": "adjudicated",
+     "assert": {
+      "mustContain": [
+       "الشكل (20)",
+       "تدريب (5)",
+       "أنثى صلعاء",
+       "كروماتيدان عبوريان",
+       "أبويان لا عبوريان",
+       "تلتقي فيها",
+       "Chiasma",
+       "Crossing"
+      ],
+      "mustNotContain": [
+       "كروماتيدا الصبغي",
+       "نقطة التصالب بين الكروماتيدتين",
+       "الناتج بعد العبور"
+      ],
+      "numerals": [
+       "2.10",
+       "20",
+       "5"
+      ],
+      "latin": [
+       "chiasma",
+       "crossing",
+       "gwgw",
+       "over"
+      ],
+      "labels": [
+       "G",
+       "W",
+       "G",
+       "W",
+       "g",
+       "w",
+       "g",
+       "w",
+       "G",
+       "W",
+       "G",
+       "w",
+       "g",
+       "W",
+       "g",
+       "w",
+       "كروماتيدان عبوريان",
+       "كروماتيدان أبويان لا عبوريان"
+      ],
+      "labelsMin": 0.6,
+      "tables": [],
+      "figures": 1,
+      "illegibleMin": 0,
+      "illegibleMax": 0
+     },
+     "goldNote": "2026-09-11: settled against pages/196.webp and crops; read A had interpreted the labels and dropped أنثى; read B was right on both. Print says تلتقي فيها."
+    },
+    {
+     "page": 211,
+     "classes": [
+      "control",
+      "rtl-table"
+     ],
+     "why": "contents table that scored 100% — regression guard",
+     "goldStatus": "candidate",
+     "assert": {
+      "mustContain": [],
+      "mustNotContain": [],
+      "numerals": [
+       "1",
+       "1.1",
+       "1.2",
+       "2",
+       "2.1",
+       "2.2",
+       "204",
+       "205",
+       "208",
+       "209"
+      ],
+      "latin": [],
+      "labels": [],
+      "labelsMin": 0.8,
+      "tables": [
+       {
+        "rows": 8,
+        "cols": 2,
+        "rightmost": "الموضوع"
+       }
+      ],
+      "figures": 0,
+      "illegibleMin": 0,
+      "illegibleMax": 0
+     }
+    },
+    {
+     "page": 243,
+     "classes": [
+      "numerals",
+      "structure"
+     ],
+     "why": "numeral F1 0.83 with a structure mismatch on a prose page",
+     "goldStatus": "candidate",
+     "assert": {
+      "mustContain": [
+       "الصورة (12)",
+       "الصورة (13أ)"
+      ],
+      "mustNotContain": [],
+      "numerals": [
+       "12",
+       "13",
+       "2",
+       "3"
+      ],
+      "latin": [],
+      "labels": [],
+      "labelsMin": 0.8,
+      "tables": [],
+      "figures": 2,
+      "illegibleMin": 0,
+      "illegibleMax": 0
+     },
+     "disputed": {
+      "numerals": [
+       "31"
+      ],
+      "latin": [],
+      "labelsOnlyInA": [],
+      "labelsOnlyInB": [],
+      "tables": [
+       0,
+       0
+      ],
+      "figures": [
+       2,
+       2
+      ]
+     }
+    },
+    {
+     "page": 245,
+     "classes": [
+      "repair-trap"
+     ],
+     "why": "body reference (الصورة 51) whose caption reads (15): must be transcribed as printed",
+     "goldStatus": "candidate",
+     "assert": {
+      "mustContain": [
+       "(الصورة 51)",
+       "الصورة (15)",
+       "الصورة 16)",
+       "الصورة 17)",
+       "الصورة 18)",
+       "الصورة 19)",
+       "الصورة 20)",
+       "الصورة 51)"
+      ],
+      "mustNotContain": [
+       "(الصورة 15)"
+      ],
+      "numerals": [
+       "1",
+       "15",
+       "16",
+       "17",
+       "18",
+       "19",
+       "20",
+       "51"
+      ],
+      "latin": [],
+      "labels": [],
+      "labelsMin": 0.8,
+      "tables": [],
+      "figures": 1,
+      "illegibleMin": 0,
+      "illegibleMax": 0
+     },
+     "goldNote": "The body reference (الصورة 51) contradicts its caption (15); the print is the truth."
+    },
+    {
+     "page": 246,
+     "classes": [
+      "multi-figure"
+     ],
+     "why": "five figures, little prose",
+     "goldStatus": "candidate",
+     "assert": {
+      "mustContain": [
+       "الصورة (16)",
+       "الصورة (17)",
+       "الصورة (18)",
+       "الصورة (19)",
+       "الصورة (20)"
+      ],
+      "mustNotContain": [],
+      "numerals": [
+       "16",
+       "17",
+       "18",
+       "19",
+       "20"
+      ],
+      "latin": [],
+      "labels": [],
+      "labelsMin": 0.8,
+      "tables": [],
+      "figures": 5,
+      "illegibleMin": 0,
+      "illegibleMax": 0
+     }
+    },
+    {
+     "page": 247,
+     "classes": [
+      "repair-trap"
+     ],
+     "why": "(الصورة 42) out of sequence and الساڤانا with ڤ — both were 'corrected' by a transcriber once",
+     "goldStatus": "candidate",
+     "assert": {
+      "mustContain": [
+       "(الصورة 42)",
+       "الساڤانا",
+       "الصورة (21)",
+       "الصورة (22)",
+       "الصورة 21)",
+       "الصورة 22)",
+       "الصورة 23)",
+       "الصورة 42)"
+      ],
+      "mustNotContain": [
+       "(الصورة 24)",
+       "السافانا"
+      ],
+      "numerals": [
+       "21",
+       "22",
+       "23",
+       "42"
+      ],
+      "latin": [],
+      "labels": [],
+      "labelsMin": 0.8,
+      "tables": [],
+      "figures": 2,
+      "illegibleMin": 0,
+      "illegibleMax": 0
+     },
+     "goldNote": "(الصورة 42) is out of sequence and the book spells الساڤانا with ڤ; both were \"corrected\" by a transcriber once and reverted."
+    }
+   ],
+   "$comment": "Source = the hogwarts curriculum tree (gitignored there); page images are also on the CDN at pagesUrl."
+  }
+ ],
+ "$comment": "The textbook benchmark corpus — small, tough, versioned. Pages are chosen for the failure classes the pipeline is measured on; assertions are objective per-page facts a person can check against the scan. Gold text is secondary. goldStatus: candidate (derived from reads on disk) → adjudicated (settled against the scan and crops) → human (a person checked). Edit assertions only with the page image open; then `textbook-bench.py freeze`."
+}

@@ -159,12 +159,47 @@ Transfigures a document or web page into clean Markdown — PDF, Office, images,
 
 ### `textbook`
 
-Gives every curriculum textbook its Markdown twin — `textbook.md` beside `textbook.pdf`, locally and on the CDN — and tells the truth about it. MarkItDown reads the text layer; the spell repairs what pdfminer does to Arabic (letter-reversed words, presentation-form glyphs, glyph-id noise from fonts without a Unicode map), grades the result from measured facts, and hands scans and unmapped fonts to tesseract OCR instead.
+Gives every curriculum textbook its Markdown twin — `textbook.md` beside `textbook.pdf`, locally and on the CDN — and tells the truth about it. The page images are read by a vision model (tesseract lost every Latin term and every diagram on the first book); a fresh agent then re-reads a random and a risk-weighted sample **blind**, six axes of agreement class every page, and every disagreement is adjudicated against the scan and its native-density crops. The contract learns each named case. A benchmark corpus of the hardest pages measures the pipeline itself.
 
 > **The Order:**
-> **Familiar:** none (direct tool) | **Portal:** MarkItDown MCP (`markitdown`, via `uvx`) + tesseract (`brew install tesseract tesseract-lang`) | **Skill:** `/textbook`
+> **Familiar:** `transcribe` (reads, never corrects) + `adjudicate` (settles, never invents) | **Portal:** none — PyMuPDF + Pillow, deterministic Python | **Skill:** `/textbook` → workflows `textbook` and `textbook-bench`
 >
-> `textbook sd g12` — 25 subjects, one JSON line each: quality A/B/C/EMPTY, coverage, engine. Ship nothing graded EMPTY as if it were text.
+> `textbook /abs/book-dir` — six phases: Prepare · Transcribe · Assemble · Verify · Adjudicate · Persist. Headline = the random sample's agreement; A ≥ 0.95 is provisional. `textbook bench sd-g12-biology --label <what changed>` scores a contract or model change on 30 tough pages.
+
+### `contract`
+
+The per-book transcription contract — the single lever for systematic quality. Templated from `structure.json` (chapter headings, language and direction, page offset) plus the clauses that earned their place: transcribe don't correct, never guess, a table is a ruled or shaded grid only, labels are printed words only. Its "Observed in this book" section is appended by the adjudicator with named cases — on the first book the abstract rule did not hold and the named example did.
+
+> **The Order:**
+> **Familiar:** none | **Portal:** none | **Skill:** `/textbook` (`textbook-contract.py <book> [--observe "…"]`)
+
+### `transcribe`
+
+One page image in, one Markdown file out, exactly as printed. The agent's toolset is deliberately narrow (read, write, glob); it returns one status line, never prose. When told the read is blind it must not open any earlier transcription — the run transcript is audited afterwards.
+
+> **The Order:**
+> **Familiar:** `transcribe` | **Portal:** none | **Skill:** `/textbook`
+
+### `agreement`
+
+Grade by a blind second read, never by volume. `md-agreement.py` samples (random + the lint's risk pages), a fresh agent re-reads, `--score` reports `seq` / `bow` / `num` / `lat` / `labels` / `struct` per page and a repair queue by class — `structure`, `omission`, `numeric`, `latin`, `illegible`, `ordering`, `wording`, `clean`. The mean is the last thing to read.
+
+> **The Order:**
+> **Familiar:** none | **Portal:** none | **Skill:** `/md` → `/textbook`
+
+### `adjudicate`
+
+Every queued page is settled against the print: the agent reads the image and its crops (native-density figures, the right edge for table direction), then both reads and the hunks, and chooses A, B or the illegible marker — never a third reading. It repairs the page, writes the verdict file, reports printed errors as contract observations. The only agent allowed to edit a transcribed page.
+
+> **The Order:**
+> **Familiar:** `adjudicate` | **Portal:** none | **Skill:** `/textbook`
+
+### `textbook bench`
+
+The benchmark: a small, tough, versioned corpus (`.claude/evals/textbook/manifest.json`) with objective per-page assertions — repair traps that must be reproduced, interpretive words that must not appear, numeral and Latin sets, label sets, table dimensions and the crop-verified rightmost column, `noTable` for diagrams, the never-guess discipline. Blind runs write to `bench-runs/<label>/`; `textbook-bench.py score` is deterministic; the transcript audit voids a run that peeked.
+
+> **The Order:**
+> **Familiar:** `transcribe` | **Portal:** none | **Skill:** `/textbook` → `.claude/memory/textbook-scores.json`
 
 ### `higgs`
 

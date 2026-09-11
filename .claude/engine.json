@@ -56,19 +56,19 @@
     }
   },
   "counts": {
-    "project_agents": 24,
-    "user_agents": 50,
+    "project_agents": 26,
+    "user_agents": 52,
     "commands": 0,
-    "project_skills": 56,
-    "user_skills": 74,
+    "project_skills": 57,
+    "user_skills": 75,
     "pattern_cards": 11,
     "project_rules": 5,
     "domain_rules": 37,
     "project_mcp": 18,
     "user_mcp": 24,
     "hooks": 14,
-    "vocabulary_spells": 206,
-    "workflows": 6,
+    "vocabulary_spells": 212,
+    "workflows": 8,
     "$plugins_comment": "The two plugins are how the fleet reaches other machines. kun-company also carries the rules, pattern cards, hooks, and workflows. Union of both skill sets is 61 (build ships in both).",
     "plugin_kun_company_agents": 22,
     "plugin_kun_company_skills": 54,
@@ -135,5 +135,62 @@
     },
     "session_hygiene": "/clear between unrelated tasks (stale context taxes every message); /compact with focus instructions on long tasks; batch touches inside the 1h cache window — a >1h idle gap reprocesses full context; plan mode before big builds; specific prompts over broad scans"
   },
-  "commit_footer": "Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
+  "commit_footer": "Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>",
+  "textbook": {
+    "$comment": "Declared POLICY for the textbook pipeline (scanned PDF → verified Markdown twin). Measured state lives in .claude/memory/textbook-scores.json — never here. Thresholds are PROVISIONAL: set on one book (sd-g12-biology, n=21, opus, 2026-09-09); re-derive once the benchmark carries three books. The workflows read these as defaults; health can check reality against them.",
+    "thresholds": {
+      "A": 0.95,
+      "B": 0.9,
+      "C": 0.8,
+      "provisional": true,
+      "set_on": "sd-g12-biology n=21 opus 2026-09-09"
+    },
+    "headline": "random-sample seq agreement only — the risk tail and post-adjudication scores are reported beside it, never folded in",
+    "sample_pages": 12,
+    "risk_cap": 12,
+    "seed": 7,
+    "batch_pages": 12,
+    "adjudicate_rounds": 2,
+    "render_width": 1000,
+    "crop_right_frac": 0.45,
+    "zoom_max": 6,
+    "tokens_per_page": 11000,
+    "tokens_per_adjudication": 15000,
+    "max_concurrent_agents": 16,
+    "models": {
+      "transcribe": "opus",
+      "adjudicate": "opus",
+      "score": "none — deterministic python"
+    },
+    "classes": [
+      "structure",
+      "omission",
+      "numeric",
+      "latin",
+      "illegible",
+      "ordering",
+      "wording",
+      "clean"
+    ],
+    "benchmark": {
+      "manifest": ".claude/evals/textbook/manifest.json",
+      "scores": ".claude/memory/textbook-scores.json",
+      "books": [
+        "sd-g12-biology"
+      ],
+      "cases": 30,
+      "gold_status_for_headline": "adjudicated",
+      "audit": ".claude/scripts/audit-textbook-run.mjs",
+      "blind_marker": "This is a blind transcription"
+    },
+    "workflows": [
+      "textbook",
+      "textbook-bench"
+    ],
+    "agents": [
+      "transcribe",
+      "adjudicate"
+    ],
+    "updated": "2026-09-11"
+  }
 }

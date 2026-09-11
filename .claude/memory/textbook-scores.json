@@ -1,0 +1,211 @@
+{
+ "$schema": "kun-textbook-scores-v1",
+ "$comment": "MEASURED state of the textbook pipeline — written only by textbook-bench.py persist (the workflows' Persist phase). Declared policy lives in engine.json → textbook; a score has no declared counterpart, so health checks only that this file is current.",
+ "last_updated": "2026-09-11",
+ "books": {
+  "sd-g12-biology": {
+   "current": {
+    "date": "2026-09-11",
+    "book": "/Users/abdout/hogwarts/curriculum/sd/g12/biology",
+    "bookId": "sd-g12-biology",
+    "mode": "rescore-of-2026-09-09-run",
+    "model": "claude-opus-5",
+    "pages": 253,
+    "transcribed": 253,
+    "missing": [],
+    "agreement": 0.9484,
+    "agreementN": 21,
+    "riskAgreement": null,
+    "riskN": 0,
+    "meanBow": 0.9776,
+    "meanStruct": 0.8975,
+    "classes": {
+     "structure": 11,
+     "clean": 6,
+     "numeric": 1,
+     "omission": 3
+    },
+    "queued": 15,
+    "repaired": 0,
+    "repairedPages": [],
+    "unresolved": [],
+    "mirrored": [
+     5,
+     42,
+     153,
+     169,
+     171,
+     172,
+     174,
+     178
+    ],
+    "quality": "B",
+    "note": "The 2026-09-09 vision run re-scored with the six-axis grader; its 21-page audit sample was random (seed 7). Table direction was fixed by right-edge crops on 2026-09-09. No adjudication has run yet — the queue is the first harness job."
+   },
+   "history": [
+    {
+     "date": "2026-09-11",
+     "book": "/Users/abdout/hogwarts/curriculum/sd/g12/biology",
+     "bookId": "sd-g12-biology",
+     "mode": "rescore-of-2026-09-09-run",
+     "model": "claude-opus-5",
+     "pages": 253,
+     "transcribed": 253,
+     "missing": [],
+     "agreement": 0.9484,
+     "agreementN": 21,
+     "riskAgreement": null,
+     "riskN": 0,
+     "meanBow": 0.9776,
+     "meanStruct": 0.8975,
+     "classes": {
+      "structure": 11,
+      "clean": 6,
+      "numeric": 1,
+      "omission": 3
+     },
+     "queued": 15,
+     "repaired": 0,
+     "repairedPages": [],
+     "unresolved": [],
+     "mirrored": [
+      5,
+      42,
+      153,
+      169,
+      171,
+      172,
+      174,
+      178
+     ],
+     "quality": "B",
+     "note": "The 2026-09-09 vision run re-scored with the six-axis grader; its 21-page audit sample was random (seed 7). Table direction was fixed by right-edge crops on 2026-09-09. No adjudication has run yet — the queue is the first harness job."
+    }
+   ]
+  }
+ },
+ "benchmark": {
+  "current": {
+   "date": "2026-09-11",
+   "label": "baseline-shipped-twin-2026-09-09",
+   "book": "sd-g12-biology",
+   "model": "claude-opus-5",
+   "contractHash": "sha1:89b2e2708372",
+   "goldHash": "sha1:5d1064d23eac",
+   "comparable": true,
+   "assertRate": 0.9621,
+   "assertPass": 482,
+   "assertTotal": 501,
+   "perKind": {
+    "direction": 0.8889,
+    "figures": 1.0,
+    "illegible": 0.9667,
+    "labels": 0.8,
+    "latin": 1.0,
+    "mustContain": 0.9605,
+    "mustNotContain": 0.4286,
+    "noTable": 0.3333,
+    "numerals": 1.0,
+    "tables": 0.9778
+   },
+   "perClass": {
+    "composed-caption": 0.9655,
+    "control": 1.0,
+    "cover": 1.0,
+    "dense-labels": 0.9381,
+    "diagram-as-table": 0.913,
+    "edge": 1.0,
+    "interpretation": 0.7179,
+    "latin": 1.0,
+    "mirrored": 1.0,
+    "multi-figure": 1.0,
+    "near-blank": 1.0,
+    "notation": 1.0,
+    "numerals": 0.9934,
+    "omission": 0.6818,
+    "ordering": 0.9074,
+    "pictorial-grid": 0.7647,
+    "punnett": 1.0,
+    "repair-trap": 1.0,
+    "rtl-table": 0.9779,
+    "structure": 0.9474,
+    "unreadable-labels": 0.9783
+   },
+   "textVsGold": {
+    "seq": 0.9918,
+    "bow": 0.9948,
+    "num": 0.9952,
+    "lat": 1.0,
+    "struct": 0.9889
+   },
+   "goldStatus": {
+    "candidate": 26,
+    "adjudicated": 4
+   },
+   "degraded": false,
+   "delta": null
+  },
+  "history": [
+   {
+    "date": "2026-09-11",
+    "label": "baseline-shipped-twin-2026-09-09",
+    "book": "sd-g12-biology",
+    "model": "claude-opus-5",
+    "contractHash": "sha1:89b2e2708372",
+    "goldHash": "sha1:5d1064d23eac",
+    "comparable": true,
+    "assertRate": 0.9621,
+    "assertPass": 482,
+    "assertTotal": 501,
+    "perKind": {
+     "direction": 0.8889,
+     "figures": 1.0,
+     "illegible": 0.9667,
+     "labels": 0.8,
+     "latin": 1.0,
+     "mustContain": 0.9605,
+     "mustNotContain": 0.4286,
+     "noTable": 0.3333,
+     "numerals": 1.0,
+     "tables": 0.9778
+    },
+    "perClass": {
+     "composed-caption": 0.9655,
+     "control": 1.0,
+     "cover": 1.0,
+     "dense-labels": 0.9381,
+     "diagram-as-table": 0.913,
+     "edge": 1.0,
+     "interpretation": 0.7179,
+     "latin": 1.0,
+     "mirrored": 1.0,
+     "multi-figure": 1.0,
+     "near-blank": 1.0,
+     "notation": 1.0,
+     "numerals": 0.9934,
+     "omission": 0.6818,
+     "ordering": 0.9074,
+     "pictorial-grid": 0.7647,
+     "punnett": 1.0,
+     "repair-trap": 1.0,
+     "rtl-table": 0.9779,
+     "structure": 0.9474,
+     "unreadable-labels": 0.9783
+    },
+    "textVsGold": {
+     "seq": 0.9918,
+     "bow": 0.9948,
+     "num": 0.9952,
+     "lat": 1.0,
+     "struct": 0.9889
+    },
+    "goldStatus": {
+     "candidate": 26,
+     "adjudicated": 4
+    },
+    "degraded": false,
+    "delta": null
+   }
+  ]
+ }
+}

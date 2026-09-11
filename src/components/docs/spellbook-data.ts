@@ -392,6 +392,27 @@ export const schools: School[] = [
         connects: ["handover", "check", "ship", "watch"],
         depends: [],
       },
+      {
+        name: "cloudflare",
+        effect:
+          "Deploy and inspect the Cloudflare Workers + Containers lane (hogwarts, mkan)",
+        order: [
+          f("cloudflare"),
+          s("/cloudflare"),
+          p("Cloudflare"),
+          p("Neon"),
+          w("deployment"),
+        ],
+        steps: [
+          "Detect the platform — a repo with wrangler.jsonc deploys to Cloudflare, not Vercel",
+          "Check the Prisma schema gap against prod before building; DDL is applied out-of-band",
+          "scripts/deploy-cloudflare.sh <env> build, then smoke, then deploy",
+          "Verify with the health endpoint and a real browser login, never on exit code alone",
+          "A connection reset is usually the blocked regional IP range, not the app",
+        ],
+        connects: ["deploy", "ship", "watch", "build"],
+        depends: ["wrangler.jsonc", "cf/", "scripts/deploy-cloudflare.sh"],
+      },
     ],
   },
   {
@@ -2519,17 +2540,119 @@ export const schools: School[] = [
         depends: [],
       },
       {
+        name: "md",
+        effect:
+          "The house standard for machine-produced Markdown — the schema, the RTL rules, and grading by agreement instead of volume",
+        order: [s("/md")],
+        steps: [
+          "Judge a conversion by re-reading a sample with a fresh, blind agent and diffing on six axes, never by character count",
+          "Read the failure classes before the mean — ordering is noise, invented prose is disqualifying, a Markdown table on a diagram is a structure error",
+          "Write or repair the transcription contract: transcribe don't correct, never guess, figures are content, a table is a grid",
+          "Record provenance, the sample, the classes and known issues in the front matter",
+        ],
+        connects: ["textbook", "agreement", "convert", "docs"],
+        depends: [],
+      },
+      {
         name: "textbook",
         effect:
-          "Every curriculum textbook.pdf gets a graded Markdown twin — MarkItDown, RTL repair, OCR fallback, CDN",
-        order: [p("MarkItDown"), s("/textbook")],
-        steps: [
-          "Run textbook-md.py over the grade or subject dirs (MarkItDown CLI, never the MCP for a book)",
-          "Read the per-book grade: A/B usable, C fragments, EMPTY → tesseract OCR fallback",
-          "Upload textbook.md beside textbook.pdf to both buckets and record the grades in the ledger",
+          "Every curriculum textbook.pdf gets a Markdown twin by VISION transcription, verified by a blind second read on text and structure, adjudicated against the scan, and benchmarked on the hardest pages",
+        order: [
+          s("/textbook"),
+          undefined("transcribe"),
+          undefined("adjudicate"),
+          s("/md"),
         ],
-        connects: ["convert", "docs"],
-        depends: ["convert"],
+        steps: [
+          "Render pages/<N>.webp and template pages-md/_CONTRACT.md from structure.json",
+          "Fan out 12 pages per transcribe agent; each writes pages-md/<N>.md and returns one line",
+          "Assemble, lint with the reader's grammar, re-read a random + risk sample blind, score six axes, class every page",
+          "Adjudicate every queued page against the scan and native crops; reverse mirrored tables; teach the contract",
+          "Persist the grade and the measured record; upload only when asked",
+        ],
+        connects: [
+          "md",
+          "contract",
+          "transcribe",
+          "agreement",
+          "adjudicate",
+          "textbook bench",
+          "convert",
+          "docs",
+        ],
+        depends: ["md"],
+      },
+      {
+        name: "contract",
+        effect:
+          "The per-book transcription contract — headings from structure.json, language and direction, and the named do-not-repair cases the adjudicator appends",
+        order: [s("/textbook")],
+        steps: [
+          "textbook-contract.py <book> templates pages-md/_CONTRACT.md from structure.json",
+          "Every transcriber and adjudicator reads it first — it is authoritative",
+          "--observe appends a named case to the observed section; that is how a systematic defect is fixed",
+        ],
+        connects: ["textbook", "transcribe", "adjudicate", "md"],
+        depends: ["textbook"],
+      },
+      {
+        name: "transcribe",
+        effect:
+          "Read one page image, write one Markdown file, exactly as printed — never correcting, never guessing, blind when told",
+        order: [undefined("transcribe"), s("/textbook")],
+        steps: [
+          "Read the contract, then the image, then write pages-md/<N>.md — one page at a time",
+          "Tables are ruled or shaded grids only; diagram labels are printed words only; no caption is composed",
+          "Return one status line; the run transcript is audited for blind reads that peeked",
+        ],
+        connects: ["textbook", "contract", "agreement", "adjudicate"],
+        depends: ["contract"],
+      },
+      {
+        name: "agreement",
+        effect:
+          "Grade a transcription by a blind second read on six axes — sequence, words, numerals, Latin, labels, structure — and class every page",
+        order: [s("/md"), s("/textbook")],
+        steps: [
+          "md-agreement.py --sample picks a random sample plus the lint's risk pages",
+          "A fresh agent re-reads them blind into pages-md-audit/",
+          "--score reports seq/bow/num/lat/labels/struct per page and a repair queue by class",
+          "The headline is the random sample only",
+        ],
+        connects: ["md", "textbook", "adjudicate", "textbook bench"],
+        depends: ["transcribe"],
+      },
+      {
+        name: "adjudicate",
+        effect:
+          "Settle every disagreement against the scan and its native-density crops, repair the page, record the verdict, teach the contract the case",
+        order: [undefined("adjudicate"), s("/textbook")],
+        steps: [
+          "textbook-crop.py zoom renders each figure at native density; right crops decide table direction",
+          "The adjudicate agent reads image, crops, both reads and the hunks; chooses A, B or the illegible marker — never a third reading",
+          "Writes the repaired page and pages-md-verify/<N>.json; printed errors become contract observations",
+          "md-table-direction.py --fix reverses only the tables the crops proved mirrored",
+        ],
+        connects: ["textbook", "agreement", "contract", "transcribe"],
+        depends: ["agreement"],
+      },
+      {
+        name: "textbook bench",
+        effect:
+          "Score the pipeline — contract × agent × model — on the benchmark corpus of the hardest pages against objective assertions, and persist the trend",
+        order: [
+          s("/textbook"),
+          undefined("transcribe"),
+          m(".claude/memory/textbook-scores.json"),
+        ],
+        steps: [
+          "textbook-bench.py propose seeds cases from two reads; gold mode adjudicates the disputes; freeze hashes the gold",
+          "The textbook-bench workflow blind-transcribes the corpus into bench-runs/<label>/",
+          "score checks every assertion — traps, numerals, Latin, label sets, table direction, noTable, illegible discipline — per class and per kind",
+          "audit-textbook-run.mjs must be CLEAN or the entry is persisted invalid",
+        ],
+        connects: ["textbook", "agreement", "bench", "md"],
+        depends: ["textbook"],
       },
       {
         name: "calendar",
@@ -3415,6 +3538,39 @@ export const workflows: Workflow[] = [
       {
         keyword: "follow up",
         action: "Draft on the Max pool, gate on a human yes, then dispatch",
+      },
+    ],
+  },
+  {
+    id: "textbook-pipeline",
+    name: "Textbook Pipeline",
+    description:
+      "A scanned textbook to a verified Markdown twin — transcribed, blind-checked, adjudicated, benchmarked",
+    steps: [
+      {
+        keyword: "textbook",
+        action: "Render pages/<N>.webp beside textbook.pdf",
+      },
+      {
+        keyword: "contract",
+        action: "Template the book's contract from structure.json",
+      },
+      {
+        keyword: "transcribe",
+        action: "One reader per 12 pages, one file per page",
+      },
+      {
+        keyword: "agreement",
+        action: "Blind second read of a random + risk sample, six axes",
+      },
+      {
+        keyword: "adjudicate",
+        action:
+          "Every disagreement settled against the scan; the contract learns",
+      },
+      {
+        keyword: "textbook bench",
+        action: "Score the pipeline on the corpus; persist the trend",
       },
     ],
   },
