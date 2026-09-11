@@ -177,9 +177,14 @@ const modelOpt = MODEL ? { model: MODEL } : {};
 // A kun agent type may not resolve in the session that created it (the registry is read at start).
 // Fall back to a general-purpose agent that reads the agent file first — the first vision book was
 // transcribed exactly that way — rather than failing the run.
+// A general-purpose agent carries tools the typed agents deliberately lack. On 2026-09-11 a
+// general-purpose adjudicator reached the right verdict and then stalled for 20 minutes inside
+// its own advisor call; the typed `adjudicate` agent (Read/Write/Glob only) finished in six.
+const NO_CONSULT =
+  "Do NOT call any advisor or consultation tool and do not ask questions — decide from the contract, the image and the crops, write the files, return. ";
 const FALLBACK = {
-  transcribe: "You are acting as the kun `transcribe` agent: read ~/.claude/agents/transcribe.md FIRST and follow it exactly. ",
-  adjudicate: "You are acting as the kun `adjudicate` agent: read ~/.claude/agents/adjudicate.md FIRST and follow it exactly. ",
+  transcribe: "You are acting as the kun `transcribe` agent: read ~/.claude/agents/transcribe.md FIRST and follow it exactly. " + NO_CONSULT,
+  adjudicate: "You are acting as the kun `adjudicate` agent: read ~/.claude/agents/adjudicate.md FIRST and follow it exactly. " + NO_CONSULT,
 };
 async function typed(prompt, opts, type) {
   try {

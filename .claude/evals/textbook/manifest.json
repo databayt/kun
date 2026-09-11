@@ -34,7 +34,7 @@
    "renderWidth": 1000,
    "contract": "pages-md/_CONTRACT.md",
    "gold": "sd-g12-biology/gold",
-   "goldHash": "sha1:5d1064d23eac",
+   "goldHash": "sha1:e2e540503419",
    "cases": [
     {
      "page": 1,
@@ -1227,14 +1227,15 @@
      "goldStatus": "adjudicated",
      "assert": {
       "mustContain": [
+       "(20): :ظاهرة",
+       "Chiasma",
+       "Crossing",
+       "أبويان لا عبوريان",
+       "أنثى صلعاء",
        "الشكل (20)",
        "تدريب (5)",
-       "أنثى صلعاء",
-       "كروماتيدان عبوريان",
-       "أبويان لا عبوريان",
        "تلتقي فيها",
-       "Chiasma",
-       "Crossing"
+       "كروماتيدان عبوريان"
       ],
       "mustNotContain": [
        "كروماتيدا الصبغي",
@@ -1255,10 +1256,6 @@
       "labels": [
        "G",
        "W",
-       "G",
-       "W",
-       "g",
-       "w",
        "g",
        "w",
        "G",
@@ -1276,9 +1273,9 @@
       "tables": [],
       "figures": 1,
       "illegibleMin": 0,
-      "illegibleMax": 0
+      "illegibleMax": 2
      },
-     "goldNote": "2026-09-11: settled against pages/196.webp and crops; read A had interpreted the labels and dropped أنثى; read B was right on both. Print says تلتقي فيها."
+     "goldNote": "2026-09-11: settled against pages/196.webp and crops/196.img2.webp. Read A interpreted the labels and dropped أنثى; read B was right on both. The caption is printed with a doubled colon (الشكل (20): :ظاهرة) — caught by the adjudicate agent, verified on the crop. The two tiny sister-chromatid labels on the left are ambiguous even at native density: up to 2 illegible marks are correct. أبويان is legible on the crop and must be read."
     },
     {
      "page": 211,

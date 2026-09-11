@@ -38,7 +38,10 @@ the sandbox has no randomness), `rounds` (2), `batch` (12), `model`, `date`.
 
 **The kun agent types may not resolve in the session that created them.** Both workflows fall
 back to `general-purpose` reading `~/.claude/agents/<name>.md` first — the first vision book was
-transcribed exactly that way.
+transcribed exactly that way. The fallback prompt forbids advisor/consultation calls: a
+general-purpose adjudicator once reached the right verdict on page 196 and then stalled for 20
+minutes inside its own advisor call, while the typed `adjudicate` agent (Read/Write/Glob only)
+settled 12 hunks in six minutes.
 
 ## What the numbers mean
 

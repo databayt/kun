@@ -298,8 +298,12 @@ def persist(a):
                  'assertPass': r.get('assertPass'), 'assertTotal': r.get('assertTotal'), 'perKind': {k: v['rate'] for k, v in r.get('perKind', {}).items()},
                  'perClass': {k: v['rate'] for k, v in r.get('perClass', {}).items()}, 'textVsGold': r.get('textVsGold'),
                  'goldStatus': r.get('goldStatus'), 'degraded': r.get('degraded', False)}
-        prev = [h for h in s['benchmark']['history'] if h.get('book') == r['book'] and h.get('comparable') and not h.get('invalid')]
+        # A delta is a claim that two runs measured the same thing: same book, same frozen gold,
+        # same contract, both clean. Anything else is two numbers, not a trend.
+        prev = [h for h in s['benchmark']['history'] if h.get('book') == r['book'] and h.get('comparable') and not h.get('invalid')
+                and h.get('goldHash') == entry.get('goldHash') and h.get('contractHash') == entry.get('contractHash')]
         entry['delta'] = round(entry['assertRate'] - prev[-1]['assertRate'], 4) if prev and entry['assertRate'] is not None and entry.get('comparable') else None
+        entry['deltaVs'] = prev[-1].get('label') if prev and entry['delta'] is not None else None
         if a.invalid:
             entry['invalid'] = True; entry['reason'] = a.invalid
         s['benchmark']['history'].append(entry)

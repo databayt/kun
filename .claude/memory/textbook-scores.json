@@ -87,23 +87,23 @@
  "benchmark": {
   "current": {
    "date": "2026-09-11",
-   "label": "baseline-shipped-twin-2026-09-09",
+   "label": "baseline-shipped-twin+p196-adjudicated",
    "book": "sd-g12-biology",
    "model": "claude-opus-5",
-   "contractHash": "sha1:89b2e2708372",
-   "goldHash": "sha1:5d1064d23eac",
+   "contractHash": "sha1:ac25527a598d",
+   "goldHash": "sha1:e2e540503419",
    "comparable": true,
-   "assertRate": 0.9621,
-   "assertPass": 482,
-   "assertTotal": 501,
+   "assertRate": 0.9741,
+   "assertPass": 489,
+   "assertTotal": 502,
    "perKind": {
     "direction": 0.8889,
     "figures": 1.0,
     "illegible": 0.9667,
-    "labels": 0.8,
+    "labels": 0.8667,
     "latin": 1.0,
-    "mustContain": 0.9605,
-    "mustNotContain": 0.4286,
+    "mustContain": 0.987,
+    "mustNotContain": 0.6429,
     "noTable": 0.3333,
     "numerals": 1.0,
     "tables": 0.9778
@@ -112,17 +112,17 @@
     "composed-caption": 0.9655,
     "control": 1.0,
     "cover": 1.0,
-    "dense-labels": 0.9381,
+    "dense-labels": 0.9692,
     "diagram-as-table": 0.913,
     "edge": 1.0,
-    "interpretation": 0.7179,
+    "interpretation": 0.875,
     "latin": 1.0,
     "mirrored": 1.0,
     "multi-figure": 1.0,
     "near-blank": 1.0,
     "notation": 1.0,
     "numerals": 0.9934,
-    "omission": 0.6818,
+    "omission": 0.9565,
     "ordering": 0.9074,
     "pictorial-grid": 0.7647,
     "punnett": 1.0,
@@ -132,18 +132,20 @@
     "unreadable-labels": 0.9783
    },
    "textVsGold": {
-    "seq": 0.9918,
-    "bow": 0.9948,
-    "num": 0.9952,
+    "seq": 0.9971,
+    "bow": 0.9991,
+    "num": 1.0,
     "lat": 1.0,
-    "struct": 0.9889
+    "struct": 0.9944
    },
    "goldStatus": {
     "candidate": 26,
     "adjudicated": 4
    },
    "degraded": false,
-   "delta": null
+   "delta": null,
+   "deltaVs": null,
+   "note": "first entry under gold sha1:e2e540503419 — the earlier baseline was scored against gold sha1:5d1064d23eac, so no delta"
   },
   "history": [
    {
@@ -204,7 +206,70 @@
      "adjudicated": 4
     },
     "degraded": false,
-    "delta": null
+    "delta": null,
+    "note": "scored against gold sha1:5d1064d23eac (superseded the same day after page 196 was corrected from the crop); not comparable with later entries"
+   },
+   {
+    "date": "2026-09-11",
+    "label": "baseline-shipped-twin+p196-adjudicated",
+    "book": "sd-g12-biology",
+    "model": "claude-opus-5",
+    "contractHash": "sha1:ac25527a598d",
+    "goldHash": "sha1:e2e540503419",
+    "comparable": true,
+    "assertRate": 0.9741,
+    "assertPass": 489,
+    "assertTotal": 502,
+    "perKind": {
+     "direction": 0.8889,
+     "figures": 1.0,
+     "illegible": 0.9667,
+     "labels": 0.8667,
+     "latin": 1.0,
+     "mustContain": 0.987,
+     "mustNotContain": 0.6429,
+     "noTable": 0.3333,
+     "numerals": 1.0,
+     "tables": 0.9778
+    },
+    "perClass": {
+     "composed-caption": 0.9655,
+     "control": 1.0,
+     "cover": 1.0,
+     "dense-labels": 0.9692,
+     "diagram-as-table": 0.913,
+     "edge": 1.0,
+     "interpretation": 0.875,
+     "latin": 1.0,
+     "mirrored": 1.0,
+     "multi-figure": 1.0,
+     "near-blank": 1.0,
+     "notation": 1.0,
+     "numerals": 0.9934,
+     "omission": 0.9565,
+     "ordering": 0.9074,
+     "pictorial-grid": 0.7647,
+     "punnett": 1.0,
+     "repair-trap": 1.0,
+     "rtl-table": 0.9779,
+     "structure": 0.9474,
+     "unreadable-labels": 0.9783
+    },
+    "textVsGold": {
+     "seq": 0.9971,
+     "bow": 0.9991,
+     "num": 1.0,
+     "lat": 1.0,
+     "struct": 0.9944
+    },
+    "goldStatus": {
+     "candidate": 26,
+     "adjudicated": 4
+    },
+    "degraded": false,
+    "delta": null,
+    "deltaVs": null,
+    "note": "first entry under gold sha1:e2e540503419 — the earlier baseline was scored against gold sha1:5d1064d23eac, so no delta"
    }
   ]
  }

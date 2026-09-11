@@ -108,7 +108,9 @@ async function typed(prompt, opts, type) {
   } catch (e) {
     log(`agent type "${type}" unavailable (${String(e).slice(0, 80)}) — falling back to general-purpose`);
     return agent(
-      `You are acting as the kun \`${type}\` agent: read ~/.claude/agents/${type}.md FIRST and follow it exactly. ` + prompt,
+      `You are acting as the kun \`${type}\` agent: read ~/.claude/agents/${type}.md FIRST and follow it exactly. ` +
+        "Do NOT call any advisor or consultation tool and do not ask questions — decide from the contract and the image, write the files, return. " +
+        prompt,
       { ...opts, agentType: "general-purpose" },
     );
   }
