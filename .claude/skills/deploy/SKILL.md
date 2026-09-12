@@ -58,15 +58,25 @@ vercel env pull /tmp/prod.env --environment=production --scope databayt --yes &&
 
 If the CLI refuses, that is the blocker to surface. Never reconstruct secrets.
 
-Vercel refuses env **writes** under the fair-use block, so a var added after 2026-09-12 lives in
-the macOS Keychain as `cf-<worker>-<VAR>` and is appended to the pulled file before the build —
-`cf/env-split.mjs` then classifies it (secret → Worker via cf-secrets.sh, config → baked):
+Vercel refuses env **writes** under the fair-use block, so every var added or **rotated** after
+2026-09-12 lives in the macOS Keychain as `cf-<worker>-<VAR>` and is appended to the pulled file
+before the build. `cf/env-split.mjs` keeps the **last** occurrence of a name, so the Keychain value
+overrides Vercel's stale copy; it then classifies it (secret → Worker via cf-secrets.sh, config →
+baked). The append is one script (hogwarts `scripts/cf-keychain-env.sh`, never run without the
+redirect — it prints secrets):
 
 ```bash
-for n in NEXT_PUBLIC_VAPID_PUBLIC_KEY VAPID_PRIVATE_KEY VAPID_SUBJECT; do
-  printf '%s=%s\n' "$n" "$(security find-generic-password -a "$USER" -s "cf-hogwarts-$n" -w)" >> /tmp/prod.env
-done
+scripts/cf-keychain-env.sh >> /tmp/prod.env
 ```
+
+Store a new or rotated value with
+`security add-generic-password -a "$USER" -s "cf-hogwarts-<VAR>" -w "<value>" -U`.
+**Secrets-only rotation (no code change):** `scripts/cf-keychain-env.sh > "$F" && scripts/cf-secrets.sh "$F"`
+pushes just the Keychain set to the Worker, then a `deploy` from the last build dir with one changed
+byte under `public/` restarts the container (a byte-identical image does not restart it). Verify
+`/api/health` `database.pass`, a cron with the new `CRON_SECRET` → 200, a wrong bearer → 401.
+Keychain is the ONLY durable home for rotated values; a Keychain miss means the next build
+resurrects the leaked one.
 
 ### 4. Schema gap — read the diff, do not just run it
 

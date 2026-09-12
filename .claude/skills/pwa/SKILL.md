@@ -144,9 +144,14 @@ Gate: subscribe in Chrome → insert one Notification with `channels: [push]` �
 - **zsh does not word-split an unquoted variable** — `git commit -- $PATHS` is one pathspec.
   Write the paths out or use `${=PATHS}`.
 - **VAPID values need a durable home.** Vercel refuses env writes under the fair-use block;
-  store `cf-<worker>-<VAR>` in the macOS Keychain and append them to the pulled env before the
-  build (deploy skill step 3). The Worker secret persists; the two config vars re-bake every
-  build.
+  store `cf-<worker>-<VAR>` in the macOS Keychain — `scripts/cf-keychain-env.sh >> <pulled env>`
+  appends the whole set before the build (deploy skill step 3). The Worker secret persists; the
+  two config vars re-bake every build.
+- **A script that prints a secret map on error has already leaked it.** The pre-fix
+  `cf-secrets.sh` counter `require()`d a temp file and echoed 26 production secrets into a
+  transcript; the rotation cost an evening. Count with `JSON.parse`, never `require`, and treat
+  any secret seen in a terminal as burned. The Neon MCP `reset_postgres_role_password` also
+  returns the new password into the transcript — the console keeps it off.
 - **Ask who requests the channel.** A push lane with no dispatcher asking for `"push"` is a queue
   that never fills; the cron schedule must also route to the processor (`cf/crons.json`).
 
