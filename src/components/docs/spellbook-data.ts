@@ -951,6 +951,39 @@ export const schools: School[] = [
         connects: ["auth", "dashboard"],
         depends: ["auth"],
       },
+      {
+        name: "pwa",
+        effect:
+          "Installable, offline-capable, push-enabled — per-tenant manifest, a service worker that respects auth, the outbox, and Web Push on Next 16",
+        order: [
+          f("pwa"),
+          s("/pwa"),
+          p("chrome-devtools"),
+          p("context7"),
+          w("next-16"),
+        ],
+        steps: [
+          "audit <url> — pwa-audit.mjs checks install criteria, every icon, the precache list for redirects",
+          "Icons 72/96/192/512 + apple-touch-icon from the 512 master; viewport.themeColor",
+          "app/manifest.ts resolves host → tenant → name, lang, dir, theme_color (start_url stays relative)",
+          "Service worker: locale-explicit precache, static cache-first, HTML + API network-only, offline fallback",
+          "Outbox kind for any write that must survive offline — idempotent on a natural key",
+          "push — PushSubscription model, VAPID keys, web-push processor on the push cron, preferences toggle",
+          "Verify: audit 0 FAIL, offline page renders, outbox replays as duplicate, push round-trip",
+        ],
+        connects: [
+          "performance",
+          "notifications",
+          "cloudflare",
+          "deploy",
+          "handover",
+        ],
+        depends: [
+          "app/manifest.ts",
+          "public/service-worker.js",
+          "src/lib/offline/",
+        ],
+      },
     ],
   },
   {
@@ -3568,6 +3601,40 @@ export const workflows: Workflow[] = [
       {
         keyword: "textbook bench",
         action: "Score the pipeline on the corpus; persist the trend",
+      },
+    ],
+  },
+  {
+    id: "pwa",
+    name: "PWA Lane",
+    description:
+      "A product a phone can install — audited, built per tenant, pushed through the deploy lane, verified on the live hosts",
+    steps: [
+      {
+        keyword: "pwa",
+        action:
+          "audit <url> — install criteria, every icon, the precache list, theme-color",
+      },
+      {
+        keyword: "pwa",
+        action:
+          "build — icons, per-tenant manifest, service worker, offline page, outbox kind",
+      },
+      {
+        keyword: "pwa",
+        action:
+          "push — PushSubscription, VAPID, web-push processor on the push cron, preferences toggle",
+      },
+      { keyword: "check", action: "tsc + build + i18n validate" },
+      {
+        keyword: "deploy",
+        action:
+          "Cloudflare cycle: restore point, DDL, secrets, smoke, real-login verify",
+      },
+      {
+        keyword: "watch",
+        action:
+          "Audit both tenants live; offline page renders; push round-trip",
       },
     ],
   },

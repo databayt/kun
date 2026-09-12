@@ -1,0 +1,88 @@
+---
+title: PWA
+description: Installable, offline-capable, push-enabled products on the web — the decision, the lane, and how it is verified
+---
+
+# PWA
+
+The engine's lane for Progressive Web Apps. Say it in prose — _"make balqalam installable"_,
+_"attendance should work offline"_, _"push notifications for parents"_ — and the `/pwa` runbook
+activates with the `pwa` agent, the `pwa` pattern card, and the audit script.
+
+**The phone is the client and there is no native app budget.** Teachers mark attendance on
+phones, parents read absences on phones, hosts answer guests on phones. A PWA gives them a
+home-screen icon, an offline shell and browser push with no app store, no Swift or Kotlin build,
+and no per-platform cost. Cash flow first: the paying pilot runs on the web app, so the web app
+has to earn the home screen.
+
+## The decision (2026-09-12)
+
+| Product  | Verdict   | Why                                                                                                                                                                                                                              |
+| -------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| hogwarts | **yes**   | Daily field flows on phones (quick attendance, kiosk, parent portal). A PWA layer already shipped and was half-broken. The notification model already carries the push columns and a cron.                                       |
+| mkan     | **defer** | Guests are one-visit and contact-only — the only volume event is a phone call. Hosts have no real message volume yet. Reopen when host messaging moves; fix the canonical host, `themeColor` and dictionary every string first. |
+
+Framed under Lean Startup (canon #13/#15) as a hypothesis with a metric: an installed app and
+offline attendance raise the share of daily attendance submitted from phones. Measured by the
+outbox `applied` rate and attendance rows per week; reviewed after four weeks.
+
+### What was actually broken
+
+Verified live on `demo.balqalam.com` and `kingfahd.balqalam.com` before any code changed:
+
+- Five icons the manifest and worker named returned **500** — shortcut icons, push icons, the
+  iOS home-screen icon.
+- The manifest was static, English and single-tenant on an Arabic-default multi-tenant product.
+- The worker precached `/` and `/offline`, both **307**s to the locale prefix. A redirected
+  response is refused for navigations, so the offline fallback never worked — silently.
+- Every navigation and every `/api/` GET was cached with no user key: a shared school device
+  could replay the previous user's dashboard.
+- The push handler hardcoded a product name, dead icons, and a click that always opened `/`.
+
+## The lane
+
+<SpellWorkflow id="pwa" />
+
+| Mode    | What happens                                                                                                                                                                                         |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `audit` | `pwa-audit.mjs <url> --sw /service-worker.js` — install criteria, every icon, the precache list for redirects, theme-color and apple-touch-icon; then the browser half (controller, offline, install) |
+| `build` | Icons → root layout → per-tenant `manifest.ts` → service worker → registration → offline page → outbox kind                                                                                          |
+| `push`  | `PushSubscription` model → VAPID keys → `web-push` processor on the push cron → preferences toggle                                                                                                    |
+
+Lighthouse 12 removed its PWA category; the audit script is the audit.
+
+## The pattern
+
+The full layout is the `pwa` pattern card. The load-bearing choices:
+
+- **The manifest resolves its own tenant.** Middleware matchers exclude dotted paths, so
+  `/manifest.webmanifest` never sees the tenant headers. The route reads the host, resolves the
+  school, and answers with its name, language, direction and colour. `start_url` stays relative.
+- **Hand-rolled worker on large apps.** A 30 MB app's whole-bundle precache is hostile to Sudan
+  and UAE mobile data. The worker precaches only the locale offline pages, caches hashed static
+  assets lazily with a cap, and treats navigations and `/api/` as network-only. Serwist is the
+  answer for a small greenfield app.
+- **Outbox, not cache, for offline writes.** IndexedDB holds the pending work; the sync route
+  applies each kind idempotently and answers `applied`, `duplicate` or `rejected`.
+- **Push on the existing rails.** Web Push adds a subscription store and a processor; the FCM
+  scaffold stays a no-op until a native app wants it.
+- **iOS order.** No install prompt event; Web Push reaches installed apps only — install first,
+  push second.
+
+One domain rule guards the worker: `next-16/sw-no-authenticated-cache` auto-loads whenever a
+service worker file is touched.
+
+## Verification
+
+1. Audit → 0 FAIL: Arabic `name`, `dir: rtl`, every icon 200, no redirecting precache entry.
+2. Browser: the worker controls the page after one reload; offline emulation renders the
+   locale-correct offline page.
+3. Outbox: a write made offline drains on reconnect and replays as `duplicate`.
+4. Push: subscribe, queue one notification, hit the cron — it lands and its tap deep-links to
+   the tenant route.
+
+## Related
+
+[Agents](/docs/agents) · [Keywords](/docs/keywords) · [Rules](/docs/rules) ·
+[Deploy](/docs/skills) — prod DDL for the subscription store goes through the deploy skill's
+schema-gap step behind a Neon restore point.

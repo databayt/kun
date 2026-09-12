@@ -6,7 +6,7 @@ When you encounter a Tier 3 vocabulary keyword that has a pattern card, load the
 
 These keywords have canonical patterns documented in `.claude/patterns/cards/`:
 
-`form`, `table`, `modal`, `auth`, `validation`, `action`, `columns`, `wizard`, `sidebar`, `header`, `e2e`
+`form`, `table`, `modal`, `auth`, `validation`, `action`, `columns`, `wizard`, `sidebar`, `header`, `e2e`, `pwa`
 
 ## Behavior
 
@@ -25,6 +25,7 @@ When building a new feature that involves one of these keywords:
 - User says "add auth" → read `auth.md`, follow the five-step flow structure
 - User says "multi-step wizard for onboarding" → read `wizard.md`, use createWizardProvider factory
 - User says "add E2E tests" or "playwright" → read `e2e.md`, clone the setup-project auth config (storageState + desktop/mobile/Arabic-RTL projects)
+- User says "make it installable", "work offline", or "push notifications" → read `pwa.md`, keep the per-tenant manifest + hand-rolled worker + outbox shape (Serwist only for small greenfield apps)
 
 ## Rule Corpus — keyword → rule directory
 
@@ -38,6 +39,6 @@ The code-side quality keywords (see `.claude/agents/quality.md`) cite atomic, se
 | `guard`               | `authjs/` + `prisma-6/` (tenant scope) + `s3/` (presigned URLs)                                                                                                |
 | `trace` / `efficient` | `react-perf/` (parallelization, bundle, RSC-boundary rules — impact-tagged)                                                                                    |
 
-Domains (37 rules total): `react-19` (5), `react-perf` (8 — vendored from vercel-labs/agent-skills, 2026-07-10), `next-16` (5), `typescript-strict` (4), `tailwind-v4` (4), `prisma-6` (4), `authjs` (3), `neon` (2), `s3` (2).
+Domains (38 rules total): `react-19` (5), `react-perf` (8 — vendored from vercel-labs/agent-skills, 2026-07-10), `next-16` (6), `typescript-strict` (4), `tailwind-v4` (4), `prisma-6` (4), `authjs` (3), `neon` (2), `s3` (2).
 
 Adding a rule: drop a new `<slug>.md` in the right domain dir with the standard frontmatter (`domain` / `severity` / `paths` glob array / `since`) + Good/Bad/Fix. No agent changes needed — the keyword reads the whole dir, and `paths` scopes the ambient auto-load.

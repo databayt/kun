@@ -54,12 +54,12 @@ Priority (High → Low):
 4. Pattern library /Users/abdout/codebase/     — Core patterns
 ```
 
-### Agent Fleet (49 agents, two plugins)
+### Agent Fleet (53 agents, two plugins)
 
 ```
 captain (company brain — allocates, decides, never writes code)
-├── Business:   revenue, growth, support, analyst
-├── Delivery:   product, tech-lead, ops, guardian
+├── Business:   revenue, growth, support, analyst, lead, funnel
+├── Delivery:   product, tech-lead, ops, guardian, cloudflare, pwa
 ├── Engine:     quality, record, report, analyze, learn, package, clone
 ├── Content:    transcribe, adjudicate
 └── Reference:  hogwarts, souq, mkan, shifa
@@ -68,7 +68,7 @@ captain (company brain — allocates, decides, never writes code)
 
 | Fleet | Plugin | Agents |
 |-------|--------|--------|
-| **Company** (22) | `kun-company` | captain, revenue, growth, support, analyst, product, tech-lead, ops, guardian, quality, record, report, analyze, learn, package, clone, transcribe, adjudicate, hogwarts, souq, mkan, shifa |
+| **Company** (26) | `kun-company` | captain, revenue, growth, support, analyst, lead, funnel, product, tech-lead, ops, guardian, cloudflare, pwa, quality, record, report, analyze, learn, package, clone, transcribe, adjudicate, hogwarts, souq, mkan, shifa |
 | **Stack** (27) | `kun-stack` | nextjs, react, typescript, tailwind, prisma, shadcn, authjs, architecture, orchestration, pattern, structure, atom, template, block, icon, semantic, build, deploy, test, git, github, middleware, internationalization, sse, optimize, performance, comment |
 
 Full breakdown: [Agents](/docs/agents).
@@ -87,9 +87,9 @@ Full breakdown: [Agents](/docs/agents).
 
 Plus the claude.ai connectors (Gmail, Calendar, Drive, PlanetScale, Vercel). Registration lives in `~/.claude.json` — **not** `~/.claude/mcp.json`, which is only a catalog. See [MCP](/docs/mcp).
 
-### Rules Engine (37 domain rules + 5 cross-cutting)
+### Rules Engine (38 domain rules + 5 cross-cutting)
 
-Domain rules auto-load via a `paths` glob: `react-perf` (8), `next-16` (5), `react-19` (5), `prisma-6` (4), `tailwind-v4` (4), `typescript-strict` (4), `authjs` (3), `neon` (2), `s3` (2). Five more load unconditionally: `github-workflow`, `block-protocol`, `patterns`, `cowork-bridge`, `engine-parity`.
+Domain rules auto-load via a `paths` glob: `react-perf` (8), `next-16` (6), `react-19` (5), `prisma-6` (4), `tailwind-v4` (4), `typescript-strict` (4), `authjs` (3), `neon` (2), `s3` (2). Five more load unconditionally: `github-workflow`, `block-protocol`, `patterns`, `cowork-bridge`, `engine-parity`.
 
 ### Hook Automation (10 hooks)
 

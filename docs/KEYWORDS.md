@@ -523,6 +523,23 @@ Each creates its respective system — forms, tabs, role-based access, user data
 
 ---
 
+### `pwa`
+
+Turns a product into something a phone can install: a home-screen icon named after the school, an offline shell that survives a dropped connection, and browser push that reaches a parent — no app store, no native build.
+
+> **The Order:**
+> **Familiar:** `pwa` → `nextjs` → `performance` | **Portal:** chrome-devtools MCP + context7 MCP | **Skill:** `/pwa` | **Ward:** `next-16` (`sw-no-authenticated-cache`)
+>
+> 1. `audit <url>` — `pwa-audit.mjs` checks install criteria, every icon, the precache list for redirects
+> 2. Icons 72/96/192/512 + apple-touch-icon from the 512 master; `viewport.themeColor`
+> 3. `app/manifest.ts` resolves host → tenant → name, lang, dir, theme_color (`start_url` stays relative)
+> 4. Service worker: locale-explicit precache, static cache-first, HTML + API network-only, offline fallback
+> 5. Outbox kind for any write that must survive offline — idempotent on a natural key
+> 6. `push` — `PushSubscription` model, VAPID keys, `web-push` processor on the push cron, preferences toggle
+> 7. Verify: audit 0 FAIL, offline page renders, outbox replays as `duplicate`, push round-trip
+
+Decided 2026-09-12: hogwarts yes (the pilot runs on phones; a half-broken layer already shipped), mkan deferred (one-visit guests, no host message volume yet).
+
 ## VI. Animation Charms
 
 _The spells that give life to stillness. In the Muggle world, they call it "motion design." We know better — it is the ancient art of making the inanimate move with purpose._

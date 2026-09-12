@@ -45,7 +45,7 @@ Claude routes these to the right skill + agent + MCP without a dedicated command
 **Transfiguration** — creating something from nothing: `component`, `page`, `api`, `atom`, `template`, `block`, `migration`
 **Ancient Runes** — the foundational frameworks: `nextjs`, `react`, `typescript`, `prisma`, `tailwind`, `shadcn`
 **Conjuration** — summoning ui elements: `table`, `header`, `menu`, `form`, `modal`, `card`, `sidebar`, `footer`, `hero`, `navbar`
-**The Dark Arts of Features** — n.e.w.t.-level system enchantments: `auth`, `saas`, `dashboard`, `landing`, `checkout`, `settings`, `profile`, `admin`, `onboarding`
+**The Dark Arts of Features** — n.e.w.t.-level system enchantments: `auth`, `saas`, `dashboard`, `landing`, `checkout`, `settings`, `profile`, `admin`, `onboarding`, `pwa`
 **Animation Charms** — giving life to stillness: `motion`, `animation`, `transition`, `gesture`, `scroll`
 **Defense Against the Dark Arts** — protection from bugs and entropy: `test`, `e2e`, `handover`, `qa`, `coverage`, `review`, `security`, `audit`, `bench`, `analyze`, `constitution`, `accessibility`, `optimize`, `performance`
 **Reparo** — the mending spells: `fix`, `error`, `scan`, `lint`, `format`, `type-check`, `report`

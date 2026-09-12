@@ -1,20 +1,20 @@
 ---
 title: Agents
-description: 49 agents in two fleets — 22 company, 27 stack
+description: 53 agents in two fleets — 26 company, 27 stack
 ---
 
 # Agents
 
-The engine ships **49 agents** in two fleets. The **company fleet** (22) runs the business: strategy, revenue, quality, product references, product flow videography, and curriculum content. The **stack fleet** (27) writes the code: one agent per framework, layer, or tool.
+The engine ships **53 agents** in two fleets. The **company fleet** (26) runs the business: strategy, revenue, leads and funnel, quality, the production platform and the PWA lane, product references, product flow videography, and curriculum content. The **stack fleet** (27) writes the code: one agent per framework, layer, or tool.
 
 Each fleet is a plugin, which is how it reaches other machines — see [Onboarding](/docs/onboarding).
 
 | Fleet | Plugin | Agents | Lives in |
 |-------|--------|--------|----------|
-| Company | `kun-company` | 22 | `.claude/agents/` |
+| Company | `kun-company` | 26 | `.claude/agents/` |
 | Stack | `kun-stack` | 27 | installed to `~/.claude/agents/` |
 
-## Company fleet (22)
+## Company fleet (26)
 
 The captain sits above everything and never writes code — it allocates, decides, and delegates.
 
@@ -22,7 +22,7 @@ The captain sits above everything and never writes code — it allocates, decide
 |-------|-------|
 | **captain** | CEO brain — weekly allocation, revenue strategy, coordination across products and the 7 humans |
 
-### Business (4)
+### Business (6)
 
 | Agent | Scope |
 |-------|-------|
@@ -30,8 +30,10 @@ The captain sits above everything and never writes code — it allocates, decide
 | **growth** | Content strategy, SEO, social, developer relations, community |
 | **support** | Customer onboarding, issue triage, knowledge base, SLA tracking |
 | **analyst** | Market intelligence per vertical, competitors, usage analytics, churn |
+| **lead** | Lead acquisition — contact-gap analysis, enrichment, tiering, outreach drafting against the CRM |
+| **funnel** | Conversion — gate state, segmentation, value ladder, the stall clock from first reply to paying customer |
 
-### Product & delivery (4)
+### Product & delivery (6)
 
 | Agent | Scope |
 |-------|-------|
@@ -39,6 +41,8 @@ The captain sits above everything and never writes code — it allocates, decide
 | **tech-lead** | Architecture across the repos — shared patterns, breaking changes, tech debt |
 | **ops** | CI/CD, API spend, monitoring, infrastructure, uptime |
 | **guardian** | OWASP Top 10, performance budgets, dependency health, SSPL compliance |
+| **cloudflare** | The production platform — Workers, Containers, zone DNS, cron triggers, the balqalam.com lane |
+| **pwa** | Installability, per-tenant manifests, service-worker caching that respects auth, offline outboxes, Web Push — see [PWA](/docs/pwa) |
 
 ### Engine maintenance & media (7)
 
