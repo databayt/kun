@@ -77,6 +77,12 @@ byte under `public/` restarts the container (a byte-identical image does not res
 `/api/health` `database.pass`, a cron with the new `CRON_SECRET` → 200, a wrong bearer → 401.
 Keychain is the ONLY durable home for rotated values; a Keychain miss means the next build
 resurrects the leaked one.
+**Rotating `AUTH_SECRET` locks out every live session unless the proxy verifies the cookie.** A proxy
+that trusts cookie *presence* bounces `/login` → `/dashboard` → `/login` for every pre-rotation cookie
+(hogwarts, 2026-09-13, fixed in `src/proxy.ts`: decode the JWT with `next-auth/jwt`, expire stale
+cookies on the response). Before rotating on any other repo, confirm its proxy does the same or bump
+the session cookie name in the same deploy; after rotating, curl `/login` with a garbage
+`authjs.session-token` → expect 200 + `Set-Cookie … Max-Age=0`, then one real form login.
 
 ### 4. Schema gap — read the diff, do not just run it
 
