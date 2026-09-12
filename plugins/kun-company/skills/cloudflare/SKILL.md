@@ -144,9 +144,12 @@ checkout after someone forgets to `git add` a file.
 
 ## Secrets
 
-`scripts/cf-secrets.sh /tmp/prod.env` pushes secret-classified vars to the Worker and **prefers
-macOS Keychain overrides** (`cf-<worker>-<VAR>`) over the dotenv — because the pulled Vercel env
-carries values that are wrong or dead. Deploy again afterwards: a container reads its env at start.
+`scripts/cf-secrets.sh /tmp/prod.env` pushes the secret-classified vars **of that file** to the
+Worker (`wrangler secret bulk`); it reads nothing else. Because the pulled Vercel env carries
+values that are wrong or dead, and Vercel refuses env writes under the fair-use block, the
+durable home for a corrected or new value is the macOS Keychain as `cf-<worker>-<VAR>` — and it
+reaches the Worker only when you append it to the pulled file first (deploy skill, step 3).
+Deploy again afterwards: a container reads its env at start.
 
 Known bad values already fixed and overridden: mkan's `NEXTAUTH_SECRET` shipped as the literal
 string `secret`, and the Resend keys on both apps were revoked.

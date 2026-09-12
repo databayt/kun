@@ -125,6 +125,31 @@ Gate: subscribe in Chrome → insert one Notification with `channels: [push]` �
 - **Every user-facing string goes through the dictionaries** — install card, offline page,
   permission copy. hogwarts and mkan both gate the build on it.
 
+### Learned executing hogwarts (2026-09-12)
+
+- **`prisma db execute` takes `--url` OR `--schema`, never both.** Local: `--schema prisma
+  --file …`; prod: `--url "$DIRECT" --file …`.
+- **A running `next dev` keeps the old Prisma client after `prisma generate`.** New models are
+  `undefined` on it until restart — verify processors with a tsx probe, not the dev server.
+- **tsx cannot import Next-only modules.** `-r ./scripts/_server-only-shim.cjs` stubs
+  `server-only`; the hogwarts probe is `scripts/push-web-probe.ts`.
+- **No tooling can grant the notification permission.** Headless Chromium reports `denied`;
+  headed Chrome shows a bubble nothing can click. Verify the processor with a bogus endpoint
+  carrying a **valid P-256 key** (the push service answers 404/410 → prune path), and verify
+  device delivery from a real phone after deploy.
+- **A bogus `p256dh` fails client-side** ("Public key is not valid for specified curve") — that
+  exercises the transient-failure branch, not the prune branch.
+- **Custom-domain tenants fall back to the default manifest** (`getSubdomainFromHost` returns
+  null for unknown roots). Acceptable until a custom domain ships.
+- **zsh does not word-split an unquoted variable** — `git commit -- $PATHS` is one pathspec.
+  Write the paths out or use `${=PATHS}`.
+- **VAPID values need a durable home.** Vercel refuses env writes under the fair-use block;
+  store `cf-<worker>-<VAR>` in the macOS Keychain and append them to the pulled env before the
+  build (deploy skill step 3). The Worker secret persists; the two config vars re-bake every
+  build.
+- **Ask who requests the channel.** A push lane with no dispatcher asking for `"push"` is a queue
+  that never fills; the cron schedule must also route to the processor (`cf/crons.json`).
+
 ## After
 
 Update the block records the work touched (`offline`, `attendance`, `notifications`), the

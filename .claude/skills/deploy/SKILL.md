@@ -58,6 +58,16 @@ vercel env pull /tmp/prod.env --environment=production --scope databayt --yes &&
 
 If the CLI refuses, that is the blocker to surface. Never reconstruct secrets.
 
+Vercel refuses env **writes** under the fair-use block, so a var added after 2026-09-12 lives in
+the macOS Keychain as `cf-<worker>-<VAR>` and is appended to the pulled file before the build —
+`cf/env-split.mjs` then classifies it (secret → Worker via cf-secrets.sh, config → baked):
+
+```bash
+for n in NEXT_PUBLIC_VAPID_PUBLIC_KEY VAPID_PRIVATE_KEY VAPID_SUBJECT; do
+  printf '%s=%s\n' "$n" "$(security find-generic-password -a "$USER" -s "cf-hogwarts-$n" -w)" >> /tmp/prod.env
+done
+```
+
 ### 4. Schema gap — read the diff, do not just run it
 
 ```bash

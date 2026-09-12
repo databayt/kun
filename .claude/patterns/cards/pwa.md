@@ -88,7 +88,7 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
     shortcuts: [
       {
         name: "التحضير السريع",
-        url: "/attendance/quick",
+        url: "/attendance", // the quick surface is the attendance index
         icons: [{ src: "/icon-96.png", sizes: "96x96" }],
       },
     ],
@@ -190,6 +190,14 @@ Bump `STATIC` on every change. Root `layout.tsx` exports `viewport: { themeColor
 ## Serwist lane (greenfield, small apps)
 
 `pnpm add @serwist/turbopack serwist` + `esbuild` (dev). `next.config` wrapped with `withSerwist`, `app/sw.ts` with `defaultCache` + `/~offline` fallback, `app/serwist/[path]/route.ts` exporting `createSerwistRoute({ swSrc: "app/sw.ts", additionalPrecacheEntries })`, `<SerwistProvider swUrl="/serwist/sw.js">` in the root layout, `public/sw*` gitignored. Works under Turbopack on Next 16.
+
+## Gotchas (from the hogwarts rollout)
+
+- Precache locale-explicit URLs only; verify each with `redirect: "manual"`.
+- The dispatcher must request `"push"` and a cron schedule must route to the processor, or the lane is silent.
+- Verify the processor with a bogus endpoint and a valid P-256 key (prune path); real delivery needs a phone.
+- `prisma db execute`: `--schema` locally, `--url` for prod — never both.
+- Custom-domain tenants get the default manifest until the host resolver knows the domain.
 
 ## Verification
 
