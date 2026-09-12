@@ -33,9 +33,19 @@ export const REPORT_DICTIONARY = {
     triggerText: "Report an issue",
     triggerAriaLabel: "Report an issue",
     title: "Report an issue",
+    description:
+      "Tell us what went wrong on this page. The page address and your browser details are attached automatically.",
     categoryPlaceholder: "Category",
-    descriptionPlaceholder: "Describe the issue in detail (minimum 30 characters)…",
-    descriptionHint: "{count}/30+ chars",
+    descriptionPlaceholder: "What went wrong on this page?",
+    descriptionHint: "{count}/{min} characters",
+    minHint: "A few more words — at least {min} characters.",
+    readyHint: "Press ⌘↵ / Ctrl+↵ to send.",
+    readyHintMobile: "Ready — tap send.",
+    composerPlaceholder: "What went wrong?",
+    send: "Send report",
+    close: "Close",
+    emptyState:
+      "Describe what you saw. Short is fine — where it happened is attached.",
     addDetails: "Add steps and expected behavior (optional)",
     reproPlaceholder: "Steps to reproduce: 1. … 2. … 3. …",
     expectedPlaceholder: "What did you expect to happen?",
@@ -53,15 +63,25 @@ export const REPORT_DICTIONARY = {
     successWithId: "Submitted. Tracked as #{id}.",
     error: "Something went wrong. Try again.",
     cooldown: "Please wait a moment before submitting another report.",
-    severityCritical_hint: "Reports flagged critical are escalated immediately.",
+    severityCritical_hint:
+      "Reports flagged critical are escalated immediately.",
   },
   ar: {
     triggerText: "الإبلاغ عن مشكلة",
     triggerAriaLabel: "الإبلاغ عن مشكلة",
     title: "الإبلاغ عن مشكلة",
+    description:
+      "أخبرنا بما حدث في هذه الصفحة. يُرفق عنوان الصفحة وبيانات المتصفح تلقائياً.",
     categoryPlaceholder: "التصنيف",
-    descriptionPlaceholder: "صف المشكلة بالتفصيل (30 حرفاً على الأقل)…",
-    descriptionHint: "{count}/30+ حرف",
+    descriptionPlaceholder: "ما الذي حدث في هذه الصفحة؟",
+    descriptionHint: "{count}/{min} حرف",
+    minHint: "بضع كلمات إضافية — {min} حرفاً على الأقل.",
+    readyHint: "اضغط ⌘↵ / Ctrl+↵ للإرسال.",
+    readyHintMobile: "جاهز — اضغط إرسال.",
+    composerPlaceholder: "ما الذي حدث؟",
+    send: "إرسال البلاغ",
+    close: "إغلاق",
+    emptyState: "صف ما رأيته. الاختصار مقبول — مكان حدوثه مُرفق تلقائياً.",
     addDetails: "أضف الخطوات والسلوك المتوقع (اختياري)",
     reproPlaceholder: "خطوات إعادة الإنتاج: 1. … 2. … 3. …",
     expectedPlaceholder: "ما الذي توقعت حدوثه؟",
@@ -83,4 +103,11 @@ export const REPORT_DICTIONARY = {
   },
 } as const;
 
-export type ReportDict = (typeof REPORT_DICTIONARY)[ReportLang];
+export type ReportDictKey = keyof (typeof REPORT_DICTIONARY)["en"];
+
+/**
+ * Widened to plain strings so a repo with a central dictionary (mkan) can pass
+ * `strings={dict.reportIssue}` as a partial override without matching the
+ * literal types of the defaults.
+ */
+export type ReportDict = Record<ReportDictKey, string>;

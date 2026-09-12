@@ -1,52 +1,70 @@
 ---
 title: Issue
-description: Issue pipeline — from user report to auto-fix, including Report an Issue dialog, report agent, and scheduled automation
+description: Issue pipeline — from the Report an Issue dialog to a human-gated fix, including the credibility pipeline, the report skill, the report agent, and the session-start hook
 ---
 
 # Issue
 
-The issue pipeline connects user-reported bugs to automated fixes. Users click "Report an Issue" in the UI, a GitHub issue is created, and the report agent processes it.
+The issue pipeline connects user-reported bugs to fixes. Anyone clicks "Report an
+Issue" in the UI, a GitHub issue is created, **a human takes or rejects it**, and the
+report agent fixes what was taken.
 
 ## Report an Issue (User-Facing)
 
-Every hogwarts page has a "Report an Issue" link or icon. When clicked, a dialog opens with a textarea. On submit, a GitHub issue is created in `databayt/hogwarts` with the `report` label.
+Every page in hogwarts, mkan and kun carries a "Report an issue" link or icon. It
+opens one canonical component (`src/components/report-issue/dialog.tsx`, source of
+truth in kun, copied verbatim to the other repos):
+
+- **≥ 768px** — a centred dialog: title, textarea, hint, captcha (anonymous only), Submit.
+- **< 768px** — a full-height bottom sheet shaped like the iOS Books search sheet: the
+  title on top, a quiet state area in the middle, and a pill composer pinned right
+  above the on-screen keyboard with a round send button inside it and a round ✕
+  beside it. The pill follows the keyboard through `window.visualViewport`. The page
+  address, viewport, direction and browser are attached automatically; the user only
+  types what went wrong.
+
+Language comes from the `[lang]` route param (never from `document` at render time),
+and direction is set on the portal explicitly so the Arabic sheet renders RTL.
 
 ### Where It Appears
 
-| Location | Variant | How |
-|----------|---------|-----|
-| SaaS marketing footer | `text` | Inline link next to "built by Databayt... GitHub" |
-| Application form wizard | `icon` | Bug icon in FormFooter next to Logo, Help, Save |
-| School marketing pages | `text` | Bottom of page |
-| School dashboard | `text` | Bottom of page |
-| SaaS dashboard | `text` | Bottom of page |
-| Auth pages | `text` | Absolute bottom-left |
-| Onboarding | `text` | Bottom of page |
-| Exam wizard | `text` | Absolute bottom-left |
+| Repo | Location | Variant |
+|------|----------|---------|
+| kun | Site footer, every page | `text` |
+| hogwarts | Dashboard footer, marketing pages, auth, onboarding, exam wizard | `text` |
+| hogwarts | Application form wizard footer | `icon` |
+| mkan | Site footer, hosting/travel/auth layouts | `text` / `icon` |
 
-### Component
+### Intake limits
 
-```
-src/components/report-issue.tsx
-```
+The dialog and the server read the same numbers from `src/lib/report/limits.ts`:
 
-Two variants:
-- **`text`** (default) — underlined "Report an issue" link that opens the dialog
-- **`icon`** — Bug icon (`lucide-react`) that opens the same dialog
+| Reporter | min chars | min unique words |
+|---|---|---|
+| anonymous | 30 | 5 |
+| signed-in | 10 | 3 |
 
-The dialog contains only a textarea and submit button. Bilingual via `useDictionary()`.
+Max 2000 chars. The send button enables exactly when the server will accept the
+text. (Before 2026-09-13 hogwarts enabled submit on any text while the server
+demanded 30 chars — short team reports drew a success toast and created nothing.)
 
 ### Server Action
 
 ```
-src/lib/actions/report-issue.ts
+src/actions/report-issue.ts          # kun
+src/lib/actions/report-issue.ts      # hogwarts, mkan
 ```
 
-On submit:
-1. Reads `GITHUB_PERSONAL_ACCESS_TOKEN` from env
-2. Reads auth session via `auth()` (for reporter identification)
-3. Creates GitHub issue with `report` label
-4. Posts acknowledgment comment: "Received. This report is queued for automated review and fix."
+A thin wrapper around `runReportPipeline()` (`src/lib/report/pipeline.ts`):
+
+```
+schema → reporter → pure filters (junk stops here, zero network)
+  → rate limit → [captcha ‖ recent-self ‖ banned] → context filters
+  → [GitHub dedup search ‖ AI triage] → score → bucket → GitHub issue
+```
+
+The client always receives the same "Submitted. Thank you!" — silent rejects are
+indistinguishable from real submissions, so spammers cannot probe the filter.
 
 ### Issue Body Format
 
@@ -55,65 +73,77 @@ On submit:
 
 ---
 
-**Page**: https://kingfahad.databayt.org/en/admissions
-**Time**: 2026-04-02T08:42:26Z
+**Page**: `https://demo.balqalam.com/en/students/enroll`
+**Reporter**: team · ADMIN (id:cmrkybll…)
+**Time**: 2026-09-13T01:20:00.000Z
+**Category**: other
+**Viewport**: 390x844
+**Direction**: ltr
+**Browser**: Mozilla/5.0 (iPhone; …)
+
+<!-- score-block
+{ "score": 58, "bucket": "needs-human", "team": true, "reporterKind": "authenticated",
+  "classification": "unknown", "severity": "medium", "language": "other",
+  "scores": { "R": 30, "Q": 8, "C": 10, "A": 0, "P": 0 }, "rationale": "" }
+-->
 ```
 
-Title is truncated to 80 characters from the description.
+Title is the description, truncated to 80 characters. `classification: "unknown"`
+with `A: 0` is the normal case: AI triage only runs when `ANTHROPIC_API_KEY` is set,
+and under the subscription-only billing posture it is not.
 
-### i18n
+### Labels the pipeline sets
 
-Translation keys in `en.json` / `ar.json` under `reportIssue`:
+| Label | Meaning |
+|-------|---------|
+| `report` | Every dialog-created issue |
+| `team` | The reporter is a databayt team member (kun contributor session; hogwarts DEVELOPER, team account, or demo-tenant admin) — listed first, never below `needs-human` |
+| `verified-report` | Score ≥ 75 with an AI-confirmed bug, or three corroborating reporters |
+| `needs-human` / `low-confidence` | Score bands — hints that order the list |
+| `severity/*`, `lang/*` | Only when AI triage ran |
 
-| Key | English | Arabic |
-|-----|---------|--------|
-| `link` | Report an issue | الإبلاغ عن مشكلة |
-| `title` | Report an issue | الإبلاغ عن مشكلة |
-| `placeholder` | Describe the issue... | ...صف المشكلة |
-| `submit` | Submit | إرسال |
-| `submitting` | Submitting... | ...جاري الإرسال |
-| `success` | Submitted. Thank you! | !تم الإرسال. شكراً لك |
-| `error` | Something went wrong. Try again. | .حدث خطأ. حاول مرة أخرى |
+## The human gate
 
-## Report Agent (Auto-Fix)
-
-The report agent processes open `report`-labeled issues. Triggered manually by typing `report` in Claude Code, or by the session-start hook.
-
-### Trigger
-
-```bash
-# Manual
-report
-report hogwarts
-
-# Session-start hook (automatic)
-# Checks hogwarts + kun for open report issues on every session start
-```
-
-### Pipeline
+**The queue is listed. Abdout chooses. Nothing is auto-processed.**
 
 ```
-READ → LOCATE → CONTEXT → VALIDATE → FIX → BUILD → PUSH → CLOSE
+report                # list the whole org queue, then take / reject
+report hogwarts       # one repo
+report hogwarts#382   # skip the list — treat as accepted and fix it
+report --status       # the table only
+```
+
+Passive triggers, no slash needed: "list the reports", "what did the team report",
+"fix reports", "البلاغات", "بلاغات الفريق".
+
+1. **LIST** — one `gh search issues --owner databayt --label report --state open` call
+   renders a numbered table ordered accepted → verified → team → needs-human →
+   low-confidence → legacy, oldest first within a lane, with reporter, score and page.
+2. **CHOOSE** — "take 1,3 reject 2 — not a bug". Up to four rows the skill asks with a
+   multi-select; more than four it asks in prose.
+3. **APPLY** — taken → `accepted` label + a one-line comment; rejected → closed as
+   *not planned* with the reason; unmentioned rows stay untouched.
+4. **FIX** — the report agent runs on every `accepted` (or `verified-report`) issue,
+   oldest first.
+
+## Report Agent (the fix lane)
+
+```
+READ → LOCATE → CONTEXT → VALIDATE → SEE → DEBUG → IDENTIFY → FIX → BUILD → PUSH → VERIFY → CLOSE
 ```
 
 | Step | What It Does |
 |------|-------------|
-| **READ** | `gh issue view` — extract description, page URL, time |
+| **READ** | `gh issue view` — description, page URL, reporter, score-block |
 | **LOCATE** | Map URL to route directory (`src/app/`) and component directory (`src/components/`) |
 | **CONTEXT** | Read `CLAUDE.md`, `README.md`, `ISSUE.md` in the component directory |
-| **VALIDATE** | Is it a real bug? Does it align with plans? Will the fix improve things? |
-| **FIX** | Edit minimum code needed, follow documented patterns |
-| **BUILD** | `pnpm build` — verify no regressions |
-| **PUSH** | `fix:` commit with `Closes #N`, push to main |
-| **CLOSE** | `gh issue close` with structured comment (root cause, fix, files, verification) |
-
-### Validation Gate
-
-Before writing any code, the agent answers three questions:
-
-1. **Is it a real bug?** — Can it reproduce from description + URL? If not → `cannot-reproduce` label
-2. **Is it aligned?** — Does it contradict `ISSUE.md` planned work? If feature request → `needs-human` label
-3. **Is the fix safe?** — Could it break shared code? When in doubt → `needs-human` label
+| **VALIDATE** | Accepted means "fix it if it is a bug the QA scope allows" — no schema/auth/middleware; data gaps and feature requests go back to the human with a comment |
+| **SEE / DEBUG** | Screenshot, console, network |
+| **FIX** | Minimum diff, documented patterns |
+| **BUILD** | `pnpm tsc --noEmit` + `pnpm build` (hogwarts ignores type errors in the build) |
+| **PUSH** | `fix:` commit with `Closes #N`, straight to `main` — no branches, no PRs |
+| **VERIFY** | kun redeploys itself on push (Vercel); hogwarts and mkan need `/deploy` (Cloudflare) |
+| **CLOSE** | `gh issue close` with root cause, fix, files, verification — and which platform has it |
 
 ### Escalation
 
@@ -123,7 +153,7 @@ Before writing any code, the agent answers three questions:
 | Server-side exception | Hand off to `sse` agent |
 | Performance issue | Hand off to `performance` agent |
 | Security concern | Hand off to `guardian` agent |
-| Needs architecture change | Comment + `needs-human` label |
+| Needs schema / auth / architecture change | Comment, leave open for Abdout |
 | Cannot reproduce | Comment + `cannot-reproduce` label |
 
 ### Agent Definition
@@ -132,20 +162,22 @@ Before writing any code, the agent answers three questions:
 .claude/agents/report.md
 ```
 
-### Close Comment Format
+## Session-Start Hook
 
-```markdown
-Fixed in abc1234.
+Every Claude Code session in a databayt repo runs `~/.claude/hooks/session-start-reports.sh`
+(canonical copy `kun/.claude/scripts/hooks/`). One search call, one compact table:
 
-**What was wrong**: <root cause>
-**What was fixed**: <change summary>
-**Files changed**: <list>
-**Verified**: build passes, auto-deploying to production
 ```
+📋 Open reports: 5 (0 accepted, 0 from the team). Say "report" to take or reject them.
+   kun#108        needs-human     111d  i got stuck in 4/8 step, also read whole terminal…
+   hogwarts#382   low-confidence   59d  in the student drop down list not all the students appears
+```
+
+It lists; it never starts the agent. The policy lives in `~/.claude/rules/session-start.md`.
 
 ## Scheduled Trigger (Paused)
 
-A remote trigger exists that runs the report agent every 2 hours in Anthropic's cloud. Currently **paused** — using manual `report` keyword until the feature stabilizes.
+A remote trigger exists that runs the report agent every 2 hours in Anthropic's cloud. Currently **paused** — the human gate makes an unattended run pointless until reports are accepted.
 
 | Field | Value |
 |-------|-------|
@@ -154,69 +186,47 @@ A remote trigger exists that runs the report agent every 2 hours in Anthropic's 
 | **Schedule** | `0 */2 * * *` (every 2 hours) |
 | **Status** | Disabled |
 | **Repo** | `databayt/hogwarts` |
-| **Model** | `claude-sonnet-5` |
 | **Manage** | https://claude.ai/code/scheduled |
-
-To re-enable when ready:
-```bash
-# In Claude Code
-schedule update trig_01MFLRtUTfMMNTDGBBGQtZLq --enabled true
-```
-
-## Session-Start Hook
-
-Every time Claude Code opens, the session-start hook checks for open report issues:
-
-```bash
-# In ~/.claude/settings.json (SessionStart hook)
-gh issue list --label report --state open --repo databayt/hogwarts
-gh issue list --label report --state open --repo databayt/kun
-```
-
-If found, the agent processes them immediately per the rule in `session-start.md`.
 
 ## Full Pipeline Flow
 
 ```
-User clicks "Report an issue"
+User taps "Report an issue" (dialog on desktop, sheet above the keyboard on mobile)
     ↓
-Dialog opens → user types description → Submit
+Server action → credibility pipeline (junk dies, the rest is scored)
     ↓
-Server action creates GitHub issue (label: report)
+GitHub issue (report + lane label, `team` when a teammate filed it)
     ↓
-Acknowledgment comment posted: "Received. Queued for review."
+Next Claude Code session → hook lists the queue
     ↓
-Next Claude Code session → hook detects → agent processes
-    OR
-User types "report" → agent processes manually
-    OR
-Scheduled trigger (when enabled) → agent processes every 2h
+Abdout says "report" → table → take / reject → `accepted` label / closed not planned
     ↓
 Agent: READ → LOCATE → CONTEXT → VALIDATE → FIX → BUILD → PUSH
     ↓
-Issue closed with structured comment
-    ↓
-Vercel auto-deploys fix to production
+Issue closed with structured comment; kun live on push, hogwarts/mkan after /deploy
 ```
 
 ## Files
 
-### Hogwarts
+### Product repos (hogwarts, mkan, kun)
 
 | File | Role |
 |------|------|
-| `src/components/report-issue.tsx` | UI component (text + icon variants) |
-| `src/lib/actions/report-issue.ts` | Server action (GitHub API + auth + ack comment) |
-| `src/components/form/footer.tsx` | FormFooter with `showReport` prop |
-| `src/components/internationalization/en.json` | English translations |
-| `src/components/internationalization/ar.json` | Arabic translations |
+| `src/components/report-issue/dialog.tsx` | The canonical dialog + mobile sheet (copied from kun) |
+| `src/components/report-issue/index.tsx` | Per-repo wrapper: session, server action, language |
+| `src/components/report-issue/dictionary.ts` | Built-in bilingual strings (mkan overrides through `strings`) |
+| `src/lib/report/` | The credibility pipeline (copied from kun; only `adapter.ts` differs) |
+| `src/lib/report/limits.ts` | Intake floors — the one place both sides read from |
+| `src/actions/report-issue.ts` or `src/lib/actions/report-issue.ts` | Server action |
 
 ### Kun (Engine)
 
 | File | Role |
 |------|------|
-| `.claude/agents/report.md` | Report agent definition (12-step pipeline) |
-| `.claude/rules/session-start.md` | Auto-process rule |
+| `.claude/skills/report/SKILL.md` | List → choose → apply → fix |
+| `.claude/agents/report.md` | The fix lane (12 steps) |
+| `.claude/scripts/hooks/session-start-reports.sh` | Session hook, canonical copy |
+| `.claude/rules-global/session-start.md` | The hook lists, the human chooses |
 | `content/docs/issue.mdx` | This documentation |
 
 ## Issue Creation (CLI)
@@ -263,10 +273,12 @@ issue "Add dark mode to dashboard"
 
 | Label | When |
 |-------|------|
-| `report` | User-reported via dialog — auto-processed by report agent |
+| `report` | User-reported via dialog — listed for the human gate |
+| `team` | Reported by a databayt team member |
+| `accepted` | A human took it — the report agent may fix it |
 | `bug` | Something is broken |
 | `enhancement` | Improve existing feature |
-| `needs-human` | Agent can't fix, needs human judgment |
+| `needs-human` | Score band; undecided until listed |
 | `cannot-reproduce` | Agent couldn't reproduce the reported issue |
 
 ### Issue Body Template (CLI)

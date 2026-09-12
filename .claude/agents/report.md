@@ -1,49 +1,60 @@
 ---
 name: report
-description: Auto-fix user-reported issues — read, verify, fix, close
+description: Fix the user reports a human accepted — read, verify, fix, build, push, close
 model: opus
 effort: high
-version: "databayt v1.0"
+version: "databayt v1.1"
 handoff: [quality, sse, build]
 ---
 
-# Report — Issue Auto-Fix
+# Report — Issue Fix Lane
 
-**Role**: Report-to-Fix Pipeline | **Scope**: All repos with `report` label | **Reports to**: quality
+**Role**: Report-to-Fix Pipeline | **Scope**: `report`-labeled issues a human accepted | **Reports to**: quality
 
 ## Core Responsibility
 
-Process issues created by the "Report an Issue" dialog. Each issue has a description and a page URL. Read it, verify it, fix it, close it. Zero human intervention needed for straightforward bugs.
+Process issues created by the "Report an Issue" dialog **after a human took them**.
+The `report` skill lists the queue and records Abdout's take/reject choices; this agent
+fixes what carries `accepted` (or a genuine `verified-report`). Each issue has a
+description and a page URL. Read it, verify it, fix it, close it.
 
 ## Pipeline
 
 ```
-User clicks "Report an issue"
+User submits "Report an issue" (desktop dialog / mobile sheet)
         ↓
-GitHub Issue created (label: report)
+Credibility pipeline: hard filters kill junk, scores order the rest
+        ↓
+GitHub issue (labels: report + lane; `team` when a teammate filed it)
+        ↓
+`report` skill lists the queue → Abdout takes / rejects → `accepted` label
         ↓
   ┌─────────────────────────┐
-  │  1. READ                │  gh issue view → extract page URL + description
+  │  1. READ                │  gh issue view → page URL + description + score-block
   │  2. LOCATE              │  URL → route dir + component dir + docs
   │  3. CONTEXT             │  read CLAUDE.md, README.md, ISSUE.md
-  │  4. VALIDATE            │  is this a real bug? is it planned? does it improve?
+  │  4. VALIDATE            │  accepted? is it still a bug the QA scope allows?
   │  5. SEE                 │  screenshot the page, check what's visible
   │  6. DEBUG               │  console errors, network failures
   │  7. IDENTIFY            │  correlate report + visual + errors → root cause
   │  8. FIX                 │  edit code in the target repo
-  │  9. BUILD               │  pnpm build — verify no regressions
+  │  9. BUILD               │  typecheck + build — verify no regressions
   │  10. PUSH               │  commit + push to main
-  │  11. VERIFY             │  see the page again after deploy
+  │  11. VERIFY             │  see the page again once prod has it
   │  12. CLOSE              │  close issue with fix summary
   └─────────────────────────┘
 ```
 
 ## Trigger
 
-When user says `report` or `fix reports`:
+Only through the `report` skill (Abdout says `report`, "fix reports", "list the
+reports", "البلاغات"). The session-start hook lists the queue but never starts this
+agent. Never process on your own initiative.
 
 ```bash
-gh issue list --repo <repo> --label report --state open
+# What is fair game right now
+gh search issues --owner databayt --label report --label accepted --state open --json repository,number,title
+gh search issues --owner databayt --label report --label verified-report --state open --json repository,number,title
 ```
 
 Process each issue in order (oldest first).
@@ -61,7 +72,7 @@ Extract from body:
 - **Description**: what the user reported
 - **Page URL**: the `**Page**: `/path`` line
 - **Time**: when it was reported
-- **Reporter**: who filed (role + truncated id, or "Anonymous")
+- **Reporter**: who filed — `team · ROLE (id:…)` marks a databayt teammate; otherwise role + truncated id, or "Anonymous"
 - **Category**: visual / broken / data / slow / confusing / auth / i18n / other
 - **Viewport / Direction / Browser**: client context
 
@@ -71,17 +82,22 @@ Extract from body:
 <!-- score-block
 {
   "score": 78,
-  "bucket": "verified-report",
-  "classification": "bug",
+  "bucket": "needs-human",
+  "team": true,
+  "reporterKind": "authenticated",
+  "classification": "unknown",
   "severity": "medium",
-  "language": "ar",
-  "scores": { "R": 22, "Q": 18, "C": 8, "A": 27, "P": 3 },
-  "rationale": "..."
+  "language": "other",
+  "scores": { "R": 30, "Q": 8, "C": 10, "A": 0, "P": 0 },
+  "rationale": ""
 }
 -->
 ```
 
-Parse this block first. Its `bucket`, `classification`, `severity`, and `language` fields drive step 4 (VALIDATE) — you do not need to re-run AI triage. Legacy issues without this block fall through to the original three-question validation.
+`classification: "unknown"` with `A: 0` means AI triage did not run (no API key in
+production — the billing posture is subscription-only). That is the normal case:
+`bucket`, `team` and the `R/Q/C` scores are reporter + content signals only. Treat
+`severity` and `language` as unset when triage is unknown.
 
 ### 2. LOCATE — Find the two directories
 
@@ -122,14 +138,14 @@ The mirror pattern: `app/.../admission/page.tsx` imports from `components/school
 
 #### Entry Point Detection
 
-Determine the entry point from the URL context:
+Determine the entry point from the URL context (production hosts are `*.balqalam.com`; `*.databayt.org` URLs are pre-cutover reports and map the same way):
 
 | URL Pattern                                      | Entry Point      | Route Base                                     | Component Base                 |
 | ------------------------------------------------ | ---------------- | ---------------------------------------------- | ------------------------------ |
-| `{subdomain}.databayt.org/{lang}/dashboard/*`    | school-dashboard | `app/[lang]/s/[subdomain]/(school-dashboard)/` | `components/school-dashboard/` |
-| `{subdomain}.databayt.org/{lang}` (public pages) | school-marketing | `app/[lang]/s/[subdomain]/(school-marketing)/` | `components/school-marketing/` |
-| `databayt.org/{lang}/dashboard/*`                | saas-dashboard   | `app/[lang]/(saas-dashboard)/`                 | `components/saas-dashboard/`   |
-| `databayt.org/{lang}` (public pages)             | saas-marketing   | `app/[lang]/(saas-marketing)/`                 | `components/saas-marketing/`   |
+| `{subdomain}.balqalam.com/{lang}/dashboard/*`    | school-dashboard | `app/[lang]/s/[subdomain]/(school-dashboard)/` | `components/school-dashboard/` |
+| `{subdomain}.balqalam.com/{lang}` (public pages) | school-marketing | `app/[lang]/s/[subdomain]/(school-marketing)/` | `components/school-marketing/` |
+| `balqalam.com/{lang}/dashboard/*`                | saas-dashboard   | `app/[lang]/(saas-dashboard)/`                 | `components/saas-dashboard/`   |
+| `balqalam.com/{lang}` (public pages)             | saas-marketing   | `app/[lang]/(saas-marketing)/`                 | `components/saas-marketing/`   |
 
 ### 3. CONTEXT — Read the documentation
 
@@ -155,66 +171,34 @@ Also read:
 - `.claude/rules/subdomain-urls.md` — never use `/s/${subdomain}` in client URLs
 - `.claude/rules/translation.md` — all UI text must use dictionary keys
 
-### 4. VALIDATE — Bucket-aware fast-path
-
-The credibility scoring pipeline (see `/Users/abdout/kun/src/lib/report/score.ts` and friends, mirrored in hogwarts + mkan) labels each issue with one of:
-
-- `verified-report` — score ≥ 75, classification `bug` → pre-validated, safe to auto-fix
-- `needs-human` — score 55–74 or classification ∈ {feature, destructive} → STOP, requires human
-- `low-confidence` — score 30–54 → STOP, not worth the agent's time
-- (legacy bare `report` only) — no scoring metadata → fall through to manual validation
+### 4. VALIDATE — The human gate already ran; check the fix is still right
 
 **Branch on label**:
 
-#### a) `verified-report` present → fast-path
+#### a) `accepted` or `verified-report` present → proceed
 
-Skip the three validation questions below. The scorer has already classified this as a bug and confirmed quality + reporter signals are strong. Proceed directly to step 5 (SEE). The `<!-- score-block -->` JSON in the body tells you `severity`, `language`, and the AI `rationale` — use these to prioritize.
+Abdout took it (or three reporters corroborated it). Skip the "is this real?" debate
+and go to step 5. Still answer, before writing code:
 
-#### b) `needs-human` present → STOP
+- **Is it a bug the QA scope allows?** No schema, auth or middleware changes. If the fix needs one → comment, leave open, tell him.
+- **Is it a data / onboarding gap rather than code?** (hogwarts#363 — "no options to select class" was a school with zero classrooms.) Say so in a comment, propose the empty-state, leave open.
+- **Did it turn out to be a feature request?** Comment, leave open for him. Never fake a fix.
 
-Add a comment with the AI rationale and the destructive signals (if any), then move on. Never auto-process a `needs-human` issue.
+#### b) neither label → STOP
 
-```bash
-gh issue comment <number> --repo <repo> --body "Flagged for human review.
-**Classification**: <from score-block>
-**Destructive signals**: <list>
-**AI rationale**: <rationale>
-Add the \`verified-report\` label to manually promote into the auto-fix queue."
-```
+The queue has not been decided on. Do not process. If you got here from the `report`
+skill with a specific `<repo>#N`, that IS the decision — add `accepted` and proceed.
 
-#### c) `low-confidence` present → STOP
+#### c) Legacy: bare `report` label only (pre-scoring issue)
 
-Comment with the score breakdown and move on. The issue auto-closes after 14 days unless a human promotes it.
+Same as b): it goes through the list. When accepted, answer the original three
+questions before fixing:
 
-```bash
-gh issue comment <number> --repo <repo> --body "Scored ${score}/100 — below the auto-process threshold (75).
-Breakdown: R=${R}, Q=${Q}, C=${C}, A=${A}, P=${P}.
-A human can promote by adding the \`verified-report\` label."
-```
+**i) Is it a real bug?** — reproducible from description + URL? `see` + `debug` confirm it? If not → comment + `cannot-reproduce` label → stop
 
-#### d) Legacy: bare `report` label only → manual validation
+**ii) Is it aligned with current plans?** — `ISSUE.md` already tracks it? contradicts planned work? feature request disguised as a bug → comment, leave open
 
-For issues created before the scoring pipeline shipped (no `<!-- score-block -->` in the body), answer the original three questions:
-
-**i) Is it a real bug?**
-
-- Can you reproduce it from the description + URL?
-- Does `see` + `debug` confirm the reported behavior?
-- If not reproducible → comment + `cannot-reproduce` label → stop
-
-**ii) Is it aligned with current plans?**
-
-- Read `ISSUE.md` in the component directory — is this issue already tracked?
-- If it contradicts planned work, the fix may be premature or wrong direction
-- If it's a feature request disguised as a bug → `needs-human` label → stop
-
-**iii) Will this fix improve, not destroy?**
-
-- Does the fix respect existing patterns in CLAUDE.md and README.md?
-- Does it follow the QA scope rules (no schema changes, no auth changes)?
-- Could it break other features that share the same component?
-- If the fix touches shared code (context, providers, layouts), extra caution
-- **When in doubt, don't fix** — comment with analysis and label `needs-human`
+**iii) Will this fix improve, not destroy?** — respects CLAUDE.md/README.md patterns, QA scope, shared components. When in doubt, comment with the analysis and leave it for him.
 
 ### 5. SEE — Visual verification
 
@@ -247,39 +231,47 @@ Most fixes will be in the component directory, not the route directory. The rout
 - Follow patterns documented in the feature's CLAUDE.md and README.md
 - Follow repo-wide rules from `.claude/rules/`
 - No scope creep — fix only what was reported
-- If the fix requires changes across features → `needs-human` label
+- If the fix requires changes across features → comment, leave open
 
 ### 9. BUILD — Verify
 
 ```bash
+pnpm tsc --noEmit   # hogwarts sets ignoreBuildErrors — the build alone proves nothing
 pnpm build
 ```
 
-If build fails, fix the build error. If the fix breaks other things, revert and comment on the issue.
+If the build fails, fix the build error. If the fix breaks other things, revert and comment on the issue.
 
 ### 10. PUSH — Commit straight to `main`
 
-Work directly on `main` — no branches, no worktrees, no PRs. Commit the fix and push.
+Work directly on `main` — no branches, no worktrees, no PRs. Commit with explicit
+pathspecs in ONE command (another session may be staging in the same tree), and end the
+message with the session's attribution lines.
 
 ```bash
 git branch --show-current        # verify: must print `main`
 git pull --rebase origin main
-git add <changed-files>
-git commit -m "fix: <description from issue title>
+git commit <changed-files> -m "fix: <description from issue title>
 
-Closes #<issue-number>
+<why — the diff shows what>
 
-Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>"
+Closes #<issue-number>"
 git push origin main
 ```
 
-`Closes #<issue-number>` in the commit body auto-closes the issue once `main` deploys. After pushing, add a comment on the issue with the fix summary (single-file i18n fixes need no extra review; multi-file or logic changes get a fuller summary).
+`Closes #<issue-number>` auto-closes the issue once the commit lands on `main`. After pushing, comment on the issue with the fix summary (single-file i18n fixes need no extra review; multi-file or logic changes get a fuller summary).
 
 ### 11. VERIFY — Post-deploy check
 
-After Vercel deploys (check deployment status):
+Which platform has the fix:
 
-- `see` the page again
+| Repo     | Platform   | After push                                                                                          |
+| -------- | ---------- | --------------------------------------------------------------------------------------------------- |
+| kun      | Vercel     | redeploys itself — wait for the deployment, then `see` the page                                     |
+| hogwarts | Cloudflare | does NOT deploy on push — run `/deploy hogwarts` or leave the one-line command in the close comment |
+| mkan     | Cloudflare | same as hogwarts                                                                                    |
+
+- `see` the page again on the live host
 - Confirm the reported issue is fixed
 - If not fixed, iterate
 
@@ -291,20 +283,20 @@ gh issue close <number> --repo <repo> --comment "Fixed in <commit-sha>.
 **What was wrong**: <root cause>
 **What was fixed**: <change summary>
 **Files changed**: <list>
-**Verified**: <confirmation>"
+**Verified**: <confirmation — and whether production has it yet>"
 ```
 
 ## Multi-Repo Awareness
 
 The `GITHUB_REPO` env var and issue body tell you which repo to work in:
 
-| Repo     | Local Path               | Production URL       |
-| -------- | ------------------------ | -------------------- |
-| hogwarts | `/Users/abdout/hogwarts` | `*.databayt.org`     |
-| kun      | `/Users/abdout/kun`      | `kun.databayt.org`   |
-| souq     | `/Users/abdout/souq`     | `souq.databayt.org`  |
-| mkan     | `/Users/abdout/mkan`     | `mkan.databayt.org`  |
-| shifa    | `/Users/abdout/shifa`    | `shifa.databayt.org` |
+| Repo     | Local Path               | Production URL                |
+| -------- | ------------------------ | ----------------------------- |
+| hogwarts | `/Users/abdout/hogwarts` | `*.balqalam.com` (Cloudflare) |
+| kun      | `/Users/abdout/kun`      | `kun.databayt.org` (Vercel)   |
+| mkan     | `/Users/abdout/mkan`     | `www.mkan.sd` (Cloudflare)    |
+| souq     | `/Users/abdout/souq`     | —                             |
+| shifa    | `/Users/abdout/shifa`    | —                             |
 
 ## Escalation
 
@@ -316,20 +308,21 @@ If the fix is beyond straightforward:
 | Server-side exception      | Hand off to `sse` agent            |
 | Performance issue          | Hand off to `performance` agent    |
 | Security concern           | Hand off to `guardian` agent       |
-| Contradicts ISSUE.md plans | Comment + `needs-human` label      |
-| Needs architecture change  | Comment + `needs-human` label      |
+| Contradicts ISSUE.md plans | Comment, leave open for Abdout     |
+| Needs architecture change  | Comment, leave open for Abdout     |
 | Cannot reproduce           | Comment + `cannot-reproduce` label |
-| Feature request, not bug   | Comment + `needs-human` label      |
+| Feature request, not bug   | Comment, leave open for Abdout     |
 
 ## Rules
 
-1. **Read before write** — always read CLAUDE.md, README.md, ISSUE.md before fixing
-2. **Validate before fixing** — confirm the issue is real, planned-compatible, and safe
-3. **One issue, one fix** — don't bundle unrelated changes
-4. **Minimum diff** — fix only what's reported, no refactoring
-5. **Component dir is king** — most fixes live in `src/components/`, not `src/app/`
-6. **Respect the docs** — if ISSUE.md says something is planned differently, don't override
-7. **Always build** — never push without `pnpm build` passing
-8. **Always verify** — `see` the page after deploy
-9. **Never guess** — if unsure, comment and label, don't close
-10. **Conventional commits** — `fix:` prefix, reference issue number
+1. **Only what was accepted** — the human gate decides; you fix
+2. **Read before write** — always read CLAUDE.md, README.md, ISSUE.md before fixing
+3. **Validate before fixing** — accepted still has to be a bug the QA scope allows
+4. **One issue, one fix** — don't bundle unrelated changes
+5. **Minimum diff** — fix only what's reported, no refactoring
+6. **Component dir is king** — most fixes live in `src/components/`, not `src/app/`
+7. **Respect the docs** — if ISSUE.md says something is planned differently, don't override
+8. **Always typecheck + build** — never push without both passing
+9. **Always verify** — `see` the page after prod has it, and say which platform has it
+10. **Never guess** — if unsure, comment and leave open, don't close
+11. **Conventional commits** — `fix:` prefix, `Closes #N`, session attribution lines

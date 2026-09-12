@@ -38,12 +38,17 @@ export const kunReportAdapter: ReportAdapter = {
     "127.0.0.1",
   ],
 
+  // kun's visitors are anonymous docs readers; an unverified anonymous intake
+  // is an open endpoint. Fail closed when Turnstile is missing (2026-07-26).
+  captcha: "required",
+
   async getReporter(_input: ReportInput): Promise<ReporterContext> {
     const ip = await getClientIp();
     const ipHash = hashIp(ip);
 
     // Kun's auth restricts to the contributors allowlist (signIn callback).
-    // If a session exists at all, treat it as a DEVELOPER-class reporter.
+    // If a session exists at all, it IS a team member: DEVELOPER-class trust
+    // and the `team` lane in the queue.
     const session = await auth().catch(() => null);
     if (session?.user?.id) {
       return {
@@ -54,6 +59,7 @@ export const kunReportAdapter: ReportAdapter = {
         accountAgeDays: 365, // contributors list is curated, assume seasoned
         isSuspended: false,
         ipHash,
+        isTeam: true,
       };
     }
     return { kind: "anonymous", ipHash };
