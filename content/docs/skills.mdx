@@ -39,7 +39,7 @@ IDEA → SPEC → [PLAN → TASKS] → SCHEMA → CODE → WIRE → CHECK → SH
 | `dev` | Kill port 3000, start the dev server, open Chrome |
 | `build` | `tsc` + production build with an auto-fix loop |
 | `quick` | Lint, fix, commit, push |
-| `deploy` | Vercel deploy (staging/preview) |
+| `deploy` | Production deploy — the full Cloudflare cycle (gate, env, schema gap, build, smoke, deploy, restore point, real-login verify); Vercel preview lane kept for legacy repos |
 | `release` | One spell: handover → check → ship → watch → close the issue |
 | `fix` | Auto-fix TypeScript, lint, and build errors |
 
