@@ -30,22 +30,40 @@ Cloudflare account `ce9a5376d149c808a0b97072421ba12f`, workers.dev subdomain `os
 
 ### `deploy` (default) — ship the current code
 
+The **order of operations is the `deploy` skill** (gate → push `main` → env → schema gap → build →
+smoke → deploy → Neon restore point → prod data steps → real login → memory). This section is the
+platform half of it. The commands, in the order they run:
+
 ```bash
 cd ~/hogwarts                       # or ~/mkan
-vercel env pull /tmp/prod.env --environment=production --scope databayt && rm -f .env.local
-scripts/deploy-cloudflare.sh /tmp/prod.env build     # clean export of HEAD, install, next build (~12 min)
-scripts/deploy-cloudflare.sh /tmp/prod.env deploy    # wrangler builds + pushes the image, swaps the container
+NODE_OPTIONS=--max-old-space-size=8192 pnpm exec tsc --noEmit                 # default heap SIGABRTs
+git pull --rebase origin main && git push origin main                         # main == what ships
+vercel env pull /tmp/prod.env --environment=production --scope databayt --yes && rm -f .env.local
+CF_SOURCE=worktree scripts/deploy-cloudflare.sh /tmp/prod.env build          # working tree, ~12 min
+scripts/deploy-cloudflare.sh /tmp/prod.env smoke                             # Docker: boot + curl table, read it
+scripts/deploy-cloudflare.sh /tmp/prod.env deploy                            # wrangler pushes the image, swaps the container
 ```
 
 Before building, always:
 
 1. **Check the schema gap.** Deploying code ahead of its DDL breaks live pages.
    ```bash
-   pnpm exec prisma migrate diff --from-url "$PROD_DATABASE_URL" --to-schema-datamodel prisma
+   pnpm exec prisma migrate diff --from-url "$PROD_DIRECT_URL" --to-schema-datamodel prisma
    ```
-   If it lists added columns or tables, apply them out-of-band first (snapshot, then the additive
-   statements only) and say what you skipped.
-2. **Confirm no other Next build is running** — concurrent builds get OOM-killed on this machine.
+   Added columns or tables block the deploy: apply them out-of-band first (restore point, then the
+   additive statements only) and say what you skipped. Index-only and nullability drift that
+   predates the deploy is noted, not fixed.
+2. **Kill `next dev` and confirm no other Next build is running** — either one gets the build
+   OOM-killed on this machine.
+
+After deploying, always:
+
+3. **Run the data steps the script never runs.** `deploy-cloudflare.sh` never seeds and
+   `ensure-demo` short-circuits, so every seed commit in the range is owed a run against prod —
+   behind a Neon restore point, under the **quota rule in the `deploy` skill** (evict the oldest
+   branch when the free tier's 10 are taken; prune `restore-point-*` older than 7 days when done).
+4. **Verify with a real login**, then write the memory line (Worker version id, `main` sha,
+   restore branch).
 
 Variants: `CF_SOURCE=<ref>` pins a commit, `CF_SOURCE=worktree` ships uncommitted work (what the
 user usually means by "deploy everything"), `CF_OVERLAY="a b"` copies working-tree files over the
