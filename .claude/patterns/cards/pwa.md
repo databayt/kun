@@ -198,13 +198,13 @@ Bump `STATIC` on every change. Root `layout.tsx` exports `viewport: { themeColor
 - Verify the processor with a bogus endpoint and a valid P-256 key (prune path); real delivery needs a phone.
 - `prisma db execute`: `--schema` locally, `--url` for prod — never both.
 - Custom-domain tenants get the default manifest until the host resolver knows the domain.
-- The install card is one tap, never a decorative icon: replay `beforeinstallprompt` when
-  captured; on iPhone call `navigator.share({ title, url })` from the tap (Web Share needs the
-  gesture; Add to Home Screen is one of the sheet's actions) with a two-step guide underneath;
-  Android without the event gets the browser-menu guide. Detect the platform with `useSyncExternalStore`
-  — the React Compiler lint rejects `setState` inside the effect. Style: the Apple Podcasts "What's new in"
-  layout (accent eyebrow over the app name, three feature rows with accent icons, footnote, one big
-  Continue) presented as an iOS bottom sheet (the shadcn `Drawer`: rounded top over the dimmed
+- The install sheet is one tap, never a decorative icon: replay `beforeinstallprompt` when
+  captured, otherwise `navigator.share({ title, url })` from the tap (Web Share needs the gesture;
+  on iPhone Add to Home Screen is one of the sheet's actions). The picture is the whole
+  explanation. Detect the platform with `useSyncExternalStore`
+  — the React Compiler lint rejects `setState` inside the effect. Style: an accent eyebrow over the app name, ONE
+  picture (a mock of the share list with Add to Home Screen lit up), one big Continue in the brand
+  green — no footnote, no guide, no Not now — presented as an iOS bottom sheet (the shadcn `Drawer`: rounded top over the dimmed
   page, grabber, round close, swipe to dismiss) — never a full-screen takeover; the app icon is a
   brand-colour box with the glyph at ~56 % so one artwork serves iOS, maskable and the tab
   (hogwarts 2026-09-13).
