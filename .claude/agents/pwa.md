@@ -71,9 +71,13 @@ outbox-wake `sync`/`message` handlers. Serwist (`@serwist/turbopack`, `createSer
 2. **Precache only public, locale-explicit, non-redirecting URLs.** `/ar/offline`, never
    `/offline` — a 307 stores `redirected: true`, which the browser refuses for navigations. Harvest
    the offline page's `_next/static` chunks after `addAll` so it renders on a cold device.
-3. **Navigations: network-first, no `cache.put`.** Fallback = the offline page for the request's
-   locale prefix. Caching HTML keys nothing on the user; a shared device replays another
-   account's dashboard.
+3. **Navigations and RSC payloads: network-first, saved per session key.** The proxy sends
+   `x-session-key` (a truncated hash of the user id); the worker keeps the HTML of full loads
+   and the flight payloads of client-side navigations in caches named by it, and a response
+   carrying a different key or none deletes every other namespace first — a shared device can
+   only replay the last signed-in person's own screens. Saved copy when the network fails or
+   is slow (4 s), with a `sw-stale` message so the page can say so; otherwise the offline page
+   for the request's locale prefix. Never key a page on the URL alone.
 4. **`/api/`: network-only.** The outbox reads IndexedDB, not the cache. Signed media tickets
    and the sync endpoint must never be cached (an expired URL, a lie about what landed).
 5. **Static assets: cache-first** on the hashed `/_next/static` paths and fonts; cap the cache

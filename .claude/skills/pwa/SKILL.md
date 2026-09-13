@@ -155,6 +155,38 @@ Gate: subscribe in Chrome → insert one Notification with `channels: [push]` �
 - **Ask who requests the channel.** A push lane with no dispatcher asking for `"push"` is a queue
   that never fills; the cron schedule must also route to the processor (`cf/crons.json`).
 
+### Learned executing hogwarts (2026-09-13) — speed + offline exploration
+
+- **Measure the RSC, not the TTFB.** The dashboard's document TTFB was 250 ms; the page was slow
+  because every open carried two 1.1 MB Server Action responses, 36 prefetches and 1 MB of CSS.
+  chrome-devtools `evaluate_script` over `performance.getEntriesByType("resource")` (decoded
+  size + duration per URL) is the measurement that finds it.
+- **A cookie set by the proxy on every response makes EVERY Server Action re-render the page.**
+  Next merges `x-middleware-set-cookie` into the request store's mutable cookies; the action
+  handler sees a modified cookie → `x-action-revalidated: 1` → full page re-render in the
+  response + a router-cache purge that re-fires every visible prefetch. Write cookies only when
+  they change.
+- **A container fetch is not a CDN fetch.** Behind a Cloudflare Worker → container, nothing is
+  edge-cached unless the Worker uses `caches.default` itself. `cf-cache-status` absent on a
+  `/_next/static` chunk is the tell; ~0.5 s per chunk from Europe, 70 chunks on a cold dashboard.
+- **No `loading.tsx` = no prefetch.** A dynamic route without one is skipped by `<Link>`
+  prefetching, so the tap shows nothing until the server answers. Every sidebar route needs one;
+  a role-aware skeleton reads the shape from a context the layout provides (the boundary itself
+  cannot await the session).
+- **Signed-in pages may be cached — per session key only.** The proxy sends
+  `x-session-key` (truncated sha256 of userId:AUTH_SECRET); the worker names page caches by it
+  and drops every other namespace when a response carries a different key or none. Network
+  first, saved copy after 4 s or on failure, and TELL the page (`sw-stale`) when the copy is
+  stale — a saved attendance page must not pass for a live one.
+- **A failed RSC fetch must be a 503 response, not an exception.** The router treats a non-RSC
+  answer as "do a full navigation", which lands on the saved HTML or the offline page; a thrown
+  error leaves the router waiting.
+- **`load` may already have fired.** A registration that waits for `window.load` never runs on
+  a page that was complete before the effect — check `document.readyState` first.
+- **The dictionary is the transfer.** 935 KB of a 1.38 MB dashboard HTML (279 of 294 KB gzipped)
+  is the merged dictionary serialised into the flight payload. Moving it to a build-hashed static
+  asset loaded client-side is the next win; it touches every `useDictionary` consumer.
+
 ## After
 
 Update the block records the work touched (`offline`, `attendance`, `notifications`), the

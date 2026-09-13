@@ -6,7 +6,7 @@ The canonical Progressive Web App layout databayt products adopt on Next.js 16. 
 
 | Repo         | PWA state                                                                                                                                     | Maturity  | Canonical |
 | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------- | --------- | --------- |
-| **hogwarts** | hand-rolled worker v3, per-tenant Arabic-first manifest, locale offline pages, IndexedDB outbox (LMS + attendance), Web Push on the push cron | canonical | **yes**   |
+| **hogwarts** | hand-rolled worker v6 — pages + RSC payloads saved per `x-session-key`, warm-up of the sidebar from the installed app, offline/stale strip; per-tenant Arabic-first manifest, locale offline pages, IndexedDB outbox (LMS + attendance), Web Push on the push cron | canonical | **yes**   |
 | mkan         | deferred 2026-09-12 — icons and CSP ready, no manifest/worker; reopen when host messaging has volume                                          | —         | no        |
 | souq         | to adopt                                                                                                                                      | —         | no        |
 | shifa        | to adopt                                                                                                                                      | —         | no        |
@@ -16,7 +16,7 @@ The canonical Progressive Web App layout databayt products adopt on Next.js 16. 
 ## Why these choices
 
 - **The manifest resolves its own tenant.** Middleware matchers exclude dotted paths, so `/manifest.webmanifest` never sees `x-subdomain`/`x-locale`. The route reads `headers().get("host")` and returns the school's name, language, direction and colour. `start_url: "/"` stays relative — fetched on the tenant origin, it already resolves there.
-- **Hand-rolled worker for big apps.** A 30 MB app's `_next/static` precache is hostile to Sudan/UAE mobile data; the worker precaches only the offline shell and caches hashed static assets lazily. Navigations and `/api/` are network-only: caching authenticated HTML replays another account's dashboard on a shared school device.
+- **Hand-rolled worker for big apps.** A 30 MB app's `_next/static` precache is hostile to Sudan/UAE mobile data; the worker precaches only the offline shell and caches hashed static assets lazily. `/api/` is network-only. Pages ARE saved (since v6, 2026-09-13) but only in a cache named by the `x-session-key` the proxy puts on every response — a different key or none drops every other namespace first, so a shared school device can only replay the last signed-in person's own screens; a saved copy shown because the network was slow is announced to the page (`sw-stale`).
 - **Locale-explicit precache.** `/ar/offline` and `/en/offline`, never `/offline`. A redirected response stored by `cache.addAll` is refused for navigations, and the failure is silent.
 - **Outbox, not cache, for offline writes.** IndexedDB holds the pending work; the sync route applies every kind idempotently on a natural key and answers `applied | duplicate | rejected`.
 - **Push on the existing rails.** The Notification model already carries `channels`, `pushSent`, `pushError` and a queue index; Web Push adds a `PushSubscription` store and a processor on the existing cron. FCM stays a no-op scaffold for a future native app.
@@ -193,6 +193,9 @@ Bump `STATIC` on every change. Root `layout.tsx` exports `viewport: { themeColor
 
 ## Gotchas (from the hogwarts rollout)
 
+- A cookie the proxy sets on EVERY response makes every Server Action answer with a full page re-render (`x-action-revalidated`) and a router-cache purge — 1.1 MB per action on the dashboard. Set cookies only on change.
+- Behind a Worker → container, nothing is edge-cached until the Worker uses `caches.default`; no `cf-cache-status` on a `/_next/static` chunk is the tell.
+- A dynamic route without `loading.tsx` is never prefetched: the tap shows nothing until the server answers.
 - Precache locale-explicit URLs only; verify each with `redirect: "manual"`.
 - The dispatcher must request `"push"` and a cron schedule must route to the processor, or the lane is silent.
 - Verify the processor with a bogus endpoint and a valid P-256 key (prune path); real delivery needs a phone.
