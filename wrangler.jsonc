@@ -13,7 +13,11 @@
   "vars": {
     // Public origin for signed approval links and drafts. Interim: the workers.dev host.
     // Flip to https://kun.databayt.org in the same deploy that adds the routes below.
-    "SOCIAL_PUBLIC_URL": "https://kun.osmanabdout.workers.dev"
+    "SOCIAL_PUBLIC_URL": "https://kun.osmanabdout.workers.dev",
+    // next-auth builds its redirects from the request URL, and the standalone server reports
+    // that as 0.0.0.0:3000 (Next standalone quirk); AUTH_URL pins the real origin. Flip with
+    // SOCIAL_PUBLIC_URL at cutover.
+    "AUTH_URL": "https://kun.osmanabdout.workers.dev"
   },
   "containers": [
     {

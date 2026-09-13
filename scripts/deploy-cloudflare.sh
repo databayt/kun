@@ -83,7 +83,12 @@ smoke() {
 
 deploy() {
   cd "$BUILD_DIR"
-  echo "==> wrangler deploy (builds + pushes the image; needs Workers Paid)"
+  # A byte-identical image does not restart the running container, so Worker vars and
+  # secrets pushed since the last deploy would never reach it. The stamp is the image's
+  # last (tiny) layer: every deploy is a new image, and the instance restarts with the
+  # current env. Only that layer is pushed when nothing else changed.
+  date -u +%FT%TZ > .cf-deploy-stamp
+  echo "==> wrangler deploy (builds + pushes the image; needs Workers Paid; stamp $(cat .cf-deploy-stamp))"
   pnpm exec wrangler deploy
 }
 

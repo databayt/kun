@@ -84,6 +84,13 @@ Rollback is `wrangler rollback` — a swap to the previous image, not a rebuild.
    `HOSTNAME=0.0.0.0` or nothing listens.
 10. **Secrets are read at container start.** After `cf-secrets.sh`, deploy again so the instance
     restarts with the new values.
+11. **A byte-identical image does not restart the container**, so a vars-only or secrets-only deploy
+    changes nothing until the instance cycles. kun's lane stamps `.cf-deploy-stamp` into the image's
+    last layer on every `deploy` (one tiny layer pushed); copy that pattern instead of editing `public/`.
+12. **next-auth needs `AUTH_URL` in a standalone container.** Next's standalone server reports the
+    request URL as `0.0.0.0:3000` and next-auth builds every redirect from it — a login attempt bounced
+    to `https://0.0.0.0:3000/login` on kun even with the right `Host`. Set `AUTH_URL` (Worker var) to
+    the public origin; Vercel never needed it.
 
 ## DNS: how a hostname actually starts serving
 

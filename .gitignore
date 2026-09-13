@@ -90,3 +90,4 @@ pt.json
 
 # wrangler local state (build dir + repo)
 .wrangler/
+.cf-deploy-stamp

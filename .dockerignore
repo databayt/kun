@@ -5,3 +5,4 @@
 !.next/static
 !public
 !cf/entry.cjs
+!.cf-deploy-stamp

@@ -10,5 +10,7 @@ COPY .next/standalone ./
 COPY .next/static ./.next/static
 COPY public ./public
 COPY cf/entry.cjs ./entry.cjs
+# Last layer: the per-deploy stamp (scripts/deploy-cloudflare.sh) that forces a container restart.
+COPY .cf-deploy-stamp ./cf-deploy-stamp
 EXPOSE 3000
 CMD ["node", "entry.cjs"]

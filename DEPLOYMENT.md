@@ -11,7 +11,7 @@
 
 | | |
 | --- | --- |
-| Worker | `kun` (`cf/worker.js`), account `ce9a5376d149c808a0b97072421ba12f`, `workers_dev` on |
+| Worker | `kun` (`cf/worker.js`), account `ce9a5376d149c808a0b97072421ba12f`, `workers_dev` on — live version `dd13f215` (2026-09-13, main `34714b0` + the AUTH_URL/stamp follow-up) |
 | Live host | `https://kun.osmanabdout.workers.dev` — the interim origin until the DNS zone moves |
 | Target host | `https://kun.databayt.org` — served once the `databayt.org` zone lives on Cloudflare (see Cutover) |
 | Container | `KunContainer`, `basic` (¼ vCPU, 1 GiB), `max_instances: 1`, `sleepAfter: 24h`, Node heap 768 MB |
@@ -47,8 +47,9 @@ scripts/deploy-cloudflare.sh /tmp/kun-prod.env deploy                # wrangler 
 - `CF_SOURCE=worktree` ships uncommitted work; `CF_SOURCE=<ref>` pins a commit; `CF_OVERLAY="a b"`
   copies working-tree files over the export. `CF_BUILD_DIR` moves the build dir (default `$TMPDIR/kun-cf-build`).
 - **Rollback:** `pnpm exec wrangler rollback` from the build dir — a swap to the previous image.
-- **Secrets are read when the container starts.** After `cf-secrets.sh`, deploy again (or change one
-  byte under `public/`; a byte-identical image does not restart the instance).
+- **Secrets and vars are read when the container starts.** `deploy` writes `.cf-deploy-stamp` as the
+  image's last layer, so every deploy restarts the instance (only that tiny layer is pushed when the
+  build is unchanged). A byte-identical image would not restart it — that cost one deploy on day one.
 - **Rotated or new values never go to Vercel** (it refuses writes). Store them as
   `security add-generic-password -a "$USER" -s "cf-kun-<VAR>" -w "<value>" -U`; both scripts read
   every `cf-kun-*` entry. `GITHUB_PERSONAL_ACCESS_TOKEN` (rotated 2026-09-13) lives there.
@@ -86,8 +87,9 @@ Neither stored Cloudflare token can create zones or edit DNS, so two steps are A
 2. **Nameservers at Namecheap** (`databayt.org`, DNSSEC unsigned, expires 2027-06): set the two
    names Cloudflare assigns. Propagation is the only wait.
 
-Then, in one deploy: uncomment `routes` in `wrangler.jsonc`, set `vars.SOCIAL_PUBLIC_URL` to
-`https://kun.databayt.org`, deploy, and point the GitHub `SITE_URL` variable back at the real host.
+Then, in one deploy: uncomment `routes` in `wrangler.jsonc`, set `vars.SOCIAL_PUBLIC_URL` **and**
+`vars.AUTH_URL` to `https://kun.databayt.org`, deploy, and point the GitHub `SITE_URL` variable back
+at the real host.
 
 Tradeoff to decide at that point: the zone lands on Cloudflare's Free plan, which answers Sudan
 and UAE resolvers with the `188.114.96/97.x` addresses Abdout's ISP resets. balqalam.com paid $25/mo
@@ -100,6 +102,10 @@ for Pro to escape that; kun is used from Sudan daily.
   static evidence facts with zero repositories. Vercel had no `gh` either; parity, not a regression.
 - **Report intake on kun fails closed** without `NEXT_PUBLIC_TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET_KEY`
   (the prod env never had them). The workers.dev host is in the intake allowlist for when they exist.
+- **`AUTH_URL` is required in the container.** Next's standalone server reports the request URL as
+  `0.0.0.0:3000`, and next-auth builds every redirect from it — a login attempt bounced to
+  `https://0.0.0.0:3000/login` until `AUTH_URL` pinned the origin (Worker var in `wrangler.jsonc`).
+  Vercel never needed it because its runtime carried the real host.
 - `src/app/layout.tsx` hardcodes `metadataBase` to `https://kun.databayt.org`; OG URLs point at the
   real host even while the interim host serves.
 - `wrangler tail` does not work from Abdout's network; use the observability telemetry API.
