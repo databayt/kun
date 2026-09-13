@@ -183,6 +183,11 @@ Gate: subscribe in Chrome → insert one Notification with `channels: [push]` �
   error leaves the router waiting.
 - **`load` may already have fired.** A registration that waits for `window.load` never runs on
   a page that was complete before the effect — check `document.readyState` first.
+- **Chrome's "Offline" emulation does not reach the worker's own fetches.** chrome-devtools
+  `emulate networkConditions: Offline` fails the PAGE's requests, but `fetch()` inside the service
+  worker still succeeds — an "offline" navigation quietly loads from the server. To test offline for
+  real, stop the local server (`next start`) and navigate: saved pages must render, unsaved ones
+  must show the offline page.
 - **The dictionary is the transfer.** 935 KB of a 1.38 MB dashboard HTML (279 of 294 KB gzipped)
   is the merged dictionary serialised into the flight payload. Moving it to a build-hashed static
   asset loaded client-side is the next win; it touches every `useDictionary` consumer.
