@@ -201,8 +201,10 @@ Bump `STATIC` on every change. Root `layout.tsx` exports `viewport: { themeColor
 - The install card is one **Download app** button, never a decorative icon: replay
   `beforeinstallprompt` when captured, otherwise open a two-step guide sheet (Share → Add to Home
   Screen on iPhone, the browser menu on Android). Detect the platform with `useSyncExternalStore`
-  — the React Compiler lint rejects `setState` inside the effect. Style: the house liquid-glass
-  tokens (hogwarts `wa-glass-tabbar`), a large radius, the app icon (hogwarts 2026-09-13).
+  — the React Compiler lint rejects `setState` inside the effect. Style: an App Store search-result
+  row (64 px icon, bold app name, grey blurb, a Get-style pill with a caption); the app icon is a
+  brand-colour box with the glyph at ~46 % so one artwork serves iOS, maskable and the tab
+  (hogwarts 2026-09-13).
 
 ## Verification
 
