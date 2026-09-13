@@ -32,6 +32,7 @@ export const kunReportAdapter: ReportAdapter = {
   repo: REPO,
   hostAllowlist: [
     "kun.databayt.org",
+    "kun.osmanabdout.workers.dev",
     "databayt.org",
     "*.databayt.org",
     "localhost",

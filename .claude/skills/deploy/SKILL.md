@@ -1,7 +1,7 @@
 ---
 name: deploy
 description: Production deploy operator — the full cycle on Cloudflare (gate, push, env, schema gap, worktree build, smoke, deploy, Neon restore point, prod data steps, real-login verify), with the Vercel preview lane kept for repos that still use it
-when_to_use: "Use when Abdout says deploy, push to prod, ship it, or deploy everything in a repo — the whole cycle from typecheck to a verified login on the live hostname, not just the upload. Routes by platform: a repo with wrangler.jsonc (hogwarts, mkan) takes the Cloudflare lane below; anything else takes the legacy Vercel lane. Owns the Neon restore-point rule (quota eviction of the oldest branch) and the prod data steps the deploy script never runs. Distinct from /check (pre-ship gate only), /watch (observe production, never fix), /cloudflare (platform operator: DNS, crons, logs), and /quick (commit-lint-push without a build). Triggers on: deploy, deploy everything, push to production, ship to cloudflare, redeploy, why is the deploy stuck, vercel preview, deploy to staging."
+when_to_use: "Use when Abdout says deploy, push to prod, ship it, or deploy everything in a repo — the whole cycle from typecheck to a verified login on the live hostname, not just the upload. Routes by platform: a repo with wrangler.jsonc (hogwarts, mkan, kun) takes the Cloudflare lane below; anything else takes the legacy Vercel lane. Owns the Neon restore-point rule (quota eviction of the oldest branch) and the prod data steps the deploy script never runs. Distinct from /check (pre-ship gate only), /watch (observe production, never fix), /cloudflare (platform operator: DNS, crons, logs), and /quick (commit-lint-push without a build). Triggers on: deploy, deploy everything, push to production, ship to cloudflare, redeploy, why is the deploy stuck, vercel preview, deploy to staging."
 argument-hint: "[preview|logs|status] [app]"
 allowed-tools: Bash(git *), Bash(pnpm *), Bash(npx *), Bash(gh *), Bash(curl *), Bash(docker *), Bash(vercel *), Bash(scripts/*)
 model: opus
@@ -197,4 +197,4 @@ inside it, and never a branch another session named in memory as a restore for u
 `npx vercel --yes` for preview, `npx vercel --prod --yes` for production; poll
 `npx vercel inspect <url>` every 30 s until `Ready` or `Error`; on `Error` read
 `npx vercel inspect <url> --logs`, fix, commit, push, retry — five attempts, then stop and show
-the trail. Never invent an env var. Do not use this lane for hogwarts or mkan.
+the trail. Never invent an env var. Do not use this lane for hogwarts, mkan or kun.

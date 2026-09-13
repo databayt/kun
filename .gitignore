@@ -87,3 +87,6 @@ pt.json
 # Local Job Engine working data. jobs/cv/ holds real CVs — personal documents
 # that must never reach a public repo. Local-only by decision (2026-08-23).
 /jobs/
+
+# wrangler local state (build dir + repo)
+.wrangler/

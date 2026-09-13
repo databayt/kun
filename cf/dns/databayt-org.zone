@@ -1,0 +1,25 @@
+$ORIGIN databayt.org.
+$TTL 60
+@	IN	CNAME	cname.vercel-dns-017.com.
+*	IN	CNAME	cname.vercel-dns-017.com.
+mk	IN	CNAME	cname.vercel-dns.com.
+cdn	IN	CNAME	d1dlwtcfl0db67.cloudfront.net.
+assets	IN	CNAME	d1dlwtcfl0db67.cloudfront.net.
+_64e4fa258f76ffbf7781aa45ba9d4664.cdn	IN	CNAME	_d4c98411283180c36aa24d4a2a56e86e.jkddzztszm.acm-validations.aws.
+@	IN	MX	10 mx1.privateemail.com.
+@	IN	MX	10 mx2.privateemail.com.
+@	IN	TXT	"v=spf1 include:spf.privateemail.com ~all"
+_dmarc	IN	TXT	"v=DMARC1; p=quarantine; adkim=s; aspf=s;"
+default._domainkey	IN	TXT	"v=DKIM1;k=rsa;p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA4LSKrPAiJ81byaONM5JpqQrmk37qF2EHRJhzkNengcYnkH23kTnzR3kgPJgG0O6vJyNhSav1g01acp7pdzljx9lHSTFLEQ8/VAiUJBlFEHCx2d5/Mqkny61Uf/E6vKYshgzm7kYTUlEl0tpxDp1RIXANnOjln3R4KfG1WkzP2anel03D4cjfZ3UOMZJPw/tBBHV" "KqGYPT7MLeV7NZxJ8jzBmt8dTPZ3Bb6a+ar1EhQFR4XQQ6KfFh0Uy4tOBKAjCef0Iem2lOKdYgYao5O09bV29p6q5+o2kNT7Hxzucmu43IhFpjT2YL93KDr4C9PdTE49eGBexbM/tQ6m9HydNjQIDAQAB"
+send	IN	MX	10 feedback-smtp.ap-northeast-1.amazonses.com.
+send	IN	TXT	"v=spf1 include:amazonses.com ~all"
+resend._domainkey	IN	TXT	"p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCysgL3zAcCHqkaGYs3WI0LYC5eetZCmeb30n8KU0j/WXCNG34RI+NUbOZbZ3nCoHhOCWSb6XQh07EkdK0I7Soz5lIp4iRF9Cc949eFhlhbmxmp4dcvkHUgSUVa2GK49Yy7QIeeo0Lrb2yhk1lBEghPNd+29JkHU0kjG+LUj6uTfwIDAQAB"
+_vercel	IN	TXT	"vc-domain-verify=databayt.org,87501b61cc5866d3c508"
+_vercel	IN	TXT	"vc-domain-verify=www.databayt.org,d3e9f1ae359836d324e6"
+_vercel	IN	TXT	"vc-domain-verify=kun.databayt.org,faa5ff9fb45f5b9aea37"
+_vercel	IN	TXT	"vc-domain-verify=ed.databayt.org,c653da50012a25e4f655"
+@	IN	CAA	0 issue "amazon.com"
+@	IN	CAA	0 issue "letsencrypt.org"
+@	IN	CAA	0 issue "pki.goog"
+@	IN	CAA	0 issue "sectigo.com"
+kun	IN	CNAME	kun.osmanabdout.workers.dev.

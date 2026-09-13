@@ -2,6 +2,10 @@ import type { NextConfig } from "next";
 import { createMDX } from "fumadocs-mdx/next";
 
 const nextConfig: NextConfig = {
+  // The Cloudflare container lane (scripts/deploy-cloudflare.sh) runs the standalone
+  // server; Vercel and local dev keep the default output. outputFileTracingIncludes below
+  // is what carries web/ and content/ into that standalone tree.
+  output: process.env.CF_CONTAINER ? "standalone" : undefined,
   // Barrel entry points re-export thousands of modules, so importing three
   // icons pulls the whole library into the graph. Next rewrites these to
   // direct imports at build time — ergonomic imports, without the cold-start tax.

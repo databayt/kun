@@ -1,0 +1,6 @@
+{
+  "_note": "From vercel.json crons. Keyed by cron expression (UTC) → route paths called inside the container with the CRON_SECRET bearer. The 15-min drain, 6-h metrics and twice-daily canary stay on GitHub Actions (.github/workflows) and reach the container over HTTPS.",
+  "schedules": {
+    "0 6 * * *": ["/api/social/cron"]
+  }
+}

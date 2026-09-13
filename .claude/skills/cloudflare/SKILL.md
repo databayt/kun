@@ -1,7 +1,7 @@
 ---
 name: cloudflare
 description: Cloudflare deploy operator — build, smoke, deploy, DNS cutover, cron and log inspection for the Workers + Containers lane
-when_to_use: "Use for anything on the Cloudflare production platform — deploying hogwarts or mkan, checking whether a deploy is live, inspecting Worker logs or cron firings, flipping a hostname's DNS to proxied, diagnosing a connection reset that looks like an outage, or deciding Worker vs Container for a new app. This is the platform operator; /ship and /watch delegate here when the repo has a wrangler.jsonc. Triggers on: cloudflare, wrangler, worker, container, deploy to cloudflare, cutover, is it live on cloudflare, worker logs, cron not firing, ERR_CONNECTION_RESET, orange cloud, proxied."
+when_to_use: "Use for anything on the Cloudflare production platform — deploying hogwarts, mkan or kun, checking whether a deploy is live, inspecting Worker logs or cron firings, flipping a hostname's DNS to proxied, diagnosing a connection reset that looks like an outage, or deciding Worker vs Container for a new app. This is the platform operator; /ship and /watch delegate here when the repo has a wrangler.jsonc. Triggers on: cloudflare, wrangler, worker, container, deploy to cloudflare, cutover, is it live on cloudflare, worker logs, cron not firing, ERR_CONNECTION_RESET, orange cloud, proxied."
 argument-hint: "[build|smoke|deploy|status|logs|dns|crons] [app]"
 allowed-tools: Bash(git *), Bash(pnpm *), Bash(npx *), Bash(gh *), Bash(curl *), Bash(dig *), Bash(docker *), Bash(security *)
 model: opus
@@ -22,7 +22,8 @@ runbook — what to type, in what order, and how to prove it worked.
 | App      | Repo                               | Worker     | Zone                     | Live hosts                                   |
 | -------- | ---------------------------------- | ---------- | ------------------------ | -------------------------------------------- |
 | hogwarts | `~/hogwarts` · `databayt/hogwarts` | `hogwarts` | `balqalam.com` (**Pro**) | apex, `www`, `*.balqalam.com` (every school) |
-| mkan     | `~/mkan` · `databayt/mkan`         | `mkan`     | `mkan.sd` (Free)         | pending the DNS flip                         |
+| mkan     | `~/mkan` · `databayt/mkan`         | `mkan`     | `mkan.sd` (Free)         | apex + `www` (proxied)                       |
+| kun      | `~/kun` · `databayt/kun`           | `kun`      | `databayt.org` (**not on Cloudflare yet**) | `kun.osmanabdout.workers.dev` until the zone moves; then `kun.databayt.org` (see kun `DEPLOYMENT.md`) |
 
 Cloudflare account `ce9a5376d149c808a0b97072421ba12f`, workers.dev subdomain `osmanabdout`.
 

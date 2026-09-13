@@ -33,7 +33,7 @@ npx opennextjs-cloudflare build && npx wrangler deploy --dry-run --outdir /tmp/p
 `vinext` (Cloudflare's Vite reimplementation of Next) is **not** an option for these apps: it does
 not support next-auth and requires `"type": "module"`.
 
-## The container lane (hogwarts, mkan)
+## The container lane (hogwarts, mkan, kun)
 
 Files per repo, all committed:
 

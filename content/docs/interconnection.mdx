@@ -17,7 +17,7 @@ How the whole system holds together: the **kun engine**, the **machine fleet**, 
                         │                                         │
                         │  GitHub ── code + issues + kun config   │
                         │  Slack ─── databayt-sh (human bus)      │
-                        │  Vercel ── kun.databayt.org + products  │
+                        │  Cloudflare ── kun + balqalam + mkan.sd  │
                         │  CRM ───── *.crm.databayt.org           │
                         └────────▲──────────▲──────────▲──────────┘
                                  │          │          │
@@ -116,7 +116,7 @@ Business state flows back into the engine through a human-paced loop: Aseel keep
 | --- | ------- |
 | **GitHub** | Code, kun config, work queue (issues), heartbeat dashboard — the durable bus everything settles onto |
 | **Slack** | The human bus — team talk, Hermes inbound gateway, Claude's MCP egress |
-| **Vercel** | The deploy plane — pushing `main` auto-deploys; also serves the databayt.org DNS |
+| **Cloudflare** | The deploy plane since 2026-09 — Workers + Containers for hogwarts, mkan and kun (`scripts/deploy-cloudflare.sh` in each repo); Vercel's free account is paused for Hobby usage and still serves the databayt.org DNS until the zone moves |
 | **bridge.md** | Local Cowork ↔ Code handoff on the same machine |
 | **PushNotification** | The instant machine-to-pocket channel |
 

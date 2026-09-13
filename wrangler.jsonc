@@ -1,0 +1,35 @@
+{
+  // kun on Cloudflare Containers — the same lane as hogwarts and mkan (see DEPLOYMENT.md).
+  // A thin Worker forwards every request to one container running the Next standalone
+  // server. `routes` are added once the databayt.org zone lives on Cloudflare; until then the
+  // Worker answers on kun.osmanabdout.workers.dev (workers_dev) and SITE_URL in GitHub points there.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "kun",
+  "main": "cf/worker.js",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "observability": { "enabled": true },
+  "vars": {
+    // Public origin for signed approval links and drafts. Interim: the workers.dev host.
+    // Flip to https://kun.databayt.org in the same deploy that adds the routes below.
+    "SOCIAL_PUBLIC_URL": "https://kun.osmanabdout.workers.dev"
+  },
+  "containers": [
+    {
+      "class_name": "KunContainer",
+      "image": "./Dockerfile.cf",
+      "max_instances": 1,
+      // basic = ¼ vCPU / 1 GiB. kun is an internal tool: docs, the social hub, cron routes.
+      // Bump to standard-1 if /api/health reports rss near the limit or the container restarts.
+      "instance_type": "basic"
+    }
+  ],
+  "durable_objects": {
+    "bindings": [{ "name": "KUN", "class_name": "KunContainer" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["KunContainer"] }],
+  // vercel.json's single cron, verbatim (UTC). New triggers can take ~19 h to start firing.
+  "triggers": { "crons": ["0 6 * * *"] }
+  // "routes": [{ "pattern": "kun.databayt.org/*", "zone_name": "databayt.org" }]
+}

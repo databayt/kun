@@ -22,7 +22,7 @@ Every web product targets this stack. Deviations are tracked as alignment debt.
 | Email           | Resend                     | —                                                                                          |
 | Animations      | Framer Motion              | —                                                                                          |
 | Testing         | Vitest + Playwright        | —                                                                                          |
-| Deployment      | Vercel                     | —                                                                                          |
+| Deployment      | Cloudflare Workers + Containers | Vercel until 2026-09 (billing blocked from Sudan/KSA cards; free account paused for usage) |
 | Docs            | fumadocs (MDX)             | —                                                                                          |
 | Font            | Geist                      | —                                                                                          |
 | Package Manager | pnpm                       | —                                                                                          |
@@ -187,7 +187,7 @@ Prototype stage. Not active.
 
 ### Aligned
 
-All active web repos share: Next.js 16, React 19, TypeScript, Tailwind CSS 4, Prisma 6, NextAuth v5, Vercel deployment.
+All active web repos share: Next.js 16, React 19, TypeScript, Tailwind CSS 4, Prisma 6, NextAuth v5, Cloudflare deployment (Containers lane).
 
 ### Debt
 
@@ -228,7 +228,8 @@ All products support bilingual operation:
 
 | Service            | Purpose                                  | Products              |
 | ------------------ | ---------------------------------------- | --------------------- |
-| **Vercel**         | Hosting, edge functions, preview deploys | All web               |
+| **Cloudflare**     | Hosting (Workers + Containers), DNS, crons | hogwarts, mkan, kun   |
+| **Vercel**         | Legacy hosting — paused; satellites only | marketing, codebase, satellites |
 | **Neon**           | Serverless PostgreSQL                    | hogwarts, mkan, shifa |
 | **Upstash**        | Redis cache, rate limiting               | hogwarts, souq, mkan  |
 | **Stripe**         | Payments, subscriptions                  | hogwarts, souq, shifa |
@@ -249,7 +250,8 @@ Kun integrates 18 MCP servers that bridge the stack with external tools:
 | ------- | ---------------------------- |
 | shadcn  | UI component registry        |
 | github  | Version control, PRs, issues |
-| vercel  | Deployment and previews      |
+| wrangler | Cloudflare deploys (`scripts/deploy-cloudflare.sh`) |
+| vercel  | Env pulls from the legacy account |
 | neon    | Database management          |
 | stripe  | Payment operations           |
 | figma   | Design-to-code               |

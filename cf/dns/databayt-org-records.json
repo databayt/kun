@@ -1,0 +1,189 @@
+[
+ {
+  "type": "CNAME",
+  "name": "databayt.org",
+  "ttl": 1,
+  "content": "cname.vercel-dns-017.com",
+  "proxied": false,
+  "comment": "Vercel apex ALIAS (marketing/databayt.org) \u2014 flattened"
+ },
+ {
+  "type": "CNAME",
+  "name": "*.databayt.org",
+  "ttl": 1,
+  "content": "cname.vercel-dns-017.com",
+  "proxied": false,
+  "comment": "Vercel wildcard ALIAS \u2014 every unclaimed subdomain (satellites)"
+ },
+ {
+  "type": "CNAME",
+  "name": "mk.databayt.org",
+  "ttl": 1,
+  "content": "cname.vercel-dns.com",
+  "proxied": false,
+  "comment": "mk.databayt.org \u2192 308 \u2192 www.mkan.sd (Vercel)"
+ },
+ {
+  "type": "CNAME",
+  "name": "cdn.databayt.org",
+  "ttl": 1,
+  "content": "d1dlwtcfl0db67.cloudfront.net",
+  "proxied": false,
+  "comment": "CloudFront (databayt-cdn)"
+ },
+ {
+  "type": "CNAME",
+  "name": "assets.databayt.org",
+  "ttl": 1,
+  "content": "d1dlwtcfl0db67.cloudfront.net",
+  "proxied": false,
+  "comment": "CloudFront (databayt-cdn)"
+ },
+ {
+  "type": "CNAME",
+  "name": "_64e4fa258f76ffbf7781aa45ba9d4664.cdn.databayt.org",
+  "ttl": 1,
+  "content": "_d4c98411283180c36aa24d4a2a56e86e.jkddzztszm.acm-validations.aws",
+  "proxied": false,
+  "comment": "ACM validation for cdn"
+ },
+ {
+  "type": "MX",
+  "name": "databayt.org",
+  "ttl": 1,
+  "content": "mx1.privateemail.com",
+  "priority": 10,
+  "proxied": false
+ },
+ {
+  "type": "MX",
+  "name": "databayt.org",
+  "ttl": 1,
+  "content": "mx2.privateemail.com",
+  "priority": 10,
+  "proxied": false
+ },
+ {
+  "type": "TXT",
+  "name": "databayt.org",
+  "ttl": 1,
+  "content": "v=spf1 include:spf.privateemail.com ~all",
+  "proxied": false
+ },
+ {
+  "type": "TXT",
+  "name": "_dmarc.databayt.org",
+  "ttl": 1,
+  "content": "v=DMARC1; p=quarantine; adkim=s; aspf=s;",
+  "proxied": false
+ },
+ {
+  "type": "TXT",
+  "name": "default._domainkey.databayt.org",
+  "ttl": 1,
+  "content": "v=DKIM1;k=rsa;p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA4LSKrPAiJ81byaONM5JpqQrmk37qF2EHRJhzkNengcYnkH23kTnzR3kgPJgG0O6vJyNhSav1g01acp7pdzljx9lHSTFLEQ8/VAiUJBlFEHCx2d5/Mqkny61Uf/E6vKYshgzm7kYTUlEl0tpxDp1RIXANnOjln3R4KfG1WkzP2anel03D4cjfZ3UOMZJPw/tBBHVKqGYPT7MLeV7NZxJ8jzBmt8dTPZ3Bb6a+ar1EhQFR4XQQ6KfFh0Uy4tOBKAjCef0Iem2lOKdYgYao5O09bV29p6q5+o2kNT7Hxzucmu43IhFpjT2YL93KDr4C9PdTE49eGBexbM/tQ6m9HydNjQIDAQAB",
+  "proxied": false
+ },
+ {
+  "type": "MX",
+  "name": "send.databayt.org",
+  "ttl": 1,
+  "content": "feedback-smtp.ap-northeast-1.amazonses.com",
+  "priority": 10,
+  "proxied": false
+ },
+ {
+  "type": "TXT",
+  "name": "send.databayt.org",
+  "ttl": 1,
+  "content": "v=spf1 include:amazonses.com ~all",
+  "proxied": false
+ },
+ {
+  "type": "TXT",
+  "name": "resend._domainkey.databayt.org",
+  "ttl": 1,
+  "content": "p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCysgL3zAcCHqkaGYs3WI0LYC5eetZCmeb30n8KU0j/WXCNG34RI+NUbOZbZ3nCoHhOCWSb6XQh07EkdK0I7Soz5lIp4iRF9Cc949eFhlhbmxmp4dcvkHUgSUVa2GK49Yy7QIeeo0Lrb2yhk1lBEghPNd+29JkHU0kjG+LUj6uTfwIDAQAB",
+  "proxied": false
+ },
+ {
+  "type": "TXT",
+  "name": "_vercel.databayt.org",
+  "ttl": 1,
+  "content": "vc-domain-verify=databayt.org,87501b61cc5866d3c508",
+  "proxied": false
+ },
+ {
+  "type": "TXT",
+  "name": "_vercel.databayt.org",
+  "ttl": 1,
+  "content": "vc-domain-verify=www.databayt.org,d3e9f1ae359836d324e6",
+  "proxied": false
+ },
+ {
+  "type": "TXT",
+  "name": "_vercel.databayt.org",
+  "ttl": 1,
+  "content": "vc-domain-verify=kun.databayt.org,faa5ff9fb45f5b9aea37",
+  "proxied": false
+ },
+ {
+  "type": "TXT",
+  "name": "_vercel.databayt.org",
+  "ttl": 1,
+  "content": "vc-domain-verify=ed.databayt.org,c653da50012a25e4f655",
+  "proxied": false
+ },
+ {
+  "type": "CAA",
+  "name": "databayt.org",
+  "ttl": 1,
+  "data": {
+   "flags": 0,
+   "tag": "issue",
+   "value": "amazon.com"
+  },
+  "proxied": false
+ },
+ {
+  "type": "CAA",
+  "name": "databayt.org",
+  "ttl": 1,
+  "data": {
+   "flags": 0,
+   "tag": "issue",
+   "value": "letsencrypt.org"
+  },
+  "proxied": false
+ },
+ {
+  "type": "CAA",
+  "name": "databayt.org",
+  "ttl": 1,
+  "data": {
+   "flags": 0,
+   "tag": "issue",
+   "value": "pki.goog"
+  },
+  "proxied": false
+ },
+ {
+  "type": "CAA",
+  "name": "databayt.org",
+  "ttl": 1,
+  "data": {
+   "flags": 0,
+   "tag": "issue",
+   "value": "sectigo.com"
+  },
+  "proxied": false
+ },
+ {
+  "type": "CNAME",
+  "name": "kun.databayt.org",
+  "ttl": 1,
+  "content": "kun.osmanabdout.workers.dev",
+  "proxied": true,
+  "comment": "kun Worker \u2014 route kun.databayt.org/* (proxied = live)"
+ }
+]
