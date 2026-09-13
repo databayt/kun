@@ -82,15 +82,16 @@ superseded by the rotation and bridge deploys):
 | 1     | An installable app named after the school, Arabic and right-to-left by default, in the school's colour; real icons; a service worker that keeps only public assets and shows the locale's offline page when the connection drops               |
 | 2     | Quick attendance that survives a dropped connection: marks queue on the phone and replay through the same ownership check as the online path; a newer mark on the server wins                                                                     |
 | 3     | Web Push on the existing notification rails: a device subscribes from the preferences page; absence, exam and live-class notices arrive as system notifications and deep-link into the school's app; iPhone only from the installed app          |
-| 4     | An install card on phone-sized dashboards — the real install prompt on Android, the Share → Add to Home Screen hint on iPhone                                                                                                                    |
+| 4     | A liquid-glass install card on phone-sized dashboards with one **Download app** button — the real install prompt on Android, a two-step Share → Add to Home Screen guide on iPhone (restyled 2026-09-13 from the Apple kit's Liquid Glass node) |
 
 ## How to experience it
 
 On any school host today (`demo.balqalam.com`, `kingfahd.balqalam.com`):
 
-1. **Install** — sign in on a phone, tap **Install** on the card at the top of the dashboard
-   (Android) or Share → *Add to Home Screen* (iPhone). The home-screen icon opens the school
-   full-screen with its own name and colour.
+1. **Install** — sign in on a phone and tap **Download app** on the liquid-glass card at the top
+   of the dashboard: Android opens the install sheet, iPhone gets the two-step Share → *Add to
+   Home Screen* guide. The home-screen icon opens the school full-screen with its own name and
+   colour.
 2. **Mark attendance offline** — *Attendance → Quick*, airplane mode on, mark a section, save;
    the sync banner shows one pending item. Network back on → it drains within seconds and the
    marks are on the server. Save again and the newer mark wins.
