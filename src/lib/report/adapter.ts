@@ -21,7 +21,7 @@ import {
 } from "@/lib/rate-limit";
 
 import { RateLimitError, type ReportAdapter } from "./adapters/adapter";
-import type { PipelineEvent, ReporterContext, ReportInput } from "./types";
+import type { PipelineEvent, ReporterContext } from "./types";
 
 // Trim env values — a stray trailing newline in GITHUB_REPO (e.g. "databayt/kun\n")
 // builds a malformed GitHub URL and silently breaks every report submission.
@@ -42,7 +42,7 @@ export const kunReportAdapter: ReportAdapter = {
   // is an open endpoint. Fail closed when Turnstile is missing (2026-07-26).
   captcha: "required",
 
-  async getReporter(_input: ReportInput): Promise<ReporterContext> {
+  async getReporter(): Promise<ReporterContext> {
     const ip = await getClientIp();
     const ipHash = hashIp(ip);
 
