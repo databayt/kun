@@ -6,7 +6,7 @@ The canonical Progressive Web App layout databayt products adopt on Next.js 16. 
 
 | Repo         | PWA state                                                                                                                                     | Maturity  | Canonical |
 | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------- | --------- | --------- |
-| **hogwarts** | hand-rolled worker v6 — pages + RSC payloads saved per `x-session-key`, warm-up of the sidebar from the installed app, offline/stale strip; per-tenant Arabic-first manifest, locale offline pages, IndexedDB outbox (LMS + attendance), Web Push on the push cron | canonical | **yes**   |
+| **hogwarts** | hand-rolled worker v7 — pages + RSC payloads saved per `x-session-key`, warm-up of the sidebar from the installed app, offline/stale strip; per-tenant Arabic-first manifest, locale offline pages, IndexedDB outbox (LMS + attendance), Web Push on the push cron | canonical | **yes**   |
 | mkan         | deferred 2026-09-12 — icons and CSP ready, no manifest/worker; reopen when host messaging has volume                                          | —         | no        |
 | souq         | to adopt                                                                                                                                      | —         | no        |
 | shifa        | to adopt                                                                                                                                      | —         | no        |

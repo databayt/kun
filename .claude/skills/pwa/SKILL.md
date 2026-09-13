@@ -183,6 +183,14 @@ Gate: subscribe in Chrome → insert one Notification with `channels: [push]` �
   error leaves the router waiting.
 - **`load` may already have fired.** A registration that waits for `window.load` never runs on
   a page that was complete before the effect — check `document.readyState` first.
+- **Next's `experimental.useOffline` and a page-saving worker do not mix.** Once its offline
+  state is set — any failed prefetch or Server Action sets it — the segment cache issues no
+  request at all, so a click on a route the router already knows hangs with nothing on screen
+  and the worker is never asked for its saved copy (reproduced twice on hogwarts, server
+  stopped). Leave the flag off: every navigation then reaches the worker, which answers from
+  the saved payload or with a 503 the router turns into a full load of the saved HTML. Have the
+  worker say WHY it served a saved copy (`reason: failed | slow`) so the strip can tell
+  "offline" from "slow" without `useOffline()`.
 - **Chrome's "Offline" emulation does not reach the worker's own fetches.** chrome-devtools
   `emulate networkConditions: Offline` fails the PAGE's requests, but `fetch()` inside the service
   worker still succeeds — an "offline" navigation quietly loads from the server. To test offline for

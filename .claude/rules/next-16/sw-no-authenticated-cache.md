@@ -16,7 +16,7 @@ since: "hogwarts service worker v3, 2026-09-12; namespaced pages v6, 2026-09-13"
 
 Two failures shipped together in hogwarts v2. Every navigation and every `/api/` GET was `cache.put` into a shared cache keyed only by URL, so a shared school device could serve the previous user's dashboard from cache. And the precache listed `/` and `/offline`, both 307s to the locale prefix: the stored responses carried `redirected: true`, the browser refuses those for navigations, and the offline fallback never worked — silently.
 
-Signed-in pages MAY be cached (hogwarts v6 does, so the dashboard is explorable offline) under one condition: the cache is **namespaced by a session key the server puts on the response**, and a response carrying a different key — or none — deletes every other namespace before anything is served. The key is a truncated HMAC-style hash of the user id (`x-session-key` from the proxy), so the worker never sees a user id and never keys on the URL alone. `/api/` stays network-only regardless: a cached signed-media ticket is an expired URL and a cached sync response is a lie about what landed.
+Signed-in pages MAY be cached (hogwarts v7 does, so the dashboard is explorable offline) under one condition: the cache is **namespaced by a session key the server puts on the response**, and a response carrying a different key — or none — deletes every other namespace before anything is served. The key is a truncated HMAC-style hash of the user id (`x-session-key` from the proxy), so the worker never sees a user id and never keys on the URL alone. `/api/` stays network-only regardless: a cached signed-media ticket is an expired URL and a cached sync response is a lie about what landed.
 
 ## Good
 
