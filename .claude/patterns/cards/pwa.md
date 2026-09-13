@@ -198,6 +198,11 @@ Bump `STATIC` on every change. Root `layout.tsx` exports `viewport: { themeColor
 - Verify the processor with a bogus endpoint and a valid P-256 key (prune path); real delivery needs a phone.
 - `prisma db execute`: `--schema` locally, `--url` for prod — never both.
 - Custom-domain tenants get the default manifest until the host resolver knows the domain.
+- The install card is one **Download app** button, never a decorative icon: replay
+  `beforeinstallprompt` when captured, otherwise open a two-step guide sheet (Share → Add to Home
+  Screen on iPhone, the browser menu on Android). Detect the platform with `useSyncExternalStore`
+  — the React Compiler lint rejects `setState` inside the effect. Style: the house liquid-glass
+  tokens (hogwarts `wa-glass-tabbar`), a large radius, the app icon (hogwarts 2026-09-13).
 
 ## Verification
 
