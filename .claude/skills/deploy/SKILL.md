@@ -77,6 +77,15 @@ byte under `public/` restarts the container (a byte-identical image does not res
 `/api/health` `database.pass`, a cron with the new `CRON_SECRET` → 200, a wrong bearer → 401.
 Keychain is the ONLY durable home for rotated values; a Keychain miss means the next build
 resurrects the leaked one.
+**The Colima disk fills up.** Every `wrangler deploy` leaves a ~2.5 GB `hogwarts-hogwartscontainer:<ver>`
+image (plus its `registry.cloudflare.com/…` tag) and the build cache grows by tens of GB; at 100 % the
+docker build dies with `no space left on device` mid-layer. Before a build: `docker system df`; then
+`docker images --format '{{.Repository}}:{{.Tag}}' | grep hogwarts-hogwartscontainer | xargs docker rmi -f`
+and `docker builder prune -f --keep-storage 8GB` (keeps the newest layers, e.g. the emulated Evolution
+stage). Never prune volumes — `twenty_db-data` is the CRM.
+**hogwarts ships a second process** (Evolution API, `cf/entry.cjs`): the smoke run must carry
+`EVOLUTION_EMBEDDED=0` (the script adds it) — a second live bridge fights production for the WhatsApp
+session; verify after deploy with `/api/health` → `checks.whatsappBridge.status: pass`.
 **Rotating `AUTH_SECRET` locks out every live session unless the proxy verifies the cookie.** A proxy
 that trusts cookie *presence* bounces `/login` → `/dashboard` → `/login` for every pre-rotation cookie
 (hogwarts, 2026-09-13, fixed in `src/proxy.ts`: decode the JWT with `next-auth/jwt`, expire stale
