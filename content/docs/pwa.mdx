@@ -82,15 +82,15 @@ superseded by the rotation and bridge deploys):
 | 1     | An installable app named after the school, Arabic and right-to-left by default, in the school's colour; real icons; a service worker that keeps only public assets and shows the locale's offline page when the connection drops               |
 | 2     | Quick attendance that survives a dropped connection: marks queue on the phone and replay through the same ownership check as the online path; a newer mark on the server wins                                                                     |
 | 3     | Web Push on the existing notification rails: a device subscribes from the preferences page; absence, exam and live-class notices arrive as system notifications and deep-link into the school's app; iPhone only from the installed app          |
-| 4     | An App Store-style install row on phone-sized dashboards — orange feather icon, app name, blurb, one **Download app** pill — the real install prompt on Android, a two-step Share → Add to Home Screen guide on iPhone (restyled 2026-09-13)             |
+| 4     | An App Store-style install row on phone-sized dashboards — orange feather icon, app name, one-line blurb, an arrow pill — the real install prompt on Android; on iPhone the native share sheet (Add to Home Screen is one of its actions) with a two-step guide underneath (2026-09-13)             |
 
 ## How to experience it
 
 On any school host today (`demo.balqalam.com`, `kingfahd.balqalam.com`):
 
-1. **Install** — sign in on a phone and tap **Download app** on the App Store-style card at the top
-   of the dashboard: Android opens the install sheet, iPhone gets the two-step Share → *Add to
-   Home Screen* guide. The home-screen icon opens the school full-screen with its own name and
+1. **Install** — sign in on a phone and tap the arrow on the App Store-style card at the top of the
+   dashboard: Android opens the install sheet, iPhone opens the native share sheet where you pick
+   *Add to Home Screen*, with a two-step guide underneath. The home-screen icon opens the school full-screen with its own name and
    colour.
 2. **Mark attendance offline** — *Attendance → Quick*, airplane mode on, mark a section, save;
    the sync banner shows one pending item. Network back on → it drains within seconds and the
