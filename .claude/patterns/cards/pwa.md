@@ -202,9 +202,10 @@ Bump `STATIC` on every change. Root `layout.tsx` exports `viewport: { themeColor
   captured; on iPhone call `navigator.share({ title, url })` from the tap (Web Share needs the
   gesture; Add to Home Screen is one of the sheet's actions) with a two-step guide underneath;
   Android without the event gets the browser-menu guide. Detect the platform with `useSyncExternalStore`
-  — the React Compiler lint rejects `setState` inside the effect. Style: a full-screen welcome sheet in
-  the Apple Podcasts "What's new in" style (accent eyebrow over the app name, three feature rows
-  with accent icons, footnote, one big Continue, Not now beneath); the app icon is a
+  — the React Compiler lint rejects `setState` inside the effect. Style: the Apple Podcasts "What's new in"
+  layout (accent eyebrow over the app name, three feature rows with accent icons, footnote, one big
+  Continue) presented as an iOS bottom sheet (the shadcn `Drawer`: rounded top over the dimmed
+  page, grabber, round close, swipe to dismiss) — never a full-screen takeover; the app icon is a
   brand-colour box with the glyph at ~56 % so one artwork serves iOS, maskable and the tab
   (hogwarts 2026-09-13).
 
