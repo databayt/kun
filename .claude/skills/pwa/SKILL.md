@@ -183,14 +183,27 @@ Gate: subscribe in Chrome → insert one Notification with `channels: [push]` �
   error leaves the router waiting.
 - **`load` may already have fired.** A registration that waits for `window.load` never runs on
   a page that was complete before the effect — check `document.readyState` first.
-- **Next's `experimental.useOffline` and a page-saving worker do not mix.** Once its offline
-  state is set — any failed prefetch or Server Action sets it — the segment cache issues no
-  request at all, so a click on a route the router already knows hangs with nothing on screen
-  and the worker is never asked for its saved copy (reproduced twice on hogwarts, server
-  stopped). Leave the flag off: every navigation then reaches the worker, which answers from
-  the saved payload or with a 503 the router turns into a full load of the saved HTML. Have the
-  worker say WHY it served a saved copy (`reason: failed | slow`) so the strip can tell
-  "offline" from "slow" without `useOffline()`.
+- **Next's `experimental.useOffline` and a page-saving worker do not mix.** With the flag on
+  and the server stopped, a sidebar click sent no request for the page and nothing moved, so
+  the worker was never asked for its saved copy (reproduced twice on hogwarts). While the flag's
+  offline state is set the segment cache's scheduler sends no fetches — the likely cause. Leave
+  it off: every navigation then reaches the worker, which answers from a saved payload or with
+  a 503 the router turns into a full load of the saved HTML. Have the worker say WHY it served a
+  saved copy (`reason: failed | slow`) so the strip can tell "offline" from "slow".
+- **Key saved RSC payloads WITH `_rsc`.** Next derives it from the router-state tree, prefetch
+  flags and next-url, and the payload is a patch against that tree. Stripped, a payload saved on
+  students → teachers was replayed on dashboard → teachers: URL and sidebar said teachers, the
+  content stayed the dashboard, and nothing warned. With it, a miss is a 503 → saved HTML.
+- **Saved HTML, not saved payloads, is what makes a page explorable offline.** An offline click
+  rarely repeats an online navigation's `_rsc`: a prefetched route sends a partial router tree,
+  an offline click (no prefetch) sends the whole tree. Measured on hogwarts: dashboard → students
+  was `Xdsm5spjRVlRmBSs` online and `AwDuXUM9oR_42pvt` offline. Save each page's HTML once a day
+  when it is opened on a good connection (the page tells the worker; one fetch at a time).
+- **The session-key header alone does not protect a shared device on a slow network.** The
+  worker shows a saved copy after its timeout, before any response can carry the new key. The
+  sign-out button and the sign-in/join pages must tell the worker to forget first (a
+  `session-end` message answered on a MessageChannel, capped at 1 s so a broken worker never
+  blocks sign-out).
 - **Chrome's "Offline" emulation does not reach the worker's own fetches.** chrome-devtools
   `emulate networkConditions: Offline` fails the PAGE's requests, but `fetch()` inside the service
   worker still succeeds — an "offline" navigation quietly loads from the server. To test offline for
