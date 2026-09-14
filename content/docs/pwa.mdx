@@ -60,8 +60,8 @@ The full layout is the `pwa` pattern card. The load-bearing choices:
   school, and answers with its name, language, direction and colour. `start_url` stays relative.
 - **Hand-rolled worker on large apps.** A 30 MB app's whole-bundle precache is hostile to Sudan
   and UAE mobile data. The worker precaches only the locale offline pages, caches hashed static
-  assets lazily with a cap, and treats navigations and `/api/` as network-only. Serwist is the
-  answer for a small greenfield app.
+  assets lazily with a cap, and keeps `/api/` network-only. Signed-in pages are saved only inside a
+  per-session namespace (below). Serwist is the answer for a small greenfield app.
 - **Outbox, not cache, for offline writes.** IndexedDB holds the pending work; the sync route
   applies each kind idempotently and answers `applied`, `duplicate` or `rejected`.
 - **Push on the existing rails.** Web Push adds a subscription store and a processor; the FCM
@@ -84,6 +84,32 @@ superseded by the rotation and bridge deploys):
 | 3     | Web Push on the existing notification rails: a device subscribes from the preferences page; absence, exam and live-class notices arrive as system notifications and deep-link into the school's app; iPhone only from the installed app          |
 | 4     | An App Store-style install row on phone-sized dashboards — orange feather icon, app name, one-line blurb, an arrow pill — the real install prompt on Android; on iPhone the native share sheet (Add to Home Screen is one of its actions) with a two-step guide underneath (2026-09-13)             |
 
+## Explorable offline on hogwarts (2026-09-13/14)
+
+The second pass made the dashboard usable without a connection, not just survivable. What a
+school gets: every page a teacher opens on a good connection opens again offline, as it last was,
+under a strip that says so. A slow network shows the saved copy after four seconds, marked as
+saved, with Retry. A page never opened says "not on this device yet" with a Back button, because an
+installed iPhone app has none. The installed app also saves the whole sidebar once a day.
+
+What it took, and the traps each rule answers:
+
+| Rule | Why |
+| --- | --- |
+| Save signed-in pages only in a cache named by a session key the server sends (`x-session-key`); a response with another key, or none, drops the rest | A shared school device must never replay the previous person's screens |
+| The sign-out button and the sign-in and join pages tell the worker to forget everything before they navigate | On a slow network a saved copy is served before any response can reveal a new person |
+| Save each opened page as HTML, once a day | An offline click never repeats an online `_rsc`: a prefetched route sends a partial router tree, an offline click the whole one. Measured: `Xdsm5spjRVlRmBSs` online, `AwDuXUM9oR_42pvt` offline |
+| Key any saved RSC payload WITH `_rsc` | The payload is a patch against the tree it was requested from. Stripped, a students → teachers payload drew the dashboard under the teachers URL |
+| Leave Next's `experimental.useOffline` off | With it on, a sidebar click sent no request and nothing moved; its scheduler stops fetching while offline, the likely cause |
+| Keep the offline page and its files in their own untrimmed cache, refreshed daily | Its scripts were the oldest entries in the capped static cache, so they were the first evicted |
+
+Measured on a local production build, with the server stopped for offline checks and a proxy
+holding every response 5 s for slow ones: an opened page offline in 283 ms, the saved copy at
+4.0 s on the slow network, saved pages gone before the sign-out request returned, and the next
+account's first page waiting 5.1 s for its own content. One saved dashboard page is 1.37 MB,
+mostly the dictionary. The same pass removed a proxy cookie that made every Server Action
+re-render the page (1.1 MB each) and put the static files behind Cloudflare's edge cache.
+
 ## How to experience it
 
 On any school host today (`demo.balqalam.com`, `kingfahd.balqalam.com`):
@@ -98,8 +124,11 @@ On any school host today (`demo.balqalam.com`, `kingfahd.balqalam.com`):
 3. **Turn on push** — *Notifications → Preferences → Push*, allow the permission. Have a teacher
    mark a child absent: on the next cron tick (every 15 minutes) the guardian's phone shows the
    absence and a tap opens it in the app.
-4. **Lose the connection anywhere** — airplane mode, open any route: the school's offline page in
-   the right language, with the outbox listing what is queued.
+4. **Lose the connection anywhere** — airplane mode: pages opened before render as last seen
+   under the offline strip; a page never opened shows "not on this device yet" with Back and
+   Retry, and the outbox lists what is queued.
+5. **Share a phone** — sign out and sign in as someone else: nothing the first account saved
+   appears, even on a slow network.
 
 The user-facing walkthrough lives in the product docs: hogwarts *Offline*, *Attendance* and
 *Notifications* pages, in English and Arabic.
@@ -117,11 +146,14 @@ attendance rows per week).
 ## Verification
 
 1. Audit → 0 FAIL: Arabic `name`, `dir: rtl`, every icon 200, no redirecting precache entry.
-2. Browser: the worker controls the page after one reload; offline emulation renders the
-   locale-correct offline page.
+2. Browser: the worker controls the page after one reload. For offline, stop the server or use a
+   phone in airplane mode — DevTools' Offline emulation does not reach the worker's own fetches.
+   An opened page renders from its saved copy; an unopened one shows the not-saved card.
 3. Outbox: a write made offline drains on reconnect and replays as `duplicate`.
 4. Push: subscribe, queue one notification, hit the cron — it lands and its tap deep-links to
    the tenant route.
+5. Sessions: sign out, sign in as another account — no page saved by the first. Repeat behind a
+   proxy that delays responses past the worker's timeout, from a freshly loaded page.
 
 ## Related
 
