@@ -1,11 +1,19 @@
 [
  {
-  "type": "CNAME",
+  "type": "AAAA",
   "name": "databayt.org",
   "ttl": 1,
-  "content": "cname.vercel-dns-017.com",
-  "proxied": false,
-  "comment": "Vercel apex ALIAS (marketing/databayt.org) \u2014 flattened"
+  "content": "100::",
+  "proxied": true,
+  "comment": "apex — proxied black hole; served by the marketing Worker (301 -> www via redirect rule)"
+ },
+ {
+  "type": "AAAA",
+  "name": "www.databayt.org",
+  "ttl": 1,
+  "content": "100::",
+  "proxied": true,
+  "comment": "www — proxied black hole; served by the marketing Worker (canonical host)"
  },
  {
   "type": "CNAME",
@@ -13,7 +21,7 @@
   "ttl": 1,
   "content": "cname.vercel-dns-017.com",
   "proxied": false,
-  "comment": "Vercel wildcard ALIAS \u2014 every unclaimed subdomain (satellites)"
+  "comment": "Vercel wildcard ALIAS — every unclaimed subdomain (satellites)"
  },
  {
   "type": "CNAME",
@@ -21,7 +29,7 @@
   "ttl": 1,
   "content": "cname.vercel-dns.com",
   "proxied": false,
-  "comment": "mk.databayt.org \u2192 308 \u2192 www.mkan.sd (Vercel)"
+  "comment": "mk.databayt.org → 308 → www.mkan.sd (Vercel)"
  },
  {
   "type": "CNAME",
@@ -177,13 +185,5 @@
    "value": "sectigo.com"
   },
   "proxied": false
- },
- {
-  "type": "CNAME",
-  "name": "kun.databayt.org",
-  "ttl": 1,
-  "content": "kun.osmanabdout.workers.dev",
-  "proxied": true,
-  "comment": "kun Worker \u2014 route kun.databayt.org/* (proxied = live)"
  }
 ]

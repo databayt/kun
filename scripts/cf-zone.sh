@@ -6,7 +6,9 @@
 #
 #   scripts/cf-zone.sh create   # add databayt.org to the account (pending until the NS change)
 #   scripts/cf-zone.sh import   # load cf/dns/databayt-org-records.json (idempotent by name+type+content)
-#   scripts/cf-zone.sh verify   # dig every record at Cloudflare's assigned NS and at Vercel's; print diffs
+#   scripts/cf-zone.sh verify   # dig every record at Cloudflare's assigned NS and at Vercel's; print
+#                               # diffs. Only works AFTER activation — a pending zone's NS answer
+#                               # REFUSED. Before the flip: scripts/cf-zone-compare.py (API vs API).
 #   scripts/cf-zone.sh ns       # print the two nameservers to set at Namecheap
 #
 # The record file is the Vercel zone as listed on 2026-09-13 (vercel dns ls) plus one proxied
@@ -51,7 +53,18 @@ print(("    ok   " if d["success"] else "    FAIL ")+r.get("type","?")+" "+r.get
     done < "$LINES" ;;
   verify)
     ID=$(zone_id); [[ -n "$ID" ]] || { echo "create the zone first"; exit 1; }
-    NS=$(cf "$API/zones/$ID" | python3 -c 'import sys,json;print(json.load(sys.stdin)["result"]["name_servers"][0])')
+    Z=$(cf "$API/zones/$ID")
+    NS=$(echo "$Z" | python3 -c 'import sys,json;print(json.load(sys.stdin)["result"]["name_servers"][0])')
+    STATUS=$(echo "$Z" | python3 -c 'import sys,json;print(json.load(sys.stdin)["result"]["status"])')
+    # Cloudflare's nameservers answer REFUSED for a zone that has not been activated, so every
+    # dig below would come back empty — and an empty answer on both sides prints a misleading
+    # "same". Refuse to run rather than hand out a false pass; compare the APIs instead.
+    if [[ "$STATUS" != "active" ]]; then
+      echo "zone status is '$STATUS', not 'active': $NS will answer REFUSED and every row would"
+      echo "read a meaningless 'same'. Before the nameserver flip use the API-to-API comparison:"
+      echo "    python3 scripts/cf-zone-compare.py"
+      exit 1
+    fi
     echo "comparing Vercel (ns1.vercel-dns.com) with Cloudflare ($NS) for every name in $RECORDS"
     python3 -c 'import json,sys
 for r in json.load(open(sys.argv[1])): print(r["name"], r["type"])' "$RECORDS" | sort -u | while read -r name type; do
