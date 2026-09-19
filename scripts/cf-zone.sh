@@ -65,6 +65,20 @@ print(("    ok   " if d["success"] else "    FAIL ")+r.get("type","?")+" "+r.get
       echo "    python3 scripts/cf-zone-compare.py"
       exit 1
     fi
+    # The old provider's nameservers were the other half of this comparison. Once the domain is
+    # deleted there they answer REFUSED, and an empty column would read as a DIFF on every row —
+    # the same lie as the pre-activation "same", just inverted. Detect it and read out the live
+    # zone instead of pretending to diff.
+    if ! dig NS "$ZONE" @ns1.vercel-dns.com +short 2>/dev/null | grep -q .; then
+      echo "ns1.vercel-dns.com no longer answers for $ZONE (the domain was deleted there), so there"
+      echo "is nothing to diff against. Reading out what Cloudflare ($NS) serves for every name in"
+      echo "$RECORDS:"
+      python3 -c 'import json,sys
+for r in json.load(open(sys.argv[1])): print(r["name"], r["type"])' "$RECORDS" | sort -u | while read -r name type; do
+        printf "  %-45s %-6s %s\n" "$name" "$type" "$(dig +short "$type" "$name" @"$NS" | sort | tr '\n' ' ')"
+      done
+      exit 0
+    fi
     echo "comparing Vercel (ns1.vercel-dns.com) with Cloudflare ($NS) for every name in $RECORDS"
     python3 -c 'import json,sys
 for r in json.load(open(sys.argv[1])): print(r["name"], r["type"])' "$RECORDS" | sort -u | while read -r name type; do

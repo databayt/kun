@@ -10,7 +10,7 @@ a missing MX or DKIM row is what turns this migration into an email outage.
   scripts/cf-zone-compare.py            # print the table, exit 1 on an unexpected diff
 Expected (intended) differences are declared in EXPECTED below and reported separately.
 """
-import json, os, subprocess, sys, urllib.request
+import json, os, subprocess, sys, urllib.error, urllib.request
 
 ZONE = "databayt.org"
 CF_ZONE_ID = "1e859289c28a83ff03c124170ae93cda"
@@ -44,7 +44,16 @@ def norm_value(v):
 
 def vercel_rows():
     tok = vercel_token()
-    d = get(f"https://api.vercel.com/v4/domains/{ZONE}/records?limit=100&teamId={VERCEL_TEAM}", tok)
+    try:
+        d = get(f"https://api.vercel.com/v4/domains/{ZONE}/records?limit=100&teamId={VERCEL_TEAM}", tok)
+    except urllib.error.HTTPError as e:
+        if e.code == 404:
+            print(f"The Vercel zone for {ZONE} no longer exists — it was deleted once Cloudflare\n"
+                  f"held a verified copy, so that stale nameservers would stop answering.\n"
+                  f"There is nothing left to compare: Cloudflare is the only authority.\n"
+                  f"Use `scripts/cf-zone.sh verify` (the zone is active) for a dig-level check.")
+            raise SystemExit(0)
+        raise
     rows = {}
     for r in d.get("records", []):
         name = ZONE if r["name"] in ("", "@") else f"{r['name']}.{ZONE}"
