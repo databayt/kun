@@ -81,7 +81,7 @@ spacing, 429 backoff).
 | ----- | ----- |
 | **Frontend** | Twenty's React SPA on Vercel |
 | **Backend** | `twenty-server` + `twenty-worker` + `postgres:16` + `redis`, in Docker **on Abdout's Mac**, host port **3100** |
-| **Public API** | Tailscale Funnel — `https://twenty-api-2.tail42a5c4.ts.net` |
+| **Public API** | Tailscale Funnel — `https://crm-api.databayt.org` |
 | **Version** | pinned `v2.31.1` (upstream is ~v2.30 on its own numbering; the fork's checkout is v2.17) |
 
 > **The CRM is down whenever the laptop is.** Every scheduled CRM job is a Mac job — which is why the funnel's cadence clock runs on launchd and Vercel cron rather than a Twenty `CRON` workflow. The worker must be up too: webhooks, crons and the workflow engine all run through BullMQ.

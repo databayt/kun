@@ -125,7 +125,7 @@ TWENTY_API_KEY=$(security find-generic-password -s databayt-twenty -a hogwarts -
 ```
 
 Keychain service `databayt-twenty`, account = `hogwarts` | `mkan` | `sijillee` | `moallimee`.
-Off this Mac, the backend is the Tailscale Funnel `https://twenty-api-2.tail42a5c4.ts.net`.
+Off this Mac, the backend is the Tailscale Funnel `https://crm-api.databayt.org`.
 The CRM is down whenever the laptop is — every scheduled CRM job is a Mac job.
 
 ## Where the code lives — kun holds none of it

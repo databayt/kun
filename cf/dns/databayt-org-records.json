@@ -32,6 +32,62 @@
   "comment": "codebase — proxied black hole; served by the codebase Worker route cb.databayt.org/*"
  },
  {
+  "type": "AAAA",
+  "name": "crm-api.databayt.org",
+  "ttl": 1,
+  "content": "100::",
+  "proxied": true,
+  "comment": "Twenty CRM backend — proxied black hole; served by the twenty-api Worker + container"
+ },
+ {
+  "type": "AAAA",
+  "name": "hogwarts.databayt.org",
+  "ttl": 1,
+  "content": "100::",
+  "proxied": true,
+  "comment": "Twenty CRM workspace — proxied black hole; served by the twenty-front Worker"
+ },
+ {
+  "type": "AAAA",
+  "name": "mkan.databayt.org",
+  "ttl": 1,
+  "content": "100::",
+  "proxied": true,
+  "comment": "Twenty CRM workspace (NOT the mkan app — that is mkan.sd) — twenty-front Worker"
+ },
+ {
+  "type": "AAAA",
+  "name": "sijillee.databayt.org",
+  "ttl": 1,
+  "content": "100::",
+  "proxied": true,
+  "comment": "Twenty CRM workspace — twenty-front Worker"
+ },
+ {
+  "type": "AAAA",
+  "name": "moallimee.databayt.org",
+  "ttl": 1,
+  "content": "100::",
+  "proxied": true,
+  "comment": "Twenty CRM workspace — twenty-front Worker"
+ },
+ {
+  "type": "AAAA",
+  "name": "sales.databayt.org",
+  "ttl": 1,
+  "content": "100::",
+  "proxied": true,
+  "comment": "Twenty CRM workspace (displayName Databayt) — twenty-front Worker"
+ },
+ {
+  "type": "AAAA",
+  "name": "app.databayt.org",
+  "ttl": 1,
+  "content": "100::",
+  "proxied": true,
+  "comment": "Twenty CRM default/landing host (DEFAULT_SUBDOMAIN=app) — twenty-front Worker"
+ },
+ {
   "type": "CNAME",
   "name": "*.databayt.org",
   "ttl": 1,
