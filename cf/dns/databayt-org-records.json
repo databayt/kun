@@ -24,6 +24,14 @@
   "comment": "kun — proxied black hole; served by the kun Worker route kun.databayt.org/*"
  },
  {
+  "type": "AAAA",
+  "name": "cb.databayt.org",
+  "ttl": 1,
+  "content": "100::",
+  "proxied": true,
+  "comment": "codebase — proxied black hole; served by the codebase Worker route cb.databayt.org/*"
+ },
+ {
   "type": "CNAME",
   "name": "*.databayt.org",
   "ttl": 1,
