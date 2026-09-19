@@ -61,8 +61,14 @@ build() {
 
 smoke() {
   cd "$BUILD_DIR"
+  # Dockerfile.cf COPYs .cf-deploy-stamp as its last layer. Only deploy() wrote it, so a smoke
+  # on a fresh build dir failed the COPY — and `docker build | tail` hid it, because the
+  # pipeline exits with tail's status, not docker's. Write the stamp here too, and check the
+  # build's real exit status through PIPESTATUS.
+  date -u +%FT%TZ > .cf-deploy-stamp
   echo "==> docker build (linux/amd64, COPY-only)"
   docker build --platform linux/amd64 -f Dockerfile.cf -t "$IMAGE" . 2>&1 | tail -3
+  [[ ${PIPESTATUS[0]} -eq 0 ]] || { echo "ABORT: docker build failed"; exit 1; }
   local DENV; DENV=$(mktemp -t kun-smoke.XXXXXX); trap 'rm -f "$DENV"' RETURN
   node cf/env-split.mjs "$ENV_FILE" docker > "$DENV"
   [[ -n "${SMOKE_DATABASE_URL:-}" ]] && printf 'DATABASE_URL=%s\n' "$SMOKE_DATABASE_URL" >> "$DENV"

@@ -1,8 +1,8 @@
 {
   // kun on Cloudflare Containers — the same lane as hogwarts and mkan (see DEPLOYMENT.md).
   // A thin Worker forwards every request to one container running the Next standalone
-  // server. `routes` are added once the databayt.org zone lives on Cloudflare; until then the
-  // Worker answers on kun.osmanabdout.workers.dev (workers_dev) and SITE_URL in GitHub points there.
+  // server. The databayt.org zone lives on Cloudflare (2026-09-18), so `routes` below serve
+  // kun.databayt.org; workers_dev stays on as an origin-independent smoke target.
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "kun",
   "main": "cf/worker.js",
@@ -11,13 +11,11 @@
   "workers_dev": true,
   "observability": { "enabled": true },
   "vars": {
-    // Public origin for signed approval links and drafts. Interim: the workers.dev host.
-    // Flip to https://kun.databayt.org in the same deploy that adds the routes below.
-    "SOCIAL_PUBLIC_URL": "https://kun.osmanabdout.workers.dev",
+    // Public origin for signed approval links and drafts.
+    "SOCIAL_PUBLIC_URL": "https://kun.databayt.org",
     // next-auth builds its redirects from the request URL, and the standalone server reports
-    // that as 0.0.0.0:3000 (Next standalone quirk); AUTH_URL pins the real origin. Flip with
-    // SOCIAL_PUBLIC_URL at cutover.
-    "AUTH_URL": "https://kun.osmanabdout.workers.dev"
+    // that as 0.0.0.0:3000 (Next standalone quirk); AUTH_URL pins the real origin.
+    "AUTH_URL": "https://kun.databayt.org"
   },
   "containers": [
     {
@@ -34,6 +32,7 @@
   },
   "migrations": [{ "tag": "v1", "new_sqlite_classes": ["KunContainer"] }],
   // vercel.json's single cron, verbatim (UTC). New triggers can take ~19 h to start firing.
-  "triggers": { "crons": ["0 6 * * *"] }
-  // "routes": [{ "pattern": "kun.databayt.org/*", "zone_name": "databayt.org" }]
+  "triggers": { "crons": ["0 6 * * *"] },
+  // kun.databayt.org is a proxied AAAA 100:: black hole in the zone; this route is what serves it.
+  "routes": [{ "pattern": "kun.databayt.org/*", "zone_name": "databayt.org" }]
 }
