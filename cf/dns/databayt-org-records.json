@@ -33,14 +33,6 @@
  },
  {
   "type": "AAAA",
-  "name": "crm-api.databayt.org",
-  "ttl": 1,
-  "content": "100::",
-  "proxied": true,
-  "comment": "Twenty CRM backend — proxied black hole; served by the twenty-api Worker + container"
- },
- {
-  "type": "AAAA",
   "name": "hogwarts.databayt.org",
   "ttl": 1,
   "content": "100::",

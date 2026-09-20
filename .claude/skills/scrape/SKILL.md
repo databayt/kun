@@ -55,7 +55,7 @@ export TWENTY_API_URL=http://localhost:3100          # NEVER 3000 — that is ho
 export TWENTY_API_KEY=$(security find-generic-password -s databayt-twenty -a <product> -w)
 ```
 
-Off this Mac: `https://crm-api.databayt.org`. The CRM is down whenever the laptop is.
+Off this Mac: `https://twenty-api-2.tail42a5c4.ts.net`. The CRM is down whenever the laptop is.
 
 ## §1 — No argument: report the gap, recommend the move
 
