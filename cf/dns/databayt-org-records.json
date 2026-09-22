@@ -33,6 +33,22 @@
  },
  {
   "type": "AAAA",
+  "name": "co.databayt.org",
+  "ttl": 1,
+  "content": "100::",
+  "proxied": true,
+  "comment": "co — proxied black hole; served by the co Worker route co.databayt.org/* (OpenNext, no container)"
+ },
+ {
+  "type": "AAAA",
+  "name": "thmanyah.databayt.org",
+  "ttl": 1,
+  "content": "100::",
+  "proxied": true,
+  "comment": "thmanyah — proxied black hole; served by the thmanyah Worker route (static assets, no container)"
+ },
+ {
+  "type": "AAAA",
   "name": "hogwarts.databayt.org",
   "ttl": 1,
   "content": "100::",
