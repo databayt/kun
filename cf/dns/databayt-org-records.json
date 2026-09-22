@@ -49,6 +49,22 @@
  },
  {
   "type": "AAAA",
+  "name": "maid-web.databayt.org",
+  "ttl": 1,
+  "content": "100::",
+  "proxied": true,
+  "comment": "maid-web — Worker custom domain for the maid-web Worker (vinext, no container)"
+ },
+ {
+  "type": "AAAA",
+  "name": "maid-app.databayt.org",
+  "ttl": 1,
+  "content": "100::",
+  "proxied": true,
+  "comment": "maid-app — Worker custom domain for the maid-app Worker (Expo web export, static assets only)"
+ },
+ {
+  "type": "AAAA",
   "name": "hogwarts.databayt.org",
   "ttl": 1,
   "content": "100::",
