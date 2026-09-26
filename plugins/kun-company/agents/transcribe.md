@@ -4,6 +4,7 @@ description: Page transcriber — reads scanned document page images and writes 
 model: opus
 effort: high
 tools: Read, Write, Glob
+omitClaudeMd: true
 version: "databayt v1.0"
 handoff: [textbook, adjudicate]
 ---

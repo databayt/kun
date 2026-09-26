@@ -4,6 +4,8 @@
     "claude-opus-5",
     "claude-sonnet-5"
   ],
+  "skillListingBudgetFraction": 0.02,
+  "$skillListingBudgetFraction_comment": "Abdout, 2026-09-26: 2% of the context window (default 1%). Measured with /skill-doctor: at 1% only ~25 of ~135 listed skills kept a description in kun sessions, so passive keyword routing silently lost feature/ship/spec/… — kun's operating model. Cost ≈ +6K cached tokens per turn. setup.sh merges this key into ~/.claude/settings.json, so it applies fleet-wide.",
   "env": {
     "CODEBASE_PATH": "/Users/abdout/codebase",
     "CODEBASE_REPO": "databayt/codebase",

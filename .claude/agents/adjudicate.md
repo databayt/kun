@@ -4,6 +4,7 @@ description: Page adjudicator — resolves every disagreement between two indepe
 model: opus
 effort: high
 tools: Read, Write, Glob
+omitClaudeMd: true
 version: "databayt v1.0"
 handoff: [textbook, transcribe]
 ---

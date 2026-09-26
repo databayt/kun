@@ -3,7 +3,7 @@ name: shadcn
 description: shadcn/ui knowledge pack — CLI, MCP, registry, skills, directory, and the docs-block pattern. Say "shadcn" to load it; "shadcn docs" = the docs-block style.
 when_to_use: "Use when working with shadcn/ui — components, the registry, the CLI, MCP, the directory model, or the docs-block MDX pattern. Triggers on: shadcn docs, add a shadcn component, registry item, how does shadcn do it, base ui vs radix."
 argument-hint: "<docs|add|registry|cli|mcp|directory> [name]"
-last-verified: 2026-08-01
+last-verified: 2026-09-26
 allowed-tools:
   [
     "Bash(pnpm *)",
@@ -28,24 +28,38 @@ across repos.
 
 > **Argument:** $ARGUMENTS
 
-## Upstream state (verified 2026-08-01)
+## Upstream state (verified 2026-09-26, CLI 4.21)
 
-- **61 registry:ui items** on the Radix lane, incl. `combobox`, `native-select`,
-  `direction`, `kbd`, `spinner`, `empty`, `field`, `item`, `button-group`,
-  `input-group`, and the June-2026 chat set (`attachment`, `bubble`, `marker`,
-  `message`, `message-scroller`). `toast` is Base-UI-lane only.
+- **61 registry:ui items** on the Radix lane (`new-york-v4`, unchanged on
+  2026-09-26), incl. `combobox`, `native-select`, `direction`, `kbd`, `spinner`,
+  `empty`, `field`, `item`, `button-group`, `input-group`, and the June-2026 chat
+  set (`attachment`, `bubble`, `marker`, `message`, `message-scroller`). `toast`
+  is Base-UI-lane only. Newer components ship to the new styles only —
+  `questionnaire` (Aug 2026) is in `radix-nova`, not in `new-york-v4`.
 - **Base UI is the default base for NEW projects** (July 2026); React Aria is
-  first-class too. **Databayt repos stay on the Radix lane.**
+  first-class too (`--base aria`). Radix is not deprecated — every update ships
+  for both — but registries without a `registry:base` item now init as Base UI.
+  **Databayt repos stay on the Radix lane.**
 - **Unified `radix-ui` package** (Feb 2026) replaced per-package
   `@radix-ui/react-*`; codemod: `npx shadcn@latest migrate radix`.
 - **First-class RTL** (Jan 2026): logical `start-/end-` classes,
   `DirectionProvider`, `npx shadcn@latest migrate rtl [path]` (calendar,
   pagination, sidebar need manual touches; `rtl:rotate-180` on directional icons).
+  Afterwards strip the `rtl:space-x-reverse`/`rtl:divide-x-reverse` it inserts —
+  Tailwind v4 spacing is already logical.
 - **CLI v4** (Mar 2026): `view`/`search`/`build`/`migrate radix|rtl|icons`/
   `eject`/`preset`/`apply`/`mcp`; registries support namespaces, GitHub
-  hosting, and server-side dynamic search. New styles: Luma/Sera/Rhea +
-  base-nova/radix-nova (our fork keeps default/new-york).
-- codebase repo: 61-item parity done 2026-08-01; drift radar `pnpm sync:shadcn`.
+  hosting, and server-side dynamic search. 8 styles (Vega, Nova, Maia, Lyra,
+  Mira, Luma, Rhea, Sera) per base, e.g. `radix-nova`/`base-nova` (our fork
+  keeps default/new-york).
+- **CLI 4.17–4.21** (Aug–Sep 2026): private GitHub registries (`gh` creds or
+  `GH_TOKEN`) + `registry validate`; registries declared in `package.json`;
+  `migrate base-color`; SOCKS proxy via `ALL_PROXY`. **`cn` package**: registry
+  items import `cn` from `"cn"` since 4.21 and `migrate cn` (4.20) converts —
+  upstream state only; adoption is a pending decision (kun keeps `@/lib/utils`).
+- codebase repo: 61-item parity done 2026-08-01; drift radar `pnpm sync:shadcn`
+  (upstream files now import `cn` from `"cn"`, so the radar reports that line
+  as drift until the `cn` decision lands).
 
 ## Modes
 

@@ -117,7 +117,9 @@
         "to": 33000,
         "why": "the measured fleet stood at 32,422/32,500 — 78 characters of headroom — so the cap had returned to the exact state the 2026-08-17 entry describes: it had stopped governing bloat and started vetoing capability, because ANY new skill breaches it however lean. /funnel was written tight from the start rather than trimmed after the fact: 390 chars against /scrape's 436, and /scrape is the lane it mirrors — so the 500 buys back headroom rather than accommodating the thing that breached it, which is the test the 2026-08-06 entry sets. The alternative was trimming the next tier down (auth 816, feature 726, deploy 713, qa 685); rejected because none has been scored and 'tuning descriptions before the first measurement is exactly what this system exists to stop'. The four heaviest (draft/higgs/approve/publish, 3,862 together) carry deliberate negative-discrimination clauses and stay untouched. Leaves 188 chars of headroom, so the next addition faces the same deliberate decision rather than a silent one. NOTE: this raise is Abdout's call to keep or revert — it is recorded here so the state is coherent and health.sh passes, not to settle the question by default."
       }
-    ]
+    ],
+    "harness_listing_fraction": 0.02,
+    "$harness_listing_comment": "The HARNESS budget (settings.json skillListingBudgetFraction), not listing_cap: Claude Code drops the descriptions of the least-used skills once the listing passes this share of the context window. Raised 0.01 → 0.02 by Abdout on 2026-09-26 after /skill-doctor showed ~110 skills listed name-only. listing_cap (kun's own fleet chars) is unchanged and still governs bloat."
   },
   "model_tiers": {
     "$comment": "Per-agent model alias by task type. The portable stack fleet (~/.claude/agents) follows this; the project fleet defaults to opus (quality-over-speed) except purely mechanical agents. Every agent also carries `effort:` frontmatter per delegation.efforts (added 2026-07-26). Aliases resolve forward on their own (opus → Opus 5.5 since 2.1.280; haiku → Haiku 5.5 when it ships).",
@@ -147,7 +149,7 @@
     "session_hygiene": "/clear between unrelated tasks (stale context taxes every message); /compact with focus instructions on long tasks; batch touches inside the 1h cache window — a >1h idle gap reprocesses full context; plan mode before big builds; specific prompts over broad scans"
   },
   "textbook": {
-    "$comment": "Declared POLICY for the textbook pipeline (scanned PDF → verified Markdown twin). Measured state lives in .claude/memory/textbook-scores.json — never here. Thresholds are PROVISIONAL: set on one book (sd-g12-biology, n=21, opus, 2026-09-09); re-derive once the benchmark carries three books. The workflows read these as defaults; health can check reality against them.",
+    "$comment": "Declared POLICY for the textbook pipeline (scanned PDF → verified Markdown twin). Measured state lives in .claude/memory/textbook-scores.json — never here. Thresholds are PROVISIONAL: set on one book (sd-g12-biology, n=21, opus, 2026-09-09); re-derive once the benchmark carries three books. The workflows read these as defaults; health can check reality against them. Since 2026-09-26 transcribe + adjudicate run with omitClaudeMd (no CLAUDE.md/rules, ~9.5K fewer tokens per spawn): re-measure tokens_per_page/tokens_per_adjudication on the next run; bench scores before and after are not comparable.",
     "thresholds": {
       "A": 0.95,
       "B": 0.9,

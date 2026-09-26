@@ -22,6 +22,10 @@
  * session model (4f2bd76). engine.json's `model` is the session default only;
  * change draft models here (and in the drain's KNOWN_MODELS), never there.
  *
+ * Never offer Fable here: the drain runs `claude -p`, and headless Fable bills
+ * usage credits without a consent prompt (code.claude.com/docs/en/model-config) —
+ * against the subscription-only billing posture. Removed 2026-09-26.
+ *
  * These ids reach `claude -p --model` on a contributor's machine via the drain,
  * so they are execution parameters rather than labels — which is why the action
  * validates against this list instead of accepting any string. Before the
@@ -36,8 +40,8 @@ export const DRAFT_MODELS = [
     roleAr: "الافتراضي",
   },
   {
-    id: "claude-fable-5",
-    label: "Fable 5",
+    id: "claude-opus-5-5",
+    label: "Opus 5.5",
     role: "First fallback",
     roleAr: "البديل الأول",
   },
