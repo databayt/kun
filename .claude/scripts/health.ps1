@@ -103,8 +103,11 @@ if (Test-Path $maintainState) {
 }
 
 # ── Config age ───────────────────────────────────────────────────
-if (Test-Path "$CLAUDE_DIR\CLAUDE.md") {
-    $age = ((Get-Date) - (Get-Item "$CLAUDE_DIR\CLAUDE.md").LastWriteTime).Days
+# Measures .kun-manifest.json (rewritten by every setup run), not CLAUDE.md,
+# which setup deliberately never overwrites.
+$AgeFile = if (Test-Path "$CLAUDE_DIR\.kun-manifest.json") { "$CLAUDE_DIR\.kun-manifest.json" } else { "$CLAUDE_DIR\CLAUDE.md" }
+if (Test-Path $AgeFile) {
+    $age = ((Get-Date) - (Get-Item $AgeFile).LastWriteTime).Days
     if ($age -le 7) { Check pass "config age" "${age}d old" }
     elseif ($age -le 30) { Check warn "config age" "${age}d old — consider re-running setup" }
     else { Check fail "config age" "${age}d old — stale, re-run setup" }

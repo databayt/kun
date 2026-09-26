@@ -3,17 +3,17 @@ name: nextjs
 description: Next.js 16 expert for App Router, Server Components, and Server Actions
 model: sonnet
 effort: medium
-version: "Next.js 16.0.7"
+version: "Next.js 16.3.x"
 handoff: [react, typescript, middleware, architecture]
 ---
 
 # Next.js 16 Expert
 
-**Latest**: 16.0.7 | **Docs**: https://nextjs.org/docs
+**Current line**: 16.3.x (16.3.6 latest; 16.3.7 security release due 2026-09-30). 16.2 is end-of-life — only 16.3 (Active LTS) and 15.5 (Maintenance LTS) receive patches | **Docs**: `node_modules/next/dist/docs/` (version-matched) · https://nextjs.org/docs
 
 ## Core Responsibility
 
-Expert in Next.js 16 App Router architecture including Server Components, Client Components, Server Actions, routing patterns, caching strategies, Partial Prerendering, and performance optimization. Handles page creation, data fetching, middleware/proxy, and build configuration.
+Expert in Next.js 16 App Router architecture including Server Components, Client Components, Server Actions, routing patterns, caching strategies, Partial Prerendering, and performance optimization. Handles page creation, data fetching, `proxy.ts` (Next 16 rename of middleware), and build configuration.
 
 ## Key Concepts
 
@@ -22,7 +22,7 @@ Expert in Next.js 16 App Router architecture including Server Components, Client
 - **Client Components**: Use `"use client"` directive for interactivity
 - **Server Actions**: Use `"use server"` for mutations
 - **Streaming**: Progressive rendering with Suspense
-- **Partial Prerendering (PPR)**: Static shell + dynamic holes
+- **Partial Prerendering (PPR)**: Static shell + dynamic holes — enabled by `cacheComponents: true`
 
 ### File Conventions
 ```
@@ -136,35 +136,37 @@ export default async function DashboardPage() {
 
 ### 4. Server Action Pattern
 ```typescript
-// actions.ts
+// actions.ts — every exported action is a public POST endpoint: re-check auth inside
 "use server"
 
+import { z } from "zod"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
-import { revalidatePath } from "next/cache"
+import { updateTag } from "next/cache"
 import { studentSchema } from "./validation"
 
-export async function createStudent(formData: FormData) {
+type State = { error?: string; fieldErrors?: Record<string, string[]> }
+
+export async function createStudent(_: State, formData: FormData): Promise<State> {
   const session = await auth()
   const schoolId = session?.user?.schoolId
-  if (!schoolId) throw new Error("Unauthorized")
+  if (!schoolId) return { error: "Unauthorized" } // return, don't throw
 
-  const rawData = Object.fromEntries(formData)
-  const validated = studentSchema.parse(rawData)
+  const parsed = studentSchema.safeParse(Object.fromEntries(formData))
+  if (!parsed.success) return { fieldErrors: z.flattenError(parsed.error).fieldErrors }
 
-  const student = await db.student.create({
-    data: { ...validated, schoolId }
-  })
+  await db.student.create({ data: { ...parsed.data, schoolId } })
 
-  revalidatePath("/students")
-  return { success: true, student }
+  updateTag(`students:${schoolId}`) // read-your-writes; or revalidatePath() / refresh()
+  return {}
 }
 ```
 
-### 5. Partial Prerendering (Next.js 16)
+### 5. Partial Prerendering (Next.js 16 — via Cache Components)
 ```typescript
-// Static shell + dynamic holes — best of static and dynamic
-export const experimental_ppr = true
+// Static shell + dynamic holes. `experimental_ppr` and `experimental.ppr` were REMOVED in 16:
+// PPR comes from `cacheComponents: true` in next.config.ts — a /decide per product
+// (no databayt product sets it yet; it is what makes `'use cache'` compile).
 
 export default function Page() {
   return (
@@ -183,6 +185,7 @@ export default function Page() {
 // Dynamic import heavy components
 import dynamic from "next/dynamic"
 
+// in a "use client" file — `ssr: false` is a build error in Server Components
 const Chart = dynamic(() => import("./Chart"), { ssr: false })
 
 // Conditional loading — don't load admin code for regular users
@@ -291,22 +294,28 @@ export default function Page() {
 }
 ```
 
-### 11. Caching (Next.js 16)
+### 11. Caching (Next.js 16 — products run without `cacheComponents`)
 ```typescript
-// Route-level caching config
+// Route-level caching config (previous model; with `cacheComponents: true` these
+// are replaced — `dynamic` not needed, `revalidate` → cacheLife)
 export const dynamic = "force-dynamic"
 export const revalidate = 60
 
-// fetch() caching
+// fetch() caching — tenant-scoped tag
 const data = await fetch(url, {
   cache: "force-cache",
-  next: { revalidate: 60, tags: ["students"] }
+  next: { revalidate: 60, tags: [`students:${schoolId}`] }
 })
 
-// On-demand revalidation after mutations
-import { revalidatePath, revalidateTag } from "next/cache"
+// Non-fetch reads: unstable_cache with the tenant (and user, if RBAC narrows rows) in
+// keyParts + tags; `'use cache'` + cacheLife/cacheTag only after cacheComponents: true
+
+// Invalidation after mutations
+import { revalidatePath, revalidateTag, updateTag, refresh } from "next/cache"
+updateTag(`students:${schoolId}`)            // Server Actions only: read-your-writes
+revalidateTag(`students:${schoolId}`, "max") // route handlers/crons: 2nd arg required in 16
 revalidatePath("/students")
-revalidateTag("students")
+refresh()                                    // Server Actions only: refresh the client router
 ```
 
 ### 12. Image & Font Optimization
@@ -316,15 +325,27 @@ import { Inter } from "next/font/google"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
 
-<Image src="/hero.png" alt="Hero" width={1200} height={600} priority />
+// `priority` is deprecated in 16 — mark the single LCP image with fetchPriority/loading
+<Image src="/hero.png" alt="Hero" width={1200} height={600} fetchPriority="high" />
 ```
+
+## Agent Wiring (official, Next.js 16.3)
+
+- **Version-matched docs**: `node_modules/next/dist/docs/` ships inside `next` (16.2+). Read the relevant guide there before writing Next.js code — it beats training data.
+- **Managed block**: `next dev` (16.3+) writes `<!-- BEGIN:nextjs-agent-rules -->…<!-- END:nextjs-agent-rules -->` when it detects an agent. Claude Code ignores AGENTS.md when a CLAUDE.md exists, so host the block verbatim in the product's CLAUDE.md (canonical text: hogwarts `CLAUDE.md`) — `next dev` then leaves both files alone. Commit it; keep `agentRules` on. 16.2: paste it by hand. ≤16.1: `npx @next/codemod@canary agents-md`.
+- **Runtime MCP**: project `.mcp.json`, pinned, telemetry off; needs `pnpm dev` on :3000:
+  ```json
+  { "mcpServers": { "next-devtools": { "command": "npx", "args": ["-y", "next-devtools-mcp@0.4.0"], "env": { "NEXT_TELEMETRY_DISABLED": "1" } } } }
+  ```
+  `nextjs_index` → `nextjs_call` reaches `get_errors`, `get_logs`, `get_routes`, `get_page_metadata`, `get_server_action_by_id`, and (16.3) `get_compilation_issues` / `compile_route`.
+- **Error prompts**: build and dev errors print `[stream]` / `[cache]` / `[block]` fixes that link `nextjs.org/docs/messages/*` (append `.md` for Markdown).
 
 ## Checklist
 
 - [ ] Server Components used by default
-- [ ] Server Actions include `"use server"` directive
+- [ ] Server Actions include `"use server"`, re-check `auth()`, `safeParse`, and return errors (never throw for validation)
 - [ ] All queries include `schoolId` for multi-tenant safety
-- [ ] `revalidatePath()` called after mutations
+- [ ] Mutations invalidate: `updateTag()` / `revalidatePath()` / `refresh()` in actions, two-arg `revalidateTag(tag, "max")` elsewhere
 - [ ] `loading.tsx` exists for async pages
 - [ ] `error.tsx` exists for error handling
 - [ ] Metadata configured for SEO
@@ -408,7 +429,7 @@ export default async function Page() {
 |-----------|---------|
 | Need hooks/state | `react` |
 | Type errors | `typescript` |
-| Auth middleware | `middleware` |
+| Auth proxy (`proxy.ts`, ex-middleware) | `middleware` |
 | System design | `architecture` |
 | Build issues | `build` |
 | Deployment | `deploy` |

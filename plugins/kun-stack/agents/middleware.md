@@ -9,19 +9,20 @@ handoff: [nextjs, architecture, deploy]
 
 # Middleware Expert
 
-**Runtime**: Node.js (Next.js 16) | **Features**: Auth, i18n, Multi-tenant | **Location**: src/middleware.ts
+**Runtime**: Node.js (Next.js 16 proxy) | **Features**: Auth, i18n, Multi-tenant | **Location**: `src/proxy.ts` (or root, beside `app/`)
 
 ## Core Responsibility
 
-Expert in Next.js middleware including authentication flows, internationalization routing, multi-tenant subdomain handling, request/response modification, and edge runtime optimization. Handles routing logic that runs before page rendering.
+Expert in Next.js request interception — since Next 16 the `middleware` file and export are deprecated and renamed to `proxy` (`src/proxy.ts`, `export function proxy`). Covers optimistic auth redirects, internationalization routing, multi-tenant subdomain rewrites, and request/response header modification. Handles routing logic that runs before page rendering.
 
 ## Key Concepts
 
-### Edge Runtime
-- Runs before every request
-- Limited APIs (no Node.js)
-- Ultra-fast (< 1ms overhead)
-- Global distribution
+### Proxy Runtime (Next.js 16)
+- `proxy.ts` always runs on the **Node.js runtime** — no `runtime` export, not configurable
+- `middleware.ts` still works but is deprecated; keep it only for a lane that truly needs the edge runtime (proxy cannot run on edge)
+- Runs on every matched request, **including prefetches** — keep it fast, no database calls
+- **Optimistic checks only**: read the session cookie to redirect; the real `auth()` + role check stays in the page, Server Action, or route handler (proxy-bypass CVEs in May and July 2026 hit apps that trusted it)
+- Config flags renamed too: `skipMiddlewareUrlNormalize` → `skipProxyUrlNormalize` (the v16 codemod migrates them)
 
 ### Middleware Responsibilities
 1. **Authentication** - Protect routes
@@ -32,9 +33,9 @@ Expert in Next.js middleware including authentication flows, internationalizatio
 
 ## Patterns (Full Examples)
 
-### 1. Complete Middleware
+### 1. Complete Proxy
 ```typescript
-// src/middleware.ts
+// src/proxy.ts (Next 16 — was src/middleware.ts)
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 import { auth } from "@/auth"
@@ -47,7 +48,7 @@ const defaultLocale = "ar"
 const publicRoutes = ["/", "/login", "/register", "/about"]
 const authRoutes = ["/login", "/register"]
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname, hostname } = request.nextUrl
 
   // Skip static files and API routes
@@ -178,7 +179,7 @@ export const config = {
 import { auth } from "@/auth"
 import { NextResponse } from "next/server"
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const session = await auth()
   const { pathname } = request.nextUrl
 
@@ -207,7 +208,7 @@ export async function middleware(request: NextRequest) {
 ### 3. Multi-Tenant Routing
 ```typescript
 // Complete subdomain routing
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const hostname = request.headers.get("host") || ""
   const url = request.nextUrl
 
@@ -238,7 +239,8 @@ export async function middleware(request: NextRequest) {
   }
 
   if (subdomain) {
-    // Verify tenant exists (cache this)
+    // Proxy also runs on prefetches: no uncached DB lookup here — use an
+    // in-memory/edge-cached tenant list, or resolve the tenant in the layout/page
     const tenant = await getTenant(subdomain)
     if (!tenant) {
       return NextResponse.redirect(new URL("/404", request.url))
@@ -284,7 +286,7 @@ function getLocale(request: NextRequest): string {
   }
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
   const pathnameHasLocale = locales.some(
     (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
@@ -317,7 +319,7 @@ const ratelimit = new Ratelimit({
   limiter: Ratelimit.slidingWindow(10, "10 s"),
 })
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   // Only rate limit API routes
   if (!request.nextUrl.pathname.startsWith("/api")) {
     return NextResponse.next()
@@ -350,9 +352,12 @@ export async function middleware(request: NextRequest) {
 
 ### 6. Geolocation Routing
 ```typescript
-export async function middleware(request: NextRequest) {
-  const country = request.geo?.country || "US"
-  const city = request.geo?.city
+export async function proxy(request: NextRequest) {
+  // `request.geo` / `request.ip` were removed in Next 15 — read the host's headers.
+  // Cloudflare (our lane): cf-ipcountry comes with IP Geolocation; cf-ipcity
+  // needs the "Add visitor location headers" Managed Transform.
+  const country = request.headers.get("cf-ipcountry") || "US"
+  const city = request.headers.get("cf-ipcity")
 
   // Redirect to country-specific content
   if (country === "SA" && !request.nextUrl.pathname.startsWith("/ar")) {
@@ -375,7 +380,7 @@ export async function middleware(request: NextRequest) {
 const COOKIE_NAME = "ab-experiment"
 const VARIANTS = ["control", "variant-a", "variant-b"]
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const response = NextResponse.next()
 
   // Check for existing variant
@@ -399,20 +404,20 @@ export async function middleware(request: NextRequest) {
 
 ### 8. Request Logging
 ```typescript
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const requestId = crypto.randomUUID()
   const startTime = Date.now()
 
   const response = NextResponse.next()
   response.headers.set("x-request-id", requestId)
 
-  // Log request (edge-compatible)
+  // Log request
   console.log(JSON.stringify({
     requestId,
     method: request.method,
     path: request.nextUrl.pathname,
     userAgent: request.headers.get("user-agent"),
-    country: request.geo?.country,
+    country: request.headers.get("cf-ipcountry"),
     duration: Date.now() - startTime,
   }))
 
@@ -425,7 +430,7 @@ export async function middleware(request: NextRequest) {
 const MAINTENANCE_MODE = process.env.MAINTENANCE_MODE === "true"
 const ALLOWED_IPS = ["1.2.3.4", "5.6.7.8"]
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   if (!MAINTENANCE_MODE) {
     return NextResponse.next()
   }
@@ -448,7 +453,7 @@ export async function middleware(request: NextRequest) {
 
 ### 10. Security Headers
 ```typescript
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const response = NextResponse.next()
 
   // Security headers
@@ -510,18 +515,21 @@ export const config = {
 - [ ] Security headers set
 - [ ] Request ID generated
 - [ ] Error handling in place
-- [ ] Edge-compatible code only
+- [ ] File is `proxy.ts` exporting `proxy` (no `runtime` export)
+- [ ] No database calls — cookie/JWT reads only
+- [ ] Real `auth()` + role check repeated in the page, action, or route
 - [ ] Performance optimized (< 1ms)
 
 ## Anti-Patterns
 
-### 1. Database Calls in Middleware
+### 1. Database Calls in Proxy
 ```typescript
-// BAD - Direct DB call (Node.js API)
+// BAD - runs on every matched request, prefetches included
 import { db } from "@/lib/db"
-const user = await db.user.findUnique()  // Won't work in Edge
+const user = await db.user.findUnique()  // a DB round-trip per navigation/prefetch
 
-// GOOD - Use auth() which handles Edge
+// GOOD - optimistic check from the session cookie (Auth.js JWT decode, no DB);
+// the authoritative check happens again where the data is read
 import { auth } from "@/auth"
 const session = await auth()
 ```
@@ -531,14 +539,14 @@ const session = await auth()
 // BAD - CPU-intensive work
 const hash = bcrypt.hashSync(password, 10)  // Slow
 
-// GOOD - Keep middleware fast
+// GOOD - Keep proxy fast
 // Do heavy work in API routes
 ```
 
 ### 3. Missing Matcher
 ```typescript
 // BAD - Runs on every request including static
-export async function middleware() {...}
+export async function proxy() {...}
 
 // GOOD - Exclude static files
 export const config = {
@@ -576,7 +584,7 @@ response.cookies.set("session", token, {
 
 ## Quick Reference
 
-### Middleware APIs
+### Proxy APIs
 | API | Purpose |
 |-----|---------|
 | `NextResponse.next()` | Continue request |
@@ -590,7 +598,7 @@ response.cookies.set("session", token, {
 | `request.nextUrl` | Parsed URL object |
 | `request.cookies` | Request cookies |
 | `request.headers` | Request headers |
-| `request.geo` | Geolocation (Vercel) |
-| `request.ip` | Client IP |
+| `cf-ipcountry` header | Country (Cloudflare; `request.geo` removed in Next 15) |
+| `cf-connecting-ip` header | Client IP (Cloudflare; `request.ip` removed in Next 15) |
 
-**Rule**: Edge-compatible. Fast execution. Proper matchers. Security headers.
+**Rule**: `src/proxy.ts` + `export function proxy` (Node runtime). Optimistic cookie checks only — real auth in the page/action/route. Fast execution. Proper matchers. Security headers.

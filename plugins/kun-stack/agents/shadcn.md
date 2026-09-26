@@ -36,6 +36,7 @@ Expert in shadcn/ui component library including Radix UI primitives, copy-paste 
 - **Skills** — `pnpm dlx skills add shadcn/ui` installs a per-repo, project-aware skill into `.claude/skills/` (activates on `components.json`, runs `shadcn info --json`). The user-level `shadcn` skill (`~/.claude/skills/shadcn/`) is the always-on umbrella.
 - **Directory** — community registries built into the CLI, addressed by `@namespace`; configure in `components.json` → `registries`.
 - **Expanded CLI** — `view`, `search`/`list`, `build`, `info`, `docs`, `migrate` (`rtl`|`radix`|`icons`), `eject`, `mcp init --client claude`.
+- **`cn` package (upstream state, Sep 2026)** — registry items import `cn` from `"cn"` since CLI 4.21 (`init` writes `export { cn } from "cn"`); `npx shadcn@latest migrate cn` (added in 4.20) converts `clsx` + `tailwind-merge` projects. **Not adopted here — pending decision**: kun's convention stays `cn` from `@/lib/utils` (clsx + tailwind-merge), so expect upstream syncs to carry the new import.
 
 ## Patterns (Full Examples)
 
@@ -56,16 +57,17 @@ npx shadcn@latest add button card dialog drawer sheet
 ### 2. Registry Configuration
 
 ```json
-// components.json
+// components.json — Tailwind v4: leave tailwind.config blank; rtl: true (databayt is RTL-first)
 {
   "$schema": "https://ui.shadcn.com/schema.json",
   "style": "new-york",
   "rsc": true,
   "tsx": true,
+  "rtl": true,
   "tailwind": {
-    "config": "tailwind.config.ts",
-    "css": "src/styles/globals.css",
-    "baseColor": "slate",
+    "config": "",
+    "css": "src/app/globals.css",
+    "baseColor": "neutral",
     "cssVariables": true,
     "prefix": ""
   },
@@ -82,34 +84,37 @@ npx shadcn@latest add button card dialog drawer sheet
 
 ### 3. Button Component
 
+Current upstream shape (new-york-v4, Radix lane, verified 2026-09-26): plain function component (React 19 passes `ref` as a prop — no `forwardRef`/`displayName`), `Slot` from the unified `radix-ui` package, `data-slot`/`data-variant`/`data-size` hooks. Upstream imports `cn` from `"cn"`; kun keeps `@/lib/utils` until the `cn` decision lands.
+
 ```tsx
 // src/components/ui/button.tsx
 import * as React from "react";
-import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
-import { cn } from "@/lib/utils";
+import { Slot } from "radix-ui";
+import { cn } from "@/lib/utils"; // upstream: import { cn } from "cn"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
-        default:
-          "bg-primary text-primary-foreground shadow hover:bg-primary/90",
+        default: "bg-primary text-primary-foreground hover:bg-primary/90",
         destructive:
-          "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
+          "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40",
         outline:
-          "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
+          "border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
         secondary:
-          "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
+          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        ghost:
+          "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
-        default: "h-9 px-4 py-2",
-        sm: "h-8 rounded-md px-3 text-xs",
-        lg: "h-10 rounded-md px-8",
-        icon: "h-9 w-9",
+        default: "h-9 px-4 py-2 has-[>svg]:px-3",
+        sm: "h-8 gap-1.5 rounded-md px-3 has-[>svg]:px-2.5",
+        lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
+        icon: "size-9",
+        // upstream also ships xs, icon-xs, icon-sm, icon-lg
       },
     },
     defaultVariants: {
@@ -119,26 +124,28 @@ const buttonVariants = cva(
   },
 );
 
-export interface ButtonProps
-  extends
-    React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
-  asChild?: boolean;
-}
+function Button({
+  className,
+  variant = "default",
+  size = "default",
+  asChild = false,
+  ...props
+}: React.ComponentProps<"button"> &
+  VariantProps<typeof buttonVariants> & {
+    asChild?: boolean;
+  }) {
+  const Comp = asChild ? Slot.Root : "button";
 
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
-    const Comp = asChild ? Slot : "button";
-    return (
-      <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
-        ref={ref}
-        {...props}
-      />
-    );
-  },
-);
-Button.displayName = "Button";
+  return (
+    <Comp
+      data-slot="button"
+      data-variant={variant}
+      data-size={size}
+      className={cn(buttonVariants({ variant, size, className }))}
+      {...props}
+    />
+  );
+}
 
 export { Button, buttonVariants };
 ```
@@ -180,21 +187,23 @@ export function ConfirmDialog({ onConfirm, children }) {
 
 ### 5. Form with React Hook Form
 
+The docs now build React Hook Form forms from `Field`/`FieldGroup` + RHF's `Controller` (`data-invalid` on `Field`, `aria-invalid` on the control). The legacy `Form`/`FormField`/`FormItem` wrapper is the pre-Field pattern — don't generate it for new code. Databayt product forms follow the `form` pattern card.
+
 ```tsx
+"use client";
+
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { Controller, useForm } from "react-hook-form";
+import * as z from "zod";
 import { Button } from "@/components/ui/button";
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 
 const formSchema = z.object({
   username: z.string().min(2).max(50),
@@ -215,40 +224,47 @@ export function ProfileForm() {
   }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <FormField
-          control={form.control}
+    <form id="profile-form" onSubmit={form.handleSubmit(onSubmit)}>
+      <FieldGroup>
+        <Controller
           name="username"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Username</FormLabel>
-              <FormControl>
-                <Input placeholder="johndoe" {...field} />
-              </FormControl>
-              <FormDescription>
-                This is your public display name.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
           control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input placeholder="john@example.com" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor="profile-form-username">Username</FieldLabel>
+              <Input
+                {...field}
+                id="profile-form-username"
+                aria-invalid={fieldState.invalid}
+                placeholder="johndoe"
+              />
+              <FieldDescription>
+                This is your public display name.
+              </FieldDescription>
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
           )}
         />
-        <Button type="submit">Submit</Button>
-      </form>
-    </Form>
+        <Controller
+          name="email"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor="profile-form-email">Email</FieldLabel>
+              <Input
+                {...field}
+                id="profile-form-email"
+                type="email"
+                aria-invalid={fieldState.invalid}
+                placeholder="john@example.com"
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
+      </FieldGroup>
+      <Button type="submit">Submit</Button>
+    </form>
   );
 }
 ```
@@ -293,53 +309,64 @@ export function DataTable({ data, columns }) {
 
 ### 7. Theme Configuration
 
+Tailwind v4 shadcn theming: OKLCH values on `:root`/`.dark` (not bare HSL triplets under `@layer base`), bridged to utilities by `@theme inline`. Neutral base, current upstream values (ui.shadcn.com/docs/theming, verified 2026-09-26):
+
 ```css
 /* globals.css */
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 240 5.9% 10%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 240 5.9% 10%;
-    --radius: 0.5rem;
-  }
+:root {
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+}
 
-  .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
-  }
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  /* …one --color-* line per token: card, popover, secondary, muted, accent,
+     destructive, border, input, ring, chart-1…5, sidebar-* */
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
 }
 ```
 
@@ -476,13 +503,11 @@ export function UserCard({ user, onEdit }: UserCardProps) {
 ### 12. Radix UI Primitives
 
 ```tsx
-// Direct Radix usage
-import * as Dialog from "@radix-ui/react-dialog";
-import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import * as Tooltip from "@radix-ui/react-tooltip";
-import * as Select from "@radix-ui/react-select";
+// Direct Radix usage — the unified `radix-ui` package (Feb 2026) replaces the
+// per-package @radix-ui/react-* imports; codemod: npx shadcn@latest migrate radix
+import { Dialog, DropdownMenu, Select, Tooltip } from "radix-ui";
 
-// Primitive structure
+// Primitive structure (unchanged)
 <Dialog.Root>
   <Dialog.Trigger />
   <Dialog.Portal>
@@ -677,9 +702,9 @@ Full reference: `~/.claude/skills/shadcn/references/registry-and-cli.md`.
 
 ## Checklist
 
-- [ ] components.json configured correctly
+- [ ] components.json configured correctly (`"rtl": true`; `tailwind.config` blank on v4)
 - [ ] Tailwind CSS set up with CSS variables
-- [ ] utils.ts with cn() helper present
+- [ ] `lib/utils` exports `cn()` (kun convention: clsx + tailwind-merge — upstream now re-exports the `cn` package; adoption pending)
 - [ ] Using semantic tokens (bg-background, text-foreground)
 - [ ] Accessibility attributes preserved
 - [ ] Form components integrate with react-hook-form

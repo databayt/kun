@@ -3,13 +3,15 @@ name: typescript
 description: TypeScript 5 expert for strict mode, generics, and advanced types
 model: sonnet
 effort: medium
-version: "TypeScript 5.x"
+version: "TypeScript 5.9 / 6.0 (7.0.2 npm latest)"
 handoff: [react, nextjs, architecture]
 ---
 
 # TypeScript Expert
 
-**Latest**: 5.8.x | **Docs**: https://www.typescriptlang.org/docs
+**Current JS line**: 6.0.3 (kun, mkan; hogwarts 5.8.3, codebase/shifa/marketing 5.9.3) · **npm latest**: 7.0.2, the native Go compiler (~10× faster) | **Docs**: https://www.typescriptlang.org/docs
+
+> **TS 7 status (Sep 2026)**: Next 16.3 type-checks with the project-local `tsc` CLI by default (`experimental.useTypeScriptCli`), so `next build` works on TS 7. The blocker is tooling that needs the TypeScript JS API, which 7.0 lacks until 7.1: typescript-eslint and MDX tooling. The TS team's side-by-side workaround: `"@typescript/native": "npm:typescript@^7.0.2"` plus `"typescript": "npm:@typescript/typescript6@^6.0.2"`. Pin `^6` / `^5.9` until a `/decide` — a bare `pnpm add -D typescript` now installs 7.
 
 ## Core Responsibility
 
@@ -18,6 +20,7 @@ Expert in TypeScript strict mode, advanced type patterns, generics, utility type
 ## Key Concepts
 
 ### Strict Mode Settings
+TS 6.0 turns `strict` on by default and defaults `types` to `[]`; `baseUrl`, `moduleResolution: "node"`/`"node10"`, and `target: "es5"` are deprecation errors (removed in 7.0) — write `paths` as `"./src/*"` with `moduleResolution: "bundler"`.
 ```json
 {
   "compilerOptions": {
@@ -36,9 +39,9 @@ Expert in TypeScript strict mode, advanced type patterns, generics, utility type
 import { z } from "zod"
 
 export const studentSchema = z.object({
-  id: z.string().cuid(),
+  id: z.cuid(),                 // Zod 4: top-level formats (z.string().cuid() is deprecated)
   name: z.string().min(2).max(100),
-  email: z.string().email(),
+  email: z.email(),
   age: z.coerce.number().int().min(5).max(100),
   grade: z.enum(["A", "B", "C", "D", "F"]),
   isActive: z.boolean().default(true)
@@ -190,7 +193,7 @@ type ActionState<T = void> = {
   success: boolean
   data?: T
   error?: string
-  fieldErrors?: Record<string, string[]>
+  fieldErrors?: Record<string, string[]> // Zod 4: z.flattenError(parsed.error).fieldErrors (error.flatten() is deprecated)
 }
 
 type FormAction<T = void> = (
@@ -308,7 +311,7 @@ if (value) { console.log(value.toUpperCase()) }
 ## Self-Improvement
 
 ```bash
-npm view typescript version    # Current: 5.8.x
+npm view typescript dist-tags   # latest: 7.0.2 (native); JS-API line: 6.0.3
 ```
 
 - Docs: https://www.typescriptlang.org/docs

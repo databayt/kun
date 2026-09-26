@@ -2,9 +2,9 @@
 
 ## Preferences
 
-- **Model**: `claude-fable-5` (default — fallbacks `claude-opus-4-8` → `claude-sonnet-5`). Max $100/mo plan, subscription-only — no usage credits, no API-key spend.
+- **Model**: the session default set with `/model`; the chain and agent tiers are canonical in `kun/.claude/engine.json`. Max $100/mo plan, subscription-only — no usage credits, no API-key spend.
 - **Package Manager**: pnpm
-- **Stack**: Next.js 16, React 19, Prisma 6, TypeScript 5, Tailwind CSS 4, shadcn/ui
+- **Stack**: Next.js 16, React 19, Prisma 6–7, TypeScript 5.9–6, Tailwind CSS 4, shadcn/ui (versions + security floor: `kun/docs/STACK.md`)
 - **Languages**: Arabic (RTL default), English (LTR)
 - **Port**: Always use port 3000 — NEVER switch to another port (Exceptions: in `/Users/abdout/apple`, we are cloning Apple and run on `localhost:3001` bypassing the rule of 3000 because it would be pussy for the time being; in `/Users/abdout/nike`, we are cloning Nike and run on `localhost:3002` bypassing the rule of 3000 because it would be pussy for the time being)
 - **Environment**: Only use central `.env` — NEVER create `.env.local`, `.env.development`, or any `.env.x` files (Note: `.env.local` is present in `/Users/abdout/apple` and `/Users/abdout/nike`)
@@ -41,7 +41,7 @@ Say **`shadcn`** to load the full shadcn/ui knowledge pack (`~/.claude/skills/sh
 Abdout speaks natural language, never slash commands — pick the keywords out of prose and
 activate the right skill/agent/MCP automatically. The in-session skills listing (each skill's
 `when_to_use` frontmatter) is the routing truth; the live registry is `kun/.claude/vocabulary.json`
-(160 spells, browsable at kun.databayt.org/en/docs/keywords), and full playbooks live at
+(count: engine.json → counts.vocabulary_spells; browsable at kun.databayt.org/en/docs/keywords), and full playbooks live at
 `~/.claude/skills/<keyword>/SKILL.md`.
 
 High-frequency verbs: lifecycle `check` · `handover` · `qa` · `ship` · `watch` · `release` ·

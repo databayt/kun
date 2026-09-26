@@ -1,38 +1,47 @@
 ---
 domain: neon
-severity: warn
-paths: ["**/db.ts", "**/prisma.ts", "**/lib/db.ts", "**/actions.ts"]
-since: "Neon"
+severity: error
+paths:
+  [
+    "**/prisma.config.ts",
+    "**/schema.prisma",
+    "**/db.ts",
+    "**/prisma.ts",
+    "**/.env.example",
+  ]
+since: "2026-09-26"
 ---
 
-# Use the pooled connection string in serverless/edge runtimes
+# Pooled URL for the app, direct URL for the Prisma CLI
 
-Serverless functions and edge runtimes spin up many short-lived instances; each direct connection ties up a real Postgres backend and exhausts Neon's direct-connection ceiling. Use the PgBouncer-pooled host (`-pooler`) for runtime queries and reserve the direct URL for migrations only.
+Neon's `-pooler` host is PgBouncer in transaction mode. Serverless and per-request clients must go through it, or they exhaust `max_connections`. Prisma's schema engine (`migrate`, `db push`, `db pull`) needs a single session connection and breaks through the pooler: you get `prepared statement "s0" already exists`, and the session-level advisory locks `migrate deploy` relies on are not supported there. So keep two URLs. **Prisma 7:** `url` and `directUrl` are gone from `schema.prisma`, and `datasource.directUrl` is gone from `prisma.config.ts`. The CLI reads only `datasource.url`, so that value must be the **direct** host; the adapter gets the pooled one. **Prisma 6:** `url` is pooled and `directUrl` is direct. Remove `pgbouncer=true`: Neon's PgBouncer supports protocol-level prepared statements, and Prisma advises against the flag on PgBouncer 1.21 and later.
+
+**workerd caveat:** on Worker, OpenNext or vinext lanes, build the client per request (see `cloudflare/no-cross-request-io-in-workers.md`). A `globalThis` singleton is correct only on the Node Containers lane.
 
 ## Good
 
 ```ts
-// lib/db.ts — pooled host for app runtime
-import { PrismaClient } from "@prisma/client";
-import { PrismaNeon } from "@prisma/adapter-neon";
+// .env: DATABASE_URL = ep-x-pooler…neon.tech · DIRECT_URL = ep-x…neon.tech (Neon: DATABASE_URL_UNPOOLED)
+// prisma.config.ts (Prisma 7): the CLI migrates over the direct host
+export default defineConfig({ datasource: { url: env("DIRECT_URL") } });
 
-// DATABASE_URL points at ...-pooler.neon.tech?sslmode=require&pgbouncer=true
+// lib/db.ts: the app queries through the pooler
 const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL });
-export const db = globalThis.prisma ?? new PrismaClient({ adapter });
-// schema.prisma: directUrl = env("DIRECT_URL")  // non-pooled, migrations only
+// Prisma 6 schema.prisma instead: url = env("DATABASE_URL") · directUrl = env("DIRECT_URL")
 ```
 
 ## Bad
 
 ```ts
-// Direct (non-pooled) host used per-request from a serverless action
-// DATABASE_URL = ...ep-cool-name.neon.tech  (no -pooler)
-const db = new PrismaClient(); // each cold start opens a direct backend
-export async function listStudents(schoolId: string) {
-  return db.student.findMany({ where: { schoolId } }); // exhausts connections under load
-}
+// Prisma 7: CLI pointed at the pooler, so migrate runs through PgBouncer
+export default defineConfig({ datasource: { url: process.env.DATABASE_URL } }); // -pooler host
+
+// Legacy flag: not needed on Neon's PgBouncer, and driver adapters never read it
+// DATABASE_URL=postgresql://…-pooler.neon.tech/db?sslmode=require&pgbouncer=true
 ```
 
 ## Fix
 
-Point `DATABASE_URL` at the `-pooler` host with `pgbouncer=true` and keep the direct host only in `directUrl` for migrations.
+Runtime adapter → pooled `DATABASE_URL`. Prisma CLI → unpooled `DIRECT_URL` (v7 `datasource.url`, v6 `directUrl`). Delete `pgbouncer=true`.
+
+> Source: https://neon.com/docs/guides/prisma · https://neon.com/docs/connect/connection-pooling · https://www.prisma.io/docs/orm/v7/prisma-client/setup-and-configuration/databases-connections/pgbouncer · https://www.prisma.io/docs/orm/reference/prisma-config-reference

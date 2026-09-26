@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "fallbackModel": [
-    "claude-opus-4-8",
+    "claude-opus-5",
     "claude-sonnet-5"
   ],
   "env": {
@@ -42,7 +42,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/session-engine-context.sh\""
+            "command": "f=\"${CLAUDE_PROJECT_DIR}/.claude/hooks/session-engine-context.sh\"; [ -f \"$f\" ] && bash \"$f\"; exit 0"
           },
           {
             "type": "command",
@@ -69,11 +69,11 @@
     ],
     "PreToolUse": [
       {
-        "matcher": "Bash(pnpm dev)",
+        "matcher": "Bash",
         "hooks": [
           {
             "type": "command",
-            "command": "lsof -ti:3000 | xargs kill -9 2>/dev/null; exit 0"
+            "command": "f=\"${CLAUDE_PROJECT_DIR}/.claude/hooks/block-destructive-bash.sh\"; [ -f \"$f\" ] || f=\"$HOME/.claude/hooks/block-destructive-bash.sh\"; bash \"$f\""
           }
         ]
       },
@@ -82,34 +82,16 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/block-destructive-bash.sh\""
-          }
-        ]
-      },
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/scrape-guard.sh\""
+            "command": "f=\"${CLAUDE_PROJECT_DIR}/.claude/hooks/scrape-guard.sh\"; [ -f \"$f\" ] || f=\"$HOME/.claude/hooks/scrape-guard.sh\"; bash \"$f\""
           },
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/funnel-guard.sh\""
+            "command": "f=\"${CLAUDE_PROJECT_DIR}/.claude/hooks/funnel-guard.sh\"; [ -f \"$f\" ] || f=\"$HOME/.claude/hooks/funnel-guard.sh\"; bash \"$f\""
           }
         ]
       }
     ],
     "PostToolUse": [
-      {
-        "matcher": "Bash(pnpm dev)",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "sleep 2 && open -a 'Google Chrome' http://localhost:3000 &"
-          }
-        ]
-      },
       {
         "matcher": "Write|Edit",
         "hooks": [
@@ -124,12 +106,12 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/scrape-yield.sh\"",
+            "command": "f=\"${CLAUDE_PROJECT_DIR}/.claude/hooks/scrape-yield.sh\"; [ -f \"$f\" ] && bash \"$f\"; exit 0",
             "async": true
           },
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/funnel-yield.sh\"",
+            "command": "f=\"${CLAUDE_PROJECT_DIR}/.claude/hooks/funnel-yield.sh\"; [ -f \"$f\" ] && bash \"$f\"; exit 0",
             "async": true
           }
         ]

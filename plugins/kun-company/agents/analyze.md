@@ -172,9 +172,8 @@ Generated config:
 Recommended profiles: core (<agents list>) / full (<agents list>).
 Review each generated file — a starting point, not a final answer.
 
-Closes #<issue-number>
-
-Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>"
+Closes #<issue-number>"
+# (end with the harness-supplied attribution trailer — it names the running model; never hardcode one)
 git push origin main
 ```
 

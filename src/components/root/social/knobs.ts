@@ -14,11 +14,13 @@
 // be worse than the duplication it prevents.
 
 /**
- * The engine's model chain (`.claude/engine.json`), in preference order.
+ * The social lane's draft-model chain, in preference order — owned HERE.
  *
  * `role` is that order said out loud, so a picker does not have to imply it by
- * position: `model` in engine.json is the default, `fallback_models` is the
- * rest, in the order written there.
+ * position. This list used to mirror `.claude/engine.json`, and that coupling
+ * is how a social-default change once overwrote the engine's Claude Code
+ * session model (4f2bd76). engine.json's `model` is the session default only;
+ * change draft models here (and in the drain's KNOWN_MODELS), never there.
  *
  * These ids reach `claude -p --model` on a contributor's machine via the drain,
  * so they are execution parameters rather than labels — which is why the action

@@ -114,7 +114,7 @@ The workflow's Handoff agent fills this template. Labels: `qa-signoff` (CLEAN) o
 ```markdown
 ## QA Signoff — <block> — <CLEAN | BLOCKED>
 
-**Verified by**: qa.js (Opus 4.8) · **Run**: <ISO> · **Rounds**: <N> · **Base**: localhost:3000
+**Verified by**: qa.js (<model>) · **Run**: <ISO> · **Rounds**: <N> · **Base**: localhost:3000
 **Auto-fixed**: <K> · **Residual for human**: <M>
 
 Autonomous QA fixed the safe + verifiable surface and adversarially confirmed every reported failure.

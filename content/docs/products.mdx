@@ -73,12 +73,12 @@ Build production AI agents. Python and TypeScript.
 
 | Model | Use Case |
 |-------|----------|
-| **Fable 5** (Mythos class) | The main loop — interactive sessions, captain-grade judgment |
-| **Opus 4.8** (1M context) | Architecture, orchestration, review, strategy agents |
+| **Opus 5.5** (1M context) | The main loop + architecture, orchestration, review, strategy agents |
+| **Fable 5.1** (1M context) | Escalation only, via `/model` — never in agents, fallbacks, or headless `-p` runs |
 | **Sonnet 5** (1M context) | Standard build agents, fast iteration |
 | **Haiku 4.5** | Mechanical agents, search, lookups, exploration |
 
-Kun runs **Fable 5** in the main loop (canonical in `.claude/engine.json`), with Opus 4.8 → Sonnet 5 as fallbacks. Agents carry a **tier alias** (`opus` / `sonnet` / `haiku`), never a pinned version, so the fleet upgrades in one line. API prices live at [platform.claude.com pricing](https://platform.claude.com/docs/en/about-claude/pricing) — we don't hardcode them; billing is subscription-only anyway.
+Kun runs **Opus 5.5** in the main loop (canonical in `.claude/engine.json`), with Opus 5 → Sonnet 5 as fallbacks. Agents carry a **tier alias** (`opus` / `sonnet` / `haiku`), never a pinned version, so the fleet upgrades in one line. API prices live at [platform.claude.com pricing](https://platform.claude.com/docs/en/about-claude/pricing) — we don't hardcode them; billing is subscription-only anyway.
 
 ## Databayt's Current Plan
 

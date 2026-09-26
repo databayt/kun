@@ -16,8 +16,8 @@ The keyword `sync` in natural conversation ("are we current?", "sync the engine"
 | Tier          | Surface                                                                                                                     | Cadence | Stamp            |
 | ------------- | --------------------------------------------------------------------------------------------------------------------------- | ------- | ---------------- |
 | **anthropic** | Claude Code CHANGELOG · platform release notes · anthropic.com/news                                                         | 7 days  | `sync.anthropic` |
-| **stack**     | Next.js · React · TypeScript · Tailwind · Prisma · shadcn/ui release surfaces                                               | 14 days | `sync.stack`     |
-| **services**  | Vercel · Neon · GitHub · Figma changelogs                                                                                   | 14 days | `sync.services`  |
+| **stack**     | Next.js · React · TypeScript · Tailwind · Prisma · shadcn/ui · GSAP release surfaces                                        | 14 days | `sync.stack`     |
+| **services**  | Cloudflare · Neon · GitHub · Figma changelogs (Vercel: legacy, headlines only)                                              | 14 days | `sync.services`  |
 | **practice**  | Agent-config craft: Anthropic engineering blog, AGENTS.md ecosystem, BMAD-method, high-signal community Claude Code configs | 30 days | `sync.practice`  |
 
 Exact URLs live in `engine.json → sync.sources` — when a source moves, fix it there, not here.
@@ -35,8 +35,8 @@ Exact URLs live in `engine.json → sync.sources` — when a source moves, fix i
 For each in-scope tier, extract only what is NEW since the tier's stamp and RELEVANT to the engine:
 
 - **anthropic** — new tools, config surfaces (settings keys, frontmatter fields, hook events, `.claude/*` dirs), models, permissions/sandbox, autonomy/long-horizon features, plan/billing changes
-- **stack** — new versions, breaking changes, deprecations, new idioms for the versions kun's products pin (Next.js 16, React 19, TypeScript 5, Tailwind 4, Prisma 6, shadcn/ui)
-- **services** — platform changes that touch deploys (Vercel), databases (Neon), repo workflows (GitHub), design handoff (Figma)
+- **stack** — new versions, breaking changes, deprecations, new idioms for the versions kun's products pin (Next.js 16, React 19, TypeScript 5–6, Tailwind 4, Prisma 6–7, shadcn/ui, GSAP 3) — plus each vendor's own agent guidance (bundled docs, AGENTS.md, official MCP servers, official skills)
+- **services** — platform changes that touch deploys (Cloudflare Workers + Containers; Vercel is legacy), databases (Neon), repo workflows (GitHub), design handoff (Figma)
 - **practice** — agent-config patterns worth stealing: multi-agent methods (e.g. BMAD), CLAUDE.md/AGENTS.md conventions, skill/hook/workflow/subagent techniques
 
 Sources of the form `gh:owner/repo` mean `gh api repos/owner/repo/releases --jq '.[0:5] | .[] | {tag_name, published_at, body}'` — cheaper and more structured than fetching release pages.
@@ -52,7 +52,7 @@ Sources of the form `gh:owner/repo` mean `gh api repos/owner/repo/releases --jq 
 Standing constraints veto adoption regardless of class:
 
 - **Subscription-only** — nothing that requires usage credits or per-token spend (`engine.json` → `billing`)
-- **Main-only git** — nothing that reintroduces branches/worktrees/PRs (`.claude/rules/github-workflow.md`)
+- **Main-only git** — nothing that reintroduces branches/worktrees/PRs (`.claude/rules-global/github-workflow.md`)
 - **Anthropic-native** — no third-party substitutes for anything Anthropic ships (`docs/CONFIG-BENCHMARK.md`)
 
 Stack findings diff against reality, not memory: product `package.json` versions + the rule corpus (`.claude/rules/<domain>/`, `since:` frontmatter). A breaking change with no matching rule → write the rule (ADOPT-SAFE). A version bump for products → ADOPT-DECIDE, executed via `/package`.
@@ -60,6 +60,11 @@ Stack findings diff against reality, not memory: product `package.json` versions
 ### 3.5 Harness audit (on model releases only)
 
 When the anthropic tier surfaces a **new model** (or a major Claude Code version), run the reverse pass: every rule, hook, gate, and fix-loop in the engine encodes an assumption about what the model _couldn't_ do when it was written. Sample the highest-friction ones (fix loops with retry caps, mandatory verification passes, deny-list breadth) and ask: does the new model still need this scaffold? Propose removals as ADOPT-DECIDE — guardrails get retired, not just added. (Anthropic harness-engineering guidance, adopted 2026-07-10.)
+
+Two native tools do the mechanical half — run them before sampling by hand:
+
+- **`/doctor prompt-audit`** (Claude Code 2.1.283+) audits CLAUDE.md files, skills, agents and commands for prompting patterns written for older models. Its findings are the harness-audit candidate list.
+- **`/skill-doctor`** (2.1.261+) reports each skill's listing cost and usage. The skill listing is capped at `skillListingBudgetFraction` of the context window (default 1%); on overflow Claude Code silently drops the descriptions of the least-used skills — which is exactly how passive keyword routing degrades. Read it beside KPI 8.
 
 ### 4. Apply + record
 

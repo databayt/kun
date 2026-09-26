@@ -159,12 +159,17 @@ else
     check warn "maintain heartbeat" "never ran — arm it: bash ~/.claude/scripts/maintain.sh --install"
 fi
 
-# ── Staleness (CLAUDE.md age) ────────────────────────────────────
-if [ -f "$CLAUDE_DIR/CLAUDE.md" ]; then
+# ── Staleness (last setup run) ───────────────────────────────────
+# Measures .kun-manifest.json, which setup.sh rewrites on EVERY run. It used to
+# measure ~/.claude/CLAUDE.md — a file setup deliberately never overwrites — so
+# "re-run setup" could never clear the check it recommended.
+AGE_FILE="$CLAUDE_DIR/.kun-manifest.json"
+[ -f "$AGE_FILE" ] || AGE_FILE="$CLAUDE_DIR/CLAUDE.md"
+if [ -f "$AGE_FILE" ]; then
     if [[ "$OS" == "Darwin" ]]; then
-        MOD_EPOCH=$(stat -f %m "$CLAUDE_DIR/CLAUDE.md")
+        MOD_EPOCH=$(stat -f %m "$AGE_FILE")
     else
-        MOD_EPOCH=$(stat -c %Y "$CLAUDE_DIR/CLAUDE.md")
+        MOD_EPOCH=$(stat -c %Y "$AGE_FILE")
     fi
     NOW_EPOCH=$(date +%s)
     AGE_DAYS=$(( (NOW_EPOCH - MOD_EPOCH) / 86400 ))

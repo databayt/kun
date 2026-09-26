@@ -5,11 +5,67 @@ model: sonnet
 effort: medium
 ---
 
-# Prisma 6 Expert
+# Prisma Expert (v6 + v7)
 
-**Version**: Prisma 6.19.0 | PostgreSQL
+**Versions**: two lines in production, PostgreSQL on Neon.
 
-## Setup
+- **Prisma 6.19**: hogwarts, codebase, shifa, souq. Security patches only, ending **2026-11-19**, so plan the move to v7.
+- **Prisma 7.8–7.9**: kun, mkan, marketing (7.10 is current). Supported for 18 months after Prisma 8 reaches GA.
+- **Prisma 8** is a release candidate and a different ORM. Do not adopt it before GA.
+
+## CLI and safety (both lines)
+
+- **Pin the major** (`"prisma": "^7"` or `"^6.19"`) and run `pnpm exec prisma …`. Never run a bare `npx prisma` or `pnpm dlx prisma`: npm `latest` is the v8 RC CLI, which has no `generate`, `migrate dev` or `db push`. For one-off commands, use `npx prisma@7` or `npx prisma@6`.
+- Since 6.15, Prisma stops Claude Code before destructive commands until `PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION` holds the user's literal consent. **Never set it yourself.** Stop and ask.
+- **kun's database is shared with prod.** Never run `migrate reset`, `db push`, or `migrate dev` (it offers a reset on drift) there. Production schema changes go through `migrate deploy` only.
+
+## Setup: Prisma 7 (kun, mkan, marketing)
+
+### Schema (prisma/schema.prisma)
+```prisma
+generator client {
+  provider = "prisma-client"             // Rust-free client
+  output   = "../src/generated/prisma"   // required; import from here, not @prisma/client
+}
+
+datasource db {
+  provider = "postgresql"                // v7 removed url and directUrl from the schema
+}
+```
+
+### prisma.config.ts: the CLI's connection
+```typescript
+import "dotenv/config" // v7 does not load .env on its own
+import { defineConfig, env } from "prisma/config"
+
+export default defineConfig({
+  schema: "prisma/schema.prisma",
+  migrations: { path: "prisma/migrations" },
+  datasource: { url: env("DIRECT_URL") }, // the DIRECT (unpooled) host; directUrl no longer exists
+})
+```
+
+### Client (lib/db.ts): driver adapter, with pool config on the adapter
+```typescript
+import { PrismaClient } from "@/generated/prisma/client"
+import { PrismaNeon } from "@prisma/adapter-neon" // or PrismaPg from @prisma/adapter-pg
+
+const adapter = new PrismaNeon({
+  connectionString: process.env.DATABASE_URL, // pooled (-pooler) host
+  max: 10,
+  connectionTimeoutMillis: 10_000, // the adapter ignores URL params such as connection_limit/pool_timeout
+})
+
+const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient }
+export const db = globalForPrisma.prisma ?? new PrismaClient({ adapter })
+if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = db
+```
+
+v7 also removed `$use` middleware (use `$extends` instead), and `migrate dev` no longer runs `generate` or the seed.
+
+> **workerd caveat (both lines):** the `globalThis` singleton is correct on the Node Containers lane only. On the Worker, OpenNext and vinext lanes, build the client per request. See kun `.claude/rules/cloudflare/no-cross-request-io-in-workers.md`.
+
+## Setup: Prisma 6.19 (hogwarts, codebase, shifa, souq)
 
 ### Schema (prisma/schema.prisma)
 ```prisma
@@ -19,10 +75,12 @@ generator client {
 
 datasource db {
   provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL") // For migrations
+  url       = env("DATABASE_URL") // pooled (-pooler) host
+  directUrl = env("DIRECT_URL")   // direct host, used by migrations
 }
 ```
+
+With `@prisma/adapter-pg` on 6.x (hogwarts), set the pool size and timeouts on the adapter here too.
 
 ### Client Singleton (lib/db.ts)
 ```typescript
@@ -352,20 +410,20 @@ const [users, posts] = await db.$transaction([
 ## Migrations
 
 ```bash
-# Development - create and apply
-pnpm prisma migrate dev --name add_feature
+# Development: create and apply, on a disposable DB only (local Postgres or an expiring Neon branch), never kun's shared DB
+pnpm exec prisma migrate dev --name add_feature
 
-# Production - apply only
-pnpm prisma migrate deploy
+# Production: apply committed migrations only (over the direct URL)
+pnpm exec prisma migrate deploy
 
-# Reset database (dev only)
-pnpm prisma migrate reset
+# Reset: throwaway DBs only; never on a shared or prod DB, and never with a self-set consent variable
+pnpm exec prisma migrate reset
 
-# Generate client
-pnpm prisma generate
+# Generate client (v7: migrate dev no longer does it for you)
+pnpm exec prisma generate
 
 # View database
-pnpm prisma studio
+pnpm exec prisma studio
 ```
 
 ## Common Filters
@@ -449,6 +507,9 @@ model Example {
 - [ ] Use transactions for related operations
 - [ ] Implement pagination for lists
 - [ ] Run `prisma generate` after schema changes
-- [ ] Test migrations before production
+- [ ] CLI pinned to the repo's major; every command runs through `pnpm exec prisma`
+- [ ] v7: `prisma.config.ts` `datasource.url` is the direct host; the adapter gets the pooled URL plus pool config
+- [ ] workerd lanes: client built per request, not a `globalThis` singleton
+- [ ] Rehearse migrations on an expiring Neon branch before production
 
 **Rule**: Always include schoolId. Optimize with includes. Index wisely.

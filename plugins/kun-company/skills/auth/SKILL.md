@@ -206,7 +206,7 @@ commit credentials or cookies, and respect that this is for Abdout's own account
 | --------- | --------------------------------------------------------------------------- |
 | `gh`      | authed as `abdout` (keyring). Re-auth: `gh auth login`                       |
 | `vercel`  | authed as `abdout`. Re-auth: `vercel login`                                 |
-| `neonctl` | authed. `neonctl auth` to refresh                                            |
+| `neon`    | authed. `neon auth` to refresh (`neonctl` is the old compat alias)            |
 | `gcloud`  | OAuth: `bash ~/.claude/bin/gcloud-mcp.sh auth-login` (gmail identity) — URL+code flow |
 | `stripe`  | `stripe login` (browser OAuth) — or set `STRIPE_API_KEY` from Keychain       |
 | API-key MCPs (neon/stripe/ref/algolia/posthog/airtable) | resolve `${VAR}` from the repo `.env` or a Keychain generic password of the same name |

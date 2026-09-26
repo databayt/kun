@@ -29,7 +29,7 @@ Full project information lives in `docs/`:
 
 ## Operating Configuration
 
-Project-level instructions: `.claude/CLAUDE.md` (Tier 1 pipeline, Tier 2 sweeps, Tier 3 vocabulary).
+Project-level instructions: `.claude/CLAUDE.md` (the Drive, preferences, agent lanes, pipeline, vocabulary).
 User-level defaults: `~/.claude/CLAUDE.md` (Component Hierarchy, Reference Codebase, Keyword Vocabulary).
 Pattern cards: `.claude/patterns/cards/`.
 

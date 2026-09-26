@@ -15,7 +15,7 @@ boundaries. Use `unknown` and narrow, or pull a precise type from Zod/Prisma.
 ```tsx
 export async function createStudent(raw: unknown) {
   const parsed = studentSchema.safeParse(raw); // Zod narrows unknown → Student
-  if (!parsed.success) return { error: parsed.error.flatten() };
+  if (!parsed.success) return { error: z.flattenError(parsed.error) }; // Zod 4
   const data = parsed.data; // fully typed, no `any`
   return db.student.create({ data: { ...data, schoolId } });
 }

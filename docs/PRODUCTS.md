@@ -126,11 +126,14 @@ Build production AI agents programmatically. Python and TypeScript.
 
 ### API Pricing (for Agent SDK / CI/CD)
 
-| Model          | Input/MTok | Output/MTok |
-| -------------- | ---------- | ----------- |
-| **Opus 4.8**   | $5         | $25         |
-| **Sonnet 4.6** | $3         | $15         |
-| **Haiku 4.5**  | $1         | $5          |
+| Model         | Input/MTok | Output/MTok |
+| ------------- | ---------- | ----------- |
+| **Fable 5.1** | $10        | $50         |
+| **Opus 5.5**  | $4         | $20         |
+| **Sonnet 5**  | $2         | $10         |
+| **Haiku 4.5** | $1         | $5          |
+
+List prices as of 2026-09-26 (platform.claude.com pricing) — for orientation only; canonical model choice lives in `.claude/engine.json`.
 
 Posture: databayt is subscription-only (Max plan) — the API-key / per-token lane stays unused; no usage credits.
 
@@ -158,23 +161,23 @@ Posture: databayt is subscription-only (Max plan) — the API-key / per-token la
 
 ### By Task
 
-| Task                        | Model      | Rationale                                     |
-| --------------------------- | ---------- | --------------------------------------------- |
-| Strategy / Type-1 decisions | Opus 4.8   | Best available brain for highest-stakes calls |
-| Architecture design         | Opus 4.8   | Deepest reasoning                             |
-| Complex features            | Opus 4.8   | Highest code quality                          |
-| Code review                 | Opus 4.8   | Catches subtle issues                         |
-| Routine changes             | Sonnet 4.6 | Fast, good enough                             |
-| Exploration/search          | Haiku 4.5  | Cheapest, fast                                |
-| Documentation               | Sonnet 4.6 | Good writing, fast                            |
+| Task                        | Model                                               | Rationale                                     |
+| --------------------------- | --------------------------------------------------- | --------------------------------------------- |
+| Strategy / Type-1 decisions | Opus 5.5 (Fable 5.1 via `/model` if it falls short) | Best available brain for highest-stakes calls |
+| Architecture design         | Opus 5.5                                            | Deepest reasoning                             |
+| Complex features            | Opus 5.5                                            | Highest code quality                          |
+| Code review                 | Opus 5.5                                            | Catches subtle issues                         |
+| Routine changes             | Sonnet 5                                            | Fast, good enough                             |
+| Exploration/search          | Haiku 4.5                                           | Cheapest, fast                                |
+| Documentation               | Sonnet 5                                            | Good writing, fast                            |
 
 ### By Kun Agent
 
-| Agent Chain                                     | Default Model |
-| ----------------------------------------------- | ------------- |
-| Captain (CEO brain), long-horizon orchestration | Opus 4.8      |
-| Stack, Design, UI, DevOps, VCS                  | Opus 4.8      |
-| Explore subagents                               | Haiku 4.5     |
+| Agent Chain                                     | Default Model                                     |
+| ----------------------------------------------- | ------------------------------------------------- |
+| Captain (CEO brain), long-horizon orchestration | `opus` → Opus 5.5                                 |
+| Stack, Design, UI, DevOps, VCS                  | `opus` / `sonnet` per `engine.json → model_tiers` |
+| Explore subagents                               | Haiku 4.5                                         |
 
 ---
 
@@ -189,15 +192,15 @@ Posture: databayt is subscription-only (Max plan) — the API-key / per-token la
 | Agent SDK             | API key | API key | API key  | API key   | API key    |
 | SSO/SCIM              | -       | -       | -        | -         | Yes        |
 | 1M Context            | -       | Beta    | Yes      | Yes       | Yes        |
-| Opus 4.8 Priority     | -       | -       | 20x only | -         | Yes        |
+| Priority Opus         | -       | -       | 20x only | -         | Yes        |
 
 ---
 
 ## 8. References
 
-- [Claude Code Overview](https://docs.anthropic.com/en/docs/claude-code/overview)
-- [Models](https://docs.anthropic.com/en/docs/about-claude/models)
-- [Agent SDK](https://docs.anthropic.com/en/docs/agent-sdk/overview)
+- [Claude Code Overview](https://code.claude.com/docs/en/overview)
+- [Models](https://platform.claude.com/docs/en/about-claude/models/overview)
+- [Agent SDK](https://code.claude.com/docs/en/agent-sdk/overview)
 - [Pricing](https://claude.ai/pricing)
 - [Cowork](https://support.anthropic.com/en/articles/13345190-get-started-with-cowork)
 - [MCP Protocol](https://modelcontextprotocol.io)

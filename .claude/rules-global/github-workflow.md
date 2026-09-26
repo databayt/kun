@@ -61,8 +61,12 @@ thing that gets lost — so commit _frequently_, not at the end.
 
 [Refs #N | Closes #N]
 
-Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>
+<attribution trailers — supplied by the harness>
 ```
+
+The attribution trailers (`Co-Authored-By` naming the model actually running, plus the session
+link) come from Claude Code's `attribution` setting. **Never hardcode a model name** in a footer:
+an instruction here overrides the harness default and goes stale on the next model switch.
 
 **Types**: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `perf`, `style`
 
@@ -80,7 +84,7 @@ Rebase-pull before pushing so concurrent commits stack cleanly instead of forcin
 
 ### 5. Deploy
 
-Vercel auto-deploys `main` on push. Nothing to do.
+Repos with a `wrangler.jsonc` do not deploy on push — run the `deploy` skill (it routes by platform). Any other repo follows its own platform's lane.
 
 ### 6. Verify
 

@@ -2,13 +2,19 @@
 domain: authjs
 severity: error
 paths:
-  ["**/layout.tsx", "**/page.tsx", "**/actions.ts", "**/middleware.ts"]
+  [
+    "**/layout.tsx",
+    "**/page.tsx",
+    "**/actions.ts",
+    "**/proxy.ts",
+    "**/middleware.ts",
+  ]
 since: "Auth.js 5.0"
 ---
 
 # Guard at the server boundary
 
-Resolve `auth()` in a server context (layout, page, or Server Action) and redirect/throw when unauthenticated. Client-only guards (hidden buttons, `useSession` checks) are cosmetic — the route handler and action still run for anyone who calls them directly.
+Resolve `auth()` in a server context (layout, page, or Server Action) and redirect/throw when unauthenticated. Client-only guards (hidden buttons, `useSession` checks) are cosmetic — the route handler and action still run for anyone who calls them directly. `proxy.ts` (Next 16's rename of `middleware.ts`) only makes the optimistic cookie check that redirects early; it is not the boundary. A layout check alone isn't either: layouts don't re-render on client navigation, so the page, action or data read repeats `auth()`.
 
 ## Good
 
@@ -43,4 +49,4 @@ export default function DashboardLayout({ children }) {
 
 ## Fix
 
-Move the `auth()` check into the server layout/page and `redirect()` on failure — never gate access purely from a `"use client"` component.
+Move the `auth()` check into the server page, action or data read (a layout check is an extra gate, not the only one) and `redirect()` on failure — never gate access purely from a `"use client"` component or from `proxy.ts`.

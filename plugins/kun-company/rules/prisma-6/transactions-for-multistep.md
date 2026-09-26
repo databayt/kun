@@ -7,7 +7,7 @@ since: "Prisma 6.0"
 
 # Wrap multi-write operations in $transaction
 
-Two or more dependent writes must run inside `$transaction` so they commit or roll back together — a mid-sequence failure otherwise leaves the tenant's data half-written.
+Two or more dependent writes must run inside `$transaction` so they commit or roll back together. Otherwise a failure mid-sequence leaves the tenant's data half-written. On Neon, transactions need the WebSocket adapter `PrismaNeon`. The HTTP adapter (`PrismaNeonHTTP` in 6.x, `PrismaNeonHttp` in 7.x) rejects them with `Transactions are not supported in HTTP mode`.
 
 ## Good
 
@@ -33,3 +33,5 @@ await db.ledgerEntry.create({
 ## Fix
 
 Move the related writes into a single `db.$transaction([...])` or interactive `$transaction(async (tx) => {...})` block.
+
+> Source: https://www.prisma.io/docs/orm/v7/prisma-client/queries/transactions · https://github.com/prisma/orm/blob/7.10.0/packages/adapter-neon/src/neon.ts

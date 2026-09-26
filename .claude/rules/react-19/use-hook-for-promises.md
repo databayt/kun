@@ -7,27 +7,31 @@ since: "React 19.0"
 
 # Read promises and context with use()
 
-When a client component must consume a server promise or context, call the `use()` hook (under `<Suspense>`) instead of resolving it through a `useEffect` + `useState` waterfall. It suspends cleanly, keeps the data flow declarative, and unlike other hooks may be called conditionally.
+When a client component must consume a server promise or context, call `use()` under a `<Suspense>` boundary instead of resolving it through a `useEffect` + `useState` waterfall. Unlike other hooks it may sit in a condition or loop, with three limits from the React docs: create the promise in a Server Component and pass it down — `use(fetch(...))` in a client render makes a new promise on every retry; never wrap `use` in `try/catch` (it throws to suspend — use an error boundary); and never skip it by reading `promise.status`/`promise.value` (React 19.3 adds a dev warning for exactly that).
 
 ## Good
 
 ```tsx
-// page.tsx (server) passes the promise down — no await here
-export default function Page() {
-  const studentsPromise = db.student.findMany({ where: { schoolId } });
+// page.tsx (Server Component) — start the query, pass the promise, don't await
+export default async function Page() {
+  const { schoolId } = await requireTenant();
+  const students = db.student.findMany({ where: { schoolId } });
   return (
     <Suspense fallback={<Skeleton />}>
-      <Roster promise={studentsPromise} />
+      <Roster students={students} />
     </Suspense>
   );
 }
+```
 
-// roster.tsx (client)
-("use client");
+```tsx
+// roster.tsx
+"use client";
 import { use } from "react";
-export function Roster({ promise }: { promise: Promise<Student[]> }) {
-  const students = use(promise); // suspends until resolved
-  return <StudentTable rows={students} />;
+
+export function Roster({ students }: { students: Promise<Student[]> }) {
+  const rows = use(students); // suspends until resolved
+  return <StudentTable rows={rows} />;
 }
 ```
 
@@ -35,17 +39,17 @@ export function Roster({ promise }: { promise: Promise<Student[]> }) {
 
 ```tsx
 "use client";
-import { useEffect, useState } from "react";
 export function Roster() {
-  const [students, setStudents] = useState<Student[] | null>(null);
+  const [rows, setRows] = useState<Student[] | null>(null);
   useEffect(() => {
-    getStudents().then(setStudents);
-  }, []); // waterfall + flicker
-  if (!students) return <Skeleton />;
-  return <StudentTable rows={students} />;
+    getStudents().then(setRows);
+  }, []); // waterfall after hydration + flicker
+  return rows ? <StudentTable rows={rows} /> : <Skeleton />;
 }
 ```
 
 ## Fix
 
-Start the fetch on the server, pass the unawaited promise as a prop, and read it with `use(promise)` inside a `<Suspense>` boundary instead of `useEffect`/`useState`.
+Start the fetch on the server, pass the unawaited promise as a prop, and read it with `use(promise)` inside `<Suspense>` plus an error boundary.
+
+> Source: https://react.dev/reference/react/use

@@ -35,6 +35,6 @@ Place the task on the cheapest adequate lane, citing `engine.json → delegation
 
 ## Standing rules (any mode)
 
-- Fable tokenizer counts ~30% more than pre-4.7 models — never reuse old token estimates; recount against `claude-fable-5`.
+- Fable tokenizer counts ~30% more than pre-4.7 models — never reuse old token estimates; recount against the current model (`engine.json` → `model`).
 - Fable can't disable thinking — **effort is the lever**, not `MAX_THINKING_TOKENS`.
 - Never propose usage credits or API-key spend — subscription-only posture changes require `/decide` + Abdout.

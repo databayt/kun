@@ -1,6 +1,6 @@
 ---
 domain: next-16
-severity: high
+severity: error
 paths:
   [
     "public/service-worker.js",

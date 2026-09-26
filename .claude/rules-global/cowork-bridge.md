@@ -13,11 +13,12 @@ Cowork and Claude Code are separate sessions sharing the same `~/.claude/` direc
 | `PushNotification` to Abdout's mobile | Yes (native tool) | Yes (native tool) |
 | Slack messages | Yes (slack MCP) | Yes (slack MCP) |
 | Run bash commands | Yes — two shells (see below) | Yes |
-| Drive a browser | Yes (claude-in-chrome MCP) | No |
+| Drive a browser | Yes (claude-in-chrome MCP) | Yes — `claude --chrome` (Claude in Chrome, GA 2026-08-26) or the Playwright / Chrome DevTools MCP servers |
+| Message another session | — | Yes — `SendMessage` / `ListAgents` (2.1.224+), Code ↔ Code on any of Abdout's machines; bridge.md stays the Cowork handoff |
 | Use hooks | No | Yes |
 | Use skills (/commands) | Yes | Yes |
 
-Three of these rows used to read "No" for Cowork. They were wrong, and the
+Three of these rows used to read "No" for Cowork, and "Drive a browser" read "No" for Code until 2026-09-26. They were wrong, and the
 wrong version cost real work — Code planned around a Cowork that supposedly
 couldn't run a command. Corrected 2026-07-27 from a session that did all three.
 

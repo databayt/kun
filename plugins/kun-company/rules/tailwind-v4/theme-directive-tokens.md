@@ -1,8 +1,7 @@
 ---
 domain: tailwind-v4
 severity: error
-paths:
-  ["**/*.css", "**/globals.css", "**/theme.css", "**/tailwind.config.*"]
+paths: ["**/*.css", "**/globals.css", "**/theme.css", "**/tailwind.config.*"]
 since: "Tailwind 4.0"
 ---
 
@@ -24,8 +23,8 @@ Tailwind v4 is CSS-first: tokens live in `@theme` inside CSS and are exposed as 
 ```
 
 ```tsx
-// usable as utility AND var
-<div className="bg-brand rounded-[var(--radius-card)] font-display" />
+// each namespace becomes a utility (--radius-card → rounded-card) AND a CSS var
+<div className="bg-brand rounded-card font-display" />
 ```
 
 ## Bad

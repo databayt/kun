@@ -233,11 +233,10 @@ Generated config:
 Recommended profiles: core (<list>) / security (<list>) / full (<list>).
 Review each file — a starting point, not gospel.
 
-Closes #<issue-number>
+Closes #<issue-number>"
+# (end with the harness-supplied attribution trailer — it names the running model; never hardcode one)
 
-Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>"
-
-# Push to main (Vercel/CI deploys automatically)
+# Push to main (CI / the repo's deploy lane takes it from there)
 git push origin main
 ```
 

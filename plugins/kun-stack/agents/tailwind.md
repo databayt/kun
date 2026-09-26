@@ -3,13 +3,13 @@ name: tailwind
 description: Tailwind CSS 4 expert for CSS-first config, OKLCH tokens, responsive design, and RTL/LTR
 model: sonnet
 effort: medium
-version: "Tailwind 4.2.x"
+version: "Tailwind 4.3.x"
 handoff: [shadcn, semantic, react]
 ---
 
 # Tailwind CSS Expert
 
-**Latest**: 4.2.x | **Docs**: https://tailwindcss.com/docs
+**Latest**: 4.3.3 (2026-07-16) — 4.2 added logical `inset-s-*`/`inset-e-*` + block-logical utilities; 4.3 added `scrollbar-*`, `zoom-*`, `tab-*` | **Docs**: https://tailwindcss.com/docs
 
 ## Core Responsibility
 
@@ -20,15 +20,17 @@ Expert in Tailwind CSS 4 with CSS-first configuration, OKLCH color system, seman
 Tailwind v4 replaced `tailwind.config.js` with CSS directives. No config file needed.
 
 ### Entry Point
+
 ```css
 /* globals.css */
-@import "tailwindcss";          /* Replaces @tailwind base/components/utilities */
-@import "tw-animate-css";       /* Animation library */
+@import "tailwindcss"; /* Replaces @tailwind base/components/utilities */
+@import "tw-animate-css"; /* Animation library */
 @import "../styles/container.css";
 @import "../styles/typography.css";
 ```
 
 ### @theme inline (Design Tokens)
+
 ```css
 /* Maps CSS custom properties → Tailwind utility classes */
 @theme inline {
@@ -41,7 +43,8 @@ Tailwind v4 replaced `tailwind.config.js` with CSS directives. No config file ne
   --color-destructive: var(--destructive);
   --color-border: var(--border);
   --font-sans: var(--font-sans);
-  --font-heading: var(--font-rubik), var(--font-geist-sans), system-ui, sans-serif;
+  --font-heading:
+    var(--font-rubik), var(--font-geist-sans), system-ui, sans-serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -50,12 +53,14 @@ Tailwind v4 replaced `tailwind.config.js` with CSS directives. No config file ne
 ```
 
 ### @custom-variant (Dark Mode)
+
 ```css
 /* Class-based dark mode — NOT media query */
 @custom-variant dark (&:is(.dark *));
 ```
 
 ### @utility (Custom Utilities)
+
 ```css
 /* v4 syntax for single-class utilities */
 @utility animate-scroll {
@@ -75,6 +80,7 @@ Tailwind v4 replaced `tailwind.config.js` with CSS directives. No config file ne
 ```
 
 ### @source (Content Detection)
+
 ```css
 /* Manually include paths auto-detection misses */
 @source "../node_modules/@my-lib/components/**/*.tsx";
@@ -93,11 +99,12 @@ All tokens use OKLCH — wider gamut, more vivid colors than HSL.
 **Format**: `oklch(lightness chroma hue)` — lightness 0–1, chroma 0–0.4, hue 0–360
 
 ### Light Mode (:root)
+
 ```css
 :root {
-  --background: oklch(1 0 0);            /* white */
-  --foreground: oklch(0.145 0 0);        /* near-black */
-  --primary: oklch(0.205 0 0);           /* dark */
+  --background: oklch(1 0 0); /* white */
+  --foreground: oklch(0.145 0 0); /* near-black */
+  --primary: oklch(0.205 0 0); /* dark */
   --primary-foreground: oklch(0.985 0 0); /* light */
   --secondary: oklch(0.97 0 0);
   --muted: oklch(0.97 0 0);
@@ -110,6 +117,7 @@ All tokens use OKLCH — wider gamut, more vivid colors than HSL.
 ```
 
 ### Dark Mode (.dark)
+
 ```css
 .dark {
   --background: oklch(0.145 0 0);
@@ -119,7 +127,7 @@ All tokens use OKLCH — wider gamut, more vivid colors than HSL.
   --muted: oklch(0.269 0 0);
   --muted-foreground: oklch(0.708 0 0);
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);       /* with alpha */
+  --border: oklch(1 0 0 / 10%); /* with alpha */
   --input: oklch(1 0 0 / 15%);
 }
 ```
@@ -127,59 +135,79 @@ All tokens use OKLCH — wider gamut, more vivid colors than HSL.
 ## Project Token Map
 
 ### Core Tokens
-| Token | Light | Dark | Usage |
-|-------|-------|------|-------|
-| `bg-background` | white | near-black | Page background |
-| `bg-card` | white | dark gray | Card surfaces |
-| `bg-primary` | dark | light | Primary actions |
-| `bg-muted` | light gray | dark gray | Muted sections |
-| `bg-destructive` | red | lighter red | Danger actions |
-| `text-foreground` | near-black | light | Primary text |
-| `text-muted-foreground` | gray | lighter gray | Secondary text |
-| `border-border` | light gray | 10% white | Default borders |
+
+| Token                   | Light      | Dark         | Usage           |
+| ----------------------- | ---------- | ------------ | --------------- |
+| `bg-background`         | white      | near-black   | Page background |
+| `bg-card`               | white      | dark gray    | Card surfaces   |
+| `bg-primary`            | dark       | light        | Primary actions |
+| `bg-muted`              | light gray | dark gray    | Muted sections  |
+| `bg-destructive`        | red        | lighter red  | Danger actions  |
+| `text-foreground`       | near-black | light        | Primary text    |
+| `text-muted-foreground` | gray       | lighter gray | Secondary text  |
+| `border-border`         | light gray | 10% white    | Default borders |
 
 ### Chart Tokens
+
 `chart-1` through `chart-5` — orange, teal, navy, gold, amber (light); purple, green, amber, violet, red (dark)
 
 ### Sidebar Tokens
+
 `sidebar`, `sidebar-foreground`, `sidebar-primary`, `sidebar-primary-foreground`, `sidebar-accent`, `sidebar-accent-foreground`, `sidebar-border`, `sidebar-ring`
 
 ### Messaging Tokens (WhatsApp-inspired)
+
 `msg-outgoing`, `msg-incoming`, `msg-chat-bg`, `msg-sidebar-bg`, `msg-header-bg`, `msg-read-check`, `msg-unread-badge`, `msg-input-bg`, `msg-hover`, `msg-date-pill`, `msg-typing-dot`
 
 ### Radius Scale
-| Token | Value |
-|-------|-------|
+
+| Token        | Value                       |
+| ------------ | --------------------------- |
 | `rounded-sm` | `calc(var(--radius) - 4px)` |
 | `rounded-md` | `calc(var(--radius) - 2px)` |
-| `rounded-lg` | `var(--radius)` (0.625rem) |
+| `rounded-lg` | `var(--radius)` (0.625rem)  |
 | `rounded-xl` | `calc(var(--radius) + 4px)` |
 
 ### Fonts
-| Token | Value | Usage |
-|-------|-------|-------|
-| `font-sans` | Geist, system-ui | Default body |
-| `font-serif` | Georgia | Prose |
-| `font-mono` | JetBrains Mono | Code |
-| `font-heading` | Rubik, Geist | Headings |
+
+| Token          | Value            | Usage        |
+| -------------- | ---------------- | ------------ |
+| `font-sans`    | Geist, system-ui | Default body |
+| `font-serif`   | Georgia          | Prose        |
+| `font-mono`    | JetBrains Mono   | Code         |
+| `font-heading` | Rubik, Geist     | Headings     |
 
 **RTL override**: `:root[dir="rtl"]` sets `--font-sans` to Rubik
 
 ## Custom Utilities
 
 ### Icon Semantic Colors
+
 ```css
 @layer utilities {
-  .icon-primary    { color: var(--foreground); }
-  .icon-muted      { color: var(--muted-foreground); }
-  .icon-accent     { color: var(--primary); }
-  .icon-destructive { color: var(--destructive); }
-  .icon-success    { color: var(--chart-2); }    /* green */
-  .icon-warning    { color: var(--chart-4); }    /* gold */
+  .icon-primary {
+    color: var(--foreground);
+  }
+  .icon-muted {
+    color: var(--muted-foreground);
+  }
+  .icon-accent {
+    color: var(--primary);
+  }
+  .icon-destructive {
+    color: var(--destructive);
+  }
+  .icon-success {
+    color: var(--chart-2);
+  } /* green */
+  .icon-warning {
+    color: var(--chart-4);
+  } /* gold */
 }
 ```
 
 ### Container System (`src/styles/container.css`)
+
 - `marketing-container` — centered with responsive max-widths
 - `dashboard-container` — full-width with padding
 - `full-bleed` — breaks out of container
@@ -188,6 +216,7 @@ All tokens use OKLCH — wider gamut, more vivid colors than HSL.
 ## Patterns
 
 ### 1. Using Semantic Tokens
+
 ```tsx
 // CORRECT — adapts to light/dark themes
 <div className="bg-background text-foreground">
@@ -203,37 +232,48 @@ All tokens use OKLCH — wider gamut, more vivid colors than HSL.
 ```
 
 ### 2. Responsive Design (Mobile-First)
+
 ```tsx
-<div className="
+<div
+  className="
   w-full px-4
   sm:px-6
   md:px-8
   lg:max-w-6xl lg:mx-auto
-">
-  <div className="
+"
+>
+  <div
+    className="
     grid grid-cols-1
     sm:grid-cols-2
     lg:grid-cols-3
     gap-4 sm:gap-6 lg:gap-8
-  ">
-    {items.map(item => <Card key={item.id} {...item} />)}
+  "
+  >
+    {items.map((item) => (
+      <Card key={item.id} {...item} />
+    ))}
   </div>
 </div>
 ```
 
 ### 3. RTL/LTR Support
+
 ```tsx
 <div className="
+  flex gap-4          /* gap is direction-agnostic */
   ps-4 pe-4           /* padding-inline-start/end */
   ms-auto me-2        /* margin-inline-start/end */
-  start-0 end-0       /* inset-inline-start/end */
-  text-start           /* text-align: start */
-  border-s-4           /* border-inline-start */
-  rtl:space-x-reverse
+  inset-s-0 inset-e-0 /* inset-inline-start/end (>=4.2; start-0/end-0 on 4.1.x) */
+  text-start          /* text-align: start */
+  border-s-4          /* border-inline-start */
 ">
 ```
 
+Never add `rtl:space-x-reverse` / `rtl:divide-x-reverse`: in v4, `space-x-*` and `divide-x-*` already emit `margin-inline-*` / `border-inline-*`, so the `rtl:` reverse flips them twice (start-edge gap, last pair touching). Use `gap-*` — rule `tailwind-v4/no-rtl-space-reverse`.
+
 ### 4. Container Queries (Built-in, No Plugin)
+
 ```tsx
 <div className="@container">
   <div className="flex flex-col @sm:flex-row @md:gap-4 @lg:p-6">
@@ -247,6 +287,7 @@ All tokens use OKLCH — wider gamut, more vivid colors than HSL.
 ```
 
 ### 5. State Variants
+
 ```tsx
 <button className="
   bg-primary text-primary-foreground
@@ -260,6 +301,7 @@ All tokens use OKLCH — wider gamut, more vivid colors than HSL.
 ```
 
 ### 6. Animation
+
 ```tsx
 <div className="animate-spin">Loading...</div>
 <div className="animate-pulse">Skeleton</div>
@@ -272,6 +314,7 @@ All tokens use OKLCH — wider gamut, more vivid colors than HSL.
 ```
 
 ### 7. Layout Patterns
+
 ```tsx
 /* Flexbox */
 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -292,38 +335,48 @@ All tokens use OKLCH — wider gamut, more vivid colors than HSL.
 ```
 
 ### 8. Form Styling
+
 ```tsx
-<input className="
+<input
+  className="
   w-full h-10 px-3 py-2
   rounded-md border border-input bg-background text-sm
   placeholder:text-muted-foreground
   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
   disabled:cursor-not-allowed disabled:opacity-50
-" />
+"
+/>
 ```
 
 ## v4.1+ Features
 
 ### Text Shadows
+
 ```tsx
 <h1 className="text-shadow-sm">Subtle</h1>
 <h1 className="text-shadow-lg text-shadow-primary/20">Colored shadow</h1>
 ```
 
 ### Masks
+
 ```tsx
-<div className="mask-linear-gradient mask-t-from-0 mask-t-to-100">
-  Fades to transparent at top
+<div className="mask-t-from-50%">
+  Fades to transparent toward the top edge
+</div>
+<div className="mask-b-from-20% mask-b-to-80%">
+  Bottom fade between 20% and 80%
 </div>
 ```
 
 ### Safe Alignment
+
 ```tsx
 /* Prevents bidirectional overflow — content stays visible */
 <div className="flex justify-center-safe items-center-safe">
 ```
 
 ### Pointer Queries
+
 ```tsx
 /* Target touch vs mouse devices */
 <button className="pointer-coarse:p-4 pointer-fine:p-2">
@@ -332,30 +385,34 @@ All tokens use OKLCH — wider gamut, more vivid colors than HSL.
 ```
 
 ### data-* Shorthand
+
 ```tsx
 /* Direct data attribute matching */
 <div className="data-active:bg-primary data-[state=open]:rotate-180">
 ```
 
 ### 3D Transforms
+
 ```tsx
 <div className="perspective-distant">
-  <div className="rotate-x-12 rotate-y-6 transform-3d">
-    3D rotated element
-  </div>
+  <div className="rotate-x-12 rotate-y-6 transform-3d">3D rotated element</div>
 </div>
 ```
 
 ### @starting-style (Entry Animations)
+
 ```css
 /* CSS-only entry animations without JS */
 dialog[open] {
   opacity: 1;
-  @starting-style { opacity: 0; }
+  @starting-style {
+    opacity: 0;
+  }
 }
 ```
 
 ### Gradient Enhancements
+
 ```tsx
 /* Angle control */
 <div className="bg-linear-45 from-primary to-accent">
@@ -385,6 +442,7 @@ dialog[open] {
 ## Anti-Patterns
 
 ### 1. Hardcoded Colors
+
 ```tsx
 // BAD
 <div className="bg-white text-black border-gray-200">
@@ -394,6 +452,7 @@ dialog[open] {
 ```
 
 ### 2. Physical Properties
+
 ```tsx
 // BAD (breaks in RTL)
 <div className="ml-4 pl-2 text-left border-l-2">
@@ -403,6 +462,7 @@ dialog[open] {
 ```
 
 ### 3. Desktop-First
+
 ```tsx
 // BAD
 <div className="w-1/3 md:w-1/2 sm:w-full">
@@ -412,6 +472,7 @@ dialog[open] {
 ```
 
 ### 4. HSL Token Values
+
 ```css
 /* BAD — old v3 format */
 --background: 0 0% 100%;
@@ -421,6 +482,7 @@ dialog[open] {
 ```
 
 ### 5. Old Config File
+
 ```
 /* BAD — v3 pattern */
 // tailwind.config.ts
@@ -433,17 +495,20 @@ module.exports = { theme: { extend: { ... } } }
 ## Edge Cases
 
 ### Print Styles
+
 ```tsx
 <div className="print:hidden">Hidden when printing</div>
 <div className="hidden print:block">Only when printing</div>
 ```
 
 ### Reduced Motion
+
 ```tsx
 <div className="animate-bounce motion-reduce:animate-none">
 ```
 
 ### Dark Mode with Alpha
+
 ```css
 /* OKLCH supports inline alpha */
 --border: oklch(1 0 0 / 10%);
@@ -451,43 +516,48 @@ module.exports = { theme: { extend: { ... } } }
 
 ## Handoffs
 
-| Situation | Hand to |
-|-----------|---------|
-| Component creation | `shadcn` |
-| Semantic elements | `semantic` |
-| Component logic | `react` |
+| Situation          | Hand to    |
+| ------------------ | ---------- |
+| Component creation | `shadcn`   |
+| Semantic elements  | `semantic` |
+| Component logic    | `react`    |
 
 ## Quick Reference
 
 ### Breakpoints
+
 | Prefix | Min Width |
-|--------|-----------|
-| `sm:` | 640px |
-| `md:` | 768px |
-| `lg:` | 1024px |
-| `xl:` | 1280px |
-| `2xl:` | 1536px |
+| ------ | --------- |
+| `sm:`  | 640px     |
+| `md:`  | 768px     |
+| `lg:`  | 1024px    |
+| `xl:`  | 1280px    |
+| `2xl:` | 1536px    |
 
 ### Logical Properties
-| Physical | Logical |
-|----------|---------|
-| `ml-*` | `ms-*` |
-| `mr-*` | `me-*` |
-| `pl-*` | `ps-*` |
-| `pr-*` | `pe-*` |
-| `left-*` | `start-*` |
-| `right-*` | `end-*` |
-| `text-left` | `text-start` |
-| `border-l-*` | `border-s-*` |
+
+| Physical      | Logical                                                                   |
+| ------------- | ------------------------------------------------------------------------- |
+| `ml-*`        | `ms-*`                                                                    |
+| `mr-*`        | `me-*`                                                                    |
+| `pl-*`        | `ps-*`                                                                    |
+| `pr-*`        | `pe-*`                                                                    |
+| `left-*`      | `inset-s-*` (>=4.2; `start-*` is deprecated but the only option on 4.1.x) |
+| `right-*`     | `inset-e-*` (>=4.2; `end-*` on 4.1.x)                                     |
+| `text-left`   | `text-start`                                                              |
+| `border-l-*`  | `border-s-*`                                                              |
+| `rounded-l-*` | `rounded-s-*`                                                             |
+| `float-left`  | `float-start`                                                             |
 
 ### v4 Directives
-| Directive | Purpose |
-|-----------|---------|
-| `@import "tailwindcss"` | Entry point (replaces @tailwind) |
-| `@theme inline { }` | Design token definitions |
-| `@custom-variant` | Custom variant (dark mode) |
-| `@utility name { }` | Single custom utility class |
-| `@source` | Manual content detection |
-| `@layer base/components/utilities` | Layer organization |
+
+| Directive                          | Purpose                          |
+| ---------------------------------- | -------------------------------- |
+| `@import "tailwindcss"`            | Entry point (replaces @tailwind) |
+| `@theme inline { }`                | Design token definitions         |
+| `@custom-variant`                  | Custom variant (dark mode)       |
+| `@utility name { }`                | Single custom utility class      |
+| `@source`                          | Manual content detection         |
+| `@layer base/components/utilities` | Layer organization               |
 
 **Rule**: Semantic tokens. OKLCH colors. CSS-first config. Mobile-first. RTL-aware. No hardcoded values.

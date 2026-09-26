@@ -217,6 +217,5 @@ Total elapsed: <duration>
 ## When NOT to use
 
 - Mid-implementation — use `/check` for the tight loop instead
-- Hotfix from a non-main branch — use `/ship` directly
 - Just want to QA a build, not ship — use `/handover` alone
 - Investigating a pre-existing production issue — use `/watch` + `/incident`

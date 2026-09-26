@@ -149,13 +149,13 @@ Append to issue: "Check stage complete. Build: pass. Visual: verified."
    git add <all files created in stages 3-5>
    git commit -m "feat: add <feature-name>
 
-   Closes #<issue-number>
-
-   Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
+   Closes #<issue-number>"
    ```
 
+   End the message with the attribution trailer the harness supplies (it names the model actually running) — never hardcode a model name.
+
 2. Push to main
-3. Deploy to Vercel: `npx vercel --prod --yes`
+3. Deploy via `/deploy` — it routes by platform (a repo with `wrangler.jsonc` takes the Cloudflare lane; Vercel is legacy)
 4. Poll deployment status until Ready (max 10 minutes)
 5. If deployment fails: read logs, fix, re-deploy (max 3 attempts)
 

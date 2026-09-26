@@ -42,10 +42,10 @@ Rules load *on top of* all three, scoped by their `paths` glob. Skills and agent
 
 | Setting | Value |
 |---------|-------|
-| Model | Fable 5 (`claude-fable-5`) |
-| Fallbacks | Opus 4.8 → Sonnet 5 |
+| Model | Opus 5.5 (`claude-opus-5-5`, the `opus` alias) — canonical in `.claude/engine.json` |
+| Fallbacks | Opus 5 → Sonnet 5 (never Fable — headless Fable can bill usage credits) |
 | Package manager | pnpm |
-| Stack | Next.js 16 · React 19 · Prisma 6 · TypeScript 5 · Tailwind CSS 4 · shadcn/ui |
+| Stack | Next.js 16 · React 19 · Prisma 6–7 · TypeScript 5.9–6 · Tailwind CSS 4 · shadcn/ui |
 | Languages | Arabic (RTL default), English (LTR) |
 | Port | Always 3000 |
 | Environment | Central `.env` only — never `.env.local` or `.env.<x>` |
@@ -67,7 +67,7 @@ The operational layer: the drive, the pipeline, the keyword vocabulary, the four
 
 ```json
 {
-  "fallbackModel": ["claude-opus-4-8", "claude-sonnet-5"],
+  "fallbackModel": ["claude-opus-5", "claude-sonnet-5"],
   "env": {
     "CODEBASE_PATH": "/Users/abdout/codebase",
     "OSS_PATH": "/Users/abdout/oss",
@@ -94,7 +94,7 @@ A hook is used rather than a deny list because it can inspect the composed comma
 
 ## Model routing
 
-Three axes: **model tier × effort × product lane**. The main loop runs Fable 5; agents resolve a tier alias.
+Three axes: **model tier × effort × product lane**. The main loop runs Opus 5.5 (Fable 5.1 is a `/model` escalation, never a default); agents resolve a tier alias.
 
 | Tier | Effort | Used for |
 |------|--------|----------|

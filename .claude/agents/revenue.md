@@ -46,7 +46,7 @@ Turn products into sustainable value. Design pricing that aligns with the sharin
 
 | Expense | Monthly | Notes |
 |---------|---------|-------|
-| Claude Max subscription | $200 | Fixed, Abdout's subscription |
+| Claude Max subscription | $100 | Fixed, subscription-only (engine.json billing) |
 | Services (Vercel, Neon, AWS, domains) | ~$300 | Various free tiers + essential services |
 | Team salary | $0 | Equity/sweat phase |
 | **Total monthly burn** | **~$500** | $5K capital = 10 months runway |

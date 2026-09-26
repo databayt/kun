@@ -182,7 +182,6 @@ Update existing memory files rather than creating duplicates. Check MEMORY.md fi
 ## What Learn Never Does
 
 - Modifies code (read-only)
-- Creates PRs (that's analyze's job)
 - Makes decisions (that's captain's job)
 - Generates config (that's analyze's job)
 

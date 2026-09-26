@@ -28,14 +28,14 @@ Keep everything running, keep costs down. Monitor deployments across all product
 
 | Service | Current Tier | Monthly Estimate | Optimization |
 |---------|-------------|-----------------|--------------|
-| **Claude API** | Max $200/mo subscription | $200 fixed | Batch API calls, use caching, Haiku for simple tasks |
+| **Claude** | Max $100/mo, subscription-only | $100 fixed | No API-key spend — see engine.json billing; check /usage weekly |
 | **Vercel** | Free / Pro ($20/mo) | $0-$20 | Stay on free tier per product where possible |
 | **Neon** | Free tier | $0 | Branch cleanup, connection pooling |
 | **Stripe** | Pay-as-you-go | 2.9% + $0.30/txn | Batch invoicing, annual plans to reduce txn count |
 | **Domains** | ~$12/yr each | $5/mo across all | Consolidate registrars |
 | **Sedon's server** | Home hosting | Electricity + bandwidth | Only for non-critical, self-hosted services |
 
-**Current burn**: ~$500/month total ($200 Claude + ~$300 services). $5K capital = 10 months runway.
+**Current burn**: Claude $100 fixed + services — read the live figure from engine.json billing / the company profile, never this line.
 
 ## Decision Matrix
 

@@ -1,7 +1,7 @@
 # Kun — Project Configuration
 
 > Project-level overrides for the kun engine. User defaults live in `~/.claude/CLAUDE.md`
-> (Component Hierarchy, Reference Codebase, Imported Rules).
+> (Preferences, Component Hierarchy, Reference Codebase, Keyword Vocabulary).
 
 ## The Drive
 
@@ -9,12 +9,12 @@
 
 ## Preferences
 
-- **Model**: `claude-fable-5` (Fable 5 — session default since 2026-07-10) — fallbacks per `engine.json` (`claude-opus-4-8` → `claude-sonnet-5`)
+- **Model**: Opus 5.5 (`claude-opus-5-5`, what the `opus` alias resolves to) — session default since 2026-09-26. Fallbacks and agent tiers live only in `.claude/engine.json`; never restate them here
 - **Billing**: Claude Max $100/mo, subscription-only — no usage credits, no API-key spend (change requires `/decide` + Abdout approval); check `/usage` weekly
 - **Package Manager**: pnpm
-- **Stack**: Next.js 16 · React 19 · Prisma 6 · TypeScript 5 · Tailwind CSS 4 · shadcn/ui
+- **Stack**: Next.js 16 · React 19 · Prisma 6–7 · TypeScript 5.9–6 · Tailwind CSS 4 · shadcn/ui (versions + security floor: `docs/STACK.md`)
 - **Languages**: Arabic (RTL default) · English (LTR)
-- **Commit footer**: `Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>`
+- **Commit footer**: the harness-supplied attribution (it names the model actually running) — never hardcode a model name
 
 > Project rules: `.claude/rules/engine-parity.md` (auto-loads, path-scoped). Cross-repo rules
 > (`cowork-bridge`, `github-workflow`, `patterns`, `block-protocol`) ship from `.claude/rules-global/`

@@ -212,8 +212,8 @@ const gate = await agent(
       ? ` — READ-ONLY: do NOT auto-fix, do NOT commit, do NOT switch branches; just run both and report.\n`
       : `, each with the documented 5-attempt auto-fix loop.\n` +
         `Verify you are on main (\`git branch --show-current\` → main) and commit any fixes atomically as ` +
-        `\`fix(${block}): typecheck/build [qa]\` with the footer:\n` +
-        `  Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>\n`) +
+        `\`fix(${block}): typecheck/build [qa]\`, ending with the attribution trailer your harness supplies ` +
+        `(it names the model you actually run on — never a hardcoded model name).\n`) +
     `Return ok=true only if BOTH pass; otherwise ok=false with the remaining errors.`,
   {
     label: "static:check",
@@ -571,7 +571,7 @@ function fixer(f, tier) {
       `HARD EXCLUSIONS (never touch — revert + escalate instead): prisma/ schema, any destructive migration, ` +
       `middleware.ts. Honor the report agent's qa-scope (minimum diff, follow existing patterns).\n` +
       `Verify the branch before committing: \`git branch --show-current\` must print main. Commit ONLY this fix:\n` +
-      `  fix(${block}): ${f.title} [qa]\n\n  Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>\n` +
+      `  fix(${block}): ${f.title} [qa]\n\n  <the attribution trailer your harness supplies — it names your model; never hardcode one>\n` +
       `Return fixed, the files changed, the short commit SHA, and escalate=true if you refused.`,
     {
       label: `fix:${f.keyword}`,

@@ -29,16 +29,17 @@ When building a new feature that involves one of these keywords:
 
 ## Rule Corpus — keyword → rule directory
 
-The code-side quality keywords (see `.claude/agents/quality.md`) cite atomic, severity-tagged rules under `.claude/rules/<domain>/`. Each rule has frontmatter (`domain`, `severity`, `paths`, `since`) and Good/Bad/Fix sections. `paths` is Claude Code's native path-scoping field (quoted glob array), so each rule auto-loads only when Claude touches a matching file — the 3 cross-cutting rules at `.claude/rules/*.md` carry no `paths` and load unconditionally. When a keyword runs, read the matching domain dir(s) and cite findings as `rule-id (severity)`.
+The code-side quality keywords (see `.claude/agents/quality.md`) cite atomic, severity-tagged rules under `.claude/rules/<domain>/`. Each rule has frontmatter (`domain`, `severity`, `paths`, `since`) and Good/Bad/Fix sections. `paths` is Claude Code's native path-scoping field (quoted glob array), so each rule auto-loads only when Claude touches a matching file — cross-cutting engine rules live at `.claude/rules/*.md`; domain rules are path-scoped. When a keyword runs, read the matching domain dir(s) and cite findings as `rule-id (severity)`.
 
 | Keyword               | Rule directories                                                                                                                                               |
 | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `stack`               | all of `react-19/`, `react-perf/`, `next-16/`, `typescript-strict/`, `tailwind-v4/`, `prisma-6/`, `authjs/`, `neon/`, `s3/` (version/import/deprecation rules) |
+| `stack`               | all of `react-19/`, `react-perf/`, `next-16/`, `typescript-strict/`, `tailwind-v4/`, `prisma-6/`, `authjs/`, `neon/`, `s3/`, `cloudflare/`, `gsap/` (version/import/deprecation rules) |
 | `pattern`             | `.claude/patterns/cards/` + `next-16/` + `react-19/`                                                                                                           |
 | `design`              | `tailwind-v4/` (tokens, OKLCH, logical properties) + component-hierarchy cards                                                                                 |
-| `guard`               | `authjs/` + `prisma-6/` (tenant scope) + `s3/` (presigned URLs)                                                                                                |
+| `guard`               | `authjs/` + `prisma-6/` (tenant scope) + `s3/` (presigned URLs) + `cloudflare/` (secrets, per-request isolation)                                                |
 | `trace` / `efficient` | `react-perf/` (parallelization, bundle, RSC-boundary rules — impact-tagged)                                                                                    |
+| `motion` / `animation` / `scroll` | `gsap/` (useGSAP scope, ScrollTrigger lifecycle, reduced motion, Arabic SplitText)                                                                 |
 
-Domains (38 rules total): `react-19` (5), `react-perf` (8 — vendored from vercel-labs/agent-skills, 2026-07-10), `next-16` (6), `typescript-strict` (4), `tailwind-v4` (4), `prisma-6` (4), `authjs` (3), `neon` (2), `s3` (2).
+Domains (55 rules total): `react-19` (6), `react-perf` (8 — vendored from vercel-labs/agent-skills, 2026-07-10), `next-16` (8), `typescript-strict` (5), `tailwind-v4` (5), `prisma-6` (6 — each rule states whether it holds for Prisma 6, 7 or both), `authjs` (3), `neon` (2), `s3` (2), `cloudflare` (5, 2026-09-26), `gsap` (5, 2026-09-26).
 
 Adding a rule: drop a new `<slug>.md` in the right domain dir with the standard frontmatter (`domain` / `severity` / `paths` glob array / `since`) + Good/Bad/Fix. No agent changes needed — the keyword reads the whole dir, and `paths` scopes the ambient auto-load.

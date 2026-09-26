@@ -37,7 +37,7 @@ Kun is a **configuration engine** — not a server, not a platform. It sits as t
 │                                                                  │
 │  Layer 1: Foundation (Anthropic-provided)                       │
 │  ┌────────────────────────────────────────────────────────────┐ │
-│  │ Opus 4.8 │ Sonnet 4.6 │ Haiku 4.5 │ 1M Context │ API    │ │
+│  │ Opus 5.5 │ Sonnet 5 │ Haiku 4.5 │ 1M Context │ Subscr.  │ │
 │  └────────────────────────────────────────────────────────────┘ │
 │                                                                  │
 └─────────────────────────────────────────────────────────────────┘
@@ -53,8 +53,8 @@ The models and API that power everything. Kun selects optimally within this laye
 
 | Model          | Use Case                                    | Kun Usage                                        |
 | -------------- | ------------------------------------------- | ------------------------------------------------ |
-| **Opus 4.8**   | Architecture, complex features, code review | Default for all agents and skills                |
-| **Sonnet 4.6** | Fast iteration, routine changes             | Quick fixes, standard build agents               |
+| **Opus 5.5**   | Main loop, architecture, complex features, review | Session default + `opus`-tier agents and skills |
+| **Sonnet 5**   | Fast iteration, routine changes             | Quick fixes, standard build agents               |
 | **Haiku 4.5**  | Search, lookups, simple queries             | Explore subagent type, routine/formatting agents |
 
 ### Cost Context
@@ -408,6 +408,8 @@ All products and workflows must be accessible:
 **Decision**: Default to Opus 4.8 for all agents and primary work; Sonnet 4.6 for standard build agents; Haiku 4.5 for exploration/routine. Fallback chain in settings (`fallbackModel: opus-4-8 → sonnet-4-6`). Source of truth: `.claude/engine.json` → `model_tiers`.
 
 **Rationale**: Architecture-first approach values output quality over cost. Max 5x plan ($100/mo), subscription-only — tiering and fallbacks keep the engine inside plan caps with zero per-token spend.
+
+**Amended 2026-09-26**: the main loop and the `opus` tier run **Opus 5.5** (`claude-opus-5-5`, $4/$20 — cheaper per token than Opus 4.8 and at Fable 5.1's level on most work); fallbacks `opus-5 → sonnet-5`; Fable 5.1 is a `/model` escalation only (headless Fable can bill usage credits). Source of truth unchanged: `.claude/engine.json`.
 
 ### ADR-004: Hogwarts-First Product Strategy
 

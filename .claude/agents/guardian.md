@@ -92,7 +92,7 @@ All 14 repos use SSPL license. For every new dependency:
 1. Check license compatibility (MIT, Apache 2.0, BSD = OK)
 2. Flag GPL, AGPL, proprietary = REVIEW NEEDED
 3. No dependency may force relicensing of databayt code
-4. Document all license decisions in PR description
+4. Document all license decisions in the commit body
 
 ## Tools
 

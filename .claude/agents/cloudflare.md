@@ -17,23 +17,26 @@ HTTP 402. Do not propose returning to Vercel without a settled billing method.
 
 ## The one decision that shapes everything: Worker or Container?
 
-A Cloudflare **Worker** has a hard **10 MiB gzipped** script ceiling (3 MiB on the free plan).
-Measure before choosing — do not assume.
+Since 2026-09-04 a Cloudflare **Worker** may be up to **64 MiB uncompressed** on Free and Paid
+alike — there is no compressed-size limit any more — and it must still parse and run its global
+scope within the **1 s startup limit**. Measure the build you would ship — do not assume.
 
 ```bash
 npx opennextjs-cloudflare build && npx wrangler deploy --dry-run --outdir /tmp/probe
-# wrangler prints:  Total Upload: <raw> KiB / gzip: <compressed> KiB
+# wrangler prints:  Total Upload: <raw> KiB / gzip: <compressed> KiB — only the raw Total Upload counts
 ```
 
-- **Under ~8 MiB gzipped** → plain Worker via `@opennextjs/cloudflare`. Cheapest, simplest.
-- **Over the ceiling** → **Container**: the Next standalone server in a real container behind a
-  thin Worker. hogwarts measured **172 MB raw / 31.6 MB gzipped**, 3.4× over, so it is a container.
+- **Raw `Total Upload` ≤ 64 MiB** → plain Worker, no container. Cheapest, simplest.
+- **Over 64 MiB raw** → **Container**: the Next standalone server in a real container behind a
+  thin Worker. hogwarts measured **172 MB raw**, well over the limit, so it is a container.
   ~85 MB of that was compiled server chunks across 491 pages — no dependency diet closes that gap.
 
-`vinext` (Cloudflare's Vite reimplementation of Next) is **not** an option for these apps: it does
-not support next-auth and requires `"type": "module"`.
+`vinext` (Cloudflare's Vite reimplementation of the Next.js API, beta) is now **Cloudflare's
+recommended path** for Next.js on Workers; OpenNext (`@opennextjs/cloudflare`) is for existing
+OpenNext apps (co). next-auth runs on vinext with the NextRequest patch (`pnpm patch vinext` — see
+mazin and nmbd).
 
-## The container lane (hogwarts, mkan, kun)
+## The container lane (hogwarts, mkan, kun, marketing, codebase)
 
 Files per repo, all committed:
 
@@ -59,17 +62,28 @@ scripts/deploy-cloudflare.sh /tmp/prod.env deploy    # wrangler builds + pushes 
 
 Rollback is `wrangler rollback` — a swap to the previous image, not a rebuild.
 
+## The containerless lane (no container, $0 marginal)
+
+- **co** — OpenNext on a plain Worker (`co.databayt.org`); `~/co/scripts/deploy-cloudflare.sh`.
+- **mazin, nmbd, satellites** — vinext + Workers Static Assets; recipe
+  `kun/.claude/scripts/vinext-migrate.sh <repo-dir> <hostname> all`.
+- **thmanyah** — Workers Static Assets only (no `main`, no Worker code).
+
 ## Traps that cost real hours. Read before debugging.
 
-1. **Cron triggers can take ~19 hours to start firing.** Registered, listed by the API, shown in
-   the dashboard with next-run times — and delivering nothing. Verified on hogwarts with a
-   deliberate `* * * * *` probe across three boundaries. They then began working on their own. **Do
-   not build a workaround on day one.** A standalone cron Worker was built and deleted for this.
+1. **New cron triggers once took ~19 hours to start firing — an observed anomaly.** Cloudflare
+   documents that adding, changing or deleting a trigger propagates in up to 15 minutes. On
+   hogwarts they were registered, listed by the API, shown in the dashboard with next-run times —
+   and delivered nothing, verified with a deliberate `* * * * *` probe across three boundaries.
+   They then began working on their own. **Do not build a workaround on day one.** A standalone
+   cron Worker was built and deleted for this.
 2. **Omitting `"triggers"` from `wrangler.jsonc` does NOT remove existing schedules.** A deploy
    without the key left all 16 in place. Set the array explicitly to change it.
-3. **`wrangler tail` does not work from Abdout's network** (blocked IP range). Use the
-   observability telemetry API or the `cloudflare-observability` MCP. Filter `$metadata.service`
-   and check `$workers.eventType` for `scheduled` vs `fetch`.
+3. **`wrangler tail` can be blocked or flaky on Abdout's network** (blocked IP range). Try
+   `wrangler tail --format=json` first; when it will not connect, read Workers Logs — the Worker's
+   Observability tab or the telemetry API. Filter `$metadata.service` and check
+   `$workers.eventType` for `scheduled` vs `fetch`. (The `cloudflare-observability` MCP is not
+   registered — pending a decision.)
 4. **Docker needs the `buildx` plugin** for wrangler's `docker build --load`:
    `brew install docker-buildx` plus a symlink into `~/.docker/cli-plugins`.
 5. **Image push fails transiently** with `Docker command exited with code: 1` after pushing some
@@ -99,8 +113,10 @@ grey-clouded record resolves straight to the old origin. So:
 
 - Cutover = toggle the cloud per record. Rollback = toggle it back. Record targets never change.
 - One proxied `*` CNAME covers **every** tenant subdomain — new schools need no DNS work.
-- The API token in `~/.zshrc` has **Workers Routes:Edit but NOT DNS:Edit**, so record toggles are a
-  dashboard click (or use the `cloudflare-api` MCP once authenticated).
+- The API token in `~/.zshrc` has **Workers Routes:Edit but NOT DNS:Edit**. DNS writes use the
+  Keychain token **`cloudflare-zones`** (Zone + DNS edit, minted 2026-09-18;
+  `security find-generic-password -a "$USER" -s cloudflare-zones -w`, as `kun/scripts/cf-zone.sh`
+  does) or a dashboard click. The `cloudflare-api` MCP is not registered — pending a decision.
 - Workers _custom domains_ (`custom_domain: true`) cannot replace records that already exist
   without DNS rights — the API accepts the call and changes nothing.
 
@@ -131,15 +147,19 @@ Deploying code ahead of its DDL produces "column does not exist" 500s on live pa
 
 ## Cost, measured not estimated
 
-Workers Paid is $5/month. hogwarts' container billed **$0.19** in its first period — Cloudflare
-charges active compute, not allocated vCPU, so list-price estimates overstate it badly. Pro on a
+Workers Paid is $5/month. hogwarts' container billed **$0.19** in its first period. Containers
+bill **CPU on active use** only, but **memory and disk on the provisioned instance size** for as
+long as the instance runs — a vCPU list-price estimate overstates the CPU part, while an always-on
+instance still pays for its memory and disk. From **2026-10-01** trace spans bill as Workers
+Observability events (same quota as logs: 20 M/month on Paid, then $0.60 per million). Pro on a
 zone is $25/month. Real invoices: $0.00 for months, then $10.46 and $2.74.
 
 ## MCP servers
 
-`cloudflare-docs` (open), `cloudflare-api` (full API incl. DNS), `cloudflare-observability` (logs
-and analytics), `cloudflare-bindings` (Workers/KV/R2/D1). The last three need one OAuth sign-in via
-`/mcp`.
+Only **`cloudflare-docs`** (`https://docs.mcp.cloudflare.com/mcp`, no auth) is registered. The
+Code Mode `cloudflare-api` (`https://mcp.cloudflare.com/mcp`) and `cloudflare-observability`
+(`https://observability.mcp.cloudflare.com/mcp`) servers are **not registered — pending a
+decision**; work through `wrangler`, the telemetry API and the Keychain tokens instead.
 
 ## Handoff
 

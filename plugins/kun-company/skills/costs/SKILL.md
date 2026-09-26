@@ -13,7 +13,7 @@ Arguments: $ARGUMENTS (optional: "monthly" for full report, or specific service 
 Steps:
 
 1. Gather cost data:
-   - Claude Max subscription: $200/mo (fixed)
+   - Claude Max subscription: fixed plan cost — see .claude/CLAUDE.md → Billing (subscription-only, no API spend)
    - Vercel: Check usage tier and bandwidth (vercel MCP)
    - Neon: Check branch count, compute hours (neon MCP)
    - Stripe: Calculate transaction fees from recent volume (stripe MCP)

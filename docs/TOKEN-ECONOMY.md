@@ -15,9 +15,9 @@ community practice (r/ClaudeCode). Adopted 2026-07-26.
 | Fact                                                          | Consequence                                                                                   |
 | ------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
 | All Anthropic surfaces draw one Max pool                      | Product delegation shifts _tokens-per-outcome_, not quota; only `a`/`h` lanes are off-pool    |
-| Fable/Mythos tokenizer counts ~30% more than pre-4.7 models   | Never reuse old token estimates; recount against `claude-fable-5`                             |
-| Fable cannot disable extended thinking                        | **Effort is the lever** (`/effort`, agent `effort:` frontmatter, Workflow `opts.effort`)      |
-| Opus-class burns ~5× sonnet against plan windows              | Down-tier every task that doesn't need judgment                                               |
+| The 4.7-generation-on tokenizer counts ~35% more than earlier | Never reuse old token estimates; recount against the current model (`engine.json` → `model`)                             |
+| Opus 5.5 and Fable cannot turn thinking off                   | **Effort is the lever** (`/effort`, agent `effort:` frontmatter, Workflow `opts.effort`)      |
+| Opus 5.5 lists at 2× Sonnet 5 per token ($4/$20 vs $2/$10)    | Down-tier routine work, but judge per solved task — on nextjs.org/evals Opus 5.5 solved more for less |
 | Prompt-cache TTL is 1h on subscription                        | A >1h idle gap reprocesses full context on the next message — batch touches inside the window |
 | Full conversation travels with every message                  | A one-line question in an all-day session pays for the whole day — `/clear` between tasks     |
 | MCP schemas are deferred, but names + instructions still load | 25 registered global servers ≈ hundreds of tool names in every session's preamble             |
@@ -30,8 +30,8 @@ Already encoded in agent frontmatter; `engine.json → model_tiers` is the doctr
 
 | Tier   | Agents                                 | Work                                                 |
 | ------ | -------------------------------------- | ---------------------------------------------------- |
-| fable  | main loop only                         | Interactive judgment, captain-grade calls            |
-| opus   | strategy/leadership + deep specialists | Architecture, review, fixes, product references      |
+| opus   | main loop + strategy/leadership + deep specialists | Interactive judgment, architecture, review, fixes |
+| fable  | `/model` escalation only               | Never in agents, fallbacks, or headless `-p` runs    |
 | sonnet | build agents                           | Standard implementation with known patterns          |
 | haiku  | mechanical agents                      | Formatting, git, icons, comments, routine transforms |
 
@@ -43,12 +43,12 @@ returns.
 
 New dimension added 2026-07-26: **every agent carries `effort:` frontmatter** matching its
 model tier — haiku→`low`, sonnet→`medium`, opus→`high`; judgment tier (captain, architecture,
-orchestration)→`xhigh`. Thinking tokens bill as output tokens; on Fable this is the only
-thinking control that exists.
+orchestration)→`xhigh`. Thinking tokens bill as output tokens; on Opus 5.5 and Fable this is the
+only thinking control that exists. Haiku 4.5 has no effort levels — `effort: low` is a no-op there.
 
 - Main loop: default effort stays as set in `/model`; raise to xhigh only for explicit deep-design asks.
 - Workflow scripts: pass `opts.effort` per stage — `low` for mechanical stages, `high`+ only for verify/judge stages.
-- Non-Fable models: `MAX_THINKING_TOKENS=8000` is available, but prefer effort levels — they survive model switches.
+- Models that can disable thinking: `MAX_THINKING_TOKENS=8000` is available, but prefer effort levels — they survive model switches.
 
 ## Axis 3 — product lane (which surface hosts the work)
 

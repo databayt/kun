@@ -36,7 +36,7 @@
     "figma": {
       "type": "http",
       "url": "https://mcp.figma.com/mcp",
-      "description": "Figma hosted MCP (OAuth) — works app-open or closed. Free Starter: reads (get_design_context/screenshot/metadata) capped 6/month; writes (generate_figma_design, add_code_connect_map, whoami) exempt. Reserve reads for critical pulls; use window screenshots for everyday design reading."
+      "description": "Figma hosted MCP (OAuth) — works app-open or closed. Free Starter: 20 tool calls/MONTH total — reads AND writes (get_screenshot, get_metadata, use_figma, generate_figma_design) all meter; only add_code_connect_map, create_new_file, whoami are exempt. Budget the whole job before the first call; use window screenshots for everyday design reading."
     },
     "figma-desktop": {
       "type": "http",

@@ -15,5 +15,10 @@ SAME commit must carry:
 2. `node .claude/scripts/generate-vocab.mjs` re-run if the change touches any vocabulary target
 3. `bash .claude/scripts/build-plugin.sh` re-run (plugin parity)
 
+**Personal beats project.** setup.sh installs every kun skill into `~/.claude/skills/`, and when a
+name exists in both, Claude Code runs the personal copy — so inside a kun session an edited
+`.claude/skills/<name>/SKILL.md` does not run until setup re-copies it (the daily maintain heartbeat
+does; `bash .claude/scripts/setup.sh` does it now). Test a skill edit only after that.
+
 Verify before committing: `bash .claude/scripts/health.sh` — the engine section must be all ✅.
 A fleet commit that leaves health warning is a broken commit even if the build is green.

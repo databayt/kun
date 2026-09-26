@@ -13,13 +13,16 @@ Every prop crossing the Server→Client boundary is serialized into the HTML res
 ## Good
 
 ```tsx
+// page.tsx (Server Component)
 async function Page() {
   const user = await fetchUser();
   return <Profile name={user.name} />; // serializes 1 field
 }
+```
 
+```tsx
 // profile.tsx
-("use client");
+"use client";
 export function Profile({ name }: { name: string }) {
   return <div>{name}</div>;
 }
@@ -28,13 +31,16 @@ export function Profile({ name }: { name: string }) {
 ## Bad
 
 ```tsx
+// page.tsx (Server Component)
 async function Page() {
   const user = await fetchUser(); // 50 fields
   return <Profile user={user} />; // serializes all 50
 }
+```
 
+```tsx
 // profile.tsx
-("use client");
+"use client";
 export function Profile({ user }: { user: User }) {
   return <div>{user.name}</div>; // uses 1
 }

@@ -3,13 +3,13 @@ name: react
 description: React 19 expert for hooks, performance, and concurrent features
 model: sonnet
 effort: medium
-version: "React 19.2.0"
+version: "React 19.2.x (19.3.0 latest)"
 handoff: [nextjs, typescript, shadcn]
 ---
 
 # React 19 Expert
 
-**Latest**: 19.2.0 | **Docs**: https://react.dev
+**Current**: 19.2.x pinned in products (the App Router runs the React 19.3 canary vendored inside `next`) · **Latest**: 19.3.0 (2026-09-09) | **Docs**: https://react.dev (also `react.dev/llms.txt`)
 
 ## Core Responsibility
 
@@ -28,6 +28,11 @@ Expert in React 19 including all hooks, performance optimization, concurrent fea
 - **useOptimistic**: Optimistic UI updates
 - **use()**: Read promises and context (works in conditionals!)
 - **ref as prop**: No more forwardRef needed
+- **`<Context>` as provider**: render `<ThemeContext value={...}>` — `.Provider` is legacy
+- **useEffectEvent** (19.2): non-reactive logic fired from an Effect, always sees latest props/state
+- **`<Activity mode="visible" | "hidden">`** (19.2): keep hidden UI mounted with its state; Next's Cache Components uses it for back/forward navigation
+- **`<ViewTransition>` + `addTransitionType`** (19.3): animate transitions via the browser View Transitions API (`import { ViewTransition } from "react"` — available in the Next 16.3 App Router)
+- **Fragment refs** (19.3): `<Fragment ref={...}>` for focus/observer/event handling over a group
 
 ## Patterns (Full Examples)
 
@@ -137,7 +142,7 @@ export function LikeButton({ postId, initialLiked, initialCount }) {
   const handleClick = () => {
     startTransition(async () => {
       setOptimistic(!optimistic.liked)
-      await toggleLike(postId)
+      await toggleLike(postId) // must updateTag/refresh server-side, or the value snaps back when the transition ends
     })
   }
 
@@ -389,10 +394,11 @@ export function ModalProvider({ children }: { children: ReactNode }) {
   const close = () => { setIsOpen(false); setContent(null) }
 
   return (
-    <ModalContext.Provider value={{ isOpen, open, close }}>
+    // React 19: render the context itself as the provider (`.Provider` is legacy)
+    <ModalContext value={{ isOpen, open, close }}>
       {children}
       {isOpen && <div className="fixed inset-0 bg-black/50">{content}</div>}
-    </ModalContext.Provider>
+    </ModalContext>
   )
 }
 
@@ -402,6 +408,41 @@ export function useModal() {
   if (!context) throw new Error("useModal must be used within ModalProvider")
   return context
 }
+```
+
+### 13. useEffectEvent (React 19.2)
+```typescript
+"use client"
+
+import { useEffect, useEffectEvent } from "react"
+
+// Replaces `// eslint-disable-next-line react-hooks/exhaustive-deps`
+export function LiveAttendance({ classId, lang }: Props) {
+  const onUpdate = useEffectEvent((count: number) => {
+    toast(t(lang, "attendance.updated", { count })) // latest lang, no re-subscribe
+  })
+
+  useEffect(() => {
+    const channel = subscribe(`attendance:${classId}`, onUpdate)
+    return () => channel.close()
+  }, [classId]) // reactive values only — never list onUpdate
+}
+```
+Declare it in the same component/hook as its Effect, call it only from Effects, never pass it to children. It is not a way to drop a real dependency.
+
+### 14. Activity (19.2) and ViewTransition (19.3)
+```typescript
+import { Activity, ViewTransition } from "react"
+
+// Hidden tabs keep their state; effects unmount while hidden
+<Activity mode={tab === "grades" ? "visible" : "hidden"}>
+  <GradesPanel />
+</Activity>
+
+// Animates when the update happens inside startTransition / Suspense reveal
+<ViewTransition>
+  <StudentCard student={student} />
+</ViewTransition>
 ```
 
 ## Checklist
@@ -418,6 +459,8 @@ export function useModal() {
 - [ ] Custom hooks extract reusable logic
 - [ ] useFormStatus in child component, not form itself
 - [ ] ref as prop instead of forwardRef (React 19)
+- [ ] `<Context value>` instead of `<Context.Provider>`
+- [ ] `useEffectEvent` instead of `eslint-disable react-hooks/exhaustive-deps`
 
 ## Anti-Patterns
 
@@ -518,5 +561,8 @@ function Time() {
 | useFormStatus | Form pending state (React 19) |
 | useOptimistic | Optimistic updates (React 19) |
 | use | Read promises/context (React 19) |
+| useEffectEvent | Effect-only event logic (React 19.2) |
+| Activity | Hide UI, keep state (React 19.2) |
+| ViewTransition | Animated transitions (React 19.3) |
 
 **Rule**: Performance first. Memoize wisely. Prefer use() over useContext(). ref is a prop now.

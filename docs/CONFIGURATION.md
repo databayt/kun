@@ -35,12 +35,12 @@ Kun's value is its configuration. This is the complete blueprint of every settin
 
 ```json
 {
-  "model": "claude-opus-4-8",
-  "fallbackModel": ["claude-opus-4-8", "claude-sonnet-4-6"]
+  "model": "opus",
+  "fallbackModel": ["claude-opus-5", "claude-sonnet-5"]
 }
 ```
 
-Default: Opus 4.8 (`.claude/engine.json` → `model_tiers`). `fallbackModel` (array, max 3) kicks in on overload/unavailability.
+Default: the `opus` alias → Opus 5.5 (`claude-opus-5-5`, since 2026-09-26; canonical in `.claude/engine.json` → `model`). `fallbackModel` (array, max 3) kicks in on overload/unavailability — current-generation and never Fable, which can bill usage credits in headless runs.
 
 ### Environment Variables
 
@@ -87,9 +87,9 @@ Default: Opus 4.8 (`.claude/engine.json` → `model_tiers`). `fallbackModel` (ar
 
 | Setting             | Value                                                                   |
 | ------------------- | ----------------------------------------------------------------------- |
-| Model               | Opus 4.8                                                                |
+| Model               | Opus 5.5 (see `.claude/engine.json`)                                    |
 | Package manager     | pnpm                                                                    |
-| Stack               | Next.js 16, React 19, Prisma 6, TypeScript 5, Tailwind CSS 4, shadcn/ui |
+| Stack               | Next.js 16, React 19, Prisma 6–7, TypeScript 5.9–6, Tailwind CSS 4, shadcn/ui |
 | Languages           | Arabic (RTL default), English (LTR)                                     |
 | Port                | Always 3000                                                             |
 | Environment         | Single .env only                                                        |

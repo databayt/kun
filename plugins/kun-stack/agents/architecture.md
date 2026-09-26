@@ -599,7 +599,7 @@ const hasAccess = await db.userSchool.findUnique({
 ## Self-Improvement
 
 ```bash
-npx prisma --version    # Current: 6.14.x
+pnpm exec prisma --version    # Products: 6.19 (hogwarts, codebase, shifa, souq) · 7.8–7.9 (kun, mkan, marketing). Never bare npx: npm latest is the v8 RC
 ```
 
 - Prisma Docs: https://www.prisma.io/docs
