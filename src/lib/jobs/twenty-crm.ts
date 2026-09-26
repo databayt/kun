@@ -43,7 +43,46 @@ const CAMPAIGN_OPTION: Record<string, string> = {
   "kivu-marine-eto": "MARINE_ETO",
   "kigali-web-developer": "WEB_DEVELOPER",
   "remote-web-developer-worldwide": "REMOTE_WORLDWIDE",
+  "ai-training-gigs": "AI_TRAINING",
+  "freelance-contracts": "FREELANCE",
+  "rwanda-tenders-databayt": "TENDER",
+  "engineering-contracts": "ENGINEERING_CONTRACT",
 };
+
+/// The Kigali object's `applicationStatus` SELECT is coarser than the engine's
+/// JobOpportunityStatus: every pre-application state is TO_APPLY, and the
+/// interview rounds collapse into INTERVIEW.
+const STATUS_OPTION: Record<string, string> = {
+  discovered: "TO_APPLY",
+  analyzed: "TO_APPLY",
+  qualified: "TO_APPLY",
+  high_priority: "TO_APPLY",
+  preparing: "TO_APPLY",
+  ready_to_apply: "TO_APPLY",
+  applied: "APPLIED",
+  response: "RESPONSE",
+  screen: "RESPONSE",
+  interview: "INTERVIEW",
+  technical_round: "INTERVIEW",
+  final_round: "INTERVIEW",
+  offer: "OFFER",
+  rejected: "REJECTED",
+  withdrawn: "ARCHIVED",
+};
+
+export function crmStatusFor(status: string): string | undefined {
+  return STATUS_OPTION[status];
+}
+
+interface PushOptions {
+  /// Override the text-matched lane when the source already knows it (a scan
+  /// that went looking for AI-training gigs should not land in REMOTE_WORLDWIDE).
+  campaignId?: string;
+  /// YYYY-MM-DD; "rolling" and anything unparseable are left empty.
+  deadline?: string;
+  /// Free text appended to the assessment: how to apply, why it fits.
+  note?: string;
+}
 
 const TIER_OPTION: Record<string, string> = {
   "High Priority": "HIGH_PRIORITY",
@@ -131,24 +170,28 @@ async function resolveCompanyId(
 
 export async function pushJobToTwentyCRM(
   job: FullJobWithAssessment,
+  opts: PushOptions = {},
 ): Promise<TwentyPushResult> {
   const apiUrl = (process.env.TWENTY_API_URL ?? "http://localhost:3100").replace(/\/+$/, "");
   const apiKey = getDatabytTwentyKey();
 
   if (!apiKey) {
-    // Offline or unprovisioned: report a simulated sync rather than throwing,
-    // so the /jobs card still gives the user an answer.
+    // Never report success without a write: a fabricated id used to land in
+    // JobOpportunity.twentyOpportunityId and point at nothing (kun#154).
     return {
-      ok: true,
-      opportunityId: `twenty-mock-${Date.now()}`,
-      url: "https://sales.databayt.org",
+      ok: false,
+      error: "No Twenty API key",
       message:
-        "Simulated sync to the Kigali object (Databayt workspace, sales.databayt.org). Set TWENTY_API_KEY_DATABAYT for a real push.",
+        "Not synced — no Databayt API key. Set TWENTY_API_KEY_DATABAYT or the Keychain entry databayt-twenty/databayt.",
     };
   }
 
   const fingerprint = generateJobFingerprint(job.title, job.company, job.remoteType);
-  const matchedCampaign = evaluateCampaignMatches(job).find((id) => id in CAMPAIGN_OPTION);
+  const matchedCampaign =
+    opts.campaignId && opts.campaignId in CAMPAIGN_OPTION
+      ? opts.campaignId
+      : evaluateCampaignMatches(job).find((id) => id in CAMPAIGN_OPTION);
+  const deadline = opts.deadline && /^\d{4}-\d{2}-\d{2}$/.test(opts.deadline) ? `${opts.deadline}T23:59:00Z` : null;
 
   const assessment = job.assessment
     ? `${job.description}\n\n` +
@@ -159,6 +202,7 @@ export async function pushJobToTwentyCRM(
       `Talking points:\n${job.assessment.talkingPoints.map((t) => `• ${t}`).join("\n")}\n\n` +
       `Fingerprint: ${fingerprint}`
     : `${job.description}\n\nNo assessment generated yet.\n\nFingerprint: ${fingerprint}`;
+  const assessmentWithNote = opts.note ? `${assessment}\n\nNote: ${opts.note}` : assessment;
 
   try {
     // Idempotency. The button is a button — it gets pressed twice, and without
@@ -201,6 +245,7 @@ export async function pushJobToTwentyCRM(
         remoteType: job.remoteType.toUpperCase(),
         employmentType: job.employmentType.toUpperCase(),
         location: job.location ?? null,
+        deadline,
         ...(job.sourceUrl
           ? {
               jobUrl: {
@@ -214,7 +259,7 @@ export async function pushJobToTwentyCRM(
         fingerprint,
         // RICH_TEXT is a composite of { blocknote, markdown }, not a string.
         // Twenty renders blocknote from the markdown on write.
-        assessment: { blocknote: null, markdown: assessment },
+        assessment: { blocknote: null, markdown: assessmentWithNote },
       },
     });
 
@@ -226,8 +271,14 @@ export async function pushJobToTwentyCRM(
       };
     }
 
-    const opportunityId =
-      res.body.data?.createKigaliOpportunity?.id ?? res.body.data?.id ?? `twenty-${Date.now()}`;
+    const opportunityId = res.body.data?.createKigaliOpportunity?.id ?? res.body.data?.id;
+    if (!opportunityId) {
+      return {
+        ok: false,
+        error: `Twenty returned ${res.status} without a record id`,
+        message: "Push response had no id — check the Kigali object before retrying.",
+      };
+    }
 
     return {
       ok: true,
@@ -241,5 +292,43 @@ export async function pushJobToTwentyCRM(
       error: err instanceof Error ? err.message : "Network error reaching Twenty CRM.",
       message: "Twenty CRM unreachable — the Docker stack on port 3100 may be asleep.",
     };
+  }
+}
+
+/// Move a record along the pipeline. `status` is the engine's
+/// JobOpportunityStatus; it is mapped onto the coarser CRM select. An optional
+/// line is appended to the assessment so outcome feedback is kept somewhere a
+/// human will read it — JobOpportunity has no column for it.
+export async function updateTwentyApplicationStatus(
+  opportunityId: string,
+  status: string,
+  logLine?: string,
+): Promise<{ ok: boolean; message: string }> {
+  const apiUrl = (process.env.TWENTY_API_URL ?? "http://localhost:3100").replace(/\/+$/, "");
+  const apiKey = getDatabytTwentyKey();
+  const applicationStatus = STATUS_OPTION[status];
+  if (!apiKey) return { ok: false, message: "No Twenty API key." };
+  if (!applicationStatus) return { ok: false, message: `No CRM status for "${status}".` };
+
+  try {
+    const body: Record<string, unknown> = { applicationStatus };
+    if (logLine) {
+      const current = await call(apiUrl, `${KIGALI_PATH}/${opportunityId}`, apiKey, { method: "GET" });
+      const record = (current.body.data as unknown as {
+        kigaliOpportunity?: { assessment?: { markdown?: string } };
+      })?.kigaliOpportunity;
+      const stamp = new Date().toISOString().slice(0, 10);
+      body.assessment = {
+        blocknote: null,
+        markdown: `${record?.assessment?.markdown ?? ""}\n\n${stamp} — ${applicationStatus}: ${logLine}`,
+      };
+      await sleep(THROTTLE_MS);
+    }
+    const res = await call(apiUrl, `${KIGALI_PATH}/${opportunityId}`, apiKey, { method: "PATCH", body });
+    return res.ok
+      ? { ok: true, message: `CRM status → ${applicationStatus}` }
+      : { ok: false, message: `Twenty API returned ${res.status}: ${JSON.stringify(res.body).slice(0, 200)}` };
+  } catch (err) {
+    return { ok: false, message: err instanceof Error ? err.message : "Twenty CRM unreachable." };
   }
 }

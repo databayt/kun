@@ -1,11 +1,21 @@
-import { FullJobWithAssessment, JobCampaign, NormalizedJobInput } from "./types";
+import {
+  FullJobWithAssessment,
+  JobCampaign,
+  NormalizedJobInput,
+} from "./types";
 
 export const DEFAULT_CAMPAIGNS: JobCampaign[] = [
   {
     id: "campaign-remote-ai-builder",
     name: "Remote Full-Stack AI Builder",
-    description: "Global remote roles focused on Next.js, AI SDK integration, and high-velocity product delivery.",
-    targetRoles: ["Full-Stack AI Engineer", "AI Application Engineer", "Product Engineer", "Full-Stack Engineer"],
+    description:
+      "Global remote roles focused on Next.js, AI SDK integration, and high-velocity product delivery.",
+    targetRoles: [
+      "Full-Stack AI Engineer",
+      "AI Application Engineer",
+      "Product Engineer",
+      "Full-Stack Engineer",
+    ],
     targetLocations: ["Remote", "Global", "US Remote", "Europe Remote"],
     remoteOnly: true,
     minOverallScore: 75,
@@ -16,9 +26,23 @@ export const DEFAULT_CAMPAIGNS: JobCampaign[] = [
   {
     id: "campaign-mena-startups",
     name: "Gulf & MENA Startup Engineering",
-    description: "High-growth startup and scaleup opportunities in Saudi Arabia, UAE, and Qatar.",
-    targetRoles: ["Founding Engineer", "Lead Full-Stack Engineer", "Senior Software Engineer", "SaaS Architect"],
-    targetLocations: ["Saudi Arabia", "Riyadh", "UAE", "Dubai", "Qatar", "Doha", "Remote"],
+    description:
+      "High-growth startup and scaleup opportunities in Saudi Arabia, UAE, and Qatar.",
+    targetRoles: [
+      "Founding Engineer",
+      "Lead Full-Stack Engineer",
+      "Senior Software Engineer",
+      "SaaS Architect",
+    ],
+    targetLocations: [
+      "Saudi Arabia",
+      "Riyadh",
+      "UAE",
+      "Dubai",
+      "Qatar",
+      "Doha",
+      "Remote",
+    ],
     remoteOnly: false,
     minOverallScore: 70,
     minBuilderFit: 85,
@@ -28,25 +52,48 @@ export const DEFAULT_CAMPAIGNS: JobCampaign[] = [
   {
     id: "campaign-founding-engineer",
     name: "0-to-1 Founding Product Engineer",
-    description: "Early-stage startup roles seeking generalists with end-to-end product ownership.",
-    targetRoles: ["Founding Engineer", "Lead Product Engineer", "Staff Software Engineer", "CTO / Technical Co-founder"],
+    description:
+      "Early-stage startup roles seeking generalists with end-to-end product ownership.",
+    targetRoles: [
+      "Founding Engineer",
+      "Lead Product Engineer",
+      "Staff Software Engineer",
+      "CTO / Technical Co-founder",
+    ],
     targetLocations: ["Remote", "Global"],
     remoteOnly: true,
     minOverallScore: 70,
     minBuilderFit: 90,
-    focusKeywords: ["0 to 1", "Founding", "Product", "Generalist", "Full-Stack"],
+    focusKeywords: [
+      "0 to 1",
+      "Founding",
+      "Product",
+      "Generalist",
+      "Full-Stack",
+    ],
     isActive: true,
   },
   {
     id: "campaign-design-systems",
     name: "Senior Frontend & Design Systems",
-    description: "Roles valuing pixel-exact design craftsmanship, atomic component architecture, and accessibility.",
-    targetRoles: ["Senior Frontend Engineer", "Design Systems Engineer", "UI Architect"],
+    description:
+      "Roles valuing pixel-exact design craftsmanship, atomic component architecture, and accessibility.",
+    targetRoles: [
+      "Senior Frontend Engineer",
+      "Design Systems Engineer",
+      "UI Architect",
+    ],
     targetLocations: ["Remote", "Global"],
     remoteOnly: true,
     minOverallScore: 80,
     minBuilderFit: 70,
-    focusKeywords: ["Design System", "Tailwind CSS", "React", "Radix", "Component"],
+    focusKeywords: [
+      "Design System",
+      "Tailwind CSS",
+      "React",
+      "Radix",
+      "Component",
+    ],
     isActive: true,
   },
 
@@ -202,7 +249,14 @@ export const DEFAULT_CAMPAIGNS: JobCampaign[] = [
       "Product Engineer",
       "Founding Engineer",
     ],
-    targetLocations: ["Remote", "Worldwide", "Global", "EMEA", "Europe Remote", "US Remote"],
+    targetLocations: [
+      "Remote",
+      "Worldwide",
+      "Global",
+      "EMEA",
+      "Europe Remote",
+      "US Remote",
+    ],
     remoteOnly: true,
     minOverallScore: 70,
     minBuilderFit: 40,
@@ -219,6 +273,157 @@ export const DEFAULT_CAMPAIGNS: JobCampaign[] = [
     ],
     isActive: true,
   },
+  // The four lanes below were added 2026-09-26 for the low-hanging-fruit push:
+  // each one pays faster or bigger than a salaried application, and each one is
+  // reachable from Kigali. Mirrored in jobs/kigali-campaigns.json.
+  {
+    id: "ai-training-gigs",
+    name: "AI Training & Evaluation Gigs",
+    description:
+      "Paid-by-the-hour model training and evaluation work — Arabic writing and review, TypeScript/React coding tasks, electrical-engineering expert questions — on Mindrift, Outlier, DataAnnotation, Alignerr, Turing, Mercor, Micro1. Fastest first dollar: onboarding in days, weekly payout.",
+    targetRoles: [
+      "AI Trainer",
+      "AI Tutor",
+      "Evaluator",
+      "Annotator",
+      "Arabic Writer",
+      "Arabic Language Expert",
+      "Coding Expert",
+      "Electrical Engineering Expert",
+      "Prompt Engineer",
+    ],
+    targetLocations: ["Remote", "Worldwide", "Rwanda", "Africa"],
+    remoteOnly: true,
+    minOverallScore: 50,
+    minBuilderFit: 0,
+    focusKeywords: [
+      "AI training",
+      "LLM",
+      "RLHF",
+      "evaluation",
+      "annotation",
+      "Arabic",
+      "native Arabic",
+      "coding expert",
+      "domain expert",
+      "freelance",
+      "per hour",
+    ],
+    isActive: true,
+  },
+  {
+    id: "freelance-contracts",
+    name: "Freelance & Contract Builds",
+    description:
+      "Fixed-scope and hourly web builds sold as a freelancer or as Databayt: Next.js/React apps, Arabic RTL sites, dashboards, SaaS MVPs. Channels: Upwork, Contra, Arc, Toptal, Gun.io, direct referrals in Kigali.",
+    targetRoles: [
+      "Freelance",
+      "Contract",
+      "Contractor",
+      "Next.js Developer",
+      "React Developer",
+      "Full-Stack Developer",
+      "Web Developer",
+    ],
+    targetLocations: ["Remote", "Worldwide", "Kigali", "Rwanda"],
+    remoteOnly: false,
+    minOverallScore: 55,
+    minBuilderFit: 40,
+    focusKeywords: [
+      "freelance",
+      "contract",
+      "MVP",
+      "Next.js",
+      "React",
+      "RTL",
+      "Arabic",
+      "dashboard",
+      "SaaS",
+      "fixed price",
+      "hourly",
+    ],
+    isActive: true,
+  },
+  {
+    id: "rwanda-tenders-databayt",
+    name: "Rwanda Tenders — Databayt as Agency",
+    description:
+      "Software, web, digital-platform and ICT-system tenders in Rwanda that Databayt bids for as an agency: Umucyo e-procurement, UNGM, ReliefWeb/NGO RFPs, jobinrwanda tenders. Bigger tickets, slower cycle; school-management and e-learning RFPs map straight onto Hogwarts.",
+    targetRoles: [
+      "Tender",
+      "RFP",
+      "RFQ",
+      "Expression of Interest",
+      "Consultancy",
+      "Consultant",
+      "Request for Proposal",
+    ],
+    targetLocations: ["Kigali", "Rwanda"],
+    remoteOnly: false,
+    minOverallScore: 50,
+    minBuilderFit: 40,
+    focusKeywords: [
+      "tender",
+      "RFP",
+      "procurement",
+      "bid",
+      "consultancy",
+      "information system",
+      "management system",
+      "web platform",
+      "website",
+      "digital platform",
+      "e-learning",
+      "school management",
+      "software development",
+    ],
+    isActive: true,
+  },
+  {
+    id: "engineering-contracts",
+    name: "Protection & Commissioning Contracts",
+    description:
+      "Short-term protection, testing and commissioning engineer contracts in East Africa and the Gulf: relay testing, substation commissioning, OMICRON/Megger test campaigns. Rotational or project-based, day-rate pay — the SEC/SWCC 33/13.8 kV record sells directly.",
+    targetRoles: [
+      "Protection Engineer",
+      "Testing Engineer",
+      "Commissioning Engineer",
+      "Test & Commissioning",
+      "Relay Testing",
+      "Substation Engineer",
+      "SCADA Engineer",
+    ],
+    targetLocations: [
+      "Rwanda",
+      "Kenya",
+      "Uganda",
+      "Tanzania",
+      "East Africa",
+      "Saudi Arabia",
+      "UAE",
+      "Qatar",
+      "Gulf",
+    ],
+    remoteOnly: false,
+    minOverallScore: 55,
+    minBuilderFit: 0,
+    focusKeywords: [
+      "protection",
+      "relay",
+      "commissioning",
+      "substation",
+      "OMICRON",
+      "CMC",
+      "CPC 100",
+      "Megger",
+      "33kV",
+      "132kV",
+      "SCADA",
+      "contract",
+      "rotation",
+    ],
+    isActive: true,
+  },
 ];
 
 export interface PrioritizedOpportunity {
@@ -231,10 +436,11 @@ export interface PrioritizedOpportunity {
 
 export function evaluateCampaignMatches(
   job: NormalizedJobInput | FullJobWithAssessment,
-  campaigns: JobCampaign[] = DEFAULT_CAMPAIGNS
+  campaigns: JobCampaign[] = DEFAULT_CAMPAIGNS,
 ): string[] {
   const matchedIds: string[] = [];
-  const text = `${job.title} ${job.description} ${(job.requiredSkills || []).join(" ")} ${job.location || ""}`.toLowerCase();
+  const text =
+    `${job.title} ${job.description} ${(job.requiredSkills || []).join(" ")} ${job.location || ""}`.toLowerCase();
 
   for (const c of campaigns) {
     if (!c.isActive) continue;
@@ -243,8 +449,12 @@ export function evaluateCampaignMatches(
       continue;
     }
 
-    const matchesRole = c.targetRoles.some((r) => job.title.toLowerCase().includes(r.toLowerCase()));
-    const matchesKeyword = c.focusKeywords.some((k) => text.includes(k.toLowerCase()));
+    const matchesRole = c.targetRoles.some((r) =>
+      job.title.toLowerCase().includes(r.toLowerCase()),
+    );
+    const matchesKeyword = c.focusKeywords.some((k) =>
+      text.includes(k.toLowerCase()),
+    );
 
     if (matchesRole || matchesKeyword) {
       matchedIds.push(c.id);
@@ -256,7 +466,7 @@ export function evaluateCampaignMatches(
 
 export function calculateOpportunityPriority(
   job: FullJobWithAssessment,
-  campaigns: JobCampaign[] = DEFAULT_CAMPAIGNS
+  campaigns: JobCampaign[] = DEFAULT_CAMPAIGNS,
 ): PrioritizedOpportunity {
   const fitScore = job.assessment?.overallScore ?? 70;
   const builderFitScore = job.problemMatch?.builderFitScore ?? 85;
@@ -268,16 +478,18 @@ export function calculateOpportunityPriority(
   // Priority formula: 35% Job Fit + 25% Builder Fit + 20% Readiness + 20% Campaign Alignment
   const priorityScore = Math.round(
     fitScore * 0.35 +
-    builderFitScore * 0.25 +
-    readinessScore * 0.20 +
-    campaignRelevance * 0.20
+      builderFitScore * 0.25 +
+      readinessScore * 0.2 +
+      campaignRelevance * 0.2,
   );
 
   let recommendationAction = "Review & Prepare";
   if (priorityScore >= 85) {
-    recommendationAction = "High Priority: Prepare application assets & apply within 24h";
+    recommendationAction =
+      "High Priority: Prepare application assets & apply within 24h";
   } else if (priorityScore >= 70) {
-    recommendationAction = "Strong Fit: Review study checklist and tailor portfolio";
+    recommendationAction =
+      "Strong Fit: Review study checklist and tailor portfolio";
   } else if (priorityScore < 55) {
     recommendationAction = "Low Probability: Archive or monitor";
   }

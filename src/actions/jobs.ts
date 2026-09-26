@@ -15,7 +15,7 @@ import { matchJobAgainstProfile } from "@/lib/jobs/matcher";
 import { normalizeJobPosting } from "@/lib/jobs/normalizer";
 import { analyzeProblemAndBuilderFit, calculateDeterministicProblemMatch } from "@/lib/jobs/problem-matcher";
 import { generateApplicationStrategy, calculateDeterministicStrategy } from "@/lib/jobs/strategy-generator";
-import { pushJobToTwentyCRM } from "@/lib/jobs/twenty-crm";
+import { pushJobToTwentyCRM, updateTwentyApplicationStatus } from "@/lib/jobs/twenty-crm";
 import {
   ApplicationStrategy,
   CampaignConversionPerformance,
@@ -374,10 +374,18 @@ export async function updateJobStatusAction(
   status: JobStatus
 ): Promise<{ ok: boolean }> {
   try {
-    await db.jobOpportunity.update({
+    const job = await db.jobOpportunity.update({
       where: { id: jobId },
       data: { status: status as JobOpportunityStatus },
+      select: { twentyOpportunityId: true },
     });
+    // The CRM board is where the pipeline is read, so a status that only
+    // changes here is a status nobody sees. Best effort: the Mac-hosted CRM
+    // may be asleep, and the engine row is still the source of truth.
+    if (job.twentyOpportunityId) {
+      const crm = await updateTwentyApplicationStatus(job.twentyOpportunityId, status);
+      if (!crm.ok) console.warn(`CRM status not updated for ${jobId}: ${crm.message}`);
+    }
     revalidatePath("/[lang]/jobs", "page");
     return { ok: true };
   } catch (err) {
@@ -395,12 +403,28 @@ export async function recordJobOutcomeAction(
   hypothesis?: string
 ): Promise<{ ok: boolean }> {
   try {
-    await db.jobOpportunity.update({
+    const job = await db.jobOpportunity.update({
       where: { id: jobId },
       data: {
         status: status as JobOpportunityStatus,
       },
+      select: { twentyOpportunityId: true },
     });
+    // JobOpportunity has no outcome columns, so the outcome, reason, feedback
+    // and hypothesis are appended to the CRM record's assessment instead of
+    // being dropped.
+    if (job.twentyOpportunityId) {
+      const logLine = [
+        outcome && `outcome ${outcome}`,
+        reasonCategory && `reason ${reasonCategory}`,
+        feedback && `feedback: ${feedback}`,
+        hypothesis && `hypothesis: ${hypothesis}`,
+      ]
+        .filter(Boolean)
+        .join(" · ");
+      const crm = await updateTwentyApplicationStatus(job.twentyOpportunityId, status, logLine || undefined);
+      if (!crm.ok) console.warn(`CRM outcome not recorded for ${jobId}: ${crm.message}`);
+    }
     revalidatePath("/[lang]/jobs", "page");
     return { ok: true };
   } catch (err) {

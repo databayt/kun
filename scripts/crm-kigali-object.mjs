@@ -17,6 +17,7 @@ import {
   recordRows,
   twentyGet,
   twentyKey,
+  twentyPatch,
   twentyPost,
   API_URL,
 } from "./lib/twenty-rest.mjs";
@@ -26,12 +27,12 @@ const DRY_RUN = process.argv.includes("--dry-run");
 const OBJECT = {
   nameSingular: "kigaliOpportunity",
   namePlural: "kigaliOpportunities",
-  labelSingular: "Kigali Opportunity",
-  labelPlural: "Kigali",
+  labelSingular: "Opportunity",
+  labelPlural: "Jobs & Opportunities",
   icon: "IconMapPin",
   isLabelSyncedWithName: false,
   description:
-    "Job and opportunity pipeline for the Kigali stay, 31 Aug – 30 Sep 2026, plus the worldwide remote developer lane. Fed by the Kun Job Engine.",
+    "Jobs, gigs, contracts and tenders from Kigali, fed by the Kun Job Engine: Rwanda roles first, then remote, AI-training, freelance, tenders and engineering contracts. The API name stays kigaliOpportunity so every caller keeps working.",
 };
 
 const sel = (name, label, color, position) => ({ value: name, label, color, position });
@@ -57,13 +58,17 @@ const FIELDS = [
     label: "Campaign",
     type: "SELECT",
     icon: "IconTarget",
-    description: "Which of the five job-search lanes this belongs to.",
+    description: "Which job-search lane this belongs to.",
     options: [
       sel("PROTECTION", "Protection Engineer", "blue", 0),
       sel("ELECTRICAL", "Electrical Engineer", "turquoise", 1),
       sel("MARINE_ETO", "Marine ETO", "green", 2),
       sel("WEB_DEVELOPER", "Web Developer — Kigali", "purple", 3),
       sel("REMOTE_WORLDWIDE", "Remote — Worldwide", "orange", 4),
+      sel("AI_TRAINING", "AI Training Gigs", "pink", 5),
+      sel("FREELANCE", "Freelance Contracts", "sky", 6),
+      sel("TENDER", "Tender — Databayt", "red", 7),
+      sel("ENGINEERING_CONTRACT", "Engineering Contract", "yellow", 8),
     ],
   },
   {
@@ -193,7 +198,17 @@ console.log(`${objects.length} objects in the workspace`);
 let kigali = objects.find((o) => o.nameSingular === OBJECT.nameSingular);
 
 if (kigali) {
-  console.log(`✓ object "${OBJECT.labelPlural}" already exists (${kigali.id})\n`);
+  console.log(`✓ object "${OBJECT.nameSingular}" already exists (${kigali.id})`);
+  const drift = ["labelSingular", "labelPlural", "description"].filter((k) => kigali[k] !== OBJECT[k]);
+  if (drift.length === 0) {
+    console.log("  · labels current\n");
+  } else if (DRY_RUN) {
+    console.log(`  would PATCH object — ${drift.join(", ")}\n`);
+  } else {
+    const patch = Object.fromEntries(drift.map((k) => [k, OBJECT[k]]));
+    const res = await twentyPatch(`/rest/metadata/objects/${kigali.id}`, patch, key);
+    console.log(res.ok ? `  ✓ relabelled — ${drift.join(", ")}\n` : `  ✗ relabel ${res.status}: ${JSON.stringify(res.body).slice(0, 300)}\n`);
+  }
 } else if (DRY_RUN) {
   console.log(`\nwould POST /rest/metadata/objects`);
   console.log(JSON.stringify(OBJECT, null, 2));
@@ -216,9 +231,8 @@ if (!companyObject) {
   process.exit(1);
 }
 
-const existingFieldNames = new Set(
-  (kigali?.fields?.edges?.map((e) => e.node) ?? kigali?.fields ?? []).map((f) => f.name),
-);
+const existingFields = kigali?.fields?.edges?.map((e) => e.node) ?? kigali?.fields ?? [];
+const existingFieldNames = new Set(existingFields.map((f) => f.name));
 
 let created = 0;
 let present = 0;
@@ -227,7 +241,29 @@ let failed = 0;
 for (const field of FIELDS) {
   if (existingFieldNames.has(field.name)) {
     present++;
-    console.log(`  · ${field.name} — already present`);
+    const live = existingFields.find((f) => f.name === field.name);
+    const missing = (field.options ?? []).filter((o) => !(live?.options ?? []).some((l) => l.value === o.value));
+    if (missing.length === 0) {
+      console.log(`  · ${field.name} — already present`);
+      continue;
+    }
+    // A SELECT only grows: keep every live option (with its id, so existing
+    // records keep their value) and append the new ones after it.
+    const options = [
+      ...live.options,
+      ...missing.map((o, i) => ({ ...o, position: live.options.length + i })),
+    ];
+    if (DRY_RUN) {
+      console.log(`  would PATCH ${field.name} — add ${missing.map((o) => o.value).join(", ")}`);
+      continue;
+    }
+    const res = await twentyPatch(`/rest/metadata/fields/${live.id}`, { options }, key);
+    console.log(
+      res.ok
+        ? `  ✓ ${field.name} — added ${missing.map((o) => o.value).join(", ")}`
+        : `  ✗ ${field.name} options ${res.status}: ${JSON.stringify(res.body).slice(0, 300)}`,
+    );
+    if (!res.ok) failed++;
     continue;
   }
 
@@ -269,7 +305,7 @@ for (const field of FIELDS) {
 }
 
 if (DRY_RUN) {
-  console.log(`\nDRY RUN — nothing written. ${FIELDS.length} fields would be created.`);
+  console.log(`\nDRY RUN — nothing written. ${FIELDS.filter((f) => !existingFieldNames.has(f.name)).length} fields would be created.`);
   process.exit(0);
 }
 

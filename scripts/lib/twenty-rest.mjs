@@ -70,6 +70,7 @@ export async function twentyFetch(path, { method = "GET", body, key, attempt = 1
 
 export const twentyGet = (path, key) => twentyFetch(path, { key });
 export const twentyPost = (path, body, key) => twentyFetch(path, { method: "POST", body, key });
+export const twentyPatch = (path, body, key) => twentyFetch(path, { method: "PATCH", body, key });
 
 /// The metadata list endpoints return `data` as an index-keyed object rather
 /// than an array — Object.values is the only reliable way to read them.
