@@ -19,15 +19,6 @@
 
 import { readFileSync, writeFileSync } from "node:fs";
 
-import { PrismaNeon } from "@prisma/adapter-neon";
-import dotenv from "dotenv";
-
-import { PrismaClient } from "@/generated/prisma/client";
-import type {
-  EmploymentType,
-  JobOpportunityStatus,
-  RemoteType,
-} from "@/generated/prisma/client";
 import { evaluateCampaignMatches } from "@/lib/jobs/campaigns";
 import { generateJobFingerprint } from "@/lib/jobs/deduplication";
 import { buildEvidenceKnowledgeProfile } from "@/lib/jobs/evidence-extractor";
@@ -35,7 +26,7 @@ import { resolveJobLane } from "@/lib/jobs/lanes";
 import { calculateDeterministicMatch } from "@/lib/jobs/matcher";
 import { NormalizedJobInput } from "@/lib/jobs/types";
 
-dotenv.config({ quiet: true });
+import { createJobRow, openDb, statusFor } from "./jobs/engine";
 
 /// The staged files carry three annotation fields on top of NormalizedJobInput.
 /// They are the researcher's opinion, not engine state: `campaign` and `tier`
@@ -75,20 +66,8 @@ function stripAnnotations(job: AnnotatedJob): NormalizedJobInput {
   return clean;
 }
 
-function statusFor(recommendation: string): JobOpportunityStatus {
-  if (recommendation === "High Priority") return "high_priority";
-  if (recommendation === "Strong Fit") return "qualified";
-  return "analyzed";
-}
-
 async function main(): Promise<void> {
-  const connectionString = (process.env.DATABASE_URL ?? "").trim();
-  if (!connectionString) {
-    console.error("DATABASE_URL is not set — check the central .env.");
-    process.exit(1);
-  }
-
-  const db = new PrismaClient({ adapter: new PrismaNeon({ connectionString }) });
+  const db = openDb();
 
   const staged: AnnotatedJob[] = SOURCE_FILES.flatMap(
     (f) => JSON.parse(readFileSync(f, "utf-8")) as AnnotatedJob[],
@@ -168,42 +147,7 @@ async function main(): Promise<void> {
 
     if (DRY_RUN) continue;
 
-    await db.jobOpportunity.create({
-      data: {
-        title: job.title,
-        company: job.company,
-        companyUrl: job.companyUrl,
-        location: job.location,
-        remoteType: job.remoteType as RemoteType,
-        employmentType: job.employmentType as EmploymentType,
-        salary: job.salary,
-        description: job.description,
-        responsibilities: job.responsibilities,
-        requiredSkills: job.requiredSkills,
-        preferredSkills: job.preferredSkills,
-        seniority: job.seniority,
-        domain: job.domain,
-        sourceUrl: job.sourceUrl,
-        source: job.source || "manual",
-        status,
-        assessment: {
-          create: {
-            overallScore: match.overallScore,
-            technicalMatch: match.dimensions.technical.score,
-            capabilityMatch: match.dimensions.capability.score,
-            domainMatch: match.dimensions.domain.score,
-            experienceMatch: match.dimensions.seniority.score,
-            recommendation: match.recommendation,
-            whySummary: match.whySummary,
-            strongEvidence: match.strongEvidence,
-            criticalMissing: match.criticalMissing,
-            niceToHaveMissing: match.niceToHaveMissing,
-            risks: match.risks,
-            talkingPoints: match.talkingPoints,
-          },
-        },
-      },
-    });
+    await createJobRow(db, job, match);
     created++;
   }
 
