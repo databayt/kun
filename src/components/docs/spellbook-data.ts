@@ -3225,6 +3225,39 @@ export const schools: School[] = [
         connects: ["leads", "outreach"],
         depends: [],
       },
+      {
+        name: "jobs",
+        effect:
+          "Abdout's own income lane — scrape jobs, gigs, contracts and tenders, draft the applications, track them on sales.databayt.org",
+        order: [s("/jobs")],
+        steps: [
+          "pnpm jobs:discover + in-session Indeed/AI-training scans → jobs/inbox",
+          "pnpm jobs:ingest — score, drop expired/ineligible, push to the board",
+          "pnpm jobs:queue — Rwanda first, then remote income, then contracts abroad",
+          "Draft top N: Gmail drafts for email applications, jobs/packets/ for portals — never send",
+          "pnpm jobs:mark <id> applied|interview|rejected after Abdout acts",
+        ],
+        connects: ["apply", "وظائف", "scrape"],
+        depends: [],
+      },
+      {
+        name: "apply",
+        effect:
+          "Draft the next applications from the jobs board — Gmail drafts and portal packets, tailored from the real CV, never sent",
+        order: [s("/jobs")],
+        steps: ["Same lane as `jobs apply [n]` — see the jobs spell"],
+        connects: ["jobs"],
+        depends: ["jobs"],
+      },
+      {
+        name: "وظائف",
+        effect:
+          "The Arabic call for the jobs lane — وظائف، فرص، مناقصات all route to /jobs",
+        order: [s("/jobs")],
+        steps: ["Identical to `jobs` — see its steps"],
+        connects: ["jobs"],
+        depends: [],
+      },
     ],
   },
   {

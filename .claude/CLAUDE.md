@@ -60,7 +60,7 @@ Claude routes these to the right skill + agent + MCP without a dedicated command
 **The Ministry of Magic** — operations and intelligence: `captain`, `weekly`, `monitor`, `incident`, `issue`, `credentials`, `health`, `sync`, `learn`, `conventions`, `patterns`, `drift`, `economy`
 **The Pensieve** — judgment and conversion: `canon`, `decide`, `premortem`, `convert`, `md`, `textbook`, `contract`, `transcribe`, `agreement`, `adjudicate`, `textbook bench`, `calendar`, `draft`, `higgs`, `media`, `approve`, `publish`, `measure`, `social`, `carousel`, `record`
 **The Portrait Gallery** — the media studio: `hero image`, `og image`, `banner`, `mockup`, `lifestyle`, `split-screen`, `reel`, `infographic`, `testimonial`, `showroom`
-**The Owlery** — lead acquisition and outreach: `scrap`, `scrape`, `contact gap`, `leads`, `prospect`, `enrich`, `outreach`, `pipeline health`, `scrap facebook`, `scrap whatsapp`, `scrap for hogwarts`, `scrap for mkan`, `اسحب`, `جمع بيانات`, `عملاء محتملين`
+**The Owlery** — lead acquisition and outreach: `scrap`, `scrape`, `contact gap`, `leads`, `prospect`, `enrich`, `outreach`, `pipeline health`, `scrap facebook`, `scrap whatsapp`, `scrap for hogwarts`, `scrap for mkan`, `اسحب`, `جمع بيانات`, `عملاء محتملين`, `jobs`, `apply`, `وظائف`
 **The Floo Network** — conversation to conversion: `funnel`, `qualify`, `segment`, `nurture`, `follow up`, `stalled`, `chatbot`, `قمع`, `تأهيل`, `متابعة`
 <!-- END vocabulary (generated) -->
 
