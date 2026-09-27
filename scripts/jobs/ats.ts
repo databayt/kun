@@ -450,7 +450,9 @@ async function submit(): Promise<void> {
         });
         continue;
       }
-      const coverPath = join(found.dir, `${row.id}.cover-letter.pdf`);
+      // Employers see the filename: give it his name, one folder per card.
+      mkdirSync(join(found.dir, row.id), { recursive: true });
+      const coverPath = join(found.dir, row.id, "Osman_Abdout_Cover_Letter.pdf");
       await coverLetterPdf(found.letter.body, coverPath, browser);
 
       const page = await browser.newPage({
@@ -467,6 +469,11 @@ async function submit(): Promise<void> {
         coverLetterPath: coverPath,
         city: `${profile.identity.city}, ${profile.identity.country}`,
       });
+      // With Greenhouse's country picker set to Rwanda, the phone field wants
+      // the national number; the full +250 form would double the code.
+      if (await page.locator('[id="country"]').count()) {
+        await page.locator('[id="phone"]').fill(profile.identity.phone.replace(/^\+250/, "")).catch(() => undefined);
+      }
       await page.screenshot({
         path: join(found.dir, `${row.id}.ats-filled.png`),
         fullPage: true,

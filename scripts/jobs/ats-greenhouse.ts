@@ -114,6 +114,15 @@ export async function fillGreenhouse(
   for (const { question, answer } of plan.answers.values()) {
     const field = question.fields[0];
     const sel = `[id="${field.name}"]`;
+    // Conditional fields (race appears only after ethnicity is answered)
+    // may be hidden: an optional hidden field is simply not asked.
+    if (answer.kind !== "file" && answer.kind !== "skip") {
+      const el = page.locator(sel).first();
+      if (!(await el.count()) || !(await el.isVisible())) {
+        if (question.required) failed.push(`${question.label.slice(0, 60)}: field not on the page`);
+        continue;
+      }
+    }
     try {
       switch (answer.kind) {
         case "skip":
@@ -158,8 +167,10 @@ export async function fillGreenhouse(
   if (await loc.count()) {
     try {
       await loc.click();
-      await loc.fill(plan.city);
-      await page.getByRole("option").first().click({ timeout: 8_000 });
+      await loc.pressSequentially(plan.city.split(",")[0], { delay: 80 });
+      const option = page.getByRole("option").filter({ hasText: /rwanda/i }).first();
+      await option.waitFor({ timeout: 12_000 });
+      await option.click();
     } catch {
       failed.push("location autocomplete");
     }

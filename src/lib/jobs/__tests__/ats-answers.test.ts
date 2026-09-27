@@ -179,7 +179,7 @@ describe("ATS answers — the Customer.io form", () => {
         profile,
         ctx,
       ),
-    ).toEqual({ kind: "text", value: "No" });
+    ).toEqual({ kind: "text", value: "N/A" });
     expect(
       answerQuestion(
         sel(

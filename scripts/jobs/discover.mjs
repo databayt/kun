@@ -453,6 +453,8 @@ const ADAPTERS = {
         const place = j.place || "";
         if (!/remote/i.test(`${place} ${j.title}`)) continue;
         if (PLACE_BAD.test(place) && !/worldwide|anywhere|global|africa|emea/i.test(place)) continue;
+        // "Playa Vista, CA or Remote": a US city/state code means US remote.
+        if (/,\s?(A[LKZR]|C[AOT]|D[EC]|FL|GA|HI|I[ADLN]|K[SY]|LA|M[ADEINOST]|N[CDEHJMVY]|O[HKR]|PA|RI|S[CD]|T[NX]|UT|V[AT]|W[AIVY])\b/.test(place) && !/worldwide|anywhere|global|africa|emea/i.test(place)) continue;
         if (!PLACE_OK.test(place.trim()) && !/worldwide|anywhere|africa|emea/i.test(place)) continue;
         if (TEXT_BAD.test(j.text)) {
           dropped.push(`residency/authorisation: ${j.title} @ ${b.company}`);

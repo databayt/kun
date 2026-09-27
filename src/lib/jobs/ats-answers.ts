@@ -436,7 +436,8 @@ export function answerQuestion(
             option: pick(field.values, /^no\b|none|not referred/i)!,
           }
         : null
-      : { kind: "text", value: "No" };
+      : // Forms that ask "if so, list their name" say "answer N/A" when not.
+        { kind: "text", value: /if so|if yes|list (their|the) name/i.test(L) ? "N/A" : "No" };
   if (
     /(at least )?18 years|of legal (working )?age|over the age of 18/i.test(L)
   )
