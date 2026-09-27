@@ -361,3 +361,53 @@ bash scripts/jobs/daily.sh --status   # launchd, 07:00 Kigali, zero tokens
   `appname` (403 without one).
 - **Status drift (kun#152):** prod Neon's `JobOpportunityStatus` enum holds 9 of the schema's 18 values.
   `jobs:mark` stores the nearest accepted value; the board keeps the precise status.
+
+---
+
+## 9. The Self-Running Loop (since 2026-09-27)
+
+Abdout chose **auto-send with a daily cap**: email applications that pass the send gate go out on
+their own from `osmanabdout@hotmail.com` through macOS Mail.app, with the lane's CV attached. Portals,
+platform sign-ups, tenders and marketplace bids stay packets he submits. The board is the control
+surface; Hermes carries the digest and alerts; learning proposes, Abdout adopts.
+
+```mermaid
+stateDiagram-v2
+    TO_APPLY --> QUEUED: wave — letter tailored + gate passes
+    TO_APPLY --> HOLD: gate fails / needs input
+    HOLD --> APPROVED: Abdout supplies it, moves the card
+    QUEUED --> APPLIED: send window, after the 2h veto
+    APPROVED --> APPLIED: next send tick
+    APPLIED --> RESPONSE: human reply
+    APPLIED --> INTERVIEW: invitation
+    APPLIED --> REJECTED
+    APPLIED --> ARCHIVED: day 21, three touches, silence
+    INTERVIEW --> OFFER
+```
+
+| Step | Script | Clock (Kigali) |
+| :--- | :--- | :--- |
+| Fetch — 7 adapters (jobinrwanda, greatrwandajobs, REG, RemoteOK, Remotive, Himalayas, Mercor) | `pnpm jobs:discover` → `jobs:ingest` | ≥07:00 daily |
+| Wave — `claude -p` tailors from lane templates + `jobs/facts.json`, gate decides | `pnpm jobs:wave` | ≥07:00 Mon–Fri |
+| Digest — the wave, the holds, deadlines ≤72h | `pnpm jobs:digest --send` (`hermes send`) | after the wave |
+| Send — Mail.app, cap 5/day → 10 after 11 Oct, 1 per company | `pnpm jobs:send --apply` | 10:00–17:00 Mon–Fri |
+| Replies — hotmail read locally, rules-first classifier | `pnpm jobs:inbox` | every tick 08–22 |
+| Follow-ups — templated day 7 / 14, archive day 21 | `pnpm jobs:followup --apply` | ≥16:00 Mon–Fri |
+| Learn — outcomes by variant / lane / wave, ≤2 inactive proposals | `pnpm jobs:learn --propose --send` | Fri ≥17:00 |
+
+- **Heartbeat:** `scripts/jobs/loop.sh` under launchd `com.databayt.jobs-loop`, every 30 min, per-day
+  stamps in `jobs/.state/` so a Mac that slept catches up. `pnpm jobs:loop --status | --pause | --resume`.
+- **The send gate** (`src/lib/jobs/send-gate.ts`, tested) replaces the human reader: placeholders,
+  length, company + role named, every number backed by the CVs or the posting, recipient present on the
+  posting, deadline, 30-day no-repeat, CV 1–2 pages; a posting that asks for a salary figure, certified
+  copies, a form, references or ID → HOLD with the reason.
+- **Variants:** `jobs/variants.json` (CV + letter + follow-up templates). Two active variants in a lane
+  split 50/50 by send count. `pnpm jobs:variant activate <id>` is the only way one goes live.
+- **Funnel reuse:** the stall clock is mkan's `decideCadenceStage` (`src/lib/jobs/cadence.ts`); templated
+  touches go unattended, tailored ones never; kill switch + caps + ledger (`jobs/ledger.jsonl`) follow
+  the hogwarts funnel tick. Recruiter WhatsApp waits on the Evolution QR scan.
+- **Hermes:** `hermes send` delivers the digest, INTERVIEW/OFFER/reply alerts and send failures to
+  Abdout's Slack DM without the Hermes model (whose Nous login expired 2026-09-13). Chat commands wait
+  on `hermes model`.
+- **One-time setup:** add osmanabdout@hotmail.com to Mail.app (System Settings → Internet Accounts).
+  Until then send and inbox refuse — they never fall back to another account.

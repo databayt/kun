@@ -1,7 +1,7 @@
 export const meta = {
   name: "jobs",
   description:
-    "Income pass — scan every lane in parallel, ingest to the sales.databayt.org board, tailor the top N into drafts and packets; never sends",
+    "Income pass — scan every lane in parallel, ingest to the sales.databayt.org board, write packets for the portal/platform top N; email sends belong to the jobs loop",
   whenToUse:
     "Invoked by the `jobs` skill for a full cycle across lanes. The invocation is the multi-agent opt-in — a single verb (queue, mark, one draft) belongs in-session. Drafts only: Abdout presses send.",
   phases: [
@@ -177,7 +177,7 @@ const tailored = await parallel(
 Opportunity on the board: ${JSON.stringify(row)}
 1. Read the posting (url). If it is closed, reserved for Rwandan nationals, or clearly out of reach, set skipped with the reason and stop.
 2. CV by lane: protection/electrical/marine/engineering-contract → Osman_Abdout_Protection_Engineer.pdf; everything else → Osman_Abdout_Web_Developer.pdf (both in ${KUN}/jobs/cv/).
-3. email: apply method → Gmail create_draft (ToolSearch "gmail create_draft"): short, specific letter, subject as the posting asks. Note the CV is to be attached by hand.
+3. email: apply method → SKIP with skipped="email — the send loop (pnpm jobs:wave / jobs:send) tailors, gates and sends these; never draft them here".
    portal:/tender-portal:/in-person → write ${KUN}/jobs/packets/${row.id}.md: deadline, link, documents, the letter, answers to the portal's questions.
    AI-training platforms / vetted networks → the packet is the profile text, the role to pick, and the test to prepare for.
 4. Do not change the board status — Abdout marks it applied after he sends.
