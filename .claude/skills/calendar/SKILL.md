@@ -13,12 +13,13 @@ Arguments: $ARGUMENTS — `plan` (allocate the coming period) or `review` (diff 
 last one against what shipped), optionally scoped to a brand and a date range.
 Default: `plan` for next week.
 
-**SCOPE (2026-08-06) — one slice: `hogwarts` × `facebook` × Sudan.** Plan for
-hogwarts only, and allocate Facebook slots only. `content/social/pillars.json`
-carries hogwarts' 8 briefs and nothing else, so a five-brand plan would invent
-slots no stage can fill. Say the other four are deferred by decision rather than
-planning empty rows for them. Two inversions apply because the country is Sudan:
-**static Arabic cards lead over video** (intermittent connectivity favors light
+**SCOPE (2026-09-27) — one slice: `balqalam` × `facebook`.** The school product publishes only
+as Balqalam (hogwarts is retired and hidden, with no briefs). Plan for balqalam only, and allocate
+Facebook slots only. `content/social/pillars.json` carries balqalam's 24 briefs — a 12-week plan,
+two a week (idea + proof), laid out so ISO week 40 is week 1; the plan table is in
+`content/docs/social/balqalam.mdx`. A five-brand plan would invent slots no stage can fill, so say
+the others are deferred by decision rather than planning empty rows for them. Two inversions still
+apply because the proof track is Sudan: **static Arabic cards lead over video** (intermittent connectivity favors light
 formats), and **the Aug 23 Saudi school-year window is not the clock**. Reasoning
 
 - expansion gate:

@@ -1,55 +1,141 @@
 ---
 title: Balqalam — Social
-description: بالقلم — the Arabic-facing school SaaS brand. Same product as Hogwarts, its own Page and its own voice.
+description: بالقلم — the school SaaS brand and its Facebook Page. The one face the school product publishes as, with the marketing strategy wired into calendar, draft, media and publish.
 ---
 
 # Balqalam — Social
 
-*بالقلم — المدرسة كلها في مكان واحد.* Balqalam is the **in-product name** of the same school
-management system that ships to English-facing audiences as [Hogwarts](/docs/social/hogwarts).
-It is not a second product; it is the face Arabic-speaking schools actually see when they open
-the app at [balqalam.com](https://balqalam.com). The Page carries a **Saudi** address (Al Khobar)
-and a Saudi contact number — this is the Gulf-facing front door, not the Sudan lane.
+*بالقلم — مدرستك كلها في مكان واحد.* Balqalam is **the** school management brand. The product
+used to be called Hogwarts; that name is retired from everything public, and the `hogwarts` brand
+in this Hub is hidden and carries no briefs. Every school post goes out as Balqalam, on the
+[Bilqalam بالقلم Facebook Page](https://web.facebook.com/profile.php?id=61592684345321).
 
-It appears here as its own brand because the pipeline models **one destination per (brand,
-channel)** — Balqalam has its own Facebook Page, its own permanent Page access token, and its own
-Arabic-first voice. Publishing to it through the Hogwarts brand would send the wrong wordmark to
-the wrong audience.
+The strategy behind this page is *Balqalam Marketing Strategy v2* (2026-09-27). This page is the
+part of it the social pipeline executes: `/calendar` and the Monday seeder read the briefs in
+`content/social/pillars.json`, `/draft` reads this page for voice and claims, the media lane reads
+each brief's `visual`, and `/publish` delivers to the Page after a human approves.
+
+## Goal
+
+Social is a **trust asset for sales**: a school owner checks the Page before a demo, and an active,
+calm, Arabic-first Page removes doubt. The company metric is active paying schools; the Page's own
+signal is **messages from decision-makers** (owners, principals, registrars, finance leads), not
+followers, likes or reach.
 
 ## Positioning
 
-- **Business model:** SaaS (per-school subscription).
-- **Type:** B2B — school owners, principals, administrators.
-- **Language:** **Arabic first.** English is the mirror, not the source.
-- **Angle:** the whole school in one place — admission, attendance, grades, fees.
+- **Business model:** SaaS, per-school subscription. B2B — the owner signs.
+- **Language:** **Arabic first.** Plain modern standard Arabic (rung 2); English is the mirror.
+- **Message:** your whole school in one place — admission, attendance, fees, results and family
+  communication — in an Arabic system that starts from the data the school already has.
+- **Markets:** one Page, two tracks. **Sudan** is the proof track (the live pilot, the warm
+  network); the **Gulf** (Saudi, UAE) is the cash track. Knowledge posts are written for any
+  Arabic-speaking school; a post that talks price, payment or regulation names one country.
 
 ## Audience
 
-| Segment | Side | What moves them |
-|---------|------|-----------------|
-| **School owners** | Buyer | Fees collected on time, fewer staff hours lost to paper |
-| **Principals / admins** | User | One system instead of five notebooks and a WhatsApp group |
-| **Teachers** | User | Attendance and grades that take a minute, not an evening |
-| **Parents** | Influencer | Knowing where their child stands without visiting the school |
+| Persona | Wants | Fears | What the post says |
+|---------|-------|-------|--------------------|
+| **School owner** (signs) | Control, financial visibility | Cost, failure, the vendor vanishing, data lock-in | The whole school in front of you, and your data stays yours |
+| **General manager** | Less chaos across departments | Staff pushback, disruption mid-year | We start from your existing Excel file |
+| **Registrar / admissions** | No more retyping family data | Errors, lost follow-ups | The parent types it once |
+| **Finance lead** | Due, late and discounted fees at a glance | Lost receipts, scattered ledgers | Fees, invoices and receipts in one record |
+| **IT / procurement** | Isolation, export, roles, hosting | Unproven compliance promises | Precise answers, no invented certificates |
+
+Teachers and parents read the Page too; knowledge posts reach them, but every post is written to
+one persona and every ask points at the decision-maker.
 
 ## Channel mix
 
-Saudi and the wider Arabic MENA market run on Facebook and WhatsApp. That is the mix — not a
-preference, an observation about where the schools already are.
+| Priority | Channel | Role |
+|----------|---------|------|
+| **Now** | **Facebook** — the Balqalam Page | The only publishing channel. Every approved piece lands here |
+| **Now** | **WhatsApp** | Follow-up only: a manual copy-out variant a person forwards to a school that already replied. Never broadcast |
+| **Later** | LinkedIn | When the Gulf track has a live conversation |
+| **Parked** | Instagram, TikTok | Instagram returns once linked to the brand Page (today's handle is personal); TikTok when someone can make two videos a week without slowing the rest |
 
-| Priority | Channel | Why |
-|----------|---------|-----|
-| **Primary** | **Facebook** | Where Arabic school communities and admin groups live |
-| **Primary** | **WhatsApp** | The follow-up surface — manual by transport, no organic posting API |
-| **Secondary** | **Instagram** | Visual proof (dashboards, classrooms); wired the day kun#141 clears |
-| **Low** | Telegram, X, LinkedIn | Not where this buyer is |
+## Content pillars
+
+| Pillar | Share | Purpose | Examples |
+|--------|-------|---------|----------|
+| `school-operations` | 35% | The owner recognises the problem | Absence, fee chaos, admission season, one staff member holding everything |
+| `product-proof` | 30% | Show it works — real screens only | Screen captures, workflows, Arabic interfaces |
+| `learning-science` | 20% | Authority, a quality audience | Retrieval practice, spacing, feedback — evidence labelled |
+| `trust` | 15% | Remove fears, explain the offer | Data ownership, the pilot, a fair comparison |
+
+## Cadence and calendar
+
+**One idea a week, two pieces:** the idea post, then its product proof. The Monday seeder
+(`scripts/seed-drafts.sh`, 07:00, `SEED_COUNT = 2`) files both from `pillars.json`; the drain
+drafts them; a person approves them in `/social/publish`; they post on the Page. Evenings
+(19:00–23:00 local) are the window.
+
+`pillars.json` holds the balqalam briefs as `balqalam-wNN-idea` / `balqalam-wNN-proof`. Rotation is
+stateless (`briefs[(isoWeek × 2 + i) % 24]`), and the list is laid out so the plan runs:
+
+| Week | ISO week | Idea | Pillar |
+|------|----------|------|--------|
+| 1 | 40 (Sep 28) | Five signs a school has outgrown paper | school-operations |
+| 2 | 41 | The whole school in one place — one working morning | product-proof |
+| 3 | 42 | Starting from the school's own Excel file | product-proof |
+| 4 | 43 | Absence as an early signal | learning-science |
+| 5 | 44 | The register that goes missing before the board meeting | school-operations |
+| 6 | 45 | A missing invoice is a trust problem | school-operations |
+| 7 | 46 | Why students forget after the exam | learning-science |
+| 8 | 47 | Who owns student data when the contract ends? | trust |
+| 9 | 48 | New systems fail because of people, not technology | school-operations |
+| 10 | 49 | The parent who calls is not the problem | school-operations |
+| 11 | 50 | Why admission season becomes data-entry season | school-operations |
+| 12 | 51 (Dec 14) | A free ministry platform does not run the whole school | trust |
+
+After week 12 the rotation starts again from the top; replace the briefs at the day-90 review
+(2026-12-26) rather than let the plan repeat unexamined.
 
 ## Voice
 
-Arabic is **written**, never translated. The Hogwarts English copy is the mirror of the Arabic,
-not its source. Avoid the Hogwarts wordmark in any asset produced for this brand — an asset
-addressed to an Arabic-speaking principal should say **بالقلم**, and the brand-kit note in
-`content/media/brand-kit.json` records exactly which name belongs where.
+- Arabic is **written**, never translated. A concrete school scene before any abstraction
+  (`content/social/scenes.json` → `balqalam`).
+- Intelligent, direct, calm. No hype words (ثورة، يغيّر كل شيء، الأول بلا منافس), no corporate
+  filler, no emoji beyond one.
+- One persona, one idea, one ask per post.
+- **The ask has no link.** Close by inviting a message to the Page (راسلونا على الصفحة) —
+  `copy.mdx` check 6: "if there is no link, say what to do instead". One ask, last.
+- Evidence posts separate three layers and never blend them: what the study found · what it may
+  mean for a school · what Balqalam actually does. Label evidence strong, promising, preliminary
+  or unsupported. No brain imagery, no dopamine, no learning styles, no correlation as causation.
+
+## Claims
+
+The canonical registry is `hogwarts/content/docs-en/marketing-brief.mdx`. A draft that needs a
+number, result or feature not listed as allowed there is refused, not softened.
+
+**Allowed:** about 28 capability areas and about 60 features · Arabic is the default (2,247 Arabic
+strings) · King Fahad Schools, Khartoum, as the one live pilot — no results, no quotes without
+recorded approval · Free up to 100 students and 10 teachers · Excel import with Arabic headers ·
+opens in the browser and installs to the home screen · data exports as CSV or JSON · built for
+slow connections · the MENA-10 pilot: three months free, then an annual contract.
+
+**Never:** the Hogwarts name or wordmark · hours or money saved, percentages, uptime · "paying
+customers" or any school count beyond the one pilot · offline · native or store app · advanced
+analytics · payment gateways by count · automatic submission to ADEK or any regulator ·
+compliance with PDPL, GDPR or FERPA · a student's face without written consent.
+
+## Media
+
+- **Idea posts** carry a `visual` in their brief (`plate` or `lifestyle`): calm school settings,
+  desks, rooms, hands — **no faces of children**. The media lane compiles it against the brand kit
+  (`content/media/brand-kit.json` → `balqalam`); the mark is the quill, never the Hogwarts wordmark.
+- **Proof posts** carry no generated visual on purpose. They attach a **real** Arabic screenshot
+  of the shipped screen — the hogwarts repo root holds `*-ar.png` captures, and `/record` makes
+  fresh ones — never a mocked or generated interface.
+- Text-bearing cards (lists, carousels) render on the template lane (`/carousel`), not as images.
+
+## Measure and kill
+
+`/measure` reads each post at 24 hours, 7 days and 30 days. Record who engaged (owner, teacher,
+parent, student), not just how many. **Four weeks without a single message from a decision-maker
+means change the angle, not the volume.** Boost nothing until the week-8 review shows which posts
+bring decision-makers.
 
 ## Wiring
 

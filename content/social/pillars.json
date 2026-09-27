@@ -1,71 +1,6 @@
 {
   "version": 1,
   "$comment": "Rotating draft briefs per brand — the seed lane's content plan. `node scripts/social-drafts.mjs seed --auto` picks the week's briefs by ISO-week rotation and files them as SocialDraftRequest asks; the 5-minute drain answers them on the Max pool, and the copy lands in the Hub for a human to stage. Briefs follow the /draft contract: the fact, the audience, the CTA, the hard constraints — plus Angle (which of the three angles this brief is pre-committed to), The scene (a moment the audience owns, so the writer opens on something that is not a feature), and Register (the rung from content/docs/social/copy.mdx). All of it goes INSIDE the brief string: the calendar panel and the seeder both read only `brief`, so a new JSON field would be written and read by nobody — which is exactly what happened to `pillar`. Never a metric, customer, price, or date that isn't true — the drafting session will refuse to invent one. Edit freely; rotation is stateless (ISO week % length), so order is cadence. Pillars per brand: content/docs/social/<brand>.mdx. | `visual` names the raster asset a post wants from the seat lane (null = the template lane owns its image).",
-  "hogwarts": [
-    {
-      "id": "admission-highlight",
-      "pillar": "feature",
-      "brief": "Feature highlight: online admission — parents apply from their phone, the school tracks every application on one dashboard instead of paper folders. Audience: school owners and administrators in MENA. CTA: book a demo at https://ed.databayt.org. Suggested visual: admission dashboard card (template lane, og type). Constraint: no invented numbers — the promise is 'the paper chase ends', not a percentage. Angle: the admissions office gets its people back. The scene: first week of the season — a queue at the door, paper files on the desk, a phone that does not stop. Register: rung 2.",
-      "visual": {
-        "type": "plate",
-        "subject": "A school front office counter, clean and unhurried, no queue, quiet wall behind it"
-      }
-    },
-    {
-      "id": "attendance-one-tap",
-      "pillar": "feature",
-      "brief": "Feature highlight: attendance in one tap — the teacher marks the class in seconds and a parent sees it the same moment. Audience: teachers first, parents second. CTA: see it live at https://ed.databayt.org. Suggested visual: classroom lifestyle photo (library: hw-classroom). Constraint: truthful — instant visibility is the feature, don't promise SMS/WhatsApp delivery. Angle: the first two minutes of every period, given back. The scene: the register going down the row while the lesson waits, and a name called twice because the sheet was already passed. Register: rung 2.",
-      "visual": {
-        "type": "lifestyle",
-        "subject": "A teacher at the front of a class holding a tablet, mid-motion marking the register, students blurred at their desks"
-      }
-    },
-    {
-      "id": "finance-without-spreadsheets",
-      "pillar": "time-savings",
-      "brief": "Administrator time-savings: invoices and receipts come out of the system, not out of a spreadsheet — fees, installments, and who-paid-what in one view. Audience: school owners. CTA: https://ed.databayt.org. Suggested visual: og card with one strong Arabic line. Constraint: no claimed hours-saved figure; 'the end-of-term spreadsheet night' is the pain to name. Angle: the night the books are reconciled by hand. The scene: a ledger open beside a laptop, the same number typed into both, and a total that refuses to agree with itself. Register: rung 2.",
-      "visual": {
-        "type": "product",
-        "subject": "A school bursar’s desk — closed ledger books stacked to one side, an open laptop beside them, warm afternoon light"
-      }
-    },
-    {
-      "id": "arabic-first-rtl",
-      "pillar": "mena-context",
-      "brief": "MENA education context: hogwarts is Arabic-first and RTL-native — built in Arabic, not translated into it. Menus, report cards, parent messages: all native. Audience: everyone; administrators decide, parents trust. CTA: https://ed.databayt.org. Suggested visual: split card (template lane) — Arabic UI beside English UI. Constraint: keep it proud but calm, no competitor-bashing. Angle: built in Arabic, not translated into it — and a parent can feel the difference in one screen. The scene: the report card that reads right to left with no English label stranded in a corner, and no date written backwards. Register: rung 2.",
-      "visual": null
-    },
-    {
-      "id": "timetable-conflicts",
-      "pillar": "feature",
-      "brief": "Feature highlight: the timetable builder catches conflicts before the term starts — a teacher can't be in two rooms, a room can't hold two classes. Audience: administrators who build the schedule every term. CTA: book a demo at https://ed.databayt.org. Suggested visual: og card. Constraint: the feature is conflict detection at build time — nothing about AI optimization. Angle: the clash is found in the week before term, not in the first period of it. The scene: a printed timetable on the wall with three cells circled in red, and a teacher who is somehow in two rooms at nine o'clock. Register: rung 2.",
-      "visual": null
-    },
-    {
-      "id": "open-source-trust",
-      "pillar": "trust",
-      "brief": "Open-source trust: hogwarts is open source — a school can read exactly how its students' data is handled, and its IT can self-host if policy requires. Audience: school owners and IT decision-makers. CTA: the code and a demo at https://ed.databayt.org. Suggested visual: og card with the repo motif. Constraint: true today — open source on GitHub; don't promise certifications we don't hold. Angle: you can read the code that holds your students' records. The scene: the question that stops a procurement meeting — where does this data actually live, and who else can see it? Register: rung 2. Say the guarantee in the reader's words, never the engineer's — 'your school's records stay your school's', not tenant scoping or reads and writes.",
-      "visual": null
-    },
-    {
-      "id": "parent-visibility",
-      "pillar": "feature",
-      "brief": "Parent visibility: one place where a parent sees attendance, grades, and fees for every child they have in the school. Audience: parents (the B2C trust that closes the B2B sale). CTA: ask your school about hogwarts — https://ed.databayt.org. Suggested visual: lifestyle photo (library: hw-dashboard-device). Constraint: calm reassurance, not surveillance framing. Angle: three children in the school should not mean three people to ask. The scene: a parent at the gate at pick-up, phone in hand, finding the answer before the teacher reaches the door. Register: rung 2, warmed — the reader is a parent, so second person is allowed.",
-      "visual": {
-        "type": "lifestyle",
-        "subject": "A parent's hands holding a phone in a school corridor, other parents soft in the background"
-      }
-    },
-    {
-      "id": "exams-to-report-cards",
-      "pillar": "time-savings",
-      "brief": "Feature highlight: exams and grades — marks entered once become report cards, transcripts, and the parent's view without re-typing. Audience: teachers and administrators at term end. CTA: https://ed.databayt.org. Suggested visual: og card. Constraint: the claim is single entry, many outputs — no 'auto-grading' language. Angle: one entry, many outputs. The scene: end of term — marks entered, then copied, then typed again, and every copy is another chance for an error. Register: rung 2. Note: this brief already has a shipped sibling in the carousel lane (hogwarts/carousels/exams-one-entry.json); write a different opening, do not reuse its first line.",
-      "visual": {
-        "type": "product",
-        "subject": "A squared stack of paper report cards on a desk next to a closed laptop, raking daylight"
-      }
-    }
-  ],
   "mkan": [
     {
       "id": "portsudan-made-possible",
@@ -100,36 +35,177 @@
   ],
   "balqalam": [
     {
-      "id": "balqalam-one-system",
-      "pillar": "feature",
-      "brief": "Feature highlight: one system instead of five notebooks and a WhatsApp group — admission, attendance, grades, timetable, exams and fees in a single place, addressed to Arabic-speaking schools. Audience: school owners and principals in Saudi Arabia and the wider Arabic MENA market; administrators, not technologists. CTA: احجز عرضاً at https://balqalam.com. Suggested visual: an unhurried principal's desk (plate). Constraint: no invented numbers and no percentages — the promise is that the school stops living in separate notebooks, not a measured saving. Never carry the Hogwarts wordmark on a balqalam asset. Angle: the argument is competence, not enthusiasm. The scene: the end of a working day, one laptop open, the paper stacks gone. Register: rung 2.",
-      "visual": {
-        "type": "plate",
-        "subject": "A school principal's desk at the end of the day, one laptop open, no paper stacks, blinds half-drawn"
-      }
-    },
-    {
-      "id": "balqalam-attendance-parent",
-      "pillar": "trust",
-      "brief": "Trust: the teacher marks the register and the parent sees it the same moment — no evening phone call, no note that arrives a week late. Audience: parents second, principals first; Gulf schools weighing whether the system is worth the switch. CTA: شوفها مباشرة at https://balqalam.com. Suggested visual: a calm morning glance at a phone (lifestyle). Constraint: truthful — same-moment visibility inside the app is the feature; do NOT promise SMS or WhatsApp delivery. Never carry the Hogwarts wordmark. Angle: trust is built by small accuracies, not announcements. The scene: a Gulf living room, early light, a parent reading one line and putting the phone down. Register: rung 2.",
+      "id": "balqalam-w09-idea",
+      "pillar": "school-operations",
+      "brief": "School operations: why new systems fail because of people, not technology — teachers resist anything that adds work, so the teacher's screen should show only what the teacher needs. Audience: principals and general managers. Angle: adoption is a design decision. The scene: a staff meeting where the new system is met with folded arms. Market: Arabic-speaking private K-12 schools, Sudan first and the Gulf second — plain modern standard Arabic, no dialect. CTA: no link — close by inviting the reader to message the Balqalam Page (راسلونا على الصفحة), one ask only. Constraint: no invented numbers, percentages, hours saved or customer counts; never say offline, native app, advanced analytics, paying customers or automatic regulator submission; King Fahad Schools may be named only as the one live pilot, with no results or quotes; never the Hogwarts name or wordmark. Register: rung 2.",
       "visual": {
         "type": "lifestyle",
-        "subject": "A parent glancing at a phone in a bright Gulf living room in early morning light, calm and undramatic"
+        "subject": "A staff room table with teachers' coffee cups and closed laptops after a meeting, no faces"
       }
     },
     {
-      "id": "balqalam-grades-one-entry",
-      "pillar": "time-savings",
-      "brief": "Time saved: the grade is entered once. From that single entry the report card, the transcript and the parent's view all follow — every re-copy is a chance to be wrong, and the re-copying is what the system removes. Audience: teachers and heads of department in Arabic-speaking schools. CTA: جرّبها at https://balqalam.com. Suggested visual: a single clean grade column on a tablet (product). Constraint: no invented hours-saved figure — 'entered once' is the claim and it is literally true. Never carry the Hogwarts wordmark. Angle: the end of term stops being a copying exercise. The scene: a tablet on a staffroom table, one column filled, no duplicate paperwork beside it. Register: rung 2.",
+      "id": "balqalam-w09-proof",
+      "pillar": "product-proof",
+      "brief": "Product proof: the teacher's view — attendance and grades only, nothing else in the way. Audience: teachers. Angle: less on the screen is the feature. The scene: a teacher finishing the register before the students have sat down. Media: a REAL Arabic screenshot of the shipped screen from the media library (the hogwarts repo root holds *-ar.png captures) or a fresh /record capture — never a generated or mocked interface. Market: Arabic-speaking private K-12 schools, Sudan first and the Gulf second — plain modern standard Arabic, no dialect. CTA: no link — close by inviting the reader to message the Balqalam Page (راسلونا على الصفحة), one ask only. Constraint: no invented numbers, percentages, hours saved or customer counts; never say offline, native app, advanced analytics, paying customers or automatic regulator submission; King Fahad Schools may be named only as the one live pilot, with no results or quotes; never the Hogwarts name or wordmark. Register: rung 2.",
+      "visual": null
+    },
+    {
+      "id": "balqalam-w10-idea",
+      "pillar": "school-operations",
+      "brief": "School operations: the parent who calls is not the problem; the missing information is — when parents can see attendance, grades and fees themselves, the evening phone calls stop. Audience: principals, with parents as influencers. Angle: calm for the family and for the office. The scene: the office phone ringing after dinner with a question the school could have answered already. Market: Arabic-speaking private K-12 schools, Sudan first and the Gulf second — plain modern standard Arabic, no dialect. CTA: no link — close by inviting the reader to message the Balqalam Page (راسلونا على الصفحة), one ask only. Constraint: no invented numbers, percentages, hours saved or customer counts; never say offline, native app, advanced analytics, paying customers or automatic regulator submission; King Fahad Schools may be named only as the one live pilot, with no results or quotes; never the Hogwarts name or wordmark. Register: rung 2.",
       "visual": {
-        "type": "product",
-        "subject": "A tablet on a staffroom table showing a single clean grade-entry column, no paperwork beside it"
+        "type": "lifestyle",
+        "subject": "A phone lying on a home kitchen table in the evening, a school bag beside it, warm light, no faces"
       }
     },
     {
-      "id": "balqalam-school-year-ready",
-      "pillar": "mena-context",
-      "brief": "Context: the Gulf school year starts in late August, and the schools that begin it calmly are the ones that set up before the first bell rather than during the first week. Audience: Saudi and Gulf school owners deciding now, in the weeks before term. CTA: ابدأ قبل الجرس at https://balqalam.com. Suggested visual: template lane — an Arabic type card, no photograph. Constraint: no urgency manufactured beyond the real calendar, no countdown pressure, no invented enrolment numbers. Never carry the Hogwarts wordmark. Angle: readiness is quieter than rescue. The scene: none — this one is typographic. Register: rung 2.",
+      "id": "balqalam-w10-proof",
+      "pillar": "product-proof",
+      "brief": "Product proof: the family portal on a phone — one child's attendance, grades and fees in one place. Audience: parents and principals. Angle: the answer is already in their hand. The scene: a parent checking the day's attendance on the way home. Media: a REAL Arabic screenshot of the shipped screen from the media library (the hogwarts repo root holds *-ar.png captures) or a fresh /record capture — never a generated or mocked interface. Market: Arabic-speaking private K-12 schools, Sudan first and the Gulf second — plain modern standard Arabic, no dialect. CTA: no link — close by inviting the reader to message the Balqalam Page (راسلونا على الصفحة), one ask only. Constraint: no invented numbers, percentages, hours saved or customer counts; never say offline, native app, advanced analytics, paying customers or automatic regulator submission; King Fahad Schools may be named only as the one live pilot, with no results or quotes; never the Hogwarts name or wordmark. Register: rung 2.",
+      "visual": null
+    },
+    {
+      "id": "balqalam-w11-idea",
+      "pillar": "school-operations",
+      "brief": "School operations: why admission season becomes data-entry season — forms on paper, retyped into a spreadsheet, retyped again into the register. Audience: registrars and principals. Angle: the season, not the software. The scene: the queue of parents at the door and the registration file moving between offices. Market: Arabic-speaking private K-12 schools, Sudan first and the Gulf second — plain modern standard Arabic, no dialect. CTA: no link — close by inviting the reader to message the Balqalam Page (راسلونا على الصفحة), one ask only. Constraint: no invented numbers, percentages, hours saved or customer counts; never say offline, native app, advanced analytics, paying customers or automatic regulator submission; King Fahad Schools may be named only as the one live pilot, with no results or quotes; never the Hogwarts name or wordmark. Register: rung 2.",
+      "visual": {
+        "type": "plate",
+        "subject": "A school admissions counter with a stack of paper application forms and a pen tray, morning light, no people"
+      }
+    },
+    {
+      "id": "balqalam-w11-proof",
+      "pillar": "product-proof",
+      "brief": "Product proof: the application filled from a parent's phone arriving in the admin board, reviewed and approved without retyping. Audience: registrars. Angle: the parent types it once. The scene: a registrar approving an application between two phone calls. Media: a REAL Arabic screenshot of the shipped screen from the media library (the hogwarts repo root holds *-ar.png captures) or a fresh /record capture — never a generated or mocked interface. Market: Arabic-speaking private K-12 schools, Sudan first and the Gulf second — plain modern standard Arabic, no dialect. CTA: no link — close by inviting the reader to message the Balqalam Page (راسلونا على الصفحة), one ask only. Constraint: no invented numbers, percentages, hours saved or customer counts; never say offline, native app, advanced analytics, paying customers or automatic regulator submission; King Fahad Schools may be named only as the one live pilot, with no results or quotes; never the Hogwarts name or wordmark. Register: rung 2.",
+      "visual": null
+    },
+    {
+      "id": "balqalam-w12-idea",
+      "pillar": "trust",
+      "brief": "Trust and offer: a free ministry platform does not run the whole school — it covers what the ministry needs, not admission, fees, the family and the daily register. Explain the difference calmly, without attacking any platform by name. Audience: owners weighing whether they need anything beyond the free tool. Angle: the gap, stated fairly. The scene: an owner comparing two screens and noticing what neither of them mentions. Market: Arabic-speaking private K-12 schools, Sudan first and the Gulf second — plain modern standard Arabic, no dialect. CTA: no link — close by inviting the reader to message the Balqalam Page (راسلونا على الصفحة), one ask only. Constraint: no invented numbers, percentages, hours saved or customer counts; never say offline, native app, advanced analytics, paying customers or automatic regulator submission; King Fahad Schools may be named only as the one live pilot, with no results or quotes; never the Hogwarts name or wordmark. Register: rung 2.",
+      "visual": null
+    },
+    {
+      "id": "balqalam-w12-proof",
+      "pillar": "product-proof",
+      "brief": "Trust and offer: the free MENA-10 pilot — three months on the live product with full support, then an annual contract; the school only sends the student and teacher lists it already keeps. State only what is true; the pilot is not the price list. Audience: school owners. Angle: low risk, stated plainly. The scene: an owner deciding before the next term. Media: a REAL Arabic screenshot of the shipped screen from the media library (the hogwarts repo root holds *-ar.png captures) or a fresh /record capture — never a generated or mocked interface. Market: Arabic-speaking private K-12 schools, Sudan first and the Gulf second — plain modern standard Arabic, no dialect. CTA: no link — close by inviting the reader to message the Balqalam Page (راسلونا على الصفحة), one ask only. Constraint: no invented numbers, percentages, hours saved or customer counts; never say offline, native app, advanced analytics, paying customers or automatic regulator submission; King Fahad Schools may be named only as the one live pilot, with no results or quotes; never the Hogwarts name or wordmark. Register: rung 2.",
+      "visual": null
+    },
+    {
+      "id": "balqalam-w01-idea",
+      "pillar": "school-operations",
+      "brief": "School operations: five signs a school has outgrown paper — the register that goes missing, the receipt nobody can find, the parent who calls to ask what the school already knows, the grade copied three times, the principal who signs until evening. Audience: school owners and principals. Angle: recognition, not a pitch — the reader should count how many are true of their school. The scene: a principal's desk at the end of the day, still covered in files. Market: Arabic-speaking private K-12 schools, Sudan first and the Gulf second — plain modern standard Arabic, no dialect. CTA: no link — close by inviting the reader to message the Balqalam Page (راسلونا على الصفحة), one ask only. Constraint: no invented numbers, percentages, hours saved or customer counts; never say offline, native app, advanced analytics, paying customers or automatic regulator submission; King Fahad Schools may be named only as the one live pilot, with no results or quotes; never the Hogwarts name or wordmark. Register: rung 2.",
+      "visual": {
+        "type": "plate",
+        "subject": "A school principal's desk late in the day, stacked paper files and a closed attendance ledger, warm window light, no people"
+      }
+    },
+    {
+      "id": "balqalam-w01-proof",
+      "pillar": "product-proof",
+      "brief": "Product proof: the whole school on one dashboard — admission, attendance, fees and grades seen from a single screen instead of five notebooks. Audience: school owners. Angle: show before claim — the screen is the argument. The scene: the same desk, one laptop open, the paper gone. Media: a REAL Arabic screenshot of the shipped screen from the media library (the hogwarts repo root holds *-ar.png captures) or a fresh /record capture — never a generated or mocked interface. Market: Arabic-speaking private K-12 schools, Sudan first and the Gulf second — plain modern standard Arabic, no dialect. CTA: no link — close by inviting the reader to message the Balqalam Page (راسلونا على الصفحة), one ask only. Constraint: no invented numbers, percentages, hours saved or customer counts; never say offline, native app, advanced analytics, paying customers or automatic regulator submission; King Fahad Schools may be named only as the one live pilot, with no results or quotes; never the Hogwarts name or wordmark. Register: rung 2.",
+      "visual": null
+    },
+    {
+      "id": "balqalam-w02-idea",
+      "pillar": "product-proof",
+      "brief": "Product: a tour of the whole school in one place, told as one working morning — who is absent, which fees are due, which application is waiting — answered from one screen. Audience: principals and administrators. Angle: the morning, not the feature list. The scene: the first hour after the bell, the office phone quiet for once. Market: Arabic-speaking private K-12 schools, Sudan first and the Gulf second — plain modern standard Arabic, no dialect. CTA: no link — close by inviting the reader to message the Balqalam Page (راسلونا على الصفحة), one ask only. Constraint: no invented numbers, percentages, hours saved or customer counts; never say offline, native app, advanced analytics, paying customers or automatic regulator submission; King Fahad Schools may be named only as the one live pilot, with no results or quotes; never the Hogwarts name or wordmark. Register: rung 2.",
+      "visual": null
+    },
+    {
+      "id": "balqalam-w02-proof",
+      "pillar": "product-proof",
+      "brief": "Product proof: the attendance and fees views of the live product, captioned in plain Arabic — what the principal sees at eight in the morning. Audience: principals. Angle: competence, not enthusiasm. The scene: a principal reading one screen before the morning assembly. Media: a REAL Arabic screenshot of the shipped screen from the media library (the hogwarts repo root holds *-ar.png captures) or a fresh /record capture — never a generated or mocked interface. Market: Arabic-speaking private K-12 schools, Sudan first and the Gulf second — plain modern standard Arabic, no dialect. CTA: no link — close by inviting the reader to message the Balqalam Page (راسلونا على الصفحة), one ask only. Constraint: no invented numbers, percentages, hours saved or customer counts; never say offline, native app, advanced analytics, paying customers or automatic regulator submission; King Fahad Schools may be named only as the one live pilot, with no results or quotes; never the Hogwarts name or wordmark. Register: rung 2.",
+      "visual": null
+    },
+    {
+      "id": "balqalam-w03-idea",
+      "pillar": "product-proof",
+      "brief": "Product: starting from the school's own Excel file — the school sends the list it already keeps, with Arabic headers, and the system builds its students and classes from it; nobody retypes the roster. Audience: general managers afraid of a painful migration. Angle: the fear of switching, answered. The scene: a registrar opening an old spreadsheet with a sigh before the new term. Market: Arabic-speaking private K-12 schools, Sudan first and the Gulf second — plain modern standard Arabic, no dialect. CTA: no link — close by inviting the reader to message the Balqalam Page (راسلونا على الصفحة), one ask only. Constraint: no invented numbers, percentages, hours saved or customer counts; never say offline, native app, advanced analytics, paying customers or automatic regulator submission; King Fahad Schools may be named only as the one live pilot, with no results or quotes; never the Hogwarts name or wordmark. Register: rung 2.",
+      "visual": {
+        "type": "plate",
+        "subject": "An office computer screen showing a long plain spreadsheet, a cup of tea beside the keyboard, evening light, no people"
+      }
+    },
+    {
+      "id": "balqalam-w03-proof",
+      "pillar": "product-proof",
+      "brief": "Product proof: the Excel import with Arabic column names turning into an organised student list. Audience: registrars and general managers. Angle: before and after, one step apart. The scene: the list that took a week to type, arriving in one upload. Media: a REAL Arabic screenshot of the shipped screen from the media library (the hogwarts repo root holds *-ar.png captures) or a fresh /record capture — never a generated or mocked interface. Market: Arabic-speaking private K-12 schools, Sudan first and the Gulf second — plain modern standard Arabic, no dialect. CTA: no link — close by inviting the reader to message the Balqalam Page (راسلونا على الصفحة), one ask only. Constraint: no invented numbers, percentages, hours saved or customer counts; never say offline, native app, advanced analytics, paying customers or automatic regulator submission; King Fahad Schools may be named only as the one live pilot, with no results or quotes; never the Hogwarts name or wordmark. Register: rung 2.",
+      "visual": null
+    },
+    {
+      "id": "balqalam-w04-idea",
+      "pillar": "learning-science",
+      "brief": "Learning and school intelligence: absence as an early signal, not an administrative box — a pattern of missed days usually says something before the grades do, if someone can see the pattern. Label the evidence honestly and separate what research found from what it may mean for a school. Audience: principals and academic leads. Angle: the question a principal should ask of the register. The scene: a homeroom teacher noticing the same empty seat for the third Sunday. Market: Arabic-speaking private K-12 schools, Sudan first and the Gulf second — plain modern standard Arabic, no dialect. CTA: no link — close by inviting the reader to message the Balqalam Page (راسلونا على الصفحة), one ask only. Constraint: no invented numbers, percentages, hours saved or customer counts; never say offline, native app, advanced analytics, paying customers or automatic regulator submission; King Fahad Schools may be named only as the one live pilot, with no results or quotes; never the Hogwarts name or wordmark. Register: rung 2.",
+      "visual": {
+        "type": "lifestyle",
+        "subject": "An empty student desk by a classroom window in morning light, chairs neatly placed, no people and no faces"
+      }
+    },
+    {
+      "id": "balqalam-w04-proof",
+      "pillar": "product-proof",
+      "brief": "Product proof: attendance capture in a tap and the absence follow-up with the family. Audience: teachers and principals. Angle: the signal reaches someone the same day. The scene: the register marked before the first lesson ends. Media: a REAL Arabic screenshot of the shipped screen from the media library (the hogwarts repo root holds *-ar.png captures) or a fresh /record capture — never a generated or mocked interface. Market: Arabic-speaking private K-12 schools, Sudan first and the Gulf second — plain modern standard Arabic, no dialect. CTA: no link — close by inviting the reader to message the Balqalam Page (راسلونا على الصفحة), one ask only. Constraint: no invented numbers, percentages, hours saved or customer counts; never say offline, native app, advanced analytics, paying customers or automatic regulator submission; King Fahad Schools may be named only as the one live pilot, with no results or quotes; never the Hogwarts name or wordmark. Register: rung 2.",
+      "visual": null
+    },
+    {
+      "id": "balqalam-w05-idea",
+      "pillar": "school-operations",
+      "brief": "School operations: the attendance register that goes missing before the board meeting — the numbers exist, somewhere, in a notebook no one can find in time. Audience: principals and owners. Angle: the cost of information that exists but cannot be reached. The scene: a meeting room waiting while someone searches the staff room. Market: Arabic-speaking private K-12 schools, Sudan first and the Gulf second — plain modern standard Arabic, no dialect. CTA: no link — close by inviting the reader to message the Balqalam Page (راسلونا على الصفحة), one ask only. Constraint: no invented numbers, percentages, hours saved or customer counts; never say offline, native app, advanced analytics, paying customers or automatic regulator submission; King Fahad Schools may be named only as the one live pilot, with no results or quotes; never the Hogwarts name or wordmark. Register: rung 2.",
+      "visual": {
+        "type": "plate",
+        "subject": "A school meeting room table with empty chairs and a single open notebook, papers slightly scattered, no people"
+      }
+    },
+    {
+      "id": "balqalam-w05-proof",
+      "pillar": "product-proof",
+      "brief": "Product proof: attendance reports ready without collecting notebooks — by class, by day, by student. Audience: principals and owners. Angle: the meeting starts on time. The scene: the report already on the screen when the board sits down. Media: a REAL Arabic screenshot of the shipped screen from the media library (the hogwarts repo root holds *-ar.png captures) or a fresh /record capture — never a generated or mocked interface. Market: Arabic-speaking private K-12 schools, Sudan first and the Gulf second — plain modern standard Arabic, no dialect. CTA: no link — close by inviting the reader to message the Balqalam Page (راسلونا على الصفحة), one ask only. Constraint: no invented numbers, percentages, hours saved or customer counts; never say offline, native app, advanced analytics, paying customers or automatic regulator submission; King Fahad Schools may be named only as the one live pilot, with no results or quotes; never the Hogwarts name or wordmark. Register: rung 2.",
+      "visual": null
+    },
+    {
+      "id": "balqalam-w06-idea",
+      "pillar": "school-operations",
+      "brief": "School operations: the missing invoice is a trust problem, not a paper problem — when a parent says they paid and the school cannot show it, the relationship pays the price. Audience: owners and finance leads. Angle: fees as trust between school and family. The scene: the accountant at month end chasing receipts notebook by notebook. Market: Arabic-speaking private K-12 schools, Sudan first and the Gulf second — plain modern standard Arabic, no dialect. CTA: no link — close by inviting the reader to message the Balqalam Page (راسلونا على الصفحة), one ask only. Constraint: no invented numbers, percentages, hours saved or customer counts; never say offline, native app, advanced analytics, paying customers or automatic regulator submission; King Fahad Schools may be named only as the one live pilot, with no results or quotes; never the Hogwarts name or wordmark. Register: rung 2.",
+      "visual": {
+        "type": "plate",
+        "subject": "A school accountant's desk at month end, receipt books and a calculator, a single lamp, no people"
+      }
+    },
+    {
+      "id": "balqalam-w06-proof",
+      "pillar": "product-proof",
+      "brief": "Product proof: the invoice and receipt coming out of the system, with who paid what in one record. Audience: finance leads. Angle: one record ends the argument. The scene: a parent's question answered while they are still on the line. Media: a REAL Arabic screenshot of the shipped screen from the media library (the hogwarts repo root holds *-ar.png captures) or a fresh /record capture — never a generated or mocked interface. Market: Arabic-speaking private K-12 schools, Sudan first and the Gulf second — plain modern standard Arabic, no dialect. CTA: no link — close by inviting the reader to message the Balqalam Page (راسلونا على الصفحة), one ask only. Constraint: no invented numbers, percentages, hours saved or customer counts; never say offline, native app, advanced analytics, paying customers or automatic regulator submission; King Fahad Schools may be named only as the one live pilot, with no results or quotes; never the Hogwarts name or wordmark. Register: rung 2.",
+      "visual": null
+    },
+    {
+      "id": "balqalam-w07-idea",
+      "pillar": "learning-science",
+      "brief": "Learning and school intelligence: why students forget after the exam — what the evidence says about retrieval practice and spacing, labelled strong, promising or preliminary, and what it does NOT prove. Separate the study, the school-level meaning, and what the product does. No brain imagery, no dopamine, no learning styles. Audience: principals and academic leads. Angle: a myth replaced by a practice. The scene: the week after the exam, when last month's lesson has already gone. Market: Arabic-speaking private K-12 schools, Sudan first and the Gulf second — plain modern standard Arabic, no dialect. CTA: no link — close by inviting the reader to message the Balqalam Page (راسلونا على الصفحة), one ask only. Constraint: no invented numbers, percentages, hours saved or customer counts; never say offline, native app, advanced analytics, paying customers or automatic regulator submission; King Fahad Schools may be named only as the one live pilot, with no results or quotes; never the Hogwarts name or wordmark. Register: rung 2.",
+      "visual": {
+        "type": "lifestyle",
+        "subject": "A teacher's hands writing short quiz questions on a whiteboard in an empty classroom, no faces"
+      }
+    },
+    {
+      "id": "balqalam-w07-proof",
+      "pillar": "product-proof",
+      "brief": "Product proof: exams and results follow-up — short checks set and marked, results reaching the teacher and the family without re-copying. Audience: teachers and academic leads. Angle: the practice made cheap to repeat. The scene: a teacher setting a quick recap check in minutes. Media: a REAL Arabic screenshot of the shipped screen from the media library (the hogwarts repo root holds *-ar.png captures) or a fresh /record capture — never a generated or mocked interface. Market: Arabic-speaking private K-12 schools, Sudan first and the Gulf second — plain modern standard Arabic, no dialect. CTA: no link — close by inviting the reader to message the Balqalam Page (راسلونا على الصفحة), one ask only. Constraint: no invented numbers, percentages, hours saved or customer counts; never say offline, native app, advanced analytics, paying customers or automatic regulator submission; King Fahad Schools may be named only as the one live pilot, with no results or quotes; never the Hogwarts name or wordmark. Register: rung 2.",
+      "visual": null
+    },
+    {
+      "id": "balqalam-w08-idea",
+      "pillar": "trust",
+      "brief": "Trust: who owns student data when the contract ends? The answer should be the school — the data exports as CSV or JSON at any time, and the school can leave with everything. Audience: owners and IT or procurement leads. Angle: lock-in named out loud, then removed. The scene: a school stuck with an old system because its records cannot come out. Market: Arabic-speaking private K-12 schools, Sudan first and the Gulf second — plain modern standard Arabic, no dialect. CTA: no link — close by inviting the reader to message the Balqalam Page (راسلونا على الصفحة), one ask only. Constraint: no invented numbers, percentages, hours saved or customer counts; never say offline, native app, advanced analytics, paying customers or automatic regulator submission; King Fahad Schools may be named only as the one live pilot, with no results or quotes; never the Hogwarts name or wordmark. Register: rung 2.",
+      "visual": {
+        "type": "plate",
+        "subject": "A row of archive boxes on a school office shelf, labelled folders, soft daylight, no people"
+      }
+    },
+    {
+      "id": "balqalam-w08-proof",
+      "pillar": "product-proof",
+      "brief": "Product proof: the export and the roles screen — what each staff member can see, and the full export button. Audience: IT and procurement leads. Angle: precise answers, no invented certificates. The scene: the IT lead asking the hard question and getting a screen instead of a promise. Media: a REAL Arabic screenshot of the shipped screen from the media library (the hogwarts repo root holds *-ar.png captures) or a fresh /record capture — never a generated or mocked interface. Market: Arabic-speaking private K-12 schools, Sudan first and the Gulf second — plain modern standard Arabic, no dialect. CTA: no link — close by inviting the reader to message the Balqalam Page (راسلونا على الصفحة), one ask only. Constraint: no invented numbers, percentages, hours saved or customer counts; never say offline, native app, advanced analytics, paying customers or automatic regulator submission; King Fahad Schools may be named only as the one live pilot, with no results or quotes; never the Hogwarts name or wordmark. Register: rung 2.",
       "visual": null
     }
   ],

@@ -502,13 +502,13 @@
       "id": "balqalam",
       "mediaName": "Balqalam",
       "domain": "balqalam.com",
-      "note": "بالقلم is the in-product name of the same school system that ships to English-facing audiences as Hogwarts — not a second product, but the face Arabic-speaking schools see when they open the app. It is its own brand here because the pipeline models one destination per (brand, channel): its own Facebook Page, its own token, its own Arabic-first voice. The Page carries a Saudi address (Al Khobar) — this is the Gulf-facing front door, not the Sudan lane. The rule that matters: an asset for this brand must never carry the Hogwarts wordmark.",
+      "note": "بالقلم is the school management system's public name — the product formerly called Hogwarts, now retired from everything public. It is the brand every school post publishes as, on the Bilqalam بالقلم Facebook Page. One Page, two tracks: Sudan is the proof track (the live pilot), the Gulf is the cash track. The rule that matters: an asset for this brand must never carry the Hogwarts wordmark, never a child's face, and never a generated or mocked product interface — product proof uses real screenshots.",
       "inAppName": {
         "ar": "بالقلم",
         "en": "balqalam"
       },
       "what": "A multi-tenant school management system — admission, attendance, grades, timetable, exams, fees — addressed to Arabic-speaking schools. The whole school in one place.",
-      "audience": "School owners, principals and administrators in Saudi Arabia and the wider Arabic MENA market. They are administrators, not technologists: the promise is one system instead of five notebooks and a WhatsApp group.",
+      "audience": "Owners, principals, registrars and finance leads of Arabic-speaking private K-12 schools — Sudan first, Saudi Arabia and the UAE second. They are administrators, not technologists: the promise is one system instead of five notebooks and a WhatsApp group.",
       "tone": "Calm, exact, unhurried, and Arabic-first — the Arabic is written, never translated. Never playful, never salesy. The visual argument is competence.",
       "mark": {
         "file": "public/brands/hogwarts.png",
