@@ -19,6 +19,8 @@
 
 import { mkdirSync, writeFileSync } from "node:fs";
 
+import { extractApplyEmail } from "./lib/apply-email.mjs";
+
 const args = process.argv.slice(2);
 const opt = (f, d) => (args.indexOf(f) > -1 ? args[args.indexOf(f) + 1] : d);
 const ONLY = opt("--source");
@@ -56,8 +58,8 @@ const text = (html) =>
 const LANES = [
   ["kigali-protection-engineer", /protection|relay|substation|commissioning|\bscada\b|testing engineer/i],
   ["kivu-marine-eto", /marine|vessel|\bship|boat|\beto\b|electro-?technical/i],
-  ["kigali-electrical-engineer", /electric|\be&i\b|electromechanical|power (plant|system)|energy engineer|maintenance engineer|biomedical|instrumentation/i],
-  ["kigali-web-developer", /software|developer|\bweb\b|full[- ]?stack|front[- ]?end|back[- ]?end|data engineer|\bict\b|programmer|devops|systems? (analyst|administrator|engineer)|digital|it (officer|specialist|support)/i],
+  ["kigali-electrical-engineer", /electric|\be&i\b|electromechanical|power (plant|system)|energy engineer|maintenance (engineer|technician)|engineering technician|biomedical|instrumentation|solar|(quality|qa\/?qc).{0,30}engineer|construction.{0,30}engineer/i],
+  ["kigali-web-developer", /software|developer|\bweb\b|full[- ]?stack|front[- ]?end|back[- ]?end|data (engineer|scien|analy)|\bict\b|programmer|devops|systems? (analyst|administrator|engineer)|digital|\bit (officer|specialist|support|lead)|applications specialist|product operations|technical support/i],
 ];
 
 const TENDER_SOFTWARE =
@@ -94,7 +96,9 @@ function parseDate(s) {
   return undefined;
 }
 
-function item({ title, company, location, url, source, campaign, deadline, description, employmentType, remoteType, salary, skills = [] }) {
+const TENDERISH = /tender|expression of interest|\beoi\b|request for (proposal|quotation)|\brf[pq]\b|terms of reference|\btors?\b/i;
+
+function item({ title, company, location, url, source, campaign, deadline, description, employmentType, remoteType, salary, skills = [], applyEmail }) {
   return {
     title,
     company: company || "Unknown employer",
@@ -110,8 +114,12 @@ function item({ title, company, location, url, source, campaign, deadline, descr
     source,
     campaign,
     deadline: deadline ?? "rolling",
-    applyMethod: `portal:${url}`,
-    note: "Auto-discovered — read the posting for the exact apply channel and documents.",
+    // A tender or EOI wants a proposal, not an application letter: it never
+    // takes the email channel, whatever address the notice gives.
+    applyMethod: applyEmail && !TENDERISH.test(title) && !campaign?.includes("tender") ? `email:${applyEmail}` : `portal:${url}`,
+    note: applyEmail
+      ? `Auto-discovered — the posting asks for applications to ${applyEmail}.`
+      : "Auto-discovered — read the posting for the exact apply channel and documents.",
   };
 }
 
@@ -146,6 +154,7 @@ const ADAPTERS = {
         const url = `https://www.jobinrwanda.com${href}`;
         let deadline;
         let description = title;
+        let applyEmail;
         try {
           const body = text(await get(url));
           // The structured field ("Deadline: Monday, 05/10/2026 23:59") comes
@@ -157,6 +166,7 @@ const ADAPTERS = {
           const start = body.search(/(Job description|Background|Description|Overview|About)/i);
           description = body.slice(start > -1 ? start : 0, (start > -1 ? start : 0) + 700);
           if (CITIZENS_ONLY.test(main)) description += " [Rwandan nationals only]";
+          applyEmail = extractApplyEmail(main);
         } catch (err) {
           dropped.push(`jobinrwanda detail ${url}: ${err.message}`);
         }
@@ -168,13 +178,13 @@ const ADAPTERS = {
           dropped.push(`Rwandan nationals only: ${title} @ ${company}`);
           continue;
         }
-        items.push(item({ title, company, url, source: "jobinrwanda", campaign, deadline, description }));
+        items.push(item({ title, company, url, source: "jobinrwanda", campaign, deadline, description, applyEmail }));
       }
     }
     return { items, dropped };
   },
 
-  /// Joomla jsjobs listing; the deadline is on the card, so no detail fetch.
+  /// Joomla jsjobs listing; the deadline is on the card, the apply address on the detail page.
   async greatrwandajobs() {
     const items = [];
     const dropped = [];
@@ -197,16 +207,35 @@ const ADAPTERS = {
         const station = text(card.match(/Duty Station:[\s\S]*?get-text">([\s\S]*?)<\/span>/)?.[1] ?? "");
         if (deadline && deadline < TODAY) continue;
         if (items.length >= LIMIT) break;
+        const url = href.startsWith("http") ? href : `https://www.greatrwandajobs.com${href}`;
+        // Matched rows only: the detail page carries the apply address and
+        // the eligibility line the card does not.
+        let applyEmail;
+        let description;
+        try {
+          const body = text(await get(url));
+          if (CITIZENS_ONLY.test(body)) {
+            dropped.push(`Rwandan nationals only: ${title}`);
+            continue;
+          }
+          applyEmail = extractApplyEmail(body);
+          const start = body.search(/(Job description|Background|Description|Overview|About)/i);
+          description = body.slice(start > -1 ? start : 0, (start > -1 ? start : 0) + 700);
+        } catch (err) {
+          dropped.push(`greatrwandajobs detail ${url}: ${err.message}`);
+        }
         items.push(
           item({
             title: title.trim(),
             company: company?.trim(),
             location: station || undefined,
             remoteType: /remote/i.test(station) ? "remote" : "onsite",
-            url: href.startsWith("http") ? href : `https://www.greatrwandajobs.com${href}`,
+            url,
             source: "greatrwandajobs",
             campaign,
             deadline,
+            description,
+            applyEmail,
           }),
         );
       }

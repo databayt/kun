@@ -21,6 +21,7 @@ import {
 } from "node:fs";
 import { join } from "node:path";
 
+import { similarRole } from "@/lib/jobs/deduplication";
 import { evaluateSendGate, holdReasonFor } from "@/lib/jobs/send-gate";
 
 import { BoardRow, ledger, listBoard, patchRow } from "./board";
@@ -112,7 +113,7 @@ export function contactState(
       splitName(o.name).company.toLowerCase() === company.toLowerCase() ||
       (!!domain && !freeMail.test(domain) && o.applyEmail?.split("@")[1] === domain);
     if (!sameCompany) continue;
-    if (splitName(o.name).role.toLowerCase() === role.toLowerCase() && age < 30 * 86_400_000) return "repeat";
+    if (similarRole(splitName(o.name).role, role) && age < 30 * 86_400_000) return "repeat";
     if (age < 86_400_000) state = "wait";
   }
   return state;

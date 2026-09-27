@@ -33,7 +33,9 @@ import type {
 
 import { parseApplyMethod } from "@/lib/jobs/apply-method";
 
-import { listBoard, patchRow } from "./board";
+import { similarRole } from "@/lib/jobs/deduplication";
+
+import { BoardRow, listBoard, patchRow } from "./board";
 import { createJobRow, openDb, statusFor } from "./engine";
 
 const INBOX = "jobs/inbox";
@@ -118,6 +120,19 @@ async function main(): Promise<void> {
 
   const db = openDb();
   const profile = buildEvidenceKnowledgeProfile();
+  // The board, for near-duplicate checks: the same role reached through two
+  // sources with different wording must not become two cards (two sends).
+  const boardRows: BoardRow[] = await listBoard();
+  const firstWord = (c: string) => c.toLowerCase().replace(/[^a-z0-9 ]/g, " ").trim().split(/\s+/)[0] ?? "";
+  const nearDuplicate = (job: NormalizedJobInput, email?: string): BoardRow | undefined =>
+    boardRows.find((r) => {
+      const at = r.name.lastIndexOf(" @ ");
+      const role = at > -1 ? r.name.slice(0, at) : r.name;
+      const company = at > -1 ? r.name.slice(at + 3) : "";
+      const sameEmployer = (!!email && r.applyEmail === email) || firstWord(company) === firstWord(job.company);
+      return sameEmployer && similarRole(role, job.title);
+    });
+
   const existing = await db.jobOpportunity.findMany({
     select: {
       id: true,
@@ -188,6 +203,13 @@ async function main(): Promise<void> {
     );
 
     const known = byFingerprint.get(fingerprint);
+    if (!known) {
+      const twin = nearDuplicate(job, parseApplyMethod(item.applyMethod).applyEmail);
+      if (twin) {
+        dropped.push(`same role already on the board as "${twin.name}"`);
+        continue;
+      }
+    }
     if (known?.twentyOpportunityId) {
       skipped++;
       continue;
@@ -236,9 +258,13 @@ async function main(): Promise<void> {
     );
     let filled = 0;
     for (const row of await listBoard()) {
-      if (row.channel || !row.fingerprint || !methods.has(row.fingerprint)) continue;
+      if (!row.fingerprint || !methods.has(row.fingerprint)) continue;
       const fields = parseApplyMethod(methods.get(row.fingerprint));
       if (!fields.channel) continue;
+      // Fill a gap, or upgrade a portal card once a posting turns out to name
+      // an address — that is what makes it sendable by the loop.
+      const upgrade = fields.channel === "EMAIL" && row.channel !== "EMAIL" && row.applicationStatus === "TO_APPLY";
+      if (row.channel && !upgrade) continue;
       await patchRow(row.id, fields);
       filled++;
     }

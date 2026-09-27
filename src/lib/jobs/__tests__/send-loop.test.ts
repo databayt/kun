@@ -213,3 +213,16 @@ describe("learn metrics", () => {
     expect(lane.replyRate).toBeNull();
   });
 });
+
+import { similarRole } from "../deduplication";
+
+describe("similar role", () => {
+  it("matches the same role worded two ways", () => {
+    expect(similarRole("Technical Support Engineers", "Technical Support Engineer (freelance)")).toBe(true);
+    expect(similarRole("IT Lead", "IT Lead")).toBe(true);
+  });
+  it("keeps different roles apart", () => {
+    expect(similarRole("Windows Forum Freelancer", "Technical Support Engineer")).toBe(false);
+    expect(similarRole("IT Lead", "Finance Lead")).toBe(false);
+  });
+});

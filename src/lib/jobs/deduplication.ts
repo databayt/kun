@@ -19,3 +19,24 @@ export function attachJobFingerprint(job: NormalizedJobInput): NormalizedJobInpu
     fingerprint,
   };
 }
+
+/// Two postings for the same role often arrive worded differently from two
+/// sources ("Technical Support Engineers" vs "Technical Support Engineer
+/// (freelance)"). Fingerprints differ; this catches them. Word-set overlap on
+/// the significant words, parentheticals and plural endings ignored.
+export function similarRole(a: string, b: string): boolean {
+  const words = (s: string) =>
+    new Set(
+      s
+        .toLowerCase()
+        .replace(/\(.*?\)/g, " ")
+        .split(/[^a-z0-9]+/)
+        .map((w) => w.replace(/s$/, ""))
+        .filter((w) => w.length >= 2 && !["and", "the", "for", "with", "senior", "junior", "fixed", "term"].includes(w)),
+    );
+  const A = words(a);
+  const B = words(b);
+  if (A.size === 0 || B.size === 0) return false;
+  const shared = [...A].filter((w) => B.has(w)).length;
+  return shared / Math.min(A.size, B.size) >= 0.75;
+}
