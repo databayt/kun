@@ -1,5 +1,6 @@
 import { execSync } from "node:child_process";
 
+import { parseApplyMethod } from "./apply-method";
 import { evaluateCampaignMatches } from "./campaigns";
 import { generateJobFingerprint } from "./deduplication";
 import { FullJobWithAssessment } from "./types";
@@ -84,6 +85,8 @@ interface PushOptions {
   deadline?: string;
   /// Free text appended to the assessment: how to apply, why it fits.
   note?: string;
+  /// email:<addr> | portal:<url> | … — sets the board's channel + applyEmail.
+  applyMethod?: string;
 }
 
 const TIER_OPTION: Record<string, string> = {
@@ -248,6 +251,7 @@ export async function pushJobToTwentyCRM(
         employmentType: job.employmentType.toUpperCase(),
         location: job.location ?? null,
         deadline,
+        ...parseApplyMethod(opts.applyMethod),
         ...(job.sourceUrl
           ? {
               jobUrl: {

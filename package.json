@@ -26,7 +26,12 @@
     "jobs:ingest": "tsx scripts/jobs/ingest.ts",
     "jobs:discover": "node scripts/jobs/discover.mjs",
     "jobs:queue": "node scripts/jobs/queue.mjs",
-    "jobs:mark": "tsx scripts/jobs/mark.ts"
+    "jobs:mark": "tsx scripts/jobs/mark.ts",
+    "jobs:wave": "tsx scripts/jobs/wave.ts",
+    "jobs:send": "tsx scripts/jobs/send.ts",
+    "jobs:variant": "tsx scripts/jobs/variants.ts",
+    "jobs:cv": "node scripts/jobs/render-cv.mjs",
+    "jobs:facts": "tsx scripts/jobs/facts.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "^4.0.37",
@@ -81,6 +86,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@fontsource/inter": "^5.3.0",
     "@tailwindcss/postcss": "^4.2.2",
     "@types/node": "^25.5.2",
     "@types/react": "^19.2.14",

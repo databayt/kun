@@ -31,6 +31,9 @@ import type {
   NormalizedJobInput,
 } from "@/lib/jobs/types";
 
+import { parseApplyMethod } from "@/lib/jobs/apply-method";
+
+import { listBoard, patchRow } from "./board";
 import { createJobRow, openDb, statusFor } from "./engine";
 
 const INBOX = "jobs/inbox";
@@ -221,6 +224,25 @@ async function main(): Promise<void> {
         `CRM push failed: ${job.title} @ ${job.company} — ${res.error ?? res.message}`,
       );
     }
+  }
+
+  // Rows pushed before the send loop existed have no channel/applyEmail. The
+  // inbox still knows how each one is applied to, so fill the gap in place.
+  if (!DRY_RUN) {
+    const methods = new Map(
+      items
+        .filter((i) => i.applyMethod && i.title && i.company)
+        .map((i) => [generateJobFingerprint(i.title, i.company, clean(i).remoteType), i.applyMethod as string]),
+    );
+    let filled = 0;
+    for (const row of await listBoard()) {
+      if (row.channel || !row.fingerprint || !methods.has(row.fingerprint)) continue;
+      const fields = parseApplyMethod(methods.get(row.fingerprint));
+      if (!fields.channel) continue;
+      await patchRow(row.id, fields);
+      filled++;
+    }
+    if (filled) console.log(`\nbackfilled channel/applyEmail on ${filled} existing board rows`);
   }
 
   if (dropped.length) {
