@@ -38,6 +38,22 @@ send gate (`src/lib/jobs/send-gate.ts`): no placeholders, 120–350 words, names
 number backed by `jobs/facts.json` or the posting, recipient appears on the posting, CV 1–2 pages,
 extra-document asks → HOLD.
 
+## ATS lane — portal forms (since 2026-09-27, goal ~100/day)
+
+`pnpm jobs:ats prepare` (daily, in the loop) → `pnpm jobs:ats submit --apply` (per tick, 09–20).
+- **Greenhouse: auto-submitted.** Answers from `jobs/profile.json` via `src/lib/jobs/ats-answers.ts`;
+  Greenhouse emails an 8-char code to hotmail — Abdout approved reading it (Mail.app) and entering it.
+- **Ashby + Lever: never auto-submitted** — Ashby's spam filter and Lever's hCaptcha block bots, and the
+  rule is **CAPTCHA/bot block → HOLD, never evade**. They get paste-ready packets in `jobs/packets/ats/`
+  (every field's answer, written answers, cover letter, CV path); the digest lists the best six.
+- **Truth rules:** a required question the profile can't answer truthfully holds the card, quoted.
+  Honeypots ("leave this field blank") are never filled. Self-ID questions always declined.
+- **Location:** `openToRwanda()` in discover.mjs — bare Remote or a named open region only
+  ("<Country> Remote" = must live there). US `City, ST` postings are US-remote.
+- Boards: `jobs/ats-boards.json` (226+), seeded by `node scripts/jobs/ats-seed.mjs <remote-jobs clone>`
+  or `--yc <yc all.json>`; merge, never replace.
+- One application per company per day across email and ATS. Daily total cap 100 (config), hotmail 40.
+
 ## Pieces
 
 | Thing | Where |

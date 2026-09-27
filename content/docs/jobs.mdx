@@ -411,3 +411,22 @@ stateDiagram-v2
   on `hermes model`.
 - **One-time setup:** add osmanabdout@hotmail.com to Mail.app (System Settings → Internet Accounts).
   Until then send and inbox refuse — they never fall back to another account.
+
+---
+
+## 10. The ATS Lane — portal forms (2026-09-27)
+
+Goal: ~100 applications a day. Remote software roles are applied to through applicant-tracking systems, so
+the loop reads the hosted forms, answers them only from `jobs/profile.json`, and — where the platform
+allows an honest automated submission — submits.
+
+| System | Mode | Why |
+| :--- | :--- | :--- |
+| Greenhouse | Auto-submit | Questions from the public board API; Greenhouse emails a code to hotmail, read via Mail.app (Abdout's approval) |
+| Ashby | Paste-ready packet | Its spam filter flags automated submissions — never evaded |
+| Lever | Paste-ready packet | hCaptcha on the form — never evaded |
+
+- `pnpm jobs:ats prepare` — questions → answers (`ats-answers.ts`), cover letter + written answers (`claude -p`), gate.
+- `pnpm jobs:ats submit [--apply] [--id <crm-id>] [--now]` — fill, screenshot, submit (Greenhouse) or write the packet.
+- Unanswerable required questions, honeypots, region-bound postings and bot blocks all end in HOLD with the reason.
+- Honest ceiling measured on day one: email 5–10/day + Greenhouse 10–20/day automated; Ashby/Lever by hand.
