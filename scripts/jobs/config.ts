@@ -23,8 +23,8 @@ export interface LoopConfig {
 
 const DEFAULTS: LoopConfig = {
   fromAccount: "osmanabdout@hotmail.com",
-  dailyCap: 10,
-  rampCap: 5,
+  dailyCap: 40, // hotmail ceiling (Abdout, 2026-09-27: cap the personal mailbox at 40)
+  rampCap: 40,
   rampUntil: "2026-10-11",
   followUpCap: 5,
   sendDays: [1, 2, 3, 4, 5],

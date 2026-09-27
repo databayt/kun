@@ -106,6 +106,16 @@ async function main(): Promise<void> {
       lines.push(`• ${short(r)} — ${r.channel?.toLowerCase()}`);
   }
 
+  // Freelance is one Upwork job a day, picked and drafted by Cowork in
+  // Abdout's logged-in browser (Upwork blocks bots); Abdout submits.
+  const upwork = `jobs/packets/upwork/${date}.md`;
+  if (existsSync(upwork)) {
+    const url = readFileSync(upwork, "utf-8").match(/https:\/\/www\.upwork\.com\/[^\s)>\]]+/)?.[0];
+    lines.push(`\n*Upwork pick of the day:* proposal ready in ${upwork}${url ? ` — ${url}` : ""}`);
+  } else {
+    lines.push(`\n*Upwork pick of the day:* not drafted yet (Cowork routine)`);
+  }
+
   const text = lines.join("\n");
   if (process.argv.includes("--send")) notify(text, `Jobs — ${date}`);
   else console.log(text);
