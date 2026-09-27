@@ -124,6 +124,19 @@ Read the smoke table, not just its exit code: health `200`, `/en` and `/ar` `200
 container log tail — env-validation failures surface there. A `Docker command exited with code: 1`
 on deploy is transient: re-run, completed layers are reused.
 
+**Keep the build dir out of `$TMPDIR`, and build → smoke → deploy in one sitting.** macOS purges
+`/var/folders/…/T` overnight, and pnpm's hard-linked / APFS-cloned files keep their old timestamps, so
+a build left overnight silently loses most of `node_modules/next` (mkan, 2026-09-27: 119 of 8,534
+files). The next smoke then dies on boot with `Cannot find module '/app/node_modules/next/dist/server/next.js'`
+and the `--rm` container vanishes before its log can be read — it looks like a Next bug, it is the
+purge. Export `CF_BUILD_DIR=$HOME/.cache/cf-build/<repo>` before `build`.
+
+**A security patch ships the patch, not the backlog.** Before `build`, list the commits since the
+last deploy (`wrangler deployments list` → its date → `git log --since`). When `main` carries
+undeployed product changes, pin the known-good source and overlay only the dependency files:
+`CF_SOURCE=<last-deployed-sha> CF_OVERLAY="package.json pnpm-lock.yaml"`. A clean `HEAD` export also
+races concurrent sessions — it ships whatever landed seconds before the build started.
+
 ### 6. The data steps the deploy never runs
 
 `deploy-cloudflare.sh` never seeds and `ensure-demo` short-circuits once the demo exists, so a
