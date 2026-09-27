@@ -247,6 +247,117 @@ const ADAPTERS = {
     return { items, dropped };
   },
 
+  /// Remotive's public API. Only roles whose candidate location admits
+  /// Rwanda: worldwide/anywhere, Africa, EMEA, or no restriction stated.
+  async remotive() {
+    const items = [];
+    const dropped = [];
+    const seen = new Set();
+    for (const q of ["react", "next.js", "typescript", "full stack"]) {
+      const data = await get(`https://remotive.com/api/remote-jobs?search=${encodeURIComponent(q)}&limit=50`, { json: true });
+      for (const j of data.jobs ?? []) {
+        if (seen.has(j.id)) continue;
+        seen.add(j.id);
+        // Remotive's search matches descriptions too; the title must be a dev role.
+        if (!/develop|engineer|programmer|full[- ]?stack|front[- ]?end|back[- ]?end|react|next\.?js|typescript/i.test(j.title)) continue;
+        const loc = String(j.candidate_required_location ?? "");
+        if (loc && !/worldwide|anywhere|africa|emea|rwanda|global/i.test(loc)) {
+          dropped.push(`region ${loc}: ${j.title} @ ${j.company_name}`);
+          continue;
+        }
+        if (items.length >= LIMIT) break;
+        items.push({
+          ...item({
+            title: j.title,
+            company: j.company_name,
+            location: loc || "Remote (worldwide)",
+            remoteType: "remote",
+            employmentType: /contract|freelance/i.test(j.job_type ?? "") ? "contract" : "full_time",
+            url: j.url,
+            source: "remotive",
+            campaign: "remote-web-developer-worldwide",
+            description: text(j.description ?? "").slice(0, 700),
+            salary: j.salary || undefined,
+            skills: j.tags ?? [],
+          }),
+          rwandaEligible: "unverified",
+        });
+      }
+    }
+    return { items, dropped };
+  },
+
+  /// Himalayas' public API (newest first). Keep stack matches whose location
+  /// restrictions are empty or name Rwanda/Africa.
+  async himalayas() {
+    const items = [];
+    const dropped = [];
+    const STACK = /react|next\.?js|typescript|full[- ]?stack|front[- ]?end|javascript|node/i;
+    for (const offset of [0, 100, 200]) {
+      const data = await get(`https://himalayas.app/jobs/api?limit=100&offset=${offset}`, { json: true });
+      for (const j of data.jobs ?? []) {
+        if (!STACK.test(`${j.title} ${(j.categories ?? []).join(" ")}`)) continue;
+        const where = j.locationRestrictions ?? [];
+        if (where.length && !where.some((w) => /rwanda|africa|worldwide/i.test(w))) {
+          dropped.push(`region ${where.slice(0, 3).join("/")}: ${j.title} @ ${j.companyName}`);
+          continue;
+        }
+        if (items.length >= LIMIT) break;
+        const salary = j.minSalary ? `${j.currency ?? "USD"} ${j.minSalary}–${j.maxSalary ?? "?"}/${j.salaryPeriod ?? "yr"}` : undefined;
+        items.push({
+          ...item({
+            title: j.title,
+            company: j.companyName,
+            location: where.length ? where.join(", ") : "Remote (worldwide)",
+            remoteType: "remote",
+            employmentType: /contract|freelance/i.test(j.employmentType ?? "") ? "contract" : "full_time",
+            url: j.applicationLink,
+            source: "himalayas",
+            campaign: "remote-web-developer-worldwide",
+            description: text(j.excerpt ?? j.description ?? "").slice(0, 700),
+            salary,
+            deadline: j.expiryDate ? new Date(j.expiryDate * (j.expiryDate < 1e12 ? 1000 : 1)).toISOString().slice(0, 10) : undefined,
+          }),
+          rwandaEligible: "unverified",
+        });
+      }
+    }
+    return { items, dropped };
+  },
+
+  /// Mercor's explore page carries a JSON-LD ItemList of every open listing;
+  /// the slug is the title. Expert listings that match the profile only.
+  async mercor() {
+    const items = [];
+    const dropped = [];
+    const html = await get("https://work.mercor.com/explore");
+    const urls = [...new Set(html.match(/https:\/\/work\.mercor\.com\/jobs\/list_[A-Za-z0-9_-]+\/[a-z0-9-]+/g) ?? [])];
+    if (urls.length === 0) dropped.push("mercor: 0 listings on /explore — markup changed?");
+    const FIT = /electrical|power-system|hardware|circuit|protection|software-engineer|full-stack|typescript|javascript|react|arabic|systems-integration|firmware/;
+    for (const url of urls) {
+      const slug = url.split("/").pop();
+      if (!FIT.test(slug)) continue;
+      if (items.length >= LIMIT) break;
+      const title = slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+      items.push({
+        ...item({
+          title,
+          company: "Mercor",
+          location: "Remote",
+          remoteType: "remote",
+          employmentType: "contract",
+          url,
+          source: "mercor",
+          campaign: "ai-training-gigs",
+          description: `Mercor expert listing: ${title}. AI-lab evaluation work, hourly, paid weekly via Stripe (Rwanda on Mercor's supported payout list). Eligibility per listing unverified.`,
+        }),
+        applyMethod: `portal:${url}`,
+        rwandaEligible: "unverified",
+      });
+    }
+    return { items, dropped };
+  },
+
   /// Public JSON API; first element is the legal notice. Keep only roles that
   /// say worldwide/Africa/EMEA or name no region — US-only is unreachable.
   async remoteok() {
