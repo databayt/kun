@@ -19,6 +19,7 @@ export interface LoopConfig {
   slackTarget: string; // hermes send --to
   vetoHours: number; // a QUEUED card waits this long before it can send
   pausedLanes: string[]; // CRM campaign values the wave skips
+  dailyTotalCap: number; // email + ATS applications per day (Abdout's goal: 100)
 }
 
 const DEFAULTS: LoopConfig = {
@@ -35,6 +36,7 @@ const DEFAULTS: LoopConfig = {
   vetoHours: 2,
   // Abdout, 2026-09-27: software first, electrical engineering paused.
   pausedLanes: ["PROTECTION", "ELECTRICAL", "MARINE_ETO", "ENGINEERING_CONTRACT"],
+  dailyTotalCap: 100,
 };
 
 /// Priority, lowest first (Abdout, 2026-09-27): software in Kigali → remote

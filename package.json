@@ -36,7 +36,8 @@
     "jobs:followup": "tsx scripts/jobs/followup.ts",
     "jobs:digest": "tsx scripts/jobs/digest.ts",
     "jobs:learn": "tsx scripts/jobs/learn.ts",
-    "jobs:loop": "bash scripts/jobs/loop.sh"
+    "jobs:loop": "bash scripts/jobs/loop.sh",
+    "jobs:ats": "tsx scripts/jobs/ats.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "^4.0.37",

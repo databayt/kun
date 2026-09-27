@@ -76,19 +76,16 @@ export function findLetter(
   return null;
 }
 
-export function sentToday(kind: "sent" | "followup", date: string): number {
+/// Applications logged today (Kigali date). `channel` separates the hotmail
+/// cap (email only) from the daily total (email + ATS forms).
+export function sentToday(kind: "sent" | "followup", date: string, channel: "email" | "ats" | "any" = "email"): number {
   if (!existsSync("jobs/ledger.jsonl")) return 0;
   return readFileSync("jobs/ledger.jsonl", "utf-8")
     .split("\n")
     .filter(Boolean)
-    .map((l) => JSON.parse(l) as { kind: string; ts: string })
-    .filter(
-      (e) =>
-        e.kind === kind &&
-        new Date(new Date(e.ts).getTime() + 2 * 3_600_000)
-          .toISOString()
-          .slice(0, 10) === date,
-    ).length;
+    .map((l) => JSON.parse(l) as { kind: string; ts: string; to?: string })
+    .filter((e) => e.kind === kind && new Date(new Date(e.ts).getTime() + 2 * 3_600_000).toISOString().slice(0, 10) === date)
+    .filter((e) => channel === "any" || (channel === "ats") === (e.to ?? "").startsWith("ats:")).length;
 }
 
 /// One email through Mail.app. Returns null on success, the error otherwise.
