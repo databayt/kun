@@ -322,7 +322,7 @@ async function main(): Promise<void> {
     const variant = `${req.cvVariant} ${req.letterVariant}`;
     const reason = holdReasonFor(verdict);
     console.log(
-      `  ${verdict.pass ? "✓ QUEUED" : "✗ HOLD  "}  ${row.name.slice(0, 60)}${verdict.pass ? "" : `\n              ${reason}`}`,
+      `  ${verdict.pass ? (row.applicationStatus === "APPROVED" ? "✓ APPROVED" : "✓ QUEUED") : "✗ HOLD  "}  ${row.name.slice(0, 60)}${verdict.pass ? "" : `\n              ${reason}`}`,
     );
     if (DRY_RUN) continue;
     if (verdict.pass) {
