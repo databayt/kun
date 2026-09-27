@@ -49,7 +49,7 @@ const _a =
 const book = _a.book;
 if (!book || !book.startsWith("/"))
   throw new Error(
-    'textbook workflow needs args.book — the ABSOLUTE path of a directory holding textbook.pdf, e.g. "/Users/abdout/hogwarts/curriculum/sd/g12/biology"',
+    'textbook workflow needs args.book — the ABSOLUTE path of a directory holding textbook.pdf, e.g. "/Users/abdout/catalog/.work/sd/g12/biology" (a staged copy — see the textbook skill, \"Where books live\")',
   );
 const MODE = _a.mode || "full"; // full | verify (no transcription; verify + adjudicate what is on disk) | repair (adjudicate the saved queue only)
 const PAGES = Array.isArray(_a.pages) && _a.pages.length ? _a.pages : null;

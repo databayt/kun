@@ -20,7 +20,7 @@ Hooks are the part of the engine that survives forgetting. A rule can be ignored
 | `PreToolUse` | `Bash(pnpm dev)` | Kill anything holding port 3000 |
 | `PreToolUse` | `Bash` | Block destructive commands (the Unforgivable list) |
 | `PostToolUse` | `Bash(pnpm dev)` | Open Chrome to `localhost:3000` |
-| `PostToolUse` | `Write\|Edit` | Prettier the changed file |
+| `PostToolUse` | `Write\|Edit` | Prettier the changed file — only in a repo with a prettier config (`format-on-write.sh`) |
 | `Stop` | `*` | Append a timestamp to `~/.claude/session-log.txt` |
 | `Notification` | `*` | macOS notification when Claude needs attention |
 

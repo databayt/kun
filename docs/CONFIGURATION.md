@@ -71,13 +71,13 @@ Default: the `opus` alias → Opus 5.5 (`claude-opus-5-5`, since 2026-09-26; can
 
 ### Hooks
 
-| Hook                     | Event             | Action                  |
-| ------------------------ | ----------------- | ----------------------- |
-| SessionStart             | Session begins    | Print model + timestamp |
-| PreToolUse(pnpm dev)     | Before dev server | Kill port 3000          |
-| PostToolUse(pnpm dev)    | After dev server  | Open Chrome             |
-| PostToolUse(Write\|Edit) | After file change | Run Prettier            |
-| Stop                     | Agent finishes    | Log session end         |
+| Hook                     | Event             | Action                                                                   |
+| ------------------------ | ----------------- | ------------------------------------------------------------------------ |
+| SessionStart             | Session begins    | Print model + timestamp                                                  |
+| PreToolUse(pnpm dev)     | Before dev server | Kill port 3000                                                           |
+| PostToolUse(pnpm dev)    | After dev server  | Open Chrome                                                              |
+| PostToolUse(Write\|Edit) | After file change | Run Prettier where the repo has a prettier config (`format-on-write.sh`) |
+| Stop                     | Agent finishes    | Log session end                                                          |
 
 ---
 
@@ -85,16 +85,16 @@ Default: the `opus` alias → Opus 5.5 (`claude-opus-5-5`, since 2026-09-26; can
 
 ### Layer 1: User-Level (`~/.claude/CLAUDE.md`)
 
-| Setting             | Value                                                                   |
-| ------------------- | ----------------------------------------------------------------------- |
-| Model               | Opus 5.5 (see `.claude/engine.json`)                                    |
-| Package manager     | pnpm                                                                    |
+| Setting             | Value                                                                         |
+| ------------------- | ----------------------------------------------------------------------------- |
+| Model               | Opus 5.5 (see `.claude/engine.json`)                                          |
+| Package manager     | pnpm                                                                          |
 | Stack               | Next.js 16, React 19, Prisma 6–7, TypeScript 5.9–6, Tailwind CSS 4, shadcn/ui |
-| Languages           | Arabic (RTL default), English (LTR)                                     |
-| Port                | Always 3000                                                             |
-| Environment         | Single .env only                                                        |
-| Component hierarchy | ui → atom → template → block → micro                                    |
-| Reference codebase  | /Users/abdout/codebase                                                  |
+| Languages           | Arabic (RTL default), English (LTR)                                           |
+| Port                | Always 3000                                                                   |
+| Environment         | Single .env only                                                              |
+| Component hierarchy | ui → atom → template → block → micro                                          |
+| Reference codebase  | /Users/abdout/codebase                                                        |
 
 ### Layer 2: Project-Level (`CLAUDE.md`)
 

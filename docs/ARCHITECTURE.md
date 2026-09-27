@@ -51,11 +51,11 @@ The models and API that power everything. Kun selects optimally within this laye
 
 ### Model Selection Strategy
 
-| Model          | Use Case                                    | Kun Usage                                        |
-| -------------- | ------------------------------------------- | ------------------------------------------------ |
-| **Opus 5.5**   | Main loop, architecture, complex features, review | Session default + `opus`-tier agents and skills |
-| **Sonnet 5**   | Fast iteration, routine changes             | Quick fixes, standard build agents               |
-| **Haiku 4.5**  | Search, lookups, simple queries             | Explore subagent type, routine/formatting agents |
+| Model         | Use Case                                          | Kun Usage                                        |
+| ------------- | ------------------------------------------------- | ------------------------------------------------ |
+| **Opus 5.5**  | Main loop, architecture, complex features, review | Session default + `opus`-tier agents and skills  |
+| **Sonnet 5**  | Fast iteration, routine changes                   | Quick fixes, standard build agents               |
+| **Haiku 4.5** | Search, lookups, simple queries                   | Explore subagent type, routine/formatting agents |
 
 ### Cost Context
 
@@ -236,13 +236,13 @@ Priority (High → Low):
 
 **5 Hooks** — Guaranteed execution at lifecycle events:
 
-| Hook         | Event             | Action                       |
-| ------------ | ----------------- | ---------------------------- |
-| SessionStart | Session begins    | Print model info + timestamp |
-| PreToolUse   | Before `pnpm dev` | Kill port 3000               |
-| PostToolUse  | After `pnpm dev`  | Open Chrome                  |
-| PostToolUse  | After Write/Edit  | Auto-run Prettier            |
-| Stop         | Agent finishes    | Log session end              |
+| Hook         | Event             | Action                           |
+| ------------ | ----------------- | -------------------------------- |
+| SessionStart | Session begins    | Print model info + timestamp     |
+| PreToolUse   | Before `pnpm dev` | Kill port 3000                   |
+| PostToolUse  | After `pnpm dev`  | Open Chrome                      |
+| PostToolUse  | After Write/Edit  | Auto-run Prettier (config-gated) |
+| Stop         | Agent finishes    | Log session end                  |
 
 **6 Memory Files** — Cross-session learning:
 
