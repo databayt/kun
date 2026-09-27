@@ -13,20 +13,37 @@
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
-const repo = process.argv[2];
-if (!repo || !existsSync(join(repo, "src/companies"))) {
-  console.error("usage: node scripts/jobs/ats-seed.mjs <remote-jobs clone>");
-  process.exit(1);
+// Sources: a remote-in-tech clone (path), or --yc <yc all.json> — the
+// yc-oss mirror of the Y Combinator directory (hiring, remote-friendly only).
+const args = process.argv.slice(2);
+const ycIdx = args.indexOf("--yc");
+let companies;
+if (ycIdx > -1) {
+  const yc = JSON.parse(readFileSync(args[ycIdx + 1], "utf-8"));
+  companies = yc
+    .filter((c) => c.isHiring && c.status === "Active" && /remote/i.test(String(c.regions ?? "")))
+    .map((c) => ({ name: c.name, slug: c.slug, website: c.website, region: String(c.regions ?? "") }));
+} else {
+  const repo = args[0];
+  if (!repo || !existsSync(join(repo, "src/companies"))) {
+    console.error("usage: node scripts/jobs/ats-seed.mjs <remote-jobs clone> | --yc <all.json>");
+    process.exit(1);
+  }
+  companies = readdirSync(join(repo, "src/companies"))
+    .filter((f) => f.endsWith(".md"))
+    .map((f) => {
+      const fm = readFileSync(join(repo, "src/companies", f), "utf-8").split("---")[1] ?? "";
+      const get = (k) => fm.match(new RegExp(`^${k}:\\s*"?([^"\\n]+)"?`, "m"))?.[1]?.trim();
+      return { name: get("title"), slug: get("slug"), website: get("website"), region: get("region") ?? "" };
+    })
+    .filter((c) => c.name && c.slug);
 }
 
-const companies = readdirSync(join(repo, "src/companies"))
-  .filter((f) => f.endsWith(".md"))
-  .map((f) => {
-    const fm = readFileSync(join(repo, "src/companies", f), "utf-8").split("---")[1] ?? "";
-    const get = (k) => fm.match(new RegExp(`^${k}:\\s*"?([^"\\n]+)"?`, "m"))?.[1]?.trim();
-    return { name: get("title"), slug: get("slug"), website: get("website"), region: get("region") ?? "" };
-  })
-  .filter((c) => c.name && c.slug);
+// Merge, never replace: boards already known are kept and not re-probed.
+const known = existsSync("jobs/ats-boards.json") ? JSON.parse(readFileSync("jobs/ats-boards.json", "utf-8")).boards : [];
+const knownNames = new Set(known.map((b) => b.company.toLowerCase()));
+companies = companies.filter((c) => !knownNames.has(c.name.toLowerCase()));
+console.log(`${companies.length} companies to probe (${known.length} boards already known)`);
 
 const candidates = (c) => {
   const host = (c.website ?? "").replace(/^https?:\/\/(www\.)?/, "").split(/[./]/)[0];
@@ -77,7 +94,7 @@ async function worker() {
 }
 await Promise.all(Array.from({ length: 6 }, worker));
 
-const live = found.filter((b) => b.openJobs > 0 || b.ats === "lever");
+const live = [...known, ...found.filter((b) => b.openJobs > 0 || b.ats === "lever")];
 writeFileSync("jobs/ats-boards.json", JSON.stringify({ generatedAt: new Date().toISOString(), boards: live }, null, 2) + "\n");
 const by = live.reduce((m, b) => ((m[b.ats] = (m[b.ats] ?? 0) + 1), m), {});
 console.log(`\njobs/ats-boards.json <- ${live.length} boards`, by);

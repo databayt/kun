@@ -46,6 +46,7 @@ import {
   submitGreenhouse,
 } from "./ats-greenhouse";
 import { ashbyQuestions, fillAshby, parseAshby, submitAshby } from "./ats-ashby";
+import { leverQuestions } from "./ats-lever";
 import { sentToday } from "./send";
 import { pickVariants } from "./variants";
 import { contactState, pdfPages, postingText, splitName } from "./wave";
@@ -65,7 +66,7 @@ const facts = JSON.parse(readFileSync("jobs/facts.json", "utf-8")) as {
   numbers: string[];
 };
 
-type Provider = "greenhouse" | "ashby";
+type Provider = "greenhouse" | "ashby" | "lever";
 
 /// Which hosted form a card's apply URL is. Lever waits for its submitter.
 const providerOf = (r: BoardRow): Provider | null =>
@@ -75,7 +76,9 @@ const providerOf = (r: BoardRow): Provider | null =>
       ? "greenhouse"
       : /jobs\.ashbyhq\.com\//.test(r.applyUrl)
         ? "ashby"
-        : null;
+        : /jobs\.lever\.co\//.test(r.applyUrl)
+          ? "lever"
+          : null;
 const isGreenhouse = (r: BoardRow) => providerOf(r) !== null;
 
 async function questionsFor(r: BoardRow): Promise<AtsQuestion[] | null> {
@@ -84,6 +87,7 @@ async function questionsFor(r: BoardRow): Promise<AtsQuestion[] | null> {
     const gh = parseGreenhouse(url);
     return gh ? greenhouseQuestions(gh.token, gh.id) : null;
   }
+  if (providerOf(r) === "lever") return leverQuestions(url);
   const a = parseAshby(url);
   return a ? ashbyQuestions(a.org, a.id) : null;
 }
@@ -216,7 +220,9 @@ async function prepare(): Promise<void> {
       continue;
     }
     const p = plan(questions, { company, role });
-    if (p.missing.length) {
+    // Packet providers (Ashby, Lever) are submitted by Abdout: an unanswerable
+    // question is flagged in the packet for him, not a reason to stop.
+    if (p.missing.length && providerOf(row) === "greenhouse") {
       const reason = `ATS form asks what the profile can't answer truthfully: ${p.missing.map((m) => `"${m}"`).join("; ")}`;
       await patchRow(row.id, {
         applicationStatus: "HOLD",
@@ -481,8 +487,9 @@ async function submit(): Promise<void> {
       )
         continue;
       const found = findAts(row.id);
-      if (found && providerOf(row) === "ashby" && !args.includes("--try-ashby")) {
-        // Ashby's reCAPTCHA flags automated submissions as spam (2026-09-27);
+      if (found && providerOf(row) !== "greenhouse" && !args.includes("--try-ashby")) {
+        // Ashby's reCAPTCHA flags automated submissions as spam and Lever runs
+        // hCaptcha (2026-09-27);
         // the rule is CAPTCHA/bot block → HOLD, never evade. Leave a paste-ready
         // packet so Abdout submits in two minutes.
         const { role, company } = splitName(row.name);
@@ -515,7 +522,7 @@ async function submit(): Promise<void> {
         if (APPLY) {
           await patchRow(row.id, {
             applicationStatus: "HOLD",
-            holdReason: `Ashby blocks automated submission — paste-ready packet: ${packet}`,
+            holdReason: `${providerOf(row) === "lever" ? "Lever (hCaptcha)" : "Ashby (spam filter)"} blocks automated submission — paste-ready packet: ${packet}`,
           });
           ledger({ kind: "hold", crmId: row.id, name: row.name, detail: "ashby packet" });
         }
