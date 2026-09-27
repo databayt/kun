@@ -45,6 +45,7 @@ export interface AtsProfile {
     currentCompany: string;
     yearsSoftwareProfessional: number;
     highestDegree: string;
+    strongestLanguages?: string;
     noticePeriod: string;
     startDate: string;
   };
@@ -59,6 +60,7 @@ export interface AtsProfile {
   };
   compensation: Record<string, string>;
   sourceAnswer: string;
+  skills?: { yes: string[]; no: string[] };
 }
 
 export type Answer =
@@ -173,6 +175,8 @@ export function answerQuestion(
       return { kind: "skip" }; // the file upload covers it
   }
   if (field.type === "input_hidden") return { kind: "skip" };
+  // The location autocomplete is typed by the submitter itself (Google Places).
+  if (field.type === "location" || field.name === "candidate-location") return { kind: "skip" };
 
   // ── voluntary self-identification: always decline ──────────────────────────
   if (
@@ -224,6 +228,57 @@ export function answerQuestion(
   if (/time ?zone/i.test(L) && !isSelect)
     return { kind: "text", value: profile.identity.timezone };
 
+  // ── where he lives, asked as "do you reside / are you based in X?" ─────────
+  if (/(do you|are you) (currently )?(reside|live|living|located|based)|currently (located|based|residing) in/i.test(L) && !/\b(what|which|where)\b/i.test(L)) {
+    return yesNo(field, /rwanda|kigali|africa|emea|worldwide|anywhere/i.test(label));
+  }
+  if (/citizenship status in|citizen of|permanent(ly)? .*(eligib|resident)|eligibility to work permanently/i.test(L)) {
+    if (isSelect) {
+      const o = pick(field.values, /^none$|none of|not applicable|no\b|other/i);
+      return o ? { kind: "select", option: o } : null;
+    }
+    return /rwanda/i.test(L) ? null : { kind: "text", value: "Not a citizen or permanent resident; would need sponsorship" };
+  }
+  if (/require (a )?(visa|work permit|government authori)/i.test(L)) return yesNo(field, profile.authorization.needsSponsorshipForCountryBoundRoles);
+
+  // ── plain facts about him ──────────────────────────────────────────────────
+  if (/relationship with any (staff|employee|board)|family relationship.*(staff|employee|board member)|related to (any|an) (employee|staff)/i.test(L)) return yesNo(field, false);
+  if (/(been|ever been|previously been) employed by|worked (for|at) [^?]* before|former (employee|contractor) of/i.test(L)) return yesNo(field, false);
+  if (/current (job )?(title|role|position)/i.test(L) && !isSelect) return { kind: "text", value: profile.work.currentTitle };
+  if (/strongest.*(language|stack)|primary (programming )?language/i.test(L) && !isSelect) return { kind: "text", value: profile.work.strongestLanguages ?? "TypeScript, JavaScript, SQL" };
+  if (/time ?zone/i.test(L) && isSelect) {
+    const o = pick(field.values, /utc\s*\+\s*0?2\b|gmt\s*\+\s*0?2\b|\+02:?00|\bcat\b|central africa|eastern europe/i);
+    return o ? { kind: "select", option: o } : null;
+  }
+
+  // ── self-descriptions with one clearly true option ─────────────────────────
+  // He builds Claude agents and MCP integrations (the kun engine) and runs
+  // Databayt's production alone — these two options are simply what he does.
+  if (/how you use ai tools|use of ai tools|ai tools (today|in your work)/i.test(L) && isSelect) {
+    const o = pick(field.values, /design or automate|building agents|integrat(e|ing) ai/i);
+    return o ? { kind: "select", option: o } : null;
+  }
+  if (/owned production features|how you have (typically )?owned|production (support|ownership)/i.test(L) && isSelect) {
+    const o = pick(field.values, /responsible for building, testing, deploying/i);
+    return o ? { kind: "select", option: o } : null;
+  }
+
+  // ── "have you worked with / do you have experience in X?" — from the skills lists
+  const skillQ = /(have you|do you have|are you (experienced|familiar)).*(experience|worked|written|used|built|familiar)|experience (with|in|using)/i.test(L);
+  if (skillQ && !/agency|employ|company|vendor|partner|work(ed)? (for|at)/i.test(L) && profile.skills && (isSelect || field.type === "boolean")) {
+    const has = (list: string[]) => list.some((k) => new RegExp(`(^|[^a-z])${k.replace(/[.+#]/g, "\\$&")}([^a-z]|$)`, "i").test(label));
+    const yes = has(profile.skills.yes);
+    const no = has(profile.skills.no);
+    if (yes !== no) {
+      if (isSelect && field.values && field.values.length > 2) {
+        const o = yes ? pick(field.values, /professional|both|yes/i) : pick(field.values, /^no\b|not written|do not|don.?t|never|less than/i);
+        return o ? { kind: "select", option: o } : null;
+      }
+      return yesNo(field, yes);
+    }
+    return null;
+  }
+
   // ── conditional follow-ups ("If you answered yes…") — N/A, before any rule
   //    that would read the words inside them
   if (
@@ -234,6 +289,13 @@ export function answerQuestion(
     return { kind: "text", value: "N/A" };
   }
 
+  // ── "at least N years of …" — answered from the real count, honestly ──────
+  const atLeast = L.match(/at least (\d+)\+? years|(\d+)\+ years/);
+  if (atLeast && /experience|years/.test(L) && (field.type === "boolean" || isSelect || /^(do|have|are)/i.test(label))) {
+    const need = Number(atLeast[1] ?? atLeast[2]);
+    return yesNo(field, profile.work.yearsSoftwareProfessional >= need);
+  }
+
   // ── work authorisation & sponsorship ───────────────────────────────────────
   if (/sponsor/i.test(L))
     return yesNo(
@@ -241,7 +303,7 @@ export function answerQuestion(
       profile.authorization.needsSponsorshipForCountryBoundRoles,
     );
   if (
-    /authori[sz]ed|legally (eligible|permitted|able)|right to work|eligible to work|work permit/i.test(
+    /authori[sz](ed|ation)|legally (eligible|permitted|able|work)|can you (legally )?work in|right to work|eligible to work|work permit/i.test(
       L,
     )
   ) {
@@ -261,6 +323,10 @@ export function answerQuestion(
     if (where === "eu") return yesNo(field, profile.authorization.authorizedEU);
     if (where === "canada")
       return yesNo(field, profile.authorization.authorizedCanada);
+    // Any other named country: authorised only where he is (Rwanda) or a
+    // citizen (Sudan) — "Can you legally work in Israel?" is a truthful no.
+    const named = label.match(/work in (?:the )?([A-Z][A-Za-z]+(?: [A-Z][a-z]+)?)/)?.[1];
+    if (named && !/country|role|location|region|office/i.test(named)) return yesNo(field, /rwanda|sudan/i.test(named));
     return null; // "authorised to work in the country where this role is based" — unknowable
   }
   if (/relocat/i.test(L))
@@ -270,7 +336,7 @@ export function answerQuestion(
 
   // ── location ───────────────────────────────────────────────────────────────
   if (
-    /(where|what) (location|city|country).*(based|located|live|reside)|current (location|city)|city.*(country|state)|^location$|country of residence|which country/i.test(
+    /(where|what) (location|city|country).*(based|located|live|reside)|current (location|city)|city.*(country|state)|^location$|country of (legal )?residence|which country|where .*(living|live now|currently live)/i.test(
       L,
     )
   ) {
@@ -376,7 +442,7 @@ export function answerQuestion(
   )
     return yesNo(field, true);
   if (
-    /how did you (hear|find|learn)|where did you (hear|find|see)|source/i.test(
+    /how did you (hear|find|learn|find out)|where did you (hear|find|see)|^source\b|how you heard/i.test(
       L,
     )
   ) {
@@ -408,7 +474,7 @@ export function answerQuestion(
         };
   }
   if (
-    /privacy|consent|agree|acknowledge|terms|data (processing|retention)|certify|attest/i.test(
+    /privacy|consent|agree|acknowledge|accept|terms|data (processing|retention)|certify|attest|confirm i have read|i understand|have read and/i.test(
       L,
     )
   ) {

@@ -229,3 +229,18 @@ describe("ATS answers — the Customer.io form", () => {
     ).toEqual(["Have you ever been convicted of a felony?"]);
   });
 });
+
+describe("ATS answers — the Comet form", () => {
+  it("answers named-country authorisation truthfully", () => {
+    expect(answerQuestion(sel("Can you legally work in Europe?", ["Yes", "No"]), profile, ctx)).toEqual({ kind: "select", option: "No" });
+    expect(answerQuestion(sel("Can you legally work in Israel?", ["Yes", "No"]), profile, ctx)).toEqual({ kind: "select", option: "No" });
+    expect(answerQuestion(sel("Can you legally work in Rwanda?", ["Yes", "No"]), profile, ctx)).toEqual({ kind: "select", option: "Yes" });
+  });
+  it("answers 'at least N years' from the real count", () => {
+    expect(answerQuestion(sel("Do you have at least 3+ years of experience with React?", ["Yes", "No"]), profile, ctx)).toEqual({ kind: "select", option: "No" });
+    expect(answerQuestion(sel("Do you have at least 2 years of professional experience?", ["Yes", "No"]), profile, ctx)).toEqual({ kind: "select", option: "Yes" });
+  });
+  it("leaves the location autocomplete to the submitter", () => {
+    expect(answerQuestion({ label: "Location (City)", required: true, fields: [{ name: "candidate-location", type: "location" }] }, profile, ctx)).toEqual({ kind: "skip" });
+  });
+});
