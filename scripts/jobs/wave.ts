@@ -17,8 +17,11 @@ import {
   existsSync,
   mkdirSync,
   readFileSync,
+  readdirSync,
+  rmSync,
   writeFileSync,
 } from "node:fs";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 import { similarRole } from "@/lib/jobs/deduplication";
@@ -65,22 +68,45 @@ export async function postingText(
       signal: AbortSignal.timeout(30_000),
     });
     if (!res.ok) return null;
-    return (await res.text())
-      .replace(
-        /<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>|<!--[\s\S]*?-->/g,
-        " ",
-      )
-      .replace(/<[^>]+>/g, " ")
-      .replace(/&nbsp;?/g, " ")
-      .replace(/&amp;/g, "&")
-      .replace(/&#0?39;|&apos;/g, "'")
-      .replace(/&quot;/g, '"')
-      .replace(/\s+/g, " ")
-      .split(/Similar jobs/i)[0]
-      .trim();
+
+    // Official job notices are often PDFs (CIMERWA's are): read them with
+    // pdftotext rather than as bytes.
+    if (/pdf/i.test(res.headers.get("content-type") ?? "") || /\.pdf($|\?)/i.test(url)) {
+      const tmp = join(tmpdir(), `posting-${process.pid}-${Date.now()}.pdf`);
+      writeFileSync(tmp, Buffer.from(await res.arrayBuffer()));
+      const out = spawnSync("pdftotext", ["-layout", tmp, "-"], { encoding: "utf-8", timeout: 60_000 });
+      rmSync(tmp, { force: true });
+      return out.status === 0 ? out.stdout.replace(/\s+/g, " ").trim() : null;
+    }
+
+    const html = await res.text();
+    // Addresses that only live in a mailto: link, or are split for line
+    // breaking with <wbr>, still count as "on the posting".
+    const mailto = [...html.matchAll(/mailto:([^"'?\s>]+)/gi)].map((m) => decodeURIComponent(m[1]));
+    return (
+      html
+        .replace(/<wbr\s*\/?>|<\/wbr>/gi, "")
+        .replace(
+          /<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>|<!--[\s\S]*?-->/g,
+          " ",
+        )
+        .replace(/<[^>]+>/g, " ")
+        .replace(/&nbsp;?/g, " ")
+        .replace(/&amp;/g, "&")
+        .replace(/&#0?39;|&apos;/g, "'")
+        .replace(/&quot;/g, '"')
+        .replace(/\s+/g, " ")
+        .split(/Similar jobs/i)[0]
+        .trim() + (mailto.length ? ` ${[...new Set(mailto)].join(" ")}` : "")
+    );
   } catch {
     return null;
   }
+}
+
+function letterExists(crmId: string): boolean {
+  if (!existsSync("jobs/outbox")) return false;
+  return readdirSync("jobs/outbox").some((w) => existsSync(join("jobs/outbox", w, `${crmId}.letter.json`)));
 }
 
 export function pdfPages(path: string): number {
@@ -202,7 +228,10 @@ async function main(): Promise<void> {
     .filter((r) =>
       REGATE
         ? r.applicationStatus === "QUEUED"
-        : r.applicationStatus === "TO_APPLY",
+        : r.applicationStatus === "TO_APPLY" ||
+          // Abdout approved a held card that never got a letter (e.g. a
+          // speculative send to a general inbox): write it now.
+          (r.applicationStatus === "APPROVED" && !existsSync(join(dir, `${r.id}.letter.json`)) && !letterExists(r.id)),
     )
     .filter((r) => r.channel === "EMAIL" && r.applyEmail)
     .filter((r) => !r.deadline || r.deadline.slice(0, 10) >= date)
@@ -298,7 +327,7 @@ async function main(): Promise<void> {
     if (DRY_RUN) continue;
     if (verdict.pass) {
       await patchRow(row.id, {
-        applicationStatus: "QUEUED",
+        applicationStatus: row.applicationStatus === "APPROVED" ? "APPROVED" : "QUEUED",
         variant,
         waveId: date,
         holdReason: "",
