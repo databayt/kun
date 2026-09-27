@@ -724,11 +724,103 @@ if (command === "list") {
       console.error(`Failed to drain ${ask.id}:`, err.message);
     }
   }
+} else if (command === "queue") {
+  // The editorial queue: a brand's numbered, undated drafts written ahead of
+  // time from the repo's SPOTLIGHT.md files, loaded into the review queue in
+  // order so the content team takes them one by one — today, tomorrow, or
+  // after a gap. Files live at content/social/queue/<brand>/NNN-<slug>.md:
+  // frontmatter (seq, brief, feature, spotlight, …) plus `## ar` and
+  // `## en` sections. They land as `answered` asks, which is exactly what
+  // /social/publish lists, oldest first — so createdAt carries the sequence.
+  // `answered` rather than `pending` also keeps the drain from rewriting them.
+  //
+  //   node scripts/social-drafts.mjs queue --brand balqalam --dry
+  //   node scripts/social-drafts.mjs queue --brand balqalam [--from 1] [--to 90]
+  //
+  // Same craft gate as `answer`, with the draft's own `brief` as the source of
+  // any number it may carry. A failing file is reported and skipped, never
+  // loaded. Re-running is safe: a seq already queued for the brand is skipped.
+  const brand = flag("brand");
+  if (!brand) {
+    console.error("Usage: queue --brand <brand> [--dry] [--from N] [--to N]");
+    process.exit(1);
+  }
+  const dry = process.argv.includes("--dry");
+  const from = Number(flag("from") ?? 1);
+  const to = Number(flag("to") ?? Number.MAX_SAFE_INTEGER);
+  const here = dirname(fileURLToPath(import.meta.url));
+  const dir = join(here, "..", "content", "social", "queue", brand);
+  const { readdirSync } = await import("node:fs");
+  const { default: matter } = await import("gray-matter");
+
+  const section = (body, lang) => {
+    // split with a capture group keeps the heading names: [pre, "ar", body, "en", body]
+    const parts = body.split(/^## +(ar|en)[ \t]*$/m);
+    const i = parts.indexOf(lang);
+    return i > -1 ? (parts[i + 1] ?? "").trim() : "";
+  };
+  const newId = () => `c${randomUUID().replace(/-/g, "").slice(0, 24)}`;
+
+  const files = readdirSync(dir)
+    .filter((f) => /^\d{3}-.+\.md$/.test(f))
+    .sort();
+  const base = Date.now() - 24 * 60 * 60 * 1000;
+  let loaded = 0;
+  let skipped = 0;
+  let refused = 0;
+  for (const file of files) {
+    const { data, content } = matter(readFileSync(join(dir, file), "utf8"));
+    const seq = Number(data.seq ?? file.slice(0, 3));
+    if (seq < from || seq > to) continue;
+    const ar = section(content, "ar");
+    const en = section(content, "en");
+    const brief = String(data.brief ?? "").trim();
+    if (!ar || !en || !brief) {
+      console.error(`✗ ${file}: needs frontmatter \`brief\` plus \`## ar\` and \`## en\`.`);
+      refused++;
+      continue;
+    }
+    const findings = checkCraft({ ar, en, brand, allowedFrom: brief });
+    const failures = craftFailures(findings);
+    if (failures.length) {
+      console.error(`✗ ${file}\n${formatCraft(findings)}`);
+      refused++;
+      continue;
+    }
+    if (dry) {
+      console.log(`✓ ${file}${findings.length ? ` (${findings.length} warning)` : ""}`);
+      loaded++;
+      continue;
+    }
+    const tag = `queue:${brand}#${String(seq).padStart(3, "0")}`;
+    const [exists] = await sql`
+      SELECT "id" FROM "SocialDraftRequest"
+       WHERE "brand" = ${brand} AND "requestedBy" = ${tag}`;
+    if (exists) {
+      skipped++;
+      continue;
+    }
+    // createdAt carries the order: the review queue lists answered drafts
+    // oldest first, so seq 1 must be the oldest row of the set.
+    const createdAt = new Date(base + seq * 1000);
+    await sql`
+      INSERT INTO "SocialDraftRequest"
+        ("id", "brand", "brief", "requestedBy", "status", "ar", "en", "note", "createdAt", "answeredAt")
+      VALUES (${newId()}, ${brand}, ${brief}, ${tag}, 'answered', ${ar}, ${en},
+              ${`editorial queue ${file}`}, ${createdAt}, now())`;
+    console.log(`queued ${tag}  ${file}`);
+    loaded++;
+  }
+  console.log(
+    `${dry ? "checked" : "queued"} ${loaded}, already queued ${skipped}, refused ${refused}`,
+  );
+  if (refused) process.exit(1);
 } else {
   console.log(
     [
       "Usage:",
       "  node scripts/social-drafts.mjs list",
+      "  node scripts/social-drafts.mjs queue --brand <brand> [--dry] [--from N] [--to N]",
       "  node scripts/social-drafts.mjs drain-google",
       "  node scripts/social-drafts.mjs lessons [--brand hogwarts]",
       "  node scripts/social-drafts.mjs check [<id>] --ar <file> [--en <file>] [--brief <file>] [--brand X] [--channel Y]",
