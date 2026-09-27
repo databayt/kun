@@ -37,6 +37,10 @@ import { contactState, pdfPages, postingText, splitName } from "./wave";
 const args = process.argv.slice(2);
 const APPLY = args.includes("--apply");
 const TO_SELF = args.includes("--to-self");
+// Abdout's explicit "apply now": skips the window, the veto wait and the
+// daily cap for this one run. The gate, the kill switch and one-per-company
+// still apply — an override of timing, never of quality.
+const NOW = args.includes("--now");
 const limitArg = args.indexOf("--limit");
 
 interface Letter {
@@ -192,7 +196,7 @@ async function main(): Promise<void> {
     hour >= cfg.windowFrom &&
     hour < cfg.windowTo;
   const cap = todaysCap(cfg, date);
-  const remaining = Math.max(0, cap - sentToday("sent", date));
+  const remaining = NOW ? 999 : Math.max(0, cap - sentToday("sent", date));
   const limit = Math.min(
     remaining,
     limitArg > -1 ? Number(args[limitArg + 1]) : remaining,
@@ -201,7 +205,7 @@ async function main(): Promise<void> {
   console.log(
     `${APPLY ? "" : "DRY RUN — "}${ready.length} ready · cap ${cap}/day · ${remaining} left today · window ${inWindow ? "open" : "closed"}\n`,
   );
-  if (APPLY && !inWindow) {
+  if (APPLY && !inWindow && !NOW) {
     console.log(
       "outside the send window (Mon–Fri 09:00–17:00 Kigali) — nothing sent",
     );
@@ -226,6 +230,7 @@ async function main(): Promise<void> {
     }
   }
   const companies = new Set<string>();
+  const sentSubjects: string[] = [];
   let sent = 0;
 
   for (const row of ready) {
@@ -264,6 +269,7 @@ async function main(): Promise<void> {
     // get to prepare and send in the same tick. APPROVED is already a yes.
     const queuedAt = queuedTimes.get(row.id);
     if (
+      !NOW &&
       !approved &&
       queuedAt &&
       Date.now() - queuedAt < cfg.vetoHours * 3_600_000
@@ -358,8 +364,16 @@ async function main(): Promise<void> {
       to: found.letter.to,
     });
     await markNeonApplied(row.id);
+    sentSubjects.push(found.letter.subject);
     companies.add(company.toLowerCase());
     sent++;
+  }
+
+  // Outlook.com sync can land a Drafts copy after mail-send's own cleanup;
+  // one more exact-subject pass once the run is done.
+  if (APPLY && sentSubjects.length) {
+    await new Promise((r) => setTimeout(r, 15_000));
+    spawnSync("osascript", ["scripts/jobs/mail-clean-drafts.applescript", cfg.fromAccount, ...sentSubjects], { timeout: 120_000 });
   }
 
   console.log(
