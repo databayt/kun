@@ -63,33 +63,28 @@ one persona and every ask points at the decision-maker.
 | `learning-science` | 20% | Authority, a quality audience | Retrieval practice, spacing, feedback — evidence labelled |
 | `trust` | 15% | Remove fears, explain the offer | Data ownership, the pilot, a fair comparison |
 
-## Cadence and calendar
+## Cadence and calendar — the editorial queue
 
-**One idea a week, two pieces:** the idea post, then its product proof. The Monday seeder
-(`scripts/seed-drafts.sh`, 07:00, `SEED_COUNT = 2`) files both from `pillars.json`; the drain
-drafts them; a person approves them in `/social/publish`; they post on the Page. Evenings
-(19:00–23:00 local) are the window.
+Balqalam does **not** use the weekly seeder. Its posts come from an **editorial queue**: ninety
+numbered, undated drafts written ahead of time from the product itself, loaded into
+`/social/publish` in order. The team takes the next one whenever it posts — daily, or with gaps;
+nothing is dated, so nothing slips.
 
-`pillars.json` holds the balqalam briefs as `balqalam-wNN-idea` / `balqalam-wNN-proof`. Rotation is
-stateless (`briefs[(isoWeek × 2 + i) % 24]`), and the list is laid out so the plan runs:
+| Piece | Where |
+|-------|-------|
+| The drafts (`001`–`090`, Arabic first, English sibling) | `content/social/queue/balqalam/NNN-<slug>.md` |
+| The plan — 13 themed weeks × 7 slots, each tied to a feature | `content/social/queue/balqalam/plan.json` |
+| The drafting contract | `content/social/queue/balqalam/SPEC.md` |
+| The product facts each draft came from | hogwarts `<feature dir>/SPOTLIGHT.md` (named in each draft's frontmatter) |
+| Loader (strict craft gate, idempotent) | `node scripts/social-drafts.mjs queue --brand balqalam [--dry]` |
 
-| Week | ISO week | Idea | Pillar |
-|------|----------|------|--------|
-| 1 | 40 (Sep 28) | Five signs a school has outgrown paper | school-operations |
-| 2 | 41 | The whole school in one place — one working morning | product-proof |
-| 3 | 42 | Starting from the school's own Excel file | product-proof |
-| 4 | 43 | Absence as an early signal | learning-science |
-| 5 | 44 | The register that goes missing before the board meeting | school-operations |
-| 6 | 45 | A missing invoice is a trust problem | school-operations |
-| 7 | 46 | Why students forget after the exam | learning-science |
-| 8 | 47 | Who owns student data when the contract ends? | trust |
-| 9 | 48 | New systems fail because of people, not technology | school-operations |
-| 10 | 49 | The parent who calls is not the problem | school-operations |
-| 11 | 50 | Why admission season becomes data-entry season | school-operations |
-| 12 | 51 (Dec 14) | A free ministry platform does not run the whole school | trust |
+The seven-slot rhythm, repeated: a school-day **pain** · a **product proof** · one **persona's**
+view · **learning science** (evidence labelled) · **trust** · a short **how-to** · a **question**
+to owners and principals. Evenings (19:00–23:00 local) are the window.
 
-After week 12 the rotation starts again from the top; replace the briefs at the day-90 review
-(2026-12-26) rather than let the plan repeat unexamined.
+To write the next ninety: add rows to `plan.json`, write `091-…` onward against `SPEC.md`, run the
+loader with `--dry`, then without. Replace or extend the set at a quarterly review rather than let
+it repeat unexamined.
 
 ## Voice
 

@@ -15,8 +15,8 @@ Default: `plan` for next week.
 
 **SCOPE (2026-09-27) — one slice: `balqalam` × `facebook`.** The school product publishes only
 as Balqalam (hogwarts is retired and hidden, with no briefs). Plan for balqalam only, and allocate
-Facebook slots only. `content/social/pillars.json` carries balqalam's 24 briefs — a 12-week plan,
-two a week (idea + proof), laid out so ISO week 40 is week 1; the plan table is in
+Facebook slots only. Balqalam is not on the weekly seeder: its plan is the editorial queue —
+90 undated drafts in `content/social/queue/balqalam/` (plan.json + NNN-*.md), described in
 `content/docs/social/balqalam.mdx`. A five-brand plan would invent slots no stage can fill, so say
 the others are deferred by decision rather than planning empty rows for them. Two inversions still
 apply because the proof track is Sudan: **static Arabic cards lead over video** (intermittent connectivity favors light
