@@ -28,7 +28,7 @@ import { similarRole } from "@/lib/jobs/deduplication";
 import { evaluateSendGate, holdReasonFor } from "@/lib/jobs/send-gate";
 
 import { BoardRow, ledger, listBoard, patchRow } from "./board";
-import { kigaliNow, loadConfig, todaysCap } from "./config";
+import { kigaliNow, LANE_BAND, loadConfig, todaysCap } from "./config";
 import { pickVariants } from "./variants";
 
 const args = process.argv.slice(2);
@@ -36,17 +36,6 @@ const DRY_RUN = args.includes("--dry-run");
 const REGATE = args.includes("--regate");
 const limitArg = args.indexOf("--limit");
 
-const BAND: Record<string, number> = {
-  PROTECTION: 1,
-  ELECTRICAL: 1,
-  MARINE_ETO: 1,
-  WEB_DEVELOPER: 1,
-  TENDER: 1,
-  AI_TRAINING: 2,
-  REMOTE_WORLDWIDE: 2,
-  FREELANCE: 2,
-  ENGINEERING_CONTRACT: 3,
-};
 
 export const splitName = (name: string): { role: string; company: string } => {
   const at = name.lastIndexOf(" @ ");
@@ -234,10 +223,11 @@ async function main(): Promise<void> {
           (r.applicationStatus === "APPROVED" && !existsSync(join(dir, `${r.id}.letter.json`)) && !letterExists(r.id)),
     )
     .filter((r) => r.channel === "EMAIL" && r.applyEmail)
+    .filter((r) => r.applicationStatus === "APPROVED" || !cfg.pausedLanes.includes(r.campaign ?? ""))
     .filter((r) => !r.deadline || r.deadline.slice(0, 10) >= date)
     .sort(
       (a, b) =>
-        (BAND[a.campaign ?? ""] ?? 9) - (BAND[b.campaign ?? ""] ?? 9) ||
+        (LANE_BAND[a.campaign ?? ""] ?? 9) - (LANE_BAND[b.campaign ?? ""] ?? 9) ||
         (a.deadline ?? "9999").localeCompare(b.deadline ?? "9999") ||
         (b.engineScore ?? 0) - (a.engineScore ?? 0),
     )

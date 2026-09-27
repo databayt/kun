@@ -95,7 +95,8 @@ async function main(): Promise<void> {
       (r) =>
         r.applicationStatus === "TO_APPLY" &&
         r.channel &&
-        r.channel !== "EMAIL",
+        r.channel !== "EMAIL" &&
+        !cfg.pausedLanes.includes(r.campaign ?? ""),
     )
     .sort((a, b) => (b.engineScore ?? 0) - (a.engineScore ?? 0))
     .slice(0, 5);

@@ -21,16 +21,18 @@ const opt = (f, d) => (args.indexOf(f) > -1 ? args[args.indexOf(f) + 1] : d);
 const LIMIT = Number(opt("--limit", 15));
 const STALE_DAYS = Number(opt("--days", 7));
 
+// Mirrors LANE_BAND in scripts/jobs/config.ts (Abdout, 2026-09-27): software in
+// Kigali → remote → freelance → the rest; electrical paused (band 8, hidden).
 const BAND = {
-  PROTECTION: 1,
-  ELECTRICAL: 1,
-  MARINE_ETO: 1,
   WEB_DEVELOPER: 1,
-  TENDER: 1,
-  AI_TRAINING: 2,
   REMOTE_WORLDWIDE: 2,
-  FREELANCE: 2,
-  ENGINEERING_CONTRACT: 3,
+  FREELANCE: 3,
+  TENDER: 4,
+  AI_TRAINING: 5,
+  PROTECTION: 8,
+  ELECTRICAL: 8,
+  MARINE_ETO: 8,
+  ENGINEERING_CONTRACT: 8,
 };
 
 const key = twentyKey("databayt");
@@ -96,6 +98,7 @@ if (flag("--stale")) {
   const today = new Date().toISOString().slice(0, 10);
   out = rows
     .filter((r) => r.applicationStatus === "TO_APPLY")
+    .filter((r) => (BAND[r.campaign] ?? 9) < 8 || args.includes("--all"))
     .filter((r) => !r.deadline || r.deadline.slice(0, 10) >= today)
     .sort(
       (a, b) =>

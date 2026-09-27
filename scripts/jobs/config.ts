@@ -18,6 +18,7 @@ export interface LoopConfig {
   windowTo: number;
   slackTarget: string; // hermes send --to
   vetoHours: number; // a QUEUED card waits this long before it can send
+  pausedLanes: string[]; // CRM campaign values the wave skips
 }
 
 const DEFAULTS: LoopConfig = {
@@ -32,6 +33,22 @@ const DEFAULTS: LoopConfig = {
   windowTo: 17,
   slackTarget: "slack:D0AQ0JR5ZU4",
   vetoHours: 2,
+  // Abdout, 2026-09-27: software first, electrical engineering paused.
+  pausedLanes: ["PROTECTION", "ELECTRICAL", "MARINE_ETO", "ENGINEERING_CONTRACT"],
+};
+
+/// Priority, lowest first (Abdout, 2026-09-27): software in Kigali → remote
+/// jobs → freelance → the rest. Paused lanes never reach the wave.
+export const LANE_BAND: Record<string, number> = {
+  WEB_DEVELOPER: 1,
+  REMOTE_WORLDWIDE: 2,
+  FREELANCE: 3,
+  TENDER: 4,
+  AI_TRAINING: 5,
+  PROTECTION: 8,
+  ELECTRICAL: 8,
+  MARINE_ETO: 8,
+  ENGINEERING_CONTRACT: 8,
 };
 
 export function loadConfig(): LoopConfig {
