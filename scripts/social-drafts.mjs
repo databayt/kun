@@ -781,7 +781,10 @@ if (command === "list") {
       continue;
     }
     const findings = checkCraft({ ar, en, brand, allowedFrom: brief });
-    const failures = craftFailures(findings);
+    // Strict on purpose, independent of the craftFailures() override: a queue
+    // is written ahead of time and loaded in bulk, so there is no writer in
+    // context to fix a post at review. Hard failures refuse the file here.
+    const failures = findings.filter((f) => f.severity === "fail");
     if (failures.length) {
       console.error(`✗ ${file}\n${formatCraft(findings)}`);
       refused++;
