@@ -92,14 +92,18 @@ Claude will:
 
 ## Remote Control
 
-Start on desktop, continue from phone:
+Every Claude Code session on the host Mac registers with Remote Control, so the Claude app's **Code** tab reaches it directly:
 
 ```
-Desktop: Start feature work → gets complex → need to leave
-Phone:   Open claude.ai/code in mobile browser → monitor progress
-Phone:   File a GitHub issue with the `from-abdout` label: "Ship it when done"
-Desktop: Captain checks `from-abdout` issues at session start → finishes and deploys
+Mac:    Start feature work → it gets long → walk away
+Phone:  Push arrives when it finishes or needs a decision (only while you're away from the Mac)
+Phone:  Code tab → open the session → answer, steer, /model, /effort, attach a photo
+Phone:  Or start something new: Code tab → "Mac · kun" (the always-on kun-rc server)
 ```
+
+- **Done with a session? Close it.** The `kun-rc` server is the way back in, so nothing has to stay open "in case". Each idle session holds ~10 MCP processes on a 16 GB Mac.
+- **Mac going off?** Start a cloud session from the Code tab instead; it runs on GitHub repos and keeps going with the lid closed.
+- **Check the lane:** `bash ~/.claude/scripts/devices.sh --status` (disk, swap, sessions, push, presence, server).
 
 ## Agent Teams (Experimental)
 

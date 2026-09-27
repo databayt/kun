@@ -25,12 +25,12 @@ How the whole system holds together: the **kun engine**, the **machine fleet**, 
          ┌───────────────────────┘          │          └──────────────────┐
          │                                  │                             │
 ┌────────┴─────────────┐          ┌─────────┴──────────┐        ┌─────────┴────────┐
-│  HOST MACHINE        │          │  TEAMMATE MACHINES │        │  PHONES          │
+│  HOST MACHINE        │          │  TEAMMATE MACHINES │        │  PHONE (iPhone)  │
 │  (Abdout's Mac)      │          │  (× 6)             │        │                  │
-│                      │          │                    │        │  Anthropic app   │
-│  Claude Code (c)     │          │  Claude Code +     │        │  ← PushNotif     │
+│                      │          │                    │        │  Claude app      │
+│  Claude Code (c)     │          │  Claude Code +     │        │  ← push (away)   │
 │  Cowork (Desktop)    │          │  kun config clone  │        │  Slack → Hermes  │
-│  Hermes gateway (h)  │◄─────────┼────────────────────┼────────│  claude.ai/code  │
+│  Hermes gateway (h)  │◄─────────┼────────────────────┼────────│  Code → Mac·kun  │
 │   ↑ Socket Mode      │  (never  │                    │ direct)│                  │
 └──────────────────────┘          └────────────────────┘        └──────────────────┘
 ```
@@ -62,7 +62,7 @@ databayt/kun (.claude/ config)
 | ------- | ---- | --------------- |
 | **Host machine** (Abdout's Mac) | Claude Code (`c` lane) · Cowork · Hermes gateway (`h` lane) | Yes — Hermes |
 | **Teammate machines** (× 6) | Claude Code + kun config clone | No — consume everything by URL |
-| **Phones** | Anthropic app · Slack · claude.ai/code | No — thin remote controls |
+| **Phone** (iPhone) | Claude app (Code tab, push) · Slack · GitHub | No — a remote control for the host Mac |
 
 Only the host machine runs a long-lived service (Hermes). Everyone else consumes the shared fabric with a browser and a terminal.
 
@@ -103,10 +103,14 @@ Business state flows back into the engine through a human-paced loop: Aseel keep
 
 | Surface | Where | Role | Connects via |
 | ------- | ----- | ---- | ------------ |
-| **Claude Code** | Terminal, every machine | The *doing* lane — builds, ships, fixes | git/GitHub, MCPs, hooks, skills |
-| **Claude chat** | claude.ai + mobile app | Thinking anywhere; claude.ai/code runs repo sessions from the phone | GitHub cloud sessions, push notifications |
-| **Cowork** | Claude Desktop | The *planning* lane — no shell, no hooks | Shares `~/.claude/` by filesystem MCP; hands off via `bridge.md` + issues |
-| **Phone** | iPhone/Android | Receive + steer on the go | PushNotification · Slack → Hermes → machine · claude.ai/code |
+| **Claude Code** | Terminal on every machine; the Desktop app's Code tab on the host | The *doing* lane — builds, ships, fixes | git/GitHub, MCPs, hooks, skills |
+| **Remote Control** | Every host session, plus the always-on `kun-rc` server ("Mac · kun") | Drive running Mac sessions, or start new ones, from the phone | The Claude app's Code tab · claude.ai/code |
+| **Cloud sessions** | The Code tab, claude.ai/code, routines (`/schedule`) | Work that must keep going with the Mac off | GitHub repos |
+| **Claude chat** | claude.ai + mobile app | Thinking anywhere; the cheapest surface | — |
+| **Cowork** | Claude Desktop | The *planning* lane — two shells (cloud + on-device), Dispatch, computer use; no Claude Code hooks | Shares `~/.claude/` by filesystem MCP; hands off via `bridge.md` + issues |
+| **Phone** | iPhone | Receive, steer, start | Built-in push (held while you're at the Mac) · `SendUserFile` · private Artifacts · Code tab · Slack → Hermes |
+
+The host Mac keeps this layer alive with `.claude/scripts/devices.sh`: a presence service (pushes wait while you're at the Mac), the `kun-rc` Remote Control server in tmux, and a session-start brief that speaks up when disk, swap or the server need attention. `bash ~/.claude/scripts/devices.sh --status` shows all of it; policy lives in `engine.json` → `devices`.
 
 > **Cowork and Code never share conversations.** They share only files (`~/.claude/`), GitHub issues, and push notifications. The bridge is deliberately file-shaped — `~/.claude/bridge.md` for short handoffs — so either side picks up where the other left off at session start. Details: [Cowork](/docs/cowork).
 
@@ -118,7 +122,7 @@ Business state flows back into the engine through a human-paced loop: Aseel keep
 | **Slack** | The human bus — team talk, Hermes inbound gateway, Claude's MCP egress |
 | **Cloudflare** | The deploy plane since 2026-09 — Workers + Containers for hogwarts, mkan and kun (`scripts/deploy-cloudflare.sh` in each repo); Vercel's free account is paused for Hobby usage and still serves the databayt.org DNS until the zone moves |
 | **bridge.md** | Local Cowork ↔ Code handoff on the same machine |
-| **PushNotification** | The instant machine-to-pocket channel |
+| **Push** | The instant machine-to-pocket channel — Remote Control's built-in push (held while you're at the Mac) plus the `PushNotification` tool for explicit pings |
 
 ## Reuse it — run this map for your own team
 
@@ -134,7 +138,7 @@ What's genuinely databayt-specific: the vocabulary (our keywords), the memory (o
 
 ## Contribute to it
 
-**Team** — work directly on `main`, no branches, no PRs (see the workflow rule in `.claude/rules/github-workflow.md`). Docs live in `content/docs/`; config in `.claude/`. Commit small and often; Vercel deploys on push. When you change the topology (new service, new lane, new bus), update **this page** in the same commit — the map is only useful while it's true.
+**Team** — work directly on `main`, no branches, no PRs (see the workflow rule in `.claude/rules/github-workflow.md`). Docs live in `content/docs/`; config in `.claude/`. Commit small and often; deploys run through the `deploy` skill. When you change the topology (new service, new lane, new bus), update **this page** in the same commit — the map is only useful while it's true.
 
 **Community** — the repos are public under [github.com/databayt](https://github.com/databayt):
 
