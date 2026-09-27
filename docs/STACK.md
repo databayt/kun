@@ -250,7 +250,7 @@ The declared fleet lives in `.claude/mcp.json` (count: `engine.json → counts.p
 
 | MCP                       | Stack Connection                                                                    |
 | ------------------------- | ----------------------------------------------------------------------------------- |
-| shadcn                    | UI component registry (`npx shadcn@latest mcp`)                                     |
+| shadcn                    | UI component registry (`npx shadcn@4.21.0 mcp`, pinned; `/sync` bumps it)           |
 | github                    | Version control, issues                                                             |
 | cloudflare-docs           | Cloudflare docs (Code Mode API + observability servers: pending a decision)         |
 | Neon                      | Database management — dev/test only per Neon; prod writes go through the `neon` CLI |

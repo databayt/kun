@@ -29,9 +29,10 @@ Arguments: $ARGUMENTS — brand (`databayt|hogwarts|balqalam|mkan|sijillee|moali
 idea or news, optional `--channels`, `--media`, `--at`, and `--from <stage>` to
 resume mid-chain.
 
-**SCOPE (2026-08-06) — one slice: `hogwarts` × `facebook` × Sudan.** Default to
-that brand and that channel; the other four brands have no filled brand kit
-(`compileBrief` throws) and no pillars, and Facebook is the only live transport.
+**SCOPE (2026-09-27) — one slice: `balqalam` × `facebook`.** Default to
+that brand and that channel (hogwarts is retired and hidden; its posts go out as balqalam).
+Brand voice, pillars and claims: `content/docs/social/balqalam.mdx`. Brands other than
+balqalam, mkan and databayt have no filled brand kit (`compileBrief` throws) and no pillars, and Facebook is the only live transport.
 If asked for another brand or channel, say it is deferred by decision and name
 the expansion gate — do not widen on your own. The multiplier is dormant: with
 one channel live, the core piece **is** the post. Register stays rung 2 and the

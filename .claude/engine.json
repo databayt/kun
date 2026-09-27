@@ -168,6 +168,12 @@
       "disk_free_gb": 20,
       "sessions": 6,
       "swap_used_pct": 80
+    },
+    "hygiene": {
+      "$comment": "Read by maintain.sh / maintain.ps1 step_disk (approved by Abdout 2026-09-27): when the daily heartbeat finds less than prune_below_gb free, it prunes only self-rebuilding caches — uv, the pnpm store, Docker build cache above docker_cache_cap_gb, Docker images older than docker_image_age that no container uses, then TRIMs the colima disk so the Mac gets the space back. Never repos, .next folders, or anything a running container needs.",
+      "prune_below_gb": 30,
+      "docker_cache_cap_gb": 8,
+      "docker_image_age": "72h"
     }
   },
   "textbook": {

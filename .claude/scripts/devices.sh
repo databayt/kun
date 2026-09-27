@@ -117,7 +117,9 @@ service_armed() { launchctl list 2>/dev/null | awk '{print $3}' | grep -qx "$1";
 
 server_up() { command -v tmux >/dev/null 2>&1 && tmux has-session -t "$RC_SESSION" 2>/dev/null; }
 
-have_net() { curl -m 8 -sfI https://claude.ai >/dev/null 2>&1; }
+# Any HTTP answer means the network is up — no -f: claude.ai answers curl with 403
+# and api.anthropic.com's root with 404, and both mean "reachable".
+have_net() { curl -m 8 -s -o /dev/null https://api.anthropic.com 2>/dev/null; }
 
 idle_seconds() { ioreg -c IOHIDSystem 2>/dev/null | awk '/HIDIdleTime/ {print int($NF / 1000000000); exit}'; }
 

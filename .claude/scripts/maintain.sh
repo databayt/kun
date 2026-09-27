@@ -238,9 +238,42 @@ step_health() {
     log "health: $VERDICT ($HEALTH_LINE)"
 }
 
+disk_free_gb() { df -Pk "$HOME" 2>/dev/null | awk 'NR==2 {print int($4/1048576)}'; }
+
+# Only caches that rebuild themselves — nothing a running container, a repo or an
+# installed tool needs. Each command is optional; a failure just skips that cache.
+prune_caches() {
+    command -v uv >/dev/null 2>&1 && UV_LOCK_TIMEOUT=10 uv cache prune >/dev/null 2>&1 && log "  pruned the uv cache"
+    command -v pnpm >/dev/null 2>&1 && pnpm store prune >/dev/null 2>&1 && log "  pruned the pnpm store"
+    if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
+        docker builder prune -af --max-used-space "${DOCKER_CACHE_CAP_GB}gb" >/dev/null 2>&1 \
+            && log "  capped the Docker build cache at ${DOCKER_CACHE_CAP_GB}GB"
+        docker image prune -af --filter "until=${DOCKER_IMAGE_AGE}" >/dev/null 2>&1 \
+            && log "  removed Docker images older than ${DOCKER_IMAGE_AGE} that no container uses"
+        # A VM disk gives freed blocks back to the host only after a TRIM.
+        command -v colima >/dev/null 2>&1 && colima status >/dev/null 2>&1 \
+            && colima ssh -- sudo fstrim -a >/dev/null 2>&1 && log "  trimmed the colima disk"
+    fi
+}
+
 step_disk() {
-    DISK_FREE_GB=$(df -Pk "$HOME" 2>/dev/null | awk 'NR==2 {print int($4/1048576)}')
+    DISK_FREE_GB=$(disk_free_gb)
     DISK_FREE_GB="${DISK_FREE_GB:-0}"
+    DISK_PRUNED="no"
+    local engine="$KUN_DIR/.claude/engine.json" floor=30 before
+    DOCKER_CACHE_CAP_GB=8; DOCKER_IMAGE_AGE=72h
+    if command -v jq >/dev/null 2>&1 && [ -f "$engine" ]; then
+        floor=$(jq -r '.devices.hygiene.prune_below_gb // 30' "$engine")
+        DOCKER_CACHE_CAP_GB=$(jq -r '.devices.hygiene.docker_cache_cap_gb // 8' "$engine")
+        DOCKER_IMAGE_AGE=$(jq -r '.devices.hygiene.docker_image_age // "72h"' "$engine")
+    fi
+    if [ "$DISK_FREE_GB" -lt "$floor" ]; then
+        before="$DISK_FREE_GB"
+        log "disk: ${before}GB free, under ${floor}GB — pruning caches"
+        prune_caches
+        DISK_FREE_GB=$(disk_free_gb); DISK_FREE_GB="${DISK_FREE_GB:-0}"
+        DISK_PRUNED="${before}GB->${DISK_FREE_GB}GB"
+    fi
     if [ "$DISK_FREE_GB" -lt 5 ] && [ "$VERDICT" = "GREEN" ]; then
         VERDICT="YELLOW"
         log "disk: ${DISK_FREE_GB}GB free — low, verdict floored to YELLOW"
@@ -296,6 +329,7 @@ state = {
     "head": "$HEAD_REV",
     "setup": "$SETUP_STATUS",
     "disk_free_gb": ${DISK_FREE_GB:-0},
+    "disk_pruned": "${DISK_PRUNED:-no}",
     "report": "$REPORT_STATUS",
     "last_report_ts": "$LAST_REPORT_TS",
 }

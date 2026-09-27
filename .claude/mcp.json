@@ -26,12 +26,9 @@
       "description": "Claude Design (Anthropic Labs) — canvas design-system sync + handoff; auth via /design-login, subscription-covered"
     },
     "context7": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@upstash/context7-mcp@latest"
-      ],
-      "description": "Up-to-date documentation for libraries"
+      "type": "http",
+      "url": "https://mcp.context7.com/mcp",
+      "description": "Up-to-date documentation for libraries — the hosted endpoint (keyless; add an Authorization: Bearer header if a Context7 key is ever issued). Was a per-session npx process at @latest until 2026-09-27."
     },
     "figma": {
       "type": "http",
@@ -50,7 +47,9 @@
         "@modelcontextprotocol/server-filesystem",
         "/Users/abdout"
       ],
-      "description": "Direct file system access"
+      "description": "Direct file system access",
+      "$skipRegistration": true,
+      "$skipRegistration_why": "Claude Code has native Read/Write/Edit/Glob, so a second file server only adds ~10 processes per session and hands the model the whole home folder. It stays in the catalog because Cowork uses it: the Claude Desktop config (claude_desktop_config.json) runs it scoped to ~/.claude, ~/kun and ~/codebase — the path the cowork-bridge rule depends on. Unregistered from Claude Code 2026-09-27 (Abdout approved the MCP trim)."
     },
     "github": {
       "command": "npx",
@@ -73,7 +72,7 @@
       "args": [
         "markitdown-mcp"
       ],
-      "description": "MarkItDown — convert PDF, Office, images, audio, HTML, URLs to Markdown"
+      "description": "MarkItDown — convert PDF, Office, images, audio, HTML, URLs to Markdown. setup.sh installs it once (uv tool install markitdown-mcp); uvx then reuses that environment. Without the install, uvx built a fresh 369 MB environment on every session start and piled up ~75 copies in ~/.cache/uv (found 2026-09-27)."
     },
     "notion": {
       "type": "http",
@@ -96,12 +95,12 @@
       "command": "npx",
       "args": [
         "-y",
-        "ref-tools-mcp@latest"
+        "ref-tools-mcp@3.0.3"
       ],
       "env": {
         "REF_API_KEY": "${REF_API_KEY}"
       },
-      "description": "Search documentation, curated technical docs"
+      "description": "Search documentation, curated technical docs — pinned: @latest made npx query the registry on every session start. /sync bumps the pin."
     },
     "sentry": {
       "type": "http",
@@ -111,10 +110,10 @@
     "shadcn": {
       "command": "npx",
       "args": [
-        "shadcn@latest",
+        "shadcn@4.21.0",
         "mcp"
       ],
-      "description": "shadcn/ui component registry - browse, search, install components"
+      "description": "shadcn/ui component registry - browse, search, install components — pinned (was @latest, a registry lookup per session start); /sync bumps it with the shadcn CLI."
     },
     "slack": {
       "type": "http",

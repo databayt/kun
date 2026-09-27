@@ -52,8 +52,9 @@ a knowledge base, or the content pipeline as Markdown the model can read.
 
 ## Notes
 
-- Runs via `uvx markitdown-mcp` (no API key). First invocation in a session may
-  pause while `uv` provisions the cached environment.
+- Runs the `markitdown-mcp` uv tool (no API key). setup.sh installs it once with
+  `uv tool install`; on a machine without the install, `uvx markitdown-mcp` builds
+  a fresh environment and the first call in a session may pause while it does.
 - Plain-language requests like "convert this PDF to markdown: <path>" route to
   the same `markitdown` tool without typing `/convert`.
 - Audio transcription needs `ffmpeg`; image EXIF needs `exiftool` (`brew install`).

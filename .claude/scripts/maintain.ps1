@@ -97,6 +97,7 @@ $script:SETUP_STATUS = "skipped"
 $script:VERDICT = "GREEN"
 $script:HEALTH_LINE = ""
 $script:DISK_FREE_GB = 0
+$script:DISK_PRUNED = "no"
 $script:REPORT_STATUS = "not-due"
 $script:LAST_REPORT_TS = ""
 
@@ -159,9 +160,48 @@ function Step-Health {
     Log "health: $($script:VERDICT) ($($script:HEALTH_LINE))"
 }
 
+function Get-DiskFreeGB { [int]((Get-Item $env:USERPROFILE).PSDrive.Free / 1GB) }
+
+# Only caches that rebuild themselves — mirrors prune_caches in maintain.sh.
+function Prune-Caches($cacheCapGB, $imageAge) {
+    if (Get-Command uv -ErrorAction SilentlyContinue) {
+        $env:UV_LOCK_TIMEOUT = "10"
+        uv cache prune *> $null; if ($LASTEXITCODE -eq 0) { Log "  pruned the uv cache" }
+    }
+    if (Get-Command pnpm -ErrorAction SilentlyContinue) {
+        pnpm store prune *> $null; if ($LASTEXITCODE -eq 0) { Log "  pruned the pnpm store" }
+    }
+    if (Get-Command docker -ErrorAction SilentlyContinue) {
+        docker info *> $null
+        if ($LASTEXITCODE -eq 0) {
+            docker builder prune -af --max-used-space "$($cacheCapGB)gb" *> $null
+            if ($LASTEXITCODE -eq 0) { Log "  capped the Docker build cache at $($cacheCapGB)GB" }
+            docker image prune -af --filter "until=$imageAge" *> $null
+            if ($LASTEXITCODE -eq 0) { Log "  removed Docker images older than $imageAge that no container uses" }
+        }
+    }
+}
+
 function Step-Disk {
-    $drive = (Get-Item $env:USERPROFILE).PSDrive
-    $script:DISK_FREE_GB = [int]($drive.Free / 1GB)
+    $script:DISK_FREE_GB = Get-DiskFreeGB
+    $script:DISK_PRUNED = "no"
+    $floor = 30; $cacheCap = 8; $imageAge = "72h"
+    $engine = "$KUN_DIR\.claude\engine.json"
+    if (Test-Path $engine) {
+        $hygiene = (Get-Content $engine -Raw | ConvertFrom-Json).devices.hygiene
+        if ($hygiene) {
+            if ($hygiene.prune_below_gb) { $floor = [int]$hygiene.prune_below_gb }
+            if ($hygiene.docker_cache_cap_gb) { $cacheCap = [int]$hygiene.docker_cache_cap_gb }
+            if ($hygiene.docker_image_age) { $imageAge = $hygiene.docker_image_age }
+        }
+    }
+    if ($script:DISK_FREE_GB -lt $floor) {
+        $before = $script:DISK_FREE_GB
+        Log "disk: $($before)GB free, under $($floor)GB — pruning caches"
+        Prune-Caches $cacheCap $imageAge
+        $script:DISK_FREE_GB = Get-DiskFreeGB
+        $script:DISK_PRUNED = "$($before)GB->$($script:DISK_FREE_GB)GB"
+    }
     if ($script:DISK_FREE_GB -lt 5 -and $script:VERDICT -eq "GREEN") {
         $script:VERDICT = "YELLOW"
         Log "disk: $($script:DISK_FREE_GB)GB free — low, verdict floored to YELLOW"
@@ -223,6 +263,7 @@ function Write-State {
         head           = "$($script:HEAD_REV)"
         setup          = $script:SETUP_STATUS
         disk_free_gb   = $script:DISK_FREE_GB
+        disk_pruned    = $script:DISK_PRUNED
         report         = $script:REPORT_STATUS
         last_report_ts = "$($script:LAST_REPORT_TS)"
     }

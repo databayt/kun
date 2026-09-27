@@ -270,6 +270,15 @@ if [ -f "$KUN_DIR/.claude/mcp.json" ]; then
     MCP_COUNT=$(grep -c '"description"' "$CLAUDE_DIR/mcp.json" 2>/dev/null || echo 0)
     info "MCP catalog copied ($MCP_COUNT) — health input, not the live config"
 
+    # MarkItDown's server is a uv tool: install it once so `uvx markitdown-mcp`
+    # reuses one environment. Without it uvx built a fresh 369 MB environment per
+    # session start (~75 copies piled up in ~/.cache/uv, found 2026-09-27).
+    if command -v uv &>/dev/null && ! uv tool list 2>/dev/null | grep -q '^markitdown-mcp '; then
+        uv tool install 'markitdown-mcp==0.0.1a7' >/dev/null 2>&1 \
+            && info "markitdown-mcp installed as a uv tool" \
+            || info "markitdown-mcp install skipped (uv tool install failed)"
+    fi
+
     # Idempotent: `claude mcp get` short-circuits anything already registered, so
     # re-running setup costs one cheap lookup per server and changes nothing.
     # `del(.description)` strips kun's own annotation — it is not part of the MCP
