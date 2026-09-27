@@ -238,7 +238,7 @@ Qualified opportunities are pushed directly into Databayt's self-hosted **Twenty
 | Property | Value |
 | :--- | :--- |
 | **Target Workspace** | **Databayt** (`sales.databayt.org`) |
-| **Target Object** | **Kigali** (custom object — `kigaliOpportunity`) |
+| **Target Object** | **Jobs & Opportunities** (custom object — API name `kigaliOpportunity`, kept so callers keep working) |
 | **Local Endpoint** | `http://localhost:3100/rest/kigaliOpportunities` |
 | **Auth Key** | macOS Keychain: `security find-generic-password -s databayt-twenty -a databayt` |
 | **Throttling** | >= 700ms spacing, exponential backoff on 429 |
@@ -321,3 +321,43 @@ pnpm dev
 - **`/jobs`**: Interactive Hub with live intake form, sample job preset loader, filter tabs, stats overview, and expandable opportunity cards.
 - **`/jobs/profile`**: Dedicated dossier view of the candidate's verified Engineering Knowledge Profile with active repositories and proven capabilities.
 - **`/docs/jobs`**: This architecture manual.
+
+---
+
+## 8. The Income Loop — scrape → apply → update
+
+Added 2026-09-26. The engine above scores; this loop is what turns scores into applications. **The
+measured bottleneck is applying, not finding**: on 26 Sep all 26 board records had sat at `TO_APPLY`
+for a month. Say **`jobs`** in a session (or `وظائف`) and the `jobs` skill runs the loop.
+
+### Lanes (campaign → CRM `campaign`)
+
+| Band | Campaign | CRM option |
+| :--- | :--- | :--- |
+| 1 — Rwanda | `kigali-protection-engineer` · `kigali-electrical-engineer` · `kivu-marine-eto` · `kigali-web-developer` | PROTECTION · ELECTRICAL · MARINE_ETO · WEB_DEVELOPER |
+| 1 — Rwanda | `rwanda-tenders-databayt` | TENDER |
+| 2 — remote income | `remote-web-developer-worldwide` · `ai-training-gigs` · `freelance-contracts` | REMOTE_WORLDWIDE · AI_TRAINING · FREELANCE |
+| 3 — abroad | `engineering-contracts` | ENGINEERING_CONTRACT |
+
+### Commands
+
+```bash
+pnpm jobs:discover                 # jobinrwanda, greatrwandajobs, REG, RemoteOK → jobs/inbox/<date>-discover.json
+pnpm jobs:discover --source reg --limit 1   # test one adapter on one row first
+pnpm jobs:ingest --dry-run         # score, drop expired / nationals-only / low auto finds
+pnpm jobs:ingest                   # write Neon + push new rows to the board (idempotent)
+pnpm jobs:queue                    # TO_APPLY ranked band → deadline → score
+pnpm jobs:queue --stale            # APPLIED with no movement ≥ 7 days → follow up
+pnpm jobs:queue --summary          # lane × status
+pnpm jobs:mark <crm-id> applied    # board + Neon move together; add a note as extra args
+bash scripts/jobs/daily.sh --status   # launchd, 07:00 Kigali, zero tokens
+```
+
+- **Apply is drafts only.** Email applications become Gmail drafts (the connector's account), portal
+  applications become `jobs/packets/*.md`. Nothing is sent or submitted by the engine.
+- **Connector lanes run in-session.** Indeed and Gmail are claude.ai connectors and are absent in
+  headless `claude -p`, so the daily run covers only plain-fetch boards.
+- **Not automated:** rwandajob.com and We Work Remotely block bots; ReliefWeb's API needs an approved
+  `appname` (403 without one).
+- **Status drift (kun#152):** prod Neon's `JobOpportunityStatus` enum holds 9 of the schema's 18 values.
+  `jobs:mark` stores the nearest accepted value; the board keeps the precise status.
