@@ -8,7 +8,7 @@
 // name to) and cv-evidence.ts (the extracted, dated claims). Re-run after any
 // CV edit; the wave step does it automatically.
 
-import { readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 
 import { CV_EVIDENCE_FACTS } from "@/lib/jobs/cv-evidence";
 import { numbersIn } from "@/lib/jobs/send-gate";
@@ -25,12 +25,19 @@ const cvs = readdirSync("jobs/cv")
   .filter((f) => f.endsWith(".html"))
   .map((f) => ({ file: f, text: text(readFileSync(`jobs/cv/${f}`, "utf-8")) }));
 
+// Facts Abdout supplies himself (a salary figure, a registration number)
+// that no CV carries. Each is dated and attributed in the file.
+const extra: { numbers?: string[]; claims?: string[] } = existsSync("jobs/facts.extra.json")
+  ? JSON.parse(readFileSync("jobs/facts.extra.json", "utf-8"))
+  : {};
+
 const claims = [
+  ...(extra.claims ?? []),
   ...cvs.map((c) => `CV ${c.file}: ${c.text}`),
   ...CV_EVIDENCE_FACTS.map((f) => `${f.claim} (${f.rawProof})`),
 ];
 
-const numbers = [...new Set(claims.flatMap(numbersIn))].sort();
+const numbers = [...new Set([...claims.flatMap(numbersIn), ...(extra.numbers ?? [])])].sort();
 
 writeFileSync(
   "jobs/facts.json",

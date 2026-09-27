@@ -142,10 +142,15 @@ async function main(): Promise<void> {
   }
 
   const board = await listBoard();
-  const ready = board.filter(
-    (r) =>
-      r.applicationStatus === "QUEUED" || r.applicationStatus === "APPROVED",
-  );
+  // Nearest deadline first (rolling last), so the daily cap never lets a
+  // closing posting miss its day; Abdout's approvals break ties.
+  const ready = board
+    .filter((r) => r.applicationStatus === "QUEUED" || r.applicationStatus === "APPROVED")
+    .sort(
+      (a, b) =>
+        (a.deadline ?? "9999").localeCompare(b.deadline ?? "9999") ||
+        Number(b.applicationStatus === "APPROVED") - Number(a.applicationStatus === "APPROVED"),
+    );
 
   if (TO_SELF) {
     // A test must work before the first wave has queued anything, so any card
