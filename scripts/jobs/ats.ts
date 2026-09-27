@@ -368,6 +368,34 @@ function findAts(
   return null;
 }
 
+
+// ── Greenhouse security codes, read from hotmail (Abdout's choice) ──────────
+function mailIds(): Set<string> {
+  const r = spawnSync("osascript", ["scripts/jobs/mail-read.applescript", profile.identity.email, "2"], { encoding: "utf-8", timeout: 120_000 });
+  return new Set(
+    (r.stdout ?? "").split("\x1e").map((m) => m.split("\x1f").slice(0, 3).join("|")).filter((x) => x.length > 2),
+  );
+}
+
+function codeFetcher(company: string, before: Set<string>): () => Promise<string | null> {
+  return async () => {
+    for (let i = 0; i < 12; i++) {
+      await new Promise((r) => setTimeout(r, 10_000));
+      spawnSync("osascript", ["-e", 'tell application "Mail" to check for new mail']);
+      const r = spawnSync("osascript", ["scripts/jobs/mail-read.applescript", profile.identity.email, "2"], { encoding: "utf-8", timeout: 120_000 });
+      for (const m of (r.stdout ?? "").split("\x1e")) {
+        const [from, subject, date, body] = m.split("\x1f");
+        if (!from || before.has(`${from}|${subject}|${date}`)) continue;
+        if (!/greenhouse/i.test(from) || !/security code/i.test(subject ?? "")) continue;
+        if (company && !(subject ?? "").toLowerCase().includes(company.toLowerCase().slice(0, 12))) continue;
+        const code = body?.match(/application:\s*([A-Za-z0-9]{8})\b/)?.[1];
+        if (code) return code;
+      }
+    }
+    return null;
+  };
+}
+
 async function submit(): Promise<void> {
   const cfg = loadConfig();
   const { date } = kigaliNow();
@@ -501,7 +529,7 @@ async function submit(): Promise<void> {
         await page.close();
         continue;
       }
-      const outcome = await submitGreenhouse(page);
+      const outcome = await submitGreenhouse(page, codeFetcher(company, mailIds()));
       await page.screenshot({
         path: join(found.dir, `${row.id}.ats-result.png`),
         fullPage: true,

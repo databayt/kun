@@ -189,38 +189,64 @@ export async function fillGreenhouse(
 
 export type SubmitOutcome = { ok: true } | { ok: false; reason: string };
 
-export async function submitGreenhouse(page: Page): Promise<SubmitOutcome> {
-  await page
-    .getByRole("button", { name: /submit application/i })
-    .first()
-    .click();
+const CONFIRMED =
+  /thank you for applying|application (has been )?(received|submitted)|we.ve received your application/i;
+
+async function waitForOutcome(
+  page: Page,
+  ms: number,
+  afterCode = false,
+): Promise<"confirmed" | "code" | "invalid" | "captcha" | "timeout"> {
   try {
     await page.waitForFunction(
-      () =>
-        /thank you for applying|application (has been )?(received|submitted)|we.ve received your application/i.test(
-          document.body.innerText,
-        ) ||
-        !!document.querySelector(
-          '[aria-invalid="true"], .error-message, iframe[src*="recaptcha/api2/bframe"]',
-        ),
-      undefined,
-      { timeout: 45_000 },
+      // After the code is entered the prompt's text stays on the page, so the
+      // second wait looks only for the confirmation or a field error.
+      (afterCode: boolean) =>
+        (afterCode
+          ? /thank you for applying|application (has been )?(received|submitted)|we.ve received your application/i
+          : /thank you for applying|application (has been )?(received|submitted)|we.ve received your application|verification code was sent/i
+        ).test(document.body.innerText) || !!document.querySelector('[aria-invalid="true"], iframe[src*="recaptcha/api2/bframe"]'),
+      afterCode,
+      { timeout: ms },
     );
   } catch {
-    return { ok: false, reason: "no confirmation within 45s" };
+    return "timeout";
   }
   const body = await page.evaluate(() => document.body.innerText);
-  if (
-    /thank you for applying|application (has been )?(received|submitted)|we.ve received your application/i.test(
-      body,
-    )
-  )
-    return { ok: true };
+  if (CONFIRMED.test(body)) return "confirmed";
+  if (!afterCode && /verification code was sent/i.test(body)) return "code";
+  if (await page.locator('iframe[src*="recaptcha/api2/bframe"]').count()) return "captcha";
+  return "invalid";
+}
+
+/// Submit; when Greenhouse emails a security code (Abdout's choice,
+/// 2026-09-27: read it from his hotmail and enter it), `getCode` fetches it.
+export async function submitGreenhouse(page: Page, getCode?: () => Promise<string | null>): Promise<SubmitOutcome> {
+  const submit = () => page.getByRole("button", { name: /submit application/i }).first().click();
+  await submit();
+  let state = await waitForOutcome(page, 45_000);
+
+  if (state === "code") {
+    if (!getCode) return { ok: false, reason: "security code requested" };
+    const code = await getCode();
+    if (!code) return { ok: false, reason: "security code email did not arrive" };
+    // Eight one-character boxes that auto-advance: focus the first, type all.
+    const boxes = page.locator('input[id^="security-input"], input[aria-label*="ecurity"], input[maxlength="1"]');
+    if (await boxes.count()) {
+      await boxes.first().click();
+      await page.keyboard.type(code, { delay: 60 });
+    } else {
+      await page.getByLabel(/security code/i).first().fill(code);
+    }
+    await submit();
+    state = await waitForOutcome(page, 60_000, true);
+  }
+
+  if (state === "confirmed") return { ok: true };
+  if (state === "captcha") return { ok: false, reason: "CAPTCHA challenge" };
+  if (state === "timeout") return { ok: false, reason: "no confirmation within 45s" };
   const invalid = await page.evaluate(() =>
-    [...document.querySelectorAll('[aria-invalid="true"]')]
-      .map((e) => e.getAttribute("id") || e.getAttribute("name") || "?")
-      .join(", "),
+    [...document.querySelectorAll('[aria-invalid="true"]')].map((e) => e.getAttribute("id") || e.getAttribute("name") || "?").join(", "),
   );
-  if (invalid) return { ok: false, reason: `form rejected fields: ${invalid}` };
-  return { ok: false, reason: "CAPTCHA challenge" };
+  return { ok: false, reason: `form rejected fields: ${invalid || "unknown"}` };
 }

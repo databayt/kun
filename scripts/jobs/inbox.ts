@@ -114,8 +114,15 @@ async function main(): Promise<void> {
   const byAddress = new Map<string, string>();
   const byDomain = new Map<string, string>();
   const bySubject = new Map<string, string>();
+  // ATS applications have no recipient address: match by company name.
+  const byCompany = new Map<string, string>();
   for (const e of sent) {
     const to = (e.to as string).toLowerCase();
+    if (to.startsWith("ats:")) {
+      const company = to.slice(4).trim();
+      if (company.length >= 4) byCompany.set(company, e.crmId);
+      continue;
+    }
     byAddress.set(to, e.crmId);
     const domain = to.split("@")[1];
     if (domain && !FREE_MAIL.test(`${domain}.`)) byDomain.set(domain, e.crmId);
@@ -132,10 +139,13 @@ async function main(): Promise<void> {
     if (seen.has(id)) continue;
     const addr = addressOf(m.from);
     if (addr === cfg.fromAccount.toLowerCase()) continue;
+    // Greenhouse's security-code emails are part of submitting, not a reply.
+    if (/security code/i.test(m.subject) && /greenhouse/i.test(m.from)) continue;
     const crmId =
       byAddress.get(addr) ??
       byDomain.get(addr.split("@")[1] ?? "") ??
-      bySubject.get(stripRe(m.subject));
+      bySubject.get(stripRe(m.subject)) ??
+      [...byCompany.entries()].find(([c]) => `${m.subject} ${m.from}`.toLowerCase().includes(c))?.[1];
     if (!crmId || !byId.has(crmId)) continue;
     const row = byId.get(crmId) as BoardRow;
     const kind = classifyReply({
