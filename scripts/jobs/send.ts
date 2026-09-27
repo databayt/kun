@@ -198,6 +198,13 @@ async function main(): Promise<void> {
   const facts = JSON.parse(readFileSync("jobs/facts.json", "utf-8")) as {
     numbers: string[];
   };
+  const queuedTimes = new Map<string, number>();
+  if (existsSync("jobs/ledger.jsonl")) {
+    for (const l of readFileSync("jobs/ledger.jsonl", "utf-8").split("\n").filter(Boolean)) {
+      const e = JSON.parse(l) as { kind: string; crmId: string; ts: string };
+      if (e.kind === "queued") queuedTimes.set(e.crmId, new Date(e.ts).getTime());
+    }
+  }
   const companies = new Set<string>();
   let sent = 0;
 
@@ -227,6 +234,14 @@ async function main(): Promise<void> {
     }
 
     const approved = fresh.applicationStatus === "APPROVED";
+    // The veto window: a QUEUED card must have sat on the board (and in the
+    // digest) for vetoHours before it can go — a Mac that woke late does not
+    // get to prepare and send in the same tick. APPROVED is already a yes.
+    const queuedAt = queuedTimes.get(row.id);
+    if (!approved && queuedAt && Date.now() - queuedAt < cfg.vetoHours * 3_600_000) {
+      console.log(`  · ${row.name.slice(0, 60)} — queued ${Math.round((Date.now() - queuedAt) / 60_000)} min ago, veto window open`);
+      continue;
+    }
     const verdict = evaluateSendGate({
       letter: found.letter,
       company,

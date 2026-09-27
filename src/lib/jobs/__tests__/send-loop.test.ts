@@ -177,3 +177,39 @@ describe("follow-up cadence", () => {
     ).toBe("none");
   });
 });
+
+import { byLane, byVariant, summarizeOutcomes } from "../learn-metrics";
+
+describe("learn metrics", () => {
+  const sent = (crmId: string, variant: string, campaign: string, ts = "2026-10-01T08:00:00Z") => ({
+    ts,
+    kind: "sent",
+    crmId,
+    variant,
+    campaign,
+  });
+  const reply = (crmId: string, kind: string, ts: string) => ({ ts, kind: "reply", crmId, detail: `${kind}: …` });
+  const lines = [
+    sent("a", "cv:web@1 letter:x@1", "WEB_DEVELOPER"),
+    sent("b", "cv:web@1 letter:x@2", "WEB_DEVELOPER"),
+    sent("c", "cv:protection@1 letter:y@1", "ELECTRICAL"),
+    reply("a", "interview", "2026-10-03T08:00:00Z"),
+    reply("b", "ack", "2026-10-01T09:00:00Z"),
+    reply("c", "rejection", "2026-10-05T08:00:00Z"),
+  ];
+
+  it("counts replies, not acknowledgements, per variant id", () => {
+    const v = summarizeOutcomes(lines, byVariant);
+    const web = v.find((o) => o.key === "cv:web@1")!;
+    expect(web.sent).toBe(2);
+    expect(web.replies).toBe(1);
+    expect(web.interviews).toBe(1);
+    expect(web.medianDaysToReply).toBe(2);
+  });
+
+  it("refuses a rate below the minimum sample", () => {
+    const lane = summarizeOutcomes(lines, byLane).find((o) => o.key === "ELECTRICAL")!;
+    expect(lane.rejections).toBe(1);
+    expect(lane.replyRate).toBeNull();
+  });
+});

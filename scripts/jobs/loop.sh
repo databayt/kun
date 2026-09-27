@@ -1,0 +1,160 @@
+#!/usr/bin/env bash
+# The jobs loop heartbeat: every 30 minutes, run whatever is due.
+#
+#   bash scripts/jobs/loop.sh --tick        one pass (what launchd calls)
+#   bash scripts/jobs/loop.sh --install     arm launchd (replaces com.databayt.jobs-daily)
+#   bash scripts/jobs/loop.sh --uninstall
+#   bash scripts/jobs/loop.sh --status      armed? last stamps, today's log tail
+#   bash scripts/jobs/loop.sh --pause       kill switch on  (touch jobs/.send-off)
+#   bash scripts/jobs/loop.sh --resume      kill switch off
+#
+# Schedule (Kigali, the Mac is on CAT):
+#   ≥07:00 daily       discover + ingest                 0 tokens
+#   ≥07:00 Mon–Fri     wave: tailor + gate → QUEUED/HOLD  claude -p (Max)
+#   ≥10:00 Mon–Fri     send, every tick until 17:00       0 tokens, capped
+#   08:00–21:00        inbox: read + classify replies     0 tokens
+#   ≥16:00 Mon–Fri     follow-ups (templated) + archive   0 tokens
+#   Fri ≥17:00         learn --propose --send             claude -p (Max)
+#   after the wave     digest → Slack DM via `hermes send`  0 tokens
+#
+# Stamps in jobs/.state/ make each daily step run once per day and let a Mac
+# that slept through a slot catch up on its first tick after waking. A lock
+# dir keeps a slow wave from overlapping the next tick.
+set -u
+REPO="$(cd "$(dirname "$0")/../.." && pwd)"
+STATE="$REPO/jobs/.state"
+LOG_DIR="$HOME/.claude/logs"
+LOCK="$HOME/.claude/.jobs-loop.lock"
+PLIST_LABEL="com.databayt.jobs-loop"
+PLIST_PATH="$HOME/Library/LaunchAgents/$PLIST_LABEL.plist"
+MODE="${1:---tick}"
+
+mkdir -p "$STATE" "$LOG_DIR"
+LOG_FILE="$LOG_DIR/jobs-loop-$(date +%F).log"
+log() { echo "[$(date '+%H:%M:%S')] $*" >> "$LOG_FILE"; }
+
+TODAY="$(date +%F)"
+HOUR=$((10#$(date +%H)))
+DOW="$(date +%u)"            # 1 = Monday … 7 = Sunday
+WEEK="$(date +%G-W%V)"
+
+done_today() { [ "$(cat "$STATE/$1" 2>/dev/null)" = "$TODAY" ]; }
+stamp() { echo "$TODAY" > "$STATE/$1"; }
+weekday() { [ "$DOW" -le 5 ]; }
+
+run() {  # run <name> <cmd...> — logs, never aborts the tick
+    local name="$1"; shift
+    log "▶ $name"
+    ( cd "$REPO" && "$@" ) >> "$LOG_FILE" 2>&1
+    local rc=$?
+    log "◀ $name exit $rc"
+    return $rc
+}
+
+render_plist() {
+    cat <<PLIST
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>$PLIST_LABEL</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/bin/bash</string>
+		<string>$REPO/scripts/jobs/loop.sh</string>
+		<string>--tick</string>
+	</array>
+	<key>WorkingDirectory</key>
+	<string>$REPO</string>
+	<key>StartInterval</key>
+	<integer>1800</integer>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>PATH</key>
+		<string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$HOME/.local/bin</string>
+		<key>DISABLE_AUTOUPDATER</key>
+		<string>1</string>
+	</dict>
+	<key>StandardOutPath</key>
+	<string>$LOG_DIR/jobs-loop-launchd.out</string>
+	<key>StandardErrorPath</key>
+	<string>$LOG_DIR/jobs-loop-launchd.err</string>
+</dict>
+</plist>
+PLIST
+}
+
+case "$MODE" in
+    --install)
+        # The morning scrape moves into this loop; the old single-purpose job goes.
+        launchctl bootout "gui/$(id -u)/com.databayt.jobs-daily" 2>/dev/null || true
+        rm -f "$HOME/Library/LaunchAgents/com.databayt.jobs-daily.plist"
+        mkdir -p "$HOME/Library/LaunchAgents"
+        render_plist > "$PLIST_PATH"
+        launchctl bootout "gui/$(id -u)/$PLIST_LABEL" 2>/dev/null || true
+        launchctl bootstrap "gui/$(id -u)" "$PLIST_PATH" 2>/dev/null || launchctl load "$PLIST_PATH"
+        echo "armed: $PLIST_LABEL every 30 min (plist: $PLIST_PATH); com.databayt.jobs-daily removed"
+        ;;
+    --uninstall)
+        launchctl bootout "gui/$(id -u)/$PLIST_LABEL" 2>/dev/null || true
+        rm -f "$PLIST_PATH"
+        echo "disarmed: $PLIST_LABEL"
+        ;;
+    --pause)
+        touch "$REPO/jobs/.send-off"; echo "sending paused (jobs/.send-off). Everything else keeps running."
+        ;;
+    --resume)
+        rm -f "$REPO/jobs/.send-off"; echo "sending resumed."
+        ;;
+    --status)
+        if launchctl print "gui/$(id -u)/$PLIST_LABEL" >/dev/null 2>&1; then echo "armed ($PLIST_LABEL, every 30 min)"; else echo "not armed"; fi
+        [ -f "$REPO/jobs/.send-off" ] && echo "⛔ sending paused (jobs/.send-off)"
+        for s in discover wave digest followup learn; do printf "  %-9s %s\n" "$s" "$(cat "$STATE/$s" 2>/dev/null || echo never)"; done
+        [ -f "$LOG_FILE" ] && tail -8 "$LOG_FILE"
+        ;;
+    --tick)
+        if ! mkdir "$LOCK" 2>/dev/null; then
+            # A lock older than 2h is a crashed tick, not a running one.
+            if [ -n "$(find "$LOCK" -maxdepth 0 -mmin +120 2>/dev/null)" ]; then rmdir "$LOCK"; mkdir "$LOCK"; else log "tick skipped — previous tick still running"; exit 0; fi
+        fi
+        trap 'rmdir "$LOCK" 2>/dev/null' EXIT
+        log "tick (dow $DOW, hour $HOUR)"
+
+        # CRM down = nothing to do; say so once per tick and stop.
+        if ! curl -sf -o /dev/null --max-time 10 http://localhost:3100/healthz; then
+            log "CRM (localhost:3100) unreachable — tick stops"; exit 0
+        fi
+
+        if [ "$HOUR" -ge 7 ] && ! done_today discover; then
+            run discover node scripts/jobs/discover.mjs && run ingest pnpm -s jobs:ingest && stamp discover
+        fi
+        if weekday && [ "$HOUR" -ge 7 ] && [ "$HOUR" -lt 17 ] && done_today discover && ! done_today wave; then
+            run facts pnpm -s jobs:facts
+            run wave pnpm -s jobs:wave && stamp wave
+        fi
+        # The digest follows the wave so it shows what will actually go out;
+        # on weekends (no wave) it follows discover. Delivered by Hermes.
+        if [ "$HOUR" -ge 7 ] && done_today discover && ! done_today digest && { ! weekday || done_today wave || [ "$HOUR" -ge 17 ]; }; then
+            run digest pnpm -s jobs:digest --send && stamp digest
+        fi
+        if weekday && [ "$HOUR" -ge 10 ] && [ "$HOUR" -lt 17 ]; then
+            run send pnpm -s jobs:send --apply --limit 10
+        fi
+        if [ "$HOUR" -ge 8 ] && [ "$HOUR" -lt 22 ]; then
+            run inbox pnpm -s jobs:inbox
+        fi
+        if weekday && [ "$HOUR" -ge 16 ] && [ "$HOUR" -lt 17 ] && ! done_today followup; then
+            run followup pnpm -s jobs:followup --apply && stamp followup
+        fi
+        if [ "$DOW" -eq 5 ] && [ "$HOUR" -ge 17 ] && [ "$(cat "$STATE/learn" 2>/dev/null)" != "$WEEK" ]; then
+            run learn pnpm -s jobs:learn --propose --send && echo "$WEEK" > "$STATE/learn"
+        fi
+        log "tick done"
+        ;;
+    *)
+        echo "Unknown flag: $MODE (use --tick|--install|--uninstall|--status|--pause|--resume)" >&2; exit 1
+        ;;
+esac

@@ -31,7 +31,12 @@
     "jobs:send": "tsx scripts/jobs/send.ts",
     "jobs:variant": "tsx scripts/jobs/variants.ts",
     "jobs:cv": "node scripts/jobs/render-cv.mjs",
-    "jobs:facts": "tsx scripts/jobs/facts.ts"
+    "jobs:facts": "tsx scripts/jobs/facts.ts",
+    "jobs:inbox": "tsx scripts/jobs/inbox.ts",
+    "jobs:followup": "tsx scripts/jobs/followup.ts",
+    "jobs:digest": "tsx scripts/jobs/digest.ts",
+    "jobs:learn": "tsx scripts/jobs/learn.ts",
+    "jobs:loop": "bash scripts/jobs/loop.sh"
   },
   "dependencies": {
     "@ai-sdk/google": "^4.0.37",

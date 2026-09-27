@@ -17,6 +17,7 @@ export interface LoopConfig {
   windowFrom: number;
   windowTo: number;
   slackTarget: string; // hermes send --to
+  vetoHours: number; // a QUEUED card waits this long before it can send
 }
 
 const DEFAULTS: LoopConfig = {
@@ -30,6 +31,7 @@ const DEFAULTS: LoopConfig = {
   windowFrom: 9,
   windowTo: 17,
   slackTarget: "slack:D0AQ0JR5ZU4",
+  vetoHours: 2,
 };
 
 export function loadConfig(): LoopConfig {
