@@ -3,7 +3,7 @@
 //
 //   pnpm jobs:send                         dry run — what would go out now
 //   pnpm jobs:send --apply --limit 5       send (inside the window, under the cap)
-//   pnpm jobs:send --apply --to-self       send the first letter to yourself, board untouched
+//   pnpm jobs:send --apply --to-self [--id <prefix>]  send one written letter to yourself, board untouched
 //
 // Auto-send is Abdout's choice (2026-09-27), so the guards live here:
 //   kill switch  jobs/.send-off or JOBS_SEND=off → nothing leaves
@@ -148,11 +148,23 @@ async function main(): Promise<void> {
   );
 
   if (TO_SELF) {
-    const first = ready
+    // A test must work before the first wave has queued anything, so any card
+    // with a written letter will do — queued ones first. --id <prefix> picks one.
+    const idArg = args.indexOf("--id");
+    const idPrefix = idArg >= 0 ? args[idArg + 1] : undefined;
+    const candidates = [
+      ...ready,
+      ...board.filter((r) => !ready.includes(r)),
+    ].filter((r) => !idPrefix || r.id.startsWith(idPrefix));
+    const first = candidates
       .map((r) => ({ r, l: findLetter(r.id) }))
       .find((x) => x.l);
     if (!first?.l) {
-      console.log("no prepared letter to test with — run pnpm jobs:wave first");
+      console.log(
+        idPrefix
+          ? `no written letter for a card starting ${idPrefix}`
+          : "no written letter on any card — run pnpm jobs:wave first",
+      );
       return;
     }
     const err = mailSend(
@@ -200,9 +212,12 @@ async function main(): Promise<void> {
   };
   const queuedTimes = new Map<string, number>();
   if (existsSync("jobs/ledger.jsonl")) {
-    for (const l of readFileSync("jobs/ledger.jsonl", "utf-8").split("\n").filter(Boolean)) {
+    for (const l of readFileSync("jobs/ledger.jsonl", "utf-8")
+      .split("\n")
+      .filter(Boolean)) {
       const e = JSON.parse(l) as { kind: string; crmId: string; ts: string };
-      if (e.kind === "queued") queuedTimes.set(e.crmId, new Date(e.ts).getTime());
+      if (e.kind === "queued")
+        queuedTimes.set(e.crmId, new Date(e.ts).getTime());
     }
   }
   const companies = new Set<string>();
@@ -238,8 +253,14 @@ async function main(): Promise<void> {
     // digest) for vetoHours before it can go — a Mac that woke late does not
     // get to prepare and send in the same tick. APPROVED is already a yes.
     const queuedAt = queuedTimes.get(row.id);
-    if (!approved && queuedAt && Date.now() - queuedAt < cfg.vetoHours * 3_600_000) {
-      console.log(`  · ${row.name.slice(0, 60)} — queued ${Math.round((Date.now() - queuedAt) / 60_000)} min ago, veto window open`);
+    if (
+      !approved &&
+      queuedAt &&
+      Date.now() - queuedAt < cfg.vetoHours * 3_600_000
+    ) {
+      console.log(
+        `  · ${row.name.slice(0, 60)} — queued ${Math.round((Date.now() - queuedAt) / 60_000)} min ago, veto window open`,
+      );
       continue;
     }
     const verdict = evaluateSendGate({
