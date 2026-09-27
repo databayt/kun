@@ -109,13 +109,13 @@ drift signal (measured, disproved).
 
 ## Where books live — stage, run, land
 
-Books live in the **catalog** repo (`~/catalog`, `databayt/catalog`) at
-`curricula/<cur>/<grade>/<subject>/`, which is also their CDN key under `catalog/`. That folder holds only
+Books live in the **catalog** repo (`~/catalog`, `databayt/catalog`), which mirrors the CDN: the book folder
+`~/catalog/<cur>/<grade>/<subject>/` IS `cdn.databayt.org/catalog/<cur>/<grade>/<subject>/`. That folder holds only
 canonical files, and the validator rejects pipeline scratch there. So the pipeline runs on a **staged copy** in
 the gitignored `.work/`, and only the outputs are landed back:
 
 ```bash
-C=~/catalog/curricula/sd/g12/biology; W=~/catalog/.work/sd/g12/biology
+C=~/catalog/sd/g12/biology; W=~/catalog/.work/sd/g12/biology
 cd ~/catalog && pnpm assets pull sd/g12/biology       # binaries (pdf, pages) if not present
 mkdir -p $W && cp -Rc $C/ $W/                           # stage (APFS clone — instant)
 # run the workflow / scripts with book = $W

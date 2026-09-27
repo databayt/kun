@@ -117,7 +117,7 @@
         "name": "Catalog",
         "url": "https://github.com/databayt/catalog",
         "local": "/Users/abdout/catalog",
-        "description": "Open curriculum catalog — every curriculum/grade/subject/chapter/lesson, question banks, exams and textbook twins in one schema; path == CDN key (curricula/<p> <-> cdn.databayt.org/catalog/<p>)",
+        "description": "Open curriculum catalog — every curriculum/grade/subject/chapter/lesson, question banks, exams and textbook twins in one schema; the repo mirrors the CDN (~/catalog/sd/g6/math/exams.json <-> cdn.databayt.org/catalog/sd/g6/math/exams.json)",
         "stack": [
           "TypeScript 5",
           "zod 4",
@@ -135,7 +135,12 @@
         "status": "active",
         "lastSync": null,
         "watchPaths": [
-          "curricula/",
+          "sd/",
+          "gb/",
+          "us/",
+          "cbse/",
+          "ib-dp/",
+          "caie-igcse/",
           "schema/",
           "vocab/"
         ]
