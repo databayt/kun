@@ -456,9 +456,14 @@ async function submit(): Promise<void> {
     headless: !HEADED,
   });
   let done = 0;
+  // One application per company per day, across email and ATS (a second
+  // role at the same employer waits a day) — plus this run's own sends.
+  const companiesThisRun = new Set<string>();
   try {
     for (const row of ready) {
       if (done >= limit) break;
+      const companyKey = splitName(row.name).company.toLowerCase();
+      if (!only && (companiesThisRun.has(companyKey) || contactState(row, board) === "wait")) continue;
       const fresh = await getRow(row.id);
       if (
         !only &&
@@ -476,6 +481,47 @@ async function submit(): Promise<void> {
       )
         continue;
       const found = findAts(row.id);
+      if (found && providerOf(row) === "ashby" && !args.includes("--try-ashby")) {
+        // Ashby's reCAPTCHA flags automated submissions as spam (2026-09-27);
+        // the rule is CAPTCHA/bot block → HOLD, never evade. Leave a paste-ready
+        // packet so Abdout submits in two minutes.
+        const { role, company } = splitName(row.name);
+        const qs = await questionsFor(row);
+        const lines = [
+          `# ${row.name}`,
+          "",
+          `Form: ${row.applyUrl}`,
+          `CV: ${found.req.cvPdf}  ·  Cover letter below (paste, or attach ${join(found.dir, row.id, "Osman_Abdout_Cover_Letter.pdf")} after a dry run)`,
+          "",
+          "## Answers, field by field",
+        ];
+        for (const q of qs ?? []) {
+          const a = answerQuestion(q, profile, { company, role });
+          const v =
+            !a ? "⚠ decide yourself" :
+            a.kind === "text" ? a.value :
+            a.kind === "select" ? a.option :
+            a.kind === "multi" ? a.options.join(", ") :
+            a.kind === "check" ? (a.value ? "Yes" : "No") :
+            a.kind === "file" ? (a.which === "resume" ? "attach the CV" : "attach the cover letter") :
+            a.kind === "prose" ? (found.letter.answers?.[q.label] ?? "⚠ not written") :
+            "(skip)";
+          lines.push("", `**${q.label}**${q.required ? " *" : ""}`, "", v);
+        }
+        lines.push("", "## Cover letter", "", found.letter.body);
+        mkdirSync("jobs/packets/ats", { recursive: true });
+        const packet = `jobs/packets/ats/${row.id}.md`;
+        writeFileSync(packet, lines.join("\n") + "\n");
+        if (APPLY) {
+          await patchRow(row.id, {
+            applicationStatus: "HOLD",
+            holdReason: `Ashby blocks automated submission — paste-ready packet: ${packet}`,
+          });
+          ledger({ kind: "hold", crmId: row.id, name: row.name, detail: "ashby packet" });
+        }
+        console.log(`  ▣ ${row.name.slice(0, 60)} — packet ${packet}`);
+        continue;
+      }
       if (!found) {
         console.log(`  · ${row.name.slice(0, 60)} — not prepared`);
         continue;
@@ -591,6 +637,7 @@ async function submit(): Promise<void> {
         to: `ats:${company}`,
       });
       console.log("      ✓ submitted");
+      companiesThisRun.add(companyKey);
       done++;
     }
   } finally {

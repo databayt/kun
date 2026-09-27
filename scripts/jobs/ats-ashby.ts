@@ -229,37 +229,40 @@ async function fillOne(
   }
 }
 
+const ASHBY_DONE =
+  /application (was )?(successfully )?(submitted|received)|thank you for (applying|your application|your interest)|thanks for applying/i;
+const ASHBY_SPAM = /flagged as (possible )?spam/i;
+const ASHBY_BUSY = /updating your application|uploading files|try again when they.re finished/i;
+
 export async function submitAshby(page: Page): Promise<SubmitOutcome> {
-  await page
-    .getByRole("button", { name: /submit application/i })
-    .first()
-    .click();
-  try {
-    await page.waitForFunction(
-      () =>
-        /application (was )?(successfully )?(submitted|received)|thank you for (applying|your application|your interest)|thanks for applying/i.test(
-          document.body.innerText,
-        ) ||
-        /(is required|missing|invalid|flagged as spam|suspicious|try again)/i.test(
-          document.body.innerText,
-        ),
-      undefined,
-      { timeout: 45_000 },
-    );
-  } catch {
-    return { ok: false, reason: "no confirmation within 45s" };
+  // Files upload in the background after setInputFiles; submitting early is
+  // refused ("we're updating your application"). Let the network settle,
+  // and retry the click while Ashby says it is still busy.
+  await page.waitForLoadState("networkidle").catch(() => undefined);
+  await page.waitForTimeout(3_000);
+  for (let attempt = 0; attempt < 5; attempt++) {
+    await page.getByRole("button", { name: /submit application/i }).first().click();
+    try {
+      await page.waitForFunction(
+        () =>
+          /application (was )?(successfully )?(submitted|received)|thank you for (applying|your application|your interest)|thanks for applying|updating your application|is required|missing|invalid|flagged as spam|suspicious|try again/i.test(
+            document.body.innerText,
+          ),
+        undefined,
+        { timeout: 45_000 },
+      );
+    } catch {
+      return { ok: false, reason: "no confirmation within 45s" };
+    }
+    const body = await page.evaluate(() => document.body.innerText);
+    if (ASHBY_DONE.test(body)) return { ok: true };
+    if (ASHBY_SPAM.test(body)) return { ok: false, reason: "Ashby spam filter blocked the automated submission" };
+    if (ASHBY_BUSY.test(body)) {
+      await page.waitForTimeout(6_000);
+      continue;
+    }
+    const why = body.match(/[^\n]*(is required|missing|invalid|flagged as spam|suspicious|try again)[^\n]*/i)?.[0] ?? "unknown";
+    return { ok: false, reason: `form said: ${why.slice(0, 160)}` };
   }
-  const body = await page.evaluate(() => document.body.innerText);
-  if (
-    /application (was )?(successfully )?(submitted|received)|thank you for (applying|your application|your interest)|thanks for applying/i.test(
-      body,
-    )
-  ) {
-    return { ok: true };
-  }
-  const why =
-    body.match(
-      /[^\n]*(is required|missing|invalid|flagged as spam|suspicious|try again)[^\n]*/i,
-    )?.[0] ?? "unknown";
-  return { ok: false, reason: `form said: ${why.slice(0, 160)}` };
+  return { ok: false, reason: "files still uploading after 5 attempts" };
 }
