@@ -15,7 +15,7 @@ const REGISTRY = "jobs/variants.json";
 
 export interface Variant {
   id: string;
-  kind: "cv" | "letter" | "followup1" | "followup2";
+  kind: "cv" | "letter" | "speculative" | "followup1" | "followup2";
   lanes: string[];
   pdf?: string;
   source?: string;
@@ -87,6 +87,7 @@ function pick(
 export function pickVariants(
   crmCampaign: string | null,
   title: string,
+  source?: string | null,
 ): { lane: string; cv?: Variant; letter?: Variant } {
   const lane = CRM_TO_CAMPAIGN[crmCampaign ?? ""] ?? "kigali-web-developer";
   const all = loadVariants();
@@ -102,7 +103,7 @@ export function pickVariants(
   return {
     lane,
     cv: pick("cv", cvLane, all, counts),
-    letter: pick("letter", lane, all, counts),
+    letter: pick(source === "direct-approach" ? "speculative" : "letter", lane, all, counts),
   };
 }
 

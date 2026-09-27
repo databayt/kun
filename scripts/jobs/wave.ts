@@ -223,7 +223,7 @@ async function main(): Promise<void> {
   const texts = new Map<string, string | null>();
   for (const row of candidates) {
     const { role, company } = splitName(row.name);
-    const { lane, cv, letter } = pickVariants(row.campaign, role);
+    const { lane, cv, letter } = pickVariants(row.campaign, role, row.source);
     const url = row.jobUrl?.primaryLinkUrl ?? "";
     const text = await postingText(url);
     texts.set(row.id, text);

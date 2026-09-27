@@ -37,6 +37,7 @@ export interface BoardRow {
   touchNumber: number | null;
   holdReason: string | null;
   fingerprint: string | null;
+  source: string | null;
   updatedAt: string;
 }
 

@@ -254,18 +254,26 @@ async function main(): Promise<void> {
     const methods = new Map(
       items
         .filter((i) => i.applyMethod && i.title && i.company)
-        .map((i) => [generateJobFingerprint(i.title, i.company, clean(i).remoteType), i.applyMethod as string]),
+        .map((i) => [generateJobFingerprint(i.title, i.company, clean(i).remoteType), i]),
     );
     let filled = 0;
     for (const row of await listBoard()) {
       if (!row.fingerprint || !methods.has(row.fingerprint)) continue;
-      const fields = parseApplyMethod(methods.get(row.fingerprint));
+      const found = methods.get(row.fingerprint) as InboxItem;
+      const fields = parseApplyMethod(found.applyMethod);
       if (!fields.channel) continue;
       // Fill a gap, or upgrade a portal card once a posting turns out to name
       // an address — that is what makes it sendable by the loop.
       const upgrade = fields.channel === "EMAIL" && row.channel !== "EMAIL" && row.applicationStatus === "TO_APPLY";
       if (row.channel && !upgrade) continue;
-      await patchRow(row.id, fields);
+      // The gate checks the recipient against the card's page, so an upgraded
+      // card must point at the page where the address was published.
+      await patchRow(row.id, {
+        ...fields,
+        ...(upgrade && found.sourceUrl
+          ? { jobUrl: { primaryLinkUrl: found.sourceUrl, primaryLinkLabel: "", secondaryLinks: [] } }
+          : {}),
+      });
       filled++;
     }
     if (filled) console.log(`\nbackfilled channel/applyEmail on ${filled} existing board rows`);
