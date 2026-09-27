@@ -158,22 +158,22 @@ export async function fillAshby(page: Page, plan: FillPlan): Promise<string[]> {
       );
     }
   }
-  // Location autocomplete: type the city, take the Rwanda suggestion.
-  const loc = container(page, "_systemfield_location").locator("input").first();
-  if (
-    await page
-      .locator('[name="_systemfield_location"], [id="_systemfield_location"]')
-      .count()
-  ) {
+  // Location autocomplete: the input has no id, so find its field entry by
+  // the location question's label, type the city, take the Rwanda option.
+  const locQ = [...plan.answers.values()].find((x) => x.question.fields[0]?.type === "location")?.question;
+  if (locQ) {
     try {
-      await loc.click();
-      await loc.pressSequentially(plan.city.split(",")[0], { delay: 80 });
-      const opt = page
-        .getByRole("option")
-        .filter({ hasText: /rwanda/i })
-        .first();
-      await opt.waitFor({ timeout: 12_000 });
-      await opt.click();
+      const entry = page.locator('div[class*="fieldEntry"]').filter({ has: page.getByText(locQ.label, { exact: true }) }).first();
+      const input = entry.locator("input").first();
+      const opt = page.getByRole("option").filter({ hasText: /rwanda/i }).first();
+      // City-level fields take "Kigali"; country-level ones only "Rwanda".
+      for (const term of /country/i.test(locQ.label) ? ["Rwanda"] : [plan.city.split(",")[0], "Rwanda"]) {
+        await input.click();
+        await input.fill("");
+        await input.pressSequentially(term, { delay: 80 });
+        if (await opt.waitFor({ timeout: 6_000 }).then(() => true, () => false)) break;
+      }
+      await opt.click({ timeout: 4_000 });
     } catch {
       failed.push("location autocomplete");
     }

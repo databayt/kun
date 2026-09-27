@@ -170,6 +170,13 @@ export function answerQuestion(
       return { kind: "file", which: "cover_letter" };
     case "_systemfield_location":
       return { kind: "skip" }; // typed by the submitter (autocomplete)
+  }
+  // Abdout (2026-09-27): attach the databayt site and org wherever a form
+  // offers a free "other links / portfolio" slot, required or not.
+  if (/^(other|other links?|portfolio|website|personal website)$/i.test(label.trim()) && !field.type.startsWith("multi_value")) {
+    return { kind: "text", value: [profile.links.website, profile.links.githubOrg, profile.links.portfolio].filter(Boolean).join(" ") };
+  }
+  switch (field.name) {
     case "first_name":
       return { kind: "text", value: profile.identity.firstName };
     case "last_name":
@@ -290,7 +297,8 @@ export function answerQuestion(
       }
       return yesNo(field, yes);
     }
-    return null;
+    // No skill word matched: let the later rules try ("have you worked remotely").
+
   }
 
   // ── more plain facts (Ashby audit, 2026-09-27) ────────────────────────────
