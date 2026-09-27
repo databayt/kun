@@ -105,6 +105,11 @@ const FIELDS = [
       sel("OFFER", "Offer", "green", 4),
       sel("REJECTED", "Rejected", "red", 5),
       sel("ARCHIVED", "Archived", "gray", 6),
+      // The send loop (2026-09-27): QUEUED goes out at the next send window
+      // unless a human moves the card; HOLD needs Abdout; APPROVED is his yes.
+      sel("QUEUED", "Queued — sends next window", "sky", 7),
+      sel("HOLD", "Hold — needs you", "orange", 8),
+      sel("APPROVED", "Approved — send", "pink", 9),
     ],
   },
   {
@@ -173,6 +178,30 @@ const FIELDS = [
     icon: "IconFileDescription",
     description: "Role description, required skills, and the engine's reasoning.",
   },
+  // ── send-loop state (2026-09-27) — the board, not Neon, carries the loop,
+  // which keeps it clear of the prod enum drift in kun#152.
+  { name: "applyEmail", label: "Apply Email", type: "TEXT", icon: "IconMail", description: "Where the application goes, as stated on the posting." },
+  {
+    name: "channel",
+    label: "Channel",
+    type: "SELECT",
+    icon: "IconSend",
+    description: "How this one is applied to.",
+    options: [
+      sel("EMAIL", "Email", "blue", 0),
+      sel("PORTAL", "Portal", "purple", 1),
+      sel("PLATFORM", "Platform sign-up", "turquoise", 2),
+      sel("IN_PERSON", "In person", "green", 3),
+      sel("TENDER", "Tender portal", "red", 4),
+    ],
+  },
+  { name: "variant", label: "Variant", type: "TEXT", icon: "IconFlask", description: "CV + letter variant ids used, e.g. cv:web@1 letter:kigali-tech@1." },
+  { name: "waveId", label: "Wave", type: "TEXT", icon: "IconWaveSine", description: "The send wave (date) this went out in." },
+  { name: "appliedAt", label: "Applied At", type: "DATE_TIME", icon: "IconCalendarCheck" },
+  { name: "lastTouchAt", label: "Last Touch", type: "DATE_TIME", icon: "IconCalendarTime" },
+  { name: "responseAt", label: "Response At", type: "DATE_TIME", icon: "IconMessageReply" },
+  { name: "touchNumber", label: "Touch #", type: "NUMBER", icon: "IconHash", description: "1 = application, 2-3 = follow-ups." },
+  { name: "holdReason", label: "Hold Reason", type: "TEXT", icon: "IconAlertTriangle", description: "Why the loop stopped — what Abdout has to supply or decide." },
 ];
 
 const key = twentyKey("databayt");
