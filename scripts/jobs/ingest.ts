@@ -171,6 +171,14 @@ async function main(): Promise<void> {
     seenThisRun.add(fingerprint);
 
     const match = calculateDeterministicMatch(job, profile);
+    // A curated scan (a person or agent read the posting) always reaches the
+    // board; a regex adapter's find has to earn it, or the board fills with
+    // designers and ops roles that matched a tag.
+    const autoDiscovered = item.note?.startsWith("Auto-discovered") ?? false;
+    if (autoDiscovered && match.recommendation === "Low Probability") {
+      dropped.push(`low score ${match.overallScore}% (auto-discovered): ${job.title} @ ${job.company}`);
+      continue;
+    }
     const campaignId = item.campaign ?? evaluateCampaignMatches(job)[0] ?? "—";
     console.log(
       `${String(match.overallScore).padStart(4)}%  ${match.recommendation.padEnd(16)} ${campaignId.slice(0, 31).padEnd(31)} ${job.title.slice(0, 40)} @ ${job.company.slice(0, 24)}`,

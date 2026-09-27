@@ -22,7 +22,11 @@
     "test:watch": "vitest",
     "db:deploy": "prisma migrate deploy",
     "db:studio": "prisma studio",
-    "db:seed:jobs": "tsx scripts/seed-jobs.ts"
+    "db:seed:jobs": "tsx scripts/seed-jobs.ts",
+    "jobs:ingest": "tsx scripts/jobs/ingest.ts",
+    "jobs:discover": "node scripts/jobs/discover.mjs",
+    "jobs:queue": "node scripts/jobs/queue.mjs",
+    "jobs:mark": "tsx scripts/jobs/mark.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "^4.0.37",
