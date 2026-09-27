@@ -193,6 +193,7 @@ const FIELDS = [
       sel("PLATFORM", "Platform sign-up", "turquoise", 2),
       sel("IN_PERSON", "In person", "green", 3),
       sel("TENDER", "Tender portal", "red", 4),
+      sel("ATS", "ATS form (auto-submit)", "purple", 5),
     ],
   },
   { name: "variant", label: "Variant", type: "TEXT", icon: "IconFlask", description: "CV + letter variant ids used, e.g. cv:web@1 letter:kigali-tech@1." },
@@ -201,6 +202,7 @@ const FIELDS = [
   { name: "lastTouchAt", label: "Last Touch", type: "DATE_TIME", icon: "IconCalendarTime" },
   { name: "responseAt", label: "Response At", type: "DATE_TIME", icon: "IconMessageReply" },
   { name: "touchNumber", label: "Touch #", type: "NUMBER", icon: "IconHash", description: "1 = application, 2-3 = follow-ups." },
+  { name: "applyUrl", label: "Apply URL", type: "TEXT", icon: "IconForms", description: "The ATS application form the submitter fills (Greenhouse, Lever, Ashby)." },
   { name: "holdReason", label: "Hold Reason", type: "TEXT", icon: "IconAlertTriangle", description: "Why the loop stopped — what Abdout has to supply or decide." },
 ];
 

@@ -28,6 +28,7 @@ export interface BoardRow {
   jobUrl?: { primaryLinkUrl?: string } | null;
   assessment?: { markdown?: string } | null;
   applyEmail: string | null;
+  applyUrl: string | null;
   channel: string | null;
   variant: string | null;
   waveId: string | null;

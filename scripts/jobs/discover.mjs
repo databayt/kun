@@ -17,7 +17,7 @@
 //   ReliefWeb API — needs an approved appname (403 without one); request at
 //     https://apidoc.reliefweb.int/parameters#appname, then add an adapter.
 
-import { mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 
 import { extractApplyEmail } from "./lib/apply-email.mjs";
 
@@ -383,6 +383,99 @@ const ADAPTERS = {
         applyMethod: `portal:${url}`,
         rwandaEligible: "unverified",
       });
+    }
+    return { items, dropped };
+  },
+
+  /// The ATS lane: every Greenhouse, Lever and Ashby board in
+  /// jobs/ats-boards.json (seeded by ats-seed.mjs from 886 remote-first
+  /// companies). Precision over recall: software titles only, remote and
+  /// open to Rwanda, nothing that asks for US/UK/EU/Canada residence or
+  /// work authorisation. The submitter applies through the hosted form.
+  async ats() {
+    const items = [];
+    const dropped = [];
+    if (!existsSync("jobs/ats-boards.json")) return { items, dropped: ["ats: no jobs/ats-boards.json — run ats-seed.mjs"] };
+    const { boards } = JSON.parse(readFileSync("jobs/ats-boards.json", "utf-8"));
+    const TITLE = /software|full[- ]?stack|front[- ]?end|back[- ]?end|\bweb\b|react|node|typescript|javascript|product engineer|platform engineer|developer/i;
+    const NOT_TITLE = /\b(staff|principal|director|manager|head|vp|intern|ios|android|mobile|embedded|firmware|data scien|machine learning|\bml\b|security|sre|devops|qa|test|sales|support|designer|recruit)/i;
+    const PLACE_OK = /worldwide|anywhere|global|africa|emea|remote$|^remote\b(?!.*\b(us|usa|united states|canada|uk|united kingdom|latam|americas|apac|india|brazil|mexico|germany|france|spain|poland|portugal|netherlands|australia)\b)/i;
+    const PLACE_BAD = /\b(us|usa|u\.s\.|united states|canada|uk|united kingdom|latam|americas|north america|apac|india|brazil|mexico|germany|france|spain|poland|portugal|netherlands|ireland|australia|new york|san francisco|london|berlin|toronto)\b/i;
+    const TEXT_BAD = /(must|should) (be )?(based|located|reside|living) in (the )?(us|u\.s\.|united states|canada|uk|united kingdom|europe|eu|european union|north america)|authori[sz]ed to work in (the )?(us|u\.s\.|united states|uk|united kingdom|canada|eu)|(us|u\.s\.) citizen|green card|security clearance|eligible to work in (the )?(us|uk|eu|europe)/i;
+
+    for (const b of boards) {
+      let jobs = [];
+      try {
+        if (b.ats === "greenhouse") {
+          const d = await get(`https://boards-api.greenhouse.io/v1/boards/${b.token}/jobs?content=true`, { json: true });
+          jobs = (d.jobs ?? []).map((j) => ({
+            id: String(j.id),
+            title: j.title,
+            place: j.location?.name ?? "",
+            url: j.absolute_url,
+            applyUrl: `https://job-boards.greenhouse.io/embed/job_app?for=${b.token}&token=${j.id}`,
+            text: text(j.content ?? "").replace(/&lt;|&gt;|&[a-z]+;/g, " "),
+          }));
+        } else if (b.ats === "lever") {
+          const d = await get(`https://api.lever.co/v0/postings/${b.token}?mode=json`, { json: true });
+          jobs = (Array.isArray(d) ? d : []).map((j) => ({
+            id: j.id,
+            title: j.text,
+            place: `${j.categories?.location ?? ""} ${j.workplaceType ?? ""}`.trim(),
+            url: j.hostedUrl,
+            applyUrl: j.applyUrl,
+            text: `${j.descriptionPlain ?? ""} ${(j.lists ?? []).map((l) => text(l.content ?? "")).join(" ")}`,
+          }));
+        } else if (b.ats === "ashby") {
+          const d = await get(`https://api.ashbyhq.com/posting-api/job-board/${b.token}?includeCompensation=true`, { json: true });
+          jobs = (d.jobs ?? [])
+            .filter((j) => j.isListed !== false)
+            .map((j) => ({
+              id: j.id,
+              title: j.title,
+              place: [j.location, ...(j.secondaryLocations ?? []).map((x) => x.location)].filter(Boolean).join(" / ") + (j.isRemote ? " Remote" : ""),
+              url: j.jobUrl,
+              applyUrl: j.applyUrl ?? `${j.jobUrl}/application`,
+              text: j.descriptionPlain ?? "",
+              salary: j.compensation?.compensationTierSummary,
+            }));
+        }
+      } catch (err) {
+        dropped.push(`${b.ats}:${b.token} ${err.message.slice(0, 60)}`);
+        continue;
+      }
+      for (const j of jobs) {
+        if (!TITLE.test(j.title) || NOT_TITLE.test(j.title)) continue;
+        // Country-bound postings name the country in the title ("- India",
+        // "Armenia 🇦🇲"): unless it is Rwanda, it is not open to Abdout.
+        if (/[\u{1F1E6}-\u{1F1FF}]{2}/u.test(j.title) && !/🇷🇼/u.test(j.title)) continue;
+        if (/\b(india|armenia|brazil|mexico|argentina|colombia|chile|peru|poland|romania|ukraine|serbia|portugal|spain|germany|france|italy|netherlands|uk|usa|us|canada|philippines|pakistan|nigeria|kenya|egypt|morocco|s[ée]n[ée]gal|south africa|ghana|turkey|vietnam|indonesia|japan|korea|singapore|australia|latam|americas|apac)\b/i.test(j.title)) continue;
+        const place = j.place || "";
+        if (!/remote/i.test(`${place} ${j.title}`)) continue;
+        if (PLACE_BAD.test(place) && !/worldwide|anywhere|global|africa|emea/i.test(place)) continue;
+        if (!PLACE_OK.test(place.trim()) && !/worldwide|anywhere|africa|emea/i.test(place)) continue;
+        if (TEXT_BAD.test(j.text)) {
+          dropped.push(`residency/authorisation: ${j.title} @ ${b.company}`);
+          continue;
+        }
+        if (items.length >= Math.max(LIMIT, 400)) break;
+        items.push({
+          ...item({
+            title: j.title,
+            company: b.company,
+            location: place || "Remote",
+            remoteType: "remote",
+            employmentType: /contract|freelance/i.test(j.title) ? "contract" : "full_time",
+            url: j.url,
+            source: `ats-${b.ats}`,
+            campaign: "remote-web-developer-worldwide",
+            description: j.text.slice(0, 900),
+            salary: j.salary,
+          }),
+          applyMethod: `ats:${b.ats}:${j.applyUrl}`,
+          rwandaEligible: "unverified",
+        });
+      }
     }
     return { items, dropped };
   },

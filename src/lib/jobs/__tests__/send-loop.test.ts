@@ -226,3 +226,12 @@ describe("similar role", () => {
     expect(similarRole("IT Lead", "Finance Lead")).toBe(false);
   });
 });
+
+describe("send gate — ATS channel", () => {
+  it("does not demand an address or subject for a hosted form", () => {
+    const v = evaluateSendGate(
+      base({ channel: "ats", letter: { to: "", subject: "", body: base().letter.body }, postingText: "Technical Support Engineer at Wicloud." }),
+    );
+    expect(v.hard).toEqual([]);
+  });
+});
