@@ -134,16 +134,28 @@ must decide it regardless of margin.
 Leave alone what is not a printed grid: on 2 pages the Markdown "table" renders a
 cross DIAGRAM, where column direction is meaningless.
 
+## Where books live — stage, run, land
+
+Books live in the **catalog** repo (`~/catalog`, `databayt/catalog`) at
+`curricula/<cur>/<grade>/<subject>/`, which is also their CDN key under `catalog/`. That folder holds only
+canonical files, and the validator rejects pipeline scratch there. So the pipeline runs on a **staged copy** in
+the gitignored `.work/`, and only the outputs are landed back:
+
+```bash
+C=~/catalog/curricula/sd/g12/biology; W=~/catalog/.work/sd/g12/biology
+cd ~/catalog && pnpm assets pull sd/g12/biology       # binaries (pdf, pages) if not present
+mkdir -p $W && cp -Rc $C/ $W/                           # stage (APFS clone — instant)
+# run the workflow / scripts with book = $W
+cp -c $W/textbook.md $C/ && rsync -a $W/pages-md/ $C/pages-md/ && rsync -a $W/pages/ $C/pages/   # land
+pnpm assets lock && pnpm validate && pnpm index        # then commit on main
+```
+
 ## Upload (only when asked)
 
-`pnpm tsx scripts/upload-textbooks-all.ts --force --assets=textbook.md
---only=<slugs> --bucket=databayt-cdn`, then again without `--bucket`. Objects are
-`immutable, max-age=1y`: after overwriting a key, invalidate
-`/catalog/textbooks/<slug>/*` on CloudFront `E3PHDXTDSBCQSJ`. Verify over HTTPS,
-not the S3 API. **The reader serves the twin from the CDN, so a re-transcription
-is not live until this runs.**
-
-Then record: the grade table in `curriculum/<code>/TEXTBOOK_AUDIT.md`, the block
-ISSUE, and memory.
+From `~/catalog`: `pnpm assets push --apply` (new page renders / PDF), then
+`pnpm publish:cdn --apply` (textbook.md, pages-md). Both are additive. Replacing a key that is already live
+(a re-transcribed `textbook.md`) needs `--overwrite`, which also triggers the CloudFront invalidation, because catalog
+binaries are `immutable`. Verify over HTTPS. **The reader serves the twin from the CDN, so a repair is not live
+until this runs.** Then record: the book's `structure.json` history if it changed, the block ISSUE, memory.
 
 Convert textbooks: $ARGUMENTS

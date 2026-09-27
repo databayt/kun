@@ -27,8 +27,8 @@
  "books": [
   {
    "id": "sd-g12-biology",
-   "source": "/Users/abdout/hogwarts/curriculum/sd/g12/biology",
-   "pagesUrl": "https://cdn.databayt.org/catalog/textbooks/sd-g12-biology/pages/{n}.webp",
+   "source": "/Users/abdout/catalog/.work/sd/g12/biology",
+   "pagesUrl": "https://cdn.databayt.org/catalog/sd/g12/biology/pages/{n}.webp",
    "lang": "ar",
    "pdfMd5": "534d69d019cd32409a034ebeed7834ee",
    "renderWidth": 1000,

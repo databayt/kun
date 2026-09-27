@@ -56,6 +56,15 @@ Code Machine configuration and documentation (this repo).
 - **URL**: [github.com/databayt/kun](https://github.com/databayt/kun)
 - **Use For**: Claude Code team config, infrastructure docs
 
+### catalog
+
+Open curriculum catalog, shared by every app that teaches. Every curriculum is in one schema: Sudan, British, American, CBSE, IB DP and Cambridge IGCSE, down to grade, subject, chapter and lesson. It carries question banks, exams and textbook Markdown twins.
+
+- **URL**: [github.com/databayt/catalog](https://github.com/databayt/catalog)
+- **CDN**: `cdn.databayt.org/catalog/index.json`. The repo path is the CDN key (`curricula/<p>` ↔ `catalog/<p>`).
+- **Use For**: curriculum content, question banks, textbooks, and `@databayt/catalog` (key/URL builders + types)
+- **Rule**: `pnpm validate` is the gate. Binaries live on the CDN, pinned in `assets.lock.json`.
+
 ---
 
 ## Product Repositories

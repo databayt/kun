@@ -29,7 +29,7 @@ Pipeline per subject directory (a dir holding textbook.pdf, optionally structure
 Usage:
   textbook-md.py <subject-dir> [<subject-dir> ...] [--ocr auto|off|force] [--dpi 200]
                  [--psm 3] [--jobs 6] [--lang ara] [--keep-raw] [--quiet]
-  textbook-md.py curriculum/sd/g12/*/            # a whole grade
+  textbook-md.py .work/sd/g12/*/                 # a whole grade (staged copies, from ~/catalog)
 Exit code 0; one JSON line per subject on stdout (subject, quality, coverage, engine, bytes).
 
 Requires: python3 with PyMuPDF (pip install pymupdf), uv (for uvx), tesseract (+ tesseract-lang).

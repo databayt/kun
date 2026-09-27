@@ -7,9 +7,9 @@ in-app reader's "original page" view.
 
 Writes <dir>/pages/<N>.webp where N is the 1-based PDF page — the SAME number
 the Markdown twin's `<!-- page N -->` markers use — so the reader can put each
-page image beside its text. Existing files are kept unless --force. Upload with
-`aws s3 sync <dir>/pages s3://<bucket>/catalog/textbooks/<dbSlug>/pages/`
-(both buckets: databayt-cdn for cdn.databayt.org and the app bucket).
+page image beside its text. Existing files are kept unless --force. Land the
+pages in ~/catalog/curricula/<cur>/<grade>/<subject>/pages/, then from ~/catalog:
+`pnpm assets lock && pnpm assets push --apply` (key: catalog/<cur>/<grade>/<subject>/pages/<N>.webp).
 """
 import argparse, concurrent.futures, io, os, sys
 import fitz  # PyMuPDF

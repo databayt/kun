@@ -1,7 +1,7 @@
 {
   "$schema": "repository-registry-schema",
   "description": "Track all databayt organization repositories for deep reference",
-  "lastUpdated": "2026-07-02T00:00:00Z",
+  "lastUpdated": "2026-09-27",
   "organization": {
     "name": "databayt",
     "url": "https://github.com/databayt",
@@ -110,6 +110,34 @@
         "watchPaths": [
           ".claude/",
           "content/docs/"
+        ]
+      },
+      {
+        "id": "catalog",
+        "name": "Catalog",
+        "url": "https://github.com/databayt/catalog",
+        "local": "/Users/abdout/catalog",
+        "description": "Open curriculum catalog — every curriculum/grade/subject/chapter/lesson, question banks, exams and textbook twins in one schema; path == CDN key (curricula/<p> <-> cdn.databayt.org/catalog/<p>)",
+        "stack": [
+          "TypeScript 5",
+          "zod 4",
+          "AWS S3 + CloudFront"
+        ],
+        "purpose": [
+          "curriculum",
+          "content",
+          "question-bank",
+          "textbooks",
+          "cdn"
+        ],
+        "agent": null,
+        "priority": 1,
+        "status": "active",
+        "lastSync": null,
+        "watchPaths": [
+          "curricula/",
+          "schema/",
+          "vocab/"
         ]
       }
     ],
