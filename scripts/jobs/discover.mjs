@@ -123,6 +123,25 @@ function item({ title, company, location, url, source, campaign, deadline, descr
   };
 }
 
+
+/// A location string is open to someone in Kigali when, with "remote" and
+/// punctuation removed, nothing but an open region is left.
+export function openToRwanda(place, text = "") {
+  const rest = place
+    .toLowerCase()
+    .replace(/\b(remote|fully|100%|hybrid|or|and|work from home|wfh|distributed|based)\b/g, " ")
+    .replace(/[()\[\],/|;:.\-–—]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!rest) return true;
+  // Naming an open region anywhere ("Americas / EMEA") admits Kigali.
+  if (/\b(emea|africa|worldwide|anywhere|global|rwanda)\b/.test(rest)) return true;
+  const OPEN = /^(worldwide|anywhere|global|globally|international|emea|africa|east africa|rwanda|kigali|earth|any location|(worldwide|anywhere|global|emea|africa|rwanda|kigali)( .*)?)$/;
+  if (OPEN.test(rest) && !/\b(us|usa|canada|uk|latam|americas|apac|india)\b/.test(rest)) return true;
+  if (/^(europe|eu|european union|cet|cest)( time ?zones?)?$/.test(rest)) return /time ?zones?/i.test(`${place} ${text}`);
+  return false;
+}
+
 // ── adapters ─────────────────────────────────────────────────────────────────
 
 const ADAPTERS = {
@@ -456,6 +475,10 @@ const ADAPTERS = {
         // "Playa Vista, CA or Remote": a US city/state code means US remote.
         if (/,\s?(A[LKZR]|C[AOT]|D[EC]|FL|GA|HI|I[ADLN]|K[SY]|LA|M[ADEINOST]|N[CDEHJMVY]|O[HKR]|PA|RI|S[CD]|T[NX]|UT|V[AT]|W[AIVY])\b/.test(place) && !/worldwide|anywhere|global|africa|emea/i.test(place)) continue;
         if (!PLACE_OK.test(place.trim()) && !/worldwide|anywhere|africa|emea/i.test(place)) continue;
+        // "<Country> Remote" means resident in that country. Only a bare
+        // Remote or an open region survives; Europe only when the posting says
+        // it hires by time zone (Kigali is UTC+2).
+        if (!openToRwanda(place, j.text)) continue;
         if (TEXT_BAD.test(j.text)) {
           dropped.push(`residency/authorisation: ${j.title} @ ${b.company}`);
           continue;

@@ -32,6 +32,7 @@ export interface AtsProfile {
     city: string;
     country: string;
     timezone: string;
+    passportCountry?: string;
   };
   links: {
     linkedin: string | null;
@@ -89,7 +90,7 @@ const pick = (
 };
 
 const YES = /^yes\b/i;
-const NO = /^no\b/i;
+const NO = /^(no|not yet|never|none)\b/i;
 
 /// A select of numeric ranges ("0-3 years", "4-6", "7 or more") → the one containing n.
 export function rangeOption(
@@ -129,7 +130,7 @@ function countryIn(
   if (/\b(eu|europe|european)\b/i.test(label)) return "eu";
   if (/canada/i.test(label)) return "canada";
   if (
-    /country (of|where you) (residence|reside|live)|where you (currently )?(live|reside)/i.test(
+    /country (of|where you) (residence|reside|live)|where you (currently )?(live|reside)|country you (are|currently) (based|live|reside|located)/i.test(
       label,
     )
   )
@@ -156,6 +157,19 @@ export function answerQuestion(
 
   // ── standard fields, by field name ─────────────────────────────────────────
   switch (field.name) {
+    // Ashby's system fields
+    case "_systemfield_name":
+      return { kind: "text", value: profile.identity.fullName };
+    case "_systemfield_email":
+      return { kind: "text", value: profile.identity.email };
+    case "_systemfield_phone":
+      return { kind: "text", value: profile.identity.phone };
+    case "_systemfield_resume":
+      return { kind: "file", which: "resume" };
+    case "_systemfield_cover_letter":
+      return { kind: "file", which: "cover_letter" };
+    case "_systemfield_location":
+      return { kind: "skip" }; // typed by the submitter (autocomplete)
     case "first_name":
       return { kind: "text", value: profile.identity.firstName };
     case "last_name":
@@ -225,7 +239,7 @@ export function answerQuestion(
     return { kind: "text", value: profile.work.currentCompany };
   if (/current (title|role|position)/i.test(L))
     return { kind: "text", value: profile.work.currentTitle };
-  if (/time ?zone/i.test(L) && !isSelect)
+  if (/time ?zone/i.test(L) && !isSelect && field.type !== "boolean" && !/^(are|can|do|will|is)\b/i.test(label))
     return { kind: "text", value: profile.identity.timezone };
 
   // ── where he lives, asked as "do you reside / are you based in X?" ─────────
@@ -279,6 +293,29 @@ export function answerQuestion(
     return null;
   }
 
+  // ── more plain facts (Ashby audit, 2026-09-27) ────────────────────────────
+  if (/passport country|country of (citizenship|nationality)|nationality/i.test(L) && !isSelect) return { kind: "text", value: profile.identity.passportCountry ?? "Sudan" };
+  if (/^phone( number)?$|mobile( number)?|phone number/i.test(L) && !isSelect) return { kind: "text", value: profile.identity.phone };
+  if (/where are you (currently )?(located|based)|where do you (currently )?(live|reside)/i.test(L) && !isSelect) return { kind: "text", value: `${profile.identity.city}, ${profile.identity.country}` };
+  if (/famil(y|ial) relationships? with (current|any)/i.test(L)) return yesNo(field, false);
+  if (/worked remotely|remote (work )?experience|full-time remote/i.test(L) && (field.type === "boolean" || isSelect)) return yesNo(field, true);
+  if (/independent contractor|as a contractor|contractor (arrangement|basis)/i.test(L)) {
+    if (isSelect) {
+      const o = pick(field.values, /^yes$/i, /^yes\b/i);
+      return o ? { kind: "select", option: o } : null;
+    }
+    return yesNo(field, true);
+  }
+  if (/link to (a |your )?(code sample|project|repo|github|portfolio)|code sample/i.test(L) && !isSelect) return { kind: "text", value: profile.links.githubOrg ?? profile.links.github };
+  if (/minimum of (\d+)\+? years/i.test(L) && (isSelect || field.type === "boolean")) {
+    const need = Number(L.match(/minimum of (\d+)/)![1]);
+    return yesNo(field, profile.work.yearsSoftwareProfessional >= need);
+  }
+  // Authorisation for a list of named countries that are not Rwanda/Sudan: no.
+  if (/(legally )?work (for any employer )?in (either )?/i.test(L) && /\b(france|belgium|spain|germany|netherlands|portugal|italy|poland|israel|india|brazil|mexico|singapore|australia|japan|sweden|norway|denmark|finland|ireland|austria|switzerland|czech|hungary|romania|greece|uk|united kingdom|usa|united states|canada)\b/i.test(L) && !/rwanda|sudan/i.test(L)) {
+    return yesNo(field, false);
+  }
+
   // ── conditional follow-ups ("If you answered yes…") — N/A, before any rule
   //    that would read the words inside them
   if (
@@ -294,6 +331,13 @@ export function answerQuestion(
   if (atLeast && /experience|years/.test(L) && (field.type === "boolean" || isSelect || /^(do|have|are)/i.test(label))) {
     const need = Number(atLeast[1] ?? atLeast[2]);
     return yesNo(field, profile.work.yearsSoftwareProfessional >= need);
+  }
+
+  // ── "are you in / can you work in X time zone?" — Kigali is UTC+2 ────────
+  if (/time ?zone|working hours|business hours/i.test(L) && (field.type === "boolean" || isSelect || /^(are|can|do|will)/i.test(label))) {
+    if (/europe|european|emea|cet|cest|eet|gmt\s*\+|utc\s*\+\s*[0-3]\b|africa/i.test(L)) return yesNo(field, true);
+    if (/overlap/i.test(L)) return yesNo(field, true); // he states full EU / partial US-East overlap
+    if (/\b(pacific|pst|pt|mountain|central time|cst|eastern|est|et|us|american|apac|asia|australia)\b/i.test(L)) return yesNo(field, false);
   }
 
   // ── work authorisation & sponsorship ───────────────────────────────────────
@@ -505,7 +549,7 @@ export function answerQuestion(
   if (
     !isSelect &&
     (field.type === "textarea" ||
-      /why|tell us|describe|what (excites|interests|draws)|motivat|anything else|additional information|cover letter|about yourself|project you/i.test(
+      /why|tell us|describe|what (excites|interests|draws)|motivat|anything else|additional information|cover letter|about yourself|project you|have you built|share (a|an|your)|example of/i.test(
         L,
       ))
   ) {

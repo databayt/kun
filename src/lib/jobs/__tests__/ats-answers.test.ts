@@ -244,3 +244,16 @@ describe("ATS answers — the Comet form", () => {
     expect(answerQuestion({ label: "Location (City)", required: true, fields: [{ name: "candidate-location", type: "location" }] }, profile, ctx)).toEqual({ kind: "skip" });
   });
 });
+
+describe("ATS answers — Ashby forms", () => {
+  const bool = (label: string): AtsQuestion => ({ label, required: true, fields: [{ name: "b", type: "boolean" }] });
+  it("fills Ashby system fields", () => {
+    expect(answerQuestion({ label: "Name", required: true, fields: [{ name: "_systemfield_name", type: "input_text" }] }, profile, ctx)).toEqual({ kind: "text", value: "Osman Abdout" });
+    expect(answerQuestion({ label: "Resume", required: true, fields: [{ name: "_systemfield_resume", type: "input_file" }] }, profile, ctx)).toEqual({ kind: "file", which: "resume" });
+  });
+  it("answers time-zone and residence questions", () => {
+    expect(answerQuestion(bool("Are you in an European time zone?"), profile, ctx)).toEqual({ kind: "check", value: true });
+    expect(answerQuestion(bool("Are you legally authorized to work in the country you are based in?"), profile, ctx)).toEqual({ kind: "check", value: true });
+    expect(answerQuestion(bool("Can you work US Pacific time zone hours?"), profile, ctx)).toEqual({ kind: "check", value: false });
+  });
+});

@@ -45,6 +45,7 @@ import {
   parseGreenhouse,
   submitGreenhouse,
 } from "./ats-greenhouse";
+import { ashbyQuestions, fillAshby, parseAshby, submitAshby } from "./ats-ashby";
 import { sentToday } from "./send";
 import { pickVariants } from "./variants";
 import { contactState, pdfPages, postingText, splitName } from "./wave";
@@ -64,8 +65,28 @@ const facts = JSON.parse(readFileSync("jobs/facts.json", "utf-8")) as {
   numbers: string[];
 };
 
-const isGreenhouse = (r: BoardRow) =>
-  !!r.applyUrl && /greenhouse\.io\/embed\/job_app/.test(r.applyUrl);
+type Provider = "greenhouse" | "ashby";
+
+/// Which hosted form a card's apply URL is. Lever waits for its submitter.
+const providerOf = (r: BoardRow): Provider | null =>
+  !r.applyUrl
+    ? null
+    : /greenhouse\.io\/embed\/job_app/.test(r.applyUrl)
+      ? "greenhouse"
+      : /jobs\.ashbyhq\.com\//.test(r.applyUrl)
+        ? "ashby"
+        : null;
+const isGreenhouse = (r: BoardRow) => providerOf(r) !== null;
+
+async function questionsFor(r: BoardRow): Promise<AtsQuestion[] | null> {
+  const url = r.applyUrl as string;
+  if (providerOf(r) === "greenhouse") {
+    const gh = parseGreenhouse(url);
+    return gh ? greenhouseQuestions(gh.token, gh.id) : null;
+  }
+  const a = parseAshby(url);
+  return a ? ashbyQuestions(a.org, a.id) : null;
+}
 
 interface AtsRequest {
   crmId: string;
@@ -178,15 +199,14 @@ async function prepare(): Promise<void> {
         (b.engineScore ?? 0) - (a.engineScore ?? 0),
     )
     .slice(0, limit);
-  console.log(`ATS prepare ${date}: ${cards.length} Greenhouse card(s)\n`);
+  console.log(`ATS prepare ${date}: ${cards.length} ATS card(s) (Greenhouse + Ashby)\n`);
 
   const requests: AtsRequest[] = [];
   const plans = new Map<string, ReturnType<typeof plan>>();
   const texts = new Map<string, string | null>();
   for (const row of cards) {
-    const gh = parseGreenhouse(row.applyUrl as string);
     const { role, company } = splitName(row.name);
-    const questions = gh ? await greenhouseQuestions(gh.token, gh.id) : null;
+    const questions = await questionsFor(row);
     if (!questions) {
       await patchRow(row.id, {
         applicationStatus: "HOLD",
@@ -460,9 +480,8 @@ async function submit(): Promise<void> {
         console.log(`  · ${row.name.slice(0, 60)} — not prepared`);
         continue;
       }
-      const gh = parseGreenhouse(row.applyUrl as string);
       const { role, company } = splitName(row.name);
-      const questions = gh ? await greenhouseQuestions(gh.token, gh.id) : null;
+      const questions = await questionsFor(row);
       if (!questions) {
         await patchRow(row.id, {
           applicationStatus: "HOLD",
@@ -490,7 +509,9 @@ async function submit(): Promise<void> {
         waitUntil: "networkidle",
         timeout: 60_000,
       });
-      const failed = await fillGreenhouse(page, {
+      const provider = providerOf(row);
+      const fill = provider === "ashby" ? fillAshby : fillGreenhouse;
+      const failed = await fill(page, {
         answers: p.answers,
         prose: found.letter.answers ?? {},
         resumePath: found.req.cvPdf,
@@ -529,7 +550,8 @@ async function submit(): Promise<void> {
         await page.close();
         continue;
       }
-      const outcome = await submitGreenhouse(page, codeFetcher(company, mailIds()));
+      const outcome =
+        provider === "ashby" ? await submitAshby(page) : await submitGreenhouse(page, codeFetcher(company, mailIds()));
       await page.screenshot({
         path: join(found.dir, `${row.id}.ats-result.png`),
         fullPage: true,
