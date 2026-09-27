@@ -56,22 +56,44 @@ let last = 0;
 async function call<T>(
   path: string,
   init: { method?: string; body?: unknown } = {},
+  attempt = 1,
 ): Promise<T> {
   const wait = SPACING_MS - (Date.now() - last);
   if (wait > 0) await new Promise((r) => setTimeout(r, wait));
   last = Date.now();
-  const res = await fetch(`${API}${path}`, {
-    method: init.method ?? "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey()}`,
-    },
-    body: init.body === undefined ? undefined : JSON.stringify(init.body),
-    signal: AbortSignal.timeout(30_000),
-  });
-  const body = (await res.json().catch(() => ({}))) as T & {
-    messages?: string[];
-  };
+  let res: Response;
+  try {
+    res = await fetch(`${API}${path}`, {
+      method: init.method ?? "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey()}`,
+      },
+      body: init.body === undefined ? undefined : JSON.stringify(init.body),
+      signal: AbortSignal.timeout(30_000),
+    });
+  } catch (err) {
+    // The Mac-hosted CRM drops a socket now and then (UND_ERR_SOCKET mid-body);
+    // a retry is cheap, a dead wave is not.
+    if (attempt >= 4) throw err;
+    await new Promise((r) => setTimeout(r, 1000 * 2 ** attempt));
+    return call<T>(path, init, attempt + 1);
+  }
+  if ((res.status === 429 || res.status >= 500) && attempt < 4) {
+    await new Promise((r) => setTimeout(r, 1000 * 2 ** attempt));
+    return call<T>(path, init, attempt + 1);
+  }
+  let body: T & { messages?: string[] };
+  try {
+    body = (await res.json()) as T & { messages?: string[] };
+  } catch (err) {
+    if (attempt < 4 && init.method === undefined) {
+      await new Promise((r) => setTimeout(r, 1000 * 2 ** attempt));
+      return call<T>(path, init, attempt + 1);
+    }
+    if (!res.ok) throw err;
+    body = {} as T & { messages?: string[] };
+  }
   if (!res.ok)
     throw new Error(
       `Twenty ${res.status} ${path}: ${JSON.stringify(body).slice(0, 200)}`,

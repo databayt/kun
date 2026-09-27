@@ -32,7 +32,7 @@ import {
 import { kigaliNow, killSwitchOn, loadConfig, todaysCap } from "./config";
 import { openDb } from "./engine";
 import { notify } from "./notify";
-import { pdfPages, postingText, recentlyContacted, splitName } from "./wave";
+import { contactState, pdfPages, postingText, splitName } from "./wave";
 
 const args = process.argv.slice(2);
 const APPLY = args.includes("--apply");
@@ -248,6 +248,11 @@ async function main(): Promise<void> {
       continue;
     }
 
+    const contact = contactState(fresh, board);
+    if (contact === "wait") {
+      console.log(`  · ${row.name.slice(0, 60)} — ${company} got another application in the last 24h, waits`);
+      continue;
+    }
     const approved = fresh.applicationStatus === "APPROVED";
     // The veto window: a QUEUED card must have sat on the board (and in the
     // digest) for vetoHours before it can go — a Mac that woke late does not
@@ -270,7 +275,7 @@ async function main(): Promise<void> {
       postingText: await postingText(fresh.jobUrl?.primaryLinkUrl),
       deadline: fresh.deadline?.slice(0, 10) ?? null,
       today: date,
-      recentlyContacted: recentlyContacted(fresh, board),
+      recentlyContacted: contact === "repeat",
       allowedNumbers: facts.numbers,
       attachment: {
         exists: existsSync(found.req.cvPdf),

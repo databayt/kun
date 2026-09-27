@@ -120,6 +120,7 @@ export function evaluateSendGate(input: GateInput): GateVerdict {
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(letter.to))
     hard.push(`bad address "${letter.to}"`);
   if (!letter.subject.trim()) hard.push("empty subject");
+  if (/\w\+\w|%[0-9a-f]{2}/i.test(letter.subject)) hard.push(`malformed subject "${letter.subject}"`);
   if (PLACEHOLDER.test(letter.body) || PLACEHOLDER.test(letter.subject))
     hard.push("placeholder text left in");
   const count = words(letter.body).length;

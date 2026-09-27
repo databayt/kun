@@ -33,6 +33,20 @@ on run argv
 		-- Mail uploads the attachment asynchronously; sending too early drops it.
 		delay 3
 		send msg
+		-- Outlook.com sync keeps an autosaved copy in Drafts after the send;
+		-- remove it so the mailbox holds each application once, in Sent.
+		delay 8
+		try
+			repeat with acct in accounts
+				if (email addresses of acct) contains fromAddr then
+					repeat with mb in mailboxes of acct
+						if name of mb is in {"Drafts", "Draft"} then
+							delete (messages of mb whose subject is subj)
+						end if
+					end repeat
+				end if
+			end repeat
+		end try
 	end tell
 	return "sent " & toAddr
 end run

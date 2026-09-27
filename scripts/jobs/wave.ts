@@ -92,24 +92,35 @@ export function pdfPages(path: string): number {
 }
 
 /// Anything sent to the same company or mail domain in the last 30 days.
-export function recentlyContacted(
+/// Contact with the same company (or its mail domain) that has already gone
+/// out. The same role within 30 days is a repeat — HOLD. A different role at
+/// the same company is legitimate but waits a day, so one employer never gets
+/// several applications in one sitting.
+export function contactState(
   row: BoardRow,
   all: BoardRow[],
   now = Date.now(),
-): boolean {
-  const { company } = splitName(row.name);
+): "repeat" | "wait" | null {
+  const { company, role } = splitName(row.name);
   const domain = row.applyEmail?.split("@")[1];
   const freeMail = /gmail|hotmail|outlook|yahoo|qq\.com|icloud/i;
-  return all.some(
-    (o) =>
-      o.id !== row.id &&
-      o.appliedAt &&
-      now - new Date(o.appliedAt).getTime() < 30 * 86_400_000 &&
-      (splitName(o.name).company.toLowerCase() === company.toLowerCase() ||
-        (!!domain &&
-          !freeMail.test(domain) &&
-          o.applyEmail?.split("@")[1] === domain)),
-  );
+  let state: "repeat" | "wait" | null = null;
+  for (const o of all) {
+    if (o.id === row.id || !o.appliedAt) continue;
+    const age = now - new Date(o.appliedAt).getTime();
+    const sameCompany =
+      splitName(o.name).company.toLowerCase() === company.toLowerCase() ||
+      (!!domain && !freeMail.test(domain) && o.applyEmail?.split("@")[1] === domain);
+    if (!sameCompany) continue;
+    if (splitName(o.name).role.toLowerCase() === role.toLowerCase() && age < 30 * 86_400_000) return "repeat";
+    if (age < 86_400_000) state = "wait";
+  }
+  return state;
+}
+
+/// Subjects copied out of a posting can arrive URL-encoded ("Forum+Freelancer").
+export function cleanSubject(subject: string): string {
+  return subject.replace(/(\w)\+(?=\w)/g, "$1 ").replace(/%20/g, " ").replace(/\s+/g, " ").trim();
 }
 
 interface Request {
@@ -259,6 +270,10 @@ async function main(): Promise<void> {
         subject: string;
         body: string;
       };
+      if (cleanSubject(letter.subject) !== letter.subject) {
+        letter.subject = cleanSubject(letter.subject);
+        writeFileSync(req.out, JSON.stringify(letter, null, 2));
+      }
       verdict = evaluateSendGate({
         letter,
         company: req.company,
@@ -266,7 +281,7 @@ async function main(): Promise<void> {
         postingText: texts.get(req.crmId) ?? null,
         deadline: row.deadline?.slice(0, 10) ?? null,
         today: date,
-        recentlyContacted: recentlyContacted(row, board),
+        recentlyContacted: contactState(row, board) === "repeat",
         allowedNumbers: facts.numbers,
         attachment: {
           exists: existsSync(req.cvPdf),
