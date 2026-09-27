@@ -12,6 +12,8 @@
 #   ≥07:00 daily       discover + ingest                 0 tokens
 #   ≥07:00 Mon–Fri     wave: tailor + gate → QUEUED/HOLD  claude -p (Max)
 #   ≥10:00 Mon–Fri     send, every tick until 17:00       0 tokens, capped
+#   ≥07:00 daily       ATS prepare: form answers + letters   claude -p (Max)
+#   09:00–20:00        ATS submit, ≤8 per tick, total cap 100/day
 #   08:00–21:00        inbox: read + classify replies     0 tokens
 #   ≥16:00 Mon–Fri     follow-ups (templated) + archive   0 tokens
 #   Fri ≥17:00         learn --propose --send             claude -p (Max)
@@ -112,7 +114,7 @@ case "$MODE" in
     --status)
         if launchctl print "gui/$(id -u)/$PLIST_LABEL" >/dev/null 2>&1; then echo "armed ($PLIST_LABEL, every 30 min)"; else echo "not armed"; fi
         [ -f "$REPO/jobs/.send-off" ] && echo "⛔ sending paused (jobs/.send-off)"
-        for s in discover wave digest followup learn; do printf "  %-9s %s\n" "$s" "$(cat "$STATE/$s" 2>/dev/null || echo never)"; done
+        for s in discover wave ats-prepare digest followup learn; do printf "  %-9s %s\n" "$s" "$(cat "$STATE/$s" 2>/dev/null || echo never)"; done
         [ -f "$LOG_FILE" ] && tail -8 "$LOG_FILE"
         ;;
     --tick)
@@ -142,6 +144,15 @@ case "$MODE" in
         fi
         if weekday && [ "$HOUR" -ge 10 ] && [ "$HOUR" -lt 17 ]; then
             run send pnpm -s jobs:send --apply --limit 10
+        fi
+        # ATS lane (Abdout, 2026-09-27: auto-submit portal forms toward
+        # 100/day): prepare once a day after discovery, then submit a few per
+        # tick through the working day. The daily total cap is in config.
+        if [ "$HOUR" -ge 7 ] && done_today discover && ! done_today ats-prepare; then
+            run ats-prepare pnpm -s jobs:ats prepare --limit 80 && stamp ats-prepare
+        fi
+        if [ "$HOUR" -ge 9 ] && [ "$HOUR" -lt 20 ]; then
+            run ats-submit pnpm -s jobs:ats submit --apply --limit 8
         fi
         if [ "$HOUR" -ge 8 ] && [ "$HOUR" -lt 22 ]; then
             run inbox pnpm -s jobs:inbox
