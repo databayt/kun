@@ -19,8 +19,10 @@ const OFFER =
   /(pleased|happy|delighted) to offer|offer letter|job offer|we would like to offer you|formal offer/i;
 const REJECTION =
   /unfortunately|regret to inform|not (be )?moving forward|not to proceed|will not be proceeding|other candidates|not been (selected|successful|shortlisted)|position has (been|now been) filled|decided to pursue|no longer (being )?considered/i;
+// An invitation, not a mention: acknowledgements routinely describe "our
+// interview process" and "next steps" (three were misread on 2026-09-27).
 const INTERVIEW =
-  /\binterview\b|shortlisted|next (stage|step|round)|schedule (a|an)? ?(call|meeting|chat)|your availability|available (for|to) (a )?(call|meeting|chat)|calendly\.com|technical (test|assessment)|assessment link|take[- ]home/i;
+  /invite you (to|for) (an? |the )?(interview|call|chat|conversation|screen|meeting)|(like|love|want) to (schedule|set up|book|arrange) (an? )?(interview|call|time|chat|meeting)|please (book|schedule|pick|select) (a )?(time|slot)|calendly\.com|cal\.com\/|goodtime\.io|your availability (for|to)|(like|love) to (speak|talk|chat|meet) with you|move (you )?forward to the next (stage|step|round)|technical (test|assessment|challenge) (link|invitation)|take[- ]home (assignment|challenge) (is )?attached/i;
 const ACK =
   /received your application|thank you for (applying|your application|your interest)|application (has been|was) received|we will review your application|auto(matic|mated)?[- ]?(reply|response)|out of (the )?office|do not reply to this/i;
 const NOREPLY_SENDER =
@@ -32,6 +34,9 @@ export function classifyReply({ from, subject, body }: ReplyInput): ReplyKind {
   const rejection = REJECTION.test(text);
   const interview = INTERVIEW.test(text);
   const ack = ACK.test(text);
+  // An application-received subject is an acknowledgement unless the body
+  // actually invites him to something.
+  const ackSubject = /thank you for (applying|your application)|received your application|application (received|confirmation)|we.ve received|has received your application/i.test(subject);
 
   if (
     /mailer-daemon|postmaster|delivery status notification|undeliverable/i.test(
@@ -43,6 +48,7 @@ export function classifyReply({ from, subject, body }: ReplyInput): ReplyKind {
   if (offer) return "offer";
   // "we will not invite you to interview" is a rejection that says interview.
   if (rejection) return "rejection";
+  if (ackSubject && !interview) return "ack";
   if (interview) return "interview";
   if (ack || NOREPLY_SENDER.test(from)) return "ack";
   // A person wrote back and said none of the above — a question, a request

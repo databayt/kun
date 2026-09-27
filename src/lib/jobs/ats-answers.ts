@@ -196,6 +196,8 @@ export function answerQuestion(
       return { kind: "skip" }; // the file upload covers it
   }
   if (field.type === "input_hidden") return { kind: "skip" };
+  // Honeypots ("Leave this field blank") exist to catch bots: never fill them.
+  if (/leave (this|the) (field )?(blank|empty)|do not (fill|complete|enter)|if you are (a )?human/i.test(label)) return { kind: "skip" };
   // The location autocomplete is typed by the submitter itself (Google Places).
   if (field.type === "location" || field.name === "candidate-location") return { kind: "skip" };
 

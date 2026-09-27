@@ -75,7 +75,16 @@ async function main(): Promise<void> {
     for (const r of queued.slice(0, 12))
       lines.push(`• ${short(r)} — <${boardUrl(r.id)}|card>`);
   }
-  const hold = by("HOLD");
+  // Portal packets (Ashby/Lever block automated submits) are their own list:
+  // they need a two-minute paste, not a decision.
+  const packets = by("HOLD").filter((r) => /paste-ready packet/.test(r.holdReason ?? ""));
+  if (packets.length) {
+    lines.push(`\n*Paste & submit (${packets.length} portal packets in jobs/packets/ats) — best first:*`);
+    for (const r of packets.sort((a, b) => (b.engineScore ?? 0) - (a.engineScore ?? 0)).slice(0, 6)) {
+      lines.push(`• ${short(r)} — ${r.applyUrl ?? ""}`);
+    }
+  }
+  const hold = by("HOLD").filter((r) => !/paste-ready packet/.test(r.holdReason ?? ""));
   if (hold.length) {
     lines.push(`\n*Needs you (${hold.length}) — fix, then move to Approved:*`);
     for (const r of hold.slice(0, 10))

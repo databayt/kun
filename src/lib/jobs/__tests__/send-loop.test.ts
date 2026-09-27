@@ -235,3 +235,20 @@ describe("send gate — ATS channel", () => {
     expect(v.hard).toEqual([]);
   });
 });
+
+describe("reply classifier — acknowledgements that mention interviews", () => {
+  it("keeps 'thank you for applying' as ack even when it describes the process", () => {
+    expect(
+      classifyReply({
+        from: "no-reply@us.greenhouse-mail.io",
+        subject: "Fingerprint Has Received Your Application - Thank You!",
+        body: "Our team will review your application. If selected, you will move to the next steps of our interview process.",
+      }),
+    ).toBe("ack");
+  });
+  it("still catches a real invitation", () => {
+    expect(
+      classifyReply({ from: "recruiter@acme.com", subject: "Re: your application", body: "We'd like to invite you to an interview. Please book a time: https://calendly.com/acme/30min" }),
+    ).toBe("interview");
+  });
+});
