@@ -68,6 +68,8 @@ const STATUS_OPTION: Record<string, string> = {
   offer: "OFFER",
   rejected: "REJECTED",
   withdrawn: "ARCHIVED",
+  ghosted: "ARCHIVED",
+  archived: "ARCHIVED",
 };
 
 export function crmStatusFor(status: string): string | undefined {

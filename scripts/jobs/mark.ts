@@ -18,6 +18,26 @@ import type { JobOpportunityStatus } from "@/generated/prisma/client";
 
 import { openDb } from "./engine";
 
+/// Prod Neon's JobOpportunityStatus enum holds 9 of the schema's 18 values —
+/// the models exist without the migration that would have grown it (kun#152).
+/// Until that migration lands, store the nearest value the database accepts;
+/// the board keeps the precise status.
+const NEON_SAFE: Record<string, JobOpportunityStatus> = {
+  needs_review: "analyzed",
+  preparing: "qualified",
+  ready_to_apply: "qualified",
+  response: "applied",
+  screen: "interview",
+  technical_round: "interview",
+  final_round: "interview",
+  withdrawn: "archived",
+  ghosted: "archived",
+};
+
+function neonStatus(status: string): JobOpportunityStatus {
+  return NEON_SAFE[status] ?? (status as JobOpportunityStatus);
+}
+
 async function main(): Promise<void> {
   const [crmId, status, ...rest] = process.argv.slice(2);
   const note = rest.join(" ") || undefined;
@@ -35,7 +55,7 @@ async function main(): Promise<void> {
   const db = openDb();
   const { count } = await db.jobOpportunity.updateMany({
     where: { twentyOpportunityId: crmId },
-    data: { status: status as JobOpportunityStatus },
+    data: { status: neonStatus(status) },
   });
   console.log(
     count
