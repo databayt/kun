@@ -1,4 +1,7 @@
 {
+  "agentPushNotifEnabled": true,
+  "inputNeededNotifEnabled": true,
+  "$push_comment": "Mirrors settings.json (2026-09-27): mobile push for Remote Control sessions; both keys default to false. The presence file (CLAUDE_CLIENT_PRESENCE_FILE) is macOS-only via devices.sh, so it is not set here.",
   "env": {
     "CODEBASE_PATH": "%USERPROFILE%\\codebase",
     "CODEBASE_REPO": "databayt/codebase",

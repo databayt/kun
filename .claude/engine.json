@@ -77,7 +77,7 @@
     "domain_rules": 55,
     "project_mcp": 18,
     "user_mcp": 24,
-    "hooks": 12,
+    "hooks": 13,
     "vocabulary_spells": 216,
     "workflows": 13,
     "$plugins_comment": "The two plugins are how the fleet reaches other machines. kun-company also carries the rules, pattern cards, hooks, and workflows. Union of both skill sets is 61 (build ships in both).",
@@ -147,6 +147,28 @@
       "hermes": "OFF-POOL chat relay (`h` = Nous) — gateway/channel tasks, never build work"
     },
     "session_hygiene": "/clear between unrelated tasks (stale context taxes every message); /compact with focus instructions on long tasks; batch touches inside the 1h cache window — a >1h idle gap reprocesses full context; plan mode before big builds; specific prompts over broad scans"
+  },
+  "devices": {
+    "$comment": "Declared POLICY for the Mac ↔ iPhone ↔ Claude-surface lane, read by .claude/scripts/devices.sh (--status, --brief at SessionStart, --install). Measured state is never stored here — devices.sh reads it live. Facts verified against code.claude.com docs on 2026-09-27 (remote-control, mobile, desktop, settings-reference, env-vars): push is two settings keys (agentPushNotifEnabled, inputNeededNotifEnabled, both default false); `max` effort cannot be saved as a default (session-only unless CLAUDE_CODE_EFFORT_LEVEL pins it, which also overrides every agent's effort frontmatter — never set it); Dispatch is closed to new users; the Claude app offers Manual / Accept edits / Plan for Remote Control sessions, so the server's starting mode is set here.",
+    "rc_server": {
+      "$comment": "One `claude remote-control` server in tmux, rooted at ~/kun, so the Claude app's Code tab can start sessions on the Mac without a terminal left open for it. same-dir, never worktree (main-only rule). Capacity is sized to 16 GB of RAM: each session carries its own MCP processes.",
+      "tmux_session": "kun-rc",
+      "name": "Mac · kun",
+      "name_prefix": "mac",
+      "capacity": 3,
+      "permission_mode": "auto"
+    },
+    "presence": {
+      "$comment": "The marker CLAUDE_CLIENT_PRESENCE_FILE points at (settings.json env). Present = input within idle_seconds and the screen unlocked; pushes are held while it exists.",
+      "file": "~/.claude/.present",
+      "idle_seconds": 180
+    },
+    "warn": {
+      "$comment": "SessionStart --brief thresholds. The 2026-09-27 audit found 3 GB free, 19 GB swapped and 9 sessions open; builds hit ENOSPC near 98% (2026-09-22).",
+      "disk_free_gb": 20,
+      "sessions": 6,
+      "swap_used_pct": 80
+    }
   },
   "textbook": {
     "$comment": "Declared POLICY for the textbook pipeline (scanned PDF → verified Markdown twin). Measured state lives in .claude/memory/textbook-scores.json — never here. Thresholds are PROVISIONAL: set on one book (sd-g12-biology, n=21, opus, 2026-09-09); re-derive once the benchmark carries three books. The workflows read these as defaults; health can check reality against them. Since 2026-09-26 transcribe + adjudicate run with omitClaudeMd (no CLAUDE.md/rules, ~9.5K fewer tokens per spawn): re-measure tokens_per_page/tokens_per_adjudication on the next run; bench scores before and after are not comparable.",
