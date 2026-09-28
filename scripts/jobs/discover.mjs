@@ -142,6 +142,51 @@ export function openToRwanda(place, text = "") {
   return false;
 }
 
+
+// ── company → ATS board, via the public job-board APIs ───────────────────────
+// Aggregators name the company; its own Greenhouse/Lever/Ashby board is the
+// honest way to apply (and the only one the loop can submit to).
+const ATS_BOARDS_FILE = "jobs/ats-boards.json";
+const atsBoards = existsSync(ATS_BOARDS_FILE) ? JSON.parse(readFileSync(ATS_BOARDS_FILE, "utf-8")).boards : [];
+const newBoards = [];
+const probedCompanies = new Set(atsBoards.map((b) => b.company.toLowerCase()));
+
+async function probeBoard(company) {
+  const key = company.toLowerCase().trim();
+  if (probedCompanies.has(key)) return atsBoards.find((b) => b.company.toLowerCase() === key) ?? null;
+  probedCompanies.add(key);
+  const base = key.replace(/\b(inc|llc|ltd|gmbh|corp|co|labs?|technologies|technology|hq)\b\.?/g, "").trim();
+  const slugs = [...new Set([base.replace(/[^a-z0-9]/g, ""), base.replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")])].filter(Boolean);
+  const probes = [
+    ["greenhouse", (t) => `https://boards-api.greenhouse.io/v1/boards/${t}/jobs`],
+    ["ashby", (t) => `https://api.ashbyhq.com/posting-api/job-board/${t}`],
+    ["lever", (t) => `https://api.lever.co/v0/postings/${t}?mode=json&limit=1`],
+  ];
+  for (const token of slugs) {
+    for (const [ats, url] of probes) {
+      try {
+        const res = await fetch(url(token), { signal: AbortSignal.timeout(15_000) });
+        if (!res.ok) continue;
+        const body = await res.json().catch(() => null);
+        if (!body) continue;
+        const board = { company, ats, token, region: "worldwide (aggregator)", openJobs: Array.isArray(body) ? body.length : (body.jobs?.length ?? 0) };
+        atsBoards.push(board);
+        newBoards.push(board);
+        return board;
+      } catch {
+        // try the next
+      }
+    }
+  }
+  return null;
+}
+
+function saveNewBoards() {
+  if (newBoards.length === 0 || DRY_RUN || ONLY) return;
+  writeFileSync(ATS_BOARDS_FILE, JSON.stringify({ generatedAt: new Date().toISOString(), boards: atsBoards }, null, 2) + "\n");
+  console.log(`ats-boards: +${newBoards.length} boards from aggregators (${newBoards.map((b) => `${b.company}/${b.ats}`).join(", ")})`);
+}
+
 // ── adapters ─────────────────────────────────────────────────────────────────
 
 const ADAPTERS = {
@@ -406,6 +451,54 @@ const ADAPTERS = {
     return { items, dropped };
   },
 
+  /// We Work Remotely (public RSS; the job pages themselves are bot-protected
+  /// and never fetched) and Jobicy (public API): worldwide/EMEA/Africa dev
+  /// roles. A company with a Greenhouse/Lever/Ashby board joins the board list
+  /// so the ats adapter applies there; the rest become portal cards.
+  async aggregators() {
+    const items = [];
+    const dropped = [];
+    const found = [];
+    for (const cat of ["remote-full-stack-programming-jobs", "remote-back-end-programming-jobs", "remote-front-end-programming-jobs"]) {
+      const xml = await get(`https://weworkremotely.com/categories/${cat}.rss`);
+      for (const it of xml.split("<item>").slice(1)) {
+        const region = it.match(/<region>([^<]*)<\/region>/)?.[1] ?? "";
+        if (!/anywhere in the world/i.test(region)) continue;
+        const raw = text(it.match(/<title>([\s\S]*?)<\/title>/)?.[1] ?? "");
+        const [company, ...rest] = raw.split(":");
+        const title = rest.join(":").trim();
+        const link = it.match(/<link>([^<]+)<\/link>/)?.[1]?.trim();
+        if (company && title && link) found.push({ company: company.trim(), title, link, source: "weworkremotely", place: "Anywhere in the World" });
+      }
+    }
+    try {
+      for (const geo of ["anywhere", "emea", "africa"]) {
+        const d = await get(`https://jobicy.com/api/v2/remote-jobs?count=50&geo=${geo}&industry=dev`, { json: true });
+        for (const j of d.jobs ?? []) found.push({ company: j.companyName, title: j.jobTitle, link: j.url, source: "jobicy", place: j.jobGeo || geo, text: text(j.jobExcerpt ?? "") });
+      }
+    } catch (err) {
+      dropped.push(`jobicy: ${err.message.slice(0, 60)}`);
+    }
+    const STACK = /software|full[- ]?stack|front[- ]?end|back[- ]?end|web|react|node|typescript|javascript|developer|engineer/i;
+    const OFF = /\b(staff|principal|director|manager|head|vp|intern|ios|android|embedded|data scien|machine learning|security|sre|devops|qa|sales|designer|java|rpg|as400|php|ruby|golang|rust|scala|salesforce|sap)\b|\.net\b|c#/i;
+    const seen = new Set();
+    for (const f of found) {
+      if (!STACK.test(f.title) || OFF.test(f.title)) continue;
+      if (!openToRwanda(f.place, f.text ?? "")) continue;
+      const key = `${f.company}|${f.title}`.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const board = await probeBoard(f.company);
+      if (board) continue; // the ats adapter will apply on the company's own board
+      if (items.length >= LIMIT) break;
+      items.push({
+        ...item({ title: f.title, company: f.company, location: f.place, remoteType: "remote", url: f.link, source: f.source, campaign: "remote-web-developer-worldwide", description: f.text || `${f.title} at ${f.company} — ${f.place}.` }),
+        rwandaEligible: "unverified",
+      });
+    }
+    return { items, dropped };
+  },
+
   /// The ATS lane: every Greenhouse, Lever and Ashby board in
   /// jobs/ats-boards.json (seeded by ats-seed.mjs from 886 remote-first
   /// companies). Precision over recall: software titles only, remote and
@@ -414,8 +507,9 @@ const ADAPTERS = {
   async ats() {
     const items = [];
     const dropped = [];
-    if (!existsSync("jobs/ats-boards.json")) return { items, dropped: ["ats: no jobs/ats-boards.json — run ats-seed.mjs"] };
-    const { boards } = JSON.parse(readFileSync("jobs/ats-boards.json", "utf-8"));
+    if (atsBoards.length === 0) return { items, dropped: ["ats: no jobs/ats-boards.json — run ats-seed.mjs"] };
+    // In-memory, so boards the aggregators found earlier in this run count.
+    const boards = atsBoards;
     const TITLE = /software|full[- ]?stack|front[- ]?end|back[- ]?end|\bweb\b|react|node|typescript|javascript|product engineer|platform engineer|developer/i;
     const NOT_TITLE = /\b(staff|principal|director|manager|head|vp|intern|ios|android|mobile|embedded|firmware|data scien|machine learning|\bml\b|security|sre|devops|qa|test|sales|support|designer|recruit)/i;
     const PLACE_OK = /worldwide|anywhere|global|africa|emea|remote$|^remote\b(?!.*\b(us|usa|united states|canada|uk|united kingdom|latam|americas|apac|india|brazil|mexico|germany|france|spain|poland|portugal|netherlands|australia)\b)/i;
@@ -572,6 +666,7 @@ for (const [name, adapter] of Object.entries(selected)) {
   }
 }
 
+saveNewBoards();
 if (DRY_RUN || ONLY) {
   console.log(`\n${DRY_RUN ? "DRY RUN" : "single-source test"} — nothing written. ${all.length} items.`);
 } else {
