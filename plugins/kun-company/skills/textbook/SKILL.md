@@ -107,6 +107,25 @@ uncaptioned figure. The abstract rule did not hold; **the contract's "Observed i
 section, populated with named cases by the adjudicate phase, did.** Tool-call counts are not a
 drift signal (measured, disproved).
 
+## The book gate — a twin is not allowed before the book is verified
+
+The catalog enforces an order: `book` -> `structure` -> `twin` -> `assessment`
+(`~/catalog/CLAUDE.md` invariant 8, `pnpm gate`). **Check it before transcribing anything:**
+
+```bash
+cd ~/catalog && pnpm gate sd --grade g12 --enforce none   # the subject must show book ✅
+```
+
+A subject whose `book` gate fails has no verified edition, or its `structure.json`
+`verification.pdfSha256` no longer matches the locked PDF — transcribing it produces a twin of a
+book nobody has established is the right one. Run `pnpm verify` first (`~/catalog/docs/verification.md`).
+
+The `twin` gate is what this skill earns, and it deliberately ignores `textbook.md`'s `quality`
+letter: the retired OCR grader scored coverage, so a 47 %-complete twin could read "A". It passes
+only on `extraction: "vision"` with a real two-read `agreement` at or above the B threshold, a
+`pages-md/` page count equal to the book's, and a `sourceMd5`. Front matter is the gate's input, so
+the assemble step's stamp is not cosmetic.
+
 ## Where books live — stage, run, land
 
 Books live in the **catalog** repo (`~/catalog`, `databayt/catalog`), which mirrors the CDN: the book folder
@@ -125,10 +144,19 @@ pnpm assets lock && pnpm validate && pnpm index        # then commit on main
 
 ## Upload (only when asked)
 
-From `~/catalog`: `pnpm assets push --apply` (new page renders / PDF), then
-`pnpm publish:cdn --apply` (textbook.md, pages-md). Both are additive. Replacing a key that is already live
-(a re-transcribed `textbook.md`) needs `--overwrite`, which also triggers the CloudFront invalidation, because catalog
-binaries are `immutable`. Verify over HTTPS. **The reader serves the twin from the CDN, so a repair is not live
+From `~/catalog`, **scoped to the book** so a one-subject fix cannot replace another grade's files:
+
+```bash
+pnpm assets push sd/g12/biology --apply                      # new page renders / PDF
+pnpm publish:cdn sd/g12/biology --overwrite --apply          # textbook.md, pages-md, structure.json
+```
+
+Both are additive; replacing a key that is already live (a re-transcribed `textbook.md`) needs
+`--overwrite`, and both writers now invalidate CloudFront, which binaries require because they are
+cached `immutable` for a year. Verify over HTTPS — and know that most g12 text keys predate
+`CATALOG_EPOCH`, so without `--overwrite` a publish reports success and changes nothing. On
+2026-09-28 that gap was real: the CDN was still serving the **tesseract** twin for all four
+vision-transcribed books, months after they were re-read. **The reader serves the twin from the CDN, so a repair is not live
 until this runs.** Then record: the book's `structure.json` history if it changed, the block ISSUE, memory.
 
 ## Files

@@ -9,9 +9,12 @@ The engine's content lane for curriculum books. Say it in prose — _"convert th
 textbooks"_, _"verify the biology twin"_, _"textbook bench"_ — and the `/textbook` runbook
 activates with the `transcribe` and `adjudicate` agents and two saved workflows.
 
-**kun holds the harness, not the books.** The books live in the product repo's `curriculum/`
-tree (gitignored) and on the CDN; kun holds the contract template, the agents, the scorers, the
-workflows, the benchmark corpus and the measured record. Nothing in the harness knows a subject:
+**kun holds the harness, not the books.** The books live in the **catalog** repo
+(`~/catalog`, `databayt/catalog`), whose root _is_ `cdn.databayt.org/catalog/`; kun holds the
+contract template, the agents, the scorers, the workflows, the benchmark corpus and the measured
+record. (Until the 2026-09-27 cutover they sat in hogwarts' gitignored `curriculum/` tree — that
+tree is now dead, and authoring there diverges silently.) A book must pass the catalog's
+`book` gate before it earns a twin: `cd ~/catalog && pnpm gate sd --grade g12`. Nothing in the harness knows a subject:
 headings come from the book's `structure.json`, the language decides direction and the illegible
 marker, and the benchmark is per book. The Grade 12 Sudanese biology book is the first benchmark,
 not a special case.
@@ -57,10 +60,10 @@ comes from `engine.json`.
 
 ```js
 // a new book — render, transcribe, verify, adjudicate, persist
-Workflow({ name: "textbook", args: { book: "/abs/curriculum/sd/g12/biology", mode: "full", date: "2026-09-11" } })
+Workflow({ name: "textbook", args: { book: "/Users/abdout/catalog/.work/sd/g12/biology", mode: "full", date: "2026-09-11" } })
 
 // a twin already on disk — verify and repair only
-Workflow({ name: "textbook", args: { book: "/abs/curriculum/sd/g12/biology", mode: "verify", seed: 11, date: "2026-09-11" } })
+Workflow({ name: "textbook", args: { book: "/Users/abdout/catalog/.work/sd/g12/biology", mode: "verify", seed: 11, date: "2026-09-11" } })
 
 // the benchmark, then the transcript audit — always both
 Workflow({ name: "textbook-bench", args: { book: "sd-g12-biology", label: "contract-v2", date: "2026-09-11" } })
@@ -69,7 +72,7 @@ Workflow({ name: "textbook-bench", args: { book: "sd-g12-biology", label: "contr
 
 | Argument  | Default   | Meaning                                                                                                                  |
 | --------- | --------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `book`    | required  | absolute path to the directory holding `textbook.pdf` and `structure.json` (the bench takes the book id from the manifest) |
+| `book`    | required  | absolute path to the staged copy under `~/catalog/.work/` holding `textbook.pdf` and `structure.json` (the bench takes the book id from the manifest) |
 | `mode`    | `full`    | `full` transcribes everything · `verify` skips transcription and checks what is on disk · `repair` adjudicates the saved queue only |
 | `pages`   | all       | restrict a run to a page list                                                                                            |
 | `sample`  | 12        | random pages re-read blind — the headline                                                                                |
