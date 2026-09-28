@@ -1,6 +1,6 @@
 ---
 name: comment
-description: Expert in writing simple yet insightful code comments
+description: "Writes short, insightful code comments"
 model: haiku
 effort: low
 version: "Clean Code"

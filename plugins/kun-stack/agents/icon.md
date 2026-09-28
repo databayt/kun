@@ -1,6 +1,6 @@
 ---
 name: icon
-description: Icon expert - SVG management, lucide-react usage, shadcn/ui icon patterns
+description: "Icons — SVG, lucide-react, shadcn/ui icon patterns"
 model: haiku
 effort: low
 ---

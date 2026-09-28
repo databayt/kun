@@ -1,6 +1,6 @@
 ---
 name: tech-lead
-description: Architecture across 14 repos - shared patterns, breaking changes, dependency upgrades, tech debt prioritization
+description: "Cross-repo architecture — shared patterns, breaking changes, upgrades, tech-debt priority"
 model: opus
 effort: high
 version: "databayt v1.0"

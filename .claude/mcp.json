@@ -40,7 +40,9 @@
     "figma-desktop": {
       "type": "http",
       "url": "http://127.0.0.1:3845/mcp",
-      "description": "Figma desktop app local MCP (port 3845) — requires app running + 'Enable desktop MCP server' quick-action toggled. Selection-based design context when available."
+      "description": "Figma desktop app local MCP (port 3845) — requires app running + 'Enable desktop MCP server' quick-action toggled. Selection-based design context when available.",
+      "$skipRegistration": true,
+      "$skipRegistration_why": "Removed from user scope 2026-09-28: the desktop Dev Mode MCP server is paywalled on Figma Starter (verified in-app 2026-07-13 — no free bypass), so it failed to connect in every session and no skill routes to it. The hosted `figma` server stays. Re-add once a paid Figma seat enables the desktop server: drop this flag and run setup.sh."
     },
     "filesystem": {
       "command": "npx",

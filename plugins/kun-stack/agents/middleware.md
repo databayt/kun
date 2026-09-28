@@ -1,6 +1,6 @@
 ---
 name: middleware
-description: Next.js middleware expert for auth, i18n, subdomain routing, and runtime
+description: "Next.js middleware/proxy — auth, i18n, subdomain routing"
 model: sonnet
 effort: medium
 version: "Next.js 16 Runtime"

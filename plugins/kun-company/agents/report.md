@@ -1,6 +1,6 @@
 ---
 name: report
-description: Fix the user reports a human accepted — read, verify, fix, build, push, close
+description: "Fixes the user reports a human accepted — read, verify, fix, build, push, close"
 model: opus
 effort: high
 version: "databayt v1.1"

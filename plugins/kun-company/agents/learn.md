@@ -1,6 +1,6 @@
 ---
 name: learn
-description: Org intelligence — extract patterns, conventions, team dynamics, and company knowledge from git history, repos, and memory
+description: "Org intelligence — patterns, conventions and team knowledge mined from git history and repos"
 model: opus
 effort: high
 version: "databayt v1.0"

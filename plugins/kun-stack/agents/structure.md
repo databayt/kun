@@ -1,6 +1,6 @@
 ---
 name: structure
-description: File organization expert for naming conventions, directory structure, and project layout
+description: "File organization — naming, directory structure, project layout"
 model: haiku
 effort: low
 version: "Next.js 16.0.7"

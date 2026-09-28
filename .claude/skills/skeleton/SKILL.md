@@ -41,7 +41,7 @@ Clone its shape, don't reinvent it:
 | `src/components/atom/loading.tsx`      | the kit — one file of composable skeletons, static (no hooks, no state, no fetching)                       |
 | `src/components/<feature>/loading.tsx` | the feature's page skeleton, composed from the kit with the page's real layout classes                     |
 | `src/app/**/loading.tsx`               | a one-liner delegating to the feature skeleton                                                             |
-| `.claude/rules/skeleton.md` (repo)     | the repo-local ward, path-scoped to loading files                                                          |
+| `<repo>/.claude/rules/skeleton.md`     | the repo-local ward, path-scoped to loading files                                                          |
 
 The kit's recurring shapes (hogwarts names — reuse them so skeletons read the same across repos):
 
@@ -154,7 +154,7 @@ Report per route group: routes · with loading.tsx · layout-matching vs generic
 
 Check `src/components/atom/` first — extend what exists, don't fork it (fold stray
 `data-table-skeleton.tsx`-style duplicates into the kit). Missing entirely → copy hogwarts'
-`atom/loading.tsx`, the shimmer utility and `.claude/rules/skeleton.md`, then prune atoms the
+`atom/loading.tsx`, the shimmer utility and `<repo>/.claude/rules/skeleton.md`, then prune atoms the
 repo has no page for. `pnpm tsc`.
 
 ### `route <path> [repo]` — one route, layout-exact

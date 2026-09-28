@@ -1,6 +1,6 @@
 ---
 name: growth
-description: Market maker - content strategy, SEO, social media, developer relations, community
+description: "Content strategy, SEO, social, developer relations, community"
 model: opus
 effort: high
 version: "databayt v1.0"

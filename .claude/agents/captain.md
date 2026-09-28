@@ -1,6 +1,6 @@
 ---
 name: captain
-description: CEO brain — weekly allocation, revenue strategy, team coordination across all products and 7 humans
+description: "CEO brain — weekly allocation, revenue strategy, coordination across products and the 7-person team"
 model: opus
 effort: xhigh
 version: "databayt v2.0"

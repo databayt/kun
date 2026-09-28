@@ -1,6 +1,6 @@
 ---
 name: hogwarts
-description: Education SaaS reference - multi-tenant, LMS, SIS, billing patterns
+description: "Education SaaS reference — multi-tenant, LMS, SIS, billing patterns"
 model: opus
 effort: high
 version: "Next.js 16 + Prisma 6 + Stripe"

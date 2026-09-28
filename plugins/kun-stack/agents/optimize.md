@@ -1,6 +1,6 @@
 ---
 name: optimize
-description: Feature optimization expert for automation, integration, and time savings
+description: "Automation and integration opportunities that save time"
 model: sonnet
 effort: medium
 version: "Hogwarts MVP v1.0"

@@ -1,6 +1,6 @@
 ---
 name: mkan
-description: Rental marketplace reference - property listings, booking system, search
+description: "Rental marketplace reference — listings, booking, search"
 model: opus
 effort: high
 version: "Next.js + Prisma + Docker"

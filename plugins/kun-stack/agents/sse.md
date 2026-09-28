@@ -1,6 +1,6 @@
 ---
 name: sse
-description: Server-side exception diagnosis and auto-fix for Next.js routes
+description: "Diagnoses and fixes Next.js server-side exceptions"
 model: haiku
 effort: low
 version: "Next.js 16"

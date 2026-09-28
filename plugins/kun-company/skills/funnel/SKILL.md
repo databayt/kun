@@ -40,9 +40,15 @@ workflow, ACTIVE** ("School shortlisted → outreach", deployed + tested entirel
 sequence and traps in `hogwarts/scripts/crm/workflow-spec.ts`; cards land in #hogwarts-funnel) ·
 **the roll scripts** (`hogwarts/scripts/funnel/{gates,tick,apply-inbox}.ts` — census + artifact,
 ramped roll, WARM-drag applier) · **chatbot capture v1 + rate limit** (identifiers → Prospect,
-saasMarketing only).
+saasMarketing only) · **waves** (2026-09-28: `tick --wave=<id>` required on `--apply`, variants
+in `scripts/funnel/templates/variants.json`, per-wave ledger in `.data/waves/`, `next-wave` prints
+the tick lines) · **the read-back loop, ARMED** (launchd `com.databayt.funnel-loop`, 30 min,
+read-only: hotmail replies → WARM, Resend delivery, prod chatbot → Twenty, daily gates, Friday
+`learn --propose`) · **the chatbot sells the outreach offer** (Balqalam, 3-month trial copy under
+the school's name, one contact ask gated in code; failures fall back to the ask).
 
-**Missing:** the cadence clock, drain and approve queue (touches 2+) · every URL in the value
+**Missing:** the first real wave (378 reachable, 0 messaged at 2026-09-28) · touch 2+ (drain
+and approve queue) · every URL in the value
 registry · transcript persistence (capture keeps identifiers, not sessions) · `UPSTASH_*` in the
 Vercel env (until then the chatbot throttle is per-invocation in prod).
 

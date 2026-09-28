@@ -1,6 +1,6 @@
 ---
 name: transcribe
-description: Page transcriber — reads scanned document page images and writes one Markdown file per page, exactly as printed, never correcting and never guessing
+description: "Page transcriber — scanned page images to Markdown exactly as printed, never correcting or guessing"
 model: opus
 effort: high
 tools: Read, Write, Glob

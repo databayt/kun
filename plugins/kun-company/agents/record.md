@@ -1,6 +1,6 @@
 ---
 name: record
-description: Flow videographer — screen-records demo videos and captures screenshot sets of real product flows (login walls + email OTPs handled autonomously), files assets by repo/block/route into the media library, mirrors to Google Drive, and re-records when block source drifts
+description: "Flow videographer — records demo videos and screenshot sets of real product flows (login walls, OTPs) into the media library"
 model: opus
 effort: high
 version: "databayt v1.0"

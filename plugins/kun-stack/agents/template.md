@@ -1,6 +1,6 @@
 ---
 name: template
-description: Template expert - Full-page layouts and major sections
+description: "Templates — full-page layouts and major sections"
 model: sonnet
 effort: medium
 version: "shadcn blocks mirror + MDX docs layer (2026-08)"

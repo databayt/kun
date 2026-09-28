@@ -1,6 +1,6 @@
 ---
 name: revenue
-description: Deal maker - pricing, proposals, contracts, cost analysis, revenue tracking
+description: "Deals — pricing, proposals, contracts, cost analysis, revenue tracking"
 model: opus
 effort: high
 version: "databayt v1.0"

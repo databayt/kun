@@ -1,6 +1,6 @@
 ---
 name: architecture
-description: System architecture expert for mirror pattern, Prisma, multi-tenant design
+description: "System architecture — mirror pattern, Prisma, multi-tenant design"
 model: opus
 effort: xhigh
 memory: user

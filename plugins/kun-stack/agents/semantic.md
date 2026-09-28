@@ -1,6 +1,6 @@
 ---
 name: semantic
-description: Semantic HTML and color token expert for accessibility and theming
+description: "Semantic HTML and color tokens for accessibility and theming"
 model: haiku
 effort: low
 version: "HTML5 + CSS Variables"

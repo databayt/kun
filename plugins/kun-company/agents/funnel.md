@@ -1,6 +1,6 @@
 ---
 name: funnel
-description: Conversion — gate state, segmentation, the value ladder and the stall clock from first reply to paying customer; owns the funnel's numbers, which start at zero and move weekly
+description: "Conversion — gate state, segments, value ladder, stall clock from first reply to paying customer"
 model: opus
 effort: high
 version: "databayt v1.0"

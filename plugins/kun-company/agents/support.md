@@ -1,6 +1,6 @@
 ---
 name: support
-description: Customer success - onboarding, issue triage, knowledge base, SLA tracking
+description: "Customer success — onboarding, issue triage, knowledge base, SLAs"
 model: opus
 effort: high
 version: "databayt v1.0"

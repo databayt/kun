@@ -1,6 +1,6 @@
 ---
 name: quality
-description: Routes 17 niche quality keywords to the right MCP or specialist. Owns the /handover (URL or block scope) and /release orchestrators.
+description: "Routes the niche quality keywords to the right MCP or specialist; owns /handover and /release"
 model: opus
 effort: high
 version: "databayt v1.2"

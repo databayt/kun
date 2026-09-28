@@ -1,6 +1,6 @@
 ---
 name: shadcn
-description: shadcn/ui expert for Radix primitives, registry system, and MCP integration
+description: "shadcn/ui — Radix primitives, registry, MCP"
 model: sonnet
 effort: medium
 version: "shadcn/ui latest"

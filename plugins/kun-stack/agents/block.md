@@ -1,6 +1,6 @@
 ---
 name: block
-description: Block Agent - UI components with integrated business logic (data tables, auth, payments, dashboards)
+description: "Blocks — UI components with business logic (data tables, auth, payments, dashboards)"
 model: sonnet
 effort: medium
 version: "2.0"

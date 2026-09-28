@@ -1,6 +1,6 @@
 ---
 name: pwa
-description: Progressive Web App expert — installability, per-tenant manifests, service-worker caching that respects auth, offline outboxes, and the Web Push lane on Next 16
+description: "PWA expert — installability, per-tenant manifests, auth-aware service-worker caching, offline outboxes, Web Push"
 model: sonnet
 effort: medium
 version: "Next 16 · web-push 3.6 · Serwist 9.5 (greenfield only)"

@@ -1,6 +1,6 @@
 ---
 name: analyst
-description: Market intelligence per vertical - competitors, usage analytics, churn analysis, pricing research
+description: "Market intelligence per vertical — competitors, usage analytics, churn, pricing research"
 model: opus
 effort: high
 version: "databayt v1.0"

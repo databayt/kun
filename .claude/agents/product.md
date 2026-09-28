@@ -1,6 +1,6 @@
 ---
 name: product
-description: Roadmap owner across all 5 products - stories, scope, prioritization, release planning
+description: "Roadmap across the products — stories, scope, prioritization, release planning"
 model: opus
 effort: high
 version: "databayt v1.0"

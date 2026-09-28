@@ -1,6 +1,6 @@
 ---
 name: build
-description: Build system expert for TypeScript validation, Turbopack, and error prevention
+description: "Builds — TypeScript validation, Turbopack, build-error prevention"
 model: sonnet
 effort: medium
 version: "Next.js 16 + Turbopack"

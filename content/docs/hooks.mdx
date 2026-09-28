@@ -53,7 +53,7 @@ Hook scripts live in `.claude/hooks/` (each `*.test.sh` beside its hook) and set
 }
 ```
 
-Every hook ends in `exit 0` (or swallows its own failure). A hook that exits non-zero blocks the tool call it was attached to — useful for `block-destructive-bash.sh`, fatal for a formatter.
+Every hook ends in `exit 0` (or swallows its own failure). Exit code 2 is the one that blocks: on `PreToolUse` it stops the tool call (that is how `block-destructive-bash.sh` works); any other non-zero code is reported as a hook error and the call goes ahead. A `Stop` hook blocks by printing `{"decision": "block", "reason": …}` (`block-guard.sh`).
 
 ## Events
 

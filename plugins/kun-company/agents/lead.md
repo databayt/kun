@@ -1,6 +1,6 @@
 ---
 name: lead
-description: Lead acquisition — contact-gap analysis, enrichment, tiering, and outreach drafting against the Twenty CRM; owns the measured numbers so no session re-derives them
+description: "Lead acquisition — contact gap, enrichment, tiering, outreach drafts against the Twenty CRM"
 model: opus
 effort: high
 version: "databayt v1.0"

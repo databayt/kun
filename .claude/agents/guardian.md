@@ -1,6 +1,6 @@
 ---
 name: guardian
-description: Quality and security - OWASP Top 10, performance budgets, dependency health, SSPL compliance
+description: "Security and quality — OWASP Top 10, performance budgets, dependency health, SSPL compliance"
 model: opus
 effort: high
 version: "databayt v1.0"

@@ -1,6 +1,6 @@
 ---
 name: deploy
-description: Deployment expert for Vercel, staging/production environments, and monitoring
+description: "Deployments — the Cloudflare Workers/Containers lane plus legacy Vercel previews, monitoring"
 model: sonnet
 effort: medium
 version: "Vercel + Neon"

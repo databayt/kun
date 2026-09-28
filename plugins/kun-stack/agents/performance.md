@@ -1,6 +1,6 @@
 ---
 name: performance
-description: Performance engineering expert for Core Web Vitals, runtime optimization, profiling, and infrastructure tuning
+description: "Performance — Core Web Vitals, runtime profiling, infrastructure tuning"
 model: sonnet
 effort: medium
 version: "Next.js 16.0.7 + React 19.2 + Prisma 6.16 + Tailwind 4 + TypeScript 5"

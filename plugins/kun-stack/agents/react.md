@@ -1,6 +1,6 @@
 ---
 name: react
-description: React 19 expert for hooks, performance, and concurrent features
+description: "React 19 — hooks, performance, concurrent features"
 model: sonnet
 effort: medium
 version: "React 19.2.x (19.3.0 latest)"

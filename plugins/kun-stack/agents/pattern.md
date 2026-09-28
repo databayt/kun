@@ -1,6 +1,6 @@
 ---
 name: pattern
-description: Code conventions expert for patterns, anti-patterns, and best practices
+description: "Code conventions — patterns and anti-patterns"
 model: sonnet
 effort: medium
 version: "Project Standards"

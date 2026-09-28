@@ -1,6 +1,6 @@
 ---
 name: cloudflare
-description: Cloudflare deployment expert — Workers, Containers, zone DNS, cron triggers, and the balqalam.com production lane
+description: "Cloudflare expert — Workers, Containers, zone DNS, crons, the balqalam.com production lane"
 model: sonnet
 effort: medium
 version: "Workers + Containers + Neon"

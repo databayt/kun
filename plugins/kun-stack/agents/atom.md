@@ -1,6 +1,6 @@
 ---
 name: atom
-description: Atom component expert - Compose 2+ shadcn/ui primitives into reusable patterns
+description: "Atoms — compose 2+ shadcn/ui primitives into reusable patterns"
 model: sonnet
 effort: medium
 version: "shadcn/ui 61-item parity (2026-08)"

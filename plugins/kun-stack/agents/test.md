@@ -1,6 +1,6 @@
 ---
 name: test
-description: Testing expert for Vitest, Playwright, TDD patterns, and 95%+ coverage
+description: "Testing — Vitest, Playwright, TDD, coverage"
 model: sonnet
 effort: medium
 version: "Vitest 2 + Playwright 1.55"

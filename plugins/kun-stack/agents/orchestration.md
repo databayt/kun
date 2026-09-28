@@ -1,6 +1,6 @@
 ---
 name: orchestration
-description: Master coordinator for multi-agent workflows and strategic task delegation
+description: "Coordinates multi-agent workflows and delegation"
 model: opus
 effort: xhigh
 memory: user

@@ -1,6 +1,6 @@
 ---
 name: package
-description: Cross-repo dependency manager - version audit, upgrade coordination, consistency enforcement across all databayt repos
+description: "Cross-repo dependency audits and coordinated upgrades"
 model: sonnet
 effort: medium
 version: "databayt v1.0"

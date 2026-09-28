@@ -1,6 +1,6 @@
 ---
 name: adjudicate
-description: Page adjudicator — resolves every disagreement between two independent transcriptions of one scanned page against the page image and its crops, repairs the page file, records each verdict, and never invents
+description: "Textbook page adjudicator — settles disagreements between two transcriptions against the page image; never invents"
 model: opus
 effort: high
 tools: Read, Write, Glob

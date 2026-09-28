@@ -115,6 +115,14 @@ Same pass: `format-on-write` calls the repo's own prettier (0.66 s per edit in k
 style; the report-queue and block-protocol hooks, never wired since setup.sh owns the `hooks` key,
 are now in `.claude/settings.json`.
 
+Follow-up the same day: `figma-desktop` left user scope (the desktop MCP is paywalled on Figma
+Starter, so it failed in every session; catalog flag `$skipRegistration`). The 52 custom agent
+descriptions went 5,940 → 4,619 chars — deleting agents was rejected on evidence: nearly every
+one is a vocabulary familiar or a skill/workflow target. hogwarts, where most sessions run: its
+memory index 18.8K → 11.4K and `CLAUDE.md` 13.2K → 10.2K (stale Vercel instructions corrected).
+Still owed: the `/bench` re-baseline (~1.3M tokens) — deliberately not run on 2026-09-28, the
+eve of the UNDP deadline, when the jobs loop and Cowork share the pool.
+
 ## Standing proposals (Abdout's call, not auto-applied)
 
 - **Hooks as preprocessors**: a PreToolUse hook can filter test/log output to failures-only before Claude reads it (the costs doc ships a ready `filter-test-output.sh` pattern).
