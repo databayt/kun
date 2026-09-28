@@ -1,7 +1,7 @@
 ---
 name: credentials
 description: Manage databayt credentials — API keys via Keychain, web logins via Safari
-when_to_use: "Use when managing databayt credentials — storing or reading API keys via the macOS Keychain, driving Safari autofill for web logins, exporting keys for env wiring; never prints secrets into files. Triggers on: credentials, api key, log into <service>, store the key, which keys do we have."
+when_to_use: "Use when storing, reading or exporting databayt API keys via the macOS Keychain, or driving Safari autofill for web logins; never prints secrets into files. Triggers on: credentials, api key, log into <service>, store the key, which keys do we have."
 argument-hint: "[status|setup|login|export] [service]"
 ---
 

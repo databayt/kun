@@ -1,7 +1,7 @@
 ---
 name: skeleton
-description: Skeleton loading states — layout-matching shimmer shapes while data loads, instead of spinners or blank screens
-when_to_use: "Use when a route or section needs a loading state while DATA loads — loading.tsx, Suspense fallbacks, the skeleton kit + shimmer, replacing page spinners, auditing routes that flash blank. Not `blur` (image bytes). Triggers on: skeleton, loading state, loading.tsx, shimmer, page flashes blank, replace the spinner, هيكل التحميل."
+description: Skeleton loading states — layout-matching shimmer while data loads
+when_to_use: "Use when a route or section needs a loading state while DATA loads — loading.tsx, Suspense fallbacks, the skeleton kit + shimmer, replacing spinners, routes that flash blank. Not `blur` (image bytes). Triggers on: skeleton, loading state, loading.tsx, shimmer, page flashes blank, replace the spinner, هيكل التحميل."
 argument-hint: "[audit|kit|route <path>|convert <component>] [repo]"
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(pnpm *), Bash(node *), Bash(git *)
 model: opus

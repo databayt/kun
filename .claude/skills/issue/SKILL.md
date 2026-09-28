@@ -1,7 +1,7 @@
 ---
 name: issue
 description: Create a GitHub issue in the appropriate databayt repo
-when_to_use: "Use when a task, bug, chore, or follow-up needs to become a tracked GitHub issue in the right databayt repo (kun, hogwarts, souq, mkan, shifa, codebase, shadcn, ios-app/android-app, marketing) with priority/type/scope/assignment labels, a Context/Action/Verification body, and a Slack #dev notification — including turning Slack messages into issues — as distinct from /idea which captures structured feature ideas with user stories. Triggers on: open/file an issue, create a GitHub issue in the right databayt repo."
+when_to_use: "Use when a task, bug, chore or follow-up should become a tracked, labelled GitHub issue in the right databayt repo, including turning Slack messages into issues — as distinct from /idea, which captures feature ideas with user stories. Triggers on: open/file an issue, create a GitHub issue in the right databayt repo."
 argument-hint: <title> [description]
 ---
 

@@ -1,7 +1,7 @@
 ---
 name: deploy
-description: Production deploy operator — the full cycle on Cloudflare (gate, push, env, schema gap, worktree build, smoke, deploy, Neon restore point, prod data steps, real-login verify), with the Vercel preview lane kept for repos that still use it
-when_to_use: "Use when Abdout says deploy, push to prod, ship it, or deploy everything in a repo — the whole cycle from typecheck to a verified login on the live hostname, not just the upload. Routes by platform: a repo with wrangler.jsonc takes the Cloudflare lane below; anything else takes the legacy Vercel lane. Owns the Neon restore-point rule (quota eviction of the oldest branch) and the prod data steps the deploy script never runs. Distinct from /check (pre-ship gate only), /watch (observe production, never fix), /cloudflare (platform operator: DNS, crons, logs), and /quick (commit-lint-push without a build). Triggers on: deploy, deploy everything, push to production, ship to cloudflare, redeploy, why is the deploy stuck, vercel preview, deploy to staging."
+description: Production deploy — the full Cloudflare cycle to a verified login, plus the legacy Vercel preview lane
+when_to_use: "Use when Abdout says deploy, push to prod, ship it or deploy everything — the whole cycle, not just the upload, including the Neon restore point and prod data steps. Distinct from /check (pre-ship gate only), /watch (observe, never fix), /cloudflare (platform ops: DNS, crons, logs) and /quick (commit-push, no build). Triggers on: deploy, deploy everything, push to production, ship to cloudflare, redeploy, why is the deploy stuck, vercel preview, deploy to staging."
 argument-hint: "[preview|logs|status] [app]"
 allowed-tools: Bash(git *), Bash(pnpm *), Bash(npx *), Bash(gh *), Bash(curl *), Bash(docker *), Bash(vercel *), Bash(scripts/*)
 model: opus

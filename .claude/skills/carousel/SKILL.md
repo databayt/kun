@@ -1,7 +1,7 @@
 ---
 name: carousel
-description: Multi-slide bilingual brand carousels — Claude writes the deck, kun renders Anthropic-styled slides at exact platform sizes, a human approves, channels receive
-when_to_use: "Use when a databayt brand needs a multi-slide social post — an Instagram/Facebook carousel, a LinkedIn PDF carousel, a story-sized slide set, or a slide album to DM a client on Telegram/WhatsApp. Triggers on: carousel, multi-slide post, swipe post, slides for instagram, carousel for <brand|block>, كاروسيل, سلايدات, منشور متعدد الشرائح."
+description: Multi-slide bilingual brand carousels — deck written, slides rendered at exact platform sizes, human-approved
+when_to_use: "Use when a databayt brand needs a multi-slide social post — an Instagram/Facebook or LinkedIn PDF carousel, a story-sized slide set, or a slide album to DM a client. Triggers on: carousel, multi-slide post, swipe post, slides for instagram, carousel for <brand|block>, كاروسيل, سلايدات, منشور متعدد الشرائح."
 argument-hint: "[brand|block] [topic] [--slides 8] [--sizes 1080x1350] [--dm <chat>] [--publish]"
 ---
 

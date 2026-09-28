@@ -1,7 +1,7 @@
 ---
 name: sync
-description: Self-update — read the latest releases across the engine's whole surface (Anthropic, stack, services, practice), diff against the engine, adopt or propose
-when_to_use: "Use when self-updating the engine against upstream releases — reads the Anthropic/stack/services/practice release feeds per engine.json sync tiers, diffs findings against the engine, adopts mechanical wins, proposes the rest, and stamps sync dates. Triggers on: sync, what's new in claude code, refresh the engine, release sweep."
+description: Self-update — diff the latest upstream releases against the engine, adopt or propose
+when_to_use: "Use when self-updating the engine against upstream releases (Anthropic, stack, services, practice) — adopt the mechanical wins, propose the rest, stamp the sync dates. Triggers on: sync, what's new in claude code, refresh the engine, release sweep."
 argument-hint: "[anthropic|stack|services|practice|all] [--force]"
 ---
 

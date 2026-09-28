@@ -1,7 +1,7 @@
 ---
 name: publish
-description: Deliver approved full drafts to the channels — the review queue decides, the lanes deliver
-when_to_use: "Use when an APPROVED full draft (copy + media) must reach its channels, now or on a schedule — via the review queue on /social/publish (Approve = publish right away or delegate to the cron drain, per its settings), the signed approval link, or the copy-out block for WhatsApp. This publishes CONTENT, not code: /ship and /deploy put software in production and /release ships a feature block, and none of them touch a brand page. It refuses without a recorded /approve yes, never writes copy (/draft), never creates from blank (the queue only fine-tunes), and never reads numbers back (/measure). Triggers on: publish the post, send it out, post it now, schedule it for tomorrow, broadcast it, review and publish, انشر المنشور, ابعت المنشور, راجع وانشر."
+description: Deliver approved full drafts to the brand channels
+when_to_use: "Use when an APPROVED full draft must reach its channels, now or on a schedule — via the review queue, the signed approval link, or the WhatsApp copy-out block. Publishes CONTENT, not code: /ship, /deploy and /release put software in production, never on a brand page. Refuses without a recorded /approve yes; never writes copy (/draft), creates from blank, or reads numbers back (/measure). Triggers on: publish the post, send it out, post it now, schedule it for tomorrow, broadcast it, review and publish, انشر المنشور, ابعت المنشور, راجع وانشر."
 argument-hint: "<brand> [--channels ...] [--at <iso>] [--dry-run]"
 ---
 

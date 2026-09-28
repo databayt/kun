@@ -1,7 +1,7 @@
 ---
 name: health
 description: Check Claude Code config health across the team + engine drift
-when_to_use: "Use when checking engine or config health — runs health.sh (counts vs engine.json, plugin parity, vocabulary sync, installed-agent matrix), reports drift, and reads teammates' statuses from the shared dashboard issue. Triggers on: health, config health, is the engine healthy, drift check, team config status."
+when_to_use: "Use when checking engine or config health — health.sh counts vs engine.json, plugin parity, vocabulary sync, drift — plus teammates' statuses from the dashboard issue. Triggers on: health, config health, is the engine healthy, drift check, team config status."
 argument-hint: "[local|all|report]"
 ---
 

@@ -1,7 +1,7 @@
 ---
 name: monitor
 description: Check all deployments, costs, and uptime across databayt products
-when_to_use: "Use when checking all deployments, costs, and uptime across the databayt products in one sweep — Vercel deploy status, production URL sampling, spend vs budget — escalating anything red to /incident. Triggers on: monitor, are the deploys green, uptime check, production status sweep."
+when_to_use: "Use for one sweep of deploys, uptime and spend across the databayt products, escalating anything red to /incident. Triggers on: monitor, are the deploys green, uptime check, production status sweep."
 argument-hint: "[product|all]"
 ---
 

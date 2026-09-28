@@ -1,7 +1,7 @@
 ---
 name: idea
 description: Capture a feature idea as a structured GitHub issue
-when_to_use: "Use when a new feature idea surfaces in conversation and needs to become a structured, deduplicated GitHub issue with user story, acceptance criteria, and scope — the Capture stage that opens the idea→production pipeline (distinct from /spec which details an existing issue, and /issue which files a generic issue without feature structure). Triggers on capture this idea, new feature idea, \"we should build …\", \"user can …\" stories, pipeline Capture stage, optionally scoped to a product (hogwarts, souq, mkan, shifa, kun)."
+when_to_use: "Use when a new feature idea surfaces and should become a deduplicated GitHub issue with a user story and acceptance criteria — the Capture stage opening the pipeline. Distinct from /spec (details an existing issue) and /issue (a generic issue without feature structure). Triggers on capture this idea, new feature idea, \"we should build …\", \"user can …\" stories, pipeline Capture stage, optionally scoped to a product (hogwarts, souq, mkan, shifa, kun)."
 argument-hint: <description> [product]
 ---
 

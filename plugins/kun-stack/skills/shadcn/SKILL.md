@@ -73,7 +73,7 @@ across repos.
 ## The five surfaces
 
 1. **CLI** — `npx shadcn@latest <init|add|view|search|build|info|docs|migrate|eject|mcp>`. Namespaced installs: `add @acme/login-form`.
-2. **MCP** — `npx shadcn@latest mcp` (already registered). Browse / search / install across every registry in the project's `components.json`. Tools: `mcp__shadcn__*`.
+2. **MCP** — `npx shadcn@4.21.0 mcp` (already registered, pinned so no session start waits on a registry lookup; `/sync` bumps the pin). Browse / search / install across every registry in the project's `components.json`. Tools: `mcp__shadcn__*`.
 3. **Registry** — `registry.json` + `registry-item.json` distribute components as JSON under `public/r/`. Types `registry:ui|block|component|lib|hook|page|file|style|theme`.
 4. **Skills** — `pnpm dlx skills add shadcn/ui` drops a _per-repo_ project-aware skill into `.claude/skills/`. This pack is the always-on user-level umbrella above it.
 5. **Directory** — community registries built into the CLI, addressed by `@namespace`, configured in `components.json` → `registries`.

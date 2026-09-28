@@ -1,7 +1,7 @@
 ---
 name: md
-description: The house standard for machine-produced Markdown — the schema, the RTL rules, and grading by agreement
-when_to_use: "Use when judging or repairing the QUALITY of Markdown that a machine produced from a document — 'this conversion is bad', 'the md is garbage', 'grade this transcription', 'why are the tables wrong', 'is this twin trustworthy' — and when writing a transcription contract for a new source. This is the standard, not a converter: /convert turns one file into Markdown via MarkItDown, /textbook orchestrates whole books. Both are held to this. Triggers on: md quality, bad conversion, grade the markdown, transcription contract, agreement score, RTL markdown, mirrored tables."
+description: House standard for machine-produced Markdown — schema, RTL rules, grading by agreement
+when_to_use: "Use when judging or repairing the quality of Markdown a machine produced from a document — a bad conversion, wrong tables, an untrustworthy twin — or writing a transcription contract for a new source. The standard, not a converter: /convert makes one file's Markdown and /textbook orchestrates whole books; both are held to it. Triggers on: md quality, bad conversion, grade the markdown, transcription contract, agreement score, RTL markdown, mirrored tables."
 argument-hint: "<file-or-dir> [--grade | --contract]"
 ---
 

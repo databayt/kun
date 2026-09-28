@@ -1,7 +1,7 @@
 ---
 name: handover
 description: UI verification — runs niche quality keywords on a URL or block
-when_to_use: 'Use when Abdout wants a UI verification pass before a demo, merge, or client handoff — polymorphic on argument, where URL mode (argument starts with /) runs all 12 per-URL niche quality keywords (browser 6 + code 6) on one route, and block mode (bare word) runs the per-route subset (debug, flow, responsive, lang) on every route in the block. Triggers on: handover <url|block>, pre-demo quality pass, run the niche quality keywords, "is this URL clean", "is the whole block ready to show".'
+when_to_use: 'Use when Abdout wants a UI verification pass before a demo, merge or client handoff — a URL (starts with /) gets all 12 per-URL niche quality keywords; a bare block name gets debug, flow, responsive and lang on every route. Triggers on: handover <url|block>, pre-demo quality pass, run the niche quality keywords, "is this URL clean", "is the whole block ready to show".'
 argument-hint: <url>|<block> [--env staging] [--fix]
 ---
 

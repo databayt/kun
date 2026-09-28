@@ -1,7 +1,7 @@
 ---
 name: plan
 description: Architecture plan — tech decisions from an approved spec, before code
-when_to_use: "Use when turning a human-approved spec into an implementation plan — pattern choices, architecture decisions, mirror target, tradeoffs, and risks appended to the feature's GitHub issue — the pipeline Plan stage between /spec and /schema (NOT Claude Code plan mode). Triggers on: plan the architecture, architecture plan for the approved spec, pipeline Plan stage."
+when_to_use: "Use when turning a human-approved spec into an implementation plan — patterns, architecture, mirror target, tradeoffs and risks on the feature's GitHub issue; the Plan stage between /spec and /schema (NOT Claude Code plan mode). Triggers on: plan the architecture, architecture plan for the approved spec, pipeline Plan stage."
 argument-hint: <feature>|#N [product]
 ---
 

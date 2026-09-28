@@ -1,7 +1,7 @@
 ---
 name: watch
 description: Post-deploy verification — visual + console + smoke test
-when_to_use: "Use when a deployment just landed and needs to be confirmed healthy in production — check Vercel deployment status, screenshot the live page, scan console errors and failed network requests, run a quick smoke interaction, then close or escalate the feature issue; unlike /check (pre-ship gate) or /qa (block QA), this observes production after /ship and never fixes code. Triggers on: watch, verify the deploy, is it live, post-deploy visual + console + smoke check, pipeline Monitor stage."
+when_to_use: "Use when a deploy just landed and must be confirmed healthy in production — screenshot the live page, scan console and network errors, run a smoke interaction, then close or escalate the issue. Unlike /check (pre-ship gate) or /qa (block QA), it observes after /ship and never fixes code. Triggers on: watch, verify the deploy, is it live, post-deploy visual + console + smoke check, pipeline Monitor stage."
 argument-hint: "[url] [product]"
 context: fork
 ---

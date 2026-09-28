@@ -1,7 +1,7 @@
 ---
 name: feature
 description: Full pipeline — idea to production (chains every stage)
-when_to_use: "Use when Abdout asks to build a feature end to end, take an idea all the way to production, or names a new feature to ship — this is the compound orchestrator that chains every pipeline stage (idea → spec → human approval → plan → tasks → schema → code → wire → check → ship → watch) with progress appended to a GitHub issue, unlike the single-stage neighbors (/idea, /spec, /schema, /code, /wire, /check, /ship, /watch) which each run one stage, and product scope resolves data-driven from .claude/memory/repositories.json (planned products get naming/spec only). Triggers on: feature <name> [product], build <feature> end to end, full pipeline idea→production."
+when_to_use: "Use when Abdout asks to build a feature end to end, take an idea to production, or names a new feature to ship — the orchestrator that chains every stage on one GitHub issue, pausing once for spec approval, unlike the single-stage /idea, /spec, /schema, /code, /wire, /check, /ship and /watch. Triggers on: feature <name> [product], build <feature> end to end, full pipeline idea→production."
 argument-hint: <name> [product] [--from <stage>]
 ---
 

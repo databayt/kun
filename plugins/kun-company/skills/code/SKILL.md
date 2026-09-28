@@ -1,7 +1,7 @@
 ---
 name: code
 description: Logic layer — server actions with auth, validation, tenant isolation
-when_to_use: "Use when the Logic stage of the pipeline is reached or Abdout asks in prose to build the business-logic layer for a feature — server actions, CRUD operations, permission rules, or optimized queries — as distinct from /schema (data layer) or /wire (UI layer). Triggers on: server actions, logic layer with auth+validation+tenant isolation, pipeline Logic stage."
+when_to_use: "Use at the pipeline's Logic stage, or when asked to build a feature's business-logic layer — server actions, CRUD, permission rules, optimized queries — as distinct from /schema (data layer) or /wire (UI layer). Triggers on: server actions, logic layer with auth+validation+tenant isolation, pipeline Logic stage."
 argument-hint: <feature> [product]
 ---
 

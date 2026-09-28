@@ -1,7 +1,7 @@
 ---
 name: record
-description: Screen-record demo videos and screenshot sets of real product flows, filed by repo/block/route and mirrored to Google Drive
-when_to_use: "Use when a REAL product flow or block needs capturing off the screen — demo/walkthrough videos or route screenshot sets, re-records after UI changes, Drive sync. Handles login walls + email OTPs. Not /screenshot (views an existing capture) or /higgs (generates media). Triggers on: record video for <flow>, record <block>, demo video, walkthrough, screen recording, re-record, sync media to drive, سجل فيديو, تسجيل الشاشة."
+description: Screen-record demo videos and screenshot sets of real product flows, mirrored to Google Drive
+when_to_use: "Use when a REAL product flow or block needs capturing off the screen — demo videos, route screenshot sets, re-records after UI changes, Drive sync. Not /screenshot (views an existing capture) or /higgs (generates media). Triggers on: record video for <flow>, record <block>, demo video, walkthrough, screen recording, re-record, sync media to drive, سجل فيديو, تسجيل الشاشة."
 argument-hint: "[block|flow|url] [--repo <repo>] [--locale ar|en] [--shots-only]"
 ---
 

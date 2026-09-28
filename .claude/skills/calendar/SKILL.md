@@ -1,7 +1,7 @@
 ---
 name: calendar
 description: The content calendar — which brand publishes what, on which day
-when_to_use: "Use when deciding or reviewing WHAT to publish and WHEN — mapping topics to weeks, allocating slots per brand, checking what actually shipped against what was planned. This is the planning stage that feeds /draft: it never writes post copy (/draft), never renders media (/higgs), never stages for sign-off (/approve), never delivers (/publish), and never reads numbers back (/measure). Triggers on: content calendar, plan the content, what are we publishing, which brand is due, what slipped this week, التقويم, خطة المحتوى."
+when_to_use: "Use when deciding or reviewing WHAT to publish and WHEN — topics to weeks, slots per brand, shipped vs planned. The planning stage feeding /draft: never writes copy (/draft), renders media (/higgs), stages sign-off (/approve), delivers (/publish) or reads numbers (/measure). Triggers on: content calendar, plan the content, what are we publishing, which brand is due, what slipped this week, التقويم, خطة المحتوى."
 argument-hint: "[plan|review] [brand] [date-range]"
 ---
 

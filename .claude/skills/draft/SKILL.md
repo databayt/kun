@@ -1,7 +1,7 @@
 ---
 name: draft
-description: Write the full draft — copy (Arabic crafted first, English mirrored) and/or its media set
-when_to_use: "Use when a topic needs to become a FULL draft for a databayt brand — the core piece plus one platform-native variant per channel, Arabic written natively and English mirrored, with UTM on every link, AND the draft's media half: library picks attached by URL, or a generation hand-off. ALSO the answering half of the Hub's agent window: with no topic, or on any phrasing about the draft queue, it drains the briefs contributors submitted on /social — picking media from the library as it answers. This is the drafting stage only: it does not decide what to write about (/calendar), does not render new images or video itself (/higgs, /carousel — it attaches their output), does not approve (/approve), and never sends anything to a platform (/publish). Triggers on: draft a post, write the copy, write the caption, post about <topic>, attach media to the draft, drain the draft queue, answer the social asks, any drafts waiting, اكتب منشور, صياغة المنشور, طابور الصياغة, أرفق وسائط للمسودة."
+description: Full brand draft — Arabic-first copy, English mirrored, plus media
+when_to_use: "Use when a topic must become a full brand draft — copy for every channel plus media picked from the library or handed off — or, with no topic, to drain the /social brief queue. Drafting only: never picks topics (/calendar), renders media (/higgs, /carousel — it attaches their output), approves (/approve) or sends (/publish). Triggers on: draft a post, write the copy, write the caption, post about <topic>, attach media to the draft, drain the draft queue, answer the social asks, any drafts waiting, اكتب منشور, صياغة المنشور, طابور الصياغة, أرفق وسائط للمسودة."
 argument-hint: "[<brand> <topic>] [--channels facebook,telegram] [--locale ar|en|both] [--media urls|type] · no args = drain the queue"
 ---
 

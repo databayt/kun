@@ -1,7 +1,7 @@
 ---
 name: bench
 description: Score the engine's own config on its labeled cases, and propose holdout-gated fixes
-when_to_use: "Use when the question is whether the CONFIG works, not whether a product feature works — scoring which skill fires for a prompt, checking runs against the contracts their SKILL.md declares, or proposing a description rewrite that must beat an unseen holdout. Unlike /health (counts files, never reads one), /qa (a product block), /check (typecheck + build). Triggers on: bench, benchmark the skills, is the routing accurate, measure the engine, dispatch accuracy, which skills collide, are any skills dead."
+when_to_use: "Use when the question is whether the CONFIG works, not a product feature — which skill fires for a prompt, runs checked against their SKILL.md contracts, or a description rewrite that must beat an unseen holdout. Unlike /health (counts files, never reads one), /qa (a product block), /check (typecheck + build). Triggers on: bench, benchmark the skills, is the routing accurate, measure the engine, dispatch accuracy, which skills collide, are any skills dead."
 argument-hint: "[dispatch|adherence|outcome] [--audit] [--tune <skill>] [--retire]"
 ---
 

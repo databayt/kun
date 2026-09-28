@@ -1,7 +1,7 @@
 ---
 name: analyze
 description: Analyze a repo's patterns and generate a tailored Claude Code config
-when_to_use: "Use when a repo needs its patterns extracted into a tailored Claude Code config — CLAUDE.md, agents, rules, and skills generated and committed straight to main — the config-generator lane, distinct from /learn which mines org-wide conventions into memory. Triggers on: analyze <repo>, generate config for this repo, repo config generator."
+when_to_use: "Use when a repo needs its patterns turned into a tailored Claude Code config (CLAUDE.md, agents, rules, skills) committed to main — distinct from /learn, which mines org-wide conventions into memory. Triggers on: analyze <repo>, generate config for this repo, repo config generator."
 argument-hint: "[repo-path] [--dry-run]"
 ---
 

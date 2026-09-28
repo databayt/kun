@@ -1,7 +1,7 @@
 ---
 name: package
 description: Cross-repo dependency audit and upgrade coordination
-when_to_use: "Use when auditing or upgrading dependencies across the databayt repos — version consistency, coordinated upgrades, breaking-change sweeps by the package agent; cross-repo scope, unlike a single repo's deps/outdated check. Triggers on: package audit, upgrade deps across repos, version consistency, dependency sweep."
+when_to_use: "Use when auditing or upgrading dependencies across the databayt repos — version consistency, coordinated upgrades, breaking-change sweeps — unlike a single repo's outdated check. Triggers on: package audit, upgrade deps across repos, version consistency, dependency sweep."
 argument-hint: "[audit|upgrade <dep>] [repo]"
 ---
 
