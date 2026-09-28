@@ -214,7 +214,15 @@ export function calculateDeterministicMatch(
 
   const capabilityScore = hitsCapability ? lane.capabilityHigh : lane.capabilityLow;
   const domainScore = hitsDomain ? lane.domainHigh : lane.domainLow;
-  const seniorityScore = 88;
+  // Seniority realism used to be a constant, which made every rung equally
+  // plausible. Abdout's goal is the shortest path to an offer (2026-09-28), so
+  // the rung the posting names now moves the score: a junior or unlabelled
+  // opening converts faster than a senior one at the same technical fit.
+  const seniorityScore = /\b(junior|jr\.?|graduate|entry[ -]level|trainee|apprentice)\b/i.test(job.title)
+    ? 96
+    : /\b(senior|sr\.?|lead|staff|principal)\b/i.test(job.title)
+      ? 80
+      : 88;
 
   const technicalDim: DimensionScore = {
     name: "Technical Stack Match",

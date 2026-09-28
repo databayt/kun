@@ -38,7 +38,7 @@ import {
   noteRow,
   patchRow,
 } from "./board";
-import { kigaliNow, killSwitchOn, LANE_BAND, loadConfig } from "./config";
+import { kigaliNow, killSwitchOn, LANE_BAND, loadConfig, seniorityBand } from "./config";
 import {
   fillGreenhouse,
   greenhouseQuestions,
@@ -200,6 +200,7 @@ async function prepare(): Promise<void> {
       (a, b) =>
         (LANE_BAND[a.campaign ?? ""] ?? 9) -
           (LANE_BAND[b.campaign ?? ""] ?? 9) ||
+        seniorityBand(a.name) - seniorityBand(b.name) ||
         (b.engineScore ?? 0) - (a.engineScore ?? 0),
     )
     .slice(0, limit);

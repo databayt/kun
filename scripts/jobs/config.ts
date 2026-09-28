@@ -53,6 +53,17 @@ export const LANE_BAND: Record<string, number> = {
   ENGINEERING_CONTRACT: 8,
 };
 
+/// The rung a posting names, as a sort band — lower goes out first. Abdout's
+/// goal is the shortest path to an offer (2026-09-28), so a junior or
+/// unlabelled rung, which has the widest funnel and the shortest interview
+/// loop, is queued ahead of a senior one. This orders the queue; nothing is
+/// filtered out, and a senior role still sends the same day if the cap allows.
+export function seniorityBand(title: string): number {
+  if (/\b(junior|jr\.?|graduate|entry[ -]level|trainee|apprentice)\b/i.test(title)) return 1;
+  if (/\b(senior|sr\.?|lead|staff|principal)\b/i.test(title)) return 3;
+  return 2; // unlabelled, which in practice reads as mid-level
+}
+
 export function loadConfig(): LoopConfig {
   const path = "jobs/loop.config.json";
   if (!existsSync(path)) return DEFAULTS;

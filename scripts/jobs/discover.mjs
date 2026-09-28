@@ -32,6 +32,14 @@ const TODAY = new Date().toISOString().slice(0, 10);
 const UA =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128 Safari/537.36";
 const SPACING_MS = 1500;
+
+// ── role vocabulary ──────────────────────────────────────────────────────────
+// One place, so every adapter hunts the same work. AI and automation
+// engineering joined on 2026-09-28 at Abdout's instruction — they are what the
+// market is buying — together with the junior rungs, which are the fastest
+// route to an offer and were never excluded, only ranked last.
+const ROLE_AI = /\b(ai|a\.i\.|artificial intelligence|automation|agentic|llm|gen ?ai)\b[\w/,& -]{0,24}\b(engineer|developer)\b/i;
+
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function get(url, { json = false } = {}, attempt = 1) {
@@ -401,7 +409,7 @@ const ADAPTERS = {
   async himalayas() {
     const items = [];
     const dropped = [];
-    const STACK = /react|next\.?js|typescript|full[- ]?stack|front[- ]?end|javascript|node/i;
+    const STACK = /react|next\.?js|typescript|full[- ]?stack|front[- ]?end|javascript|node|ai engineer|automation engineer/i;
     for (const offset of [0, 100, 200]) {
       const data = await get(`https://himalayas.app/jobs/api?limit=100&offset=${offset}`, { json: true });
       for (const j of data.jobs ?? []) {
@@ -499,7 +507,7 @@ const ADAPTERS = {
     const OFF = /\b(staff|principal|director|manager|head|vp|intern|ios|android|embedded|data scien|machine learning|security|sre|devops|qa|sales|designer|java|rpg|as400|php|ruby|golang|rust|scala|salesforce|sap)\b|\.net\b|c#/i;
     const seen = new Set();
     for (const f of found) {
-      if (!STACK.test(f.title) || OFF.test(f.title)) continue;
+      if (!STACK.test(f.title) || (OFF.test(f.title) && !ROLE_AI.test(f.title))) continue;
       if (!openToRwanda(f.place, f.text ?? "")) continue;
       const key = `${f.company}|${f.title}`.toLowerCase();
       if (seen.has(key)) continue;
@@ -526,8 +534,12 @@ const ADAPTERS = {
     if (atsBoards.length === 0) return { items, dropped: ["ats: no jobs/ats-boards.json — run ats-seed.mjs"] };
     // In-memory, so boards the aggregators found earlier in this run count.
     const boards = atsBoards;
-    const TITLE = /software|full[- ]?stack|front[- ]?end|back[- ]?end|\bweb\b|react|node|typescript|javascript|product engineer|platform engineer|developer/i;
-    const NOT_TITLE = /\b(staff|principal|director|manager|head|vp|intern|ios|android|mobile|embedded|firmware|data scien|machine learning|\bml\b|security|sre|devops|qa|test|sales|support|designer|recruit)/i;
+    const TITLE = /software|full[- ]?stack|front[- ]?end|back[- ]?end|\bweb\b|react|node|typescript|javascript|product engineer|platform engineer|developer|ai engineer|automation engineer/i;
+    // Split in two so an explicit AI or automation title can clear the wrong-
+    // specialism list without also clearing the wrong-job list: "AI/ML Engineer"
+    // is wanted, "Engineering Manager, AI" is still not.
+    const NOT_ROLE = /\b(staff|principal|director|manager|head|vp|intern|sales|support|designer|recruit)/i;
+    const NOT_STACK = /\b(ios|android|mobile|embedded|firmware|data scien|machine learning|\bml\b|security|sre|devops|qa|test)/i;
     const PLACE_OK = /worldwide|anywhere|global|africa|emea|remote$|^remote\b(?!.*\b(us|usa|united states|canada|uk|united kingdom|latam|americas|apac|india|brazil|mexico|germany|france|spain|poland|portugal|netherlands|australia)\b)/i;
     const PLACE_BAD = /\b(us|usa|u\.s\.|united states|canada|uk|united kingdom|latam|americas|north america|apac|india|brazil|mexico|germany|france|spain|poland|portugal|netherlands|ireland|australia|new york|san francisco|london|berlin|toronto)\b/i;
     // The last clause catches the phrasing that reads as a welcome rather than
@@ -577,7 +589,10 @@ const ADAPTERS = {
         continue;
       }
       for (const j of jobs) {
-        if (!TITLE.test(j.title) || NOT_TITLE.test(j.title)) continue;
+        const isAi = ROLE_AI.test(j.title);
+        if (!TITLE.test(j.title) && !isAi) continue;
+        if (NOT_ROLE.test(j.title)) continue;
+        if (NOT_STACK.test(j.title) && !isAi) continue;
         // Country-bound postings name the country in the title ("- India",
         // "Armenia 🇦🇲"): unless it is Rwanda, it is not open to Abdout.
         if (/[\u{1F1E6}-\u{1F1FF}]{2}/u.test(j.title) && !/🇷🇼/u.test(j.title)) continue;
@@ -632,13 +647,13 @@ const ADAPTERS = {
     const data = await get("https://remoteok.com/api", { json: true });
     const rows = Array.isArray(data) ? data.slice(1) : [];
     if (rows.length === 0) dropped.push("remoteok: empty API response");
-    const STACK = /react|next\.?js|typescript|javascript|full[- ]?stack|frontend|node/i;
+    const STACK = /react|next\.?js|typescript|javascript|full[- ]?stack|frontend|node|ai engineer|automation engineer/i;
     const OFF_STACK = /\.net|\bc#|\bjava\b|php|ruby|golang|\bgo\b|python|rust|ios|android|salesforce/i;
     const seen = new Set();
     const BLOCKED = /\b(us|usa|united states|north america|canada|uk only|latam|americas)\b/i;
     for (const r of rows) {
       const tags = (r.tags ?? []).join(" ");
-      if (!STACK.test(`${r.position} ${tags}`) || OFF_STACK.test(r.position ?? "")) continue;
+      if (!STACK.test(`${r.position} ${tags}`) || (OFF_STACK.test(r.position ?? "") && !ROLE_AI.test(r.position ?? ""))) continue;
       const key = `${r.company}|${r.position}`.toLowerCase();
       if (seen.has(key)) continue;
       seen.add(key);

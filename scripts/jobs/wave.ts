@@ -28,7 +28,7 @@ import { similarRole } from "@/lib/jobs/deduplication";
 import { evaluateSendGate, holdReasonFor } from "@/lib/jobs/send-gate";
 
 import { BoardRow, ledger, listBoard, patchRow } from "./board";
-import { kigaliNow, LANE_BAND, loadConfig, todaysCap } from "./config";
+import { kigaliNow, LANE_BAND, loadConfig, seniorityBand, todaysCap } from "./config";
 import { pickVariants } from "./variants";
 
 const args = process.argv.slice(2);
@@ -229,6 +229,7 @@ async function main(): Promise<void> {
       (a, b) =>
         (LANE_BAND[a.campaign ?? ""] ?? 9) - (LANE_BAND[b.campaign ?? ""] ?? 9) ||
         (a.deadline ?? "9999").localeCompare(b.deadline ?? "9999") ||
+        seniorityBand(a.name) - seniorityBand(b.name) ||
         (b.engineScore ?? 0) - (a.engineScore ?? 0),
     )
     .slice(0, limit);

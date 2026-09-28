@@ -11,7 +11,7 @@
 import { existsSync, readFileSync } from "node:fs";
 
 import { BoardRow, boardUrl, listBoard } from "./board";
-import { kigaliNow, killSwitchOn, loadConfig, todaysCap } from "./config";
+import { kigaliNow, killSwitchOn, loadConfig, seniorityBand, todaysCap } from "./config";
 import { notify } from "./notify";
 
 const short = (r: BoardRow): string =>
@@ -80,7 +80,13 @@ async function main(): Promise<void> {
   const packets = by("HOLD").filter((r) => /paste-ready packet/.test(r.holdReason ?? ""));
   if (packets.length) {
     lines.push(`\n*Paste & submit (${packets.length} portal packets in jobs/packets/ats) — best first:*`);
-    for (const r of packets.sort((a, b) => (b.engineScore ?? 0) - (a.engineScore ?? 0)).slice(0, 6)) {
+    for (const r of packets
+      .sort(
+        (a, b) =>
+          seniorityBand(a.name) - seniorityBand(b.name) ||
+          (b.engineScore ?? 0) - (a.engineScore ?? 0),
+      )
+      .slice(0, 6)) {
       lines.push(`• ${short(r)} — ${r.applyUrl ?? ""}`);
     }
   }
