@@ -57,6 +57,7 @@ export interface AtsProfile {
     authorizedEU: boolean;
     authorizedCanada: boolean;
     needsSponsorshipForCountryBoundRoles: boolean;
+    canWorkAsRemoteContractorFromRwanda?: boolean;
     willingToRelocate: string;
   };
   compensation: Record<string, string>;
@@ -130,7 +131,7 @@ function countryIn(
   if (/\b(eu|europe|european)\b/i.test(label)) return "eu";
   if (/canada/i.test(label)) return "canada";
   if (
-    /country (of|where you) (residence|reside|live)|where you (currently )?(live|reside)|country you (are|currently) (based|live|reside|located)/i.test(
+    /country (of|where you) (residence|reside|live)|country (with |in )?which you (currently )?(reside|live)|where you (currently )?(live|reside)|country you (are|currently) (based|live|reside|located)/i.test(
       label,
     )
   )
@@ -337,9 +338,9 @@ export function answerQuestion(
   }
 
   // ── "at least N years of …" — answered from the real count, honestly ──────
-  const atLeast = L.match(/at least (\d+)\+? years|(\d+)\+ years/);
+  const atLeast = L.match(/at least (\d+)\+? years|(\d+)\+ years|\((\d+)\) years/);
   if (atLeast && /experience|years/.test(L) && (field.type === "boolean" || isSelect || /^(do|have|are)/i.test(label))) {
-    const need = Number(atLeast[1] ?? atLeast[2]);
+    const need = Number(atLeast[1] ?? atLeast[2] ?? atLeast[3]);
     return yesNo(field, profile.work.yearsSoftwareProfessional >= need);
   }
 
@@ -348,6 +349,17 @@ export function answerQuestion(
     if (/europe|european|emea|cet|cest|eet|gmt\s*\+|utc\s*\+\s*[0-3]\b|africa/i.test(L)) return yesNo(field, true);
     if (/overlap/i.test(L)) return yesNo(field, true); // he states full EU / partial US-East overlap
     if (/\b(pacific|pst|pt|mountain|central time|cst|eastern|est|et|us|american|apac|asia|australia)\b/i.test(L)) return yesNo(field, false);
+  }
+
+  // ── "first time applying for this role?" — the ledger's 30-day no-repeat and
+  //    one-per-company rules mean the loop never sends the same role twice
+  if (/first time applying/i.test(L)) return yesNo(field, true);
+  // ── "Please note … confirm your knowledge of this by selecting 'Yes'" — an
+  //    acknowledgement. When it also asserts he can contract from abroad, that is
+  //    a profile fact (canWorkAsRemoteContractorFromRwanda), not a formality.
+  if (/confirm your (knowledge|understanding) of this/i.test(L)) {
+    if (/independent contractor|business entity|work authori[sz]ation allows/i.test(L) && !profile.authorization.canWorkAsRemoteContractorFromRwanda) return null;
+    return yesNo(field, true);
   }
 
   // ── work authorisation & sponsorship ───────────────────────────────────────

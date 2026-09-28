@@ -41,6 +41,7 @@ const profile: AtsProfile = {
     authorizedEU: false,
     authorizedCanada: false,
     needsSponsorshipForCountryBoundRoles: true,
+    canWorkAsRemoteContractorFromRwanda: true,
     willingToRelocate: "Yes — would need visa sponsorship",
   },
   compensation: {
@@ -255,5 +256,28 @@ describe("ATS answers — Ashby forms", () => {
     expect(answerQuestion(bool("Are you in an European time zone?"), profile, ctx)).toEqual({ kind: "check", value: true });
     expect(answerQuestion(bool("Are you legally authorized to work in the country you are based in?"), profile, ctx)).toEqual({ kind: "check", value: true });
     expect(answerQuestion(bool("Can you work US Pacific time zone hours?"), profile, ctx)).toEqual({ kind: "check", value: false });
+  });
+});
+
+describe("ATS answers — Wikimedia / ZipRecruiter wordings (2026-09-28)", () => {
+  const yn = ["Yes", "No"];
+  it("reads 'the country which you reside' as residence", () => {
+    expect(answerQuestion(sel("Are you legally authorized to work in the country with which you reside? ", yn), profile, ctx)).toEqual({ kind: "select", option: "Yes" });
+    expect(answerQuestion(sel("Are you legally authorized to work in the country which you reside? ", yn), profile, ctx)).toEqual({ kind: "select", option: "Yes" });
+  });
+  it("counts 'five (5) years' against the real years", () => {
+    expect(answerQuestion(sel("Do you have five (5) years of experience in full stack software development in a professional/work environment? ", yn), profile, ctx)).toEqual({ kind: "select", option: "No" });
+  });
+  it("answers first-time applying", () => {
+    expect(answerQuestion(sel("Is this your first time applying for this role within the last 12-months? ", yn), profile, ctx)).toEqual({ kind: "select", option: "Yes" });
+  });
+  it("acknowledges 'confirm your knowledge of this', including the contractor one", () => {
+    expect(answerQuestion(sel("Please note this role is a contract position. Contract roles are not eligible for benefits outside of the required, local statutory benefits (as applicable). Please confirm your knowledge of this by selecting 'Yes'.  ", yn), profile, ctx)).toEqual({ kind: "select", option: "Yes" });
+    const contractor = sel("Please note that sponsorship is not allowed for this role. Also, if you are an international candidate, please confirm that your work authorization allows you to work as an independent contractor or your own business entity. Please confirm your knowledge of this by selecting 'Yes'.", yn);
+    expect(answerQuestion(contractor, profile, ctx)).toEqual({ kind: "select", option: "Yes" });
+  });
+  it("still holds what the profile does not know", () => {
+    expect(answerQuestion(sel("Are you considered a business entity? ", yn), profile, ctx)).toBeNull();
+    expect(answerQuestion(sel("Does your current work authorization expire?", ["Yes", "No", "N/A"]), profile, ctx)).toBeNull();
   });
 });
