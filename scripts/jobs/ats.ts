@@ -334,9 +334,20 @@ async function prepare(): Promise<void> {
     } else if (providerOf(row) !== "greenhouse") {
       // Packet providers never auto-submit: hand Abdout the packet today
       // instead of queueing a card the submitter would bounce two hours later.
+      // A failed form fetch must not stop the run: queue the card instead, and
+      // the submitter writes the packet on its next tick.
       const found = findAts(row.id);
-      if (found) await packetHold({ ...row, variant, waveId: date } as BoardRow, found, true);
-      await patchRow(row.id, { variant, waveId: date });
+      let held = false;
+      if (found) {
+        try {
+          await packetHold({ ...row, variant, waveId: date } as BoardRow, found, true);
+          held = true;
+        } catch (err) {
+          console.log(`  · packet deferred ${row.name.slice(0, 50)} — ${(err as Error).message.slice(0, 60)}`);
+        }
+      }
+      await patchRow(row.id, { variant, waveId: date, ...(held ? {} : { applicationStatus: "QUEUED", holdReason: "" }) });
+      if (!held) ledger({ kind: "queued", crmId: row.id, name: row.name, campaign: row.campaign, variant, waveId: date });
     } else {
       await patchRow(row.id, {
         applicationStatus: "QUEUED",

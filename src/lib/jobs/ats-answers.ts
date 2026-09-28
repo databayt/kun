@@ -33,6 +33,7 @@ export interface AtsProfile {
     country: string;
     timezone: string;
     passportCountry?: string;
+    nationality?: string;
   };
   links: {
     linkedin: string | null;
@@ -271,7 +272,7 @@ export function answerQuestion(
   if (/current (job )?(title|role|position)/i.test(L) && !isSelect) return { kind: "text", value: profile.work.currentTitle };
   if (/strongest.*(language|stack)|primary (programming )?language/i.test(L) && !isSelect) return { kind: "text", value: profile.work.strongestLanguages ?? "TypeScript, JavaScript, SQL" };
   if (/time ?zone/i.test(L) && isSelect) {
-    const o = pick(field.values, /utc\s*\+\s*0?2\b|gmt\s*\+\s*0?2\b|\+02:?00|\bcat\b|central africa|eastern europe/i);
+    const o = pick(field.values, /utc\s*\+\s*0?2\b|gmt\s*\+\s*0?2\b|\+02:?00|\bcat\b|central africa|eastern europe/i, /^emea$|europe, middle east (or|and) africa|\bafrica\b/i);
     return o ? { kind: "select", option: o } : null;
   }
 
@@ -306,8 +307,16 @@ export function answerQuestion(
 
   // ── more plain facts (Ashby audit, 2026-09-27) ────────────────────────────
   if (/passport country|country of (citizenship|nationality)|nationality/i.test(L) && !isSelect) return { kind: "text", value: profile.identity.passportCountry ?? "Sudan" };
+  if (/nationality|citizenship/i.test(L) && isSelect && profile.identity.nationality) {
+    const o = pick(field.values, new RegExp(`^${profile.identity.nationality}$`, "i"));
+    return o ? (field.type === "multi_value_multi_select" ? { kind: "multi", options: [o] } : { kind: "select", option: o }) : null;
+  }
+  if (/where are you (currently |presently )?(located|based)|where do you (currently )?(live|reside)/i.test(L) && isSelect) {
+    const o = pick(field.values, /rwanda/i, /africa/i, /emea/i, /^other/i);
+    return o ? { kind: "select", option: o } : null;
+  }
   if (/^phone( number)?$|mobile( number)?|phone number/i.test(L) && !isSelect) return { kind: "text", value: profile.identity.phone };
-  if (/where are you (currently )?(located|based)|where do you (currently )?(live|reside)/i.test(L) && !isSelect) return { kind: "text", value: `${profile.identity.city}, ${profile.identity.country}` };
+  if (/where are you (currently |presently )?(located|based)|where do you (currently )?(live|reside)/i.test(L) && !isSelect) return { kind: "text", value: `${profile.identity.city}, ${profile.identity.country}` };
   if (/famil(y|ial) relationships? with (current|any)/i.test(L)) return yesNo(field, false);
   if (/worked remotely|remote (work )?experience|full-time remote/i.test(L) && (field.type === "boolean" || isSelect)) return yesNo(field, true);
   if (/independent contractor|as a contractor|contractor (arrangement|basis)/i.test(L)) {
@@ -485,7 +494,7 @@ export function answerQuestion(
       L,
     )
   ) {
-    const o = pick(field.values, /^no\b|not a former|never/i);
+    const o = pick(field.values, /^no\b|not a former|never|have not (previously )?been employed/i);
     return isSelect
       ? o
         ? { kind: "select", option: o }
@@ -509,7 +518,7 @@ export function answerQuestion(
   )
     return yesNo(field, true);
   if (
-    /how did you (hear|find|learn|find out)|where did you (hear|find|see)|^source\b|how you heard/i.test(
+    /how did you (first )?(hear|find|learn|find out)|where did you (hear|find|see)|^source\b|how you heard/i.test(
       L,
     )
   ) {
@@ -517,6 +526,7 @@ export function answerQuestion(
       const o = pick(
         field.values,
         /careers? (page|site)|company (web)?site|website/i,
+        /career site/i,
         /job board|online/i,
         /^other/i,
       );

@@ -18,6 +18,7 @@ const profile: AtsProfile = {
     city: "Kigali",
     country: "Rwanda",
     timezone: "CAT (UTC+2)",
+    nationality: "Sudanese",
   },
   links: {
     linkedin: "https://www.linkedin.com/in/abdout",
@@ -279,5 +280,25 @@ describe("ATS answers — Wikimedia / ZipRecruiter wordings (2026-09-28)", () =>
   it("still holds what the profile does not know", () => {
     expect(answerQuestion(sel("Are you considered a business entity? ", yn), profile, ctx)).toBeNull();
     expect(answerQuestion(sel("Does your current work authorization expire?", ["Yes", "No", "N/A"]), profile, ctx)).toBeNull();
+  });
+});
+
+describe("ATS answers — Canonical / Affirm / Muck Rack wordings (2026-09-28)", () => {
+  it("picks a region-named time zone", () => {
+    expect(answerQuestion(sel("What time zone are you in?", ["American Time Zones", "Asia Pacific Time Zones", "Europe, Middle East or Africa Time Zones", "Indian Ocean Time Zones"]), profile, ctx)).toEqual({ kind: "select", option: "Europe, Middle East or Africa Time Zones" });
+    expect(answerQuestion(sel("Which Timezone are you based in?", ["APAC", "EMEA", "Americas"]), profile, ctx)).toEqual({ kind: "select", option: "EMEA" });
+    expect(answerQuestion(sel("What time zone are you currently based in?", ["Eastern Time (ET)", "Pacific Time (PT)"]), profile, ctx)).toBeNull();
+  });
+  it("answers location selects and 'presently located'", () => {
+    expect(answerQuestion(sel("Where are you located?", ["Bulgaria", "Canada", "United States", "Other"]), profile, ctx)).toEqual({ kind: "select", option: "Other" });
+    expect(answerQuestion(txt("Where are you presently located?"), profile, ctx)).toEqual({ kind: "text", value: "Kigali, Rwanda" });
+  });
+  it("picks the nationality from the profile", () => {
+    const q: AtsQuestion = { label: "Please indicate your nationality:", required: true, fields: [{ name: "n", type: "multi_value_multi_select", values: ["Sudanese", "Swazi", "Rwandan"].map((label) => ({ label })) }] };
+    expect(answerQuestion(q, profile, ctx)).toEqual({ kind: "multi", options: ["Sudanese"] });
+  });
+  it("answers first-learned and never-employed selects", () => {
+    expect(answerQuestion(sel(" How did you first learn about Affirm as an employer? ", ["Affirm blog", "Affirm’s Career Site", "LinkedIn"]), profile, ctx)).toEqual({ kind: "select", option: "Affirm’s Career Site" });
+    expect(answerQuestion(sel("Have you previously been employed at Affirm for any length of time?", ["I have not previously been employed at Affirm", "I have been employed at Affirm as a contractor"]), profile, ctx)).toEqual({ kind: "select", option: "I have not previously been employed at Affirm" });
   });
 });
