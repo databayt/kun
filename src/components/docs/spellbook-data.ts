@@ -1053,6 +1053,45 @@ export const schools: School[] = [
         connects: ["motion", "hero"],
         depends: [],
       },
+      {
+        name: "skeleton",
+        effect:
+          "Layout-matching shimmer shapes while data loads — no spinners, no jumps",
+        order: [
+          f("react"),
+          f("nextjs"),
+          f("tailwind"),
+          s("/skeleton"),
+          w("loading"),
+        ],
+        steps: [
+          "Audit routes without loading.tsx, spinners and null fallbacks",
+          "Kit atoms (SkeletonDataTable, SkeletonStats, SkeletonForm …) + animate-shimmer",
+          "loading.tsx per route mirroring the page's real layout classes",
+          "role=status + sr-only label; RTL sweep; never above notFound()",
+        ],
+        connects: ["suspense", "streaming", "blur"],
+        depends: [],
+      },
+      {
+        name: "blur",
+        effect: "Images arrive blurred and sharpen into focus as they load",
+        order: [
+          f("react"),
+          f("nextjs"),
+          f("tailwind"),
+          s("/blur"),
+          w("loading"),
+        ],
+        steps: [
+          "BlurImage atom — next/image + blur-xl scale-105 → blur-0 on load",
+          "LQIP: static import → stored at upload → stock map → neutral",
+          "Convert <img> and bare next/image surfaces, hero first",
+          "Verify mid-load under throttled network",
+        ],
+        connects: ["skeleton", "motion", "performance"],
+        depends: [],
+      },
     ],
   },
   {
@@ -1828,7 +1867,7 @@ export const schools: School[] = [
           "Wrap async Server Components",
           "Show skeleton while loading",
         ],
-        connects: ["streaming", "lazy"],
+        connects: ["streaming", "lazy", "skeleton"],
         depends: [],
       },
       {

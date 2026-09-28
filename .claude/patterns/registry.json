@@ -8,14 +8,22 @@
       "maturity": "production",
       "fileCount": 22,
       "description": "Central form system with 14 field atoms, wizard factory, bridges, analytics, and server action helpers",
-      "dependencies": ["react-hook-form", "zod", "@hookform/resolvers"],
+      "dependencies": [
+        "react-hook-form",
+        "zod",
+        "@hookform/resolvers"
+      ],
       "cloneCommand": "/clone pattern:form",
       "card": ".claude/patterns/cards/form.md",
       "implementations": {
         "hogwarts": {
           "path": "src/components/form/",
           "pattern": "central-block",
-          "subPatterns": ["triplet", "wizard", "application"],
+          "subPatterns": [
+            "triplet",
+            "wizard",
+            "application"
+          ],
           "fileCount": 22,
           "maturity": "production",
           "notes": "14 field atoms, createWizardProvider factory, useActionStateBridge for React 19, multi-step provider, bridges"
@@ -56,7 +64,10 @@
       "maturity": "production",
       "fileCount": 41,
       "description": "DataTable with 14 sub-components, URL-synced state via nuqs, Prisma filter integration, action bar, skeleton",
-      "dependencies": ["@tanstack/react-table", "nuqs"],
+      "dependencies": [
+        "@tanstack/react-table",
+        "nuqs"
+      ],
       "cloneCommand": "/clone pattern:table",
       "card": ".claude/patterns/cards/table.md",
       "implementations": {
@@ -103,7 +114,9 @@
       "maturity": "production",
       "fileCount": 13,
       "description": "Complete modal system with CRUD integration, route modals, carousel, multi-step, and form layout",
-      "dependencies": ["@radix-ui/react-dialog"],
+      "dependencies": [
+        "@radix-ui/react-dialog"
+      ],
       "cloneCommand": "/clone pattern:modal",
       "card": ".claude/patterns/cards/modal.md",
       "implementations": {
@@ -150,7 +163,11 @@
       "maturity": "production",
       "fileCount": 33,
       "description": "Complete auth system with login, join, reset, password, verification, 2FA, OAuth, role-gate, user-button",
-      "dependencies": ["next-auth", "@auth/prisma-adapter", "bcryptjs"],
+      "dependencies": [
+        "next-auth",
+        "@auth/prisma-adapter",
+        "bcryptjs"
+      ],
       "cloneCommand": "/clone pattern:auth",
       "card": ".claude/patterns/cards/auth.md",
       "implementations": {
@@ -197,7 +214,9 @@
       "maturity": "production",
       "fileCount": 30,
       "description": "Zod schema factories with i18n ValidationHelper for type-safe, translated error messages",
-      "dependencies": ["zod"],
+      "dependencies": [
+        "zod"
+      ],
       "cloneCommand": "/clone pattern:validation",
       "card": ".claude/patterns/cards/validation.md",
       "implementations": {
@@ -244,7 +263,10 @@
       "maturity": "production",
       "fileCount": 1,
       "description": "Server action factory with auth, tenant isolation, Zod validation, and ActionResponse<T> return type",
-      "dependencies": ["zod", "next/cache"],
+      "dependencies": [
+        "zod",
+        "next/cache"
+      ],
       "cloneCommand": "/clone pattern:action",
       "card": ".claude/patterns/cards/action.md",
       "implementations": {
@@ -291,7 +313,9 @@
       "maturity": "production",
       "fileCount": 20,
       "description": "Column definitions with getColumns(fd, rp) accepting dictionary for i18n labels, ActionMenu for row actions",
-      "dependencies": ["@tanstack/react-table"],
+      "dependencies": [
+        "@tanstack/react-table"
+      ],
       "cloneCommand": "/clone pattern:columns",
       "card": ".claude/patterns/cards/columns.md",
       "implementations": {
@@ -338,7 +362,11 @@
       "maturity": "production",
       "fileCount": 6,
       "description": "URL-routed multi-step wizard with createWizardProvider factory, progress tracking, and step validation",
-      "dependencies": ["react-hook-form", "zod", "nuqs"],
+      "dependencies": [
+        "react-hook-form",
+        "zod",
+        "nuqs"
+      ],
       "cloneCommand": "/clone pattern:wizard",
       "card": ".claude/patterns/cards/wizard.md",
       "implementations": {
@@ -385,7 +413,9 @@
       "maturity": "production",
       "fileCount": 3,
       "description": "Collapsible sidebar with config-driven navigation, icons, and role-based visibility",
-      "dependencies": ["@radix-ui/react-collapsible"],
+      "dependencies": [
+        "@radix-ui/react-collapsible"
+      ],
       "cloneCommand": "/clone pattern:sidebar",
       "card": ".claude/patterns/cards/sidebar.md",
       "implementations": {
@@ -432,7 +462,10 @@
       "maturity": "production",
       "fileCount": 10,
       "description": "Responsive header with command menu, language switcher, mode switcher, mobile nav, and main nav",
-      "dependencies": ["cmdk", "next-themes"],
+      "dependencies": [
+        "cmdk",
+        "next-themes"
+      ],
       "cloneCommand": "/clone pattern:header",
       "card": ".claude/patterns/cards/header.md",
       "implementations": {
@@ -479,7 +512,9 @@
       "maturity": "blueprint",
       "fileCount": 3,
       "description": "Canonical Playwright E2E config — setup-project auth (storageState), desktop + mobile + Arabic-RTL projects, sharded CI with blob merge. Targets @playwright/test 1.60.",
-      "dependencies": ["@playwright/test"],
+      "dependencies": [
+        "@playwright/test"
+      ],
       "cloneCommand": "/clone pattern:e2e",
       "card": ".claude/patterns/cards/e2e.md",
       "implementations": {
@@ -517,6 +552,75 @@
           "fileCount": 0,
           "maturity": "none",
           "notes": "To adopt — not yet verified"
+        }
+      }
+    },
+    "skeleton": {
+      "canonical": "hogwarts",
+      "canonicalPath": "src/components/atom/loading.tsx",
+      "maturity": "production",
+      "fileCount": 3,
+      "description": "Layout-matching shimmer skeletons: shimmer primitive + one-file kit + feature loading.tsx delegating to it",
+      "dependencies": [],
+      "cloneCommand": "/skeleton kit",
+      "card": ".claude/patterns/cards/skeleton.md",
+      "implementations": {
+        "hogwarts": {
+          "path": "src/components/atom/loading.tsx",
+          "pattern": "one-file-kit",
+          "fileCount": 300,
+          "maturity": "production",
+          "notes": "300 loading.tsx / 491 pages, animate-shimmer, repo ward .claude/rules/skeleton.md; marketing groups uncovered"
+        },
+        "mkan": {
+          "path": "src/components/atom/skeletons.tsx",
+          "pattern": "kit-pulse",
+          "fileCount": 18,
+          "maturity": "development",
+          "notes": "animate-pulse, generic TableSkeleton on dashboards, full-screen spinners in host/hosting; no loading.tsx above listings/[id] (mkan#53)"
+        },
+        "codebase": {
+          "path": "src/components/ui/skeleton.tsx",
+          "pattern": "primitive-only",
+          "fileCount": 1,
+          "maturity": "partial",
+          "notes": "shadcn primitive only"
+        }
+      }
+    },
+    "blur": {
+      "canonical": "mkan",
+      "canonicalPath": "src/components/atom/property-image.tsx",
+      "maturity": "partial",
+      "fileCount": 3,
+      "description": "Blur-up images: BlurImage atom (blur-xl scale-105 → sharp on load) over a stored LQIP",
+      "dependencies": [
+        "next/image",
+        "sharp (scripts only)"
+      ],
+      "cloneCommand": "/blur atom",
+      "card": ".claude/patterns/cards/blur.md",
+      "implementations": {
+        "mkan": {
+          "path": "src/components/atom/property-image.tsx",
+          "pattern": "domain-primitive-lqip",
+          "fileCount": 3,
+          "maturity": "partial",
+          "notes": "placeholder=blur + stock blur map; no sharpen transition; upload LQIP never generated or stored"
+        },
+        "hogwarts": {
+          "path": "n/a",
+          "pattern": "none",
+          "fileCount": 0,
+          "maturity": "none",
+          "notes": "unused marketing blur-image.tsx; 118 raw <img>, no LQIP column"
+        },
+        "codebase": {
+          "path": "n/a",
+          "pattern": "none",
+          "fileCount": 0,
+          "maturity": "none",
+          "notes": ""
         }
       }
     }
