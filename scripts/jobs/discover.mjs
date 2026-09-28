@@ -530,7 +530,10 @@ const ADAPTERS = {
     const NOT_TITLE = /\b(staff|principal|director|manager|head|vp|intern|ios|android|mobile|embedded|firmware|data scien|machine learning|\bml\b|security|sre|devops|qa|test|sales|support|designer|recruit)/i;
     const PLACE_OK = /worldwide|anywhere|global|africa|emea|remote$|^remote\b(?!.*\b(us|usa|united states|canada|uk|united kingdom|latam|americas|apac|india|brazil|mexico|germany|france|spain|poland|portugal|netherlands|australia)\b)/i;
     const PLACE_BAD = /\b(us|usa|u\.s\.|united states|canada|uk|united kingdom|latam|americas|north america|apac|india|brazil|mexico|germany|france|spain|poland|portugal|netherlands|ireland|australia|new york|san francisco|london|berlin|toronto)\b/i;
-    const TEXT_BAD = /(must|should) (be )?(based|located|reside|living) in (the )?(us|u\.s\.|united states|canada|uk|united kingdom|europe|eu|european union|north america)|authori[sz]ed to work in (the )?(us|u\.s\.|united states|uk|united kingdom|canada|eu)|(us|u\.s\.) citizen|green card|security clearance|eligible to work in (the )?(us|uk|eu|europe)/i;
+    // The last clause catches the phrasing that reads as a welcome rather than
+    // a bar — "while we love all parts of the world, we can only hire permanent
+    // US residents" — which sailed through and cost a tailored letter.
+    const TEXT_BAD = /(must|should) (be )?(based|located|reside|living) in (the )?(us|u\.s\.|united states|canada|uk|united kingdom|europe|eu|european union|north america)|authori[sz]ed to work in (the )?(us|u\.s\.|united states|uk|united kingdom|canada|eu)|(us|u\.s\.) citizen|green card|security clearance|eligible to work in (the )?(us|uk|eu|europe)|permanent (us|u\.s\.|united states|uk|canadian) residents?|can only (hire|employ)[^.]{0,80}\b(us|u\.s\.|united states|uk|united kingdom|canada|eu|europe)\b/i;
 
     for (const b of boards) {
       let jobs = [];
