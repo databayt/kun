@@ -54,5 +54,14 @@ if [ "${FORMAT_ON_WRITE_DRY:-}" = 1 ]; then
   echo "format $root"
   exit 0
 fi
-(cd "$root" && npx prettier --write "$p" >/dev/null 2>&1)
+# This runs after EVERY Write/Edit, so its latency is paid on every edit. Call the
+# repo's own prettier directly when it has one: `npx` spends ~0.3 s just resolving a
+# local install, and 1–4 s where there is none because it checks the registry each
+# time (measured 2026-09-28). --prefer-offline keeps that fallback off the network
+# whenever the npx cache already holds prettier.
+if [ -x "$root/node_modules/.bin/prettier" ]; then
+  (cd "$root" && ./node_modules/.bin/prettier --write "$p" >/dev/null 2>&1)
+else
+  (cd "$root" && npx --prefer-offline prettier --write "$p" >/dev/null 2>&1)
+fi
 exit 0

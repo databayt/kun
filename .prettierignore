@@ -1,0 +1,9 @@
+# Machine-written JSON keeps the style its writers emit (JSON.stringify / json.dump,
+# indent 2). The format-on-write hook runs prettier after every Edit, and on these files
+# that reflows the whole document — a one-line change to engine.json or vocabulary.json
+# came back as a diff of collapsed arrays.
+.claude/engine.json
+.claude/vocabulary.json
+.claude/mcp.json
+.claude/memory/
+.claude/patterns/registry.json
