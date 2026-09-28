@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "description": "Cross-repo pattern registry — maps keywords to canonical implementations across all databayt repositories",
+  "description": "Cross-repo pattern registry \u2014 maps keywords to canonical implementations across all databayt repositories",
   "keywords": {
     "form": {
       "canonical": "hogwarts",
@@ -33,21 +33,21 @@
           "pattern": "primitive-only",
           "fileCount": 1,
           "maturity": "partial",
-          "notes": "Only the shadcn form primitive — no field atoms, no wizard, no actions"
+          "notes": "Only the shadcn form primitive \u2014 no field atoms, no wizard, no actions"
         },
         "mkan": {
           "path": "per-feature",
           "pattern": "triple-file",
           "fileCount": 28,
           "maturity": "development",
-          "notes": "Per-step form.tsx + use-{step}.tsx + validation.ts — no central system"
+          "notes": "Per-step form.tsx + use-{step}.tsx + validation.ts \u2014 no central system"
         },
         "shifa": {
           "path": "per-feature",
           "pattern": "inline-useForm",
           "fileCount": 24,
           "maturity": "development",
-          "notes": "Inline useForm + zodResolver — no central system"
+          "notes": "Inline useForm + zodResolver \u2014 no central system"
         },
         "souq": {
           "path": "n/a",
@@ -83,21 +83,21 @@
           "pattern": "dual-system",
           "fileCount": 129,
           "maturity": "partial",
-          "notes": "Two parallel systems — table/ (62 files) and tablecn/ (67 files). tablecn adds DataGrid. Needs consolidation"
+          "notes": "Two parallel systems \u2014 table/ (62 files) and tablecn/ (67 files). tablecn adds DataGrid. Needs consolidation"
         },
         "shifa": {
           "path": "src/components/table/ + src/components/template/table/",
           "pattern": "basic",
           "fileCount": 8,
           "maturity": "development",
-          "notes": "Basic DataTable + advanced DataTable with faceted filters — two separate implementations"
+          "notes": "Basic DataTable + advanced DataTable with faceted filters \u2014 two separate implementations"
         },
         "mkan": {
           "path": "src/components/ui/table.tsx",
           "pattern": "primitive-only",
           "fileCount": 1,
           "maturity": "none",
-          "notes": "Only the shadcn table primitive — no DataTable"
+          "notes": "Only the shadcn table primitive \u2014 no DataTable"
         },
         "souq": {
           "path": "n/a",
@@ -132,7 +132,7 @@
           "pattern": "core-subset",
           "fileCount": 8,
           "maturity": "partial",
-          "notes": "Core modal system — missing crud-modal, crud-form, route-modal, modal-footer, modal-form-layout"
+          "notes": "Core modal system \u2014 missing crud-modal, crud-form, route-modal, modal-footer, modal-form-layout"
         },
         "mkan": {
           "path": "src/components/atom/modal/",
@@ -146,7 +146,7 @@
           "pattern": "minimal-subset",
           "fileCount": 7,
           "maturity": "development",
-          "notes": "Smallest subset — type.ts naming, missing crud extensions"
+          "notes": "Smallest subset \u2014 type.ts naming, missing crud extensions"
         },
         "souq": {
           "path": "n/a",
@@ -183,28 +183,28 @@
           "pattern": "full-system",
           "fileCount": 30,
           "maturity": "production",
-          "notes": "Near-complete: login, join, reset, password, verification, OAuth — missing tenant extensions"
+          "notes": "Near-complete: login, join, reset, password, verification, OAuth \u2014 missing tenant extensions"
         },
         "mkan": {
           "path": "src/components/auth/",
           "pattern": "standard",
           "fileCount": 25,
           "maturity": "development",
-          "notes": "Standard flows: login, join, reset, password, verification, setting — no 2FA, no tenant"
+          "notes": "Standard flows: login, join, reset, password, verification, setting \u2014 no 2FA, no tenant"
         },
         "shifa": {
           "path": "src/components/auth/",
           "pattern": "standard",
           "fileCount": 23,
           "maturity": "development",
-          "notes": "Nearly identical to mkan — same file tree, simpler validation (min 6 password)"
+          "notes": "Nearly identical to mkan \u2014 same file tree, simpler validation (min 6 password)"
         },
         "souq": {
           "path": "n/a",
           "pattern": "clerk",
           "fileCount": 0,
           "maturity": "production",
-          "notes": "Uses Clerk — completely different auth system, not compatible with NextAuth pattern"
+          "notes": "Uses Clerk \u2014 completely different auth system, not compatible with NextAuth pattern"
         }
       }
     },
@@ -253,7 +253,7 @@
           "pattern": "centralized",
           "fileCount": 5,
           "maturity": "development",
-          "notes": "Zod v4 (not v3) — cart, order, product, review, stripe schemas"
+          "notes": "Zod v4 (not v3) \u2014 cart, order, product, review, stripe schemas"
         }
       }
     },
@@ -275,7 +275,7 @@
           "pattern": "factory",
           "fileCount": 35,
           "maturity": "production",
-          "notes": "createFormAction, createGenericAction, updateGenericAction, deleteGenericAction — auth + tenant + Zod + ActionResponse<T>"
+          "notes": "createFormAction, createGenericAction, updateGenericAction, deleteGenericAction \u2014 auth + tenant + Zod + ActionResponse<T>"
         },
         "codebase": {
           "path": "per-block actions.ts",
@@ -289,21 +289,21 @@
           "pattern": "mixed",
           "fileCount": 19,
           "maturity": "development",
-          "notes": "Centralized lib/actions/ + co-located action.ts — no factory, no ActionResponse type"
+          "notes": "Centralized lib/actions/ + co-located action.ts \u2014 no factory, no ActionResponse type"
         },
         "shifa": {
           "path": "src/lib/actions/ + per-component action.ts",
           "pattern": "mixed",
           "fileCount": 14,
           "maturity": "development",
-          "notes": "Same mixed pattern as mkan — centralized + co-located"
+          "notes": "Same mixed pattern as mkan \u2014 centralized + co-located"
         },
         "souq": {
           "path": "app/api/",
           "pattern": "rest-api",
           "fileCount": 15,
           "maturity": "production",
-          "notes": "REST API routes — no server actions at all"
+          "notes": "REST API routes \u2014 no server actions at all"
         }
       }
     },
@@ -331,21 +331,21 @@
           "pattern": "single-file",
           "fileCount": 2,
           "maturity": "development",
-          "notes": "Basic appointment columns — no factory pattern, no i18n"
+          "notes": "Basic appointment columns \u2014 no factory pattern, no i18n"
         },
         "codebase": {
           "path": "src/components/table/_components/",
           "pattern": "example",
           "fileCount": 2,
           "maturity": "partial",
-          "notes": "Task columns as example — not generalized"
+          "notes": "Task columns as example \u2014 not generalized"
         },
         "mkan": {
           "path": "n/a",
           "pattern": "none",
           "fileCount": 0,
           "maturity": "none",
-          "notes": "No column definitions — no DataTable"
+          "notes": "No column definitions \u2014 no DataTable"
         },
         "souq": {
           "path": "n/a",
@@ -382,21 +382,21 @@
           "pattern": "manual",
           "fileCount": 24,
           "maturity": "development",
-          "notes": "Manual multi-step for listing creation — 8 steps, each with form.tsx + use-{step}.tsx + validation.ts. Not using wizard factory"
+          "notes": "Manual multi-step for listing creation \u2014 8 steps, each with form.tsx + use-{step}.tsx + validation.ts. Not using wizard factory"
         },
         "shifa": {
           "path": "src/components/paediatric/",
           "pattern": "manual",
           "fileCount": 12,
           "maturity": "development",
-          "notes": "Manual multi-step for fellowship application — similar per-step pattern without factory"
+          "notes": "Manual multi-step for fellowship application \u2014 similar per-step pattern without factory"
         },
         "codebase": {
           "path": "n/a",
           "pattern": "none",
           "fileCount": 0,
           "maturity": "none",
-          "notes": "No wizard system — will be added as part of form block extraction"
+          "notes": "No wizard system \u2014 will be added as part of form block extraction"
         },
         "souq": {
           "path": "n/a",
@@ -424,14 +424,14 @@
           "pattern": "config-driven",
           "fileCount": 3,
           "maturity": "production",
-          "notes": "config.ts + content.tsx + icons.tsx — role-based nav, collapsible, multi-tenant aware"
+          "notes": "config.ts + content.tsx + icons.tsx \u2014 role-based nav, collapsible, multi-tenant aware"
         },
         "codebase": {
           "path": "src/components/template/sidebar-01/ through sidebar-16/",
           "pattern": "catalog",
           "fileCount": 16,
           "maturity": "production",
-          "notes": "16 sidebar variants in registry catalog — pick and customize"
+          "notes": "16 sidebar variants in registry catalog \u2014 pick and customize"
         },
         "mkan": {
           "path": "src/components/atom/sidebar/ + src/components/row/organisms/",
@@ -452,7 +452,7 @@
           "pattern": "single-file",
           "fileCount": 1,
           "maturity": "development",
-          "notes": "Single admin sidebar component — JavaScript"
+          "notes": "Single admin sidebar component \u2014 JavaScript"
         }
       }
     },
@@ -474,14 +474,14 @@
           "pattern": "composable",
           "fileCount": 10,
           "maturity": "production",
-          "notes": "Most composable: command-menu, lang-switcher, mode-switcher, mobile-nav, main-nav — all separate files"
+          "notes": "Most composable: command-menu, lang-switcher, mode-switcher, mobile-nav, main-nav \u2014 all separate files"
         },
         "hogwarts": {
           "path": "src/components/template/platform-header/ + marketing-header/ + saas-header/ + notion-header/",
           "pattern": "domain-prefixed",
           "fileCount": 12,
           "maturity": "production",
-          "notes": "4 header variants for different contexts — each is a customized instance"
+          "notes": "4 header variants for different contexts \u2014 each is a customized instance"
         },
         "mkan": {
           "path": "src/components/template/header-airbnb/",
@@ -502,7 +502,7 @@
           "pattern": "single-file",
           "fileCount": 1,
           "maturity": "development",
-          "notes": "Single navbar component — JavaScript"
+          "notes": "Single navbar component \u2014 JavaScript"
         }
       }
     },
@@ -511,7 +511,7 @@
       "canonicalPath": ".claude/patterns/cards/e2e.md",
       "maturity": "blueprint",
       "fileCount": 3,
-      "description": "Canonical Playwright E2E config — setup-project auth (storageState), desktop + mobile + Arabic-RTL projects, sharded CI with blob merge. Targets @playwright/test 1.60.",
+      "description": "Canonical Playwright E2E config \u2014 setup-project auth (storageState), desktop + mobile + Arabic-RTL projects, sharded CI with blob merge. Targets @playwright/test 1.60.",
       "dependencies": [
         "@playwright/test"
       ],
@@ -530,28 +530,28 @@
           "pattern": "none",
           "fileCount": 0,
           "maturity": "none",
-          "notes": "To adopt — not yet verified"
+          "notes": "To adopt \u2014 not yet verified"
         },
         "souq": {
           "path": "n/a",
           "pattern": "none",
           "fileCount": 0,
           "maturity": "none",
-          "notes": "To adopt — not yet verified"
+          "notes": "To adopt \u2014 not yet verified"
         },
         "mkan": {
           "path": "n/a",
           "pattern": "none",
           "fileCount": 0,
           "maturity": "none",
-          "notes": "To adopt — not yet verified"
+          "notes": "To adopt \u2014 not yet verified"
         },
         "shifa": {
           "path": "n/a",
           "pattern": "none",
           "fileCount": 0,
           "maturity": "none",
-          "notes": "To adopt — not yet verified"
+          "notes": "To adopt \u2014 not yet verified"
         }
       }
     },
@@ -591,9 +591,9 @@
     "blur": {
       "canonical": "mkan",
       "canonicalPath": "src/components/atom/property-image.tsx",
-      "maturity": "partial",
+      "maturity": "shipped",
       "fileCount": 3,
-      "description": "Blur-up images: BlurImage atom (blur-xl scale-105 → sharp on load) over a stored LQIP",
+      "description": "Blur-up images: BlurImage atom (blur-xl scale-105 \u2192 sharp on load) over a stored LQIP",
       "dependencies": [
         "next/image",
         "sharp (scripts only)"
@@ -606,14 +606,14 @@
           "pattern": "domain-primitive-lqip",
           "fileCount": 3,
           "maturity": "partial",
-          "notes": "BlurImage atom + PropertyImage blur→sharp (phase 1, 2026-09-28); upload LQIP returned but not persisted"
+          "notes": "BlurImage atom + PropertyImage blur\u2192sharp (phase 1, 2026-09-28); upload LQIP returned but not persisted"
         },
         "hogwarts": {
           "path": "src/components/atom/blur-image.tsx",
-          "pattern": "atom",
-          "fileCount": 22,
-          "maturity": "partial",
-          "notes": "BlurImage on catalog, library, lumos, zenda, nav logos (phase 1, 2026-09-28); no LQIP column; ~96 raw <img> left"
+          "pattern": "atom-blur-up",
+          "fileCount": 61,
+          "maturity": "shipped",
+          "notes": "BlurImage atom (blur-xl scale-105 -> blur-none scale-100 on load) across lumos, catalog/subjects, live, library and marketing; `plain` for <=48px glyphs and round avatars; blurFromColor() derives the LQIP from the colour the catalog already stores. No blurDataURL column yet -- stored per-upload LQIP is the open item. Verified 2026-09-28 under a throttled load: 130/130 catalog images blurred mid-load, 0 stuck blurred after."
         },
         "codebase": {
           "path": "n/a",

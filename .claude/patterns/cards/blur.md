@@ -5,10 +5,12 @@
 | Repo     | Pattern                                                                        | Maturity | Canonical               |
 | -------- | ------------------------------------------------------------------------------ | -------- | ----------------------- |
 | mkan     | `PropertyImage` primitive + LQIP (`placeholder="blur"`), no sharpen transition | partial  | **yes** (LQIP pipeline) |
-| hogwarts | unused `saas-marketing/pricing/shared/blur-image.tsx`, no LQIP                 | none     | no                      |
+| hogwarts | `BlurImage` atom on 61 files + `blurFromColor()` LQIP from the catalog colour  | shipped  | **yes** (atom + effect) |
 | codebase | —                                                                              | none     | no                      |
 
-Audited 2026-09-28. The atom itself is canonical in the `blur` skill until a repo ships it.
+Audited 2026-09-28; hogwarts row re-audited 2026-09-28 after the conversion pass.
+hogwarts now ships the canonical atom + sharpen transition; mkan stays canonical for the
+stored-LQIP upload pipeline.
 Skill: `blur` · ward: `.claude/rules/loading/blur-image.md`.
 
 ## Canonical shape
