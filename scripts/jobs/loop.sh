@@ -125,9 +125,24 @@ case "$MODE" in
         trap 'rmdir "$LOCK" 2>/dev/null' EXIT
         log "tick (dow $DOW, hour $HOUR)"
 
-        # CRM down = nothing to do; say so once per tick and stop.
-        if ! curl -sf -o /dev/null --max-time 10 http://localhost:3100/healthz; then
+        # Right after a wake Docker needs a minute before the CRM answers — the
+        # 2026-09-28 log shows ticks lost to exactly that. Wait up to 2 min;
+        # still down = nothing to do; say so once per tick and stop.
+        crm_up=""
+        for _ in 1 2 3 4 5 6 7 8; do
+            if curl -sf -o /dev/null --max-time 10 http://localhost:3100/healthz; then crm_up=1; break; fi
+            sleep 15
+        done
+        if [ -z "$crm_up" ]; then
             log "CRM (localhost:3100) unreachable — tick stops"; exit 0
+        fi
+
+        # Working hours on mains power: hold the Mac awake until the next tick,
+        # so an idle sleep can't skip the send windows (it lost 14:30–18:10 on
+        # 2026-09-28). Never on battery — a drained Mac runs nothing at all.
+        if [ "$HOUR" -ge 7 ] && [ "$HOUR" -lt 21 ] && pmset -g batt 2>/dev/null | grep -q "AC Power"; then
+            pkill -f "caffeinate -i -t 1900" 2>/dev/null
+            nohup caffeinate -i -t 1900 >/dev/null 2>&1 &
         fi
 
         if [ "$HOUR" -ge 7 ] && ! done_today discover; then

@@ -44,7 +44,8 @@ extra-document asks → HOLD.
 - **Greenhouse: auto-submitted.** Answers from `jobs/profile.json` via `src/lib/jobs/ats-answers.ts`;
   Greenhouse emails an 8-char code to hotmail — Abdout approved reading it (Mail.app) and entering it.
 - **Ashby + Lever: never auto-submitted** — Ashby's spam filter and Lever's hCaptcha block bots, and the
-  rule is **CAPTCHA/bot block → HOLD, never evade**. They get paste-ready packets in `jobs/packets/ats/`
+  rule is **CAPTCHA/bot block → HOLD, never evade**. `prepare` writes their packet and holds the card the
+  same morning (never QUEUED — since 2026-09-28). Paste-ready packets live in `jobs/packets/ats/`
   (every field's answer, written answers, cover letter, CV path); the digest lists the best six.
 - **Truth rules:** a required question the profile can't answer truthfully holds the card, quoted.
   Honeypots ("leave this field blank") are never filled. Self-ID questions always declined.
@@ -89,7 +90,9 @@ extra-document asks → HOLD.
 
 ## Gotchas
 
-- CRM + Mail.app + the loop all live on the Mac: asleep = nothing runs; the next tick catches up.
+- CRM + Mail.app + the loop all live on the Mac: asleep = nothing runs; the next tick catches up. On
+  mains power the tick holds `caffeinate -i` until the next tick (07–21); on battery it doesn't, so a
+  Mac on battery still sleeps through the windows. After a wake the tick waits ≤2 min for the CRM.
 - 401 "Token invalid" from Twenty = key signed with an old APP_SECRET → re-sign (memory `reference_crm.md`).
 - Prod Neon enum lacks 9 statuses (kun#152) — the board is the loop's truth; Neon is best-effort.
 - `rwandajob.com`, We Work Remotely block bots; ReliefWeb API needs an approved appname.

@@ -331,6 +331,12 @@ async function prepare(): Promise<void> {
       console.log(
         `  ✗ HOLD  ${row.name.slice(0, 60)}\n          ${reason.slice(0, 160)}`,
       );
+    } else if (providerOf(row) !== "greenhouse") {
+      // Packet providers never auto-submit: hand Abdout the packet today
+      // instead of queueing a card the submitter would bounce two hours later.
+      const found = findAts(row.id);
+      if (found) await packetHold({ ...row, variant, waveId: date } as BoardRow, found, true);
+      await patchRow(row.id, { variant, waveId: date });
     } else {
       await patchRow(row.id, {
         applicationStatus: "QUEUED",
@@ -370,6 +376,51 @@ async function coverLetterPdf(
   );
   writeFileSync(out, await page.pdf({ format: "A4" }));
   await page.close();
+}
+
+/// Ashby's reCAPTCHA flags automated submissions as spam and Lever runs
+/// hCaptcha (2026-09-27); the rule is CAPTCHA/bot block → HOLD, never evade.
+/// Leave a paste-ready packet so Abdout submits in two minutes.
+async function packetHold(
+  row: BoardRow,
+  found: { dir: string; req: AtsRequest; letter: AtsLetter },
+  apply: boolean,
+): Promise<void> {
+  const { role, company } = splitName(row.name);
+  const qs = await questionsFor(row);
+  const lines = [
+    `# ${row.name}`,
+    "",
+    `Form: ${row.applyUrl}`,
+    `CV: ${found.req.cvPdf}  ·  Cover letter below (paste, or attach ${join(found.dir, row.id, "Osman_Abdout_Cover_Letter.pdf")} after a dry run)`,
+    "",
+    "## Answers, field by field",
+  ];
+  for (const q of qs ?? []) {
+    const a = answerQuestion(q, profile, { company, role });
+    const v =
+      !a ? "⚠ decide yourself" :
+      a.kind === "text" ? a.value :
+      a.kind === "select" ? a.option :
+      a.kind === "multi" ? a.options.join(", ") :
+      a.kind === "check" ? (a.value ? "Yes" : "No") :
+      a.kind === "file" ? (a.which === "resume" ? "attach the CV" : "attach the cover letter") :
+      a.kind === "prose" ? (found.letter.answers?.[q.label] ?? "⚠ not written") :
+      "(skip)";
+    lines.push("", `**${q.label}**${q.required ? " *" : ""}`, "", v);
+  }
+  lines.push("", "## Cover letter", "", found.letter.body);
+  mkdirSync("jobs/packets/ats", { recursive: true });
+  const packet = `jobs/packets/ats/${row.id}.md`;
+  writeFileSync(packet, lines.join("\n") + "\n");
+  if (apply) {
+    await patchRow(row.id, {
+      applicationStatus: "HOLD",
+      holdReason: `${providerOf(row) === "lever" ? "Lever (hCaptcha)" : "Ashby (spam filter)"} blocks automated submission — paste-ready packet: ${packet}`,
+    });
+    ledger({ kind: "hold", crmId: row.id, name: row.name, detail: "ashby packet" });
+  }
+  console.log(`  ▣ ${row.name.slice(0, 60)} — packet ${packet}`);
 }
 
 function findAts(
@@ -489,45 +540,7 @@ async function submit(): Promise<void> {
         continue;
       const found = findAts(row.id);
       if (found && providerOf(row) !== "greenhouse" && !args.includes("--try-ashby")) {
-        // Ashby's reCAPTCHA flags automated submissions as spam and Lever runs
-        // hCaptcha (2026-09-27);
-        // the rule is CAPTCHA/bot block → HOLD, never evade. Leave a paste-ready
-        // packet so Abdout submits in two minutes.
-        const { role, company } = splitName(row.name);
-        const qs = await questionsFor(row);
-        const lines = [
-          `# ${row.name}`,
-          "",
-          `Form: ${row.applyUrl}`,
-          `CV: ${found.req.cvPdf}  ·  Cover letter below (paste, or attach ${join(found.dir, row.id, "Osman_Abdout_Cover_Letter.pdf")} after a dry run)`,
-          "",
-          "## Answers, field by field",
-        ];
-        for (const q of qs ?? []) {
-          const a = answerQuestion(q, profile, { company, role });
-          const v =
-            !a ? "⚠ decide yourself" :
-            a.kind === "text" ? a.value :
-            a.kind === "select" ? a.option :
-            a.kind === "multi" ? a.options.join(", ") :
-            a.kind === "check" ? (a.value ? "Yes" : "No") :
-            a.kind === "file" ? (a.which === "resume" ? "attach the CV" : "attach the cover letter") :
-            a.kind === "prose" ? (found.letter.answers?.[q.label] ?? "⚠ not written") :
-            "(skip)";
-          lines.push("", `**${q.label}**${q.required ? " *" : ""}`, "", v);
-        }
-        lines.push("", "## Cover letter", "", found.letter.body);
-        mkdirSync("jobs/packets/ats", { recursive: true });
-        const packet = `jobs/packets/ats/${row.id}.md`;
-        writeFileSync(packet, lines.join("\n") + "\n");
-        if (APPLY) {
-          await patchRow(row.id, {
-            applicationStatus: "HOLD",
-            holdReason: `${providerOf(row) === "lever" ? "Lever (hCaptcha)" : "Ashby (spam filter)"} blocks automated submission — paste-ready packet: ${packet}`,
-          });
-          ledger({ kind: "hold", crmId: row.id, name: row.name, detail: "ashby packet" });
-        }
-        console.log(`  ▣ ${row.name.slice(0, 60)} — packet ${packet}`);
+        await packetHold(row, found, APPLY);
         continue;
       }
       if (!found) {
