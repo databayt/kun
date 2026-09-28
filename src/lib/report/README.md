@@ -134,6 +134,6 @@ pnpm vitest run src/lib/report
 
 - Skill: `/Users/abdout/kun/.claude/skills/report/SKILL.md` — list → choose → apply → fix
 - Agent: `/Users/abdout/kun/.claude/agents/report.md` — the fix lane
-- Session hook: `/Users/abdout/kun/.claude/scripts/hooks/session-start-reports.sh` — one search call, lists the queue
+- Session hook: `kun/.claude/hooks/session-start-reports.sh` — one search call, lists the queue
 - Rule: `/Users/abdout/kun/.claude/rules-global/session-start.md` — the hook lists, the human chooses
 - Docs: `content/docs/issue.mdx`

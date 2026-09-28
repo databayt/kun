@@ -77,7 +77,7 @@
     "domain_rules": 57,
     "project_mcp": 18,
     "user_mcp": 24,
-    "hooks": 13,
+    "hooks": 17,
     "vocabulary_spells": 218,
     "workflows": 13,
     "$plugins_comment": "The two plugins are how the fleet reaches other machines. kun-company also carries the rules, pattern cards, hooks, and workflows. Union of both skill sets is 61 (build ships in both).",

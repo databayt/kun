@@ -1,37 +1,37 @@
 ---
 title: Hooks
-description: Ten lifecycle automations the engine can't forget to run
+description: Seventeen lifecycle automations the engine can't forget to run
 ---
 
 # Hooks
 
 Hooks are the part of the engine that survives forgetting. A rule can be ignored and a skill can go uninvoked, but a hook is executed by the harness — not by Claude — so it fires whether or not anyone remembers it.
 
-**10 hooks across 6 events**, configured in `.claude/settings.json`.
+**17 hooks across 7 events**, configured in `.claude/settings.json`. setup.sh merges that file into `~/.claude/settings.json` — the `hooks` key is engine territory and is replaced wholesale — so a hook wired anywhere else is wiped at the next setup. Wire new hooks here, never by hand in user settings: that is how the report and block hooks below sat unregistered until 2026-09-28.
 
 ## Active hooks
 
 | Event | Matcher | What it does |
 |-------|---------|-------------|
-| `SessionStart` | `*` | Inject engine context — sync drift, bridge handoffs, open report items |
+| `SessionStart` | `*` | Inject engine context — sync drift, bridge handoffs (`session-engine-context.sh`, kun only) |
 | `SessionStart` | `*` | Nag if the machine's maintain heartbeat is stale or RED |
 | `SessionStart` | `*` | Warn if product flow recordings or media library are stale |
-| `ConfigChange` | `*` | Warn when `vocabulary.json` drifts from the generated docs |
-| `PreToolUse` | `Bash(pnpm dev)` | Kill anything holding port 3000 |
-| `PreToolUse` | `Bash` | Block destructive commands (the Unforgivable list) |
-| `PostToolUse` | `Bash(pnpm dev)` | Open Chrome to `localhost:3000` |
+| `SessionStart` | `*` | Devices brief — disk, swap, open sessions, the `kun-rc` server (`devices.sh --brief`) |
+| `SessionStart` | `*` | List the open report-an-issue queue across the databayt repos (`session-start-reports.sh`) |
+| `UserPromptSubmit` | — | Block protocol: inject a named block's records and obligations (`block-context.sh`) |
+| `ConfigChange` | `*` | Warn when `vocabulary.json` or the plugins drift from their sources (async) |
+| `PreToolUse` | `Bash` | Block destructive commands — the Unforgivable list (`block-destructive-bash.sh`) |
+| `PreToolUse` | `Bash` | Scrape guard — account-risk readers and the session vault (`scrape-guard.sh`) |
+| `PreToolUse` | `Bash` | Funnel guard — outreach sends stay behind their gate (`funnel-guard.sh`) |
 | `PostToolUse` | `Write\|Edit` | Prettier the changed file — only in a repo with a prettier config (`format-on-write.sh`) |
+| `PostToolUse` | `Write\|Edit` | Log the touched file for the block guard (`block-touch.sh`) |
+| `PostToolUse` | `Bash` | Record scrape yield (`scrape-yield.sh`, async) |
+| `PostToolUse` | `Bash` | Record funnel yield (`funnel-yield.sh`, async) |
 | `Stop` | `*` | Append a timestamp to `~/.claude/session-log.txt` |
+| `Stop` | `*` | Block protocol: one nudge when 2+ code files in a block changed without record/docs updates (`block-guard.sh`) |
 | `Notification` | `*` | macOS notification when Claude needs attention |
 
-Hook scripts live in `.claude/hooks/` and are installed to `~/.claude/hooks/`:
-
-| Script | Purpose |
-|--------|---------|
-| `session-engine-context.sh` | Session-start engine context |
-| `session-maintain-status.sh` · `.ps1` | Maintain heartbeat (macOS/Linux · Windows) |
-| `session-media-stale.sh` | Staleness check on recorded product media |
-| `block-destructive-bash.sh` | The guard on `rm -rf`, `migrate reset`, `DROP TABLE`, force-push |
+Hook scripts live in `.claude/hooks/` (each `*.test.sh` beside its hook) and setup.sh installs them to `~/.claude/hooks/`. Each command tries the project copy first and falls back to `~/.claude/hooks/`, so the fleet-wide hooks run in every repo while kun sessions run the working copy.
 
 ## Configuration
 
@@ -40,11 +40,11 @@ Hook scripts live in `.claude/hooks/` and are installed to `~/.claude/hooks/`:
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Bash(pnpm dev)",
+        "matcher": "Bash",
         "hooks": [
           {
             "type": "command",
-            "command": "lsof -ti:3000 | xargs kill -9 2>/dev/null; exit 0"
+            "command": "f=\"${CLAUDE_PROJECT_DIR}/.claude/hooks/block-destructive-bash.sh\"; [ -f \"$f\" ] || f=\"$HOME/.claude/hooks/block-destructive-bash.sh\"; bash \"$f\""
           }
         ]
       }

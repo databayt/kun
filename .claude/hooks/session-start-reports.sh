@@ -10,7 +10,7 @@
 # session start, ~10s). Prints a compact table on stdout so it lands in the
 # session context; exits 0 always so it never blocks startup.
 #
-# Canonical copy: kun/.claude/scripts/hooks/session-start-reports.sh
+# Canonical copy: kun/.claude/hooks/session-start-reports.sh
 # Installed at:   ~/.claude/hooks/session-start-reports.sh
 
 set -u

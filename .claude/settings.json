@@ -56,6 +56,20 @@
           {
             "type": "command",
             "command": "[ -f \"$HOME/.claude/scripts/devices.sh\" ] && bash \"$HOME/.claude/scripts/devices.sh\" --brief; exit 0"
+          },
+          {
+            "type": "command",
+            "command": "f=\"${CLAUDE_PROJECT_DIR}/.claude/hooks/session-start-reports.sh\"; [ -f \"$f\" ] || f=\"$HOME/.claude/hooks/session-start-reports.sh\"; [ -f \"$f\" ] && bash \"$f\"; exit 0"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "f=\"${CLAUDE_PROJECT_DIR}/.claude/hooks/block-context.sh\"; [ -f \"$f\" ] || f=\"$HOME/.claude/hooks/block-context.sh\"; [ -f \"$f\" ] && bash \"$f\"; exit 0"
           }
         ]
       }
@@ -103,6 +117,10 @@
           {
             "type": "command",
             "command": "f=\"${CLAUDE_PROJECT_DIR}/.claude/hooks/format-on-write.sh\"; [ -f \"$f\" ] || f=\"$HOME/.claude/hooks/format-on-write.sh\"; [ -f \"$f\" ] && bash \"$f\"; exit 0"
+          },
+          {
+            "type": "command",
+            "command": "f=\"${CLAUDE_PROJECT_DIR}/.claude/hooks/block-touch.sh\"; [ -f \"$f\" ] || f=\"$HOME/.claude/hooks/block-touch.sh\"; [ -f \"$f\" ] && bash \"$f\"; exit 0"
           }
         ]
       },
@@ -129,6 +147,10 @@
           {
             "type": "command",
             "command": "echo \"[$(date '+%Y-%m-%d %H:%M:%S')] Session ended\" >> ~/.claude/session-log.txt"
+          },
+          {
+            "type": "command",
+            "command": "f=\"${CLAUDE_PROJECT_DIR}/.claude/hooks/block-guard.sh\"; [ -f \"$f\" ] || f=\"$HOME/.claude/hooks/block-guard.sh\"; [ -f \"$f\" ] && bash \"$f\"; exit 0"
           }
         ]
       }

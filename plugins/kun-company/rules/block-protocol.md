@@ -20,5 +20,5 @@ Hook-enforced — the protocol survives even when forgotten:
 - `block-context` — injects block context on prompt (UserPromptSubmit)
 - `block-touch` + `block-guard` — Stop nudge when 2+ code files change without record/docs updates
 
-Canonical hook copies: `kun/.claude/scripts/hooks/`, installed at `~/.claude/hooks/`.
+Canonical hook copies: `kun/.claude/hooks/` (setup.sh installs them at `~/.claude/hooks/`; `.claude/settings.json` wires them fleet-wide).
 Regenerate a repo's registry: `node .claude/scripts/generate-blocks.mjs <repo-root>`.

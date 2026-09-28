@@ -165,7 +165,7 @@ READ → LOCATE → CONTEXT → VALIDATE → SEE → DEBUG → IDENTIFY → FIX 
 ## Session-Start Hook
 
 Every Claude Code session in a databayt repo runs `~/.claude/hooks/session-start-reports.sh`
-(canonical copy `kun/.claude/scripts/hooks/`). One search call, one compact table:
+(canonical copy `kun/.claude/hooks/`, wired in `.claude/settings.json`). One search call, one compact table:
 
 ```
 📋 Open reports: 5 (0 accepted, 0 from the team). Say "report" to take or reject them.
@@ -174,6 +174,8 @@ Every Claude Code session in a databayt repo runs `~/.claude/hooks/session-start
 ```
 
 It lists; it never starts the agent. The policy lives in `~/.claude/rules/session-start.md`.
+
+**Why a human gate (since 2026-09-13).** The buckets used to be verdicts. But AI triage never ran in production — there is no API-key spend under the subscription-only billing posture — so every real report was scored on reporter and content signals alone, and the "auto-fix" bucket was unreachable. The pipeline still scores every submission and kills junk before an issue exists, but the score now only orders the list; Abdout takes or rejects each row.
 
 ## Scheduled Trigger (Paused)
 
@@ -225,7 +227,7 @@ Issue closed with structured comment; kun live on push, hogwarts/mkan after /dep
 |------|------|
 | `.claude/skills/report/SKILL.md` | List → choose → apply → fix |
 | `.claude/agents/report.md` | The fix lane (12 steps) |
-| `.claude/scripts/hooks/session-start-reports.sh` | Session hook, canonical copy |
+| `.claude/hooks/session-start-reports.sh` | Session hook, canonical copy |
 | `.claude/rules-global/session-start.md` | The hook lists, the human chooses |
 | `content/docs/issue.mdx` | This documentation |
 
