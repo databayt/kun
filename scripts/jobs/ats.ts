@@ -12,7 +12,7 @@
 // checked; a question nothing can answer truthfully holds the card. Greenhouse
 // first; Lever and Ashby cards wait for their submitters.
 
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -130,9 +130,26 @@ function plan(
   return { answers, missing };
 }
 
-function tailor(dir: string, requests: AtsRequest[]): void {
-  const pending = requests.filter((r) => !existsSync(r.out));
-  if (pending.length === 0) return;
+/// One claude -p session asked for 17 letters wrote 2 and said DONE
+/// (2026-09-28). Batches of 4, three sessions at a time, then one retry pass
+/// for whatever is still missing.
+async function tailor(dir: string, requests: AtsRequest[]): Promise<void> {
+  for (let pass = 1; pass <= 2; pass++) {
+    const pending = requests.filter((r) => !existsSync(r.out));
+    if (pending.length === 0) return;
+    const batches: AtsRequest[][] = [];
+    for (let i = 0; i < pending.length; i += 4) batches.push(pending.slice(i, i + 4));
+    console.log(`writing ${pending.length} cover letter(s) + answers with claude -p — ${batches.length} batch(es), pass ${pass} …`);
+    let next = 0;
+    await Promise.all(Array.from({ length: 3 }, async () => {
+      for (let b = batches[next++]; b; b = batches[next++]) await tailorBatch(dir, b);
+    }));
+  }
+  const missing = requests.filter((r) => !existsSync(r.out)).length;
+  if (missing) console.log(`${missing} letter(s) still missing after two passes`);
+}
+
+function tailorBatch(dir: string, pending: AtsRequest[]): Promise<void> {
   const prompt = `You write job applications for Osman Abdout. Work ONLY from files.
 
 For each request file listed below:
@@ -152,30 +169,22 @@ Request files:
 ${pending.map((r) => join(dir, `${r.crmId}.ats-request.json`)).join("\n")}
 
 When every "out" file is written, reply DONE.`;
-  console.log(
-    `writing ${pending.length} cover letter(s) + answers with claude -p …`,
-  );
-  const res = spawnSync(
-    "claude",
-    [
-      "-p",
-      prompt,
-      "--allowedTools",
-      "Read",
-      "Write",
-      "Glob",
-      "--max-turns",
-      String(10 * pending.length + 10),
-    ],
-    {
-      encoding: "utf-8",
-      timeout: 30 * 60_000,
-    },
-  );
-  if (res.status !== 0)
-    console.log(
-      `claude -p exited ${res.status}: ${(res.stderr || res.stdout).slice(0, 300)}`,
+  return new Promise((resolve) => {
+    const child = spawn(
+      "claude",
+      ["-p", prompt, "--allowedTools", "Read", "Write", "Glob", "--max-turns", String(10 * pending.length + 10)],
+      { stdio: ["ignore", "pipe", "pipe"] },
     );
+    let err = "";
+    child.stderr.on("data", (d) => (err += d));
+    child.stdout.resume();
+    const timer = setTimeout(() => child.kill(), 20 * 60_000);
+    child.on("close", (code) => {
+      clearTimeout(timer);
+      if (code !== 0) console.log(`claude -p exited ${code}: ${err.slice(0, 300)}`);
+      resolve();
+    });
+  });
 }
 
 const PLACEHOLDER = /[[\]{}]|\bTODO\b|\bTBD\b|lorem ipsum/i;
@@ -268,7 +277,7 @@ async function prepare(): Promise<void> {
     requests.push(req);
   }
 
-  tailor(dir, requests);
+  await tailor(dir, requests);
 
   let queued = 0;
   for (const req of requests) {
