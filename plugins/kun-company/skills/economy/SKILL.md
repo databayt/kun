@@ -17,9 +17,10 @@ Max 5x ($100/mo), subscription-only. There is no dollar meter — the budget is 
 
 ## `audit` mode
 
-1. **Measure the session surface** (report numbers, don't guess):
-   - Always-loaded config: `wc -c ~/.claude/CLAUDE.md ~/.claude/rules/*.md <repo>/CLAUDE.md <repo>/.claude/CLAUDE.md <repo>/.claude/rules/*.md` (top-level only — domain rules are path-scoped). Flag anything pushing the preamble past ~15KB; propose moving workflow detail into skills (they load on demand).
-   - MCP surface: `python3 -c "import json; d=json.load(open('$HOME/.claude.json')); print(list(d.get('mcpServers',{}).keys()))"` — tool schemas are deferred, but every server still injects its name list and instructions block. Flag servers unused in recent memory; propose `claude mcp remove` for them (reversible; needs Abdout's nod — other sessions/skills may depend on them).
+1. **Measure the session surface** (report numbers, don't guess): `node .claude/scripts/preamble.mjs [repo]` reads the newest transcript and prints the first-turn prefix in tokens plus every surface the harness injected, in chars — each instruction file, the skill listing, MCP tool names per server, MCP instruction blocks, the agent listing (`--last 10` for the trend). Baseline after the 2026-09-28 pass: ~54K session-specific tokens per kun turn (`docs/TOKEN-ECONOMY.md`).
+   - Instruction files: flag any always-loaded file that grew; detail needed only sometimes belongs in a skill or a doc (loaded on demand). MEMORY.md is an index — one short hook per line, the content lives in the files.
+   - MCP: price each server from that output, then check its use — count `mcp__<server>__` calls across `~/.claude/projects/*/*.jsonl`. Propose removing the unused ones (user scope: `claude mcp remove -s user <name>`; a claude.ai connector: a `deniedMcpServers` entry) — reversible, but needs Abdout's nod, since other sessions/skills may depend on them.
+   - Skill listing: it sits at the `skillListingBudgetFraction` ceiling while total demand exceeds it, so trimming descriptions buys dispatch room, not tokens — the saving comes only from less demand or a lower fraction.
    - Fleet drift: every agent in `~/.claude/agents/` and `.claude/agents/` must carry `effort:` matching its model per `engine.json → delegation.efforts` (haiku→low, sonnet→medium, opus→high; captain/architecture/orchestration→xhigh). Fix drift mechanically.
    - Tell Abdout to run `/usage` (per-category breakdown, flags long-context/cache-miss behaviors ≥10%) and `/context` (what fills this session) — these are interactive-only.
 2. **Report**: one table — surface, current cost, action, saving. Apply mechanical fixes (effort drift, stale skill pointers); propose posture changes (MCP trim, CLAUDE.md diet) without executing.

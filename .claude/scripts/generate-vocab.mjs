@@ -153,7 +153,10 @@ function prettify(path) {
 
 // ── 2. CLAUDE.md vocabulary block ────────────────────────────────
 function claudeMdBlock() {
-  const lines = [BEGIN];
+  // The blank line after BEGIN is what prettier writes there (format-on-write runs on
+  // every edit of this file); emitting it keeps the block prettier-stable, so an
+  // unrelated edit to CLAUDE.md no longer knocks it out of sync.
+  const lines = [BEGIN, ""];
   lines.push(
     "Claude routes these to the right skill + agent + MCP without a dedicated command. Registry: `.claude/vocabulary.json` (edit it, then `node .claude/scripts/generate-vocab.mjs`); browsable at kun.databayt.org/en/docs/keywords."
   );

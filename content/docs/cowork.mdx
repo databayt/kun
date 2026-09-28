@@ -102,3 +102,68 @@ When Code finishes work that needs strategic review:
 Cowork doesn't need to know how to code. Claude Code doesn't need to strategize. They share a brain through `bridge.md` + GitHub Issues + native push notifications.
 
 Abdout switches between them like switching between thinking and doing. Both are Captain — one thinks, one acts.
+
+## Operating notes
+
+The always-loaded rule (`.claude/rules-global/cowork-bridge.md`) keeps only what a Code session needs on every turn. The detail lives here. Cowork: read this section before your first command in a session.
+
+### What each side can do
+
+| What                                  | Cowork                         | Code                                                                                                                  |
+| ------------------------------------- | ------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
+| Read / write `~/.claude/bridge.md`    | Yes (filesystem MCP)           | Yes (Read / Write)                                                                                                    |
+| Read `~/.claude/memory/`              | Yes (filesystem MCP)           | Yes (auto-loaded)                                                                                                     |
+| GitHub issues                         | Yes (github MCP, but see below) | Yes (gh CLI + github MCP)                                                                                            |
+| `PushNotification` to Abdout's mobile | Yes (native tool)              | Yes (native tool)                                                                                                     |
+| Slack messages                        | Yes (slack MCP)                | Yes (slack MCP)                                                                                                       |
+| Run bash commands                     | Yes — two shells (see below)   | Yes                                                                                                                   |
+| Drive a browser                       | Yes (claude-in-chrome MCP)     | Yes — `claude --chrome` (Claude in Chrome, GA 2026-08-26) or the Playwright / Chrome DevTools MCP servers             |
+| Message another session               | —                              | Yes — `SendMessage` / `ListAgents` (2.1.224+), Code ↔ Code on any of Abdout's machines; bridge.md stays the Cowork handoff |
+| Use hooks                             | No                             | Yes                                                                                                                   |
+| Use skills                            | Yes                            | Yes                                                                                                                   |
+
+Three of these rows used to read "No" for Cowork, and "Drive a browser" read "No" for Code until 2026-09-26. They were wrong, and the wrong version cost real work — Code planned around a Cowork that supposedly couldn't run a command. Corrected 2026-07-27 from a session that did all three.
+
+**Not shared** between the two: conversation history, active context (tools loaded, files read), hooks and settings.json automation, slash commands.
+
+### The two shells
+
+Cowork has **two** shells, and they see **different filesystems**:
+
+- **`Bash`** runs in an ephemeral Anthropic cloud container. Use it for clones, builds, installs, scratch work. Nothing here touches Abdout's Mac. `gh` is **not** installed in it.
+- **`device_bash`** runs on Abdout's machine, inside the desktop app's Linux VM, with his connected folders mounted. `~/kun` appears there as `/sessions/<session-id>/mnt/kun/`. It **cannot delete files** — `rm` returns "Operation not permitted". To remove something, `mv` it into a `_to_delete/` subfolder under the same mounted folder and tell Abdout to empty it.
+
+A file written by one is invisible to the other. Pick one location per file.
+
+Separately, the **filesystem MCP** addresses the same Mac files by their _real_ macOS paths (`/Users/abdout/kun/...`), not the mounted `/sessions/...` ones. Three path vocabularies, one machine — read the tool name before you write.
+
+### Known breakage
+
+- **github MCP** returns `Authentication Failed: Requires authentication` on write calls (`add_issue_comment`, `create_or_update_file`) while read calls succeed. Workaround that works today: drive github.com in the browser via the claude-in-chrome MCP — `find` the comment box, `form_input` the body, click Submit. Slower, but it posts.
+- **git in a mounted folder** prints `unable to unlink '.git/index.lock': Operation not permitted` on **every** invocation. It is the sandbox's unlink restriction, not a stale lock, and clearing the lock does not stop it. The command underneath still succeeds. Ignore it; do not go hunting.
+
+### Cowork session start
+
+1. Read `~/.claude/bridge.md` via filesystem MCP — check for Code results.
+2. Check GitHub issues for completed/blocked items (label `from-abdout` or `priority/blocking`).
+3. Plan next moves, update bridge.md with the plan.
+
+### Desktop MCP config
+
+Cowork's session runs in Anthropic's cloud; it reaches the Mac through the desktop app's device bridge, which also proxies the MCP servers configured in `~/Library/Application Support/Claude/claude_desktop_config.json`:
+
+- **filesystem** — reads/writes `~/.claude/`, `~/kun`, `~/codebase` (real macOS paths)
+- **github** — repos, issues, PRs in the databayt org (reads fine; writes 401 — see Known breakage)
+
+The bridge only works while the desktop app is open. When it isn't, previously staged files remain readable but nothing new can be fetched or written back.
+
+### Phone → Mac — pick the lane
+
+| He wants                                    | Lane                                                                                                            | Needs                                  |
+| ------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| To keep going on work that is already open  | Remote Control: every interactive session registers itself (`remoteControlAtStartup`)                           | Mac awake                              |
+| To start new work on the Mac from the phone | **Mac · kun** in the Claude app's Code tab: the `kun-rc` server (`devices.sh`, tmux, auto mode, 3 sessions max) | Mac awake: on power with the lid open  |
+| Work that must continue with the Mac off    | A cloud session or project in the Code tab (GitHub repos), or a routine (`/schedule`)                           | GitHub connected                       |
+| A GUI-only task in a Mac app                | Dispatch → a Desktop Code session with computer use (Dispatch is closed to new users, so treat it as legacy)    | Desktop app open, computer use enabled |
+
+The Mac is the bottleneck, not the plan: it has 16 GB of RAM and each open session holds about 10 MCP processes. Close sessions when their work is done; the `kun-rc` server keeps the phone's way in. `bash ~/.claude/scripts/devices.sh --status` shows the whole lane.

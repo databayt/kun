@@ -1,47 +1,35 @@
 # Pattern Registry Lookup
 
-When you encounter a Tier 3 vocabulary keyword that has a pattern card, load the card for context.
+Keywords with a canonical card at `.claude/patterns/cards/<keyword>.md`: `form` · `table` ·
+`modal` · `auth` · `validation` · `action` · `columns` · `wizard` · `sidebar` · `header` ·
+`e2e` · `pwa` · `skeleton` · `blur`.
 
-## Pattern Keywords
+When building something that involves one: read the card → check
+`.claude/patterns/registry.json` for this repo's adoption status → follow the canonical
+pattern, file structure and naming, adapted to the product's stack → use the card's clone
+command if the pattern must be installed. What the cards prescribe:
 
-These keywords have canonical patterns documented in `.claude/patterns/cards/`:
+- **table** — the triplet: `content.tsx` + `table.tsx` + `columns.tsx`
+- **form** — `InputField` / `SelectField` atoms with `useActionStateBridge`
+- **auth** — the five-step flow structure · **wizard** — the `createWizardProvider` factory
+- **e2e** ("playwright") — clone the setup-project auth config: storageState + desktop / mobile / Arabic-RTL projects
+- **pwa** ("installable", "work offline", "push notifications") — per-tenant manifest + hand-rolled worker + outbox; Serwist only for small greenfield apps
+- **skeleton** ("loading state", "the page flashes blank") — the hogwarts kit (`atom/loading.tsx` + `animate-shimmer`) mirroring the page layout; never above a `notFound()` guard
+- **blur** ("images pop in") — render photos through `BlurImage` (blur-xl → sharp on load) over a stored LQIP
 
-`form`, `table`, `modal`, `auth`, `validation`, `action`, `columns`, `wizard`, `sidebar`, `header`, `e2e`, `pwa`, `skeleton`, `blur`
+## Rule corpus
 
-## Behavior
+The code-quality keywords (`.claude/agents/quality.md`) cite atomic rules in
+`.claude/rules/<domain>/`. Each rule has frontmatter `domain` / `severity` / `paths` (a quoted
+glob array — Claude Code's native path-scoping, so a rule auto-loads only when a matching file
+is touched) / `since`, then Good / Bad / Fix. When a keyword runs, read its domain dirs and
+cite findings as `rule-id (severity)`:
 
-When building a new feature that involves one of these keywords:
+`stack` → every domain dir (version / import / deprecation rules) · `pattern` → the cards +
+`next-16/` + `react-19/` · `design` → `tailwind-v4/` + `loading/` + the hierarchy cards ·
+`guard` → `authjs/` + `prisma-6/` (tenant scope) + `s3/` (presigned URLs) + `cloudflare/`
+(secrets, per-request isolation) · `trace` / `efficient` → `react-perf/` (impact-tagged) ·
+`motion` / `animation` / `scroll` → `gsap/`.
 
-1. Read `.claude/patterns/cards/{keyword}.md` for the canonical pattern
-2. Read `.claude/patterns/registry.json` to check the current repo's adoption status
-3. Follow the canonical pattern, adapting for the current product's stack
-4. Use the canonical file structure and naming conventions
-5. Reference the clone command if the pattern needs to be installed
-
-## Examples
-
-- User says "add a students table" → read `table.md`, follow the triplet pattern (content.tsx + table.tsx + columns.tsx)
-- User says "create a form for invoices" → read `form.md`, use InputField/SelectField atoms with useActionStateBridge
-- User says "add auth" → read `auth.md`, follow the five-step flow structure
-- User says "multi-step wizard for onboarding" → read `wizard.md`, use createWizardProvider factory
-- User says "add E2E tests" or "playwright" → read `e2e.md`, clone the setup-project auth config (storageState + desktop/mobile/Arabic-RTL projects)
-- User says "make it installable", "work offline", or "push notifications" → read `pwa.md`, keep the per-tenant manifest + hand-rolled worker + outbox shape (Serwist only for small greenfield apps)
-- User says "skeleton", "loading state", or "the page flashes blank" → read `skeleton.md`, compose from the hogwarts kit (`atom/loading.tsx` + `animate-shimmer`) mirroring the page layout; never above a `notFound()` guard
-- User says "blur", "blur the images while loading", or "images pop in" → read `blur.md`, render photos through `BlurImage` (blur-xl → sharp on load) over a stored LQIP
-
-## Rule Corpus — keyword → rule directory
-
-The code-side quality keywords (see `.claude/agents/quality.md`) cite atomic, severity-tagged rules under `.claude/rules/<domain>/`. Each rule has frontmatter (`domain`, `severity`, `paths`, `since`) and Good/Bad/Fix sections. `paths` is Claude Code's native path-scoping field (quoted glob array), so each rule auto-loads only when Claude touches a matching file — cross-cutting engine rules live at `.claude/rules/*.md`; domain rules are path-scoped. When a keyword runs, read the matching domain dir(s) and cite findings as `rule-id (severity)`.
-
-| Keyword               | Rule directories                                                                                                                                               |
-| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `stack`               | all of `react-19/`, `react-perf/`, `next-16/`, `typescript-strict/`, `tailwind-v4/`, `prisma-6/`, `authjs/`, `neon/`, `s3/`, `cloudflare/`, `gsap/` (version/import/deprecation rules) |
-| `pattern`             | `.claude/patterns/cards/` + `next-16/` + `react-19/`                                                                                                           |
-| `design`              | `tailwind-v4/` (tokens, OKLCH, logical properties) + `loading/` + component-hierarchy cards                                                                                 |
-| `guard`               | `authjs/` + `prisma-6/` (tenant scope) + `s3/` (presigned URLs) + `cloudflare/` (secrets, per-request isolation)                                                |
-| `trace` / `efficient` | `react-perf/` (parallelization, bundle, RSC-boundary rules — impact-tagged)                                                                                    |
-| `motion` / `animation` / `scroll` | `gsap/` (useGSAP scope, ScrollTrigger lifecycle, reduced motion, Arabic SplitText)                                                                 |
-
-Domains (57 rules total): `react-19` (6), `react-perf` (8 — vendored from vercel-labs/agent-skills, 2026-07-10), `next-16` (8), `typescript-strict` (5), `tailwind-v4` (5), `prisma-6` (6 — each rule states whether it holds for Prisma 6, 7 or both), `authjs` (3), `neon` (2), `s3` (2), `cloudflare` (5, 2026-09-26), `gsap` (5, 2026-09-26), `loading` (2 — skeleton + blur-up, 2026-09-28).
-
-Adding a rule: drop a new `<slug>.md` in the right domain dir with the standard frontmatter (`domain` / `severity` / `paths` glob array / `since`) + Good/Bad/Fix. No agent changes needed — the keyword reads the whole dir, and `paths` scopes the ambient auto-load.
+Adding a rule: drop `<slug>.md` with that frontmatter into the right domain dir — the keyword
+reads the whole dir, so no agent change is needed.

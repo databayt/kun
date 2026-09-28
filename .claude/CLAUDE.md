@@ -22,10 +22,10 @@
 
 ## Agents — the four lanes
 
-- **`c` — Claude Code (primary).** Default for everything: features, architecture, multi-step work, anything risky. (`c` = `claude --dangerously-skip-permissions`.)
-- **`a` — Antigravity (secondary).** Google's `agy` CLI (`a` = `agy --dangerously-skip-permissions`) — fallback when Claude Code is unavailable + cheap lane (Gemini Flash) for easy one-file tasks. Shares this config via `~/.gemini/` bridge. See `content/docs/antigravity.mdx`.
-- **`o` — opencode (tertiary).** Open-source terminal agent; bypass is **config-level** (`~/.config/opencode/opencode.json` → `"permission": "allow"` — the `o`-lane equivalent of `--dangerously-skip-permissions`; no flag exists).
-- **`h` — Hermes (optional gateway).** NousResearch's [hermes-agent](https://github.com/nousresearch/hermes-agent) — assistant gateway (Slack/WhatsApp/Telegram channels), NOT a coding CLI; reach the engine from chat apps, Slack is our wired channel. Gateway onboarding is interactive (`hermes gateway setup` → `hermes gateway start`); ex-OpenClaw machines migrate with `hermes claw migrate`. See `content/docs/hermes.mdx`.
+- **`c` Claude Code** (primary, `claude --dangerously-skip-permissions`) — default for everything: features, architecture, multi-step work, anything risky.
+- **`a` Antigravity** (secondary, `agy`, Gemini Flash) — fallback when Claude Code is unavailable + the off-pool cheap lane for easy one-file tasks; shares this config via the `~/.gemini/` bridge (`content/docs/antigravity.mdx`).
+- **`o` opencode** (tertiary) — bypass is config-level: `"permission": "allow"` in `~/.config/opencode/opencode.json` (no flag exists).
+- **`h` Hermes** (optional) — a chat-app gateway (Slack wired), NOT a coding CLI (`content/docs/hermes.mdx`).
 
 ## Pipeline — idea → production
 
@@ -38,6 +38,7 @@ IDEA → SPEC (human gate) → [PLAN → TASKS] → SCHEMA → CODE → WIRE →
 ## Vocabulary — keywords routed to skills, agents, MCP
 
 <!-- BEGIN vocabulary (generated) -->
+
 Claude routes these to the right skill + agent + MCP without a dedicated command. Registry: `.claude/vocabulary.json` (edit it, then `node .claude/scripts/generate-vocab.mjs`); browsable at kun.databayt.org/en/docs/keywords.
 
 **The Pipeline** — idea to production in one word: `feature`, `idea`, `spec`, `plan`, `tasks`, `schema`, `ready`, `code`, `wire`, `check`, `ship`, `watch`
@@ -88,5 +89,5 @@ Pre-demo quality pass → `/handover <block>`. Autonomous QA + human-signoff iss
 - **Agent detail**: `.claude/agents/<name>.md` (project) or `~/.claude/agents/<name>.md` (user)
 - **Keyword registry**: `.claude/vocabulary.json` → `node .claude/scripts/generate-vocab.mjs`
 - **Pattern card**: `.claude/patterns/cards/<keyword>.md`
-- **MCP servers**: `.claude/mcp.json` (project) + `~/.claude/mcp.json` (user)
+- **MCP servers**: live registrations are in `~/.claude.json` (`claude mcp list`) — `.claude/mcp.json` is kun's catalog, which setup.sh registers from; `~/.claude/mcp.json` is never read
 - **Engine truth**: `.claude/engine.json` (model, counts, sync stamps) — `/health` flags drift
