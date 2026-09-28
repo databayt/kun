@@ -570,7 +570,7 @@
           "pattern": "one-file-kit",
           "fileCount": 300,
           "maturity": "production",
-          "notes": "300 loading.tsx / 491 pages, animate-shimmer, repo ward .claude/rules/skeleton.md; marketing groups uncovered"
+          "notes": "300 loading.tsx / 491 pages, animate-shimmer with RTL reverse, page spinners replaced (2026-09-28); marketing groups uncovered; [lessonId] soft-404"
         },
         "mkan": {
           "path": "src/components/atom/skeletons.tsx",
@@ -609,11 +609,11 @@
           "notes": "BlurImage atom + PropertyImage blur→sharp (phase 1, 2026-09-28); upload LQIP returned but not persisted"
         },
         "hogwarts": {
-          "path": "n/a",
-          "pattern": "none",
-          "fileCount": 0,
-          "maturity": "none",
-          "notes": "unused marketing blur-image.tsx; 118 raw <img>, no LQIP column"
+          "path": "src/components/atom/blur-image.tsx",
+          "pattern": "atom",
+          "fileCount": 22,
+          "maturity": "partial",
+          "notes": "BlurImage on catalog, library, lumos, zenda, nav logos (phase 1, 2026-09-28); no LQIP column; ~96 raw <img> left"
         },
         "codebase": {
           "path": "n/a",

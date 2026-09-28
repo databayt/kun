@@ -49,11 +49,17 @@ Phase 2:
 
 ### hogwarts
 
-- No blur anywhere; no LQIP column; `catalog/image.ts` makes sm/md/lg WebP variants but no 16 px LQIP.
-- 114 next/image files, 118 raw `<img>` in 83 files, 46 per-image `unoptimized`.
-- First surfaces: subject catalog (hero, grid, card, detail, materials), library covers, textbook
-  cover, Lumos course/title/shelf cards, school homepage zenda `<img>`s, school logos in the nav,
-  SaaS marketing, live session cards, then avatars.
+Phase 1 shipped 2026-09-28 (`6fa1bb0cd`, `875c8091c`): `atom/blur-image.tsx` exported from
+`atom/index.ts` + repo ward `.claude/rules/blur.md`; subject catalog (hero, grid, card, detail,
+materials, textbook cover), library covers, Lumos course/title/shelf cards, 20/22 zenda homepage
+images, both nav logos (`plain`). Transparent art → `plain` (a blur placeholder draws a gray box
+behind cut-outs); catalog hero + textbook cover use the subject tint as the placeholder.
+
+Phase 2:
+
+- 16 px LQIP in `catalog/image.ts` + `blurDataURL` column + backfill.
+- ~96 raw `<img>` left; SaaS marketing, live session cards, avatars.
+- Webflow testimonial photos up to 4032 px / 660 KB bypass the optimizer.
 
 ## Clone
 

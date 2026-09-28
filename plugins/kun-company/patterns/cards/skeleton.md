@@ -42,15 +42,18 @@ src/app/**/loading.tsx                # delegates to the feature skeleton
 
 ### hogwarts
 
-- No `loading.tsx` in `(saas-marketing)` 0/9, `(school-marketing)` 0/6, `(thmanyah)` 0/3,
-  `internal-onboarding`, `kiosk`, `verify`, `certificate`, `report-card`, `invoice`; thin in
-  `finance` 26/81, `parent` 1/11, `live` 1/7.
-- Page-body spinners: 7 × `attendance/*/content.tsx`, `lumos/loading.tsx`,
-  `school-dashboard/dashboard/loading.tsx`, `finance/receipt/content.tsx`, `exams/take/exam-player.tsx`.
-- Weak fallbacks: 8 × `<div className="h-10" />` (auth pages), 3 × `null`, 1 text
-  (`school-marketing/application/application-context.tsx:632`).
-- Duplicates to fold into the kit: `table/data-table-skeleton.tsx`, `dashboard/loading.tsx` `TableSkeleton`.
-- Kit lacks `SkeletonImage` / `SkeletonHero` for public pages. Shimmer doesn't reverse in RTL.
+Phase 1 shipped 2026-09-28 (`2d4049b04`): shimmer sweeps in reading direction (RTL reverse),
+primitive `aria-hidden`; attendance ai/analytics/gamification/hall-pass/recent/letters/reports/
+bulk-upload, finance receipt, Lumos, dashboard loading → layout skeletons; `AuthFormSkeleton`
+replaces the 8 `h-10` fallbacks; banking text fallback → banking skeleton. Null fallbacks around
+render-nothing components (`ResumeTokenFromUrl`, `AccessCheck`) are correct and stay.
+
+Phase 2:
+
+- No `loading.tsx` in `(saas-marketing)`, `(school-marketing)`, `(thmanyah)`, `kiosk`, `verify`,
+  `certificate`, `report-card`, `invoice`; thin in `finance` 26/81, `parent` 1/11, `live` 1/7.
+- **Soft-404:** `[lessonId]` has a `loading.tsx` above its `notFound()`; Lumos slug redirect sits under a loading boundary.
+- `Math.random` in the banking skeleton + the kit's bar chart → hydration mismatch risk.
 
 ### mkan
 
