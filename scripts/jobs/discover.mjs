@@ -580,15 +580,21 @@ const ADAPTERS = {
         if (/[\u{1F1E6}-\u{1F1FF}]{2}/u.test(j.title) && !/🇷🇼/u.test(j.title)) continue;
         if (/\b(india|armenia|brazil|mexico|argentina|colombia|chile|peru|poland|romania|ukraine|serbia|portugal|spain|germany|france|italy|netherlands|uk|usa|us|canada|philippines|pakistan|nigeria|kenya|egypt|morocco|s[ée]n[ée]gal|south africa|ghana|turkey|vietnam|indonesia|japan|korea|singapore|australia|latam|americas|apac)\b/i.test(j.title)) continue;
         const place = j.place || "";
-        if (!/remote/i.test(`${place} ${j.title}`)) continue;
-        if (PLACE_BAD.test(place) && !/worldwide|anywhere|global|africa|emea/i.test(place)) continue;
-        // "Playa Vista, CA or Remote": a US city/state code means US remote.
-        if (/,\s?(A[LKZR]|C[AOT]|D[EC]|FL|GA|HI|I[ADLN]|K[SY]|LA|M[ADEINOST]|N[CDEHJMVY]|O[HKR]|PA|RI|S[CD]|T[NX]|UT|V[AT]|W[AIVY])\b/.test(place) && !/worldwide|anywhere|global|africa|emea/i.test(place)) continue;
-        if (!PLACE_OK.test(place.trim()) && !/worldwide|anywhere|africa|emea/i.test(place)) continue;
-        // "<Country> Remote" means resident in that country. Only a bare
-        // Remote or an open region survives; Europe only when the posting says
-        // it hires by time zone (Kigali is UTC+2).
-        if (!openToRwanda(place, j.text)) continue;
+        // Kigali is home, so an on-site Rwandan posting is the top lane, not a
+        // remote one — and every gate below is written for the worldwide lane,
+        // which would drop it for not saying "remote".
+        const inRwanda = /\b(rwanda|kigali)\b/i.test(place);
+        if (!inRwanda) {
+          if (!/remote/i.test(`${place} ${j.title}`)) continue;
+          if (PLACE_BAD.test(place) && !/worldwide|anywhere|global|africa|emea/i.test(place)) continue;
+          // "Playa Vista, CA or Remote": a US city/state code means US remote.
+          if (/,\s?(A[LKZR]|C[AOT]|D[EC]|FL|GA|HI|I[ADLN]|K[SY]|LA|M[ADEINOST]|N[CDEHJMVY]|O[HKR]|PA|RI|S[CD]|T[NX]|UT|V[AT]|W[AIVY])\b/.test(place) && !/worldwide|anywhere|global|africa|emea/i.test(place)) continue;
+          if (!PLACE_OK.test(place.trim()) && !/worldwide|anywhere|africa|emea/i.test(place)) continue;
+          // "<Country> Remote" means resident in that country. Only a bare
+          // Remote or an open region survives; Europe only when the posting says
+          // it hires by time zone (Kigali is UTC+2).
+          if (!openToRwanda(place, j.text)) continue;
+        }
         if (TEXT_BAD.test(j.text)) {
           dropped.push(`residency/authorisation: ${j.title} @ ${b.company}`);
           continue;
@@ -599,16 +605,16 @@ const ADAPTERS = {
             title: j.title,
             company: b.company,
             location: place || "Remote",
-            remoteType: "remote",
+            remoteType: inRwanda ? "onsite" : "remote",
             employmentType: /contract|freelance/i.test(j.title) ? "contract" : "full_time",
             url: j.url,
             source: `ats-${b.ats}`,
-            campaign: "remote-web-developer-worldwide",
+            campaign: inRwanda ? "kigali-web-developer" : "remote-web-developer-worldwide",
             description: j.text.slice(0, 900),
             salary: j.salary,
           }),
           applyMethod: `ats:${b.ats}:${j.applyUrl}`,
-          rwandaEligible: "unverified",
+          rwandaEligible: inRwanda ? "yes" : "unverified",
         });
       }
     }
