@@ -10,7 +10,7 @@ since: "2026-09-28"
 A photo that pops out of an empty box reads as slow even when it isn't. Every content photo
 (listing, catalog, cover, hero, gallery, avatar larger than ~48 px) renders through the repo's
 `BlurImage` atom (`src/components/atom/blur-image.tsx`), which paints a blurred LQIP and
-transitions the real image from `blur-xl scale-105` to `blur-0 scale-100` on load. A repo
+transitions the real image from `blur-xl scale-105` to `blur-none scale-100` on load. A repo
 image primitive (mkan `PropertyImage`) renders `BlurImage` inside it — use the primitive.
 
 ## Good

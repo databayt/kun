@@ -69,10 +69,10 @@ export function BlurImage({
         "transition-[filter,scale,opacity] duration-700 ease-out",
         "motion-reduce:transition-none",
         loaded
-          ? "blur-0 scale-100 opacity-100"
+          ? "blur-none scale-100 opacity-100"
           : plain
             ? "opacity-0"
-            : "blur-xl scale-105 motion-reduce:blur-0 motion-reduce:scale-100",
+            : "blur-xl scale-105 motion-reduce:blur-none motion-reduce:scale-100",
         className,
       )}
     />
@@ -155,6 +155,8 @@ landing hero → listing/catalog cards → detail galleries → avatars → dash
 
 ## Gotchas
 
+- **Tailwind v4 has no `blur-0`.** The class silently generates nothing, so the image stays blurred
+  forever. The loaded state is `blur-none` (verified 2026-09-28 against tailwindcss 4.2 — mkan caught it).
 - **`placeholder="blur"` alone is not the effect.** It swaps a blurred background for the
   image abruptly. The transition on the `<img>` is what makes it sharpen.
 - **`unoptimized` / custom loaders are fine.** The effect is CSS; it works whether the bytes

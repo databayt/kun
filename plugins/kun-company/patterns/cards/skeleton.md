@@ -54,15 +54,18 @@ src/app/**/loading.tsx                # delegates to the feature skeleton
 
 ### mkan
 
-- Primitive is `animate-pulse`, no shimmer keyframe.
-- Generic `TableSkeleton` on `(dashboard)`, `dashboard`, `managers`, `offices`, `tenants`;
-  `favorites` is a card grid; `hosting` covers messages + calendar with one card grid;
-  `travel/loading.tsx` covers search/booking/ticket and **soft-404s `travel/offices/[id]`**.
-- Missing: `bookings/[id]`, `bookings/[id]/checkout`, `listings/[id]/photos` (spinner), `admin/*`.
-- Full-screen `Loading` overlays: `hosting/content.tsx:72`, `host/content.tsx:92`,
-  `travel-host/content.tsx:52`, `travel-host/overview/page.tsx:28`.
-- Text fallbacks in `listings/[id]/page.tsx:334,374,380,390`; `null` in `travel/search/page.tsx:162`.
-- Home wraps content in a 0→100 counter splash (`home-loader/loading-wrapper.tsx`) that defeats the skeleton.
+Phase 1 shipped 2026-09-28 (`a20e47e`): shimmer primitive + `@utility animate-shimmer` (RTL reverse);
+`SkeletonStatus` + page skeletons replace the full-screen overlays on hosting, host, travel-host and
+travel-host overview; listing-detail text fallbacks and travel search `null` → section skeletons.
+
+Phase 2:
+
+- Generic `TableSkeleton` on `(dashboard)`, `dashboard`, `managers`, `offices`, `tenants`; `favorites`
+  (card grid) and hosting messages/calendar need their own shapes.
+- `travel/loading.tsx` **soft-404s `travel/offices/[id]`** — move into a route group.
+- Missing: `bookings/[id]`, `bookings/[id]/checkout`, `listings/[id]/photos` (spinner), `admin/*`;
+  ~10 dashboard `<Loading />` spinners; `HeroSectionSkeleton` still `animate-pulse`.
+- Home 0→100 counter splash (`home-loader/loading-wrapper.tsx`) hides the skeleton — product decision.
 - **Hard constraint:** no `listings/[id]/loading.tsx`, no `listings/loading.tsx`, no Suspense in
   the `[lang]` layout or `DictionaryProvider` (commit `e8df1d8`).
 

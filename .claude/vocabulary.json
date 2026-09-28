@@ -2228,7 +2228,7 @@
             }
           ],
           "steps": [
-            "BlurImage atom — next/image + blur-xl scale-105 → blur-0 on load",
+            "BlurImage atom — next/image + blur-xl scale-105 → blur-none on load",
             "LQIP: static import → stored at upload → stock map → neutral",
             "Convert <img> and bare next/image surfaces, hero first",
             "Verify mid-load under throttled network"

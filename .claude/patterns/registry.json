@@ -574,10 +574,10 @@
         },
         "mkan": {
           "path": "src/components/atom/skeletons.tsx",
-          "pattern": "kit-pulse",
+          "pattern": "kit-shimmer",
           "fileCount": 18,
           "maturity": "development",
-          "notes": "animate-pulse, generic TableSkeleton on dashboards, full-screen spinners in host/hosting; no loading.tsx above listings/[id] (mkan#53)"
+          "notes": "shimmer + page skeletons for host/hosting/travel-host (phase 1, 2026-09-28); generic dashboard skeletons remain; no loading.tsx above listings/[id] (mkan#53)"
         },
         "codebase": {
           "path": "src/components/ui/skeleton.tsx",
@@ -606,7 +606,7 @@
           "pattern": "domain-primitive-lqip",
           "fileCount": 3,
           "maturity": "partial",
-          "notes": "placeholder=blur + stock blur map; no sharpen transition; upload LQIP never generated or stored"
+          "notes": "BlurImage atom + PropertyImage blur→sharp (phase 1, 2026-09-28); upload LQIP returned but not persisted"
         },
         "hogwarts": {
           "path": "n/a",

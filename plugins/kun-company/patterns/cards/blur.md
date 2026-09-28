@@ -14,7 +14,7 @@ Skill: `blur` · ward: `.claude/rules/loading/blur-image.md`.
 ## Canonical shape
 
 ```
-src/components/atom/blur-image.tsx   # BlurImage: next/image + blur-xl scale-105 → blur-0 scale-100 on load,
+src/components/atom/blur-image.tsx   # BlurImage: next/image + blur-xl scale-105 → blur-none scale-100 on load,
                                      #   placeholder="blur" + blurDataURL (static → stored → NEUTRAL_BLUR),
                                      #   `plain` for small logos/icons, motion-reduce safe
 src/components/atom/<domain>-image.tsx  # optional domain primitive (mkan PropertyImage) — renders BlurImage,
@@ -36,14 +36,16 @@ prisma: blurDataURL String? | photoBlurs String[]   # stored next to the URL
 
 ### mkan
 
-- `PropertyImage` (17 consumers) swaps abruptly — needs the sharpen transition (render `BlurImage`).
-- `generateBlurDataURL` exists but is **never called**; `uploadListingPhoto` returns `{url,key}` only;
-  `Listing.photoUrls String[]` has no blur column → every upload uses the neutral shimmer.
-- Direct `next/image` / raw `<img>` surfaces (24 raw in 15 files, ~70 next/image files): mobile
-  listing hero carousel (`listings/mobile-listing-details.tsx:717`, mobile LCP, raw), home hero
-  (`site/HeroSection.tsx`), destination tiles (`site/inspiration.tsx`, `template/search/location.tsx`),
-  host + review avatars, mobile map card, photo-tour thumbnails, travel art, wishlists, bookings, inbox.
-- Image optimizer is live (container + sharp); `NEXT_PUBLIC_USE_CDN_VARIANTS=true` → CDN variant loader.
+Phase 1 shipped 2026-09-28 (`915b7ca`, `6d819ce`): `atom/blur-image.tsx`; `PropertyImage` renders it
+(17 consumers sharpen); home hero + inspiration tiles carry real sharp-made LQIPs in code; mobile map
+card on `PropertyImage`; thumbs/avatars `plain` ≤48 px; mobile listing hero keeps its raw
+`<picture>` (srcSet + swipe strip) with a local `HeroSlideImg` doing blur→sharp + a pre-hydration
+`complete` check; `uploadListingPhoto` returns an optional `blur` (not persisted).
+
+Phase 2:
+
+- `photoBlurs` column (prod migration) + persist the upload `blur` + batched sharp backfill → `blurDataURL`.
+- Remaining surfaces: travel art, wishlists, bookings, inbox, hosting reservation cards, office logos, ~60 next/image files.
 
 ### hogwarts
 
