@@ -78,7 +78,7 @@ const LANES = [
   ["kigali-protection-engineer", /protection|relay|substation|commissioning|\bscada\b|testing engineer/i],
   ["kivu-marine-eto", /marine|vessel|\bship|boat|\beto\b|electro-?technical/i],
   ["kigali-electrical-engineer", /electric|\be&i\b|electromechanical|power (plant|system)|energy engineer|maintenance (engineer|technician)|engineering technician|biomedical|instrumentation|solar|(quality|qa\/?qc).{0,30}engineer|construction.{0,30}engineer/i],
-  ["kigali-web-developer", /software|developer|\bweb\b|full[- ]?stack|front[- ]?end|back[- ]?end|data (engineer|scien|analy)|\bict\b|programmer|devops|systems? (analyst|administrator|engineer)|digital|\bit (officer|specialist|support|lead)|applications specialist|product operations|technical support/i],
+  ["kigali-web-developer", /software|developer|\bweb\b|full[- ]?stack|front[- ]?end|back[- ]?end|data (engineer|scien|analy)|\bict\b|programmer|devops|systems? (analyst|administrator|engineer)|digital|\bit (officer|specialist|support|lead)|applications specialist|product operations|technical support|\b(ai|artificial intelligence|automation|agentic|llm) (engineer|developer|specialist|officer)\b/i],
 ];
 
 const TENDER_SOFTWARE =
