@@ -40,6 +40,18 @@ const SPACING_MS = 1500;
 // route to an offer and were never excluded, only ranked last.
 const ROLE_AI = /\b(ai|a\.i\.|artificial intelligence|automation|agentic|llm|gen ?ai)\b[\w/,& -]{0,24}\b(engineer|developer)\b/i;
 
+// Not every distributed employer writes "remote". Canonical says "Home based -
+// Worldwide" across 300+ roles, and a bare `/remote/` test threw all of them
+// away. These are the other ways a board says the same thing.
+const REMOTE_ISH = /remote|\bhome ?[- ]?based\b|work from home|\bwfh\b|distributed|worldwide|anywhere|globally/i;
+
+// Abdout will relocate (2026-09-28), so an on-site role abroad is reachable —
+// but only where the employer says it funds the move or sponsors the visa.
+// Willingness to travel does not create work authorisation, so TEXT_BAD still
+// decides: a posting that offers sponsorship AND demands existing US/EU
+// authorisation is still out.
+const WILL_RELOCATE = /visa sponsor|sponsors? (a )?visa|sponsorship (is )?(available|provided|offered)|we sponsor|work permit (support|sponsorship|assistance)|relocation (package|assistance|support|allowance|bonus|budget)|(we )?(help|support|assist)[^.]{0,30}relocat|relocation (is )?(available|provided|offered)/i;
+
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function get(url, { json = false } = {}, attempt = 1) {
@@ -538,7 +550,14 @@ const ADAPTERS = {
     // Split in two so an explicit AI or automation title can clear the wrong-
     // specialism list without also clearing the wrong-job list: "AI/ML Engineer"
     // is wanted, "Engineering Manager, AI" is still not.
-    const NOT_ROLE = /\b(staff|principal|director|manager|head|vp|intern|sales|support|designer|recruit)/i;
+    const NOT_ROLE = /\b(staff|principal|director|manager|head|vp|intern|sales|support|designer|recruit|business develop)/i;
+    // A title that names a language Abdout does not write (jobs/profile.json
+    // skills.no — Go, Rust, C++, Java, Ruby…) is a letter nobody will answer,
+    // unless it also names his stack ("Web Frontend - JS, CSS, React, Flutter").
+    const esc = (k) => k.replace(/[.+#]/g, "\\$&");
+    const skills = existsSync("jobs/profile.json") ? JSON.parse(readFileSync("jobs/profile.json", "utf-8")).skills ?? {} : {};
+    const OFF_LANG = skills.no?.length ? new RegExp(`(^|[^a-z])(${skills.no.map(esc).join("|")}|c)([^a-z+#-]|$)`, "i") : null;
+    const HIS_STACK = /typescript|javascript|\bjs\b|react|next\.?js|node|full[- ]?stack|front[- ]?end/i;
     const NOT_STACK = /\b(ios|android|mobile|embedded|firmware|data scien|machine learning|\bml\b|security|sre|devops|qa|test)/i;
     const PLACE_OK = /worldwide|anywhere|global|africa|emea|remote$|^remote\b(?!.*\b(us|usa|united states|canada|uk|united kingdom|latam|americas|apac|india|brazil|mexico|germany|france|spain|poland|portugal|netherlands|australia)\b)/i;
     const PLACE_BAD = /\b(us|usa|u\.s\.|united states|canada|uk|united kingdom|latam|americas|north america|apac|india|brazil|mexico|germany|france|spain|poland|portugal|netherlands|ireland|australia|new york|san francisco|london|berlin|toronto)\b/i;
@@ -547,45 +566,61 @@ const ADAPTERS = {
     // US residents" — which sailed through and cost a tailored letter.
     const TEXT_BAD = /(must|should) (be )?(based|located|reside|living) in (the )?(us|u\.s\.|united states|canada|uk|united kingdom|europe|eu|european union|north america)|authori[sz]ed to work in (the )?(us|u\.s\.|united states|uk|united kingdom|canada|eu)|(us|u\.s\.) citizen|green card|security clearance|eligible to work in (the )?(us|uk|eu|europe)|permanent (us|u\.s\.|united states|uk|canadian) residents?|can only (hire|employ)[^.]{0,80}\b(us|u\.s\.|united states|uk|united kingdom|canada|eu|europe)\b/i;
 
-    for (const b of boards) {
+    // Public JSON APIs on three hosts: fetch six boards at a time (≈2 min for
+    // 280 boards instead of 10+ one by one), then filter in board order.
+    const fetchBoard = async (b) => {
       let jobs = [];
-      try {
-        if (b.ats === "greenhouse") {
-          const d = await get(`https://boards-api.greenhouse.io/v1/boards/${b.token}/jobs?content=true`, { json: true });
-          jobs = (d.jobs ?? []).map((j) => ({
-            id: String(j.id),
-            title: j.title,
-            place: j.location?.name ?? "",
-            url: j.absolute_url,
-            applyUrl: `https://job-boards.greenhouse.io/embed/job_app?for=${b.token}&token=${j.id}`,
-            text: text(j.content ?? "").replace(/&lt;|&gt;|&[a-z]+;/g, " "),
-          }));
-        } else if (b.ats === "lever") {
-          const d = await get(`https://api.lever.co/v0/postings/${b.token}?mode=json`, { json: true });
-          jobs = (Array.isArray(d) ? d : []).map((j) => ({
+      if (b.ats === "greenhouse") {
+        const d = await get(`https://boards-api.greenhouse.io/v1/boards/${b.token}/jobs?content=true`, { json: true });
+        jobs = (d.jobs ?? []).map((j) => ({
+          id: String(j.id),
+          title: j.title,
+          place: j.location?.name ?? "",
+          url: j.absolute_url,
+          applyUrl: `https://job-boards.greenhouse.io/embed/job_app?for=${b.token}&token=${j.id}`,
+          text: text(j.content ?? "").replace(/&lt;|&gt;|&[a-z]+;/g, " "),
+        }));
+      } else if (b.ats === "lever") {
+        const d = await get(`https://api.lever.co/v0/postings/${b.token}?mode=json`, { json: true });
+        jobs = (Array.isArray(d) ? d : []).map((j) => ({
+          id: j.id,
+          title: j.text,
+          place: `${j.categories?.location ?? ""} ${j.workplaceType ?? ""}`.trim(),
+          url: j.hostedUrl,
+          applyUrl: j.applyUrl,
+          text: `${j.descriptionPlain ?? ""} ${(j.lists ?? []).map((l) => text(l.content ?? "")).join(" ")}`,
+        }));
+      } else if (b.ats === "ashby") {
+        const d = await get(`https://api.ashbyhq.com/posting-api/job-board/${b.token}?includeCompensation=true`, { json: true });
+        jobs = (d.jobs ?? [])
+          .filter((j) => j.isListed !== false)
+          .map((j) => ({
             id: j.id,
-            title: j.text,
-            place: `${j.categories?.location ?? ""} ${j.workplaceType ?? ""}`.trim(),
-            url: j.hostedUrl,
-            applyUrl: j.applyUrl,
-            text: `${j.descriptionPlain ?? ""} ${(j.lists ?? []).map((l) => text(l.content ?? "")).join(" ")}`,
+            title: j.title,
+            place: [j.location, ...(j.secondaryLocations ?? []).map((x) => x.location)].filter(Boolean).join(" / ") + (j.isRemote ? " Remote" : ""),
+            url: j.jobUrl,
+            applyUrl: j.applyUrl ?? `${j.jobUrl}/application`,
+            text: j.descriptionPlain ?? "",
+            salary: j.compensation?.compensationTierSummary,
           }));
-        } else if (b.ats === "ashby") {
-          const d = await get(`https://api.ashbyhq.com/posting-api/job-board/${b.token}?includeCompensation=true`, { json: true });
-          jobs = (d.jobs ?? [])
-            .filter((j) => j.isListed !== false)
-            .map((j) => ({
-              id: j.id,
-              title: j.title,
-              place: [j.location, ...(j.secondaryLocations ?? []).map((x) => x.location)].filter(Boolean).join(" / ") + (j.isRemote ? " Remote" : ""),
-              url: j.jobUrl,
-              applyUrl: j.applyUrl ?? `${j.jobUrl}/application`,
-              text: j.descriptionPlain ?? "",
-              salary: j.compensation?.compensationTierSummary,
-            }));
+      }
+      return jobs;
+    };
+    const fetched = new Map();
+    let next = 0;
+    await Promise.all(Array.from({ length: 6 }, async () => {
+      for (let b = boards[next++]; b; b = boards[next++]) {
+        try {
+          fetched.set(b, await fetchBoard(b));
+        } catch (err) {
+          fetched.set(b, err);
         }
-      } catch (err) {
-        dropped.push(`${b.ats}:${b.token} ${err.message.slice(0, 60)}`);
+      }
+    }));
+    for (const b of boards) {
+      const jobs = fetched.get(b);
+      if (jobs instanceof Error) {
+        dropped.push(`${b.ats}:${b.token} ${jobs.message.slice(0, 60)}`);
         continue;
       }
       for (const j of jobs) {
@@ -593,6 +628,7 @@ const ADAPTERS = {
         if (!TITLE.test(j.title) && !isAi) continue;
         if (NOT_ROLE.test(j.title)) continue;
         if (NOT_STACK.test(j.title) && !isAi) continue;
+        if (OFF_LANG?.test(j.title) && !HIS_STACK.test(j.title)) continue;
         // Country-bound postings name the country in the title ("- India",
         // "Armenia 🇦🇲"): unless it is Rwanda, it is not open to Abdout.
         if (/[\u{1F1E6}-\u{1F1FF}]{2}/u.test(j.title) && !/🇷🇼/u.test(j.title)) continue;
@@ -602,8 +638,12 @@ const ADAPTERS = {
         // remote one — and every gate below is written for the worldwide lane,
         // which would drop it for not saying "remote".
         const inRwanda = /\b(rwanda|kigali)\b/i.test(place);
-        if (!inRwanda) {
-          if (!/remote/i.test(`${place} ${j.title}`)) continue;
+        // An employer that funds the move clears the location gates below: they
+        // exist to drop roles Abdout cannot take, and a sponsored on-site role
+        // is one he can.
+        const relocates = WILL_RELOCATE.test(j.text);
+        if (!inRwanda && !relocates) {
+          if (!REMOTE_ISH.test(`${place} ${j.title}`)) continue;
           if (PLACE_BAD.test(place) && !/worldwide|anywhere|global|africa|emea/i.test(place)) continue;
           // "Playa Vista, CA or Remote": a US city/state code means US remote.
           if (/,\s?(A[LKZR]|C[AOT]|D[EC]|FL|GA|HI|I[ADLN]|K[SY]|LA|M[ADEINOST]|N[CDEHJMVY]|O[HKR]|PA|RI|S[CD]|T[NX]|UT|V[AT]|W[AIVY])\b/.test(place) && !/worldwide|anywhere|global|africa|emea/i.test(place)) continue;
@@ -623,16 +663,19 @@ const ADAPTERS = {
             title: j.title,
             company: b.company,
             location: place || "Remote",
-            remoteType: inRwanda ? "onsite" : "remote",
+            remoteType: inRwanda || (relocates && !REMOTE_ISH.test(place)) ? "onsite" : "remote",
             employmentType: /contract|freelance/i.test(j.title) ? "contract" : "full_time",
             url: j.url,
             source: `ats-${b.ats}`,
             campaign: inRwanda ? "kigali-web-developer" : "remote-web-developer-worldwide",
-            description: j.text.slice(0, 900),
+            description:
+              relocates && !inRwanda && !REMOTE_ISH.test(place)
+                ? `[on-site — the posting offers visa sponsorship or relocation support] ${j.text.slice(0, 860)}`
+                : j.text.slice(0, 900),
             salary: j.salary,
           }),
           applyMethod: `ats:${b.ats}:${j.applyUrl}`,
-          rwandaEligible: inRwanda ? "yes" : "unverified",
+          rwandaEligible: inRwanda ? true : "unverified",
         });
       }
     }
