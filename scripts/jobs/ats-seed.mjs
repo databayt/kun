@@ -42,6 +42,12 @@ if (ycIdx > -1) {
 // Merge, never replace: boards already known are kept and not re-probed.
 const known = existsSync("jobs/ats-boards.json") ? JSON.parse(readFileSync("jobs/ats-boards.json", "utf-8")).boards : [];
 const knownNames = new Set(known.map((b) => b.company.toLowerCase()));
+// A board is identified by (ats, token), not by the name the list happens to
+// print. Remote-job lists carry aliases and even article titles ("Stream Native
+// Jobs", "The Ultimate Guide to Remote Work") that probe to a real company's
+// board; registered under their own name they become extra "companies", and the
+// one-application-per-company guard stops seeing them as the same employer.
+const knownBoards = new Set(known.map((b) => `${b.ats}|${b.token}`));
 companies = companies.filter((c) => !knownNames.has(c.name.toLowerCase()));
 console.log(`${companies.length} companies to probe (${known.length} boards already known)`);
 
@@ -82,7 +88,10 @@ async function worker() {
       for (const [ats, url] of Object.entries(PROBES)) {
         const n = await probe(url(token));
         if (n !== null) {
-          found.push({ company: c.name, ats, token, region: c.region, openJobs: n });
+          if (!knownBoards.has(`${ats}|${token}`)) {
+            knownBoards.add(`${ats}|${token}`);
+            found.push({ company: c.name, ats, token, region: c.region, openJobs: n });
+          }
           hit = true;
           break;
         }

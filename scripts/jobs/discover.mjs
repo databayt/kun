@@ -26,6 +26,7 @@ const opt = (f, d) => (args.indexOf(f) > -1 ? args[args.indexOf(f) + 1] : d);
 const ONLY = opt("--source");
 const LIMIT = Number(opt("--limit", 40));
 const DRY_RUN = args.includes("--dry-run");
+const WRITE = args.includes("--write"); // with --source: write jobs/inbox/<date>-<source>.json
 const TODAY = new Date().toISOString().slice(0, 10);
 
 const UA =
@@ -33,11 +34,21 @@ const UA =
 const SPACING_MS = 1500;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-async function get(url, { json = false } = {}) {
+async function get(url, { json = false } = {}, attempt = 1) {
   await sleep(SPACING_MS);
-  const res = await fetch(url, { headers: { "User-Agent": UA }, signal: AbortSignal.timeout(30_000) });
-  if (!res.ok) throw new Error(`${res.status} ${url}`);
-  return json ? res.json() : res.text();
+  try {
+    const res = await fetch(url, { headers: { "User-Agent": UA }, signal: AbortSignal.timeout(30_000) });
+    if (!res.ok) throw new Error(`${res.status} ${url}`);
+    return json ? await res.json() : await res.text();
+  } catch (err) {
+    // A Mac just back from sleep drops the first requests ("fetch failed");
+    // two retries with backoff, never on a clean HTTP refusal.
+    if (attempt < 3 && !/^\d{3} /.test(err.message)) {
+      await sleep(2000 * attempt);
+      return get(url, { json }, attempt + 1);
+    }
+    throw err;
+  }
 }
 
 const text = (html) =>
@@ -169,6 +180,11 @@ async function probeBoard(company) {
         if (!res.ok) continue;
         const body = await res.json().catch(() => null);
         if (!body) continue;
+        // Aggregators spell one employer several ways and each spelling probes
+        // to the same board; registered separately they read as separate
+        // companies and slip the one-application-per-company cap.
+        const already = atsBoards.find((b) => b.ats === ats && b.token === token);
+        if (already) return already;
         const board = { company, ats, token, region: "worldwide (aggregator)", openJobs: Array.isArray(body) ? body.length : (body.jobs?.length ?? 0) };
         atsBoards.push(board);
         newBoards.push(board);
@@ -667,7 +683,13 @@ for (const [name, adapter] of Object.entries(selected)) {
 }
 
 saveNewBoards();
-if (DRY_RUN || ONLY) {
+if (ONLY && WRITE && !DRY_RUN) {
+  mkdirSync("jobs/inbox", { recursive: true });
+  const out = `jobs/inbox/${TODAY}-${ONLY}.json`;
+  writeFileSync(out, JSON.stringify(all, null, 2) + "\n");
+  if (newBoards.length) writeFileSync(ATS_BOARDS_FILE, JSON.stringify({ generatedAt: new Date().toISOString(), boards: atsBoards }, null, 2) + "\n");
+  console.log(`\n${out} <- ${all.length} items.`);
+} else if (DRY_RUN || ONLY) {
   console.log(`\n${DRY_RUN ? "DRY RUN" : "single-source test"} — nothing written. ${all.length} items.`);
 } else {
   mkdirSync("jobs/inbox", { recursive: true });
