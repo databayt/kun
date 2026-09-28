@@ -44,7 +44,7 @@ Databayt builds products that automate real-world operations — schools, rental
 |---|------|------|
 | 1 | **Abdout** | Builder — engineering everything |
 | 2 | **Ali** | QA Engineer + Sales — issue reporting, sales@databayt.org, outreach for schools/sponsors/investors/early adopters/contributors |
-| 3 | **Samia** | R&D — Claude/Anthropic products, sharing economy research, revenue distribution, Kun caretaker |
+| 3 | **Samia** | R&D — Claude/Anthropic products, sharing economy research, revenue distribution |
 | 4 | **Sedon** | Executor — clear task maps, reliable delivery, Saudi operations |
 
 ---

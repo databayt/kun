@@ -567,6 +567,8 @@ Every feature goes through `/spec` before coding. The spec is detailed enough th
 
 ### Strategy 2: Samia as Kun Caretaker
 
+> Superseded: Samia no longer holds the Kun caretaker role (team roster, re-confirmed 2026-07-10). Kept as the record of the April plan.
+
 Samia understands the agent system. If Abdout is unavailable, Samia can direct agents via Cowork for configuration changes, non-code adjustments, and agent tuning.
 
 ### Strategy 3: Ali as Quality Gate

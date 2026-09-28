@@ -79,7 +79,7 @@ Every surface Anthropic provides. Kun's configuration loads automatically regard
 | ------ | ------------------- |
 | Abdout | Builder             |
 | Ali    | QA Engineer + Sales |
-| Samia  | R&D & Kun Caretaker |
+| Samia  | R&D                 |
 | Sedon  | Executor            |
 
 ### Surface Capabilities
