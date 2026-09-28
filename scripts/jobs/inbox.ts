@@ -46,6 +46,8 @@ function readMail(account: string, hours: number): Mail[] | string {
       maxBuffer: 20 * 1024 * 1024,
     },
   );
+  // A timeout kills osascript silently: name it, or the log reads "not read:".
+  if (res.error) return `osascript ${res.error.message} (try fewer --hours)`;
   if (res.status !== 0) return (res.stderr || res.stdout).trim();
   return res.stdout
     .split("\x1e")
@@ -58,6 +60,9 @@ function readMail(account: string, hours: number): Mail[] | string {
       body,
     }));
 }
+
+const BOUNCE_SUBJECT =
+  /^\s*(undeliverable|undelivered mail returned to sender|delivery status notification( \(failure\))?|mail delivery (failed|failure)[^:]*|returned mail[^:]*|failure notice)\s*:?\s*/i;
 
 const addressOf = (from: string): string =>
   (from.match(/<([^>]+)>/)?.[1] ?? from).trim().toLowerCase();
@@ -141,6 +146,25 @@ async function main(): Promise<void> {
     if (addr === cfg.fromAccount.toLowerCase()) continue;
     // Greenhouse's security-code emails are part of submitting, not a reply.
     if (/security code/i.test(m.subject) && /greenhouse/i.test(m.from)) continue;
+    // A bounce is not a reply: the card goes to HOLD so no follow-up chases a
+    // dead address (BBOXX's info@ bounced unseen on 2026-09-27).
+    if (/mailer-daemon|postmaster/i.test(addr) || BOUNCE_SUBJECT.test(m.subject)) {
+      const original = stripRe(m.subject.replace(BOUNCE_SUBJECT, ""));
+      const dead = [...byAddress.keys()].find((a) => m.body.toLowerCase().includes(a));
+      const bouncedId = bySubject.get(original) ?? (dead ? byAddress.get(dead) : undefined);
+      if (!bouncedId || !byId.has(bouncedId)) continue;
+      const row = byId.get(bouncedId) as BoardRow;
+      matched++;
+      console.log(`  bounce     ${row.name.slice(0, 55)}  ← ${dead ?? addr}`);
+      if (DRY_RUN) continue;
+      await noteRow(bouncedId, `bounced: ${dead ?? "the address"} did not accept the email — "${m.subject}"`, {
+        applicationStatus: "HOLD",
+        holdReason: `bounced: ${dead ?? "recipient"} does not exist — find a working address, then move to APPROVED`,
+      });
+      ledger({ kind: "error", crmId: bouncedId, name: row.name, campaign: row.campaign, detail: `bounce: ${dead ?? addr}` });
+      seen.add(id);
+      continue;
+    }
     const crmId =
       byAddress.get(addr) ??
       byDomain.get(addr.split("@")[1] ?? "") ??
