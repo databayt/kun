@@ -6,6 +6,11 @@ export const meta = {
     "Invoked by /textbook <book-dir> [--mode full|verify|repair]. The skill invocation is the multi-agent opt-in. One book per run; the benchmark corpus is the textbook-bench workflow. Not for a single page — that is one transcribe agent in-session.",
   phases: [
     {
+      title: "Preflight",
+      detail:
+        "formatter canary through the Write tool (no score can see a formatter) + per-book render kind and reference direction",
+    },
+    {
       title: "Prepare",
       detail:
         "page renders + the contract templated from structure.json — deterministic scripts, no reading",
@@ -70,6 +75,20 @@ const FURNITURE = _a.furniture || "";
 const NOTE_PATHS = "Expand ~ to $HOME. Every path is absolute. ";
 
 // ── Schemas ─────────────────────────────────────────────────────────────────
+const PREFLIGHT = {
+  type: "object",
+  properties: {
+    formatterSafe: { type: "boolean" },
+    formatterEvidence: { type: "string" },
+    kind: { type: "string" },
+    renderScale: { type: "number" },
+    referenceVerdict: { type: "string" },
+    transcribeRefsAs: { type: "string" },
+    digitScript: { type: "string" },
+  },
+  required: ["formatterSafe", "kind", "renderScale", "referenceVerdict", "transcribeRefsAs"],
+};
+
 const PREP = {
   type: "object",
   properties: {
@@ -241,6 +260,44 @@ const lintRun = (label) =>
       `Copy the numbers from the script output; do not read or judge any page content.`,
     { label, phase: "Assemble", model: "sonnet", effort: "low", schema: LINT },
   );
+
+// ── Preflight ───────────────────────────────────────────────────────────────
+// Two facts that cost real money when assumed. (a) A formatter hook on Write
+// silently rewrites what a transcriber wrote — and because the blind re-read is
+// written through the same tool and damaged identically, NO score in this
+// pipeline can see it. Only a real Write + byte read-back detects it, so this
+// runs as an agent, not a script. (b) Reference direction and render kind are
+// per-book facts; carrying another book's answer over reverses every reference.
+phase("Preflight");
+const pre = await agent(
+  `${NOTE_PATHS}Preflight the book at ${book}. Two independent checks.\n\n` +
+    `A. FORMATTER CANARY — you must use the Write TOOL, not a shell command (a shell write does ` +
+    `not trigger PostToolUse hooks, so it proves nothing). Write this exact content to ` +
+    `${book}/pages-md/_preflight_canary.md:\n` +
+    "5) خمسة\n9) تسعة\n\n- + موجبة\n\n" +
+    `Then read the file back and compare BYTE FOR BYTE. Set formatterSafe=true only if ` +
+    `"5)" is still "5)", "9)" is still "9)" (NOT renumbered to 8. or 6.) and "- +" is still ` +
+    `"- +" (NOT "- -"). Put what you actually read back in formatterEvidence. Delete the canary.\n\n` +
+    `B. BOOK FACTS — run: python3 ${SCRIPTS}/textbook-preflight.py ${book}\n` +
+    `Return kind (render.kind), renderScale (render.render_scale_for_small_glyphs), ` +
+    `digitScript (digits.script), referenceVerdict (references.verdict) and ` +
+    `transcribeRefsAs (references.transcribe_as, or references.how_to_settle when the verdict is unknown).\n` +
+    `Do not read or judge any page content.`,
+  { label: "preflight", phase: "Preflight", model: "sonnet", effort: "low", schema: PREFLIGHT },
+);
+if (!pre) throw new Error("preflight returned nothing — refusing to transcribe blind");
+if (!pre.formatterSafe)
+  throw new Error(
+    "PREFLIGHT FAILED: a formatter rewrote the canary, so every page this run writes would be " +
+      "silently corrupted and the agreement score could not detect it. Evidence: " +
+      (pre.formatterEvidence || "(none)") +
+      ". Guard the prettier hook on the path (see gotcha-prettier-hook-corrupts-transcriptions), " +
+      "then re-run.",
+  );
+log(
+  `preflight: ${pre.kind} pdf · small-glyph render ${pre.renderScale}x · digits ${pre.digitScript || "?"} · ` +
+    `references ${pre.referenceVerdict} → ${pre.transcribeRefsAs}`,
+);
 
 // ── Prepare ─────────────────────────────────────────────────────────────────
 phase("Prepare");
