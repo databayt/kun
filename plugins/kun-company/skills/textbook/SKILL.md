@@ -146,6 +146,23 @@ cp -c $W/textbook.md $C/ && rsync -a $W/pages-md/ $C/pages-md/ && rsync -a $W/pa
 pnpm assets lock && pnpm validate && pnpm index        # then commit on main
 ```
 
+## Editing this workflow? `name:` will not pick it up
+
+`Workflow({name: "textbook"})` resolves from a **session-start snapshot**, not from the file on
+disk. Edit `textbook.js` mid-session and the run still executes the OLD script — same mtime,
+different content — and reports success, so nothing looks wrong. Two full books were graded that
+way before it was caught, by checking which PHASES actually ran rather than trusting the green
+result.
+
+**To run an edited workflow in the same session, pass `scriptPath` instead of `name`:**
+`Workflow({scriptPath: "~/.claude/workflows/textbook.js", args: {...}})` (expand `~`).
+
+Copies also differ by convention and all must be updated for the NEXT session:
+`~/.claude/workflows/` is what runs · `kun/.claude/workflows/` is canonical ·
+`kun/plugins/kun-company/workflows/` ships with the plugin. (Skills are the opposite way round:
+live at `~/.claude/skills/`, synced back to kun.) After a change, verify with
+`grep -c 'phase("<NewPhase>")'` across all three.
+
 ## What five books taught the pipeline (read this before book six)
 
 **A formatter hook is the one defect no score here can see.** `prettier --write` on a PostToolUse
