@@ -112,6 +112,26 @@ def render(book: Path, struct: dict, lang: str, furniture: str, observations: li
                "arrangement of labels joined by arrows is a FIGURE, not a table: transcribe its labels as a list (below), never "
                "as a Markdown table. Every table row must have the same number of cells.")
     out.append("")
+    out.append("**`[غير مقروء]` means ink you cannot read — NOT \"nothing is printed\".** The two are "
+               "different findings. If the page prints nothing where a symbol is expected — a limit under an "
+               "operator, an exponent, an integral sign — transcribe nothing and REPORT a print omission. "
+               "A false illegible marker is worse than none: it sends adjudication hunting for glyphs that do "
+               "not exist, and it hides a real defect in the book behind a transcription caveat.")
+    out.append("")
+    out.append("**Do not restore what the page omits.** These books routinely drop an integral sign, an "
+               "exponent, a minus, a closing bracket or the constant factor their own substitution introduced. "
+               "The arithmetic \"obviously\" demanding the missing symbol is exactly the trap: transcribe what "
+               "is drawn and report it. Equally, never reconcile a worked solution against the expression it "
+               "restates, a figure caption against the body reference that points at it, or one cell of a "
+               "table against its neighbours.")
+    if rtl:
+        out.append("")
+        out.append("**A negative sign sits on OPPOSITE sides inside and outside a math run.** Arabic prose "
+                   "draws it digit-then-dash (`٢–`) and that is what to write in text. Inside `$...$` the run "
+                   "renders left-to-right, so the same value is written dash-first (`– ٢`); writing `٢–` there "
+                   "puts the sign on the wrong side of the number. The two forms are the SAME value — a blind "
+                   "re-read choosing the other one is not a disagreement worth adjudicating.")
+    out.append("")
     out.append("**Figures and diagrams.** Emit the image reference with the PRINTED caption as its alt text, then the caption "
                "as a bold line, then every label inside the figure as a bullet list, in reading order:")
     out.append("")

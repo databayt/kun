@@ -24,6 +24,7 @@ Workflow({ name: "textbook", args: { book: "/abs/path/to/book-dir", mode: "full"
 
 | Phase      | What it does                                                                                                   |
 | ---------- | -------------------------------------------------------------------------------------------------------------- |
+| Preflight  | **formatter canary through the Write TOOL** (a shell write does not fire hooks) + `textbook-preflight.py`: vector-vs-scan, digit script, reference direction. A failed canary ABORTS the run |
 | Prepare    | `textbook-pages.py` renders `pages/<N>.webp` (1000 px) if missing; `textbook-contract.py` templates `pages-md/_CONTRACT.md` from `structure.json` |
 | Transcribe | 12 pages per `transcribe` agent, one `pages-md/<N>.md` each, one status line back; pages missing on disk retried once |
 | Assemble   | `textbook-assemble.py` stitches with provenance; `md-structure.py lint --grid` parses every page with the READER's grammar and lists suspects: tables without a printed grid, composed captions, headings not in the structure, ragged tables, marks |
@@ -85,11 +86,14 @@ Corpus today: `sd-g12-biology`, 30 pages across dense labels, unreadable labels,
 RTL/notation tables, multi-figure, ordering/interpretation, repair traps, edge and control pages;
 4 pages adjudicated against the scan, the rest candidate.
 
-## Cost, measured
+## Cost, measured (5 books)
 
-**~11,000 tokens per page** on opus (reasoning + writes dominate, not the ~1,900 image tokens).
-A 253-page book ≈ 3M tokens to transcribe; verify adds ~25 pages; adjudication ~15k per queued
-page; the 30-page benchmark ≈ 350k per run. Concurrency caps at ~16 agents.
+**~9,000 tokens/page** to transcribe. **Verify + adjudicate is 2–3.5M per book — more than
+transcription on a small book** (math: 3.49M verify vs ~1.8M transcribe). A usage window holds
+roughly 3.5M and then hard-stops mid-phase. **Batch 8 pages, not 12** (12 stalls more often under
+the 600s no-progress watchdog) and run **one book at a time**: four concurrent books exhausted a
+window in 13 minutes and left four half-books. Pages are written one at a time and survive a kill,
+so an interruption costs time, not work.
 
 ## Why not OCR (settled on sd/g12/biology, 2026-09-09)
 
@@ -142,6 +146,54 @@ cp -c $W/textbook.md $C/ && rsync -a $W/pages-md/ $C/pages-md/ && rsync -a $W/pa
 pnpm assets lock && pnpm validate && pnpm index        # then commit on main
 ```
 
+## What five books taught the pipeline (read this before book six)
+
+**A formatter hook is the one defect no score here can see.** `prettier --write` on a PostToolUse
+Write/Edit hook renumbers `9)` to `8.` and rewrites a `- +` bullet to `- -` — fabricating content.
+The blind second read goes through the same tool and is damaged **identically**, so
+`md-agreement.py` diffs two corrupted files and reports agreement. The Preflight canary is the only
+detector, and it must use the **Write tool**: a shell write does not fire hooks. `.prettierignore`
+is NOT a fix (prettier resolves it from the CWD, and agents `cd` into the book), and a settings
+guard is not durable — `/model` silently reverted one. Re-verify per wave, never once per session.
+
+**Render kind is per book; 16 of 25 sd/g12 pdfs are VECTOR.** On those the 1000 px page images throw
+away detail that small integral limits, subscripts and diacritics live in — a 3× page render reads
+them. `textbook-crop.py native` cannot tell you this: it inspects **embedded rasters only**, so it
+returns `zoomHelps:false` on a vector page whose text is perfectly sharp at 3×. Classify from the
+TEXT LAYER, not the image count. Shipped `pages/*.webp` stay 1000 px; hi-res is for transcription.
+
+**Reference direction is per book and tracks the DIGIT SCRIPT.** chemistry (Latin digits, bidi EN)
+stores `(1-17)` for a reference drawn `17 - 1` — chapter first. agriculture (Arabic-Indic, bidi AN)
+stores what it draws. Carrying one book's answer to the next **reverses every reference in it**.
+`textbook-preflight.py` measures it from the text layer and returns `unknown` below 8 digit runs —
+it once produced a confident verdict on 2 runs that a 3× render flatly contradicted. When it is
+unknown, settle it on a reference whose meaning is fixed (an exercise number inside a known unit).
+
+**`[غير مقروء]` means ink you cannot read, NOT "nothing is printed."** Four `نها` on one page were
+marked illegible when the book simply prints no limit. A false marker sends adjudication hunting
+for glyphs that do not exist and hides a real defect behind a transcription caveat.
+
+**Never restore what the page omits, and never fix it with a script.** These books drop integral
+signs (including from a boxed integration-by-parts formula, both sides), exponents, minus signs and
+the constant factors their own substitutions introduce. Transcribe and report. When a systematic
+error IS found, re-transcribe the affected batches — a regex pass over transcribed content is
+repair drift with a script instead of an agent, and it silently breaks the legitimate exceptions
+(a cross-chapter reference keeps its own chapter).
+
+**A half-dead verify reports itself CLEAN.** When the usage window dies during Adjudicate the
+workflow still returns `degraded:false`, `repaired:0`, a letter grade and a long `unresolved` list.
+`repaired:0` means the stage never RAN. Check `agents_error == 0` **and** that the book reached
+`textbook-scores.json`; recover with `mode:"repair"`, which reuses the surviving `queue.json`.
+
+**Resume from DISK, never from a failure list.** `textbook.js` re-transcribes every page in
+`prep.pages`, and its `pages` arg narrows the whole book, so a `full` run with `pages:[missing]`
+assembles a PARTIAL book. Compute gaps as `pages/*.webp` stems minus `pages-md/*.md` stems — dead
+batches write partial ranges, so the failed range is not the gap.
+
+**The contract is the only lever that has paid.** Promoting book-agnostic observations into
+`textbook-contract.py` cut physics' queued pages 24 → 10 and its verify 3.49M → 2.15M tokens versus
+math. Do it after every book.
+
 ## Upload (only when asked)
 
 From `~/catalog`, **scoped to the book** so a one-subject fix cannot replace another grade's files:
@@ -167,6 +219,7 @@ until this runs.** Then record: the book's `structure.json` history if it change
 | `.claude/workflows/textbook-bench.js`         | the benchmark runner                                              |
 | `.claude/agents/transcribe.md`                | page/crop reader, narrow toolset, blind when told                 |
 | `.claude/agents/adjudicate.md`                | settles hunks against the scan; the only agent that edits a page  |
+| `skills/textbook/scripts/textbook-preflight.py`| vector-vs-scan, digit script, reference direction — before a token is spent |
 | `skills/textbook/scripts/textbook-contract.py`| contract from structure.json + the observed-cases section         |
 | `skills/textbook/scripts/md-structure.py`     | reader-grammar signature, lint, grid detector                     |
 | `skills/textbook/scripts/md-agreement.py`     | stratified sampling; six-axis scoring; classes; repair queue      |
