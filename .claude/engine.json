@@ -1,236 +1,259 @@
 {
-  "$comment": "Single source of truth for kun engine metadata. Prose/docs reference this file instead of hardcoding numbers. /health (.claude/scripts/health.sh) reads it and warns when docs or reality drift from these values. Agent frontmatter uses a model alias (`opus`/`sonnet`/`haiku` per `model_tiers`) — never pin a version number there.",
-  "model": "claude-opus-5-5",
-  "model_label": "Opus 5.5",
-  "$model_comment": "`model` is the Claude Code SESSION default only — set by Abdout via /model on 2026-09-26 (the `opus` alias resolves to it). `fallback_models` mirrors settings.json `fallbackModel`: current-generation, subscription-covered, never Fable. Nothing else may reuse these fields: the social Hub's draft-model chain is owned by src/components/root/social/knobs.ts + scripts/drain-drafts.sh (4f2bd76 once overwrote this field with the social default).",
-  "fallback_models": [
-    "claude-opus-5",
-    "claude-sonnet-5"
-  ],
-  "engine_version": "databayt v4.0",
-  "updated": "2026-09-26",
-  "min_claude_code_version": "2.1.280",
-  "billing": {
-    "plan": "claude-max-100",
-    "$comment": "Max 5x ($100/mo) for the time being — corrected from Max 20x on 2026-06-12. Subscription-ONLY posture: no usage-based credits, no API-key per-token spend — changing this requires a /decide entry + Abdout approval (captain ESCALATE gate: budget > $50/mo). Check /usage per-category weekly to stay inside plan caps."
+ "$comment": "Single source of truth for kun engine metadata. Prose/docs reference this file instead of hardcoding numbers. /health (.claude/scripts/health.sh) reads it and warns when docs or reality drift from these values. Agent frontmatter uses a model alias (`opus`/`sonnet`/`haiku` per `model_tiers`) — never pin a version number there.",
+ "model": "claude-opus-5-5",
+ "model_label": "Opus 5.5",
+ "$model_comment": "`model` is the Claude Code SESSION default only — set by Abdout via /model on 2026-09-26 (the `opus` alias resolves to it). `fallback_models` mirrors settings.json `fallbackModel`: current-generation, subscription-covered, never Fable. Nothing else may reuse these fields: the social Hub's draft-model chain is owned by src/components/root/social/knobs.ts + scripts/drain-drafts.sh (4f2bd76 once overwrote this field with the social default).",
+ "fallback_models": [
+  "claude-opus-5",
+  "claude-sonnet-5"
+ ],
+ "engine_version": "databayt v4.0",
+ "updated": "2026-09-26",
+ "min_claude_code_version": "2.1.280",
+ "billing": {
+  "plan": "claude-max-100",
+  "$comment": "Max 5x ($100/mo) for the time being — corrected from Max 20x on 2026-06-12. Subscription-ONLY posture: no usage-based credits, no API-key per-token spend — changing this requires a /decide entry + Abdout approval (captain ESCALATE gate: budget > $50/mo). Check /usage per-category weekly to stay inside plan caps."
+ },
+ "sync": {
+  "$comment": "Self-update stamps per tier — /sync refreshes them; the captain flags overdue tiers at session start. null = never synced (due immediately). Sources of the form gh:owner/repo are read via `gh api .../releases`. Material adoptions land in docs/CONFIG-BENCHMARK.md → Adoption log.",
+  "anthropic": "2026-09-26",
+  "stack": "2026-09-26",
+  "services": "2026-09-26",
+  "practice": "2026-09-26",
+  "claude_code_version": "2.1.283",
+  "cadence_days": {
+   "anthropic": 7,
+   "stack": 14,
+   "services": 14,
+   "practice": 30
   },
-  "sync": {
-    "$comment": "Self-update stamps per tier — /sync refreshes them; the captain flags overdue tiers at session start. null = never synced (due immediately). Sources of the form gh:owner/repo are read via `gh api .../releases`. Material adoptions land in docs/CONFIG-BENCHMARK.md → Adoption log.",
-    "anthropic": "2026-09-26",
-    "stack": "2026-09-26",
-    "services": "2026-09-26",
-    "practice": "2026-09-26",
-    "claude_code_version": "2.1.283",
-    "cadence_days": {
-      "anthropic": 7,
-      "stack": 14,
-      "services": 14,
-      "practice": 30
-    },
-    "sources": {
-      "anthropic": [
-        "https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md",
-        "https://platform.claude.com/docs/en/release-notes/api",
-        "https://www.anthropic.com/news",
-        "https://code.claude.com/docs/en/<page>.md — append .md to any docs page for raw markdown (settings-reference, skills, sub-agents, hooks, memory, best-practices)",
-        "https://claude.com/blog",
-        "https://code.claude.com/docs/en/whats-new"
-      ],
-      "stack": [
-        "https://nextjs.org/blog",
-        "https://react.dev/blog",
-        "https://devblogs.microsoft.com/typescript/",
-        "https://tailwindcss.com/blog",
-        "gh:prisma/prisma",
-        "https://ui.shadcn.com/docs/changelog",
-        "gh:greensock/GSAP",
-        "https://gsap.com/docs/v3/"
-      ],
-      "services": [
-        "https://developers.cloudflare.com/changelog/",
-        "https://vercel.com/changelog",
-        "https://neon.com/docs/changelog",
-        "https://github.blog/changelog/",
-        "https://www.figma.com/release-notes/",
-        "gh:cloudflare/workers-sdk (wrangler@ tags only)",
-        "gh:cloudflare/vinext",
-        "gh:opennextjs/opennextjs-cloudflare"
-      ],
-      "practice": [
-        "https://www.anthropic.com/engineering",
-        "https://agents.md",
-        "gh:bmad-code-org/BMAD-METHOD",
-        "community Claude Code configs — survey set in docs/CONFIG-BENCHMARK.md → Sources",
-        "https://nextjs.org/evals — per-model cost + pass rate on agentic Next.js tasks"
-      ],
-      "$comment": "Vercel is legacy since the 2026-09 Cloudflare move — headlines only. Stack sweeps also read each vendor's own agent guidance (bundled docs, AGENTS.md, official MCP servers and skills)."
-    }
-  },
-  "counts": {
-    "project_agents": 26,
-    "user_agents": 53,
-    "commands": 0,
-    "project_skills": 62,
-    "user_skills": 79,
-    "pattern_cards": 14,
-    "project_rules": 6,
-    "domain_rules": 57,
-    "project_mcp": 18,
-    "user_mcp": 24,
-    "hooks": 17,
-    "vocabulary_spells": 218,
-    "workflows": 13,
-    "$plugins_comment": "The two plugins are how the fleet reaches other machines. kun-company also carries the rules, pattern cards, hooks, and workflows. Union of both skill sets is 61 (build ships in both).",
-    "plugin_kun_company_agents": 26,
-    "plugin_kun_company_skills": 60,
-    "plugin_kun_stack_agents": 27,
-    "plugin_kun_stack_skills": 15
-  },
-  "eval": {
-    "$comment": "Declared POLICY for the bench layers. Measured state lives in .claude/memory/skill-scores.json — never here, because every engine.json field is something health.sh checks reality against and a score has no declared counterpart. listing_cap is a shared, zero-sum budget: the fleet listing is loaded into EVERY session before a word is typed, so accuracy bought with prefix bloat is a regression, not a win. Raising a cap is a deliberate, recorded act — never a silent accommodation of the thing that just breached it.",
-    "listing_cap": 33000,
-    "skill_cap": 1200,
-    "holdout_pct": 20,
-    "cadence_days": 7,
-    "listing_cap_history": [
-      {
-        "date": "2026-08-06",
-        "from": 26000,
-        "to": 26500,
-        "why": "absorbed two deliberate additions made before any baseline existed: the deploy frontmatter fix (+640, a proven dispatch defect) and the bench skill itself (+596). Trimming draft/higgs prose would also have fit under 26000, but tuning descriptions before the first measurement is exactly what this system exists to stop. The next reset requires evidence from a scored run."
-      },
-      {
-        "date": "2026-08-06",
-        "from": 26500,
-        "to": 32000,
-        "why": "20 of 67 skills had NO when_to_use at all, so they were reachable only by typing their exact name — unusable under kun's actual operating model, where Abdout never types slash commands. Writing them added ~5.5k chars. The previous cap only held because a third of the fleet was undocumented, which makes it an artifact of incompleteness rather than a budget. Note the cap was always a PROXY for the real question — does more text hurt dispatch? — and that question is now directly measurable, so the cap's remaining job is token-cost control while /bench measures quality. The re-run at fnv1a:9fd4080f tests the trade."
-      },
-      {
-        "date": "2026-08-17",
-        "from": 32000,
-        "to": 32500,
-        "why": "the fleet sat at 31,981/32,000 — nineteen characters of headroom — so the cap had stopped governing bloat and started vetoing capability: ANY new skill breached it regardless of how lean it was. The scrape skill was trimmed from 754 chars to 436 (still yielding 21 dispatch cases) BEFORE this raise was proposed, so the 500 buys back headroom rather than accommodating the thing that breached it. The alternative — trimming draft/higgs/approve/publish to make room — was rejected as unmeasured tuning of deliberate negative-discrimination clauses, which the 2026-08-06 entry warns against. Whether the added text costs dispatch accuracy is the bench's question, and the baseline is owed a reset regardless: corpus_hash has been stale since the record commit (scored=67, fleet=69)."
-      },
-      {
-        "date": "2026-08-18",
-        "from": 32500,
-        "to": 33000,
-        "why": "the measured fleet stood at 32,422/32,500 — 78 characters of headroom — so the cap had returned to the exact state the 2026-08-17 entry describes: it had stopped governing bloat and started vetoing capability, because ANY new skill breaches it however lean. /funnel was written tight from the start rather than trimmed after the fact: 390 chars against /scrape's 436, and /scrape is the lane it mirrors — so the 500 buys back headroom rather than accommodating the thing that breached it, which is the test the 2026-08-06 entry sets. The alternative was trimming the next tier down (auth 816, feature 726, deploy 713, qa 685); rejected because none has been scored and 'tuning descriptions before the first measurement is exactly what this system exists to stop'. The four heaviest (draft/higgs/approve/publish, 3,862 together) carry deliberate negative-discrimination clauses and stay untouched. Leaves 188 chars of headroom, so the next addition faces the same deliberate decision rather than a silent one. NOTE: this raise is Abdout's call to keep or revert — it is recorded here so the state is coherent and health.sh passes, not to settle the question by default."
-      }
-    ],
-    "harness_listing_fraction": 0.02,
-    "$harness_listing_comment": "The HARNESS budget (settings.json skillListingBudgetFraction), not listing_cap: Claude Code drops the descriptions of the least-used skills once the listing passes this share of the context window. Raised 0.01 → 0.02 by Abdout on 2026-09-26 after /skill-doctor showed ~110 skills listed name-only. listing_cap (kun's own fleet chars) is unchanged and still governs bloat."
-  },
-  "model_tiers": {
-    "$comment": "Per-agent model alias by task type. The portable stack fleet (~/.claude/agents) follows this; the project fleet defaults to opus (quality-over-speed) except purely mechanical agents. Every agent also carries `effort:` frontmatter per delegation.efforts (added 2026-07-26). Aliases resolve forward on their own (opus → Opus 5.5 since 2.1.280; haiku → Haiku 5.5 when it ships).",
-    "fable": "escalation only — switch the main loop to Fable 5.1 with /model when Opus 5.5 at xhigh falls short on long-horizon work. Never in agent frontmatter, fallbacks, or headless `claude -p` / Agent SDK runs: there Fable can bill usage credits with no consent prompt (code.claude.com/docs/en/model-config).",
-    "opus": "the main loop (session default Opus 5.5 since 2026-09-26) + architecture, orchestration, deep reasoning, code review/fixes, and strategy/leadership agents (incl. captain)",
-    "sonnet": "standard build agents + the mechanical project agent (package)",
-    "haiku": "routine/formatting agents (comment, git, icon, github, semantic, sse, structure)"
-  },
-  "delegation": {
-    "$comment": "Token-economy routing — three axes: model tier × effort × product lane. Playbook: docs/TOKEN-ECONOMY.md; on-demand audit: /economy. Facts that shape it (re-verified 2026-09-26): models from Opus 4.7 on use a larger tokenizer (~35% more tokens than pre-4.7 for the same text); Opus 5.5 and Fable cannot turn thinking off — effort is the lever; prompt-cache TTL is 1h on subscription; Opus 5.5 lists at 2x Sonnet 5 per token ($4/$20 vs $2/$10 — it was ~5x in the Opus 4.x era), and on nextjs.org/evals it solved more for less per task (UNVERIFIED whether plan-window burn tracks list price).",
-    "efforts": {
-      "low": "haiku agents — mechanical/formatting work (comment, git, icon, github, semantic, sse, structure); workflow stages that transform rather than reason. NOTE: Haiku 4.5 has no effort levels, so `effort: low` is a no-op on haiku agents until Haiku 5.5.",
-      "medium": "sonnet build agents — standard implementation with known patterns",
-      "high": "opus specialists — default ceiling for agents; review, fixes, product references, strategy",
-      "xhigh": "judgment tier ONLY — captain, architecture, orchestration; main-loop deep design on explicit request",
-      "policy": "every agent carries `effort:` frontmatter matching its model tier; Workflow scripts pass opts.effort per stage (low for mechanical stages, high+ only for verify/judge)"
-    },
-    "products": {
-      "$comment": "All Anthropic surfaces draw the SAME Max pool (5h session window + weekly window, shared with chat and Cowork). Product delegation optimizes tokens-per-outcome, not separate quotas — only the a/h lanes are off-pool.",
-      "claude-code": "build work only — heaviest per-turn context (rules + MCP + repo files travel with every message)",
-      "cowork": "planning, research, decisions, docs — no repo/MCP preamble; handoff via ~/.claude/bridge.md",
-      "claude-chat": "pure Q&A, drafting, brainstorming — cheapest surface, zero engine preamble; use before opening a Code session for think-work",
-      "claude-web-code": "long-running cloud babysitting (autofix-pr, scheduled routines) — same pool, so keep routines lean and infrequent",
-      "antigravity": "OFF-POOL cheap lane (`a` = Gemini) — easy one-file mechanical tasks; zero Anthropic tokens",
-      "hermes": "OFF-POOL chat relay (`h` = Nous) — gateway/channel tasks, never build work"
-    },
-    "session_hygiene": "/clear between unrelated tasks (stale context taxes every message); /compact with focus instructions on long tasks; batch touches inside the 1h cache window — a >1h idle gap reprocesses full context; plan mode before big builds; specific prompts over broad scans"
-  },
-  "devices": {
-    "$comment": "Declared POLICY for the Mac ↔ iPhone ↔ Claude-surface lane, read by .claude/scripts/devices.sh (--status, --brief at SessionStart, --install). Measured state is never stored here — devices.sh reads it live. Facts verified against code.claude.com docs on 2026-09-27 (remote-control, mobile, desktop, settings-reference, env-vars): push is two settings keys (agentPushNotifEnabled, inputNeededNotifEnabled, both default false); `max` effort cannot be saved as a default (session-only unless CLAUDE_CODE_EFFORT_LEVEL pins it, which also overrides every agent's effort frontmatter — never set it); Dispatch is closed to new users; the Claude app offers Manual / Accept edits / Plan for Remote Control sessions, so the server's starting mode is set here.",
-    "rc_server": {
-      "$comment": "One `claude remote-control` server in tmux, rooted at ~/kun, so the Claude app's Code tab can start sessions on the Mac without a terminal left open for it. same-dir, never worktree (main-only rule). Capacity is sized to 16 GB of RAM: each session carries its own MCP processes.",
-      "tmux_session": "kun-rc",
-      "name": "Mac · kun",
-      "name_prefix": "mac",
-      "capacity": 3,
-      "permission_mode": "auto"
-    },
-    "presence": {
-      "$comment": "The marker CLAUDE_CLIENT_PRESENCE_FILE points at (settings.json env). Present = input within idle_seconds and the screen unlocked; pushes are held while it exists.",
-      "file": "~/.claude/.present",
-      "idle_seconds": 180
-    },
-    "warn": {
-      "$comment": "SessionStart --brief thresholds. The 2026-09-27 audit found 3 GB free, 19 GB swapped and 9 sessions open; builds hit ENOSPC near 98% (2026-09-22).",
-      "disk_free_gb": 20,
-      "sessions": 6,
-      "swap_used_pct": 80
-    },
-    "hygiene": {
-      "$comment": "Read by maintain.sh / maintain.ps1 step_disk (approved by Abdout 2026-09-27): when the daily heartbeat finds less than prune_below_gb free, it prunes only self-rebuilding caches — uv, the pnpm store, Docker build cache above docker_cache_cap_gb, Docker images older than docker_image_age that no container uses, then TRIMs the colima disk so the Mac gets the space back. Never repos, .next folders, or anything a running container needs.",
-      "prune_below_gb": 30,
-      "docker_cache_cap_gb": 8,
-      "docker_image_age": "72h"
-    }
-  },
-  "textbook": {
-    "$comment": "Declared POLICY for the textbook pipeline (scanned PDF → verified Markdown twin). Measured state lives in .claude/memory/textbook-scores.json — never here. Thresholds are PROVISIONAL: set on one book (sd-g12-biology, n=21, opus, 2026-09-09); re-derive once the benchmark carries three books. The workflows read these as defaults; health can check reality against them. Since 2026-09-26 transcribe + adjudicate run with omitClaudeMd (no CLAUDE.md/rules, ~9.5K fewer tokens per spawn): re-measure tokens_per_page/tokens_per_adjudication on the next run; bench scores before and after are not comparable.",
-    "thresholds": {
-      "A": 0.95,
-      "B": 0.9,
-      "C": 0.8,
-      "provisional": true,
-      "set_on": "sd-g12-biology n=21 opus 2026-09-09"
-    },
-    "headline": "random-sample seq agreement only — the risk tail and post-adjudication scores are reported beside it, never folded in",
-    "sample_pages": 12,
-    "risk_cap": 12,
-    "seed": 7,
-    "batch_pages": 12,
-    "adjudicate_rounds": 2,
-    "render_width": 1000,
-    "crop_right_frac": 0.45,
-    "zoom_max": 6,
-    "tokens_per_page": 11000,
-    "tokens_per_adjudication": 15000,
-    "max_concurrent_agents": 16,
-    "models": {
-      "transcribe": "opus",
-      "adjudicate": "opus",
-      "score": "none — deterministic python"
-    },
-    "classes": [
-      "structure",
-      "omission",
-      "numeric",
-      "latin",
-      "illegible",
-      "ordering",
-      "wording",
-      "clean"
-    ],
-    "benchmark": {
-      "manifest": ".claude/evals/textbook/manifest.json",
-      "scores": ".claude/memory/textbook-scores.json",
-      "books": [
-        "sd-g12-biology"
-      ],
-      "cases": 30,
-      "gold_status_for_headline": "adjudicated",
-      "audit": ".claude/scripts/audit-textbook-run.mjs",
-      "blind_marker": "This is a blind transcription"
-    },
-    "workflows": [
-      "textbook",
-      "textbook-bench"
-    ],
-    "agents": [
-      "transcribe",
-      "adjudicate"
-    ],
-    "updated": "2026-09-11"
+  "sources": {
+   "anthropic": [
+    "https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md",
+    "https://platform.claude.com/docs/en/release-notes/api",
+    "https://www.anthropic.com/news",
+    "https://code.claude.com/docs/en/<page>.md — append .md to any docs page for raw markdown (settings-reference, skills, sub-agents, hooks, memory, best-practices)",
+    "https://claude.com/blog",
+    "https://code.claude.com/docs/en/whats-new"
+   ],
+   "stack": [
+    "https://nextjs.org/blog",
+    "https://react.dev/blog",
+    "https://devblogs.microsoft.com/typescript/",
+    "https://tailwindcss.com/blog",
+    "gh:prisma/prisma",
+    "https://ui.shadcn.com/docs/changelog",
+    "gh:greensock/GSAP",
+    "https://gsap.com/docs/v3/"
+   ],
+   "services": [
+    "https://developers.cloudflare.com/changelog/",
+    "https://vercel.com/changelog",
+    "https://neon.com/docs/changelog",
+    "https://github.blog/changelog/",
+    "https://www.figma.com/release-notes/",
+    "gh:cloudflare/workers-sdk (wrangler@ tags only)",
+    "gh:cloudflare/vinext",
+    "gh:opennextjs/opennextjs-cloudflare"
+   ],
+   "practice": [
+    "https://www.anthropic.com/engineering",
+    "https://agents.md",
+    "gh:bmad-code-org/BMAD-METHOD",
+    "community Claude Code configs — survey set in docs/CONFIG-BENCHMARK.md → Sources",
+    "https://nextjs.org/evals — per-model cost + pass rate on agentic Next.js tasks"
+   ],
+   "$comment": "Vercel is legacy since the 2026-09 Cloudflare move — headlines only. Stack sweeps also read each vendor's own agent guidance (bundled docs, AGENTS.md, official MCP servers and skills)."
   }
+ },
+ "counts": {
+  "project_agents": 26,
+  "user_agents": 53,
+  "commands": 0,
+  "project_skills": 62,
+  "user_skills": 79,
+  "pattern_cards": 14,
+  "project_rules": 6,
+  "domain_rules": 57,
+  "project_mcp": 18,
+  "user_mcp": 24,
+  "hooks": 17,
+  "vocabulary_spells": 218,
+  "workflows": 13,
+  "$plugins_comment": "The two plugins are how the fleet reaches other machines. kun-company also carries the rules, pattern cards, hooks, and workflows. Union of both skill sets is 61 (build ships in both).",
+  "plugin_kun_company_agents": 26,
+  "plugin_kun_company_skills": 60,
+  "plugin_kun_stack_agents": 27,
+  "plugin_kun_stack_skills": 15
+ },
+ "eval": {
+  "$comment": "Declared POLICY for the bench layers. Measured state lives in .claude/memory/skill-scores.json — never here, because every engine.json field is something health.sh checks reality against and a score has no declared counterpart. listing_cap is a shared, zero-sum budget: the fleet listing is loaded into EVERY session before a word is typed, so accuracy bought with prefix bloat is a regression, not a win. Raising a cap is a deliberate, recorded act — never a silent accommodation of the thing that just breached it.",
+  "listing_cap": 33000,
+  "skill_cap": 1200,
+  "holdout_pct": 20,
+  "cadence_days": 7,
+  "listing_cap_history": [
+   {
+    "date": "2026-08-06",
+    "from": 26000,
+    "to": 26500,
+    "why": "absorbed two deliberate additions made before any baseline existed: the deploy frontmatter fix (+640, a proven dispatch defect) and the bench skill itself (+596). Trimming draft/higgs prose would also have fit under 26000, but tuning descriptions before the first measurement is exactly what this system exists to stop. The next reset requires evidence from a scored run."
+   },
+   {
+    "date": "2026-08-06",
+    "from": 26500,
+    "to": 32000,
+    "why": "20 of 67 skills had NO when_to_use at all, so they were reachable only by typing their exact name — unusable under kun's actual operating model, where Abdout never types slash commands. Writing them added ~5.5k chars. The previous cap only held because a third of the fleet was undocumented, which makes it an artifact of incompleteness rather than a budget. Note the cap was always a PROXY for the real question — does more text hurt dispatch? — and that question is now directly measurable, so the cap's remaining job is token-cost control while /bench measures quality. The re-run at fnv1a:9fd4080f tests the trade."
+   },
+   {
+    "date": "2026-08-17",
+    "from": 32000,
+    "to": 32500,
+    "why": "the fleet sat at 31,981/32,000 — nineteen characters of headroom — so the cap had stopped governing bloat and started vetoing capability: ANY new skill breached it regardless of how lean it was. The scrape skill was trimmed from 754 chars to 436 (still yielding 21 dispatch cases) BEFORE this raise was proposed, so the 500 buys back headroom rather than accommodating the thing that breached it. The alternative — trimming draft/higgs/approve/publish to make room — was rejected as unmeasured tuning of deliberate negative-discrimination clauses, which the 2026-08-06 entry warns against. Whether the added text costs dispatch accuracy is the bench's question, and the baseline is owed a reset regardless: corpus_hash has been stale since the record commit (scored=67, fleet=69)."
+   },
+   {
+    "date": "2026-08-18",
+    "from": 32500,
+    "to": 33000,
+    "why": "the measured fleet stood at 32,422/32,500 — 78 characters of headroom — so the cap had returned to the exact state the 2026-08-17 entry describes: it had stopped governing bloat and started vetoing capability, because ANY new skill breaches it however lean. /funnel was written tight from the start rather than trimmed after the fact: 390 chars against /scrape's 436, and /scrape is the lane it mirrors — so the 500 buys back headroom rather than accommodating the thing that breached it, which is the test the 2026-08-06 entry sets. The alternative was trimming the next tier down (auth 816, feature 726, deploy 713, qa 685); rejected because none has been scored and 'tuning descriptions before the first measurement is exactly what this system exists to stop'. The four heaviest (draft/higgs/approve/publish, 3,862 together) carry deliberate negative-discrimination clauses and stay untouched. Leaves 188 chars of headroom, so the next addition faces the same deliberate decision rather than a silent one. NOTE: this raise is Abdout's call to keep or revert — it is recorded here so the state is coherent and health.sh passes, not to settle the question by default."
+   }
+  ],
+  "harness_listing_fraction": 0.02,
+  "$harness_listing_comment": "The HARNESS budget (settings.json skillListingBudgetFraction), not listing_cap: Claude Code drops the descriptions of the least-used skills once the listing passes this share of the context window. Raised 0.01 → 0.02 by Abdout on 2026-09-26 after /skill-doctor showed ~110 skills listed name-only. listing_cap (kun's own fleet chars) is unchanged and still governs bloat."
+ },
+ "model_tiers": {
+  "$comment": "Per-agent model alias by task type. The portable stack fleet (~/.claude/agents) follows this; the project fleet defaults to opus (quality-over-speed) except purely mechanical agents. Every agent also carries `effort:` frontmatter per delegation.efforts (added 2026-07-26). Aliases resolve forward on their own (opus → Opus 5.5 since 2.1.280; haiku → Haiku 5.5 when it ships).",
+  "fable": "escalation only — switch the main loop to Fable 5.1 with /model when Opus 5.5 at xhigh falls short on long-horizon work. Never in agent frontmatter, fallbacks, or headless `claude -p` / Agent SDK runs: there Fable can bill usage credits with no consent prompt (code.claude.com/docs/en/model-config).",
+  "opus": "the main loop (session default Opus 5.5 since 2026-09-26) + architecture, orchestration, deep reasoning, code review/fixes, and strategy/leadership agents (incl. captain)",
+  "sonnet": "standard build agents + the mechanical project agent (package)",
+  "haiku": "routine/formatting agents (comment, git, icon, github, semantic, sse, structure)"
+ },
+ "delegation": {
+  "$comment": "Token-economy routing — three axes: model tier × effort × product lane. Playbook: docs/TOKEN-ECONOMY.md; on-demand audit: /economy. Facts that shape it (re-verified 2026-09-26): models from Opus 4.7 on use a larger tokenizer (~35% more tokens than pre-4.7 for the same text); Opus 5.5 and Fable cannot turn thinking off — effort is the lever; prompt-cache TTL is 1h on subscription; Opus 5.5 lists at 2x Sonnet 5 per token ($4/$20 vs $2/$10 — it was ~5x in the Opus 4.x era), and on nextjs.org/evals it solved more for less per task (UNVERIFIED whether plan-window burn tracks list price).",
+  "efforts": {
+   "low": "haiku agents — mechanical/formatting work (comment, git, icon, github, semantic, sse, structure); workflow stages that transform rather than reason. NOTE: Haiku 4.5 has no effort levels, so `effort: low` is a no-op on haiku agents until Haiku 5.5.",
+   "medium": "sonnet build agents — standard implementation with known patterns",
+   "high": "opus specialists — default ceiling for agents; review, fixes, product references, strategy",
+   "xhigh": "judgment tier ONLY — captain, architecture, orchestration; main-loop deep design on explicit request",
+   "policy": "every agent carries `effort:` frontmatter matching its model tier; Workflow scripts pass opts.effort per stage (low for mechanical stages, high+ only for verify/judge)"
+  },
+  "products": {
+   "$comment": "All Anthropic surfaces draw the SAME Max pool (5h session window + weekly window, shared with chat and Cowork). Product delegation optimizes tokens-per-outcome, not separate quotas — only the a/h lanes are off-pool.",
+   "claude-code": "build work only — heaviest per-turn context (rules + MCP + repo files travel with every message)",
+   "cowork": "planning, research, decisions, docs — no repo/MCP preamble; handoff via ~/.claude/bridge.md",
+   "claude-chat": "pure Q&A, drafting, brainstorming — cheapest surface, zero engine preamble; use before opening a Code session for think-work",
+   "claude-web-code": "long-running cloud babysitting (autofix-pr, scheduled routines) — same pool, so keep routines lean and infrequent",
+   "antigravity": "OFF-POOL cheap lane (`a` = Gemini) — easy one-file mechanical tasks; zero Anthropic tokens",
+   "hermes": "OFF-POOL chat relay (`h` = Nous) — gateway/channel tasks, never build work"
+  },
+  "session_hygiene": "/clear between unrelated tasks (stale context taxes every message); /compact with focus instructions on long tasks; batch touches inside the 1h cache window — a >1h idle gap reprocesses full context; plan mode before big builds; specific prompts over broad scans"
+ },
+ "devices": {
+  "$comment": "Declared POLICY for the Mac ↔ iPhone ↔ Claude-surface lane, read by .claude/scripts/devices.sh (--status, --brief at SessionStart, --install). Measured state is never stored here — devices.sh reads it live. Facts verified against code.claude.com docs on 2026-09-27 (remote-control, mobile, desktop, settings-reference, env-vars): push is two settings keys (agentPushNotifEnabled, inputNeededNotifEnabled, both default false); `max` effort cannot be saved as a default (session-only unless CLAUDE_CODE_EFFORT_LEVEL pins it, which also overrides every agent's effort frontmatter — never set it); Dispatch is closed to new users; the Claude app offers Manual / Accept edits / Plan for Remote Control sessions, so the server's starting mode is set here.",
+  "rc_server": {
+   "$comment": "One `claude remote-control` server in tmux, rooted at ~/kun, so the Claude app's Code tab can start sessions on the Mac without a terminal left open for it. same-dir, never worktree (main-only rule). Capacity is sized to 16 GB of RAM: each session carries its own MCP processes.",
+   "tmux_session": "kun-rc",
+   "name": "Mac · kun",
+   "name_prefix": "mac",
+   "capacity": 3,
+   "permission_mode": "auto"
+  },
+  "presence": {
+   "$comment": "The marker CLAUDE_CLIENT_PRESENCE_FILE points at (settings.json env). Present = input within idle_seconds and the screen unlocked; pushes are held while it exists.",
+   "file": "~/.claude/.present",
+   "idle_seconds": 180
+  },
+  "warn": {
+   "$comment": "SessionStart --brief thresholds. The 2026-09-27 audit found 3 GB free, 19 GB swapped and 9 sessions open; builds hit ENOSPC near 98% (2026-09-22).",
+   "disk_free_gb": 20,
+   "sessions": 6,
+   "swap_used_pct": 80
+  },
+  "hygiene": {
+   "$comment": "Read by maintain.sh / maintain.ps1 step_disk (approved by Abdout 2026-09-27): when the daily heartbeat finds less than prune_below_gb free, it prunes only self-rebuilding caches — uv, the pnpm store, Docker build cache above docker_cache_cap_gb, Docker images older than docker_image_age that no container uses, then TRIMs the colima disk so the Mac gets the space back. Never repos, .next folders, or anything a running container needs.",
+   "prune_below_gb": 30,
+   "docker_cache_cap_gb": 8,
+   "docker_image_age": "72h"
+  }
+ },
+ "textbook": {
+  "$comment": "Declared POLICY for the textbook pipeline (PDF -> verified Markdown twin). Measured state lives in .claude/memory/textbook-scores.json - never here. Thresholds remain PROVISIONAL but are now backed by FIVE graded books (biology .948 B, math .967 A, physics .953 A, chemistry .946 B, math-specialized .936 B) rather than one. Two structural facts drive the 2026-09-29 revision: (1) a formatter hook on Write corrupts pages identically in BOTH reads, so no agreement score in this pipeline can detect it - the Preflight canary is the only defence and the run now ABORTS when it fails; (2) render kind and reference direction are PER-BOOK facts - 16 of 25 sd/g12 pdfs are vector (1000px throws away detail) and reference order tracks the digit script (Latin EN books store reversed, Arabic-Indic AN books store as drawn), so carrying one book's answer to the next reverses every reference in it.",
+  "thresholds": {
+   "A": 0.95,
+   "B": 0.9,
+   "C": 0.8,
+   "provisional": true,
+   "set_on": "5 books (biology, math, physics, chemistry, math-specialized), opus, 2026-09-09..29"
+  },
+  "headline": "random-sample seq agreement only — the risk tail and post-adjudication scores are reported beside it, never folded in",
+  "sample_pages": 12,
+  "risk_cap": 12,
+  "seed": 7,
+  "batch_pages": 8,
+  "adjudicate_rounds": 2,
+  "render_width": 1000,
+  "crop_right_frac": 0.45,
+  "zoom_max": 6,
+  "tokens_per_page": 9000,
+  "tokens_per_adjudication": 15000,
+  "max_concurrent_agents": 8,
+  "models": {
+   "transcribe": "opus",
+   "adjudicate": "opus",
+   "score": "none — deterministic python"
+  },
+  "classes": [
+   "structure",
+   "omission",
+   "numeric",
+   "latin",
+   "illegible",
+   "ordering",
+   "wording",
+   "clean"
+  ],
+  "benchmark": {
+   "manifest": ".claude/evals/textbook/manifest.json",
+   "scores": ".claude/memory/textbook-scores.json",
+   "books": [
+    "sd-g12-biology"
+   ],
+   "cases": 30,
+   "gold_status_for_headline": "adjudicated",
+   "audit": ".claude/scripts/audit-textbook-run.mjs",
+   "blind_marker": "This is a blind transcription"
+  },
+  "workflows": [
+   "textbook",
+   "textbook-bench"
+  ],
+  "agents": [
+   "transcribe",
+   "adjudicate"
+  ],
+  "updated": "2026-09-29",
+  "phases": [
+   "Preflight",
+   "Prepare",
+   "Transcribe",
+   "Assemble",
+   "Verify",
+   "Adjudicate",
+   "Persist"
+  ],
+  "preflight": {
+   "formatter_canary": "MANDATORY. An agent writes 5) / 9) / '- +' through the Write TOOL and reads the bytes back; a shell write does not fire PostToolUse hooks and proves nothing. Failure ABORTS the run - a corrupted page is invisible to every downstream score.",
+   "script": ".claude/skills/textbook/scripts/textbook-preflight.py",
+   "classifies": "vector vs scan from TEXT-LAYER presence (not image count: chemistry averages 0.2 images/page yet carries a 1575px figure); vector -> re-render the page at 3x for small glyphs instead of marking them illegible",
+   "reference_direction": "measured from the text layer by comparing a stored digit-run against its drawn x-order; needs >= 8 runs or it honestly returns unknown (2 runs once produced a confident verdict that a 3x render contradicted)",
+   "crop_native_caveat": "textbook-crop.py native inspects EMBEDDED RASTERS ONLY - zoomHelps:false does NOT mean 'cannot be read better' on a vector page"
+  },
+  "render_scale_small_glyphs_vector": 3,
+  "render_note": "shipped pages/*.webp stay 1000px (the reader serves them); hi-res renders are for transcription only and are never shipped",
+  "batch_note": "12 measured a higher stall rate under the 600s no-progress watchdog; 8 keeps an agent's lifetime under it. Pages are written one at a time and survive a kill, so a stall costs time, not work.",
+  "concurrency_note": "the ~8-agent cap is PER WORKFLOW, not global; 4 concurrent books exhausted a usage window in 13 minutes and left 4 half-books. One book at a time, to completion.",
+  "tokens_per_book_verify": 2500000,
+  "cost_note": "verify+adjudicate costs MORE than transcription on a small book (math: 3.49M verify vs ~1.8M transcribe). Enriching the contract is the only lever that has paid: it cut physics' queued pages 24 -> 10 and verify 3.49M -> 2.15M.",
+  "exit_gate": "a run is reportable only when agents_error == 0 AND the book appears in textbook-scores.json. A window death during Adjudicate still returns degraded:false, repaired:0 and a letter grade - that is NOT a finished book. Recovery is mode:repair, which reuses the surviving queue.json."
+ }
 }
