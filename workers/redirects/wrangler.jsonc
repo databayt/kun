@@ -1,0 +1,11 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "legacy-redirects",
+  "main": "index.js",
+  "compatibility_date": "2026-10-01",
+  // custom_domain makes Cloudflare own each hostname's DNS record (they were dead CNAMEs to Vercel).
+  "routes": [
+    { "pattern": "ed.databayt.org", "custom_domain": true },
+    { "pattern": "wa.databayt.org", "custom_domain": true }
+  ]
+}
