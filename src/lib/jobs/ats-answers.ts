@@ -64,6 +64,10 @@ export interface AtsProfile {
   compensation: Record<string, string>;
   sourceAnswer: string;
   skills?: { yes: string[]; no: string[] };
+  /// Answers Abdout supplied once for questions no rule can derive (school
+  /// grades, travel). `match` is a case-insensitive regex on the label;
+  /// `option` (regex) picks a select option, `answer` is typed text.
+  answers?: { match: string; answer: string; option?: string }[];
 }
 
 export type Answer =
@@ -305,10 +309,19 @@ export function answerQuestion(
 
   }
 
+  // ── answers Abdout gave once (jobs/profile.json → answers) ────────────────
+  for (const a of profile.answers ?? []) {
+    if (!new RegExp(a.match, "i").test(label)) continue;
+    if (!isSelect) return { kind: "text", value: a.answer };
+    const o = pick(field.values, new RegExp(a.option ?? a.answer, "i"));
+    if (o) return field.type === "multi_value_multi_select" ? { kind: "multi", options: [o] } : { kind: "select", option: o };
+  }
+
   // ── more plain facts (Ashby audit, 2026-09-27) ────────────────────────────
   if (/passport country|country of (citizenship|nationality)|nationality/i.test(L) && !isSelect) return { kind: "text", value: profile.identity.passportCountry ?? "Sudan" };
   if (/nationality|citizenship/i.test(L) && isSelect && profile.identity.nationality) {
-    const o = pick(field.values, new RegExp(`^${profile.identity.nationality}$`, "i"));
+    // Boards list the country ("Sudan") as often as the demonym ("Sudanese").
+    const o = pick(field.values, new RegExp(`^(${profile.identity.nationality}|${profile.identity.passportCountry ?? profile.identity.nationality})$`, "i"));
     return o ? (field.type === "multi_value_multi_select" ? { kind: "multi", options: [o] } : { kind: "select", option: o }) : null;
   }
   if (/where are you (currently |presently )?(located|based)|where do you (currently )?(live|reside)/i.test(L) && isSelect) {
