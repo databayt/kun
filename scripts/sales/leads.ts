@@ -158,6 +158,12 @@ async function discover(city: string) {
     const phone = t.phone ?? t["contact:phone"] ?? t["contact:mobile"] ?? null;
     const email = t.email ?? t["contact:email"] ?? null;
     if (!website && !phone && !email) continue; // nobody to talk to
+    // Chains and multinationals (OSM `brand`) buy from head office, never from
+    // a cold message — Shoprite, DHL and Spur were the first false "leads".
+    if (t.brand || t["brand:wikidata"] || /\b(plc|group|international)\b/i.test(t.operator ?? "")) {
+      delete leads[`osm:${e.type}/${e.id}`];
+      continue;
+    }
     const fp = `osm:${e.type}/${e.id}`;
     const prev = leads[fp];
     leads[fp] = {
@@ -232,6 +238,12 @@ async function auditOne(l: Lead): Promise<Audit> {
   const ms = Date.now() - t0;
   const kb = Math.round(html.length / 1024);
   notes.push(`HTTP ${res.status} in ${ms} ms, ${kb} KB HTML → ${res.url}`);
+  // 401/403/429/503 is a bot wall (Cloudflare, WAF), not a dead site — a real
+  // visitor gets through. Only 404/410/5xx-other count as broken.
+  if ([401, 403, 406, 429, 503].includes(res.status)) {
+    notes.push("blocked the automated check — judge by hand");
+    return { at, finding: "OK", score: 5, notes };
+  }
   if (res.status >= 400) return { at, finding: "BROKEN", score: 80, notes };
   if (
     /domain (is )?for sale|parked|this domain|account suspended|default web page|coming soon|under construction/i.test(
@@ -287,8 +299,10 @@ async function auditOne(l: Lead): Promise<Audit> {
 
 async function audit(city: string, limit: number) {
   const leads = load(city);
+  // --reaudit BROKEN,OK re-runs those findings after an audit-rule change.
+  const again = new Set((opt("--reaudit") ?? "").split(",").filter(Boolean));
   const todo = Object.values(leads)
-    .filter((l) => !l.audit)
+    .filter((l) => !l.audit || again.has(l.audit.finding))
     .slice(0, limit);
   const tally: Record<string, number> = {};
   for (const l of todo) {
