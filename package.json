@@ -40,7 +40,8 @@
     "jobs:ats": "tsx scripts/jobs/ats.ts",
     "jobs:markets": "tsx scripts/jobs/markets.ts",
     "jobs:funding": "tsx scripts/jobs/funding.ts",
-    "jobs:requests": "tsx scripts/jobs/requests.ts"
+    "jobs:requests": "tsx scripts/jobs/requests.ts",
+    "sales:leads": "tsx scripts/sales/leads.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "^4.0.37",

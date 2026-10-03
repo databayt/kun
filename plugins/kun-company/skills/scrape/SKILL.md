@@ -1,7 +1,7 @@
 ---
 name: scrape
 description: Lead acquisition — contact gap first, discovery last
-when_to_use: "Finding, enriching, tiering or reaching leads in the Twenty CRM. Triggers on: scrap, scrape, scrap facebook, scrap whatsapp, scrap facebook for hogwarts, scrap for mkan, leads, prospect, contact gap, enrich, outreach, pipeline health, who should we contact, find schools, اسحب, جمع بيانات, عملاء محتملين. NOT /health (engine drift), /measure (social numbers), /report (a bug)."
+when_to_use: "Finding, enriching, tiering or reaching leads in the Twenty CRM. Triggers on: scrap, scrape, scrap facebook, scrap whatsapp, scrap facebook for hogwarts, scrap for mkan, scrap for databayt, website leads, old websites, rebrand leads, leads, prospect, contact gap, enrich, outreach, pipeline health, who should we contact, find schools, اسحب, جمع بيانات, عملاء محتملين. NOT /health (engine drift), /measure (social numbers), /report (a bug)."
 argument-hint: "[facebook|whatsapp|website] [for <product>] [--apply]"
 ---
 
@@ -56,6 +56,30 @@ export TWENTY_API_KEY=$(security find-generic-password -s databayt-twenty -a <pr
 ```
 
 Off this Mac: `https://twenty-api-2.tail42a5c4.ts.net`. The CRM is down whenever the laptop is.
+
+### `databayt` — Website Leads (the software house's outbound lane, 2026-10-03)
+
+The lead is a **business whose website is missing, old, slow or not mobile-ready**: hotels,
+restaurants, schools, clinics, NGOs, offices in Kigali, Nairobi, Lagos, Khartoum and Port Sudan.
+It lives in its own object, **Website Leads** (`websiteLead`, Databayt workspace, sales.databayt.org,
+created by `scripts/crm-website-lead-object.mjs`), not in Company/Opportunity. The code is in kun
+(Databayt's own repo), not a product repo:
+
+```bash
+pnpm sales:leads discover --city kigali,nairobi,lagos   # OSM via Overpass — open data, no Google Maps (ToS)
+pnpm sales:leads audit    --city kigali                 # fetch each site → finding + need score 0-100
+pnpm sales:leads gap                                    # tiers and findings per city
+pnpm sales:leads push --tier A,B [--apply]              # → Website Leads, stage AUDITED, dedup osm:<type>/<id>
+```
+
+Findings: NO_WEBSITE · BROKEN · NO_HTTPS · NOT_MOBILE · OUTDATED · SLOW · SOCIAL_ONLY · OK. Tier A =
+need ≥60 and a phone/email; B = need ≥30 and reachable. Offer by sector: food → QR ordering,
+hotels → booking site, schools → Hogwarts, no site → website in a week, else rebrand. Proof URLs for
+the pitch: balqalam.com, mkan.sd, bu.databayt.org, abdoutgroup.com, mr.databayt.org. Outreach
+follows `/funnel` rules (a human approves each first touch; WhatsApp only to mobiles; Arabic first
+for Sudan, English for Kigali/Nairobi/Lagos). Stages: AUDITED → QUALIFIED → CONTACTED → REPLIED →
+CALL → PROPOSAL → WON/LOST, DORMANT after 4 silent touches. Posted client work (RFPs, wizard
+requests) is `/jobs`, not here.
 
 ## §1 — No argument: report the gap, recommend the move
 
