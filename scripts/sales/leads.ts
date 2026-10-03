@@ -541,8 +541,36 @@ const OFFER: Record<string, { ar: string; en: string; proof: string }> = {
   REBRAND: { ar: "نعيد تصميم المواقع لتكون سريعة وحديثة وتعمل على الجوال", en: "We rebuild websites to be fast, modern and mobile-first", proof: "abdoutgroup.com" },
 };
 
+/// The showcase a client opens from WhatsApp (link previews show the first
+/// URL, so the sector's best live build goes first; databayt.org — the global
+/// portfolio — always follows). Picked 2026-10-03 from mobile screenshots of
+/// every live github.com/databayt build; dead ones (ed., zi., hc., wa.) and
+/// off-message ones (nmbd — political) are excluded. Re-check before a big
+/// wave: `curl -sIL <url>` must be 200.
+const SHOWCASE: Record<string, { sd?: string; any: string }> = {
+  FOOD: { any: "bu.databayt.org" }, // live QR ordering, Charles Burgers Kigali
+  HOSPITALITY: { any: "mkan.sd" }, // booking marketplace
+  EDUCATION: { sd: "moalimee.com", any: "balqalam.com" },
+  RETAIL: { sd: "sijillee.com", any: "ec.databayt.org" }, // POS/accounting · e-commerce
+  PROFESSIONAL: { any: "abdoutgroup.com" }, // corporate, Port Sudan logistics
+  // No live health build yet (shifa is down): Sudanese pharmacies get Sijillee
+  // (stock + sales), everyone else the global portfolio itself.
+  HEALTH: { sd: "sijillee.com", any: "databayt.org" },
+  NGO: { any: "mr.databayt.org" }, // visual storytelling
+  TOURISM: { any: "mkan.sd" },
+  OTHER: { any: "mr.databayt.org" },
+};
+const PORTFOLIO = "databayt.org";
+
+function showcaseOf(l: Lead): string {
+  // A school keeps its system proof even in Sudan; balqalam is the live one.
+  if (offerOf(l) === "SCHOOL_SYSTEM") return "balqalam.com";
+  const s = SHOWCASE[l.sector] ?? SHOWCASE.OTHER;
+  return (l.country === "SUDAN" && s.sd) || s.any;
+}
+
 function messageFor(l: Lead): string {
-  const o = OFFER[offerOf(l)];
+  const o = { ...OFFER[offerOf(l)], proof: showcaseOf(l) };
   const f = l.audit!.finding;
   if (l.country === "SUDAN") {
     // The ask follows the offer: a school wants a demo, a restaurant a sample
@@ -556,7 +584,7 @@ function messageFor(l: Lead): string {
           : f === "NO_WEBSITE" || f === "SOCIAL_ONLY"
             ? `هل تودون أن نرسل لكم تصوراً مجانياً لموقع ${l.name}؟`
             : "هل تودون مراجعة مجانية لموقعكم من صفحة واحدة فيها ٣ تحسينات عملية؟";
-    return `السلام عليكم، معكم عثمان عبدوت من داتابايت، شركة برمجيات سودانية. ${AR_FINDING[f]?.(l) ?? ""} ${o.ar}، ومن أعمالنا: ${o.proof}. ${ask} بدون أي التزام.`;
+    return `السلام عليكم، معكم عثمان عبدوت من داتابايت، شركة برمجيات سودانية. ${AR_FINDING[f]?.(l) ?? ""} ${o.ar}، ومن أعمالنا: ${o.proof}${o.proof === PORTFOLIO ? "" : ` — وباقي أعمالنا على ${PORTFOLIO}`}. ${ask} بدون أي التزام.`;
   }
   const offer = offerOf(l);
   const ask =
@@ -567,7 +595,7 @@ function messageFor(l: Lead): string {
         : f === "NO_WEBSITE" || f === "SOCIAL_ONLY"
           ? `Would you like a free mock-up of a website for ${l.name}?`
           : "Would you like a free 1-page review with 3 concrete fixes?";
-  return `Hello ${l.name} team, I'm Osman from Databayt, a software studio in Kigali. ${EN_FINDING[f]?.(l) ?? ""} ${o.en}. Here's one we made: ${o.proof}. ${ask} No obligation.`;
+  return `Hello ${l.name} team, I'm Osman from Databayt, a software studio in Kigali. ${EN_FINDING[f]?.(l) ?? ""} ${o.en}. ${o.proof === PORTFOLIO ? `Our work: ${PORTFOLIO}.` : `Here's one we built: ${o.proof} (more of our work: ${PORTFOLIO}).`} ${ask} No obligation.`;
 }
 
 function draft(city: string, tiers: Set<string>) {
@@ -576,7 +604,14 @@ function draft(city: string, tiers: Set<string>) {
   const wa: string[] = [];
   const other: string[] = [];
   const order = ["BROKEN", "NOT_MOBILE", "NO_HTTPS", "OUTDATED", "SLOW", "SOCIAL_ONLY", "NO_WEBSITE"];
-  leads.sort((a, b) => order.indexOf(a.audit!.finding) - order.indexOf(b.audit!.finding));
+  // Broken sites first, then by how likely the sector is to buy — Kigali's OSM
+  // is 85% pharmacies, the weakest website buyer, so they go last.
+  const buyer = ["FOOD", "HOSPITALITY", "EDUCATION", "PROFESSIONAL", "RETAIL", "TOURISM", "NGO", "OTHER", "HEALTH"];
+  leads.sort(
+    (a, b) =>
+      order.indexOf(a.audit!.finding) - order.indexOf(b.audit!.finding) ||
+      buyer.indexOf(a.sector) - buyer.indexOf(b.sector),
+  );
   // OSM often maps one business as several nodes (APEDDH ×3 in Kigali): one
   // message per number, never the same pitch twice to the same phone.
   const sent = new Set<string>();

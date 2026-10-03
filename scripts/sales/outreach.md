@@ -20,14 +20,27 @@ These are used by `pnpm sales:leads` (the lane is documented in `/scrape`, under
 | SLOW        | "Your site takes a few seconds to open on mobile data."                          |
 | BROKEN      | "Your website isn't loading right now."                                          |
 
-## Proof by offer
+## Showcase by sector (`SHOWCASE` in leads.ts)
 
-| Offer                | Proof                                     |
-| -------------------- | ----------------------------------------- |
-| QR_ORDERING          | bu.databayt.org (Charles Burgers, Kigali) |
-| BOOKING              | mkan.sd                                   |
-| SCHOOL_SYSTEM        | balqalam.com                              |
-| NEW_WEBSITE, REBRAND | abdoutgroup.com · mr.databayt.org         |
+The first link is the best live build for the sector, because WhatsApp previews the first URL. **databayt.org**, the global portfolio, always follows. The sites were picked on 2026-10-03 from mobile screenshots of every live github.com/databayt build. Re-check before a big wave: `curl -sIL <url>` must return 200.
+
+| Sector | Sudan | Elsewhere |
+|---|---|---|
+| Food | bu.databayt.org | bu.databayt.org |
+| Hotels, tourism | mkan.sd | mkan.sd |
+| Schools | balqalam.com | balqalam.com |
+| Retail | sijillee.com | ec.databayt.org |
+| Offices, companies | abdoutgroup.com | abdoutgroup.com |
+| Health | sijillee.com | databayt.org only |
+| NGO, other | mr.databayt.org | mr.databayt.org |
+
+**Never cite these:**
+- Dead: ed.databayt.org, zi.databayt.org (Ziara), hc.databayt.org (Shifa), wa.databayt.org, gocartshop.in
+- NMBD (nmbdsd.org): a political movement
+- Pixel clones: apple, nike, zenda, topmate, thmanyah
+- camillemormal.com: not our domain
+
+**Known weakness:** on a first visit, bu.databayt.org opens with an "Add to Home Screen" sheet over the menu. Fix that before a large wave of restaurant messages.
 
 ## Touch 1: English (WhatsApp or email)
 
