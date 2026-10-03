@@ -14,6 +14,7 @@
 #   ≥10:00 Mon–Fri     send, every tick until 17:00       0 tokens, capped
 #   ≥07:00 daily       ATS prepare: form answers + letters   claude -p (Max)
 #   09:00–20:00        ATS submit, ≤8 per tick, total cap 100/day
+#   every tick         client requests (databayt.org wizard) → CLIENT_PROJECT  0 tokens
 #   08:00–21:00        inbox: read + classify replies     0 tokens
 #   ≥16:00 Mon–Fri     follow-ups (templated) + archive   0 tokens
 #   Fri ≥17:00         learn --propose --send             claude -p (Max)
@@ -146,7 +147,12 @@ case "$MODE" in
         fi
 
         if [ "$HOUR" -ge 7 ] && ! done_today discover; then
-            run discover node scripts/jobs/discover.mjs && run ingest pnpm -s jobs:ingest && stamp discover
+            # Ingest's Neon websocket drops now and then (an ErrorEvent, exit 1):
+            # on 2026-10-01/02 that left discover unstamped, so no wave and no
+            # digest ran for three days. One retry a minute later clears it.
+            run discover node scripts/jobs/discover.mjs &&
+                { run ingest pnpm -s jobs:ingest || { sleep 60; run ingest-retry pnpm -s jobs:ingest; }; } &&
+                stamp discover
         fi
         if weekday && [ "$HOUR" -ge 7 ] && [ "$HOUR" -lt 17 ] && done_today discover && ! done_today wave; then
             run facts pnpm -s jobs:facts
@@ -169,6 +175,9 @@ case "$MODE" in
         if [ "$HOUR" -ge 9 ] && [ "$HOUR" -lt 20 ]; then
             run ats-submit pnpm -s jobs:ats submit --apply --limit 8
         fi
+        # Client requests from the databayt.org wizard: every tick, all day —
+        # a prospect who asked for a quote is the warmest lead there is.
+        run requests pnpm -s jobs:requests --apply
         if [ "$HOUR" -ge 8 ] && [ "$HOUR" -lt 22 ]; then
             run inbox pnpm -s jobs:inbox
         fi

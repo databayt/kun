@@ -12,15 +12,8 @@
 // Idempotent: reads what exists first and creates only the gaps, so a partial
 // run can simply be re-run.
 
-import {
-  metadataRows,
-  recordRows,
-  twentyGet,
-  twentyKey,
-  twentyPatch,
-  twentyPost,
-  API_URL,
-} from "./lib/twenty-rest.mjs";
+import { ensureObject } from "./lib/twenty-object.mjs";
+import { COUNTRY_OPTIONS, TRACK_OPTIONS } from "./lib/crm-markets.mjs";
 
 const DRY_RUN = process.argv.includes("--dry-run");
 
@@ -69,6 +62,9 @@ const FIELDS = [
       sel("FREELANCE", "Freelance Contracts", "sky", 6),
       sel("TENDER", "Tender — Databayt", "red", 7),
       sel("ENGINEERING_CONTRACT", "Engineering Contract", "yellow", 8),
+      // 2026-10-03: posted client work for the software house — RFPs, gig
+      // posts, marketing /wizard requests. Track = DATABAYT.
+      sel("CLIENT_PROJECT", "Client Project — Databayt", "purple", 9),
     ],
   },
   {
@@ -203,153 +199,12 @@ const FIELDS = [
   { name: "responseAt", label: "Response At", type: "DATE_TIME", icon: "IconMessageReply" },
   { name: "touchNumber", label: "Touch #", type: "NUMBER", icon: "IconHash", description: "1 = application, 2-3 = follow-ups." },
   { name: "applyUrl", label: "Apply URL", type: "TEXT", icon: "IconForms", description: "The ATS application form the submitter fills (Greenhouse, Lever, Ashby)." },
+  // ── markets (2026-10-03): Rwanda, Kenya, Nigeria, Gulf, Sudan. `location`
+  // stays the raw posting text; these are what the views group by.
+  { name: "country", label: "Country", type: "SELECT", icon: "IconFlag", description: "Market the opportunity sits in. REMOTE = location-free.", options: COUNTRY_OPTIONS },
+  { name: "city", label: "City", type: "TEXT", icon: "IconBuildingCommunity", description: "Kigali, Nairobi, Lagos, Riyadh … empty for remote." },
+  { name: "track", label: "Track", type: "SELECT", icon: "IconArrowsSplit", description: "Who it earns for: Abdout as an individual, or Databayt the company.", options: TRACK_OPTIONS },
   { name: "holdReason", label: "Hold Reason", type: "TEXT", icon: "IconAlertTriangle", description: "Why the loop stopped — what Abdout has to supply or decide." },
 ];
 
-const key = twentyKey("databayt");
-if (!key && !DRY_RUN) {
-  console.error(
-    "No Twenty API key. Expected env TWENTY_API_KEY_DATABAYT or Keychain databayt-twenty/databayt.",
-  );
-  process.exit(1);
-}
-
-console.log(`${DRY_RUN ? "DRY RUN — " : ""}Kigali object → ${API_URL} (Databayt workspace)\n`);
-
-// ── 1. the object ────────────────────────────────────────────────────────────
-
-const objectsRes = await twentyGet("/rest/metadata/objects", key);
-if (!objectsRes.ok) {
-  console.error(`Could not read objects: ${objectsRes.status}`, JSON.stringify(objectsRes.body).slice(0, 300));
-  process.exit(1);
-}
-const objects = metadataRows(objectsRes.body);
-console.log(`${objects.length} objects in the workspace`);
-
-let kigali = objects.find((o) => o.nameSingular === OBJECT.nameSingular);
-
-if (kigali) {
-  console.log(`✓ object "${OBJECT.nameSingular}" already exists (${kigali.id})`);
-  const drift = ["labelSingular", "labelPlural", "description"].filter((k) => kigali[k] !== OBJECT[k]);
-  if (drift.length === 0) {
-    console.log("  · labels current\n");
-  } else if (DRY_RUN) {
-    console.log(`  would PATCH object — ${drift.join(", ")}\n`);
-  } else {
-    const patch = Object.fromEntries(drift.map((k) => [k, OBJECT[k]]));
-    const res = await twentyPatch(`/rest/metadata/objects/${kigali.id}`, patch, key);
-    console.log(res.ok ? `  ✓ relabelled — ${drift.join(", ")}\n` : `  ✗ relabel ${res.status}: ${JSON.stringify(res.body).slice(0, 300)}\n`);
-  }
-} else if (DRY_RUN) {
-  console.log(`\nwould POST /rest/metadata/objects`);
-  console.log(JSON.stringify(OBJECT, null, 2));
-  console.log();
-} else {
-  const res = await twentyPost("/rest/metadata/objects", OBJECT, key);
-  if (!res.ok) {
-    console.error(`✗ create object failed ${res.status}:`, JSON.stringify(res.body).slice(0, 600));
-    process.exit(1);
-  }
-  kigali = res.body?.data?.createOneObject ?? res.body?.data ?? res.body;
-  console.log(`✓ created object "${OBJECT.labelPlural}" (${kigali.id})\n`);
-}
-
-// ── 2. the fields ────────────────────────────────────────────────────────────
-
-const companyObject = objects.find((o) => o.nameSingular === "company");
-if (!companyObject) {
-  console.error("No `company` object found — cannot wire the relation.");
-  process.exit(1);
-}
-
-const existingFields = kigali?.fields?.edges?.map((e) => e.node) ?? kigali?.fields ?? [];
-const existingFieldNames = new Set(existingFields.map((f) => f.name));
-
-let created = 0;
-let present = 0;
-let failed = 0;
-
-for (const field of FIELDS) {
-  if (existingFieldNames.has(field.name)) {
-    present++;
-    const live = existingFields.find((f) => f.name === field.name);
-    const missing = (field.options ?? []).filter((o) => !(live?.options ?? []).some((l) => l.value === o.value));
-    if (missing.length === 0) {
-      console.log(`  · ${field.name} — already present`);
-      continue;
-    }
-    // A SELECT only grows: keep every live option (with its id, so existing
-    // records keep their value) and append the new ones after it.
-    const options = [
-      ...live.options,
-      ...missing.map((o, i) => ({ ...o, position: live.options.length + i })),
-    ];
-    if (DRY_RUN) {
-      console.log(`  would PATCH ${field.name} — add ${missing.map((o) => o.value).join(", ")}`);
-      continue;
-    }
-    const res = await twentyPatch(`/rest/metadata/fields/${live.id}`, { options }, key);
-    console.log(
-      res.ok
-        ? `  ✓ ${field.name} — added ${missing.map((o) => o.value).join(", ")}`
-        : `  ✗ ${field.name} options ${res.status}: ${JSON.stringify(res.body).slice(0, 300)}`,
-    );
-    if (!res.ok) failed++;
-    continue;
-  }
-
-  const payload = {
-    objectMetadataId: kigali?.id ?? "<object-id>",
-    type: field.type,
-    name: field.name,
-    label: field.label,
-    icon: field.icon,
-    isLabelSyncedWithName: false,
-    ...(field.description ? { description: field.description } : {}),
-    ...(field.options ? { options: field.options } : {}),
-    ...(field.relation
-      ? {
-          relationCreationPayload: {
-            targetObjectMetadataId: companyObject.id,
-            targetFieldLabel: field.relation.targetFieldLabel,
-            targetFieldIcon: field.relation.targetFieldIcon,
-            type: field.relation.type,
-          },
-        }
-      : {}),
-  };
-
-  if (DRY_RUN) {
-    console.log(`  would POST /rest/metadata/fields — ${field.name} (${field.type})`);
-    console.log(`    ${JSON.stringify(payload).slice(0, 220)}…`);
-    continue;
-  }
-
-  const res = await twentyPost("/rest/metadata/fields", payload, key);
-  if (res.ok) {
-    created++;
-    console.log(`  ✓ ${field.name} (${field.type})`);
-  } else {
-    failed++;
-    console.log(`  ✗ ${field.name} (${field.type}) — ${res.status}: ${JSON.stringify(res.body).slice(0, 400)}`);
-  }
-}
-
-if (DRY_RUN) {
-  console.log(`\nDRY RUN — nothing written. ${FIELDS.filter((f) => !existingFieldNames.has(f.name)).length} fields would be created.`);
-  process.exit(0);
-}
-
-console.log(`\nFields: ${created} created, ${present} already present, ${failed} failed.`);
-
-// ── 3. read it back ──────────────────────────────────────────────────────────
-
-const check = await twentyGet(`/rest/${OBJECT.namePlural}?limit=1`, key);
-console.log(
-  check.ok
-    ? `✓ GET /rest/${OBJECT.namePlural} → ${check.status}, ${recordRows(check.body, OBJECT.namePlural).length} records (total ${check.body?.totalCount ?? 0})`
-    : `✗ GET /rest/${OBJECT.namePlural} → ${check.status}: ${JSON.stringify(check.body).slice(0, 300)}`,
-);
-console.log(`\nSidebar: "${OBJECT.labelPlural}" at https://sales.databayt.org`);
-
-if (failed > 0) process.exit(1);
+await ensureObject(OBJECT, FIELDS, { dryRun: DRY_RUN });

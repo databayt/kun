@@ -12,6 +12,7 @@ import { existsSync, readFileSync } from "node:fs";
 
 import { BoardRow, boardUrl, listBoard } from "./board";
 import { kigaliNow, killSwitchOn, loadConfig, seniorityBand, todaysCap } from "./config";
+import { fundingDue } from "./funding";
 import { notify } from "./notify";
 
 const short = (r: BoardRow): string =>
@@ -129,6 +130,14 @@ async function main(): Promise<void> {
     lines.push(`\n*Upwork pick of the day:* proposal ready in ${upwork}${url ? ` — ${url}` : ""}`);
   } else {
     lines.push(`\n*Upwork pick of the day:* not drafted yet (Cowork routine)`);
+  }
+
+  // Funding & Programs board (2026-10-03): calls closing in the next 14 days.
+  // A board that is not there yet must not cost the jobs digest.
+  const due = await fundingDue(14).catch(() => []);
+  if (due.length) {
+    lines.push(`\n*Funding closing ≤14 days (${due.length}):*`);
+    for (const f of due.slice(0, 6)) lines.push(`• ${f.deadline!.slice(0, 10)} ${f.name}${f.applyUrl ? ` — ${f.applyUrl}` : ""}`);
   }
 
   const text = lines.join("\n");

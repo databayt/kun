@@ -39,6 +39,11 @@ export interface BoardRow {
   holdReason: string | null;
   fingerprint: string | null;
   source: string | null;
+  location?: string | null;
+  remoteType?: string | null;
+  country?: string | null;
+  city?: string | null;
+  track?: string | null;
   updatedAt: string;
 }
 
@@ -55,7 +60,7 @@ function apiKey(): string {
 }
 
 let last = 0;
-async function call<T>(
+export async function call<T>(
   path: string,
   init: { method?: string; body?: unknown } = {},
   attempt = 1,

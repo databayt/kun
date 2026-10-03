@@ -54,6 +54,38 @@ truncated to 16 chars, the same hash the engine uses, so a record is the same
 record in both systems. The Opportunities object still carries duplicate `[Job]`
 rows from an earlier push that had no such check.
 
+**Markets and tracks (2026-10-03).** Three more fields group the board by where
+and for whom: `country` (`SELECT` — Rwanda, Kenya, Nigeria, Uganda, Tanzania,
+Sudan, Saudi Arabia, UAE, Qatar, Gulf-other, Remote, Other), `city` (`TEXT`) and
+`track` (`SELECT` — Founder for Abdout's own income, Databayt for the company's).
+`campaign` gained **Client Project** for posted client work: RFPs and the
+databayt.org `/wizard` requests, which `pnpm jobs:requests` pulls in as HOLD
+cards. The fields are filled at push time from the posting's location
+(`src/lib/jobs/markets.ts`); `pnpm jobs:markets --apply` backfills empty ones.
+
+### Funding & Programs
+
+A second custom object, **Funding & Programs** (`fundingProgram`), holds
+incubators, accelerators, grants, cloud credits, competitions, fellowships and
+investors. Abdout asked for it to be separate from the jobs board: a program
+carries a cohort, equity terms and a ticket size, and a job card has none of these.
+
+| Field | Type | Carries |
+| --- | --- | --- |
+| `company` | `RELATION` → company | The operator, reverse-labelled "Funding" |
+| `programType` | `SELECT` | Credits · Grant · Incubator · Accelerator · Competition · Fellowship · Angel · VC · Loan |
+| `status` | `SELECT` | To review → Eligible / Not eligible → Preparing → Submitted → Interview → Accepted / Rejected → Claimed |
+| `country` · `city` | `SELECT` · `TEXT` | The same country list as the jobs board, plus Pan-Africa and Global |
+| `beneficiary` | `SELECT` | Founder · Databayt · Hogwarts |
+| `equity` · `amountUsd` · `ladderRung` | `SELECT` · `NUMBER` · `NUMBER` | Terms; rung 1–5 on the non-dilutive-first ladder |
+| `deadline` · `cohortStart` | `DATE_TIME` | Empty deadline = rolling |
+| `eligibility` | `RICH_TEXT` | Fit for a Sudanese national resident in Rwanda |
+| `programUrl` · `applyUrl` · `source` · `fingerprint` | `LINKS` · `TEXT` | Dedup on `fingerprint` = slug(organisation:name) |
+
+Seeded from `jobs/funding.seed.json` by `pnpm jobs:funding --apply`. Re-runs
+create nothing, and a card Abdout has moved keeps its status. The jobs digest
+lists programs that close within 14 days.
+
 ### Writing custom objects
 
 The metadata API is open on this build — `GET/POST/PATCH/DELETE` on
@@ -71,7 +103,9 @@ get wrong and all three cost a 400:
 Set `isLabelSyncedWithName: false` whenever the label differs from the name —
 which is always, for a plural like "Kigali" over `kigaliOpportunities`.
 
-`scripts/crm-kigali-object.mjs` creates the object and its fields idempotently;
+`scripts/crm-kigali-object.mjs` and `scripts/crm-funding-object.mjs` create their
+objects and fields idempotently through `scripts/lib/twenty-object.mjs`
+(`ensureObject`; a `SELECT` only grows, live options keep their ids);
 `scripts/lib/twenty-rest.mjs` holds the shared client (Keychain auth, 800 ms
 spacing, 429 backoff).
 

@@ -2,6 +2,7 @@ import { execSync } from "node:child_process";
 
 import { parseApplyMethod } from "./apply-method";
 import { evaluateCampaignMatches } from "./campaigns";
+import { marketOf, trackOf } from "./markets";
 import { generateJobFingerprint } from "./deduplication";
 import { FullJobWithAssessment } from "./types";
 
@@ -48,6 +49,7 @@ const CAMPAIGN_OPTION: Record<string, string> = {
   "freelance-contracts": "FREELANCE",
   "rwanda-tenders-databayt": "TENDER",
   "engineering-contracts": "ENGINEERING_CONTRACT",
+  "client-projects-databayt": "CLIENT_PROJECT",
 };
 
 /// The Kigali object's `applicationStatus` SELECT is coarser than the engine's
@@ -250,6 +252,8 @@ export async function pushJobToTwentyCRM(
         remoteType: job.remoteType.toUpperCase(),
         employmentType: job.employmentType.toUpperCase(),
         location: job.location ?? null,
+        ...marketOf(job.location, job.remoteType),
+        track: trackOf(matchedCampaign ? CAMPAIGN_OPTION[matchedCampaign] : null),
         deadline,
         ...parseApplyMethod(opts.applyMethod),
         ...(job.sourceUrl

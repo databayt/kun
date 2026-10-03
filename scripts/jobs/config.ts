@@ -34,23 +34,27 @@ const DEFAULTS: LoopConfig = {
   windowTo: 17,
   slackTarget: "slack:D0AQ0JR5ZU4",
   vetoHours: 2,
-  // Abdout, 2026-09-27: software first, electrical engineering paused.
-  pausedLanes: ["PROTECTION", "ELECTRICAL", "MARINE_ETO", "ENGINEERING_CONTRACT"],
+  // Abdout, 2026-10-03: electrical/protection back on (his deepest CV, Gulf +
+  // East Africa); only marine stays paused.
+  pausedLanes: ["MARINE_ETO"],
   dailyTotalCap: 100,
 };
 
-/// Priority, lowest first (Abdout, 2026-09-27): software in Kigali → remote
-/// jobs → freelance → the rest. Paused lanes never reach the wave.
+/// Priority, lowest first (Abdout, 2026-10-03): days-to-cash — AI-training
+/// gigs and software roles → remote → freelance + electrical/protection →
+/// Databayt tenders and client projects → engineering contracts. Paused lanes
+/// never reach the wave.
 export const LANE_BAND: Record<string, number> = {
+  AI_TRAINING: 1,
   WEB_DEVELOPER: 1,
   REMOTE_WORLDWIDE: 2,
   FREELANCE: 3,
+  PROTECTION: 3,
+  ELECTRICAL: 3,
   TENDER: 4,
-  AI_TRAINING: 5,
-  PROTECTION: 8,
-  ELECTRICAL: 8,
+  CLIENT_PROJECT: 4,
+  ENGINEERING_CONTRACT: 5,
   MARINE_ETO: 8,
-  ENGINEERING_CONTRACT: 8,
 };
 
 /// The rung a posting names, as a sort band — lower goes out first. Abdout's

@@ -52,6 +52,21 @@ const REMOTE_ISH = /remote|\bhome ?[- ]?based\b|work from home|\bwfh\b|distribut
 // authorisation is still out.
 const WILL_RELOCATE = /visa sponsor|sponsors? (a )?visa|sponsorship (is )?(available|provided|offered)|we sponsor|work permit (support|sponsorship|assistance)|relocation (package|assistance|support|allowance|bonus|budget)|(we )?(help|support|assist)[^.]{0,30}relocat|relocation (is )?(available|provided|offered)/i;
 
+// ── markets (Abdout, 2026-10-03) ─────────────────────────────────────────────
+// Africa — Rwanda, Kenya, Nigeria and their neighbours — remote AND on-site:
+// he will move within the continent. The Gulf — remote only, never on-site,
+// whatever the posting offers. Everywhere else stays remote-only as before.
+const AFRICA_ONSITE = /\b(rwanda|kigali|kenya|nairobi|mombasa|nigeria|lagos|abuja|uganda|kampala|tanzania|dar es salaam|ethiopia|addis ababa|ghana|accra|east africa)\b/i;
+const GULF = /\b(saudi|ksa|riyadh|jeddah|dammam|khobar|uae|united arab emirates|dubai|abu dhabi|sharjah|qatar|doha|bahrain|manama|kuwait|oman|muscat|gcc|gulf)\b/i;
+
+/// May Abdout take this role in person? Africa yes; the Gulf never; elsewhere
+/// only when the employer funds the move (WILL_RELOCATE).
+export function onsiteAllowed(place, text = "") {
+  if (GULF.test(place)) return false;
+  if (AFRICA_ONSITE.test(place)) return true;
+  return WILL_RELOCATE.test(text);
+}
+
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function get(url, { json = false } = {}, attempt = 1) {
@@ -99,7 +114,7 @@ const TENDER_ENGINEERING = /substation|protection relay|commissioning|testing an
 
 /// Abdout is Sudanese; a nationality gate makes the whole application moot.
 const CITIZENS_ONLY =
-  /rwandan (nationals?|citizens?) only|only rwandans?|(must|to) be (a )?rwandan\b|be of rwandan nationality|rwandan nationality|open to rwandans|rwandan citizenship|local rwandan (service providers|firms|companies|suppliers)/i;
+  /rwandan (nationals?|citizens?) only|only rwandans?|(must|to) be (a )?rwandan\b|be of rwandan nationality|rwandan nationality|open to rwandans|rwandan citizenship|local rwandan (service providers|firms|companies|suppliers)|(kenyan|nigerian|ugandan|tanzanian|saudi|emirati|qatari) (nationals?|citizens?) only|only (kenyans?|nigerians?|saudis?)|(must|to) be (a )?(kenyan|nigerian|saudi) (national|citizen)|saudi nationals|saudization|\bnysc\b/i;
 
 function laneForJob(title) {
   return LANES.find(([, re]) => re.test(title))?.[0];
@@ -166,7 +181,7 @@ export function openToRwanda(place, text = "") {
     .trim();
   if (!rest) return true;
   // Naming an open region anywhere ("Americas / EMEA") admits Kigali.
-  if (/\b(emea|africa|worldwide|anywhere|global|rwanda)\b/.test(rest)) return true;
+  if (/\b(emea|mena|middle east|africa|worldwide|anywhere|global|rwanda)\b/.test(rest)) return true;
   const OPEN = /^(worldwide|anywhere|global|globally|international|emea|africa|east africa|rwanda|kigali|earth|any location|(worldwide|anywhere|global|emea|africa|rwanda|kigali)( .*)?)$/;
   if (OPEN.test(rest) && !/\b(us|usa|canada|uk|latam|americas|apac|india)\b/.test(rest)) return true;
   if (/^(europe|eu|european union|cet|cest)( time ?zones?)?$/.test(rest)) return /time ?zones?/i.test(`${place} ${text}`);
@@ -631,18 +646,20 @@ const ADAPTERS = {
         if (OFF_LANG?.test(j.title) && !HIS_STACK.test(j.title)) continue;
         // Country-bound postings name the country in the title ("- India",
         // "Armenia 🇦🇲"): unless it is Rwanda, it is not open to Abdout.
-        if (/[\u{1F1E6}-\u{1F1FF}]{2}/u.test(j.title) && !/🇷🇼/u.test(j.title)) continue;
-        if (/\b(india|armenia|brazil|mexico|argentina|colombia|chile|peru|poland|romania|ukraine|serbia|portugal|spain|germany|france|italy|netherlands|uk|usa|us|canada|philippines|pakistan|nigeria|kenya|egypt|morocco|s[ée]n[ée]gal|south africa|ghana|turkey|vietnam|indonesia|japan|korea|singapore|australia|latam|americas|apac)\b/i.test(j.title)) continue;
+        if (/[\u{1F1E6}-\u{1F1FF}]{2}/u.test(j.title) && !/🇷🇼|🇰🇪|🇳🇬|🇺🇬|🇹🇿/u.test(j.title)) continue;
+        if (/\b(india|armenia|brazil|mexico|argentina|colombia|chile|peru|poland|romania|ukraine|serbia|portugal|spain|germany|france|italy|netherlands|uk|usa|us|canada|philippines|pakistan|egypt|morocco|s[ée]n[ée]gal|south africa|ghana|turkey|vietnam|indonesia|japan|korea|singapore|australia|latam|americas|apac)\b/i.test(j.title)) continue;
         const place = j.place || "";
         // Kigali is home, so an on-site Rwandan posting is the top lane, not a
         // remote one — and every gate below is written for the worldwide lane,
         // which would drop it for not saying "remote".
         const inRwanda = /\b(rwanda|kigali)\b/i.test(place);
+        // Africa is reachable in person, the Gulf never (onsiteAllowed).
+        const inAfrica = AFRICA_ONSITE.test(place);
         // An employer that funds the move clears the location gates below: they
         // exist to drop roles Abdout cannot take, and a sponsored on-site role
         // is one he can.
-        const relocates = WILL_RELOCATE.test(j.text);
-        if (!inRwanda && !relocates) {
+        const relocates = WILL_RELOCATE.test(j.text) && !GULF.test(place);
+        if (!inAfrica && !relocates) {
           if (!REMOTE_ISH.test(`${place} ${j.title}`)) continue;
           if (PLACE_BAD.test(place) && !/worldwide|anywhere|global|africa|emea/i.test(place)) continue;
           // "Playa Vista, CA or Remote": a US city/state code means US remote.
@@ -663,13 +680,13 @@ const ADAPTERS = {
             title: j.title,
             company: b.company,
             location: place || "Remote",
-            remoteType: inRwanda || (relocates && !REMOTE_ISH.test(place)) ? "onsite" : "remote",
+            remoteType: (inAfrica || relocates) && !REMOTE_ISH.test(place) ? "onsite" : "remote",
             employmentType: /contract|freelance/i.test(j.title) ? "contract" : "full_time",
             url: j.url,
             source: `ats-${b.ats}`,
             campaign: inRwanda ? "kigali-web-developer" : "remote-web-developer-worldwide",
             description:
-              relocates && !inRwanda && !REMOTE_ISH.test(place)
+              relocates && !inAfrica && !REMOTE_ISH.test(place)
                 ? `[on-site — the posting offers visa sponsorship or relocation support] ${j.text.slice(0, 860)}`
                 : j.text.slice(0, 900),
             salary: j.salary,
@@ -677,6 +694,63 @@ const ADAPTERS = {
           applyMethod: `ats:${b.ats}:${j.applyUrl}`,
           rwandaEligible: inRwanda ? true : "unverified",
         });
+      }
+    }
+    return { items, dropped };
+  },
+
+  /// MyJobMag runs the same board for Kenya (.co.ke) and Nigeria (.com): IT and
+  /// engineering fields, "Title at Company" cards with the deadline inline.
+  /// On-site Africa is open to Abdout (2026-10-03), so nothing is filtered on
+  /// place — only nationality gates and expired deadlines.
+  async myjobmag() {
+    const items = [];
+    const dropped = [];
+    const sites = [
+      ["https://www.myjobmag.co.ke", "Nairobi, Kenya"],
+      ["https://www.myjobmag.com", "Lagos, Nigeria"],
+    ];
+    const seen = new Set();
+    for (const [host, home] of sites) {
+      for (const field of ["information-technology", "engineering"]) {
+        const page = `${host}/jobs-by-field/${field}`;
+        const html = await get(page);
+        const cards = html.split('class="job-list-li"').slice(1);
+        if (cards.length === 0) dropped.push(`myjobmag: 0 cards on ${page} — markup changed?`);
+        for (const card of cards) {
+          const [, href, raw] = card.match(/<h2><a href="([^"]+)">([\s\S]*?)<\/a>/) ?? [];
+          if (!href || !raw) continue;
+          const [title, company] = text(raw).split(/ at (?=[^ ])/);
+          const url = `${host}${href}`;
+          if (!title || seen.has(url)) continue;
+          seen.add(url);
+          const campaign = laneForJob(title);
+          if (!campaign) continue;
+          const desc = text(card.match(/class="job-desc">([\s\S]*?)<\/li>/)?.[1] ?? "");
+          const deadline = parseDate(desc.match(/deadline:\s*([^J]{0,30})/i)?.[1]?.replace(/(\d)(st|nd|rd|th)\b/g, "$1"));
+          if (deadline && deadline < TODAY) continue;
+          const city = text(card.match(/jobs-location\/[^']*'>([^<]+)</)?.[1] ?? "");
+          const country = home.split(", ")[1];
+          if (CITIZENS_ONLY.test(`${title} ${desc}`)) {
+            dropped.push(`nationals only: ${title}`);
+            continue;
+          }
+          if (items.length >= LIMIT) break;
+          items.push(
+            item({
+              title: title.trim(),
+              company: company?.trim(),
+              location: city ? `${city}, ${country}` : home,
+              remoteType: /remote/i.test(`${title} ${city}`) ? "remote" : "onsite",
+              url,
+              source: `myjobmag-${country.toLowerCase()}`,
+              campaign,
+              deadline,
+              description: desc.replace(/^Application deadline:[^J]*/i, "").slice(0, 700),
+              applyEmail: extractApplyEmail(desc),
+            }),
+          );
+        }
       }
     }
     return { items, dropped };
@@ -761,6 +835,13 @@ if (ONLY && WRITE && !DRY_RUN) {
 } else {
   mkdirSync("jobs/inbox", { recursive: true });
   const out = `jobs/inbox/${TODAY}-discover.json`;
-  writeFileSync(out, JSON.stringify(all, null, 2) + "\n");
-  console.log(`\n${out} <- ${all.length} items. Next: pnpm jobs:ingest --dry-run`);
+  // 2026-10-02: a second run with the network down wrote 0 items over the
+  // morning's 129. An emptier re-run never replaces a fuller one.
+  const prior = existsSync(out) ? JSON.parse(readFileSync(out, "utf-8")).length : 0;
+  if (all.length < prior / 2) {
+    console.log(`\n${out} kept — this run found ${all.length}, the file already holds ${prior}.`);
+  } else {
+    writeFileSync(out, JSON.stringify(all, null, 2) + "\n");
+    console.log(`\n${out} <- ${all.length} items. Next: pnpm jobs:ingest --dry-run`);
+  }
 }
