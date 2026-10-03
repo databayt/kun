@@ -558,7 +558,16 @@ function messageFor(l: Lead): string {
             : "هل تودون مراجعة مجانية لموقعكم من صفحة واحدة فيها ٣ تحسينات عملية؟";
     return `السلام عليكم، معكم عثمان عبدوت من داتابايت، شركة برمجيات سودانية. ${AR_FINDING[f]?.(l) ?? ""} ${o.ar}، ومن أعمالنا: ${o.proof}. ${ask} بدون أي التزام.`;
   }
-  return `Hello ${l.name} team, I'm Osman from Databayt, a software studio in Kigali. ${EN_FINDING[f]?.(l) ?? ""} ${o.en}. Here's one we made: ${o.proof}. Would you like a free 1-page review with 3 concrete fixes? No obligation.`;
+  const offer = offerOf(l);
+  const ask =
+    offer === "SCHOOL_SYSTEM"
+      ? `Would you like a free demo of the system for ${l.name}?`
+      : offer === "QR_ORDERING"
+        ? `Would you like us to send a free sample of a digital menu for ${l.name}?`
+        : f === "NO_WEBSITE" || f === "SOCIAL_ONLY"
+          ? `Would you like a free mock-up of a website for ${l.name}?`
+          : "Would you like a free 1-page review with 3 concrete fixes?";
+  return `Hello ${l.name} team, I'm Osman from Databayt, a software studio in Kigali. ${EN_FINDING[f]?.(l) ?? ""} ${o.en}. Here's one we made: ${o.proof}. ${ask} No obligation.`;
 }
 
 function draft(city: string, tiers: Set<string>) {
@@ -568,8 +577,13 @@ function draft(city: string, tiers: Set<string>) {
   const other: string[] = [];
   const order = ["BROKEN", "NOT_MOBILE", "NO_HTTPS", "OUTDATED", "SLOW", "SOCIAL_ONLY", "NO_WEBSITE"];
   leads.sort((a, b) => order.indexOf(a.audit!.finding) - order.indexOf(b.audit!.finding));
+  // OSM often maps one business as several nodes (APEDDH ×3 in Kigali): one
+  // message per number, never the same pitch twice to the same phone.
+  const sent = new Set<string>();
   for (const l of leads) {
     const m = mobileOf(l.phone, l.country);
+    if (m && sent.has(m)) continue;
+    if (m) sent.add(m);
     const text = messageFor(l);
     const head = `### ${l.name} — ${l.sector.toLowerCase()} · ${l.audit!.finding}`;
     if (m) wa.push(`${head}\n\n[Send on WhatsApp → +${m}](https://wa.me/${m}?text=${encodeURIComponent(text)})\n\n> ${text}\n`);
