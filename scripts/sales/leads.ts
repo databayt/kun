@@ -5,6 +5,7 @@
 //   pnpm sales:leads push     [--city …] [--tier A|B|C] [--apply]   → Twenty "Website Leads"
 //   pnpm sales:leads gap                                  what the board holds, by tier/finding
 //   pnpm sales:leads draft    [--city …] [--tier A]       first-touch WhatsApp packet → jobs/packets/sales/
+//   pnpm sales:leads mark     --packet <file.md> [--stage CONTACTED]   after Abdout sends a wave
 //   pnpm sales:leads prune    [--city …] [--apply]         cards that now tier C → stage LOST (never deleted)
 //
 // Databayt's outbound lane (Abdout, 2026-10-03). Discovery is OpenStreetMap
@@ -562,6 +563,45 @@ async function push(
   );
 }
 
+// ── mark: a wave went out ──────────────────────────────────────────────────
+// Every "### <name> — …" heading in the packet is a lead Abdout messaged.
+// The card moves to the stage (CONTACTED by default), touch +1, last touch
+// now — the funnel's stall clock (4 touches → DORMANT) reads these.
+
+async function mark(packet: string | undefined, stage: string) {
+  if (!packet || !existsSync(packet))
+    throw new Error("mark needs --packet <jobs/packets/sales/…md>");
+  const names = new Set(
+    [...readFileSync(packet, "utf-8").matchAll(/^### (.+?) — /gm)].map((m) =>
+      m[1].trim(),
+    ),
+  );
+  const live = await boardFingerprints();
+  const now = new Date().toISOString();
+  let done = 0;
+  for (const city of Object.keys(CITIES)) {
+    for (const l of Object.values(load(city))) {
+      if (!names.has(l.name.trim())) continue;
+      const card = live.get(l.fingerprint);
+      if (!card) continue;
+      const cur = await call<{
+        data: { websiteLead: { touchNumber: number | null } };
+      }>(`${PATH}/${card.id}`);
+      await call(`${PATH}/${card.id}`, {
+        method: "PATCH",
+        body: {
+          stage,
+          touchNumber: (cur.data.websiteLead.touchNumber ?? 0) + 1,
+          lastTouchAt: now,
+        },
+      });
+      done++;
+      console.log(`  ✓ ${l.name} → ${stage}`);
+    }
+  }
+  console.log(`${done} card(s) marked · ${names.size} names in the packet`);
+}
+
 // ── prune: a filter tightened after the push ────────────────────────────────
 // Deletes in Twenty are hard and unrecoverable, so a card that no longer
 // qualifies is moved to LOST — only from AUDITED, never one a human has worked.
@@ -770,10 +810,20 @@ function messageFor(l: Lead): string {
   return `Hello ${l.name} team, I'm Osman from Databayt, a software studio in Kigali. ${EN_FINDING[f]?.(l) ?? ""} ${o.en}. ${o.proof === PORTFOLIO ? `Our work: ${PORTFOLIO}.` : `Here's one we built: ${o.proof} (more of our work: ${PORTFOLIO}).`} ${ask} No obligation.`;
 }
 
-function draft(city: string, tiers: Set<string>) {
+function draft(
+  city: string,
+  tiers: Set<string>,
+  live: Map<string, { id: string; stage: string | null }>,
+) {
   const c = CITIES[city];
+  // Only leads nobody has touched: a card past AUDITED (contacted, replied,
+  // lost…) belongs to the follow-up cadence, never to a first-touch packet.
+  const fresh = (l: Lead) => {
+    const st = live.get(l.fingerprint)?.stage;
+    return !st || st === "AUDITED" || st === "QUALIFIED";
+  };
   const leads = Object.values(load(city)).filter(
-    (l) => l.audit && tiers.has(tierOf(l)),
+    (l) => l.audit && tiers.has(tierOf(l)) && fresh(l),
   );
   const wa: string[] = [];
   const other: string[] = [];
@@ -880,13 +930,16 @@ async function main() {
       await push(c, tiers, args.includes("--apply"), live);
     if (!args.includes("--apply"))
       console.log("\nDRY RUN — re-run with --apply.");
+  } else if (verb === "mark") {
+    await mark(opt("--packet"), opt("--stage") ?? "CONTACTED");
   } else if (verb === "prune") {
     const live = await boardFingerprints();
     for (const c of cities) await prune(c, live, args.includes("--apply"));
-  } else if (verb === "draft")
+  } else if (verb === "draft") {
+    const live = await boardFingerprints();
     for (const c of cities)
-      draft(c, new Set((opt("--tier") ?? "A").split(",")));
-  else gap();
+      draft(c, new Set((opt("--tier") ?? "A").split(",")), live);
+  } else gap();
 }
 
 main().catch((err: unknown) => {
