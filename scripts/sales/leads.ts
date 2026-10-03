@@ -162,7 +162,11 @@ async function discover(city: string) {
     if (!website && !phone && !email) continue; // nobody to talk to
     // Chains and multinationals (OSM `brand`) buy from head office, never from
     // a cold message — Shoprite, DHL and Spur were the first false "leads".
-    if (t.brand || t["brand:wikidata"] || /\b(plc|group|international)\b/i.test(t.operator ?? "")) {
+    if (
+      t.brand ||
+      t["brand:wikidata"] ||
+      /\b(plc|group|international)\b/i.test(t.operator ?? "")
+    ) {
       delete leads[`osm:${e.type}/${e.id}`];
       continue;
     }
@@ -230,11 +234,34 @@ async function auditOne(l: Lead): Promise<Audit> {
     });
     html = await res.text();
   } catch (err) {
+    // "fetch failed" hides three different facts (2026-10-03 spot-check of
+    // Lagos/Nairobi): the domain no longer resolves (really gone — BROKEN), the
+    // certificate is bad (the site is up but browsers warn — NO_HTTPS), or the
+    // server is just slow from here (unknown — never tell a business its site
+    // is down on a timeout).
+    const cause = (err as { cause?: { code?: string } }).cause?.code ?? "";
+    const msg = `${(err as Error).message} ${cause}`;
+    if (/ENOTFOUND|EAI_AGAIN|ECONNREFUSED/.test(msg))
+      return {
+        at,
+        finding: "BROKEN",
+        score: 80,
+        notes: [`unreachable: ${cause || msg.slice(0, 60)}`],
+      };
+    if (/CERT|SSL|TLS|self.signed|UNABLE_TO_VERIFY|ERR_TLS/i.test(msg))
+      return {
+        at,
+        finding: "NO_HTTPS",
+        score: 60,
+        notes: [
+          `certificate error (${cause}) — browsers show a security warning`,
+        ],
+      };
     return {
       at,
-      finding: "BROKEN",
-      score: 80,
-      notes: [`unreachable: ${(err as Error).message.slice(0, 80)}`],
+      finding: "OK",
+      score: 5,
+      notes: [`no answer within 20 s (${cause || "timeout"}) — judge by hand`],
     };
   }
   const ms = Date.now() - t0;
@@ -246,10 +273,36 @@ async function auditOne(l: Lead): Promise<Audit> {
     notes.push("blocked the automated check — judge by hand");
     return { at, finding: "OK", score: 5, notes };
   }
-  if (res.status >= 400) return { at, finding: "BROKEN", score: 80, notes };
+  if (res.status >= 400) {
+    // OSM often stores a deep link (a campus or country page); a 404 there
+    // says nothing about the site. Only a dead home page is BROKEN.
+    const home = new URL(res.url).origin + "/";
+    if (res.url !== home) {
+      const h = await fetch(home, {
+        headers: { "User-Agent": UA },
+        redirect: "follow",
+        signal: AbortSignal.timeout(20_000),
+      }).catch(() => null);
+      if (h && h.ok) {
+        notes.push(
+          `home page ${home} answers ${h.status} — only the listed page is gone`,
+        );
+        return { at, finding: "OK", score: 10, notes };
+      }
+    }
+    return { at, finding: "BROKEN", score: 80, notes };
+  }
+  // Placeholder words count only in the <title> or the first visible text —
+  // a working site's JavaScript bundle can say "coming soon" anywhere.
+  const title = html.match(/<title[^>]*>([^<]*)/i)?.[1] ?? "";
+  const visible = html
+    .replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .slice(0, 600);
   if (
-    /domain (is )?for sale|parked|this domain|account suspended|default web page|coming soon|under construction/i.test(
-      html.slice(0, 20_000),
+    /domain (is )?for sale|parked|account (has been )?suspended|default web page|coming soon|under construction|index of \//i.test(
+      `${title} ${visible}`,
     )
   ) {
     notes.push("parked / suspended / placeholder page");
@@ -335,12 +388,20 @@ const NOT_A_BUYER =
 
 /// A "hotel" with no website and no hotel-like word in its name is usually a
 /// private flat or a person ("Marwa", "AHMED BILLIA") — not a buyer.
-const HOTELISH = /hotel|فندق|شقق|apartment|suites?|lodge|guest|resort|inn\b|hostel|نزل|استراحة|motel|rooms|stay|chez|residence|b&b|camp|villa/i;
+const HOTELISH =
+  /hotel|فندق|شقق|apartment|suites?|lodge|guest|resort|inn\b|hostel|نزل|استراحة|motel|rooms|stay|chez|residence|b&b|camp|villa/i;
 
 function tierOf(l: Lead): "A" | "B" | "C" {
   // A church or mosque that runs a school is a Hogwarts prospect, not noise.
-  if (NOT_A_BUYER.test(l.name) && !/school|academy|nursery|college|primary|secondary|kindergarten|pharmacy|clinic|مدرسة|روضة|أكاديمية|صيدلية/i.test(l.name)) return "C";
-  if (l.sector === "HOSPITALITY" && !l.website && !HOTELISH.test(l.name)) return "C";
+  if (
+    NOT_A_BUYER.test(l.name) &&
+    !/school|academy|nursery|college|primary|secondary|kindergarten|pharmacy|clinic|مدرسة|روضة|أكاديمية|صيدلية/i.test(
+      l.name,
+    )
+  )
+    return "C";
+  if (l.sector === "HOSPITALITY" && !l.website && !HOTELISH.test(l.name))
+    return "C";
   const s = l.audit?.score ?? 0;
   const reachable = Boolean(l.phone || l.email);
   if (s >= 60 && reachable) return "A";
@@ -372,9 +433,25 @@ function linkOf(website: string | null): string | null {
 }
 
 async function boardFingerprints(): Promise<
-  Map<string, { id: string; stage: string | null }>
+  Map<
+    string,
+    {
+      id: string;
+      stage: string | null;
+      finding?: string | null;
+      score?: number | null;
+    }
+  >
 > {
-  const out = new Map<string, { id: string; stage: string | null }>();
+  const out = new Map<
+    string,
+    {
+      id: string;
+      stage: string | null;
+      finding?: string | null;
+      score?: number | null;
+    }
+  >();
   let cursor: string | undefined;
   for (;;) {
     const page = await call<{
@@ -383,12 +460,20 @@ async function boardFingerprints(): Promise<
           id: string;
           fingerprint: string | null;
           stage: string | null;
+          auditFinding: string | null;
+          auditScore: number | null;
         }[];
       };
       pageInfo?: { hasNextPage?: boolean; endCursor?: string };
     }>(`${PATH}?limit=60${cursor ? `&starting_after=${cursor}` : ""}`);
     for (const r of page.data.websiteLeads)
-      if (r.fingerprint) out.set(r.fingerprint, { id: r.id, stage: r.stage });
+      if (r.fingerprint)
+        out.set(r.fingerprint, {
+          id: r.id,
+          stage: r.stage,
+          finding: r.auditFinding,
+          score: r.auditScore,
+        });
     if (!page.pageInfo?.hasNextPage || page.data.websiteLeads.length === 0)
       break;
     cursor = page.pageInfo.endCursor;
@@ -400,7 +485,15 @@ async function push(
   city: string,
   tiers: Set<string>,
   apply: boolean,
-  live: Map<string, { id: string; stage: string | null }>,
+  live: Map<
+    string,
+    {
+      id: string;
+      stage: string | null;
+      finding?: string | null;
+      score?: number | null;
+    }
+  >,
 ) {
   const leads = load(city);
   let created = 0;
@@ -473,16 +566,60 @@ async function push(
 // Deletes in Twenty are hard and unrecoverable, so a card that no longer
 // qualifies is moved to LOST — only from AUDITED, never one a human has worked.
 
-async function prune(city: string, live: Map<string, { id: string; stage: string | null }>, apply: boolean) {
+async function prune(
+  city: string,
+  live: Map<
+    string,
+    {
+      id: string;
+      stage: string | null;
+      finding?: string | null;
+      score?: number | null;
+    }
+  >,
+  apply: boolean,
+) {
   let n = 0;
-  for (const l of Object.values(load(city))) {
+  let synced = 0;
+  const leads = load(city);
+  for (const l of Object.values(leads)) {
     const card = live.get(l.fingerprint);
-    if (!card || card.stage !== "AUDITED" || !l.audit || tierOf(l) !== "C") continue;
-    n++;
-    if (n <= 8 && !apply) console.log(`  - ${l.name}`);
-    if (apply) await call(`${PATH}/${card.id}`, { method: "PATCH", body: { stage: "LOST" } });
+    if (!card || card.stage !== "AUDITED" || !l.audit) continue;
+    if (tierOf(l) === "C") {
+      n++;
+      if (n <= 8 && !apply) console.log(`  - ${l.name}`);
+      if (apply)
+        await call(`${PATH}/${card.id}`, {
+          method: "PATCH",
+          body: { stage: "LOST" },
+        });
+      continue;
+    }
+    // A re-audit (rules tightened) changed the finding: the card must say the
+    // same thing the WhatsApp draft says, or the pitch and the board disagree.
+    if (card.finding !== l.audit.finding || card.score !== l.audit.score) {
+      synced++;
+      if (apply) {
+        await call(`${PATH}/${card.id}`, {
+          method: "PATCH",
+          body: {
+            auditFinding: l.audit.finding,
+            auditScore: l.audit.score,
+            auditNotes: {
+              markdown: l.audit.notes.map((x) => `- ${x}`).join("\n"),
+              blocknote: null,
+            },
+            tier: tierOf(l),
+            offer: offerOf(l),
+          },
+        });
+      }
+    }
   }
-  console.log(`${CITIES[city].label.padEnd(11)} ${apply ? "moved to LOST" : "would move to LOST"} ${n}`);
+  if (apply) save(city, leads);
+  console.log(
+    `${CITIES[city].label.padEnd(11)} ${apply ? "moved to LOST" : "would move to LOST"} ${n} · ${apply ? "re-synced" : "would re-sync"} ${synced}`,
+  );
 }
 
 // ── draft: first-touch WhatsApp packet ───────────────────────────────────────
@@ -492,7 +629,12 @@ async function prune(city: string, live: Map<string, { id: string; stage: string
 // approves every first touch). WhatsApp only to mobiles; Arabic for Sudan,
 // English elsewhere. Copy mirrors scripts/sales/outreach.md.
 
-const DIAL: Record<string, string> = { SUDAN: "249", RWANDA: "250", KENYA: "254", NIGERIA: "234" };
+const DIAL: Record<string, string> = {
+  SUDAN: "249",
+  RWANDA: "250",
+  KENYA: "254",
+  NIGERIA: "234",
+};
 /// National mobile ranges: Sudan 9x/1x (0183… is a Khartoum landline),
 /// Rwanda 7x, Kenya 7x/1x, Nigeria 7x/8x/9x.
 const MOBILE: Record<string, RegExp> = {
@@ -516,10 +658,18 @@ function mobileOf(phone: string | null, country: string): string | null {
 }
 
 const AR_FINDING: Record<string, (l: Lead) => string> = {
-  NO_WEBSITE: (l) => `لم أجد موقعاً إلكترونياً لـ ${l.name}، فمن يبحث عنكم في جوجل لا يجدكم.`,
-  BROKEN: (l) => `حاولت فتح موقعكم (${linkOf(l.website)?.replace(/^https?:\/\//, "").replace(/\/$/, "") ?? l.website}) ولم يفتح.`,
-  SOCIAL_ONLY: () => "حضوركم على الإنترنت عبر فيسبوك فقط، فلا تظهرون في نتائج بحث جوجل.",
-  NOT_MOBILE: () => "موقعكم لا يظهر بشكل مناسب على شاشة الجوال، ومعظم زواركم يتصفحون من الجوال.",
+  NO_WEBSITE: (l) =>
+    `لم أجد موقعاً إلكترونياً لـ ${l.name}، فمن يبحث عنكم في جوجل لا يجدكم.`,
+  BROKEN: (l) =>
+    `حاولت فتح موقعكم (${
+      linkOf(l.website)
+        ?.replace(/^https?:\/\//, "")
+        .replace(/\/$/, "") ?? l.website
+    }) ولم يفتح.`,
+  SOCIAL_ONLY: () =>
+    "حضوركم على الإنترنت عبر فيسبوك فقط، فلا تظهرون في نتائج بحث جوجل.",
+  NOT_MOBILE: () =>
+    "موقعكم لا يظهر بشكل مناسب على شاشة الجوال، ومعظم زواركم يتصفحون من الجوال.",
   NO_HTTPS: () => "المتصفح يعرض موقعكم بعلامة «غير آمن».",
   OUTDATED: () => "موقعكم صُمم قبل سنوات ويبدو عليه القِدم.",
   SLOW: () => "موقعكم يتأخر في الفتح على بيانات الجوال.",
@@ -527,18 +677,40 @@ const AR_FINDING: Record<string, (l: Lead) => string> = {
 const EN_FINDING: Record<string, (l: Lead) => string> = {
   NO_WEBSITE: (l) => `I couldn't find a website for ${l.name}.`,
   BROKEN: () => "Your website isn't loading right now.",
-  SOCIAL_ONLY: (l) => `${l.name} is only on Facebook/Instagram, so Google searches don't find you.`,
-  NOT_MOBILE: () => "Your site doesn't fit a phone screen, and most visitors are on phones.",
+  SOCIAL_ONLY: (l) =>
+    `${l.name} is only on Facebook/Instagram, so Google searches don't find you.`,
+  NOT_MOBILE: () =>
+    "Your site doesn't fit a phone screen, and most visitors are on phones.",
   NO_HTTPS: () => "Browsers mark your site 'Not secure'.",
   OUTDATED: () => "Your site was built a few years ago and is showing its age.",
   SLOW: () => "Your site takes a few seconds to open on mobile data.",
 };
 const OFFER: Record<string, { ar: string; en: string; proof: string }> = {
-  QR_ORDERING: { ar: "نصمم قوائم طعام رقمية بالـ QR مع طلب أونلاين", en: "We build QR menus with online ordering", proof: "bu.databayt.org" },
-  BOOKING: { ar: "نصمم مواقع حجز مباشر للفنادق والشقق", en: "We build direct-booking sites for hotels and apartments", proof: "mkan.sd" },
-  SCHOOL_SYSTEM: { ar: "لدينا نظام عربي لإدارة المدارس تعمل به مدرسة في الخرطوم", en: "We run a school management system already used by a school in Khartoum", proof: "balqalam.com" },
-  NEW_WEBSITE: { ar: "نصمم مواقع سريعة تعمل على الجوال خلال أسبوع", en: "We build fast, mobile-first websites in about a week", proof: "abdoutgroup.com" },
-  REBRAND: { ar: "نعيد تصميم المواقع لتكون سريعة وحديثة وتعمل على الجوال", en: "We rebuild websites to be fast, modern and mobile-first", proof: "abdoutgroup.com" },
+  QR_ORDERING: {
+    ar: "نصمم قوائم طعام رقمية بالـ QR مع طلب أونلاين",
+    en: "We build QR menus with online ordering",
+    proof: "bu.databayt.org",
+  },
+  BOOKING: {
+    ar: "نصمم مواقع حجز مباشر للفنادق والشقق",
+    en: "We build direct-booking sites for hotels and apartments",
+    proof: "mkan.sd",
+  },
+  SCHOOL_SYSTEM: {
+    ar: "لدينا نظام عربي لإدارة المدارس تعمل به مدرسة في الخرطوم",
+    en: "We run a school management system already used by a school in Khartoum",
+    proof: "balqalam.com",
+  },
+  NEW_WEBSITE: {
+    ar: "نصمم مواقع سريعة تعمل على الجوال خلال أسبوع",
+    en: "We build fast, mobile-first websites in about a week",
+    proof: "abdoutgroup.com",
+  },
+  REBRAND: {
+    ar: "نعيد تصميم المواقع لتكون سريعة وحديثة وتعمل على الجوال",
+    en: "We rebuild websites to be fast, modern and mobile-first",
+    proof: "abdoutgroup.com",
+  },
 };
 
 /// The showcase a client opens from WhatsApp (link previews show the first
@@ -600,13 +772,33 @@ function messageFor(l: Lead): string {
 
 function draft(city: string, tiers: Set<string>) {
   const c = CITIES[city];
-  const leads = Object.values(load(city)).filter((l) => l.audit && tiers.has(tierOf(l)));
+  const leads = Object.values(load(city)).filter(
+    (l) => l.audit && tiers.has(tierOf(l)),
+  );
   const wa: string[] = [];
   const other: string[] = [];
-  const order = ["BROKEN", "NOT_MOBILE", "NO_HTTPS", "OUTDATED", "SLOW", "SOCIAL_ONLY", "NO_WEBSITE"];
+  const order = [
+    "BROKEN",
+    "NOT_MOBILE",
+    "NO_HTTPS",
+    "OUTDATED",
+    "SLOW",
+    "SOCIAL_ONLY",
+    "NO_WEBSITE",
+  ];
   // Broken sites first, then by how likely the sector is to buy — Kigali's OSM
   // is 85% pharmacies, the weakest website buyer, so they go last.
-  const buyer = ["FOOD", "HOSPITALITY", "EDUCATION", "PROFESSIONAL", "RETAIL", "TOURISM", "NGO", "OTHER", "HEALTH"];
+  const buyer = [
+    "FOOD",
+    "HOSPITALITY",
+    "EDUCATION",
+    "PROFESSIONAL",
+    "RETAIL",
+    "TOURISM",
+    "NGO",
+    "OTHER",
+    "HEALTH",
+  ];
   leads.sort(
     (a, b) =>
       order.indexOf(a.audit!.finding) - order.indexOf(b.audit!.finding) ||
@@ -621,8 +813,14 @@ function draft(city: string, tiers: Set<string>) {
     if (m) sent.add(m);
     const text = messageFor(l);
     const head = `### ${l.name} — ${l.sector.toLowerCase()} · ${l.audit!.finding}`;
-    if (m) wa.push(`${head}\n\n[Send on WhatsApp → +${m}](https://wa.me/${m}?text=${encodeURIComponent(text)})\n\n> ${text}\n`);
-    else other.push(`- **${l.name}** (${l.audit!.finding}) — ${l.phone ?? ""} ${l.email ?? ""} ${l.website ?? ""}`.trim());
+    if (m)
+      wa.push(
+        `${head}\n\n[Send on WhatsApp → +${m}](https://wa.me/${m}?text=${encodeURIComponent(text)})\n\n> ${text}\n`,
+      );
+    else
+      other.push(
+        `- **${l.name}** (${l.audit!.finding}) — ${l.phone ?? ""} ${l.email ?? ""} ${l.website ?? ""}`.trim(),
+      );
   }
   const date = new Date().toISOString().slice(0, 10);
   const out = `jobs/packets/sales/${date}-${city}-whatsapp.md`;
@@ -634,9 +832,13 @@ function draft(city: string, tiers: Set<string>) {
       `Then move the card on sales.databayt.org → Website Leads to **Contacted** (touch 1). Nothing here was sent.\n` +
       `Broken/old sites first (the pitch shows the problem), then no-website leads.\n\n` +
       wa.join("\n") +
-      (other.length ? `\n## No WhatsApp number — call or email (${other.length})\n\n${other.join("\n")}\n` : ""),
+      (other.length
+        ? `\n## No WhatsApp number — call or email (${other.length})\n\n${other.join("\n")}\n`
+        : ""),
   );
-  console.log(`${c.label.padEnd(11)} ${wa.length} WhatsApp drafts · ${other.length} without a mobile → ${out}`);
+  console.log(
+    `${c.label.padEnd(11)} ${wa.length} WhatsApp drafts · ${other.length} without a mobile → ${out}`,
+  );
 }
 
 // ── gap ──────────────────────────────────────────────────────────────────────
@@ -681,7 +883,9 @@ async function main() {
   } else if (verb === "prune") {
     const live = await boardFingerprints();
     for (const c of cities) await prune(c, live, args.includes("--apply"));
-  } else if (verb === "draft") for (const c of cities) draft(c, new Set((opt("--tier") ?? "A").split(",")));
+  } else if (verb === "draft")
+    for (const c of cities)
+      draft(c, new Set((opt("--tier") ?? "A").split(",")));
   else gap();
 }
 
