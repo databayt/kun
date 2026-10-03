@@ -1,8 +1,8 @@
 ---
 name: jobs
-description: Abdout's income lane — scrape jobs, gigs and tenders, draft applications, track on sales.databayt.org
-when_to_use: "Finding paid work for Abdout: Kigali roles, remote dev, AI-training gigs, freelance, tenders, protection contracts. Triggers on: jobs, find work, apply, opportunities, gigs, tenders, did anyone reply, وظائف, فرص, مناقصات. NOT /scrape (sales leads)."
-argument-hint: "[status|scrape|wave|send|inbox|hold|learn|pause|resume]"
+description: Abdout's + Databayt's income lane — jobs, gigs, tenders, client requests and funding programs across Rwanda, Kenya, Nigeria, Gulf, Sudan; tracked on sales.databayt.org
+when_to_use: "Any opportunity someone POSTED that pays Abdout or Databayt: Kigali/Nairobi/Lagos roles, remote dev, AI-training gigs, freelance, electrical/protection work, tenders, RFPs, client project requests, and funding — incubators, accelerators, grants, credits, angels. Triggers on: jobs, find work, apply, opportunities, gigs, tenders, RFP, client request, incubator, accelerator, grant, credits, investor, angel, fundraising, funding, did anyone reply, وظائف, فرص, مناقصات, حاضنة, مسرعة, منحة, تمويل. NOT /scrape (outbound leads we go find)."
+argument-hint: "[status|scrape|wave|send|inbox|hold|funding|requests|learn|pause|resume]"
 ---
 
 # Jobs — the self-running loop: fetch → wave → send → read → follow up → learn
@@ -12,17 +12,23 @@ On 2026-09-26 all 26 board records had sat at TO_APPLY for a month. Since 2026-0
 email applications itself — gated, capped, vetoable — so the question each run is "what did the loop
 hold, and why", not "what should I draft".
 
-**Priority (Abdout, 2026-09-26):** Rwanda/Kigali → remote income (remote dev, AI-training, freelance) →
-engineering contracts abroad. **Send mode (2026-09-27): auto-send with a daily cap** — email only;
+**Priority (Abdout, 2026-10-03), by days-to-cash:** AI-training gigs + software roles → remote →
+freelance + electrical/protection (unpaused) → Databayt tenders and client projects → engineering
+contracts. **Markets:** Rwanda, Kenya, Nigeria (Africa = remote AND on-site) · Gulf = **remote only,
+never on-site** · Sudan. **Two tracks on one board:** `track` FOUNDER (Abdout earns) / DATABAYT (the
+company earns: TENDER, CLIENT_PROJECT). **Funding** lives on its own board, "Funding & Programs".
+**Boundary with `/scrape`:** jobs = opportunities someone posted (jobs, gigs, RFPs, wizard requests,
+funding calls); scrape = outbound leads we go find (businesses with outdated sites, schools). **Send mode (2026-09-27): auto-send with a daily cap** — email only;
 portals, platforms, tenders and bids stay packets Abdout submits. **Learning proposes, Abdout adopts.**
 
 ## The loop (launchd `com.databayt.jobs-loop`, every 30 min — `pnpm jobs:loop --status`)
 
 | When (Kigali) | Step | Script | Tokens |
 |---|---|---|---|
-| ≥07:00 daily | discover (7 adapters) + ingest | `jobs:discover`, `jobs:ingest` | 0 |
+| ≥07:00 daily | discover (10 adapters, incl. MyJobMag KE/NG) + ingest (one retry) | `jobs:discover`, `jobs:ingest` | 0 |
+| every tick | databayt.org wizard requests → CLIENT_PROJECT card on HOLD + Slack | `jobs:requests --apply` | 0 |
 | ≥07:00 Mon–Fri | wave: tailor letters, gate → QUEUED / HOLD | `jobs:facts`, `jobs:wave` | claude -p |
-| after wave | digest → Slack DM via `hermes send` | `jobs:digest --send` | 0 |
+| after wave | digest → Slack DM via `hermes send` (+ funding closing ≤14 days) | `jobs:digest --send` | 0 |
 | ≥10:00–17:00 Mon–Fri | send QUEUED (after a 2h veto) + APPROVED | `jobs:send --apply` | 0 |
 | 08:00–22:00 | read hotmail replies → move cards, alert | `jobs:inbox` | 0 |
 | ≥16:00 Mon–Fri | templated follow-ups day 7/14, archive day 21 | `jobs:followup --apply` | 0 |
@@ -49,8 +55,11 @@ extra-document asks → HOLD.
   (every field's answer, written answers, cover letter, CV path); the digest lists the best six.
 - **Truth rules:** a required question the profile can't answer truthfully holds the card, quoted.
   Honeypots ("leave this field blank") are never filled. Self-ID questions always declined.
-- **Location:** `openToRwanda()` in discover.mjs — bare Remote or a named open region only
-  ("<Country> Remote" = must live there). US `City, ST` postings are US-remote.
+- **Location:** `openToRwanda()` in discover.mjs — bare Remote or a named open region (EMEA, MENA,
+  Africa) only ("<Country> Remote" = must live there). US `City, ST` postings are US-remote.
+  `onsiteAllowed()`: Africa on-site yes · Gulf on-site never · elsewhere only with visa/relocation.
+  Board `country` / `city` / `track` are derived at push time (`src/lib/jobs/markets.ts`);
+  `pnpm jobs:markets --apply` backfills empty ones.
 - Boards: `jobs/ats-boards.json` (226+), seeded by `node scripts/jobs/ats-seed.mjs <remote-jobs clone>`
   or `--yc <yc all.json>`; merge, never replace.
 - One application per company per day across email and ATS. Daily total cap 100 (config), hotmail 40.
@@ -59,7 +68,8 @@ extra-document asks → HOLD.
 
 | Thing | Where |
 |---|---|
-| Board | Twenty `kigaliOpportunity` ("Jobs & Opportunities") · sales.databayt.org · REST `localhost:3100` · Keychain `databayt-twenty`/`databayt` · client `scripts/jobs/board.ts` |
+| Board | Twenty `kigaliOpportunity` ("Jobs & Opportunities") · sales.databayt.org · REST `localhost:3100` · Keychain `databayt-twenty`/`databayt` · client `scripts/jobs/board.ts` · fields `scripts/crm-kigali-object.mjs` |
+| Funding board | Twenty `fundingProgram` ("Funding & Programs") · `scripts/crm-funding-object.mjs` · seed `jobs/funding.seed.json` → `pnpm jobs:funding` |
 | Mail | Mail.app, account **osmanabdout@hotmail.com** — `scripts/jobs/mail-send.applescript`, `mail-read.applescript`. No account → send/inbox refuse, never fall back to another sender |
 | Letters | `jobs/templates/letters/<lane>@<n>.md` · follow-ups `follow-up-{1,2}@<n>.md` |
 | CVs | `jobs/cv/*.html` → `pnpm jobs:cv` (playwright PDF) · registry `jobs/variants.json` |
@@ -85,6 +95,14 @@ extra-document asks → HOLD.
 - **`jobs hold`** — for each HOLD card: supply what `holdReason` names (salary figure → edit the
   `.letter.json` in `jobs/outbox/<wave>/`; certified copies → Abdout's scan) then move to APPROVED.
 - **`jobs apply <portal item>`** — packets for portals/platforms/tenders, as before: never submit.
+- **`jobs funding`** — `pnpm jobs:funding --due 30` first (what closes soon), then refresh the seed:
+  WebSearch each market (credits → grants → zero-equity programs → SAFE → VC, the ladder in memory
+  `reference_fundraising_ladder`), verify the program is live and read eligibility for a **Sudanese
+  national resident in Rwanda, company not yet registered**; append to `jobs/funding.seed.json`
+  (never invent a deadline — null = rolling) → `pnpm jobs:funding` → `--apply`. Portal sign-ups in
+  Abdout's name go to Cowork via `~/.claude/bridge.md`; Claude drafts the answers, he submits.
+- **`jobs requests`** — `pnpm jobs:requests` (dry) · `--apply`. A CLIENT_PROJECT card is HOLD by
+  design: a human answers a client within 24h; scope + price via `/proposal` / `/pricing`.
 - **`jobs learn`** — `pnpm jobs:learn [--propose] [--send]`; adoption = `pnpm jobs:variant activate <id>`.
 - **`jobs pause` / `resume`** — `pnpm jobs:loop --pause|--resume`.
 

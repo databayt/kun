@@ -3267,14 +3267,14 @@ export const schools: School[] = [
       {
         name: "jobs",
         effect:
-          "Abdout's own income lane — scrape jobs, gigs, contracts and tenders, draft the applications, track them on sales.databayt.org",
+          "Abdout's and Databayt's income lane — jobs, gigs, tenders, client requests and funding programs (incubators, accelerators, grants, credits) across Rwanda, Kenya, Nigeria, the Gulf and Sudan, run by a self-sending loop and tracked on sales.databayt.org",
         order: [s("/jobs")],
         steps: [
-          "pnpm jobs:discover + in-session Indeed/AI-training scans → jobs/inbox",
-          "pnpm jobs:ingest — score, drop expired/ineligible, push to the board",
-          "pnpm jobs:queue — Rwanda first, then remote income, then contracts abroad",
-          "Draft top N: Gmail drafts for email applications, jobs/packets/ for portals — never send",
-          "pnpm jobs:mark <id> applied|interview|rejected after Abdout acts",
+          "pnpm jobs:loop --status + pnpm jobs:digest — report applications sent this week first",
+          "Clear HOLD: supply what holdReason names, move the card to Approved",
+          "pnpm jobs:discover + in-session Indeed/AI-training scans → jobs/inbox → pnpm jobs:ingest",
+          "pnpm jobs:requests — databayt.org wizard requests become CLIENT_PROJECT cards",
+          "pnpm jobs:funding --due 30 — then research + seed the Funding & Programs board",
         ],
         connects: ["apply", "وظائف", "scrape"],
         depends: [],
