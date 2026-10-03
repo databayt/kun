@@ -15,11 +15,13 @@ Steps:
 2. Check Sentry error rates — any spikes? (sentry MCP)
 3. Check Neon database health — branch count, connection usage (neon MCP)
 4. Check GitHub Actions — any failing CI/CD? (github MCP)
+4b. Domains & mail — `node scripts/domains/check.mjs` (expiry, auto-renew, NS, MX/SPF/DKIM/DMARC, TLS) + open `domains` issues; fixes go through the `domains` skill
 5. Summarize:
    - Deployment status: ✅ healthy / ⚠️ warning / ❌ down
    - Error rate: normal / elevated / critical
    - Database: healthy / needs attention
    - CI/CD: passing / failing
+   - Domains & mail: green / warnings / blocking
 6. Flag anything that needs immediate attention
 7. Estimate current month's cost burn rate
 

@@ -58,7 +58,7 @@ Claude routes these to the right skill + agent + MCP without a dedicated command
 **Portkeys** — teleportation to other repos: `from codebase`, `from shadcn`, `from radix`, `like hogwarts`, `like souq`, `like mkan`, `like shifa`, `like sijillee`, `like moallimee`
 **The Unforgivable Commands** — forbidden by the engine: `rm -rf *`, `prisma migrate reset`, `prisma db push --accept-data-loss`, `DROP TABLE`, `git push --force main`
 **The Auror Office** — one keyword, one quality dimension: `see`, `flow`, `debug`, `responsive`, `lang`, `fast`, `guard`, `architecture`, `structure`, `pattern`, `design`, `stack`, `trace`, `efficient`, `mirror`, `diff`
-**The Ministry of Magic** — operations and intelligence: `captain`, `weekly`, `monitor`, `incident`, `issue`, `credentials`, `health`, `sync`, `learn`, `conventions`, `patterns`, `drift`, `economy`
+**The Ministry of Magic** — operations and intelligence: `captain`, `weekly`, `monitor`, `domains`, `incident`, `issue`, `credentials`, `health`, `sync`, `learn`, `conventions`, `patterns`, `drift`, `economy`
 **The Pensieve** — judgment and conversion: `canon`, `decide`, `premortem`, `convert`, `md`, `textbook`, `contract`, `transcribe`, `agreement`, `adjudicate`, `textbook bench`, `calendar`, `draft`, `higgs`, `media`, `approve`, `publish`, `measure`, `social`, `carousel`, `record`
 **The Portrait Gallery** — the media studio: `hero image`, `og image`, `banner`, `mockup`, `lifestyle`, `split-screen`, `reel`, `infographic`, `testimonial`, `showroom`
 **The Owlery** — lead acquisition and outreach: `scrap`, `scrape`, `contact gap`, `leads`, `prospect`, `enrich`, `outreach`, `pipeline health`, `scrap facebook`, `scrap whatsapp`, `scrap for hogwarts`, `scrap for mkan`, `اسحب`, `جمع بيانات`, `عملاء محتملين`, `jobs`, `apply`, `وظائف`
@@ -91,3 +91,13 @@ Pre-demo quality pass → `/handover <block>`. Autonomous QA + human-signoff iss
 - **Pattern card**: `.claude/patterns/cards/<keyword>.md`
 - **MCP servers**: live registrations are in `~/.claude.json` (`claude mcp list`) — `.claude/mcp.json` is kun's catalog, which setup.sh registers from; `~/.claude/mcp.json` is never read
 - **Engine truth**: `.claude/engine.json` (model, counts, sync stamps) — `/health` flags drift
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

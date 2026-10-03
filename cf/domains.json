@@ -1,0 +1,84 @@
+{
+  "$comment": "Domain + email health watchlist for scripts/domains/check.mjs. `mail` is the baseline the live DNS is compared to — edit it in the same commit as any intended mail change, or the tracer will (correctly) call the change drift. `autoRenewVerifiedAt` is stamped by a human/Cowork after looking at the registrar dashboard: whois cannot see auto-renew, so this date is the only proof it is on. Docs: content/docs/email.mdx.",
+  "nameservers": ["jason.ns.cloudflare.com", "rita.ns.cloudflare.com"],
+  "domains": [
+    {
+      "name": "databayt.org",
+      "role": "company",
+      "registrar": "Namecheap",
+      "renewal": {
+        "autoRenew": "unverified",
+        "autoRenewVerifiedAt": null,
+        "where": "namecheap.com → Domain List → databayt.org → Auto-Renew"
+      },
+      "mail": {
+        "provider": "Namecheap Private Email",
+        "mx": ["mx1.privateemail.com", "mx2.privateemail.com"],
+        "spfIncludes": ["spf.privateemail.com"],
+        "dkimSelectors": ["default", "resend"],
+        "dmarcMin": "quarantine",
+        "rcpt": ["hi", "sales"]
+      },
+      "web": true
+    },
+    {
+      "name": "balqalam.com",
+      "role": "product (hogwarts)",
+      "registrar": "Cloudflare",
+      "renewal": {
+        "autoRenew": "unverified",
+        "autoRenewVerifiedAt": null,
+        "where": "dash.cloudflare.com → Domain Registration → Manage Domains → balqalam.com"
+      },
+      "mail": {
+        "provider": "Cloudflare Email Routing (forward-only)",
+        "mx": [
+          "route1.mx.cloudflare.net",
+          "route2.mx.cloudflare.net",
+          "route3.mx.cloudflare.net"
+        ],
+        "spfIncludes": ["_spf.mx.cloudflare.net"],
+        "dkimSelectors": ["cf2024-1"],
+        "dmarcMin": "none",
+        "rcpt": ["hi", "sales"]
+      },
+      "web": true
+    },
+    {
+      "name": "mkan.sd",
+      "role": "product (mkan)",
+      "registrar": "sdnic (Sudan Internet Society)",
+      "renewal": {
+        "autoRenew": "unverified",
+        "autoRenewVerifiedAt": null,
+        "where": "sdnic / domains@isoc.sd — .sd has no self-serve auto-renew we know of"
+      },
+      "mail": null,
+      "web": true
+    },
+    {
+      "name": "abdoutgroup.com",
+      "role": "watch only",
+      "registrar": "Namecheap",
+      "renewal": {
+        "autoRenew": "unverified",
+        "autoRenewVerifiedAt": null,
+        "where": "namecheap.com → Domain List → abdoutgroup.com → Auto-Renew"
+      },
+      "mail": null,
+      "web": true
+    },
+    {
+      "name": "nmbdsd.org",
+      "role": "watch only",
+      "registrar": "Namecheap",
+      "renewal": {
+        "autoRenew": "unverified",
+        "autoRenewVerifiedAt": null,
+        "where": "namecheap.com → Domain List → nmbdsd.org → Auto-Renew"
+      },
+      "mail": "skip",
+      "web": true
+    }
+  ]
+}

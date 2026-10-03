@@ -2416,6 +2416,20 @@ export const schools: School[] = [
         depends: [],
       },
       {
+        name: "domains",
+        effect:
+          "Every domain renewed and every inbox reachable — expiry, auto-renew, nameservers, MX/SPF/DKIM/DMARC, hi@/sales@",
+        order: [f("ops"), p("Cloudflare"), s("/domains")],
+        steps: [
+          "Probe registry expiry + status (RDAP / whois)",
+          "Compare live DNS to the cf/domains.json baseline",
+          "RCPT-probe hi@/sales@ weekly from the Mac",
+          "Open or update one issue per unhealthy domain with the spell to fix it",
+        ],
+        connects: ["monitor", "cloudflare", "incident"],
+        depends: [],
+      },
+      {
         name: "incident",
         effect:
           "Production incident response — classify, diagnose, fix, postmortem",

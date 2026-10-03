@@ -1,0 +1,53 @@
+name: Domains & mail health
+
+# Turns a silent domain or mail failure into an assigned GitHub issue.
+#
+# A domain that lapses, a nameserver that changes, an MX/SPF/DKIM record that
+# disappears — none of these announce themselves. Mail just stops arriving, and
+# the first person to notice is a client whose reply bounced. This run probes
+# every domain in cf/domains.json against its baseline once a day.
+#
+# It runs on GitHub, not on our Cloudflare Worker, on purpose: the thing being
+# watched includes Cloudflare DNS, and a watchdog must not share a failure with
+# what it watches.
+#
+# Read-only against the internet. Its only writes are the `domains` issues in
+# this repo (one per unhealthy domain, rewritten each run, closed when green,
+# @abdout mentioned on blocking items so it reaches his phone).
+# The SMTP inbox probe runs from the Mac instead (GitHub runners block :25).
+
+on:
+  schedule:
+    - cron: "30 5 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: domains-health
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Probe domains and sync issues
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          set +e
+          node scripts/domains/check.mjs --alert
+          code=$?
+          # 1 = warnings (already in issues); only blocking items fail the run.
+          if [ "$code" = "2" ]; then
+            echo "::error::A domain has a blocking problem — see the open 'domains' issues."
+            exit 1
+          fi
+          exit 0

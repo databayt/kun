@@ -25,7 +25,7 @@
     },
     "skills_without_triggers": 2,
     "builtin_targeted_spells": 3,
-    "corpus_hash": "fnv1a:9fd4080f"
+    "corpus_hash": "fnv1a:ff132fec"
   },
   "split": {
     "version": "v1",
@@ -1381,6 +1381,15 @@
       "top1_lexical_free": 1,
       "n_lexical_free": 256,
       "audit": "CLEAN"
+    },
+    {
+      "week_of": "2026-10-03",
+      "baseline_reset": true,
+      "corpus_hash_from": "fnv1a:9fd4080f",
+      "corpus_hash_to": "fnv1a:ff132fec",
+      "cases_to": 656,
+      "top1_hard": null,
+      "note": "BASELINE RESET, not a scored run. New skill `domains` (domain + mail health tracer, scripts/domains/check.mjs) added its trigger phrases to the corpus; its description was trimmed to stay under the 33,000-char listing cap. Scores before and after this line are not comparable. Next /bench run re-establishes the number (dispatch scores were already stale: scored=67 vs fleet=80)."
     }
   ],
   "stratified": {
