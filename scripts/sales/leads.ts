@@ -323,7 +323,14 @@ async function audit(city: string, limit: number) {
 
 // ── tier + offer ─────────────────────────────────────────────────────────────
 
+/// Not a buyer: places of worship, private homes, and multinationals OSM
+/// carries without a brand tag (Maersk in Port Sudan, 2026-10-03).
+const NOT_A_BUYER =
+  /mosque|masjid|مسجد|جامع|church|كنيسة|\(home\)|\bhome\)|maersk|dhl|unicef|undp|\bwfp\b|embassy|سفارة/i;
+
 function tierOf(l: Lead): "A" | "B" | "C" {
+  // A church or mosque that runs a school is a Hogwarts prospect, not noise.
+  if (NOT_A_BUYER.test(l.name) && !/school|academy|nursery|college|مدرسة|روضة|أكاديمية/i.test(l.name)) return "C";
   const s = l.audit?.score ?? 0;
   const reachable = Boolean(l.phone || l.email);
   if (s >= 60 && reachable) return "A";
