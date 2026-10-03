@@ -343,6 +343,17 @@ function offerOf(l: Lead): string {
 
 const PATH = "/rest/websiteLeads";
 
+function linkOf(website: string | null): string | null {
+  if (!website) return null;
+  const first = website.split(/[;\s,]+/).find(Boolean) ?? "";
+  try {
+    const u = new URL(/^https?:/i.test(first) ? first : `http://${first}`);
+    return u.hostname.includes(".") ? u.toString() : null;
+  } catch {
+    return null;
+  }
+}
+
 async function boardFingerprints(): Promise<
   Map<string, { id: string; stage: string | null }>
 > {
@@ -403,12 +414,12 @@ async function push(
           sector: l.sector,
           country: l.country,
           city: l.city,
-          ...(l.website
+          // OSM website tags are free text ("www.x.com; www.y.com", spaces):
+          // Twenty rejects an invalid link, so a bad one rides in the notes.
+          ...(linkOf(l.website)
             ? {
                 website: {
-                  primaryLinkUrl: /^https?:/.test(l.website)
-                    ? l.website
-                    : `http://${l.website}`,
+                  primaryLinkUrl: linkOf(l.website),
                   primaryLinkLabel: "",
                   secondaryLinks: [],
                 },
