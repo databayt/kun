@@ -1,0 +1,426 @@
+---
+title: Email
+description: Professional hi@ and sales@ on every product domain — provider research (Apple, Microsoft, Google), ownership, offboarding, security, deliverability, and the health tracer that keeps domains renewed
+---
+
+# Email
+
+Databayt's client mail still leaves from personal inboxes. This page is the architecture for
+replacing that with company-owned `hi@` and `sales@` on every product domain, plus the tracer
+that keeps the domains and mail records alive. **It is a research document first: nothing in
+production DNS or any mailbox changes until the one-domain test in [§19](#19-migration-plan)
+passes and Abdout approves.**
+
+Labels used throughout:
+
+| Label | Meaning |
+|---|---|
+| **Verified** | Read on the vendor's official page (link given), checked 2026-10-03 |
+| **Recommendation** | Our architectural choice |
+| **Assumption** | Believed true, not confirmed by an official source |
+| **Must-test** | Only the lab test in §19 can settle it |
+
+---
+
+## 1. Executive summary
+
+- **Domains:** `databayt.org` (company), `balqalam.com` (Hogwarts), `mkan.sd` (Mkan), and one
+  upcoming product. All four sit on Cloudflare DNS. The registrars are Namecheap, Cloudflare and sdnic.
+- **Apple iCloud+ has the capacity but fails the ownership requirement.** One iCloud+ plan
+  allows 5 domains and 3 addresses per person per domain, so all 8 addresses fit. But a company
+  Apple Account shared by four salespeople breaks the iCloud Terms: *"You should not share your
+  Account and/or password details with another individual"*. Giving addresses to employees'
+  own Apple Accounts instead means that, after they are removed, *"any emails they sent and
+  received… remain in their iCloud Mail account"*. Apple's 2026 **Apple Business** email is
+  US-only and allows one domain per organization.
+- **Microsoft Exchange Online Plan 1 is the recommended draft** (Recommendation). It costs $4 per
+  user per month. One tenant holds every domain. `hi@` and `sales@` become **company-owned
+  shared mailboxes**, which are free up to 50 GB. People get, and lose, *permission* to them,
+  and the mail never leaves with a person. Apple Mail on Mac and iPhone connects natively.
+  The core setup costs **about $240 a year**.
+- **Google Workspace Business Starter is the close alternative.** It costs $7 per user per
+  month, and Google Groups serve as free collaborative inboxes. Choose it if the team lives in
+  Gmail, Docs and Meet.
+- **Outreach never goes out from `hi@` or `sales@`.** Cold sequences run on a separate domain
+  through a dedicated tool. App mail stays on Resend on the `send.` subdomain, which is already
+  the case for databayt.org.
+- **Twenty stays the system of record.** The mailbox is only a channel. Twenty v1.3+ syncs
+  Google, Microsoft and IMAP mailboxes, but only *true mailboxes* (see §10).
+- **Health tracing is live** (see [Health tracing](#health-tracing)). Every domain's expiry,
+  auto-renew, nameservers, MX, SPF, DKIM, DMARC and TLS are checked daily, and the inboxes
+  weekly. Problems open an assigned GitHub issue that names the fix.
+
+## 2. Databayt requirements
+
+1. A professional identity: `hi@` and `sales@` on each of four domains.
+2. Reliable delivery in both directions, with mail never lost.
+3. Mail and identity owned by the **company**. A departing employee loses access the same day
+   and takes nothing with them.
+4. Apple Mail on macOS, iPhone and iPad as the daily client.
+5. A small sales team (about 4) working human-in-the-loop, out of about 20 staff in total.
+6. **Twenty CRM** as the authoritative customer record.
+7. Low cost: cash flow comes first ([The Drive](/docs/captain)).
+8. Room for the existing automation: Mail.app scripting, plus read/send loops like the jobs lane.
+
+**Not** a requirement: an enterprise collaboration suite. Twenty, Slack and the kun engine
+already cover collaboration.
+
+## 3. Proposed iCloud architecture (as briefed)
+
+```text
+Databayt
+ └── dedicated company Apple Account  (iCloud+)
+      ├── databayt.org   hi@  sales@
+      ├── balqalam.com   hi@  sales@
+      ├── mkan.sd        hi@  sales@
+      └── product-4      hi@  sales@
+```
+
+Capacity fits: 4 domains is within the cap of 5, and 2 addresses per domain is within the cap of 3 per person
+(**Verified** — [Apple 102540](https://support.apple.com/en-us/102540),
+[Create and delete addresses](https://support.apple.com/guide/icloud/create-and-delete-email-addresses-mm11db96ba8e/icloud)).
+The problem is **access**, which §4–§9 work through.
+
+## 4. How Apple custom-domain email actually works
+
+| Fact | Status |
+|---|---|
+| Up to **5 custom domains** per iCloud+ subscriber | **Verified** [102540](https://support.apple.com/en-us/102540) |
+| Up to **10 addresses per domain**, of which **3 active per person** | **Verified** [overview](https://support.apple.com/guide/icloud/icloud-custom-email-domain-mme8ed800b5d/icloud) |
+| Every iCloud+ tier includes the feature ($0.99, $2.99, $9.99, $29.99 or $59.99 a month) | **Verified** [108047](https://support.apple.com/en-us/108047) |
+| A domain can be shared with up to **5 other people**. Family Sharing is not required. | **Verified** [add/remove people](https://support.apple.com/guide/icloud/add-or-remove-people-mmf0ccf838d5/icloud) |
+| Each member needs **their own Apple Account** with 2FA and an iCloud Mail address | **Verified** (same page) |
+| **Inbound mail stops when storage is full** | **Verified** [overview](https://support.apple.com/guide/icloud/icloud-custom-email-domain-mme8ed800b5d/icloud) |
+| An address used in iCloud Mail can never become an Apple Account sign-in | **Verified** [add a domain](https://support.apple.com/guide/icloud/add-a-domain-you-own-mma473945269/icloud) |
+| No official iCloud Mail API; only IMAP and SMTP | **Verified** for IMAP/SMTP ([102525](https://support.apple.com/en-us/102525)); "no API" is **Assumption** (no API page exists) |
+| Sending limits: **1,000 messages and 1,000 recipients a day**, 500 per message, 20 MB (Mail Drop up to 5 GB) | **Verified** [102198](https://support.apple.com/en-us/102198) |
+| *"Sending unsolicited bulk email messages through iCloud email servers is prohibited."* | **Verified** [102198](https://support.apple.com/en-us/102198) |
+| *"designed and intended for personal use on an individual basis"*, and accounts are non-transferable | **Verified** [iCloud Terms §IV.A](https://www.apple.com/legal/internet-services/icloud/) (revised 2026-09-14) |
+| Custom Email Domain is not offered in every country | **Verified** [overview](https://support.apple.com/guide/icloud/icloud-custom-email-domain-mme8ed800b5d/icloud), **Must-test** for our billing country |
+
+## 5. Company ownership model
+
+Four separate layers. Most email incidents come from blurring them.
+
+| Layer | What it is | Who must own it | Today |
+|---|---|---|---|
+| **1. Registrar account** | Where the domain is *registered* and renewed. Whoever holds it can move the domain. | Company login, company 2FA, company card | Namecheap (databayt.org), Cloudflare (balqalam.com), sdnic (mkan.sd) |
+| **2. DNS zone** | Where MX, SPF, DKIM and DMARC live. Whoever edits it redirects all mail. | Company Cloudflare account | Cloudflare account `ce9a5376…`, all three |
+| **3. Mail tenant / admin** | The provider account that creates mailboxes and grants access (Apple domain owner, Microsoft global admin, Google super admin) | A **dedicated company admin identity** (not a person's daily account) plus a sealed break-glass account | Namecheap Private Email (databayt.org) |
+| **4. Mailbox permission** | Which human may read or send as `sales@` | Granted and revoked by layer 3 | — |
+
+**With Apple**, layers 3 and 4 merge. The *domain owner* is whoever subscribed and added the
+domain. *"Only the domain owner can add and remove people."* Members can *"only create and delete
+your own email addresses"*, and every member's mail sits in their **own** account
+(**Verified** [add/remove](https://support.apple.com/guide/icloud/add-or-remove-people-mmf0ccf838d5/icloud)).
+The company Apple Account *can* stay the permanent domain owner, but any address it gives an
+employee lives in the employee's mailbox.
+
+**With Microsoft or Google**, layers 3 and 4 are separate by design. The tenant owns every mailbox,
+and a person is only granted access.
+
+## 6. Employee access model
+
+| Model | Apple | Microsoft | Google |
+|---|---|---|---|
+| Employee uses the company account's password | ❌ violates the iCloud Terms §IV.A | ❌ not needed | ❌ not needed |
+| Employee has their own account plus an address | ✅ but **mail stays with the employee** on removal | ✅ licensed mailbox, owned by the tenant | ✅ user, owned by the org |
+| Several people work one `sales@` with shared history | ❌ no shared mailbox | ✅ **shared mailbox** (free ≤50 GB; each user needs a license) | ✅ **Group as collaborative inbox** |
+| Access revocable without touching anyone's password | ⚠️ only through app-specific passwords (max 25, all revoked if the main password changes, [102654](https://support.apple.com/en-us/102654)) | ✅ remove the permission | ✅ remove from the group |
+
+Sources (**Verified**): [Microsoft shared mailboxes](https://learn.microsoft.com/en-us/microsoft-365/admin/email/about-shared-mailboxes),
+[Google collaborative inbox](https://support.google.com/a/users/answer/167430).
+
+## 7. Employee onboarding (Recommendation, Microsoft path)
+
+```text
+Admin creates  ali@databayt.org  (licensed, Plan 1)  → MFA enrolled on the employee's phone
+  → grant Full Access + Send As on  sales@balqalam.com  (shared)
+  → employee adds the account in Apple Mail (Mac + iPhone): Exchange, Microsoft sign-in
+  → shared mailbox appears; replies go out "as" sales@balqalam.com
+  → Twenty: employee's mailbox connected (Microsoft), owner set on their companies/opportunities
+```
+
+The employee never learns any password except their own.
+
+## 8. Employee offboarding (Recommendation, Microsoft path)
+
+| Step | Where | Handled by the provider? |
+|---|---|---|
+| 1. Block sign-in, reset the password, **revoke all sessions** | Microsoft 365 admin | ✅ [remove a former employee](https://learn.microsoft.com/en-us/microsoft-365/admin/add-users/remove-former-employee-step-1) |
+| 2. Remove Full Access and Send As on every shared mailbox | Exchange admin | ✅ |
+| 3. Wipe or remove the account from their devices (Apple Mail, iPhone) | device / remote sign-out | ⚠️ the session revoke stops sync, but mail already downloaded stays on the device |
+| 4. **Convert their personal mailbox to a shared mailbox**, so history stays with the company and the license frees up | Exchange admin | ✅ [convert](https://learn.microsoft.com/en-us/microsoft-365/admin/email/convert-user-mailbox-to-shared-mailbox) |
+| 5. Grant the replacement access to that converted mailbox, plus the shared `sales@` | Exchange admin | ✅ |
+| 6. Check for **inbox forwarding rules** they set (exfiltration) | Exchange admin | ✅ but a manual check |
+| 7. Reassign their Twenty records and deactivate their Twenty user | Twenty | ❌ outside email |
+| 8. Remove them from Cloudflare, Namecheap and the Slack admin if they ever had access | each console | ❌ outside email |
+| 9. Rotate any shared secret they saw (a break-glass password, API keys) | Keychain / `credentials` skill | ❌ outside email |
+
+**With Apple**, step 4 does not exist. Removing a member deletes their addresses, bounces new
+mail and *leaves their history in their own iCloud account* (**Verified**). Moving an address to another
+member needs **both people to accept**, so an uncooperative leaver can block it
+(**Verified** [transfer](https://support.apple.com/guide/icloud/transfer-custom-email-domain-addresses-mm043dbc8d94/icloud)).
+Whether history moves with a transferred address is **Must-test** (Apple doesn't say).
+
+## 9. Hostile employee scenario
+
+A salesperson leaves on bad terms. What can they keep?
+
+| Asset | Apple iCloud+ | Microsoft / Google | What protects it |
+|---|---|---|---|
+| The domain | Safe, unless they had registrar access | Safe, same condition | Registrar access for founders only, with 2FA and registrar lock (the tracer checks the lock) |
+| DNS | Safe, unless they had Cloudflare access | Same | Cloudflare members audited; NS and MX drift alerts within 24 hours |
+| The address `sales@` | Address deleted (the owner removes them), but new mail bounces until a new one is made | Kept; access is removed in minutes | Shared mailbox model |
+| **Past customer mail** | **They keep it.** It is in their own iCloud account. | Stays in the tenant; anything synced to a device until revocation is the residual | Shared mailbox; Twenty sync |
+| Incoming customer mail | Stops reaching them | Stops reaching them; check forwarding rules | Offboarding step 6 |
+| Outgoing identity | Gone once the address is removed | Gone after Send As is removed | — |
+| Account recovery | Risk if their phone was a trusted number on the company Apple Account | No risk if the admin identity was never shared | Company-held recovery (§12) |
+| Customer list and pipeline | Whatever they exported | Whatever they exported | Twenty roles: sales can't bulk-export; reassign records |
+
+No mail product stops someone who **already downloaded** mail. The defence is to keep the
+history in a company system (Twenty plus company-owned mailboxes) and to revoke access fast.
+
+## 10. Twenty CRM architecture
+
+```text
+Twenty (system of record)
+  ├── companies · contacts · opportunities · tasks · workflow state
+  ├── connected mailboxes ──sync── each salesperson's licensed mailbox (Microsoft OAuth / Google / IMAP)
+  └── workflows ──HTTP Request / webhook──▶ kun automation (drafts, follow-ups, digests)
+```
+
+- Twenty connects **Google, Microsoft or IMAP/SMTP/CalDAV** accounts. IMAP arrived in v1.3.0 (Aug 2025).
+  *"Only true mailboxes can be connected."* (**Verified** [docs](https://docs.twenty.com/user-guide/calendar-emails/overview), [releases](https://twenty.com/releases))
+- Workflow **Send Email** goes to one recipient per action from a connected account. There are also an **HTTP Request**
+  action, a **webhook trigger** and record webhooks (**Verified** [send from workflows](https://docs.twenty.com/user-guide/workflows/capabilities/send-emails-from-workflows),
+  [actions](https://docs.twenty.com/user-guide/workflows/capabilities/workflow-actions)).
+- **Must-test:** whether mail that arrives in a *shared* mailbox reaches Twenty. A shared mailbox isn't
+  a "true mailbox", so it can't be connected. Two ways out:
+  (a) make `sales@` a Microsoft 365 group or distribution list that delivers into each member's mailbox, which Twenty does sync; or
+  (b) license `sales@` as a role mailbox ($48/yr), held by the admin, with the team delegated in.
+- Apple mail could reach Twenty through IMAP with an app-specific password, but that is exactly the shared-credential
+  pattern the iCloud Terms rule out for a team.
+
+## 11. Apple Mail architecture
+
+| Client | Apple iCloud+ | Microsoft Exchange | Google Workspace |
+|---|---|---|---|
+| macOS Mail | Native; From pop-up | Native Exchange account; modern auth on 10.14+ | "Sign in with Google" (OAuth) |
+| iPhone / iPad Mail | Native | Native; Exchange moves to OAuth automatically on iOS 14+ | Native through OAuth |
+| Web | iCloud.com | Outlook on the web | Gmail |
+| Shared `sales@` shows up | n/a | Auto-mapped shared mailbox in Outlook; **Must-test** in Apple Mail (may need to be added as its own account) | Group mail lands in the user's inbox; Send As set up in Gmail |
+
+Sources: [Apple + Exchange](https://support.apple.com/guide/deployment/integrate-with-microsoft-exchange-dep158966b23/web) (**Verified**),
+[Google LSA → OAuth](https://knowledge.workspace.google.com/admin/sync/transition-from-less-secure-apps-to-oauth) (**Verified**).
+Day to day, all three feel like a normal mailbox in Apple Mail. The difference is who owns what is inside it.
+
+## 12. Security architecture
+
+- **Admin identity:** one dedicated admin account per provider (for example `admin@databayt.org`).
+  It is never used for daily mail. Its MFA uses a hardware key or an authenticator held by **two founders**, and
+  there is a **break-glass** second admin with credentials sealed in the company Keychain (`credentials` skill).
+- **Apple specifically** (if used anywhere): the trusted phone number must be a **company SIM**,
+  not a person's. The recovery key needs an Apple device, and losing it means permanent lockout
+  (**Verified** [109345](https://support.apple.com/en-us/109345)).
+- **Registrar:** 2FA, registrar lock on (checked daily), company card, auto-renew on (verified monthly, see Health tracing).
+- **DNS:** Cloudflare 2FA, least-privilege API tokens, **DNSSEC** to be turned on (Proposed, §19).
+- **Phishing and takeover:** MFA for every user, Microsoft/Google default anti-phish, and no SMTP basic auth.
+  Microsoft turns SMTP AUTH basic auth off by default at the end of December 2026
+  ([timeline](https://techcommunity.microsoft.com/blog/exchange/updated-exchange-online-smtp-auth-basic-authentication-deprecation-timeline/4489835)),
+  so automation uses OAuth or Graph.
+- **Passwords:** Keychain (`credentials` skill), never in chat, `.env` or docs.
+
+## 13. DNS / email authentication
+
+Every value comes **from the provider's admin console**. Never copy values from this page or another domain.
+
+| Record | Name | Shape | Source |
+|---|---|---|---|
+| Verification | `@` TXT | `MS=…` / `google-site-verification=…` / `apple-domain=…` | provider console |
+| MX | `@` | Microsoft: `<domain-key>.mail.protection.outlook.com` · Google: `smtp.google.com` · Apple: `mx01/mx02.mail.icloud.com` | console / [Apple 102374](https://support.apple.com/en-us/102374) |
+| SPF | `@` TXT | exactly **one** record: `v=spf1 include:<provider> ~all` (plus `include:` for each other legitimate sender) | console |
+| DKIM | `selector1._domainkey` / `google._domainkey` / `sig1._domainkey` | CNAME or TXT from the console | console |
+| DMARC | `_dmarc` TXT | start `v=DMARC1; p=none; rua=mailto:<reports>` → `quarantine` → `reject` | policy (Recommendation) |
+| App mail | `send.<domain>` | Resend/SES SPF + DKIM on a subdomain, kept separate from people mail | Resend |
+| Domains with no mail | `@` TXT + `_dmarc` | `v=spf1 -all` + `v=DMARC1; p=reject;` | anti-spoof |
+
+**Current state** (what the tracer sees today):
+- databayt.org: Private Email MX, SPF and DKIM are correct; DMARC is `quarantine` but has no `rua`.
+- balqalam.com: Cloudflare Routing MX; DMARC is `p=none` with no `rua`.
+- **mkan.sd: no records at all, so anyone can send as @mkan.sd.**
+
+## 14. Deliverability and outreach
+
+| Mail type | Volume | Where it must go out from |
+|---|---|---|
+| Human sales replies | tens a day | `sales@<product>`, via the provider |
+| Automated sales outreach | hundreds a day | **A separate domain or subdomain** (for example `try-balqalam.com` or `go.balqalam.com`) through a sequencing tool, with its own SPF, DKIM and DMARC. **Never** `hi@`/`sales@`. |
+| Transactional (OTP, invites) | app-driven | Resend/SES on `send.<domain>`, as Hogwarts already does on databayt.org |
+| Marketing newsletters | batch | an ESP with one-click unsubscribe |
+
+Rules from the receivers (**Verified**):
+- Gmail and Yahoo require SPF, DKIM, DMARC, one-click unsubscribe, and a spam rate under 0.3%. Gmail has rejected non-compliant mail since November 2025 ([Google 81126](https://support.google.com/a/answer/81126)).
+- Outlook.com requires the same for senders over 5,000 a day from 5 May 2025 ([Microsoft](https://techcommunity.microsoft.com/blog/microsoftdefenderforoffice365blog/strengthening-email-ecosystem-outlook%E2%80%99s-new-requirements-for-high%E2%80%90volume-senders/4399730)).
+
+Provider caps:
+- **iCloud:** 1,000 a day, with bulk prohibited.
+- **Google:** 2,000 messages a day and 3,000 external recipients ([limits](https://knowledge.workspace.google.com/admin/gmail/gmail-sending-limits-in-google-workspace)).
+- **Exchange:** 10,000 recipients a day plus a tenant-wide external limit. Microsoft tells bulk senders to use third parties ([limits](https://learn.microsoft.com/en-us/office365/servicedescriptions/exchange-online-service-description/exchange-online-limits)).
+
+**None of the three is an outreach engine.** Protecting the main domains' reputation is the point.
+
+## 15. Apple vs Microsoft vs Google
+
+| # | Criterion | Apple iCloud+ | Microsoft Exchange P1 | Google Workspace Starter |
+|---|---|---|---|---|
+| 1 | Professional appearance | ✅ | ✅ | ✅ |
+| 2 | Four custom domains | ✅ (cap 5) | ✅ (5,000) | ✅ (600) |
+| 3–4 | `hi@` and `sales@` on each | ✅ | ✅ shared mailboxes (same name on several domains needs PowerShell naming) | ✅ groups |
+| 5–6 | Apple Mail / iPhone | ✅ best | ✅ native Exchange | ✅ OAuth |
+| 7 | Company owns the mail | ❌ member mail stays with the member | ✅ | ✅ |
+| 8 | Offboarding | ❌ history leaves; the transfer needs the leaver's consent | ✅ convert to shared | ✅ transfer / archive |
+| 9 | Shared mailbox | ❌ | ✅ free | ✅ collaborative inbox |
+| 10 | Admin control | ⚠️ one owner, no audit | ✅ full | ✅ full |
+| 11 | Security | ⚠️ consumer 2FA, recovery tied to devices | ✅ MFA, conditional access (paid tiers), audit | ✅ 2SV, audit |
+| 12 | Deliverability (human mail) | ✅ | ✅ | ✅ |
+| 13 | Automation | ⚠️ IMAP + app password, no API | ✅ Graph API / OAuth | ✅ Gmail API / OAuth |
+| 14 | Twenty | ⚠️ IMAP only | ✅ Microsoft connector | ✅ Google connector |
+| 15 | Simplicity | ✅ simplest to start | ⚠️ admin center learning curve | ✅ simple |
+| 16 | Cost (core) | ✅ about $36/yr | ✅ about $240/yr | ⚠️ about $420/yr |
+| 17 | Scalability | ❌ 5 people per domain | ✅ | ✅ |
+
+## 16. Detailed cost comparison
+
+Prices are in USD, list price on annual commitment, before tax. **All three charge per user or account, never per domain.**
+
+| Option | Unit | Price | Core setup (5 humans + 8 role addresses) | Per year |
+|---|---|---|---|---|
+| Apple iCloud+ 200 GB | per Apple Account | $2.99 a month ([108047](https://support.apple.com/en-us/108047)) | 1 account | **$35.88**, but it fails §5 |
+| **Microsoft Exchange Online Plan 1** | per user | $4.00 a month, not part of the July 2026 increase ([FAQ](https://www.microsoft.com/en-us/licensing/news/2026-m365-packaging-pricing-updates-faq)) | 5 licensed + 8 free shared | **$240** |
+| ↳ plus Twenty sync of 4 `sales@` as licensed role mailboxes | per user | $4.00 a month | +4 | $432 |
+| Microsoft 365 Business Basic | per user | $7.00 a month from 1 July 2026 (was $6) | 5 + 8 shared | $420. It adds Teams, SharePoint and 1 TB OneDrive, which we don't need. |
+| Google Workspace Business Starter | per user | $7.00 a month annual, $8.40 flexible ([pricing](https://knowledge.workspace.google.com/admin/billing/compare-flexible-and-annual-fixed-term-payment-plans)) | 5 + 8 groups (free) | $420 |
+| Google Business Standard | per user | $14.00 a month | 5 + 8 groups | $840 |
+| *For reference:* Namecheap Private Email (databayt.org today) | per mailbox, tied to one domain | from $14.88 a year ([ownership](/docs/social/ownership)) | 8 mailboxes on 4 domains | about $120+, with no shared mailbox and weak offboarding |
+
+**Mailbox vs suite:** Exchange Online Plan 1 is *mail only* (50 GB mailbox, calendar, contacts).
+Business Basic adds Teams, SharePoint and OneDrive. That is a collaboration suite we would be
+paying for without using.
+
+## 17. Risks and limitations
+
+| Risk | Apple | Microsoft | Google | Mitigation |
+|---|---|---|---|---|
+| Mail history leaves with an employee | **High** | Low | Low | Shared mailboxes or groups; Twenty sync |
+| Shared credentials | **High** (the only team path) | None | None | Per-person accounts |
+| Admin lockout | High (device-bound recovery) | Medium | Medium | Two founders hold MFA; break-glass admin |
+| Inbound stops at quota | Medium (full storage) | Low (50 GB) | Low (30 GB) | Tracer weekly RCPT probe |
+| Domain expiry | Same for all | Same | Same | Tracer: daily expiry, monthly auto-renew verification |
+| DNS drift or hijack | Same for all | Same | Same | Tracer: NS/MX/SPF/DKIM/DMARC baseline |
+| Sanctions or region availability (Sudan) | Medium | Medium | Medium | **Must-verify:** buy from the Rwanda or UAE entity with a card there |
+| Twenty can't see shared-mailbox mail | n/a | Medium | Low | Group delivery or a licensed role mailbox (§10) |
+| Outreach damages reputation | High | High | High | Separate outreach domain and tool (§14) |
+| Vendor price rises | Low | Medium (the 2026 increase hit Basic, not P1) | Medium (2025 increase) | Annual commitment; mail-only plan |
+
+## 18. Recommended architecture
+
+```text
+                    ┌──────────────── Databayt (company-controlled) ───────────────┐
+ Registrars ──────▶ │ Namecheap · Cloudflare · sdnic   (founder 2FA, lock, auto-renew)│
+ DNS ─────────────▶ │ Cloudflare zones (MX/SPF/DKIM/DMARC per domain)                 │
+                    │                                                                  │
+ Mail tenant ─────▶ │ Microsoft 365 tenant  (admin@ + break-glass, founder-held MFA)  │
+                    │   licensed: abdout@ · 4 × salesperson@databayt.org             │
+                    │   shared:   hi@ + sales@ × {databayt.org, balqalam.com,         │
+                    │             mkan.sd, product-4}                                 │
+                    │   access:   Full Access + Send As, granted per person           │
+                    └──────────────────────────────────────────────────────────────────┘
+        ▲ Apple Mail (Mac/iPhone, Exchange OAuth)            │ Microsoft connector
+        │                                                    ▼
+   salespeople ──────────────────────────────────────▶  Twenty CRM  (system of record)
+                                                             │ HTTP / webhooks
+                                                             ▼
+                                                       kun automation
+   Separate:  send.<domain> → Resend (app mail) · outreach domain → sequencing tool
+   Watching:  kun domains tracer (daily) → GitHub issue → Abdout's phone
+```
+
+**Decision checklist:**
+- **Choose Microsoft** if the team works in Apple Mail and Twenty, wants the lowest real cost, and needs strict offboarding (**this is Databayt today**).
+- **Choose Google** if the team would rather work in Gmail, Docs and Meet, or wants the simplest admin with groups as shared inboxes.
+- **Choose Apple** only for a brand run by **one person** who will never hand the inbox to someone else.
+
+## 19. Migration plan
+
+Nothing touches production before step 4.
+
+1. **Decide the provider** (Abdout) and confirm billing-country availability.
+2. **Create the tenant** with the admin and break-glass identities. Founder-held MFA.
+3. **Lab test on `lab.databayt.org`.** Add only new records under that subdomain. The apex MX is untouched.
+   Create `test@lab.databayt.org` (shared) and one licensed test user, then run the checklist in §20.
+4. **balqalam.com first.** Snapshot the zone to `cf/dns/balqalam-com-snapshot-<date>.json`, set the MX TTL to 300
+   the day before, add the verification and DKIM records, cut over the MX and SPF, and keep DMARC `p=none` with `rua`.
+   Update `cf/domains.json` in the **same commit** so the tracer adopts the new baseline.
+5. **databayt.org next.** Export the Private Email mailboxes over IMAP into the new tenant, then cut over. Cancel Private Email at its renewal.
+6. **mkan.sd and product-4.** Fresh setup.
+7. **DMARC ramp:** after 2–4 weeks of clean reports, `quarantine`, then `reject`.
+
+**Proposed security records** (can't break mail, but still need Abdout's yes):
+- `rua=` on the existing DMARC records
+- `v=spf1 -all` + `p=reject` on mkan.sd until it gets mailboxes
+- DNSSEC (Cloudflare one-click, plus the DS record at Namecheap and sdnic)
+
+## 20. Testing checklist (lab domain)
+
+- [ ] Inbound from Gmail, Outlook.com and iCloud reaches `test@` (and not spam)
+- [ ] Outbound as `test@` passes SPF, **DKIM `d=lab.databayt.org`**, and DMARC aligned (read the headers)
+- [ ] Apple Mail on the Mac: shared mailbox visible; reply goes out *as* `test@`; attachment up to 20 MB
+- [ ] iPhone Mail: the same
+- [ ] Reply-from-the-received-address behaviour on all clients
+- [ ] Sent copy is saved in the **shared** mailbox's Sent folder
+- [ ] Twenty: test user's mailbox syncs; a thread on `test@` reaches Twenty (§10 a/b)
+- [ ] Offboarding drill: block the test user, then confirm no access within 5 minutes on Mac and iPhone and that history stays in `test@`
+- [ ] Replacement drill: grant a second user and confirm the full history is visible
+- [ ] Forwarding-rule audit shows in the admin center
+- [ ] Tracer: add `lab.databayt.org` to `cf/domains.json` and see it green
+
+## 21. Rollback plan
+
+- Before any cutover, the full zone is saved to `cf/dns/<domain>-snapshot-<date>.json`, and the old provider stays paid until the end of the month.
+- **Rollback = restore the MX, SPF and DKIM records from the snapshot.** With TTL 300, inbound returns to the old provider within minutes.
+  Mail that arrived at the new provider in the meantime is exported over IMAP and imported back.
+- The tracer flags any half-done state (MX drift is a blocking alert), so a stalled migration can't go unnoticed.
+
+---
+
+## Health tracing
+
+Kun now traces every domain so none expires and no mail record drifts unnoticed.
+
+| Piece | Where |
+|---|---|
+| Watchlist + expected baseline | `cf/domains.json` |
+| Tracer (read-only) | `scripts/domains/check.mjs` (RDAP or `.sd` whois, DNS via 1.1.1.1 and 8.8.8.8, TLS, optional SMTP RCPT) |
+| Daily run, 05:30 UTC | `.github/workflows/domains.yml`. It runs on GitHub, so it doesn't share a failure with the Cloudflare DNS it watches. |
+| Weekly inbox probe, Mon 09:30 | launchd `com.databayt.domains-probe` (`scripts/domains/probe.sh`), because GitHub blocks port 25 |
+| Alert | one `domains: <domain> needs action` issue per domain in databayt/kun, assigned @abdout, rewritten each run, **closed automatically when green**, and @-mentioning him daily while blocking. Slack too, if `SLACK_WEBHOOK_URL` is set. |
+| The fix | each alert row names a spell: `domains renew <d>` · `verify-renew` · `lock` · `restore` · `harden` · `lock-mail` (the [`domains` skill](/docs/skills)) |
+
+| Severity | Trigger |
+|---|---|
+| 🛑 blocking | expires in 30 days or less · nameservers changed · MX missing or drifted · SPF include lost · DKIM key missing · DMARC weakened · an inbox address **rejected (5xx)** · TLS expires in 7 days or less |
+| ⚠️ warning | expires in 90 days or less · auto-renew not verified in the last 35 days · registrar lock off · DMARC `p=none` or no `rua` · a no-mail domain that can be spoofed · TLS expires in 14 days or less · probe unreachable |
+
+**Why auto-renew needs a human:** no registry or whois shows auto-renew, and Namecheap and
+sdnic offer no API we hold. So someone (Cowork, in Abdout's Chrome) looks at each registrar page
+once a month, and `autoRenewVerifiedAt` in `cf/domains.json` records that they did. A stale stamp is
+a warning, and the warning *is* the reminder.
+
+**First findings, 2026-10-03:**
+- **abdoutgroup.com expires 2026-11-05 (33 days).**
+- mkan.sd and abdoutgroup.com can be spoofed.
+- balqalam.com DMARC is `p=none`.
+- No domain's auto-renew has been verified yet.
+- The Namecheap Private Email MX refused this Mac after repeated probes. The probe is now
+  weekly, and refusals count as "unreachable", not as a dead inbox.
