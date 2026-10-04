@@ -18,6 +18,7 @@ export interface LoopConfig {
   windowTo: number;
   slackTarget: string; // hermes send --to
   whatsappCap: number; // applications/day from Abdout's own WhatsApp number
+  briefWhatsApp: string; // where the one-line "applied / interview" briefs go ("" = off)
   vetoHours: number; // a QUEUED card waits this long before it can send
   pausedLanes: string[]; // CRM campaign values the wave skips
   dailyTotalCap: number; // email + ATS applications per day (Abdout's goal: 100)
@@ -37,6 +38,9 @@ const DEFAULTS: LoopConfig = {
   // Abdout, 2026-10-04: apply on WhatsApp too. Small on purpose — a personal
   // number that cold-messages many strangers a day risks a WhatsApp ban.
   whatsappCap: 5,
+  // Abdout, 2026-10-05: "send me a brief on WhatsApp when a job succeeds" —
+  // his own chat (the linked number), one line per application or real reply.
+  briefWhatsApp: "+249919071294",
   vetoHours: 2,
   // Abdout, 2026-10-03: electrical/protection back on (his deepest CV, Gulf +
   // East Africa); only marine stays paused.

@@ -34,3 +34,15 @@ export function notify(text: string, subject?: string): boolean {
   }
   return true;
 }
+
+/// A one-line brief to Abdout's own WhatsApp chat — an application that went
+/// out, or a reply that needs him. Best effort and silent on failure: a brief
+/// must never fail the send it reports. The board stays the record.
+export function whatsappBrief(text: string): void {
+  const to = loadConfig().briefWhatsApp;
+  if (!to || process.env.JOBS_BRIEF === "off") return;
+  spawnSync(HERMES, ["send", "--to", `whatsapp:${to}`, "--quiet", text], {
+    encoding: "utf-8",
+    timeout: 60_000,
+  });
+}

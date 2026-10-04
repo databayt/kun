@@ -20,7 +20,7 @@ import { crmStatusFor } from "@/lib/jobs/twenty-crm";
 import { BoardRow, boardUrl, ledger, listBoard, noteRow } from "./board";
 import { loadConfig } from "./config";
 import { openDb } from "./engine";
-import { notify } from "./notify";
+import { notify, whatsappBrief } from "./notify";
 
 const args = process.argv.slice(2);
 const DRY_RUN = args.includes("--dry-run");
@@ -237,6 +237,8 @@ async function main(): Promise<void> {
         `${head}: ${row.name}\nFrom ${addr} — "${m.subject}"\n${excerpt}\n${boardUrl(crmId)}`,
         `Jobs — ${head}`,
       );
+      if (kind !== "ambiguous")
+        whatsappBrief(`${head}: ${row.name}\n"${m.subject}"\n${boardUrl(crmId)}`);
     }
     seen.add(id);
   }
