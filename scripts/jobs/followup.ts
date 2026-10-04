@@ -103,6 +103,14 @@ async function main(): Promise<void> {
       );
       continue;
     }
+    // A WhatsApp application lives in Abdout's chat, where a templated nudge
+    // from a bot reads worse than silence: he follows those up by hand.
+    if (first.to.startsWith("+")) {
+      console.log(
+        `  skip      ${row.name.slice(0, 60)} — applied on WhatsApp, follow up in the chat`,
+      );
+      continue;
+    }
     const touch = action === "touch2" ? 2 : 3;
     const variant = pickFollowUp(touch);
     if (!variant?.template) continue;

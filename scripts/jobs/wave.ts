@@ -6,7 +6,8 @@
 //   pnpm jobs:wave --limit 3       smaller batch
 //   pnpm jobs:wave --regate        re-run the gate on existing letters (after a CV/facts edit)
 //
-// Only EMAIL cards with an applyEmail are tailored — portals, platforms and
+// Only EMAIL cards with an applyEmail (and, since 2026-10-04, WHATSAPP cards
+// with an applyPhone — same letter, sent as a message + CV) are tailored — portals, platforms and
 // tenders stay packets (Abdout's rule). Letters are written by one `claude -p`
 // session on the Max subscription, answers passed through files (the
 // drain-drafts pattern), then every letter goes through the send gate. A card
@@ -222,7 +223,7 @@ async function main(): Promise<void> {
           // speculative send to a general inbox): write it now.
           (r.applicationStatus === "APPROVED" && !existsSync(join(dir, `${r.id}.letter.json`)) && !letterExists(r.id)),
     )
-    .filter((r) => r.channel === "EMAIL" && r.applyEmail)
+    .filter((r) => (r.channel === "EMAIL" && r.applyEmail) || (r.channel === "WHATSAPP" && r.applyPhone))
     .filter((r) => r.applicationStatus === "APPROVED" || !cfg.pausedLanes.includes(r.campaign ?? ""))
     .filter((r) => !r.deadline || r.deadline.slice(0, 10) >= date)
     .sort(
@@ -235,7 +236,7 @@ async function main(): Promise<void> {
     .slice(0, limit);
 
   console.log(
-    `${DRY_RUN ? "DRY RUN — " : ""}wave ${date}: ${candidates.length} email card(s) to prepare\n`,
+    `${DRY_RUN ? "DRY RUN — " : ""}wave ${date}: ${candidates.length} email/WhatsApp card(s) to prepare\n`,
   );
   if (candidates.length === 0) return;
 
@@ -255,7 +256,7 @@ async function main(): Promise<void> {
       crmId: row.id,
       role,
       company,
-      to: row.applyEmail as string,
+      to: (row.channel === "WHATSAPP" ? row.applyPhone : row.applyEmail) as string,
       postingUrl: url,
       postingText: (text ?? "").slice(0, 8000),
       lane,
@@ -296,6 +297,7 @@ async function main(): Promise<void> {
         writeFileSync(req.out, JSON.stringify(letter, null, 2));
       }
       verdict = evaluateSendGate({
+        channel: row.channel === "WHATSAPP" ? "whatsapp" : "email",
         letter,
         company: req.company,
         role: req.role,

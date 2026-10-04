@@ -264,7 +264,11 @@ async function main(): Promise<void> {
       if (!fields.channel) continue;
       // Fill a gap, or upgrade a portal card once a posting turns out to name
       // an address — that is what makes it sendable by the loop.
-      const upgrade = fields.channel === "EMAIL" && row.channel !== "EMAIL" && row.applicationStatus === "TO_APPLY";
+      // WhatsApp is sendable too, but email wins when a posting names both.
+      const upgrade =
+        row.applicationStatus === "TO_APPLY" &&
+        ((fields.channel === "EMAIL" && row.channel !== "EMAIL") ||
+          (fields.channel === "WHATSAPP" && row.channel !== "EMAIL" && row.channel !== "WHATSAPP"));
       if (row.channel && !upgrade) continue;
       // The gate checks the recipient against the card's page, so an upgraded
       // card must point at the page where the address was published.

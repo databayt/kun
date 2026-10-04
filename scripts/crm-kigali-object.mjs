@@ -176,6 +176,7 @@ const FIELDS = [
   },
   // ── send-loop state (2026-09-27) — the board, not Neon, carries the loop,
   // which keeps it clear of the prod enum drift in kun#152.
+  { name: "applyPhone", label: "Apply WhatsApp", type: "TEXT", icon: "IconBrandWhatsapp", description: "WhatsApp number the posting says to send the CV to (E.164, e.g. +250788123456)." },
   { name: "applyEmail", label: "Apply Email", type: "TEXT", icon: "IconMail", description: "Where the application goes, as stated on the posting." },
   {
     name: "channel",
@@ -190,6 +191,7 @@ const FIELDS = [
       sel("IN_PERSON", "In person", "green", 3),
       sel("TENDER", "Tender portal", "red", 4),
       sel("ATS", "ATS form (auto-submit)", "purple", 5),
+      sel("WHATSAPP", "WhatsApp", "green", 6),
     ],
   },
   { name: "variant", label: "Variant", type: "TEXT", icon: "IconFlask", description: "CV + letter variant ids used, e.g. cv:web@1 letter:kigali-tech@1." },

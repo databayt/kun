@@ -77,15 +77,19 @@ export function findLetter(
 }
 
 /// Applications logged today (Kigali date). `channel` separates the hotmail
-/// cap (email only) from the daily total (email + ATS forms).
-export function sentToday(kind: "sent" | "followup", date: string, channel: "email" | "ats" | "any" = "email"): number {
+/// cap (email only) and the WhatsApp cap from the daily total (all channels).
+export function sentToday(kind: "sent" | "followup", date: string, channel: "email" | "ats" | "whatsapp" | "any" = "email"): number {
   if (!existsSync("jobs/ledger.jsonl")) return 0;
   return readFileSync("jobs/ledger.jsonl", "utf-8")
     .split("\n")
     .filter(Boolean)
     .map((l) => JSON.parse(l) as { kind: string; ts: string; to?: string })
     .filter((e) => e.kind === kind && new Date(new Date(e.ts).getTime() + 2 * 3_600_000).toISOString().slice(0, 10) === date)
-    .filter((e) => channel === "any" || (channel === "ats") === (e.to ?? "").startsWith("ats:")).length;
+    .filter((e) => {
+      const to = e.to ?? "";
+      const kindOf = to.startsWith("ats:") ? "ats" : to.startsWith("+") ? "whatsapp" : "email";
+      return channel === "any" || channel === kindOf;
+    }).length;
 }
 
 /// One email through Mail.app. Returns null on success, the error otherwise.
@@ -114,6 +118,23 @@ export function mailSend(
   return res.status === 0
     ? null
     : (res.stderr || res.stdout || `osascript exit ${res.status}`).trim();
+}
+
+/// One application over WhatsApp, from Abdout's own number through the Hermes
+/// Baileys bridge (paired once with `hermes whatsapp`): the letter as a
+/// message, then the CV as a PDF. Returns null on success, the error otherwise.
+export function whatsappSend(to: string, body: string, attachment: string): string | null {
+  const hermes = `${process.env.HOME}/.local/bin/hermes`;
+  const target = `whatsapp:${to}`;
+  for (const msg of [body, `MEDIA:${attachment} CV — Osman Abdout`]) {
+    const res = spawnSync(hermes, ["send", "--to", target, "--quiet", msg], {
+      encoding: "utf-8",
+      timeout: 90_000,
+    });
+    if (res.status !== 0)
+      return (res.stderr || res.stdout || `hermes exit ${res.status}`).trim().slice(0, 300);
+  }
+  return null;
 }
 
 async function markNeonApplied(crmId: string): Promise<void> {
@@ -276,7 +297,15 @@ async function main(): Promise<void> {
       );
       continue;
     }
+    const wa = fresh.channel === "WHATSAPP";
+    // A personal WhatsApp number that messages strangers in bulk gets banned:
+    // its own small daily cap, on top of the shared one.
+    if (wa && APPLY && sentToday("sent", date, "whatsapp") >= cfg.whatsappCap) {
+      console.log(`  · ${row.name.slice(0, 60)} — WhatsApp cap ${cfg.whatsappCap}/day reached, waits`);
+      continue;
+    }
     const verdict = evaluateSendGate({
+      channel: wa ? "whatsapp" : "email",
       letter: found.letter,
       company,
       role,
@@ -319,13 +348,15 @@ async function main(): Promise<void> {
       continue;
     }
 
-    const err = mailSend(
-      cfg.fromAccount,
-      found.letter.to,
-      found.letter.subject,
-      found.letter.body,
-      found.req.cvPdf,
-    );
+    const err = wa
+      ? whatsappSend(found.letter.to, found.letter.body, found.req.cvPdf)
+      : mailSend(
+          cfg.fromAccount,
+          found.letter.to,
+          found.letter.subject,
+          found.letter.body,
+          found.req.cvPdf,
+        );
     if (err) {
       console.log(`    ✗ send failed: ${err}`);
       await patchRow(row.id, {
@@ -340,7 +371,7 @@ async function main(): Promise<void> {
     const variant = `${found.req.cvVariant} ${found.req.letterVariant}`;
     await noteRow(
       row.id,
-      `sent to ${found.letter.to} — "${found.letter.subject}" (${variant})`,
+      `sent ${wa ? "on WhatsApp " : ""}to ${found.letter.to} — "${found.letter.subject}" (${variant})`,
       {
         applicationStatus: "APPLIED",
         appliedAt: now,
@@ -361,7 +392,7 @@ async function main(): Promise<void> {
       to: found.letter.to,
     });
     await markNeonApplied(row.id);
-    sentSubjects.push(found.letter.subject);
+    if (!wa) sentSubjects.push(found.letter.subject);
     companies.add(company.toLowerCase());
     sent++;
   }

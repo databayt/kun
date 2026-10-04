@@ -10,8 +10,9 @@
 // the facts in. Nothing here touches the network or the disk.
 
 export interface GateInput {
-  /// email: a letter to an address; ats: a cover letter for a hosted form.
-  channel?: "email" | "ats";
+  /// email: a letter to an address; ats: a cover letter for a hosted form;
+  /// whatsapp: the letter as a message + CV to the number on the posting.
+  channel?: "email" | "ats" | "whatsapp";
   letter: { to: string; subject: string; body: string };
   company: string;
   role: string;
@@ -110,11 +111,14 @@ export function evaluateSendGate(input: GateInput): GateVerdict {
   if (deadline && deadline < input.today)
     hard.push(`deadline passed (${deadline})`);
   const ats = input.channel === "ats";
-  if (
-    !ats &&
-    postingText !== null &&
-    !postingText.toLowerCase().includes(letter.to.toLowerCase())
-  ) {
+  const wa = input.channel === "whatsapp";
+  // A posting prints "0788 123 456" for +250788123456: compare the last nine
+  // digits against the posting with its separators removed.
+  const onPosting = (text: string): boolean =>
+    wa
+      ? text.replace(/[\s().-]/g, "").includes(letter.to.replace(/\D/g, "").slice(-9))
+      : text.toLowerCase().includes(letter.to.toLowerCase());
+  if (!ats && postingText !== null && !onPosting(postingText)) {
     hard.push(`recipient ${letter.to} is not on the posting`);
   }
   if (input.recentlyContacted)
@@ -122,9 +126,9 @@ export function evaluateSendGate(input: GateInput): GateVerdict {
 
   // ── the letter ─────────────────────────────────────────────────────────────
   // A hosted form has no recipient or subject line to get wrong.
-  if (!ats && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(letter.to))
+  if (wa ? !/^\+\d{10,15}$/.test(letter.to) : !ats && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(letter.to))
     hard.push(`bad address "${letter.to}"`);
-  if (!ats && !letter.subject.trim()) hard.push("empty subject");
+  if (!ats && !wa && !letter.subject.trim()) hard.push("empty subject");
   if (/\w\+\w|%[0-9a-f]{2}/i.test(letter.subject)) hard.push(`malformed subject "${letter.subject}"`);
   if (PLACEHOLDER.test(letter.body) || PLACEHOLDER.test(letter.subject))
     hard.push("placeholder text left in");

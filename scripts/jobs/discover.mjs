@@ -19,7 +19,7 @@
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 
-import { extractApplyEmail } from "./lib/apply-email.mjs";
+import { extractApplyEmail, extractApplyWhatsApp } from "./lib/apply-email.mjs";
 
 const args = process.argv.slice(2);
 const opt = (f, d) => (args.indexOf(f) > -1 ? args[args.indexOf(f) + 1] : d);
@@ -144,7 +144,7 @@ function parseDate(s) {
 
 const TENDERISH = /tender|expression of interest|\beoi\b|request for (proposal|quotation)|\brf[pq]\b|terms of reference|\btors?\b/i;
 
-function item({ title, company, location, url, source, campaign, deadline, description, employmentType, remoteType, salary, skills = [], applyEmail }) {
+function item({ title, company, location, url, source, campaign, deadline, description, employmentType, remoteType, salary, skills = [], applyEmail, applyWhatsApp }) {
   return {
     title,
     company: company || "Unknown employer",
@@ -162,9 +162,14 @@ function item({ title, company, location, url, source, campaign, deadline, descr
     deadline: deadline ?? "rolling",
     // A tender or EOI wants a proposal, not an application letter: it never
     // takes the email channel, whatever address the notice gives.
-    applyMethod: applyEmail && !TENDERISH.test(title) && !campaign?.includes("tender") ? `email:${applyEmail}` : `portal:${url}`,
+    // Email first, then WhatsApp ("send your CV on WhatsApp"), then the portal.
+    applyMethod: TENDERISH.test(title) || campaign?.includes("tender")
+      ? `portal:${url}`
+      : applyEmail ? `email:${applyEmail}` : applyWhatsApp ? `whatsapp:${applyWhatsApp}` : `portal:${url}`,
     note: applyEmail
       ? `Auto-discovered — the posting asks for applications to ${applyEmail}.`
+      : applyWhatsApp
+      ? `Auto-discovered — the posting asks for CVs on WhatsApp to ${applyWhatsApp}.`
       : "Auto-discovered — read the posting for the exact apply channel and documents.",
   };
 }
@@ -269,7 +274,7 @@ const ADAPTERS = {
         const url = `https://www.jobinrwanda.com${href}`;
         let deadline;
         let description = title;
-        let applyEmail;
+        let applyEmail, applyWhatsApp;
         try {
           const body = text(await get(url));
           // The structured field ("Deadline: Monday, 05/10/2026 23:59") comes
@@ -282,6 +287,7 @@ const ADAPTERS = {
           description = body.slice(start > -1 ? start : 0, (start > -1 ? start : 0) + 700);
           if (CITIZENS_ONLY.test(main)) description += " [Rwandan nationals only]";
           applyEmail = extractApplyEmail(main);
+          applyWhatsApp = extractApplyWhatsApp(main, "250");
         } catch (err) {
           dropped.push(`jobinrwanda detail ${url}: ${err.message}`);
         }
@@ -293,7 +299,7 @@ const ADAPTERS = {
           dropped.push(`Rwandan nationals only: ${title} @ ${company}`);
           continue;
         }
-        items.push(item({ title, company, url, source: "jobinrwanda", campaign, deadline, description, applyEmail }));
+        items.push(item({ title, company, url, source: "jobinrwanda", campaign, deadline, description, applyEmail, applyWhatsApp }));
       }
     }
     return { items, dropped };
@@ -325,7 +331,7 @@ const ADAPTERS = {
         const url = href.startsWith("http") ? href : `https://www.greatrwandajobs.com${href}`;
         // Matched rows only: the detail page carries the apply address and
         // the eligibility line the card does not.
-        let applyEmail;
+        let applyEmail, applyWhatsApp;
         let description;
         try {
           const body = text(await get(url));
@@ -334,6 +340,7 @@ const ADAPTERS = {
             continue;
           }
           applyEmail = extractApplyEmail(body);
+          applyWhatsApp = extractApplyWhatsApp(body, "250");
           const start = body.search(/(Job description|Background|Description|Overview|About)/i);
           description = body.slice(start > -1 ? start : 0, (start > -1 ? start : 0) + 700);
         } catch (err) {
@@ -351,6 +358,7 @@ const ADAPTERS = {
             deadline,
             description,
             applyEmail,
+            applyWhatsApp,
           }),
         );
       }
@@ -748,6 +756,7 @@ const ADAPTERS = {
               deadline,
               description: desc.replace(/^Application deadline:[^J]*/i, "").slice(0, 700),
               applyEmail: extractApplyEmail(desc),
+              applyWhatsApp: extractApplyWhatsApp(desc, country === "Kenya" ? "254" : country === "Nigeria" ? "234" : undefined),
             }),
           );
         }
