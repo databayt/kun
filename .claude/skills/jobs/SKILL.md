@@ -66,8 +66,8 @@ extra-document asks → HOLD.
 
 ## Phone surface — Hermes (since 2026-10-05; no model, subscription-only)
 
-- **Briefs out:** every sent application (email / form / WhatsApp) → `✅ Applied …` in Abdout's WhatsApp
-  self-chat (`whatsappBrief`, hung off `ledger()`); interview/offer/reply → 🎯/🏆/💬. `briefWhatsApp` in config;
+- **Briefs out:** only an accepted application → 🎯 interview / 🏆 offer in Abdout's WhatsApp self-chat
+  (`whatsappBrief`, from `inbox.ts`). No brief per send (Abdout, 2026-10-05). `briefWhatsApp` in config;
   `JOBS_BRIEF=off` silences.
 - **Commands in** (WhatsApp self-chat or Slack DM): `/jobs` `/jobsqueue` `/jobsreplies` `/jobspause` `/jobsresume` —
   Hermes `quick_commands` (exec, no args, 30s). Install/refresh: `pnpm jobs:hermes` (text-edits only that block).

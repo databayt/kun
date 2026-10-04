@@ -114,7 +114,7 @@ Hermes' model login is dead and the engine is subscription-only, so the gateway 
 | `/jobsreplies` | Real replies in the last 14 days (acknowledgements excluded) |
 | `/jobspause` · `/jobsresume` | Flip the loop's kill switch (`jobs/.send-off`) |
 
-Install or refresh with `pnpm jobs:hermes` in kun (`scripts/jobs/hermes-setup.sh`). It rewrites only the `quick_commands` block of `~/.hermes/config.yaml`, so comments survive and a dated `.bak` is kept. Then it restarts the gateway. Going the other way, the loop pushes **briefs** to the same chat: `✅ Applied …` for every application sent, and `🎯 Interview` / `🏆 OFFER` / `💬 Reply` for real replies. Configure it with `briefWhatsApp` in `scripts/jobs/config.ts`; `JOBS_BRIEF=off` silences it. The CRM board stays the record. Commands only read it or flip the kill switch.
+Install or refresh with `pnpm jobs:hermes` in kun (`scripts/jobs/hermes-setup.sh`). It rewrites only the `quick_commands` block of `~/.hermes/config.yaml`, so comments survive and a dated `.bak` is kept. Then it restarts the gateway. Going the other way, the loop pushes a **brief** to the same chat only when an application is accepted: `🎯 Interview` or `🏆 OFFER`. Other replies stay on Slack and the board. Configure it with `briefWhatsApp` in `scripts/jobs/config.ts`; `JOBS_BRIEF=off` silences it. The CRM board stays the record. Commands only read it or flip the kill switch.
 
 ## Daily use
 

@@ -35,8 +35,8 @@ export function notify(text: string, subject?: string): boolean {
   return true;
 }
 
-/// A one-line brief to Abdout's own WhatsApp chat — an application that went
-/// out, or a reply that needs him. Best effort and silent on failure: a brief
+/// A one-line brief to Abdout's own WhatsApp chat when an application is
+/// accepted (interview or offer). Best effort and silent on failure: a brief
 /// must never fail the send it reports. The board stays the record.
 export function whatsappBrief(text: string): void {
   const to = loadConfig().briefWhatsApp;

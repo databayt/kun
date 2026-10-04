@@ -436,7 +436,7 @@ allows an honest automated submission — submits.
 **WhatsApp as a channel.** If a posting says to send the CV on WhatsApp, discovery records it as `whatsapp:+<E.164>`. The number has to sit near both "WhatsApp" and an apply/CV cue; job boards' own group and alert numbers are ignored. The card gets channel `WHATSAPP` and the number goes in the `applyPhone` field. The wave writes the same gated letter. The gate matches the number against the posting by its last nine digits. `send.ts` delivers the letter, then the CV PDF, from Abdout's own number through the Hermes Baileys bridge. The cap is `whatsappCap` (5/day), because a personal number cold-messaging strangers risks a ban. The veto window and the company rules are the same as for email. There are no automated follow-ups: he follows up in the chat.
 
 **Hermes is the phone surface.** It doesn't think, it relays.
-- **Out:** `whatsappBrief` sends `✅ Applied …` for every application that goes out by email, form or WhatsApp. It hangs off `ledger()`, the one place every send passes. `🎯 / 🏆 / 💬` briefs go out for interviews, offers and real replies.
+- **Out:** `whatsappBrief` sends a brief only when an application is accepted: `🎯 Interview` or `🏆 OFFER`, from the inbox reader. Sends and other replies aren't messaged (Abdout, 2026-10-05).
 - **In:** WhatsApp/Slack quick commands `/jobs`, `/jobsqueue`, `/jobsreplies`, `/jobspause`, `/jobsresume` (`pnpm jobs:hermes`; see [Hermes](/docs/hermes)). Linking the phone: `pnpm jobs:whatsapp-pair`, because `hermes whatsapp` needs a TTY.
 
 **Self-healing.**

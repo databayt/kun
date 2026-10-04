@@ -237,7 +237,9 @@ async function main(): Promise<void> {
         `${head}: ${row.name}\nFrom ${addr} — "${m.subject}"\n${excerpt}\n${boardUrl(crmId)}`,
         `Jobs — ${head}`,
       );
-      if (kind !== "ambiguous")
+      // Abdout, 2026-10-05: WhatsApp only for an acceptance — interview or
+      // offer. Other replies stay on Slack and the board.
+      if (kind === "interview" || kind === "offer")
         whatsappBrief(`${head}: ${row.name}\n"${m.subject}"\n${boardUrl(crmId)}`);
     }
     seen.add(id);

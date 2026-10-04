@@ -10,8 +10,6 @@
 import { execSync } from "node:child_process";
 import { appendFileSync, mkdirSync } from "node:fs";
 
-import { whatsappBrief } from "./notify";
-
 const API = (process.env.TWENTY_API_URL ?? "http://localhost:3100").replace(
   /\/+$/,
   "",
@@ -185,11 +183,4 @@ export function ledger(e: LedgerEvent): void {
     "jobs/ledger.jsonl",
     JSON.stringify({ ts: new Date().toISOString(), ...e }) + "\n",
   );
-  // Every application that actually went out — email, ATS form or WhatsApp —
-  // passes through here, so the brief lives here and covers all three.
-  if (e.kind === "sent") {
-    const to = e.to ?? "";
-    const via = to.startsWith("ats:") ? "portal form" : to.startsWith("+") ? `WhatsApp ${to}` : `email ${to}`;
-    whatsappBrief(`✅ Applied: ${e.name ?? "a job"}\nvia ${via}\n${boardUrl(e.crmId)}`);
-  }
 }
