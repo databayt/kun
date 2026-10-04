@@ -28,6 +28,15 @@ Service integrations that connect Kun to external platforms. Each connector is b
 | **Notion** | databayt workspace | Needs API key |
 | **Discord** | databayt server | Planned |
 
+## Job-hunting connectors (measured 2026-10-04)
+
+| Connector | Works for | Limits |
+|---|---|---|
+| Indeed (claude.ai) | Searching postings + full details from Code | No RW/KE country codes; rate-limited after ~40 calls; "remote" often means US-only, so read the details |
+| Upwork (claude.ai) | Hiring freelancers (client side) | Cannot search jobs for a freelancer; Upwork job hunting stays a Cowork browser routine |
+| LinkedIn | — | No connector available |
+| WhatsApp (Hermes Baileys bridge) | Sending applications and briefs from Abdout's own number | Personal-number ban risk → 5 cold applications/day; see [Hermes](/docs/hermes) |
+
 ## GitHub Integration
 
 The deepest integration. Used for:

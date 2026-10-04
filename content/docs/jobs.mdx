@@ -430,3 +430,26 @@ allows an honest automated submission — submits.
 - `pnpm jobs:ats submit [--apply] [--id <crm-id>] [--now]` — fill, screenshot, submit (Greenhouse) or write the packet.
 - Unanswerable required questions, honeypots, region-bound postings and bot blocks all end in HOLD with the reason.
 - Honest ceiling measured on day one: email 5–10/day + Greenhouse 10–20/day automated; Ashby/Lever by hand.
+
+## 11. WhatsApp, Hermes and the self-healing loop (2026-10-04/05)
+
+**WhatsApp as a channel.** If a posting says to send the CV on WhatsApp, discovery records it as `whatsapp:+<E.164>`. The number has to sit near both "WhatsApp" and an apply/CV cue; job boards' own group and alert numbers are ignored. The card gets channel `WHATSAPP` and the number goes in the `applyPhone` field. The wave writes the same gated letter. The gate matches the number against the posting by its last nine digits. `send.ts` delivers the letter, then the CV PDF, from Abdout's own number through the Hermes Baileys bridge. The cap is `whatsappCap` (5/day), because a personal number cold-messaging strangers risks a ban. The veto window and the company rules are the same as for email. There are no automated follow-ups: he follows up in the chat.
+
+**Hermes is the phone surface.** It doesn't think, it relays.
+- **Out:** `whatsappBrief` sends `✅ Applied …` for every application that goes out by email, form or WhatsApp. It hangs off `ledger()`, the one place every send passes. `🎯 / 🏆 / 💬` briefs go out for interviews, offers and real replies.
+- **In:** WhatsApp/Slack quick commands `/jobs`, `/jobsqueue`, `/jobsreplies`, `/jobspause`, `/jobsresume` (`pnpm jobs:hermes`; see [Hermes](/docs/hermes)). Linking the phone: `pnpm jobs:whatsapp-pair`, because `hermes whatsapp` needs a TTY.
+
+**Self-healing.**
+- **Mail.app** can wedge: idle, with every Apple event timing out (-1712). Each tick probes it with a 20s budget and restarts it if it's stuck. When Mail is down, send, ATS codes and the inbox skip that tick instead of failing silently.
+- **Held ATS cards:** cards held for an unanswerable question are re-asked every morning, so an answer added to `jobs/profile.json` frees them without a manual move.
+- **Inbox:** the reader matches companies by whole word only and ignores GitHub mail. A "bump axios" thread had matched the Axios application. "We have filled the position" now classifies as a rejection.
+
+**Connectors, measured 2026-10-04.**
+
+| Connector | Reality |
+|---|---|
+| Indeed (`mcp__claude_ai_Indeed__*`) | Works in Code. No RW/KE country codes. US "remote" is mostly US-only, so read the details. `AE` hits are on-site, which the Gulf rule excludes. Rate-limited after about 40 calls. Hits go to `jobs/inbox/<date>-indeed*.json` |
+| Upwork (`mcp__claude_ai_Upwork__*`) | Client-side only (search freelancers, draft a job post). It can't find work, so Upwork stays a Cowork browser routine |
+| LinkedIn | No connector |
+
+**The CRM board is the single source of truth.** Every channel writes its note and its status there first. Briefs and commands only report or pause.

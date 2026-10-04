@@ -3,7 +3,7 @@ title: "Hermes"
 description: "The optional gateway lane — NousResearch's hermes-agent bridges Slack (and other chat apps) to the machine. Install, gateway setup, and the full Slack wiring."
 ---
 
-**Hermes** ([hermes-agent](https://github.com/nousresearch/hermes-agent) · [site](https://hermes-agent.nousresearch.com) · MIT) is the engine's optional **assistant gateway** — the `h` lane. It is NOT a coding CLI: it bridges chat apps (Slack, WhatsApp, Telegram, Discord, Signal, Email, …) to an agent running on your machine, so you can reach the engine from wherever the conversation already is. **Slack is databayt's wired channel.**
+**Hermes** ([hermes-agent](https://github.com/nousresearch/hermes-agent) · [site](https://hermes-agent.nousresearch.com) · MIT) is the engine's optional **assistant gateway** — the `h` lane. It is NOT a coding CLI: it bridges chat apps (Slack, WhatsApp, Telegram, Discord, Signal, Email, …) to an agent running on your machine, so you can reach the engine from wherever the conversation already is. **Slack is databayt's wired channel; WhatsApp (Abdout's personal number) is wired for the jobs lane since 2026-10-05.**
 
 Hermes replaced OpenClaw as the gateway lane. If a machine previously ran OpenClaw, Hermes imports its persona, memories, skills, and platform configs in one command:
 
@@ -82,6 +82,40 @@ hermes gateway install   # persist as a user service
 
 > **Hermes-Slack vs Slack-MCP — two different pipes.** The **Slack MCP** (`~/.claude/mcp.json` → `mcp.slack.com`) lets *Claude* post to Slack as a tool (`/slack send …`). The **Hermes gateway** lets *you* talk to an agent on your machine *from* Slack, and lets that agent push proactive notifications back. They coexist; neither replaces the other.
 
+## WhatsApp wiring (personal number, the jobs lane)
+
+Two different WhatsApp pipes exist, and only one fits a person's applications:
+
+| Pipe | What it is | Use |
+|---|---|---|
+| **Baileys bridge** (`hermes whatsapp`, `WHATSAPP_MODE=self-chat`) | Links Abdout's own WhatsApp as a device, like WhatsApp Web | **Wired.** Job applications to employers and one-line briefs to himself |
+| **Cloud API** (`hermes whatsapp-cloud`) | Meta Business API: text only, and outside a 24h window it needs an approved template | Not used. That's why the funnel's school messages are sent by a human |
+
+**Linking.** `hermes whatsapp` refuses to run without a real terminal, so `! hermes whatsapp` in Claude Code fails. Use `pnpm jobs:whatsapp-pair` in kun instead. It runs the same bridge in `--pair-only --pair-json` mode and opens `localhost:8790` with a QR that refreshes itself. On the phone, scan it from the Mac screen: **Settings → Linked devices → Link a device**. A `disconnected (515)` right after the scan means success.
+
+```bash
+# ~/.hermes/.env after linking
+WHATSAPP_MODE=self-chat
+WHATSAPP_ALLOWED_USERS=249919071294   # only Abdout can command the agent; employers' replies are ignored
+WHATSAPP_ENABLED=true
+launchctl kickstart -k gui/$(id -u)/ai.hermes.gateway   # restart; gateway_state.json → whatsapp "connected"
+```
+
+**Sending** works without an LLM, like Slack: `hermes send --to whatsapp:+250788123456 "text"`. An attachment rides as `MEDIA:/path/cv.pdf caption`. The jobs loop sends at most `whatsappCap` (5) cold applications a day. A personal number that messages many strangers gets banned, so the cap stays small.
+
+## Jobs lane commands (no model)
+
+Hermes' model login is dead and the engine is subscription-only, so the gateway works the jobs lane through **quick commands**: `type: exec` entries that run a fixed shell command and reply with its output. There's no LLM and no arguments, and each must finish in 30s. Type them in your WhatsApp self-chat ("Message yourself") or a Slack DM to the bot:
+
+| Command | Does |
+|---|---|
+| `/jobs` | Status: last 7 days sent (email · form · WhatsApp), today, queued, held and why |
+| `/jobsqueue` | What goes out next. To veto, move the card to Hold on the board |
+| `/jobsreplies` | Real replies in the last 14 days (acknowledgements excluded) |
+| `/jobspause` · `/jobsresume` | Flip the loop's kill switch (`jobs/.send-off`) |
+
+Install or refresh with `pnpm jobs:hermes` in kun (`scripts/jobs/hermes-setup.sh`). It rewrites only the `quick_commands` block of `~/.hermes/config.yaml`, so comments survive and a dated `.bak` is kept. Then it restarts the gateway. Going the other way, the loop pushes **briefs** to the same chat: `✅ Applied …` for every application sent, and `🎯 Interview` / `🏆 OFFER` / `💬 Reply` for real replies. Configure it with `briefWhatsApp` in `scripts/jobs/config.ts`; `JOBS_BRIEF=off` silences it. The CRM board stays the record. Commands only read it or flip the kill switch.
+
 ## Daily use
 
 | Action | How |
@@ -108,4 +142,8 @@ The kun site's Social Hub talks to a Hermes endpoint via env vars (see `.env.exa
 | DMs blocked | Enable the **Messages Tab** in the Slack app's App Home settings |
 | Messages silently ignored | Your Member ID isn't in `SLACK_ALLOWED_USERS`, or the channel isn't in `SLACK_ALLOWED_CHANNELS` |
 | Scope/event changes not taking effect | Reinstall the app to the workspace (Slack requires it) |
+| `'hermes whatsapp' requires an interactive terminal` | Expected from Claude Code. Use `pnpm jobs:whatsapp-pair` (kun) |
+| WhatsApp `disconnected 408` during linking | QR expired; the page shows the next one, scan again |
+| WhatsApp not in `gateway_state.json` platforms | `WHATSAPP_ENABLED=true` missing, or the gateway wasn't restarted (`launchctl kickstart -k …`) |
+| Bridge `node_modules` missing | `npm install` in `~/.hermes/hermes-agent/scripts/whatsapp-bridge` (the pair script does it) |
 | Gateway dies on reboot | You ran `hermes gateway run` (foreground) — use `hermes gateway install` for a persistent user service, then `hermes gateway start` |

@@ -41,6 +41,9 @@
     "jobs:markets": "tsx scripts/jobs/markets.ts",
     "jobs:funding": "tsx scripts/jobs/funding.ts",
     "jobs:requests": "tsx scripts/jobs/requests.ts",
+    "jobs:whatsapp-pair": "node scripts/jobs/whatsapp-pair.mjs",
+    "jobs:brief": "tsx scripts/jobs/brief.ts",
+    "jobs:hermes": "bash scripts/jobs/hermes-setup.sh",
     "sales:leads": "tsx scripts/sales/leads.ts"
   },
   "dependencies": {
@@ -104,6 +107,7 @@
     "dotenv": "^17.4.2",
     "pdf-lib": "^1.17.1",
     "playwright-core": "^1.61.1",
+    "qrcode": "^1.5.4",
     "rehype-pretty-code": "^0.14.3",
     "tailwindcss": "^4.2.2",
     "tsx": "^4.23.12",

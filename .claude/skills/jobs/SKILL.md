@@ -64,6 +64,20 @@ extra-document asks → HOLD.
   or `--yc <yc all.json>`; merge, never replace.
 - One application per company per day across email and ATS. Daily total cap 100 (config), hotmail 40.
 
+## Phone surface — Hermes (since 2026-10-05; no model, subscription-only)
+
+- **Briefs out:** every sent application (email / form / WhatsApp) → `✅ Applied …` in Abdout's WhatsApp
+  self-chat (`whatsappBrief`, hung off `ledger()`); interview/offer/reply → 🎯/🏆/💬. `briefWhatsApp` in config;
+  `JOBS_BRIEF=off` silences.
+- **Commands in** (WhatsApp self-chat or Slack DM): `/jobs` `/jobsqueue` `/jobsreplies` `/jobspause` `/jobsresume` —
+  Hermes `quick_commands` (exec, no args, 30s). Install/refresh: `pnpm jobs:hermes` (text-edits only that block).
+- **Linking WhatsApp:** `pnpm jobs:whatsapp-pair` (QR page on :8790) — `! hermes whatsapp` fails (needs a TTY).
+  Linked number: +249919071294. After linking: `WHATSAPP_ENABLED=true`, `launchctl kickstart -k gui/$(id -u)/ai.hermes.gateway`.
+- **Self-heal:** each tick probes Mail.app (20s) and restarts it if wedged (-1712); held "unanswerable" ATS cards
+  are re-asked every morning, so answers added to `jobs/profile.json` free them.
+- **Connectors:** Indeed works (no RW/KE codes, rate-limits ~40 calls; vet non-US eligibility per posting);
+  Upwork connector is client-side only (can't find work); no LinkedIn connector.
+
 ## Pieces
 
 | Thing | Where |
@@ -76,7 +90,8 @@ extra-document asks → HOLD.
 | Variants | `pnpm jobs:variant` (list, sends) · `activate <id>` / `deactivate <id>` — two active per lane split 50/50 |
 | Ledger | `jobs/ledger.jsonl` — every queued/hold/sent/followup/reply/error line; learn's raw data |
 | Reports | `jobs/learn/<date>.md` · packets `jobs/packets/` |
-| Alerts | `scripts/jobs/notify.ts` → `hermes send` (no model needed) + macOS notification |
+| Alerts | `scripts/jobs/notify.ts` → `hermes send` (no model needed) + macOS notification; `whatsappBrief` → his WhatsApp |
+| Phone | `pnpm jobs:brief [queue\|replies]` (what `/jobs*` runs) · `pnpm jobs:hermes` · `pnpm jobs:whatsapp-pair` |
 
 `jobs/` is gitignored — personal documents. Never commit, upload or paste the CVs.
 
