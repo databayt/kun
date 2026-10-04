@@ -18,7 +18,7 @@ contracts. **Markets:** Rwanda, Kenya, Nigeria (Africa = remote AND on-site) · 
 never on-site** · Sudan. **Two tracks on one board:** `track` FOUNDER (Abdout earns) / DATABAYT (the
 company earns: TENDER, CLIENT_PROJECT). **Funding** lives on its own board, "Funding & Programs".
 **Boundary with `/scrape`:** jobs = opportunities someone posted (jobs, gigs, RFPs, wizard requests,
-funding calls); scrape = outbound leads we go find (businesses with outdated sites, schools). **Send mode (2026-09-27): auto-send with a daily cap** — email only;
+funding calls); scrape = outbound leads we go find (businesses with outdated sites, schools). **Send mode (2026-09-27): auto-send with a daily cap** — email, and since 2026-10-04 **WhatsApp** (postings that say "CV on WhatsApp" → channel WHATSAPP, `applyPhone`; same letter + CV PDF from Abdout's number via the Hermes Baileys bridge, paired once with `hermes whatsapp`; cap `whatsappCap` 5/day; no auto follow-ups);
 portals, platforms, tenders and bids stay packets Abdout submits. **Learning proposes, Abdout adopts.**
 
 ## The loop (launchd `com.databayt.jobs-loop`, every 30 min — `pnpm jobs:loop --status`)
@@ -88,6 +88,7 @@ extra-document asks → HOLD.
   micro1, tender portals → `jobs/inbox/<date>-<lane>.json` (NormalizedJobInput + `campaign`, `deadline`,
   `applyMethod` `email:|portal:|tender-portal:|in-person`, `note`, `rwandaEligible`, `payoutMethod`) →
   `pnpm jobs:ingest --dry-run` → `pnpm jobs:ingest`.
+- **Indeed** — the claude.ai Indeed connector works in Code too (`mcp__claude_ai_Indeed__search_jobs`); supported countries exclude RW/KE — use `US` + `remote` (then check the posting accepts non-US) and `AE` (on-site → skip). Hits go to `jobs/inbox/<date>-indeed.json` → `pnpm jobs:ingest`.
 - **`jobs wave`** — `pnpm jobs:wave [--dry-run] [--limit n] [--regate]`.
 - **`jobs send`** — `pnpm jobs:send` (dry) · `--apply --limit n` · `--apply --to-self` (test to hotmail).
 - **`jobs inbox` / `jobs update`** — `pnpm jobs:inbox [--dry-run] [--hours n]`; Gmail (datapayt) replies
