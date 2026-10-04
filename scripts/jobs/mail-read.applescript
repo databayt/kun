@@ -11,6 +11,9 @@ on run argv
 	set US to ASCII character 31
 	set RS to ASCII character 30
 	set out to ""
+	-- Big hotmail inboxes make the date filter slow; the default 120s event
+	-- timeout fired before the caller's own 180s budget.
+	with timeout of 170 seconds
 	tell application "Mail"
 		set target to missing value
 		repeat with acct in accounts
@@ -29,5 +32,6 @@ on run argv
 			end if
 		end repeat
 	end tell
+	end timeout
 	return out
 end run

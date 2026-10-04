@@ -38,14 +38,25 @@ import {
   noteRow,
   patchRow,
 } from "./board";
-import { kigaliNow, killSwitchOn, LANE_BAND, loadConfig, seniorityBand } from "./config";
+import {
+  kigaliNow,
+  killSwitchOn,
+  LANE_BAND,
+  loadConfig,
+  seniorityBand,
+} from "./config";
 import {
   fillGreenhouse,
   greenhouseQuestions,
   parseGreenhouse,
   submitGreenhouse,
 } from "./ats-greenhouse";
-import { ashbyQuestions, fillAshby, parseAshby, submitAshby } from "./ats-ashby";
+import {
+  ashbyQuestions,
+  fillAshby,
+  parseAshby,
+  submitAshby,
+} from "./ats-ashby";
 import { leverQuestions } from "./ats-lever";
 import { sentToday } from "./send";
 import { pickVariants } from "./variants";
@@ -138,15 +149,22 @@ async function tailor(dir: string, requests: AtsRequest[]): Promise<void> {
     const pending = requests.filter((r) => !existsSync(r.out));
     if (pending.length === 0) return;
     const batches: AtsRequest[][] = [];
-    for (let i = 0; i < pending.length; i += 4) batches.push(pending.slice(i, i + 4));
-    console.log(`writing ${pending.length} cover letter(s) + answers with claude -p — ${batches.length} batch(es), pass ${pass} …`);
+    for (let i = 0; i < pending.length; i += 4)
+      batches.push(pending.slice(i, i + 4));
+    console.log(
+      `writing ${pending.length} cover letter(s) + answers with claude -p — ${batches.length} batch(es), pass ${pass} …`,
+    );
     let next = 0;
-    await Promise.all(Array.from({ length: 3 }, async () => {
-      for (let b = batches[next++]; b; b = batches[next++]) await tailorBatch(dir, b);
-    }));
+    await Promise.all(
+      Array.from({ length: 3 }, async () => {
+        for (let b = batches[next++]; b; b = batches[next++])
+          await tailorBatch(dir, b);
+      }),
+    );
   }
   const missing = requests.filter((r) => !existsSync(r.out)).length;
-  if (missing) console.log(`${missing} letter(s) still missing after two passes`);
+  if (missing)
+    console.log(`${missing} letter(s) still missing after two passes`);
 }
 
 function tailorBatch(dir: string, pending: AtsRequest[]): Promise<void> {
@@ -172,7 +190,16 @@ When every "out" file is written, reply DONE.`;
   return new Promise((resolve) => {
     const child = spawn(
       "claude",
-      ["-p", prompt, "--allowedTools", "Read", "Write", "Glob", "--max-turns", String(10 * pending.length + 10)],
+      [
+        "-p",
+        prompt,
+        "--allowedTools",
+        "Read",
+        "Write",
+        "Glob",
+        "--max-turns",
+        String(10 * pending.length + 10),
+      ],
       { stdio: ["ignore", "pipe", "pipe"] },
     );
     let err = "";
@@ -181,13 +208,15 @@ When every "out" file is written, reply DONE.`;
     const timer = setTimeout(() => child.kill(), 20 * 60_000);
     child.on("close", (code) => {
       clearTimeout(timer);
-      if (code !== 0) console.log(`claude -p exited ${code}: ${err.slice(0, 300)}`);
+      if (code !== 0)
+        console.log(`claude -p exited ${code}: ${err.slice(0, 300)}`);
       resolve();
     });
   });
 }
 
 const PLACEHOLDER = /[[\]{}]|\bTODO\b|\bTBD\b|lorem ipsum/i;
+const UNANSWERABLE = "ATS form asks what the profile can't answer truthfully";
 
 async function prepare(): Promise<void> {
   const cfg = loadConfig();
@@ -200,7 +229,12 @@ async function prepare(): Promise<void> {
   const cards = board
     .filter(
       (r) =>
-        r.applicationStatus === "TO_APPLY" &&
+        (r.applicationStatus === "TO_APPLY" ||
+          // A card held for an unanswerable question is re-asked every
+          // morning: answers added to the profile/engine free it without a
+          // manual move (67 sat held on 2026-10-04 after the bank landed).
+          (r.applicationStatus === "HOLD" &&
+            (r.holdReason ?? "").startsWith(UNANSWERABLE))) &&
         r.channel === "ATS" &&
         isGreenhouse(r),
     )
@@ -213,7 +247,9 @@ async function prepare(): Promise<void> {
         (b.engineScore ?? 0) - (a.engineScore ?? 0),
     )
     .slice(0, limit);
-  console.log(`ATS prepare ${date}: ${cards.length} ATS card(s) (Greenhouse + Ashby)\n`);
+  console.log(
+    `ATS prepare ${date}: ${cards.length} ATS card(s) (Greenhouse + Ashby)\n`,
+  );
 
   const requests: AtsRequest[] = [];
   const plans = new Map<string, ReturnType<typeof plan>>();
@@ -233,7 +269,9 @@ async function prepare(): Promise<void> {
     // Packet providers (Ashby, Lever) are submitted by Abdout: an unanswerable
     // question is flagged in the packet for him, not a reason to stop.
     if (p.missing.length && providerOf(row) === "greenhouse") {
-      const reason = `ATS form asks what the profile can't answer truthfully: ${p.missing.map((m) => `"${m}"`).join("; ")}`;
+      const reason = `${UNANSWERABLE}: ${p.missing.map((m) => `"${m}"`).join("; ")}`;
+      // A daily re-check that still holds for the same questions is no news.
+      if (row.holdReason === reason.slice(0, 480)) continue;
       await patchRow(row.id, {
         applicationStatus: "HOLD",
         holdReason: reason.slice(0, 480),
@@ -349,14 +387,32 @@ async function prepare(): Promise<void> {
       let held = false;
       if (found) {
         try {
-          await packetHold({ ...row, variant, waveId: date } as BoardRow, found, true);
+          await packetHold(
+            { ...row, variant, waveId: date } as BoardRow,
+            found,
+            true,
+          );
           held = true;
         } catch (err) {
-          console.log(`  · packet deferred ${row.name.slice(0, 50)} — ${(err as Error).message.slice(0, 60)}`);
+          console.log(
+            `  · packet deferred ${row.name.slice(0, 50)} — ${(err as Error).message.slice(0, 60)}`,
+          );
         }
       }
-      await patchRow(row.id, { variant, waveId: date, ...(held ? {} : { applicationStatus: "QUEUED", holdReason: "" }) });
-      if (!held) ledger({ kind: "queued", crmId: row.id, name: row.name, campaign: row.campaign, variant, waveId: date });
+      await patchRow(row.id, {
+        variant,
+        waveId: date,
+        ...(held ? {} : { applicationStatus: "QUEUED", holdReason: "" }),
+      });
+      if (!held)
+        ledger({
+          kind: "queued",
+          crmId: row.id,
+          name: row.name,
+          campaign: row.campaign,
+          variant,
+          waveId: date,
+        });
     } else {
       await patchRow(row.id, {
         applicationStatus: "QUEUED",
@@ -418,15 +474,25 @@ async function packetHold(
   ];
   for (const q of qs ?? []) {
     const a = answerQuestion(q, profile, { company, role });
-    const v =
-      !a ? "⚠ decide yourself" :
-      a.kind === "text" ? a.value :
-      a.kind === "select" ? a.option :
-      a.kind === "multi" ? a.options.join(", ") :
-      a.kind === "check" ? (a.value ? "Yes" : "No") :
-      a.kind === "file" ? (a.which === "resume" ? "attach the CV" : "attach the cover letter") :
-      a.kind === "prose" ? (found.letter.answers?.[q.label] ?? "⚠ not written") :
-      "(skip)";
+    const v = !a
+      ? "⚠ decide yourself"
+      : a.kind === "text"
+        ? a.value
+        : a.kind === "select"
+          ? a.option
+          : a.kind === "multi"
+            ? a.options.join(", ")
+            : a.kind === "check"
+              ? a.value
+                ? "Yes"
+                : "No"
+              : a.kind === "file"
+                ? a.which === "resume"
+                  ? "attach the CV"
+                  : "attach the cover letter"
+                : a.kind === "prose"
+                  ? (found.letter.answers?.[q.label] ?? "⚠ not written")
+                  : "(skip)";
     lines.push("", `**${q.label}**${q.required ? " *" : ""}`, "", v);
   }
   lines.push("", "## Cover letter", "", found.letter.body);
@@ -438,7 +504,12 @@ async function packetHold(
       applicationStatus: "HOLD",
       holdReason: `${providerOf(row) === "lever" ? "Lever (hCaptcha)" : "Ashby (spam filter)"} blocks automated submission — paste-ready packet: ${packet}`,
     });
-    ledger({ kind: "hold", crmId: row.id, name: row.name, detail: "ashby packet" });
+    ledger({
+      kind: "hold",
+      crmId: row.id,
+      name: row.name,
+      detail: "ashby packet",
+    });
   }
   console.log(`  ▣ ${row.name.slice(0, 60)} — packet ${packet}`);
 }
@@ -466,26 +537,49 @@ function findAts(
   return null;
 }
 
-
 // ── Greenhouse security codes, read from hotmail (Abdout's choice) ──────────
 function mailIds(): Set<string> {
-  const r = spawnSync("osascript", ["scripts/jobs/mail-read.applescript", profile.identity.email, "2"], { encoding: "utf-8", timeout: 120_000 });
+  const r = spawnSync(
+    "osascript",
+    ["scripts/jobs/mail-read.applescript", profile.identity.email, "2"],
+    { encoding: "utf-8", timeout: 120_000 },
+  );
   return new Set(
-    (r.stdout ?? "").split("\x1e").map((m) => m.split("\x1f").slice(0, 3).join("|")).filter((x) => x.length > 2),
+    (r.stdout ?? "")
+      .split("\x1e")
+      .map((m) => m.split("\x1f").slice(0, 3).join("|"))
+      .filter((x) => x.length > 2),
   );
 }
 
-function codeFetcher(company: string, before: Set<string>): () => Promise<string | null> {
+function codeFetcher(
+  company: string,
+  before: Set<string>,
+): () => Promise<string | null> {
   return async () => {
     for (let i = 0; i < 12; i++) {
       await new Promise((r) => setTimeout(r, 10_000));
-      spawnSync("osascript", ["-e", 'tell application "Mail" to check for new mail']);
-      const r = spawnSync("osascript", ["scripts/jobs/mail-read.applescript", profile.identity.email, "2"], { encoding: "utf-8", timeout: 120_000 });
+      spawnSync("osascript", [
+        "-e",
+        'tell application "Mail" to check for new mail',
+      ]);
+      const r = spawnSync(
+        "osascript",
+        ["scripts/jobs/mail-read.applescript", profile.identity.email, "2"],
+        { encoding: "utf-8", timeout: 120_000 },
+      );
       for (const m of (r.stdout ?? "").split("\x1e")) {
         const [from, subject, date, body] = m.split("\x1f");
         if (!from || before.has(`${from}|${subject}|${date}`)) continue;
-        if (!/greenhouse/i.test(from) || !/security code/i.test(subject ?? "")) continue;
-        if (company && !(subject ?? "").toLowerCase().includes(company.toLowerCase().slice(0, 12))) continue;
+        if (!/greenhouse/i.test(from) || !/security code/i.test(subject ?? ""))
+          continue;
+        if (
+          company &&
+          !(subject ?? "")
+            .toLowerCase()
+            .includes(company.toLowerCase().slice(0, 12))
+        )
+          continue;
         const code = body?.match(/application:\s*([A-Za-z0-9]{8})\b/)?.[1];
         if (code) return code;
       }
@@ -541,7 +635,12 @@ async function submit(): Promise<void> {
     for (const row of ready) {
       if (done >= limit) break;
       const companyKey = splitName(row.name).company.toLowerCase();
-      if (!only && (companiesThisRun.has(companyKey) || contactState(row, board) === "wait")) continue;
+      if (
+        !only &&
+        (companiesThisRun.has(companyKey) ||
+          contactState(row, board) === "wait")
+      )
+        continue;
       const fresh = await getRow(row.id);
       if (
         !only &&
@@ -559,7 +658,11 @@ async function submit(): Promise<void> {
       )
         continue;
       const found = findAts(row.id);
-      if (found && providerOf(row) !== "greenhouse" && !args.includes("--try-ashby")) {
+      if (
+        found &&
+        providerOf(row) !== "greenhouse" &&
+        !args.includes("--try-ashby")
+      ) {
         await packetHold(row, found, APPLY);
         continue;
       }
@@ -586,7 +689,11 @@ async function submit(): Promise<void> {
       }
       // Employers see the filename: give it his name, one folder per card.
       mkdirSync(join(found.dir, row.id), { recursive: true });
-      const coverPath = join(found.dir, row.id, "Osman_Abdout_Cover_Letter.pdf");
+      const coverPath = join(
+        found.dir,
+        row.id,
+        "Osman_Abdout_Cover_Letter.pdf",
+      );
       await coverLetterPdf(found.letter.body, coverPath, browser);
 
       const page = await browser.newPage({
@@ -608,7 +715,10 @@ async function submit(): Promise<void> {
       // With Greenhouse's country picker set to Rwanda, the phone field wants
       // the national number; the full +250 form would double the code.
       if (await page.locator('[id="country"]').count()) {
-        await page.locator('[id="phone"]').fill(profile.identity.phone.replace(/^\+250/, "")).catch(() => undefined);
+        await page
+          .locator('[id="phone"]')
+          .fill(profile.identity.phone.replace(/^\+250/, ""))
+          .catch(() => undefined);
       }
       await page.screenshot({
         path: join(found.dir, `${row.id}.ats-filled.png`),
@@ -638,7 +748,9 @@ async function submit(): Promise<void> {
         continue;
       }
       const outcome =
-        provider === "ashby" ? await submitAshby(page) : await submitGreenhouse(page, codeFetcher(company, mailIds()));
+        provider === "ashby"
+          ? await submitAshby(page)
+          : await submitGreenhouse(page, codeFetcher(company, mailIds()));
       await page.screenshot({
         path: join(found.dir, `${row.id}.ats-result.png`),
         fullPage: true,

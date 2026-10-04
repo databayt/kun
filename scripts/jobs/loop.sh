@@ -54,6 +54,24 @@ run() {  # run <name> <cmd...> — logs, never aborts the tick
     return $rc
 }
 
+# Mail.app can wedge: idle, no windows, every Apple event times out (-1712).
+# On 2026-10-04 that blocked the inbox read for a whole day and likely the
+# Greenhouse security-code reads before it. Probe with a 20s budget; a
+# wedged Mail is quit (killed if it won't), relaunched hidden, re-probed.
+mail_probe() { osascript -e 'with timeout of 20 seconds' -e 'tell application "Mail" to count accounts' -e 'end timeout' >/dev/null 2>&1; }
+mail_ok() {
+    pgrep -x Mail >/dev/null || { open -g -a Mail; sleep 30; }
+    mail_probe && return 0
+    log "Mail.app not answering — restarting it"
+    osascript -e 'with timeout of 10 seconds' -e 'tell application "Mail" to quit' -e 'end timeout' >/dev/null 2>&1
+    sleep 5
+    pkill -x Mail 2>/dev/null; sleep 3; pkill -9 -x Mail 2>/dev/null
+    open -g -a Mail; sleep 40
+    mail_probe && { log "Mail.app back"; return 0; }
+    log "Mail.app still not answering — inbox and ATS codes skipped this tick"
+    return 1
+}
+
 render_plist() {
     cat <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
@@ -163,7 +181,9 @@ case "$MODE" in
         if [ "$HOUR" -ge 7 ] && done_today discover && ! done_today digest && { ! weekday || done_today wave || [ "$HOUR" -ge 17 ]; }; then
             run digest pnpm -s jobs:digest --send && stamp digest
         fi
-        if weekday && [ "$HOUR" -ge 10 ] && [ "$HOUR" -lt 17 ]; then
+        mail_up=""
+        if [ "$HOUR" -ge 8 ] && [ "$HOUR" -lt 22 ] && mail_ok; then mail_up=1; fi
+        if weekday && [ "$HOUR" -ge 10 ] && [ "$HOUR" -lt 17 ] && [ -n "$mail_up" ]; then
             run send pnpm -s jobs:send --apply --limit 10
         fi
         # ATS lane (Abdout, 2026-09-27: auto-submit portal forms toward
@@ -172,13 +192,13 @@ case "$MODE" in
         if [ "$HOUR" -ge 7 ] && done_today discover && ! done_today ats-prepare; then
             run ats-prepare pnpm -s jobs:ats prepare --limit 80 && stamp ats-prepare
         fi
-        if [ "$HOUR" -ge 9 ] && [ "$HOUR" -lt 20 ]; then
+        if [ "$HOUR" -ge 9 ] && [ "$HOUR" -lt 20 ] && [ -n "$mail_up" ]; then
             run ats-submit pnpm -s jobs:ats submit --apply --limit 8
         fi
         # Client requests from the databayt.org wizard: every tick, all day —
         # a prospect who asked for a quote is the warmest lead there is.
         run requests pnpm -s jobs:requests --apply
-        if [ "$HOUR" -ge 8 ] && [ "$HOUR" -lt 22 ]; then
+        if [ -n "$mail_up" ]; then
             run inbox pnpm -s jobs:inbox
         fi
         if weekday && [ "$HOUR" -ge 16 ] && [ "$HOUR" -lt 17 ] && ! done_today followup; then

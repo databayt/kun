@@ -169,7 +169,13 @@ async function main(): Promise<void> {
       byAddress.get(addr) ??
       byDomain.get(addr.split("@")[1] ?? "") ??
       bySubject.get(stripRe(m.subject)) ??
-      [...byCompany.entries()].find(([c]) => `${m.subject} ${m.from}`.toLowerCase().includes(c))?.[1];
+      // Whole words only, and never from GitHub/CI: a dependabot "bump axios"
+      // thread matched the Axios application four times on 2026-10-04.
+      (/@(github\.com|.*\.github\.com)$|dependabot/i.test(addr)
+        ? undefined
+        : [...byCompany.entries()].find(([c]) =>
+            new RegExp(`\\b${c.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`).test(`${m.subject} ${m.from}`.toLowerCase()),
+          )?.[1]);
     if (!crmId || !byId.has(crmId)) continue;
     const row = byId.get(crmId) as BoardRow;
     const kind = classifyReply({

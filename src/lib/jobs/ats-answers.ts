@@ -271,8 +271,9 @@ export function answerQuestion(
   if (/require (a )?(visa|work permit|government authori)/i.test(L)) return yesNo(field, profile.authorization.needsSponsorshipForCountryBoundRoles);
 
   // ── plain facts about him ──────────────────────────────────────────────────
-  if (/relationship with any (staff|employee|board)|family relationship.*(staff|employee|board member)|related to (any|an) (employee|staff)/i.test(L)) return yesNo(field, false);
-  if (/(been|ever been|previously been) employed by|worked (for|at) [^?]* before|former (employee|contractor) of/i.test(L)) return yesNo(field, false);
+  if (/relationship with any (staff|employee|board)|family relationship.*(staff|employee|board member)|related to (any|an) (employee|staff)|(know|related to),? anyone (at|who works)/i.test(L)) return yesNo(field, false);
+  // Abdout confirmed 2026-10-04: never employed at, and no relatives at, any company the lane applies to.
+  if (/(been|ever been|previously been) employed (by|at|with)|worked (for|at) [^?]* before|former (employee|contractor|staff( member)?) (of|at)|are you a former .{0,60}(staff|employee)/i.test(L)) return yesNo(field, false);
   if (/current (job )?(title|role|position)/i.test(L) && !isSelect) return { kind: "text", value: profile.work.currentTitle };
   if (/strongest.*(language|stack)|primary (programming )?language/i.test(L) && !isSelect) return { kind: "text", value: profile.work.strongestLanguages ?? "TypeScript, JavaScript, SQL" };
   if (/time ?zone/i.test(L) && isSelect) {

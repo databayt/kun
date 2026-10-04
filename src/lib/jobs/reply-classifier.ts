@@ -18,7 +18,7 @@ export interface ReplyInput {
 const OFFER =
   /(pleased|happy|delighted) to offer|offer letter|job offer|we would like to offer you|formal offer/i;
 const REJECTION =
-  /unfortunately|regret to inform|not (be )?moving forward|not to proceed|will not be proceeding|other candidates|not been (selected|successful|shortlisted)|position has (been|now been) filled|decided to pursue|no longer (being )?considered/i;
+  /unfortunately|regret to inform|not (be )?moving forward|not to proceed|will not be proceeding|other candidates|not been (selected|successful|shortlisted)|position has (been|now been) filled|(have|has) filled the (position|role)|no longer considering|decided to pursue|no longer (being )?considered/i;
 // An invitation, not a mention: acknowledgements routinely describe "our
 // interview process" and "next steps" (three were misread on 2026-09-27).
 const INTERVIEW =
