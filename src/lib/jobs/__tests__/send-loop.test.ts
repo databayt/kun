@@ -92,6 +92,12 @@ describe("send gate", () => {
     ]);
   });
 
+  it("reads 'criminal record' in EEO boilerplate as no document ask", () => {
+    const eeo = `${base().postingText} We do not discriminate on the basis of marital status, criminal record, genetics or any other protected characteristic.`;
+    expect(evaluateSendGate(base({ postingText: eeo })).needs).toEqual([]);
+    expect(evaluateSendGate(base({ postingText: `${base().postingText} Attach a police clearance certificate.` })).needs).toEqual(["a police clearance"]);
+  });
+
   it("splits ratings into checkable parts", () => {
     expect(numbersIn("33/13.8 kV since 2022")).toEqual(["33", "13.8", "2022"]);
   });

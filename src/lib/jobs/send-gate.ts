@@ -48,7 +48,12 @@ const EXTRA_DOCUMENTS: [RegExp, string][] = [
     /application form|fill (in|out) (the|this) form/i,
     "the employer's application form",
   ],
-  [/police clearance|criminal record/i, "a police clearance"],
+  // Not a bare "criminal record": equal-opportunity boilerplate lists it as a
+  // protected characteristic (held three Klaviyo cards, 2026-10-05).
+  [
+    /police clearance|criminal record (certificate|extract|clearance|check)|certificate of (good conduct|no criminal)|good conduct certificate/i,
+    "a police clearance",
+  ],
   [
     /reference letter|recommendation letter|letters? of recommendation/i,
     "reference letters",
