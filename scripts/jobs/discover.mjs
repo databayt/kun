@@ -103,7 +103,10 @@ const text = (html) =>
 
 const LANES = [
   ["kigali-protection-engineer", /protection|relay|substation|commissioning|\bscada\b|testing engineer/i],
-  ["kivu-marine-eto", /marine|vessel|\bship|boat|\beto\b|electro-?technical/i],
+  // Electrical work on board only (Abdout, 2026-10-05: seven years at sea as
+  // ETO — electrical, never mechanical, never a "marine" teacher): an explicit
+  // ETO title, or an electrical word next to a vessel word.
+  ["kivu-marine-eto", /\beto\b|electro-?technical|(marine|ship|vessel|offshore|on-?board|barge|seafar\w*|fleet|\brig\b|fpso|dredg\w*|maritime).{0,40}electric|electric\w*.{0,40}(marine|ship\b|vessel|offshore|on-?board|barge|\brig\b|fpso|dredg|maritime)/i],
   ["kigali-electrical-engineer", /electric|\be&i\b|electromechanical|power (plant|system)|energy engineer|maintenance (engineer|technician)|engineering technician|biomedical|instrumentation|solar|(quality|qa\/?qc).{0,30}engineer|construction.{0,30}engineer/i],
   ["kigali-web-developer", /software|developer|\bweb\b|full[- ]?stack|front[- ]?end|back[- ]?end|data (engineer|scien|analy)|\bict\b|programmer|devops|systems? (analyst|administrator|engineer)|digital|\bit (officer|specialist|support|lead)|applications specialist|product operations|technical support|\b(ai|artificial intelligence|automation|agentic|llm) (engineer|developer|specialist|officer)\b/i],
 ];
@@ -116,7 +119,16 @@ const TENDER_ENGINEERING = /substation|protection relay|commissioning|testing an
 const CITIZENS_ONLY =
   /rwandan (nationals?|citizens?) only|only rwandans?|(must|to) be (a )?rwandan\b|be of rwandan nationality|rwandan nationality|open to rwandans|rwandan citizenship|local rwandan (service providers|firms|companies|suppliers)|(kenyan|nigerian|ugandan|tanzanian|saudi|emirati|qatari) (nationals?|citizens?) only|only (kenyans?|nigerians?|saudis?)|(must|to) be (a )?(kenyan|nigerian|saudi) (national|citizen)|saudi nationals|saudization|\bnysc\b/i;
 
+/// Titles Abdout never applies to, whatever lane words they carry (2026-10-05):
+/// teaching posts, and mechanical roles that are not also electrical — he is an
+/// electrical engineer.
+function notForMe(title) {
+  return /teacher|lecturer|tutor\b|teaching|instructor/i.test(title) ||
+    (/\bmechanical\b/i.test(title) && !/electric/i.test(title));
+}
+
 function laneForJob(title) {
+  if (notForMe(title)) return undefined;
   return LANES.find(([, re]) => re.test(title))?.[0];
 }
 
@@ -384,7 +396,7 @@ const ADAPTERS = {
         const title = text(inner);
         if (!title || title.length < 12) continue;
         const isTender = /tender|consult|supply|procure/i.test(title) || href.includes("tender");
-        const campaign = isTender ? laneForTender(title) : laneForJob(title) ?? "kigali-electrical-engineer";
+        const campaign = isTender ? laneForTender(title) : (notForMe(title) ? undefined : laneForJob(title) ?? "kigali-electrical-engineer");
         if (!campaign) continue;
         if (items.length >= LIMIT) break;
         items.push(
