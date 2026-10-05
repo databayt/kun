@@ -172,17 +172,17 @@ export const DEFAULT_CAMPAIGNS: JobCampaign[] = [
   },
   {
     id: "kivu-marine-eto",
-    name: "Marine ETO — Lake Kivu",
+    name: "Marine ETO — worldwide",
     description:
-      "Electro-Technical Officer & marine-electrical roles on Lake Kivu: KivuWatt methane barge + Wärtsilä power plant (ContourGlobal), Mantis Kivu Queen uBuranga cruise vessel, Kivu Belt water transport. Evidence: 2014–2021 ETO across four shipping lines, STCW certs, Sudanese seaman's book.",
+      "Electro-Technical Officer and electrical roles on board, worldwide (Abdout, 2026-10-05: sea jobs allowed): seagoing ETO contracts via Martide, offshore electrical via Rigzone, plus Lake Kivu — KivuWatt methane barge, Mantis Kivu Queen uBuranga. Evidence: 2014–2021 ETO across four shipping lines, STCW A-V/2.4, Sudanese seaman's book.",
     targetRoles: [
       "Electro-Technical Officer",
+      "Electrical Technical Officer",
       "Marine Electrician",
-      "Plant Electrical Technician",
+      "Offshore Electrical Technician",
       "Barge Technician",
-      "Technical Crew",
     ],
-    targetLocations: ["Karongi", "Kibuye", "Rubavu", "Lake Kivu", "Rwanda"],
+    targetLocations: ["At sea", "Offshore", "Lake Kivu", "Rwanda"],
     remoteOnly: false,
     minOverallScore: 55,
     minBuilderFit: 0,

@@ -27,6 +27,7 @@ export const COUNTRY_OPTIONS = [
   sel("OTHER", "Other", "gray", 11),
   sel("PAN_AFRICA", "Pan-Africa", "green", 12),
   sel("GLOBAL", "Global", "gray", 13),
+  sel("AT_SEA", "At sea", "blue", 14),
 ];
 
 export const TRACK_OPTIONS = [

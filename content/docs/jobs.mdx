@@ -339,6 +339,23 @@ for a month. Say **`jobs`** in a session (or `وظائف`) and the `jobs` skill 
 | 2 — remote income | `remote-web-developer-worldwide` · `ai-training-gigs` · `freelance-contracts` | REMOTE_WORLDWIDE · AI_TRAINING · FREELANCE |
 | 3 — abroad | `engineering-contracts` | ENGINEERING_CONTRACT |
 
+**The sea lane (since 2026-10-05).** `kivu-marine-eto` is worldwide now. Work
+on board has no country, so the market gates do not apply: the Gulf
+remote-only rule is about living there, not about sailing past it. The board
+files these jobs under country **At sea**. The lane only takes electrical work
+on board: an ETO / electro-technical title, or an electrical word next to a
+vessel word. Teaching posts and mechanical posts that are not also electrical
+are dropped from every lane. There are two sources:
+
+- **Martide** (`--source martide`) lists seagoing ETO contracts with joining
+  date, vessel, contract length and visa. A posting with a nationality list
+  that leaves out Sudan is dropped. You apply through your Martide seafarer
+  profile, so the channel is `PLATFORM`.
+- **Rigzone** (`--source rigzone`) lists offshore electrical roles. The card
+  must say offshore or name a floating unit. US-nationals-only and
+  work-authorisation bars are dropped. It throttles a burst with an empty
+  HTTP 202, so it gets two searches a day and reports a throttle as a throttle.
+
 ### Commands
 
 ```bash

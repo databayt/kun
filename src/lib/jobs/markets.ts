@@ -5,6 +5,8 @@
 // lists). Abdout's markets, 2026-10-03: Rwanda, Kenya, Nigeria, Gulf, Sudan.
 
 const COUNTRIES: [string, RegExp, string?][] = [
+  // First: a contract on board sails past every country (2026-10-05).
+  ["AT_SEA", /^(at sea|offshore)\b/i],
   ["RWANDA", /\b(rwanda|kigali|musanze|huye|rubavu|gisenyi)\b/i, "Kigali"],
   ["KENYA", /\b(kenya|nairobi|mombasa|kisumu|nakuru|kisii)\b/i, "Nairobi"],
   ["NIGERIA", /\b(nigeria|lagos|abuja|port harcourt|ibadan)\b/i, "Lagos"],

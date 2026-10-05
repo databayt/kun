@@ -7,7 +7,7 @@
 export type Channel = "EMAIL" | "PORTAL" | "PLATFORM" | "IN_PERSON" | "TENDER" | "ATS" | "WHATSAPP";
 
 const PLATFORM_HOSTS =
-  /mercor\.com|micro1\.ai|mindrift|toloka|alignerr|outlier\.ai|invisible|turing\.com|upwork\.com|contra\.com|mostaql\.com|andela\.com|arc\.dev|toptal\.com/i;
+  /mercor\.com|micro1\.ai|mindrift|toloka|alignerr|outlier\.ai|invisible|turing\.com|upwork\.com|contra\.com|mostaql\.com|andela\.com|arc\.dev|toptal\.com|martide\.com/i;
 
 export function parseApplyMethod(method: string | undefined | null): {
   channel?: Channel;

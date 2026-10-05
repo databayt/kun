@@ -117,7 +117,12 @@ const TENDER_ENGINEERING = /substation|protection relay|commissioning|testing an
 
 /// Abdout is Sudanese; a nationality gate makes the whole application moot.
 const CITIZENS_ONLY =
-  /rwandan (nationals?|citizens?) only|only rwandans?|(must|to) be (a )?rwandan\b|be of rwandan nationality|rwandan nationality|open to rwandans|rwandan citizenship|local rwandan (service providers|firms|companies|suppliers)|(kenyan|nigerian|ugandan|tanzanian|saudi|emirati|qatari) (nationals?|citizens?) only|only (kenyans?|nigerians?|saudis?)|(must|to) be (a )?(kenyan|nigerian|saudi) (national|citizen)|saudi nationals|saudization|\bnysc\b/i;
+  /rwandan (nationals?|citizens?) only|only rwandans?|(must|to) be (a )?rwandan\b|be of rwandan nationality|rwandan nationality|open to rwandans|rwandan citizenship|local rwandan (service providers|firms|companies|suppliers)|(kenyan|nigerian|ugandan|tanzanian|saudi|emirati|qatari) (nationals?|citizens?) only|only (kenyans?|nigerians?|saudis?)|(must|to) be (a )?(kenyan|nigerian|saudi) (national|citizen)|saudi nationals|saudization|\bnysc\b|\b(us|u\.s\.|american|british|uk|canadian|australian|norwegian|filipino|indian) (nationals?|citizens?) only\b/i;
+
+// The last clause catches the phrasing that reads as a welcome rather than
+// a bar — "while we love all parts of the world, we can only hire permanent
+// US residents" — which sailed through and cost a tailored letter.
+const TEXT_BAD = /(must|should) (be )?(based|located|reside|living) in (the )?(us|u\.s\.|united states|canada|uk|united kingdom|europe|eu|european union|north america)|authori[sz]ed to work in (the )?(us|u\.s\.|united states|uk|united kingdom|canada|eu)|(us|u\.s\.) citizen|green card|security clearance|eligible to work in (the )?(us|uk|eu|europe)|permanent (us|u\.s\.|united states|uk|canadian) residents?|can only (hire|employ)[^.]{0,80}\b(us|u\.s\.|united states|uk|united kingdom|canada|eu|europe)\b/i;
 
 /// Titles Abdout never applies to, whatever lane words they carry (2026-10-05):
 /// teaching posts, and mechanical roles that are not also electrical — he is an
@@ -599,10 +604,6 @@ const ADAPTERS = {
     const NOT_STACK = /\b(ios|android|mobile|embedded|firmware|data scien|machine learning|\bml\b|security|sre|devops|qa|test)/i;
     const PLACE_OK = /worldwide|anywhere|global|africa|emea|remote$|^remote\b(?!.*\b(us|usa|united states|canada|uk|united kingdom|latam|americas|apac|india|brazil|mexico|germany|france|spain|poland|portugal|netherlands|australia)\b)/i;
     const PLACE_BAD = /\b(us|usa|u\.s\.|united states|canada|uk|united kingdom|latam|americas|north america|apac|india|brazil|mexico|germany|france|spain|poland|portugal|netherlands|ireland|australia|new york|san francisco|london|berlin|toronto)\b/i;
-    // The last clause catches the phrasing that reads as a welcome rather than
-    // a bar — "while we love all parts of the world, we can only hire permanent
-    // US residents" — which sailed through and cost a tailored letter.
-    const TEXT_BAD = /(must|should) (be )?(based|located|reside|living) in (the )?(us|u\.s\.|united states|canada|uk|united kingdom|europe|eu|european union|north america)|authori[sz]ed to work in (the )?(us|u\.s\.|united states|uk|united kingdom|canada|eu)|(us|u\.s\.) citizen|green card|security clearance|eligible to work in (the )?(us|uk|eu|europe)|permanent (us|u\.s\.|united states|uk|canadian) residents?|can only (hire|employ)[^.]{0,80}\b(us|u\.s\.|united states|uk|united kingdom|canada|eu|europe)\b/i;
 
     // Public JSON APIs on three hosts: fetch six boards at a time (≈2 min for
     // 280 boards instead of 10+ one by one), then filter in board order.
@@ -782,6 +783,139 @@ const ADAPTERS = {
 
   /// Public JSON API; first element is the legal notice. Keep only roles that
   /// say worldwide/Africa/EMEA or name no region — US-only is unreachable.
+  // ── sea lane (Abdout, 2026-10-05: worldwide ETO, sea jobs allowed) ──────────
+  // Work on board has no country, so the market gates above do not apply —
+  // the Gulf-remote-only rule is about living there, not sailing past it. The
+  // title must still be electrical-on-board (the ETO lane regex), and the
+  // nationality / work-authorisation bars still drop a posting.
+
+  /// Martide — seafarer board, crawl-friendly robots.txt. The ETO rank page
+  /// lists the open contracts; the detail page carries joining date, contract
+  /// length, vessel and visa. Applying needs his free Martide profile.
+  async martide() {
+    const items = [];
+    const dropped = [];
+    const html = await get("https://www.martide.com/en/jobs/electrical-technical-officer");
+    const urls = [...new Set([...html.matchAll(/href="(https:\/\/www\.martide\.com\/en\/jobs\/[a-z0-9-]+-\d+)"/g)].map((m) => m[1]))];
+    if (urls.length === 0) dropped.push("martide: 0 jobs on the ETO page — markup changed?");
+    for (const url of urls) {
+      if (items.length >= LIMIT) break;
+      const page = await get(url);
+      const ld = JSON.parse(page.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)?.[1] ?? "{}");
+      const body = text(page);
+      const field = (label) => body.match(new RegExp(`${label} ([^]+?) (?:Rank|Vessel Type|Contract Length|Vessel Name|Engine Type|DWT|Requirements|Visa|Nationality|Only following|Job description|Similar Jobs)`))?.[1]?.trim();
+      const title = ld.title ?? "Electrical Technical Officer";
+      const company = ld.hiringOrganization?.name;
+      const vessel = field("Vessel Type");
+      const joining = field("Joining Date");
+      const contract = field("Contract Length");
+      const visa = field("Visa");
+      // "25 October" — no year; the next such date from today.
+      let deadline;
+      const jd = joining?.match(/(\d{1,2}) ([A-Za-z]+)/);
+      if (jd && MONTHS.includes(jd[2].toLowerCase())) {
+        const y = Number(TODAY.slice(0, 4));
+        const iso = (yr) => `${yr}-${String(MONTHS.indexOf(jd[2].toLowerCase()) + 1).padStart(2, "0")}-${jd[1].padStart(2, "0")}`;
+        deadline = iso(y) >= TODAY ? iso(y) : iso(y + 1);
+      }
+      // "Only following nationalities can be accepted: Philippines, Ukraine" —
+      // he is Sudanese, so a list without Sudan ends it.
+      const nationalities = body.match(/Only following nationalities can be accepted:? ([^]+?) (?:Job description|Similar Jobs|Apply)/)?.[1];
+      if (nationalities && !/sudan/i.test(nationalities)) {
+        dropped.push(`nationalities ${nationalities.slice(0, 60)}: ${title} @ ${company}`);
+        continue;
+      }
+      // A visa he must already hold (US C1/D, Schengen, Australian crew) —
+      // seafarers get these through the company, so note it, don't drop.
+      if (visa && !/^none$/i.test(visa) && /schengen|c1\/d|united states|australia|uk\b/i.test(visa) && /must|required|hold/i.test(body.slice(body.indexOf("Visa"), body.indexOf("Visa") + 200))) {
+        dropped.push(`visa ${visa}: ${title} @ ${company}`);
+        continue;
+      }
+      if (CITIZENS_ONLY.test(body) || TEXT_BAD.test(body)) {
+        dropped.push(`nationality bar: ${title} @ ${company}`);
+        continue;
+      }
+      items.push(
+        item({
+          title: `${title}${vessel ? ` — ${vessel}` : ""}`,
+          company,
+          location: `At sea — ${vessel ?? "vessel"}`,
+          remoteType: "onsite",
+          employmentType: "contract",
+          url,
+          source: "martide",
+          campaign: "kivu-marine-eto",
+          deadline,
+          description: [
+            `${title} on a ${vessel ?? "vessel"}${field("Vessel Name") ? ` (${field("Vessel Name")})` : ""} with ${company}.`,
+            joining && `Joining ${joining}.`,
+            contract && `Contract ${contract}.`,
+            field("Engine Type") && `Engine ${field("Engine Type")}.`,
+            visa && `Visa: ${visa}.`,
+            "Apply through his Martide seafarer profile.",
+          ].filter(Boolean).join(" "),
+          skills: ["STCW", "main switchboard", "power distribution", "automation", "main engine", "auxiliary engines"],
+        }),
+      );
+    }
+    return { items, dropped };
+  },
+
+  /// Rigzone — offshore / rig electrical roles. A rig can be on land, so the
+  /// title or the card must say offshore or name a floating unit. It throttles
+  /// a burst with an empty HTTP 202, so this stays to two searches once a day
+  /// (discover runs daily) and a throttle is reported, never retried around.
+  async rigzone() {
+    const items = [];
+    const dropped = [];
+    const seen = new Set();
+    const ETO_TITLE = LANES.find(([id]) => id === "kivu-marine-eto")[1];
+    const AT_SEA = /offshore|vessel|marine|fpso|drill ?ship|jack-?up|semi-?sub|on ?board|\beto\b|electro-?technical/i;
+    for (const q of ["offshore electrical", "electro technical officer"]) {
+      const html = await get(`https://www.rigzone.com/oil/jobs/search/?sk=${encodeURIComponent(q)}`);
+      if (html.length === 0) {
+        dropped.push(`rigzone: throttled (empty response) on "${q}" — next run tomorrow`);
+        break;
+      }
+      const cards = html.split('<article class="update-block">').slice(1);
+      if (cards.length === 0) dropped.push(`rigzone: 0 cards for "${q}" — markup changed?`);
+      for (const card of cards) {
+        const [, href, rawTitle] = card.match(/href="(\/oil\/jobs\/postings\/\d+[^"?]*)[^"]*"[^>]*>([\s\S]*?)<\/a>/) ?? [];
+        if (!href || seen.has(href)) continue;
+        seen.add(href);
+        const title = text(rawTitle);
+        const [company, place] = (card.match(/<address>([\s\S]*?)<\/address>/)?.[1] ?? "")
+          .replace(/<picture>[\s\S]*?<\/picture>/, "")
+          .split(/<br\s*\/?>/)
+          .map((x) => text(x));
+        const snippet = text(card.match(/<div class="text">([\s\S]*?)<\/div>/)?.[1] ?? "");
+        const posted = parseDate(text(card.match(/<time>([\s\S]*?)<\/time>/)?.[1] ?? "").replace(/^Posted:\s*/, ""));
+        if (notForMe(title) || !ETO_TITLE.test(title) && !/electrici|electrical/i.test(title)) continue;
+        if (!AT_SEA.test(`${title} ${company} ${snippet}`)) { dropped.push(`not at sea: ${title} @ ${company}`); continue; }
+        if (posted && (Date.parse(TODAY) - Date.parse(posted)) / 86_400_000 > 45) { dropped.push(`stale ${posted}: ${title}`); continue; }
+        if (items.length >= LIMIT) break;
+        const url = `https://www.rigzone.com${href}`;
+        const body = text(await get(url));
+        if (CITIZENS_ONLY.test(body) || TEXT_BAD.test(body)) { dropped.push(`work-authorisation bar: ${title} @ ${company}`); continue; }
+        items.push(
+          item({
+            title,
+            company,
+            location: `Offshore — ${place || "worldwide"}`,
+            remoteType: "onsite",
+            employmentType: "contract",
+            url,
+            source: "rigzone",
+            campaign: "kivu-marine-eto",
+            description: snippet.slice(0, 700) || title,
+            skills: ["offshore", "electrical maintenance", "switchboard", "STCW"],
+          }),
+        );
+      }
+    }
+    return { items, dropped };
+  },
+
   async remoteok() {
     const items = [];
     const dropped = [];
