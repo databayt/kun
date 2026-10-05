@@ -42,7 +42,7 @@ const FIELDS = [
     icon: "IconBuildingBank",
     description: "The fund, hub or program operator.",
     relation: {
-      targetFieldLabel: "Funding",
+      targetFieldLabel: "Funding Programs",
       targetFieldIcon: "IconRocket",
       type: "MANY_TO_ONE",
     },

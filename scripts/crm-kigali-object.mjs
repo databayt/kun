@@ -20,12 +20,12 @@ const DRY_RUN = process.argv.includes("--dry-run");
 const OBJECT = {
   nameSingular: "kigaliOpportunity",
   namePlural: "kigaliOpportunities",
-  labelSingular: "Opportunity",
+  labelSingular: "Job",
   labelPlural: "Jobs & Opportunities",
-  icon: "IconMapPin",
+  icon: "IconBriefcase",
   isLabelSyncedWithName: false,
   description:
-    "Jobs, gigs, contracts and tenders from Kigali, fed by the Kun Job Engine: Rwanda roles first, then remote, AI-training, freelance, tenders and engineering contracts. The API name stays kigaliOpportunity so every caller keeps working.",
+    "Jobs, gigs, contracts and tenders across Rwanda, Kenya, Nigeria, the Gulf (remote) and Sudan, fed by the Kun Job Engine. The loop's control surface: HOLD = needs Abdout, QUEUED = sending after the veto window. API name stays kigaliOpportunity so every caller keeps working.",
 };
 
 const sel = (name, label, color, position) => ({ value: name, label, color, position });
@@ -41,8 +41,8 @@ const FIELDS = [
     description: "The employer or target organisation.",
     relation: {
       targetObjectNameSingular: "company",
-      targetFieldLabel: "Kigali",
-      targetFieldIcon: "IconMapPin",
+      targetFieldLabel: "Jobs",
+      targetFieldIcon: "IconBriefcase",
       type: "MANY_TO_ONE",
     },
   },
