@@ -103,19 +103,30 @@ export function rangeOption(
   values: AtsOption[] | undefined,
   n: number,
 ): string | null {
+  // "More than 3 years … but less than 5 years" is a band (lo, hi). When n sits
+  // exactly on a boundary no "more than" band holds it, so fall back to the
+  // highest band below n — under-claim, never over-claim (5 years → "3–5").
+  let below: { lo: number; label: string } | null = null;
   for (const v of values ?? []) {
     const nums = (v.label.match(/\d+/g) ?? []).map(Number);
     if (nums.length === 0) continue;
+    const more = /more than|over|above|\+/i.test(v.label);
+    const less = /less than|under|fewer/i.test(v.label);
+    if (more && less && nums.length >= 2) {
+      if (n > nums[0] && n < nums[1]) return v.label;
+      if (nums[0] < n && (!below || nums[0] > below.lo)) below = { lo: nums[0], label: v.label };
+      continue;
+    }
+    if (less && !more) {
+      if (n < nums[0]) return v.label;
+      continue;
+    }
     const [lo, hi] =
-      nums.length === 1
-        ? [nums[0], /\+|more|over|above/i.test(v.label) ? Infinity : nums[0]]
-        : [nums[0], nums[1]];
-    if (
-      /less than|under|fewer/i.test(v.label) ? n < nums[0] : n >= lo && n <= hi
-    )
-      return v.label;
+      nums.length === 1 ? [nums[0], more ? Infinity : nums[0]] : [nums[0], nums[1]];
+    if (more && nums.length === 1 ? n > lo : n >= lo && n <= hi) return v.label;
+    if (lo < n && (!below || lo > below.lo)) below = { lo, label: v.label };
   }
-  return null;
+  return below?.label ?? null;
 }
 
 function yesNo(field: AtsField, yes: boolean): Answer | null {
@@ -217,11 +228,11 @@ export function answerQuestion(
       field.values,
       /decline|don.?t wish|prefer not|not to (say|answer|disclose)|choose not/i,
     );
-    return o
-      ? { kind: "select", option: o }
-      : q.required
-        ? null
-        : { kind: "skip" };
+    if (o) return { kind: "select", option: o };
+    // A required free-text self-ID field (e.g. "What are your pronouns?"):
+    // declining in words is still declining.
+    if (!isSelect && field.type !== "boolean") return { kind: "text", value: "Prefer not to say" };
+    return q.required ? null : { kind: "skip" };
   }
 
   // ── identity & links ───────────────────────────────────────────────────────
@@ -270,10 +281,26 @@ export function answerQuestion(
   }
   if (/require (a )?(visa|work permit|government authori)/i.test(L)) return yesNo(field, profile.authorization.needsSponsorshipForCountryBoundRoles);
 
+  // "…required to verify identity and eligibility to work in our countries of
+  // operation — select where you are eligible": Rwanda is the only true answer.
+  if (/eligib\w* to work in (our|the following|which) countries|countries of operation/i.test(L) && field.type === "multi_value_multi_select" && profile.authorization.authorizedRwanda) {
+    const o = pick(field.values, /^rwanda$/i);
+    return o ? { kind: "multi", options: [o] } : null;
+  }
+
   // ── plain facts about him ──────────────────────────────────────────────────
   if (/relationship with any (staff|employee|board)|family relationship.*(staff|employee|board member)|related to (any|an) (employee|staff)|(know|related to),? anyone (at|who works)/i.test(L)) return yesNo(field, false);
   // Abdout confirmed 2026-10-04: never employed at, and no relatives at, any company the lane applies to.
-  if (/(been|ever been|previously been) employed (by|at|with)|worked (for|at) [^?]* before|former (employee|contractor|staff( member)?) (of|at)|are you a former .{0,60}(staff|employee)/i.test(L)) return yesNo(field, false);
+  // Not for "If you are a former employee, list…" follow-ups (those are N/A,
+  // further down), and a select with worded options ("I have not previously
+  // been employed at Affirm") falls through to the rule that reads them.
+  if (
+    !/^if\b|please (provide|list|specify)/i.test(L) &&
+    /(been|ever been|previously been) employed (by|at|with)|worked (for|at) [^?]* before|former (employee|contractor|staff( member)?) (of|at)|are you a former .{0,60}(staff|employee)/i.test(L)
+  ) {
+    const a = yesNo(field, false);
+    if (a) return a;
+  }
   if (/current (job )?(title|role|position)/i.test(L) && !isSelect) return { kind: "text", value: profile.work.currentTitle };
   if (/strongest.*(language|stack)|primary (programming )?language/i.test(L) && !isSelect) return { kind: "text", value: profile.work.strongestLanguages ?? "TypeScript, JavaScript, SQL" };
   if (/time ?zone/i.test(L) && isSelect) {
@@ -297,9 +324,12 @@ export function answerQuestion(
   const skillQ = /(have you|do you have|are you (experienced|familiar)).*(experience|worked|written|used|built|familiar)|experience (with|in|using)/i.test(L);
   if (skillQ && !/agency|employ|company|vendor|partner|work(ed)? (for|at)/i.test(L) && profile.skills && (isSelect || field.type === "boolean")) {
     const has = (list: string[]) => list.some((k) => new RegExp(`(^|[^a-z])${k.replace(/[.+#]/g, "\\$&")}([^a-z]|$)`, "i").test(label));
-    const yes = has(profile.skills.yes);
+    let yes = has(profile.skills.yes);
     const no = has(profile.skills.no);
-    if (yes !== no) {
+    // "X and/or Y", "X or Y": one he has is enough ("Docker and/or Kubernetes").
+    const either = /and\/or|\bor\b/i.test(label);
+    if (yes && no && either) yes = true;
+    if (yes !== no || (yes && either)) {
       if (isSelect && field.values && field.values.length > 2) {
         const o = yes ? pick(field.values, /professional|both|yes/i) : pick(field.values, /^no\b|not written|do not|don.?t|never|less than/i);
         return o ? { kind: "select", option: o } : null;
@@ -459,8 +489,12 @@ export function answerQuestion(
     }
     return { kind: "text", value: String(n) };
   }
-  if (/highest (level of )?(education|degree)|degree/i.test(L) && !isSelect)
+  if (/highest (level of )?(education|degree)|degree|qualification you (currently )?hold/i.test(L) && !isSelect)
     return { kind: "text", value: profile.work.highestDegree };
+  if (/highest (level of )?(education|degree|qualification)|degree or qualification/i.test(L) && isSelect && /^b\.?sc|bachelor/i.test(profile.work.highestDegree)) {
+    const o = pick(field.values, /bachelor/i, /\b(bs|bsc|ba|b\.sc)\b|first degree|undergraduate/i);
+    return o ? { kind: "select", option: o } : null;
+  }
 
   // ── pay, timing ────────────────────────────────────────────────────────────
   if (
@@ -565,7 +599,7 @@ export function answerQuestion(
         };
   }
   if (
-    /privacy|consent|agree|acknowledge|accept|terms|data (processing|retention)|certify|attest|confirm i have read|i understand|have read and/i.test(
+    /privacy|consent|agree|acknowledge|accept|terms|data (processing|retention)|certify|attest|confirm i have read|i understand|have read and|ai use statement/i.test(
       L,
     )
   ) {

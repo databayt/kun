@@ -142,7 +142,10 @@ function parseDate(s) {
   return undefined;
 }
 
-const TENDERISH = /tender|expression of interest|\beoi\b|request for (proposal|quotation)|\brf[pq]\b|terms of reference|\btors?\b/i;
+// "Notice for Supply, Delivery…" and "(Works)" notices are tenders that never
+// say "tender" — a fishpond-construction notice got a cover letter queued on
+// 2026-10-05 before this widened.
+const TENDERISH = /tender|expression of interest|\beoi\b|request for (proposal|quotation)|\brf[pq]\b|terms of reference|\btors?\b|^notice for|supply,? delivery|construction and commissioning|\((works|goods|services)\)|procurement of/i;
 
 function item({ title, company, location, url, source, campaign, deadline, description, employmentType, remoteType, salary, skills = [], applyEmail, applyWhatsApp }) {
   return {

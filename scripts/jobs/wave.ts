@@ -32,6 +32,9 @@ import { BoardRow, ledger, listBoard, patchRow } from "./board";
 import { kigaliNow, LANE_BAND, loadConfig, seniorityBand, todaysCap } from "./config";
 import { pickVariants } from "./variants";
 
+const TENDER_NOTICE =
+  /tender|expression of interest|\beoi\b|request for (proposal|quotation)|\brf[pq]\b|terms of reference|^notice for|supply,? delivery|construction and commissioning|\((works|goods|services)\)|procurement of/i;
+
 const args = process.argv.slice(2);
 const DRY_RUN = args.includes("--dry-run");
 const REGATE = args.includes("--regate");
@@ -224,6 +227,8 @@ async function main(): Promise<void> {
           (r.applicationStatus === "APPROVED" && !existsSync(join(dir, `${r.id}.letter.json`)) && !letterExists(r.id)),
     )
     .filter((r) => (r.channel === "EMAIL" && r.applyEmail) || (r.channel === "WHATSAPP" && r.applyPhone))
+    // A tender wants a bid, not a cover letter — even when it names an address.
+    .filter((r) => r.applicationStatus === "APPROVED" || !TENDER_NOTICE.test(r.name))
     .filter((r) => r.applicationStatus === "APPROVED" || !cfg.pausedLanes.includes(r.campaign ?? ""))
     .filter((r) => !r.deadline || r.deadline.slice(0, 10) >= date)
     .sort(

@@ -302,3 +302,40 @@ describe("ATS answers — Canonical / Affirm / Muck Rack wordings (2026-09-28)",
     expect(answerQuestion(sel("Have you previously been employed at Affirm for any length of time?", ["I have not previously been employed at Affirm", "I have been employed at Affirm as a contractor"]), profile, ctx)).toEqual({ kind: "select", option: "I have not previously been employed at Affirm" });
   });
 });
+
+describe("ATS answers — held-card wordings (2026-10-05)", () => {
+  const p5: AtsProfile = {
+    ...profile,
+    work: { ...profile.work, yearsSoftwareProfessional: 5 },
+    skills: { yes: ["docker", "typescript"], no: ["kubernetes", "hadoop", "spark", "hive"] },
+  } as AtsProfile;
+  const multi = (label: string, values: string[]): AtsQuestion => ({
+    label,
+    required: true,
+    fields: [{ name: "q", type: "multi_value_multi_select", values: values.map((l) => ({ label: l })) }],
+  });
+  it("picks the experience band without over-claiming (5 years, bands 3–5 / 5+)", () => {
+    const bands = [
+      "Less than 1 year of professional experience",
+      "More than 3 years of professional experience but less than 5 years",
+      "More than 5 year of professional experience but less than 8 years",
+    ];
+    expect(rangeOption(bands.map((label) => ({ label })), 5)).toBe(bands[1]);
+    expect(rangeOption(bands.map((label) => ({ label })), 4)).toBe(bands[1]);
+  });
+  it("'X and/or Y' is yes when he has one; unknown big-data stack is no", () => {
+    expect(answerQuestion(sel("Do you have experience with containerization technologies like Docker and/or Kubernetes?", ["Yes", "No"]), p5, ctx)).toEqual({ kind: "select", option: "Yes" });
+    expect(answerQuestion(sel("Do you have experience with big data technologies such as Hadoop, Spark, and/or Hive?", ["Yes", "No"]), p5, ctx)).toEqual({ kind: "select", option: "No" });
+  });
+  it("maps a BSc to the Bachelor's option", () => {
+    expect(answerQuestion(sel("Education: What is the highest degree or qualification you currently hold?", ["Master's Degree/ Maîtrise (M.A.,M.S, M.Phil)", "Bachelor's/First Degree /Bachelier /Premier cycle  (e.g. BA, BS, B.Com)"]), p5, ctx)).toEqual({ kind: "select", option: "Bachelor's/First Degree /Bachelier /Premier cycle  (e.g. BA, BS, B.Com)" });
+  });
+  it("declines free-text pronouns; acknowledges an AI use statement; Rwanda for countries of operation", () => {
+    expect(answerQuestion(txt("What are your personal pronouns?"), p5, ctx)).toEqual({ kind: "text", value: "Prefer not to say" });
+    expect(answerQuestion(multi("AI Use Statement: We expect candidates to engage personally and authentically in interviews.", ["Acknowledge/Confirm"]), p5, ctx)).toEqual({ kind: "multi", options: ["Acknowledge/Confirm"] });
+    expect(answerQuestion(multi("In compliance with local law, all persons hired will be required to verify identity and eligibility to work in our countries of operation", ["Kenya", "Rwanda", "Uganda"]), { ...p5, authorization: { ...p5.authorization, authorizedRwanda: true } } as AtsProfile, ctx)).toEqual({ kind: "multi", options: ["Rwanda"] });
+  });
+  it("still holds work authorization 'in the country where this position is based'", () => {
+    expect(answerQuestion(sel("Do you currently have legal work authorization in the country where this position is based?", ["Yes", "No"]), p5, ctx)).toBeNull();
+  });
+});
