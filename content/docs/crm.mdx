@@ -113,7 +113,7 @@ Twenty shows every new field as a column, in creation order and unsorted. On
 the Databayt (sales) workspace, `scripts/crm-organize.mjs` declares how each
 board reads: the columns and their order, the default sort, and the working
 views. Jobs gets **Pipeline** (a kanban by status), **Needs me** (`HOLD`) and
-**In play**. Funding gets **Pipeline** and **By deadline**. Website Leads gets
+**In play**, plus two lane boards: **Electrical Engineer** (Electrical + Protection) and **Marine ETO**. Funding gets **Pipeline** and **By deadline**. Website Leads gets
 **Pipeline** and **Tier A**. It only changes labels, icons and views, never an
 API name or a `SELECT` value. It is idempotent, so a second run is a no-op.
 After adding a field, run it again (`--dry-run` first) and place the field in

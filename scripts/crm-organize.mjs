@@ -82,6 +82,23 @@ const BOARDS = {
         columns: [["name", 320], ["company", 180], ["applicationStatus", 130], ["appliedAt", 130], ["lastTouchAt", 130], ["touchNumber", 90], ["responseAt", 130], ["channel", 110]],
         sort: ["appliedAt", "DESC"],
       },
+      // Lane boards — same object, so the loop feeds them with no extra wiring.
+      {
+        name: "Electrical Engineer", type: "KANBAN", icon: "IconBolt", groupBy: "applicationStatus",
+        filter: ["campaign", ["ELECTRICAL", "PROTECTION"]],
+        groups: ["HOLD", "APPROVED", "QUEUED", "TO_APPLY", "APPLIED", "RESPONSE", "INTERVIEW", "OFFER", "REJECTED", "ARCHIVED"],
+        hidden: ["REJECTED", "ARCHIVED"],
+        columns: [["name", 0], ["company", 0], ["campaign", 0], ["country", 0], ["engineScore", 0], ["deadline", 0], ["holdReason", 0]],
+        sort: ["engineScore", "DESC"],
+      },
+      {
+        name: "Marine ETO", type: "KANBAN", icon: "IconAnchor", groupBy: "applicationStatus",
+        filter: ["campaign", ["MARINE_ETO"]],
+        groups: ["HOLD", "APPROVED", "QUEUED", "TO_APPLY", "APPLIED", "RESPONSE", "INTERVIEW", "OFFER", "REJECTED", "ARCHIVED"],
+        hidden: ["REJECTED", "ARCHIVED"],
+        columns: [["name", 0], ["company", 0], ["country", 0], ["engineScore", 0], ["deadline", 0], ["holdReason", 0]],
+        sort: ["engineScore", "DESC"],
+      },
     ],
   },
 
