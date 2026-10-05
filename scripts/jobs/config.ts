@@ -43,15 +43,16 @@ const DEFAULTS: LoopConfig = {
   briefWhatsApp: "+249919071294",
   vetoHours: 2,
   // Abdout, 2026-10-03: electrical/protection back on (his deepest CV, Gulf +
-  // East Africa); only marine stays paused.
-  pausedLanes: ["MARINE_ETO"],
+  // East Africa). 2026-10-05: marine ETO back on too — no lane is paused.
+  pausedLanes: [],
   dailyTotalCap: 100,
 };
 
 /// Priority, lowest first (Abdout, 2026-10-03): days-to-cash — AI-training
 /// gigs and software roles → remote → freelance + electrical/protection →
-/// Databayt tenders and client projects → engineering contracts. Paused lanes
-/// never reach the wave.
+/// Databayt tenders and client projects → engineering contracts. Marine ETO
+/// (unpaused 2026-10-05) sits with electrical — same CV family, ready marine CV.
+/// Paused lanes never reach the wave.
 export const LANE_BAND: Record<string, number> = {
   AI_TRAINING: 1,
   WEB_DEVELOPER: 1,
@@ -62,7 +63,7 @@ export const LANE_BAND: Record<string, number> = {
   TENDER: 4,
   CLIENT_PROJECT: 4,
   ENGINEERING_CONTRACT: 5,
-  MARINE_ETO: 8,
+  MARINE_ETO: 3,
 };
 
 /// The rung a posting names, as a sort band — lower goes out first. Abdout's

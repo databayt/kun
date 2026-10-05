@@ -21,18 +21,20 @@ const opt = (f, d) => (args.indexOf(f) > -1 ? args[args.indexOf(f) + 1] : d);
 const LIMIT = Number(opt("--limit", 15));
 const STALE_DAYS = Number(opt("--days", 7));
 
-// Mirrors LANE_BAND in scripts/jobs/config.ts (Abdout, 2026-09-27): software in
-// Kigali → remote → freelance → the rest; electrical paused (band 8, hidden).
+// Mirrors LANE_BAND in scripts/jobs/config.ts (Abdout, 2026-10-03/05): days to
+// cash — AI-training + software → remote → freelance + electrical + marine →
+// tenders → engineering contracts. No lane is paused; band 8 would hide one.
 const BAND = {
+  AI_TRAINING: 1,
   WEB_DEVELOPER: 1,
   REMOTE_WORLDWIDE: 2,
   FREELANCE: 3,
+  PROTECTION: 3,
+  ELECTRICAL: 3,
+  MARINE_ETO: 3,
   TENDER: 4,
-  AI_TRAINING: 5,
-  PROTECTION: 8,
-  ELECTRICAL: 8,
-  MARINE_ETO: 8,
-  ENGINEERING_CONTRACT: 8,
+  CLIENT_PROJECT: 4,
+  ENGINEERING_CONTRACT: 5,
 };
 
 const key = twentyKey("databayt");
