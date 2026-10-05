@@ -66,8 +66,13 @@ mail_ok() {
     osascript -e 'with timeout of 10 seconds' -e 'tell application "Mail" to quit' -e 'end timeout' >/dev/null 2>&1
     sleep 5
     pkill -x Mail 2>/dev/null; sleep 3; pkill -9 -x Mail 2>/dev/null
-    open -g -a Mail; sleep 40
-    mail_probe && { log "Mail.app back"; return 0; }
+    open -g -a Mail
+    # Right after a wake a relaunched Mail needs more than 40s (2026-10-05:
+    # restarted at 08:30, still deaf at 08:31, fine at 08:34). Re-probe for 2 min.
+    for _ in 1 2 3 4 5 6 7 8; do
+        sleep 15
+        mail_probe && { log "Mail.app back"; return 0; }
+    done
     log "Mail.app still not answering — inbox and ATS codes skipped this tick"
     return 1
 }
