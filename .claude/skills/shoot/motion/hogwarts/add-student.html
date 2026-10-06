@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: Sans; src: url("file:///Users/abdout/hogwarts/public/fonts/thmanyah/thmanyah-sans-500.woff2"); font-weight: 500; }
+  @font-face { font-family: Sans; src: url("file:///Users/abdout/hogwarts/public/fonts/thmanyah/thmanyah-sans-700.woff2"); font-weight: 700; }
+  @font-face { font-family: Display; src: url("file:///Users/abdout/hogwarts/public/fonts/thmanyah/thmanyah-serif-display-900.woff2"); font-weight: 900; }
+  :root { --green: #00bc6e; --ink: #0a0a0a; --bg: #f4f4f2; }
+  * { margin: 0; box-sizing: border-box; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); font-family: Sans; color: var(--ink); }
+  .win { position: absolute; left: 240px; top: 62px; width: 1440px; height: 816px; border-radius: 22px; overflow: hidden;
+         background: #fff; box-shadow: 0 30px 80px rgba(0,0,0,.12), 0 2px 8px rgba(0,0,0,.06); }
+  .win img { position: absolute; left: 0; top: 0; transform-origin: 0 0; will-change: transform; }
+  .ring { position: absolute; border: 5px solid var(--green); border-radius: 18px; box-shadow: 0 0 0 9999px rgba(10,10,10,.16), 0 0 24px rgba(0,188,110,.55); }
+  .cap { position: absolute; left: 50%; top: 912px; transform: translateX(-50%); display: flex; align-items: center; gap: 22px;
+         padding: 18px 34px 18px 40px; background: var(--ink); color: #fff; border-radius: 999px; white-space: nowrap; }
+  .num { width: 58px; height: 58px; border-radius: 50%; background: var(--green); color: var(--ink); display: grid; place-items: center; font-weight: 700; font-size: 32px; }
+  .txt { font-size: 38px; font-weight: 500; }
+  .bar { position: absolute; top: 24px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; direction: rtl; }
+  .seg { width: 70px; height: 6px; border-radius: 3px; background: #d6d6d1; overflow: hidden; }
+  .seg i { display: block; height: 100%; background: var(--green); width: 0; margin-inline-start: 0; }
+  .card { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; }
+  .card .inner { display: flex; flex-direction: column; align-items: center; gap: 26px; }
+  .logo { width: 120px; height: 120px; }
+  .title { font-family: Display; font-weight: 900; font-size: 128px; line-height: 1.15; }
+  .title mark { background: #a7e8c9; color: inherit; padding: 0 18px; }
+  .sub { font-size: 44px; color: #555; }
+  .pill { font-size: 34px; padding: 14px 30px; border-radius: 999px; background: #fff; box-shadow: 0 2px 10px rgba(0,0,0,.06); }
+</style>
+</head>
+<body>
+<div id="bar" class="bar"></div>
+<div id="A" class="win"><img></div>
+<div id="B" class="win"><img></div>
+<div id="cap" class="cap"><div class="num"></div><div class="txt"></div></div>
+<div id="intro" class="card"><div class="inner">
+  <img class="logo" src="file:///Users/abdout/hogwarts/public/logo.png">
+  <div class="title">إضافة <mark>طالب جديد</mark></div>
+  <div class="sub">دليل سريع لإدارة المدرسة في منصة بالقلم</div>
+</div></div>
+<div id="outro" class="card"><div class="inner">
+  <div class="title" style="font-size:104px">طالب جديد <mark>في دقائق</mark></div>
+  <div class="pill">المطلوب فقط: اسم الطالب وولي أمر واحد — والباقي يُكمل لاحقاً</div>
+  <img class="logo" src="file:///Users/abdout/hogwarts/public/logo.png" style="width:84px;height:84px;margin-top:14px">
+</div></div>
+<script>
+const DIR = "file:///Users/abdout/hogwarts/public/screenshot/add-student/";
+const IW = 3025, IH = 1715, WW = 1440, WH = 816, S0 = WW / IW;   // window shows the whole shot at zoom 1
+const AR = n => String(n).replace(/\d/g, d => "٠١٢٣٤٥٦٧٨٩"[d]);
+const R = (x1, y1, x2, y2) => ({ x1, y1, x2, y2 });   // rects in screenshot pixels
+
+// Each step: shot, caption, focus rects over time (seconds into the scene), optional image swap.
+const STEPS = [
+  { img: "01-list-ar.png", d: 5.5, cap: "من صفحة الطلاب، اضغط زر الإضافة",
+    focus: [{ at: 1.2, r: R(700, 470, 825, 590) }] },
+  { img: "02-documents-ar.png", d: 5.5, cap: "ارفع مستندات الطالب لتعبئة بياناته تلقائياً — اختياري",
+    focus: [{ at: 1.2, r: R(215, 380, 1400, 1095) }] },
+  { img: "03-personal-ar.png", swap: { img: "04-personal-filled-ar.png", at: 2.6 }, d: 6.5,
+    cap: "اكتب اسم الطالب والجنس ورقم الهاتف",
+    focus: [{ at: 1.2, r: R(215, 375, 1400, 975) }] },
+  { img: "05-father-ar.png", d: 5.5, cap: "أضف ولي الأمر: الأب أو الأم — يكفي واحد منهما",
+    focus: [{ at: 1.2, r: R(215, 480, 1400, 870) }] },
+  { img: "06-address-ar.png", d: 5, cap: "حدّد عنوان السكن بالبحث أو على الخريطة",
+    focus: [{ at: 1.2, r: R(215, 255, 1400, 1220) }] },
+  { img: "07-academic-ar.png", d: 7, cap: "اختر الصف والفصل، ثم اضغط «إنشاء»",
+    focus: [{ at: 1.2, r: R(215, 555, 1400, 925) }, { at: 4.2, r: R(205, 1515, 1300, 1700) }] },
+  { img: "08-created-ar.png", d: 6, cap: "تم! الطالب في القائمة بحساب دخول ورسوم صفّه تلقائياً",
+    focus: [{ at: 1.2, r: R(55, 675, 2410, 830) }] },
+];
+const INTRO = 3.2, OUTRO = 4, XF = 0.45;
+
+let T = 0; const SCENES = [];
+SCENES.push({ kind: "intro", t0: T, d: INTRO }); T += INTRO;
+STEPS.forEach((s, i) => { SCENES.push({ kind: "step", i, ...s, t0: T }); T += s.d; });
+SCENES.push({ kind: "outro", t0: T, d: OUTRO }); T += OUTRO;
+window.DURATION = T;
+
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const ease = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const prog = (t, a, b) => ease(clamp((t - a) / (b - a), 0, 1));
+const lerp = (a, b, k) => a + (b - a) * k;
+
+// Camera for a step at local time lt: zoom 1 on the full shot, then glide to each focus rect.
+function camera(s, lt) {
+  let cx = IW / 2, cy = IH / 2, z = 1, ring = null, ringA = 0;
+  let prev = { cx, cy, z };
+  for (const f of s.focus) {
+    const w = f.r.x2 - f.r.x1, h = f.r.y2 - f.r.y1;
+    const fz = clamp(Math.min(WW * .72 / (w * S0), WH * .66 / (h * S0)), 1, 2.2);
+    const k = prog(lt, f.at, f.at + 1.3);
+    if (k <= 0) break;
+    cx = lerp(prev.cx, (f.r.x1 + f.r.x2) / 2, k); cy = lerp(prev.cy, (f.r.y1 + f.r.y2) / 2, k); z = lerp(prev.z, fz, k);
+    ring = f.r; ringA = prog(lt, f.at + 1.0, f.at + 1.5);
+    prev = { cx: (f.r.x1 + f.r.x2) / 2, cy: (f.r.y1 + f.r.y2) / 2, z: fz };
+  }
+  // keep the window inside the shot
+  const hw = WW / 2 / (S0 * z), hh = WH / 2 / (S0 * z);
+  cx = clamp(cx, hw, IW - hw); cy = clamp(cy, hh, IH - hh);
+  return { cx, cy, z, ring, ringA };
+}
+
+function paintWin(el, s, lt, alpha) {
+  const img = el.querySelector("img");
+  let src = s.img;
+  if (s.swap && lt >= s.swap.at) src = s.swap.img;
+  if (img.dataset.src !== src) { img.src = DIR + src; img.dataset.src = src; }
+  img.style.width = IW + "px"; img.style.height = IH + "px";
+  const c = camera(s, lt), sc = S0 * c.z;
+  img.style.transform = `translate(${WW / 2 - c.cx * sc}px, ${WH / 2 - c.cy * sc}px) scale(${sc})`;
+  let ring = el.querySelector(".ring");
+  if (!ring) { ring = document.createElement("div"); ring.className = "ring"; el.appendChild(ring); }
+  if (c.ring && c.ringA > 0) {
+    const pad = 14, x = WW / 2 + (c.ring.x1 - c.cx) * sc - pad, y = WH / 2 + (c.ring.y1 - c.cy) * sc - pad;
+    Object.assign(ring.style, { display: "block", left: x + "px", top: y + "px",
+      width: (c.ring.x2 - c.ring.x1) * sc + 2 * pad + "px", height: (c.ring.y2 - c.ring.y1) * sc + 2 * pad + "px",
+      opacity: c.ringA * (s.swap && Math.abs(lt - s.swap.at) < .25 ? .6 : 1) });
+  } else ring.style.display = "none";
+  el.style.opacity = alpha; el.style.display = alpha > 0 ? "block" : "none";
+  el.style.transform = `translateY(${(1 - alpha) * 18}px)`;
+}
+
+const bar = document.getElementById("bar");
+STEPS.forEach(() => { const d = document.createElement("div"); d.className = "seg"; d.appendChild(document.createElement("i")); bar.appendChild(d); });
+
+window.render = function (t) {
+  const idx = SCENES.findIndex(s => t >= s.t0 && t < s.t0 + s.d);
+  const sc = SCENES[idx === -1 ? SCENES.length - 1 : idx], lt = t - sc.t0;
+  const prev = SCENES[(idx === -1 ? SCENES.length - 1 : idx) - 1];
+  const fadeIn = clamp(lt / XF, 0, 1);
+  const A = document.getElementById("A"), B = document.getElementById("B");
+  const intro = document.getElementById("intro"), outro = document.getElementById("outro");
+
+  // intro / outro cards
+  const introA = sc.kind === "intro" ? 1 : (prev && prev.kind === "intro" ? 1 - fadeIn : 0);
+  intro.style.opacity = introA; intro.style.transform = `scale(${1 + (1 - introA) * .04})`;
+  const outA = sc.kind === "outro" ? fadeIn : 0;
+  outro.style.opacity = outA; outro.style.transform = `translateY(${(1 - outA) * 24}px)`;
+  if (sc.kind === "intro") {
+    intro.querySelector(".title").style.opacity = prog(lt, .2, .9);
+    intro.querySelector(".sub").style.opacity = prog(lt, .7, 1.4);
+  }
+
+  // screenshot windows: current on B, previous step fading out on A
+  if (sc.kind === "step") {
+    paintWin(B, sc, lt, fadeIn);
+    if (prev && prev.kind === "step" && fadeIn < 1) paintWin(A, prev, prev.d, 1); else A.style.display = "none";
+  } else if (sc.kind === "outro" && prev.kind === "step" && fadeIn < 1) {
+    paintWin(B, prev, prev.d, 1 - fadeIn); A.style.display = "none";
+  } else { A.style.display = "none"; B.style.display = "none"; }
+
+  // caption + progress
+  const cap = document.getElementById("cap");
+  if (sc.kind === "step") {
+    const k = prog(lt, .25, .8);
+    cap.style.opacity = k; cap.style.transform = `translateX(-50%) translateY(${(1 - k) * 20}px)`;
+    cap.querySelector(".num").textContent = AR(sc.i + 1);
+    cap.querySelector(".txt").textContent = sc.cap;
+  } else cap.style.opacity = 0;
+  const cur = sc.kind === "step" ? sc.i : (sc.kind === "outro" ? STEPS.length : -1);
+  bar.style.opacity = sc.kind === "step" ? 1 : (sc.kind === "outro" ? 1 - fadeIn : fadeIn * 0);
+  [...bar.children].forEach((seg, i) => {
+    const fill = i < cur ? 1 : i === cur ? clamp(lt / sc.d, 0, 1) : 0;
+    seg.firstChild.style.width = fill * 100 + "%";
+  });
+};
+window.render(0);
+</script>
+</body>
+</html>

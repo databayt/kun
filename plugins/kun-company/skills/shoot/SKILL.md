@@ -69,6 +69,25 @@ export default async ({ page, go, shot, settle }) => {
 - Existing flows: `hogwarts/add-student` (list → documents → personal → father → address →
   academic → created dialog → new row; 9 shots).
 
+## Motion — a tutorial video from a flow's stills
+
+A flow's shots become a captioned Arabic explainer: each still in a clean window, the
+camera glides to the field that matters, a green ring marks it, a numbered caption says
+what to do. One deterministic `render(t)` per composition; frames are screenshotted and
+encoded, so Arabic shapes exactly as in the browser (ffmpeg drawtext does not).
+
+```
+node ~/.claude/skills/shoot/scripts/motion.mjs <composition.html> <out.mp4> [--preview 1.5,13.9]
+```
+
+- Compositions: `motion/<repo>/<flow>.html` — a `STEPS` list (shot, caption, focus rects in
+  screenshot pixels, optional image swap). Fonts: the product's own Thmanyah (local render only,
+  never shipped). 1920x1080, 30 fps, H.264.
+- Preview frames first, read them, then render (~4 min for 48 s). Output beside the shots:
+  `<repo>/public/screenshot/<flow>/<flow>-ar.mp4`.
+- Keep focus zoom ≤ 2.2× and frame small targets with their neighbours, or the shot is grey.
+- Claims in captions must match what the shots show (count of steps, what is required).
+
 ## Close
 
 Read every PNG before reporting it done. Send the key ones with `SendUserFile` and give
