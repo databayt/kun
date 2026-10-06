@@ -1,0 +1,87 @@
+---
+title: Edit
+description: Video editing with Claude Code on the Mac — transcript-driven cuts, Arabic captions, HyperFrames motion graphics, demos and reels, all local with zero API spend
+---
+
+# Edit
+
+The engine edits video by **reading** it, not watching it. A word-level transcript of the
+footage (a few KB of text) lets Claude pick cuts at word boundaries. It looks at a filmstrip
+only when a decision needs it, writes an edit decision list (EDL) or an HTML composition, and
+renders with ffmpeg. Say it in prose: _"edit these clips into a launch video"_, _"cut the
+silences and add Arabic captions"_, _"make a reel from this"_, _"title card for add-student"_,
+_"مونتاج للفيديو"_.
+
+[record](/docs/record) and `shoot` **film** the product, [higgs](/docs/higgs) **generates**
+clips with AI, and `edit` **finishes** them.
+
+## The four lanes
+
+| Need | Engine | What comes out |
+| --- | --- | --- |
+| Raw footage (talking head, interview, tutorial) | [video-use](https://github.com/browser-use/video-use), patched for local transcription | `<dir>/edit/final.mp4`, with silences, fillers and false starts cut, a color grade, −14 LUFS loudness and burned captions |
+| Motion graphics (promo, title card, launch video) | [HyperFrames](https://github.com/heygen-com/hyperframes) plugin (HTML + GSAP → MP4) | Deterministic renders that follow the brand kit |
+| Product demo | a `shoot` sim or `record` take, plus HyperFrames intro/outro, joined with ffmpeg at a constant 30 fps | `<flow>-ar.mp4`, a single file that is overwritten each time |
+| Reel | a video-use cut, then `reel.sh` | 1080×1920 @ 30 fps, at most 90 s, captions above the platform UI |
+
+## The stack (all free, all local)
+
+| Tool | Role | Why this one |
+| --- | --- | --- |
+| `ffmpeg-full` (Homebrew, keg-only) | Encodes, filters, burns captions | The slim `ffmpeg` formula has **no libass or freetype**, so it can't burn subtitles. `ffmpeg-full` sits beside it, so `shoot` and `record` keep the slim build. |
+| `mlx-whisper`, large-v3-turbo | Arabic and English transcription with word timestamps | About 5 s per 30 s of audio on the M4, with no upload and no spend. It replaces video-use's default ElevenLabs Scribe. |
+| video-use (MIT) | Transcript → EDL → render, with a self-check at every cut | The best agent-native footage editor of 2026. It works from a ~12 KB transcript instead of frames. |
+| HyperFrames (Apache-2.0) | Compositions written as code | The same model `shoot`'s motion lane already uses: Chrome shapes Arabic correctly. |
+| `auto-editor` | Fast silence cuts driven by audio level | A first pass on long recordings |
+| `yt-dlp` | Pull in source video from a URL | |
+
+**Not used, on purpose:**
+- **Remotion.** A company of 4 or more people needs its Company licence ($100/mo minimum), and HyperFrames covers the same ground for free.
+- **ElevenLabs Scribe.** It is a paid API.
+- **ffmpeg, Final Cut Pro and DaVinci Resolve MCP servers.** Skills that call the CLI cost fewer tokens, and the workflow is fully agentic, with no desktop editor.
+
+## Setup
+
+```bash
+bash ~/.claude/skills/edit/scripts/setup.sh   # idempotent: installs, patches, verifies
+```
+
+It installs the Homebrew formulas and `uv tool install mlx-whisper`. It clones video-use to `~/oss/video-use`, applies
+`.claude/skills/edit/patches/video-use-local-asr.patch`, symlinks the clone into
+`~/.claude/skills/video-use`, and installs the `hyperframes@hyperframes` plugin. The first
+transcription downloads the turbo weights, about 1.5 GB in `~/.cache/huggingface`.
+
+The patch makes three changes:
+- `helpers/transcribe_local.py` returns Scribe-shaped JSON (`word` and `spacing` entries), so the
+  packer, timeline view and renderer don't change.
+- It seeds Whisper with fillers in both languages so they stay visible and can be cut.
+- `VIDEO_USE_SUB_STYLE` and `VIDEO_USE_SUB_FONT` make captions configurable, because Helvetica has no Arabic glyphs.
+
+## Arabic, done right
+
+- **Captions** use Thmanyah Sans on a padded dark box (`BorderStyle=3`), because outlines muddy the
+  Arabic dots. libass shapes and joins the letters correctly.
+- **HyperFrames:** never put `dir="rtl"` on `<html>`. It renders a **blank video**, while preview
+  looks fine. Set `direction: rtl` on each text element instead.
+- **Fonts** load through `@font-face` from a project-local copy of the Thmanyah `.ttf`, which is
+  never committed or rehosted. Headlines use Thmanyah Serif Display 900 with `ss01`.
+- **Whisper on Arabic** misspells now and then (`الأضافة`). Fix the transcript `text` before
+  building subtitles.
+
+## House rules
+
+- One file per piece, always overwritten, with no `-v2` copies.
+- **Disk floor: 10 GiB.** The render scripts refuse below it. Purge the `edit/` scratch and
+  HyperFrames `renders/` drafts once the final file is delivered.
+- Confirm the strategy before the first full render, and iterate on `--draft` or `--preview` renders.
+- Claude can't listen. It reports the measured loudness instead.
+
+## Verified on 2026-10-07
+
+| Test | Result |
+| --- | --- |
+| Arabic transcription, 30 s clip | 27 words with timestamps in 5 s |
+| Raw cut: 3 pauses + 1 false start | 30 s → 16 s. No gap over 0.6 s remains, loudnorm brings it to −14 LUFS, and Arabic captions are shaped correctly |
+| HyperFrames Arabic title card, 6 s | Rendered in 10 s, and `check` passed 8/8 contrast checks |
+| Demo: card + take + card | 22 s at a constant 30 fps |
+| Reel, pad mode | 1080×1920 @ 30 fps with captions above the platform UI |
