@@ -304,7 +304,8 @@ export function gateTailoredCv(
     problems.push("claims a certificate of competency he does not hold");
 
   // 4. Coverage — counted on the rendered text, not on the model's own claim.
-  const lower = norm(text);
+  // Postings say "Bachelor's degree"; CVs say "BSc" — same thing.
+  const lower = `${norm(text)}${/\bb\.?\s?sc\b|\bb\.?e\.?\b|\bb\.?tech\b|bachelor/i.test(text) ? " bachelor bachelors degree" : ""}`;
   const covered = cv.mustHave.filter((k) => termIn(k, lower));
   const missing = cv.mustHave.filter((k) => !termIn(k, lower));
   const coverage = cv.mustHave.length

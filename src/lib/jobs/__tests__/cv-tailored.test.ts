@@ -268,4 +268,9 @@ describe("gateTailoredCv", () => {
     const coc = gateTailoredCv(cv({ summary: `${cv().summary} Holder of an ETO certificate of competency.` }), rec, ctx);
     expect(coc.problems.join()).toMatch(/certificate of competency he does not hold/);
   });
+
+  it("reads BSc as a bachelor's degree", () => {
+    const v = gateTailoredCv(cv({ mustHave: ["Bachelor's degree in Electrical Engineering"] }), career, ctx);
+    expect(v.missing).toEqual([]);
+  });
 });

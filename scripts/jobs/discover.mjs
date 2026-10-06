@@ -54,15 +54,22 @@ const WILL_RELOCATE = /visa sponsor|sponsors? (a )?visa|sponsorship (is )?(avail
 
 // ── markets (Abdout, 2026-10-03) ─────────────────────────────────────────────
 // Africa — Rwanda, Kenya, Nigeria and their neighbours — remote AND on-site:
-// he will move within the continent. The Gulf — remote only, never on-site,
-// whatever the posting offers. Everywhere else stays remote-only as before.
+// he will move within the continent. Everywhere else stays remote-only as before.
+// The Gulf (2026-10-06, Abdout: "allow on-site Gulf jobs with visa
+// sponsorship"): on-site only when the employer provides the work visa — and
+// never a posting that hires only people already in the country.
 const AFRICA_ONSITE = /\b(rwanda|kigali|kenya|nairobi|mombasa|nigeria|lagos|abuja|uganda|kampala|tanzania|dar es salaam|ethiopia|addis ababa|ghana|accra|east africa)\b/i;
 const GULF = /\b(saudi|ksa|riyadh|jeddah|dammam|khobar|uae|united arab emirates|dubai|abu dhabi|sharjah|qatar|doha|bahrain|manama|kuwait|oman|muscat|gcc|gulf)\b/i;
 
-/// May Abdout take this role in person? Africa yes; the Gulf never; elsewhere
-/// only when the employer funds the move (WILL_RELOCATE).
+// Gulf employers say it their own way: "visa provided", "employment visa",
+// "visa + ticket + accommodation".
+const GULF_SPONSOR = /visa (will be |is )?(provided|offered|included|sponsored)|employment visa|company (provided |sponsored )?visa|(work|residence|residency) visa\b|visa,? (air ?)?(tickets?|flights?|accommodation)|(accommodation|tickets?),? (and |& )?visa/i;
+const GULF_LOCAL_ONLY = /transferr?able (iqama|visa|residency)|own (visa|sponsorship)|visit visa|(uae|ksa|saudi|qatar|gcc|kuwait|oman|bahrain) (residents?|nationals?|based candidates?) only|(must|should) (be|reside|already be) (in|within|based in) (the )?(uae|ksa|saudi|kingdom|qatar|gcc|country)|candidates? (currently )?(in|inside|within) (the )?(uae|ksa|saudi|qatar|country)|local (hire|candidates?) only|immediate(ly available)? joiners? (in|from|within)/i;
+
+/// May Abdout take this role in person? Africa yes; the Gulf when the employer
+/// sponsors the visa; elsewhere only when the employer funds the move.
 export function onsiteAllowed(place, text = "") {
-  if (GULF.test(place)) return false;
+  if (GULF.test(place)) return (WILL_RELOCATE.test(text) || GULF_SPONSOR.test(text)) && !GULF_LOCAL_ONLY.test(text);
   if (AFRICA_ONSITE.test(place)) return true;
   return WILL_RELOCATE.test(text);
 }
@@ -693,12 +700,12 @@ const ADAPTERS = {
         // remote one — and every gate below is written for the worldwide lane,
         // which would drop it for not saying "remote".
         const inRwanda = /\b(rwanda|kigali)\b/i.test(place);
-        // Africa is reachable in person, the Gulf never (onsiteAllowed).
+        // Africa is reachable in person; the Gulf with a sponsored visa (onsiteAllowed).
         const inAfrica = AFRICA_ONSITE.test(place);
         // An employer that funds the move clears the location gates below: they
         // exist to drop roles Abdout cannot take, and a sponsored on-site role
         // is one he can.
-        const relocates = WILL_RELOCATE.test(j.text) && !GULF.test(place);
+        const relocates = GULF.test(place) ? onsiteAllowed(place, j.text) : WILL_RELOCATE.test(j.text);
         if (!inAfrica && !relocates) {
           if (!REMOTE_ISH.test(`${place} ${j.title}`)) continue;
           if (PLACE_BAD.test(place) && !/worldwide|anywhere|global|africa|emea/i.test(place)) continue;
@@ -822,7 +829,7 @@ const ADAPTERS = {
   /// say worldwide/Africa/EMEA or name no region — US-only is unreachable.
   // ── sea lane (Abdout, 2026-10-05: worldwide ETO, sea jobs allowed) ──────────
   // Work on board has no country, so the market gates above do not apply —
-  // the Gulf-remote-only rule is about living there, not sailing past it. The
+  // the Gulf rule is about working ashore there, not sailing past it. The
   // title must still be electrical-on-board (the ETO lane regex), and the
   // nationality / work-authorisation bars still drop a posting.
 

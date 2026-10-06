@@ -339,6 +339,13 @@ for a month. Say **`jobs`** in a session (or `وظائف`) and the `jobs` skill 
 | 2 — remote income | `remote-web-developer-worldwide` · `ai-training-gigs` · `freelance-contracts` | REMOTE_WORLDWIDE · AI_TRAINING · FREELANCE |
 | 3 — abroad | `engineering-contracts` | ENGINEERING_CONTRACT |
 
+**Gulf on-site (since 2026-10-06).** Abdout allows on-site Gulf jobs when
+the employer sponsors the work visa (`onsiteAllowed()` in `discover.mjs`).
+
+- The posting must say so: "visa provided", "employment visa", "we sponsor"…
+- Postings that hire only people already in the country are dropped:
+  "transferable iqama", "UAE residents only", "own visa", "visit visa".
+
 **The sea lane (since 2026-10-05).** `kivu-marine-eto` is worldwide now. Work
 on board has no country, so the market gates do not apply: the Gulf
 remote-only rule is about living there, not about sailing past it. The board
