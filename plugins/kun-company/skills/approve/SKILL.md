@@ -1,7 +1,7 @@
 ---
 name: approve
 description: The human gate — the /social/publish review queue, or a signed link for a remote approver
-when_to_use: "Use when a full draft needs a human yes before it reaches a public brand page — approved in the review queue (now or scheduled) or through a signed single-use link for an outside approver. The gate, not the send: never writes copy (/draft), makes media (/higgs) or delivers (/publish, which refuses to run without this yes). Triggers on: review the queue, approve the next draft, stage for review, send for approval, get sign-off, ready for review, اعتماد, راجع الطابور, اعتمد المسودة, أرسل للمراجعة."
+when_to_use: "Use when a full draft needs a human yes before it reaches a public brand page — in the review queue or via a signed link for an outside approver. The gate only — not /draft, /higgs or /publish. Triggers on: review the queue, approve the next draft, stage for review, send for approval, get sign-off, ready for review, اعتماد, راجع الطابور, اعتمد المسودة, أرسل للمراجعة."
 argument-hint: "<brand> [--channels ...] [--media <url,url>] [--reviewer <name>]"
 ---
 

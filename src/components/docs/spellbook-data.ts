@@ -2951,6 +2951,20 @@ export const schools: School[] = [
         ],
         depends: [],
       },
+      {
+        name: "edit",
+        effect:
+          "Edit video on this Mac with no API spend — transcript-driven cuts of raw footage (silences, fillers, retakes), Arabic captions burned in Thmanyah, HyperFrames motion graphics and title cards, demo takes wrapped with intro/outro, 9:16 reels",
+        order: [s("/edit"), s("/video-use")],
+        steps: [
+          "Route by need — raw footage → video-use; motion graphics → HyperFrames plugin (/hyperframes:hyperframes); demo → shoot/record take + cards; reel → cut then reel.sh",
+          "Transcribe locally (vu.sh transcribe_batch --language ar, mlx-whisper) and read takes_packed.md — never the video",
+          "Confirm the strategy, write the EDL or composition, render a draft, verify cut points and a mid-frame",
+          "Final render: one file per piece, overwritten; captions last; report loudness numbers; purge scratch (10 GiB disk floor)",
+        ],
+        connects: ["record", "shoot", "higgs", "carousel", "social"],
+        depends: [],
+      },
     ],
   },
   {

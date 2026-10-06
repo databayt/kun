@@ -1,7 +1,7 @@
 ---
 name: report
 description: Triage and fix the open user reports across databayt repos
-when_to_use: "Use when the open `report`-labeled issues need a human decision or a fix — one numbered table, Abdout takes or rejects each, the report agent fixes what was accepted; also one repo or issue. Distinct from /qa (block-wide QA), /check (pre-ship gate) and /issue (file a new issue). Triggers on: report, reports, fix reports, list the reports, show the reports, what did the team report, the team reported, Ali reported, open issues from the dialog, take/reject the reports, verified-report queue, البلاغات, بلاغات الفريق, المشاكل المبلغ عنها, أصلح البلاغات."
+when_to_use: "Use when the open `report`-labeled issues need a human decision or a fix — Abdout takes or rejects each from one table, accepted ones get fixed. Distinct from /qa (block-wide QA), /check (pre-ship gate) and /issue (file a new issue). Triggers on: report, reports, fix reports, list the reports, show the reports, what did the team report, the team reported, Ali reported, open issues from the dialog, take/reject the reports, verified-report queue, البلاغات, بلاغات الفريق, المشاكل المبلغ عنها, أصلح البلاغات."
 argument-hint: "[--status | <repo> | <repo>#N | take 1,3 reject 2]"
 ---
 

@@ -1,7 +1,7 @@
 ---
 name: higgs
 description: Marketing photos and video — Google (Nano Banana, Veo, Omni) direct, or Higgsfield
-when_to_use: "Use when making or editing marketing images or video — ads, hero or product shots, reels, stories, avatar ads — or tweaking a reference video/image URL. Text-free only: anything carrying copy (og images, banners, social cards, infographics, testimonials) goes to /carousel. Triggers on: generate video, generate image, make an ad, promo video, hero image, product shot, mockup, lifestyle scene, moodboard, showroom asset, brand kit, edit video from url, nano banana, veo, omni, gemini image, صورة تسويقية, وسائط."
+when_to_use: "Use when AI must GENERATE marketing images or video — ads, hero or product shots, stories, avatar ads — or restyle a reference URL. Cutting real footage is /edit. Text-free only: anything carrying copy (og images, banners, social cards, infographics, testimonials) goes to /carousel. Triggers on: generate video, generate image, make an ad, promo video, hero image, product shot, mockup, lifestyle scene, moodboard, showroom asset, brand kit, edit video from url, nano banana, veo, omni, gemini image, صورة تسويقية, وسائط."
 argument-hint: "[recipe|prompt] [--url <ref>] [--count N] [--premium] [--ratio 16:9]"
 ---
 

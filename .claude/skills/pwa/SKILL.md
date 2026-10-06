@@ -1,7 +1,7 @@
 ---
 name: pwa
 description: Progressive Web App lane — install, offline, Web Push
-when_to_use: "Use when a product should install to a home screen, work offline or push browser notifications — auditing installability or building the per-tenant manifest, service worker, offline page or Web Push. Distinct from /performance (Core Web Vitals), `fast` (one URL's speed), /handover (UI verification) and the `notifications` block (in-app, email, WhatsApp — this adds the browser channel). Triggers on: pwa, progressive web app, installable, add to home screen, install prompt, manifest, service worker, offline, works offline, web push, push notification, تطبيق, بدون إنترنت, إشعارات."
+when_to_use: "Use when a product should install to a home screen, work offline or push browser notifications — auditing installability or building the per-tenant manifest, service worker, offline page or Web Push. Distinct from /performance (Core Web Vitals), /handover (UI verification) and the in-app `notifications` block. Triggers on: pwa, progressive web app, installable, add to home screen, install prompt, manifest, service worker, offline, works offline, web push, push notification, تطبيق, بدون إنترنت, إشعارات."
 argument-hint: "[audit <url>|build|push] [repo]"
 allowed-tools: Bash(node *), Bash(curl *), Bash(pnpm *), Bash(npx *), Bash(git *), Bash(gh *)
 model: opus
