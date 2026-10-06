@@ -58,10 +58,21 @@ run() {  # run <name> <cmd...> — logs, never aborts the tick
 # On 2026-10-04 that blocked the inbox read for a whole day and likely the
 # Greenhouse security-code reads before it. Probe with a 20s budget; a
 # wedged Mail is quit (killed if it won't), relaunched hidden, re-probed.
-mail_probe() { osascript -e 'with timeout of 20 seconds' -e 'tell application "Mail" to count accounts' -e 'end timeout' >/dev/null 2>&1; }
+mail_probe() { MAIL_ERR="$(osascript -e 'with timeout of 20 seconds' -e 'tell application "Mail" to count accounts' -e 'end timeout' 2>&1 >/dev/null)"; }
 mail_ok() {
     pgrep -x Mail >/dev/null || { open -g -a Mail; sleep 30; }
     mail_probe && return 0
+    # -1743 is a missing Automation grant, not a wedge: from 2026-10-04 the
+    # loop read it as a hang, killed Mail every tick and sent nothing for days.
+    # A restart can't fix it — say so once a day and wait for the grant.
+    if [[ "$MAIL_ERR" == *-1743* ]]; then
+        log "Mail.app: launchd not authorized to send Apple events (-1743) — grant in System Settings › Privacy & Security › Automation"
+        done_today mail-tcc-alert || {
+            ( cd "$REPO" && pnpm -s tsx -e 'import { notify } from "./scripts/jobs/notify"; notify("Jobs loop can'\''t drive Mail.app (-1743): nothing sends. System Settings › Privacy & Security › Automation → allow Mail for the jobs loop (bash/osascript).", "Jobs: Mail blocked")' ) >> "$LOG_FILE" 2>&1
+            stamp mail-tcc-alert
+        }
+        return 1
+    fi
     log "Mail.app not answering — restarting it"
     osascript -e 'with timeout of 10 seconds' -e 'tell application "Mail" to quit' -e 'end timeout' >/dev/null 2>&1
     sleep 5
