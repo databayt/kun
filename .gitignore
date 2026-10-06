@@ -91,3 +91,7 @@ pt.json
 # wrangler local state (build dir + repo)
 .wrangler/
 .cf-deploy-stamp
+
+# shoot sim media: a stock child photo (licence unverified) and documents embedding it — local only.
+# Rebuild: python3 clean-bg.py <photo> photo.jpg && node make-docs.mjs (in shoot/assets/hogwarts/)
+**/shoot/assets/hogwarts/*.jpg

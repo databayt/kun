@@ -45,37 +45,59 @@ const OVERLAY = `(() => {
     #__cur{position:absolute;left:0;top:0;width:22px;height:22px;transform:translate(-3px,-2px);filter:drop-shadow(0 2px 3px rgba(0,0,0,.35));z-index:3}
     .__rip{position:absolute;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;border:3px solid #00bc6e;animation:__r .55s ease-out forwards;z-index:2}
     @keyframes __r{from{transform:scale(.3);opacity:1}to{transform:scale(1.4);opacity:0}}
-    #__fd{position:absolute;inset:0;background:rgba(0,0,0,.18);display:none;pointer-events:auto;z-index:1;direction:ltr;font:13px -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;color:#1d1d1f}
+    #__fd{position:absolute;inset:0;display:none;pointer-events:auto;z-index:1;direction:ltr;font:13px -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;color:#1d1d1f;-webkit-font-smoothing:antialiased}
     #__fd.on{display:block}
-    #__fw{position:absolute;left:50%;top:70px;width:700px;height:430px;transform:translateX(-50%);background:#fff;border-radius:12px;overflow:hidden;
-      box-shadow:0 30px 80px rgba(0,0,0,.35),0 0 0 .5px rgba(0,0,0,.25);display:grid;grid-template-columns:170px 1fr;grid-template-rows:44px 1fr 56px;animation:__in .28s ease-out}
-    @keyframes __in{from{transform:translateX(-50%) translateY(-24px);opacity:0}to{transform:translateX(-50%);opacity:1}}
-    #__fw .bar{grid-column:1/3;display:flex;align-items:center;gap:8px;padding:0 14px;background:#f6f6f6;border-bottom:1px solid #e3e3e3}
-    #__fw .dot{width:12px;height:12px;border-radius:50%}
-    #__fw .ttl{margin-left:14px;font-weight:600}
-    #__fw .side{background:#f2f2f4;border-right:1px solid #e3e3e3;padding:10px 8px}
-    #__fw .side .h{font-size:11px;font-weight:600;color:#8e8e93;margin:6px 8px}
-    #__fw .side .it{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:6px}
-    #__fw .side .it.sel{background:#dcdce0}
-    #__fw .files{padding:16px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;align-content:start}
-    #__fw .f{display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 4px;border-radius:8px;text-align:center;font-size:12px;line-height:1.25}
-    #__fw .f .ic{width:64px;height:64px;border-radius:6px;display:grid;place-items:center;background:#eef3ff;color:#4a6fd8;font-weight:700;font-size:13px;overflow:hidden}
-    #__fw .f .ic img{width:64px;height:64px;object-fit:cover}
-    #__fw .f.sel .ic{outline:3px solid #b3d4ff}
-    #__fw .f.sel .nm{background:#0a62e0;color:#fff;border-radius:4px;padding:0 4px}
-    #__fw .foot{grid-column:1/3;display:flex;justify-content:flex-end;align-items:center;gap:10px;padding:0 16px;border-top:1px solid #e3e3e3;background:#fafafa}
-    #__fw .btn{padding:5px 18px;border-radius:6px;background:#fff;border:1px solid #cfcfd4;font-weight:500}
-    #__fw .btn.pri{background:#0a62e0;border-color:#0a62e0;color:#fff;opacity:.45}
+    #__fw{position:absolute;left:50%;top:96px;width:720px;height:440px;transform:translateX(-50%);border-radius:26px;overflow:hidden;
+      background:rgba(248,248,250,.94);backdrop-filter:blur(40px) saturate(180%);box-shadow:0 22px 60px rgba(0,0,0,.28),0 0 0 .5px rgba(0,0,0,.22);
+      display:grid;grid-template-columns:196px 1fr;grid-template-rows:56px 1fr 60px}
+    #__fw .side{grid-row:1/3;margin:8px 0 0 8px;border-radius:18px;background:rgba(232,232,237,.85);padding:44px 10px 10px;position:relative}
+    #__fw .lights{position:absolute;top:16px;left:16px;display:flex;gap:8px}
+    #__fw .lights i{width:12px;height:12px;border-radius:50%;display:block}
+    #__fw .side .h{font-size:11px;font-weight:600;color:#86868b;margin:10px 8px 4px}
+    #__fw .side .it{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:9px;color:#1d1d1f}
+    #__fw .side .it svg{width:16px;height:16px;flex:none;color:#0a84ff}
+    #__fw .side .it.sel{background:rgba(0,0,0,.09)}
+    #__fw .side .tag{width:10px;height:10px;border-radius:50%;margin:0 3px}
+    #__fw .tb{display:flex;align-items:center;gap:10px;padding:0 14px 0 12px}
+    #__fw .cap{display:flex;align-items:center;gap:2px;height:32px;padding:0 6px;border-radius:16px;background:rgba(255,255,255,.75);box-shadow:0 0 0 .5px rgba(0,0,0,.12),0 1px 3px rgba(0,0,0,.06);color:#3a3a3c}
+    #__fw .cap span{padding:0 7px;font-size:15px}
+    #__fw .ttl{font-weight:700;font-size:15px;margin:0 4px}
+    #__fw .srch{margin-left:auto;width:170px;color:#8e8e93;padding:0 12px}
+    #__fw .files{padding:18px 20px;display:grid;grid-template-columns:repeat(4,1fr);gap:14px 10px;align-content:start;overflow:hidden}
+    #__fw .f{display:flex;flex-direction:column;align-items:center;gap:7px;padding:8px 4px;border-radius:10px;text-align:center}
+    #__fw .f .ic{width:86px;height:86px;display:grid;place-items:center}
+    #__fw .f .ic img{max-width:86px;max-height:86px;box-shadow:0 1px 4px rgba(0,0,0,.18),0 0 0 .5px rgba(0,0,0,.12);background:#fff}
+    #__fw .f .nm{font-size:12px;line-height:1.3;max-width:120px;padding:1px 6px;border-radius:5px;direction:rtl}
+    #__fw .f.sel{background:rgba(0,0,0,.07)}
+    #__fw .f.sel .nm{background:#0a84ff;color:#fff}
+    #__fw .foot{grid-column:1/3;display:flex;align-items:center;gap:10px;padding:0 16px}
+    #__fw .btn{height:32px;display:grid;place-items:center;padding:0 20px;border-radius:16px;background:rgba(255,255,255,.8);box-shadow:0 0 0 .5px rgba(0,0,0,.14),0 1px 2px rgba(0,0,0,.06);font-weight:500}
+    #__fw .btn.opts{margin-right:auto}
+    #__fw .btn.pri{background:#0a84ff;color:#fff;box-shadow:none;opacity:.45}
     #__fw .btn.pri.ok{opacity:1}\`
-  const finder = (files) => \`
+  const ico = {
+    airdrop: "<svg viewBox='0 0 16 16' fill='none' stroke='currentColor' stroke-width='1.4'><circle cx='8' cy='8' r='2'/><path d='M4.5 11.5a5 5 0 1 1 7 0M2.4 13.6a8 8 0 1 1 11.2 0'/></svg>",
+    recents: "<svg viewBox='0 0 16 16' fill='none' stroke='currentColor' stroke-width='1.4'><circle cx='8' cy='8' r='6.2'/><path d='M8 4.6V8l2.4 1.6'/></svg>",
+    apps: "<svg viewBox='0 0 16 16' fill='none' stroke='currentColor' stroke-width='1.4'><path d='M8 1.8 3 14.2M8 1.8l5 12.4M4.6 10h6.8'/></svg>",
+    desktop: "<svg viewBox='0 0 16 16' fill='none' stroke='currentColor' stroke-width='1.4'><rect x='1.8' y='2.6' width='12.4' height='8.6' rx='1.4'/><path d='M5.5 14h5M8 11.2V14'/></svg>",
+    docs: "<svg viewBox='0 0 16 16' fill='none' stroke='currentColor' stroke-width='1.4'><path d='M4 1.8h5.5L12.5 5v9.2H4z'/><path d='M9.5 1.8V5h3'/></svg>",
+    down: "<svg viewBox='0 0 16 16' fill='none' stroke='currentColor' stroke-width='1.4'><circle cx='8' cy='8' r='6.2'/><path d='M8 4.5v6.2M5.4 8.3 8 10.9l2.6-2.6'/></svg>",
+    mac: "<svg viewBox='0 0 16 16' fill='none' stroke='currentColor' stroke-width='1.4'><rect x='2.6' y='3' width='10.8' height='7.4' rx='1'/><path d='M1 12.6h14'/></svg>",
+    cloud: "<svg viewBox='0 0 16 16' fill='none' stroke='currentColor' stroke-width='1.4'><path d='M4.4 12.5a3 3 0 0 1-.3-6 4 4 0 0 1 7.7 1.2 2.4 2.4 0 0 1 .2 4.8z'/></svg>",
+  }
+  const finder = () => \`
     <div id="__fw">
-      <div class="bar"><span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span><span class="ttl">Open</span></div>
-      <div class="side"><div class="h">Favorites</div>
-        <div class="it" data-k="recents">🕘 Recents</div><div class="it" data-k="desktop">🖥 Desktop</div>
-        <div class="it" data-k="documents">📄 Documents</div><div class="it" data-k="downloads">⬇️ Downloads</div>
-        <div class="h">Locations</div><div class="it">💻 MacBook Pro</div><div class="it">☁️ iCloud Drive</div></div>
+      <div class="side"><div class="lights"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i></div>
+        <div class="h">Favorites</div>
+        <div class="it">\${ico.airdrop}AirDrop</div><div class="it" data-k="recents">\${ico.recents}Recents</div>
+        <div class="it">\${ico.apps}Applications</div><div class="it" data-k="desktop">\${ico.desktop}Desktop</div>
+        <div class="it" data-k="documents">\${ico.docs}Documents</div><div class="it" data-k="downloads">\${ico.down}Downloads</div>
+        <div class="h">Locations</div><div class="it">\${ico.mac}MacBook Pro</div><div class="it">\${ico.cloud}iCloud Drive</div>
+        <div class="h">Tags</div><div class="it"><span class="tag" style="background:#ff453a"></span>Red</div><div class="it"><span class="tag" style="background:#30d158"></span>Green</div></div>
+      <div class="tb"><div class="cap"><span>‹</span><span>›</span></div><div class="ttl">Recents</div>
+        <div class="cap" style="margin-left:6px"><span>▦</span><span>☰</span></div><div class="cap srch">⌕&nbsp; Search</div></div>
       <div class="files"></div>
-      <div class="foot"><span class="btn" data-k="cancel">Cancel</span><span class="btn pri" data-k="open">Open</span></div>
+      <div class="foot"><span class="btn opts">Show Options</span><span class="btn" data-k="cancel">Cancel</span><span class="btn pri" data-k="open">Open</span></div>
     </div>\`
   const mount = () => {
     if (document.getElementById("__sim")) return
@@ -99,15 +121,18 @@ const OVERLAY = `(() => {
   window.__simRipple = (x, y) => { mount(); const r = document.createElement("div"); r.className = "__rip"; r.style.left = x + "px"; r.style.top = y + "px"; document.getElementById("__sim").appendChild(r); setTimeout(() => r.remove(), 600) }
   window.__finderOpen = (files) => {
     mount(); const fd = document.getElementById("__fd"); fd.innerHTML = finder(); fd.classList.add("on")
-    fd.querySelector("[data-k=recents]").classList.add("sel")
-    fd.__files = files
+    const show = (k) => {
+      fd.querySelectorAll(".side .it").forEach((e) => e.classList.toggle("sel", e.dataset.k === k))
+      fd.querySelector(".ttl").textContent = { recents: "Recents", downloads: "Downloads", desktop: "Desktop", documents: "Documents" }[k] || k
+      fd.querySelector(".files").innerHTML = (k === "downloads" ? files : []).map((f) =>
+        "<div class='f' data-f='" + f.name + "'><div class='ic'><img src='" + f.thumb + "'></div><div class='nm'>" + f.name + "</div></div>").join("")
+      save({ folder: k })
+    }
+    show(JSON.parse(sessionStorage.__sim || "{}").folder || "recents")
     fd.onclick = (ev) => {
       const it = ev.target.closest("[data-k],.f"); if (!it) return
-      if (it.classList.contains("it")) {
-        fd.querySelectorAll(".side .it").forEach((e) => e.classList.remove("sel")); it.classList.add("sel")
-        fd.querySelector(".files").innerHTML = (it.dataset.k === "downloads" ? fd.__files : []).map((f) =>
-          "<div class='f' data-f='" + f.name + "'><div class='ic'>" + (f.thumb ? "<img src='" + f.thumb + "'>" : f.ext) + "</div><div class='nm'>" + f.name + "</div></div>").join("")
-      } else if (it.classList.contains("f")) {
+      if (it.classList.contains("it")) show(it.dataset.k)
+      else if (it.classList.contains("f")) {
         fd.querySelectorAll(".f").forEach((e) => e.classList.remove("sel")); it.classList.add("sel")
         fd.querySelector("[data-k=open]").classList.add("ok")
       }
@@ -216,19 +241,21 @@ const sim = {
   /** Native <select>: click it like a user, then choose (the OS menu itself is never rendered headless). */
   async select(locator, value) { await sim.click(locator, { pause: 380 }); await locator.selectOption(value); await sim.wait(420) },
   /** Upload through a simulated macOS Finder sheet: Downloads → file → Open → the real upload. */
-  async upload(trigger, file, { name, decoys = [] } = {}) {
+  async upload(trigger, file, { files }) {
     const chooserP = page.waitForEvent("filechooser", { timeout: 15000 })
     await sim.click(trigger, { pause: 150 })
     const chooser = await chooserP
-    const thumb = "data:image/png;base64," + readFileSync(file).toString("base64")
-    const files = [...decoys.slice(0, 2), { name: name ?? file.split("/").pop(), thumb }, ...decoys.slice(2)]
-    await page.evaluate((files) => window.__finderOpen(files), files)
-    await sim.wait(700)
-    await sim.click(page.locator("#__fd [data-k=downloads]"), { pause: 650 })
-    await sim.click(page.locator(`#__fd .f[data-f="${files[decoys.slice(0, 2).length].name}"]`), { pause: 550 })
-    await sim.click(page.locator("#__fd [data-k=open]"), { pause: 150 })
+    const list = files.map((f) => ({ name: f.name, thumb: "data:image/jpeg;base64," + readFileSync(f.path).toString("base64") }))
+    await page.evaluate((list) => window.__finderOpen(list), list)
+    await sim.wait(600)
+    const inDownloads = await page.locator("#__fd [data-k=downloads].sel").count()
+    if (!inDownloads) await sim.click(page.locator("#__fd [data-k=downloads]"), { pause: 600 })
+    const pick = files.find((f) => f.path === file)
+    await sim.click(page.locator(`#__fd .f[data-f="${pick.name}"]`), { pause: 450 })
+    await sim.click(page.locator("#__fd [data-k=open]"), { pause: 120 })
     await page.evaluate(() => window.__finderClose())
-    await chooser.setFiles(file); await sim.wait(2200)
+    // upload under the Finder name, so storage and the product see what the admin picked
+    await chooser.setFiles({ name: pick.name, mimeType: "image/jpeg", buffer: readFileSync(file) }); await sim.wait(1800)
   },
   asset: (n) => join(here, "..", "assets", n),
 }
@@ -274,19 +301,22 @@ const total = INTRO + takeLen + OUTRO
 
 // The take plays inside a window; the band beneath it belongs to the captions, so a caption
 // never covers a field however far the camera zooms.
-const WIN = { x: 100, y: 22, w: 1720, h: Math.round(1720 * VH / VW) }
+// Flat: the take fills the whole 1920x1080 frame (no window, no shadow); only the camera moves.
+const WIN = { x: 0, y: 0, w: 1920, h: 1080 }
 const k0 = WIN.w / VW
-const ease = (x) => (x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2)
+const CAP_CSS = (z) => 170 / (k0 * z)   // the caption's strip at the bottom, in page px at zoom z
+const ease = (x) => -(Math.cos(Math.PI * x) - 1) / 2   // sine in-out: no snap at either end
 // Fit: the framed rect (plus room for labels above fields) fills ~80% of the window, ≤ 2×.
 const fit = (e) => {
   if (!e.r) return { cx: e.cx ?? VW / 2, cy: e.cy ?? VH / 2, z: e.z ?? 1 }
   const top = e.r.y1 - e.pad - 26, w = e.r.x2 - e.r.x1 + 2 * e.pad, h = e.r.y2 + e.pad - top
-  const z = e.zFix ?? Math.max(1, Math.min(2, (VW * .8) / w, (VH * .78) / h))
-  return { cx: (e.r.x1 + e.r.x2) / 2, cy: (top + e.r.y2 + e.pad) / 2, z }
+  const z = e.zFix ?? Math.max(1, Math.min(1.9, (VW * .78) / w, (VH * .7) / h))
+  // nudge down so the framed fields sit above the caption strip
+  return { cx: (e.r.x1 + e.r.x2) / 2, cy: (top + e.r.y2 + e.pad) / 2 + CAP_CSS(z) / 2, z }
 }
 const cams = [{ o: 0, cx: VW / 2, cy: VH / 2, z: 1 }, ...timeline.filter((e) => e.type === "cam").map((e) => ({ o: e.o, ...fit(e) }))]
 // Each move starts from wherever the camera is when it fires (a move may interrupt another).
-const CAM_T = 0.9
+const CAM_T = 1.25
 const lerpCam = (a, b, k) => ({ cx: a.cx + (b.cx - a.cx) * k, cy: a.cy + (b.cy - a.cy) * k, z: a.z + (b.z - a.z) * k })
 for (let i = 1; i < cams.length; i++) cams[i].from = lerpCam(cams[i - 1].from ?? cams[0], cams[i - 1], ease(Math.min(1, (cams[i].o - cams[i - 1].o) / CAM_T)))
 function camAt(T) {
@@ -317,15 +347,15 @@ const STAGE = `<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf
 @font-face{font-family:S;src:url(${font("sans-500")});font-weight:500}@font-face{font-family:S;src:url(${font("sans-700")});font-weight:700}
 @font-face{font-family:D;src:url(${font("serif-display-900")});font-weight:900}
 *{margin:0;box-sizing:border-box}html,body{width:1920px;height:1080px;overflow:hidden;background:#fff;font-family:S;color:#0a0a0a}
-html,body{background:#f4f4f2}#win{position:absolute;left:${WIN.x}px;top:${WIN.y}px;width:${WIN.w}px;height:${WIN.h}px;border-radius:18px;overflow:hidden;background:#fff;box-shadow:0 24px 70px rgba(0,0,0,.14),0 0 0 1px rgba(0,0,0,.05)}
+html,body{background:#fff}#win{position:absolute;inset:0;overflow:hidden;background:#fff}
 #scr{position:absolute;left:0;top:0;width:${VW}px;height:${VH}px;transform-origin:0 0}
-#cap{position:absolute;top:${WIN.y + WIN.h + 14}px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:14px;padding:8px 26px 8px 28px;background:#0a0a0a;color:#fff;border-radius:999px;white-space:nowrap;box-shadow:0 10px 30px rgba(0,0,0,.22)}
-#cap .n{width:40px;height:40px;border-radius:50%;background:#00bc6e;color:#0a0a0a;display:grid;place-items:center;font-weight:700;font-size:25px}
-#cap .t{font-size:27px;font-weight:500}
-#toasts{position:absolute;right:${1920 - WIN.x - WIN.w + 24}px;top:${WIN.y + 24}px;display:flex;flex-direction:column;gap:12px;align-items:flex-end}
-.toast{display:flex;gap:14px;align-items:flex-start;width:470px;padding:16px 20px;background:#fff;border-radius:16px;box-shadow:0 14px 40px rgba(0,0,0,.16),0 0 0 1px rgba(0,0,0,.05)}
-.toast .i{flex:none;width:34px;height:34px;border-radius:50%;background:#e3f8ee;color:#00a35f;display:grid;place-items:center;font-size:20px;font-weight:700}
-.toast b{display:block;font-size:20px;margin-bottom:2px}.toast span{font-size:23px;line-height:1.35;color:#333}
+#cap{position:absolute;bottom:72px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:20px;padding:16px 38px 16px 40px;background:rgba(10,10,10,.92);color:#fff;border-radius:999px;white-space:nowrap}
+#cap .n{width:56px;height:56px;border-radius:50%;background:#00bc6e;color:#0a0a0a;display:grid;place-items:center;font-weight:700;font-size:31px}
+#cap .t{font-size:38px;font-weight:500}
+#toasts{position:absolute;right:150px;top:150px;display:flex;flex-direction:column;gap:12px;align-items:flex-end}
+.toast{display:flex;gap:18px;align-items:flex-start;width:640px;padding:22px 26px;background:#fff;border-radius:20px;border:1.5px solid #e4e4e0}
+.toast .i{flex:none;width:44px;height:44px;border-radius:50%;background:#e3f8ee;color:#00a35f;display:grid;place-items:center;font-size:24px;font-weight:700}
+.toast b{display:block;font-size:26px;margin-bottom:4px;color:#00a35f}.toast span{font-size:31px;line-height:1.4;color:#222}
 .card{position:absolute;inset:0;display:grid;place-items:center;text-align:center;background:#f4f4f2}
 .card .in{display:flex;flex-direction:column;align-items:center;gap:26px}
 .card img{width:110px;height:110px}.ti{font-family:D;font-weight:900;font-size:120px;line-height:1.15}.ti mark{background:#a7e8c9;color:inherit;padding:0 18px}
@@ -341,11 +371,11 @@ window.paint=async(s)=>{
   if(img.dataset.src!==s.frame){img.src=s.frame;img.dataset.src=s.frame;await img.decode().catch(()=>{})}
   const sc=k0*s.cam.z;img.style.transform="translate("+(${WIN.w / 2}-s.cam.cx*sc)+"px,"+(${WIN.h / 2}-s.cam.cy*sc)+"px) scale("+sc+")";
   const cap=document.getElementById("cap");
-  if(s.cap){cap.style.opacity=s.cap.a;cap.style.transform="translateX(-50%) translateY("+(1-s.cap.a)*-14+"px)";cap.querySelector(".n").textContent=s.cap.n;cap.querySelector(".t").textContent=s.cap.text}else cap.style.opacity=0;
-  document.getElementById("toasts").innerHTML=s.toasts.map(t=>'<div class="toast" style="opacity:'+t.a+';transform:translateX('+(1-t.a)*40+'px)"><div class="i">✓</div><div><b>'+t.title+'</b><span>'+t.text+'</span></div></div>').join("");
+  if(s.cap){cap.style.opacity=s.cap.a;cap.style.transform="translateX(-50%)";cap.querySelector(".n").textContent=s.cap.n;cap.querySelector(".t").textContent=s.cap.text}else cap.style.opacity=0;
+  document.getElementById("toasts").innerHTML=s.toasts.map(t=>'<div class="toast" style="opacity:'+t.a+'"><div class="i">✓</div><div><b>'+t.title+'</b><span>'+t.text+'</span></div></div>').join("");
   const i=document.getElementById("intro");i.style.opacity=s.intro;i.style.display=s.intro>0?"grid":"none";
   i.querySelector(".ti").style.opacity=Math.min(1,s.introT/.7);i.querySelector(".su").style.opacity=Math.max(0,Math.min(1,(s.introT-.5)/.7));
-  const o=document.getElementById("outro");o.style.opacity=s.outro;o.style.display=s.outro>0?"grid":"none";o.querySelector(".in").style.transform="translateY("+(1-s.outro)*24+"px)";
+  const o=document.getElementById("outro");o.style.opacity=s.outro;o.style.display=s.outro>0?"grid":"none";
 };
 </script></body></html>`
 writeFileSync(join(work, "stage.html"), STAGE)

@@ -14,17 +14,30 @@ export const meta = {
 
 const NAME = "أحمد عمر الطيب"
 const digits = () => String(Math.floor(10000000 + Math.random() * 89999999))
-const DECOYS = [
-  { name: "شهادة-الميلاد.pdf", ext: "PDF" },
-  { name: "كشف-الدرجات.pdf", ext: "PDF" },
-  { name: "جواز-ولي-الأمر.jpg", ext: "JPG" },
+const A = (f) => new URL(`../../assets/hogwarts/${f}`, import.meta.url).pathname
+// Downloads, as the admin's Mac shows it — the photo and the five documents (make-docs.mjs).
+const FILES = [
+  { slot: null, name: "صورة-أحمد.jpg", path: A("photo.jpg") },
+  { slot: "الشهادة", name: "شهادة-الروضة.jpg", path: A("degree.jpg") },
+  { slot: "كشف الدرجات", name: "تقرير-الروضة.jpg", path: A("transcript.jpg") },
+  { slot: "الهوية", name: "شهادة-الميلاد.jpg", path: A("id.jpg") },
+  { slot: "السيرة الذاتية", name: "ملف-الطالب.jpg", path: A("resume.jpg") },
+  { slot: "أخرى", name: "بطاقة-التطعيم.jpg", path: A("other.jpg") },
 ]
 
 export async function cleanup({ page, go }) {
   await archiveTestStudent({ page, go })
 }
 
-export async function prepare({ go }) {
+export async function prepare({ page, go }) {
+  // Document tiles fire a paid AI extraction (and pre-fill fields from what it reads). Filming
+  // blocks exactly that server action — the uploads themselves run as in the real app.
+  await page.route("**/*", (route) => {
+    const r = route.request()
+    if (r.method() === "POST" && r.headers()["next-action"] && /"(degree|transcript|id|resume|other)Url"\]$/.test(r.postData() || ""))
+      return (console.log("blocked AI extraction:", (r.postData() || "").slice(-14)), route.abort())
+    return route.continue()
+  })
   await go("/ar/students")
 }
 
@@ -43,17 +56,22 @@ export default async (sim) => {
   await sim.click(add, { pause: 200 })
   await page.waitForURL(/students\/add\/.+\/attachments/, { timeout: 60000 }); await sim.settle()
 
-  // 2 — documents: the photo through Finder
+  // 2 — documents: the photo and every document, each through Finder
+  sim.caption(2, "ارفع صورة الطالب ومستنداته")
+  const tiles = page.locator("form").first()
+  // the whole page for this step: six tiles, the heading and the Finder window all matter
   await sim.focus(null)
-  sim.caption(2, "ارفع صورة الطالب من جهازك")
-  const photo = page.locator("form").locator("[class*=rounded-full], [data-variant=avatar]").first()
-  await sim.focus(photo, { z: 1.8 })
   await sim.wait(900)
-  await sim.focus(null)
-  await sim.upload(photo, sim.asset("student-avatar.png"), { name: "صورة-أحمد.png", decoys: DECOYS })
-  await sim.focus(page.locator("form").first())
-  sim.toast("رفع الهوية أو الشهادة يملأ بيانات الطالب تلقائياً — والمستندات اختيارية")
-  await sim.wait(2600)
+  const photo = page.locator("form").locator("[class*=rounded-full], [data-variant=avatar]").first()
+  for (const f of FILES) {
+    const target = f.slot ? page.locator("form div.h-32").filter({ hasText: f.slot }).first() : photo
+    await sim.upload(target, f.path, { files: FILES })
+  }
+  // tips only once every Finder window is gone — never on top of one
+  sim.toast("الصورة تظهر في ملف الطالب وقوائم المدرسة")
+  await sim.wait(1700)
+  sim.toast("رفع الهوية أو الشهادة يملأ بيانات الطالب تلقائياً")
+  await sim.wait(3000)
   await sim.focus(null)
   await sim.click(next, { pause: 200 })
   await page.waitForURL(/\/personal/); await sim.settle()

@@ -91,33 +91,41 @@ node ~/.claude/skills/shoot/scripts/motion.mjs <composition.html> <out.mp4> [--p
 ## Sim — the tutorial video: the real flow, filmed as a human, directed into ONE file
 
 The real wizard on the demo, driven like an admin: an on-page cursor glides and clicks (green
-ripple), every field is filled in reading order (RTL), text typed key by key, dropdowns and the
-native month/year selects opened and picked, uploads through a simulated macOS Finder "Open"
-sheet (Downloads → file → Open) then the real upload. Recorded headless at the Mac frame at full
-Retina (`--force-device-scale-factor=2.5`, or CDP screencast drops to CSS size). A director pass
-then composes, per output frame: intro card → the take in a window with a smooth camera zooming
-onto the fields being filled → numbered captions in a band BELOW the window (never over a field)
-→ tip toasts → outro card. Frozen server waits are trimmed to 1.2 s; typing and `sim.wait` keep
-real time.
+ripple), every field filled in reading order (RTL), text typed key by key, dropdowns and native
+month/year selects picked, and every upload through a simulated **macOS 27 Finder** "Open"
+window (Liquid Glass, sidebar, Downloads with real thumbnails, remembers the last folder) then the
+real upload — so tiles show the product's own thumbnail, label and × clear button. Recorded
+headless at the Mac frame at full Retina (`--force-device-scale-factor=2.5`, or the CDP
+screencast drops to CSS size). A director pass composes the ONE file: intro card → the take
+**flat and full-screen** (no window, no shadow) with a calm sine-eased camera on the fields being
+filled → large numbered captions inward at the bottom (the camera keeps fields above them) → tip
+toasts inward at the top-right, fade only → outro card. Frozen server waits are trimmed to 1.2 s.
 
 ```
-node ~/.claude/skills/shoot/scripts/sim.mjs --flow add-student            # take + direct (~10 min)
+node ~/.claude/skills/shoot/scripts/sim.mjs --flow add-student                 # take + direct (~25 min)
 node ~/.claude/skills/shoot/scripts/sim.mjs --flow add-student --direct-only   # re-compose the saved take
 ```
 
-- **One file, overwritten:** `<repo>/public/screenshot/<flow>/<flow>-ar.mp4`. Never sibling
-  variants (Abdout, 2026-10-06). The take lives in `~/.cache/shoot-sim/<repo>-<flow>/`.
-- Sim files: `sims/<repo>/<flow>.mjs` — `meta` (intro/outro text), `default async (sim)`,
-  `prepare`, `cleanup`. API: `sim.caption(n, text)` · `sim.toast(text)` · `sim.focus(loc | [locs] | null, { z })`
-  (camera; the zoom is fitted in the director, so `--direct-only` can re-tune it) · `sim.click` ·
+- **One file, overwritten:** `<repo>/public/screenshot/<flow>/<flow>-ar.mp4`. Never variants.
+  The take is `~/.cache/shoot-sim/<repo>-<flow>/` (frames + `take.json`). Camera/caption/toast
+  timing is in `take.json` — edit an event there and `--direct-only` instead of a new take.
+- Sim files: `sims/<repo>/<flow>.mjs` — `meta`, `prepare`, `cleanup`, `default async (sim)`. API:
+  `sim.caption(n, text)` · `sim.toast(text)` · `sim.focus(loc | [locs] | null, { z })` · `sim.click` ·
   `sim.type(loc, text, { cps })` · `sim.pick(trigger, name | index)` · `sim.select(nativeSelect, value)` ·
-  `sim.upload(trigger, sim.asset("…png"), { name, decoys })` · `sim.move` · `sim.wait(ms)`.
-- Frame the FIELDS being filled (an array of locators), not `<form>` — a whole form puts the
-  active field at the window edge. Full-width rows: frame their start (name + one cell).
-- Never upload to a slot that fires paid AI extraction (hogwarts document tiles); the photo circle
-  is safe. Upload drawn assets from `assets/`, never a real person's photo.
-- Pick happy-path data (hogwarts: section «الصف الأول - أ» has a timetable; «الصف A-1» raises a
-  warning toast). Toasts are tutorial TIPS («نصيحة») — never fake product notifications.
+  `sim.upload(trigger, path, { files })` (files = everything Finder shows) · `sim.move` · `sim.wait(ms)`.
+- Frame the FIELDS being filled, not `<form>`; a page where everything matters (6 upload tiles +
+  Finder) stays full-screen. Tips go AFTER modal moments, never on top of the Finder window.
+- **Paid side effects are blocked, not avoided:** hogwarts document tiles fire a paid AI extraction
+  (and would pre-fill fields) — `prepare` aborts exactly that server action (`next-action` POST
+  ending in `"…Url"]`) and logs each block; the upload itself runs as in the real app.
+- Media: `assets/hogwarts/` — `photo.jpg` (Abdout's supplied stock photo, checkerboard removed by
+  `clean-bg.py`) and five A4 sample "scans" from `make-docs.mjs`, all watermarked «نموذج للعرض».
+  **Git-ignored**: kun is public and the photo's licence is unverified. Never a real child's photo
+  from the web; AI image generation needs a paid Gemini tier (free tier = 0 images/day).
+- Happy-path data: section «الصف الأول - أ» (has a timetable; «الصف A-1» raises a warning toast).
+  Toasts are tutorial TIPS («نصيحة») — never fake product notifications.
+- Found by sims, fixed in hogwarts 2026-10-06: Arabic file names failed every S3 upload (header
+  metadata), and document slots refused photos. Sims are QA — report what they hit.
 
 ## Close
 
