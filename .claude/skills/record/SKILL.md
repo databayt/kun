@@ -1,11 +1,13 @@
 ---
 name: record
-description: Screen-record demo videos and screenshot sets of real product flows, mirrored to Google Drive
-when_to_use: "Use when a REAL product page, flow or block must be captured — stills matching Abdout's laptop (headless shoot), demo videos, re-records after UI changes, Drive sync. Not /screenshot (views an existing capture) or /higgs (generates media). Triggers on: take a screenshot of <url>, screenshot the <x> flow, record <block>, demo video, walkthrough, re-record, لقطة شاشة, سجل فيديو."
-argument-hint: "[block|flow|url] [--repo <repo>] [--locale ar|en] [--shots-only] | shoot <path…>|--flow <name>"
+description: Screen-record demo videos of real product flows, mirrored to Google Drive
+when_to_use: "Use when a product flow must be captured as VIDEO — demo videos, ad cuts, walkthroughs, re-records, Drive sync. Stills are /shoot. Triggers on: record, record <flow|block>, demo video, walkthrough, screen recording, re-record, سجل فيديو."
+argument-hint: "[block|flow|url] [--repo <repo>] [--locale ar|en]"
 ---
 
-# Record — capture the real product
+# Record — film the real product
+
+> Screenshots moved to `/shoot` (2026-10-06): `shoot` = stills, `record` = video.
 
 Film and photograph databayt products as they actually run — signup flows, onboarding
 wizards, block features — and file every asset into one organized library that mirrors
@@ -79,39 +81,6 @@ CLI: `bash ~/.claude/scripts/record.sh <cmd>` (canonical copy in kun).
   coords are LOGICAL points = screenshot pixels ÷ 2 on this Retina display). Decide
   before the take; per-field mixing looks worse than either.
 
-## Stills lane — `shoot` (Abdout's laptop, headless, the default for screenshots)
-
-When Abdout asks for screenshots ("take a screenshot of /ar/students", "screenshot the add
-student flow"), don't drive a visible browser — run the shoot script. It needs no screen,
-no Do Not Disturb, no MCP, and logs into the demo itself:
-
-```
-node ~/.claude/skills/record/scripts/shoot.mjs /ar/students /ar/teachers   # stills, one login
-node ~/.claude/skills/record/scripts/shoot.mjs --flow add-student          # scripted flow
-  [--role admin|teacher|student|guardian|accountant|staff] [--host <url>] [--full] [--zoom 1.25]
-```
-
-- **Frame = his manual screenshot**: 14" MacBook Pro M4 (1512x982 logical, Retina 2x),
-  Chrome filling the screen (page area 1512x857), **Chrome zoom 125%** → CSS viewport
-  1210x686 at devicePixelRatio **2.5** → ~3025x1715 px. Approved by Abdout 2026-10-06.
-  Never fake zoom with CSS `zoom` on `<html>` — layout and breakpoints still see 1512 px
-  and he can see the difference.
-- **Where + name** (his choice): `~/<repo>/public/screenshot/`, file = the short URL with
-  the brand and host dropped, locale last: `/ar/students` → `students-ar.png`,
-  `/ar` → `home-ar.png`, `/ar/s/demo/students/new` → `students-new-ar.png`. Same name =
-  overwrite, so a re-shoot replaces the old shot. Flows: `<flow>/NN-<step>-<locale>.png`.
-- **Host**: `https://demo.balqalam.com` (demo tenant, role picker, password-less). The
-  marketing home is `--host https://balqalam.com`. Don't shoot `localhost:3000` without
-  checking which repo owns the port (`lsof -ti tcp:3000` → `lsof -p <pid> -d cwd`): on
-  2026-10-06 it was serving `~/space`, not hogwarts.
-- **Flows** are files: `scripts/../flows/<repo>/<flow>.mjs` exporting
-  `async ({ page, go, shot, settle }) => { await go("/ar/students"); await shot("list"); … }`.
-  Write the flow once, rerun it after every UI change — a re-shoot costs one command.
-  Data created on the demo tenant by a flow (a new student) should be removed afterwards,
-  or the next run's list shot carries it.
-- Read every PNG before reporting it done; send it with `SendUserFile` and give the path.
-- Videos and the `~/media` library below are a separate lane, for ads and walkthroughs.
-
 ## Procedure
 
 ### 1. Prep
@@ -152,8 +121,8 @@ record.sh assemble onboarding-flow--ar
 `stop` uses SIGINT — a plain kill leaves the .mov unfinalized. `otp` refuses to run
 while recording, by design.
 
-**Screenshots (blocks/routes)** — default to the stills lane above (`shoot.mjs`). Inside a
-video take, or when a saved MCP session is required, instead for each route: navigate, wait for settle, capture
+**Stills** are `/shoot` (headless, Abdout's laptop frame). Only a still taken INSIDE a video
+take, or one needing a saved MCP session, comes from here — for each route: navigate, wait for settle, capture
 via the browser MCP (`browser_take_screenshot` / `take_screenshot`) with an ABSOLUTE
 path into `~/media/_work/`, both locales when relevant. `record.sh shot` is
 only for desktop-context stills.

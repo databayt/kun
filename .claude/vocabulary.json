@@ -5660,8 +5660,29 @@
           "depends": []
         },
         {
+          "name": "shoot",
+          "effect": "Take still screenshots of real product pages and scripted end-to-end flows exactly as Abdout's 14in MacBook shows them at Chrome 125% — headless, auto demo login, filed as <url-slug>-<locale>.png in <repo>/public/screenshot",
+          "order": [
+            {
+              "type": "skill",
+              "name": "/shoot"
+            }
+          ],
+          "steps": [
+            "Resolve scope — routes, or a flow file under shoot/flows/<repo>/ (write it once if missing)",
+            "Run shoot.mjs — 1210x686 viewport at DPR 2.5, demo role picker login (admin default)",
+            "Read every PNG, send the key shots, give the folder; clean up demo data a flow created"
+          ],
+          "connects": [
+            "record",
+            "handover",
+            "qa"
+          ],
+          "depends": []
+        },
+        {
           "name": "record",
-          "effect": "Screen-record demo videos and screenshot sets of the REAL running product — login walls and email OTPs handled autonomously (Outlook desktop, Gmail), assets filed by repo/block/route into ~/media and mirrored to Google Drive, re-records flagged when block source drifts",
+          "effect": "Screen-record demo videos of the REAL running product — login walls and email OTPs handled autonomously (Outlook desktop, Gmail), ad cuts of 15-45s, assets filed by repo/block/route into ~/media and mirrored to Google Drive, re-records flagged when block source drifts",
           "order": [
             {
               "type": "familiar",
@@ -5684,13 +5705,13 @@
             "Resolve scope — a named flow, a block (routes from the repo's .claude/blocks.json), or one URL; default locale ar, capture en when bilingual",
             "Prep the frame: record.sh frame (Chrome 1512x982, infobar dismissed), fresh + alias identity per take, Do Not Disturb by hand",
             "Capture in segments: record.sh start → drive the browser → stop; fetch the OTP OFF camera (record.sh otp screenshots the Outlook desktop inbox — codes are 4 digits); assemble with ffmpeg concat",
-            "Screenshots per route via the browser MCP with absolute paths into _work — both locales when relevant",
             "File every asset: record.sh file <src> --repo --block --url — lands as <repo>--<block>--<url-slug>--<kind>--<locale>--v<N> (designation rides in the filename) with the repo sha in the manifest",
             "Flows ship as ADS: record.sh adcut renders 15-45s (body sped to target, last seconds real-time); set-dress every on-camera page first and zoom the browser to 125%",
             "record.sh sync mirrors the library to My Drive/databayt/media (rsync → Finder lanes); the local library stays the truth",
             "Iterate: the session-media-stale hook and record.sh stale flag drifted blocks — re-record as vN+1, trim with ffmpeg for fine-tunes"
           ],
           "connects": [
+            "shoot",
             "higgs",
             "media",
             "handover",

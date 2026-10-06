@@ -1,7 +1,7 @@
 ---
 name: draft
 description: Full brand draft — Arabic-first copy, English mirrored, plus media
-when_to_use: "Use when a topic must become a full brand draft — copy for every channel plus media picked from the library or handed off — or, with no topic, to drain the /social brief queue. Drafting only: never picks topics (/calendar), renders media (/higgs, /carousel — it attaches their output), approves (/approve) or sends (/publish). Triggers on: draft a post, write the copy, write the caption, post about <topic>, attach media to the draft, drain the draft queue, answer the social asks, any drafts waiting, اكتب منشور, صياغة المنشور, طابور الصياغة, أرفق وسائط للمسودة."
+when_to_use: "Use when a topic must become a full brand draft — every channel's copy plus media — or, with no topic, to drain the /social brief queue. Drafting only: never picks topics (/calendar), renders media (/higgs, /carousel), approves (/approve) or sends (/publish). Triggers on: draft a post, write the copy, write the caption, post about <topic>, attach media to the draft, drain the draft queue, answer the social asks, any drafts waiting, اكتب منشور, صياغة المنشور, طابور الصياغة, أرفق وسائط للمسودة."
 argument-hint: "[<brand> <topic>] [--channels facebook,telegram] [--locale ar|en|both] [--media urls|type] · no args = drain the queue"
 ---
 
