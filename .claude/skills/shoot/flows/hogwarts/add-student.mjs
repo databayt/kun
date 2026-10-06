@@ -5,6 +5,11 @@
 
 const NAME = "أحمد الطيب"
 const FATHER = "عمر الطيب"
+// Fresh numbers every run: a phone that matches an earlier (archived) test student reuses
+// that login, and the wizard only shows the credentials dialog for a NEW login.
+const rnd = () => String(Math.floor(10000000 + Math.random() * 89999999))
+const PHONE = `+2499${rnd()}`
+const FATHER_PHONE = `+2499${rnd()}`
 
 const dialog = (page) => page.locator('[role="alertdialog"], [role="dialog"]').last()
 const next = (page) => page.getByRole("button", { name: "التالي", exact: true }).click()
@@ -76,7 +81,7 @@ export default async ({ page, go, shot }) => {
 
   await page.locator('input[name="_fullName"]').fill(NAME)
   await pickFirst(page, page.getByRole("combobox").filter({ hasText: "اختر الجنس" }))
-  await page.locator('input[name="phone"]').first().fill("+249912345678")
+  await page.locator('input[name="phone"]').first().fill(PHONE)
   await shot("personal-filled")
 
   await page.getByRole("button", { name: "الأب" }).click()
@@ -87,7 +92,7 @@ export default async ({ page, go, shot }) => {
     .locator('xpath=ancestor::div[contains(@class,"space-y-6")][1]')
     .locator('input[type="tel"]')
     .first()
-    .fill("+249912345679")
+    .fill(FATHER_PHONE)
   await shot("father")
 
   await next(page)
@@ -104,6 +109,8 @@ export default async ({ page, go, shot }) => {
 
   await page.getByRole("button", { name: "إنشاء", exact: true }).click()
   await page.waitForURL((u) => !u.pathname.includes("/add/"), { timeout: 90000 })
+  // The login-details dialog opens a beat after the redirect.
+  await dialog(page).filter({ hasText: NAME }).waitFor({ timeout: 20000 }).catch(() => {})
   await shot("created")
 
   await page.keyboard.press("Escape")
