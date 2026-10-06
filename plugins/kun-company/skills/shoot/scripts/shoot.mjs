@@ -8,6 +8,7 @@
 // Usage (canonical: kun/.claude/skills/record/scripts/shoot.mjs, installed to ~/.claude/skills/record/scripts/):
 //   node shoot.mjs /ar/students /ar/teachers              stills, one login, named by url slug
 //   node shoot.mjs --flow add-student                      run flows/<repo>/add-student.mjs → numbered steps
+//   node shoot.mjs --flow add-student --cleanup           only undo what the flow creates (after a crash)
 //   options: --host https://demo.balqalam.com  --role admin|teacher|student|guardian|accountant|staff
 //            --repo hogwarts  --out <dir>  --zoom 1.25  --full (full-page)  --name <file-stem>
 //
@@ -22,7 +23,7 @@ import { fileURLToPath, pathToFileURL } from "node:url"
 
 const args = process.argv.slice(2)
 if (!args.length || args.includes("--help") || args.includes("-h")) {
-  console.log("usage: shoot.mjs <path|url>… | --flow <name>  [--role admin] [--host url] [--repo hogwarts] [--out dir] [--zoom 1.25] [--full] [--name stem]")
+  console.log("usage: shoot.mjs <path|url>… | --flow <name>  [--role admin] [--host url] [--repo hogwarts] [--out dir] [--zoom 1.25] [--full] [--name stem] [--cleanup]")
   process.exit(0)
 }
 const opt = (k, d) => {
@@ -46,6 +47,7 @@ const zoom = Number(opt("zoom", "1.25"))
 const flowName = opt("flow")
 const forcedName = opt("name")
 const full = flag("full")
+const cleanupOnly = flag("cleanup")
 const repoDir = join(homedir(), repo)
 const outDir = opt("out", join(repoDir, "public/screenshot"))
 const paths = args
@@ -76,7 +78,7 @@ function slug(u) {
 const localeOf = (u) => new URL(u).pathname.split("/")[1] || "ar"
 
 async function settle(page) {
-  await page.waitForLoadState("networkidle").catch(() => {})
+  await page.waitForLoadState("networkidle", { timeout: 10000 }).catch(() => {})
   await page.evaluate(() => document.fonts.ready).catch(() => {})
   await page.waitForTimeout(800)
 }
@@ -94,7 +96,7 @@ async function loginIfAsked(page, wanted) {
   await page.waitForURL((u) => !u.pathname.includes("login"), { timeout: 60000 }).catch(() => {})
   await settle(page)
   if (new URL(page.url()).pathname !== new URL(wanted).pathname) {
-    await page.goto(wanted, { waitUntil: "networkidle", timeout: 90000 })
+    await page.goto(wanted, { waitUntil: "load", timeout: 90000 })
   }
 }
 
@@ -106,7 +108,8 @@ const saved = []
 
 async function go(p) {
   const url = toUrl(p)
-  await page.goto(url, { waitUntil: "networkidle", timeout: 90000 })
+  await page.goto(url, { waitUntil: "load", timeout: 90000 })
+  await settle(page)
   await loginIfAsked(page, url)
   await settle(page)
   return url
@@ -125,7 +128,13 @@ try {
     const here = dirname(fileURLToPath(import.meta.url))
     const flowFile = join(here, "..", "flows", repo, `${flowName}.mjs`)
     if (!existsSync(flowFile)) throw new Error(`no flow at ${flowFile}`)
-    const { default: flow } = await import(pathToFileURL(flowFile).href)
+    const mod = await import(pathToFileURL(flowFile).href)
+    if (cleanupOnly) {
+      if (!mod.cleanup) throw new Error(`${flowName} exports no cleanup`)
+      await mod.cleanup({ page, go, settle })
+      console.log(`cleanup done: ${flowName}`)
+    }
+    const flow = cleanupOnly ? async () => {} : mod.default
     let n = 0
     const shot = (step) =>
       snap(join(outDir, flowName, `${String(++n).padStart(2, "0")}-${step}-${localeOf(page.url())}.png`))

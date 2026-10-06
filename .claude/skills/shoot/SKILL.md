@@ -14,7 +14,7 @@ no browser MCP. It logs into the demo by itself, so it can run while Abdout keep
 node ~/.claude/skills/shoot/scripts/shoot.mjs /ar/students /ar/teachers   # stills, one login
 node ~/.claude/skills/shoot/scripts/shoot.mjs --flow add-student          # scripted flow
   [--role admin|teacher|student|guardian|accountant|staff] [--host <url>] [--repo hogwarts]
-  [--full] [--zoom 1.25] [--name <stem>] [--out <dir>]
+  [--full] [--zoom 1.25] [--name <stem>] [--out <dir>] [--cleanup]
 ```
 
 ## The frame — his manual screenshot
@@ -61,8 +61,13 @@ export default async ({ page, go, shot, settle }) => {
   800 ms) then saves the next numbered still. `page` is Playwright.
 - Name each step after what is on screen (`list`, `form`, `filled`, `saved`, `new-row`).
 - Instant `fill()` is fine — these are stills.
-- Delete demo data the flow created (the test student) at its end, or the next run's
-  list shot carries it.
+- Export a `cleanup({ page, go })` that undoes what the flow creates; call it at the start
+  (leftovers of a crashed run) and the end. `--flow <name> --cleanup` runs it alone.
+- Locate by what the UI exposes — accessible names (`getByRole("combobox", { name: "الصف" })`),
+  never nth-of-type. Unknown screen? Probe it first: dump visible inputs/buttons per step,
+  then write the flow. Remember every `+` that opens a wizard creates a draft row.
+- Existing flows: `hogwarts/add-student` (list → documents → personal → father → address →
+  academic → created dialog → new row; 9 shots).
 
 ## Close
 
