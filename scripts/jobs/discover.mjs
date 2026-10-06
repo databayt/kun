@@ -106,7 +106,9 @@ const LANES = [
   // Electrical work on board only (Abdout, 2026-10-05: seven years at sea as
   // ETO — electrical, never mechanical, never a "marine" teacher): an explicit
   // ETO title, or an electrical word next to a vessel word.
-  ["kivu-marine-eto", /\beto\b|electro-?technical|(marine|ship|vessel|offshore|on-?board|barge|seafar\w*|fleet|\brig\b|fpso|dredg\w*|maritime).{0,40}electric|electric\w*.{0,40}(marine|ship\b|vessel|offshore|on-?board|barge|\brig\b|fpso|dredg|maritime)/i],
+  // 2026-10-06: plus shore-side marine electrical work that needs no STCW
+  // certificate — shipyards, dry docks, ports, offshore platforms, wind farms.
+  ["kivu-marine-eto", /\beto\b|electro-?technical|(marine|ship\w*|vessel|offshore|on-?board|barge|seafar\w*|fleet|\brig\b|fpso|dredg\w*|maritime|dry ?dock|dockyard|\bport\b|harbou?r|platform|wind ?farm|subsea)[\w ,/&–—-]{0,40}electric|electric\w*[\w ,/&–—-]{0,40}(marine|ship\w*|vessel|offshore|on-?board|barge|\brig\b|fpso|dredg|maritime|dry ?dock|dockyard|\bport\b|harbou?r|platform|wind ?farm|subsea)/i],
   ["kigali-electrical-engineer", /electric|\be&i\b|electromechanical|power (plant|system)|energy engineer|maintenance (engineer|technician)|engineering technician|biomedical|instrumentation|solar|(quality|qa\/?qc).{0,30}engineer|construction.{0,30}engineer/i],
   ["kigali-web-developer", /software|developer|\bweb\b|full[- ]?stack|front[- ]?end|back[- ]?end|data (engineer|scien|analy)|\bict\b|programmer|devops|systems? (analyst|administrator|engineer)|digital|\bit (officer|specialist|support|lead)|applications specialist|product operations|technical support|\b(ai|artificial intelligence|automation|agentic|llm) (engineer|developer|specialist|officer)\b/i],
 ];
@@ -123,6 +125,20 @@ const CITIZENS_ONLY =
 // a bar — "while we love all parts of the world, we can only hire permanent
 // US residents" — which sailed through and cost a tailored letter.
 const TEXT_BAD = /(must|should) (be )?(based|located|reside|living) in (the )?(us|u\.s\.|united states|canada|uk|united kingdom|europe|eu|european union|north america)|authori[sz]ed to work in (the )?(us|u\.s\.|united states|uk|united kingdom|canada|eu)|(us|u\.s\.) citizen|green card|security clearance|eligible to work in (the )?(us|uk|eu|europe)|permanent (us|u\.s\.|united states|uk|canadian) residents?|can only (hire|employ)[^.]{0,80}\b(us|u\.s\.|united states|uk|united kingdom|canada|eu|europe)\b/i;
+
+/// STCW certificates Abdout holds (2026-10-06: none — the passport and
+/// seaman's-book scan show seaman's book 14148, crowd management A-V/2, and no
+/// certificate of competency). A posting that demands one he lacks is dropped:
+/// an ETO officer rank needs III/6, a seagoing ship electrician III/7. Add
+/// "III/6" or "III/7" here the day he holds it and both lanes reopen.
+const HELD_STCW = [];
+const NEEDS_III6 = /a-?iii\s*\/\s*6|\biii\s*\/\s*6\b|eto (coc|certificate of competency|licen[cs]e)|certificate of competency[^.]{0,40}(eto|electro)/i;
+const NEEDS_III7 = /a-?iii\s*\/\s*7|\biii\s*\/\s*7\b|electro-?technical rating|\betr\b (cop|certificate)/i;
+export function stcwBar(text) {
+  if (NEEDS_III6.test(text) && !HELD_STCW.includes("III/6")) return "needs STCW A-III/6 (ETO CoC)";
+  if (NEEDS_III7.test(text) && !HELD_STCW.includes("III/7")) return "needs STCW A-III/7 (electro-technical rating)";
+  return null;
+}
 
 /// Titles Abdout never applies to, whatever lane words they carry (2026-10-05):
 /// teaching posts, and mechanical roles that are not also electrical — he is an
@@ -778,6 +794,27 @@ const ADAPTERS = {
         }
       }
     }
+    // Marine / offshore electrical work that needs no STCW certificate
+    // (2026-10-06). The search page has no card list, so titles come from
+    // its <h2> links; the lane regex still decides.
+    for (const [host, home] of sites) {
+      for (const q of ["marine electrician", "offshore electrician"]) {
+        const page = `${host}/search/jobs?q=${encodeURIComponent(q)}`;
+        const html = await get(page).catch(() => "");
+        for (const [, href, raw] of html.matchAll(/<h2><a href="(\/job\/[^"]+)">([\s\S]*?)<\/a>/g)) {
+          const [title, company] = text(raw).split(/ at (?=[^ ])/);
+          const url = `${host}${href}`;
+          if (!title || seen.has(url)) continue;
+          seen.add(url);
+          const campaign = laneForJob(title);
+          if (campaign !== "kivu-marine-eto") continue;
+          const bar = stcwBar(title);
+          if (bar) { dropped.push(`${bar}: ${title}`); continue; }
+          if (items.length >= LIMIT) break;
+          items.push(item({ title, company, location: home, url, source: host.includes(".co.ke") ? "myjobmag-kenya" : "myjobmag-nigeria", campaign }));
+        }
+      }
+    }
     return { items, dropped };
   },
 
@@ -795,6 +832,12 @@ const ADAPTERS = {
   async martide() {
     const items = [];
     const dropped = [];
+    // Every contract on Martide's ETO rank page is an officer post under STCW
+    // III/6 — closed until he holds that certificate.
+    if (!HELD_STCW.includes("III/6")) {
+      dropped.push("martide: ETO rank needs STCW A-III/6 — skipped (HELD_STCW has none)");
+      return { items, dropped };
+    }
     const html = await get("https://www.martide.com/en/jobs/electrical-technical-officer");
     const urls = [...new Set([...html.matchAll(/href="(https:\/\/www\.martide\.com\/en\/jobs\/[a-z0-9-]+-\d+)"/g)].map((m) => m[1]))];
     if (urls.length === 0) dropped.push("martide: 0 jobs on the ETO page — markup changed?");
@@ -871,7 +914,7 @@ const ADAPTERS = {
     const seen = new Set();
     const ETO_TITLE = LANES.find(([id]) => id === "kivu-marine-eto")[1];
     const AT_SEA = /offshore|vessel|marine|fpso|drill ?ship|jack-?up|semi-?sub|on ?board|\beto\b|electro-?technical/i;
-    for (const q of ["offshore electrical", "electro technical officer"]) {
+    for (const q of ["offshore electrician", "marine electrician"]) {
       const html = await get(`https://www.rigzone.com/oil/jobs/search/?sk=${encodeURIComponent(q)}`);
       if (html.length === 0) {
         dropped.push(`rigzone: throttled (empty response) on "${q}" — next run tomorrow`);
@@ -897,6 +940,8 @@ const ADAPTERS = {
         const url = `https://www.rigzone.com${href}`;
         const body = text(await get(url));
         if (CITIZENS_ONLY.test(body) || TEXT_BAD.test(body)) { dropped.push(`work-authorisation bar: ${title} @ ${company}`); continue; }
+        const bar = stcwBar(`${title} ${body}`);
+        if (bar) { dropped.push(`${bar}: ${title} @ ${company}`); continue; }
         items.push(
           item({
             title,

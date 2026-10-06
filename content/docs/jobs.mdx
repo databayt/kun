@@ -351,6 +351,16 @@ are dropped from every lane. There are two sources:
   date, vessel, contract length and visa. A posting with a nationality list
   that leaves out Sudan is dropped. You apply through your Martide seafarer
   profile, so the channel is `PLATFORM`.
+- **STCW gate (2026-10-06).** Abdout holds no STCW certificate of competency
+  (`HELD_STCW = []` in `discover.mjs`).
+  - Officer ETO posts need **A-III/6** and seagoing ship electricians need
+    **A-III/7**, so postings that demand either are dropped, and Martide's ETO
+    rank is skipped. The 5 Martide cards are held for the same reason.
+  - The lane now targets marine electrical work that needs neither: shipyards,
+    dry docks, ports, offshore platforms and wind farms, Lake Kivu vessels, and
+    MyJobMag's "marine electrician" / "offshore electrician" searches.
+  - The day he holds a certificate, add `"III/6"` or `"III/7"` to `HELD_STCW`
+    and both lanes reopen.
 - **Rigzone** (`--source rigzone`) lists offshore electrical roles. The card
   must say offshore or name a floating unit. US-nationals-only and
   work-authorisation bars are dropped. It throttles a burst with an empty
