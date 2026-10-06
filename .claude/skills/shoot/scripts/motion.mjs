@@ -1,4 +1,4 @@
-// render.mjs <html> <out.mp4> [--fps 30] [--preview t1,t2,…]
+// motion.mjs <html> <out.mp4> [--fps 30] [--preview t1,t2,…] [--range t0,t1]
 // Steps a deterministic window.render(t) frame by frame, screenshots each, encodes H.264.
 import { createRequire } from "node:module"
 import { execFileSync } from "node:child_process"
@@ -10,6 +10,7 @@ const { chromium } = require("@playwright/test")
 const args = process.argv.slice(2)
 const [html, out] = args
 const fps = Number(args.includes("--fps") ? args[args.indexOf("--fps") + 1] : 30)
+const range = args.includes("--range") ? args[args.indexOf("--range") + 1].split(",").map(Number) : null
 const preview = args.includes("--preview") ? args[args.indexOf("--preview") + 1].split(",").map(Number) : null
 
 const browser = await chromium.launch({ args: ["--allow-file-access-from-files"] })
@@ -39,9 +40,10 @@ if (preview) {
 } else {
   const dir = join(dirname(out), "frames")
   rmSync(dir, { recursive: true, force: true }); mkdirSync(dir, { recursive: true })
-  const n = Math.round(duration * fps)
+  const [t0, t1] = range ?? [0, duration]
+  const n = Math.round((t1 - t0) * fps)
   for (let f = 0; f < n; f++) {
-    await frame(f / fps, join(dir, `${String(f).padStart(5, "0")}.jpg`))
+    await frame(t0 + f / fps, join(dir, `${String(f).padStart(5, "0")}.jpg`))
     if (f % 150 === 0) console.log(`frame ${f}/${n}`)
   }
   execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-framerate", String(fps), "-i", join(dir, "%05d.jpg"),

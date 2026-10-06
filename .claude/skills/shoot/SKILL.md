@@ -88,6 +88,29 @@ node ~/.claude/skills/shoot/scripts/motion.mjs <composition.html> <out.mp4> [--p
 - Keep focus zoom ≤ 2.2× and frame small targets with their neighbours, or the shot is grey.
 - Claims in captions must match what the shots show (count of steps, what is required).
 
+## Sim — film the real flow as a human would do it
+
+The real wizard on the demo, driven like an admin: an on-page cursor glides and clicks (green
+ripple), text is typed key by key, dropdowns open and an option is picked, a real file goes
+through the upload. Numbered captions are injected into the page (native Arabic). Recorded
+headless at the Mac frame (1210x686 @ DPR 2.5) via CDP screencast; frames keep their real
+timestamps, frozen stretches (server saving) are capped at 1.4 s.
+
+```
+node ~/.claude/skills/shoot/scripts/sim.mjs --flow add-student     # → <repo>/public/screenshot/<flow>/<flow>-sim-ar.mp4
+```
+
+- Sim files: `sims/<repo>/<flow>.mjs` — `default async (sim)`, optional `prepare`/`cleanup`.
+  API: `sim.caption(n, text)` · `sim.click(loc)` · `sim.type(loc, text, { cps })` ·
+  `sim.pick(trigger, "option name" | index)` · `sim.upload(trigger, sim.asset("…png"))` ·
+  `sim.move(loc)` · `sim.wait(ms)` · `sim.go(path)`.
+- Wrap it: `motion.mjs <composition> intro.mp4 --range 0,3.2` and the outro range AFTER the last
+  card has faded, then ffmpeg `xfade` — in zsh write `${OFF}[v]`, `$OFF[v]` is an array subscript.
+- Never upload to a slot that triggers paid AI extraction (hogwarts document tiles); the photo
+  circle is safe. Uploads use drawn assets in `assets/`, never a real person's photo.
+- Pick data that shows the happy path (hogwarts: section «الصف الأول - أ» has a timetable;
+  «الصف A-1» raises a warning toast).
+
 ## Close
 
 Read every PNG before reporting it done. Send the key ones with `SendUserFile` and give
