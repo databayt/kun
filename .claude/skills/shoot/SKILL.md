@@ -88,28 +88,36 @@ node ~/.claude/skills/shoot/scripts/motion.mjs <composition.html> <out.mp4> [--p
 - Keep focus zoom ≤ 2.2× and frame small targets with their neighbours, or the shot is grey.
 - Claims in captions must match what the shots show (count of steps, what is required).
 
-## Sim — film the real flow as a human would do it
+## Sim — the tutorial video: the real flow, filmed as a human, directed into ONE file
 
 The real wizard on the demo, driven like an admin: an on-page cursor glides and clicks (green
-ripple), text is typed key by key, dropdowns open and an option is picked, a real file goes
-through the upload. Numbered captions are injected into the page (native Arabic). Recorded
-headless at the Mac frame (1210x686 @ DPR 2.5) via CDP screencast; frames keep their real
-timestamps, frozen stretches (server saving) are capped at 1.4 s.
+ripple), every field is filled in reading order (RTL), text typed key by key, dropdowns and the
+native month/year selects opened and picked, uploads through a simulated macOS Finder "Open"
+sheet (Downloads → file → Open) then the real upload. Recorded headless at the Mac frame at full
+Retina (`--force-device-scale-factor=2.5`, or CDP screencast drops to CSS size). A director pass
+then composes, per output frame: intro card → the take in a window with a smooth camera zooming
+onto the fields being filled → numbered captions in a band BELOW the window (never over a field)
+→ tip toasts → outro card. Frozen server waits are trimmed to 1.2 s; typing and `sim.wait` keep
+real time.
 
 ```
-node ~/.claude/skills/shoot/scripts/sim.mjs --flow add-student     # → <repo>/public/screenshot/<flow>/<flow>-sim-ar.mp4
+node ~/.claude/skills/shoot/scripts/sim.mjs --flow add-student            # take + direct (~10 min)
+node ~/.claude/skills/shoot/scripts/sim.mjs --flow add-student --direct-only   # re-compose the saved take
 ```
 
-- Sim files: `sims/<repo>/<flow>.mjs` — `default async (sim)`, optional `prepare`/`cleanup`.
-  API: `sim.caption(n, text)` · `sim.click(loc)` · `sim.type(loc, text, { cps })` ·
-  `sim.pick(trigger, "option name" | index)` · `sim.upload(trigger, sim.asset("…png"))` ·
-  `sim.move(loc)` · `sim.wait(ms)` · `sim.go(path)`.
-- Wrap it: `motion.mjs <composition> intro.mp4 --range 0,3.2` and the outro range AFTER the last
-  card has faded, then ffmpeg `xfade` — in zsh write `${OFF}[v]`, `$OFF[v]` is an array subscript.
-- Never upload to a slot that triggers paid AI extraction (hogwarts document tiles); the photo
-  circle is safe. Uploads use drawn assets in `assets/`, never a real person's photo.
-- Pick data that shows the happy path (hogwarts: section «الصف الأول - أ» has a timetable;
-  «الصف A-1» raises a warning toast).
+- **One file, overwritten:** `<repo>/public/screenshot/<flow>/<flow>-ar.mp4`. Never sibling
+  variants (Abdout, 2026-10-06). The take lives in `~/.cache/shoot-sim/<repo>-<flow>/`.
+- Sim files: `sims/<repo>/<flow>.mjs` — `meta` (intro/outro text), `default async (sim)`,
+  `prepare`, `cleanup`. API: `sim.caption(n, text)` · `sim.toast(text)` · `sim.focus(loc | [locs] | null, { z })`
+  (camera; the zoom is fitted in the director, so `--direct-only` can re-tune it) · `sim.click` ·
+  `sim.type(loc, text, { cps })` · `sim.pick(trigger, name | index)` · `sim.select(nativeSelect, value)` ·
+  `sim.upload(trigger, sim.asset("…png"), { name, decoys })` · `sim.move` · `sim.wait(ms)`.
+- Frame the FIELDS being filled (an array of locators), not `<form>` — a whole form puts the
+  active field at the window edge. Full-width rows: frame their start (name + one cell).
+- Never upload to a slot that fires paid AI extraction (hogwarts document tiles); the photo circle
+  is safe. Upload drawn assets from `assets/`, never a real person's photo.
+- Pick happy-path data (hogwarts: section «الصف الأول - أ» has a timetable; «الصف A-1» raises a
+  warning toast). Toasts are tutorial TIPS («نصيحة») — never fake product notifications.
 
 ## Close
 

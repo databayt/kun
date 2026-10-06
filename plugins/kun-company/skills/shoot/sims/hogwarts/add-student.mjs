@@ -1,12 +1,24 @@
-// Add student — filmed as an admin would do it on the demo school: cursor, typing, picks,
-// a real photo upload. Captions explain each move. Document tiles are NOT uploaded: they
-// trigger a paid AI extraction on production; the photo circle does not.
+// Add student — the registrar's full path on the demo school, every field filled in reading
+// order (RTL: right before left, top to bottom), uploads through a macOS Finder sheet.
+// Document tiles stay untouched: they fire a paid AI extraction on production and would
+// pre-fill fields from a fake document. The photo circle carries the upload moment.
 
 import { cleanup as archiveTestStudent } from "../../flows/hogwarts/add-student.mjs"
 
-const NAME = "أحمد الطيب"
-const FATHER = "عمر الطيب"
+export const meta = {
+  title: "إضافة <mark>طالب جديد</mark>",
+  sub: "دليل خطوة بخطوة لإدارة المدرسة في منصة بالقلم",
+  outro: "طالب جديد <mark>في دقائق</mark>",
+  outroSub: "المطلوب فقط: اسم الطالب وولي أمر واحد — والباقي يُكمل لاحقاً",
+}
+
+const NAME = "أحمد عمر الطيب"
 const digits = () => String(Math.floor(10000000 + Math.random() * 89999999))
+const DECOYS = [
+  { name: "شهادة-الميلاد.pdf", ext: "PDF" },
+  { name: "كشف-الدرجات.pdf", ext: "PDF" },
+  { name: "جواز-ولي-الأمر.jpg", ext: "JPG" },
+]
 
 export async function cleanup({ page, go }) {
   await archiveTestStudent({ page, go })
@@ -19,63 +31,109 @@ export async function prepare({ go }) {
 export default async (sim) => {
   const { page } = sim
   const next = page.getByRole("button", { name: "التالي", exact: true })
+  const tel = (nameInput) => page.locator(`input[name="${nameInput}"]`)
+    .locator('xpath=ancestor::div[contains(@class,"space-y-6")][1]').locator('input[type="tel"]').first()
 
-  // 1 — the list
-  await sim.wait(1200)
-  await sim.caption(1, "من صفحة الطلاب، اضغط زر الإضافة")
-  await sim.click(page.getByRole("button", { name: "إنشاء", exact: true }), { pause: 300 })
+  // 1 — the students list
+  await sim.wait(900)
+  sim.caption(1, "من صفحة الطلاب، اضغط زر الإضافة")
+  const add = page.getByRole("button", { name: "إنشاء", exact: true })
+  await sim.focus(add, { z: 2 })
+  await sim.wait(1100)
+  await sim.click(add, { pause: 200 })
   await page.waitForURL(/students\/add\/.+\/attachments/, { timeout: 60000 }); await sim.settle()
 
-  // 2 — documents: the photo
-  await sim.caption(2, "ارفع صورة الطالب — والمستندات اختيارية")
-  await sim.upload(page.locator("form").locator("[class*=rounded-full], [data-variant=avatar]").first(), sim.asset("student-avatar.png"))
-  await sim.wait(1200)
-  await sim.click(next, { pause: 300 })
+  // 2 — documents: the photo through Finder
+  await sim.focus(null)
+  sim.caption(2, "ارفع صورة الطالب من جهازك")
+  const photo = page.locator("form").locator("[class*=rounded-full], [data-variant=avatar]").first()
+  await sim.focus(photo, { z: 1.8 })
+  await sim.wait(900)
+  await sim.focus(null)
+  await sim.upload(photo, sim.asset("student-avatar.png"), { name: "صورة-أحمد.png", decoys: DECOYS })
+  await sim.focus(page.locator("form").first())
+  sim.toast("رفع الهوية أو الشهادة يملأ بيانات الطالب تلقائياً — والمستندات اختيارية")
+  await sim.wait(2600)
+  await sim.focus(null)
+  await sim.click(next, { pause: 200 })
   await page.waitForURL(/\/personal/); await sim.settle()
 
-  // 3 — the student
-  await sim.caption(3, "اكتب اسم الطالب — الحقل الوحيد المطلوب")
+  // 3 — the student, in reading order
+  sim.caption(3, "أدخل بيانات الطالب")
+  const personal = [page.locator('input[name="_fullName"]'), page.locator('input[name="phone"]').first(), page.locator('input[type="tel"]').nth(1)]
+  await sim.focus(personal)
   await sim.type(page.locator('input[name="_fullName"]'), NAME)
-  await sim.caption(3, "اختر الجنس وأضف رقم الهاتف")
+  // date of birth: year → month → day
+  await sim.click(page.getByText("اختر تاريخاً").first(), { pause: 600 })
+  await sim.focus([page.getByText("اختر تاريخاً").first(), page.locator("[data-radix-popper-content-wrapper]").first()])
+  await sim.select(page.locator('select[aria-label="Choose the Year"]'), "2019")
+  await sim.select(page.locator('select[aria-label="Choose the Month"]'), { index: 2 })
+  await sim.click(page.getByRole("button", { name: /^.*، 14 .* 2019$/ }).first(), { pause: 500 })
+  await sim.focus(personal)
   await sim.pick(page.getByRole("combobox").filter({ hasText: "اختر الجنس" }), "ذكر")
   await sim.type(page.locator('input[name="phone"]').first(), `+2499${digits()}`, { cps: 11 })
-  await sim.wait(800)
+  sim.toast("رقم واتساب يُنسخ تلقائياً من رقم الهاتف")
+  await sim.wait(2200)
 
-  // 4 — the guardian
-  await sim.caption(4, "أضف ولي الأمر: الأب أو الأم — يكفي واحد")
-  await sim.click(page.getByRole("button", { name: "الأب" }))
-  await sim.type(page.locator('input[name="fatherName"]'), FATHER)
-  const fatherPhone = page.locator('input[name="fatherName"]')
-    .locator('xpath=ancestor::div[contains(@class,"space-y-6")][1]').locator('input[type="tel"]').first()
-  await sim.type(fatherPhone, `+2499${digits()}`, { cps: 11 })
-  await sim.wait(700)
-  await sim.click(next, { pause: 300 })
+  // 4 — guardians: father, then mother
+  sim.caption(4, "أضف ولي الأمر: الأب ثم الأم")
+  await sim.click(page.getByRole("button", { name: "الأب" }), { pause: 400 })
+  await sim.focus([page.locator('input[name="fatherName"]'), tel("fatherName"), page.getByRole("button", { name: "الأم" })])
+  await sim.type(page.locator('input[name="fatherName"]'), "عمر الطيب محمد")
+  await sim.type(tel("fatherName"), `+2499${digits()}`, { cps: 11 })
+  sim.toast("يكفي ولي أمر واحد — ويمكن إضافة الآخر لاحقاً")
+  await sim.wait(900)
+  await sim.click(page.getByRole("button", { name: "الأم" }), { pause: 400 })
+  await sim.focus([page.locator('input[name="motherName"]'), tel("motherName")])
+  await sim.type(page.locator('input[name="motherName"]'), "فاطمة أحمد علي")
+  await sim.type(tel("motherName"), `+2499${digits()}`, { cps: 11 })
+  await sim.wait(800)
+  await sim.focus(null)
+  await sim.click(next, { pause: 200 })
   await page.waitForURL(/\/location/); await sim.settle()
 
   // 5 — the address
-  await sim.caption(5, "ابحث عن عنوان السكن واختره")
+  sim.caption(5, "ابحث عن عنوان السكن واختره")
   const search = page.getByPlaceholder(/ابحث عن حي/)
+  await sim.focus([search, page.locator(".mapboxgl-map, [class*=map]").first()])
   await sim.type(search, "الخرطوم")
   const hit = page.getByRole("option").first()
   if (await hit.waitFor({ timeout: 6000 }).then(() => true, () => false)) {
-    await sim.click(hit, { pause: 1800 })
-  } else await sim.wait(1200)
-  await sim.click(next, { pause: 300 })
+    await sim.click(hit, { pause: 1600 })
+    sim.toast("اسحب الدبوس على الخريطة لضبط الموقع بدقة")
+  }
+  await sim.wait(2200)
+  await sim.focus(null)
+  await sim.click(next, { pause: 200 })
   await page.waitForURL(/\/academic/); await sim.settle()
 
-  // 6 — grade and section
-  await sim.caption(6, "اختر الصف ثم الفصل")
-  await sim.pick(page.getByRole("combobox", { name: "الصف", exact: true }), 0)
+  // 6 — academic, in reading order: previous school, grade, section
+  sim.caption(6, "أدخل المعلومات الأكاديمية")
+  const academic = [page.locator('input[name="previousSchoolName"]'), page.getByRole("combobox", { name: "الصف", exact: true }), page.getByRole("combobox", { name: "المسار", exact: true })]
+  await sim.focus(academic)
+  await sim.type(page.locator('input[name="previousSchoolName"]'), "روضة النيل")
+  await sim.pick(page.getByRole("combobox", { name: "الصف", exact: true }), "الصف الأول")
   const section = page.getByRole("combobox", { name: "الفصل", exact: true })
   await section.and(page.locator(":enabled")).waitFor({ timeout: 15000 })
-  // "الصف A-1" (first option) has no timetable and raises a warning toast; - أ has 17 periods.
+  // «الصف A-1» has no timetable and raises a warning toast; «- أ» has 17 periods.
   await sim.pick(section, "الصف الأول - أ")
-  await sim.caption(6, "اضغط «إنشاء»")
-  await sim.click(page.getByRole("button", { name: "إنشاء", exact: true }), { pause: 300 })
+  sim.toast("تُضاف رسوم الصف للطالب تلقائياً عند الإنشاء")
+  await sim.wait(1500)
+  const create = page.getByRole("button", { name: "إنشاء", exact: true })
+  await sim.focus([...academic, create])
+  sim.caption(6, "اضغط «إنشاء»")
+  await sim.wait(900)
+  await sim.click(create, { pause: 200 })
   await page.waitForURL((u) => !u.pathname.includes("/add/"), { timeout: 90000 }); await sim.settle()
 
   // 7 — done
-  await sim.caption(7, "تم! الطالب في القائمة، وحسابه ورسوم صفّه جاهزة")
-  await sim.move(page.getByText(NAME, { exact: true }).first())
-  await sim.wait(3500)
+  await sim.focus(null)
+  sim.caption(7, "تم! الطالب في القائمة بصورته وصفّه")
+  await sim.wait(700)
+  const row = page.getByRole("row").filter({ hasText: "أحمد" }).first()
+  // the row is full-width; frame its start (RTL right): the name and the grade
+  await sim.focus([row.getByText(/^أحمد/).first(), row.getByText("الأول").first()], { z: 1.5 })
+  await sim.move(page.getByText(/^أحمد/).first())
+  sim.toast("يُرسل إشعار ترحيب للأسرة، ويُنشأ حساب دخول للطالب")
+  await sim.wait(3600)
 }
