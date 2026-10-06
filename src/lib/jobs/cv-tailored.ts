@@ -289,16 +289,19 @@ export function gateTailoredCv(
   const certBlob = norm(
     career.certifications.flatMap((c) => [c.name, c.issuer ?? "", c.date ?? ""]).join(" "),
   );
-  // "— renewal on joining" is the contract's honest wording for the expired
-  // medical (tailor.ts); the certificate itself must still be in the record.
+  // "— renewal on joining" / "— refresher due" are the contract's honest
+  // wording for expired documents (tailor.ts); the certificate itself must
+  // still be in the record.
   const unknownCert = cv.certifications.filter(
-    (c) => !orgKnown(c.replace(/\s*[—-]\s*renewal on joining\s*$/i, ""), certBlob),
+    (c) => !orgKnown(c.replace(/\s*[—-]\s*(renewal on joining|refresher due)\s*$/i, ""), certBlob),
   );
   if (unknownCert.length) problems.push(`certifications not in the record: ${unknownCert.join("; ")}`);
 
   // 3. A stale document is never presented as current.
   if (/medical[^.\n]{0,60}\b(valid|current|in date)\b/i.test(text))
     problems.push("presents the expired medical as valid");
+  if (/\b(holds?|holder of|certified)\b[^.\n]{0,40}\b(eto )?(coc|certificate of competency)\b/i.test(text))
+    problems.push("claims a certificate of competency he does not hold");
 
   // 4. Coverage — counted on the rendered text, not on the model's own claim.
   const lower = norm(text);

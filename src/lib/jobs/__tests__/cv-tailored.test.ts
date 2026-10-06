@@ -258,4 +258,14 @@ describe("gateTailoredCv", () => {
     const bad = gateTailoredCv(cv({ summary: `${cv().summary} Seafarer medical certificate valid.` }), withMedical, ctx);
     expect(bad.problems.join()).toMatch(/expired medical as valid/);
   });
+
+  it("accepts expired training only as refresher due, and never a claimed CoC", () => {
+    const rec: CareerRecord = {
+      ...career,
+      certifications: [...career.certifications, { name: "Fire Prevention and Fire Fighting — STCW A-VI/1-2", stale: true }],
+    };
+    expect(gateTailoredCv(cv({ certifications: ["Fire Prevention and Fire Fighting — STCW A-VI/1-2 — refresher due"] }), rec, ctx).problems).toEqual([]);
+    const coc = gateTailoredCv(cv({ summary: `${cv().summary} Holder of an ETO certificate of competency.` }), rec, ctx);
+    expect(coc.problems.join()).toMatch(/certificate of competency he does not hold/);
+  });
 });
