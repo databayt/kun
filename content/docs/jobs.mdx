@@ -470,3 +470,45 @@ allows an honest automated submission — submits.
 | LinkedIn | No connector |
 
 **The CRM board is the single source of truth.** Every channel writes its note and its status there first. Briefs and commands only report or pause.
+
+## 12. Tailored CVs (since 2026-10-06)
+
+Every application gets its own CV, built from the live posting. Email, WhatsApp
+and Greenhouse sends attach it automatically. For portal and platform cards
+(Martide, employer sites) it is built once a day and its path is noted on the
+card for Abdout to upload.
+
+| Step | Where |
+| :--- | :--- |
+| Verified career record, transcribed from the evidence pack (degree, sea-service letters, SCE, Marlins, fire-alarm report), with a page reference on every entry | `jobs/evidence/career.json` (gitignored) |
+| Scrape the posting and its JSON-LD (employer, website) | `scripts/jobs/lib/posting.ts`, `tailor.ts` |
+| One `claude -p` per batch writes **content only** (`cv.json`): it selects and rewords true facts in the posting's own vocabulary, and may read the company site | `scripts/jobs/tailor.ts` |
+| Fixed ATS-safe layout: one column, real headings and lists, contact details in the body, no tables, columns or positioned boxes | `src/lib/jobs/cv-tailored.ts` → `renderAtsHtml` |
+| Gate: numbers, employers, vessels, schools and certificates must be in the record; the expired medical is never called valid; `pdftotext` round-trip; 1–2 pages | `gateTailoredCv` + `atsReadback` |
+| Coverage of the posting's must-haves, measured on the rendered text. Below 60%, the card is held as a weak fit | `MIN_COVERAGE` |
+
+Profiles by lane:
+
+- **maritime** (`MARINE_ETO`): legal name (Osman Mohamed Elamin Osman Ali),
+  sea-service list, CoC and seaman's book numbers, date of birth and
+  nationality. Never the passport number.
+- **engineering**: ALFALGI first.
+- **software**: Databayt first.
+
+A CV that fails the gate falls back to the lane CV in `jobs/cv/`.
+
+```bash
+pnpm jobs:tailor <crmId…>                 # tailor these cards
+pnpm jobs:tailor --campaign MARINE_ETO --limit 3
+pnpm jobs:tailor --packets --limit 12     # portal/platform cards; loop runs it daily
+pnpm jobs:tailor <crmId> --force          # rewrite cv.json
+```
+
+**What the record does not say (open items in `career.json`):**
+
+- Which STCW regulation CoC No. 14148 was issued under. "STCW Reg. A-V/2.4" is
+  the crowd-management certificate, not an ETO CoC (A-III/6), so no CV claims
+  A-III/6.
+- Which seaman's book number is current (9972 or 014148).
+- The ALFALGI end date, printed as "Feb 2022 – 2026".
+

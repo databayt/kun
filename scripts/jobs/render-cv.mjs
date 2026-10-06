@@ -9,11 +9,9 @@
 // Same Chrome channel as scripts/render-carousel.mjs. Refuses to write a PDF
 // that is not 1-2 A4 pages — the send gate would hold every card that used it.
 
-import { mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
+import { readFileSync, statSync } from "node:fs";
 
-import { chromium } from "playwright-core";
+import { htmlToPdfs } from "./lib/pdf.mjs";
 
 const only = process.argv[2];
 const registry = JSON.parse(readFileSync("jobs/variants.json", "utf-8"));
@@ -23,32 +21,15 @@ if (targets.length === 0) {
   process.exit(1);
 }
 
-const fonts = `file://${resolve("node_modules/@fontsource")}`;
-const scratch = mkdtempSync(join(tmpdir(), "cv-"));
-const browser = await chromium.launch({ channel: "chrome", headless: true });
-
+const results = await htmlToPdfs(targets.map((v) => ({ html: readFileSync(v.source, "utf-8"), out: v.pdf })));
 let failed = 0;
-try {
-  for (const v of targets) {
-    const html = readFileSync(v.source, "utf-8").replaceAll("node_modules/@fontsource", fonts);
-    const tmp = join(scratch, `${v.id.replace(/[^a-z0-9@]/gi, "_")}.html`);
-    writeFileSync(tmp, html);
-    const page = await browser.newPage();
-    await page.goto(`file://${tmp}`, { waitUntil: "networkidle" });
-    await page.evaluate(() => document.fonts.ready);
-    const pdf = await page.pdf({ format: "A4", printBackground: true, preferCSSPageSize: true });
-    await page.close();
-    const pages = (pdf.toString("latin1").match(/\/Type\s*\/Page[^s]/g) ?? []).length;
-    if (pages < 1 || pages > 2) {
-      console.log(`✗ ${v.id}: ${pages} pages — not written`);
-      failed++;
-      continue;
-    }
-    writeFileSync(v.pdf, pdf);
-    console.log(`✓ ${v.id} → ${v.pdf} (${pages} page${pages > 1 ? "s" : ""}, ${Math.round(statSync(v.pdf).size / 1024)} KB)`);
+for (const [i, r] of results.entries()) {
+  const v = targets[i];
+  if (!r.ok) {
+    console.log(`✗ ${v.id}: ${r.error} — not written`);
+    failed++;
+    continue;
   }
-} finally {
-  await browser.close();
-  rmSync(scratch, { recursive: true, force: true });
+  console.log(`✓ ${v.id} → ${v.pdf} (${r.pages} page${r.pages > 1 ? "s" : ""}, ${Math.round(statSync(v.pdf).size / 1024)} KB)`);
 }
 process.exit(failed ? 1 : 0);

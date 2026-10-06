@@ -60,6 +60,7 @@ import {
 import { leverQuestions } from "./ats-lever";
 import { sentToday } from "./send";
 import { pickVariants } from "./variants";
+import { tailorCvs, type TailorResult } from "./tailor";
 import { contactState, pdfPages, postingText, splitName } from "./wave";
 
 const args = process.argv.slice(2);
@@ -113,6 +114,7 @@ interface AtsRequest {
   cvVariant: string;
   letterVariant: string;
   cvPdf: string;
+  cvJson?: string; // the tailored CV's content — the letter stresses the same points
   prose: string[]; // question labels needing written answers
   out: string;
 }
@@ -171,7 +173,7 @@ function tailorBatch(dir: string, pending: AtsRequest[]): Promise<void> {
   const prompt = `You write job applications for Osman Abdout. Work ONLY from files.
 
 For each request file listed below:
-1. Read it (JSON: role, company, postingText, template path, prose = form questions needing a written answer).
+1. Read it (JSON: role, company, postingText, template path, prose = form questions needing a written answer, cvJson). If cvJson is set, read it: it is the CV tailored to this posting and uploaded with the form — stress the same two or three points.
 2. Read the template and /Users/abdout/kun/jobs/facts.json.
 3. Write JSON to the request's "out" path:
    {"body": <a cover letter, plain text, 150-300 words, following the template>,
@@ -315,6 +317,23 @@ async function prepare(): Promise<void> {
     requests.push(req);
   }
 
+  // A CV tailored to each posting (2026-10-06); failures fall back to the lane CV.
+  const cvs: Map<string, TailorResult> = await tailorCvs(
+    requests.map((r) => cards.find((c) => c.id === r.crmId) as BoardRow),
+    { dir, texts },
+  );
+  for (const req of requests) {
+    const t = cvs.get(req.crmId);
+    if (t?.ok && t.pdf) {
+      req.cvPdf = t.pdf;
+      req.cvVariant = `cv:tailored@${req.crmId}`;
+      req.cvJson = join("/Users/abdout/kun", dir, req.crmId, "cv.json");
+      writeFileSync(join(dir, `${req.crmId}.ats-request.json`), JSON.stringify(req, null, 2));
+    } else if (t) {
+      console.log(`  · lane CV for ${req.company} — tailored CV failed: ${t.problems.join("; ").slice(0, 200)}`);
+    }
+  }
+
   await tailor(dir, requests);
 
   let queued = 0;
@@ -357,6 +376,9 @@ async function prepare(): Promise<void> {
             problems.push(`unbacked numbers in an answer: ${bad.join(", ")}`);
         }
       }
+      const fit = cvs.get(req.crmId);
+      if (fit?.ok && fit.weakFit)
+        problems.push(`weak fit (${fit.coverage}% of the posting's must-haves): missing ${fit.missing.join(", ")}`);
       reason = problems.join("; ");
     }
     const variant = `${req.cvVariant} ${req.letterVariant}`;

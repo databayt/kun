@@ -138,7 +138,7 @@ case "$MODE" in
     --status)
         if launchctl print "gui/$(id -u)/$PLIST_LABEL" >/dev/null 2>&1; then echo "armed ($PLIST_LABEL, every 30 min)"; else echo "not armed"; fi
         [ -f "$REPO/jobs/.send-off" ] && echo "⛔ sending paused (jobs/.send-off)"
-        for s in discover wave ats-prepare digest followup learn; do printf "  %-9s %s\n" "$s" "$(cat "$STATE/$s" 2>/dev/null || echo never)"; done
+        for s in discover wave ats-prepare tailor-packets digest followup learn; do printf "  %-9s %s\n" "$s" "$(cat "$STATE/$s" 2>/dev/null || echo never)"; done
         [ -f "$LOG_FILE" ] && tail -8 "$LOG_FILE"
         ;;
     --tick)
@@ -199,6 +199,11 @@ case "$MODE" in
         fi
         if [ "$HOUR" -ge 9 ] && [ "$HOUR" -lt 20 ] && [ -n "$mail_up" ]; then
             run ats-submit pnpm -s jobs:ats submit --apply --limit 8
+        fi
+        # Tailored CVs for the cards he submits himself (Martide, portals):
+        # once a day after discovery, the PDF path noted on each card.
+        if [ "$HOUR" -ge 7 ] && done_today discover && ! done_today tailor-packets; then
+            run tailor-packets pnpm -s jobs:tailor --packets --limit 12 && stamp tailor-packets
         fi
         # Client requests from the databayt.org wizard: every tick, all day —
         # a prospect who asked for a quote is the warmest lead there is.

@@ -31,6 +31,7 @@
     "jobs:send": "tsx scripts/jobs/send.ts",
     "jobs:variant": "tsx scripts/jobs/variants.ts",
     "jobs:cv": "node scripts/jobs/render-cv.mjs",
+    "jobs:tailor": "tsx scripts/jobs/tailor.ts",
     "jobs:facts": "tsx scripts/jobs/facts.ts",
     "jobs:inbox": "tsx scripts/jobs/inbox.ts",
     "jobs:followup": "tsx scripts/jobs/followup.ts",

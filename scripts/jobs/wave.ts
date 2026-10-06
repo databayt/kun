@@ -30,6 +30,7 @@ import { evaluateSendGate, holdReasonFor } from "@/lib/jobs/send-gate";
 
 import { BoardRow, ledger, listBoard, patchRow } from "./board";
 import { kigaliNow, LANE_BAND, loadConfig, seniorityBand, todaysCap } from "./config";
+import { tailorCvs, type TailorResult } from "./tailor";
 import { pickVariants } from "./variants";
 
 const TENDER_NOTICE =
@@ -41,61 +42,8 @@ const REGATE = args.includes("--regate");
 const limitArg = args.indexOf("--limit");
 
 
-export const splitName = (name: string): { role: string; company: string } => {
-  const at = name.lastIndexOf(" @ ");
-  return at > -1
-    ? { role: name.slice(0, at), company: name.slice(at + 3) }
-    : { role: name, company: name };
-};
-
-export async function postingText(
-  url: string | undefined,
-): Promise<string | null> {
-  if (!url) return null;
-  try {
-    const res = await fetch(url, {
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/128 Safari/537.36",
-      },
-      signal: AbortSignal.timeout(30_000),
-    });
-    if (!res.ok) return null;
-
-    // Official job notices are often PDFs (CIMERWA's are): read them with
-    // pdftotext rather than as bytes.
-    if (/pdf/i.test(res.headers.get("content-type") ?? "") || /\.pdf($|\?)/i.test(url)) {
-      const tmp = join(tmpdir(), `posting-${process.pid}-${Date.now()}.pdf`);
-      writeFileSync(tmp, Buffer.from(await res.arrayBuffer()));
-      const out = spawnSync("pdftotext", ["-layout", tmp, "-"], { encoding: "utf-8", timeout: 60_000 });
-      rmSync(tmp, { force: true });
-      return out.status === 0 ? out.stdout.replace(/\s+/g, " ").trim() : null;
-    }
-
-    const html = await res.text();
-    // Addresses that only live in a mailto: link, or are split for line
-    // breaking with <wbr>, still count as "on the posting".
-    const mailto = [...html.matchAll(/mailto:([^"'?\s>]+)/gi)].map((m) => decodeURIComponent(m[1]));
-    return (
-      html
-        .replace(/<wbr\s*\/?>|<\/wbr>/gi, "")
-        .replace(
-          /<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>|<!--[\s\S]*?-->/g,
-          " ",
-        )
-        .replace(/<[^>]+>/g, " ")
-        .replace(/&nbsp;?/g, " ")
-        .replace(/&amp;/g, "&")
-        .replace(/&#0?39;|&apos;/g, "'")
-        .replace(/&quot;/g, '"')
-        .replace(/\s+/g, " ")
-        .split(/Similar jobs/i)[0]
-        .trim() + (mailto.length ? ` ${[...new Set(mailto)].join(" ")}` : "")
-    );
-  } catch {
-    return null;
-  }
-}
+export { postingText, splitName } from "./lib/posting";
+import { postingText, splitName } from "./lib/posting";
 
 function letterExists(crmId: string): boolean {
   if (!existsSync("jobs/outbox")) return false;
@@ -155,6 +103,8 @@ interface Request {
   cvVariant: string;
   letterVariant: string;
   cvPdf: string;
+  /// The tailored CV's content (tailor.ts) — the letter stresses the same points.
+  cvJson?: string;
   out: string;
 }
 
@@ -164,7 +114,7 @@ function tailor(dir: string, requests: Request[]): void {
   const prompt = `You write job application emails for Osman Abdout. Work ONLY from files.
 
 For each request file listed below:
-1. Read it (JSON: role, company, to, postingText, template path, lane).
+1. Read it (JSON: role, company, to, postingText, template path, lane, cvJson). If cvJson is set, read it too: it is the CV tailored to this posting and attached to the email — the letter must stress the same two or three points, never repeat the CV line by line.
 2. Read the template it names and /Users/abdout/kun/jobs/facts.json.
 3. Write the letter to the path in its "out" field as JSON:
    {"to": <the request's "to">, "subject": <a subject line: use the exact subject the posting asks for if it states one, else "Application – <role> – Osman Abdout">, "body": <plain-text email body>}
@@ -278,6 +228,25 @@ async function main(): Promise<void> {
     requests.push(req);
   }
 
+  // A CV tailored to each posting (Abdout, 2026-10-06). A CV that fails its
+  // fact gate falls back to the lane CV; one that covers too little of the
+  // posting holds the card below.
+  const cvs: Map<string, TailorResult> = await tailorCvs(
+    requests.map((r) => candidates.find((c) => c.id === r.crmId) as BoardRow),
+    { dir, texts },
+  );
+  for (const req of requests) {
+    const t = cvs.get(req.crmId);
+    if (t?.ok && t.pdf) {
+      req.cvPdf = t.pdf;
+      req.cvVariant = `cv:tailored@${req.crmId}`;
+      req.cvJson = join("/Users/abdout/kun", dir, req.crmId, "cv.json");
+      writeFileSync(join(dir, `${req.crmId}.request.json`), JSON.stringify(req, null, 2));
+    } else if (t) {
+      console.log(`  · lane CV for ${req.company} — tailored CV failed: ${t.problems.join("; ").slice(0, 200)}`);
+    }
+  }
+
   tailor(dir, requests);
 
   let queued = 0;
@@ -317,6 +286,13 @@ async function main(): Promise<void> {
         },
       });
     }
+    const fit = cvs.get(req.crmId);
+    if (verdict.pass && fit?.ok && fit.weakFit)
+      verdict = {
+        pass: false,
+        hard: [`weak fit (${fit.coverage}% of the posting's must-haves): missing ${fit.missing.join(", ")}`],
+        needs: [] as string[],
+      };
     const variant = `${req.cvVariant} ${req.letterVariant}`;
     const reason = holdReasonFor(verdict);
     console.log(
