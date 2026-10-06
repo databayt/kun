@@ -57,8 +57,9 @@ export interface CareerRecord {
     github: string;
     website: string;
     languages: string[];
+    passport?: { validUntil: string };
   };
-  seafarerDocuments: { coc: string; seamansBook: string };
+  seafarerDocuments: { seamansBook: string; seamansBookValidUntil?: string };
   education: { degree: string; school: string; date: string }[];
   certifications: {
     name: string;
@@ -163,8 +164,8 @@ export function renderAtsHtml(cv: TailoredCv, career: CareerRecord): string {
       ? list([
           `Date of birth: ${id.dateOfBirth.split("-").reverse().join("/")}`,
           `Nationality: ${id.nationality}`,
-          `Certificate of Competency No.: ${career.seafarerDocuments.coc}`,
-          `Seaman's book No.: ${career.seafarerDocuments.seamansBook}`,
+          `Seaman's book (Sudan) No.: ${career.seafarerDocuments.seamansBook}${career.seafarerDocuments.seamansBookValidUntil ? `, valid until ${career.seafarerDocuments.seamansBookValidUntil}` : ""}`,
+          ...(id.passport ? [`Passport: valid until ${id.passport.validUntil}`] : []),
           `Languages: ${id.languages.join(", ")}`,
         ])
       : list([`Languages: ${id.languages.join(", ")}`]);

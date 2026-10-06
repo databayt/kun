@@ -35,7 +35,7 @@ const extra: { numbers?: string[]; claims?: string[] } = existsSync("jobs/facts.
 // evidence pack 2026-10-06) — the source tailored CVs draw on, so a letter may
 // cite the same facts. Every string value becomes a claim.
 const strings = (v: unknown): string[] =>
-  typeof v === "string" ? [v] : Array.isArray(v) ? v.flatMap(strings) : v && typeof v === "object" ? Object.entries(v).filter(([k]) => k !== "$comment" && k !== "openItems").flatMap(([, x]) => strings(x)) : [];
+  typeof v === "string" ? [v] : Array.isArray(v) ? v.flatMap(strings) : v && typeof v === "object" ? Object.entries(v).filter(([k]) => k !== "$comment" && k !== "openItems" && k !== "passport").flatMap(([, x]) => strings(x)) : [];
 const career = existsSync("jobs/evidence/career.json")
   ? strings(JSON.parse(readFileSync("jobs/evidence/career.json", "utf-8"))).map((c) => `career: ${c}`)
   : [];

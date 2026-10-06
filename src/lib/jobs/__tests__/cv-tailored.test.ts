@@ -23,8 +23,9 @@ const career: CareerRecord = {
     github: "github.com/abdout",
     website: "databayt.org",
     languages: ["Arabic (native)", "English (fluent)"],
+    passport: { validUntil: "Dec 2034" },
   },
-  seafarerDocuments: { coc: "14148", seamansBook: "9972" },
+  seafarerDocuments: { seamansBook: "14148", seamansBookValidUntil: "May 2027" },
   education: [
     {
       degree: "BSc Electrical & Control Engineering",
@@ -127,8 +128,10 @@ describe("renderAtsHtml", () => {
 
   it("uses the legal name and the seafarer block on maritime CVs only", () => {
     expect(cvName(cv(), career)).toBe("Osman Mohamed Elamin Osman Ali");
-    expect(html).toContain("Certificate of Competency No.: 14148");
-    expect(html).toContain("Seaman&#39;s book No.: 9972".replace("&#39;", "'"));
+    expect(html).toContain("No.: 14148, valid until May 2027");
+    expect(html).toContain("Passport: valid until Dec 2034");
+    expect(html).not.toContain("Certificate of Competency");
+    
     const eng = renderAtsHtml(
       cv({ profile: "engineering", seaService: [] }),
       career,
@@ -139,7 +142,11 @@ describe("renderAtsHtml", () => {
   });
 
   it("never prints a passport number", () => {
-    expect(html).not.toMatch(/passport/i);
+    const withNumber = {
+      ...career,
+      identity: { ...career.identity, passport: { validUntil: "Dec 2034", number: "P12950391" } },
+    } as CareerRecord;
+    expect(renderAtsHtml(cv(), withNumber)).not.toContain("P12950391");
   });
 
   it("escapes HTML in content", () => {

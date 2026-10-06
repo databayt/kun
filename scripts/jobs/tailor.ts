@@ -146,7 +146,7 @@ Hard rules — a mechanical gate rejects the CV otherwise:
   * software — "databayt" first, then "alfalgi" and "sea" condensed to 1-2 bullets each, framed as Electrical & Control Engineer work (PLC, SCADA, relay programming). seaService: [].
 - ALFALGI dates are "Feb 2022 – 2026". Never write "Present" for ALFALGI.
 - Voltage vocabulary: the ALFALGI work at 33 kV, 13.8 kV and 4.16 kV IS high-voltage / medium-voltage (HV/MV) switchgear work — say "HV/MV" or "high-voltage" when the posting does. MCC = motor control centres. Never claim a voltage level above 33 kV.
-- STCW: the record holds "Crowd management — STCW Reg. A-V/2.4" (a passenger-ship training certificate). It is NOT an ETO certificate of competency (A-III/6): never write "STCW A-III/6", "STCW-certified ETO" or attach a regulation to the CoC number.
+- STCW: the record holds "Crowd management — STCW Reg. A-V/2.4" (a passenger-ship training certificate). It is NOT an ETO certificate of competency (A-III/6): never write "STCW A-III/6" or "STCW-certified ETO". Osman holds NO certificate of competency in the record — never mention a CoC. "14148" is his seaman's book (valid until May 2027), not a CoC. If the posting requires a CoC / A-III/6, list it in keywordsMissing.
 - Name equipment exactly as the record does (e.g. "hydraulic cargo pumps", not "motor-driven pumps"; "deck crane", not "cranes and winches"). Rewording may change the order and the verbs, never what the equipment was.
 - No markdown, no brackets or placeholders inside values, no first person ("I").
 - English. Two pages at most: keep bullets to one line where possible.
