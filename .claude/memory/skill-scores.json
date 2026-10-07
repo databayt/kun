@@ -3,29 +3,29 @@
   "metric": "top1_hard — top-1 dispatch accuracy on non-trivial cases",
   "definition": "Given the exact frontmatter listing (skill + description + when_to_use) for every file-backed skill and one natural-language prompt, the fraction of cases where the rank-1 answer equals the extracted label — excluding cases whose prompt is literally the skill's own name, and after adversarial adjudication of every miss.",
   "source": ".claude/workflows/bench-dispatch.js + .claude/scripts/extract-dispatch-cases.mjs (deterministic extraction; grading is pure string comparison, zero LLM)",
-  "last_updated": "2026-08-07",
-  "last_updated_by": "self-improvement review — fidelity stratum + retire evidence wired, tune re-aimed",
+  "last_updated": "2026-10-07",
+  "last_updated_by": "bench-dispatch.js",
   "corpus": {
-    "skills_listed": 67,
-    "project_skills": 49,
-    "user_only_skills": 18,
-    "listing_chars": 31428,
-    "cases_total": 487,
-    "positive": 393,
+    "skills_listed": 82,
+    "project_skills": 65,
+    "user_only_skills": 17,
+    "listing_chars": 32926,
+    "cases_total": 669,
+    "positive": 575,
     "none": 94,
-    "trivial": 56,
-    "hard": 178,
+    "trivial": 70,
+    "hard": 235,
     "destructive": 5,
     "sources": {
-      "trigger_phrase": 327,
-      "vocab_spell": 74,
+      "trigger_phrase": 495,
+      "vocab_spell": 125,
       "quoted_keyword": 2,
       "vocab_none": 94,
       "real_pair": 13
     },
     "skills_without_triggers": 2,
     "builtin_targeted_spells": 3,
-    "corpus_hash": "fnv1a:ff132fec"
+    "corpus_hash": "fnv1a:596ba208"
   },
   "split": {
     "version": "v1",
@@ -521,26 +521,25 @@
       "spell:portkeys:from-shadcn-e1e1": "train"
     }
   },
-  "current_value": 1,
+  "current_value": 0.9876,
   "current": {
-    "top1_hard": 1,
-    "top1": 1,
-    "top3": 1,
-    "mrr": 1,
-    "fp_rate": 0,
+    "top1_hard": 0.9876,
+    "top1": 0.989,
+    "top1_lexical_free": 0.9901,
+    "n_lexical_free": 406,
+    "top3": 0.9921,
+    "mrr": 0.9903,
+    "fp_rate": 0.039,
     "destructive_fp": 0,
-    "abstain_error": 0,
-    "macro_f1": 1,
-    "weighted_f1": 1,
+    "abstain_error": 0.0036,
+    "macro_f1": 0.9899,
+    "weighted_f1": 0.9923,
     "holdout_top1_hard": 1,
-    "train_holdout_gap": 0,
-    "listing_chars": 31428,
+    "train_holdout_gap": -0.0158,
+    "listing_chars": 32926,
     "degraded": false,
     "unadjudicated": 0,
-    "top1_lexical_free": 1,
-    "n_lexical_free": 256,
-    "audit_verdict": "CLEAN — audit-bench-run.mjs, 13 blind agents, no forbidden read",
-    "cases_scored": 477
+    "cases_scored": 646
   },
   "known_biases": [
     "Answer-key leakage: graders must read ONLY the --redacted view. The full case set, any SKILL.md (trigger phrases sit verbatim beside the skill name), and vocabulary.json all reveal labels. Enforced by redaction + an emit-time assertion, and verified after every run by audit-bench-run.mjs, which fails the run on any forbidden read.",
@@ -573,7 +572,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "approve": {
       "support": 11,
@@ -581,7 +585,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "atom": {
       "support": 5,
@@ -589,15 +598,25 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": true,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "auth": {
-      "support": 6,
+      "support": 5,
       "chars": 816,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "bench": {
       "support": 7,
@@ -605,7 +624,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "block": {
       "support": 4,
@@ -613,7 +637,12 @@
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": true,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "build": {
       "support": 1,
@@ -621,7 +650,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 0.5,
+      "recall": 1,
+      "f1": 0.6667,
+      "fp": 1,
+      "top3": 1
     },
     "calendar": {
       "support": 8,
@@ -629,7 +663,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "canon": {
       "support": 5,
@@ -637,7 +676,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": true,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "captain": {
       "support": 5,
@@ -645,7 +689,12 @@
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "carousel": {
       "support": 13,
@@ -653,7 +702,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 0.9231,
+      "f1": 0.96,
+      "fp": 0,
+      "top3": 1
     },
     "check": {
       "support": 4,
@@ -661,15 +715,25 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "clone": {
-      "support": 8,
+      "support": 7,
       "chars": 624,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "code": {
       "support": 4,
@@ -677,7 +741,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "codebase": {
       "support": 4,
@@ -685,7 +754,12 @@
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "convert": {
       "support": 6,
@@ -693,7 +767,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "costs": {
       "support": 5,
@@ -701,7 +780,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "crawl-anthropic": {
       "support": 3,
@@ -709,7 +793,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "credentials": {
       "support": 5,
@@ -717,7 +806,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "decide": {
       "support": 4,
@@ -725,15 +819,25 @@
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": true,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "deploy": {
-      "support": 7,
+      "support": 8,
       "chars": 713,
       "scope": "user",
       "fp_cost": 3,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "dev": {
       "support": 5,
@@ -741,7 +845,12 @@
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "docs": {
       "support": 9,
@@ -749,15 +858,25 @@
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": true,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 0.8889,
+      "f1": 0.9412,
+      "fp": 0,
+      "top3": 0.8889
     },
     "draft": {
-      "support": 14,
+      "support": 13,
       "chars": 1085,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "economy": {
       "support": 10,
@@ -765,7 +884,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "feature": {
       "support": 4,
@@ -773,7 +897,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": true,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "fix": {
       "support": 5,
@@ -781,7 +910,12 @@
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 0.8333,
+      "recall": 1,
+      "f1": 0.9091,
+      "fp": 1,
+      "top3": 1
     },
     "handover": {
       "support": 6,
@@ -789,7 +923,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": true,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "health": {
       "support": 5,
@@ -797,15 +936,25 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": true,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "higgs": {
-      "support": 27,
+      "support": 22,
       "chars": 1022,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 0.9565,
+      "recall": 1,
+      "f1": 0.9778,
+      "fp": 1,
+      "top3": 1
     },
     "idea": {
       "support": 8,
@@ -813,7 +962,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 0.875,
+      "f1": 0.9333,
+      "fp": 0,
+      "top3": 0.875
     },
     "incident": {
       "support": 5,
@@ -821,7 +975,12 @@
       "scope": "project",
       "fp_cost": 3,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "issue": {
       "support": 3,
@@ -829,7 +988,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "learn": {
       "support": 3,
@@ -837,7 +1001,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "mcp-doctor": {
       "support": 4,
@@ -845,7 +1014,12 @@
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "measure": {
       "support": 8,
@@ -853,7 +1027,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "monitor": {
       "support": 4,
@@ -861,7 +1040,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "motion": {
       "support": 10,
@@ -869,7 +1053,12 @@
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "package": {
       "support": 4,
@@ -877,7 +1066,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "pattern": {
       "support": 4,
@@ -885,15 +1079,25 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "performance": {
-      "support": 6,
+      "support": 5,
       "chars": 335,
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "plan": {
       "support": 4,
@@ -901,7 +1105,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "premortem": {
       "support": 5,
@@ -909,7 +1118,12 @@
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "pricing": {
       "support": 4,
@@ -917,7 +1131,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "profile": {
       "support": 3,
@@ -925,7 +1144,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "proposal": {
       "support": 4,
@@ -933,7 +1157,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "publish": {
       "support": 10,
@@ -941,15 +1170,25 @@
       "scope": "project",
       "fp_cost": 3,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "qa": {
-      "support": 6,
+      "support": 3,
       "chars": 682,
       "scope": "project",
       "fp_cost": 3,
       "claude_md_routed": true,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "quick": {
       "support": 5,
@@ -957,7 +1196,12 @@
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "release": {
       "support": 6,
@@ -965,15 +1209,25 @@
       "scope": "project",
       "fp_cost": 3,
       "claude_md_routed": true,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "report": {
-      "support": 4,
+      "support": 15,
       "chars": 483,
       "scope": "project",
       "fp_cost": 3,
       "claude_md_routed": true,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "repos": {
       "support": 4,
@@ -981,7 +1235,12 @@
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "saas": {
       "support": 4,
@@ -989,7 +1248,12 @@
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "schema": {
       "support": 5,
@@ -997,7 +1261,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "screenshot": {
       "support": 4,
@@ -1005,7 +1274,12 @@
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "security": {
       "support": 5,
@@ -1013,7 +1287,12 @@
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "shadcn": {
       "support": 7,
@@ -1021,7 +1300,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "ship": {
       "support": 3,
@@ -1029,15 +1313,25 @@
       "scope": "project",
       "fp_cost": 3,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "social": {
-      "support": 8,
+      "support": 7,
       "chars": 568,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "spec": {
       "support": 5,
@@ -1045,15 +1339,25 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "sync": {
-      "support": 5,
+      "support": 4,
       "chars": 489,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 0.8,
+      "recall": 1,
+      "f1": 0.8889,
+      "fp": 1,
+      "top3": 1
     },
     "tasks": {
       "support": 6,
@@ -1061,7 +1365,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "template": {
       "support": 5,
@@ -1069,7 +1378,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": true,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "test": {
       "support": 5,
@@ -1077,7 +1391,12 @@
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "watch": {
       "support": 5,
@@ -1085,7 +1404,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "weekly": {
       "support": 4,
@@ -1093,7 +1417,12 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     },
     "wire": {
       "support": 5,
@@ -1101,7 +1430,207 @@
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
-      "has_when_to_use": true
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
+    },
+    "pwa": {
+      "support": 14,
+      "chars": 565,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
+    },
+    "skeleton": {
+      "support": 7,
+      "chars": 391,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
+    },
+    "scrape": {
+      "support": 23,
+      "chars": 500,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
+    },
+    "jobs": {
+      "support": 24,
+      "chars": 709,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
+    },
+    "md": {
+      "support": 9,
+      "chars": 550,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true,
+      "precision": 0.9,
+      "recall": 1,
+      "f1": 0.9474,
+      "fp": 1,
+      "top3": 1
+    },
+    "textbook": {
+      "support": 10,
+      "chars": 431,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 0.9,
+      "f1": 0.9474,
+      "fp": 0,
+      "top3": 1
+    },
+    "edit": {
+      "support": 15,
+      "chars": 358,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
+    },
+    "record": {
+      "support": 7,
+      "chars": 318,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
+    },
+    "funnel": {
+      "support": 11,
+      "chars": 390,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
+    },
+    "shoot": {
+      "support": 5,
+      "chars": 315,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
+    },
+    "blur": {
+      "support": 7,
+      "chars": 371,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
+    },
+    "cloudflare": {
+      "support": 12,
+      "chars": 533,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
+    },
+    "domains": {
+      "support": 6,
+      "chars": 215,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
+    },
+    "facebook": {
+      "support": 8,
+      "chars": 540,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
+    },
+    "airbnb-copy": {
+      "support": 10,
+      "chars": 490,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "fp": 0,
+      "top3": 1
     }
   },
   "clusters": [
@@ -1301,11 +1830,22 @@
       0.344
     ]
   ],
-  "top_confusions": [],
+  "top_confusions": [
+    {
+      "predicted": "md",
+      "actual": "textbook",
+      "count": 1
+    },
+    {
+      "predicted": "higgs",
+      "actual": "carousel",
+      "count": 1
+    }
+  ],
   "merge_candidates": [],
   "proxy_fidelity": {
-    "n": null,
-    "agreement": null,
+    "n": 10,
+    "agreement": 0.8,
     "note": "CLOSES AUTOMATICALLY on the next bench-dispatch run: real transcript pairs now enter the corpus as split:'fidelity' (source real_pair, 13 today), excluded from every headline stratum and from adjudication — their label is what the live loop actually did, a fact, not a judgment call. n climbs for free every session via /weekly step 0.5."
   },
   "judge_calibration": {
@@ -1390,6 +1930,25 @@
       "cases_to": 656,
       "top1_hard": null,
       "note": "BASELINE RESET, not a scored run. New skill `domains` (domain + mail health tracer, scripts/domains/check.mjs) added its trigger phrases to the corpus; its description was trimmed to stay under the 33,000-char listing cap. Scores before and after this line are not comparable. Next /bench run re-establishes the number (dispatch scores were already stale: scored=67 vs fleet=80)."
+    },
+    {
+      "week_of": "2026-10-07",
+      "baseline_reset": true,
+      "corpus_hash_from": "fnv1a:ff132fec",
+      "corpus_hash_to": "fnv1a:596ba208",
+      "cases_to": 669,
+      "top1_hard": null,
+      "note": "BASELINE RESET, not a scored run. Trigger phrases moved deliberately across 14 commits since 2026-10-03 (shoot split from record as the stills keyword; edit lane + video keywords; media production docs; jobs/Hermes). Scores before and after this line are not comparable. The /bench run started the same day re-establishes the number."
+    },
+    {
+      "week_of": "2026-10-07",
+      "top1_hard": 0.9876,
+      "holdout_top1_hard": 1,
+      "fp_rate": 0.039,
+      "listing_chars": 32926,
+      "cases": 646,
+      "delta": null,
+      "note": "Not degraded (degraded=false, unadjudicated=0). Corpus fnv1a:596ba208, 82 skills listed, 669 cases total, 23 adjudicated away, 646 scored; first scored run after the 2026-10-03 and 2026-10-07 baseline resets, so delta is null. proxy_fidelity 0.8 on n=10 real pairs. Misses: md-for-textbook, higgs-for-carousel."
     }
   ],
   "stratified": {

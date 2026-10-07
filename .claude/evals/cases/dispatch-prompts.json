@@ -1,16 +1,21 @@
 {
   "$comment": "REDACTED grader view. Contains no label, source, tag or split — reading any other file (a SKILL.md, the full case set, the extractor) leaks the answer and invalidates the run.",
-  "corpus_hash": "fnv1a:9fd4080f",
+  "corpus_hash": "fnv1a:596ba208",
   "listing": [
+    {
+      "skill": "airbnb-copy",
+      "description": "Airbnb-voice rental listing titles, descriptions and marketing copy — Arabic-first, English mirrored",
+      "when_to_use": "Use when writing, refining or translating copy for homes, apartments or short-term rentals on Mkan (mkan.sd) or similar platforms — warm host voice, sensory walkthroughs, honest amenities. Triggers on: write airbnb listing, homes copywriting, sound like airbnb, listing title, listing description, وصف شقة, كتابة إعلان شقة, صياغة إعلان عقار, أسلوب إير بي إن بي, كتابة وصف مكان."
+    },
     {
       "skill": "analyze",
       "description": "Analyze a repo's patterns and generate a tailored Claude Code config",
-      "when_to_use": "Use when a repo needs its patterns extracted into a tailored Claude Code config — CLAUDE.md, agents, rules, and skills generated and committed straight to main — the config-generator lane, distinct from /learn which mines org-wide conventions into memory. Triggers on: analyze <repo>, generate config for this repo, repo config generator."
+      "when_to_use": "Use when a repo needs its patterns turned into a tailored Claude Code config (CLAUDE.md, agents, rules, skills) committed to main — distinct from /learn, which mines org-wide conventions into memory. Triggers on: analyze <repo>, generate config for this repo, repo config generator."
     },
     {
       "skill": "approve",
-      "description": "The human gate — the review queue on /social/publish, or a signed link for a remote approver",
-      "when_to_use": "Use when a full draft (copy and/or media) is ready for a human to say yes before anything reaches a public brand page. Two lanes: the PRIMARY is the Hub's review queue at /social/publish — the next answered draft waits there, a contributor fine-tunes and approves (now, or scheduled to the cron drain); the SECONDARY stages a signed single-use link (it opens a confirm page; only its button publishes) for an approver outside the Hub. This is the gate, not the send: it never writes copy (/draft), never makes media (/higgs), and never delivers to a platform (/publish, which refuses to run without the yes this stage records). Triggers on: review the queue, approve the next draft, stage for review, send for approval, get sign-off, ready for review, اعتماد, راجع الطابور, اعتمد المسودة, أرسل للمراجعة."
+      "description": "The human gate — the /social/publish review queue, or a signed link for a remote approver",
+      "when_to_use": "Use when a full draft needs a human yes before it reaches a public brand page — in the review queue or via a signed link for an outside approver. The gate only — not /draft, /higgs or /publish. Triggers on: review the queue, approve the next draft, stage for review, send for approval, get sign-off, ready for review, اعتماد, راجع الطابور, اعتمد المسودة, أرسل للمراجعة."
     },
     {
       "skill": "atom",
@@ -19,18 +24,23 @@
     },
     {
       "skill": "auth",
-      "description": "Autonomously authenticate to any web service or CLI on Abdout's behalf using the macOS-Keychain-stored databayt identities, then reach protected pages and fetch original assets behind the login wall. Use whenever a page redirects to a login wall, a CLI reports \"not authenticated\", the user says \"log into X / sign me into X / auth\", or a clone/asset-fetch task needs content behind a paywall or dashboard. Minimizes interaction — only pauses for a one-time code when no non-interactive path exists.",
-      "when_to_use": "Use when a login wall blocks progress — a page redirects to sign-in, a CLI reports not authenticated, or an asset sits behind a paywall or dashboard. Uses Keychain-stored identities; never asks for a password in chat. Triggers on: log into X, sign me in, not authenticated, behind a login wall, session expired."
+      "description": "Sign in to any web service or CLI with the Keychain-stored databayt identities, then reach protected pages and fetch the assets behind the login wall",
+      "when_to_use": "Use when a login wall blocks progress — a page redirects to sign-in, a CLI reports not authenticated, or a clone or asset fetch sits behind a paywall or dashboard. Never asks for a password in chat; pauses only for a one-time code. Triggers on: log into X, sign me in, not authenticated, behind a login wall, session expired."
     },
     {
       "skill": "bench",
       "description": "Score the engine's own config on its labeled cases, and propose holdout-gated fixes",
-      "when_to_use": "Use when the question is whether the CONFIG works, not whether a product feature works — scoring which skill fires for a prompt, checking runs against the contracts their SKILL.md declares, or proposing a description rewrite that must beat an unseen holdout. Unlike /health (counts files, never reads one), /qa (a product block), /check (typecheck + build). Triggers on: bench, benchmark the skills, is the routing accurate, measure the engine, dispatch accuracy, which skills collide, are any skills dead."
+      "when_to_use": "Use when the question is whether the CONFIG works, not a product feature — which skill fires for a prompt, runs checked against their SKILL.md contracts, or a description rewrite that must beat an unseen holdout. Unlike /health (counts files, never reads one), /qa (a product block), /check (typecheck + build). Triggers on: bench, benchmark the skills, is the routing accurate, measure the engine, dispatch accuracy, which skills collide, are any skills dead."
     },
     {
       "skill": "block",
       "description": "Create blocks - UI components with integrated business logic",
       "when_to_use": "Use when building a feature-level UI component that carries business logic — a data table wired to server actions, an auth flow, a dashboard, checkout. The level above /atom (2+ primitives) and /template (page layout). Triggers on: block, create a block, data table with logic, dashboard component."
+    },
+    {
+      "skill": "blur",
+      "description": "Blur-up images — photos arrive blurred and sharpen into focus as they load",
+      "when_to_use": "Use when images should load blurred then sharpen — the BlurImage atom, converting <img>/next/image surfaces, LQIP at upload, or auditing images that pop in. Not `skeleton` (data loading shapes). Triggers on: blur, blur-up, blur while loading, lqip, images pop in, fade in images, صور ضبابية."
     },
     {
       "skill": "build",
@@ -40,37 +50,42 @@
     {
       "skill": "calendar",
       "description": "The content calendar — which brand publishes what, on which day",
-      "when_to_use": "Use when deciding or reviewing WHAT to publish and WHEN — mapping topics to weeks, allocating slots per brand, checking what actually shipped against what was planned. This is the planning stage that feeds /draft: it never writes post copy (/draft), never renders media (/higgs), never stages for sign-off (/approve), never delivers (/publish), and never reads numbers back (/measure). Triggers on: content calendar, plan the content, what are we publishing, which brand is due, what slipped this week, التقويم, خطة المحتوى."
+      "when_to_use": "Use when deciding or reviewing WHAT to publish and WHEN — topics to weeks, slots per brand, shipped vs planned. The planning stage feeding /draft: never writes copy (/draft), renders media (/higgs), stages sign-off (/approve), delivers (/publish) or reads numbers (/measure). Triggers on: content calendar, plan the content, what are we publishing, which brand is due, what slipped this week, التقويم, خطة المحتوى."
     },
     {
       "skill": "canon",
-      "description": "Surface the right CEO book + operating move for a business or leadership decision — hiring, firing, pricing, positioning, what to build, customer development, fundraising, prioritization, runway, strategy. Pull in automatically when a decision is on the table; no slash command needed. /canon also lists all 10.",
-      "when_to_use": "Use when a business or leadership decision is on the table and needs a grounded operating move rather than an opinion — hiring, pricing, positioning, what to build, fundraising, runway. Triggers on: should we build, what do I do about, how should I price, is it time to hire, are we running out of runway."
+      "description": "The right CEO book + operating move for a business or leadership decision; /canon lists all 10",
+      "when_to_use": "Use when a business or leadership decision is on the table and needs a grounded operating move rather than an opinion — hiring, firing, pricing, positioning, what to build, customer development, fundraising, prioritization, runway, strategy. Triggers on: should we build, what do I do about, how should I price, is it time to hire, are we running out of runway."
     },
     {
       "skill": "captain",
       "description": "Databayt CEO brain - synthesize identity + state + journal, suggest next action",
-      "when_to_use": "Use when the question is what to work on next at company level — identity, state and the decision journal synthesised into one allocation. Unlike /canon (a principle for one decision) or /weekly (the Friday ritual). Triggers on: what should I do next, company status, brief me, where do I spend this week."
+      "when_to_use": "Use when the question is what to work on next at company level. Unlike /canon (a principle for one decision) or /weekly (the Friday ritual). Triggers on: what should I do next, company status, brief me, where do I spend this week."
     },
     {
       "skill": "carousel",
-      "description": "Multi-slide bilingual brand carousels — Claude writes the deck, kun renders Anthropic-styled slides at exact platform sizes, a human approves, channels receive",
-      "when_to_use": "Use when a databayt brand needs a multi-slide social post — an Instagram/Facebook carousel, a LinkedIn PDF carousel, a story-sized slide set, or a slide album to DM a client on Telegram/WhatsApp. Triggers on: carousel, multi-slide post, swipe post, slides for instagram, carousel for <brand|block>, كاروسيل, سلايدات, منشور متعدد الشرائح."
+      "description": "Multi-slide bilingual brand carousels — deck written, slides rendered at exact platform sizes, human-approved",
+      "when_to_use": "Use when a databayt brand needs a multi-slide social post — an Instagram/Facebook or LinkedIn PDF carousel, a story-sized slide set, or a slide album to DM a client. Triggers on: carousel, multi-slide post, swipe post, slides for instagram, carousel for <brand|block>, كاروسيل, سلايدات, منشور متعدد الشرائح."
     },
     {
       "skill": "check",
       "description": "Quality gate — typecheck + build + visual verify before shipping",
-      "when_to_use": "Use when work is about to ship and needs the pre-ship quality gate — run tsc, production build, optional browser visual verification, and existing tests, with auto-fix loops, then emit a READY TO SHIP / BLOCKED verdict and cache the pass in the session sentinel; unlike /handover or /qa (deep UI/block verification), this is the fast mechanical green-check. Triggers on: check, pre-ship quality gate, typecheck + build + visual verify, \"is it green\"."
+      "when_to_use": "Use when work is about to ship and needs the pre-ship gate — tsc, production build, optional visual verify and existing tests with auto-fix loops, ending READY TO SHIP or BLOCKED. Unlike /handover or /qa (deep UI/block verification), this is the fast mechanical green-check. Triggers on: check, pre-ship quality gate, typecheck + build + visual verify, \"is it green\"."
     },
     {
       "skill": "clone",
       "description": "Clone a pattern/component from a source repo OR mirror a live URL section pixel-exact",
-      "when_to_use": "Use when reproducing something that already exists somewhere else — a live site section to mirror pixel-exact into the house stack (url-mode: deterministic Playwright capture → tiered Workflow), a Figma frame to implement, or code to adapt from github:/shadcn:/codebase:/pattern: sources. Triggers on: clone <url>, clone this section, make ours look like <site>, clone the figma design, clone shadcn:<component>, pattern:<keyword>. Distinct from /atom or /template (net-new components) — clone always starts from an existing source."
+      "when_to_use": "Use when reproducing something that already exists — a live site section mirrored pixel-exact into the house stack, a Figma frame to implement, or code to adapt from github:/shadcn:/codebase:/pattern: sources. Triggers on: clone <url>, clone this section, make ours look like <site>, clone the figma design, clone shadcn:<component>, pattern:<keyword>. Distinct from /atom or /template (net-new components) — clone always starts from an existing source."
+    },
+    {
+      "skill": "cloudflare",
+      "description": "Cloudflare platform operator — Workers + Containers deploys, DNS cutover, crons and logs",
+      "when_to_use": "Use for anything on the Cloudflare production platform — deploying a hosted repo, checking a deploy is live, Worker logs or crons, flipping DNS to proxied, Worker vs Container for a new app. /ship and /watch delegate here for wrangler.jsonc repos. Triggers on: cloudflare, wrangler, worker, container, deploy to cloudflare, cutover, is it live on cloudflare, worker logs, cron not firing, ERR_CONNECTION_RESET, orange cloud, proxied."
     },
     {
       "skill": "code",
       "description": "Logic layer — server actions with auth, validation, tenant isolation",
-      "when_to_use": "Use when the Logic stage of the pipeline is reached or Abdout asks in prose to build the business-logic layer for a feature — server actions, CRUD operations, permission rules, or optimized queries — as distinct from /schema (data layer) or /wire (UI layer). Triggers on: server actions, logic layer with auth+validation+tenant isolation, pipeline Logic stage."
+      "when_to_use": "Use at the pipeline's Logic stage, or when asked to build a feature's business-logic layer — server actions, CRUD, permission rules, optimized queries — as distinct from /schema (data layer) or /wire (UI layer). Triggers on: server actions, logic layer with auth+validation+tenant isolation, pipeline Logic stage."
     },
     {
       "skill": "codebase",
@@ -79,8 +94,8 @@
     },
     {
       "skill": "convert",
-      "description": "Convert a file or URL to Markdown via MarkItDown (PDF, Office, images, audio, web)",
-      "when_to_use": "Use when a file or URL needs to become clean Markdown — PDFs, Office docs (DOCX/PPTX/XLSX), images, audio, web pages, YouTube transcripts — via the MarkItDown MCP, landing in docs/, a knowledge base, or printed to the session. Triggers on: convert <file|url>, markitdown, markdown this PDF, pull this page into docs, transcribe this video."
+      "description": "Convert a file or URL to Markdown via MarkItDown",
+      "when_to_use": "Use when a file or URL should become clean Markdown — PDF, Office docs, images, audio, web pages, YouTube transcripts — landing in docs/, a knowledge base or the session. Triggers on: convert <file|url>, markitdown, markdown this PDF, pull this page into docs, transcribe this video."
     },
     {
       "skill": "costs",
@@ -95,17 +110,17 @@
     {
       "skill": "credentials",
       "description": "Manage databayt credentials — API keys via Keychain, web logins via Safari",
-      "when_to_use": "Use when managing databayt credentials — storing or reading API keys via the macOS Keychain, driving Safari autofill for web logins, exporting keys for env wiring; never prints secrets into files. Triggers on: credentials, api key, log into <service>, store the key, which keys do we have."
+      "when_to_use": "Use when storing, reading or exporting databayt API keys via the macOS Keychain, or driving Safari autofill for web logins; never prints secrets into files. Triggers on: credentials, api key, log into <service>, store the key, which keys do we have."
     },
     {
       "skill": "decide",
       "description": "Write a decision journal entry — Type 1/2 classification, premortem, expected outcome, reviewed-by date",
-      "when_to_use": "Use when a choice worth remembering needs recording — Type 1/2 classification, premortem, expected outcome and a reviewed-by date in the decision journal. Unlike /canon (surfaces a principle) and /premortem (only the failure story). Triggers on: log this decision, we decided to, record the call."
+      "when_to_use": "Use when a choice worth remembering needs recording in the decision journal. Unlike /canon (surfaces a principle) and /premortem (only the failure story). Triggers on: log this decision, we decided to, record the call."
     },
     {
       "skill": "deploy",
-      "description": "Vercel operator — preview/staging deploys, deployment logs and status, and the fix-until-deployed retry loop",
-      "when_to_use": "Use when driving Vercel directly rather than running a pipeline stage — deploying to preview/staging, inspecting why a deployment failed, checking deployment status, or looping build-fix-redeploy until it goes green (max 5 attempts). Promoting a checked build to PRODUCTION is /ship (the pipeline's commit-to-live step after /check), the commit-lint-push cycle is /quick, and confirming a live deploy is healthy is /watch — this skill does not replace any of them. Triggers on: deploy to preview, deploy to staging, vercel logs, why did the deploy fail, deployment status, redeploy until it works."
+      "description": "Production deploy — the full Cloudflare cycle to a verified login, plus the legacy Vercel preview lane",
+      "when_to_use": "Use when Abdout says deploy, push to prod, ship it or deploy everything — the whole cycle, not just the upload, including the Neon restore point and prod data steps. Distinct from /check (pre-ship gate only), /watch (observe, never fix), /cloudflare (platform ops: DNS, crons, logs) and /quick (commit-push, no build). Triggers on: deploy, deploy everything, push to production, ship to cloudflare, redeploy, why is the deploy stuck, vercel preview, deploy to staging."
     },
     {
       "skill": "dev",
@@ -118,9 +133,14 @@
       "when_to_use": "Use when code needs written documentation generated from source — component MDX, API reference, or Storybook stories. Not the docs-site content itself. Triggers on: document this component, write the API docs, generate the MDX, add a storybook story."
     },
     {
+      "skill": "domains",
+      "description": "Domain + mail health — expiry, renewal, DNS, inboxes",
+      "when_to_use": "Use when a domain or company inbox needs checking or fixing, or a domains issue fired. Triggers on: domains, renew, auto-renew, dmarc, spf, mail bouncing."
+    },
+    {
       "skill": "draft",
-      "description": "Write the full draft — copy (Arabic crafted first, English mirrored) and/or its media set",
-      "when_to_use": "Use when a topic needs to become a FULL draft for a databayt brand — the core piece plus one platform-native variant per channel, Arabic written natively and English mirrored, with UTM on every link, AND the draft's media half: library picks attached by URL, or a generation hand-off. ALSO the answering half of the Hub's agent window: with no topic, or on any phrasing about the draft queue, it drains the briefs contributors submitted on /social — picking media from the library as it answers. This is the drafting stage only: it does not decide what to write about (/calendar), does not render new images or video itself (/higgs, /carousel — it attaches their output), does not approve (/approve), and never sends anything to a platform (/publish). Triggers on: draft a post, write the copy, write the caption, post about <topic>, attach media to the draft, drain the draft queue, answer the social asks, any drafts waiting, اكتب منشور, صياغة المنشور, طابور الصياغة, أرفق وسائط للمسودة."
+      "description": "Full brand draft — Arabic-first copy, English mirrored, plus media",
+      "when_to_use": "Use when a topic must become a full brand draft — every channel's copy plus media — or, with no topic, to drain the /social brief queue. Drafting only: never picks topics (/calendar), renders media (/higgs, /carousel), approves (/approve) or sends (/publish). Triggers on: draft a post, write the copy, write the caption, post about <topic>, attach media to the draft, drain the draft queue, answer the social asks, any drafts waiting, اكتب منشور, صياغة المنشور, طابور الصياغة, أرفق وسائط للمسودة."
     },
     {
       "skill": "economy",
@@ -128,9 +148,19 @@
       "when_to_use": "Use when token consumption, plan limits, or usage windows are the topic — auditing what's burning the Max pool, delegating work to a cheaper model/effort/product lane, or applying session hygiene. Triggers on: economy, token usage, optimize tokens, we're burning tokens, hit the limit, usage window, plan limit, tokens per outcome, توكن, استهلاك."
     },
     {
+      "skill": "edit",
+      "description": "Edit video locally — footage cuts, Arabic captions, motion graphics, demos, reels",
+      "when_to_use": "Use when real footage must be cut or captioned, or a video composed from code. Filming is /record, /shoot; AI clips /higgs. Triggers on: edit video, cut the silences, rough cut, make a reel, add captions, motion graphic, title card, intro outro, مونتاج, قص الفيديو, ريلز."
+    },
+    {
+      "skill": "facebook",
+      "description": "Connect a brand's Facebook Page to the publishing pipeline",
+      "when_to_use": "Use when a Facebook Page must be wired in so drafts can reach it — a new brand Page, a Page that posts nothing, an expired or invalid token, or a permissions error that names nothing. Connection work, not content: never writes copy (/draft), renders media (/higgs), approves (/approve) or runs the everyday send (/publish). Triggers on: connect a facebook page, add my brand page, wire up facebook, new brand page, facebook token expired, invalid scopes, اربط صفحة فيسبوك."
+    },
+    {
       "skill": "feature",
       "description": "Full pipeline — idea to production (chains every stage)",
-      "when_to_use": "Use when Abdout asks to build a feature end to end, take an idea all the way to production, or names a new feature to ship — this is the compound orchestrator that chains every pipeline stage (idea → spec → human approval → plan → tasks → schema → code → wire → check → ship → watch) with progress appended to a GitHub issue, unlike the single-stage neighbors (/idea, /spec, /schema, /code, /wire, /check, /ship, /watch) which each run one stage, and product scope resolves data-driven from .claude/memory/repositories.json (planned products get naming/spec only). Triggers on: feature <name> [product], build <feature> end to end, full pipeline idea→production."
+      "when_to_use": "Use when Abdout asks to build a feature end to end, take an idea to production, or names a new feature to ship — the orchestrator that chains every stage on one GitHub issue, pausing once for spec approval, unlike the single-stage /idea, /spec, /schema, /code, /wire, /check, /ship and /watch. Triggers on: feature <name> [product], build <feature> end to end, full pipeline idea→production."
     },
     {
       "skill": "fix",
@@ -138,24 +168,29 @@
       "when_to_use": "Use when the codebase has mechanical errors to clear — TypeScript, lint and build failures fixed in a loop until green. Unlike /report (a user-filed bug) and /check (the pre-ship gate, which only reports). Triggers on: fix the errors, clear the type errors, make it compile, lint is failing."
     },
     {
+      "skill": "funnel",
+      "description": "Conversation to conversion — gates, segments, assets, the stall clock",
+      "when_to_use": "Converting a lead that already replied — gate state, segmentation, value before payment, the stall clock, the follow-up drain. Triggers on: funnel, qualify, segment, nurture, follow up, stalled, chatbot, قمع, تأهيل, متابعة. NOT /scrape (finding them), /draft (brand copy), /approve (a social post), /qa (a block)."
+    },
+    {
       "skill": "handover",
       "description": "UI verification — runs niche quality keywords on a URL or block",
-      "when_to_use": "Use when Abdout wants a UI verification pass before a demo, merge, or client handoff — polymorphic on argument, where URL mode (argument starts with /) runs all 12 per-URL niche quality keywords (browser 6 + code 6) on one route, and block mode (bare word) runs the per-route subset (debug, flow, responsive, lang) on every route in the block. Triggers on: handover <url|block>, pre-demo quality pass, run the niche quality keywords, \"is this URL clean\", \"is the whole block ready to show\"."
+      "when_to_use": "Use when Abdout wants a UI verification pass before a demo, merge or client handoff — a URL (starts with /) gets all 12 per-URL niche quality keywords; a bare block name gets debug, flow, responsive and lang on every route. Triggers on: handover <url|block>, pre-demo quality pass, run the niche quality keywords, \"is this URL clean\", \"is the whole block ready to show\"."
     },
     {
       "skill": "health",
       "description": "Check Claude Code config health across the team + engine drift",
-      "when_to_use": "Use when checking engine or config health — runs health.sh (counts vs engine.json, plugin parity, vocabulary sync, installed-agent matrix), reports drift, and reads teammates' statuses from the shared dashboard issue. Triggers on: health, config health, is the engine healthy, drift check, team config status."
+      "when_to_use": "Use when checking engine or config health — health.sh counts vs engine.json, plugin parity, vocabulary sync, drift — plus teammates' statuses from the dashboard issue. Triggers on: health, config health, is the engine healthy, drift check, team config status."
     },
     {
       "skill": "higgs",
-      "description": "Generate and edit photos and videos for databayt org marketing, ads, and prompts — Google (Nano Banana / Veo / Omni) direct, or Higgsfield",
-      "when_to_use": "Use when generating or editing marketing media — image, photo, video, ad, hero shot, product shot, promo reel, story, avatar ad — or when a reference video/image URL needs downloading and tweaking. Owns BOTH raster renderers: Google direct (Nano Banana, Nano Banana Pro, Veo, Omni Flash — pay per image, no credit ceiling) and Higgsfield (credits). This is the TEXT-FREE lane: og images, banners, social cards, infographics, testimonials, split comparisons and anything carrying copy render on /carousel's template lane instead (the Portrait Gallery spells route by taxonomy lane). Triggers on: /higgs, generate video, generate image, generate photo, make an ad, promo video, hero image, product shot, mockup, lifestyle scene, moodboard, showroom asset, brand kit, edit video from url, download and tweak video, higgs, nano banana, veo, omni, gemini image, صورة تسويقية, وسائط."
+      "description": "Marketing photos and video — Google (Nano Banana, Veo, Omni) direct, or Higgsfield",
+      "when_to_use": "Use when AI must GENERATE marketing images or video — ads, hero or product shots, stories, avatar ads — or restyle a reference URL. Cutting real footage is /edit. Text-free only: anything carrying copy (og images, banners, social cards, infographics, testimonials) goes to /carousel. Triggers on: generate video, generate image, make an ad, promo video, hero image, product shot, mockup, lifestyle scene, moodboard, showroom asset, brand kit, edit video from url, nano banana, veo, omni, gemini image, صورة تسويقية, وسائط."
     },
     {
       "skill": "idea",
       "description": "Capture a feature idea as a structured GitHub issue",
-      "when_to_use": "Use when a new feature idea surfaces in conversation and needs to become a structured, deduplicated GitHub issue with user story, acceptance criteria, and scope — the Capture stage that opens the idea→production pipeline (distinct from /spec which details an existing issue, and /issue which files a generic issue without feature structure). Triggers on capture this idea, new feature idea, \"we should build …\", \"user can …\" stories, pipeline Capture stage, optionally scoped to a product (hogwarts, souq, mkan, shifa, kun)."
+      "when_to_use": "Use when a new feature idea surfaces and should become a deduplicated GitHub issue with a user story and acceptance criteria — the Capture stage opening the pipeline. Distinct from /spec (details an existing issue) and /issue (a generic issue without feature structure). Triggers on capture this idea, new feature idea, \"we should build …\", \"user can …\" stories, pipeline Capture stage, optionally scoped to a product (hogwarts, souq, mkan, shifa, kun)."
     },
     {
       "skill": "incident",
@@ -165,27 +200,37 @@
     {
       "skill": "issue",
       "description": "Create a GitHub issue in the appropriate databayt repo",
-      "when_to_use": "Use when a task, bug, chore, or follow-up needs to become a tracked GitHub issue in the right databayt repo (kun, hogwarts, souq, mkan, shifa, codebase, shadcn, ios-app/android-app, marketing) with priority/type/scope/assignment labels, a Context/Action/Verification body, and a Slack #dev notification — including turning Slack messages into issues — as distinct from /idea which captures structured feature ideas with user stories. Triggers on: open/file an issue, create a GitHub issue in the right databayt repo."
+      "when_to_use": "Use when a task, bug, chore or follow-up should become a tracked, labelled GitHub issue in the right databayt repo, including turning Slack messages into issues — as distinct from /idea, which captures feature ideas with user stories. Triggers on: open/file an issue, create a GitHub issue in the right databayt repo."
+    },
+    {
+      "skill": "jobs",
+      "description": "Abdout's + Databayt's income lane — jobs, gigs, tenders, client requests and funding programs across Rwanda, Kenya, Nigeria, Gulf, Sudan; tracked on sales.databayt.org",
+      "when_to_use": "Any opportunity someone POSTED that pays Abdout or Databayt: Kigali/Nairobi/Lagos roles, remote dev, AI-training gigs, freelance, electrical/protection work, tenders, RFPs, client project requests, and funding — incubators, accelerators, grants, credits, angels. Triggers on: jobs, find work, apply, opportunities, gigs, tenders, RFP, client request, incubator, accelerator, grant, credits, investor, angel, fundraising, funding, did anyone reply, وظائف, فرص, مناقصات, حاضنة, مسرعة, منحة, تمويل. NOT /scrape (outbound leads we go find)."
     },
     {
       "skill": "learn",
       "description": "Extract organizational patterns and conventions from repos + history",
-      "when_to_use": "Use when extracting organizational intelligence — patterns, conventions, and team dynamics mined from git history and the databayt repos into memory; feeds the conventions/patterns/drift surfaces. Distinct from /analyze which generates a repo's Claude config. Triggers on: learn, what are our conventions, extract patterns from history."
+      "when_to_use": "Use when mining organizational patterns, conventions and team dynamics from git history and the databayt repos into memory. Distinct from /analyze, which generates a repo's Claude config. Triggers on: learn, what are our conventions, extract patterns from history."
     },
     {
       "skill": "mcp-doctor",
-      "description": "Diagnose and recover the browser/Playwright MCP server when it disconnects, fails to launch, or returns \"tool not found\" for mcp__browser__*.",
+      "description": "Diagnose and recover the browser/Playwright MCP server",
       "when_to_use": "Use when the browser/Playwright MCP is broken — tools missing, server disconnected, or a launch failure. Triggers on: browser mcp is not working, tool not found, playwright mcp is disconnected, browser tools missing."
     },
     {
+      "skill": "md",
+      "description": "House standard for machine-produced Markdown — schema, RTL rules, grading by agreement",
+      "when_to_use": "Use when judging or repairing the quality of Markdown a machine produced from a document — a bad conversion, wrong tables, an untrustworthy twin — or writing a transcription contract for a new source. The standard, not a converter: /convert makes one file's Markdown and /textbook orchestrates whole books; both are held to it. Triggers on: md quality, bad conversion, grade the markdown, transcription contract, agreement score, RTL markdown, mirrored tables."
+    },
+    {
       "skill": "measure",
-      "description": "Read the numbers back — platform reach and engagement plus UTM attribution, per post and per brand",
-      "when_to_use": "Use when asking how published posts actually performed — reach, views, reactions, comments, shares, or UTM-attributed traffic, per post, per channel, or per brand, and whether the strategy's kill criteria can yet be judged. This reads numbers only: it never writes copy (/draft), never publishes (/publish), and is neither a bug report (/report) nor a deploy check (/watch). Triggers on: how did the post do, social metrics, reach and engagement, is social working, did anyone see it, أرقام المنشور, أداء المنشورات."
+      "description": "Read the numbers back — reach, engagement and UTM attribution per post and brand",
+      "when_to_use": "Use when asking how published posts performed — reach, views, reactions, shares or UTM traffic per post, channel or brand, and whether kill criteria can be judged yet. Numbers only: never writes copy (/draft) or publishes (/publish), and is neither a bug report (/report) nor a deploy check (/watch). Triggers on: how did the post do, social metrics, reach and engagement, is social working, did anyone see it, أرقام المنشور, أداء المنشورات."
     },
     {
       "skill": "monitor",
       "description": "Check all deployments, costs, and uptime across databayt products",
-      "when_to_use": "Use when checking all deployments, costs, and uptime across the databayt products in one sweep — Vercel deploy status, production URL sampling, spend vs budget — escalating anything red to /incident. Triggers on: monitor, are the deploys green, uptime check, production status sweep."
+      "when_to_use": "Use for one sweep of deploys, uptime and spend across the databayt products, escalating anything red to /incident. Triggers on: monitor, are the deploys green, uptime check, production status sweep."
     },
     {
       "skill": "motion",
@@ -195,7 +240,7 @@
     {
       "skill": "package",
       "description": "Cross-repo dependency audit and upgrade coordination",
-      "when_to_use": "Use when auditing or upgrading dependencies across the databayt repos — version consistency, coordinated upgrades, breaking-change sweeps by the package agent; cross-repo scope, unlike a single repo's deps/outdated check. Triggers on: package audit, upgrade deps across repos, version consistency, dependency sweep."
+      "when_to_use": "Use when auditing or upgrading dependencies across the databayt repos — version consistency, coordinated upgrades, breaking-change sweeps — unlike a single repo's outdated check. Triggers on: package audit, upgrade deps across repos, version consistency, dependency sweep."
     },
     {
       "skill": "pattern",
@@ -210,12 +255,12 @@
     {
       "skill": "plan",
       "description": "Architecture plan — tech decisions from an approved spec, before code",
-      "when_to_use": "Use when turning a human-approved spec into an implementation plan — pattern choices, architecture decisions, mirror target, tradeoffs, and risks appended to the feature's GitHub issue — the pipeline Plan stage between /spec and /schema (NOT Claude Code plan mode). Triggers on: plan the architecture, architecture plan for the approved spec, pipeline Plan stage."
+      "when_to_use": "Use when turning a human-approved spec into an implementation plan — patterns, architecture, mirror target, tradeoffs and risks on the feature's GitHub issue; the Plan stage between /spec and /schema (NOT Claude Code plan mode). Triggers on: plan the architecture, architecture plan for the approved spec, pipeline Plan stage."
     },
     {
       "skill": "premortem",
       "description": "Klein-style premortem — imagine a decision/project failed, write the story, surface risks",
-      "when_to_use": "Use before committing to a decision or project, to surface risks by assuming it already failed and writing the story backwards. Unlike /decide (records the call) and /canon (supplies a principle). Triggers on: what could go wrong, imagine this failed, what are the risks, stress-test this plan."
+      "when_to_use": "Use before committing to a decision or project, to surface risks by assuming it already failed. Unlike /decide (records the call) and /canon (supplies a principle). Triggers on: what could go wrong, imagine this failed, what are the risks, stress-test this plan."
     },
     {
       "skill": "pricing",
@@ -234,13 +279,18 @@
     },
     {
       "skill": "publish",
-      "description": "Deliver approved full drafts to the channels — the review queue decides, the lanes deliver",
-      "when_to_use": "Use when an APPROVED full draft (copy + media) must reach its channels, now or on a schedule — via the review queue on /social/publish (Approve = publish right away or delegate to the cron drain, per its settings), the signed approval link, or the copy-out block for WhatsApp. This publishes CONTENT, not code: /ship and /deploy put software in production and /release ships a feature block, and none of them touch a brand page. It refuses without a recorded /approve yes, never writes copy (/draft), never creates from blank (the queue only fine-tunes), and never reads numbers back (/measure). Triggers on: publish the post, send it out, post it now, schedule it for tomorrow, broadcast it, review and publish, انشر المنشور, ابعت المنشور, راجع وانشر."
+      "description": "Deliver approved full drafts to the brand channels",
+      "when_to_use": "Use when an APPROVED full draft must reach its channels, now or on a schedule — via the review queue, the signed approval link, or the WhatsApp copy-out block. Content, not code (/ship, /deploy). Refuses without a recorded /approve yes; not /draft or /measure. Triggers on: publish the post, send it out, post it now, schedule it for tomorrow, broadcast it, review and publish, انشر المنشور, ابعت المنشور, راجع وانشر."
+    },
+    {
+      "skill": "pwa",
+      "description": "Progressive Web App lane — install, offline, Web Push",
+      "when_to_use": "Use when a product should install to a home screen, work offline or push browser notifications — auditing installability or building the per-tenant manifest, service worker, offline page or Web Push. Distinct from /performance (Core Web Vitals), /handover (UI verification) and the in-app `notifications` block. Triggers on: pwa, progressive web app, installable, add to home screen, install prompt, manifest, service worker, offline, works offline, web push, push notification, تطبيق, بدون إنترنت, إشعارات."
     },
     {
       "skill": "qa",
-      "description": "Autonomous block QA — detect, adversarially verify, fix safe tiers, hand the residual to a human",
-      "when_to_use": "Use when a feature block needs autonomous QA — detect across every route + the block source, adversarially verify every FAIL, auto-fix the safe (tier A) and build-gated (tier B) tiers, persist the verdict to blocks.json, and open one human-signoff issue carrying only the residual — triggering on qa <block> (e.g. \"qa admission\" in prose, no slash needed), \"QA this block\", pre-release verification, or a code-complete-but-unverified block; block-scope only — a single URL spot-check is handover's job, the typecheck/build gate alone is check's, and a user-reported bug is report's."
+      "description": "Autonomous block QA with one human signoff on the residual",
+      "when_to_use": "Use when a feature block needs autonomous QA across every route — detect, verify each FAIL, auto-fix the safe tiers, open one human-signoff issue for the rest — triggering on qa <block> (e.g. \"qa admission\"), \"QA this block\", pre-release verification, or a code-complete but unverified block. Block scope only: a single-URL spot-check is handover's job, the typecheck/build gate check's, a user-reported bug report's."
     },
     {
       "skill": "quick",
@@ -248,14 +298,19 @@
       "when_to_use": "Use when finished work just needs to land — lint, auto-fix, conventional commit and push to main in one pass. Not a production promotion (/ship) and not a Vercel deploy (/deploy). Triggers on: commit and push, just push it, save this work, land it."
     },
     {
+      "skill": "record",
+      "description": "Screen-record demo videos of real product flows, mirrored to Google Drive",
+      "when_to_use": "Use when a product flow must be captured as VIDEO — demo videos, ad cuts, walkthroughs, re-records, Drive sync. Stills are /shoot. Triggers on: record, record <flow|block>, demo video, walkthrough, screen recording, re-record, سجل فيديو."
+    },
+    {
       "skill": "release",
       "description": "One spell — handover, check, ship, watch, then comment + close the issue",
-      "when_to_use": "Use when a feature block is code-complete on main and Abdout wants it shipped to the client in one move — the full local-to-production-and-verified chain, not a single stage like /check (tight loop), /ship (deploy only), /handover (QA only), or /watch (verify only). Triggers on: release <block>, send to client, one-spell handoff (handover→check→ship→watch→close issue), give away to client, ship it and tell the client."
+      "when_to_use": "Use when a code-complete block on main should reach the client in one move — the full chain to verified production, not a single stage like /check (tight loop), /ship (deploy only), /handover (QA only) or /watch (verify only). Triggers on: release <block>, send to client, one-spell handoff (handover→check→ship→watch→close issue), give away to client, ship it and tell the client."
     },
     {
       "skill": "report",
-      "description": "Auto-fix a user-reported issue end to end",
-      "when_to_use": "Use when GitHub issues labeled `report` need processing — reading a user-reported bug, locating the route/component, reproducing, fixing with a minimum diff, building, pushing, and closing the issue — across the databayt repos (hogwarts, kun, souq, mkan, shifa) or a single repo/issue, distinct from /qa (block-wide QA) and /check (pre-ship gate). Triggers on: report, fix reports, user-reported issue auto-fix, verified-report queue."
+      "description": "Triage and fix the open user reports across databayt repos",
+      "when_to_use": "Use when the open `report`-labeled issues need a human decision or a fix — Abdout takes or rejects each from one table, accepted ones get fixed. Distinct from /qa (block-wide QA), /check (pre-ship gate) and /issue (file a new issue). Triggers on: report, reports, fix reports, list the reports, show the reports, what did the team report, the team reported, Ali reported, open issues from the dialog, take/reject the reports, verified-report queue, البلاغات, بلاغات الفريق, المشاكل المبلغ عنها, أصلح البلاغات."
     },
     {
       "skill": "repos",
@@ -270,7 +325,12 @@
     {
       "skill": "schema",
       "description": "Data layer — Prisma model, migration, and Zod validation",
-      "when_to_use": "Use when a feature needs its data foundation built from an approved spec — creating the Prisma model, applying the migration, generating the client, and writing Zod create/update/filter schemas with TypeScript types. Triggers on: add the model/migration, data layer, Prisma model + Zod validation, pipeline Data stage."
+      "when_to_use": "Use when a feature needs its data foundation from an approved spec — the Prisma model, migration and client, plus Zod create/update/filter schemas and types. Triggers on: add the model/migration, data layer, Prisma model + Zod validation, pipeline Data stage."
+    },
+    {
+      "skill": "scrape",
+      "description": "Lead acquisition — contact gap first, discovery last",
+      "when_to_use": "Finding, enriching, tiering or reaching leads in the Twenty CRM. Triggers on: scrap, scrape, scrap facebook, scrap whatsapp, scrap facebook for hogwarts, scrap for mkan, scrap for databayt, website leads, old websites, rebrand leads, leads, prospect, contact gap, enrich, outreach, pipeline health, who should we contact, find schools, اسحب, جمع بيانات, عملاء محتملين. NOT /health (engine drift), /measure (social numbers), /report (a bug)."
     },
     {
       "skill": "screenshot",
@@ -290,27 +350,37 @@
     {
       "skill": "ship",
       "description": "Promote a checked build to production (Vercel --prod)",
-      "when_to_use": "Use when a checked build must go live on Vercel production — the pipeline's final commit-to-live step after /check passes — including deploying main to prod, inspecting failed production deployment logs, or listing recent production deploys, as distinct from /deploy (staging/preview), /check (pre-ship gate), and /watch (post-deploy verification). Triggers on: ship, deploy to production, promote checked build (Vercel --prod)."
+      "when_to_use": "Use when a checked build must go live on Vercel production — the pipeline's final step after /check passes — or to inspect failed or recent production deploys. Distinct from /deploy (staging/preview), /check (pre-ship gate) and /watch (post-deploy verification). Triggers on: ship, deploy to production, promote checked build (Vercel --prod)."
+    },
+    {
+      "skill": "shoot",
+      "description": "Stills of real product pages and flows, framed like Abdout's MacBook",
+      "when_to_use": "Use when a page or flow needs STILL screenshots — routes or a scripted e2e flow, framed like Abdout's MacBook at Chrome 125%. Video is /record. Triggers on: shoot <route|flow>, take a screenshot of <url>, screenshot the <x> flow, لقطة شاشة."
+    },
+    {
+      "skill": "skeleton",
+      "description": "Skeleton loading states — layout-matching shimmer while data loads",
+      "when_to_use": "Use when a route or section needs a loading state while DATA loads — loading.tsx, Suspense fallbacks, the skeleton kit + shimmer, replacing spinners, routes that flash blank. Not `blur` (image bytes). Triggers on: skeleton, loading state, loading.tsx, shimmer, page flashes blank, replace the spinner, هيكل التحميل."
     },
     {
       "skill": "social",
       "description": "One spell — calendar, draft, media, approve, publish, measure for a brand post",
-      "when_to_use": "Use when a databayt brand needs a social post taken the whole way — pick the slot, write the bilingual copy, render the media, get a human sign-off, deliver to the channels, and read the numbers back. This is the compound orchestrator; run a single stage directly when that is all you need (/calendar, /draft, /higgs, /approve, /publish, /measure). Triggers on: social post, post about <topic>, publish to social, social automation, broadcast the announcement, منشور تواصل, انشر عن."
+      "when_to_use": "Use when a databayt brand post should be taken the whole way — slot, bilingual copy, media, human sign-off, delivery, numbers. The compound orchestrator; for one stage run it directly (/calendar, /draft, /higgs, /approve, /publish, /measure). Triggers on: social post, post about <topic>, publish to social, social automation, broadcast the announcement, منشور تواصل, انشر عن."
     },
     {
       "skill": "spec",
       "description": "Technical spec — data model, file plan, refined acceptance criteria",
-      "when_to_use": "Use when a captured feature idea (GitHub issue) needs to become a technical specification — Prisma data model sketch, file plan, refined acceptance criteria, and dependencies — published as an issue comment and paused for the single human approval gate of the pipeline; this is the Specify stage between /idea and /plan or /schema, not architecture planning (/plan) or task breakdown (/tasks). Triggers on: spec the <feature>, write the spec, technical specification, pipeline Specify stage (human approval gate)."
+      "when_to_use": "Use when a captured feature idea (GitHub issue) needs a technical spec — data model sketch, file plan, refined acceptance criteria — posted for the pipeline's one human approval gate. The Specify stage between /idea and /plan or /schema; not architecture (/plan) or task breakdown (/tasks). Triggers on: spec the <feature>, write the spec, technical specification, pipeline Specify stage (human approval gate)."
     },
     {
       "skill": "sync",
-      "description": "Self-update — read the latest releases across the engine's whole surface (Anthropic, stack, services, practice), diff against the engine, adopt or propose",
-      "when_to_use": "Use when self-updating the engine against upstream releases — reads the Anthropic/stack/services/practice release feeds per engine.json sync tiers, diffs findings against the engine, adopts mechanical wins, proposes the rest, and stamps sync dates. Triggers on: sync, what's new in claude code, refresh the engine, release sweep."
+      "description": "Self-update — diff the latest upstream releases against the engine, adopt or propose",
+      "when_to_use": "Use when self-updating the engine against upstream releases (Anthropic, stack, services, practice) — adopt the mechanical wins, propose the rest, stamp the sync dates. Triggers on: sync, what's new in claude code, refresh the engine, release sweep."
     },
     {
       "skill": "tasks",
       "description": "Task breakdown — dependency-ordered work list from an approved plan",
-      "when_to_use": "Use when an approved implementation plan (from /plan) needs to become an ordered, dependency-aware checklist on the GitHub issue before /schema, /code, or /wire run — the pipeline Tasks stage, not spec writing (/spec) or architecture (/plan). Triggers on: break it down, ordered task list from an approved plan, task breakdown, decompose the plan, pipeline Tasks stage."
+      "when_to_use": "Use when an approved plan (from /plan) needs an ordered, dependency-aware checklist on the GitHub issue before /schema, /code or /wire run — the Tasks stage, not spec writing (/spec) or architecture (/plan). Triggers on: break it down, ordered task list from an approved plan, task breakdown, decompose the plan, pipeline Tasks stage."
     },
     {
       "skill": "template",
@@ -323,9 +393,14 @@
       "when_to_use": "Use when code needs tests written or run — unit, component or Playwright E2E, with coverage. Unlike /qa, which verifies a shipped block in a browser. Triggers on: write tests for, add e2e coverage, run the tests, test this component."
     },
     {
+      "skill": "textbook",
+      "description": "Give every curriculum textbook.pdf a verified Markdown twin — vision transcription, blind re-reads, adjudication, a benchmark",
+      "when_to_use": "Use when curriculum textbooks (PDF scans, mostly Arabic) must become Markdown twins, or a twin must be verified, repaired or benchmarked. Triggers on: textbook markdown, textbook.md, convert the textbooks, pdf to md for grade N, re-transcribe the textbooks, fix the textbook twin, textbook bench."
+    },
+    {
       "skill": "watch",
       "description": "Post-deploy verification — visual + console + smoke test",
-      "when_to_use": "Use when a deployment just landed and needs to be confirmed healthy in production — check Vercel deployment status, screenshot the live page, scan console errors and failed network requests, run a quick smoke interaction, then close or escalate the feature issue; unlike /check (pre-ship gate) or /qa (block QA), this observes production after /ship and never fixes code. Triggers on: watch, verify the deploy, is it live, post-deploy visual + console + smoke check, pipeline Monitor stage."
+      "when_to_use": "Use when a deploy just landed and must be confirmed healthy in production — screenshot the live page, scan console and network errors, run a smoke interaction, then close or escalate the issue. Unlike /check (pre-ship gate) or /qa (block QA), it observes after /ship and never fixes code. Triggers on: watch, verify the deploy, is it live, post-deploy visual + console + smoke check, pipeline Monitor stage."
     },
     {
       "skill": "weekly",
@@ -335,10 +410,50 @@
     {
       "skill": "wire",
       "description": "UI layer — page (mirror pattern), content, form, table columns, i18n",
-      "when_to_use": "Use when a feature's UI layer needs to be built after schema and code stages — creating the route page (thin wrapper, mirror pattern), the server content component, the client form, table columns, dictionary keys for both en + ar, and optional navigation entries, all verified by pnpm build. Triggers on: wire the UI, build the page/form/table for the feature, i18n wiring, pipeline UI stage. Distinct from /code (server actions/logic) and /check (quality gate) — this is specifically the visible pages/components/i18n layer of the pipeline."
+      "when_to_use": "Use when a feature's UI layer is due after the schema and code stages — the route page (mirror pattern), server content, client form, table columns and en + ar dictionary keys, verified by pnpm build. Triggers on: wire the UI, build the page/form/table for the feature, i18n wiring, pipeline UI stage. Distinct from /code (server actions/logic) and /check (quality gate) — this is specifically the visible pages/components/i18n layer of the pipeline."
     }
   ],
   "cases": [
+    {
+      "id": "trg:airbnb-copy:write-airbnb-listing-29fd",
+      "prompt": "write airbnb listing"
+    },
+    {
+      "id": "trg:airbnb-copy:homes-copywriting-491f",
+      "prompt": "homes copywriting"
+    },
+    {
+      "id": "trg:airbnb-copy:sound-like-airbnb-17e4",
+      "prompt": "sound like airbnb"
+    },
+    {
+      "id": "trg:airbnb-copy:listing-title-989b",
+      "prompt": "listing title"
+    },
+    {
+      "id": "trg:airbnb-copy:listing-description-c8d6",
+      "prompt": "listing description"
+    },
+    {
+      "id": "trg:airbnb-copy:وصف-شقة-1ce0",
+      "prompt": "وصف شقة"
+    },
+    {
+      "id": "trg:airbnb-copy:كتابة-إعلان-شقة-0776",
+      "prompt": "كتابة إعلان شقة"
+    },
+    {
+      "id": "trg:airbnb-copy:صياغة-إعلان-عقار-2d77",
+      "prompt": "صياغة إعلان عقار"
+    },
+    {
+      "id": "trg:airbnb-copy:أسلوب-إير-بي-إن-بي-3e98",
+      "prompt": "أسلوب إير بي إن بي"
+    },
+    {
+      "id": "trg:airbnb-copy:كتابة-وصف-مكان-f6bd",
+      "prompt": "كتابة وصف مكان"
+    },
     {
       "id": "trg:analyze:analyze-repo-ba00",
       "prompt": "analyze <repo>"
@@ -470,6 +585,34 @@
     {
       "id": "trg:block:dashboard-component-2a78",
       "prompt": "dashboard component"
+    },
+    {
+      "id": "trg:blur:blur-6bfb",
+      "prompt": "blur"
+    },
+    {
+      "id": "trg:blur:blur-up-0632",
+      "prompt": "blur-up"
+    },
+    {
+      "id": "trg:blur:blur-while-loading-ed9b",
+      "prompt": "blur while loading"
+    },
+    {
+      "id": "trg:blur:lqip-33a3",
+      "prompt": "lqip"
+    },
+    {
+      "id": "trg:blur:images-pop-in-d9fe",
+      "prompt": "images pop in"
+    },
+    {
+      "id": "trg:blur:fade-in-images-5885",
+      "prompt": "fade in images"
+    },
+    {
+      "id": "trg:blur:صور-ضبابية-b34f",
+      "prompt": "صور ضبابية"
     },
     {
       "id": "trg:calendar:content-calendar-1e8f",
@@ -608,6 +751,54 @@
       "prompt": "pattern:<keyword>"
     },
     {
+      "id": "trg:cloudflare:cloudflare-a187",
+      "prompt": "cloudflare"
+    },
+    {
+      "id": "trg:cloudflare:wrangler-0fbf",
+      "prompt": "wrangler"
+    },
+    {
+      "id": "trg:cloudflare:worker-95ce",
+      "prompt": "worker"
+    },
+    {
+      "id": "trg:cloudflare:container-8daf",
+      "prompt": "container"
+    },
+    {
+      "id": "trg:cloudflare:deploy-to-cloudflare-49d0",
+      "prompt": "deploy to cloudflare"
+    },
+    {
+      "id": "trg:cloudflare:cutover-3e95",
+      "prompt": "cutover"
+    },
+    {
+      "id": "trg:cloudflare:is-it-live-on-cloudflare-6c6a",
+      "prompt": "is it live on cloudflare"
+    },
+    {
+      "id": "trg:cloudflare:worker-logs-f114",
+      "prompt": "worker logs"
+    },
+    {
+      "id": "trg:cloudflare:cron-not-firing-a8f1",
+      "prompt": "cron not firing"
+    },
+    {
+      "id": "trg:cloudflare:err-connection-reset-1308",
+      "prompt": "ERR_CONNECTION_RESET"
+    },
+    {
+      "id": "trg:cloudflare:orange-cloud-12b3",
+      "prompt": "orange cloud"
+    },
+    {
+      "id": "trg:cloudflare:proxied-751d",
+      "prompt": "proxied"
+    },
+    {
       "id": "trg:code:server-actions-9392",
       "prompt": "server actions"
     },
@@ -720,28 +911,36 @@
       "prompt": "record the call"
     },
     {
-      "id": "trg:deploy:deploy-to-preview-5496",
-      "prompt": "deploy to preview"
+      "id": "trg:deploy:deploy-5cd3",
+      "prompt": "deploy"
+    },
+    {
+      "id": "trg:deploy:deploy-everything-65b3",
+      "prompt": "deploy everything"
+    },
+    {
+      "id": "trg:deploy:push-to-production-9bed",
+      "prompt": "push to production"
+    },
+    {
+      "id": "trg:deploy:ship-to-cloudflare-f3c5",
+      "prompt": "ship to cloudflare"
+    },
+    {
+      "id": "trg:deploy:redeploy-536a",
+      "prompt": "redeploy"
+    },
+    {
+      "id": "trg:deploy:why-is-the-deploy-stuck-6cdd",
+      "prompt": "why is the deploy stuck"
+    },
+    {
+      "id": "trg:deploy:vercel-preview-9bf4",
+      "prompt": "vercel preview"
     },
     {
       "id": "trg:deploy:deploy-to-staging-c659",
       "prompt": "deploy to staging"
-    },
-    {
-      "id": "trg:deploy:vercel-logs-d731",
-      "prompt": "vercel logs"
-    },
-    {
-      "id": "trg:deploy:why-did-the-deploy-fail-a9dc",
-      "prompt": "why did the deploy fail"
-    },
-    {
-      "id": "trg:deploy:deployment-status-bb76",
-      "prompt": "deployment status"
-    },
-    {
-      "id": "trg:deploy:redeploy-until-it-works-e90f",
-      "prompt": "redeploy until it works"
     },
     {
       "id": "trg:dev:dev-d559",
@@ -778,6 +977,30 @@
     {
       "id": "trg:docs:add-a-storybook-story-56f9",
       "prompt": "add a storybook story"
+    },
+    {
+      "id": "trg:domains:domains-0f57",
+      "prompt": "domains"
+    },
+    {
+      "id": "trg:domains:renew-f466",
+      "prompt": "renew"
+    },
+    {
+      "id": "trg:domains:auto-renew-9718",
+      "prompt": "auto-renew"
+    },
+    {
+      "id": "trg:domains:dmarc-6c74",
+      "prompt": "dmarc"
+    },
+    {
+      "id": "trg:domains:spf-d641",
+      "prompt": "spf"
+    },
+    {
+      "id": "trg:domains:mail-bouncing-f801",
+      "prompt": "mail bouncing"
     },
     {
       "id": "trg:draft:draft-a-post-6ade",
@@ -868,6 +1091,78 @@
       "prompt": "استهلاك"
     },
     {
+      "id": "trg:edit:edit-video-7bc6",
+      "prompt": "edit video"
+    },
+    {
+      "id": "trg:edit:cut-the-silences-62b8",
+      "prompt": "cut the silences"
+    },
+    {
+      "id": "trg:edit:rough-cut-5133",
+      "prompt": "rough cut"
+    },
+    {
+      "id": "trg:edit:make-a-reel-e872",
+      "prompt": "make a reel"
+    },
+    {
+      "id": "trg:edit:add-captions-24bc",
+      "prompt": "add captions"
+    },
+    {
+      "id": "trg:edit:motion-graphic-189b",
+      "prompt": "motion graphic"
+    },
+    {
+      "id": "trg:edit:title-card-6307",
+      "prompt": "title card"
+    },
+    {
+      "id": "trg:edit:intro-outro-a6fe",
+      "prompt": "intro outro"
+    },
+    {
+      "id": "trg:edit:مونتاج-09a1",
+      "prompt": "مونتاج"
+    },
+    {
+      "id": "trg:edit:قص-الفيديو-8ef9",
+      "prompt": "قص الفيديو"
+    },
+    {
+      "id": "trg:edit:ريلز-742f",
+      "prompt": "ريلز"
+    },
+    {
+      "id": "trg:facebook:connect-a-facebook-page-d154",
+      "prompt": "connect a facebook page"
+    },
+    {
+      "id": "trg:facebook:add-my-brand-page-3a38",
+      "prompt": "add my brand page"
+    },
+    {
+      "id": "trg:facebook:wire-up-facebook-0a8e",
+      "prompt": "wire up facebook"
+    },
+    {
+      "id": "trg:facebook:new-brand-page-0122",
+      "prompt": "new brand page"
+    },
+    {
+      "id": "trg:facebook:facebook-token-expired-d221",
+      "prompt": "facebook token expired"
+    },
+    {
+      "id": "trg:facebook:invalid-scopes-3583",
+      "prompt": "invalid scopes"
+    },
+    {
+      "id": "trg:facebook:اربط-صفحة-فيسبوك-fb90",
+      "prompt": "اربط صفحة فيسبوك"
+    },
+    {
       "id": "trg:feature:feature-name-product-04a4",
       "prompt": "feature <name> [product]"
     },
@@ -894,6 +1189,58 @@
     {
       "id": "trg:fix:lint-is-failing-d058",
       "prompt": "lint is failing"
+    },
+    {
+      "id": "trg:funnel:funnel-9b70",
+      "prompt": "funnel"
+    },
+    {
+      "id": "trg:funnel:qualify-96b2",
+      "prompt": "qualify"
+    },
+    {
+      "id": "trg:funnel:segment-f3c3",
+      "prompt": "segment"
+    },
+    {
+      "id": "trg:funnel:nurture-f80a",
+      "prompt": "nurture"
+    },
+    {
+      "id": "trg:funnel:follow-up-1306",
+      "prompt": "follow up"
+    },
+    {
+      "id": "trg:funnel:stalled-44e3",
+      "prompt": "stalled"
+    },
+    {
+      "id": "trg:funnel:chatbot-6580",
+      "prompt": "chatbot"
+    },
+    {
+      "id": "trg:funnel:قمع-37ff",
+      "prompt": "قمع"
+    },
+    {
+      "id": "trg:funnel:تأهيل-7c7a",
+      "prompt": "تأهيل"
+    },
+    {
+      "id": "trg:funnel:متابعة-not-scrape-finding-them-75ca",
+      "prompt": "متابعة. NOT /scrape (finding them)"
+    },
+    {
+      "id": "trg:funnel:draft-brand-copy-07c3",
+      "prompt": "/draft (brand copy)"
+    },
+    {
+      "id": "trg:funnel:approve-a-social-post-0d01",
+      "prompt": "/approve (a social post)"
+    },
+    {
+      "id": "trg:funnel:qa-a-block-db1f",
+      "prompt": "/qa (a block)"
     },
     {
       "id": "trg:handover:handover-url-block-77bf",
@@ -936,20 +1283,12 @@
       "prompt": "team config status"
     },
     {
-      "id": "trg:higgs:higgs-f33c",
-      "prompt": "/higgs"
-    },
-    {
       "id": "trg:higgs:generate-video-92ca",
       "prompt": "generate video"
     },
     {
       "id": "trg:higgs:generate-image-be6d",
       "prompt": "generate image"
-    },
-    {
-      "id": "trg:higgs:generate-photo-c9ea",
-      "prompt": "generate photo"
     },
     {
       "id": "trg:higgs:make-an-ad-973d",
@@ -990,14 +1329,6 @@
     {
       "id": "trg:higgs:edit-video-from-url-e196",
       "prompt": "edit video from url"
-    },
-    {
-      "id": "trg:higgs:download-and-tweak-video-9161",
-      "prompt": "download and tweak video"
-    },
-    {
-      "id": "trg:higgs:higgs-d9e6",
-      "prompt": "higgs"
     },
     {
       "id": "trg:higgs:nano-banana-9b94",
@@ -1076,6 +1407,102 @@
       "prompt": "create a GitHub issue in the right databayt repo"
     },
     {
+      "id": "trg:jobs:jobs-e407",
+      "prompt": "jobs"
+    },
+    {
+      "id": "trg:jobs:find-work-076c",
+      "prompt": "find work"
+    },
+    {
+      "id": "trg:jobs:apply-24bc",
+      "prompt": "apply"
+    },
+    {
+      "id": "trg:jobs:opportunities-c42a",
+      "prompt": "opportunities"
+    },
+    {
+      "id": "trg:jobs:gigs-9f71",
+      "prompt": "gigs"
+    },
+    {
+      "id": "trg:jobs:tenders-52ef",
+      "prompt": "tenders"
+    },
+    {
+      "id": "trg:jobs:rfp-81d6",
+      "prompt": "RFP"
+    },
+    {
+      "id": "trg:jobs:client-request-e133",
+      "prompt": "client request"
+    },
+    {
+      "id": "trg:jobs:incubator-9a2c",
+      "prompt": "incubator"
+    },
+    {
+      "id": "trg:jobs:accelerator-bb8a",
+      "prompt": "accelerator"
+    },
+    {
+      "id": "trg:jobs:grant-b155",
+      "prompt": "grant"
+    },
+    {
+      "id": "trg:jobs:credits-50f6",
+      "prompt": "credits"
+    },
+    {
+      "id": "trg:jobs:investor-c1c4",
+      "prompt": "investor"
+    },
+    {
+      "id": "trg:jobs:angel-a83e",
+      "prompt": "angel"
+    },
+    {
+      "id": "trg:jobs:fundraising-6ccd",
+      "prompt": "fundraising"
+    },
+    {
+      "id": "trg:jobs:funding-f61c",
+      "prompt": "funding"
+    },
+    {
+      "id": "trg:jobs:did-anyone-reply-d68f",
+      "prompt": "did anyone reply"
+    },
+    {
+      "id": "trg:jobs:وظائف-b372",
+      "prompt": "وظائف"
+    },
+    {
+      "id": "trg:jobs:فرص-0518",
+      "prompt": "فرص"
+    },
+    {
+      "id": "trg:jobs:مناقصات-1874",
+      "prompt": "مناقصات"
+    },
+    {
+      "id": "trg:jobs:حاضنة-8af7",
+      "prompt": "حاضنة"
+    },
+    {
+      "id": "trg:jobs:مسرعة-7699",
+      "prompt": "مسرعة"
+    },
+    {
+      "id": "trg:jobs:منحة-a175",
+      "prompt": "منحة"
+    },
+    {
+      "id": "trg:jobs:تمويل-not-scrape-outbound-leads-we-go-find-3d1c",
+      "prompt": "تمويل. NOT /scrape (outbound leads we go find)"
+    },
+    {
       "id": "trg:learn:learn-7f69",
       "prompt": "learn"
     },
@@ -1102,6 +1529,34 @@
     {
       "id": "trg:mcp-doctor:browser-tools-missing-acb4",
       "prompt": "browser tools missing"
+    },
+    {
+      "id": "trg:md:md-quality-35e2",
+      "prompt": "md quality"
+    },
+    {
+      "id": "trg:md:bad-conversion-60d3",
+      "prompt": "bad conversion"
+    },
+    {
+      "id": "trg:md:grade-the-markdown-f0f5",
+      "prompt": "grade the markdown"
+    },
+    {
+      "id": "trg:md:transcription-contract-a838",
+      "prompt": "transcription contract"
+    },
+    {
+      "id": "trg:md:agreement-score-537f",
+      "prompt": "agreement score"
+    },
+    {
+      "id": "trg:md:rtl-markdown-7d50",
+      "prompt": "RTL markdown"
+    },
+    {
+      "id": "trg:md:mirrored-tables-8030",
+      "prompt": "mirrored tables"
     },
     {
       "id": "trg:measure:how-did-the-post-do-7b14",
@@ -1324,6 +1779,62 @@
       "prompt": "راجع وانشر"
     },
     {
+      "id": "trg:pwa:pwa-526d",
+      "prompt": "pwa"
+    },
+    {
+      "id": "trg:pwa:progressive-web-app-4d93",
+      "prompt": "progressive web app"
+    },
+    {
+      "id": "trg:pwa:installable-8525",
+      "prompt": "installable"
+    },
+    {
+      "id": "trg:pwa:add-to-home-screen-cf96",
+      "prompt": "add to home screen"
+    },
+    {
+      "id": "trg:pwa:install-prompt-7b53",
+      "prompt": "install prompt"
+    },
+    {
+      "id": "trg:pwa:manifest-6ad7",
+      "prompt": "manifest"
+    },
+    {
+      "id": "trg:pwa:service-worker-94f4",
+      "prompt": "service worker"
+    },
+    {
+      "id": "trg:pwa:offline-ec8b",
+      "prompt": "offline"
+    },
+    {
+      "id": "trg:pwa:works-offline-d994",
+      "prompt": "works offline"
+    },
+    {
+      "id": "trg:pwa:web-push-7d78",
+      "prompt": "web push"
+    },
+    {
+      "id": "trg:pwa:push-notification-0a79",
+      "prompt": "push notification"
+    },
+    {
+      "id": "trg:pwa:تطبيق-75c3",
+      "prompt": "تطبيق"
+    },
+    {
+      "id": "trg:pwa:بدون-إنترنت-7f83",
+      "prompt": "بدون إنترنت"
+    },
+    {
+      "id": "trg:pwa:إشعارات-7de9",
+      "prompt": "إشعارات"
+    },
+    {
       "id": "trg:quick:commit-and-push-8e7c",
       "prompt": "commit and push"
     },
@@ -1338,6 +1849,34 @@
     {
       "id": "trg:quick:land-it-edf4",
       "prompt": "land it"
+    },
+    {
+      "id": "trg:record:record-5930",
+      "prompt": "record"
+    },
+    {
+      "id": "trg:record:record-flow-block-6962",
+      "prompt": "record <flow|block>"
+    },
+    {
+      "id": "trg:record:demo-video-dcb2",
+      "prompt": "demo video"
+    },
+    {
+      "id": "trg:record:walkthrough-bf9d",
+      "prompt": "walkthrough"
+    },
+    {
+      "id": "trg:record:screen-recording-e030",
+      "prompt": "screen recording"
+    },
+    {
+      "id": "trg:record:re-record-2408",
+      "prompt": "re-record"
+    },
+    {
+      "id": "trg:record:سجل-فيديو-e53e",
+      "prompt": "سجل فيديو"
     },
     {
       "id": "trg:release:release-block-53e5",
@@ -1364,16 +1903,60 @@
       "prompt": "report"
     },
     {
+      "id": "trg:report:reports-19b3",
+      "prompt": "reports"
+    },
+    {
       "id": "trg:report:fix-reports-9cca",
       "prompt": "fix reports"
     },
     {
-      "id": "trg:report:user-reported-issue-auto-fix-635a",
-      "prompt": "user-reported issue auto-fix"
+      "id": "trg:report:list-the-reports-3d5b",
+      "prompt": "list the reports"
+    },
+    {
+      "id": "trg:report:show-the-reports-b602",
+      "prompt": "show the reports"
+    },
+    {
+      "id": "trg:report:what-did-the-team-report-9a15",
+      "prompt": "what did the team report"
+    },
+    {
+      "id": "trg:report:the-team-reported-e8d8",
+      "prompt": "the team reported"
+    },
+    {
+      "id": "trg:report:ali-reported-e4a1",
+      "prompt": "Ali reported"
+    },
+    {
+      "id": "trg:report:open-issues-from-the-dialog-3d92",
+      "prompt": "open issues from the dialog"
+    },
+    {
+      "id": "trg:report:take-reject-the-reports-2fc0",
+      "prompt": "take/reject the reports"
     },
     {
       "id": "trg:report:verified-report-queue-1b07",
       "prompt": "verified-report queue"
+    },
+    {
+      "id": "trg:report:البلاغات-51a8",
+      "prompt": "البلاغات"
+    },
+    {
+      "id": "trg:report:بلاغات-الفريق-25ac",
+      "prompt": "بلاغات الفريق"
+    },
+    {
+      "id": "trg:report:المشاكل-المبلغ-عنها-06e9",
+      "prompt": "المشاكل المبلغ عنها"
+    },
+    {
+      "id": "trg:report:أصلح-البلاغات-8292",
+      "prompt": "أصلح البلاغات"
     },
     {
       "id": "trg:repos:list-our-repos-6e04",
@@ -1418,6 +2001,98 @@
     {
       "id": "trg:schema:pipeline-data-stage-41b8",
       "prompt": "pipeline Data stage"
+    },
+    {
+      "id": "trg:scrape:scrap-48fb",
+      "prompt": "scrap"
+    },
+    {
+      "id": "trg:scrape:scrape-ba57",
+      "prompt": "scrape"
+    },
+    {
+      "id": "trg:scrape:scrap-facebook-5b7f",
+      "prompt": "scrap facebook"
+    },
+    {
+      "id": "trg:scrape:scrap-whatsapp-fd36",
+      "prompt": "scrap whatsapp"
+    },
+    {
+      "id": "trg:scrape:scrap-facebook-for-hogwarts-fe00",
+      "prompt": "scrap facebook for hogwarts"
+    },
+    {
+      "id": "trg:scrape:scrap-for-mkan-0739",
+      "prompt": "scrap for mkan"
+    },
+    {
+      "id": "trg:scrape:scrap-for-databayt-4aa2",
+      "prompt": "scrap for databayt"
+    },
+    {
+      "id": "trg:scrape:website-leads-be92",
+      "prompt": "website leads"
+    },
+    {
+      "id": "trg:scrape:old-websites-83e0",
+      "prompt": "old websites"
+    },
+    {
+      "id": "trg:scrape:rebrand-leads-6f27",
+      "prompt": "rebrand leads"
+    },
+    {
+      "id": "trg:scrape:leads-7a96",
+      "prompt": "leads"
+    },
+    {
+      "id": "trg:scrape:prospect-2fae",
+      "prompt": "prospect"
+    },
+    {
+      "id": "trg:scrape:contact-gap-86b8",
+      "prompt": "contact gap"
+    },
+    {
+      "id": "trg:scrape:enrich-408c",
+      "prompt": "enrich"
+    },
+    {
+      "id": "trg:scrape:outreach-d1c5",
+      "prompt": "outreach"
+    },
+    {
+      "id": "trg:scrape:pipeline-health-c1a8",
+      "prompt": "pipeline health"
+    },
+    {
+      "id": "trg:scrape:who-should-we-contact-7389",
+      "prompt": "who should we contact"
+    },
+    {
+      "id": "trg:scrape:find-schools-513f",
+      "prompt": "find schools"
+    },
+    {
+      "id": "trg:scrape:اسحب-f1b7",
+      "prompt": "اسحب"
+    },
+    {
+      "id": "trg:scrape:جمع-بيانات-23fc",
+      "prompt": "جمع بيانات"
+    },
+    {
+      "id": "trg:scrape:عملاء-محتملين-not-health-engine-drift-44a6",
+      "prompt": "عملاء محتملين. NOT /health (engine drift)"
+    },
+    {
+      "id": "trg:scrape:measure-social-numbers-7ad7",
+      "prompt": "/measure (social numbers)"
+    },
+    {
+      "id": "trg:scrape:report-a-bug-3545",
+      "prompt": "/report (a bug)"
     },
     {
       "id": "trg:screenshot:look-at-my-screenshot-99df",
@@ -1482,6 +2157,50 @@
     {
       "id": "trg:ship:promote-checked-build-vercel-prod-7d39",
       "prompt": "promote checked build (Vercel --prod)"
+    },
+    {
+      "id": "trg:shoot:shoot-route-flow-fa19",
+      "prompt": "shoot <route|flow>"
+    },
+    {
+      "id": "trg:shoot:take-a-screenshot-of-url-338a",
+      "prompt": "take a screenshot of <url>"
+    },
+    {
+      "id": "trg:shoot:screenshot-the-x-flow-5d7f",
+      "prompt": "screenshot the <x> flow"
+    },
+    {
+      "id": "trg:shoot:لقطة-شاشة-f775",
+      "prompt": "لقطة شاشة"
+    },
+    {
+      "id": "trg:skeleton:skeleton-b14c",
+      "prompt": "skeleton"
+    },
+    {
+      "id": "trg:skeleton:loading-state-a8ab",
+      "prompt": "loading state"
+    },
+    {
+      "id": "trg:skeleton:loading-tsx-b2c5",
+      "prompt": "loading.tsx"
+    },
+    {
+      "id": "trg:skeleton:shimmer-1224",
+      "prompt": "shimmer"
+    },
+    {
+      "id": "trg:skeleton:page-flashes-blank-2b12",
+      "prompt": "page flashes blank"
+    },
+    {
+      "id": "trg:skeleton:replace-the-spinner-1c28",
+      "prompt": "replace the spinner"
+    },
+    {
+      "id": "trg:skeleton:هيكل-التحميل-aa36",
+      "prompt": "هيكل التحميل"
     },
     {
       "id": "trg:social:social-post-225d",
@@ -1592,6 +2311,34 @@
       "prompt": "test this component"
     },
     {
+      "id": "trg:textbook:textbook-markdown-12c0",
+      "prompt": "textbook markdown"
+    },
+    {
+      "id": "trg:textbook:textbook-md-c26e",
+      "prompt": "textbook.md"
+    },
+    {
+      "id": "trg:textbook:convert-the-textbooks-a57a",
+      "prompt": "convert the textbooks"
+    },
+    {
+      "id": "trg:textbook:pdf-to-md-for-grade-n-3744",
+      "prompt": "pdf to md for grade N"
+    },
+    {
+      "id": "trg:textbook:re-transcribe-the-textbooks-037d",
+      "prompt": "re-transcribe the textbooks"
+    },
+    {
+      "id": "trg:textbook:fix-the-textbook-twin-f21e",
+      "prompt": "fix the textbook twin"
+    },
+    {
+      "id": "trg:textbook:textbook-bench-5286",
+      "prompt": "textbook bench"
+    },
+    {
       "id": "trg:watch:watch-5fb7",
       "prompt": "watch"
     },
@@ -1690,10 +2437,6 @@
     {
       "id": "spell:charm-work:quick-f739",
       "prompt": "quick"
-    },
-    {
-      "id": "spell:charm-work:deploy-5cd3",
-      "prompt": "deploy"
     },
     {
       "id": "spell:charm-work:release-1036",
@@ -1988,6 +2731,10 @@
       "prompt": "neon"
     },
     {
+      "id": "spell:summoning:facebook-5c6e",
+      "prompt": "facebook"
+    },
+    {
       "id": "spell:divination:story-b3e7",
       "prompt": "story"
     },
@@ -2180,12 +2927,40 @@
       "prompt": "convert"
     },
     {
+      "id": "spell:pensieve:md-672e",
+      "prompt": "md"
+    },
+    {
+      "id": "spell:pensieve:textbook-610f",
+      "prompt": "textbook"
+    },
+    {
+      "id": "spell:pensieve:contract-2a5e",
+      "prompt": "contract"
+    },
+    {
+      "id": "spell:pensieve:transcribe-a5b5",
+      "prompt": "transcribe"
+    },
+    {
+      "id": "spell:pensieve:agreement-f16c",
+      "prompt": "agreement"
+    },
+    {
+      "id": "spell:pensieve:adjudicate-01a1",
+      "prompt": "adjudicate"
+    },
+    {
       "id": "spell:pensieve:calendar-a481",
       "prompt": "calendar"
     },
     {
       "id": "spell:pensieve:draft-b576",
       "prompt": "draft"
+    },
+    {
+      "id": "spell:pensieve:higgs-d9e6",
+      "prompt": "higgs"
     },
     {
       "id": "spell:pensieve:media-fc9a",
@@ -2206,6 +2981,22 @@
     {
       "id": "spell:pensieve:social-b2ec",
       "prompt": "social"
+    },
+    {
+      "id": "spell:pensieve:shoot-b415",
+      "prompt": "shoot"
+    },
+    {
+      "id": "spell:pensieve:edit-5be7",
+      "prompt": "edit"
+    },
+    {
+      "id": "spell:pensieve:captions-7115",
+      "prompt": "captions"
+    },
+    {
+      "id": "spell:pensieve:ترجمة-الفيديو-93bb",
+      "prompt": "ترجمة الفيديو"
     },
     {
       "id": "spell:portraits:og-image-8fb6",
@@ -2238,6 +3029,18 @@
     {
       "id": "spell:portraits:showroom-4fb0",
       "prompt": "showroom"
+    },
+    {
+      "id": "spell:owlery:scrap-for-hogwarts-33d6",
+      "prompt": "scrap for hogwarts"
+    },
+    {
+      "id": "spell:owlery:عملاء-محتملين-fc74",
+      "prompt": "عملاء محتملين"
+    },
+    {
+      "id": "spell:floo-network:متابعة-1324",
+      "prompt": "متابعة"
     },
     {
       "id": "kw:qa:qa-admission-c365",

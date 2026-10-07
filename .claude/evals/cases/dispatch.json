@@ -1,25 +1,25 @@
 {
   "corpus": {
-    "skills_listed": 67,
-    "project_skills": 49,
-    "user_only_skills": 18,
-    "listing_chars": 31428,
-    "cases_total": 487,
-    "positive": 393,
+    "skills_listed": 82,
+    "project_skills": 65,
+    "user_only_skills": 17,
+    "listing_chars": 32926,
+    "cases_total": 669,
+    "positive": 575,
     "none": 94,
-    "trivial": 56,
-    "hard": 178,
+    "trivial": 70,
+    "hard": 235,
     "destructive": 5,
     "sources": {
-      "trigger_phrase": 327,
-      "vocab_spell": 74,
+      "trigger_phrase": 495,
+      "vocab_spell": 125,
       "quoted_keyword": 2,
       "vocab_none": 94,
       "real_pair": 13
     },
     "skills_without_triggers": 2,
     "builtin_targeted_spells": 3,
-    "corpus_hash": "fnv1a:9fd4080f"
+    "corpus_hash": "fnv1a:596ba208"
   },
   "split": {
     "version": "v1",
@@ -512,19 +512,217 @@
       "trg:test:add-e2e-coverage-5a51": "train",
       "trg:test:run-the-tests-e3e0": "train",
       "trg:test:test-this-component-1f4b": "holdout",
-      "spell:portkeys:from-shadcn-e1e1": "train"
+      "spell:portkeys:from-shadcn-e1e1": "train",
+      "trg:airbnb-copy:write-airbnb-listing-29fd": "holdout",
+      "trg:airbnb-copy:homes-copywriting-491f": "train",
+      "trg:airbnb-copy:sound-like-airbnb-17e4": "train",
+      "trg:airbnb-copy:listing-title-989b": "holdout",
+      "trg:airbnb-copy:listing-description-c8d6": "train",
+      "trg:airbnb-copy:وصف-شقة-1ce0": "holdout",
+      "trg:airbnb-copy:كتابة-إعلان-شقة-0776": "train",
+      "trg:airbnb-copy:صياغة-إعلان-عقار-2d77": "train",
+      "trg:airbnb-copy:أسلوب-إير-بي-إن-بي-3e98": "train",
+      "trg:airbnb-copy:كتابة-وصف-مكان-f6bd": "holdout",
+      "trg:blur:blur-6bfb": "holdout",
+      "trg:blur:blur-up-0632": "train",
+      "trg:blur:blur-while-loading-ed9b": "train",
+      "trg:blur:lqip-33a3": "train",
+      "trg:blur:images-pop-in-d9fe": "train",
+      "trg:blur:fade-in-images-5885": "train",
+      "trg:blur:صور-ضبابية-b34f": "train",
+      "trg:cloudflare:cloudflare-a187": "train",
+      "trg:cloudflare:wrangler-0fbf": "train",
+      "trg:cloudflare:worker-95ce": "holdout",
+      "trg:cloudflare:container-8daf": "holdout",
+      "trg:cloudflare:deploy-to-cloudflare-49d0": "train",
+      "trg:cloudflare:cutover-3e95": "holdout",
+      "trg:cloudflare:is-it-live-on-cloudflare-6c6a": "train",
+      "trg:cloudflare:worker-logs-f114": "train",
+      "trg:cloudflare:cron-not-firing-a8f1": "train",
+      "trg:cloudflare:err-connection-reset-1308": "train",
+      "trg:cloudflare:orange-cloud-12b3": "holdout",
+      "trg:cloudflare:proxied-751d": "train",
+      "trg:deploy:deploy-5cd3": "train",
+      "trg:deploy:deploy-everything-65b3": "holdout",
+      "trg:deploy:push-to-production-9bed": "train",
+      "trg:deploy:ship-to-cloudflare-f3c5": "train",
+      "trg:deploy:redeploy-536a": "train",
+      "trg:deploy:why-is-the-deploy-stuck-6cdd": "holdout",
+      "trg:deploy:vercel-preview-9bf4": "train",
+      "trg:domains:domains-0f57": "train",
+      "trg:domains:renew-f466": "train",
+      "trg:domains:auto-renew-9718": "holdout",
+      "trg:domains:dmarc-6c74": "train",
+      "trg:domains:spf-d641": "train",
+      "trg:domains:mail-bouncing-f801": "train",
+      "trg:edit:edit-video-7bc6": "holdout",
+      "trg:edit:cut-the-silences-62b8": "train",
+      "trg:edit:rough-cut-5133": "holdout",
+      "trg:edit:make-a-reel-e872": "train",
+      "trg:edit:add-captions-24bc": "train",
+      "trg:edit:motion-graphic-189b": "train",
+      "trg:edit:title-card-6307": "train",
+      "trg:edit:intro-outro-a6fe": "train",
+      "trg:edit:مونتاج-09a1": "train",
+      "trg:edit:قص-الفيديو-8ef9": "train",
+      "trg:edit:ريلز-742f": "train",
+      "trg:facebook:connect-a-facebook-page-d154": "train",
+      "trg:facebook:add-my-brand-page-3a38": "train",
+      "trg:facebook:wire-up-facebook-0a8e": "train",
+      "trg:facebook:new-brand-page-0122": "train",
+      "trg:facebook:facebook-token-expired-d221": "train",
+      "trg:facebook:invalid-scopes-3583": "train",
+      "trg:facebook:اربط-صفحة-فيسبوك-fb90": "train",
+      "trg:funnel:funnel-9b70": "train",
+      "trg:funnel:qualify-96b2": "train",
+      "trg:funnel:segment-f3c3": "train",
+      "trg:funnel:nurture-f80a": "holdout",
+      "trg:funnel:follow-up-1306": "train",
+      "trg:funnel:stalled-44e3": "train",
+      "trg:funnel:chatbot-6580": "train",
+      "trg:funnel:قمع-37ff": "train",
+      "trg:funnel:تأهيل-7c7a": "holdout",
+      "trg:funnel:متابعة-not-scrape-finding-them-75ca": "train",
+      "trg:funnel:draft-brand-copy-07c3": "holdout",
+      "trg:funnel:approve-a-social-post-0d01": "train",
+      "trg:funnel:qa-a-block-db1f": "train",
+      "trg:jobs:jobs-e407": "train",
+      "trg:jobs:find-work-076c": "holdout",
+      "trg:jobs:apply-24bc": "holdout",
+      "trg:jobs:opportunities-c42a": "holdout",
+      "trg:jobs:gigs-9f71": "train",
+      "trg:jobs:tenders-52ef": "train",
+      "trg:jobs:rfp-81d6": "holdout",
+      "trg:jobs:client-request-e133": "train",
+      "trg:jobs:incubator-9a2c": "train",
+      "trg:jobs:accelerator-bb8a": "train",
+      "trg:jobs:grant-b155": "train",
+      "trg:jobs:credits-50f6": "train",
+      "trg:jobs:investor-c1c4": "train",
+      "trg:jobs:angel-a83e": "train",
+      "trg:jobs:fundraising-6ccd": "train",
+      "trg:jobs:funding-f61c": "holdout",
+      "trg:jobs:did-anyone-reply-d68f": "train",
+      "trg:jobs:وظائف-b372": "train",
+      "trg:jobs:فرص-0518": "holdout",
+      "trg:jobs:مناقصات-1874": "train",
+      "trg:jobs:حاضنة-8af7": "holdout",
+      "trg:jobs:مسرعة-7699": "train",
+      "trg:jobs:منحة-a175": "holdout",
+      "trg:jobs:تمويل-not-scrape-outbound-leads-we-go-find-3d1c": "train",
+      "trg:md:md-quality-35e2": "train",
+      "trg:md:bad-conversion-60d3": "train",
+      "trg:md:grade-the-markdown-f0f5": "train",
+      "trg:md:transcription-contract-a838": "train",
+      "trg:md:agreement-score-537f": "holdout",
+      "trg:md:rtl-markdown-7d50": "train",
+      "trg:md:mirrored-tables-8030": "train",
+      "trg:pwa:pwa-526d": "train",
+      "trg:pwa:progressive-web-app-4d93": "train",
+      "trg:pwa:installable-8525": "holdout",
+      "trg:pwa:add-to-home-screen-cf96": "train",
+      "trg:pwa:install-prompt-7b53": "train",
+      "trg:pwa:manifest-6ad7": "train",
+      "trg:pwa:service-worker-94f4": "train",
+      "trg:pwa:offline-ec8b": "train",
+      "trg:pwa:works-offline-d994": "train",
+      "trg:pwa:web-push-7d78": "train",
+      "trg:pwa:push-notification-0a79": "holdout",
+      "trg:pwa:تطبيق-75c3": "train",
+      "trg:pwa:بدون-إنترنت-7f83": "train",
+      "trg:pwa:إشعارات-7de9": "train",
+      "trg:record:record-5930": "train",
+      "trg:record:record-flow-block-6962": "train",
+      "trg:record:demo-video-dcb2": "holdout",
+      "trg:record:walkthrough-bf9d": "train",
+      "trg:record:screen-recording-e030": "train",
+      "trg:record:re-record-2408": "holdout",
+      "trg:record:سجل-فيديو-e53e": "train",
+      "trg:report:reports-19b3": "train",
+      "trg:report:list-the-reports-3d5b": "train",
+      "trg:report:show-the-reports-b602": "train",
+      "trg:report:what-did-the-team-report-9a15": "holdout",
+      "trg:report:the-team-reported-e8d8": "holdout",
+      "trg:report:ali-reported-e4a1": "holdout",
+      "trg:report:open-issues-from-the-dialog-3d92": "train",
+      "trg:report:take-reject-the-reports-2fc0": "train",
+      "trg:report:البلاغات-51a8": "train",
+      "trg:report:بلاغات-الفريق-25ac": "train",
+      "trg:report:المشاكل-المبلغ-عنها-06e9": "train",
+      "trg:report:أصلح-البلاغات-8292": "train",
+      "trg:scrape:scrap-48fb": "train",
+      "trg:scrape:scrape-ba57": "holdout",
+      "trg:scrape:scrap-facebook-5b7f": "train",
+      "trg:scrape:scrap-whatsapp-fd36": "holdout",
+      "trg:scrape:scrap-facebook-for-hogwarts-fe00": "holdout",
+      "trg:scrape:scrap-for-mkan-0739": "train",
+      "trg:scrape:scrap-for-databayt-4aa2": "train",
+      "trg:scrape:website-leads-be92": "train",
+      "trg:scrape:old-websites-83e0": "train",
+      "trg:scrape:rebrand-leads-6f27": "train",
+      "trg:scrape:leads-7a96": "holdout",
+      "trg:scrape:prospect-2fae": "train",
+      "trg:scrape:contact-gap-86b8": "train",
+      "trg:scrape:enrich-408c": "holdout",
+      "trg:scrape:outreach-d1c5": "train",
+      "trg:scrape:pipeline-health-c1a8": "train",
+      "trg:scrape:who-should-we-contact-7389": "train",
+      "trg:scrape:find-schools-513f": "train",
+      "trg:scrape:اسحب-f1b7": "holdout",
+      "trg:scrape:جمع-بيانات-23fc": "train",
+      "trg:scrape:عملاء-محتملين-not-health-engine-drift-44a6": "train",
+      "trg:scrape:measure-social-numbers-7ad7": "train",
+      "trg:scrape:report-a-bug-3545": "train",
+      "trg:shoot:shoot-route-flow-fa19": "train",
+      "trg:shoot:take-a-screenshot-of-url-338a": "holdout",
+      "trg:shoot:screenshot-the-x-flow-5d7f": "train",
+      "trg:shoot:لقطة-شاشة-f775": "train",
+      "trg:skeleton:skeleton-b14c": "holdout",
+      "trg:skeleton:loading-state-a8ab": "train",
+      "trg:skeleton:loading-tsx-b2c5": "holdout",
+      "trg:skeleton:shimmer-1224": "train",
+      "trg:skeleton:page-flashes-blank-2b12": "train",
+      "trg:skeleton:replace-the-spinner-1c28": "train",
+      "trg:skeleton:هيكل-التحميل-aa36": "train",
+      "trg:textbook:textbook-markdown-12c0": "train",
+      "trg:textbook:textbook-md-c26e": "train",
+      "trg:textbook:convert-the-textbooks-a57a": "train",
+      "trg:textbook:pdf-to-md-for-grade-n-3744": "train",
+      "trg:textbook:re-transcribe-the-textbooks-037d": "holdout",
+      "trg:textbook:fix-the-textbook-twin-f21e": "train",
+      "trg:textbook:textbook-bench-5286": "train",
+      "spell:summoning:facebook-5c6e": "holdout",
+      "spell:pensieve:md-672e": "holdout",
+      "spell:pensieve:textbook-610f": "train",
+      "spell:pensieve:contract-2a5e": "train",
+      "spell:pensieve:transcribe-a5b5": "train",
+      "spell:pensieve:agreement-f16c": "train",
+      "spell:pensieve:adjudicate-01a1": "train",
+      "spell:pensieve:higgs-d9e6": "train",
+      "spell:pensieve:shoot-b415": "train",
+      "spell:pensieve:edit-5be7": "train",
+      "spell:pensieve:captions-7115": "train",
+      "spell:pensieve:ترجمة-الفيديو-93bb": "holdout",
+      "spell:owlery:scrap-for-hogwarts-33d6": "holdout",
+      "spell:owlery:عملاء-محتملين-fc74": "train",
+      "spell:floo-network:متابعة-1324": "train"
     }
   },
   "listing": [
     {
+      "skill": "airbnb-copy",
+      "description": "Airbnb-voice rental listing titles, descriptions and marketing copy — Arabic-first, English mirrored",
+      "when_to_use": "Use when writing, refining or translating copy for homes, apartments or short-term rentals on Mkan (mkan.sd) or similar platforms — warm host voice, sensory walkthroughs, honest amenities. Triggers on: write airbnb listing, homes copywriting, sound like airbnb, listing title, listing description, وصف شقة, كتابة إعلان شقة, صياغة إعلان عقار, أسلوب إير بي إن بي, كتابة وصف مكان."
+    },
+    {
       "skill": "analyze",
       "description": "Analyze a repo's patterns and generate a tailored Claude Code config",
-      "when_to_use": "Use when a repo needs its patterns extracted into a tailored Claude Code config — CLAUDE.md, agents, rules, and skills generated and committed straight to main — the config-generator lane, distinct from /learn which mines org-wide conventions into memory. Triggers on: analyze <repo>, generate config for this repo, repo config generator."
+      "when_to_use": "Use when a repo needs its patterns turned into a tailored Claude Code config (CLAUDE.md, agents, rules, skills) committed to main — distinct from /learn, which mines org-wide conventions into memory. Triggers on: analyze <repo>, generate config for this repo, repo config generator."
     },
     {
       "skill": "approve",
-      "description": "The human gate — the review queue on /social/publish, or a signed link for a remote approver",
-      "when_to_use": "Use when a full draft (copy and/or media) is ready for a human to say yes before anything reaches a public brand page. Two lanes: the PRIMARY is the Hub's review queue at /social/publish — the next answered draft waits there, a contributor fine-tunes and approves (now, or scheduled to the cron drain); the SECONDARY stages a signed single-use link (it opens a confirm page; only its button publishes) for an approver outside the Hub. This is the gate, not the send: it never writes copy (/draft), never makes media (/higgs), and never delivers to a platform (/publish, which refuses to run without the yes this stage records). Triggers on: review the queue, approve the next draft, stage for review, send for approval, get sign-off, ready for review, اعتماد, راجع الطابور, اعتمد المسودة, أرسل للمراجعة."
+      "description": "The human gate — the /social/publish review queue, or a signed link for a remote approver",
+      "when_to_use": "Use when a full draft needs a human yes before it reaches a public brand page — in the review queue or via a signed link for an outside approver. The gate only — not /draft, /higgs or /publish. Triggers on: review the queue, approve the next draft, stage for review, send for approval, get sign-off, ready for review, اعتماد, راجع الطابور, اعتمد المسودة, أرسل للمراجعة."
     },
     {
       "skill": "atom",
@@ -533,18 +731,23 @@
     },
     {
       "skill": "auth",
-      "description": "Autonomously authenticate to any web service or CLI on Abdout's behalf using the macOS-Keychain-stored databayt identities, then reach protected pages and fetch original assets behind the login wall. Use whenever a page redirects to a login wall, a CLI reports \"not authenticated\", the user says \"log into X / sign me into X / auth\", or a clone/asset-fetch task needs content behind a paywall or dashboard. Minimizes interaction — only pauses for a one-time code when no non-interactive path exists.",
-      "when_to_use": "Use when a login wall blocks progress — a page redirects to sign-in, a CLI reports not authenticated, or an asset sits behind a paywall or dashboard. Uses Keychain-stored identities; never asks for a password in chat. Triggers on: log into X, sign me in, not authenticated, behind a login wall, session expired."
+      "description": "Sign in to any web service or CLI with the Keychain-stored databayt identities, then reach protected pages and fetch the assets behind the login wall",
+      "when_to_use": "Use when a login wall blocks progress — a page redirects to sign-in, a CLI reports not authenticated, or a clone or asset fetch sits behind a paywall or dashboard. Never asks for a password in chat; pauses only for a one-time code. Triggers on: log into X, sign me in, not authenticated, behind a login wall, session expired."
     },
     {
       "skill": "bench",
       "description": "Score the engine's own config on its labeled cases, and propose holdout-gated fixes",
-      "when_to_use": "Use when the question is whether the CONFIG works, not whether a product feature works — scoring which skill fires for a prompt, checking runs against the contracts their SKILL.md declares, or proposing a description rewrite that must beat an unseen holdout. Unlike /health (counts files, never reads one), /qa (a product block), /check (typecheck + build). Triggers on: bench, benchmark the skills, is the routing accurate, measure the engine, dispatch accuracy, which skills collide, are any skills dead."
+      "when_to_use": "Use when the question is whether the CONFIG works, not a product feature — which skill fires for a prompt, runs checked against their SKILL.md contracts, or a description rewrite that must beat an unseen holdout. Unlike /health (counts files, never reads one), /qa (a product block), /check (typecheck + build). Triggers on: bench, benchmark the skills, is the routing accurate, measure the engine, dispatch accuracy, which skills collide, are any skills dead."
     },
     {
       "skill": "block",
       "description": "Create blocks - UI components with integrated business logic",
       "when_to_use": "Use when building a feature-level UI component that carries business logic — a data table wired to server actions, an auth flow, a dashboard, checkout. The level above /atom (2+ primitives) and /template (page layout). Triggers on: block, create a block, data table with logic, dashboard component."
+    },
+    {
+      "skill": "blur",
+      "description": "Blur-up images — photos arrive blurred and sharpen into focus as they load",
+      "when_to_use": "Use when images should load blurred then sharpen — the BlurImage atom, converting <img>/next/image surfaces, LQIP at upload, or auditing images that pop in. Not `skeleton` (data loading shapes). Triggers on: blur, blur-up, blur while loading, lqip, images pop in, fade in images, صور ضبابية."
     },
     {
       "skill": "build",
@@ -554,37 +757,42 @@
     {
       "skill": "calendar",
       "description": "The content calendar — which brand publishes what, on which day",
-      "when_to_use": "Use when deciding or reviewing WHAT to publish and WHEN — mapping topics to weeks, allocating slots per brand, checking what actually shipped against what was planned. This is the planning stage that feeds /draft: it never writes post copy (/draft), never renders media (/higgs), never stages for sign-off (/approve), never delivers (/publish), and never reads numbers back (/measure). Triggers on: content calendar, plan the content, what are we publishing, which brand is due, what slipped this week, التقويم, خطة المحتوى."
+      "when_to_use": "Use when deciding or reviewing WHAT to publish and WHEN — topics to weeks, slots per brand, shipped vs planned. The planning stage feeding /draft: never writes copy (/draft), renders media (/higgs), stages sign-off (/approve), delivers (/publish) or reads numbers (/measure). Triggers on: content calendar, plan the content, what are we publishing, which brand is due, what slipped this week, التقويم, خطة المحتوى."
     },
     {
       "skill": "canon",
-      "description": "Surface the right CEO book + operating move for a business or leadership decision — hiring, firing, pricing, positioning, what to build, customer development, fundraising, prioritization, runway, strategy. Pull in automatically when a decision is on the table; no slash command needed. /canon also lists all 10.",
-      "when_to_use": "Use when a business or leadership decision is on the table and needs a grounded operating move rather than an opinion — hiring, pricing, positioning, what to build, fundraising, runway. Triggers on: should we build, what do I do about, how should I price, is it time to hire, are we running out of runway."
+      "description": "The right CEO book + operating move for a business or leadership decision; /canon lists all 10",
+      "when_to_use": "Use when a business or leadership decision is on the table and needs a grounded operating move rather than an opinion — hiring, firing, pricing, positioning, what to build, customer development, fundraising, prioritization, runway, strategy. Triggers on: should we build, what do I do about, how should I price, is it time to hire, are we running out of runway."
     },
     {
       "skill": "captain",
       "description": "Databayt CEO brain - synthesize identity + state + journal, suggest next action",
-      "when_to_use": "Use when the question is what to work on next at company level — identity, state and the decision journal synthesised into one allocation. Unlike /canon (a principle for one decision) or /weekly (the Friday ritual). Triggers on: what should I do next, company status, brief me, where do I spend this week."
+      "when_to_use": "Use when the question is what to work on next at company level. Unlike /canon (a principle for one decision) or /weekly (the Friday ritual). Triggers on: what should I do next, company status, brief me, where do I spend this week."
     },
     {
       "skill": "carousel",
-      "description": "Multi-slide bilingual brand carousels — Claude writes the deck, kun renders Anthropic-styled slides at exact platform sizes, a human approves, channels receive",
-      "when_to_use": "Use when a databayt brand needs a multi-slide social post — an Instagram/Facebook carousel, a LinkedIn PDF carousel, a story-sized slide set, or a slide album to DM a client on Telegram/WhatsApp. Triggers on: carousel, multi-slide post, swipe post, slides for instagram, carousel for <brand|block>, كاروسيل, سلايدات, منشور متعدد الشرائح."
+      "description": "Multi-slide bilingual brand carousels — deck written, slides rendered at exact platform sizes, human-approved",
+      "when_to_use": "Use when a databayt brand needs a multi-slide social post — an Instagram/Facebook or LinkedIn PDF carousel, a story-sized slide set, or a slide album to DM a client. Triggers on: carousel, multi-slide post, swipe post, slides for instagram, carousel for <brand|block>, كاروسيل, سلايدات, منشور متعدد الشرائح."
     },
     {
       "skill": "check",
       "description": "Quality gate — typecheck + build + visual verify before shipping",
-      "when_to_use": "Use when work is about to ship and needs the pre-ship quality gate — run tsc, production build, optional browser visual verification, and existing tests, with auto-fix loops, then emit a READY TO SHIP / BLOCKED verdict and cache the pass in the session sentinel; unlike /handover or /qa (deep UI/block verification), this is the fast mechanical green-check. Triggers on: check, pre-ship quality gate, typecheck + build + visual verify, \"is it green\"."
+      "when_to_use": "Use when work is about to ship and needs the pre-ship gate — tsc, production build, optional visual verify and existing tests with auto-fix loops, ending READY TO SHIP or BLOCKED. Unlike /handover or /qa (deep UI/block verification), this is the fast mechanical green-check. Triggers on: check, pre-ship quality gate, typecheck + build + visual verify, \"is it green\"."
     },
     {
       "skill": "clone",
       "description": "Clone a pattern/component from a source repo OR mirror a live URL section pixel-exact",
-      "when_to_use": "Use when reproducing something that already exists somewhere else — a live site section to mirror pixel-exact into the house stack (url-mode: deterministic Playwright capture → tiered Workflow), a Figma frame to implement, or code to adapt from github:/shadcn:/codebase:/pattern: sources. Triggers on: clone <url>, clone this section, make ours look like <site>, clone the figma design, clone shadcn:<component>, pattern:<keyword>. Distinct from /atom or /template (net-new components) — clone always starts from an existing source."
+      "when_to_use": "Use when reproducing something that already exists — a live site section mirrored pixel-exact into the house stack, a Figma frame to implement, or code to adapt from github:/shadcn:/codebase:/pattern: sources. Triggers on: clone <url>, clone this section, make ours look like <site>, clone the figma design, clone shadcn:<component>, pattern:<keyword>. Distinct from /atom or /template (net-new components) — clone always starts from an existing source."
+    },
+    {
+      "skill": "cloudflare",
+      "description": "Cloudflare platform operator — Workers + Containers deploys, DNS cutover, crons and logs",
+      "when_to_use": "Use for anything on the Cloudflare production platform — deploying a hosted repo, checking a deploy is live, Worker logs or crons, flipping DNS to proxied, Worker vs Container for a new app. /ship and /watch delegate here for wrangler.jsonc repos. Triggers on: cloudflare, wrangler, worker, container, deploy to cloudflare, cutover, is it live on cloudflare, worker logs, cron not firing, ERR_CONNECTION_RESET, orange cloud, proxied."
     },
     {
       "skill": "code",
       "description": "Logic layer — server actions with auth, validation, tenant isolation",
-      "when_to_use": "Use when the Logic stage of the pipeline is reached or Abdout asks in prose to build the business-logic layer for a feature — server actions, CRUD operations, permission rules, or optimized queries — as distinct from /schema (data layer) or /wire (UI layer). Triggers on: server actions, logic layer with auth+validation+tenant isolation, pipeline Logic stage."
+      "when_to_use": "Use at the pipeline's Logic stage, or when asked to build a feature's business-logic layer — server actions, CRUD, permission rules, optimized queries — as distinct from /schema (data layer) or /wire (UI layer). Triggers on: server actions, logic layer with auth+validation+tenant isolation, pipeline Logic stage."
     },
     {
       "skill": "codebase",
@@ -593,8 +801,8 @@
     },
     {
       "skill": "convert",
-      "description": "Convert a file or URL to Markdown via MarkItDown (PDF, Office, images, audio, web)",
-      "when_to_use": "Use when a file or URL needs to become clean Markdown — PDFs, Office docs (DOCX/PPTX/XLSX), images, audio, web pages, YouTube transcripts — via the MarkItDown MCP, landing in docs/, a knowledge base, or printed to the session. Triggers on: convert <file|url>, markitdown, markdown this PDF, pull this page into docs, transcribe this video."
+      "description": "Convert a file or URL to Markdown via MarkItDown",
+      "when_to_use": "Use when a file or URL should become clean Markdown — PDF, Office docs, images, audio, web pages, YouTube transcripts — landing in docs/, a knowledge base or the session. Triggers on: convert <file|url>, markitdown, markdown this PDF, pull this page into docs, transcribe this video."
     },
     {
       "skill": "costs",
@@ -609,17 +817,17 @@
     {
       "skill": "credentials",
       "description": "Manage databayt credentials — API keys via Keychain, web logins via Safari",
-      "when_to_use": "Use when managing databayt credentials — storing or reading API keys via the macOS Keychain, driving Safari autofill for web logins, exporting keys for env wiring; never prints secrets into files. Triggers on: credentials, api key, log into <service>, store the key, which keys do we have."
+      "when_to_use": "Use when storing, reading or exporting databayt API keys via the macOS Keychain, or driving Safari autofill for web logins; never prints secrets into files. Triggers on: credentials, api key, log into <service>, store the key, which keys do we have."
     },
     {
       "skill": "decide",
       "description": "Write a decision journal entry — Type 1/2 classification, premortem, expected outcome, reviewed-by date",
-      "when_to_use": "Use when a choice worth remembering needs recording — Type 1/2 classification, premortem, expected outcome and a reviewed-by date in the decision journal. Unlike /canon (surfaces a principle) and /premortem (only the failure story). Triggers on: log this decision, we decided to, record the call."
+      "when_to_use": "Use when a choice worth remembering needs recording in the decision journal. Unlike /canon (surfaces a principle) and /premortem (only the failure story). Triggers on: log this decision, we decided to, record the call."
     },
     {
       "skill": "deploy",
-      "description": "Vercel operator — preview/staging deploys, deployment logs and status, and the fix-until-deployed retry loop",
-      "when_to_use": "Use when driving Vercel directly rather than running a pipeline stage — deploying to preview/staging, inspecting why a deployment failed, checking deployment status, or looping build-fix-redeploy until it goes green (max 5 attempts). Promoting a checked build to PRODUCTION is /ship (the pipeline's commit-to-live step after /check), the commit-lint-push cycle is /quick, and confirming a live deploy is healthy is /watch — this skill does not replace any of them. Triggers on: deploy to preview, deploy to staging, vercel logs, why did the deploy fail, deployment status, redeploy until it works."
+      "description": "Production deploy — the full Cloudflare cycle to a verified login, plus the legacy Vercel preview lane",
+      "when_to_use": "Use when Abdout says deploy, push to prod, ship it or deploy everything — the whole cycle, not just the upload, including the Neon restore point and prod data steps. Distinct from /check (pre-ship gate only), /watch (observe, never fix), /cloudflare (platform ops: DNS, crons, logs) and /quick (commit-push, no build). Triggers on: deploy, deploy everything, push to production, ship to cloudflare, redeploy, why is the deploy stuck, vercel preview, deploy to staging."
     },
     {
       "skill": "dev",
@@ -632,9 +840,14 @@
       "when_to_use": "Use when code needs written documentation generated from source — component MDX, API reference, or Storybook stories. Not the docs-site content itself. Triggers on: document this component, write the API docs, generate the MDX, add a storybook story."
     },
     {
+      "skill": "domains",
+      "description": "Domain + mail health — expiry, renewal, DNS, inboxes",
+      "when_to_use": "Use when a domain or company inbox needs checking or fixing, or a domains issue fired. Triggers on: domains, renew, auto-renew, dmarc, spf, mail bouncing."
+    },
+    {
       "skill": "draft",
-      "description": "Write the full draft — copy (Arabic crafted first, English mirrored) and/or its media set",
-      "when_to_use": "Use when a topic needs to become a FULL draft for a databayt brand — the core piece plus one platform-native variant per channel, Arabic written natively and English mirrored, with UTM on every link, AND the draft's media half: library picks attached by URL, or a generation hand-off. ALSO the answering half of the Hub's agent window: with no topic, or on any phrasing about the draft queue, it drains the briefs contributors submitted on /social — picking media from the library as it answers. This is the drafting stage only: it does not decide what to write about (/calendar), does not render new images or video itself (/higgs, /carousel — it attaches their output), does not approve (/approve), and never sends anything to a platform (/publish). Triggers on: draft a post, write the copy, write the caption, post about <topic>, attach media to the draft, drain the draft queue, answer the social asks, any drafts waiting, اكتب منشور, صياغة المنشور, طابور الصياغة, أرفق وسائط للمسودة."
+      "description": "Full brand draft — Arabic-first copy, English mirrored, plus media",
+      "when_to_use": "Use when a topic must become a full brand draft — every channel's copy plus media — or, with no topic, to drain the /social brief queue. Drafting only: never picks topics (/calendar), renders media (/higgs, /carousel), approves (/approve) or sends (/publish). Triggers on: draft a post, write the copy, write the caption, post about <topic>, attach media to the draft, drain the draft queue, answer the social asks, any drafts waiting, اكتب منشور, صياغة المنشور, طابور الصياغة, أرفق وسائط للمسودة."
     },
     {
       "skill": "economy",
@@ -642,9 +855,19 @@
       "when_to_use": "Use when token consumption, plan limits, or usage windows are the topic — auditing what's burning the Max pool, delegating work to a cheaper model/effort/product lane, or applying session hygiene. Triggers on: economy, token usage, optimize tokens, we're burning tokens, hit the limit, usage window, plan limit, tokens per outcome, توكن, استهلاك."
     },
     {
+      "skill": "edit",
+      "description": "Edit video locally — footage cuts, Arabic captions, motion graphics, demos, reels",
+      "when_to_use": "Use when real footage must be cut or captioned, or a video composed from code. Filming is /record, /shoot; AI clips /higgs. Triggers on: edit video, cut the silences, rough cut, make a reel, add captions, motion graphic, title card, intro outro, مونتاج, قص الفيديو, ريلز."
+    },
+    {
+      "skill": "facebook",
+      "description": "Connect a brand's Facebook Page to the publishing pipeline",
+      "when_to_use": "Use when a Facebook Page must be wired in so drafts can reach it — a new brand Page, a Page that posts nothing, an expired or invalid token, or a permissions error that names nothing. Connection work, not content: never writes copy (/draft), renders media (/higgs), approves (/approve) or runs the everyday send (/publish). Triggers on: connect a facebook page, add my brand page, wire up facebook, new brand page, facebook token expired, invalid scopes, اربط صفحة فيسبوك."
+    },
+    {
       "skill": "feature",
       "description": "Full pipeline — idea to production (chains every stage)",
-      "when_to_use": "Use when Abdout asks to build a feature end to end, take an idea all the way to production, or names a new feature to ship — this is the compound orchestrator that chains every pipeline stage (idea → spec → human approval → plan → tasks → schema → code → wire → check → ship → watch) with progress appended to a GitHub issue, unlike the single-stage neighbors (/idea, /spec, /schema, /code, /wire, /check, /ship, /watch) which each run one stage, and product scope resolves data-driven from .claude/memory/repositories.json (planned products get naming/spec only). Triggers on: feature <name> [product], build <feature> end to end, full pipeline idea→production."
+      "when_to_use": "Use when Abdout asks to build a feature end to end, take an idea to production, or names a new feature to ship — the orchestrator that chains every stage on one GitHub issue, pausing once for spec approval, unlike the single-stage /idea, /spec, /schema, /code, /wire, /check, /ship and /watch. Triggers on: feature <name> [product], build <feature> end to end, full pipeline idea→production."
     },
     {
       "skill": "fix",
@@ -652,24 +875,29 @@
       "when_to_use": "Use when the codebase has mechanical errors to clear — TypeScript, lint and build failures fixed in a loop until green. Unlike /report (a user-filed bug) and /check (the pre-ship gate, which only reports). Triggers on: fix the errors, clear the type errors, make it compile, lint is failing."
     },
     {
+      "skill": "funnel",
+      "description": "Conversation to conversion — gates, segments, assets, the stall clock",
+      "when_to_use": "Converting a lead that already replied — gate state, segmentation, value before payment, the stall clock, the follow-up drain. Triggers on: funnel, qualify, segment, nurture, follow up, stalled, chatbot, قمع, تأهيل, متابعة. NOT /scrape (finding them), /draft (brand copy), /approve (a social post), /qa (a block)."
+    },
+    {
       "skill": "handover",
       "description": "UI verification — runs niche quality keywords on a URL or block",
-      "when_to_use": "Use when Abdout wants a UI verification pass before a demo, merge, or client handoff — polymorphic on argument, where URL mode (argument starts with /) runs all 12 per-URL niche quality keywords (browser 6 + code 6) on one route, and block mode (bare word) runs the per-route subset (debug, flow, responsive, lang) on every route in the block. Triggers on: handover <url|block>, pre-demo quality pass, run the niche quality keywords, \"is this URL clean\", \"is the whole block ready to show\"."
+      "when_to_use": "Use when Abdout wants a UI verification pass before a demo, merge or client handoff — a URL (starts with /) gets all 12 per-URL niche quality keywords; a bare block name gets debug, flow, responsive and lang on every route. Triggers on: handover <url|block>, pre-demo quality pass, run the niche quality keywords, \"is this URL clean\", \"is the whole block ready to show\"."
     },
     {
       "skill": "health",
       "description": "Check Claude Code config health across the team + engine drift",
-      "when_to_use": "Use when checking engine or config health — runs health.sh (counts vs engine.json, plugin parity, vocabulary sync, installed-agent matrix), reports drift, and reads teammates' statuses from the shared dashboard issue. Triggers on: health, config health, is the engine healthy, drift check, team config status."
+      "when_to_use": "Use when checking engine or config health — health.sh counts vs engine.json, plugin parity, vocabulary sync, drift — plus teammates' statuses from the dashboard issue. Triggers on: health, config health, is the engine healthy, drift check, team config status."
     },
     {
       "skill": "higgs",
-      "description": "Generate and edit photos and videos for databayt org marketing, ads, and prompts — Google (Nano Banana / Veo / Omni) direct, or Higgsfield",
-      "when_to_use": "Use when generating or editing marketing media — image, photo, video, ad, hero shot, product shot, promo reel, story, avatar ad — or when a reference video/image URL needs downloading and tweaking. Owns BOTH raster renderers: Google direct (Nano Banana, Nano Banana Pro, Veo, Omni Flash — pay per image, no credit ceiling) and Higgsfield (credits). This is the TEXT-FREE lane: og images, banners, social cards, infographics, testimonials, split comparisons and anything carrying copy render on /carousel's template lane instead (the Portrait Gallery spells route by taxonomy lane). Triggers on: /higgs, generate video, generate image, generate photo, make an ad, promo video, hero image, product shot, mockup, lifestyle scene, moodboard, showroom asset, brand kit, edit video from url, download and tweak video, higgs, nano banana, veo, omni, gemini image, صورة تسويقية, وسائط."
+      "description": "Marketing photos and video — Google (Nano Banana, Veo, Omni) direct, or Higgsfield",
+      "when_to_use": "Use when AI must GENERATE marketing images or video — ads, hero or product shots, stories, avatar ads — or restyle a reference URL. Cutting real footage is /edit. Text-free only: anything carrying copy (og images, banners, social cards, infographics, testimonials) goes to /carousel. Triggers on: generate video, generate image, make an ad, promo video, hero image, product shot, mockup, lifestyle scene, moodboard, showroom asset, brand kit, edit video from url, nano banana, veo, omni, gemini image, صورة تسويقية, وسائط."
     },
     {
       "skill": "idea",
       "description": "Capture a feature idea as a structured GitHub issue",
-      "when_to_use": "Use when a new feature idea surfaces in conversation and needs to become a structured, deduplicated GitHub issue with user story, acceptance criteria, and scope — the Capture stage that opens the idea→production pipeline (distinct from /spec which details an existing issue, and /issue which files a generic issue without feature structure). Triggers on capture this idea, new feature idea, \"we should build …\", \"user can …\" stories, pipeline Capture stage, optionally scoped to a product (hogwarts, souq, mkan, shifa, kun)."
+      "when_to_use": "Use when a new feature idea surfaces and should become a deduplicated GitHub issue with a user story and acceptance criteria — the Capture stage opening the pipeline. Distinct from /spec (details an existing issue) and /issue (a generic issue without feature structure). Triggers on capture this idea, new feature idea, \"we should build …\", \"user can …\" stories, pipeline Capture stage, optionally scoped to a product (hogwarts, souq, mkan, shifa, kun)."
     },
     {
       "skill": "incident",
@@ -679,27 +907,37 @@
     {
       "skill": "issue",
       "description": "Create a GitHub issue in the appropriate databayt repo",
-      "when_to_use": "Use when a task, bug, chore, or follow-up needs to become a tracked GitHub issue in the right databayt repo (kun, hogwarts, souq, mkan, shifa, codebase, shadcn, ios-app/android-app, marketing) with priority/type/scope/assignment labels, a Context/Action/Verification body, and a Slack #dev notification — including turning Slack messages into issues — as distinct from /idea which captures structured feature ideas with user stories. Triggers on: open/file an issue, create a GitHub issue in the right databayt repo."
+      "when_to_use": "Use when a task, bug, chore or follow-up should become a tracked, labelled GitHub issue in the right databayt repo, including turning Slack messages into issues — as distinct from /idea, which captures feature ideas with user stories. Triggers on: open/file an issue, create a GitHub issue in the right databayt repo."
+    },
+    {
+      "skill": "jobs",
+      "description": "Abdout's + Databayt's income lane — jobs, gigs, tenders, client requests and funding programs across Rwanda, Kenya, Nigeria, Gulf, Sudan; tracked on sales.databayt.org",
+      "when_to_use": "Any opportunity someone POSTED that pays Abdout or Databayt: Kigali/Nairobi/Lagos roles, remote dev, AI-training gigs, freelance, electrical/protection work, tenders, RFPs, client project requests, and funding — incubators, accelerators, grants, credits, angels. Triggers on: jobs, find work, apply, opportunities, gigs, tenders, RFP, client request, incubator, accelerator, grant, credits, investor, angel, fundraising, funding, did anyone reply, وظائف, فرص, مناقصات, حاضنة, مسرعة, منحة, تمويل. NOT /scrape (outbound leads we go find)."
     },
     {
       "skill": "learn",
       "description": "Extract organizational patterns and conventions from repos + history",
-      "when_to_use": "Use when extracting organizational intelligence — patterns, conventions, and team dynamics mined from git history and the databayt repos into memory; feeds the conventions/patterns/drift surfaces. Distinct from /analyze which generates a repo's Claude config. Triggers on: learn, what are our conventions, extract patterns from history."
+      "when_to_use": "Use when mining organizational patterns, conventions and team dynamics from git history and the databayt repos into memory. Distinct from /analyze, which generates a repo's Claude config. Triggers on: learn, what are our conventions, extract patterns from history."
     },
     {
       "skill": "mcp-doctor",
-      "description": "Diagnose and recover the browser/Playwright MCP server when it disconnects, fails to launch, or returns \"tool not found\" for mcp__browser__*.",
+      "description": "Diagnose and recover the browser/Playwright MCP server",
       "when_to_use": "Use when the browser/Playwright MCP is broken — tools missing, server disconnected, or a launch failure. Triggers on: browser mcp is not working, tool not found, playwright mcp is disconnected, browser tools missing."
     },
     {
+      "skill": "md",
+      "description": "House standard for machine-produced Markdown — schema, RTL rules, grading by agreement",
+      "when_to_use": "Use when judging or repairing the quality of Markdown a machine produced from a document — a bad conversion, wrong tables, an untrustworthy twin — or writing a transcription contract for a new source. The standard, not a converter: /convert makes one file's Markdown and /textbook orchestrates whole books; both are held to it. Triggers on: md quality, bad conversion, grade the markdown, transcription contract, agreement score, RTL markdown, mirrored tables."
+    },
+    {
       "skill": "measure",
-      "description": "Read the numbers back — platform reach and engagement plus UTM attribution, per post and per brand",
-      "when_to_use": "Use when asking how published posts actually performed — reach, views, reactions, comments, shares, or UTM-attributed traffic, per post, per channel, or per brand, and whether the strategy's kill criteria can yet be judged. This reads numbers only: it never writes copy (/draft), never publishes (/publish), and is neither a bug report (/report) nor a deploy check (/watch). Triggers on: how did the post do, social metrics, reach and engagement, is social working, did anyone see it, أرقام المنشور, أداء المنشورات."
+      "description": "Read the numbers back — reach, engagement and UTM attribution per post and brand",
+      "when_to_use": "Use when asking how published posts performed — reach, views, reactions, shares or UTM traffic per post, channel or brand, and whether kill criteria can be judged yet. Numbers only: never writes copy (/draft) or publishes (/publish), and is neither a bug report (/report) nor a deploy check (/watch). Triggers on: how did the post do, social metrics, reach and engagement, is social working, did anyone see it, أرقام المنشور, أداء المنشورات."
     },
     {
       "skill": "monitor",
       "description": "Check all deployments, costs, and uptime across databayt products",
-      "when_to_use": "Use when checking all deployments, costs, and uptime across the databayt products in one sweep — Vercel deploy status, production URL sampling, spend vs budget — escalating anything red to /incident. Triggers on: monitor, are the deploys green, uptime check, production status sweep."
+      "when_to_use": "Use for one sweep of deploys, uptime and spend across the databayt products, escalating anything red to /incident. Triggers on: monitor, are the deploys green, uptime check, production status sweep."
     },
     {
       "skill": "motion",
@@ -709,7 +947,7 @@
     {
       "skill": "package",
       "description": "Cross-repo dependency audit and upgrade coordination",
-      "when_to_use": "Use when auditing or upgrading dependencies across the databayt repos — version consistency, coordinated upgrades, breaking-change sweeps by the package agent; cross-repo scope, unlike a single repo's deps/outdated check. Triggers on: package audit, upgrade deps across repos, version consistency, dependency sweep."
+      "when_to_use": "Use when auditing or upgrading dependencies across the databayt repos — version consistency, coordinated upgrades, breaking-change sweeps — unlike a single repo's outdated check. Triggers on: package audit, upgrade deps across repos, version consistency, dependency sweep."
     },
     {
       "skill": "pattern",
@@ -724,12 +962,12 @@
     {
       "skill": "plan",
       "description": "Architecture plan — tech decisions from an approved spec, before code",
-      "when_to_use": "Use when turning a human-approved spec into an implementation plan — pattern choices, architecture decisions, mirror target, tradeoffs, and risks appended to the feature's GitHub issue — the pipeline Plan stage between /spec and /schema (NOT Claude Code plan mode). Triggers on: plan the architecture, architecture plan for the approved spec, pipeline Plan stage."
+      "when_to_use": "Use when turning a human-approved spec into an implementation plan — patterns, architecture, mirror target, tradeoffs and risks on the feature's GitHub issue; the Plan stage between /spec and /schema (NOT Claude Code plan mode). Triggers on: plan the architecture, architecture plan for the approved spec, pipeline Plan stage."
     },
     {
       "skill": "premortem",
       "description": "Klein-style premortem — imagine a decision/project failed, write the story, surface risks",
-      "when_to_use": "Use before committing to a decision or project, to surface risks by assuming it already failed and writing the story backwards. Unlike /decide (records the call) and /canon (supplies a principle). Triggers on: what could go wrong, imagine this failed, what are the risks, stress-test this plan."
+      "when_to_use": "Use before committing to a decision or project, to surface risks by assuming it already failed. Unlike /decide (records the call) and /canon (supplies a principle). Triggers on: what could go wrong, imagine this failed, what are the risks, stress-test this plan."
     },
     {
       "skill": "pricing",
@@ -748,13 +986,18 @@
     },
     {
       "skill": "publish",
-      "description": "Deliver approved full drafts to the channels — the review queue decides, the lanes deliver",
-      "when_to_use": "Use when an APPROVED full draft (copy + media) must reach its channels, now or on a schedule — via the review queue on /social/publish (Approve = publish right away or delegate to the cron drain, per its settings), the signed approval link, or the copy-out block for WhatsApp. This publishes CONTENT, not code: /ship and /deploy put software in production and /release ships a feature block, and none of them touch a brand page. It refuses without a recorded /approve yes, never writes copy (/draft), never creates from blank (the queue only fine-tunes), and never reads numbers back (/measure). Triggers on: publish the post, send it out, post it now, schedule it for tomorrow, broadcast it, review and publish, انشر المنشور, ابعت المنشور, راجع وانشر."
+      "description": "Deliver approved full drafts to the brand channels",
+      "when_to_use": "Use when an APPROVED full draft must reach its channels, now or on a schedule — via the review queue, the signed approval link, or the WhatsApp copy-out block. Content, not code (/ship, /deploy). Refuses without a recorded /approve yes; not /draft or /measure. Triggers on: publish the post, send it out, post it now, schedule it for tomorrow, broadcast it, review and publish, انشر المنشور, ابعت المنشور, راجع وانشر."
+    },
+    {
+      "skill": "pwa",
+      "description": "Progressive Web App lane — install, offline, Web Push",
+      "when_to_use": "Use when a product should install to a home screen, work offline or push browser notifications — auditing installability or building the per-tenant manifest, service worker, offline page or Web Push. Distinct from /performance (Core Web Vitals), /handover (UI verification) and the in-app `notifications` block. Triggers on: pwa, progressive web app, installable, add to home screen, install prompt, manifest, service worker, offline, works offline, web push, push notification, تطبيق, بدون إنترنت, إشعارات."
     },
     {
       "skill": "qa",
-      "description": "Autonomous block QA — detect, adversarially verify, fix safe tiers, hand the residual to a human",
-      "when_to_use": "Use when a feature block needs autonomous QA — detect across every route + the block source, adversarially verify every FAIL, auto-fix the safe (tier A) and build-gated (tier B) tiers, persist the verdict to blocks.json, and open one human-signoff issue carrying only the residual — triggering on qa <block> (e.g. \"qa admission\" in prose, no slash needed), \"QA this block\", pre-release verification, or a code-complete-but-unverified block; block-scope only — a single URL spot-check is handover's job, the typecheck/build gate alone is check's, and a user-reported bug is report's."
+      "description": "Autonomous block QA with one human signoff on the residual",
+      "when_to_use": "Use when a feature block needs autonomous QA across every route — detect, verify each FAIL, auto-fix the safe tiers, open one human-signoff issue for the rest — triggering on qa <block> (e.g. \"qa admission\"), \"QA this block\", pre-release verification, or a code-complete but unverified block. Block scope only: a single-URL spot-check is handover's job, the typecheck/build gate check's, a user-reported bug report's."
     },
     {
       "skill": "quick",
@@ -762,14 +1005,19 @@
       "when_to_use": "Use when finished work just needs to land — lint, auto-fix, conventional commit and push to main in one pass. Not a production promotion (/ship) and not a Vercel deploy (/deploy). Triggers on: commit and push, just push it, save this work, land it."
     },
     {
+      "skill": "record",
+      "description": "Screen-record demo videos of real product flows, mirrored to Google Drive",
+      "when_to_use": "Use when a product flow must be captured as VIDEO — demo videos, ad cuts, walkthroughs, re-records, Drive sync. Stills are /shoot. Triggers on: record, record <flow|block>, demo video, walkthrough, screen recording, re-record, سجل فيديو."
+    },
+    {
       "skill": "release",
       "description": "One spell — handover, check, ship, watch, then comment + close the issue",
-      "when_to_use": "Use when a feature block is code-complete on main and Abdout wants it shipped to the client in one move — the full local-to-production-and-verified chain, not a single stage like /check (tight loop), /ship (deploy only), /handover (QA only), or /watch (verify only). Triggers on: release <block>, send to client, one-spell handoff (handover→check→ship→watch→close issue), give away to client, ship it and tell the client."
+      "when_to_use": "Use when a code-complete block on main should reach the client in one move — the full chain to verified production, not a single stage like /check (tight loop), /ship (deploy only), /handover (QA only) or /watch (verify only). Triggers on: release <block>, send to client, one-spell handoff (handover→check→ship→watch→close issue), give away to client, ship it and tell the client."
     },
     {
       "skill": "report",
-      "description": "Auto-fix a user-reported issue end to end",
-      "when_to_use": "Use when GitHub issues labeled `report` need processing — reading a user-reported bug, locating the route/component, reproducing, fixing with a minimum diff, building, pushing, and closing the issue — across the databayt repos (hogwarts, kun, souq, mkan, shifa) or a single repo/issue, distinct from /qa (block-wide QA) and /check (pre-ship gate). Triggers on: report, fix reports, user-reported issue auto-fix, verified-report queue."
+      "description": "Triage and fix the open user reports across databayt repos",
+      "when_to_use": "Use when the open `report`-labeled issues need a human decision or a fix — Abdout takes or rejects each from one table, accepted ones get fixed. Distinct from /qa (block-wide QA), /check (pre-ship gate) and /issue (file a new issue). Triggers on: report, reports, fix reports, list the reports, show the reports, what did the team report, the team reported, Ali reported, open issues from the dialog, take/reject the reports, verified-report queue, البلاغات, بلاغات الفريق, المشاكل المبلغ عنها, أصلح البلاغات."
     },
     {
       "skill": "repos",
@@ -784,7 +1032,12 @@
     {
       "skill": "schema",
       "description": "Data layer — Prisma model, migration, and Zod validation",
-      "when_to_use": "Use when a feature needs its data foundation built from an approved spec — creating the Prisma model, applying the migration, generating the client, and writing Zod create/update/filter schemas with TypeScript types. Triggers on: add the model/migration, data layer, Prisma model + Zod validation, pipeline Data stage."
+      "when_to_use": "Use when a feature needs its data foundation from an approved spec — the Prisma model, migration and client, plus Zod create/update/filter schemas and types. Triggers on: add the model/migration, data layer, Prisma model + Zod validation, pipeline Data stage."
+    },
+    {
+      "skill": "scrape",
+      "description": "Lead acquisition — contact gap first, discovery last",
+      "when_to_use": "Finding, enriching, tiering or reaching leads in the Twenty CRM. Triggers on: scrap, scrape, scrap facebook, scrap whatsapp, scrap facebook for hogwarts, scrap for mkan, scrap for databayt, website leads, old websites, rebrand leads, leads, prospect, contact gap, enrich, outreach, pipeline health, who should we contact, find schools, اسحب, جمع بيانات, عملاء محتملين. NOT /health (engine drift), /measure (social numbers), /report (a bug)."
     },
     {
       "skill": "screenshot",
@@ -804,27 +1057,37 @@
     {
       "skill": "ship",
       "description": "Promote a checked build to production (Vercel --prod)",
-      "when_to_use": "Use when a checked build must go live on Vercel production — the pipeline's final commit-to-live step after /check passes — including deploying main to prod, inspecting failed production deployment logs, or listing recent production deploys, as distinct from /deploy (staging/preview), /check (pre-ship gate), and /watch (post-deploy verification). Triggers on: ship, deploy to production, promote checked build (Vercel --prod)."
+      "when_to_use": "Use when a checked build must go live on Vercel production — the pipeline's final step after /check passes — or to inspect failed or recent production deploys. Distinct from /deploy (staging/preview), /check (pre-ship gate) and /watch (post-deploy verification). Triggers on: ship, deploy to production, promote checked build (Vercel --prod)."
+    },
+    {
+      "skill": "shoot",
+      "description": "Stills of real product pages and flows, framed like Abdout's MacBook",
+      "when_to_use": "Use when a page or flow needs STILL screenshots — routes or a scripted e2e flow, framed like Abdout's MacBook at Chrome 125%. Video is /record. Triggers on: shoot <route|flow>, take a screenshot of <url>, screenshot the <x> flow, لقطة شاشة."
+    },
+    {
+      "skill": "skeleton",
+      "description": "Skeleton loading states — layout-matching shimmer while data loads",
+      "when_to_use": "Use when a route or section needs a loading state while DATA loads — loading.tsx, Suspense fallbacks, the skeleton kit + shimmer, replacing spinners, routes that flash blank. Not `blur` (image bytes). Triggers on: skeleton, loading state, loading.tsx, shimmer, page flashes blank, replace the spinner, هيكل التحميل."
     },
     {
       "skill": "social",
       "description": "One spell — calendar, draft, media, approve, publish, measure for a brand post",
-      "when_to_use": "Use when a databayt brand needs a social post taken the whole way — pick the slot, write the bilingual copy, render the media, get a human sign-off, deliver to the channels, and read the numbers back. This is the compound orchestrator; run a single stage directly when that is all you need (/calendar, /draft, /higgs, /approve, /publish, /measure). Triggers on: social post, post about <topic>, publish to social, social automation, broadcast the announcement, منشور تواصل, انشر عن."
+      "when_to_use": "Use when a databayt brand post should be taken the whole way — slot, bilingual copy, media, human sign-off, delivery, numbers. The compound orchestrator; for one stage run it directly (/calendar, /draft, /higgs, /approve, /publish, /measure). Triggers on: social post, post about <topic>, publish to social, social automation, broadcast the announcement, منشور تواصل, انشر عن."
     },
     {
       "skill": "spec",
       "description": "Technical spec — data model, file plan, refined acceptance criteria",
-      "when_to_use": "Use when a captured feature idea (GitHub issue) needs to become a technical specification — Prisma data model sketch, file plan, refined acceptance criteria, and dependencies — published as an issue comment and paused for the single human approval gate of the pipeline; this is the Specify stage between /idea and /plan or /schema, not architecture planning (/plan) or task breakdown (/tasks). Triggers on: spec the <feature>, write the spec, technical specification, pipeline Specify stage (human approval gate)."
+      "when_to_use": "Use when a captured feature idea (GitHub issue) needs a technical spec — data model sketch, file plan, refined acceptance criteria — posted for the pipeline's one human approval gate. The Specify stage between /idea and /plan or /schema; not architecture (/plan) or task breakdown (/tasks). Triggers on: spec the <feature>, write the spec, technical specification, pipeline Specify stage (human approval gate)."
     },
     {
       "skill": "sync",
-      "description": "Self-update — read the latest releases across the engine's whole surface (Anthropic, stack, services, practice), diff against the engine, adopt or propose",
-      "when_to_use": "Use when self-updating the engine against upstream releases — reads the Anthropic/stack/services/practice release feeds per engine.json sync tiers, diffs findings against the engine, adopts mechanical wins, proposes the rest, and stamps sync dates. Triggers on: sync, what's new in claude code, refresh the engine, release sweep."
+      "description": "Self-update — diff the latest upstream releases against the engine, adopt or propose",
+      "when_to_use": "Use when self-updating the engine against upstream releases (Anthropic, stack, services, practice) — adopt the mechanical wins, propose the rest, stamp the sync dates. Triggers on: sync, what's new in claude code, refresh the engine, release sweep."
     },
     {
       "skill": "tasks",
       "description": "Task breakdown — dependency-ordered work list from an approved plan",
-      "when_to_use": "Use when an approved implementation plan (from /plan) needs to become an ordered, dependency-aware checklist on the GitHub issue before /schema, /code, or /wire run — the pipeline Tasks stage, not spec writing (/spec) or architecture (/plan). Triggers on: break it down, ordered task list from an approved plan, task breakdown, decompose the plan, pipeline Tasks stage."
+      "when_to_use": "Use when an approved plan (from /plan) needs an ordered, dependency-aware checklist on the GitHub issue before /schema, /code or /wire run — the Tasks stage, not spec writing (/spec) or architecture (/plan). Triggers on: break it down, ordered task list from an approved plan, task breakdown, decompose the plan, pipeline Tasks stage."
     },
     {
       "skill": "template",
@@ -837,9 +1100,14 @@
       "when_to_use": "Use when code needs tests written or run — unit, component or Playwright E2E, with coverage. Unlike /qa, which verifies a shipped block in a browser. Triggers on: write tests for, add e2e coverage, run the tests, test this component."
     },
     {
+      "skill": "textbook",
+      "description": "Give every curriculum textbook.pdf a verified Markdown twin — vision transcription, blind re-reads, adjudication, a benchmark",
+      "when_to_use": "Use when curriculum textbooks (PDF scans, mostly Arabic) must become Markdown twins, or a twin must be verified, repaired or benchmarked. Triggers on: textbook markdown, textbook.md, convert the textbooks, pdf to md for grade N, re-transcribe the textbooks, fix the textbook twin, textbook bench."
+    },
+    {
       "skill": "watch",
       "description": "Post-deploy verification — visual + console + smoke test",
-      "when_to_use": "Use when a deployment just landed and needs to be confirmed healthy in production — check Vercel deployment status, screenshot the live page, scan console errors and failed network requests, run a quick smoke interaction, then close or escalate the feature issue; unlike /check (pre-ship gate) or /qa (block QA), this observes production after /ship and never fixes code. Triggers on: watch, verify the deploy, is it live, post-deploy visual + console + smoke check, pipeline Monitor stage."
+      "when_to_use": "Use when a deploy just landed and must be confirmed healthy in production — screenshot the live page, scan console and network errors, run a smoke interaction, then close or escalate the issue. Unlike /check (pre-ship gate) or /qa (block QA), it observes after /ship and never fixes code. Triggers on: watch, verify the deploy, is it live, post-deploy visual + console + smoke check, pipeline Monitor stage."
     },
     {
       "skill": "weekly",
@@ -849,10 +1117,90 @@
     {
       "skill": "wire",
       "description": "UI layer — page (mirror pattern), content, form, table columns, i18n",
-      "when_to_use": "Use when a feature's UI layer needs to be built after schema and code stages — creating the route page (thin wrapper, mirror pattern), the server content component, the client form, table columns, dictionary keys for both en + ar, and optional navigation entries, all verified by pnpm build. Triggers on: wire the UI, build the page/form/table for the feature, i18n wiring, pipeline UI stage. Distinct from /code (server actions/logic) and /check (quality gate) — this is specifically the visible pages/components/i18n layer of the pipeline."
+      "when_to_use": "Use when a feature's UI layer is due after the schema and code stages — the route page (mirror pattern), server content, client form, table columns and en + ar dictionary keys, verified by pnpm build. Triggers on: wire the UI, build the page/form/table for the feature, i18n wiring, pipeline UI stage. Distinct from /code (server actions/logic) and /check (quality gate) — this is specifically the visible pages/components/i18n layer of the pipeline."
     }
   ],
   "cases": [
+    {
+      "id": "trg:airbnb-copy:write-airbnb-listing-29fd",
+      "prompt": "write airbnb listing",
+      "label": "airbnb-copy",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:airbnb-copy:homes-copywriting-491f",
+      "prompt": "homes copywriting",
+      "label": "airbnb-copy",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:airbnb-copy:sound-like-airbnb-17e4",
+      "prompt": "sound like airbnb",
+      "label": "airbnb-copy",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:airbnb-copy:listing-title-989b",
+      "prompt": "listing title",
+      "label": "airbnb-copy",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:airbnb-copy:listing-description-c8d6",
+      "prompt": "listing description",
+      "label": "airbnb-copy",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:airbnb-copy:وصف-شقة-1ce0",
+      "prompt": "وصف شقة",
+      "label": "airbnb-copy",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:airbnb-copy:كتابة-إعلان-شقة-0776",
+      "prompt": "كتابة إعلان شقة",
+      "label": "airbnb-copy",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:airbnb-copy:صياغة-إعلان-عقار-2d77",
+      "prompt": "صياغة إعلان عقار",
+      "label": "airbnb-copy",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:airbnb-copy:أسلوب-إير-بي-إن-بي-3e98",
+      "prompt": "أسلوب إير بي إن بي",
+      "label": "airbnb-copy",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:airbnb-copy:كتابة-وصف-مكان-f6bd",
+      "prompt": "كتابة وصف مكان",
+      "label": "airbnb-copy",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
     {
       "id": "trg:analyze:analyze-repo-ba00",
       "prompt": "analyze <repo>",
@@ -1175,6 +1523,68 @@
       "split": "holdout"
     },
     {
+      "id": "trg:blur:blur-6bfb",
+      "prompt": "blur",
+      "label": "blur",
+      "source": "trigger_phrase",
+      "tags": [
+        "trivial"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:blur:blur-up-0632",
+      "prompt": "blur-up",
+      "label": "blur",
+      "source": "trigger_phrase",
+      "tags": [
+        "lexical"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:blur:blur-while-loading-ed9b",
+      "prompt": "blur while loading",
+      "label": "blur",
+      "source": "trigger_phrase",
+      "tags": [
+        "lexical"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:blur:lqip-33a3",
+      "prompt": "lqip",
+      "label": "blur",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:blur:images-pop-in-d9fe",
+      "prompt": "images pop in",
+      "label": "blur",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:blur:fade-in-images-5885",
+      "prompt": "fade in images",
+      "label": "blur",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:blur:صور-ضبابية-b34f",
+      "prompt": "صور ضبابية",
+      "label": "blur",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
       "id": "trg:calendar:content-calendar-1e8f",
       "prompt": "content calendar",
       "label": "calendar",
@@ -1492,6 +1902,130 @@
       "split": "holdout"
     },
     {
+      "id": "trg:cloudflare:cloudflare-a187",
+      "prompt": "cloudflare",
+      "label": "cloudflare",
+      "source": "trigger_phrase",
+      "tags": [
+        "trivial",
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:cloudflare:wrangler-0fbf",
+      "prompt": "wrangler",
+      "label": "cloudflare",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:cloudflare:worker-95ce",
+      "prompt": "worker",
+      "label": "cloudflare",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:cloudflare:container-8daf",
+      "prompt": "container",
+      "label": "cloudflare",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:cloudflare:deploy-to-cloudflare-49d0",
+      "prompt": "deploy to cloudflare",
+      "label": "cloudflare",
+      "source": "trigger_phrase",
+      "tags": [
+        "lexical",
+        "hard:names-deploy",
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:cloudflare:cutover-3e95",
+      "prompt": "cutover",
+      "label": "cloudflare",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:cloudflare:is-it-live-on-cloudflare-6c6a",
+      "prompt": "is it live on cloudflare",
+      "label": "cloudflare",
+      "source": "trigger_phrase",
+      "tags": [
+        "lexical",
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:cloudflare:worker-logs-f114",
+      "prompt": "worker logs",
+      "label": "cloudflare",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:cloudflare:cron-not-firing-a8f1",
+      "prompt": "cron not firing",
+      "label": "cloudflare",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:cloudflare:err-connection-reset-1308",
+      "prompt": "ERR_CONNECTION_RESET",
+      "label": "cloudflare",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:cloudflare:orange-cloud-12b3",
+      "prompt": "orange cloud",
+      "label": "cloudflare",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:cloudflare:proxied-751d",
+      "prompt": "proxied",
+      "label": "cloudflare",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
       "id": "trg:code:server-actions-9392",
       "prompt": "server actions",
       "label": "code",
@@ -1725,7 +2259,9 @@
       "prompt": "log this decision",
       "label": "decide",
       "source": "trigger_phrase",
-      "tags": [],
+      "tags": [
+        "hard:cluster"
+      ],
       "split": "train"
     },
     {
@@ -1733,7 +2269,9 @@
       "prompt": "we decided to",
       "label": "decide",
       "source": "trigger_phrase",
-      "tags": [],
+      "tags": [
+        "hard:cluster"
+      ],
       "split": "holdout"
     },
     {
@@ -1741,16 +2279,83 @@
       "prompt": "record the call",
       "label": "decide",
       "source": "trigger_phrase",
-      "tags": [],
+      "tags": [
+        "hard:names-record",
+        "hard:cluster"
+      ],
       "split": "train"
     },
     {
-      "id": "trg:deploy:deploy-to-preview-5496",
-      "prompt": "deploy to preview",
+      "id": "trg:deploy:deploy-5cd3",
+      "prompt": "deploy",
+      "label": "deploy",
+      "source": "trigger_phrase",
+      "tags": [
+        "trivial",
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:deploy:deploy-everything-65b3",
+      "prompt": "deploy everything",
       "label": "deploy",
       "source": "trigger_phrase",
       "tags": [
         "lexical",
+        "hard:cluster"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:deploy:push-to-production-9bed",
+      "prompt": "push to production",
+      "label": "deploy",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:deploy:ship-to-cloudflare-f3c5",
+      "prompt": "ship to cloudflare",
+      "label": "deploy",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-cloudflare",
+        "hard:names-ship",
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:deploy:redeploy-536a",
+      "prompt": "redeploy",
+      "label": "deploy",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:deploy:why-is-the-deploy-stuck-6cdd",
+      "prompt": "why is the deploy stuck",
+      "label": "deploy",
+      "source": "trigger_phrase",
+      "tags": [
+        "lexical",
+        "hard:cluster"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:deploy:vercel-preview-9bf4",
+      "prompt": "vercel preview",
+      "label": "deploy",
+      "source": "trigger_phrase",
+      "tags": [
         "hard:cluster"
       ],
       "split": "train"
@@ -1762,47 +2367,6 @@
       "source": "trigger_phrase",
       "tags": [
         "lexical",
-        "hard:cluster"
-      ],
-      "split": "train"
-    },
-    {
-      "id": "trg:deploy:vercel-logs-d731",
-      "prompt": "vercel logs",
-      "label": "deploy",
-      "source": "trigger_phrase",
-      "tags": [
-        "hard:cluster"
-      ],
-      "split": "train"
-    },
-    {
-      "id": "trg:deploy:why-did-the-deploy-fail-a9dc",
-      "prompt": "why did the deploy fail",
-      "label": "deploy",
-      "source": "trigger_phrase",
-      "tags": [
-        "lexical",
-        "hard:cluster"
-      ],
-      "split": "train"
-    },
-    {
-      "id": "trg:deploy:deployment-status-bb76",
-      "prompt": "deployment status",
-      "label": "deploy",
-      "source": "trigger_phrase",
-      "tags": [
-        "hard:cluster"
-      ],
-      "split": "train"
-    },
-    {
-      "id": "trg:deploy:redeploy-until-it-works-e90f",
-      "prompt": "redeploy until it works",
-      "label": "deploy",
-      "source": "trigger_phrase",
-      "tags": [
         "hard:cluster"
       ],
       "split": "train"
@@ -1879,6 +2443,56 @@
       "id": "trg:docs:add-a-storybook-story-56f9",
       "prompt": "add a storybook story",
       "label": "docs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:domains:domains-0f57",
+      "prompt": "domains",
+      "label": "domains",
+      "source": "trigger_phrase",
+      "tags": [
+        "trivial"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:domains:renew-f466",
+      "prompt": "renew",
+      "label": "domains",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:domains:auto-renew-9718",
+      "prompt": "auto-renew",
+      "label": "domains",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:domains:dmarc-6c74",
+      "prompt": "dmarc",
+      "label": "domains",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:domains:spf-d641",
+      "prompt": "spf",
+      "label": "domains",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:domains:mail-bouncing-f801",
+      "prompt": "mail bouncing",
+      "label": "domains",
       "source": "trigger_phrase",
       "tags": [],
       "split": "train"
@@ -2092,6 +2706,161 @@
       "split": "train"
     },
     {
+      "id": "trg:edit:edit-video-7bc6",
+      "prompt": "edit video",
+      "label": "edit",
+      "source": "trigger_phrase",
+      "tags": [
+        "lexical"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:edit:cut-the-silences-62b8",
+      "prompt": "cut the silences",
+      "label": "edit",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:edit:rough-cut-5133",
+      "prompt": "rough cut",
+      "label": "edit",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:edit:make-a-reel-e872",
+      "prompt": "make a reel",
+      "label": "edit",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:edit:add-captions-24bc",
+      "prompt": "add captions",
+      "label": "edit",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:edit:motion-graphic-189b",
+      "prompt": "motion graphic",
+      "label": "edit",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-motion"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:edit:title-card-6307",
+      "prompt": "title card",
+      "label": "edit",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:edit:intro-outro-a6fe",
+      "prompt": "intro outro",
+      "label": "edit",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:edit:مونتاج-09a1",
+      "prompt": "مونتاج",
+      "label": "edit",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:edit:قص-الفيديو-8ef9",
+      "prompt": "قص الفيديو",
+      "label": "edit",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:edit:ريلز-742f",
+      "prompt": "ريلز",
+      "label": "edit",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:facebook:connect-a-facebook-page-d154",
+      "prompt": "connect a facebook page",
+      "label": "facebook",
+      "source": "trigger_phrase",
+      "tags": [
+        "lexical"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:facebook:add-my-brand-page-3a38",
+      "prompt": "add my brand page",
+      "label": "facebook",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:facebook:wire-up-facebook-0a8e",
+      "prompt": "wire up facebook",
+      "label": "facebook",
+      "source": "trigger_phrase",
+      "tags": [
+        "lexical",
+        "hard:names-wire"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:facebook:new-brand-page-0122",
+      "prompt": "new brand page",
+      "label": "facebook",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:facebook:facebook-token-expired-d221",
+      "prompt": "facebook token expired",
+      "label": "facebook",
+      "source": "trigger_phrase",
+      "tags": [
+        "lexical"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:facebook:invalid-scopes-3583",
+      "prompt": "invalid scopes",
+      "label": "facebook",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:facebook:اربط-صفحة-فيسبوك-fb90",
+      "prompt": "اربط صفحة فيسبوك",
+      "label": "facebook",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
       "id": "trg:feature:feature-name-product-04a4",
       "prompt": "feature <name> [product]",
       "label": "feature",
@@ -2158,6 +2927,122 @@
       "source": "trigger_phrase",
       "tags": [],
       "split": "holdout"
+    },
+    {
+      "id": "trg:funnel:funnel-9b70",
+      "prompt": "funnel",
+      "label": "funnel",
+      "source": "trigger_phrase",
+      "tags": [
+        "trivial"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:funnel:qualify-96b2",
+      "prompt": "qualify",
+      "label": "funnel",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:funnel:segment-f3c3",
+      "prompt": "segment",
+      "label": "funnel",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:funnel:nurture-f80a",
+      "prompt": "nurture",
+      "label": "funnel",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:funnel:follow-up-1306",
+      "prompt": "follow up",
+      "label": "funnel",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:funnel:stalled-44e3",
+      "prompt": "stalled",
+      "label": "funnel",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:funnel:chatbot-6580",
+      "prompt": "chatbot",
+      "label": "funnel",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:funnel:قمع-37ff",
+      "prompt": "قمع",
+      "label": "funnel",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:funnel:تأهيل-7c7a",
+      "prompt": "تأهيل",
+      "label": "funnel",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:funnel:متابعة-not-scrape-finding-them-75ca",
+      "prompt": "متابعة. NOT /scrape (finding them)",
+      "label": "funnel",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-scrape"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:funnel:draft-brand-copy-07c3",
+      "prompt": "/draft (brand copy)",
+      "label": "funnel",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-draft"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:funnel:approve-a-social-post-0d01",
+      "prompt": "/approve (a social post)",
+      "label": "funnel",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-approve",
+        "hard:names-social"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:funnel:qa-a-block-db1f",
+      "prompt": "/qa (a block)",
+      "label": "funnel",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-block",
+        "hard:names-qa"
+      ],
+      "split": "train"
     },
     {
       "id": "trg:handover:handover-url-block-77bf",
@@ -2266,16 +3151,6 @@
       "split": "train"
     },
     {
-      "id": "trg:higgs:higgs-f33c",
-      "prompt": "/higgs",
-      "label": "higgs",
-      "source": "trigger_phrase",
-      "tags": [
-        "lexical"
-      ],
-      "split": "train"
-    },
-    {
       "id": "trg:higgs:generate-video-92ca",
       "prompt": "generate video",
       "label": "higgs",
@@ -2290,14 +3165,6 @@
       "source": "trigger_phrase",
       "tags": [],
       "split": "train"
-    },
-    {
-      "id": "trg:higgs:generate-photo-c9ea",
-      "prompt": "generate photo",
-      "label": "higgs",
-      "source": "trigger_phrase",
-      "tags": [],
-      "split": "holdout"
     },
     {
       "id": "trg:higgs:make-an-ad-973d",
@@ -2376,24 +3243,8 @@
       "prompt": "edit video from url",
       "label": "higgs",
       "source": "trigger_phrase",
-      "tags": [],
-      "split": "train"
-    },
-    {
-      "id": "trg:higgs:download-and-tweak-video-9161",
-      "prompt": "download and tweak video",
-      "label": "higgs",
-      "source": "trigger_phrase",
-      "tags": [],
-      "split": "train"
-    },
-    {
-      "id": "trg:higgs:higgs-d9e6",
-      "prompt": "higgs",
-      "label": "higgs",
-      "source": "trigger_phrase",
       "tags": [
-        "trivial"
+        "hard:names-edit"
       ],
       "split": "train"
     },
@@ -2574,6 +3425,202 @@
       "split": "train"
     },
     {
+      "id": "trg:jobs:jobs-e407",
+      "prompt": "jobs",
+      "label": "jobs",
+      "source": "trigger_phrase",
+      "tags": [
+        "trivial"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:jobs:find-work-076c",
+      "prompt": "find work",
+      "label": "jobs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:jobs:apply-24bc",
+      "prompt": "apply",
+      "label": "jobs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:jobs:opportunities-c42a",
+      "prompt": "opportunities",
+      "label": "jobs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:jobs:gigs-9f71",
+      "prompt": "gigs",
+      "label": "jobs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:jobs:tenders-52ef",
+      "prompt": "tenders",
+      "label": "jobs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:jobs:rfp-81d6",
+      "prompt": "RFP",
+      "label": "jobs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:jobs:client-request-e133",
+      "prompt": "client request",
+      "label": "jobs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:jobs:incubator-9a2c",
+      "prompt": "incubator",
+      "label": "jobs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:jobs:accelerator-bb8a",
+      "prompt": "accelerator",
+      "label": "jobs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:jobs:grant-b155",
+      "prompt": "grant",
+      "label": "jobs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:jobs:credits-50f6",
+      "prompt": "credits",
+      "label": "jobs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:jobs:investor-c1c4",
+      "prompt": "investor",
+      "label": "jobs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:jobs:angel-a83e",
+      "prompt": "angel",
+      "label": "jobs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:jobs:fundraising-6ccd",
+      "prompt": "fundraising",
+      "label": "jobs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:jobs:funding-f61c",
+      "prompt": "funding",
+      "label": "jobs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:jobs:did-anyone-reply-d68f",
+      "prompt": "did anyone reply",
+      "label": "jobs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:jobs:وظائف-b372",
+      "prompt": "وظائف",
+      "label": "jobs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:jobs:فرص-0518",
+      "prompt": "فرص",
+      "label": "jobs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:jobs:مناقصات-1874",
+      "prompt": "مناقصات",
+      "label": "jobs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:jobs:حاضنة-8af7",
+      "prompt": "حاضنة",
+      "label": "jobs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:jobs:مسرعة-7699",
+      "prompt": "مسرعة",
+      "label": "jobs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:jobs:منحة-a175",
+      "prompt": "منحة",
+      "label": "jobs",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:jobs:تمويل-not-scrape-outbound-leads-we-go-find-3d1c",
+      "prompt": "تمويل. NOT /scrape (outbound leads we go find)",
+      "label": "jobs",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-scrape"
+      ],
+      "split": "train"
+    },
+    {
       "id": "trg:learn:learn-7f69",
       "prompt": "learn",
       "label": "learn",
@@ -2632,6 +3679,64 @@
       "id": "trg:mcp-doctor:browser-tools-missing-acb4",
       "prompt": "browser tools missing",
       "label": "mcp-doctor",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:md:md-quality-35e2",
+      "prompt": "md quality",
+      "label": "md",
+      "source": "trigger_phrase",
+      "tags": [
+        "lexical"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:md:bad-conversion-60d3",
+      "prompt": "bad conversion",
+      "label": "md",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:md:grade-the-markdown-f0f5",
+      "prompt": "grade the markdown",
+      "label": "md",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:md:transcription-contract-a838",
+      "prompt": "transcription contract",
+      "label": "md",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:md:agreement-score-537f",
+      "prompt": "agreement score",
+      "label": "md",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:md:rtl-markdown-7d50",
+      "prompt": "RTL markdown",
+      "label": "md",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:md:mirrored-tables-8030",
+      "prompt": "mirrored tables",
+      "label": "md",
       "source": "trigger_phrase",
       "tags": [],
       "split": "train"
@@ -2927,7 +4032,9 @@
       "prompt": "what could go wrong",
       "label": "premortem",
       "source": "trigger_phrase",
-      "tags": [],
+      "tags": [
+        "hard:cluster"
+      ],
       "split": "train"
     },
     {
@@ -2935,7 +4042,9 @@
       "prompt": "imagine this failed",
       "label": "premortem",
       "source": "trigger_phrase",
-      "tags": [],
+      "tags": [
+        "hard:cluster"
+      ],
       "split": "train"
     },
     {
@@ -2943,7 +4052,9 @@
       "prompt": "what are the risks",
       "label": "premortem",
       "source": "trigger_phrase",
-      "tags": [],
+      "tags": [
+        "hard:cluster"
+      ],
       "split": "train"
     },
     {
@@ -2953,7 +4064,8 @@
       "source": "trigger_phrase",
       "tags": [
         "hard:names-plan",
-        "hard:names-test"
+        "hard:names-test",
+        "hard:cluster"
       ],
       "split": "train"
     },
@@ -3150,11 +4262,127 @@
       "split": "holdout"
     },
     {
+      "id": "trg:pwa:pwa-526d",
+      "prompt": "pwa",
+      "label": "pwa",
+      "source": "trigger_phrase",
+      "tags": [
+        "trivial"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:pwa:progressive-web-app-4d93",
+      "prompt": "progressive web app",
+      "label": "pwa",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:pwa:installable-8525",
+      "prompt": "installable",
+      "label": "pwa",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:pwa:add-to-home-screen-cf96",
+      "prompt": "add to home screen",
+      "label": "pwa",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:pwa:install-prompt-7b53",
+      "prompt": "install prompt",
+      "label": "pwa",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:pwa:manifest-6ad7",
+      "prompt": "manifest",
+      "label": "pwa",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:pwa:service-worker-94f4",
+      "prompt": "service worker",
+      "label": "pwa",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:pwa:offline-ec8b",
+      "prompt": "offline",
+      "label": "pwa",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:pwa:works-offline-d994",
+      "prompt": "works offline",
+      "label": "pwa",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:pwa:web-push-7d78",
+      "prompt": "web push",
+      "label": "pwa",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:pwa:push-notification-0a79",
+      "prompt": "push notification",
+      "label": "pwa",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:pwa:تطبيق-75c3",
+      "prompt": "تطبيق",
+      "label": "pwa",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:pwa:بدون-إنترنت-7f83",
+      "prompt": "بدون إنترنت",
+      "label": "pwa",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:pwa:إشعارات-7de9",
+      "prompt": "إشعارات",
+      "label": "pwa",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
       "id": "trg:quick:commit-and-push-8e7c",
       "prompt": "commit and push",
       "label": "quick",
       "source": "trigger_phrase",
-      "tags": [],
+      "tags": [
+        "hard:cluster"
+      ],
       "split": "train"
     },
     {
@@ -3162,7 +4390,9 @@
       "prompt": "just push it",
       "label": "quick",
       "source": "trigger_phrase",
-      "tags": [],
+      "tags": [
+        "hard:cluster"
+      ],
       "split": "train"
     },
     {
@@ -3170,7 +4400,9 @@
       "prompt": "save this work",
       "label": "quick",
       "source": "trigger_phrase",
-      "tags": [],
+      "tags": [
+        "hard:cluster"
+      ],
       "split": "train"
     },
     {
@@ -3178,7 +4410,83 @@
       "prompt": "land it",
       "label": "quick",
       "source": "trigger_phrase",
-      "tags": [],
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:record:record-5930",
+      "prompt": "record",
+      "label": "record",
+      "source": "trigger_phrase",
+      "tags": [
+        "trivial",
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:record:record-flow-block-6962",
+      "prompt": "record <flow|block>",
+      "label": "record",
+      "source": "trigger_phrase",
+      "tags": [
+        "lexical",
+        "hard:names-block",
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:record:demo-video-dcb2",
+      "prompt": "demo video",
+      "label": "record",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:record:walkthrough-bf9d",
+      "prompt": "walkthrough",
+      "label": "record",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:record:screen-recording-e030",
+      "prompt": "screen recording",
+      "label": "record",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:record:re-record-2408",
+      "prompt": "re-record",
+      "label": "record",
+      "source": "trigger_phrase",
+      "tags": [
+        "lexical",
+        "hard:cluster"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:record:سجل-فيديو-e53e",
+      "prompt": "سجل فيديو",
+      "label": "record",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
       "split": "train"
     },
     {
@@ -3238,9 +4546,16 @@
       "label": "report",
       "source": "trigger_phrase",
       "tags": [
-        "trivial",
-        "hard:cluster"
+        "trivial"
       ],
+      "split": "train"
+    },
+    {
+      "id": "trg:report:reports-19b3",
+      "prompt": "reports",
+      "label": "report",
+      "source": "trigger_phrase",
+      "tags": [],
       "split": "train"
     },
     {
@@ -3249,21 +4564,66 @@
       "label": "report",
       "source": "trigger_phrase",
       "tags": [
-        "hard:names-fix",
-        "hard:cluster"
+        "hard:names-fix"
       ],
       "split": "holdout"
     },
     {
-      "id": "trg:report:user-reported-issue-auto-fix-635a",
-      "prompt": "user-reported issue auto-fix",
+      "id": "trg:report:list-the-reports-3d5b",
+      "prompt": "list the reports",
+      "label": "report",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:report:show-the-reports-b602",
+      "prompt": "show the reports",
+      "label": "report",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:report:what-did-the-team-report-9a15",
+      "prompt": "what did the team report",
       "label": "report",
       "source": "trigger_phrase",
       "tags": [
-        "hard:names-fix",
-        "hard:names-issue",
-        "hard:cluster"
+        "lexical"
       ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:report:the-team-reported-e8d8",
+      "prompt": "the team reported",
+      "label": "report",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:report:ali-reported-e4a1",
+      "prompt": "Ali reported",
+      "label": "report",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:report:open-issues-from-the-dialog-3d92",
+      "prompt": "open issues from the dialog",
+      "label": "report",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:report:take-reject-the-reports-2fc0",
+      "prompt": "take/reject the reports",
+      "label": "report",
+      "source": "trigger_phrase",
+      "tags": [],
       "split": "train"
     },
     {
@@ -3272,9 +4632,40 @@
       "label": "report",
       "source": "trigger_phrase",
       "tags": [
-        "lexical",
-        "hard:cluster"
+        "lexical"
       ],
+      "split": "train"
+    },
+    {
+      "id": "trg:report:البلاغات-51a8",
+      "prompt": "البلاغات",
+      "label": "report",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:report:بلاغات-الفريق-25ac",
+      "prompt": "بلاغات الفريق",
+      "label": "report",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:report:المشاكل-المبلغ-عنها-06e9",
+      "prompt": "المشاكل المبلغ عنها",
+      "label": "report",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:report:أصلح-البلاغات-8292",
+      "prompt": "أصلح البلاغات",
+      "label": "report",
+      "source": "trigger_phrase",
+      "tags": [],
       "split": "train"
     },
     {
@@ -3320,7 +4711,8 @@
       "label": "saas",
       "source": "trigger_phrase",
       "tags": [
-        "hard:names-feature"
+        "hard:names-feature",
+        "hard:cluster"
       ],
       "split": "train"
     },
@@ -3329,7 +4721,9 @@
       "prompt": "generate all layers",
       "label": "saas",
       "source": "trigger_phrase",
-      "tags": [],
+      "tags": [
+        "hard:cluster"
+      ],
       "split": "holdout"
     },
     {
@@ -3337,7 +4731,9 @@
       "prompt": "full CRUD for",
       "label": "saas",
       "source": "trigger_phrase",
-      "tags": [],
+      "tags": [
+        "hard:cluster"
+      ],
       "split": "train"
     },
     {
@@ -3370,6 +4766,205 @@
       "label": "schema",
       "source": "trigger_phrase",
       "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:scrape:scrap-48fb",
+      "prompt": "scrap",
+      "label": "scrape",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:scrape:scrape-ba57",
+      "prompt": "scrape",
+      "label": "scrape",
+      "source": "trigger_phrase",
+      "tags": [
+        "trivial"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:scrape:scrap-facebook-5b7f",
+      "prompt": "scrap facebook",
+      "label": "scrape",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-facebook"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:scrape:scrap-whatsapp-fd36",
+      "prompt": "scrap whatsapp",
+      "label": "scrape",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:scrape:scrap-facebook-for-hogwarts-fe00",
+      "prompt": "scrap facebook for hogwarts",
+      "label": "scrape",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-facebook"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:scrape:scrap-for-mkan-0739",
+      "prompt": "scrap for mkan",
+      "label": "scrape",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:scrape:scrap-for-databayt-4aa2",
+      "prompt": "scrap for databayt",
+      "label": "scrape",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:scrape:website-leads-be92",
+      "prompt": "website leads",
+      "label": "scrape",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:scrape:old-websites-83e0",
+      "prompt": "old websites",
+      "label": "scrape",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:scrape:rebrand-leads-6f27",
+      "prompt": "rebrand leads",
+      "label": "scrape",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:scrape:leads-7a96",
+      "prompt": "leads",
+      "label": "scrape",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:scrape:prospect-2fae",
+      "prompt": "prospect",
+      "label": "scrape",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:scrape:contact-gap-86b8",
+      "prompt": "contact gap",
+      "label": "scrape",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:scrape:enrich-408c",
+      "prompt": "enrich",
+      "label": "scrape",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:scrape:outreach-d1c5",
+      "prompt": "outreach",
+      "label": "scrape",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:scrape:pipeline-health-c1a8",
+      "prompt": "pipeline health",
+      "label": "scrape",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-health"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:scrape:who-should-we-contact-7389",
+      "prompt": "who should we contact",
+      "label": "scrape",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:scrape:find-schools-513f",
+      "prompt": "find schools",
+      "label": "scrape",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:scrape:اسحب-f1b7",
+      "prompt": "اسحب",
+      "label": "scrape",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:scrape:جمع-بيانات-23fc",
+      "prompt": "جمع بيانات",
+      "label": "scrape",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:scrape:عملاء-محتملين-not-health-engine-drift-44a6",
+      "prompt": "عملاء محتملين. NOT /health (engine drift)",
+      "label": "scrape",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-health"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:scrape:measure-social-numbers-7ad7",
+      "prompt": "/measure (social numbers)",
+      "label": "scrape",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-measure",
+        "hard:names-social"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:scrape:report-a-bug-3545",
+      "prompt": "/report (a bug)",
+      "label": "scrape",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-report"
+      ],
       "split": "train"
     },
     {
@@ -3525,6 +5120,107 @@
         "hard:cluster"
       ],
       "split": "holdout"
+    },
+    {
+      "id": "trg:shoot:shoot-route-flow-fa19",
+      "prompt": "shoot <route|flow>",
+      "label": "shoot",
+      "source": "trigger_phrase",
+      "tags": [
+        "lexical",
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:shoot:take-a-screenshot-of-url-338a",
+      "prompt": "take a screenshot of <url>",
+      "label": "shoot",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-screenshot",
+        "hard:cluster"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:shoot:screenshot-the-x-flow-5d7f",
+      "prompt": "screenshot the <x> flow",
+      "label": "shoot",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-screenshot",
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:shoot:لقطة-شاشة-f775",
+      "prompt": "لقطة شاشة",
+      "label": "shoot",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:skeleton:skeleton-b14c",
+      "prompt": "skeleton",
+      "label": "skeleton",
+      "source": "trigger_phrase",
+      "tags": [
+        "trivial"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:skeleton:loading-state-a8ab",
+      "prompt": "loading state",
+      "label": "skeleton",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:skeleton:loading-tsx-b2c5",
+      "prompt": "loading.tsx",
+      "label": "skeleton",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:skeleton:shimmer-1224",
+      "prompt": "shimmer",
+      "label": "skeleton",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:skeleton:page-flashes-blank-2b12",
+      "prompt": "page flashes blank",
+      "label": "skeleton",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:skeleton:replace-the-spinner-1c28",
+      "prompt": "replace the spinner",
+      "label": "skeleton",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:skeleton:هيكل-التحميل-aa36",
+      "prompt": "هيكل التحميل",
+      "label": "skeleton",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
     },
     {
       "id": "trg:social:social-post-225d",
@@ -3799,13 +5495,83 @@
       "split": "holdout"
     },
     {
+      "id": "trg:textbook:textbook-markdown-12c0",
+      "prompt": "textbook markdown",
+      "label": "textbook",
+      "source": "trigger_phrase",
+      "tags": [
+        "lexical"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:textbook:textbook-md-c26e",
+      "prompt": "textbook.md",
+      "label": "textbook",
+      "source": "trigger_phrase",
+      "tags": [
+        "lexical",
+        "hard:names-md"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:textbook:convert-the-textbooks-a57a",
+      "prompt": "convert the textbooks",
+      "label": "textbook",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-convert"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:textbook:pdf-to-md-for-grade-n-3744",
+      "prompt": "pdf to md for grade N",
+      "label": "textbook",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-md"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:textbook:re-transcribe-the-textbooks-037d",
+      "prompt": "re-transcribe the textbooks",
+      "label": "textbook",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "trg:textbook:fix-the-textbook-twin-f21e",
+      "prompt": "fix the textbook twin",
+      "label": "textbook",
+      "source": "trigger_phrase",
+      "tags": [
+        "lexical",
+        "hard:names-fix"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:textbook:textbook-bench-5286",
+      "prompt": "textbook bench",
+      "label": "textbook",
+      "source": "trigger_phrase",
+      "tags": [
+        "lexical",
+        "hard:names-bench"
+      ],
+      "split": "train"
+    },
+    {
       "id": "trg:watch:watch-5fb7",
       "prompt": "watch",
       "label": "watch",
       "source": "trigger_phrase",
       "tags": [
-        "trivial",
-        "hard:cluster"
+        "trivial"
       ],
       "split": "holdout"
     },
@@ -3815,8 +5581,7 @@
       "label": "watch",
       "source": "trigger_phrase",
       "tags": [
-        "hard:names-deploy",
-        "hard:cluster"
+        "hard:names-deploy"
       ],
       "split": "holdout"
     },
@@ -3825,9 +5590,7 @@
       "prompt": "is it live",
       "label": "watch",
       "source": "trigger_phrase",
-      "tags": [
-        "hard:cluster"
-      ],
+      "tags": [],
       "split": "train"
     },
     {
@@ -3837,8 +5600,7 @@
       "source": "trigger_phrase",
       "tags": [
         "hard:names-check",
-        "hard:names-deploy",
-        "hard:cluster"
+        "hard:names-deploy"
       ],
       "split": "train"
     },
@@ -3848,8 +5610,7 @@
       "label": "watch",
       "source": "trigger_phrase",
       "tags": [
-        "hard:names-monitor",
-        "hard:cluster"
+        "hard:names-monitor"
       ],
       "split": "train"
     },
@@ -3859,7 +5620,8 @@
       "label": "weekly",
       "source": "trigger_phrase",
       "tags": [
-        "trivial"
+        "trivial",
+        "hard:cluster"
       ],
       "split": "train"
     },
@@ -3869,7 +5631,8 @@
       "label": "weekly",
       "source": "trigger_phrase",
       "tags": [
-        "hard:names-plan"
+        "hard:names-plan",
+        "hard:cluster"
       ],
       "split": "train"
     },
@@ -3878,7 +5641,9 @@
       "prompt": "friday review",
       "label": "weekly",
       "source": "trigger_phrase",
-      "tags": [],
+      "tags": [
+        "hard:cluster"
+      ],
       "split": "train"
     },
     {
@@ -3887,7 +5652,8 @@
       "label": "weekly",
       "source": "trigger_phrase",
       "tags": [
-        "hard:names-plan"
+        "hard:names-plan",
+        "hard:cluster"
       ],
       "split": "holdout"
     },
@@ -4052,16 +5818,6 @@
       "id": "spell:charm-work:quick-f739",
       "prompt": "quick",
       "label": "quick",
-      "source": "vocab_spell",
-      "tags": [
-        "trivial"
-      ],
-      "split": "holdout"
-    },
-    {
-      "id": "spell:charm-work:deploy-5cd3",
-      "prompt": "deploy",
-      "label": "deploy",
       "source": "vocab_spell",
       "tags": [
         "trivial",
@@ -4267,7 +6023,8 @@
       "label": "saas",
       "source": "vocab_spell",
       "tags": [
-        "trivial"
+        "trivial",
+        "hard:cluster"
       ],
       "split": "holdout"
     },
@@ -4684,6 +6441,16 @@
       "split": "train"
     },
     {
+      "id": "spell:summoning:facebook-5c6e",
+      "prompt": "facebook",
+      "label": "facebook",
+      "source": "vocab_spell",
+      "tags": [
+        "trivial"
+      ],
+      "split": "holdout"
+    },
+    {
       "id": "spell:divination:story-b3e7",
       "prompt": "story",
       "label": "idea",
@@ -5066,7 +6833,8 @@
       "label": "decide",
       "source": "vocab_spell",
       "tags": [
-        "trivial"
+        "trivial",
+        "hard:cluster"
       ],
       "split": "holdout"
     },
@@ -5076,7 +6844,8 @@
       "label": "premortem",
       "source": "vocab_spell",
       "tags": [
-        "trivial"
+        "trivial",
+        "hard:cluster"
       ],
       "split": "holdout"
     },
@@ -5089,6 +6858,58 @@
         "trivial"
       ],
       "split": "holdout"
+    },
+    {
+      "id": "spell:pensieve:md-672e",
+      "prompt": "md",
+      "label": "md",
+      "source": "vocab_spell",
+      "tags": [
+        "trivial"
+      ],
+      "split": "holdout"
+    },
+    {
+      "id": "spell:pensieve:textbook-610f",
+      "prompt": "textbook",
+      "label": "textbook",
+      "source": "vocab_spell",
+      "tags": [
+        "trivial"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "spell:pensieve:contract-2a5e",
+      "prompt": "contract",
+      "label": "textbook",
+      "source": "vocab_spell",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "spell:pensieve:transcribe-a5b5",
+      "prompt": "transcribe",
+      "label": "textbook",
+      "source": "vocab_spell",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "spell:pensieve:agreement-f16c",
+      "prompt": "agreement",
+      "label": "md",
+      "source": "vocab_spell",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "spell:pensieve:adjudicate-01a1",
+      "prompt": "adjudicate",
+      "label": "textbook",
+      "source": "vocab_spell",
+      "tags": [],
+      "split": "train"
     },
     {
       "id": "spell:pensieve:calendar-a481",
@@ -5109,6 +6930,16 @@
       "tags": [
         "trivial",
         "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "spell:pensieve:higgs-d9e6",
+      "prompt": "higgs",
+      "label": "higgs",
+      "source": "vocab_spell",
+      "tags": [
+        "trivial"
       ],
       "split": "train"
     },
@@ -5165,6 +6996,43 @@
       "split": "train"
     },
     {
+      "id": "spell:pensieve:shoot-b415",
+      "prompt": "shoot",
+      "label": "shoot",
+      "source": "vocab_spell",
+      "tags": [
+        "trivial",
+        "hard:cluster"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "spell:pensieve:edit-5be7",
+      "prompt": "edit",
+      "label": "edit",
+      "source": "vocab_spell",
+      "tags": [
+        "trivial"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "spell:pensieve:captions-7115",
+      "prompt": "captions",
+      "label": "edit",
+      "source": "vocab_spell",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "spell:pensieve:ترجمة-الفيديو-93bb",
+      "prompt": "ترجمة الفيديو",
+      "label": "edit",
+      "source": "vocab_spell",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
       "id": "spell:portraits:og-image-8fb6",
       "prompt": "og image",
       "label": "carousel",
@@ -5199,7 +7067,7 @@
     {
       "id": "spell:portraits:reel-d6e8",
       "prompt": "reel",
-      "label": "higgs",
+      "label": "edit",
       "source": "vocab_spell",
       "tags": [],
       "split": "holdout"
@@ -5227,6 +7095,30 @@
       "source": "vocab_spell",
       "tags": [],
       "split": "holdout"
+    },
+    {
+      "id": "spell:owlery:scrap-for-hogwarts-33d6",
+      "prompt": "scrap for hogwarts",
+      "label": "scrape",
+      "source": "vocab_spell",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "spell:owlery:عملاء-محتملين-fc74",
+      "prompt": "عملاء محتملين",
+      "label": "scrape",
+      "source": "vocab_spell",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "spell:floo-network:متابعة-1324",
+      "prompt": "متابعة",
+      "label": "funnel",
+      "source": "vocab_spell",
+      "tags": [],
+      "split": "train"
     },
     {
       "id": "kw:qa:qa-admission-c365",
@@ -5362,11 +7254,24 @@
         "idea",
         "issue",
         "plan",
-        "report",
+        "saas",
         "spec",
-        "tasks"
+        "tasks",
+        "weekly"
       ],
-      "max_cosine": 0.683
+      "max_cosine": 0.686
+    },
+    {
+      "id": "build",
+      "members": [
+        "build",
+        "check",
+        "cloudflare",
+        "deploy",
+        "quick",
+        "ship"
+      ],
+      "max_cosine": 0.525
     },
     {
       "id": "approve",
@@ -5378,18 +7283,7 @@
         "publish",
         "social"
       ],
-      "max_cosine": 0.587
-    },
-    {
-      "id": "build",
-      "members": [
-        "build",
-        "check",
-        "deploy",
-        "ship",
-        "watch"
-      ],
-      "max_cosine": 0.494
+      "max_cosine": 0.517
     },
     {
       "id": "code",
@@ -5397,15 +7291,7 @@
         "code",
         "wire"
       ],
-      "max_cosine": 0.41
-    },
-    {
-      "id": "handover",
-      "members": [
-        "handover",
-        "qa"
-      ],
-      "max_cosine": 0.358
+      "max_cosine": 0.434
     },
     {
       "id": "analyze",
@@ -5413,7 +7299,31 @@
         "analyze",
         "learn"
       ],
-      "max_cosine": 0.357
+      "max_cosine": 0.379
+    },
+    {
+      "id": "record",
+      "members": [
+        "record",
+        "shoot"
+      ],
+      "max_cosine": 0.367
+    },
+    {
+      "id": "decide",
+      "members": [
+        "decide",
+        "premortem"
+      ],
+      "max_cosine": 0.361
+    },
+    {
+      "id": "handover",
+      "members": [
+        "handover",
+        "qa"
+      ],
+      "max_cosine": 0.343
     },
     {
       "id": "bench",
@@ -5421,140 +7331,148 @@
         "bench",
         "health"
       ],
-      "max_cosine": 0.331
+      "max_cosine": 0.337
     }
   ],
   "top_pairs": [
     [
       "plan",
       "tasks",
-      0.683
-    ],
-    [
-      "approve",
-      "publish",
-      0.587
+      0.686
     ],
     [
       "plan",
       "spec",
-      0.518
-    ],
-    [
-      "feature",
-      "idea",
-      0.511
-    ],
-    [
-      "deploy",
-      "ship",
-      0.494
-    ],
-    [
-      "spec",
-      "tasks",
-      0.486
+      0.552
     ],
     [
       "build",
       "check",
-      0.485
+      0.525
     ],
     [
       "draft",
       "social",
-      0.451
+      0.517
+    ],
+    [
+      "feature",
+      "idea",
+      0.513
+    ],
+    [
+      "approve",
+      "publish",
+      0.502
+    ],
+    [
+      "spec",
+      "tasks",
+      0.488
+    ],
+    [
+      "deploy",
+      "ship",
+      0.474
+    ],
+    [
+      "calendar",
+      "social",
+      0.441
     ],
     [
       "idea",
       "issue",
-      0.434
-    ],
-    [
-      "publish",
-      "social",
-      0.42
-    ],
-    [
-      "calendar",
-      "publish",
-      0.416
-    ],
-    [
-      "approve",
-      "draft",
-      0.411
+      0.44
     ],
     [
       "code",
       "wire",
-      0.41
+      0.434
     ],
     [
       "measure",
       "social",
-      0.405
-    ],
-    [
-      "issue",
-      "report",
-      0.403
-    ],
-    [
-      "feature",
-      "spec",
-      0.391
-    ],
-    [
-      "ship",
-      "watch",
-      0.386
-    ],
-    [
-      "idea",
-      "spec",
-      0.385
-    ],
-    [
-      "calendar",
-      "social",
-      0.377
+      0.421
     ],
     [
       "build",
       "ship",
-      0.374
+      0.395
     ],
     [
-      "approve",
+      "publish",
+      "social",
+      0.387
+    ],
+    [
       "calendar",
-      0.361
-    ],
-    [
-      "calendar",
-      "measure",
-      0.358
-    ],
-    [
-      "handover",
-      "qa",
-      0.358
+      "draft",
+      0.385
     ],
     [
       "analyze",
       "learn",
-      0.357
+      0.379
     ],
     [
-      "approve",
-      "social",
-      0.344
+      "feature",
+      "saas",
+      0.379
+    ],
+    [
+      "cloudflare",
+      "deploy",
+      0.369
+    ],
+    [
+      "record",
+      "shoot",
+      0.367
+    ],
+    [
+      "deploy",
+      "quick",
+      0.363
+    ],
+    [
+      "decide",
+      "premortem",
+      0.361
+    ],
+    [
+      "idea",
+      "spec",
+      0.354
+    ],
+    [
+      "feature",
+      "spec",
+      0.349
+    ],
+    [
+      "handover",
+      "qa",
+      0.343
+    ],
+    [
+      "check",
+      "ship",
+      0.342
     ]
   ],
   "per_skill": {
+    "airbnb-copy": {
+      "support": 10,
+      "chars": 490,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
     "analyze": {
       "support": 3,
-      "chars": 415,
+      "chars": 359,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
@@ -5562,7 +7480,7 @@
     },
     "approve": {
       "support": 11,
-      "chars": 904,
+      "chars": 467,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
@@ -5578,7 +7496,7 @@
     },
     "auth": {
       "support": 6,
-      "chars": 816,
+      "chars": 480,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
@@ -5586,7 +7504,7 @@
     },
     "bench": {
       "support": 7,
-      "chars": 596,
+      "chars": 550,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
@@ -5600,6 +7518,14 @@
       "claude_md_routed": true,
       "has_when_to_use": true
     },
+    "blur": {
+      "support": 7,
+      "chars": 371,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
     "build": {
       "support": 1,
       "chars": 343,
@@ -5610,7 +7536,7 @@
     },
     "calendar": {
       "support": 8,
-      "chars": 597,
+      "chars": 487,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
@@ -5618,7 +7544,7 @@
     },
     "canon": {
       "support": 5,
-      "chars": 623,
+      "chars": 462,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": true,
@@ -5626,7 +7552,7 @@
     },
     "captain": {
       "support": 5,
-      "chars": 393,
+      "chars": 318,
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
@@ -5634,7 +7560,7 @@
     },
     "carousel": {
       "support": 13,
-      "chars": 506,
+      "chars": 426,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
@@ -5642,7 +7568,7 @@
     },
     "check": {
       "support": 4,
-      "chars": 521,
+      "chars": 438,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
@@ -5650,7 +7576,15 @@
     },
     "clone": {
       "support": 8,
-      "chars": 624,
+      "chars": 545,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
+    "cloudflare": {
+      "support": 12,
+      "chars": 533,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
@@ -5658,7 +7592,7 @@
     },
     "code": {
       "support": 4,
-      "chars": 434,
+      "chars": 387,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
@@ -5674,7 +7608,7 @@
     },
     "convert": {
       "support": 6,
-      "chars": 430,
+      "chars": 340,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
@@ -5698,7 +7632,7 @@
     },
     "credentials": {
       "support": 5,
-      "chars": 376,
+      "chars": 336,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
@@ -5706,16 +7640,16 @@
     },
     "decide": {
       "support": 4,
-      "chars": 407,
+      "chars": 329,
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": true,
       "has_when_to_use": true
     },
     "deploy": {
-      "support": 7,
-      "chars": 713,
-      "scope": "user",
+      "support": 8,
+      "chars": 578,
+      "scope": "project",
       "fp_cost": 3,
       "claude_md_routed": false,
       "has_when_to_use": true
@@ -5736,9 +7670,17 @@
       "claude_md_routed": true,
       "has_when_to_use": true
     },
+    "domains": {
+      "support": 6,
+      "chars": 215,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
     "draft": {
       "support": 14,
-      "chars": 1085,
+      "chars": 570,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
@@ -5752,9 +7694,25 @@
       "claude_md_routed": false,
       "has_when_to_use": true
     },
+    "edit": {
+      "support": 15,
+      "chars": 358,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
+    "facebook": {
+      "support": 8,
+      "chars": 540,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
     "feature": {
       "support": 4,
-      "chars": 726,
+      "chars": 455,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": true,
@@ -5768,9 +7726,17 @@
       "claude_md_routed": false,
       "has_when_to_use": true
     },
+    "funnel": {
+      "support": 14,
+      "chars": 390,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
     "handover": {
       "support": 6,
-      "chars": 563,
+      "chars": 443,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": true,
@@ -5778,15 +7744,15 @@
     },
     "health": {
       "support": 5,
-      "chars": 379,
+      "chars": 329,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": true,
       "has_when_to_use": true
     },
     "higgs": {
-      "support": 27,
-      "chars": 1022,
+      "support": 23,
+      "chars": 611,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
@@ -5794,7 +7760,7 @@
     },
     "idea": {
       "support": 8,
-      "chars": 581,
+      "chars": 510,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
@@ -5810,7 +7776,15 @@
     },
     "issue": {
       "support": 3,
-      "chars": 577,
+      "chars": 378,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
+    "jobs": {
+      "support": 24,
+      "chars": 709,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
@@ -5818,7 +7792,7 @@
     },
     "learn": {
       "support": 3,
-      "chars": 411,
+      "chars": 339,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
@@ -5826,15 +7800,23 @@
     },
     "mcp-doctor": {
       "support": 4,
-      "chars": 369,
+      "chars": 282,
       "scope": "user",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
+    "md": {
+      "support": 9,
+      "chars": 550,
+      "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
       "has_when_to_use": true
     },
     "measure": {
       "support": 8,
-      "chars": 622,
+      "chars": 530,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
@@ -5842,7 +7824,7 @@
     },
     "monitor": {
       "support": 4,
-      "chars": 357,
+      "chars": 272,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
@@ -5858,7 +7840,7 @@
     },
     "package": {
       "support": 4,
-      "chars": 376,
+      "chars": 333,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
@@ -5882,7 +7864,7 @@
     },
     "plan": {
       "support": 4,
-      "chars": 438,
+      "chars": 401,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
@@ -5890,7 +7872,7 @@
     },
     "premortem": {
       "support": 5,
-      "chars": 394,
+      "chars": 362,
       "scope": "user",
       "fp_cost": 1,
       "claude_md_routed": false,
@@ -5922,15 +7904,23 @@
     },
     "publish": {
       "support": 10,
-      "chars": 851,
+      "chars": 476,
       "scope": "project",
       "fp_cost": 3,
       "claude_md_routed": false,
       "has_when_to_use": true
     },
+    "pwa": {
+      "support": 14,
+      "chars": 565,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
     "qa": {
       "support": 6,
-      "chars": 682,
+      "chars": 479,
       "scope": "project",
       "fp_cost": 3,
       "claude_md_routed": true,
@@ -5944,17 +7934,25 @@
       "claude_md_routed": false,
       "has_when_to_use": true
     },
+    "record": {
+      "support": 7,
+      "chars": 318,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
     "release": {
       "support": 6,
-      "chars": 502,
+      "chars": 462,
       "scope": "project",
       "fp_cost": 3,
       "claude_md_routed": true,
       "has_when_to_use": true
     },
     "report": {
-      "support": 4,
-      "chars": 483,
+      "support": 15,
+      "chars": 575,
       "scope": "project",
       "fp_cost": 3,
       "claude_md_routed": true,
@@ -5978,7 +7976,15 @@
     },
     "schema": {
       "support": 5,
-      "chars": 382,
+      "chars": 323,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
+    "scrape": {
+      "support": 25,
+      "chars": 500,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
@@ -6010,15 +8016,31 @@
     },
     "ship": {
       "support": 3,
-      "chars": 487,
+      "chars": 401,
       "scope": "project",
       "fp_cost": 3,
       "claude_md_routed": false,
       "has_when_to_use": true
     },
+    "shoot": {
+      "support": 5,
+      "chars": 315,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
+    "skeleton": {
+      "support": 7,
+      "chars": 391,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
     "social": {
       "support": 8,
-      "chars": 568,
+      "chars": 462,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
@@ -6026,7 +8048,7 @@
     },
     "spec": {
       "support": 5,
-      "chars": 586,
+      "chars": 483,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
@@ -6034,7 +8056,7 @@
     },
     "sync": {
       "support": 5,
-      "chars": 489,
+      "chars": 338,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
@@ -6042,7 +8064,7 @@
     },
     "tasks": {
       "support": 6,
-      "chars": 443,
+      "chars": 408,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
@@ -6064,9 +8086,17 @@
       "claude_md_routed": false,
       "has_when_to_use": true
     },
+    "textbook": {
+      "support": 11,
+      "chars": 431,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
     "watch": {
       "support": 5,
-      "chars": 553,
+      "chars": 470,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
@@ -6082,7 +8112,7 @@
     },
     "wire": {
       "support": 5,
-      "chars": 615,
+      "chars": 524,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
@@ -6120,7 +8150,7 @@
     }
   ],
   "guards": {
-    "listing_cap": 32000,
+    "listing_cap": 33000,
     "skill_cap": 1200,
     "listing_over_cap": false,
     "skills_over_cap": [],
