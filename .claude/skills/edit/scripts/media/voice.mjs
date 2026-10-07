@@ -21,6 +21,7 @@ import { arg, budgets, cer, FFMPEG, flag, normAr, positional, probe, sh, VOICE_D
 const MODEL = process.env.MEDIA_TTS_MODEL || "mlx-community/chatterbox-multilingual-v3"
 const WHISPER = "mlx-community/whisper-large-v3-turbo"
 const PY = join(homedir(), ".local/share/uv/tools/mlx-audio/bin/python")
+const WPY = join(homedir(), ".local/share/uv/tools/mlx-whisper/bin/python")
 const here = new URL(".", import.meta.url).pathname
 const [sub, ...rest] = positional()
 const today = new Date().toISOString().slice(0, 10)
@@ -156,16 +157,19 @@ if (sub === "gen") {
       made.push({ l, clean })
     }
     if (!made.length) continue
-    // one whisper load for the whole round
-    const tdir = join(work, `asr-${t}`)
-    sh("mlx_whisper", [...made.map((m) => m.clean), "--model", WHISPER, "--language", lang, "--output-format", "json", "--output-dir", tdir, "--verbose", "False", "--condition-on-previous-text", "False"])
+    // one whisper load for the whole round (the CLI's multi-file mode overwrites its own outputs)
+    const ajob = join(work, `asr-${t}.json`)
+    writeFileSync(ajob, JSON.stringify({ model: WHISPER, lang, files: made.map((m) => m.clean) }))
+    const heardBy = JSON.parse(sh(WPY, [join(here, "asr_batch.py"), ajob]).trim().split("\n").pop())
     for (const { l, clean } of made) {
-      const heard = JSON.parse(readFileSync(join(tdir, `${basename(clean, ".wav")}.json`), "utf8")).text || ""
+      const heard = heardBy[clean] || ""
       const dur = probe(clean).duration
-      const expected = normAr(l.text).length / 14
+      // Calm tutorial narration runs ~7–9 normalised Arabic letters a second; the window only has to
+      // catch a cut-off line (far too short) or a runaway/looping one (far too long).
+      const expected = normAr(l.text).length / 10
       const ratio = expected ? dur / expected : 0
       const e = cer(l.text, heard)
-      const ok = e <= B.voice_cer_max && ratio >= 0.6 && ratio <= 1.6
+      const ok = e <= B.voice_cer_max && ratio >= 0.5 && ratio <= 2.0
       if (ok || l.cer === undefined || e < l.cer) Object.assign(l, { candidate: clean, heard, cer: +e.toFixed(3), duration: +dur.toFixed(2), ratio: +ratio.toFixed(2) })
       if (ok) {
         const final = join(out, `line-${String(l.i + 1).padStart(2, "0")}.wav`)

@@ -42,14 +42,22 @@ Read the renderer ladder before spending anything.
 
 ## Renderer ladder — pick before you spend
 
-Same models, two tills. Walk down; stop at the first line that can pay.
+**Free first** (Abdout, 2026-10-07: no paid generation API). Walk down; stop at the first rung that
+can do the job. Paid rungs stay documented below but are **off** until a funded `/decide`.
 
-| #   | Situation                                  | Do this                                                               |
-| --- | ------------------------------------------ | --------------------------------------------------------------------- |
-| 0   | **Do we already own this shot?**           | `node scripts/higgs-library.mjs lookup …` — a hit costs 0             |
-| 1   | `GEMINI_API_KEY` is set                    | **Google direct** — `scripts/gemini-media.mjs`, per-image, no ceiling |
-| 2   | No key, Higgsfield has credits for the job | Higgsfield CLI (tables further down)                                  |
-| 3   | Neither                                    | Say so, propose the template lane (`/carousel`) or ask to fund a key  |
+| #   | Rung                                   | Use it for                                                                 | Cost |
+| --- | -------------------------------------- | -------------------------------------------------------------------------- | ---- |
+| 0   | **Library**: `node scripts/higgs-library.mjs lookup …` | Anything we already own                                    | 0 |
+| 1   | **Adobe for creativity** (plugin; enable per media session: `claude plugin enable adobe-for-creativity@claude-plugins-official`) | Retouching, background removal, Gen Expand, Firefly stills, resizing photos and video, Express templates | Free tier; free Adobe ID for Gen Expand and video |
+| 2   | **Canva** (plugin `canva`, on)         | Designs carrying copy, brand check, resizing to the 13 sizes in `taxonomy.ts` | Free account (bulk autofill needs Enterprise) |
+| 3   | **Claude Design** (`claude-design` MCP, after `/design-login`) | One-pagers, decks, marketing collateral, prototypes | Included in Max |
+| 4   | **Figma Weave** (via the Figma MCP)    | Flux / Imagen-class image and video models                                 | 150 free credits/month; Figma MCP ~20 calls/month (`figma-quota` hook warns) |
+| 5   | **ChatGPT seat** (Sedon)               | A person renders through the shared Plus seat                              | Already paid |
+| 6   | **`/carousel` template lane**          | Anything with text: HTML to PNG/PDF at exact sizes                         | 0 |
+| —   | Google direct · Higgsfield             | Same frontier models, per image or credit                                  | **Off (paid)** |
+
+Product truth (real screens) is never generated: stills come from `/shoot` and video from
+`/shoot` sim, `/record` and `/edit`.
 
 Today **both rungs are unfunded**: Higgsfield holds 0.7 credits, and the Gemini key is on a
 free tier whose image quota is literally zero (see below). The key itself is already wired —
