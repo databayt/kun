@@ -1,0 +1,67 @@
+{
+  "$comment": "story.mjs script: the add-student stills, narrated by a stock Google voice (Gemini 3.8 Flash TTS) — no captions. Each beat names a still by its step (NN-<step>-<lang>.png); a still the device never shot (the Mac Finder on an iPhone) is skipped with its line. Copy only claims what the product does on screen. Diacritics steer the voice: بِالقَلَم (not «بي القلم»), اخترْ (masculine imperative, not «اختري»).",
+  "brand": "balqalam",
+  "url": "balqalam.com",
+  "engine": "gemini",
+  "voice": "Charon",
+  "cuts": {
+    "support": {
+      "style": "You are the narrator of balqalam (بالقلم), a school-management app. Speak clear Modern Standard Arabic at a calm, steady tutorial pace — warm, patient and confident, like a colleague showing the office how it is done.",
+      "title": "إضافة <mark>طالب جديد</mark>",
+      "sub": "دليل خطوة بخطوة — منصة بالقلم",
+      "outro": "طالب جديد <mark>في دقائق</mark>",
+      "outroSub": "balqalam.com",
+      "beats": [
+        { "card": "title", "say": "كيف تضيف طالباً جديداً في بِالقَلَم." },
+        { "shot": "list", "say": "افتح صفحة الطلاب، واضغط زر الإضافة." },
+        {
+          "shot": "documents",
+          "say": "الخطوة الأولى هي المرفقات: صورة الطالب ومستنداته."
+        },
+        { "shot": "finder-photo", "say": "اخترْ صورة الطالب من جهازك." },
+        { "shot": "photo-uploaded", "say": "وتظهر الصورة مباشرة في مكانها." },
+        {
+          "shot": "cv-uploaded",
+          "say": "ثم أرفق ملف الطالب، وبالطريقة نفسها بقية المستندات."
+        },
+        { "shot": "personal", "say": "بعدها المعلومات الشخصية." },
+        {
+          "shot": "personal-filled",
+          "say": "اكتبْ اسم الطالب، واخترْ الجنس، وأدخلْ رقم الهاتف."
+        },
+        { "shot": "father", "say": "أضف ولي الأمر: اسم الأب ورقم هاتفه." },
+        { "shot": "address", "say": "حدّد عنوان السكن." },
+        { "shot": "academic", "say": "اخترْ الصفَّ والفصل، ثم اضغطْ إنشاء." },
+        {
+          "shot": "created",
+          "say": "تم. الطالب الآن في القائمة بصورته وصفّه."
+        },
+        { "card": "outro", "say": "طالب جديد في دقائق، على بِالقَلَم." }
+      ]
+    },
+    "ad": {
+      "style": "You are the voice of a short product ad for balqalam (بالقلم), a school-management app. Speak Modern Standard Arabic with bright, upbeat energy and a confident, friendly smile — punchy, never rushed.",
+      "title": "بالقلم",
+      "sub": "إدارة مدرستك من أي جهاز",
+      "outro": "سجّل طلابك <mark>في دقائق</mark>",
+      "outroSub": "balqalam.com",
+      "beats": [
+        {
+          "shot": "list",
+          "say": "طالب جديد في مدرستك؟ سجّله في أقل من دقيقة."
+        },
+        { "shot": "photo-uploaded", "say": "صورته ومستنداته، بلمسة واحدة." },
+        {
+          "shot": "personal-filled",
+          "say": "بياناته وولي أمره، في خطوات واضحة."
+        },
+        { "shot": "academic", "say": "اخترْ صفَّه وفصله، ثم إنشاء." },
+        { "shot": "created", "say": "وهذا هو في القائمة، بصورته وصفّه." },
+        {
+          "card": "outro",
+          "say": "بِالقَلَم. إدارة مدرستك من أي جهاز. ابدأ اليوم."
+        }
+      ]
+    }
+  }
+}

@@ -5,7 +5,7 @@
 #   media.sh setup                      install / verify the toolchain (idempotent)
 #   media.sh doctor                     what's installed, model + voice status, cache sizes, disk
 #   media.sh purge [--deep] [--force]   render caches by age; --deep also npx + stale Playwright browsers
-#   media.sh encode <profile> <in> <out> [--max S] [--fps N]
+#   media.sh encode <profile> <in> <out> [--max S] [--fps N] [--box WxH]
 #            profiles: web | av1 | reel | clip | loop | draft   (an out ending .av1.mp4 encodes AV1)
 #   media.sh poster <in> <out.webp> [--at S] [--width 1600]
 #   media.sh derive <png…> [--kind ui|photo] [--widths 1600,2400] [--out dir] [--check]
@@ -40,8 +40,8 @@ PY
 
 cmd_encode() {
   local profile="${1:?profile}" in="${2:?in}" out="${3:?out}"; shift 3
-  local max="" fps=""
-  while [ $# -gt 0 ]; do case "$1" in --max) max="$2"; shift 2 ;; --fps) fps="$2"; shift 2 ;; *) die "unknown flag $1" ;; esac; done
+  local max="" fps="" box=""
+  while [ $# -gt 0 ]; do case "$1" in --max) max="$2"; shift 2 ;; --fps) fps="$2"; shift 2 ;; --box) box="$2"; shift 2 ;; *) die "unknown flag $1" ;; esac; done
   [ -f "$in" ] || die "no such file: $in"
   disk_guard
   local w h pf cr cs r av1=0
@@ -53,7 +53,9 @@ cmd_encode() {
   if [[ "$cr" == pc || "$pf" == yuvj* ]]; then inr=pc; inm=bt601; fi
   [[ "$cs" == bt470bg || "$cs" == smpte170m ]] && inm=bt601
   # fit inside the delivery box, never upscale, even dims
+  # --box WxH targets a screen instead: 2560x1600 fills a MacBook, 1080x2340 an iPhone 16
   local bw=1920 bh=1080; [ "$profile" = reel ] && { bw=1080; bh=1920; }
+  [ -n "$box" ] && { bw="${box%x*}"; bh="${box#*x}"; }
   read -r tw th < <(python3 -c "w,h,bw,bh=$w,$h,$bw,$bh
 s=min(1,bw/w,bh/h); tw=int(w*s)//2*2; th=int(h*s)//2*2; print(tw,th)")
   local srcfps; srcfps=$(python3 -c "n,d='${r}'.split('/') if '/' in '${r}' else ('${r}','1'); print(round(float(n)/float(d or 1),3) if float(d or 1) else 30)")
@@ -63,6 +65,8 @@ s=min(1,bw/w,bh/h); tw=int(w*s)//2*2; th=int(h*s)//2*2; print(tw,th)")
   [ -n "$fps" ] && vf="fps=$fps,$vf"
   local level=4.1 hi=0; python3 -c "import sys; sys.exit(0 if $th*$tw>=1920*1080*0.9 and $ofps>30 else 1)" && hi=1
   [ $hi = 1 ] && level=4.2
+  # above 8,704 macroblocks a frame (1080p) level 4.x is out of spec — 5.1 covers 1600p and 1080x2340
+  python3 -c "import sys; sys.exit(0 if (($tw+15)//16)*(($th+15)//16) > 8704 else 1)" && level=5.1
   local gop; gop=$(python3 -c "print(int(round($ofps*2)))")
   local v=() a=(-an) t=()
   [ -n "$max" ] && t=(-t "$max")
@@ -76,8 +80,10 @@ s=min(1,bw/w,bh/h); tw=int(w*s)//2*2; th=int(h*s)//2*2; print(tw,th)")
     *) die "unknown profile $profile (web|av1|reel|clip|loop|draft)" ;;
   esac
   if [ "$profile" != loop ] && has_audio "$in"; then
-    local I=-16 TP=-1.5 ab=96k ac=1
-    [ "$profile" = reel ] && { I=-14; TP=-1; ab=128k; ac=2; }
+    # the normaliser aims 1 dB under the budget (-1.5 web, -1 social): AAC adds inter-sample overshoot,
+    # and peaky speech (TTS) landed at -0.7 dBTP when aimed at the budget itself
+    local I=-16 TP=-2.5 ab=96k ac=1
+    [ "$profile" = reel ] && { I=-14; TP=-2; ab=128k; ac=2; }
     a=(-af "$(loudnorm_af "$in" $I $TP)" -c:a aac -b:a $ab -ac $ac -ar 48000)
   fi
   local acrf=34; case "$profile" in clip) acrf=36 ;; loop) acrf=38 ;; reel) acrf=32 ;; esac
@@ -87,7 +93,9 @@ s=min(1,bw/w,bh/h); tw=int(w*s)//2*2; th=int(h*s)//2*2; print(tw,th)")
   case "$profile" in web|av1) budget=$(python3 -c "import json
 try: m=json.load(open('$KUN_DIR/.claude/engine.json')).get('media',{})
 except Exception: m={}
-print(m.get('av1_mb_per_min',5) if $av1 else m.get('h264_mb_per_min',8))") ;; esac
+b=m.get('av1_mb_per_min',5) if $av1 else m.get('h264_mb_per_min',8)
+# budgets are written for 1080p; a screen-sized box (2560x1600, 1080x2340) carries more pixels
+print(round(b*max(1,$tw*$th/(1920*1080)),2))") ;; esac
   local pass=0
   while :; do
     if [ "$profile" = draft ]; then

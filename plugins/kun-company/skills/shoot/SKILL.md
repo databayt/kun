@@ -166,6 +166,25 @@ node ~/.claude/skills/shoot/scripts/sim.mjs --flow add-student --direct-only   #
 - Found by sims, fixed in hogwarts 2026-10-06: Arabic file names failed every S3 upload (header
   metadata), and document slots refused photos. Sims are QA — report what they hit.
 
+## Story — the stills, narrated, per screen (no captions)
+
+```
+node ~/.claude/skills/shoot/scripts/story.mjs --flow add-student --device mac    --cut support
+node ~/.claude/skills/shoot/scripts/story.mjs --flow add-student --device iphone --cut ad
+   [--tts-model gemini-3.8-flash-lite-tts] [--preview 1.2,6] [--script variant.json]
+```
+
+- Script: `sims/<repo>/<flow>.story.json` — voice + per-cut `style` and `beats` (`{shot|card, say}`).
+  A beat names a still by its step; a still the device never shot (Finder on iPhone) drops out.
+- `mac` = 2560x1600 (fills a MacBook): the still in a browser window on the brand canvas.
+  `iphone` = 1080x2340 (fills an iPhone 16): status bar + Safari page + bottom bar, from
+  `shoot --device iphone-16` stills. Cuts: `support` (calm walkthrough), `ad` (≤30 s, upbeat).
+- Voice = a stock Google voice (`voice gen` engine `gemini`, Interactions API, `speech_metadata`
+  style — never directions in the text, they get read aloud). **Free tier: 10 requests/day per
+  model** — a whole cut goes in ONE request, split at long pauses; lines cache by text, so
+  mac + iphone share a cut's voice and re-renders cost nothing. Diacritics steer it: بِالقَلَم, اخترْ.
+- The voice sets the clock (beat = line + breath); no captions, a `.vtt` sidecar for accessibility.
+
 ## Close
 
 Read every PNG before reporting it done. Send the key ones with `SendUserFile` and give

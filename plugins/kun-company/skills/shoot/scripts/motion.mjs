@@ -1,4 +1,4 @@
-// motion.mjs <html> <out.mp4> [--fps 30] [--preview t1,t2,…] [--range t0,t1]
+// motion.mjs <html> <out.mp4> [--fps 30] [--size 1920x1080] [--preview t1,t2,…] [--range t0,t1] [--mezz-only]
 // Steps a deterministic window.render(t) frame by frame and delivers through the shared media library:
 // frames are captured over CDP and piped straight into an MJPEG mezzanine (no file per frame), and
 // media.sh encodes the tv-range BT.709 web file.
@@ -16,9 +16,12 @@ const [html, out] = args
 const fps = Number(args.includes("--fps") ? args[args.indexOf("--fps") + 1] : 30)
 const range = args.includes("--range") ? args[args.indexOf("--range") + 1].split(",").map(Number) : null
 const preview = args.includes("--preview") ? args[args.indexOf("--preview") + 1].split(",").map(Number) : null
+const [W, H] = (args.includes("--size") ? args[args.indexOf("--size") + 1] : "1920x1080").split("x").map(Number)
+// --mezz-only: stop at the MJPEG mezzanine (<out>.mezz.mkv) so a caller can add audio before encoding
+const mezzOnly = args.includes("--mezz-only")
 
 const browser = await chromium.launch({ args: ["--allow-file-access-from-files"] })
-const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 })
+const page = await browser.newPage({ viewport: { width: W, height: H }, deviceScaleFactor: 1 })
 await page.goto("file://" + html)
 await page.evaluate(async () => {
   await document.fonts.ready
@@ -52,6 +55,7 @@ if (preview) {
   }
   ff.stdin.end()
   await once(ff, "close")
+  if (mezzOnly) { console.log(`✓ ${mezz} · ${n} frames`); await browser.close(); process.exit(0) }
   const r = spawnSync(MEDIA, ["encode", "web", mezz, out], { encoding: "utf8" })
   rmSync(mezz, { force: true })
   if (r.status !== 0) throw new Error(`encode failed: ${r.stderr}`)

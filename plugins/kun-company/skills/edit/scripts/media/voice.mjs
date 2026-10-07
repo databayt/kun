@@ -5,6 +5,10 @@
 //   voice record <id> --speaker "<name>" [--seconds 15]  record the reference sample at this Mac's mic
 //   voice consent <id> --given | --revoke                record the speaker's yes (or withdraw it)
 //   voice gen <script.json> --out <dir> [--retries 3]    synthesize + gate every line → <dir>/voice.json
+//                                                       script.engine "gemini" = a stock Google voice
+//                                                       (script.voice e.g. "Charon", script.style) —
+//                                                       no clone, so no consent; GEMINI_API_KEY from kun/.env;
+//                                                       --model picks the TTS model (default gemini-3.8-flash-tts)
 //   voice mix <voice.json> --cues <cues.json> --duration S --out <file.wav> [--lufs -16] [--lead 0.25]
 //   voice revoke <id>                                   withdraw consent + list published assets using it
 //
@@ -16,7 +20,8 @@ import { chmodSync, existsSync, mkdirSync, readFileSync, readdirSync, writeFileS
 import { homedir, tmpdir } from "node:os"
 import { basename, join } from "node:path"
 import { spawnSync } from "node:child_process"
-import { arg, budgets, cer, FFMPEG, flag, normAr, positional, probe, sh, VOICE_DIR } from "./rt.mjs"
+import { createHash } from "node:crypto"
+import { arg, budgets, cer, FFMPEG, flag, KUN_DIR, normAr, positional, probe, sh, VOICE_DIR } from "./rt.mjs"
 
 const MODEL = process.env.MEDIA_TTS_MODEL || "mlx-community/chatterbox-multilingual-v3"
 const WHISPER = "mlx-community/whisper-large-v3-turbo"
@@ -25,6 +30,65 @@ const WPY = join(homedir(), ".local/share/uv/tools/mlx-whisper/bin/python")
 const here = new URL(".", import.meta.url).pathname
 const [sub, ...rest] = positional()
 const today = new Date().toISOString().slice(0, 10)
+
+// Gemini TTS — a stock voice through the Interactions API (gemini-3.8-*-tts). The text field is a
+// verbatim transcript; delivery goes in a speech_metadata style annotation, never in the text (older
+// prompt-style directions get read aloud). The free tier allows ~10 requests a day per model, so a
+// whole script goes in ONE request with long pauses between lines, split back at the widest gaps —
+// and every line is cached by (model, voice, style, text) so a re-render spends nothing.
+const TTS_CACHE = join(process.env.MEDIA_CACHE || join(homedir(), ".cache/media"), "tts")
+function geminiKey() {
+  if (process.env.GEMINI_API_KEY) return process.env.GEMINI_API_KEY.trim()
+  const m = /^GEMINI_API_KEY=(.*)$/m.exec(readFileSync(join(KUN_DIR, ".env"), "utf8"))
+  if (!m) throw new Error("GEMINI_API_KEY missing from kun/.env")
+  return m[1].replace(/^["']|["']$/g, "").trim()
+}
+const ttsKey = (o, text) => createHash("sha256").update(JSON.stringify([o.model, o.voice, o.style, text, o.attempt])).digest("hex").slice(0, 16)
+async function geminiSay(text, { model, voice, style }) {
+  const body = { model, input: [{ type: "user_input", content: [{ type: "text", text, annotations: style ? [{ type: "speech_metadata", style }] : [] }] }], response_format: { type: "audio" }, generation_config: { speech_config: [{ voice }] } }
+  for (let k = 0; k < 4; k++) {
+    const r = await fetch("https://generativelanguage.googleapis.com/v1beta/interactions", { method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": geminiKey() }, body: JSON.stringify(body) })
+    const j = await r.json().catch(() => ({}))
+    if (r.status === 429 && /per day/i.test(j.error?.message || "")) throw new Error(`gemini ${model}: daily free quota used — ${j.error.message.replace(/ or upgrade.*$/, "")}`)
+    if (r.status === 429 || r.status >= 500) { await new Promise((ok) => setTimeout(ok, 15000 * (k + 1))); continue }
+    if (!r.ok) throw new Error(`gemini ${r.status}: ${(j.error?.message || "").slice(0, 200)}`)
+    const data = j.steps?.flatMap((s) => s.content || []).find((c) => c.data)?.data
+    if (!data) throw new Error("gemini returned no audio")
+    return Buffer.from(data, "base64")
+  }
+  throw new Error(`gemini ${model}: rate-limited after 4 tries`)
+}
+const toWav = (buf, file) => {
+  const tmp = file + ".raw"
+  writeFileSync(tmp, buf)
+  const isWav = buf.subarray(0, 4).toString() === "RIFF"   // WAV by default; bare 24 kHz PCM on some tiers
+  ffmpeg([...(isWav ? [] : ["-f", "s16le", "-ar", "24000", "-ac", "1"]), "-i", tmp, "-c:a", "pcm_s16le", file])
+  spawnSync("rm", ["-f", tmp])
+}
+async function geminiLines(texts, o) {
+  mkdirSync(TTS_CACHE, { recursive: true })
+  const files = texts.map((t) => join(TTS_CACHE, `${ttsKey(o, t)}.wav`))
+  const todo = texts.map((t, i) => i).filter((i) => !existsSync(files[i]))
+  if (todo.length > 1) {
+    // one request: lines separated by a double long pause, cut back at the N-1 widest silences
+    const all = join(TTS_CACHE, `batch-${process.pid}.wav`)
+    toWav(await geminiSay(todo.map((i) => texts[i]).join(" <long pause> <long pause> <long pause> "), o), all)
+    const log = spawnSync(FFMPEG, ["-hide_banner", "-nostats", "-i", all, "-af", "silencedetect=n=-40dB:d=0.5", "-f", "null", "-"], { encoding: "utf8" }).stderr
+    const sil = [...log.matchAll(/silence_end: ([\d.]+) \| silence_duration: ([\d.]+)/g)].map((m) => ({ end: +m[1], d: +m[2] }))
+    const cuts = sil.sort((a, b) => b.d - a.d).slice(0, todo.length - 1).sort((a, b) => a.end - b.end)
+    if (cuts.length === todo.length - 1 && cuts.every((c) => c.d >= 0.9)) {
+      const edges = [0, ...cuts.map((c) => c.end - c.d / 2), probe(all).duration]
+      todo.forEach((i, k) => ffmpeg(["-i", all, "-ss", edges[k].toFixed(3), "-to", edges[k + 1].toFixed(3), "-c:a", "pcm_s16le", files[i]]))
+      spawnSync("rm", ["-f", all])
+    } else {
+      // never fall back to a request per line: at ~10 free requests a day that one fallback spends the
+      // whole day. Keep the take for a look and fail; the cached lines from a good batch stay.
+      throw new Error(`gemini: batch split found ${cuts.length}/${todo.length - 1} clean gaps — take kept at ${all}; shorten or re-punctuate a line and retry`)
+    }
+  }
+  if (todo.length === 1) toWav(await geminiSay(texts[todo[0]], o), files[todo[0]])
+  return files
+}
 
 function consent(id) {
   const dir = join(VOICE_DIR, id)
@@ -128,8 +192,10 @@ if (sub === "gen") {
   const lang = script.lang || "ar"
   const lines = script.lines.map((l) => (typeof l === "string" ? l : l.text))
   mkdirSync(out, { recursive: true })
-  const result = { voice: id, model: MODEL, lang, generated: new Date().toISOString(), lines: lines.map((text, i) => ({ i, text, file: null, ok: false, tries: 0 })) }
-  const c = consent(id)
+  const gemini = script.engine === "gemini"
+  const GEMINI_MODEL = arg("model", script.model || process.env.MEDIA_GEMINI_TTS || "gemini-3.8-flash-tts")
+  const result = { voice: id, engine: gemini ? "gemini" : "chatterbox", model: gemini ? GEMINI_MODEL : MODEL, lang, generated: new Date().toISOString(), lines: lines.map((text, i) => ({ i, text, file: null, ok: false, tries: 0 })) }
+  const c = gemini ? { ok: true, speaker: `Google stock voice ${id} (AI)` } : consent(id)
   if (!c.ok) {
     Object.assign(result, { captionsOnly: true, reason: `voice ${id}: ${c.reason}`, okRatio: 0 })
     writeFileSync(join(out, "voice.json"), JSON.stringify(result, null, 2))
@@ -144,9 +210,22 @@ if (sub === "gen") {
   for (let t = 1; t <= retries; t++) {
     const pending = result.lines.filter((l) => !l.ok)
     if (!pending.length) break
-    const job = join(work, `job-${t}.json`)
-    writeFileSync(job, JSON.stringify({ model: MODEL, lang, ref: join(c.dir, "reference.wav"), out: work, items: pending.map((l) => ({ id: `line-${String(l.i + 1).padStart(2, "0")}-t${t}`, text: l.text })) }))
-    const gen = JSON.parse(sh(PY, [join(here, "tts_batch.py"), job]).trim().split("\n").pop())
+    const items = pending.map((l) => ({ id: `line-${String(l.i + 1).padStart(2, "0")}-t${t}`, text: l.text }))
+    let gen
+    if (gemini) {
+      try {
+        const files = await geminiLines(items.map((it) => it.text), { model: GEMINI_MODEL, voice: id, style: script.style, attempt: t })
+        gen = items.map((it, k) => ({ id: it.id, ok: true, file: files[k] }))
+      } catch (e) {
+        // the daily quota is not a per-line failure — stop and say so instead of burning retries
+        if (/daily free quota/.test(e.message)) throw e
+        gen = items.map((it) => ({ id: it.id, ok: false, error: e.message }))
+      }
+    } else {
+      const job = join(work, `job-${t}.json`)
+      writeFileSync(job, JSON.stringify({ model: MODEL, lang, ref: join(c.dir, "reference.wav"), out: work, items }))
+      gen = JSON.parse(sh(PY, [join(here, "tts_batch.py"), job]).trim().split("\n").pop())
+    }
     const made = []
     for (const g of gen) {
       const l = result.lines[Number(/line-(\d+)/.exec(g.id)[1]) - 1]
