@@ -34,8 +34,8 @@ const FATHER_AR = "عمر الطيب", FATHER_EN = "Omar Altayeb"
 // Fresh numbers every run: a phone that matches an earlier (archived) test student reuses
 // that login, and the wizard only shows the credentials dialog for a NEW login.
 const rnd = () => String(Math.floor(10000000 + Math.random() * 89999999))
-const PHONE = `+2499${rnd()}`
-const FATHER_PHONE = `+2499${rnd()}`
+const PHONE = `+2499000000${10 + Math.floor(Math.random() * 90)}`  // patterned, fictional
+const FATHER_PHONE = `+2499000000${10 + Math.floor(Math.random() * 90)}`
 
 const dialog = (page) => page.locator('[role="alertdialog"], [role="dialog"]').last()
 const next = (page, t) => page.getByRole("button", { name: t("التالي", "Next"), exact: true }).click()
@@ -48,8 +48,7 @@ async function pickFirst(page, trigger) {
 // hogwarts search quirks (2026-10-06): a full name ("أحمد الطيب") matches nothing — search one
 // token and filter rows; and typing on /students/archived drops the archive scope, so the
 // archive is read unsearched.
-async function rows(page, go, t, path) {
-  const name = t(NAME_AR, NAME_EN)
+async function rows(page, go, t, path, name = t(NAME_AR, NAME_EN)) {
   await go(path)
   if (!path.endsWith("/archived")) {
     await page.getByPlaceholder(t("بحث في الطلاب...", "Search students...")).fill(name.split(" ").pop())
@@ -64,12 +63,16 @@ async function rowAction(page, t, row, label) {
 }
 
 export async function cleanup({ page, go, t = (ar) => ar }) {
-  let row = await rows(page, go, t, "/ar/students")
-  while (await row.count()) {
-    await rowAction(page, t, row, t("أرشفة", "Archive"))
-    await dialog(page).getByRole("button", { name: t("أرشفة", "Archive") }).click()
-    await page.waitForTimeout(2000)
-    row = await rows(page, go, t, "/ar/students")
+  // both test names, whatever language this run's UI is in: an English stills run must not leave
+  // "Ahmed Altayeb" in the Arabic video's list (media-qa, 2026-10-07)
+  for (const name of [NAME_AR, NAME_EN]) {
+    let row = await rows(page, go, t, "/ar/students", name)
+    while (await row.count()) {
+      await rowAction(page, t, row, t("أرشفة", "Archive"))
+      await dialog(page).getByRole("button", { name: t("أرشفة", "Archive") }).click()
+      await page.waitForTimeout(2000)
+      row = await rows(page, go, t, "/ar/students", name)
+    }
   }
   // Purge = export copy, typed name, delete. Blocked on 2026-10-06: the export answers
   // STUDENT_NOT_FOUND for archived students, so archived test rows stay in the archive

@@ -116,7 +116,7 @@ async function settle(page) {
       if ([...document.images].filter(vis).some((i) => !i.complete || i.naturalWidth === 0)) return false
       // BlurImage stamps data-loaded once the real pixels are in; before that it carries blur-xl/opacity-0.
       if ([...document.querySelectorAll("img.blur-xl:not([data-loaded]), img.opacity-0:not([data-loaded])")].some(vis)) return false
-      if ([...document.querySelectorAll('[data-slot="skeleton"], .animate-pulse, [aria-busy="true"]')].some(vis)) return false
+      if ([...document.querySelectorAll('[data-slot="skeleton"], .animate-pulse, .animate-spin, [aria-busy="true"]')].some(vis)) return false
       return true
     }, null, { timeout: 10000, polling: 200 })
     .then(() => true)

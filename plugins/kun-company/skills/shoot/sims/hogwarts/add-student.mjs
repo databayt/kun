@@ -13,7 +13,9 @@ export const meta = {
 }
 
 const NAME = "أحمد عمر الطيب"
-const digits = () => String(Math.floor(10000000 + Math.random() * 89999999))
+// Patterned, obviously fictional numbers (+249 900 000 0xx) — random digits land in live Sudanese
+// mobile ranges and could be a real person's number (media-qa, 2026-10-07).
+const fakePhone = () => `+2499000000${String(10 + Math.floor(Math.random() * 90))}`
 const A = (f) => new URL(`../../assets/hogwarts/${f}`, import.meta.url).pathname
 // Downloads, as the admin's Mac shows it — the photo and the five documents (make-docs.mjs).
 const FILES = [
@@ -89,7 +91,9 @@ export default async (sim) => {
   await sim.click(page.getByRole("button", { name: /^.*، 14 .* 2019$/ }).first(), { pause: 500 })
   await sim.focus(personal)
   await sim.pick(page.getByRole("combobox").filter({ hasText: "اختر الجنس" }), "ذكر")
-  await sim.type(page.locator('input[name="phone"]').first(), `+2499${digits()}`, { cps: 11 })
+  await sim.type(page.locator('input[name="phone"]').first(), fakePhone(), { cps: 11 })
+  // the WhatsApp copy lands on blur — show the tip once the field has it
+  await page.keyboard.press("Tab"); await sim.wait(700)
   sim.toast("رقم واتساب يُنسخ تلقائياً من رقم الهاتف")
   await sim.wait(2200)
 
@@ -98,13 +102,13 @@ export default async (sim) => {
   await sim.click(page.getByRole("button", { name: "الأب" }), { pause: 400 })
   await sim.focus([page.locator('input[name="fatherName"]'), tel("fatherName"), page.getByRole("button", { name: "الأم" })])
   await sim.type(page.locator('input[name="fatherName"]'), "عمر الطيب محمد")
-  await sim.type(tel("fatherName"), `+2499${digits()}`, { cps: 11 })
+  await sim.type(tel("fatherName"), fakePhone(), { cps: 11 })
   sim.toast("يكفي ولي أمر واحد — ويمكن إضافة الآخر لاحقاً")
   await sim.wait(900)
   await sim.click(page.getByRole("button", { name: "الأم" }), { pause: 400 })
   await sim.focus([page.locator('input[name="motherName"]'), tel("motherName")])
   await sim.type(page.locator('input[name="motherName"]'), "فاطمة أحمد علي")
-  await sim.type(tel("motherName"), `+2499${digits()}`, { cps: 11 })
+  await sim.type(tel("motherName"), fakePhone(), { cps: 11 })
   await sim.wait(800)
   await sim.focus(null)
   await sim.click(next, { pause: 200 })
@@ -139,14 +143,27 @@ export default async (sim) => {
   await sim.wait(1500)
   const create = page.getByRole("button", { name: "إنشاء", exact: true })
   await sim.focus([...academic, create])
-  sim.caption(6, "اضغط «إنشاء»")
+  sim.caption(7, "اضغط «إنشاء»")
   await sim.wait(900)
   await sim.click(create, { pause: 200 })
   await page.waitForURL((u) => !u.pathname.includes("/add/"), { timeout: 90000 }); await sim.settle()
 
-  // 7 — done
+  // 8 — done. The login-details dialog opens a beat after the redirect and shows the new account's
+  // real username and password: blur every credential-shaped token, give it a beat, close it.
   await sim.focus(null)
-  sim.caption(7, "تم! الطالب في القائمة بصورته وصفّه")
+  sim.caption(8, "تم! الطالب في القائمة بصورته وصفّه")
+  const dlg = page.locator('[role="alertdialog"], [role="dialog"]').last()
+  if (await dlg.waitFor({ timeout: 15000 }).then(() => true, () => false)) {
+    await page.evaluate(() => {
+      const d = [...document.querySelectorAll('[role="alertdialog"],[role="dialog"]')].pop()
+      const w = document.createTreeWalker(d, NodeFilter.SHOW_TEXT)
+      for (let n; (n = w.nextNode()); ) if (/^\s*[A-Za-z0-9@._-]{6,}\s*$/.test(n.textContent)) n.parentElement.style.filter = "blur(9px)"
+      d.querySelectorAll("input, code, pre").forEach((e) => (e.style.filter = "blur(9px)"))
+    })
+    await sim.wait(1800)
+    await page.keyboard.press("Escape")
+    await dlg.waitFor({ state: "hidden", timeout: 5000 }).catch(() => {})
+  }
   await sim.wait(700)
   const row = page.getByRole("row").filter({ hasText: "أحمد" }).first()
   // the row is full-width; frame its start (RTL right): the name and the grade
