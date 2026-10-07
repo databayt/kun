@@ -3,7 +3,7 @@
 // Document tiles stay untouched: they fire a paid AI extraction on production and would
 // pre-fill fields from a fake document. The photo circle carries the upload moment.
 
-import { cleanup as archiveTestStudent } from "../../flows/hogwarts/add-student.mjs"
+import { cleanup as archiveTestStudent, initScript as BLUR_PHONES } from "../../flows/hogwarts/add-student.mjs"
 
 export const meta = {
   title: "إضافة <mark>طالب جديد</mark>",
@@ -29,21 +29,6 @@ const FILES = [
 
 export async function cleanup({ page, go }) {
   await archiveTestStudent({ page, go })
-}
-
-// The demo school's seeded students carry numbers in live Sudanese mobile ranges. Blur any
-// phone-shaped text on screen except the fictional +249 900 000 0xx range this take types.
-const BLUR_PHONES = () => {
-  const real = /(\+?249|\b0)[19]\d{5,8}/, fake = /2499000000\d\d/
-  const scan = (root) => {
-    const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT)
-    for (let n; (n = w.nextNode()); ) {
-      const s = n.textContent.replace(/[\s-]/g, "")
-      if (real.test(s) && !fake.test(s) && n.parentElement) n.parentElement.style.filter = "blur(6px)"
-    }
-  }
-  new MutationObserver(() => scan(document.body)).observe(document, { childList: true, subtree: true, characterData: true })
-  addEventListener("DOMContentLoaded", () => scan(document.body))
 }
 
 export async function prepare({ page, go }) {

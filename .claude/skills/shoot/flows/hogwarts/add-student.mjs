@@ -28,6 +28,21 @@ async function upload({ page, shot, settle }, trigger, file, step) {
   await shot(`${step}-uploaded`)
 }
 
+// The demo school's seeded students carry numbers in live Sudanese mobile ranges. Blur any
+// phone-shaped text on screen except the fictional +249 900 000 0xx range this take types.
+export const initScript = () => {
+  const real = /(\+?249|\b0)[19]\d{5,8}/, fake = /2499000000\d\d/
+  const scan = (root) => {
+    const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT)
+    for (let n; (n = w.nextNode()); ) {
+      const s = n.textContent.replace(/[\s-]/g, "")
+      if (real.test(s) && !fake.test(s) && n.parentElement) n.parentElement.style.filter = "blur(6px)"
+    }
+  }
+  new MutationObserver(() => scan(document.body)).observe(document, { childList: true, subtree: true, characterData: true })
+  addEventListener("DOMContentLoaded", () => scan(document.body))
+}
+
 // Labels come from hogwarts school-{ar,en}.json (school.students.*); t(ar, en) picks the run's language.
 const NAME_AR = "أحمد الطيب", NAME_EN = "Ahmed Altayeb"
 const FATHER_AR = "عمر الطيب", FATHER_EN = "Omar Altayeb"

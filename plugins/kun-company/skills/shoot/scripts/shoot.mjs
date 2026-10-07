@@ -12,6 +12,7 @@
 //   options: --host <url>  --role admin|teacher|student|guardian|accountant|staff  --repo hogwarts
 //            --brand <id>  --out <dir>  --zoom 1.25  --full  --name <stem>  --clock 2026-10-01T09:00:00
 //            --mask "<css>,<css>"  --no-derive
+// Flow modules may export `initScript` (runs in every page first) and `masks` (CSS selectors).
 //
 // Deterministic by construction: light scheme, reduced motion, brand timezone, CSS animations frozen,
 // caret hidden, [data-media-mask] (and --mask) painted over, and every shot waits until visible
@@ -199,6 +200,8 @@ try {
     const mod = await import(pathToFileURL(flowFile).href)
     for (const lang of langs.length ? langs : [null]) {
       const s = await session(lang)
+      // a flow's initScript runs in every page before its own scripts (e.g. blur real phone numbers)
+      if (mod.initScript && !s.init) { await s.ctx.addInitScript(mod.initScript); s.init = true }
       const a = api(s)
       if (cleanupOnly) {
         if (!mod.cleanup) throw new Error(`${flowName} exports no cleanup`)

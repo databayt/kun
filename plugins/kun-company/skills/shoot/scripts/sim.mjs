@@ -92,11 +92,11 @@ const simFile = join(here, "..", "sims", repo, `${flowName}.mjs`)
 if (!existsSync(simFile)) throw new Error(`no sim at ${simFile}`)
 const mod = await import(pathToFileURL(simFile).href)
 const meta = { title: "", sub: "", outro: "", outroSub: "", ...(mod.meta ?? {}) }
-let frames = [], events = [], keeps = []
+let frames = [], events = [], keeps = [], end = 0
 
 if (directOnly) {
   if (!existsSync(join(work, "take.json"))) throw new Error(`no take at ${work} — run once without --direct-only`)
-  ;({ frames, events, keeps } = JSON.parse(readFileSync(join(work, "take.json"), "utf8")))
+  ;({ frames, events, keeps, end = 0 } = JSON.parse(readFileSync(join(work, "take.json"), "utf8")))
 } else {
   rmSync(work, { recursive: true, force: true }); mkdirSync(join(work, "frames"), { recursive: true })
   // Without the forced scale factor, CDP screencast frames come out at CSS size (1210 px) and zooms go soft.
@@ -223,11 +223,12 @@ if (directOnly) {
     await mod.default(sim)
     await sim.wait(1200)
     await stopRec()
+    end = now()
   } finally {
     if (mod.cleanup) await mod.cleanup(sim).catch((e) => console.warn("cleanup:", e.message))
     await browser.close()
   }
-  writeFileSync(join(work, "take.json"), JSON.stringify({ frames, events, keeps }))
+  writeFileSync(join(work, "take.json"), JSON.stringify({ frames, events, keeps, end }))
 }
 for (const e of events) if (e.type === "caption" && e.num === undefined) e.num = fromAR(e.n)
 console.log(`take: ${frames.length} frames, ${events.length} events`)
@@ -237,6 +238,8 @@ console.log(`take: ${frames.length} frames, ${events.length} events`)
 // inside an intentional pause (typing, sim.wait). `holds` adds seconds onto the frame just before a
 // source time — how narration gets room without ever stretching audio.
 const HOLD = 1.2, FPS = draft ? 15 : 30, INTRO = 3.2, OUTRO = 3.8, XF = 0.5
+// a sped-up reel samples the timeline faster; tips stretch by the same factor so they stay readable
+let TK = 1
 const kept = (a, b) => keeps.some(([s, e]) => a < e && b > s)
 const LAYOUT = portrait
   ? { W: 1080, H: 1920, WIN: { x: 0, y: 340, w: 1080, h: 1080 } }
@@ -252,7 +255,8 @@ function build(holds = []) {
   let acc = 0
   const fr = frames.map((f) => ({ ...f }))
   for (let i = 0; i < fr.length; i++) {
-    const gap = (fr[i + 1]?.w ?? fr[i].w + HOLD) - fr[i].w
+    // the last frame runs to the end of the take: a closing wait is a still screen, not an idle gap
+    const gap = (fr[i + 1]?.w ?? Math.max(fr[i].w + HOLD, end)) - fr[i].w
     fr[i].out = acc
     fr[i].dur = kept(fr[i].w, fr[i].w + gap) ? gap : Math.min(HOLD, gap)
     for (const h of holds) if (fr[i].w <= h.t && (fr[i + 1]?.w ?? Infinity) > h.t) fr[i].dur += h.d
@@ -339,8 +343,8 @@ function stateAt(t) {
   const fi = Math.max(0, T.fr.findLastIndex((f) => f.out <= tt))
   const cap = T.timeline.filter((e) => e.type === "caption" && e.o <= t).at(-1)
   const capSince = cap ? t - cap.o : 0
-  const toasts = T.timeline.filter((e) => e.type === "toast" && t >= e.o && t < e.o + e.ms / 1000)
-    .map((e) => ({ title: e.title, text: e.text, a: Math.min(1, (t - e.o) / .3, (e.o + e.ms / 1000 - t) / .3) }))
+  const toasts = T.timeline.filter((e) => e.type === "toast" && t >= e.o && t < e.o + (e.ms / 1000) * TK)
+    .map((e) => ({ title: e.title, text: e.text, a: Math.min(1, (t - e.o) / (.3 * TK), (e.o + (e.ms / 1000) * TK - t) / (.3 * TK)) }))
   return {
     frame: "file://" + T.fr[Math.min(fi, T.fr.length - 1)].f, cam: camAt(t),
     cap: cap && tt < T.takeLen ? { n: cap.n, text: cap.text, a: Math.min(1, capSince / .35) } : null, toasts,
@@ -439,6 +443,7 @@ if (previewAt) {
 // Reels must fit the platforms' 60 s: a longer flow plays uniformly faster rather than being cut off.
 const REEL_MAX = 58
 const tscale = portrait && T1 - T0 > REEL_MAX ? (T1 - T0) / REEL_MAX : 1
+TK = tscale
 if (tscale > 1) console.log(`reel: ${(T1 - T0).toFixed(0)}s flow plays at ${tscale.toFixed(2)}× to fit ${REEL_MAX}s`)
 const times = []
 for (let k = 0; k < Math.round(((T1 - T0) / tscale) * FPS); k++) times.push(T0 + (k / FPS) * tscale)
