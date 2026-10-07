@@ -75,22 +75,39 @@ s=min(1,bw/w,bh/h); tw=int(w*s)//2*2; th=int(h*s)//2*2; print(tw,th)")
     draft) crf=0 ;;
     *) die "unknown profile $profile (web|av1|reel|clip|loop|draft)" ;;
   esac
-  if [ "$profile" = draft ]; then
-    v=(-c:v h264_videotoolbox -b:v 6M -allow_sw 1)
-  elif [ $av1 = 1 ]; then
-    local acrf=34; case "$profile" in clip) acrf=36 ;; loop) acrf=38 ;; reel) acrf=32 ;; esac
-    v=(-c:v libsvtav1 -preset 6 -crf $acrf -g 240 -svtav1-params tune=0:scm=2:fast-decode=1)
-  else
-    v=(-c:v libx264 -preset slow -crf $crf -profile:v high -level:v $level -g "$gop" -keyint_min "$((gop / 2))" -sc_threshold 0)
-    [ "$profile" = reel ] && v+=(-maxrate 8M -bufsize 16M)
-  fi
   if [ "$profile" != loop ] && has_audio "$in"; then
     local I=-16 TP=-1.5 ab=96k ac=1
     [ "$profile" = reel ] && { I=-14; TP=-1; ab=128k; ac=2; }
     a=(-af "$(loudnorm_af "$in" $I $TP)" -c:a aac -b:a $ab -ac $ac -ar 48000)
   fi
-  ffmpeg -hide_banner -loglevel error -y -i "$in" ${t[@]+"${t[@]}"} -map 0:v:0 -map "0:a:0?" -vf "$vf" -r "$ofps" \
-    "${v[@]}" -pix_fmt $pixfmt "${TAGS[@]}" "${a[@]}" -movflags +faststart "$out"
+  local acrf=34; case "$profile" in clip) acrf=36 ;; loop) acrf=38 ;; reel) acrf=32 ;; esac
+  # Budget-aware: UI footage fits the MB/min budget at the default CRF; photo-heavy footage (listing
+  # tours) may not — then re-encode at CRF +3, at most twice, rather than ship an oversized file.
+  local budget=""
+  case "$profile" in web|av1) budget=$(python3 -c "import json
+try: m=json.load(open('$KUN_DIR/.claude/engine.json')).get('media',{})
+except Exception: m={}
+print(m.get('av1_mb_per_min',5) if $av1 else m.get('h264_mb_per_min',8))") ;; esac
+  local pass=0
+  while :; do
+    if [ "$profile" = draft ]; then
+      v=(-c:v h264_videotoolbox -b:v 6M -allow_sw 1)
+    elif [ $av1 = 1 ]; then
+      v=(-c:v libsvtav1 -preset 6 -crf $acrf -g 240 -svtav1-params tune=0:scm=2:fast-decode=1)
+    else
+      v=(-c:v libx264 -preset slow -crf $crf -profile:v high -level:v $level -g "$gop" -keyint_min "$((gop / 2))" -sc_threshold 0)
+      [ "$profile" = reel ] && v+=(-maxrate 8M -bufsize 16M)
+    fi
+    ffmpeg -hide_banner -loglevel error -y -i "$in" ${t[@]+"${t[@]}"} -map 0:v:0 -map "0:a:0?" -vf "$vf" -r "$ofps" \
+      "${v[@]}" -pix_fmt $pixfmt "${TAGS[@]}" "${a[@]}" -movflags +faststart "$out"
+    [ -z "$budget" ] || [ $pass -ge 2 ] && break
+    local over; over=$(python3 -c "import subprocess
+d=float(subprocess.run(['ffprobe','-v','error','-show_entries','format=duration','-of','default=nw=1:nk=1','$out'],capture_output=True,text=True).stdout or 1)
+import os; print(1 if os.path.getsize('$out')/1e6/max(d/60,1/60) > $budget else 0)")
+    [ "$over" = 1 ] || break
+    pass=$((pass + 1)); crf=$((crf + 3)); acrf=$((acrf + 3))
+    echo "encode: over ${budget} MB/min — re-encoding at CRF +3 (pass $pass)" >&2
+  done
   mjs probe "$out"
 }
 

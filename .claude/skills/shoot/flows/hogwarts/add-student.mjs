@@ -65,8 +65,9 @@ async function rowAction(page, t, row, label) {
 export async function cleanup({ page, go, t = (ar) => ar }) {
   // both test names, whatever language this run's UI is in: an English stills run must not leave
   // "Ahmed Altayeb" in the Arabic video's list (media-qa, 2026-10-07)
+  let row
   for (const name of [NAME_AR, NAME_EN]) {
-    let row = await rows(page, go, t, "/ar/students", name)
+    row = await rows(page, go, t, "/ar/students", name)
     while (await row.count()) {
       await rowAction(page, t, row, t("أرشفة", "Archive"))
       await dialog(page).getByRole("button", { name: t("أرشفة", "Archive") }).click()
