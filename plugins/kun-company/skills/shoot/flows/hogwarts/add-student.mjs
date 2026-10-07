@@ -15,12 +15,15 @@ const PHOTO = DOC("صورة-أحمد.jpg"), CV = DOC("ملف-الطالب.jpg")
 const FILES = [PHOTO, DOC("شهادة-الروضة.jpg"), DOC("تقرير-الروضة.jpg"), DOC("شهادة-الميلاد.jpg"), CV, DOC("بطاقة-التطعيم.jpg")]
 
 // Upload through the Finder window: shoot it open with the file selected, then the real upload.
-async function upload({ page, shot, settle }, trigger, file, step) {
+async function upload({ page, shot, settle, device }, trigger, file, step) {
   const chooser = page.waitForEvent("filechooser", { timeout: 15000 })
   await trigger.click()
-  await finderStill(page, { files: FILES, pick: file })
-  await shot(`finder-${step}`)
-  await finderClose(page)
+  // the Mac Finder only on the desktop frame — a phone opens its own picker, which no browser draws
+  if (!device) {
+    await finderStill(page, { files: FILES, pick: file })
+    await shot(`finder-${step}`)
+    await finderClose(page)
+  }
   // the Finder name travels with the file, as when the admin picks it
   await (await chooser).setFiles({ name: file.name, mimeType: "image/jpeg", buffer: readFileSync(file.path) })
   await trigger.locator("img").first().waitFor({ timeout: 30000 }).catch(() => {})
@@ -114,7 +117,7 @@ export async function cleanup({ page, go, t = (ar) => ar }) {
   }
 }
 
-export default async ({ page, go, shot, settle, t }) => {
+export default async ({ page, go, shot, settle, t, device }) => {
   const NAME = t(NAME_AR, NAME_EN), FATHER = t(FATHER_AR, FATHER_EN)
   await cleanup({ page, go, t })
   // A document tile fires a paid AI extraction (and pre-fills fields from the sample) — block
@@ -135,8 +138,8 @@ export default async ({ page, go, shot, settle, t }) => {
 
   // the photo circle, then one document — the CV tile
   const form = page.locator("form").first()
-  await upload({ page, shot, settle }, form.locator("[class*=rounded-full], [data-variant=avatar]").first(), PHOTO, "photo")
-  await upload({ page, shot, settle }, form.locator("div.h-32").filter({ hasText: t("السيرة الذاتية", "Resume") }).first(), CV, "cv")
+  await upload({ page, shot, settle, device }, form.locator("[class*=rounded-full], [data-variant=avatar]").first(), PHOTO, "photo")
+  await upload({ page, shot, settle, device }, form.locator("div.h-32").filter({ hasText: t("السيرة الذاتية", "Resume") }).first(), CV, "cv")
 
   await next(page, t)
   await page.waitForURL(/\/personal/)

@@ -11,7 +11,7 @@
 //   node shoot.mjs --flow add-student --cleanup          only undo what the flow creates (after a crash)
 //   options: --host <url>  --role admin|teacher|student|guardian|accountant|staff  --repo hogwarts
 //            --brand <id>  --out <dir>  --zoom 1.25  --full  --name <stem>  --clock 2026-10-01T09:00:00
-//            --mask "<css>,<css>"  --no-derive
+//            --mask "<css>,<css>"  --no-derive  --device iphone-16 (Playwright device, WebKit for iPhones)
 // Flow modules may export `initScript` (runs in every page first) and `masks` (CSS selectors).
 //
 // Deterministic by construction: light scheme, reduced motion, brand timezone, CSS animations frozen,
@@ -62,6 +62,7 @@ const forcedName = opt("name")
 const clock = opt("clock")
 const langs = opt("lang", "").split(",").filter(Boolean)
 const extraMasks = opt("mask", "").split(",").map((s) => s.trim()).filter(Boolean)
+const deviceArg = opt("device")
 const full = flag("full")
 const cleanupOnly = flag("cleanup")
 const derive = !flag("no-derive")
@@ -82,12 +83,19 @@ const deviceScaleFactor = 2 * zoom
 const DEMO_ROLES = ["admin", "teacher", "student", "guardian", "accountant", "staff", "user", "applicant"]
 
 // Playwright comes from the media runtime (pinned to kun's version), so shoot works in any repo.
-let chromium
+let pw
 try {
-  ;({ chromium } = requireRt("playwright-core"))
+  pw = requireRt("playwright-core")
 } catch {
-  ;({ chromium } = createRequire(join(repoDir, "package.json"))("@playwright/test"))
+  pw = createRequire(join(repoDir, "package.json"))("@playwright/test")
 }
+
+// --device iphone-16 → Playwright's "iPhone 16": the page area under Safari's bars (393x659),
+// DPR 3, touch, iOS Safari UA — rendered by WebKit, Safari's engine. Shots go to a device folder.
+const deviceKey = deviceArg && Object.keys(pw.devices).find((k) => k.toLowerCase().replace(/\s+/g, "-") === deviceArg.toLowerCase().replace(/\s+/g, "-"))
+if (deviceArg && !deviceKey) throw new Error(`unknown --device "${deviceArg}" — e.g. iphone-16, iphone-16-pro-max, pixel-7`)
+const device = deviceKey ? pw.devices[deviceKey] : null
+const deviceDir = deviceKey ? deviceKey.toLowerCase().replace(/\s+/g, "-") : ""
 
 const toUrl = (p) => (/^https?:/.test(p) ? p : host + (p.startsWith("/") ? p : `/${p}`))
 // /ar/s/demo/students/new → students-new-ar ; /ar → home-ar
@@ -126,18 +134,21 @@ async function settle(page) {
   await page.waitForTimeout(250)
 }
 
-const browser = await chromium.launch()
+const browser = await pw[device?.defaultBrowserType || "chromium"].launch()
 const sessions = new Map()
 async function session(lang) {
   const key = lang || "default"
   if (sessions.has(key)) return sessions.get(key)
   const locale = brand.locales?.[lang || "ar"] || lang || "ar"
   const ctx = await browser.newContext({
-    viewport, deviceScaleFactor, locale,
+    ...(device ?? { viewport, deviceScaleFactor }), locale,
     timezoneId: brand.timezone || "Africa/Khartoum",
     colorScheme: "light", reducedMotion: "reduce",
   })
   if (clock) await ctx.clock.setFixedTime(new Date(clock))
+  // A phone is a returning visitor: the "add to home screen" sheet (hogwarts offline/install-card)
+  // was dismissed already, so it never covers the page being shot.
+  if (device?.isMobile) await ctx.addInitScript(() => { try { localStorage.setItem("pwa-install-dismissed-at", String(Date.now())) } catch {} })
   const page = await ctx.newPage()
   const s = { ctx, page, lang, loggedIn: false }
   sessions.set(key, s)
@@ -211,8 +222,8 @@ try {
       }
       let n = 0
       const shot = (step) =>
-        a.snap(join(outDir, flowName, `${String(++n).padStart(2, "0")}-${step}-${lang || localeOf(a.page.url())}.png`), mod.masks || [])
-      await mod.default({ page: a.page, go: a.go, shot, settle: a.settle, t: a.t, lang: a.lang })
+        a.snap(join(outDir, flowName, deviceDir, `${String(++n).padStart(2, "0")}-${step}-${lang || localeOf(a.page.url())}.png`), mod.masks || [])
+      await mod.default({ page: a.page, go: a.go, shot, settle: a.settle, t: a.t, lang: a.lang, device: deviceKey })
     }
   } else {
     if (!paths.length) throw new Error("give at least one path or URL, or --flow <name>")
@@ -220,7 +231,7 @@ try {
       const lang = localeOf(toUrl(p))
       const a = api(await session(lang))
       const url = await a.go(p)
-      await a.snap(join(outDir, `${forcedName && paths.length === 1 ? forcedName : slug(url)}.png`))
+      await a.snap(join(outDir, deviceDir, `${forcedName && paths.length === 1 ? forcedName : slug(url)}.png`))
     }
   }
 } finally {
@@ -237,4 +248,5 @@ if (derive && saved.length) {
     }
   } else console.warn(`  ⚠ derive failed: ${(r.stderr || "").slice(-300)}`)
 }
-console.log(`${saved.length} shot(s) · viewport ${viewport.width}x${viewport.height} @${deviceScaleFactor}x · role ${role} · brand ${brand.id}`)
+const vp = device?.viewport ?? viewport
+console.log(`${saved.length} shot(s) · ${deviceKey ? `${deviceKey} · ` : ""}viewport ${vp.width}x${vp.height} @${device?.deviceScaleFactor ?? deviceScaleFactor}x · role ${role} · brand ${brand.id}`)

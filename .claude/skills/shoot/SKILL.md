@@ -71,6 +71,10 @@ export default async ({ page, go, shot, settle }) => {
   over. Use `--clock <iso>` to pin `Date` (off by default: server-rendered dates won't match).
   Login is checked against the `authjs.role` cookie.
 - **Bilingual**: `--flow add-student --lang ar,en` runs once per language in its own context.
+- **Phone**: `--device iphone-16` (any Playwright device name, dashed) shoots in WebKit, Safari's engine,
+  at the page area under Safari's bars (393x659 @3x, touch, iOS UA) into `<flow>/iphone-16/`. The phone is a
+  returning visitor (the add-to-home-screen sheet is pre-dismissed); flows get `device` and skip the Mac
+  Finder stills. First run on a new Playwright: `node ~/.local/share/databayt/media/node_modules/playwright-core/cli.js install webkit`.
   Labels come from the product dictionaries via `t()`, e.g.
   `t("التالي", "Next")` from `school.students.wizard.next`.
 - Name each step after what is on screen (`list`, `form`, `filled`, `saved`, `new-row`).
