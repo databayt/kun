@@ -92,9 +92,7 @@ export default async (sim) => {
   await sim.focus(personal)
   await sim.pick(page.getByRole("combobox").filter({ hasText: "اختر الجنس" }), "ذكر")
   await sim.type(page.locator('input[name="phone"]').first(), fakePhone(), { cps: 11 })
-  // the WhatsApp copy lands on blur — show the tip once the field has it
-  await page.keyboard.press("Tab"); await sim.wait(700)
-  sim.toast("رقم واتساب يُنسخ تلقائياً من رقم الهاتف")
+  // (no WhatsApp tip: the copy does not show on screen during the take — a tip must match the frame)
   await sim.wait(2200)
 
   // 4 — guardians: father, then mother
@@ -153,7 +151,7 @@ export default async (sim) => {
   await sim.focus(null)
   sim.caption(8, "تم! الطالب في القائمة بصورته وصفّه")
   const dlg = page.locator('[role="alertdialog"], [role="dialog"]').last()
-  if (await dlg.waitFor({ timeout: 15000 }).then(() => true, () => false)) {
+  if (await dlg.waitFor({ timeout: 6000 }).then(() => true, () => false)) {
     await page.evaluate(() => {
       const d = [...document.querySelectorAll('[role="alertdialog"],[role="dialog"]')].pop()
       const w = document.createTreeWalker(d, NodeFilter.SHOW_TEXT)
@@ -170,5 +168,5 @@ export default async (sim) => {
   await sim.focus([row.getByText(/^أحمد/).first(), row.getByText("الأول").first()], { z: 1.5 })
   await sim.move(page.getByText(/^أحمد/).first())
   sim.toast("يُرسل إشعار ترحيب للأسرة، ويُنشأ حساب دخول للطالب")
-  await sim.wait(3600)
+  await sim.wait(2400)
 }

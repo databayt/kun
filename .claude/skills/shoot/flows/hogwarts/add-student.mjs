@@ -66,7 +66,8 @@ export async function cleanup({ page, go, t = (ar) => ar }) {
   // both test names, whatever language this run's UI is in: an English stills run must not leave
   // "Ahmed Altayeb" in the Arabic video's list (media-qa, 2026-10-07)
   let row
-  for (const name of [NAME_AR, NAME_EN]) {
+  // the app shows an English-entered "Altayeb" as «الطايب» in the Arabic list — search that spelling too
+  for (const name of [NAME_AR, NAME_EN, "أحمد الطايب"]) {
     row = await rows(page, go, t, "/ar/students", name)
     while (await row.count()) {
       await rowAction(page, t, row, t("أرشفة", "Archive"))
