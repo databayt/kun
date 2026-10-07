@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactElement, ReactNode } from "react";
 import { Art } from "./art";
-import { plateColor, THEMES, type ThemeColors } from "./palette";
+import { plateColor, THEMES, themeFor, type ThemeColors } from "./palette";
 import type { Bilingual, DeckLang, Slide } from "./schema";
 
 /**
@@ -110,6 +110,8 @@ function SlideShell({ children }: { children: ReactNode }): ReactElement {
 
 interface SlideProps<S extends Slide> {
   slide: S;
+  /** The deck's brand — picks the accent from the brand kit (themeFor). */
+  brand?: string;
   lang: DeckLang;
   index: number;
   /** Deck length — a 1-slide deck is a single card, so "swipe" would lie. */
@@ -120,12 +122,13 @@ interface SlideProps<S extends Slide> {
 
 function CoverSlide({
   slide,
+  brand,
   lang,
   index,
   total,
   landscape,
 }: SlideProps<Extract<Slide, { type: "cover" }>>): ReactElement {
-  const c = THEMES[slide.theme];
+  const c = themeFor(slide.theme, brand);
 
   // The og/banner layout: text column + art plate side by side. A 630px-tall
   // artboard cannot stack the portrait cover's 92px headline over a 500px
@@ -240,10 +243,11 @@ function CoverSlide({
 
 function PointSlide({
   slide,
+  brand,
   lang,
   index,
 }: SlideProps<Extract<Slide, { type: "point" }>>): ReactElement {
-  const c = THEMES[slide.theme];
+  const c = themeFor(slide.theme, brand);
   return (
     <SlideShell>
       {slide.kicker ? (
@@ -280,10 +284,11 @@ function PointSlide({
 
 function StatSlide({
   slide,
+  brand,
   lang,
   landscape,
 }: SlideProps<Extract<Slide, { type: "stat" }>>): ReactElement {
-  const c = THEMES[slide.theme];
+  const c = themeFor(slide.theme, brand);
   return (
     <SlideShell>
       <div className="flex min-h-0 flex-1 flex-col justify-center">
@@ -331,11 +336,12 @@ function StatSlide({
 
 function QuoteSlide({
   slide,
+  brand,
   lang,
   index,
   landscape,
 }: SlideProps<Extract<Slide, { type: "quote" }>>): ReactElement {
-  const c = THEMES[slide.theme];
+  const c = themeFor(slide.theme, brand);
   return (
     <SlideShell>
       <div className="flex min-h-0 flex-1 flex-col justify-center">
@@ -384,9 +390,10 @@ function QuoteSlide({
 
 function StepsSlide({
   slide,
+  brand,
   lang,
 }: SlideProps<Extract<Slide, { type: "steps" }>>): ReactElement {
-  const c = THEMES[slide.theme];
+  const c = themeFor(slide.theme, brand);
   return (
     <SlideShell>
       <h2 className="text-balance" style={headlineStyle(54, lang)}>
@@ -426,10 +433,11 @@ function StepsSlide({
 
 function CtaSlide({
   slide,
+  brand,
   lang,
   landscape,
 }: SlideProps<Extract<Slide, { type: "cta" }>>): ReactElement {
-  const c = THEMES[slide.theme];
+  const c = themeFor(slide.theme, brand);
   const host = new URL(slide.url).host;
   return (
     <SlideShell>
@@ -467,10 +475,11 @@ function CtaSlide({
 
 function SplitSlide({
   slide,
+  brand,
   lang,
   index,
 }: SlideProps<Extract<Slide, { type: "split" }>>): ReactElement {
-  const c = THEMES[slide.theme];
+  const c = themeFor(slide.theme, brand);
   const pane = (
     label: Bilingual,
     art: string | undefined,
@@ -525,10 +534,11 @@ function SplitSlide({
 
 function GridSlide({
   slide,
+  brand,
   lang,
   index,
 }: SlideProps<Extract<Slide, { type: "grid" }>>): ReactElement {
-  const c = THEMES[slide.theme];
+  const c = themeFor(slide.theme, brand);
   const columns = slide.cells.length > 4 ? 3 : 2;
   return (
     <SlideShell>
@@ -598,12 +608,14 @@ function GridSlide({
 
 export function SlideRenderer({
   slide,
+  brand,
   lang,
   index,
   total,
   landscape,
 }: {
   slide: Slide;
+  brand?: string;
   lang: DeckLang;
   index: number;
   total?: number;
@@ -614,6 +626,7 @@ export function SlideRenderer({
       return (
         <CoverSlide
           slide={slide}
+          brand={brand}
           lang={lang}
           index={index}
           total={total}
@@ -621,11 +634,13 @@ export function SlideRenderer({
         />
       );
     case "point":
-      return <PointSlide slide={slide} lang={lang} index={index} />;
+      return <PointSlide slide={slide}
+          brand={brand} lang={lang} index={index} />;
     case "stat":
       return (
         <StatSlide
           slide={slide}
+          brand={brand}
           lang={lang}
           index={index}
           landscape={landscape}
@@ -635,25 +650,30 @@ export function SlideRenderer({
       return (
         <QuoteSlide
           slide={slide}
+          brand={brand}
           lang={lang}
           index={index}
           landscape={landscape}
         />
       );
     case "steps":
-      return <StepsSlide slide={slide} lang={lang} index={index} />;
+      return <StepsSlide slide={slide}
+          brand={brand} lang={lang} index={index} />;
     case "cta":
       return (
         <CtaSlide
           slide={slide}
+          brand={brand}
           lang={lang}
           index={index}
           landscape={landscape}
         />
       );
     case "split":
-      return <SplitSlide slide={slide} lang={lang} index={index} />;
+      return <SplitSlide slide={slide}
+          brand={brand} lang={lang} index={index} />;
     case "grid":
-      return <GridSlide slide={slide} lang={lang} index={index} />;
+      return <GridSlide slide={slide}
+          brand={brand} lang={lang} index={index} />;
   }
 }

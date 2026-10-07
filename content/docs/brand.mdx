@@ -12,23 +12,29 @@ writes or generates on databayt's behalf — Samia, Ali, Abdout, Sedon, and the 
 
 ## Visual identity
 
-A minimal, premium, developer-tool aesthetic. Restraint over decoration. Space over clutter.
+The colours, type and marks live in one file: **`content/media/brand-kit.json`**. Every renderer
+reads it: the media studio prompts, carousels, `shoot` stills, `sim` tutorials, reels and captions.
+Its `brands` block is the publishing kit (style spines, subjects, sizes). Its `production` block is
+what a renderer needs on screen: colours, logo, timezone, CDN namespace and manifest path. Check any
+brand with `bash ~/.claude/skills/edit/scripts/media.sh brand <id> --json`.
 
-| Token | Value | Use |
-|-------|-------|-----|
-| **Base** | deep charcoal / dark background | Every backdrop. We are dark-mode-first. |
-| **Accent** | restrained **cyan** | One accent, used sparingly — a single highlight, never a rainbow. |
-| **Rim (cinematic)** | warm **sunset-orange** rim light | Ads, reels, promos only — glassmorphic, shallow depth of field. |
-| **Texture** | soft studio light, subtle film grain | Photorealistic, generous negative space. |
+The look is minimal and premium, with restraint and space. Each brand has **one accent**, on a
+light canvas:
 
-Two style presets drive all generated media (see `/higgs`):
+| Brand | Canvas | Ink | Accent | Soft accent | Mark |
+|-------|--------|-----|--------|-------------|------|
+| hogwarts / balqalam / databayt | Ivory `#faf9f5` | Slate `#141413` | Clay `#d97757` | Coral `#ebcece` | quill (`public/brands/hogwarts.png`) · databayt `databayt.png` |
+| mkan | Ivory `#faf8f5` | Slate `#1a2530` | Clay `#e05638` | Dune Sand `#e5d9c5` | `public/brands/mkan.png`; Red Sea `#0f4c81` as the support colour |
+| kun, sijillee, moalimee, souq, shifa, mazin | draft: renderers refuse until filled | | | | |
 
-- **`minimal`** — og images, hero shots, product shots, docs. *"minimal premium developer-tool
-  aesthetic, deep charcoal background, generous negative space, soft studio light, subtle film
-  grain, monochrome with one restrained cyan accent, no text."*
-- **`cinematic`** — ads, reels, promos. *"high-end glassmorphic panels, deep dark mode backdrop,
-  electric cyan and warm sunset-orange rim light, shallow depth of field, slow tracking shot,
-  cinematic studio lighting, photorealistic, no text."*
+- **Type:** Thmanyah Serif Display 900 with `ss01` for Arabic headlines, Thmanyah Sans for Arabic
+  body text, Geist for Latin. Thmanyah is licensed for local use: the files stay in
+  `~/Library/Fonts` and are never committed or served (the media guard blocks it).
+- **Marks** are placed in post and never drawn by a model.
+- **Captions** use caption ink on a dark box (`media.sh brand <id> --ass`), because outlines muddy
+  Arabic dots.
+- **Generated imagery** follows each brand's `styleSpines` in the kit. They replace the earlier
+  charcoal/cyan presets, which no shipped asset used.
 
 ## The hard rule — no text inside generated visuals
 

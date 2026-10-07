@@ -962,5 +962,311 @@
         }
       }
     }
+  },
+  "production": {
+    "$comment": "What every renderer needs to put a brand on screen — shoot stills, sim tutorials, reels, motion, captions, carousels — read by edit/scripts/media/rt.mjs brand(). Separate from `brands` on purpose: `brands` holds only the brands wired for publishing (tests enforce it); production covers every brand that will ever need a still or a video. Paths: `logo` is relative to the kun repo (the marks live in public/brands/); `manifest` is relative to the brand's repo. `status: draft` entries are refused by the renderers until their TODO fields are filled — never guessed.",
+    "hogwarts": {
+      "status": "ready",
+      "repo": "hogwarts",
+      "hosts": {
+        "prod": "https://ed.databayt.org",
+        "demo": "https://demo.balqalam.com"
+      },
+      "locales": {
+        "ar": "ar",
+        "en": "en"
+      },
+      "timezone": "Africa/Khartoum",
+      "logo": "public/brands/hogwarts.png",
+      "fonts": {
+        "arabicHeadline": "thmanyah-serif-display-900.ttf",
+        "arabicBody": "thmanyah-sans-500.ttf",
+        "latin": "Geist"
+      },
+      "video": {
+        "canvas": "#faf9f5",
+        "ink": "#141413",
+        "accent": "#d97757",
+        "accentSoft": "#ebcece",
+        "captionBg": "#141413",
+        "captionInk": "#faf9f5",
+        "numerals": "arab"
+      },
+      "voice": "house-ar",
+      "cdn": "hogwarts",
+      "manifest": "src/components/docs/media-manifest.json"
+    },
+    "balqalam": {
+      "status": "ready",
+      "repo": "hogwarts",
+      "hosts": {
+        "prod": "https://balqalam.com",
+        "demo": "https://demo.balqalam.com"
+      },
+      "locales": {
+        "ar": "ar",
+        "en": "en"
+      },
+      "timezone": "Asia/Riyadh",
+      "logo": "public/brands/hogwarts.png",
+      "fonts": {
+        "arabicHeadline": "thmanyah-serif-display-900.ttf",
+        "arabicBody": "thmanyah-sans-500.ttf",
+        "latin": "Geist"
+      },
+      "video": {
+        "canvas": "#faf9f5",
+        "ink": "#141413",
+        "accent": "#d97757",
+        "accentSoft": "#ebcece",
+        "captionBg": "#141413",
+        "captionInk": "#faf9f5",
+        "numerals": "arab"
+      },
+      "voice": "house-ar",
+      "cdn": "balqalam",
+      "manifest": "src/components/docs/media-manifest.json"
+    },
+    "mkan": {
+      "status": "ready",
+      "repo": "mkan",
+      "hosts": {
+        "prod": "https://mkan.sd",
+        "demo": "https://mkan.sd"
+      },
+      "locales": {
+        "ar": "ar",
+        "en": "en"
+      },
+      "timezone": "Africa/Khartoum",
+      "logo": "public/brands/mkan.png",
+      "fonts": {
+        "arabicHeadline": "thmanyah-serif-display-900.ttf",
+        "arabicBody": "thmanyah-sans-500.ttf",
+        "latin": "Geist"
+      },
+      "video": {
+        "canvas": "#faf8f5",
+        "ink": "#1a2530",
+        "accent": "#e05638",
+        "accentSoft": "#e5d9c5",
+        "captionBg": "#1a2530",
+        "captionInk": "#faf8f5",
+        "numerals": "arab"
+      },
+      "voice": "house-ar",
+      "cdn": "mkan",
+      "manifest": "src/components/help/media-manifest.json"
+    },
+    "databayt": {
+      "status": "ready",
+      "repo": "marketing",
+      "hosts": {
+        "prod": "https://databayt.org"
+      },
+      "locales": {
+        "ar": "ar",
+        "en": "en"
+      },
+      "timezone": "Africa/Khartoum",
+      "logo": "public/brands/databayt.png",
+      "fonts": {
+        "arabicHeadline": "thmanyah-serif-display-900.ttf",
+        "arabicBody": "thmanyah-sans-500.ttf",
+        "latin": "Geist"
+      },
+      "video": {
+        "canvas": "#faf9f5",
+        "ink": "#141413",
+        "accent": "#d97757",
+        "accentSoft": "#ebcece",
+        "captionBg": "#141413",
+        "captionInk": "#faf9f5",
+        "numerals": "arab"
+      },
+      "voice": "house-ar",
+      "cdn": "databayt",
+      "manifest": "TODO"
+    },
+    "kun": {
+      "status": "draft",
+      "repo": "kun",
+      "hosts": {
+        "prod": "https://kun.databayt.org"
+      },
+      "locales": {
+        "ar": "ar",
+        "en": "en"
+      },
+      "timezone": "TODO",
+      "logo": "TODO",
+      "fonts": {
+        "arabicHeadline": "thmanyah-serif-display-900.ttf",
+        "arabicBody": "thmanyah-sans-500.ttf",
+        "latin": "Geist"
+      },
+      "video": {
+        "canvas": "TODO",
+        "ink": "TODO",
+        "accent": "TODO",
+        "accentSoft": "TODO",
+        "captionBg": "TODO",
+        "captionInk": "TODO",
+        "numerals": "TODO"
+      },
+      "voice": "house-ar",
+      "cdn": "TODO",
+      "manifest": "TODO"
+    },
+    "sijillee": {
+      "status": "draft",
+      "repo": "TODO",
+      "hosts": {
+        "prod": "TODO"
+      },
+      "locales": {
+        "ar": "ar",
+        "en": "en"
+      },
+      "timezone": "TODO",
+      "logo": "public/brands/sijillee.png",
+      "fonts": {
+        "arabicHeadline": "thmanyah-serif-display-900.ttf",
+        "arabicBody": "thmanyah-sans-500.ttf",
+        "latin": "Geist"
+      },
+      "video": {
+        "canvas": "TODO",
+        "ink": "TODO",
+        "accent": "TODO",
+        "accentSoft": "TODO",
+        "captionBg": "TODO",
+        "captionInk": "TODO",
+        "numerals": "TODO"
+      },
+      "voice": "house-ar",
+      "cdn": "TODO",
+      "manifest": "TODO"
+    },
+    "moalimee": {
+      "status": "draft",
+      "repo": "TODO",
+      "hosts": {
+        "prod": "TODO"
+      },
+      "locales": {
+        "ar": "ar",
+        "en": "en"
+      },
+      "timezone": "TODO",
+      "logo": "public/brands/moalimee.svg",
+      "fonts": {
+        "arabicHeadline": "thmanyah-serif-display-900.ttf",
+        "arabicBody": "thmanyah-sans-500.ttf",
+        "latin": "Geist"
+      },
+      "video": {
+        "canvas": "TODO",
+        "ink": "TODO",
+        "accent": "TODO",
+        "accentSoft": "TODO",
+        "captionBg": "TODO",
+        "captionInk": "TODO",
+        "numerals": "TODO"
+      },
+      "voice": "house-ar",
+      "cdn": "TODO",
+      "manifest": "TODO"
+    },
+    "souq": {
+      "status": "draft",
+      "repo": "souq",
+      "hosts": {
+        "prod": "TODO"
+      },
+      "locales": {
+        "ar": "ar",
+        "en": "en"
+      },
+      "timezone": "TODO",
+      "logo": "TODO",
+      "fonts": {
+        "arabicHeadline": "thmanyah-serif-display-900.ttf",
+        "arabicBody": "thmanyah-sans-500.ttf",
+        "latin": "Geist"
+      },
+      "video": {
+        "canvas": "TODO",
+        "ink": "TODO",
+        "accent": "TODO",
+        "accentSoft": "TODO",
+        "captionBg": "TODO",
+        "captionInk": "TODO",
+        "numerals": "TODO"
+      },
+      "voice": "house-ar",
+      "cdn": "TODO",
+      "manifest": "TODO"
+    },
+    "shifa": {
+      "status": "draft",
+      "repo": "shifa",
+      "hosts": {
+        "prod": "TODO"
+      },
+      "locales": {
+        "ar": "ar",
+        "en": "en"
+      },
+      "timezone": "TODO",
+      "logo": "TODO",
+      "fonts": {
+        "arabicHeadline": "thmanyah-serif-display-900.ttf",
+        "arabicBody": "thmanyah-sans-500.ttf",
+        "latin": "Geist"
+      },
+      "video": {
+        "canvas": "TODO",
+        "ink": "TODO",
+        "accent": "TODO",
+        "accentSoft": "TODO",
+        "captionBg": "TODO",
+        "captionInk": "TODO",
+        "numerals": "TODO"
+      },
+      "voice": "house-ar",
+      "cdn": "TODO",
+      "manifest": "TODO"
+    },
+    "mazin": {
+      "status": "draft",
+      "repo": "mazin",
+      "hosts": {
+        "prod": "TODO"
+      },
+      "locales": {
+        "ar": "ar",
+        "en": "en"
+      },
+      "timezone": "TODO",
+      "logo": "TODO",
+      "fonts": {
+        "arabicHeadline": "thmanyah-serif-display-900.ttf",
+        "arabicBody": "thmanyah-sans-500.ttf",
+        "latin": "Geist"
+      },
+      "video": {
+        "canvas": "TODO",
+        "ink": "TODO",
+        "accent": "TODO",
+        "accentSoft": "TODO",
+        "captionBg": "TODO",
+        "captionInk": "TODO",
+        "numerals": "TODO"
+      },
+      "voice": "house-ar",
+      "cdn": "TODO",
+      "manifest": "TODO"
+    }
   }
 }

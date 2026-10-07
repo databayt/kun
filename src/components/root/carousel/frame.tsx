@@ -1,6 +1,6 @@
 import type { ReactElement, ReactNode } from "react";
 import { BRANDS } from "./brands";
-import { THEMES } from "./palette";
+import { themeFor } from "./palette";
 import type { Deck, DeckLang, SlideTheme } from "./schema";
 
 /** Safe inline margin inside the 1080px artboard. */
@@ -32,7 +32,7 @@ export function SlideFrame({
   lang,
   children,
 }: SlideFrameProps): ReactElement {
-  const c = THEMES[theme];
+  const c = themeFor(theme, brand);
   const info = BRANDS[brand];
   const invertLogo = theme === "dark" || theme === "clay";
 

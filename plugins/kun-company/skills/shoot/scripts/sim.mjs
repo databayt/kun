@@ -358,7 +358,7 @@ const sig = (s) => JSON.stringify([s.frame, Math.round(s.cam.cx * 4), Math.round
 // Thmanyah is licensed for local use: read from ~/Library/Fonts, never copied into a repo.
 const fontDir = join(homedir(), "Library/Fonts")
 const fontSrc = (ttf, woff) => (existsSync(join(fontDir, ttf)) ? `file://${join(fontDir, ttf)}` : `file://${homedir()}/${repo}/public/fonts/thmanyah/${woff}`)
-const logoPath = [B.logo && join(homedir(), B.repo || repo, B.logo), join(homedir(), repo, "public/logo.png")].find((p) => p && existsSync(p))
+const logoPath = [B.logoPath, join(homedir(), repo, "public/logo.png")].find((p) => p && existsSync(p))
 const logo = logoPath ? `file://${logoPath}` : ""
 const hexA = (hex, a) => { const n = parseInt(hex.slice(1), 16); return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})` }
 const FONTS = `@font-face{font-family:S;src:url(${fontSrc("thmanyah-sans-500.ttf", "thmanyah-sans-500.woff2")});font-weight:500}

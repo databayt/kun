@@ -61,6 +61,7 @@ export default async function CarouselPage({
           lang={lang}
         >
           <SlideRenderer
+            brand={deck.brand}
             slide={current}
             lang={lang}
             index={index - 1}
@@ -98,6 +99,7 @@ export default async function CarouselPage({
                 lang={rowLang}
               >
                 <SlideRenderer
+                  brand={deck.brand}
                   slide={s}
                   lang={rowLang}
                   index={i}
@@ -152,6 +154,7 @@ export default async function CarouselPage({
                   lang={lang}
                 >
                   <SlideRenderer
+                    brand={deck.brand}
                     slide={s}
                     lang={lang}
                     index={i}

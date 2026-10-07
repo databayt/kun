@@ -12,7 +12,13 @@ if (!id) {
   console.error("usage: brand <id> [--json|--css|--ass]")
   process.exit(2)
 }
-const b = brand(id)
+let b
+try {
+  b = brand(id)
+} catch (e) {
+  console.error(e.message)
+  process.exit(2)
+}
 const v = b.video
 const fontDir = join(homedir(), "Library/Fonts")
 const font = (f) => (f && existsSync(join(fontDir, f)) ? `file://${join(fontDir, f)}` : null)

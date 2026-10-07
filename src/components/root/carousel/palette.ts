@@ -1,4 +1,5 @@
 import { COLORS } from "@/components/root/anthropic/data";
+import kit from "../../../../content/media/brand-kit.json";
 import type { SlideTheme } from "./schema";
 
 function hex(name: string): string {
@@ -73,4 +74,20 @@ export function plateColor(index: number, canvasBg: string): string {
     return PLATE_CYCLE[(index + 1) % PLATE_CYCLE.length];
   }
   return plate;
+}
+
+type ProductionVideo = { accent?: string };
+const PRODUCTION = (kit as unknown as { production?: Record<string, { video?: ProductionVideo }> }).production ?? {};
+
+/**
+ * The theme in a brand's own accent (content/media/brand-kit.json → production[brand].video.accent):
+ * mkan's slides wear mkan Clay #e05638, the balqalam/hogwarts/databayt family keeps Clay #d97757.
+ * A draft brand (accent "TODO") or an unknown one keeps the base theme rather than a guessed colour.
+ */
+export function themeFor(theme: SlideTheme, brand?: string): ThemeColors {
+  const base = THEMES[theme];
+  const accent = brand ? PRODUCTION[brand]?.video?.accent : undefined;
+  if (!accent || !/^#[0-9a-f]{6}$/i.test(accent)) return base;
+  if (accent.toLowerCase() === hex("Clay").toLowerCase()) return base;
+  return theme === "clay" ? { ...base, bg: accent } : { ...base, accent };
 }

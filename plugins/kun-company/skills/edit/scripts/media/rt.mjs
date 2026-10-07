@@ -133,7 +133,10 @@ export function brand(id) {
   const alias = { moallimee: "moalimee" }
   const key = alias[id] || id
   const p = kit.production?.[key]
-  if (p) return { id: key, ...p }
+  if (p) {
+    if (p.status === "draft") throw new Error(`brand "${key}" is a draft in content/media/brand-kit.json → production — fill its TODO fields (colours, hosts, cdn) first; renderers never guess a brand`)
+    return { id: key, ...p, logoPath: p.logo && join(KUN_DIR, p.logo) }
+  }
   const b = kit.brands?.[key]
   if (!b) throw new Error(`Unknown brand "${id}" — add it to content/media/brand-kit.json → production`)
   const hex = (name) => [...(b.palette?.canvas || []), ...(b.palette?.support || [])].find((c) => c.name === name)?.hex
@@ -141,7 +144,7 @@ export function brand(id) {
     id: key, status: "fallback", repo: key, locales: ["ar", "en"], timezone: "Africa/Khartoum",
     fonts: { arabicHeadline: "thmanyah-serif-display-900.ttf", arabicBody: "thmanyah-sans-500.ttf" },
     video: { canvas: hex("Ivory Light") || "#faf9f5", ink: hex("Slate Dark") || "#141413", accent: hex("Clay") || "#d97757", accentSoft: "#ebcece", captionBg: "#141413", captionInk: "#faf9f5", numerals: "arab" },
-    cdn: key,
+    cdn: key, logoPath: b.mark?.file && join(KUN_DIR, b.mark.file),
   }
 }
 
