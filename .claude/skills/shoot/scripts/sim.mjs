@@ -321,7 +321,7 @@ if (voiceLang) {
 }
 
 // ───────────────────────── render range ─────────────────────────
-const takeEnd = INTRO + T.takeLen
+let takeEnd = INTRO + T.takeLen
 let T0 = 0, T1 = T.total, clip = false
 if (steps) {
   const caps = captionsOf(T)
@@ -338,13 +338,19 @@ function camAt(t) {
   const hw = WIN.w / 2 / (k0 * s.z), hh = WIN.h / 2 / (k0 * s.z)
   return { ...s, cx: Math.max(hw, Math.min(VW - hw, s.cx)), cy: Math.max(Math.min(hh, VH / 2), Math.min(Math.max(VH - hh, VH / 2), s.cy)) }
 }
+// A tip lasts its duration (stretched in a sped-up reel) but never past the next step's caption:
+// a tip about the map must not sit over the academic form.
+function toastEnd(e) {
+  const next = T.timeline.find((c) => c.type === "caption" && c.o > e.o)
+  return Math.min(e.o + (e.ms / 1000) * TK, next ? next.o : Infinity)
+}
 function stateAt(t) {
   const tt = t - INTRO
   const fi = Math.max(0, T.fr.findLastIndex((f) => f.out <= tt))
   const cap = T.timeline.filter((e) => e.type === "caption" && e.o <= t).at(-1)
   const capSince = cap ? t - cap.o : 0
-  const toasts = T.timeline.filter((e) => e.type === "toast" && t >= e.o && t < e.o + (e.ms / 1000) * TK)
-    .map((e) => ({ title: e.title, text: e.text, a: Math.min(1, (t - e.o) / (.3 * TK), (e.o + (e.ms / 1000) * TK - t) / (.3 * TK)) }))
+  const toasts = T.timeline.filter((e) => e.type === "toast" && t >= e.o && t < toastEnd(e))
+    .map((e) => ({ title: e.title, text: e.text, a: Math.min(1, (t - e.o) / (.3 * TK), (toastEnd(e) - t) / (.3 * TK)) }))
   return {
     frame: "file://" + T.fr[Math.min(fi, T.fr.length - 1)].f, cam: camAt(t),
     cap: cap && tt < T.takeLen ? { n: cap.n, text: cap.text, a: Math.min(1, capSince / .35) } : null, toasts,
@@ -444,6 +450,11 @@ if (previewAt) {
 const REEL_MAX = 58
 const tscale = portrait && T1 - T0 > REEL_MAX ? (T1 - T0) / REEL_MAX : 1
 TK = tscale
+// the outro waits for the last tip, so a stretched closing tip is never cut by the end card
+if (!clip) {
+  const tail = Math.max(0, ...T.timeline.filter((e) => e.type === "toast").map((e) => toastEnd(e) + 0.3 * TK - (takeEnd - XF)))
+  if (tail > 0) { takeEnd += tail; T1 += tail }
+}
 if (tscale > 1) console.log(`reel: ${(T1 - T0).toFixed(0)}s flow plays at ${tscale.toFixed(2)}× to fit ${REEL_MAX}s`)
 const times = []
 for (let k = 0; k < Math.round(((T1 - T0) / tscale) * FPS); k++) times.push(T0 + (k / FPS) * tscale)

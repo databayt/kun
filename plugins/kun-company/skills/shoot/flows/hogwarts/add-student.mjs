@@ -176,9 +176,10 @@ export default async ({ page, go, shot, settle, t }) => {
   await dialog(page).filter({ hasText: NAME }).waitFor({ timeout: 20000 }).catch(() => {})
   await shot("created")
 
+  // No search isolates one student (2026-10-07: a full name, an English name or a phone finds
+  // nothing; one Arabic token finds 20+ namesakes) — the list is newest-first, so point at the row.
   await page.keyboard.press("Escape")
-  await page.getByPlaceholder(t("بحث في الطلاب...", "Search students...")).fill(NAME.split(" ").pop())
-  await page.waitForTimeout(2500)
+  await page.getByRole("row").filter({ hasText: NAME }).first().hover()
   await shot("new-row")
 
   await cleanup({ page, go, t })
