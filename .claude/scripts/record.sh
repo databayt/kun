@@ -9,7 +9,7 @@
 #
 # Subcommands:
 #   init                      create the library + manifest
-#   start [name]              begin a screen-recording segment (screencapture -v)
+#   start [name] [--page]     begin a screen-recording segment (screencapture -v -k; --page = Chrome page area only)
 #   stop                      end the segment (SIGINT — never plain kill) + verify
 #   shot <name>               full-screen still into _work (browser-viewport shots
 #                             come from the browser MCP instead)
@@ -65,11 +65,16 @@ cmd_init() { ensure_lib; echo "library ready: $LIB"; }
 cmd_start() {
   ensure_lib
   if pid=$(recording_pid); then die "already recording (pid $pid) — run: record.sh stop"; fi
-  local name="${1:-take}"
+  local name="take" page=0
+  for x in "$@"; do case "$x" in --page) page=1 ;; *) name="$x" ;; esac; done
   local n=1
   [ -f "$SEGLIST" ] && n=$(( $(wc -l < "$SEGLIST" | tr -d ' ') + 1 ))
   local out="$WORK/$(printf 'seg-%02d' "$n")--${name}.mov"
-  screencapture -v -x "$out" &
+  # -k shows clicks. --page records only Chrome's page area (MBP14: menu bar 38 + tabs/toolbar 87 →
+  # y=125, 1512x857 logical) — the same frame as /shoot's stills; override with RECORD_PAGE_RECT.
+  local rect=()
+  [ "$page" = 1 ] && rect=(-R"${RECORD_PAGE_RECT:-0,125,1512,857}")
+  screencapture -v -x -k ${rect[@]+"${rect[@]}"} "$out" &
   local pid=$!
   echo "$pid" > "$PIDFILE"
   echo "$out" >> "$SEGLIST"
@@ -246,9 +251,14 @@ d, t, tl = float('$dur'), float('$target'), float('$tail')
 body = max(d - tl, 0.1)
 print(round(max(body / max(t - tl, 1.0), 1.0), 3))")
   cut=$(python3 -c "print(round(float('$dur') - float('$tail'), 3))")
+  # screencapture is VFR Retina: compose at a constant 30 fps into a near-lossless mezzanine, then the
+  # shared web profile delivers 1080p tv-range BT.709 with faststart (media.sh, edit skill).
+  local mezz="${out%.*}.mezz.mkv"
   ffmpeg -y -v error -i "$in" -filter_complex \
     "[0:v]trim=0:${cut},setpts=PTS/${speed}[a];[0:v]trim=${cut},setpts=PTS-STARTPTS[b];[a][b]concat=n=2:v=1:a=0,fps=30[v]" \
-    -map "[v]" -c:v libx264 -preset fast -crf 18 -pix_fmt yuv420p "$out" || die "adcut render failed"
+    -map "[v]" -c:v libx264 -preset veryfast -crf 12 -pix_fmt yuv420p "$mezz" || die "adcut render failed"
+  "$HOME/.claude/skills/edit/scripts/media.sh" encode web "$mezz" "$out" >/dev/null || die "adcut encode failed"
+  rm -f "$mezz"
   local final; final=$(ffprobe -v quiet -show_entries format=duration -of csv=p=0 "$out")
   echo "ad cut: ${dur}s → ${final}s (body ${speed}x, last ${tail}s real-time) → $out"
 }
