@@ -33,7 +33,12 @@ and he can see the difference. DPR 2 gives the right layout at the wrong resolut
   `/ar/s/demo/students/new` → `students-new-ar.png`.
 - Same name = overwrite, so a re-shoot replaces the old shot.
 - Flows: `<flow>/NN-<step>-<locale>.png` (`add-student/01-list-ar.png`).
-- `public/` is served publicly once that folder is committed and deployed (`balqalam.com/screenshot/…`).
+- Every still also gets web derivatives in `derived/`: `<stem>-{1600,2400}.{avif,webp}` (UI text
+  stays crisp at 4:4:4). The PNG master is oxipng'd in place. `--no-derive` skips this.
+- `public/screenshot/` is **git-ignored** in hogwarts and mkan: media never ships in git (the
+  `media-guard` hook blocks it). Deliver through the CDN with
+  `media.sh publish --ns <brand> --slug <flow> --manifest <repo manifest> <files>`: hashed immutable
+  URLs plus a manifest entry the product's `<Shot>` / `<TutorialVideo>` components read.
 
 ## Hosts + login
 
@@ -57,8 +62,17 @@ export default async ({ page, go, shot, settle }) => {
 };
 ```
 
-- `go(path)` navigates and logs in if asked. `shot(step)` settles (network idle, fonts,
-  800 ms) then saves the next numbered still. `page` is Playwright.
+- `go(path)` navigates and logs in if asked; with `--lang` it rewrites the `/ar|/en` prefix.
+  `shot(step)` settles, then saves the next numbered still: network idle, fonts, visible images
+  decoded, BlurImage `data-loaded`, no skeleton on screen (capped at 10 s, then a warning).
+  `t(ar, en)` returns the run's label. `page` is Playwright.
+- **Deterministic by construction**: frozen CSS animations, hidden caret, `reducedMotion`, light
+  scheme, the brand's timezone, `[data-media-mask]` plus `--mask`/`export const masks` painted
+  over. Use `--clock <iso>` to pin `Date` (off by default: server-rendered dates won't match).
+  Login is checked against the `authjs.role` cookie.
+- **Bilingual**: `--flow add-student --lang ar,en` runs once per language in its own context.
+  Labels come from the product dictionaries via `t()`, e.g.
+  `t("التالي", "Next")` from `school.students.wizard.next`.
 - Name each step after what is on screen (`list`, `form`, `filled`, `saved`, `new-row`).
 - Instant `fill()` is fine — these are stills.
 - Export a `cleanup({ page, go })` that undoes what the flow creates; call it at the start
@@ -83,7 +97,8 @@ node ~/.claude/skills/shoot/scripts/motion.mjs <composition.html> <out.mp4> [--p
 - Compositions: `motion/<repo>/<flow>.html` — a `STEPS` list (shot, caption, focus rects in
   screenshot pixels, optional image swap). Fonts: the product's own Thmanyah (local render only,
   never shipped). 1920x1080, 30 fps, H.264.
-- Preview frames first, read them, then render (~4 min for 48 s). Output beside the shots:
+- Preview frames first, read them, then render (CDP capture piped into ffmpeg; ~45 s for 48 s),
+  delivered through `media.sh encode web` (tv-range BT.709, faststart). Output beside the shots:
   `<repo>/public/screenshot/<flow>/<flow>-ar.mp4`.
 - Keep focus zoom ≤ 2.2× and frame small targets with their neighbours, or the shot is grey.
 - Claims in captions must match what the shots show (count of steps, what is required).
@@ -91,7 +106,7 @@ node ~/.claude/skills/shoot/scripts/motion.mjs <composition.html> <out.mp4> [--p
 ## Sim — the tutorial video: the real flow, filmed as a human, directed into ONE file
 
 The real wizard on the demo, driven like an admin: an on-page cursor glides and clicks (green
-ripple), every field filled in reading order (RTL), text typed key by key, dropdowns and native
+ripple in the brand accent), every field filled in reading order (RTL), text typed key by key, dropdowns and native
 month/year selects picked, and every upload through a simulated **macOS 27 Finder** "Open"
 window (Liquid Glass, sidebar, Downloads with real thumbnails, remembers the last folder) then the
 real upload — so tiles show the product's own thumbnail, label and × clear button. Recorded
@@ -102,11 +117,28 @@ filled → large numbered captions inward at the bottom (the camera keeps fields
 toasts inward at the top-right, fade only → outro card. Frozen server waits are trimmed to 1.2 s.
 
 ```
-node ~/.claude/skills/shoot/scripts/sim.mjs --flow add-student                 # take + direct (~25 min)
+node ~/.claude/skills/shoot/scripts/sim.mjs --flow add-student                 # take (real time) + direct (~2 min)
 node ~/.claude/skills/shoot/scripts/sim.mjs --flow add-student --direct-only   # re-compose the saved take
+  [--voice ar] [--aspect 9:16] [--steps 2-3 --name <clip>] [--draft] [--preview 5,30] [--brand <id>] [--workers 3]
 ```
 
-- **One file, overwritten:** `<repo>/public/screenshot/<flow>/<flow>-ar.mp4`. Never variants.
+- **Speed**: the director captures over CDP into an MJPEG pipe across 3 pages and reuses unchanged
+  frames. A 121 s tutorial directs in ~30 s and delivers in under 2 min (it used to take ~25 min).
+- **Look = brand kit**: overlay, caption badge, toasts, cards and the click ripple take colours,
+  fonts and the mark from `content/media/brand-kit.json → production` (hogwarts → `balqalam`
+  Clay). Fonts come from `~/Library/Fonts`.
+- **Deliverables**, one file each, overwritten (never `-v2`):
+  - `<flow>-ar.mp4` (H.264), `<flow>-ar.av1.mp4`, `<flow>-ar.poster.webp`, `<flow>-ar.vtt`
+  - reel: `<flow>-ar.reel.mp4`. 1080×1920 with a brand band, a square camera, captions inside the
+    safe area; a flow over 58 s plays uniformly faster to fit.
+  - support clip: `<name>-ar.*` (`--steps a-b`). Never truncated; qa-pack flags anything over 30 s.
+  - draft: `<flow>-ar.draft.mp4`.
+- **Voice** (`--voice ar`): `sims/<repo>/<flow>.voice.ar.json` holds one line per `sim.caption`, in
+  order. Lines are synthesized locally (Chatterbox, `media.sh voice gen`) in the consented house
+  voice, gated by a whisper transcript (CER ≤ 0.10). The director holds frames so each line fits,
+  never stretching audio. No consented voice means captions only, never a failed render.
+- **QA before anything ships**: `media.sh qa-pack <outputs> --vtt <flow>-ar.vtt --out <dir>`, then
+  the `media-qa` agent (PASS / FIX / FAIL).
   The take is `~/.cache/shoot-sim/<repo>-<flow>/` (frames + `take.json`). Camera/caption/toast
   timing is in `take.json` — edit an event there and `--direct-only` instead of a new take.
 - Sim files: `sims/<repo>/<flow>.mjs` — `meta`, `prepare`, `cleanup`, `default async (sim)`. API:

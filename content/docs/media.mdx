@@ -26,6 +26,50 @@ in the [showroom](https://kun.databayt.org/en/social/media).
 
 > Editing real footage (cuts, Arabic captions, reels, title cards) is the [edit](/docs/edit) lane: local and free. This page generates new media.
 
+## Production environment
+
+Claude Code on the M4 is databayt's studio. The rule is **free and local first**: no paid
+generation API (decided 2026-10-07). Pick the tool by the job:
+
+| Job | Tool | Output |
+|---|---|---|
+| Stills of real product pages, both languages | `/shoot` (`shoot.mjs --lang ar,en`) | PNG master plus AVIF/WebP at 1600/2400 |
+| Tutorial video of a web flow | `/shoot` sim (`sim.mjs --flow <f> [--voice ar]`) | H.264 + AV1 + poster + VTT, brand look, ~2 min to render |
+| Vertical reel for TikTok, Instagram or Facebook | `sim.mjs --aspect 9:16` · `reel.sh` | 1080×1920 ≤ 58 s, captions inside the safe area |
+| Support clip (one task) | `sim.mjs --steps a-b --name <clip>` | ≤ 30 s, captioned |
+| Native apps, OTP inboxes, multi-app flows | `/record` (`--page`, clicks shown), or `computer-use` / the Desktop iOS Simulator pane (Cmd+S still, Cmd+R video) | Raw take, then `/edit` |
+| Quick support answer from a live, logged-in page | Claude in Chrome (`claude --chrome`): record a GIF, then `media.sh encode loop` | Muted looping MP4 |
+| Footage: cuts, captions, motion graphics | [`/edit`](/docs/edit): video-use, HyperFrames | Finished video |
+| AI imagery (text-free) | `/higgs` ladder: Adobe for creativity → Canva → Claude Design → Figma Weave → ChatGPT seat | Stills; video through Weave and Adobe |
+| Anything carrying copy | `/carousel` templates | Exact platform sizes |
+
+**One pipeline behind all of it.** `media.sh` (edit skill) encodes every deliverable the same way:
+tv-range BT.709, faststart, loudness normalised. It derives web images, checks everything with
+`qa-pack` against the budgets in `engine.json → media`, and publishes to `cdn.databayt.org` with
+hashed immutable URLs plus a manifest. The products render those through `<TutorialVideo>`
+(AV1 first, H.264 fallback, poster, captions) and `<Shot>` (AVIF/WebP `<picture>`). Media never
+enters git: the `media-guard` hook blocks it.
+
+**The gate.** Before publishing, the `media-qa` agent reads the `qa-pack` output and judges what
+only eyes can: Arabic shaping, RTL, captions over the action, the brand's name and mark, private
+data, safe areas. It writes PASS / FIX / FAIL, and only a PASS ships.
+
+**Voice.** Narration is synthesized locally (Chatterbox Multilingual v3) in one consented house
+voice. A team member records 10–15 s once (`media.sh voice record house-ar --speaker "<name>"`),
+then `voice consent house-ar --given`. The sample and the consent stay outside git and Drive.
+Every line is checked against a whisper transcript. With no valid consent, videos ship with
+captions only, and `voice revoke` lists every asset that then needs re-rendering.
+
+**Connectors** (all on free tiers):
+- **Canva** plugin (on): resize, brand check.
+- **Adobe for creativity**: enable it per media session with
+  `claude plugin enable adobe-for-creativity@claude-plugins-official`. Its 15 skills crowd the
+  skill listing if always on.
+- **Claude Design**: run `/design-login` once.
+- **Figma Weave**: 150 credits a month. The `figma-quota` hook warns before the Figma MCP's
+  ~20 calls a month run out.
+
+
 ## The doctrine
 
 | Rule | Why |

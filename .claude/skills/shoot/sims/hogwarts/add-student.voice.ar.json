@@ -1,0 +1,15 @@
+{
+  "voice": "house-ar",
+  "lang": "ar",
+  "$comment": "One line per sim.caption in sims/hogwarts/add-student.mjs, in order (8). Spoken a beat after its caption; the director holds the frame when a line needs longer. Never stretched.",
+  "lines": [
+    "لإضافة طالب جديد، افتح صفحة الطلاب واضغط زر الإضافة.",
+    "ارفع صورة الطالب، ثم مستنداته من جهازك.",
+    "أدخل اسم الطالب وتاريخ ميلاده ورقم الهاتف.",
+    "أضف ولي الأمر: الأب أولاً، ثم الأم إن رغبت.",
+    "ابحث عن عنوان السكن، ثم اختره من القائمة.",
+    "اختر الصف والفصل الدراسي.",
+    "ثم اضغط زر إنشاء.",
+    "تم! يظهر الطالب الآن في القائمة بصورته وصفّه."
+  ]
+}

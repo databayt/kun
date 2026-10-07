@@ -95,6 +95,34 @@ $S/reel.sh base.mp4 reel.mp4 --srt <dir>/edit/master.srt --mode pad   # pad: scr
 `auto-editor in.mp4 --margin 0.2s -o out.mp4` cuts on audio level only, which is good for long
 recordings before the transcript pass. Transcript-driven cuts (video-use) are the quality path.
 
+## Media library — `media.sh` (shared by edit, shoot, sim and record)
+
+`$S/media.sh` is the one path for encoding, deriving, publishing and checking media. It is local
+and free:
+
+| Command | Does |
+|---|---|
+| `encode <web\|av1\|reel\|clip\|loop\|draft> <in> <out>` | tv-range BT.709 tags, faststart, two-pass loudnorm (−16 web, −14 social). An out ending in `.av1.mp4` encodes SVT-AV1. |
+| `poster <in> <out.webp> --at S` | A meaningful frame as WebP, 1600 px wide |
+| `derive <png…> [--kind ui\|photo] [--check]` | oxipng master plus AVIF/WebP at 1600/2400 (4:4:4 for UI text); EXIF stripped; ssimulacra2 score |
+| `vtt <srt\|json> <out.vtt>` | WebVTT captions for `<track>` |
+| `publish --ns <brand> --slug <s> --id <id> --manifest <path> <files…>` | Hashed, immutable keys on cdn.databayt.org, each HEAD-verified, plus an upsert into the product's `media-manifest.json` (AV1 source first, then H.264) |
+| `qa-pack <files…> [--vtt] [--ref]` | Numbers against `engine.json → media` plus ≤1600 px previews for the `media-qa` agent |
+| `voice status\|record\|consent\|gen\|mix\|revoke` | Consent-gated local Arabic narration (Chatterbox Multilingual v3 on MLX), whisper-gated |
+| `brand <id> --json\|--css\|--ass` | The brand kit's production entry for any renderer |
+| `doctor` · `purge [--deep]` | Toolchain status; age out render caches (`--deep` with every session closed) |
+
+- **Before shipping:** run `qa-pack`, then have `media-qa` judge it. PASS means publish; FIX means
+  re-render with the named change.
+- **Media never enters git** (the `media-guard` hook): publish to the CDN and commit only the
+  manifest.
+- **Voice:** a house voice needs a consenting speaker. Record it once with
+  `media.sh voice record house-ar --speaker "<name>"`, then
+  `media.sh voice consent house-ar --given`. Samples and consent live outside git and outside
+  Drive. Without them, every render ships with captions only.
+- **AI imagery is free first** (higgs ladder): Adobe for creativity (enable per media session),
+  Canva, Claude Design, Figma Weave. Google and Higgsfield stay off until funded.
+
 ## House rules
 
 - **One file per piece, always overwritten**, for example `<flow>-ar.mp4`. Never `-v2` or `-final2`.

@@ -26,7 +26,7 @@ CLI: `bash ~/.claude/scripts/record.sh <cmd>` (canonical copy in kun).
 | ----------------- | ----------------------------------------------------------------------- |
 | `init` / `status` | Create/inspect the library (`~/media/`)                                 |
 | `frame`           | Size Chrome to 1512x982, dismiss the automation infobar                 |
-| `start [name]`    | Begin a recording SEGMENT (`screencapture -v`, backgrounds itself)      |
+| `start [name] [--page]` | Begin a recording SEGMENT (`screencapture -v -k`: clicks highlighted; `--page` = Chrome's page area only, the `/shoot` frame) |
 | `stop`            | End the segment with SIGINT + `ffprobe` verify                          |
 | `shot <name>`     | Full-screen still (browser-viewport shots: use the browser MCP instead) |
 | `otp`             | Screenshot the Outlook desktop inbox → Read the image for the code      |
@@ -155,7 +155,7 @@ file leaves its folder (Drive links, chat attachments, client handoffs).
 ### 3½. Ad cut — flows ship blazing fast
 
 Raw captures are minutes; **the deliverable is an ad: 15-45 seconds**. Render with
-`record.sh adcut <raw> <out> [--target 30] [--tail 3]` — it speeds the body to hit
+`record.sh adcut <raw> <out> [--target 30] [--tail 3]` — delivered through the shared `media.sh encode web` (1080p, constant 30 fps, tv-range BT.709, faststart) — it speeds the body to hit
 the target and keeps the last seconds real-time so the payoff (the new row, the
 success state) is readable. File the AD as the flow asset; keep the raw only if a
 slower walkthrough was explicitly requested. Instant field-fills are FINE for ads —
@@ -225,3 +225,7 @@ sync loses nothing.
 - Screen-recording permission is already granted to the terminal host; Drive-folder
   writes are TCC-blocked until one of the two sync fixes above is applied.
 - The dev-server route table goes stale after hours up — restart before recording dev.
+
+## Polish and delivery
+
+A raw take is footage, not a deliverable. Cut it with `/edit` (transcript-driven, or `auto-editor` for silences), make a reel with `reel.sh`, then `media.sh qa-pack` → `media-qa`, and publish to the CDN with `media.sh publish`. Media never goes into git. For web flows, the `/shoot` sim lane gives cleaner tutorials than a screen recording: a scripted take, brand look, camera, captions and narration. Use `/record` for what only the real screen can show: OTP inboxes, native apps, multi-app flows.
