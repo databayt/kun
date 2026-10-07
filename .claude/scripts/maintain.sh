@@ -244,6 +244,9 @@ disk_free_gb() { df -Pk "$HOME" 2>/dev/null | awk 'NR==2 {print int($4/1048576)}
 # installed tool needs. Each command is optional; a failure just skips that cache.
 prune_caches() {
     command -v uv >/dev/null 2>&1 && UV_LOCK_TIMEOUT=10 uv cache prune >/dev/null 2>&1 && log "  pruned the uv cache"
+    # sim takes, media scratch and assembled recordings past their keep window (engine.json → media)
+    local media="$HOME/.claude/skills/edit/scripts/media.sh"
+    [ -x "$media" ] && "$media" purge >/dev/null 2>&1 && log "  purged stale media render caches"
     command -v pnpm >/dev/null 2>&1 && pnpm store prune >/dev/null 2>&1 && log "  pruned the pnpm store"
     if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
         docker builder prune -af --max-used-space "${DOCKER_CACHE_CAP_GB}gb" >/dev/null 2>&1 \

@@ -10,6 +10,14 @@ for f in ffmpeg-full yt-dlp auto-editor uv; do
   brew list --formula "$f" >/dev/null 2>&1 || HOMEBREW_NO_AUTO_UPDATE=1 brew install "$f"
 done
 command -v mlx_whisper >/dev/null || uv tool install mlx-whisper
+# media library (media.sh): lossless PNG, local Arabic TTS, and sharp + playwright-core in their own
+# runtime dir (outside every repo; setup.sh's cp -r of the skills dir never touches it).
+brew list --formula oxipng >/dev/null 2>&1 || HOMEBREW_NO_AUTO_UPDATE=1 brew install oxipng
+command -v mlx_audio.tts.generate >/dev/null || uv tool install mlx-audio
+mkdir -p "$MEDIA_RT" "$MEDIA_CACHE"
+[ -f "$MEDIA_RT/package.json" ] || printf '{\n  "name": "databayt-media-runtime",\n  "private": true\n}\n' > "$MEDIA_RT/package.json"
+# playwright-core pinned to kun's version so the Chromium build already on disk is reused.
+(cd "$MEDIA_RT" && [ -d node_modules/sharp ] && [ -d node_modules/playwright-core ] || pnpm add sharp@0.34 playwright-core@1.61.1 >/dev/null)
 
 # video-use, patched for on-device mlx-whisper + Arabic caption styles.
 if [ ! -d "$VIDEO_USE_DIR/.git" ]; then
@@ -35,6 +43,9 @@ if [ -z "$(hf_plugin_root)" ]; then
 fi
 
 echo "--- edit toolchain"
+echo "oxipng       $(oxipng --version 2>/dev/null)"
+echo "mlx-audio    $(command -v mlx_audio.tts.generate)"
+echo "media rt     $MEDIA_RT ($(ls "$MEDIA_RT/node_modules" 2>/dev/null | tr '\n' ' '))"
 filters="$(ffmpeg -hide_banner -filters 2>/dev/null)"   # captured: grep -q + pipefail = SIGPIPE false negative
 [[ "$filters" == *" subtitles "* ]] && echo "ffmpeg-full  libass ok" || echo "ffmpeg-full  MISSING libass"
 echo "mlx_whisper  $(command -v mlx_whisper)"

@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # Vertical 1080x1920@30 reel from a finished horizontal cut, captions burned LAST.
-#   reel.sh <in.mp4> <out.mp4> [--srt master.srt] [--mode pad|crop] [--max 90]
+#   reel.sh <in.mp4> <out.mp4> [--srt master.srt] [--mode pad|crop] [--max 60]
 # pad  = whole frame centred over a blurred fill (screen content — nothing gets cropped away)
 # crop = centre 9:16 crop (talking heads)
 set -euo pipefail
 . "$(dirname "$0")/lib.sh"
 
 in="${1:?usage: reel.sh <in> <out> [--srt f] [--mode pad|crop] [--max s]}"; out="${2:?out path}"; shift 2
-srt=""; mode=pad; max=90
+srt=""; mode=pad; max=60
 while [ $# -gt 0 ]; do
   case "$1" in
     --srt) srt="$2"; shift 2 ;;
@@ -28,8 +28,10 @@ if [ -n "$srt" ]; then
   vf="$vf,subtitles='${srt_abs//:/\\:}':force_style='${EDIT_AR_SUB_STYLE//,/\\,}'"
 fi
 
+# Compose to a near-lossless intermediate, then the shared `reel` profile does the delivery encode:
+# tv-range BT.709 tags, faststart, −14 LUFS for social, the 8 Mbps cap and the 60 s platform limit.
+mezz="$MEDIA_CACHE/reel-$$.mkv"; mkdir -p "$MEDIA_CACHE"; trap 'rm -f "$mezz"' EXIT
 ffmpeg -hide_banner -loglevel error -y -i "$in" -t "$max" \
   -filter_complex "$vf[v]" -map "[v]" -map "0:a?" \
-  -c:v libx264 -profile:v high -crf 19 -pix_fmt yuv420p -c:a aac -b:a 160k -ar 48000 \
-  -movflags +faststart "$out"
-ffprobe -v error -show_entries stream=width,height,r_frame_rate:format=duration -of compact "$out"
+  -c:v libx264 -preset veryfast -crf 12 -pix_fmt yuv420p -c:a pcm_s16le "$mezz"
+"$(dirname "$0")/media.sh" encode reel "$mezz" "$out" --max "$max" | grep -E '"(width|height|fps|color_range|mb|faststart)"' 

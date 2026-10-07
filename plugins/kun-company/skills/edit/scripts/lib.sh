@@ -24,3 +24,24 @@ disk_guard() {
 hf_plugin_root() {
   ls -d "$HOME"/.claude/plugins/cache/hyperframes/hyperframes/*/ 2>/dev/null | sort -V | tail -1 | sed 's:/$::'
 }
+
+# --- media library (media.sh) — shared by edit, shoot (stills + sim) and record ---------------
+KUN_DIR="${KUN_DIR:-$HOME/kun}"
+# sharp + playwright-core live outside every repo and outside the skills copy (setup.sh cp -r's it).
+MEDIA_RT="${MEDIA_RT:-$HOME/.local/share/databayt/media}"
+# Voice samples + consent: not git, not ~/media (that syncs to Drive).
+MEDIA_VOICE_DIR="${MEDIA_VOICE_DIR:-$HOME/Library/Application Support/databayt/voice}"
+MEDIA_CACHE="${MEDIA_CACHE:-$HOME/.cache/media}"
+CDN_BUCKET="databayt-cdn"   # the bucket cdn.databayt.org fronts — NOT AWS_S3_BUCKET (hogwarts' upload bucket)
+CDN_HOST="cdn.databayt.org"
+
+# Every web render is tagged BT.709 limited range. Full-range (yuvj*, from JPEG frames) or untagged
+# video plays washed out or crushed on some players and in social re-encodes.
+TAGS=(-colorspace bt709 -color_primaries bt709 -color_trc bt709 -color_range tv)
+
+# vf_to_tv <in_range pc|tv> <in_matrix bt601|bt709> <w> <h> [pix_fmt] — resize + convert to tv-range bt709.
+# setparams stamps the frames: this ffmpeg 9 build tags the stream from frame properties, so the
+# -color_primaries/-color_trc output flags alone leave primaries and transfer unset.
+vf_to_tv() {
+  echo "scale=$3:$4:flags=lanczos+accurate_rnd+full_chroma_int:in_range=$1:in_color_matrix=$2:out_range=tv:out_color_matrix=bt709,setparams=color_primaries=bt709:color_trc=bt709:colorspace=bt709:range=tv,format=${5:-yuv420p}"
+}
