@@ -1,7 +1,7 @@
 ---
 name: edit
 description: Edit video locally — footage cuts, Arabic captions, motion graphics, demos, reels
-when_to_use: "Use when real footage must be cut or captioned, or a video composed from code. Filming is /record, /shoot; AI clips /higgs. Triggers on: edit video, cut the silences, rough cut, make a reel, add captions, motion graphic, title card, intro outro, مونتاج, قص الفيديو."
+when_to_use: "Use when real footage must be cut or captioned, or a video composed from code. Filming is /record, /shoot; AI clips /higgs. Triggers on: edit video, cut the silences, rough cut, make a reel, add captions, motion graphic, title card, intro outro, مونتاج, قص الفيديو, ريلز."
 argument-hint: "<footage dir|file> | motion <brief> | demo <flow> | reel <file>"
 ---
 
@@ -10,6 +10,11 @@ argument-hint: "<footage dir|file> | motion <brief> | demo <flow> | reel <file>"
 The agent never watches video. It reads a word-level transcript and looks at a filmstrip only at
 decision points, writes an EDL or an HTML composition, and renders with ffmpeg. Everything runs on
 this Mac, so there is no API spend.
+
+Keywords (vocabulary, *The Pensieve*) map to lanes: `edit`/`مونتاج` asks, then routes ·
+`rough cut`/`قص الفيديو` → raw footage · `captions`/`ترجمة الفيديو` → captions on a cut ·
+`title card`, `motion graphic` → HyperFrames · `reel`/`ريلز` → cut, then `reel.sh` (AI-only reels
+are /higgs). How-to for humans: `content/docs/edit.mdx`.
 
 | Need                                    | Engine                                                             | Entry                    |
 | --------------------------------------- | ------------------------------------------------------------------ | ------------------------ |

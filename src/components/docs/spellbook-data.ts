@@ -2965,6 +2965,94 @@ export const schools: School[] = [
         connects: ["record", "shoot", "higgs", "carousel", "social"],
         depends: [],
       },
+      {
+        name: "rough cut",
+        effect:
+          "Cut raw footage by its transcript — silences, fillers, false starts and retakes out, word-boundary cuts with 30ms fades, loudness to -14 LUFS",
+        order: [s("/edit"), s("/video-use")],
+        steps: [
+          "vu.sh transcribe_batch <dir> --language ar → pack_transcripts → read takes_packed.md (never the video)",
+          "Propose the strategy (keep/cut per phrase, target length, aspect) and wait for a yes",
+          "Write edit/edl.json → vu.sh render --draft, verify cut points with timeline_view → final render",
+        ],
+        connects: ["edit", "captions", "reel", "record"],
+        depends: [],
+      },
+      {
+        name: "captions",
+        effect:
+          "Burn Arabic captions into a cut — Thmanyah Sans on a padded dark box, built from the word transcript and applied LAST",
+        order: [s("/edit"), s("/video-use")],
+        steps: [
+          "Transcribe locally (mlx-whisper) if not cached",
+          "Fix Whisper's Arabic spelling slips in the transcript text before building subtitles",
+          "vu.sh render <edl> --build-subtitles (or reel.sh --srt for vertical) and read a captioned frame",
+        ],
+        connects: ["edit", "rough cut", "reel"],
+        depends: [],
+      },
+      {
+        name: "title card",
+        effect:
+          "Animated Arabic title, intro or outro card — HyperFrames HTML + GSAP rendered to MP4 in the brand type (Thmanyah Serif Display, clay #e05638)",
+        order: [s("/edit")],
+        steps: [
+          "Write the composition: per-element direction: rtl (never <html dir=rtl> — blank render), local @font-face",
+          "hf.sh check until 0 errors (contrast + layout audits then actually run)",
+          "hf.sh render → read a mid-frame PNG",
+        ],
+        connects: ["edit", "motion graphic", "shoot", "record"],
+        depends: [],
+      },
+      {
+        name: "motion graphic",
+        effect:
+          "Code-composed promo or explainer video — HyperFrames (Apache-2.0) via the /hyperframes:hyperframes router; free alternative to Remotion",
+        order: [s("/edit")],
+        steps: [
+          "Brief → storyboard → composition with the brand kit from content/docs/media.mdx",
+          "hf.sh preview --background for review, hf.sh check before any render",
+          "hf.sh render once approved; one output file, overwritten",
+        ],
+        connects: ["edit", "title card", "carousel", "higgs"],
+        depends: [],
+      },
+      {
+        name: "مونتاج",
+        effect:
+          "Arabic for edit the video — routes to the edit lane: footage cuts, captions, cards, reels",
+        order: [s("/edit")],
+        steps: [
+          "Ask which footage and which outcome (cut, captions, reel, card)",
+          "Run the matching edit lane",
+        ],
+        connects: ["edit", "rough cut", "captions"],
+        depends: [],
+      },
+      {
+        name: "قص الفيديو",
+        effect:
+          "Arabic for cut the video — transcript-driven rough cut of real footage",
+        order: [s("/edit"), s("/video-use")],
+        steps: [
+          "Transcribe locally, read the packed transcript",
+          "Confirm the cut plan, render, verify cut points",
+        ],
+        connects: ["edit", "rough cut"],
+        depends: [],
+      },
+      {
+        name: "ترجمة الفيديو",
+        effect:
+          "Arabic for subtitle the video — burned Arabic captions from the local transcript",
+        order: [s("/edit"), s("/video-use")],
+        steps: [
+          "Transcribe locally, correct the Arabic text",
+          "Render with --build-subtitles, read a captioned frame",
+        ],
+        connects: ["edit", "captions"],
+        depends: [],
+      },
     ],
   },
   {
@@ -3056,14 +3144,14 @@ export const schools: School[] = [
       {
         name: "reel",
         effect:
-          "Vertical promo clip — kling3_0_turbo at 9:16; at 0.7 credits this lane PLANS and stops, it never spends",
-        order: [p("Higgs"), s("/higgs")],
+          "Vertical 9:16 clip — from real footage via /edit (reel.sh: 1080x1920@30, captions above the platform UI, free and local); AI-generated via higgs kling3_0_turbo, which at 0.7 credits PLANS and stops",
+        order: [s("/edit"), p("Higgs"), s("/higgs")],
         steps: [
-          "State the cost honestly: video starts at 7.5 credits against a 0.7 balance",
-          "Plan the clip (image-first: iterate cheap stills, animate the winner LATER)",
-          "Stop and report — generation waits for a topped-up workspace",
+          "Footage exists? → /edit: cut it (rough cut), then reel.sh --mode pad (screen) or crop (talking head) with --srt",
+          "No footage, AI clip wanted → state the cost honestly: video starts at 7.5 credits against a 0.7 balance",
+          "Plan the AI clip image-first and stop — generation waits for a topped-up workspace",
         ],
-        connects: ["higgs", "social"],
+        connects: ["edit", "higgs", "social"],
         depends: [],
       },
       {
