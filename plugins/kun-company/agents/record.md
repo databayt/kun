@@ -4,7 +4,7 @@ description: "Flow videographer — records demo videos and screenshot sets of r
 model: opus
 effort: high
 version: "databayt v1.0"
-handoff: [quality, growth]
+handoff: [quality, growth, media-qa]
 ---
 
 # Record

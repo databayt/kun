@@ -1,11 +1,11 @@
 ---
 title: Agents
-description: 53 agents in two fleets — 26 company, 27 stack
+description: 54 agents in two fleets — 27 company, 27 stack
 ---
 
 # Agents
 
-The engine ships **53 agents** in two fleets. The **company fleet** (26) runs the business: strategy, revenue, leads and funnel, quality, the production platform and the PWA lane, product references, product flow videography, and curriculum content. The **stack fleet** (27) writes the code: one agent per framework, layer, or tool.
+The engine ships **54 agents** in two fleets. The **company fleet** (27) runs the business: strategy, revenue, leads and funnel, quality, the production platform and the PWA lane, product references, product flow videography and media QA, and curriculum content. The **stack fleet** (27) writes the code: one agent per framework, layer, or tool.
 
 Each fleet is a plugin, which is how it reaches other machines — see [Onboarding](/docs/onboarding).
 
@@ -44,12 +44,13 @@ The captain sits above everything and never writes code — it allocates, decide
 | **cloudflare** | The production platform — Workers, Containers, zone DNS, cron triggers, the balqalam.com lane |
 | **pwa** | Installability, per-tenant manifests, service-worker caching that respects auth, offline outboxes, Web Push — see [PWA](/docs/pwa) |
 
-### Engine maintenance & media (7)
+### Engine maintenance & media (8)
 
 | Agent | Scope |
 |-------|-------|
 | **quality** | Routes the 17 niche quality keywords; owns `/handover` and `/release` |
 | **record** | Screen-records demo videos and screenshot sets of real product flows, files into media archive |
+| **media-qa** | Checks finished stills and videos before they ship — budgets from `qa-pack`, then Arabic shaping, RTL, brand, privacy and safe areas by eye; never edits pixels |
 | **report** | Auto-fixes user-reported issues — read, verify, fix, close |
 | **analyze** | Generates a tailored Claude Code config for any repo |
 | **learn** | Extracts patterns, conventions, and team dynamics into memory |

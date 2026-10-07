@@ -108,6 +108,15 @@
             "command": "f=\"${CLAUDE_PROJECT_DIR}/.claude/hooks/funnel-guard.sh\"; [ -f \"$f\" ] || f=\"$HOME/.claude/hooks/funnel-guard.sh\"; bash \"$f\""
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "f=\"${CLAUDE_PROJECT_DIR}/.claude/hooks/media-guard.sh\"; [ -f \"$f\" ] || f=\"$HOME/.claude/hooks/media-guard.sh\"; bash \"$f\""
+          }
+        ]
       }
     ],
     "PostToolUse": [
@@ -136,6 +145,15 @@
             "type": "command",
             "command": "f=\"${CLAUDE_PROJECT_DIR}/.claude/hooks/funnel-yield.sh\"; [ -f \"$f\" ] && bash \"$f\"; exit 0",
             "async": true
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__figma__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "f=\"${CLAUDE_PROJECT_DIR}/.claude/hooks/figma-quota.sh\"; [ -f \"$f\" ] || f=\"$HOME/.claude/hooks/figma-quota.sh\"; bash \"$f\""
           }
         ]
       }

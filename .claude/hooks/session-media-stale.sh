@@ -54,4 +54,11 @@ if stale:
     print(f"🎬 Stale recordings for {repo}: {items} — say 'record <block>' to refresh "
           f"(detail: bash ~/.claude/scripts/record.sh stale {repo})")
 PY
+
+# Render caches (sim takes, media scratch) are kept for --direct-only re-renders; say so once they
+# pass 2 GB — on this 16 GB / small-disk Mac they are what fills the drive. Purge is safe and quick.
+cache_kb=$(du -sk "$HOME/.cache/shoot-sim" "$HOME/.cache/media" 2>/dev/null | awk '{s+=$1} END {print s+0}')
+if [ "${cache_kb:-0}" -gt 2097152 ]; then
+  echo "🧹 Media render caches hold $((cache_kb / 1048576)) GB — free them: bash ~/.claude/skills/edit/scripts/media.sh purge"
+fi
 exit 0

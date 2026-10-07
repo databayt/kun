@@ -67,8 +67,8 @@
   }
  },
  "counts": {
-  "project_agents": 26,
-  "user_agents": 53,
+  "project_agents": 27,
+  "user_agents": 54,
   "commands": 0,
   "project_skills": 65,
   "user_skills": 82,
@@ -77,11 +77,11 @@
   "domain_rules": 57,
   "project_mcp": 18,
   "user_mcp": 24,
-  "hooks": 17,
+  "hooks": 19,
   "vocabulary_spells": 227,
   "workflows": 13,
   "$plugins_comment": "The two plugins are how the fleet reaches other machines. kun-company also carries the rules, pattern cards, hooks, and workflows. Union of both skill sets is 61 (build ships in both).",
-  "plugin_kun_company_agents": 26,
+  "plugin_kun_company_agents": 27,
   "plugin_kun_company_skills": 60,
   "plugin_kun_stack_agents": 27,
   "plugin_kun_stack_skills": 15
@@ -255,5 +255,23 @@
   "tokens_per_book_verify": 2500000,
   "cost_note": "verify+adjudicate costs MORE than transcription on a small book (math: 3.49M verify vs ~1.8M transcribe). Enriching the contract is the only lever that has paid: it cut physics' queued pages 24 -> 10 and verify 3.49M -> 2.15M.",
   "exit_gate": "a run is reportable only when agents_error == 0 AND the book appears in textbook-scores.json. A window death during Adjudicate still returns degraded:false, repaired:0 and a letter grade - that is NOT a finished book. Recovery is mode:repair, which reuses the surviving queue.json."
+ },
+ "media": {
+  "$comment": "Budgets for every still and video the media library ships (edit/scripts/media.sh: encode, derive, qa-pack; read by media-qa). Free + local by decision (2026-10-07): no paid generation API. Sizes in MB unless noted.",
+  "h264_mb_per_min": 8,
+  "av1_mb_per_min": 5,
+  "reel_mb": 15,
+  "clip_mb": 6,
+  "avif_1600_median_kb": 150,
+  "vmaf_h264": 95,
+  "vmaf_av1": 93,
+  "lufs_web": -16,
+  "lufs_social": -14,
+  "lufs_tolerance": 1,
+  "true_peak_max": -1.5,
+  "voice_cer_max": 0.1,
+  "preview_px": 1600,
+  "cache_days": 7,
+  "disk_floor_gb": 10
  }
 }
