@@ -176,11 +176,10 @@ export default async ({ page, go, shot, settle, t }) => {
   await dialog(page).filter({ hasText: NAME }).waitFor({ timeout: 20000 }).catch(() => {})
   await shot("created")
 
-  // No search isolates one student (2026-10-07: a full name, an English name or a phone finds
-  // nothing; one Arabic token finds 20+ namesakes) — the list is newest-first, so point at the row.
+  // "created" is the newest-first list with the new row on top — the last still. No search isolates
+  // one student (2026-10-07: a full name, an English name or a phone finds nothing; one Arabic token
+  // finds 20+ namesakes), and a hover does not show in a screenshot.
   await page.keyboard.press("Escape")
-  await page.getByRole("row").filter({ hasText: NAME }).first().hover()
-  await shot("new-row")
 
   await cleanup({ page, go, t })
 }

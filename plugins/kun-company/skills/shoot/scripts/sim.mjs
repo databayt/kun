@@ -338,19 +338,26 @@ function camAt(t) {
   const hw = WIN.w / 2 / (k0 * s.z), hh = WIN.h / 2 / (k0 * s.z)
   return { ...s, cx: Math.max(hw, Math.min(VW - hw, s.cx)), cy: Math.max(Math.min(hh, VH / 2), Math.min(Math.max(VH - hh, VH / 2), s.cy)) }
 }
-// A tip lasts its duration (stretched in a sped-up reel) but never past the next step's caption:
-// a tip about the map must not sit over the academic form.
-function toastEnd(e) {
+// A tip lasts its duration (stretched in a sped-up reel) but never past the next step's caption —
+// a tip about the map must not sit over the academic form. A tip the cap would cut short starts
+// earlier instead (never before its own step); one that still can't show for 2 s is dropped.
+function toastSpan(e) {
+  const full = (e.ms / 1000) * TK
   const next = T.timeline.find((c) => c.type === "caption" && c.o > e.o)
-  return Math.min(e.o + (e.ms / 1000) * TK, next ? next.o : Infinity)
+  const step = T.timeline.findLast((c) => c.type === "caption" && c.o <= e.o)
+  const end = Math.min(e.o + full, next ? next.o : Infinity)
+  const start = end - e.o >= full ? e.o : Math.max(step ? step.o + 0.4 * TK : 0, end - full)
+  return end - start >= 2 * TK ? [start, end] : null
 }
+const toastEnd = (e) => toastSpan(e)?.[1] ?? -Infinity
 function stateAt(t) {
   const tt = t - INTRO
   const fi = Math.max(0, T.fr.findLastIndex((f) => f.out <= tt))
   const cap = T.timeline.filter((e) => e.type === "caption" && e.o <= t).at(-1)
   const capSince = cap ? t - cap.o : 0
-  const toasts = T.timeline.filter((e) => e.type === "toast" && t >= e.o && t < toastEnd(e))
-    .map((e) => ({ title: e.title, text: e.text, a: Math.min(1, (t - e.o) / (.3 * TK), (toastEnd(e) - t) / (.3 * TK)) }))
+  const toasts = T.timeline.filter((e) => e.type === "toast").map((e) => [e, toastSpan(e)])
+    .filter(([, sp]) => sp && t >= sp[0] && t < sp[1])
+    .map(([e, [a, b]]) => ({ title: e.title, text: e.text, a: Math.min(1, (t - a) / (.3 * TK), (b - t) / (.3 * TK)) }))
   return {
     frame: "file://" + T.fr[Math.min(fi, T.fr.length - 1)].f, cam: camAt(t),
     cap: cap && tt < T.takeLen ? { n: cap.n, text: cap.text, a: Math.min(1, capSince / .35) } : null, toasts,
