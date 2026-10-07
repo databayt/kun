@@ -48,13 +48,13 @@ async function pickFirst(page, trigger) {
 // hogwarts search quirks (2026-10-06): a full name ("أحمد الطيب") matches nothing — search one
 // token and filter rows; and typing on /students/archived drops the archive scope, so the
 // archive is read unsearched.
-async function rows(page, go, t, path, name = t(NAME_AR, NAME_EN)) {
+async function rows(page, go, t, path, name = t(NAME_AR, NAME_EN), match = name) {
   await go(path)
   if (!path.endsWith("/archived")) {
     await page.getByPlaceholder(t("بحث في الطلاب...", "Search students...")).fill(name.split(" ").pop())
     await page.waitForTimeout(2500)
   }
-  return page.getByRole("row").filter({ hasText: name })
+  return page.getByRole("row").filter({ hasText: match })
 }
 
 async function rowAction(page, t, row, label) {
@@ -65,15 +65,17 @@ async function rowAction(page, t, row, label) {
 export async function cleanup({ page, go, t = (ar) => ar }) {
   // both test names, whatever language this run's UI is in: an English stills run must not leave
   // "Ahmed Altayeb" in the Arabic video's list (media-qa, 2026-10-07)
+  // Every spelling of the surname, matched on any Ahmed row: an English-entered "Altayeb" shows as
+  // «أحمد الطايب» in the Arabic list, so neither full name ever matched it (media-qa round 3).
   let row
-  // the app shows an English-entered "Altayeb" as «الطايب» in the Arabic list — search that spelling too
-  for (const name of [NAME_AR, NAME_EN, "أحمد الطايب"]) {
-    row = await rows(page, go, t, "/ar/students", name)
+  const AHMED = /أحمد|Ahmed/
+  for (const token of ["الطيب", "الطايب", "Altayeb"]) {
+    row = await rows(page, go, t, "/ar/students", token, AHMED)
     while (await row.count()) {
       await rowAction(page, t, row, t("أرشفة", "Archive"))
       await dialog(page).getByRole("button", { name: t("أرشفة", "Archive") }).click()
       await page.waitForTimeout(2000)
-      row = await rows(page, go, t, "/ar/students", name)
+      row = await rows(page, go, t, "/ar/students", token, AHMED)
     }
   }
   // Purge = export copy, typed name, delete. Blocked on 2026-10-06: the export answers

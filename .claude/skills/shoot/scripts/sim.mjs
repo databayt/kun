@@ -498,7 +498,8 @@ if (voice) {
 }
 if (!cueList.length) {
   const caps = captionsOf(T).filter((c) => c.o >= T0 - 0.01 && c.o < T1)
-  caps.forEach((c, i) => cueList.push({ start: Math.max(0, c.o - T0), end: Math.min(dur, (caps[i + 1]?.o ?? T1) - T0), text: c.text }))
+  // the last caption ends where the outro card starts, not over it
+  caps.forEach((c, i) => cueList.push({ start: Math.max(0, c.o - T0), end: Math.min(dur, (caps[i + 1]?.o ?? (clip ? T1 : takeEnd - XF)) - T0), text: c.text }))
 }
 
 // ───────────────────────── deliver through the shared media library ─────────────────────────
@@ -520,8 +521,11 @@ if (draft) {
   const max = String(Math.ceil(dur) + 1)
   media("encode", profile, master, `${base}.mp4`, "--max", max); delivered.push(`${base}.mp4`)
   media("encode", profile, master, `${base}.av1.mp4`, "--max", max); delivered.push(`${base}.av1.mp4`)
+  // Poster = the brand title card: a frame of the app can carry a stale row, a face or a phone
+  // number (media-qa, 2026-10-07). A clip has no title card, so it takes its first caption.
   const firstCap = captionsOf(T).find((c) => c.o >= T0)
-  media("poster", `${base}.mp4`, `${base}.poster.webp`, "--at", String(Math.max(0, (firstCap?.o ?? T0 + 1) - T0 + 0.5)))
+  const posterAt = meta.posterAt ?? (clip ? Math.max(0, (firstCap?.o ?? T0 + 1) - T0 + 0.5) : INTRO / 2)
+  media("poster", `${base}.mp4`, `${base}.poster.webp`, "--at", String(posterAt))
   delivered.push(`${base}.poster.webp`)
   writeFileSync(join(segDir, "cues-vtt.json"), JSON.stringify(cueList))
   media("vtt", join(segDir, "cues-vtt.json"), `${base}.vtt`); delivered.push(`${base}.vtt`)

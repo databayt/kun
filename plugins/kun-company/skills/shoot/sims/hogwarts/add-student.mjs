@@ -31,7 +31,23 @@ export async function cleanup({ page, go }) {
   await archiveTestStudent({ page, go })
 }
 
+// The demo school's seeded students carry numbers in live Sudanese mobile ranges. Blur any
+// phone-shaped text on screen except the fictional +249 900 000 0xx range this take types.
+const BLUR_PHONES = () => {
+  const real = /(\+?249|\b0)[19]\d{5,8}/, fake = /2499000000\d\d/
+  const scan = (root) => {
+    const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT)
+    for (let n; (n = w.nextNode()); ) {
+      const s = n.textContent.replace(/[\s-]/g, "")
+      if (real.test(s) && !fake.test(s) && n.parentElement) n.parentElement.style.filter = "blur(6px)"
+    }
+  }
+  new MutationObserver(() => scan(document.body)).observe(document, { childList: true, subtree: true, characterData: true })
+  addEventListener("DOMContentLoaded", () => scan(document.body))
+}
+
 export async function prepare({ page, go }) {
+  await page.addInitScript(BLUR_PHONES)
   // Document tiles fire a paid AI extraction (and pre-fill fields from what it reads). Filming
   // blocks exactly that server action — the uploads themselves run as in the real app.
   await page.route("**/*", (route) => {
@@ -92,9 +108,7 @@ export default async (sim) => {
   await sim.focus(personal)
   await sim.pick(page.getByRole("combobox").filter({ hasText: "اختر الجنس" }), "ذكر")
   await sim.type(page.locator('input[name="phone"]').first(), fakePhone(), { cps: 11 })
-  // the WhatsApp copy lands on blur — show the tip once the field has it
-  await page.keyboard.press("Tab"); await sim.wait(700)
-  sim.toast("رقم واتساب يُنسخ تلقائياً من رقم الهاتف")
+  // (no WhatsApp tip: the copy does not show on screen during the take — a tip must match the frame)
   await sim.wait(2200)
 
   // 4 — guardians: father, then mother
@@ -142,7 +156,8 @@ export default async (sim) => {
   sim.toast("تُضاف رسوم الصف للطالب تلقائياً عند الإنشاء")
   await sim.wait(1500)
   const create = page.getByRole("button", { name: "إنشاء", exact: true })
-  await sim.focus([...academic, create])
+  // frame the button itself — the whole form plus the button cut it off at the bottom edge
+  await sim.focus([section, create], { z: 1.4 })
   sim.caption(7, "اضغط «إنشاء»")
   await sim.wait(900)
   await sim.click(create, { pause: 200 })
@@ -153,22 +168,22 @@ export default async (sim) => {
   await sim.focus(null)
   sim.caption(8, "تم! الطالب في القائمة بصورته وصفّه")
   const dlg = page.locator('[role="alertdialog"], [role="dialog"]').last()
-  if (await dlg.waitFor({ timeout: 15000 }).then(() => true, () => false)) {
+  if (await dlg.waitFor({ timeout: 6000 }).then(() => true, () => false)) {
     await page.evaluate(() => {
       const d = [...document.querySelectorAll('[role="alertdialog"],[role="dialog"]')].pop()
       const w = document.createTreeWalker(d, NodeFilter.SHOW_TEXT)
       for (let n; (n = w.nextNode()); ) if (/^\s*[A-Za-z0-9@._-]{6,}\s*$/.test(n.textContent)) n.parentElement.style.filter = "blur(9px)"
       d.querySelectorAll("input, code, pre").forEach((e) => (e.style.filter = "blur(9px)"))
     })
-    await sim.wait(1800)
+    await sim.wait(1000)
     await page.keyboard.press("Escape")
     await dlg.waitFor({ state: "hidden", timeout: 5000 }).catch(() => {})
   }
-  await sim.wait(700)
   const row = page.getByRole("row").filter({ hasText: "أحمد" }).first()
-  // the row is full-width; frame its start (RTL right): the name and the grade
+  // the row is full-width; frame its start (RTL right): the name and the grade. The tip lands with
+  // the zoom and holds 3 s — readable, and the list is never on screen still for long.
   await sim.focus([row.getByText(/^أحمد/).first(), row.getByText("الأول").first()], { z: 1.5 })
-  await sim.move(page.getByText(/^أحمد/).first())
   sim.toast("يُرسل إشعار ترحيب للأسرة، ويُنشأ حساب دخول للطالب")
-  await sim.wait(3600)
+  await sim.move(page.getByText(/^أحمد/).first())
+  await sim.wait(3000)
 }
