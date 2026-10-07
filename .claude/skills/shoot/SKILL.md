@@ -80,8 +80,11 @@ export default async ({ page, go, shot, settle }) => {
 - Locate by what the UI exposes — accessible names (`getByRole("combobox", { name: "الصف" })`),
   never nth-of-type. Unknown screen? Probe it first: dump visible inputs/buttons per step,
   then write the flow. Remember every `+` that opens a wizard creates a draft row.
-- Existing flows: `hogwarts/add-student` (list → documents → personal → father → address →
-  academic → created dialog → new row; 9 shots).
+- Existing flows: `hogwarts/add-student` (list → documents → Finder on the photo → photo uploaded →
+  Finder on the CV → CV uploaded → personal → father → address → academic → created; 12 shots).
+- Uploads in stills: `finderStill(page, { files, pick })` from `scripts/finder.mjs` draws the same
+  macOS Finder the sim films, open on Documents with the file selected; then the real upload. The
+  files are `~/Documents/*.jpg` (copies of `assets/hogwarts/`). Headless never shows the native panel.
 
 ## Motion — a tutorial video from a flow's stills
 
