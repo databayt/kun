@@ -86,6 +86,9 @@ export default async ({ page, go, shot, settle }) => {
   then write the flow. Remember every `+` that opens a wizard creates a draft row.
 - Existing flows: `hogwarts/add-student` (list → documents → Finder on the photo → photo uploaded →
   Finder on the CV → CV uploaded → personal → father → address → academic → created; 12 shots).
+  `hogwarts/add-teacher` (list → information → filled → expertise → subjects picked → contact →
+  address → employment → created; 9 shots). Blurs seeded emails too (real providers); the take's
+  own are `@example.com`. Nationality is searched in English: the picker only matches English names.
 - Uploads in stills: `finderStill(page, { files, pick })` from `scripts/finder.mjs` draws the same
   macOS Finder the sim films, open on Documents with the file selected; then the real upload. The
   files are `~/Documents/*.jpg` (copies of `assets/hogwarts/`). Headless never shows the native panel.
