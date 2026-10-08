@@ -1,6 +1,6 @@
 // Add teacher — the registrar's path from the list through the teacher wizard to the new row.
-// Demo tenant, admin. Create opens on «المعلومات الأساسية» (teachers/table.tsx firstStepHref),
-// then expertise → contact → address → employment → «إنشاء». Cleanup deletes the test
+// Demo tenant, admin. Create opens on the documents step (hogwarts 162c8b891; before that deploy
+// it skipped to «المعلومات الأساسية» — both are handled), then information → expertise → contact → address → employment → «إنشاء». Cleanup deletes the test
 // teacher by name; it runs before (leftovers of a crashed run) and after.
 
 import { initScript as blurPhones } from "./add-student.mjs"
@@ -55,14 +55,20 @@ export default async ({ page, go, shot, t }) => {
   await shot("list")
 
   await page.getByRole("button", { name: t("إنشاء", "Create"), exact: true }).click()
-  await page.waitForURL(/teachers\/add\/[^/]+\/information/, { timeout: 60000 })
+  await page.waitForURL(/teachers\/add\/[^/]+\/(attachments|information)/, { timeout: 60000 })
+  if (page.url().endsWith("/attachments")) {
+    await shot("documents")
+    await next(page, t)
+    await page.waitForURL(/\/information/)
+  }
+  await page.locator('input[name="_fullName"]').waitFor()
   await shot("information")
 
   await page.locator('input[name="_fullName"]').fill(NAME)
   await page.getByRole("combobox").filter({ hasText: t("ذكر", "Male") }).click()
   await page.getByRole("option", { name: t("أنثى", "Female") }).click()
   await page.getByRole("combobox").filter({ hasText: t("اختر الجنسية", "Select nationality") }).click()
-  // The country list only matches English names, even on /ar (2026-10-07: «سود» → "No country found.").
+  // "Sudan" matches before and after hogwarts 162c8b891 (Arabic names searchable from then on).
   await page.keyboard.type("Sudan")
   await page.getByRole("option", { name: /Sudan|السودان|سوداني/ }).first().click()
   await shot("information-filled")
