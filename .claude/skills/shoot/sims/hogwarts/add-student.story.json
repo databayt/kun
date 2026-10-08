@@ -1,5 +1,5 @@
 {
-  "$comment": "story.mjs script: the add-student stills, narrated by a stock Google voice (Gemini 3.8 Flash TTS) — no captions. Each beat names a still by its step (NN-<step>-<lang>.png); a still the device never shot (the Mac Finder on an iPhone) is skipped with its line. Copy only claims what the product does on screen. Diacritics steer the voice: بِالقَلَم (not «بي القلم»), اخترْ (masculine imperative, not «اختري»).",
+  "$comment": "story.mjs script: the add-student stills, narrated by a stock Google voice (Gemini 3.8 Flash TTS) — no captions. Each beat names a still by its step (NN-<step>-<lang>.png); a still the device never shot is skipped with its line, unless the beat names a per-device still (finder-photo → documents on the iPhone, so the phone still hears «اخترْ صورة الطالب»). Lines name what the screen shows (the tile reads «السيرة الذاتية»). Copy only claims what the product does on screen. Diacritics steer the voice: بِالقَلَم (not «بي القلم»), اخترْ (masculine imperative, not «اختري»).",
   "brand": "balqalam",
   "url": "balqalam.com",
   "engine": "gemini",
@@ -18,11 +18,11 @@
           "shot": "documents",
           "say": "الخطوة الأولى هي المرفقات: صورة الطالب ومستنداته."
         },
-        { "shot": "finder-photo", "say": "اخترْ صورة الطالب من جهازك." },
+        { "shot": "finder-photo", "say": "اخترْ صورة الطالب من جهازك.", "iphone": { "shot": "documents" } },
         { "shot": "photo-uploaded", "say": "وتظهر الصورة مباشرة في مكانها." },
         {
           "shot": "cv-uploaded",
-          "say": "ثم أرفق ملف الطالب، وبالطريقة نفسها بقية المستندات."
+          "say": "ثم أرفق السيرة الذاتية، وبالطريقة نفسها بقية المستندات."
         },
         { "shot": "personal", "say": "بعدها المعلومات الشخصية." },
         {

@@ -44,8 +44,10 @@ const stills = existsSync(stillDir) ? readdirSync(stillDir) : []
 const stillOf = (step) => stills.find((f) => new RegExp(`^\\d\\d-${step}-${lang}\\.png$`).test(f))
 
 // a beat whose still this device never shot (the Mac Finder on an iPhone) drops out with its line
-const beats = cut.beats.filter((b) => b.card || stillOf(b.shot)).map((b) => ({ ...b, img: b.shot ? join(stillDir, stillOf(b.shot)) : null }))
-const missing = cut.beats.filter((b) => b.shot && !stillOf(b.shot)).map((b) => b.shot)
+// a beat may carry a per-device override, e.g. { "shot": "finder-photo", "iphone": { "shot": "documents" } }
+const cutBeats = cut.beats.map((b) => ({ ...b, ...(b[device] || {}) }))
+const beats = cutBeats.filter((b) => b.card || stillOf(b.shot)).map((b) => ({ ...b, img: b.shot ? join(stillDir, stillOf(b.shot)) : null }))
+const missing = cutBeats.filter((b) => b.shot && !stillOf(b.shot)).map((b) => b.shot)
 if (missing.length) console.log(`skipped (no ${device} still): ${missing.join(", ")}`)
 if (!beats.some((b) => b.img)) throw new Error(`no stills for ${flow} in ${stillDir} — run shoot.mjs --flow ${flow}${device === "iphone" ? " --device iphone-16" : ""} first`)
 
@@ -99,7 +101,9 @@ const k = 1080 / 393
 const PAGE = mac
   ? (() => { const w = 2240, h = Math.round(w * 1715 / 3025), bar = 58, top = Math.round((H - h - bar) / 2); return { x: (W - w) / 2, y: top + bar, w, h, bar, top } })()
   : { x: 0, y: Math.round(54 * k), w: 1080, h: Math.round(659 * k) }
-const PUSH = ad ? 0.07 : 0.045   // slow push-in over a beat; the ad moves a little more
+// slow push-in over a beat; the ad moves a little more. None on the phone: its stills are edge to edge,
+// so any push crops right-aligned Arabic labels («الاسم» → «لاسم», media-qa 2026-10-08)
+const PUSH = device === "iphone" ? 0 : ad ? 0.07 : 0.045
 
 const css = `
 @font-face{font-family:S;src:url(${font("thmanyah-sans-500.ttf", "thmanyah-sans-500.woff2")});font-weight:500}
@@ -113,7 +117,7 @@ body{background:radial-gradient(120% 90% at 50% 0%, ${hexA(V.accentSoft, .55)}, 
 .card{position:absolute;inset:0;display:grid;place-items:center;text-align:center;background:${V.canvas};opacity:0;z-index:20}
 .card .in{display:flex;flex-direction:column;align-items:center;gap:${mac ? 34 : 44}px;padding:0 80px}
 .card img{width:${mac ? 150 : 190}px;height:${mac ? 150 : 190}px;object-fit:contain}
-.ti{font-family:D;font-weight:900;line-height:1.15;font-size:${mac ? 150 : 132}px}.ti mark{background:${V.accentSoft};color:inherit;padding:0 20px}
+.ti{font-family:D;font-weight:900;line-height:1.2;font-size:${mac ? 150 : 112}px}.ti mark{background:${V.accentSoft};color:inherit;padding:0 20px;white-space:nowrap}
 .su{font-size:${mac ? 52 : 50}px;color:${hexA(V.ink, .66)}}
 .pill{font-size:${mac ? 40 : 44}px;padding:16px 38px;border-radius:999px;background:#fff;box-shadow:0 2px 12px ${hexA(V.ink, .07)};direction:ltr;font-family:-apple-system,Geist,sans-serif;font-weight:600}
 ` + (mac ? `
