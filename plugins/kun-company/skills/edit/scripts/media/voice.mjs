@@ -75,8 +75,14 @@ async function geminiLines(texts, o) {
     toWav(await geminiSay(todo.map((i) => texts[i]).join(" <long pause> <long pause> <long pause> "), o), all)
     const log = spawnSync(FFMPEG, ["-hide_banner", "-nostats", "-i", all, "-af", "silencedetect=n=-40dB:d=0.5", "-f", "null", "-"], { encoding: "utf8" }).stderr
     const sil = [...log.matchAll(/silence_end: ([\d.]+) \| silence_duration: ([\d.]+)/g)].map((m) => ({ end: +m[1], d: +m[2] }))
-    const cuts = sil.sort((a, b) => b.d - a.d).slice(0, todo.length - 1).sort((a, b) => a.end - b.end)
-    if (cuts.length === todo.length - 1 && cuts.every((c) => c.d >= 0.9)) {
+    // the N-1 widest gaps are the line breaks when they stand clear of the rest: each >= 0.6 s and the
+    // narrowest of them >= 1.4x the widest gap left inside a line (one break came out 0.84 s against
+    // 0.50 s in-line pauses — a fixed 0.9 s floor threw that take away). Whisper's CER gate checks each piece.
+    const byWidth = [...sil].sort((a, b) => b.d - a.d)
+    const cuts = byWidth.slice(0, todo.length - 1).sort((a, b) => a.end - b.end)
+    const inLine = byWidth[todo.length - 1]?.d ?? 0
+    const clear = cuts.length === todo.length - 1 && cuts.every((c) => c.d >= 0.6 && c.d >= 1.4 * inLine)
+    if (clear) {
       const edges = [0, ...cuts.map((c) => c.end - c.d / 2), probe(all).duration]
       todo.forEach((i, k) => ffmpeg(["-i", all, "-ss", edges[k].toFixed(3), "-to", edges[k + 1].toFixed(3), "-c:a", "pcm_s16le", files[i]]))
       spawnSync("rm", ["-f", all])
@@ -217,8 +223,9 @@ if (sub === "gen") {
         const files = await geminiLines(items.map((it) => it.text), { model: GEMINI_MODEL, voice: id, style: script.style, attempt: t })
         gen = items.map((it, k) => ({ id: it.id, ok: true, file: files[k] }))
       } catch (e) {
-        // the daily quota is not a per-line failure — stop and say so instead of burning retries
-        if (/daily free quota/.test(e.message)) throw e
+        // the daily quota and an unsplittable take are not per-line failures — another round would just
+        // spend another request; stop and say so
+        if (/daily free quota|batch split/.test(e.message)) throw e
         gen = items.map((it) => ({ id: it.id, ok: false, error: e.message }))
       }
     } else {
