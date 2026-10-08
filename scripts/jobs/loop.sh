@@ -65,11 +65,14 @@ mail_ok() {
     # -1743 is a missing Automation grant, not a wedge: from 2026-10-04 the
     # loop read it as a hang, killed Mail every tick and sent nothing for days.
     # A restart can't fix it — say so once a day and wait for the grant.
+    # Stamp only a delivered alert: on 2026-10-07 the one attempt hit a
+    # network blip, was stamped anyway, and Abdout never heard of the block.
     if [[ "$MAIL_ERR" == *-1743* ]]; then
         log "Mail.app: launchd not authorized to send Apple events (-1743) — grant in System Settings › Privacy & Security › Automation"
         done_today mail-tcc-alert || {
-            ( cd "$REPO" && pnpm -s tsx -e 'import { notify } from "./scripts/jobs/notify"; notify("Jobs loop can'\''t drive Mail.app (-1743): nothing sends. System Settings › Privacy & Security › Automation → allow Mail for the jobs loop (bash/osascript).", "Jobs: Mail blocked")' ) >> "$LOG_FILE" 2>&1
-            stamp mail-tcc-alert
+            ( cd "$REPO" && pnpm -s tsx -e 'import { notify } from "./scripts/jobs/notify"; process.exit(notify("Jobs loop can'\''t drive Mail.app (-1743): nothing sends. System Settings › Privacy & Security › Automation → allow Mail for the jobs loop (bash/osascript).", "Jobs: Mail blocked") ? 0 : 1)' ) >> "$LOG_FILE" 2>&1 \
+                && stamp mail-tcc-alert \
+                || log "Mail-blocked alert not delivered — retrying next tick"
         }
         return 1
     fi

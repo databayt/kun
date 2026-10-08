@@ -74,7 +74,9 @@ export async function greenhouseQuestions(
       required: q.required,
       fields: [
         {
-          name: `demographic_${q.id}`,
+          // The form renders the bare question id (`4033064002`), not a
+          // `demographic_` prefix — the prefix held every Discord card.
+          name: String(q.id),
           type: "multi_value_single_select",
           values: (q.answer_options ?? []).map((o) => ({ label: o.label })),
         },
@@ -119,7 +121,8 @@ export async function fillGreenhouse(
     if (answer.kind !== "file" && answer.kind !== "skip") {
       const el = page.locator(sel).first();
       if (!(await el.count()) || !(await el.isVisible())) {
-        if (question.required) failed.push(`${question.label.slice(0, 60)}: field not on the page`);
+        if (question.required)
+          failed.push(`${question.label.slice(0, 60)}: field not on the page`);
         continue;
       }
     }
@@ -168,7 +171,10 @@ export async function fillGreenhouse(
     try {
       await loc.click();
       await loc.pressSequentially(plan.city.split(",")[0], { delay: 80 });
-      const option = page.getByRole("option").filter({ hasText: /rwanda/i }).first();
+      const option = page
+        .getByRole("option")
+        .filter({ hasText: /rwanda/i })
+        .first();
       await option.waitFor({ timeout: 12_000 });
       await option.click();
     } catch {
@@ -205,7 +211,10 @@ async function waitForOutcome(
         (afterCode
           ? /thank you for applying|application (has been )?(received|submitted)|we.ve received your application/i
           : /thank you for applying|application (has been )?(received|submitted)|we.ve received your application|verification code was sent/i
-        ).test(document.body.innerText) || !!document.querySelector('[aria-invalid="true"], iframe[src*="recaptcha/api2/bframe"]'),
+        ).test(document.body.innerText) ||
+        !!document.querySelector(
+          '[aria-invalid="true"], iframe[src*="recaptcha/api2/bframe"]',
+        ),
       afterCode,
       { timeout: ms },
     );
@@ -215,28 +224,42 @@ async function waitForOutcome(
   const body = await page.evaluate(() => document.body.innerText);
   if (CONFIRMED.test(body)) return "confirmed";
   if (!afterCode && /verification code was sent/i.test(body)) return "code";
-  if (await page.locator('iframe[src*="recaptcha/api2/bframe"]').count()) return "captcha";
+  if (await page.locator('iframe[src*="recaptcha/api2/bframe"]').count())
+    return "captcha";
   return "invalid";
 }
 
 /// Submit; when Greenhouse emails a security code (Abdout's choice,
 /// 2026-09-27: read it from his hotmail and enter it), `getCode` fetches it.
-export async function submitGreenhouse(page: Page, getCode?: () => Promise<string | null>): Promise<SubmitOutcome> {
-  const submit = () => page.getByRole("button", { name: /submit application/i }).first().click();
+export async function submitGreenhouse(
+  page: Page,
+  getCode?: () => Promise<string | null>,
+): Promise<SubmitOutcome> {
+  const submit = () =>
+    page
+      .getByRole("button", { name: /submit application/i })
+      .first()
+      .click();
   await submit();
   let state = await waitForOutcome(page, 45_000);
 
   if (state === "code") {
     if (!getCode) return { ok: false, reason: "security code requested" };
     const code = await getCode();
-    if (!code) return { ok: false, reason: "security code email did not arrive" };
+    if (!code)
+      return { ok: false, reason: "security code email did not arrive" };
     // Eight one-character boxes that auto-advance: focus the first, type all.
-    const boxes = page.locator('input[id^="security-input"], input[aria-label*="ecurity"], input[maxlength="1"]');
+    const boxes = page.locator(
+      'input[id^="security-input"], input[aria-label*="ecurity"], input[maxlength="1"]',
+    );
     if (await boxes.count()) {
       await boxes.first().click();
       await page.keyboard.type(code, { delay: 60 });
     } else {
-      await page.getByLabel(/security code/i).first().fill(code);
+      await page
+        .getByLabel(/security code/i)
+        .first()
+        .fill(code);
     }
     await submit();
     state = await waitForOutcome(page, 60_000, true);
@@ -244,9 +267,12 @@ export async function submitGreenhouse(page: Page, getCode?: () => Promise<strin
 
   if (state === "confirmed") return { ok: true };
   if (state === "captcha") return { ok: false, reason: "CAPTCHA challenge" };
-  if (state === "timeout") return { ok: false, reason: "no confirmation within 45s" };
+  if (state === "timeout")
+    return { ok: false, reason: "no confirmation within 45s" };
   const invalid = await page.evaluate(() =>
-    [...document.querySelectorAll('[aria-invalid="true"]')].map((e) => e.getAttribute("id") || e.getAttribute("name") || "?").join(", "),
+    [...document.querySelectorAll('[aria-invalid="true"]')]
+      .map((e) => e.getAttribute("id") || e.getAttribute("name") || "?")
+      .join(", "),
   );
   return { ok: false, reason: `form rejected fields: ${invalid || "unknown"}` };
 }
