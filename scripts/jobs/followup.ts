@@ -111,6 +111,15 @@ async function main(): Promise<void> {
       );
       continue;
     }
+    // An ATS application went through a hosted form: there is no inbox to
+    // nudge, and Mail drops an `ats:<company>` recipient silently while the
+    // ledger counts it as sent.
+    if (first.to.startsWith("ats:")) {
+      console.log(
+        `  skip      ${row.name.slice(0, 60)} — applied through an ATS form, no address to follow up`,
+      );
+      continue;
+    }
     const touch = action === "touch2" ? 2 : 3;
     const variant = pickFollowUp(touch);
     if (!variant?.template) continue;
