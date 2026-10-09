@@ -46,12 +46,16 @@ def existing_observations(path: Path) -> list:
 def render(book: Path, struct: dict, lang: str, furniture: str, observations: list) -> str:
     rtl = lang in RTL_LANGS
     mark = illegible_marker(lang)
-    title = struct.get("subjectAr") or struct.get("subject") or book.name
-    title_en = struct.get("subjectEn", "")
+    # Two structure.json shapes: the pre-catalog one (subjectAr/subjectEn, string titles, top-level
+    # pageOffset) and the catalog's (title {ar,en}, textbook.pageOffset). Accept both.
+    tl = lambda t: (t.get(lang) or t.get("ar") or t.get("en") or "") if isinstance(t, dict) else (t or "")
+    t = struct.get("title")
+    title = struct.get("subjectAr") or tl(t) or struct.get("subject") or book.name
+    title_en = struct.get("subjectEn") or (t.get("en", "") if isinstance(t, dict) else "")
     grade, curriculum = struct.get("grade", ""), struct.get("curriculum", "")
-    offset = struct.get("pageOffset")
-    chapters = [c.get("title", "") for c in struct.get("chapters", []) if c.get("title")]
-    lessons = [l.get("title", "") for c in struct.get("chapters", []) for l in c.get("lessons", []) if l.get("title")]
+    offset = struct.get("pageOffset", (struct.get("textbook") or {}).get("pageOffset"))
+    chapters = [tl(c.get("title")) for c in struct.get("chapters", []) if tl(c.get("title"))]
+    lessons = [tl(l.get("title")) for c in struct.get("chapters", []) for l in c.get("lessons", []) if tl(l.get("title"))]
     ident = f"{curriculum}/{grade}/{book.name}" if curriculum and grade else book.name
 
     out = []

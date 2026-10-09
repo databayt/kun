@@ -63,12 +63,15 @@ def main():
         body.append(f'<!-- page {n} -->\n\n{txt}')
 
     done = total - len(missing)
+    # catalog structure.json: title {ar, en} + id; pre-catalog: subjectAr/subjectEn + dbSlug
+    t = struct.get('title') if isinstance(struct.get('title'), dict) else {}
     fm = {
-        'title': struct.get('subjectAr', ''),
-        'titleEn': struct.get('subjectEn', ''),
+        'title': struct.get('subjectAr') or t.get('ar', ''),
+        'titleEn': struct.get('subjectEn') or t.get('en', ''),
         'curriculum': struct.get('curriculum', ''),
         'grade': struct.get('grade', ''),
         'subject': struct.get('subject', ''),
+        'id': struct.get('id', ''),
         'dbSlug': struct.get('dbSlug', ''),
         'lang': struct.get('lang', 'ar'),
         'source': 'textbook.pdf',

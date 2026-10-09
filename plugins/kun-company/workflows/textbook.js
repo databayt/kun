@@ -306,7 +306,7 @@ const prep = await agent(
     `1. If ${book}/pages/ holds no .webp files: python3 ${SCRIPTS}/textbook-pages.py ${book}\n` +
     `2. If ${book}/pages-md/_CONTRACT.md is missing: python3 ${SCRIPTS}/textbook-contract.py ${book}${FURNITURE ? ` --furniture "${FURNITURE}"` : ""}\n` +
     `3. pages = the numeric stems of ${book}/pages/*.webp, sorted ascending${PAGES ? ` — then keep ONLY these: ${JSON.stringify(PAGES)}` : ""}.\n` +
-    `4. bookId = dbSlug from ${book}/structure.json if present, else the directory name; lang = structure.json lang, default "ar".\n` +
+    `4. bookId = id from ${book}/structure.json (the catalog shape), else dbSlug (pre-catalog), else the directory name; lang = structure.json lang, default "ar".\n` +
     `Return pages, contract (absolute path), lang, bookId, renderWidth (1000), hasStructure. Do not read or summarise any page.`,
   { label: "prepare", phase: "Prepare", model: "sonnet", effort: "low", schema: PREP },
 );

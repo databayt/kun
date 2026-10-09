@@ -272,8 +272,10 @@ def lint(book: Path, md_dir: str, want_grid: bool) -> dict:
     sp = book / 'structure.json'
     if sp.exists():
         struct = json.loads(sp.read_text(encoding='utf-8'))
-    chapter_titles = {norm(c.get('title', '')) for c in struct.get('chapters', [])}
-    lesson_titles = {norm(l.get('title', '')) for c in struct.get('chapters', []) for l in c.get('lessons', [])}
+    # catalog structure.json titles are {ar, en}; pre-catalog ones are strings
+    tl = lambda t: (t.get('ar') or t.get('en') or '') if isinstance(t, dict) else (t or '')
+    chapter_titles = {norm(tl(c.get('title'))) for c in struct.get('chapters', [])}
+    lesson_titles = {norm(tl(l.get('title'))) for c in struct.get('chapters', []) for l in c.get('lessons', [])}
 
     out = {'book': book.name, 'pages': len(nums), 'transcribed': 0, 'missing': [], 'extra': sorted(have - set(nums)),
            'blank': [], 'findings': [], 'tablePages': [], 'figurePages': [], 'illegiblePages': [],
