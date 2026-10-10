@@ -165,7 +165,9 @@ export function renderAtsHtml(cv: TailoredCv, career: CareerRecord): string {
           `Date of birth: ${id.dateOfBirth.split("-").reverse().join("/")}`,
           `Nationality: ${id.nationality}`,
           `Seaman's book (Sudan) No.: ${career.seafarerDocuments.seamansBook}${career.seafarerDocuments.seamansBookValidUntil ? `, valid until ${career.seafarerDocuments.seamansBookValidUntil}` : ""}`,
-          ...(id.passport ? [`Passport: valid until ${id.passport.validUntil}`] : []),
+          ...(id.passport
+            ? [`Passport: valid until ${id.passport.validUntil}`]
+            : []),
           `Languages: ${id.languages.join(", ")}`,
         ])
       : list([`Languages: ${id.languages.join(", ")}`]);
@@ -278,34 +280,70 @@ export function gateTailoredCv(
       ...career.seaService.map((s) => s.company),
     ].join(" "),
   );
-  const unknownOrg = cv.experience.map((e) => e.org).filter((o) => !orgKnown(o, orgBlob));
-  if (unknownOrg.length) problems.push(`employers not in the record: ${unknownOrg.join("; ")}`);
+  const unknownOrg = cv.experience
+    .map((e) => e.org)
+    .filter((o) => !orgKnown(o, orgBlob));
+  if (unknownOrg.length)
+    problems.push(`employers not in the record: ${unknownOrg.join("; ")}`);
   const vesselBlob = norm(career.seaService.map((s) => s.vessel).join(" | "));
-  const unknownVessel = (cv.seaService ?? []).map((s) => s.vessel).filter((v) => !vesselBlob.includes(norm(v)));
-  if (unknownVessel.length) problems.push(`vessels not in the record: ${unknownVessel.join("; ")}`);
-  const schoolBlob = norm(career.education.flatMap((e) => [e.degree, e.school]).join(" "));
-  const unknownSchool = cv.education.map((e) => e.school).filter((s) => !orgKnown(s, schoolBlob));
-  if (unknownSchool.length) problems.push(`schools not in the record: ${unknownSchool.join("; ")}`);
+  const unknownVessel = (cv.seaService ?? [])
+    .map((s) => s.vessel)
+    .filter((v) => !vesselBlob.includes(norm(v)));
+  if (unknownVessel.length)
+    problems.push(`vessels not in the record: ${unknownVessel.join("; ")}`);
+  const schoolBlob = norm(
+    career.education.flatMap((e) => [e.degree, e.school]).join(" "),
+  );
+  const unknownSchool = cv.education
+    .map((e) => e.school)
+    .filter((s) => !orgKnown(s, schoolBlob));
+  if (unknownSchool.length)
+    problems.push(`schools not in the record: ${unknownSchool.join("; ")}`);
   const certBlob = norm(
-    career.certifications.flatMap((c) => [c.name, c.issuer ?? "", c.date ?? ""]).join(" "),
+    career.certifications
+      .flatMap((c) => [c.name, c.issuer ?? "", c.date ?? ""])
+      .join(" "),
   );
   // "— renewal on joining" / "— refresher due" are the contract's honest
   // wording for expired documents (tailor.ts); the certificate itself must
   // still be in the record.
   const unknownCert = cv.certifications.filter(
-    (c) => !orgKnown(c.replace(/\s*[—-]\s*(renewal on joining|refresher due)\s*$/i, ""), certBlob),
+    (c) =>
+      !orgKnown(
+        c.replace(/\s*[—-]\s*(renewal on joining|refresher due)\s*$/i, ""),
+        certBlob,
+      ),
   );
-  if (unknownCert.length) problems.push(`certifications not in the record: ${unknownCert.join("; ")}`);
+  if (unknownCert.length)
+    problems.push(
+      `certifications not in the record: ${unknownCert.join("; ")}`,
+    );
 
   // 3. A stale document is never presented as current.
   if (/medical[^.\n]{0,60}\b(valid|current|in date)\b/i.test(text))
     problems.push("presents the expired medical as valid");
-  if (/\b(holds?|holder of|certified)\b[^.\n]{0,40}\b(eto )?(coc|certificate of competency)\b/i.test(text))
+  if (
+    /\b(holds?|holder of|certified)\b[^.\n]{0,40}\b(eto )?(coc|certificate of competency)\b/i.test(
+      text,
+    )
+  )
     problems.push("claims a certificate of competency he does not hold");
 
   // 4. Coverage — counted on the rendered text, not on the model's own claim.
   // Postings say "Bachelor's degree"; CVs say "BSc" — same thing.
-  const lower = `${norm(text)}${/\bb\.?\s?sc\b|\bb\.?e\.?\b|\bb\.?tech\b|bachelor/i.test(text) ? " bachelor bachelors degree" : ""}`;
+  // Same for "TypeScript" ⊃ JavaScript, and a "(native)"/"(fluent)" language
+  // line meets "C1/C2 proficiency": on 2026-10-10 both read as missing and
+  // held an Arabic AI-training role at 11% coverage for a native speaker.
+  const lower = [
+    norm(text),
+    /\bb\.?\s?sc\b|\bb\.?e\.?\b|\bb\.?tech\b|bachelor/i.test(text)
+      ? "bachelor bachelors degree"
+      : "",
+    /\btypescript\b/i.test(text) ? "javascript" : "",
+    /\((native|fluent)\)/i.test(text)
+      ? "proficiency proficient fluent c1 c2"
+      : "",
+  ].join(" ");
   const covered = cv.mustHave.filter((k) => termIn(k, lower));
   const missing = cv.mustHave.filter((k) => !termIn(k, lower));
   const coverage = cv.mustHave.length
@@ -351,6 +389,9 @@ function termIn(term: string, lowerText: string): boolean {
         ].includes(w),
     );
   if (words.length === 0) return true;
-  const hits = words.filter((w) => lowerText.includes(w)).length;
+  // Match on a stem: "platforms" ↔ "platform", "deployment" ↔ "deployed".
+  const stem = (w: string) =>
+    w.length > 6 ? w.slice(0, 6) : w.replace(/s$/, "");
+  const hits = words.filter((w) => lowerText.includes(stem(w))).length;
   return hits / words.length >= 0.6;
 }
