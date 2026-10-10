@@ -12,6 +12,7 @@
 //   options: --host <url>  --role admin|teacher|student|guardian|accountant|staff  --repo hogwarts
 //            --brand <id>  --out <dir>  --zoom 1.25  --full  --name <stem>  --clock 2026-10-01T09:00:00
 //            --mask "<css>,<css>"  --no-derive  --device iphone-16 (Playwright device, WebKit for iPhones)
+//            --publish  (a flow only: hand the fresh stills to publish.mjs → CDN + the product manifest)
 // Flow modules may export `initScript` (runs in every page first) and `masks` (CSS selectors).
 //
 // Deterministic by construction: light scheme, reduced motion, brand timezone, CSS animations frozen,
@@ -66,6 +67,7 @@ const deviceArg = opt("device")
 const full = flag("full")
 const cleanupOnly = flag("cleanup")
 const derive = !flag("no-derive")
+const publishAfter = flag("publish")
 const repoDir = join(homedir(), repo)
 const outDir = opt("out", join(repoDir, "public/screenshot"))
 const paths = args
@@ -250,3 +252,12 @@ if (derive && saved.length) {
 }
 const vp = device?.viewport ?? viewport
 console.log(`${saved.length} shot(s) · ${deviceKey ? `${deviceKey} · ` : ""}viewport ${vp.width}x${vp.height} @${device?.deviceScaleFactor ?? deviceScaleFactor}x · role ${role} · brand ${brand.id}`)
+
+// --publish: the stills just shot go straight to the CDN and the product manifest (see publish.mjs)
+if (publishAfter && flowName && saved.length && !cleanupOnly) {
+  if (!derive) console.warn("  ⚠ --publish needs derivatives; drop --no-derive")
+  else {
+    const r = spawnSync("node", [join(here, "publish.mjs"), "--flow", flowName, "--repo", repo, "--brand", brand.id, "--only", "stills", ...(langs.length ? ["--lang", langs.join(",")] : [])], { stdio: "inherit" })
+    if (r.status !== 0) process.exitCode = 1
+  }
+}

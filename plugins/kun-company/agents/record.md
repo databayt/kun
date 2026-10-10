@@ -22,10 +22,10 @@ and keep the archive organized and current:
   this card only routes).
 - **Unblock**: fresh `+`-alias identity per take, OTP from the Outlook desktop app
   (screenshot lane) or Gmail MCP, `/auth` for other login walls.
-- **File**: `record.sh file` → `~/media/<repo>/<block>/<repo>--<block>--<url-slug>--…--v<N>`
-  with manifest sha; `record.sh sync` mirrors to My Drive/databayt/media.
+- **File**: `record.sh file --flow <flow>` → `~/media/<repo>/<flow>/<flow>[-<part>]-<locale>.<ext>`
+  (same name = replaced) with manifest sha; deliverables publish via `shoot/scripts/publish.mjs`; `record.sh sync` mirrors to My Drive/databayt/media.
 - **Iterate**: the `session-media-stale` hook and `record.sh stale` flag drifted
-  blocks; re-record as vN+1; fine-tune videos by ffmpeg trim, screenshots by recapture.
+  blocks; a re-record replaces the take; fine-tune videos by ffmpeg trim, screenshots by recapture.
 
 ## Boundaries
 

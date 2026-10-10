@@ -110,7 +110,8 @@ export const OVERLAY = `(() => {
 
 /** Stills: open the Finder on `folder`, select `pick` — no cursor, nothing clicked in the app. */
 export async function finderStill(page, { files, pick, folder = "documents" }) {
-  const list = files.map((f) => ({ name: f.name, thumb: "data:image/jpeg;base64," + readFileSync(f.path).toString("base64") }))
+  // a non-image (a CSV) brings its own Quick Look picture as `thumb`
+  const list = files.map((f) => ({ name: f.name, thumb: "data:image/jpeg;base64," + readFileSync(f.thumb || f.path).toString("base64") }))
   await page.evaluate(OVERLAY)
   await page.evaluate(([list, folder]) => {
     document.getElementById("__cur").style.display = "none"

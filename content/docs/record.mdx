@@ -16,18 +16,22 @@ To cut, caption or reframe a take into a reel, hand it to [edit](/docs/edit).
 
 ## The library
 
-```
-~/media/<repo>/<block>/<repo>--<block>--<url-slug>--<kind>--<locale>--v<N>.<ext>
+Raw footage is filed under the same words as every other media asset — the flow name
+(`<verb>-<entity>`) that also names the `shoot` flow, the CDN slug and the
+product manifest id:
 
-hogwarts/onboarding/hogwarts--onboarding--onboarding-title--shot--ar--v1.png
-hogwarts/students/hogwarts--students--students--flow--ar--v2.mov
+```
+~/media/<repo>/<flow>/<flow>[-<part>]-<locale>.<ext>
+
+hogwarts/add-student/add-student-ar.mov
+hogwarts/onboarding/onboarding-otp-ar.mov
 ```
 
-- **url-slug** derives from the route — scheme/host, locale prefix, and
-  `/s/<subdomain>` stripped; root = `home`
-- **kind**: `shot` (still) · `clip` (kept segment) · `flow` (assembled walkthrough)
-- **vN** auto-increments on every re-record; `manifest.json` carries the url, repo
-  sha at capture, date, and note for every asset
+- **Same name = replaced.** A re-record overwrites the take and its `manifest.json` entry
+  (repo, block, flow, url, repo sha at capture, date, note) — no `-vN` siblings.
+- No `--flow`: the URL slug stands in (scheme/host, locale prefix and `/s/<subdomain>` stripped).
+- The **deliverable** (ad cut or edit) goes to `~/<repo>/public/screenshot/<flow>/<flow>-<locale>.mp4`
+  and reaches the CDN with `shoot/scripts/publish.mjs --flow <flow>` as `<flow>/video-<locale>`.
 - Mirror: **My Drive → databayt → media** (`record.sh sync`; the local library is
   the truth, Drive is the mirror)
 

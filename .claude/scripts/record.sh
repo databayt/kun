@@ -4,7 +4,8 @@
 # Driven by the /record skill (kun/.claude/skills/record/SKILL.md); technique origin:
 # hogwarts memory project_demo_video_recording_otp_2026_08_08.
 #
-# Library:  ~/media/<repo>/<block>/<repo>--<block>--<url-slug>--<kind>--<locale>--v<N>.<ext>
+# Library:  ~/media/<repo>/<flow>/<flow>[-<part>]-<locale>.<ext>  — the shoot grammar, one file per
+#           name, overwritten on a re-file (the manifest keeps sha + date; no -vN siblings)
 # Drive:    My Drive/databayt/media (mirror; local library is the truth)
 #
 # Subcommands:
@@ -19,8 +20,9 @@
 #   adcut <in> <out> [--target 30] [--tail 3]
 #                             ad render — speed the body to the target length,
 #                             keep the last seconds real-time (ads run 15-45s)
-#   file <src> --repo R --block B --url U [--kind shot|clip|flow] [--locale ar|en] [--note ...]
-#                             normalize the name, move into the library, update manifest
+#   file <src> --repo R --block B --flow F [--part P] [--url U] [--locale ar|en] [--note ...]
+#                             name it <flow>[-<part>]-<locale>, move into the library (replacing
+#                             the same name), upsert the manifest. No --flow: the url slug is the flow
 #   sync                      mirror the library to Google Drive (rsync → Finder → advice)
 #   stale [repo]              list assets whose block source changed since capture
 #   frame                     size Chrome to 1512x982 + dismiss the automation infobar
@@ -160,9 +162,9 @@ from datetime import datetime, timezone
 
 args = sys.argv[1:]
 if not args:
-    sys.exit("usage: record.sh file <src> --repo R --block B --url U [--kind K] [--locale L] [--note ...]")
+    sys.exit("usage: record.sh file <src> --repo R --block B --flow F [--part P] [--url U] [--locale L] [--note ...]")
 src = args[0]
-opts = {"kind": None, "locale": "ar", "note": "", "repo": None, "block": None, "url": None, "repo-path": None}
+opts = {"kind": None, "locale": "ar", "note": "", "repo": None, "block": None, "url": None, "repo-path": None, "flow": None, "part": None}
 i = 1
 while i < len(args):
     k = args[i].lstrip("-")
@@ -170,9 +172,11 @@ while i < len(args):
         opts[k] = args[i + 1]; i += 2
     else:
         i += 1
-for req in ("repo", "block", "url"):
+for req in ("repo", "block"):
     if not opts[req]:
         sys.exit(f"record: --{req} is required")
+if not (opts["flow"] or opts["url"]):
+    sys.exit("record: --flow (or --url) is required")
 if not os.path.isfile(src):
     sys.exit(f"record: source not found: {src}")
 
@@ -180,7 +184,7 @@ lib = os.environ["RECORD_LIB"]
 manifest_path = os.path.join(lib, "manifest.json")
 
 # URL → slug: drop scheme/host, locale prefix, tenant segment; keep the meaningful path.
-path = re.sub(r"^https?://[^/]+", "", opts["url"]) or "/"
+path = re.sub(r"^https?://[^/]+", "", opts["url"] or "") or "/"
 segs = [s for s in path.split("/") if s]
 if segs and segs[0] in ("ar", "en"):
     segs = segs[1:]
@@ -194,16 +198,13 @@ if kind not in ("shot", "clip", "flow"):
     sys.exit("record: --kind must be shot|clip|flow")
 locale = opts["locale"]
 
-dest_dir = os.path.join(lib, opts["repo"], opts["block"])
+# The shoot grammar (shoot/scripts/publish.mjs): <flow>[-<part>]-<locale>, the same words the
+# product manifest and the CDN use. Same name = the same asset, replaced — never a -vN sibling.
+flow = opts["flow"] or slug
+dest_dir = os.path.join(lib, opts["repo"], flow)
 os.makedirs(dest_dir, exist_ok=True)
-# Self-describing name: repo + block ride IN the filename so the file keeps its
-# designation when shared out of context (Drive links, chat attachments).
-stem = f"{opts['repo']}--{opts['block']}--{slug}--{kind}--{locale}"
-existing = [f for f in os.listdir(dest_dir) if re.match(re.escape(stem) + r"--v(\d+)\.", f)]
-versions = [int(re.search(r"--v(\d+)\.", f).group(1)) for f in existing]
-v = max(versions, default=0) + 1
-name = f"{stem}--v{v}.{ext}"
-dest = os.path.join(dest_dir, name)
+stem = "-".join(x for x in (flow, opts["part"], locale) if x)
+dest = os.path.join(dest_dir, f"{stem}.{ext}")
 
 repo_path = opts["repo-path"] or os.path.expanduser(f"~/{opts['repo']}")
 sha = ""
@@ -215,10 +216,12 @@ except Exception:
 
 shutil.move(src, dest)
 m = json.load(open(manifest_path))
+rel = os.path.relpath(dest, lib)
+m["assets"] = [a for a in m["assets"] if a["file"] != rel]
 m["assets"].append({
-    "file": os.path.relpath(dest, lib),
-    "repo": opts["repo"], "block": opts["block"], "url": opts["url"],
-    "kind": kind, "locale": locale, "v": v, "sha": sha,
+    "file": rel,
+    "repo": opts["repo"], "block": opts["block"], "flow": flow, "url": opts["url"] or "",
+    "kind": kind, "locale": locale, "sha": sha,
     "capturedAt": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
     "note": opts["note"],
 })

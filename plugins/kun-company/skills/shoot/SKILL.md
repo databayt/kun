@@ -26,19 +26,46 @@ node ~/.claude/skills/shoot/scripts/shoot.mjs --flow add-student          # scri
 Never fake zoom with CSS `zoom` on `<html>`: layout and breakpoints still see 1512 px,
 and he can see the difference. DPR 2 gives the right layout at the wrong resolution.
 
-## Where + name (his choice)
+## Naming — one grammar, local to CDN
 
-- `~/<repo>/public/screenshot/` — the file is the short URL with brand and host dropped,
-  locale last: `/ar/students` → `students-ar.png`, `/ar` → `home-ar.png`,
-  `/ar/s/demo/students/new` → `students-new-ar.png`.
-- Same name = overwrite, so a re-shoot replaces the old shot.
-- Flows: `<flow>/NN-<step>-<locale>.png` (`add-student/01-list-ar.png`).
+A flow is named `<verb>-<entity>`, singular and kebab-case: `add-student`, `add-teacher`,
+`bulk-student`, `bulk-teacher`. That one word names the flow file, its folder, its CDN slug and
+its manifest ids; record files raw footage under the same word.
+
+| Asset | Local file (`~/<repo>/public/screenshot/`) | Manifest id (`<Shot id>` / `<TutorialVideo id>`) |
+| --- | --- | --- |
+| page still | `students-ar.png` (short URL, brand + host dropped, locale last) | — |
+| flow still | `<flow>/NN-<step>-<locale>.png` | `<flow>/<step>-<locale>` |
+| phone still | `<flow>/iphone-16/NN-<step>-<locale>.png` | `<flow>/iphone-16/<step>-<locale>` |
+| tutorial | `<flow>/<flow>-<locale>.{mp4,av1.mp4,poster.webp,vtt}` | `<flow>/video-<locale>` |
+| reel | `<flow>/<flow>-<locale>.reel.mp4` | `<flow>/reel-<locale>` |
+| support clip | `<flow>/<flow>-<clip>-<locale>.*` | `<flow>/<clip>-<locale>` |
+| raw footage (`/record`) | `~/media/<repo>/<flow>/<flow>[-<part>]-<locale>.mov` | — (archive + Drive) |
+
+- **Same name = overwrite.** A re-shoot or re-render replaces the file; never `-v2`, `-sim`,
+  `-final` siblings. The `NN-` order prefix stays in the file and leaves the id, so inserting a
+  step never breaks a docs page. Step names say what is on screen (`list`, `map`, `review`, `created`).
 - Every still also gets web derivatives in `derived/`: `<stem>-{1600,2400}.{avif,webp}` (UI text
   stays crisp at 4:4:4). The PNG master is oxipng'd in place. `--no-derive` skips this.
 - `public/screenshot/` is **git-ignored** in hogwarts and mkan: media never ships in git (the
-  `media-guard` hook blocks it). Deliver through the CDN with
-  `media.sh publish --ns <brand> --slug <flow> --manifest <repo manifest> <files>`: hashed immutable
-  URLs plus a manifest entry the product's `<Shot>` / `<TutorialVideo>` components read.
+  `media-guard` hook blocks it). The CDN is the only delivery.
+
+## CDN — publish a flow in one command
+
+```
+node ~/.claude/skills/shoot/scripts/publish.mjs --flow add-student [--lang ar,en] [--only stills|video] [--dry-run]
+node ~/.claude/skills/shoot/scripts/shoot.mjs --flow add-student --lang ar,en --publish   # shoot, then publish the stills
+```
+
+- Every asset in the flow folder goes through `media.sh publish`: content-hashed immutable keys
+  (`cdn.databayt.org/<ns>/media/<flow>/<stem>.<hash8>.<ext>`), each URL HEAD-verified, then upserted
+  into the product manifest under the id above. A re-render is a new URL; nothing is invalidated.
+- Namespace and manifest come from `content/media/brand-kit.json → production.<brand>.{cdn,manifest}`
+  (hogwarts → `balqalam`, `src/components/docs/media-manifest.json`).
+- Alt text and video titles come from the flow: `export const title = [ar, en]` and
+  `export const alt = { <step>: [ar, en] }`. A step with no alt falls back to «title — step».
+- Then commit the product's manifest on its `main` (the only file that changes there) and use
+  `<Shot id="add-student/created-ar" />` / `<TutorialVideo id="add-student/video-ar" />` in MDX.
 
 ## Hosts + login
 
@@ -51,7 +78,8 @@ and he can see the difference. DPR 2 gives the right layout at the wrong resolut
 
 ## Flows — write once, re-shoot forever
 
-A flow is a file: `scripts/../flows/<repo>/<flow>.mjs`, canonical in kun.
+A flow is a file: `flows/<repo>/<flow>.mjs`, canonical in kun. A leading `_` marks a shared
+helper, not a flow (`_bulk.mjs` drives both bulk flows).
 
 ```js
 export default async ({ page, go, shot, settle }) => {
@@ -84,7 +112,12 @@ export default async ({ page, go, shot, settle }) => {
 - Locate by what the UI exposes — accessible names (`getByRole("combobox", { name: "الصف" })`),
   never nth-of-type. Unknown screen? Probe it first: dump visible inputs/buttons per step,
   then write the flow. Remember every `+` that opens a wizard creates a draft row.
-- Existing flows: `hogwarts/add-student` (list → documents → Finder on the photo → photo uploaded →
+- Existing flows (hogwarts): `bulk-student` / `bulk-teacher` (bulk page → Finder on the CSV →
+  columns matched → review → import finished with logins → history; 6 shots each). The CSVs are
+  fictional (`assets/hogwarts/make-sheets.mjs`: DEMO- ids, +249 900 000 0xx, example.com), and
+  cleanup is the product's own **Undo** on every finished import of that file. Each run leaves
+  an «تم التراجع» row in the demo's import history; that is the product's record, not a leftover.
+- `hogwarts/add-student` (list → documents → Finder on the photo → photo uploaded →
   Finder on the CV → CV uploaded → personal → father → address → academic → created; 12 shots).
   `hogwarts/add-teacher` (list → information → filled → expertise → subjects picked → contact →
   address → employment → created; 9 shots). Blurs seeded emails too (real providers); the take's

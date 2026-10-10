@@ -127,38 +127,35 @@ via the browser MCP (`browser_take_screenshot` / `take_screenshot`) with an ABSO
 path into `~/media/_work/`, both locales when relevant. `record.sh shot` is
 only for desktop-context stills.
 
-### 3. File — the naming convention
+### 3. File — the shoot grammar
 
-`record.sh file <src> --repo <repo> --block <block> --url <real-url> [--kind flow] [--locale ar] [--note …]`
+`record.sh file <src> --repo <repo> --block <block> --flow <flow> [--part <part>] [--url <real-url>] [--locale ar] [--note …]`
 
-Every asset lands as:
+Raw footage lands in the archive under the same words as everything else (the table in
+`/shoot` → Naming):
 
 ```
-~/media/<repo>/<block>/<repo>--<block>--<url-slug>--<kind>--<locale>--v<N>.<ext>
-   hogwarts/onboarding/hogwarts--onboarding--onboarding-title--shot--ar--v1.png
-   hogwarts/students/hogwarts--students--students--flow--ar--v2.mov
+~/media/<repo>/<flow>/<flow>[-<part>]-<locale>.<ext>
+   hogwarts/add-student/add-student-ar.mov          the take
+   hogwarts/onboarding/onboarding-otp-ar.mov        --part otp
 ```
 
-The repo + block ride IN the filename on purpose — the designation survives when the
-file leaves its folder (Drive links, chat attachments, client handoffs).
-
-- **url-slug** derives from the URL path — scheme/host, locale prefix, and
-  `/s/<subdomain>` are stripped (`https://balqalam.com/ar/onboarding/x/title` →
-  `onboarding-x-title`); root = `home`. Directories are repo (= brand) then block.
-- **kind**: `shot` (still) | `clip` (segment worth keeping alone) | `flow` (assembled
-  walkthrough). Extension decides the default.
-- **vN** auto-increments; old versions stay in place (the manifest carries dates —
-  no archive dirs).
-- The manifest records repo, block, url, sha (repo HEAD at capture), capturedAt, note
-  — that sha is what staleness is measured against.
+- **flow** = `<verb>-<entity>` (`add-student`, `bulk-teacher`), the `/shoot` flow name when one
+  exists. No `--flow`: the URL slug stands in (`/ar/onboarding/x/title` → `onboarding-x-title`).
+- **Same name = replaced**, with the manifest entry (repo, block, flow, url, sha, capturedAt, note)
+  replaced too; no `-vN` siblings. **block** is the repo's blocks.json key: it is what `stale`
+  measures the sha against.
+- The archive is footage. The **deliverable** goes where the sim's does —
+  `~/<repo>/public/screenshot/<flow>/<flow>-<locale>.mp4` (ad cut or edit, one file, overwritten) —
+  and reaches the product with `node ~/.claude/skills/shoot/scripts/publish.mjs --flow <flow>`.
 
 ### 3½. Ad cut — flows ship blazing fast
 
 Raw captures are minutes; **the deliverable is an ad: 15-45 seconds**. Render with
 `record.sh adcut <raw> <out> [--target 30] [--tail 3]` — delivered through the shared `media.sh encode web` (1080p, constant 30 fps, tv-range BT.709, faststart) — it speeds the body to hit
 the target and keeps the last seconds real-time so the payoff (the new row, the
-success state) is readable. File the AD as the flow asset; keep the raw only if a
-slower walkthrough was explicitly requested. Instant field-fills are FINE for ads —
+success state) is readable. Render the ad straight to `~/<repo>/public/screenshot/<flow>/<flow>-<locale>.mp4`; keep the
+raw in the archive only if a slower walkthrough was explicitly requested. Instant field-fills are FINE for ads —
 at ad speed they read as snappy, so prefer the fast fill lane over human typing.
 
 ### 4. Sync to Google Drive
@@ -184,10 +181,10 @@ sync loses nothing.
 
 - **Staleness is automatic**: the `session-media-stale` SessionStart hook nudges when a
   repo's filed blocks gained commits since capture; `record.sh stale [repo]` lists the
-  detail. Re-recording files the same slug as vN+1.
+  detail. Re-recording files the same name and replaces the old take.
 - **Fine-tune a video without a retake**: trim/splice segments with ffmpeg
-  (`ffmpeg -i in.mov -ss 0:04 -to 1:32 -c copy out.mov`), then `file` the result as the
-  next version. Fine-tune a SCREENSHOT by recapturing the route — never edit pixels of
+  (`ffmpeg -i in.mov -ss 0:04 -to 1:32 -c copy out.mov`), then `file` the result under
+  the same name. Fine-tune a SCREENSHOT by recapturing the route — never edit pixels of
   product truth.
 - **Sweep a whole brand**: loop the repo's blocks.json blocks, screenshots per route,
   flow videos for the journeys that matter (onboarding, admission, checkout). Sweeps
@@ -228,4 +225,4 @@ sync loses nothing.
 
 ## Polish and delivery
 
-A raw take is footage, not a deliverable. Cut it with `/edit` (transcript-driven, or `auto-editor` for silences), make a reel with `reel.sh`, then `media.sh qa-pack` → `media-qa`, and publish to the CDN with `media.sh publish`. Media never goes into git. For web flows, the `/shoot` sim lane gives cleaner tutorials than a screen recording: a scripted take, brand look, camera, captions and narration. Use `/record` for what only the real screen can show: OTP inboxes, native apps, multi-app flows.
+A raw take is footage, not a deliverable. Cut it with `/edit` (transcript-driven, or `auto-editor` for silences), make a reel with `reel.sh`, then `media.sh qa-pack` → `media-qa`, and publish to the CDN with `shoot/scripts/publish.mjs --flow <flow>` (ids `<flow>/video-<locale>`, `<flow>/reel-<locale>`). Media never goes into git. For web flows, the `/shoot` sim lane gives cleaner tutorials than a screen recording: a scripted take, brand look, camera, captions and narration. Use `/record` for what only the real screen can show: OTP inboxes, native apps, multi-app flows.

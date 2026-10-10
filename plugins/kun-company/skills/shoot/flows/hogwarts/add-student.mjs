@@ -46,6 +46,23 @@ export const initScript = () => {
   addEventListener("DOMContentLoaded", () => scan(document.body))
 }
 
+// Manifest copy for publish.mjs: the video title and one alt per still (by step name).
+export const title = ["إضافة طالب", "Add a student"]
+export const alt = {
+  list: ["قائمة الطلاب قبل الإضافة", "The students list before adding"],
+  documents: ["خطوة المستندات في معالج إضافة طالب", "The documents step of the add-student wizard"],
+  "finder-photo": ["اختيار صورة الطالب من نافذة الملفات", "Picking the student's photo in Finder"],
+  "photo-uploaded": ["صورة الطالب بعد الرفع", "The student's photo uploaded"],
+  "finder-cv": ["اختيار ملف الطالب من نافذة الملفات", "Picking the student file in Finder"],
+  "cv-uploaded": ["ملف الطالب بعد الرفع", "The student file uploaded"],
+  personal: ["خطوة البيانات الشخصية", "The personal details step"],
+  "personal-filled": ["البيانات الشخصية بعد التعبئة", "Personal details filled in"],
+  father: ["بيانات ولي الأمر", "The father's details"],
+  address: ["خطوة العنوان", "The address step"],
+  academic: ["الصف والشعبة", "Grade and section"],
+  created: ["تم إنشاء الطالب مع بيانات الدخول", "The student created, with their login"],
+}
+
 // Labels come from hogwarts school-{ar,en}.json (school.students.*); t(ar, en) picks the run's language.
 const NAME_AR = "أحمد الطيب", NAME_EN = "Ahmed Altayeb"
 const FATHER_AR = "عمر الطيب", FATHER_EN = "Omar Altayeb"

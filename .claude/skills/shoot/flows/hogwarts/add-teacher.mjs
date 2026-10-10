@@ -19,19 +19,39 @@ const blurEmails = () => {
 // addInitScript ships source text, not closures — so the two run as one string.
 export const initScript = `(${blurPhones})();(${blurEmails})()`
 
+// Manifest copy for publish.mjs: the video title and one alt per still (by step name).
+export const title = ["إضافة معلم", "Add a teacher"]
+export const alt = {
+  list: ["قائمة المعلمين قبل الإضافة", "The teachers list before adding"],
+  documents: ["خطوة المستندات في معالج إضافة معلم", "The documents step of the add-teacher wizard"],
+  information: ["خطوة المعلومات الأساسية", "The basic information step"],
+  "information-filled": ["المعلومات الأساسية بعد التعبئة", "Basic information filled in"],
+  expertise: ["خطوة التخصص والمواد", "The expertise and subjects step"],
+  "expertise-picked": ["المواد والشعب المختارة", "Subjects and sections picked"],
+  contact: ["بيانات التواصل", "Contact details"],
+  address: ["خطوة العنوان", "The address step"],
+  employment: ["بيانات التوظيف", "Employment details"],
+  created: ["تم إنشاء المعلم مع بيانات الدخول", "The teacher created, with their login"],
+}
+
 const NAME_AR = "منى عبدالرحيم", NAME_EN = "Mona Abdelrahim"
 // Fictional, patterned numbers (+249 900 000 0xx) and an address that can never receive mail.
 const PHONE = `+2499000000${10 + Math.floor(Math.random() * 90)}`
 const EMAIL = `mona.${Date.now()}@example.com`
 
 const dialog = (page) => page.locator('[role="alertdialog"], [role="dialog"]').last()
-const next = (page, t) => page.getByRole("button", { name: t("التالي", "Next"), exact: true }).click()
+// The expertise save raises a toast («Saved — 10 periods assigned») bottom-right: over Next in
+// English, and in every later still. shoot freezes CSS animations, so sonner's exit never runs
+// and the toast never leaves — hide the toaster instead (style only; React keeps its nodes).
+const toastGone = (page) =>
+  page.addStyleTag({ content: "[data-sonner-toaster]{visibility:hidden!important;pointer-events:none!important}" }).catch(() => {})
+const next = async (page, t) => { await toastGone(page); await page.getByRole("button", { name: t("التالي", "Next"), exact: true }).click() }
 
 // Search one token (a full name matches nothing in hogwarts listings), then filter rows.
 async function rows(page, go, t) {
   const name = t(NAME_AR, NAME_EN)
   await go("/ar/teachers")
-  await page.getByPlaceholder(t("بحث عن معلم...", "Search teachers...")).fill(name.split(" ").pop())
+  await page.getByPlaceholder(t("بحث عن معلم...", "Search for a teacher...")).fill(name.split(" ").pop())
   await page.waitForTimeout(2500)
   return page.getByRole("row").filter({ hasText: name })
 }
@@ -88,11 +108,12 @@ export default async ({ page, go, shot, t }) => {
   await page.waitForURL(/\/contact/)
   await page.locator('input[name="emailAddress"]').fill(EMAIL)
   await page.locator('input[name="phone"]').first().fill(PHONE)
+  await toastGone(page)
   await shot("contact")
 
   await next(page, t)
   await page.waitForURL(/\/location/)
-  await page.getByPlaceholder(/ابحث عن حي|Search for a neighborhood/).fill(t("الخرطوم", "Khartoum"))
+  await page.getByPlaceholder(/ابحث عن حي|Search a neighborhood/).fill(t("الخرطوم", "Khartoum"))
   const hit = page.getByRole("option").first()
   if (await hit.waitFor({ timeout: 8000 }).then(() => true, () => false)) await hit.click()
   await shot("address")
