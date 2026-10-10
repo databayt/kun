@@ -1,6 +1,6 @@
 ---
 title: Record
-description: Screen-record demo videos and screenshot sets of the real product, filed by repo/block/route and mirrored to Google Drive
+description: Screen-record demo videos and screenshot sets of the real product, filed by repo/flow and mirrored to Google Drive
 ---
 
 # Record
@@ -17,21 +17,23 @@ To cut, caption or reframe a take into a reel, hand it to [edit](/docs/edit).
 ## The library
 
 Raw footage is filed under the same words as every other media asset — the flow name
-(`<verb>-<entity>`) that also names the `shoot` flow, the CDN slug and the
-product manifest id:
+(`<verb>-<entity>`) that also names the `shoot` flow, the files on the CDN and the
+product manifest id. Raw takes sit in the flow's `raw/` folder, beside its finished media:
 
 ```
-~/media/<repo>/<flow>/<flow>[-<part>]-<locale>.<ext>
+~/media/<repo>/<flow>/raw/<flow>[-<part>]-<locale>.<ext>
 
-hogwarts/add-student/add-student-ar.mov
-hogwarts/onboarding/onboarding-otp-ar.mov
+hogwarts/add-student/raw/add-student-ar.mov
+hogwarts/onboarding/raw/onboarding-otp-ar.mov
+hogwarts/onboarding/raw/03-verify-ar.png        a still needs --part NN-<step>
 ```
 
 - **Same name = replaced.** A re-record overwrites the take and its `manifest.json` entry
   (repo, block, flow, url, repo sha at capture, date, note) — no `-vN` siblings.
 - No `--flow`: the URL slug stands in (scheme/host, locale prefix and `/s/<subdomain>` stripped).
-- The **deliverable** (ad cut or edit) goes to `~/<repo>/public/screenshot/<flow>/<flow>-<locale>.mp4`
-  and reaches the CDN with `shoot/scripts/publish.mjs --flow <flow>` as `<flow>/video-<locale>`.
+- The **deliverable** (ad cut or edit) goes to `~/media/<repo>/<flow>/<flow>-<locale>.mp4`
+  and reaches the CDN with `shoot/scripts/publish.mjs --flow <flow>` as `<flow>/video-<locale>`, at
+  `cdn.databayt.org/hogwarts/<route>/<flow>-<locale>.<hash>.mp4` — the CDN mirrors the app's routes.
 - Mirror: **My Drive → databayt → media** (`record.sh sync`; the local library is
   the truth, Drive is the mirror)
 
@@ -50,7 +52,7 @@ record.sh start intro    # begin a screen-recording segment
 record.sh stop           # SIGINT + ffprobe verify — never plain kill
 record.sh otp            # screenshot the Outlook desktop inbox (off camera)
 record.sh assemble x     # concat segments into one .mov
-record.sh file <src> --repo hogwarts --block onboarding --url <real-url>
+record.sh file <src> --repo hogwarts --block onboarding --flow onboarding --url <real-url>
 record.sh sync           # mirror to Google Drive
 record.sh stale          # what needs a re-record
 ```
@@ -76,7 +78,7 @@ inbox never appears in the footage.
 The library stays honest by construction: every asset records the repo sha it was
 captured at. When a block's source gains commits, the `session-media-stale` hook says
 so at session start, and `record.sh stale` lists exactly what drifted. Re-recording
-files the same name as the next version; fine-tune a video with an ffmpeg trim,
+replaces the same name (no versions); fine-tune a video with an ffmpeg trim,
 a screenshot by recapturing the route.
 
 ## One-time macOS permissions

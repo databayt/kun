@@ -11,7 +11,7 @@ argument-hint: "[block|flow|url] [--repo <repo>] [--locale ar|en]"
 
 Film and photograph databayt products as they actually run — signup flows, onboarding
 wizards, block features — and file every asset into one organized library that mirrors
-to Google Drive. The library is the **product-truth archive** keyed by repo/block/route;
+to Google Drive. The library is the **product-truth archive** keyed by repo/flow (`~/media/<repo>/<flow>/`);
 anything destined for marketing or social goes through `/higgs` + the showroom
 (`/social/media`) as before — never file generated media here.
 
@@ -115,7 +115,7 @@ record.sh otp                # NOT recording now; Read the image → extract 4-d
 record.sh start verify      # segment 2: enter code → continue the wizard
 … drive …
 record.sh stop
-record.sh assemble onboarding-flow--ar
+record.sh assemble onboarding-ar
 ```
 
 `stop` uses SIGINT — a plain kill leaves the .mov unfinalized. `otp` refuses to run
@@ -131,13 +131,14 @@ only for desktop-context stills.
 
 `record.sh file <src> --repo <repo> --block <block> --flow <flow> [--part <part>] [--url <real-url>] [--locale ar] [--note …]`
 
-Raw footage lands in the archive under the same words as everything else (the table in
-`/shoot` → Naming):
+Raw footage lands in the flow's `raw/` folder, beside the finished media, under the same words
+as everything else (the table in `/shoot` → Naming):
 
 ```
-~/media/<repo>/<flow>/<flow>[-<part>]-<locale>.<ext>
-   hogwarts/add-student/add-student-ar.mov          the take
-   hogwarts/onboarding/onboarding-otp-ar.mov        --part otp
+~/media/<repo>/<flow>/raw/<flow>[-<part>]-<locale>.<ext>
+   hogwarts/add-student/raw/add-student-ar.mov          the take
+   hogwarts/onboarding/raw/onboarding-otp-ar.mov        --part otp
+   hogwarts/onboarding/raw/03-verify-ar.png             a still: --part NN-<step> is required
 ```
 
 - **flow** = `<verb>-<entity>` (`add-student`, `bulk-teacher`), the `/shoot` flow name when one
@@ -145,16 +146,18 @@ Raw footage lands in the archive under the same words as everything else (the ta
 - **Same name = replaced**, with the manifest entry (repo, block, flow, url, sha, capturedAt, note)
   replaced too; no `-vN` siblings. **block** is the repo's blocks.json key: it is what `stale`
   measures the sha against.
-- The archive is footage. The **deliverable** goes where the sim's does —
-  `~/<repo>/public/screenshot/<flow>/<flow>-<locale>.mp4` (ad cut or edit, one file, overwritten) —
-  and reaches the product with `node ~/.claude/skills/shoot/scripts/publish.mjs --flow <flow>`.
+- `raw/` is footage. The **deliverable** goes where the sim's does —
+  `~/media/<repo>/<flow>/<flow>-<locale>.mp4` (ad cut or edit, one file, overwritten; the sim, a
+  motion composition and an ad cut all write this one name — the last render wins) — and reaches
+  the product with `node ~/.claude/skills/shoot/scripts/publish.mjs --flow <flow>`, at
+  `cdn.databayt.org/hogwarts/<route>/<flow>-<locale>.<hash>.mp4` (the CDN mirrors the app's routes).
 
 ### 3½. Ad cut — flows ship blazing fast
 
 Raw captures are minutes; **the deliverable is an ad: 15-45 seconds**. Render with
 `record.sh adcut <raw> <out> [--target 30] [--tail 3]` — delivered through the shared `media.sh encode web` (1080p, constant 30 fps, tv-range BT.709, faststart) — it speeds the body to hit
 the target and keeps the last seconds real-time so the payoff (the new row, the
-success state) is readable. Render the ad straight to `~/<repo>/public/screenshot/<flow>/<flow>-<locale>.mp4`; keep the
+success state) is readable. Render the ad straight to `~/media/<repo>/<flow>/<flow>-<locale>.mp4`; keep the
 raw in the archive only if a slower walkthrough was explicitly requested. Instant field-fills are FINE for ads —
 at ad speed they read as snappy, so prefer the fast fill lane over human typing.
 

@@ -47,6 +47,11 @@ export const initScript = () => {
 }
 
 // Manifest copy for publish.mjs: the video title and one alt per still (by step name).
+// the app route this flow films — its CDN folder mirrors it: cdn.databayt.org/hogwarts/students/…
+export const route = "students"
+// the source this flow films — `record.sh stale` flags the published stills when it changes
+export const block = "listings"
+export const paths = ["src/components/school-dashboard/listings/students"]
 export const title = ["إضافة طالب", "Add a student"]
 export const alt = {
   list: ["قائمة الطلاب قبل الإضافة", "The students list before adding"],

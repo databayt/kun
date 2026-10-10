@@ -1,0 +1,51 @@
+---
+title: Shoot
+description: Stills and tutorial videos of real product flows — one name grammar from ~/media to a CDN that mirrors the app's routes
+---
+
+# Shoot
+
+`shoot` takes stills of real product pages and scripted flows, framed like Abdout's
+14" MacBook at Chrome 125%, and its sim films the same flow into a branded tutorial.
+Say it in prose: _"shoot add-student in both languages"_, _"publish the bulk flows"_.
+Raw screen takes are [record](/docs/record); cuts and reels are [edit](/docs/edit).
+
+## One name, everywhere
+
+A flow is `<verb>-<entity>`, singular kebab-case (`add-student`, `bulk-teacher`). That one
+word names the flow file, its local folder, its files on the CDN and its manifest ids.
+**hogwarts** is the internal name in every path; **balqalam** is only the public brand
+drawn on screen.
+
+| Asset | Local (`~/media/<repo>/`) | Manifest id | CDN (`cdn.databayt.org/`) |
+| --- | --- | --- | --- |
+| page still | `page/<slug>-<locale>.png` | `page/<slug>-<locale>` | `hogwarts/<slug>/<slug>-<locale>-1600.<hash>.avif` |
+| flow still | `<flow>/NN-<step>-<locale>.png` | `<flow>/<step>-<locale>` | `hogwarts/<route>/<flow>-<step>-<locale>-1600.<hash>.avif` |
+| phone still | `<flow>/iphone-16/NN-<step>-<locale>.png` | `<flow>/iphone-16/<step>-<locale>` | `hogwarts/<route>/<flow>-iphone-16-<step>-<locale>-1179.<hash>.avif` |
+| tutorial | `<flow>/<flow>-<locale>.mp4` (+ `.av1.mp4`, `.poster.webp`, `.vtt`) | `<flow>/video-<locale>` | `hogwarts/<route>/<flow>-<locale>.<hash>.mp4` |
+| reel | `<flow>/<flow>-<locale>.reel.mp4` | `<flow>/reel-<locale>` | `hogwarts/<route>/<flow>-<locale>.reel.<hash>.mp4` |
+| support clip / story cut | `<flow>/<flow>-<clip>-<locale>.*` | `<flow>/<clip>-<locale>` | `hogwarts/<route>/<flow>-<clip>-<locale>.<hash>.mp4` |
+| raw take | `<flow>/raw/<flow>[-<part>]-<locale>.mov` | — | — |
+
+- **The CDN mirrors the app's routes.** `<route>` comes from the flow's `export const route`:
+  add-student films `/students` → `hogwarts/students/`; the bulk flows film `/school/bulk` →
+  `hogwarts/school/bulk/`; the homepage `/` is `hogwarts/` itself.
+- **Same name = overwrite.** No `-v2` / `-final`. The `NN-` order prefix stays in the local file
+  and becomes the manifest entry's `order`, so the docs list stills in shot order.
+- Keys are content-hashed and `immutable`: a re-render is a new URL; nothing is invalidated.
+- `~/media` sits outside every repo and mirrors to Drive (`record.sh sync`). Nothing is captured
+  into a repo's `public/`.
+
+## Publish
+
+```bash
+node ~/.claude/skills/shoot/scripts/shoot.mjs --flow add-student --lang ar,en --publish
+node ~/.claude/skills/shoot/scripts/publish.mjs --flow add-student [--only stills|video] [--dry-run]
+node ~/.claude/skills/shoot/scripts/publish.mjs --flow page
+```
+
+Each asset is uploaded, HEAD-verified and upserted into the product's
+`media-manifest.json`; pages render it by id — `<FlowMedia flow="add-student" />`,
+`<Shot id="add-student/created-ar" />`, `<TutorialVideo id="add-student/video-ar" />` — never
+by URL. Publishing also stamps the repo sha into `~/media/manifest.json`, so
+`record.sh stale` flags a still whose source (`export const block` / `paths`) has changed.

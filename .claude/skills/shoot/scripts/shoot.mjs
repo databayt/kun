@@ -20,8 +20,8 @@
 // images are decoded, blur-up images report data-loaded, and no skeleton is on screen.
 // --clock pins Date (off by default: server-rendered dates would not match a client-side clock).
 //
-// Output: <repo>/public/screenshot/<slug>-<locale>.png   (/ar/students → students-ar.png, /ar → home-ar.png)
-//         <repo>/public/screenshot/<flow>/<NN>-<step>-<locale>.png for flows
+// Output: ~/media/<repo>/page/<slug>-<locale>.png   (/ar/students → students-ar.png, /ar → home-ar.png)
+//         ~/media/<repo>/<flow>/<NN>-<step>-<locale>.png for flows (<flow>/<device>/… with --device)
 //         …/derived/<stem>-{1600,2400}.{avif,webp} via media.sh derive (PNG masters are oxipng'd in place)
 
 import { createRequire } from "node:module"
@@ -30,7 +30,7 @@ import { existsSync, mkdirSync } from "node:fs"
 import { homedir } from "node:os"
 import { dirname, join } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
-import { brand as brandOf, requireRt } from "../../edit/scripts/media/rt.mjs"
+import { brand as brandOf, mediaRoot, REPO_BRAND, requireRt } from "../../edit/scripts/media/rt.mjs"
 
 const here = dirname(fileURLToPath(import.meta.url))
 const args = process.argv.slice(2)
@@ -53,7 +53,6 @@ const flag = (k) => {
 }
 
 const repo = opt("repo", "hogwarts")
-const REPO_BRAND = { hogwarts: "balqalam", mkan: "mkan", kun: "kun", marketing: "databayt" }
 const brand = brandOf(opt("brand", REPO_BRAND[repo] || repo))
 const host = opt("host", brand.hosts?.demo || brand.hosts?.prod || "https://demo.balqalam.com").replace(/\/$/, "")
 const role = opt("role", "admin")
@@ -69,7 +68,7 @@ const cleanupOnly = flag("cleanup")
 const derive = !flag("no-derive")
 const publishAfter = flag("publish")
 const repoDir = join(homedir(), repo)
-const outDir = opt("out", join(repoDir, "public/screenshot"))
+const outDir = opt("out", mediaRoot(repo))
 const paths = args
 
 // Mac truth: 1512x982 logical screen minus menu bar (~38) and Chrome tabs+toolbar (~87).
@@ -233,7 +232,7 @@ try {
       const lang = localeOf(toUrl(p))
       const a = api(await session(lang))
       const url = await a.go(p)
-      await a.snap(join(outDir, deviceDir, `${forcedName && paths.length === 1 ? forcedName : slug(url)}.png`))
+      await a.snap(join(outDir, "page", deviceDir, `${forcedName && paths.length === 1 ? forcedName : slug(url)}.png`))
     }
   }
 } finally {

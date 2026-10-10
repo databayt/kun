@@ -14,6 +14,16 @@ export const MEDIA_RT = process.env.MEDIA_RT || join(HOME, ".local/share/databay
 export const VOICE_DIR = process.env.MEDIA_VOICE_DIR || join(HOME, "Library/Application Support/databayt/voice")
 export const CDN_BUCKET = "databayt-cdn"
 export const CDN_HOST = "cdn.databayt.org"
+
+// The brand a repo renders in by default (palette, fonts, hosts). The CDN namespace is the
+// brand kit's `cdn`, which is always the repo name — balqalam is a tenant brand of hogwarts.
+export const REPO_BRAND = { hogwarts: "balqalam", mkan: "mkan", kun: "kun", marketing: "databayt" }
+
+// One local home per repo for every finished still, tutorial, reel and raw take — outside the
+// repo (nothing under public/ gets served by accident) and mirrored to Drive by `record.sh sync`.
+//   ~/media/<repo>/<flow>/…   ~/media/<repo>/page/<slug>-<locale>.png   ~/media/<repo>/<flow>/raw/
+export const MEDIA_HOME = process.env.MEDIA_HOME || join(HOME, "media")
+export const mediaRoot = (repo) => join(MEDIA_HOME, repo)
 const FF = "/opt/homebrew/opt/ffmpeg-full/bin"
 export const FFMPEG = existsSync(join(FF, "ffmpeg")) ? join(FF, "ffmpeg") : "ffmpeg"
 export const FFPROBE = existsSync(join(FF, "ffprobe")) ? join(FF, "ffprobe") : "ffprobe"

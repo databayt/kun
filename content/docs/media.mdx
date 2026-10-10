@@ -46,7 +46,9 @@ generation API (decided 2026-10-07). Pick the tool by the job:
 **One pipeline behind all of it.** `media.sh` (edit skill) encodes every deliverable the same way:
 tv-range BT.709, faststart, loudness normalised. It derives web images, checks everything with
 `qa-pack` against the budgets in `engine.json → media`, and publishes to `cdn.databayt.org` with
-hashed immutable URLs plus a manifest. The products render those through `<TutorialVideo>`
+hashed immutable URLs plus a manifest. Everything lives locally in `~/media/<repo>/<flow>/`, and
+the CDN path mirrors the app's routes (`hogwarts/students/add-student-ar.<hash>.mp4`); the
+[shoot docs](/docs/shoot) hold the full grammar. The products render those through `<TutorialVideo>`
 (AV1 first, H.264 fallback, poster, captions) and `<Shot>` (AVIF/WebP `<picture>`). Media never
 enters git: the `media-guard` hook blocks it.
 
@@ -277,9 +279,6 @@ Credentials live in the Keychain, never in a repo — see [Credentials](/docs/cr
   generates, so `image --model lite --yes` is a free liveness probe.
 - The Plus trial requires a working card — currently blocked by the Mada rejection.
 - The Higgsfield MCP endpoint is registered but unauthenticated; the CLI is the primary lane.
-- `cdn.databayt.org` returns 403 for every key in the bucket — a CloudFront fault that
-  predates the library. Assets are served from the S3 origin until it is fixed; the library
-  re-links in place with `push --base` once it is.
 - Video is entirely untested — no clip has ever been generated on any lane. Veo Lite at
   $0.40 per 8-second clip is the cheapest way to change that.
 - **The Media Studio does not render.** It compiles a prompt and offers a curated
@@ -293,14 +292,8 @@ Credentials live in the Keychain, never in a repo — see [Credentials](/docs/cr
   render uploaded through the Brief Queue was accepted and then dropped, in production only.
   Added and redeployed; verified with a write/read/delete round-trip against
   `media/unsorted/` (IAM user `hogwarts`, origin readback 200).
-- **`cdn.databayt.org` 403s on every key in the bucket** — a CloudFront fault
-  (distribution `E3PHDXTDSBCQSJ`) that predates the library. Assets serve from
-  the S3 origin meanwhile; `higgs-library.mjs push --base https://cdn.databayt.org`
-  re-links in place once it is fixed, no re-upload.
-- **S3 is unconfigured in production.** `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`
-  and `AWS_REGION` are absent from the Vercel project, so `isStorageConfigured()`
-  is false there and `putMedia()` no-ops. Setting them is an ops action and a
-  prerequisite for any in-app persistence.
+- `cdn.databayt.org` serves published keys (200, `immutable`); a key that was never uploaded
+  answers **403**, not 404 (private OAC origin), so a 403 means "not published", not an outage.
 - Arabic creative still needs manual typography in post. Nano Banana Pro claims accurate
   multilingual text rendering, which would overturn that rule if it holds for Arabic script
   shaping — one $0.134 render against the same string set in Thmanyah settles it. Untested,

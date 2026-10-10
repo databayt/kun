@@ -2912,7 +2912,7 @@ export const schools: School[] = [
       {
         name: "shoot",
         effect:
-          "Take still screenshots of real product pages and scripted end-to-end flows exactly as Abdout's 14in MacBook shows them at Chrome 125% — headless, auto demo login, filed as <url-slug>-<locale>.png in <repo>/public/screenshot",
+          "Take still screenshots of real product pages and scripted end-to-end flows exactly as Abdout's 14in MacBook shows them at Chrome 125% — headless, auto demo login, filed in ~/media/<repo>/<flow|page>/ and published to cdn.databayt.org/<repo>/<route>/ (the CDN mirrors the app's routes)",
         order: [s("/shoot")],
         steps: [
           "Resolve scope — routes, or a flow file under shoot/flows/<repo>/ (write it once if missing)",
@@ -2926,7 +2926,7 @@ export const schools: School[] = [
       {
         name: "record",
         effect:
-          "Screen-record demo videos of the REAL running product — login walls and email OTPs handled autonomously (Outlook desktop, Gmail), ad cuts of 15-45s, assets filed by repo/block/route into ~/media and mirrored to Google Drive, re-records flagged when block source drifts",
+          "Screen-record demo videos of the REAL running product — login walls and email OTPs handled autonomously (Outlook desktop, Gmail), ad cuts of 15-45s, assets filed by repo/flow into ~/media/<repo>/<flow>/ and mirrored to Google Drive, re-records flagged when block source drifts",
         order: [
           f("record"),
           s("/record"),

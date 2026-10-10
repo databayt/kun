@@ -13,7 +13,7 @@
 //
 //   node sim.mjs --flow add-student [--repo hogwarts] [--brand balqalam] [--host url] [--role admin]
 //                [--out <dir|file.mp4>] [--speed 1] [--direct-only] [--workers 3]
-//                [--voice ar] [--aspect 9:16] [--steps 2-3 --name add-student-photo]
+//                [--voice ar] [--aspect 9:16] [--steps 2-3 --name photo]
 //                [--draft] [--preview 5,30,60]
 //
 //   --direct-only   re-compose the last take (camera, captions, toasts, voice) without driving the app
@@ -24,7 +24,8 @@
 //   --draft         960x540 @15fps via VideoToolbox, for timing checks only
 //   --preview t,…   write PNG frames at those output times and stop
 //
-// Delivers (one file per deliverable, overwritten every run — never -v2 siblings), <stem> = <flow>-ar | <name>-ar:
+// Delivers into ~/media/<repo>/<flow>/ (one file per deliverable, overwritten every run — never -v2 siblings),
+// <stem> = <flow>-ar | <flow>-<clip>-ar. Tutorials are Arabic-only: sims drive the /ar app and caption in Arabic.
 //   <stem>.mp4 (H.264, plays everywhere) · <stem>.av1.mp4 · <stem>.poster.webp · <stem>.vtt
 //   9:16 → <stem>.reel.mp4 · draft → <stem>.draft.mp4
 // Sim file: ../sims/<repo>/<flow>.mjs → `default async (sim)`, optional `prepare`, `cleanup`, `meta`.
@@ -39,7 +40,7 @@ import { homedir } from "node:os"
 import { basename, dirname, join } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 import { OVERLAY as OVERLAY_SRC } from "./finder.mjs"
-import { brand as brandOf, FFMPEG, requireRt } from "../../edit/scripts/media/rt.mjs"
+import { brand as brandOf, FFMPEG, mediaRoot, REPO_BRAND, requireRt } from "../../edit/scripts/media/rt.mjs"
 
 const args = process.argv.slice(2)
 const opt = (k, d) => (args.includes(`--${k}`) ? args[args.indexOf(`--${k}`) + 1] : d)
@@ -50,7 +51,6 @@ if (!flowName) {
   process.exit(0)
 }
 const repo = opt("repo", "hogwarts")
-const REPO_BRAND = { hogwarts: "balqalam", mkan: "mkan", kun: "kun", marketing: "databayt" }
 const B = brandOf(opt("brand", REPO_BRAND[repo] || repo))
 const V = B.video
 const host = opt("host", B.hosts?.demo || B.hosts?.prod || "https://demo.balqalam.com").replace(/\/$/, "")
@@ -61,11 +61,12 @@ const portrait = opt("aspect", "16:9") === "9:16"
 const draft = has("draft")
 const previewAt = opt("preview")?.split(",").map(Number)
 const steps = opt("steps")?.split("-").map(Number)
-const clipName = opt("name")
+// a support clip is always <flow>-<clip>-ar, so publish.mjs files it as <flow>/<clip>-ar (--name details or add-student-details)
+const clipName = opt("name") && (opt("name").startsWith(`${flowName}-`) ? opt("name") : `${flowName}-${opt("name")}`)
 const voiceLang = opt("voice")
 const here = dirname(fileURLToPath(import.meta.url))
 const MEDIA = join(here, "../../edit/scripts/media.sh")
-const outArg = opt("out", join(homedir(), repo, "public/screenshot", flowName))
+const outArg = opt("out", join(mediaRoot(repo), flowName))
 const outDir = outArg.endsWith(".mp4") ? dirname(outArg) : outArg
 const stem = outArg.endsWith(".mp4") ? basename(outArg, ".mp4") : `${clipName || flowName}-ar`
 const base = join(outDir, stem)

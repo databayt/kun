@@ -1,22 +1,25 @@
 #!/usr/bin/env node
-// publish --ns <namespace> --slug <slug> --id <manifest id> [--manifest <path>]
-//         [--title-ar …] [--title-en …] [--alt-ar …] [--alt-en …] [--voice <id>] [--dry-run] <files…>
+// publish --ns <namespace> --slug <route> --id <manifest id> [--prefix <flow>-] [--manifest <path>]
+//         [--title-ar …] [--title-en …] [--alt-ar …] [--alt-en …] [--order N] [--voice <id>] [--dry-run] <files…>
 //
-// Uploads to cdn.databayt.org with CONTENT-HASHED keys (<ns>/media/<slug>/<stem>.<hash8>.<ext>) and
+// Uploads to cdn.databayt.org with CONTENT-HASHED keys that MIRROR the app's routes —
+// <ns>/<route>/<stem>.<hash8>.<ext>, e.g. hogwarts/students/add-student-list-ar-1600.3a9f1c2e.avif
+// (--slug "" is the root route /). --prefix names a file after its flow: a stem that doesn't
+// already start with it loses its NN- order prefix and gains the flow (01-list-ar → add-student-list-ar). Keys use
 // `immutable` caching — new pixels are a new URL, so nothing is ever overwritten in place and no
 // CloudFront invalidation is needed. Every URL is verified with a HEAD (200 + exact content-type),
 // then the entry is upserted into the product's media-manifest.json:
 //   video → {kind, title, poster, width, height, duration, sources[{src,type}], tracks[]}
-//   image → {kind, width, height, alt, avif{w:url}, webp{w:url}}
+//   image → {kind, width, height, alt, order?, avif{w:url}, webp{w:url}}   (order = the still's NN in its flow)
 // Video sources are ordered AV1 first, H.264 second; <video> takes the first it can decode.
 import { existsSync, readFileSync, writeFileSync } from "node:fs"
 import { basename, extname } from "node:path"
 import { arg, CDN_BUCKET, CDN_HOST, CONTENT_TYPE, flag, positional, probe, requireRt, sh, sha8 } from "./rt.mjs"
 
 const files = positional()
-const ns = arg("ns"), slug = arg("slug"), id = arg("id", slug)
-if (!ns || !slug || !files.length) {
-  console.error("usage: publish --ns <ns> --slug <slug> --id <id> [--manifest path] [--dry-run] <files…>")
+const ns = arg("ns"), slug = (arg("slug") ?? "").replace(/^\/+|\/+$/g, ""), id = arg("id", slug), prefix = arg("prefix", "")
+if (!ns || arg("slug") === undefined || !files.length) {
+  console.error("usage: publish --ns <ns> --slug <route> --id <id> [--prefix <flow>-] [--manifest path] [--dry-run] <files…>")
   process.exit(2)
 }
 const dry = flag("dry-run")
@@ -27,7 +30,8 @@ for (const file of files) {
   const ct = CONTENT_TYPE[ext]
   if (!ct) throw new Error(`no content-type for .${ext} (${file})`)
   const stem = basename(file, `.${ext}`)
-  const key = `${ns}/media/${slug}/${stem}.${sha8(file)}.${ext}`
+  const named = !prefix || stem.startsWith(prefix) ? stem : prefix + stem.replace(/^\d+-/, "")
+  const key = `${ns}/${slug ? `${slug}/` : ""}${named}.${sha8(file)}.${ext}`
   const url = `https://${CDN_HOST}/${key}`
   const head = () => {
     try {
@@ -97,7 +101,7 @@ if (videos.length) {
       height = m.height
     }
   }
-  entry = { kind: "image", width, height, alt: { ar: arg("alt-ar", ""), en: arg("alt-en", "") }, avif: byFmt.avif, webp: byFmt.webp }
+  entry = { kind: "image", width, height, alt: { ar: arg("alt-ar", ""), en: arg("alt-en", "") }, ...(arg("order") ? { order: Number(arg("order")) } : {}), avif: byFmt.avif, webp: byFmt.webp }
 }
 
 const manifest = arg("manifest")

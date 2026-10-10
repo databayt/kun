@@ -4,8 +4,9 @@
 # Driven by the /record skill (kun/.claude/skills/record/SKILL.md); technique origin:
 # hogwarts memory project_demo_video_recording_otp_2026_08_08.
 #
-# Library:  ~/media/<repo>/<flow>/<flow>[-<part>]-<locale>.<ext>  — the shoot grammar, one file per
-#           name, overwritten on a re-file (the manifest keeps sha + date; no -vN siblings)
+# Library:  ~/media/<repo>/<flow>/            finished stills + videos (shoot.mjs, sim.mjs, story.mjs)
+#           ~/media/<repo>/<flow>/raw/<flow>[-<part>]-<locale>.<ext>   raw takes filed here — the shoot
+#           grammar, one file per name, overwritten on a re-file (manifest keeps sha + date; no -vN)
 # Drive:    My Drive/databayt/media (mirror; local library is the truth)
 #
 # Subcommands:
@@ -21,10 +22,11 @@
 #                             ad render — speed the body to the target length,
 #                             keep the last seconds real-time (ads run 15-45s)
 #   file <src> --repo R --block B --flow F [--part P] [--url U] [--locale ar|en] [--note ...]
-#                             name it <flow>[-<part>]-<locale>, move into the library (replacing
-#                             the same name), upsert the manifest. No --flow: the url slug is the flow
+#                             name it <flow>[-<part>]-<locale>, move into <repo>/<flow>/raw/ (replacing
+#                             the same name), upsert the manifest. No --flow: the url slug is the flow.
+#                             A still needs --part NN-<step> (several stills of one flow never collide)
 #   sync                      mirror the library to Google Drive (rsync → Finder → advice)
-#   stale [repo]              list assets whose block source changed since capture
+#   stale [repo]              list assets whose block source (or `paths`) changed since capture
 #   frame                     size Chrome to 1512x982 + dismiss the automation infobar
 #   status                    recording state, pending segments, library size, last sync
 
@@ -71,7 +73,7 @@ cmd_start() {
   for x in "$@"; do case "$x" in --page) page=1 ;; *) name="$x" ;; esac; done
   local n=1
   [ -f "$SEGLIST" ] && n=$(( $(wc -l < "$SEGLIST" | tr -d ' ') + 1 ))
-  local out="$WORK/$(printf 'seg-%02d' "$n")--${name}.mov"
+  local out="$WORK/$(printf 'seg-%02d' "$n")-${name}.mov"
   # -k shows clicks. --page records only Chrome's page area (MBP14: menu bar 38 + tabs/toolbar 87 →
   # y=125, 1512x857 logical) — the same frame as /shoot's stills; override with RECORD_PAGE_RECT.
   local rect=()
@@ -104,7 +106,7 @@ cmd_stop() {
 cmd_shot() {
   ensure_lib
   local name="${1:-shot}"
-  local out="$WORK/shot--${name}--$(date +%H%M%S).png"
+  local out="$WORK/shot-${name}-$(date +%H%M%S).png"
   screencapture -x -o "$out"
   echo "$out"
 }
@@ -120,7 +122,7 @@ cmd_otp() {
   sleep 2
   # New Outlook sometimes runs with no window; open -a raises or creates one.
   # If the capture below shows no inbox, click the Dock icon (see the /record skill).
-  local out="$WORK/otp--$(date +%H%M%S).png"
+  local out="$WORK/otp-$(date +%H%M%S).png"
   screencapture -x -o "$out"
   [ -n "$prev" ] && osascript -e "tell application \"$prev\" to activate" 2>/dev/null
   echo "$out"
@@ -164,7 +166,7 @@ args = sys.argv[1:]
 if not args:
     sys.exit("usage: record.sh file <src> --repo R --block B --flow F [--part P] [--url U] [--locale L] [--note ...]")
 src = args[0]
-opts = {"kind": None, "locale": "ar", "note": "", "repo": None, "block": None, "url": None, "repo-path": None, "flow": None, "part": None}
+opts = {"locale": "ar", "note": "", "repo": None, "block": None, "url": None, "repo-path": None, "flow": None, "part": None}
 i = 1
 while i < len(args):
     k = args[i].lstrip("-")
@@ -193,17 +195,17 @@ if len(segs) >= 2 and segs[0] == "s":          # /s/<subdomain>/... tenant prefi
 slug = "-".join(re.sub(r"[^a-zA-Z0-9]+", "-", s).strip("-") for s in segs).strip("-").lower() or "home"
 
 ext = os.path.splitext(src)[1].lstrip(".").lower() or "bin"
-kind = opts["kind"] or ("shot" if ext in ("png", "jpg", "jpeg", "webp") else "clip")
-if kind not in ("shot", "clip", "flow"):
-    sys.exit("record: --kind must be shot|clip|flow")
+kind = "shot" if ext in ("png", "jpg", "jpeg", "webp") else "clip"
+if kind == "shot" and not re.match(r"^\d+-[a-z0-9-]+$", opts["part"] or ""):
+    sys.exit("record: a still needs --part NN-<step> (e.g. --part 03-review) — stills of one flow never share a name")
 locale = opts["locale"]
 
 # The shoot grammar (shoot/scripts/publish.mjs): <flow>[-<part>]-<locale>, the same words the
 # product manifest and the CDN use. Same name = the same asset, replaced — never a -vN sibling.
 flow = opts["flow"] or slug
-dest_dir = os.path.join(lib, opts["repo"], flow)
+dest_dir = os.path.join(lib, opts["repo"], flow, "raw")
 os.makedirs(dest_dir, exist_ok=True)
-stem = "-".join(x for x in (flow, opts["part"], locale) if x)
+stem = f"{opts['part']}-{locale}" if kind == "shot" else "-".join(x for x in (flow, opts["part"], locale) if x)
 dest = os.path.join(dest_dir, f"{stem}.{ext}")
 
 repo_path = opts["repo-path"] or os.path.expanduser(f"~/{opts['repo']}")
@@ -329,14 +331,14 @@ def block_path(repo_path, block):
 stale, fresh, unknown = [], [], []
 cache = {}
 for a in assets:
-    key = (a["repo"], a["block"], a["sha"])
+    key = (a["repo"], a["block"], a["sha"], tuple(a.get("paths") or ()))
     if key not in cache:
         repo_path = os.path.expanduser(f"~/{a['repo']}")
         bp = block_path(repo_path, a["block"])
         if not a["sha"] or not os.path.isdir(repo_path):
             cache[key] = None
         else:
-            spec = [bp] if bp else []
+            spec = list(a.get("paths") or ([bp] if bp else []))
             try:
                 r = subprocess.run(["git", "-C", repo_path, "log", "--oneline", f"{a['sha']}..HEAD", "--"] + spec,
                                    capture_output=True, text=True, timeout=15)

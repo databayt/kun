@@ -27,7 +27,7 @@ that every repo imports.
 
 The bucket layout, down to representative full key paths — one flat level mixing
 vendor mirrors, shared primitives, product media, and content. The bucket is named
-**`databayt-cdn`** (renamed from `hogwarts-databayt`); vendor mirrors are **flat**
+**`databayt-cdn`** (user uploads live apart, in `hogwarts-databayt`); vendor mirrors are **flat**
 (`anthropic/<file>`, no category subfolders). The `→ hogwarts/…` notes mark product
 media still at root that the migration
 ([Migration policy](#migration-policy--additive-copy-not-delete)) would move. The
@@ -83,14 +83,34 @@ cdn.databayt.org/icons/visa.svg
 cdn.databayt.org/illustrations/empty-state.svg
 cdn.databayt.org/animations/confetti.json
 
-# Product media (tier 3)
-cdn.databayt.org/hogwarts/photos/campus.jpeg
-cdn.databayt.org/hogwarts/media/story.mp4
+# Product media (tier 3) — the path after <repo>/ mirrors the app's routes
+cdn.databayt.org/hogwarts/students/add-student-created-ar-1600.3a9f1c2e.avif
+cdn.databayt.org/hogwarts/students/add-student-ar.a1b2c3d4.mp4
+cdn.databayt.org/hogwarts/school/bulk/bulk-student-review-ar-1600.689c9b4f.avif
+cdn.databayt.org/hogwarts/story.721b10fc.mp4            # route / (the homepage)
 cdn.databayt.org/souq/banners/ramadan-sale.webp
 
 # Content collections (tier 4)
 cdn.databayt.org/catalog/sd/g1/math/thumbnail-md.webp
 ```
+
+### Product media mirrors the app's routes
+
+Media that `/shoot`, `/record` and the sim produce is published by
+`shoot/scripts/publish.mjs` under the **repo name** (hogwarts — never a tenant
+brand like balqalam) and the **route the flow films**, flat:
+
+```
+cdn.databayt.org/<repo>/<route>/<flow>-<step>-<locale>-<width>.<hash8>.<avif|webp>   stills
+cdn.databayt.org/<repo>/<route>/<flow>[-<clip>]-<locale>.<hash8>.mp4                 videos
+```
+
+`/ar/s/<tenant>/students` → `hogwarts/students/`, `/ar/school/bulk` →
+`hogwarts/school/bulk/`, `/` → `hogwarts/`. Keys are content-hashed and
+`immutable`, so a re-render is a new URL and nothing is invalidated. Pages never
+hard-code these URLs — they read them from the product's `media-manifest.json` by
+id (`add-student/created-ar`). The local side lives in `~/media/<repo>/<flow>/`;
+see the `shoot` docs for the full grammar.
 
 ## Catalog key scheme
 
@@ -134,14 +154,15 @@ backfill, so it is the last thing to move.
 
 | Resource | Value |
 |----------|-------|
-| S3 bucket | `databayt-cdn` (us-east-1) — renamed from `hogwarts-databayt` |
+| S3 bucket | `databayt-cdn` (us-east-1) — curated media; user uploads stay in the separate `hogwarts-databayt` bucket |
 | CloudFront distribution | `E3PHDXTDSBCQSJ` |
 | Custom domain | `cdn.databayt.org` (+ legacy `d1dlwtcfl0db67.cloudfront.net`) |
-| DNS | `databayt.org` on Vercel (`vercel dns …`) |
+| DNS | `databayt.org` on Cloudflare (since 2026-09-18) |
 | Cache header on upload | `Cache-Control: public, max-age=31536000, immutable` |
 
-The bucket is **`databayt-cdn`**, renamed from the legacy `hogwarts-databayt` (which
-read as product-specific for what's now shared infrastructure).
+The bucket is **`databayt-cdn`**. The older `hogwarts-databayt` bucket still exists as
+hogwarts' **user-upload** bucket (avatars, documents) and is never served from
+`cdn.databayt.org`.
 
 A bare `cdn` isn't an option: S3 bucket names are globally unique across all of
 AWS, so `cdn` was claimed years ago — and it carries no org namespace anyway. But

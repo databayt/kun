@@ -14,14 +14,15 @@
 //   mac     2560x1600 — fills a MacBook screen: the still in a browser window on the brand canvas
 //   iphone  1080x2340 — fills an iPhone 16 screen: status bar, the Safari page, Safari's bottom bar
 //
-// Output: <repo>/public/screenshot/<flow>/story/<flow>-<cut>-<device>-<lang>.{mp4,av1.mp4,poster.webp,vtt}
+// Output: ~/media/<repo>/<flow>/<flow>-<cut>-<device>-<lang>.{mp4,av1.mp4,poster.webp,vtt}
+//         → publish.mjs files it as the support clip <flow>/<cut>-<device>-<lang>
 // The .vtt is a sidecar for accessibility (off by default in the player) — nothing is burned in.
 import { spawnSync } from "node:child_process"
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs"
 import { homedir } from "node:os"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
-import { brand as brandOf, FFMPEG } from "../../edit/scripts/media/rt.mjs"
+import { brand as brandOf, FFMPEG, mediaRoot } from "../../edit/scripts/media/rt.mjs"
 
 const here = dirname(fileURLToPath(import.meta.url))
 const MEDIA = join(here, "../../edit/scripts/media.sh")
@@ -38,7 +39,7 @@ const script = JSON.parse(readFileSync(opt("script", join(here, "../sims", repo,
 const cut = script.cuts[cutName]
 if (!cut) throw new Error(`no cut "${cutName}" in ${flow}.story.json`)
 const B = brandOf(script.brand || repo), V = B.video
-const shotRoot = join(homedir(), repo, "public/screenshot", flow)
+const shotRoot = join(mediaRoot(repo), flow)
 const stillDir = device === "iphone" ? join(shotRoot, "iphone-16") : shotRoot
 const stills = existsSync(stillDir) ? readdirSync(stillDir) : []
 const stillOf = (step) => stills.find((f) => new RegExp(`^\\d\\d-${step}-${lang}\\.png$`).test(f))
@@ -52,7 +53,7 @@ if (missing.length) console.log(`skipped (no ${device} still): ${missing.join(",
 if (!beats.some((b) => b.img)) throw new Error(`no stills for ${flow} in ${stillDir} — run shoot.mjs --flow ${flow}${device === "iphone" ? " --device iphone-16" : ""} first`)
 
 const base = `${flow}-${cutName}-${device}-${lang}`
-const outDir = join(shotRoot, "story")
+const outDir = shotRoot
 const work = join(process.env.MEDIA_CACHE || join(homedir(), ".cache/media"), "story", base)
 mkdirSync(outDir, { recursive: true }); mkdirSync(work, { recursive: true })
 const media = (...a) => {

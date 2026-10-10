@@ -29,43 +29,59 @@ and he can see the difference. DPR 2 gives the right layout at the wrong resolut
 ## Naming — one grammar, local to CDN
 
 A flow is named `<verb>-<entity>`, singular and kebab-case: `add-student`, `add-teacher`,
-`bulk-student`, `bulk-teacher`. That one word names the flow file, its folder, its CDN slug and
-its manifest ids; record files raw footage under the same word.
+`bulk-student`, `bulk-teacher`. That one word names the flow file, its local folder, its file
+names on the CDN and its manifest ids. **hogwarts** is the internal name in every path, folder and
+namespace; **balqalam** is only the public brand drawn on screen (palette, logo, captions).
 
-| Asset | Local file (`~/<repo>/public/screenshot/`) | Manifest id (`<Shot id>` / `<TutorialVideo id>`) |
-| --- | --- | --- |
-| page still | `students-ar.png` (short URL, brand + host dropped, locale last) | — |
-| flow still | `<flow>/NN-<step>-<locale>.png` | `<flow>/<step>-<locale>` |
-| phone still | `<flow>/iphone-16/NN-<step>-<locale>.png` | `<flow>/iphone-16/<step>-<locale>` |
-| tutorial | `<flow>/<flow>-<locale>.{mp4,av1.mp4,poster.webp,vtt}` | `<flow>/video-<locale>` |
-| reel | `<flow>/<flow>-<locale>.reel.mp4` | `<flow>/reel-<locale>` |
-| support clip | `<flow>/<flow>-<clip>-<locale>.*` | `<flow>/<clip>-<locale>` |
-| raw footage (`/record`) | `~/media/<repo>/<flow>/<flow>[-<part>]-<locale>.mov` | — (archive + Drive) |
+Everything lands in **one local home per repo, outside the repo**: `~/media/<repo>/` (mirrored to
+Drive by `record.sh sync`; nothing is captured into a repo's `public/`).
 
+| Asset | Local file (`~/media/<repo>/`) | Manifest id | CDN key (`cdn.databayt.org/…`) |
+| --- | --- | --- | --- |
+| page still | `page/<slug>-<locale>.png` | `page/<slug>-<locale>` | `hogwarts/<slug>/<slug>-<locale>-<w>.<hash>.avif` |
+| flow still | `<flow>/NN-<step>-<locale>.png` | `<flow>/<step>-<locale>` | `hogwarts/<route>/<flow>-<step>-<locale>-<w>.<hash>.avif` |
+| phone still | `<flow>/iphone-16/NN-<step>-<locale>.png` | `<flow>/iphone-16/<step>-<locale>` | `hogwarts/<route>/<flow>-iphone-16-<step>-<locale>-1179.<hash>.avif` |
+| tutorial | `<flow>/<flow>-<locale>.{mp4,av1.mp4,poster.webp,vtt}` | `<flow>/video-<locale>` | `hogwarts/<route>/<flow>-<locale>.<hash>.mp4` |
+| reel | `<flow>/<flow>-<locale>.reel.mp4` | `<flow>/reel-<locale>` | `hogwarts/<route>/<flow>-<locale>.reel.<hash>.mp4` |
+| support clip | `<flow>/<flow>-<clip>-<locale>.*` | `<flow>/<clip>-<locale>` | `hogwarts/<route>/<flow>-<clip>-<locale>.<hash>.mp4` |
+| story cut | `<flow>/<flow>-<cut>-<device>-<locale>.*` | `<flow>/<cut>-<device>-<locale>` | same as a support clip |
+| raw footage (`/record`) | `<flow>/raw/<flow>[-<part>]-<locale>.mov` | — (archive + Drive) | — |
+
+- **The CDN mirrors the app's routes.** `<route>` is the page the flow films, from the flow's
+  `export const route` (`students`, `teachers`, `school/bulk`, …; `/` is the namespace root):
+  `cdn.databayt.org/hogwarts/students/add-student-created-ar-1600.3a9f1c2e.avif`. Images and videos
+  sit flat in that folder; the flow name inside each file keeps two flows on one route apart.
 - **Same name = overwrite.** A re-shoot or re-render replaces the file; never `-v2`, `-sim`,
-  `-final` siblings. The `NN-` order prefix stays in the file and leaves the id, so inserting a
-  step never breaks a docs page. Step names say what is on screen (`list`, `map`, `review`, `created`).
+  `-final` siblings. The `NN-` order prefix stays in the local file, leaves the id and the CDN
+  name, and is kept as the manifest entry's `order` — the docs list stills by it, so inserting a
+  step neither breaks a page nor reshuffles it. Step names say what is on screen (`list`, `map`, `review`, `created`).
 - Every still also gets web derivatives in `derived/`: `<stem>-{1600,2400}.{avif,webp}` (UI text
-  stays crisp at 4:4:4). The PNG master is oxipng'd in place. `--no-derive` skips this.
-- `public/screenshot/` is **git-ignored** in hogwarts and mkan: media never ships in git (the
-  `media-guard` hook blocks it). The CDN is the only delivery.
+  stays crisp at 4:4:4); a narrower master (an iPhone's 1179 px) ships at its native width. The PNG
+  master is oxipng'd in place. `--no-derive` skips this.
+- Tutorials are **Arabic-only**: a sim drives the `/ar` app and captions in Arabic. `FlowMedia`
+  shows the Arabic video on English pages.
 
 ## CDN — publish a flow in one command
 
 ```
 node ~/.claude/skills/shoot/scripts/publish.mjs --flow add-student [--lang ar,en] [--only stills|video] [--dry-run]
+node ~/.claude/skills/shoot/scripts/publish.mjs --flow page                                # page stills
 node ~/.claude/skills/shoot/scripts/shoot.mjs --flow add-student --lang ar,en --publish   # shoot, then publish the stills
 ```
 
 - Every asset in the flow folder goes through `media.sh publish`: content-hashed immutable keys
-  (`cdn.databayt.org/<ns>/media/<flow>/<stem>.<hash8>.<ext>`), each URL HEAD-verified, then upserted
-  into the product manifest under the id above. A re-render is a new URL; nothing is invalidated.
+  (table above), each URL HEAD-verified, then upserted into the product manifest under its id.
+  A re-render is a new URL; nothing is invalidated.
 - Namespace and manifest come from `content/media/brand-kit.json → production.<brand>.{cdn,manifest}`
-  (hogwarts → `balqalam`, `src/components/docs/media-manifest.json`).
-- Alt text and video titles come from the flow: `export const title = [ar, en]` and
-  `export const alt = { <step>: [ar, en] }`. A step with no alt falls back to «title — step».
+  — `cdn` is always the repo (`hogwarts`, also for the balqalam brand), manifest
+  `src/components/docs/media-manifest.json`.
+- A flow module carries its metadata: `export const route` (the CDN folder), `title = [ar, en]`,
+  `alt = { <step>: [ar, en] }` (a step with no alt falls back to «title — step»), and `block` /
+  `paths` — publish stamps them into `~/media/manifest.json` so `record.sh stale` flags a still
+  whose source changed.
 - Then commit the product's manifest on its `main` (the only file that changes there) and use
-  `<Shot id="add-student/created-ar" />` / `<TutorialVideo id="add-student/video-ar" />` in MDX.
+  `<Shot id="add-student/created-ar" />` / `<TutorialVideo id="add-student/video-ar" />` /
+  `<FlowMedia flow="add-student" />` in MDX.
 
 ## Hosts + login
 
@@ -142,7 +158,7 @@ node ~/.claude/skills/shoot/scripts/motion.mjs <composition.html> <out.mp4> [--p
   never shipped). 1920x1080, 30 fps, H.264.
 - Preview frames first, read them, then render (CDP capture piped into ffmpeg; ~45 s for 48 s),
   delivered through `media.sh encode web` (tv-range BT.709, faststart). Output beside the shots:
-  `<repo>/public/screenshot/<flow>/<flow>-ar.mp4`.
+  `~/media/<repo>/<flow>/<flow>-ar.mp4`.
 - Keep focus zoom ≤ 2.2× and frame small targets with their neighbours, or the shot is grey.
 - Claims in captions must match what the shots show (count of steps, what is required).
 
@@ -168,13 +184,14 @@ node ~/.claude/skills/shoot/scripts/sim.mjs --flow add-student --direct-only   #
 - **Speed**: the director captures over CDP into an MJPEG pipe across 3 pages and reuses unchanged
   frames. A 121 s tutorial directs in ~30 s and delivers in under 2 min (it used to take ~25 min).
 - **Look = brand kit**: overlay, caption badge, toasts, cards and the click ripple take colours,
-  fonts and the mark from `content/media/brand-kit.json → production` (hogwarts → `balqalam`
-  Clay). Fonts come from `~/Library/Fonts`.
+  fonts and the mark from `content/media/brand-kit.json → production` (the hogwarts repo renders as
+  `balqalam`, Clay). Fonts come from `~/Library/Fonts`.
 - **Deliverables**, one file each, overwritten (never `-v2`):
-  - `<flow>-ar.mp4` (H.264), `<flow>-ar.av1.mp4`, `<flow>-ar.poster.webp`, `<flow>-ar.vtt`
+  - into `~/media/<repo>/<flow>/`: `<flow>-ar.mp4` (H.264), `<flow>-ar.av1.mp4`, `<flow>-ar.poster.webp`, `<flow>-ar.vtt`
   - reel: `<flow>-ar.reel.mp4`. 1080×1920 with a brand band, a square camera, captions inside the
     safe area; a flow over 58 s plays uniformly faster to fit.
-  - support clip: `<name>-ar.*` (`--steps a-b`). Never truncated; qa-pack flags anything over 30 s.
+  - support clip: `<flow>-<clip>-ar.*` (`--steps a-b --name <clip>`; a bare clip name gets the flow
+    prefixed). Never truncated; qa-pack flags anything over 30 s.
   - draft: `<flow>-ar.draft.mp4`.
 - **Voice** (`--voice ar`): `sims/<repo>/<flow>.voice.ar.json` holds one line per `sim.caption`, in
   order. Lines are synthesized locally (Chatterbox, `media.sh voice gen`) in the consented house

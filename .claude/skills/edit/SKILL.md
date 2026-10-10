@@ -85,10 +85,12 @@ Render the cut **without** subtitles, then reframe it and burn the captions last
 
 ```bash
 $S/vu.sh render edl.json -o base.mp4 --no-subtitles
-$S/reel.sh base.mp4 reel.mp4 --srt <dir>/edit/master.srt --mode pad   # pad: screen content; crop: talking head
+$S/reel.sh base.mp4 ~/media/<repo>/<flow>/<flow>-ar.reel.mp4 --srt <dir>/edit/master.srt --mode pad   # pad: screen content; crop: talking head
 ```
 
-`--max 90` is the default cap. Captions sit at MarginV 60, above the platform UI.
+A product flow's reel is `~/media/<repo>/<flow>/<flow>-<locale>.reel.mp4` — the name `publish.mjs`
+files as `<flow>/reel-<locale>`. `--max 58` is the default cap (the same as the sim's reel, under
+the 60 s platform limit). Captions sit at MarginV 60, above the platform UI.
 
 ## Fast silence strip
 

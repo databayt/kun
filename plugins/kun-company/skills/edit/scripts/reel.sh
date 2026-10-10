@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # Vertical 1080x1920@30 reel from a finished horizontal cut, captions burned LAST.
-#   reel.sh <in.mp4> <out.mp4> [--srt master.srt] [--mode pad|crop] [--max 60]
+#   reel.sh <in.mp4> <out.mp4> [--srt master.srt] [--mode pad|crop] [--max 58]
 # pad  = whole frame centred over a blurred fill (screen content — nothing gets cropped away)
 # crop = centre 9:16 crop (talking heads)
 set -euo pipefail
 . "$(dirname "$0")/lib.sh"
 
 in="${1:?usage: reel.sh <in> <out> [--srt f] [--mode pad|crop] [--max s]}"; out="${2:?out path}"; shift 2
-srt=""; mode=pad; max=60
+srt=""; mode=pad; max=58
 while [ $# -gt 0 ]; do
   case "$1" in
     --srt) srt="$2"; shift 2 ;;

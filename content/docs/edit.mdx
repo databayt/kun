@@ -40,7 +40,7 @@ Say any of these in a sentence and the edit lane runs. The full list is on the
 | `captions` · `ترجمة الفيديو` | Arabic captions burned in from the transcript, in Thmanyah Sans on a dark box | The same file, captioned |
 | `title card` | An animated Arabic title, intro or outro card in the brand type and colors | A short MP4 card |
 | `motion graphic` | A promo or explainer composed from code (HyperFrames), with no camera | An MP4 promo |
-| `reel` | A vertical 9:16 version of a cut, captioned and capped at 90 s. With no footage it falls back to an AI clip (higgs), which only plans while credits are out | `reel.mp4`, 1080×1920 |
+| `reel` | A vertical 9:16 version of a cut, captioned and capped at 58 s. With no footage it falls back to an AI clip (higgs), which only plans while credits are out | `reel.mp4`, 1080×1920 |
 
 Example phrasings that route correctly:
 
@@ -94,7 +94,7 @@ render.
 
 The take comes from `shoot`'s sim. Its cached take is re-composed with no new filming. A `record`
 screen recording also works. The cards come from HyperFrames, and everything is joined at a
-constant 30 fps. The result overwrites `<repo>/public/screenshot/<flow>/<flow>-ar.mp4`, with one
+constant 30 fps. The result overwrites `~/media/<repo>/<flow>/<flow>-ar.mp4`, with one
 file per flow.
 
 ### 5. A reel
