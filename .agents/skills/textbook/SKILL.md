@@ -1,138 +1,177 @@
 ---
 name: textbook
-description: Give every curriculum textbook.pdf a Markdown twin by vision transcription, graded by agreement
-when_to_use: "Use when curriculum textbooks (PDF scans, mostly Arabic) must become Markdown next to the PDF and on the CDN — per subject, per grade, or a whole curriculum. Triggers on: textbook markdown, textbook.md, convert the textbooks, pdf to md for grade N, re-transcribe the textbooks, fix the textbook twin."
-argument-hint: "<curriculum> <grade|subject-dir> [--audit N] [--upload]"
+description: Give every curriculum textbook.pdf a verified Markdown twin — vision transcription, blind re-reads, adjudication, a benchmark
+when_to_use: "Use when curriculum textbooks (PDF scans, mostly Arabic) must become Markdown twins, or a twin must be verified, repaired or benchmarked. Triggers on: textbook markdown, textbook.md, convert the textbooks, pdf to md for grade N, re-transcribe the textbooks, fix the textbook twin, textbook bench."
+argument-hint: "<book-dir> [--mode full|verify|repair] [--sample N] [--max-pages N] [--audit] | bench [book-id] [--label L] [--model M] | status [cur] [grade] | loop [--status|--tick|--pause|--resume] | land <cur> <grade> <subject>"
 ---
 
-# Textbook → Markdown twin
+# Textbook → verified Markdown twin
 
-Every `textbook.pdf` under a curriculum tree gets a `textbook.md` beside it. The
-twin is produced by **reading the page images with a vision model** — not OCR —
-and it is graded by **agreement between two independent reads**, never by a
-character count.
+Every `textbook.pdf` under a curriculum tree gets a `textbook.md` beside it. The twin is
+produced by **reading the page images with a vision model** — not OCR — and it is trusted only
+as far as **a second, blind read agrees with it**, on text AND on structure. Disagreements are
+not averaged away: each one is **adjudicated against the scan**, the page is repaired, and the
+contract learns the case so the next book does not repeat it. A **benchmark corpus** of the
+hardest pages measures the pipeline itself, so a contract or model change is a number, not an
+opinion. Nothing here knows a subject: headings come from `structure.json`, the language decides
+direction and markers, the corpus is per book.
+
+## The URL contract — what "done" looks like
+
+Every subject serves exactly two textbook files, derived from its id and nothing else:
+
+```
+https://cdn.databayt.org/catalog/<cur>/<grade>/<subject>/textbook.pdf
+https://cdn.databayt.org/catalog/<cur>/<grade>/<subject>/textbook.md
+```
+
+No URL fields, no overrides — hogwarts stores only `Subject.pdf` and derives the twin with
+`catalogSibling(pdfKey, "textbook.md")`. **`textbook status`** = `cd ~/catalog && pnpm twins sd --grade g12 --cdn`:
+both URLs per subject, extraction, agreement, the twin gate, and whether the live `.md` matches the repo.
+A subject is done when its twin gate passes AND `--cdn` shows no drift.
+
+## The harness — `.claude/workflows/textbook.js`
+
+```
+Workflow({ name: "textbook", args: { book: "/abs/path/to/book-dir", mode: "full" } })
+```
+
+| Phase      | What it does                                                                                                   |
+| ---------- | -------------------------------------------------------------------------------------------------------------- |
+| Preflight  | **formatter canary through the Write TOOL** (a shell write does not fire hooks) + `textbook-preflight.py`: vector-vs-scan, digit script, reference direction. A failed canary ABORTS the run |
+| Prepare    | `textbook-pages.py` renders `pages/<N>.webp` (1000 px) if missing; `textbook-contract.py` templates `pages-md/_CONTRACT.md` from `structure.json` |
+| Transcribe | 8 pages per `transcribe` agent, one `pages-md/<N>.md` each, one status line back; pages missing on disk retried once. `maxPages` caps NEW pages per run (resumes on what is on disk); a capped run with pages left returns `partial: true` before Verify |
+| Assemble   | `textbook-assemble.py` stitches with provenance; `md-structure.py lint --grid` parses every page with the READER's grammar and lists suspects: tables without a printed grid, composed captions, headings not in the structure, ragged tables, marks |
+| Verify     | a random sample (headline) + a risk sample (suspects, illegible, table pages) is **re-read blind**; `md-agreement.py` scores six axes and classes every page; right-edge crops (`textbook-crop.py right`) + `md-table-direction.py` settle table direction physically |
+| Adjudicate | every queued page → the `adjudicate` agent with the image, native-density crops (`textbook-crop.py zoom`), both reads and the hunks; repairs the page, writes `pages-md-verify/<N>.json`; mirrored tables reversed; observations appended to the contract; re-lint; up to `rounds` passes |
+| Persist    | re-assemble with the grade; `textbook-bench.py persist --run-result` writes `~/kun/.claude/memory/textbook-scores.json` — the only writer |
+
+Modes: `full` (everything), `verify` (skip transcription — verify and repair what is on disk),
+`repair` (adjudicate the saved queue only). `--audit` measures and queues but repairs nothing
+and persists nothing. Args: `sample` (default 12; the loop uses 24), `riskCap` (12), `seed` (7 — vary it per run;
+the sandbox has no randomness), `rounds` (2), `batch` (8), `maxPages`, `resume`, `model` (transcriber),
+`auditModel` (the blind re-read), `adjudicateModel`, `date`.
+
+**Models (engine.json `textbook.models`, decided 2026-10-10 on a blind pair):** transcribe **sonnet**,
+audit + adjudicate **opus**. Blind sonnet scored 96.4 % of the corpus assertions, blind opus 93.8 %
+(opus kept the edge only on figure labels). A second read by a different model is the stricter
+check — one model's two reads share its blind spots, and a shared error scores as agreement.
+
+**Contracts learn across books.** `textbook-contract.py` appends the clauses of every subject kind
+the book matches (`scripts/presets.json`: all · math-science · arabic-language · religious ·
+latin-language · humanities) to a NEW contract. A clause is promoted only when two books observed
+it; kinds with no transcribed book yet carry `seed` clauses. `--promote <catalog>` lists the
+observed cases no clause cites yet — the loop's Sunday proposal step.
+
+**The kun agent types may not resolve in the session that created them.** Both workflows fall
+back to `general-purpose` reading `~/.claude/agents/<name>.md` first — the first vision book was
+transcribed exactly that way. The fallback prompt forbids advisor/consultation calls: a
+general-purpose adjudicator once reached the right verdict on page 196 and then stalled for 20
+minutes inside its own advisor call, while the typed `adjudicate` agent (Read/Write/Glob only)
+settled 12 hunks in six minutes.
+
+## What the numbers mean
+
+- **Headline = the random sample's `seq` agreement**, nothing else. The risk sample is the tail
+  and is reported beside it; post-adjudication text is NOT re-scored as independent, because the
+  adjudicator saw both reads. Thresholds A ≥ 0.95 · B ≥ 0.90 · C ≥ 0.80 are **provisional**
+  (`engine.json` → `textbook.thresholds`; set on one book at n = 21, opus).
+- **Classes decide the repair, not the mean.** `md-agreement.py` labels every sampled page:
+  `structure` (tables, dims, figures, captions, label sets differ) · `omission` (a run of ≥ 6
+  words in one read only) · `numeric` · `latin` · `illegible` (one read marked, the other wrote
+  text — a guess suspect) · `ordering` (same words, different order — noise unless the contract
+  defines an order) · `wording` · `clean`. Only the first six enter the queue.
+- **Structure is scored on the reader's grammar** (`hogwarts textbook/parse.ts`, ported into
+  `md-structure.py`): a "table" is what a student sees as a grid. A Markdown table on a page with
+  no ruled or shaded grid is the diagram-as-table defect the first book showed on pages 146/150.
+- **Direction is never judged, only observed**: crop the right 45 % and ask what is in it.
+  On the first book 8 of 31 tables were mirrored and 23 were right — never blanket-swap.
+
+## The benchmark — `.claude/workflows/textbook-bench.js`
+
+```
+Workflow({ name: "textbook-bench", args: { book: "sd-g12-biology", label: "contract-v2", model: "sonnet" } })
+node ~/kun/.claude/scripts/audit-textbook-run.mjs --latest --out-dir <run dir>   # then, always
+```
+
+`.claude/evals/textbook/manifest.json` holds per-book cases: a page, its failure classes, why it
+is there, and **objective assertions** — raw `mustContain`/`mustNotContain` (repair traps like
+`(الصورة 51)`, interpretive words that must not appear), numeral and Latin token sets, an
+order-insensitive label set, table count/dims and the crop-verified rightmost column, `noTable`
+for diagrams, figure count, `illegibleMin/Max` for the never-guess discipline. Gold text sits
+beside them as a secondary signal. `textbook-bench.py score` is deterministic; it reports per
+kind, per class, and whether the run is `comparable` (gold hash + contract hash + model recorded).
+`propose` seeds a corpus from two reads on disk (what both contain is safe, the rest is
+`disputed`); promoting a case from `candidate` to `adjudicated` is **manual until wired**: run the
+`adjudicate` agent on the disputed page with its output directed to `gold/<N>.md`, edit the
+assertions with the page image open, then `freeze` hashes the gold. **Blind runs write
+to `bench-runs/<label>/` and never open `pages-md/`, `gold/` or the manifest** — the transcript
+audit fails the run on any such read, and the entry is persisted `invalid`.
+
+Corpus today: `sd-g12-biology`, 30 pages across dense labels, unreadable labels, diagram-as-table,
+RTL/notation tables, multi-figure, ordering/interpretation, repair traps, edge and control pages;
+4 pages adjudicated against the scan, the rest candidate.
+
+## Cost, measured (5 books)
+
+**~9,000 tokens/page** to transcribe. **Verify + adjudicate is 2–3.5M per book — more than
+transcription on a small book** (math: 3.49M verify vs ~1.8M transcribe). A usage window holds
+roughly 3.5M and then hard-stops mid-phase. **Batch 8 pages, not 12** (12 stalls more often under
+the 600s no-progress watchdog) and run **one book at a time**: four concurrent books exhausted a
+window in 13 minutes and left four half-books. Pages are written one at a time and survive a kill,
+so an interruption costs time, not work.
 
 ## Why not OCR (settled on sd/g12/biology, 2026-09-09)
 
-Tesseract is the wrong engine for these scans and it is not a tuning problem.
-Measured on the same book, same pages:
+Same book, same pages: tesseract 143,153 Arabic chars / **0 Latin** / 6 table rows / 0 captions /
+3 empty pages; vision 180,323 / 7,324 / 276 / 144 / 0. Page 112 — a full-page flowchart — gave
+tesseract zero characters. And the old grader counted whether output *looked like* Arabic, so a
+47 %-coverage twin scored "A". Never reintroduce a coverage-derived grade. `textbook-md.py`
+remains only as the MarkItDown/OCR lane for books whose text layer is genuinely clean.
 
-| | tesseract | vision |
-|---|---:|---:|
-| Arabic characters | 143,153 | 180,323 |
-| Latin (scientific terms) | 0 | 7,324 |
-| table rows | 6 | 276 |
-| figures with captions | 0 | 144 |
-| pages yielding no text | 3 | 0 |
+## The failure mode: repair drift
 
-Page 112 is the whole argument: a full-page spermatogenesis flowchart where
-tesseract produced **zero characters** and vision read all nine labels plus the
-caption. 29 of 253 pages held under 200 Arabic characters, and they were the
-diagram pages — which in a science textbook carry much of the teaching.
+Transcribers rationalise silent fixes — two printed figure numbers "corrected" by cross-reference,
+`ڤ` normalised to `ف`, interpretive words added to raw labels, a caption composed for an
+uncaptioned figure. The abstract rule did not hold; **the contract's "Observed in this book"
+section, populated with named cases by the adjudicate phase, did.** Tool-call counts are not a
+drift signal (measured, disproved).
 
-**The old grader certified garbage.** It counted whether output looked like
-Arabic letters, so biology scored `quality: A` at `coverage: 47`, and g12 maths
-scored A at 28. Never reintroduce a coverage-derived grade.
+## The book gate — a twin is not allowed before the book is verified
 
-## Pipeline
-
-1. **Renders already exist.** `pages/<N>.webp` (1000 px, ~60 KB) from
-   `textbook-pages.py`. 1000 px was verified legible against a 1654 px
-   re-render on a dense table page — identical reading. Do not re-render; each
-   page costs ~1,900 image tokens under the 1568 px cap.
-2. **Write the contract first** to `pages-md/_CONTRACT.md` — the per-book rules
-   (reading order, headings from `structure.json`, tables, figures, notation,
-   the no-guessing and no-repairing clauses). Every agent reads this one file.
-   Editing the contract is how you fix systematic output problems.
-3. **Fan out, 12 pages per agent.** (The `transcribe` agent exists for this and
-   is **untested** — the biology run used `general-purpose` with the contract.) Each agent reads one image, writes
-   `pages-md/<N>.md`, moves on, and returns **one status line**. Agents must
-   never return prose: 253 pages of Arabic through the parent is a context bomb,
-   and per-page files give resume for free when a session dies.
-   **Concurrency cap is 20 subagents** — a 250-page book is one full wave, a
-   400-page book is two.
-4. **Assemble** — `textbook-assemble.py <book> --model … --agreement … --note …`
-   stitches `pages-md/` in numeric order, preserves `<!-- page N -->` markers so
-   the reader's page-image strip stays aligned, and writes provenance front
-   matter. It reports missing pages rather than silently skipping them.
-5. **Grade by agreement** — `md-agreement.py <book> --sample N` picks pages,
-   a fresh agent re-transcribes them into `pages-md-audit/`, then `--score`
-   diffs normalised Arabic. Feed the mean back into the assembler.
-   The audit pass MUST use the current contract, so the score partly measures
-   contract drift — that is intended.
-6. **Keep the old file** as `textbook.ocr.md`. Front matter records
-   `extraction: vision`, the model, the agreement and the sample size.
-
-## Cost, measured
-
-**~11,000 tokens per page**, not the ~3,000 an image-token estimate suggests —
-the gap is the agent's own reasoning and file writes. A 12-page agent ran
-130–190k tokens; the 253-page biology book cost roughly **3M tokens** across 21
-agents. Budget a grade from that, not from image size.
-
-## The failure mode: correction drift
-
-Agents rationalise silent repairs. On biology one transcriber "corrected" a
-printed `(الصورة 51)` to 15 and `(الصورة 42)` to 24 by cross-referencing later
-pages, and normalised the book's `ڤ` to `ف`. It reported these as improvements.
-They were reverted and the contract gained an explicit **"Do not repair the
-book"** clause naming those exact cases. After that, audit agents began
-*reporting* book typos instead of fixing them — reversed Mendel dates, a
-mismatched cross-table label, `OBA` for `ABO`. Keep that clause verbatim.
-
-**Tool-use count is NOT a drift signal.** The agent that altered text used a
-normal 29 calls; the 87–131-call agents were working diagram-dense pages and
-their output was, if anything, more complete than the audit's. Do not build a
-detector on it. Drift is caught by the contract and by reading status lines.
-
-## Reading the agreement number
-
-Biology scored **94.8 % over 21 pages (8 %)**. Inspect the weakest pages before
-trusting or distrusting the number: there, every sub-90 % page was **diagram-label
-ordering** (identical word counts, labels listed in a different sequence) or a
-completeness difference on a dense figure. No fabricated prose appeared in any
-sampled page. A low score from label ordering is not the same defect as a low
-score from invented text — look, do not just read the percentage.
-
-Thresholds (A ≥ 0.95, B ≥ 0.90, C ≥ 0.80) are **provisional**, set on one book
-at n=21. Model was **opus**; sonnet is untested on this task.
-
-## Table column direction — solved, and how
-
-Under `dir="rtl"` Markdown column 1 renders at the RIGHT edge, so column 1 must
-carry the **rightmost printed** column or the table renders mirrored against the
-book. On biology, 8 of 31 checkable tables were mirrored. Not systematic — 23
-were already right, so a blanket swap would have corrupted the majority.
-
-**Do not ask an agent which column is on the right.** Asked to judge direction on
-a full page, transcribers get it backwards — it is the same confusion that
-creates the bug. A first audit pass reported page 42's rightmost column as
-`تينيا ساجيناتا` when the scan plainly shows `تينيا سوليوم`.
-
-**Crop instead.** Render the right ~45 % of the page and ask only "what is in
-this image". Position becomes physical, and there is no direction judgment left
-to get wrong. That pass matched every page hand-checked against the scan.
+The catalog enforces an order: `book` -> `structure` -> `twin` -> `assessment`
+(`~/catalog/CLAUDE.md` invariant 8, `pnpm gate`). **Check it before transcribing anything:**
 
 ```bash
-# 1. crop the right 45% of each page carrying a table (PyMuPDF clip)
-# 2. an agent writes tables-audit/<N>.right.json: rightmostFirstCell, nextToItsLeft
-# 3. compare + fix
-md-table-direction.py <book>          # report
-md-table-direction.py <book> --fix    # reverse only the MIRRORED tables
+cd ~/catalog && pnpm gate sd --grade g12 --enforce none   # the subject must show book ✅
 ```
 
-Reversing a whole row is safe even for a Punnett square: header and body reverse
-together, so row × column still lands on the same genotype, and the corner label
-moves to whichever end the print has it.
+A subject whose `book` gate fails has no verified edition, or its `structure.json`
+`verification.pdfSha256` no longer matches the locked PDF — transcribing it produces a twin of a
+book nobody has established is the right one. Run `pnpm verify` first (`~/catalog/docs/verification.md`).
 
-Two things the checker must handle, both found the hard way: a **blank header
-row** carries no signal, so fall through to the first row with content (page 169
-scored 0.00 both ways until then); and **near-identical labels** (`القائمة (أ)`
-vs `القائمة (ب)`) score ~0.89 against each other, so an exact match on one end
-must decide it regardless of margin.
+The `twin` gate is what this skill earns, and it deliberately ignores `textbook.md`'s `quality`
+letter: the retired OCR grader scored coverage, so a 47 %-complete twin could read "A". It passes
+only on `extraction: "vision"` with a real two-read `agreement` at or above the B threshold, a
+`pages-md/` page count equal to the book's, and a `sourceMd5`. Front matter is the gate's input, so
+the assemble step's stamp is not cosmetic.
 
-Leave alone what is not a printed grid: on 2 pages the Markdown "table" renders a
-cross DIAGRAM, where column direction is meaningless.
+## The loop — `scripts/textbook/loop.sh` (kun), nightly
+
+```bash
+bash ~/kun/scripts/textbook/loop.sh --status      # armed? the grade's twin table, next book, last log lines
+bash ~/kun/scripts/textbook/loop.sh --next        # which book the next tick takes
+bash ~/kun/scripts/textbook/loop.sh --tick --force [--pages N] [--subject S]   # one step now
+bash ~/kun/scripts/textbook/loop.sh --pause | --resume     # kill switch ~/catalog/.work/.textbook-off
+bash ~/kun/scripts/textbook/loop.sh --install     # launchd com.databayt.textbook-loop, daily 01:30
+```
+
+A tick senses (`pnpm twins --cdn`), picks (a book in progress first, then OCR before text-layer, fewer
+pages first), stages into `.work`, runs this workflow through `claude -p` capped at
+`engine.json textbook.loop.pages_per_tick` NEW pages, and — once a book is complete and persisted —
+runs `scripts/textbook/land.sh`, which publishes **only when the catalog twin gate passes**. It never
+compares the new agreement with the live one: two random 12-page samples of the same chemistry twin
+scored 0.946 and 0.893. Every tick comments on `databayt/catalog` "textbook loop: sd twins".
 
 ## Where books live — stage, run, land
 
@@ -150,12 +189,122 @@ cp -c $W/textbook.md $C/ && rsync -a $W/pages-md/ $C/pages-md/ && rsync -a $W/pa
 pnpm assets lock && pnpm validate && pnpm index        # then commit on main
 ```
 
+`bash ~/kun/scripts/textbook/land.sh <cur> <grade> <subject> [--dry-run]` does the landing in one step
+(0 tokens): readiness (every page, a persisted non-partial run, same PDF), copy `pages-md/` + `textbook.md`,
+lock / validate / index, the twin gate (revert on fail), `publish:cdn <cur> --apply`, commit + push on main.
+It never copies `pages/` — the shipped renders are locked binaries.
+
+## Editing this workflow? `name:` will not pick it up
+
+`Workflow({name: "textbook"})` resolves from a **session-start snapshot**, not from the file on
+disk. Edit `textbook.js` mid-session and the run still executes the OLD script — same mtime,
+different content — and reports success, so nothing looks wrong. Two full books were graded that
+way before it was caught, by checking which PHASES actually ran rather than trusting the green
+result.
+
+**To run an edited workflow in the same session, pass `scriptPath` instead of `name`:**
+`Workflow({scriptPath: "~/.claude/workflows/textbook.js", args: {...}})` (expand `~`).
+
+Copies also differ by convention and all must be updated for the NEXT session:
+`~/.claude/workflows/` is what runs · `kun/.claude/workflows/` is canonical ·
+`kun/plugins/kun-company/workflows/` ships with the plugin. (Skills are the opposite way round:
+live at `~/.claude/skills/`, synced back to kun.) After a change, verify with
+`grep -c 'phase("<NewPhase>")'` across all three.
+
+## What five books taught the pipeline (read this before book six)
+
+**A formatter hook is the one defect no score here can see.** `prettier --write` on a PostToolUse
+Write/Edit hook renumbers `9)` to `8.` and rewrites a `- +` bullet to `- -` — fabricating content.
+The blind second read goes through the same tool and is damaged **identically**, so
+`md-agreement.py` diffs two corrupted files and reports agreement. The Preflight canary is the only
+detector, and it must use the **Write tool**: a shell write does not fire hooks. `.prettierignore`
+is NOT a fix (prettier resolves it from the CWD, and agents `cd` into the book), and a settings
+guard is not durable — `/model` silently reverted one. Re-verify per wave, never once per session.
+
+**Render kind is per book; 16 of 25 sd/g12 pdfs are VECTOR.** On those the 1000 px page images throw
+away detail that small integral limits, subscripts and diacritics live in — a 3× page render reads
+them. `textbook-crop.py native` cannot tell you this: it inspects **embedded rasters only**, so it
+returns `zoomHelps:false` on a vector page whose text is perfectly sharp at 3×. Classify from the
+TEXT LAYER, not the image count. Shipped `pages/*.webp` stay 1000 px; hi-res is for transcription.
+
+**Reference direction is per book and tracks the DIGIT SCRIPT.** chemistry (Latin digits, bidi EN)
+stores `(1-17)` for a reference drawn `17 - 1` — chapter first. agriculture (Arabic-Indic, bidi AN)
+stores what it draws. Carrying one book's answer to the next **reverses every reference in it**.
+`textbook-preflight.py` measures it from the text layer and returns `unknown` below 8 digit runs —
+it once produced a confident verdict on 2 runs that a 3× render flatly contradicted. When it is
+unknown, settle it on a reference whose meaning is fixed (an exercise number inside a known unit).
+
+**`[غير مقروء]` means ink you cannot read, NOT "nothing is printed."** Four `نها` on one page were
+marked illegible when the book simply prints no limit. A false marker sends adjudication hunting
+for glyphs that do not exist and hides a real defect behind a transcription caveat.
+
+**Never restore what the page omits, and never fix it with a script.** These books drop integral
+signs (including from a boxed integration-by-parts formula, both sides), exponents, minus signs and
+the constant factors their own substitutions introduce. Transcribe and report. When a systematic
+error IS found, re-transcribe the affected batches — a regex pass over transcribed content is
+repair drift with a script instead of an agent, and it silently breaks the legitimate exceptions
+(a cross-chapter reference keeps its own chapter).
+
+**A half-dead verify reports itself CLEAN.** When the usage window dies during Adjudicate the
+workflow still returns `degraded:false`, `repaired:0`, a letter grade and a long `unresolved` list.
+`repaired:0` means the stage never RAN. Check `agents_error == 0` **and** that the book reached
+`textbook-scores.json`; recover with `mode:"repair"`, which reuses the surviving `queue.json`.
+
+**Resume from DISK, never from a failure list.** `textbook.js` re-transcribes every page in
+`prep.pages`, and its `pages` arg narrows the whole book, so a `full` run with `pages:[missing]`
+assembles a PARTIAL book. Compute gaps as `pages/*.webp` stems minus `pages-md/*.md` stems — dead
+batches write partial ranges, so the failed range is not the gap.
+
+**The contract is the only lever that has paid.** Promoting book-agnostic observations into
+`textbook-contract.py` cut physics' queued pages 24 → 10 and its verify 3.49M → 2.15M tokens versus
+math. Do it after every book.
+
 ## Upload (only when asked)
 
-From `~/catalog`: `pnpm assets push --apply` (new page renders / PDF), then
-`pnpm publish:cdn --apply` (textbook.md, pages-md). Both are additive. Replacing a key that is already live
-(a re-transcribed `textbook.md`) needs `--overwrite`, which also triggers the CloudFront invalidation, because catalog
-binaries are `immutable`. Verify over HTTPS. **The reader serves the twin from the CDN, so a repair is not live
+From `~/catalog`, **scoped to the book** so a one-subject fix cannot replace another grade's files:
+
+```bash
+pnpm assets push sd/g12/biology --apply                      # new page renders / PDF
+pnpm publish:cdn sd/g12/biology --overwrite --apply          # textbook.md, pages-md, structure.json
+```
+
+Both are additive; replacing a key that is already live (a re-transcribed `textbook.md`) needs
+`--overwrite`, and both writers now invalidate CloudFront, which binaries require because they are
+cached `immutable` for a year. Verify over HTTPS (`pnpm twins <cur> --grade <g> --cdn` → md drift 0). Since 2026-10-10 every sd/g12
+text key is catalog-owned, so a plain `--apply` replaces it; keys that predate `CATALOG_EPOCH` (sd g1–g11
+`structure.json` today) still need `--overwrite`, and without it a publish reports success and changes nothing. On
+2026-09-28 that gap was real: the CDN was still serving the **tesseract** twin for all four
+vision-transcribed books, months after they were re-read. **The reader serves the twin from the CDN, so a repair is not live
 until this runs.** Then record: the book's `structure.json` history if it changed, the block ISSUE, memory.
 
-Convert textbooks: $ARGUMENTS
+## Files
+
+| Path                                          | Role                                                              |
+| --------------------------------------------- | ----------------------------------------------------------------- |
+| `.claude/workflows/textbook.js`               | the harness — one book, six phases                                |
+| `.claude/workflows/textbook-bench.js`         | the benchmark runner                                              |
+| `.claude/agents/transcribe.md`                | page/crop reader, narrow toolset, blind when told                 |
+| `.claude/agents/adjudicate.md`                | settles hunks against the scan; the only agent that edits a page  |
+| `skills/textbook/scripts/textbook-preflight.py`| vector-vs-scan, digit script, reference direction — before a token is spent |
+| `skills/textbook/scripts/textbook-contract.py`| contract from structure.json + the observed-cases section         |
+| `skills/textbook/scripts/md-structure.py`     | reader-grammar signature, lint, grid detector                     |
+| `skills/textbook/scripts/md-agreement.py`     | stratified sampling; six-axis scoring; classes; repair queue      |
+| `skills/textbook/scripts/textbook-crop.py`    | right-edge crops, native-density figure crops, native-size report |
+| `skills/textbook/scripts/md-table-direction.py` | report / `--fix` mirrored tables from crop truth               |
+| `skills/textbook/scripts/textbook-assemble.py`| stitch + provenance front matter                                  |
+| `skills/textbook/scripts/textbook-bench.py`   | propose / score / freeze / persist / report                       |
+| `.claude/scripts/audit-textbook-run.mjs`      | post-run contamination check on blind reads                       |
+| `.claude/evals/textbook/`                     | manifest + per-book gold                                          |
+| `.claude/memory/textbook-scores.json`         | measured state — books and benchmark history                      |
+| `skills/textbook/scripts/presets.json`        | cross-book contract clauses by subject kind (evidence-cited)      |
+| `scripts/textbook/loop.sh` (kun)              | the nightly loop — sense, pick, stage, run, land, report          |
+| `scripts/textbook/land.sh` (kun)              | land + gate + publish one finished twin, 0 tokens                 |
+| `pnpm twins` (catalog)                        | the URL contract, checked; the loop's sensor                      |
+
+## Exit gate
+
+A run is reportable only when every page is on disk, the random sample was fully re-read blind,
+the transcript audit is CLEAN, and unresolved pages are listed. Otherwise it is **DEGRADED** and is
+persisted as such — never as a clean grade.
+
+$ARGUMENTS

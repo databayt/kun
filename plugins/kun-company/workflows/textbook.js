@@ -18,7 +18,7 @@ export const meta = {
     {
       title: "Transcribe",
       detail:
-        "12 pages per transcriber, one file per page, one status line back; missing pages retried once",
+        "8 pages per transcriber, one file per page, one status line back; missing pages retried once; maxPages caps a resumable run",
     },
     {
       title: "Assemble",
@@ -43,8 +43,8 @@ export const meta = {
   ],
 };
 
-// args: "<abs book dir>" | { book, mode, pages, sample, seed, riskCap, batch, rounds, model,
-//        agentType, adjudicator, audit, date, scripts, scoresPath, furniture }
+// args: "<abs book dir>" | { book, mode, pages, maxPages, resume, sample, seed, riskCap, batch, rounds,
+//        model, auditModel, adjudicateModel, agentType, adjudicator, audit, date, scripts, scoresPath, furniture }
 const _a =
   args && typeof args === "object"
     ? args
@@ -61,9 +61,21 @@ const PAGES = Array.isArray(_a.pages) && _a.pages.length ? _a.pages : null;
 const SAMPLE = _a.sample ?? 12; // random pages re-read blind — the headline number
 const SEED = _a.seed ?? 7; // deterministic sampling; vary per run via args, never Math.random
 const RISK_CAP = _a.riskCap ?? 12; // suspect/illegible/table pages re-read on top of the random sample
-const BATCH = _a.batch ?? 12; // pages per transcriber — measured ~11k tokens/page, 130-190k per batch
+const BATCH = _a.batch ?? 8; // pages per transcriber — engine.json batch_pages: 12 stalled under the 600s watchdog
+// The loop's unit of work. maxPages caps how many NEW pages one run transcribes; resume (on by
+// default when maxPages is set) skips pages already on disk, so a book is finished over several
+// runs. A run that leaves pages untranscribed stops after Assemble and returns partial: true —
+// a book is verified once, whole, never on a fraction.
+const MAX_PAGES = Number.isFinite(_a.maxPages) && _a.maxPages > 0 ? _a.maxPages : null;
+const RESUME = _a.resume ?? MAX_PAGES !== null;
 const ROUNDS = _a.rounds ?? 2; // adjudicate → re-lint → adjudicate the still-suspect, at most this many times
-const MODEL = _a.model || null; // omit → session model (the measured baseline was opus)
+const MODEL = _a.model || null; // the TRANSCRIBER; omit → session model. engine.json textbook.models.transcribe
+// The blind audit read and the adjudicator may run on a different model. A second read from a
+// DIFFERENT model is a stricter check: two reads by one model share its blind spots, and a shared
+// error scores as agreement. (2026-10-10 bench: blind sonnet 96.4 %, blind opus 93.8 % — opus kept
+// the edge only on figure labels, so the loop transcribes with sonnet and audits + adjudicates with opus.)
+const AUDIT_MODEL = _a.auditModel || MODEL;
+const ADJ_MODEL = _a.adjudicateModel || MODEL;
 const TRANSCRIBER = _a.agentType || "transcribe"; // kun agent; falls back to general-purpose reading the agent file
 const ADJUDICATOR = _a.adjudicator || "adjudicate";
 const AUDIT = !!_a.audit; // verify only — measure, queue, never repair, never persist
@@ -93,6 +105,7 @@ const PREP = {
   type: "object",
   properties: {
     pages: { type: "array", items: { type: "number" } },
+    onDisk: { type: "array", items: { type: "number" }, description: "pages with a non-empty pages-md/<N>.md already" },
     contract: { type: "string" },
     lang: { type: "string" },
     bookId: { type: "string" },
@@ -192,6 +205,8 @@ const chunk = (arr, n) => {
   return out;
 };
 const modelOpt = MODEL ? { model: MODEL } : {};
+const auditOpt = AUDIT_MODEL ? { model: AUDIT_MODEL } : {};
+const adjOpt = ADJ_MODEL ? { model: ADJ_MODEL } : {};
 
 // A kun agent type may not resolve in the session that created it (the registry is read at start).
 // Fall back to a general-purpose agent that reads the agent file first — the first vision book was
@@ -230,12 +245,12 @@ const transcribePrompt = (pages, outDir, blind, contract) =>
   `printedErrors = "page: what" for any apparent error in the print (transcribed as printed), status = one line. ` +
   `Never paste transcribed text into your answer — it lives in the files.\n\nPages: ${pages.join(", ")}`;
 
-async function wave(pages, outDir, blind, labelPrefix, phaseName, contract) {
+async function wave(pages, outDir, blind, labelPrefix, phaseName, contract, opt = modelOpt) {
   const groups = chunk(pages, BATCH);
   const results = await pipeline(groups, (g) =>
     typed(
       transcribePrompt(g, outDir, blind, contract),
-      { label: `${labelPrefix}:${g[0]}-${g[g.length - 1]}`, phase: phaseName, schema: STATUS, ...modelOpt },
+      { label: `${labelPrefix}:${g[0]}-${g[g.length - 1]}`, phase: phaseName, schema: STATUS, ...opt },
       TRANSCRIBER,
     ),
   );
@@ -307,7 +322,8 @@ const prep = await agent(
     `2. If ${book}/pages-md/_CONTRACT.md is missing: python3 ${SCRIPTS}/textbook-contract.py ${book}${FURNITURE ? ` --furniture "${FURNITURE}"` : ""}\n` +
     `3. pages = the numeric stems of ${book}/pages/*.webp, sorted ascending${PAGES ? ` — then keep ONLY these: ${JSON.stringify(PAGES)}` : ""}.\n` +
     `4. bookId = id from ${book}/structure.json (the catalog shape), else dbSlug (pre-catalog), else the directory name; lang = structure.json lang, default "ar".\n` +
-    `Return pages, contract (absolute path), lang, bookId, renderWidth (1000), hasStructure. Do not read or summarise any page.`,
+    `5. onDisk = the numeric stems of ${book}/pages-md/*.md that are non-empty files (ignore _CONTRACT.md and other non-numeric names).\n` +
+    `Return pages, onDisk, contract (absolute path), lang, bookId, renderWidth (1000), hasStructure. Do not read or summarise any page.`,
   { label: "prepare", phase: "Prepare", model: "sonnet", effort: "low", schema: PREP },
 );
 if (!prep || !Array.isArray(prep.pages) || !prep.pages.length)
@@ -316,11 +332,18 @@ log(`${prep.bookId}: ${prep.pages.length} pages · mode ${MODE} · contract ${pr
 
 // ── Transcribe (mode full) ──────────────────────────────────────────────────
 const printedErrors = [];
+let todo = prep.pages;
 if (MODE === "full") {
   phase("Transcribe");
-  const w = await wave(prep.pages, "pages-md", false, "transcribe", "Transcribe", prep.contract);
+  if (RESUME) {
+    const have = new Set(prep.onDisk || []);
+    todo = prep.pages.filter((p) => !have.has(p));
+    log(`resume: ${prep.pages.length - todo.length} pages already on disk, ${todo.length} to go`);
+  }
+  if (MAX_PAGES !== null) todo = todo.slice(0, MAX_PAGES);
+  const w = await wave(todo, "pages-md", false, "transcribe", "Transcribe", prep.contract);
   printedErrors.push(...w.printedErrors);
-  log(`transcribed ${w.done.size}/${prep.pages.length} (self-reported); assemble will verify on disk`);
+  log(`transcribed ${w.done.size}/${todo.length} (self-reported); assemble will verify on disk`);
 }
 
 // ── Assemble + lint, retry the pages that are really missing ────────────────
@@ -328,7 +351,7 @@ phase("Assemble");
 let lint = await lintRun("assemble");
 if (!lint) throw new Error("assemble/lint returned nothing — cannot verify what is not stitched");
 if (MODE === "full" && lint.missing.length) {
-  const retry = PAGES ? lint.missing.filter((p) => PAGES.includes(p)) : lint.missing;
+  const retry = lint.missing.filter((p) => todo.includes(p));
   if (retry.length) {
     log(`${retry.length} pages missing on disk — retrying once: ${retry.slice(0, 30).join(", ")}${retry.length > 30 ? "…" : ""}`);
     const w = await wave(retry, "pages-md", false, "transcribe-retry", "Transcribe", prep.contract);
@@ -340,6 +363,23 @@ log(
   `lint: ${lint.transcribed}/${lint.pages} pages, missing ${lint.missing.length}, tables on ${lint.tablePages.length}, ` +
     `illegible marks on ${lint.illegiblePages.length}, structural suspects ${lint.suspectPages.length}`,
 );
+
+// A capped run that left pages for the next one stops here: verifying a fraction of a book would
+// sample pages that will never be in the twin, and persist a grade for a book that does not exist.
+const remaining = PAGES ? lint.missing.filter((p) => PAGES.includes(p)) : lint.missing;
+if (MODE === "full" && MAX_PAGES !== null && remaining.length) {
+  log(`partial: ${lint.transcribed}/${lint.pages} pages on disk, ${remaining.length} left for the next run — not verified, not persisted`);
+  return {
+    book,
+    bookId: prep.bookId,
+    mode: MODE,
+    partial: true,
+    pages: lint.pages,
+    transcribed: lint.transcribed,
+    remaining: remaining.length,
+    printedErrors: [...new Set(printedErrors)],
+  };
+}
 
 // ── Verify ──────────────────────────────────────────────────────────────────
 phase("Verify");
@@ -357,7 +397,7 @@ if (MODE !== "repair") {
   // the audit read and the direction crops are independent — no barrier between them
   const tablePages = PAGES ? lint.tablePages.filter((p) => PAGES.includes(p)) : lint.tablePages;
   await parallel([
-    () => wave(auditPages, "pages-md-audit", true, "audit", "Verify", prep.contract),
+    () => wave(auditPages, "pages-md-audit", true, "audit", "Verify", prep.contract, auditOpt),
     async () => {
       if (!tablePages.length) return null;
       const cropped = await agent(
@@ -433,7 +473,7 @@ for (let round = 1; round <= ROUNDS && queue.length; round++) {
         `Settle every hunk against the print. Write the repaired page to ${book}/pages-md/${q.page}.md and the verdict file ` +
         `${book}/pages-md-verify/${q.page}.json exactly as the adjudicate agent specifies. A hunk the print cannot settle is unresolved ` +
         `and carries the illegible marker — never a third reading. Return page, changed, hunks, unresolved, classes, printedErrors, observations, status.`,
-      { label: `adjudicate:${q.page}`, phase: "Adjudicate", schema: VERDICT, ...modelOpt },
+      { label: `adjudicate:${q.page}`, phase: "Adjudicate", schema: VERDICT, ...adjOpt },
       ADJUDICATOR,
     ),
   );
@@ -477,6 +517,8 @@ const result = {
   bookId: prep.bookId,
   mode: MODE,
   model: MODEL || "session",
+  auditModel: AUDIT_MODEL || "session",
+  adjudicateModel: ADJ_MODEL || "session",
   contract: prep.contract,
   pages: lint.pages,
   transcribed: lint.transcribed,

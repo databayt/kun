@@ -1,0 +1,318 @@
+{
+ "$comment": "Cross-book transcription rules for the textbook pipeline, grouped by subject kind, sitting between the generic contract template (textbook-contract.py) and each book's own observed cases. A clause is 'promoted' only when the same rule was observed in >= 2 different books (evidence lists them); 'seed' clauses are conservative, evidence-free starting points derived from transcribe-don't-correct and await confirmation.",
+ "updated": "2026-10-10",
+ "kinds": {
+  "all": {
+   "subjects": [
+    "*"
+   ],
+   "clauses": [
+    {
+     "id": "tatweel-justification",
+     "rule": "Kashida/tatweel (ـ) that stretches a word for justification or display is typography, not spelling: write the plain form (وفي, not وفــي). A stretched letter left unjoined before a space (بـــ س) keeps exactly one ـ so it keeps its connected shape. A difference in tatweel count is never a disagreement worth adjudicating.",
+     "status": "promoted",
+     "evidence": [
+      "math:p70",
+      "arabic-rhetoric:contract",
+      "arabic-grammar:contract",
+      "physics:contract",
+      "math-specialized:p272"
+     ]
+    },
+    {
+     "id": "hamza-and-spelling-per-occurrence",
+     "rule": "Hamza is often omitted on alif (الاحصاء، الايثيل، الامشاج) and final ya drawn both dotted and dotless: transcribe each occurrence as drawn. One word may be spelled two ways on a page, or differ between caption, table and body — never unify them either way. Settle a tiny hamza on the native-density crop.",
+     "status": "promoted",
+     "evidence": [
+      "math:p73",
+      "math:p75",
+      "chemistry:p14",
+      "chemistry:p85",
+      "biology:contract",
+      "biology:p85",
+      "agriculture:contract",
+      "math-specialized:p54",
+      "math-specialized:p144"
+     ]
+    },
+    {
+     "id": "diacritics-as-drawn",
+     "rule": "Transcribe exactly the harakat that are drawn: never supply a grammatically expected ending or tanwin, never strip a printed one, and keep the vowel that sits on a shadda as printed. Single fathas, dammas or shaddas below scan resolution are not adjudicable and are never marked illegible — keep the incumbent reading.",
+     "status": "promoted",
+     "evidence": [
+      "arabic-grammar:contract",
+      "arabic-rhetoric:p42",
+      "arabic-rhetoric:contract",
+      "biology:contract"
+     ]
+    },
+    {
+     "id": "run-in-labels-not-headings",
+     "rule": "A bold body-size label at the margin that opens its own text (الحل :، مثال (١) :، أولاً :، العرض :) is a run-in label, never a heading. Only a centred line larger than the body (e.g. an exercise-set title) or one carrying section numbering takes `### `. Write them plain unless the book's observed section says it bolds them.",
+     "status": "promoted",
+     "evidence": [
+      "math:p26",
+      "math:p40",
+      "math-specialized:p43",
+      "math-specialized:p99",
+      "chemistry:contract",
+      "physics:contract",
+      "arabic-rhetoric:p48",
+      "arabic-grammar:contract",
+      "biology:contract"
+     ]
+    },
+    {
+     "id": "long-dash-glyph",
+     "rule": "The long mid-height dash used in references (٢–٣), row and question numbers (١–), class intervals and exercise titles is an en dash – (U+2013), never an ASCII hyphen. A line that opens with a printed dash stays a text paragraph beginning with –, not a Markdown bullet; a printed • stays •.",
+     "status": "promoted",
+     "evidence": [
+      "agriculture:contract",
+      "chemistry:contract",
+      "math:p105",
+      "math-specialized:contract",
+      "arabic-rhetoric:contract",
+      "arabic-grammar:contract"
+     ]
+    },
+    {
+     "id": "quran-as-printed",
+     "rule": "Qur'anic quotations keep the book's own orthography — Uthmani rasm (ٱ، ۥ، ٰ، dotless ى), or a bare alif where the font drops a hamza — and its brackets, end-of-āyah ۝ (never ۞) and waqf marks as printed. Never restore or complete a verse from the mushaf. A waqf mark of unresolvable kind is left out, not chosen.",
+     "status": "promoted",
+     "evidence": [
+      "arabic-grammar:p11",
+      "arabic-grammar:contract",
+      "arabic-rhetoric:p42",
+      "arabic-rhetoric:contract",
+      "biology:contract"
+     ]
+    },
+    {
+     "id": "continued-table-empty-header",
+     "rule": "A table continued from the previous page that prints no header row gets an EMPTY Markdown header row; never repeat or compose one (الموضوع | الصفحة). If the header is re-printed partway down the page, the rows above it form their own table with an empty header — never hoist the header above them.",
+     "status": "promoted",
+     "evidence": [
+      "biology:contract",
+      "math-specialized:p5",
+      "arabic-grammar:contract"
+     ]
+    },
+    {
+     "id": "wrapped-cell-one-line",
+     "rule": "A table cell whose words wrap only because the column is narrow is one cell on one line, words joined by a space — no <br>, no extra row. Use <br> only when the cell prints two distinct stacked entries (a label over its symbol, two listed words), and never invent a separator between them.",
+     "status": "promoted",
+     "evidence": [
+      "math:contract",
+      "math-specialized:p158",
+      "arabic-grammar:contract"
+     ]
+    },
+    {
+     "id": "small-marks-from-crop",
+     "rule": "Small print — an exponent inside a fraction, a footnote digit, a sukun, a one-letter figure label, digits in a rotated table — vanishes or misreads at page-render density. Read it on the native-density crop before writing it or marking it [غير مقروء]; a span the crop resolves is never illegible, nor is a whole legible grid.",
+     "status": "promoted",
+     "evidence": [
+      "math-specialized:p372",
+      "physics:p123",
+      "arabic-rhetoric:contract",
+      "agriculture:contract",
+      "biology:p95"
+     ]
+    }
+   ]
+  },
+  "math-science": {
+   "subjects": [
+    "math",
+    "math-*",
+    "physics",
+    "chemistry",
+    "biology",
+    "agriculture",
+    "engineering",
+    "computer-science"
+   ],
+   "clauses": [
+    {
+     "id": "numerals-and-operators-as-printed",
+     "rule": "Numeric glyphs are content: keep each decimal separator as drawn (Arabic ٫, comma or dot; with or without leading zero) even when mixed on one page, keep padding zeros, and keep the printed multiplication glyph (×, or a Latin X — never \\times). A percent sign printed left of its number is written after it, spaced: ٩٠ ٪.",
+     "status": "promoted",
+     "evidence": [
+      "agriculture:contract",
+      "chemistry:p215",
+      "chemistry:p263",
+      "math:contract",
+      "math-specialized:p146"
+     ]
+    },
+    {
+     "id": "reference-number-by-hierarchy",
+     "rule": "In a Latin-digit reference (section 2-5-3, figure, example, equation) the bidi engine can draw the parts in either visual order. Settle the order by hierarchy — which component is the chapter, checked against the chapter or lesson the page belongs to — on the native-density crop, never from glyph order on the page render.",
+     "status": "promoted",
+     "evidence": [
+      "physics:p82",
+      "chemistry:contract",
+      "biology:p52"
+     ]
+    },
+    {
+     "id": "rtl-printed-order-in-math",
+     "rule": "Equations, products and matrices are set right to left: store the rightmost printed term first in the LaTeX source, and the rightmost printed matrix column is column 1. The rendered math looks mirrored against the page; that is expected — never reorder to the left-to-right convention. An identity or symmetric matrix cannot test this.",
+     "status": "promoted",
+     "evidence": [
+      "math:p153",
+      "math:p86",
+      "chemistry:p215",
+      "physics:p36",
+      "math-specialized:contract"
+     ]
+    },
+    {
+     "id": "stacked-math-notation",
+     "rule": "A stacked fraction (numerator over a rule) is \\frac{}{}, never an inline solidus, and gains no parentheses the print lacks. Limits printed above and below Σ belong inside the math run as \\sum_{…}^{…}, never as orphan text lines above and below the sentence; a Σ printed without limits stays bare.",
+     "status": "promoted",
+     "evidence": [
+      "math:p70",
+      "math-specialized:p143",
+      "math-specialized:p146"
+     ]
+    },
+    {
+     "id": "opener-frame-decorative",
+     "rule": "A unit or chapter opener's decorative frame (arch, scroll, curl) is not a figure: transcribe only the printed title lines, with no image reference and no label list. If an opener carries a real uncaptioned illustration, its alt text is the bare word شكل, never a composed description.",
+     "status": "promoted",
+     "evidence": [
+      "math:p73",
+      "physics:contract",
+      "biology:contract"
+     ]
+    }
+   ]
+  },
+  "arabic-language": {
+   "subjects": [
+    "arabic-*",
+    "literary-studies"
+   ],
+   "clauses": [
+    {
+     "id": "hemistich-gap",
+     "rule": "The two hemistichs of a verse go on ONE Markdown line separated by plain spaces — no &nbsp; or other HTML. The width of that gap is layout, not content, and is never a disagreement. Literal asterisks printed between hemistichs are escaped (\\*\\*) so they render as asterisks, not emphasis.",
+     "status": "promoted",
+     "evidence": [
+      "arabic-grammar:contract",
+      "arabic-rhetoric:contract"
+     ]
+    },
+    {
+     "id": "printed-underline",
+     "rule": "Words the print underlines — usually the ones an analysis or exercise refers to as «تحتها خطّ» — keep the underline as <u>…</u> around exactly the underlined word. Never substitute bold, never widen it to the whole line, and never drop it: the sentence that points at it then points at nothing.",
+     "status": "promoted",
+     "evidence": [
+      "arabic-grammar:p62",
+      "arabic-grammar:contract",
+      "arabic-rhetoric:p28"
+     ]
+    },
+    {
+     "id": "footnote-calls-inline",
+     "rule": "A footnote call is the printed characters only — a raised Arabic-Indic digit in parentheses attached as printed (وَدَدا(١)) — never <sup>. Reproduce each call's inner and outer spacing as drawn, even when it varies on one page, and give the note at the page foot with the same marker.",
+     "status": "promoted",
+     "evidence": [
+      "arabic-grammar:contract",
+      "arabic-rhetoric:contract"
+     ]
+    }
+   ]
+  },
+  "religious": {
+   "subjects": [
+    "islamic-*",
+    "christian-education"
+   ],
+   "clauses": [
+    {
+     "id": "verse-never-from-memory",
+     "rule": "Every verse or scripture quotation is read off the page, never quoted from memory or a reference text. Keep every printed diacritic and Uthmani mark, the ornamental brackets ﴿ ﴾ (or plain parentheses where those are printed) and the verse-number glyph as printed; a number you cannot read inside an ornament is [غير مقروء], not supplied.",
+     "status": "seed",
+     "evidence": []
+    },
+    {
+     "id": "honorifics-as-printed",
+     "rule": "Honorific formulas keep the printed form: a ligature glyph (ﷺ، رضي الله عنه as a single mark) stays the glyph, a spelled-out phrase stays spelled out, and an abbreviation (صلى الله عليه وسلم as (ص)) stays abbreviated. Never expand, contract or add one.",
+     "status": "seed",
+     "evidence": []
+    },
+    {
+     "id": "hadith-source-verbatim",
+     "rule": "A hadith, its chain of narrators and its source citation (رواه البخاري) are transcribed verbatim in printed order, with the book's own brackets and punctuation. Never complete a truncated chain or text, and never add or correct a citation from another collection.",
+     "status": "seed",
+     "evidence": []
+    }
+   ]
+  },
+  "latin-language": {
+   "subjects": [
+    "english",
+    "french"
+   ],
+   "clauses": [
+    {
+     "id": "ltr-reading-order",
+     "rule": "Pages read left to right, top to bottom; on two columns the left column is read fully first. Arabic glosses or instructions printed inside the page stay inline, in place, in their own script — never translated or moved to the end.",
+     "status": "seed",
+     "evidence": []
+    },
+    {
+     "id": "orthography-and-punctuation-as-printed",
+     "rule": "Keep the book's own spelling variety (British or American), accents and diacritics (é, à, ç, ï), apostrophes, quotation marks (\" \" ‘ ’ « ») and the spacing before French ; : ! ? exactly as printed. Never correct grammar, spelling or a missing accent in a reading passage or exercise.",
+     "status": "seed",
+     "evidence": []
+    },
+    {
+     "id": "exercise-blanks-as-printed",
+     "rule": "Fill-in blanks are written as printed — a run of underscores (escaped \\_ so Markdown keeps them) or dots, roughly the printed length — and are never filled in. Answer options (a) b) c)) and dialogue speaker labels keep their printed form and are not converted to Markdown list syntax.",
+     "status": "seed",
+     "evidence": []
+    }
+   ]
+  },
+  "humanities": {
+   "subjects": [
+    "geography",
+    "history",
+    "art",
+    "commercial-studies",
+    "military-science",
+    "physical-education",
+    "home-economics"
+   ],
+   "clauses": [
+    {
+     "id": "map-labels-as-figure",
+     "rule": "A map is a figure: emit the image reference with its printed caption, then every printed place name, legend entry and scale label as a bullet in reading order. Never add a place the map does not print, and never describe what a region shows.",
+     "status": "seed",
+     "evidence": []
+    },
+    {
+     "id": "timeline-list-not-table",
+     "rule": "A timeline, chronology strip or arrow sequence of events is a figure or a list in reading order, not a Markdown table, unless the print draws a ruled grid. Each printed date stays with its event on one bullet.",
+     "status": "seed",
+     "evidence": []
+    },
+    {
+     "id": "dates-and-names-as-printed",
+     "rule": "Dates keep their printed calendar suffix and form (هـ / م, a range drawn ١٩٥٦–١٩٦٩) and are never converted between calendars or reconciled with another page. Personal, tribal and place names keep the printed spelling, even when it differs from a common form or from elsewhere in the book.",
+     "status": "seed",
+     "evidence": []
+    },
+    {
+     "id": "quoted-sources-verbatim",
+     "rule": "A quoted primary source — a treaty clause, a speech, a document excerpt — is transcribed verbatim with its printed quotation marks and attribution line; never complete or modernise it from a known version.",
+     "status": "seed",
+     "evidence": []
+    }
+   ]
+  }
+ }
+}

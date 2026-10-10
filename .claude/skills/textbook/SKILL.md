@@ -2,7 +2,7 @@
 name: textbook
 description: Give every curriculum textbook.pdf a verified Markdown twin — vision transcription, blind re-reads, adjudication, a benchmark
 when_to_use: "Use when curriculum textbooks (PDF scans, mostly Arabic) must become Markdown twins, or a twin must be verified, repaired or benchmarked. Triggers on: textbook markdown, textbook.md, convert the textbooks, pdf to md for grade N, re-transcribe the textbooks, fix the textbook twin, textbook bench."
-argument-hint: "<book-dir> [--mode full|verify|repair] [--sample N] [--rounds N] [--audit] | bench [book-id] [--label L] [--model M]"
+argument-hint: "<book-dir> [--mode full|verify|repair] [--sample N] [--max-pages N] [--audit] | bench [book-id] [--label L] [--model M] | status [cur] [grade] | loop [--status|--tick|--pause|--resume] | land <cur> <grade> <subject>"
 ---
 
 # Textbook → verified Markdown twin
@@ -16,6 +16,20 @@ hardest pages measures the pipeline itself, so a contract or model change is a n
 opinion. Nothing here knows a subject: headings come from `structure.json`, the language decides
 direction and markers, the corpus is per book.
 
+## The URL contract — what "done" looks like
+
+Every subject serves exactly two textbook files, derived from its id and nothing else:
+
+```
+https://cdn.databayt.org/catalog/<cur>/<grade>/<subject>/textbook.pdf
+https://cdn.databayt.org/catalog/<cur>/<grade>/<subject>/textbook.md
+```
+
+No URL fields, no overrides — hogwarts stores only `Subject.pdf` and derives the twin with
+`catalogSibling(pdfKey, "textbook.md")`. **`textbook status`** = `cd ~/catalog && pnpm twins sd --grade g12 --cdn`:
+both URLs per subject, extraction, agreement, the twin gate, and whether the live `.md` matches the repo.
+A subject is done when its twin gate passes AND `--cdn` shows no drift.
+
 ## The harness — `.claude/workflows/textbook.js`
 
 ```
@@ -26,7 +40,7 @@ Workflow({ name: "textbook", args: { book: "/abs/path/to/book-dir", mode: "full"
 | ---------- | -------------------------------------------------------------------------------------------------------------- |
 | Preflight  | **formatter canary through the Write TOOL** (a shell write does not fire hooks) + `textbook-preflight.py`: vector-vs-scan, digit script, reference direction. A failed canary ABORTS the run |
 | Prepare    | `textbook-pages.py` renders `pages/<N>.webp` (1000 px) if missing; `textbook-contract.py` templates `pages-md/_CONTRACT.md` from `structure.json` |
-| Transcribe | 12 pages per `transcribe` agent, one `pages-md/<N>.md` each, one status line back; pages missing on disk retried once |
+| Transcribe | 8 pages per `transcribe` agent, one `pages-md/<N>.md` each, one status line back; pages missing on disk retried once. `maxPages` caps NEW pages per run (resumes on what is on disk); a capped run with pages left returns `partial: true` before Verify |
 | Assemble   | `textbook-assemble.py` stitches with provenance; `md-structure.py lint --grid` parses every page with the READER's grammar and lists suspects: tables without a printed grid, composed captions, headings not in the structure, ragged tables, marks |
 | Verify     | a random sample (headline) + a risk sample (suspects, illegible, table pages) is **re-read blind**; `md-agreement.py` scores six axes and classes every page; right-edge crops (`textbook-crop.py right`) + `md-table-direction.py` settle table direction physically |
 | Adjudicate | every queued page → the `adjudicate` agent with the image, native-density crops (`textbook-crop.py zoom`), both reads and the hunks; repairs the page, writes `pages-md-verify/<N>.json`; mirrored tables reversed; observations appended to the contract; re-lint; up to `rounds` passes |
@@ -34,8 +48,20 @@ Workflow({ name: "textbook", args: { book: "/abs/path/to/book-dir", mode: "full"
 
 Modes: `full` (everything), `verify` (skip transcription — verify and repair what is on disk),
 `repair` (adjudicate the saved queue only). `--audit` measures and queues but repairs nothing
-and persists nothing. Args: `sample` (default 12), `riskCap` (12), `seed` (7 — vary it per run;
-the sandbox has no randomness), `rounds` (2), `batch` (12), `model`, `date`.
+and persists nothing. Args: `sample` (default 12; the loop uses 24), `riskCap` (12), `seed` (7 — vary it per run;
+the sandbox has no randomness), `rounds` (2), `batch` (8), `maxPages`, `resume`, `model` (transcriber),
+`auditModel` (the blind re-read), `adjudicateModel`, `date`.
+
+**Models (engine.json `textbook.models`, decided 2026-10-10 on a blind pair):** transcribe **sonnet**,
+audit + adjudicate **opus**. Blind sonnet scored 96.4 % of the corpus assertions, blind opus 93.8 %
+(opus kept the edge only on figure labels). A second read by a different model is the stricter
+check — one model's two reads share its blind spots, and a shared error scores as agreement.
+
+**Contracts learn across books.** `textbook-contract.py` appends the clauses of every subject kind
+the book matches (`scripts/presets.json`: all · math-science · arabic-language · religious ·
+latin-language · humanities) to a NEW contract. A clause is promoted only when two books observed
+it; kinds with no transcribed book yet carry `seed` clauses. `--promote <catalog>` lists the
+observed cases no clause cites yet — the loop's Sunday proposal step.
 
 **The kun agent types may not resolve in the session that created them.** Both workflows fall
 back to `general-purpose` reading `~/.claude/agents/<name>.md` first — the first vision book was
@@ -130,6 +156,23 @@ only on `extraction: "vision"` with a real two-read `agreement` at or above the 
 `pages-md/` page count equal to the book's, and a `sourceMd5`. Front matter is the gate's input, so
 the assemble step's stamp is not cosmetic.
 
+## The loop — `scripts/textbook/loop.sh` (kun), nightly
+
+```bash
+bash ~/kun/scripts/textbook/loop.sh --status      # armed? the grade's twin table, next book, last log lines
+bash ~/kun/scripts/textbook/loop.sh --next        # which book the next tick takes
+bash ~/kun/scripts/textbook/loop.sh --tick --force [--pages N] [--subject S]   # one step now
+bash ~/kun/scripts/textbook/loop.sh --pause | --resume     # kill switch ~/catalog/.work/.textbook-off
+bash ~/kun/scripts/textbook/loop.sh --install     # launchd com.databayt.textbook-loop, daily 01:30
+```
+
+A tick senses (`pnpm twins --cdn`), picks (a book in progress first, then OCR before text-layer, fewer
+pages first), stages into `.work`, runs this workflow through `claude -p` capped at
+`engine.json textbook.loop.pages_per_tick` NEW pages, and — once a book is complete and persisted —
+runs `scripts/textbook/land.sh`, which publishes **only when the catalog twin gate passes**. It never
+compares the new agreement with the live one: two random 12-page samples of the same chemistry twin
+scored 0.946 and 0.893. Every tick comments on `databayt/catalog` "textbook loop: sd twins".
+
 ## Where books live — stage, run, land
 
 Books live in the **catalog** repo (`~/catalog`, `databayt/catalog`), which mirrors the CDN: the book folder
@@ -145,6 +188,11 @@ mkdir -p $W && cp -Rc $C/ $W/                           # stage (APFS clone — 
 cp -c $W/textbook.md $C/ && rsync -a $W/pages-md/ $C/pages-md/ && rsync -a $W/pages/ $C/pages/   # land
 pnpm assets lock && pnpm validate && pnpm index        # then commit on main
 ```
+
+`bash ~/kun/scripts/textbook/land.sh <cur> <grade> <subject> [--dry-run]` does the landing in one step
+(0 tokens): readiness (every page, a persisted non-partial run, same PDF), copy `pages-md/` + `textbook.md`,
+lock / validate / index, the twin gate (revert on fail), `publish:cdn <cur> --apply`, commit + push on main.
+It never copies `pages/` — the shipped renders are locked binaries.
 
 ## Editing this workflow? `name:` will not pick it up
 
@@ -222,8 +270,9 @@ pnpm publish:cdn sd/g12/biology --overwrite --apply          # textbook.md, page
 
 Both are additive; replacing a key that is already live (a re-transcribed `textbook.md`) needs
 `--overwrite`, and both writers now invalidate CloudFront, which binaries require because they are
-cached `immutable` for a year. Verify over HTTPS — and know that most g12 text keys predate
-`CATALOG_EPOCH`, so without `--overwrite` a publish reports success and changes nothing. On
+cached `immutable` for a year. Verify over HTTPS (`pnpm twins <cur> --grade <g> --cdn` → md drift 0). Since 2026-10-10 every sd/g12
+text key is catalog-owned, so a plain `--apply` replaces it; keys that predate `CATALOG_EPOCH` (sd g1–g11
+`structure.json` today) still need `--overwrite`, and without it a publish reports success and changes nothing. On
 2026-09-28 that gap was real: the CDN was still serving the **tesseract** twin for all four
 vision-transcribed books, months after they were re-read. **The reader serves the twin from the CDN, so a repair is not live
 until this runs.** Then record: the book's `structure.json` history if it changed, the block ISSUE, memory.
@@ -247,6 +296,10 @@ until this runs.** Then record: the book's `structure.json` history if it change
 | `.claude/scripts/audit-textbook-run.mjs`      | post-run contamination check on blind reads                       |
 | `.claude/evals/textbook/`                     | manifest + per-book gold                                          |
 | `.claude/memory/textbook-scores.json`         | measured state — books and benchmark history                      |
+| `skills/textbook/scripts/presets.json`        | cross-book contract clauses by subject kind (evidence-cited)      |
+| `scripts/textbook/loop.sh` (kun)              | the nightly loop — sense, pick, stage, run, land, report          |
+| `scripts/textbook/land.sh` (kun)              | land + gate + publish one finished twin, 0 tokens                 |
+| `pnpm twins` (catalog)                        | the URL contract, checked; the loop's sensor                      |
 
 ## Exit gate
 

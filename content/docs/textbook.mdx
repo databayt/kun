@@ -53,6 +53,29 @@ The harness is `.claude/workflows/textbook.js` (Prepare → Transcribe → Assem
 Adjudicate → Persist); the benchmark runner is `.claude/workflows/textbook-bench.js`. Both are
 Workflow-tool scripts: deterministic control flow, agents only where a page has to be read.
 
+## Predictable URLs
+
+Every subject serves exactly two textbook files, and both are derived from the subject's id — no
+URL fields, no override table, no per-book exception:
+
+```
+https://cdn.databayt.org/catalog/<curriculum>/<grade>/<subject>/textbook.pdf
+https://cdn.databayt.org/catalog/<curriculum>/<grade>/<subject>/textbook.md
+```
+
+`sd-g12-biology` is `…/catalog/sd/g12/biology/textbook.pdf` and `…/textbook.md`. The catalog builds
+them with `catalogKey` + `catalogUrl`; hogwarts stores only `Subject.pdf` and derives the twin with
+`catalogSibling(pdfKey, "textbook.md")`. **`textbook status`** checks the contract live:
+
+```bash
+cd ~/catalog && pnpm twins sd --grade g12 --cdn
+# 25 subjects — pdf 25 · md 25 · vision 8 · twin gate 8 · live 25/25 · md drift 0   (2026-10-10)
+```
+
+It exits non-zero when a subject lacks either file, or when the CDN disagrees with the repo — on its
+first run it caught biology's adjudicated twin (0.952) sitting unpublished behind the 0.948 copy.
+CI runs the offline half on every push.
+
 ## Run it
 
 Three calls cover every use. The book path is absolute; every other argument has a default that
@@ -78,9 +101,12 @@ Workflow({ name: "textbook-bench", args: { book: "sd-g12-biology", label: "contr
 | `sample`  | 12        | random pages re-read blind — the headline                                                                                |
 | `riskCap` | 12        | suspects, illegible and table pages added to the sample — the tail, reported beside the headline                          |
 | `seed`    | 7         | vary it per run; the workflow sandbox has no randomness                                                                  |
-| `batch`   | 12        | pages per transcriber                                                                                                    |
+| `batch`   | 8         | pages per transcriber — 12 stalled under the 600 s no-progress watchdog                                                  |
+| `maxPages`| none      | cap on NEW pages this run transcribes; with it, `resume` skips pages on disk and a run with pages left returns `partial`  |
 | `rounds`  | 2         | adjudication passes                                                                                                      |
-| `model`   | opus      | the readers and the adjudicator; the scorers are Python and take no model                                                |
+| `model`   | sonnet    | the transcriber (engine `textbook.models.transcribe`)                                                                    |
+| `auditModel` | opus   | the blind re-read — a different model from the transcriber is the stricter check                                         |
+| `adjudicateModel` | opus | settles every disagreement against the scan; the scorers are Python and take no model                              |
 | `audit`   | false     | measure and queue, repair nothing, persist nothing                                                                       |
 | `label`   | bench     | names the run under `bench-runs/<label>/` — say what changed                                                             |
 | `date`    | pass it   | stamped into the record; a workflow script cannot read the clock                                                         |
@@ -178,9 +204,38 @@ blind reads), `pages-md-verify/` (verdicts, queue, score, run), `tables-audit/` 
 the same curriculum starts from the template, not from the first book's cases — repair drift is
 book-specific, and a clause that names a case the book does not have is noise.
 
+What does generalise travels through **presets** (`skills/textbook/scripts/presets.json`): rules by
+subject kind — `all`, `math-science`, `arabic-language`, `religious`, `latin-language`,
+`humanities` — appended to every new contract under "Learned across books". A clause is promoted
+only when **two different books** observed it (each cites its `book:page` evidence: tatweel is
+typography, hamza-less spellings stay as printed, run-in labels are not headings, stacked math stays
+`\frac`, matrices read right-to-left…); kinds with no transcribed book yet carry `seed` clauses.
+`textbook-contract.py --promote ~/catalog` lists the observed cases no clause cites — the loop
+turns them into proposals every Sunday, and a proposal is adopted only after a bench run.
+
 The language is the only thing the harness reads about the text: it decides direction, the
 illegible marker and the normalisation the scorers apply. Right-to-left languages are listed in
 `textbook-contract.py`.
+
+## The loop
+
+`scripts/textbook/loop.sh` (launchd `com.databayt.textbook-loop`, daily 01:30) keeps going without
+being asked. One tick:
+
+1. **sense** — `pnpm twins <cur> --grade <g> --cdn` writes `.work/twins/<cur>-<g>.json`
+2. **pick** — a book already in progress, else OCR twins before text-layer ones, fewer pages first; a grade
+   whose subjects all pass the twin gate hands over to the next (`g12 → g11 → g10`)
+3. **stage** — the PDF, `structure.json` and page renders cloned into `~/catalog/.work/`
+4. **run** — `claude -p` runs the textbook workflow with `maxPages: 120`, `sample: 24`; a complete book is
+   verified and adjudicated in the same call
+5. **land** — `scripts/textbook/land.sh` copies, locks, validates and **publishes only when the twin gate
+   passes**, reverting otherwise
+6. **tell** — one comment on `databayt/catalog` "textbook loop: sd twins"
+
+It never compares a new agreement with the live one: two random 12-page samples of the same chemistry
+twin scored 0.946 and 0.893 — a coin flip, not a regression. That is also why loop books sample 24.
+`--status`, `--next`, `--tick --force [--pages N] [--subject S]`, `--pause` / `--resume` (kill switch
+`~/catalog/.work/.textbook-off`).
 
 ## Configuration
 
@@ -190,35 +245,41 @@ bench uses.
 
 | Knob                                          | Value                    | Meaning                                                                 |
 | --------------------------------------------- | ------------------------ | ----------------------------------------------------------------------- |
-| `thresholds`                                  | A 0.95 · B 0.90 · C 0.80 | provisional — set on one book, n = 21, opus                              |
-| `sample_pages` / `risk_cap`                   | 12 / 12                  | the headline sample and the risk tail                                   |
+| `thresholds`                                  | A 0.95 · B 0.90 · C 0.80 | provisional — backed by 8 books now, opus                               |
+| `sample_pages` / `risk_cap`                   | 12 / 12                  | the headline sample and the risk tail (`loop.sample_pages` 24)          |
 | `seed`                                        | 7                        | default sampling seed — vary it per run                                 |
-| `batch_pages`                                 | 12                       | pages per transcriber                                                   |
+| `batch_pages`                                 | 8                        | pages per transcriber                                                   |
 | `adjudicate_rounds`                           | 2                        | repair passes before a page is left `unresolved`                        |
 | `render_width`                                | 1000                     | px — the page strip the reader and the transcribers share               |
 | `crop_right_frac`                             | 0.45                     | the right-edge crop that settles table direction                        |
 | `zoom_max`                                    | 6                        | cap on the native-density re-render                                     |
-| `tokens_per_page` / `tokens_per_adjudication` | 11,000 / 15,000          | measured on opus — for budgeting a run, not a limit                     |
-| `max_concurrent_agents`                       | 16                       | the Workflow tool's ceiling                                             |
-| `models`                                      | opus · opus · none       | transcribe · adjudicate · score (deterministic Python)                  |
+| `tokens_per_page` / `tokens_per_adjudication` | 9,000 / 15,000           | measured on opus — for budgeting a run, not a limit                     |
+| `max_concurrent_agents`                       | 8                        | per workflow; four books at once emptied a usage window in 13 minutes   |
+| `models`                                      | sonnet · opus · opus     | transcribe · audit · adjudicate (scoring is deterministic Python)       |
+| `loop`                                        | sd · g12→g11→g10 · 120 pages/tick · 01:00–07:00 | the nightly loop's policy                        |
+| `presets`                                     | 6 kinds                  | cross-book contract clauses                                             |
 | `classes`                                     | 8                        | the failure classes above                                               |
 | `benchmark`                                   | manifest, scores, books, audit script, blind marker | where the corpus and its record live                  |
 
 ## The record
 
-| Measure                    | Value                          | Provenance                                                        |
-| -------------------------- | ------------------------------ | ----------------------------------------------------------------- |
-| Sampled agreement          | 94.8 %, grade B                | 21 pages of `sd-g12-biology` re-read blind, 2026-09-09            |
-| Repair queue               | 15 pages                       | structure 11 · omission 3 · numeric 1                              |
-| Benchmark                  | 97.4 % — 489 of 502 assertions | the shipped twin under gold `e2e540503419`, 2026-09-11             |
-| Gold                       | 4 adjudicated · 26 candidate   | 30 cases                                                          |
+Sudan grade 12, 2026-10-10 — 8 of 25 subjects carry a vision twin that passes the twin gate, all live
+at their URLs (headline = random 12-page sample):
 
-An earlier 96.2 % entry sits under a superseded gold and is marked not comparable. Neither
-workflow has yet run end to end: the scorers were validated page by page on the biology data, and
-the `adjudicate` agent ran once, by hand, on page 196 — it restored a dropped word, stripped
-interpretive labels, marked two tiny labels illegible and caught a printed doubled colon the hand
-gold had missed. The first full verify run is the next step, and its number enters the record
-with its seed.
+| Subject          | Agreement | Grade | Subject          | Agreement | Grade |
+| ---------------- | --------- | ----- | ---------------- | --------- | ----- |
+| agriculture      | 0.997     | A     | math             | 0.967     | A     |
+| arabic-rhetoric  | 0.980     | A     | physics          | 0.953     | A     |
+| arabic-grammar   | 0.978     | A     | chemistry        | 0.946     | B     |
+| biology          | 0.952     | A     | math-specialized | 0.936     | B     |
+
+The other 17 are tesseract or text-layer twins with no agreement score — the loop's queue.
+
+**Benchmark, the blind pair (2026-10-10).** Same 30 pages, same contract (`d6a20313b1cc`), both
+transcripts audited CLEAN: **sonnet 96.4 %** (481/499) vs **opus 93.8 %** (468/499). Sonnet won numerals
+(226/226 vs 209/226) and RTL tables (172/178 vs 157/178); opus won only figure labels (12/15 vs 9/15).
+The earlier 97.4 % and 96.2 % entries scored *shipped* twins — opus plus adjudication — and were never
+a blind baseline. Hence the split: sonnet transcribes, opus re-reads blind and adjudicates.
 
 ## Honesty
 
@@ -228,8 +289,8 @@ with its seed.
   `DEGRADED` and is persisted as such — never as a clean grade.
 - Blind means blind: a bench read that opens `pages-md/`, `gold/` or the manifest is voided by
   the transcript audit and persisted `invalid`.
-- Measured cost: ~11k tokens per transcribed page on opus; ~3M for a 253-page book; ~350k per
-  benchmark run.
+- Measured cost: ~9k tokens per transcribed page on opus (sonnet's tokens cost about a fifth);
+  verify + adjudicate ~2–3.5M per book; ~400k per benchmark run.
 
 ## Files
 
@@ -249,6 +310,10 @@ with its seed.
 | `.claude/scripts/audit-textbook-run.mjs`         | post-run contamination check on blind reads                       |
 | `.claude/evals/textbook/`                        | manifest + per-book gold                                          |
 | `.claude/memory/textbook-scores.json`            | measured state — books and benchmark history                      |
+| `skills/textbook/scripts/presets.json`           | cross-book contract clauses by subject kind, evidence-cited       |
+| `scripts/textbook/loop.sh`                       | the nightly loop — sense, pick, stage, run, land, tell            |
+| `scripts/textbook/land.sh`                       | land + twin gate + publish one finished twin, zero tokens         |
+| `pnpm twins` (catalog `scripts/twins.ts`)        | the URL contract, checked — the loop's sensor                     |
 
 Runbook: `.claude/skills/textbook/SKILL.md`. The standard both converters are held to:
 `.claude/skills/md/SKILL.md`. The words: [Keywords](/docs/keywords) · [Workflows](/docs/workflows).

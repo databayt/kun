@@ -11,18 +11,25 @@ named example did.
   textbook-contract.py <book> [--lang ar] [--furniture "running footer text"] [--force]
   textbook-contract.py <book> --observe "body reference (الصورة 51) whose caption reads (15) — transcribe 51"
   textbook-contract.py <book> --print
+  textbook-contract.py <book> --force --preset auto        re-render with the cross-book preset clauses
+  textbook-contract.py --promote ~/catalog --out candidates.json   observed cases no preset cites yet
 
 Nothing here is subject-specific: headings come from structure.json, the language decides direction,
-the illegible marker and the digit rule, and the observations come from the book itself.
+the illegible marker and the digit rule, and the observations come from the book itself. What one book
+taught is carried to the next through presets.json (beside this script): clauses by subject KIND
+(math-science, arabic-language, ...), promoted only when >= 2 books observed them. A new contract gets
+the kinds its subject matches (`--preset auto`, the default); `--promote` lists the observed cases no
+clause cites yet, for the loop's weekly proposal step.
 Exit 0; prints the contract path (or the contract with --print).
 """
-import argparse, json, re, sys
+import argparse, fnmatch, json, re, sys
 from pathlib import Path
 
 RTL_LANGS = {"ar", "fa", "ur", "he", "ps", "ku"}
 MARK = {"ar": "[غير مقروء]", "fa": "[ناخوانا]", "ur": "[ناقابل مطالعہ]", "he": "[לא קריא]"}
 BLANK = "<!-- blank -->"
 OBS_BEGIN, OBS_END = "<!-- observed:begin -->", "<!-- observed:end -->"
+PRESETS = Path(__file__).with_name("presets.json")
 
 
 def illegible_marker(lang: str) -> str:
@@ -40,10 +47,43 @@ def existing_observations(path: Path) -> list:
     m = re.search(re.escape(OBS_BEGIN) + r"(.*?)" + re.escape(OBS_END), path.read_text(encoding="utf-8"), re.S)
     if not m:
         return []
-    return [l[2:].strip() for l in m.group(1).splitlines() if l.startswith("- ")]
+    # An observation may wrap: lines that do not open a new "- " bullet continue the previous one.
+    # Keeping only the "- " lines silently cut the second half off every hand-wrapped case the
+    # next time --observe rewrote the block (found 2026-10-10 in chemistry, physics, math-specialized).
+    out = []
+    for line in m.group(1).splitlines():
+        if line.startswith("- "):
+            out.append(line[2:].rstrip())
+        elif line.strip() and out:
+            out[-1] += "\n" + line.rstrip()
+    return out
 
 
-def render(book: Path, struct: dict, lang: str, furniture: str, observations: list) -> str:
+def load_presets(path: Path = PRESETS) -> dict:
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {"kinds": {}}
+
+
+def kinds_for(subject: str, presets: dict) -> list:
+    """Every kind whose subject patterns match — `all` (pattern *) included."""
+    return [k for k, v in presets.get("kinds", {}).items()
+            if any(fnmatch.fnmatch(subject, pat) for pat in v.get("subjects", []))]
+
+
+def preset_lines(kinds: list, presets: dict) -> list:
+    out = []
+    for k in kinds:
+        clauses = presets["kinds"].get(k, {}).get("clauses", [])
+        if not clauses:
+            continue
+        out.append(f"### {k}")
+        out.append("")
+        for c in clauses:
+            out.append(f"- {c['rule']}" + (" *(seed: not yet observed in a transcribed book)*" if c.get("status") == "seed" else ""))
+        out.append("")
+    return out
+
+
+def render(book: Path, struct: dict, lang: str, furniture: str, observations: list, preset: list = ()) -> str:
     rtl = lang in RTL_LANGS
     mark = illegible_marker(lang)
     # Two structure.json shapes: the pre-catalog one (subjectAr/subjectEn, string titles, top-level
@@ -167,6 +207,16 @@ def render(book: Path, struct: dict, lang: str, furniture: str, observations: li
     out.append("")
     out.append(f"**Blank or purely decorative page**: write the single line `{BLANK}`.")
     out.append("")
+    if preset:
+        presets = load_presets()
+        lines = preset_lines(list(preset), presets)
+        if lines:
+            out.append("## Learned across books")
+            out.append("")
+            out.append("Each rule below was settled against the scan in at least two other books of the same kind. They "
+                       "refine the rules above; where this book's own observed cases (at the end) disagree, this book wins.")
+            out.append("")
+            out.extend(lines)
     out.append("## Independence")
     out.append("")
     out.append("When your caller says the read is independent (an audit read, a benchmark run, or an adjudication), you must "
@@ -192,7 +242,42 @@ def render(book: Path, struct: dict, lang: str, furniture: str, observations: li
     return "\n".join(out)
 
 
+def promote(root: Path, presets_path: Path, out_path: Path):
+    """Observed cases across every contract under root that no preset clause cites (book:pN)."""
+    presets = load_presets(presets_path)
+    cited = {e for v in presets.get("kinds", {}).values() for c in v.get("clauses", []) for e in c.get("evidence", [])}
+    books, total, fresh = {}, 0, 0
+    for contract in sorted(root.glob("*/*/*/pages-md/_CONTRACT.md")):
+        subject = contract.parent.parent.name
+        rel = contract.parent.parent.relative_to(root)
+        obs = [o for o in existing_observations(contract) if not o.startswith("(none recorded")]
+        total += len(obs)
+        keep = []
+        for o in obs:
+            pages = set(re.findall(r"\bpp?\.? ?(\d+)", o))
+            # only an exact book:page ref counts as cited — a clause citing "<book>:contract" does not
+            # say WHICH of that book's page-less cases it absorbed, so those stay candidates
+            if any(f"{subject}:p{n}" in cited for n in pages):
+                continue
+            keep.append(o)
+        fresh += len(keep)
+        if keep:
+            books["-".join(rel.parts)] = {"subject": subject, "kinds": kinds_for(subject, presets), "observations": keep}
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(json.dumps({"presets": str(presets_path), "observedTotal": total, "uncited": fresh, "books": books},
+                                   ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    print(f"{fresh} of {total} observed cases are cited by no preset clause -> {out_path}")
+
+
 def main():
+    if "--promote" in sys.argv:
+        ap = argparse.ArgumentParser()
+        ap.add_argument("--promote", required=True, help="catalog root: every <cur>/<grade>/<subject>/pages-md/_CONTRACT.md")
+        ap.add_argument("--presets", default=str(PRESETS))
+        ap.add_argument("--out", required=True)
+        a = ap.parse_args()
+        promote(Path(a.promote).expanduser().resolve(), Path(a.presets).expanduser(), Path(a.out).expanduser())
+        return
     ap = argparse.ArgumentParser()
     ap.add_argument("book")
     ap.add_argument("--lang")
@@ -201,6 +286,8 @@ def main():
     ap.add_argument("--observe", action="append", default=[], help="append a named case to the observed section")
     ap.add_argument("--out", default="pages-md/_CONTRACT.md")
     ap.add_argument("--print", action="store_true")
+    ap.add_argument("--preset", default="auto",
+                    help="auto (kinds matching the subject dir, from presets.json) | none | kind[,kind]")
     a = ap.parse_args()
 
     book = Path(a.book).resolve()
@@ -232,7 +319,10 @@ def main():
         print(str(out))
         return
 
-    text = render(book, struct, lang, a.furniture, observations)
+    presets = load_presets()
+    preset = (kinds_for(book.name, presets) if a.preset == "auto"
+              else [] if a.preset == "none" else [k.strip() for k in a.preset.split(",") if k.strip()])
+    text = render(book, struct, lang, a.furniture, observations, preset)
     if a.print:
         print(text)
         return

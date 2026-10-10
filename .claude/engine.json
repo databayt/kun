@@ -198,9 +198,11 @@
   "tokens_per_adjudication": 15000,
   "max_concurrent_agents": 8,
   "models": {
-   "transcribe": "opus",
+   "transcribe": "sonnet",
+   "audit": "opus",
    "adjudicate": "opus",
-   "score": "none — deterministic python"
+   "score": "none — deterministic python",
+   "$comment": "2026-10-10, biology corpus (30 pages, 499 assertions, contract sha1:d6a20313b1cc, both runs audited CLEAN): blind sonnet-v1 0.9639 vs blind opus-v1 0.9379. Sonnet won numerals (226/226 vs 209/226) and RTL tables (172/178 vs 157/178); opus won only figure labels (12/15 vs 9/15). Both earlier 'baselines' (0.9621, 0.9741) were SHIPPED twins — opus transcription + adjudication — not blind reads, so they were never the right yardstick. The blind audit read stays opus: a second read by a different model does not share the first one's blind spots."
   },
   "classes": [
    "structure",
@@ -231,7 +233,7 @@
    "transcribe",
    "adjudicate"
   ],
-  "updated": "2026-09-29",
+  "updated": "2026-10-10",
   "phases": [
    "Preflight",
    "Prepare",
@@ -254,7 +256,55 @@
   "concurrency_note": "the ~8-agent cap is PER WORKFLOW, not global; 4 concurrent books exhausted a usage window in 13 minutes and left 4 half-books. One book at a time, to completion.",
   "tokens_per_book_verify": 2500000,
   "cost_note": "verify+adjudicate costs MORE than transcription on a small book (math: 3.49M verify vs ~1.8M transcribe). Enriching the contract is the only lever that has paid: it cut physics' queued pages 24 -> 10 and verify 3.49M -> 2.15M.",
-  "exit_gate": "a run is reportable only when agents_error == 0 AND the book appears in textbook-scores.json. A window death during Adjudicate still returns degraded:false, repaired:0 and a letter grade - that is NOT a finished book. Recovery is mode:repair, which reuses the surviving queue.json."
+  "exit_gate": "a run is reportable only when agents_error == 0 AND the book appears in textbook-scores.json. A window death during Adjudicate still returns degraded:false, repaired:0 and a letter grade - that is NOT a finished book. Recovery is mode:repair, which reuses the surviving queue.json.",
+  "loop": {
+   "$comment": "The nightly textbook loop (scripts/textbook/loop.sh, launchd com.databayt.textbook-loop). Each tick: sense (catalog `pnpm twins --cdn`) -> pick (in-progress book first, then priority) -> stage into catalog/.work -> claude -p runs the textbook workflow capped at pages_per_tick NEW pages (resumable; a complete book is verified + adjudicated + persisted in the same call) -> scripts/textbook/land.sh publishes when the twin gate passes -> one comment on the tracking issue. Sundays: textbook-contract.py --promote -> presets proposals.",
+   "curriculum": "sd",
+   "grades": [
+    "g12",
+    "g11",
+    "g10"
+   ],
+   "priority": [
+    "none",
+    "ocr",
+    "text-layer",
+    "vision"
+   ],
+   "priority_note": "worst text first: OCR twins (scans, fonts without a Unicode map) before text-layer twins; fewer pages first within a kind so books finish and publish sooner",
+   "pages_per_tick": 120,
+   "pages_note": "~120 pages x 9k tokens ~= 1.1M tokens of transcription per night; a ~180-page book finishes in two nights and verifies (+~2M) on the second",
+   "sample_pages": 24,
+   "sample_note": "24, not 12, for loop books: two random 12-page samples of the SAME chemistry twin scored 0.946 and 0.893 (2026-10-09). 12 more blind re-reads cost ~110k tokens per book and halve that swing.",
+   "model": "sonnet",
+   "model_note": "transcribe/audit/adjudicate follow textbook.models — decided by the 2026-10-10 blind bench pair",
+   "window": [
+    1,
+    7
+   ],
+   "publish_rule": "the catalog twin gate passes on the new twin (vision, agreement >= thresholds.B, agreementSample >= 12, every page transcribed, sourceMd5) — NOT 'new >= live': random samples of one twin differ by ~5 points",
+   "kill_switch": "~/catalog/.work/.textbook-off  (loop.sh --pause / --resume)",
+   "issue": {
+    "repo": "databayt/catalog",
+    "title": "textbook loop: sd twins"
+   },
+   "land": "scripts/textbook/land.sh <cur> <grade> <subject> [--dry-run]",
+   "sensor": "catalog: pnpm twins <cur> --grade <g> [--cdn] -> .work/twins/<cur>-<g>.json",
+   "audit_model": "opus",
+   "adjudicate_model": "opus"
+  },
+  "presets": {
+   "$comment": "Cross-book contract clauses by subject kind, in the textbook skill's scripts/presets.json. textbook-contract.py appends the matching kinds to every NEW contract (--preset to force one). A clause is promoted only with evidence from >= 2 books; seed clauses for kinds with no transcribed book yet are marked seed. The loop's Sunday step proposes new ones (--promote).",
+   "file": "~/.claude/skills/textbook/scripts/presets.json",
+   "kinds": [
+    "all",
+    "math-science",
+    "arabic-language",
+    "religious",
+    "latin-language",
+    "humanities"
+   ]
+  }
  },
  "media": {
   "$comment": "Budgets for every still and video the media library ships (edit/scripts/media.sh: encode, derive, qa-pack; read by media-qa). Free + local by decision (2026-10-07): no paid generation API. Sizes in MB unless noted.",

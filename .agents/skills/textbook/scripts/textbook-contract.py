@@ -1,0 +1,334 @@
+#!/usr/bin/env python3
+"""textbook-contract.py — write (or extend) a book's transcription contract from its own structure.
+
+The contract is the single lever for systematic transcription quality: every transcriber and every
+adjudicator reads pages-md/_CONTRACT.md before touching a page. This templates it from structure.json
+(titles, language, chapter headings, page offset) plus the generic clauses that earned their place on
+the first vision-transcribed book, and keeps a per-book "Observed in this book" section that the
+adjudicate phase appends to with NAMED cases — on that book the abstract rule alone did not hold; the
+named example did.
+
+  textbook-contract.py <book> [--lang ar] [--furniture "running footer text"] [--force]
+  textbook-contract.py <book> --observe "body reference (الصورة 51) whose caption reads (15) — transcribe 51"
+  textbook-contract.py <book> --print
+  textbook-contract.py <book> --force --preset auto        re-render with the cross-book preset clauses
+  textbook-contract.py --promote ~/catalog --out candidates.json   observed cases no preset cites yet
+
+Nothing here is subject-specific: headings come from structure.json, the language decides direction,
+the illegible marker and the digit rule, and the observations come from the book itself. What one book
+taught is carried to the next through presets.json (beside this script): clauses by subject KIND
+(math-science, arabic-language, ...), promoted only when >= 2 books observed them. A new contract gets
+the kinds its subject matches (`--preset auto`, the default); `--promote` lists the observed cases no
+clause cites yet, for the loop's weekly proposal step.
+Exit 0; prints the contract path (or the contract with --print).
+"""
+import argparse, fnmatch, json, re, sys
+from pathlib import Path
+
+RTL_LANGS = {"ar", "fa", "ur", "he", "ps", "ku"}
+MARK = {"ar": "[غير مقروء]", "fa": "[ناخوانا]", "ur": "[ناقابل مطالعہ]", "he": "[לא קריא]"}
+BLANK = "<!-- blank -->"
+OBS_BEGIN, OBS_END = "<!-- observed:begin -->", "<!-- observed:end -->"
+PRESETS = Path(__file__).with_name("presets.json")
+
+
+def illegible_marker(lang: str) -> str:
+    return MARK.get(lang, "[illegible]")
+
+
+def load_structure(book: Path) -> dict:
+    p = book / "structure.json"
+    return json.loads(p.read_text(encoding="utf-8")) if p.exists() else {}
+
+
+def existing_observations(path: Path) -> list:
+    if not path.exists():
+        return []
+    m = re.search(re.escape(OBS_BEGIN) + r"(.*?)" + re.escape(OBS_END), path.read_text(encoding="utf-8"), re.S)
+    if not m:
+        return []
+    # An observation may wrap: lines that do not open a new "- " bullet continue the previous one.
+    # Keeping only the "- " lines silently cut the second half off every hand-wrapped case the
+    # next time --observe rewrote the block (found 2026-10-10 in chemistry, physics, math-specialized).
+    out = []
+    for line in m.group(1).splitlines():
+        if line.startswith("- "):
+            out.append(line[2:].rstrip())
+        elif line.strip() and out:
+            out[-1] += "\n" + line.rstrip()
+    return out
+
+
+def load_presets(path: Path = PRESETS) -> dict:
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {"kinds": {}}
+
+
+def kinds_for(subject: str, presets: dict) -> list:
+    """Every kind whose subject patterns match — `all` (pattern *) included."""
+    return [k for k, v in presets.get("kinds", {}).items()
+            if any(fnmatch.fnmatch(subject, pat) for pat in v.get("subjects", []))]
+
+
+def preset_lines(kinds: list, presets: dict) -> list:
+    out = []
+    for k in kinds:
+        clauses = presets["kinds"].get(k, {}).get("clauses", [])
+        if not clauses:
+            continue
+        out.append(f"### {k}")
+        out.append("")
+        for c in clauses:
+            out.append(f"- {c['rule']}" + (" *(seed: not yet observed in a transcribed book)*" if c.get("status") == "seed" else ""))
+        out.append("")
+    return out
+
+
+def render(book: Path, struct: dict, lang: str, furniture: str, observations: list, preset: list = ()) -> str:
+    rtl = lang in RTL_LANGS
+    mark = illegible_marker(lang)
+    # Two structure.json shapes: the pre-catalog one (subjectAr/subjectEn, string titles, top-level
+    # pageOffset) and the catalog's (title {ar,en}, textbook.pageOffset). Accept both.
+    tl = lambda t: (t.get(lang) or t.get("ar") or t.get("en") or "") if isinstance(t, dict) else (t or "")
+    t = struct.get("title")
+    title = struct.get("subjectAr") or tl(t) or struct.get("subject") or book.name
+    title_en = struct.get("subjectEn") or (t.get("en", "") if isinstance(t, dict) else "")
+    grade, curriculum = struct.get("grade", ""), struct.get("curriculum", "")
+    offset = struct.get("pageOffset", (struct.get("textbook") or {}).get("pageOffset"))
+    chapters = [tl(c.get("title")) for c in struct.get("chapters", []) if tl(c.get("title"))]
+    lessons = [tl(l.get("title")) for c in struct.get("chapters", []) for l in c.get("lessons", []) if tl(l.get("title"))]
+    ident = f"{curriculum}/{grade}/{book.name}" if curriculum and grade else book.name
+
+    out = []
+    out.append(f"# Transcription contract — {ident}")
+    out.append("")
+    out.append("You transcribe scanned textbook pages into Markdown. One input image, one output file.")
+    out.append("")
+    out.append(f"Book: {title}" + (f" — {title_en}" if title_en else "") + (f" ({curriculum} curriculum, {grade})" if curriculum else "") + ".")
+    out.append(f"Language: {lang}" + (" (RTL — right-to-left)" if rtl else " (LTR)") + ". Terms printed in another script stay inline, in place, as printed.")
+    if isinstance(offset, int):
+        out.append(f"Printed book page = PDF page number − {offset}.")
+    out.append("")
+    out.append("## For each page N you are assigned")
+    out.append("")
+    out.append("1. Read the image `pages/<N>.webp` (relative to the book directory). Read the image BEFORE anything else.")
+    out.append("2. Write the transcription to the output file your caller names (normally `pages-md/<N>.md`).")
+    out.append("")
+    out.append("## The rules")
+    out.append("")
+    out.append("**Transcribe. Do not correct, normalize, modernize, translate or summarize.** Reproduce what is printed, "
+               "including the book's own digits exactly as they appear" + (" (Arabic-Indic ٣٤، ١٠٠٠ stay Arabic-Indic; Latin digits stay Latin)" if lang == "ar" else "") +
+               ". Do not fix the book's spelling or punctuation. Do not add explanation, notes or commentary of your own.")
+    out.append("")
+    out.append("**Do not repair the book.** Printed books contain real errors: wrong figure numbers, reversed dates, "
+               "non-standard spellings, mismatched labels. Transcribe them as printed. Cross-referencing another page to "
+               "\"establish\" the right value is out of scope and produces a file that disagrees with the scan. If you notice "
+               "an apparent error, transcribe it as printed and say so in your final status line. Never silently fix it. "
+               "The cases already observed in THIS book are listed at the end of this contract — every one of them was "
+               "\"corrected\" by a transcriber once and had to be reverted.")
+    out.append("")
+    out.append(f"**Never guess.** If a word or span is genuinely illegible, write `{mark}` in its place. If a whole page is "
+               f"unreadable, write `{mark}` and nothing else. Plausible-looking invented text is the single worst failure "
+               "here: it is undetectable later. Marking uncertainty is always the correct choice and is never penalised. "
+               "A later pass re-reads illegible spans from a higher-resolution crop; it can only do that if you marked them.")
+    out.append("")
+    if rtl:
+        out.append("**Reading order.** Follow the logical reading order of the page: right to left, top to bottom. On a "
+                   "two-column layout the right column is read fully before the left. Never interleave columns.")
+    else:
+        out.append("**Reading order.** Follow the logical reading order of the page: left to right, top to bottom. On a "
+                   "two-column layout the left column is read fully before the right. Never interleave columns.")
+    out.append("")
+    out.append("**Headings.** " + (f"These are the book's {len(chapters)} chapter titles. When a line on the page is one of "
+               "them, or clearly a chapter opener, mark it `## `:" if chapters else
+               "Mark a chapter opener `## ` and a numbered section heading `### `. Do not invent a heading for a page that has none."))
+    if chapters:
+        out.append("")
+        out.append(" · ".join(chapters))
+        out.append("")
+        out.append("Numbered section headings inside a chapter get `### `." +
+                   (f" The {len(lessons)} lesson titles from the book's contents are ordinary `### ` candidates when printed as headings." if lessons else "") +
+                   " Do not invent a heading for a page that has none, and do not promote a bold run-in label to a heading.")
+    out.append("")
+    out.append("**Tables** become real Markdown tables, with the columns in printed order" +
+               (" (rightmost printed column = leftmost Markdown column, so the rendered RTL table matches the book)" if rtl else "") +
+               ". Never flatten a table into prose. Numbers inside tables are the highest-value content — read them carefully. "
+               "**A table is a ruled or shaded grid only.** A cross, a flow chart, a genetics diagram, a labelled drawing or any "
+               "arrangement of labels joined by arrows is a FIGURE, not a table: transcribe its labels as a list (below), never "
+               "as a Markdown table. Every table row must have the same number of cells.")
+    out.append("")
+    out.append("**`[غير مقروء]` means ink you cannot read — NOT \"nothing is printed\".** The two are "
+               "different findings. If the page prints nothing where a symbol is expected — a limit under an "
+               "operator, an exponent, an integral sign — transcribe nothing and REPORT a print omission. "
+               "A false illegible marker is worse than none: it sends adjudication hunting for glyphs that do "
+               "not exist, and it hides a real defect in the book behind a transcription caveat.")
+    out.append("")
+    out.append("**Do not restore what the page omits.** These books routinely drop an integral sign, an "
+               "exponent, a minus, a closing bracket or the constant factor their own substitution introduced. "
+               "The arithmetic \"obviously\" demanding the missing symbol is exactly the trap: transcribe what "
+               "is drawn and report it. Equally, never reconcile a worked solution against the expression it "
+               "restates, a figure caption against the body reference that points at it, or one cell of a "
+               "table against its neighbours.")
+    if rtl:
+        out.append("")
+        out.append("**A negative sign sits on OPPOSITE sides inside and outside a math run.** Arabic prose "
+                   "draws it digit-then-dash (`٢–`) and that is what to write in text. Inside `$...$` the run "
+                   "renders left-to-right, so the same value is written dash-first (`– ٢`); writing `٢–` there "
+                   "puts the sign on the wrong side of the number. The two forms are the SAME value — a blind "
+                   "re-read choosing the other one is not a disagreement worth adjudicating.")
+    out.append("")
+    out.append("**Figures and diagrams.** Emit the image reference with the PRINTED caption as its alt text, then the caption "
+               "as a bold line, then every label inside the figure as a bullet list, in reading order:")
+    out.append("")
+    out.append("```")
+    out.append("![<printed caption>](pages/<N>.webp)")
+    out.append("")
+    out.append("**<printed caption>**")
+    out.append("")
+    out.append("- <label exactly as printed>")
+    out.append("- <label exactly as printed>")
+    out.append("```")
+    out.append("")
+    out.append("Labels are reproduced verbatim — the printed words only. Do not describe what a label points at, do not group "
+               "labels under headings you composed, do not add words that are not printed. A printed arrow chain may be written "
+               "on one bullet with `←` / `→` between its labels. When the print has NO caption, the alt text is the single word "
+               "`شكل` (or `figure` for a non-Arabic book) and no bold caption line follows — never compose a description. Labels "
+               "inside diagrams are real teaching content: a page that is nothing but a diagram still yields a full label list.")
+    out.append("")
+    out.append("**Terms in another script** stay inline exactly as printed, in place (a binomial, a chemical symbol, an English "
+               "gloss after the term).")
+    out.append("")
+    out.append("**Notation** uses LaTeX where the print uses super/subscripts or symbols (`$I^A I^B$`, `$H_2O$`, `$x^2$`). "
+               "Crosses, ratios and formulas keep their printed form (`AB x A`, `1 : 2 : 1`).")
+    out.append("")
+    out.append("**Page furniture is dropped.**" + (f" Do not transcribe the running footer/header (`{furniture}`), the page-number "
+               "mark, or decorative rules." if furniture else " Do not transcribe running headers/footers, the page-number mark, or decorative rules."))
+    out.append("")
+    out.append("**Do not write a `<!-- page N -->` marker.** The assembler adds those.")
+    out.append("")
+    out.append(f"**Blank or purely decorative page**: write the single line `{BLANK}`.")
+    out.append("")
+    if preset:
+        presets = load_presets()
+        lines = preset_lines(list(preset), presets)
+        if lines:
+            out.append("## Learned across books")
+            out.append("")
+            out.append("Each rule below was settled against the scan in at least two other books of the same kind. They "
+                       "refine the rules above; where this book's own observed cases (at the end) disagree, this book wins.")
+            out.append("")
+            out.extend(lines)
+    out.append("## Independence")
+    out.append("")
+    out.append("When your caller says the read is independent (an audit read, a benchmark run, or an adjudication), you must "
+               "not open any earlier transcription of the page — not `pages-md/<N>.md`, not `pages-md-audit/`, not `gold/`, not "
+               "`textbook.md`. Reading them turns a measurement into a copy. The image and this contract are your only inputs.")
+    out.append("")
+    out.append("## When you finish")
+    out.append("")
+    out.append("Reply with ONE line only: `done <first>-<last>, <count> files, illegible: <page list or \"none\">, "
+               "printed-errors: <page: what, or \"none\">`. Do not paste any transcribed text back. It all lives in the files.")
+    out.append("")
+    out.append("## Observed in this book (do not repair)")
+    out.append("")
+    out.append("Each line names a real case a transcriber once \"fixed\". Transcribe these exactly as printed.")
+    out.append("")
+    out.append(OBS_BEGIN)
+    for o in observations:
+        out.append(f"- {o}")
+    if not observations:
+        out.append("- (none recorded yet — the adjudicate phase appends named cases here)")
+    out.append(OBS_END)
+    out.append("")
+    return "\n".join(out)
+
+
+def promote(root: Path, presets_path: Path, out_path: Path):
+    """Observed cases across every contract under root that no preset clause cites (book:pN)."""
+    presets = load_presets(presets_path)
+    cited = {e for v in presets.get("kinds", {}).values() for c in v.get("clauses", []) for e in c.get("evidence", [])}
+    books, total, fresh = {}, 0, 0
+    for contract in sorted(root.glob("*/*/*/pages-md/_CONTRACT.md")):
+        subject = contract.parent.parent.name
+        rel = contract.parent.parent.relative_to(root)
+        obs = [o for o in existing_observations(contract) if not o.startswith("(none recorded")]
+        total += len(obs)
+        keep = []
+        for o in obs:
+            pages = set(re.findall(r"\bpp?\.? ?(\d+)", o))
+            # only an exact book:page ref counts as cited — a clause citing "<book>:contract" does not
+            # say WHICH of that book's page-less cases it absorbed, so those stay candidates
+            if any(f"{subject}:p{n}" in cited for n in pages):
+                continue
+            keep.append(o)
+        fresh += len(keep)
+        if keep:
+            books["-".join(rel.parts)] = {"subject": subject, "kinds": kinds_for(subject, presets), "observations": keep}
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(json.dumps({"presets": str(presets_path), "observedTotal": total, "uncited": fresh, "books": books},
+                                   ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    print(f"{fresh} of {total} observed cases are cited by no preset clause -> {out_path}")
+
+
+def main():
+    if "--promote" in sys.argv:
+        ap = argparse.ArgumentParser()
+        ap.add_argument("--promote", required=True, help="catalog root: every <cur>/<grade>/<subject>/pages-md/_CONTRACT.md")
+        ap.add_argument("--presets", default=str(PRESETS))
+        ap.add_argument("--out", required=True)
+        a = ap.parse_args()
+        promote(Path(a.promote).expanduser().resolve(), Path(a.presets).expanduser(), Path(a.out).expanduser())
+        return
+    ap = argparse.ArgumentParser()
+    ap.add_argument("book")
+    ap.add_argument("--lang")
+    ap.add_argument("--furniture", default="")
+    ap.add_argument("--force", action="store_true", help="rewrite the contract (the observed section is preserved)")
+    ap.add_argument("--observe", action="append", default=[], help="append a named case to the observed section")
+    ap.add_argument("--out", default="pages-md/_CONTRACT.md")
+    ap.add_argument("--print", action="store_true")
+    ap.add_argument("--preset", default="auto",
+                    help="auto (kinds matching the subject dir, from presets.json) | none | kind[,kind]")
+    a = ap.parse_args()
+
+    book = Path(a.book).resolve()
+    struct = load_structure(book)
+    lang = a.lang or struct.get("lang") or "ar"
+    out = book / a.out
+    out.parent.mkdir(parents=True, exist_ok=True)
+
+    observations = existing_observations(out)
+    for o in a.observe:
+        o = " ".join(o.split())
+        if o and o not in observations:
+            observations.append(o)
+    observations = [o for o in observations if not o.startswith("(none recorded")]
+
+    if out.exists() and not a.force and not a.observe and not a.print:
+        print(str(out))
+        return
+
+    if out.exists() and a.observe and not a.force:
+        # surgical update of the observed section only — the rest of the contract is someone's edited prose
+        text = out.read_text(encoding="utf-8")
+        block = OBS_BEGIN + "\n" + "\n".join(f"- {o}" for o in observations) + "\n" + OBS_END
+        if OBS_BEGIN in text:
+            text = re.sub(re.escape(OBS_BEGIN) + r".*?" + re.escape(OBS_END), lambda _: block, text, flags=re.S)
+        else:
+            text = text.rstrip("\n") + "\n\n## Observed in this book (do not repair)\n\n" + block + "\n"
+        out.write_text(text, encoding="utf-8")
+        print(str(out))
+        return
+
+    presets = load_presets()
+    preset = (kinds_for(book.name, presets) if a.preset == "auto"
+              else [] if a.preset == "none" else [k.strip() for k in a.preset.split(",") if k.strip()])
+    text = render(book, struct, lang, a.furniture, observations, preset)
+    if a.print:
+        print(text)
+        return
+    out.write_text(text, encoding="utf-8")
+    print(str(out))
+
+
+if __name__ == "__main__":
+    main()

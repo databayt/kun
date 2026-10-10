@@ -2650,21 +2650,24 @@ export const schools: School[] = [
           "Every curriculum textbook.pdf gets a Markdown twin by VISION transcription, verified by a blind second read on text and structure, adjudicated against the scan, and benchmarked on the hardest pages",
         order: [s("/textbook"), f("transcribe"), f("adjudicate"), s("/md")],
         steps: [
-          "Render pages/<N>.webp and template pages-md/_CONTRACT.md from structure.json",
-          "Fan out 12 pages per transcribe agent; each writes pages-md/<N>.md and returns one line",
-          "Assemble, lint with the reader's grammar, re-read a random + risk sample blind, score six axes, class every page",
-          "Adjudicate every queued page against the scan and native crops; reverse mirrored tables; teach the contract",
-          "Persist the grade and the measured record; upload only when asked",
+          "Render pages/<N>.webp and template pages-md/_CONTRACT.md from structure.json plus the presets of the subject's kind",
+          "Fan out 8 pages per transcribe agent (sonnet); each writes pages-md/<N>.md and returns one line; maxPages makes a run resumable",
+          "Assemble, lint with the reader's grammar, re-read a random + risk sample blind (opus), score six axes, class every page",
+          "Adjudicate every queued page against the scan and native crops (opus); reverse mirrored tables; teach the contract",
+          "Persist the grade and the measured record; land.sh publishes when the catalog twin gate passes",
         ],
         connects: [
-          "md",
-          "contract",
-          "transcribe",
-          "agreement",
           "adjudicate",
-          "textbook bench",
+          "agreement",
+          "contract",
           "convert",
           "docs",
+          "land the twin",
+          "md",
+          "textbook bench",
+          "textbook loop",
+          "textbook status",
+          "transcribe",
         ],
         depends: ["md"],
       },
@@ -2738,6 +2741,73 @@ export const schools: School[] = [
           "audit-textbook-run.mjs must be CLEAN or the entry is persisted invalid",
         ],
         connects: ["textbook", "agreement", "bench", "md"],
+        depends: ["textbook"],
+      },
+      {
+        name: "textbook status",
+        effect:
+          "Every subject's two textbook URLs — textbook.pdf and textbook.md at cdn.databayt.org/catalog/<cur>/<grade>/<subject>/ — checked live, with extraction, agreement and the twin gate",
+        order: [s("/textbook")],
+        steps: [
+          "cd ~/catalog && pnpm twins <cur> --grade <g> --cdn",
+          "Both URLs per subject answer 200; the live .md matches the repo (md drift 0)",
+          "Extraction, agreement, pages-md count and the twin gate per subject — the loop's work queue",
+          "Writes .work/twins/<cur>-<g>.json for the loop's picker",
+        ],
+        connects: ["textbook", "textbook loop", "land the twin"],
+        depends: ["textbook"],
+      },
+      {
+        name: "textbook loop",
+        effect:
+          "Every night the next unverified textbook moves one step — staged, transcribed in capped resumable runs, verified, adjudicated — and is published the moment it passes the twin gate",
+        order: [
+          s("/textbook"),
+          f("transcribe"),
+          f("adjudicate"),
+          m(".claude/memory/textbook-scores.json"),
+        ],
+        steps: [
+          "Sense with pnpm twins --cdn; pick a book in progress, else OCR before text-layer, fewer pages first",
+          "claude -p runs the textbook workflow capped at engine.json textbook.loop.pages_per_tick new pages",
+          "A complete book is verified on a 24-page blind sample and adjudicated in the same run",
+          "land.sh publishes when the twin gate passes; one comment on the tracking issue",
+          "Sundays: textbook-contract.py --promote proposes cross-book preset clauses",
+        ],
+        connects: [
+          "textbook",
+          "textbook status",
+          "land the twin",
+          "textbook bench",
+          "contract",
+        ],
+        depends: ["textbook"],
+      },
+      {
+        name: "land the twin",
+        effect:
+          "A finished twin moves from the catalog's staging area into the catalog and onto the CDN — only if the twin gate passes, reverted otherwise, zero tokens",
+        order: [s("/textbook")],
+        steps: [
+          "Ready: every page on disk, a persisted non-partial run, the same PDF (sourceMd5)",
+          "Copy pages-md and textbook.md; assets lock, validate, index",
+          "The catalog twin gate decides — fail reverts, nothing published",
+          "publish:cdn <cur> --apply, commit and push on main",
+        ],
+        connects: ["textbook", "textbook status", "textbook loop"],
+        depends: ["textbook"],
+      },
+      {
+        name: "تحويل الكتب",
+        effect:
+          "Arabic for 'convert the textbooks' — every curriculum textbook.pdf becomes a verified Markdown twin at its predictable URL (the textbook pipeline, then the nightly loop)",
+        order: [s("/textbook"), f("transcribe"), f("adjudicate")],
+        steps: [
+          "Same pipeline as `textbook`: vision transcription, blind re-read by a second model, adjudication against the scan",
+          "`textbook status` shows both URLs and the twin gate per subject",
+          "`textbook loop` keeps converting nightly and publishes what passes the gate",
+        ],
+        connects: ["textbook", "textbook status", "textbook loop"],
         depends: ["textbook"],
       },
       {
@@ -3798,7 +3868,7 @@ export const workflows: Workflow[] = [
       },
       {
         keyword: "transcribe",
-        action: "One reader per 12 pages, one file per page",
+        action: "One reader per 8 pages, one file per page",
       },
       {
         keyword: "agreement",
@@ -3812,6 +3882,35 @@ export const workflows: Workflow[] = [
       {
         keyword: "textbook bench",
         action: "Score the pipeline on the corpus; persist the trend",
+      },
+    ],
+  },
+  {
+    id: "textbook-loop",
+    name: "Textbook Loop",
+    description:
+      "Nightly: the next unverified textbook to a published, verified Markdown twin at its predictable URL",
+    steps: [
+      {
+        keyword: "textbook status",
+        action: "Sense both URLs and the twin gate per subject",
+      },
+      {
+        keyword: "textbook loop",
+        action: "Pick, stage and run a capped, resumable transcription",
+      },
+      {
+        keyword: "agreement",
+        action: "A complete book: blind 24-page re-read by a second model",
+      },
+      {
+        keyword: "adjudicate",
+        action: "Settle every disagreement against the scan",
+      },
+      { keyword: "land the twin", action: "Publish when the twin gate passes" },
+      {
+        keyword: "contract",
+        action: "Sundays: observed cases become cross-book presets",
       },
     ],
   },
