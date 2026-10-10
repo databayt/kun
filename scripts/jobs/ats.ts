@@ -235,8 +235,14 @@ async function prepare(): Promise<void> {
           // A card held for an unanswerable question is re-asked every
           // morning: answers added to the profile/engine free it without a
           // manual move (67 sat held on 2026-10-04 after the bank landed).
+          // Same for a letter or written answer the tailor run failed to
+          // produce — a transient claude -p miss, not a verdict (6 cards
+          // sat on "no cover letter was written" on 2026-10-10).
           (r.applicationStatus === "HOLD" &&
-            (r.holdReason ?? "").startsWith(UNANSWERABLE))) &&
+            ((r.holdReason ?? "").startsWith(UNANSWERABLE) ||
+              /^(no cover letter was written|no answer written for)/.test(
+                r.holdReason ?? "",
+              )))) &&
         r.channel === "ATS" &&
         isGreenhouse(r),
     )
@@ -328,9 +334,14 @@ async function prepare(): Promise<void> {
       req.cvPdf = t.pdf;
       req.cvVariant = `cv:tailored@${req.crmId}`;
       req.cvJson = join("/Users/abdout/kun", dir, req.crmId, "cv.json");
-      writeFileSync(join(dir, `${req.crmId}.ats-request.json`), JSON.stringify(req, null, 2));
+      writeFileSync(
+        join(dir, `${req.crmId}.ats-request.json`),
+        JSON.stringify(req, null, 2),
+      );
     } else if (t) {
-      console.log(`  · lane CV for ${req.company} — tailored CV failed: ${t.problems.join("; ").slice(0, 200)}`);
+      console.log(
+        `  · lane CV for ${req.company} — tailored CV failed: ${t.problems.join("; ").slice(0, 200)}`,
+      );
     }
   }
 
@@ -378,7 +389,9 @@ async function prepare(): Promise<void> {
       }
       const fit = cvs.get(req.crmId);
       if (fit?.ok && fit.weakFit)
-        problems.push(`weak fit (${fit.coverage}% of the posting's must-haves): missing ${fit.missing.join(", ")}`);
+        problems.push(
+          `weak fit (${fit.coverage}% of the posting's must-haves): missing ${fit.missing.join(", ")}`,
+        );
       reason = problems.join("; ");
     }
     const variant = `${req.cvVariant} ${req.letterVariant}`;

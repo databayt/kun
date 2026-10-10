@@ -11,7 +11,13 @@
 import { existsSync, readFileSync } from "node:fs";
 
 import { BoardRow, boardUrl, listBoard } from "./board";
-import { kigaliNow, killSwitchOn, loadConfig, seniorityBand, todaysCap } from "./config";
+import {
+  kigaliNow,
+  killSwitchOn,
+  loadConfig,
+  seniorityBand,
+  todaysCap,
+} from "./config";
 import { fundingDue } from "./funding";
 import { notify } from "./notify";
 
@@ -68,6 +74,28 @@ async function main(): Promise<void> {
     `Board: ${by("APPLIED").length} applied · ${by("RESPONSE").length + by("INTERVIEW").length} in conversation · ${by("OFFER").length} offers · ${by("TO_APPLY").length} to apply`,
   );
 
+  // Supply alarm. 2026-09-30 → 10-08 sent nothing for nine days while the
+  // loop ran green: 194 of 195 TO_APPLY cards had no address or form, so the
+  // wave had nothing to tailor. Say so the day it happens, not a week later.
+  const weekAgo = new Date(Date.now() - 7 * 86_400_000).toISOString();
+  const sentWeek = existsSync("jobs/ledger.jsonl")
+    ? readFileSync("jobs/ledger.jsonl", "utf-8")
+        .split("\n")
+        .filter((l) => l.includes('"kind":"sent"'))
+        .filter((l) => (JSON.parse(l) as { ts: string }).ts >= weekAgo).length
+    : 0;
+  const toApply = by("TO_APPLY");
+  const routed = toApply.filter(
+    (r) => r.applyEmail || r.applyPhone || r.channel === "ATS",
+  ).length;
+  lines.push(
+    `Supply: ${sentWeek} sent in 7 days · ${routed}/${toApply.length} to-apply cards have a route the loop can send`,
+  );
+  if (sentWeek < 10)
+    lines.push(
+      `⚠️ *Stalled* — under 10 sends this week. Not a sending problem: the loop has nothing routable. Run \`pnpm jobs:resolve --apply\`, paste the Ashby/Lever packets, or widen discovery.`,
+    );
+
   const queued = [...by("QUEUED"), ...by("APPROVED")];
   if (queued.length) {
     lines.push(
@@ -78,9 +106,13 @@ async function main(): Promise<void> {
   }
   // Portal packets (Ashby/Lever block automated submits) are their own list:
   // they need a two-minute paste, not a decision.
-  const packets = by("HOLD").filter((r) => /paste-ready packet/.test(r.holdReason ?? ""));
+  const packets = by("HOLD").filter((r) =>
+    /paste-ready packet/.test(r.holdReason ?? ""),
+  );
   if (packets.length) {
-    lines.push(`\n*Paste & submit (${packets.length} portal packets in jobs/packets/ats) — best first:*`);
+    lines.push(
+      `\n*Paste & submit (${packets.length} portal packets in jobs/packets/ats) — best first:*`,
+    );
     for (const r of packets
       .sort(
         (a, b) =>
@@ -91,7 +123,9 @@ async function main(): Promise<void> {
       lines.push(`• ${short(r)} — ${r.applyUrl ?? ""}`);
     }
   }
-  const hold = by("HOLD").filter((r) => !/paste-ready packet/.test(r.holdReason ?? ""));
+  const hold = by("HOLD").filter(
+    (r) => !/paste-ready packet/.test(r.holdReason ?? ""),
+  );
   if (hold.length) {
     lines.push(`\n*Needs you (${hold.length}) — fix, then move to Approved:*`);
     for (const r of hold.slice(0, 10))
@@ -126,8 +160,12 @@ async function main(): Promise<void> {
   // Abdout's logged-in browser (Upwork blocks bots); Abdout submits.
   const upwork = `jobs/packets/upwork/${date}.md`;
   if (existsSync(upwork)) {
-    const url = readFileSync(upwork, "utf-8").match(/https:\/\/www\.upwork\.com\/[^\s)>\]]+/)?.[0];
-    lines.push(`\n*Upwork pick of the day:* proposal ready in ${upwork}${url ? ` — ${url}` : ""}`);
+    const url = readFileSync(upwork, "utf-8").match(
+      /https:\/\/www\.upwork\.com\/[^\s)>\]]+/,
+    )?.[0];
+    lines.push(
+      `\n*Upwork pick of the day:* proposal ready in ${upwork}${url ? ` — ${url}` : ""}`,
+    );
   } else {
     lines.push(`\n*Upwork pick of the day:* not drafted yet (Cowork routine)`);
   }
@@ -137,7 +175,10 @@ async function main(): Promise<void> {
   const due = await fundingDue(14).catch(() => []);
   if (due.length) {
     lines.push(`\n*Funding closing ≤14 days (${due.length}):*`);
-    for (const f of due.slice(0, 6)) lines.push(`• ${f.deadline!.slice(0, 10)} ${f.name}${f.applyUrl ? ` — ${f.applyUrl}` : ""}`);
+    for (const f of due.slice(0, 6))
+      lines.push(
+        `• ${f.deadline!.slice(0, 10)} ${f.name}${f.applyUrl ? ` — ${f.applyUrl}` : ""}`,
+      );
   }
 
   const text = lines.join("\n");
