@@ -108,7 +108,7 @@ report() {  # report <markdown body> — one comment on the tracking issue (crea
     local n
     n=$(gh issue list --repo "$ISSUE_REPO" --state open --search "\"$ISSUE_TITLE\" in:title" --json number -q '.[0].number' 2>/dev/null)
     if [ -z "$n" ]; then
-        n=$(gh issue create --repo "$ISSUE_REPO" --title "$ISSUE_TITLE" --label "type:chore" \
+        n=$(gh issue create --repo "$ISSUE_REPO" --title "$ISSUE_TITLE" \
             --body "Tracking issue for kun's textbook loop (\`scripts/textbook/loop.sh\`, launchd \`$PLIST_LABEL\`). One comment per tick. Policy: kun \`.claude/engine.json → textbook.loop\`. Kill switch: \`bash scripts/textbook/loop.sh --pause\`." 2>/dev/null | grep -o '[0-9]*$')
     fi
     [ -n "$n" ] && gh issue comment "$n" --repo "$ISSUE_REPO" --body "$1" >/dev/null 2>&1 && log "reported on $ISSUE_REPO#$n"
