@@ -31,8 +31,21 @@ export async function cleanup({ page, go }) {
   await archiveTestStudent({ page, go })
 }
 
+// The login-details dialog shows the new account's real username and password. Blur every
+// credential-shaped token from the dialog's first paint — a blur added after it appears leaves
+// 1–2 legible frames (media-qa 2026-10-10, 114.85 s).
+const BLUR_CREDENTIALS = () => {
+  const scan = () => document.querySelectorAll('[role="alertdialog"],[role="dialog"]').forEach((d) => {
+    const w = document.createTreeWalker(d, NodeFilter.SHOW_TEXT)
+    for (let n; (n = w.nextNode()); ) if (/^\s*[A-Za-z0-9@._-]{6,}\s*$/.test(n.textContent) && n.parentElement) n.parentElement.style.filter = "blur(9px)"
+    d.querySelectorAll("input, code, pre").forEach((e) => (e.style.filter = "blur(9px)"))
+  })
+  new MutationObserver(scan).observe(document, { childList: true, subtree: true, characterData: true })
+}
+
 export async function prepare({ page, go }) {
   await page.addInitScript(BLUR_PHONES)
+  await page.addInitScript(BLUR_CREDENTIALS)
   // Document tiles fire a paid AI extraction (and pre-fill fields from what it reads). Filming
   // blocks exactly that server action — the uploads themselves run as in the real app.
   await page.route("**/*", (route) => {
@@ -55,7 +68,8 @@ export default async (sim) => {
   sim.caption(1, "من صفحة الطلاب، اضغط زر الإضافة")
   const add = page.getByRole("button", { name: "إنشاء", exact: true })
   await sim.focus(add, { z: 2 })
-  await sim.wait(1100)
+  // long enough that caption 1 still holds 2 s in the ~2.2× reel
+  await sim.wait(3200)
   await sim.click(add, { pause: 200 })
   await page.waitForURL(/students\/add\/.+\/attachments/, { timeout: 60000 }); await sim.settle()
 
@@ -70,10 +84,12 @@ export default async (sim) => {
     const target = f.slot ? page.locator("form div.h-32").filter({ hasText: f.slot }).first() : photo
     await sim.upload(target, f.path, { files: FILES })
   }
-  // tips only once every Finder window is gone — never on top of one
+  // every tile shows its thumbnail before anything else happens — no spinner under a tip or a Next
+  await page.locator("form .animate-spin").first().waitFor({ state: "detached", timeout: 45000 }).catch(() => console.warn("  ⚠ an upload tile still spinning after 45 s"))
+  await sim.settle()
+  // tips only once every Finder window is gone — never on top of one. (No auto-fill tip: the
+  // extraction is blocked while filming, so the video types the fields — a tip must match the frame.)
   sim.toast("الصورة تظهر في ملف الطالب وقوائم المدرسة")
-  await sim.wait(1700)
-  sim.toast("رفع الهوية أو الشهادة يملأ بيانات الطالب تلقائياً")
   await sim.wait(3000)
   await sim.focus(null)
   await sim.click(next, { pause: 200 })
@@ -102,14 +118,15 @@ export default async (sim) => {
   await sim.focus([page.locator('input[name="fatherName"]'), tel("fatherName"), page.getByRole("button", { name: "الأم" })])
   await sim.type(page.locator('input[name="fatherName"]'), "عمر الطيب محمد")
   await sim.type(tel("fatherName"), fakePhone(), { cps: 11 })
-  sim.toast("يكفي ولي أمر واحد — ويمكن إضافة الآخر لاحقاً")
   await sim.wait(900)
   await sim.click(page.getByRole("button", { name: "الأم" }), { pause: 400 })
   await sim.focus([page.locator('input[name="motherName"]'), tel("motherName")])
   await sim.type(page.locator('input[name="motherName"]'), "فاطمة أحمد علي")
   await sim.type(tel("motherName"), fakePhone(), { cps: 11 })
-  await sim.wait(800)
+  // the tip comes once both are filled and the camera has pulled back — never over a fresh field
   await sim.focus(null)
+  sim.toast("يكفي ولي أمر واحد — ويمكن إضافة الآخر لاحقاً")
+  await sim.wait(3000)
   await sim.click(next, { pause: 200 })
   await page.waitForURL(/\/location/); await sim.settle()
 
@@ -138,11 +155,11 @@ export default async (sim) => {
   await section.and(page.locator(":enabled")).waitFor({ timeout: 15000 })
   // «الصف A-1» has no timetable and raises a warning toast; «- أ» has 17 periods.
   await sim.pick(section, "الصف الأول - أ")
-  sim.toast("تُضاف رسوم الصف للطالب تلقائياً عند الإنشاء")
-  await sim.wait(1500)
   const create = page.getByRole("button", { name: "إنشاء", exact: true })
-  // frame the button itself — the whole form plus the button cut it off at the bottom edge
+  // frame the button itself — the whole form plus the button cut it off at the bottom edge.
+  // (The fees tip moved to the list: here every spot it can take covers a field just filled.)
   await sim.focus([section, create], { z: 1.4 })
+  await sim.wait(1500)
   sim.caption(7, "اضغط «إنشاء»")
   await sim.wait(900)
   await sim.click(create, { pause: 200 })
@@ -167,8 +184,13 @@ export default async (sim) => {
   const row = page.getByRole("row").filter({ hasText: "أحمد" }).first()
   // the row is full-width; frame its start (RTL right): the name and the grade. The tip lands with
   // the zoom and holds 3 s — readable, and the list is never on screen still for long.
-  await sim.focus([row.getByText(/^أحمد/).first(), row.getByText("الأول").first()], { z: 1.5 })
+  // Photo, name and grade all in frame (the caption says «بصورته وصفّه»): the fit picks the zoom,
+  // so the square reel window keeps the photo whole instead of cutting it at the right edge.
+  await sim.focus([row.locator("img, [data-slot=avatar]").first(), row.getByText(/^أحمد/).first(), row.getByText("الأول").first()])
   sim.toast("يُرسل إشعار ترحيب للأسرة، ويُنشأ حساب دخول للطالب")
-  await sim.move(page.getByText(/^أحمد/).first())
+  // park the cursor off the new row — never on its name or phone digits
+  await sim.move(row.getByText("الأول").first())
+  await sim.wait(3000)
+  sim.toast("تُضاف رسوم الصف للطالب تلقائياً عند الإنشاء")
   await sim.wait(3000)
 }

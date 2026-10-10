@@ -357,6 +357,9 @@ function stateAt(t) {
   const capSince = cap ? t - cap.o : 0
   const toasts = T.timeline.filter((e) => e.type === "toast").map((e) => [e, toastSpan(e)])
     .filter(([, sp]) => sp && t >= sp[0] && t < sp[1])
+    // the reel stretches every tip by TK, so neighbours overlap: there the newest tip replaces the
+    // older one — two stacked tips reach down over the caption pill (media-qa, reel 55 s)
+    .filter((x, i, all) => !portrait || i === all.length - 1)
     .map(([e, [a, b]]) => ({ title: e.title, text: e.text, a: Math.min(1, (t - a) / (.3 * TK), (b - t) / (.3 * TK)) }))
   return {
     frame: "file://" + T.fr[Math.min(fi, T.fr.length - 1)].f, cam: camAt(t),
@@ -400,7 +403,7 @@ const LAND = `#cap{position:absolute;bottom:72px;left:50%;transform:translateX(-
 // 9:16 — text lives between 220 px from the top and 380 px from the bottom (platform UI covers the rest).
 const PORT = `#band{position:absolute;left:0;top:0;width:1080px;height:340px;display:flex;align-items:flex-end;justify-content:center;gap:22px;padding-bottom:34px}
 #band img{width:64px;height:64px}#band .bt{font-family:D;font-weight:900;font-size:58px;font-feature-settings:"ss01"}#band .bt mark{background:${V.accentSoft};color:inherit;padding:0 10px}
-#cap{position:absolute;top:1440px;left:60px;right:60px;display:flex;align-items:center;gap:20px;padding:20px 28px;background:${hexA(V.captionBg, .94)};color:${V.captionInk};border-radius:36px}
+#cap{position:absolute;top:1420px;left:60px;right:60px;display:flex;align-items:center;gap:20px;padding:20px 28px;background:${hexA(V.captionBg, .94)};color:${V.captionInk};border-radius:36px}
 #cap .n{width:62px;height:62px;font-size:34px}#cap .t{font-size:40px;font-weight:500;line-height:1.35}
 #toasts{position:absolute;left:60px;right:60px;top:1240px;display:flex;flex-direction:column;gap:10px}
 .toast{padding:16px 20px}.toast .i{width:38px;height:38px;font-size:20px}.toast b{font-size:24px;margin-bottom:2px}.toast span{font-size:28px;line-height:1.35}

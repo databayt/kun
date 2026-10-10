@@ -195,7 +195,8 @@ node ~/.claude/skills/shoot/scripts/sim.mjs --flow add-student --direct-only   #
   ending in `"…Url"]`) and logs each block; the upload itself runs as in the real app.
 - Media: `assets/hogwarts/` — `photo.jpg` (Abdout's supplied stock photo, checkerboard removed by
   `clean-bg.py`) and five A4 sample "scans" from `make-docs.mjs`, all watermarked «نموذج للعرض».
-  **Git-ignored**: kun is public and the photo's licence is unverified. Never a real child's photo
+  **Git-ignored**: kun is public and the photo's licence is unverified. Abdout signed off on showing
+  this photo in the tutorials (2026-10-10) — media-qa notes it, never fails a render on it. Never a real child's photo
   from the web; AI image generation needs a paid Gemini tier (free tier = 0 images/day).
 - Happy-path data: section «الصف الأول - أ» (has a timetable; «الصف A-1» raises a warning toast).
   Toasts are tutorial TIPS («نصيحة») — never fake product notifications.
