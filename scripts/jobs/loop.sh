@@ -9,7 +9,7 @@
 #   bash scripts/jobs/loop.sh --resume      kill switch off
 #
 # Schedule (Kigali, the Mac is on CAT):
-#   ≥07:00 daily       discover + ingest                 0 tokens
+#   ≥07:00 daily       discover + ingest + resolve       0 tokens
 #   ≥07:00 Mon–Fri     wave: tailor + gate → QUEUED/HOLD  claude -p (Max)
 #   ≥10:00 Mon–Fri     send, every tick until 17:00       0 tokens, capped
 #   ≥07:00 daily       ATS prepare: form answers + letters   claude -p (Max)
@@ -194,6 +194,9 @@ case "$MODE" in
             run discover node scripts/jobs/discover.mjs &&
                 { run ingest pnpm -s jobs:ingest || { sleep 60; run ingest-retry pnpm -s jobs:ingest; }; } &&
                 stamp discover
+            # Board listings carry only the board link; read each posting for
+            # its address or form so the wave and the ATS lane can use it.
+            run resolve pnpm -s jobs:resolve --apply
         fi
         if weekday && [ "$HOUR" -ge 7 ] && [ "$HOUR" -lt 17 ] && done_today discover && ! done_today wave; then
             run facts pnpm -s jobs:facts
