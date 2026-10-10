@@ -83,9 +83,10 @@ export default async (sim) => {
   await sim.type(search, "Sudan")
   await sudan.waitFor({ timeout: 8000 })
   await sim.click(sudan, { pause: 500 })
-  await sim.focus([name, gender, nationality])
-  await sim.wait(1400)
+  // no re-zoom here: `nationality` matches by its placeholder, gone once a country is picked
+  // (re-framing on it waited out a 30 s locator timeout on 2026-10-10)
   await sim.focus(null)
+  await sim.wait(1400)
   await sim.click(next, { pause: 200 })
   await page.waitForURL(/\/expertise/); await sim.settle()
 

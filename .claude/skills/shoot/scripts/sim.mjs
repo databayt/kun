@@ -247,6 +247,15 @@ const HOLD = 1.2, FPS = draft ? 15 : 30, INTRO = 3.2, OUTRO = 3.8, XF = 0.5
 // a sped-up reel samples the timeline faster; tips stretch by the same factor so they stay readable
 let TK = 1
 const kept = (a, b) => keeps.some(([s, e]) => a < e && b > s)
+// seconds of [a, b] inside intentional pauses (the union of keeps)
+const keptLen = (a, b) => {
+  let len = 0, cur = -Infinity
+  for (const [s, e] of keeps.filter(([s, e]) => s < b && e > a).map(([s, e]) => [Math.max(s, a), Math.min(e, b)]).sort((x, y) => x[0] - y[0])) {
+    if (e <= cur) continue
+    len += e - Math.max(s, cur); cur = e
+  }
+  return len
+}
 const LAYOUT = portrait
   ? { W: 1080, H: 1920, WIN: { x: 0, y: 340, w: 1080, h: 1080 } }
   : { W: 1920, H: 1080, WIN: { x: 0, y: 0, w: 1920, h: 1080 } }
@@ -266,12 +275,18 @@ function build(holds = []) {
     fr[i].out = acc
     // a lapse scales only its own span: a still that outlasts it holds as any other frame would
     const cut = cuts.find(([s, e]) => fr[i].w >= s && fr[i].w < e)
-    const hold = (a, g) => (kept(a, a + g) ? g : Math.min(HOLD, g))
+    // only the intentional part of a still keeps real time; the rest (a settle, a server wait) shrinks
+    // to HOLD together — so a still spanning `settle()` + `sim.wait()` no longer plays the settle in full
+    const hold = (a, g) => { const k = keptLen(a, a + g), n = g - k; return k + Math.min(HOLD, n) }
     if (cut) {
       const inside = Math.min(gap, cut[1] - fr[i].w), k = cut[2] / (cut[1] - cut[0])
       fr[i].lapse = { inside, k }
       fr[i].dur = inside * k + (gap > inside ? hold(cut[1], gap - inside) : 0)
-    } else fr[i].dur = hold(fr[i].w, gap)
+    } else {
+      fr[i].dur = hold(fr[i].w, gap)
+      const n = gap - keptLen(fr[i].w, fr[i].w + gap)
+      fr[i].c = n > 0 ? Math.min(HOLD, n) / n : 1   // how much the unintended part shrinks
+    }
     for (const h of holds) if (fr[i].w <= h.t && (fr[i + 1]?.w ?? Infinity) > h.t) fr[i].dur += h.d
     acc += fr[i].dur
   }
@@ -280,7 +295,8 @@ function build(holds = []) {
     const i = fr.findLastIndex((f) => f.w <= w); if (i < 0) return 0
     const f = fr[i], d = w - f.w
     if (f.lapse) return f.out + (d <= f.lapse.inside ? d * f.lapse.k : f.lapse.inside * f.lapse.k + Math.min(d - f.lapse.inside, f.dur - f.lapse.inside * f.lapse.k))
-    return f.out + Math.min(d, f.dur)
+    const k = keptLen(f.w, w)
+    return f.out + Math.min(k + (d - k) * (f.c ?? 1), f.dur)
   }
   const timeline = events.map((e) => ({ ...e, o: INTRO + toOut(e.t) }))
   // Fit: the framed rect (plus room for labels above fields) fills ~80% of the window, ≤ 1.9×.
