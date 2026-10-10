@@ -93,11 +93,11 @@ const simFile = join(here, "..", "sims", repo, `${flowName}.mjs`)
 if (!existsSync(simFile)) throw new Error(`no sim at ${simFile}`)
 const mod = await import(pathToFileURL(simFile).href)
 const meta = { title: "", sub: "", outro: "", outroSub: "", ...(mod.meta ?? {}) }
-let frames = [], events = [], keeps = [], end = 0
+let frames = [], events = [], keeps = [], cuts = [], end = 0
 
 if (directOnly) {
   if (!existsSync(join(work, "take.json"))) throw new Error(`no take at ${work} — run once without --direct-only`)
-  ;({ frames, events, keeps, end = 0 } = JSON.parse(readFileSync(join(work, "take.json"), "utf8")))
+  ;({ frames, events, keeps, cuts = [], end = 0 } = JSON.parse(readFileSync(join(work, "take.json"), "utf8")))
 } else {
   rmSync(work, { recursive: true, force: true }); mkdirSync(join(work, "frames"), { recursive: true })
   // Without the forced scale factor, CDP screencast frames come out at CSS size (1210 px) and zooms go soft.
@@ -161,6 +161,9 @@ if (directOnly) {
     page, go, settle,
     /** An intentional pause — kept in real time (server waits are trimmed, these are not). */
     async wait(ms) { const a = now(); await page.waitForTimeout(ms / speed); keeps.push([a, now()]) },
+    /** Time-lapse a slow server step (an import's progress bar): however long `fn` takes, it plays in `keep` s.
+     *  A moving screen is never frozen, so the HOLD trim alone would play it in real time. */
+    async lapse(fn, { keep = 2.5 } = {}) { const a = now(); const r = await fn(); cuts.push([a, now(), keep]); return r },
     caption(n, text) { events.push({ t: now(), type: "caption", n: n ? AR(n) : "", num: n || 0, text }) },
     toast(text, { title = "نصيحة", ms = 3400 } = {}) { events.push({ t: now(), type: "toast", title, text, ms }) },
     /** Camera: zoom onto a locator (or several, framed together); null = back to the full screen. */
@@ -202,7 +205,8 @@ if (directOnly) {
       const chooserP = page.waitForEvent("filechooser", { timeout: 15000 })
       await sim.click(trigger, { pause: 150 })
       const chooser = await chooserP
-      const list = files.map((f) => ({ name: f.name, thumb: "data:image/jpeg;base64," + readFileSync(f.path).toString("base64") }))
+      // a non-image file (a CSV sheet) shows its own `thumb` jpg in Finder
+      const list = files.map((f) => ({ name: f.name, thumb: "data:image/jpeg;base64," + readFileSync(f.thumb ?? f.path).toString("base64") }))
       await page.evaluate((list) => window.__finderOpen(list), list)
       await sim.wait(600)
       const inDownloads = await page.locator("#__fd [data-k=downloads].sel").count()
@@ -212,7 +216,8 @@ if (directOnly) {
       await sim.click(page.locator("#__fd [data-k=open]"), { pause: 120 })
       await page.evaluate(() => window.__finderClose())
       // upload under the Finder name, so storage and the product see what the admin picked
-      await chooser.setFiles({ name: pick.name, mimeType: "image/jpeg", buffer: readFileSync(file) }); await sim.wait(1800)
+      const mimeType = /\.csv$/i.test(pick.name) ? "text/csv" : "image/jpeg"
+      await chooser.setFiles({ name: pick.name, mimeType, buffer: readFileSync(file) }); await sim.wait(1800)
     },
     asset: (n) => join(here, "..", "assets", n),
   }
@@ -229,7 +234,7 @@ if (directOnly) {
     if (mod.cleanup) await mod.cleanup(sim).catch((e) => console.warn("cleanup:", e.message))
     await browser.close()
   }
-  writeFileSync(join(work, "take.json"), JSON.stringify({ frames, events, keeps, end }))
+  writeFileSync(join(work, "take.json"), JSON.stringify({ frames, events, keeps, cuts, end }))
 }
 for (const e of events) if (e.type === "caption" && e.num === undefined) e.num = fromAR(e.n)
 console.log(`take: ${frames.length} frames, ${events.length} events`)
@@ -259,14 +264,23 @@ function build(holds = []) {
     // the last frame runs to the end of the take: a closing wait is a still screen, not an idle gap
     const gap = (fr[i + 1]?.w ?? Math.max(fr[i].w + HOLD, end)) - fr[i].w
     fr[i].out = acc
-    fr[i].dur = kept(fr[i].w, fr[i].w + gap) ? gap : Math.min(HOLD, gap)
+    // a lapse scales only its own span: a still that outlasts it holds as any other frame would
+    const cut = cuts.find(([s, e]) => fr[i].w >= s && fr[i].w < e)
+    const hold = (a, g) => (kept(a, a + g) ? g : Math.min(HOLD, g))
+    if (cut) {
+      const inside = Math.min(gap, cut[1] - fr[i].w), k = cut[2] / (cut[1] - cut[0])
+      fr[i].lapse = { inside, k }
+      fr[i].dur = inside * k + (gap > inside ? hold(cut[1], gap - inside) : 0)
+    } else fr[i].dur = hold(fr[i].w, gap)
     for (const h of holds) if (fr[i].w <= h.t && (fr[i + 1]?.w ?? Infinity) > h.t) fr[i].dur += h.d
     acc += fr[i].dur
   }
   const takeLen = acc
   const toOut = (w) => {
     const i = fr.findLastIndex((f) => f.w <= w); if (i < 0) return 0
-    return fr[i].out + Math.min(w - fr[i].w, fr[i].dur)
+    const f = fr[i], d = w - f.w
+    if (f.lapse) return f.out + (d <= f.lapse.inside ? d * f.lapse.k : f.lapse.inside * f.lapse.k + Math.min(d - f.lapse.inside, f.dur - f.lapse.inside * f.lapse.k))
+    return f.out + Math.min(d, f.dur)
   }
   const timeline = events.map((e) => ({ ...e, o: INTRO + toOut(e.t) }))
   // Fit: the framed rect (plus room for labels above fields) fills ~80% of the window, ≤ 1.9×.

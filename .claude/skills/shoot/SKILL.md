@@ -204,7 +204,14 @@ node ~/.claude/skills/shoot/scripts/sim.mjs --flow add-student --direct-only   #
 - Sim files: `sims/<repo>/<flow>.mjs` — `meta`, `prepare`, `cleanup`, `default async (sim)`. API:
   `sim.caption(n, text)` · `sim.toast(text)` · `sim.focus(loc | [locs] | null, { z })` · `sim.click` ·
   `sim.type(loc, text, { cps })` · `sim.pick(trigger, name | index)` · `sim.select(nativeSelect, value)` ·
-  `sim.upload(trigger, path, { files })` (files = everything Finder shows) · `sim.move` · `sim.wait(ms)`.
+  `sim.upload(trigger, path, { files })` (files = everything Finder shows; a non-image file carries a `thumb` jpg, a `.csv` uploads as text/csv) · `sim.move` · `sim.wait(ms)` ·
+  `sim.lapse(fn, { keep })` — time-lapse a slow server step (an import's moving progress bar never freezes, so the
+  1.2 s trim cannot cut it): whatever `fn` takes plays in `keep` s. A take's `cuts` in `take.json` can be edited too.
+- Sims (hogwarts): `add-student`, `add-teacher` (documents → information → subjects/sections → contact → address →
+  employment → row; captions count the steps the demo actually shows), `bulk-student` / `bulk-teacher` (shared
+  `_bulk.mjs`: card → Finder on the CSV → columns → review → import lapsed to 3 s → done → history; cleanup = Undo).
+- A blur on `[role=dialog]` must skip Radix popovers (`[data-radix-popper-content-wrapper]`): dropdowns are dialogs
+  too, and a credential regex blurs every one-word country name (add-teacher, 2026-10-10).
 - Frame the FIELDS being filled, not `<form>`; a page where everything matters (6 upload tiles +
   Finder) stays full-screen. Tips go AFTER modal moments, never on top of the Finder window.
 - **Paid side effects are blocked, not avoided:** hogwarts document tiles fire a paid AI extraction
