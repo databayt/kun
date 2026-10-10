@@ -4,13 +4,14 @@
 //   pnpm jobs:brief            status: this week, today, the queue, what's held
 //   pnpm jobs:brief queue      what goes out next (veto it on the board)
 //   pnpm jobs:brief replies    replies in the last 14 days
+//   pnpm jobs:brief week       the latest weekly report: learned, changed, needed
 //
 // Hermes runs these from WhatsApp/Slack as /jobs, /jobsqueue, /jobsreplies
 // (scripts/jobs/hermes-setup.sh). No model involved, so it must stay fast
 // (<30s, Hermes' quick-command limit) and short (a phone screen). The CRM
 // board is read live; the ledger supplies the week's counts.
 
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 
 import { boardUrl, listBoard } from "./board";
 import { kigaliNow, killSwitchOn } from "./config";
@@ -35,6 +36,45 @@ async function main(): Promise<void> {
     : [];
   const since = (days: number) =>
     new Date(Date.now() - days * 86_400_000).toISOString();
+  if (mode === "week") {
+    const plans = existsSync("jobs/learn")
+      ? readdirSync("jobs/learn").filter((f) => f.endsWith(".week.json")).sort()
+      : [];
+    const latest = plans.at(-1);
+    if (!latest) {
+      console.log("No weekly report yet — the first lands Friday 17:00 in #jobs.");
+      return;
+    }
+    const p = JSON.parse(readFileSync(`jobs/learn/${latest}`, "utf-8")) as {
+      headline: string;
+      learned: string[];
+      needFromYou: string[];
+    };
+    const changed = existsSync("jobs/learn/changes.jsonl")
+      ? readFileSync("jobs/learn/changes.jsonl", "utf-8")
+          .split("\n")
+          .filter(Boolean)
+          .slice(-5)
+          .map((l) => {
+            const c = JSON.parse(l) as { n: number; type: string; target: string; value: unknown };
+            return `• #${c.n} ${c.type} ${c.target} → ${String(c.value)}`;
+          })
+      : [];
+    console.log(
+      [
+        `Week ${latest.slice(0, 10)}: ${p.headline}`,
+        ...p.learned.slice(0, 3).map((l) => `• ${l}`),
+        changed.length ? "Changed:" : "",
+        ...changed,
+        p.needFromYou.length ? "Needs you:" : "",
+        ...p.needFromYou.slice(0, 3).map((n, i) => `${i + 1}. ${n}`),
+      ]
+        .filter(Boolean)
+        .join("\n"),
+    );
+    return;
+  }
+
   const board = await listBoard();
   const by = (s: string) => board.filter((r) => r.applicationStatus === s);
 

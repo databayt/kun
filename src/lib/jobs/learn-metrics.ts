@@ -12,6 +12,7 @@ export interface LedgerLine {
   campaign?: string | null;
   variant?: string | null;
   waveId?: string | null;
+  source?: string | null; // board source, joined at report time
   detail?: string;
 }
 
@@ -30,12 +31,16 @@ export const MIN_N = 5;
 
 const REPLY_KINDS = new Set(["interview", "offer", "rejection", "response"]);
 
+/// `sinceTs` limits the cohort to applications SENT on or after it (the
+/// weekly view); their replies count whenever they arrived.
 export function summarizeOutcomes(
   lines: LedgerLine[],
   keyOf: (sent: LedgerLine) => string[],
+  sinceTs = "",
 ): Outcome[] {
   const sentBy = new Map<string, LedgerLine>();
-  for (const l of lines) if (l.kind === "sent") sentBy.set(l.crmId, l);
+  for (const l of lines)
+    if (l.kind === "sent" && l.ts >= sinceTs) sentBy.set(l.crmId, l);
 
   const firstReply = new Map<string, LedgerLine>();
   const kinds = new Map<string, Set<string>>();
@@ -86,3 +91,4 @@ export const byVariant = (s: LedgerLine): string[] =>
   (s.variant ?? "none").split(" ");
 export const byLane = (s: LedgerLine): string[] => [s.campaign ?? "none"];
 export const byWave = (s: LedgerLine): string[] => [s.waveId ?? "none"];
+export const bySource = (s: LedgerLine): string[] => [s.source ?? "unknown"];

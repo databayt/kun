@@ -45,6 +45,7 @@ export interface BoardRow {
   country?: string | null;
   city?: string | null;
   track?: string | null;
+  createdAt?: string;
   updatedAt: string;
 }
 

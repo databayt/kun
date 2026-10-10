@@ -150,8 +150,14 @@ export function stcwBar(text) {
 /// Titles Abdout never applies to, whatever lane words they carry (2026-10-05):
 /// teaching posts, and mechanical roles that are not also electrical — he is an
 /// electrical engineer.
+/// AI-training platforms that refuse a Rwanda-resident (Alignerr "Location
+/// Denied" 2026-10-10; Outlier dropped most of Africa 2026-07-15;
+/// DataAnnotation and Prolific are OECD-only). Never retry, never route around.
+const BLOCKED_PLATFORMS = /alignerr|outlier\.ai|\boutlier\b|dataannotation|prolific/i;
+
 function notForMe(title) {
-  return /teacher|lecturer|tutor\b|teaching|instructor/i.test(title) ||
+  // "AI Tutor" (xAI) is model-training work, not teaching (2026-10-10).
+  return /teacher|lecturer|(?<!ai )tutor\b|teaching|instructor/i.test(title) ||
     (/\bmechanical\b/i.test(title) && !/electric/i.test(title));
 }
 
@@ -731,7 +737,10 @@ const ADAPTERS = {
             employmentType: /contract|freelance/i.test(j.title) ? "contract" : "full_time",
             url: j.url,
             source: `ats-${b.ats}`,
-            campaign: inRwanda ? "kigali-web-developer" : "remote-web-developer-worldwide",
+            // AI tutor/trainer roles (xAI, 2026-10-10) are the quick-cash lane.
+            campaign: /\bai (tutor|trainer)\b/i.test(j.title)
+              ? "ai-training-gigs"
+              : inRwanda ? "kigali-web-developer" : "remote-web-developer-worldwide",
             description:
               relocates && !inAfrica && !REMOTE_ISH.test(place)
                 ? `[on-site — the posting offers visa sponsorship or relocation support] ${j.text.slice(0, 860)}`
@@ -1014,23 +1023,41 @@ const ADAPTERS = {
 
 // ── run ──────────────────────────────────────────────────────────────────────
 
-const selected = ONLY ? { [ONLY]: ADAPTERS[ONLY] } : ADAPTERS;
+// The weekly adopter (scripts/jobs/adopt.ts) switches adapters off here when
+// a week's yield shows a source finds nothing Abdout can apply to.
+const OFF = existsSync("jobs/sources.json")
+  ? (JSON.parse(readFileSync("jobs/sources.json", "utf-8")).off ?? [])
+  : [];
+const selected = ONLY
+  ? { [ONLY]: ADAPTERS[ONLY] }
+  : Object.fromEntries(Object.entries(ADAPTERS).filter(([n]) => !OFF.includes(n)));
 if (ONLY && !ADAPTERS[ONLY]) {
   console.error(`unknown source "${ONLY}" — one of: ${Object.keys(ADAPTERS).join(", ")}`);
   process.exit(1);
 }
 
 const all = [];
+const yields = {};
 for (const [name, adapter] of Object.entries(selected)) {
   try {
-    const { items, dropped } = await adapter();
+    const found = await adapter();
+    // Platforms that refused Abdout's location — never resurface them.
+    const items = found.items.filter((i) => !BLOCKED_PLATFORMS.test(`${i.company} ${i.sourceUrl ?? ""}`));
+    const { dropped } = found;
+    yields[name] = { items: items.length, dropped: dropped.length, blocked: found.items.length - items.length };
     console.log(`${name.padEnd(16)} ${String(items.length).padStart(3)} items   ${dropped.length} dropped`);
     for (const d of dropped.slice(0, 8)) console.log(`   · ${d}`);
     for (const i of items.slice(0, ONLY ? LIMIT : 3)) console.log(`   + [${i.campaign}] ${i.deadline} ${i.title} @ ${i.company}`);
     all.push(...items);
   } catch (err) {
     console.log(`${name.padEnd(16)}   ✗ ${err.message}`);
+    yields[name] = { items: 0, dropped: 0, error: err.message.slice(0, 120) };
   }
+}
+// Per-adapter yield, read by the weekly report to judge each source.
+if (!ONLY && !DRY_RUN) {
+  mkdirSync("jobs/learn", { recursive: true });
+  writeFileSync(`jobs/learn/yield-${TODAY}.json`, JSON.stringify(yields, null, 2) + "\n");
 }
 
 saveNewBoards();

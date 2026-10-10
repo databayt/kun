@@ -17,11 +17,13 @@ export interface LoopConfig {
   windowFrom: number;
   windowTo: number;
   slackTarget: string; // hermes send --to
+  jobsChannel: string; // private #jobs — weekly report + discussion thread
   whatsappCap: number; // applications/day from Abdout's own WhatsApp number
   briefWhatsApp: string; // where the interview/offer briefs go ("" = off)
   vetoHours: number; // a QUEUED card waits this long before it can send
   pausedLanes: string[]; // CRM campaign values the wave skips
   dailyTotalCap: number; // email + ATS applications per day (Abdout's goal: 100)
+  minCoverageByLane: Record<string, number>; // tailored-CV fit floor per campaign
 }
 
 const DEFAULTS: LoopConfig = {
@@ -35,6 +37,8 @@ const DEFAULTS: LoopConfig = {
   windowFrom: 9,
   windowTo: 17,
   slackTarget: "slack:D0AQ0JR5ZU4",
+  // Private on purpose (CVs, contacts) — created 2026-10-10, kun bot invited.
+  jobsChannel: "C0C8A8YRXNW",
   // Abdout, 2026-10-04: apply on WhatsApp too. Small on purpose — a personal
   // number that cold-messages many strangers a day risks a WhatsApp ban.
   whatsappCap: 5,
@@ -46,6 +50,7 @@ const DEFAULTS: LoopConfig = {
   // East Africa). 2026-10-05: marine ETO back on too — no lane is paused.
   pausedLanes: [],
   dailyTotalCap: 100,
+  minCoverageByLane: { AI_TRAINING: 20 },
 };
 
 /// Priority, lowest first (Abdout, 2026-10-03): days-to-cash — AI-training
@@ -53,11 +58,16 @@ const DEFAULTS: LoopConfig = {
 /// Databayt tenders and client projects → engineering contracts. Marine ETO
 /// (unpaused 2026-10-05) sits with electrical — same CV family, ready marine CV.
 /// Paused lanes never reach the wave.
+/// 2026-10-10 repositioning (quick earn): AI-training / Arabic-AI evaluation
+/// first (Mercor confirms Rwanda, weekly Stripe pay), then software roles,
+/// then the fixed-price freelance offer; US-heavy remote Greenhouse drops a
+/// band — it rarely hires from Rwanda. The weekly adopter may re-order these
+/// through `laneBand` in jobs/loop.config.json.
 export const LANE_BAND: Record<string, number> = {
-  AI_TRAINING: 1,
+  AI_TRAINING: 0,
   WEB_DEVELOPER: 1,
-  REMOTE_WORLDWIDE: 2,
-  FREELANCE: 3,
+  FREELANCE: 2,
+  REMOTE_WORLDWIDE: 3,
   PROTECTION: 3,
   ELECTRICAL: 3,
   TENDER: 4,
@@ -75,6 +85,29 @@ export function seniorityBand(title: string): number {
   if (/\b(junior|jr\.?|graduate|entry[ -]level|trainee|apprentice)\b/i.test(title)) return 1;
   if (/\b(senior|sr\.?|lead|staff|principal)\b/i.test(title)) return 3;
   return 2; // unlabelled, which in practice reads as mid-level
+}
+
+/// Limits the weekly adopter can never cross, whatever the data says
+/// (Abdout, 2026-10-10: fully autonomous adoption inside these walls).
+export const HARD_LIMITS = {
+  dailyTotalCap: 100,
+  dailyCap: 40, // hotmail account-lock risk
+  rampCap: 40,
+  whatsappCap: 5, // personal-number ban risk
+  followUpCap: 10,
+  vetoHours: { min: 1, max: 24 },
+};
+
+// Adopted lane order overrides the defaults above, once at load.
+try {
+  const o = existsSync("jobs/loop.config.json")
+    ? (JSON.parse(readFileSync("jobs/loop.config.json", "utf-8")) as {
+        laneBand?: Record<string, number>;
+      })
+    : {};
+  Object.assign(LANE_BAND, o.laneBand ?? {});
+} catch {
+  // a malformed override must never stop the loop — defaults stand
 }
 
 export function loadConfig(): LoopConfig {

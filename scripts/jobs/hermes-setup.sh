@@ -35,6 +35,7 @@ want = {
     "jobs":        f"{run} ./node_modules/.bin/tsx scripts/jobs/brief.ts",
     "jobsqueue":   f"{run} ./node_modules/.bin/tsx scripts/jobs/brief.ts queue",
     "jobsreplies": f"{run} ./node_modules/.bin/tsx scripts/jobs/brief.ts replies",
+    "jobsweek":    f"{run} ./node_modules/.bin/tsx scripts/jobs/brief.ts week",
     "jobspause":   f"{run} bash scripts/jobs/loop.sh --pause && echo 'Jobs loop paused — nothing sends until /jobsresume.'",
     "jobsresume":  f"{run} bash scripts/jobs/loop.sh --resume && echo 'Jobs loop resumed.'",
 }

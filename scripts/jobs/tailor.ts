@@ -44,13 +44,22 @@ import {
 import { numbersIn } from "@/lib/jobs/send-gate";
 
 import { type BoardRow, getRow, listBoard, noteRow } from "./board";
-import { kigaliNow } from "./config";
+import { kigaliNow, loadConfig } from "./config";
 import { htmlToPdfs } from "./lib/pdf.mjs";
 import { postingText, splitName } from "./lib/posting";
 
 const ROOT = "/Users/abdout/kun";
 const CAREER = "jobs/evidence/career.json";
 export const MIN_COVERAGE = 60;
+
+/// Per-lane floor, tunable by the weekly adopter (`minCoverageByLane` in
+/// jobs/loop.config.json). AI-training platforms screen with their own tests
+/// and list wish-lists as must-haves; a native Arabic engineer at 22% of an
+/// Arabic trainer posting is still a candidate there (2026-10-10).
+export function minCoverage(campaign: string | null): number {
+  const by = loadConfig().minCoverageByLane ?? {};
+  return by[campaign ?? ""] ?? MIN_COVERAGE;
+}
 
 export interface TailorResult {
   crmId: string;
@@ -136,6 +145,8 @@ For each job file listed below:
   "keywordsCovered": [<mustHave items the CV truthfully covers>],
   "keywordsMissing": [<mustHave items Osman does not have>]
 }
+
+Positioning — when the job file's campaign is "AI_TRAINING" (AI-training, LLM-evaluation, AI-tutor roles): open the summary with what makes him rare there — a native Arabic speaker who is also a working engineer (electrical + full-stack TypeScript) — and put "Arabic (native)" and the evaluation-relevant skills (STEM reasoning, code review, Arabic/RTL interfaces) first in skills, as far as the record supports them.
 
 Hard rules — a mechanical gate rejects the CV otherwise:
 - Every employer, vessel, school, certificate, number, date and tool comes from the career record. Reword and reorder; NEVER invent experience, certificates, vessel types, voltages, tonnages, years or results. If the posting wants something he lacks, list it in keywordsMissing — do not hint at it in the CV.
@@ -349,7 +360,7 @@ export async function tailorCvs(
     results.set(r.job.crmId, {
       crmId: r.job.crmId,
       ok,
-      weakFit: verdict.coverage < MIN_COVERAGE,
+      weakFit: verdict.coverage < minCoverage(r.job.campaign),
       pdf: pdf.ok ? join(ROOT, r.out) : undefined,
       coverage: verdict.coverage,
       missing: verdict.missing,

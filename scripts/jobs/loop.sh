@@ -17,7 +17,8 @@
 #   every tick         client requests (databayt.org wizard) → CLIENT_PROJECT  0 tokens
 #   08:00–21:00        inbox: read + classify replies     0 tokens
 #   ≥16:00 Mon–Fri     follow-ups (templated) + archive   0 tokens
-#   Fri ≥17:00         learn --propose --send             claude -p (Max)
+#   Fri ≥17:00         week: learn → adopt → #jobs report  claude -p (Max)
+#   every tick         discuss: answer Abdout in #jobs      claude -p only when he wrote
 #   after the wave     digest → Slack DM via `hermes send`  0 tokens
 #
 # Stamps in jobs/.state/ make each daily step run once per day and let a Mac
@@ -156,7 +157,7 @@ case "$MODE" in
     --status)
         if launchctl print "gui/$(id -u)/$PLIST_LABEL" >/dev/null 2>&1; then echo "armed ($PLIST_LABEL, every 30 min)"; else echo "not armed"; fi
         [ -f "$REPO/jobs/.send-off" ] && echo "⛔ sending paused (jobs/.send-off)"
-        for s in discover wave ats-prepare tailor-packets digest followup learn; do printf "  %-9s %s\n" "$s" "$(cat "$STATE/$s" 2>/dev/null || echo never)"; done
+        for s in discover wave ats-prepare tailor-packets digest followup week; do printf "  %-9s %s\n" "$s" "$(cat "$STATE/$s" 2>/dev/null || echo never)"; done
         [ -f "$LOG_FILE" ] && tail -8 "$LOG_FILE"
         ;;
     --tick)
@@ -235,9 +236,16 @@ case "$MODE" in
         if weekday && [ "$HOUR" -ge 16 ] && [ "$HOUR" -lt 17 ] && ! done_today followup; then
             run followup pnpm -s jobs:followup --apply && stamp followup
         fi
-        if [ "$DOW" -eq 5 ] && [ "$HOUR" -ge 17 ] && [ "$(cat "$STATE/learn" 2>/dev/null)" != "$WEEK" ]; then
-            run learn pnpm -s jobs:learn --propose --send && echo "$WEEK" > "$STATE/learn"
+        # The weekly cycle (2026-10-10): learn → Claude decides → adopt.ts
+        # applies inside its walls → report + discussion thread in #jobs.
+        # A failure is not stamped, so it retries — at most 3 times a week.
+        tries="$(grep -c "^$WEEK$" "$STATE/week-tries" 2>/dev/null)"; tries="${tries:-0}"
+        if [ "$DOW" -eq 5 ] && [ "$HOUR" -ge 17 ] && [ "$(cat "$STATE/week" 2>/dev/null)" != "$WEEK" ] && [ "$tries" -lt 3 ]; then
+            echo "$WEEK" >> "$STATE/week-tries"
+            run week pnpm -s jobs:week && echo "$WEEK" > "$STATE/week"
         fi
+        # Abdout's messages in #jobs: answered every tick (0 tokens when quiet).
+        run discuss pnpm -s jobs:discuss
         log "tick done"
         ;;
     *)
