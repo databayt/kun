@@ -286,7 +286,8 @@
    "kill_switch": "~/catalog/.work/.textbook-off  (loop.sh --pause / --resume)",
    "issue": {
     "repo": "databayt/catalog",
-    "title": "textbook loop: sd twins"
+    "title": "textbook loop: sd twins",
+    "number": 1
    },
    "land": "scripts/textbook/land.sh <cur> <grade> <subject> [--dry-run]",
    "sensor": "catalog: pnpm twins <cur> --grade <g> [--cdn] -> .work/twins/<cur>-<g>.json",
