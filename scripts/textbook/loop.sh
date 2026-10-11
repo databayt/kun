@@ -4,6 +4,7 @@
 #
 #   bash scripts/textbook/loop.sh --tick [--force] [--pages N] [--subject S]   one step (what launchd calls)
 #   bash scripts/textbook/loop.sh --next          print the subject the next tick would work on
+#   bash scripts/textbook/loop.sh --weekly        run the Sunday presets-proposal step now
 #   bash scripts/textbook/loop.sh --install       arm launchd com.databayt.textbook-loop (daily 01:30)
 #   bash scripts/textbook/loop.sh --uninstall
 #   bash scripts/textbook/loop.sh --status        armed? the grade's twin table, the last log lines
@@ -118,14 +119,22 @@ report() {  # report <markdown body> — one comment on the tracking issue (crea
 weekly() {
     local week; week="$(date +%G-W%V)"
     [ "$(cat "$STATE/weekly" 2>/dev/null)" = "$week" ] && return
-    [ "$(date +%u)" = 7 ] || return
+    [ "$(date +%u)" = 7 ] || [ "$FORCE" = 1 ] || return
+    # Outside .claude/: a headless session may not write there (protected config path) — the
+    # first Sunday run, 2026-10-11, did all the work and could not save it.
+    local cand="$STATE/promote-candidates-$week.json" prop="$STATE/promote-proposals-$week.md"
     log "▶ weekly promote"
-    python3 "$SCRIPTS/textbook-contract.py" --promote "$CATALOG" --presets "$SCRIPTS/presets.json" \
-        --out "$REPO/.claude/evals/textbook/promote-candidates.json" >> "$LOG_FILE" 2>&1
-    claude -p "You maintain kun's textbook transcription presets. Read $REPO/.claude/evals/textbook/promote-candidates.json (observed cases from every catalog book's contract that no preset clause cites yet, grouped by subject kind) and $SCRIPTS/presets.json. Write $REPO/.claude/evals/textbook/promote-proposals.md: each proposed new clause (id, kind, rule ≤60 words, evidence book:page refs from >=2 DIFFERENT books) — a case seen in one book stays per-book and is not proposed. Do not edit presets.json; Abdout or an interactive session adopts proposals after a textbook bench. Reply DONE." \
+    python3 "$SCRIPTS/textbook-contract.py" --promote "$CATALOG" --presets "$SCRIPTS/presets.json" --out "$cand" >> "$LOG_FILE" 2>&1
+    claude -p "You maintain kun's textbook transcription presets. Read $cand (observed cases from every catalog book's contract that no preset clause cites yet, grouped by book with its subject kinds) and $SCRIPTS/presets.json. Write $prop in Markdown: a table of proposed NEW clauses (id, kind, rule <= 60 words, evidence book:page refs from >= 2 DIFFERENT books) — a case seen in one book stays per-book and is not proposed; then 'Contested across books' (books disagree — needs a decision) and 'Contradictions inside one contract'. Do not edit presets.json. Reply DONE." \
         --model opus --allowedTools Read Write Glob --max-turns 30 >> "$LOG_FILE" 2>&1
     echo "$week" > "$STATE/weekly"
-    [ -s "$REPO/.claude/evals/textbook/promote-proposals.md" ] && report "**Weekly presets proposals ($week)** — \`kun/.claude/evals/textbook/promote-proposals.md\`. Adopt with a \`textbook bench\` run first."
+    if [ -s "$prop" ]; then
+        report "**Weekly presets proposals ($week)** — adopt a clause into \`skills/textbook/scripts/presets.json\` only after a \`textbook bench\` run shows no drop.
+
+$(head -c 60000 "$prop")"
+    else
+        log "weekly: no proposals file written"
+    fi
 }
 
 # ── tick ──────────────────────────────────────────────────────────────────────
@@ -210,6 +219,7 @@ PLIST
 case "$MODE" in
     --tick) tick ;;
     --next) pick || true ;;
+    --weekly) FORCE=1; rm -f "$STATE/weekly"; weekly ;;
     --install)
         mkdir -p "$HOME/Library/LaunchAgents"
         render_plist > "$PLIST_PATH"
@@ -230,5 +240,5 @@ case "$MODE" in
         echo "next: $(pick)"
         tail -5 "$LOG_FILE" 2>/dev/null
         ;;
-    *) echo "Unknown flag: $MODE (use --tick|--next|--install|--uninstall|--status|--pause|--resume)" >&2; exit 1 ;;
+    *) echo "Unknown flag: $MODE (use --tick|--next|--weekly|--install|--uninstall|--status|--pause|--resume)" >&2; exit 1 ;;
 esac

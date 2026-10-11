@@ -163,6 +163,7 @@ bash ~/kun/scripts/textbook/loop.sh --status      # armed? the grade's twin tabl
 bash ~/kun/scripts/textbook/loop.sh --next        # which book the next tick takes
 bash ~/kun/scripts/textbook/loop.sh --tick --force [--pages N] [--subject S]   # one step now
 bash ~/kun/scripts/textbook/loop.sh --pause | --resume     # kill switch ~/catalog/.work/.textbook-off
+bash ~/kun/scripts/textbook/loop.sh --weekly      # the Sunday presets proposals, now (posted on the tracking issue)
 bash ~/kun/scripts/textbook/loop.sh --install     # launchd com.databayt.textbook-loop, daily 01:30
 ```
 
