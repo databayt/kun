@@ -85,6 +85,8 @@ for (const f of readdirSync(dir)) {
     if (!Array.isArray(c)) continue;
     for (const b of c) {
       if (b.type !== "tool_use") continue;
+      // The agent's own return payload names its output paths; it reads nothing.
+      if (b.name === "StructuredOutput") continue;
       const input = JSON.stringify(b.input || {});
       // Writing into the agent's own output directory is its job, never a leak.
       if (OWN && input.includes(OWN) && b.name === "Write") continue;
