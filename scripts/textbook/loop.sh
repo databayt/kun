@@ -72,7 +72,11 @@ twins = json.load(open(sys.argv[1]))["twins"]
 loop = json.load(open(sys.argv[2]))["textbook"]["loop"]
 work = sys.argv[3]
 only = os.environ.get("SUBJ") or ""
-open_ = [t for t in twins if not t["twinGate"] and t["pdf"]["locked"] and (not only or t["subject"] == only)]
+# A twin of a book whose structure gate fails can never land (catalog gate order book → structure →
+# twin) — transcribing it only spends tokens. Fix the structure first.
+open_ = [t for t in twins if not t["twinGate"] and t["pdf"]["locked"]
+         and "blocked by" not in (t.get("twinReason") or "")
+         and (not only or t["subject"] == only)]
 if not open_:
     sys.exit(0)
 def on_disk(s):
