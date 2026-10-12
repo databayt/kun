@@ -91,15 +91,21 @@ def main():
             left  = pt.get('nextToItsLeft')
             if not data or right is None:
                 res['unclear'].append((n, 'no printed cell')); continue
-            first = data[0]
-            if len(first) < 2:
+            if len(data[0]) < 2:
                 res['unclear'].append((n, 'single column')); continue
-            # md col 1 renders rightmost -> it should match the printed rightmost cell
-            s_ok  = sim(first[0],  right)
-            s_mir = sim(first[-1], right)
-            if left:                       # corroborate with the neighbour
-                s_ok  = (s_ok  + sim(first[1],  left)) / 2
-                s_mir = (s_mir + sim(first[-2], left)) / 2
+
+            def score(row):
+                # md col 1 renders rightmost -> it should match the printed rightmost cell
+                ok, mir = sim(row[0], right), sim(row[-1], right)
+                if left and len(row) >= 2:     # corroborate with the neighbour
+                    ok  = (ok  + sim(row[1],  left)) / 2
+                    mir = (mir + sim(row[-2], left)) / 2
+                return ok, mir
+            # The crop's first cell is the header when the header is ruled inside the grid,
+            # but the first BODY row when the header is printed above it (sd-g12-literary-studies
+            # p93) — compare against whichever of the two rows the crop actually names.
+            s_ok, s_mir = max((score(r) for r in data[:2] if len(r) >= 2),
+                              key=lambda s: max(s))
             # an exact match on one end decides it even when both ends look alike
             # (e.g. "القائمة (أ)" vs "القائمة (ب)" score ~0.89 against each other)
             decisive = (s_ok >= 0.999) != (s_mir >= 0.999)

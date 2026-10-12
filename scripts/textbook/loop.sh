@@ -156,8 +156,25 @@ tick() {
     local before; before=$(find "$W/pages-md" -maxdepth 1 -name '[0-9]*.md' 2>/dev/null | wc -l | tr -d ' ')
     local seed=$(( $(date +%j) % 89 + 11 ))
 
+    # A book that is complete and already graded only needs landing. Re-running the workflow on it
+    # re-stitches textbook.md without its grade and re-adjudicates pages (2026-10-12, literary-studies).
+    if bash "$REPO/scripts/textbook/land.sh" "$CUR" "$G" "$S" --dry-run >/dev/null 2>&1 \
+        && grep -q '^agreement: *[0-9]' "$W/textbook.md" 2>/dev/null; then
+        local agr0; agr0=$(sed -n 's/^agreement: *//p' "$W/textbook.md" | head -1)
+        bash "$REPO/scripts/textbook/land.sh" "$CUR" "$G" "$S" >> "$LOG_FILE" 2>&1
+        local landed0; case $? in 0) landed0="yes — published";; 4) landed0="no — twin gate failed, reverted";; *) landed0="no — see log";; esac
+        log "◀ $CUR-$G-$S: complete + graded, land only — agreement $agr0, landed: $landed0"
+        report "**$CUR-$G-$S** · $(date +%F) · complete + graded — land only (0 tokens)
+- agreement: $agr0 · landed: $landed0
+- URLs: https://cdn.databayt.org/catalog/$CUR/$G/$S/textbook.pdf · …/textbook.md"
+        weekly
+        return 0
+    fi
+
     # The prompt names the workflow explicitly: that is the multi-agent opt-in for a headless run.
-    ( cd "$REPO" && claude -p "Run the textbook workflow now: Workflow({ name: \"textbook\", args: { book: \"$W\", mode: \"full\", maxPages: $PAGES_PER_TICK, sample: $SAMPLE, seed: $seed, model: \"$MODEL\", auditModel: \"$AUDIT_MODEL\", adjudicateModel: \"$ADJ_MODEL\", date: \"$(date +%F)\" } }). This is the nightly textbook loop. Wait for the workflow's completion notification, then reply with ONE line: the result's partial/transcribed/pages/agreement fields. Do not land, upload, commit or publish — the loop script does that." \
+    # claude -p stops background work 10 min after its last turn, killing a verify mid-phase
+    # (2026-10-12) — the ceiling is lifted so the workflow runs to its own end.
+    ( cd "$REPO" && CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS=0 claude -p "Run the textbook workflow now: Workflow({ name: \"textbook\", args: { book: \"$W\", mode: \"full\", maxPages: $PAGES_PER_TICK, sample: $SAMPLE, seed: $seed, model: \"$MODEL\", auditModel: \"$AUDIT_MODEL\", adjudicateModel: \"$ADJ_MODEL\", date: \"$(date +%F)\" } }). This is the nightly textbook loop. Wait for the workflow's completion notification, then reply with ONE line: the result's partial/transcribed/pages/agreement fields. Do not land, upload, commit or publish — the loop script does that." \
         --model "$MODEL" --dangerously-skip-permissions --max-turns 40 ) >> "$LOG_FILE" 2>&1
     local rc=$?
     local after; after=$(find "$W/pages-md" -maxdepth 1 -name '[0-9]*.md' 2>/dev/null | wc -l | tr -d ' ')
