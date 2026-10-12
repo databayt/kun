@@ -12,6 +12,7 @@
 import type { Page } from "playwright-core";
 
 import type { Answer, AtsQuestion } from "@/lib/jobs/ats-answers";
+import { proseFor } from "@/lib/jobs/ats-answers";
 
 export function parseGreenhouse(
   applyUrl: string,
@@ -134,7 +135,7 @@ export async function fillGreenhouse(
           await page.locator(sel).first().fill(answer.value);
           break;
         case "prose": {
-          const text = plan.prose[question.label];
+          const text = proseFor(plan.prose, question.label);
           if (!text) throw new Error("no prose written");
           await page.locator(sel).first().fill(text);
           break;

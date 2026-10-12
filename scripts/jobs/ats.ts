@@ -20,6 +20,7 @@ import { chromium } from "playwright-core";
 
 import {
   answerQuestion,
+  proseFor,
   AtsProfile,
   AtsQuestion,
   Answer,
@@ -375,7 +376,7 @@ async function prepare(): Promise<void> {
         ...numbersIn(texts.get(req.crmId) ?? ""),
       ]);
       for (const q of req.prose) {
-        const a = l.answers?.[q];
+        const a = proseFor(l.answers, q);
         if (!a) problems.push(`no answer written for "${q.slice(0, 60)}"`);
         else if (PLACEHOLDER.test(a))
           problems.push(`placeholder in answer to "${q.slice(0, 60)}"`);
@@ -526,7 +527,7 @@ async function packetHold(
                   ? "attach the CV"
                   : "attach the cover letter"
                 : a.kind === "prose"
-                  ? (found.letter.answers?.[q.label] ?? "⚠ not written")
+                  ? (proseFor(found.letter.answers, q.label) ?? "⚠ not written")
                   : "(skip)";
     lines.push("", `**${q.label}**${q.required ? " *" : ""}`, "", v);
   }
@@ -673,7 +674,9 @@ async function submit(): Promise<void> {
       if (
         !only &&
         (companiesThisRun.has(companyKey) ||
-          contactState(row, board) === "wait")
+          // "repeat" (a similar role there within 30 days) blocks too —
+          // only "wait" did, so Affirm took 3 forms on 10-11 and 2 on 10-12.
+          contactState(row, board) !== null)
       )
         continue;
       const fresh = await getRow(row.id);

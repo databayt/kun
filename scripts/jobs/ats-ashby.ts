@@ -12,6 +12,7 @@
 import type { Locator, Page } from "playwright-core";
 
 import type { Answer, AtsQuestion } from "@/lib/jobs/ats-answers";
+import { proseFor } from "@/lib/jobs/ats-answers";
 
 import type { FillPlan, SubmitOutcome } from "./ats-greenhouse";
 
@@ -198,7 +199,7 @@ async function fillOne(
         .fill(answer.value);
       return;
     case "prose": {
-      const text = plan.prose[question.label];
+      const text = proseFor(plan.prose, question.label);
       if (!text) throw new Error("no prose written");
       await page.locator(`[id="${path}"], [name="${path}"]`).first().fill(text);
       return;

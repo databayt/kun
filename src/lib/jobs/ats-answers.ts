@@ -95,6 +95,21 @@ const pick = (
   return null;
 };
 
+/// A written answer by its form label. Forms put non-breaking or doubled
+/// spaces in labels that the tailor run writes back as plain ones, so an exact
+/// key lookup missed answers that exist (Supabase, 2026-10-12).
+export function proseFor(
+  prose: Record<string, string> | undefined,
+  label: string,
+): string | undefined {
+  if (!prose) return undefined;
+  if (prose[label]) return prose[label];
+  const norm = (t: string) => t.replace(/\s+/g, " ").trim();
+  const want = norm(label);
+  for (const [k, v] of Object.entries(prose)) if (norm(k) === want) return v;
+  return undefined;
+}
+
 const YES = /^yes\b/i;
 const NO = /^(no|not yet|never|none)\b/i;
 
