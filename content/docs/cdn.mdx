@@ -83,10 +83,11 @@ cdn.databayt.org/icons/visa.svg
 cdn.databayt.org/illustrations/empty-state.svg
 cdn.databayt.org/animations/confetti.json
 
-# Product media (tier 3) — the path after <repo>/ mirrors the app's routes
-cdn.databayt.org/hogwarts/students/add-student-created-ar-1600.3a9f1c2e.avif
-cdn.databayt.org/hogwarts/students/add-student-ar.a1b2c3d4.mp4
-cdn.databayt.org/hogwarts/school/bulk/bulk-student-review-ar-1600.689c9b4f.avif
+# Product media (tier 3) — <repo>/<block>/, short stable names
+cdn.databayt.org/hogwarts/students/add.mp4
+cdn.databayt.org/hogwarts/students/add/created.avif
+cdn.databayt.org/hogwarts/students/bulk/review-en@2x.avif
+cdn.databayt.org/hogwarts/students/marketing.mp4
 cdn.databayt.org/hogwarts/story.721b10fc.mp4            # route / (the homepage)
 cdn.databayt.org/souq/banners/ramadan-sale.webp
 
@@ -94,23 +95,28 @@ cdn.databayt.org/souq/banners/ramadan-sale.webp
 cdn.databayt.org/catalog/sd/g1/math/thumbnail-md.webp
 ```
 
-### Product media mirrors the app's routes
+### Product media is grouped by block
 
 Media that `/shoot`, `/record` and the sim produce is published by
 `shoot/scripts/publish.mjs` under the **repo name** (hogwarts — never a tenant
-brand like balqalam) and the **route the flow films**, flat:
+brand like balqalam), the **block**, and the flow's short **name** — the flow's
+`export const cdn = "<block>/<name>"`:
 
 ```
-cdn.databayt.org/<repo>/<route>/<flow>-<step>-<locale>-<width>.<hash8>.<avif|webp>   stills
-cdn.databayt.org/<repo>/<route>/<flow>[-<clip>]-<locale>.<hash8>.mp4                 videos
+cdn.databayt.org/<repo>/<block>/<name>.mp4                         tutorial (+ .av1.mp4 .poster.webp .vtt)
+cdn.databayt.org/<repo>/<block>/<name>/<step>[-en][@2x].<avif|webp>  stills
+cdn.databayt.org/<repo>/<block>/<name>/<clip|reel>.mp4             clips and reels
+cdn.databayt.org/<repo>/<block>/<file>.mp4                         block media (marketing, reel)
 ```
 
-`/ar/s/<tenant>/students` → `hogwarts/students/`, `/ar/school/bulk` →
-`hogwarts/school/bulk/`, `/` → `hogwarts/`. Keys are content-hashed and
-`immutable`, so a re-render is a new URL and nothing is invalidated. Pages never
-hard-code these URLs — they read them from the product's `media-manifest.json` by
-id (`add-student/created-ar`). The local side lives in `~/media/<repo>/<flow>/`;
-see the `shoot` docs for the full grammar.
+Arabic is bare and English adds `-en`; the narrowest width is bare and wider
+ones add `@2x`. Keys are stable: a re-render overwrites the object (each carries
+its sha8, so unchanged bytes are skipped) and invalidates CloudFront for exactly
+that key. Objects cache an hour in browsers and a year at the edge; manifest URLs
+carry `?v=<sha8>`, which the edge ignores and browsers treat as a new URL. Pages
+never hard-code these URLs — they read them from the product's
+`media-manifest.json` by id (`add-student/created-ar`). The local side lives in
+`~/media/<repo>/<flow>/`; see the `shoot` docs for the full grammar.
 
 ## Catalog key scheme
 
@@ -184,7 +190,9 @@ copies every object (and flattens `anthropic/`), making the bucket move free.
 
 ### Immutability & versioning
 
-Every object is immutable and served with a one-year `immutable` cache header.
+Every object is immutable and served with a one-year `immutable` cache header —
+except product media from `/shoot` and `/record` (above), whose stable keys are
+overwritten in place and invalidated by the publisher.
 **Never overwrite an existing key.** When an asset's content changes, write a new
 key with a `-vN` suffix and point references at it. Because keys are never
 overwritten, CloudFront never serves stale content and **no invalidation is ever

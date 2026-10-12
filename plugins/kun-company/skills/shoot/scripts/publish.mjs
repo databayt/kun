@@ -4,11 +4,15 @@
 //   node publish.mjs --flow page                     the page stills (shoot.mjs <path>…)
 //
 // Reads ~/media/<repo>/<flow>/ (what shoot.mjs, sim.mjs and story.mjs write) and hands each asset
-// to `media.sh publish` (content-hashed immutable keys, HEAD-verified, manifest upsert).
+// to `media.sh publish --key` (clean stable keys, HEAD-verified, invalidated on overwrite, manifest upsert).
 // Namespace + manifest come from the brand kit (production.<brand>.cdn / .manifest); the namespace
-// is always the repo (hogwarts — balqalam is only the public name on screen), and the folder MIRRORS
-// the app route the flow films (`export const route`): cdn.databayt.org/hogwarts/students/add-student-….
-// Page stills mirror their own path: page/students-ar.png → hogwarts/students/, home-ar.png → hogwarts/.
+// is always the repo (hogwarts — balqalam is only the public name on screen). A flow's CDN home is
+// `export const cdn = "<block>/<name>"` — the block folder plus the flow's verb:
+//   tutorial    hogwarts/students/add.mp4  (.av1.mp4 · .poster.webp · .vtt)   English adds -en: add-en.mp4
+//   still       hogwarts/students/add/list.avif · list@2x.avif · list.webp · list@2x.webp · list-en.avif
+//   phone       hogwarts/students/add/iphone-16/review.avif
+//   reel, clip  hogwarts/students/add/reel.mp4 · hogwarts/students/add/details.mp4
+// Page stills land on their own path: page/students-ar.png → hogwarts/students/page.avif, home → hogwarts/page.avif.
 //
 // The id grammar — one name per asset, the same in the manifest, MDX and the CDN slug:
 //   <flow>/<step>-<locale>           a still         add-student/created-ar      ← 12-created-ar.png
@@ -56,13 +60,14 @@ const L = (pair, lang) => pair[lang === "en" ? 1 : 0] || ""
 const media = join(here, "../../edit/scripts/media.sh")
 const results = []
 const published = []
-const route = (mod.route ?? flow).replace(/^\/+|\/+$/g, "")
-function publish(id, files, extra, { slug = route, prefix = `${flow}-` } = {}) {
-  const r = spawnSync(media, ["publish", "--ns", brand.cdn, "--slug", slug, "--prefix", prefix, "--id", id, "--manifest", manifest, ...extra, ...(dry ? ["--dry-run"] : []), ...files], { encoding: "utf8" })
+const home = (mod.cdn ?? flow).replace(/^\/+|\/+$/g, "")
+const en = (lang) => (lang === "en" ? "-en" : "")
+function publish(id, files, extra, key) {
+  const r = spawnSync(media, ["publish", "--ns", brand.cdn, "--key", key, "--id", id, "--manifest", manifest, ...extra, ...(dry ? ["--dry-run"] : []), ...files], { encoding: "utf8" })
   if (r.status !== 0) throw new Error(`publish ${id} failed:\n${(r.stderr || r.stdout).slice(-600)}`)
   results.push(id)
   published.push(...files)
-  console.log(`✓ ${id}  (${files.length} file${files.length > 1 ? "s" : ""})`)
+  console.log(`✓ ${id}  → ${brand.cdn}/${key}  (${files.length} file${files.length > 1 ? "s" : ""})`)
 }
 
 // ── stills: every [NN-]<step>-<locale>.png with whatever avif/webp widths derive made ──
@@ -82,10 +87,10 @@ function stills(folder, prefix) {
     const files = have.filter((d) => new RegExp(`^${stem.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}-\\d+\\.(avif|webp)$`).test(d)).map((d) => join(derived, d))
     if (!files.some((x) => x.endsWith(".avif")) || !files.some((x) => x.endsWith(".webp"))) { (underived[folder] ||= []).push(stem); continue }
     const pair = alt[m[2]] || [`${L(title, "ar")} — ${m[2]}`, `${L(title, "en")} — ${m[2]}`]
-    const at = flow === "page"
-      ? { slug: m[2] === "home" ? "" : m[2], prefix: "" }
-      : { prefix: `${flow}-${prefix.replace(/\//g, "-")}` }
-    publish(`${flow}/${prefix}${m[2]}-${m[3]}`, files, ["--alt-ar", pair[0], "--alt-en", pair[1], ...(m[1] ? ["--order", String(Number(m[1]))] : [])], at)
+    const key = flow === "page"
+      ? `${m[2] === "home" ? "" : `${m[2]}/`}page${en(m[3])}`
+      : `${home}/${prefix}${m[2]}${en(m[3])}`
+    publish(`${flow}/${prefix}${m[2]}-${m[3]}`, files, ["--alt-ar", pair[0], "--alt-en", pair[1], ...(m[1] ? ["--order", String(Number(m[1]))] : [])], key)
   }
 }
 
@@ -101,8 +106,9 @@ function videos() {
       const part = m[1] || "video"
       const files = [f, `${stem}.av1.mp4`, `${stem}.poster.webp`, `${stem}.vtt`].filter((x) => names.includes(x)).map((x) => join(dir, x))
       const t = ["--title-ar", L(title, "ar"), "--title-en", L(title, "en")]
-      publish(`${flow}/${part}-${lang}`, files, t)
-      if (names.includes(`${stem}.reel.mp4`)) publish(`${flow}/${part === "video" ? "reel" : `${part}-reel`}-${lang}`, [join(dir, `${stem}.reel.mp4`), ...files.filter((x) => x.endsWith(".vtt"))], t)
+      publish(`${flow}/${part}-${lang}`, files, t, part === "video" ? `${home}${en(lang)}` : `${home}/${part}${en(lang)}`)
+      const reel = part === "video" ? "reel" : `${part}-reel`
+      if (names.includes(`${stem}.reel.mp4`)) publish(`${flow}/${reel}-${lang}`, [join(dir, `${stem}.reel.mp4`), ...files.filter((x) => x.endsWith(".vtt"))], t, `${home}/${reel}${en(lang)}`)
     }
   }
 }

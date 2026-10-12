@@ -1,14 +1,22 @@
 #!/usr/bin/env node
-// publish --ns <namespace> --slug <route> --id <manifest id> [--prefix <flow>-] [--manifest <path>]
+// publish --ns <namespace> (--key <path> | --slug <route> [--prefix <flow>-]) --id <manifest id> [--manifest <path>]
 //         [--title-ar …] [--title-en …] [--alt-ar …] [--alt-en …] [--order N] [--voice <id>] [--dry-run] <files…>
 //
-// Uploads to cdn.databayt.org with CONTENT-HASHED keys that MIRROR the app's routes —
-// <ns>/<route>/<stem>.<hash8>.<ext>, e.g. hogwarts/students/add-student-list-ar-1600.3a9f1c2e.avif
-// (--slug "" is the root route /). --prefix names a file after its flow: a stem that doesn't
-// already start with it loses its NN- order prefix and gains the flow (01-list-ar → add-student-list-ar). Keys use
-// `immutable` caching — new pixels are a new URL, so nothing is ever overwritten in place and no
-// CloudFront invalidation is needed. Every URL is verified with a HEAD (200 + exact content-type),
-// then the entry is upserted into the product's media-manifest.json:
+// Two key modes on cdn.databayt.org:
+//   --key   CLEAN, STABLE keys — <ns>/<key><suffix>, e.g. hogwarts/students/add.mp4,
+//           hogwarts/students/add/list.avif. The suffix comes from each file's role: .mp4 · .av1.mp4 ·
+//           .poster.webp · .vtt for a video (a .reel.mp4 source publishes as .mp4 under its own key),
+//           and for a still the narrowest width is bare and each wider one adds @2x, @3x
+//           (list-1600.avif → list.avif, list-2400.avif → list@2x.avif). Re-publishing the same key
+//           overwrites in place: objects carry their sha8 as metadata (unchanged bytes are skipped),
+//           cache for an hour in browsers and a year at the edge, and every overwritten key gets a
+//           CloudFront invalidation. Manifest URLs carry ?v=<sha8> — the edge ignores the query,
+//           browsers see a new URL, so a re-render reaches viewers without a stale hour.
+//   --slug  CONTENT-HASHED, immutable keys that mirror a route — <ns>/<route>/<stem>.<hash8>.<ext>
+//           (--slug "" is the root). --prefix names a file after its flow (01-list-ar → add-student-list-ar).
+//           New pixels are a new URL; nothing is overwritten and nothing needs invalidating.
+// Every URL is verified with a HEAD (200 + exact content-type), then the entry is upserted into the
+// product's media-manifest.json:
 //   video → {kind, title, poster, width, height, duration, sources[{src,type}], tracks[]}
 //   image → {kind, width, height, alt, order?, avif{w:url}, webp{w:url}}   (order = the still's NN in its flow)
 // Video sources are ordered AV1 first, H.264 second; <video> takes the first it can decode.
@@ -17,40 +25,84 @@ import { basename, extname } from "node:path"
 import { arg, CDN_BUCKET, CDN_HOST, CONTENT_TYPE, flag, positional, probe, requireRt, sh, sha8 } from "./rt.mjs"
 
 const files = positional()
-const ns = arg("ns"), slug = (arg("slug") ?? "").replace(/^\/+|\/+$/g, ""), id = arg("id", slug), prefix = arg("prefix", "")
-if (!ns || arg("slug") === undefined || !files.length) {
-  console.error("usage: publish --ns <ns> --slug <route> --id <id> [--prefix <flow>-] [--manifest path] [--dry-run] <files…>")
+const ns = arg("ns"), key = arg("key")?.replace(/^\/+|\/+$/g, ""), slug = (arg("slug") ?? "").replace(/^\/+|\/+$/g, ""), prefix = arg("prefix", "")
+const id = arg("id", key ?? slug)
+if (!ns || (key === undefined && arg("slug") === undefined) || !files.length) {
+  console.error("usage: publish --ns <ns> (--key <path> | --slug <route> [--prefix <flow>-]) --id <id> [--manifest path] [--dry-run] <files…>")
   process.exit(2)
 }
 const dry = flag("dry-run")
+const IMMUTABLE = "public, max-age=31536000, immutable"
+const STABLE = "public, max-age=3600, s-maxage=31536000"
+
+// --key: a still's widths become bare / @2x / @3x, narrowest first; a phone's lone 1179 stays bare
+const widthOf = (f) => Number(/-(\d+)\.(avif|webp)$/.exec(basename(f))?.[1] || 0)
+const tiers = [...new Set(files.map(widthOf).filter(Boolean))].sort((a, b) => a - b)
+function cleanKey(file, ext) {
+  const w = widthOf(file)
+  if (w) return `${ns}/${key}${tiers.indexOf(w) ? `@${tiers.indexOf(w) + 1}x` : ""}.${ext}`
+  const role = /\.(av1|poster)\.[a-z0-9]+$/.exec(basename(file))?.[1]
+  return `${ns}/${key}${role ? `.${role}` : ""}.${ext}`
+}
+
+const remoteSha = (k) => {
+  try {
+    return JSON.parse(sh("aws", ["s3api", "head-object", "--bucket", CDN_BUCKET, "--key", k, "--output", "json"])).Metadata?.sha ?? "?"
+  } catch {
+    return null
+  }
+}
+const head = (url) => {
+  try {
+    return sh("curl", ["-sI", "--max-time", "20", url])
+  } catch {
+    return ""
+  }
+}
 
 const up = []
+const overwritten = []
 for (const file of files) {
   const ext = extname(file).slice(1).toLowerCase()
   const ct = CONTENT_TYPE[ext]
   if (!ct) throw new Error(`no content-type for .${ext} (${file})`)
   const stem = basename(file, `.${ext}`)
-  const named = !prefix || stem.startsWith(prefix) ? stem : prefix + stem.replace(/^\d+-/, "")
-  const key = `${ns}/${slug ? `${slug}/` : ""}${named}.${sha8(file)}.${ext}`
-  const url = `https://${CDN_HOST}/${key}`
-  const head = () => {
-    try {
-      return sh("curl", ["-sI", "--max-time", "20", url])
-    } catch {
-      return ""
+  const sha = sha8(file)
+  let k, url
+  if (key !== undefined) {
+    k = cleanKey(file, ext)
+    url = `https://${CDN_HOST}/${k}`
+    if (!dry) {
+      const had = remoteSha(k)
+      if (had !== sha) {
+        sh("aws", ["s3", "cp", file, `s3://${CDN_BUCKET}/${k}`, "--content-type", ct, "--cache-control", STABLE, "--metadata", `sha=${sha}`, "--only-show-errors"])
+        if (had !== null) overwritten.push(`/${k}`)
+      }
     }
+  } else {
+    const named = !prefix || stem.startsWith(prefix) ? stem : prefix + stem.replace(/^\d+-/, "")
+    k = `${ns}/${slug ? `${slug}/` : ""}${named}.${sha}.${ext}`
+    url = `https://${CDN_HOST}/${k}`
+    if (!dry && !/^HTTP\/\S+ 200/m.test(head(url)))
+      sh("aws", ["s3", "cp", file, `s3://${CDN_BUCKET}/${k}`, "--content-type", ct, "--cache-control", IMMUTABLE, "--only-show-errors"])
   }
-  let h = dry ? "" : head()
-  if (!dry && !/^HTTP\/\S+ 200/m.test(h)) {
-    sh("aws", ["s3", "cp", file, `s3://${CDN_BUCKET}/${key}`, "--content-type", ct, "--cache-control", "public, max-age=31536000, immutable", "--only-show-errors"])
-    h = head()
-  }
-  if (!dry) {
+  up.push({ file, ext, stem, key: k, url: key !== undefined ? `${url}?v=${sha}` : url, bare: url, ct })
+}
+
+// stable keys that changed bytes: drop the edge copy (CloudFront, aliased cdn.databayt.org)
+if (overwritten.length) {
+  const dist = sh("aws", ["cloudfront", "list-distributions", "--query", `DistributionList.Items[?contains(Aliases.Items, '${CDN_HOST}')].Id | [0]`, "--output", "text"]).trim()
+  if (!dist || dist === "None") throw new Error(`no CloudFront distribution aliased ${CDN_HOST}`)
+  sh("aws", ["cloudfront", "create-invalidation", "--distribution-id", dist, "--paths", ...overwritten, "--output", "text", "--query", "Invalidation.Id"])
+}
+
+if (!dry) {
+  for (const u of up) {
+    const h = head(u.bare)
     const status = /^HTTP\/\S+ (\d+)/m.exec(h)?.[1]
     const got = /^content-type:\s*(.+)$/im.exec(h)?.[1]?.trim()
-    if (status !== "200" || (got || "").split(";")[0] !== ct.split(";")[0]) throw new Error(`verify failed for ${url}: status ${status}, content-type ${got}`)
+    if (status !== "200" || (got || "").split(";")[0] !== u.ct.split(";")[0]) throw new Error(`verify failed for ${u.bare}: status ${status}, content-type ${got}`)
   }
-  up.push({ file, ext, stem, url, ct })
 }
 
 // --- manifest entry -------------------------------------------------------------------------
@@ -110,4 +162,4 @@ if (manifest && !dry) {
   m[id] = entry
   writeFileSync(manifest, JSON.stringify(m, null, 2) + "\n")
 }
-console.log(JSON.stringify({ id, manifest: manifest || null, dry, entry, uploads: up.map(({ file, url }) => ({ file, url })) }, null, 2))
+console.log(JSON.stringify({ id, manifest: manifest || null, dry, entry, uploads: up.map(({ file, url }) => ({ file, url })), invalidated: overwritten }, null, 2))

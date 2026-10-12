@@ -10,7 +10,7 @@
 #   media.sh poster <in> <out.webp> [--at S] [--width 1600]
 #   media.sh derive <png…> [--kind ui|photo] [--widths 1600,2400] [--out dir] [--check]
 #   media.sh vtt <in.srt|in.json> <out.vtt> [--offset S]
-#   media.sh publish --ns <ns> --slug <slug> --id <id> [--manifest path] <files…>
+#   media.sh publish --ns <ns> (--key <path> | --slug <slug>) --id <id> [--manifest path] <files…>
 #   media.sh qa-pack <file…> [--profile p] [--ref mezz] [--vtt f] [--at t1,t2] [--out dir]
 #   media.sh probe <file>               compact JSON (codec, colour tags, faststart, size)
 #   media.sh loudness <file>            EBU R128 integrated / LRA / true peak

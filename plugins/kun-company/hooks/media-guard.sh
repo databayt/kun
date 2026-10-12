@@ -84,7 +84,7 @@ for seg in re.split(r"&&|\|\||;", cmd):
 
 if hits:
     reason = ("media-guard: these would land in git —\n  " + "\n  ".join(hits[:12]) +
-              "\nPublish media to the CDN instead (media.sh publish → hashed immutable URL + manifest) "
+              "\nPublish media to the CDN instead (media.sh publish → clean CDN URL + manifest) "
               "and keep fonts in ~/Library/Fonts. Deliberate exception: prefix MEDIA_GUARD_ALLOW=1.")
     print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": reason}}))
 PY

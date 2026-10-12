@@ -13,7 +13,7 @@ import { initScript as blurPhones } from "./add-student.mjs"
 const ASSETS = join(dirname(fileURLToPath(import.meta.url)), "../../assets/hogwarts")
 const sheet = (name) => ({ name, path: join(ASSETS, name), thumb: join(ASSETS, name.replace(/\.csv$/, ".thumb.jpg")) })
 // What the Finder shows in Documents: both sheets, the picked one selected.
-const SHEETS = [sheet("طلاب-الصف-الأول.csv"), sheet("معلمون-جدد.csv")]
+export const SHEETS = [sheet("طلاب-الصف-الأول.csv"), sheet("معلمون-جدد.csv")]
 
 export const initScript = blurPhones
 
@@ -21,7 +21,7 @@ export const initScript = blurPhones
 // its row (history.tsx: row > details > «file · date»). Never filter generic divs by text — an
 // outer container holding several rows matches too, and its Undo belongs to another import
 // (bit us 2026-10-10). If the markup moves, this finds nothing and the review count check fails.
-const undoRow = (page, file, t) =>
+export const undoRow = (page, file, t) =>
   page.locator("p").filter({ hasText: `${file} ·` })
     .locator("xpath=../..")
     .filter({ has: page.getByRole("button", { name: t("تراجع", "Undo"), exact: true }) })

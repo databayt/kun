@@ -1,8 +1,8 @@
 // Bulk teacher — four fictional teachers with their subjects from one CSV, through /school/bulk.
 import { bulkFlow, initScript } from "./_bulk.mjs"
 
-// the app route this flow films — its CDN folder mirrors it: cdn.databayt.org/hogwarts/school/bulk/…
-export const route = "school/bulk"
+// the flow's CDN home — <block>/<name>: cdn.databayt.org/hogwarts/teachers/bulk.mp4, stills under hogwarts/teachers/bulk/
+export const cdn = "teachers/bulk"
 // the source this flow films — `record.sh stale` flags the published stills when it changes
 export const block = "import"
 export const paths = ["src/components/school-dashboard/import"]

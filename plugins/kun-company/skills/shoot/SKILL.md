@@ -36,23 +36,28 @@ namespace; **balqalam** is only the public brand drawn on screen (palette, logo,
 Everything lands in **one local home per repo, outside the repo**: `~/media/<repo>/` (mirrored to
 Drive by `record.sh sync`; nothing is captured into a repo's `public/`).
 
-| Asset | Local file (`~/media/<repo>/`) | Manifest id | CDN key (`cdn.databayt.org/…`) |
+| Asset | Local file (`~/media/<repo>/`) | Manifest id | CDN key (`cdn.databayt.org/hogwarts/…`) |
 | --- | --- | --- | --- |
-| page still | `page/<slug>-<locale>.png` | `page/<slug>-<locale>` | `hogwarts/<slug>/<slug>-<locale>-<w>.<hash>.avif` |
-| flow still | `<flow>/NN-<step>-<locale>.png` | `<flow>/<step>-<locale>` | `hogwarts/<route>/<flow>-<step>-<locale>-<w>.<hash>.avif` |
-| phone still | `<flow>/iphone-16/NN-<step>-<locale>.png` | `<flow>/iphone-16/<step>-<locale>` | `hogwarts/<route>/<flow>-iphone-16-<step>-<locale>-1179.<hash>.avif` |
-| tutorial | `<flow>/<flow>-<locale>.{mp4,av1.mp4,poster.webp,vtt}` | `<flow>/video-<locale>` | `hogwarts/<route>/<flow>-<locale>.<hash>.mp4` |
-| reel | `<flow>/<flow>-<locale>.reel.mp4` | `<flow>/reel-<locale>` | `hogwarts/<route>/<flow>-<locale>.reel.<hash>.mp4` |
-| support clip | `<flow>/<flow>-<clip>-<locale>.*` | `<flow>/<clip>-<locale>` | `hogwarts/<route>/<flow>-<clip>-<locale>.<hash>.mp4` |
-| story cut | `<flow>/<flow>-<cut>-<device>-<locale>.*` | `<flow>/<cut>-<device>-<locale>` | same as a support clip |
+| page still | `page/<slug>-<locale>.png` | `page/<slug>-<locale>` | `<slug>/page.avif` (home → `page.avif`) |
+| flow still | `<flow>/NN-<step>-<locale>.png` | `<flow>/<step>-<locale>` | `<block>/<name>/<step>.avif` · `@2x.avif` · `.webp` · `@2x.webp` |
+| phone still | `<flow>/iphone-16/NN-<step>-<locale>.png` | `<flow>/iphone-16/<step>-<locale>` | `<block>/<name>/iphone-16/<step>.avif` |
+| tutorial | `<flow>/<flow>-<locale>.{mp4,av1.mp4,poster.webp,vtt}` | `<flow>/video-<locale>` | `<block>/<name>.mp4` (+ `.av1.mp4` `.poster.webp` `.vtt`) |
+| reel | `<flow>/<flow>-<locale>.reel.mp4` | `<flow>/reel-<locale>` | `<block>/<name>/reel.mp4` |
+| support clip | `<flow>/<flow>-<clip>-<locale>.*` | `<flow>/<clip>-<locale>` | `<block>/<name>/<clip>.mp4` |
+| story cut | `<flow>/<flow>-<cut>-<device>-<locale>.*` | `<flow>/<cut>-<device>-<locale>` | `<block>/<name>/<cut>-<device>.mp4` |
+| block media | (an ad, a block reel) | your id | `<block>/<file>.mp4` — `media.sh publish --key <block>/<file>` |
 | raw footage (`/record`) | `<flow>/raw/<flow>[-<part>]-<locale>.mov` | — (archive + Drive) | — |
 
-- **The CDN mirrors the app's routes.** `<route>` is the page the flow films, from the flow's
-  `export const route` (`students`, `teachers`, `school/bulk`, …; `/` is the namespace root):
-  `cdn.databayt.org/hogwarts/students/add-student-created-ar-1600.3a9f1c2e.avif`. Images and videos
-  sit flat in that folder; the flow name inside each file keeps two flows on one route apart.
-- **Same name = overwrite.** A re-shoot or re-render replaces the file; never `-v2`, `-sim`,
-  `-final` siblings. The `NN-` order prefix stays in the local file, leaves the id and the CDN
+- **The CDN is grouped by block, names are short.** A flow declares its home as
+  `export const cdn = "<block>/<name>"` — `add-student` → `students/add`, `bulk-student` →
+  `students/bulk`, `add-teacher` → `teachers/add`. The tutorial is `hogwarts/students/add.mp4`; its
+  stills, reel and clips sit in `hogwarts/students/add/`; block-wide media (`marketing.mp4`,
+  `reel.mp4`) sits in `hogwarts/students/`.
+- **Arabic is bare, English adds `-en`**: `add.mp4`, `add/list.avif`, `add/list-en.avif`.
+  **The narrowest width is bare, wider ones add `@2x`**: `list.avif` (1600), `list@2x.avif` (2400);
+  a phone still ships only its native 1179 px, bare.
+- **Same name = overwrite.** A re-shoot or re-render replaces the file at the same URL; never
+  `-v2`, `-sim`, `-final` siblings. The `NN-` order prefix stays in the local file, leaves the id and the CDN
   name, and is kept as the manifest entry's `order` — the docs list stills by it, so inserting a
   step neither breaks a page nor reshuffles it. Step names say what is on screen (`list`, `map`, `review`, `created`).
 - Every still also gets web derivatives in `derived/`: `<stem>-{1600,2400}.{avif,webp}` (UI text
@@ -69,13 +74,15 @@ node ~/.claude/skills/shoot/scripts/publish.mjs --flow page                     
 node ~/.claude/skills/shoot/scripts/shoot.mjs --flow add-student --lang ar,en --publish   # shoot, then publish the stills
 ```
 
-- Every asset in the flow folder goes through `media.sh publish`: content-hashed immutable keys
-  (table above), each URL HEAD-verified, then upserted into the product manifest under its id.
-  A re-render is a new URL; nothing is invalidated.
+- Every asset in the flow folder goes through `media.sh publish --key`: the clean keys above,
+  each URL HEAD-verified, then upserted into the product manifest under its id. Unchanged bytes
+  are skipped (each object carries its sha8); a changed file overwrites its key and gets a
+  CloudFront invalidation. Objects cache 1 h in browsers, a year at the edge; manifest URLs carry
+  `?v=<sha8>`, which the edge ignores and browsers treat as new — a re-render shows at once.
 - Namespace and manifest come from `content/media/brand-kit.json → production.<brand>.{cdn,manifest}`
   — `cdn` is always the repo (`hogwarts`, also for the balqalam brand), manifest
   `src/components/docs/media-manifest.json`.
-- A flow module carries its metadata: `export const route` (the CDN folder), `title = [ar, en]`,
+- A flow module carries its metadata: `export const cdn` (`<block>/<name>`), `title = [ar, en]`,
   `alt = { <step>: [ar, en] }` (a step with no alt falls back to «title — step»), and `block` /
   `paths` — publish stamps them into `~/media/manifest.json` so `record.sh stale` flags a still
   whose source changed.
@@ -204,7 +211,14 @@ node ~/.claude/skills/shoot/scripts/sim.mjs --flow add-student --direct-only   #
 - Sim files: `sims/<repo>/<flow>.mjs` — `meta`, `prepare`, `cleanup`, `default async (sim)`. API:
   `sim.caption(n, text)` · `sim.toast(text)` · `sim.focus(loc | [locs] | null, { z })` · `sim.click` ·
   `sim.type(loc, text, { cps })` · `sim.pick(trigger, name | index)` · `sim.select(nativeSelect, value)` ·
-  `sim.upload(trigger, path, { files })` (files = everything Finder shows) · `sim.move` · `sim.wait(ms)`.
+  `sim.upload(trigger, path, { files })` (files = everything Finder shows; a non-image file carries a `thumb` jpg, a `.csv` uploads as text/csv) · `sim.move` · `sim.wait(ms)` ·
+  `sim.lapse(fn, { keep })` — time-lapse a slow server step (an import's moving progress bar never freezes, so the
+  1.2 s trim cannot cut it): whatever `fn` takes plays in `keep` s. A take's `cuts` in `take.json` can be edited too.
+- Sims (hogwarts): `add-student`, `add-teacher` (documents → information → subjects/sections → contact → address →
+  employment → row; captions count the steps the demo actually shows), `bulk-student` / `bulk-teacher` (shared
+  `_bulk.mjs`: card → Finder on the CSV → columns → review → import lapsed to 3 s → done → history; cleanup = Undo).
+- A blur on `[role=dialog]` must skip Radix popovers (`[data-radix-popper-content-wrapper]`): dropdowns are dialogs
+  too, and a credential regex blurs every one-word country name (add-teacher, 2026-10-10).
 - Frame the FIELDS being filled, not `<form>`; a page where everything matters (6 upload tiles +
   Finder) stays full-screen. Tips go AFTER modal moments, never on top of the Finder window.
 - **Paid side effects are blocked, not avoided:** hogwarts document tiles fire a paid AI extraction
