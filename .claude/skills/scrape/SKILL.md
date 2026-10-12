@@ -2,7 +2,7 @@
 name: scrape
 description: Lead acquisition — contact gap first, discovery last
 when_to_use: "Finding, enriching, tiering or reaching leads in the Twenty CRM. Triggers on: scrap, scrape, scrap facebook, scrap whatsapp, scrap facebook for hogwarts, scrap for mkan, scrap for databayt, website leads, old websites, rebrand leads, leads, prospect, contact gap, enrich, outreach, pipeline health, who should we contact, find schools, اسحب, جمع بيانات, عملاء محتملين. NOT /health (engine drift), /measure (social numbers), /report (a bug)."
-argument-hint: "[facebook|whatsapp|website] [for <product>] [--apply]"
+argument-hint: "[facebook|whatsapp|website|tiktok] [for <product>] [--apply]"
 ---
 
 # Scrape — the lead acquisition runbook
@@ -41,6 +41,7 @@ Polymorphic on argument, like `/handover`:
 | `facebook`                            | The FB Page About/Intro lane. §2               |
 | `whatsapp`                            | Harvest numbers + hand to the sender. §3       |
 | `website`                             | Fetch + extract from a domain. §4              |
+| `tiktok` (mkan, Kigali)               | Rental videos → CRM homes at VETTING. §4b      |
 | `for <product>` / `<x> for <product>` | Resolve scope, then run the above. §0          |
 | `--apply`                             | Write. Absent = dry run. Always dry-run first. |
 
@@ -204,6 +205,24 @@ attribution is what tells you whether the lane is worth re-running.
 
 Jina Reader stays **unavailable here** — 451 for `example.com` as readily as for a school site, so
 it is an IP/region block on this machine, not the target. Re-test before planning around it.
+
+## §4b — `tiktok`: Kigali rental videos (mkan, 2026-10-12)
+
+Kigali brokers advertise rentals on TikTok, not Airbnb. Code: `mkan/scripts/crm/tiktok.ts`; this skill only routes.
+The lane needs no login (yt-dlp on public videos), so no account is at risk. It is never pointed at the :9222 vault.
+
+```bash
+cd ~/mkan && pnpm crm:tiktok-status                 # ledger by state + skip reason
+pnpm crm:tiktok-seeds                               # accounts: search PROPOSES, a human --promote=h / --ignore=h
+caffeinate -i pnpm crm:tiktok --limit=20            # discover → fetch → read → upsert (dry)
+caffeinate -i pnpm crm:tiktok --limit=20 --apply    # writes S3 frames + Twenty host/home/note
+```
+
+Every video becomes a `home` at **VETTING** (`source TIKTOK`, `sourceId tiktok:<id>`) with the reader's
+property frames as photos. Its poster becomes a `host` with an Opportunity. Nothing publishes.
+A launchd job, `com.databayt.mkan-tiktok-sweep`, runs it daily at 06:00 (`--limit=40 --notify`).
+The volume comes from the seed accounts: web search is blocked after a few queries.
+Traps and numbers: `references/backends.md` → TikTok.
 
 ## §5 — Official directories (build this next)
 

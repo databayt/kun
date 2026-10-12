@@ -92,6 +92,7 @@ The Owlery — school 20 in the [spellbook](/docs/keywords).
 | `scrap facebook`                          | The Page About/Intro lane — 13 rows, the whole surface                |
 | `scrap whatsapp`                          | Honest redirect — see below                                           |
 | `scrap for hogwarts` · `scrap for mkan`   | Product-scoped, resolved from `repositories.json`                     |
+| `scrap tiktok` · `tiktok homes`           | Kigali rental videos on TikTok → mkan CRM homes at VETTING            |
 
 Abdout types **`scrap`**. Both spellings trigger, in the spellbook and in the skill's
 `when_to_use`.
@@ -107,6 +108,39 @@ spell exists because the phrase gets said, and it routes to the two real capabil
    retry, rate limiter, templates and dispatch. Never build a second sender.
 
 Configuring a capability we do not have would be worse than not configuring it at all.
+
+## TikTok — Kigali rentals (mkan, 2026-10-12)
+
+In Kigali, most rentals are advertised by brokers in TikTok videos rather than on Airbnb.
+`mkan/scripts/crm/tiktok.ts` reads those videos into the mkan CRM. Kun only routes to it.
+
+| Stage | What it does | Tool |
+| --- | --- | --- |
+| discover | Recent videos from seed accounts, plus 3 rotating web-search phrases a day. Search **proposes** new accounts and a human promotes them | yt-dlp, DuckDuckGo → Brave |
+| fetch | Caption, 8 evenly spaced frames and a speech transcript. The mp4 is deleted | yt-dlp, ffmpeg, mlx-whisper |
+| read | Is it a Kigali rental? It extracts price (RWF/month), rooms, place, phones and the frames that show the property | `claude -p` on the Max pool |
+| upsert | Property frames go to S3; host + Opportunity, home at **VETTING** and a note with the caption and transcript go to Twenty | Twenty REST |
+
+```bash
+cd ~/mkan
+pnpm crm:tiktok-status                        # the ledger by state and skip reason
+pnpm crm:tiktok-seeds --promote=<handle>      # or --ignore=<handle>
+caffeinate -i pnpm crm:tiktok --limit=20      # dry run; add --apply to write
+```
+
+A launchd job, `com.databayt.mkan-tiktok-sweep`, runs the lane every day at 06:00 with `--limit=40` and posts the count to `#mkan`.
+Nothing publishes: a TikTok home goes live through the same human step as a Slack home.
+
+What the first run measured:
+- 12 broker accounts and 334 videos discovered.
+- A pilot of 8 videos gave 6 homes. The other 2 were marketplace promos, correctly rejected.
+- Rerunning the upsert creates nothing new.
+
+Things to know:
+- **No login, no account at risk.** The lane is never pointed at the :9222 vault. scrape-guard lets it through on purpose, and a test pins that.
+- **Web search blocks fast.** DuckDuckGo blocks after 2–3 queries and Brave after a few more. The volume comes from seed accounts, each with hundreds of videos.
+- **Whisper doesn't know Kinyarwanda.** The caption and the frames' on-screen text carry the facts; the transcript only helps with place names.
+- **Prices are monthly.** They go in `priceMonthLocal` + `rentPeriod`. Converting to the site's nightly price is a publish-time decision.
 
 ## Where the code lives
 

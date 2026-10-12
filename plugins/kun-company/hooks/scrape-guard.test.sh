@@ -135,6 +135,20 @@ for c in \
   fi
 done
 
+# The mkan TikTok lane is anonymous (yt-dlp on public videos, no login, no CDP,
+# a 4 s built-in delay): it must pass with NO scrape env at all. If someone widens
+# SCRAPE_ENTRYPOINTS to catch it, the FB_SCRAPE_PROFILE rule would block a lane
+# that has no Facebook identity to declare — this case is that tripwire.
+for c in \
+  'pnpm crm:tiktok --limit=20 --apply' \
+  'npx tsx scripts/crm/tiktok.ts discover --seeds-only' \
+  'caffeinate -i pnpm crm:tiktok-read --limit=8'; do
+  run_guard "$c"
+  if [ "$CODE" = 0 ] && [ -z "$OUT" ]; then ok "allow tiktok: ${c:0:44}"; else
+    bad "allow tiktok: ${c:0:44}" "exit=$CODE (want 0) stdout='${OUT:0:80}'"
+  fi
+done
+
 echo
 if [ "$FAIL" = 0 ]; then
   echo "ALL PASS ($PASSED cases)"

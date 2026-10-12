@@ -6616,6 +6616,56 @@
           "depends": []
         },
         {
+          "name": "scrap tiktok",
+          "effect": "Kigali rentals posted as TikTok videos → mkan CRM homes at VETTING (scrape §4b)",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "lead"
+            },
+            {
+              "type": "skill",
+              "name": "/scrape"
+            }
+          ],
+          "steps": [
+            "Code: mkan/scripts/crm/tiktok.ts — `pnpm crm:tiktok` (discover → fetch → read → upsert), dry run unless --apply",
+            "No login: yt-dlp on public videos of seed accounts + 3 rotating web-search phrases a day; search PROPOSES accounts, a human promotes (`crm:tiktok-seeds`)",
+            "Each video → Twenty home at VETTING (source TIKTOK, frames on S3) + its poster as host; never publishes",
+            "Daily launchd com.databayt.mkan-tiktok-sweep 06:00 --limit=40; status: `pnpm crm:tiktok-status`"
+          ],
+          "connects": [
+            "scrap for mkan",
+            "scrap"
+          ],
+          "depends": []
+        },
+        {
+          "name": "tiktok homes",
+          "effect": "Same lane, said as the inventory: TikTok rental videos in Kigali → mkan CRM",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "lead"
+            },
+            {
+              "type": "skill",
+              "name": "/scrape"
+            }
+          ],
+          "steps": [
+            "Code: mkan/scripts/crm/tiktok.ts — `pnpm crm:tiktok` (discover → fetch → read → upsert), dry run unless --apply",
+            "No login: yt-dlp on public videos of seed accounts + 3 rotating web-search phrases a day; search PROPOSES accounts, a human promotes (`crm:tiktok-seeds`)",
+            "Each video → Twenty home at VETTING (source TIKTOK, frames on S3) + its poster as host; never publishes",
+            "Daily launchd com.databayt.mkan-tiktok-sweep 06:00 --limit=40; status: `pnpm crm:tiktok-status`"
+          ],
+          "connects": [
+            "scrap for mkan",
+            "scrap"
+          ],
+          "depends": []
+        },
+        {
           "name": "اسحب",
           "effect": "Arabic for `scrap` — the same umbrella, measured first",
           "order": [

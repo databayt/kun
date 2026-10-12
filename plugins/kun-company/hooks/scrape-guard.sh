@@ -84,6 +84,10 @@ cmd="$(printf '%s' "$json" | jq -r '.tool_input.command // .toolCall.args.Comman
 #     raises the stakes of detection on exactly the account we cannot re-buy.
 #   • attaching to an existing CDP endpoint (`cdp`/`9222`) — DynamicFetcher can
 #     connect to a remote browser, and the remote browser here is the vault.
+# NOT matched, deliberately: mkan's TikTok lane (`crm:tiktok*`, scripts/crm/tiktok.ts).
+# It reads public videos through yt-dlp with no login and no CDP port, and throttles
+# itself (--delay, default 4 s) — there is no account to lose, so the identity rule
+# below would only block it. scrape-guard.test.sh pins that it passes.
 SCRAPE_ENTRYPOINTS='(sudan-schools-scraper|tier[0-9]+-[a-z]+|cdp-client|fb-matrix|dorker|enricher|scripts/crm/(scrape|discover|enrich|contact-hunt)|crm:(scrape|discover|enrich|matrix|dork|fb)|opencli[[:space:]]+(facebook|instagram)|agent-reach[[:space:]]+[a-z-]*[[:space:]]*(facebook|instagram)|scrapling[^;&|]*(facebook|instagram|cdp|9222))'
 printf '%s' "$cmd" | grep -Eiq "$SCRAPE_ENTRYPOINTS" || exit 0
 

@@ -163,3 +163,16 @@ and do not loosen the pattern to make documentation easier.
 "MUST USE when the user wants to research/search anything, or mentions any platform or URL" — a
 fleet-wide dispatch collision, and the listing budget has roughly 80 characters of headroom. Call
 its CLI from this runbook instead.
+
+## TikTok (mkan Kigali lane, measured 2026-10-12)
+
+| Step | Tool | Measured |
+| --- | --- | --- |
+| Account videos | `yt-dlp --flat-playlist -J https://www.tiktok.com/@h` | ~2.5 s/account, no login; `tiktok:tag` and `tiktok:sound` are **broken** in yt-dlp 2026.08.19 |
+| Find accounts | DuckDuckGo html → Brave html | DDG serves its bot "anomaly" page (HTTP 202) after 2–3 queries, Brave 429s after a few more; Bing/Yahoo/Startpage/Mojeek return no TikTok URLs to a plain fetch. So 3 rotating phrases run per day |
+| Video + frames | `yt-dlp -f b[ext=mp4]` + ffmpeg, 8 evenly spaced frames | ~5 s/video; the mp4 is deleted after |
+| Speech | mlx-whisper large-v3-turbo (`~/.claude/skills/edit/scripts/media/asr_batch.py`) | Kinyarwanda isn't a Whisper language, and over background music it hallucinates. Place names survive; the caption and the on-screen text carry the facts |
+| Read | `claude -p --model sonnet --allowedTools Read`, cwd = the frames dir | 15–24 s/video; pilot 6/8 kept, 2 rejected correctly (marketplace promos) |
+
+First run: 12 broker accounts proposed by search and 334 videos discovered. 30% of search hits are older than 120 days and skipped.
+`@rentzen.co` is a competing Kigali rental marketplace (seed ignored).
