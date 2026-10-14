@@ -129,8 +129,8 @@ weekly() {
     local cand="$STATE/promote-candidates-$week.json" prop="$STATE/promote-proposals-$week.md"
     log "▶ weekly promote"
     python3 "$SCRIPTS/textbook-contract.py" --promote "$CATALOG" --presets "$SCRIPTS/presets.json" --out "$cand" >> "$LOG_FILE" 2>&1
-    claude -p "You maintain kun's textbook transcription presets. Read $cand (observed cases from every catalog book's contract that no preset clause cites yet, grouped by book with its subject kinds) and $SCRIPTS/presets.json. Write $prop in Markdown: a table of proposed NEW clauses (id, kind, rule <= 60 words, evidence book:page refs from >= 2 DIFFERENT books) — a case seen in one book stays per-book and is not proposed; then 'Contested across books' (books disagree — needs a decision) and 'Contradictions inside one contract'. Do not edit presets.json. Reply DONE." \
-        --model opus --allowedTools Read Write Glob --max-turns 30 >> "$LOG_FILE" 2>&1
+    claude -p "You maintain kun's textbook transcription presets. Read $cand (observed cases from every catalog book's contract that no preset clause cites yet, grouped by book with its subject kinds) and $SCRIPTS/presets.json, and the generic clauses every contract already carries in $SCRIPTS/textbook-contract.py — never propose a rule the template already states. Write $prop in Markdown: a table of proposed NEW clauses (id, kind, rule <= 60 words, evidence book:page refs from >= 2 DIFFERENT books) — a case seen in one book stays per-book and is not proposed; then 'Contested across books' (books disagree — needs a decision) and 'Contradictions inside one contract'. Do not edit presets.json. Reply DONE." \
+        --model opus --allowedTools Read Write Glob --add-dir "$SCRIPTS" --add-dir "$STATE" --max-turns 30 >> "$LOG_FILE" 2>&1
     echo "$week" > "$STATE/weekly"
     if [ -s "$prop" ]; then
         report "**Weekly presets proposals ($week)** — adopt a clause into \`skills/textbook/scripts/presets.json\` only after a \`textbook bench\` run shows no drop.
