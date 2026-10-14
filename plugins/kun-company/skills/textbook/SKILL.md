@@ -86,6 +86,9 @@ settled 12 hunks in six minutes.
   no ruled or shaded grid is the diagram-as-table defect the first book showed on pages 146/150.
 - **Direction is never judged, only observed**: crop the right 45 % and ask what is in it.
   On the first book 8 of 31 tables were mirrored and 23 were right — never blanket-swap.
+  The expected side follows `structure.json` `lang`: in an LTR book the LAST Markdown column is the
+  rightmost. Before 2026-10-14 the check assumed RTL, and sd-g12-english shipped 16 pages of
+  correct tables reversed by `--fix`.
 
 ## The benchmark — `.claude/workflows/textbook-bench.js`
 
