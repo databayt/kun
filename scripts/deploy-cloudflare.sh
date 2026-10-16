@@ -24,6 +24,14 @@ ENV_FILE=$(cd "$(dirname "$ENV_FILE")" && pwd)/$(basename "$ENV_FILE")
 BUILD_DIR=${CF_BUILD_DIR:-${TMPDIR:-/tmp}/kun-cf-build}
 IMAGE=kun-cf:local
 
+# Next's standalone output copies the build dir's .env (the local one, copied in for
+# prisma.config.ts) into .next/standalone/, so every image shipped the Mac's secrets —
+# stale copies of values the Worker already holds. Secrets reach the container only as
+# Worker bindings (cf/worker.js) and config only as env.json; the image carries no dotenv.
+strip_dotenv() {
+  rm -f .next/standalone/.env .next/standalone/.env.*
+}
+
 build() {
   local SOURCE=${CF_SOURCE:-head}
   rm -rf "$BUILD_DIR"; mkdir -p "$BUILD_DIR"
@@ -54,6 +62,7 @@ build() {
   done
 
   echo "==> assembling: baked non-secret config"
+  strip_dotenv
   node cf/env-split.mjs "$ENV_FILE" config > .next/standalone/env.json
   echo "    env.json: $(node -e 'console.log(Object.keys(require("./.next/standalone/env.json")).length)') config vars; $(node cf/env-split.mjs "$ENV_FILE" secrets | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>console.log(Object.keys(JSON.parse(s)).length))') secrets stay with the Worker"
   du -sh .next/standalone .next/static public | sed 's/^/    /'
@@ -89,6 +98,7 @@ smoke() {
 
 deploy() {
   cd "$BUILD_DIR"
+  strip_dotenv   # also covers build dirs assembled before the strip existed
   # A byte-identical image does not restart the running container, so Worker vars and
   # secrets pushed since the last deploy would never reach it. The stamp is the image's
   # last (tiny) layer: every deploy is a new image, and the instance restarts with the
