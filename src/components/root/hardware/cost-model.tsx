@@ -2,15 +2,16 @@
 
 import { useMemo, useState } from "react";
 import {
-  LOAD_ROWS,
+  SETUP_ITEMS,
   MACHINES,
-  SIZING,
-  computeSizing,
+  SETUP,
+  computeSetup,
+  itemWh,
   machineWh,
-  type LoadRow,
+  type ItemGroup,
 } from "./config";
 
-interface SizingModelProps {
+interface CostModelProps {
   isAr: boolean;
 }
 
@@ -21,22 +22,27 @@ function fmt(n: number, digits = 1): string {
   });
 }
 
+function usd(n: number): string {
+  return `$${Math.round(n).toLocaleString("en-US")}`;
+}
+
 /**
- * The live electrical model. Picking the box or toggling a load re-derives
- * battery, array and area from the same formulas the doc prints — the point of
- * this page over the doc is that the cost of a choice is visible rather than
- * asserted. Choosing the $85K Station over the $4K Spark roughly triples the
- * solar plant, and that is the argument the page exists to make.
+ * The live cost model. Picking the box or toggling a line item re-derives
+ * capex, the monthly bill, daily energy and UPS runtime from the same formulas
+ * the doc prints — the point of this page over the doc is that the cost of a
+ * choice is visible rather than asserted. Choosing the M5 Ultra over the
+ * M5 Max adds $4,100 up front and roughly doubles the box's energy; that delta
+ * is the argument, and here it is live.
  */
-export function SizingModel({ isAr }: SizingModelProps) {
+export function CostModel({ isAr }: CostModelProps) {
   const [machineId, setMachineId] = useState<string>(MACHINES[0].id);
   const [selected, setSelected] = useState<Set<string>>(
-    () => new Set(LOAD_ROWS.filter((r) => r.defaultOn).map((r) => r.id)),
+    () => new Set(SETUP_ITEMS.filter((r) => r.defaultOn).map((r) => r.id)),
   );
 
   const machine = MACHINES.find((m) => m.id === machineId) ?? MACHINES[0];
-  const sizing = useMemo(
-    () => computeSizing(selected, machine),
+  const setup = useMemo(
+    () => computeSetup(selected, machine),
     [selected, machine],
   );
 
@@ -49,10 +55,13 @@ export function SizingModel({ isAr }: SizingModelProps) {
     });
   }
 
-  const groups: { key: LoadRow["group"]; title: string; titleAr: string }[] = [
-    { key: "node", title: "The node", titleAr: "الموقع" },
-    { key: "site", title: "Site", titleAr: "الخدمات" },
+  const groups: { key: ItemGroup; title: string; titleAr: string }[] = [
+    { key: "desk", title: "The desk", titleAr: "المكتب" },
+    { key: "link", title: "The link", titleAr: "الاتصال" },
+    { key: "power", title: "Power", titleAr: "الطاقة" },
   ];
+
+  const overUps = setup.hasUps && setup.peakW > SETUP.upsMaxW;
 
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_20rem]">
@@ -61,13 +70,13 @@ export function SizingModel({ isAr }: SizingModelProps) {
         <section>
           <div className="mb-3 flex items-baseline justify-between">
             <h2 className="text-muted-foreground text-xs font-medium tracking-widest uppercase">
-              {isAr ? "الحاسوب الخارق" : "The one box"}
+              {isAr ? "الجهاز" : "The one box"}
             </h2>
             <span
               dir="ltr"
               className="text-muted-foreground font-mono text-xs tabular-nums"
             >
-              {fmt(sizing.machineKWh)} kWh
+              {usd(machine.priceUSD)}
             </span>
           </div>
 
@@ -92,21 +101,23 @@ export function SizingModel({ isAr }: SizingModelProps) {
                     </span>
                     <span
                       dir="ltr"
-                      className="font-mono text-xs tabular-nums whitespace-nowrap"
+                      className="font-mono text-xs whitespace-nowrap tabular-nums"
                     >
-                      {m.price}
+                      {usd(m.priceUSD)}
                     </span>
                   </div>
                   <div
                     dir="ltr"
                     className="text-muted-foreground mt-2 space-y-0.5 font-mono text-[11px] tabular-nums rtl:text-end"
                   >
-                    <div>{m.memory}</div>
+                    <div>
+                      {m.memory} · {m.config.split(" · ")[1]} SSD
+                    </div>
                     <div>
                       {m.bandwidth} · {m.compute}
                     </div>
                     <div>
-                      {m.loadW} W load · {m.idleW} W idle ·{" "}
+                      ~{m.loadW} W load · {m.idleW} W idle ·{" "}
                       {(machineWh(m) / 1000).toFixed(1)} kWh/day
                     </div>
                   </div>
@@ -119,13 +130,12 @@ export function SizingModel({ isAr }: SizingModelProps) {
           </div>
         </section>
 
-        {/* ── Load table ────────────────────────────────────────────── */}
+        {/* ── Line items ────────────────────────────────────────────── */}
         {groups.map((group) => {
-          const rows = LOAD_ROWS.filter((r) => r.group === group.key);
-          const subtotal =
-            rows
-              .filter((r) => selected.has(r.id))
-              .reduce((sum, r) => sum + r.wh, 0) / 1000;
+          const rows = SETUP_ITEMS.filter((r) => r.group === group.key);
+          const subtotal = rows
+            .filter((r) => selected.has(r.id))
+            .reduce((sum, r) => sum + r.capexUSD, 0);
 
           return (
             <section key={group.key}>
@@ -137,7 +147,7 @@ export function SizingModel({ isAr }: SizingModelProps) {
                   dir="ltr"
                   className="text-muted-foreground font-mono text-xs tabular-nums"
                 >
-                  {fmt(subtotal)} kWh
+                  {usd(subtotal)}
                 </span>
               </div>
 
@@ -166,28 +176,18 @@ export function SizingModel({ isAr }: SizingModelProps) {
                       </span>
 
                       <span className="min-w-0 flex-1">
-                        <span className="flex flex-wrap items-baseline gap-x-2">
-                          <span className="text-sm font-medium">
-                            {isAr ? row.labelAr : row.label}
+                        <span className="text-sm font-medium">
+                          {isAr ? row.labelAr : row.label}
+                        </span>
+                        {row.watts > 0 && (
+                          <span
+                            dir="ltr"
+                            className="text-muted-foreground mt-0.5 block font-mono text-xs rtl:text-end"
+                          >
+                            {row.watts} W × {row.hours} h ={" "}
+                            {itemWh(row).toLocaleString("en-US")} Wh
                           </span>
-                          {row.firm && (
-                            <span className="text-muted-foreground border-border rounded border px-1 text-[10px]">
-                              {isAr ? "ثابت" : "firm"}
-                            </span>
-                          )}
-                          {row.shiftable && (
-                            <span className="text-muted-foreground border-border rounded border px-1 text-[10px]">
-                              {isAr ? "قابل للجدولة" : "solar-shiftable"}
-                            </span>
-                          )}
-                        </span>
-                        <span
-                          dir="ltr"
-                          className="text-muted-foreground mt-0.5 block font-mono text-xs rtl:text-end"
-                        >
-                          {row.qty > 1 ? `${row.qty} × ` : ""}
-                          {row.watts} W × {row.hours} h
-                        </span>
+                        )}
                         {(isAr ? row.detailAr : row.detail) && (
                           <span className="text-muted-foreground mt-1 block text-xs">
                             {isAr ? row.detailAr : row.detail}
@@ -197,13 +197,14 @@ export function SizingModel({ isAr }: SizingModelProps) {
 
                       <span
                         dir="ltr"
-                        className="shrink-0 font-mono text-sm tabular-nums"
+                        className="shrink-0 text-end font-mono text-sm tabular-nums"
                       >
-                        {row.wh.toLocaleString("en-US")}
-                        <span className="text-muted-foreground text-xs">
-                          {" "}
-                          Wh
-                        </span>
+                        {usd(row.capexUSD)}
+                        {row.monthlyUSD > 0 && (
+                          <span className="text-muted-foreground block text-xs">
+                            +{usd(row.monthlyUSD)}/mo
+                          </span>
+                        )}
                       </span>
                     </button>
                   );
@@ -214,70 +215,82 @@ export function SizingModel({ isAr }: SizingModelProps) {
         })}
       </div>
 
-      {/* ── Derived sizing ──────────────────────────────────────────── */}
+      {/* ── Derived totals ──────────────────────────────────────────── */}
       <aside className="lg:sticky lg:top-24 lg:self-start">
         <div className="border-border space-y-5 rounded-lg border p-5">
           <div>
             <div className="text-muted-foreground text-xs tracking-widest uppercase">
-              {isAr ? "الحمل اليومي" : "Daily load"}
+              {isAr ? "التكلفة لمرة واحدة" : "One-time"}
             </div>
             <div
               dir="ltr"
               className="mt-1 font-mono text-3xl tabular-nums rtl:text-end"
             >
-              {fmt(sizing.dailyKWh)}
-              <span className="text-muted-foreground text-base"> kWh</span>
+              {usd(setup.capexUSD)}
             </div>
             <div className="text-muted-foreground mt-1 text-xs">
-              {isAr ? "نقطة التصميم" : "Design point"}{" "}
-              <span dir="ltr" className="font-mono tabular-nums">
-                ×{SIZING.designMargin} = {fmt(sizing.designKWh)} kWh
-              </span>
+              {isAr
+                ? "أسعار أبل الأمريكية — أضف الشحن والجمارك"
+                : "Apple US list — add freight and duty"}
             </div>
           </div>
 
-          <div className="border-border grid grid-cols-2 gap-4 border-t pt-4 text-sm">
-            <div>
-              <div className="text-muted-foreground text-xs">
-                {isAr ? "ثابت" : "Firm"}
-              </div>
-              <div dir="ltr" className="font-mono tabular-nums rtl:text-end">
-                {fmt(sizing.firmKWh)} kWh
-              </div>
+          <div className="border-border border-t pt-4">
+            <div className="text-muted-foreground text-xs tracking-widest uppercase">
+              {isAr ? "شهريًا" : "Monthly"}
             </div>
-            <div>
-              <div className="text-muted-foreground text-xs">
-                {isAr ? "الجهاز" : "The box"}
-              </div>
-              <div dir="ltr" className="font-mono tabular-nums rtl:text-end">
-                {fmt(sizing.machineKWh)} kWh
-              </div>
+            <div
+              dir="ltr"
+              className="mt-1 font-mono text-2xl tabular-nums rtl:text-end"
+            >
+              {usd(setup.monthlyUSD)}
+              <span className="text-muted-foreground text-sm">
+                {" "}
+                ≈ {Math.round((setup.monthlyUSD * SETUP.usdRwf) / 1000)}K RWF
+              </span>
+            </div>
+            <div
+              dir="ltr"
+              className="text-muted-foreground mt-1 font-mono text-[10px] rtl:text-end"
+            >
+              {usd(setup.serviceMonthlyUSD)} link + {usd(setup.powerMonthlyUSD)}{" "}
+              power
             </div>
           </div>
 
           <div className="border-border space-y-4 border-t pt-4">
             <Spec
-              label={isAr ? "البطارية" : "Battery"}
-              value={`${fmt(sizing.batteryKWh)} kWh`}
-              formula={`(${fmt(sizing.designKWh)} × ${SIZING.autonomyDays}) / (${SIZING.dod} × ${SIZING.inverterEff})`}
+              label={isAr ? "الطاقة اليومية" : "Daily energy"}
+              value={`${fmt(setup.dailyKWh, 2)} kWh`}
+              formula={`box ${fmt(setup.machineKWh, 2)} + rest · × 30 × $${SETUP.kwhUSD}`}
             />
             <Spec
-              label={isAr ? "الألواح — الحد الأدنى" : "Array — minimum"}
-              value={`${fmt(sizing.pvMinKWp)} kWp`}
-              formula={`${fmt(sizing.designKWh)} / (${SIZING.pshWorstMonth} × ${SIZING.derate})`}
+              label={isAr ? "ذروة السحب" : "Peak draw"}
+              value={`${Math.round(setup.peakW)} W`}
+              formula={`UPS limit ${SETUP.upsMaxW} W`}
             />
             <Spec
-              label={isAr ? "الألواح — الموصى به" : "Array — recommended"}
-              value={`${fmt(sizing.pvRecKWp)} kWp`}
-              formula={`× ${SIZING.pvHeadroom} · ≈ ${Math.round(sizing.arrayAreaM2)} m²`}
+              label={isAr ? "زمن البطارية" : "UPS runtime"}
+              value={setup.hasUps ? `${Math.round(setup.upsMinutes)} min` : "—"}
+              formula={
+                setup.hasUps
+                  ? `(${SETUP.upsBatteryWh} Wh × ${SETUP.upsEff}) / ${Math.round(setup.peakW)} W`
+                  : isAr
+                    ? "بلا مزوّد طاقة — أي انقطاع يطفئ الجهاز"
+                    : "No UPS — every blip is a hard power-off"
+              }
               emphasis
             />
           </div>
 
           <p className="text-muted-foreground border-border border-t pt-4 text-xs leading-relaxed">
-            {isAr
-              ? "الجهاز هو أكبر حمل وأكثره مرونة — لذا يعمل في نافذة الشمس. الكيلوواط النهاري يكلف نحو ثلث نظيره الليلي."
-              : "The box is the largest and most flexible load, so it runs in the solar window. A daytime kWh costs about a third of a night-time one."}
+            {overUps
+              ? isAr
+                ? "الذروة تتجاوز حد المزوّد — اختر فئة ٣٠٠٠ فولت أمبير."
+                : "Peak exceeds the UPS rating — step up to the 3000 VA class."
+              : isAr
+                ? "الجهاز يسحب أقل من مصباح مكتب في الخمول. الكهرباء أصغر بند شهري؛ الاتصال هو الأكبر."
+                : "At idle the box draws less than a desk lamp. Power is the smallest monthly line; the link is the largest."}
           </p>
         </div>
       </aside>

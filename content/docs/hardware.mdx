@@ -1,631 +1,288 @@
 ---
 title: Hardware
-description: One supercomputer on solar at Erkowit — an unmanned, remotely-dispatched compute node that runs the models locally
+description: One Mac Studio in Kigali — a workstation on the desk that runs the models locally, with a Studio Display and fibre backed by an LTE failover
 ---
 
 # Hardware
 
-Every other document here configures software. This one configures **atoms** — the
-watts, the bandwidth and the silicon that has to exist before any of the engine runs.
+Every other document here configures software. This one configures **atoms**: the
+silicon, the screen, the link and the watts that have to exist before any of the
+engine runs locally.
 
 | | |
 | --- | --- |
-| **What** | **One supercomputer**, unmanned, running the models locally |
-| **Where** | Erkowit (أركويت), Red Sea Hills, eastern Sudan — ~4 h by road from Port Sudan |
-| **Operated** | **Remotely.** Dispatched from anywhere; nobody sits there |
-| **Powered** | Off-grid solar — the grid runs 12–18 h daily blackouts |
-| **Design load** | ~9.3 kWh/day → 6 kWp array, 15 kWh battery |
+| **What** | **One Mac Studio** (M5 Max, 128 GB) + **Studio Display**, running the models locally |
+| **Where** | Kigali, Rwanda |
+| **Operated** | On the desk, and reachable remotely when nobody is at it |
+| **Link** | Business fibre + LTE failover on a second carrier |
+| **Powered** | The grid, behind a 1500 VA line-interactive UPS |
+| **Plan capex** | **~$8,200** all in (box ~$5.4K) · **~$100/month** to run |
 
-> **Supersedes the 7-seat live-in hub.** An earlier version of this document sized a
-> residential compound for the whole team (commit `a2499aa`, in git history). That is
-> not what this is. No housing, no desks, no domestic load — a machine on a hill that
-> answers when you call it. The change removes about two thirds of the electrical
-> plant and most of the cost.
+> **Supersedes the Erkowit solar node.** The previous version of this document sized
+> an unmanned, off-grid DGX Spark node in eastern Sudan: a 6 kWp array, a 15 kWh
+> battery, VSAT and a caretaker (in git history). Moving to Kigali removes the whole
+> power plant. The grid is steady enough that a UPS replaces it, so the number that
+> matters stops being kWp and becomes dollars.
 
 > **Status: plan, not a purchase order.** Tier 1 is affordable today; everything else
 > is costed so the trigger is a decision rather than a scramble. See
-> [Tiers and triggers](#tiers-and-triggers).
+> [Tiers and triggers](#tiers-and-triggers). The live cost model is at
+> [/hardware](/en/hardware).
 
 ## The site
 
-| Fact | Value | Consequence |
-| ---- | ----- | ----------- |
-| Elevation | ~1,100–1,350 m (sources vary) | Ambient ~22 °C — **the equipment room cools on outside air** |
-| Distance to Red Sea | ~40–45 km | Salt-laden air → corrosion class C3/C4 on exposed metal |
-| Distance to Port Sudan | ~90–95 km, ~4 h by road | **The nearest hands are half a day away.** This drives the whole ops design |
-| Fog | Heavy and frequent — a known **mist oasis** | PV derate + condensation risk |
-| Grid | Effectively absent; national grid runs 12–18 h daily blackouts | Design **off-grid** |
+| | |
+| --- | --- |
+| City | Kigali, Rwanda |
+| Elevation | ~1,567 m |
+| Ambient | ~20–27 °C year-round: **no cooling load**, the box sits in a normal room |
+| Grid | Stable by regional standards; short outages and brownouts still happen |
+| Fibre | CanalBox Business (GVA, launched Feb 2026, tiers up to 10 Gbps); Liquid and MTN as comparison quotes |
+| Time zone | CAT, UTC+2 |
 
-Erkowit is a British-era hill station, and the reason it *was* one is the reason it
-suits a machine: it is the one place within reach of Port Sudan that is cold enough to
-dump a kilowatt of heat into the air for free. In Khartoum, cooling a box like this
-costs more power than the box. Here it costs two fans.
+The Erkowit plan was dominated by what the site lacked: grid, staff and a lawful
+satellite link. Kigali has all three, so the plan shrinks to the machine and the two
+things it actually needs from the room: clean power for a few minutes, and a link
+that fails over.
 
-## What "run frontier models locally" can mean
+## What "run models locally" can mean
 
-The load-bearing constraint, so it goes first.
-
-**Frontier models in the strict sense cannot be run locally by anyone.** Claude, GPT
-and Gemini weights are closed — no hardware buys them. What runs is the **open-weight
-frontier-class tier**, which is good and is not level with what we use today:
-
-> Self-hostable open-weight models top out around **71–72 % SWE-bench Verified**;
-> closed frontier coders sit at **80–95 %**.
-
-So the architecture is a ladder, not a replacement:
-
-| Lane | Runs on | Handles |
-| ---- | ------- | ------- |
-| **Hard lane** | Claude (Max plan, cloud) | Architecture, multi-step features, anything risky. Unchanged |
-| **Volume lane** | **The node** | Social drafting, CRM enrichment, summarisation, classification, translation, media generation — dispatched as jobs |
-| **Offline lane** | **The node** | Everything, degraded, when the link is down — which in Sudan is a scheduled event, not a hypothetical |
-
-That third row is the argument money alone doesn't make. During Sudan's nationwide
-blackout from February 2024, ~30 million people were offline for over a month. A
-cloud-only operation stops completely. A node with local weights, a local git mirror
-and local CI keeps working at reduced quality.
+Frontier weights are closed, and no hardware buys them. What runs locally is the
+open-weight tier, which tops out around 71–72 % on SWE-bench against 80–95 % for closed
+models. The cloud keeps the frontier work; the box takes enrichment, classification,
+the coder model and anything that should not leave the building.
 
 ### Run MoE models with low active parameters — never dense 70B
 
-This single rule decides whether the machine feels fast or broken, because decode
-speed is set by **memory bandwidth × active parameters**, not by model size:
+Decode speed is set by **memory bandwidth ÷ bytes read per token**, and a mixture-of-
+experts model only reads its *active* parameters. On 614 GB/s:
 
-| Model on a DGX Spark | Result |
-| -------------------- | ------ |
-| Dense Llama 3.1 70B | **~2.7 tok/s decode** — unusable |
-| Qwen3-Coder-30B-A3B FP8 (3B active) | **~483 tok/s at batch 64** |
-| Llama 3.1 8B FP4 | **~924 tok/s at batch 128** |
+| Model | Active | Memory | Verdict |
+| ----- | ------ | ------ | ------- |
+| Llama 3.1 8B 4-bit | 8B dense | ~5 GB | Trivial. Classification and enrichment |
+| Qwen3-Coder-30B-A3B 8-bit | 3B active | ~32 GB | **The target.** Low active params is what this hardware wants |
+| gpt-oss-120b / 80B-class MoE | ~5B active | ~45–65 GB | Best quality that fits 128 GB with KV headroom; ~75 tok/s measured on an M5 Max |
+| Dense Llama 3.1 70B | 70B dense | ~40 GB 4-bit | **Never.** Bandwidth-bound, single-digit tok/s |
 
-A 30B MoE with 3B active reads a twentieth of the memory per token that a dense 70B
-does. Same box, two orders of magnitude of difference. **Pin the model class in the
-config, not in someone's memory.**
+### macOS and MLX, honestly
 
-The second rule follows from the first: **prefill is compute-bound, decode is
-bandwidth-bound.** Cutting memory bandwidth 40 % raises prefill latency only ~17 %.
-That is why a machine can look fast on paper and stall on agentic coding, and why
-dispatched batch work — our case — is the friendliest possible workload.
+The box serves through Apple's **MLX** (mlx-lm, Ollama's MLX engine). Unified memory
+puts the whole model within the GPU's reach with no host-to-device copies, which is
+why 128 GB on a Mac behaves like 128 GB of VRAM.
+
+The price: **no CUDA and no vLLM**. vLLM's PagedAttention is Linux + CUDA only, and
+mlx_lm.server keeps a per-request KV cache. So the box is excellent for one person
+or a serial job queue, and the wrong shape for dozens of concurrent requests. That
+matches our size today; if it stops matching, it shows up as measured saturation and
+fires Tier 4.
 
 ## The one box
 
-Two real candidates, six months and $80,000 apart.
+**Mac Studio, M5 Max, 128 GB unified memory, 1 TB SSD: $5,399** (US list, October
+2026). The M5 Mac Studio shipped 22 September 2026.
 
-| | **DGX Spark class** | **DGX Station GB300** |
+| | M5 Max (buy) | M5 Ultra (Tier 4) |
 | --- | --- | --- |
-| Memory | 128 GB unified | **~784 GB coherent** (496 GB LPDDR5X + 288 GB HBM3e) |
-| Bandwidth | 273 GB/s | Far higher (HBM3e) |
-| Compute | ~1 PFLOP FP4 | **~20 PFLOPS FP4** |
-| **Power** | **240 W** load · ~37–45 W idle | **1,600 W max** |
-| Price | **$3,999–4,699** | **~$85,000** (MSI XpertStation WS300 variant; NVIDIA has not published list) |
-| Runs | Up to ~200B params; excellent on low-active MoE | Frontier-class open weights comfortably |
-| Solar plant it needs | **6 kWp · 15 kWh** | **16 kWp · 40 kWh** |
-| All-in with plant | **~$20–26K** | **~$110K** |
+| Memory | 128 GB unified | 256 GB (512 GB option slipping) |
+| Bandwidth | 614 GB/s | 1.2 TB/s |
+| GPU | 40-core | up to 80-core |
+| Typical draw | ~105 W under inference (measured), ~10 W idle | ~220 W est. (480 W max continuous rating) |
+| Price | **$5,399** (128 GB · 1 TB) | **$9,499** (256 GB · 1 TB) |
 
-**Recommendation: Spark-class is the box to buy now.** At 240 W it fits the array with
-room to spare, costs a twentieth of the Station, and its weakness — bandwidth-bound
-decode on dense models — is one we sidestep by policy anyway (MoE only, above). Its
-strength is batch throughput, which is exactly what a dispatched queue is.
-
-**The Station is the named endpoint, not a fantasy.** It is on the table at ~$85K plus
-roughly $20K of additional solar plant. It ships today. Its trigger is written down in
-[Tiers](#tiers-and-triggers) like every other purchase.
-
-Two notes that save money and watts:
-
-- **Disable the ConnectX-7 NIC unless clustering.** It draws substantial idle power;
-  a system update that adds hot-plug detection cuts idle draw by up to 18 W. On solar
-  that is 0.43 kWh/day for a checkbox — about 130 W of panel.
-- **Two Sparks can be linked** over ConnectX-7 at 200 Gb/s for 256 GB, which is the
-  cheap path to bigger models if one proves insufficient. Then the NIC earns its watts.
+The M5 Max holds the target models with room for context at the power draw of a desk
+lamp. The Ultra doubles bandwidth, and so decode speed, for $4,100 more. That is real
+speed bought before there is a queue to speed up.
 
 ### Buy the class, never the SKU
 
-NVIDIA's roadmap says the current Spark's one real weakness gets fixed on a known
-schedule: **Rubin Spark with LPDDR6 lands 2027–2028**, and LPDDR5X bandwidth is
-precisely what caps decode today. (Rubin R100 samples Q4 2026, volume Q1 2027; Rosa
-Feynman Spark follows around 2029.)
-
-Our Tier 3 trigger plausibly fires in 2027. So the specification is
-**"Spark-class, current generation at trigger time"** — never a part number. Written
-that way, buying the box last is not only cash discipline; the plan upgrades itself
-while it waits.
-
-## The roads not taken
-
-Three reasonable alternatives, each rejected for a specific reason rather than a
-preference.
-
-### Apple — Mac Studio
-
-**Disqualified on availability, as of August 2026.** The M3 Ultra's 819 GB/s is still
-3× the Spark's bandwidth and it does it at ~200 W, which on solar is superb. But Apple
-pulled the large memory configurations during 2026's memory-supply squeeze: the Mac
-Studio now ships **M3 Ultra at 96 GB** and M4 Max at 36–64 GB. The 128 GB, 256 GB and
-512 GB options are gone.
-
-**Today's Mac Studio therefore has less memory than a $4K DGX Spark** — 96 GB against
-128 GB — and the "512 GB Mac runs a 671B model" story describes a machine you cannot
-currently buy.
-
-An M5 Ultra with up to 768 GB is *reported* for later in 2026 (around October, delayed
-by the same supply problem) — that is press rumour, not published spec. **Even if it
-ships, it does not re-qualify**: no CUDA means no media lane and no vLLM. The Mac's
-role here is Abdout's development machine, not the node.
-
-### macOS vs Linux — a decision the box already made
-
-**The DGX Spark ships DGX OS, built on Ubuntu Desktop**, with CUDA, cuDNN, TensorRT and
-the NVIDIA Container Runtime pre-configured. Choosing the box chooses the OS; there is
-no second decision.
-
-It is the right one anyway, for two reasons that matter to *this* node:
-
-- **Serving.** vLLM has no official GPU support on macOS — PagedAttention is a
-  Linux+CUDA feature. The Apple-silicon bridge translates a subset of CUDA through
-  Metal and is slower than llama.cpp's native Metal backend. The native macOS path,
-  `mlx_lm.server`, does now expose an OpenAI-compatible API with continuous batching,
-  but **its KV cache is per-request — no paged or block-based KV management.** For a
-  node whose entire workload is concurrent dispatched jobs, that is the exact gap.
-- **Unattended operation.** Headless, remote, containerised, power-cycled without a
-  human is what a server OS is for. macOS is not built to be run this way.
-
-### Starlink — the best link we cannot lawfully use
-
-On the technical merits it wins outright, and its power figures are remarkable for an
-off-grid site: **Starlink Mini draws ~15–20 W steady (≈17 W typical) after the January
-2026 firmware, with a 60 W startup peak — budget ~30 W, about 720 Wh/day.** Licensed
-VSAT costs **4,320 Wh/day**, six times more, at fifteen times the latency.
-
-If Sudan licensed it, the honest planning consequence is not "somewhat better link" —
-it would **delete the VSAT line item entirely** ($1,500–3,500 capex plus $200–800/mo)
-and hand back 3.6 kWh/day of generation.
-
-It is **not licensed in Sudan.** Starlink now operates in 27–28 African countries
-(Uganda and Côte d'Ivoire licensed during 2026), but Sudan carries no committed date
-and the service is treated as not legally operational; terminals in-country arrive
-informally. For a company signing school contracts and pursuing regulated enterprise
-buyers, running core infrastructure on an unlicensed service is a business exposure as
-much as a legal one.
-
-**So: plan on licensed LTE and licensed VSAT, and revisit the day the licence exists.**
-The design already has a slot for it.
-
-### Tesla Powerwall — a good product in the wrong place
-
-| | Powerwall 3 | 48 V LiFePO4 rack (specified) |
-| --- | --- | --- |
-| Capacity | 13.5 kWh | 15 kWh (3 × 5 kWh modules) |
-| Chemistry | NMC, ~5,000 cycles | **LiFePO4, 6,000+ cycles**, better in heat |
-| Inverter | **~11.5 kW built in** | Separate — 2 × 3 kW, N+1 |
-| Cost | ~$11,500–16,500 **US installed** (~$998/kWh) | ~$2,550–4,200 **landed hardware** |
-| Service | Tesla-certified installers, app/cloud commissioning | Any competent electrician |
-
-Not a like-for-like price comparison — Powerwall's figure is a US installed price and
-ours is landed hardware — but the gap is wide enough that the direction is not in
-doubt. Three reasons it is wrong for Erkowit specifically:
-
-1. **It integrates the inverter, which destroys the N+1 design.** The whole reason the
-   plan specifies two 3 kW hybrids instead of one bigger unit is that the site is four
-   hours from a technician. A single integrated battery-plus-inverter is precisely the
-   single point of failure that section exists to avoid.
-2. **There is no Tesla service network in Sudan.** Powerwall is sold and supported
-   through certified installers — it reached South Africa in 2025 — and commissioning
-   and monitoring run through Tesla's app. A site whose entire premise is autonomy
-   should not depend on a vendor cloud it cannot reach.
-3. **A 13.5 kWh monolith cannot go to Port Sudan in a car.** A 5 kWh rack module can.
-
-Its 11.5 kW inverter is also roughly four times our 2.6 kW peak — capacity we would
-pay for and never use.
-
-### Solar panels — no change
-
-Already the design: **6 kWp**, about 11 × 550 W modules at $0.25–0.45/W. Worth
-specifying **bifacial or N-type TOPCon** if the price delta is small — a hilltop with
-light-coloured ground returns a few percent on the rear face, and better temperature
-coefficients suit the site. Not worth paying a premium for.
-
-## Three planes, split by blast radius
-
-"All owned local" is right for most of the stack and wrong for one part. The line is
-not ideology — it is **who is harmed when a hilltop link drops**.
-
-| Plane | Where | Why |
-| ----- | ----- | --- |
-| **Internal — all local** | The node | Inference, media generation, Hermes gateway, CRM, internal Postgres, git mirror, CI runners, staging, package cache, backups. If the link drops, *we* are inconvenienced |
-| **Customer — stays cloud** | Vercel + Neon + CDN | Live school tenants. A school's SLA cannot be backed by an unmanned hilltop 4 h from a technician. Owning this would be negligence, not sovereignty |
-| **Never local** | Anthropic | The hard lane |
-
-**The customer plane migrates only on evidence** — 12 months of measured node uptime,
-and then only for customers who *want* on-prem. Some do: [delivery](/docs/delivery)
-already sells self-hosted and on-prem tiers to Tier-1 procurement. That reframes the
-capex — **the node is the reference implementation of the on-prem enterprise product**,
-not merely an internal cost saving. It is the only argument here with a direct line to
-revenue.
-
-## Unattended operations
-
-This section exists because nobody is there. It matters more than the load table.
-
-**The recovery problem.** Spark-class hardware has no BMC or IPMI — there is no
-lights-out management processor to call when the OS stops answering. The nearest human
-is four hours away. So recovery is built out of dumb, reliable parts:
-
-| Layer | Mechanism |
-| ----- | --------- |
-| **Remote power cycle** | Network-switched PDU on its own outlet. The last-resort button, pressable from anywhere |
-| **Auto-recovery** | BIOS set to *power-on after power loss* — every outage self-heals without a human |
-| **Hang detection** | Hardware watchdog that power-cycles on missed heartbeat |
-| **Console** | IP KVM if the budget allows; otherwise serial-over-USB to the always-on service box |
-
-**The management plane needs its own path.** If the primary link is what died, you
-cannot reach the PDU through it. So: **a second LTE modem on a different carrier,
-reaching only the PDU and management gear** — a few dollars a month for the ability to
-fix the site without driving to it. This is the highest-value $30 in the plan.
-
-**The queue must be idempotent.** A hard power-cycle mid-job is a normal event here,
-not an incident. Every dispatched job must be safe to re-run: write outputs to a
-temporary key and rename on completion, record job state in the service-plane Postgres
-rather than in the worker's memory, and make the drain resume from the database on
-boot. Design for the power-cycle and it stops being a failure.
-
-**Delivery is a sizing input.** Rendered media has to *leave* the site over rural LTE
-upload. Push finished assets straight to S3/CloudFront (`cdn.databayt.org`) as they
-complete rather than accumulating them, and keep the source frames local. Measure
-upload on the survey — it is the real ceiling on the media lane, not the GPU.
-
-**A caretaker is retained.** Not optional and not a comfort item: an unmanned building
-holding $20–100K of silicon, copper and lithium is a theft target, and the panels need
-cleaning monthly (weekly after dust events). Budget the person. The minimal quarters
-in the load table below are theirs.
-
-## The load model
-
-An unmanned node, not a compound. Replace with measured values after the first month.
-
-### The node
-
-| Item | Avg W | h/day | Wh/day |
-| ---- | ----: | ----: | -----: |
-| **Supercomputer** — Spark class, 240 W load / 30 W idle | — | 10 load | **2,820** |
-| Service plane — CRM, Hermes, Postgres, git, CI, cache | 25 | 24 | 600 |
-| Storage — weights archive, package cache, backups | 30 | 24 | 720 |
-| Network — router, switch, LTE CPE | 45 | 24 | 1,080 |
-| Out-of-band — switched PDU, management modem, watchdog | 12 | 24 | 288 |
-| Security — cameras, sensors, perimeter light | 25 | 24 | 600 |
-| Equipment-room free-air cooling | 120 | 10 | 1,200 |
-| **Subtotal** | | | **7,308** |
-| *If the Station replaces the Spark* | *1,600 / 400* | *8 load* | *19,200* |
-
-### Site
-
-| Item | Wh/day |
-| ---- | -----: |
-| Caretaker quarters — light, fan, charging, small fridge | 1,500 |
-| Water transfer pump (solar-window only) | 525 |
-| **Subtotal** | **2,025** |
-| *Dehumidifier — equipment room, fog season* | *+1,920* |
-
-### Design point
-
-| Case | kWh/day |
-| ---- | ------: |
-| **Baseline — Spark class** | **9.3** |
-| Fog season | 11.3 |
-| **With DGX Station GB300 instead** | **25.7** |
-| Design figure (baseline × 1.1) | **10.3** |
-
-**Firm (non-sheddable) load: 3.3 kWh/day** — service plane, storage, network,
-out-of-band, security. That is what battery autonomy actually has to protect. The
-supercomputer itself is *not* firm: it is the most schedulable load on the site.
-
-## Electrical sizing
-
-### Battery
-
-```
-E_batt = (E_daily × A) / (DoD × η_inv)
-
-  E_daily = 10.3 kWh/day   A (autonomy) = 1.2 days
-  DoD     = 0.90 (LiFePO4) η_inv        = 0.94
-
-E_batt = (10.3 × 1.2) / (0.90 × 0.94) = 14.6 kWh  →  15 kWh nameplate
-```
-
-**Specify: 48 V LiFePO4, 15 kWh, as 3 × 5 kWh rack modules.**
-
-Modules, not a monolith — a dead module costs 5 kWh, not the bank, and one fits in a
-car for the trip to a technician. At full load that is 1.2 days; **on the firm bus
-alone, with the supercomputer idle, it is over four days.**
-
-### Solar array
-
-```
-P_pv = E_daily / (PSH_worst-month × derate)
-
-  PSH_worst-month = 4.5 h   (Sudan GHI ≈ 6.0–6.5 kWh/m²/day; Erkowit's fog
-                             justifies a conservative worst month)
-  derate          = 0.75    (soiling, temperature, wiring, MPPT, mismatch)
-
-P_pv = 10.3 / (4.5 × 0.75) = 3.0 kW minimum
-```
-
-**Specify: 6 kWp** — about 11 × 550 W modules, ~29 m².
-
-The 2× oversize is the cheapest decision in the document. At $0.25–0.45/W the marginal
-panel is the cheapest energy in the system, and it buys fog-day resilience, headroom to
-run the compute without touching the battery, degradation cover, and a second machine
-later. Altitude helps — cell temperature is the dominant PV loss in Sudan, and 1,350 m
-runs 8–12 °C cooler than Khartoum. Fog works the other way. Pull the exact pin from
-[Global Solar Atlas](https://globalsolaratlas.info) before ordering.
-
-Tilt ~15–18° south is optimal; **use ≥20° regardless** — fog and dust need a
-self-shedding angle. Wind-rate the mounting for an exposed hilltop.
-
-### Inverter
-
-Peak concurrency is modest: supercomputer 0.24 + service/network/storage 0.11 + pump
-start 2.2 surge ≈ **2.6 kW peak, surging to ~3 kW**.
-
-**Specify: 2 × 3 kW 48 V hybrid inverters in parallel.**
-
-Not one unit. Four hours from a replacement, N+1 is the whole argument: one dead
-inverter in a pair is a degraded week; one dead inverter alone takes the site off the
-air until someone drives there.
-
-### Solar-scheduled compute
-
-On an off-grid site **a daytime kWh costs about a third of a night-time one**:
-
-```
-Daytime load   → needs PV only            ≈ $103 per kWh/day of capacity
-Night-time load → needs PV *and* battery  ≈ $370 per kWh/day of capacity
-```
-
-The supercomputer is the largest and most flexible load on the site, so it belongs in
-the sun. kun already has the machinery — the social pipeline is a queue with a cron
-drain that runs today. Making the drain solar-aware is a scheduling change, not an
-architecture change:
-
-> Drain the queue when the battery is above 70 % and the array is above 60 % of
-> nameplate. Otherwise let it wait.
-
-That one rule is worth more than several kWh of battery, and it is exactly how a
-dispatched node should behave: **jobs are asynchronous, so let physics pick the hour.**
-
-### Priority bus
-
-Split the distribution board into two circuits from day one:
-
-| Circuit | Loads | Behaviour |
-| ------- | ----- | --------- |
-| **Critical** | Service plane, network, out-of-band, security, storage | Never shed. Protected autonomy 4+ days |
-| **Flexible** | Supercomputer, pump, caretaker quarters | Shed first; scheduled into the solar window |
-
-The out-of-band gear belongs on the critical bus specifically so that **you can still
-reach the site when everything else has been shed.**
-
-## The UPS mostly disappears
-
-There is no grid to drop from: the hybrid inverters plus 15 kWh of battery **are** the
-UPS. What is still worth buying is **one 1 kVA online UPS on the critical rack** —
-service plane, network, out-of-band — so inverter faults and maintenance never hard-cut
-a database mid-write. Anything beyond that duplicates a bank you already paid for.
-
-## Protection and environment
-
-A hilltop at 1,350 m, 40 km from salt water, inside a mist oasis, unattended.
-
-| Threat | Countermeasure |
-| ------ | -------------- |
-| **Lightning** — exposed high ground | Earth rod array to under 10 Ω, bonded to array frames, mast and enclosures; Type 1+2 SPD on AC, Type 2 on DC strings. Non-negotiable and the cheapest insurance in the BOM. Measure soil resistivity on the survey — rocky hills often need multiple rods or a bentonite trench |
-| **Condensation / fog** | IP54+ enclosures with breathers; dehumidifier in the equipment room; **no outdoor-exposed electronics**. Fog here is daily weather, not an exception |
-| **Salt + corrosion** | Aluminium or hot-dip galvanised mounting, stainless fixings, annual torque inspection. Painted steel fails within a few seasons |
-| **Dust / haboob** | Filtered intake, sealed glands, panel cleaning monthly and weekly after dust events. Soiling losses hit 10–20 % when this slips |
-| **Theft** | Caretaker, locked equipment room, anchored racks, cameras on the critical bus |
-
-## Cooling
-
-The site's climate is why this section is short — and why putting a supercomputer here
-works at all.
-
-**Free-air cooling, not a compressor.** The machine puts 240 W (Spark) to 1.6 kW
-(Station) of heat into the equipment room. At ~22 °C ambient that is removed by
-**filtered forced ventilation** — two EC fans, ~120 W, ~1.2 kWh/day — where Khartoum
-would need a mini-split drawing 6× that. This is the single biggest reason the site is
-Erkowit and not somewhere convenient.
-
-Two caveats: the intake must be **filtered** (dust) and the room **dehumidified**
-(fog) — condensation on cold silicon at dawn is the failure mode here, not heat. Fit a
-small mini-split as backup for the hottest weeks and for a Station-class upgrade, sized
-for backup duty, not baseline.
+Apple refreshes its chips roughly yearly, and each generation raises memory
+bandwidth, which is exactly what caps decode. Our Tier 2 trigger may not fire before
+the M6 generation. So the spec reads **"Mac Studio, Max-class chip, at least 128 GB,
+current generation at trigger time"**, never a part number. Written that way, buying
+the box last is not only cash discipline; the plan upgrades itself while it waits.
+
+## The display
+
+**Studio Display (2026): $1,599.** 27″ 5K, 600 nits, P3, 12 MP Center Stage camera
+with Desk View, six speakers, **two Thunderbolt 5 ports + two USB-C**, daisy-chainable.
+The panel is the 2022 one; the new parts are the ports and the camera.
+
+| Option | Cost | Take it? |
+| ------ | ---: | -------- |
+| Nano-texture glass | +$300 | Only if the desk faces a window |
+| Tilt- and height-adjustable stand | +$400 | No: a VESA arm does it for a quarter of the price |
+
+The Mac Studio ships with no keyboard or pointer: **Magic Keyboard with Touch ID +
+Magic Trackpad, $278.**
 
 ## Connectivity
 
-Power is arithmetic. The link is the hard part, and for a remotely-operated node it
-*is* the product.
+| Lane | Role | Cost |
+| ---- | ---- | ---: |
+| **Business fibre** (CanalBox Business; Liquid / MTN quotes) | Primary | ~$50 install · **~$60/mo est.** |
+| **LTE failover router** on a different carrier | Automatic failover in seconds | ~$150 · ~$20/mo data |
 
-| Option | Legal status | Cost | Latency | Verdict |
-| ------ | ------------ | ---: | ------- | ------- |
-| **LTE via mast + directional antenna** | Licensed retail service | $600–1,200 capex + plan | 40–80 ms | **Primary.** Altitude is the asset — a 12 m mast at 1,350 m reaches corridor cell sites well past normal CPE range |
-| **Second carrier SIM** | Licensed | ~$10–30/mo | — | **Cheapest redundancy available. Do this first** |
-| **Management-plane modem** | Licensed | ~$30/mo | — | **Separate carrier, reaches only the PDU and OOB gear.** Highest-value line item in the BOM |
-| **Licensed VSAT** (TPRA-licensed — NTvsat, Hotnet, GlobalTT, Vizocom) | Licensed | $1,500–3,500 + $200–800/mo | ~600 ms | Backup. Costs ~4.3 kWh/day if run continuously — power it down unless needed |
-| **Point-to-point microwave to Sinkat / Port Sudan** | Needs a licensed partner | Site-dependent | 5–20 ms | Best case if a licensed partner exists. Investigate on the survey |
-| **Starlink Mini** | **Not licensed in Sudan** (27–28 African countries are; Sudan has no committed date) | — | ~40 ms | Best technical fit by far — **~17 W, ~720 Wh/day** against VSAT's 4,320. Licensing it would delete the VSAT line entirely. Not lawful there today; see [the roads not taken](#starlink--the-best-link-we-cannot-lawfully-use) |
+The fibre monthly is an **estimate until a written quote replaces it**. Pick the
+carrier for the LTE line so it does not share the fibre provider's upstream; two
+links that fail together are one link.
 
 ### Ingress and bandwidth
 
-Rural LTE gives no static IP and no inbound ports, so everything reaches the world
-**outbound-only**: Hermes over Slack Socket Mode (already correct — outbound WebSocket,
-no public endpoint), and Cloudflare Tunnel or Tailscale for the CRM, dashboards and
-staging.
+The box does not take inbound traffic from the internet. Remote access goes over
+**Tailscale** (and macOS Screen Sharing over it); no ports are opened on the router.
+Model weights are the only large downloads: a one-off 30–65 GB per model, minutes on
+fibre and something to avoid on the LTE lane.
 
-**Agent traffic is cheap** — a session is text, a few MB per hour. What eats the link is
-housekeeping, and one row is new with local inference:
+## Power
 
-| Traffic | Size | Note |
-| ------- | ---: | ---- |
-| `pnpm install`, Docker pulls | 0.8–2 GB | Cache on the service plane; one download serves everything |
-| **Model weights** | **40–400 GB each** | **Bring on physical media from Port Sudan.** Pulling an 80B model over a metered link is a multi-day, multi-hundred-dollar operation |
-| Rendered media out | Per job | Push to `cdn.databayt.org` as each render completes; never accumulate |
+Kigali's grid replaces the solar plant. What remains is a **1500 VA / 900 W
+line-interactive UPS (~$300)**: the AVR absorbs brownouts, and the battery gives
+an outage enough minutes to finish the job and sleep cleanly.
+
+### UPS runtime
+
+```
+runtime (min) = (battery Wh × efficiency) / peak W × 60
+              = (216 × 0.8) / 158 × 60  ≈ 66 min
+```
+
+Peak is the box under load (105 W) + display (30 W) + fibre ONT/router (12 W) +
+LTE router (6 W) + SSD (5 W) = **158 W**. With the M5 Ultra it rises to ~273 W and
+runtime falls to ~38 minutes. Both are well under the UPS's 900 W limit.
+
+### Energy and the bill
+
+| Load | W × h | Wh/day |
+| ---- | ----- | -----: |
+| Mac Studio M5 Max | 105 W × 8 h + 10 W × 16 h | 1,000 |
+| Studio Display | 30 W × 10 h | 300 |
+| Fibre ONT + router | 12 W × 24 h | 288 |
+| LTE router | 6 W × 24 h | 144 |
+| Time Machine SSD | 5 W × 24 h | 120 |
+| **Total** | | **~1.85 kWh/day** |
+
+At ~$0.25/kWh that is **~$14/month**. Power is the smallest monthly line; the link
+is the largest.
+
+## When the power or the link drops
+
+The box gets used remotely whenever nobody is at the desk, so recovery is built out of
+simple, reliable parts:
+
+- **UPS with AVR.** Brownouts never reach the box; a real outage gets minutes to
+  finish and sleep cleanly.
+- **Start up automatically after a power failure.** One macOS Energy setting, so every
+  long outage heals itself without a human.
+- **LTE failover on a second carrier.** The router cuts over in seconds, and Tailscale
+  keeps the remote session alive through it.
+- **Backups.** Time Machine hourly to the Thunderbolt 5 SSD, plus an off-site copy to
+  S3.
+- **Idempotent queue.** A power cut mid-job is normal, not an incident. Every job must
+  be safe to re-run.
 
 ## Bill of materials
 
-USD, **as of August 2026**, estimates only. Landed cost in Sudan typically runs
-**25–40 % above international list** once freight, customs and FX are included. Local
-distributors exist (EMPOWER, Khartoum); Port Sudan is the working import channel.
-**GPUs and lithium both attract customs scrutiny** — verify with a broker before
-committing.
-
-### Power — Spark-class node
-
-| Item | Spec | Cost |
-| ---- | ---- | ---: |
-| PV modules | 6 kWp (~11 × 550 W) @ $0.25–0.45/W | $1,500–2,700 |
-| Mounting | Galvanised/aluminium, wind-rated | $500–1,000 |
-| Battery | 48 V LiFePO4, 15 kWh @ $170–280/kWh | $2,550–4,200 |
-| Inverters | 2 × 3 kW hybrid, parallel-capable | $800–1,600 |
-| Protection | SPDs, earthing, breakers, enclosures | $700–1,400 |
-| Cabling, busbar, dual distribution board | DC + AC, conduit | $500–1,000 |
-| Install + commissioning | Labour | $800–1,500 |
-| **Subtotal** | | **$7,350–13,400** |
-
-### Compute and operations
+USD, **US list as of October 2026**. Landed cost in Rwanda adds freight, duty and VAT;
+get a quote from an Apple Authorised Reseller in Kigali before committing, and
+compare it with buying in Dubai.
 
 | Item | Cost |
 | ---- | ---: |
-| **The supercomputer** — DGX Spark class, 128 GB | **$3,999–4,699** |
-| Service-plane mini server (CRM, Hermes, Postgres, git, CI) | $600–1,200 |
-| Storage — 4 × 8 TB + NVMe (weights, cache, backup) | $800–1,500 |
-| **Network-switched PDU + hardware watchdog** | $250–500 |
-| **Management-plane LTE modem (second carrier)** | $80–150 |
-| IP KVM (optional but wanted) | $150–400 |
-| Rack, free-air cooling, filtration, backup mini-split | $1,200–2,500 |
-| 1 kVA online UPS (critical rack) | $200–400 |
-| Security — cameras, sensors, locks | $300–700 |
-| **Subtotal** | **$7,580–12,050** |
+| **Mac Studio — M5 Max, 128 GB, 1 TB** | **$5,399** |
+| Studio Display (2026), standard glass, tilt stand | $1,599 |
+| Magic Keyboard (Touch ID) + Magic Trackpad | $278 |
+| 4 TB Thunderbolt 5 SSD (Time Machine) | ~$400 |
+| 1500 VA line-interactive UPS | ~$300 |
+| LTE failover router | ~$150 |
+| Fibre installation | ~$50 |
+| **Total** | **~$8,180** |
 
-### Connectivity and site
-
-| Item | Cost |
-| ---- | ---: |
-| Mast 12 m + guys + directional antenna + LTE CPE + lightning protection | $600–1,200 |
-| Dual-WAN failover router | $150–400 |
-| Licensed VSAT install (optional backup lane) | $1,500–3,500 |
-| Building — small structure, renovation not construction | $2,000–6,000 |
-| Water tank, pump, filtration (caretaker) | $400–800 |
-| **Subtotal** | **$4,650–11,900** |
-
-### Totals
-
-| | Capex | Monthly opex |
+| | Capex | Monthly |
 | --- | ---: | ---: |
-| **Spark-class node** | **$19,580–37,350** · plan **~$26K** | **$300–700** (data, caretaker, water, transport) |
-| **Station GB300 node** | **~$110,000** (box ~$85K + ~$20K larger plant) | Similar |
+| **M5 Max workstation** | **~$8,200** | **~$95** (fibre ~$60 + LTE ~$20 + power ~$14) |
+| **M5 Ultra workstation** | **~$12,300** | ~$100 |
 
 ## Tiers and triggers
 
-The Drive settles it: cash flow first. A node that eats the runway before there is
-revenue is the failure mode, not the plan.
+The Drive settles it: cash flow first. A workstation that eats the runway before
+there is revenue is the failure mode, not the plan.
 
 | Tier | What | Capex | Trigger |
-| ---- | ---- | ----: | ------- |
-| **0 — Today** | Laptops the team owns, plus cloud. No site | $0 | Current state |
-| **1 — Blackout resilience** | Per person in Sudan: 1 kWh power station, 200–400 W folding panel, LTE router, surge strip. 8–10 working hours through an outage | **$400–900/person** | **None — do this now.** It protects delivery wherever the team sits, and it is affordable inside the current burn |
-| **2 — The node, without the supercomputer** | 6 kWp, 15 kWh, 2 × 3 kW hybrid, mast + LTE, service plane, PDU + management modem, security. CRM, Hermes, git, cache and staging move local | **$15,000–22,000** | **First paying school**, or non-dilutive funding |
-| **3 — The supercomputer** | Spark-class box on the plant Tier 2 already built. Local inference and media generation go live | **$4,000–5,000** | **3 paying schools / ~$3K MRR sustained 3 months** — burn covered by revenue *before* capex |
-| **4 — Scale the box** | Second Spark linked over ConnectX-7 (256 GB), **or** DGX Station GB300 with the plant tripled to 16 kWp / 40 kWh | **$5,000** *or* **~$105,000** | Measured saturation of Tier 3 — the queue is genuinely waiting on the machine, not on the link |
-| **5 — Customer plane migration** | Selected tenants on owned iron | Incremental | **12 months of measured node uptime**, and a customer who wants on-prem and pays for it |
+| ---- | ---- | ---: | ------- |
+| 0 | Laptops the team owns, plus cloud | $0 | Current state |
+| **1** | **The link**: business fibre, LTE failover on a second carrier, UPS for the router | **~$500 + ~$80/mo** | **None. Affordable now, and it protects delivery today** |
+| 2 | **The workstation**: Mac Studio M5 Max 128 GB, Studio Display, input, Time Machine SSD. Hermes, the CRM mirror, git and staging move onto it | ~$7,700 | First paying school, or non-dilutive funding |
+| 3 | **Local models live**: MLX serving for enrichment, classification and the coder model | $0 (software) | 3 paying schools / ~$3K MRR sustained 3 months |
+| 4 | **Scale the box**: M5 Ultra 256–512 GB, or a second Studio clustered over Thunderbolt 5; the Max moves to a teammate's desk | ~$9,500+ | Measured saturation: the queue waits on the machine, not the link |
+| 5 | **Customer plane migration**: selected tenants on owned iron | Incremental | 12 months of measured uptime, and a customer who wants on-prem and pays for it |
 
-Note the shape: **Tier 2 is the expensive part, and it is the part with no NVIDIA logo
-on it.** The plant, the link and the ability to reach the site remotely cost four times
-what the computer costs. That is the honest structure of an off-grid compute node, and
-it is why the sequence puts the box last rather than first.
+Note the shape: the link comes first because it is cheap and protects delivery today,
+and the box waits on revenue. Running models locally then costs nothing extra: it is
+software on a machine we already bought.
 
-**Fund Tiers 2–4 non-dilutively first.** A solar-powered, remotely-operated AI compute
-node in eastern Sudan is a strong story for exactly the grants, vendor-credit
-programmes and accelerator tracks already on the fundraising ladder.
+## The roads not taken
 
-**A generator is deliberately absent.** Fuel scarcity and price are why Sudanese
-households are moving to solar; a diesel genset imports the problem the site was chosen
-to escape. If one is ever bought it is a manual-start emergency unit, never part of the
-daily energy balance.
+### NVIDIA DGX Spark: rejected
+
+128 GB unified at ~$4,000–4,700, with CUDA, vLLM and DGX OS (Ubuntu). It was the
+previous plan's box. Against the M5 Max it has **the same memory and under half the
+bandwidth (273 vs 614 GB/s)**, so decode is slower. It buys CUDA, but it would be a
+second, headless machine beside a Mac rather than the one desk the team works at.
+Revisit only if a workload appears that genuinely needs CUDA (video generation is
+the likely one).
+
+### M5 Ultra now: watch
+
+**+$4,100** for 2× bandwidth and 2× memory (256 GB · 1.2 TB/s · from $9,499; the
+512 GB option is slipping). Real speed, bought before there is a queue to speed up.
+It is Tier 4. Revisit when measured saturation says the Max is the bottleneck.
+
+### Studio Display XDR: rejected
+
+**$3,299** for mini-LED, HDR and 120 Hz on the same 27″ 5K canvas. Code, docs and
+dashboards gain nothing from HDR, and the $1,700 difference pays for the fibre line
+for two years.
 
 ## Risks
 
-| Risk | Severity | Mitigation |
-| ---- | -------- | ---------- |
-| **Theft** | **High — higher because unmanned** | Caretaker, locked and anchored equipment room, cameras on the critical bus, insurance if obtainable |
-| **Conflict exposure** | High | Red Sea State is comparatively stable and Port Sudan is the de facto seat of government, but this is a live-conflict country. Keeping the customer plane in the cloud means the *business* survives even if the *site* does not |
-| **Unrecoverable hang** | High | PDU + watchdog + power-on-after-loss + separate management path. Without these, one hung kernel costs a 4-hour drive |
-| **Link failure** | High | Dual carrier, separate management modem, VSAT backup |
-| **Buying the Station on enthusiasm** | Medium | $85K box needs $20K of extra plant and only pays off if Tier 3 measurably saturates. The trigger is written down for a reason |
-| **Lightning** | Medium | Earthing and SPDs as specified |
-| **Customs / import** | Medium | GPUs and lithium both attract scrutiny; verify landed cost with a Port Sudan broker before committing |
-
-## Site survey checklist
-
-Nothing above is buyable until someone stands on the hill. The first visit returns with:
-
-- [ ] **LTE readings** — RSRP/RSRQ/SINR for Zain, MTN and Sudani at roof height on each bearing, **and upload speed**. This single measurement decides viability
-- [ ] **Second-carrier coverage** — the management plane needs a *different* network to be worth anything
-- [ ] **Grid** — any village supply? Voltage, hours per day
-- [ ] **Building** — condition, roof load, a room that locks, photographs
-- [ ] **Ground** — soil resistivity for earthing; rock depth
-- [ ] **Wind** — prevailing direction and observed extremes, for array and mast rating
-- [ ] **Fog** — hours per day, season, how late into the morning it persists
-- [ ] **Road** — real travel time and vehicle requirement to Sinkat and Port Sudan
-- [ ] **Caretaker** — is there someone local who can be trained and trusted?
-- [ ] **Ownership** — who controls the building, on what terms
+| Risk | Mitigation |
+| ---- | ---------- |
+| Landed price in Kigali well above US list | Quote a Kigali reseller and Dubai before ordering; the plan is written in USD list on purpose |
+| Fibre quote higher than the $60 estimate | It is a single line item; the model on /hardware updates the moment the real number lands |
+| Both links fail together | LTE carrier chosen to not share the fibre's upstream |
+| Long outage beyond UPS runtime | Clean sleep on low battery + auto-start after power returns + idempotent queue |
+| Theft or damage | Normal office security and insurance; Time Machine + S3 mean the data outlives the box |
+| Open-weight quality stalls | The cloud keeps the frontier work; local models only take jobs they do well |
 
 ## Open decisions
 
-1. **Rent, renovate, or build?** Costed as renovation of a small existing structure.
-2. **IP KVM or serial console?** $150–400 for the ability to watch a boot from 4,000 km
-   away. Probably worth it.
-3. **Is microwave backhaul real?** Depends on a licensed partner in Sinkat or Port
-   Sudan. Would beat both LTE and VSAT.
-4. **Who owns the site?** DevOps is Sedon's lane, but so is Saudi operations. Needs a
-   named owner before Tier 2 fires.
-5. **Insurance** — obtainable in Sudan at a sane price? If not, theft risk is uninsured
-   and the caretaker line grows.
+1. Fibre provider: get written quotes from CanalBox Business, Liquid and MTN.
+2. Where to buy: a Kigali Apple Authorised Reseller vs Dubai (price, warranty, duty).
+3. Nano-texture glass: depends on the desk's position relative to windows.
+4. Whose desk the box sits on, and who holds physical access.
 
 ## Sources
 
-**Site and climate:** [Ar Kaweit](https://en.wikipedia.org/wiki/Ar_Kaweit) ·
-[Erkowit — Discover Sudan](https://discoversudan.de/en/travel/sudan/locations/erkowit) ·
-[Sinkat](https://en.wikipedia.org/wiki/Sinkat,_Sudan)
-**Grid:** [UNDP — $3bn damage to Sudan's grid](https://allafrica.com/stories/202605260010.html) ·
-[Sudan Tribune — power cuts](https://sudantribune.com/article/316452) ·
-[Port Sudan protests over outages](https://sudantribune.com/article/316909)
-**Solar resource:** [Global Solar Atlas — Sudan](https://globalsolaratlas.info/downloads/Sudan)
-**The one box:** [NVIDIA DGX Station](https://www.nvidia.com/en-us/products/workstations/dgx-station/) ·
-[MSI XpertStation WS300 at $85K](https://www.techradar.com/pro/msi-re-launches-usd85-000-nvidia-dgx-station-workstation-with-the-nvidia-gb300-ultra-a-pair-of-400gbe-lan-ports-and-768gb-of-ram) ·
-[DGX Spark review — StorageReview](https://www.storagereview.com/review/nvidia-dgx-spark-review-the-ai-appliance-bringing-datacenter-capabilities-to-desktops) ·
-[Spark concurrency benchmark](https://dendro-logic.com/engineering/nvidia-dgx-spark-concurrency-benchmark/) ·
-[Spark idle power cut by ConnectX hot-plug detection](https://www.tomshardware.com/tech-industry/artificial-intelligence/nvidia-dgx-spark-update-cuts-idle-power-by-32-percent-or-more-hot-plug-detection-on-connectx-nic-makes-for-a-more-efficient-ai-workstation) ·
-[Spark vs Mac Studio bandwidth](https://tech-insider.org/dgx-spark-vs-mac-studio-2026/) ·
+**The box:** [Apple Mac Studio technical specifications](https://www.apple.com/mac-studio/specs/) ·
+[Macworld — 2026 Mac Studio M5 Max and M5 Ultra specs and prices](https://www.macworld.com/article/2973459/2026-mac-studio-m5-release-date-specs-price-rumors.html) ·
+[MacRumors — Mac Studio roundup](https://www.macrumors.com/roundup/mac-studio/) ·
+[Engadget — M5 Ultra review](https://www.engadget.com/2263184/apple-mac-studio-m5-ultra-review/) ·
+[Engadget — why the Mac Studio got expensive](https://www.engadget.com/2264291/why-apple-mac-studio-so-expensive/) ·
+[M5 Max 128 GB · 1 TB retail listing — Abt](https://www.abt.com/Apple-Mac-Studio-Desktop-M5-Max-128GB-Unified-Memory-1TB-SSD-in-Silver-Z1U4000EF/p/248640.html) ·
+[M5 Ultra vs DGX Spark on local LLMs](https://aiweekly.co/alerts/apple-m5-ultra-mac-studio-outpaces-dgx-spark-on-local-llms)
+**The display:** [9to5Mac — new Studio Display](https://9to5mac.com/2026/03/03/apple-launches-new-generation-of-studio-display/) ·
+[EveryMac — Studio Display 2026 specs](https://everymac.com/monitors/apple/studio-display/specs/apple-studio-display-retina-27-inch-5k-2026-specs.html) ·
+[Macworld — Studio Display 2026 review](https://www.macworld.com/article/3091564/studio-display-2026-review-a-great-monitor-if-you-can-get-it-for-half-price.html) ·
+[iGeeksBlog — Studio Display XDR](https://www.igeeksblog.com/apple-studio-display-xdr-specs-features-price/)
+**Connectivity:** [Liquid Home fibre in Kigali](https://liquid.tech/about-us/news/liquid_intelligent_technologies_launches_liquid_home_super_fast_fibre_broadband_in_kigali) ·
+[More Kigali households get fibre](https://www.newtimes.co.rw/article/151393/News/more-kigali-households-get-fibre-optic-coverage)
+**Serving:** [vLLM GPU installation (Linux + CUDA)](https://docs.vllm.ai/en/stable/getting_started/installation/gpu/) ·
 [Prefill is compute-bound, decode is memory-bound](https://towardsdatascience.com/prefill-is-compute-bound-decode-is-memory-bound-why-your-gpu-shouldnt-do-both/)
-**NVIDIA roadmap:** [RTX Spark roadmap — Rubin 2027, Rosa Feynman 2029](https://www.tomshardware.com/pc-components/cpus/nvidia-unveils-dgx-sparrk-roadmap-for-laptops-and-desktop-pcs-at-computex-2026-three-generations-outlined-rubin-followed-by-rosa-feynman) ·
-[Inside the Vera Rubin platform](https://developer.nvidia.com/blog/inside-the-nvidia-rubin-platform-six-new-chips-one-ai-supercomputer/)
-**Apple:** [Mac Studio technical specifications](https://www.apple.com/mac-studio/specs/) (96 GB max, checked August 2026) ·
-[M5 Ultra Mac Studio reported for 2026 with up to 768 GB](https://www.macrumors.com/2026/06/25/m5-ultra-mac-studio-2026/) ·
-[…still due in 2026](https://appleinsider.com/articles/26/06/28/m5-ultra-mac-studio-still-due-in-2026-m7-ultra-in-2028)
-**macOS vs Linux serving:** [vLLM on Apple Silicon — does MLX integration work](https://contracollective.com/blog/vllm-mlx-apple-silicon-integration-2026) ·
-[vLLM GPU installation (Linux + CUDA)](https://docs.vllm.ai/en/stable/getting_started/installation/gpu/)
-**Starlink:** [Starlink now in 27 African nations](https://www.advanced-television.com/2026/03/27/starlink-now-working-in-27-african-nations/) ·
-[Starlink Mini power consumption — real wattage data](https://gridwright.com/blog/starlink-mini-power-consumption)
-**Powerwall:** [Powerwall 3 review and pricing 2026](https://www.energysage.com/energy-storage/best-home-batteries/tesla-powerwall-battery-complete-review/) ·
-[Powerwall 3 launches in South Africa](https://cleantechnica.com/2025/03/05/tesla-powerwall-3-now-available-in-south-africa/) ·
-[48 V server-rack battery vs Powerwall](https://www.lithpower.com/48v-server-rack-battery-vs-powerwall-guide/)
 **Open-weight models:** [Best open-weight coding models to self-host, 2026](https://www.digitalapplied.com/blog/best-open-weight-coding-models-self-host-hardware-match-2026)
-**Media generation:** [Video-gen GPU requirements 2026](https://willitrunai.com/blog/video-generation-gpu-guide-2026)
-**Connectivity:** [Telecommunications in Sudan](https://en.wikipedia.org/wiki/Telecommunications_in_Sudan) ·
-[VSAT services in Sudan](https://nt-vsat.com/vsat-services-in-sudan/) ·
-[Starlink on the ruins of Sudan's networks](https://www.geeska.com/en/starlink-ruins-sudans-networks)
 
 ## See also
 
-- [/hardware](/en/hardware) — the live sizing model: pick the box, watch the plant resize
-- [Delivery](/docs/delivery) — the on-prem tier this node is the reference build for
-- [CRM](/docs/crm) · [Hermes](/docs/hermes) — the first two services to move onto it
-- [Stack](/docs/stack) — what runs, and where
+- [/hardware](/en/hardware): the live cost model. Pick the box, toggle line items, watch capex, the monthly bill and UPS runtime move
+- [Delivery](/docs/delivery): the on-prem tier this workstation is the reference build for
+- [CRM](/docs/crm) · [Hermes](/docs/hermes): the first two services to move onto it
+- [Stack](/docs/stack): what runs, and where

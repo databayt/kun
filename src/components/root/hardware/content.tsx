@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { SizingModel } from "./sizing-model";
+import { CostModel } from "./cost-model";
 import { SITE_FACTS, TIERS, MODEL_LADDER, ALTERNATIVES } from "./config";
 import type { Locale } from "@/components/local/config";
 
@@ -19,8 +19,8 @@ export default function HardwareContent({ lang }: HardwareContentProps) {
         </h1>
         <p className="text-muted-foreground mt-2 max-w-2xl text-base">
           {isAr
-            ? "حاسوب خارق واحد يعمل بالطاقة الشمسية في أركويت — موقع حوسبة بلا طاقم، يُشغَّل عن بُعد ويدير النماذج محليًا."
-            : "One supercomputer on solar at Erkowit — an unmanned compute node, dispatched remotely, running the models locally."}
+            ? "جهاز ماك ستوديو واحد في كيغالي — محطة عمل على المكتب تدير النماذج محليًا، مع شاشة Studio Display وألياف بخط احتياطي."
+            : "One Mac Studio in Kigali — a workstation on the desk that runs the models locally, with a Studio Display and fibre backed by a failover link."}
         </p>
       </header>
 
@@ -41,16 +41,16 @@ export default function HardwareContent({ lang }: HardwareContentProps) {
       {/* ── The live model ──────────────────────────────────────────── */}
       <section className="mt-16">
         <h2 className="text-xl font-semibold tracking-tight">
-          {isAr ? "نموذج القياس الحي" : "The live sizing model"}
+          {isAr ? "نموذج التكلفة الحي" : "The live cost model"}
         </h2>
         <p className="text-muted-foreground mt-2 max-w-2xl text-sm">
           {isAr
-            ? "اختر الجهاز وأطفئ أي حمل لترى ما يكلفه فعلًا من بطارية وألواح. اختيار جهاز الـ٨٥ ألف بدل جهاز الـ٤ آلاف يضاعف المحطة الشمسية ثلاث مرات — وهذا ما تراه هنا مباشرة."
-            : "Pick the box, switch loads off, and watch the plant resize. Choosing the $85K machine over the $4K one roughly triples the solar plant — that delta is the whole argument, and here it is live."}
+            ? "اختر الجهاز وأطفئ أي بند لترى كلفته الفعلية مرة واحدة وشهريًا وكم تصمد البطارية. اختيار M5 Ultra بدل M5 Max يضيف ٤١٠٠ دولار مقدمًا — وهذا ما تراه هنا مباشرة."
+            : "Pick the box, switch line items off, and watch the one-time cost, the monthly bill and the UPS runtime move. Choosing the M5 Ultra over the M5 Max adds $4,100 up front — that delta is the whole argument, and here it is live."}
         </p>
 
         <div className="mt-8">
-          <SizingModel isAr={isAr} />
+          <CostModel isAr={isAr} />
         </div>
       </section>
 
@@ -102,13 +102,13 @@ export default function HardwareContent({ lang }: HardwareContentProps) {
         <div className="border-border mt-6 rounded-lg border p-4">
           <h3 className="text-sm font-semibold">
             {isAr
-              ? "نظام التشغيل ليس قرارًا منفصلًا"
-              : "The OS is not a separate decision"}
+              ? "macOS وMLX — بصراحة"
+              : "macOS and MLX, honestly"}
           </h3>
           <p className="text-muted-foreground mt-1 text-xs leading-relaxed">
             {isAr
-              ? "جهاز Spark يأتي بنظام DGX OS المبني على أوبنتو مع CUDA مثبتًا — اختيار الجهاز يختار النظام. وهو الصواب أصلًا: PagedAttention في vLLM حصري على لينكس وCUDA، بينما ذاكرة السياق في mlx_lm.server لكل طلب على حدة — وهو بالضبط ما لا يناسب المهام المتزامنة المُرسَلة عن بُعد."
-              : "The Spark ships DGX OS, built on Ubuntu, with CUDA preloaded — choosing the box chooses the OS. It is right anyway: vLLM's PagedAttention is Linux + CUDA only, while mlx_lm.server keeps a per-request KV cache — exactly the wrong shape for concurrent dispatched jobs."}
+              ? "الجهاز يشغّل النماذج عبر MLX من أبل (mlx-lm وOllama بمحرك MLX) — الذاكرة الموحدة تعني أن النموذج كله في متناول المعالج الرسومي بلا نسخ. الثمن: لا CUDA ولا vLLM، وذاكرة السياق في mlx_lm.server لكل طلب على حدة، فالجهاز ممتاز لمستخدم واحد أو طابور متسلسل لا لعشرات الطلبات المتزامنة. وهذا يناسب حجمنا الآن."
+              : "The box serves models through Apple's MLX (mlx-lm, Ollama's MLX engine) — unified memory means the whole model sits within the GPU's reach with no copies. The price: no CUDA, no vLLM, and mlx_lm.server keeps a per-request KV cache, so the box is excellent for one person or a serial queue, not dozens of concurrent requests. That matches our size today."}
           </p>
         </div>
       </section>
@@ -120,8 +120,8 @@ export default function HardwareContent({ lang }: HardwareContentProps) {
         </h2>
         <p className="text-muted-foreground mt-2 max-w-2xl text-sm">
           {isAr
-            ? "ثلاثة بدائل معقولة، كلٌّ مرفوض لسبب محدد لا لتفضيل. الأرقام محققة في أغسطس ٢٠٢٦."
-            : "Three reasonable alternatives, each rejected for a specific reason rather than a preference. Figures checked August 2026."}
+            ? "ثلاثة بدائل معقولة، كلٌّ مرفوض أو مؤجل لسبب محدد لا لتفضيل. الأرقام محققة في أكتوبر ٢٠٢٦."
+            : "Three reasonable alternatives, each rejected or deferred for a specific reason rather than a preference. Figures checked October 2026."}
         </p>
 
         <div className="mt-6 grid gap-3 md:grid-cols-3">
@@ -180,8 +180,8 @@ export default function HardwareContent({ lang }: HardwareContentProps) {
           </h3>
           <p className="text-muted-foreground mt-1 text-xs leading-relaxed">
             {isAr
-              ? "خارطة NVIDIA تُصلح ضعف الجهاز الحالي في موعد معروف: Rubin Spark بذاكرة LPDDR6 بين ٢٠٢٧ و٢٠٢٨، وعرض النطاق هو بالضبط ما يقيّد التوليد اليوم. ومحفّز المرحلة ٣ يقع غالبًا في ٢٠٢٧ — لذا تُكتب المواصفة «من فئة Spark، الجيل المتاح وقت التنفيذ»، لا رقم طراز. بهذا لا يكون تأجيل الشراء انضباطًا ماليًا فحسب، بل ترقية تلقائية للخطة."
-              : "NVIDIA's roadmap fixes the current box's one weakness on a known schedule: Rubin Spark with LPDDR6 lands 2027–28, and LPDDR5X bandwidth is precisely what caps decode today. Our Tier 3 trigger plausibly fires in 2027 — so the spec reads “Spark-class, current generation at trigger time,” never a part number. Written that way, buying the box last is not only cash discipline; the plan upgrades itself while it waits."}
+              ? "أبل تجدد شرائحها كل عام تقريبًا، وكل جيل يرفع عرض النطاق — وهو بالضبط ما يقيّد التوليد. ومحفّز المرحلة ٢ قد لا يقع قبل جيل M6 — لذا تُكتب المواصفة «ماك ستوديو بشريحة Max وذاكرة ١٢٨ ج.ب على الأقل، الجيل المتاح وقت التنفيذ»، لا رقم طراز. بهذا لا يكون تأجيل الشراء انضباطًا ماليًا فحسب، بل ترقية تلقائية للخطة."
+              : "Apple refreshes its chips roughly yearly, and each generation raises memory bandwidth — precisely what caps decode. Our Tier 2 trigger may not fire before the M6 generation — so the spec reads “Mac Studio, Max-class chip, at least 128 GB, current generation at trigger time,” never a part number. Written that way, buying the box last is not only cash discipline; the plan upgrades itself while it waits."}
           </p>
         </div>
       </section>
@@ -189,39 +189,39 @@ export default function HardwareContent({ lang }: HardwareContentProps) {
       {/* ── Unattended ops ──────────────────────────────────────────── */}
       <section className="mt-20">
         <h2 className="text-xl font-semibold tracking-tight">
-          {isAr ? "التشغيل بلا حضور" : "Nobody is there"}
+          {isAr ? "حين تنقطع الكهرباء أو الاتصال" : "When the power or the link drops"}
         </h2>
         <p className="text-muted-foreground mt-2 max-w-2xl text-sm">
           {isAr
-            ? "أقرب يد بشرية على بعد أربع ساعات، وأجهزة هذه الفئة بلا وحدة إدارة مستقلة. لذا يُبنى التعافي من قطع بسيطة موثوقة."
-            : "The nearest hands are four hours away, and Spark-class hardware has no BMC or IPMI to call. So recovery is built out of dumb, reliable parts."}
+            ? "شبكة كيغالي مستقرة لكنها ليست مثالية، والجهاز يُستخدم عن بُعد حين لا يكون أحد على المكتب. لذا يُبنى التعافي من قطع بسيطة موثوقة."
+            : "Kigali's grid is steady, not perfect, and the box gets used remotely whenever nobody is at the desk. So recovery is built out of simple, reliable parts."}
         </p>
 
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
           {[
             {
-              t: "Switched PDU",
-              tAr: "مقبس مُبدَّل عبر الشبكة",
-              d: "The remote power button — the last resort, pressable from anywhere",
-              dAr: "زر التشغيل عن بُعد — الملاذ الأخير من أي مكان",
+              t: "UPS with AVR",
+              tAr: "مزوّد طاقة بمنظم جهد",
+              d: "Brownouts never reach the box; a real outage gets minutes to finish the job and sleep cleanly",
+              dAr: "التذبذب لا يصل إلى الجهاز، والانقطاع الفعلي يمنحه دقائق لإنهاء المهمة والإيقاف النظيف",
             },
             {
-              t: "Power-on after loss",
-              tAr: "تشغيل تلقائي بعد الانقطاع",
-              d: "Set in BIOS, so every outage self-heals without a human",
-              dAr: "يُضبط في البيوس ليتعافى الموقع من كل انقطاع وحده",
+              t: "Start up after a power failure",
+              tAr: "تشغيل تلقائي بعد انقطاع التيار",
+              d: "One macOS Energy setting, so every long outage self-heals without a human",
+              dAr: "إعداد واحد في macOS ليتعافى الجهاز من كل انقطاع طويل وحده",
             },
             {
-              t: "Separate management path",
-              tAr: "مسار إدارة منفصل",
-              d: "A second LTE modem on a different carrier reaching only the PDU. You cannot fix the link through the link",
-              dAr: "مودم ثانٍ على شبكة أخرى يصل للمقبس فقط — لا يمكن إصلاح الوصلة عبر الوصلة",
+              t: "LTE failover on a second carrier",
+              tAr: "LTE احتياطي على مشغّل ثانٍ",
+              d: "The router cuts over in seconds, and remote login (Tailscale, Screen Sharing) keeps working through it",
+              dAr: "الموجه يتحول خلال ثوانٍ، والدخول عن بُعد (Tailscale ومشاركة الشاشة) يستمر",
             },
             {
-              t: "Idempotent queue",
-              tAr: "طابور قابل للإعادة",
-              d: "A hard power-cycle mid-job is normal here, not an incident. Every job must be safe to re-run",
-              dAr: "قطع التيار أثناء المهمة أمر عادي هنا — كل مهمة يجب أن تحتمل الإعادة",
+              t: "Backups and an idempotent queue",
+              tAr: "نسخ احتياطي وطابور قابل للإعادة",
+              d: "Time Machine hourly, an off-site copy to S3, and every job safe to re-run after a cut",
+              dAr: "Time Machine كل ساعة ونسخة خارجية إلى S3، وكل مهمة تحتمل الإعادة بعد الانقطاع",
             },
           ].map((item) => (
             <div key={item.t} className="border-border rounded-lg border p-4">
@@ -243,8 +243,8 @@ export default function HardwareContent({ lang }: HardwareContentProps) {
         </h2>
         <p className="text-muted-foreground mt-2 max-w-2xl text-sm">
           {isAr
-            ? "لاحظ الشكل: المرحلة ٢ هي الأغلى ولا يحمل أي جزء منها شعار NVIDIA. المحطة والوصلة والقدرة على الوصول عن بُعد تكلف أربعة أضعاف الحاسوب نفسه."
-            : "Note the shape: Tier 2 is the expensive part, and none of it has an NVIDIA logo on it. The plant, the link and the ability to reach the site remotely cost four times what the computer costs."}
+            ? "لاحظ الشكل: الاتصال يأتي أولًا لأنه رخيص ويحمي التسليم اليوم، والجهاز ينتظر الإيراد. وتشغيل النماذج محليًا لا يكلف شيئًا إضافيًا — إنه برمجيات على جهاز اشتريناه."
+            : "Note the shape: the link comes first because it is cheap and protects delivery today, and the box waits on revenue. Running models locally then costs nothing extra — it is software on a machine we already bought."}
         </p>
 
         <div className="mt-6 space-y-3">
@@ -294,8 +294,8 @@ export default function HardwareContent({ lang }: HardwareContentProps) {
       <footer className="border-border mt-20 border-t pt-8">
         <p className="text-muted-foreground text-sm">
           {isAr
-            ? "التفاصيل الكاملة — اختيار الجهاز والحماية والتبريد والاتصال وقائمة المواد والمخاطر ومسح الموقع — في "
-            : "The full reasoning — choosing the box, protection, cooling, connectivity, bill of materials, risks and the site survey — is in "}
+            ? "التفاصيل الكاملة — اختيار الجهاز والشاشة والاتصال والطاقة وقائمة المواد والمخاطر — في "
+            : "The full reasoning — choosing the box, the display, connectivity, power, bill of materials and risks — is in "}
           {/* Hardcoded /en: the docs corpus is English-only, so /ar/docs/*
               404s. Point Arabic readers at the page that exists. */}
           <Link

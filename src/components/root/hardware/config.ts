@@ -1,186 +1,151 @@
-// Data behind /hardware — the unmanned, solar-powered compute node at Erkowit.
+// Data behind /hardware — one Mac Studio workstation in Kigali.
 //
 // Numbers here are the authority for the page and must stay in step with
-// content/docs/hardware.mdx, which carries the reasoning. Wh/day is stored
-// explicitly rather than always derived, because a few rows have mixed duty
-// cycles that a single watts x hours product cannot express honestly.
+// content/docs/hardware.mdx, which carries the reasoning. Apple prices are US
+// list, checked October 2026; Kigali line items (fibre, LTE, power tariff) are
+// estimates until a written quote replaces them — each says so in its detail.
 //
-// This replaced a 7-seat live-in hub model. The node is unmanned and dispatched
-// remotely, so there is no domestic load beyond the caretaker's quarters.
+// This replaced an unmanned solar node at Erkowit. Kigali's grid is steady
+// enough that the solar plant collapses to a line-interactive UPS, and the
+// interesting number stops being kWp and becomes dollars.
 
-export type LoadGroup = "node" | "site";
+export type ItemGroup = "desk" | "link" | "power";
 
-export type LoadRow = {
+export type SetupItem = {
   id: string;
-  group: LoadGroup;
+  group: ItemGroup;
   label: string;
   labelAr: string;
-  qty: number;
+  /** One-time cost, USD. */
+  capexUSD: number;
+  /** Recurring cost, USD per month (service fees, not electricity). */
+  monthlyUSD: number;
+  /** Typical draw while on — what the UPS has to carry. */
   watts: number;
   hours: number;
-  /** Authoritative Wh/day. Equals qty x watts x hours except on mixed-duty rows. */
-  wh: number;
-  /** Non-sheddable — this is what battery autonomy actually has to protect. */
-  firm: boolean;
-  /** Can be scheduled into the solar window instead of drawn from battery. */
-  shiftable: boolean;
   defaultOn: boolean;
   detail?: string;
   detailAr?: string;
 };
 
-export const LOAD_ROWS: LoadRow[] = [
-  // ── The node ──────────────────────────────────────────────────────────
+export function itemWh(item: SetupItem): number {
+  return item.watts * item.hours;
+}
+
+export const SETUP_ITEMS: SetupItem[] = [
+  // ── The desk ──────────────────────────────────────────────────────────
   {
-    id: "service-plane",
-    group: "node",
-    label: "Service plane",
-    labelAr: "طبقة الخدمات",
-    qty: 1,
-    watts: 25,
-    hours: 24,
-    wh: 600,
-    firm: true,
-    shiftable: false,
-    defaultOn: true,
-    detail: "CRM · Hermes · Postgres · git mirror · CI · staging",
-    detailAr:
-      "إدارة العملاء · هيرمس · قاعدة البيانات · مرآة git · التكامل · التجريب",
-  },
-  {
-    id: "storage",
-    group: "node",
-    label: "Storage",
-    labelAr: "التخزين",
-    qty: 1,
+    id: "display",
+    group: "desk",
+    label: "Studio Display (2026) — 27″ 5K",
+    labelAr: "شاشة Studio Display (٢٠٢٦) — ٢٧ بوصة 5K",
+    capexUSD: 1599,
+    monthlyUSD: 0,
     watts: 30,
-    hours: 24,
-    wh: 720,
-    firm: true,
-    shiftable: false,
-    defaultOn: true,
-    detail: "Model weights, package cache, backup target",
-    detailAr: "أوزان النماذج وذاكرة الحزم والنسخ الاحتياطي",
-  },
-  {
-    id: "network",
-    group: "node",
-    label: "Network — router, switch, LTE CPE",
-    labelAr: "الشبكة — الموجه والمبدل ووحدة الاتصال",
-    qty: 1,
-    watts: 45,
-    hours: 24,
-    wh: 1080,
-    firm: true,
-    shiftable: false,
-    defaultOn: true,
-  },
-  {
-    id: "oob",
-    group: "node",
-    label: "Out-of-band — switched PDU, management modem, watchdog",
-    labelAr: "التحكم المستقل — مقبس مُبدَّل ومودم إدارة ومراقب",
-    qty: 1,
-    watts: 12,
-    hours: 24,
-    wh: 288,
-    firm: true,
-    shiftable: false,
-    defaultOn: true,
-    detail: "The remote power button. Nobody is there to press one",
-    detailAr: "زر التشغيل عن بُعد — لا أحد هناك ليضغطه",
-  },
-  {
-    id: "security",
-    group: "node",
-    label: "Security — cameras, sensors, perimeter light",
-    labelAr: "الحماية — كاميرات وحساسات وإنارة محيطية",
-    qty: 1,
-    watts: 25,
-    hours: 24,
-    wh: 600,
-    firm: true,
-    shiftable: false,
-    defaultOn: true,
-  },
-  {
-    id: "cooling",
-    group: "node",
-    label: "Equipment-room free-air cooling",
-    labelAr: "تبريد غرفة المعدات بالهواء الحر",
-    qty: 2,
-    watts: 60,
     hours: 10,
-    wh: 1200,
-    firm: false,
-    shiftable: false,
     defaultOn: true,
     detail:
-      "EC fans. At 22 °C ambient this replaces a compressor drawing 6× more",
-    detailAr: "مراوح — عند ٢٢ درجة تُغني عن مكيف يستهلك ٦ أضعاف",
+      "600 nits · P3 · 12 MP Center Stage · Thunderbolt 5 in, daisy-chain out",
+    detailAr: "٦٠٠ شمعة · P3 · كاميرا ١٢ ميغابكسل · Thunderbolt 5 مع تسلسل",
+  },
+  {
+    id: "nano",
+    group: "desk",
+    label: "Nano-texture glass",
+    labelAr: "زجاج النانو المطفأ",
+    capexUSD: 300,
+    monthlyUSD: 0,
+    watts: 0,
+    hours: 0,
+    defaultOn: false,
+    detail: "Only if the desk faces a window — Kigali light is bright",
+    detailAr: "فقط إن كان المكتب مقابل نافذة — ضوء كيغالي ساطع",
+  },
+  {
+    id: "stand",
+    group: "desk",
+    label: "Tilt- and height-adjustable stand",
+    labelAr: "حامل قابل للإمالة والارتفاع",
+    capexUSD: 400,
+    monthlyUSD: 0,
+    watts: 0,
+    hours: 0,
+    defaultOn: false,
+    detail: "A VESA arm does the same for a quarter of the price",
+    detailAr: "ذراع VESA يؤدي الغرض بربع السعر",
+  },
+  {
+    id: "input",
+    group: "desk",
+    label: "Magic Keyboard (Touch ID) + Magic Trackpad",
+    labelAr: "لوحة مفاتيح Magic بـ Touch ID ولوحة لمس",
+    capexUSD: 278,
+    monthlyUSD: 0,
+    watts: 0,
+    hours: 0,
+    defaultOn: true,
+    detail: "The Mac Studio ships with neither",
+    detailAr: "الجهاز لا يأتي بأيٍّ منهما",
+  },
+  {
+    id: "ssd",
+    group: "desk",
+    label: "4 TB Thunderbolt 5 SSD — Time Machine",
+    labelAr: "قرص SSD بسعة ٤ تيرابايت — Time Machine",
+    capexUSD: 400,
+    monthlyUSD: 0,
+    watts: 5,
+    hours: 24,
+    defaultOn: true,
+    detail: "Hourly local snapshots; the off-site copy goes to S3",
+    detailAr: "نسخ محلية كل ساعة، والنسخة الخارجية إلى S3",
   },
 
-  // ── Site ──────────────────────────────────────────────────────────────
+  // ── The link ──────────────────────────────────────────────────────────
   {
-    id: "caretaker",
-    group: "site",
-    label: "Caretaker quarters",
-    labelAr: "سكن الحارس",
-    qty: 1,
-    watts: 63,
+    id: "fibre",
+    group: "link",
+    label: "Business fibre — CanalBox Business",
+    labelAr: "ألياف للأعمال — CanalBox Business",
+    capexUSD: 50,
+    monthlyUSD: 60,
+    watts: 12,
     hours: 24,
-    wh: 1500,
-    firm: false,
-    shiftable: false,
     defaultOn: true,
     detail:
-      "Light, fan, charging, small fridge. Not optional — theft and panel cleaning",
+      "Up to 10 Gbps tiers in Kigali since Feb 2026. Monthly is an estimate until quoted; Liquid and MTN are the comparison",
     detailAr:
-      "إنارة ومروحة وشحن وثلاجة صغيرة — ضرورة لمنع السرقة وتنظيف الألواح",
+      "باقات حتى ١٠ جيجابت في كيغالي منذ فبراير ٢٠٢٦. الشهري تقديري حتى عرض السعر؛ Liquid وMTN للمقارنة",
   },
   {
-    id: "pump",
-    group: "site",
-    label: "Water transfer pump",
-    labelAr: "مضخة المياه",
-    qty: 1,
-    watts: 750,
-    hours: 0.7,
-    wh: 525,
-    firm: false,
-    shiftable: true,
-    defaultOn: true,
-  },
-  {
-    id: "dehumidifier",
-    group: "site",
-    label: "Dehumidifier — fog season",
-    labelAr: "مزيل الرطوبة — موسم الضباب",
-    qty: 1,
-    watts: 320,
-    hours: 6,
-    wh: 1920,
-    firm: false,
-    shiftable: false,
-    defaultOn: false,
-    detail:
-      "Condensation on cold silicon at dawn is the failure mode here, not heat",
-    detailAr: "التكثف على الرقائق الباردة فجرًا هو الخطر لا الحرارة",
-  },
-  {
-    id: "vsat",
-    group: "site",
-    label: "VSAT as primary link",
-    labelAr: "الأقمار كوصلة أساسية",
-    qty: 1,
-    watts: 180,
+    id: "lte",
+    group: "link",
+    label: "LTE failover router + data plan",
+    labelAr: "موجه LTE احتياطي مع باقة بيانات",
+    capexUSD: 150,
+    monthlyUSD: 20,
+    watts: 6,
     hours: 24,
-    wh: 4320,
-    firm: true,
-    shiftable: false,
-    defaultOn: false,
-    detail: "Backup lane — power it down unless the primary is out",
-    detailAr: "وصلة احتياطية — تُطفأ ما لم تنقطع الأساسية",
+    defaultOn: true,
+    detail: "Different carrier from the fibre's upstream. Cuts over in seconds",
+    detailAr: "مشغّل مختلف عن مزوّد الألياف — يتحول خلال ثوانٍ",
+  },
+
+  // ── Power ─────────────────────────────────────────────────────────────
+  {
+    id: "ups",
+    group: "power",
+    label: "Line-interactive UPS — 1500 VA / 900 W",
+    labelAr: "مزوّد طاقة احتياطي — ١٥٠٠ فولت أمبير / ٩٠٠ واط",
+    capexUSD: 300,
+    monthlyUSD: 0,
+    watts: 0,
+    hours: 0,
+    defaultOn: true,
+    detail:
+      "AVR rides through brownouts; the battery covers an outage long enough to finish the job and sleep cleanly",
+    detailAr:
+      "منظم الجهد يمتص التذبذب، والبطارية تكفي لإنهاء المهمة والإيقاف النظيف",
   },
 ];
 
@@ -196,42 +161,46 @@ export type Machine = {
   loadW: number;
   idleW: number;
   loadHours: number;
-  price: string;
+  priceUSD: number;
+  config: string;
   verdict: string;
   verdictAr: string;
 };
 
 export const MACHINES: Machine[] = [
   {
-    id: "spark",
-    name: "DGX Spark class",
-    nameAr: "من فئة DGX Spark",
+    id: "m5-max",
+    name: "Mac Studio — M5 Max",
+    nameAr: "ماك ستوديو — M5 Max",
     memory: "128 GB unified",
-    bandwidth: "273 GB/s",
-    compute: "~1 PFLOP FP4",
-    loadW: 240,
-    idleW: 30,
-    loadHours: 10,
-    price: "$3,999–4,699",
+    bandwidth: "614 GB/s",
+    compute: "40-core GPU",
+    loadW: 105,
+    idleW: 10,
+    loadHours: 8,
+    priceUSD: 5399,
+    config: "128 GB · 1 TB",
     verdict:
-      "Buy this one. Fits the array with room to spare; excellent on low-active MoE at batch",
+      "Buy this one. Holds an 80B-class MoE with room for context, at the power draw of a desk lamp",
     verdictAr:
-      "الخيار الآن — يناسب الألواح بسهولة وممتاز مع نماذج MoE على دفعات",
+      "الخيار الآن — يتسع لنموذج MoE بحجم ٨٠ مليار مع سياق، باستهلاك مصباح مكتب",
   },
   {
-    id: "station",
-    name: "DGX Station GB300",
-    nameAr: "DGX Station GB300",
-    memory: "~784 GB coherent",
-    bandwidth: "HBM3e",
-    compute: "~20 PFLOPS FP4",
-    loadW: 1600,
-    idleW: 400,
+    id: "m5-ultra",
+    name: "Mac Studio — M5 Ultra",
+    nameAr: "ماك ستوديو — M5 Ultra",
+    memory: "256 GB unified",
+    bandwidth: "1.2 TB/s",
+    compute: "up to 80-core GPU",
+    loadW: 220,
+    idleW: 15,
     loadHours: 8,
-    price: "~$85,000",
+    priceUSD: 9499,
+    config: "256 GB · 1 TB",
     verdict:
-      "The endpoint, priced and gated. Needs roughly triple the solar plant on top of the box",
-    verdictAr: "الهدف البعيد — يحتاج ثلاثة أضعاف المحطة الشمسية فوق ثمن الجهاز",
+      "Twice the bandwidth, so twice the decode speed — for $4,100 more. The Tier 4 box, not the first one",
+    verdictAr:
+      "ضعف عرض النطاق أي ضعف سرعة التوليد — مقابل ٤١٠٠ دولار إضافية. جهاز المرحلة ٤ لا الأولى",
   },
 ];
 
@@ -239,70 +208,68 @@ export function machineWh(m: Machine): number {
   return m.loadW * m.loadHours + m.idleW * (24 - m.loadHours);
 }
 
-/** Sizing constants. Every one of these is a design choice, not a law. */
-export const SIZING = {
-  /** Days the bank carries the full load with no sun. */
-  autonomyDays: 1.2,
-  /** LiFePO4 depth of discharge. */
-  dod: 0.9,
-  /** Inverter efficiency. */
-  inverterEff: 0.94,
-  /** Worst-month peak sun hours — conservative for Erkowit's fog. */
-  pshWorstMonth: 4.5,
-  /** Soiling, temperature, wiring, MPPT, mismatch. */
-  derate: 0.75,
-  /** Deliberate array oversize — PV beats battery per delivered kWh. */
-  pvHeadroom: 1.9,
-  /** Contingency on the measured load table to reach the design figure. */
-  designMargin: 1.1,
+/** Cost and power constants. Every one of these is an assumption, not a law. */
+export const SETUP = {
+  /** Rwanda non-residential tariff, roughly — USD per kWh. */
+  kwhUSD: 0.25,
+  /** For showing the monthly figure in francs. */
+  usdRwf: 1450,
+  /** 1500 VA class UPS: 2 × 12 V 9 Ah. */
+  upsBatteryWh: 216,
+  /** Inverter efficiency plus usable depth of a lead-acid pack. */
+  upsEff: 0.8,
+  /** UPS output limit — peak draw must stay under this. */
+  upsMaxW: 900,
 } as const;
 
-export type Sizing = {
+export type Setup = {
+  capexUSD: number;
+  serviceMonthlyUSD: number;
+  powerMonthlyUSD: number;
+  monthlyUSD: number;
   dailyKWh: number;
-  designKWh: number;
-  firmKWh: number;
   machineKWh: number;
-  batteryKWh: number;
-  pvMinKWp: number;
-  pvRecKWp: number;
-  arrayAreaM2: number;
+  peakW: number;
+  /** 0 when no UPS is selected. */
+  upsMinutes: number;
+  hasUps: boolean;
 };
 
 /**
- * The whole electrical model in one function. Kept pure and exported so the
- * numbers on the page and the numbers in the doc come from one place.
+ * The whole cost model in one function. Kept pure and exported so the numbers
+ * on the page and the numbers in the doc come from one place.
  */
-export function computeSizing(
+export function computeSetup(
   selectedIds: ReadonlySet<string>,
   machine: Machine,
-): Sizing {
+): Setup {
+  let capexUSD = machine.priceUSD;
+  let serviceMonthlyUSD = 0;
   let dailyWh = machineWh(machine);
-  let firmWh = 0;
+  let peakW = machine.loadW;
 
-  for (const row of LOAD_ROWS) {
-    if (!selectedIds.has(row.id)) continue;
-    dailyWh += row.wh;
-    if (row.firm) firmWh += row.wh;
+  for (const item of SETUP_ITEMS) {
+    if (!selectedIds.has(item.id)) continue;
+    capexUSD += item.capexUSD;
+    serviceMonthlyUSD += item.monthlyUSD;
+    dailyWh += itemWh(item);
+    peakW += item.watts;
   }
 
   const dailyKWh = dailyWh / 1000;
-  const designKWh = dailyKWh * SIZING.designMargin;
-
-  const batteryKWh =
-    (designKWh * SIZING.autonomyDays) / (SIZING.dod * SIZING.inverterEff);
-  const pvMinKWp = designKWh / (SIZING.pshWorstMonth * SIZING.derate);
-  const pvRecKWp = pvMinKWp * SIZING.pvHeadroom;
+  const powerMonthlyUSD = dailyKWh * 30 * SETUP.kwhUSD;
+  const hasUps = selectedIds.has("ups");
 
   return {
+    capexUSD,
+    serviceMonthlyUSD,
+    powerMonthlyUSD,
+    monthlyUSD: serviceMonthlyUSD + powerMonthlyUSD,
     dailyKWh,
-    designKWh,
-    firmKWh: firmWh / 1000,
     machineKWh: machineWh(machine) / 1000,
-    batteryKWh,
-    pvMinKWp,
-    pvRecKWp,
-    // ~550 W modules at roughly 2.6 m² each.
-    arrayAreaM2: (pvRecKWp / 0.55) * 2.6,
+    peakW,
+    upsMinutes: hasUps ? ((SETUP.upsBatteryWh * SETUP.upsEff) / peakW) * 60 : 0,
+    hasUps,
   };
 }
 
@@ -317,40 +284,40 @@ export type SiteFact = {
 
 export const SITE_FACTS: SiteFact[] = [
   {
+    label: "City",
+    labelAr: "المدينة",
+    value: "Kigali, Rwanda",
+    valueAr: "كيغالي، رواندا",
+  },
+  {
     label: "Elevation",
     labelAr: "الارتفاع",
-    value: "~1,100–1,350 m",
-    valueAr: "١١٠٠–١٣٥٠ م",
+    value: "~1,567 m",
+    valueAr: "١٥٦٧ م تقريبًا",
   },
   {
     label: "Ambient",
     labelAr: "الحرارة",
-    value: "~22 °C — free-air cooling",
-    valueAr: "٢٢° — تبريد بالهواء الحر",
-  },
-  {
-    label: "To Port Sudan",
-    labelAr: "إلى بورتسودان",
-    value: "~90 km · ~4 h",
-    valueAr: "٩٠ كم · ٤ ساعات",
+    value: "~20–27 °C — no cooling load",
+    valueAr: "٢٠–٢٧° — بلا حمل تبريد",
   },
   {
     label: "Grid",
     labelAr: "الشبكة",
-    value: "12–18 h daily blackouts",
-    valueAr: "انقطاع ١٢–١٨ ساعة يوميًا",
+    value: "Stable · short outages",
+    valueAr: "مستقرة · انقطاعات قصيرة",
   },
   {
-    label: "Worst-month sun",
-    labelAr: "أقل شمس شهريًا",
-    value: "4.5 PSH (fog)",
-    valueAr: "٤٫٥ ساعة ذروة (ضباب)",
+    label: "Link",
+    labelAr: "الاتصال",
+    value: "Fibre + LTE failover",
+    valueAr: "ألياف + LTE احتياطي",
   },
   {
     label: "Staffing",
     labelAr: "التشغيل",
-    value: "Unmanned — dispatched remotely",
-    valueAr: "بلا طاقم — يُشغَّل عن بُعد",
+    value: "On the desk · reachable remotely",
+    valueAr: "على المكتب · متاح عن بُعد",
   },
 ];
 
@@ -373,8 +340,8 @@ export const TIERS: Tier[] = [
     n: "0",
     name: "Today",
     nameAr: "اليوم",
-    what: "Laptops the team already owns, plus cloud. No site.",
-    whatAr: "حواسيب الفريق الحالية والسحابة. بلا موقع.",
+    what: "Laptops the team already owns, plus cloud.",
+    whatAr: "حواسيب الفريق الحالية والسحابة.",
     capex: "$0",
     trigger: "Current state",
     triggerAr: "الوضع الحالي",
@@ -382,36 +349,36 @@ export const TIERS: Tier[] = [
   },
   {
     n: "1",
-    name: "Blackout resilience",
-    nameAr: "الصمود أمام الانقطاع",
-    what: "Per person in Sudan: 1 kWh power station, 200–400 W folding panel, LTE router, surge strip. Buys 8–10 working hours through an outage.",
+    name: "The link",
+    nameAr: "الاتصال",
+    what: "Business fibre, an LTE failover on a second carrier, and a UPS for the router. The one piece every later tier stands on.",
     whatAr:
-      "لكل شخص في السودان: بطارية ١ ك.و.س، لوح شمسي ٢٠٠–٤٠٠ واط، موجه، حماية من التيار. ٨–١٠ ساعات عمل خلال الانقطاع.",
-    capex: "$400–900 / person",
+      "ألياف للأعمال، وخط LTE احتياطي على مشغّل ثانٍ، ومزوّد طاقة للموجه. الأساس الذي تقف عليه كل المراحل اللاحقة.",
+    capex: "~$500 + ~$80/mo",
     trigger: "None — affordable now, and it protects delivery today",
     triggerAr: "بلا شرط — ممكن الآن ويحمي التسليم",
     now: true,
   },
   {
     n: "2",
-    name: "The node, without the supercomputer",
-    nameAr: "الموقع بلا الحاسوب الخارق",
-    what: "6 kWp, 15 kWh, 2 × 3 kW hybrid, mast + LTE, service plane, switched PDU + management modem, security. CRM, Hermes, git, cache and staging move local.",
+    name: "The workstation",
+    nameAr: "محطة العمل",
+    what: "Mac Studio M5 Max 128 GB, Studio Display, keyboard and trackpad, Time Machine SSD. Hermes, the CRM mirror, git and staging move onto the box.",
     whatAr:
-      "٦ ك.و.ذ ألواح، بطارية ١٥ ك.و.س، عاكسان ٣ ك.و، برج واتصال، طبقة الخدمات، مقبس مُبدَّل ومودم إدارة، حماية. نقل العملاء وهيرمس وgit والتجريب محليًا.",
-    capex: "$15,000–22,000",
+      "ماك ستوديو M5 Max بذاكرة ١٢٨ ج.ب، شاشة Studio Display، لوحة مفاتيح ولمس، قرص Time Machine. نقل هيرمس ومرآة العملاء وgit والتجريب إلى الجهاز.",
+    capex: "~$7,700",
     trigger: "First paying school, or non-dilutive funding",
     triggerAr: "أول مدرسة مدفوعة أو تمويل غير مخفِّض",
     now: false,
   },
   {
     n: "3",
-    name: "The supercomputer",
-    nameAr: "الحاسوب الخارق",
-    what: "Spark-class box on the plant Tier 2 already built. Local inference and media generation go live.",
+    name: "Local models live",
+    nameAr: "تشغيل النماذج محليًا",
+    what: "MLX serving on the box: enrichment, classification and the coder model run locally; the cloud keeps the frontier work.",
     whatAr:
-      "جهاز من فئة Spark على المحطة التي بنتها المرحلة ٢. تشغيل الاستدلال وتوليد الوسائط محليًا.",
-    capex: "$4,000–5,000",
+      "تشغيل MLX على الجهاز: الإثراء والتصنيف ونموذج البرمجة محليًا، والسحابة للمهام الحدودية.",
+    capex: "$0 — software",
     trigger: "3 paying schools / ~$3K MRR sustained 3 months",
     triggerAr: "٣ مدارس مدفوعة أو ٣ آلاف دولار شهريًا لثلاثة أشهر",
     now: false,
@@ -420,10 +387,10 @@ export const TIERS: Tier[] = [
     n: "4",
     name: "Scale the box",
     nameAr: "توسيع الجهاز",
-    what: "Second Spark linked over ConnectX-7 for 256 GB, or a DGX Station GB300 with the plant tripled to 16 kWp / 40 kWh.",
+    what: "M5 Ultra with 256–512 GB, or a second Studio clustered over Thunderbolt 5. The M5 Max moves to a teammate's desk.",
     whatAr:
-      "جهاز Spark ثانٍ موصول عبر ConnectX-7 ليصبح ٢٥٦ ج.ب، أو DGX Station GB300 مع مضاعفة المحطة ثلاث مرات.",
-    capex: "$5,000 or ~$105,000",
+      "M5 Ultra بذاكرة ٢٥٦–٥١٢ ج.ب، أو جهاز ثانٍ موصول عبر Thunderbolt 5. وينتقل M5 Max إلى مكتب زميل.",
+    capex: "~$9,500+",
     trigger:
       "Measured saturation — the queue is waiting on the machine, not on the link",
     triggerAr: "إشباع مُقاس — الطابور ينتظر الجهاز لا الاتصال",
@@ -437,7 +404,7 @@ export const TIERS: Tier[] = [
     whatAr: "مستأجرون مختارون على عتادنا.",
     capex: "Incremental",
     trigger:
-      "12 months of measured node uptime, and a customer who wants on-prem and pays for it",
+      "12 months of measured uptime, and a customer who wants on-prem and pays for it",
     triggerAr: "١٢ شهرًا من التشغيل المُقاس وعميل يطلب الاستضافة المحلية ويدفع",
     now: false,
   },
@@ -457,38 +424,37 @@ export type ModelRow = {
 
 export const MODEL_LADDER: ModelRow[] = [
   {
-    klass: "Llama 3.1 8B FP4",
-    klassAr: "Llama 3.1 8B FP4",
+    klass: "Llama 3.1 8B 4-bit",
+    klassAr: "Llama 3.1 8B 4-bit",
     active: "8B dense",
-    speed: "~924 tok/s @ batch 128",
+    speed: "fast — ~5 GB",
     verdict: "Trivial for the box. Good for classification and enrichment",
     verdictAr: "سهل على الجهاز — مناسب للتصنيف والإثراء",
     good: true,
   },
   {
-    klass: "Qwen3-Coder-30B-A3B FP8",
-    klassAr: "Qwen3-Coder-30B-A3B FP8",
+    klass: "Qwen3-Coder-30B-A3B 8-bit",
+    klassAr: "Qwen3-Coder-30B-A3B 8-bit",
     active: "3B active (MoE)",
-    speed: "~483 tok/s @ batch 64",
-    verdict:
-      "The target. Low active params is exactly what this hardware wants",
-    verdictAr: "الهدف — قلة المعاملات النشطة هي ما يناسب هذا العتاد",
+    speed: "~32 GB weights",
+    verdict: "The target. Low active params is exactly what 614 GB/s wants",
+    verdictAr: "الهدف — قلة المعاملات النشطة هي ما يناسب ٦١٤ ج.ب/ث",
     good: true,
   },
   {
-    klass: "80B-class MoE coder",
-    klassAr: "مبرمج MoE بحجم ٨٠ مليار",
-    active: "~45 GB weights",
-    speed: "fits 128 GB with KV headroom",
-    verdict: "Best quality that still fits and still prefills fast",
-    verdictAr: "أفضل جودة تتسع وتُعالج السياق بسرعة",
+    klass: "gpt-oss-120b / 80B-class MoE",
+    klassAr: "gpt-oss-120b / MoE بحجم ٨٠ مليار",
+    active: "~45–65 GB weights",
+    speed: "~75 tok/s measured",
+    verdict: "Best quality that still fits 128 GB with KV headroom",
+    verdictAr: "أفضل جودة تتسع في ١٢٨ ج.ب مع هامش للسياق",
     good: true,
   },
   {
     klass: "Dense Llama 3.1 70B",
     klassAr: "Llama 3.1 70B الكثيف",
     active: "70B dense",
-    speed: "~2.7 tok/s decode",
+    speed: "single-digit tok/s",
     verdict: "Never. Bandwidth-bound — the box looks broken running this",
     verdictAr: "أبدًا — محدود بعرض النطاق ويبدو الجهاز معطلًا",
     good: false,
@@ -498,8 +464,7 @@ export const MODEL_LADDER: ModelRow[] = [
 // ── The roads not taken ─────────────────────────────────────────────────
 //
 // Three reasonable alternatives, each rejected for a specific reason rather
-// than a preference. Facts checked August 2026 — the Apple row in particular
-// is date-sensitive and flips if an M5 Ultra ships with large memory.
+// than a preference. Facts checked October 2026.
 
 export type Alternative = {
   id: string;
@@ -519,72 +484,72 @@ export type Alternative = {
 
 export const ALTERNATIVES: Alternative[] = [
   {
-    id: "apple",
-    name: "Apple — Mac Studio",
-    nameAr: "أبل — ماك ستوديو",
-    headline: "96 GB",
-    headlineLabel: "max unified memory, Aug 2026",
-    headlineLabelAr: "أقصى ذاكرة موحدة، أغسطس ٢٠٢٦",
+    id: "spark",
+    name: "NVIDIA DGX Spark",
+    nameAr: "NVIDIA DGX Spark",
+    headline: "273 GB/s",
+    headlineLabel: "against 614 for the M5 Max",
+    headlineLabelAr: "مقابل ٦١٤ لجهاز M5 Max",
     specs: [
-      "M3 Ultra · 819 GB/s · ~200 W",
-      "128 / 256 / 512 GB options withdrawn",
-      "M5 Ultra ~768 GB reported for late 2026",
+      "128 GB unified · ~$4,000–4,700",
+      "CUDA · vLLM · DGX OS (Ubuntu)",
+      "No display workflow — a headless box",
     ],
     specsAr: [
-      "M3 Ultra · 819 GB/s · ~200 W",
-      "سُحبت خيارات 128 / 256 / 512 GB",
-      "M5 Ultra ~768 GB مُتوقَّع أواخر ٢٠٢٦",
+      "128 GB موحدة · ~$4,000–4,700",
+      "CUDA · vLLM · DGX OS (أوبنتو)",
+      "بلا سير عمل للشاشة — جهاز بلا واجهة",
     ],
     verdict:
-      "Less memory than a $4K Spark, and no CUDA — so no media lane and no vLLM. Even an M5 Ultra would not re-qualify. Stays Abdout's dev machine.",
+      "Same memory, under half the bandwidth, so slower decode. It buys CUDA, but it would be a second machine beside a Mac rather than the one desk the team works at.",
     verdictAr:
-      "ذاكرة أقل من جهاز بأربعة آلاف دولار وبلا CUDA — لا وسائط ولا vLLM. حتى M5 Ultra لن يغيّر ذلك. يبقى جهاز تطوير.",
+      "الذاكرة نفسها بأقل من نصف عرض النطاق، أي توليد أبطأ. يمنح CUDA لكنه جهاز ثانٍ بجانب ماك لا المكتب الواحد الذي يعمل عليه الفريق.",
     status: "rejected",
   },
   {
-    id: "starlink",
-    name: "Starlink Mini",
-    nameAr: "ستارلينك ميني",
-    headline: "~720 Wh/day",
-    headlineLabel: "against 4,320 for licensed VSAT",
-    headlineLabelAr: "مقابل ٤٣٢٠ لمحطة الأقمار المرخّصة",
+    id: "ultra",
+    name: "M5 Ultra now",
+    nameAr: "M5 Ultra الآن",
+    headline: "+$4,100",
+    headlineLabel: "for 2× bandwidth and 2× memory",
+    headlineLabelAr: "مقابل ضعف عرض النطاق والذاكرة",
     specs: [
-      "~17 W steady · 60 W startup peak",
-      "~40 ms vs ~600 ms GEO",
-      "Licensed in 27–28 African countries",
+      "256 GB · 1.2 TB/s · from $9,499",
+      "512 GB option slipping to 2027",
+      "480 W max continuous rating",
     ],
     specsAr: [
-      "~17 W مستقر · 60 W ذروة الإقلاع",
-      "~40 ms مقابل ~600 ms للأقمار الثابتة",
-      "مرخّص في ٢٧–٢٨ دولة أفريقية",
+      "256 GB · 1.2 TB/s · من $9,499",
+      "خيار 512 GB متأخر إلى ٢٠٢٧",
+      "تصنيف أقصى ٤٨٠ واط مستمر",
     ],
     verdict:
-      "Best technical fit by far — licensing it would delete the VSAT line item entirely. Not licensed in Sudan, no committed date. Revisit when that changes.",
+      "Real speed, bought before there is a queue to speed up. It is Tier 4 — revisit when measured saturation says the Max is the bottleneck.",
     verdictAr:
-      "الأنسب تقنيًا بفارق كبير — لو رُخّص لألغى بند الأقمار كليًا. غير مرخّص في السودان ولا موعد معلن. يُراجع عند التغيّر.",
+      "سرعة حقيقية تُشترى قبل وجود طابور يحتاجها. هذه المرحلة ٤ — تُراجع حين يثبت القياس أن M5 Max هو عنق الزجاجة.",
     status: "watch",
   },
   {
-    id: "powerwall",
-    name: "Tesla Powerwall 3",
-    nameAr: "تسلا باوروول ٣",
-    headline: "One box",
-    headlineLabel: "battery and inverter, inseparable",
-    headlineLabelAr: "بطارية وعاكس لا ينفصلان",
+    id: "xdr",
+    name: "Studio Display XDR",
+    nameAr: "Studio Display XDR",
+    headline: "$3,299",
+    headlineLabel: "against $1,599 for the Studio Display",
+    headlineLabelAr: "مقابل ١٥٩٩ دولارًا للشاشة العادية",
     specs: [
-      "13.5 kWh · NMC · ~5,000 cycles",
-      "~11.5 kW inverter — 4× our peak",
-      "~$998/kWh US installed vs ~$170–280 landed",
+      "Mini-LED · HDR · 120 Hz",
+      "Same 27″ 5K canvas",
+      "Built for colour grading",
     ],
     specsAr: [
-      "13.5 kWh · NMC · ~5,000 دورة",
-      "عاكس ~11.5 kW — أربعة أضعاف ذروتنا",
-      "~$998/kWh مركّبًا في أمريكا مقابل ~$170–280 واصلًا",
+      "Mini-LED · HDR · 120 Hz",
+      "المساحة نفسها ٢٧ بوصة 5K",
+      "مصممة لتصحيح الألوان",
     ],
     verdict:
-      "Integrating the inverter destroys the 2 × 3 kW N+1 that exists because help is 4 h away. No Tesla service in Sudan, and a 13.5 kWh monolith cannot ride to Port Sudan in a car — a 5 kWh module can.",
+      "Code, docs and dashboards gain nothing from HDR. The $1,700 difference is a fibre line for two years.",
     verdictAr:
-      "دمج العاكس يلغي التكرار الاحتياطي الموجود لأن المساعدة على بعد أربع ساعات. لا خدمة تسلا في السودان، ووحدة ١٣٫٥ ك.و.س لا تُنقل بسيارة بينما وحدة ٥ ك.و.س تُنقل.",
+      "الكود والوثائق ولوحات المتابعة لا تستفيد من HDR. فرق ١٧٠٠ دولار يدفع خط الألياف لعامين.",
     status: "rejected",
   },
 ];
