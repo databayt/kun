@@ -162,11 +162,27 @@ const mdxComponents = {
   img: ({
     className,
     alt,
+    src,
     ...props
-  }: React.ImgHTMLAttributes<HTMLImageElement>) => (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img className={cn("rounded-md", className)} alt={alt} {...props} />
-  ),
+  }: Omit<React.ImgHTMLAttributes<HTMLImageElement>, "src"> & {
+    // Markdown images arrive as static imports ({ src, width, height }), JSX as strings
+    src?: string | { src: string; width?: number; height?: number };
+  }) => {
+    const image = typeof src === "object" ? src : undefined;
+    const url = typeof src === "object" ? src.src : src;
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        className={cn("rounded-md", className)}
+        alt={alt}
+        src={url}
+        width={image?.width}
+        height={image?.height}
+        loading="lazy"
+        {...props}
+      />
+    );
+  },
   hr: ({ ...props }: React.HTMLAttributes<HTMLHRElement>) => (
     <hr className="my-4 md:my-8" {...props} />
   ),
