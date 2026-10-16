@@ -334,6 +334,20 @@ fi
 npm_global_smart pnpm
 npm_global_smart vercel
 
+# Engine side-tools — jq (MCP registration), ffmpeg (media lanes), tmux, uv
+# (MarkItDown MCP). Distro packages for the first three; uv from its installer.
+for t in jq ffmpeg tmux; do
+    if command -v "$t" &>/dev/null; then pass "$t present"
+    elif [[ "$PKG" == "apt" ]]; then apt_smart "$t"
+    else $PKG_INSTALL "$t" >/dev/null 2>&1 && pass "$t installed" || fail "$t install failed"; fi
+done
+if ! command -v uv &>/dev/null; then
+    curl -LsSf https://astral.sh/uv/install.sh | sh >/dev/null 2>&1 && pass "uv installed" || fail "uv install failed"
+    export PATH="$HOME/.local/bin:$PATH"
+else
+    pass "uv present"
+fi
+
 # =============================================================================
 # PHASE 2: Applications (snap-first; fall back to direct install)
 # =============================================================================
@@ -574,7 +588,7 @@ clone_parallel() {
 
 # Every machine clones the full org — any machine can be any task.
 if [[ "$ALL_REPOS" == "1" ]]; then
-    clone_parallel kun hogwarts codebase shadcn radix souq mkan shifa ios-app android-app crm distributed-computer marketing
+    clone_parallel kun hogwarts codebase catalog space shadcn radix souq mkan shifa ios-app android-app crm distributed-computer marketing
 else
     clone_parallel kun hogwarts codebase
 fi

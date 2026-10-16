@@ -153,6 +153,9 @@ if (-not $hasWinget) {
 Winget-Smart "Git.Git"
 Winget-Smart "GitHub.cli"
 Winget-Smart "OpenJS.NodeJS.LTS"
+Winget-Smart "jqlang.jq"            # setup registers the MCP catalog through jq
+Winget-Smart "astral-sh.uv"         # MarkItDown MCP (uv tool install markitdown-mcp)
+Winget-Smart "Gyan.FFmpeg"          # media lanes (/edit, /record, /shoot)
 
 # pnpm + Vercel CLI — @latest is idempotent (noop if already latest)
 Npm-Global-Smart "pnpm"
@@ -358,7 +361,7 @@ function Clone-Parallel([string[]]$repos) {
 
 # Every machine clones the full org — any machine can be any task.
 if (-not $EssentialsOnly) {
-    Clone-Parallel @("kun", "hogwarts", "codebase", "shadcn", "radix", "souq", "mkan", "shifa", "ios-app", "android-app", "crm", "distributed-computer", "marketing")
+    Clone-Parallel @("kun", "hogwarts", "codebase", "catalog", "space", "shadcn", "radix", "souq", "mkan", "shifa", "ios-app", "android-app", "crm", "distributed-computer", "marketing")
 } else {
     Clone-Parallel @("kun", "hogwarts", "codebase")
 }

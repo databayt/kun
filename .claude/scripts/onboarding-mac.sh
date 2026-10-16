@@ -246,6 +246,12 @@ brew_smart gh
 brew_smart node@24
 brew_smart tesseract        # OCR for the `textbook` skill (scanned / unmapped-font PDFs)
 brew_smart tesseract-lang   # Arabic, French … language data for tesseract
+brew_smart jq               # setup.sh registers the MCP catalog through jq
+brew_smart uv               # MarkItDown MCP (`uv tool install markitdown-mcp`) + Python lanes
+brew_smart ffmpeg           # media library, /edit, /record, /shoot
+brew_smart tmux             # devices.sh keeps the Remote Control server alive in tmux
+brew_smart colima           # Docker runtime for the Cloudflare Containers deploy lane
+brew_smart docker           # docker CLI (talks to colima)
 brew link --overwrite --force node@24 &>/dev/null || true
 
 # pnpm + Vercel CLI — @latest is idempotent (noop if already latest)
@@ -451,7 +457,7 @@ clone_parallel() {
 
 # Every machine clones the full org — any machine can be any task.
 if [[ "$ALL_REPOS" == "1" ]]; then
-    clone_parallel kun hogwarts codebase shadcn radix souq mkan shifa ios-app android-app crm distributed-computer marketing
+    clone_parallel kun hogwarts codebase catalog space shadcn radix souq mkan shifa ios-app android-app crm distributed-computer marketing
 else
     clone_parallel kun hogwarts codebase
 fi
@@ -599,6 +605,15 @@ fi
 # Vercel isn't logged in; the teammate can run `vercel login` later and re-run.
 if [[ -f "$KUN_DIR/.claude/scripts/vercel-pull.sh" ]]; then
     bash "$KUN_DIR/.claude/scripts/vercel-pull.sh" "$REPOS_DIR" || true
+fi
+
+# Devices lane — the presence file (no phone pushes while you're at the Mac) and
+# the Remote Control server the Claude app's Code tab starts sessions through.
+# Idempotent; the server waits for `claude` to be signed in.
+if command -v claude &>/dev/null && [[ -f "$HOME/.claude/scripts/devices.sh" ]]; then
+    bash "$HOME/.claude/scripts/devices.sh" --install >/dev/null 2>&1 \
+        && pass "Devices lane armed (presence + Remote Control)" \
+        || info "Devices lane skipped — run later: bash ~/.claude/scripts/devices.sh --install"
 fi
 
 # =============================================================================

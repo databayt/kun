@@ -46,7 +46,7 @@ Scan — system
   ✓ gh               gh version 2.83.1
 
 Scan — agents
-  ✓ claude           2.1.206 (Claude Code)
+  ✓ claude           2.1.301 (Claude Code)
   ✓   alias c        bypass launcher
   ✓ claude desktop   app + MCP config
   ✓ agy              1.0.14
@@ -89,7 +89,7 @@ Running the bootstrap line leaves your machine fully provisioned. Here's what la
 
 | Category | What |
 |---|---|
-| **Side-tools** | git, Node 24 LTS (Krypton), pnpm, gh CLI, Vercel CLI, Chrome |
+| **Side-tools** | git, Node 24 LTS (Krypton), pnpm, gh CLI, Vercel CLI, Chrome, `jq` (MCP registration), `uv` (MarkItDown MCP), `ffmpeg` (media lanes), `tesseract` + language data (textbook OCR), `tmux` (Remote Control server), Colima + Docker CLI (Cloudflare Containers deploys — Mac) |
 | **IDEs** | WebStorm (+ Claude plugin), VS Code (+ Claude extension) |
 | **Claude** | Desktop (Chat / Cowork / Code tabs), Claude Code CLI, IDE integrations, `claude.ai/code` in browser, Mobile (iOS/Android) |
 | **Claude Design** | The `design` plugin (`/critique`, `/accessibility`, `/handoff`, `/ux-copy` — beside kun's quality keywords) + the Labs canvas MCP (`claude.ai/design`; decks, mockups, prototypes). Subscription-covered on Max. Sign in later with `/design-login`. |
@@ -97,8 +97,11 @@ Running the bootstrap line leaves your machine fully provisioned. Here's what la
 | **opencode** *(tertiary)* | `opencode` CLI + `o` launcher; permissive config written (see [The agents](#the-agents)) |
 | **Hermes** *(optional)* | `hermes` CLI (official installer) + `h` launcher; gateway setup stays manual (interactive) — see [Hermes](/docs/hermes) |
 | **Dotfiles** | SSH key (uploaded to GitHub), one managed launcher block (`c` / `a` / `o` / `h`) in `~/.zshrc` / `~/.bashrc` / `$PROFILE`, `~/.gitconfig`, `~/.ssh/config` (Keychain on Mac) |
-| **Claude config** | `~/.claude/` — agents, skills, MCP servers, hooks, rules, memory; secrets in `~/.claude/.env` |
-| **Desktop ↔ CLI parity** | `claude_desktop_config.json` symlinked to `~/.claude/mcp.json` so Desktop tabs see the same MCP fleet; Antigravity's `~/.gemini/config/mcp_config.json` is transformed from the same source |
+| **Claude config** | `~/.claude/` — agents, skills, workflows, hooks, cross-repo rules (from `rules-global/`), helper scripts (`~/.claude/bin/`), memory; secrets in `~/.claude/.env`. Session default model: **Opus 5.5** (fallbacks and agent tiers live only in `kun/.claude/engine.json`) |
+| **MCP fleet** | kun's catalog (`.claude/mcp.json`, 18 servers) **registered at user scope** with `claude mcp add-json -s user` — the live config is `~/.claude.json`, check it with `claude mcp list`. Catalog paths are rewritten to your `$HOME`. Servers flagged `$skipRegistration` (filesystem, vercel, …) stay catalog-only on purpose. The browser (Playwright) MCP is one extra command — see [Browser MCP](#browser-mcp) |
+| **Desktop ↔ CLI parity** | `claude_desktop_config.json` symlinked to `~/.claude/mcp.json` so Desktop tabs see the same catalog; Antigravity's `~/.gemini/config/mcp_config.json` is transformed from the same source |
+| **Devices lane** *(Mac)* | `devices.sh --install` arms two launchd services: a **presence** file (no phone pushes while you're at the Mac) and a **Remote Control** server in tmux, rooted at `~/kun`, so the Claude app's Code tab can start sessions on the Mac. See [Away from the keyboard](#away-from-the-keyboard) |
+| **Daily heartbeat** | `maintain.sh --install` — pull, refresh, health, disk hygiene, dashboard report. See [Day 2](#day-2--the-machine-supervises-itself) |
 | **Repos** | The full databayt org cloned to your chosen directory (default: `~/<repo>`) — see [Which repos you get](#which-repos-you-get) |
 
 ### Verify what you got
@@ -107,7 +110,9 @@ Run these to confirm each layer — all green means fully provisioned:
 
 | Layer | Verify command | Pass looks like |
 |---|---|---|
-| **Tools** | `for t in git node pnpm gh claude agy opencode vercel; do command -v $t; done` | a path prints for each |
+| **Tools** | `for t in git node pnpm gh jq uv ffmpeg tmux claude agy opencode; do command -v $t; done` | a path prints for each |
+| **MCP** | `claude mcp list` | catalog servers ✔ Connected (a server whose key isn't in your Gist fails to connect — harmless) |
+| **MarkItDown** | `uv tool list \| grep markitdown-mcp` | one line prints |
 | **Agent scan** | `bash ~/kun/.claude/scripts/onboarding-mac.sh --detect-only` | all lanes ✓ (or ○ for optional ones you skipped) |
 | **Auth** | `gh auth status && ssh -T git@github.com` | "Logged in"; "successfully authenticated" |
 | **Org gate** | `gh api user/memberships/orgs/databayt --jq .state` | `active` |
@@ -116,6 +121,7 @@ Run these to confirm each layer — all green means fully provisioned:
 | **Config** | `bash ~/.claude/scripts/health.sh` | `✅ healthy` (0 errors) |
 | **Heartbeat** | `bash ~/.claude/scripts/maintain.sh --status` (Win: `maintain.ps1 -Status`) | state JSON + "scheduler: armed" |
 | **Scheduler** | `launchctl list \| grep com.databayt.kun-maintain` (Win: `Get-ScheduledTask kun-maintain`) | one line prints |
+| **Devices** *(Mac)* | `bash ~/.claude/scripts/devices.sh --status` | presence + Remote Control services armed |
 | **Surfaces** | `claude doctor` | all checks green |
 | **Product** *(if `--hogwarts-dev`)* | `cd ~/hogwarts && pnpm dev` → open `localhost:3000` | login works (`admin@kingfahad.edu` / `1234`) |
 
@@ -139,13 +145,14 @@ All installer scripts live in `~/kun/.claude/scripts/`. Print any backend's flag
 
 ### Every machine is a full autonomous worker
 
-**Config is universal — the machine, not the person, is the unit of capability.** Every machine gets all agents, all skills, the full MCP fleet (~18), all hooks, and the entire org's repos. Any machine can run any task. Your **role** is just a label + a *secrets-trust tier* — it does not limit what your computer can do.
+**Config is universal — the machine, not the person, is the unit of capability.** Every machine gets all agents, all skills, the full MCP catalog (18), all hooks, and the entire org's repos. Any machine can run any task. Your **role** is just a label + a *secrets-trust tier* — it does not limit what your computer can do.
 
 What still varies (and why):
 
 - **Secrets** — scoped by which **Gist** you're handed, not by config. A machine only holds the keys it's trusted with; an MCP server without its key simply doesn't connect (harmless). Full config everywhere, contained blast radius.
 - **Linux** — Claude Desktop doesn't exist on Linux; surfaces are the CLI, `claude.ai/code` in the browser, and the IDE plugins. A Linux box with those is complete — don't expect the Chat/Cowork/Code tabs.
-- **No Pro/Max** — Desktop tabs are unavailable; Claude Code can still bill through an `ANTHROPIC_API_KEY`, or upgrade for the Desktop surfaces.
+- **No Pro/Max** — Desktop tabs and Remote Control are unavailable. databayt runs **subscription-only** (Claude Max, no API-key spend) — ask for a seat rather than wiring an `ANTHROPIC_API_KEY`.
+- **RAM** — each Claude Code session holds ~10 MCP processes. On a 16 GB machine keep a few sessions open, close the finished ones, and let the Remote Control server start new ones on demand.
 
 ---
 
@@ -194,12 +201,12 @@ Eight phases run back-to-back. You can minimize the terminal — the wizard fire
 
 | Phase | What |
 |---|---|
-| 1 | System Foundation — build tools, git, Node 24 LTS, pnpm, gh CLI, Vercel CLI |
+| 1 | System Foundation — build tools, git, Node 24 LTS, pnpm, gh CLI, Vercel CLI, jq, uv, ffmpeg, tesseract, tmux, Colima + Docker (Mac) |
 | 2 | Applications — WebStorm, VS Code, Chrome |
 | 3 | GitHub — SSH key, **browser sign-in** (`gh auth login --web`), key uploaded, git identity auto-set, verify databayt org membership + SSH push |
 | 4 | Clone Repositories — the full databayt org, **cloned concurrently** |
 | 5 | Agents — the selected lanes from the multi-select: Claude Code CLI + Desktop (Mac/Win) + MCP symlink, **Claude Design** (the `design` plugin + canvas MCP, auth deferred to `/design-login`), Antigravity (`~/.gemini/` bridged to the same fleet), opencode (+ permissive config), Hermes (CLI only; ex-OpenClaw machines: `hermes claw migrate`); one managed launcher block `c`/`a`/`o`/`h` |
-| 6 | Kun Engine — `setup.sh` installs full config; `secrets.sh` pulls `~/.claude/.env` from Gist; `vercel-pull.sh` populates per-product `.env` |
+| 6 | Kun Engine — `setup.sh` installs the full config (agents, skills, workflows, hooks, rules, `bin/`), registers the MCP catalog, installs MarkItDown as a uv tool, bridges Antigravity, arms the daily heartbeat; `secrets.sh` pulls `~/.claude/.env` from Gist; `vercel-pull.sh` populates per-product `.env`; Mac also arms the devices lane |
 | 7 | Hogwarts — pnpm install, prisma generate + push + seed, build verify (only with `--hogwarts-dev`) |
 | 8 | Health Check — every tool / repo / config verified |
 
@@ -228,7 +235,8 @@ What the inviter must grant or hand over before paste-time:
 - [ ] **Anthropic account** — Pro/Max sub for the full Desktop + CLI experience, or an API key if not on Pro/Max
 - [ ] **Anthropic mobile app** — installed + signed in with the same account (native `PushNotification` from Claude Code)
 - [ ] **Secrets Gist ID** — handed out-of-band; powers `~/.claude/.env` (MCP keys + cross-cutting tokens). See [Secrets](/docs/secrets).
-- [ ] **Vercel** — team invite to `databayt` (every role) — needed for `vercel env pull` to populate per-product `.env`
+- [ ] **Cloudflare** — account access for anyone who deploys (production runs on Cloudflare Workers/Containers; deploys go through the `deploy` skill, not on push)
+- [ ] **Vercel** *(legacy)* — team invite to `databayt` — still how `vercel env pull` fills per-product `.env`
 - [ ] **Neon** — project access for any product whose `DATABASE_URL_*` you'll touch (engineer)
 - [ ] **Slack** — invite to `databayt-sh` ([invite link](https://join.slack.com/t/databayt-sh/shared_invite/zt-42mt16sb7-urQm0MDGtPMEsdrd0Uf3fw))
 - [ ] **CRM** — login `<name>@databayt.org` works on all 4 workspaces (see [CRM](/docs/crm))
@@ -242,7 +250,7 @@ If something's missing the wizard skips that step and lists it under "things to 
 
 **Every machine clones the full databayt org** to your chosen directory (`~/`, `~/databayt/`, or custom) — any machine can touch any repo:
 
-`kun` (engine config), `hogwarts` (multi-tenant LMS), `codebase` (patterns, agents, blocks), `shadcn` (UI library), `radix` (UI primitives), `souq` (e-commerce), `mkan` (rentals), `shifa` (medical), `ios-app` (iOS/Swift), `android-app` (Kotlin), `crm` (self-hosted CRM), `distributed-computer` (infra), `marketing` (landing pages).
+`kun` (engine config), `hogwarts` (multi-tenant LMS), `codebase` (patterns, agents, blocks), `catalog` (curriculum content, mirrors the CDN), `space`, `shadcn` (UI library), `radix` (UI primitives), `souq` (e-commerce), `mkan` (rentals), `shifa` (medical), `ios-app` (iOS/Swift), `android-app` (Kotlin), `crm` (self-hosted CRM), `distributed-computer` (infra), `marketing` (landing pages).
 
 Pick a custom directory and the wizard symlinks `~/kun`, `~/hogwarts`, etc. back to it so tooling that hard-codes `~/kun` keeps working. To clone only the essentials (kun, hogwarts, codebase): pass `--essentials-only` (Mac/Linux) or `-EssentialsOnly` (Windows).
 
@@ -272,11 +280,25 @@ Install the Claude **mobile app** ([iOS](https://apps.apple.com/app/claude-by-an
 
 | Need | Native primitive |
 |---|---|
-| Push when a Code task finishes | `PushNotification` tool → Anthropic mobile app |
-| Drive your dev box from your phone | `claude.ai/code` in the mobile browser — same projects/sessions |
+| Push when a Code task finishes or a question waits | Built-in push (`agentPushNotifEnabled` + `inputNeededNotifEnabled`, set by the engine) → Claude app; silenced while `~/.claude/.present` says you're at the Mac |
+| Keep going on an open session from the phone | **Remote Control** — every interactive session registers; pick it up in the app |
+| Start new Mac work from the phone | The Claude app's **Code** tab → your Mac's Remote Control server (`devices.sh` keeps it alive, 3 sessions max) |
+| Work that must continue with the Mac off | A cloud session at `claude.ai/code`, or a scheduled routine |
 | Resume Code from another machine | Cowork ↔ Code bridge (`~/.claude/bridge.md`) + GitHub Issues |
-| Browser-driven automation | Computer-use beta (Desktop **Code** tab, Pro/Max) |
-| Team async updates | GitHub Issues · Slack MCP (`/slack send …`) |
+| Browser-driven automation | Playwright + DevTools MCP from Claude Code; computer-use in the Desktop **Code** tab |
+| Team async updates | GitHub Issues · Slack |
+
+Check the whole lane with `bash ~/.claude/scripts/devices.sh --status` — Mac headroom, Remote Control, push, services, and the next step if anything is off.
+
+### Browser MCP
+
+The Playwright browser server is registered per machine rather than shipped in the catalog. One command (exact pin — never `@latest`):
+
+```bash
+claude mcp add-json -s user browser '{"type":"stdio","command":"npx","args":["-y","@playwright/mcp@0.0.75","--headless","--isolated","--caps","vision,pdf"]}'
+```
+
+`claude mcp list` should then show `browser` ✔ Connected. The quality keywords (`see`, `flow`, `responsive`, …), `watch`, `shoot` and `record` drive it.
 
 ### WebStorm settings sync
 
@@ -342,13 +364,21 @@ For hogwarts, your team contact shares the `.env` out-of-band — there is no `.
 | Secondary agent (fallback / easy task) | `a` |
 | Tertiary agent (opencode) | `o` |
 | Hermes gateway status | `hermes gateway status` |
-| Synthesize company status | `c "/captain"` |
-| Capture an idea | `c "/idea <description>"` |
-| Run the full feature pipeline | `c "/feature <name> [product]"` |
-| Verify a production deploy | `c "/watch"` |
+| Synthesize company status | say "captain" |
+| Capture an idea | say "idea: <description>" |
+| Run the full feature pipeline | say "feature <name> for <product>" |
+| Ship to production | say "deploy" (Cloudflare lane) |
+| Verify a production deploy | say "watch" |
+| Triage user reports | say "report" — the session-start banner lists them |
 | Mobile / browser | https://claude.ai/code |
 
-Full keyword list: [keywords](/docs/keywords).
+Speak in prose — the engine picks keywords out of what you write and loads the matching skill; slash commands are optional. Full keyword list: [keywords](/docs/keywords).
+
+### Every session starts with
+
+- **Report queue** — the open report-an-issue items across the databayt repos (`📋 Open reports: N`). Nothing is auto-fixed; say "report" to take or reject them.
+- **Heartbeat / health / devices warnings** — only when something needs you.
+- **Engine sync nudge** — when an upstream tier (Anthropic, stack, services) hasn't been synced in a while; say "sync".
 
 ---
 
@@ -358,9 +388,10 @@ After setup, every machine runs a **daily maintain heartbeat** (09:17 local — 
 
 1. **Pull** `~/kun` (main only; skips if you're mid-rebase or offline; aborts cleanly on conflict — never leaves the tree broken)
 2. **Refresh** `~/.claude` — `setup.sh --quiet` re-copies agents/skills/rules/settings/MCP from the fresh source and prunes engine items removed upstream
-3. **Health-check** — full `health.sh` audit + a disk-space floor
-4. **Record** — state to `~/.claude/.kun-maintain.json` (`cat` it anytime)
-5. **Report** — posts to the team's [Config Health Dashboard](https://github.com/databayt/kun/issues?q=label%3Aconfig-health) weekly, and immediately if health goes RED
+3. **Health-check** — full `health.sh` audit
+4. **Disk hygiene** — under the floor (`engine.json → devices.hygiene`, 30 GB by default) it prunes caches itself (Docker build cache, old images, package caches)
+5. **Record** — state to `~/.claude/.kun-maintain.json` (`cat` it anytime)
+6. **Report** — posts to the team's [Config Health Dashboard](https://github.com/databayt/kun/issues?q=label%3Aconfig-health) weekly, and immediately if health goes RED
 
 If the heartbeat goes stale (>48h) or health is RED, a warning surfaces automatically at the start of every Claude Code session — in any project, not just kun. What each warning means:
 
@@ -377,8 +408,8 @@ The heartbeat re-copies engine config daily — so know which files are yours:
 | Yours (never touched) | Engine-managed (refreshed + pruned daily) |
 |---|---|
 | `~/.claude/CLAUDE.md` (seeded from template once) | `~/.claude/agents/`, `skills/`, `rules/`, `workflows/` shipped by kun |
-| `~/.claude/.env` (secrets) | `~/.claude/mcp.json`, `settings.json` engine keys |
-| `.claude/settings.local.json` (per-project) | `~/.claude/scripts/`, `hooks/` |
+| `~/.claude/.env` (secrets) | `~/.claude/mcp.json`, `settings.json` engine keys, MCP registrations in `~/.claude.json` (added, never removed) |
+| `.claude/settings.local.json` (per-project) | `~/.claude/scripts/`, `hooks/`, `bin/` (same-named files only) |
 | Top-level `settings.json` keys the engine doesn't define (model, voice, …) | — |
 | Anything you created (personal skills/agents) | — |
 
@@ -409,6 +440,11 @@ To reset and start fresh: delete the state file, then re-run the bootstrap.
 | `hermes` installed but no channels | Hermes gateway setup is interactive by design: `hermes gateway setup && hermes gateway start` — Slack wiring: [Hermes](/docs/hermes) |
 | `a` (Antigravity) can't see the MCP servers | Re-run `bash ~/kun/.claude/scripts/antigravity-sync.sh`; see [Antigravity](/docs/antigravity) |
 | `claude doctor` red | Re-run `claude` to re-auth; check `~/.claude/settings.json` exists |
+| MCP servers missing from `claude mcp list` | `jq` or `claude` wasn't on PATH when setup ran — `bash ~/kun/.claude/scripts/setup.sh --quiet` registers the catalog again |
+| `markitdown` MCP slow / disk filling under `~/.cache/uv` | `uv` was missing at setup — install it (`brew install uv`), then re-run `setup.sh --quiet` |
+| `chrome-devtools` MCP fails to start | `~/.claude/bin/` missing on an older install — re-run `setup.sh --quiet` |
+| Phone shows no Mac in the Code tab | `bash ~/.claude/scripts/devices.sh --status`, then `--install` to re-arm |
+| Cloudflare container deploy can't reach Docker | `colima start` (Mac) — then retry the deploy |
 | Hogwarts won't build | Confirm `.env` is present; re-run `secrets.sh <GIST_ID>` |
 | GitHub clone fails on private repos | Run `gh auth login -p ssh -w` again; confirm the SSH key is on your GitHub account |
 | Windows: "running scripts is disabled" / `'iwr' is not recognized` | You pasted into cmd.exe — use the universal form: `powershell -ExecutionPolicy Bypass -Command "iwr https://kun.databayt.org/install.ps1 | iex"`, or open **PowerShell** and re-run |
@@ -441,7 +477,7 @@ This page is the front door. Once your machine is provisioned, branch out:
 **Contribute**
 - [Issue pipeline](/docs/issue) — "Report an issue" → GitHub → optional auto-fix
 - [Repositories](/docs/repositories) — full org map
-- [Contributing](https://github.com/databayt/kun/blob/main/.claude/rules/github-workflow.md) — issue → branch → PR → merge
+- [Contributing](https://github.com/databayt/kun/blob/main/.claude/rules-global/github-workflow.md) — main only: edit → commit → `git pull --rebase` → push (no branches, worktrees or PRs)
 
 **External**
 - [Apps](/docs/apps) · [Connectors](/docs/connectors) · [Anthropic Directory](https://claude.ai/directory)

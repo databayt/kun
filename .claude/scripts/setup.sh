@@ -114,6 +114,16 @@ if [ -d "$KUN_DIR/.claude/hooks" ]; then
     info "hooks"
 fi
 
+# Engine helpers MCP servers and skills call by path (chrome-devtools-mcp.sh is
+# the chrome-devtools MCP command; greenlist/chrome-debug serve /auth). Personal
+# files already in ~/.claude/bin are left alone — only same-named ones refresh.
+if [ -d "$KUN_DIR/.claude/bin" ]; then
+    mkdir -p "$CLAUDE_DIR/bin"
+    cp "$KUN_DIR/.claude/bin/"*.sh "$CLAUDE_DIR/bin/" 2>/dev/null || true
+    chmod +x "$CLAUDE_DIR/bin/"*.sh 2>/dev/null || true
+    info "bin"
+fi
+
 say ""
 
 # ── Full config (universal — every machine is a full autonomous worker) ──
@@ -265,7 +275,9 @@ info "settings (engine keys refreshed, personal keys preserved)"
 #
 # The loop after it is what actually registers the catalog with Claude Code.
 if [ -f "$KUN_DIR/.claude/mcp.json" ]; then
-    cp "$KUN_DIR/.claude/mcp.json" "$CLAUDE_DIR/mcp.json"
+    # The catalog is authored on one Mac; its absolute paths name that home folder.
+    # Rewrite them to this machine's $HOME for both the copy and the registration.
+    sed "s#/Users/abdout#$HOME#g" "$KUN_DIR/.claude/mcp.json" > "$CLAUDE_DIR/mcp.json"
     chmod 600 "$CLAUDE_DIR/mcp.json" 2>/dev/null || true
     MCP_COUNT=$(grep -c '"description"' "$CLAUDE_DIR/mcp.json" 2>/dev/null || echo 0)
     info "MCP catalog copied ($MCP_COUNT) — health input, not the live config"
@@ -291,7 +303,7 @@ if [ -f "$KUN_DIR/.claude/mcp.json" ]; then
         # servers in every session.
         for name in $(jq -r '.mcpServers | to_entries[] | select(.value["$skipRegistration"] != true) | .key' "$KUN_DIR/.claude/mcp.json"); do
             claude mcp get "$name" >/dev/null 2>&1 && continue
-            if jq -c ".mcpServers.\"$name\" | del(.description, .\"\$skipRegistration\", .\"\$skipRegistration_why\")" "$KUN_DIR/.claude/mcp.json" \
+            if jq -c ".mcpServers.\"$name\" | del(.description, .\"\$skipRegistration\", .\"\$skipRegistration_why\")" "$CLAUDE_DIR/mcp.json" \
                 | claude mcp add-json -s user "$name" - >/dev/null 2>&1; then
                 MCP_NEW=$((MCP_NEW + 1))
             else
