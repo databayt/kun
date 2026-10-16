@@ -11,12 +11,12 @@ engine runs locally.
 
 | | |
 | --- | --- |
-| **What** | **One Mac Studio** (M5 Max, 128 GB) + **Studio Display**, running the models locally |
+| **What** | **One Mac Studio** (M5 Max, default configuration) + **Studio Display**, running the models locally |
 | **Where** | Kigali, Rwanda |
 | **Operated** | On the desk, and reachable remotely when nobody is at it |
 | **Link** | Business fibre + LTE failover on a second carrier |
 | **Powered** | The grid, behind a 1500 VA line-interactive UPS |
-| **Plan capex** | **~$8,200** all in (box ~$5.4K) · **~$100/month** to run |
+| **Plan capex** | **~$5,300** all in (box $2,499) · **~$93/month** to run |
 
 > **Supersedes the Erkowit solar node.** The previous version of this document sized
 > an unmanned, off-grid DGX Spark node in eastern Sudan: a 6 kWp array, a 15 kWh
@@ -55,20 +55,24 @@ the coder model and anything that should not leave the building.
 ### Run MoE models with low active parameters — never dense 70B
 
 Decode speed is set by **memory bandwidth ÷ bytes read per token**, and a mixture-of-
-experts model only reads its *active* parameters. On 614 GB/s:
+experts model only reads its *active* parameters. In 36 GB at 460 GB/s:
 
 | Model | Active | Memory | Verdict |
 | ----- | ------ | ------ | ------- |
 | Llama 3.1 8B 4-bit | 8B dense | ~5 GB | Trivial. Classification and enrichment |
-| Qwen3-Coder-30B-A3B 8-bit | 3B active | ~32 GB | **The target.** Low active params is what this hardware wants |
-| gpt-oss-120b / 80B-class MoE | ~5B active | ~45–65 GB | Best quality that fits 128 GB with KV headroom; ~75 tok/s measured on an M5 Max |
-| Dense Llama 3.1 70B | 70B dense | ~40 GB 4-bit | **Never.** Bandwidth-bound, single-digit tok/s |
+| gpt-oss-20b | ~4B active | ~13 GB | General reasoning that leaves most of the memory free |
+| Qwen3-Coder-30B-A3B 4-bit | 3B active | ~17 GB | **The target.** Fits with room for context; low active params is what this hardware wants |
+| gpt-oss-120b / 80B-class MoE | ~5B active | ~45–65 GB | **Does not fit.** Needs the 128 GB build (~75 tok/s measured there) |
+| Dense Llama 3.1 70B | 70B dense | ~40 GB 4-bit | **Never.** Too big here, and bandwidth-bound on any Mac |
+
+In 36 GB the 30B MoE class is the comfortable ceiling. That covers enrichment,
+classification and a capable coder; the cloud keeps everything bigger.
 
 ### macOS and MLX, honestly
 
 The box serves through Apple's **MLX** (mlx-lm, Ollama's MLX engine). Unified memory
-puts the whole model within the GPU's reach with no host-to-device copies, which is
-why 128 GB on a Mac behaves like 128 GB of VRAM.
+puts the whole model within the GPU's reach with no host-to-device copies, so 36 GB
+on a Mac behaves like 36 GB of VRAM, minus what macOS itself holds.
 
 The price: **no CUDA and no vLLM**. vLLM's PagedAttention is Linux + CUDA only, and
 mlx_lm.server keeps a per-request KV cache. So the box is excellent for one person
@@ -78,28 +82,36 @@ fires Tier 4.
 
 ## The one box
 
-**Mac Studio, M5 Max, 128 GB unified memory, 1 TB SSD: $5,399** (US list, October
-2026). The M5 Mac Studio shipped 22 September 2026.
+**Mac Studio, M5 Max, Apple's default configuration: $2,499** (US list, October
+2026; $2,299 education). The M5 Mac Studio shipped 22 September 2026.
 
-| | M5 Max (buy) | M5 Ultra (Tier 4) |
-| --- | --- | --- |
-| Memory | 128 GB unified | 256 GB (512 GB option slipping) |
-| Bandwidth | 614 GB/s | 1.2 TB/s |
-| GPU | 40-core | up to 80-core |
-| Typical draw | ~105 W under inference (measured), ~10 W idle | ~220 W est. (480 W max continuous rating) |
-| Price | **$5,399** (128 GB · 1 TB) | **$9,499** (256 GB · 1 TB) |
+| | Default (buy) | Upgrade at checkout | M5 Ultra (Tier 4) |
+| --- | --- | --- | --- |
+| CPU | 18-core (6 super + 12 performance) | same | 36-core |
+| GPU | 32-core | 40-core | up to 80-core |
+| Memory | **36 GB** unified | 128 GB | 96–512 GB |
+| Bandwidth | **460 GB/s** | 614 GB/s | 1.2 TB/s |
+| Storage | 512 GB SSD | 512 GB | 1 TB |
+| Typical draw | ~90 W load, ~9 W idle (est.) | ~105 W measured | ~220 W est. (480 W max rating) |
+| Price | **$2,499** | **$5,099** (+$2,600) | from $5,499 |
 
-The M5 Max holds the target models with room for context at the power draw of a desk
-lamp. The Ultra doubles bandwidth, and so decode speed, for $4,100 more. That is real
-speed bought before there is a queue to speed up.
+Ports: 4× Thunderbolt 5, 10 Gb Ethernet, 2× USB-A, HDMI and a headphone jack on the
+back; 2× USB-C and an SDXC slot on the front. Wi-Fi 7 and Bluetooth 6 on Apple's N1
+chip. Ships with macOS 27.
+
+**Memory is decided at checkout or never.** Apple memory is part of the chip package;
+nothing can be added later. The default box is the cash-first choice and holds the
+30B class. If 80B-class models are a known need on the day of purchase, the +$2,600
+upgrade is the time to buy them, not a later Tier.
 
 ### Buy the class, never the SKU
 
 Apple refreshes its chips roughly yearly, and each generation raises memory
 bandwidth, which is exactly what caps decode. Our Tier 2 trigger may not fire before
-the M6 generation. So the spec reads **"Mac Studio, Max-class chip, at least 128 GB,
-current generation at trigger time"**, never a part number. Written that way, buying
-the box last is not only cash discipline; the plan upgrades itself while it waits.
+the M6 generation. So the spec reads **"Mac Studio, Max-class chip, default
+configuration of the generation current at trigger time"**, never a part number.
+Written that way, buying the box last is not only cash discipline; the plan upgrades
+itself while it waits.
 
 ## The display
 
@@ -112,8 +124,8 @@ The panel is the 2022 one; the new parts are the ports and the camera.
 | Nano-texture glass | +$300 | Only if the desk faces a window |
 | Tilt- and height-adjustable stand | +$400 | No: a VESA arm does it for a quarter of the price |
 
-The Mac Studio ships with no keyboard or pointer: **Magic Keyboard with Touch ID +
-Magic Trackpad, $278.**
+The Mac Studio ships with no keyboard or pointer: **Magic Keyboard with Touch ID
+($149) + Magic Trackpad ($129).**
 
 ## Connectivity
 
@@ -135,33 +147,34 @@ fibre and something to avoid on the LTE lane.
 
 ## Power
 
-Kigali's grid replaces the solar plant. What remains is a **1500 VA / 900 W
-line-interactive UPS (~$300)**: the AVR absorbs brownouts, and the battery gives
-an outage enough minutes to finish the job and sleep cleanly.
+Kigali's grid replaces the solar plant. What remains is an **APC Back-UPS Pro 1500
+(BR1500MI, the 230 V model; 1500 VA / 865 W, line-interactive, ~$300)**: the AVR
+absorbs brownouts, and the battery gives an outage enough minutes to finish the job
+and sleep cleanly. The 120 V BR1500MS2 is the US sibling; do not import that one.
 
 ### UPS runtime
 
 ```
 runtime (min) = (battery Wh × efficiency) / peak W × 60
-              = (216 × 0.8) / 158 × 60  ≈ 66 min
+              = (216 × 0.8) / 143 × 60  ≈ 73 min
 ```
 
-Peak is the box under load (105 W) + display (30 W) + fibre ONT/router (12 W) +
-LTE router (6 W) + SSD (5 W) = **158 W**. With the M5 Ultra it rises to ~273 W and
-runtime falls to ~38 minutes. Both are well under the UPS's 900 W limit.
+Peak is the box under load (~90 W) + display (30 W) + fibre ONT/router (12 W) +
+LTE router (6 W) + SSD (5 W) = **143 W**. With the 128 GB upgrade it rises to ~158 W
+(~66 minutes). Both are far under the UPS's 865 W limit.
 
 ### Energy and the bill
 
 | Load | W × h | Wh/day |
 | ---- | ----- | -----: |
-| Mac Studio M5 Max | 105 W × 8 h + 10 W × 16 h | 1,000 |
+| Mac Studio M5 Max | 90 W × 8 h + 9 W × 16 h | 864 |
 | Studio Display | 30 W × 10 h | 300 |
 | Fibre ONT + router | 12 W × 24 h | 288 |
 | LTE router | 6 W × 24 h | 144 |
 | Time Machine SSD | 5 W × 24 h | 120 |
-| **Total** | | **~1.85 kWh/day** |
+| **Total** | | **~1.72 kWh/day** |
 
-At ~$0.25/kWh that is **~$14/month**. Power is the smallest monthly line; the link
+At ~$0.25/kWh that is **~$13/month**. Power is the smallest monthly line; the link
 is the largest.
 
 ## When the power or the link drops
@@ -188,19 +201,20 @@ compare it with buying in Dubai.
 
 | Item | Cost |
 | ---- | ---: |
-| **Mac Studio — M5 Max, 128 GB, 1 TB** | **$5,399** |
+| **Mac Studio — M5 Max, default configuration (36 GB, 512 GB)** | **$2,499** |
 | Studio Display (2026), standard glass, tilt stand | $1,599 |
-| Magic Keyboard (Touch ID) + Magic Trackpad | $278 |
+| Magic Keyboard with Touch ID | $149 |
+| Magic Trackpad | $129 |
 | 4 TB Thunderbolt 5 SSD (Time Machine) | ~$400 |
-| 1500 VA line-interactive UPS | ~$300 |
+| APC Back-UPS Pro 1500 (BR1500MI) | ~$300 |
 | LTE failover router | ~$150 |
 | Fibre installation | ~$50 |
-| **Total** | **~$8,180** |
+| **Total** | **~$5,276** |
 
 | | Capex | Monthly |
 | --- | ---: | ---: |
-| **M5 Max workstation** | **~$8,200** | **~$95** (fibre ~$60 + LTE ~$20 + power ~$14) |
-| **M5 Ultra workstation** | **~$12,300** | ~$100 |
+| **Default workstation** | **~$5,300** | **~$93** (fibre ~$60 + LTE ~$20 + power ~$13) |
+| **With the 128 GB upgrade** | **~$7,900** | ~$93 |
 
 ## Tiers and triggers
 
@@ -211,9 +225,9 @@ there is revenue is the failure mode, not the plan.
 | ---- | ---- | ---: | ------- |
 | 0 | Laptops the team owns, plus cloud | $0 | Current state |
 | **1** | **The link**: business fibre, LTE failover on a second carrier, UPS for the router | **~$500 + ~$80/mo** | **None. Affordable now, and it protects delivery today** |
-| 2 | **The workstation**: Mac Studio M5 Max 128 GB, Studio Display, input, Time Machine SSD. Hermes, the CRM mirror, git and staging move onto it | ~$7,700 | First paying school, or non-dilutive funding |
-| 3 | **Local models live**: MLX serving for enrichment, classification and the coder model | $0 (software) | 3 paying schools / ~$3K MRR sustained 3 months |
-| 4 | **Scale the box**: M5 Ultra 256–512 GB, or a second Studio clustered over Thunderbolt 5; the Max moves to a teammate's desk | ~$9,500+ | Measured saturation: the queue waits on the machine, not the link |
+| 2 | **The workstation**: Mac Studio M5 Max (default configuration), Studio Display, Magic Keyboard and Trackpad, Time Machine SSD. Hermes, the CRM mirror, git and staging move onto it | ~$4,800 | First paying school, or non-dilutive funding |
+| 3 | **Local models live**: MLX serving for enrichment, classification and a 30B-class coder, all within 36 GB | $0 (software) | 3 paying schools / ~$3K MRR sustained 3 months |
+| 4 | **Scale the box**: memory cannot be added later, so a second machine: an M5 Ultra (96–512 GB) or a 128 GB Studio clustered over Thunderbolt 5; the first Studio moves to a teammate's desk | ~$5,100–9,500 | Measured saturation: the queue waits on the machine, not the link |
 | 5 | **Customer plane migration**: selected tenants on owned iron | Incremental | 12 months of measured uptime, and a customer who wants on-prem and pays for it |
 
 Note the shape: the link comes first because it is cheap and protects delivery today,
@@ -225,17 +239,19 @@ software on a machine we already bought.
 ### NVIDIA DGX Spark: rejected
 
 128 GB unified at ~$4,000–4,700, with CUDA, vLLM and DGX OS (Ubuntu). It was the
-previous plan's box. Against the M5 Max it has **the same memory and under half the
-bandwidth (273 vs 614 GB/s)**, so decode is slower. It buys CUDA, but it would be a
-second, headless machine beside a Mac rather than the one desk the team works at.
-Revisit only if a workload appears that genuinely needs CUDA (video generation is
+previous plan's box. Against the default M5 Max it holds **3.5× the memory at under
+two-thirds the bandwidth (273 vs 460 GB/s)**: bigger models, slower decode. It would
+be a second, headless machine beside the desk rather than the desk itself. If
+80B-class models become the need, the +$2,600 upgrade at checkout keeps them in one
+box. Revisit only if a workload appears that genuinely needs CUDA (video generation is
 the likely one).
 
 ### M5 Ultra now: watch
 
-**+$4,100** for 2× bandwidth and 2× memory (256 GB · 1.2 TB/s · from $9,499; the
-512 GB option is slipping). Real speed, bought before there is a queue to speed up.
-It is Tier 4. Revisit when measured saturation says the Max is the bottleneck.
+**+$3,000** over the default Max for 2.6× the bandwidth and 96 GB (from $5,499; up to
+512 GB, with that option slipping). Real speed, bought before there is a queue to
+speed up. It is Tier 4. Revisit when measured saturation says the Max is the
+bottleneck.
 
 ### Studio Display XDR: rejected
 
@@ -252,14 +268,16 @@ for two years.
 | Both links fail together | LTE carrier chosen to not share the fibre's upstream |
 | Long outage beyond UPS runtime | Clean sleep on low battery + auto-start after power returns + idempotent queue |
 | Theft or damage | Normal office security and insurance; Time Machine + S3 mean the data outlives the box |
+| 36 GB turns out too small | Memory is fixed at purchase, so the fix is a second box (Tier 4); decide the +$2,600 upgrade at checkout if 80B-class models are already a known need |
 | Open-weight quality stalls | The cloud keeps the frontier work; local models only take jobs they do well |
 
 ## Open decisions
 
-1. Fibre provider: get written quotes from CanalBox Business, Liquid and MTN.
-2. Where to buy: a Kigali Apple Authorised Reseller vs Dubai (price, warranty, duty).
-3. Nano-texture glass: depends on the desk's position relative to windows.
-4. Whose desk the box sits on, and who holds physical access.
+1. Memory: the default 36 GB, or the +$2,600 128 GB build. It can only be decided at checkout.
+2. Fibre provider: get written quotes from CanalBox Business, Liquid and MTN.
+3. Where to buy: a Kigali Apple Authorised Reseller vs Dubai (price, warranty, duty).
+4. Nano-texture glass: depends on the desk's position relative to windows.
+5. Whose desk the box sits on, and who holds physical access.
 
 ## Sources
 
@@ -268,9 +286,12 @@ for two years.
 [MacRumors — Mac Studio roundup](https://www.macrumors.com/roundup/mac-studio/) ·
 [Engadget — M5 Ultra review](https://www.engadget.com/2263184/apple-mac-studio-m5-ultra-review/) ·
 [Engadget — why the Mac Studio got expensive](https://www.engadget.com/2264291/why-apple-mac-studio-so-expensive/) ·
-[M5 Max 128 GB · 1 TB retail listing — Abt](https://www.abt.com/Apple-Mac-Studio-Desktop-M5-Max-128GB-Unified-Memory-1TB-SSD-in-Silver-Z1U4000EF/p/248640.html) ·
+[Apple Newsroom — Mac Studio with M5 Max and M5 Ultra](https://www.apple.com/newsroom/2026/08/apple-introduces-new-mac-studio-with-m5-max-and-m5-ultra/) ·
+[Macworld — M5 Max Mac Studio review (base config, 460 GB/s)](https://www.macworld.com/article/3238319/mac-studio-m5-max-review.html) ·
+[M5 Max 128 GB retail listing — Abt](https://www.abt.com/Apple-Mac-Studio-Desktop-M5-Max-128GB-Unified-Memory-1TB-SSD-in-Silver-Z1U4000EF/p/248640.html) ·
 [M5 Ultra vs DGX Spark on local LLMs](https://aiweekly.co/alerts/apple-m5-ultra-mac-studio-outpaces-dgx-spark-on-local-llms)
-**The display:** [9to5Mac — new Studio Display](https://9to5mac.com/2026/03/03/apple-launches-new-generation-of-studio-display/) ·
+**The display:** [Apple Newsroom — new Studio Display and Studio Display XDR](https://www.apple.com/newsroom/2026/03/apple-unveils-new-studio-display-and-all-new-studio-display-xdr/) ·
+[9to5Mac — new Studio Display](https://9to5mac.com/2026/03/03/apple-launches-new-generation-of-studio-display/) ·
 [EveryMac — Studio Display 2026 specs](https://everymac.com/monitors/apple/studio-display/specs/apple-studio-display-retina-27-inch-5k-2026-specs.html) ·
 [Macworld — Studio Display 2026 review](https://www.macworld.com/article/3091564/studio-display-2026-review-a-great-monitor-if-you-can-get-it-for-half-price.html) ·
 [iGeeksBlog — Studio Display XDR](https://www.igeeksblog.com/apple-studio-display-xdr-specs-features-price/)
@@ -282,7 +303,7 @@ for two years.
 
 ## See also
 
-- [/hardware](/en/hardware): the live cost model. Pick the box, toggle line items, watch capex, the monthly bill and UPS runtime move
+- [/hardware](/en/hardware): product photos and the live cost model. Toggle line items or the memory upgrade, watch capex, the monthly bill and UPS runtime move
 - [Delivery](/docs/delivery): the on-prem tier this workstation is the reference build for
 - [CRM](/docs/crm) · [Hermes](/docs/hermes): the first two services to move onto it
 - [Stack](/docs/stack): what runs, and where

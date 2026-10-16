@@ -5,11 +5,23 @@
 // list, checked October 2026; Kigali line items (fibre, LTE, power tariff) are
 // estimates until a written quote replaces them — each says so in its detail.
 //
+// Product photos live in public/hardware/: Apple Newsroom press images and
+// Apple Store product shots, plus the APC product render. The fibre and LTE
+// routers come from the provider, so they carry no photo.
+//
 // This replaced an unmanned solar node at Erkowit. Kigali's grid is steady
 // enough that the solar plant collapses to a line-interactive UPS, and the
 // interesting number stops being kWp and becomes dollars.
 
-export type ItemGroup = "desk" | "link" | "power";
+export type ItemGroup = "box" | "desk" | "link" | "power";
+
+export type ProductImage = {
+  src: string;
+  width: number;
+  height: number;
+  /** Transparent PNG cut-out rather than a photo on a baked light backdrop. */
+  cutout: boolean;
+};
 
 export type SetupItem = {
   id: string;
@@ -26,6 +38,7 @@ export type SetupItem = {
   defaultOn: boolean;
   detail?: string;
   detailAr?: string;
+  image?: ProductImage;
 };
 
 export function itemWh(item: SetupItem): number {
@@ -33,6 +46,23 @@ export function itemWh(item: SetupItem): number {
 }
 
 export const SETUP_ITEMS: SetupItem[] = [
+  // ── The box, upgraded ─────────────────────────────────────────────────
+  {
+    id: "upgrade-128",
+    group: "box",
+    label: "Upgrade: 40-core GPU + 128 GB memory",
+    labelAr: "ترقية: معالج رسومي ٤٠ نواة وذاكرة ١٢٨ ج.ب",
+    capexUSD: 2600,
+    monthlyUSD: 0,
+    watts: 15,
+    hours: 8,
+    defaultOn: false,
+    detail:
+      "Bandwidth 460 → 614 GB/s and room for 80B-class models. Apple memory cannot be added later — this is decided at checkout or never",
+    detailAr:
+      "عرض النطاق من ٤٦٠ إلى ٦١٤ ج.ب/ث ومساحة لنماذج ٨٠ مليار. ذاكرة أبل لا تُضاف لاحقًا — القرار عند الشراء أو أبدًا",
+  },
+
   // ── The desk ──────────────────────────────────────────────────────────
   {
     id: "display",
@@ -47,6 +77,12 @@ export const SETUP_ITEMS: SetupItem[] = [
     detail:
       "600 nits · P3 · 12 MP Center Stage · Thunderbolt 5 in, daisy-chain out",
     detailAr: "٦٠٠ شمعة · P3 · كاميرا ١٢ ميغابكسل · Thunderbolt 5 مع تسلسل",
+    image: {
+      src: "/hardware/studio-display.jpg",
+      width: 1400,
+      height: 788,
+      cutout: false,
+    },
   },
   {
     id: "nano",
@@ -62,30 +98,42 @@ export const SETUP_ITEMS: SetupItem[] = [
     detailAr: "فقط إن كان المكتب مقابل نافذة — ضوء كيغالي ساطع",
   },
   {
-    id: "stand",
+    id: "keyboard",
     group: "desk",
-    label: "Tilt- and height-adjustable stand",
-    labelAr: "حامل قابل للإمالة والارتفاع",
-    capexUSD: 400,
-    monthlyUSD: 0,
-    watts: 0,
-    hours: 0,
-    defaultOn: false,
-    detail: "A VESA arm does the same for a quarter of the price",
-    detailAr: "ذراع VESA يؤدي الغرض بربع السعر",
-  },
-  {
-    id: "input",
-    group: "desk",
-    label: "Magic Keyboard (Touch ID) + Magic Trackpad",
-    labelAr: "لوحة مفاتيح Magic بـ Touch ID ولوحة لمس",
-    capexUSD: 278,
+    label: "Magic Keyboard with Touch ID",
+    labelAr: "لوحة مفاتيح Magic بـ Touch ID",
+    capexUSD: 149,
     monthlyUSD: 0,
     watts: 0,
     hours: 0,
     defaultOn: true,
-    detail: "The Mac Studio ships with neither",
-    detailAr: "الجهاز لا يأتي بأيٍّ منهما",
+    detail: "The Mac Studio ships without one. Touch ID unlocks and signs in",
+    detailAr: "الجهاز يأتي بدونها — Touch ID للفتح وتسجيل الدخول",
+    image: {
+      src: "/hardware/magic-keyboard-touch-id.png",
+      width: 800,
+      height: 800,
+      cutout: true,
+    },
+  },
+  {
+    id: "trackpad",
+    group: "desk",
+    label: "Magic Trackpad",
+    labelAr: "لوحة اللمس Magic Trackpad",
+    capexUSD: 129,
+    monthlyUSD: 0,
+    watts: 0,
+    hours: 0,
+    defaultOn: true,
+    detail: "Force Touch, USB-C charging",
+    detailAr: "Force Touch وشحن USB-C",
+    image: {
+      src: "/hardware/magic-trackpad.png",
+      width: 800,
+      height: 800,
+      cutout: true,
+    },
   },
   {
     id: "ssd",
@@ -135,74 +183,107 @@ export const SETUP_ITEMS: SetupItem[] = [
   {
     id: "ups",
     group: "power",
-    label: "Line-interactive UPS — 1500 VA / 900 W",
-    labelAr: "مزوّد طاقة احتياطي — ١٥٠٠ فولت أمبير / ٩٠٠ واط",
+    label: "APC Back-UPS Pro 1500",
+    labelAr: "APC Back-UPS Pro 1500",
     capexUSD: 300,
     monthlyUSD: 0,
     watts: 0,
     hours: 0,
     defaultOn: true,
     detail:
-      "AVR rides through brownouts; the battery covers an outage long enough to finish the job and sleep cleanly",
+      "BR1500MI, the 230 V model · 1500 VA / 865 W, line-interactive AVR. Rides through brownouts and covers an outage long enough to sleep cleanly",
     detailAr:
-      "منظم الجهد يمتص التذبذب، والبطارية تكفي لإنهاء المهمة والإيقاف النظيف",
+      "طراز BR1500MI بجهد ٢٣٠ فولت · ١٥٠٠ فولت أمبير / ٨٦٥ واط مع منظم جهد. يمتص التذبذب ويكفي للإيقاف النظيف",
+    image: {
+      src: "/hardware/apc-back-ups-pro-1500.jpg",
+      width: 800,
+      height: 800,
+      cutout: false,
+    },
   },
 ];
 
 // ── The one box ─────────────────────────────────────────────────────────
 
+export type Spec = {
+  label: string;
+  labelAr: string;
+  value: string;
+};
+
 export type Machine = {
-  id: string;
   name: string;
   nameAr: string;
+  tagline: string;
+  taglineAr: string;
   memory: string;
   bandwidth: string;
   compute: string;
+  storage: string;
   loadW: number;
   idleW: number;
   loadHours: number;
   priceUSD: number;
-  config: string;
-  verdict: string;
-  verdictAr: string;
+  image: ProductImage;
+  rearImage: ProductImage;
+  specs: Spec[];
 };
 
-export const MACHINES: Machine[] = [
-  {
-    id: "m5-max",
-    name: "Mac Studio — M5 Max",
-    nameAr: "ماك ستوديو — M5 Max",
-    memory: "128 GB unified",
-    bandwidth: "614 GB/s",
-    compute: "40-core GPU",
-    loadW: 105,
-    idleW: 10,
-    loadHours: 8,
-    priceUSD: 5399,
-    config: "128 GB · 1 TB",
-    verdict:
-      "Buy this one. Holds an 80B-class MoE with room for context, at the power draw of a desk lamp",
-    verdictAr:
-      "الخيار الآن — يتسع لنموذج MoE بحجم ٨٠ مليار مع سياق، باستهلاك مصباح مكتب",
+/** Apple's default M5 Max configuration — no build-to-order upgrades. */
+export const MACHINE: Machine = {
+  name: "Mac Studio — M5 Max",
+  nameAr: "ماك ستوديو — M5 Max",
+  tagline: "The default configuration. Nothing upgraded, nothing missing.",
+  taglineAr: "الإعداد الافتراضي — بلا ترقيات وبلا نقص.",
+  memory: "36 GB unified",
+  bandwidth: "460 GB/s",
+  compute: "18-core CPU · 32-core GPU",
+  storage: "512 GB SSD",
+  loadW: 90,
+  idleW: 9,
+  loadHours: 8,
+  priceUSD: 2499,
+  image: {
+    src: "/hardware/mac-studio-front.jpg",
+    width: 1400,
+    height: 787,
+    cutout: false,
   },
-  {
-    id: "m5-ultra",
-    name: "Mac Studio — M5 Ultra",
-    nameAr: "ماك ستوديو — M5 Ultra",
-    memory: "256 GB unified",
-    bandwidth: "1.2 TB/s",
-    compute: "up to 80-core GPU",
-    loadW: 220,
-    idleW: 15,
-    loadHours: 8,
-    priceUSD: 9499,
-    config: "256 GB · 1 TB",
-    verdict:
-      "Twice the bandwidth, so twice the decode speed — for $4,100 more. The Tier 4 box, not the first one",
-    verdictAr:
-      "ضعف عرض النطاق أي ضعف سرعة التوليد — مقابل ٤١٠٠ دولار إضافية. جهاز المرحلة ٤ لا الأولى",
+  rearImage: {
+    src: "/hardware/mac-studio-rear.jpg",
+    width: 1400,
+    height: 787,
+    cutout: false,
   },
-];
+  specs: [
+    { label: "Chip", labelAr: "الشريحة", value: "Apple M5 Max" },
+    {
+      label: "CPU",
+      labelAr: "المعالج",
+      value: "18-core (6 super + 12 performance)",
+    },
+    {
+      label: "GPU",
+      labelAr: "المعالج الرسومي",
+      value: "32-core, Neural Accelerators",
+    },
+    { label: "Neural Engine", labelAr: "المحرك العصبي", value: "16-core" },
+    { label: "Memory", labelAr: "الذاكرة", value: "36 GB unified · 460 GB/s" },
+    { label: "Storage", labelAr: "التخزين", value: "512 GB SSD" },
+    {
+      label: "Rear",
+      labelAr: "الخلف",
+      value: "4× Thunderbolt 5 · 10 Gb Ethernet · 2× USB-A · HDMI",
+    },
+    { label: "Front", labelAr: "الأمام", value: "2× USB-C · SDXC" },
+    {
+      label: "Wireless",
+      labelAr: "اللاسلكي",
+      value: "Wi-Fi 7 · Bluetooth 6 (N1)",
+    },
+    { label: "Software", labelAr: "النظام", value: "macOS 27" },
+  ],
+};
 
 export function machineWh(m: Machine): number {
   return m.loadW * m.loadHours + m.idleW * (24 - m.loadHours);
@@ -219,7 +300,7 @@ export const SETUP = {
   /** Inverter efficiency plus usable depth of a lead-acid pack. */
   upsEff: 0.8,
   /** UPS output limit — peak draw must stay under this. */
-  upsMaxW: 900,
+  upsMaxW: 865,
 } as const;
 
 export type Setup = {
@@ -239,14 +320,11 @@ export type Setup = {
  * The whole cost model in one function. Kept pure and exported so the numbers
  * on the page and the numbers in the doc come from one place.
  */
-export function computeSetup(
-  selectedIds: ReadonlySet<string>,
-  machine: Machine,
-): Setup {
-  let capexUSD = machine.priceUSD;
+export function computeSetup(selectedIds: ReadonlySet<string>): Setup {
+  let capexUSD = MACHINE.priceUSD;
   let serviceMonthlyUSD = 0;
-  let dailyWh = machineWh(machine);
-  let peakW = machine.loadW;
+  let dailyWh = machineWh(MACHINE);
+  let peakW = MACHINE.loadW;
 
   for (const item of SETUP_ITEMS) {
     if (!selectedIds.has(item.id)) continue;
@@ -266,12 +344,17 @@ export function computeSetup(
     powerMonthlyUSD,
     monthlyUSD: serviceMonthlyUSD + powerMonthlyUSD,
     dailyKWh,
-    machineKWh: machineWh(machine) / 1000,
+    machineKWh: machineWh(MACHINE) / 1000,
     peakW,
     upsMinutes: hasUps ? ((SETUP.upsBatteryWh * SETUP.upsEff) / peakW) * 60 : 0,
     hasUps,
   };
 }
+
+/** The default selection — what the hero's headline totals describe. */
+export const DEFAULT_SELECTION: ReadonlySet<string> = new Set(
+  SETUP_ITEMS.filter((r) => r.defaultOn).map((r) => r.id),
+);
 
 // ── Site facts ──────────────────────────────────────────────────────────
 
@@ -363,10 +446,10 @@ export const TIERS: Tier[] = [
     n: "2",
     name: "The workstation",
     nameAr: "محطة العمل",
-    what: "Mac Studio M5 Max 128 GB, Studio Display, keyboard and trackpad, Time Machine SSD. Hermes, the CRM mirror, git and staging move onto the box.",
+    what: "Mac Studio M5 Max in its default configuration, Studio Display, Magic Keyboard and Trackpad, Time Machine SSD. Hermes, the CRM mirror, git and staging move onto the box.",
     whatAr:
-      "ماك ستوديو M5 Max بذاكرة ١٢٨ ج.ب، شاشة Studio Display، لوحة مفاتيح ولمس، قرص Time Machine. نقل هيرمس ومرآة العملاء وgit والتجريب إلى الجهاز.",
-    capex: "~$7,700",
+      "ماك ستوديو M5 Max بإعداده الافتراضي، شاشة Studio Display، لوحة مفاتيح ولمس، قرص Time Machine. نقل هيرمس ومرآة العملاء وgit والتجريب إلى الجهاز.",
+    capex: "~$4,800",
     trigger: "First paying school, or non-dilutive funding",
     triggerAr: "أول مدرسة مدفوعة أو تمويل غير مخفِّض",
     now: false,
@@ -375,9 +458,9 @@ export const TIERS: Tier[] = [
     n: "3",
     name: "Local models live",
     nameAr: "تشغيل النماذج محليًا",
-    what: "MLX serving on the box: enrichment, classification and the coder model run locally; the cloud keeps the frontier work.",
+    what: "MLX serving on the box: enrichment, classification and a 30B-class coder run locally in 36 GB; the cloud keeps the frontier work.",
     whatAr:
-      "تشغيل MLX على الجهاز: الإثراء والتصنيف ونموذج البرمجة محليًا، والسحابة للمهام الحدودية.",
+      "تشغيل MLX على الجهاز: الإثراء والتصنيف ونموذج برمجة بحجم ٣٠ مليار محليًا ضمن ٣٦ ج.ب، والسحابة للمهام الحدودية.",
     capex: "$0 — software",
     trigger: "3 paying schools / ~$3K MRR sustained 3 months",
     triggerAr: "٣ مدارس مدفوعة أو ٣ آلاف دولار شهريًا لثلاثة أشهر",
@@ -387,10 +470,10 @@ export const TIERS: Tier[] = [
     n: "4",
     name: "Scale the box",
     nameAr: "توسيع الجهاز",
-    what: "M5 Ultra with 256–512 GB, or a second Studio clustered over Thunderbolt 5. The M5 Max moves to a teammate's desk.",
+    what: "Memory cannot be added to a Mac later, so scaling means a second box: an M5 Ultra (96–512 GB) or a 128 GB Studio clustered over Thunderbolt 5. The first Studio moves to a teammate's desk.",
     whatAr:
-      "M5 Ultra بذاكرة ٢٥٦–٥١٢ ج.ب، أو جهاز ثانٍ موصول عبر Thunderbolt 5. وينتقل M5 Max إلى مكتب زميل.",
-    capex: "~$9,500+",
+      "ذاكرة الماك لا تُضاف لاحقًا، فالتوسع يعني جهازًا ثانيًا: M5 Ultra (٩٦–٥١٢ ج.ب) أو ستوديو بذاكرة ١٢٨ ج.ب موصول عبر Thunderbolt 5. وينتقل الجهاز الأول إلى مكتب زميل.",
+    capex: "~$5,100–9,500",
     trigger:
       "Measured saturation — the queue is waiting on the machine, not on the link",
     triggerAr: "إشباع مُقاس — الطابور ينتظر الجهاز لا الاتصال",
@@ -427,36 +510,46 @@ export const MODEL_LADDER: ModelRow[] = [
     klass: "Llama 3.1 8B 4-bit",
     klassAr: "Llama 3.1 8B 4-bit",
     active: "8B dense",
-    speed: "fast — ~5 GB",
+    speed: "~5 GB · fast",
     verdict: "Trivial for the box. Good for classification and enrichment",
     verdictAr: "سهل على الجهاز — مناسب للتصنيف والإثراء",
     good: true,
   },
   {
-    klass: "Qwen3-Coder-30B-A3B 8-bit",
-    klassAr: "Qwen3-Coder-30B-A3B 8-bit",
+    klass: "gpt-oss-20b",
+    klassAr: "gpt-oss-20b",
+    active: "~4B active (MoE)",
+    speed: "~13 GB",
+    verdict: "General reasoning that leaves most of the 36 GB free",
+    verdictAr: "استدلال عام يترك معظم الذاكرة فارغة",
+    good: true,
+  },
+  {
+    klass: "Qwen3-Coder-30B-A3B 4-bit",
+    klassAr: "Qwen3-Coder-30B-A3B 4-bit",
     active: "3B active (MoE)",
-    speed: "~32 GB weights",
-    verdict: "The target. Low active params is exactly what 614 GB/s wants",
-    verdictAr: "الهدف — قلة المعاملات النشطة هي ما يناسب ٦١٤ ج.ب/ث",
+    speed: "~17 GB weights",
+    verdict:
+      "The target. Fits with room for context — low active params is what 460 GB/s wants",
+    verdictAr: "الهدف — يتسع مع هامش للسياق، وقلة المعاملات النشطة تناسب ٤٦٠ ج.ب/ث",
     good: true,
   },
   {
     klass: "gpt-oss-120b / 80B-class MoE",
     klassAr: "gpt-oss-120b / MoE بحجم ٨٠ مليار",
     active: "~45–65 GB weights",
-    speed: "~75 tok/s measured",
-    verdict: "Best quality that still fits 128 GB with KV headroom",
-    verdictAr: "أفضل جودة تتسع في ١٢٨ ج.ب مع هامش للسياق",
-    good: true,
+    speed: "needs the 128 GB box",
+    verdict: "Does not fit in 36 GB. Only with the upgrade, decided at checkout",
+    verdictAr: "لا يتسع في ٣٦ ج.ب — فقط مع الترقية عند الشراء",
+    good: false,
   },
   {
     klass: "Dense Llama 3.1 70B",
     klassAr: "Llama 3.1 70B الكثيف",
     active: "70B dense",
-    speed: "single-digit tok/s",
-    verdict: "Never. Bandwidth-bound — the box looks broken running this",
-    verdictAr: "أبدًا — محدود بعرض النطاق ويبدو الجهاز معطلًا",
+    speed: "~40 GB 4-bit",
+    verdict: "Never. Too big here, and bandwidth-bound on any Mac",
+    verdictAr: "أبدًا — أكبر من الذاكرة ومحدود بعرض النطاق على أي ماك",
     good: false,
   },
 ];
@@ -487,40 +580,40 @@ export const ALTERNATIVES: Alternative[] = [
     id: "spark",
     name: "NVIDIA DGX Spark",
     nameAr: "NVIDIA DGX Spark",
-    headline: "273 GB/s",
-    headlineLabel: "against 614 for the M5 Max",
-    headlineLabelAr: "مقابل ٦١٤ لجهاز M5 Max",
+    headline: "128 GB",
+    headlineLabel: "for ~$4,000, against 36 GB here",
+    headlineLabelAr: "مقابل ~٤٠٠٠ دولار، مقابل ٣٦ ج.ب هنا",
     specs: [
-      "128 GB unified · ~$4,000–4,700",
+      "273 GB/s vs 460 GB/s",
       "CUDA · vLLM · DGX OS (Ubuntu)",
-      "No display workflow — a headless box",
+      "Headless — no desk, no display workflow",
     ],
     specsAr: [
-      "128 GB موحدة · ~$4,000–4,700",
+      "273 GB/s مقابل 460 GB/s",
       "CUDA · vLLM · DGX OS (أوبنتو)",
-      "بلا سير عمل للشاشة — جهاز بلا واجهة",
+      "بلا واجهة — لا مكتب ولا شاشة",
     ],
     verdict:
-      "Same memory, under half the bandwidth, so slower decode. It buys CUDA, but it would be a second machine beside a Mac rather than the one desk the team works at.",
+      "Holds bigger models, decodes slower, and is a second headless machine beside the desk. If 80B-class models become the need, the +$2,600 upgrade keeps it in one box.",
     verdictAr:
-      "الذاكرة نفسها بأقل من نصف عرض النطاق، أي توليد أبطأ. يمنح CUDA لكنه جهاز ثانٍ بجانب ماك لا المكتب الواحد الذي يعمل عليه الفريق.",
+      "يتسع لنماذج أكبر لكنه أبطأ في التوليد، وجهاز ثانٍ بلا واجهة بجانب المكتب. إن صارت نماذج ٨٠ مليار حاجة، فالترقية بـ٢٦٠٠ دولار تبقيها في جهاز واحد.",
     status: "rejected",
   },
   {
     id: "ultra",
     name: "M5 Ultra now",
     nameAr: "M5 Ultra الآن",
-    headline: "+$4,100",
-    headlineLabel: "for 2× bandwidth and 2× memory",
-    headlineLabelAr: "مقابل ضعف عرض النطاق والذاكرة",
+    headline: "+$3,000",
+    headlineLabel: "for 2.6× bandwidth and 96 GB",
+    headlineLabelAr: "مقابل ٢٫٦ ضعف عرض النطاق و٩٦ ج.ب",
     specs: [
-      "256 GB · 1.2 TB/s · from $9,499",
-      "512 GB option slipping to 2027",
+      "96 GB · 1.2 TB/s · from $5,499",
+      "Up to 512 GB (slipping to 2027)",
       "480 W max continuous rating",
     ],
     specsAr: [
-      "256 GB · 1.2 TB/s · من $9,499",
-      "خيار 512 GB متأخر إلى ٢٠٢٧",
+      "96 GB · 1.2 TB/s · من $5,499",
+      "حتى 512 GB (متأخر إلى ٢٠٢٧)",
       "تصنيف أقصى ٤٨٠ واط مستمر",
     ],
     verdict:
@@ -553,3 +646,9 @@ export const ALTERNATIVES: Alternative[] = [
     status: "rejected",
   },
 ];
+
+// ── Formatting ──────────────────────────────────────────────────────────
+
+export function usd(n: number): string {
+  return `$${Math.round(n).toLocaleString("en-US")}`;
+}

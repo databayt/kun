@@ -2,18 +2,41 @@
 
 import { useMemo, useState } from "react";
 import {
+  Check,
+  Cpu,
+  HardDrive,
+  RadioTower,
+  Router,
+  SunDim,
+  type LucideIcon,
+} from "lucide-react";
+import { BlurImage } from "@/components/atom/blur-image";
+import { cn } from "@/lib/utils";
+import {
   SETUP_ITEMS,
-  MACHINES,
+  MACHINE,
   SETUP,
+  DEFAULT_SELECTION,
   computeSetup,
   itemWh,
   machineWh,
+  usd,
   type ItemGroup,
+  type ProductImage,
 } from "./config";
 
 interface CostModelProps {
   isAr: boolean;
 }
+
+/** Rows without a product photo get a glyph, so every row has a thumbnail. */
+const ICONS: Record<string, LucideIcon> = {
+  "upgrade-128": Cpu,
+  nano: SunDim,
+  ssd: HardDrive,
+  fibre: Router,
+  lte: RadioTower,
+};
 
 function fmt(n: number, digits = 1): string {
   return n.toLocaleString("en-US", {
@@ -22,29 +45,19 @@ function fmt(n: number, digits = 1): string {
   });
 }
 
-function usd(n: number): string {
-  return `$${Math.round(n).toLocaleString("en-US")}`;
-}
-
 /**
- * The live cost model. Picking the box or toggling a line item re-derives
- * capex, the monthly bill, daily energy and UPS runtime from the same formulas
- * the doc prints — the point of this page over the doc is that the cost of a
- * choice is visible rather than asserted. Choosing the M5 Ultra over the
- * M5 Max adds $4,100 up front and roughly doubles the box's energy; that delta
- * is the argument, and here it is live.
+ * The live cost model. Toggling a line item re-derives capex, the monthly
+ * bill, daily energy and UPS runtime from the same formulas the doc prints —
+ * the point of this page over the doc is that the cost of a choice is visible
+ * rather than asserted. The 128 GB upgrade is the one that matters: +$2,600,
+ * and Apple only sells it at checkout.
  */
 export function CostModel({ isAr }: CostModelProps) {
-  const [machineId, setMachineId] = useState<string>(MACHINES[0].id);
   const [selected, setSelected] = useState<Set<string>>(
-    () => new Set(SETUP_ITEMS.filter((r) => r.defaultOn).map((r) => r.id)),
+    () => new Set(DEFAULT_SELECTION),
   );
 
-  const machine = MACHINES.find((m) => m.id === machineId) ?? MACHINES[0];
-  const setup = useMemo(
-    () => computeSetup(selected, machine),
-    [selected, machine],
-  );
+  const setup = useMemo(() => computeSetup(selected), [selected]);
 
   function toggle(id: string): void {
     setSelected((prev) => {
@@ -56,6 +69,7 @@ export function CostModel({ isAr }: CostModelProps) {
   }
 
   const groups: { key: ItemGroup; title: string; titleAr: string }[] = [
+    { key: "box", title: "The box", titleAr: "الجهاز" },
     { key: "desk", title: "The desk", titleAr: "المكتب" },
     { key: "link", title: "The link", titleAr: "الاتصال" },
     { key: "power", title: "Power", titleAr: "الطاقة" },
@@ -66,83 +80,20 @@ export function CostModel({ isAr }: CostModelProps) {
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_20rem]">
       <div className="space-y-8">
-        {/* ── The one box ───────────────────────────────────────────── */}
-        <section>
-          <div className="mb-3 flex items-baseline justify-between">
-            <h2 className="text-muted-foreground text-xs font-medium tracking-widest uppercase">
-              {isAr ? "الجهاز" : "The one box"}
-            </h2>
-            <span
-              dir="ltr"
-              className="text-muted-foreground font-mono text-xs tabular-nums"
-            >
-              {usd(machine.priceUSD)}
-            </span>
-          </div>
-
-          <div className="grid gap-3 sm:grid-cols-2">
-            {MACHINES.map((m) => {
-              const on = m.id === machineId;
-              return (
-                <button
-                  key={m.id}
-                  type="button"
-                  onClick={() => setMachineId(m.id)}
-                  aria-pressed={on}
-                  className={`rounded-lg border p-4 text-start transition-colors ${
-                    on
-                      ? "border-foreground"
-                      : "border-border hover:bg-muted/50 opacity-60"
-                  }`}
-                >
-                  <div className="flex items-baseline justify-between gap-2">
-                    <span className="text-sm font-semibold">
-                      {isAr ? m.nameAr : m.name}
-                    </span>
-                    <span
-                      dir="ltr"
-                      className="font-mono text-xs whitespace-nowrap tabular-nums"
-                    >
-                      {usd(m.priceUSD)}
-                    </span>
-                  </div>
-                  <div
-                    dir="ltr"
-                    className="text-muted-foreground mt-2 space-y-0.5 font-mono text-[11px] tabular-nums rtl:text-end"
-                  >
-                    <div>
-                      {m.memory} · {m.config.split(" · ")[1]} SSD
-                    </div>
-                    <div>
-                      {m.bandwidth} · {m.compute}
-                    </div>
-                    <div>
-                      ~{m.loadW} W load · {m.idleW} W idle ·{" "}
-                      {(machineWh(m) / 1000).toFixed(1)} kWh/day
-                    </div>
-                  </div>
-                  <p className="text-muted-foreground mt-2 text-xs">
-                    {isAr ? m.verdictAr : m.verdict}
-                  </p>
-                </button>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* ── Line items ────────────────────────────────────────────── */}
         {groups.map((group) => {
           const rows = SETUP_ITEMS.filter((r) => r.group === group.key);
-          const subtotal = rows
-            .filter((r) => selected.has(r.id))
-            .reduce((sum, r) => sum + r.capexUSD, 0);
+          const subtotal =
+            (group.key === "box" ? MACHINE.priceUSD : 0) +
+            rows
+              .filter((r) => selected.has(r.id))
+              .reduce((sum, r) => sum + r.capexUSD, 0);
 
           return (
             <section key={group.key}>
               <div className="mb-3 flex items-baseline justify-between">
-                <h2 className="text-muted-foreground text-xs font-medium tracking-widest uppercase">
+                <h3 className="text-muted-foreground text-xs font-medium tracking-widest uppercase">
                   {isAr ? group.titleAr : group.title}
-                </h2>
+                </h3>
                 <span
                   dir="ltr"
                   className="text-muted-foreground font-mono text-xs tabular-nums"
@@ -151,32 +102,72 @@ export function CostModel({ isAr }: CostModelProps) {
                 </span>
               </div>
 
-              <div className="border-border divide-border divide-y rounded-lg border">
+              <div className="border-border divide-border divide-y overflow-hidden rounded-2xl border">
+                {/* The base machine is not optional — it is the page. */}
+                {group.key === "box" && (
+                  <div className="flex items-center gap-4 p-3">
+                    <Thumb image={MACHINE.image} alt="Mac Studio" />
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm font-medium">
+                        {isAr ? MACHINE.nameAr : MACHINE.name}
+                      </div>
+                      <div
+                        dir="ltr"
+                        className="text-muted-foreground mt-0.5 font-mono text-xs rtl:text-end"
+                      >
+                        {MACHINE.memory} · {MACHINE.bandwidth} · ~
+                        {MACHINE.loadW} W load · {MACHINE.idleW} W idle ·{" "}
+                        {(machineWh(MACHINE) / 1000).toFixed(2)} kWh/day
+                      </div>
+                    </div>
+                    <span
+                      dir="ltr"
+                      className="shrink-0 font-mono text-sm tabular-nums"
+                    >
+                      {usd(MACHINE.priceUSD)}
+                    </span>
+                  </div>
+                )}
+
                 {rows.map((row) => {
                   const on = selected.has(row.id);
+                  const Icon = ICONS[row.id];
                   return (
                     <button
                       key={row.id}
                       type="button"
                       onClick={() => toggle(row.id)}
                       aria-pressed={on}
-                      className={`flex w-full items-start gap-3 p-3 text-start transition-colors ${
-                        on ? "" : "opacity-40"
-                      } hover:bg-muted/50`}
+                      className="hover:bg-muted/50 flex w-full items-center gap-4 p-3 text-start transition-colors"
                     >
                       <span
-                        aria-hidden
-                        className={`mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-sm border text-[10px] ${
-                          on
-                            ? "border-foreground bg-foreground text-background"
-                            : "border-muted-foreground"
-                        }`}
+                        className={cn(
+                          "transition-opacity",
+                          on ? "opacity-100" : "opacity-40",
+                        )}
                       >
-                        {on ? "✓" : ""}
+                        {row.image ? (
+                          <Thumb image={row.image} alt={row.label} />
+                        ) : (
+                          <span className="bg-muted flex size-14 items-center justify-center rounded-xl">
+                            {Icon && (
+                              <Icon
+                                aria-hidden
+                                className="size-5"
+                                strokeWidth={1.5}
+                              />
+                            )}
+                          </span>
+                        )}
                       </span>
 
-                      <span className="min-w-0 flex-1">
-                        <span className="text-sm font-medium">
+                      <span
+                        className={cn(
+                          "min-w-0 flex-1 transition-opacity",
+                          on ? "opacity-100" : "opacity-50",
+                        )}
+                      >
+                        <span className="block text-sm font-medium">
                           {isAr ? row.labelAr : row.label}
                         </span>
                         {row.watts > 0 && (
@@ -195,16 +186,32 @@ export function CostModel({ isAr }: CostModelProps) {
                         )}
                       </span>
 
-                      <span
-                        dir="ltr"
-                        className="shrink-0 text-end font-mono text-sm tabular-nums"
-                      >
-                        {usd(row.capexUSD)}
+                      <span className="flex shrink-0 flex-col items-end gap-1.5">
+                        <span
+                          dir="ltr"
+                          className="font-mono text-sm tabular-nums"
+                        >
+                          {row.capexUSD > 0 ? usd(row.capexUSD) : "—"}
+                        </span>
                         {row.monthlyUSD > 0 && (
-                          <span className="text-muted-foreground block text-xs">
+                          <span
+                            dir="ltr"
+                            className="text-muted-foreground font-mono text-xs"
+                          >
                             +{usd(row.monthlyUSD)}/mo
                           </span>
                         )}
+                        <span
+                          aria-hidden
+                          className={cn(
+                            "flex size-5 items-center justify-center rounded-full border transition-colors",
+                            on
+                              ? "border-foreground bg-foreground text-background"
+                              : "border-muted-foreground/50",
+                          )}
+                        >
+                          {on && <Check className="size-3" strokeWidth={3} />}
+                        </span>
                       </span>
                     </button>
                   );
@@ -217,7 +224,7 @@ export function CostModel({ isAr }: CostModelProps) {
 
       {/* ── Derived totals ──────────────────────────────────────────── */}
       <aside className="lg:sticky lg:top-24 lg:self-start">
-        <div className="border-border space-y-5 rounded-lg border p-5">
+        <div className="bg-muted/50 space-y-5 rounded-2xl p-5">
           <div>
             <div className="text-muted-foreground text-xs tracking-widest uppercase">
               {isAr ? "التكلفة لمرة واحدة" : "One-time"}
@@ -295,6 +302,25 @@ export function CostModel({ isAr }: CostModelProps) {
         </div>
       </aside>
     </div>
+  );
+}
+
+function Thumb({ image, alt }: { image: ProductImage; alt: string }) {
+  return (
+    <span className="bg-muted relative block size-14 shrink-0 overflow-hidden rounded-xl">
+      <BlurImage
+        src={image.src}
+        alt={alt}
+        fill
+        unoptimized
+        sizes="56px"
+        className={cn(
+          image.cutout
+            ? "object-contain p-1.5"
+            : "object-cover mix-blend-multiply dark:mix-blend-normal",
+        )}
+      />
+    </span>
   );
 }
 
