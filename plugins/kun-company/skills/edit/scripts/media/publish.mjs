@@ -20,6 +20,7 @@
 //   video → {kind, title, poster, width, height, duration, sources[{src,type}], tracks[]}
 //   image → {kind, width, height, alt, order?, avif{w:url}, webp{w:url}}   (order = the still's NN in its flow)
 // Video sources are ordered AV1 first, H.264 second; <video> takes the first it can decode.
+import { spawnSync } from "node:child_process"
 import { existsSync, readFileSync, writeFileSync } from "node:fs"
 import { basename, extname } from "node:path"
 import { arg, CDN_BUCKET, CDN_HOST, CONTENT_TYPE, flag, positional, probe, requireRt, sh, sha8 } from "./rt.mjs"
@@ -45,9 +46,20 @@ function cleanKey(file, ext) {
   return `${ns}/${key}${role ? `.${role}` : ""}.${ext}`
 }
 
+// the uplink drops (Could not connect to the endpoint URL): retry an aws call with backoff before failing the flow
+function aws(args) {
+  for (let i = 1; ; i++) {
+    try {
+      return sh("aws", args)
+    } catch (e) {
+      if (i >= 5 || !/Could not connect|Connection (was )?(reset|closed)|timed out|EndpointConnectionError|RequestTimeout/i.test(e.message)) throw e
+      spawnSync("sleep", [String(2 ** i)])
+    }
+  }
+}
 const remoteSha = (k) => {
   try {
-    return JSON.parse(sh("aws", ["s3api", "head-object", "--bucket", CDN_BUCKET, "--key", k, "--output", "json"])).Metadata?.sha ?? "?"
+    return JSON.parse(aws(["s3api", "head-object", "--bucket", CDN_BUCKET, "--key", k, "--output", "json"])).Metadata?.sha ?? "?"
   } catch {
     return null
   }
@@ -75,7 +87,7 @@ for (const file of files) {
     if (!dry) {
       const had = remoteSha(k)
       if (had !== sha) {
-        sh("aws", ["s3", "cp", file, `s3://${CDN_BUCKET}/${k}`, "--content-type", ct, "--cache-control", STABLE, "--metadata", `sha=${sha}`, "--only-show-errors"])
+        aws(["s3", "cp", file, `s3://${CDN_BUCKET}/${k}`, "--content-type", ct, "--cache-control", STABLE, "--metadata", `sha=${sha}`, "--only-show-errors"])
         if (had !== null) overwritten.push(`/${k}`)
       }
     }
@@ -91,9 +103,9 @@ for (const file of files) {
 
 // stable keys that changed bytes: drop the edge copy (CloudFront, aliased cdn.databayt.org)
 if (overwritten.length) {
-  const dist = sh("aws", ["cloudfront", "list-distributions", "--query", `DistributionList.Items[?contains(Aliases.Items, '${CDN_HOST}')].Id | [0]`, "--output", "text"]).trim()
+  const dist = aws(["cloudfront", "list-distributions", "--query", `DistributionList.Items[?contains(Aliases.Items, '${CDN_HOST}')].Id | [0]`, "--output", "text"]).trim()
   if (!dist || dist === "None") throw new Error(`no CloudFront distribution aliased ${CDN_HOST}`)
-  sh("aws", ["cloudfront", "create-invalidation", "--distribution-id", dist, "--paths", ...overwritten, "--output", "text", "--query", "Invalidation.Id"])
+  aws(["cloudfront", "create-invalidation", "--distribution-id", dist, "--paths", ...overwritten, "--output", "text", "--query", "Invalidation.Id"])
 }
 
 if (!dry) {
