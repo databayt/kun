@@ -1,4 +1,6 @@
 import { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { requireContributor } from "@/lib/auth-guard";
 import { type Locale, isRTL } from "@/components/local/config";
 import { PageHeader } from "@/components/atom/page-header";
 import { Announcement } from "@/components/atom/announcement";
@@ -8,18 +10,26 @@ import { JobsHub } from "@/components/root/jobs/jobs-hub";
 import { getJobsList, getEvidenceProfile } from "@/actions/jobs";
 
 export const metadata: Metadata = {
-  title: "Job Engine | Databayt",
+  robots: { index: false, follow: false },
+  title: "Seek board | Databayt",
   description:
     "Evidence-based career matching engine powered by real repository engineering proof from Databayt.",
 };
 
-interface JobsPageProps {
+interface SeekBoardPageProps {
   params: Promise<{ lang: string }>;
 }
 
-export default async function JobsPage({ params }: JobsPageProps) {
+export default async function SeekBoardPage({ params }: SeekBoardPageProps) {
   const { lang } = await params;
   const locale = lang as Locale;
+
+  // The board carries one person's CV facts, letters and pipeline — it is the
+  // private instance behind the public /seek workflow. The proxy gates it in
+  // production; this re-check keeps the page safe if the proxy ever drifts.
+  if (!(await requireContributor())) {
+    redirect(`/${lang}/login?callbackUrl=${encodeURIComponent(`/${lang}/seek/board`)}`);
+  }
   const t = getJobsDict(locale);
 
   const [jobs, profile] = await Promise.all([
@@ -33,7 +43,7 @@ export default async function JobsPage({ params }: JobsPageProps) {
         announcement={
           <Announcement
             text={t.announcementText}
-            href={`/${lang}/jobs`}
+            href={`/${lang}/seek`}
             external={false}
             badgeClassName="px-0"
           />
@@ -44,9 +54,9 @@ export default async function JobsPage({ params }: JobsPageProps) {
         actions={
           <TwoButtons
             primaryLabel={t.primaryAction}
-            primaryHref={`/${lang}/jobs/profile`}
+            primaryHref={`/${lang}/seek/profile`}
             secondaryLabel={t.secondaryAction}
-            secondaryHref={`/${lang}/docs/jobs`}
+            secondaryHref={`/${lang}/docs/seek`}
           />
         }
       />

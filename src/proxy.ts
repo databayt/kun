@@ -40,5 +40,12 @@ export default async function proxy(request: NextRequest) {
 // and HMAC, so that silently breaks the daily cron and every approval link.
 // Keep this list in sync with i18n.locales in components/local/config.ts.
 export const config = {
-  matcher: ["/(en|ar)/social/:path*", "/(en|ar)/context/:path*"],
+  matcher: [
+    "/(en|ar)/social/:path*",
+    "/(en|ar)/context/:path*",
+    // /seek itself is the public workflow page; only the private instance
+    // (one person's board and evidence profile) sits behind the login.
+    "/(en|ar)/seek/board/:path*",
+    "/(en|ar)/seek/profile/:path*",
+  ],
 };

@@ -64,6 +64,28 @@ const nextConfig: NextConfig = {
         destination: "/en/social",
         permanent: false,
       },
+      // The job engine became /seek — a generic opportunity workflow with the
+      // personal board behind the login. Temporary until the old links age out.
+      {
+        source: "/:lang(en|ar)/jobs/profile",
+        destination: "/:lang/seek/profile",
+        permanent: false,
+      },
+      {
+        source: "/:lang(en|ar)/jobs/:path+",
+        destination: "/:lang/seek/board",
+        permanent: false,
+      },
+      {
+        source: "/:lang(en|ar)/jobs",
+        destination: "/:lang/seek",
+        permanent: false,
+      },
+      {
+        source: "/jobs",
+        destination: "/en/seek",
+        permanent: false,
+      },
     ];
   },
 };
