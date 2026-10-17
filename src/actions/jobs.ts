@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
+import { requireContributor } from "@/lib/auth-guard";
 import {
   calculateCampaignPerformance,
   calculateConversionFunnel,
@@ -40,6 +41,7 @@ export async function ingestAndAnalyzeJob(
   rawText: string,
   sourceUrl?: string
 ): Promise<{ ok: boolean; job?: FullJobWithAssessment; error?: string }> {
+  if (!(await requireContributor())) return { ok: false, error: "Forbidden: contributors only." };
   try {
     if (!rawText.trim()) {
       return { ok: false, error: "Job posting text cannot be empty." };
@@ -118,7 +120,7 @@ export async function ingestAndAnalyzeJob(
       },
     });
 
-    revalidatePath("/[lang]/jobs", "page");
+    revalidatePath("/[lang]/seek/board", "page");
 
     const fullResult: FullJobWithAssessment = {
       ...(createdJob as unknown as FullJobWithAssessment),
@@ -140,6 +142,7 @@ export async function ingestAndAnalyzeJob(
 }
 
 export async function getJobsList(): Promise<FullJobWithAssessment[]> {
+  if (!(await requireContributor())) return [];
   try {
     const jobs = await db.jobOpportunity.findMany({
       include: {
@@ -242,6 +245,7 @@ export async function getJobsList(): Promise<FullJobWithAssessment[]> {
 }
 
 export async function getJobById(id: string): Promise<FullJobWithAssessment | null> {
+  if (!(await requireContributor())) return null;
   try {
     const job = await db.jobOpportunity.findUnique({
       where: { id },
@@ -341,6 +345,7 @@ export async function getJobById(id: string): Promise<FullJobWithAssessment | nu
 }
 
 export async function syncJobToCRM(jobId: string): Promise<{ ok: boolean; message: string; url?: string }> {
+  if (!(await requireContributor())) return { ok: false, message: "Forbidden: contributors only." };
   try {
     const job = await getJobById(jobId);
     if (!job) {
@@ -356,7 +361,7 @@ export async function syncJobToCRM(jobId: string): Promise<{ ok: boolean; messag
           status: "qualified",
         },
       });
-      revalidatePath("/[lang]/jobs", "page");
+      revalidatePath("/[lang]/seek/board", "page");
     }
 
     return res;
@@ -373,6 +378,7 @@ export async function updateJobStatusAction(
   jobId: string,
   status: JobStatus
 ): Promise<{ ok: boolean }> {
+  if (!(await requireContributor())) return { ok: false };
   try {
     const job = await db.jobOpportunity.update({
       where: { id: jobId },
@@ -386,7 +392,7 @@ export async function updateJobStatusAction(
       const crm = await updateTwentyApplicationStatus(job.twentyOpportunityId, status);
       if (!crm.ok) console.warn(`CRM status not updated for ${jobId}: ${crm.message}`);
     }
-    revalidatePath("/[lang]/jobs", "page");
+    revalidatePath("/[lang]/seek/board", "page");
     return { ok: true };
   } catch (err) {
     console.error("Error updating status:", err);
@@ -402,6 +408,7 @@ export async function recordJobOutcomeAction(
   feedback?: string,
   hypothesis?: string
 ): Promise<{ ok: boolean }> {
+  if (!(await requireContributor())) return { ok: false };
   try {
     const job = await db.jobOpportunity.update({
       where: { id: jobId },
@@ -425,7 +432,7 @@ export async function recordJobOutcomeAction(
       const crm = await updateTwentyApplicationStatus(job.twentyOpportunityId, status, logLine || undefined);
       if (!crm.ok) console.warn(`CRM outcome not recorded for ${jobId}: ${crm.message}`);
     }
-    revalidatePath("/[lang]/jobs", "page");
+    revalidatePath("/[lang]/seek/board", "page");
     return { ok: true };
   } catch (err) {
     console.error("Error recording outcome:", err);
@@ -459,11 +466,12 @@ export async function getWeeklySearchReviewAction(): Promise<WeeklyJobSearchRevi
 }
 
 export async function deleteJobAction(jobId: string): Promise<{ ok: boolean }> {
+  if (!(await requireContributor())) return { ok: false };
   try {
     await db.jobOpportunity.delete({
       where: { id: jobId },
     });
-    revalidatePath("/[lang]/jobs", "page");
+    revalidatePath("/[lang]/seek/board", "page");
     return { ok: true };
   } catch (err) {
     console.error("Error deleting job:", err);
@@ -472,5 +480,6 @@ export async function deleteJobAction(jobId: string): Promise<{ ok: boolean }> {
 }
 
 export async function getEvidenceProfile(): Promise<EngineeringKnowledgeProfile> {
+  if (!(await requireContributor())) throw new Error("Forbidden: contributors only.");
   return buildEvidenceKnowledgeProfile();
 }
