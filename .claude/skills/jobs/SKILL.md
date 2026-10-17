@@ -31,6 +31,7 @@ portals, platforms, tenders and bids stay packets Abdout submits. **Learning ado
 | When (Kigali) | Step | Script | Tokens |
 |---|---|---|---|
 | ≥07:00 daily | discover (10 adapters, incl. MyJobMag KE/NG) + ingest (one retry) | `jobs:discover`, `jobs:ingest` | 0 |
+| ≥07:00 daily | **google**: `claude -p` WebSearch sweep for Rwanda electrical + software postings (New Times, career pages, LinkedIn — boards the adapters can't fetch) → `jobs/inbox/<date>-google.json` | `jobs:google` | claude -p |
 | every tick | databayt.org wizard requests → CLIENT_PROJECT card on HOLD + Slack | `jobs:requests --apply` | 0 |
 | ≥07:00 Mon–Fri | wave: tailor letters, gate → QUEUED / HOLD | `jobs:facts`, `jobs:wave` | claude -p |
 | after wave | digest → Slack DM via `hermes send` (+ funding closing ≤14 days) | `jobs:digest --send` | 0 |
@@ -39,6 +40,8 @@ portals, platforms, tenders and bids stay packets Abdout submits. **Learning ado
 | ≥16:00 Mon–Fri | templated follow-ups day 7/14, archive day 21 | `jobs:followup --apply` | 0 |
 | Fri ≥17:00 | **week**: learn → Claude decides → adopt → report + thread in #jobs (≤3 tries) | `jobs:week` | claude -p |
 | every tick | **discuss**: answer Abdout in #jobs, apply/revert what he asks | `jobs:discuss` | claude -p only if he wrote |
+
+**Focus mode:** `focus: {lanes, countries, until}` in `jobs/loop.config.json` — until the date, wave / send / ATS / digest touch only those lanes in those countries; other QUEUED cards wait, Abdout's APPROVED cards still go. Lapses on its own (`inFocus()` in config.ts).
 
 **Board states:** TO_APPLY → QUEUED (sends next window) → APPLIED → RESPONSE/INTERVIEW/OFFER/REJECTED;
 gate fail / needs input → HOLD (`holdReason` says what) → Abdout fixes + moves to APPROVED → sends.

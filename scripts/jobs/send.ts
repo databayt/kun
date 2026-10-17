@@ -29,7 +29,7 @@ import {
   noteRow,
   patchRow,
 } from "./board";
-import { kigaliNow, killSwitchOn, loadConfig, todaysCap } from "./config";
+import { inFocus, kigaliNow, killSwitchOn, loadConfig, todaysCap } from "./config";
 import { openDb } from "./engine";
 import { notify } from "./notify";
 import { contactState, pdfPages, postingText, splitName } from "./wave";
@@ -168,6 +168,8 @@ async function main(): Promise<void> {
   // closing posting miss its day; Abdout's approvals break ties.
   const ready = board
     .filter((r) => r.applicationStatus === "QUEUED" || r.applicationStatus === "APPROVED")
+    // Outside the focus a QUEUED card waits on the board; Abdout's approvals still go.
+    .filter((r) => r.applicationStatus === "APPROVED" || inFocus(r, cfg))
     .sort(
       (a, b) =>
         (a.deadline ?? "9999").localeCompare(b.deadline ?? "9999") ||

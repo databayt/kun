@@ -10,6 +10,7 @@
 #
 # Schedule (Kigali, the Mac is on CAT):
 #   ≥07:00 daily       discover + ingest + resolve       0 tokens
+#   ≥07:00 daily       google: Kigali electrical + software sweep  claude -p (Max)
 #   ≥07:00 Mon–Fri     wave: tailor + gate → QUEUED/HOLD  claude -p (Max)
 #   ≥10:00 Mon–Fri     send, every tick until 17:00       0 tokens, capped
 #   ≥07:00 daily       ATS prepare: form answers + letters   claude -p (Max)
@@ -157,7 +158,7 @@ case "$MODE" in
     --status)
         if launchctl print "gui/$(id -u)/$PLIST_LABEL" >/dev/null 2>&1; then echo "armed ($PLIST_LABEL, every 30 min)"; else echo "not armed"; fi
         [ -f "$REPO/jobs/.send-off" ] && echo "⛔ sending paused (jobs/.send-off)"
-        for s in discover wave ats-prepare tailor-packets digest followup week; do printf "  %-9s %s\n" "$s" "$(cat "$STATE/$s" 2>/dev/null || echo never)"; done
+        for s in google discover wave ats-prepare tailor-packets digest followup week; do printf "  %-9s %s\n" "$s" "$(cat "$STATE/$s" 2>/dev/null || echo never)"; done
         [ -f "$LOG_FILE" ] && tail -8 "$LOG_FILE"
         ;;
     --tick)
@@ -192,6 +193,9 @@ case "$MODE" in
             # Ingest's Neon websocket drops now and then (an ErrorEvent, exit 1):
             # on 2026-10-01/02 that left discover unstamped, so no wave and no
             # digest ran for three days. One retry a minute later clears it.
+            # Google sweep (2026-10-17): Kigali electrical + software roles the
+            # fetch adapters can't reach. A miss never blocks discover.
+            done_today google || { run google pnpm -s jobs:google && stamp google; }
             run discover node scripts/jobs/discover.mjs &&
                 { run ingest pnpm -s jobs:ingest || { sleep 60; run ingest-retry pnpm -s jobs:ingest; }; } &&
                 stamp discover

@@ -12,6 +12,7 @@ import { existsSync, readFileSync } from "node:fs";
 
 import { BoardRow, boardUrl, listBoard } from "./board";
 import {
+  inFocus,
   kigaliNow,
   killSwitchOn,
   loadConfig,
@@ -146,7 +147,8 @@ async function main(): Promise<void> {
         r.applicationStatus === "TO_APPLY" &&
         r.channel &&
         r.channel !== "EMAIL" &&
-        !cfg.pausedLanes.includes(r.campaign ?? ""),
+        !cfg.pausedLanes.includes(r.campaign ?? "") &&
+        inFocus(r, cfg),
     )
     .sort((a, b) => (b.engineScore ?? 0) - (a.engineScore ?? 0))
     .slice(0, 5);

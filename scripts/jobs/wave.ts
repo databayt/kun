@@ -29,7 +29,7 @@ import { similarRole } from "@/lib/jobs/deduplication";
 import { evaluateSendGate, holdReasonFor } from "@/lib/jobs/send-gate";
 
 import { BoardRow, ledger, listBoard, patchRow } from "./board";
-import { kigaliNow, LANE_BAND, loadConfig, seniorityBand, todaysCap } from "./config";
+import { inFocus, kigaliNow, LANE_BAND, loadConfig, seniorityBand, todaysCap } from "./config";
 import { tailorCvs, type TailorResult } from "./tailor";
 import { pickVariants } from "./variants";
 
@@ -180,6 +180,7 @@ async function main(): Promise<void> {
     // A tender wants a bid, not a cover letter — even when it names an address.
     .filter((r) => r.applicationStatus === "APPROVED" || !TENDER_NOTICE.test(r.name))
     .filter((r) => r.applicationStatus === "APPROVED" || !cfg.pausedLanes.includes(r.campaign ?? ""))
+    .filter((r) => r.applicationStatus === "APPROVED" || inFocus(r, cfg, date))
     .filter((r) => !r.deadline || r.deadline.slice(0, 10) >= date)
     .sort(
       (a, b) =>

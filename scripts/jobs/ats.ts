@@ -40,6 +40,7 @@ import {
   patchRow,
 } from "./board";
 import {
+  inFocus,
   kigaliNow,
   killSwitchOn,
   LANE_BAND,
@@ -247,7 +248,7 @@ async function prepare(): Promise<void> {
         r.channel === "ATS" &&
         isGreenhouse(r),
     )
-    .filter((r) => !cfg.pausedLanes.includes(r.campaign ?? ""))
+    .filter((r) => !cfg.pausedLanes.includes(r.campaign ?? "") && inFocus(r, cfg))
     .sort(
       (a, b) =>
         (LANE_BAND[a.campaign ?? ""] ?? 9) -
@@ -652,7 +653,7 @@ async function submit(): Promise<void> {
     .filter((r) =>
       only
         ? r.id === only
-        : r.applicationStatus === "QUEUED" ||
+        : (r.applicationStatus === "QUEUED" && inFocus(r, cfg)) ||
           r.applicationStatus === "APPROVED",
     );
   console.log(

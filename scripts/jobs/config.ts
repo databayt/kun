@@ -24,6 +24,9 @@ export interface LoopConfig {
   pausedLanes: string[]; // CRM campaign values the wave skips
   dailyTotalCap: number; // email + ATS applications per day (Abdout's goal: 100)
   minCoverageByLane: Record<string, number>; // tailored-CV fit floor per campaign
+  // A time-boxed focus: until the date, only these lanes in these countries
+  // are prepared or sent; every other card waits on the board, untouched.
+  focus?: { lanes: string[]; countries: string[]; until: string };
 }
 
 const DEFAULTS: LoopConfig = {
@@ -117,6 +120,19 @@ export function loadConfig(): LoopConfig {
     ...DEFAULTS,
     ...(JSON.parse(readFileSync(path, "utf-8")) as Partial<LoopConfig>),
   };
+}
+
+/// Inside the focus window, may this card be prepared or sent? No focus, or a
+/// lapsed one, lets everything through. Abdout, 2026-10-17: "all this week
+/// focus solely on Kigali electrical + software".
+export function inFocus(
+  r: { campaign?: string | null; country?: string | null },
+  c: LoopConfig,
+  today = new Date().toISOString().slice(0, 10),
+): boolean {
+  const f = c.focus;
+  if (!f || today > f.until) return true;
+  return f.lanes.includes(r.campaign ?? "") && (f.countries.length === 0 || f.countries.includes(r.country ?? ""));
 }
 
 export function todaysCap(
