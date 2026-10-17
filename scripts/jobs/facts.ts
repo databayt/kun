@@ -12,6 +12,7 @@ import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 
 import { CV_EVIDENCE_FACTS } from "@/lib/jobs/cv-evidence";
 import { numbersIn } from "@/lib/jobs/send-gate";
+import { DATA } from "./lib/paths.mjs";
 
 const text = (html: string): string =>
   html
@@ -21,14 +22,14 @@ const text = (html: string): string =>
     .replace(/\s+/g, " ")
     .trim();
 
-const cvs = readdirSync("jobs/cv")
+const cvs = readdirSync(`${DATA}/cv`)
   .filter((f) => f.endsWith(".html"))
-  .map((f) => ({ file: f, text: text(readFileSync(`jobs/cv/${f}`, "utf-8")) }));
+  .map((f) => ({ file: f, text: text(readFileSync(`${DATA}/cv/${f}`, "utf-8")) }));
 
 // Facts Abdout supplies himself (a salary figure, a registration number)
 // that no CV carries. Each is dated and attributed in the file.
-const extra: { numbers?: string[]; claims?: string[] } = existsSync("jobs/facts.extra.json")
-  ? JSON.parse(readFileSync("jobs/facts.extra.json", "utf-8"))
+const extra: { numbers?: string[]; claims?: string[] } = existsSync(`${DATA}/facts.extra.json`)
+  ? JSON.parse(readFileSync(`${DATA}/facts.extra.json`, "utf-8"))
   : {};
 
 // The verified career record (jobs/evidence/career.json, transcribed from the
@@ -36,8 +37,8 @@ const extra: { numbers?: string[]; claims?: string[] } = existsSync("jobs/facts.
 // cite the same facts. Every string value becomes a claim.
 const strings = (v: unknown): string[] =>
   typeof v === "string" ? [v] : Array.isArray(v) ? v.flatMap(strings) : v && typeof v === "object" ? Object.entries(v).filter(([k]) => k !== "$comment" && k !== "openItems" && k !== "passport").flatMap(([, x]) => strings(x)) : [];
-const career = existsSync("jobs/evidence/career.json")
-  ? strings(JSON.parse(readFileSync("jobs/evidence/career.json", "utf-8"))).map((c) => `career: ${c}`)
+const career = existsSync(`${DATA}/evidence/career.json`)
+  ? strings(JSON.parse(readFileSync(`${DATA}/evidence/career.json`, "utf-8"))).map((c) => `career: ${c}`)
   : [];
 
 const claims = [
@@ -50,7 +51,7 @@ const claims = [
 const numbers = [...new Set([...claims.flatMap(numbersIn), ...(extra.numbers ?? [])])].sort();
 
 writeFileSync(
-  "jobs/facts.json",
+  `${DATA}/facts.json`,
   JSON.stringify(
     { generatedAt: new Date().toISOString(), numbers, claims },
     null,
@@ -58,5 +59,5 @@ writeFileSync(
   ) + "\n",
 );
 console.log(
-  `jobs/facts.json <- ${numbers.length} numbers, ${claims.length} claims from ${cvs.length} CVs + ${CV_EVIDENCE_FACTS.length} evidence facts`,
+  `${DATA}/facts.json <- ${numbers.length} numbers, ${claims.length} claims from ${cvs.length} CVs + ${CV_EVIDENCE_FACTS.length} evidence facts`,
 );

@@ -20,6 +20,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 
 import { extractApplyEmail, extractApplyWhatsApp } from "./lib/apply-email.mjs";
+import { DATA } from "./lib/paths.mjs";
 
 const args = process.argv.slice(2);
 const opt = (f, d) => (args.indexOf(f) > -1 ? args[args.indexOf(f) + 1] : d);
@@ -246,7 +247,7 @@ export function openToRwanda(place, text = "") {
 // ── company → ATS board, via the public job-board APIs ───────────────────────
 // Aggregators name the company; its own Greenhouse/Lever/Ashby board is the
 // honest way to apply (and the only one the loop can submit to).
-const ATS_BOARDS_FILE = "jobs/ats-boards.json";
+const ATS_BOARDS_FILE = `${DATA}/ats-boards.json`;
 const atsBoards = existsSync(ATS_BOARDS_FILE) ? JSON.parse(readFileSync(ATS_BOARDS_FILE, "utf-8")).boards : [];
 const newBoards = [];
 const probedCompanies = new Set(atsBoards.map((b) => b.company.toLowerCase()));
@@ -627,7 +628,7 @@ const ADAPTERS = {
     // skills.no — Go, Rust, C++, Java, Ruby…) is a letter nobody will answer,
     // unless it also names his stack ("Web Frontend - JS, CSS, React, Flutter").
     const esc = (k) => k.replace(/[.+#]/g, "\\$&");
-    const skills = existsSync("jobs/profile.json") ? JSON.parse(readFileSync("jobs/profile.json", "utf-8")).skills ?? {} : {};
+    const skills = existsSync(`${DATA}/profile.json`) ? JSON.parse(readFileSync(`${DATA}/profile.json`, "utf-8")).skills ?? {} : {};
     const OFF_LANG = skills.no?.length ? new RegExp(`(^|[^a-z])(${skills.no.map(esc).join("|")}|c)([^a-z+#-]|$)`, "i") : null;
     const HIS_STACK = /typescript|javascript|\bjs\b|react|next\.?js|node|full[- ]?stack|front[- ]?end/i;
     const NOT_STACK = /\b(ios|android|mobile|embedded|firmware|data scien|machine learning|\bml\b|security|sre|devops|qa|test)/i;
@@ -1025,8 +1026,8 @@ const ADAPTERS = {
 
 // The weekly adopter (scripts/jobs/adopt.ts) switches adapters off here when
 // a week's yield shows a source finds nothing Abdout can apply to.
-const OFF = existsSync("jobs/sources.json")
-  ? (JSON.parse(readFileSync("jobs/sources.json", "utf-8")).off ?? [])
+const OFF = existsSync(`${DATA}/sources.json`)
+  ? (JSON.parse(readFileSync(`${DATA}/sources.json`, "utf-8")).off ?? [])
   : [];
 const selected = ONLY
   ? { [ONLY]: ADAPTERS[ONLY] }
@@ -1056,22 +1057,22 @@ for (const [name, adapter] of Object.entries(selected)) {
 }
 // Per-adapter yield, read by the weekly report to judge each source.
 if (!ONLY && !DRY_RUN) {
-  mkdirSync("jobs/learn", { recursive: true });
-  writeFileSync(`jobs/learn/yield-${TODAY}.json`, JSON.stringify(yields, null, 2) + "\n");
+  mkdirSync(`${DATA}/learn`, { recursive: true });
+  writeFileSync(`${DATA}/learn/yield-${TODAY}.json`, JSON.stringify(yields, null, 2) + "\n");
 }
 
 saveNewBoards();
 if (ONLY && WRITE && !DRY_RUN) {
-  mkdirSync("jobs/inbox", { recursive: true });
-  const out = `jobs/inbox/${TODAY}-${ONLY}.json`;
+  mkdirSync(`${DATA}/inbox`, { recursive: true });
+  const out = `${DATA}/inbox/${TODAY}-${ONLY}.json`;
   writeFileSync(out, JSON.stringify(all, null, 2) + "\n");
   if (newBoards.length) writeFileSync(ATS_BOARDS_FILE, JSON.stringify({ generatedAt: new Date().toISOString(), boards: atsBoards }, null, 2) + "\n");
   console.log(`\n${out} <- ${all.length} items.`);
 } else if (DRY_RUN || ONLY) {
   console.log(`\n${DRY_RUN ? "DRY RUN" : "single-source test"} — nothing written. ${all.length} items.`);
 } else {
-  mkdirSync("jobs/inbox", { recursive: true });
-  const out = `jobs/inbox/${TODAY}-discover.json`;
+  mkdirSync(`${DATA}/inbox`, { recursive: true });
+  const out = `${DATA}/inbox/${TODAY}-discover.json`;
   // 2026-10-02: a second run with the network down wrote 0 items over the
   // morning's 129. An emptier re-run never replaces a fuller one.
   const prior = existsSync(out) ? JSON.parse(readFileSync(out, "utf-8")).length : 0;

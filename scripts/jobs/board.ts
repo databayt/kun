@@ -9,6 +9,7 @@
 
 import { execSync } from "node:child_process";
 import { appendFileSync, mkdirSync } from "node:fs";
+import { DATA } from "./lib/paths.mjs";
 
 const API = (process.env.TWENTY_API_URL ?? "http://localhost:3100").replace(
   /\/+$/,
@@ -179,9 +180,9 @@ export interface LedgerEvent {
 }
 
 export function ledger(e: LedgerEvent): void {
-  mkdirSync("jobs", { recursive: true });
+  mkdirSync(DATA, { recursive: true });
   appendFileSync(
-    "jobs/ledger.jsonl",
+    `${DATA}/ledger.jsonl`,
     JSON.stringify({ ts: new Date().toISOString(), ...e }) + "\n",
   );
 }

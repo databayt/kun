@@ -19,6 +19,7 @@ import { kigaliNow, killSwitchOn, loadConfig } from "./config";
 import { mailSend, sentToday } from "./send";
 import { pickFollowUp } from "./variants";
 import { splitName } from "./wave";
+import { DATA } from "./lib/paths.mjs";
 
 const APPLY = process.argv.includes("--apply");
 
@@ -47,8 +48,8 @@ async function main(): Promise<void> {
   const { date, hour, weekday } = kigaliNow();
   const now = new Date();
 
-  const ledgerLines: Sent[] = existsSync("jobs/ledger.jsonl")
-    ? readFileSync("jobs/ledger.jsonl", "utf-8")
+  const ledgerLines: Sent[] = existsSync(`${DATA}/ledger.jsonl`)
+    ? readFileSync(`${DATA}/ledger.jsonl`, "utf-8")
         .split("\n")
         .filter(Boolean)
         .map((l) => JSON.parse(l) as Sent)

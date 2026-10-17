@@ -15,6 +15,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 
 import { boardUrl, listBoard } from "./board";
 import { kigaliNow, killSwitchOn } from "./config";
+import { DATA } from "./lib/paths.mjs";
 
 interface Line {
   ts: string;
@@ -28,8 +29,8 @@ const mode = process.argv[2] ?? "status";
 
 async function main(): Promise<void> {
   const { date } = kigaliNow();
-  const lines: Line[] = existsSync("jobs/ledger.jsonl")
-    ? readFileSync("jobs/ledger.jsonl", "utf-8")
+  const lines: Line[] = existsSync(`${DATA}/ledger.jsonl`)
+    ? readFileSync(`${DATA}/ledger.jsonl`, "utf-8")
         .split("\n")
         .filter(Boolean)
         .map((l) => JSON.parse(l) as Line)
@@ -37,21 +38,21 @@ async function main(): Promise<void> {
   const since = (days: number) =>
     new Date(Date.now() - days * 86_400_000).toISOString();
   if (mode === "week") {
-    const plans = existsSync("jobs/learn")
-      ? readdirSync("jobs/learn").filter((f) => f.endsWith(".week.json")).sort()
+    const plans = existsSync(`${DATA}/learn`)
+      ? readdirSync(`${DATA}/learn`).filter((f) => f.endsWith(".week.json")).sort()
       : [];
     const latest = plans.at(-1);
     if (!latest) {
       console.log("No weekly report yet — the first lands Friday 17:00 in #jobs.");
       return;
     }
-    const p = JSON.parse(readFileSync(`jobs/learn/${latest}`, "utf-8")) as {
+    const p = JSON.parse(readFileSync(`${DATA}/learn/${latest}`, "utf-8")) as {
       headline: string;
       learned: string[];
       needFromYou: string[];
     };
-    const changed = existsSync("jobs/learn/changes.jsonl")
-      ? readFileSync("jobs/learn/changes.jsonl", "utf-8")
+    const changed = existsSync(`${DATA}/learn/changes.jsonl`)
+      ? readFileSync(`${DATA}/learn/changes.jsonl`, "utf-8")
           .split("\n")
           .filter(Boolean)
           .slice(-5)

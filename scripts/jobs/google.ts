@@ -24,12 +24,13 @@ import {
   rmSync,
   writeFileSync,
 } from "node:fs";
+import { DATA, REPO } from "./lib/paths.mjs";
 
 const DRY = process.argv.includes("--dry-run");
-const ROOT = "/Users/abdout/kun";
+const ROOT = REPO;
 const TODAY = new Date().toISOString().slice(0, 10);
-const OUT = `jobs/inbox/${TODAY}-google.json`;
-const TMP = `jobs/.state/google-${TODAY}.json`;
+const OUT = `${DATA}/inbox/${TODAY}-google.json`;
+const TMP = `${DATA}/.state/google-${TODAY}.json`;
 
 const LANES = new Set([
   "kigali-electrical-engineer",
@@ -71,7 +72,7 @@ Write ${ROOT}/${TMP} as a JSON array (and output nothing else), each item:
 Use kigali-protection-engineer for protection/relay/substation/SCADA/commissioning roles, rwanda-tenders-databayt for every family-3 RFP, tender or quotation (a website job posted as an employee role stays kigali-web-developer). Write [] if nothing qualifies.`;
 
 function main(): void {
-  mkdirSync("jobs/.state", { recursive: true });
+  mkdirSync(`${DATA}/.state`, { recursive: true });
   rmSync(TMP, { force: true });
   console.log(`google sweep ${TODAY}: claude -p with WebSearch …`);
   const res = spawnSync(
@@ -155,7 +156,7 @@ function main(): void {
     ...prior,
     ...items.filter((i) => !prior.some((p) => p.sourceUrl === i.sourceUrl)),
   ];
-  mkdirSync("jobs/inbox", { recursive: true });
+  mkdirSync(`${DATA}/inbox`, { recursive: true });
   writeFileSync(OUT, JSON.stringify(merged, null, 2) + "\n");
   console.log(
     `${OUT} <- ${merged.length} items (${merged.length - prior.length} new).`,

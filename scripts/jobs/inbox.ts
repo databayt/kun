@@ -21,11 +21,12 @@ import { BoardRow, boardUrl, ledger, listBoard, noteRow } from "./board";
 import { loadConfig } from "./config";
 import { openDb } from "./engine";
 import { notify, whatsappBrief } from "./notify";
+import { DATA, SCRIPTS } from "./lib/paths.mjs";
 
 const args = process.argv.slice(2);
 const DRY_RUN = args.includes("--dry-run");
 const hoursArg = args.indexOf("--hours");
-const STATE = "jobs/.state";
+const STATE = `${DATA}/.state`;
 const FREE_MAIL =
   /(^|\.)(gmail|googlemail|hotmail|outlook|live|yahoo|icloud|qq|163|proton(mail)?)\./i;
 
@@ -39,7 +40,7 @@ interface Mail {
 function readMail(account: string, hours: number): Mail[] | string {
   const res = spawnSync(
     "osascript",
-    ["scripts/jobs/mail-read.applescript", account, String(hours)],
+    [`${SCRIPTS}/mail-read.applescript`, account, String(hours)],
     {
       encoding: "utf-8",
       timeout: 180_000,
@@ -99,8 +100,8 @@ async function main(): Promise<void> {
   }
 
   // What we sent, from the ledger: address + subject → card.
-  const sent = existsSync("jobs/ledger.jsonl")
-    ? readFileSync("jobs/ledger.jsonl", "utf-8")
+  const sent = existsSync(`${DATA}/ledger.jsonl`)
+    ? readFileSync(`${DATA}/ledger.jsonl`, "utf-8")
         .split("\n")
         .filter(Boolean)
         .map(

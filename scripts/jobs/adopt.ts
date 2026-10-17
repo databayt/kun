@@ -22,6 +22,7 @@ import {
 
 import { HARD_LIMITS, LANE_BAND } from "./config";
 import { loadVariants } from "./variants";
+import { DATA } from "./lib/paths.mjs";
 
 export type ActionType =
   | "variant" // target: variant id · value: "activate" | "deactivate"
@@ -45,9 +46,9 @@ export interface Change extends Action {
   by: string; // "week" | "discuss" | "revert"
 }
 
-const CONFIG = "jobs/loop.config.json";
-const SOURCES = "jobs/sources.json";
-const LOG = "jobs/learn/changes.jsonl";
+const CONFIG = `${DATA}/loop.config.json`;
+const SOURCES = `${DATA}/sources.json`;
+const LOG = `${DATA}/learn/changes.jsonl`;
 
 const readJson = <T>(path: string, fallback: T): T =>
   existsSync(path) ? (JSON.parse(readFileSync(path, "utf-8")) as T) : fallback;
@@ -55,7 +56,7 @@ const writeJson = (path: string, v: unknown): void =>
   writeFileSync(path, JSON.stringify(v, null, 2) + "\n");
 
 export function adoptionOff(): boolean {
-  return existsSync("jobs/.adopt-off");
+  return existsSync(`${DATA}/.adopt-off`);
 }
 
 export function changes(): Change[] {
@@ -161,7 +162,7 @@ export function apply(a: Action, by: string): Change {
     from,
     by,
   };
-  mkdirSync("jobs/learn", { recursive: true });
+  mkdirSync(`${DATA}/learn`, { recursive: true });
   appendFileSync(LOG, JSON.stringify(change) + "\n");
   return change;
 }

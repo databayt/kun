@@ -10,8 +10,9 @@
 // against the incumbent. Learn reports the winner; a human decides.
 
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { DATA } from "./lib/paths.mjs";
 
-const REGISTRY = "jobs/variants.json";
+const REGISTRY = `${DATA}/variants.json`;
 
 export interface Variant {
   id: string;
@@ -55,8 +56,8 @@ function saveVariants(variants: Variant[]): void {
 
 export function sendCounts(): Map<string, number> {
   const counts = new Map<string, number>();
-  if (!existsSync("jobs/ledger.jsonl")) return counts;
-  for (const line of readFileSync("jobs/ledger.jsonl", "utf-8").split("\n")) {
+  if (!existsSync(`${DATA}/ledger.jsonl`)) return counts;
+  for (const line of readFileSync(`${DATA}/ledger.jsonl`, "utf-8").split("\n")) {
     if (!line.trim()) continue;
     const e = JSON.parse(line) as { kind: string; variant?: string };
     if (e.kind !== "sent" || !e.variant) continue;

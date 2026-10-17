@@ -33,6 +33,7 @@ import { inFocus, kigaliNow, killSwitchOn, loadConfig, todaysCap } from "./confi
 import { openDb } from "./engine";
 import { notify } from "./notify";
 import { contactState, pdfPages, postingText, splitName } from "./wave";
+import { DATA, SCRIPTS } from "./lib/paths.mjs";
 
 const args = process.argv.slice(2);
 const APPLY = args.includes("--apply");
@@ -60,9 +61,9 @@ interface Request {
 export function findLetter(
   crmId: string,
 ): { letter: Letter; req: Request; dir: string } | null {
-  if (!existsSync("jobs/outbox")) return null;
-  for (const wave of readdirSync("jobs/outbox").sort().reverse()) {
-    const dir = join("jobs/outbox", wave);
+  if (!existsSync(`${DATA}/outbox`)) return null;
+  for (const wave of readdirSync(`${DATA}/outbox`).sort().reverse()) {
+    const dir = join(`${DATA}/outbox`, wave);
     const lp = join(dir, `${crmId}.letter.json`);
     const rp = join(dir, `${crmId}.request.json`);
     if (existsSync(lp) && existsSync(rp)) {
@@ -79,8 +80,8 @@ export function findLetter(
 /// Applications logged today (Kigali date). `channel` separates the hotmail
 /// cap (email only) and the WhatsApp cap from the daily total (all channels).
 export function sentToday(kind: "sent" | "followup", date: string, channel: "email" | "ats" | "whatsapp" | "any" = "email"): number {
-  if (!existsSync("jobs/ledger.jsonl")) return 0;
-  return readFileSync("jobs/ledger.jsonl", "utf-8")
+  if (!existsSync(`${DATA}/ledger.jsonl`)) return 0;
+  return readFileSync(`${DATA}/ledger.jsonl`, "utf-8")
     .split("\n")
     .filter(Boolean)
     .map((l) => JSON.parse(l) as { kind: string; ts: string; to?: string })
@@ -100,12 +101,12 @@ export function mailSend(
   body: string,
   attachment?: string,
 ): string | null {
-  const bodyFile = join("jobs/outbox", `.body-${process.pid}.txt`);
+  const bodyFile = join(`${DATA}/outbox`, `.body-${process.pid}.txt`);
   writeFileSync(bodyFile, body);
   const res = spawnSync(
     "osascript",
     [
-      "scripts/jobs/mail-send.applescript",
+      `${SCRIPTS}/mail-send.applescript`,
       from,
       to,
       subject,
@@ -236,12 +237,12 @@ async function main(): Promise<void> {
     return;
   }
 
-  const facts = JSON.parse(readFileSync("jobs/facts.json", "utf-8")) as {
+  const facts = JSON.parse(readFileSync(`${DATA}/facts.json`, "utf-8")) as {
     numbers: string[];
   };
   const queuedTimes = new Map<string, number>();
-  if (existsSync("jobs/ledger.jsonl")) {
-    for (const l of readFileSync("jobs/ledger.jsonl", "utf-8")
+  if (existsSync(`${DATA}/ledger.jsonl`)) {
+    for (const l of readFileSync(`${DATA}/ledger.jsonl`, "utf-8")
       .split("\n")
       .filter(Boolean)) {
       const e = JSON.parse(l) as { kind: string; crmId: string; ts: string };
@@ -403,7 +404,7 @@ async function main(): Promise<void> {
   // one more exact-subject pass once the run is done.
   if (APPLY && sentSubjects.length) {
     await new Promise((r) => setTimeout(r, 15_000));
-    spawnSync("osascript", ["scripts/jobs/mail-clean-drafts.applescript", cfg.fromAccount, ...sentSubjects], { timeout: 120_000 });
+    spawnSync("osascript", [`${SCRIPTS}/mail-clean-drafts.applescript`, cfg.fromAccount, ...sentSubjects], { timeout: 120_000 });
   }
 
   console.log(

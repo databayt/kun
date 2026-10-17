@@ -8,6 +8,7 @@
 import { readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
+import { DATA } from "./lib/paths.mjs";
 
 function envKey(key: string): string {
   if (process.env[key]) return process.env[key]!.trim();
@@ -20,7 +21,7 @@ function envKey(key: string): string {
 }
 
 /// The open weekly report thread (written by week.ts, read by discuss.ts).
-export const WEEK_THREAD = "jobs/.state/week-thread.json";
+export const WEEK_THREAD = `${DATA}/.state/week-thread.json`;
 
 /// Abdout's Slack user — the first id Hermes is allowed to hear.
 export function abdoutUserId(): string {

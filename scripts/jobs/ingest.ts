@@ -37,8 +37,9 @@ import { similarRole } from "@/lib/jobs/deduplication";
 
 import { BoardRow, listBoard, patchRow } from "./board";
 import { createJobRow, openDb, statusFor } from "./engine";
+import { DATA } from "./lib/paths.mjs";
 
-const INBOX = "jobs/inbox";
+const INBOX = `${DATA}/inbox`;
 const DRY_RUN = process.argv.includes("--dry-run");
 const fileArg = process.argv.indexOf("--file");
 const ONLY_FILE = fileArg > -1 ? process.argv[fileArg + 1] : undefined;

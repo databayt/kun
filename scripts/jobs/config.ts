@@ -5,6 +5,7 @@
 // can be read in the digest before the volume rises (plan, 2026-09-27).
 
 import { existsSync, readFileSync } from "node:fs";
+import { DATA } from "./lib/paths.mjs";
 
 export interface LoopConfig {
   fromAccount: string;
@@ -104,8 +105,8 @@ export const HARD_LIMITS = {
 
 // Adopted lane order overrides the defaults above, once at load.
 try {
-  const o = existsSync("jobs/loop.config.json")
-    ? (JSON.parse(readFileSync("jobs/loop.config.json", "utf-8")) as {
+  const o = existsSync(`${DATA}/loop.config.json`)
+    ? (JSON.parse(readFileSync(`${DATA}/loop.config.json`, "utf-8")) as {
         laneBand?: Record<string, number>;
       })
     : {};
@@ -115,7 +116,7 @@ try {
 }
 
 export function loadConfig(): LoopConfig {
-  const path = "jobs/loop.config.json";
+  const path = `${DATA}/loop.config.json`;
   if (!existsSync(path)) return DEFAULTS;
   return {
     ...DEFAULTS,
@@ -160,5 +161,5 @@ export function kigaliNow(d = new Date()): {
 }
 
 export function killSwitchOn(): boolean {
-  return existsSync("jobs/.send-off") || process.env.JOBS_SEND === "off";
+  return existsSync(`${DATA}/.send-off`) || process.env.JOBS_SEND === "off";
 }

@@ -30,7 +30,7 @@ import {
   rmSync,
   writeFileSync,
 } from "node:fs";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 
 import {
   type CareerRecord,
@@ -47,9 +47,10 @@ import { type BoardRow, getRow, listBoard, noteRow } from "./board";
 import { kigaliNow, loadConfig } from "./config";
 import { htmlToPdfs } from "./lib/pdf.mjs";
 import { postingText, splitName } from "./lib/posting";
+import { DATA, REPO } from "./lib/paths.mjs";
 
-const ROOT = "/Users/abdout/kun";
-const CAREER = "jobs/evidence/career.json";
+const ROOT = REPO;
+const CAREER = `${DATA}/evidence/career.json`;
 export const MIN_COVERAGE = 60;
 
 /// Per-lane floor, tunable by the weekly adopter (`minCoverageByLane` in
@@ -244,10 +245,10 @@ export async function tailorCvs(
   } = {},
 ): Promise<Map<string, TailorResult>> {
   const career = JSON.parse(readFileSync(CAREER, "utf-8")) as CareerRecord;
-  const facts = JSON.parse(readFileSync("jobs/facts.json", "utf-8")) as {
+  const facts = JSON.parse(readFileSync(`${DATA}/facts.json`, "utf-8")) as {
     numbers: string[];
   };
-  const dir = opts.dir ?? `jobs/outbox/${kigaliNow().date}`;
+  const dir = opts.dir ?? `${DATA}/outbox/${kigaliNow().date}`;
   const results = new Map<string, TailorResult>();
   const jobs: JobFile[] = [];
 
@@ -276,7 +277,7 @@ export async function tailorCvs(
       ),
       hiringOrganization: ld.org,
       companyWebsite: ld.site,
-      out: join(ROOT, cardDir, "cv.json"),
+      out: resolve(ROOT, cardDir, "cv.json"),
     };
     writeFileSync(join(cardDir, "job.json"), JSON.stringify(job, null, 2));
     if (opts.force) rmSync(job.out, { force: true });
@@ -297,7 +298,7 @@ export async function tailorCvs(
     await Promise.all(
       Array.from({ length: 3 }, async () => {
         for (let b = batches[next++]; b; b = batches[next++])
-          await runBatch(b.map((j) => join(ROOT, dir, j.crmId, "job.json")));
+          await runBatch(b.map((j) => resolve(ROOT, dir, j.crmId, "job.json")));
       }),
     );
   }
@@ -361,7 +362,7 @@ export async function tailorCvs(
       crmId: r.job.crmId,
       ok,
       weakFit: verdict.coverage < minCoverage(r.job.campaign),
-      pdf: pdf.ok ? join(ROOT, r.out) : undefined,
+      pdf: pdf.ok ? resolve(ROOT, r.out) : undefined,
       coverage: verdict.coverage,
       missing: verdict.missing,
       problems,
@@ -386,7 +387,7 @@ async function main(): Promise<void> {
     // Cards no machine submits: the CV is what he uploads, so it is tailored
     // ahead and its path written on the card. Once per card, ever.
     const done = (id: string) =>
-      existsSync("jobs/outbox") && readdirSync("jobs/outbox").some((d) => existsSync(join("jobs/outbox", d, id, "cv.json")));
+      existsSync(`${DATA}/outbox`) && readdirSync(`${DATA}/outbox`).some((d) => existsSync(join(`${DATA}/outbox`, d, id, "cv.json")));
     rows = (await listBoard())
       .filter(
         (r) =>

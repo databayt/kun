@@ -20,9 +20,10 @@ import { kigaliNow, loadConfig } from "./config";
 import { notify } from "./notify";
 import { post, WEEK_THREAD } from "./slack";
 import { loadVariants } from "./variants";
+import { DATA, REPO } from "./lib/paths.mjs";
 
 const DRY = process.argv.includes("--dry-run");
-const ROOT = "/Users/abdout/kun";
+const ROOT = REPO;
 
 export interface WeekPlan {
   learned: string[];
@@ -64,8 +65,8 @@ function settledAbTests(lines: LedgerLine[]): Action[] {
 
 async function main(): Promise<void> {
   const { date } = kigaliNow();
-  const report = `jobs/learn/${date}.md`;
-  const planFile = `jobs/learn/${date}.week.json`;
+  const report = `${DATA}/learn/${date}.md`;
+  const planFile = `${DATA}/learn/${date}.week.json`;
 
   // 1. Metrics.
   const learn = spawnSync("pnpm", ["-s", "jobs:learn"], { encoding: "utf-8" });
@@ -116,7 +117,7 @@ Prefer 1–4 actions that move volume toward the fastest-paying lanes. With too 
   }
   const plan = JSON.parse(readFileSync(planFile, "utf-8")) as WeekPlan;
 
-  const lines = readFileSync("jobs/ledger.jsonl", "utf-8")
+  const lines = readFileSync(`${DATA}/ledger.jsonl`, "utf-8")
     .split("\n")
     .filter(Boolean)
     .map((l) => JSON.parse(l) as LedgerLine);
@@ -154,7 +155,7 @@ Prefer 1–4 actions that move volume toward the fastest-paying lanes. With too 
     `_Reply in this thread — I answer within ~30 min. "revert 3" undoes change #3; ask for any change in plain words. Full report: jobs/learn/${date}.md_`,
   ].join("\n");
   const ts = await post(loadConfig().jobsChannel, msg);
-  mkdirSync("jobs/.state", { recursive: true });
+  mkdirSync(`${DATA}/.state`, { recursive: true });
   writeFileSync(
     WEEK_THREAD,
     JSON.stringify({ ts, date, cursor: ts }, null, 2) + "\n",

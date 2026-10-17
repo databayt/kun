@@ -28,11 +28,12 @@ import {
   replies,
   WEEK_THREAD,
 } from "./slack";
+import { DATA, REPO } from "./lib/paths.mjs";
 
 const DRY = process.argv.includes("--dry-run");
-const ROOT = "/Users/abdout/kun";
-const LOCK = "jobs/.state/discuss.lock";
-const CURSOR = "jobs/.state/discuss-cursor";
+const ROOT = REPO;
+const LOCK = `${DATA}/.state/discuss.lock`;
+const CURSOR = `${DATA}/.state/discuss-cursor`;
 
 interface Answer {
   reply: string;
@@ -80,7 +81,7 @@ async function main(): Promise<void> {
       return;
     }
   }
-  mkdirSync("jobs/.state", { recursive: true });
+  mkdirSync(`${DATA}/.state`, { recursive: true });
   writeFileSync(LOCK, String(process.pid));
   try {
     const { date } = kigaliNow();
@@ -91,7 +92,7 @@ async function main(): Promise<void> {
     const recent =
       changes().slice(-15).map(describe).join("\n") || "(none yet)";
     const said = mine.map(({ m }) => `- ${plain(m.text)}`).join("\n");
-    const out = `jobs/.state/discuss-${Date.now()}.json`;
+    const out = `${DATA}/.state/discuss-${Date.now()}.json`;
 
     const prompt = `You run Osman Abdout's job-hunting loop (drive: quick cash) and he is talking to you in Slack #jobs. Answer him like a sharp colleague: short, concrete, numbers first, in the language he wrote in (Arabic or English). Slack mrkdwn, no headings, under 180 words.
 

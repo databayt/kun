@@ -14,7 +14,7 @@
 
 import { spawn, spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 
 import { chromium } from "playwright-core";
 
@@ -64,6 +64,7 @@ import { sentToday } from "./send";
 import { pickVariants } from "./variants";
 import { tailorCvs, type TailorResult } from "./tailor";
 import { contactState, pdfPages, postingText, splitName } from "./wave";
+import { DATA, DATA_ABS, REPO, SCRIPTS } from "./lib/paths.mjs";
 
 const args = process.argv.slice(2);
 const verb = args[0];
@@ -74,9 +75,9 @@ const opt = (f: string) =>
   args.indexOf(f) > -1 ? args[args.indexOf(f) + 1] : undefined;
 
 const profile = JSON.parse(
-  readFileSync("jobs/profile.json", "utf-8"),
+  readFileSync(`${DATA}/profile.json`, "utf-8"),
 ) as AtsProfile;
-const facts = JSON.parse(readFileSync("jobs/facts.json", "utf-8")) as {
+const facts = JSON.parse(readFileSync(`${DATA}/facts.json`, "utf-8")) as {
   numbers: string[];
 };
 
@@ -176,7 +177,7 @@ function tailorBatch(dir: string, pending: AtsRequest[]): Promise<void> {
 
 For each request file listed below:
 1. Read it (JSON: role, company, postingText, template path, prose = form questions needing a written answer, cvJson). If cvJson is set, read it: it is the CV tailored to this posting and uploaded with the form — stress the same two or three points.
-2. Read the template and /Users/abdout/kun/jobs/facts.json.
+2. Read the template and ${DATA_ABS}/facts.json.
 3. Write JSON to the request's "out" path:
    {"body": <a cover letter, plain text, 150-300 words, following the template>,
     "answers": {<each prose question, verbatim, as key>: <a direct answer, 40-150 words, plain text>}}
@@ -225,7 +226,7 @@ const UNANSWERABLE = "ATS form asks what the profile can't answer truthfully";
 async function prepare(): Promise<void> {
   const cfg = loadConfig();
   const { date } = kigaliNow();
-  const dir = `jobs/outbox/${date}`;
+  const dir = `${DATA}/outbox/${date}`;
   mkdirSync(dir, { recursive: true });
   const board = await listBoard();
   const limit = Number(opt("--limit") ?? 60);
@@ -309,14 +310,14 @@ async function prepare(): Promise<void> {
       company,
       postingUrl: row.jobUrl?.primaryLinkUrl ?? "",
       postingText: (text ?? "").slice(0, 8000),
-      template: join("/Users/abdout/kun", letter.template),
+      template: resolve(REPO, letter.template),
       cvVariant: cv.id,
       letterVariant: letter.id,
       cvPdf: cv.pdf,
       prose: [...p.answers.values()]
         .filter((x) => x.answer.kind === "prose")
         .map((x) => x.question.label),
-      out: join("/Users/abdout/kun", dir, `${row.id}.ats-letter.json`),
+      out: resolve(REPO, dir, `${row.id}.ats-letter.json`),
     };
     writeFileSync(
       join(dir, `${row.id}.ats-request.json`),
@@ -335,7 +336,7 @@ async function prepare(): Promise<void> {
     if (t?.ok && t.pdf) {
       req.cvPdf = t.pdf;
       req.cvVariant = `cv:tailored@${req.crmId}`;
-      req.cvJson = join("/Users/abdout/kun", dir, req.crmId, "cv.json");
+      req.cvJson = resolve(REPO, dir, req.crmId, "cv.json");
       writeFileSync(
         join(dir, `${req.crmId}.ats-request.json`),
         JSON.stringify(req, null, 2),
@@ -533,8 +534,8 @@ async function packetHold(
     lines.push("", `**${q.label}**${q.required ? " *" : ""}`, "", v);
   }
   lines.push("", "## Cover letter", "", found.letter.body);
-  mkdirSync("jobs/packets/ats", { recursive: true });
-  const packet = `jobs/packets/ats/${row.id}.md`;
+  mkdirSync(`${DATA}/packets/ats`, { recursive: true });
+  const packet = `${DATA}/packets/ats/${row.id}.md`;
   writeFileSync(packet, lines.join("\n") + "\n");
   if (apply) {
     await patchRow(row.id, {
@@ -554,13 +555,13 @@ async function packetHold(
 function findAts(
   crmId: string,
 ): { dir: string; req: AtsRequest; letter: AtsLetter } | null {
-  if (!existsSync("jobs/outbox")) return null;
-  for (const wave of spawnSync("ls", ["-1r", "jobs/outbox"], {
+  if (!existsSync(`${DATA}/outbox`)) return null;
+  for (const wave of spawnSync("ls", ["-1r", `${DATA}/outbox`], {
     encoding: "utf-8",
   })
     .stdout.split("\n")
     .filter(Boolean)) {
-    const dir = join("jobs/outbox", wave);
+    const dir = join(`${DATA}/outbox`, wave);
     const rp = join(dir, `${crmId}.ats-request.json`);
     const lp = join(dir, `${crmId}.ats-letter.json`);
     if (existsSync(rp) && existsSync(lp)) {
@@ -578,7 +579,7 @@ function findAts(
 function mailIds(): Set<string> {
   const r = spawnSync(
     "osascript",
-    ["scripts/jobs/mail-read.applescript", profile.identity.email, "2"],
+    [`${SCRIPTS}/mail-read.applescript`, profile.identity.email, "2"],
     { encoding: "utf-8", timeout: 120_000 },
   );
   return new Set(
@@ -602,7 +603,7 @@ function codeFetcher(
       ]);
       const r = spawnSync(
         "osascript",
-        ["scripts/jobs/mail-read.applescript", profile.identity.email, "2"],
+        [`${SCRIPTS}/mail-read.applescript`, profile.identity.email, "2"],
         { encoding: "utf-8", timeout: 120_000 },
       );
       for (const m of (r.stdout ?? "").split("\x1e")) {
@@ -640,8 +641,8 @@ async function submit(): Promise<void> {
     NOW ? 999 : Math.max(0, total),
   );
   const queuedAt = new Map<string, number>();
-  if (existsSync("jobs/ledger.jsonl")) {
-    for (const l of readFileSync("jobs/ledger.jsonl", "utf-8")
+  if (existsSync(`${DATA}/ledger.jsonl`)) {
+    for (const l of readFileSync(`${DATA}/ledger.jsonl`, "utf-8")
       .split("\n")
       .filter(Boolean)) {
       const e = JSON.parse(l) as { kind: string; crmId: string; ts: string };

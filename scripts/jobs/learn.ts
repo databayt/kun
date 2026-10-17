@@ -33,6 +33,7 @@ import {
 import { listBoard } from "./board";
 import { kigaliNow } from "./config";
 import { notify } from "./notify";
+import { DATA, DATA_ABS, REPO } from "./lib/paths.mjs";
 
 const args = process.argv.slice(2);
 
@@ -49,8 +50,8 @@ const table = (title: string, rows: Outcome[]): string =>
 
 async function main(): Promise<void> {
   const { date } = kigaliNow();
-  const lines: LedgerLine[] = existsSync("jobs/ledger.jsonl")
-    ? readFileSync("jobs/ledger.jsonl", "utf-8")
+  const lines: LedgerLine[] = existsSync(`${DATA}/ledger.jsonl`)
+    ? readFileSync(`${DATA}/ledger.jsonl`, "utf-8")
         .split("\n")
         .filter(Boolean)
         .map((l) => JSON.parse(l) as LedgerLine)
@@ -91,11 +92,11 @@ async function main(): Promise<void> {
 
   // Discover's per-adapter yield over the last 7 daily files.
   const yieldBy = new Map<string, { items: number; days: number; errors: number }>();
-  if (existsSync("jobs/learn"))
-    for (const file of readdirSync("jobs/learn")
+  if (existsSync(`${DATA}/learn`))
+    for (const file of readdirSync(`${DATA}/learn`)
       .filter((n) => /^yield-\d{4}-\d{2}-\d{2}\.json$/.test(n))
       .filter((n) => n.slice(6, 16) >= weekAgo.slice(0, 10))) {
-      const y = JSON.parse(readFileSync(`jobs/learn/${file}`, "utf-8")) as Record<
+      const y = JSON.parse(readFileSync(`${DATA}/learn/${file}`, "utf-8")) as Record<
         string,
         { items: number; error?: string }
       >;
@@ -174,22 +175,22 @@ async function main(): Promise<void> {
       .map(([r, n]) => `- ${n}× ${r}`),
   ].join("\n");
 
-  mkdirSync("jobs/learn", { recursive: true });
-  const out = `jobs/learn/${date}.md`;
+  mkdirSync(`${DATA}/learn`, { recursive: true });
+  const out = `${DATA}/learn/${date}.md`;
   writeFileSync(out, md + "\n");
   console.log(md);
 
   if (args.includes("--propose") && sent >= 3) {
     const prompt = `You improve Osman Abdout's job applications. Read:
-- /Users/abdout/kun/${out} (this week's outcomes)
-- /Users/abdout/kun/jobs/variants.json and the active letter templates it points to
-- the sent letters in /Users/abdout/kun/jobs/outbox/*/ (*.letter.json) and /Users/abdout/kun/jobs/ledger.jsonl (which got replies)
-- /Users/abdout/kun/jobs/facts.json (the only claims allowed)
+- ${REPO}/${out} (this week's outcomes)
+- ${DATA_ABS}/variants.json and the active letter templates it points to
+- the sent letters in ${DATA_ABS}/outbox/*/ (*.letter.json) and ${DATA_ABS}/ledger.jsonl (which got replies)
+- ${DATA_ABS}/facts.json (the only claims allowed)
 
 Then propose AT MOST 2 new variants — a letter template or a CV HTML edit — each aimed at a specific finding. For each:
 1. Write the new file next to its parent with the version bumped (e.g. jobs/templates/letters/kigali-tech@2.md, or jobs/cv/web@2.html copied from web.html with your edit). Never edit an existing file.
-2. Append an entry to jobs/variants.json "variants" with "active": false, "parent": <parent id>, "createdAt": "${date}", "hypothesis": <one sentence: what you expect to improve and why, citing the numbers>. For a CV also set "pdf": "jobs/cv/Osman_Abdout_<Name>@<n>.pdf" and "source".
-3. Append a "## Proposals" section to /Users/abdout/kun/${out} explaining each and how to adopt it (pnpm jobs:variant activate <id>).
+2. Append an entry to ${DATA_ABS}/variants.json "variants" with "active": false, "parent": <parent id>, "createdAt": "${date}", "hypothesis": <one sentence: what you expect to improve and why, citing the numbers>. For a CV also set "pdf": "${DATA}/cv/<Name>@<n>.pdf" and "source".
+3. Append a "## Proposals" section to ${REPO}/${out} explaining each and how to adopt it (pnpm jobs:variant activate <id>).
 If the sample is too small to support a change, propose nothing and say so in the Proposals section. Never invent facts.`;
     const res = spawnSync(
       "claude",

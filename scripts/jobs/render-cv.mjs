@@ -12,9 +12,10 @@
 import { readFileSync, statSync } from "node:fs";
 
 import { htmlToPdfs } from "./lib/pdf.mjs";
+import { DATA } from "./lib/paths.mjs";
 
 const only = process.argv[2];
-const registry = JSON.parse(readFileSync("jobs/variants.json", "utf-8"));
+const registry = JSON.parse(readFileSync(`${DATA}/variants.json`, "utf-8"));
 const targets = registry.variants.filter((v) => v.kind === "cv" && v.source && v.pdf && (!only || v.id === only));
 if (targets.length === 0) {
   console.error(only ? `no cv variant "${only}"` : "no cv variants with a source");

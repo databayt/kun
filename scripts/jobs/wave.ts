@@ -23,7 +23,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 
 import { similarRole } from "@/lib/jobs/deduplication";
 import { evaluateSendGate, holdReasonFor } from "@/lib/jobs/send-gate";
@@ -44,10 +44,11 @@ const limitArg = args.indexOf("--limit");
 
 export { postingText, splitName } from "./lib/posting";
 import { postingText, splitName } from "./lib/posting";
+import { DATA, DATA_ABS, REPO } from "./lib/paths.mjs";
 
 function letterExists(crmId: string): boolean {
-  if (!existsSync("jobs/outbox")) return false;
-  return readdirSync("jobs/outbox").some((w) => existsSync(join("jobs/outbox", w, `${crmId}.letter.json`)));
+  if (!existsSync(`${DATA}/outbox`)) return false;
+  return readdirSync(`${DATA}/outbox`).some((w) => existsSync(join(`${DATA}/outbox`, w, `${crmId}.letter.json`)));
 }
 
 export function pdfPages(path: string): number {
@@ -115,7 +116,7 @@ function tailor(dir: string, requests: Request[]): void {
 
 For each request file listed below:
 1. Read it (JSON: role, company, to, postingText, template path, lane, cvJson). If cvJson is set, read it too: it is the CV tailored to this posting and attached to the email — the letter must stress the same two or three points, never repeat the CV line by line.
-2. Read the template it names and /Users/abdout/kun/jobs/facts.json.
+2. Read the template it names and ${DATA_ABS}/facts.json.
 3. Write the letter to the path in its "out" field as JSON:
    {"to": <the request's "to">, "subject": <a subject line: use the exact subject the posting asks for if it states one, else "Application – <role> – Osman Abdout">, "body": <plain-text email body>}
 
@@ -157,10 +158,10 @@ When every "out" file is written, reply DONE.`;
 async function main(): Promise<void> {
   const cfg = loadConfig();
   const { date } = kigaliNow();
-  const dir = `jobs/outbox/${date}`;
+  const dir = `${DATA}/outbox/${date}`;
   mkdirSync(dir, { recursive: true });
 
-  const facts = JSON.parse(readFileSync("jobs/facts.json", "utf-8")) as {
+  const facts = JSON.parse(readFileSync(`${DATA}/facts.json`, "utf-8")) as {
     numbers: string[];
   };
   const board = await listBoard();
@@ -216,11 +217,11 @@ async function main(): Promise<void> {
       postingUrl: url,
       postingText: (text ?? "").slice(0, 8000),
       lane,
-      template: join("/Users/abdout/kun", letter.template),
+      template: resolve(REPO, letter.template),
       cvVariant: cv.id,
       letterVariant: letter.id,
       cvPdf: cv.pdf,
-      out: join("/Users/abdout/kun", dir, `${row.id}.letter.json`),
+      out: resolve(REPO, dir, `${row.id}.letter.json`),
     };
     writeFileSync(
       join(dir, `${row.id}.request.json`),
@@ -241,7 +242,7 @@ async function main(): Promise<void> {
     if (t?.ok && t.pdf) {
       req.cvPdf = t.pdf;
       req.cvVariant = `cv:tailored@${req.crmId}`;
-      req.cvJson = join("/Users/abdout/kun", dir, req.crmId, "cv.json");
+      req.cvJson = resolve(REPO, dir, req.crmId, "cv.json");
       writeFileSync(join(dir, `${req.crmId}.request.json`), JSON.stringify(req, null, 2));
     } else if (t) {
       console.log(`  · lane CV for ${req.company} — tailored CV failed: ${t.problems.join("; ").slice(0, 200)}`);

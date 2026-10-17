@@ -12,9 +12,10 @@
 import { existsSync, readFileSync } from "node:fs";
 
 import { call } from "./board";
+import { DATA } from "./lib/paths.mjs";
 
 const PATH = "/rest/fundingPrograms";
-const SEED = "jobs/funding.seed.json";
+const SEED = `${DATA}/funding.seed.json`;
 
 export interface FundingSeed {
   name: string;

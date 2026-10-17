@@ -21,6 +21,7 @@ import {
 } from "./config";
 import { fundingDue } from "./funding";
 import { notify } from "./notify";
+import { DATA } from "./lib/paths.mjs";
 
 const short = (r: BoardRow): string =>
   r.name
@@ -37,8 +38,8 @@ async function main(): Promise<void> {
   const yesterday = new Date(Date.now() - 86_400_000)
     .toISOString()
     .slice(0, 10);
-  const events = existsSync("jobs/ledger.jsonl")
-    ? readFileSync("jobs/ledger.jsonl", "utf-8")
+  const events = existsSync(`${DATA}/ledger.jsonl`)
+    ? readFileSync(`${DATA}/ledger.jsonl`, "utf-8")
         .split("\n")
         .filter(Boolean)
         .map(
@@ -79,8 +80,8 @@ async function main(): Promise<void> {
   // loop ran green: 194 of 195 TO_APPLY cards had no address or form, so the
   // wave had nothing to tailor. Say so the day it happens, not a week later.
   const weekAgo = new Date(Date.now() - 7 * 86_400_000).toISOString();
-  const sentWeek = existsSync("jobs/ledger.jsonl")
-    ? readFileSync("jobs/ledger.jsonl", "utf-8")
+  const sentWeek = existsSync(`${DATA}/ledger.jsonl`)
+    ? readFileSync(`${DATA}/ledger.jsonl`, "utf-8")
         .split("\n")
         .filter((l) => l.includes('"kind":"sent"'))
         .filter((l) => (JSON.parse(l) as { ts: string }).ts >= weekAgo).length
@@ -160,7 +161,7 @@ async function main(): Promise<void> {
 
   // Freelance is one Upwork job a day, picked and drafted by Cowork in
   // Abdout's logged-in browser (Upwork blocks bots); Abdout submits.
-  const upwork = `jobs/packets/upwork/${date}.md`;
+  const upwork = `${DATA}/packets/upwork/${date}.md`;
   if (existsSync(upwork)) {
     const url = readFileSync(upwork, "utf-8").match(
       /https:\/\/www\.upwork\.com\/[^\s)>\]]+/,

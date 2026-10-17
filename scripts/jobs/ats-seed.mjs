@@ -12,6 +12,7 @@
 
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { DATA } from "./lib/paths.mjs";
 
 // Sources: a remote-in-tech clone (path), or --yc <yc all.json> — the
 // yc-oss mirror of the Y Combinator directory (hiring, remote-friendly only).
@@ -40,7 +41,7 @@ if (ycIdx > -1) {
 }
 
 // Merge, never replace: boards already known are kept and not re-probed.
-const known = existsSync("jobs/ats-boards.json") ? JSON.parse(readFileSync("jobs/ats-boards.json", "utf-8")).boards : [];
+const known = existsSync(`${DATA}/ats-boards.json`) ? JSON.parse(readFileSync(`${DATA}/ats-boards.json`, "utf-8")).boards : [];
 const knownNames = new Set(known.map((b) => b.company.toLowerCase()));
 // A board is identified by (ats, token), not by the name the list happens to
 // print. Remote-job lists carry aliases and even article titles ("Stream Native
@@ -104,6 +105,6 @@ async function worker() {
 await Promise.all(Array.from({ length: 6 }, worker));
 
 const live = [...known, ...found.filter((b) => b.openJobs > 0 || b.ats === "lever")];
-writeFileSync("jobs/ats-boards.json", JSON.stringify({ generatedAt: new Date().toISOString(), boards: live }, null, 2) + "\n");
+writeFileSync(`${DATA}/ats-boards.json`, JSON.stringify({ generatedAt: new Date().toISOString(), boards: live }, null, 2) + "\n");
 const by = live.reduce((m, b) => ((m[b.ats] = (m[b.ats] ?? 0) + 1), m), {});
 console.log(`\njobs/ats-boards.json <- ${live.length} boards`, by);
