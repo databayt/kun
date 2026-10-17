@@ -26,7 +26,8 @@ export interface LoopConfig {
   minCoverageByLane: Record<string, number>; // tailored-CV fit floor per campaign
   // A time-boxed focus: until the date, only these lanes in these countries
   // are prepared or sent; every other card waits on the board, untouched.
-  focus?: { lanes: string[]; countries: string[]; until: string };
+  // anywhereLanes pass in any country (remote work like AI_TRAINING).
+  focus?: { lanes: string[]; countries: string[]; until: string; anywhereLanes?: string[] };
 }
 
 const DEFAULTS: LoopConfig = {
@@ -132,6 +133,7 @@ export function inFocus(
 ): boolean {
   const f = c.focus;
   if (!f || today > f.until) return true;
+  if (f.anywhereLanes?.includes(r.campaign ?? "")) return true;
   return f.lanes.includes(r.campaign ?? "") && (f.countries.length === 0 || f.countries.includes(r.country ?? ""));
 }
 

@@ -41,7 +41,7 @@ portals, platforms, tenders and bids stay packets Abdout submits. **Learning ado
 | Fri ≥17:00 | **week**: learn → Claude decides → adopt → report + thread in #jobs (≤3 tries) | `jobs:week` | claude -p |
 | every tick | **discuss**: answer Abdout in #jobs, apply/revert what he asks | `jobs:discuss` | claude -p only if he wrote |
 
-**Focus mode:** `focus: {lanes, countries, until}` in `jobs/loop.config.json` — until the date, wave / send / ATS / digest touch only those lanes in those countries; other QUEUED cards wait, Abdout's APPROVED cards still go. Lapses on its own (`inFocus()` in config.ts).
+**Focus mode:** `focus: {lanes, countries, until}` in `jobs/loop.config.json` — until the date, wave / send / ATS / digest touch only those lanes in those countries; other QUEUED cards wait, Abdout's APPROVED cards still go; `anywhereLanes` (e.g. AI_TRAINING) pass in any country. Lapses on its own (`inFocus()` in config.ts).
 
 **Board states:** TO_APPLY → QUEUED (sends next window) → APPLIED → RESPONSE/INTERVIEW/OFFER/REJECTED;
 gate fail / needs input → HOLD (`holdReason` says what) → Abdout fixes + moves to APPROVED → sends.
