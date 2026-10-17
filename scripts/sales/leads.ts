@@ -855,8 +855,15 @@ function draft(
       buyer.indexOf(a.sector) - buyer.indexOf(b.sector),
   );
   // OSM often maps one business as several nodes (APEDDH ×3 in Kigali): one
-  // message per number, never the same pitch twice to the same phone.
-  const sent = new Set<string>();
+  // message per number, never the same pitch twice to the same phone. A twin
+  // node of a business already contacted counts as contacted (2026-10-17: a
+  // second APEDDH node landed in a first-touch packet two weeks after wave 1).
+  const sent = new Set<string>(
+    Object.values(load(city))
+      .filter((l) => !fresh(l))
+      .map((l) => mobileOf(l.phone, l.country))
+      .filter((m): m is string => !!m),
+  );
   for (const l of leads) {
     const m = mobileOf(l.phone, l.country);
     if (m && sent.has(m)) continue;
