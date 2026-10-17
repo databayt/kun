@@ -12,7 +12,7 @@ import { numbersIn } from "../send-gate";
 
 const career: CareerRecord = {
   identity: {
-    legalName: "Osman Mohamed Elamin Osman Ali",
+    legalName: "Osman Mohamedelamin Osman Ali",
     brandName: "Osman Abdout",
     dateOfBirth: "1990-01-01",
     nationality: "Sudanese",
@@ -127,7 +127,7 @@ describe("renderAtsHtml", () => {
   });
 
   it("uses the legal name and the seafarer block on maritime CVs only", () => {
-    expect(cvName(cv(), career)).toBe("Osman Mohamed Elamin Osman Ali");
+    expect(cvName(cv(), career)).toBe("Osman Mohamedelamin Osman Ali");
     expect(html).toContain("No.: 14148, valid until May 2027");
     expect(html).toContain("Passport: valid until Dec 2034");
     expect(html).not.toContain("Certificate of Competency");
