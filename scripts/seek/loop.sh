@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # The jobs loop heartbeat: every 30 minutes, run whatever is due.
 #
-#   bash scripts/jobs/loop.sh --tick        one pass (what launchd calls)
-#   bash scripts/jobs/loop.sh --install     arm launchd (replaces com.databayt.jobs-daily)
-#   bash scripts/jobs/loop.sh --uninstall
-#   bash scripts/jobs/loop.sh --status      armed? last stamps, today's log tail
-#   bash scripts/jobs/loop.sh --pause       kill switch on  (touch jobs/.send-off)
-#   bash scripts/jobs/loop.sh --resume      kill switch off
+#   bash scripts/seek/loop.sh --tick        one pass (what launchd calls)
+#   bash scripts/seek/loop.sh --install     arm launchd (replaces com.databayt.jobs-daily)
+#   bash scripts/seek/loop.sh --uninstall
+#   bash scripts/seek/loop.sh --status      armed? last stamps, today's log tail
+#   bash scripts/seek/loop.sh --pause       kill switch on  (touch jobs/.send-off)
+#   bash scripts/seek/loop.sh --resume      kill switch off
 #
 # Schedule (Kigali, the Mac is on CAT):
 #   ≥07:00 daily       discover + ingest + resolve       0 tokens
@@ -76,7 +76,7 @@ mail_ok() {
     if [[ "$MAIL_ERR" == *-1743* ]]; then
         log "Mail.app: launchd not authorized to send Apple events (-1743) — grant in System Settings › Privacy & Security › Automation"
         done_today mail-tcc-alert || {
-            ( cd "$REPO" && pnpm -s tsx -e 'import { notify } from "./scripts/jobs/notify"; process.exit(notify("Jobs loop can'\''t drive Mail.app (-1743): nothing sends. System Settings › Privacy & Security › Automation → allow Mail for the jobs loop (bash/osascript).", "Jobs: Mail blocked") ? 0 : 1)' ) >> "$LOG_FILE" 2>&1 \
+            ( cd "$REPO" && pnpm -s tsx -e 'import { notify } from "./scripts/seek/notify"; process.exit(notify("Jobs loop can'\''t drive Mail.app (-1743): nothing sends. System Settings › Privacy & Security › Automation → allow Mail for the jobs loop (bash/osascript).", "Jobs: Mail blocked") ? 0 : 1)' ) >> "$LOG_FILE" 2>&1 \
                 && stamp mail-tcc-alert \
                 || log "Mail-blocked alert not delivered — retrying next tick"
         }
@@ -108,7 +108,7 @@ render_plist() {
 	<key>ProgramArguments</key>
 	<array>
 		<string>/bin/bash</string>
-		<string>$REPO/scripts/jobs/loop.sh</string>
+		<string>$REPO/scripts/seek/loop.sh</string>
 		<string>--tick</string>
 	</array>
 	<key>WorkingDirectory</key>
@@ -196,7 +196,7 @@ case "$MODE" in
             # Google sweep (2026-10-17): Kigali electrical + software roles the
             # fetch adapters can't reach. A miss never blocks discover.
             done_today google || { run google pnpm -s jobs:google && stamp google; }
-            run discover node scripts/jobs/discover.mjs &&
+            run discover node scripts/seek/discover.mjs &&
                 { run ingest pnpm -s jobs:ingest || { sleep 60; run ingest-retry pnpm -s jobs:ingest; }; } &&
                 stamp discover
             # Board listings carry only the board link; read each posting for

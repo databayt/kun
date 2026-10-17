@@ -41,6 +41,8 @@ export const CRM_TO_CAMPAIGN: Record<string, string> = {
 };
 
 export function loadVariants(): Variant[] {
+  // A fresh setup has no CV/letter variants yet — nothing to rank or rotate.
+  if (!existsSync(REGISTRY)) return [];
   return (
     JSON.parse(readFileSync(REGISTRY, "utf-8")) as { variants: Variant[] }
   ).variants;
@@ -57,7 +59,9 @@ function saveVariants(variants: Variant[]): void {
 export function sendCounts(): Map<string, number> {
   const counts = new Map<string, number>();
   if (!existsSync(`${DATA}/ledger.jsonl`)) return counts;
-  for (const line of readFileSync(`${DATA}/ledger.jsonl`, "utf-8").split("\n")) {
+  for (const line of readFileSync(`${DATA}/ledger.jsonl`, "utf-8").split(
+    "\n",
+  )) {
     if (!line.trim()) continue;
     const e = JSON.parse(line) as { kind: string; variant?: string };
     if (e.kind !== "sent" || !e.variant) continue;
@@ -104,7 +108,12 @@ export function pickVariants(
   return {
     lane,
     cv: pick("cv", cvLane, all, counts),
-    letter: pick(source === "direct-approach" ? "speculative" : "letter", lane, all, counts),
+    letter: pick(
+      source === "direct-approach" ? "speculative" : "letter",
+      lane,
+      all,
+      counts,
+    ),
   };
 }
 

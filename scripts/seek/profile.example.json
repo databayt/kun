@@ -1,0 +1,64 @@
+{
+  "$comment": "Copy to seek/profile.json (gitignored) and fill it in. Every letter, CV and form answer is written from this file and your CVs alone — never invented. Leave a field out rather than guess.",
+  "identity": {
+    "firstName": "Jane",
+    "lastName": "Doe",
+    "fullName": "Jane Doe",
+    "email": "jane@example.com",
+    "phone": "+10000000000",
+    "phoneDisplay": "+1 000 000 0000",
+    "city": "Nairobi",
+    "country": "Kenya",
+    "timezone": "EAT (UTC+3)",
+    "utcOffsetHours": 3,
+    "nationality": "Kenyan",
+    "passportCountry": "Kenya",
+    "bio": "data analyst with 4 years in fintech, Python and SQL, open to remote roles"
+  },
+  "links": {
+    "github": "https://github.com/janedoe",
+    "linkedin": "https://www.linkedin.com/in/janedoe",
+    "portfolio": "https://janedoe.dev"
+  },
+  "work": {
+    "currentTitle": "Data Analyst",
+    "currentCompany": "Example Fintech",
+    "yearsSoftwareProfessional": 4,
+    "highestDegree": "BSc Statistics, University of Nairobi, 2020",
+    "noticePeriod": "One month",
+    "startDate": "One month from offer",
+    "workedRemotelyFullTime": false
+  },
+  "authorization": {
+    "rule": "Authorized to work in Kenya. Needs sponsorship elsewhere.",
+    "needsSponsorshipForCountryBoundRoles": true,
+    "willingToRelocate": "Yes, with sponsorship"
+  },
+  "compensation": {
+    "remoteExpectedUSDPerYear": "30000-40000",
+    "remoteExpectedUSDPerHour": "18-25"
+  },
+  "languages": ["English (fluent)", "Swahili (native)"],
+  "skills": {
+    "$comment": "Yes/no experience questions are answered from these lists only; anything unlisted is held for you to answer.",
+    "yes": ["python", "sql", "pandas", "power bi", "excel"],
+    "no": ["java", "kubernetes"]
+  },
+  "answers": [
+    {
+      "match": "why do you want to work",
+      "answer": "One or two honest sentences you are happy to reuse."
+    }
+  ],
+  "seek": {
+    "strategy": "What you want first and why — e.g. remote data roles that hire from Kenya, then Nairobi on-site roles; skip US-only postings.",
+    "tailorRules": "How a CV may present your record — which experience leads for which kind of role, dates to write exactly, certificates never to overstate.",
+    "sweep": {
+      "brief": "Use WebSearch (and WebFetch to read postings) to find OPEN data analyst and BI roles that are remote-from-Kenya or in Nairobi. Run at least 10 searches, e.g. \"data analyst job Nairobi\", \"remote data analyst Africa {month}\", \"site:brightermonday.co.ke data analyst\". Prefer the employer's own posting page. Drop roles restricted to other nationals.",
+      "campaigns": ["remote-data-analyst", "nairobi-data-analyst"],
+      "campaignGuide": "Use remote-data-analyst for remote roles and nairobi-data-analyst for on-site Nairobi roles.",
+      "location": "Nairobi, Kenya",
+      "bidCampaigns": []
+    }
+  }
+}

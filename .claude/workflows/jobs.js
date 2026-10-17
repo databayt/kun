@@ -156,7 +156,7 @@ Return how many rows were created, pushed and dropped, with the dropped lines.`,
 // ── Tailor ───────────────────────────────────────────────────────
 phase("Tailor");
 const queueOut = await agent(
-  `In ${KUN} run \`node scripts/jobs/queue.mjs --limit ${TOP} --json\` and return the parsed array unchanged.`,
+  `In ${KUN} run \`node scripts/seek/queue.mjs --limit ${TOP} --json\` and return the parsed array unchanged.`,
   {
     label: "queue",
     phase: "Tailor",

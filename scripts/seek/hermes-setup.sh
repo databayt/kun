@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # ── Wire Hermes to the jobs lane: quick commands from WhatsApp / Slack ───────
 #
-#   bash scripts/jobs/hermes-setup.sh          install/refresh, restart the gateway
-#   bash scripts/jobs/hermes-setup.sh --check  print what is installed, change nothing
+#   bash scripts/seek/hermes-setup.sh          install/refresh, restart the gateway
+#   bash scripts/seek/hermes-setup.sh --check  print what is installed, change nothing
 #
 # Hermes' model login has been dead since 2026-09-13 and the engine is
 # subscription-only (no API keys), so nothing here calls a model: these are
@@ -10,7 +10,7 @@
 # the gateway and replies with its output (no arguments, 30s limit). Typed in
 # Abdout's WhatsApp self-chat or a Slack DM to the bot:
 #
-#   /jobs          status: last 7 days, today, queued, held (scripts/jobs/brief.ts)
+#   /jobs          status: last 7 days, today, queued, held (scripts/seek/brief.ts)
 #   /jobsqueue     what goes out next — veto by moving the card to Hold
 #   /jobsreplies   real replies in the last 14 days
 #   /jobspause     kill switch on (nothing sends)   /jobsresume  kill switch off
@@ -32,12 +32,12 @@ import sys, yaml
 cfg_path, run, mode = sys.argv[1], sys.argv[2], sys.argv[3]
 cfg = yaml.safe_load(open(cfg_path)) or {}
 want = {
-    "jobs":        f"{run} ./node_modules/.bin/tsx scripts/jobs/brief.ts",
-    "jobsqueue":   f"{run} ./node_modules/.bin/tsx scripts/jobs/brief.ts queue",
-    "jobsreplies": f"{run} ./node_modules/.bin/tsx scripts/jobs/brief.ts replies",
-    "jobsweek":    f"{run} ./node_modules/.bin/tsx scripts/jobs/brief.ts week",
-    "jobspause":   f"{run} bash scripts/jobs/loop.sh --pause && echo 'Jobs loop paused — nothing sends until /jobsresume.'",
-    "jobsresume":  f"{run} bash scripts/jobs/loop.sh --resume && echo 'Jobs loop resumed.'",
+    "jobs":        f"{run} ./node_modules/.bin/tsx scripts/seek/brief.ts",
+    "jobsqueue":   f"{run} ./node_modules/.bin/tsx scripts/seek/brief.ts queue",
+    "jobsreplies": f"{run} ./node_modules/.bin/tsx scripts/seek/brief.ts replies",
+    "jobsweek":    f"{run} ./node_modules/.bin/tsx scripts/seek/brief.ts week",
+    "jobspause":   f"{run} bash scripts/seek/loop.sh --pause && echo 'Jobs loop paused — nothing sends until /jobsresume.'",
+    "jobsresume":  f"{run} bash scripts/seek/loop.sh --resume && echo 'Jobs loop resumed.'",
 }
 qc = cfg.get("quick_commands") or {}
 if mode == "--check":
@@ -65,7 +65,7 @@ import os
 bak = f"{cfg_path}.bak-jobs-{datetime.date.today()}"
 if not os.path.exists(bak):  # keep the first (pre-change) copy of the day
     shutil.copy(cfg_path, bak)
-open(cfg_path, "w").write("\n".join(out).rstrip("\n") + "\n\n# jobs lane — managed by kun scripts/jobs/hermes-setup.sh\n" + block)
+open(cfg_path, "w").write("\n".join(out).rstrip("\n") + "\n\n# jobs lane — managed by kun scripts/seek/hermes-setup.sh\n" + block)
 assert (yaml.safe_load(open(cfg_path)) or {}).get("quick_commands", {}).keys() >= want.keys()
 print("quick_commands:", ", ".join("/" + k for k in want))
 PY
