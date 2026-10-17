@@ -56,18 +56,19 @@ const prompt = `You are the daily Kigali job sweep for Osman Abdout (Sudanese na
 Use WebSearch (and WebFetch to read postings) to find job postings LOCATED IN RWANDA (Kigali or elsewhere in Rwanda) that are OPEN today, in two families:
 1. Electrical: electrical engineer, power/energy engineer, protection/substation/SCADA/commissioning engineer, E&I, electromechanical, maintenance engineer, solar/renewable engineer, instrumentation.
 2. Software: software engineer/developer, full-stack/front-end/back-end, web/mobile developer, DevOps, data engineer, AI/ML engineer, systems engineer.
+3. Website work for Databayt (the company): Rwandan businesses, NGOs, schools or institutions asking for a website to be designed, built, redesigned or rebranded — RFPs, requests for quotation, expressions of interest, tenders and freelance gigs ("website design and development", "website redesign", "web portal", "e-commerce website").
 
-Search the way Google surfaces them daily — run at least 10 searches, e.g. "electrical engineer job Kigali", "software engineer vacancy Rwanda", "site:jobs.newtimes.co.rw engineer", "site:jobinrwanda.com electrical", "site:greatrwandajobs.com software", "site:mucuruzi.com engineer", "site:linkedin.com/jobs Kigali software engineer", "Zipline Kigali careers", "career opportunities Kigali developer ${TODAY.slice(0, 7)}". Prefer the employer's own posting page or the board page over aggregators.
+Search the way Google surfaces them daily — run at least 10 searches, e.g. "electrical engineer job Kigali", "software engineer vacancy Rwanda", "site:jobs.newtimes.co.rw engineer", "site:jobinrwanda.com electrical", "site:greatrwandajobs.com software", "site:mucuruzi.com engineer", "site:linkedin.com/jobs Kigali software engineer", "Zipline Kigali careers", "career opportunities Kigali developer ${TODAY.slice(0, 7)}", "website design tender Rwanda", "request for quotation website development Kigali", "site:jobinrwanda.com website", "website redesign expression of interest Rwanda". Prefer the employer's own posting page or the board page over aggregators.
 
 Rules — never break them:
 - Only postings whose deadline is ${TODAY} or later, or with no deadline and published within the last 21 days. Read the posting to confirm; drop it if you can't.
-- Drop anything restricted to Rwandan (or other) nationals/citizens, teacher/lecturer roles, purely mechanical roles, internships for current students, and tenders/procurement notices.
+- Drop anything restricted to Rwandan (or other) nationals/citizens, teacher/lecturer roles, purely mechanical roles, internships for current students, and tenders/procurement notices outside family 3.
 - applyEmail / applyWhatsApp: ONLY if printed on the posting itself as the way to apply. Never guess or construct an address.
 - Never invent a deadline, company or detail. Unknown = omit the field.
 
 Write ${ROOT}/${TMP} as a JSON array (and output nothing else), each item:
-{"title": "...", "company": "...", "location": "Kigali, Rwanda", "remoteType": "onsite|hybrid|remote", "employmentType": "full_time|contract|part_time", "description": "<=600 chars from the posting: duties + requirements", "sourceUrl": "<the posting URL>", "campaign": "kigali-electrical-engineer|kigali-protection-engineer|kigali-web-developer", "deadline": "YYYY-MM-DD", "applyEmail": "...", "applyWhatsApp": "+250..."}
-Use kigali-protection-engineer for protection/relay/substation/SCADA/commissioning roles. Write [] if nothing qualifies.`;
+{"title": "...", "company": "...", "location": "Kigali, Rwanda", "remoteType": "onsite|hybrid|remote", "employmentType": "full_time|contract|part_time", "description": "<=600 chars from the posting: duties + requirements", "sourceUrl": "<the posting URL>", "campaign": "kigali-electrical-engineer|kigali-protection-engineer|kigali-web-developer|rwanda-tenders-databayt", "deadline": "YYYY-MM-DD", "applyEmail": "...", "applyWhatsApp": "+250..."}
+Use kigali-protection-engineer for protection/relay/substation/SCADA/commissioning roles, rwanda-tenders-databayt for every family-3 RFP, tender or quotation (a website job posted as an employee role stays kigali-web-developer). Write [] if nothing qualifies.`;
 
 function main(): void {
   mkdirSync("jobs/.state", { recursive: true });
@@ -118,16 +119,23 @@ function main(): void {
       source: "google",
       campaign: r.campaign,
       deadline: r.deadline ?? "rolling",
-      applyMethod: r.applyEmail
-        ? `email:${r.applyEmail}`
-        : r.applyWhatsApp
-          ? `whatsapp:${r.applyWhatsApp}`
-          : `portal:${r.sourceUrl}`,
-      note: r.applyEmail
-        ? `Google sweep — the posting asks for applications to ${r.applyEmail}.`
-        : r.applyWhatsApp
-          ? `Google sweep — the posting asks for CVs on WhatsApp to ${r.applyWhatsApp}.`
-          : "Google sweep — read the posting for the exact apply channel and documents.",
+      // A tender wants a bid packet, never a cover letter by email.
+      applyMethod:
+        r.campaign === "rwanda-tenders-databayt"
+          ? `portal:${r.sourceUrl}`
+          : r.applyEmail
+            ? `email:${r.applyEmail}`
+            : r.applyWhatsApp
+              ? `whatsapp:${r.applyWhatsApp}`
+              : `portal:${r.sourceUrl}`,
+      note:
+        r.campaign === "rwanda-tenders-databayt"
+          ? `Google sweep — website/software bid for Databayt${r.applyEmail ? `; submissions to ${r.applyEmail}` : ""}. Prepare a proposal packet.`
+          : r.applyEmail
+            ? `Google sweep — the posting asks for applications to ${r.applyEmail}.`
+            : r.applyWhatsApp
+              ? `Google sweep — the posting asks for CVs on WhatsApp to ${r.applyWhatsApp}.`
+              : "Google sweep — read the posting for the exact apply channel and documents.",
     }));
   rmSync(TMP, { force: true });
 
