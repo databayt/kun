@@ -23,8 +23,8 @@ function envKey(key: string): string {
 /// The open weekly report thread (written by week.ts, read by discuss.ts).
 export const WEEK_THREAD = `${DATA}/.state/week-thread.json`;
 
-/// Abdout's Slack user — the first id Hermes is allowed to hear.
-export function abdoutUserId(): string {
+/// The owner's Slack user — the first id Hermes is allowed to hear.
+export function ownerUserId(): string {
   return envKey("SLACK_ALLOWED_USERS").split(",")[0].trim();
 }
 

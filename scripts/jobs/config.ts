@@ -1,10 +1,13 @@
 // ── Send-loop configuration ──────────────────────────────────────────────────
 //
-// Defaults here; jobs/loop.config.json (gitignored, personal) overrides any key.
+// Defaults here; <data>/loop.config.json (gitignored, personal) overrides any key.
+// The defaults name nobody: the sending mailbox comes from the profile, and
+// the Slack and WhatsApp targets stay off until the person sets them.
 // The ramp is deliberate: the first two weeks send 5/day so the first waves
 // can be read in the digest before the volume rises (plan, 2026-09-27).
 
 import { existsSync, readFileSync } from "node:fs";
+import { ME } from "./lib/identity";
 import { DATA } from "./lib/paths.mjs";
 
 export interface LoopConfig {
@@ -19,11 +22,13 @@ export interface LoopConfig {
   windowTo: number;
   slackTarget: string; // hermes send --to
   jobsChannel: string; // private #jobs — weekly report + discussion thread
-  whatsappCap: number; // applications/day from Abdout's own WhatsApp number
+  whatsappCap: number; // applications/day from the person's own WhatsApp number
   briefWhatsApp: string; // where the interview/offer briefs go ("" = off)
+  // slackTarget / jobsChannel "" = off: the loop still runs, it just reports
+  // to the terminal and the macOS notification centre.
   vetoHours: number; // a QUEUED card waits this long before it can send
   pausedLanes: string[]; // CRM campaign values the wave skips
-  dailyTotalCap: number; // email + ATS applications per day (Abdout's goal: 100)
+  dailyTotalCap: number; // email + ATS applications per day
   minCoverageByLane: Record<string, number>; // tailored-CV fit floor per campaign
   // A time-boxed focus: until the date, only these lanes in these countries
   // are prepared or sent; every other card waits on the board, untouched.
@@ -32,8 +37,8 @@ export interface LoopConfig {
 }
 
 const DEFAULTS: LoopConfig = {
-  fromAccount: "osmanabdout@hotmail.com",
-  dailyCap: 40, // hotmail ceiling (Abdout, 2026-09-27: cap the personal mailbox at 40)
+  fromAccount: ME.email,
+  dailyCap: 40, // a personal mailbox ceiling — more risks an account lock
   rampCap: 40,
   rampUntil: "2026-10-11",
   followUpCap: 5,
@@ -41,15 +46,15 @@ const DEFAULTS: LoopConfig = {
   sendHour: 10,
   windowFrom: 9,
   windowTo: 17,
-  slackTarget: "slack:D0AQ0JR5ZU4",
-  // Private on purpose (CVs, contacts) — created 2026-10-10, kun bot invited.
-  jobsChannel: "C0C8A8YRXNW",
-  // Abdout, 2026-10-04: apply on WhatsApp too. Small on purpose — a personal
-  // number that cold-messages many strangers a day risks a WhatsApp ban.
+  slackTarget: "",
+  // Keep it private if set — the thread carries CVs and contacts.
+  jobsChannel: "",
+  // Small on purpose — a personal number that cold-messages many strangers a
+  // day risks a WhatsApp ban.
   whatsappCap: 5,
-  // Abdout, 2026-10-05: a WhatsApp brief only when an application is
-  // accepted (interview or offer) — not on every send. His own chat.
-  briefWhatsApp: "+249919071294",
+  // A brief only when an application is accepted (interview or offer) — not
+  // on every send. The person's own chat.
+  briefWhatsApp: "",
   vetoHours: 2,
   // Abdout, 2026-10-03: electrical/protection back on (his deepest CV, Gulf +
   // East Africa). 2026-10-05: marine ETO back on too — no lane is paused.
@@ -145,20 +150,24 @@ export function todaysCap(
   return today <= c.rampUntil ? c.rampCap : c.dailyCap;
 }
 
-/// Kigali is UTC+2 year-round; the Mac is on CAT too, but launchd children
-/// should not depend on it.
+/// The person's local clock (identity.utcOffsetHours in the profile) — send
+/// windows and daily stamps follow it, not the machine's timezone, since
+/// launchd children should not depend on it. Named for the first instance
+/// (Kigali, UTC+2); localNow is the same function.
 export function kigaliNow(d = new Date()): {
   date: string;
   hour: number;
   weekday: number;
 } {
-  const k = new Date(d.getTime() + 2 * 3_600_000);
+  const k = new Date(d.getTime() + ME.utcOffsetHours * 3_600_000);
   return {
     date: k.toISOString().slice(0, 10),
     hour: k.getUTCHours(),
     weekday: k.getUTCDay(),
   };
 }
+
+export const localNow = kigaliNow;
 
 export function killSwitchOn(): boolean {
   return existsSync(`${DATA}/.send-off`) || process.env.JOBS_SEND === "off";

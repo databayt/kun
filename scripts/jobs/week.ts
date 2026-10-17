@@ -21,6 +21,7 @@ import { notify } from "./notify";
 import { post, WEEK_THREAD } from "./slack";
 import { loadVariants } from "./variants";
 import { DATA, REPO } from "./lib/paths.mjs";
+import { ME, STRATEGY } from "./lib/identity";
 
 const DRY = process.argv.includes("--dry-run");
 const ROOT = REPO;
@@ -74,7 +75,7 @@ async function main(): Promise<void> {
     throw new Error(`jobs:learn failed: ${(learn.stderr || "").slice(0, 300)}`);
 
   // 2. Claude reads the week and decides.
-  const prompt = `You run Osman Abdout's job-hunting loop and improve it every week. The drive is QUICK CASH: the first paid work in days, not months. He is a Sudanese national living in Kigali, Rwanda — native Arabic, fluent English, BSc Electrical Engineering, 7 years marine ETO, substation protection since 2022, ~5 years full-stack TypeScript/Next.js, founder of Databayt. Positioning (2026-10-10): "Native Arabic engineer (electrical + full-stack TypeScript) — Arabic LLM evaluation, STEM reasoning, RTL code review". Fastest lanes: Arabic AI-evaluation / AI-training platforms that accept Rwanda (Mercor confirmed), then software roles, then a fixed-price "Arabic/RTL-ready Next.js in 72h" freelance offer. US-only remote roles rarely hire from Rwanda.
+  const prompt = `You run ${ME.name}'s opportunity loop and improve it every week.${STRATEGY ? ` ${STRATEGY}` : ""}
 
 Read:
 - ${ROOT}/${report} — this week's funnel by source, discover yield, outcomes by lane/source/variant, hold reasons
@@ -154,7 +155,12 @@ Prefer 1–4 actions that move volume toward the fastest-paying lanes. With too 
     "",
     `_Reply in this thread — I answer within ~30 min. "revert 3" undoes change #3; ask for any change in plain words. Full report: jobs/learn/${date}.md_`,
   ].join("\n");
-  const ts = await post(loadConfig().jobsChannel, msg);
+  const channel = loadConfig().jobsChannel;
+  if (!channel) {
+    console.log(msg);
+    return;
+  }
+  const ts = await post(channel, msg);
   mkdirSync(`${DATA}/.state`, { recursive: true });
   writeFileSync(
     WEEK_THREAD,

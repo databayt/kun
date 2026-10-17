@@ -65,6 +65,7 @@ import { pickVariants } from "./variants";
 import { tailorCvs, type TailorResult } from "./tailor";
 import { contactState, pdfPages, postingText, splitName } from "./wave";
 import { DATA, DATA_ABS, REPO, SCRIPTS } from "./lib/paths.mjs";
+import { ME } from "./lib/identity";
 
 const args = process.argv.slice(2);
 const verb = args[0];
@@ -173,7 +174,7 @@ async function tailor(dir: string, requests: AtsRequest[]): Promise<void> {
 }
 
 function tailorBatch(dir: string, pending: AtsRequest[]): Promise<void> {
-  const prompt = `You write job applications for Osman Abdout. Work ONLY from files.
+  const prompt = `You write job applications for ${ME.name}. Work ONLY from files.
 
 For each request file listed below:
 1. Read it (JSON: role, company, postingText, template path, prose = form questions needing a written answer, cvJson). If cvJson is set, read it: it is the CV tailored to this posting and uploaded with the form — stress the same two or three points.
@@ -186,7 +187,7 @@ Hard rules — a mechanical gate rejects the file otherwise:
 - Every number, year, date and credential must appear in facts.json or the posting text. Never invent experience, clients, results or years.
 - No brackets, braces, placeholders or notes to the reader.
 - Name the company and the exact role in the cover letter. Where a form allows links, the profile supplies them — do not paste URLs into the letter except github.com/abdout and databayt.org.
-- Sign the letter: Osman Abdout.
+- Sign the letter: ${ME.name}.
 
 Request files:
 ${pending.map((r) => join(dir, `${r.crmId}.ats-request.json`)).join("\n")}
@@ -506,7 +507,7 @@ async function packetHold(
     `# ${row.name}`,
     "",
     `Form: ${row.applyUrl}`,
-    `CV: ${found.req.cvPdf}  ·  Cover letter below (paste, or attach ${join(found.dir, row.id, "Osman_Abdout_Cover_Letter.pdf")} after a dry run)`,
+    `CV: ${found.req.cvPdf}  ·  Cover letter below (paste, or attach ${join(found.dir, row.id, `${ME.fileStem()}_Cover_Letter.pdf`)} after a dry run)`,
     "",
     "## Answers, field by field",
   ];
@@ -732,7 +733,7 @@ async function submit(): Promise<void> {
       const coverPath = join(
         found.dir,
         row.id,
-        "Osman_Abdout_Cover_Letter.pdf",
+        `${ME.fileStem()}_Cover_Letter.pdf`,
       );
       await coverLetterPdf(found.letter.body, coverPath, browser);
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env tsx
-// ── Google sweep: Kigali electrical + software roles → jobs/inbox ────────────
+// ── Google sweep: the profile's search brief → <data>/inbox ─────────────────
 //
 //   pnpm jobs:google              search, write jobs/inbox/<date>-google.json
 //   pnpm jobs:google --dry-run    search and print; nothing written
@@ -24,6 +24,7 @@ import {
   rmSync,
   writeFileSync,
 } from "node:fs";
+import { ME, SWEEP } from "./lib/identity";
 import { DATA, REPO } from "./lib/paths.mjs";
 
 const DRY = process.argv.includes("--dry-run");
@@ -32,11 +33,6 @@ const TODAY = new Date().toISOString().slice(0, 10);
 const OUT = `${DATA}/inbox/${TODAY}-google.json`;
 const TMP = `${DATA}/.state/google-${TODAY}.json`;
 
-const LANES = new Set([
-  "kigali-electrical-engineer",
-  "kigali-protection-engineer",
-  "kigali-web-developer",
-]);
 
 interface Row {
   title: string;
@@ -52,26 +48,34 @@ interface Row {
   applyWhatsApp?: string;
 }
 
-const prompt = `You are the daily Kigali job sweep for Osman Abdout (Sudanese national resident in Kigali; electrical engineer — protection, substations, marine ETO — and full-stack TypeScript/Next.js software engineer). Today is ${TODAY}.
+// Who, where and what to search comes from profile.json → seek.sweep; the
+// truth rules and the output contract stay here. {today} and {month} in the
+// brief are filled in at run time.
+const brief = (SWEEP?.brief ?? "")
+  .replaceAll("{today}", TODAY)
+  .replaceAll("{month}", TODAY.slice(0, 7));
+const CAMPAIGNS = SWEEP?.campaigns ?? [];
+const LOCATION = SWEEP?.location ?? "";
+const BIDS = new Set(SWEEP?.bidCampaigns ?? []);
 
-Use WebSearch (and WebFetch to read postings) to find job postings LOCATED IN RWANDA (Kigali or elsewhere in Rwanda) that are OPEN today, in two families:
-1. Electrical: electrical engineer, power/energy engineer, protection/substation/SCADA/commissioning engineer, E&I, electromechanical, maintenance engineer, solar/renewable engineer, instrumentation.
-2. Software: software engineer/developer, full-stack/front-end/back-end, web/mobile developer, DevOps, data engineer, AI/ML engineer, systems engineer.
-3. Website work for Databayt (the company): Rwandan businesses, NGOs, schools or institutions asking for a website to be designed, built, redesigned or rebranded — RFPs, requests for quotation, expressions of interest, tenders and freelance gigs ("website design and development", "website redesign", "web portal", "e-commerce website").
+const prompt = `You are the daily opportunity sweep for ${ME.name}${ME.bio ? ` (${ME.bio})` : ""}. Today is ${TODAY}.
 
-Search the way Google surfaces them daily — run at least 10 searches, e.g. "electrical engineer job Kigali", "software engineer vacancy Rwanda", "site:jobs.newtimes.co.rw engineer", "site:jobinrwanda.com electrical", "site:greatrwandajobs.com software", "site:mucuruzi.com engineer", "site:linkedin.com/jobs Kigali software engineer", "Zipline Kigali careers", "career opportunities Kigali developer ${TODAY.slice(0, 7)}", "website design tender Rwanda", "request for quotation website development Kigali", "site:jobinrwanda.com website", "website redesign expression of interest Rwanda". Prefer the employer's own posting page or the board page over aggregators.
+${brief}
 
 Rules — never break them:
 - Only postings whose deadline is ${TODAY} or later, or with no deadline and published within the last 21 days. Read the posting to confirm; drop it if you can't.
-- Drop anything restricted to Rwandan (or other) nationals/citizens, teacher/lecturer roles, purely mechanical roles, internships for current students, and tenders/procurement notices outside family 3.
 - applyEmail / applyWhatsApp: ONLY if printed on the posting itself as the way to apply. Never guess or construct an address.
 - Never invent a deadline, company or detail. Unknown = omit the field.
 
 Write ${ROOT}/${TMP} as a JSON array (and output nothing else), each item:
-{"title": "...", "company": "...", "location": "Kigali, Rwanda", "remoteType": "onsite|hybrid|remote", "employmentType": "full_time|contract|part_time", "description": "<=600 chars from the posting: duties + requirements", "sourceUrl": "<the posting URL>", "campaign": "kigali-electrical-engineer|kigali-protection-engineer|kigali-web-developer|rwanda-tenders-databayt", "deadline": "YYYY-MM-DD", "applyEmail": "...", "applyWhatsApp": "+250..."}
-Use kigali-protection-engineer for protection/relay/substation/SCADA/commissioning roles, rwanda-tenders-databayt for every family-3 RFP, tender or quotation (a website job posted as an employee role stays kigali-web-developer). Write [] if nothing qualifies.`;
+{"title": "...", "company": "...", "location": "${LOCATION || "City, Country"}", "remoteType": "onsite|hybrid|remote", "employmentType": "full_time|contract|part_time", "description": "<=600 chars from the posting: duties + requirements", "sourceUrl": "<the posting URL>", "campaign": "${CAMPAIGNS.join("|")}", "deadline": "YYYY-MM-DD", "applyEmail": "...", "applyWhatsApp": "+..."}
+${SWEEP?.campaignGuide ?? ""} Write [] if nothing qualifies.`;
 
 function main(): void {
+  if (!SWEEP?.brief || CAMPAIGNS.length === 0) {
+    console.log("google sweep: no seek.sweep brief/campaigns in profile.json — skipped.");
+    return;
+  }
   mkdirSync(`${DATA}/.state`, { recursive: true });
   rmSync(TMP, { force: true });
   console.log(`google sweep ${TODAY}: claude -p with WebSearch …`);
@@ -98,7 +102,7 @@ function main(): void {
   const raw = JSON.parse(readFileSync(TMP, "utf-8")) as Row[];
   const seen = new Set<string>();
   const items = raw
-    .filter((r) => r.title && r.sourceUrl && LANES.has(r.campaign))
+    .filter((r) => r.title && r.sourceUrl && CAMPAIGNS.includes(r.campaign))
     .filter(
       (r) =>
         !r.deadline ||
@@ -109,7 +113,7 @@ function main(): void {
     .map((r) => ({
       title: r.title,
       company: r.company || "Unknown employer",
-      location: r.location || "Kigali, Rwanda",
+      location: r.location || LOCATION,
       remoteType: r.remoteType ?? "onsite",
       employmentType: r.employmentType ?? "full_time",
       description: r.description || r.title,
@@ -122,7 +126,7 @@ function main(): void {
       deadline: r.deadline ?? "rolling",
       // A tender wants a bid packet, never a cover letter by email.
       applyMethod:
-        r.campaign === "rwanda-tenders-databayt"
+        BIDS.has(r.campaign)
           ? `portal:${r.sourceUrl}`
           : r.applyEmail
             ? `email:${r.applyEmail}`
@@ -130,8 +134,8 @@ function main(): void {
               ? `whatsapp:${r.applyWhatsApp}`
               : `portal:${r.sourceUrl}`,
       note:
-        r.campaign === "rwanda-tenders-databayt"
-          ? `Google sweep — website/software bid for Databayt${r.applyEmail ? `; submissions to ${r.applyEmail}` : ""}. Prepare a proposal packet.`
+        BIDS.has(r.campaign)
+          ? `Google sweep — a bid, not an application${r.applyEmail ? `; submissions to ${r.applyEmail}` : ""}. Prepare a proposal packet.`
           : r.applyEmail
             ? `Google sweep — the posting asks for applications to ${r.applyEmail}.`
             : r.applyWhatsApp

@@ -34,6 +34,7 @@ import { openDb } from "./engine";
 import { notify } from "./notify";
 import { contactState, pdfPages, postingText, splitName } from "./wave";
 import { DATA, SCRIPTS } from "./lib/paths.mjs";
+import { ME } from "./lib/identity";
 
 const args = process.argv.slice(2);
 const APPLY = args.includes("--apply");
@@ -127,7 +128,7 @@ export function mailSend(
 export function whatsappSend(to: string, body: string, attachment: string): string | null {
   const hermes = `${process.env.HOME}/.local/bin/hermes`;
   const target = `whatsapp:${to}`;
-  for (const msg of [body, `MEDIA:${attachment} CV — Osman Abdout`]) {
+  for (const msg of [body, `MEDIA:${attachment} CV — ${ME.name}`]) {
     const res = spawnSync(hermes, ["send", "--to", target, "--quiet", msg], {
       encoding: "utf-8",
       timeout: 90_000,

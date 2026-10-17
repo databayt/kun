@@ -21,7 +21,7 @@ import {
 import { type Action, applyAll, changes, describe, revert } from "./adopt";
 import { kigaliNow, loadConfig } from "./config";
 import {
-  abdoutUserId,
+  ownerUserId,
   history,
   plain,
   post,
@@ -29,6 +29,7 @@ import {
   WEEK_THREAD,
 } from "./slack";
 import { DATA, REPO } from "./lib/paths.mjs";
+import { ME } from "./lib/identity";
 
 const DRY = process.argv.includes("--dry-run");
 const ROOT = REPO;
@@ -43,7 +44,8 @@ interface Answer {
 
 async function main(): Promise<void> {
   const channel = loadConfig().jobsChannel;
-  const me = abdoutUserId();
+  if (!channel) return; // no #jobs channel configured — nothing to discuss
+  const me = ownerUserId();
   const week = existsSync(WEEK_THREAD)
     ? (JSON.parse(readFileSync(WEEK_THREAD, "utf-8")) as {
         ts: string;
@@ -94,7 +96,7 @@ async function main(): Promise<void> {
     const said = mine.map(({ m }) => `- ${plain(m.text)}`).join("\n");
     const out = `${DATA}/.state/discuss-${Date.now()}.json`;
 
-    const prompt = `You run Osman Abdout's job-hunting loop (drive: quick cash) and he is talking to you in Slack #jobs. Answer him like a sharp colleague: short, concrete, numbers first, in the language he wrote in (Arabic or English). Slack mrkdwn, no headings, under 180 words.
+    const prompt = `You run ${ME.name}'s opportunity loop and they are talking to you in Slack. Answer them like a sharp colleague: short, concrete, numbers first, in the language they wrote in (Arabic or English). Slack mrkdwn, no headings, under 180 words.
 
 He wrote:
 ${said}

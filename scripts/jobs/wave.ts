@@ -45,6 +45,7 @@ const limitArg = args.indexOf("--limit");
 export { postingText, splitName } from "./lib/posting";
 import { postingText, splitName } from "./lib/posting";
 import { DATA, DATA_ABS, REPO } from "./lib/paths.mjs";
+import { ME } from "./lib/identity";
 
 function letterExists(crmId: string): boolean {
   if (!existsSync(`${DATA}/outbox`)) return false;
@@ -112,20 +113,20 @@ interface Request {
 function tailor(dir: string, requests: Request[]): void {
   const pending = requests.filter((r) => !existsSync(r.out));
   if (pending.length === 0) return;
-  const prompt = `You write job application emails for Osman Abdout. Work ONLY from files.
+  const prompt = `You write job application emails for ${ME.name}. Work ONLY from files.
 
 For each request file listed below:
 1. Read it (JSON: role, company, to, postingText, template path, lane, cvJson). If cvJson is set, read it too: it is the CV tailored to this posting and attached to the email — the letter must stress the same two or three points, never repeat the CV line by line.
 2. Read the template it names and ${DATA_ABS}/facts.json.
 3. Write the letter to the path in its "out" field as JSON:
-   {"to": <the request's "to">, "subject": <a subject line: use the exact subject the posting asks for if it states one, else "Application – <role> – Osman Abdout">, "body": <plain-text email body>}
+   {"to": <the request's "to">, "subject": <a subject line: use the exact subject the posting asks for if it states one, else "Application – <role> – ${ME.name}">, "body": <plain-text email body>}
 
 Hard rules — a mechanical gate rejects the letter otherwise:
 - Every number, year, date and credential you write must appear in facts.json or in the posting text. Never invent experience, years, certificates or results.
 - No brackets, braces, placeholders, TODO, or notes to the reader. 120-350 words.
 - Name the company and the exact role. Match the posting's language (Arabic posting → Arabic letter).
-- If the posting asks for something only Osman can supply (salary expectation, certified copies, a form), still write the letter without it — do not invent it.
-- Plain text, no markdown. Sign: Osman Abdout, +250 780 984 777, osmanabdout@hotmail.com
+- If the posting asks for something only ${ME.firstName} can supply (salary expectation, certified copies, a form), still write the letter without it — do not invent it.
+- Plain text, no markdown. Sign: ${ME.signature}
 
 Request files:
 ${pending.map((r) => join(dir, `${r.crmId}.request.json`)).join("\n")}

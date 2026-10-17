@@ -34,6 +34,7 @@ import { listBoard } from "./board";
 import { kigaliNow } from "./config";
 import { notify } from "./notify";
 import { DATA, DATA_ABS, REPO } from "./lib/paths.mjs";
+import { ME } from "./lib/identity";
 
 const args = process.argv.slice(2);
 
@@ -181,7 +182,7 @@ async function main(): Promise<void> {
   console.log(md);
 
   if (args.includes("--propose") && sent >= 3) {
-    const prompt = `You improve Osman Abdout's job applications. Read:
+    const prompt = `You improve ${ME.name}'s applications. Read:
 - ${REPO}/${out} (this week's outcomes)
 - ${DATA_ABS}/variants.json and the active letter templates it points to
 - the sent letters in ${DATA_ABS}/outbox/*/ (*.letter.json) and ${DATA_ABS}/ledger.jsonl (which got replies)

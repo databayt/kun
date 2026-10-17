@@ -48,6 +48,7 @@ import { kigaliNow, loadConfig } from "./config";
 import { htmlToPdfs } from "./lib/pdf.mjs";
 import { postingText, splitName } from "./lib/posting";
 import { DATA, REPO } from "./lib/paths.mjs";
+import { ME, TAILOR } from "./lib/identity";
 
 const ROOT = REPO;
 const CAREER = `${DATA}/evidence/career.json`;
@@ -126,7 +127,12 @@ async function jsonLd(
   return { org: null, site: null };
 }
 
-const CONTRACT = `You tailor Osman's CV to ONE job posting. Work ONLY from files (and, if useful, the company's own website).
+// The person's own record rules (profiles, dates, certificate wording) live in
+// profile.json → seek.tailorRules; the contract below holds only the rules
+// every CV obeys.
+const TAILOR_RULES = TAILOR ? `${TAILOR}\n` : "";
+
+const CONTRACT = `You tailor ${ME.firstName}'s CV to ONE job posting. Work ONLY from files (and, if useful, the company's own website).
 
 For each job file listed below:
 1. Read it (JSON: role, company, profile, postingText, hiringOrganization, companyWebsite, out).
@@ -135,7 +141,7 @@ For each job file listed below:
 4. Write JSON to the job's "out" path with exactly these keys:
 {
   "profile": <the job file's profile: "maritime" | "engineering" | "software">,
-  "headline": <the posting's job title, or the closest true title Osman can hold, e.g. "Electro-Technical Officer (ETO)">,
+  "headline": <the posting's job title, or the closest true title ${ME.firstName} can hold, e.g. "Electro-Technical Officer (ETO)">,
   "summary": <3-4 sentences, 60-110 words: years and domain that match THIS posting, the 2-3 strongest matching facts, the company's own context (vessel type, plant, product) where it truly connects>,
   "skills": [<12-22 items, most relevant to the posting first; use the posting's own terms when the record supports them>],
   "experience": [{"role","org","place","dates","bullets":[<2-6 bullets>]}],
@@ -144,23 +150,13 @@ For each job file listed below:
   "certifications": [<names exactly as in the record; maritime: STCW and seafarer documents first>],
   "mustHave": [<5-12 REQUIREMENTS the posting places on the candidate — skills, certificates, experience, systems — in its own short words, e.g. "high voltage", "PLC", "STCW A-III/6", "DP vessels". Not vessel particulars (DWT, flag, vessel name), not contract terms>],
   "keywordsCovered": [<mustHave items the CV truthfully covers>],
-  "keywordsMissing": [<mustHave items Osman does not have>]
+  "keywordsMissing": [<mustHave items ${ME.firstName} does not have>]
 }
 
-Positioning — when the job file's campaign is "AI_TRAINING" (AI-training, LLM-evaluation, AI-tutor roles): open the summary with what makes him rare there — a native Arabic speaker who is also a working engineer (electrical + full-stack TypeScript) — and put "Arabic (native)" and the evaluation-relevant skills (STEM reasoning, code review, Arabic/RTL interfaces) first in skills, as far as the record supports them.
-
+${TAILOR_RULES}
 Hard rules — a mechanical gate rejects the CV otherwise:
-- Every employer, vessel, school, certificate, number, date and tool comes from the career record. Reword and reorder; NEVER invent experience, certificates, vessel types, voltages, tonnages, years or results. If the posting wants something he lacks, list it in keywordsMissing — do not hint at it in the CV.
+- Every employer, vessel, school, certificate, number, date and tool comes from the career record. Reword and reorder; NEVER invent experience, certificates, vessel types, voltages, tonnages, years or results. If the posting wants something the record lacks, list it in keywordsMissing — do not hint at it in the CV.
 - Spotlight: put the experience that matches the posting first and give it the most bullets; drop bullets that are irrelevant to this job; mirror the posting's vocabulary where the record supports it (an ATS matches words).
-- Profiles:
-  * maritime — experience: the "sea" entry first (role "Electro-Technical Officer"), then "lady-moon", then "alfalgi" framed as shore-side HV/protection work, then "paf". Include seaService (all 5 rows) and the seafarer certifications. The seafarer medical is EXPIRED: never call it valid; list it only as "Seafarer medical certificate (MLC 2006) — renewal on joining" if the posting asks for a medical.
-  * engineering — "alfalgi" first, then "sea" as Electro-Technical Officer, then "lady-moon"/"paf"/"rakta" only if relevant. seaService: [].
-  * software — "databayt" first, then "alfalgi" and "sea" condensed to 1-2 bullets each, framed as Electrical & Control Engineer work (PLC, SCADA, relay programming). seaService: [].
-- ALFALGI dates are "Feb 2022 – 2026". Never write "Present" for ALFALGI.
-- Voltage vocabulary: the ALFALGI work at 33 kV, 13.8 kV and 4.16 kV IS high-voltage / medium-voltage (HV/MV) switchgear work — say "HV/MV" or "high-voltage" when the posting does. MCC = motor control centres. Never claim a voltage level above 33 kV.
-- STCW: the record holds "Crowd management — STCW Reg. A-V/2.4" (a passenger-ship training certificate). It is NOT an ETO certificate of competency (A-III/6): never write "STCW A-III/6" or "STCW-certified ETO". Osman holds NO certificate of competency in the record — never mention a CoC. "14148" is his seaman's book (valid until May 2027), not a CoC. If the posting requires a CoC / A-III/6, list it in keywordsMissing. He DID complete the AASTMT "Electro-Technical Officer — Certificate of Competence Course (Part B), IMO Model Course 7.08" (Sept 2019): on maritime CVs put it first among certifications and say "ETO Certificate of Competence course completed (IMO Model Course 7.08)" — a course, never a certificate of competency.
-- Expired training: the STCW A-VI/1 basic safety courses, engine watchkeeping and the tanker basic course expired in Jan/Feb 2024. List them with the suffix " — refresher due" (e.g. "Fire Prevention and Fire Fighting — STCW A-VI/1-2 — refresher due"); never call them valid or current.
-- Name equipment exactly as the record does (e.g. "hydraulic cargo pumps", not "motor-driven pumps"; "deck crane", not "cranes and winches"). Rewording may change the order and the verbs, never what the equipment was.
 - No markdown, no brackets or placeholders inside values, no first person ("I").
 - English. Two pages at most: keep bullets to one line where possible.
 
@@ -337,8 +333,7 @@ export async function tailorCvs(
       continue;
     }
     cv.profile = profileForCampaign(job.campaign);
-    const who =
-      cv.profile === "maritime" ? "Osman_Mohamed_Elamin" : "Osman_Abdout";
+    const who = ME.fileStem(cv.profile);
     const out = join(dir, job.crmId, `${who}_CV_${fileSafe(job.company)}.pdf`);
     toRender.push({ job, cv, html: renderAtsHtml(cv, career), out });
   }
