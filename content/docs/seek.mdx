@@ -1,0 +1,113 @@
+---
+title: Seek
+description: An open opportunity loop for Claude Code — discover openings, tailor the CV and letter, apply, follow up, and get briefed when someone replies
+---
+
+# Seek
+
+> **Find the chance, apply, follow up — on autopilot, in your own name, from your own facts.**
+
+**Seek** is an open workflow that runs inside your own Claude Code. Every day it does what a job
+search, a scholarship hunt or a funding round needs done and nobody has time for:
+
+1. **Discover** — sweeps boards, portals and search results for open chances; drops duplicates
+   and expired calls.
+2. **Tailor** — writes a CV and a cover letter, pitch or proposal for *this one* chance, using only
+   the facts in your profile and CVs.
+3. **Apply** — by email, portal or form, with daily caps and a review window before anything sends.
+4. **Follow up** — a nudge on day 7 and day 14, then a quiet archive.
+5. **Brief** — reads the replies, classifies them, and tells you only what matters: a response,
+   an interview, an offer.
+
+It runs on your machine and your own Claude subscription. There is no account to create and none
+of your data reaches us. The public page is [/seek](/en/seek).
+
+---
+
+## Tracks
+
+The loop is the same for every kind of opportunity. What changes per **track** is where chances are
+found, which documents each one needs, and which replies deserve a brief. Tracks are defined in
+`src/lib/seek/tracks/`.
+
+| Track | Status | What it writes |
+|---|---|---|
+| **Jobs & gigs** — full-time roles, remote contracts, freelance, AI-training work, tenders | Live | CV, cover letter, form answers, proposal |
+| **Scholarships & fellowships** | Soon | CV, personal statement, document checklist |
+| **University admission** | Soon | CV, personal statement, document checklist |
+| **Visa & residency** | Soon | Cover letter, document checklist, form answers |
+| **Funding & grants** — grants, accelerators, investors | Soon | Pitch deck, proposal, form answers |
+
+---
+
+## Set it up
+
+```bash
+git clone https://github.com/databayt/kun && cd kun && pnpm install
+mkdir -p seek && cp scripts/seek/profile.example.json seek/profile.json
+```
+
+`seek/` is gitignored. To keep your data somewhere else, export `SEEK_HOME=/path/to/folder`.
+
+Then fill `seek/profile.json`. Leave a field out rather than guess — the loop holds an application
+for you instead of inventing an answer.
+
+| Block | What goes in it |
+|---|---|
+| `identity` | Name, email, phone, city, country, `utcOffsetHours`, a one-line `bio`. Letters are signed from this. |
+| `work`, `authorization`, `compensation`, `languages`, `skills`, `answers` | What application forms ask. Yes/no skill questions are answered from `skills.yes` / `skills.no` only. |
+| `seek.sweep` | The daily search in plain words — which roles, where, example queries — plus the allowed `campaigns`, a `campaignGuide`, the default `location` and any `bidCampaigns` (tenders that get a proposal, not a letter). `{today}` and `{month}` are filled in at run time. |
+| `seek.strategy` | What you want first and why. The weekly planner reads it when it tunes the loop. |
+| `seek.tailorRules` | How a CV may present your record: which experience leads for which role, exact dates, certificates never to overstate. |
+
+Put your CVs (HTML) in `seek/cv/` and run `pnpm seek:facts`. The resulting `facts.json` is the only
+source of numbers and credentials a letter is allowed to use.
+
+Optional settings go in `seek/loop.config.json`: `slackTarget`, `jobsChannel` and `briefWhatsApp`
+for alerts (off when unset), daily caps, and a time-boxed `focus` on certain lanes or countries.
+
+---
+
+## Run it
+
+Open Claude Code in the folder and say **"seek"** — or run the steps yourself:
+
+| Beat | Command |
+|---|---|
+| Discover | `pnpm seek:google` · `pnpm seek:discover` · `pnpm seek:ingest` |
+| Tailor | `pnpm seek:wave` · `pnpm seek:tailor` |
+| Apply | `pnpm seek:send --apply` · `pnpm seek:ats` |
+| Follow up | `pnpm seek:followup --apply` |
+| Brief | `pnpm seek:inbox` · `pnpm seek:digest` |
+| All of it, every 30 minutes | `pnpm seek:loop --install` (macOS launchd) · `--status` · `--pause` · `--resume` |
+
+Sending email uses Mail.app on macOS today; on other systems the loop prepares the letters and
+packets and you send them.
+
+---
+
+## Guardrails
+
+- **Truth.** Every number, date and credential in a letter or CV must appear in your facts or in the
+  posting. A mechanical gate rejects anything else, and the card waits on hold with the reason.
+- **Your name only.** A profile belongs to the person who fills it. Never run the loop for someone
+  who has not set it up themselves.
+- **Caps and a veto.** A daily cap, one application per company per run, no repeat within 30 days,
+  a send window, and a waiting period in which you can cancel anything queued.
+- **Kill switch.** `pnpm seek:loop --pause` (or a `.send-off` file in the data folder) stops all
+  sending at once.
+
+---
+
+## How it fits together
+
+| Piece | Where |
+|---|---|
+| Public page | `src/app/[lang]/(root)/seek/page.tsx`, `src/components/root/seek/` |
+| Track definitions | `src/lib/seek/tracks/` |
+| The job track's engine (matching, gates, cadence, reply classifier) | `src/lib/jobs/` |
+| The loop | `scripts/seek/` — paths in `lib/paths.mjs`, identity in `lib/identity.ts`, limits in `config.ts` |
+| Profile template | `scripts/seek/profile.example.json` |
+| Claude Code skill | `.claude/skills/seek/SKILL.md` |
+
+Our own team's instance (its board, CRM and Slack channel) is documented in [Job Engine](/en/docs/jobs).

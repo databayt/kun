@@ -5,6 +5,8 @@ description: Evidence-based career intelligence comparing market opportunities a
 
 # Job Engine
 
+> **This is our own instance of [Seek](/en/docs/seek)** — the open opportunity loop anyone can run from their own profile. This page documents how our team's instance runs: its data in `jobs/`, the Twenty board, the Kigali lanes and Slack #jobs. The loop lives in `scripts/seek/` (`scripts/jobs` links to it, and `pnpm jobs:*` aliases `pnpm seek:*`).
+
 > **"Evidence over keywords. Capabilities over job titles. Explainability over mysterious scores."**
 
 The **Job Engine** is Kun's career operations and opportunity matching platform. Rather than building a naive keyword counter that matches "React" to "React" without understanding depth, the engine inspects Databayt's actual codebase on disk, builds a verified **Engineering Knowledge Profile**, normalizes incoming market opportunities, and scores candidate fit with full explainability.
@@ -318,8 +320,8 @@ pnpm dev
 
 ### Route Map
 
-- **`/jobs`**: Interactive Hub with live intake form, sample job preset loader, filter tabs, stats overview, and expandable opportunity cards.
-- **`/jobs/profile`**: Dedicated dossier view of the candidate's verified Engineering Knowledge Profile with active repositories and proven capabilities.
+- **`/seek/board`** (contributor login; `/jobs` links redirect): Interactive Hub with live intake form, sample job preset loader, filter tabs, stats overview, and expandable opportunity cards.
+- **`/seek/profile`** (contributor login): Dedicated dossier view of the candidate's verified Engineering Knowledge Profile with active repositories and proven capabilities.
 - **`/docs/jobs`**: This architecture manual.
 
 ---
@@ -384,7 +386,7 @@ pnpm jobs:queue                    # TO_APPLY ranked band → deadline → score
 pnpm jobs:queue --stale            # APPLIED with no movement ≥ 7 days → follow up
 pnpm jobs:queue --summary          # lane × status
 pnpm jobs:mark <crm-id> applied    # board + Neon move together; add a note as extra args
-bash scripts/jobs/daily.sh --status   # launchd, 07:00 Kigali, zero tokens
+bash scripts/seek/daily.sh --status   # launchd, 07:00 Kigali, zero tokens
 ```
 
 - **Apply is drafts only.** Email applications become Gmail drafts (the connector's account), portal
@@ -429,7 +431,7 @@ stateDiagram-v2
 | Follow-ups — templated day 7 / 14, archive day 21 | `pnpm jobs:followup --apply` | ≥16:00 Mon–Fri |
 | Learn — outcomes by variant / lane / wave, ≤2 inactive proposals | `pnpm jobs:learn --propose --send` | Fri ≥17:00 |
 
-- **Heartbeat:** `scripts/jobs/loop.sh` under launchd `com.databayt.jobs-loop`, every 30 min, per-day
+- **Heartbeat:** `scripts/seek/loop.sh` under launchd `com.databayt.jobs-loop`, every 30 min, per-day
   stamps in `jobs/.state/` so a Mac that slept catches up. `pnpm jobs:loop --status | --pause | --resume`.
 - **The send gate** (`src/lib/jobs/send-gate.ts`, tested) replaces the human reader: placeholders,
   length, company + role named, every number backed by the CVs or the posting, recipient present on the
@@ -498,8 +500,8 @@ card for Abdout to upload.
 | Step | Where |
 | :--- | :--- |
 | Verified career record, transcribed from the evidence pack (degree, sea-service letters, SCE, Marlins, fire-alarm report), with a page reference on every entry | `jobs/evidence/career.json` (gitignored) |
-| Scrape the posting and its JSON-LD (employer, website) | `scripts/jobs/lib/posting.ts`, `tailor.ts` |
-| One `claude -p` per batch writes **content only** (`cv.json`): it selects and rewords true facts in the posting's own vocabulary, and may read the company site | `scripts/jobs/tailor.ts` |
+| Scrape the posting and its JSON-LD (employer, website) | `scripts/seek/lib/posting.ts`, `tailor.ts` |
+| One `claude -p` per batch writes **content only** (`cv.json`): it selects and rewords true facts in the posting's own vocabulary, and may read the company site | `scripts/seek/tailor.ts` |
 | Fixed ATS-safe layout: one column, real headings and lists, contact details in the body, no tables, columns or positioned boxes | `src/lib/jobs/cv-tailored.ts` → `renderAtsHtml` |
 | Gate: numbers, employers, vessels, schools and certificates must be in the record; the expired medical is never called valid; `pdftotext` round-trip; 1–2 pages | `gateTailoredCv` + `atsReadback` |
 | Coverage of the posting's must-haves, measured on the rendered text. Below 60%, the card is held as a weak fit | `MIN_COVERAGE` |

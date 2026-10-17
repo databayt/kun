@@ -1,11 +1,17 @@
 ---
 name: jobs
-description: Abdout's + Databayt's income lane — jobs, gigs, tenders, client requests and funding programs across Rwanda, Kenya, Nigeria, Gulf, Sudan; tracked on sales.databayt.org
-when_to_use: "Any opportunity someone POSTED that pays Abdout or Databayt: Kigali/Nairobi/Lagos roles, remote dev, AI-training gigs, freelance, electrical/protection work, tenders, RFPs, client project requests, and funding — incubators, accelerators, grants, credits, angels. Triggers on: jobs, find work, apply, opportunities, gigs, tenders, RFP, client request, incubator, accelerator, grant, credits, investor, angel, fundraising, funding, did anyone reply, وظائف, فرص, مناقصات, حاضنة, مسرعة, منحة, تمويل. NOT /scrape (outbound leads we go find)."
+description: Abdout's instance of seek — his + Databayt's income lane (jobs, gigs, tenders, client requests, funding) across Rwanda, Kenya, Nigeria, Gulf, Sudan; on sales.databayt.org
+when_to_use: "Opportunities someone POSTED that pay Abdout or Databayt. Triggers on: jobs, find work, apply, opportunities, gigs, tenders, RFP, client request, incubator, accelerator, grant, credits, investor, angel, fundraising, funding, did anyone reply, وظائف, فرص, مناقصات, حاضنة, مسرعة, منحة, تمويل. NOT /scrape (outbound leads we go find)."
 argument-hint: "[status|scrape|wave|send|inbox|hold|funding|requests|learn|pause|resume]"
 ---
 
 # Jobs — the self-running loop: fetch → wave → send → read → follow up → learn
+
+> **Abdout's instance of `seek`.** The loop is generic now (`seek` skill, `scripts/seek/`, public
+> page `/seek`); this runbook is how *his* instance runs — data in `jobs/` (his profile, CVs,
+> ledger), the Twenty board, Kigali lanes, #jobs. `scripts/jobs` is a link to `scripts/seek` and
+> `pnpm jobs:*` aliases `pnpm seek:*`, so every command below still works. His dashboard moved to
+> `/seek/board` (login).
 
 **The measured truth this runbook exists to enforce: the bottleneck is SENDING, not finding.**
 On 2026-09-26 all 26 board records had sat at TO_APPLY for a month. Since 2026-09-27 the loop sends

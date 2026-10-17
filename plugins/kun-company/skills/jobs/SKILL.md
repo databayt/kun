@@ -1,11 +1,17 @@
 ---
 name: jobs
-description: Abdout's + Databayt's income lane — jobs, gigs, tenders, client requests and funding programs across Rwanda, Kenya, Nigeria, Gulf, Sudan; tracked on sales.databayt.org
-when_to_use: "Any opportunity someone POSTED that pays Abdout or Databayt: Kigali/Nairobi/Lagos roles, remote dev, AI-training gigs, freelance, electrical/protection work, tenders, RFPs, client project requests, and funding — incubators, accelerators, grants, credits, angels. Triggers on: jobs, find work, apply, opportunities, gigs, tenders, RFP, client request, incubator, accelerator, grant, credits, investor, angel, fundraising, funding, did anyone reply, وظائف, فرص, مناقصات, حاضنة, مسرعة, منحة, تمويل. NOT /scrape (outbound leads we go find)."
+description: Abdout's instance of seek — his + Databayt's income lane (jobs, gigs, tenders, client requests, funding) across Rwanda, Kenya, Nigeria, Gulf, Sudan; on sales.databayt.org
+when_to_use: "Opportunities someone POSTED that pay Abdout or Databayt. Triggers on: jobs, find work, apply, opportunities, gigs, tenders, RFP, client request, incubator, accelerator, grant, credits, investor, angel, fundraising, funding, did anyone reply, وظائف, فرص, مناقصات, حاضنة, مسرعة, منحة, تمويل. NOT /scrape (outbound leads we go find)."
 argument-hint: "[status|scrape|wave|send|inbox|hold|funding|requests|learn|pause|resume]"
 ---
 
 # Jobs — the self-running loop: fetch → wave → send → read → follow up → learn
+
+> **Abdout's instance of `seek`.** The loop is generic now (`seek` skill, `scripts/seek/`, public
+> page `/seek`); this runbook is how *his* instance runs — data in `jobs/` (his profile, CVs,
+> ledger), the Twenty board, Kigali lanes, #jobs. `scripts/jobs` is a link to `scripts/seek` and
+> `pnpm jobs:*` aliases `pnpm seek:*`, so every command below still works. His dashboard moved to
+> `/seek/board` (login).
 
 **The measured truth this runbook exists to enforce: the bottleneck is SENDING, not finding.**
 On 2026-09-26 all 26 board records had sat at TO_APPLY for a month. Since 2026-09-27 the loop sends
@@ -31,6 +37,7 @@ portals, platforms, tenders and bids stay packets Abdout submits. **Learning ado
 | When (Kigali) | Step | Script | Tokens |
 |---|---|---|---|
 | ≥07:00 daily | discover (10 adapters, incl. MyJobMag KE/NG) + ingest (one retry) | `jobs:discover`, `jobs:ingest` | 0 |
+| ≥07:00 daily | **google**: `claude -p` WebSearch sweep for Rwanda electrical + software postings (New Times, career pages, LinkedIn — boards the adapters can't fetch) → `jobs/inbox/<date>-google.json` | `jobs:google` | claude -p |
 | every tick | databayt.org wizard requests → CLIENT_PROJECT card on HOLD + Slack | `jobs:requests --apply` | 0 |
 | ≥07:00 Mon–Fri | wave: tailor letters, gate → QUEUED / HOLD | `jobs:facts`, `jobs:wave` | claude -p |
 | after wave | digest → Slack DM via `hermes send` (+ funding closing ≤14 days) | `jobs:digest --send` | 0 |
@@ -39,6 +46,8 @@ portals, platforms, tenders and bids stay packets Abdout submits. **Learning ado
 | ≥16:00 Mon–Fri | templated follow-ups day 7/14, archive day 21 | `jobs:followup --apply` | 0 |
 | Fri ≥17:00 | **week**: learn → Claude decides → adopt → report + thread in #jobs (≤3 tries) | `jobs:week` | claude -p |
 | every tick | **discuss**: answer Abdout in #jobs, apply/revert what he asks | `jobs:discuss` | claude -p only if he wrote |
+
+**Focus mode:** `focus: {lanes, countries, until}` in `jobs/loop.config.json` — until the date, wave / send / ATS / digest touch only those lanes in those countries; other QUEUED cards wait, Abdout's APPROVED cards still go; `anywhereLanes` (e.g. AI_TRAINING) pass in any country. Lapses on its own (`inFocus()` in config.ts).
 
 **Board states:** TO_APPLY → QUEUED (sends next window) → APPLIED → RESPONSE/INTERVIEW/OFFER/REJECTED;
 gate fail / needs input → HOLD (`holdReason` says what) → Abdout fixes + moves to APPROVED → sends.

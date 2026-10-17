@@ -3499,9 +3499,24 @@ export const schools: School[] = [
         depends: [],
       },
       {
+        name: "seek",
+        effect:
+          "The open opportunity loop — discover openings, tailor the CV and letter, apply, follow up, and brief on replies — run by anyone in their own Claude Code from their own profile; jobs live, scholarships, admission, visa and funding next",
+        order: [s("/seek")],
+        steps: [
+          "Setup: copy scripts/seek/profile.example.json to seek/profile.json and fill identity, sweep brief and strategy with the person",
+          "pnpm seek:facts — the CVs become the only claims a letter may make",
+          "pnpm seek:google + seek:discover + seek:ingest — open chances into the inbox",
+          "pnpm seek:wave + seek:send --apply — tailored, gated, capped applications",
+          "pnpm seek:loop --install — the whole loop every 30 min; replies brief the person",
+        ],
+        connects: ["jobs", "apply"],
+        depends: [],
+      },
+      {
         name: "jobs",
         effect:
-          "Abdout's and Databayt's income lane — jobs, gigs, tenders, client requests and funding programs (incubators, accelerators, grants, credits) across Rwanda, Kenya, Nigeria, the Gulf and Sudan, run by a self-sending loop and tracked on sales.databayt.org",
+          "Abdout's own instance of seek — his and Databayt's income lane: jobs, gigs, tenders, client requests and funding programs across Rwanda, Kenya, Nigeria, the Gulf and Sudan, run by the self-sending loop and tracked on sales.databayt.org",
         order: [s("/jobs")],
         steps: [
           "pnpm jobs:loop --status + pnpm jobs:digest — report applications sent this week first",
@@ -3510,7 +3525,7 @@ export const schools: School[] = [
           "pnpm jobs:requests — databayt.org wizard requests become CLIENT_PROJECT cards",
           "pnpm jobs:funding --due 30 — then research + seed the Funding & Programs board",
         ],
-        connects: ["apply", "وظائف", "scrape"],
+        connects: ["seek", "apply", "وظائف", "scrape"],
         depends: [],
       },
       {
