@@ -12,18 +12,28 @@
 // the two states that box cannot show for itself — a queue read that failed,
 // and the first read still in flight.
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+import { PublishRail } from "@/components/root/social/publish-rail";
 import { ReviewSpotlight } from "@/components/root/social/spotlight";
 import { StageFrame } from "@/components/root/social/stage";
 import { useSocial } from "@/components/root/social/provider";
 
-export function ReviewPanel() {
+export function ReviewPanel({ initialDraft }: { initialDraft?: string }) {
   const { t, reviewQueue } = useSocial();
-  const { drafts, loading, error, refresh } = reviewQueue;
+  const { drafts, loading, error, refresh, focusDraft } = reviewQueue;
 
   useEffect(() => {
     void refresh();
   }, [refresh]);
+
+  // Arrived from the Calendar's "Publish": open that draft once the first
+  // queue read is in, so the composer holds the calendar post ready to send.
+  const focused = useRef(false);
+  useEffect(() => {
+    if (!initialDraft || focused.current || loading) return;
+    focused.current = true;
+    void focusDraft(initialDraft);
+  }, [initialDraft, loading, focusDraft]);
 
   return (
     <StageFrame title={t.reviewTitle}>
@@ -55,10 +65,10 @@ export function ReviewPanel() {
             </p>
           )}
 
-          {/* review-editor.tsx is still on disk and still holds what has not
-              been folded in yet — dismiss-with-a-reason and the craft
-              findings. It is not rendered anywhere; the fold continues from
-              there. */}
+          {/* What the brand and feature recommend — calendar posts due and
+              media on the shelf — and, with a draft loaded, its language
+              and Reject. */}
+          <PublishRail />
         </>
       )}
     </StageFrame>

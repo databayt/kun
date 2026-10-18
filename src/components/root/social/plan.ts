@@ -95,12 +95,11 @@ export function todayIso(now: Date = new Date()): string {
 }
 
 /**
- * The slots worth recommending now: everything due up to the end of this
- * plan week (overdue first, then today, then the rest of the week).
+ * The slots worth recommending now: everything overdue plus the coming seven
+ * days — a rolling week, so Sunday already shows Monday's post rather than
+ * an empty list.
  */
 export function dueSlots(brand: string, now: Date = new Date()): PlanSlot[] {
-  const today = todayIso(now);
-  const dow = (now.getUTCDay() + 6) % 7; // Monday = 0
-  const weekEnd = addDays(today, 6 - dow);
-  return planFor(brand).filter((s) => s.date <= weekEnd);
+  const horizon = addDays(todayIso(now), 7);
+  return planFor(brand).filter((s) => s.date <= horizon);
 }

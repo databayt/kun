@@ -49,7 +49,11 @@ import {
 import { checkCraft, craftFailures, type CraftFinding } from "@/lib/craft";
 import { allowInlineDraft, getClientIp } from "@/lib/rate-limit";
 import { conceptFor, type Concept } from "@/lib/social-concept";
-import { findSlot, type PlanSlot } from "@/components/root/social/plan";
+import {
+  dueSlots,
+  findSlot,
+  type PlanSlot,
+} from "@/components/root/social/plan";
 
 // Long enough for a human to see it in the morning, short enough that a
 // leaked link goes stale before it is useful. Matches the cron.
@@ -721,6 +725,18 @@ function variantMedia(mediaUrls: string[]): {
 // copy-out, transport down) never reached a platform, the contributor sees
 // the error immediately, and writing a row nothing will ever act on would
 // just accumulate noise the drain and metrics both have to filter past.
+/**
+ * The AI-disclosure flag: true when any attached media was generated. It used
+ * to be `mediaUrls.length > 0`, which labelled a real screenshot or a filmed
+ * clip as AI. The media team's own uploads carry a `u` id in their storage key
+ * (`media/<brand>/u…`, see uploadMedia); everything else on the shelf — the
+ * Higgsfield library, seat-lane renders, studio stills — is generated, and an
+ * outside URL nobody can vouch for is treated as generated too.
+ */
+function anyGeneratedMedia(mediaUrls: string[]): boolean {
+  return mediaUrls.some((url) => !/\/media\/[a-z]+\/u[0-9a-z]+-/.test(url));
+}
+
 async function recordPublishedPiece(
   product: string,
   text: string,
@@ -734,7 +750,7 @@ async function recordPublishedPiece(
         brand: product,
         source: "human",
         locale: detectSocialLocale(text),
-        aiGenerated: mediaUrls.length > 0,
+        aiGenerated: anyGeneratedMedia(mediaUrls),
         variants: {
           create: outcomes.map((outcome) => ({
             channel: outcome.channel,
@@ -774,7 +790,7 @@ async function createScheduledPiece(
       brand: product,
       source: "human",
       locale: detectSocialLocale(text),
-      aiGenerated: mediaUrls.length > 0,
+      aiGenerated: anyGeneratedMedia(mediaUrls),
       variants: {
         create: channels.map((channel) => ({
           channel,
@@ -921,7 +937,7 @@ export async function stageForReview(input: unknown): Promise<ReviewResult> {
         brand: product,
         source: "human",
         locale: detectSocialLocale(text),
-        aiGenerated: mediaUrls.length > 0,
+        aiGenerated: anyGeneratedMedia(mediaUrls),
         variants: {
           create: channels.map((channel) => ({
             channel,
@@ -1024,6 +1040,10 @@ export interface AnsweredDraft {
   /** ISO — when the ask was filed. The queue orders oldest-first by this. */
   createdAt: string;
   answeredAt: string | null;
+  /** The calendar slot it answers (`<brand>#NNN`), or null for an ad-hoc ask. */
+  slot: string | null;
+  /** Feature id the post is about, when the ask recorded one. */
+  feature: string | null;
 }
 
 export interface AnsweredDraftsResult {
@@ -1041,45 +1061,87 @@ export interface AnsweredDraftsResult {
 // `answered`. That is the whole reason refinement supersedes instead of
 // inserting a sibling — a reviewer should see the current draft, not three
 // versions of one post competing for the same slot.
+const ANSWERED_SELECT = {
+  id: true,
+  brand: true,
+  brief: true,
+  ar: true,
+  en: true,
+  mediaUrls: true,
+  requestedBy: true,
+  turn: true,
+  instruction: true,
+  createdAt: true,
+  answeredAt: true,
+  slot: true,
+  feature: true,
+} as const;
+
+function toAnsweredDraft(row: {
+  id: string;
+  brand: string;
+  brief: string;
+  ar: string | null;
+  en: string | null;
+  mediaUrls: string[];
+  requestedBy: string | null;
+  turn: number;
+  instruction: string | null;
+  createdAt: Date;
+  answeredAt: Date | null;
+  slot: string | null;
+  feature: string | null;
+}): AnsweredDraft {
+  return {
+    ...row,
+    ar: row.ar ?? "",
+    en: row.en ?? "",
+    createdAt: row.createdAt.toISOString(),
+    answeredAt: row.answeredAt?.toISOString() ?? null,
+  };
+}
+
+/**
+ * One answered draft by id — the Calendar's "Publish" link, which may point at
+ * a slot not yet due and so not in the queue read.
+ */
+export async function readAnsweredDraft(
+  id: unknown,
+): Promise<{ ok: boolean; draft?: AnsweredDraft; error?: string }> {
+  if (!(await requireContributor())) {
+    return { ok: false, error: "Forbidden: contributors only." };
+  }
+  if (typeof id !== "string" || !id) return { ok: false, error: "Invalid id." };
+  const row = await db.socialDraftRequest.findFirst({
+    where: { id, status: "answered" },
+    select: ANSWERED_SELECT,
+  });
+  return row
+    ? { ok: true, draft: toAnsweredDraft(row) }
+    : { ok: false, error: "That draft is no longer waiting for review." };
+}
+
 export async function listAnsweredDrafts(): Promise<AnsweredDraftsResult> {
   if (!(await requireContributor())) {
     return { ok: false, error: "Forbidden: contributors only." };
   }
   try {
+    // A brand's editorial plan is loaded months ahead (balqalam: 90 answered
+    // drafts at once), and oldest-first with a cap of 20 meant the plan
+    // crowded every ad-hoc draft — and every other brand — out of the queue.
+    // Planned drafts now join the queue when their slot falls due (overdue or
+    // this week); the rest wait on the Calendar, one press from Publish.
+    const dueKeys = PRODUCT_IDS.flatMap((b) => dueSlots(b).map((s) => s.key));
     const rows = await db.socialDraftRequest.findMany({
-      where: { status: "answered" },
-      orderBy: { createdAt: "asc" },
-      take: 20,
-      select: {
-        id: true,
-        brand: true,
-        brief: true,
-        ar: true,
-        en: true,
-        mediaUrls: true,
-        requestedBy: true,
-        turn: true,
-        instruction: true,
-        createdAt: true,
-        answeredAt: true,
+      where: {
+        status: "answered",
+        OR: [{ slot: null }, { slot: { in: dueKeys } }],
       },
+      orderBy: { createdAt: "asc" },
+      take: 40,
+      select: ANSWERED_SELECT,
     });
-    return {
-      ok: true,
-      drafts: rows.map((row) => ({
-        id: row.id,
-        brand: row.brand,
-        brief: row.brief,
-        ar: row.ar ?? "",
-        en: row.en ?? "",
-        mediaUrls: row.mediaUrls,
-        requestedBy: row.requestedBy,
-        turn: row.turn,
-        instruction: row.instruction,
-        createdAt: row.createdAt.toISOString(),
-        answeredAt: row.answeredAt?.toISOString() ?? null,
-      })),
-    };
+    return { ok: true, drafts: rows.map(toAnsweredDraft) };
   } catch (err: unknown) {
     return {
       ok: false,

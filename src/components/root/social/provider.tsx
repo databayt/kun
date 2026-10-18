@@ -18,8 +18,10 @@ import {
 import { useRouter } from "next/navigation";
 import { isRTL, type Locale } from "@/components/local/config";
 import {
+  dismissDraft,
   listAnsweredDrafts,
   listBrandMedia,
+  readAnsweredDraft,
   listDraftReferences,
   listQueuedVariants,
   readSocialDraft,
@@ -33,6 +35,7 @@ import {
 } from "@/actions/post-social";
 import {
   DEFAULT_DRAFT_MODEL,
+  type DismissReasonId,
   type DraftAngleId,
   type DraftModelId,
   type DraftRegisterId,
@@ -175,7 +178,30 @@ export interface ReviewQueue {
   activeDraftId: string | null;
   /** Copies the draft's copy + media into the editor/tray and selects it. */
   loadDraft: (id: string) => void;
+  /**
+   * loadDraft for a draft that may not be in the queue read — a calendar slot
+   * not yet due. Reads it first, then loads it.
+   */
+  focusDraft: (id: string) => Promise<void>;
   clearActive: () => void;
+  /** Which half of a bilingual draft the editor holds. */
+  composerLang: ComposerLang;
+  /** Refills the editor from the active draft in that language. */
+  setComposerLang: (lang: ComposerLang) => void;
+  /** Dismisses the active draft with a reason; the queue drops it. */
+  rejectActive: (reason: DismissReasonId) => Promise<string | null>;
+}
+
+export type ComposerLang = "ar" | "en" | "both";
+
+/** The editor's text for one draft in one language — Arabic first. */
+export function draftText(
+  d: { ar: string; en: string },
+  lang: ComposerLang,
+): string {
+  if (lang === "en") return d.en || d.ar;
+  if (lang === "both" && d.ar && d.en) return `${d.ar}\n\n—\n\n${d.en}`;
+  return d.ar || d.en;
 }
 
 /**
@@ -762,13 +788,17 @@ export function SocialProvider({
     }
   }, []);
 
+  const [composerLang, setComposerLangState] = useState<ComposerLang>("ar");
+
   const loadDraft = useCallback(
-    (id: string) => {
-      const found = reviewDrafts.find((d) => d.id === id);
+    (id: string, given?: AnsweredDraft) => {
+      const found = given ?? reviewDrafts.find((d) => d.id === id);
       if (found) {
-        // Arabic-first house rule: the AR copy loads by default; the editor's
-        // language pills refill from the same draft.
-        setComposerText(found.ar || found.en);
+        // Arabic-first house rule: the AR copy loads by default; the language
+        // toggle refills from the same draft. It used to be `ar || en` with no
+        // way back to the English half from Publish.
+        setComposerLangState("ar");
+        setComposerText(draftText(found, "ar"));
         setComposerMediaUrls(found.mediaUrls.slice(0, MAX_MEDIA));
         // The draft's brand is authoritative — channels, transport health and
         // the approve payload all scope to it, not to whatever the select
@@ -782,11 +812,56 @@ export function SocialProvider({
     [reviewDrafts],
   );
 
+  const focusDraft = useCallback(
+    async (id: string) => {
+      const inQueue = reviewDrafts.find((d) => d.id === id);
+      if (inQueue) return loadDraft(id);
+      const res = await readAnsweredDraft(id).catch(() => null);
+      if (res?.ok && res.draft) {
+        const draft = res.draft;
+        setReviewDrafts((prev) =>
+          prev.some((d) => d.id === draft.id) ? prev : [...prev, draft],
+        );
+        loadDraft(id, draft);
+      } else {
+        setReviewError(res?.error ?? "Could not open that draft.");
+      }
+    },
+    [reviewDrafts, loadDraft],
+  );
+
   const clearActive = useCallback(() => {
     setActiveDraftId(null);
     setComposerText("");
     setComposerMediaUrls([]);
   }, []);
+
+  const setComposerLang = useCallback(
+    (next: ComposerLang) => {
+      setComposerLangState(next);
+      const found = reviewDrafts.find((d) => d.id === activeDraftId);
+      if (found) setComposerText(draftText(found, next));
+    },
+    [reviewDrafts, activeDraftId],
+  );
+
+  const rejectActive = useCallback(
+    async (reason: DismissReasonId): Promise<string | null> => {
+      if (!activeDraftId) return null;
+      const res = await dismissDraft({ draftId: activeDraftId, reason }).catch(
+        (err: unknown) => ({
+          ok: false,
+          error: err instanceof Error ? err.message : String(err),
+        }),
+      );
+      if (!res.ok) return res.error ?? "Could not reject the draft.";
+      setReviewDrafts((prev) => prev.filter((d) => d.id !== activeDraftId));
+      clearActive();
+      void refreshReview();
+      return null;
+    },
+    [activeDraftId, clearActive, refreshReview],
+  );
 
   const reviewQueue: ReviewQueue = {
     drafts: reviewDrafts,
@@ -796,7 +871,11 @@ export function SocialProvider({
     refresh: refreshReview,
     activeDraftId,
     loadDraft,
+    focusDraft,
     clearActive,
+    composerLang,
+    setComposerLang,
+    rejectActive,
   };
 
   const draftKnobs: DraftKnobs = {

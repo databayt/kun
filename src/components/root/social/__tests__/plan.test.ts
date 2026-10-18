@@ -28,9 +28,19 @@ describe("plan", () => {
     expect(planFor("mkan")).toEqual([]);
   });
 
-  it("due slots run through the end of the current plan week", () => {
-    const due = dueSlots("balqalam", new Date("2026-10-21T12:00:00Z"));
-    expect(due.map((s) => s.date).every((d) => d <= "2026-10-25")).toBe(true);
-    expect(due).toHaveLength(7);
+  it("due slots are the overdue ones plus a rolling seven days", () => {
+    const sunday = dueSlots("balqalam", new Date("2026-10-18T12:00:00Z"));
+    expect(sunday.map((s) => s.date)).toEqual([
+      "2026-10-19",
+      "2026-10-20",
+      "2026-10-21",
+      "2026-10-22",
+      "2026-10-23",
+      "2026-10-24",
+      "2026-10-25",
+    ]);
+    const later = dueSlots("balqalam", new Date("2026-10-21T12:00:00Z"));
+    expect(later.every((s) => s.date <= "2026-10-28")).toBe(true);
+    expect(later).toHaveLength(10);
   });
 });

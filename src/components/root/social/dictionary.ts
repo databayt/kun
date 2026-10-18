@@ -100,7 +100,7 @@ export const SOCIAL_DICTIONARY = {
     composerLangEn: "English",
     composerLangBoth: "Both",
     rejectDraft: "Reject",
-    rejectDraftConfirm: "Reject this draft? It leaves the queue.",
+    rejectCancel: "Cancel",
     // The showroom — the Media stage's gallery of generated assets and kept
     // references. Copy is never rendered into AI images (typography breaks,
     // Arabic doubly so); text-bearing formats render on the template lane.
@@ -621,7 +621,7 @@ export const SOCIAL_DICTIONARY = {
     composerLangEn: "الإنجليزية",
     composerLangBoth: "كلاهما",
     rejectDraft: "ارفض",
-    rejectDraftConfirm: "رفض هذه المسودة؟ ستخرج من الطابور.",
+    rejectCancel: "إلغاء",
     showroomTitle: "المعرض",
     showroomIntro:
       "ما ولّدناه وما نحتفظ به كمرجع. الصور بلا نصوص تأتي من Higgsfield أو من مقعد ChatGPT عبر طابور الموجزات بالأسفل؛ والقوالب النصية تُصاغ من HTML بخط الدار. أرفق أصلاً من هنا يهبط في حافظة مرحلة النشر.",

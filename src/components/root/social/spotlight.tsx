@@ -191,8 +191,6 @@ const APPROVE_MODE_KEY = "social:approve-mode";
 
 const DESTINATION_KEY = SETTING_KEYS.destination;
 
-/** The select's "no pillar chosen" row, stored as a value rather than absence. */
-
 type Mode = "all" | "draft" | "scheduled" | "published";
 type Scope = "brand" | "every";
 type Order = "oldest" | "newest";
@@ -212,6 +210,8 @@ interface QueueItem {
   channel?: string;
   /** Drafts only: the ask it was written from, which carries its pillar. */
   brief?: string;
+  /** Drafts only: the feature the ask recorded, when it recorded one. */
+  feature?: string | null;
   /** Everything the matcher may look at, joined once. */
   haystack: string;
 }
@@ -453,6 +453,7 @@ export function ReviewSpotlight({
       mediaUrls: d.mediaUrls,
       turn: d.turn,
       brief: d.brief,
+      feature: d.feature,
       haystack: [
         d.ar,
         d.en,
@@ -499,20 +500,23 @@ export function ReviewSpotlight({
         // The settings face reaches the queue too: asking for Video narrows
         // this to drafts and posts that actually carry one.
         if (!queueFits(item.mediaUrls, mediaFilter)) return false;
-        // Every mode, not only drafts: a feature is matched on the words a
-        // post uses, and a published post uses them too.
+        // A draft that recorded one of this brand's features is matched on
+        // it exactly; everything else (older drafts, published posts, plan
+        // features named by code rather than by the Feature list) on the
+        // words it uses.
+        const recorded =
+          item.feature && brandFeatures.some((f) => f.id === item.feature);
         if (
-          !featureFits(
-            item.brand,
-            item.haystack,
-            feature === ANY_FEATURE ? null : feature,
-          )
+          feature !== ANY_FEATURE &&
+          (recorded
+            ? item.feature !== feature
+            : !featureFits(item.brand, item.haystack, feature))
         ) {
           return false;
         }
         return !trimmed || matchesQuery(item.haystack, trimmed);
       }),
-    [items, mediaOnly, mediaFilter, feature, trimmed],
+    [items, mediaOnly, mediaFilter, feature, brandFeatures, trimmed],
   );
 
   const counts = React.useMemo(() => {
@@ -720,7 +724,7 @@ export function ReviewSpotlight({
    *
    * Routing on `activeDraftId` rather than on a mode flag means the wrong path
    * cannot be selected by mistake — the state that decides is the same state
-   * that put the text on screen. Lifted verbatim from review-editor.tsx, which
+   * that put the text on screen. Lifted from the retired review editor, which
    * is where this reasoning was paid for.
    */
   /**

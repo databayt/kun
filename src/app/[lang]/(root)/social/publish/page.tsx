@@ -8,6 +8,16 @@ import { ReviewPanel } from "@/components/root/social/review";
  * so navigating away (say, to attach media in the showroom) and back keeps
  * the draft under review.
  */
-export default function SocialPublishPage() {
-  return <ReviewPanel />;
+export default async function SocialPublishPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ draft?: string | string[] }>;
+}) {
+  // `?draft=<id>` arrives from the Calendar's "Publish" on a drafted slot.
+  const { draft } = await searchParams;
+  return (
+    <ReviewPanel
+      initialDraft={typeof draft === "string" && draft ? draft : undefined}
+    />
+  );
 }
