@@ -463,3 +463,91 @@ model EvidenceProfileSnapshot {
   @@index([scannedAt])
 }
 
+
+// Seek console.
+//
+// The seek loop runs on a person's own machine (launchd, Mail.app, a local
+// CRM); Cloudflare can't reach it. So the machine pushes what it knows here
+// each tick and pulls the commands the console queued. Everything is keyed by
+// `instance` (whose loop) so another person's seek can share these tables.
+// The board stays the system of record — these rows are a mirror plus a queue.
+
+/// One person's loop: when it last ticked and its switches.
+model SeekInstance {
+  id         String    @id
+  lastTickAt DateTime?
+  /// { sendOff, pausedLanes, dailyCap, focus, week: { headline, learned, actions, needFromYou } }
+  state      Json      @default("{}")
+  updatedAt  DateTime  @updatedAt
+}
+
+/// One opportunity as the console shows it (src/lib/seek/item.ts).
+model SeekItem {
+  id          String    @id @default(cuid())
+  instance    String
+  track       String
+  externalId  String
+  lane        String?
+  stage       String
+  tier        String?
+  score       Float?
+  title       String
+  org         String?
+  country     String?
+  city        String?
+  remote      String?
+  channel     String?
+  beneficiary String?
+  deadline    String?
+  touch       Int?
+  appliedAt   DateTime?
+  lastTouchAt DateTime?
+  holdReason  String?
+  sourceUrl   String?
+  recordUrl   String?
+  notes       String?
+  /// When the source record last changed.
+  sourceUpdatedAt DateTime
+  pushedAt    DateTime  @default(now()) @updatedAt
+
+  @@unique([instance, externalId])
+  @@index([instance, track, stage])
+}
+
+/// One loop event (a ledger line), deduped on its natural key.
+model SeekEvent {
+  id         String   @id @default(cuid())
+  instance   String
+  ts         DateTime
+  kind       String
+  externalId String   @default("")
+  title      String?
+  lane       String?
+  detail     String?
+
+  @@unique([instance, ts, kind, externalId])
+  @@index([instance, ts])
+}
+
+enum SeekCommandStatus {
+  pending
+  applied
+  failed
+}
+
+/// What the console asked the loop to do (src/lib/seek/commands.ts).
+model SeekCommand {
+  id         String            @id @default(cuid())
+  instance   String
+  kind       String
+  externalId String?
+  payload    Json
+  status     SeekCommandStatus @default(pending)
+  by         String
+  result     String?
+  createdAt  DateTime          @default(now())
+  appliedAt  DateTime?
+
+  @@index([instance, status, createdAt])
+  @@index([instance, externalId])
+}
