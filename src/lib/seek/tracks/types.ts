@@ -20,6 +20,17 @@ export interface Bilingual {
   ar: string;
 }
 
+// Where a stage sits on the console board. Groups are track-agnostic, so the
+// same columns, counts and public pulse work for jobs, funding or visas.
+export type StageGroup = "inbox" | "needs" | "in_play" | "won" | "lost";
+
+export interface StageDef {
+  // The value the source record stores (a CRM SELECT option, a status enum).
+  id: string;
+  label: Bilingual;
+  group: StageGroup;
+}
+
 export interface TrackDef {
   id: TrackId;
   // "soon" tracks are declared so the page and skill can name them; the loop
@@ -36,4 +47,7 @@ export interface TrackDef {
   followUpDays: number[];
   // Statuses that trigger a brief to the person ("you got an interview").
   briefOn: string[];
+  // The board stages the console shows, in order. Tracks without a console
+  // (still "soon") leave it out.
+  stages?: readonly StageDef[];
 }

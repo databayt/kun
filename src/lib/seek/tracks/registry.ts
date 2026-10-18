@@ -16,4 +16,4 @@ export function getTrack(id: TrackId): TrackDef {
   return track;
 }
 
-export type { ArtifactKind, Bilingual, TrackDef, TrackId } from "./types";
+export type { ArtifactKind, Bilingual, StageDef, StageGroup, TrackDef, TrackId } from "./types";

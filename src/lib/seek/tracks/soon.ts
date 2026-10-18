@@ -1,4 +1,4 @@
-import type { TrackDef } from "./types";
+import type { StageDef, TrackDef } from "./types";
 
 // Declared, not yet running. Each gets a discover adapter and artifact
 // templates before its status flips to "live".
@@ -50,6 +50,21 @@ export const visaTrack: TrackDef = {
   briefOn: ["response", "interview", "offer"],
 };
 
+// The fundingProgram board's status values (scripts/crm-funding-object.mjs).
+// Funding runs on its own board ahead of a discover adapter, so the console
+// shows it while the loop still lists it as coming.
+const fundingStages: readonly StageDef[] = [
+  { id: "TO_REVIEW", label: { en: "To review", ar: "للمراجعة" }, group: "inbox" },
+  { id: "ELIGIBLE", label: { en: "Eligible", ar: "مؤهل" }, group: "needs" },
+  { id: "PREPARING", label: { en: "Preparing", ar: "قيد التحضير" }, group: "needs" },
+  { id: "SUBMITTED", label: { en: "Submitted", ar: "تم التقديم" }, group: "in_play" },
+  { id: "INTERVIEW", label: { en: "Interview", ar: "مقابلة" }, group: "in_play" },
+  { id: "ACCEPTED", label: { en: "Accepted", ar: "مقبول" }, group: "won" },
+  { id: "CLAIMED", label: { en: "Claimed", ar: "تم الاستلام" }, group: "won" },
+  { id: "NOT_ELIGIBLE", label: { en: "Not eligible", ar: "غير مؤهل" }, group: "lost" },
+  { id: "REJECTED", label: { en: "Rejected", ar: "مرفوض" }, group: "lost" },
+];
+
 export const fundingTrack: TrackDef = {
   id: "funding",
   status: "soon",
@@ -63,4 +78,5 @@ export const fundingTrack: TrackDef = {
   pipeline: SOON_PIPELINE,
   followUpDays: [7, 21],
   briefOn: ["response", "interview", "offer"],
+  stages: fundingStages,
 };
