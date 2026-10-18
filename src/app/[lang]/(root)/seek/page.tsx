@@ -8,6 +8,9 @@ export const metadata: Metadata = {
     "An open opportunity loop for Claude Code — discover openings, tailor the CV and letter, apply, follow up, and get briefed when someone replies.",
 };
 
+// The pulse reads the loop's mirror; the loop pushes every 30 minutes.
+export const revalidate = 1800;
+
 interface SeekPageProps {
   params: Promise<{ lang: string }>;
 }

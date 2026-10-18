@@ -18,7 +18,7 @@ import { kigaliAdapter } from "@/lib/seek/adapters/twenty-kigali";
 import type { SeekEvent, SeekItem } from "@/lib/seek/item";
 
 import { listBoard, type LedgerEvent } from "./board";
-import { killSwitchOn, loadConfig } from "./config";
+import { killSwitchOn, LANE_BAND, loadConfig } from "./config";
 import { openDb } from "./engine";
 import { listFunding } from "./funding";
 import { INSTANCE } from "./lib/console";
@@ -74,6 +74,8 @@ export function loopState(): Record<string, unknown> {
     pausedLanes: c.pausedLanes ?? [],
     dailyCap: c.dailyCap,
     dailyTotalCap: c.dailyTotalCap,
+    vetoHours: c.vetoHours,
+    lanes: Object.keys(LANE_BAND),
     focus: c.focus ?? null,
     week: latestWeek(),
   };

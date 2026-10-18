@@ -43,9 +43,8 @@ export const config = {
   matcher: [
     "/(en|ar)/social/:path*",
     "/(en|ar)/context/:path*",
-    // /seek itself is the public workflow page; only the private instance
-    // (one person's board and evidence profile) sits behind the login.
-    "/(en|ar)/seek/board/:path*",
-    "/(en|ar)/seek/profile/:path*",
+    // /seek itself is the public workflow page; every console view under it
+    // (one person's pipeline, notes and evidence profile) sits behind the login.
+    "/(en|ar)/seek/:view(board|needs|table|activity|loop|profile)/:path*",
   ],
 };

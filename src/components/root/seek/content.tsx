@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { BellRing, PenLine, Radar, Repeat, Send } from "lucide-react";
 import { PageHeader } from "@/components/atom/page-header";
@@ -7,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { TRACKS } from "@/lib/seek/tracks/registry";
 import { cn } from "@/lib/utils";
 import { isRTL, type Locale } from "@/components/local/config";
+import { Pulse } from "./console/pulse";
 import { getSeekDict } from "./dictionary";
 
 const STEP_ICONS = [Radar, PenLine, Send, Repeat, BellRing];
@@ -16,8 +18,8 @@ interface SeekContentProps {
 }
 
 // The public face of seek: what the loop does, which tracks it covers, and how
-// to run it yourself. Static on purpose — no session, no database; the private
-// instance lives at /seek/board.
+// to run it yourself. No session: the one live part is the pulse, counts only
+// from a real loop (lib/seek/public.ts); the private console is /seek/board.
 export default function SeekContent({ lang }: SeekContentProps) {
   const t = getSeekDict(lang);
 
@@ -46,6 +48,9 @@ export default function SeekContent({ lang }: SeekContentProps) {
       />
 
       <div className="space-y-16 py-10">
+        <Suspense fallback={null}>
+          <Pulse lang={lang} />
+        </Suspense>
         <section>
           <SectionHeading title={t.loopTitle} subtitle={t.loopSubtitle} />
           <ol className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
