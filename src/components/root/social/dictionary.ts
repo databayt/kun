@@ -76,6 +76,11 @@ export const SOCIAL_DICTIONARY = {
     conceptDontSay: "Do not say",
     conceptMissing:
       "No concept note for this feature yet — write from the brief.",
+    conceptStatusPartial:
+      "Partly built — keep to what the note says you can say.",
+    conceptScreens: "Real screens — tap to attach",
+    conceptNoScreens: "No product screens on the CDN yet",
+    conceptShootHint: "For the media team: film {routes}, then publish.",
     conceptPick:
       "Pick a feature in the settings, or open a slot from the Calendar, to see what the post is about.",
     conceptKickOff: "Kick off with AI",
@@ -599,6 +604,10 @@ export const SOCIAL_DICTIONARY = {
     conceptSay: "يمكنك أن تقول",
     conceptDontSay: "لا تقل",
     conceptMissing: "لا توجد ملاحظة مفهوم لهذه الميزة بعد — اكتب من الموجز.",
+    conceptStatusPartial: "مكتملة جزئيًا — التزم بما تقول الملاحظة إنه يُقال.",
+    conceptScreens: "شاشات حقيقية — اضغط للإرفاق",
+    conceptNoScreens: "لا توجد شاشات للمنتج على الشبكة بعد",
+    conceptShootHint: "لفريق الإنتاج: صوّر {routes} ثم انشرها.",
     conceptPick:
       "اختر ميزة من الإعدادات، أو افتح خانة من التقويم، لترى عمّ يتحدث المنشور.",
     conceptKickOff: "ابدأ بالذكاء الاصطناعي",

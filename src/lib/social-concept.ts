@@ -8,13 +8,20 @@
 // `server-only` import, because vitest loads the draft lane that reads this.
 
 import conceptsData from "../../content/social/concepts.json";
+import productMediaData from "../../content/social/product-media.json";
 import voiceData from "../../content/social/voice.json";
 import { findSlot, type PlanSlot } from "@/components/root/social/plan";
 
 export interface Concept {
   feature: string;
   title: string;
+  /** live | partial — a partial feature leans harder on "Do not say". */
+  status: string;
   personas: string[];
+  /** App routes the feature lives on — what the media team films. */
+  routes: string[];
+  /** Shoot/record flows whose published screens show this feature. */
+  flows: string[];
   oneLine: string;
   without: string;
   what: string;
@@ -36,21 +43,110 @@ const SCHOOL_BRANDS = new Set(["hogwarts", "balqalam"]);
 const ALIASES: Record<string, string> = {
   fees: "my-fees",
   gradebook: "grades",
-  parents: "parent",
-  teachers: "teacher",
+  parent: "parents",
+  teacher: "teachers",
   payment: "billing",
 };
+
+const school = (conceptsData as unknown as { school: Record<string, ConceptBody> })
+  .school;
+
+/** The spotlight id a brand's feature word resolves to, or null. */
+function spotlightId(brand: string, feature: string | null | undefined) {
+  if (!feature || !SCHOOL_BRANDS.has(brand)) return null;
+  if (school[feature]) return feature;
+  const alias = ALIASES[feature];
+  return alias && school[alias] ? alias : null;
+}
 
 export function conceptFor(
   brand: string,
   feature: string | null | undefined,
 ): Concept | null {
-  if (!feature || !SCHOOL_BRANDS.has(brand)) return null;
-  const school = (conceptsData as { school: Record<string, ConceptBody> })
-    .school;
-  const id = school[feature] ? feature : ALIASES[feature];
-  const body = id ? school[id] : undefined;
-  return body ? { feature: id, ...body } : null;
+  const id = spotlightId(brand, feature);
+  return id ? { feature: id, ...school[id] } : null;
+}
+
+/**
+ * Product screens show the shipped app, which introduces itself as بالقلم —
+ * the brand kit forbids that name on a hogwarts-brand asset, so the screens
+ * belong to balqalam alone.
+ */
+const SCREEN_BRANDS = new Set(["balqalam"]);
+
+/** A real product screen on the CDN — a shoot still or a recorded tutorial. */
+export interface ProductMedia {
+  id: string;
+  kind: "image" | "video";
+  lang: "ar" | "en";
+  flow: string;
+  url: string;
+  poster?: string;
+  alt: { ar?: string; en?: string };
+  order?: number;
+}
+
+interface MediaGap {
+  feature: string;
+  missing: "spotlight" | "screens";
+  routes?: string[];
+  command?: string;
+}
+
+const productMedia = productMediaData as unknown as {
+  $gaps: MediaGap[];
+  school: Record<string, ProductMedia[]>;
+};
+
+/**
+ * The feature's published screens, Arabic first (the brand writes Arabic
+ * first), each language in its flow's step order. Empty when the brand has
+ * no spotlights or the feature has no flow yet.
+ */
+export function productMediaFor(
+  brand: string,
+  feature: string | null | undefined,
+): ProductMedia[] {
+  const id = SCREEN_BRANDS.has(brand) ? spotlightId(brand, feature) : null;
+  const items = id ? (productMedia.school[id] ?? []) : [];
+  return [...items].sort(
+    (a, b) =>
+      (a.lang === b.lang ? 0 : a.lang === "ar" ? -1 : 1) ||
+      (a.kind === b.kind ? 0 : a.kind === "video" ? -1 : 1) ||
+      (a.order ?? 0) - (b.order ?? 0),
+  );
+}
+
+/** Every brand's screens, for the Media stage's search box. */
+export function allProductMedia(): Array<ProductMedia & { brand: string; feature: string }> {
+  return [...SCREEN_BRANDS].flatMap((brand) =>
+    Object.entries(productMedia.school).flatMap(([feature, items]) =>
+      items.map((m) => ({ ...m, brand, feature })),
+    ),
+  );
+}
+
+/**
+ * What the media team still owes a feature: the routes to film and the shoot
+ * command, built from the spotlight. Null when the feature has screens.
+ */
+export function mediaGapFor(
+  brand: string,
+  feature: string | null | undefined,
+): { routes: string[]; command: string } | null {
+  if (!feature || !SCREEN_BRANDS.has(brand)) return null;
+  const id = spotlightId(brand, feature);
+  if (id && productMedia.school[id]?.length) return null;
+  const concept = id ? school[id] : undefined;
+  const routes = (concept?.routes ?? [])
+    .map((r) => r.replace("/s/{school}", ""))
+    .filter((r) => !/[{?]/.test(r))
+    .slice(0, 3);
+  if (!routes.length) return null;
+  return {
+    routes,
+    command: `node ~/.claude/skills/shoot/scripts/shoot.mjs ${routes.join(" ")}`,
+  };
 }
 
 export function voiceFor(brand: string): string | undefined {

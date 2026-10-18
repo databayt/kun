@@ -16,6 +16,7 @@ import {
   listRenderedBriefs,
 } from "@/lib/social-media-brief";
 import { MediaStage, type MediaPick } from "@/components/root/social/media-spotlight";
+import { allProductMedia } from "@/lib/social-concept";
 import { briefAsAsset, getShowroomData } from "./data";
 import { BrandShelves } from "./brand-shelf";
 import { BriefQueue } from "./brief-queue";
@@ -54,6 +55,18 @@ export async function ShowroomContent({ lang }: { lang: Locale }) {
       type: a.type,
       feature: a.feature,
     }));
+  // The shipped app's own screens, published by shoot/record and named in
+  // each feature's SPOTLIGHT.md — searchable and attachable like any asset.
+  for (const m of allProductMedia()) {
+    picks.push({
+      id: `product:${m.brand}:${m.id}`,
+      title: m.alt.en || m.alt.ar || m.id,
+      url: m.url,
+      brand: m.brand,
+      type: "product",
+      feature: m.feature,
+    });
+  }
 
   return (
     <MediaStage assets={picks} below={

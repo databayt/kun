@@ -48,7 +48,13 @@ import {
 } from "@/lib/google-draft";
 import { checkCraft, craftFailures, type CraftFinding } from "@/lib/craft";
 import { allowInlineDraft, getClientIp } from "@/lib/rate-limit";
-import { conceptFor, type Concept } from "@/lib/social-concept";
+import {
+  conceptFor,
+  mediaGapFor,
+  productMediaFor,
+  type Concept,
+  type ProductMedia,
+} from "@/lib/social-concept";
 import {
   dueSlots,
   findSlot,
@@ -1292,22 +1298,34 @@ export async function listBrandMedia(
     // With a feature picked: assets made for it first, then brand-wide ones
     // that fit any post. Assets tagged for a DIFFERENT feature drop out — an
     // attendance screenshot is the wrong picture for an admission post.
+    const toMedia = (a: (typeof mine)[number]): BrandMedia => ({
+      id: a.id,
+      title: a.title,
+      url: a.imageUrl as string,
+      type: a.type,
+      feature: a.feature,
+    });
+    // The feature's real screens, published by shoot/record and named in its
+    // SPOTLIGHT.md — proof posts need the shipped screen, never a mock.
+    const screens: BrandMedia[] = wanted
+      ? productMediaFor(brand, wanted)
+          .slice(0, 8)
+          .map((m) => ({
+            id: `product:${m.id}`,
+            title: m.alt.en || m.alt.ar || m.id,
+            url: m.url,
+            type: "product",
+            feature: wanted,
+          }))
+      : [];
     const ranked = wanted
       ? [
-          ...mine.filter((a) => a.feature === wanted),
-          ...mine.filter((a) => a.feature === null),
+          ...mine.filter((a) => a.feature === wanted).map(toMedia),
+          ...screens,
+          ...mine.filter((a) => a.feature === null).map(toMedia),
         ]
-      : mine;
-    return {
-      ok: true,
-      media: ranked.slice(0, 24).map((a) => ({
-        id: a.id,
-        title: a.title,
-        url: a.imageUrl as string,
-        type: a.type,
-        feature: a.feature,
-      })),
-    };
+      : mine.map(toMedia);
+    return { ok: true, media: ranked.slice(0, 24) };
   } catch (err: unknown) {
     return {
       ok: false,
@@ -1717,6 +1735,10 @@ export interface ConceptReadResult {
   slot?: PlanSlot;
   /** The feature's concept note, when the brand has one for it. */
   concept?: Concept;
+  /** Real product screens on the CDN for the feature, Arabic first. */
+  screens?: ProductMedia[];
+  /** When there are no screens: the routes to film and the shoot command. */
+  gap?: { routes: string[]; command: string };
   error?: string;
 }
 
@@ -1737,11 +1759,16 @@ export async function readConcept(input: {
   if (slot && !slot.key.startsWith(`${input.product}#`)) {
     return { ok: false, error: "That slot belongs to another brand." };
   }
-  const concept = conceptFor(input.product, input.feature || slot?.feature);
+  const feature = input.feature || slot?.feature;
+  const concept = conceptFor(input.product, feature);
+  const screens = productMediaFor(input.product, feature).slice(0, 8);
+  const gap = screens.length ? null : mediaGapFor(input.product, feature);
   return {
     ok: true,
     ...(slot && { slot }),
     ...(concept && { concept }),
+    ...(screens.length > 0 && { screens }),
+    ...(gap && { gap }),
   };
 }
 

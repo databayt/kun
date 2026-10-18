@@ -69,6 +69,7 @@ import {
 } from "@/components/root/social/dictionary";
 import type { PromptInputMessage } from "@/components/atom/prompt-input";
 import type { EgressStatus } from "@/lib/social-status";
+import { findSlot } from "@/components/root/social/plan";
 
 /** The five stages, as routes. Order is the documented pipeline's. */
 export const STAGES = [
@@ -366,7 +367,10 @@ export function SocialProvider({
    */
   const brandFeatures = useMemo(() => featuresFor(product), [product]);
   useEffect(() => {
-    if (feature !== ANY_FEATURE && !brandFeatures.some((f) => f.id === feature)) {
+    if (
+      feature !== ANY_FEATURE &&
+      !brandFeatures.some((f) => f.id === feature)
+    ) {
       setFeature(ANY_FEATURE);
     }
   }, [brandFeatures, feature, setFeature]);
@@ -381,6 +385,12 @@ export function SocialProvider({
   const [composerMediaUrls, setComposerMediaUrls] = useState<string[]>([]);
   // The review queue's selection — which answered draft the editor holds.
   const [activeDraftId, setActiveDraftId] = useState<string | null>(null);
+  // Read by refreshReview, which must keep the post in hand without being
+  // rebuilt (and re-polling) every time a different draft is opened.
+  const activeIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    activeIdRef.current = activeDraftId;
+  }, [activeDraftId]);
 
   const goToStage = useCallback(
     (stage: Stage) => {
@@ -518,21 +528,6 @@ export function SocialProvider({
   // deliberately non-blocking: a library read that fails leaves an empty strip,
   // never a broken composer — attaching media is optional, writing is not.
   const [brandMedia, setBrandMedia] = useState<BrandMedia[]>([]);
-  useEffect(() => {
-    let cancelled = false;
-    // The feature narrows and ranks it: the media made for this feature
-    // first, then brand-wide assets that fit any post.
-    listBrandMedia(product, feature)
-      .then((res) => {
-        if (!cancelled) setBrandMedia(res.ok ? (res.media ?? []) : []);
-      })
-      .catch(() => {
-        if (!cancelled) setBrandMedia([]);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [product, feature]);
 
   const [draftError, setDraftError] = useState<string | null>(null);
   const [requestId, setRequestId] = useState<string | null>(null);
@@ -774,7 +769,15 @@ export function SocialProvider({
         listQueuedVariants(),
       ]);
       if (drafts.ok) {
-        setReviewDrafts(drafts.drafts ?? []);
+        // A draft opened by link (?draft=, a calendar slot not yet due) is
+        // outside the queue's window; a refresh must not drop the post in hand.
+        const fresh = drafts.drafts ?? [];
+        setReviewDrafts((prev) => {
+          const held = prev.find((d) => d.id === activeIdRef.current);
+          return held && !fresh.some((d) => d.id === held.id)
+            ? [...fresh, held]
+            : fresh;
+        });
       } else {
         setReviewError(drafts.error ?? "Could not read the queue.");
       }
@@ -862,6 +865,31 @@ export function SocialProvider({
     },
     [activeDraftId, clearActive, refreshReview],
   );
+
+  // The feature narrows and ranks it: the media made for this feature first,
+  // then the product's real screens for it, then brand-wide assets. With no
+  // feature picked, the post in hand says what it is about — the loaded
+  // draft's feature, else the calendar slot's — so a calendar post opened on
+  // "All" still gets its screens offered.
+  const mediaFeature =
+    feature !== ANY_FEATURE
+      ? feature
+      : (reviewDrafts.find((d) => d.id === activeDraftId)?.feature ??
+        (planSlot ? findSlot(planSlot)?.feature : undefined) ??
+        feature);
+  useEffect(() => {
+    let cancelled = false;
+    listBrandMedia(product, mediaFeature)
+      .then((res) => {
+        if (!cancelled) setBrandMedia(res.ok ? (res.media ?? []) : []);
+      })
+      .catch(() => {
+        if (!cancelled) setBrandMedia([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [product, mediaFeature]);
 
   const reviewQueue: ReviewQueue = {
     drafts: reviewDrafts,
