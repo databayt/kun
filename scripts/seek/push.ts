@@ -124,12 +124,45 @@ export async function push(apply: boolean): Promise<{ items: number; events: num
 
   const db = openDb();
   try {
-    await db.$transaction([
-      db.seekItem.deleteMany({ where: { instance: INSTANCE } }),
-      db.seekItem.createMany({ data: items.map(toRow) }),
-    ], { maxWait: 30_000, timeout: 60_000 }); // a cold Neon compute is slow to open one
+    // Send only what changed. The first version replaced the whole mirror in
+    // one transaction (~1 MB of rows); from the launchd tick it ran 208 s over
+    // the Neon websocket and expired (2026-10-18). A card's Twenty updatedAt
+    // moves on every edit, so it is the change signal.
+    const have = new Map(
+      (
+        await db.seekItem.findMany({
+          where: { instance: INSTANCE },
+          select: { externalId: true, sourceUpdatedAt: true },
+        })
+      ).map((r) => [r.externalId, r.sourceUpdatedAt.getTime()]),
+    );
+    const rows = items.map(toRow);
+    const fresh = rows.filter((r) => !have.has(r.externalId));
+    const changed = rows.filter(
+      (r) => have.has(r.externalId) && have.get(r.externalId) !== r.sourceUpdatedAt.getTime(),
+    );
+    const live = new Set(rows.map((r) => r.externalId));
+    const gone = [...have.keys()].filter((id) => !live.has(id));
+
+    for (let i = 0; i < fresh.length; i += 100)
+      await db.seekItem.createMany({ data: fresh.slice(i, i + 100), skipDuplicates: true });
+    for (const r of changed)
+      await db.seekItem.update({
+        where: { instance_externalId: { instance: INSTANCE, externalId: r.externalId } },
+        data: r,
+      });
+    if (gone.length)
+      await db.seekItem.deleteMany({ where: { instance: INSTANCE, externalId: { in: gone } } });
+
+    // Ledger lines only ever append: send the ones newer than the newest stored.
+    const last = await db.seekEvent.findFirst({
+      where: { instance: INSTANCE },
+      orderBy: { ts: "desc" },
+      select: { ts: true },
+    });
+    const newer = events.filter((e) => !last || Date.parse(e.ts) >= last.ts.getTime());
     const { count } = await db.seekEvent.createMany({
-      data: events.map((e) => ({ ...e, ts: new Date(e.ts), externalId: e.externalId ?? "" })),
+      data: newer.map((e) => ({ ...e, ts: new Date(e.ts), externalId: e.externalId ?? "" })),
       skipDuplicates: true,
     });
     await db.seekInstance.upsert({
@@ -137,7 +170,9 @@ export async function push(apply: boolean): Promise<{ items: number; events: num
       create: { id: INSTANCE, lastTickAt: new Date(), state: state as object },
       update: { lastTickAt: new Date(), state: state as object },
     });
-    console.log(`✓ pushed ${items.length} items, ${count} new events`);
+    console.log(
+      `✓ pushed ${fresh.length} new, ${changed.length} changed, ${gone.length} removed of ${items.length} items; ${count} new events`,
+    );
   } finally {
     await db.$disconnect();
   }
