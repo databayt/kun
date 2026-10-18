@@ -34,6 +34,7 @@ import {
   useSpotlightBox,
 } from "@/components/root/social/spotlight-shell";
 import { mediaKind } from "@/lib/media-kind";
+import { ANY_FEATURE } from "@/components/root/social/post-settings";
 import { useSocial } from "@/components/root/social/provider";
 import { StageFrame } from "@/components/root/social/stage";
 import { MediaThumb } from "@/components/root/social/media-thumb";
@@ -52,6 +53,8 @@ export interface MediaPick {
   url: string;
   brand: string | null;
   type: string;
+  /** Feature id the asset shows; null for a brand-wide asset. */
+  feature: string | null;
 }
 
 export function MediaSpotlight({
@@ -106,10 +109,15 @@ export function MediaSpotlight({
       if (a.brand && a.brand !== product) return false;
       if (mediaFilter !== "any" && mediaKind(a.url) !== mediaFilter) return false;
       if (mediaType !== "any" && a.type !== mediaType) return false;
+      // A feature pick keeps assets made for it plus brand-wide ones — the
+      // Feature box here used to change nothing.
+      if (feature !== ANY_FEATURE && a.feature && a.feature !== feature) {
+        return false;
+      }
       if (!q) return true;
       return matchesQuery([a.title, a.brand ?? "", a.type, a.id].join(" "), q);
     });
-  }, [assets, query, product, mediaFilter, mediaType]);
+  }, [assets, query, product, mediaFilter, mediaType, feature]);
 
   return (
     <div

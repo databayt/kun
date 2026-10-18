@@ -10,6 +10,7 @@ import type { Locale } from "@/components/local/config";
 import { getSocialDict } from "@/components/root/social/dictionary";
 import { listDecks } from "@/components/root/carousel/content";
 import {
+  brandKitBrands,
   chatgptTypes,
   listPendingBriefs,
   listRenderedBriefs,
@@ -19,12 +20,9 @@ import { briefAsAsset, getShowroomData } from "./data";
 import { BrandShelves } from "./brand-shelf";
 import { BriefQueue } from "./brief-queue";
 import { MediaStudio } from "./media-studio";
+import { UploadShelf } from "./upload-shelf";
 import { ShowroomGrid } from "./grid";
 import { ShowroomKeyword } from "./keyword-pill";
-
-// The brand the seat lane files against. One brand today by deliberate scope
-// (hogwarts is the pilot); the picker appears the day a second brand has a kit.
-const SEAT_BRAND = "hogwarts";
 
 export async function ShowroomContent({ lang }: { lang: Locale }) {
   const t = getSocialDict(lang);
@@ -54,6 +52,7 @@ export async function ShowroomContent({ lang }: { lang: Locale }) {
       url: a.imageUrl as string,
       brand: a.brand,
       type: a.type,
+      feature: a.feature,
     }));
 
   return (
@@ -64,6 +63,8 @@ export async function ShowroomContent({ lang }: { lang: Locale }) {
           box above finds what exists, this one asks for what does not. Below
           the fold for now, where it reads as a different job rather than a
           competing field. */}
+      <UploadShelf />
+
       <MediaStudio />
 
       <div id="showroom-gallery" className="space-y-10 border-t pt-10">
@@ -88,10 +89,9 @@ export async function ShowroomContent({ lang }: { lang: Locale }) {
 
         <BriefQueue
           briefs={pending}
-          typesByBrand={{
-            mkan: chatgptTypes("mkan"),
-            hogwarts: chatgptTypes("hogwarts"),
-          }}
+          typesByBrand={Object.fromEntries(
+            brandKitBrands().map((b) => [b, chatgptTypes(b)]),
+          )}
         />
       </div>
 

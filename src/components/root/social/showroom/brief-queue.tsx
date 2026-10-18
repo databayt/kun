@@ -31,7 +31,7 @@ const WEBP_QUALITY = 0.92;
  * chain fails: a browser that cannot do this should still be able to upload,
  * and the action's own size check is the backstop.
  */
-async function toWebp(file: File): Promise<File> {
+export async function toWebp(file: File): Promise<File> {
   try {
     const bitmap = await createImageBitmap(file);
     const canvas = document.createElement("canvas");
@@ -67,14 +67,9 @@ export function BriefQueue({
 }) {
   const { t, product } = useSocial();
   const activeBrand = product || initialBrand || "mkan";
-  const activeTypes =
-    types ||
-    (typesByBrand
-      ? typesByBrand[activeBrand] ||
-        typesByBrand.mkan ||
-        typesByBrand.hogwarts ||
-        []
-      : []);
+  // The brand's own types or none: falling back to another brand's list filed
+  // balqalam briefs against mkan's kit.
+  const activeTypes = types || typesByBrand?.[activeBrand] || [];
 
   // Optimistic local list: the server component above only re-reads on a route
   // change, and a renderer working through four briefs should see each one
@@ -83,6 +78,8 @@ export function BriefQueue({
   const [error, setError] = useState<string | null>(null);
 
   const drop = (id: string) => setRows((r) => r.filter((b) => b.id !== id));
+  // The queue is per brand, like everything else under the brand picker.
+  const shown = rows.filter((b) => b.brand === activeBrand);
 
   return (
     <div className="space-y-4">
@@ -90,9 +87,9 @@ export function BriefQueue({
         <h4 className="text-muted-foreground text-xs font-medium tracking-widest uppercase">
           {t.briefQueueTitle}
         </h4>
-        {rows.length > 0 && (
+        {shown.length > 0 && (
           <span className="text-muted-foreground font-mono text-xs">
-            {rows.length}
+            {shown.length}
           </span>
         )}
       </div>
@@ -106,22 +103,25 @@ export function BriefQueue({
         </p>
       )}
 
-      {rows.length === 0 ? (
+      {shown.length === 0 ? (
         <p className="text-muted-foreground text-sm">{t.briefQueueEmpty}</p>
       ) : (
         <ul className="space-y-3">
-          {rows.map((b) => (
+          {shown.map((b) => (
             <BriefCard key={b.id} brief={b} onDone={drop} onError={setError} />
           ))}
         </ul>
       )}
 
-      <FileBriefForm
-        brand={activeBrand}
-        types={activeTypes}
-        onFiled={(b) => setRows((r) => [...r, b])}
-        onError={setError}
-      />
+      {activeTypes.length > 0 && (
+        <FileBriefForm
+          key={activeBrand}
+          brand={activeBrand}
+          types={activeTypes}
+          onFiled={(b) => setRows((r) => [...r, b])}
+          onError={setError}
+        />
+      )}
     </div>
   );
 }
