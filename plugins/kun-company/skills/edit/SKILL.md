@@ -108,7 +108,8 @@ and free:
 | `poster <in> <out.webp> --at S` | A meaningful frame as WebP, 1600 px wide |
 | `derive <png…> [--kind ui\|photo] [--check]` | oxipng master plus AVIF/WebP at 1600/2400 (4:4:4 for UI text); EXIF stripped; ssimulacra2 score |
 | `vtt <srt\|json> <out.vtt>` | WebVTT captions for `<track>` |
-| `publish --ns <brand> (--key <path> \| --slug <s>) --id <id> --manifest <path> <files…>` | `--key`: clean stable keys (`hogwarts/students/add.mp4`, `…/add/list@2x.avif`), overwritten in place + CloudFront-invalidated; `--slug`: hashed immutable keys. Each HEAD-verified, plus an upsert into the product's `media-manifest.json` (AV1 source first, then H.264) |
+| `publish --ns <brand> (--key <path> \| --slug <s>) --id <id> --manifest <path> <files…>` | `--key`: clean stable keys that mirror the app URL (`hogwarts/ar/students/add/video.mp4`, `…/add/list@2x.avif`), overwritten in place + CloudFront-invalidated, `?v=<sha8>` in the manifest; `--slug`: legacy hashed immutable keys — don't use for new media. Each HEAD-verified, plus an upsert into the product's `media-manifest.json` (AV1 source first, then H.264) |
+| `prune --ns <brand> --manifest <path> --repo <dir> [--match re] [--delete]` | Lists CDN keys nothing serves or names any more (default: hashed leftovers); `--delete` removes them one by one after a human yes |
 | `qa-pack <files…> [--vtt] [--ref]` | Numbers against `engine.json → media` plus ≤1600 px previews for the `media-qa` agent |
 | `voice status\|record\|consent\|gen\|mix\|revoke` | Consent-gated local Arabic narration (Chatterbox Multilingual v3 on MLX), whisper-gated |
 | `brand <id> --json\|--css\|--ass` | The brand kit's production entry for any renderer |

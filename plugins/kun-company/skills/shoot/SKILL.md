@@ -38,22 +38,25 @@ Drive by `record.sh sync`; nothing is captured into a repo's `public/`).
 
 | Asset | Local file (`~/media/<repo>/`) | Manifest id | CDN key (`cdn.databayt.org/hogwarts/…`) |
 | --- | --- | --- | --- |
-| page still | `page/<slug>-<locale>.png` | `page/<slug>-<locale>` | `<slug>/page.avif` (home → `page.avif`) |
-| flow still | `<flow>/NN-<step>-<locale>.png` | `<flow>/<step>-<locale>` | `<block>/<name>/<step>.avif` · `@2x.avif` · `.webp` · `@2x.webp` |
-| phone still | `<flow>/iphone-16/NN-<step>-<locale>.png` | `<flow>/iphone-16/<step>-<locale>` | `<block>/<name>/iphone-16/<step>.avif` |
-| tutorial | `<flow>/<flow>-<locale>.{mp4,av1.mp4,poster.webp,vtt}` | `<flow>/video-<locale>` | `<block>/<name>.mp4` (+ `.av1.mp4` `.poster.webp` `.vtt`) |
-| reel | `<flow>/<flow>-<locale>.reel.mp4` | `<flow>/reel-<locale>` | `<block>/<name>/reel.mp4` |
-| support clip | `<flow>/<flow>-<clip>-<locale>.*` | `<flow>/<clip>-<locale>` | `<block>/<name>/<clip>.mp4` |
-| story cut | `<flow>/<flow>-<cut>-<device>-<locale>.*` | `<flow>/<cut>-<device>-<locale>` | `<block>/<name>/<cut>-<device>.mp4` |
-| block media | (an ad, a block reel) | your id | `<block>/<file>.mp4` — `media.sh publish --key <block>/<file>` |
+| page still | `page/<slug>-<locale>.png` | `page/<slug>-<locale>` | `<locale>/<route>/page.avif` (home → `<locale>/page.avif`; a nested route's slug spells `/` as `.`) |
+| flow still | `<flow>/NN-<step>-<locale>.png` | `<flow>/<step>-<locale>` | `<locale>/<route>/<step>.avif` · `@2x.avif` · `.webp` · `@2x.webp` |
+| phone still | `<flow>/iphone-16/NN-<step>-<locale>.png` | `<flow>/iphone-16/<step>-<locale>` | `<locale>/<route>/iphone-16/<step>.avif` |
+| tutorial | `<flow>/<flow>-<locale>.{mp4,av1.mp4,poster.webp,vtt}` | `<flow>/video-<locale>` | `<locale>/<route>/video.mp4` (+ `video.av1.mp4` `video.poster.webp` `video.vtt`) |
+| reel | `<flow>/<flow>-<locale>.reel.mp4` | `<flow>/reel-<locale>` | `<locale>/<route>/reel.mp4` |
+| support clip | `<flow>/<flow>-<clip>-<locale>.*` | `<flow>/<clip>-<locale>` | `<locale>/<route>/<clip>.mp4` |
+| story cut | `<flow>/<flow>-<cut>-<device>-<locale>.*` | `<flow>/<cut>-<device>-<locale>` | `<locale>/<route>/<cut>-<device>.mp4` |
+| block media | (an ad, a block reel) | your id | `<locale>/<route>/<file>.mp4` — `media.sh publish --key <locale>/<route>/<file>` |
 | raw footage (`/record`) | `<flow>/raw/<flow>[-<part>]-<locale>.mov` | — (archive + Drive) | — |
 
-- **The CDN is grouped by block, names are short.** A flow declares its home as
-  `export const cdn = "<block>/<name>"` — `add-student` → `students/add`, `bulk-student` →
-  `students/bulk`, `add-teacher` → `teachers/add`. The tutorial is `hogwarts/students/add.mp4`; its
-  stills, reel and clips sit in `hogwarts/students/add/`; block-wide media (`marketing.mp4`,
-  `reel.mp4`) sits in `hogwarts/students/`.
-- **Arabic is bare, English adds `-en`**: `add.mp4`, `add/list.avif`, `add/list-en.avif`.
+- **The CDN mirrors the app URL, language first.** `cdn.databayt.org/hogwarts/<locale>/<route>[/<flow>]/<asset>`
+  — the same shape as `<school>.databayt.org/<locale>/<route>` (route groups and `s/[subdomain]` never
+  reach a URL, so never a key). A flow declares it as `export const route` — `add-student` →
+  `students/add`, `add-teacher` → `teachers/add`, `bulk-student` → `school/bulk/student` (two flows
+  share `/school/bulk`, so each gets a subfolder), `set-fees` → `finance/fees`, `login` → `login`.
+  publish refuses a flow module without one. The tutorial is `hogwarts/ar/students/add/video.mp4`;
+  its stills, reel and clips sit beside it.
+- **Every key names its language, and no key carries a hash.** `ar/students/add/list.avif`,
+  `en/students/add/list.avif`; cache-busting is the manifest's `?v=<sha8>`, never the file name.
   **The narrowest width is bare, wider ones add `@2x`**: `list.avif` (1600), `list@2x.avif` (2400);
   a phone still ships only its native 1179 px, bare.
 - **Same name = overwrite.** A re-shoot or re-render replaces the file at the same URL; never
@@ -82,7 +85,7 @@ node ~/.claude/skills/shoot/scripts/shoot.mjs --flow add-student --lang ar,en --
 - Namespace and manifest come from `content/media/brand-kit.json → production.<brand>.{cdn,manifest}`
   — `cdn` is always the repo (`hogwarts`, also for the balqalam brand), manifest
   `src/components/docs/media-manifest.json`.
-- A flow module carries its metadata: `export const cdn` (`<block>/<name>`), `title = [ar, en]`,
+- A flow module carries its metadata: `export const route` (`<route>[/<flow>]`, the app URL it films), `title = [ar, en]`,
   `alt = { <step>: [ar, en] }` (a step with no alt falls back to «title — step»), and `block` /
   `paths` — publish stamps them into `~/media/manifest.json` so `record.sh stale` flags a still
   whose source changed.

@@ -1,8 +1,8 @@
 // Bulk student — six fictional first-graders («الصف الأول - أ») from one CSV, through /school/bulk.
 import { bulkFlow, initScript } from "./_bulk.mjs"
 
-// the flow's CDN home — <block>/<name>: cdn.databayt.org/hogwarts/students/bulk.mp4, stills under hogwarts/students/bulk/
-export const cdn = "students/bulk"
+// the app route it films → cdn.databayt.org/hogwarts/<lang>/school/bulk/student/video.mp4, stills beside it
+export const route = "school/bulk/student"
 // the source this flow films — `record.sh stale` flags the published stills when it changes
 export const block = "import"
 export const paths = ["src/components/school-dashboard/import"]

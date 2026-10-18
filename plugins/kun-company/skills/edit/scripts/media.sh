@@ -11,6 +11,7 @@
 #   media.sh derive <png…> [--kind ui|photo] [--widths 1600,2400] [--out dir] [--check]
 #   media.sh vtt <in.srt|in.json> <out.vtt> [--offset S]
 #   media.sh publish --ns <ns> (--key <path> | --slug <slug>) --id <id> [--manifest path] <files…>
+#   media.sh prune --ns <ns> --manifest path [--repo dir] [--delete]   unreferenced CDN keys (read-only by default)
 #   media.sh qa-pack <file…> [--profile p] [--ref mezz] [--vtt f] [--at t1,t2] [--out dir]
 #   media.sh probe <file>               compact JSON (codec, colour tags, faststart, size)
 #   media.sh loudness <file>            EBU R128 integrated / LRA / true peak
@@ -191,6 +192,7 @@ case "$sub" in
   derive) mjs derive "$@" ;;
   vtt) mjs vtt "$@" ;;
   publish) mjs publish "$@" ;;
+  prune) mjs prune "$@" ;;
   qa-pack) mjs qa "$@" ;;
   probe) mjs probe "$@" ;;
   voice) mjs voice "$@" ;;

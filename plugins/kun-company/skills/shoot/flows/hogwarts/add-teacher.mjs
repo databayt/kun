@@ -20,8 +20,8 @@ const blurEmails = () => {
 export const initScript = `(${blurPhones})();(${blurEmails})()`
 
 // Manifest copy for publish.mjs: the video title and one alt per still (by step name).
-// the flow's CDN home — <block>/<name>: cdn.databayt.org/hogwarts/teachers/add.mp4, stills under hogwarts/teachers/add/
-export const cdn = "teachers/add"
+// the app route it films → cdn.databayt.org/hogwarts/<lang>/teachers/add/video.mp4, stills beside it
+export const route = "teachers/add"
 // the source this flow films — `record.sh stale` flags the published stills when it changes
 export const block = "listings"
 export const paths = ["src/components/school-dashboard/listings/teachers"]

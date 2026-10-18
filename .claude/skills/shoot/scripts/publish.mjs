@@ -6,13 +6,17 @@
 // Reads ~/media/<repo>/<flow>/ (what shoot.mjs, sim.mjs and story.mjs write) and hands each asset
 // to `media.sh publish --key` (clean stable keys, HEAD-verified, invalidated on overwrite, manifest upsert).
 // Namespace + manifest come from the brand kit (production.<brand>.cdn / .manifest); the namespace
-// is always the repo (hogwarts — balqalam is only the public name on screen). A flow's CDN home is
-// `export const cdn = "<block>/<name>"` — the block folder plus the flow's verb:
-//   tutorial    hogwarts/students/add.mp4  (.av1.mp4 · .poster.webp · .vtt)   English adds -en: add-en.mp4
-//   still       hogwarts/students/add/list.avif · list@2x.avif · list.webp · list@2x.webp · list-en.avif
-//   phone       hogwarts/students/add/iphone-16/review.avif
-//   reel, clip  hogwarts/students/add/reel.mp4 · hogwarts/students/add/details.mp4
-// Page stills land on their own path: page/students-ar.png → hogwarts/students/page.avif, home → hogwarts/page.avif.
+// is always the repo (hogwarts — balqalam is only the public name on screen). A flow's CDN home
+// mirrors the app URL it films — `export const route = "<route>[/<flow>]"`, language first, the
+// way the app puts [lang] first (route groups and s/[subdomain] never reach a URL, so never here):
+//   tutorial    hogwarts/ar/students/add/video.mp4  (video.av1.mp4 · video.poster.webp · video.vtt)
+//   still       hogwarts/ar/students/add/list.avif · list@2x.avif · list.webp · list@2x.webp
+//   phone       hogwarts/ar/students/add/iphone-16/review.avif
+//   reel, clip  hogwarts/ar/students/add/reel.mp4 · hogwarts/ar/students/add/details.mp4
+//   english     the same path under en/: hogwarts/en/students/add/video.mp4
+// Page stills land on their route: page/students-ar.png → hogwarts/ar/students/page.avif, home → hogwarts/ar/page.avif
+// (a nested route spells its slashes as dots in the file name: page/finance.fees-ar.png → ar/finance/fees/page.avif).
+// No hash in a key, ever: manifest URLs carry ?v=<sha8>, so a re-shoot reaches viewers on the same path.
 //
 // The id grammar — one name per asset, the same in the manifest, MDX and the CDN slug:
 //   <flow>/<step>-<locale>           a still         add-student/created-ar      ← 12-created-ar.png
@@ -60,8 +64,9 @@ const L = (pair, lang) => pair[lang === "en" ? 1 : 0] || ""
 const media = join(here, "../../edit/scripts/media.sh")
 const results = []
 const published = []
-const home = (mod.cdn ?? flow).replace(/^\/+|\/+$/g, "")
-const en = (lang) => (lang === "en" ? "-en" : "")
+const route = typeof mod.route === "string" ? mod.route.replace(/^\/+|\/+$/g, "") : undefined
+if (flow !== "page" && !route) throw new Error(`${flowFile.replace(homedir(), "~")} needs \`export const route = "<route>[/<flow>]"\` — the app URL it films`)
+const at = (lang, rest) => [lang, route, rest].filter(Boolean).join("/")
 function publish(id, files, extra, key) {
   const r = spawnSync(media, ["publish", "--ns", brand.cdn, "--key", key, "--id", id, "--manifest", manifest, ...extra, ...(dry ? ["--dry-run"] : []), ...files], { encoding: "utf8" })
   if (r.status !== 0) throw new Error(`publish ${id} failed:\n${(r.stderr || r.stdout).slice(-600)}`)
@@ -88,8 +93,8 @@ function stills(folder, prefix) {
     if (!files.some((x) => x.endsWith(".avif")) || !files.some((x) => x.endsWith(".webp"))) { (underived[folder] ||= []).push(stem); continue }
     const pair = alt[m[2]] || [`${L(title, "ar")} — ${m[2]}`, `${L(title, "en")} — ${m[2]}`]
     const key = flow === "page"
-      ? `${m[2] === "home" ? "" : `${m[2]}/`}page${en(m[3])}`
-      : `${home}/${prefix}${m[2]}${en(m[3])}`
+      ? [m[3], m[2] === "home" ? "" : m[2].replace(/\./g, "/"), "page"].filter(Boolean).join("/")
+      : at(m[3], `${prefix}${m[2]}`)
     publish(`${flow}/${prefix}${m[2]}-${m[3]}`, files, ["--alt-ar", pair[0], "--alt-en", pair[1], ...(m[1] ? ["--order", String(Number(m[1]))] : [])], key)
   }
 }
@@ -106,9 +111,9 @@ function videos() {
       const part = m[1] || "video"
       const files = [f, `${stem}.av1.mp4`, `${stem}.poster.webp`, `${stem}.vtt`].filter((x) => names.includes(x)).map((x) => join(dir, x))
       const t = ["--title-ar", L(title, "ar"), "--title-en", L(title, "en")]
-      publish(`${flow}/${part}-${lang}`, files, t, part === "video" ? `${home}${en(lang)}` : `${home}/${part}${en(lang)}`)
+      publish(`${flow}/${part}-${lang}`, files, t, at(lang, part))
       const reel = part === "video" ? "reel" : `${part}-reel`
-      if (names.includes(`${stem}.reel.mp4`)) publish(`${flow}/${reel}-${lang}`, [join(dir, `${stem}.reel.mp4`), ...files.filter((x) => x.endsWith(".vtt"))], t, `${home}/${reel}${en(lang)}`)
+      if (names.includes(`${stem}.reel.mp4`)) publish(`${flow}/${reel}-${lang}`, [join(dir, `${stem}.reel.mp4`), ...files.filter((x) => x.endsWith(".vtt"))], t, at(lang, reel))
     }
   }
 }

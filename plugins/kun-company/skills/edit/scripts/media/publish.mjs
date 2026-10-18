@@ -3,8 +3,8 @@
 //         [--title-ar …] [--title-en …] [--alt-ar …] [--alt-en …] [--order N] [--voice <id>] [--dry-run] <files…>
 //
 // Two key modes on cdn.databayt.org:
-//   --key   CLEAN, STABLE keys — <ns>/<key><suffix>, e.g. hogwarts/students/add.mp4,
-//           hogwarts/students/add/list.avif. The suffix comes from each file's role: .mp4 · .av1.mp4 ·
+//   --key   CLEAN, STABLE keys — <ns>/<key><suffix>, mirroring the app URL language first, e.g.
+//           hogwarts/ar/students/add/video.mp4, hogwarts/ar/students/add/list.avif. The suffix comes from each file's role: .mp4 · .av1.mp4 ·
 //           .poster.webp · .vtt for a video (a .reel.mp4 source publishes as .mp4 under its own key),
 //           and for a still the narrowest width is bare and each wider one adds @2x, @3x
 //           (list-1600.avif → list.avif, list-2400.avif → list@2x.avif). Re-publishing the same key
@@ -12,7 +12,7 @@
 //           cache for an hour in browsers and a year at the edge, and every overwritten key gets a
 //           CloudFront invalidation. Manifest URLs carry ?v=<sha8> — the edge ignores the query,
 //           browsers see a new URL, so a re-render reaches viewers without a stale hour.
-//   --slug  CONTENT-HASHED, immutable keys that mirror a route — <ns>/<route>/<stem>.<hash8>.<ext>
+//   --slug  LEGACY — content-hashed, immutable keys (new media uses --key; `prune` lists the leftovers) that mirror a route — <ns>/<route>/<stem>.<hash8>.<ext>
 //           (--slug "" is the root). --prefix names a file after its flow (01-list-ar → add-student-list-ar).
 //           New pixels are a new URL; nothing is overwritten and nothing needs invalidating.
 // Every URL is verified with a HEAD (200 + exact content-type), then the entry is upserted into the

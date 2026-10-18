@@ -150,9 +150,9 @@ as everything else (the table in `/shoot` → Naming):
   `~/media/<repo>/<flow>/<flow>-<locale>.mp4` (ad cut or edit, one file, overwritten; the sim, a
   motion composition and an ad cut all write this one name — the last render wins) — and reaches
   the product with `node ~/.claude/skills/shoot/scripts/publish.mjs --flow <flow>`, at
-  `cdn.databayt.org/hogwarts/<block>/<name>.mp4` (the flow's `export const cdn`, e.g. `students/add.mp4`;
-  English adds `-en`). Block-wide cuts (an ad, a block reel) go to `hogwarts/<block>/<file>.mp4` with
-  `media.sh publish --ns hogwarts --key students/marketing …`.
+  `cdn.databayt.org/hogwarts/<locale>/<route>/video.mp4` (the flow's `export const route`, e.g.
+  `ar/students/add/video.mp4`; English under `en/`). Route-wide cuts (an ad, a block reel) go to
+  `hogwarts/<locale>/<route>/<file>.mp4` with `media.sh publish --ns hogwarts --key ar/students/marketing …`.
 
 ### 3½. Ad cut — flows ship blazing fast
 
