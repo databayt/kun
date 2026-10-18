@@ -297,21 +297,31 @@ returns `drafted: 0`.
   lane. The Hub's model label names the model that actually answers
 - **Docs** — overview, status (this page), ownership, architecture, strategy, carousel, five
   brand pages, the channel guides, and the groups/destinations design
+- **Calendar → Draft → Media → Publish, joined (2026-10-18)** — the Calendar draws the brand's
+  dated plan as a month grid, each slot linked to its draft by `SocialDraftRequest.slot`; a
+  slot's **Write it** opens Draft on a concept card (the slot's theme, angle, persona and shape,
+  plus the feature's SPOTLIGHT note) whose **Kick off with AI** drafts from exactly that context —
+  the prompt now carries the brand's Voice and the feature's facts and do-not-say list. Media
+  takes finished images and videos straight onto the shelf (`uploadMedia`, presigned PUT for
+  video up to 200MB), tagged by brand and feature. Publish recommends, for the picked brand and
+  feature, the calendar posts due this week and the matching media; a loaded draft has an
+  Arabic / English / Both toggle and **Reject** with a reason (feeding `lessons`)
 
 ## What's not
 
-- **The craft gate never sees what actually publishes.** `checkCraft` is called in exactly two
-  places: the Gemini drafting lanes, and `review-editor.tsx`, which is no longer rendered anywhere.
-  So AI copy is gated until a human edits it, and anything typed straight into the composer reaches
-  the Page with the linter never looking. It is the linter that catches a bare link, a banned word
-  and the length floor — the mechanical half a reader at 11pm misses.
-- **Dismiss has no button.** The composer can load a queue draft but not reject one, and
-  `dismissReason` is what `social-drafts.mjs lessons` feeds the writer *before* it drafts. So the
-  feedback loop [Copy](/docs/social/copy) describes is starved by the UI rather than by the data
-  model. Disposal currently means SQL.
-- **The composer always takes Arabic.** Every draft answers `ar` **and** `en`; the box does
-  `ar || en` on both its own ask and a queue load. The English half is reachable only from the
-  Draft stage's "Use English", so a session run entirely in the fast lane can never get it.
+- **The craft gate never sees what actually publishes.** `checkCraft` runs in the Gemini drafting
+  lanes and the queue loader only. AI copy is gated until a human edits it, and anything typed
+  straight into the composer reaches the Page with the linter never looking. It is the linter that
+  catches a bare link, a banned word and the length floor — the mechanical half a reader at 11pm
+  misses.
+- **The plan is dated for one brand.** `plan.ts` gives balqalam a start date (week 1 =
+  2026-10-19) and the Calendar draws it as a month grid; every other brand still shows the
+  `pillars.json` rotation. A new brand's plan is a `content/social/queue/<brand>/plan.json` plus
+  one line in `PLANS`.
+- **Concept notes cover the school features only.** `content/social/concepts.json` is vendored
+  from hogwarts' `SPOTLIGHT.md` files by `node scripts/social-concepts.mjs` and must be re-run when
+  they change. mkan and databayt features have no concept note, so the Draft card says so and
+  the prompt drafts from the brief alone.
 - **A visual register is remembered and changes nothing.** The Media tab's sixteen styles are a
   directive with no wire: nothing in `library.json` records a style, and `lib/media-prompt.ts` —
   where the adjective belongs — does not read it yet.
