@@ -19,12 +19,18 @@ Never route around these. Stop, say exactly what is waiting and where, and send 
 
 | Gate                                                                           | What to do                                                                                                                                |
 | ------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| CAPTCHA / "are you human" / puzzle                                             | **Never solve, bypass or farm it out.** Leave the page open in the vault Chrome; ask him to tick it there. When he says "done", continue. |
+| CAPTCHA / "are you human" / puzzle                                             | **Never solve, bypass or farm it out.** Fill everything else first, bring the tab to the front, then ask him to tick it **and click the submit button himself**. Continue from the next page. |
 | SMS / authenticator code to his phone                                          | Ask for the code; continue when he replies.                                                                                               |
 | Payment, card, bank details, a paid plan or trial that converts to paid        | Stop. Free tiers only, unless he names the plan.                                                                                          |
 | KYC: ID / passport / selfie upload, legal entity documents, signing a contract | Stop. Prepare everything else first.                                                                                                      |
 | Anything that posts publicly in his name (profile bio, a review, a post)       | Route through `/approve`.                                                                                                                 |
 | The site's terms forbid automated sign-up, or a block is clearly anti-bot      | Stop and hand him the open page — don't fight it.                                                                                         |
+
+**Why he clicks submit after the CAPTCHA.** Checks like MTN's proof-of-work "I'm not a robot"
+expire within seconds, and the token can be tied to his own click. On 2026-10-18 the MTN sign-up
+was rejected as "Invalid solution" when Claude clicked Sign up after he ticked the box. Never
+click submit on a CAPTCHA-gated form. If the page shows "Invalid solution" or the box resets,
+ask him to tick it again and submit at once. A login form with no CAPTCHA is still yours.
 
 Everything else (forms, email confirmation, choosing a free product, generating keys, settings)
 is yours to finish.
