@@ -259,6 +259,22 @@ model SocialDraftRequest {
   /// draft is copy AND/OR media: any of the two may be empty, never both.
   mediaUrls String[] @default([])
 
+  // ── The plan ──────────────────────────────────────────────────────────────
+  //
+  // What the draft is FOR, as columns rather than words buried in the brief, so
+  // the Calendar can find a slot's draft and Publish can recommend by feature
+  // without a text match.
+
+  /// The calendar slot this answers, `<brand>#<seq>` from the brand's plan.json
+  /// (e.g. "balqalam#012"). Null for an ad-hoc ask.
+  slot String?
+  /// The feature (block) the post is about — an id from features.json.
+  feature String?
+  /// The channel the writer was steering toward, when one was picked.
+  channel String?
+  /// The post shape — text, photo, carousel, reel — when one was picked.
+  shape String?
+
   createdAt  DateTime  @default(now())
   answeredAt DateTime?
 
@@ -268,6 +284,8 @@ model SocialDraftRequest {
   @@index([parentId])
   /// The lessons read: recent dismissals for one brand.
   @@index([brand, dismissReason])
+  /// The calendar read: a brand's slot → its draft.
+  @@index([brand, slot])
 }
 
 enum MediaBriefStatus {
@@ -310,6 +328,12 @@ model SocialMediaBrief {
   renderedBy String?
   /// Why it was dismissed, or anything the renderer wants the next person to know.
   note String?
+  /// The feature (block) the asset shows — an id from features.json. Null means
+  /// a brand-wide asset that fits any post.
+  feature String?
+  /// image | video. A free-standing upload from the media team has no compiled
+  /// prompt; its `subject` is the uploader's caption and `prompt` stays empty.
+  kind String @default("image")
 
   createdAt  DateTime  @default(now())
   renderedAt DateTime?

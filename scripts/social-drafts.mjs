@@ -795,11 +795,28 @@ if (command === "list") {
       loaded++;
       continue;
     }
-    const tag = `queue:${brand}#${String(seq).padStart(3, "0")}`;
+    const slot = `${brand}#${String(seq).padStart(3, "0")}`;
+    const tag = `queue:${slot}`;
+    // The plan columns: the Calendar finds a slot's draft by `slot`, Publish
+    // recommends by `feature`, and the file's `visual` is the art direction
+    // the media team works from — all three used to be dropped on load.
+    const feature = data.feature ? String(data.feature) : null;
+    const shape = data.format ? String(data.format) : null;
+    const note = data.visual
+      ? `editorial queue ${file} · visual: ${String(data.visual).trim()}`
+      : `editorial queue ${file}`;
     const [exists] = await sql`
       SELECT "id" FROM "SocialDraftRequest"
        WHERE "brand" = ${brand} AND "requestedBy" = ${tag}`;
     if (exists) {
+      // Rows loaded before the plan columns existed get them now.
+      await sql`
+        UPDATE "SocialDraftRequest"
+           SET "slot" = COALESCE("slot", ${slot}),
+               "feature" = COALESCE("feature", ${feature}),
+               "shape" = COALESCE("shape", ${shape}),
+               "note" = CASE WHEN "note" = ${`editorial queue ${file}`} THEN ${note} ELSE "note" END
+         WHERE "id" = ${exists.id}`;
       skipped++;
       continue;
     }
@@ -808,9 +825,10 @@ if (command === "list") {
     const createdAt = new Date(base + seq * 1000);
     await sql`
       INSERT INTO "SocialDraftRequest"
-        ("id", "brand", "brief", "requestedBy", "status", "ar", "en", "note", "createdAt", "answeredAt")
+        ("id", "brand", "brief", "requestedBy", "status", "ar", "en", "note",
+         "slot", "feature", "shape", "createdAt", "answeredAt")
       VALUES (${newId()}, ${brand}, ${brief}, ${tag}, 'answered', ${ar}, ${en},
-              ${`editorial queue ${file}`}, ${createdAt}, now())`;
+              ${note}, ${slot}, ${feature}, ${shape}, ${createdAt}, now())`;
     console.log(`queued ${tag}  ${file}`);
     loaded++;
   }
