@@ -52,7 +52,10 @@ WEB_SERVICES=(
 store_key() {
   local key_name="$1"
   local value="$2"
-  security add-generic-password -s "$KEYCHAIN_SERVICE" -a "$key_name" -w "$value" -U 2>/dev/null
+  # `security -i` reads the command on stdin, so the secret never sits in argv / `ps`.
+  local escaped="${value//\\/\\\\}"
+  escaped="${escaped//\"/\\\"}"
+  printf 'add-generic-password -s "%s" -a "%s" -w "%s" -U\n' "$KEYCHAIN_SERVICE" "$key_name" "$escaped" | security -i >/dev/null 2>&1
   echo -e "${GREEN}✓ Stored $key_name in Keychain${NC}"
 }
 
@@ -209,11 +212,18 @@ case "${1:-help}" in
   # Store a single key
   # --------------------------------------------------------
   "set")
-    if [ -z "$2" ] || [ -z "$3" ]; then
-      echo "Usage: $0 set <KEY_NAME> <value>"
+    # Prefer stdin (`printf %s "$v" | $0 set KEY`) — an argv value shows in `ps`.
+    if [ -z "$2" ]; then
+      echo "Usage: printf %s \"\$value\" | $0 set <KEY_NAME>   (or: $0 set <KEY_NAME> <value>)"
       exit 1
     fi
-    store_key "$2" "$3"
+    value="$3"
+    if [ -z "$value" ] && [ ! -t 0 ]; then value="$(cat)"; fi
+    if [ -z "$value" ]; then
+      echo "No value for $2 (pipe it on stdin)"
+      exit 1
+    fi
+    store_key "$2" "$value"
     ;;
 
   # --------------------------------------------------------

@@ -1,7 +1,7 @@
 ---
 name: auth
-description: Sign in to any web service or CLI with the Keychain-stored databayt identities, then reach protected pages and fetch the assets behind the login wall
-when_to_use: "Use when a login wall blocks progress — a page redirects to sign-in, a CLI reports not authenticated, or a clone or asset fetch sits behind a paywall or dashboard. Never asks for a password in chat; pauses only for a one-time code. Triggers on: log into X, sign me in, not authenticated, behind a login wall, session expired."
+description: Sign in to any web service or CLI with the Keychain-stored databayt identities and reach what sits behind the login wall
+when_to_use: "Use when a login wall blocks progress — a sign-in redirect, a CLI not authenticated, assets behind a dashboard. New accounts are /behalf. Triggers on: log into X, sign me in, not authenticated, session expired."
 ---
 
 # auth — self-service login for the kun engine
@@ -150,8 +150,10 @@ code — then continue. Never loop on a CAPTCHA; report it and move on.
 
 ### Signup
 
-Same fill technique on the signup form, default identity, the shared password. Stop and report
-if it requires email/phone verification, a CAPTCHA, or payment — those need Abdout.
+A new account is an errand, not a login → run **`/behalf`**. It signs up with the default
+identity, confirms the email itself (`.claude/scripts/mail-code.sh` reads the hotmail code or
+link), finishes the task and records the account in `~/.claude/accounts.json`. Only a CAPTCHA,
+an SMS code, payment or KYC still need Abdout.
 
 ## Fetching assets & content behind the login wall
 

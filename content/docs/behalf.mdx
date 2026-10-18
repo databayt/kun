@@ -1,0 +1,59 @@
+---
+title: Behalf
+description: Claude Code runs web errands in your name — sign up, confirm the email, finish the job, bring back the keys
+---
+
+# Behalf
+
+Say what you want done ("get me MTN MoMo sandbox keys for food", "sign up for X and put the
+API key in hogwarts") and Claude does the whole errand, not just the form. That means making
+the account, confirming the email, getting what you asked for, storing the secrets, delivering
+them to the repo and proving they work.
+
+It runs in **your own signed-in Chrome**: the [session vault](/docs/auth) on `127.0.0.1:9222`,
+the window on your screen. That gives it what Cowork has, plus things Cowork lacks: the
+Keychain identities, an inbox reader for confirmation codes, the repos and a record of every
+account.
+
+## What it does without asking
+
+You've given standing permission for **free accounts in your name**. Under it, Claude can:
+- fill in sign-up forms with `osmanabdout@hotmail.com`, or gmail for Google sites
+- accept the standard terms, leaving marketing boxes unticked
+- confirm the email
+- pick a free plan or product
+- generate API keys and change settings
+
+Your name, phone and country come from `jobs/profile.json`, and the password is the shared
+identity password from the Keychain.
+
+## Where it stops for you
+
+| It stops at | Why |
+| --- | --- |
+| A CAPTCHA or "are you human" check | It never solves or bypasses one. You tick it in the open Chrome window and say "done". |
+| An SMS or authenticator code | The code goes to your phone, so you send it to Claude. |
+| Payment, a card, or a paid plan or trial | Free tiers only, unless you name the plan. |
+| ID or passport upload, KYC, or contracts | Documents and signatures stay yours. |
+| A public post in your name | It goes through [`approve`](/docs/social). |
+
+When you're away from the Mac, one push notification says exactly what is waiting.
+
+## The pieces
+
+| Piece | Path |
+| --- | --- |
+| Skill | `.claude/skills/behalf/SKILL.md` |
+| Inbox code reader. It prints only the newest code or verification link from a sender, never a whole email. | `.claude/scripts/mail-code.sh --from <domain> --wait 180` |
+| Secrets are stored from stdin, so they never appear in `ps`. | `printf %s "$v" \| .claude/scripts/credentials.sh set <ENV_NAME>` |
+| Account ledger: service, identity, date, which Keychain entries, which repos use them. It holds no secrets. | `~/.claude/accounts.json` |
+
+## Example
+
+> get me MTN MoMo sandbox keys for food
+
+1. Sign up at momodeveloper.mtn.com as hotmail, then open the confirmation link that `mail-code.sh` finds.
+2. Subscribe to **Collections**, then read the Primary key (`MOMO_SUBSCRIPTION_KEY`).
+3. Create the sandbox API user and key over MTN's provisioning API (`MOMO_API_USER`, `MOMO_API_KEY`).
+4. Store all three in Keychain `databayt`, then write food's `.env`.
+5. Run a real sandbox payment through food, add a row to the ledger, and report in three lines.

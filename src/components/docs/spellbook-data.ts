@@ -2472,6 +2472,21 @@ export const schools: School[] = [
         depends: [],
       },
       {
+        name: "behalf",
+        effect:
+          "Web errands in Abdout's name — sign up, confirm the email, finish the job, bring back the keys",
+        order: [s("/behalf"), p("chrome-devtools")],
+        steps: [
+          "Check the account ledger; existing account → /auth login",
+          "Sign up in the vault Chrome with the Keychain identity + profile.json",
+          "Confirm the email via mail-code.sh (hotmail) or the Gmail MCP",
+          "Finish the errand, store secrets in Keychain from stdin, deliver to the repo .env",
+          "Stop only at CAPTCHA, SMS code, payment, KYC; record the ledger row",
+        ],
+        connects: ["credentials", "auth"],
+        depends: [],
+      },
+      {
         name: "health",
         effect: "Config health across the team + engine drift check",
         order: [s("/health")],

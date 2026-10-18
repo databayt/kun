@@ -10,7 +10,9 @@ phone → Mac lanes live in `kun/content/docs/cowork.mdx` — read it before pla
 `device_bash`), drives his logged-in Chrome, reads GitHub, pushes to his phone and uses Slack;
 it has no hooks, and its GitHub MCP _writes_ fail (it posts via the browser). A table that
 said otherwise cost real work until 2026-07-27. Code drives browsers too (Playwright +
-DevTools MCP, `claude --chrome`) — Cowork's edge is his own signed-in Chrome.
+DevTools MCP, `claude --chrome`), and its `chrome-devtools` MCP attaches to the session vault,
+his own signed-in Chrome on :9222. So **errands in his name (sign-ups, email confirmation,
+portals, dashboard keys) run in Code first via `/behalf`**; Cowork is the fallback.
 Code ↔ Code (any of Abdout's machines): `SendMessage` / `ListAgents`; bridge.md stays the
 Cowork handoff.
 
@@ -25,8 +27,8 @@ Cowork handoff.
 - **Cowork → Code:** the plan or decision (3–7 lines), the issue numbers, and
   _"Code: pick up issue #N — context above."_ in bridge.md.
 - **Code → Cowork:** after building, deploying or fixing, write the results and follow-up
-  issue numbers to bridge.md. Work that needs a browser session, a portal or a sign-up in
-  Abdout's name goes to Cowork this way.
+  issue numbers to bridge.md. A browser errand in Abdout's name goes to Cowork only when
+  `/behalf` can't reach it (no vault session, a desktop-only app).
 - Update bridge.md's sections; don't append forever.
 
 ## Reaching Abdout asynchronously

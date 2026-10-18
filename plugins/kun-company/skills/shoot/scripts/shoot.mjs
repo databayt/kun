@@ -16,7 +16,7 @@
 // Flow modules may export `initScript` (runs in every page first) and `masks` (CSS selectors).
 //
 // Deterministic by construction: light scheme, reduced motion, brand timezone, CSS animations frozen,
-// caret hidden, [data-media-mask] (and --mask) painted over, and every shot waits until visible
+// caret hidden, [data-chat-button] / [data-media-hide] hidden, [data-media-mask] (and --mask) painted over, and every shot waits until visible
 // images are decoded, blur-up images report data-loaded, and no skeleton is on screen.
 // --clock pins Date (off by default: server-rendered dates would not match a client-side clock).
 //
@@ -197,6 +197,8 @@ function api(s) {
       path: file, fullPage: full, animations: "disabled", caret: "hide", scale: "device",
       mask: ["[data-media-mask]", ...extraMasks, ...masks].map((sel) => page.locator(sel)),
       maskColor: "#e9e9e7",
+      // floating helpers (the hogwarts chat launcher) are chrome, not the flow being taught
+      style: "[data-chat-button],[data-media-hide]{visibility:hidden!important}",
     })
     saved.push(file)
     console.log(`✓ ${file}`)
