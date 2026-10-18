@@ -19,21 +19,24 @@ drawn on screen.
 
 | Asset | Local (`~/media/<repo>/`) | Manifest id | CDN (`cdn.databayt.org/hogwarts/`) |
 | --- | --- | --- | --- |
-| page still | `page/<slug>-<locale>.png` | `page/<slug>-<locale>` | `<slug>/page.avif` (home → `page.avif`) |
-| flow still | `<flow>/NN-<step>-<locale>.png` | `<flow>/<step>-<locale>` | `<block>/<name>/<step>.avif` (+ `@2x`, `.webp`) |
-| phone still | `<flow>/iphone-16/NN-<step>-<locale>.png` | `<flow>/iphone-16/<step>-<locale>` | `<block>/<name>/iphone-16/<step>.avif` |
-| tutorial | `<flow>/<flow>-<locale>.mp4` (+ `.av1.mp4`, `.poster.webp`, `.vtt`) | `<flow>/video-<locale>` | `<block>/<name>.mp4` (+ same sidecars) |
-| reel | `<flow>/<flow>-<locale>.reel.mp4` | `<flow>/reel-<locale>` | `<block>/<name>/reel.mp4` |
-| support clip / story cut | `<flow>/<flow>-<clip>-<locale>.*` | `<flow>/<clip>-<locale>` | `<block>/<name>/<clip>.mp4` |
-| block media (ad, block reel) | — | your id | `<block>/<file>.mp4` |
+| page still | `page/<slug>-<locale>.png` | `page/<slug>-<locale>` | `<locale>/<route>/page.avif` (home → `<locale>/page.avif`) |
+| flow still | `<flow>/NN-<step>-<locale>.png` | `<flow>/<step>-<locale>` | `<locale>/<route>/<step>.avif` (+ `@2x`, `.webp`) |
+| phone still | `<flow>/iphone-16/NN-<step>-<locale>.png` | `<flow>/iphone-16/<step>-<locale>` | `<locale>/<route>/iphone-16/<step>.avif` |
+| tutorial | `<flow>/<flow>-<locale>.mp4` (+ `.av1.mp4`, `.poster.webp`, `.vtt`) | `<flow>/video-<locale>` | `<locale>/<route>/video.mp4` (+ `video.av1.mp4`, `video.poster.webp`, `video.vtt`) |
+| reel | `<flow>/<flow>-<locale>.reel.mp4` | `<flow>/reel-<locale>` | `<locale>/<route>/reel.mp4` |
+| support clip / story cut | `<flow>/<flow>-<clip>-<locale>.*` | `<flow>/<clip>-<locale>` | `<locale>/<route>/<clip>.mp4` |
+| block media (ad, block reel) | — | your id | `<locale>/<route>/<file>.mp4` |
 | raw take | `<flow>/raw/<flow>[-<part>]-<locale>.mov` | — | — |
 
-- **Grouped by block, short names.** A flow's `export const cdn = "<block>/<name>"` is its home:
-  add-student → `students/add` gives `hogwarts/students/add.mp4` and `hogwarts/students/add/list.avif`;
-  bulk-student → `students/bulk`; add-teacher → `teachers/add`. Block-wide media such as
-  `hogwarts/students/marketing.mp4` or `hogwarts/students/reel.mp4` sits beside the flows.
-- **Arabic is bare, English adds `-en`** (`list.avif`, `list-en.avif`). The narrowest width is bare
-  and wider ones add `@2x` (`list.avif` 1600 px, `list@2x.avif` 2400 px).
+- **The CDN mirrors the app URL, language first.** A flow's `export const route` is its home:
+  `cdn.databayt.org/hogwarts/<locale>/<route>[/<flow>]/…`, the same shape as
+  `<school>.databayt.org/<locale>/<route>`. add-student → `students/add` gives
+  `hogwarts/ar/students/add/video.mp4` and `hogwarts/en/students/add/list.avif`; the two flows on
+  `/school/bulk` get subfolders (`school/bulk/student`, `school/bulk/teacher`). publish refuses a
+  flow module without a `route`.
+- **Every key names its language, and no key carries a hash.** The narrowest width is bare and
+  wider ones add `@2x` (`list.avif` 1600 px, `list@2x.avif` 2400 px); cache-busting is the
+  manifest's `?v=<sha8>`.
 - **Same name = overwrite.** No `-v2` / `-final`. The `NN-` order prefix stays in the local file
   and becomes the manifest entry's `order`, so the docs list stills in shot order.
 - Keys are stable: a re-render overwrites the object and invalidates CloudFront for that key;

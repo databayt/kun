@@ -83,33 +83,34 @@ cdn.databayt.org/icons/visa.svg
 cdn.databayt.org/illustrations/empty-state.svg
 cdn.databayt.org/animations/confetti.json
 
-# Product media (tier 3) — <repo>/<block>/, short stable names
-cdn.databayt.org/hogwarts/students/add.mp4
-cdn.databayt.org/hogwarts/students/add/created.avif
-cdn.databayt.org/hogwarts/students/bulk/review-en@2x.avif
-cdn.databayt.org/hogwarts/students/marketing.mp4
-cdn.databayt.org/hogwarts/story.721b10fc.mp4            # route / (the homepage)
+# Product media (tier 3) — <repo>/<lang>/<route>[/<flow>]/, fixed names, no hash
+cdn.databayt.org/hogwarts/ar/students/add/video.mp4
+cdn.databayt.org/hogwarts/ar/students/add/created.avif
+cdn.databayt.org/hogwarts/en/school/bulk/student/review@2x.avif
+cdn.databayt.org/hogwarts/ar/timetable/week.avif
+cdn.databayt.org/hogwarts/story.mp4                     # homepage loop (chrome tier, language-neutral)
 cdn.databayt.org/souq/banners/ramadan-sale.webp
 
 # Content collections (tier 4)
 cdn.databayt.org/catalog/sd/g1/math/thumbnail-md.webp
 ```
 
-### Product media is grouped by block
+### Product media mirrors the app URL
 
 Media that `/shoot`, `/record` and the sim produce is published by
 `shoot/scripts/publish.mjs` under the **repo name** (hogwarts — never a tenant
-brand like balqalam), the **block**, and the flow's short **name** — the flow's
-`export const cdn = "<block>/<name>"`:
+brand like balqalam), the **locale** and the **route** the flow films — the
+flow's `export const route`. The path is the school's own URL with the CDN host:
+`<school>.databayt.org/ar/school/bulk` → `cdn.databayt.org/hogwarts/ar/school/bulk/…`.
 
 ```
-cdn.databayt.org/<repo>/<block>/<name>.mp4                         tutorial (+ .av1.mp4 .poster.webp .vtt)
-cdn.databayt.org/<repo>/<block>/<name>/<step>[-en][@2x].<avif|webp>  stills
-cdn.databayt.org/<repo>/<block>/<name>/<clip|reel>.mp4             clips and reels
-cdn.databayt.org/<repo>/<block>/<file>.mp4                         block media (marketing, reel)
+cdn.databayt.org/<repo>/<locale>/<route>[/<flow>]/video.mp4                tutorial (+ video.av1.mp4 video.poster.webp video.vtt)
+cdn.databayt.org/<repo>/<locale>/<route>[/<flow>]/<step>[@2x].<avif|webp>  stills
+cdn.databayt.org/<repo>/<locale>/<route>[/<flow>]/<clip|reel>.mp4          clips and reels
+cdn.databayt.org/<repo>/<locale>/<route>/page.avif                         page still
 ```
 
-Arabic is bare and English adds `-en`; the narrowest width is bare and wider
+Every key names its locale and none carries a hash; the narrowest width is bare and wider
 ones add `@2x`. Keys are stable: a re-render overwrites the object (each carries
 its sha8, so unchanged bytes are skipped) and invalidates CloudFront for exactly
 that key. Objects cache an hour in browsers and a year at the edge; manifest URLs
