@@ -45,7 +45,9 @@ portals, platforms, tenders and bids stay packets Abdout submits. **Learning ado
 | 08:00–22:00 | read hotmail replies → move cards, alert | `jobs:inbox` | 0 |
 | ≥16:00 Mon–Fri | templated follow-ups day 7/14, archive day 21 | `jobs:followup --apply` | 0 |
 | Fri ≥17:00 | **week**: learn → Claude decides → adopt → report + thread in #jobs (≤3 tries) | `jobs:week` | claude -p |
+| every tick, first | **console pull**: apply what kun.databayt.org/seek queued (approve/hold/veto/move, send switch, lane pause, cap, pasted posting) | `seek:pull --apply` | 0 |
 | every tick | **discuss**: answer Abdout in #jobs, apply/revert what he asks | `jobs:discuss` | claude -p only if he wrote |
+| every tick, last | **console push**: mirror both boards, ledger (60d), week report, switches to Neon for the web console | `seek:push --apply` | 0 |
 
 **Focus mode:** `focus: {lanes, countries, until}` in `jobs/loop.config.json` — until the date, wave / send / ATS / digest touch only those lanes in those countries; other QUEUED cards wait, Abdout's APPROVED cards still go; `anywhereLanes` (e.g. AI_TRAINING) pass in any country. Lapses on its own (`inFocus()` in config.ts).
 

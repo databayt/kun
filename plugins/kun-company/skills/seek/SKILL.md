@@ -60,6 +60,7 @@ Paths resolve in `scripts/seek/lib/paths.mjs`; identity in `scripts/seek/lib/ide
 | follow up | `pnpm seek:followup --apply` | day 7 / 14, archive day 21 |
 | brief | `pnpm seek:inbox`, `pnpm seek:digest` | replies classified; interview/offer → notify + brief |
 | all of it | `pnpm seek:loop --install` | launchd every 30 min; `--status`, `--pause`, `--resume` |
+| console | `pnpm seek:pull --apply` (tick start), `pnpm seek:push --apply` (tick end) | web console at `/seek/board`: pull applies queued web commands through the loop's own tools, push mirrors board + ledger + switches to Neon under `SEEK_INSTANCE` |
 
 ## Guards — never cross them
 

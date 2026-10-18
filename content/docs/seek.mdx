@@ -86,6 +86,37 @@ packets and you send them.
 
 ---
 
+## Watch and steer it from the web
+
+The loop runs on your own machine, which a hosted website can't reach. So the loop sends its state
+up instead: at the end of every 30-minute run, `pnpm seek:push --apply` copies your board, the
+last 60 days of activity, this week's report and your switches to the database. At the start of the
+next run, `pnpm seek:pull --apply` carries out whatever you asked for on the web, before anything
+is sent. Once you're signed in, the console is at `/seek/board`.
+
+| View | What it shows | What you can do |
+|---|---|---|
+| Board | Every card, one column per stage, with a switch between jobs and funding | Open a card to see its history and links |
+| Needs me | Cards on hold, and queued cards with the time they will send | Approve, veto before sending, hold with a reason |
+| Table | All cards, filtered by lane, stage or a search | Open any card and move it to another stage |
+| Activity | What was sent, followed up, replied to or held, day by day | — |
+| Loop | Your switches, the focus, this week's report, and recent commands | Turn sending on or off, pause a lane, change the daily cap, add a posting |
+
+Everything you do here waits in a queue and runs at the next tick. A card shows **pending** until
+then. Caps and lane pauses still go through the same limits as the weekly self-tuning step, so the
+web can never set a cap above its ceiling.
+
+The public `/seek` page shows a live count for one running instance: cards in each stage, plus this
+week's sends and replies. It never shows a name, a company or a link.
+
+**Reusing it.** Every console row has an `instance` (yours is `SEEK_INSTANCE`, or your first name
+from the profile). Every board is turned into the same item shape by an adapter, and every track
+lists its own stages. Adding a new kind of opportunity needs three small pieces: an adapter in
+`src/lib/seek/adapters/`, a `stages` list on its track, and a line in `push.ts`. The views stay
+the same.
+
+---
+
 ## Guardrails
 
 - **Truth.** Every number, date and credential in a letter or CV must appear in your facts or in the
@@ -108,6 +139,9 @@ packets and you send them.
 | The job track's engine (matching, gates, cadence, reply classifier) | `src/lib/jobs/` |
 | The loop | `scripts/seek/` — paths in `lib/paths.mjs`, identity in `lib/identity.ts`, limits in `config.ts` |
 | Profile template | `scripts/seek/profile.example.json` |
+| Console: item shape, adapters, metrics, commands, public counts | `src/lib/seek/` |
+| Console: views | `src/app/[lang]/(root)/seek/(hub)/`, `src/components/root/seek/console/` |
+| Console: the bridge to your machine | `scripts/seek/push.ts`, `scripts/seek/pull.ts` |
 | Claude Code skill | `.claude/skills/seek/SKILL.md` |
 
 Our own team's instance (its board, CRM and Slack channel) is documented in [Job Engine](/en/docs/jobs).
