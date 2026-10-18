@@ -25,6 +25,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowRight, CalendarClock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -42,6 +43,15 @@ import {
   isoWeek,
   weeklyPickIndexes,
 } from "@/components/root/social/rotation";
+import { dueSlots, planFor } from "@/components/root/social/plan";
+import { MonthPlan, type PlannedSlot } from "@/components/root/social/month-plan";
+
+/** A live draft turn that answers a plan slot. */
+export interface SlotDraft {
+  id: string;
+  slot: string;
+  status: string;
+}
 
 export interface RecentAsk {
   brand: string;
@@ -58,9 +68,40 @@ const STATE_KEYS = {
   failed: "calendarStateFailed",
 } as const;
 
-export function CalendarPanel({ recent }: { recent: RecentAsk[] }) {
+/**
+ * The slot's standing: the most decided of its live turns wins — one approved
+ * turn makes the slot approved, whatever else is still in review.
+ */
+const STATE_RANK = ["consumed", "answered", "pending", "failed", "dismissed"];
+
+export function CalendarPanel({
+  recent,
+  slotDrafts,
+}: {
+  recent: RecentAsk[];
+  slotDrafts: SlotDraft[];
+}) {
   const { lang, t, product } = useSocial();
+  const router = useRouter();
   const week = isoWeek(new Date());
+
+  // The dated plan, when the brand has one — each slot joined to its draft.
+  const planned: PlannedSlot[] = useMemo(() => {
+    const best = new Map<string, SlotDraft>();
+    for (const d of slotDrafts) {
+      const held = best.get(d.slot);
+      if (
+        !held ||
+        STATE_RANK.indexOf(d.status) < STATE_RANK.indexOf(held.status)
+      ) {
+        best.set(d.slot, d);
+      }
+    }
+    return planFor(product).map((s) => {
+      const d = best.get(s.key);
+      return { ...s, draftId: d?.id ?? null, state: d?.status ?? null };
+    });
+  }, [product, slotDrafts]);
 
   const [queueing, setQueueing] = useState<string | null>(null);
   // Optimistic queue state for briefs asked from either surface — the server
@@ -76,6 +117,28 @@ export function CalendarPanel({ recent }: { recent: RecentAsk[] }) {
    * same three lines. One plan, one reader.
    */
   const rows: CalendarRow[] = useMemo(() => {
+    // A dated plan answers the box with what is due: overdue and this week's
+    // slots, each pressed straight into the Draft stage on its concept.
+    if (planned.length > 0) {
+      const due = new Set(dueSlots(product).map((s) => s.key));
+      const weekStart = new Date();
+      weekStart.setUTCDate(weekStart.getUTCDate() - ((weekStart.getUTCDay() + 6) % 7));
+      const thisWeek = weekStart.toISOString().slice(0, 10);
+      return planned
+        .filter((s) => due.has(s.key))
+        .map((s) => ({
+          id: s.key,
+          pillar: `${s.kind} · ${s.feature}`,
+          brief: s.angle,
+          isPick: s.date >= thisWeek,
+          state: s.state,
+          opensStage:
+            s.state === null ||
+            s.state === "answered" ||
+            s.state === "dismissed" ||
+            s.state === "failed",
+        }));
+    }
     const briefs = pillarsFor(product);
     const picks = new Set(weeklyPickIndexes(briefs.length, week, SEED_COUNT));
     return briefs.map((brief, index) => ({
@@ -90,7 +153,7 @@ export function CalendarPanel({ recent }: { recent: RecentAsk[] }) {
           ?.status ??
         null,
     }));
-  }, [product, week, recent, justQueued]);
+  }, [product, week, recent, justQueued, planned]);
 
   const stateLabel = (status: string) => {
     const key = STATE_KEYS[status as keyof typeof STATE_KEYS];
@@ -98,6 +161,17 @@ export function CalendarPanel({ recent }: { recent: RecentAsk[] }) {
   };
 
   const queueNow = async (row: CalendarRow) => {
+    // A plan slot is written, not blindly queued: the Draft stage shows its
+    // concept first, then kicks the AI off from it.
+    const slot = planned.find((s) => s.key === row.id);
+    if (slot) {
+      router.push(
+        slot.draftId && slot.state === "answered"
+          ? `/${lang}/social/publish?draft=${slot.draftId}`
+          : `/${lang}/social/draft?slot=${encodeURIComponent(slot.key)}`,
+      );
+      return;
+    }
     if (row.state !== null || queueing !== null) return;
     setQueueing(row.id);
     setError(null);
@@ -122,17 +196,27 @@ export function CalendarPanel({ recent }: { recent: RecentAsk[] }) {
   // screen the box holds, and a press down here releases the stage's lock.
   const below = (
     <section className="full-bleed from-background to-muted/20 flex flex-col bg-gradient-to-b pb-16 md:pb-24">
-      <div className="mx-auto flex w-full max-w-4xl flex-col px-4">
+      <div
+        className={cn(
+          "mx-auto flex w-full flex-col px-4",
+          planned.length > 0 ? "max-w-6xl" : "max-w-4xl",
+        )}
+      >
         <div className="mb-8 text-center">
           <h3 className="text-primary text-base font-medium">
-            {t.calendarTitle}
+            {planned.length > 0 ? t.calendarMonthTitle : t.calendarTitle}
           </h3>
           <p className="text-muted-foreground mx-auto mt-3 max-w-xl text-sm leading-relaxed font-light">
-            {t.calendarIntro}
+            {planned.length > 0 ? t.calendarMonthIntro : t.calendarIntro}
           </p>
         </div>
 
-        <div className="mx-auto mb-4 flex w-full max-w-3xl flex-wrap items-center gap-2">
+        <div
+          className={cn(
+            "mx-auto mb-4 flex w-full max-w-3xl flex-wrap items-center gap-2",
+            planned.length > 0 && "hidden",
+          )}
+        >
           <span className="bg-muted flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium">
             <CalendarClock className="size-3.5" />
             {fill(t.calendarWeek, { week })}
@@ -142,7 +226,14 @@ export function CalendarPanel({ recent }: { recent: RecentAsk[] }) {
           </span>
         </div>
 
-        {rows.length > 0 ? (
+        {planned.length > 0 ? (
+          <MonthPlan
+            slots={planned}
+            lang={lang}
+            t={t}
+            stateLabel={stateLabel}
+          />
+        ) : rows.length > 0 ? (
           <ul className="mx-auto w-full max-w-3xl space-y-2">
             {rows.map((row) => (
               <li

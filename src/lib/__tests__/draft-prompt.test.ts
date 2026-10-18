@@ -19,6 +19,8 @@ interface MirrorInput {
   scenes?: string;
   lessons?: string;
   violations?: string;
+  voice?: string;
+  concept?: string;
 }
 
 const CASES: Array<[string, MirrorInput]> = [
@@ -49,6 +51,15 @@ const CASES: Array<[string, MirrorInput]> = [
       brief: "كشف الدرجات",
       scenes: "- آخر الفصل، طابور أولياء الأمور عند مكتب الإدارة",
       lessons: "hook 3×, two-posts 1×",
+    },
+  ],
+  [
+    "voice and concept ride along",
+    {
+      brand: "balqalam",
+      brief: "منشور عن الحضور",
+      voice: "- Intelligent, direct, calm.",
+      concept: "Feature: Attendance\nIn one line: Teachers take the register on their phone.",
     },
   ],
   [

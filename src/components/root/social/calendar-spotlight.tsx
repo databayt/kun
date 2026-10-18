@@ -55,6 +55,12 @@ export interface CalendarRow {
   isPick: boolean;
   /** pending · answered · consumed · dismissed · failed, or not asked yet. */
   state: string | null;
+  /**
+   * A dated-plan slot: pressing it opens a stage (Draft on its concept, or
+   * Publish on its answered draft) instead of filing an ask, so an asked slot
+   * stays pressable.
+   */
+  opensStage?: boolean;
 }
 
 export function CalendarSpotlight({
@@ -249,7 +255,7 @@ export function CalendarSpotlight({
                   // by someone pressing this row a second ago. Either way the
                   // row reports rather than offers: filing it twice is what
                   // the dedup window exists to prevent.
-                  const asked = row.state !== null;
+                  const asked = row.state !== null && !row.opensStage;
                   const busy = queueing === row.id;
                   return (
                     <button

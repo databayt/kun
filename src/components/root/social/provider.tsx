@@ -222,6 +222,13 @@ interface SocialContextValue {
   feature: string;
   setFeature: (next: string) => void;
   brandFeatures: BrandFeature[];
+  /**
+   * The calendar slot being written (`<brand>#NNN`), or null for an ad-hoc
+   * post. Set by the Calendar's "Write it"; rides every ask so the draft
+   * lands linked to its slot.
+   */
+  planSlot: string | null;
+  setPlanSlot: (next: string | null) => void;
   postType: PostType;
   setPostType: (next: PostType) => void;
   mediaFilter: MediaFilter;
@@ -337,6 +344,11 @@ export function SocialProvider({
       setFeature(ANY_FEATURE);
     }
   }, [brandFeatures, feature, setFeature]);
+  // A slot belongs to one brand; switching brand ends the slot.
+  const [planSlot, setPlanSlot] = useState<string | null>(null);
+  useEffect(() => {
+    if (planSlot && !planSlot.startsWith(`${product}#`)) setPlanSlot(null);
+  }, [product, planSlot]);
   const [status, setStatus] = useState<EgressStatus | null>(null);
   const [checking, setChecking] = useState(true);
   const [composerText, setComposerText] = useState("");
@@ -482,7 +494,9 @@ export function SocialProvider({
   const [brandMedia, setBrandMedia] = useState<BrandMedia[]>([]);
   useEffect(() => {
     let cancelled = false;
-    listBrandMedia(product)
+    // The feature narrows and ranks it: the media made for this feature
+    // first, then brand-wide assets that fit any post.
+    listBrandMedia(product, feature)
       .then((res) => {
         if (!cancelled) setBrandMedia(res.ok ? (res.media ?? []) : []);
       })
@@ -492,7 +506,7 @@ export function SocialProvider({
     return () => {
       cancelled = true;
     };
-  }, [product]);
+  }, [product, feature]);
 
   const [draftError, setDraftError] = useState<string | null>(null);
   const [requestId, setRequestId] = useState<string | null>(null);
@@ -654,6 +668,13 @@ export function SocialProvider({
               angle: angle ?? undefined,
               register: register ?? undefined,
               referenceId: referenceId ?? undefined,
+              // The settings row's picks — the Draft box offered them and
+              // they used to go nowhere. The feature's concept note and the
+              // slot's direction ride into the prompt server-side.
+              slot: planSlot ?? undefined,
+              feature: feature !== ANY_FEATURE ? feature : undefined,
+              channel: selectedChannels[0],
+              shape: postType,
             });
         if (res.ok && res.id) {
           setRequestId(res.id);
@@ -678,6 +699,10 @@ export function SocialProvider({
       angle,
       register,
       referenceId,
+      planSlot,
+      feature,
+      selectedChannels,
+      postType,
     ],
   );
 
@@ -815,6 +840,8 @@ export function SocialProvider({
     feature,
     setFeature,
     brandFeatures,
+    planSlot,
+    setPlanSlot,
     postType,
     setPostType,
     mediaFilter,

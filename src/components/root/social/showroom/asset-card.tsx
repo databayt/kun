@@ -19,6 +19,7 @@ import { ILLUSTRATION_COLORS } from "@/components/root/anthropic/data";
 import { useSocial } from "@/components/root/social/provider";
 import { typeLabel } from "./taxonomy";
 import type { ShowroomAsset } from "./data";
+import { MediaThumb } from "@/components/root/social/media-thumb";
 
 export function ShowroomCard({
   asset,
@@ -85,12 +86,10 @@ export function ShowroomCard({
         style={{ backgroundColor: asset.imageUrl ? undefined : bg }}
       >
         {asset.imageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <MediaThumb
             src={asset.imageUrl}
             alt={asset.title}
             className="max-h-full max-w-full object-contain"
-            loading="lazy"
           />
         ) : (
           <>
@@ -111,10 +110,10 @@ export function ShowroomCard({
             style={{ backgroundColor: asset.imageUrl ? undefined : bg }}
           >
             {asset.imageUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <MediaThumb
                 src={asset.imageUrl}
                 alt={asset.title}
+                lazy={false}
                 className="max-h-[240px] max-w-full object-contain"
               />
             ) : (

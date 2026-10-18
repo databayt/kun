@@ -11,6 +11,7 @@
 // library. When it is fixed this is the one line that changes.
 
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 const BUCKET = "hogwarts-databayt";
 const PREFIX = "media";
@@ -42,6 +43,52 @@ export function isStorageConfigured(): boolean {
   return client() !== null;
 }
 
+function mediaKey(brand: string, id: string, filename: string): string {
+  const safe = filename
+    .toLowerCase()
+    .replace(/[^a-z0-9.-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(-64);
+  return `${PREFIX}/${brand}/${id}-${safe}`;
+}
+
+/**
+ * A short-lived PUT URL the browser uploads to directly. Videos are far past
+ * the 4MB server-action body limit, and streaming hundreds of megabytes
+ * through a Worker to S3 would spend its CPU budget on copying bytes. The
+ * signature pins the key and the content type; the bucket's CORS rule must
+ * allow PUT from the Hub's origin.
+ */
+export async function presignMediaPut(
+  brand: string,
+  id: string,
+  filename: string,
+  contentType: string,
+  expiresInSeconds = 600,
+): Promise<StoredObject & { uploadUrl: string }> {
+  const s3 = client();
+  if (!s3) throw new Error("Object storage is not configured on this machine.");
+  const key = mediaKey(brand, id, filename);
+  const uploadUrl = await getSignedUrl(
+    s3,
+    new PutObjectCommand({
+      Bucket: BUCKET,
+      Key: key,
+      ContentType: contentType,
+      CacheControl: "public, max-age=31536000, immutable",
+    }),
+    { expiresIn: expiresInSeconds },
+  );
+  return { key, url: `${ORIGIN}/${key}`, uploadUrl };
+}
+
+/** The public URL for a key this module minted — for confirming an upload. */
+export function mediaUrlFor(key: string): string | null {
+  return key.startsWith(`${PREFIX}/`) && !key.includes("..")
+    ? `${ORIGIN}/${key}`
+    : null;
+}
+
 /**
  * Key layout mirrors the library's: media/<brand>/<id>-<slug>.<ext>. The id
  * prefix is what keeps two people uploading "hero.png" on the same day from
@@ -57,12 +104,7 @@ export async function putMedia(
   const s3 = client();
   if (!s3) throw new Error("Object storage is not configured on this machine.");
 
-  const safe = filename
-    .toLowerCase()
-    .replace(/[^a-z0-9.-]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(-64);
-  const key = `${PREFIX}/${brand}/${id}-${safe}`;
+  const key = mediaKey(brand, id, filename);
 
   await s3.send(
     new PutObjectCommand({

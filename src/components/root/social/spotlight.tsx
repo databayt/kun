@@ -160,6 +160,7 @@ import {
 } from "@/components/root/social/products";
 import { fill, type SocialDict } from "@/components/root/social/dictionary";
 import { useSocial, usePersisted } from "@/components/root/social/provider";
+import { MediaThumb } from "@/components/root/social/media-thumb";
 import {
   GLASS,
   SPOTLIGHT_BAR,
@@ -3569,19 +3570,11 @@ export function MediaPanel({
         <div className="mb-4 flex flex-wrap items-center gap-2">
           {urls.map((url) => (
             <div key={url} className="group/chip relative">
-              {mediaKind(url) === "image" ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={url}
-                  alt=""
-                  loading="lazy"
-                  className="border-border size-16 rounded-xl border object-cover"
-                />
-              ) : (
-                <span className="border-border bg-muted-foreground/10 flex size-16 items-center justify-center rounded-xl border font-mono text-[10px] tracking-wider uppercase">
-                  {t.mediaKindVideo}
-                </span>
-              )}
+              <MediaThumb
+                src={url}
+                alt={mediaKind(url) === "video" ? t.mediaKindVideo : ""}
+                className="border-border size-16 rounded-xl border object-cover"
+              />
               <button
                 type="button"
                 onMouseDown={(e) => e.preventDefault()}
@@ -3612,13 +3605,7 @@ export function MediaPanel({
                 aria-label={fill(t.attachNamed, { name: asset.title })}
                 className="border-border hover:border-foreground/40 focus-visible:border-foreground/40 size-16 shrink-0 overflow-hidden rounded-xl border transition-colors"
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={asset.url}
-                  alt=""
-                  loading="lazy"
-                  className="size-full object-cover"
-                />
+                <MediaThumb src={asset.url} className="size-full object-cover" />
               </button>
             ))}
           </div>

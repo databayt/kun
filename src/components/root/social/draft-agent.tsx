@@ -14,36 +14,21 @@
 // describes the real queue rather than performing invented thinking, and the
 // "Thought for 3 seconds" of the original is a genuine measured wait here.
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AIResponseDisplay } from "@/components/atom/ai-response-display";
 import { Button } from "@/components/ui/button";
 import { fill } from "@/components/root/social/dictionary";
-import {
-  type DraftAngleId,
-  type DraftModelId,
-  type DraftRegisterId,
-} from "@/components/root/social/knobs";
+import { ConceptCard } from "@/components/root/social/concept-card";
 import { DraftSpotlight } from "@/components/root/social/draft-spotlight";
-import { PRODUCTS } from "@/components/root/social/products";
+import { MediaThumb } from "@/components/root/social/media-thumb";
+import { PRODUCT_IDS, PRODUCTS, type ProductId } from "@/components/root/social/products";
 import { StageFrame } from "@/components/root/social/stage";
 import { useSocial } from "@/components/root/social/provider";
-import { mediaKind } from "@/lib/media-kind";
 import { cn } from "@/lib/utils";
 
 const RESPONSE_CONTAINER_ID = "ai-response-container";
 
-/** The select's "unset" option — Radix rejects an empty string as a value. */
-
-/**
- * One pill shape for every knob in the toolbar. Extracted because four selects
- * repeating the same twelve utilities is where they start to drift apart, and a
- * toolbar whose controls are almost-but-not-quite the same height is the kind
- * of thing nobody reports and everybody sees.
- */
-const KNOB_TRIGGER =
-  "border-input bg-muted text-muted-foreground hover:text-foreground hover:bg-accent inline-flex h-8 items-center justify-center gap-1.5 rounded-full border px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors duration-100 ease-in-out hover:border-transparent";
-
-export function DraftAgent() {
+export function DraftAgent({ initialSlot }: { initialSlot?: string }) {
   // The conversation — brief, queue poll, answer, reveal — is provider state,
   // so it survives leaving this page the way the old hidden panel survived a
   // tab switch. Only presentation state stays here.
@@ -51,9 +36,22 @@ export function DraftAgent() {
     isRTL,
     t,
     product,
+    setProduct,
+    setPlanSlot,
     handToComposer,
     draftQueue,
   } = useSocial();
+
+  // Arrived from the Calendar's "Write it": the slot names its brand, and the
+  // concept card above the box reads from it.
+  useEffect(() => {
+    if (!initialSlot) return;
+    const brand = initialSlot.split("#")[0];
+    if ((PRODUCT_IDS as readonly string[]).includes(brand)) {
+      setProduct(brand as ProductId);
+      setPlanSlot(initialSlot);
+    }
+  }, [initialSlot, setProduct, setPlanSlot]);
   const {
     prompt,
     setPrompt,
@@ -128,6 +126,8 @@ export function DraftAgent() {
               take. Its ⊕ is the same shared tray the pill's attach menu
               filled, its seat is the same `submit`, and its empty seat opens
               the same three knobs the pill carried as selects. */}
+          <ConceptCard />
+
           <DraftSpotlight
             onEngagedChange={(engaged) => {
               onEngagedChange(engaged);
@@ -235,25 +235,13 @@ export function DraftAgent() {
                 {t.agentDraftMedia}
               </p>
               <div className="flex flex-wrap gap-2">
-                {draft.mediaUrls.map((url) =>
-                  mediaKind(url) === "image" ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      key={url}
-                      src={url}
-                      alt=""
-                      loading="lazy"
-                      className="border-border h-16 w-16 rounded-xl border object-cover"
-                    />
-                  ) : (
-                    <span
-                      key={url}
-                      className="border-border bg-muted flex h-16 w-16 items-center justify-center rounded-xl border font-mono text-[10px] tracking-wider uppercase"
-                    >
-                      {t.mediaKindVideo}
-                    </span>
-                  ),
-                )}
+                {draft.mediaUrls.map((url) => (
+                  <MediaThumb
+                    key={url}
+                    src={url}
+                    className="border-border h-16 w-16 rounded-xl border object-cover"
+                  />
+                ))}
               </div>
             </div>
           )}

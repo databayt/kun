@@ -36,6 +36,7 @@ import {
 import { mediaKind } from "@/lib/media-kind";
 import { useSocial } from "@/components/root/social/provider";
 import { StageFrame } from "@/components/root/social/stage";
+import { MediaThumb } from "@/components/root/social/media-thumb";
 
 /**
  * One library row, narrowed to what a search result draws.
@@ -240,11 +241,8 @@ export function MediaSpotlight({
                         attached ? "bg-accent" : "hover:bg-muted",
                       )}
                     >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
+                      <MediaThumb
                         src={asset.url}
-                        alt=""
-                        loading="lazy"
                         className="bg-muted size-10 shrink-0 rounded-md object-cover"
                       />
                       <span className="min-w-0 flex-1">

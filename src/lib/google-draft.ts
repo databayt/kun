@@ -6,6 +6,7 @@ import {
   GEMINI_DRAFT_MODEL,
   scenesFor,
 } from "@/lib/draft-prompt";
+import { conceptPromptNote, voiceFor } from "@/lib/social-concept";
 
 // The model id, the refusal marker, and the prompt live in the mirror pair
 // src/lib/draft-prompt.ts ⇄ scripts/lib/draft-prompt.mjs (parity-pinned by
@@ -42,6 +43,10 @@ export interface GoogleDraftParams {
   instruction?: string;
   angle?: string;
   register?: number;
+  /** Feature id — its concept note is the prompt's source of product facts. */
+  feature?: string;
+  /** Calendar slot key — the slot's angle, persona and guide. */
+  slot?: string;
   /** Aggregated dismiss reasons for this brand, e.g. "hook 3×, two-posts 1×". */
   lessons?: string;
   /**
@@ -78,6 +83,8 @@ export async function draftWithGeminiFree(
     scenes: scenesFor(params.product),
     lessons: params.lessons,
     violations: params.violations,
+    voice: voiceFor(params.product),
+    concept: conceptPromptNote(params.product, params.feature, params.slot),
   });
 
   try {

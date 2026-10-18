@@ -126,6 +126,7 @@ if (command === "list") {
     SELECT r."id", r."brand", r."brief", r."requestedBy", r."createdAt",
            r."mediaUrls", r."turn", r."instruction",
            r."model", r."angle", r."register", r."note",
+           r."slot", r."feature", r."channel", r."shape",
            p."ar" AS "parentAr", p."en" AS "parentEn",
            ref."ar" AS "referenceAr"
     FROM "SocialDraftRequest" r
@@ -160,6 +161,10 @@ if (command === "list") {
           brief: r.brief,
           requestedBy: r.requestedBy,
           mediaUrls: r.mediaUrls ?? [],
+          ...(r.slot && { slot: r.slot }),
+          ...(r.feature && { feature: r.feature }),
+          ...(r.channel && { channel: r.channel }),
+          ...(r.shape && { shape: r.shape }),
           waitingMinutes: Math.round(
             (Date.now() - new Date(r.createdAt).getTime()) / 60000,
           ),

@@ -11,6 +11,7 @@ import {
   type AssetType,
   type ShowroomType,
 } from "./taxonomy";
+import { mediaKind } from "@/lib/media-kind";
 
 export interface ShowroomAsset {
   id: string;
@@ -38,6 +39,14 @@ export interface ShowroomAsset {
   ratio: string | null;
   credits: number | null;
   createdAt: string | null;
+  /** Feature id the asset shows; null for a brand-wide asset. */
+  feature: string | null;
+  /** What the bytes are — a video tile plays, an image tile shows. */
+  mediaKind: "image" | "video";
+}
+
+function mediaKindOf(url: string | null | undefined): "image" | "video" {
+  return url ? mediaKind(url) : "image";
 }
 
 function asShowroomType(value: string | null | undefined): ShowroomType {
@@ -92,10 +101,16 @@ export function briefAsAsset(brief: {
   brand: string;
   assetType: string;
   subject: string;
+  prompt: string;
   size: string;
   renderedUrl: string | null;
+  feature: string | null;
+  kind: string;
   createdAt: string;
 }): ShowroomAsset {
+  // No compiled prompt means the media team uploaded finished work rather
+  // than rendering a brief.
+  const uploaded = !brief.prompt;
   return {
     id: brief.id,
     kind: "generated",
@@ -105,12 +120,14 @@ export function briefAsAsset(brief: {
     brand: brief.brand,
     type: asShowroomType(brief.assetType),
     collection: null,
-    source: "chatgpt",
+    source: uploaded ? "upload" : "chatgpt",
     note: brief.subject,
-    model: "gpt-image-2",
-    ratio: brief.size,
+    model: uploaded ? null : "gpt-image-2",
+    ratio: brief.size || null,
     credits: null,
     createdAt: brief.createdAt,
+    feature: brief.feature,
+    mediaKind: brief.kind === "video" ? "video" : mediaKindOf(brief.renderedUrl),
   };
 }
 
@@ -136,6 +153,8 @@ export function getShowroomData(extra: ShowroomAsset[] = []): ShowroomData {
       ratio: a.ratio,
       credits: a.credits,
       createdAt: a.createdAt,
+      feature: null,
+      mediaKind: mediaKindOf(a.cdnUrl),
     }));
 
   const refs: ShowroomAsset[] = (references.references as ReferenceCard[]).map(
@@ -154,6 +173,8 @@ export function getShowroomData(extra: ShowroomAsset[] = []): ShowroomData {
       ratio: null,
       credits: null,
       createdAt: null,
+      feature: null,
+      mediaKind: "image" as const,
     }),
   );
 

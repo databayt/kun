@@ -93,7 +93,7 @@ export const BRAND_CONTEXTS = {
 /**
  * Build the drafting prompt for one ask.
  *
- * input: { brand, brief, instruction?, angle?, register?, scenes?, lessons?,
+ * input: { brand, brief, instruction?, angle?, register?, scenes?, lessons?, voice?, concept?,
  * violations? } — all strings except register (number). Absent sections are
  * omitted entirely rather than rendered empty, so an ask with no direction
  * LOOKS like an ask with no direction.
@@ -106,6 +106,10 @@ export function buildDraftPrompt(input) {
     "You are Databayt's lead social media writer for MENA.",
     `Product: ${brandContext}`,
   ];
+
+  if (input.voice) {
+    lines.push("", "Brand voice (from the brand's own page):", input.voice);
+  }
 
   if (input.scenes) {
     lines.push(
@@ -128,6 +132,15 @@ export function buildDraftPrompt(input) {
     "",
     `User Brief: ${input.brief}`,
   );
+
+  if (input.concept) {
+    lines.push(
+      "",
+      "What the post is about — the only source of product facts; never claim anything it does not say:",
+      input.concept,
+      "",
+    );
+  }
 
   if (input.instruction) {
     lines.push(`Refinement Instruction: ${input.instruction}`);

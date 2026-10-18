@@ -118,6 +118,13 @@ export interface DraftPromptInput {
   lessons?: string;
   /** Named craft failures from the attempt this retry corrects. */
   violations?: string;
+  /** The brand's voice rules — static per brand, so it sits in the prefix. */
+  voice?: string;
+  /**
+   * The feature's concept note and the calendar slot's direction — what the
+   * post is about. Per-ask, so it sits after the brief.
+   */
+  concept?: string;
 }
 
 /**
@@ -133,6 +140,10 @@ export function buildDraftPrompt(input: DraftPromptInput): string {
     "You are Databayt's lead social media writer for MENA.",
     `Product: ${brandContext}`,
   ];
+
+  if (input.voice) {
+    lines.push("", "Brand voice (from the brand's own page):", input.voice);
+  }
 
   if (input.scenes) {
     lines.push(
@@ -155,6 +166,15 @@ export function buildDraftPrompt(input: DraftPromptInput): string {
     "",
     `User Brief: ${input.brief}`,
   );
+
+  if (input.concept) {
+    lines.push(
+      "",
+      "What the post is about — the only source of product facts; never claim anything it does not say:",
+      input.concept,
+      "",
+    );
+  }
 
   if (input.instruction) {
     lines.push(`Refinement Instruction: ${input.instruction}`);

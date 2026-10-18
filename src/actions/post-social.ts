@@ -8,20 +8,31 @@ import { deliverPost, type ChannelOutcome } from "@/lib/social-publish";
 import { getEgressStatus, type EgressStatus } from "@/lib/social-status";
 import { sendReview } from "@/lib/social-review";
 import { createApprovalToken } from "@/lib/social-token";
-import { isStorageConfigured, putMedia } from "@/lib/s3";
+import {
+  isStorageConfigured,
+  mediaUrlFor,
+  presignMediaPut,
+  putMedia,
+} from "@/lib/s3";
 import {
   dismissBrief,
   fileBrief,
+  listRenderedBriefs,
   markRendered,
+  recordUpload,
   type BriefRow,
 } from "@/lib/social-media-brief";
 import { db } from "@/lib/db";
-import { getShowroomData } from "@/components/root/social/showroom/data";
+import {
+  briefAsAsset,
+  getShowroomData,
+} from "@/components/root/social/showroom/data";
 import {
   CHANNELS,
   DISTRIBUTION_CHANNEL_IDS,
 } from "@/components/root/social/config";
 import { type MediaStudioRatio } from "@/lib/brand-kit";
+import { ASSET_TYPES } from "@/components/root/social/showroom/taxonomy";
 import {
   PRODUCT_IDS,
   productChannelWired,
@@ -37,6 +48,8 @@ import {
 } from "@/lib/google-draft";
 import { checkCraft, craftFailures, type CraftFinding } from "@/lib/craft";
 import { allowInlineDraft, getClientIp } from "@/lib/rate-limit";
+import { conceptFor, type Concept } from "@/lib/social-concept";
+import { findSlot, type PlanSlot } from "@/components/root/social/plan";
 
 // Long enough for a human to see it in the morning, short enough that a
 // leaked link goes stale before it is useful. Matches the cron.
@@ -179,6 +192,16 @@ const draftCopySchema = draftKnobsSchema.extend({
     .array(httpsUrl)
     .max(10, "At most 10 media items per draft.")
     .optional(),
+  // The plan — what the draft is FOR. The Calendar and Draft stages send the
+  // slot and feature; the Draft box's Channels and Post shape used to be
+  // decoration because nothing carried them.
+  slot: z
+    .string()
+    .regex(/^[a-z]+#\d{3}$/, "Unknown calendar slot.")
+    .optional(),
+  feature: z.string().trim().max(60).optional(),
+  channel: z.string().trim().max(40).optional(),
+  shape: z.string().trim().max(40).optional(),
 });
 
 export interface DraftRequestResult {
@@ -305,6 +328,10 @@ async function draftInlineGated(params: {
   instruction?: string;
   angle?: string;
   register?: number;
+  /** Feature id — its concept note rides into the prompt. */
+  feature?: string;
+  /** Calendar slot key — its angle, persona and guide ride into the prompt. */
+  slot?: string;
   /** Every text a number may legitimately come from — see CraftInput. */
   allowedFrom: string;
 }): Promise<InlineDraftOutcome> {
@@ -388,6 +415,8 @@ export async function requestSocialDraft(
         brief: parsed.data.brief,
         angle: parsed.data.angle,
         register: parsed.data.register,
+        feature: parsed.data.feature,
+        slot: parsed.data.slot,
         // A root ask has no thread yet — the brief is the whole allowance.
         allowedFrom: parsed.data.brief,
       });
@@ -403,6 +432,13 @@ export async function requestSocialDraft(
         model: parsed.data.model,
         angle: parsed.data.angle,
         register: parsed.data.register,
+        slot: parsed.data.slot,
+        // A slot implies its feature; an explicit pick wins.
+        feature:
+          parsed.data.feature ??
+          (parsed.data.slot ? findSlot(parsed.data.slot)?.feature : undefined),
+        channel: parsed.data.channel,
+        shape: parsed.data.shape,
         referenceId: await resolveReference(
           parsed.data.referenceId,
           parsed.data.product,
@@ -485,6 +521,10 @@ export async function refineSocialDraft(
       angle: true,
       register: true,
       referenceId: true,
+      slot: true,
+      feature: true,
+      channel: true,
+      shape: true,
       // The craft gate's allowance: a number the parent draft already carries
       // (or the reviewer's own instruction asks for) stays legal on the child —
       // same construction as `answer`'s in social-drafts.mjs.
@@ -539,6 +579,8 @@ export async function refineSocialDraft(
         instruction: parsed.data.instruction,
         angle: chosenAngle,
         register: chosenRegister,
+        feature: parent.feature ?? undefined,
+        slot: parent.slot ?? undefined,
         allowedFrom: [
           parent.brief,
           parsed.data.instruction,
@@ -564,6 +606,10 @@ export async function refineSocialDraft(
         angle: chosenAngle,
         register: chosenRegister,
         referenceId: parent.referenceId,
+        slot: parent.slot,
+        feature: parent.feature,
+        channel: parent.channel,
+        shape: parent.shape,
         status: instantResult ? "answered" : "pending",
         ar: instantResult?.ar ?? null,
         en: instantResult?.en ?? null,
@@ -1141,6 +1187,8 @@ export interface BrandMedia {
    * two that drift.
    */
   type: string;
+  /** Feature id the asset shows; null for a brand-wide asset. */
+  feature: string | null;
 }
 
 /**
@@ -1154,6 +1202,7 @@ export interface BrandMedia {
  */
 export async function listBrandMedia(
   brand: unknown,
+  feature?: unknown,
 ): Promise<{ ok: boolean; media?: BrandMedia[]; error?: string }> {
   if (!(await requireContributor())) {
     return { ok: false, error: "Forbidden: contributors only." };
@@ -1165,21 +1214,37 @@ export async function listBrandMedia(
     return { ok: false, error: "Unknown product." };
   }
 
+  const wanted =
+    typeof feature === "string" && feature && feature !== "any"
+      ? feature
+      : null;
+
   try {
-    const { assets } = getShowroomData();
+    // The library file plus everything the media team rendered or uploaded —
+    // reading only library.json meant an upload never reached a post.
+    const rendered = await listRenderedBriefs();
+    const { assets } = getShowroomData(rendered.map(briefAsAsset));
+    const mine = assets.filter(
+      (a) => a.kind === "generated" && a.brand === brand && a.imageUrl,
+    );
+    // With a feature picked: assets made for it first, then brand-wide ones
+    // that fit any post. Assets tagged for a DIFFERENT feature drop out — an
+    // attendance screenshot is the wrong picture for an admission post.
+    const ranked = wanted
+      ? [
+          ...mine.filter((a) => a.feature === wanted),
+          ...mine.filter((a) => a.feature === null),
+        ]
+      : mine;
     return {
       ok: true,
-      media: assets
-        .filter(
-          (a) => a.kind === "generated" && a.brand === brand && a.imageUrl,
-        )
-        .slice(0, 24)
-        .map((a) => ({
-          id: a.id,
-          title: a.title,
-          url: a.imageUrl as string,
-          type: a.type,
-        })),
+      media: ranked.slice(0, 24).map((a) => ({
+        id: a.id,
+        title: a.title,
+        url: a.imageUrl as string,
+        type: a.type,
+        feature: a.feature,
+      })),
     };
   } catch (err: unknown) {
     return {
@@ -1582,4 +1647,202 @@ export async function generateStudioImage(
   }
 
   return generateStudioImageCore(input);
+}
+
+export interface ConceptReadResult {
+  ok: boolean;
+  /** The calendar slot, when one was asked for and exists. */
+  slot?: PlanSlot;
+  /** The feature's concept note, when the brand has one for it. */
+  concept?: Concept;
+  error?: string;
+}
+
+/**
+ * The Draft stage's concept card: what a writer reads before writing. Either
+ * key may be absent — a slot implies its feature, a feature alone is an
+ * ad-hoc post about it.
+ */
+export async function readConcept(input: {
+  product: string;
+  feature?: string;
+  slot?: string;
+}): Promise<ConceptReadResult> {
+  if (!(await requireContributor())) {
+    return { ok: false, error: "Forbidden: contributors only." };
+  }
+  const slot = input.slot ? findSlot(input.slot) : null;
+  if (slot && !slot.key.startsWith(`${input.product}#`)) {
+    return { ok: false, error: "That slot belongs to another brand." };
+  }
+  const concept = conceptFor(input.product, input.feature || slot?.feature);
+  return {
+    ok: true,
+    ...(slot && { slot }),
+    ...(concept && { concept }),
+  };
+}
+
+// ── Free-standing uploads ───────────────────────────────────────────────────
+//
+// The media team's own lane: finished images and videos put on the shelf for
+// a brand (and optionally a feature), waiting for a post — no brief first.
+// Images ride the server action (≤4MB, the body limit); videos go browser →
+// S3 on a presigned PUT and are recorded after the bytes land.
+
+const MAX_VIDEO_BYTES = 200 * 1024 * 1024;
+const VIDEO_TYPES = ["video/mp4", "video/webm", "video/quicktime"];
+const VIDEO_EXT: Record<string, string> = {
+  "video/mp4": "mp4",
+  "video/webm": "webm",
+  "video/quicktime": "mov",
+};
+
+const uploadMetaSchema = z.object({
+  product: z.enum(PRODUCT_IDS, { message: "Unknown product." }),
+  feature: z
+    .string()
+    .regex(/^[a-z0-9-]{1,40}$/, "Unknown feature.")
+    .nullable()
+    .optional(),
+  caption: z
+    .string()
+    .trim()
+    .min(2, "Say in a few words what it shows.")
+    .max(200, "Keep the caption under 200 characters."),
+  assetType: z.enum(ASSET_TYPES).optional(),
+});
+
+function uploadId(): string {
+  return `u${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+}
+
+export async function uploadMedia(
+  form: FormData,
+): Promise<{ ok: boolean; error?: string; url?: string }> {
+  const session = await auth();
+  const email = session?.user?.email ?? "contributor";
+  if (!(await requireContributor())) {
+    return { ok: false, error: "Forbidden: contributors only." };
+  }
+  const meta = uploadMetaSchema.safeParse({
+    product: form.get("product"),
+    feature: form.get("feature") || null,
+    caption: form.get("caption"),
+    assetType: form.get("assetType") || undefined,
+  });
+  if (!meta.success) {
+    return { ok: false, error: meta.error.issues[0]?.message ?? "Invalid upload." };
+  }
+  const file = form.get("file");
+  if (!(file instanceof File) || file.size === 0) {
+    return { ok: false, error: "No image attached." };
+  }
+  if (!RENDER_TYPES.includes(file.type)) {
+    return { ok: false, error: `Unsupported image type: ${file.type || "unknown"}.` };
+  }
+  if (file.size > MAX_RENDER_BYTES) {
+    return { ok: false, error: "Image is over 4MB — export it smaller, or as WebP." };
+  }
+  if (!isStorageConfigured()) {
+    return { ok: false, error: "Object storage is not configured on this deployment." };
+  }
+  try {
+    const id = uploadId();
+    const ext = file.type.split("/")[1] ?? "webp";
+    const stored = await putMedia(
+      meta.data.product,
+      id,
+      `${meta.data.feature ?? "brand"}.${ext}`,
+      new Uint8Array(await file.arrayBuffer()),
+      file.type,
+    );
+    await recordUpload({
+      brand: meta.data.product,
+      assetType: meta.data.assetType ?? "product",
+      subject: meta.data.caption,
+      feature: meta.data.feature ?? null,
+      kind: "image",
+      url: stored.url,
+      by: email,
+    });
+    return { ok: true, url: stored.url };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "Upload failed." };
+  }
+}
+
+export async function presignMediaUpload(input: {
+  product: string;
+  contentType: string;
+  size: number;
+}): Promise<{ ok: boolean; error?: string; uploadUrl?: string; key?: string }> {
+  if (!(await requireContributor())) {
+    return { ok: false, error: "Forbidden: contributors only." };
+  }
+  if (!(PRODUCT_IDS as readonly string[]).includes(input.product)) {
+    return { ok: false, error: "Unknown product." };
+  }
+  if (!VIDEO_TYPES.includes(input.contentType)) {
+    return { ok: false, error: "Videos must be MP4, WebM or MOV." };
+  }
+  if (!(input.size > 0) || input.size > MAX_VIDEO_BYTES) {
+    return { ok: false, error: "Videos must be under 200MB." };
+  }
+  if (!isStorageConfigured()) {
+    return { ok: false, error: "Object storage is not configured on this deployment." };
+  }
+  try {
+    const signed = await presignMediaPut(
+      input.product,
+      uploadId(),
+      `video.${VIDEO_EXT[input.contentType]}`,
+      input.contentType,
+    );
+    return { ok: true, uploadUrl: signed.uploadUrl, key: signed.key };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "Could not sign the upload." };
+  }
+}
+
+/** Records a video the browser already PUT to S3 under a presigned key. */
+export async function confirmMediaUpload(input: {
+  product: string;
+  key: string;
+  feature?: string | null;
+  caption: string;
+}): Promise<{ ok: boolean; error?: string; url?: string }> {
+  const session = await auth();
+  const email = session?.user?.email ?? "contributor";
+  if (!(await requireContributor())) {
+    return { ok: false, error: "Forbidden: contributors only." };
+  }
+  const meta = uploadMetaSchema.safeParse({
+    product: input.product,
+    feature: input.feature || null,
+    caption: input.caption,
+  });
+  if (!meta.success) {
+    return { ok: false, error: meta.error.issues[0]?.message ?? "Invalid upload." };
+  }
+  // The key must be one presignMediaUpload minted for this brand — never a
+  // URL the client chose.
+  const url = input.key.startsWith(`media/${meta.data.product}/u`)
+    ? mediaUrlFor(input.key)
+    : null;
+  if (!url) return { ok: false, error: "That upload key is not ours." };
+  try {
+    await recordUpload({
+      brand: meta.data.product,
+      assetType: "reel",
+      subject: meta.data.caption,
+      feature: meta.data.feature ?? null,
+      kind: "video",
+      url,
+      by: email,
+    });
+    return { ok: true, url };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "Could not record the upload." };
+  }
 }

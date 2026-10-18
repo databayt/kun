@@ -19,6 +19,10 @@ export interface BriefRow {
   size: string;
   status: string;
   renderedUrl: string | null;
+  /** Feature id the asset shows, or null for a brand-wide asset. */
+  feature: string | null;
+  /** image | video */
+  kind: string;
   createdAt: string;
 }
 
@@ -31,6 +35,8 @@ const SELECT = {
   size: true,
   status: true,
   renderedUrl: true,
+  feature: true,
+  kind: true,
   createdAt: true,
 } as const;
 
@@ -43,6 +49,8 @@ function toRow(r: {
   size: string;
   status: string;
   renderedUrl: string | null;
+  feature: string | null;
+  kind: string;
   createdAt: Date;
 }): BriefRow {
   return { ...r, createdAt: r.createdAt.toISOString().slice(0, 10) };
@@ -56,6 +64,40 @@ export async function fileBrief(
   const { prompt, size } = compileBrief(brand, assetType, subject);
   const row = await db.socialMediaBrief.create({
     data: { brand, assetType, subject, prompt, size },
+    select: SELECT,
+  });
+  return toRow(row);
+}
+
+/**
+ * A free-standing upload from the media team: no brief, no compiled prompt —
+ * the asset already exists and is waiting on the shelf for a post. Filed
+ * straight as `rendered` so it joins the library the moment it lands.
+ */
+export async function recordUpload(input: {
+  brand: string;
+  assetType: string;
+  subject: string;
+  feature: string | null;
+  kind: "image" | "video";
+  url: string;
+  by: string;
+  size?: string;
+}): Promise<BriefRow> {
+  const row = await db.socialMediaBrief.create({
+    data: {
+      brand: input.brand,
+      assetType: input.assetType,
+      subject: input.subject,
+      prompt: "",
+      size: input.size ?? "",
+      feature: input.feature,
+      kind: input.kind,
+      status: "rendered",
+      renderedUrl: input.url,
+      renderedBy: input.by,
+      renderedAt: new Date(),
+    },
     select: SELECT,
   });
   return toRow(row);
