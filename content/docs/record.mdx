@@ -33,7 +33,10 @@ hogwarts/onboarding/raw/03-verify-ar.png        a still needs --part NN-<step>
 - No `--flow`: the URL slug stands in (scheme/host, locale prefix and `/s/<subdomain>` stripped).
 - The **deliverable** (ad cut or edit) goes to `~/media/<repo>/<flow>/<flow>-<locale>.mp4`
   and reaches the CDN with `shoot/scripts/publish.mjs --flow <flow>` as `<flow>/video-<locale>`, at
-  `cdn.databayt.org/hogwarts/<route>/<flow>-<locale>.<hash>.mp4` — the CDN mirrors the app's routes.
+  `cdn.databayt.org/hogwarts/<locale>/<route>/video.mp4` — the CDN mirrors the app's URL,
+  language first, with no hash in the name (the manifest carries `?v=<sha8>`).
+- A published tutorial also reaches the social block as the feature's real screen once the
+  feature's `SPOTLIGHT.md` names the flow in `flows:` — see [Shoot → Feeds social](/docs/shoot#feeds-social).
 - Mirror: **My Drive → databayt → media** (`record.sh sync`; the local library is
   the truth, Drive is the mirror)
 

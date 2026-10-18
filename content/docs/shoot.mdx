@@ -58,3 +58,16 @@ Each asset is uploaded, HEAD-verified and upserted into the product's
 `<Shot id="add-student/created-ar" />`, `<TutorialVideo id="add-student/video-ar" />` — never
 by URL. Publishing also stamps the repo sha into `~/media/manifest.json`, so
 `record.sh stale` flags a still whose source (`export const block` / `paths`) has changed.
+
+## Feeds social
+
+A published flow is also what the social block offers as a feature's **real screens**. Name the
+flow in that feature's `SPOTLIGHT.md` (`flows: [<flow>]`), then:
+
+```bash
+node scripts/spotlight-cdn.mjs          # hogwarts — refreshes the spotlight's "On the CDN" links
+node scripts/social-concepts.mjs        # kun — rebuilds content/social/product-media.json; commit it
+```
+
+The screens then appear on Draft's concept card, the Publish rail and the Media box for that
+feature. The format and the chain: [Spotlight](/docs/social/spotlight).

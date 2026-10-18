@@ -92,6 +92,10 @@ node ~/.claude/skills/shoot/scripts/shoot.mjs --flow add-student --lang ar,en --
 - Then commit the product's manifest on its `main` (the only file that changes there) and use
   `<Shot id="add-student/created-ar" />` / `<TutorialVideo id="add-student/video-ar" />` /
   `<FlowMedia flow="add-student" />` in MDX.
+- **Feeds social.** Name the flow in the feature's `SPOTLIGHT.md` (`flows: [<flow>]`), run
+  `node scripts/spotlight-cdn.mjs` in hogwarts and `node scripts/social-concepts.mjs` in kun, and
+  commit `content/social/product-media.json` — the screens then show on Draft's concept card,
+  the Publish rail and the Media box for that feature (kun `content/docs/social/spotlight.mdx`).
 
 ## Hosts + login
 

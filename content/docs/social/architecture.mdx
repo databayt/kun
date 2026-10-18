@@ -225,6 +225,50 @@ be the "calendar structure" it was waiting for).
 The binding constraint is **content capacity, not channel count** — which is why the pipeline is
 built around *one core piece → N platform-native variants* rather than N independent posts.
 
+## Context in, media in — what the stages read
+
+The loops above move a post. This is what the stages *read* to make one, and none of it
+needs a database round trip on the Worker: the product context is vendored JSON, rebuilt by
+script and committed.
+
+```mermaid
+graph LR
+    SP["SPOTLIGHT.md<br/>hogwarts features"]
+    BR["content/docs/social/&lt;brand&gt;.mdx<br/>## Voice"]
+    PL["queue/&lt;brand&gt;/plan.json<br/>+ plan.ts start date"]
+    MF["media-manifest.json<br/>shoot / record → CDN"]
+    EX["scripts/social-concepts.mjs"]
+    J1["concepts.json"]
+    J2["voice.json"]
+    J3["product-media.json"]
+    DB[("SocialDraftRequest<br/>slot · feature · channel · shape<br/>SocialMediaBrief<br/>feature · kind")]
+
+    SP --> EX
+    BR --> EX
+    MF --> EX
+    EX --> J1 & J2 & J3
+    PL --> CAL["Calendar month grid"]
+    J1 --> CARD["Draft concept card"]
+    J3 --> CARD
+    J1 & J2 --> PROMPT["Gemini / drain prompt"]
+    J3 --> SHELF["Publish rail · Media box"]
+    DB --> CAL & SHELF
+```
+
+| Piece | Where | Rebuilt by |
+| --- | --- | --- |
+| Concept notes (what a feature does, can/cannot say, routes, flows) | `content/social/concepts.json` | `node scripts/social-concepts.mjs` |
+| Brand voice | `content/social/voice.json` | same |
+| Real product screens per feature + the gaps list | `content/social/product-media.json` | same, after a shoot/record publish |
+| The dated plan | `content/social/queue/<brand>/plan.json` + `PLANS` in `plan.ts` | by hand |
+| Which draft answers which slot | `SocialDraftRequest.slot` (`balqalam#012`), plus `feature`, `channel`, `shape` | the queue loader and the Draft stage |
+| Uploaded media | `SocialMediaBrief` rows with `status: rendered`, `feature`, `kind` (image or video), bytes under `media/<brand>/u…` on S3 | `/social/media` upload: images through a server action (≤ 4 MB), videos by presigned PUT (≤ 200 MB) |
+
+The draft prompt is the mirror pair `src/lib/draft-prompt.ts` ⇄ `scripts/lib/draft-prompt.mjs`
+(parity-tested); both take the optional **voice** and **concept** sections, so the inline Gemini
+lane and the Mac drain write from the same context. The spotlight format and the shoot → CDN →
+spotlight chain are on [Spotlight](/docs/social/spotlight).
+
 ## Keywords
 
 Say these in prose — no slash needed. The engine routes them.
@@ -270,6 +314,7 @@ node scripts/generate-social-media.mjs --product <brand> --prompt "<topic>"
 ## See also
 
 - [Status](/docs/social/status) — what is actually configured and live right now
+- [Spotlight](/docs/social/spotlight) — the per-feature brief, and how real screens reach the social block
 - [Channel Setup](/docs/social/channels) — how to configure each platform, and the traps
 - [Environment reference](/docs/social/channels/env) — every variable, its default, and whether production has it
 - [Social Automation](/docs/social) — the pipeline overview and channel reality

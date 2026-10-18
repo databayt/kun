@@ -8,19 +8,20 @@ shape — and say the topic in a few words. Those picks are not a form: **each o
 paragraph of context handed to the writer.** Claude writes it in Arabic and English, a craft
 check reads it before you do, and nothing goes out until you say so.
 
-## The four pages
+## The pages
 
 `/social` is one job split across pages, and **`/social/publish` can do the whole job by
-itself** — which is why the bare `/social` opens there. The other three exist for when you
-want to start somewhere earlier.
+itself**, which is why the bare `/social` opens there. The others exist for when you want to
+start somewhere earlier: from the month's plan, from understanding a feature, or from the
+media shelf.
 
 ```mermaid
 graph TD
     CFG["Settings —<br/>Brand · Feature · Channel · Post · Draft · Media · Queue · Plan"]
-    CAL["/social/calendar<br/>this week's topics, ready to press"]
-    DRA["/social/draft<br/>ask for words in your own words"]
-    MED["/social/media<br/>find a picture, or make one"]
-    PUB["/social/publish<br/>read it · attach it · send it"]
+    CAL["/social/calendar<br/>the month's plan, slot by slot"]
+    DRA["/social/draft<br/>understand the feature, then let the AI start"]
+    MED["/social/media<br/>real screens, uploads, generated art"]
+    PUB["/social/publish<br/>pick a post or write one · attach · send"]
     MEA["/social/measure<br/>how it did"]
     LIVE(["Live on your channels"])
 
@@ -29,8 +30,8 @@ graph TD
     CFG -.-> MED
     CFG -.-> PUB
 
-    CAL ~~~ DRA ~~~ MED
-    CAL -->|"Queue now"| DRA
+    CAL -->|"Write it (?slot=)"| DRA
+    CAL -->|"Publish (?draft=)"| PUB
     DRA -->|"Use Arabic"| PUB
     MED -->|"Attach"| PUB
     PUB --> LIVE --> MEA
@@ -61,16 +62,29 @@ pictures has no post shape to pick.
 
 **Draft** and **Media** grew this row on 2026-08-26; before that Draft's seat held three
 writing knobs and no brand, and Media's seat did not exist — so a person asking for copy had
-to leave the box they were writing in to say which brand it was for. **Calendar** is the one
-page still without it: Brand is currently a page-level context rather than a word in the row,
-and Queue would earn its place there the moment it is.
+to leave the box they were writing in to say which brand it was for. **Calendar** still takes
+Brand as a page-level context rather than a word in the row; what Queue would say there, it now
+shows on each slot of the month grid as a status (planned · asked · drafted · approved ·
+published).
 
 | Page | What you go there for |
 | --- | --- |
-| **calendar** | The topics we already decided to write about this week, per brand, with the ones due now highlighted. Press **Queue now** and it becomes a request for words. |
-| **draft** | The place to ask for copy in a sentence and get Arabic and English back. Type again to refine what is on screen rather than starting over. **Use Arabic** carries it to publish. |
-| **media** | Type two words and the library narrows; **Attach** puts a picture in the tray. Generating something new lives below it — this page finds what exists, the studio asks for what does not. |
+| **calendar** | The month's plan for the brand: one slot a day, each with its theme, kind and feature, and a status chip. **Write it** opens Draft on that slot; a slot with a finished draft offers **Publish**. Brands without a dated plan still show the weekly topics with **Queue now**. |
+| **draft** | First, *understand*: a concept card shows the slot's angle, persona and shape and the feature's [spotlight](/docs/social/spotlight) — what it does, what you can and cannot say, and its real screens to attach. Then **Kick off with AI** writes the first Arabic and English draft from exactly that. Type again to refine it. **Use Arabic** carries it to publish. |
+| **media** | The shelf. The product's real screens (published by shoot and record), finished images and videos the media team uploads (tagged by brand and feature), and generated art — type two words and it narrows; **Attach** puts it in the tray. |
 | **publish** | The whole job in one place: write it, refine it, attach, and send — now, later, or out for someone else's approval. It is also the review queue, where a draft someone else asked for waits for a yes. |
+
+### The three ways in on Publish
+
+Pick the brand (and, if you like, the feature) and Publish recommends what fits:
+
+1. **A calendar post, fully composed.** *Due from the calendar* lists the drafts for slots due in
+   the next seven days. One press loads the copy and its media; the language toggle switches
+   Arabic, English or both, and **Reject** sends it back with a reason.
+2. **Compose now.** Pick a waiting draft from the queue, attach a recommended screen or upload,
+   edit, send.
+3. **From scratch.** The empty box is the default: write, attach, send. Recommended media still
+   follows the feature you picked, or the loaded draft's feature when you picked none.
 | **measure** | The last twenty posts, with what each one reached. |
 
 ## How a post travels

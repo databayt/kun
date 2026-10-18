@@ -66,17 +66,20 @@ one persona and every ask points at the decision-maker.
 ## Cadence and calendar — the editorial queue
 
 Balqalam does **not** use the weekly seeder. Its posts come from an **editorial queue**: ninety
-numbered, undated drafts written ahead of time from the product itself, loaded into
-`/social/publish` in order. The team takes the next one whenever it posts — daily, or with gaps;
-nothing is dated, so nothing slips.
+numbered drafts written ahead of time from the product itself, and since 2026-10-18 they are
+**dated**. Week 1 starts **Monday 2026-10-19**, one slot a day, so slot `balqalam#012` is the
+fifth day of week 2. `/social/calendar` draws the plan as a month grid with each slot's status;
+`/social/publish` shows the drafts due in the next seven days under *Due from the calendar*. A
+missed day is not lost: an overdue slot stays in that list until it ships or is rejected.
 
 | Piece | Where |
 |-------|-------|
 | The drafts (`001`–`090`, Arabic first, English sibling) | `content/social/queue/balqalam/NNN-<slug>.md` |
 | The plan — 13 themed weeks × 7 slots, each tied to a feature | `content/social/queue/balqalam/plan.json` |
+| The start date, and slot → date | `src/components/root/social/plan.ts` → `PLANS.balqalam` |
 | The drafting contract | `content/social/queue/balqalam/SPEC.md` |
 | The product facts each draft came from | hogwarts `<feature dir>/SPOTLIGHT.md` (named in each draft's frontmatter) |
-| Loader (strict craft gate, idempotent) | `node scripts/social-drafts.mjs queue --brand balqalam [--dry]` |
+| Loader (strict craft gate, idempotent; writes each row's `slot`, `feature`, `shape` and visual) | `node scripts/social-drafts.mjs queue --brand balqalam [--dry]` |
 
 The seven-slot rhythm, repeated: a school-day **pain** · a **product proof** · one **persona's**
 view · **learning science** (evidence labelled) · **trust** · a short **how-to** · a **question**
@@ -120,9 +123,14 @@ compliance with PDPL, GDPR or FERPA · a student's face without written consent.
 - **Idea posts** carry a `visual` in their brief (`plate` or `lifestyle`): calm school settings,
   desks, rooms, hands — **no faces of children**. The media lane compiles it against the brand kit
   (`content/media/brand-kit.json` → `balqalam`); the mark is the quill, never the Hogwarts wordmark.
-- **Proof posts** carry no generated visual on purpose. They attach a **real** Arabic screenshot
-  of the shipped screen — the hogwarts repo root holds `*-ar.png` captures, and `/record` makes
-  fresh ones — never a mocked or generated interface.
+- **Proof posts** carry no generated visual on purpose. They attach a **real** Arabic screen of
+  the shipped product, never a mocked or generated interface. Those screens are already on the
+  CDN: each feature's [spotlight](/docs/social/spotlight) names the shoot/record flows that film
+  it, and Draft's concept card, the Publish rail and the Media box offer them for the feature in
+  hand. A feature with none shows the media team the routes to film and the command.
+- **Finished work from the media team** goes straight onto the shelf: `/social/media` →
+  upload, tagged with the brand and, optionally, the feature. Images up to 4 MB, videos (MP4,
+  WebM, MOV) up to 200 MB. It is then recommended on Publish like any other asset.
 - Text-bearing cards (lists, carousels) render on the template lane (`/carousel`), not as images.
 
 ## Measure and kill

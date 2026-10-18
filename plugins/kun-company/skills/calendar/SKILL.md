@@ -16,8 +16,9 @@ Default: `plan` for next week.
 **SCOPE (2026-09-27) — one slice: `balqalam` × `facebook`.** The school product publishes only
 as Balqalam (hogwarts is retired and hidden, with no briefs). Plan for balqalam only, and allocate
 Facebook slots only. Balqalam is not on the weekly seeder: its plan is the editorial queue —
-90 undated drafts in `content/social/queue/balqalam/` (plan.json + NNN-*.md), described in
-`content/docs/social/balqalam.mdx`. A five-brand plan would invent slots no stage can fill, so say
+90 drafts in `content/social/queue/balqalam/` (plan.json + NNN-*.md), dated since 2026-10-18 —
+week 1 = Mon 2026-10-19, one slot a day (`PLANS` in `src/components/root/social/plan.ts`), drawn as
+a month grid on `/social/calendar` — described in `content/docs/social/balqalam.mdx`. A five-brand plan would invent slots no stage can fill, so say
 the others are deferred by decision rather than planning empty rows for them. Two inversions still
 apply because the proof track is Sudan: **static Arabic cards lead over video** (intermittent connectivity favors light
 formats), and **the Aug 23 Saudi school-year window is not the clock**. Reasoning

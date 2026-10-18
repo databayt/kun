@@ -3,6 +3,7 @@
   "pages": [
     "index",
     "loop",
+    "spotlight",
     "status",
     "ownership",
     "architecture",

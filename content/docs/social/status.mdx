@@ -306,6 +306,15 @@ returns `drafted: 0`.
   video up to 200MB), tagged by brand and feature. Publish recommends, for the picked brand and
   feature, the calendar posts due this week and the matching media; a loaded draft has an
   Arabic / English / Both toggle and **Reject** with a reason (feeding `lessons`)
+- **Spotlights feed the social block, real screens included (2026-10-18)** — every hogwarts
+  `SPOTLIGHT.md` with a shoot flow names it in `flows:`; `scripts/social-concepts.mjs` reads all 53
+  spotlights (it used to read only top-level dashboard folders) and joins their flows to the CDN
+  media manifest into `content/social/product-media.json`. All twelve school features have
+  screens (four new tour flows filled transport, messages, report cards and document templates;
+  163 screens, Arabic and English). The concept card shows them to attach, the Publish rail
+  ranks them after feature uploads, and the Media box can search them; a feature without screens
+  shows the media team its routes and the shoot command. Spotlight format:
+  [Spotlight](/docs/social/spotlight)
 
 ## What's not
 
@@ -318,10 +327,15 @@ returns `drafted: 0`.
   2026-10-19) and the Calendar draws it as a month grid; every other brand still shows the
   `pillars.json` rotation. A new brand's plan is a `content/social/queue/<brand>/plan.json` plus
   one line in `PLANS`.
-- **Concept notes cover the school features only.** `content/social/concepts.json` is vendored
-  from hogwarts' `SPOTLIGHT.md` files by `node scripts/social-concepts.mjs` and must be re-run when
-  they change. mkan and databayt features have no concept note, so the Draft card says so and
-  the prompt drafts from the brief alone.
+- **Concept notes and screens cover the school product only.** `concepts.json` and
+  `product-media.json` are vendored from hogwarts by `node scripts/social-concepts.mjs` and must be
+  re-run after a spotlight edit or a shoot/record publish. mkan has no spotlights yet (six
+  features to write), and databayt's "features" are products, so neither gets a concept card or
+  screens; the AI drafts from the brief alone. Screens are offered to balqalam only, never the
+  hogwarts brand, because they show the app's بالقلم name.
+- **Some screens are thin.** The document-templates tour shows an empty state on the demo
+  tenant (no uploaded templates), and several features have one screen. Richer captures are a
+  shoot flow away; the spotlight's *Real screens* notes list what to film.
 - **A visual register is remembered and changes nothing.** The Media tab's sixteen styles are a
   directive with no wire: nothing in `library.json` records a style, and `lib/media-prompt.ts` —
   where the adjective belongs — does not read it yet.
