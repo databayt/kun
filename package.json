@@ -50,6 +50,8 @@
     "seek:whatsapp-pair": "node scripts/seek/whatsapp-pair.mjs",
     "seek:brief": "tsx scripts/seek/brief.ts",
     "seek:hermes": "bash scripts/seek/hermes-setup.sh",
+    "seek:push": "tsx scripts/seek/push.ts",
+    "seek:pull": "tsx scripts/seek/pull.ts",
     "jobs:ingest": "pnpm -s seek:ingest",
     "jobs:discover": "pnpm -s seek:discover",
     "jobs:google": "pnpm -s seek:google",
@@ -77,6 +79,8 @@
     "jobs:whatsapp-pair": "pnpm -s seek:whatsapp-pair",
     "jobs:brief": "pnpm -s seek:brief",
     "jobs:hermes": "pnpm -s seek:hermes",
+    "jobs:push": "pnpm -s seek:push",
+    "jobs:pull": "pnpm -s seek:pull",
     "sales:leads": "tsx scripts/sales/leads.ts"
   },
   "dependencies": {

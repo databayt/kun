@@ -21,6 +21,7 @@
 #   Fri ≥17:00         week: learn → adopt → #jobs report  claude -p (Max)
 #   every tick         discuss: answer Abdout in #jobs      claude -p only when he wrote
 #   after the wave     digest → Slack DM via `hermes send`  0 tokens
+#   every tick         console: pull first (web commands), push last (mirror)  0 tokens
 #
 # Stamps in jobs/.state/ make each daily step run once per day and let a Mac
 # that slept through a slot catch up on its first tick after waking. A lock
@@ -189,6 +190,10 @@ case "$MODE" in
             nohup caffeinate -i -t 1900 >/dev/null 2>&1 &
         fi
 
+        # The web console's queue (kun.databayt.org/seek): applied before the
+        # wave and the send, so a veto from the phone beats the send window.
+        run console-pull pnpm -s seek:pull --apply
+
         if [ "$HOUR" -ge 7 ] && ! done_today discover; then
             # Ingest's Neon websocket drops now and then (an ErrorEvent, exit 1):
             # on 2026-10-01/02 that left discover unstamped, so no wave and no
@@ -250,6 +255,9 @@ case "$MODE" in
         fi
         # Abdout's messages in #jobs: answered every tick (0 tokens when quiet).
         run discuss pnpm -s jobs:discuss
+        # Mirror the board, ledger and switches for the console — last, so it
+        # shows everything this tick did.
+        run console-push pnpm -s seek:push --apply
         log "tick done"
         ;;
     *)

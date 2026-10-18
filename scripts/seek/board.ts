@@ -168,7 +168,15 @@ export const boardUrl = (id: string): string =>
 
 export interface LedgerEvent {
   ts?: string;
-  kind: "sent" | "followup" | "reply" | "hold" | "queued" | "archive" | "error";
+  kind:
+    | "sent"
+    | "followup"
+    | "reply"
+    | "hold"
+    | "queued"
+    | "archive"
+    | "error"
+    | "console"; // a move the person made from the web console
   crmId: string;
   name?: string;
   campaign?: string | null;
