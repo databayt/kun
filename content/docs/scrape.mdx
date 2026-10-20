@@ -118,17 +118,26 @@ In Kigali, most rentals are advertised by brokers in TikTok videos rather than o
 | --- | --- | --- |
 | discover | Recent videos from seed accounts, plus 3 rotating web-search phrases a day. Search **proposes** new accounts and a human promotes them | yt-dlp, DuckDuckGo → Brave |
 | fetch | Caption, 8 evenly spaced frames and a speech transcript. The mp4 is deleted | yt-dlp, ffmpeg, mlx-whisper |
-| read | Is it a Kigali rental? It extracts price (RWF/month), rooms, place, phones and the frames that show the property | `claude -p` on the Max pool |
+| read | Is it a Kigali rental? It extracts price (RWF/month), rooms, place, phones and the frames that show the property. Posts with a phone and a price are read first | Groq (vision + text, free tier); `claude -p` as fallback |
 | upsert | Property frames go to S3; host + Opportunity, home at **VETTING** and a note with the caption and transcript go to Twenty | Twenty REST |
 
 ```bash
 cd ~/mkan
 pnpm crm:tiktok-status                        # the ledger by state and skip reason
 pnpm crm:tiktok-seeds --promote=<handle>      # or --ignore=<handle>
-caffeinate -i pnpm crm:tiktok --limit=20      # dry run; add --apply to write
+caffeinate -i pnpm crm:tiktok --fetch-limit=10 --read-limit=10   # dry run; add --apply to write
+pnpm crm:tiktok-requeue                       # skipped-by-caption rows the gate now passes
+pnpm crm:tiktok-settle --apply                # same-facts copies → DUPLICATE of the first home
 ```
 
-A launchd job, `com.databayt.mkan-tiktok-sweep`, runs the lane every day at 06:00 with `--limit=40` and posts the count to `#mkan`.
+A launchd job, `com.databayt.mkan-tiktok-sweep`, runs the lane every day at 06:00 with `--fetch-limit=40 --read-limit=80` and posts new homes and **new** /find leads to `#mkan`.
+
+What the 2026-10-20 tightening changed:
+- 112 rentals an older caption gate had skipped went back to the queue; the gate now re-checks skipped rows every run.
+- The gazetteer decides "in Kigali" before the model (a Norvege flat was rejected, a Kamonyi house kept). A read with neither price nor rooms is skipped.
+- A wrong-looking price is flagged `PRICE_ANOMALY` and a home with no phone `UNREACHABLE_HOST` on the board. Phones also come from the voice-over and the broker's other posts.
+- A re-post of a home already on the board joins it as a note instead of creating a copy. 13 old copies were marked DUPLICATE.
+- Dead seeds pause after three failed runs; proposals with three search hits and a kept home are promoted.
 Nothing publishes: a TikTok home goes live through the same human step as a Slack home.
 
 What the first run measured:

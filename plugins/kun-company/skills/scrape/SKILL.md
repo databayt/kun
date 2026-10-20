@@ -214,13 +214,23 @@ The lane needs no login (yt-dlp on public videos), so no account is at risk. It 
 ```bash
 cd ~/mkan && pnpm crm:tiktok-status                 # ledger by state + skip reason
 pnpm crm:tiktok-seeds                               # accounts: search PROPOSES, a human --promote=h / --ignore=h
-caffeinate -i pnpm crm:tiktok --limit=20            # discover → fetch → read → upsert (dry)
-caffeinate -i pnpm crm:tiktok --limit=20 --apply    # writes S3 frames + Twenty host/home/note
+caffeinate -i pnpm crm:tiktok --fetch-limit=10 --read-limit=10          # requeue → discover → fetch → read → upsert (dry)
+caffeinate -i pnpm crm:tiktok --fetch-limit=10 --read-limit=10 --apply  # writes S3 frames + Twenty host/home/note, mirrors /find leads
+pnpm crm:tiktok-requeue                             # caption-skipped rows today's gate passes → back to fetch (run auto)
+pnpm crm:tiktok-settle [--apply]                    # SUSPECTED same-facts homes → DUPLICATE of the first copy
 ```
 
 Every video becomes a `home` at **VETTING** (`source TIKTOK`, `sourceId tiktok:<id>`) with the reader's
 property frames as photos. Its poster becomes a `host` with an Opportunity. Nothing publishes.
-A launchd job, `com.databayt.mkan-tiktok-sweep`, runs it daily at 06:00 (`--limit=40 --notify`).
+A launchd job, `com.databayt.mkan-tiktok-sweep`, runs it daily at 06:00 (`--fetch-limit=40 --read-limit=80 --notify`).
+The reader is Groq (`qwen3.8-27b` vision, `gpt-oss-120b` for fact-rich captions); `--reader=claude` is the fallback.
+The vision quota (200k tokens/day) is the bottleneck, so reads go phone+price first, one 3-frame strip
+before two, and a caption that already missed the text read goes straight to vision.
+Gates (2026-10-20): the gazetteer decides "in Kigali" before the reader, a read with neither price nor
+rooms is skipped, confidence ≥ 0.6. Out-of-band prices land as `qualificationStatus PRICE_ANOMALY`,
+no phone as `UNREACHABLE_HOST`. A re-post with the same facts joins the existing home as a note.
+Seeds list via `tiktokuser:<secUid>` (the `@handle` extractor is broken); three failed runs pause
+a seed (re-tried weekly); a proposal with ≥3 search hits and a kept home is promoted automatically.
 The volume comes from the seed accounts: web search is blocked after a few queries.
 Traps and numbers: `references/backends.md` → TikTok.
 
