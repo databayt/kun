@@ -4,9 +4,12 @@
 // wave.ts on 2026-10-06 so tailor.ts can use it without a wave ↔ tailor cycle.
 
 import { spawnSync } from "node:child_process";
-import { rmSync, writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+
+import { DATA } from "./paths.mjs";
 
 export const splitName = (name: string): { role: string; company: string } => {
   const at = name.lastIndexOf(" @ ");
@@ -15,10 +18,39 @@ export const splitName = (name: string): { role: string; company: string } => {
     : { role: name, company: name };
 };
 
+// Every posting read is kept for a week. Job boards that answered the wave at
+// 07:00 often 403 the same bot by the 10:00 send — without this the send gate
+// held every card it had just verified as "posting unreachable" (2026-10-15:
+// 3 of 3 queued). A failed fetch falls back to what the wave read.
+const CACHE_DIR = join(DATA, ".state", "postings");
+const CACHE_TTL_MS = 7 * 86_400_000;
+const cacheFile = (url: string) =>
+  join(CACHE_DIR, `${createHash("sha1").update(url).digest("hex")}.txt`);
+
 export async function postingText(
   url: string | undefined,
 ): Promise<string | null> {
   if (!url) return null;
+  const text = await fetchPostingText(url);
+  const file = cacheFile(url);
+  if (text === GONE) return null; // a closed posting never falls back
+  if (text) {
+    try {
+      mkdirSync(CACHE_DIR, { recursive: true });
+      writeFileSync(file, text);
+    } catch {}
+    return text;
+  }
+  try {
+    if (existsSync(file) && Date.now() - statSync(file).mtimeMs < CACHE_TTL_MS)
+      return readFileSync(file, "utf-8");
+  } catch {}
+  return null;
+}
+
+const GONE = Symbol("gone");
+
+async function fetchPostingText(url: string): Promise<string | null | typeof GONE> {
   try {
     const res = await fetch(url, {
       headers: {
@@ -27,6 +59,7 @@ export async function postingText(
       },
       signal: AbortSignal.timeout(30_000),
     });
+    if (res.status === 404 || res.status === 410) return GONE;
     if (!res.ok) return null;
 
     // Official job notices are often PDFs (CIMERWA's are): read them with
