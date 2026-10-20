@@ -5,7 +5,7 @@ description: Property-rental marketplace. B2C to renters, B2B to hosts. The most
 
 # Mkan — Social
 
-*"Saudi property rentals, simplified" — Mkan for homes.* A rental marketplace, Airbnb-style. This
+*"Homes for rent, simplified" — Mkan for homes, in Sudan and Kigali.* A rental marketplace, Airbnb-style. This
 is the most **visual, consumer-first** brand in the portfolio: the [SaaS](/docs/social#business-models--who-were-talking-to)
 product sells to two sides — **B2C** renters/travelers looking for a place, and **B2B** hosts
 listing one. Social leans hard into imagery and short-form video.
@@ -14,7 +14,7 @@ listing one. Social leans hard into imagery and short-form video.
 
 - **Business model:** SaaS marketplace (two-sided).
 - **Type:** B2C (renters) + B2B (hosts / property managers).
-- **Tagline:** Saudi property rentals, simplified.
+- **Tagline:** Homes for rent, simplified.
 - **Angle:** beautiful places, booked in a tap — and effortless for hosts.
 
 ## Audience
@@ -51,12 +51,44 @@ support. This is the brand where the consumer-visual channels finally lead.
 | Channel | Handle | Status |
 |---------|--------|--------|
 | Instagram | `@mkan.sd` (`17841444144779316`) | Account exists and is **linked to the Page** — the furthest brand; publishing waits on [gate 5](/docs/social/channels/instagram#standard-access-hypothesis) |
-| TikTok | Mkan | To claim / confirm |
+| TikTok | `@mkan.kigali` — Kigali monthly rentals | To open (business account, Real Estate) — see [Kigali TikTok page](#kigali-tiktok-page) |
 | Snapchat | Mkan | To claim / confirm — allowlist-gated API |
 | Facebook | Mkan مكان (`1133424016531929`) | **Live** — publishing + metrics through the pipeline |
 
 > TikTok and Snapchat posting APIs are gated (audit / allowlist). Early stage is likely
 > human-posted or via an aggregator — see `docs/SOCIAL-AUTOMATION.md`.
+
+## Kigali TikTok page
+
+Kigali's monthly rental market lives on brokers' TikTok pages: a business account with the
+WhatsApp button, one short video per house, the price and area on screen. Mkan runs the same
+play on its own page — beside, not inside, the Airbnb-style site.
+
+| | |
+|---|---|
+| **Account** | `@mkan.kigali` (fallback `@mkanrwanda`), TikTok Business, category Real Estate |
+| **Bio** | Houses & apartments for rent in Kigali 🏠 Monthly · Verified · No fake listings — phone + WhatsApp buttons, link `https://www.mkan.sd/en/find` |
+| **WhatsApp** | A dedicated Rwanda (MTN) line on WhatsApp Business — also the future `MKAN_EVOLUTION_*` line |
+| **Inventory** | Monthly rentals only: owners' and field-agent homes, Airbnb hosts who took a monthly price, and broker leads once that broker said YES (Twenty host `repostConsent`) |
+| **Cadence** | 3 videos a day (`TIKTOK_POSTS_PER_DAY`) |
+
+**The daily queue** lives in mkan (`scripts/crm/tiktok-post.ts`, launchd
+`com.databayt.mkan-tiktok-post` at 07:00, after the 06:00 broker sweep):
+
+1. `tt:pick` — today's homes, spread across districts; a posted home rests 30 days.
+2. `tt:render` — a ~16 s 9:16 slideshow per home: photos with a slow push-in, price / area /
+   beds overlay inside TikTok's safe area, a WhatsApp end card with the home's ref (`K5771`).
+   No music — the poster adds a trending sound in the app.
+3. `tt:card` — each video + its caption (English, one Kinyarwanda line, hashtags) lands in
+   Slack #mkan (CDN link when the bot can't upload files).
+4. **A person posts it** from the phone: save → TikTok → sound → paste caption → post, then
+   `pnpm tt:posted <ref> <url>`.
+5. `tt:stats` reads views back with yt-dlp; `tt:ask` lists the brokers, the consent message
+   (EN + Kinyarwanda) and records ASKED / YES / NO.
+
+Inquiries arrive on WhatsApp quoting the ref; the operator finds the home on `/find` or in the
+CRM. Posting by API waits on TikTok's Content Posting API audit (posts stay private until it
+passes) — the phone step goes away then.
 
 ## Production Playbooks & Scenarios
 
