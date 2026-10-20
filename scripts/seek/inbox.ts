@@ -146,36 +146,67 @@ async function main(): Promise<void> {
     const addr = addressOf(m.from);
     if (addr === cfg.fromAccount.toLowerCase()) continue;
     // Greenhouse's security-code emails are part of submitting, not a reply.
-    if (/security code/i.test(m.subject) && /greenhouse/i.test(m.from)) continue;
+    if (/security code/i.test(m.subject) && /greenhouse/i.test(m.from))
+      continue;
     // A bounce is not a reply: the card goes to HOLD so no follow-up chases a
     // dead address (BBOXX's info@ bounced unseen on 2026-09-27).
-    if (/mailer-daemon|postmaster/i.test(addr) || BOUNCE_SUBJECT.test(m.subject)) {
+    if (
+      /mailer-daemon|postmaster/i.test(addr) ||
+      BOUNCE_SUBJECT.test(m.subject)
+    ) {
       const original = stripRe(m.subject.replace(BOUNCE_SUBJECT, ""));
-      const dead = [...byAddress.keys()].find((a) => m.body.toLowerCase().includes(a));
-      const bouncedId = bySubject.get(original) ?? (dead ? byAddress.get(dead) : undefined);
+      const dead = [...byAddress.keys()].find((a) =>
+        m.body.toLowerCase().includes(a),
+      );
+      const bouncedId =
+        bySubject.get(original) ?? (dead ? byAddress.get(dead) : undefined);
       if (!bouncedId || !byId.has(bouncedId)) continue;
       const row = byId.get(bouncedId) as BoardRow;
       matched++;
       console.log(`  bounce     ${row.name.slice(0, 55)}  ← ${dead ?? addr}`);
       if (DRY_RUN) continue;
-      await noteRow(bouncedId, `bounced: ${dead ?? "the address"} did not accept the email — "${m.subject}"`, {
-        applicationStatus: "HOLD",
-        holdReason: `bounced: ${dead ?? "recipient"} does not exist — find a working address, then move to APPROVED`,
+      await noteRow(
+        bouncedId,
+        `bounced: ${dead ?? "the address"} did not accept the email — "${m.subject}"`,
+        {
+          applicationStatus: "HOLD",
+          holdReason: `bounced: ${dead ?? "recipient"} does not exist — find a working address, then move to APPROVED`,
+        },
+      );
+      ledger({
+        kind: "error",
+        crmId: bouncedId,
+        name: row.name,
+        campaign: row.campaign,
+        detail: `bounce: ${dead ?? addr}`,
       });
-      ledger({ kind: "error", crmId: bouncedId, name: row.name, campaign: row.campaign, detail: `bounce: ${dead ?? addr}` });
       seen.add(id);
       continue;
     }
+    // A company's product notifications share its domain but are not about the
+    // application: Irembo's visa-renewal emails matched the Irembo card three
+    // times on 2026-10-17. A domain-only match from a robot sender must name
+    // the application.
+    const byDomainId = byDomain.get(addr.split("@")[1] ?? "");
+    const domainOk =
+      !/^(no-?reply|notifications?|alerts?|billing|support|info|news(letter)?)[@.+-]/i.test(
+        addr,
+      ) ||
+      /applica|candida|position|vacanc|recruit|interview|resume|\bcv\b|hiring|role/i.test(
+        `${m.subject} ${m.body.slice(0, 2000)}`,
+      );
     const crmId =
       byAddress.get(addr) ??
-      byDomain.get(addr.split("@")[1] ?? "") ??
+      (domainOk ? byDomainId : undefined) ??
       bySubject.get(stripRe(m.subject)) ??
       // Whole words only, and never from GitHub/CI: a dependabot "bump axios"
       // thread matched the Axios application four times on 2026-10-04.
       (/@(github\.com|.*\.github\.com)$|dependabot/i.test(addr)
         ? undefined
         : [...byCompany.entries()].find(([c]) =>
-            new RegExp(`\\b${c.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`).test(`${m.subject} ${m.from}`.toLowerCase()),
+            new RegExp(
+              `\\b${c.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`,
+            ).test(`${m.subject} ${m.from}`.toLowerCase()),
           )?.[1]);
     if (!crmId || !byId.has(crmId)) continue;
     const row = byId.get(crmId) as BoardRow;
@@ -241,7 +272,9 @@ async function main(): Promise<void> {
       // Abdout, 2026-10-05: WhatsApp only for an acceptance — interview or
       // offer. Other replies stay on Slack and the board.
       if (kind === "interview" || kind === "offer")
-        whatsappBrief(`${head}: ${row.name}\n"${m.subject}"\n${boardUrl(crmId)}`);
+        whatsappBrief(
+          `${head}: ${row.name}\n"${m.subject}"\n${boardUrl(crmId)}`,
+        );
     }
     seen.add(id);
   }
