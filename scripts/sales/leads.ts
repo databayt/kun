@@ -774,6 +774,29 @@ const SHOWCASE: Record<string, { sd?: string; any: string }> = {
 };
 const PORTFOLIO = "databayt.org";
 
+/// Health outside Sudan gets its own pitch in the message only — the board's
+/// `offer` SELECT stays NEW_WEBSITE/REBRAND. Kigali's health leads are 85%
+/// pharmacies, and Rwanda FDA licenses online pharmacies (2026-10-20), so the
+/// concrete thing is ordering + prescription upload, not "a website".
+const CLINICISH =
+  /clini|hospital|h[oô]pital|medic|dental|dentist|doctor|polyclini|laborator|\blab\b|diagnos|physio|maternit|health ?cent/i;
+const HEALTH_PITCH = {
+  pharmacy: {
+    en: "We build pharmacy websites where customers check what's in stock, upload a prescription and order on WhatsApp",
+    ask: (l: Lead) =>
+      `Would you like a free mock-up of an online pharmacy page for ${l.name}?`,
+  },
+  clinic: {
+    en: "We build clinic websites with online appointment booking and WhatsApp reminders",
+    ask: (l: Lead) =>
+      `Would you like a free mock-up of a booking page for ${l.name}?`,
+  },
+};
+const healthPitch = (l: Lead) =>
+  l.sector === "HEALTH" && l.country !== "SUDAN"
+    ? HEALTH_PITCH[CLINICISH.test(l.name) ? "clinic" : "pharmacy"]
+    : null;
+
 function showcaseOf(l: Lead): string {
   // A school keeps its system proof even in Sudan; balqalam is the live one.
   if (offerOf(l) === "SCHOOL_SYSTEM") return "balqalam.com";
@@ -799,8 +822,13 @@ function messageFor(l: Lead): string {
     return `السلام عليكم، معكم عثمان عبدوت من داتابايت، شركة برمجيات سودانية. ${AR_FINDING[f]?.(l) ?? ""} ${o.ar}، ومن أعمالنا: ${o.proof}${o.proof === PORTFOLIO ? "" : ` — وباقي أعمالنا على ${PORTFOLIO}`}. ${ask} بدون أي التزام.`;
   }
   const offer = offerOf(l);
-  const ask =
-    offer === "SCHOOL_SYSTEM"
+  const hp = healthPitch(l);
+  if (hp) o.en = hp.en;
+  const ask = hp
+    ? f === "NO_WEBSITE" || f === "SOCIAL_ONLY"
+      ? hp.ask(l)
+      : "Would you like a free 1-page review with 3 concrete fixes?"
+    : offer === "SCHOOL_SYSTEM"
       ? `Would you like a free demo of the system for ${l.name}?`
       : offer === "QR_ORDERING"
         ? `Would you like us to send a free sample of a digital menu for ${l.name}?`
