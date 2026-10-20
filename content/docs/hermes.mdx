@@ -116,6 +116,18 @@ Hermes' model login is dead and the engine is subscription-only, so the gateway 
 
 Install or refresh with `pnpm jobs:hermes` in kun (`scripts/seek/hermes-setup.sh`). It rewrites only the `quick_commands` block of `~/.hermes/config.yaml`, so comments survive and a dated `.bak` is kept. Then it restarts the gateway. Going the other way, the loop pushes a **brief** to the same chat only when an application is accepted: `🎯 Interview` or `🏆 OFFER`. Other replies stay on Slack and the board. Configure it with `briefWhatsApp` in `scripts/seek/config.ts`; `JOBS_BRIEF=off` silences it. The CRM board stays the record. Commands only read it or flip the kill switch.
 
+## Scheduled jobs (cron, no model)
+
+The gateway also runs the engine's local cron jobs. Each one is a script in `~/.hermes/scripts/`, run in **no-agent** mode: the script is the whole job, its stdout goes to the job's channel as written, and empty stdout sends nothing. The gateway must be up for jobs to fire. A daily job missed while the Mac slept still runs if it is less than 2 h late.
+
+| Job | When | Does | Installed by |
+|---|---|---|---|
+| `mkan-tiktok-sweep` | 06:00 | Kigali TikTok rentals → Twenty homes and TikTok posts → /find leads. The sweep posts its own counts to `#mkan`; Hermes adds a line only when a run fails | `bash scripts/crm/install-tiktok-sweep.sh` (mkan) |
+| `hogwarts-crm-digest` · `hogwarts-crm-activity` · `hogwarts-snapshot-freshness` | 08:00 · every 2 h · every 3 h | hogwarts CRM digests to a DM | by hand |
+| `databayt-daily-social-digest` · `databayt-weekly-social-plan` | weekdays 08:30 · Sun 18:00 | social digest and plan to `#social` | by hand |
+
+The sweep reads for about an hour, longer than Hermes' default 1 h script limit, so its installer sets `cron.script_timeout_seconds: 7200` in `~/.hermes/config.yaml`. Its chat commands: **`/tiktok`** gives the ledger status and the next run; **`/tiktokrun`** runs the sweep on the next tick. `hermes cron list` shows every job's last result. A job that needs a model fails today, because the Nous login is dead; that is why `databayt-4h-heartbeat` errors.
+
 ## Daily use
 
 | Action | How |
