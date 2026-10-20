@@ -218,7 +218,12 @@ caffeinate -i pnpm crm:tiktok --fetch-limit=10 --read-limit=10          # requeu
 caffeinate -i pnpm crm:tiktok --fetch-limit=10 --read-limit=10 --apply  # writes S3 frames + Twenty host/home/note, mirrors /find leads
 pnpm crm:tiktok-requeue                             # caption-skipped rows today's gate passes → back to fetch (run auto)
 pnpm crm:tiktok-settle [--apply]                    # SUSPECTED same-facts homes → DUPLICATE of the first copy
+pnpm crm:tiktok-posts [--apply]                     # one Twenty `tiktokPost` per read video (run does it)
 ```
+
+The ad itself lives on its own object, **TikTok posts** (`tiktokPost`): broker/agency name, publish
+date, caption, text in the video (reader `onScreenText`, tiktok-v3+), speech transcript, phones seen,
+status (WAITING / LISTING / JOINED_EXISTING / SKIPPED) — linked to its home and host.
 
 Every video becomes a `home` at **VETTING** (`source TIKTOK`, `sourceId tiktok:<id>`) with the reader's
 property frames as photos. Its poster becomes a `host` with an Opportunity. Nothing publishes.
