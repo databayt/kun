@@ -126,7 +126,7 @@ The gateway also runs the engine's local cron jobs. Each one is a script in `~/.
 | `hogwarts-crm-digest` · `hogwarts-crm-activity` · `hogwarts-snapshot-freshness` | 08:00 · every 2 h · every 3 h | hogwarts CRM digests to a DM | by hand |
 | `databayt-daily-social-digest` · `databayt-weekly-social-plan` | weekdays 08:30 · Sun 18:00 | social digest and plan to `#social` | by hand |
 
-The sweep reads for about an hour, longer than Hermes' default 1 h script limit, so its installer sets `cron.script_timeout_seconds: 7200` in `~/.hermes/config.yaml`. Its chat commands: **`/tiktok`** gives the ledger status and the next run; **`/tiktokrun`** runs the sweep on the next tick. `hermes cron list` shows every job's last result. A job that needs a model fails today, because the Nous login is dead; that is why `databayt-4h-heartbeat` errors.
+The sweep reads for about an hour, longer than Hermes' default 1 h script limit, so its installer sets `cron.script_timeout_seconds: 7200` in `~/.hermes/config.yaml`. Its chat command **`/tiktok`** starts the sweep at once (detached, since `hermes cron run` runs the whole job in its own process and quick commands die at 30 s) and replies with the ledger status. `hermes cron list` shows every job's last result. A job that needs a model fails today, because the Nous login is dead; that is why `databayt-4h-heartbeat` errors.
 
 ## Daily use
 

@@ -227,7 +227,7 @@ status (WAITING / LISTING / JOINED_EXISTING / SKIPPED) — linked to its home an
 
 Every video becomes a `home` at **VETTING** (`source TIKTOK`, `sourceId tiktok:<id>`) with the reader's
 property frames as photos. Its poster becomes a `host` with an Opportunity. Nothing publishes.
-The Hermes gateway's cron runs it daily at 06:00: job `mkan-tiktok-sweep` (`--fetch-limit=40 --read-limit=80 --notify`), no agent, silent unless it fails. Install or refresh with `bash scripts/crm/install-tiktok-sweep.sh` in mkan (`--launchd` falls back to the old launchd job). From Slack or WhatsApp: `/tiktok` for status, `/tiktokrun` to run it now.
+The Hermes gateway's cron runs it daily at 06:00: job `mkan-tiktok-sweep` (`--fetch-limit=40 --read-limit=80 --notify`), no agent, silent unless it fails. Install or refresh with `bash scripts/crm/install-tiktok-sweep.sh` in mkan (`--launchd` falls back to the old launchd job). From Slack or WhatsApp, `/tiktok` runs it now and replies with the ledger status.
 The reader is Groq (`qwen3.8-27b` vision, `gpt-oss-120b` for fact-rich captions); `--reader=claude` is the fallback.
 The vision quota (200k tokens/day) is the bottleneck, so reads go phone+price first, one 3-frame strip
 before two, and a caption that already missed the text read goes straight to vision.
