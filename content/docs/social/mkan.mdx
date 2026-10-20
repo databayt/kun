@@ -89,11 +89,17 @@ play on its own page — beside, not inside, the Airbnb-style site.
      WhatsApp end card. Everything sits inside TikTok's safe area.
    - Delivered through `media.sh encode reel` (BT.709, faststart, 60 s cap); `--slideshow` forces
      the photo path. No music — the poster adds a trending sound in the app.
-3. `tt:card` — each video + its caption (English, one Kinyarwanda line, hashtags) lands in
+3. `tt:carousel` — one **data carousel** a day (photo mode, 7 slides): a cover, five homes —
+   price, place, rooms, the ref, the WhatsApp line — and a call-to-action slide, in the brand
+   kit. Built from CRM facts only, no broker photo or footage, so every Kigali monthly home
+   qualifies; the caption says we connect the tenant with the agent or owner. Themes rotate by
+   day (district → budget → bedrooms); a shown home rests 14 days. Slides land on the CDN
+   (`mkan/uploads/tiktok-post/<date>/carousel-…`) with the caption in #mkan.
+4. `tt:card` — each video + its caption (English, one Kinyarwanda line, hashtags) lands in
    Slack #mkan (CDN link when the bot can't upload files).
-4. **A person posts it** from the phone: save → TikTok → sound → paste caption → post, then
+5. **A person posts it** from the phone: save → TikTok → sound → paste caption → post, then
    `pnpm tt:posted <ref> <url>`.
-5. `tt:stats` reads views back with yt-dlp; `tt:ask` lists the brokers, the consent message
+6. `tt:stats` reads views back with yt-dlp; `tt:ask` lists the brokers, the consent message
    (EN + Kinyarwanda) and records ASKED / YES / NO.
 
 Inquiries arrive on WhatsApp quoting the ref; the operator finds the home on `/find` or in the
