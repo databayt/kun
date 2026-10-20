@@ -95,6 +95,10 @@ play on its own page — beside, not inside, the Airbnb-style site.
    qualifies; the caption says we connect the tenant with the agent or owner. Themes rotate by
    day (district → budget → bedrooms); a shown home rests 14 days. Slides land on the CDN
    (`mkan/uploads/tiktok-post/<date>/carousel-…`) with the caption in #mkan.
+   **Voiced cut** — `tt:datavideo` turns the same carousel into a ~55 s video: each slide holds
+   for its narrated line (a Google stock voice through `media.sh voice`, one request a day,
+   Whisper-gated), with a push-in and crossfades. The caption says "AI voice"; keep TikTok's
+   AI-generated label on when posting.
 4. `tt:card` — each video + its caption (English, one Kinyarwanda line, hashtags) lands in
    Slack #mkan (CDN link when the bot can't upload files).
 5. **A person posts it** from the phone: save → TikTok → sound → paste caption → post, then
