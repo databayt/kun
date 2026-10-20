@@ -130,7 +130,7 @@ pnpm crm:tiktok-requeue                       # skipped-by-caption rows the gate
 pnpm crm:tiktok-settle --apply                # same-facts copies → DUPLICATE of the first home
 ```
 
-The [Hermes](/docs/hermes) gateway's cron runs the lane every day at 06:00 (job `mkan-tiktok-sweep`, `--fetch-limit=40 --read-limit=80`) and posts new homes and **new** /find leads to `#mkan`. It runs without a model and says nothing more unless the run fails. Install or refresh it with `bash scripts/crm/install-tiktok-sweep.sh` in mkan; `--launchd` puts it back on launchd. Send `/tiktok` to the bot to run it now; the reply carries the ledger status.
+The [Hermes](/docs/hermes) gateway's cron runs the lane every day at 06:00 (job `mkan-tiktok-sweep`, `--fetch-limit=40 --read-limit=80`) and posts new homes and **new** /find leads to `#mkan`. It runs without a model and says nothing more unless the run fails. Install or refresh it with `bash scripts/crm/install-tiktok-sweep.sh` in mkan; `--launchd` puts it back on launchd. Send `/tiktok` to the bot to run it now; the reply carries the ledger status. Only posts from the last 7 days are fetched and read (`--max-age=7`, since 2026-10-20, down from 120): an older ad is usually let, and the vision quota goes further on fresh ones. Pass `--max-age=N` to widen a one-off run.
 
 What the 2026-10-20 tightening changed:
 - 112 rentals an older caption gate had skipped went back to the queue; the gate now re-checks skipped rows every run.
