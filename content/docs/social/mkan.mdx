@@ -76,9 +76,19 @@ play on its own page — beside, not inside, the Airbnb-style site.
 `com.databayt.mkan-tiktok-post` at 07:00, after the 06:00 broker sweep):
 
 1. `tt:pick` — today's homes, spread across districts; a posted home rests 30 days.
-2. `tt:render` — a ~16 s 9:16 slideshow per home: photos with a slow push-in, price / area /
-   beds overlay inside TikTok's safe area, a WhatsApp end card with the home's ref (`K5771`).
-   No music — the poster adds a trending sound in the app.
+2. `tt:render` — one branded 9:16 video per home, in three passes:
+   - **Source** — for a broker lead, that broker's own TikTok video (yt-dlp, cached in
+     `.data/tiktok-post/src/`); a photo post or a deleted video falls back to a slideshow of the
+     home's photos with a slow push-in.
+   - **Enhance** (ffmpeg-full, the [Media Studio](/docs/media) build) — vidstab stabilising,
+     light denoise (`hqdn3d`), a gentle grade (`eq`), `unsharp`, lanczos to 1080×1920 (a
+     landscape clip sits on a blurred fill), muted, cut at 45 s.
+   - **Brand** — mkan's brand kit (`content/media/brand-kit.json` → `production.mkan`): an ivory
+     sting with the arch mark, the mark + "Video @broker" credit top-start, a slate lower third
+     (price, place, rooms, ref) that slides up and hands over to a price pill at 7 s, and a slate
+     WhatsApp end card. Everything sits inside TikTok's safe area.
+   - Delivered through `media.sh encode reel` (BT.709, faststart, 60 s cap); `--slideshow` forces
+     the photo path. No music — the poster adds a trending sound in the app.
 3. `tt:card` — each video + its caption (English, one Kinyarwanda line, hashtags) lands in
    Slack #mkan (CDN link when the bot can't upload files).
 4. **A person posts it** from the phone: save → TikTok → sound → paste caption → post, then
