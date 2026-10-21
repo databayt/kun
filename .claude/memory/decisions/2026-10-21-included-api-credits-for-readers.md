@@ -14,7 +14,7 @@ The Max plan now includes $100 a month in API credits, and the scrape lanes' vis
 
 ## Context
 
-Groq's free vision tier shares one key with mkan's `/find` agent. On 2026-10-20 the TikTok sweep read only 2–8 videos by vision while fetch pulled 40 a day, and 128 downloaded videos went stale unread. Abdout saw the included-credits offer at session start on 2026-10-21 and asked to use it.
+Groq's free vision tier shares one key with mkan's `/find` agent. On 2026-10-20, with repeat runs, the TikTok sweep read only 2–8 videos by vision while fetch pulled 40 a day, and 128 downloaded videos went stale unread. On a clean day (2026-10-21) Groq read 22 by vision and 50 still waited. Abdout saw the included-credits offer at session start on 2026-10-21 and asked to use it.
 
 ## Expected outcome
 
