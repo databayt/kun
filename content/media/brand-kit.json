@@ -1055,6 +1055,13 @@
         "numerals": "arab"
       },
       "voice": "house-ar",
+      "audio": {
+        "bed": "public/brands/mkan-bed.m4a",
+        "bpm": 112,
+        "lufs": -14,
+        "source": "Google Lyria RealTime (lyria-realtime-exp, free Gemini API tier), 2026-10-21. Instrumental, AI-generated: posts carry TikTok's AI-generated label. Regenerate: .claude/skills/edit/scripts/media/lyria.py",
+        "prompt": "warm modern Afro-house, marimba and kalimba melody, Rhodes chords, light shaker, gentle kick, uplifting calm real-estate showcase"
+      },
       "cdn": "mkan",
       "manifest": "src/components/help/media-manifest.json"
     },
