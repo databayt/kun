@@ -42,6 +42,7 @@ Polymorphic on argument, like `/handover`:
 | `whatsapp`                            | Harvest numbers + hand to the sender. §3       |
 | `website`                             | Fetch + extract from a domain. §4              |
 | `tiktok` (mkan, Kigali)               | Rental videos → CRM homes at VETTING. §4b      |
+| `facebook for mkan` (Kigali)          | Rental group posts → the same pipeline. §4c    |
 | `for <product>` / `<x> for <product>` | Resolve scope, then run the above. §0          |
 | `--apply`                             | Write. Absent = dry run. Always dry-run first. |
 
@@ -112,7 +113,7 @@ automated lane** — treat a stale number here as a planning error, not a detail
   zero; schools publish phone and WhatsApp on About.
 - Split Pages from Groups. A `/groups/` URL is not a school lead.
 - Reuse `contact-extract.ts` (`extractContacts`, `WHATSAPP_NEAR`) and `normalize-contacts.ts`; do not write a third. (`tier4-enricher.js` invented WhatsApp numbers and is retired.)
-- Empty reads are not final: `enrich-fb-about.ts --retry-empty` re-reads a page whose last read found nothing and is 14+ days old (339 of 707 were empty on 2026-10-21).
+- Empty reads are real: 339 of 707 About tabs carry nothing but a Messenger button. `--retry-empty` re-reads pages 14+ days old, but 0 of 20 gained anything on 2026-10-21 — a manual flag, not a schedule.
 - **Checkpoint** (`dorker_checkpoint.json` pattern) so a stop is resumable, and log what the stop dropped.
 
 **Account + throttle rule — read this every time.** Use a **dedicated account**, never Abdout's.
@@ -243,6 +244,23 @@ Seeds list via `tiktokuser:<secUid>` (the `@handle` extractor is broken); three 
 a seed (re-tried weekly); a proposal with ≥3 search hits and a kept home is promoted automatically.
 The volume comes from the seed accounts: web search is blocked after a few queries.
 Traps and numbers: `references/backends.md` → TikTok.
+
+## §4c — `facebook for mkan`: Kigali rental groups (2026-10-21)
+
+Code: `mkan/scripts/crm/facebook-rentals.ts` — `pnpm crm:fb-rentals` (capture → read → upsert),
+dry run unless `--apply`. It reads Facebook's own GraphQL and the JSON embedded in the first page,
+not screen text, on the **dedicated scrape account only** (`cdp-session.ts` refuses 9222). Every read,
+gate, `dupKey` and Twenty body is the TikTok lane's: homes land at VETTING with `source FACEBOOK` and
+`sourceId facebook:<postId>`. A post whose facts match a home already on the board, from TikTok or
+anywhere else, becomes a note on that home instead of a copy.
+
+- **Seeds are human-curated** (`pnpm crm:fb-rentals-seeds --add=<group url>`): Kigali rental groups the
+  scrape account already belongs to. The bot never searches, joins or posts.
+- **Marketplace is closed** to the scrape account ("Marketplace isn't available to you", measured
+  2026-10-21; new accounts are ineligible). It is group posts until that changes.
+- A checkpoint or login wall stops the run with one Slack line; nothing retries a login.
+- Not scheduled yet: there are no seeds. After a human adds them, run it by hand, then schedule a Hermes job
+  modelled on `mkan-tiktok-sweep`, starting at 15 posts a day.
 
 ## §5 — Official directories (build this next)
 

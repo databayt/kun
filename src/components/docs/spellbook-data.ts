@@ -3488,6 +3488,20 @@ export const schools: School[] = [
         depends: [],
       },
       {
+        name: "scrap facebook for mkan",
+        effect:
+          "Kigali rental posts in Facebook groups → the TikTok pipeline → mkan CRM homes at VETTING (scrape §4c)",
+        order: [f("lead"), s("/scrape")],
+        steps: [
+          "Code: mkan/scripts/crm/facebook-rentals.ts — `pnpm crm:fb-rentals` (capture → read → upsert), dry run unless --apply",
+          "Dedicated scrape account only (FB_SCRAPE_PORT/PROFILE, chrome-scrape.sh); seeds are human-curated groups, the bot never searches or joins",
+          "Same reader, gates and dupKey as TikTok: a home already on the board gets a note, not a copy",
+          "Marketplace is closed to the scrape account (2026-10-21); no schedule until seeds exist",
+        ],
+        connects: ["scrap for mkan", "scrap tiktok", "scrap facebook"],
+        depends: [],
+      },
+      {
         name: "tiktok homes",
         effect:
           "Same lane, said as the inventory: TikTok rental videos in Kigali → mkan CRM",

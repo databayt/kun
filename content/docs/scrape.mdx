@@ -152,6 +152,16 @@ Things to know:
 - **Whisper doesn't know Kinyarwanda.** The caption and the frames' on-screen text carry the facts; the transcript only helps with place names.
 - **Prices are monthly.** They go in `priceMonthLocal` + `rentPeriod`. Converting to the site's nightly price is a publish-time decision.
 
+## Facebook groups — Kigali rentals (mkan, 2026-10-21)
+
+The same brokers who post on TikTok also post their homes in Facebook groups. `pnpm crm:fb-rentals` in mkan reads those group posts and runs them through the TikTok pipeline: the same reader, the same gates and the same dedupe key. A home posted on both platforms lands once, and the second copy becomes a note on the first.
+
+- **Account:** the dedicated scrape account only, never the :9222 vault. Launch it with `bash ~/.claude/bin/chrome-scrape.sh`.
+- **Data:** Facebook's own GraphQL responses and the JSON embedded in the first page, not screen text.
+- **Seeds:** a human adds groups the scrape account already belongs to. The bot never searches, joins or posts.
+- **Marketplace:** not available to the scrape account (new accounts are ineligible, measured 2026-10-21).
+- **Schedule:** none until there are seeds.
+
 ## Where the code lives
 
 | Repo                                    | What                                                                                                              |
