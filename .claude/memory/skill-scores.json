@@ -1949,6 +1949,15 @@
       "cases": 646,
       "delta": null,
       "note": "Not degraded (degraded=false, unadjudicated=0). Corpus fnv1a:596ba208, 82 skills listed, 669 cases total, 23 adjudicated away, 646 scored; first scored run after the 2026-10-03 and 2026-10-07 baseline resets, so delta is null. proxy_fidelity 0.8 on n=10 real pairs. Misses: md-for-textbook, higgs-for-carousel."
+    },
+    {
+      "week_of": "2026-10-21",
+      "baseline_reset": true,
+      "corpus_hash_from": "fnv1a:596ba208",
+      "corpus_hash_to": "fnv1a:22ef7cf0",
+      "cases_to": 692,
+      "top1_hard": null,
+      "note": "BASELINE RESET, not a scored run. New skill `reverse` (REA feature teardown, 251 chars, 5 cases) on top of a corpus already stale before it (fnv1a:11b27769 without reverse; scored=82, fleet=85). listing_cap raised 33000 → 33500 (engine.json history). Scores before and after this line are not comparable; the next /bench run re-establishes the number."
     }
   ],
   "stratified": {

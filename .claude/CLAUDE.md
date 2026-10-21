@@ -51,7 +51,7 @@ Claude routes these to the right skill + agent + MCP without a dedicated command
 **Defense Against the Dark Arts** — protection from bugs and entropy: `test`, `e2e`, `handover`, `qa`, `coverage`, `review`, `security`, `audit`, `bench`, `analyze`, `constitution`, `accessibility`, `optimize`, `performance`
 **Reparo** — the mending spells: `fix`, `error`, `scan`, `lint`, `format`, `type-check`, `report`
 **Quill Charms** — the spells of documentation: `docs`, `readme`, `api-docs`, `storybook`, `changelog`
-**Geminio** — duplication and summoning: `clone`, `copy`, `fork`, `extend`, `upstream`
+**Geminio** — duplication and summoning: `clone`, `copy`, `fork`, `extend`, `upstream`, `reverse`
 **Summoning Charms** — portals to external realms: `github`, `figma`, `linear`, `slack`, `notion`, `sentry`, `stripe`, `vercel`, `analytics`, `neon`, `facebook`
 **Divination** — seeing ahead: `story`, `loop`, `goal`, `schedule`, `workflow`
 **Advanced Spellwork** — performance magic: `parallelize`, `waterfall`, `bundle`, `lazy`, `suspense`, `memo`, `server-component`, `streaming`, `barrel`, `dedup`

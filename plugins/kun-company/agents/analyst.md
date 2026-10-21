@@ -77,6 +77,7 @@ Know the market better than anyone. Track competitors per vertical, interpret us
 - Benchmark pricing against competitors
 - Research Saudi/MENA market regulations
 - Track competitor product launches and pricing changes
+- Tear down a competitor feature (requests, routes, API shape) with `/reverse` → evidence-cited TEARDOWN.md
 
 ### ESCALATE TO product
 - Strategic pivots based on market data

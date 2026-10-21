@@ -1576,6 +1576,20 @@ export const schools: School[] = [
         connects: ["sync", "clone"],
         depends: [],
       },
+      {
+        name: "reverse",
+        effect:
+          "Tear down how a competitor's feature works — requests, routes, API shape — with evidence",
+        order: [s("/reverse"), f("analyst"), w("cowork-bridge")],
+        steps: [
+          "Script the feature as a browser scenario (or read the HAR / app)",
+          "Capture evidence with REA",
+          "Write TEARDOWN.md with cited claims + unknowns",
+          "Propose our build → /idea",
+        ],
+        connects: ["clone", "idea"],
+        depends: [],
+      },
     ],
   },
   {

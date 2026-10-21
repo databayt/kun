@@ -35,6 +35,9 @@ Polymorphic. Two families of source:
 /clone https://app.example.com/dash --devtools # logged-in page via real Chrome
 ```
 
+Need the **behavior** behind the section — the requests it fires, routes, API shape — not
+just its pixels? That is `/reverse <url>` (REA teardown); clone stays visual.
+
 ### Figma (pixel-perfect design-to-code)
 
 ```

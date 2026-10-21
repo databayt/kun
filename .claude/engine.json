@@ -70,7 +70,7 @@
   "project_agents": 27,
   "user_agents": 54,
   "commands": 0,
-  "project_skills": 67,
+  "project_skills": 68,
   "user_skills": 84,
   "pattern_cards": 14,
   "project_rules": 6,
@@ -88,7 +88,7 @@
  },
  "eval": {
   "$comment": "Declared POLICY for the bench layers. Measured state lives in .claude/memory/skill-scores.json — never here, because every engine.json field is something health.sh checks reality against and a score has no declared counterpart. listing_cap is a shared, zero-sum budget: the fleet listing is loaded into EVERY session before a word is typed, so accuracy bought with prefix bloat is a regression, not a win. Raising a cap is a deliberate, recorded act — never a silent accommodation of the thing that just breached it.",
-  "listing_cap": 33000,
+  "listing_cap": 33500,
   "skill_cap": 1200,
   "holdout_pct": 20,
   "cadence_days": 7,
@@ -116,6 +116,12 @@
     "from": 32500,
     "to": 33000,
     "why": "the measured fleet stood at 32,422/32,500 — 78 characters of headroom — so the cap had returned to the exact state the 2026-08-17 entry describes: it had stopped governing bloat and started vetoing capability, because ANY new skill breaches it however lean. /funnel was written tight from the start rather than trimmed after the fact: 390 chars against /scrape's 436, and /scrape is the lane it mirrors — so the 500 buys back headroom rather than accommodating the thing that breached it, which is the test the 2026-08-06 entry sets. The alternative was trimming the next tier down (auth 816, feature 726, deploy 713, qa 685); rejected because none has been scored and 'tuning descriptions before the first measurement is exactly what this system exists to stop'. The four heaviest (draft/higgs/approve/publish, 3,862 together) carry deliberate negative-discrimination clauses and stay untouched. Leaves 188 chars of headroom, so the next addition faces the same deliberate decision rather than a silent one. NOTE: this raise is Abdout's call to keep or revert — it is recorded here so the state is coherent and health.sh passes, not to settle the question by default."
+   },
+   {
+     "date": "2026-10-21",
+     "from": 33000,
+     "to": 33500,
+     "why": "the fleet stood at 32,999/33,000 — one character of headroom — so ANY new skill breached it however lean, the state the 2026-08-17 and 2026-08-18 entries describe. /reverse (REA feature teardown) was written tight from the start: trimmed from ~680 to 251 chars (5 dispatch cases) BEFORE this raise, against /funnel's 390. Trimming higgs/deploy/report/draft/pwa prose to fit was tried and reverted: those are unscored negative-discrimination clauses, which every earlier entry leaves untouched. Measured after: 33,250, leaving 250 chars of headroom so the next addition faces the same deliberate decision. NOTE: Abdout's call to keep or revert, recorded so the state is coherent and health.sh passes."
    }
   ],
   "harness_listing_fraction": 0.02,

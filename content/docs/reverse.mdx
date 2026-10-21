@@ -1,0 +1,51 @@
+---
+title: Reverse
+description: Feature teardowns — how a competitor's app really does X, with evidence, before we build our own
+---
+
+# Reverse
+
+`reverse` answers _"how does that app do it?"_ with evidence instead of guesses. Say it in
+prose: _"reverse how Classera marks attendance"_, _"teardown this HAR"_,
+_"what API does that rental site call when you filter by price?"_. The result is a
+`TEARDOWN.md` that ends in a proposal for one of our products — the input to [idea](/docs/workflows).
+
+It wraps [REA](https://github.com/morluto/rea) (MIT), which inspects software with no source
+access and states its unknowns next to every finding. kun drives REA's **CLI**; its MCP server
+is deliberately not registered, so it costs nothing until it runs.
+
+## Where it sits
+
+| Question | Keyword |
+| --- | --- |
+| Make our section **look** like theirs | `clone` |
+| Understand what their feature **does** — requests, routes, API shape | `reverse` |
+| Find **people** to sell to | `scrape` |
+
+## Lanes
+
+| Target | Lane | Measured on the Mac |
+| --- | --- | --- |
+| Public URL + a feature to exercise | Scripted scenario — a clean headless Chrome runs the steps and records every request | ~9 s, ~380 MB |
+| A page behind Abdout's login | The same scenario in **connect** mode on a fresh tab in the [session vault](/docs/behalf) | same |
+| A `.har` exported from DevTools | Network-capture inspection (cookies and auth headers never retained) | seconds |
+| Electron app, `.asar`, or a page's exported scripts | Static JavaScript reconstruction | ~30 s, ~1.4 GB peak |
+| `.apk` / native binaries | Need JADX + JDK / Ghidra — not installed; the skill says so instead of installing | — |
+
+## Known limits (2026-10-21, REA 6.7.0)
+
+- REA needs Node 22, 24 or 26+. The Mac runs 25, so the skill's runner
+  (`.claude/skills/reverse/scripts/rea.sh`) pins Node 24 per call through `npx`.
+- `analyze-web-bundle` ran out of its 4 GB heap on kun.databayt.org's own Next.js bundle. The
+  skill routes bundle questions through script export + static analysis instead.
+- Passive page inspection only sees traffic after it attaches — on an already-loaded page it
+  reported zero requests. Traffic questions always use a scenario.
+- Static analysis output is huge (237 MB for a 1 MB bundle); the skill reads `summary` and
+  `statistics`, then queries with `jq`.
+
+## Guardrails
+
+Lawful, authorized analysis only: the public behavior of competitor products, our own apps, and
+software we are licensed to run. No bypassing logins, paywalls or anti-bot measures, no other
+users' data, and no copying their code or assets — understand it, then build our own.
+Evidence stays in the gitignored `.claude/handoff/reverse/`.

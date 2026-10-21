@@ -3255,6 +3255,35 @@
             "clone"
           ],
           "depends": []
+        },
+        {
+          "name": "reverse",
+          "effect": "Tear down how a competitor's feature works — requests, routes, API shape — with evidence",
+          "order": [
+            {
+              "type": "skill",
+              "name": "/reverse"
+            },
+            {
+              "type": "familiar",
+              "name": "analyst"
+            },
+            {
+              "type": "ward",
+              "name": "cowork-bridge"
+            }
+          ],
+          "steps": [
+            "Script the feature as a browser scenario (or read the HAR / app)",
+            "Capture evidence with REA",
+            "Write TEARDOWN.md with cited claims + unknowns",
+            "Propose our build → /idea"
+          ],
+          "connects": [
+            "clone",
+            "idea"
+          ],
+          "depends": []
         }
       ]
     },
