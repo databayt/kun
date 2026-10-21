@@ -57,7 +57,11 @@ const CITIES: Record<
 
 /// The businesses that buy websites. Government, embassies, banks and
 /// multinationals are out: they tender, and a cold message never lands.
-const KINDS = `["amenity"~"^(restaurant|cafe|fast_food|bar|school|college|kindergarten|clinic|dentist|doctors|pharmacy|driving_school|language_school)$"]`;
+const KINDS = `["amenity"~"^(restaurant|cafe|fast_food|bar|school|college|kindergarten|clinic|dentist|doctors|pharmacy|veterinary|car_wash|driving_school|language_school)$"]`;
+/// Appointment businesses (2026-10-21): salons, gyms, garages — they live on
+/// bookings and WhatsApp, so the pitch is a booking page, not "a website".
+const SERVICES = `["shop"~"^(hairdresser|beauty|massage|car_repair|tyres)$"]`;
+const LEISURE = `["leisure"~"^(fitness_centre|sports_centre)$"]`;
 const TOURISM = `["tourism"~"^(hotel|guest_house|hostel|apartment|motel)$"]`;
 
 interface Lead {
@@ -133,6 +137,10 @@ function sectorOf(t: Record<string, string>): string {
   if (/restaurant|cafe|fast_food|bar/.test(a)) return "FOOD";
   if (/school|college|kindergarten/.test(a)) return "EDUCATION";
   if (/clinic|dentist|doctors|pharmacy/.test(a)) return "HEALTH";
+  if (a === "veterinary") return "PETS";
+  if (a === "car_wash" || /car_repair|tyres/.test(t.shop ?? "")) return "AUTO";
+  if (/hairdresser|beauty|massage/.test(t.shop ?? "")) return "BEAUTY";
+  if (t.leisure) return "FITNESS";
   if (t.office === "ngo") return "NGO";
   if (t.shop) return "RETAIL";
   if (t.office) return "PROFESSIONAL";
@@ -149,6 +157,7 @@ async function discover(city: string) {
   // With a site (to audit) and without one but reachable (NO_WEBSITE leads).
   const q = `[out:json][timeout:120];(
     nwr["name"]${KINDS}(${bb}); nwr["name"]${TOURISM}(${bb});
+    nwr["name"]${SERVICES}(${bb}); nwr["name"]${LEISURE}(${bb});
     nwr["name"]["office"~"^(company|ngo|lawyer|accountant|estate_agent|travel_agent|insurance|consulting)$"](${bb});
     nwr["name"]["shop"]["website"](${bb});
   ); out tags center 4000;`;
@@ -770,6 +779,11 @@ const SHOWCASE: Record<string, { sd?: string; any: string }> = {
   HEALTH: { sd: "sijillee.com", any: "databayt.org" },
   NGO: { any: "mr.databayt.org" }, // visual storytelling
   TOURISM: { any: "mkan.sd" },
+  // No live booking build for appointment trades yet: the portfolio itself.
+  BEAUTY: { any: "databayt.org" },
+  FITNESS: { any: "databayt.org" },
+  AUTO: { any: "databayt.org" },
+  PETS: { any: "databayt.org" },
   OTHER: { any: "mr.databayt.org" },
 };
 const PORTFOLIO = "databayt.org";
@@ -792,10 +806,46 @@ const HEALTH_PITCH = {
       `Would you like a free mock-up of a booking page for ${l.name}?`,
   },
 };
+/// Appointment trades get the same treatment: the booking is what they buy.
+const SERVICE_PITCH: Record<string, typeof HEALTH_PITCH.clinic> = {
+  BEAUTY: {
+    en: "We build salon websites where clients see your services and prices and book a slot on WhatsApp",
+    ask: (l: Lead) =>
+      `Would you like a free mock-up of a booking page for ${l.name}?`,
+  },
+  FITNESS: {
+    en: "We build gym websites with class timetables, membership sign-up and WhatsApp reminders",
+    ask: (l: Lead) =>
+      `Would you like a free mock-up of a membership page for ${l.name}?`,
+  },
+  AUTO: {
+    en: "We build garage websites where drivers book a service online and get a WhatsApp message when the car is ready",
+    ask: (l: Lead) =>
+      `Would you like a free mock-up of a booking page for ${l.name}?`,
+  },
+  PETS: {
+    en: "We build vet clinic websites with online appointment booking and vaccination reminders on WhatsApp",
+    ask: (l: Lead) =>
+      `Would you like a free mock-up of a booking page for ${l.name}?`,
+  },
+};
+/// OSM tags agro-vet suppliers as `veterinary` and parts dealers as
+/// `car_repair` (Kigali, 2026-10-21): they sell stock, so they get the
+/// stock-and-order pitch, not a booking page.
+const STOCKISH = /agro|vet pharm|pharmac|supplier|farm|spare|parts|machinery/i;
+const STOCK_PITCH = {
+  en: "We build websites where customers see what's in stock and order on WhatsApp",
+  ask: (l: Lead) =>
+    `Would you like a free mock-up of an online catalogue for ${l.name}?`,
+};
 const healthPitch = (l: Lead) =>
-  l.sector === "HEALTH" && l.country !== "SUDAN"
-    ? HEALTH_PITCH[CLINICISH.test(l.name) ? "clinic" : "pharmacy"]
-    : null;
+  l.country === "SUDAN"
+    ? null
+    : l.sector === "HEALTH"
+      ? HEALTH_PITCH[CLINICISH.test(l.name) ? "clinic" : "pharmacy"]
+      : (l.sector === "PETS" || l.sector === "AUTO") && STOCKISH.test(l.name)
+        ? STOCK_PITCH
+        : (SERVICE_PITCH[l.sector] ?? null);
 
 function showcaseOf(l: Lead): string {
   // A school keeps its system proof even in Sudan; balqalam is the live one.
@@ -870,6 +920,10 @@ function draft(
     "FOOD",
     "HOSPITALITY",
     "EDUCATION",
+    "BEAUTY",
+    "FITNESS",
+    "AUTO",
+    "PETS",
     "PROFESSIONAL",
     "RETAIL",
     "TOURISM",
