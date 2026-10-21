@@ -49,9 +49,11 @@ or stale figure — and prefer the artifact over this table.
 1. **hogwarts Postgres is the source of truth for gate state. Twenty is a mirrored Kanban.** A human
    dragging a card is advisory — the webhook records it and opens a review task, never a silent
    write-back. One writer, one truth.
-2. **Zero tokens per lead.** Routing, segmentation and scheduling are deterministic code. Groq
-   answers free-form chat (already live, separate budget line). Follow-up copy is batch-drafted on
-   the Max pool — one `claude -p` session per tick, not one per lead. **Never an Anthropic API key.**
+2. **Zero tokens per lead.** Routing, segmentation and scheduling are deterministic code. Free-form
+   chat is answered by Groq, or by Claude Haiku on the plan's included API credits under its own hard
+   cap and its own key (D-20261021-included-api-credits-for-hogwarts-chatbot) — a separate budget
+   line. Follow-up copy is batch-drafted on the Max pool — one `claude -p` session per tick, not one per
+   lead. **Never an Anthropic API key for lead work.**
 3. **No new stage vocabulary.** The gate ladder is the union of `Prospect.status`, `Lead.status` and
    the stage options **already live in the workspace**. Twenty options are **appended, never
    replaced** — it stores an option's value on the record, so a swap orphans every row holding one.

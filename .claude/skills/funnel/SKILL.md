@@ -25,8 +25,10 @@ Three facts govern the design, and none of them are opinions:
   (`requestDemo`, `startFreeTrial`, `captureLead`) still await UI wiring.
 - **The funnel logic is deterministic; the LLM is asynchronous.** Which question comes next, which
   segment you land in, which asset you get, when a touch fires — scripted, **zero tokens**. Groq
-  answers free-form messages (already live, a different budget line). Personalized follow-up copy is
-  batch-drafted on the Max pool via the launchd drain. **Never a per-lead Anthropic call.**
+  answers free-form messages (already live, a different budget line) — or, once enabled, Claude Haiku
+  on the plan's included API credits under a hard $20/month cap (D-20261021-included-api-credits-for-hogwarts-chatbot).
+  Personalized follow-up copy is batch-drafted on the Max pool via the launchd drain. **Never a per-lead
+  Anthropic call** — a chat answer is not lead work.
 
 Numbers and hard rules: `.claude/agents/funnel.md`. Acquisition — everything before the first
 reply — belongs to `.claude/agents/lead.md` and `/scrape`. **kun holds no funnel code.**
