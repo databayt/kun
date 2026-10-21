@@ -38,9 +38,9 @@
 # Set these to run a scrape:
 #   FB_SCRAPE_PORT=9333                                   # a port that is NOT the vault
 #   FB_SCRAPE_PROFILE="$HOME/.claude/chrome-fbscrape-profile"
-#   FB_SCRAPE_DELAY_MS=4000                               # throttle (warn if absent)
+#   FB_SCRAPE_DELAY_MS=8000                               # throttle (warn if absent)
 # Launch that profile once and log in as the dedicated account:
-#   bash ~/.claude/bin/chrome-debug.sh 9333   # after pointing PROFILE at the above
+#   bash ~/.claude/bin/chrome-scrape.sh   # reads the two vars above; refuses 9222 and the vault
 #
 # Exit 2 BLOCKS the call and returns stderr to Claude. Exit 0 allows (warnings
 # still print). Deliberately narrow: only scrape entrypoints are matched, so
@@ -159,7 +159,7 @@ block() {
     echo "   Fix: run the scrape on a dedicated Facebook account, on its own port+profile."
     echo "     export FB_SCRAPE_PORT=9333"
     echo "     export FB_SCRAPE_PROFILE=\"\$HOME/.claude/chrome-fbscrape-profile\""
-    echo "     export FB_SCRAPE_DELAY_MS=4000"
+    echo "     export FB_SCRAPE_DELAY_MS=8000"
     echo "   Launch it once and log in as that account, then re-run."
     echo
     echo "   Before scraping at all: raw discovery is the measured low-yield lane"

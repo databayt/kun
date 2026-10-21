@@ -118,7 +118,7 @@ In Kigali, most rentals are advertised by brokers in TikTok videos rather than o
 | --- | --- | --- |
 | discover | Recent videos from seed accounts, plus 3 rotating web-search phrases a day. Search **proposes** new accounts and a human promotes them | yt-dlp, DuckDuckGo → Brave |
 | fetch | Caption, 8 evenly spaced frames and a speech transcript. The mp4 is deleted | yt-dlp, ffmpeg, mlx-whisper |
-| read | Is it a Kigali rental? It extracts price (RWF/month), rooms, place, phones and the frames that show the property. Posts with a phone and a price are read first | Groq (vision + text, free tier); `claude -p` as fallback |
+| read | Is it a Kigali rental? It extracts price (RWF/month), rooms, place, phones and the frames that show the property. Posts with a phone and a price are read first | Claude API (`claude-haiku-5-5`, included Max credits, monthly cap); Groq free tier as fallback |
 | upsert | Property frames go to S3; host + Opportunity, home at **VETTING** and a note with the caption and transcript go to Twenty | Twenty REST |
 
 ```bash
@@ -160,7 +160,7 @@ Things to know:
 | `hogwarts/scripts/crm/`                 | `twenty-rest.ts` (vendored from mkan), `contact-gap.ts`, `normalize-contacts.ts`                                   |
 | `hogwarts/src/lib/whatsapp/`            | The Evolution API sender                                                                                          |
 | `hogwarts/src/lib/email.ts`             | Resend — the larger channel for this list                                                                         |
-| `twenty/scripts/sudan-schools-scraper/` | The CDP Facebook scraper, relocating to `hogwarts/scripts/crm/`                                                    |
+| `hogwarts/scripts/crm/` (Facebook)      | The CDP Facebook scraper: `discover-fb-pages.ts`, `enrich-fb-about.ts` (`--retry-empty`), `cdp-session.ts`        |
 | `kun`                                   | Routing only — no scraper code, ever                                                                              |
 
 `twenty-rest.ts` is **vendored, not shared**: fix bugs in both copies until it is extracted to a
@@ -311,7 +311,8 @@ to. Session vault → blocked. It also warns, without blocking, when a run decla
 ```bash
 export FB_SCRAPE_PORT=9333
 export FB_SCRAPE_PROFILE="$HOME/.claude/chrome-fbscrape-profile"
-export FB_SCRAPE_DELAY_MS=4000
+export FB_SCRAPE_DELAY_MS=8000
+bash ~/.claude/bin/chrome-scrape.sh   # the dedicated profile; refuses 9222 and the vault
 ```
 
 Read-only commands (`contact-gap.ts`, `normalize-contacts.ts`) are never blocked.

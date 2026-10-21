@@ -35,6 +35,9 @@ cmd="$(printf '%s' "$json" | jq -r '.tool_input.command // .toolCall.args.Comman
 # is exactly when a fresh snapshot lands.
 LEAD_RUN='(sudan-schools-scraper|tier[0-9]+-[a-z]+|fb-matrix|dorker|enricher|contact-gap|normalize-contacts|twenty-upsert|contact-hunt|scripts/crm/|crm:(scrape|discover|enrich|upsert|matrix|dork|fb|gap|hunt))'
 printf '%s' "$cmd" | grep -Eiq "$LEAD_RUN" || exit 0
+# A run, not a look: `ls`/`grep`/`git` over scripts/crm/ used to be logged as
+# scrape runs (3,551 lines by 10-21). Only a command that executes something counts.
+printf '%s' "$cmd" | grep -Eq '(^|[;&|(]|[[:space:]])((npx tsx|tsx|node|python3?)[[:space:]]|pnpm( -s)? (crm:|exec tsx|tsx))' || exit 0
 
 ROOT="${CLAUDE_PROJECT_DIR:-$HOME/kun}"
 LOG="$ROOT/.claude/logs/scrape-runs.log"

@@ -111,7 +111,8 @@ automated lane** — treat a stale number here as a planning error, not a detail
 - Extract from the **About / Intro tab**, not the feed — the feed is why the earlier yield was near
   zero; schools publish phone and WhatsApp on About.
 - Split Pages from Groups. A `/groups/` URL is not a school lead.
-- Reuse the existing phone regex and `extractWhatsApp` in `tier4-enricher.js`; do not write a third.
+- Reuse `contact-extract.ts` (`extractContacts`, `WHATSAPP_NEAR`) and `normalize-contacts.ts`; do not write a third. (`tier4-enricher.js` invented WhatsApp numbers and is retired.)
+- Empty reads are not final: `enrich-fb-about.ts --retry-empty` re-reads a page whose last read found nothing and is 14+ days old (339 of 707 were empty on 2026-10-21).
 - **Checkpoint** (`dorker_checkpoint.json` pattern) so a stop is resumable, and log what the stop dropped.
 
 **Account + throttle rule — read this every time.** Use a **dedicated account**, never Abdout's.
@@ -147,7 +148,7 @@ The account's value is that losing it costs nothing. Four rules preserve that:
    from one egress, or accept a checkpoint.
 3. **Warm up; never burst.** A new account scraping at volume is the classic pattern. Ramp like the
    WhatsApp lane does — ~20 profile reads/day for the first week, then 50, then 100 — and keep
-   `FB_SCRAPE_DELAY_MS` at 4000 or higher. The guard escalates an unthrottled run to a human.
+   `FB_SCRAPE_DELAY_MS` at 8000 (the scripts' default; jitter adds up to 60%). The guard escalates an unthrottled run to a human.
 4. **No evasion, ever.** Scrapling's `StealthyFetcher` stays off Meta. Fingerprint spoofing on a
    platform you hold an account on raises the stakes of detection instead of lowering the odds —
    and evasion is what turns a rate-limit into a ban.
@@ -228,9 +229,13 @@ status (WAITING / LISTING / JOINED_EXISTING / SKIPPED) — linked to its home an
 Every video becomes a `home` at **VETTING** (`source TIKTOK`, `sourceId tiktok:<id>`) with the reader's
 property frames as photos. Its poster becomes a `host` with an Opportunity. Nothing publishes.
 The Hermes gateway's cron runs it daily at 06:00: job `mkan-tiktok-sweep` (`--fetch-limit=40 --read-limit=80 --notify`), no agent, silent unless it fails. Install or refresh with `bash scripts/crm/install-tiktok-sweep.sh` in mkan (`--launchd` falls back to the old launchd job). From Slack or WhatsApp, `/tiktok` runs it now and replies with the ledger status. Only posts from the last 7 days are fetched and read (`--max-age=7`, since 2026-10-20, down from 120): an older ad is usually let, and the vision quota goes further on fresh ones. Pass `--max-age=N` to widen a one-off run.
-The reader is Groq (`qwen3.8-27b` vision, `gpt-oss-120b` for fact-rich captions); `--reader=claude` is the fallback.
-The vision quota (200k tokens/day) is the bottleneck, so reads go phone+price first, one 3-frame strip
-before two, and a caption that already missed the text read goes straight to vision.
+The reader (since 2026-10-21) is the Claude API — `claude-haiku-5-5`, six whole frames, on the Max plan's
+included API credits, capped per month (`TIKTOK_API_CAP_USD`, default $10; spend in `.data/tiktok/spend.json`).
+The key is the Keychain item `mkan-ANTHROPIC_API_KEY`; without it, or once the cap is hit, Groq's free tier
+reads (`qwen3.8-27b` vision, `gpt-oss-120b` for fact-rich captions), phone+price first, one 3-frame strip before two.
+Fetch is sized to what the last read stage took (`capacity.json`), a video id dates itself (top 32 bits = unix
+seconds) so stale search hits never cost a `yt-dlp -J`, and Whisper is skipped when the caption already gives
+price, rooms and a phone.
 Gates (2026-10-20): the gazetteer decides "in Kigali" before the reader, a read with neither price nor
 rooms is skipped, confidence ≥ 0.6. Out-of-band prices land as `qualificationStatus PRICE_ANOMALY`,
 no phone as `UNREACHABLE_HOST`. A re-post with the same facts joins the existing home as a note.

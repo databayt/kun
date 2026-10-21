@@ -147,9 +147,8 @@ const discoverPrompt = () =>
   `Run DISCOVERY for ${product}. The caller asked for this explicitly; it is not a default.\n` +
   `FIRST, state the measured yield out loud: the last full scrape produced 15 new contactable rows ` +
   `(505 of its 817 names were already in the CRM). If a cheaper lane is still unrun, say so.\n` +
-  `The scraper entrypoints (tier1-dorker / tier2-osm / tier3-fb-matrix) are being relocated from ` +
-  `/Users/abdout/twenty/scripts/sudan-schools-scraper/ to ${repo}/scripts/crm/ — use whichever path ` +
-  `exists. The kun scrape-guard hook will BLOCK any Facebook run that would drive the shared session ` +
+  `The scraper lives in ${repo}/scripts/crm/ (discover-fb-pages.ts, enrich-fb-about.ts, cdp-session.ts). ` +
+  `The kun scrape-guard hook will BLOCK any Facebook run that would drive the shared session ` +
   `vault Chrome (port 9222 = Abdout's own logged-in profile). If it fires, STOP and report it — do ` +
   `not route around it. A dedicated account needs FB_SCRAPE_PROFILE + FB_SCRAPE_PORT + FB_SCRAPE_DELAY_MS.\n` +
   `Set gained = rows that are new AND contactable, not rows discovered.` +
@@ -162,7 +161,7 @@ const enrichPrompt = (gap) =>
   `not spend a single request on them — they need a human worksheet or a real directory.\n` +
   `FB lane: read the Page's About/Intro tab, NOT the feed — the feed is why the earlier yield was ` +
   `near zero; schools publish phone and WhatsApp on About. Split Pages from Groups; a /groups/ URL ` +
-  `is not a school. Reuse the existing phone regex and extractWhatsApp in tier4-enricher.js.\n` +
+  `is not a school. Reuse contact-extract.ts (extractContacts, WHATSAPP_NEAR) — tier4-enricher.js invented WhatsApp and is retired. --retry-empty re-reads pages whose last read was empty.\n` +
   `Website lane: fetch the domain and extract from /contact, /about and the footer.\n` +
   `Checkpoint so a stop is resumable, and put whatever the stop skipped in "dropped".\n` +
   `Then normalize: numbers to E.164 via scripts/crm/normalize-contacts.ts, and LABEL mobile vs ` +
