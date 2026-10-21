@@ -774,16 +774,17 @@ const SHOWCASE: Record<string, { sd?: string; any: string }> = {
   EDUCATION: { sd: "moalimee.com", any: "balqalam.com" },
   RETAIL: { sd: "sijillee.com", any: "ec.databayt.org" }, // POS/accounting · e-commerce
   PROFESSIONAL: { any: "abdoutgroup.com" }, // corporate, Port Sudan logistics
-  // No live health build yet (shifa is down): Sudanese pharmacies get Sijillee
-  // (stock + sales), everyone else the global portfolio itself.
-  HEALTH: { sd: "sijillee.com", any: "databayt.org" },
+  // Shifa is live again (2026-10-21) and opens on an "Appointment" button.
+  HEALTH: { sd: "sijillee.com", any: "hc.databayt.org" },
   NGO: { any: "mr.databayt.org" }, // visual storytelling
   TOURISM: { any: "mkan.sd" },
-  // No live booking build for appointment trades yet: the portfolio itself.
-  BEAUTY: { any: "databayt.org" },
-  FITNESS: { any: "databayt.org" },
-  AUTO: { any: "databayt.org" },
-  PETS: { any: "databayt.org" },
+  // Picked from phone screenshots (2026-10-21): Almersal is the boldest visual
+  // build for looks-led trades, Acme the cleanest service-and-quote site.
+  // space.databayt.org opens on an Arabic install sheet — not for Kigali.
+  BEAUTY: { any: "mr.databayt.org" },
+  FITNESS: { any: "mr.databayt.org" },
+  AUTO: { any: "co.databayt.org" },
+  PETS: { any: "hc.databayt.org" },
   OTHER: { any: "mr.databayt.org" },
 };
 const PORTFOLIO = "databayt.org";
@@ -850,6 +851,9 @@ const healthPitch = (l: Lead) =>
 function showcaseOf(l: Lead): string {
   // A school keeps its system proof even in Sudan; balqalam is the live one.
   if (offerOf(l) === "SCHOOL_SYSTEM") return "balqalam.com";
+  // Agro-vets and parts dealers sell stock: the shop build fits them.
+  if ((l.sector === "PETS" || l.sector === "AUTO") && STOCKISH.test(l.name))
+    return "ec.databayt.org";
   const s = SHOWCASE[l.sector] ?? SHOWCASE.OTHER;
   return (l.country === "SUDAN" && s.sd) || s.any;
 }
