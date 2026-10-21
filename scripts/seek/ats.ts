@@ -614,11 +614,15 @@ function codeFetcher(
         if (!from || before.has(`${from}|${subject}|${date}`)) continue;
         if (!/greenhouse/i.test(from) || !/security code/i.test(subject ?? ""))
           continue;
+        // "Invisible Technologies (Meridial)" — Greenhouse's subject names the
+        // board, which may be either part.
+        const names = company
+          .split(/[()]/)
+          .map((n) => n.trim().toLowerCase().slice(0, 12))
+          .filter(Boolean);
         if (
-          company &&
-          !(subject ?? "")
-            .toLowerCase()
-            .includes(company.toLowerCase().slice(0, 12))
+          names.length &&
+          !names.some((n) => (subject ?? "").toLowerCase().includes(n))
         )
           continue;
         const code = body?.match(/application:\s*([A-Za-z0-9]{8})\b/)?.[1];

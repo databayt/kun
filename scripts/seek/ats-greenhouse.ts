@@ -259,6 +259,8 @@ async function waitForOutcome(
           ? /thank you for applying|application (has been )?(received|submitted)|we.ve received your application/i
           : /thank you for applying|application (has been )?(received|submitted)|we.ve received your application|verification code was sent/i
         ).test(document.body.innerText) ||
+        // Some boards (Meridial) confirm with an image only; the URL still says so.
+        /\/confirmation/.test(location.pathname) ||
         !!document.querySelector(
           '[aria-invalid="true"], iframe[src*="recaptcha/api2/bframe"]',
         ),
@@ -269,7 +271,11 @@ async function waitForOutcome(
     return "timeout";
   }
   const body = await page.evaluate(() => document.body.innerText);
-  if (CONFIRMED.test(body)) return "confirmed";
+  if (
+    CONFIRMED.test(body) ||
+    /\/confirmation/.test(new URL(page.url()).pathname)
+  )
+    return "confirmed";
   if (!afterCode && /verification code was sent/i.test(body)) return "code";
   if (await page.locator('iframe[src*="recaptcha/api2/bframe"]').count())
     return "captcha";
