@@ -10,7 +10,7 @@
 ## Preferences
 
 - **Model**: Opus 5.5 (`claude-opus-5-5`, what the `opus` alias resolves to) — session default since 2026-09-26. Fallbacks and agent tiers live only in `.claude/engine.json`; never restate them here
-- **Billing**: Claude Max $100/mo, subscription-only — no usage credits, no API-key spend (change requires `/decide` + Abdout approval); check `/usage` weekly
+- **Billing**: Claude Max $100/mo, subscription-only — no paid usage credits, no API-key spend beyond the plan's included API credits (scrape readers only, hard-capped — D-20261021); any other change requires `/decide` + Abdout approval; check `/usage` weekly
 - **Package Manager**: pnpm
 - **Stack**: Next.js 16 · React 19 · Prisma 6–7 · TypeScript 5.9–6 · Tailwind CSS 4 · shadcn/ui (versions + security floor: `docs/STACK.md`)
 - **Languages**: Arabic (RTL default) · English (LTR)
