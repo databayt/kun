@@ -11,7 +11,7 @@
 
 import type { Page } from "playwright-core";
 
-import type { Answer, AtsQuestion } from "@/lib/jobs/ats-answers";
+import type { Answer, AtsProfile, AtsQuestion } from "@/lib/jobs/ats-answers";
 import { proseFor } from "@/lib/jobs/ats-answers";
 
 export function parseGreenhouse(
@@ -95,6 +95,12 @@ async function pickCombo(
   const input = page.locator(selector).first();
   await input.click();
   await input.fill(option.slice(0, 40));
+  // Long lists (school, discipline) fetch their options after typing.
+  await page
+    .getByRole("option")
+    .first()
+    .waitFor({ timeout: 6_000 })
+    .catch(() => {});
   const exact = page.getByRole("option", { name: option, exact: true }).first();
   if (await exact.count()) await exact.click();
   else await page.getByRole("option").first().click();
@@ -106,6 +112,7 @@ export interface FillPlan {
   resumePath: string;
   coverLetterPath: string;
   city: string;
+  education?: AtsProfile["education"];
 }
 
 /// Fill the form. Returns the list of fields it could not set.
@@ -141,11 +148,21 @@ export async function fillGreenhouse(
           break;
         }
         case "select":
-          await pickCombo(page, sel, answer.option);
+        case "multi": {
+          // Short multi-selects ("Yes" privacy acks, "where did you hear")
+          // render as a <fieldset> of checkboxes, not a combobox.
+          const options =
+            answer.kind === "select" ? [answer.option] : answer.options;
+          const el = page.locator(sel).first();
+          if ((await el.evaluate((n) => n.tagName)) === "FIELDSET") {
+            for (const o of options)
+              await el
+                .getByLabel(o, { exact: true })
+                .first()
+                .check({ force: true });
+          } else for (const o of options) await pickCombo(page, sel, o);
           break;
-        case "multi":
-          for (const o of answer.options) await pickCombo(page, sel, o);
-          break;
+        }
         case "check":
           if (answer.value)
             await page.locator(sel).first().check({ force: true });
@@ -180,6 +197,35 @@ export async function fillGreenhouse(
       await option.click();
     } catch {
       failed.push("location autocomplete");
+    }
+  }
+  // Education block — rendered by the form, absent from the questions API.
+  if (await page.locator('[id="degree--0"]').count()) {
+    const required = async (id: string): Promise<boolean> =>
+      /\*/.test((await page.locator(`[id="${id}-label"]`).textContent()) ?? "");
+    const ed = plan.education;
+    const combos: [string, string | undefined][] = [
+      ["school--0", ed?.school],
+      ["degree--0", ed?.degree],
+      ["discipline--0", ed?.discipline],
+    ];
+    for (const [id, value] of combos) {
+      try {
+        if (value) await pickCombo(page, `[id="${id}"]`, value);
+        else if (await required(id))
+          failed.push(`education ${id.split("--")[0]}`);
+      } catch {
+        if (await required(id)) failed.push(`education ${id.split("--")[0]}`);
+      }
+    }
+    const years: [string, number | null | undefined][] = [
+      ["start-year--0", ed?.startYear],
+      ["end-year--0", ed?.endYear],
+    ];
+    for (const [id, year] of years) {
+      if (year) await page.locator(`[id="${id}"]`).fill(String(year));
+      else if (await required(id))
+        failed.push(`education ${id.replace("--0", "")}`);
     }
   }
   // Phone country code, when the form shows the picker.

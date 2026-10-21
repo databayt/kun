@@ -46,10 +46,20 @@ export interface AtsProfile {
     currentTitle: string;
     currentCompany: string;
     yearsSoftwareProfessional: number;
+    yearsEngineeringTotal?: number;
     highestDegree: string;
     strongestLanguages?: string;
     noticePeriod: string;
     startDate: string;
+  };
+  /// Greenhouse's Education block (school, degree, discipline, years) is not in
+  /// the questions API; a year left null holds the card rather than guessing.
+  education?: {
+    school: string;
+    degree: string;
+    discipline: string;
+    startYear: number | null;
+    endYear: number | null;
   };
   authorization: {
     authorizedRwanda?: boolean;
@@ -189,6 +199,26 @@ export function answerQuestion(
         ? { kind: "select", option: pick(field.values, new RegExp(v, "i"))! }
         : null
       : { kind: "text", value: v }) as Answer;
+
+  // A one-option consent box ("Yes, I consent.") — before the label rules, which
+  // read "your name, location, email address…" in its text as a contact field.
+  if (field.type === "multi_value_multi_select" && field.values?.length === 1) {
+    const only = field.values[0].label;
+    if (
+      /^(yes|i )?.{0,12}(consent|agree|acknowledge|confirm|accept)/i.test(only)
+    )
+      return { kind: "multi", options: [only] };
+  }
+  // "Select your passport country" buried in a work-authorization paragraph:
+  // the residence rules would answer Rwanda; the passport is Sudanese.
+  if (/passport country|country of (your )?passport/i.test(L) && isSelect) {
+    const country = profile.identity.passportCountry ?? "Sudan";
+    const o = pick(field.values, new RegExp(`^${country}$`, "i"));
+    if (!o) return null;
+    return field.type === "multi_value_multi_select"
+      ? { kind: "multi", options: [o] }
+      : { kind: "select", option: o };
+  }
 
   // ── standard fields, by field name ─────────────────────────────────────────
   switch (field.name) {
@@ -702,7 +732,16 @@ export function answerQuestion(
       L,
     )
   ) {
-    const n = profile.work.yearsSoftwareProfessional;
+    // "Full-time work experience" with no field named is his whole career
+    // (engineering + software), not the software years alone.
+    const whole =
+      /(full[- ]time|total|overall) work experience|years of work experience/i.test(
+        L,
+      ) && !/software|engineer|develop|relevant|related|similar/i.test(L);
+    const n =
+      whole && profile.work.yearsEngineeringTotal
+        ? profile.work.yearsEngineeringTotal
+        : profile.work.yearsSoftwareProfessional;
     if (isSelect) {
       const o = rangeOption(field.values, n);
       return o ? { kind: "select", option: o } : null;

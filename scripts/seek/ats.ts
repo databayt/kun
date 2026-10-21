@@ -250,7 +250,9 @@ async function prepare(): Promise<void> {
         r.channel === "ATS" &&
         isGreenhouse(r),
     )
-    .filter((r) => !cfg.pausedLanes.includes(r.campaign ?? "") && inFocus(r, cfg))
+    .filter(
+      (r) => !cfg.pausedLanes.includes(r.campaign ?? "") && inFocus(r, cfg),
+    )
     .sort(
       (a, b) =>
         (LANE_BAND[a.campaign ?? ""] ?? 9) -
@@ -752,6 +754,7 @@ async function submit(): Promise<void> {
         resumePath: found.req.cvPdf,
         coverLetterPath: coverPath,
         city: `${profile.identity.city}, ${profile.identity.country}`,
+        education: profile.education,
       });
       // With Greenhouse's country picker set to Rwanda, the phone field wants
       // the national number; the full +250 form would double the code.
