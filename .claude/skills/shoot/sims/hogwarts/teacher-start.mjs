@@ -75,11 +75,18 @@ export default async (sim) => {
   await sim.focus([password, login], { z: 2 })
   await sim.type(password, PIN)
   await sim.wait(700)
-  await sim.click(login, { pause: 300 })
-  await page.waitForURL((u) => !u.pathname.includes("login"), { timeout: 60000 }); await sim.settle()
+  const platform = page.getByRole("link", { name: "المنصة" }).first()
+  // signing in redraws the form and the page: time-lapse it, then hold the signed-in page wide
+  await sim.lapse(async () => {
+    await sim.click(login, { pause: 300 })
+    await page.waitForURL((u) => !u.pathname.includes("login"), { timeout: 60000 })
+    if (!/\/dashboard/.test(page.url())) await platform.waitFor({ timeout: 60000 })
+    await sim.settle()
+  }, { keep: 1 })
+  await sim.focus(null)
+  await sim.wait(2600)
 
   // 4 — the school's public page: «المنصة» (☰ on a phone) leads in
-  const platform = page.getByRole("link", { name: "المنصة" }).first()
   if (!/\/dashboard/.test(page.url())) {
     sim.caption(4, "تظهر صفحة المدرسة؟ اضغط «المنصة» (أو ☰ ثم «المنصة» على الجوال)")
     await sim.focus(platform, { z: 2.2 })
@@ -108,9 +115,11 @@ export default async (sim) => {
   sim.caption(6, "هذه لوحة التحكم. اضغط «الجدول» لترى حصصك")
   await sim.focus(timetable, { z: 2.2 })
   await sim.wait(3000)
-  await sim.click(timetable, { pause: 250 })
-  await page.waitForURL(/\/timetable/, { timeout: 60000 })
-  await page.getByText("حصة فارغة").first().waitFor({ timeout: 60000 }).catch(() => {}); await sim.settle()
+  await sim.lapse(async () => {
+    await sim.click(timetable, { pause: 250 })
+    await page.waitForURL(/\/timetable/, { timeout: 60000 })
+    await page.getByText("حصة فارغة").first().waitFor({ timeout: 60000 }).catch(() => {}); await sim.settle()
+  }, { keep: 1 })
 
   // 7 — today's periods
   sim.caption(7, "حصص اليوم: المادة والفصل والوقت")
@@ -122,9 +131,14 @@ export default async (sim) => {
   // 8 — the week
   const week = page.getByText("عرض الأسبوع", { exact: true })
   sim.caption(8, "«عرض الأسبوع» يعرض حصصك في الأسبوع كله")
-  await sim.click(week, { pause: 250 })
-  await page.waitForURL(/timetable\/full/, { timeout: 60000 }); await sim.settle()
-  await sim.wait(1500)
-  await sim.focus(null)
+  await sim.focus(week, { z: 2 })
+  await sim.wait(1800)
+  await sim.lapse(async () => {
+    await sim.click(week, { pause: 250 })
+    await page.waitForURL(/timetable\/full/, { timeout: 60000 })
+    await page.getByText("الحصة 1").first().waitFor({ timeout: 60000 }); await sim.settle()
+  }, { keep: 1 })
+  // the week grid: a div, not a table (timetable/views/simple-grid.tsx)
+  await sim.focus(page.locator("div.overflow-x-auto.rounded-xl").first(), { z: 1.25 })
   await sim.wait(3500)
 }
