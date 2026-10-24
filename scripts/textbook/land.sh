@@ -48,11 +48,23 @@ cd "$CATALOG" || exit 2
 
 # ── land ──────────────────────────────────────────────────────────────────────
 mkdir -p "$C/pages-md"
+# A book landing for the first time (sd g1–g11) has no locked renders: the reader serves its figures
+# from pages/<N>.webp, so the staged renders land with it — lock pins them, assets push uploads them.
+# A book that already has a full pages/ keeps it: shipped renders are locked binaries, never replaced here.
+NEW_PAGES=0
+HAVE_C=$(find "$C/pages" -maxdepth 1 -name '[0-9]*.webp' 2>/dev/null | wc -l | tr -d ' ')
+if [ "$HAVE_C" != "$PAGES" ]; then
+    HAVE_W=$(find "$W/pages" -maxdepth 1 -name '[0-9]*.webp' 2>/dev/null | wc -l | tr -d ' ')
+    [ "$HAVE_W" = "$PAGES" ] || { say "renders: catalog $HAVE_C, staging $HAVE_W, book $PAGES — cannot land figures"; exit 3; }
+    mkdir -p "$C/pages" && rsync -a --include='[0-9]*.webp' --exclude='*' "$W/pages/" "$C/pages/"; NEW_PAGES=1
+    say "renders: landing $HAVE_W new pages/*.webp"
+fi
+undo_pages() { [ "$NEW_PAGES" = 1 ] && rm -rf "$C/pages"; git checkout -q -- assets.lock.json 2>/dev/null; return 0; }
 rsync -a --delete --include='[0-9]*.md' --include='_CONTRACT.md' --exclude='*' "$W/pages-md/" "$C/pages-md/"
 cp "$W/textbook.md" "$C/textbook.md"
 pnpm -s assets lock >/dev/null && pnpm -s validate >/dev/null && pnpm -s index >/dev/null || {
     say "validate/index failed — reverting"
-    git checkout -q -- "$CUR/$GRADE/$SUBJ" index.json; git clean -qfd -- "$C/pages-md"; exit 4; }
+    git checkout -q -- "$CUR/$GRADE/$SUBJ" index.json; git clean -qfd -- "$C/pages-md"; undo_pages; exit 4; }
 
 GATE=$(pnpm -s twins "$CUR" --grade "$GRADE" --json | python3 -c "
 import json,sys;d=json.load(sys.stdin)
@@ -60,13 +72,16 @@ t=[x for x in d['twins'] if x['id']=='$ID'][0]
 print('pass' if t['twinGate'] else 'fail: '+t['twinReason'])")
 if [ "$GATE" != "pass" ]; then
     say "twin gate $GATE — reverting, nothing published"
-    git checkout -q -- "$CUR/$GRADE/$SUBJ" index.json; git clean -qfd -- "$C/pages-md"; exit 4
+    git checkout -q -- "$CUR/$GRADE/$SUBJ" index.json; git clean -qfd -- "$C/pages-md"; undo_pages; exit 4
 fi
 say "twin gate passes"
 
 # ── publish + commit ──────────────────────────────────────────────────────────
 # Pre-catalog keys are never overwritten here (no --overwrite): the loop only replaces what
 # the catalog itself published.
+if [ "$NEW_PAGES" = 1 ]; then
+    pnpm -s assets push "$CUR/$GRADE/$SUBJ" --apply | tail -2 || { say "render upload failed — landed locally, not on the CDN"; exit 5; }
+fi
 pnpm -s publish:cdn "$CUR" --apply | tail -2 || { say "publish failed — landed locally, not on the CDN"; exit 5; }
 git add -- "$C/pages-md"
 git commit -q -m "feat($ID): vision twin, agreement $AGR (textbook loop)
@@ -75,6 +90,6 @@ Transcribed by vision, verified by a blind re-read sample and adjudicated
 against the scan; landed and published by kun scripts/textbook/land.sh
 because the twin gate passes.
 
-Co-Authored-By: Claude <noreply@anthropic.com>" -- "$CUR/$GRADE/$SUBJ" index.json
+Co-Authored-By: Claude <noreply@anthropic.com>" -- "$CUR/$GRADE/$SUBJ" index.json assets.lock.json
 git pull -q --rebase origin main && git push -q origin main || say "push failed — commit is local"
 say "landed + published: $(git log --oneline -1)"

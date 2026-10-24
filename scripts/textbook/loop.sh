@@ -56,6 +56,8 @@ PAGES_PER_TICK="${PAGES_OVERRIDE:-$(cfg "['pages_per_tick']")}"
 SAMPLE="$(cfg "['sample_pages']")"
 MODEL="$(cfg "['model']")"; AUDIT_MODEL="$(cfg "['audit_model']")"; ADJ_MODEL="$(cfg "['adjudicate_model']")"
 WIN_START="$(cfg "['window'][0]")"; WIN_END="$(cfg "['window'][1]")"
+COVERAGE="$(cfg ".get('coverage','sample')")"
+TICKS="$(cfg ".get('ticks',['01:30'])")"   # launchd start times inside the window, e.g. 01:30 04:30"
 ISSUE_REPO="$(cfg "['issue']['repo']")"; ISSUE_TITLE="$(cfg "['issue']['title']")"
 
 # ── pick ──────────────────────────────────────────────────────────────────────
@@ -178,7 +180,7 @@ tick() {
     # The prompt names the workflow explicitly: that is the multi-agent opt-in for a headless run.
     # claude -p stops background work 10 min after its last turn, killing a verify mid-phase
     # (2026-10-12) — the ceiling is lifted so the workflow runs to its own end.
-    ( cd "$REPO" && CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS=0 claude -p "Run the textbook workflow now: Workflow({ name: \"textbook\", args: { book: \"$W\", mode: \"full\", maxPages: $PAGES_PER_TICK, sample: $SAMPLE, seed: $seed, model: \"$MODEL\", auditModel: \"$AUDIT_MODEL\", adjudicateModel: \"$ADJ_MODEL\", date: \"$(date +%F)\" } }). This is the nightly textbook loop. Wait for the workflow's completion notification, then reply with ONE line: the result's partial/transcribed/pages/agreement fields. Do not land, upload, commit or publish — the loop script does that." \
+    ( cd "$REPO" && CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS=0 claude -p "Run the textbook workflow now: Workflow({ name: \"textbook\", args: { book: \"$W\", mode: \"full\", maxPages: $PAGES_PER_TICK, sample: $SAMPLE, coverage: \"$COVERAGE\", seed: $seed, model: \"$MODEL\", auditModel: \"$AUDIT_MODEL\", adjudicateModel: \"$ADJ_MODEL\", date: \"$(date +%F)\" } }). This is the nightly textbook loop. Wait for the workflow's completion notification, then reply with ONE line: the result's partial/transcribed/pages/agreement fields. Do not land, upload, commit or publish — the loop script does that." \
         --model "$MODEL" --dangerously-skip-permissions --max-turns 40 ) >> "$LOG_FILE" 2>&1
     local rc=$?
     local after; after=$(find "$W/pages-md" -maxdepth 1 -name '[0-9]*.md' 2>/dev/null | wc -l | tr -d ' ')
@@ -215,12 +217,9 @@ render_plist() {
 	<key>WorkingDirectory</key>
 	<string>$REPO</string>
 	<key>StartCalendarInterval</key>
-	<dict>
-		<key>Hour</key>
-		<integer>$WIN_START</integer>
-		<key>Minute</key>
-		<integer>30</integer>
-	</dict>
+	<array>
+$(for t in $TICKS; do printf '\t\t<dict>\n\t\t\t<key>Hour</key>\n\t\t\t<integer>%d</integer>\n\t\t\t<key>Minute</key>\n\t\t\t<integer>%d</integer>\n\t\t</dict>\n' "$((10#${t%%:*}))" "$((10#${t##*:}))"; done)
+	</array>
 	<key>EnvironmentVariables</key>
 	<dict>
 		<key>PATH</key>
@@ -246,7 +245,7 @@ case "$MODE" in
         render_plist > "$PLIST_PATH"
         launchctl bootout "gui/$(id -u)/$PLIST_LABEL" 2>/dev/null || true
         launchctl bootstrap "gui/$(id -u)" "$PLIST_PATH" 2>/dev/null || launchctl load "$PLIST_PATH"
-        echo "armed: $PLIST_LABEL daily at $WIN_START:30 (plist: $PLIST_PATH)"
+        echo "armed: $PLIST_LABEL daily at $TICKS (plist: $PLIST_PATH)"
         ;;
     --uninstall)
         launchctl bootout "gui/$(id -u)/$PLIST_LABEL" 2>/dev/null || true
@@ -255,7 +254,7 @@ case "$MODE" in
     --pause) touch "$KILL"; echo "paused ($KILL)" ;;
     --resume) rm -f "$KILL"; echo "resumed" ;;
     --status)
-        if launchctl print "gui/$(id -u)/$PLIST_LABEL" >/dev/null 2>&1; then echo "armed ($PLIST_LABEL, daily $WIN_START:30)"; else echo "not armed"; fi
+        if launchctl print "gui/$(id -u)/$PLIST_LABEL" >/dev/null 2>&1; then echo "armed ($PLIST_LABEL, daily $TICKS)"; else echo "not armed"; fi
         [ -f "$KILL" ] && echo "⛔ paused ($KILL)"
         for g in $GRADES; do ( cd "$CATALOG" && pnpm -s twins "$CUR" --grade "$g" | tail -4 | head -1 ); done
         echo "next: $(pick)"

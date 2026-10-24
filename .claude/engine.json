@@ -262,6 +262,25 @@
   "concurrency_note": "the ~8-agent cap is PER WORKFLOW, not global; 4 concurrent books exhausted a usage window in 13 minutes and left 4 half-books. One book at a time, to completion.",
   "tokens_per_book_verify": 2500000,
   "cost_note": "verify+adjudicate costs MORE than transcription on a small book (math: 3.49M verify vs ~1.8M transcribe). Enriching the contract is the only lever that has paid: it cut physics' queued pages 24 -> 10 and verify 3.49M -> 2.15M.",
+  "coverage": {
+   "$comment": "2026-10-24 (Abdout: '100% accurate to the latest PDF'). sample = only the headline sample + risk tail are re-read, so ~85% of a book's pages are never measured. full = EVERY page gets an independent witness and every non-clean page (ordering included) is adjudicated; the twin front matter carries coverage / verifiedPages / unsettled. The headline stays the random sample's seq so grades remain comparable across modes.",
+   "default": "sample",
+   "loop": "full",
+   "witness_order": [
+    "blank (textbook-triage.py) — no read",
+    "textlayer (md-agreement.py --witness textlayer) — free; clears only skeleton >= 0.98 pages with <= 2 numerals, no table, no figure labels",
+    "blind model read (auditModel) — every page the free witnesses cannot clear, and ALWAYS the random sample"
+   ],
+   "textlayer_measured": "21 landed g12 twins: the layer is usable on 5 (art .99 / home-economics .95 health; biology .48, engineering .32, agriculture .15) and absent or mojibake on 16. Strict clearance 0-20 pages per book (~5-10% where usable). Its value is the OMISSION detector: pages whose PDF text holds >15% more words than the twin are force-queued even when both model reads agree; after furniture + alt-text handling it flagged no real omission in the 5 usable landed books. Skeleton cannot see numerals (gold p39 biology: skeleton .987 hid a numeric error) — numerals never clear.",
+   "witness_threshold": 0.98
+  },
+  "routing": {
+   "$comment": "Who does what, cheapest first; a swap is adopted only when a blind textbook-bench run on the corpus scores >= the current model AND the text-layer/gold false-clean rate is 0. Status 'adopted' = in use; 'bench' = wired but not yet adopted.",
+   "transcribe": { "adopted": "sonnet", "bench": "haiku on prose pages with a usable layer (textbook-triage layer arabic|latin)" },
+   "witness": { "adopted": "opus blind read + free textlayer", "bench": "Gemini 3.8 Flash via agy -p (off the Claude pool; blocked 2026-10-24: Google account 'not eligible for Antigravity' until verified in a browser) · haiku (different model, cheaper; its misses cost adjudications, not false agreement)" },
+   "adjudicate": { "adopted": "opus", "bench": "sonnet for wording/ordering-only hunks" },
+   "free_tools": "PyMuPDF triage + text-layer skeleton witness, md-structure grid lint, md-table-direction crops, pdftoppm/imagehash for edition matching (catalog verify sources). tesseract measured weak on these scans (2026-09-09) — not a witness."
+  },
   "exit_gate": "a run is reportable only when agents_error == 0 AND the book appears in textbook-scores.json. A window death during Adjudicate still returns degraded:false, repaired:0 and a letter grade - that is NOT a finished book. Recovery is mode:repair, which reuses the surviving queue.json.",
   "loop": {
    "$comment": "The nightly textbook loop (scripts/textbook/loop.sh, launchd com.databayt.textbook-loop). Each tick: sense (catalog `pnpm twins --cdn`) -> pick (in-progress book first, then priority) -> stage into catalog/.work -> claude -p runs the textbook workflow capped at pages_per_tick NEW pages (resumable; a complete book is verified + adjudicated + persisted in the same call) -> scripts/textbook/land.sh publishes when the twin gate passes -> one comment on the tracking issue. Sundays: textbook-contract.py --promote -> presets proposals.",
@@ -269,8 +288,24 @@
    "grades": [
     "g12",
     "g11",
-    "g10"
+    "g10",
+    "g9",
+    "g8",
+    "g7",
+    "g6",
+    "g5",
+    "g4",
+    "g3",
+    "g2",
+    "g1"
    ],
+   "grades_note": "g12 -> g1 (Abdout, 2026-10-24). A book whose catalog book gate fails (no verification block: all of g1-g11 today) is skipped by pick() until `pnpm verify` records its edition — so listing a grade arms it, verifying it opens it.",
+   "coverage": "full",
+   "ticks": [
+    "01:30",
+    "04:30"
+   ],
+   "ticks_note": "two starts inside the window (Abdout, 2026-10-24: subscription only, more ticks). Add a third only when /usage shows weekly room — a full-coverage book costs ~2x a sampled one.",
    "priority": [
     "none",
     "ocr",

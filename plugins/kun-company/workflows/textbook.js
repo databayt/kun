@@ -44,7 +44,8 @@ export const meta = {
 };
 
 // args: "<abs book dir>" | { book, mode, pages, maxPages, resume, sample, seed, riskCap, batch, rounds,
-//        model, auditModel, adjudicateModel, agentType, adjudicator, audit, date, scripts, scoresPath, furniture }
+//        model, auditModel, adjudicateModel, agentType, adjudicator, audit, date, scripts, scoresPath, furniture,
+//        coverage, witnessThreshold }
 const _a =
   args && typeof args === "object"
     ? args
@@ -61,6 +62,12 @@ const PAGES = Array.isArray(_a.pages) && _a.pages.length ? _a.pages : null;
 const SAMPLE = _a.sample ?? 12; // random pages re-read blind — the headline number
 const SEED = _a.seed ?? 7; // deterministic sampling; vary per run via args, never Math.random
 const RISK_CAP = _a.riskCap ?? 12; // suspect/illegible/table pages re-read on top of the random sample
+// coverage "sample": only the headline sample + risk tail are re-read (pages outside it are unmeasured).
+// coverage "full": EVERY page gets an independent witness — the free PDF text layer where it clears the
+// page (md-agreement.py --witness textlayer), a blind model read everywhere else — and every non-clean
+// page is adjudicated. The headline stays the random sample's seq, so grades remain comparable.
+const COVERAGE = _a.coverage === "full" ? "full" : "sample";
+const WITNESS_THRESHOLD = _a.witnessThreshold ?? 0.98; // skeleton agreement the text layer needs to clear a page
 const BATCH = _a.batch ?? 8; // pages per transcriber — engine.json batch_pages: 12 stalled under the 600s watchdog
 // The loop's unit of work. maxPages caps how many NEW pages one run transcribes; resume (on by
 // default when maxPages is set) skips pages already on disk, so a book is finished over several
@@ -148,6 +155,17 @@ const SAMPLED = {
   },
   required: ["random", "risk"],
 };
+const WITNESSED = {
+  type: "object",
+  properties: {
+    cleared: { type: "array", items: { type: "number" }, description: "pages the text-layer witness cleared" },
+    omissionSuspects: { type: "array", items: { type: "number" } },
+    blank: { type: "array", items: { type: "number" }, description: "triage blank pages" },
+    audited: { type: "array", items: { type: "number" }, description: "pages that already have pages-md-audit/<N>.md" },
+    layerHealth: { type: "number" },
+  },
+  required: ["cleared", "omissionSuspects", "blank", "audited"],
+};
 const CROPPED = {
   type: "object",
   properties: {
@@ -165,6 +183,7 @@ const SCORED = {
     meanBow: { type: "number" },
     meanStruct: { type: "number" },
     classes: { type: "object" },
+    audited: { type: "array", items: { type: "number" }, description: "every page with a pages-md-audit/<N>.md" },
     queue: {
       type: "array",
       items: {
@@ -384,6 +403,7 @@ if (MODE === "full" && MAX_PAGES !== null && remaining.length) {
 // ── Verify ──────────────────────────────────────────────────────────────────
 phase("Verify");
 let scored = null;
+let witnessed = null;
 if (MODE !== "repair") {
   const sampled = await agent(
     `${NOTE_PATHS}Run: python3 ${SCRIPTS}/md-agreement.py ${book} --sample ${SAMPLE} --seed ${SEED} --risk-json ${lint.lintPath} --risk-cap ${RISK_CAP} --json\n` +
@@ -391,8 +411,28 @@ if (MODE !== "repair") {
     { label: "sample", phase: "Verify", model: "sonnet", effort: "low", schema: SAMPLED },
   );
   if (!sampled) throw new Error("sampling returned nothing");
-  const auditPages = [...new Set([...sampled.random, ...sampled.risk])].sort((a, b) => a - b);
-  log(`blind re-read: ${sampled.random.length} random + ${sampled.risk.length} risk pages`);
+  let auditPages = [...new Set([...sampled.random, ...sampled.risk])].sort((a, b) => a - b);
+  if (COVERAGE === "full") {
+    witnessed = await agent(
+      `${NOTE_PATHS}Run the free witnesses on the book at ${book}, capturing each JSON output:\n` +
+        `1. python3 ${SCRIPTS}/textbook-triage.py ${book} --json   → blank\n` +
+        `2. python3 ${SCRIPTS}/md-agreement.py ${book} --witness textlayer --threshold ${WITNESS_THRESHOLD} --out ${book}/pages-md-verify/witness.json --json   → cleared, omissionSuspects, layerHealth\n` +
+        `3. ls ${book}/pages-md-audit/ 2>/dev/null   → audited = the N of every non-empty N.md\n` +
+        `Copy the numbers; do not read page content.`,
+      { label: "witness", phase: "Verify", model: "sonnet", effort: "low", schema: WITNESSED },
+    );
+    if (!witnessed) throw new Error("witness step returned nothing — full coverage cannot be claimed");
+    const skip = new Set([...witnessed.cleared, ...witnessed.blank, ...witnessed.audited]);
+    const all = Array.from({ length: lint.pages }, (_, i) => i + 1).filter((p) => !PAGES || PAGES.includes(p));
+    // the random sample is ALWAYS model-read (the headline must not lean on the free witness)
+    const randomTodo = sampled.random.filter((p) => !witnessed.audited.includes(p));
+    auditPages = [...new Set([...all.filter((p) => !skip.has(p)), ...randomTodo])].sort((a, b) => a - b);
+    log(
+      `full coverage: ${all.length} pages — text layer cleared ${witnessed.cleared.length} (health ${witnessed.layerHealth ?? "n/a"}), ` +
+        `blank ${witnessed.blank.length}, already read ${witnessed.audited.length}, blind re-read now ${auditPages.length}; ` +
+        `omission suspects ${witnessed.omissionSuspects.length}`,
+    );
+  } else log(`blind re-read: ${sampled.random.length} random + ${sampled.risk.length} risk pages`);
 
   // the audit read and the direction crops are independent — no barrier between them
   const tablePages = PAGES ? lint.tablePages.filter((p) => PAGES.includes(p)) : lint.tablePages;
@@ -425,8 +465,9 @@ if (MODE !== "repair") {
       (sampled.risk.length
         ? `2. python3 ${SCRIPTS}/md-agreement.py ${book} --score --pages ${sampled.risk.join(",")} --json   → riskMean = meanAgreement, riskN = sampled\n`
         : `2. (no risk pages) riskMean = -1, riskN = 0\n`) +
-      `3. python3 ${SCRIPTS}/md-agreement.py ${book} --score --json --queue-out ${book}/pages-md-verify/queue.json   → meanBow, meanStruct, classes, queue (page, classes, primary)\n` +
+      `3. python3 ${SCRIPTS}/md-agreement.py ${book} --score --json${COVERAGE === "full" ? " --queue-all" : ""} --queue-out ${book}/pages-md-verify/queue.json   → meanBow, meanStruct, classes, queue (page, classes, primary)\n` +
       `4. python3 ${SCRIPTS}/md-table-direction.py ${book}   → mirrored = the page list on the MIRRORED line, unclearDirection = the UNCLEAR pages\n` +
+      `5. ls ${book}/pages-md-audit/   → audited = the N of every non-empty N.md\n` +
       `Write the combined object to ${book}/pages-md-verify/score.json and return it with scorePath. Copy numbers; do not read page content.`,
     { label: "score", phase: "Verify", model: "sonnet", effort: "low", schema: SCORED },
   );
@@ -450,6 +491,13 @@ const repaired = [];
 const unresolvedPages = [];
 const observations = [];
 let queue = scored.queue.map((q) => ({ page: q.page, classes: q.classes || [q.primary], primary: q.primary }));
+// pages where the PDF's own text holds markedly more words than the twin: a second model read can
+// share the first one's blind spot, the text layer cannot — they are adjudicated even when both reads agree
+for (const p of (witnessed && witnessed.omissionSuspects) || []) {
+  const q = queue.find((x) => x.page === p);
+  if (q) q.classes.includes("omission") || q.classes.push("omission");
+  else queue.push({ page: p, classes: ["omission"], primary: "omission" });
+}
 if (AUDIT) {
   log(`audit mode — ${queue.length} pages queued, nothing repaired`);
   queue = [];
@@ -539,8 +587,17 @@ const result = {
   observations: [...new Set(observations)],
   printedErrors: [...new Set(printedErrors)],
   audit: AUDIT,
+  coverage: COVERAGE,
   degraded: lint.missing.length > 0 || scored.randomN < Math.min(SAMPLE, lint.pages),
 };
+if (COVERAGE === "full") {
+  const verified = new Set([...(scored.audited || []), ...((witnessed && witnessed.cleared) || []), ...((witnessed && witnessed.blank) || [])]);
+  result.verifiedPages = verified.size;
+  result.clearedByTextLayer = ((witnessed && witnessed.cleared) || []).length;
+  result.unsettled = new Set([...result.unresolved, ...result.stillSuspect]).size;
+  // full coverage is a claim about EVERY page: one unwitnessed page makes it a sampled run again
+  if (verified.size < lint.pages) result.degraded = true;
+}
 const quality = result.agreement >= 0.95 ? "A" : result.agreement >= 0.9 ? "B" : result.agreement >= 0.8 ? "C" : "D";
 result.quality = quality;
 
@@ -558,6 +615,7 @@ await agent(
     (result.unresolved.length ? `--note "Unresolved after adjudication (illegible marker kept): pages ${result.unresolved.join(", ")}." ` : "") +
     (result.mirrored.length ? `--note "Table direction verified by right-edge crops; mirrored tables reversed on pages ${result.mirrored.join(", ")}." ` : "") +
     (MODEL ? `--model ${MODEL} ` : "") +
+    (COVERAGE === "full" ? `--coverage full --verified-pages ${result.verifiedPages} --unsettled ${result.unsettled} ` : "") +
     `\n3. python3 ${SCRIPTS}/textbook-bench.py persist --scores ${SCORES} --run-result ${book}/pages-md-verify/run.json --book-id ${prep.bookId}${DATE ? ` --date ${DATE}` : ""}\n` +
     `4. Verify: python3 -c "import json;json.load(open('${SCORES.replace("~", "$HOME")}'))" and return "ok" plus the scores path.`,
   { label: "persist", phase: "Persist", model: "sonnet", effort: "low" },
