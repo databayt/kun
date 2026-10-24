@@ -4,7 +4,7 @@
 
 | Repo     | Pattern                                                                        | Maturity | Canonical               |
 | -------- | ------------------------------------------------------------------------------ | -------- | ----------------------- |
-| mkan     | `PropertyImage` primitive + LQIP (`placeholder="blur"`), no sharpen transition | partial  | **yes** (LQIP pipeline) |
+| mkan     | `PropertyImage` + `BlurImage`, stored cover LQIP (`coverBlur`), sharpen on byte arrival | partial  | **yes** (LQIP pipeline) |
 | hogwarts | `BlurImage` atom on 61 files + `blurFromColor()` LQIP from the catalog colour  | shipped  | **yes** (atom + effect) |
 | codebase | —                                                                              | none     | no                      |
 
@@ -33,6 +33,9 @@ prisma: blurDataURL String? | photoBlurs String[]   # stored next to the URL
 - LCP hero gets a real LQIP (static import or stored), never the neutral one.
 - LQIP made at upload or by a backfill script, never at request time.
 - Exempt: SVG icons, `blob:`/`data:` previews, email/print/PDF, shadcn `AvatarImage`.
+- Sharpen on byte arrival, not hydration: key the blur off `data-loaded`, stamped by a
+  pre-paint capturing `load` listener in the root layout. React's `onLoad` for SSR'd
+  images waits for hydration — seconds on a slow phone (mkan, 2026-10-24).
 
 ## Gaps (2026-09-28)
 
@@ -46,7 +49,10 @@ card on `PropertyImage`; thumbs/avatars `plain` ≤48 px; mobile listing hero ke
 
 Phase 2:
 
-- `photoBlurs` column (prod migration) + persist the upload `blur` + batched sharp backfill → `blurDataURL`.
+- ~~`photoBlurs` column + backfill~~ — done 2026-10-24 as **cover-only** `Listing.coverBlur` + `coverBlurUrl`
+  (stale guard: used only while it matches `photoUrls[0]`), filled hourly by `pnpm images:blurs`
+  with raw SQL (no `updatedAt` bump). Deliberate deviation: cards render one photo first and other
+  slides load on interaction, so per-photo blurs weren't worth the payload.
 - Remaining surfaces: travel art, wishlists, bookings, inbox, hosting reservation cards, office logos, ~60 next/image files.
 
 ### hogwarts
