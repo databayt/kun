@@ -79,6 +79,14 @@ only = os.environ.get("SUBJ") or ""
 open_ = [t for t in twins if not t["twinGate"] and t["pdf"]["locked"]
          and "blocked by" not in (t.get("twinReason") or "")
          and (not only or t["subject"] == only)]
+# Re-verify: a twin that passes on the old sampled grade is re-witnessed page by page once the
+# grade's unfinished books are done (loop.coverage "full"); it leaves the queue when it lands full.
+if not open_ and loop.get("coverage") == "full":
+    open_ = [t for t in twins if t["twinGate"] and t.get("coverage") != "full"
+             and (not only or t["subject"] == only)]
+    for t in open_:
+        print(t["grade"], t["subject"], f"reverify ({t.get('coverage') or 'sample'} → full, {t['pages']} pages)")
+        sys.exit(0)
 if not open_:
     sys.exit(0)
 def on_disk(s):
@@ -108,6 +116,8 @@ stage() {  # stage <grade> <subject> — the inputs only; a book in progress kee
     [ -f "$C/textbook.pdf" ] || ( cd "$CATALOG" && pnpm -s assets pull "$CUR/$1/$2" >/dev/null )
     for f in textbook.pdf structure.json; do [ -f "$W/$f" ] || cp -c "$C/$f" "$W/$f"; done
     if [ ! -d "$W/pages" ] && [ -d "$C/pages" ]; then cp -Rc "$C/pages" "$W/pages"; fi
+    # A re-verify starts from the landed twin, not from a fresh transcription.
+    if [ ! -d "$W/pages-md" ] && [ -d "$C/pages-md" ]; then cp -Rc "$C/pages-md" "$W/pages-md"; fi
 }
 
 # ── report ────────────────────────────────────────────────────────────────────
