@@ -276,7 +276,7 @@
   },
   "routing": {
    "$comment": "Who does what, cheapest first; a swap is adopted only when a blind textbook-bench run on the corpus scores >= the current model AND the text-layer/gold false-clean rate is 0. Status 'adopted' = in use; 'bench' = wired but not yet adopted.",
-   "transcribe": { "adopted": "sonnet", "bench": "haiku on prose pages with a usable layer (textbook-triage layer arabic|latin)" },
+   "transcribe": { "adopted": "sonnet", "bench": "haiku REJECTED 2026-10-25 (haiku-v1, audit CLEAN): 0.952 vs sonnet 0.964 on the g12 biology corpus — weak on table direction 0.63, labels 0.73, illegible 0.80; stronger on latin 0.99 vs 0.94, numerals 1.0. Re-bench only on a latin-book corpus" },
    "witness": { "adopted": "opus blind read + free textlayer", "bench": "Gemini 3.8 Flash via agy -p (off the Claude pool; blocked 2026-10-24: Google account 'not eligible for Antigravity' until verified in a browser) · haiku (different model, cheaper; its misses cost adjudications, not false agreement)" },
    "adjudicate": { "adopted": "opus", "bench": "sonnet for wording/ordering-only hunks" },
    "free_tools": "PyMuPDF triage + text-layer skeleton witness, md-structure grid lint, md-table-direction crops, pdftoppm/imagehash for edition matching (catalog verify sources). tesseract measured weak on these scans (2026-09-09) — not a witness."
