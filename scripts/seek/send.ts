@@ -49,6 +49,9 @@ interface Letter {
   to: string;
   subject: string;
   body: string;
+  /// Documents the posting asks for beyond the CV (a passport copy), added
+  /// by hand when Abdout approves sending them — absolute paths.
+  attachments?: string[];
 }
 
 interface Request {
@@ -100,7 +103,7 @@ export function mailSend(
   to: string,
   subject: string,
   body: string,
-  attachment?: string,
+  attachments: string | string[] = [],
 ): string | null {
   const bodyFile = join(`${DATA}/outbox`, `.body-${process.pid}.txt`);
   writeFileSync(bodyFile, body);
@@ -112,7 +115,7 @@ export function mailSend(
       to,
       subject,
       bodyFile,
-      ...(attachment ? [attachment] : []),
+      ...[attachments].flat(),
     ],
     { encoding: "utf-8", timeout: 120_000 },
   );
@@ -359,7 +362,7 @@ async function main(): Promise<void> {
           found.letter.to,
           found.letter.subject,
           found.letter.body,
-          found.req.cvPdf,
+          [found.req.cvPdf, ...(found.letter.attachments ?? [])],
         );
     if (err) {
       console.log(`    ✗ send failed: ${err}`);

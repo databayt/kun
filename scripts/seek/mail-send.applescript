@@ -1,6 +1,6 @@
 -- Send one email through Mail.app — the send loop's only transport.
 --
---   osascript scripts/jobs/mail-send.applescript <from> <to> <subject> <bodyFile> [attachmentPath]
+--   osascript scripts/jobs/mail-send.applescript <from> <to> <subject> <bodyFile> [attachmentPath ...]
 --
 -- The body comes from a UTF-8 file so quotes, Arabic and newlines survive
 -- argv. <from> must be an address on an account configured in Mail.app;
@@ -10,8 +10,8 @@ on run argv
 	set toAddr to item 2 of argv
 	set subj to item 3 of argv
 	set bodyFile to item 4 of argv
-	set attachPath to ""
-	if (count of argv) ≥ 5 then set attachPath to item 5 of argv
+	set attachPaths to {}
+	if (count of argv) ≥ 5 then set attachPaths to items 5 thru -1 of argv
 
 	set bodyText to read (POSIX file bodyFile) as «class utf8»
 
@@ -26,9 +26,9 @@ on run argv
 		tell msg
 			set sender to fromAddr
 			make new to recipient at end of to recipients with properties {address:toAddr}
-			if attachPath is not "" then
-				make new attachment with properties {file name:(POSIX file attachPath) as alias} at after the last paragraph of content
-			end if
+			repeat with attachPath in attachPaths
+				make new attachment with properties {file name:(POSIX file (attachPath as text)) as alias} at after the last paragraph of content
+			end repeat
 		end tell
 		-- Mail uploads the attachment asynchronously; sending too early drops it.
 		delay 3
