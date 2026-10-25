@@ -1,13 +1,16 @@
-import { existsSync } from "fs";
-import path from "path";
 import type { CSSProperties, ReactElement } from "react";
+import { CAROUSEL_ART } from "@/generated/kun-bundle";
 
 const CDN_BASE = "https://cdn.databayt.org/anthropic";
 
-/** Vendored copy first (deterministic screenshots), live CDN as fallback. */
+const VENDORED = new Set(CAROUSEL_ART);
+
+/**
+ * Vendored copy first (deterministic screenshots), live CDN as fallback. Which files are
+ * vendored is listed at build time (scripts/gen-bundle.mjs) — Workers can't existsSync.
+ */
 export function artSrc(name: string): string {
-  const local = path.join(process.cwd(), "public", "carousel-art", name);
-  return existsSync(local) ? `/carousel-art/${name}` : `${CDN_BASE}/${name}`;
+  return VENDORED.has(name) ? `/carousel-art/${name}` : `${CDN_BASE}/${name}`;
 }
 
 export function Art({

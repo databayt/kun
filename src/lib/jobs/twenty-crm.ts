@@ -106,14 +106,17 @@ function getDatabytTwentyKey(): string {
     return process.env.TWENTY_API_KEY.trim();
   }
 
-  try {
-    const key = execSync(
-      "security find-generic-password -s databayt-twenty -a databayt -w 2>/dev/null",
-      { encoding: "utf-8" },
-    ).trim();
-    if (key) return key;
-  } catch {
-    // ignore — fall through to the offline simulation below
+  // The macOS Keychain lookup is Mac-only; on Workers the key arrives as a secret binding.
+  if (!process.env.CF_WORKERS) {
+    try {
+      const key = execSync(
+        "security find-generic-password -s databayt-twenty -a databayt -w 2>/dev/null",
+        { encoding: "utf-8" },
+      ).trim();
+      if (key) return key;
+    } catch {
+      // ignore — fall through to the offline simulation below
+    }
   }
 
   return "";

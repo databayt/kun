@@ -472,7 +472,9 @@ export function extractTechnologySkills(facts: EvidenceFact[]): TechnologySkillF
 }
 
 export function buildEvidenceKnowledgeProfile(): EngineeringKnowledgeProfile {
-  const repos = resolveDatabaytRepositories();
+  // The repository scan shells out to git/gh and reads clones on the Mac's disk. Workers have
+  // neither, so there the profile degrades to the CV evidence channel alone (no repo facts).
+  const repos = process.env.CF_WORKERS ? [] : resolveDatabaytRepositories();
   const currentFingerprint = repos
     .map((r) => `${r.id}:${r.sources.find((s) => s.type === "github")?.fingerprint || "remote"}`)
     .join(";");

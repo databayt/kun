@@ -98,3 +98,7 @@ pt.json
 # shoot sim media: a stock child photo (licence unverified) and documents embedding it — local only.
 # Rebuild: python3 clean-bg.py <photo> photo.jpg && node make-docs.mjs (in shoot/assets/hogwarts/)
 **/shoot/assets/hogwarts/*.jpg
+
+# opennext build output + local worker vars
+/.open-next/
+.dev.vars

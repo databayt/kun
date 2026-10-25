@@ -1,5 +1,6 @@
 import "server-only";
 
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaClient } from "@/generated/prisma/client";
 
@@ -8,9 +9,15 @@ import { PrismaClient } from "@/generated/prisma/client";
 // HTTP/WebSocket, which is what makes it viable from a serverless function
 // where a normal TCP pool would exhaust connections.
 //
-// Cached on globalThis because dev hot-reload re-evaluates modules on every
-// change; without this each reload opens another client and Neon starts
-// refusing connections.
+// Two runtimes, one `db`:
+//
+// - Cloudflare Workers (production, CF_WORKERS=1): a Worker's socket belongs to
+//   the request that opened it — reusing it from a later request hangs — so each
+//   request gets its own client, keyed on the per-request ctx object. (Same
+//   recipe as food, space, co and codebase.)
+// - Node (local dev, scripts): one client cached on globalThis, because dev
+//   hot-reload re-evaluates modules on every change; without this each reload
+//   opens another client and Neon starts refusing connections.
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
@@ -28,7 +35,27 @@ function createClient(): PrismaClient {
   });
 }
 
+function workerCtx(): object | undefined {
+  if (!process.env.CF_WORKERS) return undefined;
+  try {
+    return getCloudflareContext().ctx;
+  } catch {
+    return undefined;
+  }
+}
+
+const perRequest = new WeakMap<object, PrismaClient>();
+
 function getClient(): PrismaClient {
+  const ctx = workerCtx();
+  if (ctx) {
+    let client = perRequest.get(ctx);
+    if (!client) {
+      client = createClient();
+      perRequest.set(ctx, client);
+    }
+    return client;
+  }
   if (globalForPrisma.prisma) return globalForPrisma.prisma;
   const client = createClient();
   if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = client;

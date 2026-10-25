@@ -1,15 +1,9 @@
 // Serves the OS-detect bootstrap shim at https://kun.databayt.org/install
 //   curl -fsSL https://kun.databayt.org/install | bash
-// Single source of truth: web/install.sh (traced into the serverless bundle
-// via outputFileTracingIncludes in next.config.ts).
+// Single source of truth: web/install.sh, bundled as a string at build time by
+// scripts/gen-bundle.mjs (src/generated/kun-bundle.ts) — Workers have no filesystem.
 
-import { readFileSync } from "fs";
-import path from "path";
-
-const SHIM = readFileSync(
-  path.join(process.cwd(), "web", "install.sh"),
-  "utf8",
-);
+import { INSTALL_SH as SHIM } from "@/generated/kun-bundle";
 
 export function GET() {
   return new Response(SHIM, {

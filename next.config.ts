@@ -1,11 +1,39 @@
+import path from "node:path";
+
 import type { NextConfig } from "next";
 import { createMDX } from "fumadocs-mdx/next";
 
+// Cloudflare Workers lane (scripts/deploy-cloudflare.sh sets CF_WORKERS=1): OpenNext bundles the
+// server into one Worker, so there is no disk at request time. Everything the app used to read
+// off disk (web/install.*, the docs graph, carousel decks, the art list) is bundled by
+// scripts/gen-bundle.mjs into src/generated/kun-bundle.ts instead.
+const CF_WORKERS = Boolean(process.env.CF_WORKERS);
+
 const nextConfig: NextConfig = {
-  // The Cloudflare container lane (scripts/deploy-cloudflare.sh) runs the standalone
-  // server; Vercel and local dev keep the default output. outputFileTracingIncludes below
-  // is what carries web/ and content/ into that standalone tree.
-  output: process.env.CF_CONTAINER ? "standalone" : undefined,
+  // The image optimizer would need Cloudflare Images (paid) on Workers: serve originals.
+  ...(CF_WORKERS ? { images: { unoptimized: true } } : {}),
+  // Workers can't compile WebAssembly from bytes, so Prisma's workerd runtime imports its query
+  // compiler as `./query_compiler_fast_bg.wasm?module`. Keep that a runtime import with an
+  // absolute path so OpenNext marks it external and wrangler uploads the .wasm as a module.
+  ...(CF_WORKERS
+    ? {
+        webpack: (config: { externals?: unknown }, { isServer }: { isServer: boolean }) => {
+          if (!isServer) return config;
+          const existing = config.externals ? (Array.isArray(config.externals) ? config.externals : [config.externals]) : [];
+          config.externals = [
+            ...existing,
+            ({ request, context }: { request?: string; context?: string }, callback: (err?: Error | null, result?: string) => void) => {
+              if (request?.endsWith(".wasm?module") && context) {
+                const file = path.resolve(context, request.slice(0, -"?module".length));
+                return callback(null, `import ${file}?module`);
+              }
+              callback();
+            },
+          ];
+          return config;
+        },
+      }
+    : {}),
   // Barrel entry points re-export thousands of modules, so importing three
   // icons pulls the whole library into the graph. Next rewrites these to
   // direct imports at build time — ergonomic imports, without the cold-start tax.
@@ -21,20 +49,6 @@ const nextConfig: NextConfig = {
   // The carousel render route is screenshotted by Playwright — the dev
   // indicator badge would land inside the captured slides.
   devIndicators: false,
-  // The install routes read web/install.{sh,ps1} at runtime; trace them into
-  // the serverless bundle so the read works on Vercel, not just locally.
-  outputFileTracingIncludes: {
-    "/install": ["./web/install.sh"],
-    "/install.ps1": ["./web/install.ps1"],
-    // The Second Brain graph derives its notes layer by reading the docs
-    // corpus at runtime; trace it into the serverless bundle.
-    "/[lang]/graph": ["./content/docs/**/*"],
-    // Deck JSONs are fs-read at request time (content.ts readDeck/listDecks);
-    // trace them so kun-owned decks render on Vercel — brand-repo deckDirs
-    // stay local-only by design.
-    "/[lang]/carousel/[brand]/[slug]": ["./content/carousels/**/*"],
-    "/[lang]/social/media": ["./content/carousels/**/*"],
-  },
   // Locale-less docs URLs (e.g. shared links like /docs/onboarding) redirect
   // to the default locale. The docs render under /[lang]/docs/[[...slug]], so
   // without this a bare /docs/<slug> 404s.

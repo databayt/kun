@@ -2,7 +2,8 @@
 //
 //   1. The vocabulary registry (.claude/vocabulary.json → spellbook-data.ts) —
 //      schools, spells, agents, MCP portals, workflows and their typed edges.
-//   2. The docs notes (content/docs/**/*.mdx) — the second-brain layer. Every
+//   2. The docs notes (content/docs/**/*.mdx, extracted at build time by
+//      scripts/gen-bundle.mjs — Workers have no filesystem) — the second-brain layer. Every
 //      markdown link between docs becomes a `references` edge, so "back-links
 //      do most of the organizational work" holds here the way it does in an
 //      Obsidian vault. A doc named after a spell is stitched to that spell.
@@ -12,70 +13,11 @@
 // Runs on the server. Only the derived nodes/edges cross the RSC boundary —
 // the 88KB spellbook module and the docs corpus stay out of the client bundle.
 
-import fs from "node:fs";
-import path from "node:path";
 import { schools, workflows } from "@/components/docs/spellbook-data";
+import { GRAPH_NOTES } from "@/generated/kun-bundle";
 import type { GraphData, GraphEdge, GraphNode } from "./types";
 
 type Draft = Omit<GraphNode, "degree" | "influence">;
-
-interface DocNote {
-  slug: string;
-  title: string;
-  description: string;
-  links: string[];
-}
-
-/**
- * Read the docs corpus. Markdown links to /docs/<slug> (with or without a
- * locale prefix) are the note-to-note relations. Wiki-bracket syntax is NOT
- * parsed — the docs contain bash `[[ -s … ]]` conditionals that would false-
- * positive. Failure of any kind degrades to "no notes", never to a crash.
- */
-function collectNotes(): DocNote[] {
-  try {
-    const root = path.join(process.cwd(), "content/docs");
-    const files: string[] = [];
-
-    const walk = (dir: string) => {
-      for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-        const full = path.join(dir, entry.name);
-        if (entry.isDirectory()) walk(full);
-        else if (entry.name.endsWith(".mdx")) files.push(full);
-      }
-    };
-    walk(root);
-
-    return files.map((file) => {
-      const raw = fs.readFileSync(file, "utf8");
-      const slug = path
-        .relative(root, file)
-        .replace(/\.mdx$/, "")
-        .split(path.sep)
-        .join("/");
-
-      const frontmatter = raw.match(/^---\n([\s\S]*?)\n---/)?.[1] ?? "";
-      const field = (name: string) =>
-        frontmatter
-          .match(new RegExp(`^${name}:\\s*(.+)$`, "m"))?.[1]
-          .trim()
-          .replace(/^["']|["']$/g, "") ?? "";
-
-      const links = [
-        ...raw.matchAll(/\]\((?:\/(?:en|ar))?\/docs\/([a-zA-Z0-9/_-]+)/g),
-      ].map((m) => m[1].replace(/\/$/, ""));
-
-      return {
-        slug,
-        title: field("title") || slug,
-        description: field("description"),
-        links: [...new Set(links)].filter((l) => l !== slug),
-      };
-    });
-  } catch {
-    return [];
-  }
-}
 
 function derive(): GraphData {
   const drafts: Draft[] = [];
@@ -187,7 +129,7 @@ function derive(): GraphData {
   }
 
   // ── Notes (the docs vault) ──────────────────────────────────────────────
-  const notes = collectNotes();
+  const notes = GRAPH_NOTES;
   const noteIndex = new Map<string, number>();
 
   for (const note of notes) {

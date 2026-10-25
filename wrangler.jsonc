@@ -1,38 +1,51 @@
 {
-  // kun on Cloudflare Containers — the same lane as hogwarts and mkan (see DEPLOYMENT.md).
-  // A thin Worker forwards every request to one container running the Next standalone
-  // server. The databayt.org zone lives on Cloudflare (2026-09-18), so `routes` below serve
-  // kun.databayt.org; workers_dev stays on as an origin-independent smoke target.
+  // kun (kun.databayt.org) on Cloudflare Workers via OpenNext — no container.
+  //
+  // The $0-incremental lane (same recipe as databayt/food, marketing, codebase, space and co):
+  // OpenNext bundles the whole Next server into one Worker. Build + deploy with
+  // scripts/deploy-cloudflare.sh, which builds in a throwaway directory so it can switch the Prisma
+  // generator to `runtime = "workerd"` without touching local `next dev`.
+  // The files the app used to read at request time are bundled by scripts/gen-bundle.mjs.
+  // kun.databayt.org is a proxied AAAA 100:: placeholder in the databayt.org zone; the route below
+  // is what actually serves it.
+  // History: this was a Cloudflare Container (basic) until 2026-10-25.
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "kun",
   "main": "cf/worker.js",
   "compatibility_date": "2026-09-01",
-  "compatibility_flags": ["nodejs_compat"],
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "workers_dev": true,
   "observability": { "enabled": true },
+  // The server bundle is large; its sourcemaps can exceed the 60 MiB upload cap (error 10021).
+  "upload_source_maps": false,
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
   "vars": {
+    // Tells src/lib/db.ts (and the jobs/carousel guards) this is the Workers runtime.
+    "CF_WORKERS": "1",
     // Public origin for signed approval links and drafts.
     "SOCIAL_PUBLIC_URL": "https://kun.databayt.org",
-    // next-auth builds its redirects from the request URL, and the standalone server reports
-    // that as 0.0.0.0:3000 (Next standalone quirk); AUTH_URL pins the real origin.
+    // Pins next-auth's redirect origin (a pulled prod env may carry no/other AUTH_URL).
     "AUTH_URL": "https://kun.databayt.org"
   },
-  "containers": [
-    {
-      "class_name": "KunContainer",
-      "image": "./Dockerfile.cf",
-      "max_instances": 1,
-      // basic = ¼ vCPU / 1 GiB. kun is an internal tool: docs, the social hub, cron routes.
-      // Bump to standard-1 if /api/health reports rss near the limit or the container restarts.
-      "instance_type": "basic"
-    }
-  ],
+  // ISR incremental cache (open-next.config.ts).
+  "kv_namespaces": [{ "binding": "NEXT_INC_CACHE_KV", "id": "132e5cd9c2894a9b9c9cc218fa3cc2ad" }],
+  // revalidatePath / revalidateTag tag cache (open-next.config.ts).
   "durable_objects": {
-    "bindings": [{ "name": "KUN", "class_name": "KunContainer" }]
+    "bindings": [{ "name": "NEXT_TAG_CACHE_DO_SHARDED", "class_name": "DOShardedTagCache" }]
   },
-  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["KunContainer"] }],
-  // vercel.json's single cron, verbatim (UTC). New triggers can take ~19 h to start firing.
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["KunContainer"] },
+    // The container is gone: drop its class and add the OpenNext tag cache.
+    { "tag": "v2", "deleted_classes": ["KunContainer"], "new_sqlite_classes": ["DOShardedTagCache"] }
+  ],
+  // OpenNext calls back into its own Worker when revalidating.
+  "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "kun" }],
+  // vercel.json's single cron (UTC) -> /api/social/cron, dispatched by cf/worker.js (cf/crons.json).
+  // The 15-min drain, 6-h metrics and twice-daily canary stay on GitHub Actions.
+  // Omitting this key would NOT remove the existing schedule — keep it explicit.
   "triggers": { "crons": ["0 6 * * *"] },
-  // kun.databayt.org is a proxied AAAA 100:: black hole in the zone; this route is what serves it.
   "routes": [{ "pattern": "kun.databayt.org/*", "zone_name": "databayt.org" }]
 }
