@@ -87,6 +87,63 @@ export function summarizeOutcomes(
     .sort((a, b) => b.sent - a.sent);
 }
 
+// A person read it: acks and rejections don't count (every rejection so far
+// was an automated ATS template — the 2026-10-27 review).
+const HUMAN_KINDS = new Set(["interview", "offer", "response"]);
+const DAY = 86_400_000;
+
+/// Interviews (offers included) per rolling 7-day window, oldest first, the
+/// last one ending `now`. The Friday report leads with this number.
+export function interviewsByWeek(
+  lines: LedgerLine[],
+  weeks = 4,
+  now = Date.now(),
+): number[] {
+  const out = Array<number>(weeks).fill(0);
+  const seen = new Set<string>();
+  for (const l of lines) {
+    if (l.kind !== "reply" || !l.detail) continue;
+    const kind = l.detail.split(":")[0];
+    if (kind !== "interview" && kind !== "offer") continue;
+    if (seen.has(l.crmId)) continue; // one interview per application
+    seen.add(l.crmId);
+    const ago = Math.floor((now - new Date(l.ts).getTime()) / (7 * DAY));
+    if (ago >= 0 && ago < weeks) out[weeks - 1 - ago]++;
+  }
+  return out;
+}
+
+/// Lanes with `minSent`+ sends and no human reply — the channel isn't
+/// reaching a person there. `sinceByLane` restarts a lane's count (its last
+/// manual resume), so a lane Abdout resumed isn't paused again next Friday.
+export function silentLanes(
+  lines: LedgerLine[],
+  minSent = 15,
+  sinceByLane: Record<string, string> = {},
+): { lane: string; sent: number }[] {
+  const human = new Set(
+    lines
+      .filter(
+        (l) =>
+          l.kind === "reply" && HUMAN_KINDS.has((l.detail ?? "").split(":")[0]),
+      )
+      .map((l) => l.crmId),
+  );
+  const lanes = new Map<string, { sent: number; heard: boolean }>();
+  for (const l of lines) {
+    if (l.kind !== "sent") continue;
+    const lane = l.campaign ?? "none";
+    if (l.ts < (sinceByLane[lane] ?? "")) continue;
+    const s = lanes.get(lane) ?? { sent: 0, heard: false };
+    s.sent++;
+    s.heard ||= human.has(l.crmId);
+    lanes.set(lane, s);
+  }
+  return [...lanes.entries()]
+    .filter(([, s]) => s.sent >= minSent && !s.heard)
+    .map(([lane, s]) => ({ lane, sent: s.sent }));
+}
+
 export const byVariant = (s: LedgerLine): string[] =>
   (s.variant ?? "none").split(" ");
 export const byLane = (s: LedgerLine): string[] => [s.campaign ?? "none"];

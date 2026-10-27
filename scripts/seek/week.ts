@@ -13,9 +13,14 @@
 import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 
-import { summarizeOutcomes, type LedgerLine } from "@/lib/jobs/learn-metrics";
+import {
+  interviewsByWeek,
+  silentLanes,
+  summarizeOutcomes,
+  type LedgerLine,
+} from "@/lib/jobs/learn-metrics";
 
-import { type Action, applyAll, describe } from "./adopt";
+import { type Action, applyAll, changes, describe } from "./adopt";
 import { kigaliNow, loadConfig } from "./config";
 import { notify } from "./notify";
 import { post, WEEK_THREAD } from "./slack";
@@ -64,6 +69,23 @@ function settledAbTests(lines: LedgerLine[]): Action[] {
   return out;
 }
 
+/// Pause every lane that sent 15+ since its last resume with no human reply
+/// (Abdout, 2026-10-27: 57 sends, 0 interviews — stop feeding dead channels).
+function silentLanePauses(lines: LedgerLine[]): Action[] {
+  const paused = new Set(loadConfig().pausedLanes);
+  const resumedAt: Record<string, string> = {};
+  for (const c of changes())
+    if (c.type === "pause" && c.value === "resume") resumedAt[c.target] = c.ts;
+  return silentLanes(lines, 15, resumedAt)
+    .filter((s) => !paused.has(s.lane))
+    .map((s) => ({
+      type: "pause" as const,
+      target: s.lane,
+      value: "pause",
+      why: `${s.sent} sends, 0 human replies — switch this lane to calls/walk-ins or resume it in the thread`,
+    }));
+}
+
 async function main(): Promise<void> {
   const { date } = kigaliNow();
   const report = `${DATA}/learn/${date}.md`;
@@ -86,7 +108,7 @@ Read:
 Decide what to change. You may also write ONE new letter template variant (next to its parent, version bumped, never edit an existing file) and register it in jobs/variants.json with "active": false, a "parent", "createdAt": "${date}" and a "hypothesis" citing the numbers — then include a "variant activate" action for it so it A/B-tests against its parent. Never invent facts about Abdout.
 
 Write ${ROOT}/${planFile} as JSON exactly:
-{"headline": "<one sentence: the week in numbers and the main problem>",
+{"headline": "<one sentence: interviews this week first, then the main problem — sends are a means, interviews are the metric>",
  "learned": ["<3–5 findings, each with the number that backs it>"],
  "actions": [{"type": "variant|lane|pause|cap|coverage|source", "target": "...", "value": ..., "why": "<the number behind it>"}],
  "needFromYou": ["<only things a human must do: paste a portal application, sign an attestation, take an AI interview, a missing fact — most valuable first, max 5>"]}
@@ -122,9 +144,13 @@ Prefer 1–4 actions that move volume toward the fastest-paying lanes. With too 
     .split("\n")
     .filter(Boolean)
     .map((l) => JSON.parse(l) as LedgerLine);
-  plan.actions.push(...settledAbTests(lines));
+  plan.actions.push(...settledAbTests(lines), ...silentLanePauses(lines));
+  const interviews = interviewsByWeek(lines);
+
+  const interviewLine = `*Interviews: ${interviews.at(-1)} this week* (last 4 weeks: ${interviews.join(" · ")})`;
 
   if (DRY) {
+    console.log(interviewLine);
     console.log(JSON.stringify(plan, null, 2));
     return;
   }
@@ -135,6 +161,7 @@ Prefer 1–4 actions that move volume toward the fastest-paying lanes. With too 
   // 4. Report + open the discussion thread.
   const msg = [
     `*Jobs — week of ${date}*`,
+    interviewLine,
     plan.headline,
     "",
     "*What I learned*",
