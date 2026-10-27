@@ -2,11 +2,12 @@
 
 ## Status
 
-| Repo     | Pattern                                                                        | Maturity | Canonical               |
-| -------- | ------------------------------------------------------------------------------ | -------- | ----------------------- |
-| mkan     | `PropertyImage` + `BlurImage`, stored cover LQIP (`coverBlur`), sharpen on byte arrival | partial  | **yes** (LQIP pipeline) |
-| hogwarts | `BlurImage` atom on 61 files + `blurFromColor()` LQIP from the catalog colour  | shipped  | **yes** (atom + effect) |
-| codebase | —                                                                              | none     | no                      |
+| Repo     | Pattern                                                                                                                                    | Maturity | Canonical               |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------ | -------- | ----------------------- |
+| mkan     | `PropertyImage` + `BlurImage`, stored cover LQIP (`coverBlur`), sharpen on byte arrival                                                    | partial  | **yes** (LQIP pipeline) |
+| hogwarts | `BlurImage` atom on 61 files + `blurFromColor()` LQIP from the catalog colour                                                              | shipped  | **yes** (atom + effect) |
+| farm     | `BlurImage` (homepage, next/image) + server `BlurImg` for raw `/designs` photos, build-time LQIP map (`pnpm site:blur`), pre-paint sharpen | shipped  | no                      |
+| codebase | —                                                                                                                                          | none     | no                      |
 
 Audited 2026-09-28; hogwarts row re-audited 2026-09-28 after the conversion pass.
 hogwarts now ships the canonical atom + sharpen transition; mkan stays canonical for the
