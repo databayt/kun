@@ -343,6 +343,8 @@ function syncIssue(state) {
       f.approved_by = pol.approver;
     }
   }
+  const done = state.findings.filter((f) => /^applied@|^verified$/.test(f.status || "") && f.applied && hoursAgo(f.applied) <= 24 * 14);
+  const doneLines = done.map((f) => `- \`${f.id}\` ${f.title.replace(/\|/g, "/")} → **${f.status.replace(/^applied@/, "applied ")}**${f.approved_by ? ` (approved: ${f.approved_by})` : ""}`);
   const rows = decide.map((f) => `| \`${f.id}\` | ${f.status === "approved" ? "✅ approved" : f.status} | ${f.title.replace(/\|/g, "/")} | ${(f.evidence || []).slice(0, 2).join("<br>").replace(/\|/g, "/")} | ${(f.fix?.how || "").replace(/\|/g, "/")} |`);
   const body = `Kun's self-improvement queue — written by \`improve.mjs\` (zero tokens), rewritten on every run. Each row is a change that alters behaviour, cost, or a fleet surface, so it waits for Abdout.
 
@@ -351,9 +353,9 @@ function syncIssue(state) {
 | id | status | finding | evidence | proposed fix |
 |---|---|---|---|---|
 ${rows.join("\n") || "| — | — | nothing waiting | | |"}
-
+${doneLines.length ? `\n**Applied in the last 14 days** — a detector's row is re-checked every run (\`verified\` when it stops firing, \`regressed\` if it returns); a row from a /sync sweep is done once its change ships:\n${doneLines.join("\n")}\n` : ""}
 <sub>Updated ${new Date().toISOString().slice(0, 16).replace("T", " ")} UTC · SAFE fixes apply automatically · TRACK items appear in the weekly plan · source: ~/.claude/state/findings.json</sub>`;
-  if (!decide.length && !num) return "no DECIDE findings — no issue needed";
+  if (!decide.length && !done.length && !num) return "no DECIDE findings — no issue needed";
   let res;
   if (num) res = run("gh", ["issue", "edit", num, "--repo", pol.issue_repo, "--body", body], 30000);
   else {
