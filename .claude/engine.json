@@ -20,7 +20,7 @@
   "stack": "2026-09-26",
   "services": "2026-09-26",
   "practice": "2026-09-26",
-  "self": null,
+  "self": "2026-11-01",
   "tiers": ["anthropic", "stack", "services", "practice", "self"],
   "claude_code_version": "2.1.283",
   "cadence_days": {
@@ -74,7 +74,7 @@
   "user_agents": 54,
   "commands": 0,
   "project_skills": 68,
-  "user_skills": 84,
+  "user_skills": 85,
   "pattern_cards": 14,
   "project_rules": 6,
   "domain_rules": 57,
