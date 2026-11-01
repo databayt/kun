@@ -85,8 +85,9 @@ resurrects the leaked one.
 image (plus its `registry.cloudflare.com/…` tag) and the build cache grows by tens of GB; at 100 % the
 docker build dies with `no space left on device` mid-layer. Before a build: `docker system df`; then
 `docker images --format '{{.Repository}}:{{.Tag}}' | grep hogwarts-hogwartscontainer | xargs docker rmi -f`
-and `docker builder prune -f --keep-storage 8GB` (keeps the newest layers, e.g. the emulated Evolution
-stage). Never prune volumes — `twenty_db-data` is the CRM.
+and `docker builder prune -f --max-used-space 8gb` (keeps the newest layers, e.g. the emulated Evolution
+stage; `--keep-storage` is the old name and this Docker silently prunes nothing with it), then
+`colima ssh -- sudo fstrim -av` so the Mac gets the space back. Never prune volumes — `twenty_db-data` is the CRM.
 **hogwarts ships a second process** (Evolution API, `cf/entry.cjs`): the smoke run must carry
 `EVOLUTION_EMBEDDED=0` (the script adds it) — a second live bridge fights production for the WhatsApp
 session; verify after deploy with `/api/health` → `checks.whatsappBridge.status: pass`.
