@@ -36,6 +36,7 @@ PLIST_PATH="$HOME/Library/LaunchAgents/$PLIST_LABEL.plist"
 mkdir -p "$LOG_DIR" "$STATE"
 LOG_FILE="$LOG_DIR/textbook-loop-$(date +%F).log"
 log() { echo "[$(date '+%H:%M:%S')] $*" | tee -a "$LOG_FILE"; }
+KUN_CLAUDE="$HOME/.claude/bin/kun-claude.sh"; [ -x "$KUN_CLAUDE" ] || KUN_CLAUDE=claude
 . "$HOME/.claude/scripts/lib/runs.sh" 2>/dev/null || . "$REPO/.claude/scripts/lib/runs.sh" 2>/dev/null || runs_record() { :; }
 
 MODE="${1:---tick}"; shift || true
@@ -142,7 +143,7 @@ weekly() {
     local cand="$STATE/promote-candidates-$week.json" prop="$STATE/promote-proposals-$week.md"
     log "▶ weekly promote"
     python3 "$SCRIPTS/textbook-contract.py" --promote "$CATALOG" --presets "$SCRIPTS/presets.json" --out "$cand" >> "$LOG_FILE" 2>&1
-    claude -p "You maintain kun's textbook transcription presets. Read $cand (observed cases from every catalog book's contract that no preset clause cites yet, grouped by book with its subject kinds) and $SCRIPTS/presets.json, and the generic clauses every contract already carries in $SCRIPTS/textbook-contract.py — never propose a rule the template already states. Write $prop in Markdown: a table of proposed NEW clauses (id, kind, rule <= 60 words, evidence book:page refs from >= 2 DIFFERENT books) — a case seen in one book stays per-book and is not proposed; then 'Contested across books' (books disagree — needs a decision) and 'Contradictions inside one contract'. Do not edit presets.json. Reply DONE." \
+    KUN_JOB=textbook:presets "$KUN_CLAUDE" -p "You maintain kun's textbook transcription presets. Read $cand (observed cases from every catalog book's contract that no preset clause cites yet, grouped by book with its subject kinds) and $SCRIPTS/presets.json, and the generic clauses every contract already carries in $SCRIPTS/textbook-contract.py — never propose a rule the template already states. Write $prop in Markdown: a table of proposed NEW clauses (id, kind, rule <= 60 words, evidence book:page refs from >= 2 DIFFERENT books) — a case seen in one book stays per-book and is not proposed; then 'Contested across books' (books disagree — needs a decision) and 'Contradictions inside one contract'. Do not edit presets.json. Reply DONE." \
         --model opus --allowedTools Read Write Glob --add-dir "$SCRIPTS" --add-dir "$STATE" --max-turns 30 >> "$LOG_FILE" 2>&1
     echo "$week" > "$STATE/weekly"
     if [ -s "$prop" ]; then
@@ -191,7 +192,7 @@ tick() {
     # The prompt names the workflow explicitly: that is the multi-agent opt-in for a headless run.
     # claude -p stops background work 10 min after its last turn, killing a verify mid-phase
     # (2026-10-12) — the ceiling is lifted so the workflow runs to its own end.
-    ( cd "$REPO" && CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS=0 claude -p "Run the textbook workflow now: Workflow({ name: \"textbook\", args: { book: \"$W\", mode: \"full\", maxPages: $PAGES_PER_TICK, sample: $SAMPLE, coverage: \"$COVERAGE\", seed: $seed, model: \"$MODEL\", auditModel: \"$AUDIT_MODEL\", adjudicateModel: \"$ADJ_MODEL\", date: \"$(date +%F)\" } }). This is the nightly textbook loop. Wait for the workflow's completion notification, then reply with ONE line: the result's partial/transcribed/pages/agreement fields. Do not land, upload, commit or publish — the loop script does that." \
+    ( cd "$REPO" && CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS=0 KUN_JOB=textbook:tick "$KUN_CLAUDE" -p "Run the textbook workflow now: Workflow({ name: \"textbook\", args: { book: \"$W\", mode: \"full\", maxPages: $PAGES_PER_TICK, sample: $SAMPLE, coverage: \"$COVERAGE\", seed: $seed, model: \"$MODEL\", auditModel: \"$AUDIT_MODEL\", adjudicateModel: \"$ADJ_MODEL\", date: \"$(date +%F)\" } }). This is the nightly textbook loop. Wait for the workflow's completion notification, then reply with ONE line: the result's partial/transcribed/pages/agreement fields. Do not land, upload, commit or publish — the loop script does that." \
         --model "$MODEL" --dangerously-skip-permissions --max-turns 40 ) >> "$LOG_FILE" 2>&1
     local rc=$?
     local after; after=$(find "$W/pages-md" -maxdepth 1 -name '[0-9]*.md' 2>/dev/null | wc -l | tr -d ' ')

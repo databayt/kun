@@ -50,6 +50,11 @@ ALLOWED="${KUN_BRIDGE_USERS:-U0AQ0GLDY04}"
 DAILY="${KUN_BRIDGE_DAILY:-15}"
 TIMEOUT_S="${KUN_BRIDGE_TIMEOUT:-1800}"
 CLAUDE="${KUN_BRIDGE_CLAUDE:-$HOME/.local/bin/claude}"
+# The ledger wrapper logs tokens + cost per run (JSON output passes through untouched).
+if [ -z "${KUN_BRIDGE_CLAUDE:-}" ] && [ -x "$HOME/.claude/bin/kun-claude.sh" ]; then
+  export KUN_CLAUDE_REAL="$CLAUDE" KUN_JOB=hermes:bridge
+  CLAUDE="$HOME/.claude/bin/kun-claude.sh"
+fi
 export PATH="$HOME/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
 mkdir -p "$STATE" "$(dirname "$LOG")"
 

@@ -28,6 +28,7 @@ import { loadVariants } from "./variants";
 import { DATA, REPO } from "./lib/paths.mjs";
 import { ME, STRATEGY } from "./lib/identity";
 
+import { KUN_CLAUDE } from "../lib/kun-claude.mjs";
 const DRY = process.argv.includes("--dry-run");
 const ROOT = REPO;
 
@@ -114,7 +115,7 @@ Write ${ROOT}/${planFile} as JSON exactly:
  "needFromYou": ["<only things a human must do: paste a portal application, sign an attestation, take an AI interview, a missing fact — most valuable first, max 5>"]}
 Prefer 1–4 actions that move volume toward the fastest-paying lanes. With too little data, change little and say so. Output nothing else.`;
   const res = spawnSync(
-    "claude",
+    KUN_CLAUDE,
     [
       "-p",
       prompt,

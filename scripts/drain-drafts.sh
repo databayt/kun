@@ -72,6 +72,8 @@ done
 
 mkdir -p "$LOG_DIR"
 LOG_FILE="$LOG_DIR/draft-drain-$(date +%F).log"
+# Headless runs go through the ledger wrapper (tokens + cost → ~/.claude/logs/runs.jsonl).
+KUN_CLAUDE="$HOME/.claude/bin/kun-claude.sh"; [ -x "$KUN_CLAUDE" ] || KUN_CLAUDE=claude
 log() { echo "[$(date '+%H:%M:%S')] $*" >> "$LOG_FILE"; }
 
 # ── Scheduler ────────────────────────────────────────────────────
@@ -257,11 +259,11 @@ for pass in $(seq 1 $PASSES); do
         # script, doc reads, and answer files. --max-turns caps a runaway session.
         ID_COUNT="$(printf '%s' "$IDS" | wc -w | tr -d ' ')"
         if [ "$group" = "default" ] || [ "$group" = "google-free" ]; then
-            claude -p "${PROMPT//__IDS__/$IDS}" \
+            KUN_JOB=social:drafts "$KUN_CLAUDE" -p "${PROMPT//__IDS__/$IDS}" \
                 --allowedTools "Bash(node scripts/social-drafts.mjs*)" "Read" "Write" "Glob" "Grep" \
                 --max-turns 50 >> "$LOG_FILE" 2>&1
         else
-            claude -p "${PROMPT//__IDS__/$IDS}" --model "$group" \
+            KUN_JOB=social:drafts "$KUN_CLAUDE" -p "${PROMPT//__IDS__/$IDS}" --model "$group" \
                 --allowedTools "Bash(node scripts/social-drafts.mjs*)" "Read" "Write" "Glob" "Grep" \
                 --max-turns 50 >> "$LOG_FILE" 2>&1
         fi

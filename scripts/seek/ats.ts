@@ -67,6 +67,7 @@ import { contactState, pdfPages, postingText, splitName } from "./wave";
 import { DATA, DATA_ABS, REPO, SCRIPTS } from "./lib/paths.mjs";
 import { ME } from "./lib/identity";
 
+import { KUN_CLAUDE } from "../lib/kun-claude.mjs";
 const args = process.argv.slice(2);
 const verb = args[0];
 const APPLY = args.includes("--apply");
@@ -195,7 +196,7 @@ ${pending.map((r) => join(dir, `${r.crmId}.ats-request.json`)).join("\n")}
 When every "out" file is written, reply DONE.`;
   return new Promise((resolve) => {
     const child = spawn(
-      "claude",
+      KUN_CLAUDE,
       [
         "-p",
         prompt,

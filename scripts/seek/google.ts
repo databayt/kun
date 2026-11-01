@@ -27,6 +27,7 @@ import {
 import { ME, SWEEP } from "./lib/identity";
 import { DATA, REPO } from "./lib/paths.mjs";
 
+import { KUN_CLAUDE } from "../lib/kun-claude.mjs";
 const DRY = process.argv.includes("--dry-run");
 const ROOT = REPO;
 const TODAY = new Date().toISOString().slice(0, 10);
@@ -80,7 +81,7 @@ function main(): void {
   rmSync(TMP, { force: true });
   console.log(`google sweep ${TODAY}: claude -p with WebSearch …`);
   const res = spawnSync(
-    "claude",
+    KUN_CLAUDE,
     [
       "-p",
       prompt,

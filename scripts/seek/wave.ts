@@ -47,6 +47,7 @@ import { postingText, splitName } from "./lib/posting";
 import { DATA, DATA_ABS, REPO } from "./lib/paths.mjs";
 import { ME } from "./lib/identity";
 
+import { KUN_CLAUDE } from "../lib/kun-claude.mjs";
 function letterExists(crmId: string): boolean {
   if (!existsSync(`${DATA}/outbox`)) return false;
   return readdirSync(`${DATA}/outbox`).some((w) => existsSync(join(`${DATA}/outbox`, w, `${crmId}.letter.json`)));
@@ -134,7 +135,7 @@ ${pending.map((r) => join(dir, `${r.crmId}.request.json`)).join("\n")}
 When every "out" file is written, reply DONE.`;
   console.log(`tailoring ${pending.length} letter(s) with claude -p …`);
   const res = spawnSync(
-    "claude",
+    KUN_CLAUDE,
     [
       "-p",
       prompt,

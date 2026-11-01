@@ -50,6 +50,7 @@ import { postingText, splitName } from "./lib/posting";
 import { DATA, REPO } from "./lib/paths.mjs";
 import { ME, TAILOR } from "./lib/identity";
 
+import { KUN_CLAUDE } from "../lib/kun-claude.mjs";
 const ROOT = REPO;
 const CAREER = `${DATA}/evidence/career.json`;
 export const MIN_COVERAGE = 60;
@@ -167,7 +168,7 @@ function runBatch(files: string[]): Promise<void> {
   const prompt = `${CONTRACT}${files.join("\n")}\n\nWhen every "out" file is written, reply DONE.`;
   return new Promise((resolve) => {
     const child = spawn(
-      "claude",
+      KUN_CLAUDE,
       [
         "-p",
         prompt,

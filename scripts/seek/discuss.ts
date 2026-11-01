@@ -31,6 +31,7 @@ import {
 import { DATA, REPO } from "./lib/paths.mjs";
 import { ME } from "./lib/identity";
 
+import { KUN_CLAUDE } from "../lib/kun-claude.mjs";
 const DRY = process.argv.includes("--dry-run");
 const ROOT = REPO;
 const LOCK = `${DATA}/.state/discuss.lock`;
@@ -114,7 +115,7 @@ If he asks for a change you can make, include it as an action; if he asks to und
 
 Write ${ROOT}/${out} as JSON exactly: {"reply": "<your answer>", "actions": [{"type": "...", "target": "...", "value": ..., "why": "..."}], "reverts": [<change numbers>]}. Output nothing else.`;
     const res = spawnSync(
-      "claude",
+      KUN_CLAUDE,
       [
         "-p",
         prompt,

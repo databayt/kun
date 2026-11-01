@@ -5,6 +5,7 @@
 #   bash ~/.claude/scripts/runs.sh --brief    one line, only when something is red/stale (SessionStart)
 #   bash ~/.claude/scripts/runs.sh --json     machine form (maintain.sh step_runs)
 #   bash ~/.claude/scripts/runs.sh --notify   send the red/stale digest to Slack DM via `hermes send`
+#   bash ~/.claude/scripts/runs.sh --spend [days]  headless claude runs per job (kun-claude.sh ledger lines)
 #
 # Three signals, no edits to the jobs themselves:
 #   1. launchd's last exit code (a crash)           → red
@@ -15,6 +16,36 @@
 # Policy (labels, cadences, logs) lives in engine.json → jobs; this script holds none.
 
 MODE="${1:---table}"
+if [ "$MODE" = "--spend" ]; then
+    python3 - "${RUNS_LEDGER:-$HOME/.claude/logs/runs.jsonl}" "${2:-7}" <<'PY2'
+import json, sys, time, calendar
+path, days = sys.argv[1], int(sys.argv[2]); since = time.time() - days * 86400
+agg = {}
+try:
+    lines = open(path).readlines()
+except FileNotFoundError:
+    lines = []
+for line in lines:
+    try: e = json.loads(line)
+    except Exception: continue
+    if e.get("kind") != "claude": continue
+    if calendar.timegm(time.strptime(e["ts"], "%Y-%m-%dT%H:%M:%SZ")) < since: continue
+    a = agg.setdefault(e["job"], {"runs": 0, "fail": 0, "tokens": 0, "out": 0, "usd": 0.0, "models": set()})
+    a["runs"] += 1; a["fail"] += e.get("status") != "ok"
+    a["tokens"] += e.get("tokens") or 0; a["out"] += e.get("output_tokens") or 0
+    a["usd"] += e.get("cost_usd") or 0; a["models"].add(f'{e.get("model")}/{e.get("effort")}')
+if not agg:
+    print(f"no headless claude runs logged in the last {days}d (ledger: {path})"); sys.exit(0)
+print(f"headless claude, last {days}d — $ is plan-equivalent value (Max is flat-rate), not a bill")
+print(f"{'job':<24}{'runs':>5}{'fail':>5}{'tokens':>12}{'out':>9}{'$':>9}  model/effort")
+tot = [0, 0, 0, 0, 0.0]
+for j, a in sorted(agg.items(), key=lambda kv: -kv[1]["tokens"]):
+    print(f"{j:<24}{a['runs']:>5}{a['fail']:>5}{a['tokens']:>12,}{a['out']:>9,}{a['usd']:>9.2f}  {', '.join(sorted(a['models']))}")
+    for i, k in enumerate(["runs", "fail", "tokens", "out", "usd"]): tot[i] += a[k]
+print(f"{'TOTAL':<24}{tot[0]:>5}{tot[1]:>5}{tot[2]:>12,}{tot[3]:>9,}{tot[4]:>9.2f}")
+PY2
+    exit 0
+fi
 ENGINE="${KUN_DIR:-$HOME/kun}/.claude/engine.json"
 LEDGER="${RUNS_LEDGER:-$HOME/.claude/logs/runs.jsonl}"
 [ -f "$ENGINE" ] || exit 0

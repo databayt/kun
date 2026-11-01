@@ -36,6 +36,7 @@ import { notify } from "./notify";
 import { DATA, DATA_ABS, REPO } from "./lib/paths.mjs";
 import { ME } from "./lib/identity";
 
+import { KUN_CLAUDE } from "../lib/kun-claude.mjs";
 const args = process.argv.slice(2);
 
 const table = (title: string, rows: Outcome[]): string =>
@@ -194,7 +195,7 @@ Then propose AT MOST 2 new variants — a letter template or a CV HTML edit — 
 3. Append a "## Proposals" section to ${REPO}/${out} explaining each and how to adopt it (pnpm jobs:variant activate <id>).
 If the sample is too small to support a change, propose nothing and say so in the Proposals section. Never invent facts.`;
     const res = spawnSync(
-      "claude",
+      KUN_CLAUDE,
       [
         "-p",
         prompt,
