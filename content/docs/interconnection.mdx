@@ -1,6 +1,6 @@
 ---
 title: Interconnection
-description: How every piece connects — kun engine, machines, Hermes, CRM, and the four Claude surfaces — and how to reuse or contribute to the map
+description: How work flows and how every piece connects — the SENSE → THINK → ACT → LEARN loop, the dispatch table, kun engine, machines, Hermes, CRM, and the Claude surfaces
 ---
 
 # Interconnection
@@ -8,6 +8,122 @@ description: How every piece connects — kun engine, machines, Hermes, CRM, and
 How the whole system holds together: the **kun engine**, the **machine fleet**, the **Hermes gateway**, the **self-hosted CRM**, and the four surfaces you touch Claude from (terminal, chat, Cowork, phone).
 
 > **The core insight: nothing talks machine-to-machine.** Every machine talks to a small set of shared cloud services — GitHub, Slack, Vercel, the CRM — and those services *are* the interconnection. No VPN, no port-forwarding, no server administration for the team.
+
+## How work flows — SENSE → THINK → ACT → LEARN
+
+You talk to **one door** — a Claude Code session, from the terminal, the Desktop Code tab, the
+iPhone (Remote Control), or Slack (Hermes). The session splits the work; you don't. Every surface
+and every loop follows the same four beats:
+
+```
+ SENSE ─────────────► THINK ─────────────► ACT ─────────────► LEARN ─┐
+ aware.mjs            resolve.mjs           lanes + ledger          improve.mjs
+ one snapshot of      names → repos and     main session, agents,   findings from the
+ everything, 0 tokens blocks; dispatch      Workflows, loops        runs → SAFE fixes,
+                      table picks lane,     (kun-claude.sh logs     DECIDE → one issue,
+                      model, effort         tokens + cost)          measured before/after
+   ▲                                                                       │
+   └─────────────────────── the Monday routine closes the loop ◄───────────┘
+```
+
+### Talk to kun — plain words, few of them
+
+| You say | What happens |
+|---|---|
+| "mkan listing is broken" | the router names `~/mkan` (its own CLAUDE.md applies), the session works there |
+| "fix the admission form" (from a kun session) | one hint: the hogwarts `admission` block — and that `seek` also uses the word — the session picks by context |
+| "fix the admission form" (inside hogwarts) | the full block protocol: read the block's records first, update them + its docs + the issue after |
+| "status" / "حالة" on Slack | Hermes pastes `~/.claude/state/aware.md` — zero Claude tokens |
+| "deploy balqalam" on Slack | Hermes hands it to Claude Code with `auto`; the router picks hogwarts; the thread stays there |
+| "sync self" / "improve yourself" | `/sync self`: apply safe fixes, refresh the Engine decisions issue, apply what you approved |
+| "yes 9ac6e654" on the Engine decisions issue | approves that row; the next `sync self` (or Monday) applies it and measures the result |
+
+### SENSE — awareness of everything happening
+
+`node ~/kun/.claude/scripts/aware.mjs` takes one zero-token snapshot: the machine (disk + its
+24 h trend, swap, sessions, Remote Control), every scheduled job (`runs.sh`, Hermes cron), spend
+(the headless ledger plus every transcript's usage — fresh tokens vs cache reads, per surface,
+average context per turn), the engine (heartbeat, sync tiers, bench age, findings, decisions past
+review), the queue (reports, issues by priority, Cowork handoffs), main CI per repo, Hermes, WIP,
+and which sessions are active now. Where you read it:
+
+| Surface | How |
+|---|---|
+| Every session start | a ≤5-line brief, silent when green (`session-aware.sh`, ~30 ms) |
+| iPhone / Slack | alerts (below) and "status" via Hermes |
+| Cowork | reads `~/.claude/state/aware.md` through the filesystem |
+| GitHub | each machine's #133 health report carries an awareness block |
+
+**Alerts are transitions, not nags**: a condition must hold on two refreshes in a row, is sent
+once, clears when it goes away, and at most 6 go out a day. At the Mac → a banner; away → this
+machine's `~/.claude/.kun-notify` target (Abdout: his Slack DM). Alerted: disk under 10 GB or
+falling 5 GB/day, a job turning red, Hermes or Remote Control down, a failed main CI, commits
+unpushed for 12 h. Shown but never alerted: spend, sync, bench, dirty files.
+
+| Alert | Owner (the one place it comes from) |
+|---|---|
+| jobs, disk, CI, Hermes/RC down, unpushed | `aware.mjs` (owner Mac: every 30 min) |
+| report-an-issue queue | the SessionStart reports hook (from aware's cache) |
+| domains, mail | the `domains` GitHub Action → `domains` issues |
+| engine findings | `improve.mjs` → the Engine decisions issue |
+| weekly plan | the Monday routine → one message |
+
+### THINK — the router and the dispatch table
+
+`resolve.mjs` turns names into places before the model guesses: a **block of the current repo**
+gets the block protocol; **another repo by name** (hogwarts, mkan, souq, shifa — and aliases like
+balqalam, بالقلم, mkan.sd) gets a one-line pointer; a **curated global block** (admission,
+attendance, timetable, parent-portal, …) gets a one-line hint from any session. Generic words
+(docs, table, finance, grades, listings) never route across repos; `kun` and `codebase` never
+route bare. Policy: `engine.json → resolver`; registry: `.claude/memory/repositories.json`.
+
+Then the session picks a lane — **the dispatch table** (`engine.json → delegation`):
+
+| Work | Lane | Model · effort |
+|---|---|---|
+| Q&A, small edits, deciding | the main session | Opus 5.5 · session effort |
+| Look up across many files | an Explore subagent | sonnet · low |
+| Mechanical edit, formatting, git | haiku agents (git, comment, icon, …) | haiku · low |
+| Build to a known pattern | build agents | sonnet · medium |
+| Review, verify, judge | opus specialists, Workflow verify stages | opus · high |
+| Fan out with verification | a Workflow (qa, handover, textbook, scrape, …) — every stage names its model and effort (lint-enforced) | per stage |
+| Long or recurring work | a loop through `kun-claude.sh` (ledgered; lean when it needs no skills or MCP) | per job |
+| An errand in Abdout's name | `/behalf`, then Cowork | — |
+| An easy one-file task, off the Max pool | Antigravity (`a`) | Gemini |
+| Another running session | `ListAgents` → `SendMessage` (Code ↔ Code, any machine) | — |
+
+### ACT — every run leaves a receipt
+
+Headless Claude runs go through `~/.claude/bin/kun-claude.sh`: same args, same output, plus one
+ledger line (job, model, effort, tokens, cost, turns, duration) and an optional daily cap.
+`bash ~/.claude/scripts/runs.sh --spend` totals it per job. Measured on 2026-11-01: a one-word
+headless reply from `~/kun` cost 67.9K tokens with the context hooks, 61.1K without them (they
+now stay silent headless), and 39.5K in lean mode (no MCP, no skill listing).
+
+### LEARN — kun improves itself
+
+`improve.mjs` (zero tokens, daily in the heartbeat) reads kun's own evidence — the ledger, the
+awareness history, the router log, transcripts, lint, health, bench-retire — and files findings
+with stable ids: **SAFE** (mechanical — applied automatically), **DECIDE** (changes behaviour,
+cost or a fleet surface — one row each on the rolling **Engine decisions** issue, approved with
+`yes <id>`), **TRACK** (context for the weekly plan). After a change, the detector either stops
+firing (**verified**) or comes back (**regressed**) — measured, never assumed.
+
+**The Monday routine** (`scripts/captain/weekly.sh`, Mondays 08:00 on the owner Mac): sense →
+detect → one ledgered Opus run that applies `sync self`, syncs the anthropic tier only when a new
+Claude Code release exists, and writes the week's plan to `.claude/memory/weekly/` — never the
+1.3M-token bench, never a 36-day catch-up. Abdout gets one message.
+
+### The commands, in one place
+
+```bash
+node ~/kun/.claude/scripts/aware.mjs              # everything happening, now
+bash ~/.claude/scripts/runs.sh                    # every scheduled job: ok / red / stale
+bash ~/.claude/scripts/runs.sh --spend            # headless spend per job, last 7 days
+node ~/kun/.claude/scripts/resolve.mjs "<words>"  # where would these words route?
+node ~/kun/.claude/scripts/improve.mjs            # what kun would improve, and why
+bash ~/kun/scripts/captain/weekly.sh --status     # the Monday routine
+```
 
 ## The big picture
 

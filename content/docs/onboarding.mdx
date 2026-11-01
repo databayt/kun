@@ -101,7 +101,8 @@ Running the bootstrap line leaves your machine fully provisioned. Here's what la
 | **MCP fleet** | kun's catalog (`.claude/mcp.json`, 18 servers) **registered at user scope** with `claude mcp add-json -s user` — the live config is `~/.claude.json`, check it with `claude mcp list`. Catalog paths are rewritten to your `$HOME`. Servers flagged `$skipRegistration` (filesystem, vercel, …) stay catalog-only on purpose. The browser (Playwright) MCP is one extra command — see [Browser MCP](#browser-mcp) |
 | **Desktop ↔ CLI parity** | `claude_desktop_config.json` symlinked to `~/.claude/mcp.json` so Desktop tabs see the same catalog; Antigravity's `~/.gemini/config/mcp_config.json` is transformed from the same source |
 | **Devices lane** *(Mac)* | `devices.sh --install` arms two launchd services: a **presence** file (no phone pushes while you're at the Mac) and a **Remote Control** server in tmux, rooted at `~/kun`, so the Claude app's Code tab can start sessions on the Mac. See [Away from the keyboard](#away-from-the-keyboard) |
-| **Daily heartbeat** | `maintain.sh --install` — pull, refresh, health, disk hygiene, dashboard report. See [Day 2](#day-2--the-machine-supervises-itself) |
+| **Daily heartbeat** | `maintain.sh --install` — pull, refresh, health, disk hygiene, awareness + self-improvement detection, dashboard report. See [Day 2](#day-2--the-machine-supervises-itself) |
+| **Orchestration layer** | One loop every surface follows — **sense → think → act → learn** ([how it works](/docs/interconnection#how-work-flows--sense--think--act--learn)): **awareness** (`aware.mjs` — one zero-token snapshot of your machine, jobs, spend, queue and CI; a ≤5-line brief at session start, silent when green) · **router** (`resolve.mjs` — say "mkan" or "admission" and the session knows the repo and block; one node process per prompt, every repo) · **ledger** (`kun-claude.sh` — every headless Claude run logs tokens and cost; lean mode for jobs that need no skills or MCP) · **self-improvement** (`improve.mjs` — kun's own evidence becomes safe fixes and decisions; `sync self` applies them) |
 | **Repos** | The full databayt org cloned to your chosen directory (default: `~/<repo>`) — see [Which repos you get](#which-repos-you-get) |
 
 ### Verify what you got
@@ -120,6 +121,10 @@ Run these to confirm each layer — all green means fully provisioned:
 | **Per-product env** | `for d in kun hogwarts souq mkan shifa marketing codebase; do [[ -s ~/$d/.env ]] && echo "$d ✓"; done` | each cloned repo prints |
 | **Config** | `bash ~/.claude/scripts/health.sh` | `✅ healthy` (0 errors) |
 | **Heartbeat** | `bash ~/.claude/scripts/maintain.sh --status` (Win: `maintain.ps1 -Status`) | state JSON + "scheduler: armed" |
+| **Awareness** | `node ~/kun/.claude/scripts/aware.mjs` | a snapshot: machine, spend, queue, CI (a teammate's machine shows no job rows — that's correct) |
+| **Router** | `node ~/kun/.claude/scripts/resolve.mjs "fix the admission form"` | JSON with a `global` hint for `hogwarts/admission` |
+| **Self-improvement** | `node ~/kun/.claude/scripts/improve.mjs` | findings grouped Safe / Decide / Track |
+| **Headless ledger** | `bash ~/.claude/scripts/runs.sh --spend` | tokens per job, or "no headless claude runs logged" on a fresh machine |
 | **Scheduler** | `launchctl list \| grep com.databayt.kun-maintain` (Win: `Get-ScheduledTask kun-maintain`) | one line prints |
 | **Devices** *(Mac)* | `bash ~/.claude/scripts/devices.sh --status` | presence + Remote Control services armed |
 | **Surfaces** | `claude doctor` | all checks green |
@@ -150,7 +155,8 @@ All installer scripts live in `~/kun/.claude/scripts/`. Print any backend's flag
 What still varies (and why):
 
 - **Secrets** — scoped by which **Gist** you're handed, not by config. A machine only holds the keys it's trusted with; an MCP server without its key simply doesn't connect (harmless). Full config everywhere, contained blast radius.
-- **Linux** — Claude Desktop doesn't exist on Linux; surfaces are the CLI, `claude.ai/code` in the browser, and the IDE plugins. A Linux box with those is complete — don't expect the Chat/Cowork/Code tabs.
+- **Linux** — Claude Desktop doesn't exist on Linux; surfaces are the CLI, `claude.ai/code` in the browser, and the IDE plugins. A Linux box with those is complete — don't expect the Chat/Cowork/Code tabs. Linux now gets the same hooks as macOS: before 2026-11-01 setup handed Linux the Windows settings file (no destructive-command guard, no prompt router) — the heartbeat fixes it on its next run, or run `bash ~/.claude/scripts/setup.sh --quiet` now.
+- **Windows** — the engine installs, but its session hooks have not been verified on a real Windows machine yet. After the install, run the doctor (`-Doctor`) and send what you see with **Report an issue** — that is how the Windows lane gets fixed.
 - **No Pro/Max** — Desktop tabs and Remote Control are unavailable. databayt runs **subscription-only** (Claude Max, no API-key spend) — ask for a seat rather than wiring an `ANTHROPIC_API_KEY`.
 - **RAM** — each Claude Code session holds ~10 MCP processes. On a 16 GB machine keep a few sessions open, close the finished ones, and let the Remote Control server start new ones on demand.
 
@@ -389,9 +395,10 @@ After setup, every machine runs a **daily maintain heartbeat** (09:17 local — 
 1. **Pull** `~/kun` (main only; skips if you're mid-rebase or offline; aborts cleanly on conflict — never leaves the tree broken)
 2. **Refresh** `~/.claude` — `setup.sh --quiet` re-copies agents/skills/rules/settings/MCP from the fresh source and prunes engine items removed upstream
 3. **Health-check** — full `health.sh` audit
-4. **Disk hygiene** — under the floor (`engine.json → devices.hygiene`, 30 GB by default) it prunes caches itself (Docker build cache, old images, package caches)
-5. **Record** — state to `~/.claude/.kun-maintain.json` (`cat` it anytime)
-6. **Report** — posts to the team's [Config Health Dashboard](https://github.com/databayt/kun/issues?q=label%3Aconfig-health) weekly, and immediately if health goes RED
+4. **Disk hygiene** — under the floor (`engine.json → devices.hygiene`, 30 GB by default) it prunes caches itself (Docker build cache, old images, package caches, idle Cloudflare build copies — never env files)
+5. **Sense + learn** — rebuilds the prompt router's index, refreshes the awareness snapshot (`~/.claude/state/aware.md`), and runs kun's improvement detectors — zero tokens — applying only machine-local safe fixes (env-file permissions, missing labels)
+6. **Record** — state to `~/.claude/.kun-maintain.json` (`cat` it anytime)
+7. **Report** — posts to the team's [Config Health Dashboard](https://github.com/databayt/kun/issues?q=label%3Aconfig-health) weekly (with a 4-line awareness block), and immediately if health goes RED. **This is how Abdout sees your machine is healthy — if your machine never appears there, run `bash ~/.claude/scripts/maintain.sh --run` once and check `gh auth status`.**
 
 If the heartbeat goes stale (>48h) or health is RED, a warning surfaces automatically at the start of every Claude Code session — in any project, not just kun. What each warning means:
 
@@ -400,6 +407,9 @@ If the heartbeat goes stale (>48h) or health is RED, a warning surfaces automati
 | `heartbeat stale (Nh)` | The scheduler didn't fire (machine off / scheduler disarmed) | `bash ~/.claude/scripts/maintain.sh` — and `--install` to re-arm |
 | `engine health RED` | The health audit found errors | `bash ~/.claude/scripts/health.sh` and fix what's ❌ |
 | `could not pull ~/kun` | Rebase conflict was aborted safely | `git -C ~/kun pull --rebase --autostash` by hand |
+| `⚠ …` (first line of the brief) | An alert that held for two refreshes: disk, a red job, CI, Hermes/Remote Control down, commits unpushed 12 h | act on it; it clears itself when the condition goes away |
+| `Mac disk: N GB free` | Under 20 GB — builds and swap start failing near zero | `bash ~/.claude/scripts/maintain.sh --run` (prunes caches) |
+| `Engine: … improvement finding(s)` (kun sessions) | kun found something to improve in its own runs | say **"sync self"** |
 
 ### Personal vs engine-managed config
 
@@ -409,6 +419,7 @@ The heartbeat re-copies engine config daily — so know which files are yours:
 |---|---|
 | `~/.claude/CLAUDE.md` (seeded from template once) | `~/.claude/agents/`, `skills/`, `rules/`, `workflows/` shipped by kun |
 | `~/.claude/.env` (secrets) | `~/.claude/mcp.json`, `settings.json` engine keys, MCP registrations in `~/.claude.json` (added, never removed) |
+| `~/.claude/.kun-notify` — where *your* alerts go (e.g. `slack:<your DM id>`); absent = desktop banners only | `~/.claude/state/` (awareness snapshot, findings, router index) — regenerated, safe to delete |
 | `.claude/settings.local.json` (per-project) | `~/.claude/scripts/`, `hooks/`, `bin/` (same-named files only) |
 | Top-level `settings.json` keys the engine doesn't define (model, voice, …) | — |
 | Anything you created (personal skills/agents) | — |

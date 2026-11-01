@@ -2593,6 +2593,32 @@ export const schools: School[] = [
         connects: ["health", "sync", "captain"],
         depends: [],
       },
+      {
+        name: "dispatch",
+        effect:
+          "One door: route the work to the right repo, block, lane, model and effort — then record it",
+        order: [m("content/docs/interconnection.mdx"), f("orchestration")],
+        steps: [
+          "Read the <kun-route> hint (or run resolve.mjs) — the place",
+          "Pick the lane from engine.json → delegation — the who, model and effort",
+          "Long or recurring work goes through kun-claude.sh — the receipt",
+          "Read ~/.claude/state/aware.md before asking what is happening",
+        ],
+        connects: ["aware", "captain"],
+        depends: [],
+      },
+      {
+        name: "aware",
+        effect:
+          "Everything happening now — jobs, disk, spend, queue, CI, Hermes, active sessions — zero tokens",
+        order: [m(".claude/scripts/aware.mjs")],
+        steps: [
+          "node ~/kun/.claude/scripts/aware.mjs (refreshes when stale)",
+          "Alerts fire once per transition; the brief at session start is silent when green",
+        ],
+        connects: ["dispatch", "health", "monitor"],
+        depends: [],
+      },
     ],
   },
   {

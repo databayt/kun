@@ -123,6 +123,28 @@ memory index 18.8K → 11.4K and `CLAUDE.md` 13.2K → 10.2K (stale Vercel instr
 Still owed: the `/bench` re-baseline (~1.3M tokens) — deliberately not run on 2026-09-28, the
 eve of the UNDP deadline, when the jobs loop and Cowork share the pool.
 
+## Measured 2026-11-01 — the orchestration pass
+
+Numbers, not estimates. Each came from a real run on Abdout's Mac and is now tracked by kun itself
+(`aware.mjs` senses it, `improve.mjs` flags drift, the Monday routine reads both).
+
+| What | Before | After | How |
+|---|---|---|---|
+| Always-loaded context (CLAUDE.md files + always-on rules + MEMORY.md index) | 46.6K chars | 32.7K chars | rules path-scoped (shadcn-pattern, patterns, block-protocol), cowork-bridge trimmed, vocabulary block lists only keywords with no skill, memory index hooks shortened |
+| `bridge.md`, read at every session start | 42.5 KB (~11K tokens) | 1.3 KB | pointers only; history in `~/.claude/bridge-archive/` |
+| A one-word headless reply from `~/kun` (haiku) | 67.9K tokens | 61.1K (hooks silent) · 39.5K (lean) | context hooks exit on `KUN_HEADLESS` (they fire under `claude -p` too); lean = no MCP, no skill listing (`engine.json → jobs.$lean`) |
+| Reports hook at session start | 1.7 s (a live org search) | 0.03 s | reads aware's cached search when under 30 min old |
+| Prompt router (UserPromptSubmit) | 147 ms, hogwarts only | 63.5 ms, every repo | one node process over a prebuilt index |
+| Workflow stages that named no model/effort (inherited Opus) | 23 stages | 0 | `lint-contracts.mjs → workflow-effort` fails the build on a new one |
+
+**What dominates now** (aware's first day): 9.2M fresh tokens against 708M cache reads over
+~2,000 turns — about 356K tokens of context re-read per turn. The lever is session length, not
+model choice: `/clear` between unrelated tasks, `/compact` long ones, research in subagents. The
+`context.avg_per_turn` finding (target 250K) makes the trend visible every week.
+
+**Not adopted:** `claude --bare` would cut a headless run further, but it reads only
+`ANTHROPIC_API_KEY` (no OAuth) — API billing, which the subscription-only rule forbids.
+
 ## Standing proposals (Abdout's call, not auto-applied)
 
 - **Hooks as preprocessors**: a PreToolUse hook can filter test/log output to failures-only before Claude reads it (the costs doc ships a ready `filter-test-output.sh` pattern).

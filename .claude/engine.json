@@ -81,7 +81,7 @@
   "project_mcp": 18,
   "user_mcp": 24,
   "hooks": 17,
-  "vocabulary_spells": 238,
+  "vocabulary_spells": 240,
   "workflows": 13,
   "$plugins_comment": "The two plugins are how the fleet reaches other machines. kun-company also carries the rules, pattern cards, hooks, and workflows. Union of both skill sets is 61 (build ships in both).",
   "plugin_kun_company_agents": 27,
@@ -154,6 +154,19 @@
    "claude-web-code": "long-running cloud babysitting (autofix-pr, scheduled routines) — same pool, so keep routines lean and infrequent",
    "antigravity": "OFF-POOL cheap lane (`a` = Gemini) — easy one-file mechanical tasks; zero Anthropic tokens",
    "hermes": "OFF-POOL chat relay (`h` = free Nous model) — gateway/channel tasks, never build work itself; it hands build work to Claude Code through scripts/hermes/claude.sh (ON-POOL: Opus 5.5 on the Max plan, Abdout only, one at a time, 15 runs/day)"
+  },
+  "lanes": {
+   "$comment": "The dispatch table (2026-11-01): which lane, model and effort a kind of work goes to. Read by the main session (.claude/CLAUDE.md → Dispatch) and explained in content/docs/interconnection.mdx. Workflow stages must name model + effort (lint-contracts → workflow-effort).",
+   "decide": "main session — Opus 5.5, session effort",
+   "lookup": "Explore subagent — sonnet, low effort",
+   "mechanical": "haiku agents (git, comment, icon, github, semantic, sse, structure) — low effort",
+   "build": "build agents — sonnet, medium effort",
+   "judge": "opus specialists or Workflow verify stages — high effort",
+   "fan_out": "a Workflow (qa, handover, textbook, scrape, …) — per-stage model + effort",
+   "long_or_recurring": "a loop through .claude/bin/kun-claude.sh — ledgered, lean when it needs no skills or MCP",
+   "errand_as_abdout": "/behalf, then Cowork",
+   "off_pool": "Antigravity (`a`, Gemini) — easy one-file tasks, zero Anthropic tokens",
+   "other_session": "ListAgents → SendMessage (Code ↔ Code, any of Abdout's machines)"
   },
   "session_hygiene": "/clear between unrelated tasks (stale context taxes every message); /compact with focus instructions on long tasks; batch touches inside the 1h cache window — a >1h idle gap reprocesses full context; plan mode before big builds; specific prompts over broad scans"
  },

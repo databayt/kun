@@ -58,7 +58,7 @@ Every skill routes by its own description. The keywords below have NO skill of t
 **Portkeys** — teleportation to other repos: `from codebase`, `from shadcn`, `from radix`, `like hogwarts`, `like souq`, `like mkan`, `like shifa`, `like sijillee`, `like moallimee`
 **The Unforgivable Commands** — forbidden by the engine: `rm -rf *`, `prisma migrate reset`, `prisma db push --accept-data-loss`, `DROP TABLE`, `git push --force main`
 **The Auror Office** — one keyword, one quality dimension: `see`, `flow`, `debug`, `responsive`, `lang`, `fast`, `guard`, `architecture`, `structure`, `design`, `stack`, `trace`, `efficient`, `mirror`, `diff`
-**The Ministry of Magic** — operations and intelligence: `captain`, `conventions`, `patterns`, `drift`
+**The Ministry of Magic** — operations and intelligence: `captain`, `conventions`, `patterns`, `drift`, `dispatch`, `aware`
 **The Pensieve** — judgment and conversion: `decide`, `premortem`, `contract`, `transcribe`, `agreement`, `adjudicate`, `textbook bench`, `textbook status`, `textbook loop`, `land the twin`, `تحويل الكتب`, `media`, `rough cut`, `captions`, `title card`, `motion graphic`, `مونتاج`, `قص الفيديو`, `ترجمة الفيديو`
 **The Portrait Gallery** — the media studio: `hero image`, `og image`, `banner`, `mockup`, `lifestyle`, `split-screen`, `reel`, `infographic`, `testimonial`, `showroom`
 **The Owlery** — lead acquisition and outreach: `scrap`, `contact gap`, `leads`, `prospect`, `enrich`, `outreach`, `pipeline health`, `scrap facebook`, `scrap whatsapp`, `scrap for hogwarts`, `scrap for mkan`, `scrap tiktok`, `scrap facebook for mkan`, `tiktok homes`, `اسحب`, `جمع بيانات`, `عملاء محتملين`, `apply`, `وظائف`
@@ -79,6 +79,8 @@ When you see a keyword:
 2. **Vocabulary keyword** → activate the right agent + MCP
 3. **`from <repo>` / `like <product>`** → reference patterns from the named source
 4. **Business/leadership/strategy decision** (natural conversation, _no slash_) → consult `docs/CANON.md`; surface the relevant book + one operating move, grounded in principle `#N`. Don't wait for `/canon`. Keep it brief — one book, one move — and skip trivial or purely-technical choices.
+
+**Dispatch — one door, four beats** (`dispatch`; full map: `content/docs/interconnection.mdx`): read live state from `~/.claude/state/aware.md` before asking; take the place from the `<kun-route>` hint; pick the lane from `engine.json → delegation` (lookup → Explore subagent, low effort · build → sonnet, medium · judge → opus, high · fan-out → a Workflow · long or recurring → a loop through `kun-claude.sh`); "sync self" turns what the runs showed into fixes.
 
 Bug fixes → `/report`. New features → `/feature <name>`. Components → `/atom`, `/block`, `/template`.
 Pre-demo quality pass → `/handover <block>`. Autonomous QA + human-signoff issue → `/qa <block>` (passive: saying **"qa admission"** in prose activates it). **Send to client (one spell) → `/release <block>`.**

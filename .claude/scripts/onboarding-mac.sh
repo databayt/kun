@@ -178,6 +178,14 @@ if [[ "$DOCTOR" == "1" ]]; then
     else
         info "~/.claude not provisioned yet — run this script without --doctor to install"
     fi
+    # Awareness + self-improvement (2026-11-01): what is happening on this machine, and what
+    # kun would improve — both zero tokens.
+    if command -v node >/dev/null 2>&1 && [[ -f "$HOME/kun/.claude/scripts/aware.mjs" ]]; then
+        echo ""
+        echo -e "${BD}Doctor — awareness${NC}"
+        KUN_AWARE_NO_NOTIFY=1 node "$HOME/kun/.claude/scripts/aware.mjs" --refresh 2>/dev/null || info "awareness snapshot failed"
+        node "$HOME/kun/.claude/scripts/resolve.mjs" --test 2>/dev/null | head -1 || true
+    fi
     echo ""
     echo -e "${BD}Fix hints${NC}"
     echo -e "  ${D}missing agent lane      → re-run with --agents=<lane>${NC}"
@@ -185,6 +193,7 @@ if [[ "$DOCTOR" == "1" ]]; then
     echo -e "  ${D}stale heartbeat         → bash ~/.claude/scripts/maintain.sh --install${NC}"
     echo -e "  ${D}browser MCP down        → /mcp-doctor inside Claude Code${NC}"
     echo -e "  ${D}CLI self-check          → claude doctor${NC}"
+    echo -e "  ${D}router / awareness      → node ~/kun/.claude/scripts/resolve.mjs --build · node ~/kun/.claude/scripts/aware.mjs${NC}"
     exit 0
 fi
 if [[ "$DRY_RUN" == "1" ]]; then
