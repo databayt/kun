@@ -239,9 +239,12 @@ fi
 # keys the engine doesn't define (model, effortLevel, voice, …) survive the
 # refresh. Anything deeper than top level is engine territory.
 SRC_SETTINGS="$KUN_DIR/.claude/settings.json"
-if [[ "$(uname)" != "Darwin" ]] && [ -f "$KUN_DIR/.claude/settings-windows.json" ]; then
-    SRC_SETTINGS="$KUN_DIR/.claude/settings-windows.json"
-fi
+# Windows settings only on Windows shells. Until 2026-11-01 this tested `!= Darwin`,
+# which handed Linux the Windows file: no destructive-bash guard, no prompt hook.
+case "$(uname -s)" in
+    MINGW*|MSYS*|CYGWIN*)
+        [ -f "$KUN_DIR/.claude/settings-windows.json" ] && SRC_SETTINGS="$KUN_DIR/.claude/settings-windows.json" ;;
+esac
 python3 - "$SRC_SETTINGS" "$CLAUDE_DIR/settings.json" <<'PYEOF' || cp "$SRC_SETTINGS" "$CLAUDE_DIR/settings.json"
 import json, os, sys
 src_path, dst_path = sys.argv[1], sys.argv[2]

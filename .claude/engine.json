@@ -184,7 +184,7 @@
  },
  "jobs": {
   "$comment": "Declared POLICY for every scheduled job, read by .claude/scripts/runs.sh (red/stale detection) and maintain.sh step_runs (daily digest). Measured state never lives here: runs.sh reads launchd, log mtimes and ~/.claude/logs/runs.jsonl live. cadence_hours 0 = a KeepAlive daemon (red when launchd shows no PID); kind trigger = a WatchPaths job that runs on demand (red only on a bad exit or a ledger fail); a job is stale when its newest log is older than 2x its cadence. mac_only false marks a job that needs nothing on the Mac and is a candidate to move to GitHub Actions / Cloudflare cron (orchestration plan item 4, 2026-11-01).",
-  "$notify": "slack:D0AQ0JR5ZU4",
+  "$notify": "per machine — ~/.claude/.kun-notify holds this machine's `me` target (e.g. slack:<DM id>); never fleet config, or every teammate's digest lands in one person's DM",
   "$hermes": "~/.hermes/cron/jobs.json",
   "$lean": ["seek:", "funnel:"],
   "$lean_comment": "Headless claude runs whose job name starts with one of these prefixes run lean through .claude/bin/kun-claude.sh: no MCP servers, no skill listing (-43% tokens per run, measured 2026-11-01). Only for jobs that use neither skills/Workflow nor MCP tools; drain-drafts (/draft skill), textbook (Workflow) and hermes (full sessions) stay full.",

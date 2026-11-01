@@ -7,6 +7,7 @@
 # Installed at ~/.claude/hooks/session-media-stale.sh; canonical copy in kun
 # (.claude/hooks/ — setup.sh ships everything in that dir user-global).
 
+[ -n "${KUN_HEADLESS:-}" ] && exit 0   # headless `claude -p` (kun-claude.sh): context hooks stay silent — nobody reads them, every token is paid
 input=$(cat)
 MANIFEST="${RECORD_LIBRARY:-$HOME/media}/manifest.json"
 [ -f "$MANIFEST" ] || exit 0

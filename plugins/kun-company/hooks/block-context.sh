@@ -5,6 +5,7 @@
 # and the post-work update obligations (records + <block>.mdx + issue).
 # Installed at ~/.claude/hooks/block-context.sh; canonical copy in kun.
 
+[ -n "${KUN_HEADLESS:-}" ] && exit 0   # headless `claude -p` (kun-claude.sh): context hooks stay silent — nobody reads them, every token is paid
 input=$(cat)
 proj="${CLAUDE_PROJECT_DIR:-$(printf '%s' "$input" | jq -r '.cwd // empty' 2>/dev/null)}"
 reg="$proj/.claude/blocks.json"

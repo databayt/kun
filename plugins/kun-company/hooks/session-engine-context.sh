@@ -4,6 +4,7 @@
 # and a bridge.md handoff note if fresh.
 # stdout on exit 0 becomes additional context for the session.
 
+[ -n "${KUN_HEADLESS:-}" ] && exit 0   # headless `claude -p` (kun-claude.sh): context hooks stay silent — nobody reads them, every token is paid
 ROOT="${CLAUDE_PROJECT_DIR:-$(pwd)}"
 ENGINE="$ROOT/.claude/engine.json"
 [ -f "$ENGINE" ] || exit 0

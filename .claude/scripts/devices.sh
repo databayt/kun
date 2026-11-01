@@ -271,6 +271,7 @@ do_uninstall() {
 # ── Reports ──────────────────────────────────────────────────────
 
 do_brief() {
+    [ -n "${KUN_HEADLESS:-}" ] && return 0   # headless claude -p runs: nobody reads a brief
     local free swap sessions
     free="$(disk_free_gb)"; swap="$(swap_used_pct)"; sessions="$(session_count)"
     if [ -n "$free" ] && [ "$free" -lt "$WARN_DISK_GB" ]; then

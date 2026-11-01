@@ -13,6 +13,7 @@
 # Canonical copy: kun/.claude/hooks/session-start-reports.sh
 # Installed at:   ~/.claude/hooks/session-start-reports.sh
 
+[ -n "${KUN_HEADLESS:-}" ] && exit 0   # headless `claude -p` (kun-claude.sh): context hooks stay silent — nobody reads them, every token is paid
 set -u
 
 # Only fire in databayt-owned working trees

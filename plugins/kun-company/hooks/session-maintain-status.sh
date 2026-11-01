@@ -4,6 +4,7 @@
 # Installed to ~/.claude/hooks/ by setup.sh and wired via $HOME in
 # settings.json so it fires in EVERY project, not just inside ~/kun.
 
+[ -n "${KUN_HEADLESS:-}" ] && exit 0   # headless `claude -p` (kun-claude.sh): context hooks stay silent — nobody reads them, every token is paid
 STATE="$HOME/.claude/.kun-maintain.json"
 [ -f "$STATE" ] || exit 0
 command -v python3 >/dev/null 2>&1 || exit 0

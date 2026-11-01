@@ -4,7 +4,7 @@
 #   bash ~/.claude/scripts/runs.sh            table of every job in engine.json → jobs
 #   bash ~/.claude/scripts/runs.sh --brief    one line, only when something is red/stale (SessionStart)
 #   bash ~/.claude/scripts/runs.sh --json     machine form (maintain.sh step_runs)
-#   bash ~/.claude/scripts/runs.sh --notify   send the red/stale digest to Slack DM via `hermes send`
+#   bash ~/.claude/scripts/runs.sh --notify   send the red/stale digest to this machine's ~/.claude/.kun-notify target (hermes send)
 #   bash ~/.claude/scripts/runs.sh --spend [days]  headless claude runs per job (kun-claude.sh ledger lines)
 #
 # Three signals, no edits to the jobs themselves:
@@ -14,6 +14,7 @@
 # Hermes cron jobs are read from engine.json → jobs.$hermes (their own scheduler's state file).
 # Daemons (cadence_hours 0) are red when launchd shows no PID; trigger jobs (kind trigger) never go stale.
 # Policy (labels, cadences, logs) lives in engine.json → jobs; this script holds none.
+# Only jobs whose plist is installed on THIS machine are checked (teammates see nothing).
 
 MODE="${1:---table}"
 if [ "$MODE" = "--spend" ]; then
@@ -84,6 +85,11 @@ def age_h(ts):
 rows = []
 for name, j in jobs.items():
     label, trigger = j.get("label", ""), j.get("kind") == "trigger"
+    # engine.json → jobs is the OWNER machine's schedule. A job is this machine's only
+    # if its plist is installed here — so a teammate's Mac, Linux or Windows sees no
+    # rows instead of twenty false reds (and a disabled/moved plist reads as retired).
+    if not (label and os.path.exists(os.path.expanduser(f"~/Library/LaunchAgents/{label}.plist"))):
+        continue
     cad = -1.0 if trigger else float(j.get("cadence_hours", 24))
     state, why, human = "ok", "", False
     info = lc.get(label)
@@ -171,8 +177,10 @@ PY
 
 if [ "$MODE" = "--notify" ]; then
     [ -n "$OUT" ] || exit 0
-    TARGET=$(python3 -c "import json;print(json.load(open('$HOME/kun/.claude/engine.json')).get('jobs',{}).get('\$notify',''))" 2>/dev/null)
-    osascript -e "display notification \"$(echo "$OUT" | head -1)\" with title \"Kun jobs\"" 2>/dev/null || true
+    # The "me" target is per machine (~/.claude/.kun-notify, first non-# line), never
+    # fleet config — a teammate's digest must not land in Abdout's DM.
+    TARGET=$(grep -v '^[[:space:]]*#' "$HOME/.claude/.kun-notify" 2>/dev/null | head -1 | tr -d '[:space:]')
+    [ "$(uname -s)" = "Darwin" ] && osascript -e "display notification \"$(echo "$OUT" | head -1)\" with title \"Kun jobs\"" 2>/dev/null || true
     [ -n "$TARGET" ] && [ -x "$HOME/.local/bin/hermes" ] \
         && "$HOME/.local/bin/hermes" send --to "$TARGET" --quiet --subject "Kun jobs" "$OUT" >/dev/null 2>&1
     echo "$OUT"

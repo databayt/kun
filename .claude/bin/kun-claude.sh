@@ -19,13 +19,18 @@ LEDGER="${RUNS_LEDGER:-$HOME/.claude/logs/runs.jsonl}"
 ENGINE="${KUN_DIR:-$HOME/kun}/.claude/engine.json"
 [ -n "$CLAUDE_BIN" ] || { echo "kun-claude: claude not on PATH" >&2; exit 127; }
 
-JOB="${KUN_JOB:-}"
+JOB="${KUN_JOB:-}"; JOB_SOURCE=env
 if [ -z "$JOB" ]; then
+    JOB_SOURCE=parent
     PARENT=$(ps -o args= -p "$PPID" 2>/dev/null)
     JOB=$(printf '%s' "$PARENT" | grep -oE '[A-Za-z0-9_-]+/[A-Za-z0-9_.-]+\.(ts|mjs|js|sh|py)' | tail -1 \
         | sed -E 's/\.(ts|mjs|js|sh|py)$//; s#/#:#')
-    [ -n "$JOB" ] || JOB="adhoc"
+    [ -n "$JOB" ] || { JOB="adhoc"; JOB_SOURCE=adhoc; }
 fi
+# Children see both: KUN_JOB names the run in the ledger; KUN_HEADLESS tells the
+# context hooks (SessionStart briefs, reports table, prompt router) to stay silent —
+# they fire under `claude -p` too, and a headless run has nobody to read them.
+export KUN_JOB="$JOB" KUN_HEADLESS=1
 
 MODEL="default"; EFFORT="default"; FORMAT="text"; prev=""
 for a in "$@"; do
@@ -58,9 +63,9 @@ PY
 fi
 
 record() {  # record <exit> <json-file-or-empty> <started-epoch>
-    python3 - "$LEDGER" "$JOB" "$MODEL" "$EFFORT" "$1" "$2" "$3" <<'PY' 2>/dev/null || true
+    python3 - "$LEDGER" "$JOB" "$MODEL" "$EFFORT" "$1" "$2" "$3" "$JOB_SOURCE" <<'PY' 2>/dev/null || true
 import json, os, sys, time
-ledger, job, model, effort, rc, jf, started = sys.argv[1:8]
+ledger, job, model, effort, rc, jf, started, source = sys.argv[1:9]
 r = {}
 if jf and os.path.exists(jf):
     try:
@@ -72,7 +77,7 @@ if jf and os.path.exists(jf):
 u = r.get("usage") or {}
 tokens = sum(int(u.get(k) or 0) for k in ("input_tokens", "output_tokens", "cache_creation_input_tokens", "cache_read_input_tokens"))
 ok = rc == "0" and not r.get("is_error")
-line = {"ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "kind": "claude", "job": job,
+line = {"ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "kind": "claude", "job": job, "job_source": source,
         "status": "ok" if ok else "fail", "model": model, "effort": effort,
         "tokens": tokens, "output_tokens": int(u.get("output_tokens") or 0),
         "cost_usd": round(float(r.get("total_cost_usd") or 0), 4), "turns": r.get("num_turns"),
