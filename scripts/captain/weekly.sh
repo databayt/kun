@@ -57,7 +57,7 @@ do_run() {
     local prompt
     prompt="You are kun's captain running the Monday routine headless — nobody can answer a question mid-run, so finish on your own and stay inside these limits.
 
-LIMITS: never run the bench-dispatch workflow or /bench. Never run a /sync tier other than \`self\` and, only if UPSTREAM below says NEW, \`anthropic\`. No deploys, no messages to anyone, no product code. Do not edit a fleet surface (hooks, settings, rules-global, skills, engine policy) unless it is an approved row (status \`approved\` in ~/.claude/state/findings.json). Commit with explicit pathspecs (\`git commit -m … -- <paths>\`), never \`git add -A\`; push only with \`git pull --rebase origin main && git push origin main\` when your own commits are ready. Do NOT commit ${out} — the script commits it.
+LIMITS: never run the bench-dispatch workflow or /bench. Never run a /sync tier other than \`self\` and, only if UPSTREAM below says NEW, \`anthropic\`. No deploys, no messages to anyone, no product code. Do not edit a fleet surface (hooks, settings, rules-global, skills, engine policy) unless it is an approved row (status \`approved\` in ~/.claude/state/findings.json). Commit with explicit pathspecs (\`git commit -m … -- <paths>\`), never \`git add -A\`. Do NOT push — the script pushes after you finish. Never run git stash, git reset, git checkout -- <file>, git restore or git clean: other sessions have uncommitted work in this tree and it is not yours. Do NOT commit ${out} — the script commits it.
 
 CONTEXT (already sensed with zero tokens — use it, don't re-derive it):
 --- awareness ---
