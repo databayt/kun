@@ -177,12 +177,10 @@ PY
 
 if [ "$MODE" = "--notify" ]; then
     [ -n "$OUT" ] || exit 0
-    # The "me" target is per machine (~/.claude/.kun-notify, first non-# line), never
-    # fleet config — a teammate's digest must not land in Abdout's DM.
-    TARGET=$(grep -v '^[[:space:]]*#' "$HOME/.claude/.kun-notify" 2>/dev/null | head -1 | tr -d '[:space:]')
-    [ "$(uname -s)" = "Darwin" ] && osascript -e "display notification \"$(echo "$OUT" | head -1)\" with title \"Kun jobs\"" 2>/dev/null || true
-    [ -n "$TARGET" ] && [ -x "$HOME/.local/bin/hermes" ] \
-        && "$HOME/.local/bin/hermes" send --to "$TARGET" --quiet --subject "Kun jobs" "$OUT" >/dev/null 2>&1
+    # kun's one sink: this machine's `me` target (~/.claude/.kun-notify) via hermes,
+    # a banner when the owner is at the Mac — never fleet config.
+    . "$HOME/.claude/scripts/lib/notify.sh" 2>/dev/null || . "${KUN_DIR:-$HOME/kun}/.claude/scripts/lib/notify.sh" 2>/dev/null || kun_notify() { :; }
+    kun_notify me "Kun jobs" "$OUT"
     echo "$OUT"
     exit 0
 fi

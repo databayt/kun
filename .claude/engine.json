@@ -187,6 +187,12 @@
    "$cf_build_comment": "Approved by Abdout 2026-11-01: ~/.cache/cf-build/<repo> folders with no file newer than this many days are removed (each deploy wipes and rebuilds its own folder anyway). Folders only — files and anything named *env* (production dotenvs) are never touched."
   }
  },
+ "notify": {
+  "$comment": "Team channels for .claude/scripts/lib/notify.sh / scripts/lib/notify.mjs (kun_notify <channel> <subject> <text>). `me` is NOT here: it is per machine (~/.claude/.kun-notify), so a teammate's alerts never land in Abdout's DM. Transport: hermes send → desktop banner → stderr.",
+  "social": "slack:C0AQ9RNPVDF",
+  "mkan": "slack:C0BS2NZE2AY",
+  "jobs": "slack:C0C8A8YRXNW"
+ },
  "improve": {
   "$comment": "Declared POLICY for the LEARN layer (.claude/scripts/improve.mjs → /sync tier `self`, 2026-11-01). Detection is zero tokens and runs daily in the heartbeat; findings live in ~/.claude/state/findings.json. SAFE local fixes apply automatically; SAFE repo fixes are applied and committed by /sync self; DECIDE rows wait in ONE rolling issue (label engine-decision) for Abdout's `yes <id>`. Only the owner Mac (the one running aware's launchd refresher) writes that issue.",
   "prefix_target_tokens": 85000,
@@ -237,7 +243,8 @@
   "chrome-vault": { "label": "com.databayt.chrome-session", "cadence_hours": 0 },
   "remote-control": { "label": "com.databayt.claude-rc", "cadence_hours": 0 },
   "presence": { "label": "com.databayt.presence", "cadence_hours": 0 },
-  "aware": { "label": "com.databayt.kun-aware", "cadence_hours": 0.5, "logs": ["~/.claude/logs/aware-*.log"] }
+  "aware": { "label": "com.databayt.kun-aware", "cadence_hours": 0.5, "logs": ["~/.claude/logs/aware-*.log"] },
+  "captain-weekly": { "label": "com.databayt.captain-weekly", "cadence_hours": 168, "claude_runs_per_day": 1, "logs": ["~/.claude/logs/captain-weekly-*.log"] }
  },
  "textbook": {
   "$comment": "Declared POLICY for the textbook pipeline (PDF -> verified Markdown twin). Measured state lives in .claude/memory/textbook-scores.json - never here. Thresholds remain PROVISIONAL but are now backed by FIVE graded books (biology .948 B, math .967 A, physics .953 A, chemistry .946 B, math-specialized .936 B) rather than one. Two structural facts drive the 2026-09-29 revision: (1) a formatter hook on Write corrupts pages identically in BOTH reads, so no agreement score in this pipeline can detect it - the Preflight canary is the only defence and the run now ABORTS when it fails; (2) render kind and reference direction are PER-BOOK facts - 16 of 25 sd/g12 pdfs are vector (1000px throws away detail) and reference order tracks the digit script (Latin EN books store reversed, Arabic-Indic AN books store as drawn), so carrying one book's answer to the next reverses every reference in it.",

@@ -44,7 +44,9 @@ done
 [ "$EFFORT" = "default" ] && [ -n "${CLAUDE_CODE_EFFORT_LEVEL:-}" ] && EFFORT="$CLAUDE_CODE_EFFORT_LEVEL"
 
 # Daily cap (only when engine.json declares one for this job).
-CAP=$(python3 -c "import json,sys;print(json.load(open('$ENGINE')).get('jobs',{}).get(sys.argv[1],{}).get('claude_runs_per_day',''))" "$JOB" 2>/dev/null)
+# the cap lives on the job's engine.json entry: by run name (seek:tailor) or by its launchd
+# job name with ':' → '-' (captain:weekly → jobs.captain-weekly)
+CAP=$(python3 -c "import json,sys;j=json.load(open('$ENGINE')).get('jobs',{});e=j.get(sys.argv[1]) or j.get(sys.argv[1].replace(':','-')) or {};print(e.get('claude_runs_per_day',''))" "$JOB" 2>/dev/null)
 if [ -n "$CAP" ] && [ -f "$LEDGER" ]; then
     USED=$(python3 - "$LEDGER" "$JOB" <<'PY' 2>/dev/null
 import json, sys, time

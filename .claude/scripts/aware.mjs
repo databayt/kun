@@ -29,6 +29,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { execFileSync, spawn } from "node:child_process";
+import { kunNotify } from "../../scripts/lib/notify.mjs";
 
 const HOME = os.homedir();
 const KUN = process.env.KUN_DIR || path.join(HOME, "kun");
@@ -512,16 +513,7 @@ function deliver(prev, s) {
 function notify(msgs) {
   const text = msgs.join("\n");
   if (process.env.KUN_AWARE_NOTIFY_FILE) return fs.appendFileSync(process.env.KUN_AWARE_NOTIFY_FILE, text + "\n---\n"); // tests
-  const present = fs.existsSync(expand(engine.devices?.presence?.file || "~/.claude/.present"));
-  let target = "";
-  try {
-    target = fs.readFileSync(path.join(CLAUDE, ".kun-notify"), "utf8").split("\n").map((l) => l.trim()).find((l) => l && !l.startsWith("#")) || "";
-  } catch {}
-  const hermes = path.join(HOME, ".local/bin/hermes");
-  if (!present && target && fs.existsSync(hermes)) {
-    if (run(hermes, ["send", "--to", target, "--quiet", "--subject", "kun", text], 60000) !== null) return;
-  }
-  if (MAC) run("osascript", ["-e", `display notification ${JSON.stringify(msgs[0].slice(0, 180))} with title "kun"`], 5000);
+  kunNotify("me", "kun", text); // kun's one sink: banner when present, else this machine's .kun-notify target
 }
 
 // ── render ─────────────────────────────────────────────────────────────────
@@ -561,7 +553,7 @@ function markdown(s) {
   const e = s.engine;
   const eng = [];
   if (e.maintain) eng.push(`heartbeat ${e.maintain.verdict}`);
-  if (e.sync_overdue.length) eng.push(`sync overdue ${e.sync_overdue.map((t) => `${t.tier} ${t.age_d ?? "never"}d`).join(", ")}`);
+  if (e.sync_overdue.length) eng.push(`sync overdue ${e.sync_overdue.map((t) => `${t.tier} ${t.age_d == null ? "never" : `${t.age_d}d`}`).join(", ")}`);
   if (e.bench_age_d != null) eng.push(`bench ${e.bench_age_d}d old`);
   if (e.findings_open) eng.push(`${e.findings_open} improvement finding(s) open`);
   if (eng.length) L.push(`Engine: ${eng.join(" · ")}`);
@@ -631,7 +623,7 @@ function brief(projectDir) {
   if (inKun) {
     const e = s.engine || {};
     const eng = [];
-    if (e.sync_overdue?.length) eng.push(`sync overdue ${e.sync_overdue.map((t) => `${t.tier}(${t.age_d ?? "never"}d)`).join(" ")}`);
+    if (e.sync_overdue?.length) eng.push(`sync overdue ${e.sync_overdue.map((t) => `${t.tier}(${t.age_d == null ? "never" : `${t.age_d}d`})`).join(" ")}`);
     if (e.maintain && e.maintain.verdict !== "GREEN") eng.push(`heartbeat ${e.maintain.verdict}`);
     if (e.findings_open) eng.push(`${e.findings_open} improvement finding(s) — say "sync self"`);
     if (eng.length) L.push(`Engine: ${eng.join(" · ")}`);
