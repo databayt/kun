@@ -26,18 +26,26 @@ set -uo pipefail
 
 REPO_NAME="${1:-}"
 shift || true
-case "$REPO_NAME" in
-  kun) REPO=/Users/abdout/kun; OTHER=/Users/abdout/mkan ;;
-  mkan) REPO=/Users/abdout/mkan; OTHER=/Users/abdout/kun ;;
-  *) echo "usage: claude.sh <kun|mkan> [--file <path>]... [\"<task>\"]  (or the task on stdin)"; exit 2 ;;
-esac
+RESOLVE="$HOME/kun/.claude/scripts/resolve.mjs"
+# `auto` (2026-11-01): kun's resolver picks the repo from the task's own words (balqalam →
+# hogwarts, mkan.sd → mkan, …; default kun). A Slack thread then keeps its first repo,
+# because its Claude session lives in that repo's project dir and cannot resume elsewhere.
+valid_repo() {  # a repo the registry knows and this Mac has
+  case "$1" in kun|mkan) return 0 ;; ""|auto) return 1 ;; esac
+  [ -d "$HOME/$1/.git" ] && /usr/bin/python3 -c 'import json,os,sys; i=json.load(open(os.path.expanduser("~/.claude/kun-index.json"))); r=i["repos"].get(sys.argv[1]); sys.exit(0 if r and r.get("source")=="registry" else 1)' "$1" 2>/dev/null
+}
+if [ "$REPO_NAME" != auto ] && ! valid_repo "$REPO_NAME"; then
+  echo "usage: claude.sh <auto|kun|mkan|<registry repo>> [--file <path>]... [--dry-run] [\"<task>\"]  (or the task on stdin)"; exit 2
+fi
 
 FILES=()
 WORDS=()
+DRY=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --file) [ -n "${2:-}" ] && FILES+=("$2"); shift 2 || shift ;;
     --file=*) FILES+=("${1#--file=}"); shift ;;
+    --dry-run) DRY=1; shift ;;
     *) WORDS+=("$1"); shift ;;
   esac
 done
@@ -64,6 +72,33 @@ THREAD="${HERMES_SESSION_THREAD_ID:-}"
 [ -z "$THREAD" ] && THREAD="${HERMES_SESSION_MESSAGE_ID:-}"
 USER_ID="${HERMES_SESSION_USER_ID:-}"
 log() { printf '%s %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*" >>"$LOG"; }
+
+# The thread's stored session: {"sid", "repo"} (a bare string is the pre-2026-11-01 form).
+thread_field() {  # $1 = sid|repo
+  [ -n "$THREAD" ] && [ -f "$THREADS" ] || return 0
+  KEY="$CHAT:$THREAD" FIELD="$1" /usr/bin/python3 -c 'import json,os,sys
+v = json.load(open(sys.argv[1])).get(os.environ["KEY"])
+if isinstance(v, str): v = {"sid": v, "repo": ""}
+print((v or {}).get(os.environ["FIELD"], ""))' "$THREADS" 2>/dev/null
+}
+route() {  # the task text → a repo id
+  local sticky; sticky="$(thread_field repo)"
+  if [ -n "$sticky" ] && valid_repo "$sticky"; then echo "$sticky"; return; fi
+  local r; r="$(node "$RESOLVE" --route "$1" 2>/dev/null)"
+  valid_repo "$r" && echo "$r" || echo kun
+}
+if [ "$REPO_NAME" = auto ] && [ -z "${KUN_BRIDGE_CHILD:-}" ]; then
+  PEEK="${WORDS[*]-}"
+  if [ -z "$PEEK" ] && [ ! -t 0 ]; then PEEK="$(cat)"; WORDS=("$PEEK"); fi
+  REPO_NAME="$(route "$PEEK")"
+fi
+if [ -n "$DRY" ]; then
+  SID_NOW="$(thread_field sid)"
+  echo "route: $REPO_NAME → $HOME/$REPO_NAME (session: ${SID_NOW:-new})"
+  exit 0
+fi
+REPO="$HOME/$REPO_NAME"
+[ "$REPO_NAME" = kun ] && OTHER="$HOME/mkan" || OTHER="$HOME/kun"
 
 ARGS=("$REPO_NAME")
 for f in ${FILES[@]+"${FILES[@]}"}; do ARGS+=(--file "$f"); done
@@ -146,9 +181,14 @@ PY
 }
 
 # A thread that already has a Claude session continues it.
-SESSION=""
-if [ -n "$THREAD" ] && [ -f "$THREADS" ]; then
-  SESSION="$(KEY="$CHAT:$THREAD" /usr/bin/python3 -c 'import json,os,sys; print(json.load(open(sys.argv[1])).get(os.environ["KEY"],""))' "$THREADS" 2>/dev/null)"
+SESSION="$(thread_field sid)"
+SESSION_REPO="$(thread_field repo)"
+# a session lives in its repo's project dir — resuming it from another repo fails, so
+# resume only when the transcript is really there (covers pre-2026-11-01 entries too)
+[ -n "$SESSION_REPO" ] && [ "$SESSION_REPO" != "$REPO_NAME" ] && SESSION=""
+if [ -n "$SESSION" ]; then
+  SLUG="$(cd "$REPO" 2>/dev/null && pwd -P | sed 's#[/.]#-#g')"
+  [ -f "$HOME/.claude/projects/$SLUG/$SESSION.jsonl" ] || SESSION=""
 fi
 
 ATTACH=""
@@ -196,12 +236,12 @@ SID="${REST%%$'\t'*}"; ANSWER="${REST#*$'\t'}"
 rm -f "$OUT"
 
 if [ -n "$SID" ] && [ -n "$THREAD" ]; then
-  KEY="$CHAT:$THREAD" SID="$SID" /usr/bin/python3 - "$THREADS" <<'PY'
+  KEY="$CHAT:$THREAD" SID="$SID" REPO_ID="$REPO_NAME" /usr/bin/python3 - "$THREADS" <<'PY'
 import json, os, sys
 p = sys.argv[1]
 try: m = json.load(open(p))
 except Exception: m = {}
-m[os.environ["KEY"]] = os.environ["SID"]
+m[os.environ["KEY"]] = {"sid": os.environ["SID"], "repo": os.environ["REPO_ID"]}
 json.dump(dict(list(m.items())[-200:]), open(p, "w"))
 PY
 fi

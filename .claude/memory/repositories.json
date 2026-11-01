@@ -180,7 +180,13 @@
           "src/components/platform/",
           "prisma/",
           "src/auth.ts"
-        ]
+        ],
+        "aliases": [
+          "balqalam",
+          "balqalam.com",
+          "بالقلم"
+        ],
+        "bareMatch": true
       },
       {
         "id": "souq",
@@ -213,7 +219,8 @@
           "src/store/",
           "src/app/vendor/",
           "prisma/models/"
-        ]
+        ],
+        "bareMatch": true
       },
       {
         "id": "mkan",
@@ -247,7 +254,11 @@
           "src/components/search/",
           "src/lib/booking.ts",
           "prisma/models/"
-        ]
+        ],
+        "aliases": [
+          "mkan.sd"
+        ],
+        "bareMatch": true
       },
       {
         "id": "shifa",
@@ -280,7 +291,8 @@
           "src/app/clinic/",
           "src/lib/appointments.ts",
           "prisma/models/"
-        ]
+        ],
+        "bareMatch": true
       },
       {
         "id": "sijillee",
@@ -658,5 +670,6 @@
     "preferLocal": true,
     "fallbackToGitHub": true,
     "cachePatterns": true
-  }
+  },
+  "$aliases_comment": "aliases + bareMatch feed .claude/scripts/resolve.mjs (2026-11-01): a bareMatch repo routes from its bare name in a prompt; every other repo needs an explicit form (in X, X repo, ~/X, databayt/X). Aliases must be unambiguous — Arabic مكان/سوق/شفاء are everyday words (place/market/healing), so they are NOT aliases."
 }

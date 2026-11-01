@@ -308,7 +308,12 @@ step_aware() {
     # Refresh kun's SENSE snapshot (~/.claude/state/aware.json + aware.md). On machines
     # without the 30-min launchd refresher (every teammate), this daily run is what keeps
     # awareness, the reports cache and #133's awareness block current. Zero tokens.
-    local aware="$KUN_DIR/.claude/scripts/aware.mjs"
+    local aware="$KUN_DIR/.claude/scripts/aware.mjs" resolver="$KUN_DIR/.claude/scripts/resolve.mjs"
+    # the prompt router's index (repos, blocks, aliases) — rebuilt daily so new repos and
+    # blocks route without anyone remembering to run --build
+    if command -v node >/dev/null 2>&1 && [ -f "$resolver" ]; then
+        KUN_DIR="$KUN_DIR" node "$resolver" --build >/dev/null 2>&1 && log "resolve: index rebuilt" || log "resolve: index build failed (non-fatal)"
+    fi
     if command -v node >/dev/null 2>&1 && [ -f "$aware" ]; then
         if KUN_DIR="$KUN_DIR" node "$aware" --refresh --quiet >/dev/null 2>&1; then log "aware: snapshot refreshed"; else log "aware: refresh failed (non-fatal)"; fi
     else

@@ -43,13 +43,15 @@ CI, Hermes itself). Zero Claude tokens. Only if it is missing or older than an h
 
 ## How
 
-Pick the repo: **`mkan`** for mkan.sd, rentals, the /find chat, WhatsApp, the mkan CRM,
-brokers, TikTok; **`kun`** for everything else (the engine, hogwarts ops, social, jobs,
-docs, other products). Pass Abdout's message **word for word** as the task — never
-summarize or rewrite it. Add one line of context only when the thread makes it necessary.
+Use **`auto`** — kun's resolver picks the repo from Abdout's own words (balqalam → hogwarts,
+mkan.sd → mkan, a hogwarts block like admission or timetable → hogwarts; anything else → kun),
+and a thread keeps its first repo so a follow-up resumes the same Claude session. Name a repo
+yourself (`mkan`, `kun`) only when Abdout names it and the words alone would not. Pass his
+message **word for word** as the task — never summarize or rewrite it. Add one line of
+context only when the thread makes it necessary.
 
 ```bash
-bash /Users/abdout/kun/scripts/hermes/claude.sh mkan <<'TASK'
+bash /Users/abdout/kun/scripts/hermes/claude.sh auto <<'TASK'
 <Abdout's message, word for word>
 TASK
 ```

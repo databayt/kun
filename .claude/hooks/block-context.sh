@@ -1,12 +1,21 @@
 #!/bin/bash
-# UserPromptSubmit — block protocol context injector.
-# When the prompt names a block registered in <project>/.claude/blocks.json,
-# inject the pre-work reading list (README/ISSUE/CLAUDE + related GitHub issue)
-# and the post-work update obligations (records + <block>.mdx + issue).
+# UserPromptSubmit — kun's router: names in a prompt → repos and blocks.
+# Since 2026-11-01 the work is done by .claude/scripts/resolve.mjs, one node process over
+# a prebuilt index (~/.claude/kun-index.json) instead of ~150 jq/grep calls per prompt:
+#   - a block of THIS repo (its .claude/blocks.json) → the block protocol below, byte for byte
+#   - another repo by name (hogwarts, mkan, balqalam…) or a curated global block
+#     (engine.json → resolver.global_blocks) → a one-line <kun-route> pointer
+# Without node or the index, the original bash logic below still runs. Always exits 0.
 # Installed at ~/.claude/hooks/block-context.sh; canonical copy in kun.
 
 [ -n "${KUN_HEADLESS:-}" ] && exit 0   # headless `claude -p` (kun-claude.sh): context hooks stay silent — nobody reads them, every token is paid
 input=$(cat)
+RESOLVE="${KUN_DIR:-$HOME/kun}/.claude/scripts/resolve.mjs"
+if command -v node >/dev/null 2>&1 && [ -f "$RESOLVE" ] && [ -f "$HOME/.claude/kun-index.json" ]; then
+  printf '%s' "$input" | node "$RESOLVE" --hook 2>/dev/null
+  exit 0
+fi
+# ── fallback: the original block protocol (no node / no index) ─────────────
 proj="${CLAUDE_PROJECT_DIR:-$(printf '%s' "$input" | jq -r '.cwd // empty' 2>/dev/null)}"
 reg="$proj/.claude/blocks.json"
 [ -f "$reg" ] || exit 0

@@ -364,6 +364,13 @@ if [ -f "$KUN_DIR/.claude/scripts/maintain.sh" ]; then
     info "maintain heartbeat armed"
 fi
 
+# The prompt router's index and the first awareness snapshot (both zero tokens). The
+# daily heartbeat rebuilds/refreshes them after this; here they exist from minute one.
+if command -v node >/dev/null 2>&1; then
+    KUN_DIR="$KUN_DIR" node "$KUN_DIR/.claude/scripts/resolve.mjs" --build >/dev/null 2>&1 && info "router index built" || info "router index build failed (non-fatal)"
+    KUN_DIR="$KUN_DIR" KUN_AWARE_NO_NOTIFY=1 node "$KUN_DIR/.claude/scripts/aware.mjs" --refresh --quiet >/dev/null 2>&1 && info "awareness snapshot taken" || info "awareness snapshot failed (non-fatal)"
+fi
+
 say ""
 
 # ── Health check ─────────────────────────────────────────────────
@@ -418,6 +425,12 @@ MCP_PERM=$(stat -f "%Lp" "$CLAUDE_DIR/mcp.json" 2>/dev/null || stat -c "%a" "$CL
 
 # CLI
 command -v claude &> /dev/null && pass "claude CLI installed" || fail "claude CLI not found"
+
+# Orchestration layer (2026-11-01): awareness, router, ledger
+command -v node &> /dev/null && pass "node (router + awareness)" || info "node missing — router and awareness fall back to the bash hooks"
+[ -f "$HOME/.claude/kun-index.json" ] && pass "router index (~/.claude/kun-index.json)" || info "router index not built yet — node ~/kun/.claude/scripts/resolve.mjs --build"
+[ -f "$HOME/.claude/state/aware.md" ] && pass "awareness snapshot (~/.claude/state/aware.md)" || info "no awareness snapshot yet — node ~/kun/.claude/scripts/aware.mjs"
+[ -x "$CLAUDE_DIR/bin/kun-claude.sh" ] && pass "headless ledger wrapper (kun-claude.sh)" || info "kun-claude.sh not installed"
 command -v agy &> /dev/null && pass "agy CLI (secondary)" || info "agy CLI not installed (optional)"
 
 say ""
