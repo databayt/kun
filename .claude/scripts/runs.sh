@@ -31,19 +31,22 @@ for line in lines:
     except Exception: continue
     if e.get("kind") != "claude": continue
     if calendar.timegm(time.strptime(e["ts"], "%Y-%m-%dT%H:%M:%SZ")) < since: continue
-    a = agg.setdefault(e["job"], {"runs": 0, "fail": 0, "tokens": 0, "out": 0, "usd": 0.0, "models": set()})
+    a = agg.setdefault(e["job"], {"runs": 0, "fail": 0, "fresh": 0, "tokens": 0, "out": 0, "usd": 0.0, "models": set()})
     a["runs"] += 1; a["fail"] += e.get("status") != "ok"
     a["tokens"] += e.get("tokens") or 0; a["out"] += e.get("output_tokens") or 0
+    # older lines have no split: count their total as fresh (an overestimate, never an under)
+    a["fresh"] += e.get("fresh_tokens", e.get("tokens") or 0) or 0
     a["usd"] += e.get("cost_usd") or 0; a["models"].add(f'{e.get("model")}/{e.get("effort")}')
 if not agg:
     print(f"no headless claude runs logged in the last {days}d (ledger: {path})"); sys.exit(0)
 print(f"headless claude, last {days}d — $ is plan-equivalent value (Max is flat-rate), not a bill")
-print(f"{'job':<24}{'runs':>5}{'fail':>5}{'tokens':>12}{'out':>9}{'$':>9}  model/effort")
-tot = [0, 0, 0, 0, 0.0]
-for j, a in sorted(agg.items(), key=lambda kv: -kv[1]["tokens"]):
-    print(f"{j:<24}{a['runs']:>5}{a['fail']:>5}{a['tokens']:>12,}{a['out']:>9,}{a['usd']:>9.2f}  {', '.join(sorted(a['models']))}")
-    for i, k in enumerate(["runs", "fail", "tokens", "out", "usd"]): tot[i] += a[k]
-print(f"{'TOTAL':<24}{tot[0]:>5}{tot[1]:>5}{tot[2]:>12,}{tot[3]:>9,}{tot[4]:>9.2f}")
+print("fresh = input + cache writes + output (the real cost of a run); total adds the cheap cache re-reads")
+print(f"{'job':<24}{'runs':>5}{'fail':>5}{'fresh':>11}{'total':>12}{'out':>9}{'$':>9}  model/effort")
+tot = [0, 0, 0, 0, 0, 0.0]
+for j, a in sorted(agg.items(), key=lambda kv: -kv[1]["fresh"]):
+    print(f"{j:<24}{a['runs']:>5}{a['fail']:>5}{a['fresh']:>11,}{a['tokens']:>12,}{a['out']:>9,}{a['usd']:>9.2f}  {', '.join(sorted(a['models']))}")
+    for i, k in enumerate(["runs", "fail", "fresh", "tokens", "out", "usd"]): tot[i] += a[k]
+print(f"{'TOTAL':<24}{tot[0]:>5}{tot[1]:>5}{tot[2]:>11,}{tot[3]:>12,}{tot[4]:>9,}{tot[5]:>9.2f}")
 PY2
     exit 0
 fi

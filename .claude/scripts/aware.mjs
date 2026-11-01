@@ -173,7 +173,7 @@ function readJSONString(s) {
 // ── spend: headless ledger + incremental transcript usage ──────────────────
 function headless() {
   const ledger = path.join(LOG_DIR, "runs.jsonl");
-  const out = { tokens_24h: 0, usd_24h: 0, runs_24h: 0, tokens_7d: 0, usd_7d: 0, by_job_7d: {} };
+  const out = { tokens_24h: 0, fresh_24h: 0, usd_24h: 0, runs_24h: 0, tokens_7d: 0, fresh_7d: 0, usd_7d: 0, by_job_7d: {} };
   if (!fs.existsSync(ledger)) return out;
   const lines = fs.readFileSync(ledger, "utf8").split("\n").slice(-20000);
   for (const l of lines) {
@@ -182,10 +182,12 @@ function headless() {
     const h = hoursAgo(Date.parse(e.ts));
     if (h > 24 * 7) continue;
     out.tokens_7d += e.tokens || 0;
+    out.fresh_7d += e.fresh_tokens ?? e.tokens ?? 0;
     out.usd_7d += e.cost_usd || 0;
     out.by_job_7d[e.job] = (out.by_job_7d[e.job] || 0) + (e.tokens || 0);
     if (h <= 24) {
       out.tokens_24h += e.tokens || 0;
+      out.fresh_24h += e.fresh_tokens ?? e.tokens ?? 0;
       out.usd_24h += e.cost_usd || 0;
       out.runs_24h += 1;
     }
@@ -536,7 +538,7 @@ function markdown(s) {
     const t = sp.interactive.today;
     const surf = Object.entries(t.by_surface || {}).map(([k, v]) => `${k} ${fmtTok(v.fresh)}`).join(", ");
     L.push(`Spend today: ${fmtTok(t.fresh)} fresh tokens${surf ? ` (${surf})` : ""} + ${fmtTok(t.cache_read)} cache reads over ${t.turns} turns · avg context ${fmtTok(t.avg_context_per_turn)}/turn · 7d ${fmtTok(sp.interactive.d7.fresh)} fresh`);
-    if (sp.headless.runs_24h) L.push(`Loops (ledger): ${sp.headless.runs_24h} runs · ${fmtTok(sp.headless.tokens_24h)} tokens · $${sp.headless.usd_24h} plan-equivalent`);
+    if (sp.headless.runs_24h) L.push(`Loops (ledger): ${sp.headless.runs_24h} runs · ${fmtTok(sp.headless.fresh_24h)} fresh / ${fmtTok(sp.headless.tokens_24h)} total · $${sp.headless.usd_24h} plan-equivalent`);
   }
   const q = s.queue;
   if (q) {

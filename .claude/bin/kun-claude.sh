@@ -82,6 +82,10 @@ ok = rc == "0" and not r.get("is_error")
 line = {"ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "kind": "claude", "job": job, "job_source": source,
         "status": "ok" if ok else "fail", "model": model, "effort": effort,
         "tokens": tokens, "output_tokens": int(u.get("output_tokens") or 0),
+        # fresh = input + cache writes + output (what a run really costs); cache_read = context
+        # re-read every turn (cheap per token). The first Monday routine: 120K fresh, 2.15M cached.
+        "fresh_tokens": int(u.get("input_tokens") or 0) + int(u.get("cache_creation_input_tokens") or 0) + int(u.get("output_tokens") or 0),
+        "cache_read_tokens": int(u.get("cache_read_input_tokens") or 0),
         "cost_usd": round(float(r.get("total_cost_usd") or 0), 4), "turns": r.get("num_turns"),
         "duration_s": round(time.time() - float(started)), "summary": "" if ok else f"claude exit {rc}",
         "needs_human": False}

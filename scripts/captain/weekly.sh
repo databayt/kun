@@ -40,6 +40,14 @@ do_run() {
     week="$(date +%G-W%V)"; today="$(date +%F)"
     out=".claude/memory/weekly/${today}-plan.md"
     mkdir -p .claude/memory/weekly
+    # one plan per planning week: a plan written in the last 3 days already covers it (a
+    # Sunday run plans Mon–Sun, so Monday's launchd tick must not pay for the same plan twice)
+    local recent; recent="$(find .claude/memory/weekly -name '*-plan.md' -mtime -3 2>/dev/null | head -1)"
+    if [ -n "$recent" ] && [ "${1:-}" != "--force" ]; then
+        log "a plan from the last 3 days already covers this week ($recent) — skip (--run --force overrides)"
+        runs_record "$NAME" ok "skipped — $recent covers the week"
+        return 0
+    fi
     log "▶ weekly routine $week"
 
     # ── zero tokens ──
@@ -120,7 +128,7 @@ PL
 }
 
 case "${1:---run}" in
-    --run) do_run ;;
+    --run) do_run "${2:-}" ;;
     --install) install ;;
     --uninstall) launchctl bootout "gui/$(id -u)/$LABEL" 2>/dev/null; rm -f "$PLIST"; echo "disarmed $LABEL" ;;
     --status) launchctl list | grep "$LABEL" || echo "not armed"; ls -t "$REPO/.claude/memory/weekly" 2>/dev/null | head -3; tail -5 "$LOG_FILE" 2>/dev/null ;;
