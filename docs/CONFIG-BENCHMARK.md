@@ -297,6 +297,14 @@ routine can't edit fleet surfaces without an approved row, so every material ite
 
 ## Adoption log
 
+- **2026-11-01** — Abdout approved three Engine-decisions rows in chat (`yes b25ab2ca eaccc380 14f29841`):
+  `b25ab2ca` fallback chain `opus-5 → sonnet-5` → `opus-5 → sonnet-5-5` (settings.json, settings-windows.json,
+  engine.json; the haiku effort note now says Haiku 5.5 takes effort; min Claude Code 2.1.299) — the
+  harness audit half (`/doctor prompt-audit`) does not run headless (a `-p` try failed after 124K fresh
+  tokens), so it is a TRACK row for an attended session · `eaccc380` idle compaction minimum 200K → 100K
+  tokens (before: avg context 366K/turn — tracked by `context.avg_per_turn`; the direct effect is fewer
+  fresh cache writes when an idle session resumes) · `14f29841` destructive-bash guard fail-open →
+  fail-closed (`onFailure: "block"`).
 - **2026-11-01** — first `/sync self` (Monday routine): `engine.json → counts.user_skills` 84 → 85
   (finding `4ddffe56`, applied in 80b5439). Anthropic tier swept 2.1.284 → 2.1.316 (table above): nothing
   adopted, 4 DECIDE rows waiting for Abdout. `sync.self` + `sync.anthropic` stamped, `claude_code_version` 2.1.316.

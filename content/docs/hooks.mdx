@@ -18,7 +18,7 @@ Hooks are the part of the engine that survives forgetting. A rule can be ignored
 | `SessionStart` | `*` | List the open report-an-issue queue across the databayt repos (`session-start-reports.sh`; reads aware's cached search when it is under 30 min old, ~1.7 s → 0.03 s) |
 | `UserPromptSubmit` | — | Block protocol: inject a named block's records and obligations (`block-context.sh`) |
 | `ConfigChange` | `*` | Warn when `vocabulary.json` or the plugins drift from their sources (async) |
-| `PreToolUse` | `Bash` | Block destructive commands — the Unforgivable list (`block-destructive-bash.sh`) |
+| `PreToolUse` | `Bash` | Block destructive commands — the Unforgivable list (`block-destructive-bash.sh`). Fails closed (`onFailure: "block"`, 2026-11-01): if the guard can't run, the Bash call is blocked rather than let through |
 | `PreToolUse` | `Bash` | Scrape guard — account-risk readers and the session vault (`scrape-guard.sh`) |
 | `PreToolUse` | `Bash` | Funnel guard — outreach sends stay behind their gate (`funnel-guard.sh`) |
 | `PreToolUse` | `Bash` | Media guard — no video, image/audio over 2 MiB or Thmanyah font gets committed to any repo; media goes to the CDN (`media-guard.sh`) |

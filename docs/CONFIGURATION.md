@@ -36,7 +36,7 @@ Kun's value is its configuration. This is the complete blueprint of every settin
 ```json
 {
   "model": "opus",
-  "fallbackModel": ["claude-opus-5", "claude-sonnet-5"]
+  "fallbackModel": ["claude-opus-5", "claude-sonnet-5-5"]
 }
 ```
 

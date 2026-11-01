@@ -140,7 +140,10 @@ Numbers, not estimates. Each came from a real run on Abdout's Mac and is now tra
 **What dominates now** (aware's first day): 9.2M fresh tokens against 708M cache reads over
 ~2,000 turns — about 356K tokens of context re-read per turn. The lever is session length, not
 model choice: `/clear` between unrelated tasks, `/compact` long ones, research in subagents. The
-`context.avg_per_turn` finding (target 250K) makes the trend visible every week.
+`context.avg_per_turn` finding (target 250K) makes the trend visible every week. Idle compaction
+now starts at 100K tokens instead of the 200K default (`CLAUDE_CODE_IDLE_COMPACT_MIN_TOKENS`,
+approved 2026-11-01): a session left idle ~54 min is summarized before its one-hour cache expires,
+so coming back doesn't re-send it all as fresh cache writes. It doesn't shrink an active session.
 
 **Not adopted:** `claude --bare` would cut a headless run further, but it reads only
 `ANTHROPIC_API_KEY` (no OAuth) — API billing, which the subscription-only rule forbids.

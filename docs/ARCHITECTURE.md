@@ -411,6 +411,8 @@ All products and workflows must be accessible:
 
 **Amended 2026-09-26**: the main loop and the `opus` tier run **Opus 5.5** (`claude-opus-5-5`, $4/$20 — cheaper per token than Opus 4.8 and at Fable 5.1's level on most work); fallbacks `opus-5 → sonnet-5`; Fable 5.1 is a `/model` escalation only (headless Fable can bill usage credits). Source of truth unchanged: `.claude/engine.json`.
 
+**Amended 2026-11-01**: fallbacks `opus-5 → sonnet-5-5` — Sonnet 5.5 (`claude-sonnet-5-5`) is the default Sonnet since Claude Code 2.1.284, Haiku 5.5 the default Haiku since 2.1.293 (aliases resolve forward, so agents moved without edits). Approved on the Engine decisions queue (b25ab2ca).
+
 ### ADR-004: Hogwarts-First Product Strategy
 
 **Decision**: Concentrate all engineering effort on Hogwarts until the King Fahad Schools pilot is delivering revenue.
