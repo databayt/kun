@@ -12,13 +12,14 @@ lanes — live in `kun/content/docs/cowork.mdx`; read it before planning Cowork 
 
 ## Session start (Code)
 
-1. Read `~/.claude/bridge.md` — act on any Cowork → Code handoff.
-2. `gh issue list --repo databayt/kun --state open --label "from-abdout,priority/blocking" --json title,number`.
+1. Read `~/.claude/bridge.md` (pointers only, under 3 KB) — act on any Cowork → Code line.
+2. `gh issue list --repo databayt/kun --state open --label priority/p0 --json title,number` — blockers.
 3. `gh issue list --repo databayt/kun --state open` — work the highest priority.
 
 ## Handoffs
 
 Cowork → Code: plan (3–7 lines) + issue numbers + _"Code: pick up issue #N — context above."_
-Code → Cowork: results + follow-up issue numbers. Update bridge.md's sections; don't append forever.
+Code → Cowork: results + follow-up issue numbers. bridge.md holds one line per open handoff;
+details go on the issue (the pre-2026-11-01 history is in `~/.claude/bridge-archive/`).
 Async to Abdout: built-in push already covers task-done/input-needed; `PushNotification` only for
 blockers; send the file itself with `SendUserFile`; reports → Artifact link.

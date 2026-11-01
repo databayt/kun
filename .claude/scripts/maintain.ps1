@@ -163,6 +163,8 @@ function Step-Health {
 function Get-DiskFreeGB { [int]((Get-Item $env:USERPROFILE).PSDrive.Free / 1GB) }
 
 # Only caches that rebuild themselves — mirrors prune_caches in maintain.sh.
+# Mirror note (2026-11-01): maintain.sh also prunes idle ~/.cache/cf-build/<repo> folders
+# (devices.hygiene.cf_build_keep_days). Cloudflare builds run on the Mac only, so Windows has none.
 function Prune-Caches($cacheCapGB, $imageAge) {
     if (Get-Command uv -ErrorAction SilentlyContinue) {
         $env:UV_LOCK_TIMEOUT = "10"

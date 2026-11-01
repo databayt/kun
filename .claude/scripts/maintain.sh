@@ -248,6 +248,24 @@ prune_caches() {
     local media="$HOME/.claude/skills/edit/scripts/media.sh"
     [ -x "$media" ] && "$media" purge >/dev/null 2>&1 && log "  purged stale media render caches"
     command -v pnpm >/dev/null 2>&1 && pnpm store prune >/dev/null 2>&1 && log "  pruned the pnpm store"
+    # Cloudflare build copies (~/.cache/cf-build/<repo>): every deploy rm -rf's its own
+    # folder before building, so an idle one is a pure leftover — 29 GB of them on
+    # 2026-11-01. Folders only, idle past devices.hygiene.cf_build_keep_days; files and
+    # anything named *env* (production dotenvs live here) are never touched.
+    local cfb="$HOME/.cache/cf-build" d
+    if [ -d "$cfb" ]; then
+        while IFS= read -r d; do
+            case "$(basename "$d")" in *env*) continue ;; esac
+            # -mtime is portable across BSD find, GNU find and bfs (-newermt "-N days" is
+            # not: bfs rejects it, the empty answer read as idle, and fresh folders went).
+            # Fail safe: if find errors, we cannot tell, so nothing is removed.
+            local recent rc
+            recent=$(find "$d" -type f -mtime "-${CF_BUILD_KEEP_DAYS}" -print -quit 2>/dev/null); rc=$?
+            [ "$rc" -ne 0 ] && continue
+            [ -n "$recent" ] && continue
+            rm -rf -- "$d" && log "  removed idle build copy $(basename "$d")"
+        done < <(find "$cfb" -mindepth 1 -maxdepth 1 -type d 2>/dev/null)
+    fi
     if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
         docker builder prune -af --max-used-space "${DOCKER_CACHE_CAP_GB}gb" >/dev/null 2>&1 \
             && log "  capped the Docker build cache at ${DOCKER_CACHE_CAP_GB}GB"
@@ -264,11 +282,12 @@ step_disk() {
     DISK_FREE_GB="${DISK_FREE_GB:-0}"
     DISK_PRUNED="no"
     local engine="$KUN_DIR/.claude/engine.json" floor=30 before
-    DOCKER_CACHE_CAP_GB=8; DOCKER_IMAGE_AGE=72h
+    DOCKER_CACHE_CAP_GB=8; DOCKER_IMAGE_AGE=72h; CF_BUILD_KEEP_DAYS=3
     if command -v jq >/dev/null 2>&1 && [ -f "$engine" ]; then
         floor=$(jq -r '.devices.hygiene.prune_below_gb // 30' "$engine")
         DOCKER_CACHE_CAP_GB=$(jq -r '.devices.hygiene.docker_cache_cap_gb // 8' "$engine")
         DOCKER_IMAGE_AGE=$(jq -r '.devices.hygiene.docker_image_age // "72h"' "$engine")
+        CF_BUILD_KEEP_DAYS=$(jq -r '.devices.hygiene.cf_build_keep_days // 3' "$engine")
     fi
     if [ "$DISK_FREE_GB" -lt "$floor" ]; then
         before="$DISK_FREE_GB"
