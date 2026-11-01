@@ -1,6 +1,7 @@
 #!/bin/bash
 # SessionStart hook (kun repo) — inject engine status as session context.
-# Emits: overdue sync tiers from engine.json + a bridge.md handoff note if fresh.
+# Emits: overdue sync tiers from engine.json, red/stale scheduled jobs (runs.sh --brief),
+# and a bridge.md handoff note if fresh.
 # stdout on exit 0 becomes additional context for the session.
 
 ROOT="${CLAUDE_PROJECT_DIR:-$(pwd)}"
@@ -22,6 +23,10 @@ for tier in anthropic stack services practice; do
     fi
 done
 [ -n "$OVERDUE" ] && echo "Engine sync overdue:$OVERDUE — consider running /sync for those tiers."
+
+# Scheduled jobs that crashed, recorded a fail, or went quiet (engine.json → jobs)
+RUNS="$HOME/.claude/scripts/runs.sh"; [ -f "$RUNS" ] || RUNS="$ROOT/.claude/scripts/runs.sh"
+[ -f "$RUNS" ] && KUN_DIR="$ROOT" bash "$RUNS" --brief 2>/dev/null
 
 # Bridge handoff (Cowork ↔ Code) — surface only if touched in the last 24h
 BRIDGE="$HOME/.claude/bridge.md"

@@ -38,6 +38,8 @@ MODE="${1:---tick}"
 mkdir -p "$STATE" "$LOG_DIR"
 LOG_FILE="$LOG_DIR/jobs-loop-$(date +%F).log"
 log() { echo "[$(date '+%H:%M:%S')] $*" >> "$LOG_FILE"; }
+# Run ledger: a failed step lands in ~/.claude/logs/runs.jsonl (read by runs.sh / maintain).
+. "$HOME/.claude/scripts/lib/runs.sh" 2>/dev/null || . "$REPO/.claude/scripts/lib/runs.sh" 2>/dev/null || runs_record() { :; }
 
 TODAY="$(date +%F)"
 HOUR=$((10#$(date +%H)))
@@ -54,6 +56,7 @@ run() {  # run <name> <cmd...> — logs, never aborts the tick
     ( cd "$REPO" && "$@" ) >> "$LOG_FILE" 2>&1
     local rc=$?
     log "◀ $name exit $rc"
+    [ "$rc" -ne 0 ] && runs_record jobs fail "$name exit $rc"
     return $rc
 }
 

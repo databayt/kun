@@ -285,6 +285,27 @@ step_disk() {
     fi
 }
 
+step_runs() {
+    # Every scheduled job (engine.json → jobs): red = crashed or recorded a fail,
+    # stale = no log within 2x its cadence. Either floors the verdict to YELLOW and
+    # sends ONE digest (desktop + Slack DM via hermes) — the run itself, not the
+    # SessionStart hook, is what reaches Abdout when he isn't at a session.
+    local runs_script="$CLAUDE_DIR/scripts/runs.sh" json
+    [ -f "$runs_script" ] || runs_script="$KUN_DIR/.claude/scripts/runs.sh"
+    RUNS_RED=""; RUNS_STALE=""
+    [ -f "$runs_script" ] || { log "runs: runs.sh missing — skipped"; return; }
+    json=$(KUN_DIR="$KUN_DIR" bash "$runs_script" --json 2>/dev/null)
+    RUNS_RED=$(echo "$json" | python3 -c "import json,sys;print(' '.join(json.load(sys.stdin).get('red',[])))" 2>/dev/null)
+    RUNS_STALE=$(echo "$json" | python3 -c "import json,sys;print(' '.join(json.load(sys.stdin).get('stale',[])))" 2>/dev/null)
+    if [ -n "$RUNS_RED$RUNS_STALE" ]; then
+        [ "$VERDICT" = "GREEN" ] && VERDICT="YELLOW"
+        log "runs: red [${RUNS_RED}] stale [${RUNS_STALE}] — verdict floored to YELLOW, digest sent"
+        KUN_DIR="$KUN_DIR" bash "$runs_script" --notify >/dev/null 2>&1 || true
+    else
+        log "runs: all jobs ok"
+    fi
+}
+
 load_prev_state() {
     # Carry last_report_ts across runs BEFORE the provisional write clobbers it.
     [ -f "$STATE_FILE" ] && LAST_REPORT_TS=$(python3 -c "import json;print(json.load(open('$STATE_FILE')).get('last_report_ts',''))" 2>/dev/null)
@@ -333,6 +354,8 @@ state = {
     "setup": "$SETUP_STATUS",
     "disk_free_gb": ${DISK_FREE_GB:-0},
     "disk_pruned": "${DISK_PRUNED:-no}",
+    "runs_red": "${RUNS_RED:-}",
+    "runs_stale": "${RUNS_STALE:-}",
     "report": "$REPORT_STATUS",
     "last_report_ts": "$LAST_REPORT_TS",
 }
@@ -384,6 +407,7 @@ do_run() {
     step_setup
     step_health
     step_disk
+    step_runs
     step_report
     write_state
     notify

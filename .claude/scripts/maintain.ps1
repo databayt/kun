@@ -210,6 +210,12 @@ function Step-Disk {
     }
 }
 
+function Step-Runs {
+    # Mirror of maintain.sh step_runs. The job registry (engine.json -> jobs) is
+    # launchd-only today, so Windows has no scheduled jobs to check.
+    Log "runs: no launchd on Windows — skipped"
+}
+
 function Load-PrevState {
     # Carry last_report_ts across runs BEFORE the provisional write clobbers it.
     if (Test-Path $STATE_FILE) {
@@ -305,6 +311,7 @@ function Do-Run {
         Step-Setup
         Step-Health
         Step-Disk
+        Step-Runs
         Step-Report
         Write-State
         Log "maintain run done — verdict: $($script:VERDICT)"

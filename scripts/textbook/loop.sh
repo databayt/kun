@@ -36,6 +36,7 @@ PLIST_PATH="$HOME/Library/LaunchAgents/$PLIST_LABEL.plist"
 mkdir -p "$LOG_DIR" "$STATE"
 LOG_FILE="$LOG_DIR/textbook-loop-$(date +%F).log"
 log() { echo "[$(date '+%H:%M:%S')] $*" | tee -a "$LOG_FILE"; }
+. "$HOME/.claude/scripts/lib/runs.sh" 2>/dev/null || . "$REPO/.claude/scripts/lib/runs.sh" 2>/dev/null || runs_record() { :; }
 
 MODE="${1:---tick}"; shift || true
 FORCE=0; PAGES_OVERRIDE=""; SUBJECT_OVERRIDE=""
@@ -203,6 +204,12 @@ tick() {
         case $? in 0) landed="yes — published";; 4) landed="no — twin gate failed, reverted";; *) landed="no — see log";; esac
     fi
     log "◀ $CUR-$G-$S: pages $after, agreement $agr, landed: $landed"
+    # Run ledger: a dead claude run, or a run that added no pages, is a fail runs.sh surfaces.
+    if [ "$rc" -ne 0 ] || [ "$after" = "$before" ]; then
+        runs_record textbook fail "$CUR-$G-$S claude exit $rc, pages $before→$after"
+    else
+        runs_record textbook ok "$CUR-$G-$S pages $before→$after, landed: $landed"
+    fi
     report "**$CUR-$G-$S** · $(date +%F) · $REASON
 - pages on disk: $before → $after (cap $PAGES_PER_TICK/tick, model $MODEL, claude exit $rc)
 - agreement: $agr · landed: $landed
