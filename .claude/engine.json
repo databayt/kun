@@ -77,7 +77,7 @@
   "domain_rules": 57,
   "project_mcp": 18,
   "user_mcp": 24,
-  "hooks": 19,
+  "hooks": 17,
   "vocabulary_spells": 238,
   "workflows": 13,
   "$plugins_comment": "The two plugins are how the fleet reaches other machines. kun-company also carries the rules, pattern cards, hooks, and workflows. Union of both skill sets is 61 (build ships in both).",
@@ -184,6 +184,15 @@
    "$cf_build_comment": "Approved by Abdout 2026-11-01: ~/.cache/cf-build/<repo> folders with no file newer than this many days are removed (each deploy wipes and rebuilds its own folder anyway). Folders only — files and anything named *env* (production dotenvs) are never touched."
   }
  },
+ "aware": {
+  "$comment": "Declared POLICY for the SENSE layer (.claude/scripts/aware.mjs, 2026-11-01). Measured state lives in ~/.claude/state/aware.json, never here. Alerts fire on transitions only (two refreshes in a row), once each, at most alert_cap_per_day; spend, sync, bench and dirty files are shown, never alerted.",
+  "repos": ["kun", "hogwarts", "mkan", "souq", "marketing", "codebase", "space"],
+  "refresh_minutes": 30,
+  "alert_cap_per_day": 6,
+  "disk_low_gb": 10,
+  "disk_drop_gb_24h": 5,
+  "unpushed_hours": 12
+ },
  "jobs": {
   "$comment": "Declared POLICY for every scheduled job, read by .claude/scripts/runs.sh (red/stale detection) and maintain.sh step_runs (daily digest). Measured state never lives here: runs.sh reads launchd, log mtimes and ~/.claude/logs/runs.jsonl live. cadence_hours 0 = a KeepAlive daemon (red when launchd shows no PID); kind trigger = a WatchPaths job that runs on demand (red only on a bad exit or a ledger fail); a job is stale when its newest log is older than 2x its cadence. mac_only false marks a job that needs nothing on the Mac and is a candidate to move to GitHub Actions / Cloudflare cron (orchestration plan item 4, 2026-11-01).",
   "$notify": "per machine — ~/.claude/.kun-notify holds this machine's `me` target (e.g. slack:<DM id>); never fleet config, or every teammate's digest lands in one person's DM",
@@ -209,7 +218,8 @@
   "mkan-mastering-webhook": { "label": "com.databayt.mkan-mastering-webhook", "cadence_hours": 0 },
   "chrome-vault": { "label": "com.databayt.chrome-session", "cadence_hours": 0 },
   "remote-control": { "label": "com.databayt.claude-rc", "cadence_hours": 0 },
-  "presence": { "label": "com.databayt.presence", "cadence_hours": 0 }
+  "presence": { "label": "com.databayt.presence", "cadence_hours": 0 },
+  "aware": { "label": "com.databayt.kun-aware", "cadence_hours": 0.5, "logs": ["~/.claude/logs/aware-*.log"] }
  },
  "textbook": {
   "$comment": "Declared POLICY for the textbook pipeline (PDF -> verified Markdown twin). Measured state lives in .claude/memory/textbook-scores.json - never here. Thresholds remain PROVISIONAL but are now backed by FIVE graded books (biology .948 B, math .967 A, physics .953 A, chemistry .946 B, math-specialized .936 B) rather than one. Two structural facts drive the 2026-09-29 revision: (1) a formatter hook on Write corrupts pages identically in BOTH reads, so no agreement score in this pipeline can detect it - the Preflight canary is the only defence and the run now ABORTS when it fails; (2) render kind and reference direction are PER-BOOK facts - 16 of 25 sd/g12 pdfs are vector (1000px throws away detail) and reference order tracks the digit script (Latin EN books store reversed, Arabic-Indic AN books store as drawn), so carrying one book's answer to the next reverses every reference in it.",

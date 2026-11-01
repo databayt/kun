@@ -33,6 +33,12 @@ Keychain, the browser vault — and it answers in the Slack thread itself.
 **Keep for yourself:** quick mkan facts from `pnpm mkan:read` (the `mkan` skill), the
 quick commands, cron jobs, greetings, one-line answers you already know.
 
+**Status — answer yourself, never hand off:** "status", "kun status", "what's happening",
+"what's running", "how's the Mac", "حالة", "شنو الوضع" → run `cat ~/.claude/state/aware.md`
+and paste it as is (it is ≤1.5K chars, refreshed every 30 min: jobs, disk, spend, queue,
+CI, Hermes itself). Zero Claude tokens. Only if it is missing or older than an hour, run
+`node ~/kun/.claude/scripts/aware.mjs` first.
+
 **Never from #mkan** (`C0BS2NZE2AY`): that channel belongs to the intake desk (`home`).
 
 ## How

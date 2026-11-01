@@ -212,6 +212,15 @@ function Step-Disk {
     }
 }
 
+function Step-Aware {
+    # Mirror of maintain.sh step_aware: refresh kun's SENSE snapshot (zero tokens).
+    $aware = Join-Path $KUN_DIR ".claude\scripts\aware.mjs"
+    if ((Get-Command node -EA SilentlyContinue) -and (Test-Path $aware)) {
+        & node $aware --refresh --quiet *> $null
+        Log "aware: snapshot refreshed"
+    } else { Log "aware: node or aware.mjs missing — skipped" }
+}
+
 function Step-Runs {
     # Mirror of maintain.sh step_runs. The job registry (engine.json -> jobs) is
     # launchd-only today, so Windows has no scheduled jobs to check.
@@ -313,6 +322,7 @@ function Do-Run {
         Step-Setup
         Step-Health
         Step-Disk
+        Step-Aware
         Step-Runs
         Step-Report
         Write-State

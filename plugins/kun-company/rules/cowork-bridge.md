@@ -7,6 +7,8 @@ lanes — live in `kun/content/docs/cowork.mdx`; read it before planning Cowork 
 
 - **Don't under-plan Cowork**: it runs bash on Abdout's Mac (`device_bash`), drives his signed-in
   Chrome, reads GitHub, pushes to his phone; its GitHub MCP writes fail (it posts via browser).
+- **Live state** (jobs, disk, spend, queue, CI — refreshed every 30 min): `~/.claude/state/aware.md`;
+  Cowork reads it through the filesystem instead of asking Code.
 - **Errands in his name** (sign-ups, confirmations, portals, keys) run in Code first via `/behalf`;
   Cowork is the fallback. Code ↔ Code: `SendMessage` / `ListAgents`.
 

@@ -304,6 +304,18 @@ step_disk() {
     fi
 }
 
+step_aware() {
+    # Refresh kun's SENSE snapshot (~/.claude/state/aware.json + aware.md). On machines
+    # without the 30-min launchd refresher (every teammate), this daily run is what keeps
+    # awareness, the reports cache and #133's awareness block current. Zero tokens.
+    local aware="$KUN_DIR/.claude/scripts/aware.mjs"
+    if command -v node >/dev/null 2>&1 && [ -f "$aware" ]; then
+        if KUN_DIR="$KUN_DIR" node "$aware" --refresh --quiet >/dev/null 2>&1; then log "aware: snapshot refreshed"; else log "aware: refresh failed (non-fatal)"; fi
+    else
+        log "aware: node or aware.mjs missing — skipped"
+    fi
+}
+
 step_runs() {
     # Every scheduled job (engine.json → jobs): red = crashed or recorded a fail,
     # stale = no log within 2x its cadence. Either floors the verdict to YELLOW and
@@ -318,8 +330,14 @@ step_runs() {
     RUNS_STALE=$(echo "$json" | python3 -c "import json,sys;print(' '.join(json.load(sys.stdin).get('stale',[])))" 2>/dev/null)
     if [ -n "$RUNS_RED$RUNS_STALE" ]; then
         [ "$VERDICT" = "GREEN" ] && VERDICT="YELLOW"
-        log "runs: red [${RUNS_RED}] stale [${RUNS_STALE}] — verdict floored to YELLOW, digest sent"
-        KUN_DIR="$KUN_DIR" bash "$runs_script" --notify >/dev/null 2>&1 || true
+        # Where aware's refresher runs it owns alerts (transition-only, once each), so the
+        # daily digest would repeat what was already sent; elsewhere the digest stays.
+        if [ -f "$HOME/Library/LaunchAgents/com.databayt.kun-aware.plist" ]; then
+            log "runs: red [${RUNS_RED}] stale [${RUNS_STALE}] — verdict floored to YELLOW (aware owns the alerts)"
+        else
+            log "runs: red [${RUNS_RED}] stale [${RUNS_STALE}] — verdict floored to YELLOW, digest sent"
+            KUN_DIR="$KUN_DIR" bash "$runs_script" --notify >/dev/null 2>&1 || true
+        fi
     else
         log "runs: all jobs ok"
     fi
@@ -426,6 +444,7 @@ do_run() {
     step_setup
     step_health
     step_disk
+    step_aware
     step_runs
     step_report
     write_state

@@ -309,6 +309,7 @@ if [[ "$REPORT" == "--report" ]]; then
 | | Check | Detail |
 |---|-------|--------|
 $(echo -e "$CHECKS")
+$( [ -f "$HOME/.claude/state/aware.md" ] && printf '\n**Awareness** (aware.mjs):\n```\n%s\n```\n' "$(grep -E '^(Jobs|Machine|Spend today|Engine):' "$HOME/.claude/state/aware.md" | head -4)" )
 ---"
 
     # Find or create the health issue (label must exist before issue create).

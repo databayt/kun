@@ -7,17 +7,15 @@ description: Seventeen lifecycle automations the engine can't forget to run
 
 Hooks are the part of the engine that survives forgetting. A rule can be ignored and a skill can go uninvoked, but a hook is executed by the harness — not by Claude — so it fires whether or not anyone remembers it.
 
-**19 hooks across 7 events**, configured in `.claude/settings.json`. setup.sh merges that file into `~/.claude/settings.json` — the `hooks` key is engine territory and is replaced wholesale — so a hook wired anywhere else is wiped at the next setup. Wire new hooks here, never by hand in user settings: that is how the report and block hooks below sat unregistered until 2026-09-28.
+**17 hooks across 7 events**, configured in `.claude/settings.json`. setup.sh merges that file into `~/.claude/settings.json` — the `hooks` key is engine territory and is replaced wholesale — so a hook wired anywhere else is wiped at the next setup. Wire new hooks here, never by hand in user settings: that is how the report and block hooks below sat unregistered until 2026-09-28.
 
 ## Active hooks
 
 | Event | Matcher | What it does |
 |-------|---------|-------------|
-| `SessionStart` | `*` | Inject engine context — sync drift, bridge handoffs (`session-engine-context.sh`, kun only) |
-| `SessionStart` | `*` | Nag if the machine's maintain heartbeat is stale or RED |
+| `SessionStart` | `*` | One awareness brief from kun's snapshot — alerts, red/stale jobs, disk and memory, engine drift (kun only), Cowork handoffs; silent when green (`session-aware.sh` → `aware.mjs --brief`, ~30 ms). Replaced the engine-context, heartbeat and devices briefs on 2026-11-01 |
 | `SessionStart` | `*` | Warn if product flow recordings or media library are stale, and when render caches pass 2 GB |
-| `SessionStart` | `*` | Devices brief — disk, swap, open sessions, the `kun-rc` server (`devices.sh --brief`) |
-| `SessionStart` | `*` | List the open report-an-issue queue across the databayt repos (`session-start-reports.sh`) |
+| `SessionStart` | `*` | List the open report-an-issue queue across the databayt repos (`session-start-reports.sh`; reads aware's cached search when it is under 30 min old, ~1.7 s → 0.03 s) |
 | `UserPromptSubmit` | — | Block protocol: inject a named block's records and obligations (`block-context.sh`) |
 | `ConfigChange` | `*` | Warn when `vocabulary.json` or the plugins drift from their sources (async) |
 | `PreToolUse` | `Bash` | Block destructive commands — the Unforgivable list (`block-destructive-bash.sh`) |
@@ -61,7 +59,7 @@ Every hook ends in `exit 0` (or swallows its own failure). Exit code 2 is the on
 
 | Event | Fires | Used for |
 |-------|-------|----------|
-| `SessionStart` | New session begins | Context injection, drift warnings |
+| `SessionStart` | New session begins | Context injection, drift warnings. Context hooks exit early when `KUN_HEADLESS=1` (set by `kun-claude.sh` for headless `claude -p` runs — they fire there too, and nobody reads them) |
 | `ConfigChange` | Config file changes | Regeneration checks |
 | `PreToolUse` | Before a tool runs | Validation, guards, cleanup |
 | `PostToolUse` | After a tool completes | Formatting, browser open |

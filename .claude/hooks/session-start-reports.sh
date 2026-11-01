@@ -20,25 +20,36 @@ set -u
 git -C "$PWD" remote get-url origin 2>/dev/null | grep -q 'databayt/' || exit 0
 command -v gh >/dev/null 2>&1 || exit 0
 
-rows=$(gh search issues --owner databayt --label report --state open --limit 50 \
-  --json repository,number,title,labels,createdAt,author \
-  --jq '
-    def has($l): ([.labels[].name] | index($l)) != null;
-    def lane:
-      if has("accepted") then "accepted"
-      elif has("verified-report") then "verified"
-      elif has("team") then "team"
-      elif has("needs-human") then "needs-human"
-      elif has("low-confidence") then "low-confidence"
-      else "legacy" end;
-    def rank: {accepted:0, verified:1, team:2, "needs-human":3, "low-confidence":4, legacy:5}[lane];
-    def age: ((now - (.createdAt | fromdateiso8601)) / 86400 | floor);
-    [ .[] | { key: (.repository.name + "#" + (.number|tostring)),
-              lane: lane, rank: rank, age: age,
-              title: (.title | .[0:70]) } ]
-    | sort_by(.rank, -.age)
-    | .[] | "\(.key)\t\(.lane)\t\(.age)d\t\(.title)"
-  ' 2>/dev/null) || exit 0
+# Lane order + row format, shared by both sources below.
+DEFS='def has($l): ([.labels[].name] | index($l)) != null;
+def lane:
+  if has("accepted") then "accepted"
+  elif has("verified-report") then "verified"
+  elif has("team") then "team"
+  elif has("needs-human") then "needs-human"
+  elif has("low-confidence") then "low-confidence"
+  else "legacy" end;
+def rank: {accepted:0, verified:1, team:2, "needs-human":3, "low-confidence":4, legacy:5}[lane];
+def age: ((now - (.createdAt | fromdateiso8601)) / 86400 | floor);'
+BODY='[ .[] | { key: (.repository.name + "#" + (.number|tostring)),
+           lane: lane, rank: rank, age: age,
+           title: (.title | .[0:70]) } ]
+| sort_by(.rank, -.age)
+| .[] | "\(.key)\t\(.lane)\t\(.age)d\t\(.title)"'
+
+# aware.mjs caches the same org-wide search every refresh (~/.claude/state/reports.json);
+# a fresh cache spares this hook the 1–3 s search that every session start waits on.
+rows=""
+CACHE="$HOME/.claude/state/reports.json"
+if command -v jq >/dev/null 2>&1 && [ -n "$(find "$CACHE" -mmin -30 2>/dev/null)" ]; then
+  rows=$(jq -r "$DEFS .rows | $BODY" "$CACHE" 2>/dev/null) || rows=""
+  cached=1
+fi
+if [ -z "${cached:-}" ]; then
+  rows=$(gh search issues --owner databayt --label report --state open --limit 50 \
+    --json repository,number,title,labels,createdAt,author \
+    --jq "$DEFS $BODY" 2>/dev/null) || exit 0
+fi
 
 [ -z "$rows" ] && exit 0
 
