@@ -185,6 +185,7 @@
  "jobs": {
   "$comment": "Declared POLICY for every scheduled job, read by .claude/scripts/runs.sh (red/stale detection) and maintain.sh step_runs (daily digest). Measured state never lives here: runs.sh reads launchd, log mtimes and ~/.claude/logs/runs.jsonl live. cadence_hours 0 = a KeepAlive daemon (red when launchd shows no PID); kind trigger = a WatchPaths job that runs on demand (red only on a bad exit or a ledger fail); a job is stale when its newest log is older than 2x its cadence. mac_only false marks a job that needs nothing on the Mac and is a candidate to move to GitHub Actions / Cloudflare cron (orchestration plan item 4, 2026-11-01).",
   "$notify": "slack:D0AQ0JR5ZU4",
+  "$hermes": "~/.hermes/cron/jobs.json",
   "jobs": { "label": "com.databayt.jobs-loop", "cadence_hours": 0.5, "logs": ["~/.claude/logs/jobs-loop-*.log"] },
   "funnel": { "label": "com.databayt.funnel-loop", "cadence_hours": 0.5, "logs": ["~/.claude/logs/funnel-loop-*.log"] },
   "textbook": { "label": "com.databayt.textbook-loop", "cadence_hours": 24, "logs": ["~/.claude/logs/textbook-loop-*.log"] },

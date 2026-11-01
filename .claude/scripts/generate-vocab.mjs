@@ -13,7 +13,7 @@
 // Edit vocabulary.json, never the generated outputs. docs/KEYWORDS.md is
 // non-normative lore; content/docs/keywords.mdx renders from spellbook-data.ts.
 
-import { readFileSync, writeFileSync, existsSync, mkdtempSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, mkdtempSync, readdirSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { join, dirname, resolve } from "node:path";
@@ -156,17 +156,25 @@ function claudeMdBlock() {
   // The blank line after BEGIN is what prettier writes there (format-on-write runs on
   // every edit of this file); emitting it keeps the block prettier-stable, so an
   // unrelated edit to CLAUDE.md no longer knocks it out of sync.
+  // A spell whose name IS a skill already reaches the model through the skill listing
+  // (its description + when_to_use) — repeating it here costs tokens every session and
+  // buys no routing. Only the keywords with no skill of their own are listed (2026-11-01).
+  const skillNames = new Set(
+    readdirSync(join(ROOT, ".claude/skills"), { withFileTypes: true })
+      .filter((d) => d.isDirectory())
+      .map((d) => d.name)
+  );
   const lines = [BEGIN, ""];
   lines.push(
-    "Claude routes these to the right skill + agent + MCP without a dedicated command. Registry: `.claude/vocabulary.json` (edit it, then `node .claude/scripts/generate-vocab.mjs`); browsable at kun.databayt.org/en/docs/keywords."
+    "Every skill routes by its own description. The keywords below have NO skill of their own — route them to the agent/MCP/rule named by their school. Full registry: `.claude/vocabulary.json` (edit, then `node .claude/scripts/generate-vocab.mjs`)."
   );
   lines.push("");
   for (const sc of vocab.schools) {
     const kws = sc.spells
-      .map((sp) => (sp.mergedInto ? null : `\`${sp.name}\``))
+      .map((sp) => (sp.mergedInto || skillNames.has(sp.name) ? null : `\`${sp.name}\``))
       .filter(Boolean)
       .join(", ");
-    lines.push(`**${sc.name}** — ${sc.subtitle.toLowerCase()}: ${kws}`);
+    if (kws) lines.push(`**${sc.name}** — ${sc.subtitle.toLowerCase()}: ${kws}`);
   }
   lines.push(END);
   return lines.join("\n");

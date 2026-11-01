@@ -1,3 +1,11 @@
+---
+paths:
+  - "**/.claude/blocks.json"
+  - "**/src/components/**"
+  - "**/src/app/**"
+  - "**/content/docs*/**"
+---
+
 # Block Protocol — per-repo feature blocks
 
 Every feature block in a repo's `.claude/blocks.json` is a passive keyword (hogwarts:

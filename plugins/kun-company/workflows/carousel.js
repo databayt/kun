@@ -65,7 +65,7 @@ const resolved = await agent(
   } For each block, read its README.md / docs under the block's component dir if present and
   distill: what it does, who it serves, the one pain it kills, one proof point. Return JSON.`,
   {
-    label: "resolve:blocks",
+    label: "resolve:blocks", model: "sonnet", effort: "low",
     schema: {
       type: "object",
       properties: {
@@ -100,7 +100,7 @@ ${DECK_RULES}
 Write the file to ${deckDir}/block-${b.name}.json and
 return {"slug":"block-${b.name}","written":true}.`,
       {
-        label: `draft:${b.name}`,
+        label: `draft:${b.name}`, model: "sonnet", effort: "medium",
         phase: "Draft",
         schema: {
           type: "object",
@@ -120,7 +120,7 @@ Attack: Arabic correctness and naturalness (is it crafted or translated?), hook 
 body 140), CTA clarity, art choice sanity. If ANY finding, FIX the file in place (minimum
 diff, keep the voice) and list what you changed. Return JSON.`,
       {
-        label: `qa:${b.name}`,
+        label: `qa:${b.name}`, model: "sonnet", effort: "medium",
         phase: "QA",
         schema: {
           type: "object",
@@ -143,7 +143,7 @@ const staged = await agent(
 (dev server assumed on ${base} — if it is down, report that instead of starting it).
 Return JSON with per-slug output paths or the error.`,
   {
-    label: "stage:render-all",
+    label: "stage:render-all", model: "sonnet", effort: "low",
     schema: {
       type: "object",
       properties: {

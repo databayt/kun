@@ -156,7 +156,7 @@ const verify = (row) => {
         )
         .join("\n"),
     {
-      label: `verify:${row.keyword}`,
+      label: `verify:${row.keyword}`, effort: "high",
       phase: "Verify",
       model: isBrowser ? "sonnet" : CODE_MODEL[row.keyword] || "opus",
       schema: RECHECK_BATCH,
@@ -185,7 +185,7 @@ const detected = (
   await parallel([
     () =>
       agent(browserPrompt(), {
-        label: "sweep:browser",
+        label: "sweep:browser", effort: "medium",
         phase: "Sweep",
         model: "sonnet",
         schema: MULTI,
@@ -201,7 +201,7 @@ const detected = (
     ...CODE.map(
       (kw) => () =>
         agent(codePrompt(kw), {
-          label: `sweep:${kw}`,
+          label: `sweep:${kw}`, effort: "medium",
           phase: "Sweep",
           model: CODE_MODEL[kw] || "sonnet",
           schema: VERDICT,

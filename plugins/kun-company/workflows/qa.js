@@ -184,7 +184,7 @@ const resolved = await agent(
     `first remaining segment is "${block}" or its singular/plural variant.\n` +
     `Return { path, routes }.`,
   {
-    label: "resolve",
+    label: "resolve", effort: "low",
     phase: "Static",
     model: "sonnet",
     schema: {
@@ -216,7 +216,7 @@ const gate = await agent(
         `(it names the model you actually run on — never a hardcoded model name).\n`) +
     `Return ok=true only if BOTH pass; otherwise ok=false with the remaining errors.`,
   {
-    label: "static:check",
+    label: "static:check", effort: "medium",
     phase: "Static",
     model: "sonnet",
     schema: {
@@ -306,7 +306,7 @@ const verify = (row) => {
     return Promise.resolve(row);
   const isBrowser = BROWSER.includes(row.keyword);
   return agent(recheckPrompt(row.keyword, row.target, row.findings), {
-    label: `verify:${row.keyword}`,
+    label: `verify:${row.keyword}`, effort: "high",
     phase: "Verify",
     model: isBrowser ? "sonnet" : CODE_MODEL[row.keyword] || "opus",
     schema: RECHECK_BATCH,
@@ -332,7 +332,7 @@ const verify = (row) => {
 // yield one row each. Every FAILing row is batch-verified (model-tiered, death-safe).
 const detectBrowser = (route) =>
   agent(browserPrompt(route), {
-    label: "detect:browser",
+    label: "detect:browser", effort: "medium",
     phase: "Detect",
     model: "sonnet",
     schema: MULTI,
@@ -349,7 +349,7 @@ const detectBrowser = (route) =>
 
 const detectCode = (keyword) =>
   agent(codePrompt(keyword), {
-    label: `detect:${keyword}`,
+    label: `detect:${keyword}`, effort: "medium",
     phase: "Detect",
     model: CODE_MODEL[keyword] || "sonnet",
     schema: VERDICT,
@@ -502,7 +502,7 @@ if (AUDIT) {
       `labels) instead of opening a duplicate. Return its number + url.\n\n` +
       `MATRIX:\n${JSON.stringify(matrix, null, 2)}\n\nAUTO-FIXED:\n${JSON.stringify(allFixed, null, 2)}\n\nRESIDUAL:\n${JSON.stringify(residual, null, 2)}`,
     {
-      label: "handoff",
+      label: "handoff", effort: "low",
       phase: "Handoff",
       model: "sonnet",
       schema: {
@@ -532,7 +532,7 @@ if (AUDIT) {
       `Commit on main as \`chore(${block}): record qa verdict ${verdict} [qa]\` with the standard Co-Authored-By footer. ` +
       `Return the files you changed.`,
     {
-      label: "persist",
+      label: "persist", effort: "low",
       phase: "Persist",
       model: "sonnet",
       schema: {
@@ -574,7 +574,7 @@ function fixer(f, tier) {
       `  fix(${block}): ${f.title} [qa]\n\n  <the attribution trailer your harness supplies — it names your model; never hardcode one>\n` +
       `Return fixed, the files changed, the short commit SHA, and escalate=true if you refused.`,
     {
-      label: `fix:${f.keyword}`,
+      label: `fix:${f.keyword}`, effort: "high",
       phase: "Fix",
       model: "opus",
       schema: FIXRESULT,

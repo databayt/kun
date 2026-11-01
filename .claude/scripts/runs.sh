@@ -10,6 +10,7 @@
 #   1. launchd's last exit code (a crash)           → red
 #   2. newest log mtime vs 2× the declared cadence  → stale (it stopped running or stopped writing)
 #   3. the ledger (~/.claude/logs/runs.jsonl)       → red on a recorded fail, and needs_human
+# Hermes cron jobs are read from engine.json → jobs.$hermes (their own scheduler's state file).
 # Daemons (cadence_hours 0) are red when launchd shows no PID; trigger jobs (kind trigger) never go stale.
 # Policy (labels, cadences, logs) lives in engine.json → jobs; this script holds none.
 
@@ -86,6 +87,34 @@ for name, j in jobs.items():
             state, why = ("red" if e["status"] == "fail" else "warn"), e.get("summary", "") or e["status"]
     rows.append({"job": name, "label": label, "state": state, "why": why,
                  "seen": seen, "needs_human": human, "mac_only": bool(j.get("mac_only", True))})
+
+# Hermes cron (its own scheduler, state in ~/.hermes/cron/jobs.json): red on a last error,
+# stale when an enabled job's next run is >2h in the past (the gateway stopped firing).
+hpath = os.path.expanduser(json.load(open(engine)).get("jobs", {}).get("$hermes", ""))
+if hpath and os.path.exists(hpath):
+    try:
+        from datetime import datetime, timezone
+        for h in json.load(open(hpath)).get("jobs", []):
+            if not h.get("enabled"):
+                continue
+            st, why = "ok", ""
+            nxt = h.get("next_run_at")
+            late = 0
+            if nxt:
+                late = (datetime.now(timezone.utc) - datetime.fromisoformat(nxt)).total_seconds() / 3600
+            if h.get("last_status") == "error":
+                st, why = "red", (h.get("last_error") or "error")[:120]
+            elif late > 2:
+                st, why = "stale", f"next run was due {late:.0f}h ago — gateway not firing"
+            last = h.get("last_run_at")
+            seen = "never"
+            if last:
+                seen = f"{(datetime.now(timezone.utc) - datetime.fromisoformat(last)).total_seconds() / 3600:.1f}h ago"
+            rows.append({"job": "hermes:" + h.get("name", h.get("id", "?")), "label": "hermes", "state": st,
+                         "why": why, "seen": seen, "needs_human": False, "mac_only": True})
+    except Exception as ex:
+        rows.append({"job": "hermes", "label": "hermes", "state": "warn", "why": f"jobs.json unreadable: {ex}",
+                     "seen": "?", "needs_human": False, "mac_only": True})
 
 bad = [r for r in rows if r["state"] in ("red", "stale")]
 if mode == "--json":

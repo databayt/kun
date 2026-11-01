@@ -28,6 +28,10 @@
 //                      artifacts are allowlisted: their absence here is correct.
 //   workflow-parity    A referenced workflow file exists and its meta.name matches
 //                      its filename.
+//   workflow-effort    Every agent() call in a workflow names its model AND effort.
+//                      A stage that names neither inherits the session default
+//                      (Opus 5.5) — the token-economy policy says mechanical
+//                      stages run low, only verify/judge run high (2026-11-01).
 //   no-when-to-use     A skill with no when_to_use is invisible to dispatch — it
 //                      can only ever be invoked by exact name.
 
@@ -157,6 +161,32 @@ if (existsSync(wfDir)) {
     const expected = f.replace(/\.js$/, "");
     if (m && m[1] !== expected) {
       add("warn", "workflow-parity", f, `meta.name is "${m[1]}" but the file is ${f}`, `make them match — the name is how the workflow is invoked`);
+    }
+  }
+}
+
+// ── 4b. workflow-effort ─────────────────────────────────────────────────────
+// Each agent( call's options object must carry model: and effort:. The options are
+// the last object literal before the call's closing paren; a 1500-char window from
+// the call start that reaches its `label:` key is enough for every workflow here.
+if (existsSync(wfDir)) {
+  for (const f of readdirSync(wfDir).filter((x) => x.endsWith(".js"))) {
+    const raw = readFileSync(join(wfDir, f), "utf8");
+    const re = /\bagent\(/g;
+    let m;
+    while ((m = re.exec(raw))) {
+      const win = raw.slice(m.index, m.index + 4000);
+      const head = win.slice(0, 260);
+      // A wrapper that forwards its caller's options (`...opts`) is checked at the
+      // caller; `lint:inherit` marks a stage that must run on the session model on
+      // purpose (bench-dispatch measures what the SESSION model would pick).
+      if (/\.\.\.opts\b/.test(head) || /lint:inherit/.test(head)) continue;
+      const li = win.search(/\blabel:/);
+      if (li < 0) continue; // options passed by variable — not checkable statically
+      const opts = win.slice(li, li + 300).split(/schema:/)[0];
+      const line = raw.slice(0, m.index).split("\n").length;
+      const miss = ["model", "effort"].filter((k) => !new RegExp(`\\b${k}:`).test(opts));
+      if (miss.length) add("error", "workflow-effort", `${f}:${line}`, `agent() without ${miss.join(" + ")} — inherits the Opus session default`, `pass model + effort per engine.json delegation.efforts (low mechanical, medium build, high verify)`);
     }
   }
 }

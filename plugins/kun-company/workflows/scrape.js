@@ -223,6 +223,7 @@ if (stages.has("discover")) {
       label: "discover",
       phase: "Discover",
       model: "sonnet",
+      effort: "low",
       schema: STAGE,
     }),
   );
@@ -234,6 +235,7 @@ if (stages.has("enrich")) {
       label: "enrich",
       phase: "Enrich",
       model: "sonnet",
+      effort: "medium",
       schema: STAGE,
     }),
   );
@@ -245,6 +247,7 @@ if (stages.has("tier")) {
       label: "tier",
       phase: "Tier",
       model: "sonnet",
+      effort: "low",
       schema: STAGE,
     }),
   );

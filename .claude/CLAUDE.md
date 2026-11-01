@@ -39,30 +39,30 @@ IDEA → SPEC (human gate) → [PLAN → TASKS] → SCHEMA → CODE → WIRE →
 
 <!-- BEGIN vocabulary (generated) -->
 
-Claude routes these to the right skill + agent + MCP without a dedicated command. Registry: `.claude/vocabulary.json` (edit it, then `node .claude/scripts/generate-vocab.mjs`); browsable at kun.databayt.org/en/docs/keywords.
+Every skill routes by its own description. The keywords below have NO skill of their own — route them to the agent/MCP/rule named by their school. Full registry: `.claude/vocabulary.json` (edit, then `node .claude/scripts/generate-vocab.mjs`).
 
-**The Pipeline** — idea to production in one word: `feature`, `idea`, `spec`, `plan`, `tasks`, `schema`, `ready`, `code`, `wire`, `check`, `ship`, `watch`
-**Charm Work** — everyday practical magic: `dev`, `build`, `push`, `quick`, `deploy`, `release`, `cloudflare`
-**Transfiguration** — creating something from nothing: `component`, `page`, `api`, `atom`, `template`, `block`, `migration`
-**Ancient Runes** — the foundational frameworks: `nextjs`, `react`, `typescript`, `prisma`, `tailwind`, `shadcn`
+**The Pipeline** — idea to production in one word: `ready`
+**Charm Work** — everyday practical magic: `dev`, `push`, `quick`
+**Transfiguration** — creating something from nothing: `component`, `page`, `api`, `block`, `migration`
+**Ancient Runes** — the foundational frameworks: `nextjs`, `react`, `typescript`, `prisma`, `tailwind`
 **Conjuration** — summoning ui elements: `table`, `header`, `menu`, `form`, `modal`, `card`, `sidebar`, `footer`, `hero`, `navbar`
-**The Dark Arts of Features** — n.e.w.t.-level system enchantments: `auth`, `saas`, `dashboard`, `landing`, `checkout`, `settings`, `profile`, `admin`, `onboarding`, `pwa`
-**Animation Charms** — giving life to stillness: `motion`, `animation`, `transition`, `gesture`, `scroll`, `skeleton`, `blur`
-**Defense Against the Dark Arts** — protection from bugs and entropy: `test`, `e2e`, `handover`, `qa`, `coverage`, `review`, `security`, `audit`, `bench`, `analyze`, `constitution`, `accessibility`, `optimize`, `performance`
-**Reparo** — the mending spells: `fix`, `error`, `scan`, `lint`, `format`, `type-check`, `report`
+**The Dark Arts of Features** — n.e.w.t.-level system enchantments: `saas`, `dashboard`, `landing`, `checkout`, `settings`, `admin`, `onboarding`
+**Animation Charms** — giving life to stillness: `motion`, `animation`, `transition`, `gesture`, `scroll`
+**Defense Against the Dark Arts** — protection from bugs and entropy: `test`, `e2e`, `coverage`, `review`, `security`, `audit`, `constitution`, `accessibility`, `optimize`, `performance`
+**Reparo** — the mending spells: `fix`, `error`, `scan`, `lint`, `format`, `type-check`
 **Quill Charms** — the spells of documentation: `docs`, `readme`, `api-docs`, `storybook`, `changelog`
-**Geminio** — duplication and summoning: `clone`, `copy`, `fork`, `extend`, `upstream`, `reverse`
-**Summoning Charms** — portals to external realms: `github`, `figma`, `linear`, `slack`, `notion`, `sentry`, `stripe`, `vercel`, `analytics`, `neon`, `facebook`
+**Geminio** — duplication and summoning: `copy`, `fork`, `extend`, `upstream`
+**Summoning Charms** — portals to external realms: `github`, `figma`, `linear`, `slack`, `notion`, `sentry`, `stripe`, `vercel`, `analytics`, `neon`
 **Divination** — seeing ahead: `story`, `loop`, `goal`, `schedule`, `workflow`
 **Advanced Spellwork** — performance magic: `parallelize`, `waterfall`, `bundle`, `lazy`, `suspense`, `memo`, `server-component`, `streaming`, `barrel`, `dedup`
 **Portkeys** — teleportation to other repos: `from codebase`, `from shadcn`, `from radix`, `like hogwarts`, `like souq`, `like mkan`, `like shifa`, `like sijillee`, `like moallimee`
 **The Unforgivable Commands** — forbidden by the engine: `rm -rf *`, `prisma migrate reset`, `prisma db push --accept-data-loss`, `DROP TABLE`, `git push --force main`
-**The Auror Office** — one keyword, one quality dimension: `see`, `flow`, `debug`, `responsive`, `lang`, `fast`, `guard`, `architecture`, `structure`, `pattern`, `design`, `stack`, `trace`, `efficient`, `mirror`, `diff`
-**The Ministry of Magic** — operations and intelligence: `captain`, `weekly`, `monitor`, `domains`, `incident`, `issue`, `credentials`, `behalf`, `health`, `sync`, `learn`, `conventions`, `patterns`, `drift`, `economy`
-**The Pensieve** — judgment and conversion: `canon`, `decide`, `premortem`, `convert`, `md`, `textbook`, `contract`, `transcribe`, `agreement`, `adjudicate`, `textbook bench`, `textbook status`, `textbook loop`, `land the twin`, `تحويل الكتب`, `calendar`, `draft`, `higgs`, `media`, `approve`, `publish`, `measure`, `social`, `carousel`, `shoot`, `record`, `edit`, `rough cut`, `captions`, `title card`, `motion graphic`, `مونتاج`, `قص الفيديو`, `ترجمة الفيديو`
+**The Auror Office** — one keyword, one quality dimension: `see`, `flow`, `debug`, `responsive`, `lang`, `fast`, `guard`, `architecture`, `structure`, `design`, `stack`, `trace`, `efficient`, `mirror`, `diff`
+**The Ministry of Magic** — operations and intelligence: `captain`, `conventions`, `patterns`, `drift`
+**The Pensieve** — judgment and conversion: `decide`, `premortem`, `contract`, `transcribe`, `agreement`, `adjudicate`, `textbook bench`, `textbook status`, `textbook loop`, `land the twin`, `تحويل الكتب`, `media`, `rough cut`, `captions`, `title card`, `motion graphic`, `مونتاج`, `قص الفيديو`, `ترجمة الفيديو`
 **The Portrait Gallery** — the media studio: `hero image`, `og image`, `banner`, `mockup`, `lifestyle`, `split-screen`, `reel`, `infographic`, `testimonial`, `showroom`
-**The Owlery** — lead acquisition and outreach: `scrap`, `scrape`, `contact gap`, `leads`, `prospect`, `enrich`, `outreach`, `pipeline health`, `scrap facebook`, `scrap whatsapp`, `scrap for hogwarts`, `scrap for mkan`, `scrap tiktok`, `scrap facebook for mkan`, `tiktok homes`, `اسحب`, `جمع بيانات`, `عملاء محتملين`, `seek`, `jobs`, `apply`, `وظائف`
-**The Floo Network** — conversation to conversion: `funnel`, `qualify`, `segment`, `nurture`, `follow up`, `stalled`, `chatbot`, `قمع`, `تأهيل`, `متابعة`
+**The Owlery** — lead acquisition and outreach: `scrap`, `contact gap`, `leads`, `prospect`, `enrich`, `outreach`, `pipeline health`, `scrap facebook`, `scrap whatsapp`, `scrap for hogwarts`, `scrap for mkan`, `scrap tiktok`, `scrap facebook for mkan`, `tiktok homes`, `اسحب`, `جمع بيانات`, `عملاء محتملين`, `apply`, `وظائف`
+**The Floo Network** — conversation to conversion: `qualify`, `segment`, `nurture`, `follow up`, `stalled`, `chatbot`, `قمع`, `تأهيل`, `متابعة`
 <!-- END vocabulary (generated) -->
 
 **Quality dimensions** route through `.claude/agents/quality.md`; `/handover` orchestrates all of them on a URL or block.

@@ -1,3 +1,16 @@
+---
+paths:
+  - "**/*.tsx"
+  - "**/actions.ts"
+  - "**/validation.ts"
+  - "**/columns.tsx"
+  - "**/playwright.config.*"
+  - "**/e2e/**"
+  - "**/manifest*"
+  - "**/sw.*"
+  - "**/loading.tsx"
+---
+
 # Pattern Registry Lookup
 
 Keywords with a canonical card at `.claude/patterns/cards/<keyword>.md`: `form` · `table` ·

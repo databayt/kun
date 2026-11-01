@@ -462,6 +462,7 @@ await pipeline(
   // a number produced on the wrong model is worse than none because it is trusted.
   (ids, _orig, i) =>
     agent(dispatchPrompt(ids, i), {
+      // lint:inherit — dispatch must run on the session model: the bench measures what IT would pick
       label: `dispatch:${i + 1}`,
       phase: "Dispatch",
       schema: DISPATCH_BATCH,
@@ -505,6 +506,7 @@ await pipeline(
     return agent(adjudicatePrompt(misses), {
       label: `adjudicate:${i + 1}`,
       phase: "Adjudicate",
+      model: "opus",
       effort: "high",
       schema: ADJUDICATE_BATCH,
     }).then((v) => {

@@ -158,6 +158,17 @@ Cowork's session runs in Anthropic's cloud; it reaches the Mac through the deskt
 
 The bridge only works while the desktop app is open. When it isn't, previously staged files remain readable but nothing new can be fetched or written back.
 
+### Reaching Abdout asynchronously
+
+- **Built-in push** (`agentPushNotifEnabled` + `inputNeededNotifEnabled`) already reaches his
+  iPhone when a long task ends or a question waits — only while Remote Control is connected,
+  never while `~/.claude/.present` says he is at the Mac. Don't stack extra pushes on it.
+- **`PushNotification`** → only when something needs him _now_ (a blocker, a decision, a deadline).
+- **`SendUserFile`** → send the screenshot, PDF, video or report itself; don't describe a file he can't open.
+- **Artifact** (private claude.ai page) → a report or dashboard he'll read on the phone or share; publish, then give the link.
+- **GitHub issue** labelled `from-captain` or `priority/blocking`, assigned `@abdout` → the durable, mobile-readable record.
+- **bridge.md** → Cowork ↔ Code handoffs that don't need him. **Slack DM** (slack MCP) → team-visible async, rarely needed.
+
 ### Phone → Mac — pick the lane
 
 | He wants                                    | Lane                                                                                                            | Needs                                  |

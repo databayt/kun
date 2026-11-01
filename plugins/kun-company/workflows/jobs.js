@@ -124,7 +124,7 @@ Tools: curl -sL, \`scrapling extract get|fetch <url> out.md\`, ToolSearch for We
 
 Write ${KUN}/jobs/inbox/${TODAY}-${lane}.json — ${INBOX_SHAPE}
 Return the file path, the item count, the top 3 as one line each, and every source you could not reach in dropped[].`,
-        { label: `scan:${lane}`, phase: "Scan", schema: SCAN_SCHEMA },
+        { label: `scan:${lane}`, model: "sonnet", effort: "low", phase: "Scan", schema: SCAN_SCHEMA },
       ),
   ),
 );
@@ -139,7 +139,7 @@ const ingest = await agent(
   } The CRM API is localhost:3100 (Docker on the Mac); a 401 means the Keychain key needs re-signing — report it, do not mint a new key.
 Return how many rows were created, pushed and dropped, with the dropped lines.`,
   {
-    label: "ingest",
+    label: "ingest", model: "sonnet", effort: "low",
     phase: "Ingest",
     schema: {
       type: "object",
@@ -158,7 +158,7 @@ phase("Tailor");
 const queueOut = await agent(
   `In ${KUN} run \`node scripts/seek/queue.mjs --limit ${TOP} --json\` and return the parsed array unchanged.`,
   {
-    label: "queue",
+    label: "queue", model: "sonnet", effort: "low",
     phase: "Tailor",
     schema: {
       type: "object",
@@ -183,7 +183,7 @@ Opportunity on the board: ${JSON.stringify(row)}
 4. Do not change the board status — Abdout marks it applied after he sends.
 Return the artifact and the one human step.`,
         {
-          label: `tailor:${(row.name || "").slice(0, 30)}`,
+          label: `tailor:${(row.name || "").slice(0, 30)}`, model: "sonnet", effort: "medium",
           phase: "Tailor",
           schema: TAILOR_SCHEMA,
         },
