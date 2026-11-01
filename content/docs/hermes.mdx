@@ -3,7 +3,7 @@ title: "Hermes"
 description: "The optional gateway lane — NousResearch's hermes-agent bridges Slack (and other chat apps) to the machine. Install, gateway setup, and the full Slack wiring."
 ---
 
-**Hermes** ([hermes-agent](https://github.com/nousresearch/hermes-agent) · [site](https://hermes-agent.nousresearch.com) · MIT) is the engine's optional **assistant gateway** — the `h` lane. It is NOT a coding CLI: it bridges chat apps (Slack, WhatsApp, Telegram, Discord, Signal, Email, …) to an agent running on your machine, so you can reach the engine from wherever the conversation already is. **Slack is databayt's wired channel; WhatsApp (Abdout's personal number) is wired for the jobs lane since 2026-10-05.**
+**Hermes** ([hermes-agent](https://github.com/nousresearch/hermes-agent) · [site](https://hermes-agent.nousresearch.com) · MIT) is the engine's optional **assistant gateway** — the `h` lane. It is NOT a coding CLI: it bridges chat apps (Slack, WhatsApp, Telegram, Discord, Signal, Email, …) to an agent running on your machine, so you can reach the engine from wherever the conversation already is. **Slack is databayt's wired channel; WhatsApp (Abdout's personal number) is wired for the jobs lane since 2026-10-05.** Since 2026-11-01 Hermes is the **ears** and Claude Code the **hands**: real work asked for in Slack is handed to Claude Code (Opus 5.5) on the Mac through the [bridge](#claude-code-bridge).
 
 Hermes replaced OpenClaw as the gateway lane. If a machine previously ran OpenClaw, Hermes imports its persona, memories, skills, and platform configs in one command:
 
@@ -105,7 +105,7 @@ launchctl kickstart -k gui/$(id -u)/ai.hermes.gateway   # restart; gateway_state
 
 ## Jobs lane commands (no model)
 
-Hermes' model login is dead and the engine is subscription-only, so the gateway works the jobs lane through **quick commands**: `type: exec` entries that run a fixed shell command and reply with its output. There's no LLM and no arguments, and each must finish in 30s. Type them in your WhatsApp self-chat ("Message yourself") or a Slack DM to the bot:
+The gateway works the jobs lane through **quick commands**: `type: exec` entries that run a fixed shell command and reply with its output, with no model in the loop. There's no LLM and no arguments, and each must finish in 30s. Type them in your WhatsApp self-chat ("Message yourself") or a Slack DM to the bot:
 
 | Command | Does |
 |---|---|
@@ -123,10 +123,39 @@ The gateway also runs the engine's local cron jobs. Each one is a script in `~/.
 | Job | When | Does | Installed by |
 |---|---|---|---|
 | `mkan-tiktok-sweep` | 06:00 | Kigali TikTok rentals → Twenty homes and TikTok posts → /find leads. The sweep posts its own counts to `#mkan`; Hermes adds a line only when a run fails | `bash scripts/crm/install-tiktok-sweep.sh` (mkan) |
+| `mkan-tiktok-post` | 07:00 | Renders the day's TikTok pieces and posts them to @mkan.rw through the session-vault Chrome, which it wakes first | `bash scripts/crm/install-tiktok-post.sh` (mkan) |
+| `mkan-tiktok-upload-retry` | 13:00 | Posts whatever 07:00 rendered but could not upload; the day's `uploads.json` keeps it from posting twice | same installer |
 | `hogwarts-crm-digest` · `hogwarts-crm-activity` · `hogwarts-snapshot-freshness` | 08:00 · every 2 h · every 3 h | hogwarts CRM digests to a DM | by hand |
 | `databayt-daily-social-digest` · `databayt-weekly-social-plan` | weekdays 08:30 · Sun 18:00 | social digest and plan to `#social` | by hand |
 
-The sweep reads for about an hour, longer than Hermes' default 1 h script limit, so its installer sets `cron.script_timeout_seconds: 7200` in `~/.hermes/config.yaml`. Its chat command **`/tiktok`** starts the sweep at once (detached, since `hermes cron run` runs the whole job in its own process and quick commands die at 30 s) and replies with the ledger status. `hermes cron list` shows every job's last result. A job that needs a model fails today, because the Nous login is dead; that is why `databayt-4h-heartbeat` errors.
+The sweep reads for about an hour, longer than Hermes' default 1 h script limit, so its installer sets `cron.script_timeout_seconds: 7200` in `~/.hermes/config.yaml`. Its chat command **`/tiktok`** starts the sweep at once (detached, since `hermes cron run` runs the whole job in its own process and quick commands die at 30 s) and replies with the ledger status. `hermes cron list` shows every job's last result. A job that runs the model (`databayt-4h-heartbeat`) must be **pinned** to it: when the default model changes, Hermes skips every unpinned agent job with "config drifted" rather than spend on a model nobody chose. Pin with `cron.jobs.update_job(id, {"model": …, "provider": "nous"})` from the Hermes venv; the CLI has no flag for it.
+
+## Model — free, never the Claude login
+
+Hermes runs a **free Nous Portal model**: `reflection/beam-1.0-501b-a23b:free` since 2026-11-01 (it answers, uses tools and writes Arabic). `stepfun/step-3.7-flash:free` started refusing every request with HTTP 451 that day. `ornith/ornith-1.5-122b:free` and `upstage/solar-mini4:free` are the tested backups. Today's free list comes from `fetch_nous_recommended_models()["freeRecommendedModels"]` in `hermes_cli/models.py`.
+
+The Nous login expires now and then (`No access token found for Nous Portal login`): run `hermes model`, pick **Nous Portal**, sign in in the browser.
+
+**Never pick the Anthropic provider in Hermes.** Its "API key" option is pay-per-token, which the engine's billing rule forbids. Its "Claude Code" option would run Hermes on the Max subscription login, which Anthropic bans in third-party tools (Feb 2026) and which would put the account at risk. Claude stays where it is allowed: in Claude Code, reached through the bridge below.
+
+## Claude Code bridge
+
+Hermes hands real work to **Claude Code (Opus 5.5)** on the Mac: building, fixing, deploying, kun spells (`social`, `report`, `scrape`, `jobs`…), deep questions about a repo, screenshots to read. `claude -p` is Claude Code itself on the Max plan, so nothing borrows the login.
+
+| Piece | Where |
+|---|---|
+| The bridge | `kun/scripts/hermes/claude.sh <kun\|mkan>`, task on stdin |
+| When to hand off | the Hermes skill `kun` (`kun/scripts/hermes/skills/kun/SKILL.md`) |
+| Install the skills | `bash scripts/hermes/install.sh` (kun), then `/new` in the Slack DM |
+| Log | `~/.hermes/logs/claude-bridge.log` |
+
+In Slack, just ask ("ask Claude Code in mkan: …", or any build/fix/deploy request). Hermes runs the bridge and stays silent; the bridge posts "on it" and then Claude Code's answer **in the same thread**, as the kun bot, so the free model never reads it. A follow-up in that thread resumes the same Claude session.
+
+Guards: only Abdout's Slack user (`U0AQ0GLDY04`); one run at a time; 15 runs a day (`KUN_BRIDGE_DAILY`); 30 min wall clock. It runs `--permission-mode auto` (Claude Code's classifier approves normal work and blocks risky actions) with permission prompts refused, never `--dangerously-skip-permissions`. Every run draws on the same Max usage as the terminal sessions, which is what the daily cap protects. A trivial run costs about $0.49 of plan usage, mostly from loading kun's context.
+
+## mkan
+
+The `mkan` skill (canonical in the mkan repo, `scripts/crm/hermes/mkan/SKILL.md`, installed by `bash scripts/crm/hermes/install-mkan-skill.sh`) teaches Hermes the /find chat, the WhatsApp line, brokers, the CRM and the TikTok page. It answers with one read-only command, `pnpm -s mkan:read <topic>` (`chats`, `wa`, `crm homes|brokers|consent|tiktok`, `tiktok`). Phones in its output are masked to their last three digits, because it reaches a third-party model. Its one write is `tt:consent`, recording brokers who agreed to TikTok reposts, and only for Abdout. `#mkan` itself stays the intake desk (`home` skill).
 
 ## Daily use
 
@@ -138,6 +167,7 @@ The sweep reads for about an hour, longer than Hermes' default 1 h script limit,
 | Diagnose | `hermes doctor` |
 | Change model/provider | `hermes model` |
 | Refresh Slack slash commands | `hermes slack manifest --write`, then reinstall the app |
+| Tool steps in Slack threads | off (`display.platforms.slack.tool_progress: off`); the terminal still shows them |
 
 ## Kun site integration (social egress)
 

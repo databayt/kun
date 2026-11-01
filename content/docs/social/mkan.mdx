@@ -51,7 +51,7 @@ support. This is the brand where the consumer-visual channels finally lead.
 | Channel | Handle | Status |
 |---------|--------|--------|
 | Instagram | `@mkan.sd` (`17841444144779316`) | Account exists and is **linked to the Page** — the furthest brand; publishing waits on [gate 5](/docs/social/channels/instagram#standard-access-hypothesis) |
-| TikTok | [`@mkan.rw`](https://www.tiktok.com/@mkan.rw) — Kigali monthly rentals | **Live 10-20** (was `@abdout982`) — personal account; posted from the iPhone — see [Kigali TikTok page](#kigali-tiktok-page) |
+| TikTok | [`@mkan.rw`](https://www.tiktok.com/@mkan.rw) — Kigali monthly rentals | **Live 10-20** (was `@abdout982`) — personal account; **posted automatically since 10-21** through TikTok Studio in the session-vault Chrome — see [Kigali TikTok page](#kigali-tiktok-page) |
 | Snapchat | Mkan | To claim / confirm — allowlist-gated API |
 | Facebook | Mkan مكان (`1133424016531929`) | **Live** — publishing + metrics through the pipeline |
 
@@ -70,12 +70,16 @@ play on its own page — beside, not inside, the Airbnb-style site.
 | **Bio** | `Houses in Kigali / +250780984777` — no "verified" claim until homes are checked; a bio link unlocks at 1,000 followers (`https://www.mkan.sd/en/find`) |
 | **WhatsApp** | +250 780 984 777 (`MKAN_KIGALI_WHATSAPP`) — on every end card and caption |
 | **Inventory** | Monthly rentals only: owners' and field-agent homes, Airbnb hosts who took a monthly price, and broker leads once that broker said YES (Twenty host `repostConsent`) |
-| **Cadence** | 3 videos a day (`TIKTOK_POSTS_PER_DAY`) |
+| **Cadence** | Up to 3 broker homes a day (`TIKTOK_POSTS_PER_DAY`) once brokers have said YES, plus one picture video every day |
 
-**The daily queue** lives in mkan (`scripts/crm/tiktok-post.ts`, launchd
-`com.databayt.mkan-tiktok-post` at 07:00, after the 06:00 broker sweep):
+**The daily queue** lives in mkan (`scripts/crm/tiktok-post.ts`), run by the Hermes cron
+`mkan-tiktok-post` at 07:00, after the 06:00 broker sweep. It wakes the session-vault Chrome first
+(its launchd job respects a Cmd-Q, so a quit or a reboot leaves it down), and
+`mkan-tiktok-upload-retry` at 13:00 posts whatever the morning could not:
 
-1. `tt:pick` — today's homes, spread across districts; a posted home rests 30 days.
+1. `tt:pick` — first records brokers' answers to the repost ask that came in on the WhatsApp line
+   (see [Broker consent](#broker-consent)), then picks today's homes, spread across districts; a
+   posted home rests 30 days.
 2. `tt:render` — one branded 9:16 video per home, in three passes:
    - **Source** — for a broker lead, that broker's own TikTok video (yt-dlp, cached in
      `.data/tiktok-post/src/`); a photo post or a deleted video falls back to a slideshow of the
@@ -88,27 +92,44 @@ play on its own page — beside, not inside, the Airbnb-style site.
      (price, place, rooms, ref) that slides up and hands over to a price pill at 7 s, and a slate
      WhatsApp end card. Everything sits inside TikTok's safe area.
    - Delivered through `media.sh encode reel` (BT.709, faststart, 60 s cap); `--slideshow` forces
-     the photo path. No music — the poster adds a trending sound in the app.
+     the photo path. mkan's own AI music bed goes under every render, so the AI-generated label
+     is switched on for every post.
 3. `tt:carousel` — one **data carousel** a day (photo mode, 7 slides): a cover, five homes —
    price, place, rooms, the ref, the WhatsApp line — and a call-to-action slide, in the brand
    kit. Built from CRM facts only, no broker photo or footage, so every Kigali monthly home
    qualifies; the caption says we connect the tenant with the agent or owner. Themes rotate by
    day (district → budget → bedrooms); a shown home rests 14 days. Slides land on the CDN
    (`mkan/uploads/tiktok-post/<date>/carousel-…`) with the caption in #mkan.
-   **Voiced cut** — `tt:datavideo` turns the same carousel into a ~55 s video: each slide holds
-   for its narrated line (a Google stock voice through `media.sh voice`, one request a day,
-   Whisper-gated), with a push-in and crossfades. The caption says "AI voice"; keep TikTok's
-   AI-generated label on when posting.
+   **Picture video** — `tt:datavideo` turns the same carousel into a short video: the homes'
+   photos (or hand-picked Commons area photos) on the beat of mkan's own AI music bed, no voice.
+   It is the post that goes out every day; the AI-generated label is switched on.
 4. `tt:card` — each video + its caption (English, one Kinyarwanda line, hashtags) lands in
    Slack #mkan (CDN link when the bot can't upload files).
-5. **A person posts it** from the phone: save → TikTok → sound → paste caption → post, then
-   `pnpm tt:posted <ref> <url>`.
-6. `tt:stats` reads views back with yt-dlp; `tt:ask` lists the brokers, the consent message
-   (EN + Kinyarwanda) and records ASKED / YES / NO.
+5. `tt:upload` posts every piece through TikTok Studio's web upload in the session-vault Chrome
+   (127.0.0.1:9222, logged in as @mkan.rw): caption pasted, AI label on, 1.5–3.5 min between
+   posts, `uploads.json` per day so nothing posts twice. A logged-out vault says so in #mkan.
+6. `tt:stats` reads views back with yt-dlp; `tt:ask` lists the brokers and the consent message
+   (EN + Kinyarwanda + FR) and posts the asks to #mkan as wa.me links for the phone to send.
 
 Inquiries arrive on WhatsApp quoting the ref; the operator finds the home on `/find` or in the
-CRM. Posting by API waits on TikTok's Content Posting API audit (posts stay private until it
-passes) — the phone step goes away then.
+CRM. TikTok's Content Posting API (kun#168) replaces the Studio upload once its audit passes.
+
+### Broker consent
+
+The CRM holds every broker video the sweep found (`tiktokPost`, 931 on 11-01) — links, not files.
+**A broker's video goes on the page only after that broker said YES** (Twenty host
+`repostConsent`): reposting someone's video without permission is a copyright claim, and
+takedowns would kill the page. On 11-01 no broker was recorded as asked, YES or NO.
+
+- **Record a YES** — `pnpm tt:consent --yes=<handle,…> --source="<how they said it>" --apply`
+  sets the host's `repostConsent`, adds a note saying where the answer came from, and keeps the
+  broker's videos on the Mac and the CDN, so a post never depends on TikTok still having them.
+  From Slack: tell Hermes "these brokers said yes: a, b, c" (Abdout only).
+- **Answers on the WhatsApp line record themselves** — the repost ask goes from the phone, so the
+  line's inbox notes it when it sees it; while it is the latest question, a broker's reply answers
+  it (YES / YEGO / OUI, NO / OYA / NON; anything hedged goes to a person) instead of an open "is this
+  available?". Each answer gets a #mkan card, and the next 07:00 run records it on the CRM host.
+- `pnpm -s mkan:read crm consent` shows who said what.
 
 ## Production Playbooks & Scenarios
 

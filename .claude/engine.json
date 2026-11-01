@@ -150,7 +150,7 @@
    "claude-chat": "pure Q&A, drafting, brainstorming — cheapest surface, zero engine preamble; use before opening a Code session for think-work",
    "claude-web-code": "long-running cloud babysitting (autofix-pr, scheduled routines) — same pool, so keep routines lean and infrequent",
    "antigravity": "OFF-POOL cheap lane (`a` = Gemini) — easy one-file mechanical tasks; zero Anthropic tokens",
-   "hermes": "OFF-POOL chat relay (`h` = Nous) — gateway/channel tasks, never build work"
+   "hermes": "OFF-POOL chat relay (`h` = free Nous model) — gateway/channel tasks, never build work itself; it hands build work to Claude Code through scripts/hermes/claude.sh (ON-POOL: Opus 5.5 on the Max plan, Abdout only, one at a time, 15 runs/day)"
   },
   "session_hygiene": "/clear between unrelated tasks (stale context taxes every message); /compact with focus instructions on long tasks; batch touches inside the 1h cache window — a >1h idle gap reprocesses full context; plan mode before big builds; specific prompts over broad scans"
  },
