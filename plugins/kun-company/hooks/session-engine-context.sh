@@ -12,7 +12,7 @@ command -v jq >/dev/null 2>&1 || exit 0
 
 NOW=$(date +%s)
 OVERDUE=""
-for tier in anthropic stack services practice; do
+for tier in $(jq -r '(.sync.tiers // ["anthropic","stack","services","practice"]) | .[]' "$ENGINE"); do
     STAMP=$(jq -r ".sync.\"$tier\" // empty" "$ENGINE")
     CADENCE=$(jq -r ".sync.cadence_days.\"$tier\" // 30" "$ENGINE")
     if [ -z "$STAMP" ]; then

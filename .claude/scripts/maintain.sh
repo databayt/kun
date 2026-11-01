@@ -321,6 +321,16 @@ step_aware() {
     fi
 }
 
+step_improve() {
+    # kun's LEARN layer, detection half: zero tokens. Applies only machine-local SAFE fixes
+    # (env file permissions, missing labels, the approved prune); improve.mjs itself only
+    # rewrites the shared Engine decisions issue from the owner Mac.
+    local improve="$KUN_DIR/.claude/scripts/improve.mjs"
+    command -v node >/dev/null 2>&1 && [ -f "$improve" ] || { log "improve: skipped (no node or improve.mjs)"; return; }
+    KUN_DIR="$KUN_DIR" node "$improve" --apply-safe --issue >>"$LOG_DIR/maintain-$(date '+%Y-%m-%d').log" 2>&1 \
+        && log "improve: findings refreshed" || log "improve: run failed (non-fatal)"
+}
+
 step_runs() {
     # Every scheduled job (engine.json → jobs): red = crashed or recorded a fail,
     # stale = no log within 2x its cadence. Either floors the verdict to YELLOW and
@@ -450,6 +460,7 @@ do_run() {
     step_health
     step_disk
     step_aware
+    step_improve
     step_runs
     step_report
     write_state

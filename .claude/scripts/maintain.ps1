@@ -221,6 +221,16 @@ function Step-Aware {
     } else { Log "aware: node or aware.mjs missing — skipped" }
 }
 
+function Step-Improve {
+    # Mirror of maintain.sh step_improve: zero-token detection + machine-local SAFE fixes.
+    # The shared Engine decisions issue is written only from the owner Mac.
+    $improve = Join-Path $KUN_DIR ".claude\scripts\improve.mjs"
+    if ((Get-Command node -EA SilentlyContinue) -and (Test-Path $improve)) {
+        & node $improve --apply-safe *> $null
+        Log "improve: findings refreshed"
+    } else { Log "improve: skipped (no node or improve.mjs)" }
+}
+
 function Step-Runs {
     # Mirror of maintain.sh step_runs. The job registry (engine.json -> jobs) is
     # launchd-only today, so Windows has no scheduled jobs to check.
@@ -323,6 +333,7 @@ function Do-Run {
         Step-Health
         Step-Disk
         Step-Aware
+        Step-Improve
         Step-Runs
         Step-Report
         Write-State

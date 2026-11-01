@@ -20,12 +20,15 @@
   "stack": "2026-09-26",
   "services": "2026-09-26",
   "practice": "2026-09-26",
+  "self": null,
+  "tiers": ["anthropic", "stack", "services", "practice", "self"],
   "claude_code_version": "2.1.283",
   "cadence_days": {
    "anthropic": 7,
    "stack": 14,
    "services": 14,
-   "practice": 30
+   "practice": 30,
+   "self": 7
   },
   "sources": {
    "anthropic": [
@@ -183,6 +186,16 @@
    "cf_build_keep_days": 3,
    "$cf_build_comment": "Approved by Abdout 2026-11-01: ~/.cache/cf-build/<repo> folders with no file newer than this many days are removed (each deploy wipes and rebuilds its own folder anyway). Folders only — files and anything named *env* (production dotenvs) are never touched."
   }
+ },
+ "improve": {
+  "$comment": "Declared POLICY for the LEARN layer (.claude/scripts/improve.mjs → /sync tier `self`, 2026-11-01). Detection is zero tokens and runs daily in the heartbeat; findings live in ~/.claude/state/findings.json. SAFE local fixes apply automatically; SAFE repo fixes are applied and committed by /sync self; DECIDE rows wait in ONE rolling issue (label engine-decision) for Abdout's `yes <id>`. Only the owner Mac (the one running aware's launchd refresher) writes that issue.",
+  "prefix_target_tokens": 85000,
+  "avg_context_target": 250000,
+  "hook_p95_ms": 150,
+  "required_labels": ["engine-decision", "config-health", "priority/p0", "priority/p1", "priority/p2", "priority/p3"],
+  "issue_repo": "databayt/kun",
+  "issue_label": "engine-decision",
+  "approver": "abdout"
  },
  "resolver": {
   "$comment": "Declared POLICY for .claude/scripts/resolve.mjs (the UserPromptSubmit router, 2026-11-01). global_blocks: hogwarts blocks distinctive enough to hint from ANY session (curated by Abdout's choice: curated list, one-line hint) — generic ones (docs, table, finance, grades, listings, dashboard, settings) stay local. never_bare: repo names too common in prose to route without an explicit form.",
