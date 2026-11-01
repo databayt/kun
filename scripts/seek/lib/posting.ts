@@ -104,21 +104,35 @@ function htmlText(html: string): string {
   const mailto = [...html.matchAll(/mailto:([^"'?\s>]+)/gi)].map((m) =>
     decodeURIComponent(m[1]),
   );
+  const text = html
+    .replace(/<wbr\s*\/?>|<\/wbr>/gi, "")
+    .replace(
+      /<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>|<!--[\s\S]*?-->/g,
+      " ",
+    )
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;?/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&#0?39;|&apos;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/\s+/g, " ");
+  const [head] = text.split(/Similar jobs/i);
+  // MyJobMag moved "Similar jobs" ABOVE "Method of Application" (seen
+  // 2026-11-01): cutting at the first one dropped the employer's address and
+  // held 6 cards as "recipient not on the posting". Keep the application
+  // section wherever it sits — and only it, not the other jobs' listings.
+  const how = text.search(/Method of Application|How to Apply/i);
+  const apply =
+    how > head.length
+      ? ` ${text
+          .slice(how)
+          .split(/Similar jobs/i)[0]
+          .slice(0, 2000)}`
+      : "";
   return (
-    html
-      .replace(/<wbr\s*\/?>|<\/wbr>/gi, "")
-      .replace(
-        /<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>|<!--[\s\S]*?-->/g,
-        " ",
-      )
-      .replace(/<[^>]+>/g, " ")
-      .replace(/&nbsp;?/g, " ")
-      .replace(/&amp;/g, "&")
-      .replace(/&#0?39;|&apos;/g, "'")
-      .replace(/&quot;/g, '"')
-      .replace(/\s+/g, " ")
-      .split(/Similar jobs/i)[0]
-      .trim() + (mailto.length ? ` ${[...new Set(mailto)].join(" ")}` : "")
+    head.trim() +
+    apply.trimEnd() +
+    (mailto.length ? ` ${[...new Set(mailto)].join(" ")}` : "")
   );
 }
 
