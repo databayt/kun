@@ -5,6 +5,10 @@
 //   node ~/kun/.claude/scripts/improve.mjs --json       findings as JSON
 //   node ~/kun/.claude/scripts/improve.mjs --apply-safe apply the machine-local SAFE fixes
 //   node ~/kun/.claude/scripts/improve.mjs --issue      sync the rolling "Engine decisions" issue
+//   node ~/kun/.claude/scripts/improve.mjs --add DECIDE "<title>" "<fix>" --source sync:anthropic
+//                                                     a finding from outside the detectors (a /sync
+//                                                     tier, a review) — it joins the same queue
+//   node ~/kun/.claude/scripts/improve.mjs --close <id> [--reason "<why>"]   drop one (e.g. rejected)
 //
 // Zero tokens. Deterministic detectors read kun's own evidence — the run ledger, the
 // awareness snapshot and its history, the router log, transcripts (via preamble.mjs),
@@ -273,6 +277,12 @@ function detect(only) {
   // gone since last time: applied → verified, anything else → resolved
   for (const p of prev.findings || []) {
     if (seen.has(p.id) || ["resolved", "verified"].includes(p.status)) continue;
+    // added findings (a /sync tier, a review) have no detector to re-fire them: they stay
+    // until closed (--close) or applied, never silently "resolved"
+    if (!detectors[p.detector] && !p.closed) {
+      merged.push(p);
+      continue;
+    }
     if (only && !only.includes(p.detector)) {
       merged.push(p);
       continue;
@@ -380,6 +390,36 @@ function markdown(state) {
 // ── main ───────────────────────────────────────────────────────────────────
 const args = process.argv.slice(2);
 const only = args.includes("--only") ? args[args.indexOf("--only") + 1].split(",") : null;
+if (args[0] === "--add" || args[0] === "--close") {
+  const st = readJSON(FINDINGS, { schema: 1, findings: [] });
+  const opt = (f) => (args.includes(f) ? args[args.indexOf(f) + 1] : undefined);
+  if (args[0] === "--add") {
+    const [, cls, title, how] = args;
+    if (!["SAFE", "DECIDE", "TRACK"].includes(cls) || !title) {
+      console.error('usage: improve.mjs --add SAFE|DECIDE|TRACK "<title>" "<fix>" [--source <who>] [--evidence "<line>"]');
+      process.exit(2);
+    }
+    const source = opt("--source") || "manual";
+    const f = { detector: source, subject: title, class: cls, title, evidence: opt("--evidence") ? [opt("--evidence")] : [], fix: { kind: "repo", how: how && !how.startsWith("--") ? how : "" } };
+    f.id = id(f.detector, f.subject);
+    if (!st.findings.find((x) => x.id === f.id)) st.findings.push({ ...f, first_seen: new Date().toISOString(), last_seen: new Date().toISOString(), status: "open" });
+    console.log(`added ${f.id} — ${title}`);
+  } else {
+    const fid = args[1];
+    const f = st.findings.find((x) => x.id === fid);
+    if (!f) {
+      console.error(`no finding ${fid}`);
+      process.exit(1);
+    }
+    f.status = "resolved";
+    f.closed = new Date().toISOString();
+    f.reason = opt("--reason") || "closed by hand";
+    console.log(`closed ${fid} — ${f.title}`);
+  }
+  st.ts = new Date().toISOString();
+  writeAtomic(FINDINGS, JSON.stringify(st, null, 1));
+  process.exit(0);
+}
 const state = detect(only);
 if (args.includes("--apply-safe")) for (const l of applySafe(state)) console.log(l);
 if (args.includes("--issue")) console.log(syncIssue(state));

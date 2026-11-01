@@ -47,7 +47,7 @@ Sources of the form `gh:owner/repo` mean `gh api repos/owner/repo/releases --jq 
 | Class            | Meaning                                                                                          | Action                                                                                                     |
 | ---------------- | ------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
 | **ADOPT-SAFE**   | Pure config/docs addition — no behavior risk, no spend, no team-workflow change                  | Apply now                                                                                                  |
-| **ADOPT-DECIDE** | Changes behavior, cost, dependencies, or how the team works — including any product version bump | `/decide` entry + GitHub issue labelled `engine-decision`; `PushNotification` Abdout if Type-1 |
+| **ADOPT-DECIDE** | Changes behavior, cost, dependencies, or how the team works — including any product version bump | `node .claude/scripts/improve.mjs --add DECIDE "<title>" "<proposed change>" --source sync:<tier>` — it joins the one Engine decisions queue (approved with `yes <id>`); `/decide` entry for Type-1, plus `PushNotification` |
 | **TRACK**        | Real but not useful to kun yet                                                                   | Deferred list in `docs/CONFIG-BENCHMARK.md`                                                                |
 
 Standing constraints veto adoption regardless of class:

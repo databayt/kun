@@ -77,7 +77,7 @@ ${upstream}
 
 DO, IN ORDER:
 1. /sync self: apply SAFE findings whose fix kind is \`repo\` (verify with \`bash .claude/scripts/health.sh\` and \`node .claude/scripts/lint-contracts.mjs\`), then implement each \`approved\` finding, verify, commit, and set its status to \`applied@<sha>\` in ~/.claude/state/findings.json. Stamp engine.json → sync.self = ${today}.
-2. Only if UPSTREAM says NEW: /sync anthropic. Otherwise no outward sync this week.
+2. Only if UPSTREAM says NEW: /sync anthropic. Otherwise no outward sync this week. Record each ADOPT-DECIDE with \`node .claude/scripts/improve.mjs --add DECIDE "<title>" "<proposed change>" --source sync:anthropic\` so it joins the one queue Abdout approves from.
 3. Plan the week with the /weekly skill in \`plan\` mode, replacing its steps 0 and 0.5 with the context above. The Drive orders everything: revenue > deadlines > infra > engine.
 4. Write the plan to ${out} (≤ 60 lines of Markdown): the week's top 5 by the Drive, the allocation per person, risks, and the rows waiting for Abdout on the Engine decisions issue.
 
