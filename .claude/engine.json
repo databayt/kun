@@ -16,13 +16,13 @@
  },
  "sync": {
   "$comment": "Self-update stamps per tier — /sync refreshes them; the captain flags overdue tiers at session start. null = never synced (due immediately). Sources of the form gh:owner/repo are read via `gh api .../releases`. Material adoptions land in docs/CONFIG-BENCHMARK.md → Adoption log.",
-  "anthropic": "2026-09-26",
+  "anthropic": "2026-11-01",
   "stack": "2026-09-26",
   "services": "2026-09-26",
   "practice": "2026-09-26",
   "self": "2026-11-01",
   "tiers": ["anthropic", "stack", "services", "practice", "self"],
-  "claude_code_version": "2.1.283",
+  "claude_code_version": "2.1.316",
   "cadence_days": {
    "anthropic": 7,
    "stack": 14,

@@ -274,8 +274,32 @@ step", no word caps, no version pins) — the engine's debt is **outgrown facts*
 stale counts). The 15 high-confidence hunks are applied; the rest is the backlog in
 `.claude/handoff/2026-09-26-prompt-audit.md`.
 
+## Re-benchmark 2026-11-01 — the November surface (CHANGELOG 2.1.284 → 2.1.316, anthropic tier only)
+
+Run headless by the Monday routine: anthropic tier only (upstream showed a release), plus `self`.
+Stack, services and practice stay overdue (36d) — never a catch-up unattended. Read: the CHANGELOG
+range filtered for config surfaces, plus the platform API release notes since 2026-09-26. The
+routine can't edit fleet surfaces without an approved row, so every material item is DECIDE or TRACK.
+
+| Finding (version) | Class | kun decision |
+| --- | --- | --- |
+| **Sonnet 5.5** `claude-sonnet-5-5` default Sonnet (2.1.284, 1M, $2/$10); **Haiku 5.5** `claude-haiku-5-5` default Haiku (2.1.294, 1M) | DECIDE | Aliases resolve forward, so agents move with no change. Proposed: `fallback_models` `sonnet-5 → sonnet-5-5`; drop the "Haiku 4.5 has no effort levels" note in `delegation.efforts`; consider re-running the haiku-transcribe bench. Since these are new models, the §3.5 harness audit (`/doctor prompt-audit`) is owed in an interactive session |
+| `CLAUDE_CODE_SUBAGENT_EFFORT` (2.1.316) + Agent-tool `effort` param (2.1.292) + `autoCompactWindow` subagent frontmatter (2.1.296) | TRACK | Per-agent `effort:` frontmatter already covers this; it's only a default for agents that set none |
+| `idleCompaction` / `CLAUDE_CODE_IDLE_COMPACT_MIN_TOKENS` (2.1.299) | DECIDE | Bears on finding `9d88a6f8` (366K average context). A lower minimum is a cost/behavior change |
+| Hook `onFailure: "block"` (2.1.295) | DECIDE | Fail-closed for the destructive-bash guard hook. Changes behavior if the hook breaks |
+| `permissions.blockWritesOutsideWorkingDirectories` (2.1.314) | TRACK | Would break cross-repo edits (`~/.claude`, sibling repos) that kun relies on |
+| `CLAUDE_CODE_RETRY_WATCHDOG_*` usage-limit recheck/max-wait (2.1.301, 2.1.305) | TRACK | Useful for headless routines that hit the Max 5-hour window |
+| Max-plan warning on expensive resumes (2.1.305); `/usage` warnings for always-on context (2.1.299) | TRACK | Native visibility for KPI 8 / finding `acea1a1a` |
+| `sed -i` now runs as written and is not restored by `/rewind` (2.1.309) | TRACK | Doesn't affect the fleet; prefer Edit when rewind matters |
+| Opus 4.8 fast mode deprecated, removed 2026-11-30 | TRACK | No exposure — the session is Opus 5.5 |
+| API version `2026-10-21` + TypeScript SDK 1.0.0 (breaking, now Apache-2.0) | DECIDE | kun/hogwarts pin `^0.68.0`, mkan `^0.137.0`. Caret ranges keep them on 0.x, so there's no forced move. Any bump goes through `/package` |
+| Usage and Cost Analytics API (beta); Claude Tag API (Enterprise) | TRACK | Console/Enterprise only — kun is subscription-only |
+
 ## Adoption log
 
+- **2026-11-01** — first `/sync self` (Monday routine): `engine.json → counts.user_skills` 84 → 85
+  (finding `4ddffe56`, applied in 80b5439). Anthropic tier swept 2.1.284 → 2.1.316 (table above): nothing
+  adopted, 4 DECIDE rows waiting for Abdout. `sync.self` + `sync.anthropic` stamped, `claude_code_version` 2.1.316.
 - **2026-09-26** — `/sync` all four tiers after 50–78 days, plus the first `/doctor prompt-audit`
   harness audit. Model → Opus 5.5 (Abdout's `/model`), fallbacks `opus-5 → sonnet-5`, Fable
   escalation-only; `engine.json → model` un-hijacked from the social lane (and its test decoupled);
