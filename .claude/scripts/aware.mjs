@@ -566,6 +566,10 @@ function notify(msgs) {
   kunNotify("me", "kun", text); // kun's one sink: banner when present, else this machine's .kun-notify target
 }
 
+// launchd keeps the node path it was given. process.execPath is the versioned Cellar path
+// (…/Cellar/node/25.1.0_2/…), which disappears on the next `brew upgrade node`; the
+// Homebrew symlink survives upgrades.
+const stableNode = ["/opt/homebrew/bin/node", "/usr/local/bin/node"].find((p) => fs.existsSync(p)) || process.execPath;
 // ── render ─────────────────────────────────────────────────────────────────
 const alertLine = (s) =>
   Object.entries(s.alerts?.messages || {})
@@ -716,7 +720,7 @@ function install() {
 <dict>
 	<key>Label</key><string>${LABEL}</string>
 	<key>ProgramArguments</key>
-	<array><string>${process.execPath}</string><string>${path.join(KUN, ".claude/scripts/aware.mjs")}</string><string>--refresh</string></array>
+	<array><string>${stableNode}</string><string>${path.join(KUN, ".claude/scripts/aware.mjs")}</string><string>--refresh</string></array>
 	<key>StartInterval</key><integer>${cfg.refresh_minutes * 60}</integer>
 	<key>RunAtLoad</key><true/>
 	<key>StandardOutPath</key><string>${path.join(LOG_DIR, "aware-launchd.out")}</string>
