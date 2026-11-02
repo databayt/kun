@@ -57,12 +57,15 @@ and which sessions are active now. Where you read it:
 **Alerts are transitions, not nags**: a condition must hold on two refreshes in a row, is sent
 once, clears when it goes away, and at most 6 go out a day. At the Mac → a banner; away → this
 machine's `~/.claude/.kun-notify` target (Abdout: his Slack DM). Alerted: disk under 10 GB or
-falling 5 GB/day, a job turning red, Hermes or Remote Control down, a failed main CI, commits
-unpushed for 12 h. Shown but never alerted: spend, sync, bench, dirty files.
+falling 5 GB/day, the job supervisor gone silent (it handles the jobs themselves, below), Hermes or
+Remote Control down, a failed main CI, commits unpushed for 12 h. Shown but never alerted: spend,
+sync, bench, dirty files.
 
 | Alert | Owner (the one place it comes from) |
 |---|---|
-| jobs, disk, CI, Hermes/RC down, unpushed | `aware.mjs` (owner Mac: every 30 min) |
+| a job (Mac or cloud) still broken after its re-runs | `supervise.mjs` → one `job-health` issue + one Slack line |
+| the supervisor silent, disk, CI, Hermes/RC down, unpushed | `aware.mjs` (owner Mac: every 30 min) |
+| the Mac off or asleep past a job's deadline | the `mkan-watchdog` Worker (outside the Mac) |
 | report-an-issue queue | the SessionStart reports hook (from aware's cache) |
 | domains, mail | the `domains` GitHub Action → `domains` issues |
 | engine findings | `improve.mjs` → the Engine decisions issue |
@@ -116,16 +119,31 @@ Claude Code release exists, and writes the week's plan to `.claude/memory/weekly
 2.8M-token bench, never a 36-day catch-up. Abdout gets one message. A Sunday run already plans
 Monday–Sunday, so a plan written in the last 3 days makes the next tick skip at zero cost.
 
-> **The Mac's loops sleep when it does.** launchd doesn't run interval jobs while the Mac sleeps;
-> missed runs collapse into one on wake (2026-11-01: deep sleep from ~17:30, a refresh at the
-> 00:15 dark wake, full wake 01:56). Night-time slots — the textbook loop at 01:30 / 04:30 — need
-> the Mac on power with the lid open, or they run at the next wake instead.
+### RESUME — jobs that finish what sleep interrupted
+
+The Mac sleeps with its lid shut, then makes ~50 *dark wakes* a day (2–30 s, no real network);
+launchd and Hermes used to fire jobs into them, and every one failed (2026-11-02: ten runs before
+noon). Four pieces make every scheduled job finish once the Mac is really up — exactly once:
+
+| Piece | What it does |
+|---|---|
+| `~/.claude/bin/job-run.sh <job> -- cmd` | every launchd job's entry: waits for a **full wake** (`pmset -g systemstate` has Graphics) + the network + what the job needs (Twenty, the vault Chrome, Docker…), takes a PID lock a sleeping run keeps, caps the run, and records how it went. A dark wake becomes `defer`, not a failure. `lib/runs.sh` holds the parts; the mkan lanes and Hermes' Python jobs (`hermes-gate.sh`) use the same gate |
+| `~/.claude/state/runs/<job>.json` | each job's own record — status, last ok, the live run, the last 10 runs, per-step results. `runs.sh` judges from it first, so a detached run that Hermes called "ok" the moment it started is judged by how it really ended |
+| `supervise.mjs` (every 5 min, and within 15 s of a real wake) | **heals** what jobs need (Hermes gateway, Colima + Twenty, the vault Chrome, daemons, plists an installer unwrapped); **re-runs** a missed or failed slot through the job's own entry, by policy (`engine.json → jobs.<job>.resume`: auto · tick · alert · heal), never a live run, never twice; **escalates** what stays broken — one `job-health` issue (the record) + one Slack line (the push), closed when it recovers. It also checks the cloud schedules hourly: GitHub Actions crons (a fresh failure re-runs once) and every Cloudflare Worker cron route (Workers Logs) |
+| the `mkan-watchdog` Worker | outside eyes: the supervisor writes a beat every 15 min; when the beat goes quiet *and* a job's deadline passes, the Worker opens the issue — the one case no check on the Mac can report |
+
+Plugged in, the Mac now stays awake with the lid shut, so the jobs run on time; on battery it
+sleeps as before (`devices.sh --keepawake-setup` prints the one-time sudo rule). Rollout:
+healing and alerts are on; re-runs are live for mkan's jobs and logged as *would-fire* for the
+rest until `jobs.$supervise.live` is true.
 
 ### The commands, in one place
 
 ```bash
 node ~/kun/.claude/scripts/aware.mjs              # everything happening, now
-bash ~/.claude/scripts/runs.sh                    # every scheduled job: ok / red / stale
+bash ~/.claude/scripts/runs.sh                    # every scheduled job: ok / red / stale / defer
+node ~/kun/.claude/scripts/supervise.mjs --status # what the supervisor re-ran, healed, escalated
+bash ~/.claude/bin/job-run.sh --wrap-plists --dry # which launchd jobs are not behind the gate
 bash ~/.claude/scripts/runs.sh --spend            # headless spend per job, last 7 days
 node ~/kun/.claude/scripts/resolve.mjs "<words>"  # where would these words route?
 node ~/kun/.claude/scripts/improve.mjs            # what kun would improve, and why
