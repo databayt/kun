@@ -396,16 +396,25 @@ async function queue() {
   return q;
 }
 
-// ── products: latest main CI per repo ──────────────────────────────────────
+// ── products: main CI per repo ─────────────────────────────────────────────
+// The latest run of EACH push-triggered workflow on main. Not "the latest run": scheduled
+// jobs (hogwarts' dead "Keep Vercel Cache Warm" cron, failing twice a day since the Vercel
+// lane closed) outvoted real CI, and a passing CodeQL finishing last masked a failing
+// Playwright run on the same push (2026-11-02).
 async function products() {
   if (!has("gh")) return null;
   const res = await Promise.all(
     cfg.repos.map(async (r) => {
-      const out = await runAsync("gh", ["run", "list", "--repo", `databayt/${r}`, "--branch", "main", "--limit", "1", "--json", "conclusion,status,workflowName,createdAt,url"]);
-      const j = out ? readJSONString(out)?.[0] : null;
-      if (!j) return { repo: r, ci: "none" };
-      const ci = j.status !== "completed" ? "running" : j.conclusion || "unknown";
-      return { repo: r, ci, workflow: j.workflowName, at: j.createdAt, url: j.url };
+      const out = await runAsync("gh", ["run", "list", "--repo", `databayt/${r}`, "--branch", "main", "--event", "push", "--limit", "20", "--json", "workflowName,conclusion,status,createdAt,url"]);
+      const runs = out ? readJSONString(out) : null;
+      if (!runs || !runs.length) return { repo: r, ci: "none" };
+      const latest = {};
+      for (const x of runs) if (!latest[x.workflowName]) latest[x.workflowName] = x; // newest first
+      const all = Object.values(latest);
+      const failed = all.filter((x) => x.status === "completed" && ["failure", "timed_out", "startup_failure"].includes(x.conclusion));
+      const running = all.filter((x) => x.status !== "completed");
+      const ci = failed.length ? "failure" : running.length ? "running" : all.every((x) => ["success", "skipped", "neutral"].includes(x.conclusion)) ? "success" : "unknown";
+      return { repo: r, ci, workflow: failed.map((x) => x.workflowName).join(", ") || undefined, at: all[0].createdAt, url: (failed[0] || all[0]).url };
     }),
   );
   return res;
