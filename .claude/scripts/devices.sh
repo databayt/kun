@@ -66,7 +66,8 @@ main() {
         --presence)   run_presence ;;
         --server)     run_server ;;
         --serve-once) serve_once ;;
-        *) echo "Unknown flag: $mode (use --status|--brief|--install|--uninstall)" >&2; return 1 ;;
+        --keepawake-setup) keepawake_setup ;;
+        *) echo "Unknown flag: $mode (use --status|--brief|--install|--uninstall|--keepawake-setup)" >&2; return 1 ;;
     esac
 }
 
@@ -128,6 +129,38 @@ screen_locked() {
     [ "$(ioreg -n Root -d1 -a 2>/dev/null | plutil -extract IOConsoleUsers.0.CGSSessionScreenIsLocked raw - 2>/dev/null)" = "true" ]
 }
 
+# ── Plugged in: stay awake, lid shut or not (2026-11-02) ─────────
+# With the lid shut the Mac sleeps even on AC, so the scheduled jobs wait for the lid. Plugged in,
+# it now never sleeps (pmset disablesleep 1) and every job runs on time; on battery it sleeps as
+# before — a shut MacBook in a bag must. The presence loop below flips it within 15 s of plugging
+# in or unplugging. It needs one sudoers rule that allows exactly these two pmset calls without a
+# password: `devices.sh --keepawake-setup` prints it. Without the rule this does nothing.
+KEEPAWAKE_RULE=/etc/sudoers.d/kun-pmset
+power_keepawake() {
+    [ -f "$KEEPAWAKE_RULE" ] || return 0
+    local want=0 have
+    pmset -g batt 2>/dev/null | head -1 | grep -q "AC Power" && want=1
+    have="$(pmset -g 2>/dev/null | awk '/SleepDisabled/ {print $2}')"
+    [ "${have:-0}" = "$want" ] && return 0
+    if sudo -n /usr/bin/pmset -a disablesleep "$want" >/dev/null 2>&1; then
+        log "keep-awake: disablesleep $want ($([ "$want" = 1 ] && echo 'plugged in: no sleep, lid shut or not' || echo 'on battery: normal sleep'))"
+    fi
+}
+keepawake_setup() {
+    if [ -f "$KEEPAWAKE_RULE" ]; then
+        echo "keep-awake is set up ($KEEPAWAKE_RULE). Now: $(pmset -g batt | head -1 | sed "s/Now drawing from //") · SleepDisabled=$(pmset -g | awk '/SleepDisabled/ {print $2}')"
+        return 0
+    fi
+    cat <<HELP
+Keep the Mac awake while it is plugged in (lid shut or not); on battery it sleeps as before.
+Run this once in Terminal (it asks for your password, and allows only these two pmset calls):
+
+  echo '$(id -un) ALL=(root) NOPASSWD: /usr/bin/pmset -a disablesleep 0, /usr/bin/pmset -a disablesleep 1' | sudo tee $KEEPAWAKE_RULE >/dev/null && sudo chmod 440 $KEEPAWAKE_RULE && sudo visudo -cf $KEEPAWAKE_RULE
+
+The presence loop takes it from there within 15 seconds. To undo: sudo rm $KEEPAWAKE_RULE && sudo pmset -a disablesleep 0
+HELP
+}
+
 # ── Services ─────────────────────────────────────────────────────
 
 run_presence() {
@@ -144,6 +177,7 @@ run_presence() {
             launchctl kickstart "gui/$(id -u)/com.databayt.supervisor" >/dev/null 2>&1
             kicked="$wake"
         fi
+        power_keepawake
         idle="$(idle_seconds)"
         if ! screen_locked && [ "${idle:-999999}" -lt "$IDLE_LIMIT" ]; then
             [ -f "$PRESENCE_FILE" ] || : > "$PRESENCE_FILE"
