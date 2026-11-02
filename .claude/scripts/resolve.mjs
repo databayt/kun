@@ -331,7 +331,12 @@ try {
       const idx = readJSON(INDEX);
       if (idx) {
         const input = readJSON("/dev/stdin", {}) || {};
-        const res = resolve(idx, input.prompt || "", process.env.CLAUDE_PROJECT_DIR || input.cwd || process.cwd());
+        // Background-task and system notifications arrive as user turns, so this hook fires
+        // on them too — and their paths ("output-file", repo names in commands) routed like
+        // a request (2026-11-02: a hogwarts `file` block pointer from a task notification).
+        // Only words a person typed route.
+        const said = /<task-notification>|\[SYSTEM NOTIFICATION|^\s*<system-reminder>/.test(input.prompt || "") ? "" : input.prompt || "";
+        const res = resolve(idx, said, process.env.CLAUDE_PROJECT_DIR || input.cwd || process.cwd());
         const out = render(idx, res);
         if (out) {
           process.stdout.write(out + "\n");
