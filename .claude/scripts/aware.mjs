@@ -434,7 +434,19 @@ async function products() {
       const failed = all.filter((x) => x.status === "completed" && ["failure", "timed_out", "startup_failure"].includes(x.conclusion));
       const running = all.filter((x) => x.status !== "completed");
       const ci = failed.length ? "failure" : running.length ? "running" : all.every((x) => ["success", "skipped", "neutral"].includes(x.conclusion)) ? "success" : "unknown";
-      return { repo: r, ci, workflow: failed.map((x) => x.workflowName).join(", ") || undefined, at: all[0].createdAt, url: (failed[0] || all[0]).url };
+      // How long it has been red: a fresh red is news, a red since August is a backlog item
+      // (mkan's lint, 2026-11-02). One lookup per failing workflow; green repos cost nothing.
+      let red_days = null;
+      let never_green = false; // gh answered and no push run of it ever passed (hogwarts' Playwright)
+      for (const x of failed) {
+        const g = await runAsync("gh", ["run", "list", "--repo", `databayt/${r}`, "--branch", "main", "--event", "push", "--workflow", x.workflowName, "--status", "success", "--limit", "1", "--json", "createdAt"]);
+        const found = g ? readJSONString(g) : null;
+        if (Array.isArray(found) && !found.length) never_green = true;
+        const last = found?.[0]?.createdAt;
+        const d = last ? Math.floor((Date.now() - Date.parse(last)) / 864e5) : null;
+        if (d != null && (red_days == null || d > red_days)) red_days = d;
+      }
+      return { repo: r, ci, workflow: failed.map((x) => x.workflowName).join(", ") || undefined, red_days, never_green, at: all[0].createdAt, url: (failed[0] || all[0]).url };
     }),
   );
   return res;
@@ -517,10 +529,12 @@ function candidates(s) {
   } else for (const j of s.jobs?.red || []) c[`job_red:${j.job}`] = `Job red: ${j.job}${j.why ? ` — ${j.why.slice(0, 80)}` : ""}`;
   if (s.surfaces?.hermes_installed && s.surfaces.hermes_up === false) c.hermes_down = "Hermes gateway is not running";
   if (m.rc_armed && m.rc_up === false) c.rc_down = "Remote Control server is down (the phone can't reach the Mac)";
-  for (const p of s.products || []) if (p.ci === "failure") c[`ci_fail:${p.repo}`] = `${p.repo} main CI failed (${p.workflow})`;
+  // Keyed by repo, so the day count in the text never re-fires a delivered alert.
+  for (const p of s.products || []) if (p.ci === "failure") c[`ci_fail:${p.repo}`] = `${p.repo} main CI failed (${p.workflow})${redFor(p)}`;
   for (const w of s.wip || []) if (w.oldest_unpushed_h != null && w.oldest_unpushed_h > cfg.unpushed_hours) c[`unpushed:${w.repo}`] = `${w.repo}: ${w.unpushed} commit(s) unpushed for ${w.oldest_unpushed_h} h`;
   return c;
 }
+const redFor = (p) => (p.never_green ? ", never green" : p.red_days >= 2 ? `, red ${p.red_days}d` : "");
 function deliver(prev, s) {
   const cand = candidates(s);
   const prevCand = new Set(prev?.alerts?.candidates || []);
@@ -586,7 +600,7 @@ function markdown(s) {
     L.push(`Queue: ${parts.join(" · ")}`);
     if (q.kun_issues?.p0?.length) L.push(`P0: ${q.kun_issues.p0.slice(0, 3).join(" · ")}`);
   }
-  if (s.products) L.push(`CI main: ${s.products.map((p) => `${p.repo} ${p.ci === "success" ? "✓" : p.ci === "failure" ? "✗" : p.ci === "running" ? "…" : "·"}`).join(" ")}`);
+  if (s.products) L.push(`CI main: ${s.products.map((p) => `${p.repo} ${p.ci === "success" ? "✓" : p.ci === "failure" ? `✗${p.never_green ? "never" : p.red_days >= 2 ? `${p.red_days}d` : ""}` : p.ci === "running" ? "…" : "·"}`).join(" ")}`);
   if (s.wip?.length) L.push(`WIP: ${s.wip.filter((w) => w.dirty || w.unpushed).map((w) => `${w.repo} ${w.dirty} dirty${w.unpushed ? `/${w.unpushed} unpushed` : ""}`).join(" · ") || "clean"}`);
   const e = s.engine;
   const eng = [];
