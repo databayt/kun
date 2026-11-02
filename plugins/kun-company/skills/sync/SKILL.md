@@ -86,7 +86,7 @@ Detection is zero tokens — `improve.mjs` already does it, daily, in the heartb
    `regressed` (flag it, never auto-revert).
 5. TRACK findings go into the weekly plan as context — nothing to apply.
 
-Hard limits: no bench run (≈1.3M tokens — only on an approved row), no billing change, and
+Hard limits: no bench run (≈2.8M tokens — only on an approved row), no billing change, and
 no edit to a fleet surface (hooks, settings, rules-global, skills, engine policy) without an
 approved row — `maintain` ships `main` to every teammate's machine within a day.
 

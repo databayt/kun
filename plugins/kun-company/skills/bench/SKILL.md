@@ -53,7 +53,7 @@ node .claude/scripts/extract-dispatch-cases.mjs --check # guards (health.sh runs
 ```
 
 Then run the workflow `bench-dispatch` (Extract → Dispatch → Adjudicate → Score → Persist).
-~16 agents, ~1.3M subagent tokens, entirely on the Max subscription — no API-key spend.
+~31 agents, ~2.8M subagent tokens (measured 2026-11-02 on 85 skills / 711 cases; it was ~16 agents / ~1.3M at 67 skills), entirely on the Max subscription — no API-key spend.
 
 **Ground truth is free.** 244 `Triggers on:` phrases, 73 vocabulary spells naming a skill,
 and 95 spells that route to an agent/MCP and must therefore fire _nothing_. Nothing is

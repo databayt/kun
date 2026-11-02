@@ -11,7 +11,7 @@
 # jobs.captain-weekly caps it at 1 a day) that:
 #   1. /sync self — SAFE repo fixes + the rows Abdout approved with `yes <id>` on #169
 #   2. /sync anthropic — only when a newer Claude Code release exists (no 36-day catch-up)
-#   3. /weekly plan — from the sensed context, never the 1.3M-token bench
+#   3. /weekly plan — from the sensed context, never the ~2.8M-token bench
 #   4. writes .claude/memory/weekly/<date>-plan.md
 # The script commits that file by pathspec, pushes when nothing is ahead, re-syncs the
 # Engine decisions issue, and sends Abdout one message (kun_notify me).

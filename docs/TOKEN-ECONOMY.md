@@ -120,7 +120,7 @@ Starter, so it failed in every session; catalog flag `$skipRegistration`). The 5
 descriptions went 5,940 → 4,619 chars — deleting agents was rejected on evidence: nearly every
 one is a vocabulary familiar or a skill/workflow target. hogwarts, where most sessions run: its
 memory index 18.8K → 11.4K and `CLAUDE.md` 13.2K → 10.2K (stale Vercel instructions corrected).
-Still owed: the `/bench` re-baseline (~1.3M tokens) — deliberately not run on 2026-09-28, the
+Done 2026-11-02 (335a2e9): the `/bench` re-baseline — it cost 2.79M subagent tokens, about 2× the ~1.3M estimate; earlier note: — deliberately not run on 2026-09-28, the
 eve of the UNDP deadline, when the jobs loop and Cowork share the pool.
 
 ## Measured 2026-11-01 — the orchestration pass

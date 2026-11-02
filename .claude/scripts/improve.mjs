@@ -112,7 +112,7 @@ const detectors = {
   bench() {
     const r = run("node", [".claude/scripts/extract-dispatch-cases.mjs", "--check"]);
     const moved = /corpus_hash moved \(([^)]+)\)/.exec(r.out);
-    if (moved) add({ detector: "bench", subject: "baseline", class: "DECIDE", title: "Dispatch bench baseline is stale — trigger phrases changed since the last score", evidence: [`corpus_hash moved ${moved[1]}`], metric: { name: "bench.corpus_drift", before: 1, target: 0 }, fix: { kind: "repo", how: "re-run /bench deliberately (bench-dispatch workflow, ~1.3M subagent tokens) and note it in weekly_history — never automatic" } });
+    if (moved) add({ detector: "bench", subject: "baseline", class: "DECIDE", title: "Dispatch bench baseline is stale — trigger phrases changed since the last score", evidence: [`corpus_hash moved ${moved[1]}`], metric: { name: "bench.corpus_drift", before: 1, target: 0 }, fix: { kind: "repo", how: "re-run /bench deliberately (bench-dispatch workflow, ~2.8M subagent tokens — 31 agents, measured 2026-11-02) and note it in weekly_history — never automatic" } });
     const scores = readJSON(path.join(KUN, ".claude/memory/skill-scores.json"));
     const lu = scores?.last_updated || scores?.updated;
     const cadence = engine.eval?.cadence_days ?? 7;
