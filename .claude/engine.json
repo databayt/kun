@@ -196,6 +196,8 @@
    "prune_below_gb": 30,
    "docker_cache_cap_gb": 8,
    "docker_image_age": "72h",
+   "docker_container_idle_days": 7,
+   "$container_comment": "Approved by Abdout 2026-11-03 (e3517cf7): containers stopped longer than docker_container_idle_days are removed, except one holding an anonymous volume (it would be orphaned). Named volumes and bind mounts keep their data, and volumes are never pruned. Docker is left alone while a deploy build runs.",
    "cf_build_keep_days": 3,
    "$cf_build_comment": "Approved by Abdout 2026-11-01: ~/.cache/cf-build/<repo> folders with no file newer than this many days are removed (each deploy wipes and rebuilds its own folder anyway). Folders only — files and anything named *env* (production dotenvs) are never touched."
   }

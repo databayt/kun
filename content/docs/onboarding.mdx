@@ -395,7 +395,7 @@ After setup, every machine runs a **daily maintain heartbeat** (09:17 local — 
 1. **Pull** `~/kun` (main only; skips if you're mid-rebase or offline; aborts cleanly on conflict — never leaves the tree broken)
 2. **Refresh** `~/.claude` — `setup.sh --quiet` re-copies agents/skills/rules/settings/MCP from the fresh source and prunes engine items removed upstream
 3. **Health-check** — full `health.sh` audit
-4. **Disk hygiene** — under the floor (`engine.json → devices.hygiene`, 30 GB by default) it prunes caches itself (Docker build cache, old images, package caches, idle Cloudflare build copies — never env files)
+4. **Disk hygiene** — under the floor (`engine.json → devices.hygiene`, 30 GB by default) it prunes caches itself (Docker build cache, old images, containers stopped over a week with their volumes kept, package caches, idle Cloudflare build copies — never env files, and never Docker while a deploy build runs)
 5. **Sense + learn** — rebuilds the prompt router's index, refreshes the awareness snapshot (`~/.claude/state/aware.md`), and runs kun's improvement detectors — zero tokens — applying only machine-local safe fixes (env-file permissions, missing labels)
 6. **Record** — state to `~/.claude/.kun-maintain.json` (`cat` it anytime)
 7. **Report** — posts to the team's [Config Health Dashboard](https://github.com/databayt/kun/issues?q=label%3Aconfig-health) weekly (with a 4-line awareness block), and immediately if health goes RED. **This is how Abdout sees your machine is healthy — if your machine never appears there, run `bash ~/.claude/scripts/maintain.sh --run` once and check `gh auth status`.**

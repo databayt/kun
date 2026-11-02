@@ -266,15 +266,42 @@ prune_caches() {
             rm -rf -- "$d" && log "  removed idle build copy $(basename "$d")"
         done < <(find "$cfb" -mindepth 1 -maxdepth 1 -type d 2>/dev/null)
     fi
-    if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
-        docker builder prune -af --max-used-space "${DOCKER_CACHE_CAP_GB}gb" >/dev/null 2>&1 \
-            && log "  capped the Docker build cache at ${DOCKER_CACHE_CAP_GB}GB"
-        docker image prune -af --filter "until=${DOCKER_IMAGE_AGE}" >/dev/null 2>&1 \
-            && log "  removed Docker images older than ${DOCKER_IMAGE_AGE} that no container uses"
-        # A VM disk gives freed blocks back to the host only after a TRIM.
-        command -v colima >/dev/null 2>&1 && colima status >/dev/null 2>&1 \
-            && colima ssh -- sudo fstrim -a >/dev/null 2>&1 && log "  trimmed the colima disk"
+    prune_docker
+}
+
+# Docker: the build cache above its cap, containers stopped for a week, unused old images,
+# then a TRIM. Volumes are never pruned: twenty_db-data is the CRM.
+prune_docker() {
+    command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1 || return 0
+    # A Cloudflare deploy in flight builds on this cache: clean up after it, never under it.
+    if pgrep -f 'deploy-cloudflare\.sh|docker(-buildx)? (buildx )?build|wrangler[^ ]* (deploy|containers)' >/dev/null 2>&1; then
+        log "  left Docker alone — a build is running"
+        return 0
     fi
+    docker builder prune -af --max-used-space "${DOCKER_CACHE_CAP_GB}gb" >/dev/null 2>&1 \
+        && log "  capped the Docker build cache at ${DOCKER_CACHE_CAP_GB}GB"
+    # Containers stopped longer than DOCKER_CONTAINER_IDLE_DAYS: a crashed compose stack held
+    # 2.4 GB on 2026-11-02. Named volumes and bind mounts keep their data after the container
+    # goes; an anonymous volume would be orphaned, so a container with one stays. Any docker
+    # or jq error leaves the list empty, and nothing is removed.
+    local exited stale
+    exited=$(docker ps -aq --filter status=exited 2>/dev/null)
+    if [ -n "$exited" ] && command -v jq >/dev/null 2>&1; then
+        # shellcheck disable=SC2086  # container ids, split on purpose
+        stale=$(docker inspect $exited 2>/dev/null | jq -r --argjson days "$DOCKER_CONTAINER_IDLE_DAYS" '
+            .[] | select((.State.FinishedAt | sub("\\.[0-9]+"; "") | fromdateiso8601) < (now - $days * 86400))
+                | select([.Mounts[]? | select(.Type == "volume" and (.Name | test("^[0-9a-f]{64}$")))] | length == 0)
+                | .Id' 2>/dev/null)
+        # shellcheck disable=SC2086
+        [ -n "$stale" ] && docker rm $stale >/dev/null 2>&1 \
+            && log "  removed $(printf '%s\n' "$stale" | wc -l | tr -d ' ') container(s) stopped over ${DOCKER_CONTAINER_IDLE_DAYS} days (volumes kept)"
+    fi
+    docker image prune -af --filter "until=${DOCKER_IMAGE_AGE}" >/dev/null 2>&1 \
+        && log "  removed Docker images older than ${DOCKER_IMAGE_AGE} that no container uses"
+    # A VM disk gives freed blocks back to the host only after a TRIM.
+    command -v colima >/dev/null 2>&1 && colima status >/dev/null 2>&1 \
+        && colima ssh -- sudo fstrim -a >/dev/null 2>&1 && log "  trimmed the colima disk"
+    return 0
 }
 
 step_disk() {
@@ -282,11 +309,12 @@ step_disk() {
     DISK_FREE_GB="${DISK_FREE_GB:-0}"
     DISK_PRUNED="no"
     local engine="$KUN_DIR/.claude/engine.json" floor=30 before
-    DOCKER_CACHE_CAP_GB=8; DOCKER_IMAGE_AGE=72h; CF_BUILD_KEEP_DAYS=3
+    DOCKER_CACHE_CAP_GB=8; DOCKER_IMAGE_AGE=72h; DOCKER_CONTAINER_IDLE_DAYS=7; CF_BUILD_KEEP_DAYS=3
     if command -v jq >/dev/null 2>&1 && [ -f "$engine" ]; then
         floor=$(jq -r '.devices.hygiene.prune_below_gb // 30' "$engine")
         DOCKER_CACHE_CAP_GB=$(jq -r '.devices.hygiene.docker_cache_cap_gb // 8' "$engine")
         DOCKER_IMAGE_AGE=$(jq -r '.devices.hygiene.docker_image_age // "72h"' "$engine")
+        DOCKER_CONTAINER_IDLE_DAYS=$(jq -r '.devices.hygiene.docker_container_idle_days // 7' "$engine")
         CF_BUILD_KEEP_DAYS=$(jq -r '.devices.hygiene.cf_build_keep_days // 3' "$engine")
     fi
     if [ "$DISK_FREE_GB" -lt "$floor" ]; then

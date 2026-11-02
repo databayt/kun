@@ -165,6 +165,9 @@ function Get-DiskFreeGB { [int]((Get-Item $env:USERPROFILE).PSDrive.Free / 1GB) 
 # Only caches that rebuild themselves — mirrors prune_caches in maintain.sh.
 # Mirror note (2026-11-01): maintain.sh also prunes idle ~/.cache/cf-build/<repo> folders
 # (devices.hygiene.cf_build_keep_days). Cloudflare builds run on the Mac only, so Windows has none.
+# Mirror note (2026-11-03): maintain.sh also removes containers stopped longer than
+# devices.hygiene.docker_container_idle_days (never one holding an anonymous volume) and leaves
+# Docker alone while a deploy build runs. Not mirrored here: untested on Windows.
 function Prune-Caches($cacheCapGB, $imageAge) {
     if (Get-Command uv -ErrorAction SilentlyContinue) {
         $env:UV_LOCK_TIMEOUT = "10"
