@@ -89,8 +89,11 @@ function field(spec, lo, hi) {
   }
   return out;
 }
-export function cronMatcher(expr) {
+export function cronMatcher(expr, utc = false) {
   const [m, h, dom, mon, dow] = expr.trim().split(/\s+/);
+  const G = utc
+    ? { min: (d) => d.getUTCMinutes(), hr: (d) => d.getUTCHours(), day: (d) => d.getUTCDate(), mon: (d) => d.getUTCMonth() + 1, wd: (d) => d.getUTCDay() }
+    : { min: (d) => d.getMinutes(), hr: (d) => d.getHours(), day: (d) => d.getDate(), mon: (d) => d.getMonth() + 1, wd: (d) => d.getDay() };
   const M = field(m, 0, 59);
   const H = field(h, 0, 23);
   const D = field(dom, 1, 31);
@@ -99,10 +102,10 @@ export function cronMatcher(expr) {
   const domAny = dom === '*';
   const dowAny = dow === '*';
   return (d) =>
-    M.has(d.getMinutes()) &&
-    H.has(d.getHours()) &&
-    Mo.has(d.getMonth() + 1) &&
-    (domAny && dowAny ? true : domAny ? W.has(d.getDay()) : dowAny ? D.has(d.getDate()) : D.has(d.getDate()) || W.has(d.getDay()));
+    M.has(G.min(d)) &&
+    H.has(G.hr(d)) &&
+    Mo.has(G.mon(d)) &&
+    (domAny && dowAny ? true : domAny ? W.has(G.wd(d)) : dowAny ? D.has(G.day(d)) : D.has(G.day(d)) || W.has(G.wd(d)));
 }
 export function calendarMatcher(entries) {
   const list = (Array.isArray(entries) ? entries : [entries]).map(
@@ -293,7 +296,8 @@ function main() {
 
     const down = only ? new Set() : heal(jobs, sup, mode, log, wake);
     resume(scope, row, hermes, sup, mode, log, wake, down, cfg);
-    escalate(scope, row, sup, mode, log, owners, cfg, down, wake);
+    const c = only ? { jobs: {}, rows: {} } : cloud(jobs.$cloud, sup, mode, log, cfg);
+    escalate({ ...scope, ...c.jobs }, { ...row, ...c.rows }, sup, mode, log, owners, cfg, down, wake);
     if (!only) beat(jobs, hermes, sup, mode, log, cfg);
   } finally {
     sup.log = sup.log.slice(-300);
@@ -573,6 +577,144 @@ function escalate(jobs, row, sup, mode, log, owners, cfg, down, wake) {
     sup.alerts[key] = { ...a, open: false, closedAt: iso(NOW) };
     log('close', key, `${a.repo}#${a.issue}`);
   }
+}
+
+// ── cloud: scheduled GitHub workflows and Cloudflare Worker crons ──────────────────────────────
+// They run off the Mac, but they fail too. Checked every check_minutes (default 60); the result is
+// kept in supervise.json so escalate sees it every tick (to open, and to close, its issues).
+//   GitHub: the newest scheduled run per workflow (gh run list). Failed → re-run its failed jobs once
+//   (gh run rerun --failed; live for live_owners), then escalate. A workflow GitHub disabled for
+//   inactivity is enabled again (heal). No scheduled run for 2x its period + 2 h → stale.
+//   Workers: each cron route's newest run in Workers Logs (the scheduled handler logs {cron, path,
+//   status, ms}). Status ≥ 500 → red; no run for 2x its period + 15 min → stale. Alert only: a blind
+//   re-run of a school's or a tenant's cron route could send something twice.
+const period = (match) => {
+  const a = prevFire(match, NOW);
+  const b = a && nextFire(match, a);
+  return a && b ? b - a : 86_400_000;
+};
+function cloud(cc, sup, mode, log, cfg) {
+  if (!cc) return { jobs: {}, rows: {} };
+  if (sup.cloud && sup.cloudAt && NOW - t(sup.cloudAt) < (cc.check_minutes ?? 60) * 60_000) return sup.cloud;
+  const jobs = {};
+  const rows = {};
+  sup.ghRerun ??= {};
+  const liveFor = (owner) => mode.live || (!flag('--dry') && (cfg.live_owners ?? []).includes(owner));
+  for (const g of cc.gh ?? []) {
+    const key = `gh:${g.repo}/${g.workflow}`;
+    jobs[key] = { owner: g.owner ?? 'kun', resume: 'auto', max_attempts: 1 };
+    const file = join(HOME, g.repo.split('/')[1], '.github', 'workflows', g.workflow);
+    const crons = (() => {
+      try {
+        return [...readFileSync(file, 'utf8').matchAll(/^\s*-\s*cron:\s*["']?([^"'#\n]+)/gm)].map((m) => m[1].trim());
+      } catch {
+        return [];
+      }
+    })();
+    const every = crons.length ? Math.min(...crons.map((c) => period(cronMatcher(c, true)))) : 86_400_000;
+    const list = sh('gh', ['run', 'list', '--repo', g.repo, '--workflow', g.workflow, '--event', 'schedule', '--limit', '2', '--json', 'databaseId,status,conclusion,createdAt,attempt']);
+    let run = null;
+    let before = null;
+    try {
+      [run = null, before = null] = JSON.parse(list.out || '[]');
+    } catch {}
+    // GitHub throttles frequent schedules (every 15 min runs every few hours): stale only after 12 h.
+    const staleAfter = Math.max(2 * every + 7_200_000, 12 * 3_600_000);
+    if (!list.ok) {
+      rows[key] = { job: key, state: 'ok', why: `gh unreachable: ${list.err.slice(0, 80)}` };
+      continue;
+    }
+    const age = run ? NOW - t(run.createdAt) : Infinity;
+    if (run && run.status !== 'completed') rows[key] = { job: key, state: 'ok', why: run.status };
+    else if (run && ['failure', 'timed_out', 'startup_failure'].includes(run.conclusion) && age < staleAfter) {
+      const id = String(run.databaseId);
+      // Re-run only a fresh failure (the run before it was green): one that fails every time needs a
+      // person, and re-running it only burns Actions minutes.
+      const fresh = !before || before.conclusion === 'success';
+      if (fresh && (run.attempt ?? 1) < 2 && !sup.ghRerun[id]) {
+        if (liveFor(jobs[key].owner)) {
+          const r = sh('gh', ['run', 'rerun', id, '--failed', '--repo', g.repo]);
+          sup.ghRerun[id] = iso(NOW);
+          log(r.ok ? 'fire' : 'fire-failed', key, r.ok ? `scheduled run ${id} ${run.conclusion}: re-running its failed jobs` : r.err);
+        } else log('would-fire', key, `scheduled run ${id} ${run.conclusion}: would re-run its failed jobs`);
+        rows[key] = { job: key, state: 'red', why: `scheduled run ${run.conclusion} (${iso(t(run.createdAt))})` };
+      } else {
+        (sup.fired[`${key}@${iso(t(run.createdAt))}`] ??= { n: 1 }).exhausted = true;
+        rows[key] = { job: key, state: 'red', why: `scheduled run ${run.conclusion}${fresh ? ' again after a re-run' : ', and the run before it too'} — https://github.com/${g.repo}/actions/runs/${id}` };
+      }
+    } else if (!run || age > staleAfter) {
+      // Not running at all: disabled for inactivity (GitHub does that after 60 quiet days) → enable.
+      const wl = sh('gh', ['workflow', 'list', '--repo', g.repo, '--all', '--json', 'path,state']);
+      const state = (() => {
+        try {
+          return (JSON.parse(wl.out).find((w) => w.path.endsWith(`/${g.workflow}`)) ?? {}).state;
+        } catch {
+          return undefined;
+        }
+      })();
+      if (state === 'disabled_inactivity' && mode.heal) {
+        const r = sh('gh', ['workflow', 'enable', g.workflow, '--repo', g.repo]);
+        log(r.ok ? 'heal' : 'heal-failed', key, r.ok ? 'GitHub had disabled it for inactivity: enabled again' : r.err);
+        rows[key] = { job: key, state: 'ok', why: 'enabled again' };
+        continue;
+      }
+      (sup.fired[`${key}@stale`] ??= { n: 1 }).exhausted = true;
+      rows[key] = { job: key, state: 'stale', why: state && state !== 'active' ? `workflow ${state}` : `no scheduled run for ${run ? Math.round(age / 3_600_000) : '?'} h (every ${Math.round(every / 3_600_000) || '<1'} h)` };
+    } else {
+      delete sup.fired[`${key}@stale`];
+      rows[key] = { job: key, state: 'ok', why: '' };
+    }
+  }
+  // Cloudflare Worker crons, through the Workers Logs telemetry API (CLOUDFLARE_API_TOKEN).
+  // launchd has no shell profile: the token comes from the Keychain (service cloudflare-api).
+  const token = (process.env.CLOUDFLARE_API_TOKEN || sh('security', ['find-generic-password', '-s', 'cloudflare-api', '-w']).out || '').trim();
+  const acct = (process.env.CLOUDFLARE_ACCOUNT_ID ?? cc.cf_account ?? '').trim();
+  if (token && acct) {
+    const hdr = join(LOCK_DIR, `cf-headers.${process.pid}`);
+    writeFileSync(hdr, `Authorization: Bearer ${token}\nContent-Type: application/json\n`, { mode: 0o600 });
+    try {
+      for (const w of cc.workers ?? []) {
+        const map = readJson(w.crons.replace(/^~/, HOME), {}).schedules ?? {};
+        for (const [expr, paths] of Object.entries(map)) {
+          const every = period(cronMatcher(expr, true));
+          for (const path of paths) {
+            const key = `cf:${w.worker}${path}`;
+            jobs[key] = { owner: w.owner ?? 'kun', resume: 'alert' };
+            const body = JSON.stringify({
+              queryId: 'kun-supervise-cron',
+              view: 'events',
+              limit: 1,
+              timeframe: { from: NOW - Math.max(2 * every + 900_000, 3_600_000), to: NOW },
+              parameters: { datasets: ['cloudflare-workers'], filters: [{ key: '$metadata.service', operation: 'eq', type: 'string', value: w.worker }, { key: 'path', operation: 'eq', type: 'string', value: path }] },
+            });
+            const r = sh('curl', ['-s', '--max-time', '20', '-H', `@${hdr}`, '-X', 'POST', `https://api.cloudflare.com/client/v4/accounts/${acct}/workers/observability/telemetry/query`, '--data-binary', '@-'], { input: body, stdio: ['pipe', 'pipe', 'pipe'] });
+            let ev = null;
+            let ok = false;
+            try {
+              const d = JSON.parse(r.out);
+              ok = !!d.success;
+              ev = d.result?.events?.events?.[0] ?? null;
+            } catch {}
+            if (!ok) {
+              rows[key] = { job: key, state: 'ok', why: 'Workers Logs unreadable' };
+              continue;
+            }
+            const src = ev?.source ?? {};
+            if (!ev) rows[key] = { job: key, state: 'stale', why: `no run in Workers Logs for ${Math.round(Math.max(2 * every + 900_000, 3_600_000) / 60_000)} min (cron ${expr} UTC)` };
+            else if (Number(src.status) >= 500 || src.error) rows[key] = { job: key, state: 'red', why: `last run ${src.status ?? src.error} at ${iso(ev.timestamp)} (cron ${expr} UTC)` };
+            else rows[key] = { job: key, state: 'ok', why: '' };
+          }
+        }
+      }
+    } finally {
+      rmSync(hdr, { force: true });
+    }
+  } else log('cloud-skipped', 'workers', 'no CLOUDFLARE_API_TOKEN / account id in the environment');
+  sup.cloud = { jobs, rows };
+  sup.cloudAt = iso(NOW);
+  const bad = Object.values(rows).filter((x) => x.state !== 'ok');
+  log('cloud', null, `${Object.keys(rows).length} cloud schedule(s) checked, ${bad.length} not ok${bad.length ? `: ${bad.map((x) => x.job).join(', ')}` : ''}`);
+  return sup.cloud;
 }
 
 // ── beat: the watchdog outside the Mac reads this ─────────────────────────────────────────────
