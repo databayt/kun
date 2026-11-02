@@ -1,25 +1,25 @@
 {
   "corpus": {
-    "skills_listed": 82,
-    "project_skills": 65,
+    "skills_listed": 85,
+    "project_skills": 68,
     "user_only_skills": 17,
-    "listing_chars": 32926,
-    "cases_total": 669,
-    "positive": 575,
-    "none": 94,
-    "trivial": 70,
-    "hard": 235,
+    "listing_chars": 33334,
+    "cases_total": 711,
+    "positive": 615,
+    "none": 96,
+    "trivial": 73,
+    "hard": 242,
     "destructive": 5,
     "sources": {
-      "trigger_phrase": 495,
-      "vocab_spell": 125,
+      "trigger_phrase": 515,
+      "vocab_spell": 135,
       "quoted_keyword": 2,
-      "vocab_none": 94,
-      "real_pair": 13
+      "vocab_none": 96,
+      "real_pair": 27
     },
     "skills_without_triggers": 2,
     "builtin_targeted_spells": 3,
-    "corpus_hash": "fnv1a:596ba208"
+    "corpus_hash": "fnv1a:222d8bcc"
   },
   "split": {
     "version": "v1",
@@ -523,6 +523,11 @@
       "trg:airbnb-copy:صياغة-إعلان-عقار-2d77": "train",
       "trg:airbnb-copy:أسلوب-إير-بي-إن-بي-3e98": "train",
       "trg:airbnb-copy:كتابة-وصف-مكان-f6bd": "holdout",
+      "trg:behalf:on-my-behalf-e54c": "train",
+      "trg:behalf:sign-up-for-4adb": "train",
+      "trg:behalf:create-an-account-ffaa": "train",
+      "trg:behalf:like-cowork-2533": "train",
+      "trg:behalf:نيابة-عني-b7e8": "train",
       "trg:blur:blur-6bfb": "holdout",
       "trg:blur:blur-up-0632": "train",
       "trg:blur:blur-while-loading-ed9b": "train",
@@ -650,6 +655,11 @@
       "trg:report:بلاغات-الفريق-25ac": "train",
       "trg:report:المشاكل-المبلغ-عنها-06e9": "train",
       "trg:report:أصلح-البلاغات-8292": "train",
+      "trg:reverse:reverse-2150": "train",
+      "trg:reverse:teardown-032a": "train",
+      "trg:reverse:how-does-app-do-feature-1469": "train",
+      "trg:reverse:inspect-this-har-6242": "train",
+      "trg:reverse:هندسة-عكسية-f1ec": "holdout",
       "trg:scrape:scrap-48fb": "train",
       "trg:scrape:scrape-ba57": "holdout",
       "trg:scrape:scrap-facebook-5b7f": "train",
@@ -673,6 +683,14 @@
       "trg:scrape:عملاء-محتملين-not-health-engine-drift-44a6": "train",
       "trg:scrape:measure-social-numbers-7ad7": "train",
       "trg:scrape:report-a-bug-3545": "train",
+      "trg:seek:seek-5745": "train",
+      "trg:seek:set-up-seek-b0aa": "train",
+      "trg:seek:scholarship-4d7a": "train",
+      "trg:seek:admission-99a8": "train",
+      "trg:seek:visa-c5c7": "train",
+      "trg:seek:منحة-دراسية-0637": "train",
+      "trg:seek:قبول-جامعي-4ccf": "train",
+      "trg:seek:تأشيرة-209e": "holdout",
       "trg:shoot:shoot-route-flow-fa19": "train",
       "trg:shoot:take-a-screenshot-of-url-338a": "holdout",
       "trg:shoot:screenshot-the-x-flow-5d7f": "train",
@@ -684,6 +702,10 @@
       "trg:skeleton:page-flashes-blank-2b12": "train",
       "trg:skeleton:replace-the-spinner-1c28": "train",
       "trg:skeleton:هيكل-التحميل-aa36": "train",
+      "trg:sync:sync-self-e14b": "train",
+      "trg:sync:improve-yourself-d62f": "train",
+      "trg:sync:self-improve-abad": "train",
+      "trg:sync:what-should-kun-improve-bc67": "train",
       "trg:textbook:textbook-markdown-12c0": "train",
       "trg:textbook:textbook-md-c26e": "train",
       "trg:textbook:convert-the-textbooks-a57a": "train",
@@ -692,18 +714,28 @@
       "trg:textbook:fix-the-textbook-twin-f21e": "train",
       "trg:textbook:textbook-bench-5286": "train",
       "spell:summoning:facebook-5c6e": "holdout",
+      "spell:ministry:behalf-41ff": "holdout",
+      "none:ministry:dispatch-aa55": "train",
+      "none:ministry:aware-db21": "train",
       "spell:pensieve:md-672e": "holdout",
       "spell:pensieve:textbook-610f": "train",
       "spell:pensieve:contract-2a5e": "train",
       "spell:pensieve:transcribe-a5b5": "train",
       "spell:pensieve:agreement-f16c": "train",
       "spell:pensieve:adjudicate-01a1": "train",
+      "spell:pensieve:textbook-status-30f5": "train",
+      "spell:pensieve:textbook-loop-05cf": "holdout",
+      "spell:pensieve:land-the-twin-8442": "train",
+      "spell:pensieve:تحويل-الكتب-925a": "train",
       "spell:pensieve:higgs-d9e6": "train",
       "spell:pensieve:shoot-b415": "train",
       "spell:pensieve:edit-5be7": "train",
       "spell:pensieve:captions-7115": "train",
       "spell:pensieve:ترجمة-الفيديو-93bb": "holdout",
       "spell:owlery:scrap-for-hogwarts-33d6": "holdout",
+      "spell:owlery:scrap-tiktok-5987": "train",
+      "spell:owlery:scrap-facebook-for-mkan-f8f0": "train",
+      "spell:owlery:tiktok-homes-c95b": "train",
       "spell:owlery:عملاء-محتملين-fc74": "train",
       "spell:floo-network:متابعة-1324": "train"
     }
@@ -731,8 +763,13 @@
     },
     {
       "skill": "auth",
-      "description": "Sign in to any web service or CLI with the Keychain-stored databayt identities, then reach protected pages and fetch the assets behind the login wall",
-      "when_to_use": "Use when a login wall blocks progress — a page redirects to sign-in, a CLI reports not authenticated, or a clone or asset fetch sits behind a paywall or dashboard. Never asks for a password in chat; pauses only for a one-time code. Triggers on: log into X, sign me in, not authenticated, behind a login wall, session expired."
+      "description": "Sign in to any web service or CLI with the Keychain-stored databayt identities and reach what sits behind the login wall",
+      "when_to_use": "Use when a login wall blocks progress — a sign-in redirect, a CLI not authenticated, assets behind a dashboard. New accounts are /behalf. Triggers on: log into X, sign me in, not authenticated, session expired."
+    },
+    {
+      "skill": "behalf",
+      "description": "Web errands as Abdout — sign up, confirm, get keys",
+      "when_to_use": "Use when a site task must be done as Abdout: a new account, email confirmation or dashboard keys. Triggers on: on my behalf, sign up for, create an account, like cowork, نيابة عني."
     },
     {
       "skill": "bench",
@@ -816,8 +853,8 @@
     },
     {
       "skill": "credentials",
-      "description": "Manage databayt credentials — API keys via Keychain, web logins via Safari",
-      "when_to_use": "Use when storing, reading or exporting databayt API keys via the macOS Keychain, or driving Safari autofill for web logins; never prints secrets into files. Triggers on: credentials, api key, log into <service>, store the key, which keys do we have."
+      "description": "Databayt API keys in the macOS Keychain — store, read, export",
+      "when_to_use": "Use when an API key must be stored, read or exported via the Keychain (value on stdin, never printed). Triggers on: credentials, api key, store the key, which keys do we have."
     },
     {
       "skill": "decide",
@@ -911,8 +948,8 @@
     },
     {
       "skill": "jobs",
-      "description": "Abdout's + Databayt's income lane — jobs, gigs, tenders, client requests and funding programs across Rwanda, Kenya, Nigeria, Gulf, Sudan; tracked on sales.databayt.org",
-      "when_to_use": "Any opportunity someone POSTED that pays Abdout or Databayt: Kigali/Nairobi/Lagos roles, remote dev, AI-training gigs, freelance, electrical/protection work, tenders, RFPs, client project requests, and funding — incubators, accelerators, grants, credits, angels. Triggers on: jobs, find work, apply, opportunities, gigs, tenders, RFP, client request, incubator, accelerator, grant, credits, investor, angel, fundraising, funding, did anyone reply, وظائف, فرص, مناقصات, حاضنة, مسرعة, منحة, تمويل. NOT /scrape (outbound leads we go find)."
+      "description": "Abdout's instance of seek — his + Databayt's income lane (jobs, gigs, tenders, client requests, funding) across Rwanda, Kenya, Nigeria, Gulf, Sudan; on sales.databayt.org",
+      "when_to_use": "Opportunities someone POSTED that pay Abdout or Databayt. Triggers on: jobs, find work, apply, opportunities, gigs, tenders, RFP, client request, incubator, accelerator, grant, credits, investor, angel, fundraising, funding, did anyone reply, وظائف, فرص, مناقصات, حاضنة, مسرعة, منحة, تمويل. NOT /scrape (outbound leads we go find)."
     },
     {
       "skill": "learn",
@@ -1025,6 +1062,11 @@
       "when_to_use": "Use when the question spans the databayt GitHub org rather than this repo — listing, syncing, cross-repo status, or finding which repo holds something. Triggers on: list our repos, which repo has, org status, sync the repos."
     },
     {
+      "skill": "reverse",
+      "description": "Competitor feature teardown, with evidence (REA)",
+      "when_to_use": "Use when the question is HOW another product works — requests, routes, API shape. Not /clone (pixels). Triggers on: reverse, teardown, how does <app> do <feature>, inspect this HAR, هندسة عكسية."
+    },
+    {
       "skill": "saas",
       "description": "Generate complete SaaS feature with all layers",
       "when_to_use": "Use when a whole feature should be scaffolded across every layer at once — schema, server actions and UI — instead of walking the staged /feature pipeline. Triggers on: scaffold the whole feature, generate all layers, full CRUD for."
@@ -1048,6 +1090,11 @@
       "skill": "security",
       "description": "Security audit - OWASP Top 10, dependency scanning",
       "when_to_use": "Use when code needs a security pass — OWASP Top 10, dependency vulnerabilities, auth and exposure checks. Unlike /guard, the per-URL tenant and authz quality keyword. Triggers on: security audit, are we vulnerable, scan the dependencies, owasp check."
+    },
+    {
+      "skill": "seek",
+      "description": "The open opportunity loop anyone runs from their own profile — find, tailor, apply, follow up",
+      "when_to_use": "Seek for a new person, or a track beyond jobs. Triggers on: seek, set up seek, scholarship, admission, visa, منحة دراسية, قبول جامعي, تأشيرة. Abdout's own loop is /jobs."
     },
     {
       "skill": "shadcn",
@@ -1081,8 +1128,8 @@
     },
     {
       "skill": "sync",
-      "description": "Self-update — diff the latest upstream releases against the engine, adopt or propose",
-      "when_to_use": "Use when self-updating the engine against upstream releases (Anthropic, stack, services, practice) — adopt the mechanical wins, propose the rest, stamp the sync dates. Triggers on: sync, what's new in claude code, refresh the engine, release sweep."
+      "description": "Self-update — diff upstream releases and kun's own run evidence against the engine, adopt or propose",
+      "when_to_use": "Use when self-updating the engine against upstream releases (Anthropic, stack, services, practice) — adopt the mechanical wins, propose the rest, stamp the sync dates. Triggers on: sync, what's new in claude code, refresh the engine, release sweep, sync self, improve yourself, self-improve, what should kun improve."
     },
     {
       "skill": "tasks",
@@ -1399,17 +1446,51 @@
       "split": "train"
     },
     {
-      "id": "trg:auth:behind-a-login-wall-60fe",
-      "prompt": "behind a login wall",
-      "label": "auth",
-      "source": "trigger_phrase",
-      "tags": [],
-      "split": "holdout"
-    },
-    {
       "id": "trg:auth:session-expired-3098",
       "prompt": "session expired",
       "label": "auth",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:behalf:on-my-behalf-e54c",
+      "prompt": "on my behalf",
+      "label": "behalf",
+      "source": "trigger_phrase",
+      "tags": [
+        "lexical"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:behalf:sign-up-for-4adb",
+      "prompt": "sign up for",
+      "label": "behalf",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:behalf:create-an-account-ffaa",
+      "prompt": "create an account",
+      "label": "behalf",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:behalf:like-cowork-2533",
+      "prompt": "like cowork",
+      "label": "behalf",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:behalf:نيابة-عني-b7e8",
+      "prompt": "نيابة عني",
+      "label": "behalf",
       "source": "trigger_phrase",
       "tags": [],
       "split": "train"
@@ -2229,14 +2310,6 @@
       "source": "trigger_phrase",
       "tags": [],
       "split": "holdout"
-    },
-    {
-      "id": "trg:credentials:log-into-service-af50",
-      "prompt": "log into <service>",
-      "label": "credentials",
-      "source": "trigger_phrase",
-      "tags": [],
-      "split": "train"
     },
     {
       "id": "trg:credentials:store-the-key-8d4a",
@@ -4706,6 +4779,50 @@
       "split": "train"
     },
     {
+      "id": "trg:reverse:reverse-2150",
+      "prompt": "reverse",
+      "label": "reverse",
+      "source": "trigger_phrase",
+      "tags": [
+        "trivial"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:reverse:teardown-032a",
+      "prompt": "teardown",
+      "label": "reverse",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:reverse:how-does-app-do-feature-1469",
+      "prompt": "how does <app> do <feature>",
+      "label": "reverse",
+      "source": "trigger_phrase",
+      "tags": [
+        "hard:names-feature"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:reverse:inspect-this-har-6242",
+      "prompt": "inspect this HAR",
+      "label": "reverse",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:reverse:هندسة-عكسية-f1ec",
+      "prompt": "هندسة عكسية",
+      "label": "reverse",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
       "id": "trg:saas:scaffold-the-whole-feature-a860",
       "prompt": "scaffold the whole feature",
       "label": "saas",
@@ -5042,6 +5159,74 @@
       "split": "train"
     },
     {
+      "id": "trg:seek:seek-5745",
+      "prompt": "seek",
+      "label": "seek",
+      "source": "trigger_phrase",
+      "tags": [
+        "trivial"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:seek:set-up-seek-b0aa",
+      "prompt": "set up seek",
+      "label": "seek",
+      "source": "trigger_phrase",
+      "tags": [
+        "lexical"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:seek:scholarship-4d7a",
+      "prompt": "scholarship",
+      "label": "seek",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:seek:admission-99a8",
+      "prompt": "admission",
+      "label": "seek",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:seek:visa-c5c7",
+      "prompt": "visa",
+      "label": "seek",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:seek:منحة-دراسية-0637",
+      "prompt": "منحة دراسية",
+      "label": "seek",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:seek:قبول-جامعي-4ccf",
+      "prompt": "قبول جامعي",
+      "label": "seek",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:seek:تأشيرة-209e",
+      "prompt": "تأشيرة",
+      "label": "seek",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
       "id": "trg:shadcn:shadcn-docs-f2d0",
       "prompt": "shadcn docs",
       "label": "shadcn",
@@ -5365,6 +5550,40 @@
       "tags": [
         "hard:names-release"
       ],
+      "split": "train"
+    },
+    {
+      "id": "trg:sync:sync-self-e14b",
+      "prompt": "sync self",
+      "label": "sync",
+      "source": "trigger_phrase",
+      "tags": [
+        "lexical"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "trg:sync:improve-yourself-d62f",
+      "prompt": "improve yourself",
+      "label": "sync",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:sync:self-improve-abad",
+      "prompt": "self-improve",
+      "label": "sync",
+      "source": "trigger_phrase",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "trg:sync:what-should-kun-improve-bc67",
+      "prompt": "what should kun improve",
+      "label": "sync",
+      "source": "trigger_phrase",
+      "tags": [],
       "split": "train"
     },
     {
@@ -6804,6 +7023,16 @@
       "split": "holdout"
     },
     {
+      "id": "spell:ministry:behalf-41ff",
+      "prompt": "behalf",
+      "label": "behalf",
+      "source": "vocab_spell",
+      "tags": [
+        "trivial"
+      ],
+      "split": "holdout"
+    },
+    {
       "id": "none:ministry:conventions-79c2",
       "prompt": "conventions",
       "label": "none",
@@ -6826,6 +7055,22 @@
       "source": "vocab_none",
       "tags": [],
       "split": "holdout"
+    },
+    {
+      "id": "none:ministry:dispatch-aa55",
+      "prompt": "dispatch",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "none:ministry:aware-db21",
+      "prompt": "aware",
+      "label": "none",
+      "source": "vocab_none",
+      "tags": [],
+      "split": "train"
     },
     {
       "id": "spell:pensieve:decide-ee17",
@@ -6906,6 +7151,38 @@
     {
       "id": "spell:pensieve:adjudicate-01a1",
       "prompt": "adjudicate",
+      "label": "textbook",
+      "source": "vocab_spell",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "spell:pensieve:textbook-status-30f5",
+      "prompt": "textbook status",
+      "label": "textbook",
+      "source": "vocab_spell",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "spell:pensieve:textbook-loop-05cf",
+      "prompt": "textbook loop",
+      "label": "textbook",
+      "source": "vocab_spell",
+      "tags": [],
+      "split": "holdout"
+    },
+    {
+      "id": "spell:pensieve:land-the-twin-8442",
+      "prompt": "land the twin",
+      "label": "textbook",
+      "source": "vocab_spell",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "spell:pensieve:تحويل-الكتب-925a",
+      "prompt": "تحويل الكتب",
       "label": "textbook",
       "source": "vocab_spell",
       "tags": [],
@@ -7105,6 +7382,30 @@
       "split": "holdout"
     },
     {
+      "id": "spell:owlery:scrap-tiktok-5987",
+      "prompt": "scrap tiktok",
+      "label": "scrape",
+      "source": "vocab_spell",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "spell:owlery:scrap-facebook-for-mkan-f8f0",
+      "prompt": "scrap facebook for mkan",
+      "label": "scrape",
+      "source": "vocab_spell",
+      "tags": [],
+      "split": "train"
+    },
+    {
+      "id": "spell:owlery:tiktok-homes-c95b",
+      "prompt": "tiktok homes",
+      "label": "scrape",
+      "source": "vocab_spell",
+      "tags": [],
+      "split": "train"
+    },
+    {
       "id": "spell:owlery:عملاء-محتملين-fc74",
       "prompt": "عملاء محتملين",
       "label": "scrape",
@@ -7141,19 +7442,9 @@
       "split": "holdout"
     },
     {
-      "id": "real:clone:clone-https-gemini-google-overview-image-generat-0d28",
-      "prompt": "clone https://gemini.google/overview/image-generation/ section Dial in every detail\nwith Nano Banana. as a template",
-      "label": "clone",
-      "source": "real_pair",
-      "tags": [
-        "real"
-      ],
-      "split": "fidelity"
-    },
-    {
-      "id": "real:qa:qa-admission-block-82b0",
-      "prompt": "qa admission block",
-      "label": "qa",
+      "id": "real:deploy:fix-the-story-mp4-type-and-deploy-codebase-8a2e",
+      "prompt": "fix the story.mp4 type and deploy codebase",
+      "label": "deploy",
       "source": "real_pair",
       "tags": [
         "real",
@@ -7162,9 +7453,9 @@
       "split": "fidelity"
     },
     {
-      "id": "real:qa:audit-admission-block-for-shipping-it-we-be-in-u-2682",
-      "prompt": "audit admission block for shipping , it we be in use from towmorrw .. ensure full translaition and internationlaztion and full production readness , health routes and functioning ui and seed",
-      "label": "qa",
+      "id": "real:deploy:go-and-deploy-407b",
+      "prompt": "go and deploy",
+      "label": "deploy",
       "source": "real_pair",
       "tags": [
         "real",
@@ -7173,30 +7464,8 @@
       "split": "fidelity"
     },
     {
-      "id": "real:qa:test-admission-block-4de3",
-      "prompt": "test admission block",
-      "label": "qa",
-      "source": "real_pair",
-      "tags": [
-        "real",
-        "hard:cluster"
-      ],
-      "split": "fidelity"
-    },
-    {
-      "id": "real:draft:run-the-draft-skill-in-queue-mode-drain-every-pe-57c0",
-      "prompt": "Run the /draft skill in queue mode: drain every pending ask via 'node scripts/social-drafts.mjs'. Write each answer's Arabic and English to temp files and pass them with 'answer <id> --ar <file> --en <file>'. Every ask must end answered or failed — never left pending.",
-      "label": "draft",
-      "source": "real_pair",
-      "tags": [
-        "real",
-        "hard:cluster"
-      ],
-      "split": "fidelity"
-    },
-    {
-      "id": "real:higgs:higgs-edit-this-vido-https-www-youtube-com-short-50d1",
-      "prompt": "higgs edit this vido https://www.youtube.com/shorts/yqA_C-c0ibc to preserve everything while tune it for arabic , sudan , and replace airbnb with mkan",
+      "id": "real:higgs:make-the-top-image-photorealistic-like-the-pin-a-0b1f",
+      "prompt": "make the top image photorealistic like the pin and make the first screen show the photorealistic",
       "label": "higgs",
       "source": "real_pair",
       "tags": [
@@ -7205,9 +7474,9 @@
       "split": "fidelity"
     },
     {
-      "id": "real:sync:what-is-next-55ec",
-      "prompt": "what is next",
-      "label": "sync",
+      "id": "real:behalf:let-s-create-the-tiktok-account-6748",
+      "prompt": "let's create the tiktok account",
+      "label": "behalf",
       "source": "real_pair",
       "tags": [
         "real"
@@ -7215,9 +7484,9 @@
       "split": "fidelity"
     },
     {
-      "id": "real:social:now-foucs-on-hogwarts-and-facebook-we-want-to-te-713f",
-      "prompt": "now foucs on hogwarts and facebook we want to test the soical workflow end to end",
-      "label": "social",
+      "id": "real:deploy:apply-the-migration-and-deploy-hogwarts-0ff4",
+      "prompt": "apply the migration and deploy hogwarts",
+      "label": "deploy",
       "source": "real_pair",
       "tags": [
         "real",
@@ -7226,9 +7495,9 @@
       "split": "fidelity"
     },
     {
-      "id": "real:auth:test-in-production-in-fornt-of-me-bc53",
-      "prompt": "test in production in fornt of me",
-      "label": "auth",
+      "id": "real:scrape:scrap-tiktok-for-more-kimihurura-homes-71db",
+      "prompt": "scrap tiktok for more Kimihurura homes",
+      "label": "scrape",
       "source": "real_pair",
       "tags": [
         "real"
@@ -7236,9 +7505,167 @@
       "split": "fidelity"
     },
     {
-      "id": "real:performance:optimize-mkan-e9dd",
-      "prompt": "optimize mkan",
-      "label": "performance",
+      "id": "real:textbook:carry-on-work-on-textbook-58bc",
+      "prompt": "carry on work on textbook",
+      "label": "textbook",
+      "source": "real_pair",
+      "tags": [
+        "real"
+      ],
+      "split": "fidelity"
+    },
+    {
+      "id": "real:deploy:deploy-and-ensure-all-changes-live-48b4",
+      "prompt": "deploy and ensure all changes live",
+      "label": "deploy",
+      "source": "real_pair",
+      "tags": [
+        "real",
+        "hard:cluster"
+      ],
+      "split": "fidelity"
+    },
+    {
+      "id": "real:record:record-optimize-videos-of-add-student-flow-suppo-350f",
+      "prompt": "record , optimize videos of add student flow, support and marketing for mackbook and iphone 16",
+      "label": "record",
+      "source": "real_pair",
+      "tags": [
+        "real",
+        "hard:cluster"
+      ],
+      "split": "fidelity"
+    },
+    {
+      "id": "real:blur:read-farm-optimize-it-by-adding-blur-while-image-5b31",
+      "prompt": "read @~/farm/ optimize it by adding blur while images is loading like mkan and hogwarts",
+      "label": "blur",
+      "source": "real_pair",
+      "tags": [
+        "real"
+      ],
+      "split": "fidelity"
+    },
+    {
+      "id": "real:textbook:run-textbook-workflow-13ee",
+      "prompt": "run textbook workflow",
+      "label": "textbook",
+      "source": "real_pair",
+      "tags": [
+        "real"
+      ],
+      "split": "fidelity"
+    },
+    {
+      "id": "real:dev:dev-hogwarts-f427",
+      "prompt": "dev hogwarts",
+      "label": "dev",
+      "source": "real_pair",
+      "tags": [
+        "real"
+      ],
+      "split": "fidelity"
+    },
+    {
+      "id": "real:dev:dev-farm-92dd",
+      "prompt": "dev farm",
+      "label": "dev",
+      "source": "real_pair",
+      "tags": [
+        "real"
+      ],
+      "split": "fidelity"
+    },
+    {
+      "id": "real:deploy:deploy-farm-6ca8",
+      "prompt": "deploy farm",
+      "label": "deploy",
+      "source": "real_pair",
+      "tags": [
+        "real",
+        "hard:cluster"
+      ],
+      "split": "fidelity"
+    },
+    {
+      "id": "real:scrape:foucs-on-webistes-for-kigali-rebrand-and-from-sc-3b1a",
+      "prompt": "foucs on webistes for kigali , rebrand and from scratch , list all possible business and companies that may need a website",
+      "label": "scrape",
+      "source": "real_pair",
+      "tags": [
+        "real"
+      ],
+      "split": "fidelity"
+    },
+    {
+      "id": "real:deploy:task-notification-task-id-bajehuoke-task-id-tool-01cc",
+      "prompt": "<task-notification>\n<task-id>bajehuoke</task-id>\n<tool-use-id>toolu_01AgfR7THj9Z6VAsQAHuZEqE</tool-use-id>\n<output-file>/private/tmp/claude-501/-Users-abdout-kun/a747c274-dc5a-4c28-bf7e-35553c7f3a05/tasks/bajehuoke.output</output-file>\n<status>completed</status>\n<summary>Background command \"Run mkan production build\" completed (exit code 0)</summary>\n</task-notification>",
+      "label": "deploy",
+      "source": "real_pair",
+      "tags": [
+        "real",
+        "hard:cluster"
+      ],
+      "split": "fidelity"
+    },
+    {
+      "id": "real:deploy:deploy-mkan-f4f8",
+      "prompt": "deploy mkan",
+      "label": "deploy",
+      "source": "real_pair",
+      "tags": [
+        "real",
+        "hard:cluster"
+      ],
+      "split": "fidelity"
+    },
+    {
+      "id": "real:shoot:shoot-admission-flow-f2b4",
+      "prompt": "shoot admission flow",
+      "label": "shoot",
+      "source": "real_pair",
+      "tags": [
+        "real",
+        "hard:cluster"
+      ],
+      "split": "fidelity"
+    },
+    {
+      "id": "real:clone:read-https-essentiality-of-beauty-loreal-com-ref-07db",
+      "prompt": "read https://essentiality-of-beauty.loreal.com refactor noor loading and hero section with header to mirror reference exactally , use the same content and assest and motion",
+      "label": "clone",
+      "source": "real_pair",
+      "tags": [
+        "real"
+      ],
+      "split": "fidelity"
+    },
+    {
+      "id": "real:deploy:deoly-e291",
+      "prompt": "deoly",
+      "label": "deploy",
+      "source": "real_pair",
+      "tags": [
+        "real",
+        "hard:cluster"
+      ],
+      "split": "fidelity"
+    },
+    {
+      "id": "real:cloudflare:put-noor-databayt-org-b72f",
+      "prompt": "put noor.databayt.org",
+      "label": "cloudflare",
+      "source": "real_pair",
+      "tags": [
+        "real",
+        "hard:cluster"
+      ],
+      "split": "fidelity"
+    },
+    {
+      "id": "real:auth:config-google-and-facebook-and-enusre-it-functio-a946",
+      "prompt": "config google and facebook and enusre it function end to end",
+      "label": "auth",
       "source": "real_pair",
       "tags": [
         "real"
@@ -7495,8 +7922,16 @@
       "has_when_to_use": true
     },
     "auth": {
-      "support": 6,
-      "chars": 480,
+      "support": 5,
+      "chars": 336,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
+    "behalf": {
+      "support": 7,
+      "chars": 238,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
@@ -7519,7 +7954,7 @@
       "has_when_to_use": true
     },
     "blur": {
-      "support": 7,
+      "support": 8,
       "chars": 371,
       "scope": "project",
       "fp_cost": 1,
@@ -7583,7 +8018,7 @@
       "has_when_to_use": true
     },
     "cloudflare": {
-      "support": 12,
+      "support": 13,
       "chars": 533,
       "scope": "project",
       "fp_cost": 1,
@@ -7631,8 +8066,8 @@
       "has_when_to_use": true
     },
     "credentials": {
-      "support": 5,
-      "chars": 336,
+      "support": 4,
+      "chars": 249,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
@@ -7647,7 +8082,7 @@
       "has_when_to_use": true
     },
     "deploy": {
-      "support": 8,
+      "support": 16,
       "chars": 578,
       "scope": "project",
       "fp_cost": 3,
@@ -7655,7 +8090,7 @@
       "has_when_to_use": true
     },
     "dev": {
-      "support": 5,
+      "support": 7,
       "chars": 282,
       "scope": "user",
       "fp_cost": 1,
@@ -7679,7 +8114,7 @@
       "has_when_to_use": true
     },
     "draft": {
-      "support": 14,
+      "support": 13,
       "chars": 570,
       "scope": "project",
       "fp_cost": 1,
@@ -7784,7 +8219,7 @@
     },
     "jobs": {
       "support": 24,
-      "chars": 709,
+      "chars": 507,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
@@ -7855,7 +8290,7 @@
       "has_when_to_use": true
     },
     "performance": {
-      "support": 6,
+      "support": 5,
       "chars": 335,
       "scope": "user",
       "fp_cost": 1,
@@ -7919,7 +8354,7 @@
       "has_when_to_use": true
     },
     "qa": {
-      "support": 6,
+      "support": 3,
       "chars": 479,
       "scope": "project",
       "fp_cost": 3,
@@ -7935,7 +8370,7 @@
       "has_when_to_use": true
     },
     "record": {
-      "support": 7,
+      "support": 8,
       "chars": 318,
       "scope": "project",
       "fp_cost": 1,
@@ -7966,6 +8401,14 @@
       "claude_md_routed": false,
       "has_when_to_use": true
     },
+    "reverse": {
+      "support": 5,
+      "chars": 251,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
     "saas": {
       "support": 4,
       "chars": 284,
@@ -7983,7 +8426,7 @@
       "has_when_to_use": true
     },
     "scrape": {
-      "support": 25,
+      "support": 30,
       "chars": 500,
       "scope": "project",
       "fp_cost": 1,
@@ -8006,6 +8449,14 @@
       "claude_md_routed": false,
       "has_when_to_use": true
     },
+    "seek": {
+      "support": 8,
+      "chars": 268,
+      "scope": "project",
+      "fp_cost": 1,
+      "claude_md_routed": false,
+      "has_when_to_use": true
+    },
     "shadcn": {
       "support": 7,
       "chars": 395,
@@ -8023,7 +8474,7 @@
       "has_when_to_use": true
     },
     "shoot": {
-      "support": 5,
+      "support": 6,
       "chars": 315,
       "scope": "project",
       "fp_cost": 1,
@@ -8039,7 +8490,7 @@
       "has_when_to_use": true
     },
     "social": {
-      "support": 8,
+      "support": 7,
       "chars": 462,
       "scope": "project",
       "fp_cost": 1,
@@ -8055,8 +8506,8 @@
       "has_when_to_use": true
     },
     "sync": {
-      "support": 5,
-      "chars": 338,
+      "support": 8,
+      "chars": 422,
       "scope": "project",
       "fp_cost": 1,
       "claude_md_routed": false,
@@ -8087,7 +8538,7 @@
       "has_when_to_use": true
     },
     "textbook": {
-      "support": 11,
+      "support": 17,
       "chars": 431,
       "scope": "project",
       "fp_cost": 1,
@@ -8150,7 +8601,7 @@
     }
   ],
   "guards": {
-    "listing_cap": 33000,
+    "listing_cap": 33500,
     "skill_cap": 1200,
     "listing_over_cap": false,
     "skills_over_cap": [],
