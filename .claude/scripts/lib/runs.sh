@@ -258,7 +258,7 @@ runs_wrap() {
     case "$rc" in
         0) st=ok; sum="" ;;
         75) st=defer; [ -n "$sum" ] || sum="not now (exit 75)" ;;
-        77) st=fail; human=1 ;;
+        77) st=fail; human=1; [ -n "$sum" ] || sum="needs Abdout (exit 77) — see the job's log" ;;
         *) st=fail; [ -n "$sum" ] || sum="exit $rc" ;;
     esac
     runs_record "$job" "$st" "$sum" "$human" "" "" "$slept"

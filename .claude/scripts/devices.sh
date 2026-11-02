@@ -133,8 +133,17 @@ screen_locked() {
 run_presence() {
     trap 'rm -f "$PRESENCE_FILE"; exit 0' TERM INT
     log "presence started (idle limit ${IDLE_LIMIT}s, file $PRESENCE_FILE)"
-    local idle
+    local idle wake kicked=""
     while :; do
+        # A real wake (Graphics in pmset's systemstate, not a lid-shut dark wake): start the job
+        # supervisor now, once per wake, so a missed run resumes within seconds, not at its next
+        # 5-minute tick. kern.waketime changes with every wake, dark ones too — so a dark wake that
+        # turns into a real one still gets its single kick.
+        wake="$(sysctl -n kern.waketime 2>/dev/null | sed -n 's/^{ sec = \([0-9]*\),.*/\1/p')"
+        if [ -n "$wake" ] && [ "$wake" != "$kicked" ] && pmset -g systemstate 2>/dev/null | grep -q Graphics; then
+            launchctl kickstart "gui/$(id -u)/com.databayt.supervisor" >/dev/null 2>&1
+            kicked="$wake"
+        fi
         idle="$(idle_seconds)"
         if ! screen_locked && [ "${idle:-999999}" -lt "$IDLE_LIMIT" ]; then
             [ -f "$PRESENCE_FILE" ] || : > "$PRESENCE_FILE"

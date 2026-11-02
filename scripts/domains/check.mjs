@@ -362,7 +362,11 @@ if (flag("--alert") && !offline) {
     console.error(`alert sync failed: ${String(e.stderr || e.message).trim()}`);
   }
 }
-if (worst === SEV.block) process.exit(77);
+if (worst === SEV.block) {
+  // stderr's last line becomes the run record's summary (kun lib/runs.sh runs_wrap): name what needs Abdout.
+  console.error(`needs you: ${all.filter((r) => r.sev === SEV.block).map((r) => `${r.domain} ${r.check} — ${r.detail}`).join("; ")}`.slice(0, 200));
+  process.exit(77);
+}
 if (offline) {
   console.error("every probe failed — offline or resolvers down, deferring");
   process.exit(75);

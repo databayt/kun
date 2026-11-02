@@ -259,11 +259,11 @@
   "aware": { "label": "com.databayt.kun-aware", "cadence_hours": 0.5, "logs": ["~/.claude/logs/aware-*.log"], "owner": "kun", "resume": "tick", "needs": ["network"], "max_minutes": 20 },
   "captain-weekly": { "label": "com.databayt.captain-weekly", "cadence_hours": 168, "claude_runs_per_day": 1, "logs": ["~/.claude/logs/captain-weekly-*.log"], "owner": "kun", "resume": "auto", "max_attempts": 1, "needs": ["network"], "max_wait": 60, "max_minutes": 60 },
   "hermes:databayt-4h-heartbeat": { "cadence_hours": 4, "owner": "kun", "resume": "tick", "needs": ["network"] },
-  "hermes:hogwarts-crm-digest": { "cadence_hours": 24, "owner": "hogwarts", "resume": "auto", "max_attempts": 2, "needs": ["network", "twenty"], "only_if": "undelivered" },
+  "hermes:hogwarts-crm-digest": { "cadence_hours": 24, "owner": "hogwarts", "resume": "auto", "max_attempts": 2, "needs": ["network", "twenty"], "only_if": "undelivered", "refire_within_hours": 6 },
   "hermes:hogwarts-crm-activity": { "cadence_hours": 2, "owner": "hogwarts", "resume": "tick", "needs": ["network", "twenty"] },
   "hermes:hogwarts-snapshot-freshness": { "cadence_hours": 3, "owner": "hogwarts", "resume": "tick", "needs": ["network"] },
-  "hermes:databayt-weekly-social-plan": { "cadence_hours": 168, "owner": "kun", "resume": "auto", "max_attempts": 2, "needs": ["network"], "only_if": "undelivered" },
-  "hermes:databayt-daily-social-digest": { "cadence_hours": 72, "owner": "kun", "resume": "auto", "max_attempts": 2, "needs": ["network"], "only_if": "undelivered" },
+  "hermes:databayt-weekly-social-plan": { "cadence_hours": 168, "owner": "kun", "resume": "auto", "max_attempts": 2, "needs": ["network"], "only_if": "undelivered", "refire_within_hours": 24 },
+  "hermes:databayt-daily-social-digest": { "cadence_hours": 72, "owner": "kun", "resume": "auto", "max_attempts": 2, "needs": ["network"], "only_if": "undelivered", "refire_within_hours": 6 },
   "hermes:mkan-demand-match": { "cadence_hours": 24, "owner": "mkan", "resume": "auto", "max_attempts": 2, "needs": ["network"], "deadline_hours": 15 },
   "hermes:mkan-web-sweep": { "cadence_hours": 12, "owner": "mkan", "resume": "auto", "max_attempts": 2, "needs": ["network"], "deadline_hours": 14 },
   "hermes:mkan-tiktok-sweep": { "cadence_hours": 12, "owner": "mkan", "resume": "auto", "max_attempts": 2, "needs": ["network"], "deadline_hours": 14 },
@@ -271,7 +271,7 @@
   "hermes:mkan-tiktok-upload-retry": { "cadence_hours": 24, "owner": "mkan", "resume": "alert", "needs": ["network", "vault"] },
   "hermes:mkan-tiktok-stats": { "cadence_hours": 168, "owner": "mkan", "resume": "auto", "max_attempts": 3, "needs": ["network"] },
   "$owners": { "mkan": { "repo": "databayt/mkan", "notify": "mkan" }, "kun": { "repo": "databayt/kun", "notify": "me" }, "hogwarts": { "repo": "databayt/hogwarts", "notify": "me" } },
-  "$supervise": { "live": false, "heal": false, "alerts": false, "max_refires_per_tick": 2, "max_new_issues_per_day": 5, "reopen_days": 7, "wake_grace_minutes": 3, "min_minutes_to_next_slot": 60, "issue_label": "job-health", "mkan_mention": "<@U0AQ0GLDY04>", "beat_minutes": 15, "$comment": "live/heal/alerts start false: supervise.mjs logs what it would do to ~/.claude/state/supervise.json until each is turned on." }
+  "$supervise": { "live": false, "live_owners": ["mkan"], "heal": true, "alerts": true, "max_refires_per_tick": 2, "max_new_issues_per_day": 5, "reopen_days": 7, "wake_grace_minutes": 3, "min_minutes_to_next_slot": 60, "issue_label": "job-health", "mkan_mention": "<@U0AQ0GLDY04>", "beat_minutes": 15, "$comment": "heal and alerts are on; re-fires are live for live_owners (mkan since 2026-11-02) and logged as would-fire for the rest until live is true. supervise.mjs writes every decision to ~/.claude/state/supervise.json." }
  },
  "textbook": {
   "$comment": "Declared POLICY for the textbook pipeline (PDF -> verified Markdown twin). Measured state lives in .claude/memory/textbook-scores.json - never here. Thresholds remain PROVISIONAL but are now backed by FIVE graded books (biology .948 B, math .967 A, physics .953 A, chemistry .946 B, math-specialized .936 B) rather than one. Two structural facts drive the 2026-09-29 revision: (1) a formatter hook on Write corrupts pages identically in BOTH reads, so no agreement score in this pipeline can detect it - the Preflight canary is the only defence and the run now ABORTS when it fails; (2) render kind and reference direction are PER-BOOK facts - 16 of 25 sd/g12 pdfs are vector (1000px throws away detail) and reference order tracks the digit script (Latin EN books store reversed, Arabic-Indic AN books store as drawn), so carrying one book's answer to the next reverses every reference in it.",
