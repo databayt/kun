@@ -10,7 +10,7 @@
 //   node scripts/domains/check.mjs --only mkan.sd  one domain
 //   node scripts/domains/check.mjs --fixture expired   pretend the first domain expires in 5 days (alert-path test)
 //
-// Exit code: 0 all ok · 1 warnings · 2 something blocking.
+// Exit code (a job wrapper maps these): 0 ok — warnings too, they go to the run ledger and stay green · 75 defer (offline / gh unreachable, retry later) · 77 something blocking, needs Abdout · 1 any other failure.
 // Docs: content/docs/email.mdx (section "Health tracing").
 
 import { readFileSync } from "node:fs";
@@ -38,6 +38,10 @@ const resolver = new Resolver({ timeout: 5000, tries: 2 });
 resolver.setServers(["1.1.1.1", "8.8.8.8"]);
 
 const SEV = { ok: 0, warn: 1, block: 2 };
+
+// Probe bookkeeping: when EVERY probe fails we are offline (or both resolvers are down) — a defer, not a wall of warnings.
+let probes = 0;
+let probeFails = 0;
 
 // ---------- probes ----------
 
@@ -136,9 +140,11 @@ async function checkDomain(entry) {
   const out = [];
   const add = (check, sev, detail, action) => out.push({ domain: d, check, sev, detail, action });
   const guard = async (check, fn) => {
+    probes += 1;
     try {
       await fn();
     } catch (e) {
+      probeFails += 1;
       add(check, "warn", `probe failed: ${e.message}`, "re-run; if it persists, the registry or resolver is down");
     }
   };
@@ -315,6 +321,21 @@ async function syncIssues(all) {
   }
 }
 
+// ---------- exit ----------
+
+// gh / network failures a retry can fix. Anything else (auth, gh missing) is a real fault and must stay loud.
+const transient = (e) =>
+  /connecting to|could not resolve|time(d)? ?out|deadline|EAI_AGAIN|ENOTFOUND|ECONN|ENETUNREACH|HTTP (429|5\d\d)|rate limit/i.test(`${e.stderr ?? ""} ${e.message}`);
+
+// The run's record (kun's lib/runs.sh runs_record — state file + ledger) carries the warnings, so the
+// job stays green and the warning still shows in runs.sh. Best effort: a GitHub runner has no lib.
+function recordWarn(warns) {
+  const summary = `${warns.length} warnings: ${warns.map((r) => `${r.domain} ${r.check}`).join(", ")}`.slice(0, 200);
+  try {
+    execFileSync("bash", ["-c", '. "$HOME/.claude/scripts/lib/runs.sh" && runs_record "$@"', "_", "domains", "warn", summary, "0", "check"], { stdio: "ignore", timeout: 15_000 });
+  } catch {}
+}
+
 // ---------- main ----------
 
 const targets = config.domains.filter((e) => !opt("--only") || e.name === opt("--only"));
@@ -330,5 +351,23 @@ else {
   }
 }
 
-if (flag("--alert")) await syncIssues(all);
-process.exit(worst);
+// Exit codes (a job wrapper maps them): blocking → 77 (wins over everything) · every probe failed, or gh unreachable → 75 · warnings → 0 plus one ledger line.
+const offline = probes > 0 && probeFails === probes; // no network / resolvers down: nothing was learned, so open no issues from it
+let syncError = null;
+if (flag("--alert") && !offline) {
+  try {
+    await syncIssues(all);
+  } catch (e) {
+    syncError = e;
+    console.error(`alert sync failed: ${String(e.stderr || e.message).trim()}`);
+  }
+}
+if (worst === SEV.block) process.exit(77);
+if (offline) {
+  console.error("every probe failed — offline or resolvers down, deferring");
+  process.exit(75);
+}
+if (syncError) process.exit(transient(syncError) ? 75 : 1);
+const warns = all.filter((r) => r.sev === "warn");
+if (warns.length && flag("--alert")) recordWarn(warns);
+process.exit(0);

@@ -115,8 +115,9 @@ esac
 cd "$REPO" || exit 0
 
 log "nudge check start (stale threshold ${STALE_DAYS}d)"
+# Exit codes (the job wrapper maps them): 0 ok · 75 defer (Slack unreachable, retry later) · 77 needs Abdout · other = fail — passed through from social-digest.mjs.
 node scripts/social-digest.mjs --backlog-only --stale-days "$STALE_DAYS" >> "$LOG_FILE" 2>&1 || {
-    log "nudge failed — check DATABASE_URL / network"; exit 0;
+    rc=$?; log "nudge failed (exit $rc) — 75 = Slack/network unreachable, 1 = DATABASE_URL / webhook config or a crash"; exit "$rc"
 }
 log "nudge check end"
 exit 0

@@ -45,9 +45,11 @@ jobs:
           set +e
           node scripts/domains/check.mjs --alert
           code=$?
-          # 1 = warnings (already in issues); only blocking items fail the run.
-          if [ "$code" = "2" ]; then
-            echo "::error::A domain has a blocking problem — see the open 'domains' issues."
-            exit 1
-          fi
-          exit 0
+          # 0 ok (warnings live in the issues) · 75 GitHub or the network unreachable (the next
+          # run retries) · 77 a blocking item · anything else: the probe itself crashed.
+          case "$code" in
+            0) exit 0 ;;
+            75) echo "::warning::check.mjs could not reach GitHub or the network — the next run retries."; exit 0 ;;
+            77) echo "::error::A domain has a blocking problem — see the open 'domains' issues."; exit 1 ;;
+            *) echo "::error::check.mjs failed (exit $code)."; exit 1 ;;
+          esac

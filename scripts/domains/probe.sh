@@ -45,7 +45,8 @@ export SLACK_WEBHOOK_URL
 echo "--- $(date '+%F %T')"
 node "$KUN/scripts/domains/check.mjs" --smtp --alert
 code=$?
-if [ "$code" = "2" ]; then
+# Exit codes (a job wrapper maps them): 0 ok (check.mjs ledgers warnings itself) · 75 defer (offline / gh unreachable) · 77 blocking, needs Abdout · other = fail — all propagated below.
+if [ "$code" = "77" ]; then
   osascript -e 'display notification "A domain or inbox is failing — see the domains issue in databayt/kun" with title "Domains & mail" sound name "Basso"' 2>/dev/null
 fi
 exit "$code"

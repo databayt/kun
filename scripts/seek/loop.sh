@@ -52,6 +52,7 @@ weekday() { [ "$DOW" -le 5 ]; }
 
 run() {  # run <name> <cmd...> — logs, never aborts the tick
     local name="$1"; shift
+    local step="${name%-retry}"   # ingest-retry reports (and heals) as step ingest
     log "▶ $name"
     ( cd "$REPO" && "$@" ) >> "$LOG_FILE" 2>&1
     local rc=$?
@@ -59,10 +60,11 @@ run() {  # run <name> <cmd...> — logs, never aborts the tick
     # The ledger hears failures AND recoveries: a step that failed once must not keep the
     # whole loop red for a day after it healed (2026-11-02: console-push lost the network
     # 36 s before a lid-close sleep, then ran clean twice, still red). One line per recovery.
+    # Every record carries its step (5th arg): the ledger keeps per-step status, so one step's ok can't hide another's fail.
     if [ "$rc" -ne 0 ]; then
-        runs_record jobs fail "$name exit $rc"; : > "$STATE/.failed-$name"
-    elif [ -f "$STATE/.failed-$name" ]; then
-        rm -f "$STATE/.failed-$name"; runs_record jobs ok "$name recovered"
+        runs_record jobs fail "$name exit $rc" 0 "$step"; : > "$STATE/.failed-$step"
+    elif [ -f "$STATE/.failed-$step" ]; then
+        rm -f "$STATE/.failed-$step"; runs_record jobs ok "$name recovered" 0 "$step"
     fi
     return $rc
 }

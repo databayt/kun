@@ -121,8 +121,9 @@ esac
 cd "$REPO" || exit 0
 
 log "digest start"
+# Exit codes (the job wrapper maps them): 0 ok · 75 defer (Slack/Hermes unreachable, retry later) · 77 needs Abdout · other = fail — passed through from social-digest.mjs.
 node scripts/social-digest.mjs >> "$LOG_FILE" 2>&1 || {
-    log "digest failed — check DATABASE_URL / network"; exit 0;
+    rc=$?; log "digest failed (exit $rc) — 75 = Slack/network unreachable, 1 = DATABASE_URL / webhook config or a crash"; exit "$rc"
 }
 log "digest end"
 exit 0

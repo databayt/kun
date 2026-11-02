@@ -91,6 +91,13 @@ function firstLine(text, max = 60) {
   return line.length > max ? `${line.slice(0, max)}…` : line;
 }
 
+// Exit codes (a job wrapper maps them): 0 ok · 75 defer — Slack/Hermes unreachable, a retry can fix it · 1 fail — no target, or the webhook was rejected (a config fix).
+// Slack's error strings come from lib/slack.mjs: "unreachable" (the fetch threw) and HTTP 429/5xx are transient; any other status (404 no_service, 403 invalid_token…) is a dead webhook.
+function failCode(slackError, hermesConfigured = false) {
+  if (slackError) return /unreachable|webhook (429|5\d\d)\b/.test(slackError) ? 75 : 1;
+  return hermesConfigured ? 75 : 1; // Slack not configured: only a configured Hermes that failed counts as an outage
+}
+
 const weekStart = isoWeekStart();
 const week = isoWeekNumber();
 
@@ -225,16 +232,18 @@ if (BACKLOG_ONLY) {
   const nudge = backlogLines().join("\n");
   console.log(nudge);
   if (DRY_RUN) process.exit(0);
+  let slackError = "";
   if (isSlackConfigured()) {
     const res = await sendSlackMessage(nudge, "Social — waiting on you");
     if (res.ok) {
       console.error("Nudge delivered to Slack.");
       process.exit(0);
     }
+    slackError = res.error;
     console.error(`Slack nudge failed: ${res.error}`);
   }
   console.error("⚠ Nudge printed above but DELIVERED NOWHERE — set SLACK_WEBHOOK_URL.");
-  process.exit(0);
+  process.exit(failCode(slackError));
 }
 
 lines.push(`📋 Social — week ${week} Friday digest`);
@@ -304,12 +313,14 @@ if (DRY_RUN) process.exit(0);
 
 // Slack's direct webhook first — the one destination reachable with nothing
 // else awake. Same order, and the same reasoning, as lib/social-review.ts.
+let slackError = "";
 if (isSlackConfigured()) {
   const res = await sendSlackMessage(digest, "Weekly social digest");
   if (res.ok) {
     console.error("Delivered to Slack.");
     process.exit(0);
   }
+  slackError = res.error;
   console.error(`Slack delivery failed (${res.error}) — falling back to the Hermes relay.`);
 }
 
@@ -330,4 +341,4 @@ try {
 console.error(
   "⚠ Digest printed above but DELIVERED NOWHERE — set SLACK_WEBHOOK_URL (an incoming webhook on a PRIVATE channel) or HERMES_API_URL.",
 );
-process.exit(0);
+process.exit(failCode(slackError, Boolean((process.env.HERMES_API_URL ?? "").trim())));
