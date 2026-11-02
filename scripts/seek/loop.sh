@@ -56,7 +56,14 @@ run() {  # run <name> <cmd...> — logs, never aborts the tick
     ( cd "$REPO" && "$@" ) >> "$LOG_FILE" 2>&1
     local rc=$?
     log "◀ $name exit $rc"
-    [ "$rc" -ne 0 ] && runs_record jobs fail "$name exit $rc"
+    # The ledger hears failures AND recoveries: a step that failed once must not keep the
+    # whole loop red for a day after it healed (2026-11-02: console-push lost the network
+    # 36 s before a lid-close sleep, then ran clean twice, still red). One line per recovery.
+    if [ "$rc" -ne 0 ]; then
+        runs_record jobs fail "$name exit $rc"; : > "$STATE/.failed-$name"
+    elif [ -f "$STATE/.failed-$name" ]; then
+        rm -f "$STATE/.failed-$name"; runs_record jobs ok "$name recovered"
+    fi
     return $rc
 }
 

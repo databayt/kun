@@ -238,6 +238,30 @@ const detectors = {
     visit(dir, 0);
     if (bad.length) add({ detector: "envperms", subject: "cf-build", class: "SAFE", title: `${bad.length} production env file(s) readable by other users`, evidence: bad.map((f) => f.replace(HOME, "~")), fix: { kind: "local", how: "chmod 600", files: bad } });
   },
+  locks() {
+    // A loop that can't take its lock skips every tick, exits 0 and writes a fresh log, so
+    // exit codes and log age both read healthy (2026-11-02: ~/.claude/.draft-drain.lock had
+    // blocked the social draft drain since 2026-09-13 — seven weeks, every tick "skip: lock
+    // held"). Any loop lock older than 6 h is stale; reclaiming it revives a lane that may
+    // spend, so it is a decision, never automatic.
+    let ents = [];
+    try {
+      ents = fs.readdirSync(CLAUDE, { withFileTypes: true }).filter((e) => /^\..+\.lock$/.test(e.name));
+    } catch {}
+    for (const e of ents) {
+      const p = path.join(CLAUDE, e.name);
+      let st;
+      try {
+        st = fs.statSync(p);
+      } catch {
+        continue;
+      }
+      const ageH = (NOW - st.mtimeMs) / 3.6e6;
+      if (ageH < 6) continue;
+      const since = new Date(st.mtimeMs).toISOString().slice(0, 16).replace("T", " ");
+      add({ detector: "locks", subject: e.name, class: "DECIDE", title: `Stale lock ${e.name} since ${since} UTC — its loop skips every tick while looking healthy`, evidence: [`${p} is ${Math.round(ageH)} h old`], metric: { name: `locks.${e.name}.age_h`, before: Math.round(ageH), target: 0 }, fix: { kind: "local", how: `confirm no process holds it, then ${st.isDirectory() ? "rmdir" : "rm"} ${p.replace(HOME, "~")} — revives the loop, which then spends per its design` } });
+    }
+  },
   memory() {
     const dir = path.join(CLAUDE, "projects", `-${KUN.replace(/^\//, "").replace(/[/.]/g, "-")}`, "memory");
     const idx = path.join(dir, "MEMORY.md");
@@ -332,7 +356,10 @@ function syncIssue(state) {
   const owner = fs.existsSync(path.join(HOME, "Library/LaunchAgents/com.databayt.kun-aware.plist"));
   if (!owner && !process.argv.includes("--force")) return "not the owner machine — the Engine decisions issue is written from the Mac that runs aware's refresher (--force overrides)";
   const decide = state.findings.filter((f) => f.class === "DECIDE" && ["open", "proposed", "approved", "regressed"].includes(f.status));
-  const list = run("gh", ["issue", "list", "--repo", pol.issue_repo, "--label", pol.issue_label, "--state", "open", "--json", "number", "-q", ".[0].number"], 30000);
+  // Find OUR issue by its exact title, never "the first issue with the label": a decision
+  // proposal filed under the same label (#171, 2026-11-02) got its body overwritten.
+  const TITLE = "Engine decisions — kun self-improvement queue";
+  const list = run("gh", ["issue", "list", "--repo", pol.issue_repo, "--label", pol.issue_label, "--state", "open", "--limit", "50", "--json", "number,title", "-q", `[.[] | select(.title == "${TITLE}")][0].number // ""`], 30000);
   let num = list.ok ? list.out.trim() : "";
   // approvals first: `yes <id>` comments from the approver
   if (num) {
@@ -360,7 +387,7 @@ ${doneLines.length ? `\n**Applied in the last 14 days** — a detector's row is 
   if (num) res = run("gh", ["issue", "edit", num, "--repo", pol.issue_repo, "--body", body], 30000);
   else {
     run("gh", ["label", "create", pol.issue_label, "--repo", pol.issue_repo, "--force", "--color", "5319e7"], 30000);
-    res = run("gh", ["issue", "create", "--repo", pol.issue_repo, "--title", "Engine decisions — kun self-improvement queue", "--label", pol.issue_label, "--body", body], 30000);
+    res = run("gh", ["issue", "create", "--repo", pol.issue_repo, "--title", TITLE, "--label", pol.issue_label, "--body", body], 30000);
     num = (/\/issues\/(\d+)/.exec(res.out) || [])[1] || "";
   }
   for (const f of state.findings) if (f.class === "DECIDE" && f.status === "open" && res.ok) f.status = "proposed";
