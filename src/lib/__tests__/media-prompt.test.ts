@@ -1,11 +1,28 @@
 import { describe, expect, it } from "vitest";
 import { buildMediaPrompt } from "@/lib/media-prompt";
 import kit from "../../../content/media/brand-kit.json";
+import pillars from "../../../content/social/pillars.json";
 
 const ok = (r: ReturnType<typeof buildMediaPrompt>) => {
   if (!r.ok) throw new Error(`expected a compile, got: ${r.error}`);
   return r;
 };
+
+// Pillar fixtures come from the live plan BY PROPERTY, never by id. The plan's briefs
+// rotate with the campaigns: hogwarts' pillars left content/social/pillars.json on
+// 2026-09-27 (cf6bdf4, dbbb67a) and these tests sat red — or passed vacuously — for five
+// weeks while the behaviour under test never changed.
+type PlanPillar = { brand: string; id: string; visual?: { type: string; subject: string } | null };
+const PLAN: PlanPillar[] = Object.entries(pillars as unknown as Record<string, unknown>).flatMap(
+  ([brand, list]) => (Array.isArray(list) ? (list as Omit<PlanPillar, "brand">[]).map((p) => ({ ...p, brand })) : []),
+);
+const RASTER = ["hero", "lifestyle", "product", "plate", "mockup"];
+const withVisual = PLAN.find((p) => p.visual?.subject && RASTER.includes(p.visual.type));
+const withoutVisual = PLAN.find((p) => p.visual === null);
+function need<T>(p: T | undefined, what: string): T {
+  if (!p) throw new Error(`content/social/pillars.json has no ${what} — add one, or retire the test that needs it`);
+  return p;
+}
 
 describe("buildMediaPrompt — routing", () => {
   it("sends a copy-carrying type to the template lane, never to a raster model", () => {
@@ -67,17 +84,19 @@ describe("buildMediaPrompt — what it says", () => {
   });
 
   it("names the feature and why, when a pillar is picked", () => {
-    const r = ok(buildMediaPrompt({ brand: "hogwarts", assetType: "product", subject: "", pillarId: "admission-highlight" }));
-    expect(r.prompt).toContain("admission-highlight");
+    const p = need(withVisual, "pillar with a raster visual");
+    const r = ok(buildMediaPrompt({ brand: p.brand, assetType: p.visual!.type, subject: "", pillarId: p.id }));
+    expect(r.prompt).toContain(p.id);
     // The pillar carries its own scene, so an empty subject still compiles.
     expect(r.prompt.length).toBeGreaterThan(400);
   });
 
   it("omits an absent section rather than rendering it empty", () => {
-    const without = ok(buildMediaPrompt({ brand: "hogwarts", assetType: "hero", subject: "a desk" }));
+    const p = need(withVisual, "pillar with a raster visual");
+    const without = ok(buildMediaPrompt({ brand: p.brand, assetType: "hero", subject: "a desk" }));
     expect(without.prompt).not.toMatch(/WHY IT EXISTS/);
     expect(without.prompt).not.toMatch(/REFERENCES/);
-    const withPillar = ok(buildMediaPrompt({ brand: "hogwarts", assetType: "hero", subject: "a desk", pillarId: "admission-highlight" }));
+    const withPillar = ok(buildMediaPrompt({ brand: p.brand, assetType: "hero", subject: "a desk", pillarId: p.id }));
     expect(withPillar.prompt).toMatch(/WHY IT EXISTS/);
   });
 
@@ -92,19 +111,21 @@ describe("buildMediaPrompt — what it says", () => {
 
 describe("buildMediaPrompt — it says when it diverges from the plan", () => {
   it("warns when the chosen type is not the one the plan suggested", () => {
-    // admission-highlight's plan entry asks for a `plate`.
-    const r = ok(buildMediaPrompt({ brand: "hogwarts", assetType: "product", subject: "a counter", pillarId: "admission-highlight" }));
-    expect(r.warnings.join(" ")).toMatch(/plan suggests "plate"/);
+    const p = need(withVisual, "pillar with a raster visual");
+    const other = RASTER.find((t) => t !== p.visual!.type)!;
+    const r = ok(buildMediaPrompt({ brand: p.brand, assetType: other, subject: "a counter", pillarId: p.id }));
+    expect(r.warnings.join(" ")).toContain(`plan suggests "${p.visual!.type}"`);
   });
 
   it("stays quiet when the type matches the plan", () => {
-    const r = ok(buildMediaPrompt({ brand: "hogwarts", assetType: "plate", subject: "a counter", pillarId: "admission-highlight" }));
+    const p = need(withVisual, "pillar with a raster visual");
+    const r = ok(buildMediaPrompt({ brand: p.brand, assetType: p.visual!.type, subject: "a counter", pillarId: p.id }));
     expect(r.warnings.join(" ")).not.toMatch(/plan suggests/);
   });
 
   it("says so when the plan left the image to the template lane", () => {
-    // arabic-first-rtl carries visual: null.
-    const r = ok(buildMediaPrompt({ brand: "hogwarts", assetType: "hero", subject: "a screen", pillarId: "arabic-first-rtl" }));
+    const p = need(withoutVisual, "pillar with visual: null");
+    const r = ok(buildMediaPrompt({ brand: p.brand, assetType: "hero", subject: "a screen", pillarId: p.id }));
     expect(r.warnings.join(" ")).toMatch(/template lane/);
   });
 

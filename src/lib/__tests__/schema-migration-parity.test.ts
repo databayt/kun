@@ -31,11 +31,10 @@ import { describe, expect, it } from "vitest";
 // deliberately a human step. Listing them here keeps the debt visible and lets
 // the guard catch the NEXT one immediately. Delete an entry when #152 lands —
 // the test fails if an entry here is no longer missing, so the list cannot rot.
-const KNOWN_MISSING = [
-  "JobOpportunity",
-  "JobAssessment",
-  "EvidenceProfileSnapshot",
-] as const;
+// Empty since 2026-11-02: JobOpportunity, JobAssessment and EvidenceProfileSnapshot gained
+// their CREATE TABLE in prisma/migrations/20260821120000_job_engine — the stale-entry test
+// below asked for exactly this. A new entry needs a dated reason, like the three had.
+const KNOWN_MISSING: readonly string[] = [];
 
 const root = fileURLToPath(new URL("../../..", import.meta.url));
 const schemaPath = `${root}/prisma/schema.prisma`;
