@@ -71,4 +71,6 @@ print("quick_commands:", ", ".join("/" + k for k in want))
 PY
 
 [ "${1:-}" = "--check" ] && exit 0
-launchctl kickstart -k "gui/$(id -u)/ai.hermes.gateway" && echo "gateway restarted"
+# `hermes gateway restart` drains in-flight cron jobs first (agent.restart_drain_timeout);
+# `kickstart -k` killed them mid-run (11-01).
+hermes gateway restart >/dev/null 2>&1 && echo "gateway restarted"
