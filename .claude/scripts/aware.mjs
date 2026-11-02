@@ -155,11 +155,31 @@ function jobs() {
   const j = out ? readJSONString(out) : null;
   if (!j) return null;
   const why = Object.fromEntries((j.rows || []).map((r) => [r.job, r.why]));
+  // The job supervisor (supervise.mjs) acts on the same judgment; its last tick says it is alive.
+  const supPlist = path.join(os.homedir(), "Library/LaunchAgents/com.databayt.supervisor.plist");
+  let supervisor = null;
+  if (fs.existsSync(supPlist)) {
+    const st = (() => {
+      try {
+        return JSON.parse(fs.readFileSync(path.join(CLAUDE, "state/supervise.json"), "utf8"));
+      } catch {
+        return null;
+      }
+    })();
+    const today = new Date().toISOString().slice(0, 10);
+    supervisor = {
+      age_min: st?.at ? Math.round((Date.now() - Date.parse(st.at)) / 60000) : null,
+      open: Object.entries(st?.alerts || {}).filter(([, a]) => a.open).map(([k, a]) => `${k} ${a.repo}#${a.issue}`),
+      fired_today: (st?.log || []).filter((l) => l.action === "fire" && l.at?.startsWith(today)).length,
+      healed_today: (st?.log || []).filter((l) => l.action === "heal" && l.at?.startsWith(today)).length,
+    };
+  }
   return {
     red: (j.red || []).map((n) => ({ job: n, why: why[n] || "" })),
     stale: (j.stale || []).map((n) => ({ job: n, why: why[n] || "" })),
     needs_human: j.needs_human || [],
     total: (j.rows || []).length,
+    supervisor,
   };
 }
 function readJSONString(s) {
@@ -489,7 +509,12 @@ function candidates(s) {
   const m = s.machine;
   if (m.disk_gb != null && m.disk_gb < cfg.disk_low_gb) c.disk_low = `Disk ${m.disk_gb} GB free (under ${cfg.disk_low_gb})`;
   if (m.disk_delta_24h != null && m.disk_delta_24h <= -cfg.disk_drop_gb_24h) c.disk_drop = `Disk fell ${-m.disk_delta_24h} GB in 24 h`;
-  for (const j of s.jobs?.red || []) c[`job_red:${j.job}`] = `Job red: ${j.job}${j.why ? ` — ${j.why.slice(0, 80)}` : ""}`;
+  // With the job supervisor on this Mac, it re-runs and escalates red jobs itself (an issue + Slack);
+  // aware only watches that the supervisor is alive. Without it (a teammate's Mac), red jobs alert here.
+  const sup = s.jobs?.supervisor;
+  if (sup) {
+    if (sup.age_min == null || sup.age_min > 20) c.supervisor_silent = `Job supervisor silent${sup.age_min == null ? "" : ` for ${sup.age_min} min`} — launchctl print gui/$(id -u)/com.databayt.supervisor`;
+  } else for (const j of s.jobs?.red || []) c[`job_red:${j.job}`] = `Job red: ${j.job}${j.why ? ` — ${j.why.slice(0, 80)}` : ""}`;
   if (s.surfaces?.hermes_installed && s.surfaces.hermes_up === false) c.hermes_down = "Hermes gateway is not running";
   if (m.rc_armed && m.rc_up === false) c.rc_down = "Remote Control server is down (the phone can't reach the Mac)";
   for (const p of s.products || []) if (p.ci === "failure") c[`ci_fail:${p.repo}`] = `${p.repo} main CI failed (${p.workflow})`;
@@ -540,6 +565,8 @@ function markdown(s) {
   L.push(`# kun · ${host} · ${new Date(s.ts).toISOString().slice(0, 16).replace("T", " ")} UTC`);
   if (alertLine(s)) L.push(`⚠ ${alertLine(s)}`);
   if (s.jobs) L.push(`Jobs: ${s.jobs.red.length} red${s.jobs.red.length ? ` (${s.jobs.red.map((j) => j.job).join(", ")})` : ""} · ${s.jobs.stale.length} stale · ${s.jobs.total} watched`);
+  const sv = s.jobs?.supervisor;
+  if (sv) L.push(`Job supervisor: last tick ${sv.age_min == null ? "never" : `${sv.age_min} min ago`} · re-fired ${sv.fired_today} · healed ${sv.healed_today} today${sv.open.length ? ` · open: ${sv.open.join(", ")}` : ""} — node ~/kun/.claude/scripts/supervise.mjs --status`);
   const m = s.machine;
   L.push(`Machine: disk ${m.disk_gb} GB${m.disk_delta_24h != null ? ` (${m.disk_delta_24h >= 0 ? "+" : ""}${m.disk_delta_24h} GB/24h)` : ""}${m.swap_pct != null ? ` · swap ${m.swap_pct}%` : ""} · ${m.sessions ?? "?"} sessions${m.rc_armed ? ` · RC ${m.rc_up ? "up" : "DOWN"}` : ""}`);
   const sp = s.spend;
@@ -627,6 +654,8 @@ function brief(projectDir) {
     const stale = s.jobs.stale.map((j) => j.job).join(", ");
     L.push(`Jobs needing attention: ${[red && `red ${red}`, stale && `stale ${stale}`].filter(Boolean).join("; ")} — detail: bash ~/.claude/scripts/runs.sh`);
   }
+  const sv = s.jobs?.supervisor;
+  if (sv) L.push(`Job supervisor: last tick ${sv.age_min == null ? "never" : `${sv.age_min} min ago`} · re-fired ${sv.fired_today} · healed ${sv.healed_today} today${sv.open.length ? ` · open: ${sv.open.join(", ")}` : ""}`);
   const m = s.machine || {};
   if (m.disk_gb != null && m.disk_gb < (warn.disk_free_gb ?? 20) && !s.alerts?.active?.some((k) => k.startsWith("disk"))) L.push(`Mac disk: ${m.disk_gb} GB free (under ${warn.disk_free_gb ?? 20}) — builds and swap fail near zero.`);
   if (m.sessions > (warn.sessions ?? 6) && (m.swap_pct ?? 0) >= (warn.swap_used_pct ?? 80)) L.push(`Memory: ${m.sessions} Claude sessions open, swap ${m.swap_pct}% — close idle ones.`);
