@@ -6,6 +6,7 @@
 **Type**: 2 (reversible — ordering of work, not an architecture change)
 **Status**: proposed
 **Reviewed-by**: 2026-08-15
+**Reviewed**: 2026-11-02 (grade: right)
 **Tags**: #security #auth #server-actions #ci #performance #cowork-handoff
 
 ## Decision
@@ -122,3 +123,10 @@ all downstream of that one missing generated module.)
 ## Review
 
 (To be filled at reviewed-by date 2026-08-15.)
+
+**2026-11-02 — decision-review sweep · grade: right**
+
+- **Actual outcome**: Executed in order, the same day. Security: scrypt hashes replaced `"1234"` (`594ffa8`), contributor emails left the client bundle (`db6347b`), `dispatch.ts`/`status.ts` gated + `proxy.ts` (`deabc26`), abuse pipeline fails closed (`ee58dba`). Build gate: `ignoreBuildErrors` removed, `ci.yml` runs typecheck + vitest + build on every push (`b1797df`; red 11-01, green 11-02). The performance PR (Tasks 6–7) never shipped: `report-issue/index.tsx:17` still awaits `auth()`, `/en` serves `no-store`, `framer-motion` and `@tabler/icons-react` remain.
+- **Was the prediction right?** Yes on what mattered — no unauthenticated path to a Page or the PAT, a build that can fail. One regression: `e606768` (08-19, a brand-registration commit) re-opened two holes (ungated `generateStudioImage`, a commented-out Hub `auth()`), fixed the same day (`bf9caa0`) and pinned by a test (`0dd9b74`).
+- **Was the decision right** (independent of outcome)? Yes; static rendering is still owed.
+- **Lesson**: A closed hole stays closed only when a test pins it — unrelated commits reopen them; and a deferred last phase needs its own issue, or it never ships.

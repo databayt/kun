@@ -60,3 +60,13 @@ Specific questions:
 2. Has the "pre-launch equity contract" principle been applied to any actual Databayt partnership?
 3. Has the Khedr Helicopter staging actually been used to frame the MENA-10 → paid → scale progression?
 4. Has any Khedr-attributed framework been removed for accuracy reasons?
+
+## Review — needs Abdout (2026-11-02)
+
+**The one question**: Has any teammate or partner signed a written equity/CU agreement — the "pre-launch equity contract" the public contract page (kun.databayt.org/en/docs/share-economy → "The five Khedr clauses") says no partnership operates without?
+
+**What the record establishes**:
+- Q1/Q4: all five Khedr clauses are live and unchanged in EN and AR (last edit `4a0967f`, 05-19); none was removed for accuracy and no misquote flag is on record. They rest on secondary sources (the إضاءات summary, publisher pages), not a reading of the book.
+- Q2: the doctrine's own table still says "(gap — partnerships are presently informal)"; the roster has since grown to 7 (`2f7090a`, 07-02), and no agreement, template or `databayt/revenue` repo exists in any databayt repo.
+- Q3: "Khedr Helicopter" staging appears only in the doctrine and contract page — no GTM, North-Star or pilot doc frames MENA-10 → paid → scale with it.
+- Grade on the answer: agreements exist → **right**; none → **wrong** (the public page states a rule the company does not keep: sign the agreements or soften the clause).

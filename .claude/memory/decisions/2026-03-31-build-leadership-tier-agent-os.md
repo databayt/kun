@@ -6,6 +6,7 @@
 **Type**: 1 (architectural — the structure of the agent system shapes all subsequent work)
 **Status**: executed
 **Reviewed-by**: 2026-06-30 (Q2 end)
+**Reviewed**: 2026-11-02 (grade: wrong)
 **Tags**: #architecture #agents #captain #leadership #backfilled
 
 ## Decision
@@ -49,3 +50,10 @@ Build the Databayt agent OS as a tiered hierarchy: **Tier 0 captain** → **Tier
 (To be filled at reviewed-by date 2026-06-30.)
 
 **Notes from backfill (2026-05-12)**: 9 leadership agents built and operating (captain, revenue, growth, support, product, analyst, tech-lead, ops, guardian). 31+ specialists in `/Users/abdout/kun/.claude/agents/`. Captain v2 (this Phase A) addresses the "captain advisory not authoritative" risk by giving it persistent state, frontmatter discipline, and machine-parseable decision matrix.
+
+**2026-11-02 — decision-review sweep · grade: wrong**
+
+- **Actual outcome**: The tier exists and is maintained (`.claude/agents/`, `plugins/kun-company`), but nothing dispatches it: across 2,390 Claude Code transcripts (2026-04-25 → 11-02), 0 of 1,028 subagent calls went to captain, revenue, growth, support, product, analyst, tech-lead, ops or guardian — Explore (427), general-purpose (409), fork (69) and Plan (42) did the work, and nine skills cite the agent files only as reference text. The captain lives on as the `captain`/`weekly` skills; its routine `scripts/captain/weekly.sh` was built 2026-11-01, and `952b38b` is the only plan in `memory/weekly/`.
+- **Was the prediction right?** No — the failure case held: every commit since April in kun/hogwarts/mkan/codebase/marketing/space is Abdout's, the GitHub org's only member is `abdout`, and the North Star is still 0 paying schools (weekly plan 2026-11-01).
+- **Was the decision right** (independent of outcome)? No — the org-chart tier added files, plugin parity and engine counts to maintain, and no leverage the generic subagents and skills did not already give.
+- **Lesson**: An agent earns its place by being dispatched; count `subagent_type` calls before adding or keeping a role agent, and put standing roles in skills or routines that actually run (`feedback_agents_earn_dispatch.md`).

@@ -6,6 +6,7 @@
 **Type**: 2 (additive refinement of an existing artifact + alignment work; reversible)
 **Status**: executed
 **Reviewed-by**: 2026-08-18 (alongside the other two 2026-05-18 decisions)
+**Reviewed**: 2026-11-02 (grade: right)
 **Tags**: #doctrine #share-economy #smart-contract #arabic-sync #upstream-cross-link
 
 ## Decision
@@ -66,3 +67,10 @@ Specific questions:
 3. Have CONSTITUTION/PRINCIPLES/doctrine cross-links continued to resolve cleanly?
 4. Has any reader been confused about the three-layer story (doctrine / contract / measurement)?
 5. Has any new Akbar or Khedr material surfaced that should be integrated, or was integrated material rolled back for accuracy?
+
+**2026-11-02 — decision-review sweep · grade: right**
+
+- **Actual outcome**: The alignment held. `share-economy.mdx` and `.ar.mdx` are both 158 lines with the same 11 sections in the same order — under the ~175-line cap (Q2) — and have only changed together since (`4a0967f`, 05-19; Q5: nothing rolled back). CONSTITUTION.md §7 and PRINCIPLES.md #22 still link both the doctrine and the contract with distinguishing labels (Q3), and the doctrine still opens with the three-layer order.
+- **Was the prediction right?** Yes on everything checkable; no AR-reader or three-layer feedback is on record (Q1, Q4).
+- **Was the decision right** (independent of outcome)? Yes. One rough edge: kun's docs route prerenders `en` only (`generateStaticParams`), so the Arabic mirror is live at `/en/docs/share-economy.ar` while `/ar/docs/share-economy` — the URL `4a0967f` announced — returns 404.
+- **Lesson**: Mirrors stay aligned when both languages change in one commit; verify each mirror at its own locale URL, not only in the repo.

@@ -6,6 +6,7 @@
 **Type**: 2 (reversible — `SOCIAL_DRAFT_INLINE=off` reverts to the queue in one env var)
 **Status**: verified — proceed, with a named ceiling
 **Reviewed-by**: 2026-09-07 (against observed daily draft volume)
+**Reviewed**: 2026-11-02 (grade: partly)
 **Tags**: #social #draft #gemini #latency #billing
 **Supersedes the blocked half of**: [D-20260730-in-app-draft-spend](./2026-07-30-in-app-draft-spend.md)
 
@@ -90,3 +91,12 @@ Measuring first-pass craft rates surfaced a live bug: the `invented-number` guar
 accept a figure supplied by an Arabic brief in Arabic-Indic digits, making such drafts
 unanswerable on the shipping Mac lane without `--craft-override`. Fixed in `440f5ee`; first-pass
 clean went **1/6 → 4/6** on the fix alone.
+
+## Review
+
+**2026-11-02 — decision-review sweep · grade: partly**
+
+- **Actual outcome**: The inline lane worked when used — $0, busiest day 4 asks against the 20/day ceiling, billing never needed. But demand was one person: Abdout's 9 `google-free` asks (08-07 → 08-29), none approved (8 dismissed, 1 superseded), none from anyone since. And the floor is dead: `~/.claude/.draft-drain.lock` has been held since 2026-09-13 08:00, so every one-minute tick of `drain-drafts.sh` (the Mac `claude -p` lane and `drain-google`) logs `skip: lock held` and exits 0. All 11 weekly seed asks since (09-14, 10-19, 10-26) expired unanswered, while the Friday digest posted "draft-drain ⚠ stale" to Slack (10-09, 10-23, 10-30).
+- **Was the prediction right?** Partly — the ~11 s path held and overflow never arose, but the premise of 5–10 drafts a day was off by an order of magnitude (~0.4/day for three weeks, then zero).
+- **Was the decision right** (independent of outcome)? Yes as a free, reversible lane; the volume premise was never measured, and the floor it counted on had no alarm anyone answers.
+- **Lesson**: A fallback is a floor only if a progress check pages someone when it stops — exit 0 plus a fresh log passes `runs.sh`, which is how this one sat dead for 50 days (`feedback_liveness_is_not_progress.md`).

@@ -6,6 +6,7 @@
 **Type**: 2 (reversible — remove the window or unset the key and the spend stops)
 **Status**: blocked — the premise was wrong (see Blocker below)
 **Reviewed-by**: 2026-08-30 (against the first Anthropic bill, if the lane is ever funded)
+**Reviewed**: 2026-11-02 (grade: wrong)
 **Tags**: #social #billing #api-spend #agent-window
 
 ## Decision
@@ -58,3 +59,12 @@ radius: contributors only (allowlist + scrypt), brief capped at 2 000 chars, one
 Team drafting moves into the product (no Claude Code session needed); monthly draft spend stays
 under ~$5 at realistic volume (≈100 drafts). If the 2026-08-30 review shows more, downshift the
 model or cap per-day drafts before touching the doctrine.
+
+## Review
+
+**2026-11-02 — decision-review sweep · grade: wrong**
+
+- **Actual outcome**: Never executed. The premise — a working `ANTHROPIC_API_KEY` — failed its first live test the same day (the 401 in the Blocker above), and the lane was never funded. The `draftBrief` client was deleted 08-07 (`f0e334c`), the window moved to free-tier Gemini (D-20260807-gemini-inline-draft), and API spend later entered the doctrine by another route: included Max credits, hard-capped per lane (the three D-20261021 records).
+- **Was the prediction right?** No. Team drafting never moved into the product: the only person who ever asked from the window is Abdout — 11 asks, 08-05 → 08-29 (`SocialDraftRequest`), none approved, none since.
+- **Was the decision right** (independent of outcome)? No — it sanctioned a spend before checking that the money behind the key existed, under a subscription-only doctrine that said it did not.
+- **Lesson**: Probe the credential and its balance with a live call before writing a spend decision; D-20260807 measured first (Track 0) and shipped (`feedback_probe_before_recording.md`).

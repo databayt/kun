@@ -6,6 +6,7 @@
 **Type**: 1 (constitutional — once published, the doctrine binds the meaning of "Community is the moat" / Principle #22 across the company and the public-facing brand)
 **Status**: in-progress (drafting)
 **Reviewed-by**: 2026-08-12 (90 days)
+**Reviewed**: 2026-11-02 (grade: partly)
 **Tags**: #doctrine #share-economy #constitution #principle-22 #samia #references
 
 ## Decision
@@ -75,3 +76,10 @@ Specific review questions to answer at 90 days:
 4. Has any political-lineage concern surfaced from a sponsor, partner, or contributor?
 5. Has any Khedr-misquote concern surfaced from a reviewer who has read his work?
 6. Did scope creep occur after publication (Part III translation table breached)?
+
+**2026-11-02 — decision-review sweep · grade: partly**
+
+- **Actual outcome**: The artifact shipped and held: `d3c09aa` (05-18, inside the 3-week target), 595 lines against the ~800 plan (no scope creep, Q6), live at kun.databayt.org/en/docs/share-economy, CONSTITUTION §7 / PRINCIPLES #22 / CEO-OS Part V §I / hogwarts `shared-economy.mdx` links still resolve (Q3), and the Aldar and delivery docs cite it for the open-core licence (05-26, Q1). The human half never happened: the Samia and Ali gates were dropped by the founder six days later (D-20260518-khedr); Samia's Q3 spec never started — `databayt/revenue` does not exist and `1on1/samia.md` has no entry after its 05-12 init (Q2); the doctrine's own 2026-08-13 review lapsed (header still "Last reviewed 2026-05-13"). The Ahmed Baha share and any lineage or misquote concern (Q4, Q5) are unrecorded.
+- **Was the prediction right?** Partially — on time, no creep, links resolve; the Samia and Ali criteria failed.
+- **Was the decision right** (independent of outcome)? Yes to name the posture; the deferral it leaned on had no date Samia accepted and nothing that checked it.
+- **Lesson**: A deferral to a named teammate ("Samia, Q3") is a plan only if they accepted the date and something checks it — this one silently became "never" (`feedback_qa_workflow.md`: never put a teammate's repo work on a critical path).

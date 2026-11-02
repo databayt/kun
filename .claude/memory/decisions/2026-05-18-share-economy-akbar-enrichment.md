@@ -6,6 +6,7 @@
 **Type**: 2 (refinement of an existing Type-1 doctrine; additive, no constitutional change; reversible by editing the same sections back if reception is poor)
 **Status**: executed
 **Reviewed-by**: 2026-08-18 (90 days, alongside the 2026-08-13 quarterly doctrine review)
+**Reviewed**: 2026-11-02 (grade: partly)
 **Tags**: #doctrine #share-economy #akbar #qas-al-haq #enrichment
 
 ## Decision
@@ -65,3 +66,10 @@ Specific review questions:
 3. Has the three-forms-of-submission language appeared in any pitch material, contract template, or sponsor conversation?
 4. Has the doctrine's audience treated the new sections as doctrine (intended) or as Spec (failure mode)?
 5. Did the founder need to amend or trim any of the new content within 90 days?
+
+**2026-11-02 — decision-review sweep · grade: partly**
+
+- **Actual outcome**: The three imports held and became the live contract page's spine — EN and AR both carry "three claims × five forms of submission", "Akbar's three mechanisms" and "Hard core, protective belt"; the founder's 07-02 edit (`49d3aeb`) reworked §B (NMBD), not Akbar (Q5: no trim). Q1: no misrepresentation flag is on record — nor any outside reader. Q2: Samia never validated the terms (her gate was dropped the same day). Q3: no pitch, proposal or contract in any repo uses the five-forms language outside kun's own share-economy pages.
+- **Was the prediction right?** Unprovable at 0.85: premortem #1's mitigation was the verbatim audit trail `b1iiecq03.txt` in a session `tool-results/` folder, and that file no longer exists — "every claim backed by a verbatim quote" can no longer be re-checked.
+- **Was the decision right** (independent of outcome)? Yes as additive, reversible work; the evidence it depended on was kept somewhere ephemeral.
+- **Lesson**: Evidence a decision rests on belongs in the repo or an issue — a session `tool-results/` path dies with the session (`feedback_probe_before_recording.md`).

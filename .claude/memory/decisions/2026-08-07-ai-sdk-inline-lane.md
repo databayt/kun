@@ -6,6 +6,7 @@
 **Type**: 2 (reversible — the adoption is one lib file; revert = revert the commit)
 **Status**: shipped
 **Reviewed-by**: 2026-09-07 (with D-20260807-gemini-inline-draft's own review)
+**Reviewed**: 2026-11-02 (grade: partly)
 **Tags**: #social #draft #ai-sdk #eve #billing
 **Amends**: [D-20260807-gemini-inline-draft](./2026-08-07-gemini-inline-draft.md) — its "no new dependency" line
 
@@ -62,3 +63,12 @@ craft retries (still inside the 20/day ceiling at current volume; overflow is
 the Mac lane by design). If the 2026-09-07 review shows the gate refusing
 
 > 1 in 3 drafts, the prompt (not the gate) is the thing to fix.
+
+## Review
+
+**2026-11-02 — decision-review sweep · grade: partly**
+
+- **Actual outcome**: The SDK half held — `google-draft.ts` still runs `generateObject` (`ai` ^7.0.56, `@ai-sdk/google` ^4.0.37) with a zod schema, with no upgrade breakage or revert on record, and eve/HarnessAgent stayed out. The gate half was reversed 17 days later: `e26e39c` (08-24, Abdout's call) made craft findings advisory because the 400-character floor blocked even a "hello world" end-to-end test. The Friday digest it shipped still reaches Slack weekly (`~/.claude/logs/social-digest-2026-10-30.log`).
+- **Was the prediction right?** Unscorable: the window saw ~9 Gemini asks, all Abdout's, all in August; no row ever carried a `craft-refused:` marker, so the "> 1 in 3" test never had data. Reviewers still dismissed window drafts for reject-list faults (length, hook, untrue).
+- **Was the decision right** (independent of outcome)? Yes for the library; the refusing gate was premature.
+- **Lesson**: Ship a new quality gate advisory-first — one that refuses before the loop has ever run end to end blocks the very test that would prove the loop.

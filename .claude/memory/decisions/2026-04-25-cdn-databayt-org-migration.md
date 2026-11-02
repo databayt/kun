@@ -6,6 +6,7 @@
 **Type**: 1 (irreversible — DNS/CAA/IAM changes have multi-day blast radius)
 **Status**: executed
 **Reviewed-by**: 2026-07-25 (Q3 mid-quarter)
+**Reviewed**: 2026-11-02 (grade: right)
 **Tags**: #infrastructure #aws #cdn #vercel-dns #backfilled
 
 ## Decision
@@ -49,3 +50,10 @@ Migrate CDN delivery for Hogwarts and other Databayt products from raw CloudFron
 (To be filled at reviewed-by date 2026-07-25.)
 
 **Notes from backfill (2026-05-12)**: Migration completed successfully on 2026-04-25 per `/Users/abdout/.claude/projects/-Users-abdout-kun/memory/project_cdn_migration.md`. Specific gotchas captured (CAA, Vercel CLI, IAM reuse) — these are now part of the team's institutional knowledge.
+
+**2026-11-02 — decision-review sweep · grade: right**
+
+- **Actual outcome**: The alias stuck and became the org's asset host: `cdn.databayt.org` CNAMEs to `d1dlwtcfl0db67.cloudfront.net`, answers 200 with CloudFront caching (Miss → Hit on repeat, probed 2026-11-02), and is referenced in hogwarts (53 files), kun (97), mkan (34) and catalog (13). The ACM cert auto-renewed 2026-09-25 (valid to 2027-04-10), across the 2026-09-18 zone move from Vercel DNS to Cloudflare.
+- **Was the prediction right?** Mostly. No cert failure, rollback or CDN outage is on record; the ≥90% hit rate was never measured; hogwarts user uploads still serve from the public `hogwarts-databayt` bucket the CDN does not front (`src/lib/upload-url.ts`; kun#148 still open).
+- **Was the decision right** (independent of outcome)? Yes — but this record named a nonexistent IAM user (`hogwarts-s3-uploader`; the key is `hogwarts`, corrected 08-19), and its companion memory had the CDN origin as `hogwarts-databayt` until an 08-24 probe found `databayt-cdn` (`reference_aws_cdn.md`) — the false premise kun#148 was opened on.
+- **Lesson**: Write infrastructure facts from a live probe (`aws sts get-caller-identity`, a discriminating object fetch), not recall — two wrong facts here survived four months (`feedback_probe_before_recording.md`).
