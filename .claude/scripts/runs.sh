@@ -56,7 +56,7 @@ LEDGER="${RUNS_LEDGER:-$HOME/.claude/logs/runs.jsonl}"
 command -v python3 >/dev/null 2>&1 || exit 0
 
 OUT=$(python3 - "$ENGINE" "$LEDGER" "$MODE" <<'PY'
-import glob, json, os, subprocess, sys, time
+import calendar, glob, json, os, re, subprocess, sys, time
 engine, ledger, mode = sys.argv[1:4]
 jobs = json.load(open(engine)).get("jobs", {})
 jobs = {k: v for k, v in jobs.items() if not k.startswith("$")}
@@ -78,6 +78,8 @@ if os.path.exists(ledger):
                 e = json.loads(line)
             except Exception:
                 continue
+            if e.get("kind") == "claude":
+                continue
             last[e["job"]] = e
             if e.get("status") == "ok":
                 last_ok[e["job"]] = e
@@ -85,8 +87,66 @@ if os.path.exists(ledger):
 def age_h(ts):
     return (now - ts) / 3600
 
+def t(s):
+    try:
+        return calendar.timegm(time.strptime(s, "%Y-%m-%dT%H:%M:%SZ"))
+    except Exception:
+        return 0
+
+# Each job's own record (lib/runs.sh runs_record / runs_wrap, mkan's recordRun): the truth when it
+# exists. launchd's exit code and log mtimes only judge jobs that don't record yet.
+statedir = os.path.expanduser(os.environ.get("RUNS_STATE_DIR", "~/.claude/state/runs"))
+
+def state_of(job):
+    try:
+        return json.load(open(os.path.join(statedir, re.sub(r"[^A-Za-z0-9._-]", "_", job) + ".json")))
+    except Exception:
+        return None
+
+def alive(pid):
+    try:
+        os.kill(int(pid), 0)
+        return True
+    except Exception:
+        return False
+
+def judge(s, cad):
+    """(state, why, needs_human, seen) from a job's own record."""
+    status, at = s.get("status"), t(s.get("ts", ""))
+    last_good = max(t(s.get("last_ok", "")), t(s.get("last_ok_step", "")) if not status else 0)
+    window = max(2 * cad, 24) if cad > 0 else 24
+    started = t(s.get("started", ""))
+    steps = s.get("steps", {})
+    human = bool(s.get("needs_human")) or any(v.get("needs_human") and v.get("status") == "fail" for v in steps.values())
+    seen = f"ok {age_h(last_good):.1f}h ago" if last_good else "no ok yet"
+    st, why = "ok", ""
+    if status == "start":
+        if s.get("pid") and not alive(s["pid"]):
+            return "red", "the run died without recording an end", human, seen
+        why = f"running for {age_h(started):.1f}h"
+    elif status == "fail" and age_h(at) <= window:
+        st, why = "red", s.get("summary") or "failed"
+    elif status == "warn" and age_h(at) <= window:
+        st, why = "warn", s.get("summary") or "warning"
+    elif status == "defer":
+        st, why = "defer", f"deferred {age_h(at):.1f}h ago: {s.get('summary') or 'not ready'}"
+    # A step that failed since the run started (or inside the window) is the job's state: seek's
+    # ingest succeeding no longer hides its console-push failing.
+    since = max(started - 60, now - window * 3600) if started else now - window * 3600
+    bad = sorted(((k, v) for k, v in steps.items() if v.get("status") in ("fail", "warn") and t(v.get("ts", "")) >= since),
+                 key=lambda kv: kv[1].get("status") != "fail")
+    if bad and st in ("ok", "defer", "warn"):
+        k, v = bad[0]
+        if not (st == "warn" and v.get("status") == "warn"):
+            st, why = ("red" if v["status"] == "fail" else "warn"), f"{k}: {v.get('summary') or v['status']}"
+    if cad > 0 and st in ("ok", "defer") and status != "start" and (not last_good or age_h(last_good) > 2 * cad):
+        st, why = "stale", (why + " · " if why else "") + f"no ok for {age_h(last_good):.0f}h (cadence {cad:g}h)" if last_good else (why or "no ok recorded yet")
+    return st, why, human, seen
+
 rows = []
 for name, j in jobs.items():
+    if name.startswith("hermes:"):
+        continue  # judged with Hermes' own state below
     label, trigger = j.get("label", ""), j.get("kind") == "trigger"
     # engine.json → jobs is the OWNER machine's schedule. A job is this machine's only
     # if its plist is installed here — so a teammate's Mac, Linux or Windows sees no
@@ -96,39 +156,42 @@ for name, j in jobs.items():
     cad = -1.0 if trigger else float(j.get("cadence_hours", 24))
     state, why, human = "ok", "", False
     info = lc.get(label)
+    s = state_of(name)
     if label and info is None:
         state, why = "red", "not loaded in launchd"
     elif label and cad == 0:
         if not info["pid"]:
             state, why = "red", f"daemon not running (last exit {info['exit']})"
+    elif s and (s.get("status") or s.get("steps")):
+        state, why, human, seen = judge(s, cad)
     elif label and info["exit"] not in ("0", ""):
         state, why = "red", f"last exit {info['exit']}"
-    newest = 0
-    for g in j.get("logs", []):
-        for p in glob.glob(os.path.expanduser(g)):
-            try:
-                newest = max(newest, os.path.getmtime(p))
-            except OSError:
-                pass
-    seen = f"{age_h(newest):.1f}h ago" if newest else "never"
-    if state == "ok" and cad > 0 and j.get("logs"):
-        if not newest or age_h(newest) > 2 * cad:
-            state, why = "stale", f"no log for {seen} (cadence {cad:g}h)"
-    e = last.get(name)
-    if e:
-        human = bool(e.get("needs_human"))
-        try:
-            e_age = age_h(time.mktime(time.strptime(e["ts"], "%Y-%m-%dT%H:%M:%SZ")) - time.timezone)
-        except Exception:
-            e_age = 0
-        # A recorded fail counts for max(2x cadence, 24h) — long enough for the daily
-        # maintain digest to see it, short enough that a recovered job turns green.
-        if state == "ok" and e.get("status") in ("fail", "warn") and e_age <= max(2 * cad, 24):
-            state, why = ("red" if e["status"] == "fail" else "warn"), e.get("summary", "") or e["status"]
+    if not (s and (s.get("status") or s.get("steps"))) or cad == 0 or info is None:
+        newest = 0
+        for g in j.get("logs", []):
+            for p in glob.glob(os.path.expanduser(g)):
+                try:
+                    newest = max(newest, os.path.getmtime(p))
+                except OSError:
+                    pass
+        seen = f"log {age_h(newest):.1f}h ago" if newest else "no log"
+        if state == "ok" and cad > 0 and j.get("logs"):
+            if not newest or age_h(newest) > 2 * cad:
+                state, why = "stale", f"no log for {age_h(newest):.1f}h (cadence {cad:g}h)" if newest else "no log yet"
+        e = last.get(name)
+        if e:
+            human = human or bool(e.get("needs_human"))
+            e_age = age_h(t(e.get("ts", "")))
+            # A recorded fail counts for max(2x cadence, 24h) — long enough for the daily
+            # maintain digest to see it, short enough that a recovered job turns green.
+            if state == "ok" and e.get("status") in ("fail", "warn") and e_age <= max(2 * cad, 24):
+                state, why = ("red" if e["status"] == "fail" else "warn"), e.get("summary", "") or e["status"]
     rows.append({"job": name, "label": label, "state": state, "why": why,
                  "seen": seen, "needs_human": human, "mac_only": bool(j.get("mac_only", True))})
 
-# Hermes cron (its own scheduler, state in ~/.hermes/cron/jobs.json): red on a last error,
+# Hermes cron (its own scheduler, state in ~/.hermes/cron/jobs.json). A job that records its own
+# runs (mkan's detached lanes: Hermes says "ok" the moment they start) is judged by that record;
+# the rest: red on a last error, warn when the run was ok but its output never reached Slack,
 # stale when an enabled job's next run is >2h in the past (the gateway stopped firing).
 hpath = os.path.expanduser(json.load(open(engine)).get("jobs", {}).get("$hermes", ""))
 if hpath and os.path.exists(hpath):
@@ -137,21 +200,28 @@ if hpath and os.path.exists(hpath):
         for h in json.load(open(hpath)).get("jobs", []):
             if not h.get("enabled"):
                 continue
-            st, why = "ok", ""
+            key = "hermes:" + h.get("name", h.get("id", "?"))
+            cad = float((jobs.get(key) or {}).get("cadence_hours", 24))
+            st, why, human = "ok", "", False
             nxt = h.get("next_run_at")
             late = 0
             if nxt:
                 late = (datetime.now(timezone.utc) - datetime.fromisoformat(nxt)).total_seconds() / 3600
-            if h.get("last_status") == "error":
-                st, why = "red", (h.get("last_error") or "error")[:120]
-            elif late > 2:
-                st, why = "stale", f"next run was due {late:.0f}h ago — gateway not firing"
-            last = h.get("last_run_at")
+            last_run = h.get("last_run_at")
             seen = "never"
-            if last:
-                seen = f"{(datetime.now(timezone.utc) - datetime.fromisoformat(last)).total_seconds() / 3600:.1f}h ago"
-            rows.append({"job": "hermes:" + h.get("name", h.get("id", "?")), "label": "hermes", "state": st,
-                         "why": why, "seen": seen, "needs_human": False, "mac_only": True})
+            if last_run:
+                seen = f"run {(datetime.now(timezone.utc) - datetime.fromisoformat(last_run)).total_seconds() / 3600:.1f}h ago"
+            s = state_of(key)
+            if s and (s.get("status") or s.get("steps")):
+                st, why, human, seen = judge(s, cad)
+            elif h.get("last_status") == "error":
+                st, why = "red", (h.get("last_error") or "error")[:120]
+            elif h.get("last_delivery_error"):
+                st, why = "warn", f"ran, but not delivered: {str(h.get('last_delivery_error'))[:100]}"
+            if st in ("ok", "warn", "defer") and late > 2:
+                st, why = "stale", f"next run was due {late:.0f}h ago — gateway not firing"
+            rows.append({"job": key, "label": "hermes", "state": st,
+                         "why": why, "seen": seen, "needs_human": human, "mac_only": True})
     except Exception as ex:
         rows.append({"job": "hermes", "label": "hermes", "state": "warn", "why": f"jobs.json unreadable: {ex}",
                      "seen": "?", "needs_human": False, "mac_only": True})
@@ -172,9 +242,9 @@ elif mode == "--notify":
               "\n".join(f"• {r['job']}: {r['state']} — {r['why']}" for r in bad))
 else:
     w = max(len(r["job"]) for r in rows) if rows else 4
-    for r in sorted(rows, key=lambda r: ("red", "stale", "warn", "ok").index(r["state"])):
+    for r in sorted(rows, key=lambda r: ("red", "stale", "warn", "defer", "ok").index(r["state"])):
         flag = " ⚑ needs Abdout" if r["needs_human"] else ""
-        print(f"{r['state']:<6} {r['job']:<{w}}  last log {r['seen']:<12} {r['why']}{flag}")
+        print(f"{r['state']:<6} {r['job']:<{w}}  {r['seen']:<15} {r['why']}{flag}")
 PY
 )
 
