@@ -61,8 +61,8 @@
       "role": "watch only",
       "registrar": "Namecheap",
       "renewal": {
-        "autoRenew": "unverified",
-        "autoRenewVerifiedAt": null,
+        "autoRenew": "off",
+        "autoRenewVerifiedAt": "2026-11-02",
         "where": "namecheap.com → Domain List → abdoutgroup.com → Auto-Renew"
       },
       "mail": null,

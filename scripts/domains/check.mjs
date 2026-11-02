@@ -167,7 +167,9 @@ async function checkDomain(entry) {
 
   const r = entry.renewal ?? {};
   const verified = r.autoRenewVerifiedAt ? Math.floor((Date.now() - new Date(r.autoRenewVerifiedAt)) / DAY) : null;
-  if (r.autoRenew !== "on" || verified === null)
+  if (r.autoRenew === "off" && verified !== null)
+    add("auto-renew", "warn", `auto-renew is OFF at ${entry.registrar} (seen ${r.autoRenewVerifiedAt}) — renew by hand, then switch it on (${r.where})`, spell(d, "renew"));
+  else if (r.autoRenew !== "on" || verified === null)
     add("auto-renew", "warn", `auto-renew not verified at ${entry.registrar} (${r.where})`, spell(d, "verify-renew"));
   else if (verified > RENEW_RECHECK_DAYS)
     add("auto-renew", "warn", `auto-renew last verified ${verified} days ago`, spell(d, "verify-renew"));
