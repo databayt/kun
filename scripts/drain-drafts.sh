@@ -144,8 +144,24 @@ esac
 # ── One tick ─────────────────────────────────────────────────────
 
 # No overlap: a drain can outlive the 60-second tick while Claude writes.
-mkdir "$LOCK_DIR" 2>/dev/null || { log "skip: lock held"; exit 0; }
-trap 'rmdir "$LOCK_DIR" 2>/dev/null' EXIT
+# The lock heals itself. A run that died without its EXIT trap (killed, crashed, slept
+# through) left this dir behind on 2026-09-13, and every tick after it logged "skip: lock
+# held" and exited 0 — healthy by exit code and log age, dead for seven weeks. Reclaim it
+# when its owner is gone: the pid recorded inside is dead, or (a pid-less lock from before
+# this fix) it is over an hour old.
+if ! mkdir "$LOCK_DIR" 2>/dev/null; then
+    owner="$(cat "$LOCK_DIR/pid" 2>/dev/null)"
+    if { [ -n "$owner" ] && ! kill -0 "$owner" 2>/dev/null; } ||
+       { [ -z "$owner" ] && [ -n "$(find "$LOCK_DIR" -maxdepth 0 -mmin +60 2>/dev/null)" ]; }; then
+        log "reclaimed a stale lock (owner ${owner:-unrecorded} is gone)"
+        rm -f "$LOCK_DIR/pid"; rmdir "$LOCK_DIR" 2>/dev/null
+        mkdir "$LOCK_DIR" 2>/dev/null || { log "skip: lock held"; exit 0; }
+    else
+        log "skip: lock held"; exit 0
+    fi
+fi
+echo $$ > "$LOCK_DIR/pid"
+trap 'rm -f "$LOCK_DIR/pid"; rmdir "$LOCK_DIR" 2>/dev/null' EXIT
 
 cd "$REPO" || exit 0
 
