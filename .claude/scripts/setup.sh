@@ -306,8 +306,12 @@ if [ -f "$KUN_DIR/.claude/mcp.json" ]; then
         # servers in every session.
         for name in $(jq -r '.mcpServers | to_entries[] | select(.value["$skipRegistration"] != true) | .key' "$KUN_DIR/.claude/mcp.json"); do
             claude mcp get "$name" >/dev/null 2>&1 && continue
-            if jq -c ".mcpServers.\"$name\" | del(.description, .\"\$skipRegistration\", .\"\$skipRegistration_why\")" "$CLAUDE_DIR/mcp.json" \
-                | claude mcp add-json -s user "$name" - >/dev/null 2>&1; then
+            # add-json takes the JSON as an argument. Piping it with "-" passes the
+            # literal string "-", which is rejected: every fresh install printed
+            # "skipped" for each server and registered none (fixed 2026-11-02).
+            # A variable's value is not re-expanded, so literal ${VAR} survives.
+            spec=$(jq -c ".mcpServers.\"$name\" | del(.description, .\"\$skipRegistration\", .\"\$skipRegistration_why\")" "$CLAUDE_DIR/mcp.json")
+            if [ -n "$spec" ] && claude mcp add-json -s user "$name" "$spec" >/dev/null 2>&1; then
                 MCP_NEW=$((MCP_NEW + 1))
             else
                 info "MCP registration skipped: $name"
