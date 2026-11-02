@@ -214,6 +214,10 @@ if hpath and os.path.exists(hpath):
             s = state_of(key)
             if s and (s.get("status") or s.get("steps")):
                 st, why, human, seen = judge(s, cad)
+                # The script ran fine but Hermes could not deliver its output (Slack unreachable).
+                lr = datetime.fromisoformat(last_run).timestamp() if last_run else 0
+                if st == "ok" and h.get("last_delivery_error") and lr >= t(s.get("last_ok", "")) - 300:
+                    st, why = "warn", f"ran, but not delivered: {str(h.get('last_delivery_error'))[:100]}"
             elif h.get("last_status") == "error":
                 st, why = "red", (h.get("last_error") or "error")[:120]
             elif h.get("last_delivery_error"):
