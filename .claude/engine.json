@@ -269,6 +269,7 @@
   "hermes:databayt-daily-social-digest": { "cadence_hours": 72, "owner": "kun", "resume": "auto", "max_attempts": 2, "needs": ["network"], "only_if": "undelivered", "refire_within_hours": 6 },
   "hermes:mkan-demand-match": { "cadence_hours": 24, "owner": "mkan", "resume": "auto", "max_attempts": 2, "needs": ["network"], "deadline_hours": 15 },
   "hermes:mkan-web-sweep": { "cadence_hours": 12, "owner": "mkan", "resume": "auto", "max_attempts": 2, "needs": ["network"], "deadline_hours": 14 },
+  "hermes:mkan-agencies": { "cadence_hours": 24, "owner": "mkan", "resume": "auto", "max_attempts": 2, "needs": ["network"] },
   "hermes:mkan-tiktok-sweep": { "cadence_hours": 12, "owner": "mkan", "resume": "auto", "max_attempts": 2, "needs": ["network"], "deadline_hours": 14 },
   "hermes:mkan-tiktok-post": { "cadence_hours": 24, "owner": "mkan", "resume": "auto", "max_attempts": 1, "needs": ["network", "vault"], "deadline_hours": 10, "refire": "hermes:mkan-tiktok-upload-retry", "steps": ["tiktok-post", "tiktok-upload"] },
   "hermes:mkan-tiktok-upload-retry": { "cadence_hours": 24, "owner": "mkan", "resume": "alert", "needs": ["network", "vault"] },
