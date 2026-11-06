@@ -12,6 +12,7 @@ import { existsSync, readFileSync } from "node:fs";
 
 import { BoardRow, boardUrl, listBoard } from "./board";
 import {
+  LANE_BAND,
   inFocus,
   kigaliNow,
   killSwitchOn,
@@ -28,6 +29,40 @@ const short = (r: BoardRow): string =>
     .replace(/\s*\(.*?\)\s*/g, " ")
     .slice(0, 70)
     .trim();
+
+const band = (r: BoardRow): number => LANE_BAND[r.campaign ?? ""] ?? 9;
+
+/// The one thing to do first. From 10-11 to 11-07 the digest listed 19 holds a
+/// day and none moved, while one 3-minute Mercor interview held six cards and
+/// a Meridial "all that's left" email sat unseen. One line, the biggest unlock:
+/// an answer someone already sent beats any hold; then the hold that frees the
+/// most cards in the fastest-paying lane.
+function firstAsk(board: BoardRow[]): string | null {
+  const answered = board
+    .filter((r) => r.applicationStatus === "RESPONSE")
+    .sort((a, b) => band(a) - band(b));
+  if (answered.length)
+    return `${answered.length} card(s) got an answer that needs you — start with ${short(answered[0])} <${boardUrl(answered[0].id)}|card>`;
+  const groups = new Map<string, BoardRow[]>();
+  for (const r of board) {
+    const reason = r.holdReason ?? "";
+    if (r.applicationStatus !== "HOLD" || !reason) continue;
+    if (/paste-ready packet/.test(reason)) continue;
+    const key = (
+      reason.startsWith("Abdout:") ? reason.split(" — ")[0] : reason.split(";")[0]
+    )
+      .trim()
+      .slice(0, 160);
+    groups.set(key, [...(groups.get(key) ?? []), r]);
+  }
+  const lane = (rows: BoardRow[]) => Math.min(...rows.map(band));
+  const best = [...groups.entries()].sort(
+    ([, a], [, b]) => lane(a) - lane(b) || b.length - a.length,
+  )[0];
+  if (!best) return null;
+  const [ask, rows] = best;
+  return `${ask.replace(/^Abdout:\s*/, "")} — unblocks ${rows.length} card(s) <${boardUrl(rows[0].id)}|card>`;
+}
 
 async function main(): Promise<void> {
   const cfg = loadConfig();
@@ -86,6 +121,9 @@ async function main(): Promise<void> {
         .filter((l) => l.includes('"kind":"sent"'))
         .filter((l) => (JSON.parse(l) as { ts: string }).ts >= weekAgo).length
     : 0;
+  const ask = firstAsk(board);
+  if (ask) lines.push(`👉 *Do this first:* ${ask}`);
+
   const toApply = by("TO_APPLY");
   const routed = toApply.filter(
     (r) => r.applyEmail || r.applyPhone || r.channel === "ATS",
@@ -97,6 +135,13 @@ async function main(): Promise<void> {
     lines.push(
       `⚠️ *Stalled* — under 10 sends this week. Not a sending problem: the loop has nothing routable. Run \`pnpm jobs:resolve --apply\`, paste the Ashby/Lever packets, or widen discovery.`,
     );
+
+  const answeredRows = by("RESPONSE");
+  if (answeredRows.length) {
+    lines.push(`\n*They answered — waiting on you (${answeredRows.length}):*`);
+    for (const r of answeredRows.sort((a, b) => band(a) - band(b)).slice(0, 8))
+      lines.push(`• ${short(r)} <${boardUrl(r.id)}|card>`);
+  }
 
   const queued = [...by("QUEUED"), ...by("APPROVED")];
   if (queued.length) {
