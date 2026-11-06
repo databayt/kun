@@ -53,13 +53,17 @@ const REMOTE_ISH = /remote|\bhome ?[- ]?based\b|work from home|\bwfh\b|distribut
 // authorisation is still out.
 const WILL_RELOCATE = /visa sponsor|sponsors? (a )?visa|sponsorship (is )?(available|provided|offered)|we sponsor|work permit (support|sponsorship|assistance)|relocation (package|assistance|support|allowance|bonus|budget)|(we )?(help|support|assist)[^.]{0,30}relocat|relocation (is )?(available|provided|offered)/i;
 
-// ── markets (Abdout, 2026-10-03) ─────────────────────────────────────────────
-// Africa — Rwanda, Kenya, Nigeria and their neighbours — remote AND on-site:
-// he will move within the continent. Everywhere else stays remote-only as before.
+// ── markets (Abdout, 2026-10-03; narrowed 2026-11-07) ───────────────────────
+// On-site: Rwanda only — he lives in Kigali. Kenya, Nigeria and the
+// neighbours were on-site too from 10-03; 0 replies in 17 sends (Nigeria 0/12,
+// Kenya 0/5): a Sudanese national with no permit there, for roles where the
+// employer must show no local can do the job. Since 11-07 (Abdout) they are
+// remote-only like everywhere else, unless the employer funds the move
+// (WILL_RELOCATE), which is the permit sponsorship that makes a yes possible.
 // The Gulf (2026-10-06, Abdout: "allow on-site Gulf jobs with visa
 // sponsorship"): on-site only when the employer provides the work visa — and
 // never a posting that hires only people already in the country.
-const AFRICA_ONSITE = /\b(rwanda|kigali|kenya|nairobi|mombasa|nigeria|lagos|abuja|uganda|kampala|tanzania|dar es salaam|ethiopia|addis ababa|ghana|accra|east africa)\b/i;
+const AFRICA_ONSITE = /\b(rwanda|kigali)\b/i;
 const GULF = /\b(saudi|ksa|riyadh|jeddah|dammam|khobar|uae|united arab emirates|dubai|abu dhabi|sharjah|qatar|doha|bahrain|manama|kuwait|oman|muscat|gcc|gulf)\b/i;
 
 // Gulf employers say it their own way: "visa provided", "employment visa",
@@ -707,7 +711,8 @@ const ADAPTERS = {
         // remote one — and every gate below is written for the worldwide lane,
         // which would drop it for not saying "remote".
         const inRwanda = /\b(rwanda|kigali)\b/i.test(place);
-        // Africa is reachable in person; the Gulf with a sponsored visa (onsiteAllowed).
+        // Rwanda is reachable in person; elsewhere only a funded move or, in the
+        // Gulf, a sponsored visa (onsiteAllowed).
         const inAfrica = AFRICA_ONSITE.test(place);
         // An employer that funds the move clears the location gates below: they
         // exist to drop roles Abdout cannot take, and a sponsored on-site role

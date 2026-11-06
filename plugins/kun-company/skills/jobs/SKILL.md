@@ -24,7 +24,7 @@ AI_TRAINING 0 (Mercor — confirms Rwanda, weekly Stripe pay — micro1, Mindrif
 Tutor" on Greenhouse) → WEB_DEVELOPER 1 → FREELANCE 2 ("Arabic/RTL-ready Next.js in 72h" on Mostaql +
 Upwork) → REMOTE_WORLDWIDE / electrical / protection / marine 3 → tenders + CLIENT_PROJECT 4 →
 engineering contracts 5. **Never retry (refuse Rwanda):** Alignerr, Outlier, DataAnnotation, Prolific
-(`BLOCKED_PLATFORMS` in discover.mjs). **Markets:** Rwanda, Kenya, Nigeria (Africa = remote AND on-site) · Gulf = **remote only,
+(`BLOCKED_PLATFORMS` in discover.mjs). **Markets:** Rwanda (remote AND on-site) · Kenya, Nigeria **remote-only since 2026-11-07** (0/17 on-site: no permit for a foreign national; on-site only when the employer funds the move) · Gulf = **remote only,
 never on-site** · Sudan. **Two tracks on one board:** `track` FOUNDER (Abdout earns) / DATABAYT (the
 company earns: TENDER, CLIENT_PROJECT). **Funding** lives on its own board, "Funding & Programs".
 **Boundary with `/scrape`:** jobs = opportunities someone posted (jobs, gigs, RFPs, wizard requests,
@@ -167,3 +167,4 @@ Discover writes `jobs/learn/yield-<date>.json` per adapter.
 - Prod Neon enum lacks 9 statuses (kun#152) — the board is the loop's truth; Neon is best-effort.
 - `rwandajob.com`, We Work Remotely block bots; ReliefWeb API needs an approved appname.
 - The matcher scores from software + CV evidence; AI-training/tender rows score low by construction.
+- **Platform steps are human gates (2026-11-07):** Mercor login is behind reCAPTCHA Enterprise, micro1's "application is incomplete" means its AI interview, and Meridial's onboarding ends in a typed-name e-signature. Code prepares everything else; the checklist is `jobs/packets/2026-11-07-platform-hour.md`. A "next steps / complete your application" email is a RESPONSE (classifier, 11-07), never an ack.
