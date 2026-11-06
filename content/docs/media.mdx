@@ -130,6 +130,30 @@ into an opaque 400.
 > on project `gen-lang-client-0243019665`, which AI Studio will pair with a monthly **spend
 > cap** — the safe way to switch it on.
 
+### The Gemini app lane — Nano Banana at $0
+
+The same models run free in the **Gemini app** on Abdout's Google plan, so kun drives the app
+instead of paying for the API. `scripts/gemini-web.mjs` attaches to the session-vault Chrome
+(`~/.claude/bin/chrome-debug.sh`, CDP on `:9222`, signed in to the plan) and does what he did by
+hand: attach the images in order, choose **Create image** and the shape, paste the prompt, send, and
+save the full-size result (2K: 2752 × 1536 at 16:9, about 40 s each).
+
+```bash
+node scripts/gemini-web.mjs ~/Desktop/<place>-nano-banana --dry-run      # the jobs, in order
+node scripts/gemini-web.mjs ~/Desktop/<place>-nano-banana                # make what is missing
+node scripts/gemini-web.mjs ~/Desktop/<place>-nano-banana --fix 02 --note "Make the sign wall blank."
+```
+
+It reads the pack's `pack.json` (contract: `scripts/lib/media-pack.mjs`), skips results already
+saved, and logs each job with its chat to `runs.jsonl`. Claude checks every picture by eye and
+sends the boards ([`/higgs` pack mode](/docs/skills)). Limits: the plan caps images per window
+(about nine on 2026-11-07, then a reset an hour or so later; the run stops and names the time);
+one picture at a time, at a person's pace; **Mac-local only, never behind a server or a public
+endpoint**, because it is a personal seat.
+
+Antigravity's built-in image tool is the headless alternative (`scripts/agy-image.mjs`, up to 3
+images per job, 1K) once its account check is cleared — see [Antigravity](/docs/antigravity).
+
 ## Higgsfield model defaults
 
 Costs are per job, re-verified 2026-07-27 with `higgsfield generate cost`.

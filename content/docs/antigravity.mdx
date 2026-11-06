@@ -99,6 +99,27 @@ Verify:
 | A remote server (vercel/figma/…) won't connect | Confirm it became `serverUrl` (not `type`/`url`) in `mcp_config.json` — re-run the sync if not |
 | Flag rejected by `agy` | Run `agy --help`; if the skip-permissions flag changed, update `.claude/scripts/onboarding-*` |
 | `~/.gemini/skills` not picked up | Antigravity reads `~/.gemini/skills/{name}/SKILL.md`; confirm the symlink resolves and isn't a stale real directory |
+| `Eligibility check failed … Verify your account to continue` | Google wants the signed-in account verified (`VALIDATION_REQUIRED` in `~/.gemini/antigravity-cli/cli.log`). Open the link it prints, signed in as that account, and finish the check; until then `a` answers nothing (seen 2026-10-24 to 2026-11-07 on the team's Google account) |
+
+---
+
+## Images — the built-in Nano Banana tool
+
+`agy` carries a `generate_image` tool (arguments `Prompt`, `ImagePaths` — at most **3** images to
+edit or combine — `AspectRatio`, `ImageName`). It runs on the signed-in Google account at no cost and
+saves into the conversation's folder, `~/.gemini/antigravity-cli/brain/<id>/<ImageName>_<ms>.jpg`, at
+Nano Banana's 1K sizes (it made four photoreal images here on 2026-08-19).
+`scripts/agy-image.mjs` wraps it for a pack: one `agy -p` per job, the prompt passed word for word
+(checked against the transcript), the result saved under the job's name.
+
+```bash
+node scripts/agy-image.mjs ~/Desktop/<place>-nano-banana --dry-run
+node scripts/agy-image.mjs --prompt "..." --ref photo.jpg --ratio 16:9 --out ~/Downloads/x.jpg
+```
+
+The default renderer for packs is the Gemini app lane (`scripts/gemini-web.mjs`: 2K, up to 10
+images per job); this one is the headless alternative for jobs of three images or fewer. See
+[Media](/docs/media).
 
 ---
 

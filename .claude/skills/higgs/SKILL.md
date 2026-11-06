@@ -1,7 +1,7 @@
 ---
 name: higgs
 description: Marketing photos and video — Google (Nano Banana, Veo, Omni) direct, or Higgsfield
-when_to_use: "Use when AI must GENERATE marketing images or video — ads, hero or product shots, stories, avatar ads — or restyle a reference URL. Cutting real footage is /edit. Text-free only: anything carrying copy (og images, banners, social cards, infographics, testimonials) goes to /carousel. Triggers on: generate video, generate image, make an ad, promo video, hero image, product shot, mockup, lifestyle scene, moodboard, showroom asset, brand kit, edit video from url, nano banana, veo, omni, gemini image, صورة تسويقية, وسائط."
+when_to_use: "Use when AI must GENERATE marketing images or video — ads, hero or product shots, stories, avatar ads — restyle a reference URL, or render a Nano Banana pack. Cutting real footage is /edit. Text-free only: copy-bearing formats (og images, banners, social cards, infographics, testimonials) go to /carousel. Triggers on: generate video, generate image, make an ad, promo video, hero image, product shot, mockup, lifestyle scene, moodboard, showroom asset, brand kit, nano banana, veo, omni, gemini image, run the pack, make the pictures, صورة تسويقية, وسائط."
 argument-hint: "[recipe|prompt] [--url <ref>] [--count N] [--premium] [--ratio 16:9]"
 ---
 
@@ -11,13 +11,15 @@ One-command marketing media. Every decision below is pre-made — do NOT ask Abd
 model, style, aspect ratio, renderer, or output location. Pick the recipe, run it, deliver
 the file.
 
-Two renderers reach the **same** frontier models — Higgsfield resells Google's Nano Banana
-(`nano_banana_pro` there IS `gemini-3-pro-image` here), so the choice is purely commercial:
+Four renderers reach the **same** Nano Banana models; the choice is commercial. Higgsfield resells
+Google's (`nano_banana_pro` there IS `gemini-3-pro-image` here), and the Gemini app is Abdout's own plan:
 
-| Renderer                    | Surface                          | Pays with                   | Status                    |
-| --------------------------- | -------------------------------- | --------------------------- | ------------------------- |
-| **Google direct** (default) | `node scripts/gemini-media.mjs`  | `GEMINI_API_KEY`, per image | needs key — see below     |
-| Higgsfield (alternate)      | `higgsfield` CLI (`higgs`, `hf`) | credits, OAuth on disk      | **0.7 credits — drained** |
+| Renderer                         | Surface                          | Pays with                   | Status                                     |
+| -------------------------------- | -------------------------------- | --------------------------- | ------------------------------------------ |
+| **Gemini app** (default, images) | `node scripts/gemini-web.mjs`    | his Google plan (seat), $0  | **live** — 2K, ~40 s, plan caps per window |
+| Antigravity (`agy`)              | `node scripts/agy-image.mjs`     | his Google account, $0      | blocked on the account check; 3 images max |
+| Google direct                    | `node scripts/gemini-media.mjs`  | `GEMINI_API_KEY`, per image | off (paid) — see below                     |
+| Higgsfield                       | `higgsfield` CLI (`higgs`, `hf`) | credits, OAuth on disk      | **0.7 credits — drained**                  |
 
 Read the renderer ladder before spending anything.
 
@@ -45,28 +47,62 @@ Read the renderer ladder before spending anything.
 **Free first** (Abdout, 2026-10-07: no paid generation API). Walk down; stop at the first rung that
 can do the job. Paid rungs stay documented below but are **off** until a funded `/decide`.
 
-| #   | Rung                                   | Use it for                                                                 | Cost |
-| --- | -------------------------------------- | -------------------------------------------------------------------------- | ---- |
-| 0   | **Library**: `node scripts/higgs-library.mjs lookup …` | Anything we already own                                    | 0 |
-| 1   | **Adobe for creativity** (plugin; enable per media session: `claude plugin enable adobe-for-creativity@claude-plugins-official`) | Retouching, background removal, Gen Expand, Firefly stills, resizing photos and video, Express templates | Free tier; free Adobe ID for Gen Expand and video |
-| 2   | **Canva** (plugin `canva`, on)         | Designs carrying copy, brand check, resizing to the 13 sizes in `taxonomy.ts` | Free account (bulk autofill needs Enterprise) |
-| 3   | **Claude Design** (`claude-design` MCP, after `/design-login`) | One-pagers, decks, marketing collateral, prototypes | Included in Max |
-| 4   | **Figma Weave** (via the Figma MCP)    | Flux / Imagen-class image and video models                                 | 150 free credits/month; Figma MCP ~20 calls/month (`figma-quota` hook warns) |
-| 5   | **ChatGPT seat** (Sedon)               | A person renders through the shared Plus seat                              | Already paid |
-| 6   | **`/carousel` template lane**          | Anything with text: HTML to PNG/PDF at exact sizes                         | 0 |
-| —   | Google direct · Higgsfield             | Same frontier models, per image or credit                                  | **Off (paid)** |
+| #   | Rung                                                                                                                             | Use it for                                                                                               | Cost                                                                         |
+| --- | -------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| 0   | **Library**: `node scripts/higgs-library.mjs lookup …`                                                                           | Anything we already own                                                                                  | 0                                                                            |
+| ½   | **Gemini app** in the session vault: `node scripts/gemini-web.mjs <pack>` | Nano Banana stills and photo remakes with up to 10 reference images; whole packs (see Pack mode) | 0 — his plan's image cap per window |
+| 1   | **Adobe for creativity** (plugin; enable per media session: `claude plugin enable adobe-for-creativity@claude-plugins-official`) | Retouching, background removal, Gen Expand, Firefly stills, resizing photos and video, Express templates | Free tier; free Adobe ID for Gen Expand and video                            |
+| 2   | **Canva** (plugin `canva`, on)                                                                                                   | Designs carrying copy, brand check, resizing to the 13 sizes in `taxonomy.ts`                            | Free account (bulk autofill needs Enterprise)                                |
+| 3   | **Claude Design** (`claude-design` MCP, after `/design-login`)                                                                   | One-pagers, decks, marketing collateral, prototypes                                                      | Included in Max                                                              |
+| 4   | **Figma Weave** (via the Figma MCP)                                                                                              | Flux / Imagen-class image and video models                                                               | 150 free credits/month; Figma MCP ~20 calls/month (`figma-quota` hook warns) |
+| 5   | **ChatGPT seat** (Sedon)                                                                                                         | A person renders through the shared Plus seat                                                            | Already paid                                                                 |
+| 6   | **`/carousel` template lane**                                                                                                    | Anything with text: HTML to PNG/PDF at exact sizes                                                       | 0                                                                            |
+| —   | Google direct · Higgsfield                                                                                                       | Same frontier models, per image or credit                                                                | **Off (paid)**                                                               |
 
 Product truth (real screens) is never generated: stills come from `/shoot` and video from
 `/shoot` sim, `/record` and `/edit`.
 
-Today **both rungs are unfunded**: Higgsfield holds 0.7 credits, and the Gemini key is on a
-free tier whose image quota is literally zero (see below). The key itself is already wired —
+The two **paid** renderers are unfunded: Higgsfield holds 0.7 credits, and the Gemini key is on a
+free tier whose image quota is literally zero (see below). Nano Banana itself is not blocked: the
+Gemini app on his plan renders it at $0 (rung ½, Pack mode). The key itself is already wired —
 `GEMINI_API_KEY` in kun's central `.env`, new-format (`AQ.Ab…`, 53 chars — _not_ the legacy
 `AIza…`), issued to the AI Studio key named `kun`. What's missing is billing on the Google
 project, not a credential.
 
 The script trims the value on read: a trailing newline pasted from a dashboard turns the
 auth header into an opaque 400 (it cost us kun report-issue / PR #97 once already).
+
+## Pack mode — Claude renders the pack, he gets the boards
+
+A **pack** is one folder: numbered photos and references, `prompt.txt` for a person, and `pack.json`
+for a runner (the contract: `scripts/lib/media-pack.mjs`; the farm repo's pack scripts write both).
+Abdout's word (2026-11-07): "why don't you do this for me?" — so a pack is no longer handed over to
+paste into Gemini. Claude renders it, checks it and sends the result; the folder stays as the record
+and as his way to make one himself.
+
+1. **Find or write `pack.json`.** If a pack has only `prompt.txt`, write the jobs from it (attach list
+   in order, the prompt word for word, ratio, save name).
+2. **Vault up?** `curl -sf http://127.0.0.1:9222/json/version` (else `bash ~/.claude/bin/chrome-debug.sh`).
+   The vault is signed in to the Google plan with Nano Banana (checked 2026-11-07: Plus, 2K images).
+3. **Run it in the background**: `node scripts/gemini-web.mjs <pack-dir>` — jobs in order, done ones
+   skipped, one JSON line each (`chat` = the job's Gemini conversation). `--dry-run` lists the jobs.
+   Exit 2 = stopped: the plan's image cap (`Limit reached. Resets <time>`) or no vault — say when it
+   resets and pick up then; never loop on it.
+4. **Check every result by eye** against its spot photo and the references: the camera and the
+   lake's side from the photo; every building as its mastered photo; the asked change present; no
+   people, cars, plates or **lettering** (Gemini writes gibberish on sign walls — zoom on signs).
+5. **Fix in the same chat**: `node scripts/gemini-web.mjs <pack-dir> --fix NN --note "<what to change>"`
+   (the pack's follow-ups are the usual notes). At most two fixes, then show the best take and say
+   what is off. A tiny defect (a sign's letters) can be painted out locally with sharp instead.
+6. **Finish** with the pack's own step (farm: `node scripts/site/ecosystem-pack.mjs --boards`), then
+   SendUserFile the boards to his phone. Register AI images where the repo asks (farm: media.csv,
+   `place=generated`; caption "Concept render · planned").
+
+Limits: his plan's image cap per window (~9 images on 2026-11-07, reset after ~75 min) · one picture at
+a time, at a person's pace · Mac-local, never behind a server or a public endpoint (it is a personal
+seat). `agy-image.mjs` is the headless alternative once Antigravity's account check is cleared, for
+packs of ≤3 images per job. Before any of this: references come from what is **mastered** (the
+places' heroes, the A-series exteriors); raw footage gives positions only (Abdout, 2026-11-07).
 
 ## Account (re-verified 2026-07-27)
 
