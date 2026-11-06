@@ -143,6 +143,8 @@ function testSlots() {
     ['0 */4 * * *', '2026-11-02T19:59', '2026-11-02T16:00', '2026-11-02T20:00'],
     ['0 18 * * 0', '2026-11-03T10:00', '2026-11-01T18:00', '2026-11-08T18:00'],
     ['0 10 * * 1', '2026-11-02T09:00', '2026-10-26T10:00', '2026-11-02T10:00'],
+    ['0 1 1 * *', '2026-11-06T12:00', '2026-11-01T01:00', '2026-12-01T01:00'], // monthly: 62-day search, not "daily"
+    ['0 1 1 * *', '2026-11-01T00:59', '2026-10-01T01:00', '2026-11-01T01:00'],
   ];
   let fail = 0;
   const fmt = (ms) => {
@@ -152,7 +154,7 @@ function testSlots() {
   };
   for (const [expr, now, prev, next] of cases) {
     const m = cronMatcher(expr);
-    const [p, n] = [fmt(prevFire(m, at(now))), fmt(nextFire(m, at(now)))];
+    const [p, n] = [fmt(prevFire(m, at(now), 62)), fmt(nextFire(m, at(now), 62))];
     const ok = p === prev && n === next;
     if (!ok) fail++;
     console.log(`${ok ? 'ok  ' : 'FAIL'} cron '${expr}' at ${now}: prev ${p} (want ${prev}) next ${n} (want ${next})`);
@@ -588,11 +590,15 @@ function escalate(jobs, row, sup, mode, log, owners, cfg, down, wake) {
 //   Workers: each cron route's newest run in Workers Logs (the scheduled handler logs {cron, path,
 //   status, ms}). Status ≥ 500 → red; no run for 2x its period + 15 min → stale. Alert only: a blind
 //   re-run of a school's or a tenant's cron route could send something twice.
+// 62 days back and forth: a monthly cron ("0 1 1 * *") has no slot inside the 9-day default, and
+// falling back to "daily" made it alarm two days after every 1st (databayt/mkan#58, 2026-11-03).
 const period = (match) => {
-  const a = prevFire(match, NOW);
-  const b = a && nextFire(match, a);
+  const a = prevFire(match, NOW, 62);
+  const b = a && nextFire(match, a, 62);
   return a && b ? b - a : 86_400_000;
 };
+/** Workers Logs keeps about 7 days: a slot older than this cannot be checked, so it is not "stale". */
+const LOGS_RETAIN_MS = 6 * 86_400_000;
 function cloud(cc, sup, mode, log, cfg) {
   if (!cc) return { jobs: {}, rows: {} };
   if (sup.cloud && sup.cloudAt && NOW - t(sup.cloudAt) < (cc.check_minutes ?? 60) * 60_000) return sup.cloud;
@@ -676,15 +682,24 @@ function cloud(cc, sup, mode, log, cfg) {
       for (const w of cc.workers ?? []) {
         const map = readJson(w.crons.replace(/^~/, HOME), {}).schedules ?? {};
         for (const [expr, paths] of Object.entries(map)) {
-          const every = period(cronMatcher(expr, true));
+          const match = cronMatcher(expr, true);
+          const every = period(match);
+          // A cron rarer than the log retention (monthly): look only around its last slot, and only
+          // while that slot is still in the logs; otherwise there is nothing to judge until it fires.
+          const lastSlot = every > LOGS_RETAIN_MS ? prevFire(match, NOW, 62) : null;
+          const from = lastSlot ? lastSlot - 300_000 : NOW - Math.max(2 * every + 900_000, 3_600_000);
           for (const path of paths) {
             const key = `cf:${w.worker}${path}`;
             jobs[key] = { owner: w.owner ?? 'kun', resume: 'alert' };
+            if (lastSlot && NOW - lastSlot > LOGS_RETAIN_MS) {
+              rows[key] = { job: key, state: 'ok', why: `runs ${expr} UTC; next check after ${iso(nextFire(match, NOW, 62) ?? NOW)}` };
+              continue;
+            }
             const body = JSON.stringify({
               queryId: 'kun-supervise-cron',
               view: 'events',
               limit: 1,
-              timeframe: { from: NOW - Math.max(2 * every + 900_000, 3_600_000), to: NOW },
+              timeframe: { from, to: NOW },
               parameters: { datasets: ['cloudflare-workers'], filters: [{ key: '$metadata.service', operation: 'eq', type: 'string', value: w.worker }, { key: 'path', operation: 'eq', type: 'string', value: path }] },
             });
             const r = sh('curl', ['-s', '--max-time', '20', '-H', `@${hdr}`, '-X', 'POST', `https://api.cloudflare.com/client/v4/accounts/${acct}/workers/observability/telemetry/query`, '--data-binary', '@-'], { input: body, stdio: ['pipe', 'pipe', 'pipe'] });
@@ -700,7 +715,7 @@ function cloud(cc, sup, mode, log, cfg) {
               continue;
             }
             const src = ev?.source ?? {};
-            if (!ev) rows[key] = { job: key, state: 'stale', why: `no run in Workers Logs for ${Math.round(Math.max(2 * every + 900_000, 3_600_000) / 60_000)} min (cron ${expr} UTC)` };
+            if (!ev) rows[key] = { job: key, state: 'stale', why: lastSlot ? `no run in Workers Logs since its ${iso(lastSlot)} slot (cron ${expr} UTC)` : `no run in Workers Logs for ${Math.round((NOW - from) / 60_000)} min (cron ${expr} UTC)` };
             else if (Number(src.status) >= 500 || src.error) rows[key] = { job: key, state: 'red', why: `last run ${src.status ?? src.error} at ${iso(ev.timestamp)} (cron ${expr} UTC)` };
             else rows[key] = { job: key, state: 'ok', why: '' };
           }
