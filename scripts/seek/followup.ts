@@ -7,8 +7,9 @@
 // Day 7 and day 14 get a short templated nudge in the same thread ("Re: …");
 // day 21 with nothing back archives the card. Templated touches may go out
 // unattended (funnel rule); they share the kill switch and window with the
-// wave, and have their own daily cap. A card that got any reply is no longer
-// APPLIED, so it never reaches this script.
+// wave, and have their own daily cap. A card whose ledger holds a human answer
+// (rejection, response, interview, offer) is never nudged, even while the
+// board still says APPLIED.
 
 import { existsSync, readFileSync } from "node:fs";
 
@@ -28,6 +29,7 @@ interface Sent {
   crmId: string;
   to?: string;
   subject?: string;
+  detail?: string;
   ts: string;
 }
 
@@ -57,6 +59,18 @@ async function main(): Promise<void> {
   const original = new Map(
     ledgerLines.filter((e) => e.kind === "sent").map((e) => [e.crmId, e]),
   );
+  // The board can lag the inbox: until 2026-11-07 the classifier read
+  // "decided not to move forward" as an ack, so rejected cards stayed APPLIED.
+  // A human answer in the ledger stops the cadence whatever the board says.
+  const answered = new Set(
+    ledgerLines
+      .filter(
+        (e) =>
+          e.kind === "reply" &&
+          /^(rejection|response|interview|offer):/.test(e.detail ?? ""),
+      )
+      .map((e) => e.crmId),
+  );
 
   const board = await listBoard();
   const applied = board.filter(
@@ -76,7 +90,7 @@ async function main(): Promise<void> {
     const action = decideFollowUp({
       appliedAt: row.appliedAt,
       touchNumber: row.touchNumber,
-      replied: false,
+      replied: answered.has(row.id),
       now,
     });
     if (action === "none") continue;
