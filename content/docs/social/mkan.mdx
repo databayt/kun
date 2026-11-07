@@ -70,14 +70,18 @@ play on its own page — beside, not inside, the Airbnb-style site.
 | **Bio** | `Houses in Kigali / +250780984777` — no "verified" claim until homes are checked; a bio link unlocks at 1,000 followers (`https://www.mkan.sd/en/find`) |
 | **WhatsApp** | +250 780 984 777 (`MKAN_KIGALI_WHATSAPP`) — on every end card and caption |
 | **Inventory** | Monthly rentals only: owners' and field-agent homes, Airbnb hosts who took a monthly price, and broker leads once that broker said YES (Twenty host `repostConsent`) |
-| **Cadence** | Every day: one picture video and the same slides as a photo post. Broker homes (up to 3 a day, `TIKTOK_POSTS_PER_DAY`, once the broker said YES) are on hold at 0 until their burned-in text and numbers are stripped to Abdout's satisfaction (11-01) |
+| **Cadence** | Every ad that went up today or yesterday, from a broker who said YES or from an owner, gets posted: 3 to 15 a day (`TIKTOK_POSTS_PER_DAY=fresh`, `TIKTOK_POSTS_MIN` / `TIKTOK_POSTS_MAX`; TikTok's own guidelines cap automated posting at about 15 a day per account). One post an hour from 07:00 to 22:30, each the broker's own video with their text stripped (since 11-07; was 3 a day) |
 
 **The daily queue** lives in mkan (`scripts/crm/tiktok-post.ts`), run by the Hermes cron
-`mkan-tiktok-post` at 07:00, after the 06:00 broker sweep. It wakes the session-vault Chrome first
-(its launchd job respects a Cmd-Q, so a quit or a reboot leaves it down), and
-`mkan-tiktok-upload-retry` at 13:00 posts whatever the morning could not — or runs the whole
-post when the morning rendered nothing (Neon refused it twice on 10-24, 10-25, 10-27 and 10-28,
-and the page posted nothing those days). Both run detached from the Hermes gateway, so a
+`mkan-tiktok-post` at 07:00, after the 06:00 broker sweep. It picks every postable ad from today
+and yesterday (yesterday's evening ads only reach mkan in the 06:00 sweep), renders the first and
+posts it. `mkan-tiktok-upload-retry` (08:30–17:30) and `mkan-tiktok-upload-evening` (18:30–22:30)
+run at :30 past every hour. Each renders and posts its share of the day, so the page spreads
+evenly whatever the day's count, and a missed slot is caught up two at a time. The evening slots
+first add the ads the 18:00 sweep fetched. The 07:00 run wakes the session-vault Chrome first
+(its launchd job respects a Cmd-Q, so a quit or a reboot leaves it down), and a slot that finds
+nothing rendered runs the whole morning post (Neon refused it twice on 10-24, 10-25, 10-27 and
+10-28, and the page posted nothing those days). All of them run detached from the Hermes gateway, so a
 gateway restart can't kill them, and share one lock, so they never upload at once:
 
 1. `tt:pick` — first records brokers' answers to the repost ask that came in on the WhatsApp line
