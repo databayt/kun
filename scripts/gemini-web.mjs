@@ -65,18 +65,27 @@ async function limitReached(page) {
 }
 
 // Open the "Upload & tools" menu; it closes itself after each choice.
+// (the phone layout has the same choices as tiles, "Files" for "Upload files")
 async function menu(page) {
   await page.getByRole('button', { name: 'Upload & tools' }).click();
-  await page.getByRole('menu', { name: 'Menu options' }).waitFor({ timeout: 10000 });
+  await page.getByRole('menu', { name: 'Menu options' }).or(page.getByRole('button', { name: /^Files$/ })).first().waitFor({ timeout: 10000 });
 }
+const uploadItem = (page) => page.getByRole('menuitem', { name: /^Upload files/ }).or(page.getByRole('button', { name: /^Files$/ })).first();
 
 async function attach(page, files) {
   for (const [i, file] of files.entries()) {
-    await menu(page);
-    const [chooser] = await Promise.all([
-      page.waitForEvent('filechooser', { timeout: 15000 }),
-      page.getByRole('menuitem', { name: /^Upload files/ }).click(),
-    ]);
+    let chooser;
+    for (let tries = 1; !chooser; tries++) {
+      // the picker sometimes fails to open on the first click; close the menu and try once more
+      try {
+        await menu(page);
+        [chooser] = await Promise.all([page.waitForEvent('filechooser', { timeout: 15000 }), uploadItem(page).click()]);
+      } catch (e) {
+        if (tries >= 2) throw e;
+        await page.keyboard.press('Escape');
+        await wait(1500);
+      }
+    }
     await chooser.setFiles(file);
     // wait until this file has its chip and no image is still loading
     for (let t = 0; t < 120; t++) {
@@ -232,6 +241,8 @@ try {
   process.exit(2);
 }
 const page = await browser.contexts()[0].newPage();
+// a new tab over CDP can open at phone width, and Gemini then serves its phone layout
+await page.setViewportSize({ width: 1440, height: 900 });
 let code = 0;
 try {
   if (a.fix || a.fetch) {
