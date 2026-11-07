@@ -70,15 +70,19 @@ play on its own page — beside, not inside, the Airbnb-style site.
 | **Bio** | `Houses in Kigali / +250780984777` — no "verified" claim until homes are checked; a bio link unlocks at 1,000 followers (`https://www.mkan.sd/en/find`) |
 | **WhatsApp** | +250 780 984 777 (`MKAN_KIGALI_WHATSAPP`) — on every end card and caption |
 | **Inventory** | Monthly rentals only: owners' and field-agent homes, Airbnb hosts who took a monthly price, and broker leads once that broker said YES (Twenty host `repostConsent`) |
-| **Cadence** | Every ad that went up today or yesterday, from a broker who said YES or from an owner, gets posted: 3 to 15 a day (`TIKTOK_POSTS_PER_DAY=fresh`, `TIKTOK_POSTS_MIN` / `TIKTOK_POSTS_MAX`; TikTok's own guidelines cap automated posting at about 15 a day per account). One post an hour from 07:00 to 22:30, each the broker's own video with their text stripped (since 11-07; was 3 a day) |
+| **Cadence** | Every ad that went up today or yesterday, from a broker who said YES or from an owner, gets posted: 3 to 15 a day (`TIKTOK_POSTS_PER_DAY=fresh`, `TIKTOK_POSTS_MIN` / `TIKTOK_POSTS_MAX`; TikTok's own guidelines cap automated posting at about 15 a day per account). They go out one at a time, mostly when Kigali scrolls: 07:00, 08:30, 12:30, 13:30, then every 30 minutes from 17:00 to 21:30. Each post is the broker's own video with their text stripped (since 11-07; was 3 a day) |
 
 **The daily queue** lives in mkan (`scripts/crm/tiktok-post.ts`), run by the Hermes cron
 `mkan-tiktok-post` at 07:00, after the 06:00 broker sweep. It picks every postable ad from today
-and yesterday (yesterday's evening ads only reach mkan in the 06:00 sweep), renders the first and
-posts it. `mkan-tiktok-upload-retry` (08:30–17:30) and `mkan-tiktok-upload-evening` (18:30–22:30)
-run at :30 past every hour. Each renders and posts its share of the day, so the page spreads
-evenly whatever the day's count, and a missed slot is caught up two at a time. The evening slots
-first add the ads the 18:00 sweep fetched. The 07:00 run wakes the session-vault Chrome first
+and yesterday (yesterday's late ads only reach mkan in the 06:00 sweep), renders the first,
+posts it, and renders ahead. `mkan-tiktok-upload-retry` (08:30, 12:30, 13:30) and
+`mkan-tiktok-upload-evening` (every 30 minutes, 17:00–21:30) each post their share of the day, then
+render the next videos ahead, so a post goes out on the minute; 10 of the 14 slots fall in the
+evening, East Africa's best TikTok hours. A missed slot is caught up two at a time. The evening
+slots first add the ads the 15:00 sweep fetched (the sweep moved from 18:00 so it never holds the
+vault Chrome while the evening uploads). The 21:00 stats line carries the reposts' median views,
+day against evening, the chats the posts brought, and a warning if repost reach halves; plan B is
+reviewed with those numbers on 11-14. The 07:00 run wakes the session-vault Chrome first
 (its launchd job respects a Cmd-Q, so a quit or a reboot leaves it down), and a slot that finds
 nothing rendered runs the whole morning post (Neon refused it twice on 10-24, 10-25, 10-27 and
 10-28, and the page posted nothing those days). All of them run detached from the Hermes gateway, so a
