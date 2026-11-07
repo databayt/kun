@@ -732,9 +732,27 @@ function cloud(cc, sup, mode, log, cfg) {
   return sup.cloud;
 }
 
+/**
+ * Whether this tick may write the beat (2026-11-07, Abdout: "match the app's ticks"). mkan's Neon
+ * sleeps after 5 quiet minutes, so the beat lands only in the first 5 minutes after the app's own
+ * ticks, when the database is awake anyway: every quarter hour by day (07:00–21:45 here, the
+ * Worker's `15,30,45 5-19` UTC outbox plus its hourly tick) and on the hour at night. Once a beat
+ * is `beat_minutes` old (75), any tick writes one, so a missed window never leaves it stale.
+ * The watchdog calls the beat stale after 80 minutes (ops/watchdog BEAT_STALE_SEC).
+ */
+function beatDue(lastBeatAt, now, cfg = {}) {
+  if (!lastBeatAt) return true;
+  const since = now - lastBeatAt;
+  if (since >= (cfg.beat_minutes ?? 75) * 60_000) return true;
+  const at = new Date(now);
+  const day = at.getHours() >= 7 && at.getHours() <= 21;
+  const inWindow = at.getMinutes() % (day ? 15 : 60) < 5;
+  return inWindow && since >= 10 * 60_000;
+}
+
 // ── beat: the watchdog outside the Mac reads this ─────────────────────────────────────────────
 function beat(jobs, hermes, sup, mode, log, cfg) {
-  if (sup.beatAt && NOW - t(sup.beatAt) < (cfg.beat_minutes ?? 15) * 60_000) return;
+  if (!beatDue(sup.beatAt ? t(sup.beatAt) : 0, NOW, cfg)) return;
   const due = {};
   for (const [name, j] of Object.entries(jobs)) {
     if (name.startsWith('$') || !j.deadline_hours) continue;
