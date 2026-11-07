@@ -18,6 +18,7 @@ business people can **find**, **message** and **pay**:
 7. **The MoMo API**: Mkan asks for the money in one tap, and the payment closes the deal by itself.
 
 Abdout's decisions (2026-11-07):
+- The registered office is **the office rented in Kimironko**.
 - The existing **@mkan.rw** becomes the Business page, keeping its followers and videos.
 - The country in TikTok's list is **Rwanda**.
 - The new number becomes **Mkan's whole business line**: the WhatsApp bot, the TikTok contact and MoMo. The current
@@ -59,7 +60,7 @@ the MoMo merchant code needs the number.
 | | |
 |---|---|
 | **Where** | [urs.rdb.rw](https://urs.rdb.rw) (the RDB online registration) |
-| **State** | Draft **REG-2026-383583** is filled in. One choice is left: the registered office (your residence now, or the Norrsken virtual office first). The packet is private, in `kun/jobs/packets/rdb/`; tracked in databayt/kun#167. |
+| **State** | Draft **REG-2026-383583** is filled in. The registered office is decided: **the office rented in Kimironko** (Gasabo district), 2026-11-07. What's left: its cell, village and street on the address form, then the last forms and your submission. The packet is private, in `kun/jobs/packets/rdb/`; tracked in databayt/kun#167. |
 | **You get** | The company code and the **TIN**. RDB and RRA are integrated, so one TIN comes with the registration ([RRA](https://www.rra.gov.rw/en/details?tx_news_pi1%5Baction%5D=detail&tx_news_pi1%5Bcontroller%5D=News&tx_news_pi1%5Bnews%5D=2172&cHash=f71b51506099ed5a5ee43a7c3d80d1d5)). |
 | **Cost / time** | The RRA says online registration is free and immediate. Guides quote from a few hours to two days, and one cites RWF 40,000 for a domestic company (unverified: check on the portal). |
 | **Done when** | The certificate PDF and the TIN are saved in the private packet. Tick **Company registered** on /monetize. |
@@ -151,7 +152,7 @@ profile.
 | | |
 |---|---|
 | **Where** | An MTN business centre. |
-| **Bring** | The RDB certificate, the TIN, the legal representative's ID, and proof of the business location (a lease) ([Kisimenti](https://kisimenti.com/en/times/rwanda-mobile-money-for-business-2026)). Third-party list: confirm at the centre. |
+| **Bring** | The RDB certificate, the TIN, the legal representative's ID, and proof of the business location: the Kimironko office lease ([Kisimenti](https://kisimenti.com/en/times/rwanda-mobile-money-for-business-2026)). Third-party list: confirm at the centre. |
 | **Time** | 1–5 business days, per one guide. |
 | **You get** | A merchant code: brokers pay Mkan's share to it. |
 | **Store it** | `security add-generic-password -a "$USER" -s cf-mkan-MKAN_PAYOUT_MOMO -U -w` (paste the code when asked), and `cf-mkan-MKAN_PAYOUT_NAME` = "Databayt Ltd". The next deploy puts "Pay with MoMo …" in every share request. |
@@ -188,7 +189,7 @@ the Keychain as `cf-mkan-MOMO_SUBSCRIPTION_KEY`, `cf-mkan-MOMO_API_USER` and `cf
 
 | Item | Cost | Note |
 |---|---|---|
-| Databayt Ltd | Free to RWF 40,000 | Sources disagree. The Norrsken virtual office is extra, if chosen. |
+| Databayt Ltd | Free to RWF 40,000 | Sources disagree. The Kimironko office rent is the business's own cost. |
 | MTN SIM | A few hundred RWF | Plus airtime and data. |
 | mkan.rw | ~$216–650 a year | Registrar retail. Compare. |
 | TikTok Business, verification | Free | Ads are separate. |
