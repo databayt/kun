@@ -16,7 +16,7 @@
       "android-app"
     ],
     "stack": "Next.js 16, React 19, Prisma 6, TypeScript 5, Tailwind CSS 4, shadcn/ui",
-    "headcount": 8
+    "headcount": 9
   },
   "team": [
     {
@@ -111,10 +111,19 @@
       "installRole": "business",
       "email": "abobaker@databayt.org",
       "traits": "Two decades of institutional systems: technical director of Sudan's national data-exchange platform (40+ institutions, 78+ services), architect of the passport booking system (40+ global offices, 674K+ bookings), lead on the foreigners management system (85+ offices); ex-CTO of a telecom/digital services company; founder of a bank notification platform (95K+ users, 1.6M+ notifications, self-funded). Value-driven monetization; knows the Sudan + Saudi market, public sector and commercial",
-      "status": "paused",
+      "status": "busy",
       "status_since": "2026-11-08",
-      "status_note": "On leave per Abdout 2026-11-08; CEO seat empty — Claude runs the weekly rhythm behind Abdout's gate"
+      "status_note": "Still CEO (Abdout, 2026-11-08) but busy; Kun runs the weekly rhythm as the standing CEO agent and sends him a one-page brief"
+    },
+    {
+      "id": "huwaida",
+      "name": "Huwaida",
+      "name_ar": "هويدا",
+      "category": "business",
+      "role": "Business, marketing, social media and sales",
+      "installRole": "business",
+      "traits": "Communities of Sudanese school owners/principals; school-digitisation survey; wants to open the Gulf",
+      "joined": "2026-09-28"
     }
-  ],
-  "_pending": "Huwaida (هويدا) — active in «المدرسة 2.0» since 2026-09-28 (school survey, reach to Sudanese school owners); add to the roster? asked Abdout 2026-11-08"
+  ]
 }
