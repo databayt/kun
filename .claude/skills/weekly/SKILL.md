@@ -1,13 +1,13 @@
 ---
 name: weekly
-description: Run the captain's weekly Monday-plan / Wednesday-check / Friday-review cycle
+description: Run the captain's weekly Sunday-plan / Tuesday-check / Thursday-review cycle
 when_to_use: "Use when running the captain's weekly cadence — Monday plan (allocate the 7 humans), Wednesday check (progress vs plan), Friday review (coach + canon principle) with archive to memory/weekly. Triggers on: weekly, monday plan, friday review, plan the week."
 argument-hint: "[plan|check|review]"
 ---
 
 Run the captain's weekly review.
 
-Arguments: $ARGUMENTS (optional: "plan" for Monday planning, "check" for Wednesday, "review" for Friday)
+Arguments: $ARGUMENTS (optional: "plan" for Sunday planning, "check" for Tuesday, "review" for Thursday, "team" to read the group, "send <nn>" to post an approved draft)
 
 Default behavior (no args): Full weekly review.
 
@@ -22,12 +22,22 @@ Steps:
 5. Summarize what shipped vs what was planned
 6. Identify blockers and risks
    6.5. **Decision-review sweep (Friday / full review only)** — scan the decision journal (`.claude/memory/decisions/` and `/decide` entries) for entries whose reviewed-by date has passed: grade the prediction against what actually happened, write the lesson as a `feedback_*` memory, and mark the entry reviewed. Predictions that are never graded never compound.
-7. Recommend next week's allocation:
-   - Abdout: [technical focus]
-   - Ali: [business focus]
-   - Samia: [content focus]
-   - Sedon: [ops tasks — batched weekly]
+7. Recommend next week's allocation — one or two tasks each, every task with "done when" and a date, all
+   pointed at paying schools (the Drive). People: Abdout, Mutaz, Ali, Moed, Samia, Sedon, Ibrahim, Huwaida
+   (Abobaker on leave since 2026-11-08). Keep hogwarts `content/docs-*/sprint.mdx` (EN + AR) as the live
+   sprint page.
 8. Output concise summary for Slack posting
+9. **The team group gate («المدرسة 2.0», since 2026-11-08 — Abdout's rule: read everything, post nothing
+   without his "send").**
+   - Read first: `node .claude/scripts/team-wa.mjs status`, then `read` (read-only snapshot of WhatsApp
+     Desktop; data stays in `~/.claude/state/team/`, never in git). Summarise for Abdout: decisions,
+     promises with owners and dates, blockers («عائق:»), questions only he can answer.
+   - Draft the Arabic post (plan / check / review / reply) in `~/.claude/state/team/outbox/<nn>-<slug>.md`,
+     first line «🧭 مكتب التشغيل». Short, one line per person, dates.
+   - Post only after Abdout says "send <nn>" for that draft: WhatsApp Web in the chrome-devtools Chrome,
+     open «المدرسة 2.0», paste the exact text, send, confirm it appears, mark the draft sent. Never post a
+     draft he has not approved, never edit an approved one silently, never message a school or a person
+     outside the group from this step.
 
 Reference: .claude/agents/captain.md for weekly rhythm
 Reference: .claude/memory/team.json for team profiles

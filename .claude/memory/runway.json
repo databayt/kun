@@ -1,14 +1,12 @@
 {
   "$schema": "Captain runway state — read at every weekly review",
-  "last_updated": "2026-05-12",
-  "last_updated_by": "captain-os-bootstrap",
-
+  "last_updated": "2026-11-08",
+  "last_updated_by": "interim-ceo-session-2026-11-08",
   "capital": {
     "amount_usd": 5000,
     "source": "founder",
     "last_verified": "2026-04-02"
   },
-
   "burn": {
     "monthly_usd": 500,
     "breakdown": {
@@ -23,32 +21,35 @@
     "salary_usd": 0,
     "salary_note": "Equity / sweat / Contribution Units phase. No cash salary."
   },
-
   "revenue": {
     "mrr_usd": 0,
     "arr_usd": 0,
     "paying_customers": 0,
     "last_invoice_date": null
   },
-
   "runway": {
     "months_remaining": 10,
     "weeks_remaining": 43,
-    "status": "default-dead",
-    "status_note": "Graham's question: 'At your current rate of growth, can you make it to profitability before you run out of money?' Answer: no — MRR is $0, growth rate is undefined. Default-dead until first paying customer.",
+    "status": "default-dead — near the 3-month wartime trigger (estimate)",
+    "status_note": "Capital last verified 2026-04-02; burn changed (Max plan $100 since 06-12, container cut 10-25). Estimate 3–5 months left. Real cash + monthly costs asked of Abdout 2026-11-08 — replace this estimate when answered.",
     "exit_to_default_alive": {
       "condition": "MRR ≥ monthly_burn × 0.85, with 3+ paying customers and ≥3 months of consecutive positive net",
       "estimated_path": "3 paying Hogwarts schools at $99-149/mo each = $300-450 MRR → 85% of $500 burn"
-    }
+    },
+    "months_remaining_estimate": "3-5 (unverified)"
   },
-
   "alerts": {
     "trigger_at_6_months": "Review burn cuts + accelerate Ali outreach + consider pricing experiment",
     "trigger_at_3_months": "Wartime CEO mode (Horowitz) — cut all non-pilot work, all hands on Hogwarts conversion",
     "trigger_at_1_month": "Either close a paying customer this month or pause the company"
   },
-
   "history": [
-    {"date": "2026-04-02", "capital": 5000, "burn": 500, "mrr": 0, "months_remaining": 10}
+    {
+      "date": "2026-04-02",
+      "capital": 5000,
+      "burn": 500,
+      "mrr": 0,
+      "months_remaining": 10
+    }
   ]
 }

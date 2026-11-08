@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "updated": "2026-07-02",
+  "updated": "2026-11-08",
   "$comment": "ids = CRM/workspace logins (<id>@databayt.org works on every *.crm.databayt.org workspace and Slack databayt-sh).",
   "company": {
     "name": "Databayt",
@@ -110,7 +110,11 @@
       "role": "CEO",
       "installRole": "business",
       "email": "abobaker@databayt.org",
-      "traits": "Two decades of institutional systems: technical director of Sudan's national data-exchange platform (40+ institutions, 78+ services), architect of the passport booking system (40+ global offices, 674K+ bookings), lead on the foreigners management system (85+ offices); ex-CTO of a telecom/digital services company; founder of a bank notification platform (95K+ users, 1.6M+ notifications, self-funded). Value-driven monetization; knows the Sudan + Saudi market, public sector and commercial"
+      "traits": "Two decades of institutional systems: technical director of Sudan's national data-exchange platform (40+ institutions, 78+ services), architect of the passport booking system (40+ global offices, 674K+ bookings), lead on the foreigners management system (85+ offices); ex-CTO of a telecom/digital services company; founder of a bank notification platform (95K+ users, 1.6M+ notifications, self-funded). Value-driven monetization; knows the Sudan + Saudi market, public sector and commercial",
+      "status": "paused",
+      "status_since": "2026-11-08",
+      "status_note": "On leave per Abdout 2026-11-08; CEO seat empty — Claude runs the weekly rhythm behind Abdout's gate"
     }
-  ]
+  ],
+  "_pending": "Huwaida (هويدا) — active in «المدرسة 2.0» since 2026-09-28 (school survey, reach to Sudanese school owners); add to the roster? asked Abdout 2026-11-08"
 }

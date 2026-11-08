@@ -43,6 +43,18 @@ The captain reads the **last 5 entries** at session start, plus any entries tagg
 
 ---
 
+## 2026-11-08 — Interim CEO desk: one price, one contract, one plan the team receives
+
+**What happened**: Abdout asked Claude to run the team while the CEO seat is empty (Abobaker paused), with gated access to «المدرسة 2.0» (read everything, post nothing without his "send"). A full read of the group showed the drift: 171 messages in October, 7 in November, هويدا's "ما الجديد؟" unanswered, and the 10-29 marketing meeting never held. The CRM held 3,899 scraped schools and one stale deal. Al-Ibda (client #1, 48 students) starts teaching this week. Under the "first 100 free" rule it would never have paid. Abdout reset the price to 24 SAR ($6.40) per student from the first, with a 1-month trial for new schools; Al-Ibda keeps 3 months from 09-19, so the first bill is 12-19 ([D-20261108-pricing-one-month-trial](decisions/2026-11-08-pricing-one-month-trial.md)). The ~43 business pages were folded into 16 short team pages (EN + AR) in hogwarts docs. A one-page Arabic contract was made for Al-Ibda, and 4 real deals were put in the CRM.
+
+**Why this matters**: R-005 ("no paying customer") triggers 11-12 and runway is an estimated 3–5 months. Nothing moved because the plan never reached the team and the pipeline lived in WhatsApp.
+
+**Decision/Next action**: Sprint 1 (8–21 Nov) = Al-Ibda signs by 11-20 and two schools start a free month. The cadence moves to Sudan's week: Sunday plan, Tuesday check, Thursday review, posted to «المدرسة 2.0» only on Abdout's "send". Drafts 01–03 are in `~/.claude/state/team/outbox/`. Owed by Abdout: contract blanks (signing entity, Bankak account), real cash and burn, London/Alhuda real or test, هويدا on the roster, the 09-16/09-17 clients.
+
+**Tags**: #decision #pricing #weekly #open
+
+---
+
 ## How to use this journal
 
 **When the captain writes**: At the end of every weekly/monthly/quarterly review. On every Type-1 decision (use `/decide`). On every observation worth keeping for later sessions.
@@ -64,3 +76,4 @@ The captain reads the **last 5 entries** at session start, plus any entries tagg
 - `#lesson` — a generalizable principle; consider promoting to `PRINCIPLES.md` via `/principle add`.
 - `#pivot` — a major direction change.
 - `#decision` — links to a decision in `decisions/<date>-<slug>.md`.
+- 2026-10-21 #decision mkan /find agent reads and writes with Claude Haiku 5.5 on the included Max API credits, hard-capped at $15/mo (ledger `ApiSpend`, Groq → rules fallback) — [D-20261021-included-api-credits-for-find](decisions/2026-10-21-included-api-credits-for-find.md)

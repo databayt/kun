@@ -1,8 +1,7 @@
 {
   "$schema": "Deal pipeline — every prospect, current stage, last contact",
-  "last_updated": "2026-05-12",
-  "last_updated_by": "pilot-audit-refresh",
-
+  "last_updated": "2026-11-08",
+  "last_updated_by": "interim-ceo-session-2026-11-08",
   "stages": {
     "cold": "Identified prospect, no contact yet",
     "warm": "First conversation held; interest expressed",
@@ -12,21 +11,37 @@
     "live": "Customer is live and using the product (paying or pilot)",
     "lost": "Did not convert; reason logged"
   },
-
   "deals": [
     {
+      "customer_id": "alibda",
+      "stage": "proposal",
+      "expected_annual_usd": 307.2,
+      "owner": "abdout",
+      "next_action": "Contract signed",
+      "next_action_due": "2026-11-20"
+    },
+    {
       "customer_id": "king-fahad-schools",
-      "stage": "pilot",
-      "product": "hogwarts",
-      "expected_mrr_usd": 99,
+      "stage": "discovery",
+      "owner": "mutaz",
+      "next_action": "Demo + free-month offer",
+      "next_action_due": "2026-11-15"
+    },
+    {
+      "customer_id": "alqabs",
+      "stage": "discovery",
+      "owner": "mutaz",
+      "next_action": "Meet + demo",
+      "next_action_due": "2026-11-17"
+    },
+    {
+      "customer_id": "alwafi",
+      "stage": "discovery",
       "owner": "ali",
-      "last_contact": "2026-04-15",
-      "days_since_contact": 27,
-      "next_action": "Conversion conversation",
-      "next_action_due": "2026-06-15"
+      "next_action": "Confirm intent",
+      "next_action_due": "2026-11-15"
     }
   ],
-
   "weekly_targets": {
     "new_warm_prospects": 3,
     "outreach_actions": 10,
@@ -34,7 +49,6 @@
     "proposals_sent": 1,
     "_revised_2026-05-12": "Bumped from {1, 5, 1, 0} under MENA-10 cohort strategy. See /Users/abdout/hogwarts/content/docs-en/pilot.mdx + leads.mdx."
   },
-
   "pilot_recruitment": {
     "cohort": "MENA-10",
     "target_signed": 10,
@@ -50,7 +64,6 @@
       "UAE": 1
     }
   },
-
   "outreach_scope": {
     "schools": "Sudan + Saudi private schools (Hogwarts beachhead)",
     "vendors": "MENA SMB (Souq, future)",
@@ -61,5 +74,6 @@
     "contributors": "Anyone willing to push commits / docs / translations",
     "sponsors": "Open-source sponsors via GitHub Sponsors / Open Collective",
     "owner": "ali (sales@databayt.org)"
-  }
+  },
+  "source_of_truth": "Twenty CRM hogwarts workspace (hogwarts.databayt.org) — 4 opportunities created/updated 2026-11-08; this file mirrors it"
 }
