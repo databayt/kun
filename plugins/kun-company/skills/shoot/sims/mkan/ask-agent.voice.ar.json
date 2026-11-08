@@ -1,0 +1,14 @@
+{
+  "engine": "gemini",
+  "voice": "Charon",
+  "style": "Warm, calm and clear, like a helpful guide. Modern Standard Arabic, natural pace.",
+  "lang": "ar",
+  "$comment": "One line per sim.caption in sims/mkan/ask-agent.mjs, in order (5). Stock Google voice (AI) — no consent needed (feedback_voice_consent).",
+  "lines": [
+    "من أي صفحة بحث في مكان، افتح وكيل مكان.",
+    "اكتب ما تحتاجه بكلماتك، مثل شقة مفروشة بغرفتين وميزانيتك.",
+    "يقرأ الوكيل طلبك، ويبحث في منازل كيغالي، ويرتبها أمامك خطوة بخطوة.",
+    "تصلك منازل حقيقية، مع سبب اختيار كل منزل وسعره الشهري.",
+    "ومن القائمة، أكمل المحادثة نفسها على واتساب."
+  ]
+}
