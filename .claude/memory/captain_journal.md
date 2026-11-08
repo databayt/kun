@@ -77,3 +77,4 @@ The captain reads the **last 5 entries** at session start, plus any entries tagg
 - `#pivot` — a major direction change.
 - `#decision` — links to a decision in `decisions/<date>-<slug>.md`.
 - 2026-10-21 #decision mkan /find agent reads and writes with Claude Haiku 5.5 on the included Max API credits, hard-capped at $15/mo (ledger `ApiSpend`, Groq → rules fallback) — [D-20261021-included-api-credits-for-find](decisions/2026-10-21-included-api-credits-for-find.md)
+- 2026-11-08 #decision hogwarts live classes run on LiveKit Cloud Ship ($50/mo + overage, ~$50–110/mo at alabidae's volume vs ~$26/mo its revenue) — subscription-only exception; kill/continue ≥60% of alabidae students joining within 2 weeks; review 2026-11-23 — [D-20261108-livekit-ship-for-live-classes](decisions/2026-11-08-livekit-ship-for-live-classes.md)
