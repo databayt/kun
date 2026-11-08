@@ -31,7 +31,14 @@ Steps:
    without his "send").**
    - Read first: `node .claude/scripts/team-wa.mjs status`, then `read` (read-only snapshot of WhatsApp
      Desktop; data stays in `~/.claude/state/team/`, never in git). Summarise for Abdout: decisions,
-     promises with owners and dates, blockers («عائق:»), questions only he can answer.
+     promises with owners and dates, blockers («عائق:»), objections to a Team page («اعتراض:»), questions
+     only he can answer.
+   - **Objections improve the Team pages (Thursday review).** For each «اعتراض: <page> — <reason>», run the
+     captain's argument protocol (steelman both sides, cite the canon, name the metric line) against the
+     page's own "Argue with this page" section — it states what would change the rule. Draft the EN + AR
+     edit to hogwarts `content/docs-{en,ar}/<page>.mdx`; apply and commit only after Abdout's yes, update the
+     page's "Reviewed" date, and tell the group what changed in the review post. A rejected objection gets
+     its one-line reason in the same post.
    - Draft the Arabic post (plan / check / review / reply) in `~/.claude/state/team/outbox/<nn>-<slug>.md`,
      first line «🧭 مكتب التشغيل». Short, one line per person, dates.
    - Post only after Abdout says "send <nn>" for that draft: WhatsApp Web in the chrome-devtools Chrome,
