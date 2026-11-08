@@ -4,7 +4,7 @@
 **Date**: 2026-11-08
 **Decided by**: founder (Abdout), in the live-classes planning session
 **Type**: 2 (reversible — a monthly plan; downgrade or switch the provider default back to `external` any month)
-**Status**: decided (the plan upgrade itself is Abdout's billing action — not yet executed)
+**Status**: superseded 2026-11-09 by [D-20261109-livekit-free-tier-bridge](2026-11-09-livekit-free-tier-bridge.md) — Abdout: stay on the free plan until LiveKit is self-hosted; Ship was never purchased
 **Reviewed-by**: 2026-11-23 (two weeks after alabidae goes Online)
 **Tags**: #spend #hogwarts #live #livekit #alabidae #subscription-exception
 
