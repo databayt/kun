@@ -4,7 +4,7 @@
 **Date**: 2026-11-09
 **Decided by**: founder
 **Type**: 2 (reversible — the app switches LiveKit servers with 4 env vars)
-**Status**: decided
+**Status**: superseded — by [D-20261109-livekit-ship-now-self-host-later](2026-11-09-livekit-ship-now-self-host-later.md) (Abdout: easy and stable first, school is starting)
 **Reviewed-by**: 2026-11-23
 **Tags**: #hogwarts #live #infra #cost
 **Supersedes**: [D-20261109-livekit-free-tier-bridge](2026-11-09-livekit-free-tier-bridge.md)
