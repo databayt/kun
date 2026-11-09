@@ -4,7 +4,7 @@
 **Date**: 2026-11-09
 **Decided by**: founder (Abdout)
 **Type**: 2 (reversible — buy Ship, self-host, or fall back to meeting links any day)
-**Status**: decided
+**Status**: superseded — by [D-20261109-livekit-self-host-hetzner-cloudflare-turn](2026-11-09-livekit-self-host-hetzner-cloudflare-turn.md)
 **Reviewed-by**: the day the free cap is first hit, or 2026-11-23, whichever comes first
 **Tags**: #spend #hogwarts #live #livekit #alabidae
 
