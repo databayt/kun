@@ -4,7 +4,7 @@
 **Date**: 2026-11-09
 **Decided by**: founder (Abdout): *"I want an easy, stable solution because school is about to begin."*
 **Type**: 2 (reversible: a monthly plan; downgrade any month, or move servers by changing 4 env vars)
-**Status**: decided (the upgrade is Abdout's: LiveKit dashboard → Billing → Ship)
+**Status**: superseded — by [D-20261109-livekit-hetzner-final](2026-11-09-livekit-hetzner-final.md) (Abdout: go with Hetzner; Ship only as a one-month safety net)
 **Reviewed-by**: 2026-11-23
 **Tags**: #spend #hogwarts #live #livekit #alabidae #subscription-exception
 **Supersedes**: [D-20261109-livekit-self-host-hetzner-cloudflare-turn](2026-11-09-livekit-self-host-hetzner-cloudflare-turn.md). **Revives**: [D-20261108-livekit-ship-for-live-classes](2026-11-08-livekit-ship-for-live-classes.md), with the same kill/continue test.
