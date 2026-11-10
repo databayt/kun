@@ -1,13 +1,13 @@
-// Live join · notification — the teacher started the class: the bell holds «الحصة المباشرة بدأت
-// الآن», and the notice opens the class. Demo tenant, the demo student; needs a timetable class its
-// teacher has started.
+// Live join · notification — the class's room is open: the bell holds «الحصة المباشرة بدأت الآن»
+// (sent when the first person walks in, teacher or student), and the notice opens the class. Demo
+// tenant, the demo student; needs a timetable class on now whose room someone has entered.
 import { joinFromCard, openCard } from "./_live-room.mjs"
 
 export const meta = {
   title: "انضم للحصة <mark>من الإشعار</mark>",
-  sub: "حين يبدأ المعلم الحصة يصلك إشعار",
+  sub: "في موعد الحصة يصلك إشعار",
   outro: "إشعار واحد <mark>يدخلك الحصة</mark>",
-  outroSub: "قبلها بعشر دقائق تنبيه، وعند البدء إشعار «بدأت الآن»",
+  outroSub: "قبلها بعشر دقائق تنبيه، وحين تُفتح الغرفة إشعار «بدأت الآن»",
 }
 
 const bellOf = (page) => page.locator('button[aria-haspopup="dialog"][aria-label]').first()
@@ -25,7 +25,7 @@ export default async (sim) => {
 
   // 1 — the bell
   await sim.wait(900)
-  sim.caption(1, "بدأ المعلم الحصة: يظهر رقم على الجرس")
+  sim.caption(1, "حان موعد الحصة: يظهر رقم على الجرس")
   await sim.focus(bell, { z: 1.9 })
   await sim.wait(2600)
   await sim.click(bell, { pause: 900 })

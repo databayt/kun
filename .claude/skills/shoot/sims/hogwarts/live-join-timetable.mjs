@@ -1,6 +1,7 @@
 // Live join · timetable — a student joins today's live class from «الجدول»: the class's cell
 // carries «انضمام» inside its window → the class card → the room. Demo tenant, the demo student;
-// needs a timetable class on now (the 2026-11-09 capture used a temporary combined class).
+// needs a timetable class on now. The room is there at the class's time: the student may be the
+// first one in (2026-11-10 model — nobody starts a timetable class).
 import { joinFromCard, openCard } from "./_live-room.mjs"
 
 export const meta = {
@@ -36,6 +37,6 @@ export default async (sim) => {
 
   // 3 — in
   await joinFromCard(sim, { n: 3, text: "اضغط «انضمام» — تدخل والميكروفون والكاميرا مغلقان" })
-  sim.toast("وصلت قبل المعلم؟ تنتظر في البطاقة وتدخل وحدك حين يبدأ")
+  sim.toast("وصلت قبل المعلم؟ ادخل مباشرة — الغرفة مفتوحة في موعد الحصة")
   await sim.wait(3400)
 }

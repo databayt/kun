@@ -1,7 +1,8 @@
-// Live teacher — a teacher starts today's class: the dashboard's green banner pins the class at its
-// bell («… مباشرة الآن») → «انضم» → the class card → «انضمام», and the teacher's own join opens the
-// class for the students (they get «الحصة المباشرة بدأت الآن») → the room, the whiteboard →
-// «إنهاء الحصة», pointed at, not pressed (ending writes the class's attendance).
+// Live teacher — a teacher walks into today's class like the classroom (2026-11-10 model: nobody
+// starts a timetable class; the room is there at its time and everyone enters when they arrive): the
+// dashboard's green banner pins the class at its bell («… مباشرة الآن») → «انضم» → the class card →
+// «انضمام» → the room, the whiteboard → «مغادرة», pointed at, not pressed (the room closes by itself
+// after its time and attendance is written then).
 //
 // Demo tenant, the demo teacher (teacher@, through the role picker): needs a timetable class of
 // theirs inside its window — the 2026-11-09 capture used a temporary combined class (G12-A + G12-B).
@@ -10,10 +11,10 @@
 import { joinFromCard, openCard } from "./_live-room.mjs"
 
 export const meta = {
-  title: "المعلم <mark>يبدأ الحصة المباشرة</mark>",
-  sub: "من لوحة التحكم أو من الجدول، في موعد الحصة",
-  outro: "حصتك <mark>مفتوحة لطلابك</mark>",
-  outroSub: "وحين تنهيها يُسجَّل الحضور وحده",
+  title: "المعلم <mark>يدخل الحصة المباشرة</mark>",
+  sub: "في موعدها، كما يدخل الفصل",
+  outro: "الحصة <mark>مثل الفصل</mark>",
+  outroSub: "يدخلها المعلم والطلاب كلٌّ حين يصل، ويُسجَّل الحضور وحده",
 }
 
 export async function prepare({ page, go }) {
@@ -33,7 +34,7 @@ export default async (sim) => {
   sim.caption(1, "في موعد الحصة يثبّت الشريط الأخضر حصتك في أول الصفحة")
   await sim.focus([line, start], { z: 1.4 })
   await sim.wait(3400)
-  sim.toast("قبلها بعشر دقائق يصلك إشعار «اضغط لتبدأ الحصة»")
+  sim.toast("قبلها بعشر دقائق يصلك إشعار «اضغط للانضمام»")
   await sim.wait(3000)
 
   // 2 — the class card
@@ -41,19 +42,19 @@ export default async (sim) => {
   await openCard(sim, start)
 
   // 3 — the teacher's join opens the class
-  await joinFromCard(sim, { n: 3, text: "اضغط «انضمام» — دخولك يفتح الحصة، ويصل طلابك إشعار بالبدء" })
+  await joinFromCard(sim, { n: 3, text: "اضغط «انضمام» — تدخل الغرفة مباشرة، وقد تجد طلابك سبقوك" })
 
   // 4 — the whiteboard
   const board = page.getByRole("button", { name: "السبورة" }).first()
   sim.caption(4, "استخدم السبورة والشرائح ومشاركة الشاشة من أسفل الشاشة")
   if (await board.isVisible().catch(() => false)) await sim.click(board, { pause: 600 })
   await sim.wait(3400)
-  sim.toast("الطلاب المتأخرون يُرصدون «متأخر» تلقائيًا")
+  sim.toast("التأخير يُحسب من موعد الجرس، ويُرصد «متأخر» تلقائيًا")
   await sim.wait(2800)
 
-  // 5 — the end button, pointed at
-  const end = page.getByRole("button", { name: /إنهاء الحصة/ }).first()
-  sim.caption(5, "حين تنتهي اضغط «إنهاء الحصة» — فيُكتب الحضور وحده")
+  // 5 — the leave button, pointed at
+  const end = page.getByRole("button", { name: "مغادرة" }).first()
+  sim.caption(5, "في النهاية اضغط «مغادرة» — تُغلق الغرفة وحدها بعد الموعد ويُكتب الحضور")
   if (await end.isVisible().catch(() => false)) {
     await sim.focus(end, { z: 1.8 })
     await sim.move(end)
