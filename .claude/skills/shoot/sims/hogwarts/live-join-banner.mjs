@@ -12,6 +12,11 @@ export const meta = {
 
 export async function prepare({ page, go }) {
   await page.context().grantPermissions(["camera", "microphone"], { origin: "https://demo.balqalam.com" })
+  await page.addInitScript(() => {
+    // headless reports notifications as blocked, and the class-alerts offer would read as a fault:
+    // show what a person sees on a first visit — the offer itself
+    try { Object.defineProperty(Notification, "permission", { get: () => "default" }) } catch {}
+  })
   await go("/ar/dashboard")
   await page.getByRole("link", { name: /^انضم$/ }).first().waitFor({ timeout: 60000 })
   await page.waitForTimeout(1200)
@@ -36,4 +41,6 @@ export default async (sim) => {
 
   // 3 — in
   await joinFromCard(sim, { n: 3, text: "اضغط «انضمام» — تدخل والميكروفون والكاميرا مغلقان" })
+  sim.toast("لم يدخل المعلم بعد؟ ابقَ في الغرفة — يصله إشعار بأن طلابه في انتظاره")
+  await sim.wait(3400)
 }

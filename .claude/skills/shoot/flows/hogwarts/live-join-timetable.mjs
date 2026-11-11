@@ -15,6 +15,11 @@ export const alt = {
 export const role = "student"
 export { initScript } from "./_tour.mjs"
 export default async ({ page, go, shot }) => {
+  await page.addInitScript(() => {
+    // headless reports notifications as blocked, and the class-alerts offer would read as a fault:
+    // show what a person sees on a first visit — the offer itself
+    try { Object.defineProperty(Notification, "permission", { get: () => "default" }) } catch {}
+  })
   await go("/ar/timetable")
   const pill = page.locator('a[href*="/live/join/"]').first()
   await pill.waitFor({ timeout: 60000 })

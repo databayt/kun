@@ -14,6 +14,11 @@ const bellOf = (page) => page.locator('button[aria-haspopup="dialog"][aria-label
 
 export async function prepare({ page, go }) {
   await page.context().grantPermissions(["camera", "microphone"], { origin: "https://demo.balqalam.com" })
+  await page.addInitScript(() => {
+    // headless reports notifications as blocked, and the class-alerts offer would read as a fault:
+    // show what a person sees on a first visit — the offer itself
+    try { Object.defineProperty(Notification, "permission", { get: () => "default" }) } catch {}
+  })
   await go("/ar/dashboard")
   await bellOf(page).waitFor({ timeout: 60000 })
   await page.waitForTimeout(1200)
@@ -42,4 +47,6 @@ export default async (sim) => {
 
   // 3 — in
   await joinFromCard(sim, { n: 3, text: "اضغط «انضمام» — تدخل والميكروفون والكاميرا مغلقان" })
+  sim.toast("وإن دخل المعلم ولم يجد طلابه يصلك إشعار «… في الحصة الآن»")
+  await sim.wait(3400)
 }
