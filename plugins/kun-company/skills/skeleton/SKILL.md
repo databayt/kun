@@ -4,7 +4,6 @@ description: Skeleton loading states — layout-matching shimmer while data load
 when_to_use: "Use when a route or section needs a loading state while DATA loads — loading.tsx, Suspense fallbacks, the skeleton kit + shimmer, replacing spinners, routes that flash blank. Not `blur` (image bytes). Triggers on: skeleton, loading state, loading.tsx, shimmer, page flashes blank, replace the spinner, هيكل التحميل."
 argument-hint: "[audit|kit|route <path>|convert <component>] [repo]"
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(pnpm *), Bash(node *), Bash(git *)
-model: opus
 ---
 
 # Skeleton — the page's shape, before its data

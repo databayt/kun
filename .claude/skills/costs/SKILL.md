@@ -3,7 +3,6 @@ name: costs
 description: API spend breakdown and cost-optimization analysis
 when_to_use: "Use when Abdout asks where the money goes — API and infra spend breakdown with cost-optimization analysis across Vercel, Neon, AWS, and the Anthropic plan, honoring the subscription-only posture. Triggers on: costs, spend, how much are we paying, cost optimization, budget check."
 argument-hint: "[monthly|<service>]"
-model: sonnet
 ---
 
 API spend breakdown and cost optimization analysis.
