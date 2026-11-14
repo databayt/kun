@@ -71,6 +71,7 @@ The MCP catalog in `.claude/mcp.json`. `setup.sh` registers a server unless the 
 
 | Server | What it is for | Registered by setup |
 | --- | --- | --- |
+| `after-effects` | Adobe After Effects through the ae-mcp panel (JUNKDOGE-JOE/after-effects-mcp, MIT). After Effects must be open with Window > Extensions > ae-mcp; the panel itself is the MCP service on 127.0.0.1:11488. | no — catalog only |
 | `airtable` | Airtable data management | no — catalog only |
 | `chrome-devtools` | Chrome DevTools Protocol — real-Chrome capture, network/asset waterfall, CSS cascade, performance. Attaches to Chrome on :9222 (chrome-debug.sh) to reuse manual logins, else default persistent profile. (clone --devtools; pinned 1.3.0) | yes |
 | `claude-design` | Claude Design (Anthropic Labs) — canvas design-system sync + handoff; auth via /design-login, subscription-covered | yes |
@@ -83,6 +84,7 @@ The MCP catalog in `.claude/mcp.json`. `setup.sh` registers a server unless the 
 | `markitdown` | MarkItDown — convert PDF, Office, images, audio, HTML, URLs to Markdown. setup.sh installs it once (uv tool install markitdown-mcp); uvx then reuses that environment. Without the install, uvx built a fresh 369 MB environment on every session start and piled up ~75 copies in ~/.cache/uv (found 2026-09-27). | yes |
 | `notion` | Documentation sync, knowledge base | no — catalog only |
 | `posthog` | Product analytics, feature flags | no — catalog only |
+| `premiere-pro` | Adobe Premiere Pro through a CEP bridge panel (hetpatel-11/Adobe_Premiere_Pro_MCP, MIT). Premiere must be open with a project and Window > Extensions > MCP Bridge (CEP) started. | no — catalog only |
 | `ref` | Search documentation, curated technical docs — pinned: @latest made npx query the registry on every session start. /sync bumps the pin. | yes |
 | `sentry` | Error monitoring, debug production issues | no — catalog only |
 | `shadcn` | shadcn/ui component registry - browse, search, install components — pinned (was @latest, a registry lookup per session start); /sync bumps it with the shadcn CLI. | yes |
