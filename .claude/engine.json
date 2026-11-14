@@ -80,7 +80,7 @@
   "domain_rules": 57,
   "project_mcp": 18,
   "user_mcp": 24,
-  "hooks": 17,
+  "hooks": 18,
   "vocabulary_spells": 240,
   "workflows": 13,
   "$plugins_comment": "The two plugins are how the fleet reaches other machines. kun-company also carries the rules, pattern cards, hooks, and workflows. Since 2026-11-14 the stack fleet is in this repo too: .claude/agents holds the company agents and the 27 stack agents (kun-company skips the stack ones, and Explore), and every stack skill is also a company skill, so the union of both skill sets is 85.",
