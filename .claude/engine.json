@@ -70,11 +70,11 @@
   }
  },
  "counts": {
-  "project_agents": 28,
+  "project_agents": 55,
   "user_agents": 55,
   "commands": 0,
-  "project_skills": 68,
-  "user_skills": 85,
+  "project_skills": 85,
+  "user_skills": 89,
   "pattern_cards": 14,
   "project_rules": 6,
   "domain_rules": 57,
@@ -83,9 +83,9 @@
   "hooks": 17,
   "vocabulary_spells": 240,
   "workflows": 13,
-  "$plugins_comment": "The two plugins are how the fleet reaches other machines. kun-company also carries the rules, pattern cards, hooks, and workflows. Union of both skill sets is 61 (build ships in both).",
+  "$plugins_comment": "The two plugins are how the fleet reaches other machines. kun-company also carries the rules, pattern cards, hooks, and workflows. Since 2026-11-14 the stack fleet is in this repo too: .claude/agents holds the company agents and the 27 stack agents (kun-company skips the stack ones, and Explore), and every stack skill is also a company skill, so the union of both skill sets is 85.",
   "plugin_kun_company_agents": 27,
-  "plugin_kun_company_skills": 60,
+  "plugin_kun_company_skills": 85,
   "plugin_kun_stack_agents": 27,
   "plugin_kun_stack_skills": 15
  },

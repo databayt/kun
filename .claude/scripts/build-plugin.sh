@@ -5,8 +5,8 @@
 #   • kun-stack   — portable stack fleet (Next.js/React/Prisma/Tailwind/...). OSS, install anywhere.
 #   • kun-company — databayt's leadership/pipeline fleet. Reference, not install-and-run.
 #
-# The plugin dirs are BUILD ARTIFACTS: canonical sources stay in .claude/ (project) and
-# ~/.claude/agents (user stack fleet). This script copies them into plugins/ so the repo
+# The plugin dirs are BUILD ARTIFACTS: canonical sources stay in .claude/ (agents and skills,
+# company and stack alike). This script copies them into plugins/ so the repo
 # is directly installable via `/plugin marketplace add databayt/kun`. Re-run after editing
 # any canonical source. `/health` asserts plugin == source via --check.
 #
@@ -17,13 +17,15 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-USER_AGENTS="$HOME/.claude/agents"
-USER_SKILLS="$HOME/.claude/skills"
+# Since 2026-11-14 the stack fleet lives in this repo like everything else (it used to exist
+# only in ~/.claude, which is not a git repo). setup.sh installs it from here.
+SRC_AGENTS="$ROOT/.claude/agents"
+SRC_SKILLS="$ROOT/.claude/skills"
 CHECK=0
 [ "${1:-}" = "--check" ] && CHECK=1
 
-# The 27 user stack agents that belong to kun-stack (everything in ~/.claude/agents
-# except the _index file). These do NOT overlap the project company fleet.
+# The 27 stack agents that belong to kun-stack. They do NOT overlap the company fleet:
+# the kun-company loop below skips them.
 STACK_AGENTS="architecture atom authjs block build comment deploy git github icon internationalization middleware nextjs optimize orchestration pattern performance prisma react semantic shadcn sse structure tailwind template test typescript"
 
 # Stack skills bundled with kun-stack (cross-cutting build/dev know-how).
@@ -51,14 +53,14 @@ copy_one() {
 STACK="$ROOT/plugins/kun-stack"
 [ "$CHECK" = 0 ] && { rm -rf "$STACK/agents" "$STACK/skills"; mkdir -p "$STACK/agents" "$STACK/skills"; }
 for a in $STACK_AGENTS; do
-  [ -f "$USER_AGENTS/$a.md" ] && copy_one "$USER_AGENTS/$a.md" "$STACK/agents/$a.md" || say "skip (missing): agent $a"
+  [ -f "$SRC_AGENTS/$a.md" ] && copy_one "$SRC_AGENTS/$a.md" "$STACK/agents/$a.md" || say "skip (missing): agent $a"
 done
 for s in $STACK_SKILLS; do
-  if [ -f "$USER_SKILLS/$s/SKILL.md" ]; then
+  if [ -f "$SRC_SKILLS/$s/SKILL.md" ]; then
     # copy the whole skill dir (SKILL.md + any references/ assets)
     while IFS= read -r f; do
-      copy_one "$f" "$STACK/skills/$s/${f#"$USER_SKILLS/$s/"}"
-    done < <(find "$USER_SKILLS/$s" -type f)
+      copy_one "$f" "$STACK/skills/$s/${f#"$SRC_SKILLS/$s/"}"
+    done < <(find "$SRC_SKILLS/$s" -type f)
   else
     say "skip (missing): skill $s"
   fi
@@ -71,6 +73,7 @@ for f in "$ROOT"/.claude/agents/*.md; do
   # Explore.md overrides Claude Code's built-in Explore agent (model: haiku). A plugin agent is
   # namespaced, so a mirrored copy would override nothing — it ships through setup.sh only.
   base="$(basename "$f")"; case "$base" in _index* | Explore.md) continue;; esac
+  case " $STACK_AGENTS " in *" ${base%.md} "*) continue;; esac   # stack agents ship in kun-stack only
   copy_one "$f" "$CO/agents/$base"
 done
 for f in "$ROOT"/.claude/commands/*.md; do
