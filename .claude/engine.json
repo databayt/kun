@@ -191,6 +191,11 @@
    "capacity": 3,
    "permission_mode": "auto"
   },
+  "power": {
+   "$comment": "This Mac as a server (2026-11-14, Abdout: it sleeps or shuts down only when he does it by hand, and looks shut down while it works). Enforced by the presence loop in devices.sh once keepawake-admin.sh apply has installed its sudoers rule. On mains it never sleeps, lid open or shut. When mains is lost it keeps working on battery and tells him; at floor_pct it sleeps on purpose so the sessions stay in memory. A lid shut AFTER mains was lost means a laptop being carried, so it sleeps; a lid that was already shut when the power went stays a server. display_minutes is how long the screen stays lit when idle (the Mac itself stays awake). `gabriel sleep` is the manual way to sleep it.",
+   "floor_pct": 10,
+   "display_minutes": 2
+  },
   "presence": {
    "$comment": "The marker CLAUDE_CLIENT_PRESENCE_FILE points at (settings.json env). Present = input within idle_seconds and the screen unlocked; pushes are held while it exists.",
    "file": "~/.claude/.present",

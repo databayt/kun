@@ -50,7 +50,7 @@ for _ in $(seq 1 90); do
     fi
     if curl -s -o /dev/null --max-time 2 "$URL"; then
         case "$(uname -s)" in
-            Darwin) open -a "Google Chrome" "$URL" 2>/dev/null || open "$URL" 2>/dev/null ;;
+            Darwin) open -g -a "Google Chrome" "$URL" 2>/dev/null || open -g "$URL" 2>/dev/null ;;   # -g: the tab is there, nothing jumps to the front
             Linux) command -v xdg-open >/dev/null 2>&1 && xdg-open "$URL" >/dev/null 2>&1 ;;
         esac
         echo "dev: $NAME is up at $URL (pid $SERVER, log $LOG)"

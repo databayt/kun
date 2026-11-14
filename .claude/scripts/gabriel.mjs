@@ -16,7 +16,9 @@
 //       --mode <permission-mode>         default auto
 //       --full                           keep skills and MCP (default: lean)
 //       --dry                            print the command and the contract, run nothing
-//   gabriel status                       one screen: machine, jobs, queue, last runs
+//   gabriel status                       one screen: machine, power, jobs, queue, last runs
+//   gabriel dark                         screen off now; the Mac keeps working
+//   gabriel sleep                        the one manual way to sleep a Mac in server mode
 //   gabriel queue list                   open asks and where each stands
 //   gabriel queue add [--for <repo>] [--lane <lane>] "<ask>"
 //   gabriel queue approve <n> [lane]     the owner's yes (the same as commenting "yes")
@@ -420,10 +422,43 @@ function queueAdd(flags, text) {
   console.log(`asked: ${r.out}\nIt runs only after ${pol.approver} answers "yes" on that issue.`);
 }
 
+// ── power (the Mac as a server: engine.json → devices.power, devices.sh) ────
+export function powerLine() {
+  if (process.platform !== "darwin") return null;
+  const batt = sh("pmset", ["-g", "batt"], { timeout: 5000 }).out;
+  const src = /AC Power/.test(batt) ? "mains" : "battery";
+  const pct = /(\d+)%/.exec(batt)?.[1];
+  const disabled = /"SleepDisabled" = Yes/.test(sh("ioreg", ["-rd1", "-c", "IOPMrootDomain"], { timeout: 5000 }).out);
+  const lid = /"AppleClamshellState" = Yes/.test(sh("ioreg", ["-r", "-k", "AppleClamshellState", "-d", "1"], { timeout: 5000 }).out) ? "shut" : "open";
+  const stamp = (k) => Number(/sec = (\d+)/.exec(sh("sysctl", ["-n", k], { timeout: 3000 }).out)?.[1] || 0) * 1000;
+  const boot = stamp("kern.boottime");
+  const wake = stamp("kern.waketime");
+  const hm = (ms) => new Date(ms).toLocaleString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+  const armed = fs.existsSync("/etc/sudoers.d/kun-pmset");
+  return `power    ${src}${pct ? ` · battery ${pct}%` : ""} · lid ${lid} · ${disabled ? "sleep disabled (server mode)" : armed ? "sleep allowed" : "server mode NOT set up — bash ~/kun/.claude/scripts/keepawake-admin.sh apply"} · up since ${boot ? hm(boot) : "?"}${wake > boot ? ` · last woke ${hm(wake)}` : " · has not slept since"}`;
+}
+function dark() {
+  const r = sh("pmset", ["displaysleepnow"], { timeout: 5000 });
+  console.log(r.ok ? "screen off — the Mac keeps working" : `could not turn the screen off: ${r.err.slice(0, 120)}`);
+}
+function sleepNow() {
+  if (process.platform !== "darwin") die("sleep is for the Mac");
+  // The presence loop keeps sleep disabled on mains. This flag tells it to stand down until
+  // the Mac has slept and woken once (it compares the wake time written here).
+  const wake = /sec = (\d+)/.exec(sh("sysctl", ["-n", "kern.waketime"]).out)?.[1] || "0";
+  fs.writeFileSync(path.join(HOME, ".claude/.sleep-ok"), wake);
+  if (fs.existsSync("/etc/sudoers.d/kun-pmset")) sh("sudo", ["-n", "/usr/bin/pmset", "-a", "disablesleep", "0"], { timeout: 5000 });
+  console.log("sleeping now — the sessions stay in memory, and server mode comes back by itself when the Mac wakes");
+  const r = sh("pmset", ["sleepnow"], { timeout: 10000 });
+  if (!r.ok) console.log(`pmset sleepnow failed: ${r.err.slice(0, 160)}`);
+}
+
 // ── status ─────────────────────────────────────────────────────────────────
 function status() {
   const a = sh("node", [path.join(SCRIPTS, "aware.mjs")], { timeout: 60000 });
   console.log(a.out || "aware: no snapshot yet — node ~/kun/.claude/scripts/aware.mjs --refresh");
+  const pw = powerLine();
+  if (pw) console.log(`\n${pw}`);
   const ledger = path.join(HOME, ".claude/logs/runs.jsonl");
   try {
     const lines = fs.readFileSync(ledger, "utf8").trim().split("\n").slice(-400).map((l) => readJSONString(l)).filter((r) => r?.kind === "claude").slice(-5);
@@ -553,7 +588,8 @@ const HELP = `gabriel — carries a command to whoever runs it, and brings the a
 
   gabriel route "<prompt>"            where the words land, and on which lane
   gabriel run [--repo id] [--lane build] [--turns n] [--minutes n] [--dry] -- "<task>"
-  gabriel status                      machine, jobs, queue, last runs
+  gabriel status                      machine, power, jobs, queue, last runs
+  gabriel dark | sleep                screen off now (keeps working) | sleep this Mac by hand
   gabriel queue list | add [--for repo] [--lane l] "<ask>" | approve <n> [lane] | tick [--dry]
   gabriel node init [--runner c|d] [--window 22:00-06:00] [--repos a,b] | status | tick [--dry] [--now]
 
@@ -568,6 +604,8 @@ if (process.argv[1] && path.resolve(process.argv[1]) === path.resolve(new URL(im
       if (!rest.length) die('run needs a task: gabriel run --repo kun -- "fix the failing test in scripts/seek"');
       printRun(runTask(flags, rest.join(" ")));
     } else if (cmd === "status") status();
+    else if (cmd === "dark") dark();
+    else if (cmd === "sleep") sleepNow();
     else if (cmd === "queue") {
       const [sub, ...qa] = argv;
       const { flags, rest } = parse(qa, ["for", "lane"]);

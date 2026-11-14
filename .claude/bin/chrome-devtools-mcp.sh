@@ -16,6 +16,7 @@ if curl -sf -m 1 "http://127.0.0.1:${PORT}/json/version" >/dev/null 2>&1; then
   # Real Chrome is up on :$PORT — attach and inherit its live sessions.
   exec npx -y "$VERSION" --browserUrl "http://127.0.0.1:${PORT}"
 else
-  # No debug Chrome — use the default persistent profile.
-  exec npx -y "$VERSION"
+  # No debug Chrome — fall back to a headless, throwaway browser. A visible Chrome appearing
+  # because the vault happened to be down is exactly the surprise the owner asked to stop.
+  exec npx -y "$VERSION" --headless --isolated
 fi

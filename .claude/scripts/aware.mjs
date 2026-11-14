@@ -139,6 +139,25 @@ function machine(history) {
     const rc = engine.devices?.rc_server || {};
     m.rc_armed = fs.existsSync(path.join(HOME, "Library/LaunchAgents/com.databayt.claude-rc.plist"));
     if (m.rc_armed && has("tmux")) m.rc_up = run("tmux", ["has-session", "-t", rc.tmux_session || "kun-rc"], 3000) !== null;
+    // Power: is this Mac on mains, how much battery is left, and is it held awake as a server
+    // (engine.json → devices.power, devices.sh). "Is it still working?" is answered from here,
+    // so nobody has to look at a dark screen and guess.
+    const batt = run("pmset", ["-g", "batt"], 3000) || "";
+    const stamp = (k) => Number(/sec = (\d+)/.exec(run("sysctl", ["-n", k], 3000) || "")?.[1] || 0) * 1000;
+    const boot = stamp("kern.boottime");
+    const woke = stamp("kern.waketime");
+    const watts = /"Watts"=(\d+)/.exec(run("ioreg", ["-rn", "AppleSmartBattery"], 3000) || "")?.[1];
+    const pct = /(\d+)%/.exec(batt)?.[1];
+    m.power = {
+      source: /AC Power/.test(batt) ? "mains" : "battery",
+      pct: pct ? Number(pct) : null,
+      watts: watts ? Number(watts) : null,
+      sleep_disabled: /"SleepDisabled" = Yes/.test(run("ioreg", ["-rd1", "-c", "IOPMrootDomain"], 3000) || ""),
+      server_mode: fs.existsSync("/etc/sudoers.d/kun-pmset"),
+      booted: boot ? new Date(boot).toISOString() : null,
+      woke: woke > boot ? new Date(woke).toISOString() : null,
+      hot: /CPU_Speed_Limit\s*=\s*([0-6]?\d)\s*$/m.test(run("pmset", ["-g", "therm"], 3000) || ""),
+    };
   }
   m.present = fs.existsSync(expand(engine.devices?.presence?.file || "~/.claude/.present"));
   // 24h disk delta from the closest history entry at least 23h old
@@ -529,6 +548,8 @@ function candidates(s) {
   } else for (const j of s.jobs?.red || []) c[`job_red:${j.job}`] = `Job red: ${j.job}${j.why ? ` — ${j.why.slice(0, 80)}` : ""}`;
   if (s.surfaces?.hermes_installed && s.surfaces.hermes_up === false) c.hermes_down = "Hermes gateway is not running";
   if (m.rc_armed && m.rc_up === false) c.rc_down = "Remote Control server is down (the phone can't reach the Mac)";
+  if (m.power?.source === "battery") c.on_battery = `The Mac is on battery (${m.power.pct ?? "?"}%) — mains power is gone`;
+  if (m.power?.hot) c.running_hot = "The Mac is throttling from heat — give it air";
   // Keyed by repo, so the day count in the text never re-fires a delivered alert.
   for (const p of s.products || []) if (p.ci === "failure") c[`ci_fail:${p.repo}`] = `${p.repo} main CI failed (${p.workflow})${redFor(p)}`;
   for (const w of s.wip || []) if (w.oldest_unpushed_h != null && w.oldest_unpushed_h > cfg.unpushed_hours) c[`unpushed:${w.repo}`] = `${w.repo}: ${w.unpushed} commit(s) unpushed for ${w.oldest_unpushed_h} h`;
@@ -587,6 +608,11 @@ function markdown(s) {
   if (sv) L.push(`Job supervisor: last tick ${sv.age_min == null ? "never" : `${sv.age_min} min ago`} · re-fired ${sv.fired_today} · healed ${sv.healed_today} today${sv.open.length ? ` · open: ${sv.open.join(", ")}` : ""} — node ~/kun/.claude/scripts/supervise.mjs --status`);
   const m = s.machine;
   L.push(`Machine: disk ${m.disk_gb} GB${m.disk_delta_24h != null ? ` (${m.disk_delta_24h >= 0 ? "+" : ""}${m.disk_delta_24h} GB/24h)` : ""}${m.swap_pct != null ? ` · swap ${m.swap_pct}%` : ""} · ${m.sessions ?? "?"} sessions${m.rc_armed ? ` · RC ${m.rc_up ? "up" : "DOWN"}` : ""}`);
+  if (m.power) {
+    const hm = (iso) => new Date(iso).toLocaleString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+    const pw = m.power;
+    L.push(`Power: ${pw.source}${pw.source === "mains" && pw.watts ? ` ${pw.watts}W` : ""} · battery ${pw.pct ?? "?"}% · ${pw.sleep_disabled ? "held awake (server mode)" : pw.server_mode ? "sleep allowed" : "server mode not set up"} · up since ${pw.booted ? hm(pw.booted) : "?"}${pw.woke ? ` · last woke ${hm(pw.woke)}` : " · no sleep since"}`);
+  }
   const sp = s.spend;
   if (sp) {
     const t = sp.interactive.today;

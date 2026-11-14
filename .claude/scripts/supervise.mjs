@@ -271,6 +271,7 @@ function main() {
   try {
     sup.at = iso(NOW);
     sup.mode = mode;
+    powerGuard(log);
     sup.awake = fullWake();
     sup.online = sup.awake && online();
     if (!sup.awake || !sup.online) {
@@ -310,6 +311,23 @@ function main() {
 }
 
 // ── heal ─────────────────────────────────────────────────────────────────────────────────────
+// The presence loop (devices.sh) holds this Mac awake as a server and stands down when the
+// laptop is being carried. If that loop has died, nothing would ever clear the flag, and a
+// shut laptop on battery would run flat and hot in a bag. This is the second guard: before
+// the wake gate, on every tick.
+function powerGuard(log) {
+  if (process.platform !== 'darwin' || !existsSync('/etc/sudoers.d/kun-pmset')) return;
+  if (!/"SleepDisabled" = Yes/.test(sh('ioreg', ['-rd1', '-c', 'IOPMrootDomain']).out)) return;
+  const onBattery = !/AC Power/.test(sh('pmset', ['-g', 'batt']).out);
+  const lidShut = /"AppleClamshellState" = Yes/.test(sh('ioreg', ['-r', '-k', 'AppleClamshellState', '-d', '1']).out);
+  const loop = sh('launchctl', ['list']).out.split('\n').find((l) => l.trim().endsWith('com.databayt.presence')) || '';
+  const loopUp = /^\d+\s/.test(loop.trim());
+  if (onBattery && lidShut && !loopUp) {
+    const r = sh('sudo', ['-n', '/usr/bin/pmset', '-a', 'disablesleep', '0']);
+    log('heal', 'power', r.ok ? 'presence loop is down with the lid shut on battery — sleep allowed again' : `could not clear SleepDisabled: ${r.err}`);
+  }
+}
+
 function heal(jobs, sup, mode, log, wake) {
   const down = new Set();
   const attempt = (target, why, fn) => {

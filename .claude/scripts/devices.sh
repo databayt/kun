@@ -67,7 +67,8 @@ main() {
         --server)     run_server ;;
         --serve-once) serve_once ;;
         --keepawake-setup) keepawake_setup ;;
-        *) echo "Unknown flag: $mode (use --status|--brief|--install|--uninstall|--keepawake-setup)" >&2; return 1 ;;
+        --power-check) power_keepawake; [ -n "${KUN_POWER_TEST:-}" ] || echo "power: $(power_source), battery $(battery_pct)%, lid $(lid_state), SleepDisabled=$(sleep_disabled)" ;;
+        *) echo "Unknown flag: $mode (use --status|--brief|--install|--uninstall|--keepawake-setup|--power-check)" >&2; return 1 ;;
     esac
 }
 
@@ -129,36 +130,110 @@ screen_locked() {
     [ "$(ioreg -n Root -d1 -a 2>/dev/null | plutil -extract IOConsoleUsers.0.CGSSessionScreenIsLocked raw - 2>/dev/null)" = "true" ]
 }
 
-# ── Plugged in: stay awake, lid shut or not (2026-11-02) ─────────
-# With the lid shut the Mac sleeps even on AC, so the scheduled jobs wait for the lid. Plugged in,
-# it now never sleeps (pmset disablesleep 1) and every job runs on time; on battery it sleeps as
-# before — a shut MacBook in a bag must. The presence loop below flips it within 15 s of plugging
-# in or unplugging. It needs one sudoers rule that allows exactly these two pmset calls without a
-# password: `devices.sh --keepawake-setup` prints it. Without the rule this does nothing.
+# ── The Mac as a server (2026-11-14) ─────────────────────────────
+# Abdout: "it sleeps or shuts down only if I do it by hand … it looks like shutdown but it keeps
+# working 24/7". What that means here (policy: engine.json → devices.power):
+#   on mains, lid open or shut          never sleeps (pmset disablesleep 1)
+#   mains lost                          keeps working on battery; the owner is told at once
+#   battery at the floor (10%)          sleeps on purpose — RAM is kept, so the sessions are
+#                                       still there when power returns
+#   lid shut AFTER mains was lost       sleeps: a laptop being carried. A lid that was already
+#                                       shut when the power went stays a server.
+#   running hot, lid shut, on battery   sleeps
+#   `gabriel sleep`                     the one manual way to sleep it; re-armed on the next wake
+# Measured on this Mac: the timer alone never sleeps it while a script holds `caffeinate`, so the
+# floor and the carried-laptop case call `pmset sleepnow`. Needs one sudoers rule that allows
+# exactly `pmset -a disablesleep 0|1` (keepawake-admin.sh apply). Without the rule this does
+# nothing. KUN_POWER_TEST="battery|shut|8|0" feeds a fake state (source|lid|percent|hot) and
+# makes the run a dry one: it prints what it would do and touches nothing.
 KEEPAWAKE_RULE=/etc/sudoers.d/kun-pmset
+POWER_STATE="${KUN_POWER_STATE:-$HOME/.claude/state/power.state}"
+SLEEP_FLAG="${KUN_SLEEP_FLAG:-$HOME/.claude/.sleep-ok}"
+power_source() { pmset -g batt 2>/dev/null | head -1 | grep -q "AC Power" && echo ac || echo battery; }
+battery_pct() { pmset -g batt 2>/dev/null | grep -Eo '[0-9]+%' | head -1 | tr -d '%'; }
+lid_state() { ioreg -r -k AppleClamshellState -d 1 2>/dev/null | grep -q '"AppleClamshellState" = Yes' && echo shut || echo open; }
+sleep_disabled() { ioreg -rd1 -c IOPMrootDomain 2>/dev/null | grep -q '"SleepDisabled" = Yes' && echo 1 || echo 0; }
+running_hot() { pmset -g therm 2>/dev/null | awk -F'= *' '/CPU_Speed_Limit/ && $2 + 0 < 70 {hot = 1} END {exit !hot}'; }
+wake_stamp() { sysctl -n kern.waketime 2>/dev/null | sed -n 's/^{ sec = \([0-9]*\),.*/\1/p'; }
+boot_stamp() { sysctl -n kern.boottime 2>/dev/null | sed -n 's/^{ sec = \([0-9]*\),.*/\1/p'; }
+power_tell() {  # one line to the owner (phone when away, banner when at the Mac) and to the log
+    log "power: $1"
+    [ -n "${KUN_POWER_TEST:-}" ] && { echo "notify: $1"; return 0; }
+    . "$CLAUDE_DIR/scripts/lib/notify.sh" 2>/dev/null && kun_notify me "Kun server" "$1"
+    return 0
+}
 power_keepawake() {
-    [ -f "$KEEPAWAKE_RULE" ] || return 0
-    local want=0 have
-    pmset -g batt 2>/dev/null | head -1 | grep -q "AC Power" && want=1
-    have="$(pmset -g 2>/dev/null | awk '/SleepDisabled/ {print $2}')"
-    [ "${have:-0}" = "$want" ] && return 0
-    if sudo -n /usr/bin/pmset -a disablesleep "$want" >/dev/null 2>&1; then
-        log "keep-awake: disablesleep $want ($([ "$want" = 1 ] && echo 'plugged in: no sleep, lid shut or not' || echo 'on battery: normal sleep'))"
+    local dry="" src lid pct hot=0 floor prev_src="" prev_lid="" shut_before=0 prev_boot="" asleep_for="" was_asleep="" want=1 why="" boot
+    if [ -n "${KUN_POWER_TEST:-}" ]; then
+        dry=1; IFS='|' read -r src lid pct hot <<< "$KUN_POWER_TEST"
+    else
+        [ -f "$KEEPAWAKE_RULE" ] || return 0
+        src="$(power_source)"; lid="$(lid_state)"; pct="$(battery_pct)"; running_hot && hot=1
+    fi
+    floor="$(policy power.floor_pct 10)"
+    mkdir -p "$(dirname "$POWER_STATE")"
+    [ -f "$POWER_STATE" ] && IFS='|' read -r prev_src prev_lid shut_before prev_boot asleep_for < "$POWER_STATE"
+    was_asleep="$asleep_for"; asleep_for=""
+    boot="$(boot_stamp)"
+
+    # What changed since the last look.
+    if [ -n "$prev_boot" ] && [ -n "$boot" ] && [ "$boot" != "$prev_boot" ] && [ -z "$dry" ]; then
+        power_tell "This Mac restarted at $(date -r "$boot" '+%H:%M'). Scheduled jobs are back by themselves; the Claude sessions that were open before are gone."
+        was_asleep=""
+    fi
+    if [ -n "$prev_src" ] && [ "$src" != "$prev_src" ]; then
+        if [ "$src" = battery ]; then
+            # where the lid was when the power went decides what a shut lid means from here on
+            [ "$prev_lid" = shut ] && shut_before=1 || shut_before=0
+            power_tell "Mains power is gone. Working on battery (${pct}%), and it will sleep by itself at ${floor}% to keep the sessions."
+        else
+            power_tell "Mains power is back (battery ${pct}%)."
+        fi
+    fi
+    [ "$src" = ac ] && shut_before=0
+    [ "$src" = battery ] && [ "$lid" = open ] && shut_before=0
+
+    # A manual sleep stays in force until the Mac has slept and woken once.
+    if [ -f "$SLEEP_FLAG" ]; then
+        if [ "$(cat "$SLEEP_FLAG" 2>/dev/null)" = "$(wake_stamp)" ]; then want=0; why="manual sleep asked for"; else rm -f "$SLEEP_FLAG"; fi
+    fi
+    if [ "$src" = battery ] && [ "$want" = 1 ]; then
+        if [ "${pct:-100}" -le "$floor" ]; then want=sleep; why="battery at ${pct}%"
+        elif [ "$lid" = shut ] && [ "$shut_before" != 1 ]; then want=sleep; why="lid shut on battery"
+        elif [ "$lid" = shut ] && [ "$hot" = 1 ]; then want=sleep; why="running hot with the lid shut on battery"
+        fi
+    fi
+    # Say it once per sleep, and once when it is over — a dark wake in between stays quiet.
+    if [ "$want" = sleep ]; then
+        asleep_for="$why"
+    elif [ -n "$was_asleep" ]; then
+        power_tell "Awake again after sleeping ($was_asleep). The sessions are intact — unlock, do not restart."
+    fi
+    printf '%s|%s|%s|%s|%s\n' "$src" "$lid" "$shut_before" "$boot" "$asleep_for" > "$POWER_STATE"
+
+    if [ -n "$dry" ]; then
+        echo "decision: $([ "$want" = 1 ] && echo "stay awake (disablesleep 1)" || { [ "$want" = sleep ] && echo "sleep now — $why" || echo "sleep allowed — $why"; })"
+        return 0
+    fi
+    local flag=1; [ "$want" = 1 ] || flag=0
+    if [ "$(sleep_disabled)" != "$flag" ] && sudo -n /usr/bin/pmset -a disablesleep "$flag" >/dev/null 2>&1; then
+        log "keep-awake: disablesleep $flag (${why:-$src, lid $lid})"
+    fi
+    if [ "$want" = sleep ]; then
+        [ -n "$was_asleep" ] || power_tell "Going to sleep: $why. The sessions stay in memory; plug in and open the lid to carry on."
+        pmset sleepnow >/dev/null 2>&1
     fi
 }
 keepawake_setup() {
+    local admin="$KUN_DIR/.claude/scripts/keepawake-admin.sh"
     if [ -f "$KEEPAWAKE_RULE" ]; then
-        echo "keep-awake is set up ($KEEPAWAKE_RULE). Now: $(pmset -g batt | head -1 | sed "s/Now drawing from //") · SleepDisabled=$(pmset -g | awk '/SleepDisabled/ {print $2}')"
+        echo "keep-awake is set up ($KEEPAWAKE_RULE). Now: $(power_source), battery $(battery_pct)%, lid $(lid_state), SleepDisabled=$(sleep_disabled)"
         return 0
     fi
-    cat <<HELP
-Keep the Mac awake while it is plugged in (lid shut or not); on battery it sleeps as before.
-Run this once in Terminal (it asks for your password, and allows only these two pmset calls):
-
-  echo '$(id -un) ALL=(root) NOPASSWD: /usr/bin/pmset -a disablesleep 0, /usr/bin/pmset -a disablesleep 1' | sudo tee $KEEPAWAKE_RULE >/dev/null && sudo chmod 440 $KEEPAWAKE_RULE && sudo visudo -cf $KEEPAWAKE_RULE
-
-The presence loop takes it from there within 15 seconds. To undo: sudo rm $KEEPAWAKE_RULE && sudo pmset -a disablesleep 0
-HELP
+    echo "Server mode is not set up on this Mac. One step, which asks for your password in a macOS dialog:"
+    echo "  bash $admin apply"
+    echo "It allows exactly two pmset calls without a password, dims the display after two minutes, stops macOS"
+    echo "installing updates by itself, and puts a line on the lock screen. Undo: bash $admin rollback"
 }
 
 # ── Services ─────────────────────────────────────────────────────
@@ -341,7 +416,12 @@ do_status() {
     [ "${sessions:-0}" -le "$WARN_SESSIONS" ] && mark ok "Claude sessions open: $sessions" || mark bad "Claude sessions open: $sessions (each holds ~10 MCP processes; keep ≤ $WARN_SESSIONS)"
     echo "    MCP helper processes: $mcp"
     ac_sleep="$(pmset -g custom 2>/dev/null | awk '/^AC Power/ {ac=1} ac && $1 == "sleep" {print $2; exit}')"
-    [ "$ac_sleep" = "0" ] && mark ok "on power the Mac never idle-sleeps (lid open)" || mark bad "on power the Mac idle-sleeps after ${ac_sleep} min — the phone loses it"
+    [ "$ac_sleep" = "0" ] && mark ok "on mains the Mac never idle-sleeps" || mark bad "on mains the Mac idle-sleeps after ${ac_sleep} min — the phone loses it"
+    if [ -f "$KEEPAWAKE_RULE" ]; then
+        mark ok "server mode: $(power_source), battery $(battery_pct)%, lid $(lid_state), SleepDisabled=$(sleep_disabled) (a shut lid on mains keeps working)"
+    else
+        mark bad "server mode is not set up — a shut lid sleeps the Mac even on mains. Run: bash ~/kun/.claude/scripts/keepawake-admin.sh apply"
+    fi
     awake="$(desktop_pref keepAwakeEnabled)"
     [ "$awake" = "true" ] && mark ok "Claude Desktop keeps the Mac awake" || mark bad "Claude Desktop keep-awake is off (Settings → General → Keep computer awake)"
 

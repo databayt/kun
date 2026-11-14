@@ -7,8 +7,11 @@
 # so Claude reuses it forever with no re-login.
 #
 # Usage:
-#   bash ~/.claude/bin/chrome-debug.sh                 # launch on :9222
-#   bash ~/.claude/bin/chrome-debug.sh 9222 <url>      # launch/focus + open url
+#   bash ~/.claude/bin/chrome-debug.sh                 # launch on :9222, hidden
+#   bash ~/.claude/bin/chrome-debug.sh 9222 <url>      # bring it to the front and open url
+#
+# Silent by default (2026-11-14): with no URL the vault starts hidden and takes no focus.
+# Passing a URL is how a person says "show me" — a login, a CAPTCHA, a code to type.
 #
 # Normally you don't run this by hand — the launchd agent keeps it alive
 # (see chrome-session-agent.sh). Run it only to start the vault ad-hoc.
@@ -35,6 +38,9 @@ FLAGS=(
   --no-first-run
   --no-default-browser-check
   --restore-last-session
+  --disable-backgrounding-occluded-windows
+  --disable-renderer-backgrounding
+  --disable-background-timer-throttling
 )
 
 # Already running on this port? Hand the URL to the existing instance (Chrome
@@ -47,4 +53,8 @@ fi
 
 echo "Launching session-vault Chrome on http://127.0.0.1:$PORT"
 echo "Profile: $PROFILE (persistent — log in once, sessions stick)"
+if [ "$URL" = "about:blank" ] && [ "$(uname -s)" = Darwin ]; then
+  # nobody asked to look: start hidden, take no focus
+  exec /usr/bin/open -g -j -n -W -a "Google Chrome" --args "${FLAGS[@]}"
+fi
 exec "$CHROME" "${FLAGS[@]}" "$URL"

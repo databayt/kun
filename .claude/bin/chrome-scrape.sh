@@ -44,6 +44,9 @@ FLAGS=(
   --user-data-dir="$PROFILE"
   --no-first-run
   --no-default-browser-check
+  --disable-backgrounding-occluded-windows
+  --disable-renderer-backgrounding
+  --disable-background-timer-throttling
 )
 
 if curl -sf -m 1 "http://127.0.0.1:${PORT}/json/version" >/dev/null 2>&1; then
@@ -53,4 +56,8 @@ fi
 
 echo "Launching scrape Chrome on http://127.0.0.1:$PORT"
 echo "Profile: $PROFILE (the dedicated scrape account — log in once, sessions stick)"
+# Hidden, no focus taken (2026-11-14). FB_SCRAPE_SHOW=1 brings it up for a manual login.
+if [ -z "${FB_SCRAPE_SHOW:-}" ] && [ "$(uname -s)" = Darwin ]; then
+  exec /usr/bin/open -g -j -n -W -a "Google Chrome" --args "${FLAGS[@]}" "$URL"
+fi
 exec "$CHROME" "${FLAGS[@]}" "$URL"

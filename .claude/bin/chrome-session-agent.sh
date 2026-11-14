@@ -5,8 +5,13 @@
 #
 # Usage:
 #   chrome-session-agent.sh install     # write + load the LaunchAgent
+#   chrome-session-agent.sh write       # rewrite the plist only: takes effect at the next login,
+#                                       # the running Chrome (and whatever it is uploading) is left alone
 #   chrome-session-agent.sh uninstall   # unload + remove it
 #   chrome-session-agent.sh status      # is it loaded / running?
+#
+# Since 2026-11-14 the vault starts HIDDEN (chrome-session-run.sh): automation in it never
+# puts a window on screen. Click Chrome in the Dock to see it.
 #
 # The agent starts the vault at login and restarts it if it crashes. A normal
 # Quit (Cmd-Q) is respected and won't be fought — it comes back at next login,
@@ -21,12 +26,16 @@ PROFILE="$HOME/.claude/chrome-debug-profile"
 CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 LOG="$HOME/.claude/chrome-session.log"
 
+RUNNER="$HOME/.claude/bin/chrome-session-run.sh"
+
 case "${1:-status}" in
-  install)
+  install | write)
     mkdir -p "$HOME/Library/LaunchAgents" "$PROFILE"
-    # Free the port so launchd's Chrome becomes the owner.
-    pkill -f "remote-debugging-port=${PORT}" 2>/dev/null || true
-    sleep 1
+    if [ "$1" = install ]; then
+      # Free the port so launchd's Chrome becomes the owner.
+      pkill -f "remote-debugging-port=${PORT}" 2>/dev/null || true
+      sleep 1
+    fi
     cat > "$PLIST" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -35,13 +44,10 @@ case "${1:-status}" in
   <key>Label</key><string>${LABEL}</string>
   <key>ProgramArguments</key>
   <array>
-    <string>${CHROME}</string>
-    <string>--remote-debugging-port=${PORT}</string>
-    <string>--remote-allow-origins=*</string>
-    <string>--user-data-dir=${PROFILE}</string>
-    <string>--no-first-run</string>
-    <string>--no-default-browser-check</string>
-    <string>--restore-last-session</string>
+    <string>/bin/bash</string>
+    <string>${RUNNER}</string>
+    <string>${PORT}</string>
+    <string>${PROFILE}</string>
   </array>
   <key>RunAtLoad</key><true/>
   <key>KeepAlive</key>
@@ -51,9 +57,13 @@ case "${1:-status}" in
 </dict>
 </plist>
 EOF
+    if [ "$1" = write ]; then
+      echo "Wrote ${PLIST}. The running vault is untouched; it starts hidden from the next login."
+      exit 0
+    fi
     launchctl unload "$PLIST" 2>/dev/null || true
     launchctl load "$PLIST"
-    echo "Loaded ${LABEL} — session-vault Chrome will stay up on :${PORT}."
+    echo "Loaded ${LABEL} — session-vault Chrome will stay up on :${PORT}, hidden."
     echo "Log into your sites once (greenlist.sh add <url>); Claude reuses them."
     ;;
   uninstall)
@@ -75,5 +85,5 @@ EOF
     fi
     ;;
   *)
-    echo "usage: chrome-session-agent.sh {install|uninstall|status}"; exit 1;;
+    echo "usage: chrome-session-agent.sh {install|write|uninstall|status}"; exit 1;;
 esac
