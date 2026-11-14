@@ -9,7 +9,8 @@
 // by hand in each file. Now every kun-authored agent and skill carries one word, `lane:`, and
 // this script writes the frontmatter Claude Code actually reads from engine.json → lanes:
 //
-//   agent                 model + effort                    (applied when the agent is spawned)
+//   agent                 model + effort (+ the lane's      (applied when the agent is spawned)
+//                         autoCompactWindow, if it has one)
 //   skill on a fork lane  context: fork + model + effort    (a subagent with no conversation
 //                                                           history; mechanical, lookup, research)
 //   skill on an inline    effort only, never a model        (a model switch mid-conversation
@@ -26,7 +27,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
-const KEYS = ["model", "effort", "context"];
+const KEYS = ["model", "effort", "context", "autoCompactWindow"];
 
 export function loadLanes(root = ROOT) {
   const lanes = JSON.parse(fs.readFileSync(path.join(root, ".claude/engine.json"), "utf8")).lanes || {};
@@ -39,7 +40,8 @@ export function expected(kind, laneName, lanes) {
   if (!lane) return { error: `unknown lane "${laneName}" (engine.json → lanes has: ${Object.keys(lanes).join(", ")})` };
   if (!lane.model || !lane.effort || !lane.skill) return { error: `lane "${laneName}" is not one a ${kind} can declare` };
   if (/fable|mythos/i.test(lane.model)) return { error: `lane "${laneName}" runs on ${lane.model} — attended only, never in a ${kind}` };
-  if (kind === "agent") return { model: lane.model, effort: lane.effort };
+  // autoCompactWindow: a Haiku agent compacts at 100K, because above that Haiku costs five times as much
+  if (kind === "agent") return { model: lane.model, effort: lane.effort, autoCompactWindow: lane.autoCompactWindow ? String(lane.autoCompactWindow) : null };
   if (lane.skill === "fork") return { context: "fork", model: lane.model, effort: lane.effort };
   return { context: null, model: null, effort: lane.effort };
 }

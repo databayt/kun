@@ -6,6 +6,7 @@ effort: low
 version: "GitHub API v4"
 handoff: [git, build, deploy]
 lane: mechanical
+autoCompactWindow: 100000
 ---
 
 # GitHub Expert

@@ -37,6 +37,10 @@
 //     gets `skill X → lane …`: the harness forks the skill onto its lane's model only when
 //     the skill is actually invoked, so the hint is what keeps the main loop from doing the
 //     work itself at its own price
+//   - a trigger phrase of one of kun's own skills, two words or more or in Arabic ("cut the
+//     silences", "راجع الطابور"), anywhere in the prompt gets `skill X ← "phrase"`. The phrases
+//     are each skill's own "Triggers on:" list, so the documented wording routes without a
+//     model reading 85 descriptions to find it. Single plain words are left to the listing.
 // The hook never builds or scans; without an index it stays silent. Every hit is logged
 // to ~/.claude/logs/resolve.jsonl so improve.mjs can review false positives and latency.
 
@@ -145,6 +149,35 @@ function skillLanes(lanes) {
   }
   return out;
 }
+// phrase → [skill], from each kun skill's "Triggers on:" list. Placeholders (<repo>, <url>)
+// are dropped; a phrase is kept when it has two words or more, or any non-ASCII letter.
+function skillPhrases() {
+  const map = {};
+  const root = path.join(KUN, ".claude/skills");
+  let dirs = [];
+  try {
+    dirs = fs.readdirSync(root, { withFileTypes: true }).filter((d) => d.isDirectory());
+  } catch {}
+  for (const d of dirs) {
+    let head = "";
+    try {
+      head = fs.readFileSync(path.join(root, d.name, "SKILL.md"), "utf8").slice(0, 4000);
+    } catch {
+      continue;
+    }
+    const m = /Triggers on:?\s*([^\n]*)/i.exec(head);
+    if (!m) continue;
+    // the list ends at its first full stop; what follows ("NOT /scrape …") is not a trigger
+    const list = m[1].split(/\.(?:\s+(?=[A-Z"'])|\s*"?\s*$)/)[0];
+    for (const raw of list.split(/[,;،]/)) {
+      const phrase = raw.toLowerCase().replace(/<[^>]*>/g, " ").replace(/[`"“”()]/g, "").replace(/[‘’]/g, "'").replace(/\s+/g, " ").trim();
+      if (!phrase || phrase.length > 60) continue;
+      if (phrase.split(" ").length < 2 && !/[^\x00-\x7f]/.test(phrase)) continue;
+      (map[phrase] ||= []).push(d.name);
+    }
+  }
+  return Object.fromEntries(Object.entries(map).map(([k, v]) => [k, [...new Set(v)].sort()]));
+}
 // One class per block key, across every repo that has a blocks.json.
 export function classify(blocks, repos, always, words) {
   const owners = {};
@@ -227,6 +260,7 @@ export function build() {
     keywords,
     global_blocks: Object.keys(keywords).filter((k) => keywords[k].class === "unique"),
     skills: skillLanes(engine.lanes || {}),
+    phrases: skillPhrases(),
     triggers: skillTriggers(),
   };
   writeAtomic(INDEX, JSON.stringify(idx));
@@ -315,6 +349,15 @@ export function resolve(idx, text, projectDir) {
   const said = prompt.trim().split(/\s+/).filter(Boolean);
   const first = (said[0] || "").replace(/^\/|[.,:;!?]+$/g, "");
   const sk = said.length <= 6 ? idx.skills?.[first] : null;
+  // trigger phrases of kun's skills: longest first, two skills at most
+  const skills = [];
+  const phrases = Object.keys(idx.phrases || {}).filter((p) => prompt.includes(p)).sort((a, b) => b.length - a.length);
+  for (const p of phrases) {
+    if (skills.length >= 2) break;
+    if (!word(esc(p)).test(prompt)) continue;
+    const names = idx.phrases[p].filter((n) => !skills.some((x) => x.names.includes(n)));
+    if (names.length) skills.push({ names, phrase: p, ...(idx.skills?.[names[0]] || {}) });
+  }
   return {
     project: here?.id || null,
     repos: repos.filter((id) => !(here && id === here.id)).map((id) => ({ id, path: idx.repos[id].path })),
@@ -322,6 +365,7 @@ export function resolve(idx, text, projectDir) {
     named,
     global,
     skill: sk?.fork ? { name: first, ...sk } : null,
+    skills,
   };
 }
 
@@ -353,6 +397,11 @@ export function render(idx, res) {
   // a light repo's own block: one line, and only when it has records (resolve() filtered)
   for (const b of res.local.filter((b) => b.light)) lines.push(`block ${b.key} → ${b.path}${sib(b)}${records(b)}`);
   if (res.skill) lines.push(`skill ${res.skill.name} → lane ${res.skill.lane} (a ${res.skill.model} fork, ${res.skill.effort} effort): if this is that skill, invoke it — do not do its work in the main loop`);
+  for (const s of res.skills || []) {
+    if (res.skill && s.names.includes(res.skill.name)) continue;
+    const how = s.names.length > 1 ? "pick by context" : s.fork ? `lane ${s.lane}: a ${s.model} fork — invoke it, do not do its work in the main loop` : `lane ${s.lane}`;
+    lines.push(`skill ${s.names.join(" or ")} ← "${s.phrase}" (${how})`);
+  }
   for (const r of res.repos) lines.push(`repo ${r.id} → ${tilde(r.path)} (another repo: its own CLAUDE.md applies there; use absolute paths)`);
   for (const b of res.named) {
     const at = tilde(path.join(idx.repos[b.repo].path, b.path));
@@ -470,7 +519,7 @@ const CASES = [
   ["the catalog of books", "~/kun", { repos: [] }],
   ["sync the catalog repo", "~/kun", { repos: ["catalog"] }],
   ["databayt/space careers page", "~/kun", { repos: ["space"] }],
-  ["what's new in claude code", "~/kun", { none: true }],
+  ["what's new in claude code", "~/kun", { skills: ["sync"], repos: [] }], // a trigger phrase of the sync skill
   ["admissions are open", "~/kun", { global: ["admission"] }],
   ["transportation routes for the buses", "~/kun", { global: ["transportation"] }],
   ["school dashboard is slow", "~/kun", { global: ["school-dashboard"] }],
@@ -512,8 +561,13 @@ const CASES = [
   ["health", "~/kun", { skill: "health", lane: "mechanical" }],
   ["watch kun.databayt.org", "~/hogwarts", { skill: "watch", lane: "research", repos: ["kun"] }],
   ["quick", "~/kun", { none: true }], // an inline lane: the skill's own frontmatter is enough
-  ["plan the week with the team", "~/kun", { none: true }],
+  ["plan the week with the team", "~/kun", { skills: ["weekly"], skill: null }], // weekly's trigger phrase, not the plan skill
   ["the dev server crashed again after the upgrade to next", "~/kun", { none: true }], // not a keyword prompt
+  // trigger phrases: the documented wording routes without a description
+  ["can you cut the silences from yesterday's clip", "~/kun", { skills: ["edit"] }],
+  ["راجع الطابور", "~/kun", { skills: ["approve"] }],
+  ["is it live yet", "~/hogwarts", { skills: ["watch"] }],
+  ["we should check the report", "~/kun", { none: true }], // single plain words are left to the listing
   ["", "~/kun", { none: true }],
 ];
 function test(idx) {
@@ -530,7 +584,7 @@ function test(idx) {
       if (want !== undefined && got !== [...want].sort().join(",")) errs.push(`${name}: got [${got}] want [${[...want].sort()}]`);
     };
     if (exp.none) {
-      if (res.repos.length || res.local.length || res.named.length || res.global.length || res.skill) errs.push(`expected nothing, got ${JSON.stringify({ repos: ids(res.repos), local: ids(res.local), named: ids(res.named), global: ids(res.global) })}`);
+      if (res.repos.length || res.local.length || res.named.length || res.global.length || res.skill || res.skills.length) errs.push(`expected nothing, got ${JSON.stringify({ repos: ids(res.repos), local: ids(res.local), named: ids(res.named), global: ids(res.global) })}`);
     } else {
       eq("repos", ids(res.repos), exp.repos);
       eq("local", res.local.map((b) => b.key).sort().join(","), exp.local);
@@ -539,6 +593,7 @@ function test(idx) {
       if (exp.alsoIncludes && !res.global.some((b) => b.also.includes(exp.alsoIncludes))) errs.push(`hint should name skill ${exp.alsoIncludes}`);
       if (exp.skill !== undefined && (res.skill?.name || null) !== exp.skill) errs.push(`skill: got ${res.skill?.name || null} want ${exp.skill}`);
       if (exp.lane && res.skill?.lane !== exp.lane) errs.push(`lane: got ${res.skill?.lane} want ${exp.lane}`);
+      if (exp.skills !== undefined) eq("skills", res.skills.flatMap((x) => x.names).sort().join(","), exp.skills);
     }
     if (errs.length) fails.push(`✗ "${prompt}" @ ${proj}: ${errs.join("; ")}`);
     else pass++;
@@ -576,7 +631,7 @@ try {
         const out = render(idx, res);
         if (out) {
           process.stdout.write(out + "\n");
-          const hit = { ts: new Date().toISOString(), project: res.project, ...(res.skill ? { skill: res.skill.name, lane: res.skill.lane } : {}), repos: res.repos.map((r) => r.id), local: res.local.map((b) => b.key), named: res.named.map((b) => `${b.repo}/${b.key}`), global: res.global.map((b) => `${b.repo}/${b.key}`), ms: Math.round(ms()) };
+          const hit = { ts: new Date().toISOString(), project: res.project, ...(res.skill ? { skill: res.skill.name, lane: res.skill.lane } : {}), ...(res.skills.length ? { phrases: res.skills.map((x) => `${x.names.join("|")}:${x.phrase}`) } : {}), repos: res.repos.map((r) => r.id), local: res.local.map((b) => b.key), named: res.named.map((b) => `${b.repo}/${b.key}`), global: res.global.map((b) => `${b.repo}/${b.key}`), ms: Math.round(ms()) };
           try {
             fs.mkdirSync(path.dirname(LOG), { recursive: true });
             fs.appendFileSync(LOG, JSON.stringify(hit) + "\n");
@@ -590,6 +645,34 @@ try {
     const allowed = new Set(Object.values(idx.repos).filter((r) => r.source === "registry" && r.path).map((r) => r.id));
     const pick = res.repos.map((r) => r.id).find((id) => allowed.has(id)) || res.global.map((b) => b.repo).find((id) => allowed.has(id)) || "kun";
     console.log(pick);
+  } else if (args[0] === "--eval") {
+    // Deterministic dispatch on the labeled cases (extract-dispatch-cases.mjs --json): how often
+    // does the router alone name the right skill, with no model and no description read?
+    const idx = readJSON(INDEX) || build();
+    const cases = (readJSON(args[1], {}) || {}).cases || [];
+    const t = { pos: 0, posHit: 0, phrasePos: 0, phraseHit: 0, none: 0, noneClean: 0, miss: [] };
+    for (const c of cases) {
+      const res = resolve(idx, c.prompt, path.join(HOME, "kun"));
+      const named = [...res.skills.flatMap((x) => x.names), ...(res.skill ? [res.skill.name] : [])];
+      const first = c.prompt.toLowerCase().trim().split(/\s+/)[0];
+      if (c.label && c.label !== "none" && c.label !== null) {
+        t.pos++;
+        const phrase = c.prompt.trim().split(/\s+/).length >= 2 || /[^\x00-\x7f]/.test(c.prompt);
+        if (phrase) t.phrasePos++;
+        const hit = named.includes(c.label) || first === c.label;
+        if (hit) t.posHit++;
+        if (phrase && named.includes(c.label)) t.phraseHit++;
+        if (phrase && !named.includes(c.label) && t.miss.length < 12) t.miss.push(`${c.label} ← "${c.prompt}" (got ${named.join(",") || "nothing"})`);
+      } else {
+        t.none++;
+        if (!named.length) t.noneClean++;
+      }
+    }
+    console.log(`resolve --eval: ${cases.length} labeled cases`);
+    console.log(`  a skill is expected: ${t.pos} — the router names it (phrase or the skill's own name first) in ${t.posHit} (${((100 * t.posHit) / Math.max(1, t.pos)).toFixed(1)}%)`);
+    console.log(`  of those, multi-word or Arabic phrases: ${t.phrasePos} — hinted ${t.phraseHit} (${((100 * t.phraseHit) / Math.max(1, t.phrasePos)).toFixed(1)}%)`);
+    console.log(`  no skill is expected: ${t.none} — the router stays silent in ${t.noneClean} (${((100 * t.noneClean) / Math.max(1, t.none)).toFixed(1)}%)`);
+    for (const m of t.miss) console.log(`  miss: ${m}`);
   } else if (args[0] === "--test") {
     const idx = readJSON(INDEX) || build();
     process.exitCode = test(idx) ? 0 : 1;

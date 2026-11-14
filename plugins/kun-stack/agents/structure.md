@@ -6,6 +6,7 @@ effort: low
 version: "Next.js 16.0.7"
 handoff: [architecture, pattern, nextjs]
 lane: mechanical
+autoCompactWindow: 100000
 ---
 
 # Structure Expert

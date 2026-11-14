@@ -6,6 +6,7 @@ effort: low
 version: "Git 2.x"
 handoff: [github, architecture, build]
 lane: mechanical
+autoCompactWindow: 100000
 ---
 
 # Git Expert

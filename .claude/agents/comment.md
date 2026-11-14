@@ -6,6 +6,7 @@ effort: low
 version: "Clean Code"
 handoff: [pattern, typescript]
 lane: mechanical
+autoCompactWindow: 100000
 ---
 
 # Comment Expert

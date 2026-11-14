@@ -4,6 +4,7 @@ description: "Read-only search agent for broad fan-out searches — when answeri
 model: haiku
 effort: low
 lane: lookup
+autoCompactWindow: 100000
 disallowedTools: Agent, Artifact, ArtifactComments, ArtifactData, ArtifactCheck, ExitPlanMode, Edit, Write, NotebookEdit
 omitClaudeMd: true
 version: "databayt v1.0"

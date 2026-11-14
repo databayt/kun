@@ -6,6 +6,7 @@ effort: low
 version: "HTML5 + CSS Variables"
 handoff: [tailwind, shadcn, react]
 lane: mechanical
+autoCompactWindow: 100000
 ---
 
 # Semantic Expert

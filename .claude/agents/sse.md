@@ -6,6 +6,7 @@ effort: low
 version: "Next.js 16"
 handoff: [react, nextjs, build]
 lane: mechanical
+autoCompactWindow: 100000
 ---
 
 # SSE Expert (Server-Side Exception)

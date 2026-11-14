@@ -4,6 +4,7 @@ description: "Icons — SVG, lucide-react, shadcn/ui icon patterns"
 model: haiku
 effort: low
 lane: mechanical
+autoCompactWindow: 100000
 ---
 
 # Icon Agent
