@@ -36,6 +36,22 @@ Execute stages in order. Each stage appends progress to the GitHub issue. Stop o
 IDEA → SPEC → [human approval] → PLAN → TASKS → READY → SCHEMA → CODE → WIRE → CHECK → SHIP → WATCH
 ```
 
+Each stage runs on a lane (`engine.json → lanes`). This skill is the orchestrator and stays in the main loop; it hands a stage's heavy work to that lane's agent with a written brief, and keeps the decisions:
+
+| Stage | Lane | How it runs |
+| --- | --- | --- |
+| IDEA | build | main loop, medium effort — a structured issue |
+| SPEC, PLAN | judge | main loop, high effort — the decisions, then the one human gate |
+| TASKS | build | the breakdown; it tags every task with its own lane |
+| READY | judge | the cross-artifact check |
+| SCHEMA | judge | a migration touches live data: decide in the main loop, then a build agent writes the model and Zod |
+| CODE, WIRE | build | build agents (sonnet, medium), one written brief per task from the breakdown |
+| CHECK | build | `pnpm tsc` and the build are scripts; the fix loop is build work |
+| SHIP | judge | a production deploy — main loop, and it waits for Abdout's word |
+| WATCH | research | a sonnet fork that reads the live page and reports |
+
+When a breakdown exists, dispatch by each task's tag (`[build]`, `[judge]`, `[lookup]`, `[script]`) rather than by its stage. A brief for a build agent names the files, the mirror target, the pattern card and the verify step — it knows nothing else. Review what comes back before the next task depends on it.
+
 PLAN, TASKS, and READY are **optional as a trio** — they add architecture rigor for non-trivial features, but a typo fix or single-field change should skip straight to SCHEMA (or be a `/report`, not a `/feature`). For a small change, note "trivial — skipping plan/tasks/ready" on the issue and continue.
 
 ### Stage 1: IDEA — Capture

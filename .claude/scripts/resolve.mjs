@@ -33,6 +33,10 @@
 // skill, agent or spell); `common` — a plain single word. Shared and common keys work bare
 // inside their own repo and need the repo named anywhere else. engine.json → resolver.
 // always_bare promotes a key to unique (the old global_blocks list is read as a fallback).
+//   - a short prompt that opens with the name of a skill on a FORK lane (dev, health, watch…)
+//     gets `skill X → lane …`: the harness forks the skill onto its lane's model only when
+//     the skill is actually invoked, so the hint is what keeps the main loop from doing the
+//     work itself at its own price
 // The hook never builds or scans; without an index it stays silent. Every hit is logged
 // to ~/.claude/logs/resolve.jsonl so improve.mjs can review false positives and latency.
 
@@ -119,6 +123,28 @@ function engineWords() {
   for (const s of vocab.schools || []) for (const sp of s.spells || []) put(sp.name, "spell");
   return words;
 }
+// kun's own skills and the lane each declares (frontmatter `lane:`, stamped by
+// compile-lanes.mjs), joined with engine.json → lanes.
+function skillLanes(lanes) {
+  const out = {};
+  const root = path.join(KUN, ".claude/skills");
+  let dirs = [];
+  try {
+    dirs = fs.readdirSync(root, { withFileTypes: true }).filter((d) => d.isDirectory());
+  } catch {}
+  for (const d of dirs) {
+    let head = "";
+    try {
+      head = fs.readFileSync(path.join(root, d.name, "SKILL.md"), "utf8").slice(0, 3000);
+    } catch {
+      continue;
+    }
+    const lane = /^lane:\s*([a-z_]+)\s*$/m.exec(head)?.[1];
+    const row = lane && lanes[lane];
+    if (row?.model) out[d.name] = { lane, model: row.model, effort: row.effort, fork: row.skill === "fork" };
+  }
+  return out;
+}
 // One class per block key, across every repo that has a blocks.json.
 export function classify(blocks, repos, always, words) {
   const owners = {};
@@ -200,6 +226,7 @@ export function build() {
     light,
     keywords,
     global_blocks: Object.keys(keywords).filter((k) => keywords[k].class === "unique"),
+    skills: skillLanes(engine.lanes || {}),
     triggers: skillTriggers(),
   };
   writeAtomic(INDEX, JSON.stringify(idx));
@@ -284,12 +311,17 @@ export function resolve(idx, text, projectDir) {
     }
     if (landed) hits++;
   }
+  // a short prompt that opens with a fork-lane skill's name: "dev", "health", "watch kun"
+  const said = prompt.trim().split(/\s+/).filter(Boolean);
+  const first = (said[0] || "").replace(/^\/|[.,:;!?]+$/g, "");
+  const sk = said.length <= 6 ? idx.skills?.[first] : null;
   return {
     project: here?.id || null,
     repos: repos.filter((id) => !(here && id === here.id)).map((id) => ({ id, path: idx.repos[id].path })),
     local,
     named,
     global,
+    skill: sk?.fork ? { name: first, ...sk } : null,
   };
 }
 
@@ -320,6 +352,7 @@ export function render(idx, res) {
   const records = (b) => ((b.context || []).length ? ` — read its records first (${b.context.join(", ")}); update them after the work` : "");
   // a light repo's own block: one line, and only when it has records (resolve() filtered)
   for (const b of res.local.filter((b) => b.light)) lines.push(`block ${b.key} → ${b.path}${sib(b)}${records(b)}`);
+  if (res.skill) lines.push(`skill ${res.skill.name} → lane ${res.skill.lane} (a ${res.skill.model} fork, ${res.skill.effort} effort): if this is that skill, invoke it — do not do its work in the main loop`);
   for (const r of res.repos) lines.push(`repo ${r.id} → ${tilde(r.path)} (another repo: its own CLAUDE.md applies there; use absolute paths)`);
   for (const b of res.named) {
     const at = tilde(path.join(idx.repos[b.repo].path, b.path));
@@ -473,6 +506,14 @@ const CASES = [
   ["mail from support@databayt.org", "~/kun", { repos: [] }],
   ["report issue dialog", "~/hogwarts", { local: ["report-issue"], global: [] }],
   ["report issue dialog", "~/catalog", { none: true }], // six repos own it → shared
+  // lane hint: a short prompt that opens with a fork-lane skill
+  ["dev", "~/kun", { skill: "dev", lane: "mechanical" }],
+  ["dev", "~/hogwarts", { skill: "dev", lane: "mechanical" }],
+  ["health", "~/kun", { skill: "health", lane: "mechanical" }],
+  ["watch kun.databayt.org", "~/hogwarts", { skill: "watch", lane: "research", repos: ["kun"] }],
+  ["quick", "~/kun", { none: true }], // an inline lane: the skill's own frontmatter is enough
+  ["plan the week with the team", "~/kun", { none: true }],
+  ["the dev server crashed again after the upgrade to next", "~/kun", { none: true }], // not a keyword prompt
   ["", "~/kun", { none: true }],
 ];
 function test(idx) {
@@ -489,13 +530,15 @@ function test(idx) {
       if (want !== undefined && got !== [...want].sort().join(",")) errs.push(`${name}: got [${got}] want [${[...want].sort()}]`);
     };
     if (exp.none) {
-      if (res.repos.length || res.local.length || res.named.length || res.global.length) errs.push(`expected nothing, got ${JSON.stringify({ repos: ids(res.repos), local: ids(res.local), named: ids(res.named), global: ids(res.global) })}`);
+      if (res.repos.length || res.local.length || res.named.length || res.global.length || res.skill) errs.push(`expected nothing, got ${JSON.stringify({ repos: ids(res.repos), local: ids(res.local), named: ids(res.named), global: ids(res.global) })}`);
     } else {
       eq("repos", ids(res.repos), exp.repos);
       eq("local", res.local.map((b) => b.key).sort().join(","), exp.local);
       eq("named", res.named.map((b) => b.key).sort().join(","), exp.named);
       eq("global", res.global.map((b) => b.key).sort().join(","), exp.global);
       if (exp.alsoIncludes && !res.global.some((b) => b.also.includes(exp.alsoIncludes))) errs.push(`hint should name skill ${exp.alsoIncludes}`);
+      if (exp.skill !== undefined && (res.skill?.name || null) !== exp.skill) errs.push(`skill: got ${res.skill?.name || null} want ${exp.skill}`);
+      if (exp.lane && res.skill?.lane !== exp.lane) errs.push(`lane: got ${res.skill?.lane} want ${exp.lane}`);
     }
     if (errs.length) fails.push(`✗ "${prompt}" @ ${proj}: ${errs.join("; ")}`);
     else pass++;
@@ -533,7 +576,7 @@ try {
         const out = render(idx, res);
         if (out) {
           process.stdout.write(out + "\n");
-          const hit = { ts: new Date().toISOString(), project: res.project, repos: res.repos.map((r) => r.id), local: res.local.map((b) => b.key), named: res.named.map((b) => `${b.repo}/${b.key}`), global: res.global.map((b) => `${b.repo}/${b.key}`), ms: Math.round(ms()) };
+          const hit = { ts: new Date().toISOString(), project: res.project, ...(res.skill ? { skill: res.skill.name, lane: res.skill.lane } : {}), repos: res.repos.map((r) => r.id), local: res.local.map((b) => b.key), named: res.named.map((b) => `${b.repo}/${b.key}`), global: res.global.map((b) => `${b.repo}/${b.key}`), ms: Math.round(ms()) };
           try {
             fs.mkdirSync(path.dirname(LOG), { recursive: true });
             fs.appendFileSync(LOG, JSON.stringify(hit) + "\n");
