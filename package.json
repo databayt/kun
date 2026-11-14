@@ -84,17 +84,17 @@
     "sales:leads": "tsx scripts/sales/leads.ts"
   },
   "dependencies": {
-    "@ai-sdk/google": "^4.0.37",
+    "@ai-sdk/google": "^4.0.121",
     "@anthropic-ai/sdk": "^0.68.0",
-    "@auth/core": "^0.34.3",
+    "@auth/core": "^0.41.3",
     "@aws-sdk/client-s3": "^3.1103.0",
     "@aws-sdk/s3-request-presigner": "3.1103.0",
     "@hookform/resolvers": "^5.9.1",
     "@marsidev/react-turnstile": "^1.4.0",
     "@neondatabase/serverless": "^1.1.0",
-    "@opennextjs/cloudflare": "^1.20.6",
+    "@opennextjs/cloudflare": "^1.20.17",
     "@prisma/adapter-neon": "^7.9.0",
-    "@prisma/client": "^7.9.0",
+    "@prisma/client": "^7.10.1",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-collapsible": "^1.1.12",
     "@radix-ui/react-dialog": "^1.1.15",
@@ -110,7 +110,7 @@
     "@tabler/icons-react": "^3.41.1",
     "@upstash/ratelimit": "^2.0.6",
     "@upstash/redis": "^1.35.6",
-    "ai": "^7.0.56",
+    "ai": "^7.0.173",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
@@ -124,34 +124,35 @@
     "jotai": "^2.19.1",
     "lucide-react": "^1.7.0",
     "mermaid": "^11.17.0",
-    "next": "16.3.6",
-    "next-auth": "5.0.0-beta.30",
+    "next": "16.4.6",
+    "next-auth": "5.0.0-beta.32",
     "next-themes": "^0.4.6",
-    "prisma": "^7.9.0",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
+    "prisma": "^7.10.1",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
     "react-hook-form": "^7.86.0",
     "server-only": "^0.0.1",
     "shiki": "^4.0.2",
     "tailwind-merge": "^3.5.0",
-    "zod": "^4.3.6"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@fontsource/inter": "^5.3.0",
-    "@tailwindcss/postcss": "^4.2.2",
+    "@tailwindcss/postcss": "^4.3.5",
     "@types/node": "^25.5.2",
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "dotenv": "^17.4.2",
     "pdf-lib": "^1.17.1",
     "playwright-core": "^1.61.1",
     "qrcode": "^1.5.4",
     "rehype-pretty-code": "^0.14.3",
-    "tailwindcss": "^4.2.2",
+    "tailwindcss": "^4.3.5",
     "tsx": "^4.23.12",
     "typescript": "^6.0.2",
-    "vitest": "^4.1.10",
-    "wrangler": "^4.141.0"
+    "vite": "~8.1.6",
+    "vitest": "^4.1.12",
+    "wrangler": "^4.162.0"
   },
   "keywords": [
     "claude-code",
@@ -169,5 +170,16 @@
   },
   "engines": {
     "node": ">=22.0.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "dompurify@<3.4.17": "^3.4.17",
+      "fast-uri@<3.1.7": "^3.1.7",
+      "image-size@<2.0.3": "^2.0.3",
+      "js-yaml@>=3.0.0 <3.15.2": "^3.15.2",
+      "js-yaml@>=4.0.0 <4.3.2": "^4.3.2",
+      "nanoid@>=3.0.0 <3.3.18": "^3.3.18",
+      "source-map-js@<1.2.2": "^1.2.2"
+    }
   }
 }
