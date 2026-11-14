@@ -124,11 +124,12 @@ its board's `columns`.
 | Piece | Where |
 | ----- | ----- |
 | **Frontend** | Twenty's React SPA on Vercel |
-| **Backend** | `twenty-server` + `twenty-worker` + `postgres:16` + `redis`, in Docker **on Abdout's Mac**, host port **3100** |
-| **Public API** | Tailscale Funnel — `https://twenty-api-2.tail42a5c4.ts.net` |
+| **Backend** | `twenty-server` + `twenty-worker` + `postgres:16` + `redis`, in Docker on the **Hetzner** server `twenty-1` (CX23, fsn1, since 2026-11-14) — setup in `twenty/hetzner/` |
+| **Public API** | `https://crm-api.databayt.org` (Caddy + Let's Encrypt) |
+| **Mac access** | `localhost:3100` = SSH tunnel `com.databayt.twenty-tunnel` (`twenty/hetzner/tunnel.sh`); it also carries Hermes :8644 back to the server for the Hogwarts "School shortlisted → outreach" workflow |
 | **Version** | pinned `v2.31.1` (upstream is ~v2.30 on its own numbering; the fork's checkout is v2.17) |
 
-> **The CRM is down whenever the laptop is.** Every scheduled CRM job is a Mac job — which is why the funnel's cadence clock runs on launchd and Vercel cron rather than a Twenty `CRON` workflow. The worker must be up too: webhooks, crons and the workflow engine all run through BullMQ.
+> **The CRM stays up when the laptop sleeps** (Hetzner since 2026-11-14). The scheduled CRM *jobs* are still Mac jobs on launchd, reaching it through the tunnel; a workflow that calls Hermes needs the Mac awake. The worker must be up too: webhooks, crons and the workflow engine all run through BullMQ.
 
 ## API access
 

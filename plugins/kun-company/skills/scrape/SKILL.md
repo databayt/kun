@@ -57,7 +57,7 @@ export TWENTY_API_URL=http://localhost:3100          # NEVER 3000 — that is ho
 export TWENTY_API_KEY=$(security find-generic-password -s databayt-twenty -a <product> -w)
 ```
 
-Off this Mac: `https://twenty-api-2.tail42a5c4.ts.net`. The CRM is down whenever the laptop is.
+Off this Mac: `https://crm-api.databayt.org` (Hetzner since 2026-11-14; `localhost:3100` is an SSH tunnel to it).
 
 ### `databayt` — Website Leads (the software house's outbound lane, 2026-10-03)
 

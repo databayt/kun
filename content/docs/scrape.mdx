@@ -195,10 +195,9 @@ export TWENTY_API_KEY=$(security find-generic-password -s databayt-twenty -a hog
 npx tsx scripts/crm/contact-gap.ts
 ```
 
-Keychain service `databayt-twenty`, account = `hogwarts` | `mkan` | `sijillee` | `moallimee`. Off
-this Mac, the backend answers at the Tailscale Funnel `https://twenty-api-2.tail42a5c4.ts.net`. The
-backend is Docker on Abdout's laptop, so the CRM is down whenever the laptop is — every scheduled
-CRM job is a Mac job. See [CRM](/docs/crm).
+Keychain service `databayt-twenty`, account = `hogwarts` | `mkan` | `sijillee` | `moallimee`. The
+backend runs on a Hetzner server at `https://crm-api.databayt.org`; on the Mac, `localhost:3100` is an
+SSH tunnel to it, so the CRM stays up when the laptop sleeps. See [CRM](/docs/crm).
 
 Defaulting to port 3000 is not hypothetical: it is why Hermes' CRM crons silently returned nothing
 for weeks while reporting `last_status: ok`.

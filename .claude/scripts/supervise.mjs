@@ -346,17 +346,14 @@ function heal(jobs, sup, mode, log, wake) {
     down.add('hermes');
     attempt('hermes', `the Hermes ticker has not run for ${Math.round((NOW - tick) / 60_000)} min`, () => sh('launchctl', ['kickstart', '-k', `gui/${UID}/ai.hermes.gateway`]));
   } else fine('hermes');
-  // Docker (Colima) and the Twenty CRM on it.
-  if (!sh('colima', ['status']).ok) {
-    down.add('docker').add('twenty');
-    attempt('docker', 'Colima (Docker) is not running', () => sh('colima', ['start'], { timeout: 300_000 }));
-  } else {
-    fine('docker');
-    if (up(`${process.env.RUNS_TWENTY_URL ?? 'http://localhost:3100'}/healthz`).out !== '200') {
-      down.add('twenty');
-      attempt('twenty', 'the Twenty CRM is not answering on :3100', () => sh('docker', ['start', 'twenty-db-1', 'twenty-redis-1', 'twenty-server-1', 'twenty-worker-1'], { timeout: 120_000 }));
-    } else fine('twenty');
-  }
+  // The Twenty CRM runs on Hetzner since 2026-11-14 (twenty/hetzner/). :3100 on this Mac is the
+  // SSH tunnel (com.databayt.twenty-tunnel), so a dead :3100 is healed by restarting the tunnel —
+  // NEVER by starting Colima or the old local containers: that would revive a stale second CRM.
+  // Colima is no longer always-on; nothing here starts it.
+  if (up(`${process.env.RUNS_TWENTY_URL ?? 'http://localhost:3100'}/healthz`).out !== '200') {
+    down.add('twenty');
+    attempt('twenty', 'the Twenty CRM is not answering on :3100 (Hetzner tunnel)', () => sh('launchctl', ['kickstart', '-k', `gui/${UID}/com.databayt.twenty-tunnel`]));
+  } else fine('twenty');
   // The session-vault Chrome (TikTok uploads, logged-in reads). A plain kickstart never fights a run.
   if (!up(`${process.env.RUNS_VAULT_URL ?? 'http://127.0.0.1:9222'}/json/version`, 4).ok) {
     down.add('vault');
