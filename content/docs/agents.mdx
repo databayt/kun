@@ -44,7 +44,7 @@ The captain sits above everything and never writes code — it allocates, decide
 | **cloudflare** | The production platform — Workers, Containers, zone DNS, cron triggers, the balqalam.com lane |
 | **pwa** | Installability, per-tenant manifests, service-worker caching that respects auth, offline outboxes, Web Push — see [PWA](/docs/pwa) |
 
-### Engine maintenance & media (8)
+### Engine maintenance & media (9)
 
 | Agent | Scope |
 |-------|-------|
@@ -56,6 +56,7 @@ The captain sits above everything and never writes code — it allocates, decide
 | **learn** | Extracts patterns, conventions, and team dynamics into memory |
 | **package** | Cross-repo dependency audit and upgrade coordination |
 | **clone** | Translates a captured live-URL section into house-stack JSX |
+| **Explore** | Read-only search across files — kun's own copy of the built-in agent, so that lookups run on Haiku |
 
 ### Content (2)
 
@@ -102,15 +103,15 @@ effort: medium
 Instructions, context, and domain knowledge...
 ```
 
-`model` is always an **alias** (`opus` / `sonnet` / `haiku`), never a pinned version — the alias resolves through `model_tiers` in `.claude/engine.json`, so upgrading the fleet is a one-line change. `effort` sets the reasoning budget per [`delegation.efforts`](/docs/configuration).
+`model` and `effort` are never set by hand. Each agent names a **lane** in its frontmatter, and `compile-lanes.mjs` stamps both from the one table in `.claude/engine.json` ([Lanes](/docs/lanes)); the lint fails on a value set any other way. The model is always an alias (`opus` / `sonnet` / `haiku`), never a pinned version.
 
 | Tier | Used for |
 |------|----------|
-| **opus** | Architecture, orchestration, review, strategy, leadership |
-| **sonnet** | Standard build agents with known patterns |
-| **haiku** | Mechanical work — `comment`, `git`, `icon`, `github`, `semantic`, `sse`, `structure` |
+| **opus** | The `judge` and `captain` lanes — architecture, review, strategy, quality |
+| **sonnet** | The `build` and `research` lanes — implementation with known patterns, reading and reporting |
+| **haiku** | The `mechanical` and `lookup` lanes — `comment`, `git`, `icon`, `github`, `semantic`, `sse`, `structure`, `Explore` |
 
-The main loop itself runs **Opus 5.5** (Fable 5.1 only as a `/model` escalation); agents stay on the aliases above, which resolve forward on their own.
+The main loop itself runs **Opus 5.5** (Fable 5.2 only as a `/model` escalation, by hand); agents stay on the aliases above, which resolve forward on their own.
 
 ## Routing
 
