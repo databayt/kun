@@ -1,10 +1,11 @@
 ---
 name: analyze
 description: "Repo config generator — derive a repo's CLAUDE.md, agents, rules and skills from its patterns"
-model: opus
-effort: high
+model: sonnet
+effort: medium
 version: "databayt v1.0"
 handoff: [learn, tech-lead, github]
+lane: build
 ---
 
 # Analyze — Repo Config Generator

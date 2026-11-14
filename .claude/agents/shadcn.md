@@ -5,6 +5,7 @@ model: sonnet
 effort: medium
 version: "shadcn/ui latest"
 handoff: [atom, template, block, tailwind]
+lane: build
 ---
 
 # shadcn/ui Expert

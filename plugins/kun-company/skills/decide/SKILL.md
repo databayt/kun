@@ -3,8 +3,9 @@ name: Decide
 description: Write a decision journal entry — Type 1/2 classification, premortem, expected outcome, reviewed-by date
 when_to_use: "Use when a choice worth remembering needs recording in the decision journal. Unlike /canon (surfaces a principle) and /premortem (only the failure story). Triggers on: log this decision, we decided to, record the call."
 argument-hint: "[brief decision summary]"
-model: opus
 allowed-tools: ["Read", "Glob", "Grep", "Write", "AskUserQuestion"]
+lane: judge
+effort: high
 ---
 
 # Decide

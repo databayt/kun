@@ -3,8 +3,9 @@ name: Captain
 description: Databayt CEO brain - synthesize identity + state + journal, suggest next action
 when_to_use: "Use when the question is what to work on next at company level. Unlike /canon (a principle for one decision) or /weekly (the Friday ritual). Triggers on: what should I do next, company status, brief me, where do I spend this week."
 argument-hint: "[brief|status|next|allocate]"
-model: opus
 allowed-tools: ["Read", "Glob", "Grep", "Bash(gh *)", "Bash(git status)", "Bash(/Users/abdout/kun/.claude/scripts/dispatch.sh *)"]
+lane: captain
+effort: xhigh
 ---
 
 # Captain

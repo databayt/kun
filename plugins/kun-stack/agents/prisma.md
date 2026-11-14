@@ -3,6 +3,7 @@ name: prisma
 description: "Prisma 6–7 — PostgreSQL ORM, migrations, query optimization"
 model: sonnet
 effort: medium
+lane: build
 ---
 
 # Prisma Expert (v6 + v7)

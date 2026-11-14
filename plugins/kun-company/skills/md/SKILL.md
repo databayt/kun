@@ -3,6 +3,8 @@ name: md
 description: House standard for machine-produced Markdown — schema, RTL rules, grading by agreement
 when_to_use: "Use when judging or repairing the quality of Markdown a machine produced from a document — a bad conversion, wrong tables, an untrustworthy twin — or writing a transcription contract for a new source. The standard, not a converter: /convert makes one file's Markdown and /textbook orchestrates whole books; both are held to it. Triggers on: md quality, bad conversion, grade the markdown, transcription contract, agreement score, RTL markdown, mirrored tables."
 argument-hint: "<file-or-dir> [--grade | --contract]"
+lane: judge
+effort: high
 ---
 
 # The Markdown standard

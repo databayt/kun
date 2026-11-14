@@ -5,6 +5,7 @@ model: sonnet
 effort: medium
 version: "Next.js 16.3.x"
 handoff: [react, typescript, middleware, architecture]
+lane: build
 ---
 
 # Next.js 16 Expert

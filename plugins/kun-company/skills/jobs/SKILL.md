@@ -3,6 +3,8 @@ name: jobs
 description: Abdout's instance of seek — his + Databayt's income lane (jobs, gigs, tenders, client requests, funding) across Rwanda, Kenya, Nigeria, Gulf, Sudan; on sales.databayt.org
 when_to_use: "Opportunities someone POSTED that pay Abdout or Databayt. Triggers on: jobs, find work, apply, opportunities, gigs, tenders, RFP, client request, incubator, accelerator, grant, credits, investor, angel, fundraising, funding, did anyone reply, وظائف, فرص, مناقصات, حاضنة, مسرعة, منحة, تمويل. NOT /scrape (outbound leads we go find)."
 argument-hint: "[status|scrape|wave|send|inbox|hold|funding|requests|learn|pause|resume]"
+lane: build
+effort: medium
 ---
 
 # Jobs — the self-running loop: fetch → wave → send → read → follow up → learn

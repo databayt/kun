@@ -3,6 +3,8 @@ name: check
 description: Quality gate — typecheck + build + visual verify before shipping
 when_to_use: "Use when work is about to ship and needs the pre-ship gate — tsc, production build, optional visual verify and existing tests with auto-fix loops, ending READY TO SHIP or BLOCKED. Unlike /handover or /qa (deep UI/block verification), this is the fast mechanical green-check. Triggers on: check, pre-ship quality gate, typecheck + build + visual verify, \"is it green\"."
 argument-hint: "[feature] [--visual <route>]"
+lane: build
+effort: medium
 ---
 
 # Check — Quality Gate

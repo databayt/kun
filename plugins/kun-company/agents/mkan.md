@@ -1,10 +1,11 @@
 ---
 name: mkan
 description: "Rental marketplace reference — listings, booking, search"
-model: opus
-effort: high
+model: sonnet
+effort: low
 version: "Next.js + Prisma + Docker"
 handoff: [architecture, prisma, nextjs]
+lane: research
 ---
 
 # Mkan Reference Agent

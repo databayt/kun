@@ -3,6 +3,8 @@ name: weekly
 description: Run the captain's weekly Sunday-plan / Tuesday-check / Thursday-review cycle
 when_to_use: "Use when running the captain's weekly cadence — Monday plan (allocate the 7 humans), Wednesday check (progress vs plan), Friday review (coach + canon principle) with archive to memory/weekly. Triggers on: weekly, monday plan, friday review, plan the week."
 argument-hint: "[plan|check|review]"
+lane: captain
+effort: xhigh
 ---
 
 Run the captain's weekly review.

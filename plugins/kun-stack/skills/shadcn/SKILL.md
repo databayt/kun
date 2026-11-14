@@ -16,6 +16,8 @@ allowed-tools:
     "mcp__shadcn__*",
     "WebFetch",
   ]
+lane: build
+effort: medium
 ---
 
 # shadcn

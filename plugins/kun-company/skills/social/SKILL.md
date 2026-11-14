@@ -3,6 +3,8 @@ name: social
 description: One spell — calendar, draft, media, approve, publish, measure for a brand post
 when_to_use: "Use when a databayt brand post should be taken the whole way — slot, bilingual copy, media, human sign-off, delivery, numbers. The compound orchestrator; for one stage run it directly (/calendar, /draft, /higgs, /approve, /publish, /measure). Triggers on: social post, post about <topic>, publish to social, social automation, broadcast the announcement, منشور تواصل, انشر عن."
 argument-hint: "<brand> <topic> [--channels ...] [--media [type]] [--at <iso>] [--from <stage>]"
+lane: build
+effort: medium
 ---
 
 # Social — one post, all the way through

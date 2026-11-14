@@ -5,6 +5,7 @@ model: sonnet
 effort: medium
 version: "Tailwind 4.3.x"
 handoff: [shadcn, semantic, react]
+lane: build
 ---
 
 # Tailwind CSS Expert

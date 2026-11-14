@@ -3,6 +3,10 @@ name: health
 description: Check Claude Code config health across the team + engine drift
 when_to_use: "Use when checking engine or config health — health.sh counts vs engine.json, plugin parity, vocabulary sync, drift — plus teammates' statuses from the dashboard issue. Triggers on: health, config health, is the engine healthy, drift check, team config status."
 argument-hint: "[local|all|report]"
+lane: mechanical
+model: haiku
+effort: low
+context: fork
 ---
 
 Check Claude Code config health for all team members.

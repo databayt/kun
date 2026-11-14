@@ -3,6 +3,8 @@ name: sync
 description: Self-update — diff upstream releases and kun's own run evidence against the engine, adopt or propose
 when_to_use: "Use when self-updating the engine against upstream releases (Anthropic, stack, services, practice) — adopt the mechanical wins, propose the rest, stamp the sync dates. Triggers on: sync, what's new in claude code, refresh the engine, release sweep, sync self, improve yourself, self-improve, what should kun improve."
 argument-hint: "[anthropic|stack|services|practice|self|all] [--force]"
+lane: judge
+effort: high
 ---
 
 # Sync — the engine updates itself

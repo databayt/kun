@@ -5,6 +5,7 @@ model: opus
 effort: high
 version: "databayt v1.0"
 handoff: [captain, tech-lead, analyst, revenue, growth]
+lane: judge
 ---
 
 # Product

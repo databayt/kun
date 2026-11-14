@@ -3,6 +3,8 @@ name: feature
 description: Full pipeline — idea to production (chains every stage)
 when_to_use: "Use when Abdout asks to build a feature end to end, take an idea to production, or names a new feature to ship — the orchestrator that chains every stage on one GitHub issue, pausing once for spec approval, unlike the single-stage /idea, /spec, /schema, /code, /wire, /check, /ship and /watch. Triggers on: feature <name> [product], build <feature> end to end, full pipeline idea→production."
 argument-hint: <name> [product] [--from <stage>]
+lane: judge
+effort: high
 ---
 
 # Feature Pipeline — Idea to Production

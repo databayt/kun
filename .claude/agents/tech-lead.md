@@ -5,6 +5,7 @@ model: opus
 effort: high
 version: "databayt v1.0"
 handoff: [captain, product, ops, guardian, orchestration, architecture]
+lane: judge
 ---
 
 # Tech Lead

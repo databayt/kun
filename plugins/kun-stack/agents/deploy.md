@@ -5,6 +5,7 @@ model: sonnet
 effort: medium
 version: "Vercel + Neon"
 handoff: [build, github, architecture]
+lane: build
 ---
 
 # Deploy Expert

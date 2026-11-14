@@ -35,6 +35,14 @@ say() { printf "  %s\n" "$1"; }
 
 DRIFT=0
 
+# Lanes first: the plugins must carry the frontmatter each file's lane compiles to
+# (engine.json → lanes). A build stamps; --check only compares.
+if [ "$CHECK" = 1 ]; then
+  node "$ROOT/.claude/scripts/compile-lanes.mjs" --check >/dev/null 2>&1 || { echo "DRIFT: a lane stamp is off — run: node .claude/scripts/compile-lanes.mjs"; DRIFT=$((DRIFT+1)); }
+else
+  node "$ROOT/.claude/scripts/compile-lanes.mjs" >/dev/null || { echo "ERROR: an agent or skill has no usable lane — node .claude/scripts/compile-lanes.mjs"; exit 1; }
+fi
+
 # copy_one SRC DST — copy a file (creating parents). In --check mode, diff instead.
 copy_one() {
   local src="$1" dst="$2"

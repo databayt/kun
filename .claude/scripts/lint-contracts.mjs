@@ -34,10 +34,17 @@
 //                      stages run low, only verify/judge run high (2026-11-01).
 //   no-when-to-use     A skill with no when_to_use is invisible to dispatch — it
 //                      can only ever be invoked by exact name.
+//   lane-declared      Every agent and skill in this repo names a lane from
+//                      engine.json → lanes. The lane, not the file, decides the
+//                      model and the effort (2026-11-14).
+//   lane-match         Its frontmatter is what the lane compiles to — a hand-set
+//                      model or effort is drift. Fix: compile-lanes.mjs.
+//   workflow-lane      A workflow stage's model + effort pair is one of the lanes.
 
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { join, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { audit as auditLanes, loadLanes } from "./compile-lanes.mjs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const HOME = process.env.HOME || "";
@@ -195,6 +202,28 @@ if (existsSync(wfDir)) {
 for (const s of skills.values()) {
   if (!/^when_to_use:/m.test(s.raw.slice(0, 2000))) {
     add("warn", "no-when-to-use", s.name, `has no when_to_use, so dispatch can only reach it by exact name`, `add a when_to_use with a "Triggers on:" list`);
+  }
+}
+
+// ── 6. lane-declared / lane-match / workflow-lane ───────────────────────────
+// Repo sources only (.claude/agents, .claude/skills): third-party skills installed in
+// ~/.claude are not ours to stamp, so they can never turn this red.
+for (const r of auditLanes(ROOT)) {
+  if (!r.declared) add("error", "lane-declared", `${r.kind} ${r.name}`, r.problems[0], "add `lane: <name>` to its frontmatter (engine.json → lanes), then run node .claude/scripts/compile-lanes.mjs");
+  else if (r.problems.length) add("error", "lane-match", `${r.kind} ${r.name}`, `lane ${r.lane} compiles to ${r.problems.join("; ")}`, "run node .claude/scripts/compile-lanes.mjs — never set model, effort or context by hand");
+}
+{
+  const pairs = new Set(Object.values(loadLanes(ROOT)).filter((l) => l.model && l.effort).map((l) => `${l.model}/${l.effort}`));
+  const wfDir = join(ROOT, ".claude/workflows");
+  for (const f of existsSync(wfDir) ? readdirSync(wfDir).filter((x) => x.endsWith(".js")) : []) {
+    const src = readFileSync(join(wfDir, f), "utf8");
+    const seen = new Set();
+    for (const m of src.matchAll(/model:\s*"([a-z0-9-]+)"\s*,\s*effort:\s*"([a-z]+)"|effort:\s*"([a-z]+)"\s*,\s*model:\s*"([a-z0-9-]+)"/g)) {
+      const pair = m[1] ? `${m[1]}/${m[2]}` : `${m[4]}/${m[3]}`;
+      if (pairs.has(pair) || seen.has(pair)) continue;
+      seen.add(pair);
+      add("warn", "workflow-lane", f, `a stage runs ${pair}, which is no lane in engine.json → lanes`, "use a lane's pair, or add the lane");
+    }
   }
 }
 

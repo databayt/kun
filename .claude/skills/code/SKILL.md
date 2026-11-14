@@ -3,6 +3,8 @@ name: code
 description: Logic layer — server actions with auth, validation, tenant isolation
 when_to_use: "Use at the pipeline's Logic stage, or when asked to build a feature's business-logic layer — server actions, CRUD, permission rules, optimized queries — as distinct from /schema (data layer) or /wire (UI layer). Triggers on: server actions, logic layer with auth+validation+tenant isolation, pipeline Logic stage."
 argument-hint: <feature> [product]
+lane: build
+effort: medium
 ---
 
 # Code — Logic Layer

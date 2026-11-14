@@ -5,6 +5,7 @@ model: haiku
 effort: low
 version: "Next.js 16"
 handoff: [react, nextjs, build]
+lane: mechanical
 ---
 
 # SSE Expert (Server-Side Exception)

@@ -5,6 +5,7 @@ model: sonnet
 effort: medium
 version: "shadcn/ui 61-item parity (2026-08)"
 handoff: [shadcn, template, react]
+lane: build
 ---
 
 # Atom Agent

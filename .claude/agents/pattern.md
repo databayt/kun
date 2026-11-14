@@ -5,6 +5,7 @@ model: sonnet
 effort: medium
 version: "Project Standards"
 handoff: [architecture, structure, typescript]
+lane: build
 ---
 
 # Pattern Expert

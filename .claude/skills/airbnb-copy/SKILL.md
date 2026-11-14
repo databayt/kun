@@ -3,6 +3,8 @@ name: airbnb-copy
 description: Airbnb-voice rental listing titles, descriptions and marketing copy — Arabic-first, English mirrored
 when_to_use: "Use when writing, refining or translating copy for homes, apartments or short-term rentals on Mkan (mkan.sd) or similar platforms — warm host voice, sensory walkthroughs, honest amenities. Triggers on: write airbnb listing, homes copywriting, sound like airbnb, listing title, listing description, وصف شقة, كتابة إعلان شقة, صياغة إعلان عقار, أسلوب إير بي إن بي, كتابة وصف مكان."
 argument-hint: "[<property details or raw specs>] [--locale ar|en|both] [--zone <district>]"
+lane: build
+effort: medium
 ---
 
 # Airbnb Copy — The Master Rental Copywriting Voice

@@ -3,6 +3,8 @@ name: pattern
 description: Look up a canonical cross-repo pattern (form, table, auth, ...)
 when_to_use: "Use when looking up a canonical cross-repo pattern (form, table, modal, auth, validation, action, columns, wizard, sidebar, header, e2e) — reads the pattern card + registry adoption status and applies the canonical file structure. Triggers on: pattern <keyword>, how do we do forms, canonical pattern, follow the card."
 argument-hint: <name> [product]
+lane: build
+effort: medium
 ---
 
 # Pattern — Cross-Repo Pattern Reference

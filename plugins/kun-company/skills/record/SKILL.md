@@ -3,6 +3,8 @@ name: record
 description: Screen-record demo videos of real product flows, mirrored to Google Drive
 when_to_use: "Use when a product flow must be captured as VIDEO — demo videos, ad cuts, walkthroughs, re-records, Drive sync. Stills are /shoot. Triggers on: record, record <flow|block>, demo video, walkthrough, screen recording, re-record, سجل فيديو."
 argument-hint: "[block|flow|url] [--repo <repo>] [--locale ar|en]"
+lane: build
+effort: medium
 ---
 
 # Record — film the real product

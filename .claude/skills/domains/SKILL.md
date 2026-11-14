@@ -4,6 +4,10 @@ description: Domain + mail health — expiry, renewal, DNS, inboxes
 when_to_use: "Use when a domain or company inbox needs checking or fixing, or a domains issue fired. Triggers on: domains, renew, auto-renew, dmarc, spf, mail bouncing."
 argument-hint: "[check|renew|verify-renew|lock|restore|harden|lock-mail|add] [domain]"
 allowed-tools: Bash(node *), Bash(bash *), Bash(dig *), Bash(whois *), Bash(gh *), Bash(curl *), Bash(security *)
+lane: mechanical
+model: haiku
+effort: low
+context: fork
 ---
 
 # Domains — keep every domain renewed and every inbox reachable

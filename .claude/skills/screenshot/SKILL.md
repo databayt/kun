@@ -4,6 +4,8 @@ description: View most recent screenshot from Desktop or Downloads
 when_to_use: "Use when the most recent screenshot from Desktop or Downloads should be opened and read — usually a UI bug or design reference just captured. Triggers on: look at my screenshot, I just took a screenshot, check the image I saved, see the screen grab."
 argument-hint: "[path]"
 allowed-tools: ["Read", "Bash(ls *)"]
+lane: build
+effort: medium
 ---
 
 # View Recent Screenshot

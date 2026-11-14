@@ -5,6 +5,7 @@ model: haiku
 effort: low
 version: "HTML5 + CSS Variables"
 handoff: [tailwind, shadcn, react]
+lane: mechanical
 ---
 
 # Semantic Expert

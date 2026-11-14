@@ -5,6 +5,7 @@ model: opus
 effort: high
 version: "databayt v1.2"
 handoff: [guardian, tech-lead, captain]
+lane: judge
 ---
 
 # Quality

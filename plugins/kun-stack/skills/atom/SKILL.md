@@ -5,6 +5,8 @@ when_to_use: When creating, listing, previewing, or documenting an atom in /User
 argument-hint: "<name|list|preview|docs> [name]"
 allowed-tools:
   ["Bash(pnpm *)", "Read", "Write", "Edit", "Glob", "Grep", "mcp__shadcn__*"]
+lane: build
+effort: medium
 ---
 
 # Atom Skill

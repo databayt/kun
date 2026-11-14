@@ -5,6 +5,7 @@ model: haiku
 effort: low
 version: "Clean Code"
 handoff: [pattern, typescript]
+lane: mechanical
 ---
 
 # Comment Expert

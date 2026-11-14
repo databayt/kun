@@ -3,6 +3,8 @@ name: MCP Doctor
 description: Diagnose and recover the browser/Playwright MCP server
 when_to_use: "Use when the browser/Playwright MCP is broken — tools missing, server disconnected, or a launch failure. Triggers on: browser mcp is not working, tool not found, playwright mcp is disconnected, browser tools missing."
 allowed-tools: Bash(pgrep *), Bash(pkill *), Bash(ls *), Bash(du *), Bash(rm *), Bash(grep *), Bash(find *), Bash(cat *), Bash(tail *), Bash(xargs *), Bash(npx *), Bash(node *), Bash(python3 *), Bash(test *), Bash(echo *), Bash(printf *), Read, Edit, Write
+lane: build
+effort: medium
 ---
 
 # MCP Doctor — Browser/Playwright Recovery

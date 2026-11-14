@@ -3,6 +3,7 @@ name: icon
 description: "Icons — SVG, lucide-react, shadcn/ui icon patterns"
 model: haiku
 effort: low
+lane: mechanical
 ---
 
 # Icon Agent

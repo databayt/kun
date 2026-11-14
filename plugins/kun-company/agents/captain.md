@@ -42,6 +42,7 @@ memory:
   - .claude/memory/capacity.json
   - .claude/memory/team.json
   - .claude/memory/learnings.md
+lane: captain
 ---
 
 # Captain

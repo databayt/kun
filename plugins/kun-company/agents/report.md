@@ -1,10 +1,11 @@
 ---
 name: report
 description: "Fixes the user reports a human accepted — read, verify, fix, build, push, close"
-model: opus
-effort: high
+model: sonnet
+effort: medium
 version: "databayt v1.1"
 handoff: [quality, sse, build]
+lane: build
 ---
 
 # Report — Issue Fix Lane

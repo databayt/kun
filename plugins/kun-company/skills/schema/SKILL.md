@@ -3,6 +3,8 @@ name: schema
 description: Data layer — Prisma model, migration, and Zod validation
 when_to_use: "Use when a feature needs its data foundation from an approved spec — the Prisma model, migration and client, plus Zod create/update/filter schemas and types. Triggers on: add the model/migration, data layer, Prisma model + Zod validation, pipeline Data stage."
 argument-hint: <model> [product]
+lane: judge
+effort: high
 ---
 
 # Schema — Data Layer

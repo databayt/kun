@@ -3,6 +3,10 @@ name: measure
 description: Read the numbers back — reach, engagement and UTM attribution per post and brand
 when_to_use: "Use when asking how published posts performed — reach, views, reactions, shares or UTM traffic per post, channel or brand, and whether kill criteria can be judged yet. Numbers only: never writes copy (/draft) or publishes (/publish), and is neither a bug report (/report) nor a deploy check (/watch). Triggers on: how did the post do, social metrics, reach and engagement, is social working, did anyone see it, أرقام المنشور, أداء المنشورات."
 argument-hint: "[brand] [--since 30d] [--channel facebook] [--refresh]"
+lane: mechanical
+model: haiku
+effort: low
+context: fork
 ---
 
 # Measure — what actually happened

@@ -5,6 +5,7 @@ model: sonnet
 effort: medium
 version: "React 19.2.x (19.3.0 latest)"
 handoff: [nextjs, typescript, shadcn]
+lane: build
 ---
 
 # React 19 Expert

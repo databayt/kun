@@ -5,6 +5,7 @@ model: sonnet
 effort: medium
 version: "Workers + Containers + Neon"
 handoff: [deploy, build, github, architecture]
+lane: build
 ---
 
 # Cloudflare Deploy Expert

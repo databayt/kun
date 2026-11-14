@@ -4,6 +4,8 @@ description: Blur-up images — photos arrive blurred and sharpen into focus as 
 when_to_use: "Use when images should load blurred then sharpen — the BlurImage atom, converting <img>/next/image surfaces, LQIP at upload, or auditing images that pop in. Not `skeleton` (data loading shapes). Triggers on: blur, blur-up, blur while loading, lqip, images pop in, fade in images, صور ضبابية."
 argument-hint: "[audit|atom|convert <surface>|lqip] [repo]"
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(pnpm *), Bash(node *), Bash(git *)
+lane: build
+effort: medium
 ---
 
 # Blur — images that sharpen into focus

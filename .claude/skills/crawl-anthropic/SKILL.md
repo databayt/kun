@@ -3,6 +3,10 @@ name: crawl-anthropic
 description: Crawl and snapshot Anthropic docs/assets
 when_to_use: "Use when snapshotting Anthropic docs or assets into the local mirror — crawling code.claude.com and platform.claude.com pages for offline reference and rule harvesting. Triggers on: crawl anthropic, snapshot the docs, refresh the anthropic mirror."
 argument-hint: "[url] [--section S]"
+lane: research
+model: sonnet
+effort: low
+context: fork
 ---
 
 # Crawl Anthropic Assets

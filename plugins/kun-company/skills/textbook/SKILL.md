@@ -3,6 +3,8 @@ name: textbook
 description: Give every curriculum textbook.pdf a verified Markdown twin — vision transcription, blind re-reads, adjudication, a benchmark
 when_to_use: "Use when curriculum textbooks (PDF scans, mostly Arabic) must become Markdown twins, or a twin must be verified, repaired or benchmarked. Triggers on: textbook markdown, textbook.md, convert the textbooks, pdf to md for grade N, re-transcribe the textbooks, fix the textbook twin, textbook bench."
 argument-hint: "<book-dir> [--mode full|verify|repair] [--sample N] [--max-pages N] [--audit] | bench [book-id] [--label L] [--model M] | status [cur] [grade] | loop [--status|--tick|--pause|--resume] | land <cur> <grade> <subject>"
+lane: build
+effort: medium
 ---
 
 # Textbook → verified Markdown twin

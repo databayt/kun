@@ -3,6 +3,8 @@ name: proposal
 description: Generate a client proposal via the revenue agent
 when_to_use: "Use when generating a client proposal via the revenue agent — scope, pricing, timeline, and branded structure ready to send to a school or client. Triggers on: proposal, draft the offer, client proposal, send them a quote."
 argument-hint: <product> <client>
+lane: judge
+effort: high
 ---
 
 Generate a client proposal using the revenue agent.

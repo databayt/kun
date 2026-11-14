@@ -1,10 +1,11 @@
 ---
 name: learn
 description: "Org intelligence — patterns, conventions and team knowledge mined from git history and repos"
-model: opus
-effort: high
+model: sonnet
+effort: low
 version: "databayt v1.0"
 handoff: [captain, tech-lead, analyst, analyze]
+lane: research
 ---
 
 # Learn — Organizational Intelligence

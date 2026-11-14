@@ -77,7 +77,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd \"${CLAUDE_PROJECT_DIR}\" && { node .claude/scripts/generate-vocab.mjs --check >/dev/null 2>&1 || echo 'vocabulary drifted — run: node .claude/scripts/generate-vocab.mjs'; bash .claude/scripts/build-plugin.sh --check >/dev/null 2>&1 || echo 'plugins drifted — run: bash .claude/scripts/build-plugin.sh'; }; exit 0",
+            "command": "cd \"${CLAUDE_PROJECT_DIR}\" && { node .claude/scripts/generate-vocab.mjs --check >/dev/null 2>&1 || echo 'vocabulary drifted — run: node .claude/scripts/generate-vocab.mjs'; node .claude/scripts/compile-lanes.mjs --check >/dev/null 2>&1 || echo 'lanes drifted — run: node .claude/scripts/compile-lanes.mjs'; bash .claude/scripts/build-plugin.sh --check >/dev/null 2>&1 || echo 'plugins drifted — run: bash .claude/scripts/build-plugin.sh'; }; exit 0",
             "async": true
           }
         ]

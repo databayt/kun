@@ -5,6 +5,7 @@ model: sonnet
 effort: medium
 version: "Hogwarts MVP v1.0"
 handoff: [architecture, nextjs, prisma, orchestration]
+lane: build
 ---
 
 # Optimization Expert

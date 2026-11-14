@@ -4,6 +4,8 @@ description: Access reference codebase at /Users/abdout/codebase or databayt/cod
 when_to_use: "Use when a pattern, component or convention should be pulled from the reference codebase rather than invented. Triggers on: from codebase, how does codebase do it, check the reference repo, is there an existing pattern for this."
 argument-hint: "[search query]"
 allowed-tools: ["Read", "Glob", "Grep", "mcp__github__*"]
+lane: build
+effort: medium
 ---
 
 # Codebase Reference

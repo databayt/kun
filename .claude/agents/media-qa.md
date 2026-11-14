@@ -9,6 +9,7 @@ maxTurns: 30
 color: purple
 version: "databayt v1.0"
 handoff: [record, growth]
+lane: judge
 ---
 
 # Media QA

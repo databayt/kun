@@ -5,6 +5,7 @@ model: haiku
 effort: low
 version: "Git 2.x"
 handoff: [github, architecture, build]
+lane: mechanical
 ---
 
 # Git Expert

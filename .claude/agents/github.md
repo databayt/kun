@@ -5,6 +5,7 @@ model: haiku
 effort: low
 version: "GitHub API v4"
 handoff: [git, build, deploy]
+lane: mechanical
 ---
 
 # GitHub Expert

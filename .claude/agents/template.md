@@ -5,6 +5,7 @@ model: sonnet
 effort: medium
 version: "shadcn blocks mirror + MDX docs layer (2026-08)"
 handoff: [atom, block, tailwind]
+lane: build
 ---
 
 # Template Agent

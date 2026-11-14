@@ -3,8 +3,9 @@ name: Premortem
 description: Klein-style premortem — imagine a decision/project failed, write the story, surface risks
 when_to_use: "Use before committing to a decision or project, to surface risks by assuming it already failed. Unlike /decide (records the call) and /canon (supplies a principle). Triggers on: what could go wrong, imagine this failed, what are the risks, stress-test this plan."
 argument-hint: "[decision or project to premortem]"
-model: opus
 allowed-tools: ["Read", "Glob", "Grep", "Write", "AskUserQuestion"]
+lane: judge
+effort: high
 ---
 
 # Premortem

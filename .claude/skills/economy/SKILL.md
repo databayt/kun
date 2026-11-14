@@ -4,6 +4,7 @@ description: Token economy — audit consumption and delegate across model × ef
 when_to_use: "Use when token consumption, plan limits, or usage windows are the topic — auditing what's burning the Max pool, delegating work to a cheaper model/effort/product lane, or applying session hygiene. Triggers on: economy, token usage, optimize tokens, we're burning tokens, hit the limit, usage window, plan limit, tokens per outcome, توكن, استهلاك."
 argument-hint: "[audit|route <task>]"
 effort: medium
+lane: build
 ---
 
 Token-economy audit and delegation. Policy: `docs/TOKEN-ECONOMY.md`; machine truth: `.claude/engine.json` → `delegation`.

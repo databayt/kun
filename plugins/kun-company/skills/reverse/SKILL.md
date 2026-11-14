@@ -3,6 +3,8 @@ name: reverse
 description: Competitor feature teardown, with evidence (REA)
 when_to_use: "Use when the question is HOW another product works — requests, routes, API shape. Not /clone (pixels). Triggers on: reverse, teardown, how does <app> do <feature>, inspect this HAR, هندسة عكسية."
 argument-hint: '<url|file.har|app-dir|file.asar|file.apk> ["the feature"] [--vault]'
+lane: build
+effort: medium
 ---
 
 # Reverse — feature teardown with evidence

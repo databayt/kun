@@ -3,6 +3,8 @@ name: shoot
 description: Stills of real product pages and flows, framed like Abdout's MacBook
 when_to_use: "Use when a page or flow needs STILL screenshots — routes or a scripted e2e flow, framed like Abdout's MacBook at Chrome 125%. Video is /record. Triggers on: shoot <route|flow>, take a screenshot of <url>, screenshot the <x> flow, لقطة شاشة."
 argument-hint: "<path|url>… | --flow <name> [--role admin] [--host url] [--full]"
+lane: build
+effort: medium
 ---
 
 # Shoot — stills of the real product

@@ -4,6 +4,8 @@ description: Cloudflare platform operator — Workers + Containers deploys, DNS 
 when_to_use: "Use for anything on the Cloudflare production platform — deploying a hosted repo, checking a deploy is live, Worker logs or crons, flipping DNS to proxied, Worker vs Container for a new app. /ship and /watch delegate here for wrangler.jsonc repos. Triggers on: cloudflare, wrangler, worker, container, deploy to cloudflare, cutover, is it live on cloudflare, worker logs, cron not firing, ERR_CONNECTION_RESET, orange cloud, proxied."
 argument-hint: "[build|smoke|deploy|status|logs|dns|crons] [app]"
 allowed-tools: Bash(git *), Bash(pnpm *), Bash(npx *), Bash(gh *), Bash(curl *), Bash(dig *), Bash(docker *), Bash(security *)
+lane: judge
+effort: high
 ---
 
 # Cloudflare — the deploy operator

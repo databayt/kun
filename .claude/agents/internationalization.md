@@ -3,6 +3,7 @@ name: internationalization
 description: "i18n — Arabic/English, RTL/LTR, dictionaries, locale-aware formatting"
 model: sonnet
 effort: medium
+lane: build
 ---
 
 # Internationalization Expert

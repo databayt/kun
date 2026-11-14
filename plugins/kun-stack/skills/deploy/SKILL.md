@@ -4,6 +4,8 @@ description: Production deploy — the full Cloudflare cycle to a verified login
 when_to_use: "Use when Abdout says deploy, push to prod, ship it or deploy everything — the whole cycle, not just the upload, including the Neon restore point and prod data steps. Distinct from /check (pre-ship gate only), /watch (observe, never fix), /cloudflare (platform ops: DNS, crons, logs) and /quick (commit-push, no build). Triggers on: deploy, deploy everything, push to production, ship to cloudflare, redeploy, why is the deploy stuck, vercel preview, deploy to staging."
 argument-hint: "[preview|logs|status] [app]"
 allowed-tools: Bash(git *), Bash(pnpm *), Bash(npx *), Bash(gh *), Bash(curl *), Bash(docker *), Bash(vercel *), Bash(scripts/*)
+lane: judge
+effort: high
 ---
 
 # Deploy — the production cycle

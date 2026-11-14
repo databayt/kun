@@ -9,6 +9,7 @@ handoff: [atom, template, react, shadcn, prisma]
 skills: ["/block"]
 memory: ["~/.claude/memory/block.json"]
 mcps: [shadcn, github, postgres]
+lane: build
 ---
 
 # Block Agent

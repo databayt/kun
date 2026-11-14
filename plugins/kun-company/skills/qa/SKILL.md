@@ -3,6 +3,8 @@ name: qa
 description: Autonomous block QA with one human signoff on the residual
 when_to_use: 'Use when a feature block needs autonomous QA across every route — detect, verify each FAIL, auto-fix the safe tiers, open one human-signoff issue for the rest — triggering on qa <block> (e.g. "qa admission"), "QA this block", pre-release verification, or a code-complete but unverified block. Block scope only: a single-URL spot-check is handover''s job, the typecheck/build gate check''s, a user-reported bug report''s.'
 argument-hint: <block> [--env staging] [--audit] [--rounds N]
+lane: judge
+effort: high
 ---
 
 # QA — Autonomous Block Verification

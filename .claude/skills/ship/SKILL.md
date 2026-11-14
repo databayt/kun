@@ -3,6 +3,8 @@ name: ship
 description: Promote a checked build to production (Vercel --prod)
 when_to_use: "Use when a checked build must go live on Vercel production — the pipeline's final step after /check passes — or to inspect failed or recent production deploys. Distinct from /deploy (staging/preview), /check (pre-ship gate) and /watch (post-deploy verification). Triggers on: ship, deploy to production, promote checked build (Vercel --prod)."
 argument-hint: "[product]"
+lane: judge
+effort: high
 ---
 
 # Ship — Production Deploy

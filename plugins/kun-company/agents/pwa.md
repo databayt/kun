@@ -5,6 +5,7 @@ model: sonnet
 effort: medium
 version: "Next 16 · web-push 3.6 · Serwist 9.5 (greenfield only)"
 handoff: [nextjs, performance, quality, cloudflare, internationalization]
+lane: build
 ---
 
 # PWA Expert

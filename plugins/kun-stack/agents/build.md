@@ -5,6 +5,7 @@ model: sonnet
 effort: medium
 version: "Next.js 16 + Turbopack"
 handoff: [typescript, nextjs, deploy]
+lane: build
 ---
 
 # Build Expert

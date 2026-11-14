@@ -3,6 +3,8 @@ name: incident
 description: Incident response workflow for production issues
 when_to_use: "Use when production is broken and needs structured response — classify severity (P0-P3), diagnose via Sentry traces + Vercel logs, fix or roll back, verify recovery, write the postmortem on a GitHub issue. Triggers on: incident, production is down, outage, P0, users can't log in."
 argument-hint: <description>
+lane: judge
+effort: high
 ---
 
 Incident response workflow for production issues.

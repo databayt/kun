@@ -2,6 +2,8 @@
 name: auth
 description: Sign in to any web service or CLI with the Keychain-stored databayt identities and reach what sits behind the login wall
 when_to_use: "Use when a login wall blocks progress — a sign-in redirect, a CLI not authenticated, assets behind a dashboard. New accounts are /behalf. Triggers on: log into X, sign me in, not authenticated, session expired."
+lane: build
+effort: medium
 ---
 
 # auth — self-service login for the kun engine

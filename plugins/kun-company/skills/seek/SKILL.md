@@ -3,6 +3,8 @@ name: seek
 description: The open opportunity loop anyone runs from their own profile — find, tailor, apply, follow up
 when_to_use: "Seek for a new person, or a track beyond jobs. Triggers on: seek, set up seek, scholarship, admission, visa, منحة دراسية, قبول جامعي, تأشيرة. Abdout's own loop is /jobs."
 argument-hint: "[setup|status|sweep|wave|send|inbox|pause|resume]"
+lane: build
+effort: medium
 ---
 
 # Seek — the opportunity loop

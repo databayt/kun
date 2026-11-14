@@ -5,6 +5,8 @@ when_to_use: When creating, listing, previewing, or rebuilding a template in /Us
 argument-hint: "<name|list|preview|build> [name]"
 allowed-tools:
   ["Bash(pnpm *)", "Read", "Write", "Edit", "Glob", "Grep", "mcp__shadcn__*"]
+lane: build
+effort: medium
 ---
 
 # Template Skill

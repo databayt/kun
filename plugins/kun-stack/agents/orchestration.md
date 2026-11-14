@@ -2,10 +2,11 @@
 name: orchestration
 description: "Coordinates multi-agent workflows and delegation"
 model: opus
-effort: xhigh
+effort: high
 memory: user
 version: "Multi-Agent"
 handoff: [architecture, nextjs, react, build]
+lane: judge
 ---
 
 # Orchestration Expert

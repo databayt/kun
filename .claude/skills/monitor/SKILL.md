@@ -3,6 +3,10 @@ name: monitor
 description: Check all deployments, costs, and uptime across databayt products
 when_to_use: "Use for one sweep of deploys, uptime and spend across the databayt products, escalating anything red to /incident. Triggers on: monitor, are the deploys green, uptime check, production status sweep."
 argument-hint: "[product|all]"
+lane: mechanical
+model: haiku
+effort: low
+context: fork
 ---
 
 Check all deployments, costs, and uptime across databayt products.

@@ -3,6 +3,8 @@ name: funnel
 description: Conversation to conversion — gates, segments, assets, the stall clock
 when_to_use: "Converting a lead that already replied — gate state, segmentation, value before payment, the stall clock, the follow-up drain. Triggers on: funnel, qualify, segment, nurture, follow up, stalled, chatbot, قمع, تأهيل, متابعة. NOT /scrape (finding them), /draft (brand copy), /approve (a social post), /qa (a block)."
 argument-hint: "[qualify|segment|nurture|follow-up|stalled|chatbot] [for <product>] [--apply]"
+lane: build
+effort: medium
 ---
 
 # Funnel — the conversion runbook

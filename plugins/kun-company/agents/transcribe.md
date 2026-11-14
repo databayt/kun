@@ -7,6 +7,7 @@ tools: Read, Write, Glob
 omitClaudeMd: true
 version: "databayt v1.0"
 handoff: [textbook, adjudicate]
+lane: judge
 ---
 
 # Transcribe

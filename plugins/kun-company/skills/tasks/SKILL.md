@@ -3,6 +3,8 @@ name: tasks
 description: Task breakdown — dependency-ordered work list from an approved plan
 when_to_use: "Use when an approved plan (from /plan) needs an ordered, dependency-aware checklist on the GitHub issue before /schema, /code or /wire run — the Tasks stage, not spec writing (/spec) or architecture (/plan). Triggers on: break it down, ordered task list from an approved plan, task breakdown, decompose the plan, pipeline Tasks stage."
 argument-hint: <feature>|#N [product]
+lane: build
+effort: medium
 ---
 
 # Tasks — Dependency-Ordered Breakdown

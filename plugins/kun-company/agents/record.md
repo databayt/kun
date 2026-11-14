@@ -1,10 +1,11 @@
 ---
 name: record
 description: "Flow videographer — records demo videos and screenshot sets of real product flows (login walls, OTPs) into the media library"
-model: opus
-effort: high
+model: sonnet
+effort: medium
 version: "databayt v1.0"
 handoff: [quality, growth, media-qa]
+lane: build
 ---
 
 # Record

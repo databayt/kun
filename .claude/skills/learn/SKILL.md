@@ -3,6 +3,8 @@ name: learn
 description: Extract organizational patterns and conventions from repos + history
 when_to_use: "Use when mining organizational patterns, conventions and team dynamics from git history and the databayt repos into memory. Distinct from /analyze, which generates a repo's Claude config. Triggers on: learn, what are our conventions, extract patterns from history."
 argument-hint: "[repo] [--since DATE]"
+lane: build
+effort: medium
 ---
 
 # Learn — Organizational Intelligence

@@ -5,6 +5,7 @@ model: opus
 effort: high
 version: "databayt v1.0"
 handoff: [lead, revenue, support, captain]
+lane: judge
 ---
 
 # Funnel

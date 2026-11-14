@@ -3,6 +3,8 @@ name: edit
 description: Edit video locally — footage cuts, Arabic captions, motion graphics, demos, reels
 when_to_use: "Use when real footage must be cut or captioned, or a video composed from code. Filming is /record, /shoot; AI clips /higgs. Triggers on: edit video, cut the silences, rough cut, make a reel, add captions, motion graphic, title card, intro outro, مونتاج, قص الفيديو, ريلز."
 argument-hint: "<footage dir|file> | motion <brief> | demo <flow> | reel <file>"
+lane: build
+effort: medium
 ---
 
 # Edit — the video lane

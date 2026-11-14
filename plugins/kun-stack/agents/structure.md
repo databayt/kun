@@ -5,6 +5,7 @@ model: haiku
 effort: low
 version: "Next.js 16.0.7"
 handoff: [architecture, pattern, nextjs]
+lane: mechanical
 ---
 
 # Structure Expert

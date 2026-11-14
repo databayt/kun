@@ -3,6 +3,8 @@ name: higgs
 description: Marketing photos and video — Google (Nano Banana, Veo, Omni) direct, or Higgsfield
 when_to_use: "Use when AI must GENERATE marketing images or video — ads, hero or product shots, stories, avatar ads — restyle a reference URL, or render a Nano Banana pack. Cutting real footage is /edit. Text-free only: copy-bearing formats (og images, banners, social cards, infographics, testimonials) go to /carousel. Triggers on: generate video, generate image, make an ad, promo video, hero image, product shot, mockup, lifestyle scene, moodboard, showroom asset, brand kit, nano banana, veo, omni, gemini image, run the pack, make the pictures, صورة تسويقية, وسائط."
 argument-hint: "[recipe|prompt] [--url <ref>] [--count N] [--premium] [--ratio 16:9]"
+lane: build
+effort: medium
 ---
 
 # Higgs — the raster media lane for databayt

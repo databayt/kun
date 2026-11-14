@@ -3,6 +3,8 @@ name: facebook
 description: Connect a brand's Facebook Page to the publishing pipeline
 when_to_use: "Use when a Facebook Page must be wired in so drafts can reach it — a new brand Page, a Page that posts nothing, an expired or invalid token, or a permissions error that names nothing. Connection work, not content: never writes copy (/draft), renders media (/higgs), approves (/approve) or runs the everyday send (/publish). Triggers on: connect a facebook page, add my brand page, wire up facebook, new brand page, facebook token expired, invalid scopes, اربط صفحة فيسبوك."
 argument-hint: "<brand-id> [--page-url <profile-or-page-url>]"
+lane: build
+effort: medium
 ---
 
 # Facebook — connect a brand Page

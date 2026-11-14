@@ -3,6 +3,8 @@ name: behalf
 description: Web errands as Abdout — sign up, confirm, get keys
 when_to_use: "Use when a site task must be done as Abdout: a new account, email confirmation or dashboard keys. Triggers on: on my behalf, sign up for, create an account, like cowork, نيابة عني."
 argument-hint: "<what to get done, e.g. 'MTN MoMo sandbox keys for food'>"
+lane: judge
+effort: high
 ---
 
 # behalf — errands in Abdout's name

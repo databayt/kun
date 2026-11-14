@@ -3,6 +3,8 @@ name: release
 description: One spell — handover, check, ship, watch, then comment + close the issue
 when_to_use: "Use when a code-complete block on main should reach the client in one move — the full chain to verified production, not a single stage like /check (tight loop), /ship (deploy only), /handover (QA only) or /watch (verify only). Triggers on: release <block>, send to client, one-spell handoff (handover→check→ship→watch→close issue), give away to client, ship it and tell the client."
 argument-hint: <block> [--issue #N] [--notify-slack #channel]
+lane: judge
+effort: high
 ---
 
 # Release — Give Away to Client

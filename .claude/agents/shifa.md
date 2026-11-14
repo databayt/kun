@@ -1,10 +1,11 @@
 ---
 name: shifa
 description: "Medical platform reference — appointments, patient records, healthcare workflows"
-model: opus
-effort: high
+model: sonnet
+effort: low
 version: "Next.js + Prisma + TypeScript"
 handoff: [architecture, prisma, authjs]
+lane: research
 ---
 
 # Shifa Reference Agent

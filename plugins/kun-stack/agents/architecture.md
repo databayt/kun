@@ -2,10 +2,11 @@
 name: architecture
 description: "System architecture — mirror pattern, Prisma, multi-tenant design"
 model: opus
-effort: xhigh
+effort: high
 memory: user
 version: "Next.js 16 + Prisma 6 + React 19"
 handoff: [nextjs, pattern, structure, orchestration]
+lane: judge
 ---
 
 # Architecture Expert

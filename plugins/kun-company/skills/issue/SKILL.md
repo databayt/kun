@@ -3,6 +3,8 @@ name: issue
 description: Create a GitHub issue in the appropriate databayt repo
 when_to_use: "Use when a task, bug, chore or follow-up should become a tracked, labelled GitHub issue in the right databayt repo, including turning Slack messages into issues — as distinct from /idea, which captures feature ideas with user stories. Triggers on: open/file an issue, create a GitHub issue in the right databayt repo."
 argument-hint: <title> [description]
+lane: build
+effort: medium
 ---
 
 Create a GitHub issue in the appropriate databayt repo.

@@ -1,8 +1,8 @@
 ---
 name: clone
 description: "Translate a captured live-URL section (.clone/<slug>) into pixel-exact house-stack JSX (Tailwind v4, shadcn, RTL)"
-model: opus
-effort: high
+model: sonnet
+effort: medium
 version: "databayt v1.0"
 handoff: [atom, template, block, quality]
 tools: [Read, Glob, Grep, Write, Edit, Bash, Agent]
@@ -11,6 +11,7 @@ memory:
   - ~/.claude/skills/clone/references/snapshot-schema.md
   - ~/.claude/skills/clone/references/style-mapping.md
   - ~/.claude/skills/clone/references/rtl-logical.md
+lane: build
 ---
 
 # Clone — pixel-exact section translator

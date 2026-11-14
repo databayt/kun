@@ -3,6 +3,8 @@ name: profile
 description: Load a selective config profile by role (engineer/business/content/ops)
 when_to_use: "Use when loading a selective config profile by role — engineer, business, content, or ops — trimming the active agent/MCP surface to what that role needs. Triggers on: profile <role>, load the business profile, switch to content mode."
 argument-hint: <role>
+lane: build
+effort: medium
 ---
 
 # Profile — Selective Config Loading

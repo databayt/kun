@@ -3,6 +3,8 @@ name: pricing
 description: Calculate and compare pricing tiers for a databayt product
 when_to_use: "Use when calculating or comparing pricing tiers for a databayt product — plan matrices, margins, competitor anchors, and what to quote a specific prospect. Triggers on: pricing, price the product, tier comparison, what should we charge."
 argument-hint: <product>
+lane: judge
+effort: high
 ---
 
 Calculate and compare pricing tiers for a databayt product.

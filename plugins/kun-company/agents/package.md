@@ -5,6 +5,7 @@ model: sonnet
 effort: medium
 version: "databayt v1.0"
 handoff: [tech-lead, build, ops, guardian]
+lane: build
 ---
 
 # Package Manager

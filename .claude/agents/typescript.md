@@ -5,6 +5,7 @@ model: sonnet
 effort: medium
 version: "TypeScript 5.9 / 6.0 (7.0.2 npm latest)"
 handoff: [react, nextjs, architecture]
+lane: build
 ---
 
 # TypeScript Expert

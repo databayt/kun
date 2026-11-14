@@ -3,6 +3,8 @@ name: wire
 description: UI layer — page (mirror pattern), content, form, table columns, i18n
 when_to_use: "Use when a feature's UI layer is due after the schema and code stages — the route page (mirror pattern), server content, client form, table columns and en + ar dictionary keys, verified by pnpm build. Triggers on: wire the UI, build the page/form/table for the feature, i18n wiring, pipeline UI stage. Distinct from /code (server actions/logic) and /check (quality gate) — this is specifically the visible pages/components/i18n layer of the pipeline."
 argument-hint: <feature> [product]
+lane: build
+effort: medium
 ---
 
 # Wire — UI Layer

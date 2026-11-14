@@ -3,6 +3,8 @@ name: scrape
 description: Lead acquisition — contact gap first, discovery last
 when_to_use: "Finding, enriching, tiering or reaching leads in the Twenty CRM. Triggers on: scrap, scrape, scrap facebook, scrap whatsapp, scrap facebook for hogwarts, scrap for mkan, scrap for databayt, website leads, old websites, rebrand leads, leads, prospect, contact gap, enrich, outreach, pipeline health, who should we contact, find schools, اسحب, جمع بيانات, عملاء محتملين. NOT /health (engine drift), /measure (social numbers), /report (a bug)."
 argument-hint: "[facebook|whatsapp|website|tiktok] [for <product>] [--apply]"
+lane: build
+effort: medium
 ---
 
 # Scrape — the lead acquisition runbook

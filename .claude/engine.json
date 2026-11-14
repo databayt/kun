@@ -158,7 +158,7 @@
   "lanes": {
    "$comment": "The dispatch table (2026-11-01): which lane, model and effort a kind of work goes to. Read by the main session (.claude/CLAUDE.md → Dispatch) and explained in content/docs/interconnection.mdx. Workflow stages must name model + effort (lint-contracts → workflow-effort).",
    "decide": "main session — Opus 5.5, session effort",
-   "lookup": "Explore subagent — sonnet, low effort",
+   "lookup": "Explore subagent — haiku, low effort (kun's own Explore agent; ask for sonnet on a deep read)",
    "mechanical": "haiku agents (git, comment, icon, github, semantic, sse, structure) — low effort",
    "build": "build agents — sonnet, medium effort",
    "judge": "opus specialists or Workflow verify stages — high effort",
@@ -171,14 +171,14 @@
   "session_hygiene": "/clear between unrelated tasks (stale context taxes every message); /compact with focus instructions on long tasks; batch touches inside the 1h cache window — a >1h idle gap reprocesses full context; plan mode before big builds; specific prompts over broad scans"
  },
  "lanes": {
-  "$comment": "The one routing table (2026-11-14, Kun v5 — docs: ~/.claude/plans/groovy-booping-pebble.md §2). A lane fixes the model and the effort; skills, agents, workflow stages and jobs name a lane instead of a model. Today .claude/bin/kun-claude.sh reads it: a headless run that names no --model takes its lane's (jobs.<job>.lane, then the longest jobs.$lanes prefix, then jobs.$lane_default), so no loop ever inherits the saved session default. `escalate` is the only lane on Fable and no unattended run may resolve to it — kun-claude.sh exits 75 on any fable model, because `claude -p` bills Fable to usage credits without asking. delegation.lanes / delegation.efforts / model_tiers stay as prose until compile-lanes.mjs (P2) derives them from here.",
+  "$comment": "The one routing table (2026-11-14, Kun v5 — docs: ~/.claude/plans/groovy-booping-pebble.md §2). A lane fixes the model and the effort; skills, agents, workflow stages and jobs name a lane instead of a model. Today .claude/bin/kun-claude.sh reads it: a headless run that names no --model takes its lane's (jobs.<job>.lane, then the longest jobs.$lanes prefix, then jobs.$lane_default), so no loop ever inherits the saved session default. `escalate` is the only lane on Fable and no unattended run may resolve to it — kun-claude.sh exits 75 on any fable model, because `claude -p` bills Fable to usage credits without asking. Since 2026-11-14 every agent and skill in .claude/ carries `lane:` and .claude/scripts/compile-lanes.mjs stamps its frontmatter from this table: an agent gets model + effort; a skill on a `skill: fork` lane gets context: fork + model + effort; a skill on a `skill: inline` lane gets the effort only (a model switch mid-conversation discards the prompt cache). lint-contracts.mjs fails on a missing lane or a stamp that drifted. delegation.lanes / delegation.efforts / model_tiers are the older prose view of the same thing.",
   "script": { "model": null, "effort": null, "runs": "a script — zero tokens" },
-  "mechanical": { "model": "haiku", "effort": "low", "runs": "a forked skill: no conversation history, under 100K tokens" },
-  "lookup": { "model": "haiku", "effort": "low", "runs": "the Explore agent" },
-  "research": { "model": "sonnet", "effort": "low", "runs": "Explore with a written brief" },
-  "build": { "model": "sonnet", "effort": "medium", "runs": "a build agent with a written brief" },
-  "judge": { "model": "opus", "effort": "high", "runs": "the main loop or an opus agent" },
-  "captain": { "model": "opus", "effort": "xhigh", "runs": "the main loop, attended" },
+  "mechanical": { "model": "haiku", "effort": "low", "skill": "fork", "runs": "a forked skill: no conversation history, under 100K tokens" },
+  "lookup": { "model": "haiku", "effort": "low", "skill": "fork", "runs": "the Explore agent" },
+  "research": { "model": "sonnet", "effort": "low", "skill": "fork", "runs": "Explore with a written brief" },
+  "build": { "model": "sonnet", "effort": "medium", "skill": "inline", "runs": "a build agent with a written brief" },
+  "judge": { "model": "opus", "effort": "high", "skill": "inline", "runs": "the main loop or an opus agent" },
+  "captain": { "model": "opus", "effort": "xhigh", "skill": "inline", "runs": "the main loop, attended" },
   "escalate": { "model": "fable", "effort": "xhigh", "runs": "by hand, attended only — never unattended" }
  },
  "devices": {
