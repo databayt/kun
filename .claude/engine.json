@@ -262,6 +262,16 @@
   "turns": 40,
   "minutes": 30
  },
+ "ledger": {
+  "$comment": "The share-economy ledger (.claude/scripts/ledger.mjs, Kun v5 §6). The rule itself is the contract page's (hogwarts content/docs-en/shared-economy.mdx): 5% of revenue to the community pool, 2.5% of net profit to the needs fund, the rest split equally with each person capped at a written salary (lowest met first), and anything above every salary shared by score. A score is the sum of a person's accepted tasks; a task carries its rate as a label before anyone starts it and counts when its issue is closed as completed. Salaries are private: they live in salaries_file on the owner's machine, never in git. people maps a GitHub login to a name on the statement. require_label, when set, makes a task count only with that label too (for example verified).",
+  "org": "databayt",
+  "pool_pct": 5,
+  "needs_fund_pct": 2.5,
+  "rate_labels": ["rate:", "cu:"],
+  "require_label": null,
+  "salaries_file": "~/.claude/state/team/salaries.json",
+  "people": {}
+ },
  "resolver": {
   "$comment": "Declared POLICY for .claude/scripts/resolve.mjs (the UserPromptSubmit router). Since 2026-11-14 every block key gets a class when the index is built — unique (bare from any session), shared (several repos own it, or it is already a repo, skill, agent or spell), common (a plain single word) — so the hand-kept global_blocks list is gone. always_bare: plain single words promoted to unique (Abdout's curated four from the old list; the six hyphenated ones are unique by computation). never_bare: repo names too common in prose to route without an explicit form — they also get no repo-before-block match ('marketing video' is not the marketing repo). The public list: content/docs/places.mdx (resolve.mjs --page).",
   "always_bare": ["admission", "attendance", "timetable", "transportation"],
