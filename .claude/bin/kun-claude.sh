@@ -233,11 +233,18 @@ case "$(printf '%s' "$MODEL" | tr '[:upper:]' '[:lower:]')" in
         exit 75 ;;
 esac
 
-# Lean mode (KUN_LEAN=1, or the job matches engine.json jobs.$lean prefixes): no MCP servers, no skill listing. Measured 2026-11-01 on a
-# one-word haiku reply: 50.3K → 28.7K tokens (-43%). Only for callers that use neither
-# skills/Workflow nor MCP tools. (--bare would cut more but drops OAuth → API billing.)
+# Lean mode: no MCP servers, no skill listing. Measured 2026-11-01 on a one-word haiku
+# reply: 50.3K → 28.7K tokens (-43%). (--bare would cut more but drops OAuth → API billing.)
+# Since 2026-11-14 lean is the DEFAULT for a headless run; the jobs that need skills, a
+# Workflow or MCP tools are the listed exception (engine.json → jobs.$full prefixes). A
+# caller overrides either way with KUN_LEAN=1 / KUN_LEAN=0. With engine.json unreadable the
+# run stays full: losing a skill silently is worse than paying for the listing.
 if [ -z "${KUN_LEAN:-}" ]; then
-    KUN_LEAN=$(python3 -c "import json,sys;l=json.load(open('$ENGINE')).get('jobs',{}).get('\$lean',[]);print(1 if any(sys.argv[1].startswith(x) for x in l) else 0)" "$JOB" 2>/dev/null)
+    KUN_LEAN=$(python3 -c "
+import json, sys
+j = json.load(open('$ENGINE')).get('jobs', {}); job = sys.argv[1]
+if '\$full' in j: print(0 if any(job.startswith(x) for x in j['\$full']) else 1)
+else: print(1 if any(job.startswith(x) for x in j.get('\$lean', [])) else 0)" "$JOB" 2>/dev/null)
 fi
 if [ "${KUN_LEAN:-0}" = 1 ]; then
     EMPTY_MCP="$HOME/.claude/.kun-empty-mcp.json"

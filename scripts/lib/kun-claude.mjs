@@ -1,6 +1,7 @@
 // The binary every headless `claude -p` call spawns: kun's ledger wrapper when installed
-// (~/.claude/bin/kun-claude.sh — tokens + cost per run in ~/.claude/logs/runs.jsonl, lean
-// mode per engine.json jobs.$lean), plain `claude` otherwise. Drop-in: same args, same output.
+// (~/.claude/bin/kun-claude.sh — tokens + cost per run in ~/.claude/logs/runs.jsonl, a model
+// from the job's lane when the caller names none, lean unless engine.json jobs.$full lists
+// the job), plain `claude` otherwise. Drop-in: same args, same output.
 import { existsSync } from "node:fs";
 import { basename, dirname } from "node:path";
 
