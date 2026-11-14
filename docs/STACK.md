@@ -8,24 +8,24 @@ The unified technology stack across all Databayt repositories.
 
 Every web product targets this stack. Deviations are tracked as alignment debt.
 
-| Layer           | Technology                    | Version                                                                                                                                                                              |
-| --------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Framework       | Next.js                       | 16.3 (Active LTS; the 16.2 line is end-of-life) — **security: ≥16.3.6 now, 16.3.7 on 2026-09-30**; agent-native: managed `nextjs-agent-rules` block, bundled docs, next-devtools-mcp |
-| UI Library      | React                         | 19.2 in products — 19.3.0 latest (ViewTransition, Fragment refs, `<Context>` in RSC)                                                                                                 |
-| Language        | TypeScript                    | 5.9–6.0 in products — 7.0.2 is npm `latest` and Next 16.3 builds with it; the blocker is lint/MDX tooling (typescript-eslint needs the `@typescript/typescript6` alias)              |
-| Styling         | Tailwind CSS                  | 4.3.3 (no release since 07-16; Tailwind Labs joined Shopify 09-09, stays MIT) — hogwarts still resolves 4.1.11 (no `inset-s-*`)                                                      |
-| Database        | Prisma + Neon (PostgreSQL)    | Prisma 7.8–7.10 and 6.19 (security patches only until **2026-11-19**); npm `latest` is the v8 RC — pin the CLI major, never bare `npx prisma`                                        |
-| Auth            | NextAuth (Auth.js)            | v5 beta 30                                                                                                                                                                           |
-| Payments        | Stripe                        | 20                                                                                                                                                                                   |
-| Monitoring      | Sentry                        | 10                                                                                                                                                                                   |
-| Cache           | Upstash Redis                 | —                                                                                                                                                                                    |
-| Email           | Resend                        | —                                                                                                                                                                                    |
-| Animations      | Motion (Framer Motion) + GSAP | Motion 12 for UI; GSAP 3.15 + `@gsap/react` on marketing pages (hogwarts) — free incl. all plugins since 3.13                                                                        |
-| Testing         | Vitest + Playwright           | —                                                                                                                                                                                    |
-| Deployment      | Cloudflare                    | Containers (hogwarts, mkan, kun, marketing, codebase) + containerless Workers (co on OpenNext; vinext sites; thmanyah static) — Vercel is legacy                                     |
-| Docs            | fumadocs (MDX)                | —                                                                                                                                                                                    |
-| Font            | Geist                         | —                                                                                                                                                                                    |
-| Package Manager | pnpm                          | —                                                                                                                                                                                    |
+| Layer           | Technology                    | Version                                                                                                                                                                                     |
+| --------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Framework       | Next.js                       | 16.4 (Active LTS from 16.4.5; 16.3 is off the supported lines) — **security: ≥16.4.5 since the 2026-11-03 release** (15.5.29 on the 15 line); agent-native: bundled docs, next-devtools-mcp |
+| UI Library      | React                         | 19.2 in products, 19.3.1 in kun — 19.3.1 latest (ViewTransition, Fragment refs, `<Context>` in RSC)                                                                                         |
+| Language        | TypeScript                    | 5.9–6.0 in products — 7.0.2 is npm `latest` and Next 16.3 builds with it; the blocker is lint/MDX tooling (typescript-eslint needs the `@typescript/typescript6` alias)                     |
+| Styling         | Tailwind CSS                  | 4.3.5 (4.3.4 added the `@tailwindcss/turbopack` loader; Tailwind Labs joined Shopify 09-09, stays MIT) — hogwarts still resolves 4.1.11 (no `inset-s-*`)                                    |
+| Database        | Prisma + Neon (PostgreSQL)    | Prisma 7.8–7.10 and 6.19 (security patches only until **2026-11-19**); npm `latest` is the v8 RC — pin the CLI major, never bare `npx prisma`                                               |
+| Auth            | NextAuth (Auth.js)            | v5 beta 32 (a critical fix; kun is on it, the other repos are due)                                                                                                                          |
+| Payments        | Stripe                        | 20                                                                                                                                                                                          |
+| Monitoring      | Sentry                        | 10                                                                                                                                                                                          |
+| Cache           | Upstash Redis                 | —                                                                                                                                                                                           |
+| Email           | Resend                        | —                                                                                                                                                                                           |
+| Animations      | Motion (Framer Motion) + GSAP | Motion 12 for UI; GSAP 3.15 + `@gsap/react` on marketing pages (hogwarts) — free incl. all plugins since 3.13                                                                               |
+| Testing         | Vitest + Playwright           | —                                                                                                                                                                                           |
+| Deployment      | Cloudflare                    | Containers (hogwarts, mkan, kun, marketing, codebase) + containerless Workers (co on OpenNext; vinext sites; thmanyah static) — Vercel is legacy                                            |
+| Docs            | fumadocs (MDX)                | —                                                                                                                                                                                           |
+| Font            | Geist                         | —                                                                                                                                                                                           |
+| Package Manager | pnpm                          | —                                                                                                                                                                                           |
 
 ---
 
@@ -67,19 +67,19 @@ Both radix and shadcn are forks of their upstream repos, customized for Arabic R
 
 ## Version Matrix
 
-Installed versions as of 2026-09-26 (read from each repo's `node_modules`, not package.json ranges; spot-refreshed by `/sync`, full audit via `/package`).
+Installed versions as of 2026-09-26 (read from each repo's `node_modules`, not package.json ranges; spot-refreshed by `/sync`, full audit via `/package`). kun's row was re-read on 2026-11-14 after its update; the other rows are re-read as the org-wide pass reaches each repo (kun#183).
 
 | Repo          | Next.js   | React  | TypeScript | Prisma | Tailwind | Auth                |
 | ------------- | --------- | ------ | ---------- | ------ | -------- | ------------------- |
 | **hogwarts**  | 16.3.4 ⚠️ | 19.2.8 | 5.8.3      | 6.19.0 | 4.1.11   | NextAuth v5 beta 30 |
 | **codebase**  | 16.2.4 ⚠️ | 19.2.5 | 5.9.3      | 6.19.3 | 4.3.3    | NextAuth v5 beta 31 |
-| **kun**       | 16.2.2 ⚠️ | 19.2.4 | 6.0.2      | 7.9.0  | 4.2.2    | NextAuth v5 beta 30 |
+| **kun**       | 16.4.6    | 19.3.1 | 6.0.2      | 7.10.1 | 4.3.5    | NextAuth v5 beta 32 |
 | **marketing** | 16.1.1 ⚠️ | 19.2.3 | 5.9.3      | 7.2.0  | 4.1.12   | NextAuth v5 beta 29 |
 | **mkan**      | 16.2.4 ⚠️ | 19.2.5 | 6.0.3      | 7.8.0  | 4.2.4    | NextAuth v5 beta 31 |
 | **shifa**     | 16.1.1 ⚠️ | 19.2.3 | 5.9.3      | 6.19.1 | 4.1.18   | NextAuth v5 beta 25 |
 | **souq**      | 15.3.8 ⚠️ | 19.2.3 | —          | 6.19.1 | 4.1.18   | Clerk               |
 
-⚠️ = below the current security floor (16.3.6 / 15.5.24): the Aug AVIF Image-Optimizer RCE (<16.3.3) and the Sep `next/og` ImageResponse RCE (≥16.2, <16.3.6); 16.3.7 / 15.5.27 ship 2026-09-30 with nine more fixes. hogwarts is past the AVIF fix and its og routes run on Edge (not affected), but it still takes 16.3.7.
+⚠️ = below the security floor on the row's date. The floor today is **16.4.5 / 15.5.29** (the 2026-11-03 security release), and only kun is above it. The earlier floor was 16.3.6 / 15.5.24: the Aug AVIF Image-Optimizer RCE (<16.3.3) and the Sep `next/og` ImageResponse RCE (≥16.2, <16.3.6); 16.3.7 / 15.5.27 shipped 2026-09-30 with nine more fixes. hogwarts is past the AVIF fix and its og routes run on Edge (not affected), but it still takes 16.3.7.
 
 ---
 
@@ -195,13 +195,14 @@ All active web repos share: Next.js 16 (souq: 15), React 19.2, Tailwind CSS 4, N
 
 | Repo                                | Issue                                        | Fix                                                      |
 | ----------------------------------- | -------------------------------------------- | -------------------------------------------------------- |
-| **every repo**                      | Next.js below the security floor             | → 16.3.6 now; every repo → 16.3.7 on 09-30               |
+| **every repo but kun**              | Next.js below the security floor             | kun done 2026-11-14; the rest → ≥16.4.5 from 21 Nov      |
+| **every repo but kun**              | NextAuth below beta 32 (a critical fix)      | → beta 32 with the Next.js bump, hogwarts first          |
 | **hogwarts, codebase, shifa, souq** | Prisma 6 — security patches end 2026-11-19   | `/decide` + `/package` → 7.10 (not v8 until GA + parity) |
 | **hogwarts**                        | Tailwind 4.1.11                              | Bump to 4.3.3 (unlocks `inset-s-*`, `scrollbar-*`)       |
 | **souq**                            | Next.js 15.3 (15.5 is the only patched 15.x) | → 15.5.27 or retire                                      |
 | **souq**                            | Clerk instead of NextAuth                    | Migrate to NextAuth v5                                   |
 | **souq**                            | Redux Toolkit instead of Jotai               | Migrate to Jotai or Zustand                              |
-| **shifa**                           | NextAuth beta 25 (behind)                    | Upgrade to beta 30+                                      |
+| **shifa**                           | NextAuth beta 25 (behind)                    | Upgrade to beta 32                                       |
 
 ### Alignment Priority
 
