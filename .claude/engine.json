@@ -57,14 +57,14 @@
     "https://www.figma.com/release-notes/",
     "gh:cloudflare/workers-sdk (wrangler@ tags only)",
     "gh:cloudflare/vinext",
-    "gh:opennextjs/opennextjs-cloudflare"
+    "gh:opennextjs/opennextjs-cloudflare", "gh:twentyhq/twenty (the CRM at crm-api.databayt.org — read-only REST)", "https://api-docs.deepseek.com/quick_start/agent_integrations/claude_code — the d lane's setup", "https://api-docs.deepseek.com/guides/anthropic_api — what the d lane's endpoint supports and ignores"
    ],
    "practice": [
     "https://www.anthropic.com/engineering",
     "https://agents.md",
     "gh:bmad-code-org/BMAD-METHOD",
     "community Claude Code configs — survey set in docs/CONFIG-BENCHMARK.md → Sources",
-    "https://nextjs.org/evals — per-model cost + pass rate on agentic Next.js tasks"
+    "https://nextjs.org/evals — per-model cost + pass rate on agentic Next.js tasks", "gh:github/spec-kit", "gh:vercel-labs/agent-skills", "gh:vercel-labs/skills (npx skills — the install path for harnesses other than Claude Code)", "gh:jev-ai/jev-ai (typed-decision API — a watch item, off by default)"
    ],
    "$comment": "Vercel is legacy since the 2026-09 Cloudflare move — headlines only. Stack sweeps also read each vendor's own agent guidance (bundled docs, AGENTS.md, official MCP servers and skills)."
   }
