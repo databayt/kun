@@ -83,7 +83,7 @@ DO, IN ORDER:
 
 FINAL MESSAGE: at most 5 lines — the top priorities, what you applied, what waits for Abdout."
     local answer rc
-    answer="$( (KUN_JOB=captain:weekly "$KUN_CLAUDE" -p "$prompt" --effort high --max-turns 40 --permission-mode auto --permission-prompts none) 2>> "$LOG_FILE")"; rc=$?
+    answer="$( (KUN_JOB=captain:weekly "$KUN_CLAUDE" -p "$prompt" --model opus --effort high --max-turns 40 --permission-mode auto --permission-prompts none) 2>> "$LOG_FILE")"; rc=$?
     printf '%s\n' "$answer" >> "$LOG_FILE"
     log "claude exit $rc"
 

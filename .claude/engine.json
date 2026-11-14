@@ -170,6 +170,17 @@
   },
   "session_hygiene": "/clear between unrelated tasks (stale context taxes every message); /compact with focus instructions on long tasks; batch touches inside the 1h cache window — a >1h idle gap reprocesses full context; plan mode before big builds; specific prompts over broad scans"
  },
+ "lanes": {
+  "$comment": "The one routing table (2026-11-14, Kun v5 — docs: ~/.claude/plans/groovy-booping-pebble.md §2). A lane fixes the model and the effort; skills, agents, workflow stages and jobs name a lane instead of a model. Today .claude/bin/kun-claude.sh reads it: a headless run that names no --model takes its lane's (jobs.<job>.lane, then the longest jobs.$lanes prefix, then jobs.$lane_default), so no loop ever inherits the saved session default. `escalate` is the only lane on Fable and no unattended run may resolve to it — kun-claude.sh exits 75 on any fable model, because `claude -p` bills Fable to usage credits without asking. delegation.lanes / delegation.efforts / model_tiers stay as prose until compile-lanes.mjs (P2) derives them from here.",
+  "script": { "model": null, "effort": null, "runs": "a script — zero tokens" },
+  "mechanical": { "model": "haiku", "effort": "low", "runs": "a forked skill: no conversation history, under 100K tokens" },
+  "lookup": { "model": "haiku", "effort": "low", "runs": "the Explore agent" },
+  "research": { "model": "sonnet", "effort": "low", "runs": "Explore with a written brief" },
+  "build": { "model": "sonnet", "effort": "medium", "runs": "a build agent with a written brief" },
+  "judge": { "model": "opus", "effort": "high", "runs": "the main loop or an opus agent" },
+  "captain": { "model": "opus", "effort": "xhigh", "runs": "the main loop, attended" },
+  "escalate": { "model": "fable", "effort": "xhigh", "runs": "by hand, attended only — never unattended" }
+ },
  "devices": {
   "$comment": "Declared POLICY for the Mac ↔ iPhone ↔ Claude-surface lane, read by .claude/scripts/devices.sh (--status, --brief at SessionStart, --install). Measured state is never stored here — devices.sh reads it live. Facts verified against code.claude.com docs on 2026-09-27 (remote-control, mobile, desktop, settings-reference, env-vars): push is two settings keys (agentPushNotifEnabled, inputNeededNotifEnabled, both default false); `max` effort cannot be saved as a default (session-only unless CLAUDE_CODE_EFFORT_LEVEL pins it, which also overrides every agent's effort frontmatter — never set it); Dispatch is closed to new users; the Claude app offers Manual / Accept edits / Plan for Remote Control sessions, so the server's starting mode is set here.",
   "rc_server": {
@@ -236,6 +247,9 @@
   "$comment": "Declared POLICY for every scheduled job. runs.sh judges (each job's own record in ~/.claude/state/runs/<job>.json first, then launchd, log mtimes and ~/.claude/logs/runs.jsonl); supervise.mjs acts on that judgment (re-fire, heal, escalate). Measured state never lives here; schedules stay in the plists and Hermes jobs.json, never copied. cadence_hours 0 = a KeepAlive daemon; kind trigger = a WatchPaths job. owner → $owners (where its issue and Slack line go). resume: auto (re-fire a missed or failed slot, up to max_attempts started runs) · tick (one early run on wake, never per slot) · alert (never re-fire) · heal (restart when down). needs: what the gate waits for besides a full wake and the network (twenty, vault, docker, neon, github, slack). max_wait: minutes job-run.sh waits for the gate before recording defer. max_minutes: the run cap. deadline_hours: an ok is due this long after a slot, or the watchdog outside the Mac alerts. refire: the entry point that re-runs this job's slot. only_if undelivered: re-fire only when Hermes ran it but the Slack send failed. mac_only false marks a job that needs nothing on the Mac.",
   "$notify": "per machine — ~/.claude/.kun-notify holds this machine's `me` target (e.g. slack:<DM id>); never fleet config, or every teammate's digest lands in one person's DM",
   "$hermes": "~/.hermes/cron/jobs.json",
+  "$lanes": { "seek:": "build", "social:": "build", "funnel:": "build", "jobs:": "build", "captain:": "judge" },
+  "$lane_default": "build",
+  "$lanes_comment": "Which lane a headless claude run takes when its caller names no model (2026-11-14). First match wins: the job's own `lane` field (run name, then ':' → '-'), the longest prefix in $lanes, then $lane_default. kun-claude.sh adds --model and --effort from the lane ONLY when the caller passed none: textbook:, hermes: and mkan's sprint runner name their own and keep them. captain: is `judge` (opus, high — the effort scripts/captain/weekly.sh already passes), not the attended `captain` lane. seek:, social: and funnel: ran on the saved session default (Opus) until today; they are `build` (sonnet, medium) now — move one back to `judge` here if its output drops.",
   "$lean": ["seek:", "funnel:"],
   "$lean_comment": "Headless claude runs whose job name starts with one of these prefixes run lean through .claude/bin/kun-claude.sh: no MCP servers, no skill listing (-43% tokens per run, measured 2026-11-01). Only for jobs that use neither skills/Workflow nor MCP tools; drain-drafts (/draft skill), textbook (Workflow) and hermes (full sessions) stay full.",
   "jobs": { "label": "com.databayt.jobs-loop", "cadence_hours": 0.5, "logs": ["~/.claude/logs/jobs-loop-*.log"], "owner": "kun", "resume": "tick", "needs": ["network"], "max_minutes": 120 },

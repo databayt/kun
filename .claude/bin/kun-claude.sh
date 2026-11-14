@@ -14,6 +14,11 @@
 #   4. the plan's limit: a run that dies on "You've hit your weekly limit · resets 5pm (…)" exits
 #      75 (not 1) and parks EVERY headless job until that reset — a loop no longer burns runs on
 #      6-second failures. Park files: ~/.claude/state/claude-park/{_plan,<job>}.json {until, reason}
+#   5. the lane (2026-11-14): a caller that names no --model gets its lane's model and effort
+#      (engine.json → lanes, jobs.$lanes), so no loop inherits the saved session default; the
+#      ledger line carries lane, model (asked) and model_actual (what answered)
+#   6. no Fable unattended: a run that would land on a fable model exits 75 before it starts —
+#      `claude -p` bills Fable to usage credits without asking
 # Output contract: text mode (the default) still prints only the result text on stdout;
 # a caller that passes --output-format json gets the JSON untouched; stream-json is passed
 # through unparsed (logged without tokens). Exit code is claude's own, except 75 (capped/parked).
@@ -45,9 +50,53 @@ for a in "$@"; do
         --effort) EFFORT="$a" ;;
         --output-format) FORMAT="$a" ;;
     esac
+    case "$a" in
+        --model=*) MODEL="${a#--model=}" ;;
+        --effort=*) EFFORT="${a#--effort=}" ;;
+        --output-format=*) FORMAT="${a#--output-format=}" ;;
+    esac
     prev="$a"
 done
 [ "$EFFORT" = "default" ] && [ -n "${CLAUDE_CODE_EFFORT_LEVEL:-}" ] && EFFORT="$CLAUDE_CODE_EFFORT_LEVEL"
+
+# The lane (engine.json → lanes + jobs.$lanes, 2026-11-14): a run whose caller names no
+# model takes its lane's, so no loop inherits the saved session default. That default is a
+# person's choice for attended work — the day it was set to Fable, every unnamed loop would
+# have billed usage credits, which `claude -p` does without asking. First match wins: the
+# job's own `lane`, the longest $lanes prefix, $lane_default. With engine.json unreadable
+# the run still gets a named model (sonnet) — never the saved default. A caller that names
+# its own model is recorded as lane `caller`: the lane did not choose that run's model.
+LANE_INFO=$(python3 - "$ENGINE" "$JOB" <<'PY' 2>/dev/null
+import json, sys
+try: e = json.load(open(sys.argv[1]))
+except Exception: e = {}
+jobs = e.get("jobs") or {}; lanes = e.get("lanes") or {}; job = sys.argv[2]
+entry = jobs.get(job) or jobs.get(job.replace(":", "-")) or {}
+lane = entry.get("lane") if isinstance(entry, dict) else None
+if not lane:
+    pref = jobs.get("$lanes") or {}
+    hits = [p for p in pref if job.startswith(p)]
+    lane = pref[max(hits, key=len)] if hits else jobs.get("$lane_default") or "build"
+l = lanes.get(lane) if isinstance(lanes.get(lane), dict) else {}
+print(lane, l.get("model") or "-", l.get("effort") or "-")
+PY
+)
+read -r LANE LANE_MODEL LANE_EFFORT <<EOF
+${LANE_INFO:-build sonnet medium}
+EOF
+[ -n "$LANE" ] || LANE=build
+{ [ -z "$LANE_MODEL" ] || [ "$LANE_MODEL" = "-" ]; } && LANE_MODEL=sonnet
+[ "$LANE_EFFORT" = "-" ] && LANE_EFFORT=""
+if [ "$MODEL" = "default" ]; then
+    MODEL="$LANE_MODEL"; set -- "$@" --model "$MODEL"
+    # Effort follows the lane only when the lane also chose the model: a caller that named
+    # its own model keeps the effort that model is configured with.
+    if [ "$EFFORT" = "default" ] && [ -n "$LANE_EFFORT" ]; then
+        EFFORT="$LANE_EFFORT"; set -- "$@" --effort "$EFFORT"
+    fi
+else
+    LANE=caller
+fi
 
 # Daily cap (only when engine.json declares one for this job).
 # the cap lives on the job's engine.json entry: by run name (seek:tailor) or by its launchd
@@ -133,10 +182,10 @@ if [ -n "$PARKED" ]; then
     exit 75
 fi
 
-record() {  # record <exit> <json-file-or-empty> <started-epoch>
-    python3 - "$LEDGER" "$JOB" "$MODEL" "$EFFORT" "$1" "$2" "$3" "$JOB_SOURCE" <<'PY' 2>/dev/null || true
+record() {  # record <exit> <json-file-or-empty> <started-epoch> [summary]
+    python3 - "$LEDGER" "$JOB" "$MODEL" "$EFFORT" "$1" "$2" "$3" "$JOB_SOURCE" "$LANE" "${4:-}" <<'PY' 2>/dev/null || true
 import json, os, sys, time
-ledger, job, model, effort, rc, jf, started, source = sys.argv[1:9]
+ledger, job, model, effort, rc, jf, started, source, lane, note = sys.argv[1:11]
 r = {}
 if jf and os.path.exists(jf):
     try:
@@ -148,21 +197,41 @@ if jf and os.path.exists(jf):
 u = r.get("usage") or {}
 tokens = sum(int(u.get(k) or 0) for k in ("input_tokens", "output_tokens", "cache_creation_input_tokens", "cache_read_input_tokens"))
 ok = rc == "0" and not r.get("is_error")
+# `model` is what the run was ASKED for (an alias, since the lane fill never "default");
+# model_actual is what answered, from the result's per-model usage — the heaviest model
+# when subagents ran on others. Empty when the CLI's JSON carries no modelUsage.
+mu = r.get("modelUsage") if isinstance(r.get("modelUsage"), dict) else {}
+def weight(v):
+    if not isinstance(v, dict): return 0
+    return float(v.get("costUSD") or 0) or sum(float(v.get(k) or 0) for k in ("inputTokens", "outputTokens", "cacheReadInputTokens", "cacheCreationInputTokens"))
+actual = max(mu, key=lambda k: weight(mu[k])) if mu else ""
 line = {"ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "kind": "claude", "job": job, "job_source": source,
-        "status": "ok" if ok else "fail", "model": model, "effort": effort,
+        "status": "ok" if ok else "fail", "lane": lane, "model": model, "model_actual": actual, "effort": effort,
         "tokens": tokens, "output_tokens": int(u.get("output_tokens") or 0),
         # fresh = input + cache writes + output (what a run really costs); cache_read = context
         # re-read every turn (cheap per token). The first Monday routine: 120K fresh, 2.15M cached.
         "fresh_tokens": int(u.get("input_tokens") or 0) + int(u.get("cache_creation_input_tokens") or 0) + int(u.get("output_tokens") or 0),
         "cache_read_tokens": int(u.get("cache_read_input_tokens") or 0),
         "cost_usd": round(float(r.get("total_cost_usd") or 0), 4), "turns": r.get("num_turns"),
-        "duration_s": round(time.time() - float(started)), "summary": "" if ok else f"claude exit {rc}",
+        "duration_s": round(time.time() - float(started)), "summary": note or ("" if ok else f"claude exit {rc}"),
         "needs_human": False}
 os.makedirs(os.path.dirname(ledger), exist_ok=True)
 with open(ledger, "a") as f:
     f.write(json.dumps(line) + "\n")
 PY
 }
+
+# Fable never runs unattended. `claude -p` bills it to usage credits with no consent prompt,
+# and the billing rule is subscription-only — so a headless run that would land on it (named
+# by the caller, or by a lane) is handed back, not run. Exit 75 is the code callers already
+# treat as "parked": the sprint runner returns the prompt to pending and it does not count
+# toward its circuit breaker. Fable is for sessions a person opens by hand.
+case "$(printf '%s' "$MODEL" | tr '[:upper:]' '[:lower:]')" in
+    *fable* | *mythos*)
+        echo "kun-claude: $JOB asked for $MODEL — Fable does not run unattended (it bills usage credits). Name opus, sonnet or haiku, or give the job a lane in engine.json → jobs.\$lanes." >&2
+        record 75 "" "$(date +%s)" "refused: $MODEL in an unattended run"
+        exit 75 ;;
+esac
 
 # Lean mode (KUN_LEAN=1, or the job matches engine.json jobs.$lean prefixes): no MCP servers, no skill listing. Measured 2026-11-01 on a
 # one-word haiku reply: 50.3K → 28.7K tokens (-43%). Only for callers that use neither
