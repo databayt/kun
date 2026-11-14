@@ -95,7 +95,7 @@ render_plist() {
 	<key>WorkingDirectory</key>
 	<string>$REPO</string>
 	<key>StartInterval</key>
-	<integer>60</integer>
+	<integer>600</integer>
 	<key>EnvironmentVariables</key>
 	<dict>
 		<key>PATH</key>
@@ -117,7 +117,7 @@ do_install() {
     render_plist > "$PLIST_PATH"
     launchctl bootout "gui/$(id -u)/$PLIST_LABEL" 2>/dev/null || true
     launchctl bootstrap "gui/$(id -u)" "$PLIST_PATH" 2>/dev/null || launchctl load "$PLIST_PATH" 2>/dev/null || true
-    echo "armed: $PLIST_LABEL every 60s (plist: $PLIST_PATH)"
+    echo "armed: $PLIST_LABEL every 600s (plist: $PLIST_PATH)"
 }
 
 do_uninstall() {
