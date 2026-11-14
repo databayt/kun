@@ -25,7 +25,7 @@
     },
     "skills_without_triggers": 2,
     "builtin_targeted_spells": 3,
-    "corpus_hash": "fnv1a:222d8bcc"
+    "corpus_hash": "fnv1a:b699b700"
   },
   "split": {
     "version": "v1",
@@ -2011,6 +2011,15 @@
       "cases": 691,
       "delta": 0.0074,
       "note": "Not degraded; first scored run after the 2026-11-02 baseline reset (corpus fnv1a:222d8bcc, 85 skills, 20 adjudicated away, 0 unadjudicated). Delta is against the last scored entry. Delta crosses the same-day baseline reset, so it is not a like-for-like comparison. Guard 9 audit: CLEAN (31 agents, 18 blind dispatch agents, none touched a labelled source). proxy_fidelity 0.9545 on n=22 real pairs (was 0.8 on n=10). Cost: 2.79M subagent tokens on the Max plan — about 2x the ~1.3M estimate. Approved run (Engine decisions 511a3479)."
+    },
+    {
+      "week_of": "2026-11-14",
+      "baseline_reset": true,
+      "corpus_hash_from": "fnv1a:222d8bcc",
+      "corpus_hash_to": "fnv1a:b699b700",
+      "cases_to": 712,
+      "top1_hard": null,
+      "note": "BASELINE RESET, not a scored run. Approved by Abdout in the plan of 2026-11-14. Trigger phrases moved deliberately in the v5 overhaul (lane tags and the fork skills' own trigger phrases, dev as a Haiku fork, 17 once-user-only skills now sources in the repo), and four HyperFrames skills joined the listing with no trigger phrases (89 skills, 712 cases, listing 34,559 chars; cap raised 33,500 -> 34,600 in engine.json with its reason). Scores before this entry are not comparable with scores after it. The next bench-dispatch run re-establishes the number."
     }
   ],
   "stratified": {
