@@ -91,26 +91,39 @@ info "rules ($RULE_COUNT)"
 cp "$KUN_DIR/.claude/memory/"*.json "$CLAUDE_DIR/memory/" 2>/dev/null || true
 info "memory"
 
-cp "$KUN_DIR/.claude/scripts/"*.sh "$CLAUDE_DIR/scripts/" 2>/dev/null || true
-cp "$KUN_DIR/.claude/scripts/"*.ps1 "$CLAUDE_DIR/scripts/" 2>/dev/null || true
-cp "$KUN_DIR/.claude/scripts/"*.json "$CLAUDE_DIR/scripts/" 2>/dev/null || true
-cp "$KUN_DIR/.claude/scripts/"*.md "$CLAUDE_DIR/scripts/" 2>/dev/null || true
-chmod +x "$CLAUDE_DIR/scripts/"*.sh 2>/dev/null || true
+# atomic_copy SRC… DESTDIR — replace each file by rename, never in place. Bash reads a script
+# as it runs, so a plain `cp` over a running loop hands it new bytes at an old offset: a
+# 70-minute sprint session would read a half-replaced kun-claude.sh, and maintain.sh (which
+# calls this script every day) would overwrite itself mid-run. The temp file sits in the
+# destination directory so the `mv` is a same-filesystem rename.
+atomic_copy() {
+    local dest="${*: -1}" src base tmp
+    for src in "${@:1:$#-1}"; do
+        [ -f "$src" ] || continue
+        base=$(basename "$src")
+        tmp="$dest/.$base.kun-tmp.$$"
+        cp -p "$src" "$tmp" 2>/dev/null || { rm -f "$tmp"; continue; }
+        case "$base" in *.sh) chmod 755 "$tmp" ;; esac
+        mv -f "$tmp" "$dest/$base" 2>/dev/null || rm -f "$tmp"
+    done
+}
+
+atomic_copy "$KUN_DIR/.claude/scripts/"*.sh "$KUN_DIR/.claude/scripts/"*.ps1 \
+    "$KUN_DIR/.claude/scripts/"*.json "$KUN_DIR/.claude/scripts/"*.md "$CLAUDE_DIR/scripts"
 info "scripts"
 
 # Shared script libs (health.sh sources lib/agents.sh — keep the installed
 # copy self-contained instead of leaning on the ~/kun fallback)
 if [ -d "$KUN_DIR/.claude/scripts/lib" ]; then
     mkdir -p "$CLAUDE_DIR/scripts/lib"
-    cp "$KUN_DIR/.claude/scripts/lib/"* "$CLAUDE_DIR/scripts/lib/" 2>/dev/null || true
+    atomic_copy "$KUN_DIR/.claude/scripts/lib/"* "$CLAUDE_DIR/scripts/lib"
     info "scripts/lib"
 fi
 
 # User-global hooks (e.g. session-maintain-status.sh runs in EVERY project,
 # so it must live under ~/.claude/hooks, not only inside the kun repo)
 if [ -d "$KUN_DIR/.claude/hooks" ]; then
-    cp "$KUN_DIR/.claude/hooks/"*.sh "$CLAUDE_DIR/hooks/" 2>/dev/null || true
-    chmod +x "$CLAUDE_DIR/hooks/"*.sh 2>/dev/null || true
+    atomic_copy "$KUN_DIR/.claude/hooks/"*.sh "$CLAUDE_DIR/hooks"
     info "hooks"
 fi
 
@@ -119,8 +132,7 @@ fi
 # files already in ~/.claude/bin are left alone — only same-named ones refresh.
 if [ -d "$KUN_DIR/.claude/bin" ]; then
     mkdir -p "$CLAUDE_DIR/bin"
-    cp "$KUN_DIR/.claude/bin/"*.sh "$CLAUDE_DIR/bin/" 2>/dev/null || true
-    chmod +x "$CLAUDE_DIR/bin/"*.sh 2>/dev/null || true
+    atomic_copy "$KUN_DIR/.claude/bin/"*.sh "$CLAUDE_DIR/bin"
     info "bin"
 fi
 
