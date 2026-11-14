@@ -16,6 +16,7 @@ Kun is the word: what should be, declared once in the keyword registry, the lane
 | `gabriel queue list` | Open asks and where each stands. |
 | `gabriel queue approve 214` | The owner's yes (the same as commenting `yes` on the issue). |
 | `gabriel queue tick` | One pass over the queue: refuse, ask, wait or run. Owner's machine only. |
+| `gabriel node init` · `status` · `tick` | This machine as a node that takes `night-ok` issues in its own hours. |
 
 `gabriel run` takes `--lane` (lookup, research, build, judge; build is the default), `--turns` and `--minutes` for the budget, `--full` to keep skills and MCP servers (a run is lean otherwise), and `--dry` to print the command and the contract without running anything.
 
@@ -65,6 +66,33 @@ What the queue refuses, with the reason written on the issue:
 
 A daily cap (`engine.json → queue.daily_cap`, five) holds anything beyond it for the next day.
 
+## The team's own lane: `d`
+
+A teammate does not need Abdout's account to work with the engine. `d` runs Claude Code on DeepSeek's Anthropic-compatible endpoint with the teammate's own key, in its own config folder, with kun's skills, agents and hooks linked in.
+
+| Step | Command |
+| --- | --- |
+| Prepare the lane | `d --setup` |
+| Store your own DeepSeek key | macOS: `security add-generic-password -s deepseek-api-key -a "$USER" -w` |
+| Work | `d` |
+
+The lane table carries over without a second copy: where an agent or skill asks for `opus`, the lane uses DeepSeek's pro model; `sonnet` and `haiku` use flash. So judge work runs on pro and build work on flash.
+
+Limits, from DeepSeek's own docs: Anthropic does not support third-party endpoints, so Remote Control, cloud sessions, the Slack app and the desktop app do not work on this lane; there is no prompt-cache discount; the pro model does not read images. The key and its bill are the teammate's.
+
+## Nodes and night work
+
+Any machine can offer its idle hours. `gabriel node init` writes `~/.claude/.kun-node.json`: the owner, the runner (`c` for the owner's own Claude plan, `d` for the DeepSeek lane), the lanes it may take, the hours it offers (22:00 to 06:00 by default) and a nightly budget.
+
+GitHub is the tracker. An issue labelled `night-ok` is a piece any node may take. `gabriel node tick`, inside the node's hours:
+
+1. finds an open `night-ok` issue with no assignee, in a repo the node takes, on a lane it may run (`lane:build` unless the issue says otherwise);
+2. claims it by assigning itself and adding `claimed:<node>`;
+3. runs it under the run contract and the mandate;
+4. comments the result. A finished piece is labelled `night:done`; a failed one is handed back for another node. Three failures park the node for the night.
+
+Nothing is scheduled for you: each owner arms the tick on their own machine, and `night-ok` is put on an issue by a person.
+
 ## Where it lives
 
 | Piece | File |
@@ -74,3 +102,5 @@ A daily cap (`engine.json → queue.daily_cap`, five) holds anything beyond it f
 | The guard | `.claude/hooks/mandate-guard.sh` (tests beside it) |
 | The runner and ledger | `.claude/bin/kun-claude.sh`, `~/.claude/logs/runs.jsonl` |
 | Progress notes | `~/.claude/state/gabriel/notes/` |
+| The `d` lane | `.claude/bin/kun-d.sh` (the command `d`) |
+| This machine as a node | `~/.claude/.kun-node.json` |

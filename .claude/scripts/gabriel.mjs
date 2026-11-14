@@ -21,6 +21,9 @@
 //   gabriel queue add [--for <repo>] [--lane <lane>] "<ask>"
 //   gabriel queue approve <n> [lane]     the owner's yes (the same as commenting "yes")
 //   gabriel queue tick [--dry]           one pass: refuse, ask, wait or run — owner Mac only
+//   gabriel node init [--runner c|d] [--window 22:00-06:00] [--repos a,b] [--runs 3]
+//   gabriel node status                  this machine as a node: window, budget, last night
+//   gabriel node tick [--dry] [--now]    in its window, take one `night-ok` issue and run it
 //
 // Properties, each one checkable:
 //   faithful        every report cites its evidence (ledger line, commit, progress note);
@@ -36,6 +39,14 @@
 // lane). An ask from someone without write access to the repo is refused, an ask the
 // mandate keeps for the owner is refused with the rule named, and the daily cap holds the
 // rest. State lives in labels (queue:asked, queue:running, queue:done, queue:failed).
+//
+// Nodes. Any machine with ~/.claude/.kun-node.json is a node: its owner, the runner it uses
+// (`c` Claude Code on the owner's own plan, `d` the DeepSeek lane with the owner's own key),
+// the lanes it may take, the hours its owner offers, and a nightly budget. GitHub is the
+// tracker: an issue labelled `night-ok` is a piece anyone may take; a node claims one by
+// assigning itself and adding `claimed:<node>`, runs it under the same contract and mandate
+// as any other run, and hands it back if the run fails. Three failures park the node for
+// the night. Nothing is scheduled by this script: the node's owner arms the tick.
 //
 // Zero tokens except for `run`. Never blocks a caller: errors print and exit non-zero.
 
@@ -168,6 +179,8 @@ export function runTask(opts, task) {
   // write its progress note outside the repo.
   const args = ["-p", prompt, "--output-format", "json", "--max-turns", turns, "--permission-mode", opts.mode || "auto", "--add-dir", path.dirname(note)];
   const env = { ...process.env, KUN_JOB: job, KUN_LANE: lane, KUN_MANDATE: "1", ...(opts.full ? { KUN_LEAN: "0" } : {}) };
+  // runner d: the same wrapper and ledger, but the binary underneath is the DeepSeek lane
+  if (opts.runner === "d") env.KUN_CLAUDE_REAL = path.join(HOME, ".claude/bin/kun-d.sh");
   if (opts.dry) {
     return { ok: true, dry: true, job, lane, model: row.model, effort: row.effort, dir, note, turns, minutes, prompt };
   }
@@ -236,6 +249,7 @@ function backend(pol, dry) {
       log,
       act,
       issues: () => fx.issues || [],
+      night: () => fx.night || [],
       comments: (n) => (fx.comments || {})[String(n)] || [],
       permission: (login) => (fx.permissions || {})[login] || "none",
     };
@@ -247,6 +261,11 @@ function backend(pol, dry) {
       const r = sh("gh", ["issue", "list", "--repo", pol.repo, "--label", pol.label, "--state", "open", "--limit", "50", "--json", "number,title,body,author,labels,createdAt,url"]);
       if (!r.ok) throw new Error(`gh issue list failed: ${r.err.slice(0, 200)}`);
       return JSON.parse(r.out || "[]").map((i) => ({ ...i, author: i.author?.login, labels: (i.labels || []).map((l) => l.name) }));
+    },
+    night: () => {
+      const r = sh("gh", ["search", "issues", "--owner", pol.repo.split("/")[0], "--label", "night-ok", "--state", "open", "--no-assignee", "--limit", "40", "--json", "number,title,body,labels,repository,assignees,url"]);
+      if (!r.ok) throw new Error(`gh search failed: ${r.err.slice(0, 200)}`);
+      return JSON.parse(r.out || "[]").map((i) => ({ number: i.number, title: i.title, body: i.body || "", url: i.url, repo: i.repository?.name, labels: (i.labels || []).map((l) => l.name), assignees: (i.assignees || []).map((a) => a.login) }));
     },
     comments: (n) => {
       const r = sh("gh", ["api", `repos/${pol.repo}/issues/${n}/comments`, "--paginate", "-q", ".[] | {login: .user.login, body: .body, at: .created_at}"]);
@@ -402,6 +421,104 @@ function readJSONString(l) {
   }
 }
 
+// ── node ───────────────────────────────────────────────────────────────────
+const NODE_FILE = process.env.GABRIEL_NODE || path.join(HOME, ".claude/.kun-node.json");
+export function inWindow(win, d = new Date()) {
+  const m = /^(\d{1,2}):(\d{2})-(\d{1,2}):(\d{2})$/.exec(win || "");
+  if (!m) return false;
+  const now = d.getHours() * 60 + d.getMinutes();
+  const a = Number(m[1]) * 60 + Number(m[2]);
+  const b = Number(m[3]) * 60 + Number(m[4]);
+  return a <= b ? now >= a && now < b : now >= a || now < b; // a window may cross midnight
+}
+// The night a moment belongs to: before noon it is still last evening's night.
+const nightOf = (d = new Date()) => new Date(d.getTime() - (d.getHours() < 12 ? 86400000 : 0)).toISOString().slice(0, 10);
+// Pure: the first open piece this node may take.
+export function pickWork(issues, node) {
+  for (const i of issues) {
+    if (!i.labels.includes("night-ok") || (i.assignees || []).length) continue;
+    if (i.labels.some((l) => l.startsWith("claimed:") || l === "night:done")) continue;
+    if ((node.repos || []).length && !node.repos.includes(i.repo)) continue;
+    const lane = i.labels.find((l) => l.startsWith("lane:"))?.slice(5) || "build";
+    if (!(node.lanes || ["build"]).includes(lane)) continue;
+    return { ...i, lane };
+  }
+  return null;
+}
+function nodeState() {
+  const s = readJSON(path.join(STATE, "node.json"), {});
+  return s.night === nightOf() ? s : { night: nightOf(), runs: 0, strikes: 0, parked: false, last: s.last || null };
+}
+function saveNodeState(s) {
+  fs.mkdirSync(STATE, { recursive: true });
+  fs.writeFileSync(path.join(STATE, "node.json"), JSON.stringify(s, null, 1));
+}
+function nodeInit(flags) {
+  const me = sh("gh", ["api", "user", "-q", ".login"], { timeout: 20000 }).out || os.userInfo().username;
+  const node = {
+    node: `${me}-${os.hostname().split(".")[0].toLowerCase()}`,
+    owner: me,
+    runner: flags.runner === "d" ? "d" : "c",
+    lanes: flags.runner === "d" ? ["lookup", "research", "build"] : ["lookup", "research", "build", "judge"],
+    window: flags.window || "22:00-06:00",
+    runs_per_night: Number(flags.runs || 3),
+    repos: flags.repos ? String(flags.repos).split(",").map((x) => x.trim()).filter(Boolean) : [],
+  };
+  fs.writeFileSync(NODE_FILE, JSON.stringify(node, null, 2) + "\n");
+  console.log(`node ${node.node}: runner ${node.runner}, lanes ${node.lanes.join("/")}, window ${node.window}, ${node.runs_per_night} runs a night, ${node.repos.length ? node.repos.join(", ") : "any repo cloned here"}\nsaved ${tilde(NODE_FILE)}. Nothing is scheduled: arm \`gabriel node tick\` yourself when you want this machine to work at night.`);
+}
+function nodeStatus() {
+  const node = readJSON(NODE_FILE);
+  if (!node) return console.log("this machine is not a node — gabriel node init");
+  const s = nodeState();
+  console.log(`node ${node.node} · runner ${node.runner} · lanes ${node.lanes.join("/")} · window ${node.window} (${inWindow(node.window) ? "open now" : "closed now"})\ntonight ${s.runs} of ${node.runs_per_night} runs · ${s.strikes} failed${s.parked ? " · parked until tomorrow" : ""}${s.last ? `\nlast: ${s.last}` : ""}`);
+}
+function nodeTick(flags) {
+  const node = readJSON(NODE_FILE);
+  if (!node) return console.log("this machine is not a node — gabriel node init");
+  const dry = !!flags.dry || !!process.env.GABRIEL_FIXTURE;
+  if (!flags.now && !inWindow(node.window)) return console.log(`node ${node.node}: outside its window (${node.window})`);
+  const s = nodeState();
+  if (s.parked) return console.log(`node ${node.node}: parked for tonight after ${s.strikes} failed runs`);
+  if (s.runs >= node.runs_per_night) return console.log(`node ${node.node}: tonight's ${node.runs_per_night} runs are used`);
+  const pol = policy();
+  const be = backend(pol, dry);
+  const w = pickWork(be.night(), node);
+  if (!w) return console.log(`node ${node.node}: nothing labelled night-ok that this node may take`);
+  if (!repoDir(w.repo) && !dry) return console.log(`node ${node.node}: ${w.repo}#${w.number} is open, but ${w.repo} is not cloned on this machine`);
+  const ref = `${pol.repo.split("/")[0]}/${w.repo}`;
+  console.log(`node ${node.node}: taking ${w.repo}#${w.number} on lane ${w.lane} — ${w.title}`);
+  if (dry) return;
+  const R = ["--repo", ref];
+  sh("gh", ["label", "create", `claimed:${node.node}`, ...R, "--force", "--color", "c5def5"]);
+  if (!sh("gh", ["issue", "edit", String(w.number), ...R, "--add-assignee", "@me", "--add-label", `claimed:${node.node}`]).ok) return console.log("could not claim it");
+  // two nodes may claim in the same second: the one whose name sorts first keeps it
+  const claims = (sh("gh", ["issue", "view", String(w.number), ...R, "--json", "labels", "-q", ".labels[].name"]).out || "").split("\n").filter((l) => l.startsWith("claimed:")).sort();
+  if (claims[0] !== `claimed:${node.node}`) {
+    sh("gh", ["issue", "edit", String(w.number), ...R, "--remove-assignee", "@me", "--remove-label", `claimed:${node.node}`]);
+    return console.log(`another node claimed it first (${claims[0]})`);
+  }
+  const task = `${w.title}\n\n${w.body}\n\nThis is issue ${ref}#${w.number}. When the work is green and pushed, comment the outcome on the issue.`;
+  const r = runTask({ repo: w.repo, lane: w.lane, job: `node:${w.repo}#${w.number}`, runner: node.runner }, task);
+  s.runs++;
+  s.last = `${new Date().toISOString().slice(0, 16)} ${w.repo}#${w.number} ${r.ok ? "done" : "handed back"}`;
+  const tail = `\n\n— node ${node.node} · lane ${w.lane} · ${(r.models || []).join(", ") || "model unknown"} · ${r.turns ?? "?"} turns\n— evidence: ${r.noteWritten ? "a progress note on the node" : "no progress note — treat this as unverified"}`;
+  sh("gh", ["issue", "comment", String(w.number), ...R, "--body", `Gabriel (night run${r.ok ? "" : ", not finished — handed back"}):\n\n${String(r.error || r.result).slice(0, 3000)}${tail}`]);
+  if (r.ok) {
+    sh("gh", ["label", "create", "night:done", ...R, "--force", "--color", "0e8a16"]);
+    sh("gh", ["issue", "edit", String(w.number), ...R, "--add-label", "night:done"]);
+  } else {
+    sh("gh", ["issue", "edit", String(w.number), ...R, "--remove-assignee", "@me", "--remove-label", `claimed:${node.node}`]);
+    s.strikes++;
+    if (s.strikes >= 3) {
+      s.parked = true;
+      be.act("notify", w.number, `node ${node.node} parked itself for tonight after three failed runs (last: ${w.repo}#${w.number})`);
+    }
+  }
+  saveNodeState(s);
+  console.log(s.last);
+}
+
 // ── main ───────────────────────────────────────────────────────────────────
 const HELP = `gabriel — carries a command to whoever runs it, and brings the answer back
 
@@ -409,6 +526,7 @@ const HELP = `gabriel — carries a command to whoever runs it, and brings the a
   gabriel run [--repo id] [--lane build] [--turns n] [--minutes n] [--dry] -- "<task>"
   gabriel status                      machine, jobs, queue, last runs
   gabriel queue list | add [--for repo] [--lane l] "<ask>" | approve <n> [lane] | tick [--dry]
+  gabriel node init [--runner c|d] [--window 22:00-06:00] [--repos a,b] | status | tick [--dry] [--now]
 
 Nothing is published, deployed, spent or sent to a person unattended (engine.json → mandate).`;
 
@@ -417,7 +535,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === path.resolve(new URL(im
   try {
     if (cmd === "route") route(argv.join(" "));
     else if (cmd === "run") {
-      const { flags, rest } = parse(argv, ["repo", "dir", "lane", "job", "turns", "minutes", "mode"]);
+      const { flags, rest } = parse(argv, ["repo", "dir", "lane", "job", "turns", "minutes", "mode", "runner"]);
       if (!rest.length) die('run needs a task: gabriel run --repo kun -- "fix the failing test in scripts/seek"');
       printRun(runTask(flags, rest.join(" ")));
     } else if (cmd === "status") status();
@@ -433,6 +551,12 @@ if (process.argv[1] && path.resolve(process.argv[1]) === path.resolve(new URL(im
         const r = sh("gh", ["issue", "comment", rest[0], "--repo", pol.repo, "--body", `yes${rest[1] ? ` ${rest[1]}` : ""}`]);
         console.log(r.ok ? `approved #${rest[0]} — it runs on the next tick (gabriel queue tick)` : `could not comment: ${r.err.slice(0, 200)}`);
       } else die(`unknown queue command "${sub}"`);
+    } else if (cmd === "node") {
+      const [sub, ...na] = argv;
+      const { flags } = parse(na, ["runner", "window", "repos", "runs"]);
+      if (sub === "init") nodeInit(flags);
+      else if (sub === "tick") nodeTick(flags);
+      else nodeStatus();
     } else console.log(HELP);
   } catch (err) {
     die(err?.message || String(err));

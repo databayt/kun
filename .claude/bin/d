@@ -1,0 +1,3 @@
+#!/bin/bash
+# d — the DeepSeek lane (see kun-d.sh). Installed at ~/.claude/bin/d; canonical copy in kun.
+exec "$(dirname "$0")/kun-d.sh" "$@"
