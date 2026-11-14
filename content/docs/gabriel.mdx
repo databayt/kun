@@ -54,8 +54,8 @@ Answering a teammate who addressed Gabriel, in the place they asked, is a reply 
 The team works on its own lanes and never holds Abdout's Claude login. When a task needs his account, it goes through the queue:
 
 1. A teammate asks: `gabriel queue add`, or an issue labelled `queue` in the queue repo with `repo:` and `lane:` lines.
-2. Gabriel tells Abdout once.
-3. Abdout answers `yes` on that issue. `yes judge` also grants the judge lane; without it an ask cannot go above the queue's ceiling (build).
+2. Gabriel tells Abdout once, and writes a fingerprint of the ask on the issue.
+3. Abdout answers `yes` on that issue. The yes covers the ask as it read at that moment: if the ask is edited afterwards, Gabriel asks again and the earlier yes no longer counts. `yes judge` also grants the judge lane; without it an ask cannot go above the queue's ceiling (build).
 4. Only then does his Mac run it, under the run contract, and post the result on the issue.
 
 What the queue refuses, with the reason written on the issue:
@@ -86,7 +86,7 @@ Any machine can offer its idle hours. `gabriel node init` writes `~/.claude/.kun
 
 GitHub is the tracker. An issue labelled `night-ok` is a piece any node may take. `gabriel node tick`, inside the node's hours:
 
-1. finds an open `night-ok` issue with no assignee, in a repo the node takes, on a lane it may run (`lane:build` unless the issue says otherwise);
+1. finds an open `night-ok` issue with no assignee, in a repo the node takes, on a lane it may run (`lane:build` unless the issue says otherwise). The label counts only when it was put on by the node's owner or by Abdout; a label from anyone else is ignored;
 2. claims it by assigning itself and adding `claimed:<node>`;
 3. runs it under the run contract and the mandate;
 4. comments the result. A finished piece is labelled `night:done`; a failed one is handed back for another node. Three failures park the node for the night.

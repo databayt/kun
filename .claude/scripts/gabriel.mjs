@@ -39,11 +39,15 @@
 // lane). An ask from someone without write access to the repo is refused, an ask the
 // mandate keeps for the owner is refused with the rule named, and the daily cap holds the
 // rest. State lives in labels (queue:asked, queue:running, queue:done, queue:failed).
+// A yes covers the ask as it read when Gabriel asked: he posts a fingerprint of the title and
+// body, and a yes counts only if it comes after that fingerprint and the ask still matches
+// it. An ask edited after it was approved is asked again, never run.
 //
 // Nodes. Any machine with ~/.claude/.kun-node.json is a node: its owner, the runner it uses
 // (`c` Claude Code on the owner's own plan, `d` the DeepSeek lane with the owner's own key),
 // the lanes it may take, the hours its owner offers, and a nightly budget. GitHub is the
-// tracker: an issue labelled `night-ok` is a piece anyone may take; a node claims one by
+// tracker: an issue labelled `night-ok` (by the node's owner or the queue's approver — a
+// label from anyone else is ignored) is a piece a node may take; it claims one by
 // assigning itself and adding `claimed:<node>`, runs it under the same contract and mandate
 // as any other run, and hands it back if the run fails. Three failures park the node for
 // the night. Nothing is scheduled by this script: the node's owner arms the tick.
@@ -54,6 +58,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
+import { createHash } from "node:crypto";
 
 const HOME = os.homedir();
 const KUN = process.env.KUN_DIR || path.join(HOME, "kun");
@@ -284,6 +289,8 @@ export function askOf(issue) {
   return { repo, lane, text };
 }
 
+export const fingerprint = (issue) => createHash("sha256").update(`${issue.title}\n${issue.body || ""}`).digest("hex").slice(0, 10);
+const FP = /^Gabriel: asked the owner\. Ask fingerprint `([0-9a-f]{10})`/;
 // Pure: what should happen to one ask. No I/O — the fixture tests call this through tick().
 export function decide(issue, comments, permission, pol, ranToday) {
   const labels = issue.labels || [];
@@ -293,17 +300,30 @@ export function decide(issue, comments, permission, pol, ranToday) {
   const ask = askOf(issue);
   const kept = pol.ask_patterns.find((p) => p.re.test(ask.text));
   if (kept) return { action: "refuse", reason: `the mandate keeps this for the owner — ${kept.rule}. It is his to do himself, in his own session` };
+  // A verdict counts only after the latest fingerprint Gabriel posted: each time the ask is
+  // (re)asked, earlier answers stop counting.
+  const fp = fingerprint(issue);
   let verdict = null;
   let granted = null;
+  let asked = null;
   for (const c of comments) {
+    const f = FP.exec(c.body || "");
+    if (f) {
+      asked = f[1];
+      verdict = null;
+      granted = null;
+      continue;
+    }
     if (c.login !== pol.approver) continue;
     const m = /^\s*(yes|نعم|no|لا)(?![\p{L}\p{N}_])[\s,:-]*([a-z_]+)?/iu.exec(c.body || "");
     if (!m) continue;
     verdict = /^(yes|نعم)$/iu.test(m[1]) ? "yes" : "no";
     granted = verdict === "yes" && LANE_ORDER.includes(m[2]) ? m[2] : null;
   }
+  if (!asked) return { action: "ask", fp };
+  if (asked !== fp) return { action: "ask", fp, reason: "the ask was edited after Gabriel asked — any earlier yes no longer counts" };
   if (verdict === "no") return { action: "refuse", reason: "the owner declined" };
-  if (verdict !== "yes") return has("asked") ? { action: "wait", reason: "waiting for the owner's yes" } : { action: "ask" };
+  if (verdict !== "yes") return { action: "wait", reason: "waiting for the owner's yes" };
   if (ranToday >= pol.daily_cap) return { action: "wait", reason: `today's cap of ${pol.daily_cap} runs is used` };
   const want = LANE_ORDER.includes(ask.lane) ? ask.lane : pol.lane_default;
   const ceiling = LANE_ORDER.indexOf(pol.lane_ceiling);
@@ -354,6 +374,7 @@ function tick(dry) {
         be.act("label", n, `${pol.label}:refused`);
         be.act("close", n, "not planned");
       } else if (d.action === "ask") {
+        be.act("comment", n, `Gabriel: asked the owner. Ask fingerprint \`${d.fp}\`${d.reason ? ` — ${d.reason}` : ""}. It runs only after @${pol.approver} answers "yes" below.`);
         be.act("label", n, `${pol.label}:asked`);
         be.act("notify", n, `#${n} from ${issue.author}: ${issue.title} — reply "yes" on the issue to run it (${issue.url || pol.repo})`);
       } else if (d.action === "run") {
@@ -487,9 +508,17 @@ function nodeTick(flags) {
   if (!w) return console.log(`node ${node.node}: nothing labelled night-ok that this node may take`);
   if (!repoDir(w.repo) && !dry) return console.log(`node ${node.node}: ${w.repo}#${w.number} is open, but ${w.repo} is not cloned on this machine`);
   const ref = `${pol.repo.split("/")[0]}/${w.repo}`;
+  const R = ["--repo", ref];
+  if (!dry) {
+    // night-ok is a person's decision. On this node it counts only when it was put on by
+    // someone the node trusts (its owner and the queue's approver, unless the node file says
+    // otherwise) — a label from anyone else must not spend this machine's plan.
+    const trusted = node.trust?.length ? node.trust : [...new Set([node.owner, pol.approver])];
+    const by = sh("gh", ["api", `repos/${ref}/issues/${w.number}/events`, "--paginate", "-q", '[.[] | select(.event == "labeled" and .label.name == "night-ok")] | last | .actor.login']).out;
+    if (!trusted.includes(by)) return console.log(`node ${node.node}: ${w.repo}#${w.number} was marked night-ok by ${by || "an unknown account"}, not by ${trusted.join(" or ")} — left alone`);
+  }
   console.log(`node ${node.node}: taking ${w.repo}#${w.number} on lane ${w.lane} — ${w.title}`);
   if (dry) return;
-  const R = ["--repo", ref];
   sh("gh", ["label", "create", `claimed:${node.node}`, ...R, "--force", "--color", "c5def5"]);
   if (!sh("gh", ["issue", "edit", String(w.number), ...R, "--add-assignee", "@me", "--add-label", `claimed:${node.node}`]).ok) return console.log("could not claim it");
   // two nodes may claim in the same second: the one whose name sorts first keeps it
