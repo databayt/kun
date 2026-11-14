@@ -68,7 +68,9 @@ done
 CO="$ROOT/plugins/kun-company"
 [ "$CHECK" = 0 ] && { rm -rf "$CO/agents" "$CO/commands" "$CO/skills" "$CO/patterns" "$CO/rules"; mkdir -p "$CO/agents" "$CO/commands" "$CO/skills" "$CO/patterns/cards" "$CO/rules"; }
 for f in "$ROOT"/.claude/agents/*.md; do
-  base="$(basename "$f")"; case "$base" in _index*) continue;; esac
+  # Explore.md overrides Claude Code's built-in Explore agent (model: haiku). A plugin agent is
+  # namespaced, so a mirrored copy would override nothing — it ships through setup.sh only.
+  base="$(basename "$f")"; case "$base" in _index* | Explore.md) continue;; esac
   copy_one "$f" "$CO/agents/$base"
 done
 for f in "$ROOT"/.claude/commands/*.md; do
