@@ -1,0 +1,76 @@
+---
+title: Gabriel
+description: The messenger — one command that routes a request, runs it under a contract, and queues the team's asks behind one human yes
+---
+
+Kun is the word: what should be, declared once in the keyword registry, the lane table and the rules. **Gabriel (جبريل)** is the one who carries a command to whoever runs it and brings the answer back. He is a single command, `gabriel`, in front of pieces the engine already had: the router, the headless runner and its ledger, the watcher and the notifier.
+
+## The command
+
+| Say | What happens |
+| --- | --- |
+| `gabriel route "mkan booking double charges"` | Where the words land (repo, block) and the lanes on offer. No model is called. |
+| `gabriel run --repo mkan -- "fix the mobile total on the booking page"` | One bounded piece of work, unattended, under the mandate. |
+| `gabriel status` | One screen: the machine, the scheduled jobs, the queue, the last runs. |
+| `gabriel queue add --for mkan "the booking total is wrong on mobile"` | A teammate files an ask. |
+| `gabriel queue list` | Open asks and where each stands. |
+| `gabriel queue approve 214` | The owner's yes (the same as commenting `yes` on the issue). |
+| `gabriel queue tick` | One pass over the queue: refuse, ask, wait or run. Owner's machine only. |
+
+`gabriel run` takes `--lane` (lookup, research, build, judge; build is the default), `--turns` and `--minutes` for the budget, `--full` to keep skills and MCP servers (a run is lean otherwise), and `--dry` to print the command and the contract without running anything.
+
+## The run contract
+
+Every run gets the same five lines after its task:
+
+1. Read the progress note and the last commits first: resume, do not restart.
+2. Do the one task. Stay on `main`, commit only what is green, by explicit path, and push.
+3. What it may do, from the mandate.
+4. What it must not do, from the mandate. If the task needs one of those, it stops and says exactly what is needed.
+5. Before it ends, it writes the progress note: what is done, what is next, and the evidence. It reports only what the evidence shows, and says what it did not verify.
+
+The run's lane fixes its model and effort; it cannot pick another. Its line in the run ledger carries the lane and the model that actually ran. A run that leaves no progress note is reported as unverified.
+
+## The mandate
+
+`engine.json → mandate` says what may happen without Abdout and what always waits for him.
+
+| May run unattended | Always waits for Abdout |
+| --- | --- |
+| read, build, test | publish |
+| commit and push to `main` after green | deploy to production |
+| draft | spend money |
+| | message a person |
+| | delete data |
+| | change model or billing settings |
+
+Two things hold it. The contract states it in words. A hook (`mandate-guard.sh`) blocks the matching commands in any run started by Gabriel, so the rule holds when the words are ignored. An attended session is untouched: there the person at the keyboard is the gate.
+
+Answering a teammate who addressed Gabriel, in the place they asked, is a reply to a command and is allowed. Anything Gabriel would start himself, and anything to a person outside the team, waits for Abdout's word.
+
+## The queue
+
+The team works on its own lanes and never holds Abdout's Claude login. When a task needs his account, it goes through the queue:
+
+1. A teammate asks: `gabriel queue add`, or an issue labelled `queue` in the queue repo with `repo:` and `lane:` lines.
+2. Gabriel tells Abdout once.
+3. Abdout answers `yes` on that issue. `yes judge` also grants the judge lane; without it an ask cannot go above the queue's ceiling (build).
+4. Only then does his Mac run it, under the run contract, and post the result on the issue.
+
+What the queue refuses, with the reason written on the issue:
+
+- an ask from an account without write access to the repo;
+- an ask the mandate keeps for Abdout (a production deploy, a publish, a payment, a message to a person, a delete), even if someone says yes to it;
+- an ask he declined.
+
+A daily cap (`engine.json → queue.daily_cap`, five) holds anything beyond it for the next day.
+
+## Where it lives
+
+| Piece | File |
+| --- | --- |
+| The command | `.claude/bin/gabriel` → `.claude/scripts/gabriel.mjs` |
+| Mandate and queue policy | `.claude/engine.json` → `mandate`, `queue` |
+| The guard | `.claude/hooks/mandate-guard.sh` (tests beside it) |
+| The runner and ledger | `.claude/bin/kun-claude.sh`, `~/.claude/logs/runs.jsonl` |
+| Progress notes | `~/.claude/state/gabriel/notes/` |

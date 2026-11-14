@@ -1,0 +1,4 @@
+#!/bin/bash
+# gabriel — the messenger's command. A shim: the work is .claude/scripts/gabriel.mjs in kun.
+# Installed at ~/.claude/bin/gabriel (on PATH); canonical copy in kun.
+exec node "${KUN_DIR:-$HOME/kun}/.claude/scripts/gabriel.mjs" "$@"

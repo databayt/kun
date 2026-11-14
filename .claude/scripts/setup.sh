@@ -133,6 +133,11 @@ fi
 if [ -d "$KUN_DIR/.claude/bin" ]; then
     mkdir -p "$CLAUDE_DIR/bin"
     atomic_copy "$KUN_DIR/.claude/bin/"*.sh "$CLAUDE_DIR/bin"
+    # gabriel has no extension (it is a command on PATH), so the *.sh glob misses it
+    if [ -f "$KUN_DIR/.claude/bin/gabriel" ]; then
+        cp -p "$KUN_DIR/.claude/bin/gabriel" "$CLAUDE_DIR/bin/.gabriel.kun-tmp.$$" 2>/dev/null \
+            && chmod 755 "$CLAUDE_DIR/bin/.gabriel.kun-tmp.$$" && mv -f "$CLAUDE_DIR/bin/.gabriel.kun-tmp.$$" "$CLAUDE_DIR/bin/gabriel"
+    fi
     info "bin"
 fi
 

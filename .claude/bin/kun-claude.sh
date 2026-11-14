@@ -63,16 +63,22 @@ done
 # model takes its lane's, so no loop inherits the saved session default. That default is a
 # person's choice for attended work — the day it was set to Fable, every unnamed loop would
 # have billed usage credits, which `claude -p` does without asking. First match wins: the
-# job's own `lane`, the longest $lanes prefix, $lane_default. With engine.json unreadable
+# KUN_LANE (a caller naming a lane), the job's own `lane`, the longest $lanes prefix,
+# $lane_default. With engine.json unreadable
 # the run still gets a named model (sonnet) — never the saved default. A caller that names
 # its own model is recorded as lane `caller`: the lane did not choose that run's model.
 LANE_INFO=$(python3 - "$ENGINE" "$JOB" <<'PY' 2>/dev/null
-import json, sys
+import json, os, sys
 try: e = json.load(open(sys.argv[1]))
 except Exception: e = {}
 jobs = e.get("jobs") or {}; lanes = e.get("lanes") or {}; job = sys.argv[2]
 entry = jobs.get(job) or jobs.get(job.replace(":", "-")) or {}
 lane = entry.get("lane") if isinstance(entry, dict) else None
+# KUN_LANE: the caller names a lane instead of a model (gabriel run --lane judge). Only a
+# lane that has a model counts; anything else falls through to the job's own.
+forced = os.environ.get("KUN_LANE") or ""
+if isinstance(lanes.get(forced), dict) and lanes[forced].get("model"):
+    lane = forced
 if not lane:
     pref = jobs.get("$lanes") or {}
     hits = [p for p in pref if job.startswith(p)]

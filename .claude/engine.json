@@ -80,7 +80,7 @@
   "domain_rules": 57,
   "project_mcp": 18,
   "user_mcp": 24,
-  "hooks": 18,
+  "hooks": 19,
   "vocabulary_spells": 240,
   "workflows": 13,
   "$plugins_comment": "The two plugins are how the fleet reaches other machines. kun-company also carries the rules, pattern cards, hooks, and workflows. Since 2026-11-14 the stack fleet is in this repo too: .claude/agents holds the company agents and the 27 stack agents (kun-company skips the stack ones, and Explore), and every stack skill is also a company skill, so the union of both skill sets is 85.",
@@ -228,6 +228,39 @@
   "issue_repo": "databayt/kun",
   "issue_label": "engine-decision",
   "approver": "abdout"
+ },
+ "mandate": {
+  "$comment": "What may run unattended and what always waits for Abdout (Kun v5 §4, 2026-11-14). Gabriel reads it: `gabriel run` puts both lists in every run's contract and sets KUN_MANDATE=1, under which .claude/hooks/mandate-guard.sh blocks any Bash command matching blocked_commands; the queue refuses an ask matching ask_patterns before it runs, naming the rule. Answering a teammate who addressed Gabriel, in the place they asked, is a reply to a command and is allowed; anything Gabriel would start himself, and anything to a person outside the team, waits for Abdout's word.",
+  "unattended": ["read", "build", "test", "commit and push to main after green", "draft"],
+  "needs_owner": ["publish", "deploy to production", "spend money", "message a person", "delete data", "change model or billing settings"],
+  "ask_patterns": [
+   {"rule": "production deploys wait for Abdout", "pattern": "\\b(deploy|ship|release|roll\\s*out|push)\\b[^.\\n]{0,40}\\b(prod|production|live)\\b|\\bproduction deploy"},
+   {"rule": "publishing waits for Abdout", "pattern": "\\bpublish(es|ed|ing)?\\b|انشر|نشر المنشور"},
+   {"rule": "spending waits for Abdout", "pattern": "\\b(pay|purchase|buy|subscribe|renew|top[ -]?up|upgrade (the )?plan|usage credits?)\\b|ادفع|اشتر"},
+   {"rule": "messages to a person wait for Abdout", "pattern": "\\b(send|message|email|e-mail|whatsapp|text|dm|call)\\b[^.\\n]{0,40}\\b(client|customer|school|parent|lead|prospect|principal|owner|him|her|them)\\b|ارسل|أرسل|راسل"},
+   {"rule": "deleting data waits for Abdout", "pattern": "\\b(delete|drop|wipe|purge|truncate|reset)\\b[^.\\n]{0,40}\\b(database|db|table|tenant|data|bucket|repo|account|records?)\\b|احذف|امسح"},
+   {"rule": "model and billing changes wait for Abdout", "pattern": "\\b(switch|change|set|enable|turn on)\\b[^.\\n]{0,40}\\b(model|fable|billing|usage credits?)\\b"}
+  ],
+  "blocked_commands": [
+   {"rule": "production deploy", "pattern": "wrangler\\s+(deploy|publish|rollback|versions\\s+deploy)|deploy-cloudflare\\.sh\\s+\\S+\\s+(deploy|all)|vercel\\b[^|;&]*--prod|opennextjs-cloudflare\\s+deploy"},
+   {"rule": "publish", "pattern": "\\b(npm|pnpm|yarn|bun)\\s+publish\\b|media\\.sh\\s+publish|publish\\.mjs|hero\\.mjs[^|;&]*--publish|gh\\s+release\\s+create"},
+   {"rule": "message a person", "pattern": "hermes\\s+send\\b|wa-send|whatsapp[^|;&]*send|chat\\.postMessage|osascript[^|;&]*(Messages|Mail)"},
+   {"rule": "spend", "pattern": "\\bstripe\\s|bankak|momo[^|;&]*(pay|collect|disburse)|usage-credits"},
+   {"rule": "delete data", "pattern": "rm\\s+-[a-zA-Z]*r[a-zA-Z]*f|rm\\s+-[a-zA-Z]*f[a-zA-Z]*r|prisma\\s+migrate\\s+(reset|deploy)|prisma\\s+db\\s+push|DROP\\s+(TABLE|DATABASE)|aws\\s+s3\\s+(rm|rb)|aws\\s+s3\\s+sync[^|;&]*--delete|gh\\s+repo\\s+delete|git\\s+push[^|;&]*(--force|-f\\b)"},
+   {"rule": "engine or billing settings", "pattern": "claude\\s+(mcp|config|plugin)\\b|launchctl\\s+(load|bootstrap|unload|bootout)|gh\\s+secret\\s+set"}
+  ]
+ },
+ "queue": {
+  "$comment": "Gabriel's queue (Kun v5 §4): how a teammate gets work done on the owner's Claude account without ever holding his login. An ask is an issue labelled `label` in `repo`; nothing runs until `approver` himself comments yes on it (\"yes judge\" also grants that lane). Asks from accounts without write access are refused; lane_ceiling caps what an ask may request on its own; daily_cap holds the rest for tomorrow. turns and minutes bound each run. Driven by `gabriel queue tick` on the owner Mac; with `auto: true` the 30-minute awareness refresher runs that tick by itself (off until Abdout switches it on).",
+  "repo": "databayt/kun",
+  "label": "queue",
+  "approver": "abdout",
+  "auto": false,
+  "daily_cap": 5,
+  "lane_default": "build",
+  "lane_ceiling": "build",
+  "turns": 40,
+  "minutes": 30
  },
  "resolver": {
   "$comment": "Declared POLICY for .claude/scripts/resolve.mjs (the UserPromptSubmit router). Since 2026-11-14 every block key gets a class when the index is built — unique (bare from any session), shared (several repos own it, or it is already a repo, skill, agent or spell), common (a plain single word) — so the hand-kept global_blocks list is gone. always_bare: plain single words promoted to unique (Abdout's curated four from the old list; the six hyphenated ones are unique by computation). never_bare: repo names too common in prose to route without an explicit form — they also get no repo-before-block match ('marketing video' is not the marketing repo). The public list: content/docs/places.mdx (resolve.mjs --page).",

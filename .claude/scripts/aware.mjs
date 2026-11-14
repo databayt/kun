@@ -655,6 +655,14 @@ async function refresh() {
   keep.push(h);
   writeAtomic(HIST, keep.map((x) => JSON.stringify(x)).join("\n") + "\n");
   fs.appendFileSync(path.join(LOG_DIR, `aware-${TODAY}.log`), `${s.ts} refresh ok — alerts ${s.alerts.active.length}, delivered ${s.alerts.delivered.length}\n`);
+  // Gabriel's queue rides this refresher only when the owner switched it on (engine.json →
+  // queue.auto). Detached: a queued run may take its whole budget, the snapshot must not wait.
+  // The tick itself checks it is on the owner's machine and that he said yes on the issue.
+  try {
+    if (readJSON(path.join(KUN, ".claude/engine.json"), {})?.queue?.auto === true) {
+      spawn(process.execPath, [path.join(KUN, ".claude/scripts/gabriel.mjs"), "queue", "tick"], { detached: true, stdio: "ignore" }).unref();
+    }
+  } catch {}
   return s;
 }
 
