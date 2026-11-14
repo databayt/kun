@@ -173,7 +173,10 @@ function test() {
   console.log(`${p3 ? "ok  " : "FAIL"} scores: a shared task splits its rate; unrated and unassigned tasks do not count`);
   const p4 = split(500, { A: 300, B: 0 }).unwritten.join() === "B";
   console.log(`${p4 ? "ok  " : "FAIL"} a person with no written salary is named, not paid`);
-  return ok && p1 && p2 && p3 && p4;
+  const zero = split(0, S);
+  const p5 = Object.values(zero.paid).every((v) => v === 0) && zero.met.length === 0 && zero.above === 0;
+  console.log(`${p5 ? "ok  " : "FAIL"} team money $0 → nobody is paid, no salary is met, nothing above the salaries`);
+  return ok && p1 && p2 && p3 && p4 && p5;
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === path.resolve(new URL(import.meta.url).pathname)) {
