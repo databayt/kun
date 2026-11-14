@@ -175,6 +175,14 @@ const detectors = {
       if (thisW.length >= 2 && lastW.length >= 2 && avg(thisW) > avg(lastW) * 1.3) add({ detector: "ledger", subject: `cost:${job}`, class: avg(thisW) > avg(lastW) * 2 ? "DECIDE" : "TRACK", title: `${job}: tokens per run up ${Math.round((avg(thisW) / avg(lastW) - 1) * 100)}% week on week`, evidence: [`this week ${Math.round(avg(thisW))} / run (${thisW.length} runs)`, `last week ${Math.round(avg(lastW))} / run (${lastW.length} runs)`], metric: { name: `ledger.${job}.tokens_per_run`, before: Math.round(avg(thisW)), target: Math.round(avg(lastW)) }, fix: { kind: "repo", how: "lean mode, a smaller model or effort, or a tighter prompt" } });
     }
     const adhoc = lines.filter((e) => hoursAgo(e.ts) <= 24 * 7 && (e.job === "adhoc" || e.job_source === "adhoc"));
+    // The lane gate (Kun v5, P0): since 2026-11-14 every headless run takes a named model from
+    // its lane, and none may be Fable — `claude -p` bills Fable to usage credits without asking.
+    const LANES_SINCE = Date.parse("2026-11-14T04:00:00Z");
+    const recent = lines.filter((e) => Date.parse(e.ts) >= LANES_SINCE && hoursAgo(e.ts) <= 7 * 24);
+    const fable = recent.filter((e) => /fable|mythos/i.test(`${e.model_actual || ""} ${e.status === "ok" ? e.model || "" : ""}`));
+    if (fable.length) add({ detector: "ledger", subject: "fable-unattended", class: "DECIDE", title: `${fable.length} unattended run(s) ran on Fable this week — that bills usage credits`, evidence: fable.slice(-3).map((e) => `${e.ts} ${e.job} ${e.model_actual || e.model}`), metric: { name: "ledger.fable_unattended", before: fable.length, target: 0 }, fix: { kind: "repo", how: "give the job a lane in engine.json → jobs, or name opus, sonnet or haiku at the caller" } });
+    const blind = recent.filter((e) => e.status === "ok" && (e.tokens || 0) > 0 && (!e.lane || !e.model_actual));
+    if (blind.length) add({ detector: "ledger", subject: "lane-blind", class: "TRACK", title: `${blind.length} headless run(s) this week recorded no lane or no actual model`, evidence: blind.slice(-3).map((e) => `${e.ts} ${e.job} lane=${e.lane || "-"} actual=${e.model_actual || "-"}`), fix: { kind: "repo", how: "the caller bypasses kun-claude.sh or runs an old copy — route it through the wrapper (bash .claude/scripts/setup.sh refreshes it)" } });
     if (adhoc.length) add({ detector: "ledger", subject: "adhoc", class: "DECIDE", title: `${adhoc.length} headless run(s) this week had no job name (lose lean mode and attribution)`, evidence: adhoc.slice(-3).map((e) => `${e.ts} model ${e.model}`), fix: { kind: "repo", how: "set KUN_JOB at the caller (or import scripts/lib/kun-claude.mjs)" } });
   },
   aware() {
@@ -206,7 +214,7 @@ const detectors = {
     const g = {};
     for (const h of hits) for (const k of h.global || []) g[k] = (g[k] || 0) + 1;
     const top = Object.entries(g).sort((a, b) => b[1] - a[1]);
-    if (top.length) add({ detector: "resolver", subject: "global-hints", class: "TRACK", title: "Global block hints fired this week — review for false positives", evidence: top.slice(0, 5).map(([k, n]) => `${k} ×${n}`), fix: { kind: "repo", how: "drop a key from engine.json → resolver.global_blocks if its hints were wrong" } });
+    if (top.length) add({ detector: "resolver", subject: "global-hints", class: "TRACK", title: "Global block hints fired this week — review for false positives", evidence: top.slice(0, 5).map(([k, n]) => `${k} ×${n}`), fix: { kind: "repo", how: "if a hint was wrong: a plain word leaves engine.json → resolver.always_bare; a hyphenated key is unique by computation, so rename the folder or name its repo in never_bare" } });
   },
   labels() {
     const r = run("gh", ["label", "list", "--repo", pol.issue_repo, "--limit", "300", "--json", "name", "-q", ".[].name"], 30000);
