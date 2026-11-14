@@ -16,6 +16,10 @@
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "workers_dev": true,
   "observability": { "enabled": true },
+  // esbuild's keepNames injects __name() into functions that next-themes stringifies into its
+  // inline anti-flash script, which then throws in the browser on every Worker-rendered page
+  // (same fix as databayt/leader).
+  "keep_names": false,
   // The server bundle is large; its sourcemaps can exceed the 60 MiB upload cap (error 10021).
   "upload_source_maps": false,
   "assets": {
